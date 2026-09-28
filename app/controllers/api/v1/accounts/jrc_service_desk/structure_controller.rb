@@ -36,16 +36,20 @@ class Api::V1::Accounts::JrcServiceDesk::StructureController < Api::V1::Accounts
 
   def members
     authorize Current.account, :members?, policy_class: ::JrcServiceDesk::StructurePolicy
-    values = ::JrcServiceDesk::Input.attributes(request.query_parameters, %w[page q])
+    values = ::JrcServiceDesk::Input.attributes(request.query_parameters, %w[page q unit_id])
     page = ::JrcServiceDesk::Input.id(values.fetch('page', 1))
     query = values.fetch('q', '')
     raise ArgumentError unless page <= 1_000_000 && query.is_a?(String) && query.length <= 200
     rows = AccountUser.where(account_id: Current.account.id).joins(:user).where(users: { type: [nil, ''] })
       .where.not(users: { confirmed_at: nil }).where.not(user_id: ::JrcServiceDesk::InitializerAuthority.ids)
     rows = rows.where('users.name ILIKE ?', "%#{ActiveRecord::Base.sanitize_sql_like(query)}%") unless query.blank?
-    render json: envelope.merge(items: rows.order(:id).limit(25).offset((page - 1) * 25).includes(:user).map do |au|
-      { id: au.id.to_s, user_id: au.user_id.to_s, name: au.user.name, role: au.role }
-    end, meta: { page: page, per_page: 25, total: rows.count })
+    unit = if values.key?('unit_id')
+             policy_scope(::JrcServiceDesk::Unit, policy_scope_class: ::JrcServiceDesk::StructurePolicy::Scope)
+               .find(::JrcServiceDesk::Input.id(values['unit_id']))
+           end
+    members = rows.order(:id).limit(25).offset((page - 1) * 25).includes(:user).to_a
+    data = ::JrcServiceDesk::MembershipDirectory.new(account: Current.account, unit: unit).project(members)
+    render json: envelope.merge(data).merge(meta: { page: page, per_page: 25, total: rows.count })
   end
 
   def create

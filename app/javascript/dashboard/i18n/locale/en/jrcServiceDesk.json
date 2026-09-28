@@ -1,5 +1,25 @@
 {
   "JRC_SERVICE_DESK": {
+    "UNIT_ACCESS": {
+      "title": "Unit access",
+      "help": "Manage unit scope for existing account members. Assignment, teams and action permissions remain separate. Revoking preserves membership history.",
+      "choose_unit": "Select a unit to search members and their access.",
+      "parent_inactive": "Unit or operator company inactive: operational access is blocked.",
+      "role": "Role and effective permissions",
+      "state": "Membership",
+      "absent": "No membership",
+      "grant": "Grant access",
+      "revoke": "Revoke access",
+      "reactivate": "Reactivate membership",
+      "capabilities": "Effective Service Desk permissions",
+      "no_capabilities": "No Service Desk permissions",
+      "roles": "Native custom roles",
+      "agents": "Manage agents and assigned roles",
+      "agent": "Agent",
+      "administrator": "Administrator",
+      "pagination": "Page {page} of {pages} · {total} records",
+      "roles_help": "Action permissions are configured in Settings → Custom roles and assigned in Settings → Agents by an account administrator authorized to use those native settings. This page only manages unit scope. A membership does not grant action permissions."
+    },
     "MODULE": "Service Desk",
     "SUBTITLE": "Connected support. Better customer experiences.",
     "GROUPS": {

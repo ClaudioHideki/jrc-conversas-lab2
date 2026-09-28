@@ -8,21 +8,43 @@ import ConfigurationManager from '../components/ConfigurationManager.vue';
 import Panel from '../components/ServiceDeskPanel.vue';
 import PendingAction from '../components/PendingAction.vue';
 import { useServiceDesk } from '../composables/useServiceDesk';
+import { useServiceDeskStructure } from 'dashboard/composables/useServiceDeskStructure';
 import { canPreviewScreen } from '../helpers/access';
 import { SERVICE_DESK_ROUTES, serviceDeskRouteName } from '../routeDefinitions';
 const { t } = useI18n();
 const router = useRouter();
 const session = useServiceDesk();
+const structure = useServiceDeskStructure(
+  session.accountId,
+  session.userId,
+  session.enabled
+);
 const sections = [
-  { key: 'statuses', icon: 'i-lucide-list-checks' }, { key: 'priorities', icon: 'i-lucide-flag' },
-  { key: 'categories', icon: 'i-lucide-tags' }, { key: 'queues', icon: 'i-lucide-network' },
-  { key: 'units', icon: 'i-lucide-building' }, { key: 'operator_companies', icon: 'i-lucide-building-2' },
-  { key: 'assignees', icon: 'i-lucide-users' }, { key: 'sla', icon: 'i-lucide-clock' },
+  { key: 'statuses', icon: 'i-lucide-list-checks' },
+  { key: 'priorities', icon: 'i-lucide-flag' },
+  { key: 'categories', icon: 'i-lucide-tags' },
+  { key: 'queues', icon: 'i-lucide-network' },
+  { key: 'units', icon: 'i-lucide-building' },
+  { key: 'operator_companies', icon: 'i-lucide-building-2' },
+  { key: 'assignees', icon: 'i-lucide-users' },
+  { key: 'sla', icon: 'i-lucide-clock' },
   { key: 'automations', icon: 'i-lucide-workflow' },
 ];
-const visibleSections = computed(() => sections.filter(section => canPreviewScreen(session.state.context, SERVICE_DESK_ROUTES.find(item => item.key === section.key))));
-const open = key => router.push({ name: serviceDeskRouteName(key), params: { accountId: session.accountId.value } });
+const visibleSections = computed(() =>
+  sections.filter(section =>
+    canPreviewScreen(
+      session.state.context,
+      SERVICE_DESK_ROUTES.find(item => item.key === section.key)
+    )
+  )
+);
+const open = key =>
+  router.push({
+    name: serviceDeskRouteName(key),
+    params: { accountId: session.accountId.value },
+  });
 </script>
+
 <template>
   <section>
     <header class="sd-page-heading">
@@ -36,6 +58,25 @@ const open = key => router.push({ name: serviceDeskRouteName(key), params: { acc
       </div>
     </header>
     <div class="sd-settings-grid">
+      <Panel
+        v-if="structure.state.context?.capabilities?.unit_memberships"
+        :title="t('JRC_SERVICE_DESK.UNIT_ACCESS.title')"
+        icon="i-lucide-user-round-check"
+      >
+        <p class="text-xs text-n-slate-11 mb-4">
+          {{ t('JRC_SERVICE_DESK.UNIT_ACCESS.help') }}
+        </p>
+        <Button
+          :label="t('JRC_SERVICE_DESK.UNIT_ACCESS.title')"
+          @click="
+            router.push({
+              name: 'jrc_service_desk_structure',
+              params: { accountId: session.accountId.value },
+              query: { resource: 'unit_memberships' },
+            })
+          "
+        />
+      </Panel>
       <Panel
         v-for="section in visibleSections"
         :key="section.key"
