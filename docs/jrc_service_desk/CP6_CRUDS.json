@@ -1,0 +1,110 @@
+[
+  {
+    "resource": "queues",
+    "list": "API de gestao inclui ativos/inativos; lookup operacional so ativos",
+    "create": "POST, valores explicitos e chave de intencao",
+    "edit": "PATCH + expected_revision; code e ownership imutaveis",
+    "activation": "PATCH active booleano; recibo+GET; nao apaga vinculos",
+    "delete": "N/A - nao exposto",
+    "permission": "queues_manage",
+    "api": "/api/v1/accounts/:account_id/jrc_service_desk/configuration/queues",
+    "ui": "ConfigurationManager.vue (pagina do catalogo; services em Configuracoes)",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA"
+  },
+  {
+    "resource": "categories",
+    "list": "API de gestao inclui ativos/inativos; lookup operacional so ativos",
+    "create": "POST, valores explicitos e chave de intencao",
+    "edit": "PATCH + expected_revision; code e ownership imutaveis",
+    "activation": "PATCH active booleano; recibo+GET; nao apaga vinculos",
+    "delete": "N/A - nao exposto",
+    "permission": "categories_manage",
+    "api": "/api/v1/accounts/:account_id/jrc_service_desk/configuration/categories",
+    "ui": "ConfigurationManager.vue (pagina do catalogo; services em Configuracoes)",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA"
+  },
+  {
+    "resource": "priorities",
+    "list": "API de gestao inclui ativos/inativos; lookup operacional so ativos",
+    "create": "POST, valores explicitos e chave de intencao",
+    "edit": "PATCH + expected_revision; code e ownership imutaveis",
+    "activation": "PATCH active booleano; recibo+GET; nao apaga vinculos",
+    "delete": "N/A - nao exposto",
+    "permission": "priorities_manage",
+    "api": "/api/v1/accounts/:account_id/jrc_service_desk/configuration/priorities",
+    "ui": "ConfigurationManager.vue (pagina do catalogo; services em Configuracoes)",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA"
+  },
+  {
+    "resource": "statuses",
+    "list": "API de gestao inclui ativos/inativos; lookup operacional so ativos",
+    "create": "POST, valores explicitos e chave de intencao",
+    "edit": "PATCH + expected_revision; code e ownership imutaveis",
+    "activation": "PATCH active booleano; recibo+GET; nao apaga vinculos",
+    "delete": "N/A - nao exposto",
+    "permission": "statuses_manage",
+    "api": "/api/v1/accounts/:account_id/jrc_service_desk/configuration/statuses",
+    "ui": "ConfigurationManager.vue (pagina do catalogo; services em Configuracoes)",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA"
+  },
+  {
+    "resource": "services",
+    "list": "API de gestao inclui ativos/inativos; lookup operacional so ativos",
+    "create": "POST, valores explicitos e chave de intencao",
+    "edit": "PATCH + expected_revision; code e ownership imutaveis",
+    "activation": "PATCH active booleano; recibo+GET; nao apaga vinculos",
+    "delete": "N/A - nao exposto",
+    "permission": "services_manage",
+    "api": "/api/v1/accounts/:account_id/jrc_service_desk/configuration/services",
+    "ui": "ConfigurationManager.vue (pagina do catalogo; services em Configuracoes)",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA"
+  },
+  {
+    "resource": "lifecycle_policies",
+    "list": "GET scoped; versao atual + definicao",
+    "create": "POST publica primeira versao",
+    "edit": "POST expected_version publica outra versao; nao altera versao antiga",
+    "activation": "enabled na publicacao; service/Unidade e regra obrigatorios",
+    "delete": "N/A - historico preservado",
+    "permission": "lifecycle_policies_manage",
+    "api": "/api/v1/accounts/:account_id/jrc_service_desk/lifecycle_policies",
+    "ui": "LifecyclePolicyEditor.vue (JSON avancado)",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA"
+  },
+  {
+    "resource": "units",
+    "list": "GET estrutural escopado/paginado com ativos e inativos",
+    "create": "POST: somente autoridade explicita; primeira estrutura pela acao JRC humana",
+    "edit": "PATCH com revisao; propriedade e identidade imutaveis",
+    "activation": "active explicito com auditoria/GET; grant proprio negado",
+    "delete": "N/A - sem exclusao fisica",
+    "permission": "units_manage + structure_view; cliente administrador com role explicita",
+    "api": "/api/v1/accounts/:account_id/jrc_service_desk/structure/units",
+    "ui": "StructureView; primeira estrutura por formulario nativo Super Admin",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA"
+  },
+  {
+    "resource": "operator_companies",
+    "list": "GET estrutural escopado/paginado com ativos e inativos",
+    "create": "POST: somente autoridade explicita; primeira estrutura pela acao JRC humana",
+    "edit": "PATCH com revisao; propriedade e identidade imutaveis",
+    "activation": "active explicito com auditoria/GET; grant proprio negado",
+    "delete": "N/A - sem exclusao fisica",
+    "permission": "operator_companies_manage + structure_view; cliente administrador com role explicita",
+    "api": "/api/v1/accounts/:account_id/jrc_service_desk/structure/operator_companies",
+    "ui": "StructureView; primeira estrutura por formulario nativo Super Admin",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA"
+  },
+  {
+    "resource": "unit_memberships",
+    "list": "GET estrutural paginado da Account, mediante structure_view",
+    "create": "Primeiro grant pelo POST humano JRC; demais POST por autoridade estrutural explicita",
+    "edit": "PATCH active com revisao; destinatario e unidade imutaveis",
+    "activation": "Booleano explicito; sem autoconcessao/reativacao propria; permite revogacao propria autorizada",
+    "delete": "N/A - nao exposto",
+    "permission": "unit_memberships_manage + structure_view; administrator com concessao explicita, nao default",
+    "api": "/api/v1/accounts/:account_id/jrc_service_desk/structure/unit_memberships",
+    "ui": "StructureView; primeiro vinculo no formulario nativo JRC",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA"
+  }
+]

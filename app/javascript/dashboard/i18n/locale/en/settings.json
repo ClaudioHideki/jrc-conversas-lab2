@@ -306,6 +306,7 @@
     }
   },
   "SIDEBAR": {
+    "DOWNLOAD_JRC_SOFTPHONE": "Download JRC Softphone",
     "NO_ITEMS": "No items",
     "CURRENTLY_VIEWING_ACCOUNT": "Currently viewing:",
     "SWITCH": "Switch",

@@ -1,0 +1,43 @@
+{
+  "name": "jrc-softphone-desktop",
+  "version": "1.0.0",
+  "description": "Cliente Windows do Ramal JRC Conversas",
+  "main": "src/main.cjs",
+  "packageManager": "pnpm@10.2.0",
+  "pnpm": {
+    "onlyBuiltDependencies": ["electron"]
+  },
+  "scripts": {
+    "dev": "electron . --development --server-url=http://localhost:3000",
+    "start": "electron .",
+    "dist:win": "electron-builder --win nsis --publish never",
+    "test": "node --test test/*.test.cjs"
+  },
+  "devDependencies": {
+    "electron": "44.4.5",
+    "electron-builder": "26.0.12"
+  },
+  "build": {
+    "appId": "br.com.jrcpabx.softphone",
+    "productName": "JRC Softphone",
+    "asar": true,
+    "files": [
+      "src/**/*.cjs",
+      "floating/**/*",
+      "setup/**/*",
+      "assets/tray.png",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "artifactName": "JRC-Softphone-Setup.exe",
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}

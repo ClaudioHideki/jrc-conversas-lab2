@@ -1,6 +1,8 @@
 <script setup>
 import { h, ref, computed, onMounted, watch } from 'vue';
 import { provideSidebarContext, useSidebarResize } from './provider';
+import { useServiceDeskNavigation } from 'dashboard/composables/useServiceDeskNavigation';
+import { useServiceDeskStructure } from 'dashboard/composables/useServiceDeskStructure';
 import { useAccount } from 'dashboard/composables/useAccount';
 import { useConfig } from 'dashboard/composables/useConfig';
 import { useKbd } from 'dashboard/composables/utils/useKbd';
@@ -10,6 +12,10 @@ import { useI18n } from 'vue-i18n';
 import { useSidebarKeyboardShortcuts } from './useSidebarKeyboardShortcuts';
 import { vOnClickOutside } from '@vueuse/components';
 import { FEATURE_FLAGS } from 'dashboard/featureFlags';
+import {
+  SERVICE_DESK_ROUTES,
+  serviceDeskRouteName,
+} from 'dashboard/routes/dashboard/serviceDesk/routeDefinitions';
 import { useWindowSize, useEventListener } from '@vueuse/core';
 
 import Button from 'dashboard/components-next/button/Button.vue';
@@ -129,6 +135,16 @@ const hasSales = computed(() =>
 const hasJrcCampaigns = computed(() =>
   isFeatureEnabledonAccount.value(accountId.value, FEATURE_FLAGS.JRC_CAMPAIGNS)
 );
+
+const hasServiceDesk = computed(() =>
+  isFeatureEnabledonAccount.value(
+    accountId.value,
+    FEATURE_FLAGS.JRC_SERVICE_DESK
+  ) === true
+);
+
+const serviceDeskNavigation = useServiceDeskNavigation(accountId, currentUserId, hasServiceDesk);
+const serviceDeskStructure = useServiceDeskStructure(accountId, currentUserId, hasServiceDesk);
 
 const hasCrmUserAccess = computed(() => {
   const currentAccount = currentUser.value?.accounts?.find(
@@ -1153,6 +1169,22 @@ const menuItems = computed(() => {
           ignoreFeatureFlag: true,
         }
       : null,
+    hasServiceDesk.value && serviceDeskNavigation.visible
+      ? {
+          name: 'JRC Service Desk',
+          label: t('JRC_SERVICE_DESK.MODULE'),
+          icon: 'i-lucide-headset',
+          to: accountScopedRoute(serviceDeskNavigation.route),
+          activeOn: SERVICE_DESK_ROUTES.map(route =>
+            serviceDeskRouteName(route.key)
+          ),
+        }
+      : null,
+    hasServiceDesk.value && serviceDeskStructure.state.visible
+      ? { name: 'JRC Service Desk Structure', label: t('JRC_SERVICE_DESK.STRUCTURE.title'),
+          icon: 'i-lucide-building-2', to: accountScopedRoute('jrc_service_desk_structure'),
+          activeOn: ['jrc_service_desk_structure'] }
+      : null,
     contactsModule ? { ...contactsModule, label: 'Contatos' } : null,
     companiesModule ? { ...companiesModule, label: 'Empresas' } : null,
     {
@@ -1299,6 +1331,7 @@ const menuSections = computed(() => {
     'CRM', 'Sales', 'JRC Campaigns', 'Reports', 'JRC AI Administration',
     'Video Conference', 'Settings',
     'JRC Broker Connections',
+    'JRC Service Desk',
   ]);
   const legacyExtras = legacyMenuItems.value
     .filter(item => item && !mappedNames.has(item.name))
@@ -1317,6 +1350,7 @@ const menuSections = computed(() => {
         'JRC Email Center',
         'JRC Calls Center',
         'Contacts',
+        'JRC Service Desk',
         'CRM',
         'Sales',
         'JRC Campaigns',

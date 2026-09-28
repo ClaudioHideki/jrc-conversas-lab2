@@ -25,6 +25,9 @@ as well as a link to its edit page.
     </h1>
 
     <div class="flex gap-2">
+      <% if JrcServiceDesk::InitializerAuthority.authorized?(current_super_admin) && page.resource.feature_enabled?('jrc_service_desk') %>
+        <%= link_to t('jrc_sd_initialization.title'), super_admin_account_service_desk_initialization_path(account_id: page.resource.id), class: 'button' %>
+      <% end %>
       <%= link_to('Configurações da conta',
                   "/super_admin/accounts/#{page.resource.id}/settings/general",
                   class: 'button') %>

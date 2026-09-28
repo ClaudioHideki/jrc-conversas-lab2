@@ -2,6 +2,8 @@
 /* eslint-disable vue/no-bare-strings-in-template, @intlify/vue-i18n/no-raw-text */
 import { computed, onMounted, reactive, ref } from 'vue';
 import { useStore } from 'vuex';
+import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useAlert } from 'dashboard/composables';
 import { dealsAPI, productsAPI, proposalsAPI } from 'dashboard/api/crm';
 import CrmStatusBadge from '../../components/shared/CrmStatusBadge.vue';
@@ -11,6 +13,11 @@ import CrmStatCard from '../../components/shared/CrmStatCard.vue';
 import { formatCrmDate } from '../../utils/dateTime';
 
 const store = useStore();
+const route = useRoute();
+const { t } = useI18n();
+const pdfLoading = ref(false);
+const savedForm = ref('');
+const itemUpdateFailed = ref(false);
 const proposals = computed(
   () => store.getters['jrcCrm/proposals/allProposals'] || []
 );
@@ -31,6 +38,7 @@ const sendingChannel = ref('');
 const actionWorking = ref('');
 const proposalDiscount = ref('');
 const itemForm = reactive({ product_id: '', quantity: 1, unit_price: '' });
+const hasPendingItem = computed(() => Boolean(itemForm.product_id));
 const proposalForm = reactive({
   title: '',
   solution_description: '',
@@ -53,6 +61,11 @@ const proposalForm = reactive({
   follow_up_enabled: true,
   follow_up_days: 3,
 });
+const formSnapshot = () =>
+  JSON.stringify([proposalForm, proposalDiscount.value]);
+const hasUnsavedChanges = computed(
+  () => Boolean(selectedProposal.value) && savedForm.value !== formSnapshot()
+);
 const proposalStats = computed(() => [
   {
     label: 'Propostas',
@@ -125,7 +138,9 @@ const billingLabel = value =>
     monthly: 'Mensal',
     annual: 'Anual',
     usage: 'Por uso',
-  })[value] || value || 'Cobrança única';
+  })[value] ||
+  value ||
+  'Cobrança única';
 
 const loadProducts = async () => {
   if (products.value.length) return;
@@ -136,7 +151,16 @@ const loadProducts = async () => {
 const openForm = async () => {
   try {
     const { data } = await dealsAPI.list({ status: 'open' });
-    deals.value = data;
+    const contactId = route.query.contactId;
+    deals.value =
+      typeof contactId === 'string' && /^\d+$/.test(contactId)
+        ? data.filter(
+            deal =>
+              String(deal.contact_id) === contactId ||
+              deal.contacts?.some(contact => String(contact.id) === contactId)
+          )
+        : data;
+    dealId.value = deals.value.length === 1 ? deals.value[0].id : '';
     showForm.value = true;
   } catch {
     useAlert('Não foi possível carregar os negócios.');
@@ -167,9 +191,11 @@ const hydrateProposalForm = data => {
   proposalForm.follow_up_enabled = data.follow_up?.enabled ?? true;
   proposalForm.follow_up_days = data.follow_up?.days ?? 3;
   proposalDiscount.value = moneyInput(data.discount_cents);
+  savedForm.value = formSnapshot();
 };
 
 const openProposal = async proposal => {
+  itemUpdateFailed.value = false;
   loadingDetails.value = true;
   selectedProposal.value = proposal;
   try {
@@ -180,6 +206,7 @@ const openProposal = async proposal => {
     selectedProposal.value = data;
     hydrateProposalForm(data);
   } catch {
+    selectedProposal.value = null;
     useAlert('Não foi possível abrir a proposta.');
   } finally {
     loadingDetails.value = false;
@@ -212,9 +239,10 @@ const createProposal = async () => {
   }
 };
 
-const applyProposalResponse = async data => {
+const applyProposalResponse = async (data, preserveDraft = true) => {
+  const dirty = preserveDraft && hasUnsavedChanges.value;
   selectedProposal.value = data;
-  hydrateProposalForm(data);
+  if (!dirty) hydrateProposalForm(data);
   await refresh();
 };
 
@@ -242,8 +270,7 @@ const persistCommercialData = async (showSuccess = true) => {
           : null,
         first_billing_days: Number(proposalForm.first_billing_days || 0),
         taxes_included: proposalForm.taxes_included,
-        annual_adjustment_index:
-          proposalForm.annual_adjustment_index || 'IPCA',
+        annual_adjustment_index: proposalForm.annual_adjustment_index || 'IPCA',
         renewal_type: proposalForm.renewal_type,
         cancellation_penalty_percent: Number(
           proposalForm.cancellation_penalty_percent || 0
@@ -252,7 +279,7 @@ const persistCommercialData = async (showSuccess = true) => {
         follow_up_days: Number(proposalForm.follow_up_days || 0),
       },
     });
-    await applyProposalResponse(data);
+    await applyProposalResponse(data, false);
     if (showSuccess) useAlert('Dados comerciais da proposta atualizados.');
     return true;
   } catch (requestError) {
@@ -301,7 +328,8 @@ const addItem = async () => {
 };
 
 const updateItem = async item => {
-  if (!selectedProposal.value) return;
+  if (!selectedProposal.value || itemSaving.value) return;
+  itemSaving.value = true;
   try {
     const { data } = await proposalsAPI.updateItem(
       selectedProposal.value.id,
@@ -316,7 +344,10 @@ const updateItem = async item => {
     );
     await applyProposalResponse(data);
   } catch {
+    itemUpdateFailed.value = true;
     useAlert('Não foi possível atualizar o item.');
+  } finally {
+    itemSaving.value = false;
   }
 };
 
@@ -331,7 +362,8 @@ const updateItemDiscount = (item, value) => {
 };
 
 const removeItem = async item => {
-  if (!selectedProposal.value) return;
+  if (!selectedProposal.value || itemSaving.value) return;
+  itemSaving.value = true;
   try {
     const { data } = await proposalsAPI.deleteItem(
       selectedProposal.value.id,
@@ -340,6 +372,8 @@ const removeItem = async item => {
     await applyProposalResponse(data);
   } catch {
     useAlert('Não foi possível remover o item.');
+  } finally {
+    itemSaving.value = false;
   }
 };
 
@@ -359,13 +393,41 @@ const previewProposal = () => {
     );
 };
 
-const previewPdf = (download = false) => {
-  if (!selectedProposal.value) return;
-  const url = proposalsAPI.pdfUrl(selectedProposal.value.id, download);
-  if (download) {
-    window.location.assign(url);
-  } else {
-    window.open(url, '_blank', 'noopener');
+const downloadPdf = async (proposal = selectedProposal.value) => {
+  if (
+    !proposal ||
+    pdfLoading.value ||
+    loadingDetails.value ||
+    saving.value ||
+    itemSaving.value
+  )
+    return;
+  if (
+    proposal.id === selectedProposal.value?.id &&
+    (hasUnsavedChanges.value || hasPendingItem.value || itemUpdateFailed.value)
+  ) {
+    useAlert(t('CRM.PROPOSAL_PDF.UNSAVED'));
+    return;
+  }
+  pdfLoading.value = true;
+  try {
+    const { data } = await proposalsAPI.pdf(proposal.id);
+    const url = URL.createObjectURL(data);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `proposta-${proposal.id}-v${proposal.version_number || 1}.pdf`;
+    document.body.appendChild(link);
+    try {
+      link.click();
+    } finally {
+      link.remove();
+      // Chromium needs the blob to remain alive while the download starts.
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    }
+  } catch {
+    useAlert(t('CRM.PROPOSAL_PDF.ERROR'));
+  } finally {
+    pdfLoading.value = false;
   }
 };
 
@@ -485,7 +547,15 @@ const sendFromRow = async (proposal, channel) => {
   await sendProposal(channel);
 };
 
-onMounted(refresh);
+onMounted(async () => {
+  await refresh();
+  const { proposalId } = route.query;
+  if (typeof proposalId === 'string' && /^\d+$/.test(proposalId)) {
+    await openProposal({ id: proposalId });
+  } else if (route.query.new === '1') {
+    await openForm();
+  }
+});
 </script>
 
 <template>
@@ -609,8 +679,9 @@ onMounted(refresh);
                 <button
                   type="button"
                   class="rounded-lg border border-n-weak p-2"
-                  title="Visualizar PDF"
-                  @click="openProposal(proposal).then(() => previewPdf(false))"
+                  :title="t('CRM.PROPOSAL_PDF.DOWNLOAD')"
+                  :disabled="pdfLoading"
+                  @click="downloadPdf(proposal)"
                 >
                   <i class="i-lucide-file-text size-4" />
                 </button>
@@ -643,7 +714,7 @@ onMounted(refresh);
       @click.self="showForm = false"
     >
       <form
-        class="w-full max-w-lg rounded-xl bg-n-solid-2 p-6 shadow-xl"
+        class="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-xl bg-n-solid-2 p-6 shadow-xl"
         @submit.prevent="createProposal"
       >
         <h3 class="text-lg font-bold text-n-slate-12">Criar proposta</h3>
@@ -722,16 +793,15 @@ onMounted(refresh);
               <button
                 type="button"
                 class="rounded-xl bg-n-ruby-9 px-3 py-2 text-sm font-semibold text-white shadow-sm"
-                @click="previewPdf(false)"
+                :disabled="pdfLoading || loadingDetails || saving || itemSaving"
+                @click="downloadPdf()"
               >
-                <i class="i-lucide-file-text mr-1" /> Gerar PDF
-              </button>
-              <button
-                type="button"
-                class="rounded-xl bg-n-iris-9 px-3 py-2 text-sm font-semibold text-white shadow-sm"
-                @click="previewPdf(true)"
-              >
-                <i class="i-lucide-download mr-1" /> Baixar
+                <i class="i-lucide-file-text mr-1" />
+                {{
+                  pdfLoading
+                    ? t('CRM.PROPOSAL_PDF.LOADING')
+                    : t('CRM.PROPOSAL_PDF.DOWNLOAD')
+                }}
               </button>
               <button
                 type="button"
@@ -802,6 +872,13 @@ onMounted(refresh);
           </div>
         </div>
 
+        <p
+          v-if="hasUnsavedChanges || hasPendingItem || itemUpdateFailed"
+          role="status"
+          class="shrink-0 bg-n-amber-3 px-5 py-2 text-sm text-n-amber-11"
+        >
+          {{ t('CRM.PROPOSAL_PDF.UNSAVED') }}
+        </p>
         <div class="shrink-0 border-b border-n-weak bg-n-solid-2 px-5 py-3">
           <ol class="grid grid-cols-2 gap-2 sm:grid-cols-5">
             <li
@@ -891,7 +968,8 @@ onMounted(refresh);
                 {{ selectedProposal.viewed_count || 0 }} visualizações
               </p>
               <p class="text-xs text-n-slate-10">
-                Válida até {{ selectedProposal.valid_until_display || 'não definida' }}
+                Válida até
+                {{ selectedProposal.valid_until_display || 'não definida' }}
               </p>
             </div>
           </div>
@@ -902,9 +980,12 @@ onMounted(refresh);
           >
             <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h4 class="font-bold text-n-slate-12">Conteúdo e condições comerciais</h4>
+                <h4 class="font-bold text-n-slate-12">
+                  Conteúdo e condições comerciais
+                </h4>
                 <p class="text-xs text-n-slate-10">
-                  Dados usados na visualização, no PDF, no envio e no aceite digital.
+                  Dados usados na visualização, no PDF, no envio e no aceite
+                  digital.
                 </p>
               </div>
               <button
@@ -919,27 +1000,38 @@ onMounted(refresh);
               v-if="selectedProposal.locked"
               class="mb-4 rounded-xl border border-n-amber-6 bg-n-amber-2 p-3 text-sm font-medium text-n-amber-11"
             >
-              <i class="i-lucide-lock-keyhole mr-1" /> Esta proposta foi aceita e está bloqueada. Use “Duplicar” para criar uma nova versão editável.
+              <i class="i-lucide-lock-keyhole mr-1" /> Esta proposta foi aceita
+              e está bloqueada. Use “Duplicar” para criar uma nova versão
+              editável.
             </div>
 
-            <fieldset :disabled="selectedProposal.locked" class="space-y-6 disabled:opacity-70">
+            <fieldset
+              :disabled="selectedProposal.locked || itemSaving"
+              class="space-y-6 disabled:opacity-70"
+            >
               <section>
-                <h5 class="mb-3 text-sm font-bold text-n-slate-12">Identificação e conteúdo</h5>
+                <h5 class="mb-3 text-sm font-bold text-n-slate-12">
+                  Identificação e conteúdo
+                </h5>
                 <div class="grid gap-4 md:grid-cols-2">
-                  <label class="text-sm font-medium text-n-slate-11 md:col-span-2">
+                  <label
+                    class="text-sm font-medium text-n-slate-11 md:col-span-2"
+                  >
                     Título
                     <input
                       v-model="proposalForm.title"
-                      :disabled="selectedProposal.locked"
+                      :disabled="selectedProposal.locked || itemSaving"
                       required
                       class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"
                     />
                   </label>
-                  <label class="text-sm font-medium text-n-slate-11 md:col-span-2">
+                  <label
+                    class="text-sm font-medium text-n-slate-11 md:col-span-2"
+                  >
                     Descrição da solução
                     <textarea
                       v-model="proposalForm.solution_description"
-                      :disabled="selectedProposal.locked"
+                      :disabled="selectedProposal.locked || itemSaving"
                       rows="4"
                       class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"
                     />
@@ -954,7 +1046,10 @@ onMounted(refresh);
                       :readonly="selectedProposal.items_count > 0"
                       class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2 read-only:bg-n-alpha-2"
                     />
-                    <span v-if="selectedProposal.items_count > 0" class="mt-1 block text-xs text-n-slate-9">
+                    <span
+                      v-if="selectedProposal.items_count > 0"
+                      class="mt-1 block text-xs text-n-slate-9"
+                    >
                       Calculada automaticamente pelos itens recorrentes.
                     </span>
                   </label>
@@ -968,7 +1063,10 @@ onMounted(refresh);
                       :readonly="selectedProposal.items_count > 0"
                       class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2 read-only:bg-n-alpha-2"
                     />
-                    <span v-if="selectedProposal.items_count > 0" class="mt-1 block text-xs text-n-slate-9">
+                    <span
+                      v-if="selectedProposal.items_count > 0"
+                      class="mt-1 block text-xs text-n-slate-9"
+                    >
                       Calculada automaticamente pelos itens e setups.
                     </span>
                   </label>
@@ -976,7 +1074,7 @@ onMounted(refresh);
                     Validade
                     <input
                       v-model="proposalForm.valid_until"
-                      :disabled="selectedProposal.locked"
+                      :disabled="selectedProposal.locked || itemSaving"
                       type="date"
                       class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"
                     />
@@ -990,20 +1088,24 @@ onMounted(refresh);
                       class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"
                     />
                   </label>
-                  <label class="text-sm font-medium text-n-slate-11 md:col-span-2">
+                  <label
+                    class="text-sm font-medium text-n-slate-11 md:col-span-2"
+                  >
                     Observações comerciais
                     <textarea
                       v-model="proposalForm.commercial_notes"
-                      :disabled="selectedProposal.locked"
+                      :disabled="selectedProposal.locked || itemSaving"
                       rows="4"
                       class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"
                     />
                   </label>
-                  <label class="text-sm font-medium text-n-slate-11 md:col-span-2">
+                  <label
+                    class="text-sm font-medium text-n-slate-11 md:col-span-2"
+                  >
                     Próximos passos
                     <textarea
                       v-model="proposalForm.next_steps"
-                      :disabled="selectedProposal.locked"
+                      :disabled="selectedProposal.locked || itemSaving"
                       rows="5"
                       class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"
                     />
@@ -1012,7 +1114,9 @@ onMounted(refresh);
               </section>
 
               <section class="border-t border-n-weak pt-5">
-                <h5 class="mb-3 text-sm font-bold text-n-slate-12">Empresa emissora e faturamento</h5>
+                <h5 class="mb-3 text-sm font-bold text-n-slate-12">
+                  Empresa emissora e faturamento
+                </h5>
                 <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                   <label class="text-sm font-medium text-n-slate-11">
                     Empresa emissora
@@ -1100,22 +1204,45 @@ onMounted(refresh);
                   </label>
                 </div>
                 <div class="mt-4 grid gap-3 sm:grid-cols-2">
-                  <label class="flex items-center justify-between gap-3 rounded-xl border border-n-weak p-3">
+                  <label
+                    class="flex items-center justify-between gap-3 rounded-xl border border-n-weak p-3"
+                  >
                     <span>
-                      <span class="block text-sm font-semibold text-n-slate-12">Impostos inclusos</span>
-                      <span class="text-xs text-n-slate-10">Indica como os valores serão apresentados.</span>
+                      <span class="block text-sm font-semibold text-n-slate-12"
+                        >Impostos inclusos</span
+                      >
+                      <span class="text-xs text-n-slate-10"
+                        >Indica como os valores serão apresentados.</span
+                      >
                     </span>
-                    <input v-model="proposalForm.taxes_included" type="checkbox" class="size-5 accent-n-teal-9" />
+                    <input
+                      v-model="proposalForm.taxes_included"
+                      type="checkbox"
+                      class="size-5 accent-n-teal-9"
+                    />
                   </label>
-                  <label class="flex items-center justify-between gap-3 rounded-xl border border-n-weak p-3">
+                  <label
+                    class="flex items-center justify-between gap-3 rounded-xl border border-n-weak p-3"
+                  >
                     <span>
-                      <span class="block text-sm font-semibold text-n-slate-12">Acompanhamento automático</span>
-                      <span class="text-xs text-n-slate-10">Registrar lembrete após o envio.</span>
+                      <span class="block text-sm font-semibold text-n-slate-12"
+                        >Acompanhamento automático</span
+                      >
+                      <span class="text-xs text-n-slate-10"
+                        >Registrar lembrete após o envio.</span
+                      >
                     </span>
-                    <input v-model="proposalForm.follow_up_enabled" type="checkbox" class="size-5 accent-n-iris-9" />
+                    <input
+                      v-model="proposalForm.follow_up_enabled"
+                      type="checkbox"
+                      class="size-5 accent-n-iris-9"
+                    />
                   </label>
                 </div>
-                <label v-if="proposalForm.follow_up_enabled" class="mt-4 block text-sm font-medium text-n-slate-11">
+                <label
+                  v-if="proposalForm.follow_up_enabled"
+                  class="mt-4 block text-sm font-medium text-n-slate-11"
+                >
                   Acompanhamento após (dias)
                   <input
                     v-model.number="proposalForm.follow_up_days"
@@ -1145,7 +1272,7 @@ onMounted(refresh);
             >
               <select
                 v-model="itemForm.product_id"
-                :disabled="selectedProposal.locked"
+                :disabled="selectedProposal.locked || itemSaving"
                 required
                 class="rounded-lg border border-n-weak bg-n-solid-2 px-3 py-2 text-sm"
                 @change="selectProduct"
@@ -1161,7 +1288,7 @@ onMounted(refresh);
               </select>
               <input
                 v-model.number="itemForm.quantity"
-                :disabled="selectedProposal.locked"
+                :disabled="selectedProposal.locked || itemSaving"
                 min="1"
                 required
                 type="number"
@@ -1170,7 +1297,7 @@ onMounted(refresh);
               />
               <input
                 v-model="itemForm.unit_price"
-                :disabled="selectedProposal.locked"
+                :disabled="selectedProposal.locked || itemSaving"
                 min="0"
                 step="0.01"
                 required
@@ -1222,14 +1349,24 @@ onMounted(refresh);
                         SKU {{ item.product.sku }}
                       </p>
                       <div class="mt-2 flex flex-wrap gap-1 text-[11px]">
-                        <span class="rounded-full bg-n-iris-3 px-2 py-0.5 text-n-iris-11">
+                        <span
+                          class="rounded-full bg-n-iris-3 px-2 py-0.5 text-n-iris-11"
+                        >
                           {{ billingLabel(item.billing_model) }}
                         </span>
-                        <span v-if="item.setup_fee_cents" class="rounded-full bg-n-blue-3 px-2 py-0.5 text-n-blue-11">
-                          Implantação <CrmValueDisplay :cents="item.setup_fee_cents" />
+                        <span
+                          v-if="item.setup_fee_cents"
+                          class="rounded-full bg-n-blue-3 px-2 py-0.5 text-n-blue-11"
+                        >
+                          Implantação
+                          <CrmValueDisplay :cents="item.setup_fee_cents" />
                         </span>
-                        <span v-if="item.included_quantity" class="rounded-full bg-n-teal-3 px-2 py-0.5 text-n-teal-11">
-                          {{ item.included_quantity }} {{ item.included_unit || 'incluídos' }}
+                        <span
+                          v-if="item.included_quantity"
+                          class="rounded-full bg-n-teal-3 px-2 py-0.5 text-n-teal-11"
+                        >
+                          {{ item.included_quantity }}
+                          {{ item.included_unit || 'incluídos' }}
                         </span>
                       </div>
                     </td>
@@ -1239,7 +1376,7 @@ onMounted(refresh);
                         min="1"
                         type="number"
                         class="w-20 rounded border border-n-weak px-2 py-1 text-right"
-                        :disabled="selectedProposal.locked"
+                        :disabled="selectedProposal.locked || itemSaving"
                         @change="updateItem(item)"
                       />
                     </td>
@@ -1250,7 +1387,7 @@ onMounted(refresh);
                         step="0.01"
                         type="number"
                         class="w-28 rounded border border-n-weak px-2 py-1 text-right"
-                        :disabled="selectedProposal.locked"
+                        :disabled="selectedProposal.locked || itemSaving"
                         @change="updateItemPrice(item, $event.target.value)"
                       />
                     </td>
@@ -1261,14 +1398,18 @@ onMounted(refresh);
                         step="0.01"
                         type="number"
                         class="w-24 rounded border border-n-weak px-2 py-1 text-right"
-                        :disabled="selectedProposal.locked"
+                        :disabled="selectedProposal.locked || itemSaving"
                         @change="updateItemDiscount(item, $event.target.value)"
                       />
                     </td>
                     <td class="px-4 py-3 text-right font-semibold">
                       <CrmValueDisplay :cents="item.initial_total_cents" />
-                      <p v-if="item.recurring_total_cents" class="mt-1 text-xs font-normal text-n-teal-11">
-                        Recorrência <CrmValueDisplay :cents="item.recurring_total_cents" />
+                      <p
+                        v-if="item.recurring_total_cents"
+                        class="mt-1 text-xs font-normal text-n-teal-11"
+                      >
+                        Recorrência
+                        <CrmValueDisplay :cents="item.recurring_total_cents" />
                       </p>
                     </td>
                     <td class="px-4 py-3 text-right">
@@ -1276,7 +1417,7 @@ onMounted(refresh);
                         v-if="!selectedProposal.locked"
                         type="button"
                         class="rounded-lg border border-n-weak px-3 py-1.5 text-xs text-n-ruby-11 disabled:opacity-40"
-                        :disabled="selectedProposal.locked"
+                        :disabled="selectedProposal.locked || itemSaving"
                         @click="removeItem(item)"
                       >
                         Remover
@@ -1298,7 +1439,7 @@ onMounted(refresh);
                 min="0"
                 step="0.01"
                 class="rounded-lg border border-n-weak px-3 py-2"
-                :disabled="selectedProposal.locked"
+                :disabled="selectedProposal.locked || itemSaving"
               />
               <p class="text-xs text-n-slate-10">
                 Aplicado depois dos descontos individuais dos produtos. Clique
@@ -1371,8 +1512,12 @@ onMounted(refresh);
                   Comercial, financeiro e técnico antes do envio.
                 </p>
               </div>
-              <span class="rounded-full bg-n-amber-3 px-2.5 py-1 text-xs font-semibold text-n-amber-11">
-                {{ selectedProposal.approval?.status_display || 'Não requerida' }}
+              <span
+                class="rounded-full bg-n-amber-3 px-2.5 py-1 text-xs font-semibold text-n-amber-11"
+              >
+                {{
+                  selectedProposal.approval?.status_display || 'Não requerida'
+                }}
               </span>
             </div>
 
@@ -1387,27 +1532,36 @@ onMounted(refresh);
                 class="rounded-xl border border-n-weak p-3"
               >
                 <div class="flex items-center justify-between gap-3">
-                  <span class="text-sm font-semibold text-n-slate-12">{{ approvalItem.label }}</span>
+                  <span class="text-sm font-semibold text-n-slate-12">{{
+                    approvalItem.label
+                  }}</span>
                   <span
                     class="rounded-full px-2 py-0.5 text-xs font-semibold"
                     :class="
-                      selectedProposal.approval?.[approvalItem.key] === 'approved'
+                      selectedProposal.approval?.[approvalItem.key] ===
+                      'approved'
                         ? 'bg-n-teal-3 text-n-teal-11'
-                        : selectedProposal.approval?.[approvalItem.key] === 'rejected'
+                        : selectedProposal.approval?.[approvalItem.key] ===
+                            'rejected'
                           ? 'bg-n-ruby-3 text-n-ruby-11'
-                          : selectedProposal.approval?.[approvalItem.key] === 'pending'
+                          : selectedProposal.approval?.[approvalItem.key] ===
+                              'pending'
                             ? 'bg-n-amber-3 text-n-amber-11'
                             : 'bg-n-alpha-3 text-n-slate-10'
                     "
                   >
                     {{
-                      selectedProposal.approval?.[`${approvalItem.key}_display`] ||
-                      'Não requerida'
+                      selectedProposal.approval?.[
+                        `${approvalItem.key}_display`
+                      ] || 'Não requerida'
                     }}
                   </span>
                 </div>
                 <div
-                  v-if="isAdmin && selectedProposal.approval?.[approvalItem.key] === 'pending'"
+                  v-if="
+                    isAdmin &&
+                    selectedProposal.approval?.[approvalItem.key] === 'pending'
+                  "
                   class="mt-3 flex gap-2"
                 >
                   <button
@@ -1430,8 +1584,13 @@ onMounted(refresh);
               </div>
             </div>
 
-            <div v-if="selectedProposal.acceptance?.name" class="mt-4 rounded-xl bg-n-teal-2 p-3">
-              <p class="text-xs font-semibold uppercase text-n-teal-11">Aceite digital</p>
+            <div
+              v-if="selectedProposal.acceptance?.name"
+              class="mt-4 rounded-xl bg-n-teal-2 p-3"
+            >
+              <p class="text-xs font-semibold uppercase text-n-teal-11">
+                Aceite digital
+              </p>
               <p class="mt-1 text-sm font-semibold text-n-slate-12">
                 {{ selectedProposal.acceptance.name }}
               </p>

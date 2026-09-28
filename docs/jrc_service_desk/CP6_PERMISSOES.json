@@ -1,0 +1,575 @@
+[
+  {
+    "capability": "jrc_service_desk_module_view",
+    "meaning": "Visualizar modulo",
+    "native_agent_default": true,
+    "native_administrator_default": true,
+    "custom_role": "Explicit native permission; NO base-role fallback while assigned",
+    "requires": [],
+    "unit_membership": "Required active; no admin/Team bypass",
+    "policy": "ModulePolicy#show?",
+    "implementation": "Code connected; native validation pending",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA",
+    "validation": "PENDENTE — validação nativa em Docker/servidor"
+  },
+  {
+    "capability": "jrc_service_desk_tickets_view",
+    "meaning": "Visualizar chamados",
+    "native_agent_default": true,
+    "native_administrator_default": true,
+    "custom_role": "Explicit native permission; NO base-role fallback while assigned",
+    "requires": [
+      "module_view"
+    ],
+    "unit_membership": "Required active; no admin/Team bypass",
+    "policy": "TicketPolicy#index?/show?/Scope",
+    "implementation": "Code connected; native validation pending",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA",
+    "validation": "PENDENTE — validação nativa em Docker/servidor"
+  },
+  {
+    "capability": "jrc_service_desk_tickets_view_all",
+    "meaning": "Visualizar todos os chamados das unidades vinculadas",
+    "native_agent_default": false,
+    "native_administrator_default": true,
+    "custom_role": "Explicit native permission; NO base-role fallback while assigned",
+    "requires": [
+      "tickets_view"
+    ],
+    "unit_membership": "Required active; no admin/Team bypass",
+    "policy": "TicketPolicy::Scope (same units only)",
+    "implementation": "Code connected; native validation pending",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA",
+    "validation": "PENDENTE — validação nativa em Docker/servidor"
+  },
+  {
+    "capability": "jrc_service_desk_tickets_create",
+    "meaning": "Criar chamado",
+    "native_agent_default": true,
+    "native_administrator_default": true,
+    "custom_role": "Explicit native permission; NO base-role fallback while assigned",
+    "requires": [
+      "tickets_view",
+      "lookups_view",
+      "customers_view"
+    ],
+    "unit_membership": "Required active; no admin/Team bypass",
+    "policy": "TicketPolicy#create?",
+    "implementation": "Code connected; native validation pending",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA",
+    "validation": "PENDENTE — validação nativa em Docker/servidor"
+  },
+  {
+    "capability": "jrc_service_desk_tickets_edit",
+    "meaning": "Editar dados do chamado",
+    "native_agent_default": true,
+    "native_administrator_default": true,
+    "custom_role": "Explicit native permission; NO base-role fallback while assigned",
+    "requires": [
+      "tickets_view"
+    ],
+    "unit_membership": "Required active; no admin/Team bypass",
+    "policy": "TicketPolicy#update? + field checks",
+    "implementation": "Code connected; native validation pending",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA",
+    "validation": "PENDENTE — validação nativa em Docker/servidor"
+  },
+  {
+    "capability": "jrc_service_desk_tickets_assign",
+    "meaning": "Atribuir chamado",
+    "native_agent_default": true,
+    "native_administrator_default": true,
+    "custom_role": "Explicit native permission; NO base-role fallback while assigned",
+    "requires": [
+      "tickets_view"
+    ],
+    "unit_membership": "Required active; no admin/Team bypass",
+    "policy": "TicketPolicy#assign?",
+    "implementation": "Code connected; native validation pending",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA",
+    "validation": "PENDENTE — validação nativa em Docker/servidor"
+  },
+  {
+    "capability": "jrc_service_desk_tickets_transfer",
+    "meaning": "Transferir na mesma unidade",
+    "native_agent_default": true,
+    "native_administrator_default": true,
+    "custom_role": "Explicit native permission; NO base-role fallback while assigned",
+    "requires": [
+      "tickets_view"
+    ],
+    "unit_membership": "Required active; no admin/Team bypass",
+    "policy": "TicketPolicy#transfer?",
+    "implementation": "Code connected; native validation pending",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA",
+    "validation": "PENDENTE — validação nativa em Docker/servidor"
+  },
+  {
+    "capability": "jrc_service_desk_priority_change",
+    "meaning": "Alterar prioridade",
+    "native_agent_default": true,
+    "native_administrator_default": true,
+    "custom_role": "Explicit native permission; NO base-role fallback while assigned",
+    "requires": [
+      "tickets_view"
+    ],
+    "unit_membership": "Required active; no admin/Team bypass",
+    "policy": "TicketPolicy#change_priority? + field checks",
+    "implementation": "Code connected; native validation pending",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA",
+    "validation": "PENDENTE — validação nativa em Docker/servidor"
+  },
+  {
+    "capability": "jrc_service_desk_work_status_change",
+    "meaning": "Alterar status de trabalho",
+    "native_agent_default": true,
+    "native_administrator_default": true,
+    "custom_role": "Explicit native permission; NO base-role fallback while assigned",
+    "requires": [
+      "tickets_view",
+      "history_view",
+      "sla_view"
+    ],
+    "unit_membership": "Required active; no admin/Team bypass",
+    "policy": "WorkStatusPolicy + published rule",
+    "implementation": "Code connected; native validation pending",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA",
+    "validation": "PENDENTE — validação nativa em Docker/servidor"
+  },
+  {
+    "capability": "jrc_service_desk_pause",
+    "meaning": "Pausar",
+    "native_agent_default": true,
+    "native_administrator_default": true,
+    "custom_role": "Explicit native permission; NO base-role fallback while assigned",
+    "requires": [
+      "tickets_view",
+      "history_view",
+      "sla_view"
+    ],
+    "unit_membership": "Required active; no admin/Team bypass",
+    "policy": "LifecycleActionPolicy#action? + pinned rule",
+    "implementation": "Code connected; native validation pending",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA",
+    "validation": "PENDENTE — validação nativa em Docker/servidor"
+  },
+  {
+    "capability": "jrc_service_desk_resume",
+    "meaning": "Retomar",
+    "native_agent_default": true,
+    "native_administrator_default": true,
+    "custom_role": "Explicit native permission; NO base-role fallback while assigned",
+    "requires": [
+      "tickets_view",
+      "history_view",
+      "sla_view"
+    ],
+    "unit_membership": "Required active; no admin/Team bypass",
+    "policy": "LifecycleActionPolicy#action? + pinned rule",
+    "implementation": "Code connected; native validation pending",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA",
+    "validation": "PENDENTE — validação nativa em Docker/servidor"
+  },
+  {
+    "capability": "jrc_service_desk_resolve",
+    "meaning": "Resolver",
+    "native_agent_default": true,
+    "native_administrator_default": true,
+    "custom_role": "Explicit native permission; NO base-role fallback while assigned",
+    "requires": [
+      "tickets_view",
+      "history_view",
+      "sla_view"
+    ],
+    "unit_membership": "Required active; no admin/Team bypass",
+    "policy": "LifecycleActionPolicy#action? + pinned rule",
+    "implementation": "Code connected; native validation pending",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA",
+    "validation": "PENDENTE — validação nativa em Docker/servidor"
+  },
+  {
+    "capability": "jrc_service_desk_close",
+    "meaning": "Encerrar",
+    "native_agent_default": true,
+    "native_administrator_default": true,
+    "custom_role": "Explicit native permission; NO base-role fallback while assigned",
+    "requires": [
+      "tickets_view",
+      "history_view",
+      "sla_view"
+    ],
+    "unit_membership": "Required active; no admin/Team bypass",
+    "policy": "LifecycleActionPolicy#action? + pinned rule",
+    "implementation": "Code connected; native validation pending",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA",
+    "validation": "PENDENTE — validação nativa em Docker/servidor"
+  },
+  {
+    "capability": "jrc_service_desk_cancel",
+    "meaning": "Cancelar",
+    "native_agent_default": true,
+    "native_administrator_default": true,
+    "custom_role": "Explicit native permission; NO base-role fallback while assigned",
+    "requires": [
+      "tickets_view",
+      "history_view",
+      "sla_view"
+    ],
+    "unit_membership": "Required active; no admin/Team bypass",
+    "policy": "LifecycleActionPolicy#action? + pinned rule",
+    "implementation": "Code connected; native validation pending",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA",
+    "validation": "PENDENTE — validação nativa em Docker/servidor"
+  },
+  {
+    "capability": "jrc_service_desk_reopen",
+    "meaning": "Reabrir",
+    "native_agent_default": true,
+    "native_administrator_default": true,
+    "custom_role": "Explicit native permission; NO base-role fallback while assigned",
+    "requires": [
+      "tickets_view",
+      "history_view",
+      "sla_view"
+    ],
+    "unit_membership": "Required active; no admin/Team bypass",
+    "policy": "LifecycleActionPolicy#action? + pinned rule",
+    "implementation": "Code connected; native validation pending",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA",
+    "validation": "PENDENTE — validação nativa em Docker/servidor"
+  },
+  {
+    "capability": "jrc_service_desk_notes_view",
+    "meaning": "Consultar notas internas",
+    "native_agent_default": true,
+    "native_administrator_default": true,
+    "custom_role": "Explicit native permission; NO base-role fallback while assigned",
+    "requires": [
+      "tickets_view"
+    ],
+    "unit_membership": "Required active; no admin/Team bypass",
+    "policy": "TicketNotePolicy",
+    "implementation": "Code connected; native validation pending",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA",
+    "validation": "PENDENTE — validação nativa em Docker/servidor"
+  },
+  {
+    "capability": "jrc_service_desk_notes_add",
+    "meaning": "Adicionar nota interna",
+    "native_agent_default": true,
+    "native_administrator_default": true,
+    "custom_role": "Explicit native permission; NO base-role fallback while assigned",
+    "requires": [
+      "notes_view"
+    ],
+    "unit_membership": "Required active; no admin/Team bypass",
+    "policy": "TicketPolicy#add_note? + TicketNotePolicy#create?",
+    "implementation": "Code connected; native validation pending",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA",
+    "validation": "PENDENTE — validação nativa em Docker/servidor"
+  },
+  {
+    "capability": "jrc_service_desk_history_view",
+    "meaning": "Consultar historico",
+    "native_agent_default": true,
+    "native_administrator_default": true,
+    "custom_role": "Explicit native permission; NO base-role fallback while assigned",
+    "requires": [
+      "tickets_view"
+    ],
+    "unit_membership": "Required active; no admin/Team bypass",
+    "policy": "TicketEventPolicy + LifecycleReadService",
+    "implementation": "Code connected; native validation pending",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA",
+    "validation": "PENDENTE — validação nativa em Docker/servidor"
+  },
+  {
+    "capability": "jrc_service_desk_conversations_view",
+    "meaning": "Consultar vinculos de conversa",
+    "native_agent_default": true,
+    "native_administrator_default": true,
+    "custom_role": "Explicit native permission; NO base-role fallback while assigned",
+    "requires": [
+      "tickets_view"
+    ],
+    "unit_membership": "Required active; no admin/Team bypass",
+    "policy": "TicketConversationPolicy + native ConversationPolicy",
+    "implementation": "Code connected; native validation pending",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA",
+    "validation": "PENDENTE — validação nativa em Docker/servidor"
+  },
+  {
+    "capability": "jrc_service_desk_conversations_link",
+    "meaning": "Relacionar conversa",
+    "native_agent_default": true,
+    "native_administrator_default": true,
+    "custom_role": "Explicit native permission; NO base-role fallback while assigned",
+    "requires": [
+      "conversations_view"
+    ],
+    "unit_membership": "Required active; no admin/Team bypass",
+    "policy": "TicketPolicy#link_conversation? + native ConversationPolicy",
+    "implementation": "Code connected; native validation pending",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA",
+    "validation": "PENDENTE — validação nativa em Docker/servidor"
+  },
+  {
+    "capability": "jrc_service_desk_sla_view",
+    "meaning": "Visualizar SLA operacional",
+    "native_agent_default": true,
+    "native_administrator_default": true,
+    "custom_role": "Explicit native permission; NO base-role fallback while assigned",
+    "requires": [
+      "tickets_view"
+    ],
+    "unit_membership": "Required active; no admin/Team bypass",
+    "policy": "SlaMilestonePolicy / LifecycleActionPolicy",
+    "implementation": "Code connected; native validation pending",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA",
+    "validation": "PENDENTE — validação nativa em Docker/servidor"
+  },
+  {
+    "capability": "jrc_service_desk_contract_conditions_view",
+    "meaning": "Consultar condicoes contratuais restritas",
+    "native_agent_default": false,
+    "native_administrator_default": true,
+    "custom_role": "Explicit native permission; NO base-role fallback while assigned",
+    "requires": [
+      "sla_view"
+    ],
+    "unit_membership": "Required active; no admin/Team bypass",
+    "policy": "SlaSnapshotPolicy#show?/Scope",
+    "implementation": "Policy/capability only; complete operational UI/API not exposed",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA",
+    "validation": "PENDENTE — validação nativa em Docker/servidor"
+  },
+  {
+    "capability": "jrc_service_desk_sla_snapshots_record",
+    "meaning": "Registrar snapshot de SLA",
+    "native_agent_default": false,
+    "native_administrator_default": true,
+    "custom_role": "Explicit native permission; NO base-role fallback while assigned",
+    "requires": [
+      "contract_conditions_view"
+    ],
+    "unit_membership": "Required active; no admin/Team bypass",
+    "policy": "SlaSnapshotPolicy#create?",
+    "implementation": "Service interno protegido, sem API/UI de captura; integracao externa futura.",
+    "status": "PENDENTE FUNCIONAL",
+    "validation": "PENDENTE — validação nativa em Docker/servidor"
+  },
+  {
+    "capability": "jrc_service_desk_lookups_view",
+    "meaning": "Consultar seletores operacionais",
+    "native_agent_default": true,
+    "native_administrator_default": true,
+    "custom_role": "Explicit native permission; NO base-role fallback while assigned",
+    "requires": [
+      "module_view"
+    ],
+    "unit_membership": "Required active; no admin/Team bypass",
+    "policy": "LookupPolicy + resource/native policies",
+    "implementation": "Code connected; native validation pending",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA",
+    "validation": "PENDENTE — validação nativa em Docker/servidor"
+  },
+  {
+    "capability": "jrc_service_desk_customers_view",
+    "meaning": "Consultar contexto do cliente",
+    "native_agent_default": true,
+    "native_administrator_default": true,
+    "custom_role": "Explicit native permission; NO base-role fallback while assigned",
+    "requires": [
+      "tickets_view"
+    ],
+    "unit_membership": "Required active; no admin/Team bypass",
+    "policy": "TicketPolicy#view_customer? + native Contact/Company policies",
+    "implementation": "Code connected; native validation pending",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA",
+    "validation": "PENDENTE — validação nativa em Docker/servidor"
+  },
+  {
+    "capability": "jrc_service_desk_queues_manage",
+    "meaning": "Gerenciar filas",
+    "native_agent_default": false,
+    "native_administrator_default": true,
+    "custom_role": "Explicit native permission; NO base-role fallback while assigned",
+    "requires": [
+      "settings_view",
+      "lookups_view"
+    ],
+    "unit_membership": "Required active; no admin/Team bypass",
+    "policy": "ConfigurationPolicy (Queue)",
+    "implementation": "CRUD de listar/criar/editar/ativar/desativar conectado; sem exclusao; recibo Audited::Audit por Unit.",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA",
+    "validation": "PENDENTE — validação nativa em Docker/servidor"
+  },
+  {
+    "capability": "jrc_service_desk_categories_manage",
+    "meaning": "Gerenciar categorias",
+    "native_agent_default": false,
+    "native_administrator_default": true,
+    "custom_role": "Explicit native permission; NO base-role fallback while assigned",
+    "requires": [
+      "settings_view",
+      "lookups_view"
+    ],
+    "unit_membership": "Required active; no admin/Team bypass",
+    "policy": "ConfigurationPolicy (Category)",
+    "implementation": "CRUD de listar/criar/editar/ativar/desativar conectado; sem exclusao; recibo Audited::Audit por Unit.",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA",
+    "validation": "PENDENTE — validação nativa em Docker/servidor"
+  },
+  {
+    "capability": "jrc_service_desk_priorities_manage",
+    "meaning": "Gerenciar prioridades",
+    "native_agent_default": false,
+    "native_administrator_default": true,
+    "custom_role": "Explicit native permission; NO base-role fallback while assigned",
+    "requires": [
+      "settings_view",
+      "lookups_view"
+    ],
+    "unit_membership": "Required active; no admin/Team bypass",
+    "policy": "ConfigurationPolicy (Priority)",
+    "implementation": "CRUD de listar/criar/editar/ativar/desativar conectado; sem exclusao; recibo Audited::Audit por Unit.",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA",
+    "validation": "PENDENTE — validação nativa em Docker/servidor"
+  },
+  {
+    "capability": "jrc_service_desk_statuses_manage",
+    "meaning": "Gerenciar status",
+    "native_agent_default": false,
+    "native_administrator_default": true,
+    "custom_role": "Explicit native permission; NO base-role fallback while assigned",
+    "requires": [
+      "settings_view",
+      "lookups_view"
+    ],
+    "unit_membership": "Required active; no admin/Team bypass",
+    "policy": "ConfigurationPolicy (TicketStatus)",
+    "implementation": "CRUD de listar/criar/editar/ativar/desativar conectado; sem exclusao; recibo Audited::Audit por Unit.",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA",
+    "validation": "PENDENTE — validação nativa em Docker/servidor"
+  },
+  {
+    "capability": "jrc_service_desk_services_manage",
+    "meaning": "Gerenciar servicos",
+    "native_agent_default": false,
+    "native_administrator_default": true,
+    "custom_role": "Explicit native permission; NO base-role fallback while assigned",
+    "requires": [
+      "settings_view",
+      "lookups_view"
+    ],
+    "unit_membership": "Required active; no admin/Team bypass",
+    "policy": "ServicePolicy#create?",
+    "implementation": "CRUD de listar/criar/editar/ativar/desativar conectado; sem exclusao; recibo Audited::Audit por Unit.",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA",
+    "validation": "PENDENTE — validação nativa em Docker/servidor"
+  },
+  {
+    "capability": "jrc_service_desk_lifecycle_policies_manage",
+    "meaning": "Publicar politicas de ciclo",
+    "native_agent_default": false,
+    "native_administrator_default": true,
+    "custom_role": "Explicit native permission; NO base-role fallback while assigned",
+    "requires": [
+      "settings_view",
+      "lookups_view"
+    ],
+    "unit_membership": "Required active; no admin/Team bypass",
+    "policy": "LifecyclePolicyPolicy#publish?",
+    "implementation": "Code connected; native validation pending",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA",
+    "validation": "PENDENTE — validação nativa em Docker/servidor"
+  },
+  {
+    "capability": "jrc_service_desk_settings_view",
+    "meaning": "Visualizar configuracoes",
+    "native_agent_default": false,
+    "native_administrator_default": true,
+    "custom_role": "Explicit native permission; NO base-role fallback while assigned",
+    "requires": [
+      "module_view"
+    ],
+    "unit_membership": "Required active; no admin/Team bypass",
+    "policy": "ModulePolicy#settings?",
+    "implementation": "Code connected; native validation pending",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA",
+    "validation": "PENDENTE — validação nativa em Docker/servidor"
+  },
+  {
+    "capability": "jrc_service_desk_dashboard_view",
+    "meaning": "Visualizar dashboard autorizado",
+    "native_agent_default": true,
+    "native_administrator_default": true,
+    "custom_role": "Explicit native permission; NO base-role fallback while assigned",
+    "requires": [
+      "tickets_view"
+    ],
+    "unit_membership": "Required active; no admin/Team bypass",
+    "policy": "ModulePolicy#dashboard? + TicketPolicy::Scope",
+    "implementation": "Code connected; native validation pending",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA",
+    "validation": "PENDENTE — validação nativa em Docker/servidor"
+  },
+  {
+    "capability": "jrc_service_desk_structure_view",
+    "meaning": "Consultar estrutura da Account sem chamados",
+    "native_agent_default": false,
+    "native_administrator_default": false,
+    "custom_role": "Concessao explicita no CustomRole nativo; AccountUser administrator necessario",
+    "requires": [],
+    "unit_membership": "N/A para administracao estrutural explicitamente delegada; obrigatorio independentemente para operar chamados",
+    "policy": "StructurePolicy + StructureContext; nao TicketPolicy",
+    "implementation": "Somente depois da inicializacao humana/estrutura autorizada existente",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA",
+    "validation": "PENDENTE — validação nativa em Docker/servidor"
+  },
+  {
+    "capability": "jrc_service_desk_operator_companies_manage",
+    "meaning": "Gerenciar operadoras da Account",
+    "native_agent_default": false,
+    "native_administrator_default": false,
+    "custom_role": "Concessao explicita no CustomRole nativo; AccountUser administrator necessario",
+    "requires": [
+      "structure_view"
+    ],
+    "unit_membership": "N/A para administracao estrutural explicitamente delegada; obrigatorio independentemente para operar chamados",
+    "policy": "StructurePolicy + StructureContext; nao TicketPolicy",
+    "implementation": "Somente depois da inicializacao humana/estrutura autorizada existente",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA",
+    "validation": "PENDENTE — validação nativa em Docker/servidor"
+  },
+  {
+    "capability": "jrc_service_desk_units_manage",
+    "meaning": "Gerenciar unidades da Account",
+    "native_agent_default": false,
+    "native_administrator_default": false,
+    "custom_role": "Concessao explicita no CustomRole nativo; AccountUser administrator necessario",
+    "requires": [
+      "structure_view"
+    ],
+    "unit_membership": "N/A para administracao estrutural explicitamente delegada; obrigatorio independentemente para operar chamados",
+    "policy": "StructurePolicy + StructureContext; nao TicketPolicy",
+    "implementation": "Somente depois da inicializacao humana/estrutura autorizada existente",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA",
+    "validation": "PENDENTE — validação nativa em Docker/servidor"
+  },
+  {
+    "capability": "jrc_service_desk_unit_memberships_manage",
+    "meaning": "Conceder/revogar escopo de clientes sem autoconcessao",
+    "native_agent_default": false,
+    "native_administrator_default": false,
+    "custom_role": "Concessao explicita no CustomRole nativo; AccountUser administrator necessario",
+    "requires": [
+      "structure_view"
+    ],
+    "unit_membership": "N/A para administracao estrutural explicitamente delegada; obrigatorio independentemente para operar chamados",
+    "policy": "StructurePolicy + StructureContext; nao TicketPolicy",
+    "implementation": "Somente depois da inicializacao humana/estrutura autorizada existente",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA",
+    "validation": "PENDENTE — validação nativa em Docker/servidor"
+  }
+]

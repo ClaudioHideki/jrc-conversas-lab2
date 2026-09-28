@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'none'; img-src 'self' data:; media-src 'none'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'" />
+    <title>JRC Softphone</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main class="softphone" aria-live="polite">
+      <header><span class="brand">JRC Softphone</span><button id="open-main" type="button">Abrir JRC</button></header>
+      <p id="status" class="status">Aguardando ramal</p>
+      <p id="extension">Ramal: —</p>
+      <section class="caller">
+        <span id="call-state">Pronto para ligar</span>
+        <strong id="remote">—</strong>
+        <time id="duration">00:00</time>
+      </section>
+      <section id="dial-panel">
+        <label for="destination">Número ou ramal</label>
+        <input id="destination" inputmode="tel" autocomplete="off" maxlength="128" />
+        <button id="dial" class="primary" type="button">Ligar</button>
+      </section>
+      <section id="incoming-actions" class="actions hidden"><button id="answer" class="primary" type="button">Atender</button><button id="reject" class="danger" type="button">Recusar</button></section>
+      <section id="call-actions" class="actions hidden"><button id="mute" type="button">Mudo</button><button id="hold" type="button">Espera</button><button id="hangup" class="danger" type="button">Desligar</button></section>
+      <section id="transfer-panel" class="hidden">
+        <label for="transfer-destination">Transferir para</label>
+        <input id="transfer-destination" inputmode="tel" autocomplete="off" maxlength="128" />
+        <div class="actions"><button data-transfer="immediate" type="button">Imediata</button><button data-transfer="supervised" type="button">Supervisionada</button></div>
+      </section>
+      <section class="keypad" aria-label="Teclado DTMF">
+        <button data-tone="1">1</button><button data-tone="2">2</button><button data-tone="3">3</button>
+        <button data-tone="4">4</button><button data-tone="5">5</button><button data-tone="6">6</button>
+        <button data-tone="7">7</button><button data-tone="8">8</button><button data-tone="9">9</button>
+        <button data-tone="*">*</button><button data-tone="0">0</button><button data-tone="#">#</button>
+      </section>
+      <p id="error" class="error hidden"></p>
+    </main>
+    <script src="./app.js"></script>
+  </body>
+</html>

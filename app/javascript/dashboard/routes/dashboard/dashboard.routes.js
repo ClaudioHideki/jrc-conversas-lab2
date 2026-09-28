@@ -21,6 +21,7 @@ import { routes as jrcCopilotRoutes } from './jrcCopilot/routes';
 import { routes as jrcServiceRoutes } from './jrcService/routes';
 import { routes as jrcAiRoutes } from './jrcAI/routes';
 import { routes as jrcBrokerRoutes } from './jrcBroker/routes';
+import { routes as serviceDeskRoutes } from './serviceDesk/routes';
 import AppContainer from './Dashboard.vue';
 import Suspended from './suspended/Index.vue';
 import NoAccounts from './noAccounts/Index.vue';
@@ -55,6 +56,7 @@ export default {
         ...jrcAiRoutes,
         ...jrcBrokerRoutes,
         ...jrcFlowRoutes,
+        ...serviceDeskRoutes,
       ],
     },
     {

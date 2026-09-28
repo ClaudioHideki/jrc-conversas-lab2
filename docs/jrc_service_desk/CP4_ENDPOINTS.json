@@ -1,0 +1,282 @@
+[
+  {
+    "method": "GET",
+    "path": "/api/v1/accounts/:account_id/jrc_service_desk/ui_context",
+    "controller_action": "UiContextController#show",
+    "service": "UiContextService",
+    "policy": "LookupPolicy#index?",
+    "purpose": "Contexto nativo, unidades e capacidades autorizadas",
+    "status": "PENDENTE",
+    "validation": "PENDENTE — validação nativa em ambiente Docker/local"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/accounts/:account_id/jrc_service_desk/dashboard",
+    "controller_action": "DashboardController#show",
+    "service": "DashboardService / TicketQuery / KpiCounts",
+    "policy": "TicketPolicy#index? / Scope",
+    "purpose": "Agregacoes reais, sem cache de contadores",
+    "status": "PENDENTE",
+    "validation": "PENDENTE — validação nativa em ambiente Docker/local"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/accounts/:account_id/jrc_service_desk/queues",
+    "controller_action": "LookupsController#index",
+    "service": "CatalogQuery / Presenter",
+    "policy": "LookupPolicy + policies do recurso e nativas",
+    "purpose": "Lookup paginado; unidade obrigatoria para assignees/requesters/teams",
+    "status": "PENDENTE",
+    "validation": "PENDENTE — validação nativa em ambiente Docker/local"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/accounts/:account_id/jrc_service_desk/priorities",
+    "controller_action": "LookupsController#index",
+    "service": "CatalogQuery / Presenter",
+    "policy": "LookupPolicy + policies do recurso e nativas",
+    "purpose": "Lookup paginado; unidade obrigatoria para assignees/requesters/teams",
+    "status": "PENDENTE",
+    "validation": "PENDENTE — validação nativa em ambiente Docker/local"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/accounts/:account_id/jrc_service_desk/categories",
+    "controller_action": "LookupsController#index",
+    "service": "CatalogQuery / Presenter",
+    "policy": "LookupPolicy + policies do recurso e nativas",
+    "purpose": "Lookup paginado; unidade obrigatoria para assignees/requesters/teams",
+    "status": "PENDENTE",
+    "validation": "PENDENTE — validação nativa em ambiente Docker/local"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/accounts/:account_id/jrc_service_desk/statuses",
+    "controller_action": "LookupsController#index",
+    "service": "CatalogQuery / Presenter",
+    "policy": "LookupPolicy + policies do recurso e nativas",
+    "purpose": "Lookup paginado; unidade obrigatoria para assignees/requesters/teams",
+    "status": "PENDENTE",
+    "validation": "PENDENTE — validação nativa em ambiente Docker/local"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/accounts/:account_id/jrc_service_desk/units",
+    "controller_action": "LookupsController#index",
+    "service": "CatalogQuery / Presenter",
+    "policy": "LookupPolicy + policies do recurso e nativas",
+    "purpose": "Lookup paginado; unidade obrigatoria para assignees/requesters/teams",
+    "status": "PENDENTE",
+    "validation": "PENDENTE — validação nativa em ambiente Docker/local"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/accounts/:account_id/jrc_service_desk/operator_companies",
+    "controller_action": "LookupsController#index",
+    "service": "CatalogQuery / Presenter",
+    "policy": "LookupPolicy + policies do recurso e nativas",
+    "purpose": "Lookup paginado; unidade obrigatoria para assignees/requesters/teams",
+    "status": "PENDENTE",
+    "validation": "PENDENTE — validação nativa em ambiente Docker/local"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/accounts/:account_id/jrc_service_desk/assignees",
+    "controller_action": "LookupsController#index",
+    "service": "CatalogQuery / Presenter",
+    "policy": "LookupPolicy + policies do recurso e nativas",
+    "purpose": "Lookup paginado; unidade obrigatoria para assignees/requesters/teams",
+    "status": "PENDENTE",
+    "validation": "PENDENTE — validação nativa em ambiente Docker/local"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/accounts/:account_id/jrc_service_desk/requesters",
+    "controller_action": "LookupsController#index",
+    "service": "CatalogQuery / Presenter",
+    "policy": "LookupPolicy + policies do recurso e nativas",
+    "purpose": "Lookup paginado; unidade obrigatoria para assignees/requesters/teams",
+    "status": "PENDENTE",
+    "validation": "PENDENTE — validação nativa em ambiente Docker/local"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/accounts/:account_id/jrc_service_desk/teams",
+    "controller_action": "LookupsController#index",
+    "service": "CatalogQuery / Presenter",
+    "policy": "LookupPolicy + policies do recurso e nativas",
+    "purpose": "Lookup paginado; unidade obrigatoria para assignees/requesters/teams",
+    "status": "PENDENTE",
+    "validation": "PENDENTE — validação nativa em ambiente Docker/local"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/accounts/:account_id/jrc_service_desk/tickets",
+    "controller_action": "TicketsController#index",
+    "service": "TicketQuery / Presenter",
+    "policy": "TicketPolicy#index? / Scope",
+    "purpose": "Busca/filtros/ordenacao/paginacao/Minha fila",
+    "status": "PENDENTE",
+    "validation": "PENDENTE — validação nativa em ambiente Docker/local"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/accounts/:account_id/jrc_service_desk/tickets/:id",
+    "controller_action": "TicketsController#show",
+    "service": "Presenter",
+    "policy": "TicketPolicy#show? / Scope",
+    "purpose": "Leitura ou releitura de chamado persistido",
+    "status": "PENDENTE",
+    "validation": "PENDENTE — validação nativa em ambiente Docker/local"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/accounts/:account_id/jrc_service_desk/tickets",
+    "controller_action": "TicketsController#create",
+    "service": "CreateTicketWorkflowService -> CreateTicketService / LinkConversationService",
+    "policy": "TicketPolicy#create? + ConversationPolicy se vinculo",
+    "purpose": "Criacao atomica, chave obrigatoria e contexto de criacao vinculado a chave",
+    "status": "PENDENTE",
+    "validation": "PENDENTE — validação nativa em ambiente Docker/local"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/accounts/:account_id/jrc_service_desk/tickets/:id",
+    "controller_action": "TicketsController#update",
+    "service": "UpdateTicketService",
+    "policy": "TicketPolicy#update?",
+    "purpose": "Titulo/descricao/prioridade/categoria e versao otimista",
+    "status": "PENDENTE",
+    "validation": "PENDENTE — validação nativa em ambiente Docker/local"
+  },
+  {
+    "method": "PUT",
+    "path": "/api/v1/accounts/:account_id/jrc_service_desk/tickets/:id",
+    "controller_action": "TicketsController#update",
+    "service": "UpdateTicketService",
+    "policy": "TicketPolicy#update?",
+    "purpose": "Titulo/descricao/prioridade/categoria e versao otimista",
+    "status": "PENDENTE",
+    "validation": "PENDENTE — validação nativa em ambiente Docker/local"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/accounts/:account_id/jrc_service_desk/tickets/:id/assign",
+    "controller_action": "TicketsController#assign",
+    "service": "AssignTicketService",
+    "policy": "TicketPolicy#assign?",
+    "purpose": "Responsavel/fila/equipe na mesma unidade",
+    "status": "PENDENTE",
+    "validation": "PENDENTE — validação nativa em ambiente Docker/local"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/accounts/:account_id/jrc_service_desk/tickets/:id/transfer",
+    "controller_action": "TicketsController#assign",
+    "service": "AssignTicketService",
+    "policy": "TicketPolicy#assign?",
+    "purpose": "Mesmo comando restrito a unidade; nao transfere unidade",
+    "status": "PENDENTE",
+    "validation": "PENDENTE — validação nativa em ambiente Docker/local"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/accounts/:account_id/jrc_service_desk/tickets/:id/work_status",
+    "controller_action": "TicketsController#work_status",
+    "service": "ChangeWorkStatusService",
+    "policy": "WorkStatusPolicy#change_work_status?",
+    "purpose": "Somente status ativos da familia open na mesma unidade",
+    "status": "PENDENTE",
+    "validation": "PENDENTE — validação nativa em ambiente Docker/local"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/accounts/:account_id/jrc_service_desk/tickets/:id/notes",
+    "controller_action": "TicketsController#add_note",
+    "service": "AddNoteService",
+    "policy": "TicketPolicy#add_note?",
+    "purpose": "Nota interna idempotente com autor nativo",
+    "status": "PENDENTE",
+    "validation": "PENDENTE — validação nativa em ambiente Docker/local"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/accounts/:account_id/jrc_service_desk/tickets/:id/conversations",
+    "controller_action": "TicketsController#link_conversation",
+    "service": "LinkConversationService",
+    "policy": "TicketPolicy#link_conversation? + ConversationPolicy",
+    "purpose": "Vinculo a ID interno de conversa autorizada, sem copiar/enviar mensagens",
+    "status": "PENDENTE",
+    "validation": "PENDENTE — validação nativa em ambiente Docker/local"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/accounts/:account_id/jrc_service_desk/tickets/:id/notes",
+    "controller_action": "TicketsController#related",
+    "service": "RelatedRecordsQuery / Presenter",
+    "policy": "TicketPolicy#show? + policy de cada registro",
+    "purpose": "Colecao autorizada paginada; sem payload financeiro bruto",
+    "status": "PENDENTE",
+    "validation": "PENDENTE — validação nativa em ambiente Docker/local"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/accounts/:account_id/jrc_service_desk/tickets/:id/events",
+    "controller_action": "TicketsController#related",
+    "service": "RelatedRecordsQuery / Presenter",
+    "policy": "TicketPolicy#show? + policy de cada registro",
+    "purpose": "Colecao autorizada paginada; sem payload financeiro bruto",
+    "status": "PENDENTE",
+    "validation": "PENDENTE — validação nativa em ambiente Docker/local"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/accounts/:account_id/jrc_service_desk/tickets/:id/sla",
+    "controller_action": "TicketsController#related",
+    "service": "RelatedRecordsQuery / Presenter",
+    "policy": "TicketPolicy#show? + policy de cada registro",
+    "purpose": "Colecao autorizada paginada; sem payload financeiro bruto",
+    "status": "PENDENTE",
+    "validation": "PENDENTE — validação nativa em ambiente Docker/local"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/accounts/:account_id/jrc_service_desk/tickets/:id/conversations",
+    "controller_action": "TicketsController#related",
+    "service": "RelatedRecordsQuery / Presenter",
+    "policy": "TicketPolicy#show? + policy de cada registro",
+    "purpose": "Colecao autorizada paginada; sem payload financeiro bruto",
+    "status": "PENDENTE",
+    "validation": "PENDENTE — validação nativa em ambiente Docker/local"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/accounts/:account_id/jrc_service_desk/tickets/:id/status_options",
+    "controller_action": "TicketsController#related",
+    "service": "RelatedRecordsQuery / Presenter",
+    "policy": "TicketPolicy#show? + policy de cada registro",
+    "purpose": "Colecao autorizada paginada; sem payload financeiro bruto",
+    "status": "PENDENTE",
+    "validation": "PENDENTE — validação nativa em ambiente Docker/local"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/accounts/:account_id/jrc_service_desk/tickets/:id/notes/:record_id",
+    "controller_action": "TicketsController#related_item",
+    "service": "Presenter",
+    "policy": "TicketPolicy#show? + policy do registro",
+    "purpose": "Releitura individual obrigatoria para confirmar a gravacao correspondente",
+    "status": "PENDENTE",
+    "validation": "PENDENTE — validação nativa em ambiente Docker/local"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/accounts/:account_id/jrc_service_desk/tickets/:id/conversations/:record_id",
+    "controller_action": "TicketsController#related_item",
+    "service": "Presenter",
+    "policy": "TicketPolicy#show? + policy do registro",
+    "purpose": "Releitura individual obrigatoria para confirmar a gravacao correspondente",
+    "status": "PENDENTE",
+    "validation": "PENDENTE — validação nativa em ambiente Docker/local"
+  }
+]

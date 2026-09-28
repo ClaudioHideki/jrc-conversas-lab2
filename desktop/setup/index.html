@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'none'; img-src 'self'; media-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'" />
+    <title>Configurações — JRC Softphone</title>
+    <link rel="stylesheet" href="../floating/style.css" />
+  </head>
+  <body>
+    <main class="softphone">
+      <h1 class="brand">JRC Softphone</h1>
+      <p>Informe o endereço do seu ambiente JRC Conversas.</p>
+      <form id="server-form">
+        <label for="server-url">Endereço do JRC Conversas</label>
+        <input id="server-url" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="2048" required aria-describedby="server-help server-error" />
+        <p id="server-help">Use HTTPS. Somente a origem do servidor será salva. O login será feito no JRC.</p>
+        <p id="switch-warning" class="hidden">Trocar de servidor encerra chamadas e a sessão anterior. Será necessário fazer login novamente.</p>
+        <button id="connect" class="primary" type="submit">Conectar</button>
+        <p id="server-error" class="error hidden" role="alert"></p>
+      </form>
+    </main>
+    <script src="./app.js"></script>
+  </body>
+</html>

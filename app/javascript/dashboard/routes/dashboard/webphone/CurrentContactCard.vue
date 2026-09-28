@@ -22,6 +22,15 @@ const emit = defineEmits([
   'loadMore',
 ]);
 
+const isDesktop = Boolean(window.jrcSoftphoneDesktop);
+const openInJrc = () =>
+  window.jrcSoftphoneDesktop
+    .openContact({
+      accountId: String(props.accountId),
+      contactId: String(props.contact.id),
+    })
+    .catch(() => {});
+
 const TEXT = Object.freeze({
   title: 'CONTATO ATUAL',
   identifying: 'Identificando contato...',
@@ -118,8 +127,16 @@ const selectContact = contact => emit('selectContact', contact);
             {{ companyName }}
           </p>
         </div>
+        <button
+          v-if="contactId && isDesktop"
+          type="button"
+          class="shrink-0 text-xs font-semibold text-n-brand hover:underline"
+          @click="openInJrc"
+        >
+          {{ $t('SOFTPHONE.OPEN_IN_JRC') }}
+        </button>
         <RouterLink
-          v-if="contactId"
+          v-else-if="contactId"
           :to="{
             name: 'contacts_edit',
             params: { accountId, contactId },

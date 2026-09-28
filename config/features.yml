@@ -280,11 +280,15 @@
   display_name: JRC Campanhas
   enabled: false
   column: feature_flags_ext_1
-- name: jrc_broker
-  display_name: JRC Broker
+- name: jrc_service_desk
+  display_name: JRC Service Desk
   enabled: false
   column: feature_flags_ext_1
 - name: jrc_flows
   display_name: JRC Flows
+  enabled: false
+  column: feature_flags_ext_1
+- name: jrc_broker
+  display_name: JRC Broker
   enabled: false
   column: feature_flags_ext_1

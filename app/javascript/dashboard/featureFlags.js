@@ -56,6 +56,7 @@ export const FEATURE_FLAGS = {
   SALES: 'sales',
   JRC_CRM: 'jrc_crm',
   JRC_CAMPAIGNS: 'jrc_campaigns',
+  JRC_SERVICE_DESK: 'jrc_service_desk',
 };
 
 export const PREMIUM_FEATURES = [

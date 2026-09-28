@@ -1,0 +1,35 @@
+[
+  {
+    "kpi": "total",
+    "meaning": "Quantidade de chamados visiveis que correspondem aos filtros",
+    "source": "jrc_service_desk_tickets JOIN jrc_service_desk_ticket_statuses",
+    "service": "DashboardService -> TicketQuery -> KpiCounts",
+    "formula": "sum(contagem agrupada por status_id/name/phase)",
+    "filters": "q, unit_id, operator_company_id, status_id, priority_id, category_id, queue_id, assignee_id, source, mine; Account e scope Pundit sempre",
+    "exclusions": "page/per_page/sort nao alteram KPI"
+  },
+  {
+    "kpi": "phases.open/waiting/resolved/closed/cancelled",
+    "meaning": "Quantidade de chamados por familia tecnica de status",
+    "source": "mesmo resultado SQL agrupado",
+    "service": "KpiCounts",
+    "formula": "sum(count) somente onde phase = familia",
+    "filters": "identicos ao total"
+  },
+  {
+    "kpi": "active",
+    "meaning": "Chamados nas familias open ou waiting",
+    "source": "mesmo resultado SQL agrupado",
+    "service": "KpiCounts",
+    "formula": "phases.open + phases.waiting",
+    "filters": "identicos ao total"
+  },
+  {
+    "kpi": "by_status",
+    "meaning": "Distribuicao por cada status configurado, com nome real e acesso ao filtro correspondente",
+    "source": "status.id, status.name, status.phase e count de tickets autorizados",
+    "service": "DashboardService / KpiCounts",
+    "formula": "count de tickets por status; soma = total",
+    "filters": "identicos ao total"
+  }
+]

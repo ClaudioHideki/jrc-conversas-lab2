@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useSipWebphone } from './useSipWebphone';
 import { useJrcCopilot } from 'dashboard/components-next/jrcCopilot/useJrcCopilot';
 
@@ -18,6 +18,23 @@ const TEXT = Object.freeze({
 const RINGTONE_URL = '/audio/dashboard/ringtone.mp3';
 
 const route = useRoute();
+const router = useRouter();
+// Route only on account entry/change. SPA navigation preserves the shared SIP renderer.
+watch(
+  () => route.params?.accountId,
+  accountId => {
+    if (
+      window.jrcSoftphoneDesktop &&
+      accountId &&
+      route.name !== 'ramal_index'
+    ) {
+      router
+        .replace({ name: 'ramal_index', params: { accountId } })
+        .catch(() => {});
+    }
+  },
+  { immediate: true }
+);
 const {
   status,
   incoming,

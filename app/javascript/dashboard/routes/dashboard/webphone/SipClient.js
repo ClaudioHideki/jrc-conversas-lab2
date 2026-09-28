@@ -1,11 +1,12 @@
 import {
   Invitation,
   Inviter,
-  Registerer,
   RegistererState,
   SessionState,
   UserAgent,
 } from 'sip.js';
+import { SipRegisterer } from './SipRegisterer';
+import { sanitizeSipMessage } from './sipErrors';
 
 const CONNECTION_TIMEOUT_SECONDS = 10;
 const DTMF_SEQUENCE_GAP_MS = 300;
@@ -38,6 +39,10 @@ export class SipClient {
     this.callLockRelease = null;
     this.callStarting = false;
     this.transportConnected = false;
+    this.transferInProgress = false;
+    this.holdPending = false;
+    this.cancelHold = null;
+    this.cancelRegistration = null;
   }
 
   get registered() {
@@ -53,16 +58,20 @@ export class SipClient {
     );
   }
 
-  emit(name, payload) {
-    this.callbacks[name]?.(payload);
+  emit(name, ...args) {
+    this.callbacks[name]?.(...args);
   }
 
-  log(category, message, details = '') {
-    this.emit('onLog', { category, message, details });
-    // Os logs de console são intencionais para diagnóstico SIP em produção.
+  log(category, message) {
+    const safeMessage = sanitizeSipMessage(message, [
+      this.configuration?.password,
+      this.configuration?.username,
+    ]);
+    // Raw exceptions/SIP messages can carry Authorization and session material.
+    this.emit('onLog', { category, message: safeMessage, details: '' });
     // eslint-disable-next-line no-console
     const logger = category === 'ERRO SIP' ? console.error : console.info;
-    logger(`[SIP] ${message}`, details || '');
+    logger(`[SIP] ${safeMessage}`);
   }
 
   setStatus(label, tone = 'neutral') {
@@ -72,15 +81,13 @@ export class SipClient {
   async connect(configuration) {
     if (this.registered) return;
     if (this.userAgent) await this.disconnect();
-
     this.configuration = { ...configuration };
     const uri = UserAgent.makeURI(
       `sip:${configuration.extension}@${configuration.sip_domain}`
     );
     if (!uri) throw new Error('Não foi possível criar a identidade SIP');
-
     this.setStatus('Conectando ao ramal', 'warning');
-    this.userAgent = new UserAgent({
+    const userAgent = new UserAgent({
       uri,
       authorizationUsername: configuration.username,
       authorizationPassword: configuration.password,
@@ -91,43 +98,97 @@ export class SipClient {
       },
       delegate: {
         onConnect: () => {
+          if (this.userAgent !== userAgent) return;
           this.transportConnected = true;
           this.emit('onTransport', 'Conectado');
           this.log('TRANSPORTE', 'WebSocket conectado');
         },
-        onDisconnect: error => {
+        onDisconnect: () => {
+          if (this.userAgent !== userAgent) return;
           this.transportConnected = false;
           this.emit('onTransport', 'Desconectado');
           this.setStatus('Conexão perdida', 'error');
-          this.log('TRANSPORTE', 'WebSocket desconectado', error?.message);
-          if (error) this.log('ERRO SIP', 'Erro SIP no transporte', error);
+          this.log('TRANSPORTE', 'WebSocket desconectado');
         },
         onInvite: invitation => {
-          this.receive(invitation).catch(error => {
-            this.log('ERRO SIP', 'Erro SIP ao receber chamada', error);
-            this.emit(
-              'onError',
-              error?.message || 'Erro SIP ao receber chamada'
-            );
+          this.receive(invitation).catch(() => {
+            this.log('ERRO SIP', 'Erro SIP ao receber chamada');
+            this.emit('onError', 'Erro SIP ao receber chamada');
           });
         },
       },
       logBuiltinEnabled: false,
       logConfiguration: false,
     });
-
+    this.userAgent = userAgent;
+    let cancelRegistration;
     try {
-      await this.userAgent.start();
-      this.registerer = new Registerer(this.userAgent);
-      this.registerer.stateChange.addListener(state => {
-        const stateText = String(state);
-        this.emit('onRegister', stateText);
+      await userAgent.start();
+      if (this.userAgent !== userAgent) return;
+      let resolveRegistration;
+      let rejectRegistration;
+      const registered = new Promise((resolve, reject) => {
+        resolveRegistration = resolve;
+        rejectRegistration = reject;
+      });
+      cancelRegistration = () =>
+        rejectRegistration(new Error('Registro SIP cancelado'));
+      this.cancelRegistration = cancelRegistration;
+      const registerer = new SipRegisterer(userAgent, {
+        onAccept: () => {
+          if (this.userAgent !== userAgent) return;
+          this.emit('onRegister', 'Registered');
+          this.log('REGISTRO', 'REGISTER aceito');
+          resolveRegistration();
+        },
+        onReject: response => {
+          if (this.userAgent !== userAgent) return;
+          const statusCode = Number(response?.message?.statusCode) || 0;
+          const message =
+            REGISTRATION_ERRORS[statusCode] ||
+            `Registro SIP rejeitado (${statusCode || 'sem código'})`;
+          const retryAfter = Number.parseInt(
+            response?.message?.getHeader?.('retry-after'),
+            10
+          );
+          const retryAfterMs =
+            Number.isFinite(retryAfter) && retryAfter > 0
+              ? retryAfter * 1000
+              : 0;
+          this.emit('onRegistrationFailure', {
+            permanent:
+              statusCode >= 400 &&
+              statusCode < 500 &&
+              ![408, 423, 480].includes(statusCode),
+            retryAfterMs,
+          });
+          this.emit('onRegister', `Rejeitado (${statusCode || 'sem código'})`);
+          this.emit('onError', message);
+          this.setStatus('Falha no registro', 'error');
+          this.log('REGISTRO', message);
+          rejectRegistration(new Error(message));
+        },
+        onRedirect: () => {
+          if (this.userAgent !== userAgent) return;
+          this.emit('onRegistrationFailure', {
+            permanent: true,
+            retryAfterMs: 0,
+          });
+          rejectRegistration(new Error('Redirecionamento SIP não autorizado'));
+        },
+      });
+      this.registerer = registerer;
+      registerer.stateChange.addListener(state => {
+        if (this.registerer !== registerer) return;
+        const retryAfterMs =
+          Math.max(0, Number(registerer.retryAfter) || 0) * 1000;
+        this.emit('onRegister', String(state), { retryAfterMs });
         if (state === RegistererState.Registered) {
           this.setStatus('Ramal registrado', 'success');
-          this.log(
-            'REGISTRO',
-            `SIP registrado - ramal ${configuration.extension}`
-          );
+          this.log('REGISTRO', 'Ramal registrado');
+        }
+        if (state === RegistererState.Unregistered) {
+          this.setStatus('Registro perdido', 'warning');
         }
         if (state === RegistererState.Terminated) {
           this.setStatus('Registro encerrado', 'error');
@@ -135,48 +196,22 @@ export class SipClient {
       });
       this.setStatus('Registrando ramal', 'warning');
       this.emit('onRegister', 'Registrando');
-      await this.registerer.register({
-        requestDelegate: {
-          onAccept: response => {
-            const statusCode = response?.message?.statusCode || 200;
-            this.log('REGISTRO', `REGISTER aceito (${statusCode})`);
-          },
-          onReject: response => {
-            const statusCode = response?.message?.statusCode;
-            const reasonPhrase = response?.message?.reasonPhrase;
-            const message =
-              REGISTRATION_ERRORS[statusCode] ||
-              `Registro SIP rejeitado (${statusCode || 'sem código'}${
-                reasonPhrase ? ` - ${reasonPhrase}` : ''
-              })`;
-            this.emit(
-              'onRegister',
-              statusCode ? `Rejeitado (${statusCode})` : 'Rejeitado'
-            );
-            this.emit('onError', message);
-            this.setStatus('Falha no registro', 'error');
-            this.log('REGISTRO', message);
-          },
-          onRedirect: response => {
-            this.log(
-              'REGISTRO',
-              `REGISTER redirecionado (${response?.message?.statusCode || '—'})`
-            );
-          },
-          onTrying: () => {
-            this.emit('onRegister', 'Registrando');
-          },
-        },
-      });
+      // register() alone resolves when the request is sent, not when REGISTER succeeds.
+      await Promise.all([registerer.register(), registered]);
     } catch (error) {
-      await this.userAgent.stop().catch(() => {});
-      this.userAgent = null;
-      this.registerer = null;
-      this.transportConnected = false;
-      this.emit('onTransport', 'Desconectado');
-      this.setStatus('Falha ao conectar', 'error');
-      this.log('ERRO SIP', 'Erro SIP ao conectar ou registrar', error);
+      if (this.userAgent === userAgent) {
+        this.userAgent = null;
+        this.registerer = null;
+        await userAgent.stop().catch(() => {});
+        this.transportConnected = false;
+        this.emit('onTransport', 'Desconectado');
+        this.setStatus('Falha ao conectar', 'error');
+        this.log('ERRO SIP', 'Erro SIP ao conectar ou registrar');
+      }
       throw error;
+    } finally {
+      if (this.cancelRegistration === cancelRegistration)
+        this.cancelRegistration = null;
     }
   }
 
@@ -267,8 +302,10 @@ export class SipClient {
     this.setStatus('Chamada recebida', 'warning');
     const remote = this.remoteIdentity(invitation);
     this.log('CHAMADA', 'Chamada recebida');
-    this.log('CHAMADA', `Origem da chamada: ${remote}`);
-    this.emit('onIncoming', { remote });
+    this.emit('onIncoming', {
+      remote,
+      callId: invitation.request?.callId || invitation.id,
+    });
   }
 
   async call(destination) {
@@ -318,10 +355,7 @@ export class SipClient {
           },
           onReject: response => {
             const statusCode = response?.message?.statusCode;
-            const reason = response?.message?.reasonPhrase;
-            const details = `${statusCode || 'sem código'}${
-              reason ? ` - ${reason}` : ''
-            }`;
+            const details = Number(statusCode) || 'sem código';
             const message = `O PABX recusou a chamada (${details}).`;
             this.emit('onError', message);
             this.setStatus('Chamada recusada', 'error');
@@ -397,32 +431,61 @@ export class SipClient {
   }
 
   async setHold(held) {
-    if (this.session?.state !== SessionState.Established) {
+    const session = this.session;
+    if (session?.state !== SessionState.Established) {
       throw new Error('Não existe chamada estabelecida');
     }
-    await this.session.invite({
-      sessionDescriptionHandlerOptions: { hold: held },
-    });
-    this.held = held;
-    const peerConnection =
-      this.session.sessionDescriptionHandler?.peerConnection;
-    peerConnection?.getSenders().forEach(sender => {
-      if (sender.track?.kind === 'audio')
-        sender.track.enabled = !held && !this.muted;
-    });
-    peerConnection?.getReceivers().forEach(receiver => {
-      if (receiver.track?.kind === 'audio') receiver.track.enabled = !held;
-    });
-    this.emit('onHold', held);
-    this.setStatus(
-      held ? 'Chamada em espera' : 'Em chamada',
-      held ? 'warning' : 'success'
-    );
+    if (this.holdPending || this.transferInProgress) {
+      throw new Error('Aguarde a operação de chamada em andamento');
+    }
+    this.holdPending = true;
+    this.emit('onHoldPending', true);
+    try {
+      await new Promise((resolve, reject) => {
+        this.cancelHold = () => reject(new Error('A chamada foi encerrada'));
+        session
+          .invite({
+            sessionDescriptionHandlerOptions: { hold: held },
+            requestDelegate: {
+              onAccept: resolve,
+              onReject: () =>
+                reject(new Error('O PABX recusou a alteração de espera')),
+            },
+          })
+          .catch(reject);
+      });
+      if (
+        this.session !== session ||
+        session.state !== SessionState.Established
+      ) {
+        throw new Error('A chamada foi encerrada');
+      }
+      this.held = held;
+      const peerConnection = session.sessionDescriptionHandler?.peerConnection;
+      peerConnection?.getSenders().forEach(sender => {
+        if (sender.track?.kind === 'audio')
+          sender.track.enabled = !held && !this.muted;
+      });
+      peerConnection?.getReceivers().forEach(receiver => {
+        if (receiver.track?.kind === 'audio') receiver.track.enabled = !held;
+      });
+      this.emit('onHold', held);
+      this.setStatus(
+        held ? 'Chamada em espera' : 'Em chamada',
+        held ? 'warning' : 'success'
+      );
+    } finally {
+      this.cancelHold = null;
+      this.holdPending = false;
+      this.emit('onHoldPending', false);
+    }
   }
 
   async sendDtmf(tone) {
     const handler = this.session?.sessionDescriptionHandler;
-    if (!handler || this.session?.state !== SessionState.Established) return;
+    if (!handler || this.session?.state !== SessionState.Established) {
+      throw new Error('Não existe chamada estabelecida para enviar DTMF');
+    }
     if (handler.sendDtmf?.(tone, { duration: 160, interToneGap: 70 })) return;
     await this.session.info({
       requestOptions: {
@@ -435,7 +498,7 @@ export class SipClient {
     });
   }
 
-  async sendDtmfSequence(sequence) {
+  async sendDtmfSequence(sequence, session = this.session) {
     const tones = String(sequence || '').split('');
     if (!tones.length) throw new Error('Informe os tons DTMF para enviar');
     if (this.session?.state !== SessionState.Established) {
@@ -445,6 +508,7 @@ export class SipClient {
     // Sequential DTMF delivery is required by the PABX transfer protocol.
     // eslint-disable-next-line no-restricted-syntax
     for (const tone of tones) {
+      if (this.session !== session) throw new Error('A chamada foi encerrada');
       // eslint-disable-next-line no-await-in-loop
       await this.sendDtmf(tone);
       // eslint-disable-next-line no-await-in-loop
@@ -455,29 +519,39 @@ export class SipClient {
   }
 
   async transfer(type, destination) {
-    const cleanDestination = String(destination || '').replace(/[^\d+]/g, '');
-    if (!cleanDestination) {
-      throw new Error('Informe o ramal ou numero de destino');
+    if (this.transferInProgress || this.holdPending) {
+      throw new Error('Aguarde a operação de chamada em andamento');
     }
-
+    const cleanDestination = String(destination || '').replace(/[^\d+]/g, '');
+    if (!cleanDestination)
+      throw new Error('Informe o ramal ou numero de destino');
+    const session = this.session;
     const transferCode =
       TRANSFER_DTMF_CODES[type] || TRANSFER_DTMF_CODES.immediate;
-    await this.sendDtmfSequence(transferCode.prefix);
-    await new Promise(resolve => {
-      window.setTimeout(resolve, TRANSFER_ACTIVATION_DELAY_MS);
-    });
-    await this.sendDtmfSequence(cleanDestination);
-    await new Promise(resolve => {
-      window.setTimeout(resolve, TRANSFER_CONFIRM_DELAY_MS);
-    });
-    await this.sendDtmfSequence(transferCode.suffix);
-    this.log(
-      'TRANSFERENCIA',
-      `${type === 'supervised' ? 'Supervisionada' : 'Imediata'} enviada`
-    );
+    this.transferInProgress = true;
+    this.emit('onTransferPending', true);
+    try {
+      await this.sendDtmfSequence(transferCode.prefix, session);
+      await new Promise(resolve => {
+        window.setTimeout(resolve, TRANSFER_ACTIVATION_DELAY_MS);
+      });
+      await this.sendDtmfSequence(cleanDestination, session);
+      await new Promise(resolve => {
+        window.setTimeout(resolve, TRANSFER_CONFIRM_DELAY_MS);
+      });
+      await this.sendDtmfSequence(transferCode.suffix, session);
+      this.log(
+        'TRANSFERENCIA',
+        `${type === 'supervised' ? 'Supervisionada' : 'Imediata'} enviada`
+      );
+    } finally {
+      this.transferInProgress = false;
+      this.emit('onTransferPending', false);
+    }
   }
 
   finishCall(preserveStatus = false) {
+    this.cancelHold?.();
     this.stopSessionMedia();
     if (!preserveStatus) this.setStatus('Chamada encerrada', 'neutral');
     this.log('CHAMADA', 'Chamada encerrada');
@@ -495,18 +569,28 @@ export class SipClient {
   }
 
   async disconnect() {
-    await this.hangup();
-    if (this.registerer?.state === RegistererState.Registered) {
-      await this.registerer.unregister();
-    }
-    await this.userAgent?.stop();
+    const userAgent = this.userAgent;
+    const registerer = this.registerer;
+    this.cancelRegistration?.();
     this.userAgent = null;
     this.registerer = null;
-    this.transportConnected = false;
-    this.finishCall();
-    this.emit('onTransport', 'Desconectado');
-    this.emit('onRegister', 'Não registrado');
-    this.setStatus('Desconectado', 'neutral');
+    try {
+      await this.hangup();
+      if (registerer?.state === RegistererState.Registered) {
+        await registerer.unregister();
+      }
+    } finally {
+      try {
+        await userAgent?.stop();
+      } finally {
+        this.transportConnected = false;
+        this.configuration = null;
+        this.finishCall();
+        this.emit('onTransport', 'Desconectado');
+        this.emit('onRegister', 'Não registrado');
+        this.setStatus('Desconectado', 'neutral');
+      }
+    }
   }
 
   stopSessionMedia() {

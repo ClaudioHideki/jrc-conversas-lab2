@@ -1,3 +1,4 @@
+import jrcServiceDesk from './jrcServiceDesk.json';
 import advancedFilters from './advancedFilters.json';
 import jrcBroker from './jrcBroker.json';
 import agentBots from './agentBots.json';
@@ -52,6 +53,7 @@ import jrcCampaigns from './jrcCampaigns.json';
 import jrcNico from './jrcNico.json';
 
 export default {
+  ...jrcServiceDesk,
   ...jrcNico,
   ...advancedFilters,
   ...agentBots,

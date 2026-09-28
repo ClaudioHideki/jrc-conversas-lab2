@@ -65,6 +65,49 @@
         "CANCELED": "Cancelada",
         "UNKNOWN": "Não informado"
       }
+    },
+    "CONTACT_LEAD": {
+      "CREATE": "Criar lead deste contato",
+      "VIEW": "Abrir lead",
+      "LOADING": "Consultando CRM…",
+      "RETRY": "Tentar novamente",
+      "ERROR": "Não foi possível consultar ou criar o lead.",
+      "UNAVAILABLE": "Contato ou lead indisponível para seu usuário.",
+      "AMBIGUOUS": "Este contato possui mais de um lead. Selecione o registro na lista do CRM.",
+      "PAGE_ERROR": "Não foi possível carregar a próxima página. Tente novamente.",
+      "LOAD_MORE": "Carregar mais contatos",
+      "PAGE_SUMMARY": "Exibindo {count} de {total} contatos",
+      "PREVIOUS": "Anterior",
+      "NEXT": "Próxima"
+    },
+    "ACTIVITY_FILTERS": {
+      "OPEN": "Em aberto",
+      "OVERDUE": "Atrasadas",
+      "COMPLETED": "Concluídas",
+      "OWNER": "Responsável",
+      "ALL_OWNERS": "Todos os responsáveis visíveis",
+      "TYPE": "Tipo de atividade",
+      "SEARCH": "Buscar atividade, cliente ou negócio",
+      "CLEAR": "Limpar filtros",
+      "FOLLOW_UP": "Acompanhamento",
+      "TASK": "Tarefa",
+      "DEMONSTRATION": "Demonstração"
+    },
+    "TEAM_METRICS": {
+      "ERROR": "Não foi possível carregar as métricas.",
+      "EMPTY": "Nenhuma métrica no período.",
+      "RESTRICTED": "Disponível somente para administradores.",
+      "SEARCH": "Buscar agente",
+      "REFRESH": "Atualizar",
+      "LOADING": "Carregando métricas da equipe…",
+      "FROM": "De (padrão: últimos 30 dias)",
+      "TO": "Até"
+    },
+    "PROPOSAL_PDF": {
+      "DOWNLOAD": "Baixar PDF",
+      "LOADING": "Gerando PDF…",
+      "ERROR": "Não foi possível baixar o PDF. Tente novamente.",
+      "UNSAVED": "Salve as alterações antes de baixar o PDF. Se houve falha ao atualizar um produto, reabra a proposta e revise os dados primeiro."
     }
   }
 }

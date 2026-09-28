@@ -36,6 +36,7 @@
         jrcFlowsEnabled: <%= ENV['JRC_FLOWS_ENABLED'] == 'true' %>,
         hostURL: '<%= ENV.fetch('FRONTEND_URL', '') %>',
         helpCenterURL: '<%= ENV.fetch('HELPCENTER_URL', '') %>',
+        softphoneDownloadUrl: <%= raw json_escape(ENV.fetch('JRC_SOFTPHONE_DOWNLOAD_URL', '').to_json) %>,
         fbAppId: '<%= @global_config['FB_APP_ID'] %>',
         instagramAppId: '<%= @global_config['INSTAGRAM_APP_ID'] %>',
         tiktokAppId: '<%= @global_config['TIKTOK_APP_ID'] %>',

@@ -8,7 +8,13 @@ import { useAlert } from 'dashboard/composables';
 import { formatCrmDateTime } from '../../utils/dateTime';
 import CrmPageHeader from '../../components/shared/CrmPageHeader.vue';
 import CrmStatCard from '../../components/shared/CrmStatCard.vue';
+import { useI18n } from 'vue-i18n';
+import { filterActivities } from '../../utils/activityFilters';
 
+const { t } = useI18n();
+const filters = reactive({ search: '', type: '', owner: '', status: '' });
+const clearFilters = () =>
+  Object.assign(filters, { search: '', type: '', owner: '', status: '' });
 const store = useStore();
 const route = useRoute();
 const router = useRouter();
@@ -24,6 +30,42 @@ const form = reactive({
 const activities = computed(
   () => store.getters['jrcCrm/activities/allActivities'] || []
 );
+const statusOptions = computed(() =>
+  [
+    {
+      value: 'open',
+      label: t('CRM.ACTIVITY_FILTERS.OPEN'),
+      color: 'bg-n-amber-3 border-n-amber-4 text-n-amber-11',
+    },
+    {
+      value: 'overdue',
+      label: t('CRM.ACTIVITY_FILTERS.OVERDUE'),
+      color: 'bg-n-ruby-3 border-n-ruby-4 text-n-ruby-11',
+    },
+    {
+      value: 'completed',
+      label: t('CRM.ACTIVITY_FILTERS.COMPLETED'),
+      color: 'bg-n-teal-3 border-n-teal-4 text-n-teal-11',
+    },
+  ].map(status => ({
+    ...status,
+    count: filterActivities(activities.value, {
+      search: '',
+      type: '',
+      owner: '',
+      status: status.value,
+    }).length,
+  }))
+);
+
+const filteredActivities = computed(() =>
+  filterActivities(activities.value, filters)
+);
+const owners = computed(() => [
+  ...new Map(
+    activities.value.filter(a => a.user).map(a => [a.user.id, a.user])
+  ).values(),
+]);
 const loading = computed(() => store.getters['jrcCrm/activities/isLoading']);
 const error = computed(() => store.getters['jrcCrm/activities/error']);
 const openActivities = computed(() => activities.value.filter(activity => !activity.completed_at));
@@ -141,15 +183,38 @@ onMounted(async () => {
         </template>
       </CrmPageHeader>
 
-      <div class="flex flex-wrap items-center gap-2 rounded-2xl border border-[#e4e9f1] bg-white p-3 shadow-sm">
-        <button class="rounded-xl border border-[#fed7aa] bg-[#fff7ed] px-4 py-2 text-sm font-semibold text-[#c2410c]">Hoje <span class="ml-2 rounded-full bg-white px-2 py-0.5">{{ activities.filter(a => !a.completed_at).length }}</span></button>
-        <button class="rounded-xl border border-[#fecaca] bg-[#fff3f3] px-4 py-2 text-sm font-semibold text-[#b42318]">Atrasadas <span class="ml-2 rounded-full bg-white px-2 py-0.5">{{ activities.filter(a => a.overdue).length }}</span></button>
-        <button class="rounded-xl border border-[#bfdbfe] bg-[#eff6ff] px-4 py-2 text-sm font-semibold text-[#175cd3]">Próximos 7 dias</button>
-        <button class="rounded-xl border border-[#bbf7d0] bg-[#effdf5] px-4 py-2 text-sm font-semibold text-[#067647]">Concluídas <span class="ml-2 rounded-full bg-white px-2 py-0.5">{{ activities.filter(a => a.completed_at).length }}</span></button>
-        <div class="ml-auto flex gap-2">
-          <select class="h-10 rounded-xl border border-[#e4e9f1] bg-white px-3 text-sm"><option>Minhas atividades</option></select>
-          <select class="h-10 rounded-xl border border-[#e4e9f1] bg-white px-3 text-sm"><option>Este mês</option></select>
-        </div>
+      <div
+        class="flex flex-wrap gap-2 rounded-2xl border border-n-weak bg-n-solid-2 p-3"
+      >
+        <button
+          v-for="status in statusOptions"
+          :key="status.value"
+          type="button"
+          :aria-pressed="filters.status === status.value"
+          class="rounded-lg border px-3 py-2 text-sm font-semibold"
+          :class="[
+            status.color,
+            { 'ring-2 ring-current': filters.status === status.value },
+          ]"
+          @click="
+            filters.status = filters.status === status.value ? '' : status.value
+          "
+        >
+          {{ status.label }}
+          <span class="ml-2 rounded-full bg-n-solid-2 px-2 py-0.5">
+            {{ status.count }}
+          </span>
+        </button>
+        <select
+          v-model="filters.owner"
+          :aria-label="t('CRM.ACTIVITY_FILTERS.OWNER')"
+          class="ml-auto rounded-lg border border-n-weak bg-n-solid-2 px-3 py-2 text-sm"
+        >
+          <option value="">{{ t('CRM.ACTIVITY_FILTERS.ALL_OWNERS') }}</option>
+          <option v-for="owner in owners" :key="owner.id" :value="owner.id">
+            {{ owner.name }}
+          </option>
+        </select>
       </div>
 
       <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
@@ -172,28 +237,40 @@ onMounted(async () => {
             class="i-lucide-search absolute left-3 top-1/2 size-4 -translate-y-1/2 text-n-slate-9"
           />
           <input
-            type="text"
+            v-model="filters.search"
+            type="search"
+            :aria-label="t('CRM.ACTIVITY_FILTERS.SEARCH')"
             placeholder="Buscar atividade, cliente ou negócio"
             class="h-10 w-full rounded-xl border border-n-weak bg-n-solid-2 py-2 pl-9 pr-3 text-sm"
           />
         </div>
         <select
+          v-model="filters.type"
+          :aria-label="t('CRM.ACTIVITY_FILTERS.TYPE')"
           class="h-10 min-w-48 rounded-xl border border-n-weak bg-n-solid-2 px-3 text-sm"
         >
           <option value="">Tipo (Todos)</option>
           <option value="call">Ligação</option>
           <option value="email">Email</option>
           <option value="meeting">Reunião</option>
+          <option value="whatsapp">WhatsApp</option>
+          <option value="follow_up">
+            {{ t('CRM.ACTIVITY_FILTERS.FOLLOW_UP') }}
+          </option>
+          <option value="task">{{ t('CRM.ACTIVITY_FILTERS.TASK') }}</option>
+          <option value="demonstration">
+            {{ t('CRM.ACTIVITY_FILTERS.DEMONSTRATION') }}
+          </option>
         </select>
       </div>
 
-      <div class="flex flex-wrap gap-2 rounded-2xl border border-[#e4e9f1] bg-white p-3 shadow-sm">
-        <button type="button" class="rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700"><i class="i-lucide-phone mr-1 size-4" /> Ligações</button>
-        <button type="button" class="rounded-xl border border-violet-200 bg-violet-50 px-3 py-2 text-xs font-semibold text-violet-700"><i class="i-lucide-users-round mr-1 size-4" /> Reuniões</button>
-        <button type="button" class="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700"><i class="i-ri-whatsapp-fill mr-1 size-4" /> WhatsApp</button>
-        <button type="button" class="rounded-xl border border-orange-200 bg-orange-50 px-3 py-2 text-xs font-semibold text-orange-700"><i class="i-lucide-mail mr-1 size-4" /> E-mails</button>
-        <div class="ml-auto flex gap-2"><button class="rounded-xl border border-[#e4e9f1] bg-white px-3 py-2 text-xs font-semibold text-[#667085]"><i class="i-lucide-eraser mr-1 size-4" />Limpar filtros</button><button class="rounded-xl bg-[#087cf0] px-4 py-2 text-xs font-semibold text-white shadow-md"><i class="i-lucide-filter mr-1 size-4" />Aplicar filtros</button></div>
-      </div>
+      <button
+        type="button"
+        class="self-start rounded-lg border border-n-weak px-3 py-2 text-sm"
+        @click="clearFilters"
+      >
+        {{ t('CRM.ACTIVITY_FILTERS.CLEAR') }}
+      </button>
 
       <div class="grid min-h-[380px] flex-1 gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
       <div
@@ -232,13 +309,13 @@ onMounted(async () => {
                 {{ error }}
               </td>
             </tr>
-            <tr v-else-if="!activities.length">
+            <tr v-else-if="!filteredActivities.length">
               <td colspan="7" class="px-6 py-12 text-center text-n-slate-10">
                 Nenhuma atividade encontrada
               </td>
             </tr>
             <tr
-              v-for="activity in activities"
+              v-for="activity in filteredActivities"
               :key="activity.id"
               class="transition hover:bg-n-alpha-2"
             >

@@ -1,3 +1,4 @@
+import jrcServiceDesk from './jrcServiceDesk.json';
 import advancedFilters from './advancedFilters.json';
 import agentBots from './agentBots.json';
 import agentMgmt from './agentMgmt.json';
@@ -46,6 +47,7 @@ import whatsappCalling from './whatsappCalling.json';
 import yearInReview from './yearInReview.json';
 
 export default {
+  ...jrcServiceDesk,
   ...advancedFilters,
   ...agentBots,
   ...agentMgmt,

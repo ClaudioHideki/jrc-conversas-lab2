@@ -1,0 +1,156 @@
+[
+  {
+    "id": "CP6-A01",
+    "finding": "CRUDs unitarios incompletos",
+    "source": "ConfigurationController / ConfigurationService / ConfigurationManager",
+    "resolution": "Implementadas consultas, criacao, edicao, ativacao/desativacao, revisao e recibo independente para cinco recursos. Sem exclusao.",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA"
+  },
+  {
+    "id": "CP6-A02",
+    "finding": "Autoridade para estrutura inicial nao definida",
+    "source": "UnitPolicy / OperatorCompanyPolicy / UnitMembershipPolicy",
+    "resolution": "CP6-D01 APROVADA. Ver CP6_D01_APROVADA/IMPLEMENTACAO; manual JRC + capacidades estruturais nativas, sem bypass operacional.",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA"
+  },
+  {
+    "id": "CP6-A03",
+    "finding": "Booleano de disponibilidade da criacao",
+    "source": "UiContextService",
+    "resolution": "Uma expressao que podia produzir false era testada por nil. A permissao agora exige um registro inicial verdadeiro e a policy.",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA"
+  },
+  {
+    "id": "CP6-A04",
+    "finding": "Campos de classificacao perdidos na projecao",
+    "source": "Presenter / helpers/contracts.js",
+    "resolution": "phase, initial e position foram incluidos explicitamente; sem exposicao de campos nao permitidos.",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA"
+  },
+  {
+    "id": "CP6-A05",
+    "finding": "Reuso da rota de catalogo com chave antiga",
+    "source": "CatalogView.vue",
+    "resolution": "Chave de estado e observacao do recurso agora reagem a troca de catalogo; nao reutilizam resultados do recurso anterior.",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA"
+  },
+  {
+    "id": "CP6-A06",
+    "finding": "Fase de status publicada antes de existir ticket",
+    "source": "TicketStatus#phase_cannot_relabel_existing_tickets",
+    "resolution": "Impede mudar fase referenciada em qualquer versao publicada, mesmo sem chamado. Nome/atividade seguem editaveis; o historico nao muda de familia.",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA"
+  },
+  {
+    "id": "CP6-A07",
+    "finding": "Desabilitacao explicita de politica com referencias inativas",
+    "source": "PublishLifecyclePolicyService",
+    "resolution": "Ao desabilitar a mesma definicao, preserva o mapa historico anterior. Nao revalida como nova politica ativa nem reinterpreta a versao anterior.",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA"
+  },
+  {
+    "id": "CP6-A08",
+    "finding": "Historico podia expor conteudo de notas fora da capacidade",
+    "source": "HistoryProjection / LifecycleReadService / Presenter",
+    "resolution": "Campos de nota/solucao/evidencias/custom fields e informacoes de SLA tem projecoes separadas. Conteudo original continua armazenado.",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA"
+  },
+  {
+    "id": "CP6-A09",
+    "finding": "Transicao exigindo evidencia que o ator nao pode ler",
+    "source": "LifecycleActionPolicy / LifecycleTransitionService / LifecyclePanel",
+    "resolution": "Nega input protegido sem notes_view e filtra regras com requisitos protegidos; nenhuma ampliacao silenciosa de capacidades.",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA"
+  },
+  {
+    "id": "CP6-A10",
+    "finding": "Auditoria de catalogos poderia escapar pelo log geral da Account",
+    "source": "ConfigurationAudit / AuditLogsController nativo inspecionado",
+    "resolution": "Reuso da tabela audits com associated=Unit; nao anexar payload privado a Account.associated_audits. Account e ator no metadata. Recibo scoped; controller nativo intacto.",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA"
+  },
+  {
+    "id": "CP6-A11",
+    "finding": "Mensagens remanescentes diziam que CP3/CP4 nao gravavam",
+    "source": "i18n en/pt/pt_BR jrcServiceDesk.json",
+    "resolution": "Textos de formulario, notas, estados e ciclo refletem o candidato; nao afirmam homologacao ou execucao nativa.",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA"
+  },
+  {
+    "id": "CP6-A12",
+    "finding": "Confirmacao e incerteza de escrita administrativa",
+    "source": "ConfigurationManager / LifecyclePolicyEditor",
+    "resolution": "Novos CRUDs exigem recibo+GET; antigas publicacoes/servicos verificam ID retornado. Timeout nao e traduzido em certeza de falha. Mesmo intento/chave na recuperacao de catalogo.",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA"
+  },
+  {
+    "id": "CP6-A13",
+    "finding": "Codigo de placeholder relacionado inalcancavel",
+    "source": "TicketDetailView.vue",
+    "resolution": "Removidos somente um controle desabilitado num ramo impossivel e rascunho nao utilizado; formulario real de vinculo foi preservado.",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA"
+  },
+  {
+    "id": "CP6-A14",
+    "finding": "Build Node usava tag movel apesar de .nvmrc exato",
+    "source": "docker/Dockerfile",
+    "resolution": "Node pinado em 24.13.0-alpine; pnpm install exige frozen-lockfile. Versoes declaradas e lockfiles intactos. Pull/build ainda pendentes.",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA"
+  },
+  {
+    "id": "CP6-A15",
+    "finding": "Dois services sem referencia operacional no app",
+    "source": "FindTicketService / RecordSlaSnapshotService",
+    "resolution": "Retidos com classificacao explicita: consulta de dominio testada usada como contrato e gravacao interna sem consumidor HTTP/UI. Nao cria novos endpoints para esconder lacuna.",
+    "status": "PENDENTE FUNCIONAL"
+  },
+  {
+    "id": "CP6-A16",
+    "finding": "Fontes dos indicadores",
+    "source": "DashboardService / TicketQuery / KpiCounts / LiveKpis",
+    "resolution": "Consulta agrupada autorizada e equacoes preservadas; nenhuma correcao aritmetica necessaria por inspecao. Prova SQL/UI ainda pendente.",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA"
+  },
+  {
+    "id": "CP6-A17",
+    "finding": "Flags, contexto e respostas obsoletas",
+    "source": "BaseController / BaseService / OperationalContext / guards / session helpers",
+    "resolution": "Flags e limites foram preservados. APIs reautorizam; limpeza frontend possui revalidacao por foco/visibilidade/60 s, nao push instantaneo.",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA"
+  },
+  {
+    "id": "CP6-A18",
+    "finding": "Escopo nativo indisponivel",
+    "source": "Logs em VALIDACOES",
+    "resolution": "Suites Rails/RSpec/SQL/Vue nao iniciaram; nenhum resultado nativo foi promovido a aprovado.",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA"
+  },
+  {
+    "id": "CP6-D01-A19",
+    "finding": "Autoridade inicial nao definida",
+    "source": "InitializerAuthority / InitializeAccountService",
+    "resolution": "Agora designacao nominativa + sessao SuperAdmin; POST manual e transacao com auditoria; nenhum grant do ator",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA"
+  },
+  {
+    "id": "CP6-D01-A20",
+    "finding": "Administracao do cliente sem capacidades estruturais",
+    "source": "Capabilities / StructurePolicy",
+    "resolution": "Quatro capacidades novas explicitas, sem default admin/agent, escopo somente estrutural",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA"
+  },
+  {
+    "id": "CP6-D01-A21",
+    "finding": "Acoes estruturais sem consumidor real",
+    "source": "StructureView / StructureController",
+    "resolution": "Pagina estrutural nativa, seletores reais, GET recibo e registro, sem DELETE",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA"
+  },
+  {
+    "id": "CP6-D01-A22",
+    "finding": "Mensagens antigas sobre CP6-D01 pendente",
+    "source": "docs/jrc_service_desk",
+    "resolution": "Decisao aprovada e roteiro/matrizes atualizados; alternativas anteriores sob historico nao vigente",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA"
+  }
+]

@@ -7,6 +7,10 @@ import ContactAPI from 'dashboard/api/contacts';
 import CallHistoryPanel from './CallHistoryPanel.vue';
 import CurrentContactCard from './CurrentContactCard.vue';
 import { useSipWebphone } from './useSipWebphone';
+import {
+  notificationPermission,
+  requestCallNotificationPermission,
+} from './callNotification';
 
 const RINGTONE_URL = '/audio/dashboard/ringtone.mp3';
 const CONTACT_PAGE_SIZE = 15;
@@ -54,6 +58,8 @@ const {
   established,
   muted,
   held,
+  holdPending,
+  transferring,
   errorMessage,
   remoteNumber,
   remoteStream,
@@ -77,6 +83,10 @@ const remoteAudio = ref(null);
 const transferMenuOpen = ref(false);
 const transferMode = ref('');
 const transferDestination = ref('');
+const callNotificationPermission = ref(notificationPermission());
+const enableCallNotifications = async () => {
+  callNotificationPermission.value = await requestCallNotificationPermission();
+};
 const hasAutodialed = ref(false);
 const currentContact = ref(null);
 const currentContactNumber = ref('');
@@ -172,8 +182,13 @@ const selectTransferMode = mode => {
 };
 
 const submitTransfer = async () => {
-  if (!transferMode.value || !transferDestination.value) return;
-  await transferCall(transferMode.value, transferDestination.value);
+  if (!transferMode.value || !transferDestination.value || transferring.value)
+    return;
+  const sent = await transferCall(
+    transferMode.value,
+    transferDestination.value
+  );
+  if (!sent) return;
   transferMode.value = '';
   transferDestination.value = '';
 };
@@ -471,6 +486,20 @@ onMounted(loadRecentContacts);
           </div>
 
           <template v-else>
+            <button
+              v-if="callNotificationPermission === 'default'"
+              type="button"
+              class="mt-3 rounded-lg bg-white/10 px-3 py-2 text-sm text-white"
+              @click="enableCallNotifications"
+            >
+              {{ $t('SOFTPHONE.ENABLE_NOTIFICATIONS') }}
+            </button>
+            <p
+              v-if="callNotificationPermission === 'denied'"
+              class="mt-3 text-sm text-white"
+            >
+              {{ $t('SOFTPHONE.NOTIFICATIONS_DENIED') }}
+            </p>
             <div class="jrc-caller-card">
               <div class="min-w-0 flex-1">
                 <p class="truncate text-base font-semibold text-white">
@@ -528,7 +557,7 @@ onMounted(loadRecentContacts);
                 <button
                   type="button"
                   class="jrc-action-button bg-white/10"
-                  :disabled="!canTransfer"
+                  :disabled="!canTransfer || transferring || holdPending"
                   @click="transferMenuOpen = !transferMenuOpen"
                 >
                   <span class="i-lucide-arrow-left-right" />
@@ -555,7 +584,7 @@ onMounted(loadRecentContacts);
                 type="button"
                 class="jrc-action-button bg-white/10"
                 :class="{ 'jrc-hold-active': held }"
-                :disabled="!established"
+                :disabled="!established || holdPending || transferring"
                 @click="toggleHold"
               >
                 <span :class="held ? 'i-lucide-play' : 'i-lucide-pause'" />
@@ -580,12 +609,13 @@ onMounted(loadRecentContacts);
                 type="tel"
                 :placeholder="TEXT.transferDestination"
                 class="jrc-transfer-input"
+                :disabled="transferring"
                 @keyup.enter="submitTransfer"
               />
               <button
                 type="button"
                 class="jrc-transfer-submit"
-                :disabled="!transferDestination"
+                :disabled="!transferDestination || transferring || holdPending"
                 @click="submitTransfer"
               >
                 {{ TEXT.confirmTransfer }}
@@ -598,7 +628,9 @@ onMounted(loadRecentContacts);
                 :key="tone"
                 type="button"
                 class="jrc-key-button border-white/20 bg-white/10 text-white shadow-sm"
-                :disabled="!configured || (hasCall && !established)"
+                :disabled="
+                  !configured || (hasCall && !established) || transferring
+                "
                 @click="pressKey(tone)"
               >
                 <span class="text-white drop-shadow-sm">{{ tone }}</span>

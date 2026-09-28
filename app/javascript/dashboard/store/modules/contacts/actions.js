@@ -68,8 +68,10 @@ export const actions = {
       commit(append ? types.APPEND_CONTACTS : types.SET_CONTACTS, payload);
       commit(types.SET_CONTACT_META, meta);
       commit(types.SET_CONTACT_UI_FLAG, { isFetching: false });
+      return true;
     } catch (error) {
       commit(types.SET_CONTACT_UI_FLAG, { isFetching: false });
+      return false;
     }
   },
 

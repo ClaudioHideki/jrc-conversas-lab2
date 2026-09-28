@@ -37,6 +37,14 @@ module Api
             render json: JrcCrm::LeadSerializer.new(@lead).as_json
           end
 
+          def for_contact
+            contact_lead_response(create: false)
+          end
+
+          def from_contact
+            contact_lead_response(create: true)
+          end
+
           def create
             lead = crm_scope.jrc_crm_leads.new(lead_params)
             lead.owner ||= Current.user
@@ -90,6 +98,18 @@ module Api
           end
 
           private
+
+          def contact_lead_response(create:)
+            result = JrcCrm::ContactLeadService.new(
+              account: crm_scope, actor: Current.user, contact_id: params.require(:contact_id)
+            ).call(create: create)
+            render json: {
+              lead: result[:lead] && JrcCrm::LeadSerializer.new(result[:lead]).as_json,
+              created: result[:created]
+            }, status: result[:created] ? :created : :ok
+          rescue JrcCrm::ContactLeadService::AmbiguousContact
+            render json: { code: 'CONTACT_HAS_MULTIPLE_LEADS' }, status: :conflict
+          end
 
           def set_lead
             @lead = visible_to_current_user(crm_scope.jrc_crm_leads).find(params[:id])

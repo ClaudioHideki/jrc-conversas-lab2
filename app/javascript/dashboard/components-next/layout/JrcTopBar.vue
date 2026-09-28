@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { useAccount } from 'dashboard/composables/useAccount';
 import { useKbd } from 'dashboard/composables/utils/useKbd';
 import { useMapGetter } from 'dashboard/composables/store';
-import wootConstants from 'dashboard/constants/globals';
+import SoftphoneDownload from './SoftphoneDownload.vue';
 
 import Avatar from 'next/avatar/Avatar.vue';
 import SidebarNotificationBell from 'dashboard/components-next/sidebar/SidebarNotificationBell.vue';
@@ -75,6 +75,8 @@ const availability = computed(() => {
           <SidebarProfileMenuStatus />
         </DropdownBody>
       </DropdownContainer>
+
+      <SoftphoneDownload />
 
       <SidebarNotificationBell
         class="!size-10 !rounded-full !border !border-n-weak hover:!bg-n-alpha-1"

@@ -1,13 +1,19 @@
 import { flushPromises, mount } from '@vue/test-utils';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { mockRoute } from 'vue-router';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { mockRoute, mockRouter } from 'vue-router';
 import { mockSipState } from './useSipWebphone';
 import SipCallWidget from './SipCallWidget.vue';
 
 vi.mock('vue-router', async () => {
   const { reactive } = await import('vue');
   const routeState = reactive({ name: 'ramal_index' });
-  return { useRoute: () => routeState, mockRoute: routeState };
+  const router = { replace: vi.fn().mockResolvedValue(undefined) };
+  return {
+    useRoute: () => routeState,
+    useRouter: () => router,
+    mockRoute: routeState,
+    mockRouter: router,
+  };
 });
 
 vi.mock('./useSipWebphone', async () => {
@@ -27,8 +33,12 @@ vi.mock('./useSipWebphone', async () => {
 });
 
 describe('SipCallWidget', () => {
+  let wrapper;
   beforeEach(() => {
     mockRoute.name = 'ramal_index';
+    mockRoute.params = {};
+    mockRouter.replace.mockClear();
+    mockRouter.replace.mockResolvedValue(undefined);
     mockSipState.incoming.value = false;
     mockSipState.established.value = false;
     mockSipState.answer.mockClear();
@@ -44,10 +54,14 @@ describe('SipCallWidget', () => {
       }))
     );
   });
+  afterEach(() => {
+    wrapper?.unmount();
+    vi.unstubAllGlobals();
+  });
 
   it('shows answer and reject actions for an incoming call on the Ramal page', async () => {
     mockSipState.incoming.value = true;
-    const wrapper = mount(SipCallWidget);
+    wrapper = mount(SipCallWidget);
     await flushPromises();
 
     expect(wrapper.text()).toContain('Chamada recebida');
@@ -63,12 +77,35 @@ describe('SipCallWidget', () => {
 
   it('closes when the call is no longer incoming', async () => {
     mockSipState.incoming.value = true;
-    const wrapper = mount(SipCallWidget);
+    wrapper = mount(SipCallWidget);
     expect(wrapper.find('aside').exists()).toBe(true);
 
     mockSipState.incoming.value = false;
     await wrapper.vm.$nextTick();
 
     expect(wrapper.find('aside').exists()).toBe(false);
+  });
+
+  it('opens Ramal on desktop account entry without reloading the renderer', async () => {
+    vi.stubGlobal('jrcSoftphoneDesktop', {});
+    mockRoute.name = 'dashboard';
+    mockRoute.params = { accountId: '1' };
+    wrapper = mount(SipCallWidget);
+    await flushPromises();
+    expect(mockRouter.replace).toHaveBeenCalledWith({
+      name: 'ramal_index',
+      params: { accountId: '1' },
+    });
+    mockRoute.name = 'contacts_edit';
+    await flushPromises();
+    expect(mockRouter.replace).toHaveBeenCalledOnce();
+  });
+
+  it('does not redirect ordinary browser navigation', async () => {
+    mockRoute.name = 'contacts_edit';
+    mockRoute.params = { accountId: '1' };
+    wrapper = mount(SipCallWidget);
+    await flushPromises();
+    expect(mockRouter.replace).not.toHaveBeenCalled();
   });
 });

@@ -5,6 +5,8 @@ const proposalsAPI = new ApiClient('crm/proposals', { accountScoped: true });
 proposalsAPI.list = params => axios.get(proposalsAPI.url, { params });
 proposalsAPI.sendProposal = (id, channel = 'auto') =>
   axios.post(`${proposalsAPI.url}/${id}/send_proposal`, { channel });
+proposalsAPI.pdf = id =>
+  axios.get(`${proposalsAPI.url}/${id}/pdf`, { responseType: 'blob' });
 proposalsAPI.pdfUrl = (id, download = false) =>
   `${proposalsAPI.url}/${id}/pdf${download ? '?download=1' : ''}`;
 proposalsAPI.accept = (id, payload) =>

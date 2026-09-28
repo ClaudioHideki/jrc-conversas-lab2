@@ -12,6 +12,8 @@ import {
   CONVERSATION_PARTICIPATING_PERMISSIONS,
 } from 'dashboard/constants/permissions.js';
 
+import { SERVICE_DESK_CUSTOM_ROLE_PERMISSIONS } from 'dashboard/constants/serviceDeskPermissions';
+import { FEATURE_FLAGS } from 'dashboard/featureFlags';
 import Button from 'dashboard/components-next/button/Button.vue';
 
 const props = defineProps({
@@ -30,6 +32,12 @@ const emit = defineEmits(['close']);
 
 const store = useStore();
 const { t } = useI18n();
+const showServiceDeskPermissions = computed(() => store.getters['accounts/isFeatureEnabledonAccount']?.(store.getters.getCurrentAccountId, FEATURE_FLAGS.JRC_SERVICE_DESK) === true);
+const visiblePermissions = computed(() => showServiceDeskPermissions.value
+  ? [...AVAILABLE_CUSTOM_ROLE_PERMISSIONS, ...SERVICE_DESK_CUSTOM_ROLE_PERMISSIONS]
+  : AVAILABLE_CUSTOM_ROLE_PERMISSIONS);
+// Existing selections are preserved when the feature is off. No automatic dependency grants.
+
 
 const name = ref('');
 const description = ref('');
@@ -189,9 +197,10 @@ const isSubmitDisabled = computed(
         <label :class="{ 'text-n-ruby-9': v$.selectedPermissions.$error }">
           {{ $t('CUSTOM_ROLE.FORM.PERMISSIONS.LABEL') }}
         </label>
+        <p v-if="showServiceDeskPermissions" class="text-xs text-n-slate-11 mt-2">{{ t('JRC_SERVICE_DESK.NATIVE.role_help') }}</p>
         <div class="flex flex-col gap-2.5 mb-4 mt-2">
           <div
-            v-for="permission in AVAILABLE_CUSTOM_ROLE_PERMISSIONS"
+            v-for="permission in visiblePermissions"
             :key="permission"
             class="flex items-center"
           >

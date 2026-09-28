@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import CurrentContactCard from './CurrentContactCard.vue';
 
 const contact = {
@@ -24,6 +24,7 @@ const mountCard = props =>
   });
 
 describe('CurrentContactCard', () => {
+  afterEach(() => vi.unstubAllGlobals());
   it('keeps contact selection separate from the dial action', async () => {
     const wrapper = mountCard();
 
@@ -44,5 +45,27 @@ describe('CurrentContactCard', () => {
       .trigger('click');
 
     expect(wrapper.emitted('loadMore')).toHaveLength(1);
+  });
+
+  it('opens the contact through the narrow desktop bridge without sending authentication', async () => {
+    const openContact = vi.fn().mockResolvedValue(true);
+    vi.stubGlobal('jrcSoftphoneDesktop', { openContact });
+    const wrapper = mountCard({ contact });
+    await wrapper
+      .findAll('button')
+      .find(button => button.text() === 'Open in JRC Conversas')
+      .trigger('click');
+    expect(openContact).toHaveBeenCalledWith({
+      accountId: '1',
+      contactId: '42',
+    });
+    expect(wrapper.find('router-link-stub').exists()).toBe(false);
+    wrapper.unmount();
+  });
+
+  it('preserves the browser contact link', () => {
+    const wrapper = mountCard({ contact });
+    expect(wrapper.find('router-link-stub').exists()).toBe(true);
+    wrapper.unmount();
   });
 });

@@ -22,6 +22,8 @@ tmp
 .codeclimate.yml
 public/packs
 node_modules
+desktop/node_modules
+desktop/dist
 vendor/bundle
 .DS_Store
 *.swp

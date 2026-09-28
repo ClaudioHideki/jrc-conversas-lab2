@@ -7,6 +7,11 @@ on:
         description: Tag da imagem Docker
         required: true
         default: v4.16.2-jrc-lab3.1
+      publish_lab3:
+        description: Atualizar tambem a tag lab3
+        required: false
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -63,7 +68,7 @@ jobs:
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.image.outputs.tag }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:lab3
+            ${{ (github.event_name != 'workflow_dispatch' || inputs.publish_lab3) && format('{0}/{1}:lab3', env.REGISTRY, env.IMAGE_NAME) || '' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           provenance: false

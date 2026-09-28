@@ -1,4 +1,9 @@
 {
+  "SOFTPHONE": {
+    "ENABLE_NOTIFICATIONS": "Enable call notifications",
+    "NOTIFICATIONS_DENIED": "Call notifications are blocked. Allow notifications in your browser settings.",
+    "OPEN_IN_JRC": "Open in JRC Conversas"
+  },
   "CALLS_PAGE": {
     "HEADER": "Calls",
     "ALL_CALLS": "All Calls",

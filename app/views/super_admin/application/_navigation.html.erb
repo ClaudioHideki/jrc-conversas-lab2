@@ -51,6 +51,8 @@ as defined by the routes in the `admin/` namespace
     <ul class="my-4">
       <%= render partial: "nav_item", locals: { icon: 'icon-grid-line', url: super_admin_root_url, label: 'Dashboard' } %>
       <% Administrate::Namespace.new(namespace).resources.each do |resource| %>
+        <%# Initialization is an account-scoped action, not an Administrate index resource. %>
+        <% next if resource.resource == "service_desk_initializations" %>
         <% next if resource.resource.start_with?("api/") || ["account_users", "account_impersonations", "account_inboxes", "account_settings", "access_tokens", "installation_configs", "dashboard", "devise/sessions", "app_configs", "instance_statuses", "settings", "push_diagnostics", "sip_credentials", "telephony_integrations", "video_conference_settings", "whatsapp_calling_configurations"].include?(resource.resource) %>
         <% next if resource.resource == "platform_banners" && !ChatwootApp.chatwoot_cloud? %>
         <%= render partial: "nav_item", locals: {

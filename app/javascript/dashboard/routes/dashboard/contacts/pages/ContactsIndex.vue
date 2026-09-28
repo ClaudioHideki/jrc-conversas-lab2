@@ -15,6 +15,8 @@ import ContactsList from 'dashboard/components-next/Contacts/Pages/ContactsList.
 import ContactsBulkActionBar from '../components/ContactsBulkActionBar.vue';
 import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import BulkActionsAPI from 'dashboard/api/bulkActions';
+import ContactLeadAction from '../components/ContactLeadAction.vue';
+import { FEATURE_FLAGS } from 'dashboard/featureFlags';
 
 const DEFAULT_SORT_FIELD = 'last_activity_at';
 const DEBOUNCE_DELAY = 300;
@@ -67,6 +69,15 @@ const currentPage = computed(() => Number(meta.value?.currentPage));
 const totalItems = computed(() => meta.value?.count);
 const hasMore = computed(() => meta.value?.hasMore ?? false);
 const isSearchView = computed(() => !!searchQuery.value);
+const hasNextPage = computed(
+  () => currentPage.value * 15 < Number(totalItems.value || 0)
+);
+const canUseCrm = computed(() =>
+  store.getters['accounts/isFeatureEnabledonAccount'](
+    Number(route.params.accountId),
+    FEATURE_FLAGS.JRC_CRM
+  )
+);
 
 const selectedContactIds = ref([]);
 const isBulkActionLoading = ref(false);
@@ -319,19 +330,21 @@ const searchContacts = debounce(
 );
 
 const loadMoreSearchResults = async () => {
-  if (!hasMore.value || isLoadingMore.value) return;
+  if (!hasMore.value || isLoadingMore.value || isFetchingList.value) return;
 
   isLoadingMore.value = true;
   const nextPage = searchPageNumber.value + 1;
-
-  await store.dispatch('contacts/search', {
-    ...getCommonFetchParams(nextPage),
-    search: encodeURIComponent(searchValue.value),
-    append: true,
-  });
-
-  searchPageNumber.value = nextPage;
-  isLoadingMore.value = false;
+  try {
+    const success = await store.dispatch('contacts/search', {
+      ...getCommonFetchParams(nextPage),
+      search: encodeURIComponent(searchValue.value),
+      append: true,
+    });
+    if (success) searchPageNumber.value = Number(meta.value.currentPage);
+    else useAlert(t('CRM.CONTACT_LEAD.PAGE_ERROR'));
+  } finally {
+    isLoadingMore.value = false;
+  }
 };
 
 const fetchContactsBasedOnContext = async (page, options = {}) => {
@@ -374,8 +387,10 @@ const fetchContactsBasedOnContext = async (page, options = {}) => {
   });
 };
 
-const onPageChange = page =>
-  fetchContactsBasedOnContext(page, { clearSelection: false });
+const onPageChange = page => {
+  crmSelectedContact.value = null;
+  return fetchContactsBasedOnContext(page, { clearSelection: false });
+};
 
 const assignLabels = async labels => {
   if (!labels.length || !selectedContactIds.value.length) {
@@ -632,11 +647,57 @@ onMounted(async () => {
           </table>
         </div>
 
-        <div v-if="!isFetchingList && hasContacts && !isSearchView" class="flex items-center justify-between border-t border-n-weak px-4 py-3 text-xs text-n-slate-9"><span>Exibindo {{ contacts.length }} de {{ totalContactsMetric }} contatos</span><div class="flex items-center gap-2"><button class="rounded-lg border border-n-weak px-3 py-1.5" :disabled="currentPage <= 1" @click="onPageChange(currentPage - 1)">Anterior</button><span class="rounded-lg bg-blue-500 px-3 py-1.5 font-semibold text-white">{{ currentPage || 1 }}</span><button class="rounded-lg border border-n-weak px-3 py-1.5" :disabled="!hasMore" @click="onPageChange((currentPage || 1) + 1)">Próxima</button></div></div>
+        <div
+          v-if="!isFetchingList && hasContacts && !isSearchView"
+          class="flex items-center justify-between border-t border-n-weak px-4 py-3 text-xs text-n-slate-9"
+        >
+          <span>
+            {{
+              t('CRM.CONTACT_LEAD.PAGE_SUMMARY', {
+                count: contacts.length,
+                total: totalContactsMetric,
+              })
+            }}
+          </span>
+          <div class="flex items-center gap-2">
+            <button
+              class="rounded-lg border border-n-weak px-3 py-1.5"
+              :disabled="currentPage <= 1"
+              @click="onPageChange(currentPage - 1)"
+            >
+              {{ t('CRM.CONTACT_LEAD.PREVIOUS') }}
+            </button>
+            <span
+              class="rounded-lg bg-blue-500 px-3 py-1.5 font-semibold text-white"
+            >
+              {{ currentPage || 1 }}
+            </span>
+            <button
+              class="rounded-lg border border-n-weak px-3 py-1.5"
+              :disabled="!hasNextPage"
+              @click="onPageChange((currentPage || 1) + 1)"
+            >
+              {{ t('CRM.CONTACT_LEAD.NEXT') }}
+            </button>
+          </div>
+        </div>
+        <button
+          v-if="!isFetchingList && isSearchView && hasMore"
+          type="button"
+          :disabled="isLoadingMore"
+          class="m-4 rounded-lg border border-n-weak px-3 py-2 text-sm disabled:opacity-50"
+          @click="loadMoreSearchResults"
+        >
+          {{ t('CRM.CONTACT_LEAD.LOAD_MORE') }}
+        </button>
       </main>
 
       <aside class="overflow-y-auto rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm xl:min-h-0">
         <template v-if="selectedRelationshipContact">
+          <ContactLeadAction
+            v-if="canUseCrm"
+            :contact="selectedRelationshipContact"
+          />
           <div class="flex items-start justify-between"><div class="flex items-center gap-3"><span class="flex size-12 items-center justify-center rounded-2xl bg-emerald-500/10 text-lg font-bold text-emerald-700">{{ contactInitials(selectedRelationshipContact) }}</span><div><h2 class="font-semibold text-n-slate-12">{{ selectedRelationshipContact.name }}</h2><p class="text-xs text-n-slate-9">{{ contactCompany(selectedRelationshipContact) }}</p><span class="mt-1 inline-flex rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">{{ contactStatus(selectedRelationshipContact) }}</span></div></div><button class="text-n-slate-8" @click="crmSelectedContact = null">×</button></div>
           <div class="mt-4 grid grid-cols-4 gap-2"><button class="rounded-lg bg-emerald-500 px-2 py-2 text-xs font-semibold text-white"><span class="i-ri-whatsapp-fill me-1 inline-block size-4 align-text-bottom" />WhatsApp</button><button class="rounded-lg bg-blue-500 px-2 py-2 text-xs font-semibold text-white" @click="openWhatsappCalling(selectedRelationshipContact)"><span class="i-lucide-phone me-1 inline-block size-4 align-text-bottom" />Ligar</button><button class="rounded-lg bg-amber-500 px-2 py-2 text-xs font-semibold text-white"><span class="i-lucide-mail me-1 inline-block size-4 align-text-bottom" />E-mail</button><button class="rounded-lg bg-violet-500 px-2 py-2 text-xs font-semibold text-white"><span class="i-lucide-calendar-plus me-1 inline-block size-4 align-text-bottom" />Agenda</button></div>
           <div class="mt-5 space-y-3 text-sm"><p class="flex items-center gap-2 text-n-slate-10"><span class="i-ri-whatsapp-line size-4 text-emerald-500" />{{ contactPhone(selectedRelationshipContact) }}</p><p class="flex items-center gap-2 text-n-slate-10"><span class="i-lucide-mail size-4 text-blue-500" />{{ selectedRelationshipContact.email || 'Sem e-mail' }}</p><p class="flex items-center gap-2 text-n-slate-10"><span class="i-lucide-user-round size-4" />Responsável: JRC ADM</p></div>
@@ -649,4 +710,3 @@ onMounted(async () => {
     </div>
   </div>
 </template>
-

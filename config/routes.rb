@@ -53,6 +53,55 @@ Rails.application.routes.draw do
         end
 
         scope module: :accounts do
+          # JRC Service Desk CP4: all endpoints inherit the native Account authentication.
+          namespace :jrc_service_desk do
+            # CP6-D01: structural authority is separate from ticket access.
+            get 'structure/context', to: 'structure#context'
+            get 'structure/members', to: 'structure#members'
+            %w[operator_companies units unit_memberships].each do |structural_resource|
+              scope "structure/#{structural_resource}", defaults: { resource: structural_resource } do
+                get '/', to: 'structure#index'
+                post '/', to: 'structure#create'
+                get ':id/receipts/:audit_id', to: 'structure#receipt'
+                get ':id', to: 'structure#show'
+                patch ':id', to: 'structure#update'
+              end
+            end
+            # CP6: finite, authorized administrative catalogue. No structural bootstrap or deletion.
+            scope 'configuration/:resource', constraints: { resource: /queues|categories|priorities|statuses|services/ } do
+              get '/', to: 'configuration#index'
+              post '/', to: 'configuration#create'
+              get '/:id/receipts/:audit_id', to: 'configuration#receipt'
+              get '/:id', to: 'configuration#show'
+              patch '/:id', to: 'configuration#update'
+            end
+            resources :lifecycle_policies, only: [:index, :show, :create]
+            resources :service_definitions, only: [:index, :show, :create]
+            get 'ui_context', to: 'ui_context#show'
+            get 'dashboard', to: 'dashboard#show'
+            %w[queues priorities categories statuses units operator_companies assignees requesters teams].each do |resource|
+              get resource, to: 'lookups#index', defaults: { resource: resource }
+            end
+            resources :tickets, only: [:index, :show, :create, :update] do
+              member do
+                get 'lifecycle', to: 'lifecycle#show'
+                post 'lifecycle', to: 'lifecycle#create'
+                get 'lifecycle/transitions/:transition_id', to: 'lifecycle#transition'
+                post :assign
+                post 'transfer', to: 'tickets#transfer'
+                get 'customer_context', to: 'native_context#customer'
+                get 'conversations/:record_id/navigation', to: 'native_context#conversation_navigation'
+                post :work_status
+                post 'notes', to: 'tickets#add_note'
+                post 'conversations', to: 'tickets#link_conversation'
+                get 'notes/:record_id', to: 'tickets#related_item', defaults: { kind: 'notes' }
+                get 'conversations/:record_id', to: 'tickets#related_item', defaults: { kind: 'conversations' }
+                %w[notes events sla conversations status_options].each do |kind|
+                  get kind, to: 'tickets#related', defaults: { kind: kind }
+                end
+              end
+            end
+          end
           namespace :actions do
             resource :contact_merge, only: [:create]
           end
@@ -332,11 +381,13 @@ Rails.application.routes.draw do
             end
           end
           namespace :crm do
-              resource :dashboard, only: :show, controller: :dashboards
-              resources :reports, only: :index
-              resources :leads, only: [:index, :show, :create, :update] do
-                post :from_conversation, on: :collection
-                member do
+            resource :dashboard, only: :show, controller: :dashboards
+            resources :reports, only: :index
+            resources :leads, only: [:index, :show, :create, :update] do
+              get :for_contact, on: :collection
+              post :from_contact, on: :collection
+              post :from_conversation, on: :collection
+              member do
                 post :convert
                 post :lose
               end
@@ -349,6 +400,7 @@ Rails.application.routes.draw do
                 post :lose
               end
             end
+            resources :management, only: [:index]
             resources :pipelines
             resources :stages do
               post :reorder, on: :collection
@@ -913,6 +965,9 @@ Rails.application.routes.draw do
 
       # order of resources affect the order of sidebar navigation in super admin
       resources :accounts, only: [:index, :new, :create, :show, :edit, :update, :destroy] do
+        get 'service-desk-initialization', to: 'service_desk_initializations#show', as: :service_desk_initialization
+        post 'service-desk-initialization', to: 'service_desk_initializations#create'
+        get 'service-desk-initialization/receipts/:audit_id', to: 'service_desk_initializations#receipt', as: :service_desk_initialization_receipt
         post :seed, on: :member
         post :reset_cache, on: :member
         post :toggle_feature, on: :member

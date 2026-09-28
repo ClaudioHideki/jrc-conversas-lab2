@@ -1,0 +1,68 @@
+[
+  {
+    "id": "CP6-D01",
+    "item": "Inicializacao JRC humana e delegacao estrutural explicita",
+    "dependency": "APROVADA e implementada. Configurar designacao do funcionario e capacidades do cliente explicitamente no destino; executar provas nativas.",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA"
+  },
+  {
+    "id": "NATIVE",
+    "item": "Execucao Rails/RSpec/SQL/Vue/Docker e F5",
+    "dependency": "Runtime exato e bases isoladas; nenhuma migration executada aqui",
+    "status": "PENDENTE DE EXECUÇÃO NATIVA"
+  },
+  {
+    "id": "SNAPSHOT-INPUT",
+    "item": "Captura operacional de condicoes contratuais/calendario",
+    "dependency": "RecordSlaSnapshotService existe, mas sem API/UI/integacao externa; ensaio automatizado usa somente fixture de teste",
+    "status": "PENDENTE FUNCIONAL"
+  },
+  {
+    "id": "PORTAL",
+    "item": "Identidade externa/portal/SSO",
+    "dependency": "Fora deste candidato; Contact nao autentica cliente",
+    "status": "PENDENTE FUNCIONAL"
+  },
+  {
+    "id": "FILES",
+    "item": "Anexos upload/download autorizado",
+    "dependency": "Associacao Active Storage nao e fluxo entregue; sem endpoints/signed URLs",
+    "status": "PENDENTE FUNCIONAL"
+  },
+  {
+    "id": "CHANNELS",
+    "item": "Resposta publica e primeira resposta real",
+    "dependency": "Sem envio ou marca de primeira resposta por nota interna",
+    "status": "PENDENTE FUNCIONAL"
+  },
+  {
+    "id": "CALENDAR-EDITOR",
+    "item": "Cadastro mestre/editor visual/importacao de calendarios",
+    "dependency": "Existe interpretador de snapshot explicito; nao editor/master",
+    "status": "PENDENTE FUNCIONAL"
+  },
+  {
+    "id": "NEXT",
+    "item": "Assumir proximo/capacidade/competencia",
+    "dependency": "Nao presumir FIFO ou prioridade sem regras operacionais aprovadas",
+    "status": "PENDENTE FUNCIONAL"
+  },
+  {
+    "id": "CROSS-UNIT",
+    "item": "Transferencia entre unidades",
+    "dependency": "Nao autorizada; transferencia atual e dentro da unidade",
+    "status": "PENDENTE FUNCIONAL"
+  },
+  {
+    "id": "ADVANCED",
+    "item": "Relatorios avancados/exportacao/governanca/ativos/aprovacoes/pesquisas/automacoes/NICO operacional",
+    "dependency": "Referencias visuais nao sao API, persistencia ou KPI entregue",
+    "status": "PENDENTE FUNCIONAL"
+  },
+  {
+    "id": "PROJECTS",
+    "item": "Modulo Projetos",
+    "dependency": "Nao implementado, nao iniciado, fora do candidato",
+    "status": "N/A"
+  }
+]

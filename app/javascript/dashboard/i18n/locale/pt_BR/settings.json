@@ -305,6 +305,7 @@
     }
   },
   "SIDEBAR": {
+    "DOWNLOAD_JRC_SOFTPHONE": "Baixar JRC Softphone",
     "NO_ITEMS": "Nenhum item",
     "CURRENTLY_VIEWING_ACCOUNT": "Visualização atual:",
     "SWITCH": "Trocar",

@@ -26,6 +26,33 @@ global.axios = axios;
 vi.mock('axios');
 
 describe('#actions', () => {
+  describe('#search continuation', () => {
+    it('reports success only after appending records and updating pagination', async () => {
+      const meta = { current_page: 2, has_more: true };
+      axios.get.mockResolvedValue({ data: { payload: contactList, meta } });
+      const success = await actions.search(
+        { commit },
+        { search: 'Cliente', page: 2, append: true }
+      );
+      expect(success).toBe(true);
+      expect(commit).toHaveBeenCalledWith(types.APPEND_CONTACTS, contactList);
+      expect(commit).toHaveBeenCalledWith(types.SET_CONTACT_META, meta);
+      expect(commit).not.toHaveBeenCalledWith(types.CLEAR_CONTACTS);
+    });
+
+    it('reports failure without advancing metadata or clearing previous results', async () => {
+      axios.get.mockRejectedValue(new Error('network'));
+      const success = await actions.search(
+        { commit },
+        { search: 'Cliente', page: 2, append: true }
+      );
+      expect(success).toBe(false);
+      expect(commit.mock.calls).toEqual([
+        [types.SET_CONTACT_UI_FLAG, { isFetching: true }],
+        [types.SET_CONTACT_UI_FLAG, { isFetching: false }],
+      ]);
+    });
+  });
   describe('#get', () => {
     it('sends correct mutations if API is success', async () => {
       axios.get.mockResolvedValue({

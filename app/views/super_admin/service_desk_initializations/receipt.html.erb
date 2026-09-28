@@ -1,0 +1,18 @@
+<% content_for(:title) { t('jrc_sd_initialization.receipt') } %>
+<header class="main-content__header"><h1 class="main-content__page-title"><%= t('jrc_sd_initialization.receipt') %></h1></header>
+<section class="main-content__body">
+  <p><%= t('jrc_sd_initialization.reloaded') %></p>
+  <dl><dt>Account</dt><dd><%= @receipt['account_id'] %></dd>
+    <dt><%= t('jrc_sd_initialization.author') %></dt><dd><%= @receipt['author_user_id'] %></dd>
+    <dt><%= t('jrc_sd_initialization.recipient') %></dt><dd><%= @receipt['recipient_account_user_id'] %></dd>
+    <dt><%= t('jrc_sd_initialization.audit') %></dt><dd><%= @receipt['audit_id'] %> - <%= @receipt['occurred_at'] %></dd>
+    <dt><%= t('jrc_sd_initialization.reason') %></dt><dd><%= @receipt['reason'] %></dd>
+  </dl>
+  <% @receipt['current_records'].each do |resource, record| %>
+    <h2><%= resource %> #<%= record['id'] %></h2>
+    <p><%= record['name'] || t('jrc_sd_initialization.recipient') %> - <%= t('jrc_sd_initialization.active') %>: <%= record['active'] %></p>
+  <% end %>
+  <% if @receipt['records'] != @receipt['current_records'] %><p role="alert"><%= t('jrc_sd_initialization.changed') %></p><% end %>
+  <p><%= t('jrc_sd_initialization.separation') %></p>
+  <%= link_to t('jrc_sd_initialization.back'), super_admin_account_path(@account), class: 'button' %>
+</section>

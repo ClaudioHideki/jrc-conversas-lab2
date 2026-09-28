@@ -1,0 +1,44 @@
+<% content_for(:title) { t('jrc_sd_initialization.title') } %>
+<header class="main-content__header"><h1 class="main-content__page-title"><%= t('jrc_sd_initialization.title') %> - <%= @account.name %> (#<%= @account.id %>)</h1></header>
+<section class="main-content__body">
+  <p><%= t('jrc_sd_initialization.separation') %></p>
+  <p><%= t('jrc_sd_initialization.manual') %></p>
+  <%= link_to t('jrc_sd_initialization.back'), super_admin_account_path(@account), class: 'button' %>
+  <% if @error %><p role="alert"><%= @error %></p><% end %>
+  <% if @last_receipt_id %>
+    <p><%= link_to t('jrc_sd_initialization.receipt'), super_admin_account_service_desk_initialization_receipt_path(account_id: @account.id, audit_id: @last_receipt_id), class: 'button' %></p>
+  <% end %>
+  <% if @empty %>
+    <%= form_with url: super_admin_account_service_desk_initialization_path(account_id: @account.id), method: :get, local: true do %>
+      <%= label_tag :q, t('jrc_sd_initialization.search') %>
+      <%= text_field_tag :q, params[:q], maxlength: 200 %>
+      <%= submit_tag t('jrc_sd_initialization.search') %>
+    <% end %>
+    <p><%= t('jrc_sd_initialization.existing_user') %></p>
+    <%= form_with url: super_admin_account_service_desk_initialization_path(account_id: @account.id), method: :post, local: true do %>
+      <%= hidden_field_tag :request_key, @request_key %>
+      <fieldset><legend><%= t('jrc_sd_initialization.operator') %></legend>
+        <%= label_tag 'initialization_operator_code', t('jrc_sd_initialization.code') %>
+        <%= text_field_tag 'initialization[operator][code]', nil, required: true, maxlength: 80 %>
+        <%= label_tag 'initialization_operator_name', t('jrc_sd_initialization.name') %>
+        <%= text_field_tag 'initialization[operator][name]', nil, required: true, maxlength: 255 %>
+        <%= hidden_field_tag 'initialization[operator][active]', 'true' %>
+      </fieldset>
+      <fieldset><legend><%= t('jrc_sd_initialization.unit') %></legend>
+        <%= label_tag 'initialization_unit_code', t('jrc_sd_initialization.code') %>
+        <%= text_field_tag 'initialization[unit][code]', nil, required: true, maxlength: 80 %>
+        <%= label_tag 'initialization_unit_name', t('jrc_sd_initialization.name') %>
+        <%= text_field_tag 'initialization[unit][name]', nil, required: true, maxlength: 255 %>
+        <%= hidden_field_tag 'initialization[unit][active]', 'true' %>
+      </fieldset>
+      <%= label_tag 'initialization_account_user_id', t('jrc_sd_initialization.recipient') %>
+      <%= select_tag 'initialization[account_user_id]', options_for_select(@candidates.map { |au| ["#{au.user.name} (AccountUser ##{au.id})", au.id] }), include_blank: true, required: true %>
+      <%= label_tag 'initialization_reason', t('jrc_sd_initialization.reason') %>
+      <%= text_field_tag 'initialization[reason]', nil, required: true, minlength: 3, maxlength: 500 %>
+      <label><%= check_box_tag 'initialization[confirmed]', 'confirmed', false, required: true %><%= t('jrc_sd_initialization.confirmation') %></label>
+      <%= submit_tag t('jrc_sd_initialization.submit'), disabled: @candidates.empty? %>
+    <% end %>
+  <% else %>
+    <p role="status"><%= t('jrc_sd_initialization.not_empty') %></p>
+  <% end %>
+</section>

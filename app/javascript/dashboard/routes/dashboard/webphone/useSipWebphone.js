@@ -1,7 +1,12 @@
-import { computed, ref, shallowRef } from 'vue';
+import { computed, effectScope, ref, shallowRef, watch } from 'vue';
 import SipCredentialsAPI from 'dashboard/api/sipCredentials';
 import { SipClient } from './SipClient';
 import { normalizeSipDialNumber } from './phoneNumber';
+import {
+  notifyIncomingCall,
+  clearIncomingCallNotification,
+} from './callNotification';
+import { sanitizeSipMessage, sipActionError } from './sipErrors';
 
 const credential = ref(null);
 const loading = ref(true);
@@ -21,6 +26,8 @@ const sessionActive = ref(false);
 const established = ref(false);
 const muted = ref(false);
 const held = ref(false);
+const holdPending = ref(false);
+const transferring = ref(false);
 const errorMessage = ref('');
 const callEvents = ref([]);
 const remoteStream = shallowRef(null);
@@ -38,7 +45,13 @@ let initializationVersion = 0;
 let reconnectTimer;
 let reconnectAttempt = 0;
 let intentionalDisconnect = false;
+let reconnectBlocked = false;
+let retryNotBefore = 0;
+let disconnectRequested = false;
+let connectionVersion = 0;
 let networkListenersAttached = false;
+let floatingBridgeScope;
+let removeFloatingCommands;
 
 const extensionStorageKey = accountId =>
   `jrc-softphone-extension:${accountId}:enabled`;
@@ -104,21 +117,36 @@ const client = new SipClient({
       scheduleReconnect();
     }
   },
-  onRegister: value => {
+  onRegister: (value, { retryAfterMs = 0 } = {}) => {
     registration.value = value;
+    if (retryAfterMs > 0)
+      retryNotBefore = Math.max(retryNotBefore, Date.now() + retryAfterMs);
     // The callback is registered before the reconnect coordinator is initialized.
     // eslint-disable-next-line no-use-before-define
     if (value === 'Registered') resetReconnectState();
-    if (value === 'Terminated' && !intentionalDisconnect) {
+    if (
+      ['Unregistered', 'Terminated'].includes(value) &&
+      !intentionalDisconnect
+    ) {
       // eslint-disable-next-line no-use-before-define
       scheduleReconnect();
     }
   },
-  onIncoming: ({ remote }) => {
+  onRegistrationFailure: ({ permanent, retryAfterMs = 0 }) => {
+    reconnectBlocked = permanent;
+    retryNotBefore = Math.max(retryNotBefore, Date.now() + retryAfterMs);
+    // eslint-disable-next-line no-use-before-define
+    clearReconnectTimer();
+    reconnecting.value = false;
+    // eslint-disable-next-line no-use-before-define
+    if (!permanent && !intentionalDisconnect) scheduleReconnect();
+  },
+  onIncoming: ({ remote, callId: incomingCallId }) => {
     incoming.value = true;
     sessionActive.value = true;
     remoteNumber.value = remote;
     direction.value = 'entrada';
+    notifyIncomingCall({ remote, callId: incomingCallId });
   },
   onSession: summary => {
     sessionState.value = summary.state;
@@ -128,16 +156,19 @@ const client = new SipClient({
     callId.value = summary.callId;
   },
   onEstablished: () => {
+    clearIncomingCallNotification();
     incoming.value = false;
     established.value = true;
     startTimer();
   },
   onEnded: () => {
+    clearIncomingCallNotification();
     incoming.value = false;
     sessionActive.value = false;
     established.value = false;
     muted.value = false;
     held.value = false;
+    remoteNumber.value = '—';
     remoteStream.value = null;
     stopTimer();
   },
@@ -147,11 +178,19 @@ const client = new SipClient({
   onHold: value => {
     held.value = value;
   },
+  onHoldPending: value => {
+    holdPending.value = value;
+  },
+  onTransferPending: value => {
+    transferring.value = value;
+  },
   onRemoteStream: stream => {
     remoteStream.value = stream;
   },
   onError: message => {
-    errorMessage.value = message;
+    errorMessage.value = sanitizeSipMessage(message, [
+      credential.value?.password,
+    ]);
   },
   onLog: event => {
     callEvents.value = [...callEvents.value.slice(-5), event];
@@ -178,7 +217,9 @@ const run = async action => {
   try {
     return await action();
   } catch (error) {
-    errorMessage.value = error?.message || 'Não foi possível concluir a ação.';
+    errorMessage.value = sanitizeSipMessage(sipActionError(error), [
+      credential.value?.password,
+    ]);
     return undefined;
   }
 };
@@ -188,7 +229,9 @@ const canReconnect = () =>
     activeAccountId &&
       configured.value &&
       extensionEnabled.value &&
-      !intentionalDisconnect
+      !intentionalDisconnect &&
+      !disconnectRequested &&
+      !reconnectBlocked
   );
 
 const clearReconnectTimer = () => {
@@ -199,6 +242,8 @@ const clearReconnectTimer = () => {
 function resetReconnectState() {
   clearReconnectTimer();
   reconnectAttempt = 0;
+  retryNotBefore = 0;
+  reconnectBlocked = false;
   reconnecting.value = false;
 }
 
@@ -218,13 +263,22 @@ function scheduleReconnect({ immediate = false } = {}) {
       ? 'Sem internet. Aguardando reconexão'
       : 'Reconectando ramal';
   statusTone.value = 'warning';
-  const delay = immediate
+  const backoff = immediate
     ? 0
     : RECONNECT_DELAYS_MS[
         Math.min(reconnectAttempt, RECONNECT_DELAYS_MS.length - 1)
       ];
+  // Re-check long server delays in bounded chunks; never overflow setTimeout.
+  const delay = Math.min(
+    2147483647,
+    Math.max(backoff, retryNotBefore - Date.now())
+  );
   reconnectTimer = window.setTimeout(() => {
     reconnectTimer = undefined;
+    if (Date.now() < retryNotBefore) {
+      scheduleReconnect();
+      return;
+    }
     reconnectAttempt += 1;
     if (typeof navigator !== 'undefined' && navigator.onLine === false) {
       scheduleReconnect();
@@ -263,6 +317,7 @@ const detachNetworkListeners = () => {
 };
 
 const connect = async ({ reconnect = false } = {}) => {
+  if (reconnect && !canReconnect()) return;
   if (
     !configured.value ||
     !extensionEnabled.value ||
@@ -271,6 +326,17 @@ const connect = async ({ reconnect = false } = {}) => {
   ) {
     return;
   }
+  if (!reconnect) {
+    reconnectBlocked = false;
+    disconnectRequested = false;
+  }
+  if (Date.now() < retryNotBefore) {
+    scheduleReconnect();
+    return;
+  }
+  clearReconnectTimer();
+  connectionVersion += 1;
+  const version = connectionVersion;
   connecting.value = true;
   reconnecting.value = reconnect;
   intentionalDisconnect = true;
@@ -285,24 +351,40 @@ const connect = async ({ reconnect = false } = {}) => {
         );
       }),
     ]);
-    errorMessage.value = '';
+    if (version === connectionVersion) errorMessage.value = '';
   } catch (error) {
-    errorMessage.value = error?.message || 'Não foi possível conectar o ramal.';
+    if (version === connectionVersion) {
+      errorMessage.value = sanitizeSipMessage(sipActionError(error), [
+        credential.value?.password,
+      ]);
+      // Cancel the transport/pending REGISTER before permitting another attempt.
+      await client.disconnect().catch(() => {});
+      if (reconnectBlocked) {
+        status.value = 'Registro recusado. Confira a configuração do ramal';
+        statusTone.value = 'error';
+      }
+    }
   } finally {
     if (watchdogTimer) window.clearTimeout(watchdogTimer);
-    intentionalDisconnect = false;
-    connecting.value = false;
-    if (!registered.value) scheduleReconnect();
+    if (version === connectionVersion) {
+      intentionalDisconnect = false;
+      connecting.value = false;
+      if (!registered.value) scheduleReconnect();
+    }
   }
 };
 
 const disconnect = async () => {
+  disconnectRequested = true;
+  connectionVersion += 1;
+  clearIncomingCallNotification();
   clearReconnectTimer();
   reconnecting.value = false;
   intentionalDisconnect = true;
   try {
     return await run(() => client.disconnect());
   } finally {
+    connecting.value = false;
     intentionalDisconnect = false;
   }
 };
@@ -335,17 +417,135 @@ const reject = () => run(() => client.reject());
 const hangup = () => run(() => client.hangup());
 const setMuted = value => run(() => client.setMuted(value));
 const setHold = value => run(() => client.setHold(value));
-const transferCall = (type, transferDestination) =>
-  run(() => client.transfer(type, transferDestination));
+const transferCall = async (type, transferDestination) => {
+  if (transferring.value) return false;
+  const result = await run(async () => {
+    await client.transfer(type, transferDestination);
+    return true;
+  });
+  return result === true;
+};
 
 const pressKey = tone => {
+  if (transferring.value) return undefined;
   if (established.value) return run(() => client.sendDtmf(tone));
   if (!hasCall.value) destination.value += tone;
   return undefined;
 };
 
+const floatingSnapshot = () => ({
+  registered: registered.value,
+  status:
+    registered.value && !sessionActive.value
+      ? 'Disponível / Registrado'
+      : status.value || '—',
+  extension: String(credential.value?.extension || ''),
+  destination: destination.value || '',
+  remote: remoteNumber.value || '—',
+  duration: duration.value || '00:00',
+  incoming: incoming.value,
+  sessionActive: sessionActive.value,
+  established: established.value,
+  muted: muted.value,
+  held: held.value,
+  holdPending: holdPending.value,
+  transferring: transferring.value,
+  errorMessage: errorMessage.value || '',
+});
+
+const publishFloatingState = () => {
+  try {
+    window.jrcSoftphoneDesktop?.sendFloatingState?.(floatingSnapshot());
+  } catch {
+    // The optional Desktop bridge must not change SIP behavior.
+  }
+};
+
+const handleFloatingCommand = async command => {
+  try {
+    switch (command?.action) {
+      case 'setDestination':
+        if (!hasCall.value) destination.value = command.number;
+        break;
+      case 'dial':
+        destination.value = command.number;
+        await call();
+        break;
+      case 'answer':
+        await answer();
+        break;
+      case 'reject':
+        await reject();
+        break;
+      case 'hangup':
+        await hangup();
+        break;
+      case 'toggleMute':
+        await setMuted(!muted.value);
+        break;
+      case 'toggleHold':
+        await setHold(!held.value);
+        break;
+      case 'dtmf':
+        await pressKey(command.tone);
+        break;
+      case 'transfer':
+        await transferCall(command.mode, command.destination);
+        break;
+      case 'shutdown':
+        // The handler is attached after module initialization; shutdown is declared below.
+        // eslint-disable-next-line no-use-before-define
+        await shutdown();
+        try {
+          window.jrcSoftphoneDesktop?.sendFloatingShutdownComplete?.();
+        } catch {
+          // The process can already be closing; SIP shutdown remains complete.
+        }
+        break;
+      default:
+        break;
+    }
+  } finally {
+    publishFloatingState();
+  }
+};
+
+const attachFloatingBridge = () => {
+  if (floatingBridgeScope || !window.jrcSoftphoneDesktop?.onFloatingCommand)
+    return;
+  removeFloatingCommands = window.jrcSoftphoneDesktop.onFloatingCommand(
+    handleFloatingCommand
+  );
+  // The bridge belongs to the singleton SIP session, not the first Vue view
+  // that happens to consume it. Navigation must not stop state delivery.
+  floatingBridgeScope = effectScope(true);
+  floatingBridgeScope.run(() =>
+    watch(
+      [
+        registered,
+        status,
+        credential,
+        destination,
+        remoteNumber,
+        duration,
+        incoming,
+        sessionActive,
+        established,
+        muted,
+        held,
+        holdPending,
+        transferring,
+        errorMessage,
+      ],
+      publishFloatingState,
+      { immediate: true }
+    )
+  );
+};
+
 const initialize = accountId => {
   if (!accountId) return Promise.resolve();
+  attachFloatingBridge();
   attachNetworkListeners();
   if (initializationPromise && activeAccountId === accountId) {
     return initializationPromise;
@@ -361,6 +561,9 @@ const initialize = accountId => {
       await disconnect();
     }
     activeAccountId = accountId;
+    disconnectRequested = false;
+    reconnectBlocked = false;
+    retryNotBefore = 0;
     extensionEnabled.value = readExtensionEnabled(accountId);
     loading.value = true;
     try {
@@ -389,7 +592,10 @@ const initialize = accountId => {
   return initializationPromise;
 };
 
-const shutdown = async () => {
+async function shutdown() {
+  disconnectRequested = true;
+  connectionVersion += 1;
+  clearIncomingCallNotification();
   stopTimer();
   clearReconnectTimer();
   reconnecting.value = false;
@@ -399,51 +605,63 @@ const shutdown = async () => {
   initializationVersion += 1;
   initializationPromise = undefined;
   try {
-    if (client.userAgent) await client.disconnect();
+    await client.disconnect();
   } finally {
+    credential.value = null;
+    connecting.value = false;
     intentionalDisconnect = false;
+    publishFloatingState();
+    floatingBridgeScope?.stop();
+    floatingBridgeScope = undefined;
+    removeFloatingCommands?.();
+    removeFloatingCommands = undefined;
   }
-};
+}
 
-export const useSipWebphone = () => ({
-  credential,
-  loading,
-  connecting,
-  status,
-  transport,
-  registration,
-  sessionState,
-  destination,
-  remoteNumber,
-  direction,
-  duration,
-  callId,
-  incoming,
-  sessionActive,
-  established,
-  muted,
-  held,
-  errorMessage,
-  callEvents,
-  remoteStream,
-  extensionEnabled,
-  reconnecting,
-  configured,
-  registered,
-  hasCall,
-  statusClass,
-  initialize,
-  shutdown,
-  connect,
-  disconnect,
-  turnOnExtension,
-  turnOffExtension,
-  call,
-  answer,
-  reject,
-  hangup,
-  setMuted,
-  setHold,
-  transferCall,
-  pressKey,
-});
+export const useSipWebphone = () => {
+  attachFloatingBridge();
+  return {
+    credential,
+    loading,
+    connecting,
+    status,
+    transport,
+    registration,
+    sessionState,
+    destination,
+    remoteNumber,
+    direction,
+    duration,
+    callId,
+    incoming,
+    sessionActive,
+    established,
+    muted,
+    held,
+    holdPending,
+    transferring,
+    errorMessage,
+    callEvents,
+    remoteStream,
+    extensionEnabled,
+    reconnecting,
+    configured,
+    registered,
+    hasCall,
+    statusClass,
+    initialize,
+    shutdown,
+    connect,
+    disconnect,
+    turnOnExtension,
+    turnOffExtension,
+    call,
+    answer,
+    reject,
+    hangup,
+    setMuted,
+    setHold,
+    transferCall,
+    pressKey,
+  };
+};
