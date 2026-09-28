@@ -8,6 +8,13 @@ export function moduleAccessible(context) {
 }
 export function screenAccessible(context, definition) {
   if (!moduleAccessible(context) || !definition) return false;
+  // Catalogue lookups used by tickets do not authorize administrative deep links.
+  if (
+    definition.path.startsWith('settings/') &&
+    !canRead(context, 'settings')
+  ) {
+    return false;
+  }
   if (definition.key === 'overview') return canRead(context, 'dashboard');
   if (definition.key === 'new') return context.units.some(unit => unit.permissions.create_ticket === true);
   if (['detail', 'edit', 'tickets', 'mine'].includes(definition.key)) return canRead(context, 'tickets');
