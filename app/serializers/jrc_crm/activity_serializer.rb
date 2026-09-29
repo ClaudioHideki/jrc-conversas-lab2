@@ -20,6 +20,7 @@ module JrcCrm
         deal: serialize_deal,
         lead_id: @activity.lead_id,
         lead: serialize_lead,
+        contact: serialize_contact,
         related_type: related_type,
         related_id: @activity.deal_id || @activity.lead_id,
         related_label: related_label,
@@ -32,6 +33,13 @@ module JrcCrm
     end
 
     private
+
+    def serialize_contact
+      contact = @activity.contact || @activity.deal&.contact || @activity.lead&.contact
+      return nil unless contact
+
+      { id: contact.id, name: contact.name, phone_number: contact.phone_number, email: contact.email }
+    end
 
     def serialize_deal
       return nil unless @activity.deal

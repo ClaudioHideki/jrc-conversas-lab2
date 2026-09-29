@@ -17,11 +17,14 @@
 #  commercial_notes             :text
 #  customer_notes               :text
 #  discount_cents               :bigint           default(0), not null
+#  down_payment_cents           :bigint           default(0), not null
 #  financial_approval_status    :string           default("not_required"), not null
 #  first_billing_days           :integer          default(0), not null
 #  follow_up_days               :integer          default(3), not null
 #  follow_up_enabled            :boolean          default(TRUE), not null
+#  has_monthly_fee              :boolean          default(TRUE), not null
 #  implementation_cents         :bigint           default(0), not null
+#  installments_count           :integer          default(1), not null
 #  issuer_company_name          :string           default("Grupo JRC"), not null
 #  issuer_unit                  :string
 #  last_sent_channel            :string
@@ -31,6 +34,7 @@
 #  monthly_cents                :bigint           default(0), not null
 #  next_steps                   :text
 #  notes                        :text
+#  payment_condition            :string           default("cash"), not null
 #  payment_method               :string
 #  proposal_number              :string           not null
 #  public_token_digest          :string           not null
@@ -39,6 +43,9 @@
 #  rejected_at                  :datetime
 #  renewal_type                 :string           default("automatic"), not null
 #  sent_at                      :datetime
+#  shipping_cents               :bigint           default(0), not null
+#  shipping_in_installments     :boolean          default(TRUE), not null
+#  shipping_mode                :string           default("not_applicable"), not null
 #  solution_description         :text
 #  status                       :string           default("draft"), not null
 #  subtotal_cents               :bigint           default(0), not null
@@ -54,6 +61,7 @@
 #  created_at                   :datetime         not null
 #  updated_at                   :datetime         not null
 #  account_id                   :integer          not null
+#  business_unit_id             :bigint
 #  deal_id                      :bigint           not null
 #  issuer_tax_id                :string
 #  last_sent_conversation_id    :integer
@@ -64,6 +72,7 @@
 #
 #  idx_jrc_crm_proposals_account_number                  (account_id,proposal_number) UNIQUE
 #  index_jrc_crm_proposals_on_account_id                 (account_id)
+#  index_jrc_crm_proposals_on_business_unit_id           (business_unit_id)
 #  index_jrc_crm_proposals_on_deal_id                    (deal_id)
 #  index_jrc_crm_proposals_on_last_sent_conversation_id  (last_sent_conversation_id)
 #  index_jrc_crm_proposals_on_last_sent_message_id       (last_sent_message_id)
@@ -73,6 +82,7 @@
 # Foreign Keys
 #
 #  fk_rails_...  (account_id => accounts.id)
+#  fk_rails_...  (business_unit_id => jrc_crm_business_units.id)
 #  fk_rails_...  (deal_id => jrc_crm_deals.id)
 #  fk_rails_...  (owner_id => users.id)
 #
@@ -93,6 +103,7 @@ module JrcCrm
     has_many :items, class_name: 'JrcCrm::ProposalItem', foreign_key: :proposal_id, dependent: :destroy
     has_many :events, class_name: 'JrcCrm::ProposalEvent', foreign_key: :proposal_id, dependent: :destroy
     has_many :proposal_items, class_name: 'JrcCrm::ProposalItem', foreign_key: :proposal_id, dependent: :destroy
+    has_many :sales_orders, class_name: 'JrcCrm::SalesOrder', dependent: :restrict_with_error
 
     validates :title, presence: true
     validates :proposal_number, presence: true, uniqueness: { scope: :account_id }
@@ -104,11 +115,18 @@ module JrcCrm
     validates :first_billing_days, :follow_up_days, numericality: { greater_than_or_equal_to: 0 }
     validates :cancellation_penalty_percent,
               numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 100 }
+    validates :shipping_mode, inclusion: { in: %w[not_applicable included separate] }
+    validates :payment_condition, inclusion: { in: %w[cash down_payment_installments installments] }
+    validates :shipping_cents, :down_payment_cents, numericality: { greater_than_or_equal_to: 0 }
+    validates :installments_count, numericality: { greater_than: 0, less_than_or_equal_to: 120 }
     validates :approval_status, :commercial_approval_status,
               :financial_approval_status, :technical_approval_status,
               inclusion: { in: APPROVAL_VALUES }
 
     enum status: STATUS_VALUES.index_with(&:itself)
+
+    validate :owner_belongs_to_account
+    validate :payment_terms_are_consistent
 
     before_validation :generate_secure_public_token, on: :create
     before_validation :assign_proposal_number, on: :create
@@ -207,32 +225,65 @@ module JrcCrm
       proposal_items.to_a.sum(&:initial_total_cents)
     end
 
+    # Same engine and initial-period semantics used by SalesOrder.
+    def financial_items
+      records = proposal_items.to_a
+      return records.map do |item|
+        { product_id: item.product_id, name: item.name_snapshot, quantity: item.quantity,
+          unit_cents: item.unit_price_cents, discount_cents: item.discount_cents,
+          snapshot: { description: item.description_snapshot, billing_model: item.billing_model,
+                      unit_name: item.unit_name, setup_fee_cents: item.setup_fee_cents,
+                      included_quantity: item.included_quantity, included_unit: item.included_unit,
+                      overage_unit_price_cents: item.overage_unit_price_cents,
+                      activation_days: item.activation_days, validation_period_days: item.validation_period_days } }
+      end if records.any?
+
+      rows = [{ name: 'Valor inicial', quantity: 1, unit_cents: implementation_cents.to_i,
+                snapshot: { billing_model: 'one_time' } }]
+      if has_monthly_fee? && monthly_cents.to_i.positive?
+        rows << { name: 'Primeiro periodo de recorrencia', quantity: 1, unit_cents: monthly_cents.to_i,
+                  snapshot: { billing_model: 'monthly' } }
+      end
+      rows
+    end
+
+    def financial_summary
+      published_anchor = if persisted?
+                           events.where(event_type: 'sent').order(:id).pluck(:metadata).filter_map do |metadata|
+                             metadata.to_h['financial_anchor_on']
+                           end.first
+                         end
+      anchor = published_anchor.present? ? Date.iso8601(published_anchor) : (sent_at || accepted_at || created_at || Time.current).to_date
+      due_date = anchor + first_billing_days.to_i
+      CommercialFinancials.new(
+        attributes: attributes.merge('first_due_date' => due_date.iso8601),
+        items: financial_items
+      ).call
+    end
+
     def recalculate_totals!
       proposal_items.reset
-      items = proposal_items.to_a
-
-      if items.empty?
-        initial_total = implementation_cents.to_i + monthly_cents.to_i
-        update_columns(
-          subtotal_cents: initial_total,
-          total_cents: [initial_total - effective_general_discount_cents, 0].max,
-          updated_at: Time.current
-        )
-        return
-      end
-
-      gross_initial = items.sum(&:gross_initial_total_cents)
-      setup_total = items.sum { |item| item.setup_fee_cents.to_i }
-      recurring_monthly_total = items.sum { |item| item.recurring_total_cents.to_i }
-      net_initial_total = items.sum { |item| item.initial_total_cents.to_i }
-
-      update_columns(
-        subtotal_cents: gross_initial,
-        implementation_cents: setup_total,
-        monthly_cents: recurring_monthly_total,
-        total_cents: [net_initial_total - effective_general_discount_cents, 0].max,
+      result = financial_summary
+      columns = {
+        subtotal_cents: result[:subtotal_cents], total_cents: result[:total_cents],
+        monthly_cents: result[:monthly_cents], shipping_cents: result[:shipping_cents],
+        down_payment_cents: result[:down_payment_cents], installments_count: result[:installments_count],
         updated_at: Time.current
-      )
+      }
+      columns[:implementation_cents] = proposal_items.to_a.sum { |item| item.setup_fee_cents.to_i } if proposal_items.any?
+      update_columns(columns)
+    end
+
+    def contract_total_cents
+      financial_summary[:total_cents]
+    end
+
+    def payable_base_cents
+      financial_summary[:payable_base_cents]
+    end
+
+    def installment_plan_cents
+      financial_summary[:installment_plan_cents]
     end
 
     def reset_approvals!
@@ -247,14 +298,16 @@ module JrcCrm
     end
 
     def record_customer_view!
-      now = Time.current
-      update_columns(
-        viewed_at: viewed_at || now,
-        last_viewed_at: now,
-        viewed_count: viewed_count.to_i + 1,
-        status: sent? ? 'viewed' : status,
-        updated_at: now
-      )
+      with_lock do
+        now = Time.current
+        update_columns(
+          viewed_at: viewed_at || now,
+          last_viewed_at: now,
+          viewed_count: viewed_count.to_i + 1,
+          status: sent? ? 'viewed' : status,
+          updated_at: now
+        )
+      end
     end
 
     def accept_by_customer!(name:, document:, remote_ip:, user_agent:)
@@ -275,6 +328,16 @@ module JrcCrm
     end
 
     private
+
+    def owner_belongs_to_account
+      errors.add(:owner, 'must belong to account') if owner && !account.users.exists?(owner.id)
+    end
+
+    def payment_terms_are_consistent
+      financial_summary
+    rescue CommercialFinancials::InvalidTerms => e
+      errors.add(:base, e.message)
+    end
 
     def assign_proposal_number
       return if proposal_number.present?

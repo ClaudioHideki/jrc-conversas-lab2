@@ -4,9 +4,13 @@ module Api
       module Crm
         class BaseController < Api::V1::Accounts::BaseController
           before_action :ensure_crm_enabled
+          before_action :ensure_crm_access
           around_action :use_account_timezone
 
           rescue_from ActiveRecord::StaleObjectError, with: :handle_stale_object_conflict
+          rescue_from JrcCrm::CommercialFinancials::InvalidTerms do |exception|
+            render json: { errors: [exception.message], code: 'INVALID_COMMERCIAL_TERMS' }, status: :unprocessable_entity
+          end
 
           private
 
@@ -18,6 +22,10 @@ module Api
 
           def crm_admin?
             Current.account_user.administrator?
+          end
+
+          def ensure_crm_access
+            raise Pundit::NotAuthorizedError unless Current.account_user.permissions.include?('jrc_crm')
           end
 
           def crm_scope

@@ -2,7 +2,7 @@
 /* eslint-disable vue/no-bare-strings-in-template, @intlify/vue-i18n/no-raw-text */
 import { computed, onMounted, reactive, ref } from 'vue';
 import { useStore } from 'vuex';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAlert } from 'dashboard/composables';
 import { dealsAPI, productsAPI, proposalsAPI } from 'dashboard/api/crm';
@@ -14,6 +14,7 @@ import { formatCrmDate } from '../../utils/dateTime';
 
 const store = useStore();
 const route = useRoute();
+const router = useRouter();
 const { t } = useI18n();
 const pdfLoading = ref(false);
 const savedForm = ref('');
@@ -26,6 +27,7 @@ const error = computed(() => store.getters['jrcCrm/proposals/error']);
 const isAdmin = computed(
   () => store.getters.getCurrentRole === 'administrator'
 );
+const agents = computed(() => store.getters['agents/getAgents'] || []);
 const deals = ref([]);
 const products = ref([]);
 const dealId = ref('');
@@ -44,6 +46,14 @@ const proposalForm = reactive({
   solution_description: '',
   implementation: '',
   monthly: '',
+  has_monthly_fee: true,
+  shipping: '',
+  shipping_mode: 'not_applicable',
+  shipping_in_installments: true,
+  owner_id: '',
+  payment_condition: 'cash',
+  down_payment: '',
+  installments_count: 1,
   valid_until: '',
   term_months: 12,
   commercial_notes: '',
@@ -66,6 +76,17 @@ const formSnapshot = () =>
 const hasUnsavedChanges = computed(
   () => Boolean(selectedProposal.value) && savedForm.value !== formSnapshot()
 );
+const withoutMonthlyFee = computed({
+  get: () => !proposalForm.has_monthly_fee,
+  set: value => { proposalForm.has_monthly_fee = !value; },
+});
+const installmentPreview = computed(() => {
+  const values = selectedProposal.value?.installment_plan_cents || [];
+  if (!values.length) return '';
+  const unique = [...new Set(values)];
+  if (unique.length === 1) return `${values.length} x R$ ${moneyInput(unique[0]).replace('.', ',')}`;
+  return values.map(value => `R$ ${moneyInput(value).replace('.', ',')}`).join(' + ');
+});
 const proposalStats = computed(() => [
   {
     label: 'Propostas',
@@ -172,6 +193,14 @@ const hydrateProposalForm = data => {
   proposalForm.solution_description = data.solution_description || '';
   proposalForm.implementation = moneyInput(data.implementation_cents);
   proposalForm.monthly = moneyInput(data.monthly_cents);
+  proposalForm.has_monthly_fee = data.has_monthly_fee ?? true;
+  proposalForm.shipping = moneyInput(data.shipping_cents);
+  proposalForm.shipping_mode = data.shipping_mode || 'not_applicable';
+  proposalForm.shipping_in_installments = data.shipping_in_installments ?? true;
+  proposalForm.owner_id = data.owner?.id || '';
+  proposalForm.payment_condition = data.payment_condition || 'cash';
+  proposalForm.down_payment = moneyInput(data.down_payment_cents);
+  proposalForm.installments_count = data.installments_count || 1;
   proposalForm.valid_until = data.valid_until || '';
   proposalForm.term_months = data.term_months || 12;
   proposalForm.commercial_notes = data.commercial_notes || '';
@@ -255,7 +284,15 @@ const persistCommercialData = async (showSuccess = true) => {
         title: proposalForm.title,
         solution_description: proposalForm.solution_description,
         implementation_cents: centsFromInput(proposalForm.implementation),
-        monthly_cents: centsFromInput(proposalForm.monthly),
+        monthly_cents: proposalForm.has_monthly_fee ? centsFromInput(proposalForm.monthly) : 0,
+        has_monthly_fee: proposalForm.has_monthly_fee,
+        shipping_cents: centsFromInput(proposalForm.shipping),
+        shipping_mode: proposalForm.shipping_mode,
+        shipping_in_installments: proposalForm.shipping_in_installments,
+        owner_id: proposalForm.owner_id || undefined,
+        payment_condition: proposalForm.payment_condition,
+        down_payment_cents: centsFromInput(proposalForm.down_payment),
+        installments_count: Number(proposalForm.installments_count || 1),
         valid_until: proposalForm.valid_until || null,
         term_months: Number(proposalForm.term_months || 12),
         commercial_notes: proposalForm.commercial_notes,
@@ -542,13 +579,31 @@ const sendProposal = async channel => {
   }
 };
 
+const convertProposalToOrder = async () => {
+  if (!selectedProposal.value || actionWorking.value) return;
+  if (selectedProposal.value.status !== 'accepted') {
+    useAlert('Somente propostas aceitas podem ser convertidas em pedido.');
+    return;
+  }
+  actionWorking.value = 'order';
+  try {
+    const { data } = await proposalsAPI.convertToOrder(selectedProposal.value.id);
+    useAlert(`Pedido ${data.order_number || data.id} criado com sucesso.`);
+    router.push({ name: 'crm_orders', params: { accountId: route.params.accountId }, query: { orderId: data.id } });
+  } catch (requestError) {
+    useAlert(requestError.response?.data?.errors?.join(', ') || 'Não foi possível converter a proposta em pedido.');
+  } finally {
+    actionWorking.value = null;
+  }
+};
+
 const sendFromRow = async (proposal, channel) => {
   await openProposal(proposal);
   await sendProposal(channel);
 };
 
 onMounted(async () => {
-  await refresh();
+  await Promise.all([refresh(), store.dispatch('agents/get')]);
   const { proposalId } = route.query;
   if (typeof proposalId === 'string' && /^\d+$/.test(proposalId)) {
     await openProposal({ id: proposalId });
@@ -861,6 +916,15 @@ onMounted(async () => {
                 {{ sendingChannel === 'email' ? 'Enviando…' : 'Enviar e-mail' }}
               </button>
               <button
+                v-if="selectedProposal.status === 'accepted'"
+                type="button"
+                class="rounded-xl bg-emerald-700 px-3 py-2 text-sm font-semibold text-white shadow-sm disabled:opacity-50"
+                :disabled="Boolean(actionWorking)"
+                @click="convertProposalToOrder"
+              >
+                <i class="i-lucide-shopping-cart mr-1" /> Converter em pedido
+              </button>
+              <button
                 type="button"
                 class="flex size-9 items-center justify-center rounded-xl border border-n-weak bg-n-solid-2 text-n-slate-10 shadow-sm"
                 aria-label="Fechar"
@@ -1014,9 +1078,18 @@ onMounted(async () => {
                   Identificação e conteúdo
                 </h5>
                 <div class="grid gap-4 md:grid-cols-2">
-                  <label
-                    class="text-sm font-medium text-n-slate-11 md:col-span-2"
-                  >
+                  <label v-if="isAdmin" class="text-sm font-medium text-n-slate-11">
+                    Responsável da proposta
+                    <select v-model="proposalForm.owner_id" class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 px-3 py-2">
+                      <option value="">Responsável atual</option>
+                      <option v-for="agent in agents" :key="agent.id" :value="agent.id">{{ agent.name || agent.email }}</option>
+                    </select>
+                  </label>
+                  <div class="rounded-xl border border-n-weak bg-n-alpha-2 p-3 text-sm">
+                    <span class="block text-xs font-semibold uppercase text-n-slate-9">Responsável salvo</span>
+                    <strong class="mt-1 block text-n-slate-12">{{ selectedProposal.owner?.name || 'Não definido' }}</strong>
+                  </div>
+                  <label class="text-sm font-medium text-n-slate-11 md:col-span-2">
                     Título
                     <input
                       v-model="proposalForm.title"
@@ -1025,9 +1098,7 @@ onMounted(async () => {
                       class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"
                     />
                   </label>
-                  <label
-                    class="text-sm font-medium text-n-slate-11 md:col-span-2"
-                  >
+                  <label class="text-sm font-medium text-n-slate-11 md:col-span-2">
                     Descrição da solução
                     <textarea
                       v-model="proposalForm.solution_description"
@@ -1036,7 +1107,11 @@ onMounted(async () => {
                       class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"
                     />
                   </label>
-                  <label class="text-sm font-medium text-n-slate-11">
+                  <label class="flex items-center justify-between gap-3 rounded-xl border border-n-weak bg-n-alpha-2 p-3 text-sm font-medium text-n-slate-11 md:col-span-2">
+                    <span><strong class="block text-n-slate-12">Sem mensalidade</strong><span class="text-xs text-n-slate-9">Quando marcado, a proposta não possui cobrança recorrente.</span></span>
+                    <input v-model="withoutMonthlyFee" type="checkbox" class="size-5 accent-emerald-600" />
+                  </label>
+                  <label v-if="proposalForm.has_monthly_fee" class="text-sm font-medium text-n-slate-11">
                     Mensalidade (R$)
                     <input
                       v-model="proposalForm.monthly"
@@ -1046,13 +1121,38 @@ onMounted(async () => {
                       :readonly="selectedProposal.items_count > 0"
                       class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2 read-only:bg-n-alpha-2"
                     />
-                    <span
-                      v-if="selectedProposal.items_count > 0"
-                      class="mt-1 block text-xs text-n-slate-9"
-                    >
+                    <span v-if="selectedProposal.items_count > 0" class="mt-1 block text-xs text-n-slate-9">
                       Calculada automaticamente pelos itens recorrentes.
                     </span>
                   </label>
+                  <label v-if="proposalForm.shipping_mode === 'separate'" class="text-sm font-medium text-n-slate-11">
+                    Frete (R$)
+                    <input v-model="proposalForm.shipping" type="number" min="0" step="0.01" class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2" />
+                  </label>
+                  <label class="text-sm font-medium text-n-slate-11">
+                    Condição do frete
+                    <select v-model="proposalForm.shipping_mode" class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"><option value="not_applicable">Sem frete</option><option value="included">Incluso</option><option value="separate">Cobrado à parte</option></select>
+                  </label>
+                  <label v-if="proposalForm.shipping_mode === 'separate'" class="flex items-center gap-2 rounded-xl border border-n-weak p-3 text-sm font-medium text-n-slate-11 md:col-span-2">
+                    <input v-model="proposalForm.shipping_in_installments" type="checkbox" class="size-4 accent-n-brand" />
+                    Incluir o frete no valor parcelável
+                  </label>
+                  <label class="text-sm font-medium text-n-slate-11">
+                    Condição de pagamento
+                    <select v-model="proposalForm.payment_condition" class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"><option value="cash">À vista</option><option value="down_payment_installments">Entrada + parcelas</option><option value="installments">Parcelado sem entrada</option></select>
+                  </label>
+                  <label v-if="proposalForm.payment_condition === 'down_payment_installments'" class="text-sm font-medium text-n-slate-11">
+                    Entrada (R$)
+                    <input v-model="proposalForm.down_payment" type="number" min="0" step="0.01" class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2" />
+                  </label>
+                  <label v-if="proposalForm.payment_condition !== 'cash'" class="text-sm font-medium text-n-slate-11">
+                    Quantidade de parcelas
+                    <input v-model.number="proposalForm.installments_count" type="number" min="1" max="60" class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2" />
+                  </label>
+                  <div v-if="proposalForm.payment_condition !== 'cash'" class="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm">
+                    <span class="block text-xs font-semibold uppercase text-emerald-700">Parcelamento calculado</span>
+                    <strong class="mt-1 block text-emerald-800">{{ installmentPreview || 'Salve para calcular as parcelas' }}</strong>
+                  </div>
                   <label class="text-sm font-medium text-n-slate-11">
                     Implantação (R$)
                     <input

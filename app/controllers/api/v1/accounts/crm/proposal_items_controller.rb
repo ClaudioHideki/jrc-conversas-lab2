@@ -7,6 +7,8 @@ module Api
           before_action :ensure_unlocked_proposal!
           before_action :set_item, only: [:update, :destroy]
 
+          around_action :lock_proposal_items
+
           def create
             item = @proposal.proposal_items.new(item_params)
             hydrate_product_snapshot(item)
@@ -38,6 +40,16 @@ module Api
           end
 
           private
+
+          def lock_proposal_items
+            @proposal.with_lock do
+              if @proposal.locked_for_editing?
+                render json: { errors: ['A proposta aceita esta bloqueada. Crie uma nova versao.'] }, status: :unprocessable_entity
+              else
+                yield
+              end
+            end
+          end
 
           def set_proposal
             @proposal = visible_to_current_user(crm_scope.jrc_crm_proposals).find(params[:proposal_id])

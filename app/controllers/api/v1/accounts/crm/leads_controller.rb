@@ -3,7 +3,7 @@ module Api
     module Accounts
       module Crm
         class LeadsController < BaseController
-          before_action :set_lead, only: [:show, :update, :convert, :lose]
+          before_action :set_lead, only: [:show, :update, :destroy, :convert, :lose]
 
           def index
             leads = visible_to_current_user(crm_scope.jrc_crm_leads)
@@ -46,14 +46,21 @@ module Api
           end
 
           def create
-            lead = crm_scope.jrc_crm_leads.new(lead_params)
-            lead.owner ||= Current.user
-            
-            if lead.save
-              render json: JrcCrm::LeadSerializer.new(lead).as_json, status: :created
-            else
-              render json: { errors: lead.errors.full_messages }, status: :unprocessable_entity
+            authorize crm_scope.jrc_crm_leads.new, :create?
+            attributes = lead_params.to_h
+            attributes['status'] = normalized_write_status(attributes['status']) if attributes['status'].present?
+            result = JrcCrm::LeadCreationService.new(account: crm_scope, actor: Current.user, attributes: attributes).call do |contact|
+              authorize contact, contact.persisted? ? :show? : :create?
             end
+            lead = result[:lead]
+            unless visible_to_current_user(crm_scope.jrc_crm_leads).exists?(lead.id)
+              return render json: { errors: ['Este contato já possui Lead. Solicite acesso ao administrador.'] }, status: :conflict
+            end
+
+            render json: JrcCrm::LeadSerializer.new(lead).as_json, status: result[:created] ? :created : :ok
+          rescue ActiveRecord::RecordInvalid => e
+            Rails.logger.info("CRM lead creation rejected account=#{crm_scope.id} model=#{e.record.class.name} errors=#{e.record.errors.attribute_names}")
+            render json: { errors: e.record.errors.full_messages }, status: :unprocessable_entity
           end
 
           def update
@@ -66,6 +73,26 @@ module Api
             else
               render json: { errors: @lead.errors.full_messages }, status: :unprocessable_entity
             end
+          end
+
+          def destroy
+            authorize @lead, :destroy?
+
+            @lead.with_lock do
+              if JrcCrm::Deal.where(lead_id: @lead.id).exists?
+                render json: { error: 'O lead possui negocio vinculado e nao pode ser excluido.' }, status: :conflict
+                next
+              end
+              # Preserve activity/history rows; only the nullable lead link is cleared.
+              JrcCrm::AuditEvent.create!(account_id: crm_scope.id, actor_type: 'User', actor_id: Current.user.id,
+                event_type: 'lead_deleted', resource_type: 'JrcCrm::Lead', resource_id: @lead.id,
+                from_value: @lead.attributes.slice('name', 'contact_id', 'owner_id', 'status'), to_value: {}, metadata: {})
+              @lead.activities.where(account_id: crm_scope.id).update_all(lead_id: nil)
+              @lead.follow_ups.where(account_id: crm_scope.id).update_all(lead_id: nil)
+              @lead.destroy!
+            end
+            return if performed?
+            head :no_content
           end
 
           def convert
@@ -118,6 +145,7 @@ module Api
           def lead_params
             allowed = [:name, :company_name, :email, :phone, :source, :status, :contact_id, :conversation_id, :team_id,
                        :temperature, :notes]
+            allowed << :identifier if action_name == 'create'
             allowed << :owner_id if crm_admin?
             params.require(:lead).permit(*allowed)
           end
@@ -125,6 +153,7 @@ module Api
           def conversion_params
             allowed = [:deal_title, :company_name, :product_id, :product_name, :value_cents, :pipeline_id,
                        :stage_id, :probability, :expected_close_at, :team_id, :notes]
+            allowed << :identifier if action_name == 'create'
             allowed << :owner_id if crm_admin?
             attributes = params.permit(*allowed)
             attributes[:expected_close_at] = parse_crm_time(attributes[:expected_close_at]) if attributes[:expected_close_at].present?

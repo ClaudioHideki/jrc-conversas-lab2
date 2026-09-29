@@ -16,6 +16,10 @@ module JrcCrm
       show?
     end
 
+    def destroy?
+      update?
+    end
+
     def convert?
       same_account? && (admin? || owns_record? || @record.owner_id.nil?)
     end

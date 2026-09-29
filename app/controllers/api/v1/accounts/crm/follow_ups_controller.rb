@@ -14,7 +14,8 @@ module Api
           end
 
           def show
-            render json: @follow_up
+            responsible = crm_scope.users.find_by(id: @follow_up.user_id)
+            render json: @follow_up.as_json.merge(user: responsible&.as_json(only: %i[id name]))
           end
 
           def create

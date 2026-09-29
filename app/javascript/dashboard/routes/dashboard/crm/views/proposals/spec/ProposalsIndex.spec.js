@@ -1,12 +1,12 @@
 import { shallowMount, flushPromises } from '@vue/test-utils';
 import { createStore } from 'vuex';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useAlert } from 'dashboard/composables';
 import { proposalsAPI, dealsAPI, productsAPI } from 'dashboard/api/crm';
 import messages from 'dashboard/i18n/locale/en/crm.json';
 import ProposalsIndex from '../ProposalsIndex.vue';
 
-vi.mock('vue-router', () => ({ useRoute: vi.fn() }));
+vi.mock('vue-router', () => ({ useRoute: vi.fn(), useRouter: vi.fn() }));
 vi.mock('dashboard/composables', () => ({ useAlert: vi.fn() }));
 vi.mock('dashboard/api/crm', () => ({
   proposalsAPI: {
@@ -15,6 +15,7 @@ vi.mock('dashboard/api/crm', () => ({
     update: vi.fn(),
     createItem: vi.fn(),
     updateItem: vi.fn(),
+    convertToOrder: vi.fn(),
   },
   dealsAPI: { list: vi.fn() },
   productsAPI: { list: vi.fn() },
@@ -24,7 +25,8 @@ let wrapper;
 let proposal;
 let click;
 const mountPage = async (query = { proposalId: '1' }) => {
-  useRoute.mockReturnValue({ query });
+  useRoute.mockReturnValue({ query, params: { accountId: '1' } });
+  useRouter.mockReturnValue({ push: vi.fn() });
   const store = createStore({
     getters: {
       'jrcCrm/proposals/allProposals': () => [proposal],
@@ -241,4 +243,15 @@ it('requires adding or clearing a draft product before downloading', async () =>
   await pdfButton().trigger('click');
   expect(proposalsAPI.pdf).not.toHaveBeenCalled();
   expect(useAlert).toHaveBeenCalledWith(messages.CRM.PROPOSAL_PDF.UNSAVED);
+});
+
+it('converts an accepted proposal using the server endpoint and opens the order', async () => {
+  proposal.status = 'accepted'; proposal.locked = true;
+  proposalsAPI.convertToOrder.mockResolvedValue({ data: { id: 9, order_number: 'PED-JRC' } });
+  await mountPage();
+  await wrapper.findAll('button').find(button => button.text().includes('Converter em pedido')).trigger('click');
+  await flushPromises();
+  expect(proposalsAPI.convertToOrder).toHaveBeenCalledWith(1);
+  expect(useRouter().push).toHaveBeenCalledWith({ name: 'crm_orders', params: { accountId: '1' }, query: { orderId: 9 } });
+  expect(proposalsAPI.update).not.toHaveBeenCalled();
 });

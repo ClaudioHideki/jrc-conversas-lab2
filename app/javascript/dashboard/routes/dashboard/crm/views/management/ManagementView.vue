@@ -26,6 +26,22 @@ const filteredRows = computed(() =>
       .includes(search.value.trim().toLocaleLowerCase())
   )
 );
+const rankedRows = computed(() => [...filteredRows.value].sort(
+  (a, b) => Number(b.metrics.won_revenue_cents || 0) - Number(a.metrics.won_revenue_cents || 0)
+));
+const totals = computed(() => rows.value.reduce((total, row) => {
+  for (const key of Object.keys(total)) total[key] += Number(row.metrics[key] || 0);
+  return total;
+}, { open_deals_count: 0, closed_won_count: 0, closed_lost_count: 0,
+  pipeline_value_cents: 0, won_revenue_cents: 0, overdue_activities_count: 0, stalled_deals_count: 0 }));
+const summary = computed(() => [
+  { label: t('CRM.TEAM_METRICS.PIPELINE'), value: money(totals.value.pipeline_value_cents) },
+  { label: t('CRM.TEAM_METRICS.REVENUE'), value: money(totals.value.won_revenue_cents) },
+  { label: t('CRM.TEAM_METRICS.CONVERSION'), value: `${(100 * totals.value.closed_won_count / Math.max(1, totals.value.closed_won_count + totals.value.closed_lost_count)).toFixed(1)}%` },
+  { label: t('CRM.TEAM_METRICS.TICKET'), value: money(totals.value.won_revenue_cents / Math.max(1, totals.value.closed_won_count)) },
+  { label: t('CRM.TEAM_METRICS.OVERDUE'), value: totals.value.overdue_activities_count },
+  { label: t('CRM.TEAM_METRICS.STALLED'), value: totals.value.stalled_deals_count },
+]);
 const money = value =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
     Number(value || 0) / 100
@@ -98,6 +114,12 @@ watch(
 
     <p v-if="!isAdmin" role="status">{{ t('CRM.TEAM_METRICS.RESTRICTED') }}</p>
     <template v-else>
+      <section v-if="!loading && !error && rows.length" class="mb-4 grid gap-3 sm:grid-cols-3 xl:grid-cols-6">
+        <article v-for="metric in summary" :key="metric.label" class="rounded-xl border border-n-weak bg-n-solid-2 p-3">
+          <p class="text-xs text-n-slate-11">{{ metric.label }}</p>
+          <strong class="mt-2 block text-lg text-n-slate-12">{{ metric.value }}</strong>
+        </article>
+      </section>
       <input
         v-model="search"
         type="search"
@@ -136,12 +158,15 @@ watch(
               >
                 Taxa de Conversão
               </th>
+              <th class="px-6 py-3 text-right text-xs text-n-slate-10">{{ t('CRM.TEAM_METRICS.PIPELINE') }}</th>
+              <th class="px-6 py-3 text-right text-xs text-n-slate-10">{{ t('CRM.TEAM_METRICS.OVERDUE') }}</th>
+              <th class="px-6 py-3 text-right text-xs text-n-slate-10">{{ t('CRM.TEAM_METRICS.STALLED') }}</th>
             </tr>
           </thead>
           <tbody class="bg-n-solid-2 divide-y divide-n-weak">
             <tr v-if="loading || error || !filteredRows.length">
               <td
-                colspan="5"
+                colspan="8"
                 role="status"
                 class="px-6 py-12 text-center text-n-slate-10"
               >
@@ -153,8 +178,8 @@ watch(
               </td>
             </tr>
             <template v-else>
-              <tr v-for="row in filteredRows" :key="row.user.id">
-                <td class="px-6 py-3">{{ row.user.name }}</td>
+              <tr v-for="(row, position) in rankedRows" :key="row.user.id">
+                <td class="px-6 py-3">{{ position + 1 }}. {{ row.user.name }}</td>
                 <td class="px-6 py-3 text-right">
                   {{ row.metrics.open_deals_count }}
                 </td>
@@ -167,6 +192,9 @@ watch(
                 <td class="px-6 py-3 text-right">
                   {{ Number(row.metrics.conversion_rate || 0).toFixed(1) }}%
                 </td>
+                <td class="px-6 py-3 text-right">{{ money(row.metrics.pipeline_value_cents) }}</td>
+                <td class="px-6 py-3 text-right">{{ row.metrics.overdue_activities_count || 0 }}</td>
+                <td class="px-6 py-3 text-right">{{ row.metrics.stalled_deals_count || 0 }}</td>
               </tr>
             </template>
           </tbody>

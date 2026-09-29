@@ -30,4 +30,7 @@ proposalsAPI.updateItem = (proposalId, itemId, data) =>
 proposalsAPI.deleteItem = (proposalId, itemId) =>
   axios.delete(`${proposalsAPI.url}/${proposalId}/items/${itemId}`);
 
+proposalsAPI.convertToOrder = id =>
+  axios.post(`${proposalsAPI.url}/${id}/convert_to_order`);
+
 export default proposalsAPI;

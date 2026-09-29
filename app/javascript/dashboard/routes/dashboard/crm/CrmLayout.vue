@@ -1,7 +1,10 @@
 <script setup>
+import { computed } from 'vue';
+import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
+const store = useStore();
 /* eslint-disable vue/no-bare-strings-in-template, @intlify/vue-i18n/no-raw-text, @intlify/vue-i18n/no-dynamic-keys */
 const navigation = [
   { name: 'crm_dashboard', label: 'Visão Geral', icon: 'i-lucide-layout-dashboard', tone: 'blue' },
@@ -14,7 +17,18 @@ const navigation = [
   { name: 'crm_calendar', label: 'Agenda', icon: 'i-lucide-calendar-days', tone: 'violet' },
   { name: 'crm_products', label: 'Produtos', icon: 'i-lucide-package', tone: 'green' },
   { name: 'crm_proposals', label: 'Propostas', icon: 'i-lucide-file-signature', tone: 'rose' },
+  { name: 'crm_orders', label: 'Pedidos', icon: 'i-lucide-shopping-cart', tone: 'green' },
+  { name: 'crm_contracts', label: 'Contratos', icon: 'i-lucide-file-check-2', tone: 'blue' },
+  { name: 'crm_goals', label: 'Metas', icon: 'i-lucide-target', tone: 'cyan' },
+  { name: 'crm_commissions', label: 'Comissões', icon: 'i-lucide-badge-dollar-sign', tone: 'orange' },
+  { name: 'crm_backoffice', label: 'Backoffice', icon: 'i-lucide-settings-2', tone: 'green' },
+  { name: 'crm_management', label: 'Gestão de Equipe', icon: 'i-lucide-users-round', tone: 'violet' },
+  { name: 'crm_settings', label: 'Configurações', icon: 'i-lucide-settings', tone: 'blue' },
 ];
+
+const visibleNavigation = computed(() => navigation.filter(item =>
+  !['crm_management', 'crm_settings'].includes(item.name) || store.getters.getCurrentRole === 'administrator'
+));
 
 const activeTabClass = item => {
   if (route.name !== item.name) return '';
@@ -50,14 +64,14 @@ const activeTabClass = item => {
         </RouterLink>
       </div>
       <nav class="relative flex min-w-0 gap-2 overflow-x-auto pb-3 [scrollbar-width:none]">
-        <RouterLink v-for="item in navigation" :key="item.name" :to="{ name: item.name }" class="jrc-crm-tab flex items-center gap-2 whitespace-nowrap rounded-xl border border-[#e8ecf2] bg-white px-3 py-2.5 text-sm font-medium text-[#4a5568] shadow-[0_2px_8px_rgba(16,24,40,.04)] transition hover:-translate-y-0.5 hover:border-[#cfd7e4] hover:text-[#172033]" :class="activeTabClass(item)">
+        <RouterLink v-for="item in visibleNavigation" :key="item.name" :to="{ name: item.name }" class="jrc-crm-tab flex items-center gap-2 whitespace-nowrap rounded-xl border border-[#e8ecf2] bg-white px-3 py-2.5 text-sm font-medium text-[#4a5568] shadow-[0_2px_8px_rgba(16,24,40,.04)] transition hover:-translate-y-0.5 hover:border-[#cfd7e4] hover:text-[#172033]" :class="activeTabClass(item)">
           <span class="grid size-6 place-content-center rounded-lg bg-black/[.035] text-current"><i class="size-4" :class="item.icon" /></span>
           {{ item.label }}
         </RouterLink>
       </nav>
     </header>
     <main class="min-h-0 flex-1 overflow-auto">
-      <RouterView />
+      <RouterView :key="route.params.accountId" />
     </main>
   </div>
 </template>

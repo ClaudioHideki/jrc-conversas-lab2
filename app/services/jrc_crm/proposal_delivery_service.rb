@@ -13,11 +13,20 @@ module JrcCrm
     end
 
     def call
+      @proposal.with_lock { deliver_under_lock }
+    end
+
+    private
+
+    def deliver_under_lock
       raise ArgumentError, 'Canal de envio inválido' unless CHANNELS.include?(@channel)
 
       conversation = resolve_conversation
       raise StandardError, channel_error_message unless conversation
 
+      # Preserve the schedule actually printed, even after subsequent resends.
+      # Use existing event metadata rather than a parallel proposal table.
+      anchor_on = Date.iso8601(@proposal.financial_summary[:first_due_date]) - @proposal.first_billing_days.to_i
       pdf_bytes = JrcCrm::ProposalPdfService.new(@proposal).call
       message = build_message(conversation, pdf_bytes)
 
@@ -35,6 +44,7 @@ module JrcCrm
         user_id: @actor&.id,
         description: "Proposta enviada por #{channel_label(conversation)} na conversa ##{conversation.display_id}",
         metadata: {
+          financial_anchor_on: anchor_on.iso8601,
           channel: channel_key(conversation),
           conversation_id: conversation.id,
           message_id: message.id,

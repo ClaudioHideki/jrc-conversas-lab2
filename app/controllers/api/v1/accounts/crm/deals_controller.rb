@@ -97,9 +97,14 @@ module Api
             attributes = deal_params
             conversation_id = attributes.delete(:conversation_id)
 
-            if @deal.update(attributes)
-              link_conversation!(@deal, conversation_id) if conversation_id.present?
+            # Serialize source edits with Linker, which locks this deal before linking.
+            updated = @deal.with_lock do
+              saved = @deal.update(attributes)
+              link_conversation!(@deal, conversation_id) if saved && conversation_id.present?
+              saved
+            end
 
+            if updated
               render json: JrcCrm::DealSerializer.new(@deal).as_json
             else
               render json: {

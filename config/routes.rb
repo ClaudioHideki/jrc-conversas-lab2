@@ -384,7 +384,7 @@ Rails.application.routes.draw do
           namespace :crm do
             resource :dashboard, only: :show, controller: :dashboards
             resources :reports, only: :index
-            resources :leads, only: [:index, :show, :create, :update] do
+            resources :leads, only: [:index, :show, :create, :update, :destroy] do
               get :for_contact, on: :collection
               post :from_contact, on: :collection
               post :from_conversation, on: :collection
@@ -426,8 +426,58 @@ Rails.application.routes.draw do
                 post :accept
                 post :reject
                 post :cancel
+                post :convert_to_order
               end
             end
+            resources :sales_orders, only: [:index, :show, :create, :update] do
+              post :preview, on: :collection
+              member do
+                get :pdf
+                post :attachments, action: :upload_attachments
+                get 'attachments/:attachment_id', action: :download_attachment, as: :attachment
+              end
+            end
+            resources :contracts, only: [:index, :show, :create, :update] do
+              member do
+                get :pdf
+                get :history
+                post :documents, action: :upload_documents
+                get 'documents/:attachment_id', action: :download_document, as: :document
+                get :signed_document, action: :download_signed_document
+                post :prepare_signature
+                post :send_for_signature
+                post :register_manual_signature
+                post :renew
+                post :addendum
+              end
+            end
+            resources :commissions, only: [:index, :create, :update] do
+              get :summary, on: :collection
+              get :history, on: :collection
+            end
+            resources :commission_programs, only: [:index, :show, :create, :update] do
+              post :simulate, on: :collection
+            end
+            resources :backoffice_requests, only: [:index, :show, :create, :update] do
+              get :summary, on: :collection
+              member do
+                post :advance
+                post :documents, action: :upload_documents
+                get 'documents/:attachment_id', action: :download_document, as: :document
+                post :document_status
+                post :issues, action: :add_issue
+                post :resolve_issue
+                post :confirm_provisioning
+                post :reopen
+              end
+            end
+            resources :invoices, only: [:index, :show, :create, :update]
+            resources :payments, only: [:index, :create]
+            resources :contract_templates, only: [:index, :show, :create, :update, :destroy]
+            resources :goals, only: [:index, :create, :update] do
+              get :dashboard, on: :collection
+            end
+            resources :customers, only: [:show]
             resources :lost_reasons
             resource :wallet, only: :show
             resources :timeline, only: :index

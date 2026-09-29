@@ -5,9 +5,11 @@ module Api
         class ProposalsController < BaseController
           before_action :set_proposal, only: [
             :show, :update, :destroy, :send_proposal, :pdf, :accept, :reject,
-            :cancel, :duplicate, :request_approval, :approve
+            :cancel, :duplicate, :request_approval, :approve, :convert_to_order
           ]
           before_action :ensure_unlocked_proposal!, only: [:update, :destroy, :request_approval, :approve, :accept, :reject, :cancel]
+
+          around_action :lock_proposal_mutation, only: %i[update destroy request_approval approve accept reject cancel send_proposal duplicate]
 
           def index
             proposals = visible_to_current_user(crm_scope.jrc_crm_proposals)
@@ -34,6 +36,8 @@ module Api
 
           def update
             attributes = proposal_params.to_h.symbolize_keys
+            validate_proposal_owner!(attributes[:owner_id]) if attributes[:owner_id].present?
+            normalize_payment_attributes!(attributes)
             if @proposal.proposal_items.exists?
               attributes.except!(:implementation_cents, :monthly_cents, :subtotal_cents, :total_cents)
             end
@@ -90,12 +94,14 @@ module Api
                 last_sent_conversation_id: nil,
                 title: "#{@proposal.title} - Versão #{@proposal.version_number.to_i + 1}"
               )
+              duplicate.down_payment_cents = 0 # Items are copied before restoring the accepted entry.
               duplicate.save!
 
               @proposal.proposal_items.find_each do |item|
                 attributes = item.attributes.except('id', 'proposal_id', 'created_at', 'updated_at')
                 duplicate.proposal_items.create!(attributes)
               end
+              duplicate.update!(down_payment_cents: @proposal.down_payment_cents)
               duplicate.recalculate_totals!
 
               duplicate.events.create!(
@@ -251,7 +257,24 @@ module Api
             render json: { message: 'Proposta cancelada', proposal: serialize(@proposal.reload) }
           end
 
+          def convert_to_order
+            order = JrcCrm::ProposalToOrderService.new(proposal: @proposal, actor: Current.user).call
+            render json: { id: order.id, order_number: order.order_number, status: order.status, total_cents: order.total_cents }, status: :created
+          rescue StandardError => e
+            render json: { errors: [e.message] }, status: :unprocessable_entity
+          end
+
           private
+
+          def lock_proposal_mutation
+            @proposal.with_lock do
+              if !%w[duplicate send_proposal].include?(action_name) && @proposal.locked_for_editing?
+                render json: { errors: ['A proposta aceita esta bloqueada. Crie uma nova versao.'] }, status: :unprocessable_entity
+              else
+                yield
+              end
+            end
+          end
 
           def set_proposal
             @proposal = visible_to_current_user(crm_scope.jrc_crm_proposals).includes(
@@ -330,6 +353,25 @@ module Api
             end
           end
 
+          def validate_proposal_owner!(owner_id)
+            user = crm_scope.users.find_by(id: owner_id)
+            raise Pundit::NotAuthorizedError unless user
+            raise Pundit::NotAuthorizedError unless crm_admin? || user.id == @proposal.owner_id
+          end
+
+          def normalize_payment_attributes!(attributes)
+            condition = attributes[:payment_condition].presence || @proposal.payment_condition
+            case condition
+            when 'cash'
+              attributes[:down_payment_cents] = 0
+              attributes[:installments_count] = 1
+            when 'installments'
+              attributes[:down_payment_cents] = 0
+            end
+            attributes[:monthly_cents] = 0 if attributes.key?(:has_monthly_fee) && !ActiveModel::Type::Boolean.new.cast(attributes[:has_monthly_fee])
+            attributes[:shipping_cents] = 0 if attributes[:shipping_mode].present? && attributes[:shipping_mode] != 'separate'
+          end
+
           def proposal_params
             params.require(:proposal).permit(
               :title, :discount_cents,
@@ -339,7 +381,8 @@ module Api
               :issuer_tax_id, :issuer_unit, :payment_method, :billing_day,
               :first_billing_days, :taxes_included, :annual_adjustment_index,
               :renewal_type, :cancellation_penalty_percent, :follow_up_enabled,
-              :follow_up_days
+              :follow_up_days, :owner_id, :shipping_cents, :shipping_mode, :payment_condition,
+              :down_payment_cents, :installments_count, :has_monthly_fee, :shipping_in_installments
             )
           end
         end

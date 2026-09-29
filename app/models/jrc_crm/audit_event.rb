@@ -37,7 +37,7 @@ module JrcCrm
     
     validates :event_type, :resource_type, :resource_id, presence: true
     
-    EVENT_TYPES = %w[lead_created lead_updated lead_converted deal_created deal_updated deal_stage_changed deal_owner_changed deal_won deal_lost activity_created activity_completed proposal_created proposal_sent proposal_viewed proposal_accepted proposal_rejected]
+    EVENT_TYPES = %w[lead_deleted commission_calculation_pending backoffice_payment_gate_pending lead_created lead_updated lead_converted deal_created deal_updated deal_stage_changed deal_owner_changed deal_won deal_lost activity_created activity_completed proposal_created proposal_sent proposal_viewed proposal_accepted proposal_rejected commission_created commission_updated commission_status_changed backoffice_created backoffice_updated backoffice_stage_changed backoffice_document_uploaded backoffice_document_status_changed backoffice_issue_created backoffice_issue_resolved backoffice_provisioning_confirmed backoffice_reopened order_attachment_uploaded contract_created contract_updated contract_document_uploaded contract_signature_prepared contract_signature_sent contract_manual_signature_registered contract_renewed contract_addendum_created]
     validates :event_type, inclusion: { in: EVENT_TYPES }
     
     scope :for_resource, ->(type, id) { where(resource_type: type, resource_id: id) }

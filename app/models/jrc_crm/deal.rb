@@ -86,6 +86,8 @@ module JrcCrm
     has_many :conversations, through: :deal_conversations
     has_many :audit_events, -> { where(resource_type: 'JrcCrm::Deal') }, class_name: 'JrcCrm::AuditEvent', foreign_key: :resource_id
 
+    has_many :sales_orders, class_name: 'JrcCrm::SalesOrder', dependent: :restrict_with_error
+    has_many :contracts, class_name: 'JrcCrm::Contract', dependent: :restrict_with_error
     validates :title, :pipeline, :stage, :owner, presence: true
     validates :value_cents, numericality: { greater_than_or_equal_to: 0 }
     validates :conversion_key, uniqueness: { scope: :account_id }, allow_nil: true
@@ -141,7 +143,16 @@ module JrcCrm
       )
     end
 
+    validate :preserve_project_contact, if: :will_save_change_to_contact_id?
+
     private
+
+    def preserve_project_contact
+      return unless persisted? && JrcOperations::Link.table_exists?
+      return unless JrcOperations::Link.where(account_id: account_id, crm_deal_id: id).where.not(project_id: nil).exists?
+
+      errors.add(:contact, 'remova os vinculos com projetos antes de trocar o cliente')
+    end
 
     def dispatch_flow_stage_change
       return if Current.executed_by.is_a?(JrcFlowRun)

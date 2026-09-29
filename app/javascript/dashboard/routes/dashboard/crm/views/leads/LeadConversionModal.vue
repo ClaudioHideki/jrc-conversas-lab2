@@ -1,4 +1,5 @@
 <script setup>
+import { crmControlClasses } from '../../crmControlClasses';
 /* eslint-disable vue/no-bare-strings-in-template, @intlify/vue-i18n/no-raw-text */
 import { computed, reactive, watch } from 'vue';
 
@@ -73,7 +74,7 @@ const submit = () =>
 
 <template>
   <div
-    class="fixed inset-0 z-[90] flex items-center justify-center bg-black/55 p-4"
+    :class="crmControlClasses" class="fixed inset-0 z-[90] flex items-center justify-center bg-black/55 p-4"
     @click.self="emit('close')"
   >
     <form

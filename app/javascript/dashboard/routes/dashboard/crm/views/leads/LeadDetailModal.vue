@@ -1,4 +1,5 @@
 <script setup>
+import { crmControlClasses } from '../../crmControlClasses';
 /* eslint-disable vue/no-bare-strings-in-template, @intlify/vue-i18n/no-raw-text */
 import CrmStatusBadge from '../../components/shared/CrmStatusBadge.vue';
 import { formatCrmDateTime } from '../../utils/dateTime';
@@ -23,7 +24,7 @@ const historyText = event =>
 
 <template>
   <div
-    class="fixed inset-0 z-[85] flex justify-end bg-black/55"
+    :class="crmControlClasses" class="fixed inset-0 z-[85] flex justify-end bg-black/55"
     @click.self="emit('close')"
   >
     <aside

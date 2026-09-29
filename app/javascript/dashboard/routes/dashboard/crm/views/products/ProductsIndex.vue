@@ -1594,7 +1594,7 @@ onMounted(refresh);
                   <input
                     v-model.trim="form.availability_text"
                     class="mt-1.5 w-full rounded-xl border border-n-weak bg-n-solid-2 px-3 py-2.5"
-                    placeholder="Todas as empresas, Operadora JRC, GoPure"
+                    placeholder="Todas as empresas, Operadora JRC, Unidade comercial"
                   />
                 </label>
               </div>
