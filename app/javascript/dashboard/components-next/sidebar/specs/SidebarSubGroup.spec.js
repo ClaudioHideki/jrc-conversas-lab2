@@ -101,7 +101,7 @@ describe('SidebarSubGroup', () => {
     const button = wrapper.find('button');
 
     expect(button.classes()).toContain('relative');
-    expect(button.classes()).toContain('before:bg-n-slate-4');
+    expect(button.classes()).toContain('before:bg-white/25');
     expect(button.classes()).toContain('before:-bottom-1');
   });
 

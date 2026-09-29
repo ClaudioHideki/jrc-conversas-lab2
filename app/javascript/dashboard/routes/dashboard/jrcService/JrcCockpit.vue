@@ -423,18 +423,18 @@ onBeforeUnmount(() => window.clearInterval(refreshTimer));
               <i class="i-lucide-radar size-4" /> Cockpit · Central de
               Atendimento
             </span>
-            <h1 class="mt-3 text-3xl font-bold">
+            <h1 class="mt-3 text-3xl font-bold text-white">
               {{ greeting }}, {{ firstName }}!
             </h1>
-            <p class="mt-1 text-sm text-blue-50/90">
+            <p class="mt-1 text-sm text-white/90">
               {{ profileTitle }} · {{ profileDescription }}
             </p>
-            <p class="mt-2 max-w-3xl text-xs leading-5 text-cyan-100">
+            <p class="mt-2 max-w-3xl text-xs leading-5 text-white/90">
               Uma única central para acompanhar a operação, identificar
               prioridades e seguir para Conversas, E-mails, Ligações, Agenda e
               CRM sem duplicar esses módulos.
             </p>
-            <p class="mt-3 text-xs text-cyan-100">
+            <p class="mt-3 text-xs text-white/90">
               Atualizado às {{ formatUpdated(data.generated_at) }}
             </p>
           </div>

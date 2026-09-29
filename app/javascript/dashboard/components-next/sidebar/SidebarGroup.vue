@@ -223,7 +223,7 @@ const toggleTrigger = () => {
 
 onMounted(async () => {
   await nextTick();
-  if (hasActiveChild.value) {
+  if (hasActiveChild.value && !isExpanded.value) {
     setExpandedItem(props.name);
   }
   window.addEventListener('blur', handleWindowBlur);
@@ -235,15 +235,11 @@ onUnmounted(() => {
   document.removeEventListener('mouseleave', handleWindowBlur);
 });
 
-watch(
-  hasActiveChild,
-  hasNewActiveChild => {
-    if (hasNewActiveChild && !isExpanded.value) {
-      setExpandedItem(props.name);
-    }
-  },
-  { once: true }
-);
+watch(hasActiveChild, hasNewActiveChild => {
+  if (hasNewActiveChild && !isExpanded.value) {
+    setExpandedItem(props.name);
+  }
+});
 </script>
 
 <!-- eslint-disable-next-line vue/no-root-v-if -->
@@ -269,12 +265,14 @@ watch(
           type="button"
           class="flex items-center justify-center size-10 rounded-lg"
           :class="{
-            'bg-[#087cf0] text-white': isActive || hasActiveChild,
-            'text-white/90 hover:bg-white/10 hover:text-white':
+            'bg-sidebar-active text-sidebar-foreground':
+              isActive || hasActiveChild,
+            'text-sidebar-foreground hover:bg-white/10 hover:text-white':
               !isActive && !hasActiveChild && !disabled,
-            'cursor-not-allowed text-white/40 opacity-60': disabled,
+            'cursor-not-allowed text-sidebar-muted': disabled,
           }"
           :title="label"
+          :aria-disabled="disabled || undefined"
           @click="hasChildren && !disabled ? handleCollapsedClick() : undefined"
         >
           <Icon v-if="icon" :icon="icon" class="size-4" />
@@ -310,7 +308,7 @@ watch(
       />
       <ul
         v-if="hasChildren"
-        v-show="isExpanded || hasActiveChild"
+        v-show="isExpanded"
         class="grid m-0 list-none min-w-0"
       >
         <template v-for="child in visibleChildren" :key="child.name">
@@ -331,7 +329,6 @@ watch(
           />
           <SidebarGroupLeaf
             v-else-if="isAllowed(child.to)"
-            v-show="isExpanded || activeChild?.name === child.name"
             v-bind="child"
             :active="activeChild?.name === child.name"
           />

@@ -27,11 +27,14 @@ const count = computed(() =>
 
 <template>
   <component
-    :is="to && !disabled ? 'router-link' : 'div'"
+    :is="to && !disabled && !expandable ? 'router-link' : 'button'"
     class="flex items-center gap-2 px-2.5 py-2 rounded-xl h-10 min-w-0 transition-colors"
     role="button"
     draggable="false"
-    :to="disabled ? undefined : to"
+    :type="expandable || !to || disabled ? 'button' : undefined"
+    :aria-expanded="expandable ? isExpanded : undefined"
+    :aria-disabled="disabled || undefined"
+    :to="disabled || expandable ? undefined : to"
     :title="label"
     :class="{
       'bg-sidebar-active text-white font-medium shadow-[0_6px_18px_rgba(8,124,240,0.28)]':
@@ -71,9 +74,8 @@ const count = computed(() =>
     </div>
     <span
       v-if="expandable"
-      v-show="isExpanded"
-      class="i-lucide-chevron-up size-3"
-      @click.stop="emit('toggle')"
+      class="i-lucide-chevron-down size-3"
+      :class="{ 'rotate-180': isExpanded }"
     />
   </component>
 </template>

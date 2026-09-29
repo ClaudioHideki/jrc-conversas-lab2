@@ -1550,9 +1550,6 @@ const menuSections = computed(() => {
       class="relative z-10 flex flex-col flex-shrink-0 gap-1 justify-between items-center"
     >
       <div
-        class="pointer-events-none absolute inset-x-0 -top-[1.938rem] h-8 bg-gradient-to-t from-[#062f57] to-transparent"
-      />
-      <div
         class="px-2 py-2 flex-shrink-0 flex w-full z-50 gap-2 items-center border-t border-white/10 bg-[#062f57]/80 backdrop-blur-sm"
         :class="isEffectivelyCollapsed ? 'justify-center' : 'justify-between'"
       >
