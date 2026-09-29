@@ -39,7 +39,7 @@ class CustomRole < ApplicationRecord
     contact_manage
     report_manage
     knowledge_base_manage
-  ].concat(::JrcServiceDesk::Capabilities::PERMISSIONS).freeze
+  ].concat(::JrcServiceDesk::Capabilities::PERMISSIONS).concat(::JrcProjects::Authorization::PERMISSIONS).freeze
 
   validates :name, presence: true
   validates :permissions, inclusion: { in: PERMISSIONS }

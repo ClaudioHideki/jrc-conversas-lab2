@@ -33,8 +33,7 @@ RSpec.describe JrcServiceDesk::OperationalContext do
     expect(described_class.new(sd_context).native_operator?).to be(false)
   end
 
-  it 'never grants access by role alone after the UnitMembership is revoked' do
-    sd_as_admin!
+  it 'never grants agent access after the UnitMembership is revoked' do
     sd_membership.update!(active: false)
     expect(JrcServiceDesk::ModulePolicy.new(sd_context, :service_desk).show?).to be(false)
     expect(JrcServiceDesk::TicketPolicy::Scope.new(sd_context, JrcServiceDesk::Ticket).resolve).to be_empty
@@ -67,7 +66,9 @@ RSpec.describe JrcServiceDesk::OperationalContext do
     sd_membership.update!(active: false)
     role.destroy!
     expect(sd_account_user.reload.custom_role_id).to be_nil
-    expect(JrcServiceDesk::ModulePolicy.new(sd_context, :service_desk).show?).to be(false)
+    expect(JrcServiceDesk::ModulePolicy.new(sd_context, :service_desk).show?).to be(true)
+    expect(JrcServiceDesk::OperationalContext.new(sd_context).unit_scope).to be_empty
+    expect(JrcServiceDesk::TicketPolicy.new(sd_context, JrcServiceDesk::Ticket.new(account: sd_account, unit: sd_unit)).create?).to be(false)
   end
 
 end

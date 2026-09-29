@@ -15,7 +15,7 @@ class JrcServiceDesk::CatalogQuery
     raise ArgumentError, 'Unknown lookup' unless MODELS.key?(@resource) || NATIVE.include?(@resource)
     @parameters = JrcServiceDesk::QueryParameters.new(parameters, catalog: true)
     @unit_id = @parameters['unit_id']
-    @units = context.unit_scope
+    @units = context.view_unit_scope
     if @parameters['operator_company_id']
       raise ActiveRecord::RecordNotFound unless @units.exists?(operator_company_id: @parameters['operator_company_id'])
       @units = @units.where(operator_company_id: @parameters['operator_company_id'])

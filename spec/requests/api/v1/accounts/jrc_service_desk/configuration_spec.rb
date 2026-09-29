@@ -38,7 +38,7 @@ RSpec.describe 'CP6 catalogue API', type: :request do
     end
   end
 
-  it 'denies flag false, actor without capability and admin without unit membership' do
+  it 'denies feature-off and unauthorized agent but allows admin configuration without membership' do
     params = { unit_id: sd_unit.id }
     sd_account.disable_features!('jrc_service_desk')
     get "#{root}/categories", params: params, headers: headers
@@ -48,14 +48,15 @@ RSpec.describe 'CP6 catalogue API', type: :request do
     expect(response).to have_http_status(:forbidden)
     sd_as_admin!; sd_membership.update!(active: false)
     get "#{root}/categories", params: params, headers: headers
-    expect(response).to have_http_status(:forbidden)
+    expect(response).to have_http_status(:ok)
+    expect(sd_membership.reload.active).to be(false)
   end
 
   it 'rejects foreign records/units, injected fields and malformed pagination' do
     row = create(:jrc_sd_category, unit: sd_foreign_unit)
     get "#{root}/categories/#{row.id}", headers: headers
     expect(response).to have_http_status(:not_found)
-    get "#{root}/categories", params: { unit_id: sd_other_unit.id }, headers: headers
+    get "#{root}/categories", params: { unit_id: sd_foreign_unit.id }, headers: headers
     expect(response).to have_http_status(:not_found)
     post "#{root}/categories", params: { unit_id: sd_unit.id, record: { name: 'bad', code: 'bad', active: true, account_id: sd_foreign_account.id } }, headers: request_headers(SecureRandom.uuid), as: :json
     expect(response).to have_http_status(:unprocessable_entity)

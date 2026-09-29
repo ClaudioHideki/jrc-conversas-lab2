@@ -14,7 +14,12 @@ class JrcServiceDesk::OperationalPolicy < JrcServiceDesk::BasePolicy
 
   def any_unit_allowed?
     context = operational_context
-    context.native_operator? && context.unit_scope.exists?
+    context.native_operator? && (context.administrator? || context.view_unit_scope.exists?)
+  end
+
+  def record_unit_visible?
+    context = operational_context
+    context.native_operator? && context.record_in_account?(record) && context.view_unit_scope.exists?(id: record.unit_id)
   end
 
   def record_unit_allowed?
@@ -33,7 +38,7 @@ class JrcServiceDesk::OperationalPolicy < JrcServiceDesk::BasePolicy
       context = operational_context
       return scope.none unless context.native_operator?
 
-      scope.where(account_id: context.account.id, unit_id: context.unit_scope.select(:id))
+      scope.where(account_id: context.account.id, unit_id: context.view_unit_scope.select(:id))
     end
   end
 end

@@ -107,10 +107,12 @@ RSpec.describe 'Service Desk unit access administration', type: :request do
     end
   end
 
-  it 'denies native administrators without the explicit structural capability' do
+  it 'allows native admin to manage agent scopes without creating operational membership' do
     sd_account_user.update!(custom_role: nil)
+    sd_membership.update!(active: false)
     get "#{root}/members", params: { unit_id: sd_unit.id }, headers: headers
-    expect(response).to have_http_status(:forbidden)
+    expect(response).to have_http_status(:ok)
+    expect(sd_membership.reload.active).to be(false)
   end
 
   it 'denies membership administration when only structure viewing is delegated' do

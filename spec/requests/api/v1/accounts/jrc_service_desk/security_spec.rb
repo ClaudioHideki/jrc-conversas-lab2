@@ -19,9 +19,8 @@ RSpec.describe 'JRC Service Desk CP4 request boundaries', type: :request do
     denied!
   end
 
-  it 'denies a same-Account ticket from an ungranted unit, even to an administrator' do
+  it 'denies an agent a same-Account ticket from an ungranted unit' do
     hidden = create(:jrc_sd_ticket, unit: sd_other_unit, title: 'cross-boundary secret')
-    sd_as_admin!
     get "#{base}/tickets/#{hidden.id}", headers: headers
     denied!
     get "#{base}/tickets", headers: headers, params: { unit_id: sd_other_unit.id }
@@ -29,8 +28,7 @@ RSpec.describe 'JRC Service Desk CP4 request boundaries', type: :request do
   end
 
   %w[ui_context tickets dashboard queues units operator_companies].each do |endpoint|
-    it "denies #{endpoint} to an administrator with no active UnitMembership" do
-      sd_as_admin!
+    it "denies #{endpoint} to an agent with no active UnitMembership" do
       sd_membership.update!(active: false)
       get "#{base}/#{endpoint}", headers: headers
       denied!

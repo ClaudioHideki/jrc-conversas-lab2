@@ -55,12 +55,13 @@ RSpec.describe JrcServiceDesk::ConfigurationService do
     expect(JrcServiceDesk::Category.where(unit_id: sd_unit.id)).to be_empty
   end
 
-  it 'rejects another Account, another unit and admin without a membership' do
-    [sd_other_unit, sd_foreign_unit].each do |unit|
+  it 'rejects another Account and preserves administrative access without operational membership' do
+    [sd_foreign_unit].each do |unit|
       expect { command.create(resource: 'categories', unit_id: unit.id, attributes: attributes, idempotency_key: SecureRandom.uuid) }.to raise_error(ActiveRecord::RecordNotFound)
     end
     sd_membership.update!(active: false)
-    expect { create_row }.to raise_error(ActiveRecord::RecordNotFound)
+    expect(create_row.record.unit_id).to eq(sd_unit.id)
+    expect(sd_membership.reload.active).to be(false)
   end
 
   it 'denies an agent with membership but no management capability' do

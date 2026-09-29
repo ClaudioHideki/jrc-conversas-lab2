@@ -15,8 +15,7 @@ RSpec.describe JrcServiceDesk::TicketPolicy do
     expect(described_class.new(sd_context, ticket).show?).to be(false)
   end
 
-  it 'denies a ticket in an ungranted unit of the same Account even for administrator' do
-    sd_as_admin!
+  it 'denies an agent a ticket in an ungranted unit of the same Account' do
     ticket = create(:jrc_sd_ticket, unit: sd_other_unit)
     expect(described_class.new(sd_context, ticket).show?).to be(false)
     expect(described_class::Scope.new(sd_context, JrcServiceDesk::Ticket).resolve).not_to include(ticket)

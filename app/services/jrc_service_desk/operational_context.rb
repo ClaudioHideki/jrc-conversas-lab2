@@ -29,6 +29,13 @@ class JrcServiceDesk::OperationalContext < JrcServiceDesk::AccessContext
       .where(jrc_service_desk_operator_companies: { account_id: account.id, active: true })
   end
 
+  def view_unit_scope
+    return unit_scope unless administrator?
+
+    JrcServiceDesk::Unit.where(account_id: account.id, active: true).joins(:operator_company)
+      .where(jrc_service_desk_operator_companies: { account_id: account.id, active: true })
+  end
+
   def active_memberships
     return JrcServiceDesk::UnitMembership.none unless available?
 

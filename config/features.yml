@@ -292,3 +292,8 @@
   display_name: JRC Broker
   enabled: false
   column: feature_flags_ext_1
+
+- name: jrc_projects
+  display_name: JRC Projetos
+  enabled: false
+  column: feature_flags_ext_1

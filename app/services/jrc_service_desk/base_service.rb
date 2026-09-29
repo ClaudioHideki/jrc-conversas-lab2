@@ -17,7 +17,7 @@ class JrcServiceDesk::BaseService
     value
   end
 
-  def with_unit(unit_id)
+  def with_unit(unit_id, administrative: false)
     unit_id = JrcServiceDesk::Input.id(unit_id)
     JrcServiceDesk::Base.transaction do
       initial = fresh_context!
@@ -30,9 +30,12 @@ class JrcServiceDesk::BaseService
       end
       @context = fresh_context!
       # Serialize writes in one unit in this foundation; no global/account write mutex.
-      unit = context.unit_scope.lock('FOR UPDATE OF jrc_service_desk_units').find(unit_id)
+      scope = administrative && context.administrator? ? context.view_unit_scope : context.unit_scope
+      unit = scope.lock('FOR UPDATE OF jrc_service_desk_units').find(unit_id)
+      @acting_unit = unit
       JrcServiceDesk::OperatorCompany.where(account_id: context.account.id, id: unit.operator_company_id, active: true).lock('FOR SHARE').take!
-      @actor_membership = context.active_memberships.where(unit_id: unit.id).lock('FOR SHARE').take!
+      memberships = context.active_memberships.where(unit_id: unit.id).lock('FOR SHARE')
+      @actor_membership = administrative && context.administrator? ? memberships.take : memberships.take!
       yield unit
     end
   end

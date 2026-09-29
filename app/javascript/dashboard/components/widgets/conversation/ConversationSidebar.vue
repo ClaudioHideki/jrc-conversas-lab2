@@ -1,4 +1,5 @@
 <script setup>
+import OperationsLinks from 'dashboard/routes/dashboard/jrcOperations/components/OperationsLinks.vue';
 import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import ContactPanel from 'dashboard/routes/dashboard/conversation/ContactPanel.vue';
@@ -137,6 +138,7 @@ watch(() => [props.currentChat?.id, hasCrm.value], loadCrmLinks, {
         :conversation-id="currentChat.id"
         :inbox-id="currentChat.inbox_id"
       />
+      <OperationsLinks :conversation-id="currentChat.id" compact />
       <ConversationCrmWidget
         v-if="hasCrm"
         :linked-deal="linkedDeal"

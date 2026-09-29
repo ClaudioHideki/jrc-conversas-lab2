@@ -8,7 +8,7 @@ class JrcServiceDesk::Capabilities
   PERMISSIONS = KEYS.map { |key| "#{PREFIX}#{key}" }.freeze
   DEFAULTS = {
     'agent' => %w[module_view tickets_view tickets_create tickets_edit tickets_assign tickets_transfer priority_change work_status_change pause resume resolve close cancel reopen notes_view notes_add history_view conversations_view conversations_link sla_view lookups_view customers_view dashboard_view].freeze,
-    'administrator' => %w[module_view tickets_view tickets_view_all tickets_create tickets_edit tickets_assign tickets_transfer priority_change work_status_change pause resume resolve close cancel reopen notes_view notes_add history_view conversations_view conversations_link sla_view contract_conditions_view sla_snapshots_record lookups_view customers_view queues_manage categories_manage priorities_manage statuses_manage services_manage lifecycle_policies_manage settings_view dashboard_view].freeze
+    'administrator' => %w[structure_view operator_companies_manage units_manage unit_memberships_manage module_view tickets_view tickets_view_all tickets_create tickets_edit tickets_assign tickets_transfer priority_change work_status_change pause resume resolve close cancel reopen notes_view notes_add history_view conversations_view conversations_link sla_view contract_conditions_view sla_snapshots_record lookups_view customers_view queues_manage categories_manage priorities_manage statuses_manage services_manage lifecycle_policies_manage settings_view dashboard_view].freeze
   }.freeze
   DEPENDENCIES = {
     'operator_companies_manage' => %w[structure_view].freeze,

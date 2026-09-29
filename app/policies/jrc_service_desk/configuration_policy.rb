@@ -17,11 +17,11 @@ class JrcServiceDesk::ConfigurationPolicy < JrcServiceDesk::OperationalPolicy
   end
 
   def show?
-    record_unit_allowed? && capability?(:lookups_view)
+    record_unit_visible? && capability?(:lookups_view)
   end
 
   def create?
-    record_unit_allowed? && capability?(MANAGEMENT.fetch(record.class.name, :unknown))
+    record_unit_visible? && capability?(MANAGEMENT.fetch(record.class.name, :unknown))
   end
 
   def update?

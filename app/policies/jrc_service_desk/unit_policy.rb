@@ -7,7 +7,7 @@ class JrcServiceDesk::UnitPolicy < JrcServiceDesk::OperationalPolicy
 
   def show?
     context = operational_context
-    context.capability?(:lookups_view) && context.unit_allowed?(record)
+    context.capability?(:lookups_view) && context.record_in_account?(record) && context.view_unit_scope.exists?(id: record.id)
   end
 
   # No implicit bootstrap, global administration or self-grant command.
@@ -16,7 +16,7 @@ class JrcServiceDesk::UnitPolicy < JrcServiceDesk::OperationalPolicy
       context = operational_context
       return scope.none unless context.capability?(:lookups_view)
 
-      scope.where(account_id: context.account.id, id: context.unit_scope.select(:id))
+      scope.where(account_id: context.account.id, id: context.view_unit_scope.select(:id))
     end
   end
 end

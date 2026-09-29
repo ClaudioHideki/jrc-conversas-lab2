@@ -16,8 +16,7 @@ RSpec.describe JrcServiceDesk::Presenter do
     expect(result.keys & %i[request_fingerprint idempotency_key contract_conditions files]).to be_empty
   end
 
-  it 'never projects denied unit data, including for admin' do
-    sd_as_admin!
+  it 'never projects denied unit data to an agent' do
     hidden = create(:jrc_sd_ticket, unit: sd_other_unit)
     expect { presenter.ticket(hidden) }.to raise_error(Pundit::NotAuthorizedError)
   end

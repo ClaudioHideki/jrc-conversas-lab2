@@ -1,5 +1,11 @@
 {
   "CRM": {
+    "AGENDA_RECORD": {
+      "LOADING": "Loading the original CRM record…",
+      "UNAVAILABLE": "This record is unavailable or you no longer have access.",
+      "COMPLETED": "Completed",
+      "COMPLETE": "Mark as completed"
+    },
     "FUNNEL": {
       "RETRY": "Tentar novamente",
       "NO_PIPELINES": "Nenhum funil disponível. Solicite a configuração de um funil ao administrador.",

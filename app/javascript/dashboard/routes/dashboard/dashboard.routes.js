@@ -22,6 +22,8 @@ import { routes as jrcServiceRoutes } from './jrcService/routes';
 import { routes as jrcAiRoutes } from './jrcAI/routes';
 import { routes as jrcBrokerRoutes } from './jrcBroker/routes';
 import { routes as serviceDeskRoutes } from './serviceDesk/routes';
+import { routes as jrcProjectRoutes } from './jrcProjects/routes';
+import { routes as operationsRoutes } from './jrcOperations/routes';
 import AppContainer from './Dashboard.vue';
 import Suspended from './suspended/Index.vue';
 import NoAccounts from './noAccounts/Index.vue';
@@ -57,6 +59,8 @@ export default {
         ...jrcBrokerRoutes,
         ...jrcFlowRoutes,
         ...serviceDeskRoutes,
+        ...jrcProjectRoutes,
+        ...operationsRoutes,
       ],
     },
     {

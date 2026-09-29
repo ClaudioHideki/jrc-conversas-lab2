@@ -8,7 +8,7 @@ class JrcServiceDesk::OperatorCompanyPolicy < JrcServiceDesk::OperationalPolicy
   def show?
     context = operational_context
     context.capability?(:lookups_view) && context.record_in_account?(record) &&
-      context.unit_scope.exists?(operator_company_id: record.id)
+      context.view_unit_scope.exists?(operator_company_id: record.id)
   end
 
   class Scope < JrcServiceDesk::OperationalPolicy::Scope
@@ -16,7 +16,7 @@ class JrcServiceDesk::OperatorCompanyPolicy < JrcServiceDesk::OperationalPolicy
       context = operational_context
       return scope.none unless context.capability?(:lookups_view)
 
-      scope.where(account_id: context.account.id, id: context.unit_scope.select(:operator_company_id))
+      scope.where(account_id: context.account.id, id: context.view_unit_scope.select(:operator_company_id))
     end
   end
 end

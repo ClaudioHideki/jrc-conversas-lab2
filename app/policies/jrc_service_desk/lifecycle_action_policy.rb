@@ -8,7 +8,7 @@ class JrcServiceDesk::LifecycleActionPolicy < JrcServiceDesk::TicketPolicy
 
   def action?(action)
     key = JrcServiceDesk::Capabilities::LIFECYCLE_ACTIONS[action.to_s]
-    inspect? && key && capability?(key) && JrcServiceDesk::LifecycleSelector.new(record).applicable.present? || false
+    inspect? && record_unit_allowed? && key && capability?(key) && JrcServiceDesk::LifecycleSelector.new(record).applicable.present? || false
   end
 
   def requirements_allowed?(requirements)

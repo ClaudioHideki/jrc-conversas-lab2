@@ -10,7 +10,7 @@ class JrcServiceDesk::ConfigurationService < JrcServiceDesk::BaseService
     values = JrcServiceDesk::ConfigurationContract.attributes(resource, attributes, create: true)
     key = JrcServiceDesk::Input.request_key(idempotency_key)
     fingerprint = JrcServiceDesk::CanonicalJson.digest('action' => 'create', 'resource' => resource, 'attributes' => values)
-    with_unit(unit_id) do |unit|
+    with_unit(unit_id, administrative: true) do |unit|
       candidate = model.new(account: context.account, unit: unit)
       authorize!(candidate, :create?)
       existing = replay(resource, key, fingerprint)
@@ -35,7 +35,7 @@ class JrcServiceDesk::ConfigurationService < JrcServiceDesk::BaseService
       'attributes' => values, 'revision' => expected_revision)
     initial = fresh_context!
     candidate = Pundit.policy_scope!(initial.to_h, model).find(id)
-    with_unit(candidate.unit_id) do |unit|
+    with_unit(candidate.unit_id, administrative: true) do |unit|
       record = Pundit.policy_scope!(context.to_h, model).where(unit_id: unit.id).lock.find(id)
       authorize!(record, :update?)
       existing = replay(resource, key, fingerprint)
@@ -56,7 +56,7 @@ class JrcServiceDesk::ConfigurationService < JrcServiceDesk::BaseService
   private
 
   def auditor
-    JrcServiceDesk::ConfigurationAudit.new(context: context, membership: actor_membership)
+    JrcServiceDesk::ConfigurationAudit.new(context: context, membership: actor_membership, unit: @acting_unit)
   end
 
   def replay(resource, key, fingerprint)
@@ -66,7 +66,7 @@ class JrcServiceDesk::ConfigurationService < JrcServiceDesk::BaseService
     raise JrcServiceDesk::IdempotencyConflict, 'Request key already used' unless data['fingerprint'] == fingerprint && data['resource'] == resource
     model = JrcServiceDesk::ConfigurationResources.model(resource)
     raise ActiveRecord::RecordNotFound unless prior.auditable_type == model.base_class.name
-    record = Pundit.policy_scope!(context.to_h, model).where(unit_id: actor_membership.unit_id).find(prior.auditable_id)
+    record = Pundit.policy_scope!(context.to_h, model).where(unit_id: @acting_unit.id).find(prior.auditable_id)
     authorize!(record, :update?) # Replay must not restore a revoked management capability.
     Result.new(record: record, audit_id: prior.id)
   end

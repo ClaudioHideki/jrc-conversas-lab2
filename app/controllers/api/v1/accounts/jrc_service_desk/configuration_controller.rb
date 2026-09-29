@@ -44,8 +44,8 @@ class Api::V1::Accounts::JrcServiceDesk::ConfigurationController < Api::V1::Acco
     raise ArgumentError unless query_values.empty?
     authorize configuration_record, :update?
     context = ::JrcServiceDesk::OperationalContext.new(pundit_user)
-    membership = context.active_memberships.where(unit_id: configuration_record.unit_id).take!
-    audit = ::JrcServiceDesk::ConfigurationAudit.new(context: context, membership: membership)
+    membership = context.active_memberships.find_by(unit_id: configuration_record.unit_id)
+    audit = ::JrcServiceDesk::ConfigurationAudit.new(context: context, membership: membership, unit: configuration_record.unit)
     render json: base_payload.merge(receipt: audit.receipt(resource, configuration_record, params[:audit_id]))
   end
 

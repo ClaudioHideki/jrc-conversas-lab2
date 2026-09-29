@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_09_28_120000) do
+ActiveRecord::Schema[7.1].define(version: 2026_09_29_140200) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -53,6 +53,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_09_28_120000) do
     t.bigint "custom_role_id"
     t.bigint "agent_capacity_policy_id"
     t.boolean "crm_enabled", default: false, null: false
+    t.boolean "jrc_projects_enabled", default: false, null: false
     t.index ["account_id", "id"], name: "jrc_sd_ref_account_users", unique: true
     t.index ["account_id", "user_id"], name: "uniq_user_id_per_account_id", unique: true
     t.index ["account_id"], name: "index_account_users_on_account_id"
@@ -1979,7 +1980,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_09_28_120000) do
     t.datetime "updated_at", null: false
     t.index ["account_id", "created_at"], name: "index_jrc_flow_runs_on_account_id_and_created_at"
     t.index ["account_id"], name: "index_jrc_flow_runs_on_account_id"
-    t.index ["conversation_id"], name: "idx_jrc_one_live_flow_per_conversation", unique: true, where: "((status)::text = ANY ((ARRAY['running'::character varying, 'waiting'::character varying, 'delayed'::character varying])::text[]))"
+    t.index ["conversation_id"], name: "idx_jrc_one_live_flow_per_conversation", unique: true, where: "((status)::text = ANY (ARRAY[('running'::character varying)::text, ('waiting'::character varying)::text, ('delayed'::character varying)::text]))"
     t.index ["conversation_id"], name: "index_jrc_flow_runs_on_conversation_id"
     t.index ["flow_id", "event_key"], name: "index_jrc_flow_runs_on_flow_id_and_event_key", unique: true
     t.index ["flow_id"], name: "index_jrc_flow_runs_on_flow_id"
@@ -2198,6 +2199,382 @@ ActiveRecord::Schema[7.1].define(version: 2026_09_28_120000) do
     t.index ["delegation_id"], name: "index_jrc_nico_turns_on_delegation_id"
   end
 
+  create_table "jrc_operations_links", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "created_by_id", null: false
+    t.bigint "ticket_id"
+    t.bigint "project_id", null: false
+    t.bigint "task_id"
+    t.bigint "conversation_id"
+    t.bigint "crm_deal_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "ticket_unit_id"
+    t.index ["account_id", "project_id", "conversation_id"], name: "idx_jrc_ops_project_conversation", unique: true
+    t.index ["account_id", "project_id", "crm_deal_id"], name: "idx_jrc_ops_project_deal", unique: true
+    t.index ["account_id", "project_id", "ticket_id", "task_id"], name: "idx_jrc_ops_project_ticket_task", unique: true, where: "(task_id IS NOT NULL)"
+    t.index ["account_id", "project_id", "ticket_id"], name: "idx_jrc_ops_project_ticket", unique: true, where: "(task_id IS NULL)"
+    t.index ["account_id"], name: "index_jrc_operations_links_on_account_id"
+    t.index ["conversation_id"], name: "index_jrc_operations_links_on_conversation_id"
+    t.index ["created_by_id"], name: "index_jrc_operations_links_on_created_by_id"
+    t.index ["crm_deal_id"], name: "index_jrc_operations_links_on_crm_deal_id"
+    t.index ["project_id"], name: "index_jrc_operations_links_on_project_id"
+    t.index ["task_id"], name: "index_jrc_operations_links_on_task_id"
+    t.index ["ticket_id"], name: "index_jrc_operations_links_on_ticket_id"
+    t.check_constraint "num_nonnulls(ticket_id, conversation_id, crm_deal_id) = 1 AND (task_id IS NULL OR ticket_id IS NOT NULL) AND (ticket_id IS NULL) = (ticket_unit_id IS NULL)", name: "jrc_project_link_shape"
+  end
+
+  create_table "jrc_projects_audit_events", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "actor_id"
+    t.string "action", null: false
+    t.string "auditable_type", null: false
+    t.bigint "auditable_id", null: false
+    t.jsonb "before_data", default: {}, null: false
+    t.jsonb "after_data", default: {}, null: false
+    t.string "correlation_id"
+    t.datetime "created_at", null: false
+    t.index ["account_id"], name: "index_jrc_projects_audit_events_on_account_id"
+    t.index ["actor_id"], name: "index_jrc_projects_audit_events_on_actor_id"
+    t.index ["auditable_type", "auditable_id"], name: "idx_on_auditable_type_auditable_id_99c282993f"
+  end
+
+  create_table "jrc_projects_automation_rules", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "project_id"
+    t.string "name", null: false
+    t.string "event_name", null: false
+    t.jsonb "conditions", default: {}, null: false
+    t.jsonb "actions", default: [], null: false
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_projects_automation_rules_on_account_id"
+    t.index ["project_id"], name: "index_jrc_projects_automation_rules_on_project_id"
+  end
+
+  create_table "jrc_projects_board_columns", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "board_id", null: false
+    t.string "name", null: false
+    t.string "status_key", null: false
+    t.integer "position", default: 0, null: false
+    t.integer "wip_limit"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_projects_board_columns_on_account_id"
+    t.index ["board_id"], name: "index_jrc_projects_board_columns_on_board_id"
+  end
+
+  create_table "jrc_projects_boards", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "project_id", null: false
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_projects_boards_on_account_id"
+    t.index ["project_id"], name: "index_jrc_projects_boards_on_project_id"
+  end
+
+  create_table "jrc_projects_budgets", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "project_id", null: false
+    t.bigint "planned_cents", default: 0, null: false
+    t.bigint "committed_cents", default: 0, null: false
+    t.bigint "actual_cents", default: 0, null: false
+    t.string "currency", default: "BRL", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_projects_budgets_on_account_id"
+    t.index ["project_id"], name: "index_jrc_projects_budgets_on_project_id", unique: true
+  end
+
+  create_table "jrc_projects_capacities", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "user_id", null: false
+    t.date "starts_on", null: false
+    t.date "ends_on", null: false
+    t.integer "minutes_per_day", default: 480, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_projects_capacities_on_account_id"
+    t.index ["user_id"], name: "index_jrc_projects_capacities_on_user_id"
+  end
+
+  create_table "jrc_projects_checklist_items", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "task_id", null: false
+    t.string "text", null: false
+    t.boolean "completed", default: false, null: false
+    t.integer "position", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_projects_checklist_items_on_account_id"
+    t.index ["task_id"], name: "index_jrc_projects_checklist_items_on_task_id"
+  end
+
+  create_table "jrc_projects_custom_field_definitions", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "project_id"
+    t.string "name", null: false
+    t.string "field_type", null: false
+    t.boolean "required", default: false, null: false
+    t.jsonb "configuration", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_projects_custom_field_definitions_on_account_id"
+    t.index ["project_id"], name: "index_jrc_projects_custom_field_definitions_on_project_id"
+  end
+
+  create_table "jrc_projects_decisions", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "project_id", null: false
+    t.string "title", null: false
+    t.text "description"
+    t.string "status", default: "open", null: false
+    t.string "severity"
+    t.bigint "owner_id"
+    t.jsonb "metadata", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_projects_decisions_on_account_id"
+    t.index ["owner_id"], name: "index_jrc_projects_decisions_on_owner_id"
+    t.index ["project_id"], name: "index_jrc_projects_decisions_on_project_id"
+  end
+
+  create_table "jrc_projects_issues", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "project_id", null: false
+    t.string "title", null: false
+    t.text "description"
+    t.string "status", default: "open", null: false
+    t.string "severity"
+    t.bigint "owner_id"
+    t.jsonb "metadata", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_projects_issues_on_account_id"
+    t.index ["owner_id"], name: "index_jrc_projects_issues_on_owner_id"
+    t.index ["project_id"], name: "index_jrc_projects_issues_on_project_id"
+  end
+
+  create_table "jrc_projects_milestones", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "project_id", null: false
+    t.bigint "phase_id"
+    t.string "name", null: false
+    t.date "due_on"
+    t.string "status", default: "open", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_projects_milestones_on_account_id"
+    t.index ["phase_id"], name: "index_jrc_projects_milestones_on_phase_id"
+    t.index ["project_id"], name: "index_jrc_projects_milestones_on_project_id"
+  end
+
+  create_table "jrc_projects_outbox_events", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.string "event_name", null: false
+    t.string "aggregate_type", null: false
+    t.bigint "aggregate_id", null: false
+    t.jsonb "payload", default: {}, null: false
+    t.string "status", default: "pending", null: false
+    t.integer "attempts", default: 0, null: false
+    t.datetime "available_at", null: false
+    t.datetime "delivered_at"
+    t.text "last_error"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_projects_outbox_events_on_account_id"
+    t.index ["status", "available_at"], name: "index_jrc_projects_outbox_events_on_status_and_available_at"
+  end
+
+  create_table "jrc_projects_phases", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "project_id", null: false
+    t.string "name", null: false
+    t.integer "position", default: 0, null: false
+    t.date "starts_on"
+    t.date "ends_on"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_projects_phases_on_account_id"
+    t.index ["project_id"], name: "index_jrc_projects_phases_on_project_id"
+  end
+
+  create_table "jrc_projects_project_members", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "project_id", null: false
+    t.bigint "user_id", null: false
+    t.string "role", default: "member", null: false
+    t.integer "allocation_percent", default: 100, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_projects_project_members_on_account_id"
+    t.index ["project_id", "user_id"], name: "index_jrc_projects_project_members_on_project_id_and_user_id", unique: true
+    t.index ["project_id"], name: "index_jrc_projects_project_members_on_project_id"
+    t.index ["user_id"], name: "index_jrc_projects_project_members_on_user_id"
+  end
+
+  create_table "jrc_projects_project_templates", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.string "name", null: false
+    t.integer "version", default: 1, null: false
+    t.jsonb "definition", default: {}, null: false
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_projects_project_templates_on_account_id"
+  end
+
+  create_table "jrc_projects_projects", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.string "key", null: false
+    t.string "name", null: false
+    t.text "description"
+    t.string "status", default: "planned", null: false
+    t.string "visibility", default: "members", null: false
+    t.bigint "owner_id", null: false
+    t.date "starts_on"
+    t.date "due_on"
+    t.jsonb "settings", default: {}, null: false
+    t.jsonb "template_snapshot", default: {}, null: false
+    t.datetime "archived_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "contact_id"
+    t.string "idempotency_key"
+    t.string "request_fingerprint"
+    t.integer "lock_version", default: 0, null: false
+    t.text "acceptance_notes"
+    t.datetime "completed_at"
+    t.bigint "accepted_by_id"
+    t.index ["accepted_by_id"], name: "index_jrc_projects_projects_on_accepted_by_id"
+    t.index ["account_id", "id"], name: "idx_projects_account_identity", unique: true
+    t.index ["account_id", "idempotency_key"], name: "idx_jrc_project_request", unique: true, where: "(idempotency_key IS NOT NULL)"
+    t.index ["account_id", "key"], name: "index_jrc_projects_projects_on_account_id_and_key", unique: true
+    t.index ["account_id"], name: "index_jrc_projects_projects_on_account_id"
+    t.index ["contact_id"], name: "index_jrc_projects_projects_on_contact_id"
+    t.index ["owner_id"], name: "index_jrc_projects_projects_on_owner_id"
+  end
+
+  create_table "jrc_projects_recurrences", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "project_id", null: false
+    t.string "frequency", null: false
+    t.integer "interval", default: 1, null: false
+    t.jsonb "payload", default: {}, null: false
+    t.datetime "next_run_at", null: false
+    t.string "last_occurrence_key"
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_projects_recurrences_on_account_id"
+    t.index ["project_id"], name: "index_jrc_projects_recurrences_on_project_id"
+  end
+
+  create_table "jrc_projects_risks", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "project_id", null: false
+    t.string "title", null: false
+    t.text "description"
+    t.string "status", default: "open", null: false
+    t.string "severity"
+    t.bigint "owner_id"
+    t.jsonb "metadata", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_projects_risks_on_account_id"
+    t.index ["owner_id"], name: "index_jrc_projects_risks_on_owner_id"
+    t.index ["project_id"], name: "index_jrc_projects_risks_on_project_id"
+  end
+
+  create_table "jrc_projects_sprints", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "project_id", null: false
+    t.string "name", null: false
+    t.string "status", default: "planned", null: false
+    t.date "starts_on"
+    t.date "ends_on"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_projects_sprints_on_account_id"
+    t.index ["project_id"], name: "index_jrc_projects_sprints_on_project_id"
+  end
+
+  create_table "jrc_projects_task_comments", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "task_id", null: false
+    t.bigint "user_id", null: false
+    t.text "body", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_projects_task_comments_on_account_id"
+    t.index ["task_id"], name: "index_jrc_projects_task_comments_on_task_id"
+    t.index ["user_id"], name: "index_jrc_projects_task_comments_on_user_id"
+  end
+
+  create_table "jrc_projects_task_dependencies", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "predecessor_id", null: false
+    t.bigint "successor_id", null: false
+    t.string "kind", default: "finish_to_start", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_projects_task_dependencies_on_account_id"
+    t.index ["predecessor_id", "successor_id"], name: "idx_jrc_projects_unique_dependency", unique: true
+    t.index ["predecessor_id"], name: "index_jrc_projects_task_dependencies_on_predecessor_id"
+    t.index ["successor_id"], name: "index_jrc_projects_task_dependencies_on_successor_id"
+  end
+
+  create_table "jrc_projects_tasks", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "project_id", null: false
+    t.bigint "board_column_id"
+    t.bigint "parent_id"
+    t.bigint "assignee_id"
+    t.bigint "created_by_id", null: false
+    t.string "title", null: false
+    t.text "description"
+    t.string "status", default: "backlog", null: false
+    t.string "priority", default: "medium", null: false
+    t.decimal "position", precision: 20, scale: 10, default: "0.0", null: false
+    t.integer "estimated_minutes", default: 0, null: false
+    t.date "starts_on"
+    t.date "due_on"
+    t.jsonb "custom_fields", default: {}, null: false
+    t.integer "lock_version", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "project_id", "id"], name: "idx_project_tasks_scope_identity", unique: true
+    t.index ["account_id"], name: "index_jrc_projects_tasks_on_account_id"
+    t.index ["assignee_id"], name: "index_jrc_projects_tasks_on_assignee_id"
+    t.index ["board_column_id"], name: "index_jrc_projects_tasks_on_board_column_id"
+    t.index ["created_by_id"], name: "index_jrc_projects_tasks_on_created_by_id"
+    t.index ["parent_id"], name: "index_jrc_projects_tasks_on_parent_id"
+    t.index ["project_id", "board_column_id", "position"], name: "idx_jrc_projects_task_order"
+    t.index ["project_id"], name: "index_jrc_projects_tasks_on_project_id"
+  end
+
+  create_table "jrc_projects_time_entries", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "project_id", null: false
+    t.bigint "task_id"
+    t.bigint "user_id", null: false
+    t.integer "minutes", null: false
+    t.date "worked_on", null: false
+    t.string "status", default: "submitted", null: false
+    t.integer "hourly_cost_cents"
+    t.string "currency", default: "BRL", null: false
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_projects_time_entries_on_account_id"
+    t.index ["project_id"], name: "index_jrc_projects_time_entries_on_project_id"
+    t.index ["task_id"], name: "index_jrc_projects_time_entries_on_task_id"
+    t.index ["user_id"], name: "index_jrc_projects_time_entries_on_user_id"
+  end
+
   create_table "jrc_service_desk_categories", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.bigint "unit_id", null: false
@@ -2283,7 +2660,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_09_28_120000) do
     t.index ["account_id", "unit_id", "ticket_id", "actor_membership_id", "request_key"], name: "jrc_sd_lc_transition_key", unique: true
     t.index ["account_id", "unit_id", "ticket_id", "id"], name: "jrc_sd_lc_lifecycle_transitions_ref", unique: true
     t.index ["account_id", "unit_id", "ticket_id", "occurred_at", "id"], name: "jrc_sd_lc_transition_timeline"
-    t.check_constraint "(action::text = ANY (ARRAY['pause'::character varying, 'resume'::character varying, 'resolve'::character varying, 'close'::character varying, 'cancel'::character varying, 'reopen'::character varying, 'work_status'::character varying]::text[])) AND jsonb_typeof(payload) = 'object'::text AND fingerprint::text ~ '^[a-f0-9]{64}$'::text AND btrim(request_key::text) <> ''::text", name: "jrc_sd_lc_transition_valid"
+    t.check_constraint "(action::text = ANY (ARRAY['pause'::character varying::text, 'resume'::character varying::text, 'resolve'::character varying::text, 'close'::character varying::text, 'cancel'::character varying::text, 'reopen'::character varying::text, 'work_status'::character varying::text])) AND jsonb_typeof(payload) = 'object'::text AND fingerprint::text ~ '^[a-f0-9]{64}$'::text AND btrim(request_key::text) <> ''::text", name: "jrc_sd_lc_transition_valid"
   end
 
   create_table "jrc_service_desk_operator_companies", force: :cascade do |t|
@@ -2364,7 +2741,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_09_28_120000) do
     t.datetime "updated_at", null: false
     t.index ["account_id", "unit_id", "ticket_id", "id"], name: "jrc_sd_lc_sla_clocks_ref", unique: true
     t.index ["account_id", "unit_id", "ticket_id", "sla_cycle_id", "kind"], name: "jrc_sd_lc_clock_kind", unique: true
-    t.check_constraint "(kind::text = ANY (ARRAY['first_response'::character varying, 'resolution'::character varying]::text[])) AND (state::text = ANY (ARRAY['running'::character varying, 'paused'::character varying, 'completed'::character varying, 'stopped'::character varying]::text[])) AND budget_seconds > 0 AND elapsed_seconds >= 0::numeric", name: "jrc_sd_lc_clock_values"
+    t.check_constraint "(kind::text = ANY (ARRAY['first_response'::character varying::text, 'resolution'::character varying::text])) AND (state::text = ANY (ARRAY['running'::character varying::text, 'paused'::character varying::text, 'completed'::character varying::text, 'stopped'::character varying::text])) AND budget_seconds > 0 AND elapsed_seconds >= 0::numeric", name: "jrc_sd_lc_clock_values"
     t.check_constraint "(state::text = 'completed'::text) = (achieved_at IS NOT NULL)", name: "jrc_sd_lc_clock_completion"
   end
 
@@ -2400,7 +2777,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_09_28_120000) do
     t.index ["account_id", "unit_id", "sla_snapshot_id", "kind"], name: "jrc_sd_milestone_unique", unique: true
     t.index ["account_id", "unit_id", "ticket_id"], name: "jrc_sd_milestone_ticket"
     t.check_constraint "due_at IS NULL AND calculated_at IS NULL AND calculator_version IS NULL OR due_at IS NOT NULL AND calculated_at IS NOT NULL AND calculator_version IS NOT NULL AND btrim(calculator_version::text) <> ''::text", name: "jrc_sd_milestone_calculation"
-    t.check_constraint "kind::text = ANY (ARRAY['first_response'::character varying, 'resolution'::character varying]::text[])", name: "jrc_sd_milestone_kind"
+    t.check_constraint "kind::text = ANY (ARRAY['first_response'::character varying::text, 'resolution'::character varying::text])", name: "jrc_sd_milestone_kind"
   end
 
   create_table "jrc_service_desk_sla_snapshots", force: :cascade do |t|
@@ -2427,7 +2804,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_09_28_120000) do
     t.index ["account_id", "unit_id", "ticket_id", "id"], name: "jrc_sd_snapshot_ref", unique: true
     t.index ["account_id", "unit_id", "ticket_id", "payload_digest"], name: "jrc_sd_snapshot_deduplicate", unique: true
     t.index ["account_id", "unit_id", "ticket_id", "version"], name: "jrc_sd_snapshot_version", unique: true
-    t.check_constraint "calendar_scope::text = ANY (ARRAY['account'::character varying, 'operator_company'::character varying, 'unit'::character varying]::text[])", name: "jrc_sd_snapshot_scope"
+    t.check_constraint "calendar_scope::text = ANY (ARRAY['account'::character varying::text, 'operator_company'::character varying::text, 'unit'::character varying::text])", name: "jrc_sd_snapshot_scope"
     t.check_constraint "jsonb_typeof(calendar_conditions) = 'object'::text", name: "jrc_sd_snapshot_calendar_conditions"
     t.check_constraint "jsonb_typeof(contract_conditions) = 'object'::text", name: "jrc_sd_snapshot_contract_conditions"
     t.check_constraint "jsonb_typeof(policy_conditions) = 'object'::text", name: "jrc_sd_snapshot_policy_conditions"
@@ -2500,7 +2877,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_09_28_120000) do
     t.check_constraint "NOT initial OR phase::text = 'open'::text", name: "jrc_sd_status_initial_phase"
     t.check_constraint "\"position\" >= 0", name: "jrc_sd_status_position"
     t.check_constraint "btrim(code::text) <> ''::text AND btrim(name::text) <> ''::text", name: "jrc_sd_ticket_statuses_names"
-    t.check_constraint "phase::text = ANY (ARRAY['open'::character varying, 'waiting'::character varying, 'resolved'::character varying, 'closed'::character varying, 'cancelled'::character varying]::text[])", name: "jrc_sd_status_phase"
+    t.check_constraint "phase::text = ANY (ARRAY['open'::character varying::text, 'waiting'::character varying::text, 'resolved'::character varying::text, 'closed'::character varying::text, 'cancelled'::character varying::text])", name: "jrc_sd_status_phase"
   end
 
   create_table "jrc_service_desk_tickets", force: :cascade do |t|
@@ -3283,6 +3660,75 @@ ActiveRecord::Schema[7.1].define(version: 2026_09_28_120000) do
   add_foreign_key "jrc_nico_sessions", "accounts", on_delete: :cascade
   add_foreign_key "jrc_nico_sessions", "users", on_delete: :cascade
   add_foreign_key "jrc_nico_turns", "jrc_nico_delegations", column: "delegation_id", on_delete: :cascade
+  add_foreign_key "jrc_operations_links", "accounts"
+  add_foreign_key "jrc_operations_links", "conversations"
+  add_foreign_key "jrc_operations_links", "jrc_crm_deals", column: "crm_deal_id"
+  add_foreign_key "jrc_operations_links", "jrc_projects_projects", column: "project_id"
+  add_foreign_key "jrc_operations_links", "jrc_projects_projects", column: ["account_id", "project_id"], primary_key: ["account_id", "id"], name: "fk_project_links_account"
+  add_foreign_key "jrc_operations_links", "jrc_projects_tasks", column: "task_id"
+  add_foreign_key "jrc_operations_links", "jrc_projects_tasks", column: ["account_id", "project_id", "task_id"], primary_key: ["account_id", "project_id", "id"], name: "fk_project_links_task_scope"
+  add_foreign_key "jrc_operations_links", "jrc_service_desk_tickets", column: "ticket_id"
+  add_foreign_key "jrc_operations_links", "jrc_service_desk_tickets", column: ["account_id", "ticket_unit_id", "ticket_id"], primary_key: ["account_id", "unit_id", "id"], name: "fk_project_links_r2_unit"
+  add_foreign_key "jrc_operations_links", "users", column: "created_by_id"
+  add_foreign_key "jrc_projects_audit_events", "accounts"
+  add_foreign_key "jrc_projects_audit_events", "users", column: "actor_id"
+  add_foreign_key "jrc_projects_automation_rules", "accounts"
+  add_foreign_key "jrc_projects_automation_rules", "jrc_projects_projects", column: "project_id"
+  add_foreign_key "jrc_projects_board_columns", "accounts"
+  add_foreign_key "jrc_projects_board_columns", "jrc_projects_boards", column: "board_id"
+  add_foreign_key "jrc_projects_boards", "accounts"
+  add_foreign_key "jrc_projects_boards", "jrc_projects_projects", column: "project_id"
+  add_foreign_key "jrc_projects_budgets", "accounts"
+  add_foreign_key "jrc_projects_budgets", "jrc_projects_projects", column: "project_id"
+  add_foreign_key "jrc_projects_capacities", "accounts"
+  add_foreign_key "jrc_projects_capacities", "users"
+  add_foreign_key "jrc_projects_checklist_items", "accounts"
+  add_foreign_key "jrc_projects_checklist_items", "jrc_projects_tasks", column: "task_id"
+  add_foreign_key "jrc_projects_custom_field_definitions", "accounts"
+  add_foreign_key "jrc_projects_custom_field_definitions", "jrc_projects_projects", column: "project_id"
+  add_foreign_key "jrc_projects_decisions", "accounts"
+  add_foreign_key "jrc_projects_decisions", "jrc_projects_projects", column: "project_id"
+  add_foreign_key "jrc_projects_decisions", "users", column: "owner_id"
+  add_foreign_key "jrc_projects_issues", "accounts"
+  add_foreign_key "jrc_projects_issues", "jrc_projects_projects", column: "project_id"
+  add_foreign_key "jrc_projects_issues", "users", column: "owner_id"
+  add_foreign_key "jrc_projects_milestones", "accounts"
+  add_foreign_key "jrc_projects_milestones", "jrc_projects_phases", column: "phase_id"
+  add_foreign_key "jrc_projects_milestones", "jrc_projects_projects", column: "project_id"
+  add_foreign_key "jrc_projects_outbox_events", "accounts"
+  add_foreign_key "jrc_projects_phases", "accounts"
+  add_foreign_key "jrc_projects_phases", "jrc_projects_projects", column: "project_id"
+  add_foreign_key "jrc_projects_project_members", "accounts"
+  add_foreign_key "jrc_projects_project_members", "jrc_projects_projects", column: "project_id"
+  add_foreign_key "jrc_projects_project_members", "users"
+  add_foreign_key "jrc_projects_project_templates", "accounts"
+  add_foreign_key "jrc_projects_projects", "accounts"
+  add_foreign_key "jrc_projects_projects", "contacts"
+  add_foreign_key "jrc_projects_projects", "users", column: "accepted_by_id"
+  add_foreign_key "jrc_projects_projects", "users", column: "owner_id"
+  add_foreign_key "jrc_projects_recurrences", "accounts"
+  add_foreign_key "jrc_projects_recurrences", "jrc_projects_projects", column: "project_id"
+  add_foreign_key "jrc_projects_risks", "accounts"
+  add_foreign_key "jrc_projects_risks", "jrc_projects_projects", column: "project_id"
+  add_foreign_key "jrc_projects_risks", "users", column: "owner_id"
+  add_foreign_key "jrc_projects_sprints", "accounts"
+  add_foreign_key "jrc_projects_sprints", "jrc_projects_projects", column: "project_id"
+  add_foreign_key "jrc_projects_task_comments", "accounts"
+  add_foreign_key "jrc_projects_task_comments", "jrc_projects_tasks", column: "task_id"
+  add_foreign_key "jrc_projects_task_comments", "users"
+  add_foreign_key "jrc_projects_task_dependencies", "accounts"
+  add_foreign_key "jrc_projects_task_dependencies", "jrc_projects_tasks", column: "predecessor_id"
+  add_foreign_key "jrc_projects_task_dependencies", "jrc_projects_tasks", column: "successor_id"
+  add_foreign_key "jrc_projects_tasks", "accounts"
+  add_foreign_key "jrc_projects_tasks", "jrc_projects_board_columns", column: "board_column_id"
+  add_foreign_key "jrc_projects_tasks", "jrc_projects_projects", column: "project_id"
+  add_foreign_key "jrc_projects_tasks", "jrc_projects_tasks", column: "parent_id"
+  add_foreign_key "jrc_projects_tasks", "users", column: "assignee_id"
+  add_foreign_key "jrc_projects_tasks", "users", column: "created_by_id"
+  add_foreign_key "jrc_projects_time_entries", "accounts"
+  add_foreign_key "jrc_projects_time_entries", "jrc_projects_projects", column: "project_id"
+  add_foreign_key "jrc_projects_time_entries", "jrc_projects_tasks", column: "task_id"
+  add_foreign_key "jrc_projects_time_entries", "users"
   add_foreign_key "jrc_service_desk_categories", "accounts", name: "jrc_sd_categories_account_fk"
   add_foreign_key "jrc_service_desk_categories", "jrc_service_desk_units", column: ["account_id", "unit_id"], primary_key: ["account_id", "id"], name: "jrc_sd_categories_unit_fk"
   add_foreign_key "jrc_service_desk_lifecycle_pauses", "accounts"

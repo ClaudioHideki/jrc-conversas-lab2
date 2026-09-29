@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import OperationsLinks from '../../jrcOperations/components/OperationsLinks.vue';
 import Button from 'dashboard/components-next/button/Button.vue';
 import TabBar from 'dashboard/components-next/tabbar/TabBar.vue';
 import Panel from '../components/ServiceDeskPanel.vue';
@@ -85,6 +86,7 @@ watch(() => session.operations?.state.revision, refresh);
           </p>
           <div class="mt-6">
             <TicketSummary :ticket="ticket" />
+            <OperationsLinks :ticket-id="ticket.id" :title="ticket.title" />
             <CustomerContextPanel v-if="ticket.permissions.view_customer" :ticket="ticket" />
           </div>
         </template>

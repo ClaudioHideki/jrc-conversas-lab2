@@ -11,11 +11,13 @@ RSpec.describe 'Service Desk configuration, history and SLA policies' do
     expect(policy.update?).to be(false)
   end
 
-  it 'allows an administrator configuration only in explicitly granted units' do
+  it 'allows native admin configuration throughout the same Account without operational grants' do
     sd_as_admin!
     foreign_unit_priority = create(:jrc_sd_priority, unit: sd_other_unit)
     expect(JrcServiceDesk::PriorityPolicy.new(sd_context, sd_priority).update?).to be(true)
-    expect(JrcServiceDesk::PriorityPolicy.new(sd_context, foreign_unit_priority).update?).to be(false)
+    expect(JrcServiceDesk::PriorityPolicy.new(sd_context, foreign_unit_priority).update?).to be(true)
+    foreign = create(:jrc_sd_priority, unit: sd_foreign_unit)
+    expect(JrcServiceDesk::PriorityPolicy.new(sd_context, foreign).update?).to be(false)
   end
 
   it 'does not expose scope self-grant commands to administrator' do
@@ -44,8 +46,7 @@ RSpec.describe 'Service Desk configuration, history and SLA policies' do
     expect(JrcServiceDesk::TicketConversationPolicy::Scope.new(sd_context, JrcServiceDesk::TicketConversation).resolve).to be_empty
   end
 
-  it 'denies index permission without any active unit, including for administrator' do
-    sd_as_admin!
+  it 'denies agent index permission without any active unit' do
     sd_membership.update!(active: false)
     [JrcServiceDesk::UnitPolicy, JrcServiceDesk::OperatorCompanyPolicy,
      JrcServiceDesk::TicketPolicy, JrcServiceDesk::PriorityPolicy,

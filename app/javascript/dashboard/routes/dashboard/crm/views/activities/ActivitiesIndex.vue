@@ -10,6 +10,7 @@ import CrmPageHeader from '../../components/shared/CrmPageHeader.vue';
 import CrmStatCard from '../../components/shared/CrmStatCard.vue';
 import { useI18n } from 'vue-i18n';
 import { filterActivities } from '../../utils/activityFilters';
+import AgendaRecord from '../../components/shared/AgendaRecord.vue';
 
 const { t } = useI18n();
 const filters = reactive({ search: '', type: '', owner: '', status: '' });
@@ -154,6 +155,7 @@ onMounted(async () => {
     <div
       class="mx-auto flex min-h-full w-full max-w-[1680px] flex-col gap-5 p-4 sm:p-6"
     >
+      <AgendaRecord @changed="load" />
       <CrmPageHeader
         eyebrow="Organização comercial"
         title="Atividades"

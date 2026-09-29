@@ -26,7 +26,7 @@ class JrcServiceDesk::TicketQuery
   private
 
   def apply_filters!
-    units = context.unit_scope
+    units = context.view_unit_scope
     if parameters['operator_company_id']
       id = parameters['operator_company_id']
       raise ActiveRecord::RecordNotFound unless units.exists?(operator_company_id: id)

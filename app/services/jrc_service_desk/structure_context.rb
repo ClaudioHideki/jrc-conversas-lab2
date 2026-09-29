@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Account-level STRUCTURAL administration, explicitly delegated in native CustomRole.
+# Account-level structural administration for native Admin or explicit CustomRole.
 # It does not implement unit_scope and is never accepted by operational services.
 class JrcServiceDesk::StructureContext
   attr_reader :native
@@ -13,7 +13,7 @@ class JrcServiceDesk::StructureContext
 
   def available?
     native.available? && account_user.role == 'administrator' &&
-      JrcServiceDesk::InitializerAuthority.client_user?(user) && native.capability?(:structure_view) && initialized?
+      JrcServiceDesk::InitializerAuthority.client_user?(user) && native.capability?(:structure_view) && (native.administrator? || initialized?)
   end
 
   def allowed?(resource = nil)
@@ -22,8 +22,8 @@ class JrcServiceDesk::StructureContext
 
   def initialized?
     return false unless native.available?
-    # Existing explicitly provisioned accounts remain usable; inactive grants are history,
-    # not renewed access. A new empty Account can ONLY use the human staff initializer.
+    # Delegated custom roles require an existing structure. Native Account Admin can
+    # initialize its enabled module without becoming an operational unit member.
     JrcServiceDesk::UnitMembership.where(account_id: account.id).exists? ||
       Audited::Audit.where(request_uuid: JrcServiceDesk::InitializeAccountService.marker(account.id)).exists?
   end

@@ -1,4 +1,5 @@
 <script setup>
+import { useOperations } from 'dashboard/routes/dashboard/jrcOperations/useOperations';
 import { h, ref, computed, onMounted, watch } from 'vue';
 import { provideSidebarContext, useSidebarResize } from './provider';
 import { useServiceDeskNavigation } from 'dashboard/composables/useServiceDeskNavigation';
@@ -143,6 +144,7 @@ const hasServiceDesk = computed(() =>
   ) === true
 );
 
+const { status: operationsStatus } = useOperations();
 const serviceDeskNavigation = useServiceDeskNavigation(accountId, currentUserId, hasServiceDesk);
 const serviceDeskStructure = useServiceDeskStructure(accountId, currentUserId, hasServiceDesk);
 
@@ -1185,6 +1187,15 @@ const menuItems = computed(() => {
           icon: 'i-lucide-building-2', to: accountScopedRoute('jrc_service_desk_structure'),
           activeOn: ['jrc_service_desk_structure'] }
       : null,
+    operationsStatus.value?.projects_enabled ? {
+      name: 'JRC Projects', label: 'Projetos', icon: 'i-lucide-folder-kanban',
+      to: accountScopedRoute('jrc_projects_list'),
+      activeOn: ['jrc_projects_list', 'jrc_projects_detail', 'jrc_projects_settings'], ignoreFeatureFlag: true,
+    } : null,
+    operationsStatus.value?.projects_enabled || operationsStatus.value?.crm_enabled ? {
+      name: 'JRC Agenda', label: 'Minha Agenda', icon: 'i-lucide-calendar-days',
+      to: accountScopedRoute('jrc_operations_agenda'), activeOn: ['jrc_operations_agenda'], ignoreFeatureFlag: true,
+    } : null,
     contactsModule ? { ...contactsModule, label: 'Contatos' } : null,
     companiesModule ? { ...companiesModule, label: 'Empresas' } : null,
     {
@@ -1370,7 +1381,7 @@ const menuSections = computed(() => {
         'JRC Intelligent Automation',
       ]),
     },
-    { name: 'relationships', label: 'Relacionamentos', items: take(['Companies']) },
+    { name: 'relationships', label: 'Relacionamentos', items: take(['Companies', 'JRC Projects', 'JRC Agenda']) },
 
 
 

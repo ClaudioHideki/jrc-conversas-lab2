@@ -75,6 +75,8 @@ RSpec.describe 'CP4-D01 lifecycle HTTP persistence and readback', type: :request
     expect([403, 404]).to include(response.status)
     sd_membership.update!(active: false)
     get "#{base}/tickets/#{row.id}/lifecycle", headers: headers
+    expect(response).to have_http_status(:ok)
+    post "#{base}/tickets/#{row.id}/lifecycle", headers: headers.merge('Idempotency-Key' => 'revoked'), as: :json, params: attributes
     expect([403, 404]).to include(response.status)
     sd_membership.update!(active: true)
     sd_account.disable_features!('jrc_service_desk')

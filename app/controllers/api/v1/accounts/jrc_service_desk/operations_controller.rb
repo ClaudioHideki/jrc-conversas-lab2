@@ -15,7 +15,7 @@ class Api::V1::Accounts::JrcServiceDesk::OperationsController < Api::V1::Account
 
   def require_operational_identity!
     context = ::JrcServiceDesk::OperationalContext.new(pundit_user)
-    raise Pundit::NotAuthorizedError unless context.native_operator? && context.unit_scope.exists?
+    raise Pundit::NotAuthorizedError unless context.native_operator? && (context.administrator? || context.unit_scope.exists?)
   end
 
   def consistent_reads

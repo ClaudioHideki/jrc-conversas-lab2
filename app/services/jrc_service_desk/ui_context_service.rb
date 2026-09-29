@@ -8,14 +8,15 @@ class JrcServiceDesk::UiContextService
 
   def call
     Pundit.authorize(@context.to_h, :service_desk, :show?, policy_class: JrcServiceDesk::ModulePolicy)
-    units = @context.unit_scope.includes(:operator_company).order(:name, :id).map do |unit|
+    units = @context.view_unit_scope.includes(:operator_company).order(:name, :id).map do |unit|
       initial = @context.capability?(:lookups_view) && JrcServiceDesk::TicketStatus.find_by(account_id: @context.account.id, unit_id: unit.id, initial: true, active: true, phase: 'open')
       candidate = JrcServiceDesk::Ticket.new(account: @context.account, unit: unit)
+      operational_unit = @context.unit_scope.exists?(id: unit.id)
       { id: unit.id.to_s, account_id: @context.account.id.to_s, name: unit.name, active: true,
         operator_company: { id: unit.operator_company.id.to_s, account_id: unit.account_id.to_s, name: unit.operator_company.name },
         initial_status: initial ? { id: initial.id.to_s, name: initial.name } : nil,
         permissions: { create_ticket: !!initial && Pundit.policy!(@context.to_h, candidate).create?,
-                       assign_ticket: @context.capability?(:tickets_assign), link_conversation: @context.capability?(:conversations_link),
+                       assign_ticket: operational_unit && @context.capability?(:tickets_assign), link_conversation: operational_unit && @context.capability?(:conversations_link),
                        manage_services: @context.capability?(:services_manage), manage_lifecycle_policies: @context.capability?(:lifecycle_policies_manage) } }
     end
     capabilities = RESOURCES.to_h { |name, model| [name, { index: Pundit.policy!(@context.to_h, model).index? }] }

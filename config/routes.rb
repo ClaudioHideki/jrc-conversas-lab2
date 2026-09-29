@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  draw :jrc_operations
   get '/flows/portal(/:public_id)', to: 'jrc_flows/portal#show'
   post '/jrc_flows/events/:public_id', to: 'jrc_flows/events#create'
   # AUTH STARTS

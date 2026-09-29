@@ -34,6 +34,7 @@
       </div>
     </div>
 
+    <OperationsLinks v-if="contact?.id" :contact-id="contact.id" compact />
     <div class="grid grid-cols-2 gap-2 mt-4 pt-3 border-t text-sm">
       <div class="bg-n-alpha-2 p-2 rounded text-center">
         <div class="text-xl font-bold text-n-blue-11">
@@ -52,6 +53,7 @@
 </template>
 
 <script setup>
+import OperationsLinks from '../../../jrcOperations/components/OperationsLinks.vue';
 defineProps({
   contact: Object,
   company: Object,

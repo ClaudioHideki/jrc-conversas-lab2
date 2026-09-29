@@ -107,8 +107,7 @@ RSpec.describe 'JRC Service Desk CP4 queries and real aggregates', type: :servic
     expect(result[:unavailable]).to include('sla_breached', 'csat', 'time_series')
   end
 
-  it 'never counts another Account or an ungranted unit, even for admin' do
-    sd_as_admin!
+  it 'never counts another Account or an ungranted unit for agents' do
     sd_ticket
     create(:jrc_sd_ticket, unit: sd_other_unit)
     create(:jrc_sd_ticket, unit: sd_foreign_unit)
