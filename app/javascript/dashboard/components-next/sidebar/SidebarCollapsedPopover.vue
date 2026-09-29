@@ -121,10 +121,10 @@ onMounted(async () => {
       @mouseleave="emit('mouseleave')"
     >
       <div
-        class="bg-n-alpha-3 backdrop-blur-[100px] outline outline-1 -outline-offset-1 w-56 outline-n-weak rounded-xl shadow-lg py-2 px-2"
+        class="bg-sidebar-surface text-sidebar-foreground outline outline-1 -outline-offset-1 w-56 outline-n-weak rounded-xl shadow-lg py-2 px-2"
       >
         <div
-          class="px-2 py-1.5 text-xs font-medium text-n-slate-11 uppercase tracking-wider border-b border-n-weak mb-1"
+          class="px-2 py-1.5 text-xs font-medium text-sidebar-secondary uppercase tracking-wider border-b border-n-weak mb-1"
         >
           {{ label }}
         </div>
@@ -135,7 +135,7 @@ onMounted(async () => {
             <!-- SubGroup with children -->
             <li v-if="child.children" class="group/sidebar-section py-0.5">
               <div
-                class="flex items-center rounded-lg text-n-slate-11 hover:bg-n-alpha-2 transition-colors duration-150 ease-out"
+                class="flex items-center rounded-lg text-sidebar-secondary hover:bg-white/10 hover:text-sidebar-foreground transition-colors duration-150 ease-out"
               >
                 <button
                   class="flex flex-1 min-w-0 items-center gap-2 ps-2 py-1.5 text-left rtl:text-right"
@@ -159,7 +159,7 @@ onMounted(async () => {
                   />
                   <button
                     type="button"
-                    class="flex size-6 flex-shrink-0 items-center justify-center rounded-md text-n-slate-11 hover:bg-n-alpha-2 focus-visible:bg-n-alpha-2 focus-visible:outline-none"
+                    class="flex size-6 flex-shrink-0 items-center justify-center rounded-md text-sidebar-secondary hover:bg-white/10 hover:text-sidebar-foreground focus-visible:bg-white/10 focus-visible:outline-none"
                     @click.stop="toggleSubGroup(child.name)"
                   >
                     <span
@@ -184,8 +184,9 @@ onMounted(async () => {
                     <button
                       class="flex items-center gap-2 px-2 py-1.5 w-full rounded-lg text-sm text-left rtl:text-right transition-colors duration-150 ease-out"
                       :class="{
-                        'text-n-slate-12 bg-n-alpha-2': isActive(subChild),
-                        'text-n-slate-11 hover:bg-n-alpha-2':
+                        'text-sidebar-foreground bg-sidebar-active':
+                          isActive(subChild),
+                        'text-sidebar-secondary hover:bg-white/10 hover:text-sidebar-foreground':
                           !isActive(subChild),
                       }"
                       @click="navigateAndClose(subChild.to)"
@@ -208,8 +209,9 @@ onMounted(async () => {
               <button
                 class="flex items-center gap-2 px-2 py-1.5 w-full rounded-lg text-sm text-left rtl:text-right transition-colors duration-150 ease-out"
                 :class="{
-                  'text-n-slate-12 bg-n-alpha-2': isActive(child),
-                  'text-n-slate-11 hover:bg-n-alpha-2': !isActive(child),
+                  'text-sidebar-foreground bg-sidebar-active': isActive(child),
+                  'text-sidebar-secondary hover:bg-white/10 hover:text-sidebar-foreground':
+                    !isActive(child),
                 }"
                 @click="navigateAndClose(child.to)"
               >

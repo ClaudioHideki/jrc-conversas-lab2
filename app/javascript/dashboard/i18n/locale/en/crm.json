@@ -1,5 +1,13 @@
 {
   "CRM": {
+    "FUNNEL": {
+      "RETRY": "Tentar novamente",
+      "NO_PIPELINES": "Nenhum funil disponível. Solicite a configuração de um funil ao administrador.",
+      "NO_STAGES": "Este funil não tem etapas configuradas. Solicite a configuração das etapas ao administrador.",
+      "NO_DEALS": "Nenhuma oportunidade encontrada para estes filtros. Limpe os filtros ou crie uma nova oportunidade.",
+      "MOVE_ERROR": "Não foi possível mover a oportunidade. A etapa anterior foi mantida.",
+      "REASONS_ERROR": "Não foi possível carregar os motivos de perda. Tente novamente."
+    },
     "SIDEBAR": "CRM",
     "TITLE": "CRM",
     "CANCEL": "Cancelar",

@@ -146,10 +146,12 @@ const allowedMenuItems = computed(() => {
           class="flex-shrink-0"
         />
         <div v-if="!isCollapsed" class="min-w-0 flex-1">
-          <div class="text-sm font-medium leading-4 truncate text-white">
+          <div
+            class="text-sm font-semibold leading-4 truncate !text-sidebar-foreground"
+          >
             {{ currentUser.available_name }}
           </div>
-          <div class="text-xs truncate text-white/65">
+          <div class="text-xs truncate !text-sidebar-secondary">
             {{ currentUser.email }}
           </div>
         </div>

@@ -9,7 +9,7 @@ const props = defineProps({
   deals: { type: Array, required: true },
 });
 
-defineEmits(['dragStart', 'dragOver', 'drop']);
+defineEmits(['dragStart', 'dragEnd', 'dragOver', 'drop']);
 
 const dealCount = computed(() => props.deals.length);
 const financialSum = computed(() =>
@@ -88,6 +88,7 @@ const stageAccent = computed(() => {
         :deal="deal"
         draggable="true"
         @dragstart="$emit('dragStart', $event, deal)"
+        @dragend="$emit('dragEnd', $event)"
       />
       <div
         v-if="!deals.length"
@@ -98,4 +99,3 @@ const stageAccent = computed(() => {
     </div>
   </div>
 </template>
-

@@ -1332,6 +1332,7 @@ const menuSections = computed(() => {
     'Video Conference', 'Settings',
     'JRC Broker Connections',
     'JRC Service Desk',
+    'JRC Service Desk Structure',
   ]);
   const legacyExtras = legacyMenuItems.value
     .filter(item => item && !mappedNames.has(item.name))
@@ -1377,7 +1378,11 @@ const menuSections = computed(() => {
     {
       name: 'administration',
       label: 'Administracao',
-      items: take(['JRC AI Administration', 'Settings']),
+      items: take([
+        'JRC Service Desk Structure',
+        'JRC AI Administration',
+        'Settings',
+      ]),
     },
     { name: 'legacy-tools', label: 'Outros recursos', items: legacyExtras },
   ].filter(section => section.items.length > 0);
@@ -1396,7 +1401,7 @@ const menuSections = computed(() => {
         ],
       },
     ]"
-    class="flex flex-col overflow-hidden bg-[#062f57] text-base pb-px fixed top-0 ltr:left-0 rtl:right-0 h-full z-40 w-[292px] md:w-auto md:relative md:flex-shrink-0 md:ltr:translate-x-0 md:rtl:translate-x-0 ltr:border-r rtl:border-l border-white/10 shadow-[8px_0_32px_rgba(5,40,76,0.12)]"
+    class="flex flex-col overflow-hidden bg-sidebar-surface text-sidebar-foreground text-base pb-px fixed top-0 ltr:left-0 rtl:right-0 h-full z-40 w-[292px] md:w-auto md:relative md:flex-shrink-0 md:ltr:translate-x-0 md:rtl:translate-x-0 ltr:border-r rtl:border-l border-white/10 shadow-[8px_0_32px_rgba(5,40,76,0.12)]"
     :class="[
       {
         'shadow-lg md:shadow-none': isMobileSidebarOpen,
@@ -1463,7 +1468,7 @@ const menuSections = computed(() => {
             {{ SIDEBAR_SEARCH_TEXT }}
           </span>
           <span
-            class="hidden tracking-wide pointer-events-none select-none text-white/60"
+            class="hidden tracking-wide pointer-events-none select-none text-sidebar-muted"
           >
             {{ searchShortcut }}
           </span>
@@ -1511,7 +1516,7 @@ const menuSections = computed(() => {
       </button>
     </section>
     <nav
-      class="relative z-10 grid overflow-y-scroll flex-grow gap-2 pb-5 min-w-0"
+      class="relative z-10 grid overflow-y-auto flex-grow gap-2 pb-5 min-w-0 [scrollbar-gutter:stable] [scrollbar-width:thin] [scrollbar-color:#7295b8_#062f57] hover:[scrollbar-color:#a0bdd8_#062f57] [&::-webkit-scrollbar]:w-3 [&::-webkit-scrollbar-track]:bg-[#062f57] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:border-[3px] [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-[#062f57] [&::-webkit-scrollbar-thumb]:bg-[#7295b8] [&::-webkit-scrollbar-thumb:hover]:bg-[#a0bdd8]"
       :class="isEffectivelyCollapsed ? 'px-1' : 'px-4'"
     >
       <section
@@ -1521,7 +1526,7 @@ const menuSections = computed(() => {
       >
         <p
           v-if="!isEffectivelyCollapsed"
-          class="px-2.5 pt-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/45"
+          class="px-2.5 pt-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-sidebar-muted"
         >
           {{ section.label }}
         </p>
@@ -1563,7 +1568,7 @@ const menuSections = computed(() => {
         <p class="text-sm font-semibold text-white">
           {{ JRC_BRAND_TEXT.group }}
         </p>
-        <p class="mt-1 text-xs leading-5 text-white/65">
+        <p class="mt-1 text-xs leading-5 text-sidebar-secondary">
           {{ JRC_BRAND_TEXT.messageLineOne }}<br />
           {{ JRC_BRAND_TEXT.messageLineTwo }}
         </p>

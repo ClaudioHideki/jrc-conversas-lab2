@@ -63,6 +63,11 @@ onBeforeUnmount(() => { session.resetResource(key); session.resetResource(previe
       <div class="flex flex-wrap gap-3">
         <PendingAction :label="t('JRC_SERVICE_DESK.COMMON.export')" icon="i-lucide-download" />
         <Button
+          v-if="
+            session.state.context?.units.some(
+              unit => unit.permissions.create_ticket === true
+            )
+          "
           :label="t('JRC_SERVICE_DESK.COMMON.open_structure')"
           icon="i-lucide-plus"
           size="sm"

@@ -37,6 +37,26 @@ beforeEach(()=>{wrappers=[];});
 afterEach(()=>{wrappers.forEach(wrapper=>wrapper.unmount());holder.session?.dispose();holder.session=null;});
 
 describe('CP3 view structures and explicit non-persistence (native Vue pending)',()=>{
+  it.each([true, false])(
+    'New ticket visibility follows the backend create grant: %s',
+    async allowed => {
+      await setupSession(
+        fakeClient({
+          context: async () =>
+            contextPayload({
+              units: contextPayload().units.map(unit => ({
+                ...unit,
+                permissions: { create_ticket: allowed },
+              })),
+            }),
+        })
+      );
+      const wrapper = await render(TicketListView, 'tickets');
+      expect(Boolean(button(wrapper, keys.COMMON.open_structure))).toBe(
+        allowed
+      );
+    }
+  );
   it('missing API renders pending rather than a fabricated ticket table or zero count',async()=>{
     await setupSession(fakeClient({context:async()=>{throw httpError(404);}}));
     const wrapper=await render(TicketListView,'tickets');

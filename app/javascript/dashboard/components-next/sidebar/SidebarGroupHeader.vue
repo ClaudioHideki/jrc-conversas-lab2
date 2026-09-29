@@ -34,12 +34,12 @@ const count = computed(() =>
     :to="disabled ? undefined : to"
     :title="label"
     :class="{
-      'bg-[#087cf0] text-white font-medium shadow-[0_6px_18px_rgba(8,124,240,0.28)]':
+      'bg-sidebar-active text-white font-medium shadow-[0_6px_18px_rgba(8,124,240,0.28)]':
         isActive && !hasActiveChild,
       'bg-white/10 text-white font-medium': hasActiveChild,
-      'text-white/90 hover:bg-white/10 hover:text-white':
+      'text-sidebar-foreground hover:bg-white/10 hover:text-white':
         !isActive && !hasActiveChild && !disabled,
-      'cursor-not-allowed text-white/40 opacity-60': disabled,
+      'cursor-not-allowed text-sidebar-muted': disabled,
     }"
     @click.stop="disabled ? undefined : emit('toggle')"
   >

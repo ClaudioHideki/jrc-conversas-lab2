@@ -179,8 +179,8 @@ onBeforeUnmount(clearCloseTimer);
       ghost
       slate
       xs
-      class="!size-6 !text-n-slate-11 hover:!text-n-slate-12"
-      :class="{ '!bg-n-alpha-2': isOpen }"
+      class="!size-6 !text-sidebar-secondary hover:!text-sidebar-foreground hover:!bg-white/10"
+      :class="{ '!bg-white/10': isOpen }"
       @click.stop="openMenu"
     />
     <TeleportWithDirection>

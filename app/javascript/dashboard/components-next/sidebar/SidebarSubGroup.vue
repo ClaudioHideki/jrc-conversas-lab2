@@ -73,7 +73,7 @@ const isScrollable = computed(() => {
 const scrollEnd = ref(false);
 
 const CHILDREN_TRUNK =
-  "before:content-[''] before:absolute before:top-0 before:bottom-0 before:w-0.5 before:bg-n-slate-4 before:start-[-0.5rem]";
+  "before:content-[''] before:absolute before:top-0 before:bottom-0 before:w-0.5 before:bg-white/25 before:start-[-0.5rem]";
 
 const hideLeafTreeLine = computed(
   () => props.showTreeLine && !props.isExpanded
@@ -169,11 +169,11 @@ watch([hasActiveChild, storageKey], expandSubGroupOnActiveChild, {
         <div
           v-if="isScrollable && isExpanded"
           v-show="!scrollEnd"
-          class="absolute bg-gradient-to-t from-n-background w-full h-12 to-transparent -bottom-1 pointer-events-none flex items-end justify-end px-2 animate-fade-in-up"
+          class="absolute bg-gradient-to-t from-sidebar-surface w-full h-12 to-transparent -bottom-1 pointer-events-none flex items-end justify-end px-2 animate-fade-in-up"
         >
           <Icon
             icon="i-woot-chevrons-down"
-            class="w-4 h-6 text-n-slate-9 opacity-50 group-hover:opacity-100"
+            class="w-4 h-6 text-sidebar-secondary"
           />
         </div>
       </ul>

@@ -40,9 +40,9 @@ defineProps({
 const emit = defineEmits(['toggle', 'update-sort']);
 
 const TREE_VERTICAL_LINE =
-  "before:content-[''] before:absolute before:-top-1 before:w-0.5 before:bg-n-slate-4 before:start-[-0.5rem]";
+  "before:content-[''] before:absolute before:-top-1 before:w-0.5 before:bg-white/25 before:start-[-0.5rem]";
 const TREE_ELBOW =
-  "after:content-[''] after:absolute after:w-2.5 after:h-3 after:bottom-1/2 after:start-[-0.5rem] after:border-b-2 after:border-s-2 after:rounded-es after:border-n-slate-4";
+  "after:content-[''] after:absolute after:w-2.5 after:h-3 after:bottom-1/2 after:start-[-0.5rem] after:border-b-2 after:border-s-2 after:rounded-es after:border-white/25";
 </script>
 
 <template>
@@ -52,7 +52,7 @@ const TREE_ELBOW =
       :type="collapsible ? 'button' : undefined"
       :aria-expanded="collapsible ? isExpanded : undefined"
       :title="label"
-      class="relative flex h-8 w-full min-w-0 items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-blue-200 select-none"
+      class="relative flex h-8 w-full min-w-0 items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-sidebar-secondary select-none"
       :class="[
         showTreeLine && TREE_VERTICAL_LINE,
         showTreeLine &&
@@ -89,7 +89,7 @@ const TREE_ELBOW =
       <button
         v-if="collapsible"
         type="button"
-        class="flex size-6 flex-shrink-0 items-center justify-center rounded-md text-blue-200 hover:bg-white/10 hover:text-white focus-visible:bg-white/10 focus-visible:outline-none"
+        class="flex size-6 flex-shrink-0 items-center justify-center rounded-md text-sidebar-secondary hover:bg-white/10 hover:text-white focus-visible:bg-white/10 focus-visible:outline-none"
         :aria-expanded="isExpanded"
         :aria-label="label"
         @click.stop="emit('toggle')"

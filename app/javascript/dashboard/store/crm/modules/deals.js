@@ -13,6 +13,7 @@ export default {
     pagination: {},
     kanbanColumns: [],
     error: null,
+    kanbanRequest: 0,
   },
 
   getters: {
@@ -75,9 +76,7 @@ export default {
     },
 
     UPDATE_DEAL_STAGE(state, { dealId, stageId }) {
-      const deal = state.deals.find(
-        item => Number(item.id) === Number(dealId)
-      );
+      const deal = state.deals.find(item => Number(item.id) === Number(dealId));
 
       if (deal) {
         deal.stage_id = stageId;
@@ -96,9 +95,7 @@ export default {
     },
 
     ROLLBACK_DEAL_STAGE(state, { dealId, stageId }) {
-      const deal = state.deals.find(
-        item => Number(item.id) === Number(dealId)
-      );
+      const deal = state.deals.find(item => Number(item.id) === Number(dealId));
 
       if (deal) {
         deal.stage_id = stageId;
@@ -118,6 +115,9 @@ export default {
 
     SET_KANBAN_COLUMNS(state, payload) {
       state.kanbanColumns = Array.isArray(payload) ? payload : [];
+    },
+    START_KANBAN_REQUEST(state) {
+      state.kanbanRequest += 1;
     },
   },
 
@@ -143,7 +143,7 @@ export default {
         commit(
           'SET_ERROR',
           error.response?.data?.error ||
-          'Não foi possível carregar os negócios.'
+            'Não foi possível carregar os negócios.'
         );
       } finally {
         commit('SET_LOADING', false);
@@ -175,8 +175,7 @@ export default {
 
         commit(
           'SET_ERROR',
-          error.response?.data?.error ||
-          'Não foi possível carregar o negócio.'
+          error.response?.data?.error || 'Não foi possível carregar o negócio.'
         );
       } finally {
         commit('SET_LOADING', false);
@@ -190,45 +189,55 @@ export default {
       });
     },
 
-    async fetchKanbanData({ commit, dispatch }, filters = {}) {
-      commit('SET_FILTERS', filters);
-
+    async fetchKanbanData({ commit, state, rootState }, filters = {}) {
+      commit('SET_FILTERS', { ...filters });
+      commit('START_KANBAN_REQUEST');
+      const request = state.kanbanRequest;
       const pipelineId = filters.pipeline_id || filters.pipelineId;
-
-      if (!pipelineId) {
-        commit('SET_KANBAN_COLUMNS', []);
-        return;
-      }
-
+      const pipelines = rootState.jrcCrm.pipelines.pipelines;
+      const pipelineIds = pipelineId ? [pipelineId] : pipelines.map(p => p.id);
       commit('SET_LOADING', true);
       commit('SET_ERROR', null);
-
+      commit('SET_KANBAN_COLUMNS', []);
+      commit('SET_DEALS', []);
       try {
-        const [stagesResponse] = await Promise.all([
-          stagesAPI.list({
-            pipeline_id: pipelineId,
-          }),
-
-          dispatch('fetchDeals', {
-            ...filters,
-            pipeline_id: pipelineId,
+        const [stagesResponses, dealsResponse] = await Promise.all([
+          Promise.all(
+            pipelineIds.map(id => stagesAPI.list({ pipeline_id: id }))
+          ),
+          dealsAPI.list({
+            pipeline_id: pipelineId || undefined,
+            owner_id: filters.owner_id || undefined,
+            search: filters.search,
           }),
         ]);
-
-        const stagesPayload =
-          stagesResponse.data?.payload || stagesResponse.data;
-
-        commit('SET_KANBAN_COLUMNS', stagesPayload);
+        if (request !== state.kanbanRequest) return;
+        const stages = stagesResponses.flatMap(
+          response => response.data?.payload || response.data
+        );
+        const deals = dealsResponse.data?.payload || dealsResponse.data;
+        if (!Array.isArray(deals) || stages.some(stage => !stage?.id)) {
+          throw new Error('Invalid funnel response');
+        }
+        commit('SET_KANBAN_COLUMNS', stages);
+        commit(
+          'SET_DEALS',
+          deals.filter(
+            deal =>
+              (!filters.overdueOnly ||
+                deal.overdue ||
+                deal.next_activity?.is_overdue) &&
+              (!filters.noNextActivity || !deal.next_activity)
+          )
+        );
       } catch (error) {
-        console.error('Erro ao carregar funil:', error);
-
+        if (request !== state.kanbanRequest) return;
         commit(
           'SET_ERROR',
-          error.response?.data?.error ||
-          'Não foi possível carregar o funil.'
+          error.response?.data?.error || 'Não foi possível carregar o funil.'
         );
       } finally {
-        commit('SET_LOADING', false);
+        if (request === state.kanbanRequest) commit('SET_LOADING', false);
       }
     },
   },

@@ -14,6 +14,14 @@ const {
 } = require('@radix-ui/colors');
 
 export const colors = {
+  // The sidebar keeps its navy surface in both application themes.
+  sidebar: {
+    surface: '#062f57',
+    foreground: '#ffffff',
+    secondary: '#dbeafe',
+    muted: '#b8cfe5',
+    active: '#087cf0',
+  },
   woot: {
     25: blue.blue2,
     50: blue.blue3,
