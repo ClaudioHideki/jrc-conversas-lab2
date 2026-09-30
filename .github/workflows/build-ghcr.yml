@@ -12,6 +12,15 @@ on:
         description: Publicar as imagens desta revisão no GHCR
         type: boolean
         default: false
+      component:
+        description: Imagens a construir
+        type: choice
+        options: [all, app]
+        default: all
+      source_sha:
+        description: SHA completo do código-fonte (vazio usa a revisão do workflow)
+        type: string
+        default: ''
 
 permissions:
   contents: read
@@ -23,26 +32,30 @@ env:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    concurrency:
+      group: ghcr-${{ matrix.component }}-${{ inputs.source_sha || github.sha }}
+      cancel-in-progress: false
+    env:
+      IMAGE: ${{ matrix.component == 'app' && 'claudiohideki/jrc-conversas-nico-v12-2-7-comercial-integrado' || format('claudiohideki/jrc-conversas-nico-v12-2-7-comercial-integrado-{0}', matrix.component) }}
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - component: app
-            image: claudiohideki/jrc-conversas-nico-v12-2-7-comercial-integrado
-            dockerfile: ./docker/Dockerfile
-            context: .
-          - component: nico-runtime
-            image: claudiohideki/jrc-conversas-nico-v12-2-7-comercial-integrado-nico-runtime
-            dockerfile: ./docker/nico-runtime.Dockerfile
-            context: .
-          - component: flows-sandbox
-            image: claudiohideki/jrc-conversas-nico-v12-2-7-comercial-integrado-flows-sandbox
-            dockerfile: ./services/flows-sandbox/Dockerfile
-            context: ./services/flows-sandbox
+        component: ${{ fromJSON(inputs.component == 'app' && '["app"]' || '["app","nico-runtime","flows-sandbox"]') }}
 
     steps:
       - name: Baixar codigo
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source_sha || github.sha }}
+
+      - name: Confirmar identidade do código-fonte
+        id: source
+        env:
+          EXPECTED_SHA: ${{ inputs.source_sha || github.sha }}
+        run: |
+          [[ "$EXPECTED_SHA" =~ ^[0-9a-f]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          echo "sha=$EXPECTED_SHA" >> "$GITHUB_OUTPUT"
 
       - name: Configurar Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -55,23 +68,43 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Recusar sobrescrita de tag existente
+        if: github.event_name == 'workflow_dispatch' && inputs.publish
+        env:
+          SOURCE_SHA: ${{ steps.source.outputs.sha }}
+        run: |
+          set +e
+          result=$(docker buildx imagetools inspect "$REGISTRY/$IMAGE:sha-$SOURCE_SHA" 2>&1)
+          status=$?
+          set -e
+          if [ "$status" -eq 0 ]; then
+            echo 'A tag já existe; publicação recusada.' >&2
+            exit 1
+          fi
+          if ! grep -Eqi 'manifest unknown|not found' <<< "$result"; then
+            printf '%s\n' "$result" >&2
+            exit 1
+          fi
+
       - name: Gerar metadados
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ matrix.image }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE }}
           tags: |
-            type=raw,value=sha-${{ github.sha }}
+            type=raw,value=sha-${{ steps.source.outputs.sha }}
+          labels: |
+            org.opencontainers.image.revision=${{ steps.source.outputs.sha }}
 
       - name: Construir e publicar ${{ matrix.component }}
         uses: docker/build-push-action@v6
         with:
-          context: ${{ matrix.context }}
-          file: ${{ matrix.dockerfile }}
+          context: ${{ matrix.component == 'flows-sandbox' && './services/flows-sandbox' || '.' }}
+          file: ${{ matrix.component == 'app' && './docker/Dockerfile' || matrix.component == 'nico-runtime' && './docker/nico-runtime.Dockerfile' || './services/flows-sandbox/Dockerfile' }}
           platforms: linux/amd64
           push: ${{ github.event_name == 'workflow_dispatch' && inputs.publish }}
           build-args: |
-            GIT_SHA=${{ github.sha }}
+            GIT_SHA=${{ steps.source.outputs.sha }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=${{ matrix.component }}
