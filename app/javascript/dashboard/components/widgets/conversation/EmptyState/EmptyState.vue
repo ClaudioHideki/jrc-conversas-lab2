@@ -4,11 +4,13 @@ import { useAdmin } from 'dashboard/composables/useAdmin';
 import { useAccount } from 'dashboard/composables/useAccount';
 import OnboardingView from '../OnboardingView.vue';
 import EmptyStateMessage from './EmptyStateMessage.vue';
+import ConversationHome from 'dashboard/components-next/Conversation/ConversationHome/ConversationHome.vue';
 
 export default {
   components: {
     OnboardingView,
     EmptyStateMessage,
+    ConversationHome,
   },
   props: {
     isOnExpandedLayout: {
@@ -78,7 +80,10 @@ export default {
       <OnboardingView v-if="isAdmin" />
       <EmptyStateMessage v-else :message="$t('CONVERSATION.NO_INBOX_AGENT')" />
     </div>
-    <!-- Show empty state images if not loading -->
+    <ConversationHome
+      v-else-if="!uiFlags.isFetching && !loadingChatList && !isOnExpandedLayout && !currentChat.id"
+    />
+    <!-- Preserve loading, onboarding and unavailable-conversation states. -->
 
     <div
       v-else-if="!uiFlags.isFetching && !loadingChatList"

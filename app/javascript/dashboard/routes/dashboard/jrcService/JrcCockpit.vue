@@ -131,7 +131,7 @@ const summaryCards = computed(() => {
       value: formatNumber(summary.calls_in_progress),
       detail: `${formatNumber(summary.missed_calls)} perdida(s)`,
       icon: 'i-lucide-phone-call',
-      tone: 'rose',
+      tone: summary.missed_calls > 0 ? 'rose' : 'teal',
       route: 'jrc_calls_center',
     },
     {
@@ -149,7 +149,7 @@ const summaryCards = computed(() => {
       value: formatPercent(summary.sla_estimated_percent),
       detail: `${formatNumber(summary.sla_risk_count)} em risco`,
       icon: 'i-lucide-gauge',
-      tone: 'teal',
+      tone: summary.sla_risk_count > 0 ? 'amber' : 'teal',
       route: 'operational_live_reports',
     },
   ];
@@ -495,7 +495,7 @@ onBeforeUnmount(() => window.clearInterval(refreshTimer));
               <p class="truncate text-xs font-semibold text-n-slate-11">
                 {{ card.label }}
               </p>
-              <strong class="mt-3 block text-3xl text-n-slate-12">
+              <strong class="mt-3 block text-3xl" :class="toneClasses(card.tone).split(' ')[2]">
                 {{ card.value }}
               </strong>
             </div>
@@ -530,7 +530,7 @@ onBeforeUnmount(() => window.clearInterval(refreshTimer));
             </span>
             <div>
               <p class="text-xs text-n-slate-11">{{ card.label }}</p>
-              <strong class="text-xl text-n-slate-12">{{ card.value }}</strong>
+              <strong class="text-xl" :class="toneClasses(card.tone).split(' ')[2]">{{ card.value }}</strong>
             </div>
           </div>
         </article>

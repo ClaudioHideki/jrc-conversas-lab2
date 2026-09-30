@@ -10,6 +10,8 @@ import CmdBarConversationSnooze from 'dashboard/routes/dashboard/commands/CmdBar
 import { emitter } from 'shared/helpers/mitt';
 import SidepanelSwitch from 'dashboard/components-next/Conversation/SidepanelSwitch.vue';
 import ConversationSidebar from 'dashboard/components/widgets/conversation/ConversationSidebar.vue';
+import ConversationHome from 'dashboard/components-next/Conversation/ConversationHome/ConversationHome.vue';
+import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 
 export default {
   components: {
@@ -18,6 +20,8 @@ export default {
     CmdBarConversationSnooze,
     SidepanelSwitch,
     ConversationSidebar,
+    ConversationHome,
+    Dialog,
   },
   beforeRouteLeave(to, from, next) {
     // Clear selected state if navigating away from a conversation to a route without a conversationId to prevent stale data issues
@@ -223,7 +227,17 @@ export default {
       :folders-id="foldersId"
       :is-on-expanded-layout="isOnExpandedLayout"
       @conversation-load="onConversationLoad"
-    />
+    >
+      <button
+        v-if="isOnExpandedLayout && !conversationId"
+        type="button"
+        class="m-3 flex min-h-10 items-center justify-center gap-2 rounded-xl border border-n-blue-6 bg-n-blue-2 px-3 text-sm font-semibold text-n-blue-11 hover:bg-n-blue-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-n-brand"
+        @click="$refs.homeDialog.open()"
+      >
+        <span class="i-lucide-sparkles size-4" aria-hidden="true" />
+        {{ $t('JRC_HOME.QUICK_ACTIONS') }}
+      </button>
+    </ChatList>
     <ConversationBox
       v-if="showMessageView"
       class="lg:h-full lg:min-w-0 lg:overflow-hidden lg:rounded-2xl lg:border lg:border-n-weak lg:bg-n-solid-1 lg:shadow-sm"
@@ -238,5 +252,10 @@ export default {
       :current-chat="currentChat"
     />
     <CmdBarConversationSnooze />
+    <Dialog ref="homeDialog" width="3xl" overflow-y-auto :title="$t('JRC_HOME.QUICK_ACTIONS')" :cancel-button-label="$t('GENERAL.CLOSE')" :show-confirm-button="false">
+      <div class="h-[min(42rem,70dvh)] min-h-0 overflow-hidden">
+        <ConversationHome @navigate="$refs.homeDialog.close()" />
+      </div>
+    </Dialog>
   </section>
 </template>

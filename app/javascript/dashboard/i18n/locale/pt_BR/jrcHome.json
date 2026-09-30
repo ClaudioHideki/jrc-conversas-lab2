@@ -1,0 +1,41 @@
+{
+  "JRC_HOME": {
+    "TITLE": "Central de trabalho NICO",
+    "HEADLINE": "está aqui para te ajudar",
+    "GREETING": "Olá, {name}!",
+    "USER": "usuário",
+    "INTRO": "Acompanhe suas prioridades e acesse as ferramentas do JRC Conversas em um só lugar.",
+    "LEARNING": "Capacitação",
+    "QUICK_ACTIONS": "NICO e ações rápidas",
+    "METRIC_SCOPE": "Hoje no seu escopo autorizado. Os indicadores não seguem os filtros da lista de conversas.",
+    "LOADING": "Atualizando...",
+    "REFRESH": "Atualizar",
+    "METRIC_ERROR": "Não foi possível consultar os indicadores. Tente atualizar novamente.",
+    "UNAVAILABLE": "Indisponível",
+    "AUTHORIZED_DATA": "Dados do seu escopo",
+    "SNAPSHOT": "Retrato da última consulta. Use Atualizar para buscar os dados mais recentes.",
+    "NEXT_ACTION": "O que você deseja fazer agora?",
+    "PROMPT_LABEL": "Solicitação para o NICO",
+    "PROMPT_PLACEHOLDER": "Pergunte ao NICO ou peça ajuda com uma ação...",
+    "PROMPT_SUMMARY": "Resuma minhas conversas de hoje.",
+    "PROMPT_GUIDE": "Mostre o que posso fazer nos módulos disponíveis para mim.",
+    "SEND": "Enviar ao NICO",
+    "NICO_HELP": "O painel do NICO será aberto com sua solicitação. As permissões e confirmações de cada ação continuam valendo.",
+    "CONTACT_ERROR": "Não foi possível criar o contato. Confira os dados e tente novamente.",
+    "ACTIONS": {
+      "CONTACT": "Novo contato",
+      "CALL": "Nova ligação",
+      "LEAD": "Novo lead",
+      "DEAL": "Nova oportunidade",
+      "ACTIVITY": "Nova atividade",
+      "TICKET": "Novo chamado",
+      "NICO": "Conversar com o NICO"
+    },
+    "METRICS": {
+      "WAITING": "Conversas aguardando",
+      "MISSED": "Ligações perdidas",
+      "SLA": "Conversas em risco de SLA",
+      "TASKS": "Atividades pendentes"
+    }
+  }
+}

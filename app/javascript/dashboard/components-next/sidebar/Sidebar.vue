@@ -3,6 +3,8 @@ import { useOperations } from 'dashboard/routes/dashboard/jrcOperations/useOpera
 import { h, ref, computed, onMounted, watch } from 'vue';
 import { provideSidebarContext, useSidebarResize } from './provider';
 import { visibleSidebarSections } from './temporaryVisibility';
+import { universityLink } from './university';
+import SidebarUniversity from './SidebarUniversity.vue';
 import { useServiceDeskNavigation } from 'dashboard/composables/useServiceDeskNavigation';
 import { useServiceDeskStructure } from 'dashboard/composables/useServiceDeskStructure';
 import { useAccount } from 'dashboard/composables/useAccount';
@@ -1412,6 +1414,7 @@ const menuSections = computed(() => {
         'Settings',
       ]),
     },
+    { name: 'learning', label: t('JRC_HOME.LEARNING'), items: [universityLink] },
     { name: 'legacy-tools', label: 'Outros recursos', items: legacyExtras },
   ]);
 });
@@ -1566,11 +1569,10 @@ const menuSections = computed(() => {
           class="flex flex-col gap-1 m-0 list-none min-w-0"
           :class="{ 'items-center': isEffectivelyCollapsed }"
         >
-          <SidebarGroup
-            v-for="item in section.items"
-            :key="item.name"
-            v-bind="item"
-          />
+          <template v-for="item in section.items" :key="item.name">
+            <SidebarUniversity v-if="item.name === universityLink.name" :collapsed="isEffectivelyCollapsed" />
+            <SidebarGroup v-else v-bind="item" />
+          </template>
         </ul>
       </section>
     </nav>

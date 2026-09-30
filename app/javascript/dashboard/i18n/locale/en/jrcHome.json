@@ -1,0 +1,41 @@
+{
+  "JRC_HOME": {
+    "TITLE": "NICO workspace",
+    "HEADLINE": "is here to help you",
+    "GREETING": "Hello, {name}!",
+    "USER": "user",
+    "INTRO": "Follow your priorities and access JRC Conversas tools in one place.",
+    "LEARNING": "Learning",
+    "QUICK_ACTIONS": "NICO and quick actions",
+    "METRIC_SCOPE": "Today within your authorized scope. Indicators are independent of conversation list filters.",
+    "LOADING": "Updating...",
+    "REFRESH": "Refresh",
+    "METRIC_ERROR": "Unable to load indicators. Try refreshing again.",
+    "UNAVAILABLE": "Unavailable",
+    "AUTHORIZED_DATA": "Data in your scope",
+    "SNAPSHOT": "Snapshot from the latest request. Refresh to retrieve current data.",
+    "NEXT_ACTION": "What would you like to do now?",
+    "PROMPT_LABEL": "Request for NICO",
+    "PROMPT_PLACEHOLDER": "Ask NICO a question or request help with an action...",
+    "PROMPT_SUMMARY": "Summarize my conversations today.",
+    "PROMPT_GUIDE": "Show what I can do in the modules available to me.",
+    "SEND": "Send to NICO",
+    "NICO_HELP": "The NICO panel will open with your request. Existing permissions and action confirmations still apply.",
+    "CONTACT_ERROR": "Unable to create the contact. Check the details and try again.",
+    "ACTIONS": {
+      "CONTACT": "New contact",
+      "CALL": "New call",
+      "LEAD": "New lead",
+      "DEAL": "New opportunity",
+      "ACTIVITY": "New activity",
+      "TICKET": "New ticket",
+      "NICO": "Talk to NICO"
+    },
+    "METRICS": {
+      "WAITING": "Waiting conversations",
+      "MISSED": "Missed calls",
+      "SLA": "Conversations at SLA risk",
+      "TASKS": "Pending activities"
+    }
+  }
+}

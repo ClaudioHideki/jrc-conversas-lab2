@@ -41,7 +41,14 @@ describe('JRC pt-BR catalogs and display labels', () => {
     config.global.plugins = originalPlugins;
   });
 
-  it.each(['CRM', 'JRC_NICO', 'JRC_SERVICE_DESK', 'CALLS_PAGE', 'SOFTPHONE'])(
+  it.each([
+    'CRM',
+    'JRC_NICO',
+    'JRC_SERVICE_DESK',
+    'CALLS_PAGE',
+    'SOFTPHONE',
+    'JRC_HOME',
+  ])(
     'registers all %s messages in pt-BR without falling back to English',
     namespace => {
       const translated = Object.fromEntries(leaves(ptBR[namespace]));
