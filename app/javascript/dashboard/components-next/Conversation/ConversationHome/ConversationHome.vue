@@ -1,33 +1,21 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
-import { useAlert } from 'dashboard/composables';
 import { useJrcCopilot } from 'dashboard/components-next/jrcCopilot/useJrcCopilot';
-import CreateNewContactDialog from 'dashboard/components-next/Contacts/ContactsForm/CreateNewContactDialog.vue';
-import ConversationQuickActions from './ConversationQuickActions.vue';
 import { useConversationHome } from './useConversationHome';
 import { homeMetrics, homeTones } from './presentation';
 
 const { t, locale } = useI18n();
 const avatarUrl = '/brand-assets/jrc-copilot-avatar.png';
 const emit = defineEmits(['navigate']);
-const router = useRouter();
-const store = useStore();
 const home = useConversationHome();
-const { actions, user, summary, crmAllowed, failed, loading, generatedAt } =
-  home;
+const { user, summary, crmAllowed, failed, loading, generatedAt } = home;
 const { openQuick, openWithPrompt } = useJrcCopilot();
 const prompt = ref('');
-const contactDialog = ref(null);
-const canCreateContact = computed(() =>
-  actions.value.some(action => action.key === 'CONTACT')
-);
-const contactDialogKey = computed(
+const identityKey = computed(
   () => `${home.accountId.value}:${home.userId.value}`
 );
-watch(contactDialogKey, () => {
+watch(identityKey, () => {
   prompt.value = '';
 });
 const firstName = computed(
@@ -41,32 +29,6 @@ const formatCount = value =>
 const openNico = () => {
   emit('navigate');
   openQuick();
-};
-const activate = key => {
-  // Re-evaluate access at the instant of the click, including revocation/account changes.
-  const action = actions.value.find(item => item.key === key);
-  if (!action) return;
-  if (action.command === 'contact') contactDialog.value?.dialogRef.open();
-  else if (action.command === 'nico') openNico();
-  else {
-    emit('navigate');
-    router.push(action.to);
-  }
-};
-const createContact = async contact => {
-  if (!canCreateContact.value) return;
-  const identity = contactDialogKey.value;
-  try {
-    await store.dispatch('contacts/create', contact);
-    if (identity !== contactDialogKey.value) return;
-    contactDialog.value?.onSuccess();
-    useAlert(
-      t('CONTACTS_LAYOUT.HEADER.ACTIONS.CONTACT_CREATION.SUCCESS_MESSAGE')
-    );
-  } catch {
-    if (identity === contactDialogKey.value)
-      useAlert(t('JRC_HOME.CONTACT_ERROR'));
-  }
 };
 const ask = text => {
   if (!text.trim()) return;
@@ -82,7 +44,7 @@ const suggestedPrompts = computed(() => [
 
 <template>
   <section
-    class="flex h-full min-h-0 w-full min-w-0 flex-col-reverse overflow-hidden bg-n-surface-1 xl:flex-row"
+    class="flex h-full min-h-0 w-full min-w-0 flex-col overflow-hidden bg-n-surface-1"
     :aria-label="t('JRC_HOME.TITLE')"
   >
     <main
@@ -237,12 +199,5 @@ const suggestedPrompts = computed(() => [
         </p>
       </section>
     </main>
-    <ConversationQuickActions :actions="actions" @select="activate" />
-    <CreateNewContactDialog
-      v-if="canCreateContact"
-      :key="contactDialogKey"
-      ref="contactDialog"
-      @create="createContact"
-    />
   </section>
 </template>

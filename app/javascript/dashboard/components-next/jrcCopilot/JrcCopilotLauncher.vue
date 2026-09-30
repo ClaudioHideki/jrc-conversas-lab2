@@ -12,7 +12,10 @@ import { useI18n } from 'vue-i18n';
 import api from 'dashboard/api/jrcNicoOperations';
 import { useJrcCopilot } from './useJrcCopilot';
 
-const props = defineProps({ callActive: { type: Boolean, default: false } });
+const props = defineProps({
+  callActive: { type: Boolean, default: false },
+  docked: { type: Boolean, default: false },
+});
 const route = useRoute();
 const { t } = useI18n();
 const label = key => t(`JRC_NICO.OPERATOR.${key}`);
@@ -131,8 +134,15 @@ onBeforeUnmount(() => {
   <section
     v-show="mode !== 'full'"
     :aria-label="label('NOTICES')"
-    class="pointer-events-none absolute end-2 z-40 flex w-14 flex-col items-center gap-1 sm:end-3 sm:w-[72px]"
-    :class="callActive ? 'top-4' : 'bottom-20 sm:bottom-4'"
+    class="pointer-events-none z-40 flex w-14 shrink-0 flex-col items-center gap-1 xl:w-[72px]"
+    :class="
+      docked
+        ? 'relative'
+        : [
+            'absolute end-2 sm:end-3',
+            callActive ? 'top-4' : 'bottom-20 sm:bottom-4',
+          ]
+    "
     @keydown.esc.stop="dismissBubble"
   >
     <div class="sr-only" role="status" aria-live="polite" aria-atomic="true">
@@ -210,7 +220,7 @@ onBeforeUnmount(() => {
     <button
       ref="avatar"
       type="button"
-      class="pointer-events-auto relative grid size-14 shrink-0 place-content-center rounded-full border-2 border-white bg-gradient-to-br from-n-blue-3 to-n-teal-3 shadow-lg ring-1 ring-n-blue-6 hover:shadow-xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-n-blue-7 motion-safe:transition motion-safe:duration-200 motion-safe:hover:-translate-y-1 sm:size-[72px]"
+      class="pointer-events-auto relative grid size-14 shrink-0 place-content-center rounded-full border-2 border-white bg-gradient-to-br from-n-blue-3 to-n-teal-3 shadow-lg ring-1 ring-n-blue-6 hover:shadow-xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-n-blue-7 motion-safe:transition motion-safe:duration-200 motion-safe:hover:-translate-y-1 xl:size-[72px]"
       :aria-label="label('OPEN_ASSISTANT')"
       :aria-expanded="isOpen"
       aria-controls="nico-quick-panel"
@@ -223,7 +233,7 @@ onBeforeUnmount(() => {
         :src="avatarUrl"
         alt=""
         draggable="false"
-        class="size-12 rounded-full object-cover sm:size-16"
+        class="size-12 rounded-full object-cover xl:size-16"
       />
       <span
         v-if="unread.length"

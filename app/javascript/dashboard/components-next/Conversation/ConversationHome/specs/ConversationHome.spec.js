@@ -126,39 +126,15 @@ describe('NICO conversation workspace', () => {
       expect(cards[1].text()).toContain('Indisponível');
       expect(cards[3].text()).toContain('Atividades pendentes');
       expect(wrapper.get('main').classes()).toContain('overflow-y-auto');
-      expect(wrapper.get('nav').classes()).toContain('xl:flex-col');
-      expect(wrapper.get('nav').classes()).toContain('overflow-x-auto');
+      expect(wrapper.findComponent(ConversationQuickActions).exists()).toBe(
+        false
+      );
+      expect(wrapper.find('[data-contact-dialog]').exists()).toBe(false);
       expect(
         wrapper.get('button[type="submit"]').attributes('disabled')
       ).toBeDefined();
     }
   );
-
-  it('opens the original modal and routes without performing writes on shortcut clicks', async () => {
-    wrapper = mount(ConversationHome);
-    await wrapper.get('button[aria-label="Novo contato"]').trigger('click');
-    expect(mocks.open).toHaveBeenCalledOnce();
-    await wrapper.get('button[aria-label="Nova ligação"]').trigger('click');
-    expect(mocks.push).toHaveBeenCalledWith({
-      name: 'ramal_index',
-      params: { accountId: 1 },
-    });
-    await wrapper.get('button[aria-label="Novo lead"]').trigger('click');
-    expect(mocks.push).toHaveBeenLastCalledWith({
-      name: 'crm_leads',
-      params: { accountId: 1 },
-      query: { new: '1' },
-    });
-    expect(mocks.dispatch).not.toHaveBeenCalled();
-    expect(wrapper.emitted('navigate')).toHaveLength(2);
-  });
-
-  it('rejects a stale action after permissions are removed', () => {
-    wrapper = mount(ConversationHome);
-    mocks.home.actions.value = [];
-    wrapper.findComponent(ConversationQuickActions).vm.$emit('select', 'LEAD');
-    expect(mocks.push).not.toHaveBeenCalled();
-  });
 
   it('uses the existing NICO panel for prompts and never fabricates results', async () => {
     wrapper = mount(ConversationHome);
@@ -167,23 +143,6 @@ describe('NICO conversation workspace', () => {
     expect(mocks.ask).toHaveBeenCalledWith('Resuma minhas conversas');
     expect(wrapper.text()).not.toContain('Ação concluída');
     expect(wrapper.emitted('navigate')).toHaveLength(1);
-  });
-
-  it('saves contacts through the existing store and only confirms actual success', async () => {
-    wrapper = mount(ConversationHome);
-    const payload = { name: 'Contato de teste' };
-    const dialog = wrapper.findComponent({ name: 'CreateNewContactDialog' });
-    mocks.dispatch.mockRejectedValueOnce(new Error('denied'));
-    dialog.vm.$emit('create', payload);
-    await flushPromises();
-    expect(mocks.success).not.toHaveBeenCalled();
-    expect(mocks.alert).toHaveBeenCalledWith(
-      expect.stringContaining('Não foi possível')
-    );
-    dialog.vm.$emit('create', payload);
-    await flushPromises();
-    expect(mocks.dispatch).toHaveBeenCalledWith('contacts/create', payload);
-    expect(mocks.success).toHaveBeenCalledOnce();
   });
 
   it('drops drafts and remounts the contact dialog when account identity changes', async () => {

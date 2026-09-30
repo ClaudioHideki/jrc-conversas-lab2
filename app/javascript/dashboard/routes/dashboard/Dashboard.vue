@@ -26,7 +26,7 @@ const FloatingCallWidget = defineAsyncComponent(
   () => import('dashboard/components-next/call/FloatingCallWidget.vue')
 );
 
-import JrcCopilotLauncher from 'dashboard/components-next/jrcCopilot/JrcCopilotLauncher.vue';
+import GlobalQuickActions from 'dashboard/components-next/layout/GlobalQuickActions.vue';
 import JrcCopilotPanel from 'dashboard/components-next/jrcCopilot/JrcCopilotPanel.vue';
 import { useJrcCopilot } from 'dashboard/components-next/jrcCopilot/useJrcCopilot';
 
@@ -43,7 +43,7 @@ export default {
     WootKeyShortcutModal,
     AddAccountModal,
     UpgradePage,
-    JrcCopilotLauncher,
+    GlobalQuickActions,
     JrcCopilotPanel,
     FloatingCallWidget,
     MobileSidebarLauncher,
@@ -170,37 +170,41 @@ export default {
     >
       <JrcTopBar />
       <div
-        class="relative flex min-h-0 flex-1 overflow-hidden"
-        :class="!showUpgradePage && !nicoOpen ? 'pe-16 sm:pe-24' : ''"
+        class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden lg:flex-row"
       >
-        <UpgradePage
-          v-show="showUpgradePage"
-          ref="upgradePageRef"
-          :bypass-upgrade-page="bypassUpgradePage"
-        >
-          <MobileSidebarLauncher
-            :is-mobile-sidebar-open="isMobileSidebarOpen"
-            @toggle="toggleMobileSidebar"
-          />
-        </UpgradePage>
-        <template v-if="!showUpgradePage">
-          <div
-            :class="nicoOpen ? 'hidden sm:block' : ''"
-            class="h-full min-h-0 w-full min-w-0 flex-1 overflow-auto"
+        <div class="relative flex min-h-0 min-w-0 flex-1 overflow-hidden">
+          <UpgradePage
+            v-show="showUpgradePage"
+            ref="upgradePageRef"
+            :bypass-upgrade-page="bypassUpgradePage"
           >
-            <router-view />
-          </div>
-          <CommandBar />
-          <MobileSidebarLauncher
-            v-if="!nicoOpen || windowWidth >= 640"
-            :is-mobile-sidebar-open="isMobileSidebarOpen"
-            @toggle="toggleMobileSidebar"
-          />
-          <JrcCopilotPanel />
-          <FloatingCallWidget v-if="hasActiveCall || hasIncomingCall" />
-          <SipCallWidget />
-          <JrcCopilotLauncher :call-active="nicoCallActive" />
-        </template>
+            <MobileSidebarLauncher
+              :is-mobile-sidebar-open="isMobileSidebarOpen"
+              @toggle="toggleMobileSidebar"
+            />
+          </UpgradePage>
+          <template v-if="!showUpgradePage">
+            <div
+              :class="nicoOpen ? 'hidden sm:block' : ''"
+              class="h-full min-h-0 w-full min-w-0 flex-1 overflow-auto"
+            >
+              <router-view />
+            </div>
+            <CommandBar />
+            <MobileSidebarLauncher
+              v-if="!nicoOpen || windowWidth >= 640"
+              :is-mobile-sidebar-open="isMobileSidebarOpen"
+              @toggle="toggleMobileSidebar"
+            />
+            <JrcCopilotPanel />
+            <FloatingCallWidget v-if="hasActiveCall || hasIncomingCall" />
+            <SipCallWidget />
+          </template>
+        </div>
+        <GlobalQuickActions
+          v-if="!showUpgradePage"
+          :call-active="nicoCallActive"
+        />
       </div>
       <AddAccountModal
         :show="showCreateAccountModal"

@@ -1,4 +1,5 @@
 <script setup>
+import { useQuickActionTarget } from 'dashboard/components-next/layout/useQuickActionTarget';
 /* eslint-disable vue/no-bare-strings-in-template, @intlify/vue-i18n/no-raw-text */
 import { computed, onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -20,6 +21,9 @@ const store = useStore();
 const route = useRoute();
 const router = useRouter();
 const showForm = ref(false);
+useQuickActionTarget('crm_activities', () => {
+  showForm.value = true;
+});
 const saving = ref(false);
 const deals = ref([]);
 const form = reactive({

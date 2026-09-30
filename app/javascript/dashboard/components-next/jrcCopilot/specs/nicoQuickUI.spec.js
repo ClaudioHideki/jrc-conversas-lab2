@@ -163,7 +163,10 @@ describe('Quick NICO and Full Copilot use one operator session', () => {
     ui.focusedNoticeId.value = null;
     const host = defineComponent({
       components: { JrcCopilotLauncher, JrcCopilotPanel },
-      template: '<div><JrcCopilotLauncher /><JrcCopilotPanel /></div>',
+      // eslint-disable-next-line vue/no-unused-properties -- Consumed by the inline host template below.
+      props: { docked: { type: Boolean, default: false } },
+      template:
+        '<div><JrcCopilotLauncher :docked="docked" /><JrcCopilotPanel /></div>',
     });
     wrapper = mount(host, {
       attachTo: document.body,
@@ -179,6 +182,21 @@ describe('Quick NICO and Full Copilot use one operator session', () => {
     });
     await flushPromises();
   });
+  it('keeps the existing notice session and quick panel when docked in the global rail', async () => {
+    const launcher = wrapper.findComponent(JrcCopilotLauncher);
+    const reads = api.notices.mock.calls.length;
+    await wrapper.setProps({ docked: true });
+    expect(launcher.classes()).toContain('relative');
+    expect(launcher.classes()).not.toContain('absolute');
+    await launcher
+      .get('button[aria-controls="nico-quick-panel"]')
+      .trigger('click');
+    await flushPromises();
+    expect(ui.mode.value).toBe('quick');
+    expect(api.notices.mock.calls.length - reads).toBeLessThanOrEqual(1);
+    expect(wrapper.findAllComponents(JrcCopilotLauncher)).toHaveLength(1);
+  });
+
   afterEach(() => {
     wrapper.unmount();
     ui.close();

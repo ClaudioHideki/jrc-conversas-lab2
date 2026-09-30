@@ -1,4 +1,5 @@
 <script setup>
+import { useQuickActionTarget } from 'dashboard/components-next/layout/useQuickActionTarget';
 import OperationsLinks from '../../../jrcOperations/components/OperationsLinks.vue';
 import { crmControlClasses } from '../../crmControlClasses';
 /* eslint-disable vue/no-bare-strings-in-template, @intlify/vue-i18n/no-raw-text */
@@ -94,6 +95,7 @@ const openForm = () => {
   form.conversation_id = route.query.conversationId || '';
   showForm.value = true;
 };
+useQuickActionTarget('crm_deals', openForm);
 
 const createContact = async () => {
   if (!contactForm.name.trim()) return;
