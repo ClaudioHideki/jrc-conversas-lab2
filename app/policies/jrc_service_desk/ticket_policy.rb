@@ -34,7 +34,7 @@ class JrcServiceDesk::TicketPolicy < JrcServiceDesk::OperationalPolicy
       context = operational_context
       return scope.none unless context.capability?(:tickets_view)
 
-      records = scope.where(account_id: context.account.id, unit_id: context.view_unit_scope.select(:id))
+      records = scope.where(account_id: context.account.id, unit_id: context.unit_scope.select(:id))
       return records if context.capability?(:tickets_view_all) # Always within the current Account and authorized view scope.
 
       memberships = context.active_memberships.select(:id)

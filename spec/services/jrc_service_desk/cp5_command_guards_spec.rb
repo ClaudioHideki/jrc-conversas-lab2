@@ -37,9 +37,11 @@ RSpec.describe 'CP5 command-level authorization and audit' do
     target = create(:account_user, account: sd_account)
     create(:jrc_sd_membership, unit: sd_unit, account_user: target)
     grants('module_view', 'tickets_view', 'tickets_create', 'customers_view', 'lookups_view')
-    expect { JrcServiceDesk::CreateTicketService.new(user_context: sd_context).call(unit_id: sd_unit.id,
-      attributes: sd_create_attributes.merge(assignee_account_user_id: target.id), idempotency_key: SecureRandom.uuid) }.to raise_error(Pundit::NotAuthorizedError)
-    expect(JrcServiceDesk::Ticket.count).to eq(0)
+    expect do
+      expect { JrcServiceDesk::CreateTicketService.new(user_context: sd_context).call(unit_id: sd_unit.id,
+        attributes: sd_create_attributes.merge(assignee_account_user_id: target.id), idempotency_key: SecureRandom.uuid) }.to raise_error(Pundit::NotAuthorizedError)
+    end.not_to change(JrcServiceDesk::Ticket, :count)
+    expect(JrcServiceDesk::Ticket.where(account_id: sd_account.id).count).to eq(0)
   end
 
   it 'records transfer intent and does not silently share a unit' do
@@ -90,10 +92,12 @@ RSpec.describe 'CP5 command-level authorization and audit' do
     command = JrcServiceDesk::CreateTicketWorkflowService.new(user_context: sd_context)
     first = command.call(unit_id: sd_unit.id, attributes: sd_create_attributes, conversation_id: conversation.id, idempotency_key: key)
     grants('module_view', 'tickets_view', 'tickets_create', 'customers_view', 'lookups_view')
-    expect { command.call(unit_id: sd_unit.id, attributes: sd_create_attributes,
-      conversation_id: conversation.id, idempotency_key: key) }.to raise_error(Pundit::NotAuthorizedError)
+    expect do
+      expect { command.call(unit_id: sd_unit.id, attributes: sd_create_attributes,
+        conversation_id: conversation.id, idempotency_key: key) }.to raise_error(Pundit::NotAuthorizedError)
+    end.not_to change(JrcServiceDesk::Ticket, :count)
     expect(first.ticket_conversations.count).to eq(1)
-    expect(JrcServiceDesk::Ticket.count).to eq(1)
+    expect(JrcServiceDesk::Ticket.where(account_id: sd_account.id).count).to eq(1)
   end
 
 end

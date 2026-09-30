@@ -63,11 +63,13 @@ RSpec.describe 'JRC Service Desk CP4 request boundaries', type: :request do
     denied_units = [sd_other_unit, sd_foreign_unit]
     original_units = JrcServiceDesk::Unit.count
     denied_units.each do |unit|
-      post "#{base}/tickets", headers: headers.merge('Idempotency-Key' => "bad-unit-#{unit.id}"), as: :json,
-        params: { unit_id: unit.id, ticket: sd_create_attributes }
+      expect do
+        post "#{base}/tickets", headers: headers.merge('Idempotency-Key' => "bad-unit-#{unit.id}"), as: :json,
+          params: { unit_id: unit.id, ticket: sd_create_attributes }
+      end.not_to change(JrcServiceDesk::Ticket, :count)
       denied!
     end
-    expect(JrcServiceDesk::Ticket.count).to eq(0)
+    expect(JrcServiceDesk::Ticket.where(account_id: sd_account.id).count).to eq(0)
     expect(JrcServiceDesk::Unit.count).to eq(original_units)
   end
 

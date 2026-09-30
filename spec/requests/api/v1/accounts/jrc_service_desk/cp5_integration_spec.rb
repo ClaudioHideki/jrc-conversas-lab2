@@ -82,11 +82,13 @@ RSpec.describe 'CP5 native integrations', type: :request do
   end
   it 'refuses creation with a Contact from a different Account' do
     foreign = create(:contact, account: sd_foreign_account)
-    post "#{base}/tickets", params: { unit_id: sd_unit.id,
-      ticket: sd_create_attributes.merge(requester_id: foreign.id) },
-      headers: headers.merge('Idempotency-Key' => SecureRandom.uuid), as: :json
+    expect do
+      post "#{base}/tickets", params: { unit_id: sd_unit.id,
+        ticket: sd_create_attributes.merge(requester_id: foreign.id) },
+        headers: headers.merge('Idempotency-Key' => SecureRandom.uuid), as: :json
+    end.not_to change(JrcServiceDesk::Ticket, :count)
     expect(response).to have_http_status(:not_found)
-    expect(JrcServiceDesk::Ticket.count).to eq(0)
+    expect(JrcServiceDesk::Ticket.where(account_id: sd_account.id).count).to eq(0)
   end
 
   it 'does not expose context to an Account other than the native membership' do
