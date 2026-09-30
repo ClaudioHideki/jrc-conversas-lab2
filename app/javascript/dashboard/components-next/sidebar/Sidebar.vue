@@ -2,6 +2,7 @@
 import { useOperations } from 'dashboard/routes/dashboard/jrcOperations/useOperations';
 import { h, ref, computed, onMounted, watch } from 'vue';
 import { provideSidebarContext, useSidebarResize } from './provider';
+import { visibleSidebarSections } from './temporaryVisibility';
 import { useServiceDeskNavigation } from 'dashboard/composables/useServiceDeskNavigation';
 import { useServiceDeskStructure } from 'dashboard/composables/useServiceDeskStructure';
 import { useAccount } from 'dashboard/composables/useAccount';
@@ -1366,7 +1367,7 @@ const menuSections = computed(() => {
     .map(item => ({ ...item }))
     .filter(Boolean);
 
-  return [
+  return visibleSidebarSections([
     {
       name: 'attendance',
       label: 'Atendimento',
@@ -1412,7 +1413,7 @@ const menuSections = computed(() => {
       ]),
     },
     { name: 'legacy-tools', label: 'Outros recursos', items: legacyExtras },
-  ].filter(section => section.items.length > 0);
+  ]);
 });
 </script>
 

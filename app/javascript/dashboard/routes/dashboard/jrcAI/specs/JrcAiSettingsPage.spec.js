@@ -1,4 +1,6 @@
-import { mount, flushPromises } from '@vue/test-utils';
+import { config, mount, flushPromises } from '@vue/test-utils';
+import { createI18n } from 'vue-i18n';
+import ptBR from 'dashboard/i18n/locale/pt_BR';
 import { ref } from 'vue';
 import JrcAiSettingsPage from '../JrcAiSettingsPage.vue';
 import api from 'dashboard/api/jrcAi';
@@ -18,6 +20,7 @@ vi.mock('dashboard/api/jrcAi', () => ({
 
 describe('AI provider actions', () => {
   let wrapper;
+  const originalPlugins = config.global.plugins;
   beforeEach(() => {
     role = ref('administrator');
     api.providers.mockResolvedValue({
@@ -30,8 +33,48 @@ describe('AI provider actions', () => {
   });
   afterEach(() => {
     wrapper?.unmount();
+    config.global.plugins = originalPlugins;
+    document.documentElement.classList.remove('dark');
     vi.restoreAllMocks();
   });
+
+  it.each([false, true])(
+    'keeps localized labels and the hero foreground with dark=%s',
+    async dark => {
+      document.documentElement.classList.toggle('dark', dark);
+      config.global.plugins = [
+        createI18n({
+          legacy: false,
+          locale: 'pt_BR',
+          messages: { pt_BR: ptBR },
+        }),
+      ];
+      api.providers.mockResolvedValueOnce({
+        data: [
+          {
+            id: 7,
+            name: 'Teste',
+            status: 'configured',
+            masked_api_key: '••••1234',
+          },
+        ],
+      });
+      wrapper = mount(JrcAiSettingsPage);
+      await flushPromises();
+      expect(wrapper.get('header').classes()).toContain('text-white');
+      expect(wrapper.get('header h1').classes()).toContain('text-inherit');
+      expect(wrapper.get('header p').classes()).toContain('text-blue-50/90');
+      expect(wrapper.text()).toContain('Chave da API');
+      expect(wrapper.text()).toContain('••••1234');
+      expect(wrapper.text()).not.toContain('API Key');
+      await wrapper
+        .findAll('button')
+        .find(button => button.text() === 'Novo provedor')
+        .trigger('click');
+      expect(wrapper.get('form').text()).toContain('Chave da API');
+      expect(wrapper.get('form input[type="password"]').element.value).toBe('');
+    }
+  );
 
   it.each([
     ['Definir como padrão', 'makeDefault'],

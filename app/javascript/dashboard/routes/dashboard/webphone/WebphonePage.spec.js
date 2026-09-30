@@ -1,4 +1,6 @@
-import { flushPromises, shallowMount } from '@vue/test-utils';
+import { config, flushPromises, shallowMount } from '@vue/test-utils';
+import { createI18n } from 'vue-i18n';
+import ptBR from 'dashboard/i18n/locale/pt_BR';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { mockState } from './useSipWebphone';
 import WebphonePage from './WebphonePage.vue';
@@ -50,7 +52,12 @@ vi.mock('./useSipWebphone', async () => {
 
 describe('transfer form', () => {
   let wrapper;
+  const originalPlugins = config.global.plugins;
   beforeEach(() => {
+    config.global.plugins = [
+      createI18n({ legacy: false, locale: 'pt_BR', messages: { pt_BR: ptBR } }),
+    ];
+    vi.stubGlobal('Notification', { permission: 'default' });
     mockState.transferring.value = false;
     mockState.holdPending.value = false;
     vi.stubGlobal(
@@ -64,7 +71,12 @@ describe('transfer form', () => {
   });
   afterEach(() => {
     wrapper.unmount();
+    config.global.plugins = originalPlugins;
     vi.unstubAllGlobals();
+  });
+  it('renders the call notification action in pt-BR', () => {
+    expect(wrapper.text()).toContain('Ativar notificações de chamadas');
+    expect(wrapper.text()).not.toContain('Enable call notifications');
   });
   it('preserves mode and destination after failure, clears only after successful sequence', async () => {
     wrapper.vm.selectTransferMode('supervised');
