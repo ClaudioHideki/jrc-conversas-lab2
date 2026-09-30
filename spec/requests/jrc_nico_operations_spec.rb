@@ -51,6 +51,40 @@ RSpec.describe 'NICO operational assistant', type: :request do
     expect(account.jrc_crm_leads).to be_empty
   end
 
+  it 'applies native CustomRole CRM permissions to tools and execution' do
+    account.enable_features!('jrc_crm')
+    operator = create(:user, account: account, role: :agent)
+    role = create(:custom_role, account: account, permissions: ['conversation_manage'])
+    account.account_users.find_by!(user_id: operator.id).update!(custom_role: role)
+    operator_headers = operator.create_new_auth_token
+    get base, headers: operator_headers
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body['tools'].map { |tool| tool['name'] }).not_to include('list_leads', 'create_lead', 'create_deal')
+
+    expect do
+      post "#{base}/prepare", params: { request_id: SecureRandom.uuid, message: 'Criar lead', tool: 'create_lead',
+        arguments: { name: 'Sem autorização CRM' } }, headers: operator_headers, as: :json
+    end.not_to change(JrcCrm::Lead, :count)
+    expect(response).to have_http_status(:forbidden)
+    access = JrcNico::OperationalAccess.new(account: account, user: operator).authorize!
+    expect { JrcNico::ToolExecutor.new(access).call('list_leads', {}) }.to raise_error(Pundit::NotAuthorizedError)
+  end
+
+  it 'cancels a CRM preview when native role permissions are revoked before confirmation' do
+    account.enable_features!('jrc_crm')
+    operator = create(:user, account: account, role: :agent)
+    operator_headers = operator.create_new_auth_token
+    post "#{base}/prepare", params: { request_id: SecureRandom.uuid, message: 'Criar lead', tool: 'create_lead',
+      arguments: { name: 'Prévia antiga' } }, headers: operator_headers, as: :json
+    command = response.parsed_body.fetch('commands').first
+    role = create(:custom_role, account: account, permissions: ['conversation_manage'])
+    account.account_users.find_by!(user_id: operator.id).update!(custom_role: role)
+    expect do
+      post "#{base}/commands/#{command['id']}/confirm", headers: operator_headers, as: :json
+    end.not_to change(JrcCrm::Lead, :count)
+    expect(JrcNico::Command.find(command['id']).status).to eq('cancelled')
+  end
+
   it 'revalidates account scope on approval and never updates another account contact' do
     other = create(:contact, name: 'Other account')
     post "#{base}/prepare", params: contact_input.merge(tool: 'update_contact', arguments: { contact_id: other.id, name: 'Intrusion' }), headers: headers, as: :json
@@ -241,6 +275,27 @@ RSpec.describe 'NICO operational assistant', type: :request do
     job.perform(outgoing.id)
     expect(delegation.reload.status).to eq('needs_human')
     expect(turn.reload.status).to eq('cancelled')
+  end
+
+  it 'hands definitive channel failures to the operator without retrying delivery' do
+    bot = AgentBot.create!(account: account, name: 'NICO QA')
+    delegation = JrcNico::Delegation.create!(account: account, user: admin, conversation: conversation, agent_bot: bot,
+      objective: 'Qualificar', expires_at: 1.hour.from_now)
+    conversation.update!(status: 'pending', assignee_agent_bot: bot)
+    incoming = create(:message, conversation: conversation, account: account, message_type: :incoming, content: 'Olá')
+    turn = delegation.turns.create!(message_id: incoming.id, version: delegation.version, status: 'queued')
+    outgoing = Messages::MessageBuilder.new(bot, conversation, content: 'Olá!', content_attributes: {
+      nico_turn_id: turn.id, nico_delegation: { id: delegation.id, version: delegation.version }
+    }).perform
+    turn.update!(outgoing_message_id: outgoing.id)
+    job = SendReplyJob.new
+    expect(job).to(receive(:deliver).once { |message| message.update!(status: :failed) })
+    job.perform(outgoing.id)
+    expect(turn.reload.status).to eq('failed')
+    expect(delegation.reload).to have_attributes(status: 'needs_human', reason: 'delivery_failed')
+    expect(conversation.reload).to have_attributes(status: 'open', assignee_id: admin.id, assignee_agent_bot_id: nil)
+    expect(JrcNico::Notice.where(account: account, user: admin, conversation: conversation, kind: 'attention').count).to eq(1)
+    expect { job.perform(outgoing.id) }.not_to change(JrcNico::Notice, :count)
   end
 end
 

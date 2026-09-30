@@ -3,6 +3,7 @@ import { nextTick, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import NicoComposer from './NicoComposer.vue';
 import NicoInteractionStatus from './NicoInteractionStatus.vue';
+import NicoWorkflowSummary from './NicoWorkflowSummary.vue';
 
 defineProps({
   modelValue: { type: String, default: '' },
@@ -16,6 +17,7 @@ defineProps({
   error: { type: String, default: '' },
   needsReview: { type: Boolean, default: false },
   unreadCount: { type: Number, default: 0 },
+  workflow: { type: Object, default: null },
 });
 const emit = defineEmits([
   'update:modelValue',
@@ -77,6 +79,7 @@ onMounted(async () => {
         :state="interactionState"
         :show-timeline="hasOperation"
       />
+      <NicoWorkflowSummary :workflow="workflow" />
       <p v-if="error" role="alert" class="text-xs text-n-ruby-11">
         {{ error }}
       </p>

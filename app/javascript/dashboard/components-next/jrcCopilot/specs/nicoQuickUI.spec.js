@@ -59,6 +59,10 @@ describe('Quick NICO and Full Copilot use one operator session', () => {
   beforeEach(async () => {
     vi.useFakeTimers();
     vi.clearAllMocks();
+    Object.defineProperty(document, 'visibilityState', {
+      configurable: true,
+      value: 'visible',
+    });
     Object.defineProperty(window, 'innerWidth', {
       configurable: true,
       value: 1366,
@@ -202,6 +206,96 @@ describe('Quick NICO and Full Copilot use one operator session', () => {
     expect(wrapper.text()).toContain(message);
   });
 
+  it('preserves the draft and request identity after a failed send', async () => {
+    ui.openQuick();
+    await flushPromises();
+    api.ask.mockRejectedValueOnce(new Error('network unavailable'));
+    await wrapper.get('textarea').setValue('Crie um contato');
+    await wrapper.get('form').trigger('submit');
+    await flushPromises();
+    const firstRequest = api.ask.mock.calls[0][1];
+    expect(wrapper.get('textarea').element.value).toBe('Crie um contato');
+    await wrapper.get('form').trigger('submit');
+    await flushPromises();
+    expect(api.ask.mock.calls[1][1].request_id).toBe(firstRequest.request_id);
+    expect(wrapper.get('textarea').element.value).toBe('');
+  });
+
+  it('clears only a synchronization error when the next load succeeds', async () => {
+    api.show.mockRejectedValueOnce(new Error('temporary failure'));
+    ui.openQuick();
+    await flushPromises();
+    expect(wrapper.text()).toContain(translations.JRC_NICO.OPERATOR.LOAD_ERROR);
+    await vi.advanceTimersByTimeAsync(5000);
+    await flushPromises();
+    expect(wrapper.text()).not.toContain(
+      translations.JRC_NICO.OPERATOR.LOAD_ERROR
+    );
+  });
+
+  it('does not poll the closed idle session and pauses notices in a hidden tab', async () => {
+    const initialShows = api.show.mock.calls.length;
+    await vi.advanceTimersByTimeAsync(30000);
+    expect(api.show).toHaveBeenCalledTimes(initialShows);
+    expect(api.notices).toHaveBeenCalledTimes(2);
+    Object.defineProperty(document, 'visibilityState', {
+      configurable: true,
+      value: 'hidden',
+    });
+    document.dispatchEvent(new Event('visibilitychange'));
+    await vi.advanceTimersByTimeAsync(60000);
+    expect(api.notices).toHaveBeenCalledTimes(2);
+    expect(api.show).toHaveBeenCalledTimes(initialShows);
+  });
+
+  it('keeps polling an active delegation while the panel is closed', async () => {
+    snapshot.delegations = [{ id: 1, status: 'active' }];
+    const initialShows = api.show.mock.calls.length;
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(api.show).toHaveBeenCalledTimes(initialShows + 1);
+  });
+
+  it('does not abort or duplicate a slow session refresh', async () => {
+    let resolveLoad;
+    api.show.mockImplementationOnce(
+      () =>
+        new Promise(resolve => {
+          resolveLoad = resolve;
+        })
+    );
+    ui.openQuick();
+    await flushPromises();
+    const callsBeforeTick = api.show.mock.calls.length;
+    const signal = api.show.mock.calls.at(-1)[1];
+    await vi.advanceTimersByTimeAsync(15000);
+    expect(api.show).toHaveBeenCalledTimes(callsBeforeTick);
+    expect(signal.aborted).toBe(false);
+    resolveLoad({ data: snapshot });
+    await flushPromises();
+  });
+
+  it('shows a partial workflow and each step outcome in Quick and Full', async () => {
+    snapshot.workflow = {
+      state: 'partial',
+      completed_count: 1,
+      steps: [
+        { id: 1, status: 'succeeded', reply: 'Lead criado' },
+        { id: 2, status: 'failed', reply: 'Envio recusado' },
+      ],
+    };
+    ui.openQuick();
+    await flushPromises();
+    expect(
+      wrapper.get('[data-testid="nico-workflow-summary"]').text()
+    ).toContain('Envio recusado');
+    expect(wrapper.text()).toContain(translations.JRC_NICO.WORKFLOW.partial);
+    await wrapper.get('[aria-label="Abrir Full Copilot"]').trigger('click');
+    await flushPromises();
+    expect(
+      wrapper.get('[data-testid="nico-workflow-summary"]').text()
+    ).toContain('Falhou');
+  });
+
   it('opens Quick from the mascot without asking or executing on hover', async () => {
     const mascot = wrapper.get('[aria-label="Abrir assistente NICO"]');
     await mascot.trigger('mouseenter');
@@ -211,6 +305,7 @@ describe('Quick NICO and Full Copilot use one operator session', () => {
     expect(ui.mode.value).toBe('quick');
     expect(wrapper.find('#nico-quick-panel').exists()).toBe(true);
     expect(wrapper.find('#nico-operator-panel').exists()).toBe(false);
+    await vi.advanceTimersByTimeAsync(200);
     expect(
       wrapper
         .find('[aria-label="Recolher balão e manter aviso pendente"]')
@@ -408,7 +503,7 @@ describe('Quick NICO and Full Copilot use one operator session', () => {
         unread: true,
       },
     ];
-    await vi.advanceTimersByTimeAsync(4000);
+    await vi.advanceTimersByTimeAsync(30000);
     expect(wrapper.text()).toContain('Revisar oportunidade');
     await wrapper
       .get('[aria-label="Recolher balão e manter aviso pendente"]')
@@ -418,6 +513,7 @@ describe('Quick NICO and Full Copilot use one operator session', () => {
     );
     await wrapper.get('[aria-label="Abrir assistente NICO"]').trigger('click');
     await flushPromises();
+    await vi.advanceTimersByTimeAsync(200);
     expect(
       wrapper
         .find('[aria-label="Recolher balão e manter aviso pendente"]')
@@ -444,7 +540,7 @@ describe('Quick NICO and Full Copilot use one operator session', () => {
         unread: true,
       },
     ];
-    await vi.advanceTimersByTimeAsync(4000);
+    await vi.advanceTimersByTimeAsync(30000);
     const dismiss = wrapper.get(
       '[aria-label="Recolher balão e manter aviso pendente"]'
     );

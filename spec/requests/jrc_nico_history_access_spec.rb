@@ -43,4 +43,13 @@ RSpec.describe 'NICO historical authorization', type: :request do
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.dig('result', 'summary')).to eq('Restricted CRM note')
   end
+
+  it 'hides analysis CRM sources after a restrictive native CustomRole is assigned' do
+    role = create(:custom_role, account: account, permissions: ['conversation_manage'])
+    account.account_users.find_by!(user_id: user.id).update!(custom_role: role)
+    get "#{path}/#{run.id}", headers: headers
+    expect(response).to have_http_status(:ok)
+    expect(response.body).not_to include('Restricted CRM note')
+    expect(response.parsed_body['error_code']).to eq('source_access_revoked')
+  end
 end

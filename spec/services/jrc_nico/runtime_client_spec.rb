@@ -32,6 +32,69 @@ RSpec.describe JrcNico::RuntimeClient do
       expect(described_class.new.analyze(run, context)).to include('mode' => 'fixture', 'usage' => nil)
     end
   end
+
+  describe 'server-owned Account routing' do
+    let(:other_account) { create(:account) }
+    let(:routes) do
+      {
+        account.id.to_s => { url: 'http://nico-a:3108', token_env: 'NICO_RUNTIME_TOKEN_A' },
+        other_account.id.to_s => { url: 'http://nico-b:3108', token_env: 'NICO_RUNTIME_TOKEN_B' }
+      }.to_json
+    end
+
+    around do |example|
+      with_modified_env NICO_RUNTIME_ROUTES: routes,
+                        NICO_RUNTIME_TOKEN_A: 'account-a-test-token-not-for-production',
+                        NICO_RUNTIME_TOKEN_B: 'account-b-test-token-not-for-production',
+                        NICO_RUNTIME_URL: 'http://legacy:3108', NICO_SERVICE_TOKEN: 'legacy-test-token-not-for-production' do
+        example.run
+      end
+    end
+
+    it 'sends each Account only to its configured runtime with its own credential' do
+      other_user = create(:user, account: other_account, role: :administrator)
+      other_run = JrcNico::Run.create!(account: other_account, user: other_user,
+                                      conversation: create(:conversation, account: other_account),
+                                      request_id: SecureRandom.uuid, message: 'Resumo')
+      stub_request(:post, 'http://nico-a:3108/v1/analyze')
+        .with(headers: { 'Authorization' => 'Bearer account-a-test-token-not-for-production' },
+              body: hash_including('account_id' => account.id))
+        .to_return(status: 200, body: body.to_json)
+      stub_request(:post, 'http://nico-b:3108/v1/analyze')
+        .with(headers: { 'Authorization' => 'Bearer account-b-test-token-not-for-production' },
+              body: hash_including('account_id' => other_account.id))
+        .to_return(status: 200, body: body.merge(account_id: other_account.id, request_id: other_run.request_id).to_json)
+
+      expect(described_class.new.analyze(run, context)['account_id']).to eq(account.id)
+      expect(described_class.new.analyze(other_run, context)['account_id']).to eq(other_account.id)
+      expect(WebMock).not_to have_requested(:post, 'http://legacy:3108/v1/analyze')
+    end
+
+    it 'fails closed for an unmapped Account instead of using the global fallback' do
+      with_modified_env NICO_RUNTIME_ROUTES: {}.to_json do
+        expect { described_class.new.analyze(run, context) }.to raise_error(described_class::Error) { |error| expect(error.code).to eq('account_not_configured') }
+        expect(WebMock).not_to have_requested(:post, 'http://legacy:3108/v1/analyze')
+      end
+    end
+
+    it 'still rejects a response containing a different Account from the selected runtime' do
+      stub_request(:post, 'http://nico-a:3108/v1/analyze')
+        .to_return(status: 200, body: body.merge(account_id: other_account.id).to_json)
+      expect { described_class.new.analyze(run, context) }.to raise_error(described_class::Error)
+    end
+
+    it 'rejects invalid routing configuration without leaking its contents' do
+      ['{PRIVATE_CONFIG', '[]', { account.id.to_s => { url: 'http://nico-a:3108', token_env: 'DATABASE_PASSWORD' } }.to_json].each do |config|
+        with_modified_env NICO_RUNTIME_ROUTES: config do
+          expect { described_class.new.analyze(run, context) }.to raise_error do |error|
+            expect(error.code).to eq('invalid_configuration')
+            expect(error.message).not_to include('PRIVATE_CONFIG', 'DATABASE_PASSWORD')
+          end
+        end
+      end
+    end
+  end
+
   describe 'operation wire contract' do
     let(:wire) { JSON.parse(Rails.root.join('services/nico-runtime/test/fixtures/operation-contract.json').read) }
     let(:payload) { { request_id: wire['request_id'], account_id: wire['account_id'], kind: 'operator', message: 'Criar Telmo', context: {}, history: [] } }

@@ -21,6 +21,7 @@ import { useNicoVoice } from './useNicoVoice';
 import JrcCopilotQuickPanel from './JrcCopilotQuickPanel.vue';
 import NicoComposer from './NicoComposer.vue';
 import NicoInteractionStatus from './NicoInteractionStatus.vue';
+import NicoWorkflowSummary from './NicoWorkflowSummary.vue';
 import { nicoInteractionState } from './nicoInteractionState';
 import NicoKnowledgePanel from './NicoKnowledgePanel.vue';
 import NicoConversationPanel from './NicoConversationPanel.vue';
@@ -73,6 +74,9 @@ const input = ref('');
 const busy = ref(false);
 const phase = ref('submitting');
 const error = ref('');
+const syncError = ref('');
+let pendingRequest;
+let submittingRequest = false;
 const emptyState = () => ({
   messages: [],
   commands: [],
@@ -186,23 +190,38 @@ const apply = data => {
     data.delegations.filter(d => d.status === 'needs_human').length;
 };
 const load = async () => {
-  if (!accountId.value || busy.value) return;
+  if (!accountId.value || busy.value || (abort && !abort.signal.aborted))
+    return;
   const current = version;
   loadVersion += 1;
   const currentLoad = loadVersion;
-  abort?.abort();
-  abort = new AbortController();
+  const request = new AbortController();
+  abort = request;
   try {
-    const { data } = await api.show(accountId.value, abort.signal);
-    if (current === version && currentLoad === loadVersion) apply(data);
+    const { data } = await api.show(accountId.value, request.signal);
+    if (current === version && currentLoad === loadVersion) {
+      apply(data);
+      syncError.value = '';
+    }
   } catch (e) {
     if (
       current === version &&
       currentLoad === loadVersion &&
       e.code !== 'ERR_CANCELED'
     )
-      error.value = label('LOAD_ERROR');
+      syncError.value = label('LOAD_ERROR');
+  } finally {
+    if (abort === request) abort = undefined;
   }
+};
+const refresh = () => {
+  if (document.visibilityState === 'hidden') return;
+  const running =
+    state.value.delegations.some(item => item.status === 'active') ||
+    state.value.commands.some(item =>
+      ['planning', 'executing'].includes(item.status)
+    );
+  if (visible.value || running) load();
 };
 const perform = async (action, nextPhase = 'working') => {
   if (busy.value) return undefined;
@@ -216,6 +235,7 @@ const perform = async (action, nextPhase = 'working') => {
     const { data } = await action();
     if (current !== version) return undefined;
     apply(data);
+    syncError.value = '';
     if (visible.value) voice.speak(data.messages.at(-1)?.content);
     await nextTick();
     if (fullVisible.value) scrollToCurrent();
@@ -235,20 +255,37 @@ const perform = async (action, nextPhase = 'working') => {
 };
 const ask = async prompt => {
   const message = String(prompt ?? input.value).trim();
-  if (!message || busy.value) return;
+  if (!message || busy.value || submittingRequest) return;
+  submittingRequest = true;
+  const current = version;
   focusedNoticeId.value = null;
-  input.value = '';
   voice.stop();
-  await perform(
+  const requestContext = `${accountId.value}:${conversationId.value || ''}:${String(route.name || '')}`;
+  if (
+    pendingRequest?.message !== message ||
+    pendingRequest?.context !== requestContext
+  ) {
+    pendingRequest = {
+      message,
+      context: requestContext,
+      requestId: crypto.randomUUID(),
+    };
+  }
+  const result = await perform(
     () =>
       api.ask(accountId.value, {
         message,
-        request_id: crypto.randomUUID(),
+        request_id: pendingRequest.requestId,
         conversation_id: conversationId.value,
         route_name: route.name,
       }),
     'submitting'
   );
+  if (result && current === version) {
+    if (input.value.trim() === message) input.value = '';
+    pendingRequest = undefined;
+  }
+  if (current === version) submittingRequest = false;
 };
 const navigate = async result => {
   if (!result?.route_name || !router.hasRoute(result.route_name)) return;
@@ -277,13 +314,15 @@ const openConversation = async id => {
   if (window.innerWidth < 640) close();
 };
 const prepareDelegation = async () => {
+  const current = version;
   delegateForm.value = true;
   objective.value ||= label('DEFAULT_OBJECTIVE');
   if (conversationId.value) selected.value = [conversationId.value];
   try {
-    choices.value = (await api.conversations(accountId.value)).data;
+    const { data } = await api.conversations(accountId.value);
+    if (current === version) choices.value = data;
   } catch {
-    error.value = label('LOAD_ERROR');
+    if (current === version) error.value = label('LOAD_ERROR');
   }
 };
 const submitDelegation = async () => {
@@ -380,7 +419,8 @@ const formatValue = (value, field) => {
       .map(action => t(`JRC_NICO.OPERATOR.ACTIONS.${action}`))
       .join(', ');
   if (typeof value === 'boolean') return label(value ? 'YES' : 'NO');
-  return Array.isArray(value) ? value.join(', ') : String(value);
+  if (value && typeof value === 'object') return JSON.stringify(value, null, 2);
+  return String(value);
 };
 const toolLabel = command =>
   state.value.tools.find(tool => tool.name === command.tool)?.description ||
@@ -395,6 +435,10 @@ watch(
     input.value = '';
     busy.value = false;
     error.value = '';
+    syncError.value = '';
+    pendingRequest = undefined;
+    submittingRequest = false;
+    choices.value = [];
     selected.value = [];
     allowCrm.value = false;
     allowedActions.value = [];
@@ -453,12 +497,14 @@ watch(focusedNoticeId, () => load());
 onMounted(async () => {
   await load();
   if (pendingPrompt.value) await ask(consumePrompt());
-  poll = setInterval(load, 5000);
+  poll = setInterval(refresh, 5000);
+  document.addEventListener('visibilitychange', refresh);
 });
 onBeforeUnmount(() => {
   version += 1;
   abort?.abort();
   clearInterval(poll);
+  document.removeEventListener('visibilitychange', refresh);
 });
 </script>
 
@@ -473,7 +519,8 @@ onBeforeUnmount(() => {
     :interaction-state="interactionState"
     :has-operation="hasOperation"
     :reply="quickReply"
-    :error="error"
+    :error="error || syncError"
+    :workflow="state.workflow"
     :needs-review="
       pending.some(command =>
         ['awaiting_confirmation', 'browser_pending'].includes(command.status)
@@ -544,26 +591,18 @@ onBeforeUnmount(() => {
         :state="interactionState"
         :show-timeline="hasOperation"
       />
-      <details v-if="state.workflow" class="mt-2 rounded border border-n-weak p-2 text-xs" aria-live="polite">
-        <summary class="cursor-pointer font-medium">
-          {{ t(`JRC_NICO.WORKFLOW.${state.workflow.state}`) }}
-        </summary>
-        <p class="mt-2">{{ t('JRC_NICO.WORKFLOW.COUNT', { count: state.workflow.completed_count }) }}</p>
-        <ol class="mt-2 space-y-2" :aria-label="t('JRC_NICO.WORKFLOW.TITLE')">
-          <li v-for="step in state.workflow.steps" :key="step.id">{{ step.reply }}</li>
-        </ol>
-      </details>
+      <NicoWorkflowSummary :workflow="state.workflow" />
     </div>
     <div
       ref="scroller"
       class="min-h-0 flex-1 space-y-3 overflow-y-auto px-3 py-3"
     >
       <p
-        v-if="error"
+        v-if="error || syncError"
         role="alert"
         class="rounded bg-n-ruby-3 p-2 text-sm text-n-ruby-11"
       >
-        {{ error }}
+        {{ error || syncError }}
       </p>
       <form
         v-if="delegateForm"

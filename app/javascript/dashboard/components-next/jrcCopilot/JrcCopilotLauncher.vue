@@ -34,18 +34,25 @@ let timer;
 let abort;
 let generation = 0;
 const load = async () => {
-  if (!accountId.value) return;
+  if (
+    !accountId.value ||
+    document.visibilityState === 'hidden' ||
+    (abort && !abort.signal.aborted)
+  )
+    return;
   const current = generation;
-  abort?.abort();
-  abort = new AbortController();
+  const request = new AbortController();
+  abort = request;
   try {
-    const { data } = await api.notices(accountId.value, abort.signal);
+    const { data } = await api.notices(accountId.value, request.signal);
     if (current !== generation) return;
     notices.value = data.notices;
     connected.value = true;
   } catch (error) {
     if (current === generation && error.code !== 'ERR_CANCELED')
       connected.value = false;
+  } finally {
+    if (abort === request) abort = undefined;
   }
 };
 const read = async notice => {
@@ -90,6 +97,7 @@ watch(latestVersion, value => {
 });
 watch(isOpen, async value => {
   dismissBubble();
+  if (value) load();
   if (!value) {
     await nextTick();
     avatar.value?.focus({ preventScroll: true });
@@ -107,13 +115,15 @@ watch(accountId, () => {
 });
 onMounted(() => {
   load();
-  timer = setInterval(load, 4000);
+  timer = setInterval(load, 30000);
+  document.addEventListener('visibilitychange', load);
 });
 onBeforeUnmount(() => {
   generation += 1;
   abort?.abort();
   clearInterval(timer);
   clearTimeout(bubbleTimer);
+  document.removeEventListener('visibilitychange', load);
 });
 </script>
 

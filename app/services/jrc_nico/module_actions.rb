@@ -1,4 +1,5 @@
 class JrcNico::ModuleActions
+  PROJECT_TASK_TOOLS = %w[create_project_task update_project_task].freeze
   # These operations deliberately use the existing authenticated module endpoints:
   # approval rules, item pricing, delivery checks and Enterprise overlays remain authoritative.
   TOOLS = {
@@ -6,6 +7,10 @@ class JrcNico::ModuleActions
                          %w[name* unit_price_cents* description sku billing_model currency scope_included scope_excluded]],
     'update_product' => ['Atualizar produto ou serviço e sua disponibilidade (administrador CRM)', 'crm_admin', true,
                          %w[product_id* name unit_price_cents description sku billing_model currency active scope_included scope_excluded]],
+    'create_project_task' => ['Criar tarefa pela tela autenticada de Projetos; execução única na aba, sem repetir automaticamente se o resultado for desconhecido', 'projects', true,
+                              %w[project_id* title* description priority board_column_id assignee_id parent_id estimated_minutes starts_on due_on labels]],
+    'update_project_task' => ['Editar tarefa pela tela autenticada usando lock_version consultado. Para concluir ou mudar estado, use move_project_task e uma coluna real', 'projects', true,
+                              %w[project_id* task_id* lock_version* title description priority assignee_id parent_id estimated_minutes starts_on due_on labels clear_assignee clear_parent]],
     'update_inbox_settings' => ['Configurar nome, saudação e mensagem fora do expediente de uma caixa (administrador)', 'settings_admin', true,
                                 %w[inbox_id* name greeting_enabled greeting_message out_of_office_message timezone]],
     'update_account_profile' => ['Atualizar nome, idioma e email de suporte da conta (administrador)', 'settings_admin', true,
@@ -32,6 +37,17 @@ class JrcNico::ModuleActions
   end
 
   def prepare(name, args)
+    if PROJECT_TASK_TOOLS.include?(name)
+      domain = JrcNico::DomainAccess.new(@access)
+      project = domain.project(args.fetch('project_id'), capability: name == 'create_project_task' ? 'projects.task.create' : 'projects.task.update')
+      domain.authorize_project!(project, 'projects.task.view')
+      task = domain.task(project.id, args.fetch('task_id'), capability: 'projects.task.update') if name == 'update_project_task'
+      resources = [['JrcProjects::Project', project.id], ['JrcNico::ProjectTasks', project.id]]
+      resources << ['JrcProjects::Task', task.id] if task
+      return { browser_action: 'module_action', operation: name, parameters: args, resources: resources,
+               message: 'Tarefa revisada. A aba aplica as regras de Projetos uma vez; se o resultado ficar desconhecido, confira o projeto antes de preparar outro comando.' }
+    end
+
     @access.crm_scope(JrcCrm::Deal).find(args['deal_id']) if args['deal_id']
     @access.crm_scope(JrcCrm::Proposal).find(args['proposal_id']) if args['proposal_id']
     @access.account.jrc_campaigns.find(args['campaign_id']) if args['campaign_id']

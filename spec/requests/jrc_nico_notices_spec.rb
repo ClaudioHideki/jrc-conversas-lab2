@@ -135,4 +135,138 @@ RSpec.describe 'NICO customer actions and notices', type: :request do
     expect(notice.reload.status).to eq('planning')
     expect { post "#{base}/notices/#{notice.id}/retry", headers: headers, as: :json }.not_to have_enqueued_job(JrcNico::NoticePlanJob)
   end
+
+  it 'revalidates every source of a synthesized customer reply without replacing the operator selection' do
+    account.enable_features!('jrc_crm')
+    operator_user = create(:user, account: account, role: :agent)
+    create(:inbox_member, inbox: conversation.inbox, user: operator_user)
+    lead = create(:jrc_crm_lead, account: account, owner: operator_user, contact: conversation.contact, notes: 'REVOKED_NOTICE_SOURCE')
+    operator = JrcNico::OperatorSession.new(account: account, user: operator_user)
+    previous_selection = { 'tool' => 'count_contacts', 'result' => { 'count' => 7 } }
+    operator.session.update!(context: operator.session.context.merge('last_result' => previous_selection))
+    customer_notice = JrcNico::Notice.publish!(account: account, user: operator_user, conversation: conversation,
+      event_key: 'read-source', kind: 'action', request: 'Consulte meu lead', body: 'Consulta do cliente')
+    allow(JrcNico::OperationalInference).to receive(:call).and_return(
+      { 'tool' => 'list_leads', 'arguments' => {}, 'reply' => 'Consultar lead' },
+      { 'tool' => '', 'arguments' => {}, 'reply' => 'REVOKED_NOTICE_SOURCE' })
+    JrcNico::NoticePlanJob.perform_now(customer_notice.id)
+    command = customer_notice.commands.last
+    expect(command.tool).to be_nil
+    expect(command.result).to eq({})
+    expect(command.execution_context['resources']).to include(['JrcCrm::Lead', lead.id])
+    expect(operator.session.reload.context['last_result']).to eq(previous_selection)
+    operator_headers = operator_user.create_new_auth_token
+    get "#{base}/notices", headers: operator_headers
+    expect(response.body).to include('REVOKED_NOTICE_SOURCE')
+
+    lead.update!(owner: admin)
+    get "#{base}/notices", headers: operator_headers
+    expect(response.body).not_to include('REVOKED_NOTICE_SOURCE')
+    get base, headers: operator_headers
+    expect(response.body).not_to include('REVOKED_NOTICE_SOURCE')
+    expect(response.parsed_body['commands']).to be_empty
+    expect(response.parsed_body['messages']).to be_empty
+  end
+
+  it 'records mutation results from customer notices for later ownership revalidation' do
+    account.enable_features!('jrc_crm')
+    operator_user = create(:user, account: account, role: :agent)
+    create(:inbox_member, inbox: conversation.inbox, user: operator_user)
+    lead = create(:jrc_crm_lead, account: account, owner: operator_user, contact: conversation.contact, name: 'REVOKED_MUTATION_RESULT')
+    operator = JrcNico::OperatorSession.new(account: account, user: operator_user)
+    customer_notice = JrcNico::Notice.publish!(account: account, user: operator_user, conversation: conversation,
+      event_key: 'write-source', kind: 'action', request: 'Qualifique o lead', body: 'Pedido do cliente')
+    command = operator.session.commands.create!(source_notice: customer_notice, request_id: SecureRandom.uuid,
+      message: customer_notice.request, status: 'awaiting_confirmation', tool: 'update_lead',
+      arguments: { lead_id: lead.id, status: 'qualified' })
+    operator.execute(command)
+    expect(lead.reload.status).to eq('qualified')
+    expect(command.reload.execution_context['resources']).to include(['JrcCrm::Lead', lead.id])
+    expect(operator.session.reload.context['resources']).to include(['JrcCrm::Lead', lead.id])
+
+    lead.update!(owner: admin)
+    operator_headers = operator_user.create_new_auth_token
+    get base, headers: operator_headers
+    expect(response.body).not_to include('REVOKED_MUTATION_RESULT')
+    expect(response.parsed_body['commands']).to be_empty
+    get "#{base}/notices", headers: operator_headers
+    expect(response.parsed_body['notices']).to be_empty
+  end
+
+  it 'hides a legacy synthesized notice whose source manifest cannot be reconstructed' do
+    operator = JrcNico::OperatorSession.new(account: account, user: admin)
+    operator.session.commands.create!(source_notice: notice, request_id: SecureRandom.uuid,
+      message: notice.request, status: 'succeeded', reply: 'LEGACY_UNSCOPED_SUMMARY', tool: nil, result: {})
+    get "#{base}/notices", headers: headers
+    expect(response.body).not_to include('LEGACY_UNSCOPED_SUMMARY')
+  end
+
+  it 'revalidates an automation receipt against its Account and current record' do
+    account.enable_features!('automations')
+    rule = create(:automation_rule, account: account)
+    foreign_rule = create(:automation_rule)
+    access = JrcNico::OperationalAccess.new(account: account, user: admin).authorize!
+    receipt = JrcNico::Notice.publish!(account: account, user: admin, event_key: 'automation-receipt', kind: 'result',
+                                     body: 'Automation result', metadata: { tool: 'create_automation', resources: [['AutomationRule', rule.id]] })
+    expect(receipt.visible_to?(access)).to be(true)
+
+    receipt.update!(metadata: { tool: 'create_automation', resources: [['AutomationRule', foreign_rule.id]] })
+    expect(receipt.visible_to?(access)).to be(false)
+    receipt.update!(metadata: { tool: 'create_automation', resources: [['AutomationRule', rule.id]] })
+    rule.destroy!
+    expect(receipt.visible_to?(access)).to be(false)
+  end
+
+  it 'revalidates a campaign receipt against its Account and current record' do
+    account.enable_features!('jrc_campaigns')
+    campaign = account.jrc_campaigns.create!(name: 'Own campaign', created_by: admin)
+    foreign_campaign = create(:account).jrc_campaigns.create!(name: 'Foreign campaign')
+    access = JrcNico::OperationalAccess.new(account: account, user: admin).authorize!
+    receipt = JrcNico::Notice.publish!(account: account, user: admin, event_key: 'campaign-receipt', kind: 'result',
+                                     body: 'Campaign result', metadata: { tool: 'create_campaign', resources: [['JrcCampaigns::Campaign', campaign.id]] })
+    expect(receipt.visible_to?(access)).to be(true)
+
+    receipt.update!(metadata: { tool: 'create_campaign', resources: [['JrcCampaigns::Campaign', foreign_campaign.id]] })
+    expect(receipt.visible_to?(access)).to be(false)
+    receipt.update!(metadata: { tool: 'create_campaign', resources: [['JrcCampaigns::Campaign', campaign.id]] })
+    campaign.destroy!
+    expect(receipt.visible_to?(access)).to be(false)
+  end
+
+  it 'hides operator summaries after a listed campaign is removed' do
+    account.enable_features!('jrc_campaigns')
+    campaign = account.jrc_campaigns.create!(name: 'REMOVED_CAMPAIGN_SOURCE', created_by: admin)
+    allow(JrcNico::OperationalInference).to receive(:call).and_return(
+      { 'tool' => 'list_campaigns', 'arguments' => {}, 'reply' => 'Consultar campanhas' },
+      { 'tool' => '', 'arguments' => {}, 'reply' => 'REMOVED_CAMPAIGN_SOURCE' })
+    post "#{base}/ask", params: { request_id: SecureRandom.uuid, message: 'Consultar campanhas' }, headers: headers, as: :json
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include('REMOVED_CAMPAIGN_SOURCE')
+
+    campaign.destroy!
+    get base, headers: headers
+    expect(response.body).not_to include('REMOVED_CAMPAIGN_SOURCE')
+    expect(response.parsed_body['commands']).to be_empty
+  end
+
+  it 'revokes synthesized catalog summaries even when the read returned no resource references' do
+    account.enable_features!('jrc_crm')
+    operator_user = create(:user, account: account, role: :agent)
+    create(:inbox_member, inbox: conversation.inbox, user: operator_user)
+    customer_notice = JrcNico::Notice.publish!(account: account, user: operator_user, conversation: conversation,
+      event_key: 'catalog-source', kind: 'action', request: 'Consulte o catálogo', body: 'Consulta do cliente')
+    allow(JrcNico::OperationalInference).to receive(:call).and_return(
+      { 'tool' => 'list_products', 'arguments' => {}, 'reply' => 'Consultar catálogo' },
+      { 'tool' => '', 'arguments' => {}, 'reply' => 'REVOKED_CATALOG_SUMMARY' })
+    JrcNico::NoticePlanJob.perform_now(customer_notice.id)
+    command = customer_notice.commands.last
+    expect(command.execution_context['source_tools']).to include('list_products')
+    expect(command.execution_context['resources']).to eq([])
+    role = create(:custom_role, account: account, permissions: ['conversation_manage'])
+    account.account_users.find_by!(user_id: operator_user.id).update!(custom_role: role)
+
+    get "#{base}/notices", headers: operator_user.create_new_auth_token
+    expect(response).to have_http_status(:ok)
+    expect(response.body).not_to include('REVOKED_CATALOG_SUMMARY')
+  end
 end

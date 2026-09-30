@@ -20,16 +20,20 @@ class JrcNico::Access
   end
 
   def leads
-    return JrcCrm::Lead.none unless account.feature_enabled?('jrc_crm')
+    return JrcCrm::Lead.none unless crm?
 
     scope = JrcCrm::Lead.where(account_id: account.id, contact_id: conversation.contact_id)
     membership.administrator? ? scope : scope.where(owner_id: user.id)
   end
 
   def deals
-    return JrcCrm::Deal.none unless account.feature_enabled?('jrc_crm')
+    return JrcCrm::Deal.none unless crm?
 
     scope = JrcCrm::Deal.where(account_id: account.id, contact_id: conversation.contact_id)
     membership.administrator? ? scope : scope.where(owner_id: user.id)
+  end
+
+  def crm?
+    JrcOperations::Access.crm?(membership)
   end
 end

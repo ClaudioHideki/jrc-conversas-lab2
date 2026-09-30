@@ -3,6 +3,16 @@
     "WORKFLOW": {
       "TITLE": "Etapas deste pedido",
       "COUNT": "{count} ação(ões) com execução registrada",
+      "STATUS": {
+        "planning": "Preparando",
+        "awaiting_confirmation": "Aguardando confirmação",
+        "browser_pending": "Aguardando execução no navegador",
+        "executing": "Executando",
+        "succeeded": "Execução registrada",
+        "failed": "Falhou",
+        "unknown": "Resultado não confirmado",
+        "cancelled": "Cancelada"
+      },
       "partial": "Pedido com etapas pendentes ou falhas",
       "failed": "Pedido interrompido; confira os detalhes",
       "pending": "Pedido em andamento ou aguardando revisão",

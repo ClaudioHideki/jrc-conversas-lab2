@@ -353,6 +353,51 @@ module JrcCopilot
           { label: 'Configurar equipe', route_name: 'settings_teams_list', icon: 'i-lucide-users', tone: 'violet' }
         ]
       },
+      'crm_orders' => {
+        title: 'Pedidos', summary: 'Consulte pedidos ou crie um pedido a partir de uma proposta aceita. Revise os valores e vínculos antes de confirmar.',
+        quick_prompts: ['Liste meus pedidos', 'Consulte um pedido', 'Crie um pedido da proposta aceita'],
+        actions: [{ label: 'Abrir Pedidos', route_name: 'crm_orders', icon: 'i-lucide-shopping-cart', tone: 'blue' }]
+      },
+      'crm_contracts' => {
+        title: 'Contratos', summary: 'Consulte contratos, vigências e estados de assinatura. Renovação, aditivo e registro de assinatura são realizados na tela do contrato.',
+        quick_prompts: ['Liste meus contratos', 'Consulte a vigência de um contrato'],
+        actions: [{ label: 'Abrir Contratos', route_name: 'crm_contracts', icon: 'i-lucide-file-text', tone: 'blue' }]
+      },
+      'crm_goals' => {
+        title: 'Metas', summary: 'Administradores podem consultar metas e progresso pelo NICO. Criação, distribuição e publicação de metas ficam na tela de Metas.',
+        quick_prompts: ['Consulte as metas e o progresso'],
+        actions: [{ label: 'Abrir Metas', route_name: 'crm_goals', icon: 'i-lucide-target', tone: 'blue' }]
+      },
+      'crm_commissions' => {
+        title: 'Comissões', summary: 'Consulte as comissões permitidas ao seu perfil. Liberação, pagamento, estorno e edição de programas exigem revisão na tela de Comissões.',
+        quick_prompts: ['Liste minhas comissões'],
+        actions: [{ label: 'Abrir Comissões', route_name: 'crm_commissions', icon: 'i-lucide-wallet', tone: 'blue' }]
+      },
+      'crm_backoffice' => {
+        title: 'Backoffice', summary: 'Consulte etapa, estado e prazo das solicitações. Documentos, provisionamento e ações financeiras são tratados na tela de Backoffice.',
+        quick_prompts: ['Liste minhas solicitações de backoffice'],
+        actions: [{ label: 'Abrir Backoffice', route_name: 'crm_backoffice', icon: 'i-lucide-clipboard-list', tone: 'blue' }]
+      },
+      'crm_management' => {
+        title: 'Equipe Comercial', summary: 'Acompanhe indicadores da equipe e seus responsáveis. O NICO orienta a navegação; a gestão comercial da equipe permanece nesta tela.',
+        quick_prompts: ['Abra a equipe comercial'],
+        actions: [{ label: 'Abrir Equipe Comercial', route_name: 'crm_management', icon: 'i-lucide-users', tone: 'blue' }]
+      },
+      'jrc_service_desk_tickets' => {
+        title: 'Service Desk R2', summary: 'Consulte, crie e atualize chamados nas unidades autorizadas. Atribuições, notas e transições respeitam as permissões, versões e evidências exigidas pelo chamado.',
+        quick_prompts: ['Liste meus chamados', 'Consulte minhas unidades de atendimento', 'Consulte as próximas ações deste chamado'],
+        actions: [{ label: 'Abrir Chamados', route_name: 'jrc_service_desk_tickets', icon: 'i-lucide-ticket', tone: 'blue' }]
+      },
+      'jrc_projects_list' => {
+        title: 'Projetos', summary: 'Consulte e crie projetos e tarefas, edite o planejamento e mova tarefas entre colunas. Criar ou editar tarefas usa a aba autenticada; revise a versão e as condições de conclusão antes de confirmar.',
+        quick_prompts: ['Liste meus projetos', 'Consulte as tarefas do projeto', 'Crie uma tarefa no projeto'],
+        actions: [{ label: 'Abrir Projetos', route_name: 'jrc_projects_list', icon: 'i-lucide-folder-kanban', tone: 'blue' }]
+      },
+      'jrc_operations_agenda' => {
+        title: 'Minha Agenda', summary: 'Consolida compromissos do CRM e tarefas de Projetos conforme suas permissões. Prazos de tarefas mantêm a data original; chamados R2 ainda não fornecem tarefas para esta agenda.',
+        quick_prompts: ['Consulte minha agenda de hoje', 'Quais compromissos estão atrasados?'],
+        actions: [{ label: 'Abrir Minha Agenda', route_name: 'jrc_operations_agenda', icon: 'i-lucide-calendar-days', tone: 'blue' }]
+      },
       'jrc_copilot_index' => {
         title: 'Copiloto JRC',
         summary: 'Descreva o objetivo; o Copiloto orienta o módulo, a sequência, as validações e a próxima ação segura.',

@@ -1,12 +1,19 @@
 class JrcNico::ToolExecutor
-  def initialize(access, customer_notice: nil)
+  def initialize(access, customer_notice: nil, command: nil)
     @access = access.authorize!
     @account, @user = access.account, access.user
     @customer_conversation = customer_notice && @access.conversation(customer_notice.conversation.display_id)
+    @customer_notice, @command = customer_notice, command
   end
 
   def call(name, arguments)
     JrcNico::ToolCatalog.new(@access).validate!(name, arguments)
+    if JrcNico::DomainToolCatalog::TOOLS.key?(name) || JrcNico::ModuleActions::PROJECT_TASK_TOOLS.include?(name)
+      raise Pundit::NotAuthorizedError if @customer_notice || @command&.source_notice_id
+    end
+    if JrcNico::DomainToolCatalog::TOOLS.key?(name)
+      return JrcNico::DomainActions.new(@access, command: @command).call(name, arguments)
+    end
     return JrcNico::AutomationActions.new(@access).call(name, arguments) if JrcNico::AutomationActions::TOOLS.key?(name)
     return JrcNico::CommercialActions.new(@access).call(name, arguments) if JrcNico::CommercialActions::TOOLS.include?(name)
     return JrcNico::ModuleActions.new(@access).prepare(name, arguments) if JrcNico::ModuleActions::TOOLS.key?(name)

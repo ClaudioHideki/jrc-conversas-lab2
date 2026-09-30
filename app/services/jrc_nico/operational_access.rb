@@ -28,7 +28,7 @@ class JrcNico::OperationalAccess
   end
 
   def crm?
-    account.feature_enabled?('jrc_crm')
+    JrcOperations::Access.crm?(membership)
   end
 
   def campaigns?

@@ -63,6 +63,9 @@ class SendReplyJob < ApplicationJob
       end
       deliver(message)
       turn.update!(status: message.reload.failed? ? 'failed' : 'channel_processed')
+      if message.failed?
+        JrcNico::DelegationService.stop(message.conversation, reason: 'delivery_failed', status: 'needs_human')
+      end
     end
   rescue StandardError
     turn&.update!(status: 'unknown')

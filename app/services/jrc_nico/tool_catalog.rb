@@ -48,13 +48,15 @@ class JrcNico::ToolCatalog
                        %w[action* destination]],
     'open_video' => ['Abrir sala de videoconferência configurada para o operador', 'conversations', true, []],
     'open_module' => ['Navegar para um módulo existente usando route_name disponível no contexto', 'navigation', false, %w[route_name*]]
-  }.merge(JrcNico::ModuleActions::TOOLS).merge(JrcNico::AutomationActions::TOOLS).freeze
+  }.merge(JrcNico::ModuleActions::TOOLS).merge(JrcNico::AutomationActions::TOOLS).merge(JrcNico::DomainToolCatalog::TOOLS).freeze
 
   def initialize(access)
     @access = access
   end
 
   def available
+    domain_access = nil
+    domain_permissions = {}
     TOOLS.filter_map do |name, (description, group, mutation, fields)|
       next if group == 'automations' && !(@access.account.feature_enabled?('automations') && @access.policy(AutomationRule).create?)
       next if group == 'crm' && !@access.crm?
@@ -62,6 +64,10 @@ class JrcNico::ToolCatalog
       next if group == 'settings_admin' && !@access.membership.administrator?
       next if group == 'campaigns' && !@access.campaigns?
       next if group == 'contacts' && !@access.policy(Contact).public_send(name == 'create_contact' ? :create? : :index?)
+      if %w[service_desk projects projects_create].include?(group)
+        domain_access ||= JrcNico::DomainAccess.new(@access)
+        next unless domain_permissions.fetch(group) { domain_permissions[group] = domain_access.available?(group) }
+      end
 
       { name: name, description: description, confirmation: mutation, fields: fields }
     end
@@ -91,12 +97,26 @@ class JrcNico::ToolCatalog
     if name == 'create_activity' && arguments['lead_id'].blank? && arguments['deal_id'].blank?
       raise ArgumentError, 'A atividade precisa de lead_id ou deal_id. Consulte os registros deste contato antes de agendar.'
     end
+    if name == 'update_project_task'
+      if (arguments['clear_assignee'] && arguments['assignee_id']) || (arguments['clear_parent'] && arguments['parent_id'])
+        raise ArgumentError, 'Escolha entre definir ou remover o responsavel/pai da tarefa.'
+      end
+    end
     arguments.each do |key, value|
+      if JrcNico::DomainToolCatalog::TOOLS.key?(name) || JrcNico::ModuleActions::PROJECT_TASK_TOOLS.include?(name)
+        domain_valid = JrcNico::DomainToolCatalog.valid_value?(key, value)
+        unless domain_valid.nil?
+          raise ArgumentError, "Valor inválido: #{key}." unless domain_valid
+
+          next
+        end
+      end
       valid = case key
               when 'conversation_ids' then value.is_a?(Array) && value.length.between?(1, 20) && value.all? { |id| id.is_a?(Integer) && id.positive? }
               when 'labels' then value.is_a?(Array) && value.length <= 20 && value.all? { |label| label.is_a?(String) && label.length <= 100 }
               when 'allowed_actions' then value.is_a?(Array) && value.length <= 5 && (value - JrcNico::DelegatedActions::GROUPS.keys).empty?
-              when 'allow_crm', 'private', 'active', 'greeting_enabled' then [true, false].include?(value)
+              when 'allow_crm', 'private', 'active', 'greeting_enabled', 'clear_assignee', 'clear_parent' then [true, false].include?(value)
+              when 'estimated_minutes' then value.is_a?(Integer) && value >= 0
               when 'page' then value.is_a?(Integer) && value.between?(1, 20)
               when /_id$/, 'hours' then value.is_a?(Integer) && value.positive?
               when /_cents$/ then value.is_a?(Integer) && value >= 0

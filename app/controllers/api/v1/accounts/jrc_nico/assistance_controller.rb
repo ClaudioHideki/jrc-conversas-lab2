@@ -25,7 +25,7 @@ class Api::V1::Accounts::JrcNico::AssistanceController < Api::V1::Accounts::Base
       end
     end
     JrcNico::AnalyzeJob.perform_later(run.id)
-    render json: snapshot.merge(run: run.snapshot, lead: lead_result&.fetch(:lead, nil), binding: binding&.public_snapshot), status: :accepted
+    render json: snapshot.merge(run: run.snapshot, lead: lead_result&.slice(:id, :name, :status), binding: binding&.public_snapshot), status: :accepted
   rescue Pundit::NotAuthorizedError
     forbidden
   rescue ActiveRecord::RecordNotFound
@@ -61,9 +61,13 @@ class Api::V1::Accounts::JrcNico::AssistanceController < Api::V1::Accounts::Base
   end
 
   def create_lead
-    raise Pundit::NotAuthorizedError unless Current.account.feature_enabled?('jrc_crm')
+    raise Pundit::NotAuthorizedError unless @access.crm?
 
-    JrcCrm::ConversationLeadService.new(account: Current.account, conversation: @conversation, actor: Current.user).call
+    result = JrcCrm::ConversationLeadService.new(account: Current.account, conversation: @conversation, actor: Current.user).call
+    lead = @access.leads.find_by(id: result.fetch(:lead).id)
+    raise Pundit::NotAuthorizedError unless lead
+
+    lead
   end
 
   def bind_erp(cnpj)

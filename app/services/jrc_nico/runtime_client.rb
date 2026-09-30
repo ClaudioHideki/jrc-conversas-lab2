@@ -34,7 +34,7 @@ class JrcNico::RuntimeClient
   KEYS = %w[request_id account_id summary suggested_reply evidence warnings usage model mode].freeze
 
   def transcribe(payload)
-    body = transport('/v1/transcribe', payload.to_json, max_bytes: 5_600_000)
+    body = transport('/v1/transcribe', payload.to_json, account_id: payload.fetch(:account_id), max_bytes: 5_600_000)
     valid = body.is_a?(Hash) && body.keys.sort == %w[account_id mode model request_id text usage]
     valid &&= body['account_id'] == payload[:account_id] && body['request_id'] == payload[:request_id]
     valid &&= body['mode'] == 'provider' && text?(body['text'], 4000) && text?(body['model'], 150, required: true) && valid_usage?(body)
@@ -44,7 +44,7 @@ class JrcNico::RuntimeClient
   end
 
   def operate(payload)
-    body = transport('/v1/operate', payload.to_json)
+    body = transport('/v1/operate', payload.to_json, account_id: payload.fetch(:account_id))
     estimated = body.is_a?(Hash) && body.delete('usage_estimated')
     raise Error, 'invalid_response' unless estimated.nil? || estimated == true
 
@@ -75,15 +75,38 @@ class JrcNico::RuntimeClient
 
   def analyze(run, context)
     payload = { request_id: run.request_id, account_id: run.account_id, agent_key: run.agent_key, message: run.message, context: context, history: [] }.to_json
-    validate!(transport('/v1/analyze', payload), run, context)
+    validate!(transport('/v1/analyze', payload, account_id: run.account_id), run, context)
   end
 
   private
 
-  def transport(path, payload, max_bytes: 262_144)
-    uri = URI(ENV.fetch('NICO_RUNTIME_URL'))
-    token = ENV.fetch('NICO_SERVICE_TOKEN')
-    raise Error, 'invalid_configuration' unless %w[http https].include?(uri.scheme) && uri.host.present? && uri.userinfo.nil? && token.length >= 32
+  def runtime_credentials(account_id)
+    raise Error, 'invalid_scope' unless account_id.is_a?(Integer) && account_id.positive?
+
+    routes_json = ENV['NICO_RUNTIME_ROUTES']
+    return [ENV.fetch('NICO_RUNTIME_URL'), ENV.fetch('NICO_SERVICE_TOKEN')] if routes_json.blank?
+
+    # Only installation configuration can select an endpoint or a credential.
+    # An unmapped Account must never fall back to another tenant's runtime.
+    routes = JSON.parse(routes_json)
+    raise Error, 'invalid_configuration' unless routes.is_a?(Hash)
+
+    route = routes[account_id.to_s]
+    raise Error, 'account_not_configured' unless route
+    raise Error, 'invalid_configuration' unless route.is_a?(Hash) && route.keys.sort == %w[token_env url]
+    raise Error, 'invalid_configuration' unless route['url'].is_a?(String) && route['token_env'].is_a?(String) &&
+                                              route['token_env'].match?(/\ANICO_RUNTIME_TOKEN_[A-Z0-9_]+\z/)
+
+    [route['url'], ENV.fetch(route['token_env'])]
+  rescue JSON::ParserError, KeyError
+    raise Error, 'invalid_configuration'
+  end
+
+  def transport(path, payload, account_id:, max_bytes: 262_144)
+    endpoint, token = runtime_credentials(account_id)
+    uri = URI(endpoint)
+    raise Error, 'invalid_configuration' unless %w[http https].include?(uri.scheme) && uri.host.present? && uri.userinfo.nil? &&
+                                              uri.query.nil? && uri.fragment.nil? && ['', '/'].include?(uri.path) && token.length >= 32
 
     raise Error, 'context_too_large' if payload.bytesize > max_bytes
 

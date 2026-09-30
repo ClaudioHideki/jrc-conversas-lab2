@@ -52,9 +52,19 @@ class JrcNico::Notice < ApplicationRecord
     return false unless account_id == access.account.id && user_id == access.user.id
     return false if conversation && !access.policy(conversation).show?
     available = JrcNico::ToolCatalog.new(access).available.map { |item| item[:name] }
-    return false unless commands.all? { |command| command.tool.blank? || available.include?(command.tool) }
+    authorized_tools = commands.all? do |command|
+      ([command.tool] + Array(command.execution_context['source_tools'])).all? { |tool| tool.blank? || available.include?(tool) }
+    end
+    return false unless authorized_tools
+    # Old synthesized replies have no recoverable source manifest; do not expose them after upgrading.
+    return false if commands.any? { |command| command.status == 'succeeded' && command.tool.blank? && !command.execution_context.key?('resources') }
     tool = metadata['tool']
     return false if tool && JrcNico::ToolCatalog.new(access).available.none? { |item| item[:name] == tool }
+    commands.each do |command|
+      ids = Array(command.execution_context['conversation_ids'])
+      ids += Array(command.result['conversation_ids']) if command.result.is_a?(Hash)
+      ids.uniq.each { |id| access.conversation(id) }
+    end
 
     resources = Array(metadata['resources']) + commands.flat_map { |command| self.class.resources_for(command) }
     resources.all? do |type, id|
@@ -64,8 +74,18 @@ class JrcNico::Notice < ApplicationRecord
       when 'JrcCrm::Deal' then access.crm_scope(JrcCrm::Deal).find(id)
       when 'JrcCrm::Proposal' then access.crm_scope(JrcCrm::Proposal).find(id)
       when 'JrcCrm::Activity' then access.crm_scope(JrcCrm::Activity, owner: :user_id).find(id)
+      when 'AutomationRule'
+        rule = access.account.automation_rules.find(id)
+        raise Pundit::NotAuthorizedError unless access.account.feature_enabled?('automations') && access.policy(rule).show?
+
+        rule
+      when 'JrcCampaigns::Campaign'
+        raise Pundit::NotAuthorizedError unless access.campaigns?
+
+        access.account.jrc_campaigns.find(id)
       when 'JrcNico::KnowledgeDocument' then JrcNico::KnowledgeDocument.where(account: access.account).approved.find(id)
-      else true
+      else
+        JrcNico::DomainAccess::RESOURCE_TYPES.include?(type) ? JrcNico::DomainAccess.authorize_resource!(access, type, id) : true
       end
     end
   rescue Pundit::NotAuthorizedError, ActiveRecord::RecordNotFound
@@ -98,13 +118,26 @@ class JrcNico::Notice < ApplicationRecord
 
   def self.resources_for(command)
     types = { 'search_contacts' => 'Contact', 'list_leads' => 'JrcCrm::Lead', 'list_deals' => 'JrcCrm::Deal',
-              'list_activities' => 'JrcCrm::Activity', 'list_proposals' => 'JrcCrm::Proposal', 'search_knowledge' => 'JrcNico::KnowledgeDocument' }
-    rows = command.result.is_a?(Array) ? command.result : [command.result]
-    rows.filter_map do |row|
+              'list_activities' => 'JrcCrm::Activity', 'list_proposals' => 'JrcCrm::Proposal', 'search_knowledge' => 'JrcNico::KnowledgeDocument',
+              'list_automations' => 'AutomationRule', 'list_campaigns' => 'JrcCampaigns::Campaign' }
+    rows = if command.result.is_a?(Array)
+             command.result
+           else
+             command.result.fetch('items', [command.result])
+           end
+    resources = rows.filter_map do |row|
       next unless row.is_a?(Hash)
       type = row['resource_type'] || types[command.tool]
       id = row.dig('record', 'id') || row['id']
       [type, id] if type && id
     end
+    resources += Array(command.result['resources']) if command.result.is_a?(Hash)
+    arguments = command.arguments.to_h
+    { 'contact_id' => 'Contact', 'lead_id' => 'JrcCrm::Lead', 'deal_id' => 'JrcCrm::Deal',
+      'proposal_id' => 'JrcCrm::Proposal', 'activity_id' => 'JrcCrm::Activity',
+      'automation_id' => 'AutomationRule', 'campaign_id' => 'JrcCampaigns::Campaign' }.each do |field, type|
+      resources << [type, arguments[field]] if arguments[field]
+    end
+    (resources + Array(command.execution_context['resources'])).uniq
   end
 end

@@ -70,4 +70,39 @@ RSpec.describe 'NICO recommendation authorization', type: :request do
     expect(response).to have_http_status(:unprocessable_entity)
     expect(JrcNico::Run.where(account: account)).to be_empty
   end
+
+  it 'denies CRM assistance to a CustomRole even when the account CRM feature is enabled' do
+    operator = create(:user, account: account, role: :agent)
+    create(:inbox_member, inbox: conversation.inbox, user: operator)
+    role = create(:custom_role, account: account, permissions: ['conversation_manage'])
+    account.account_users.find_by!(user_id: operator.id).update!(custom_role: role)
+    expect do
+      post path, params: input, headers: operator.create_new_auth_token, as: :json
+    end.not_to change(JrcCrm::Lead, :count)
+    expect(response).to have_http_status(:forbidden)
+    expect(JrcNico::Run.where(account: account)).to be_empty
+    expect(conversation.reload.custom_attributes.dig('nico_assistance', 'status')).to eq('pending')
+  end
+
+  it 'does not disclose another owners lead through a shared conversation' do
+    operator = create(:user, account: account, role: :agent)
+    create(:inbox_member, inbox: conversation.inbox, user: operator)
+    lead = create(:jrc_crm_lead, account: account, owner: admin, conversation: conversation,
+      contact: conversation.contact, notes: 'PRIVATE_OTHER_OWNER')
+    post path, params: input, headers: operator.create_new_auth_token, as: :json
+    expect(response).to have_http_status(:forbidden)
+    expect(response.body).not_to include('PRIVATE_OTHER_OWNER')
+    expect(lead.reload.owner).to eq(admin)
+    expect(JrcNico::Run.where(account: account)).to be_empty
+    expect(conversation.reload.custom_attributes.dig('nico_assistance', 'status')).to eq('pending')
+  end
+
+  it 'returns only the authorized lead summary fields' do
+    lead = create(:jrc_crm_lead, account: account, owner: admin, conversation: conversation,
+      contact: conversation.contact, notes: 'PRIVATE_LEAD_NOTES')
+    post path, params: input, headers: headers, as: :json
+    expect(response).to have_http_status(:accepted)
+    expect(response.parsed_body.fetch('lead')).to eq('id' => lead.id, 'name' => lead.name, 'status' => lead.status)
+    expect(response.body).not_to include('PRIVATE_LEAD_NOTES')
+  end
 end

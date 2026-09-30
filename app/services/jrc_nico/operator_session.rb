@@ -70,10 +70,10 @@ class JrcNico::OperatorSession
           end
           command.update!(status: 'executing', approved_at: Time.current,
             execution_context: command.execution_context.merge('authorization' => authorization))
-          result = JrcNico::ToolExecutor.new(access).call(command.tool, command.arguments)
+          result = JrcNico::ToolExecutor.new(access, command: command).call(command.tool, command.arguments)
           status = result.is_a?(Hash) && result[:browser_action] ? 'browser_pending' : 'succeeded'
+          remember_result(command.tool, result, command: command, remember_selection: !command.source_notice)
           command.update!(status: status, result: result.as_json, reply: result.is_a?(Hash) ? result[:message] : 'Ação concluída. Confira os resultados.')
-          remember_result(command.tool, result) unless command.source_notice
           session.append('assistant', command.reply)
         end
       end
@@ -111,7 +111,7 @@ class JrcNico::OperatorSession
         raise Pundit::NotAuthorizedError unless JrcNico::DelegatedActions.permitted?(delegation, command, access)
       end
 
-      current_result = JrcNico::ToolExecutor.new(access).call(command.tool, command.arguments) # revalidate current permissions and channel
+      current_result = JrcNico::ToolExecutor.new(access, command: command).call(command.tool, command.arguments) # revalidate current permissions and channel
       if command.tool == 'call_contact' && current_result[:phone_number] != command.result['phone_number']
         raise ArgumentError, 'O telefone do contato mudou. Prepare a ligação novamente para revisar o destinatário.'
       end
@@ -168,7 +168,7 @@ class JrcNico::OperatorSession
   private :execute_authorized, :claim_browser_action
 
   def check_history_access!
-    digest = Digest::SHA256.hexdigest([access.membership.attributes.slice('role', 'crm_enabled', 'custom_role_id'), access.membership.try(:custom_role)&.attributes,
+    digest = Digest::SHA256.hexdigest(['resource_provenance_v2', access.membership.attributes.slice('role', 'crm_enabled', 'custom_role_id'), access.membership.try(:custom_role)&.attributes,
                                       access.crm?, access.campaigns?, access.user.inboxes.pluck(:id).sort, access.user.teams.pluck(:id).sort].to_json)
     allowed = session.context['access_digest'] == digest
     if allowed
@@ -188,12 +188,21 @@ class JrcNico::OperatorSession
         when 'AutomationRule'
           rule = access.account.automation_rules.find(id)
           raise Pundit::NotAuthorizedError unless access.account.feature_enabled?('automations') && access.policy(rule).show?
+        when 'JrcCampaigns::Campaign'
+          raise Pundit::NotAuthorizedError unless access.campaigns?
+
+          access.account.jrc_campaigns.find(id)
         when 'JrcNico::KnowledgeDocument' then JrcNico::KnowledgeDocument.where(account: access.account).approved.find(id)
+        else
+          JrcNico::DomainAccess.authorize_resource!(access, type, id) if JrcNico::DomainAccess::RESOURCE_TYPES.include?(type)
         end
         true
       rescue Pundit::NotAuthorizedError, ActiveRecord::RecordNotFound
         false
       end
+      notices = JrcNico::Notice.where(id: session.commands.where('created_at >= ?', session.context['visible_since'])
+                                               .where.not(source_notice_id: nil).select(:source_notice_id)).includes(:commands, :conversation)
+      allowed &&= notices.all? { |notice| notice.visible_to?(access) }
     end
     return if allowed
 
@@ -225,6 +234,10 @@ class JrcNico::OperatorSession
       linked_leads: selected && access.crm? ? access.crm_scope(JrcCrm::Lead).where(contact_id: selected.contact_id).limit(20).map { |lead| lead.slice(:id, :name, :status) } : [],
       linked_deals: selected && access.crm? ? access.crm_scope(JrcCrm::Deal).where(contact_id: selected.contact_id).limit(20).map { |deal| deal.slice(:id, :title, :status) } : []
     }
+    session.with_lock do
+      remember_result('list_leads', context[:linked_leads], command: command, remember_selection: false, source_tool: false)
+      remember_result('list_deals', context[:linked_deals], command: command, remember_selection: false, source_tool: false)
+    end
     steps = if notice
               notice.commands
             elsif command.execution_context['workflow_id']
@@ -297,9 +310,9 @@ class JrcNico::OperatorSession
                                     error: 'Consulta idêntica já concluída. Use o resultado existente e prossiga sem repeti-la.' }
         next
       end
-      result = JrcNico::ToolExecutor.new(access, customer_notice: notice).call(response['tool'], response['arguments'])
+      result = JrcNico::ToolExecutor.new(access, customer_notice: notice, command: command).call(response['tool'], response['arguments'])
       command.update!(tool: response['tool'], arguments: response['arguments'], result: result.as_json)
-      session.with_lock { remember_result(response['tool'], result) } unless notice
+      session.with_lock { remember_result(response['tool'], result, command: command, remember_selection: !notice) }
       if response['tool'] == 'open_module'
         command.update!(status: 'succeeded', reply: result[:message])
         session.with_lock { session.append('assistant', command.reply) }
@@ -454,13 +467,15 @@ class JrcNico::OperatorSession
     session.with_lock { session.append('assistant', "Prévia: #{command.reply}") }
   end
 
-  def remember_result(tool, result)
+  def remember_result(tool, result, command:, remember_selection: true, source_tool: true)
     data = result.as_json
-    rows = data.is_a?(Array) ? data : data['conversations'] || [data]
+    rows = data.is_a?(Array) ? data : data['items'] || data['conversations'] || [data]
     nested = rows.flat_map { |row| row.is_a?(Hash) ? Array(row['conversations']) : [] }
     ids = (rows + nested).filter_map { |row| row['conversation_id'] if row.is_a?(Hash) }
+    ids += Array(data['conversation_ids']) if data.is_a?(Hash)
     types = { 'search_contacts' => 'Contact', 'list_contacts' => 'Contact', 'list_leads' => 'JrcCrm::Lead', 'list_deals' => 'JrcCrm::Deal',
-              'list_activities' => 'JrcCrm::Activity', 'list_proposals' => 'JrcCrm::Proposal', 'list_automations' => 'AutomationRule' }
+              'list_activities' => 'JrcCrm::Activity', 'list_proposals' => 'JrcCrm::Proposal', 'list_automations' => 'AutomationRule',
+              'list_campaigns' => 'JrcCampaigns::Campaign' }
     resources = rows.filter_map do |row|
       next unless row.is_a?(Hash)
 
@@ -469,9 +484,15 @@ class JrcNico::OperatorSession
       [type, id] if type && id
     end
     resources += rows.filter_map { |row| ['Contact', row['contact_id']] if row.is_a?(Hash) && row['contact_id'] }
-    session.update!(context: session.context.merge('last_result' => { tool: tool, result: data },
-                                                   'resources' => (Array(session.context['resources']) + resources).uniq,
-                                                   'conversation_ids' => (Array(session.context['conversation_ids']) + ids).uniq))
+    resources += Array(data['resources']) if data.is_a?(Hash)
+    command.update!(execution_context: command.execution_context.merge(
+      'resources' => (Array(command.execution_context['resources']) + resources).uniq,
+      'source_tools' => (Array(command.execution_context['source_tools']) + (source_tool ? [tool] : [])).uniq,
+      'conversation_ids' => (Array(command.execution_context['conversation_ids']) + ids).uniq))
+    context = session.context.merge('resources' => (Array(session.context['resources']) + resources).uniq,
+                                    'conversation_ids' => (Array(session.context['conversation_ids']) + ids).uniq)
+    context['last_result'] = { tool: tool, result: data } if remember_selection
+    session.update!(context: context)
   end
 
   def fail_command(command, error)

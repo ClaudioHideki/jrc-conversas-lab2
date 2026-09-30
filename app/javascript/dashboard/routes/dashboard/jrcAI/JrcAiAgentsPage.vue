@@ -1,14 +1,19 @@
 <script setup>
 /* eslint-disable vue/no-bare-strings-in-template, @intlify/vue-i18n/no-raw-text */
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import jrcAiAPI from 'dashboard/api/jrcAi';
 import { useJrcCopilot } from 'dashboard/components-next/jrcCopilot/useJrcCopilot';
+import { usePolicy } from 'dashboard/composables/usePolicy';
 
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
+const { checkPermissions } = usePolicy();
+const canManageProviders = computed(() => checkPermissions(['administrator']));
+// This public asset is served by Rails, outside Vite's module graph.
+const agentIllustration = '/brand-assets/jrc-copilot-thinking.png';
 
 const loading = ref(false);
 const error = ref('');
@@ -62,7 +67,7 @@ const openSettings = () =>
   });
 const selectAgent = agent => {
   sessionStorage.setItem('jrcNicoPreferredAgent', agent.key);
-  useJrcCopilot().open();
+  useJrcCopilot().close();
   router.push({ name: 'home', params: { accountId: route.params.accountId } });
 };
 
@@ -89,7 +94,7 @@ onMounted(load);
           </p>
         </div>
         <img
-          :src="'/brand-assets/jrc-copilot-thinking.png'"
+          :src="agentIllustration"
           alt="Copiloto JRC"
           class="pointer-events-none absolute -bottom-24 right-8 hidden w-64 opacity-90 lg:block"
         />
@@ -113,6 +118,7 @@ onMounted(load);
         </div>
         <div class="flex gap-2">
           <button
+            v-if="canManageProviders"
             class="rounded-xl border border-violet-200 px-4 py-2 text-xs font-semibold text-violet-700"
             @click="openSettings"
           >

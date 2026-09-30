@@ -12,8 +12,28 @@ export const runNicoModuleAction = async (
     );
   const proposal = `${base}/crm/proposals/${Number(args.proposal_id)}`;
   const campaign = `${base}/jrc_campaigns/campaigns/${Number(args.campaign_id)}`;
+  const projectTasks = `${base}/projects/projects/${Number(args.project_id)}/tasks`;
   let response;
   switch (action.operation) {
+    case 'create_project_task':
+      response = await axios.post(projectTasks, {
+        task: without('project_id'),
+      });
+      break;
+    case 'update_project_task': {
+      const task = without(
+        'project_id',
+        'task_id',
+        'clear_assignee',
+        'clear_parent'
+      );
+      if (args.clear_assignee) task.assignee_id = null;
+      if (args.clear_parent) task.parent_id = null;
+      response = await axios.patch(`${projectTasks}/${Number(args.task_id)}`, {
+        task,
+      });
+      break;
+    }
     case 'create_product':
       response = await axios.post(`${base}/crm/products`, { product: args });
       break;
@@ -123,7 +143,7 @@ export const runNicoModuleAction = async (
     default:
       throw new Error('Operação não disponível.');
   }
-  const data = response.data;
+  const data = response.data?.data || response.data;
   const id = data?.id || data?.proposal?.id || data?.deal?.id;
   return `O módulo confirmou a operação${id ? ` no registro ${id}` : ''}${data?.status ? ` (estado: ${data.status})` : ''}.`;
 };
