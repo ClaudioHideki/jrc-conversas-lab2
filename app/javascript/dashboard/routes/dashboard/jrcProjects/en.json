@@ -167,5 +167,6 @@
   "CLOSE_RELATED": "Close",
   "RELATED_DEAL_LOADING": "Loading deal...",
   "HOURS_LOADING": "Loading time entries...",
-  "NO_TIME_ENTRIES": "No time entries."
+  "NO_TIME_ENTRIES": "No time entries.",
+  "ADMIN_ACCESS_HELP": "Administrators already have access to Projects when the module is enabled for the account."
 }

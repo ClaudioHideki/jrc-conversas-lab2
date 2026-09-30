@@ -61,6 +61,11 @@ async function save() {
         v-for="agent in agents"
         :key="agent.account_user_id"
         class="flex gap-2"
+        :title="
+          agent.role === 'administrator'
+            ? projectText('ADMIN_ACCESS_HELP')
+            : undefined
+        "
       >
         <input
           v-model="agent.enabled"

@@ -1,3 +1,7 @@
+import jrcBroker from './jrcBroker.json';
+import calls from './calls.json';
+import jrcNico from './jrcNico.json';
+import crm from './crm.json';
 import jrcServiceDesk from './jrcServiceDesk.json';
 import advancedFilters from './advancedFilters.json';
 import agentBots from './agentBots.json';
@@ -47,6 +51,10 @@ import whatsappCalling from './whatsappCalling.json';
 import yearInReview from './yearInReview.json';
 
 export default {
+  ...jrcBroker,
+  ...calls,
+  ...jrcNico,
+  ...crm,
   ...jrcServiceDesk,
   ...advancedFilters,
   ...agentBots,

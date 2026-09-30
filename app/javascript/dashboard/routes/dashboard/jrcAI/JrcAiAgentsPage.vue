@@ -43,9 +43,9 @@ const statusClasses = status =>
     active: 'bg-emerald-100 text-emerald-700',
     attention: 'bg-amber-100 text-amber-700',
     ready: 'bg-blue-100 text-blue-700',
-    idle: 'bg-slate-100 text-slate-600',
+    idle: 'bg-n-slate-3 text-n-slate-11',
     restricted: 'bg-violet-100 text-violet-700',
-  })[status] || 'bg-slate-100 text-slate-600';
+  })[status] || 'bg-n-slate-3 text-n-slate-11';
 const statusLabel = status =>
   ({
     not_run: 'Ainda não executado',
@@ -75,9 +75,7 @@ onMounted(load);
 </script>
 
 <template>
-  <main
-    class="h-full overflow-auto bg-[linear-gradient(135deg,#f3f7fc,#eef6ff)] p-4 sm:p-5"
-  >
+  <main class="h-full overflow-auto bg-n-surface-1 p-4 sm:p-5">
     <div class="mx-auto max-w-[1500px] space-y-4">
       <header
         class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#062f57] via-[#075a87] to-[#7758e8] p-6 text-white shadow-lg"
@@ -88,7 +86,9 @@ onMounted(load);
             ><i class="i-lucide-brain-circuit size-4" /> Inteligencia
             operacional</span
           >
-          <h1 class="mt-3 text-3xl font-bold">Central de Agentes IA</h1>
+          <h1 class="mt-3 text-3xl font-bold text-inherit">
+            Central de Agentes IA
+          </h1>
           <p class="mt-2 text-sm leading-6 text-blue-50/90">
             {{ t('JRC_NICO.CENTRAL_DESCRIPTION') }}
           </p>
@@ -101,10 +101,10 @@ onMounted(load);
       </header>
 
       <div
-        class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#dbe7f5] bg-white p-4 shadow-sm"
+        class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm"
       >
         <div>
-          <b class="text-sm text-[#172033]"
+          <b class="text-sm text-n-slate-12"
             >Perfil atual:
             {{
               payload.profile === 'supervisor'
@@ -112,7 +112,7 @@ onMounted(load);
                 : 'Agente'
             }}</b
           >
-          <p class="text-xs text-[#667085]">
+          <p class="text-xs text-n-slate-11">
             As analises respeitam o escopo e as permissoes do usuario.
           </p>
         </div>
@@ -147,11 +147,11 @@ onMounted(load);
         <article
           v-for="agent in payload.agents"
           :key="agent.key"
-          class="flex min-h-64 flex-col rounded-2xl border border-[#dfe7f2] bg-white p-5 shadow-sm"
+          class="flex min-h-64 flex-col rounded-2xl border border-n-weak bg-n-solid-2 p-5 shadow-sm"
         >
           <div class="flex items-start justify-between gap-3">
             <span
-              class="grid size-12 place-content-center rounded-2xl bg-gradient-to-br from-cyan-50 to-violet-100 text-[#075a87]"
+              class="grid size-12 place-content-center rounded-2xl bg-gradient-to-br from-cyan-50 to-violet-100 text-n-blue-11"
               ><i class="i-lucide-bot size-6" /></span
             ><span
               class="rounded-full px-2.5 py-1 text-[10px] font-bold uppercase"
@@ -159,41 +159,47 @@ onMounted(load);
               >{{ statusLabel(agent.status) }}</span
             >
           </div>
-          <h2 class="mt-4 text-lg font-bold text-[#172033]">
+          <h2 class="mt-4 text-lg font-bold text-n-slate-12">
             {{ agent.name }}
           </h2>
-          <p class="mt-1 text-sm leading-5 text-[#667085]">
+          <p class="mt-1 text-sm leading-5 text-n-slate-11">
             {{ agent.description }}
           </p>
-          <div class="mt-4 flex-1 rounded-xl bg-[#f6f8fb] p-3">
+          <div class="mt-4 flex-1 rounded-xl bg-n-surface-1 p-3">
             <span
-              class="text-[10px] font-bold uppercase tracking-wide text-[#98a2b3]"
+              class="text-[10px] font-bold uppercase tracking-wide text-n-slate-11"
               >Ultimo resultado</span
             >
-            <p class="mt-1 text-sm font-medium text-[#344054]">
+            <p class="mt-1 text-sm font-medium text-n-slate-12">
               {{ agent.last_result }}
             </p>
           </div>
           <button
-            class="mt-4 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#087ff5] to-[#7758e8] px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+            class="mt-4 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#087ff5] to-[#7758e8] px-4 py-2.5 text-sm font-semibold text-white disabled:bg-none disabled:opacity-100 disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:cursor-not-allowed"
             :disabled="agent.status === 'restricted'"
             @click="selectAgent(agent)"
           >
             <i class="i-lucide-sparkles size-4" />
             {{ t('JRC_NICO.SELECT_CONVERSATION') }}
           </button>
+          <p
+            v-if="agent.status === 'restricted'"
+            class="mt-2 text-xs text-n-slate-11"
+          >
+            {{ t('JRC_NICO.SPECIALIST_RESTRICTED') }}
+          </p>
         </article>
       </section>
 
       <section
-        class="rounded-2xl border border-[#dfe7f2] bg-white p-5 shadow-sm"
+        class="rounded-2xl border border-n-weak bg-n-solid-2 p-5 shadow-sm"
       >
         <div class="flex items-center justify-between">
           <div>
-            <h2 class="text-lg font-bold text-[#172033]">
+            <h2 class="text-lg font-bold text-n-slate-12">
               Fluxo de trabalho da IA
             </h2>
-            <p class="text-sm text-[#667085]">
+            <p class="text-sm text-n-slate-11">
               {{ t('JRC_NICO.CENTRAL_DESCRIPTION') }}
             </p>
           </div>
@@ -208,13 +214,13 @@ onMounted(load);
               'Copiloto entrega a proxima acao',
             ]"
             :key="step"
-            class="relative rounded-2xl bg-[#f6f8fb] p-4"
+            class="relative rounded-2xl bg-n-surface-1 p-4"
           >
             <span
-              class="grid size-8 place-content-center rounded-full bg-[#087ff5] text-xs font-bold text-white"
+              class="grid size-8 place-content-center rounded-full bg-n-brand text-xs font-bold text-white"
               >{{ index + 1 }}</span
             >
-            <p class="mt-3 text-sm font-semibold text-[#344054]">{{ step }}</p>
+            <p class="mt-3 text-sm font-semibold text-n-slate-12">{{ step }}</p>
           </div>
         </div>
       </section>

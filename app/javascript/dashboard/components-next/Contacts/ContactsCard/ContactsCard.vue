@@ -229,7 +229,7 @@ const handleAvatarHover = isHovered => {
                 <button
                   type="button"
                   disabled
-                  class="inline-flex size-7 cursor-not-allowed items-center justify-center rounded-lg text-n-slate-10 opacity-50"
+                  class="inline-flex size-7 cursor-not-allowed items-center justify-center rounded-lg bg-n-slate-3 text-n-slate-11"
                 >
                   <span class="i-ri-whatsapp-fill size-4" />
                 </button>

@@ -69,9 +69,9 @@ const statusClass = status =>
   ({
     configured: 'bg-emerald-100 text-emerald-700',
     error: 'bg-rose-100 text-rose-700',
-    disabled: 'bg-slate-100 text-slate-600',
+    disabled: 'bg-n-slate-3 text-n-slate-11',
     not_validated: 'bg-amber-100 text-amber-700',
-  })[status] || 'bg-slate-100 text-slate-600';
+  })[status] || 'bg-n-slate-3 text-n-slate-11';
 const formatNumber = value =>
   new Intl.NumberFormat('pt-BR').format(Number(value || 0));
 const formatMoney = cents =>
@@ -166,7 +166,7 @@ const save = async () => {
     return;
   }
   if (!editingId.value && !form.value.api_key.trim()) {
-    useAlert('Informe a API Key.');
+    useAlert(t('JRC_NICO.PROVIDER.API_KEY_REQUIRED'));
     return;
   }
   saving.value = true;
@@ -240,9 +240,7 @@ onMounted(load);
 </script>
 
 <template>
-  <main
-    class="h-full overflow-auto bg-[linear-gradient(135deg,#f3f7fc,#eef6ff)] p-4 sm:p-5"
-  >
+  <main class="h-full overflow-auto bg-n-surface-1 p-4 sm:p-5">
     <div class="mx-auto max-w-[1500px] space-y-4">
       <header
         class="rounded-3xl bg-gradient-to-r from-[#062f57] via-[#075a87] to-[#7758e8] p-6 text-white shadow-lg"
@@ -251,7 +249,9 @@ onMounted(load);
           class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[11px] font-bold uppercase"
           ><i class="i-lucide-shield-check size-4" /> Administracao</span
         >
-        <h1 class="mt-3 text-3xl font-bold">Intelig&ecirc;ncia Artificial</h1>
+        <h1 class="mt-3 text-3xl font-bold text-inherit">
+          Intelig&ecirc;ncia Artificial
+        </h1>
         <p class="mt-2 max-w-3xl text-sm text-blue-50/90">
           Cadastre provedores, modelos e limites de consumo. A chave nunca
           &eacute; devolvida ao navegador depois de salva e as chamadas do
@@ -279,7 +279,7 @@ onMounted(load);
 
       <template v-else>
         <nav
-          class="flex gap-2 overflow-x-auto rounded-2xl border border-[#dfe7f2] bg-white p-2 shadow-sm"
+          class="flex gap-2 overflow-x-auto rounded-2xl border border-n-weak bg-n-solid-2 p-2 shadow-sm"
         >
           <button
             v-for="tab in tabs"
@@ -287,8 +287,8 @@ onMounted(load);
             class="inline-flex shrink-0 items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition"
             :class="
               activeTab === tab.key
-                ? 'bg-[#087ff5] text-white shadow'
-                : 'text-[#667085] hover:bg-slate-50'
+                ? 'bg-n-brand text-white shadow'
+                : 'text-n-slate-11 hover:bg-n-slate-2'
             "
             @click="activeTab = tab.key"
           >
@@ -304,18 +304,18 @@ onMounted(load);
 
         <section v-if="activeTab === 'providers'" class="space-y-4">
           <div
-            class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#dfe7f2] bg-white p-4 shadow-sm"
+            class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm"
           >
             <div>
-              <h2 class="font-bold text-[#172033]">Provedores configurados</h2>
-              <p class="text-xs text-[#667085]">
+              <h2 class="font-bold text-n-slate-12">Provedores configurados</h2>
+              <p class="text-xs text-n-slate-11">
                 OpenAI e APIs compat&iacute;veis podem alimentar o Copiloto
                 nesta vers&atilde;o. Outros provedores ficam cadastrados para
                 adaptadores futuros.
               </p>
             </div>
             <button
-              class="inline-flex items-center gap-2 rounded-xl bg-[#087ff5] px-4 py-2.5 text-sm font-semibold text-white"
+              class="inline-flex items-center gap-2 rounded-xl bg-n-brand hover:enabled:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-n-brand px-4 py-2.5 text-sm font-semibold text-white"
               @click="startCreate"
             >
               <i class="i-lucide-plus size-4" /> Novo provedor
@@ -325,7 +325,7 @@ onMounted(load);
             <article
               v-for="provider in providers"
               :key="provider.id"
-              class="rounded-2xl border border-[#dfe7f2] bg-white p-5 shadow-sm"
+              class="rounded-2xl border border-n-weak bg-n-solid-2 p-5 shadow-sm"
             >
               <div class="flex items-start justify-between gap-3">
                 <div class="flex gap-3">
@@ -335,7 +335,7 @@ onMounted(load);
                   /></span>
                   <div>
                     <div class="flex flex-wrap items-center gap-2">
-                      <h3 class="font-bold text-[#172033]">
+                      <h3 class="font-bold text-n-slate-12">
                         {{ provider.name }}
                       </h3>
                       <span
@@ -344,7 +344,7 @@ onMounted(load);
                         >PADRAO</span
                       >
                     </div>
-                    <p class="text-xs text-[#667085]">
+                    <p class="text-xs text-n-slate-11">
                       {{ providerLabel(provider.provider_type) }} &middot;
                       {{ provider.default_model || 'Sem modelo' }}
                     </p>
@@ -357,16 +357,18 @@ onMounted(load);
                 >
               </div>
               <dl
-                class="mt-5 grid grid-cols-2 gap-3 rounded-xl bg-[#f6f8fb] p-4 text-xs"
+                class="mt-5 grid grid-cols-2 gap-3 rounded-xl bg-n-surface-1 p-4 text-xs"
               >
                 <div>
-                  <dt class="text-[#98a2b3]">API Key</dt>
-                  <dd class="mt-1 font-semibold text-[#344054]">
+                  <dt class="text-n-slate-11">
+                    {{ t('JRC_NICO.PROVIDER.API_KEY') }}
+                  </dt>
+                  <dd class="mt-1 font-semibold text-n-slate-12">
                     {{ provider.masked_api_key || 'Nao cadastrada' }}
                   </dd>
                 </div>
                 <div>
-                  <dt class="text-[#98a2b3]">Compatibilidade</dt>
+                  <dt class="text-n-slate-11">Compatibilidade</dt>
                   <dd
                     class="mt-1 font-semibold"
                     :class="
@@ -383,8 +385,8 @@ onMounted(load);
                   </dd>
                 </div>
                 <div>
-                  <dt class="text-[#98a2b3]">Limite mensal</dt>
-                  <dd class="mt-1 font-semibold text-[#344054]">
+                  <dt class="text-n-slate-11">Limite mensal</dt>
+                  <dd class="mt-1 font-semibold text-n-slate-12">
                     {{
                       provider.monthly_token_limit
                         ? formatNumber(provider.monthly_token_limit) + ' tokens'
@@ -393,8 +395,8 @@ onMounted(load);
                   </dd>
                 </div>
                 <div>
-                  <dt class="text-[#98a2b3]">Orcamento mensal</dt>
-                  <dd class="mt-1 font-semibold text-[#344054]">
+                  <dt class="text-n-slate-11">Orcamento mensal</dt>
+                  <dd class="mt-1 font-semibold text-n-slate-12">
                     {{
                       provider.monthly_budget_cents
                         ? formatMoney(provider.monthly_budget_cents)
@@ -440,9 +442,9 @@ onMounted(load);
               @click="startCreate"
             >
               <i class="i-lucide-key-round mx-auto size-8 text-blue-600" /><b
-                class="mt-3 block text-[#172033]"
+                class="mt-3 block text-n-slate-12"
                 >Nenhum provedor configurado</b
-              ><span class="mt-1 block text-sm text-[#667085]"
+              ><span class="mt-1 block text-sm text-n-slate-11"
                 >Cadastre a primeira conex&atilde;o para ativar respostas de
                 IA.</span
               >
@@ -452,17 +454,19 @@ onMounted(load);
 
         <section
           v-else-if="activeTab === 'models'"
-          class="rounded-2xl border border-[#dfe7f2] bg-white p-5 shadow-sm"
+          class="rounded-2xl border border-n-weak bg-n-solid-2 p-5 shadow-sm"
         >
-          <h2 class="text-lg font-bold text-[#172033]">Modelos por provedor</h2>
-          <p class="text-sm text-[#667085]">
+          <h2 class="text-lg font-bold text-n-slate-12">
+            Modelos por provedor
+          </h2>
+          <p class="text-sm text-n-slate-11">
             Separe um modelo r&aacute;pido, um padr&atilde;o e um
             avan&ccedil;ado conforme custo e complexidade.
           </p>
           <div class="mt-5 overflow-x-auto">
             <table class="w-full min-w-[800px] text-left text-sm">
               <thead
-                class="border-b border-slate-200 text-xs uppercase text-[#98a2b3]"
+                class="border-b border-n-weak text-xs uppercase text-n-slate-11"
               >
                 <tr>
                   <th class="p-3">Conexao</th>
@@ -478,16 +482,16 @@ onMounted(load);
                   :key="provider.id"
                   class="border-b border-slate-100"
                 >
-                  <td class="p-3 font-semibold text-[#172033]">
+                  <td class="p-3 font-semibold text-n-slate-12">
                     {{ provider.name }}
                   </td>
-                  <td class="p-3 text-[#667085]">
+                  <td class="p-3 text-n-slate-11">
                     {{ provider.fast_model || '--' }}
                   </td>
-                  <td class="p-3 text-[#667085]">
+                  <td class="p-3 text-n-slate-11">
                     {{ provider.default_model || '--' }}
                   </td>
-                  <td class="p-3 text-[#667085]">
+                  <td class="p-3 text-n-slate-11">
                     {{ provider.advanced_model || '--' }}
                   </td>
                   <td class="p-3">
@@ -529,28 +533,28 @@ onMounted(load);
                 },
               ]"
               :key="card.label"
-              class="rounded-2xl border border-[#dfe7f2] bg-white p-4 shadow-sm"
+              class="rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm"
             >
-              <p class="text-xs text-[#667085]">{{ card.label }}</p>
-              <strong class="mt-2 block text-2xl text-[#172033]">{{
+              <p class="text-xs text-n-slate-11">{{ card.label }}</p>
+              <strong class="mt-2 block text-2xl text-n-slate-12">{{
                 card.value
               }}</strong>
             </article>
           </div>
           <div class="grid gap-4 xl:grid-cols-2">
             <article
-              class="rounded-2xl border border-[#dfe7f2] bg-white p-5 shadow-sm"
+              class="rounded-2xl border border-n-weak bg-n-solid-2 p-5 shadow-sm"
             >
-              <h2 class="font-bold text-[#172033]">Consumo por agente</h2>
+              <h2 class="font-bold text-n-slate-12">Consumo por agente</h2>
               <div class="mt-4 space-y-3">
                 <div v-for="item in usage.by_agent" :key="item.key">
                   <div class="flex justify-between text-xs">
-                    <span class="text-[#667085]">{{ item.key }}</span
-                    ><b class="text-[#172033]">{{
+                    <span class="text-n-slate-11">{{ item.key }}</span
+                    ><b class="text-n-slate-12">{{
                       formatNumber(item.tokens)
                     }}</b>
                   </div>
-                  <div class="mt-1 h-2 rounded-full bg-slate-100">
+                  <div class="mt-1 h-2 rounded-full bg-n-slate-3">
                     <div
                       class="h-2 rounded-full bg-violet-500"
                       :style="{
@@ -559,30 +563,33 @@ onMounted(load);
                     />
                   </div>
                 </div>
-                <p v-if="!usage.by_agent.length" class="text-sm text-[#98a2b3]">
+                <p
+                  v-if="!usage.by_agent.length"
+                  class="text-sm text-n-slate-11"
+                >
                   O consumo aparecer&aacute; depois das primeiras chamadas de
                   IA.
                 </p>
               </div>
             </article>
             <article
-              class="rounded-2xl border border-[#dfe7f2] bg-white p-5 shadow-sm"
+              class="rounded-2xl border border-n-weak bg-n-solid-2 p-5 shadow-sm"
             >
-              <h2 class="font-bold text-[#172033]">
+              <h2 class="font-bold text-n-slate-12">
                 Consumo por usu&aacute;rio
               </h2>
               <div class="mt-4 space-y-3">
                 <div
                   v-for="item in usage.by_user"
                   :key="item.key"
-                  class="flex items-center justify-between rounded-xl bg-[#f6f8fb] p-3"
+                  class="flex items-center justify-between rounded-xl bg-n-surface-1 p-3"
                 >
-                  <span class="text-sm text-[#344054]">{{ item.label }}</span
-                  ><b class="text-sm text-[#172033]"
+                  <span class="text-sm text-n-slate-12">{{ item.label }}</span
+                  ><b class="text-sm text-n-slate-12"
                     >{{ formatNumber(item.tokens) }} tokens</b
                   >
                 </div>
-                <p v-if="!usage.by_user.length" class="text-sm text-[#98a2b3]">
+                <p v-if="!usage.by_user.length" class="text-sm text-n-slate-11">
                   Nenhum consumo registrado neste m&ecirc;s.
                 </p>
               </div>
@@ -595,16 +602,16 @@ onMounted(load);
           class="grid gap-4 xl:grid-cols-2"
         >
           <article
-            class="rounded-2xl border border-emerald-200 bg-white p-5 shadow-sm"
+            class="rounded-2xl border border-emerald-200 bg-n-solid-2 p-5 shadow-sm"
           >
             <span
               class="grid size-11 place-content-center rounded-xl bg-emerald-50 text-emerald-700"
               ><i class="i-lucide-lock-keyhole size-5"
             /></span>
-            <h2 class="mt-4 font-bold text-[#172033]">
+            <h2 class="mt-4 font-bold text-n-slate-12">
               Prote&ccedil;&atilde;o das chaves
             </h2>
-            <ul class="mt-3 space-y-2 text-sm leading-6 text-[#667085]">
+            <ul class="mt-3 space-y-2 text-sm leading-6 text-n-slate-11">
               <li>A chave fica criptografada no banco pelo backend Rails.</li>
               <li>A API retorna apenas uma vers&atilde;o mascarada.</li>
               <li>
@@ -614,14 +621,14 @@ onMounted(load);
             </ul>
           </article>
           <article
-            class="rounded-2xl border border-blue-200 bg-white p-5 shadow-sm"
+            class="rounded-2xl border border-blue-200 bg-n-solid-2 p-5 shadow-sm"
           >
             <span
               class="grid size-11 place-content-center rounded-xl bg-blue-50 text-blue-700"
               ><i class="i-lucide-server-cog size-5"
             /></span>
-            <h2 class="mt-4 font-bold text-[#172033]">Fluxo seguro</h2>
-            <ol class="mt-3 space-y-2 text-sm leading-6 text-[#667085]">
+            <h2 class="mt-4 font-bold text-n-slate-12">Fluxo seguro</h2>
+            <ol class="mt-3 space-y-2 text-sm leading-6 text-n-slate-11">
               <li>1. O usu&aacute;rio envia a pergunta ao backend.</li>
               <li>2. O backend aplica permiss&otilde;es e contexto.</li>
               <li>3. O backend usa a credencial criptografada.</li>
@@ -635,15 +642,15 @@ onMounted(load);
 
         <section
           v-else
-          class="rounded-2xl border border-[#dfe7f2] bg-white p-5 shadow-sm"
+          class="rounded-2xl border border-n-weak bg-n-solid-2 p-5 shadow-sm"
         >
           <div class="flex items-center justify-between">
             <div>
-              <h2 class="text-lg font-bold text-[#172033]">
+              <h2 class="text-lg font-bold text-n-slate-12">
                 Logs de uso de IA
               </h2>
-              <p class="text-sm text-[#667085]">
-                Somente metadados de consumo; a API Key nunca &eacute;
+              <p class="text-sm text-n-slate-11">
+                Somente metadados de consumo; a chave da API nunca &eacute;
                 registrada.
               </p>
             </div>
@@ -657,7 +664,7 @@ onMounted(load);
           <div class="mt-5 overflow-x-auto">
             <table class="w-full min-w-[900px] text-left text-sm">
               <thead
-                class="border-b border-slate-200 text-xs uppercase text-[#98a2b3]"
+                class="border-b border-n-weak text-xs uppercase text-n-slate-11"
               >
                 <tr>
                   <th class="p-3">Data</th>
@@ -674,20 +681,20 @@ onMounted(load);
                   :key="event.id"
                   class="border-b border-slate-100"
                 >
-                  <td class="p-3 text-[#667085]">
+                  <td class="p-3 text-n-slate-11">
                     {{ formatDate(event.created_at) }}
                   </td>
-                  <td class="p-3 font-semibold text-[#344054]">
+                  <td class="p-3 font-semibold text-n-slate-12">
                     {{ event.agent_key }}
                   </td>
-                  <td class="p-3 text-[#667085]">{{ event.model || '--' }}</td>
-                  <td class="p-3 text-[#667085]">
+                  <td class="p-3 text-n-slate-11">{{ event.model || '--' }}</td>
+                  <td class="p-3 text-n-slate-11">
                     {{ formatNumber(event.input_tokens) }}
                   </td>
-                  <td class="p-3 text-[#667085]">
+                  <td class="p-3 text-n-slate-11">
                     {{ formatNumber(event.output_tokens) }}
                   </td>
-                  <td class="p-3 font-semibold text-[#172033]">
+                  <td class="p-3 font-semibold text-n-slate-12">
                     {{ formatNumber(event.total_tokens) }}
                   </td>
                 </tr>
@@ -695,7 +702,7 @@ onMounted(load);
             </table>
             <p
               v-if="!usage.recent.length"
-              class="p-6 text-center text-sm text-[#98a2b3]"
+              class="p-6 text-center text-sm text-n-slate-11"
             >
               Nenhuma execu&ccedil;&atilde;o registrada.
             </p>
@@ -705,36 +712,37 @@ onMounted(load);
 
       <div
         v-if="showForm"
-        class="fixed inset-0 z-[90] grid place-content-center overflow-y-auto bg-slate-950/50 p-4"
+        class="fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto bg-slate-950/50 p-4"
         @click.self="showForm = false"
       >
         <form
-          class="my-6 w-full max-w-3xl rounded-3xl bg-white p-6 shadow-2xl"
+          class="my-auto max-h-[calc(100dvh-2rem)] w-full max-w-3xl overflow-y-auto overscroll-contain rounded-3xl bg-n-solid-2 p-6 shadow-2xl"
           @submit.prevent="save"
         >
           <div class="flex items-center justify-between">
             <div>
-              <h2 class="text-xl font-bold text-[#172033]">
+              <h2 class="text-xl font-bold text-n-slate-12">
                 {{ editingId ? 'Editar provedor' : 'Novo provedor de IA' }}
               </h2>
-              <p class="text-sm text-[#667085]">
+              <p class="text-sm text-n-slate-11">
                 A chave ser&aacute; enviada uma vez ao backend e armazenada de
                 forma criptografada.
               </p>
             </div>
             <button
               type="button"
-              class="grid size-9 place-content-center rounded-xl bg-slate-100"
+              class="grid size-9 place-content-center rounded-xl bg-n-slate-3"
+              :aria-label="t('GENERAL.CLOSE')"
               @click="showForm = false"
             >
               <i class="i-lucide-x size-4" />
             </button>
           </div>
           <div class="mt-6 grid gap-4 md:grid-cols-2">
-            <label class="text-sm font-medium text-[#344054]"
+            <label class="text-sm font-medium text-n-slate-12"
               >Provedor<select
                 v-model="form.provider_type"
-                class="mt-1 h-11 w-full rounded-xl border border-slate-200 px-3 outline-none focus:border-blue-500"
+                class="mt-1 h-11 w-full rounded-xl border border-n-weak bg-n-solid-2 text-n-slate-12 px-3 outline-none focus:border-blue-500"
                 @change="providerChanged"
               >
                 <option
@@ -745,68 +753,69 @@ onMounted(load);
                   {{ option.label }}
                 </option>
               </select></label
-            ><label class="text-sm font-medium text-[#344054]"
+            ><label class="text-sm font-medium text-n-slate-12"
               >Nome da conex&atilde;o<input
                 v-model="form.name"
-                class="mt-1 h-11 w-full rounded-xl border border-slate-200 px-3 outline-none focus:border-blue-500"
+                class="mt-1 h-11 w-full rounded-xl border border-n-weak bg-n-solid-2 text-n-slate-12 px-3 outline-none focus:border-blue-500"
                 placeholder="JRC IA Producao" /></label
-            ><label class="md:col-span-2 text-sm font-medium text-[#344054]"
-              >API Key<input
+            ><label class="md:col-span-2 text-sm font-medium text-n-slate-12"
+              >{{ t('JRC_NICO.PROVIDER.API_KEY')
+              }}<input
                 v-model="form.api_key"
                 type="password"
                 autocomplete="new-password"
-                class="mt-1 h-11 w-full rounded-xl border border-slate-200 px-3 font-mono outline-none focus:border-blue-500"
+                class="mt-1 h-11 w-full rounded-xl border border-n-weak bg-n-solid-2 text-n-slate-12 px-3 font-mono outline-none focus:border-blue-500"
                 :placeholder="
                   editingId
                     ? 'Deixe vazio para manter a chave atual'
                     : 'Cole a chave do provedor'
                 " /></label
-            ><label class="md:col-span-2 text-sm font-medium text-[#344054]"
+            ><label class="md:col-span-2 text-sm font-medium text-n-slate-12"
               >URL base<input
                 v-model="form.base_url"
-                class="mt-1 h-11 w-full rounded-xl border border-slate-200 px-3 font-mono text-xs outline-none focus:border-blue-500"
+                class="mt-1 h-11 w-full rounded-xl border border-n-weak bg-n-solid-2 text-n-slate-12 px-3 font-mono text-xs outline-none focus:border-blue-500"
                 placeholder="https://api.exemplo.com" /></label
-            ><label class="text-sm font-medium text-[#344054]"
+            ><label class="text-sm font-medium text-n-slate-12"
               >Modelo r&aacute;pido<input
                 v-model="form.fast_model"
-                class="mt-1 h-11 w-full rounded-xl border border-slate-200 px-3 outline-none focus:border-blue-500"
+                class="mt-1 h-11 w-full rounded-xl border border-n-weak bg-n-solid-2 text-n-slate-12 px-3 outline-none focus:border-blue-500"
                 placeholder="Nome do modelo" /></label
-            ><label class="text-sm font-medium text-[#344054]"
+            ><label class="text-sm font-medium text-n-slate-12"
               >Modelo padr&atilde;o *<input
                 v-model="form.default_model"
                 required
-                class="mt-1 h-11 w-full rounded-xl border border-slate-200 px-3 outline-none focus:border-blue-500"
+                class="mt-1 h-11 w-full rounded-xl border border-n-weak bg-n-solid-2 text-n-slate-12 px-3 outline-none focus:border-blue-500"
                 placeholder="Nome do modelo" /></label
-            ><label class="text-sm font-medium text-[#344054]"
+            ><label class="text-sm font-medium text-n-slate-12"
               >Modelo avan&ccedil;ado<input
                 v-model="form.advanced_model"
-                class="mt-1 h-11 w-full rounded-xl border border-slate-200 px-3 outline-none focus:border-blue-500"
+                class="mt-1 h-11 w-full rounded-xl border border-n-weak bg-n-solid-2 text-n-slate-12 px-3 outline-none focus:border-blue-500"
                 placeholder="Nome do modelo" /></label
-            ><label class="text-sm font-medium text-[#344054]"
+            ><label class="text-sm font-medium text-n-slate-12"
               >Limite mensal de tokens<input
                 v-model="form.monthly_token_limit"
                 type="number"
                 min="0"
-                class="mt-1 h-11 w-full rounded-xl border border-slate-200 px-3 outline-none focus:border-blue-500"
+                class="mt-1 h-11 w-full rounded-xl border border-n-weak bg-n-solid-2 text-n-slate-12 px-3 outline-none focus:border-blue-500"
                 placeholder="Ex.: 1000000" /></label
-            ><label class="text-sm font-medium text-[#344054]"
+            ><label class="text-sm font-medium text-n-slate-12"
               >Limite financeiro mensal (R$)<input
                 v-model="form.monthly_budget_brl"
                 type="number"
                 min="0"
                 step="0.01"
-                class="mt-1 h-11 w-full rounded-xl border border-slate-200 px-3 outline-none focus:border-blue-500"
+                class="mt-1 h-11 w-full rounded-xl border border-n-weak bg-n-solid-2 text-n-slate-12 px-3 outline-none focus:border-blue-500"
                 placeholder="Ex.: 500,00"
             /></label>
             <div class="flex flex-wrap items-center gap-5 md:col-span-2">
-              <label class="flex items-center gap-2 text-sm text-[#344054]"
+              <label class="flex items-center gap-2 text-sm text-n-slate-12"
                 ><input
                   v-model="form.active"
                   type="checkbox"
                   class="size-4 accent-blue-600"
                 />
                 Conex&atilde;o ativa</label
-              ><label class="flex items-center gap-2 text-sm text-[#344054]"
+              ><label class="flex items-center gap-2 text-sm text-n-slate-12"
                 ><input
                   v-model="form.default_provider"
                   type="checkbox"
@@ -827,14 +836,14 @@ onMounted(load);
           <div class="mt-6 flex justify-end gap-2">
             <button
               type="button"
-              class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-[#667085]"
+              class="rounded-xl border border-n-weak px-4 py-2.5 text-sm font-semibold text-n-slate-11"
               @click="showForm = false"
             >
               Cancelar</button
             ><button
               type="submit"
               :disabled="saving"
-              class="inline-flex items-center gap-2 rounded-xl bg-[#087ff5] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+              class="inline-flex items-center gap-2 rounded-xl bg-n-brand hover:enabled:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-n-brand px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-100 disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:cursor-not-allowed"
             >
               <i
                 v-if="saving"

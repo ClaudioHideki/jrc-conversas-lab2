@@ -306,9 +306,9 @@
       "TITLE": "ERP da conversa — configuração administrativa"
     },
     "PROVIDER": {
-      "API_KEY": "API key",
-      "API_KEY_REQUIRED": "Enter the API key."
+      "API_KEY": "Chave da API",
+      "API_KEY_REQUIRED": "Informe a chave da API."
     },
-    "SPECIALIST_RESTRICTED": "This specialist is unavailable with your current access. Contact your account administrator."
+    "SPECIALIST_RESTRICTED": "Este especialista está indisponível para seu acesso atual. Consulte o administrador da conta."
   }
 }

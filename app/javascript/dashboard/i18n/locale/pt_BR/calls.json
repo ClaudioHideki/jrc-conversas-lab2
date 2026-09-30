@@ -1,0 +1,50 @@
+{
+  "SOFTPHONE": {
+    "ENABLE_NOTIFICATIONS": "Ativar notificações de chamadas",
+    "NOTIFICATIONS_DENIED": "As notificações de chamadas estão bloqueadas. Permita as notificações nas configurações do navegador.",
+    "OPEN_IN_JRC": "Abrir no JRC Conversas"
+  },
+  "CALLS_PAGE": {
+    "HEADER": "Ligações",
+    "ALL_CALLS": "Todas as ligações",
+    "ALL_CALLS_COUNT": "Todas as ligações ({count})",
+    "EMPTY_STATE": "Nenhuma ligação encontrada",
+    "SETUP": {
+      "TITLE": "Faça e receba ligações em um só lugar",
+      "SUBTITLE": "Configure um canal de voz para atender ligações com sua equipe. Cada ligação e sua gravação aparecerão aqui.",
+      "ACTION": "Configurar canal de voz"
+    },
+    "FILTERS": {
+      "MISSED": "Não atendida",
+      "NO_REPLY": "Sem resposta",
+      "OTHER_ACTIVITY": "Outra atividade",
+      "INCOMING": "Recebida",
+      "OUTGOING": "Realizada",
+      "IN_PROGRESS": "Em andamento",
+      "ASSIGNEE": "Responsável",
+      "ALL_ASSIGNEES": "Todos os responsáveis",
+      "MORE_FILTERS": "Mais filtros",
+      "INBOX": "Caixa de entrada",
+      "ALL_INBOXES": "Todas as caixas de entrada"
+    },
+    "STATUS": {
+      "ONGOING": "Em andamento",
+      "INCOMING": "Recebida",
+      "OUTGOING": "Realizada",
+      "MISSED": "Não atendida",
+      "NO_REPLY": "Sem resposta",
+      "FAILED": "Falhou"
+    },
+    "ROW": {
+      "PICKED_BY": "Atendida por",
+      "DIALED_BY": "Realizada por",
+      "ANSWERED": "Atendida",
+      "RINGING": "Chamando",
+      "IN_PROGRESS": "Em andamento",
+      "NO_AGENT": "Nenhum agente atendeu esta ligação",
+      "NO_CONTACT_ANSWER": "O contato não atendeu",
+      "FAILED": "Não foi possível conectar esta ligação",
+      "YESTERDAY": "Ontem"
+    }
+  }
+}

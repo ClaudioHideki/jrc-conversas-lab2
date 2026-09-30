@@ -512,6 +512,26 @@
         "invalid": "Confira os campos, referência obrigatória e IDs selecionados.",
         "not_found": "O registro solicitado está indisponível."
       }
+    },
+    "UNIT_ACCESS": {
+      "title": "Acesso às unidades",
+      "help": "Gerencie o acesso às unidades dos membros já vinculados à conta. Atribuição, equipes e permissões de ação continuam independentes. A revogação preserva o histórico do vínculo.",
+      "choose_unit": "Selecione uma unidade para pesquisar os membros e seus acessos.",
+      "parent_inactive": "Unidade ou empresa operadora inativa: o acesso operacional está bloqueado.",
+      "role": "Papel e permissões efetivas",
+      "state": "Vínculo",
+      "absent": "Sem vínculo",
+      "grant": "Conceder acesso",
+      "revoke": "Revogar acesso",
+      "reactivate": "Reativar vínculo",
+      "capabilities": "Permissões efetivas do Service Desk",
+      "no_capabilities": "Sem permissões do Service Desk",
+      "roles": "Papéis personalizados",
+      "agents": "Gerenciar agentes e papéis atribuídos",
+      "agent": "Agente",
+      "administrator": "Administrador",
+      "pagination": "Página {page} de {pages} · {total} registros",
+      "roles_help": "As permissões de ação são configuradas em Configurações → Papéis personalizados e atribuídas em Configurações → Agentes por um administrador autorizado a usar essas configurações. Esta página gerencia somente o acesso às unidades. Um vínculo não concede permissões de ação."
     }
   }
 }

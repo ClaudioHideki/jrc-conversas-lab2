@@ -2,10 +2,12 @@
 /* eslint-disable vue/no-bare-strings-in-template, @intlify/vue-i18n/no-raw-text */
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useMapGetter, useStore } from 'dashboard/composables/store';
 import jrcAiAPI from 'dashboard/api/jrcAi';
 import { useJrcCopilot } from 'dashboard/components-next/jrcCopilot/useJrcCopilot';
 
+const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const store = useStore();
@@ -965,7 +967,9 @@ onBeforeUnmount(() => window.clearInterval(refreshTimer));
       class="fixed inset-0 z-[80] grid place-content-center bg-slate-950/40 p-4"
       @click.self="showPersonalize = false"
     >
-      <section class="w-full max-w-md rounded-3xl bg-n-solid-2 p-6 shadow-2xl">
+      <section
+        class="max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto overscroll-contain rounded-3xl bg-n-solid-2 p-6 shadow-2xl"
+      >
         <div class="flex items-center justify-between">
           <div>
             <h2 class="text-lg font-bold text-n-slate-12">
@@ -976,7 +980,8 @@ onBeforeUnmount(() => window.clearInterval(refreshTimer));
             </p>
           </div>
           <button
-            class="grid size-9 place-content-center rounded-xl bg-n-slate-3"
+            class="grid size-9 shrink-0 place-content-center rounded-xl bg-n-slate-3 text-n-slate-12 hover:bg-n-alpha-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-n-brand"
+            :aria-label="t('GENERAL.CLOSE')"
             @click="showPersonalize = false"
           >
             <i class="i-lucide-x size-4" />

@@ -410,7 +410,8 @@
     "DOCS": "Ler documentos",
     "SECURITY": "Segurança",
     "CAPTAIN_AI": "Assistente JRC",
-    "CONVERSATION_WORKFLOW": "Fluxo de Conversa"
+    "CONVERSATION_WORKFLOW": "Fluxo de Conversa",
+    "CALLS": "Ligações"
   },
   "DATA_IMPORTS": {
     "HEADER": "Dado",

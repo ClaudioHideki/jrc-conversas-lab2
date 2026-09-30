@@ -73,4 +73,23 @@ describe('AI provider actions', () => {
       .trigger('click');
     expect(api.deleteProvider).not.toHaveBeenCalled();
   });
+
+  it('keeps the provider dialog scrollable and closes it without saving', async () => {
+    wrapper = mount(JrcAiSettingsPage);
+    await flushPromises();
+    await wrapper
+      .findAll('button')
+      .find(button => button.text() === 'Novo provedor')
+      .trigger('click');
+    const form = wrapper.get('form');
+    expect(form.classes()).toContain('overflow-y-auto');
+    expect(form.classes()).toContain('overscroll-contain');
+    expect(form.classes()).toContain('max-h-[calc(100dvh-2rem)]');
+    expect(form.classes()).toContain('bg-n-solid-2');
+    expect(form.get('input[type="password"]').classes()).toContain(
+      'text-n-slate-12'
+    );
+    await form.get('button[aria-label="Close"]').trigger('click');
+    expect(wrapper.find('form').exists()).toBe(false);
+  });
 });
