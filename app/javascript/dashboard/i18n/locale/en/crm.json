@@ -1,5 +1,10 @@
 {
   "CRM": {
+    "NAVIGATION": {
+      "LABEL": "CRM modules",
+      "PREVIOUS": "Previous CRM tabs",
+      "NEXT": "Next CRM tabs"
+    },
     "AGENDA_RECORD": {
       "LOADING": "Loading the original CRM record…",
       "UNAVAILABLE": "This record is unavailable or you no longer have access.",
@@ -81,6 +86,19 @@
       }
     },
     "CONTACT_LEAD": {
+      "LIST": "Contact list",
+      "CENTER_TITLE": "Relationship center",
+      "UNAVAILABLE_ACTION": "This action is not available in this view.",
+      "UNAVAILABLE_VIEWS": "The disabled views and actions are not available in this contact list.",
+      "CALLING_CENTER": "Open calling center",
+      "VIEW_PROFILE": "View contact profile",
+      "CLOSE_DETAILS": "Close contact details",
+      "CONTACT_OPTIONS": "Contact options",
+      "METRIC_UNAVAILABLE": "Metric unavailable",
+      "AVAILABILITY": "Availability",
+      "ONLINE": "Online",
+      "OFFLINE": "Offline",
+      "UNKNOWN": "Not available",
       "CREATE": "Criar lead deste contato",
       "VIEW": "Abrir lead",
       "LOADING": "Consultando CRM…",
@@ -180,11 +198,17 @@
       "EDIT_ACTIVITY": "Editar atividade",
       "ACTIVITY_NOTES": "Descrição e anotações",
       "EXECUTE_ACTIVITY": "Executar atividade",
+      "START_ACTION_UNAVAILABLE": "Iniciar chamadas ou mensagens por esta atividade está indisponível.",
+      "EDIT_ACTIVITY_UNAVAILABLE": "Editar e reagendar atividades ainda não está disponível nesta tela.",
+      "RESCHEDULE": "Reagendar",
       "CLOSE": "Fechar",
       "EDIT": "Editar",
       "COMPLETE": "Concluir",
       "REFRESH_CALENDAR": "Atualizar agenda",
       "CALENDAR_LOCAL": "Agenda interna do CRM. Atualizar consulta os compromissos salvos; a sincronização com calendários externos não está configurada.",
+      "CALENDAR_VIEWS_UNAVAILABLE": "Visualização semanal disponível. Os modos Mês, Dia e Lista ainda não estão disponíveis.",
+      "CALENDAR_SYNC_UNAVAILABLE": "A sincronização com calendários externos ainda não está disponível.",
+      "CALENDAR_FILTERS_UNAVAILABLE": "Os filtros de calendário ainda não estão disponíveis. A semana exibe as atividades carregadas.",
       "PREVIOUS_PERIOD": "Período anterior",
       "NEXT_PERIOD": "Próximo período",
       "EMPTY_PERIOD": "Nenhuma atividade neste período.",

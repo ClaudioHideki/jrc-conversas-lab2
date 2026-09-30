@@ -1,7 +1,7 @@
 import { shallowMount, flushPromises } from '@vue/test-utils';
 import { createStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
-import { dealsAPI } from 'dashboard/api/crm';
+import { activitiesAPI, dealsAPI } from 'dashboard/api/crm';
 import ActivitiesIndex from '../ActivitiesIndex.vue';
 
 vi.mock('vue-router', () => ({ useRoute: vi.fn(), useRouter: vi.fn() }));
@@ -68,5 +68,52 @@ it('preserves semantic colors/count badges, highlights selection and applies/cle
   expect(wrapper.get('tbody').text()).toContain('Visitar João');
   expect(statusButtons[1].attributes('aria-pressed')).toBe('false');
   expect(statusButtons[1].classes()).not.toContain('ring-2');
+  wrapper.unmount();
+});
+
+it('explains unavailable execution, editing and rescheduling while preserving completion', async () => {
+  useRoute.mockReturnValue({ params: { accountId: '1' }, query: {} });
+  useRouter.mockReturnValue({ push: vi.fn() });
+  dealsAPI.list.mockResolvedValue({ data: [] });
+  activitiesAPI.complete.mockResolvedValue({});
+  const store = createStore({
+    getters: {
+      'jrcCrm/activities/allActivities': () => [
+        {
+          id: 1,
+          title: 'Telefonar Maria',
+          activity_type: 'call',
+          due_at: '2026-09-30T12:00:00Z',
+          status: 'scheduled',
+        },
+      ],
+    },
+  });
+  store.dispatch = vi.fn().mockResolvedValue();
+  const wrapper = shallowMount(ActivitiesIndex, {
+    global: { plugins: [store], stubs: { RouterLink: true } },
+  });
+  await flushPromises();
+
+  const unavailableButtons = wrapper.findAll('button[aria-describedby]');
+  expect(unavailableButtons).toHaveLength(5);
+  await Promise.all(
+    unavailableButtons.map(async button => {
+      expect(button.element.disabled).toBe(true);
+      const explanation = wrapper.get(
+        `#${button.attributes('aria-describedby')}`
+      );
+      expect(explanation.isVisible()).toBe(true);
+      expect(explanation.text()).toMatch(/indisponível|não est/);
+      await button.trigger('click');
+    })
+  );
+  expect(activitiesAPI.complete).not.toHaveBeenCalled();
+  expect(store.dispatch).toHaveBeenCalledTimes(1);
+
+  await wrapper.get('tbody button[title="Concluir"]').trigger('click');
+  await flushPromises();
+  expect(activitiesAPI.complete).toHaveBeenCalledWith(1);
+  expect(store.dispatch).toHaveBeenCalledTimes(2);
   wrapper.unmount();
 });

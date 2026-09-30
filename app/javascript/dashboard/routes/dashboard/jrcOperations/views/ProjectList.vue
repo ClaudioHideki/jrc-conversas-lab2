@@ -90,7 +90,7 @@ function created(project) {
       </div>
       <button
         v-if="status?.can_create_project"
-        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50 bg-n-blue-9 text-white"
+        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed bg-n-blue-9 text-white"
         @click="creating = true"
       >
         Novo projeto
@@ -103,7 +103,7 @@ function created(project) {
     >
       {{ error }}
       <button
-        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50 text-xs"
+        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed text-xs"
         :disabled="loading"
         @click="load"
       >
@@ -143,7 +143,7 @@ function created(project) {
         >
           {{ label }}
         </option></select><button
-        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50"
+        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
         :disabled="loading"
       >
         Pesquisar</button><span class="text-n-slate-11 text-sm">{{ meta.total }} projetos no seu acesso</span>
@@ -199,7 +199,7 @@ function created(project) {
         </div>
         <div class="flex flex-wrap items-center gap-3 justify-between">
           <span class="text-n-slate-11 text-sm">Entrega: {{ formatDate(project.due_on) }}</span><RouterLink
-            class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50 text-xs"
+            class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed text-xs"
             :to="
               routeTo('jrc_projects_detail', accountId, {
                 projectId: project.id,
@@ -216,12 +216,12 @@ function created(project) {
       class="flex justify-end items-center gap-3 pt-4"
     >
       <button
-        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50"
+        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
         :disabled="page === 1 || loading"
         @click="navigatePage(-1)"
       >
         Anterior</button><span>Pagina {{ page }}</span><button
-        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50"
+        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
         :disabled="page * 25 >= meta.total || loading"
         @click="navigatePage(1)"
       >

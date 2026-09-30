@@ -99,7 +99,7 @@ onMounted(async () => {
 
       <div
         v-if="loading"
-        class="rounded-2xl border border-n-weak bg-n-solid-2 p-10 text-center text-sm text-n-slate-10 shadow-sm"
+        class="rounded-2xl border border-n-weak bg-n-solid-2 p-10 text-center text-sm text-n-slate-11 shadow-sm"
       >
         <span
           class="i-lucide-loader-circle mr-2 inline-block size-4 animate-spin"
@@ -139,14 +139,14 @@ onMounted(async () => {
                 <span class="block truncate font-medium text-n-slate-12">{{
                   deal.title
                 }}</span>
-                <span class="mt-1 block text-xs text-n-slate-10"
+                <span class="mt-1 block text-xs text-n-slate-11"
                   >Abrir detalhes do negócio</span
                 >
               </span>
               <span class="flex items-center gap-2"><span class="text-sm font-semibold text-n-blue-11">{{ formatBRL(deal.value_cents) }}</span><span class="grid size-8 place-content-center rounded-lg bg-[#087cf0] text-white"><i class="i-lucide-phone size-3.5" /></span><span class="grid size-8 place-content-center rounded-lg bg-[#16a76b] text-white"><i class="i-ri-whatsapp-fill size-3.5" /></span><span class="grid size-8 place-content-center rounded-lg bg-[#7c3aed] text-white"><i class="i-lucide-calendar-days size-3.5" /></span></span>
             </button>
           </div>
-          <p v-else class="p-5 text-sm text-n-slate-10">
+          <p v-else class="p-5 text-sm text-n-slate-11">
             Nenhum negócio ativo.
           </p>
         </CrmPanel>
@@ -183,7 +183,7 @@ onMounted(async () => {
                 <p class="truncate font-medium text-n-slate-12">
                   {{ activity.title }}
                 </p>
-                <p class="mt-1 text-xs text-n-slate-10">
+                <p class="mt-1 text-xs text-n-slate-11">
                   {{
                     activity.due_at_display ||
                     formatCrmDateTime(activity.due_at)
@@ -192,7 +192,7 @@ onMounted(async () => {
               </div>
             </div>
           </div>
-          <p v-else class="p-5 text-sm text-n-slate-10">
+          <p v-else class="p-5 text-sm text-n-slate-11">
             Nenhuma atividade para hoje.
           </p>
         </CrmPanel>
@@ -217,7 +217,7 @@ onMounted(async () => {
               class="px-5 py-4"
             >
               <p class="font-medium text-n-slate-12">{{ lead.name }}</p>
-              <p class="mt-1 text-xs text-n-slate-10">
+              <p class="mt-1 text-xs text-n-slate-11">
                 {{
                   lead.company_name ||
                   lead.email ||
@@ -227,7 +227,7 @@ onMounted(async () => {
               </p>
             </div>
           </div>
-          <p v-else class="p-5 text-sm text-n-slate-10">Nenhum lead novo.</p>
+          <p v-else class="p-5 text-sm text-n-slate-11">Nenhum lead novo.</p>
         </CrmPanel>
 
         <CrmPanel title="Fechamentos próximos" icon="i-lucide-target" flush>
@@ -256,12 +256,12 @@ onMounted(async () => {
               >
             </button>
           </div>
-          <p v-else class="p-5 text-sm text-n-slate-10">
+          <p v-else class="p-5 text-sm text-n-slate-11">
             Nenhum fechamento previsto para os próximos sete dias.
           </p>
         </CrmPanel>
       </div>
-      <section v-if="!loading && !error" class="rounded-2xl border border-[#e4e9f1] bg-white p-4 shadow-sm"><div class="flex items-center gap-2"><i class="i-lucide-sparkles size-5 text-[#7c3aed]" /><h3 class="font-semibold text-[#172033]">Prioridades recomendadas</h3></div><div class="mt-3 grid gap-3 lg:grid-cols-3"><RouterLink :to="{name:'crm_activities'}" class="rounded-xl border border-orange-200 bg-orange-50 p-3 text-sm font-semibold text-orange-800">Revisar atividades pendentes →</RouterLink><RouterLink :to="{name:'crm_leads'}" class="rounded-xl border border-blue-200 bg-blue-50 p-3 text-sm font-semibold text-blue-800">Contatar leads sem retorno →</RouterLink><RouterLink :to="{name:'crm_funnel'}" class="rounded-xl border border-violet-200 bg-violet-50 p-3 text-sm font-semibold text-violet-800">Atualizar negócios sem atividade →</RouterLink></div></section>
+      <section v-if="!loading && !error" class="rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm"><div class="flex items-center gap-2"><i class="i-lucide-sparkles size-5 text-[#7c3aed]" /><h3 class="font-semibold text-n-slate-12">Prioridades recomendadas</h3></div><div class="mt-3 grid gap-3 lg:grid-cols-3"><RouterLink :to="{name:'crm_activities'}" class="rounded-xl border border-orange-200 bg-orange-50 p-3 text-sm font-semibold text-orange-800">Revisar atividades pendentes →</RouterLink><RouterLink :to="{name:'crm_leads'}" class="rounded-xl border border-blue-200 bg-blue-50 p-3 text-sm font-semibold text-blue-800">Contatar leads sem retorno →</RouterLink><RouterLink :to="{name:'crm_funnel'}" class="rounded-xl border border-violet-200 bg-violet-50 p-3 text-sm font-semibold text-violet-800">Atualizar negócios sem atividade →</RouterLink></div></section>
     </div>
   </div>
 </template>

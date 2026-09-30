@@ -32,7 +32,10 @@ describe('sidebar palette and shared navigation components', () => {
         (luminance(colors.sidebar.surface) + 0.05);
       expect(ratio).toBeGreaterThanOrEqual(4.5);
     });
-    expect(colors.sidebar.active).toBe('#087cf0');
+    expect(
+      (luminance(colors.sidebar.foreground) + 0.05) /
+        (luminance(colors.sidebar.active) + 0.05)
+    ).toBeGreaterThanOrEqual(4.5);
   });
 
   it.each([false, true])(

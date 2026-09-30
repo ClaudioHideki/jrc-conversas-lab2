@@ -327,7 +327,7 @@ function navigatePage(delta) {
       </div>
       <button
         v-if="canEdit"
-        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50 bg-n-blue-9 text-white"
+        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed bg-n-blue-9 text-white"
         :disabled="busy"
         @click="open()"
       >
@@ -363,14 +363,14 @@ function navigatePage(delta) {
             </td>
             <td>
               <button
-                class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50 text-xs"
+                class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed text-xs"
                 @click="open(record)"
               >
                 {{ canEdit && !locked(record) ? 'Editar' : 'Consultar' }}
               </button>
               <button
                 v-if="canEdit && !locked(record)"
-                class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50 text-xs text-n-ruby-11"
+                class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed text-xs text-n-ruby-11"
                 :disabled="busy"
                 @click="remove(record)"
               >
@@ -382,7 +382,7 @@ function navigatePage(delta) {
                   schema.key === 'milestones' &&
                   record.status === 'open'
                 "
-                class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50 text-xs"
+                class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed text-xs"
                 :disabled="busy"
                 @click="complete(record)"
               >
@@ -398,12 +398,12 @@ function navigatePage(delta) {
     </p>
     <footer v-if="total > 25" class="flex justify-end items-center gap-3 pt-4">
       <button
-        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50"
+        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
         :disabled="page <= 1 || loading"
         @click="navigatePage(-1)"
       >
         Anterior</button><span>{{ page }} · {{ total }} registros</span><button
-        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50"
+        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
         :disabled="page * 25 >= total || loading"
         @click="navigatePage(1)"
       >
@@ -518,14 +518,14 @@ function navigatePage(delta) {
         </fieldset>
         <footer class="flex justify-end gap-3 mt-4">
           <button
-            class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50"
+            class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
             type="button"
             :disabled="busy"
             @click="modal = false"
           >
             Fechar</button><button
             v-if="canEdit && !locked(editing)"
-            class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50 bg-n-blue-9 text-white"
+            class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed bg-n-blue-9 text-white"
             :disabled="busy"
           >
             Salvar
@@ -541,12 +541,12 @@ function navigatePage(delta) {
         </label>
         <div class="flex flex-wrap items-center gap-3">
           <button
-            class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50"
+            class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
             :disabled="busy || !approvalReason.trim()"
             @click="approve('approved')"
           >
             Aprovar</button><button
-            class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50 danger"
+            class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed danger"
             :disabled="busy || !approvalReason.trim()"
             @click="approve('rejected')"
           >

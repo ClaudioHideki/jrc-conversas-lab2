@@ -871,7 +871,7 @@ onMounted(async () => {
                   selectedProposal.approval?.status !== 'pending'
                 "
                 type="button"
-                class="rounded-xl bg-n-amber-9 px-3 py-2 text-sm font-semibold text-white shadow-sm disabled:opacity-50"
+                class="rounded-xl bg-n-amber-9 px-3 py-2 text-sm font-semibold text-n-on-amber shadow-sm disabled:opacity-100"
                 :disabled="Boolean(actionWorking)"
                 @click="requestApproval"
               >

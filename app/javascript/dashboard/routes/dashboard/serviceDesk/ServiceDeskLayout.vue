@@ -48,7 +48,7 @@ const blocked = computed(() => ['denied', 'unauthenticated', 'invalid_contract',
         </div>
         <nav class="sd-module-nav-scroll">
           <section v-for="group in groups" :key="group" class="mb-4">
-            <h2 class="text-[10px] font-semibold uppercase tracking-wider text-n-slate-10 px-3 mb-2">
+            <h2 class="text-[10px] font-semibold uppercase tracking-wider text-n-slate-11 px-3 mb-2">
               {{ t(`JRC_SERVICE_DESK.GROUPS.${group}`) }}
             </h2>
             <RouterLink

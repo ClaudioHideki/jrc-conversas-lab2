@@ -122,14 +122,14 @@ const STYLE_CONFIG = {
     },
     amber: {
       solid:
-        'bg-n-amber-9 text-white hover:enabled:bg-n-amber-10 focus-visible:bg-n-amber-10 outline-transparent',
+        'bg-n-amber-9 text-n-on-amber hover:enabled:bg-n-amber-10 focus-visible:bg-n-amber-10 outline-transparent',
       faded:
         'bg-n-amber-9/10 text-n-slate-12 hover:enabled:bg-n-amber-9/20 focus-visible:bg-n-amber-9/20 outline-transparent',
       outline:
         'text-n-amber-11 hover:enabled:bg-n-amber-9/10 focus-visible:bg-n-amber-9/10 outline-n-amber-9',
-      link: 'text-n-amber-9 hover:enabled:underline focus-visible:underline outline-transparent',
+      link: 'text-n-amber-11 hover:enabled:underline focus-visible:underline outline-transparent',
       ghost:
-        'text-n-amber-9 hover:enabled:bg-n-alpha-2 focus-visible:bg-n-alpha-2 outline-transparent',
+        'text-n-amber-11 hover:enabled:bg-n-alpha-2 focus-visible:bg-n-alpha-2 outline-transparent',
     },
     slate: {
       solid:
@@ -149,9 +149,9 @@ const STYLE_CONFIG = {
         'bg-n-teal-9/10 text-n-teal-11 hover:enabled:bg-n-teal-9/20 focus-visible:bg-n-teal-9/20 outline-transparent',
       outline:
         'text-n-teal-11 hover:enabled:bg-n-teal-9/10 focus-visible:bg-n-teal-9/10 outline-n-teal-9',
-      link: 'text-n-teal-9 hover:enabled:underline focus-visible:underline outline-transparent',
+      link: 'text-n-teal-11 hover:enabled:underline focus-visible:underline outline-transparent',
       ghost:
-        'text-n-teal-9 hover:enabled:bg-n-alpha-2 focus-visible:bg-n-alpha-2 outline-transparent',
+        'text-n-teal-11 hover:enabled:bg-n-alpha-2 focus-visible:bg-n-alpha-2 outline-transparent',
     },
   },
   sizes: {
@@ -191,7 +191,7 @@ const STYLE_CONFIG = {
     center: 'justify-center',
     end: 'justify-end',
   },
-  base: 'inline-flex items-center min-w-0 gap-2 transition-all duration-100 ease-out border-0 rounded-lg outline-1 outline disabled:opacity-50',
+  base: 'inline-flex items-center min-w-0 gap-2 transition-all duration-100 ease-out border-0 rounded-lg outline-1 outline focus-visible:ring-2 focus-visible:ring-n-blue-8 focus-visible:ring-offset-2 focus-visible:ring-offset-n-background disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:outline-n-slate-6 disabled:opacity-100 disabled:cursor-not-allowed',
 };
 
 const variantClasses = computed(() => {

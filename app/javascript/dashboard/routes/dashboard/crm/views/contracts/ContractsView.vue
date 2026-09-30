@@ -181,11 +181,11 @@ const badge = value =>
     awaiting_signature:
       'border-blue-200 bg-blue-50 text-blue-700',
     draft:
-      'border-slate-200 bg-slate-100 text-slate-700',
+      'border-slate-200 bg-n-slate-3 text-n-slate-12',
     renewed:
       'border-violet-200 bg-violet-50 text-violet-700',
   })[value] ||
-  'border-slate-200 bg-slate-100 text-slate-700';
+  'border-slate-200 bg-n-slate-3 text-n-slate-12';
 
 const label = value =>
   ({
@@ -449,10 +449,10 @@ const updateStatus = async (contract, nextStatus) => {
 </script>
 
 <template>
-  <div class="h-full overflow-auto bg-[#f6f8fc] dark:bg-n-background">
+  <div class="h-full overflow-auto bg-n-background dark:bg-n-background">
     <!-- CABEÇALHO -->
     <header
-      class="border-b border-slate-200 bg-white px-5 py-5 sm:px-6"
+      class="border-b border-slate-200 bg-n-solid-2 px-5 py-5 sm:px-6"
     >
       <div
         class="mx-auto flex max-w-[1600px] flex-wrap items-center justify-between gap-4"
@@ -466,7 +466,7 @@ const updateStatus = async (contract, nextStatus) => {
 
           <div>
             <div class="flex flex-wrap items-center gap-2">
-              <h2 class="text-2xl font-bold text-slate-900">
+              <h2 class="text-2xl font-bold text-n-slate-12">
                 Contratos
               </h2>
 
@@ -477,7 +477,7 @@ const updateStatus = async (contract, nextStatus) => {
               </span>
             </div>
 
-            <p class="mt-1 text-sm text-slate-500">
+            <p class="mt-1 text-sm text-n-slate-11">
               Gestão de contratos, vigência, renovações e relacionamento
               com clientes.
             </p>
@@ -518,11 +518,11 @@ const updateStatus = async (contract, nextStatus) => {
             />
           </div>
 
-          <p class="mt-5 text-sm font-medium text-slate-500">
+          <p class="mt-5 text-sm font-medium text-n-slate-11">
             Total de contratos
           </p>
 
-          <strong class="mt-1 block text-3xl font-bold text-slate-900">
+          <strong class="mt-1 block text-3xl font-bold text-n-slate-12">
             {{ stats.total }}
           </strong>
         </button>
@@ -547,7 +547,7 @@ const updateStatus = async (contract, nextStatus) => {
             </span>
           </div>
 
-          <p class="mt-5 text-sm font-medium text-slate-500">
+          <p class="mt-5 text-sm font-medium text-n-slate-11">
             Contratos ativos
           </p>
 
@@ -578,7 +578,7 @@ const updateStatus = async (contract, nextStatus) => {
             </span>
           </div>
 
-          <p class="mt-5 text-sm font-medium text-slate-500">
+          <p class="mt-5 text-sm font-medium text-n-slate-11">
             A vencer
           </p>
 
@@ -603,7 +603,7 @@ const updateStatus = async (contract, nextStatus) => {
             </span>
           </div>
 
-          <p class="mt-5 text-sm font-medium text-slate-500">
+          <p class="mt-5 text-sm font-medium text-n-slate-11">
             Vencidos
           </p>
 
@@ -668,7 +668,7 @@ const updateStatus = async (contract, nextStatus) => {
 
         <button
           type="button"
-          class="rounded-lg border border-blue-200 bg-white px-4 py-2 text-sm font-semibold text-blue-700"
+          class="rounded-lg border border-blue-200 bg-n-solid-2 px-4 py-2 text-sm font-semibold text-blue-700"
           @click="status = 'awaiting_signature'"
         >
           Visualizar
@@ -677,25 +677,25 @@ const updateStatus = async (contract, nextStatus) => {
 
       <!-- LISTAGEM -->
       <section
-        class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+        class="overflow-hidden rounded-2xl border border-slate-200 bg-n-solid-2 shadow-sm"
       >
         <!-- TÍTULO -->
         <div
           class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-5 py-4"
         >
           <div>
-            <h3 class="font-bold text-slate-900">
+            <h3 class="font-bold text-n-slate-12">
               Todos os contratos
             </h3>
 
-            <p class="text-sm text-slate-500">
+            <p class="text-sm text-n-slate-11">
               {{ filtered.length }} resultado(s) encontrado(s)
             </p>
           </div>
 
           <button
             type="button"
-            class="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+            class="flex items-center gap-2 rounded-lg border border-slate-200 bg-n-solid-2 px-3 py-2 text-sm font-medium text-n-slate-11 transition hover:bg-n-slate-2"
             @click="load"
           >
             <i
@@ -708,23 +708,23 @@ const updateStatus = async (contract, nextStatus) => {
 
         <!-- FILTROS -->
         <div
-          class="grid gap-3 border-b border-slate-200 bg-slate-50/60 p-4 xl:grid-cols-[1.4fr_.7fr_.8fr_.8fr_.8fr_auto]"
+          class="grid gap-3 border-b border-slate-200 bg-n-slate-2/60 p-4 xl:grid-cols-[1.4fr_.7fr_.8fr_.8fr_.8fr_auto]"
         >
           <label class="relative">
             <i
-              class="i-lucide-search absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400"
+              class="i-lucide-search absolute left-3 top-1/2 size-4 -translate-y-1/2 text-n-slate-11"
             />
 
             <input
               v-model="q"
-              class="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+              class="w-full rounded-xl border border-slate-200 bg-n-solid-2 py-2.5 pl-10 pr-3 text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
               placeholder="Buscar cliente, contrato, venda ou responsável..."
             />
           </label>
 
           <select
             v-model="status"
-            class="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-400"
+            class="rounded-xl border border-slate-200 bg-n-solid-2 px-3 py-2.5 text-sm outline-none focus:border-blue-400"
           >
             <option value="all">
               Todos os status
@@ -751,7 +751,7 @@ const updateStatus = async (contract, nextStatus) => {
 
           <select
             v-model="owner"
-            class="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-400"
+            class="rounded-xl border border-slate-200 bg-n-solid-2 px-3 py-2.5 text-sm outline-none focus:border-blue-400"
           >
             <option value="all">
               Todos os responsáveis
@@ -766,7 +766,7 @@ const updateStatus = async (contract, nextStatus) => {
             </option>
           </select>
 
-          <select v-model="validity" class="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-400">
+          <select v-model="validity" class="rounded-xl border border-slate-200 bg-n-solid-2 px-3 py-2.5 text-sm outline-none focus:border-blue-400">
             <option value="all">Todas as vigências</option>
             <option value="30">Vence em 30 dias</option>
             <option value="60">Vence em 60 dias</option>
@@ -774,14 +774,14 @@ const updateStatus = async (contract, nextStatus) => {
             <option value="expired">Vencidos</option>
           </select>
 
-          <select v-model="dealFilter" class="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-400">
+          <select v-model="dealFilter" class="rounded-xl border border-slate-200 bg-n-solid-2 px-3 py-2.5 text-sm outline-none focus:border-blue-400">
             <option value="all">Todos os negócios</option>
             <option v-for="dealItem in deals" :key="dealItem.id" :value="String(dealItem.id)">{{ dealItem.title }}</option>
           </select>
 
           <button
             type="button"
-            class="flex items-center justify-center gap-2 rounded-xl border border-blue-200 bg-white px-4 py-2.5 text-sm font-semibold text-blue-700 transition hover:bg-blue-50"
+            class="flex items-center justify-center gap-2 rounded-xl border border-blue-200 bg-n-solid-2 px-4 py-2.5 text-sm font-semibold text-blue-700 transition hover:bg-blue-50"
             @click="clearFilters"
           >
             <i class="i-lucide-filter-x size-4" />
@@ -793,7 +793,7 @@ const updateStatus = async (contract, nextStatus) => {
         <div class="overflow-x-auto">
           <table class="w-full min-w-[1100px] text-sm">
             <thead
-              class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500"
+              class="bg-n-slate-2 text-left text-xs font-semibold uppercase tracking-wide text-n-slate-11"
             >
               <tr>
                 <th class="p-4">
@@ -840,7 +840,7 @@ const updateStatus = async (contract, nextStatus) => {
                     />
                   </div>
 
-                  <p class="font-medium text-slate-700">
+                  <p class="font-medium text-n-slate-12">
                     Carregando contratos...
                   </p>
                 </td>
@@ -864,12 +864,12 @@ const updateStatus = async (contract, nextStatus) => {
 
                     <div>
                       <strong
-                        class="font-semibold text-slate-900"
+                        class="font-semibold text-n-slate-12"
                       >
                         {{ contract.contract_number || `#${contract.id}` }}
                       </strong>
 
-                      <p class="mt-0.5 text-xs text-slate-500">
+                      <p class="mt-0.5 text-xs text-n-slate-11">
                         {{ contract.contact?.name || 'Cliente não informado' }}
                       </p>
                     </div>
@@ -878,7 +878,7 @@ const updateStatus = async (contract, nextStatus) => {
 
                 <!-- NEGÓCIO -->
                 <td class="p-4">
-                  <p class="font-medium text-slate-700">
+                  <p class="font-medium text-n-slate-12">
                     {{ contract.deal?.title || 'Pedido direto' }}
                   </p>
 
@@ -894,7 +894,7 @@ const updateStatus = async (contract, nextStatus) => {
 
                   <p
                     v-else
-                    class="mt-1 text-xs text-slate-400"
+                    class="mt-1 text-xs text-n-slate-11"
                   >
                     Sem pedido vinculado
                   </p>
@@ -902,7 +902,7 @@ const updateStatus = async (contract, nextStatus) => {
 
                 <!-- PRODUTOS -->
                 <td class="p-4">
-                  <div class="flex items-center gap-2 text-slate-600">
+                  <div class="flex items-center gap-2 text-n-slate-11">
                     <span
                       class="grid size-8 place-content-center rounded-lg bg-violet-50 text-violet-600"
                     >
@@ -919,15 +919,15 @@ const updateStatus = async (contract, nextStatus) => {
                 <td class="p-4">
                   <div class="flex items-start gap-2">
                     <i
-                      class="i-lucide-calendar-days mt-0.5 size-4 text-slate-400"
+                      class="i-lucide-calendar-days mt-0.5 size-4 text-n-slate-11"
                     />
 
                     <div>
-                      <p class="font-medium text-slate-700">
+                      <p class="font-medium text-n-slate-12">
                         {{ date(contract.starts_on) }}
                       </p>
 
-                      <p class="text-xs text-slate-500">
+                      <p class="text-xs text-n-slate-11">
                         até {{ date(contract.ends_on) }}
                       </p>
                     </div>
@@ -942,7 +942,7 @@ const updateStatus = async (contract, nextStatus) => {
                     {{ money(contract.monthly_cents) }}
                   </strong>
 
-                  <p class="text-xs text-slate-400">
+                  <p class="text-xs text-n-slate-11">
                     por mês
                   </p>
                 </td>
@@ -979,7 +979,7 @@ const updateStatus = async (contract, nextStatus) => {
                     </span>
 
                     <span
-                      class="font-medium text-slate-700"
+                      class="font-medium text-n-slate-12"
                     >
                       {{ contract.owner.name }}
                     </span>
@@ -987,7 +987,7 @@ const updateStatus = async (contract, nextStatus) => {
 
                   <span
                     v-else
-                    class="text-slate-400"
+                    class="text-n-slate-11"
                   >
                     Não definido
                   </span>
@@ -997,7 +997,7 @@ const updateStatus = async (contract, nextStatus) => {
                     <button title="Gerenciar contrato" class="grid size-9 place-content-center rounded-lg border border-violet-200 text-violet-600 hover:bg-violet-50" @click="openManage(contract)">
                       <i class="i-lucide-panel-right-open size-4" />
                     </button>
-                    <button title="Baixar PDF" class="grid size-9 place-content-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50" @click="downloadPdf(contract)">
+                    <button title="Baixar PDF" class="grid size-9 place-content-center rounded-lg border border-slate-200 text-n-slate-11 hover:bg-n-slate-2" @click="downloadPdf(contract)">
                       <i class="i-lucide-file-down size-4" />
                     </button>
                     <button v-if="normalized(contract)==='draft'" title="Enviar para assinatura" :disabled="saving" class="grid size-9 place-content-center rounded-lg border border-blue-200 text-blue-600 hover:bg-blue-50" @click="updateStatus(contract,'awaiting_signature')">
@@ -1025,21 +1025,21 @@ const updateStatus = async (contract, nextStatus) => {
                   </div>
 
                   <h3
-                    class="mt-4 text-base font-bold text-slate-900"
+                    class="mt-4 text-base font-bold text-n-slate-12"
                   >
                     Nenhum contrato encontrado
                   </h3>
 
                   <p
                     v-if="rows.length"
-                    class="mx-auto mt-1 max-w-md text-sm text-slate-500"
+                    class="mx-auto mt-1 max-w-md text-sm text-n-slate-11"
                   >
                     Nenhum contrato corresponde aos filtros selecionados.
                   </p>
 
                   <p
                     v-else
-                    class="mx-auto mt-1 max-w-md text-sm text-slate-500"
+                    class="mx-auto mt-1 max-w-md text-sm text-n-slate-11"
                   >
                     Você ainda não possui contratos cadastrados.
                     Crie o primeiro contrato para iniciar a gestão.
@@ -1051,7 +1051,7 @@ const updateStatus = async (contract, nextStatus) => {
                     <button
                       v-if="rows.length"
                       type="button"
-                      class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700"
+                      class="rounded-xl border border-slate-200 bg-n-solid-2 px-4 py-2.5 text-sm font-semibold text-n-slate-12"
                       @click="clearFilters"
                     >
                       Limpar filtros
@@ -1071,16 +1071,16 @@ const updateStatus = async (contract, nextStatus) => {
             </tbody>
           </table>
         </div>
-        <div v-if="filtered.length" class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 bg-slate-50/60 px-4 py-3">
-          <span class="text-xs text-slate-500">Página {{ page }} de {{ pageCount }} · {{ filtered.length }} contrato(s)</span>
+        <div v-if="filtered.length" class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 bg-n-slate-2/60 px-4 py-3">
+          <span class="text-xs text-n-slate-11">Página {{ page }} de {{ pageCount }} · {{ filtered.length }} contrato(s)</span>
           <div class="flex items-center gap-2">
-            <select v-model.number="perPage" class="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs" @change="page=1">
+            <select v-model.number="perPage" class="rounded-lg border border-slate-200 bg-n-solid-2 px-2 py-1.5 text-xs" @change="page=1">
               <option :value="10">10 por página</option>
               <option :value="20">20 por página</option>
               <option :value="50">50 por página</option>
             </select>
-            <button class="rounded-lg border bg-white px-3 py-1.5 text-xs font-semibold disabled:opacity-40" :disabled="page<=1" @click="page--">Anterior</button>
-            <button class="rounded-lg border bg-white px-3 py-1.5 text-xs font-semibold disabled:opacity-40" :disabled="page>=pageCount" @click="page++">Próxima</button>
+            <button class="rounded-lg border bg-n-solid-2 px-3 py-1.5 text-xs font-semibold disabled:opacity-40" :disabled="page<=1" @click="page--">Anterior</button>
+            <button class="rounded-lg border bg-n-solid-2 px-3 py-1.5 text-xs font-semibold disabled:opacity-40" :disabled="page>=pageCount" @click="page++">Próxima</button>
           </div>
         </div>
       </section>
@@ -1088,37 +1088,37 @@ const updateStatus = async (contract, nextStatus) => {
 
     <Teleport to="body">
       <div :class="crmControlClasses" v-if="manageContract" class="fixed inset-0 z-[95] flex justify-end bg-black/40" @click.self="manageContract=null">
-        <section class="h-full w-full max-w-4xl overflow-y-auto bg-slate-50 shadow-2xl">
-          <div class="sticky top-0 z-10 border-b bg-white px-5 py-4">
+        <section class="h-full w-full max-w-4xl overflow-y-auto bg-n-slate-2 shadow-2xl">
+          <div class="sticky top-0 z-10 border-b bg-n-solid-2 px-5 py-4">
             <div class="flex items-start justify-between gap-4">
               <div>
                 <p class="text-xs font-semibold uppercase tracking-wide text-violet-600">Gestão do contrato</p>
                 <h3 class="text-xl font-bold">{{ manageContract.contract_number }}</h3>
-                <p class="text-sm text-slate-500">{{ manageContract.contact?.name || 'Cliente' }} · {{ label(normalized(manageContract)) }}</p>
+                <p class="text-sm text-n-slate-11">{{ manageContract.contact?.name || 'Cliente' }} · {{ label(normalized(manageContract)) }}</p>
               </div>
               <button class="grid size-9 place-content-center rounded-lg border text-xl" @click="manageContract=null">×</button>
             </div>
             <nav class="mt-4 flex gap-2 overflow-x-auto">
-              <button v-for="item in [['summary','Resumo'],['documents','Documentos'],['signature','Assinatura'],['addenda','Aditivos'],['renewal','Renovação'],['history','Histórico']]" :key="item[0]" class="shrink-0 rounded-lg px-3 py-2 text-sm font-semibold" :class="manageTab===item[0]?'bg-violet-600 text-white':'bg-slate-100 text-slate-600'" @click="manageTab=item[0]">{{item[1]}}</button>
+              <button v-for="item in [['summary','Resumo'],['documents','Documentos'],['signature','Assinatura'],['addenda','Aditivos'],['renewal','Renovação'],['history','Histórico']]" :key="item[0]" class="shrink-0 rounded-lg px-3 py-2 text-sm font-semibold" :class="manageTab===item[0]?'bg-violet-600 text-white':'bg-n-slate-3 text-n-slate-11'" @click="manageTab=item[0]">{{item[1]}}</button>
             </nav>
           </div>
 
-          <div v-if="detailLoading" class="p-10 text-center text-slate-500">Carregando detalhes...</div>
+          <div v-if="detailLoading" class="p-10 text-center text-n-slate-11">Carregando detalhes...</div>
           <div v-else class="space-y-4 p-5">
             <template v-if="manageTab==='summary'">
               <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                <article class="rounded-xl border bg-white p-4"><p class="text-xs text-slate-500">Valor único</p><strong>{{money(manageContract.one_time_cents)}}</strong></article>
-                <article class="rounded-xl border bg-white p-4"><p class="text-xs text-slate-500">MRR</p><strong>{{money(manageContract.monthly_cents)}}</strong></article>
-                <article class="rounded-xl border bg-white p-4"><p class="text-xs text-slate-500">Vigência</p><strong>{{date(manageContract.starts_on)}} a {{date(manageContract.ends_on)}}</strong></article>
-                <article class="rounded-xl border bg-white p-4"><p class="text-xs text-slate-500">Assinatura</p><strong>{{manageContract.signature_status || 'not_started'}}</strong></article>
+                <article class="rounded-xl border bg-n-solid-2 p-4"><p class="text-xs text-n-slate-11">Valor único</p><strong>{{money(manageContract.one_time_cents)}}</strong></article>
+                <article class="rounded-xl border bg-n-solid-2 p-4"><p class="text-xs text-n-slate-11">MRR</p><strong>{{money(manageContract.monthly_cents)}}</strong></article>
+                <article class="rounded-xl border bg-n-solid-2 p-4"><p class="text-xs text-n-slate-11">Vigência</p><strong>{{date(manageContract.starts_on)}} a {{date(manageContract.ends_on)}}</strong></article>
+                <article class="rounded-xl border bg-n-solid-2 p-4"><p class="text-xs text-n-slate-11">Assinatura</p><strong>{{manageContract.signature_status || 'not_started'}}</strong></article>
               </div>
-              <article class="rounded-2xl border bg-white p-5">
+              <article class="rounded-2xl border bg-n-solid-2 p-5">
                 <h4 class="font-bold">Vínculos</h4>
                 <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-2">
-                  <div><dt class="text-slate-500">Pedido</dt><dd class="font-semibold">{{manageContract.sales_order?.order_number || '—'}}</dd></div>
-                  <div><dt class="text-slate-500">Negócio</dt><dd class="font-semibold">{{manageContract.deal?.title || '—'}}</dd></div>
-                  <div><dt class="text-slate-500">Responsável</dt><dd class="font-semibold">{{manageContract.owner?.name || '—'}}</dd></div>
-                  <div><dt class="text-slate-500">Modelo</dt><dd class="font-semibold">{{manageContract.template?.name || manageContract.contract_template?.name || 'Sem modelo'}}</dd></div>
+                  <div><dt class="text-n-slate-11">Pedido</dt><dd class="font-semibold">{{manageContract.sales_order?.order_number || '—'}}</dd></div>
+                  <div><dt class="text-n-slate-11">Negócio</dt><dd class="font-semibold">{{manageContract.deal?.title || '—'}}</dd></div>
+                  <div><dt class="text-n-slate-11">Responsável</dt><dd class="font-semibold">{{manageContract.owner?.name || '—'}}</dd></div>
+                  <div><dt class="text-n-slate-11">Modelo</dt><dd class="font-semibold">{{manageContract.template?.name || manageContract.contract_template?.name || 'Sem modelo'}}</dd></div>
                 </dl>
                 <div class="mt-5 flex flex-wrap gap-2">
                   <button class="rounded-xl border px-4 py-2 text-sm font-semibold" @click="downloadPdf(manageContract)">Baixar PDF gerado</button>
@@ -1128,38 +1128,38 @@ const updateStatus = async (contract, nextStatus) => {
             </template>
 
             <template v-else-if="manageTab==='documents'">
-              <article class="rounded-2xl border bg-white p-5">
+              <article class="rounded-2xl border bg-n-solid-2 p-5">
                 <h4 class="font-bold">Documentos do contrato</h4>
-                <p class="mt-1 text-xs text-slate-500">Arquivos enviados aqui ficam persistidos no ActiveStorage do contrato.</p>
+                <p class="mt-1 text-xs text-n-slate-11">Arquivos enviados aqui ficam persistidos no ActiveStorage do contrato.</p>
                 <div class="mt-4 flex flex-wrap items-center gap-2">
                   <input type="file" multiple class="min-w-0 flex-1 rounded-lg border p-2 text-sm" @change="contractUploadFiles=Array.from($event.target.files||[])" />
                   <button class="rounded-lg bg-violet-600 px-4 py-2 font-semibold text-white disabled:opacity-50" :disabled="saving || !contractUploadFiles.length" @click="uploadContractDocuments">Enviar</button>
                 </div>
                 <div class="mt-4 divide-y">
                   <div v-for="file in contractFiles" :key="file.id" class="flex items-center justify-between gap-3 py-3">
-                    <div class="min-w-0"><p class="truncate font-semibold">{{file.filename}}</p><p class="text-xs text-slate-500">{{file.content_type}} · {{Math.ceil((file.byte_size||0)/1024)}} KB</p></div>
+                    <div class="min-w-0"><p class="truncate font-semibold">{{file.filename}}</p><p class="text-xs text-n-slate-11">{{file.content_type}} · {{Math.ceil((file.byte_size||0)/1024)}} KB</p></div>
                     <button class="rounded-lg border px-3 py-1.5 text-sm" @click="downloadContractDocument(file)">Baixar</button>
                   </div>
-                  <p v-if="!contractFiles.length" class="py-8 text-center text-sm text-slate-500">Nenhum documento adicional anexado.</p>
+                  <p v-if="!contractFiles.length" class="py-8 text-center text-sm text-n-slate-11">Nenhum documento adicional anexado.</p>
                 </div>
               </article>
             </template>
 
             <template v-else-if="manageTab==='signature'">
-              <article class="rounded-2xl border bg-white p-5">
+              <article class="rounded-2xl border bg-n-solid-2 p-5">
                 <h4 class="font-bold">Assinatura e acompanhamento</h4>
-                <p class="mt-1 text-sm text-slate-500">Status atual: <b>{{manageContract.signature_status || 'not_started'}}</b>. Assinatura manual e provedor externo são fluxos distintos.</p>
+                <p class="mt-1 text-sm text-n-slate-11">Status atual: <b>{{manageContract.signature_status || 'not_started'}}</b>. Assinatura manual e provedor externo são fluxos distintos.</p>
                 <div class="mt-4 grid gap-3 md:grid-cols-2">
-                  <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-4"><strong>Manual</strong><p class="mt-1 text-xs text-slate-600">Registre apenas quando o documento foi realmente assinado fora do provedor.</p></div>
-                  <div class="rounded-xl border border-indigo-200 bg-indigo-50 p-4"><strong>Provedor externo</strong><p class="mt-1 text-xs text-slate-600">Preparar não significa enviar. O CRM só marca envio após receber um identificador real.</p></div>
+                  <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-4"><strong>Manual</strong><p class="mt-1 text-xs text-n-slate-11">Registre apenas quando o documento foi realmente assinado fora do provedor.</p></div>
+                  <div class="rounded-xl border border-indigo-200 bg-indigo-50 p-4"><strong>Provedor externo</strong><p class="mt-1 text-xs text-n-slate-11">Preparar não significa enviar. O CRM só marca envio após receber um identificador real.</p></div>
                 </div>
                 <div v-if="manageContract.signed_document" class="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
                   <div class="min-w-0">
                     <p class="text-xs font-semibold uppercase text-emerald-700">Documento assinado arquivado</p>
-                    <p class="truncate text-sm font-semibold text-slate-800">{{ manageContract.signed_document.filename }}</p>
-                    <p class="text-xs text-slate-500">{{ Math.ceil((manageContract.signed_document.byte_size || 0) / 1024) }} KB · disponível para recuperação</p>
+                    <p class="truncate text-sm font-semibold text-n-slate-12">{{ manageContract.signed_document.filename }}</p>
+                    <p class="text-xs text-n-slate-11">{{ Math.ceil((manageContract.signed_document.byte_size || 0) / 1024) }} KB · disponível para recuperação</p>
                   </div>
-                  <button class="rounded-lg border border-emerald-300 bg-white px-3 py-2 text-sm font-semibold text-emerald-700" @click="downloadSignedDocument">Baixar documento assinado</button>
+                  <button class="rounded-lg border border-emerald-300 bg-n-solid-2 px-3 py-2 text-sm font-semibold text-emerald-700" @click="downloadSignedDocument">Baixar documento assinado</button>
                 </div>
                 <div v-else-if="manageContract.signature_status === 'signed'" class="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
                   A assinatura está registrada, mas nenhum arquivo assinado foi anexado ao contrato.
@@ -1169,7 +1169,7 @@ const updateStatus = async (contract, nextStatus) => {
             </template>
 
             <template v-else-if="manageTab==='addenda'">
-              <article class="rounded-2xl border bg-white p-5">
+              <article class="rounded-2xl border bg-n-solid-2 p-5">
                 <h4 class="font-bold">Aditivos</h4>
                 <div class="mt-4 grid gap-3">
                   <input v-model="addendumTitle" class="rounded-lg border p-2.5" placeholder="Título do aditivo" />
@@ -1178,18 +1178,18 @@ const updateStatus = async (contract, nextStatus) => {
                 </div>
                 <div class="mt-5 space-y-3">
                   <div v-for="item in (manageContract.lifecycle_metadata?.addenda || [])" :key="item.id" class="rounded-xl border p-4">
-                    <div class="flex justify-between gap-3"><strong>{{item.title}}</strong><span class="text-xs text-slate-500">{{new Date(item.created_at).toLocaleString('pt-BR')}}</span></div>
-                    <p class="mt-2 whitespace-pre-line text-sm text-slate-600">{{item.notes || 'Sem observações.'}}</p>
+                    <div class="flex justify-between gap-3"><strong>{{item.title}}</strong><span class="text-xs text-n-slate-11">{{new Date(item.created_at).toLocaleString('pt-BR')}}</span></div>
+                    <p class="mt-2 whitespace-pre-line text-sm text-n-slate-11">{{item.notes || 'Sem observações.'}}</p>
                   </div>
-                  <p v-if="!(manageContract.lifecycle_metadata?.addenda || []).length" class="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">Nenhum aditivo registrado.</p>
+                  <p v-if="!(manageContract.lifecycle_metadata?.addenda || []).length" class="rounded-xl bg-n-slate-2 p-4 text-sm text-n-slate-11">Nenhum aditivo registrado.</p>
                 </div>
               </article>
             </template>
 
             <template v-else-if="manageTab==='renewal'">
-              <article class="rounded-2xl border bg-white p-5">
+              <article class="rounded-2xl border bg-n-solid-2 p-5">
                 <h4 class="font-bold">Renovação</h4>
-                <p class="mt-1 text-sm text-slate-500">A renovação cria um novo contrato em rascunho vinculado ao contrato de origem; não altera silenciosamente a vigência antiga.</p>
+                <p class="mt-1 text-sm text-n-slate-11">A renovação cria um novo contrato em rascunho vinculado ao contrato de origem; não altera silenciosamente a vigência antiga.</p>
                 <div class="mt-4 grid gap-3 sm:grid-cols-2">
                   <label>Nova vigência a partir de<input v-model="renewStartsOn" type="date" class="mt-1 w-full rounded-lg border p-2" /></label>
                   <label>Prazo (meses)<input v-model.number="renewTermMonths" type="number" min="1" max="120" class="mt-1 w-full rounded-lg border p-2" /></label>
@@ -1199,14 +1199,14 @@ const updateStatus = async (contract, nextStatus) => {
             </template>
 
             <template v-else>
-              <article class="rounded-2xl border bg-white p-5">
+              <article class="rounded-2xl border bg-n-solid-2 p-5">
                 <h4 class="font-bold">Histórico do contrato</h4>
                 <div class="mt-4 space-y-3">
                   <div v-for="event in contractHistory" :key="event.id" class="rounded-xl border p-4">
-                    <div class="flex flex-wrap items-center justify-between gap-2"><strong>{{event.event_type}}</strong><span class="text-xs text-slate-500">{{new Date(event.created_at).toLocaleString('pt-BR')}}</span></div>
-                    <p class="mt-1 text-xs text-slate-500">Ator #{{event.actor_id || 'sistema'}}</p>
+                    <div class="flex flex-wrap items-center justify-between gap-2"><strong>{{event.event_type}}</strong><span class="text-xs text-n-slate-11">{{new Date(event.created_at).toLocaleString('pt-BR')}}</span></div>
+                    <p class="mt-1 text-xs text-n-slate-11">Ator #{{event.actor_id || 'sistema'}}</p>
                   </div>
-                  <p v-if="!contractHistory.length" class="py-8 text-center text-sm text-slate-500">Nenhum evento registrado.</p>
+                  <p v-if="!contractHistory.length" class="py-8 text-center text-sm text-n-slate-11">Nenhum evento registrado.</p>
                 </div>
               </article>
             </template>
@@ -1217,11 +1217,13 @@ const updateStatus = async (contract, nextStatus) => {
 
     <Teleport to="body">
       <div :class="crmControlClasses" v-if="signatureContract" class="fixed inset-0 z-[100] grid place-items-center bg-black/45 p-4" @click.self="signatureContract=null">
-        <section class="w-full max-w-3xl rounded-2xl bg-white p-6 shadow-2xl">
-          <div class="flex items-start justify-between"><div><p class="text-xs font-semibold uppercase text-blue-600">Assinatura do contrato</p><h3 class="text-xl font-bold">{{ signatureContract.contract_number }}</h3><p class="text-sm text-slate-500">Status real: {{ signatureContract.signature_status || 'not_started' }}</p></div><button class="text-2xl" @click="signatureContract=null">×</button></div>
+        <section
+          class="w-full max-w-3xl rounded-2xl bg-n-solid-2 p-6 shadow-2xl"
+        >
+          <div class="flex items-start justify-between"><div><p class="text-xs font-semibold uppercase text-blue-600">Assinatura do contrato</p><h3 class="text-xl font-bold">{{ signatureContract.contract_number }}</h3><p class="text-sm text-n-slate-11">Status real: {{ signatureContract.signature_status || 'not_started' }}</p></div><button class="text-2xl" @click="signatureContract=null">×</button></div>
           <div class="mt-5 grid gap-4 md:grid-cols-2">
-            <div class="rounded-xl border border-emerald-200 bg-emerald-50/40 dark:bg-n-teal-3 p-4"><h4 class="font-bold">Assinatura manual</h4><p class="mt-1 text-xs text-slate-600">Registre somente depois que a assinatura realmente ocorrer.</p><button class="mt-3 rounded-lg border px-3 py-2 text-sm" @click="prepareSignature('manual')">Preparar assinatura manual</button><label class="mt-3 block text-sm">Assinado por<input v-model="signedByName" class="mt-1 w-full rounded-lg border p-2" /></label><label class="mt-3 block text-sm">Data/hora<input v-model="signedAt" type="datetime-local" class="mt-1 w-full rounded-lg border p-2" /></label><label class="mt-3 block text-sm">Documento assinado<input type="file" accept="application/pdf,image/*" class="mt-1 w-full rounded-lg border p-2" @change="signedFile=$event.target.files?.[0]||null" /></label><button class="mt-3 w-full rounded-lg bg-emerald-600 px-3 py-2 font-semibold text-white" :disabled="saving" @click="registerManualSignature">Registrar assinatura real</button></div>
-            <div class="rounded-xl border border-indigo-200 bg-indigo-50/40 dark:bg-n-iris-3 p-4"><h4 class="font-bold">Provedor externo</h4><p class="mt-1 text-xs text-slate-600">Não há simulação: o ID abaixo deve vir do provedor após envio real.</p><label class="mt-3 block text-sm">Provedor<select v-model="signatureProvider" class="mt-1 w-full rounded-lg border p-2"><option value="">Selecione</option><option value="clicksign">Clicksign</option><option value="docusign">DocuSign</option><option value="zoho_sign">Zoho Sign</option><option value="other">Outro</option></select></label><button class="mt-3 w-full rounded-lg border border-indigo-300 px-3 py-2 font-semibold text-indigo-700" :disabled="!signatureProvider||saving" @click="prepareSignature('provider')">Preparar provedor</button><label class="mt-3 block text-sm">ID externo<input v-model="signatureExternalId" class="mt-1 w-full rounded-lg border p-2" /></label><button class="mt-3 w-full rounded-lg bg-indigo-600 px-3 py-2 font-semibold text-white" :disabled="!signatureExternalId||saving" @click="registerProviderResult">Registrar envio externo</button></div>
+            <div class="rounded-xl border border-emerald-200 bg-emerald-50/40 dark:bg-n-teal-3 p-4"><h4 class="font-bold">Assinatura manual</h4><p class="mt-1 text-xs text-n-slate-11">Registre somente depois que a assinatura realmente ocorrer.</p><button class="mt-3 rounded-lg border px-3 py-2 text-sm" @click="prepareSignature('manual')">Preparar assinatura manual</button><label class="mt-3 block text-sm">Assinado por<input v-model="signedByName" class="mt-1 w-full rounded-lg border p-2" /></label><label class="mt-3 block text-sm">Data/hora<input v-model="signedAt" type="datetime-local" class="mt-1 w-full rounded-lg border p-2" /></label><label class="mt-3 block text-sm">Documento assinado<input type="file" accept="application/pdf,image/*" class="mt-1 w-full rounded-lg border p-2" @change="signedFile=$event.target.files?.[0]||null" /></label><button class="mt-3 w-full rounded-lg bg-emerald-600 px-3 py-2 font-semibold text-white" :disabled="saving" @click="registerManualSignature">Registrar assinatura real</button></div>
+            <div class="rounded-xl border border-indigo-200 bg-indigo-50/40 dark:bg-n-iris-3 p-4"><h4 class="font-bold">Provedor externo</h4><p class="mt-1 text-xs text-n-slate-11">Não há simulação: o ID abaixo deve vir do provedor após envio real.</p><label class="mt-3 block text-sm">Provedor<select v-model="signatureProvider" class="mt-1 w-full rounded-lg border p-2"><option value="">Selecione</option><option value="clicksign">Clicksign</option><option value="docusign">DocuSign</option><option value="zoho_sign">Zoho Sign</option><option value="other">Outro</option></select></label><button class="mt-3 w-full rounded-lg border border-indigo-300 px-3 py-2 font-semibold text-indigo-700" :disabled="!signatureProvider||saving" @click="prepareSignature('provider')">Preparar provedor</button><label class="mt-3 block text-sm">ID externo<input v-model="signatureExternalId" class="mt-1 w-full rounded-lg border p-2" /></label><button class="mt-3 w-full rounded-lg bg-indigo-600 px-3 py-2 font-semibold text-white" :disabled="!signatureExternalId||saving" @click="registerProviderResult">Registrar envio externo</button></div>
           </div>
         </section>
       </div>

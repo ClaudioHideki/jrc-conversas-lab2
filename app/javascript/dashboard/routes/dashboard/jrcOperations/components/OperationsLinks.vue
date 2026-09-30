@@ -159,7 +159,7 @@ function dealRoute(dealId) {
     <div class="flex flex-wrap items-center gap-3 justify-between">
       <h3>{{ heading }}</h3>
       <button
-        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50 text-xs"
+        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed text-xs"
         :disabled="loading || !!removing"
         @click="load"
       >
@@ -259,7 +259,7 @@ function dealRoute(dealId) {
         </p>
         <button
           v-if="link.can_remove"
-          class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50 text-xs self-start"
+          class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed text-xs self-start"
           :disabled="!!removing"
           @click="remove(link)"
         >
@@ -355,28 +355,28 @@ function dealRoute(dealId) {
     <div class="flex flex-wrap items-center gap-3">
       <button
         v-if="canLink && data.actions.create_project"
-        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50 text-xs bg-n-blue-9 text-white"
+        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed text-xs bg-n-blue-9 text-white"
         @click="modal = 'project'"
       >
         {{ projectText('CREATE_PROJECT', 'Criar projeto') }}
       </button>
       <button
         v-if="canLink && data.actions.link_project"
-        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50 text-xs"
+        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed text-xs"
         @click="modal = 'linkProject'"
       >
         {{ projectText('LINK_PROJECT', 'Vincular projeto') }}
       </button>
       <button
         v-if="canLink && data.actions.link_task"
-        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50 text-xs"
+        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed text-xs"
         @click="modal = 'linkTask'"
       >
         {{ projectText('LINK_TASK', 'Vincular tarefa') }}
       </button>
       <button
         v-if="canLink && data.actions.link && (projectId || conversationId)"
-        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50 text-xs"
+        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed text-xs"
         @click="modal = 'link'"
       >
         {{ projectText('LINK_ORIGIN', 'Vincular registro existente') }}

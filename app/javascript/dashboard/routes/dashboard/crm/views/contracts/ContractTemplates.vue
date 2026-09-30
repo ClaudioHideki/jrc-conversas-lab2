@@ -137,7 +137,7 @@ onMounted(load);
 </script>
 
 <template>
-  <div class="h-full overflow-auto bg-[#f7faff] p-5 sm:p-6">
+  <div class="h-full overflow-auto bg-n-background p-5 sm:p-6">
     <!-- CABEÇALHO -->
     <header
       class="mb-6 flex flex-wrap items-center justify-between gap-4"
@@ -154,11 +154,11 @@ onMounted(load);
             CRM / Contratos
           </p>
 
-          <h2 class="text-2xl font-bold text-slate-900">
+          <h2 class="text-2xl font-bold text-n-slate-12">
             Modelos de contrato
           </h2>
 
-          <p class="text-sm text-slate-500">
+          <p class="text-sm text-n-slate-11">
             Crie e gerencie modelos reutilizáveis para geração de contratos.
           </p>
         </div>
@@ -176,7 +176,7 @@ onMounted(load);
     <!-- INDICADORES -->
     <section class="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       <article
-        class="flex items-center gap-4 rounded-2xl border border-blue-100 bg-white p-5 shadow-sm"
+        class="flex items-center gap-4 rounded-2xl border border-blue-100 bg-n-solid-2 p-5 shadow-sm"
       >
         <span
           class="grid size-12 place-content-center rounded-2xl bg-blue-50 text-blue-600"
@@ -185,15 +185,15 @@ onMounted(load);
         </span>
 
         <div>
-          <p class="text-sm text-slate-500">Total de modelos</p>
-          <strong class="text-3xl font-bold text-slate-900">
+          <p class="text-sm text-n-slate-11">Total de modelos</p>
+          <strong class="text-3xl font-bold text-n-slate-12">
             {{ stats.total }}
           </strong>
         </div>
       </article>
 
       <article
-        class="flex items-center gap-4 rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm"
+        class="flex items-center gap-4 rounded-2xl border border-emerald-100 bg-n-solid-2 p-5 shadow-sm"
       >
         <span
           class="grid size-12 place-content-center rounded-2xl bg-emerald-50 text-emerald-600"
@@ -202,7 +202,7 @@ onMounted(load);
         </span>
 
         <div>
-          <p class="text-sm text-slate-500">Modelos ativos</p>
+          <p class="text-sm text-n-slate-11">Modelos ativos</p>
           <strong class="text-3xl font-bold text-emerald-600">
             {{ stats.active }}
           </strong>
@@ -210,24 +210,24 @@ onMounted(load);
       </article>
 
       <article
-        class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+        class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-n-solid-2 p-5 shadow-sm"
       >
         <span
-          class="grid size-12 place-content-center rounded-2xl bg-slate-100 text-slate-600"
+          class="grid size-12 place-content-center rounded-2xl bg-n-slate-3 text-n-slate-11"
         >
           <i class="i-lucide-circle-pause size-6" />
         </span>
 
         <div>
-          <p class="text-sm text-slate-500">Modelos inativos</p>
-          <strong class="text-3xl font-bold text-slate-700">
+          <p class="text-sm text-n-slate-11">Modelos inativos</p>
+          <strong class="text-3xl font-bold text-n-slate-12">
             {{ stats.inactive }}
           </strong>
         </div>
       </article>
 
       <article
-        class="flex items-center gap-4 rounded-2xl border border-amber-100 bg-white p-5 shadow-sm"
+        class="flex items-center gap-4 rounded-2xl border border-amber-100 bg-n-solid-2 p-5 shadow-sm"
       >
         <span
           class="grid size-12 place-content-center rounded-2xl bg-amber-50 text-amber-600"
@@ -236,7 +236,7 @@ onMounted(load);
         </span>
 
         <div>
-          <p class="text-sm text-slate-500">Variáveis cadastradas</p>
+          <p class="text-sm text-n-slate-11">Variáveis cadastradas</p>
           <strong class="text-3xl font-bold text-amber-600">
             {{ stats.variables }}
           </strong>
@@ -246,7 +246,7 @@ onMounted(load);
 
     <!-- CONTEÚDO -->
     <section
-      class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+      class="overflow-hidden rounded-2xl border border-slate-200 bg-n-solid-2 shadow-sm"
     >
       <!-- BUSCA -->
       <div
@@ -254,17 +254,17 @@ onMounted(load);
       >
         <div class="relative w-full max-w-md">
           <i
-            class="i-lucide-search absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400"
+            class="i-lucide-search absolute left-3 top-1/2 size-4 -translate-y-1/2 text-n-slate-11"
           />
 
           <input
             v-model="query"
-            class="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 outline-none transition focus:border-violet-400 focus:bg-white"
+            class="w-full rounded-xl border border-slate-200 bg-n-slate-2 py-2.5 pl-10 pr-4 outline-none transition focus:border-violet-400 focus:bg-n-solid-2"
             placeholder="Buscar por nome, categoria ou descrição..."
           />
         </div>
 
-        <div class="text-sm text-slate-500">
+        <div class="text-sm text-n-slate-11">
           {{ filtered.length }}
           {{ filtered.length === 1 ? 'modelo encontrado' : 'modelos encontrados' }}
         </div>
@@ -273,7 +273,7 @@ onMounted(load);
       <!-- LOADING -->
       <div
         v-if="loading"
-        class="flex min-h-64 flex-col items-center justify-center gap-3 text-slate-500"
+        class="flex min-h-64 flex-col items-center justify-center gap-3 text-n-slate-11"
       >
         <i class="i-lucide-loader-circle size-8 animate-spin text-violet-600" />
         <span>Carregando modelos...</span>
@@ -290,11 +290,11 @@ onMounted(load);
           <i class="i-lucide-layout-template size-8" />
         </span>
 
-        <h3 class="text-lg font-bold text-slate-900">
+        <h3 class="text-lg font-bold text-n-slate-12">
           Nenhum modelo encontrado
         </h3>
 
-        <p class="mt-1 max-w-md text-sm text-slate-500">
+        <p class="mt-1 max-w-md text-sm text-n-slate-11">
           Crie modelos de contrato para padronizar e agilizar o processo
           comercial.
         </p>
@@ -315,7 +315,7 @@ onMounted(load);
         <article
           v-for="template in filtered"
           :key="template.id"
-          class="group flex min-h-64 flex-col rounded-2xl border border-slate-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-violet-200 hover:shadow-lg"
+          class="group flex min-h-64 flex-col rounded-2xl border border-slate-200 bg-n-solid-2 p-5 transition hover:-translate-y-0.5 hover:border-violet-200 hover:shadow-lg"
         >
           <div class="flex items-start justify-between gap-3">
             <div class="flex min-w-0 items-start gap-3">
@@ -327,7 +327,7 @@ onMounted(load);
 
               <div class="min-w-0">
                 <h3
-                  class="truncate text-base font-bold text-slate-900"
+                  class="truncate text-base font-bold text-n-slate-12"
                   :title="template.name"
                 >
                   {{ template.name }}
@@ -344,24 +344,24 @@ onMounted(load);
               :class="
                 template.active
                   ? 'bg-emerald-50 text-emerald-700'
-                  : 'bg-slate-100 text-slate-600'
+                  : 'bg-n-slate-3 text-n-slate-11'
               "
             >
               {{ template.active ? 'Ativo' : 'Inativo' }}
             </span>
           </div>
 
-          <p class="mt-4 min-h-10 text-sm leading-5 text-slate-600">
+          <p class="mt-4 min-h-10 text-sm leading-5 text-n-slate-11">
             {{ template.description || 'Sem descrição cadastrada.' }}
           </p>
 
           <div class="mt-4">
             <div class="mb-2 flex items-center justify-between">
-              <span class="text-xs font-semibold uppercase text-slate-400">
+              <span class="text-xs font-semibold uppercase text-n-slate-11">
                 Variáveis
               </span>
 
-              <span class="text-xs text-slate-400">
+              <span class="text-xs text-n-slate-11">
                 {{ template.variables?.length || 0 }}
               </span>
             </div>
@@ -379,7 +379,7 @@ onMounted(load);
               </code>
             </div>
 
-            <p v-else class="text-xs text-slate-400">
+            <p v-else class="text-xs text-n-slate-11">
               Nenhuma variável cadastrada.
             </p>
           </div>
@@ -414,7 +414,7 @@ onMounted(load);
       @click.self="closeForm"
     >
       <form
-        class="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl"
+        class="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl bg-n-solid-2 shadow-2xl"
         @submit.prevent="save"
       >
         <!-- MODAL HEADER -->
@@ -436,11 +436,11 @@ onMounted(load);
             </span>
 
             <div>
-              <h3 class="text-xl font-bold text-slate-900">
+              <h3 class="text-xl font-bold text-n-slate-12">
                 {{ editingId ? 'Editar modelo' : 'Novo modelo de contrato' }}
               </h3>
 
-              <p class="text-sm text-slate-500">
+              <p class="text-sm text-n-slate-11">
                 Configure o conteúdo e as variáveis disponíveis no contrato.
               </p>
             </div>
@@ -448,7 +448,7 @@ onMounted(load);
 
           <button
             type="button"
-            class="grid size-9 place-content-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+            class="grid size-9 place-content-center rounded-lg text-n-slate-11 transition hover:bg-n-slate-3 hover:text-n-slate-12"
             title="Fechar"
             @click="closeForm"
           >
@@ -459,7 +459,7 @@ onMounted(load);
         <!-- MODAL BODY -->
         <div class="overflow-y-auto p-6">
           <div class="grid gap-5 sm:grid-cols-2">
-            <label class="text-sm font-medium text-slate-700">
+            <label class="text-sm font-medium text-n-slate-12">
               Nome do modelo
               <input
                 v-model="form.name"
@@ -469,7 +469,7 @@ onMounted(load);
               />
             </label>
 
-            <label class="text-sm font-medium text-slate-700">
+            <label class="text-sm font-medium text-n-slate-12">
               Categoria
               <input
                 v-model="form.category"
@@ -478,7 +478,7 @@ onMounted(load);
               />
             </label>
 
-            <label class="sm:col-span-2 text-sm font-medium text-slate-700">
+            <label class="sm:col-span-2 text-sm font-medium text-n-slate-12">
               Descrição
               <input
                 v-model="form.description"
@@ -487,7 +487,7 @@ onMounted(load);
               />
             </label>
 
-            <label class="sm:col-span-2 text-sm font-medium text-slate-700">
+            <label class="sm:col-span-2 text-sm font-medium text-n-slate-12">
               Variáveis disponíveis
               <input
                 v-model="form.variables"
@@ -495,30 +495,30 @@ onMounted(load);
                 placeholder="cliente.nome, contrato.numero, contrato.valor"
               />
 
-              <span class="mt-1.5 block text-xs text-slate-400">
+              <span class="mt-1.5 block text-xs text-n-slate-11">
                 Separe as variáveis por vírgula.
               </span>
             </label>
 
-            <label class="sm:col-span-2 text-sm font-medium text-slate-700">
+            <label class="sm:col-span-2 text-sm font-medium text-n-slate-12">
               Conteúdo do contrato
               <textarea
                 v-model="form.body"
                 required
                 rows="14"
-                class="mt-1.5 w-full resize-y rounded-xl border border-slate-200 bg-slate-50 p-4 font-mono text-sm leading-6 outline-none transition focus:border-violet-400 focus:bg-white"
+                class="mt-1.5 w-full resize-y rounded-xl border border-slate-200 bg-n-slate-2 p-4 font-mono text-sm leading-6 outline-none transition focus:border-violet-400 focus:bg-n-solid-2"
                 placeholder="Digite aqui o conteúdo do contrato..."
               />
             </label>
 
             <label
-              class="sm:col-span-2 flex cursor-pointer items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-4"
+              class="sm:col-span-2 flex cursor-pointer items-center justify-between rounded-xl border border-slate-200 bg-n-slate-2 p-4"
             >
               <div>
-                <p class="font-semibold text-slate-800">
+                <p class="font-semibold text-n-slate-12">
                   Modelo ativo
                 </p>
-                <p class="text-xs text-slate-500">
+                <p class="text-xs text-n-slate-11">
                   Modelos ativos ficam disponíveis durante a geração de contratos.
                 </p>
               </div>
@@ -534,11 +534,11 @@ onMounted(load);
 
         <!-- MODAL FOOTER -->
         <footer
-          class="flex justify-end gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4"
+          class="flex justify-end gap-3 border-t border-slate-200 bg-n-slate-2 px-6 py-4"
         >
           <button
             type="button"
-            class="rounded-xl border border-slate-200 bg-white px-5 py-2.5 font-semibold text-slate-700 transition hover:bg-slate-50"
+            class="rounded-xl border border-slate-200 bg-n-solid-2 px-5 py-2.5 font-semibold text-n-slate-12 transition hover:bg-n-slate-2"
             @click="closeForm"
           >
             Cancelar

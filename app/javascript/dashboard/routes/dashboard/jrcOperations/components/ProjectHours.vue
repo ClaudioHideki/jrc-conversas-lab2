@@ -155,7 +155,7 @@ function navigatePage(delta) {
     >
       {{ error }}
       <button
-        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50 text-xs"
+        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed text-xs"
         :disabled="busy || loading"
         @click="load"
       >
@@ -256,7 +256,7 @@ function navigatePage(delta) {
             min="0"
             step="0.01"
             required /></label><button
-          class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50"
+          class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
           :disabled="busy || loading"
         >
           Salvar orcamento
@@ -297,7 +297,7 @@ v-model="form.notes" maxlength="2000"
         /></label>
       </div>
       <button
-        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50 bg-n-blue-9 text-white"
+        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed bg-n-blue-9 text-white"
         :disabled="busy || loading"
       >
         Registrar horas
@@ -336,14 +336,14 @@ v-model="form.notes" maxlength="2000"
             </td>
             <td v-if="can('time_entry.manage')">
               <button
-                class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50 text-xs"
+                class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed text-xs"
                 :disabled="busy || loading"
                 @click="review(row, 'approved')"
               >
                 {{ row.status === 'approved' ? 'Atualizar custo' : 'Aprovar' }}
               </button>
               <button
-                class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50 text-xs text-n-ruby-11"
+                class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed text-xs text-n-ruby-11"
                 :disabled="busy || loading"
                 @click="review(row, 'rejected')"
               >
@@ -361,12 +361,12 @@ v-model="form.notes" maxlength="2000"
     </div>
     <div v-if="total > 25" class="flex justify-end items-center gap-3 pt-4">
       <button
-        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50"
+        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
         :disabled="page <= 1 || busy || loading"
         @click="navigatePage(-1)"
       >
         Anterior</button><span>Pagina {{ page }}</span><button
-        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50"
+        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
         :disabled="page * 25 >= total || busy || loading"
         @click="navigatePage(1)"
       >

@@ -179,13 +179,13 @@ onMounted(async () => {
       </button>
     </header>
     <section class="mb-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      <article v-for="item in leadSummary" :key="item.label" class="rounded-2xl border border-[#e4e9f1] bg-white p-4 shadow-sm">
-        <div class="flex items-center justify-between"><span class="text-xs font-semibold text-[#667085]">{{ item.label }}</span><span class="grid size-10 place-content-center rounded-xl" :class="item.tone === 'blue' ? 'bg-blue-50 text-blue-600' : item.tone === 'amber' ? 'bg-amber-50 text-amber-600' : item.tone === 'violet' ? 'bg-violet-50 text-violet-600' : 'bg-emerald-50 text-emerald-600'"><i class="size-4" :class="item.icon" /></span></div>
-        <strong class="mt-2 block text-2xl text-[#172033]">{{ item.value }}</strong>
+      <article v-for="item in leadSummary" :key="item.label" class="rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm">
+        <div class="flex items-center justify-between"><span class="text-xs font-semibold text-n-slate-11">{{ item.label }}</span><span class="grid size-10 place-content-center rounded-xl" :class="item.tone === 'blue' ? 'bg-blue-50 text-blue-600' : item.tone === 'amber' ? 'bg-amber-50 text-amber-600' : item.tone === 'violet' ? 'bg-violet-50 text-violet-600' : 'bg-emerald-50 text-emerald-600'"><i class="size-4" :class="item.icon" /></span></div>
+        <strong class="mt-2 block text-2xl text-n-slate-12">{{ item.value }}</strong>
       </article>
     </section>
 
-    <div class="mb-3 flex justify-end"><div class="flex rounded-xl border border-[#e4e9f1] bg-white p-1 shadow-sm"><button type="button" class="rounded-lg px-3 py-2 text-xs font-semibold" :class="viewMode === 'list' ? 'bg-blue-700 text-white' : 'text-[#667085]'" @click="viewMode = 'list'"><i class="i-lucide-list mr-1 size-4" />Lista</button><button type="button" class="rounded-lg px-3 py-2 text-xs font-semibold" :class="viewMode === 'kanban' ? 'bg-[#7c3aed] text-white' : 'text-[#667085]'" @click="viewMode = 'kanban'"><i class="i-lucide-columns-3 mr-1 size-4" />Kanban</button></div></div>
+    <div class="mb-3 flex justify-end"><div class="flex rounded-xl border border-n-weak bg-n-solid-2 p-1 shadow-sm"><button type="button" class="rounded-lg px-3 py-2 text-xs font-semibold" :class="viewMode === 'list' ? 'bg-blue-700 text-white' : 'text-n-slate-11'" @click="viewMode = 'list'"><i class="i-lucide-list mr-1 size-4" />Lista</button><button type="button" class="rounded-lg px-3 py-2 text-xs font-semibold" :class="viewMode === 'kanban' ? 'bg-[#7c3aed] text-white' : 'text-n-slate-11'" @click="viewMode = 'kanban'"><i class="i-lucide-columns-3 mr-1 size-4" />Kanban</button></div></div>
 
     <form
       class="mb-4 flex flex-wrap gap-2 rounded-2xl border border-n-weak bg-n-solid-2 p-3 shadow-sm"
@@ -195,7 +195,7 @@ onMounted(async () => {
         v-model="filters.search"
         type="search"
         placeholder="Buscar por nome ou e-mail"
-        class="h-10 min-w-64 flex-1 rounded-xl border border-n-weak bg-n-solid-1 px-3 text-sm text-n-slate-12 placeholder:text-n-slate-10 focus:border-n-brand focus:outline-none focus:ring-2 focus:ring-n-brand/20"
+        class="h-10 min-w-64 flex-1 rounded-xl border border-n-weak bg-n-solid-1 px-3 text-sm text-n-slate-12 placeholder:text-n-slate-11 focus:border-n-brand focus:outline-none focus:ring-2 focus:ring-n-brand/20"
       /><select
         v-model="filters.status"
         class="h-10 rounded-xl border border-n-weak bg-n-solid-1 px-3 text-sm font-medium text-n-slate-12"
@@ -292,7 +292,7 @@ onMounted(async () => {
               >
                 Abrir negócio
               </button>
-              <span v-else class="text-xs text-n-slate-10">
+              <span v-else class="text-xs text-n-slate-11">
                 Sem ação pendente
               </span>
             </td>
@@ -313,8 +313,8 @@ onMounted(async () => {
     </div>
     <div v-else class="grid flex-1 gap-4 overflow-auto xl:grid-cols-4">
       <section v-for="column in kanbanColumns" :key="column.status" class="min-h-[420px] rounded-2xl border p-3" :class="column.className">
-        <div class="mb-3 flex items-center justify-between"><strong class="text-sm text-[#344054]">{{ column.label }}</strong><span class="rounded-full bg-white px-2 py-0.5 text-xs font-bold text-[#667085]">{{ column.items.length }}</span></div>
-        <div class="space-y-3"><button v-for="lead in column.items" :key="lead.id" type="button" class="w-full rounded-xl border border-white/80 bg-white p-3 text-left shadow-sm transition hover:-translate-y-0.5" @click="openDetails(lead)"><strong class="block truncate text-sm text-[#172033]">{{ lead.name }}</strong><span class="mt-1 block truncate text-xs text-[#667085]">{{ lead.company_name || lead.email || lead.phone || 'Sem empresa' }}</span><div class="mt-3 flex items-center justify-between"><span class="text-[11px] text-[#98a2b3]">{{ lead.source || 'Origem não informada' }}</span><i class="i-lucide-chevron-right size-4 text-[#98a2b3]" /></div></button></div>
+        <div class="mb-3 flex items-center justify-between"><strong class="text-sm text-n-slate-12">{{ column.label }}</strong><span class="rounded-full bg-n-solid-2 px-2 py-0.5 text-xs font-bold text-n-slate-11">{{ column.items.length }}</span></div>
+        <div class="space-y-3"><button v-for="lead in column.items" :key="lead.id" type="button" class="w-full rounded-xl border border-white/80 bg-n-solid-2 p-3 text-left shadow-sm transition hover:-translate-y-0.5" @click="openDetails(lead)"><strong class="block truncate text-sm text-n-slate-12">{{ lead.name }}</strong><span class="mt-1 block truncate text-xs text-n-slate-11">{{ lead.company_name || lead.email || lead.phone || 'Sem empresa' }}</span><div class="mt-3 flex items-center justify-between"><span class="text-[11px] text-n-slate-11">{{ lead.source || 'Origem não informada' }}</span><i class="i-lucide-chevron-right size-4 text-n-slate-11" /></div></button></div>
       </section>
     </div>
     <LeadCreateModal v-if="showForm" @close="showForm = false" @created="onLeadCreated" />

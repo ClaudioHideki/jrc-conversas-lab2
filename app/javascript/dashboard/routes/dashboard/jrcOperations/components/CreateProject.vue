@@ -138,13 +138,13 @@ v-model="form.starts_on" type="date"
       </div>
       <footer class="flex justify-end gap-3 mt-4">
         <button
-          class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50"
+          class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
           type="button"
           :disabled="busy"
           @click="emit('close')"
         >
           Cancelar</button><button
-          class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50 bg-n-blue-9 text-white"
+          class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed bg-n-blue-9 text-white"
           :disabled="busy"
         >
           {{ busy ? 'Criando...' : 'Criar projeto' }}

@@ -233,7 +233,7 @@ function openSubtask(id) {
         {{ error }}
         <button
           v-if="task"
-          class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50 text-xs"
+          class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed text-xs"
           :disabled="busy"
           @click="refresh"
         >
@@ -371,14 +371,14 @@ v-if="!task" class="flex flex-col gap-1 min-w-0"
         </p>
         <footer class="flex justify-end gap-3 mt-4">
           <button
-            class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50"
+            class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
             type="button"
             :disabled="busy"
             @click="emit('close')"
           >
             Fechar</button><button
             v-if="editable"
-            class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50 bg-n-blue-9 text-white"
+            class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed bg-n-blue-9 text-white"
             :disabled="busy"
           >
             {{ task ? 'Salvar tarefa' : 'Criar tarefa' }}
@@ -403,7 +403,7 @@ v-if="!task" class="flex flex-col gap-1 min-w-0"
               "
             />{{ item.text }}</label><button
             v-if="editable"
-            class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50 text-xs"
+            class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed text-xs"
             :disabled="busy"
             @click="action(`checklist_items/${item.id}`, 'delete')"
           >
@@ -421,7 +421,7 @@ v-if="!task" class="flex flex-col gap-1 min-w-0"
             required
             placeholder="Novo item de verificacao"
           /><button
-            class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50"
+            class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
             :disabled="busy"
           >
             Adicionar item
@@ -450,7 +450,7 @@ v-if="!task" class="flex flex-col gap-1 min-w-0"
           @submit.prevent="addComment"
         >
           <label class="flex flex-col gap-1 min-w-0"><span>Comentario interno</span><textarea v-model="comment" required maxlength="20000" /></label><button
-            class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50"
+            class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
             :disabled="busy"
           >
             Registrar comentario
@@ -473,7 +473,7 @@ v-if="!task" class="flex flex-col gap-1 min-w-0"
         >
           <span>{{ taskTitle(edge.predecessor_id) }} → {{ task.title }}</span><button
             v-if="canDependencies"
-            class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50 text-xs"
+            class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed text-xs"
             :disabled="busy"
             @click="dependency(edge)"
           >
@@ -500,7 +500,7 @@ v-if="!task" class="flex flex-col gap-1 min-w-0"
                 {{ candidate.title }}
               </option>
             </select></label><button
-            class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50"
+            class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
             :disabled="busy"
           >
             {{ projectText('ADD_DEPENDENCY', 'Adicionar dependência') }}
@@ -538,7 +538,7 @@ v-if="!task" class="flex flex-col gap-1 min-w-0"
               max="1440"
               step="1"
               required /></label><label class="flex flex-col gap-1 min-w-0"><span>{{ projectText('TIME_NOTES', 'Observação') }}</span><input v-model="timeForm.notes" maxlength="2000" /></label><button
-            class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50 bg-n-blue-9 text-white"
+            class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed bg-n-blue-9 text-white"
             :disabled="busy"
           >
             {{ projectText('REGISTER_HOURS', 'Registrar horas') }}

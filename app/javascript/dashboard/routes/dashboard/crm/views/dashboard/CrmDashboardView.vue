@@ -88,17 +88,17 @@ onMounted(() => store.dispatch('jrcCrm/dashboard/fetchMetrics'));
 </script>
 
 <template>
-  <div class="h-full overflow-y-auto bg-[linear-gradient(135deg,#f8fbff_0%,#f4f7fb_55%,#faf7ff_100%)] p-4 sm:p-6">
+  <div class="h-full overflow-y-auto bg-gradient-to-br from-n-blue-2 via-n-background to-n-violet-2 p-4 sm:p-6">
     <div class="mx-auto max-w-[1720px] space-y-5">
-      <section class="flex flex-wrap items-end justify-between gap-4 rounded-2xl border border-white/70 bg-white/80 p-5 shadow-sm backdrop-blur">
+      <section class="flex flex-wrap items-end justify-between gap-4 rounded-2xl border border-white/70 bg-n-solid-2/80 p-5 shadow-sm backdrop-blur">
         <div>
           <div class="mb-2 flex items-center gap-2">
             <span class="grid size-9 place-content-center rounded-xl bg-[#087cf0] text-white shadow-[0_8px_20px_rgba(8,124,240,.20)]">
               <i class="i-lucide-chart-no-axes-combined size-5" />
             </span>
             <div>
-              <h2 class="text-2xl font-bold text-[#172033]">Central de vendas</h2>
-              <p class="text-sm text-[#667085]">Acompanhe o desempenho comercial e avance nas oportunidades.</p>
+              <h2 class="text-2xl font-bold text-n-slate-12">Central de vendas</h2>
+              <p class="text-sm text-n-slate-11">Acompanhe o desempenho comercial e avance nas oportunidades.</p>
             </div>
           </div>
           <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
@@ -116,80 +116,80 @@ onMounted(() => store.dispatch('jrcCrm/dashboard/fetchMetrics'));
         </div>
       </section>
 
-      <div v-if="isLoading" class="grid min-h-72 place-content-center rounded-2xl border border-[#e4e9f1] bg-white text-sm text-[#667085]">
+      <div v-if="isLoading" class="grid min-h-72 place-content-center rounded-2xl border border-n-weak bg-n-solid-2 text-sm text-n-slate-11">
         <span class="i-lucide-loader-circle mr-2 inline-block size-5 animate-spin" /> Carregando visão geral…
       </div>
 
       <template v-else>
         <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
-          <article v-for="card in cards" :key="card.label" class="group rounded-2xl border border-[#e5eaf1] bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+          <article v-for="card in cards" :key="card.label" class="group rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
             <div class="flex items-start justify-between gap-3">
-              <span class="text-xs font-semibold text-[#667085]">{{ card.label }}</span>
+              <span class="text-xs font-semibold text-n-slate-11">{{ card.label }}</span>
               <span class="grid size-10 place-content-center rounded-xl border" :class="card.accent">
                 <i class="size-4" :class="card.icon" />
               </span>
             </div>
-            <strong class="mt-3 block truncate text-2xl font-bold text-[#172033]">{{ card.value }}</strong>
-            <small class="mt-1 block min-h-8 text-[#667085]">{{ card.helper }}</small>
+            <strong class="mt-3 block truncate text-2xl font-bold text-n-slate-12">{{ card.value }}</strong>
+            <small class="mt-1 block min-h-8 text-n-slate-11">{{ card.helper }}</small>
           </article>
         </section>
 
         <section class="grid gap-5 xl:grid-cols-[1.12fr_.88fr]">
-          <article class="rounded-2xl border border-[#e4e9f1] bg-white p-5 shadow-sm">
+          <article class="rounded-2xl border border-n-weak bg-n-solid-2 p-5 shadow-sm">
             <div class="mb-4 flex items-center justify-between gap-3">
               <div>
-                <h3 class="text-lg font-bold text-[#172033]">Funil de vendas</h3>
-                <p class="mt-1 text-xs text-[#667085]">Quantidade e valor por etapa do pipeline.</p>
+                <h3 class="text-lg font-bold text-n-slate-12">Funil de vendas</h3>
+                <p class="mt-1 text-xs text-n-slate-11">Quantidade e valor por etapa do pipeline.</p>
               </div>
               <RouterLink :to="{ name: 'crm_funnel' }" class="text-sm font-semibold text-[#087cf0]">Ver Kanban →</RouterLink>
             </div>
 
             <div v-if="stages.length" class="space-y-2.5">
-              <div v-for="(stage, index) in stages" :key="stage.id" class="grid grid-cols-[minmax(170px,1fr)_72px_130px] items-center gap-3 rounded-xl border border-[#edf0f4] bg-[#fbfcfe] p-3">
+              <div v-for="(stage, index) in stages" :key="stage.id" class="grid grid-cols-[minmax(170px,1fr)_72px_130px] items-center gap-3 rounded-xl border border-n-weak bg-n-slate-2 p-3">
                 <div class="min-w-0">
                   <div class="mb-1.5 flex items-center gap-2">
                     <span class="grid size-7 place-content-center rounded-lg bg-gradient-to-br text-white" :class="stagePalette[index % stagePalette.length]">
                       <i class="i-lucide-sparkles size-3.5" />
                     </span>
-                    <strong class="truncate text-sm text-[#344054]">{{ stage.name }}</strong>
+                    <strong class="truncate text-sm text-n-slate-12">{{ stage.name }}</strong>
                   </div>
-                  <div class="h-2 overflow-hidden rounded-full bg-[#e9edf3]">
+                  <div class="h-2 overflow-hidden rounded-full bg-n-slate-4">
                     <div class="h-full rounded-full bg-gradient-to-r" :class="stagePalette[index % stagePalette.length]" :style="{ width: stageWidth(stage) }" />
                   </div>
                 </div>
-                <span class="text-right text-sm font-semibold text-[#344054]">{{ stage.deals_count }}</span>
-                <span class="text-right text-sm font-semibold text-[#344054]">{{ formatBRL(stage.value_cents || 0) }}</span>
+                <span class="text-right text-sm font-semibold text-n-slate-12">{{ stage.deals_count }}</span>
+                <span class="text-right text-sm font-semibold text-n-slate-12">{{ formatBRL(stage.value_cents || 0) }}</span>
               </div>
-              <div class="flex items-center justify-between border-t border-[#eef2f6] pt-3 text-sm">
-                <span class="font-semibold text-[#667085]">Total nas etapas</span>
-                <span class="font-bold text-[#172033]">{{ totalFunnelDeals }} oportunidades · {{ formatBRL(pipelineValue) }}</span>
+              <div class="flex items-center justify-between border-t border-n-weak pt-3 text-sm">
+                <span class="font-semibold text-n-slate-11">Total nas etapas</span>
+                <span class="font-bold text-n-slate-12">{{ totalFunnelDeals }} oportunidades · {{ formatBRL(pipelineValue) }}</span>
               </div>
             </div>
-            <p v-else class="py-12 text-center text-sm text-[#98a2b3]">Nenhum dado de funil disponível.</p>
+            <p v-else class="py-12 text-center text-sm text-n-slate-11">Nenhum dado de funil disponível.</p>
           </article>
 
-          <article class="rounded-2xl border border-[#e4e9f1] bg-white p-5 shadow-sm">
+          <article class="rounded-2xl border border-n-weak bg-n-solid-2 p-5 shadow-sm">
             <div class="flex items-start justify-between gap-3">
               <div>
-                <h3 class="text-lg font-bold text-[#172033]">Prioridades de hoje</h3>
-                <p class="mt-1 text-xs text-[#667085]">Pontos que merecem atenção imediata.</p>
+                <h3 class="text-lg font-bold text-n-slate-12">Prioridades de hoje</h3>
+                <p class="mt-1 text-xs text-n-slate-11">Pontos que merecem atenção imediata.</p>
               </div>
-              <span class="rounded-lg bg-[#f8fafc] px-2.5 py-1 text-xs font-semibold text-[#667085]">Operacional</span>
+              <span class="rounded-lg bg-n-slate-2 px-2.5 py-1 text-xs font-semibold text-n-slate-11">Operacional</span>
             </div>
 
             <div class="mt-4 space-y-3">
-              <div class="grid grid-cols-[1fr_auto_auto] items-center gap-3 rounded-xl border border-[#fee2e2] bg-[#fff7f7] p-3">
-                <div><strong class="text-sm text-[#344054]">Atividades vencidas</strong><p class="text-xs text-[#98a2b3]">Exigem atenção imediata</p></div>
-                <b class="text-[#e11d48]">{{ metrics.overdue_activities_count || 0 }}</b>
+              <div class="grid grid-cols-[1fr_auto_auto] items-center gap-3 rounded-xl border border-n-ruby-6 bg-n-ruby-2 p-3">
+                <div><strong class="text-sm text-n-slate-12">Atividades vencidas</strong><p class="text-xs text-n-slate-11">Exigem atenção imediata</p></div>
+                <b class="text-n-ruby-11">{{ metrics.overdue_activities_count || 0 }}</b>
                 <div class="flex gap-1">
                   <RouterLink :to="{ name: 'crm_activities' }" class="grid size-9 place-content-center rounded-lg bg-[#087cf0] text-white" title="Abrir atividades"><i class="i-lucide-list-checks size-4" /></RouterLink>
                   <RouterLink :to="{ name: 'crm_calendar' }" class="grid size-9 place-content-center rounded-lg bg-[#7c3aed] text-white" title="Abrir agenda"><i class="i-lucide-calendar-days size-4" /></RouterLink>
                 </div>
               </div>
 
-              <div class="grid grid-cols-[1fr_auto_auto] items-center gap-3 rounded-xl border border-[#ffedd5] bg-[#fffaf4] p-3">
-                <div><strong class="text-sm text-[#344054]">Negócios estagnados</strong><p class="text-xs text-[#98a2b3]">Sem atualização há mais de 7 dias</p></div>
-                <b class="text-[#f97316]">{{ metrics.stalled_deals_count || 0 }}</b>
+              <div class="grid grid-cols-[1fr_auto_auto] items-center gap-3 rounded-xl border border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-950 p-3">
+                <div><strong class="text-sm text-n-slate-12">Negócios estagnados</strong><p class="text-xs text-n-slate-11">Sem atualização há mais de 7 dias</p></div>
+                <b class="text-orange-700 dark:text-orange-300">{{ metrics.stalled_deals_count || 0 }}</b>
                 <div class="flex gap-1">
                   <RouterLink :to="{ name: 'crm_deals' }" class="grid size-9 place-content-center rounded-lg bg-[#16a76b] text-white" title="Abrir negócios"><i class="i-lucide-handshake size-4" /></RouterLink>
                   <RouterLink :to="{ name: 'crm_calendar' }" class="grid size-9 place-content-center rounded-lg bg-[#7c3aed] text-white" title="Agendar retorno"><i class="i-lucide-calendar-days size-4" /></RouterLink>
@@ -197,13 +197,13 @@ onMounted(() => store.dispatch('jrcCrm/dashboard/fetchMetrics'));
               </div>
             </div>
 
-            <div class="mt-5 grid grid-cols-2 gap-3 border-t border-[#eef2f6] pt-4">
-              <div class="rounded-xl bg-[#f8fafc] p-3">
-                <span class="text-xs text-[#667085]">Ganhos</span>
+            <div class="mt-5 grid grid-cols-2 gap-3 border-t border-n-weak pt-4">
+              <div class="rounded-xl bg-n-slate-2 p-3">
+                <span class="text-xs text-n-slate-11">Ganhos</span>
                 <strong class="mt-1 block text-xl text-emerald-700">{{ metrics.closed_won_count || 0 }}</strong>
               </div>
-              <div class="rounded-xl bg-[#f8fafc] p-3">
-                <span class="text-xs text-[#667085]">Perdidos</span>
+              <div class="rounded-xl bg-n-slate-2 p-3">
+                <span class="text-xs text-n-slate-11">Perdidos</span>
                 <strong class="mt-1 block text-xl text-rose-600">{{ metrics.closed_lost_count || 0 }}</strong>
               </div>
             </div>
@@ -211,24 +211,24 @@ onMounted(() => store.dispatch('jrcCrm/dashboard/fetchMetrics'));
         </section>
 
         <section class="grid gap-5 xl:grid-cols-[1fr_.8fr]">
-          <article class="rounded-2xl border border-[#e4e9f1] bg-white p-5 shadow-sm">
+          <article class="rounded-2xl border border-n-weak bg-n-solid-2 p-5 shadow-sm">
             <div class="flex items-center justify-between gap-3">
               <div>
-                <h3 class="font-bold text-[#172033]">Pipeline comercial</h3>
-                <p class="mt-1 text-xs text-[#667085]">Valor aberto, ponderado e realizado com dados do CRM.</p>
+                <h3 class="font-bold text-n-slate-12">Pipeline comercial</h3>
+                <p class="mt-1 text-xs text-n-slate-11">Valor aberto, ponderado e realizado com dados do CRM.</p>
               </div>
               <RouterLink :to="{ name: 'crm_indicators' }" class="text-sm font-semibold text-[#087cf0]">Ver indicadores →</RouterLink>
             </div>
             <div class="mt-4 grid gap-3 sm:grid-cols-3">
-              <div class="rounded-xl border border-blue-100 bg-blue-50/70 p-4"><span class="text-xs font-semibold text-blue-700">Pipeline aberto</span><strong class="mt-2 block text-xl text-[#172033]">{{ formatBRL(pipelineValue) }}</strong></div>
-              <div class="rounded-xl border border-cyan-100 bg-cyan-50/70 p-4"><span class="text-xs font-semibold text-cyan-700">Valor ponderado</span><strong class="mt-2 block text-xl text-[#172033]">{{ formatBRL(weightedValue) }}</strong></div>
-              <div class="rounded-xl border border-emerald-100 bg-emerald-50/70 p-4"><span class="text-xs font-semibold text-emerald-700">Receita ganha</span><strong class="mt-2 block text-xl text-[#172033]">{{ formatBRL(wonRevenue) }}</strong></div>
+              <div class="rounded-xl border border-blue-100 bg-blue-50/70 p-4"><span class="text-xs font-semibold text-blue-700">Pipeline aberto</span><strong class="mt-2 block text-xl text-n-slate-12">{{ formatBRL(pipelineValue) }}</strong></div>
+              <div class="rounded-xl border border-cyan-100 bg-cyan-50/70 p-4"><span class="text-xs font-semibold text-cyan-700">Valor ponderado</span><strong class="mt-2 block text-xl text-n-slate-12">{{ formatBRL(weightedValue) }}</strong></div>
+              <div class="rounded-xl border border-emerald-100 bg-emerald-50/70 p-4"><span class="text-xs font-semibold text-emerald-700">Receita ganha</span><strong class="mt-2 block text-xl text-n-slate-12">{{ formatBRL(wonRevenue) }}</strong></div>
             </div>
           </article>
 
-          <article class="rounded-2xl border border-[#e4e9f1] bg-white p-5 shadow-sm">
-            <h3 class="font-bold text-[#172033]">Ações rápidas</h3>
-            <p class="mt-1 text-xs text-[#667085]">Atalhos para continuar o trabalho comercial.</p>
+          <article class="rounded-2xl border border-n-weak bg-n-solid-2 p-5 shadow-sm">
+            <h3 class="font-bold text-n-slate-12">Ações rápidas</h3>
+            <p class="mt-1 text-xs text-n-slate-11">Atalhos para continuar o trabalho comercial.</p>
             <div class="mt-4 grid grid-cols-2 gap-2">
               <RouterLink :to="{ name: 'crm_leads' }" class="rounded-xl bg-blue-50 px-3 py-3 text-sm font-semibold text-blue-700"><i class="i-lucide-user-plus mr-1 size-4" /> Leads</RouterLink>
               <RouterLink :to="{ name: 'crm_deals' }" class="rounded-xl bg-emerald-50 px-3 py-3 text-sm font-semibold text-emerald-700"><i class="i-lucide-handshake mr-1 size-4" /> Negócios</RouterLink>

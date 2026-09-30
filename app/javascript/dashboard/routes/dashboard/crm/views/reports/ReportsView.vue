@@ -181,7 +181,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="h-full overflow-y-auto bg-[linear-gradient(135deg,#f8fbff_0%,#f5f7fb_58%,#fbf8ff_100%)] p-4 sm:p-6">
+  <div class="h-full overflow-y-auto bg-gradient-to-br from-n-blue-2 via-n-background to-n-violet-2 p-4 sm:p-6">
     <div class="mx-auto max-w-[1720px] space-y-5">
       <header class="rounded-2xl border border-white/70 bg-white/85 p-5 shadow-sm backdrop-blur">
         <div class="flex flex-wrap items-start justify-between gap-4">
@@ -189,8 +189,8 @@ onMounted(async () => {
             <div class="flex items-center gap-2">
               <span class="grid size-9 place-content-center rounded-xl bg-[#087cf0] text-white shadow-[0_8px_18px_rgba(8,124,240,.20)]"><i class="i-lucide-chart-no-axes-combined size-5" /></span>
               <div>
-                <h2 class="text-2xl font-bold text-[#172033]">Indicadores do CRM</h2>
-                <p class="text-sm text-[#667085]">Resultados, conversões e produtividade com os dados reais da operação.</p>
+                <h2 class="text-2xl font-bold text-n-slate-12">Indicadores do CRM</h2>
+                <p class="text-sm text-n-slate-11">Resultados, conversões e produtividade com os dados reais da operação.</p>
               </div>
             </div>
           </div>
@@ -199,27 +199,27 @@ onMounted(async () => {
           </button>
         </div>
 
-        <div class="mt-5 flex flex-wrap items-end gap-3 rounded-xl border border-[#e7ebf1] bg-[#fbfcfe] p-3">
-          <label v-if="isAdmin" class="min-w-48 flex-1 text-[11px] font-semibold uppercase tracking-wide text-[#667085]">
+        <div class="mt-5 flex flex-wrap items-end gap-3 rounded-xl border border-n-weak bg-n-slate-2 p-3">
+          <label v-if="isAdmin" class="min-w-48 flex-1 text-[11px] font-semibold uppercase tracking-wide text-n-slate-11">
             Responsável
-            <select v-model="ownerId" class="mt-1 h-10 w-full rounded-xl border border-[#dde3ea] bg-white px-3 text-sm font-medium normal-case text-[#344054]" @change="load">
+            <select v-model="ownerId" class="mt-1 h-10 w-full rounded-xl border border-n-weak bg-n-solid-2 px-3 text-sm font-medium normal-case text-n-slate-12" @change="load">
               <option value="">Todos os responsáveis</option>
               <option v-for="agent in agents" :key="agent.id" :value="agent.id">{{ agent.name }}</option>
             </select>
           </label>
 
-          <label class="min-w-48 flex-1 text-[11px] font-semibold uppercase tracking-wide text-[#667085]">
+          <label class="min-w-48 flex-1 text-[11px] font-semibold uppercase tracking-wide text-n-slate-11">
             Funil
-            <select v-model="pipelineId" class="mt-1 h-10 w-full rounded-xl border border-[#dde3ea] bg-white px-3 text-sm font-medium normal-case text-[#344054]" @change="load">
+            <select v-model="pipelineId" class="mt-1 h-10 w-full rounded-xl border border-n-weak bg-n-solid-2 px-3 text-sm font-medium normal-case text-n-slate-12" @change="load">
               <option value="">Todos os funis</option>
               <option v-for="pipeline in pipelines" :key="pipeline.id" :value="pipeline.id">{{ pipeline.name }}</option>
             </select>
           </label>
 
           <div class="min-w-72 flex-1">
-            <span class="text-[11px] font-semibold uppercase tracking-wide text-[#667085]">Período</span>
-            <div class="mt-1 flex h-10 rounded-xl border border-[#dde3ea] bg-white p-1">
-              <button v-for="option in ['30', '90', 'year']" :key="option" type="button" class="flex-1 rounded-lg px-3 text-xs font-semibold transition" :class="period === option ? 'bg-[#087cf0] text-white shadow-sm' : 'text-[#667085] hover:bg-[#f4f7fb]'" @click="period = option; load();">
+            <span class="text-[11px] font-semibold uppercase tracking-wide text-n-slate-11">Período</span>
+            <div class="mt-1 flex h-10 rounded-xl border border-n-weak bg-n-solid-2 p-1">
+              <button v-for="option in ['30', '90', 'year']" :key="option" type="button" class="flex-1 rounded-lg px-3 text-xs font-semibold transition" :class="period === option ? 'bg-[#087cf0] text-white shadow-sm' : 'text-n-slate-11 hover:bg-n-slate-2'" @click="period = option; load();">
                 {{ option === '30' ? 'Últimos 30 dias' : option === '90' ? 'Últimos 90 dias' : 'Este ano' }}
               </button>
             </div>
@@ -227,116 +227,116 @@ onMounted(async () => {
         </div>
       </header>
 
-      <div v-if="loading" class="flex min-h-80 items-center justify-center rounded-2xl border border-[#e4e9f1] bg-white text-sm text-[#667085]">
+      <div v-if="loading" class="flex min-h-80 items-center justify-center rounded-2xl border border-n-weak bg-n-solid-2 text-sm text-n-slate-11">
         <i class="i-lucide-loader-circle mr-2 size-5 animate-spin" /> Carregando indicadores…
       </div>
 
       <template v-else>
         <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
-          <article v-for="metric in metricCards" :key="metric.label" class="rounded-2xl border border-[#e4e9f1] bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+          <article v-for="metric in metricCards" :key="metric.label" class="rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
             <div class="flex items-start justify-between gap-3">
-              <p class="text-xs font-semibold text-[#667085]">{{ metric.label }}</p>
+              <p class="text-xs font-semibold text-n-slate-11">{{ metric.label }}</p>
               <span class="grid size-10 place-content-center rounded-xl border" :class="metric.accent"><i class="size-4" :class="metric.icon" /></span>
             </div>
-            <p class="mt-3 truncate text-2xl font-bold text-[#172033]">{{ metric.value }}</p>
-            <small class="mt-1 block min-h-8 text-[#667085]">{{ metric.helper }}</small>
+            <p class="mt-3 truncate text-2xl font-bold text-n-slate-12">{{ metric.value }}</p>
+            <small class="mt-1 block min-h-8 text-n-slate-11">{{ metric.helper }}</small>
           </article>
         </section>
 
         <section class="grid gap-5 xl:grid-cols-[1.1fr_.9fr]">
-          <article class="rounded-2xl border border-[#e4e9f1] bg-white p-5 shadow-sm">
+          <article class="rounded-2xl border border-n-weak bg-n-solid-2 p-5 shadow-sm">
             <div class="flex items-center justify-between gap-3">
-              <div><h3 class="font-bold text-[#172033]">Distribuição do funil</h3><p class="mt-1 text-xs text-[#667085]">Negócios e valores por etapa.</p></div>
+              <div><h3 class="font-bold text-n-slate-12">Distribuição do funil</h3><p class="mt-1 text-xs text-n-slate-11">Negócios e valores por etapa.</p></div>
               <RouterLink :to="{ name: 'crm_funnel' }" class="text-sm font-semibold text-[#087cf0]">Abrir funil →</RouterLink>
             </div>
 
             <div v-if="report.summary.funnel_stages?.length" class="mt-5 space-y-3">
               <div v-for="(stage, index) in report.summary.funnel_stages" :key="stage.id" class="grid grid-cols-[minmax(150px,1fr)_88px_135px] items-center gap-3 text-sm">
                 <div class="min-w-0">
-                  <div class="mb-1.5 flex items-center justify-between gap-2"><span class="truncate font-semibold text-[#344054]">{{ stage.name }}</span></div>
-                  <div class="h-3 overflow-hidden rounded-full bg-[#eef2f6]"><div class="h-full rounded-full bg-gradient-to-r" :class="funnelPalette[index % funnelPalette.length]" :style="{ width: funnelWidth(stage) }" /></div>
+                  <div class="mb-1.5 flex items-center justify-between gap-2"><span class="truncate font-semibold text-n-slate-12">{{ stage.name }}</span></div>
+                  <div class="h-3 overflow-hidden rounded-full bg-n-slate-3"><div class="h-full rounded-full bg-gradient-to-r" :class="funnelPalette[index % funnelPalette.length]" :style="{ width: funnelWidth(stage) }" /></div>
                 </div>
-                <strong class="text-right text-[#344054]">{{ stage.deals_count }}</strong>
-                <strong class="text-right text-[#344054]">{{ formatBRL(stage.value_cents || 0) }}</strong>
+                <strong class="text-right text-n-slate-12">{{ stage.deals_count }}</strong>
+                <strong class="text-right text-n-slate-12">{{ formatBRL(stage.value_cents || 0) }}</strong>
               </div>
             </div>
-            <p v-else class="py-12 text-center text-sm text-[#98a2b3]">Sem dados de funil no período.</p>
+            <p v-else class="py-12 text-center text-sm text-n-slate-11">Sem dados de funil no período.</p>
           </article>
 
-          <article class="rounded-2xl border border-[#e4e9f1] bg-white p-5 shadow-sm">
-            <div><h3 class="font-bold text-[#172033]">Origem dos leads</h3><p class="mt-1 text-xs text-[#667085]">Distribuição dos leads por origem.</p></div>
+          <article class="rounded-2xl border border-n-weak bg-n-solid-2 p-5 shadow-sm">
+            <div><h3 class="font-bold text-n-slate-12">Origem dos leads</h3><p class="mt-1 text-xs text-n-slate-11">Distribuição dos leads por origem.</p></div>
             <div v-if="report.leads_by_source.length" class="mt-5 flex flex-col items-center gap-5 sm:flex-row">
               <div class="grid size-44 shrink-0 place-content-center rounded-full" :style="{ background: sourceGradient }">
-                <div class="grid size-28 place-content-center rounded-full bg-white text-center shadow-inner">
-                  <strong class="text-2xl text-[#172033]">{{ sourceTotal }}</strong>
-                  <span class="text-xs text-[#667085]">Leads totais</span>
+                <div class="grid size-28 place-content-center rounded-full bg-n-solid-2 text-center shadow-inner">
+                  <strong class="text-2xl text-n-slate-12">{{ sourceTotal }}</strong>
+                  <span class="text-xs text-n-slate-11">Leads totais</span>
                 </div>
               </div>
               <div class="w-full space-y-2.5">
                 <div v-for="(source, index) in report.leads_by_source" :key="source.name" class="flex items-center justify-between gap-3 text-xs">
-                  <span class="flex min-w-0 items-center gap-2 text-[#475467]"><i class="size-2.5 shrink-0 rounded-full" :style="{ background: sourcePalette[index % sourcePalette.length] }" /><span class="truncate">{{ sourceLabel(source.name) }}</span></span>
-                  <strong class="text-[#344054]">{{ source.count }} · {{ sourceTotal ? Math.round((source.count / sourceTotal) * 100) : 0 }}%</strong>
+                  <span class="flex min-w-0 items-center gap-2 text-n-slate-11"><i class="size-2.5 shrink-0 rounded-full" :style="{ background: sourcePalette[index % sourcePalette.length] }" /><span class="truncate">{{ sourceLabel(source.name) }}</span></span>
+                  <strong class="text-n-slate-12">{{ source.count }} · {{ sourceTotal ? Math.round((source.count / sourceTotal) * 100) : 0 }}%</strong>
                 </div>
               </div>
             </div>
-            <p v-else class="py-12 text-center text-sm text-[#98a2b3]">Sem origem de leads no período.</p>
+            <p v-else class="py-12 text-center text-sm text-n-slate-11">Sem origem de leads no período.</p>
           </article>
         </section>
 
         <section class="grid gap-5 xl:grid-cols-3">
-          <article class="rounded-2xl border border-[#e4e9f1] bg-white p-5 shadow-sm">
-            <h3 class="font-bold text-[#172033]">Ciclo dos leads</h3>
+          <article class="rounded-2xl border border-n-weak bg-n-solid-2 p-5 shadow-sm">
+            <h3 class="font-bold text-n-slate-12">Ciclo dos leads</h3>
             <div v-if="report.leads_by_status.length" class="mt-4 grid grid-cols-2 gap-3">
               <div v-for="(item, index) in report.leads_by_status" :key="item.name" class="rounded-xl border p-3" :class="index % 2 ? 'border-violet-100 bg-violet-50/70' : 'border-blue-100 bg-blue-50/70'">
-                <strong class="text-xl text-[#172033]">{{ item.count }}</strong><span class="mt-1 block text-xs font-medium text-[#667085]">{{ statusLabel(item.name) }}</span>
+                <strong class="text-xl text-n-slate-12">{{ item.count }}</strong><span class="mt-1 block text-xs font-medium text-n-slate-11">{{ statusLabel(item.name) }}</span>
               </div>
             </div>
-            <p v-else class="py-8 text-center text-sm text-[#98a2b3]">Sem dados de leads.</p>
+            <p v-else class="py-8 text-center text-sm text-n-slate-11">Sem dados de leads.</p>
           </article>
 
-          <article class="rounded-2xl border border-[#e4e9f1] bg-white p-5 shadow-sm">
-            <h3 class="font-bold text-[#172033]">Produtividade</h3>
+          <article class="rounded-2xl border border-n-weak bg-n-solid-2 p-5 shadow-sm">
+            <h3 class="font-bold text-n-slate-12">Produtividade</h3>
             <div class="mt-4 grid grid-cols-3 gap-3 text-center">
-              <div class="rounded-xl bg-emerald-50 p-3"><strong class="text-xl text-emerald-700">{{ report.activities.completed || 0 }}</strong><span class="mt-1 block text-xs text-[#667085]">Concluídas</span></div>
-              <div class="rounded-xl bg-amber-50 p-3"><strong class="text-xl text-amber-700">{{ report.activities.pending || 0 }}</strong><span class="mt-1 block text-xs text-[#667085]">Pendentes</span></div>
-              <div class="rounded-xl bg-rose-50 p-3"><strong class="text-xl text-rose-700">{{ report.activities.overdue || 0 }}</strong><span class="mt-1 block text-xs text-[#667085]">Atrasadas</span></div>
+              <div class="rounded-xl bg-emerald-50 p-3"><strong class="text-xl text-emerald-700">{{ report.activities.completed || 0 }}</strong><span class="mt-1 block text-xs text-n-slate-11">Concluídas</span></div>
+              <div class="rounded-xl bg-amber-50 p-3"><strong class="text-xl text-amber-700">{{ report.activities.pending || 0 }}</strong><span class="mt-1 block text-xs text-n-slate-11">Pendentes</span></div>
+              <div class="rounded-xl bg-rose-50 p-3"><strong class="text-xl text-rose-700">{{ report.activities.overdue || 0 }}</strong><span class="mt-1 block text-xs text-n-slate-11">Atrasadas</span></div>
             </div>
             <RouterLink :to="{ name: 'crm_activities' }" class="mt-4 inline-flex text-sm font-semibold text-[#087cf0]">Abrir atividades →</RouterLink>
           </article>
 
-          <article class="rounded-2xl border border-[#e4e9f1] bg-white p-5 shadow-sm">
-            <h3 class="font-bold text-[#172033]">Resultados dos negócios</h3>
+          <article class="rounded-2xl border border-n-weak bg-n-solid-2 p-5 shadow-sm">
+            <h3 class="font-bold text-n-slate-12">Resultados dos negócios</h3>
             <div v-if="report.deals_by_status.length" class="mt-4 space-y-2">
-              <div v-for="item in report.deals_by_status" :key="item.name" class="flex items-center justify-between rounded-xl border border-[#edf0f4] bg-[#fbfcfe] px-3 py-2.5">
-                <span class="text-sm font-medium text-[#667085]">{{ statusLabel(item.name) }}</span><strong class="text-[#172033]">{{ item.count }}</strong>
+              <div v-for="item in report.deals_by_status" :key="item.name" class="flex items-center justify-between rounded-xl border border-n-weak bg-n-slate-2 px-3 py-2.5">
+                <span class="text-sm font-medium text-n-slate-11">{{ statusLabel(item.name) }}</span><strong class="text-n-slate-12">{{ item.count }}</strong>
               </div>
             </div>
-            <p v-else class="py-8 text-center text-sm text-[#98a2b3]">Sem resultados no período.</p>
+            <p v-else class="py-8 text-center text-sm text-n-slate-11">Sem resultados no período.</p>
           </article>
         </section>
 
         <section class="grid gap-5 xl:grid-cols-[1.3fr_.7fr]">
-          <article class="rounded-2xl border border-[#e4e9f1] bg-white p-5 shadow-sm">
-            <div class="flex items-center justify-between gap-3"><div><h3 class="font-bold text-[#172033]">Desempenho por vendedor</h3><p class="mt-1 text-xs text-[#667085]">Receita ganha por responsável no período selecionado.</p></div><span class="rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700">Ranking</span></div>
+          <article class="rounded-2xl border border-n-weak bg-n-solid-2 p-5 shadow-sm">
+            <div class="flex items-center justify-between gap-3"><div><h3 class="font-bold text-n-slate-12">Desempenho por vendedor</h3><p class="mt-1 text-xs text-n-slate-11">Receita ganha por responsável no período selecionado.</p></div><span class="rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700">Ranking</span></div>
             <div v-if="report.revenue_by_owner.length" class="mt-5 space-y-4">
               <div v-for="(owner, index) in report.revenue_by_owner" :key="owner.id || owner.owner_id || owner.name" class="grid grid-cols-[30px_minmax(120px,1fr)_minmax(140px,2fr)_120px] items-center gap-3 text-sm">
                 <strong class="text-[#087cf0]">{{ index + 1 }}</strong>
-                <span class="truncate font-medium text-[#344054]">{{ owner.name || owner.owner_name || 'Responsável' }}</span>
-                <div class="h-2 overflow-hidden rounded-full bg-[#eef2f6]"><div class="h-full rounded-full bg-gradient-to-r from-[#087cf0] to-[#7c3aed]" :style="{ width: `${Math.max(4, (Number(owner.revenue_cents || owner.value_cents || 0) / maxOwnerRevenue) * 100)}%` }" /></div>
-                <strong class="text-right text-[#344054]">{{ formatBRL(owner.revenue_cents || owner.value_cents || 0) }}</strong>
+                <span class="truncate font-medium text-n-slate-12">{{ owner.name || owner.owner_name || 'Responsável' }}</span>
+                <div class="h-2 overflow-hidden rounded-full bg-n-slate-3"><div class="h-full rounded-full bg-gradient-to-r from-[#087cf0] to-[#7c3aed]" :style="{ width: `${Math.max(4, (Number(owner.revenue_cents || owner.value_cents || 0) / maxOwnerRevenue) * 100)}%` }" /></div>
+                <strong class="text-right text-n-slate-12">{{ formatBRL(owner.revenue_cents || owner.value_cents || 0) }}</strong>
               </div>
             </div>
-            <p v-else class="mt-5 text-sm text-[#98a2b3]">Sem dados de receita por vendedor no período.</p>
+            <p v-else class="mt-5 text-sm text-n-slate-11">Sem dados de receita por vendedor no período.</p>
           </article>
 
-          <article class="rounded-2xl border border-[#e4e9f1] bg-white p-5 shadow-sm">
-            <h3 class="font-bold text-[#172033]">Propostas</h3>
+          <article class="rounded-2xl border border-n-weak bg-n-solid-2 p-5 shadow-sm">
+            <h3 class="font-bold text-n-slate-12">Propostas</h3>
             <div v-if="report.proposals_by_status.length" class="mt-4 space-y-2">
-              <div v-for="item in report.proposals_by_status" :key="item.name" class="flex items-center justify-between rounded-xl border border-[#edf0f4] px-3 py-2.5">
-                <span class="text-sm font-medium text-[#667085]">{{ statusLabel(item.name) }}</span><strong class="text-[#172033]">{{ item.count }}</strong>
+              <div v-for="item in report.proposals_by_status" :key="item.name" class="flex items-center justify-between rounded-xl border border-n-weak px-3 py-2.5">
+                <span class="text-sm font-medium text-n-slate-11">{{ statusLabel(item.name) }}</span><strong class="text-n-slate-12">{{ item.count }}</strong>
               </div>
             </div>
-            <p v-else class="py-8 text-center text-sm text-[#98a2b3]">Sem propostas no período.</p>
+            <p v-else class="py-8 text-center text-sm text-n-slate-11">Sem propostas no período.</p>
             <RouterLink :to="{ name: 'crm_proposals' }" class="mt-3 inline-flex text-sm font-semibold text-[#087cf0]">Abrir propostas →</RouterLink>
           </article>
         </section>

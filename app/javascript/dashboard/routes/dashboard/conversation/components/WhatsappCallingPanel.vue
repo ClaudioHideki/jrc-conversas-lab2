@@ -568,7 +568,7 @@ onMounted(async () => {
         </button>
         <button
           type="button"
-          class="flex min-h-[50px] w-full items-center justify-center gap-2 rounded-xl border border-n-amber-10 bg-n-amber-9 px-3 py-3 text-sm font-bold text-white shadow-sm hover:enabled:bg-n-amber-10 disabled:cursor-not-allowed disabled:opacity-45"
+          class="flex min-h-[50px] w-full items-center justify-center gap-2 rounded-xl border border-n-amber-10 bg-n-amber-9 px-3 py-3 text-sm font-bold text-n-on-amber shadow-sm hover:enabled:bg-n-amber-10 disabled:cursor-not-allowed disabled:opacity-100"
           :disabled="isBusy && !showKeypad"
           @click="showKeypad = !showKeypad"
         >

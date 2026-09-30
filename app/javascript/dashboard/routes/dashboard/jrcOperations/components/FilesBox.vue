@@ -101,7 +101,7 @@ async function remove(file) {
     >
       {{ error }}
       <button
-        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50 text-xs"
+        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed text-xs"
         @click="load"
       >
         {{ projectText('RETRY', 'Tentar novamente') }}
@@ -139,7 +139,7 @@ async function remove(file) {
           rel="noopener noreferrer"
           >{{ projectText('DOWNLOAD', 'Baixar') }}</a><button
           v-if="canEdit"
-          class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50 text-xs text-n-ruby-11"
+          class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed text-xs text-n-ruby-11"
           :disabled="busy"
           @click="remove(file)"
         >
@@ -165,7 +165,7 @@ async function remove(file) {
         :aria-label="projectText('INTERNAL_FILES', 'Arquivos internos')"
         @change="selected = Array.from($event.target.files || [])"
       /><button
-        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50"
+        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
         :disabled="busy || !selected.length"
       >
         {{ projectText('UPLOAD_FILES', 'Enviar arquivos') }}</button><small class="text-n-slate-11 text-sm">{{

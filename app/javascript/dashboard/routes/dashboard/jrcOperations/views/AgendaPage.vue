@@ -26,7 +26,7 @@ const { accountId, agendaText } = useAgenda();
           </p>
         </div>
         <RouterLink
-          class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50 text-xs"
+          class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed text-xs"
           :to="routeTo('jrc_cockpit', accountId)"
         >
           {{ agendaText('BACK_COCKPIT', 'Voltar ao Cockpit') }}

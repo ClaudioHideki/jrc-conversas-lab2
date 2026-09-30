@@ -504,17 +504,17 @@ onMounted(load);
 </script>
 
 <template>
-  <div class="h-full overflow-auto bg-slate-50 p-4 sm:p-6">
+  <div class="h-full overflow-auto bg-n-slate-2 p-4 sm:p-6">
     <header class="flex flex-wrap items-center justify-between gap-3">
       <div>
         <p class="text-xs font-semibold text-blue-700">CRM / Comercial</p>
         <h2 class="text-2xl font-bold">Comissões</h2>
-        <p class="text-sm text-slate-500">
+        <p class="text-sm text-n-slate-11">
           Planos, apuração, aprovação e pagamento sobre pedidos reais.
         </p>
       </div>
       <button
-        class="rounded-lg border bg-white px-4 py-2 font-semibold"
+        class="rounded-lg border bg-n-solid-2 px-4 py-2 font-semibold"
         :disabled="loading"
         @click="load"
       >
@@ -522,12 +522,12 @@ onMounted(load);
       </button>
     </header>
 
-    <nav class="my-4 flex gap-2 overflow-x-auto border-b bg-white p-2">
+    <nav class="my-4 flex gap-2 overflow-x-auto border-b bg-n-solid-2 p-2">
       <button
         v-for="item in tabs"
         :key="item[0]"
         class="shrink-0 rounded-lg px-3 py-2 text-sm font-semibold"
-        :class="tab === item[0] ? 'bg-blue-600 text-white' : 'text-slate-600'"
+        :class="tab === item[0] ? 'bg-blue-600 text-white' : 'text-n-slate-11'"
         @click="goTab(item[0])"
       >
         {{ item[1] }}
@@ -540,50 +540,50 @@ onMounted(load);
         <article
           v-for="item in metrics"
           :key="item[0]"
-          class="rounded-lg border bg-white p-4"
+          class="rounded-lg border bg-n-solid-2 p-4"
         >
-          <p class="text-xs text-slate-500">{{ item[0] }}</p>
+          <p class="text-xs text-n-slate-11">{{ item[0] }}</p>
           <strong class="text-xl text-blue-700">{{ money(item[1]) }}</strong>
         </article>
       </section>
 
       <section v-if="tab === 'current'" class="mt-4 grid gap-4 xl:grid-cols-[1.2fr_.8fr]">
-        <article class="rounded-2xl border bg-white p-5 shadow-sm">
-          <div class="flex items-center justify-between"><div><h3 class="font-bold">Evolução mensal</h3><p class="text-xs text-slate-500">Prevista, liberada e paga nos últimos meses.</p></div><i class="i-lucide-chart-column-big size-5 text-blue-600"/></div>
+        <article class="rounded-2xl border bg-n-solid-2 p-5 shadow-sm">
+          <div class="flex items-center justify-between"><div><h3 class="font-bold">Evolução mensal</h3><p class="text-xs text-n-slate-11">Prevista, liberada e paga nos últimos meses.</p></div><i class="i-lucide-chart-column-big size-5 text-blue-600"/></div>
           <div class="mt-5 grid min-h-56 grid-cols-8 items-end gap-3">
             <div v-for="item in monthlyEvolution" :key="item.key" class="flex h-52 flex-col justify-end gap-1">
               <div class="rounded-t bg-blue-200" :style="{height:`${Math.max(3,item.forecast/chartMax*100)}%`}"/>
               <div class="rounded-t bg-amber-400" :style="{height:`${Math.max(3,item.released/chartMax*100)}%`}"/>
               <div class="rounded-t bg-emerald-500" :style="{height:`${Math.max(3,item.paid/chartMax*100)}%`}"/>
-              <span class="pt-1 text-center text-[10px] text-slate-500">{{item.label}}</span>
+              <span class="pt-1 text-center text-[10px] text-n-slate-11">{{item.label}}</span>
             </div>
           </div>
         </article>
-        <article class="rounded-2xl border bg-white p-5 shadow-sm">
+        <article class="rounded-2xl border bg-n-solid-2 p-5 shadow-sm">
           <h3 class="font-bold">Comissão por vendedor</h3>
           <div class="mt-4 space-y-3">
             <div v-for="item in sellerChart" :key="item.id">
               <div class="flex justify-between text-xs"><span class="font-medium">{{item.name}}</span><b>{{money(item.value)}}</b></div>
-              <div class="mt-1 h-2 rounded-full bg-slate-100"><div class="h-full rounded-full bg-violet-500" :style="{width:`${Math.max(2,item.value/chartMax*100)}%`}" /></div>
+              <div class="mt-1 h-2 rounded-full bg-n-slate-3"><div class="h-full rounded-full bg-violet-500" :style="{width:`${Math.max(2,item.value/chartMax*100)}%`}" /></div>
             </div>
-            <p v-if="!sellerChart.length" class="py-8 text-center text-sm text-slate-500">Sem dados por vendedor.</p>
+            <p v-if="!sellerChart.length" class="py-8 text-center text-sm text-n-slate-11">Sem dados por vendedor.</p>
           </div>
         </article>
       </section>
 
-      <section v-if="tab === 'current'" class="mt-4 rounded-2xl border bg-white p-5 shadow-sm">
+      <section v-if="tab === 'current'" class="mt-4 rounded-2xl border bg-n-solid-2 p-5 shadow-sm">
         <h3 class="font-bold">Comissão por produto</h3>
         <p role="status" class="mt-3 rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">{{ t('CRM.HOMOLOGATION.PRODUCT_COMMISSION_PENDING') }}</p>
       </section>
 
       <section
         v-if="tab === 'plans'"
-        class="mt-4 rounded-lg border bg-white p-4"
+        class="mt-4 rounded-lg border bg-n-solid-2 p-4"
       >
         <div class="flex items-center justify-between">
           <div>
             <h3 class="font-bold">Planos persistidos</h3>
-            <p class="text-sm text-slate-500">
+            <p class="text-sm text-n-slate-11">
               Regras usadas pela apuração automática de pedidos.
             </p>
           </div>
@@ -597,13 +597,13 @@ onMounted(load);
             Novo plano
           </button>
         </div>
-        <p v-if="!plans.length" class="py-10 text-center text-slate-500">
+        <p v-if="!plans.length" class="py-10 text-center text-n-slate-11">
           Nenhum plano cadastrado.
         </p>
         <div v-else class="mt-4 overflow-x-auto">
           <table class="w-full min-w-[760px] text-sm">
             <thead>
-              <tr class="border-b text-left text-xs uppercase text-slate-500">
+              <tr class="border-b text-left text-xs uppercase text-n-slate-11">
                 <th class="p-2">Plano</th>
                 <th>Vigência</th>
                 <th>Evento</th>
@@ -643,17 +643,17 @@ onMounted(load);
         class="mt-4 space-y-4"
         @submit.prevent
       >
-        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-n-solid-2 shadow-sm">
           <div class="border-b border-slate-200 px-5 py-4">
             <div class="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p class="text-xs font-semibold uppercase tracking-wide text-blue-600">
                   Planos de comissão
                 </p>
-                <h3 class="text-xl font-bold text-slate-900">
+                <h3 class="text-xl font-bold text-n-slate-12">
                   {{ editingPlanId ? 'Editar plano de comissão' : 'Novo plano de comissão' }}
                 </h3>
-                <p class="text-sm text-slate-500">
+                <p class="text-sm text-n-slate-11">
                   Configure regras reais de cálculo e revise antes de publicar.
                 </p>
               </div>
@@ -662,18 +662,18 @@ onMounted(load);
               </button>
             </div>
           </div>
-          <div class="grid grid-cols-5 border-b border-slate-200 bg-slate-50/70">
+          <div class="grid grid-cols-5 border-b border-slate-200 bg-n-slate-2/70">
             <button
               v-for="(item, index) in planSteps"
               :key="item[0]"
               type="button"
               class="relative flex min-w-0 items-center justify-center gap-2 px-2 py-4 text-xs font-semibold sm:text-sm"
-              :class="planStep === index + 1 ? 'text-blue-700' : planStep > index + 1 ? 'text-emerald-700' : 'text-slate-500'"
+              :class="planStep === index + 1 ? 'text-blue-700' : planStep > index + 1 ? 'text-emerald-700' : 'text-n-slate-11'"
               @click="planStep = index + 1"
             >
               <span
                 class="grid size-8 shrink-0 place-content-center rounded-full font-bold"
-                :class="planStep === index + 1 ? 'bg-blue-600 text-white' : planStep > index + 1 ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600'"
+                :class="planStep === index + 1 ? 'bg-blue-600 text-white' : planStep > index + 1 ? 'bg-emerald-600 text-white' : 'bg-n-slate-4 text-n-slate-11'"
               >
                 <i v-if="planStep > index + 1" class="i-lucide-check size-4" />
                 <span v-else>{{ index + 1 }}</span>
@@ -686,10 +686,10 @@ onMounted(load);
 
         <div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_330px]">
           <div class="min-w-0 space-y-4">
-            <section v-if="planStep === 1" class="rounded-2xl border bg-white p-5 shadow-sm">
+            <section v-if="planStep === 1" class="rounded-2xl border bg-n-solid-2 p-5 shadow-sm">
               <div class="mb-5 flex items-center gap-3">
                 <span class="grid size-10 place-content-center rounded-xl bg-blue-50 text-blue-600"><i class="i-lucide-badge-percent size-5" /></span>
-                <div><h4 class="font-bold">Dados gerais</h4><p class="text-xs text-slate-500">Vigência, participantes, tipo e evento gerador.</p></div>
+                <div><h4 class="font-bold">Dados gerais</h4><p class="text-xs text-n-slate-11">Vigência, participantes, tipo e evento gerador.</p></div>
               </div>
               <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                 <label class="md:col-span-2">Nome do plano *
@@ -726,22 +726,22 @@ onMounted(load);
                   <select v-model="form.user_ids" multiple class="mt-2 h-32 w-full rounded-lg border p-2">
                     <option v-for="agent in agents" :key="agent.id" :value="agent.id">{{ agent.name }}</option>
                   </select>
-                  <span class="mt-1 block text-xs text-slate-500">Sem seleção, a regra não restringe vendedores.</span>
+                  <span class="mt-1 block text-xs text-n-slate-11">Sem seleção, a regra não restringe vendedores.</span>
                 </label>
                 <label class="rounded-xl border border-slate-200 p-4">
                   <span class="font-semibold">Equipes participantes</span>
                   <select v-model="form.team_ids" multiple class="mt-2 h-32 w-full rounded-lg border p-2">
                     <option v-for="team in teams" :key="team.id" :value="team.id">{{ team.name }}</option>
                   </select>
-                  <span class="mt-1 block text-xs text-slate-500">A equipe é validada contra os vínculos reais da conta.</span>
+                  <span class="mt-1 block text-xs text-n-slate-11">A equipe é validada contra os vínculos reais da conta.</span>
                 </label>
               </div>
             </section>
 
-            <section v-else-if="planStep === 2" class="rounded-2xl border bg-white p-5 shadow-sm">
+            <section v-else-if="planStep === 2" class="rounded-2xl border bg-n-solid-2 p-5 shadow-sm">
               <div class="mb-5 flex items-center gap-3">
                 <span class="grid size-10 place-content-center rounded-xl bg-indigo-50 text-indigo-600"><i class="i-lucide-calculator size-5" /></span>
-                <div><h4 class="font-bold">Base comissionável e regras de cálculo</h4><p class="text-xs text-slate-500">A mesma regra é usada na simulação e na apuração automática.</p></div>
+                <div><h4 class="font-bold">Base comissionável e regras de cálculo</h4><p class="text-xs text-n-slate-11">A mesma regra é usada na simulação e na apuração automática.</p></div>
               </div>
               <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                 <label>Base comissionável
@@ -768,7 +768,7 @@ onMounted(load);
               <div class="mt-5 grid gap-3 md:grid-cols-2">
                 <label class="flex items-start gap-3 rounded-xl border p-4">
                   <input v-model="form.requires_approval" type="checkbox" class="mt-1" />
-                  <span><strong class="block">Exigir aprovação antes de liberar</strong><small class="text-slate-500">A comissão nasce em aprovação e só pode ser paga depois da liberação.</small></span>
+                  <span><strong class="block">Exigir aprovação antes de liberar</strong><small class="text-n-slate-11">A comissão nasce em aprovação e só pode ser paga depois da liberação.</small></span>
                 </label>
                 <div class="rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-800">
                   <strong class="block">Evento e base são independentes</strong>
@@ -778,12 +778,12 @@ onMounted(load);
             </section>
 
             <section v-else-if="planStep === 3" class="space-y-4">
-              <article class="rounded-2xl border bg-white p-5 shadow-sm">
+              <article class="rounded-2xl border bg-n-solid-2 p-5 shadow-sm">
                 <div class="flex flex-wrap items-center justify-between gap-3">
-                  <div><h4 class="font-bold">Faixas de comissão</h4><p class="text-xs text-slate-500">Faixas por valor vendido e por atingimento usam limites diferentes.</p></div>
+                  <div><h4 class="font-bold">Faixas de comissão</h4><p class="text-xs text-n-slate-11">Faixas por valor vendido e por atingimento usam limites diferentes.</p></div>
                   <button type="button" class="rounded-xl border px-3 py-2 text-sm font-semibold" @click="addTier">Adicionar faixa</button>
                 </div>
-                <div v-for="(tier, index) in form.tiers" :key="index" class="mt-3 grid gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3 md:grid-cols-[1fr_1fr_1fr_auto]">
+                <div v-for="(tier, index) in form.tiers" :key="index" class="mt-3 grid gap-3 rounded-xl border border-slate-200 bg-n-slate-2/60 p-3 md:grid-cols-[1fr_1fr_1fr_auto]">
                   <template v-if="form.tier_basis === 'sales_value'">
                     <label>Venda mínima (R$)<input v-model="tier.min_value" inputmode="decimal" class="mt-1 w-full rounded-lg border p-2" /></label>
                     <label>Venda máxima (R$)<input v-model="tier.max_value" inputmode="decimal" class="mt-1 w-full rounded-lg border p-2" placeholder="Sem limite" /></label>
@@ -796,7 +796,7 @@ onMounted(load);
                   <button type="button" title="Remover faixa" class="self-end rounded-lg border border-red-200 p-2 text-red-600" @click="removeTier(index)"><i class="i-lucide-trash-2 size-4" /></button>
                 </div>
               </article>
-              <article class="rounded-2xl border bg-white p-5 shadow-sm">
+              <article class="rounded-2xl border bg-n-solid-2 p-5 shadow-sm">
                 <div class="grid gap-4 lg:grid-cols-[1fr_.8fr]">
                   <label>Metas vinculadas
                     <select v-model="form.goal_ids" multiple class="mt-2 h-36 w-full rounded-lg border p-2">
@@ -807,27 +807,27 @@ onMounted(load);
                     <span v-if="form.tier_basis === 'goal_attainment'" class="mt-1 block text-xs font-semibold text-amber-700">Obrigatório para faixas por atingimento.</span>
                   </label>
                   <div>
-                    <div class="flex items-center justify-between"><div><h5 class="font-semibold">Bônus por atingimento</h5><p class="text-xs text-slate-500">Somados quando o percentual mínimo for alcançado.</p></div><button type="button" class="rounded-lg border px-2 py-1 text-xs" @click="addBonus">Adicionar</button></div>
+                    <div class="flex items-center justify-between"><div><h5 class="font-semibold">Bônus por atingimento</h5><p class="text-xs text-n-slate-11">Somados quando o percentual mínimo for alcançado.</p></div><button type="button" class="rounded-lg border px-2 py-1 text-xs" @click="addBonus">Adicionar</button></div>
                     <div v-for="(bonus,index) in form.bonuses" :key="index" class="mt-2 grid grid-cols-[1fr_1fr_1fr_auto] gap-2">
                       <input v-model.number="bonus.attainment_percent" type="number" min="0" class="rounded-lg border p-2" title="Atingimento mínimo %" placeholder="Meta %" />
                       <input v-model.number="bonus.percent" type="number" min="0" step="0.01" class="rounded-lg border p-2" title="Bônus percentual" placeholder="Bônus %" />
                       <input v-model="bonus.amount_value" inputmode="decimal" class="rounded-lg border p-2" title="Bônus fixo em reais" placeholder="Bônus R$" />
                       <button type="button" class="rounded-lg border p-2 text-red-600" @click="removeBonus(index)">×</button>
                     </div>
-                    <p v-if="!form.bonuses.length" class="mt-4 rounded-lg bg-slate-50 p-3 text-xs text-slate-500">Nenhum bônus adicional configurado.</p>
+                    <p v-if="!form.bonuses.length" class="mt-4 rounded-lg bg-n-slate-2 p-3 text-xs text-n-slate-11">Nenhum bônus adicional configurado.</p>
                   </div>
                 </div>
               </article>
             </section>
 
             <section v-else-if="planStep === 4" class="space-y-4">
-              <article class="rounded-2xl border bg-white p-5 shadow-sm">
-                <div class="mb-4"><h4 class="font-bold">Produtos e serviços</h4><p class="text-xs text-slate-500">O plano só considera os produtos selecionados. Sem seleção, considera todos.</p></div>
+              <article class="rounded-2xl border bg-n-solid-2 p-5 shadow-sm">
+                <div class="mb-4"><h4 class="font-bold">Produtos e serviços</h4><p class="text-xs text-n-slate-11">O plano só considera os produtos selecionados. Sem seleção, considera todos.</p></div>
                 <select v-model="form.product_ids" multiple class="h-56 w-full rounded-xl border border-slate-200 p-3">
                   <option v-for="product in products" :key="product.id" :value="product.id">{{ product.name }}</option>
                 </select>
               </article>
-              <article class="rounded-2xl border bg-white p-5 shadow-sm">
+              <article class="rounded-2xl border bg-n-solid-2 p-5 shadow-sm">
                 <h4 class="font-bold">Equipes, participantes e rateio</h4>
                 <div class="mt-4 grid gap-4 lg:grid-cols-3">
                   <label>Vendedores
@@ -844,7 +844,7 @@ onMounted(load);
                     <label>Participação aplicada ao cálculo (%)
                       <input v-model.number="form.share_percent" type="number" min="0.001" max="100" step="0.001" class="mt-1 w-full rounded-lg border p-2" />
                     </label>
-                    <p class="mt-3 text-xs text-slate-500">O valor é gravado na memória da comissão e mantém simulação e apuração consistentes.</p>
+                    <p class="mt-3 text-xs text-n-slate-11">O valor é gravado na memória da comissão e mantém simulação e apuração consistentes.</p>
                   </div>
                 </div>
               </article>
@@ -852,27 +852,27 @@ onMounted(load);
 
             <section v-else class="space-y-4">
               <div class="grid gap-4 lg:grid-cols-2">
-                <article class="rounded-2xl border bg-white p-5 shadow-sm">
+                <article class="rounded-2xl border bg-n-solid-2 p-5 shadow-sm">
                   <div class="flex justify-between gap-3"><h4 class="font-bold">1. Dados gerais</h4><button type="button" class="text-sm font-semibold text-blue-600" @click="planStep=1">Editar</button></div>
-                  <dl class="mt-3 grid grid-cols-2 gap-2 text-sm"><dt class="text-slate-500">Plano</dt><dd class="font-semibold">{{form.name}}</dd><dt class="text-slate-500">Período</dt><dd>{{form.starts_on||'Sem início'}} a {{form.ends_on||'sem fim'}}</dd><dt class="text-slate-500">Evento</dt><dd>{{form.release_condition}}</dd><dt class="text-slate-500">Tipo</dt><dd>{{form.plan_type}}</dd></dl>
+                  <dl class="mt-3 grid grid-cols-2 gap-2 text-sm"><dt class="text-n-slate-11">Plano</dt><dd class="font-semibold">{{form.name}}</dd><dt class="text-n-slate-11">Período</dt><dd>{{form.starts_on||'Sem início'}} a {{form.ends_on||'sem fim'}}</dd><dt class="text-n-slate-11">Evento</dt><dd>{{form.release_condition}}</dd><dt class="text-n-slate-11">Tipo</dt><dd>{{form.plan_type}}</dd></dl>
                 </article>
-                <article class="rounded-2xl border bg-white p-5 shadow-sm">
+                <article class="rounded-2xl border bg-n-solid-2 p-5 shadow-sm">
                   <div class="flex justify-between gap-3"><h4 class="font-bold">2. Regras de cálculo</h4><button type="button" class="text-sm font-semibold text-blue-600" @click="planStep=2">Editar</button></div>
-                  <dl class="mt-3 grid grid-cols-2 gap-2 text-sm"><dt class="text-slate-500">Base</dt><dd>{{form.base}}</dd><dt class="text-slate-500">Taxa padrão</dt><dd>{{form.rate_percent}}%</dd><dt class="text-slate-500">Critério das faixas</dt><dd>{{form.tier_basis==='goal_attainment'?'Atingimento de meta':'Valor vendido'}}</dd><dt class="text-slate-500">Aprovação</dt><dd>{{form.requires_approval?'Obrigatória':'Liberação automática'}}</dd></dl>
+                  <dl class="mt-3 grid grid-cols-2 gap-2 text-sm"><dt class="text-n-slate-11">Base</dt><dd>{{form.base}}</dd><dt class="text-n-slate-11">Taxa padrão</dt><dd>{{form.rate_percent}}%</dd><dt class="text-n-slate-11">Critério das faixas</dt><dd>{{form.tier_basis==='goal_attainment'?'Atingimento de meta':'Valor vendido'}}</dd><dt class="text-n-slate-11">Aprovação</dt><dd>{{form.requires_approval?'Obrigatória':'Liberação automática'}}</dd></dl>
                 </article>
-                <article class="rounded-2xl border bg-white p-5 shadow-sm">
+                <article class="rounded-2xl border bg-n-solid-2 p-5 shadow-sm">
                   <div class="flex justify-between gap-3"><h4 class="font-bold">3. Faixas e metas</h4><button type="button" class="text-sm font-semibold text-blue-600" @click="planStep=3">Editar</button></div>
                   <p class="mt-3 text-sm">{{form.tiers.length}} faixa(s) · {{form.goal_ids.length}} meta(s) vinculada(s) · {{form.bonuses.length}} bônus.</p>
                 </article>
-                <article class="rounded-2xl border bg-white p-5 shadow-sm">
+                <article class="rounded-2xl border bg-n-solid-2 p-5 shadow-sm">
                   <div class="flex justify-between gap-3"><h4 class="font-bold">4. Produtos e equipes</h4><button type="button" class="text-sm font-semibold text-blue-600" @click="planStep=4">Editar</button></div>
                   <p class="mt-3 text-sm">{{form.product_ids.length || 'Todos os'}} produto(s) · {{form.team_ids.length || 'Todas as'}} equipe(s) · rateio {{form.share_percent}}%.</p>
                 </article>
               </div>
 
-              <article class="rounded-2xl border bg-white p-5 shadow-sm">
+              <article class="rounded-2xl border bg-n-solid-2 p-5 shadow-sm">
                 <div class="flex flex-wrap items-center justify-between gap-3">
-                  <div><h4 class="font-bold">Simulação final</h4><p class="text-xs text-slate-500">Executada no mesmo motor de regras usado pela apuração.</p></div>
+                  <div><h4 class="font-bold">Simulação final</h4><p class="text-xs text-n-slate-11">Executada no mesmo motor de regras usado pela apuração.</p></div>
                   <button type="button" class="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white" @click="simulatePlan">Simular cálculo</button>
                 </div>
                 <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
@@ -883,9 +883,9 @@ onMounted(load);
                   <label>Atingimento (%)<input v-model.number="sim.attainment" type="number" class="mt-1 w-full rounded-lg border p-2" /></label>
                 </div>
                 <div v-if="simulationResult" class="mt-4 grid gap-3 sm:grid-cols-4">
-                  <div class="rounded-xl bg-slate-50 p-4"><p class="text-xs text-slate-500">Base</p><strong>{{money(simulationResult.base_cents)}}</strong></div>
-                  <div class="rounded-xl bg-slate-50 p-4"><p class="text-xs text-slate-500">Taxa</p><strong>{{simulationResult.rate_percent}}%</strong></div>
-                  <div class="rounded-xl bg-slate-50 p-4"><p class="text-xs text-slate-500">Bônus</p><strong>{{money(simulationResult.bonus_cents)}}</strong></div>
+                  <div class="rounded-xl bg-n-slate-2 p-4"><p class="text-xs text-n-slate-11">Base</p><strong>{{money(simulationResult.base_cents)}}</strong></div>
+                  <div class="rounded-xl bg-n-slate-2 p-4"><p class="text-xs text-n-slate-11">Taxa</p><strong>{{simulationResult.rate_percent}}%</strong></div>
+                  <div class="rounded-xl bg-n-slate-2 p-4"><p class="text-xs text-n-slate-11">Bônus</p><strong>{{money(simulationResult.bonus_cents)}}</strong></div>
                   <div class="rounded-xl bg-emerald-50 p-4"><p class="text-xs text-emerald-700">Comissão estimada</p><strong class="text-emerald-700">{{money(simulationResult.commission_cents)}}</strong></div>
                 </div>
               </article>
@@ -898,18 +898,18 @@ onMounted(load);
             </section>
           </div>
 
-          <aside class="h-fit rounded-2xl border bg-white p-5 shadow-sm xl:sticky xl:top-3">
+          <aside class="h-fit rounded-2xl border bg-n-solid-2 p-5 shadow-sm xl:sticky xl:top-3">
             <p class="text-xs font-semibold uppercase tracking-wide text-blue-600">Resumo do plano</p>
             <h4 class="mt-1 truncate text-lg font-bold">{{ form.name || 'Plano sem nome' }}</h4>
             <dl class="mt-4 grid grid-cols-[1fr_auto] gap-x-3 gap-y-3 text-sm">
-              <dt class="text-slate-500">Etapa</dt><dd class="font-semibold">{{planStep}}/5</dd>
-              <dt class="text-slate-500">Evento</dt><dd class="font-semibold">{{form.release_condition}}</dd>
-              <dt class="text-slate-500">Base</dt><dd class="font-semibold">{{form.base}}</dd>
-              <dt class="text-slate-500">Taxa</dt><dd class="font-semibold">{{form.rate_percent}}%</dd>
-              <dt class="text-slate-500">Faixas</dt><dd class="font-semibold">{{form.tiers.length}}</dd>
-              <dt class="text-slate-500">Metas</dt><dd class="font-semibold">{{form.goal_ids.length}}</dd>
-              <dt class="text-slate-500">Produtos</dt><dd class="font-semibold">{{form.product_ids.length || 'Todos'}}</dd>
-              <dt class="text-slate-500">Rateio</dt><dd class="font-semibold">{{form.share_percent}}%</dd>
+              <dt class="text-n-slate-11">Etapa</dt><dd class="font-semibold">{{planStep}}/5</dd>
+              <dt class="text-n-slate-11">Evento</dt><dd class="font-semibold">{{form.release_condition}}</dd>
+              <dt class="text-n-slate-11">Base</dt><dd class="font-semibold">{{form.base}}</dd>
+              <dt class="text-n-slate-11">Taxa</dt><dd class="font-semibold">{{form.rate_percent}}%</dd>
+              <dt class="text-n-slate-11">Faixas</dt><dd class="font-semibold">{{form.tiers.length}}</dd>
+              <dt class="text-n-slate-11">Metas</dt><dd class="font-semibold">{{form.goal_ids.length}}</dd>
+              <dt class="text-n-slate-11">Produtos</dt><dd class="font-semibold">{{form.product_ids.length || 'Todos'}}</dd>
+              <dt class="text-n-slate-11">Rateio</dt><dd class="font-semibold">{{form.share_percent}}%</dd>
             </dl>
             <div class="mt-5 rounded-xl bg-blue-50 p-4 text-xs text-blue-800">
               <strong class="block">Regra operacional</strong>
@@ -918,11 +918,11 @@ onMounted(load);
           </aside>
         </div>
 
-        <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border bg-white p-4 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border bg-n-solid-2 p-4 shadow-sm">
           <button type="button" class="rounded-xl border px-4 py-2 font-semibold" @click="planStep === 1 ? (resetPlan(), goTab('plans')) : previousPlanStep()">
             {{ planStep === 1 ? 'Cancelar' : 'Voltar' }}
           </button>
-          <div class="text-xs text-slate-500">Etapa {{planStep}} de 5 · {{planSteps[planStep-1][1]}}</div>
+          <div class="text-xs text-n-slate-11">Etapa {{planStep}} de 5 · {{planSteps[planStep-1][1]}}</div>
           <div class="flex gap-2">
             <template v-if="planStep < 5">
               <button type="button" class="rounded-xl bg-blue-600 px-5 py-2 font-semibold text-white disabled:opacity-50" :disabled="!stepIsValid" @click="nextPlanStep">Avançar</button>
@@ -935,28 +935,28 @@ onMounted(load);
         </div>
       </form>
 
-      <section v-else-if="tab === 'history'" class="mt-4 rounded-2xl border bg-white p-5 shadow-sm">
+      <section v-else-if="tab === 'history'" class="mt-4 rounded-2xl border bg-n-solid-2 p-5 shadow-sm">
         <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <div><h3 class="font-bold">Histórico de eventos</h3><p class="text-sm text-slate-500">Alterações persistidas de criação, atualização, liberação, pagamento e estorno.</p></div>
+          <div><h3 class="font-bold">Histórico de eventos</h3><p class="text-sm text-n-slate-11">Alterações persistidas de criação, atualização, liberação, pagamento e estorno.</p></div>
           <select v-model="sellerFilter" class="rounded-lg border px-3 py-2 text-sm"><option value="all">Todos os vendedores</option><option v-for="seller in uniqueSellers" :key="seller.id" :value="String(seller.id)">{{seller.name}}</option></select>
         </div>
         <div class="overflow-x-auto">
           <table class="w-full min-w-[760px] text-sm">
-            <thead><tr class="border-b text-left text-xs uppercase text-slate-500"><th class="p-2">Data</th><th>Pedido</th><th>Vendedor</th><th>Evento</th><th>Antes</th><th>Depois</th></tr></thead>
+            <thead><tr class="border-b text-left text-xs uppercase text-n-slate-11"><th class="p-2">Data</th><th>Pedido</th><th>Vendedor</th><th>Evento</th><th>Antes</th><th>Depois</th></tr></thead>
             <tbody><tr v-for="event in filteredHistory" :key="event.id" class="border-b"><td class="p-3">{{new Date(event.created_at).toLocaleString('pt-BR')}}</td><td>{{rows.find(r=>Number(r.id)===Number(event.commission_id))?.order?.order_number||`#${event.commission_id}`}}</td><td>{{rows.find(r=>Number(r.id)===Number(event.commission_id))?.user?.name||'—'}}</td><td class="font-semibold">{{event.event_type}}</td><td>{{event.from_value?.status||'—'}}</td><td>{{event.to_value?.status||'—'}}</td></tr></tbody>
           </table>
         </div>
-        <p v-if="!filteredHistory.length" class="py-10 text-center text-sm text-slate-500">Ainda não existem eventos de comissão registrados neste ambiente.</p>
+        <p v-if="!filteredHistory.length" class="py-10 text-center text-sm text-n-slate-11">Ainda não existem eventos de comissão registrados neste ambiente.</p>
       </section>
 
       <div v-else class="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
-        <section class="rounded-lg border bg-white p-4">
+        <section class="rounded-lg border bg-n-solid-2 p-4">
           <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
             <div>
               <h3 class="font-bold">
                 {{ tabs.find(item => item[0] === tab)?.[1] }}
               </h3>
-              <p class="text-sm text-slate-500">
+              <p class="text-sm text-n-slate-11">
                 {{ rowsForTab.length }} registro(s) persistido(s)
               </p>
             </div>
@@ -967,19 +967,19 @@ onMounted(load);
               <select v-model="programFilter" class="rounded-lg border px-3 py-2 text-sm"><option value="all">Todos os planos</option><option v-for="program in uniquePrograms" :key="program.id" :value="String(program.id)">{{program.name}}</option></select>
             </div>
           </div>
-          <p v-if="loading" class="py-10 text-center text-slate-500">
+          <p v-if="loading" class="py-10 text-center text-n-slate-11">
             Carregando dados...
           </p>
           <p
             v-else-if="!rowsForTab.length"
-            class="py-10 text-center text-slate-500"
+            class="py-10 text-center text-n-slate-11"
           >
             Nenhuma comissão encontrada nesta visão.
           </p>
           <div v-else class="overflow-x-auto">
             <table class="w-full min-w-[820px] text-sm">
               <thead>
-                <tr class="border-b text-left text-xs uppercase text-slate-500">
+                <tr class="border-b text-left text-xs uppercase text-n-slate-11">
                   <th class="p-2">Pedido</th>
                   <th>Vendedor</th>
                   <th>Plano</th>
@@ -993,7 +993,7 @@ onMounted(load);
                 <tr
                   v-for="row in pagedRows"
                   :key="row.id"
-                  class="cursor-pointer border-b hover:bg-slate-50"
+                  class="cursor-pointer border-b hover:bg-n-slate-2"
                   @click="selected = row"
                 >
                   <td class="p-3 font-semibold text-blue-700">
@@ -1010,12 +1010,12 @@ onMounted(load);
             </table>
           </div>
           <div v-if="rowsForTab.length" class="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-3">
-            <span class="text-xs text-slate-500">Página {{page}} de {{pageCount}} · {{rowsForTab.length}} registro(s)</span>
+            <span class="text-xs text-n-slate-11">Página {{page}} de {{pageCount}} · {{rowsForTab.length}} registro(s)</span>
             <div class="flex gap-2"><select v-model.number="perPage" class="rounded-lg border px-2 py-1 text-xs" @change="page=1"><option :value="10">10</option><option :value="20">20</option><option :value="50">50</option></select><button class="rounded-lg border px-3 py-1 text-xs disabled:opacity-40" :disabled="page<=1" @click="page--">Anterior</button><button class="rounded-lg border px-3 py-1 text-xs disabled:opacity-40" :disabled="page>=pageCount" @click="page++">Próxima</button></div>
           </div>
         </section>
 
-        <aside class="rounded-lg border bg-white p-4">
+        <aside class="rounded-lg border bg-n-solid-2 p-4">
           <template v-if="selected">
             <div class="flex justify-between">
               <h3 class="font-bold">{{ selected.order.order_number }}</h3>
@@ -1023,15 +1023,15 @@ onMounted(load);
             </div>
             <dl class="mt-4 space-y-3 text-sm">
               <div>
-                <dt class="text-slate-500">Vendedor</dt>
+                <dt class="text-n-slate-11">Vendedor</dt>
                 <dd>{{ selected.user.name }}</dd>
               </div>
               <div>
-                <dt class="text-slate-500">Plano aplicado</dt>
+                <dt class="text-n-slate-11">Plano aplicado</dt>
                 <dd>{{ selected.program?.name || 'Lançamento manual' }}</dd>
               </div>
               <div>
-                <dt class="text-slate-500">Memória de cálculo</dt>
+                <dt class="text-n-slate-11">Memória de cálculo</dt>
                 <dd>
                   {{ money(selected.base_cents) }} ×
                   {{ selected.rate_percent }}% =
@@ -1039,7 +1039,7 @@ onMounted(load);
                 </dd>
               </div>
               <div>
-                <dt class="text-slate-500">Status</dt>
+                <dt class="text-n-slate-11">Status</dt>
                 <dd>{{ selected.status }}</dd>
               </div>
             </dl>
@@ -1075,7 +1075,7 @@ onMounted(load);
           </template>
           <template v-else>
             <h3 class="font-bold">Memória de cálculo</h3>
-            <p class="mt-2 text-sm text-slate-500">
+            <p class="mt-2 text-sm text-n-slate-11">
               Selecione uma comissão para consultar sua origem e executar as
               ações permitidas.
             </p>

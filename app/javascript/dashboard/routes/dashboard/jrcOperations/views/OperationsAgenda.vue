@@ -152,7 +152,7 @@ watch(
     >
       {{ statusError }}
       <button
-        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50"
+        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
         @click="refresh(true)"
       >
         {{ agendaText('RETRY', 'Tentar novamente') }}
@@ -234,7 +234,7 @@ watch(
             </option>
           </select></label>
         <button
-          class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50"
+          class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
           :disabled="loading"
         >
           {{ agendaText('APPLY', 'Aplicar filtros / Atualizar') }}
@@ -260,7 +260,7 @@ watch(
       >
         {{ error }}
         <button
-          class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50 text-xs"
+          class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed text-xs"
           @click="load"
         >
           {{ agendaText('RETRY', 'Tentar novamente') }}

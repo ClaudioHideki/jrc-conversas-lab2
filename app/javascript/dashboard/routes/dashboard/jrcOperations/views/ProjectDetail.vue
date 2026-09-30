@@ -425,7 +425,7 @@ async function exportTasks() {
     >
       {{ error }}
       <button
-        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50 text-xs"
+        class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed text-xs"
         @click="load"
       >
         Atualizar dados
@@ -457,12 +457,12 @@ async function exportTasks() {
               priorities[project.priority]
             }}</span><button
               v-if="can('project.update')"
-              class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50 text-xs"
+              class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed text-xs"
               @click="tab = 'settings'"
             >
               {{ projectText('EDIT_PROJECT', 'Editar projeto') }}</button><button
               v-if="can('report.export')"
-              class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50 text-xs"
+              class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed text-xs"
               @click="exportTasks"
             >
               Exportar tarefas
@@ -611,7 +611,7 @@ async function exportTasks() {
             }}
           </p>
           <button
-            class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50"
+            class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
             @click="tab = 'planning'"
           >
             {{ projectText('OPEN_PLANNING', 'Abrir planejamento') }}
@@ -720,7 +720,7 @@ async function exportTasks() {
               <option v-for="label in labelOptions" :key="label" :value="label">
                 {{ label }}
               </option></select><button
-              class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50"
+              class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
               @click="boardView = boardView === 'board' ? 'list' : 'board'"
             >
               {{ boardView === 'board' ? 'Ver lista' : 'Ver quadro' }}
@@ -728,7 +728,7 @@ async function exportTasks() {
           </div>
           <button
             v-if="can('task.create') && editable && tasksSynced"
-            class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50 bg-n-blue-9 text-white"
+            class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed bg-n-blue-9 text-white"
             @click="openTask()"
           >
             Nova tarefa
@@ -1044,7 +1044,7 @@ async function exportTasks() {
           </p>
           <button
             v-if="can('project.update')"
-            class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50 bg-n-blue-9 text-white"
+            class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed bg-n-blue-9 text-white"
             :disabled="busy"
           >
             Salvar projeto

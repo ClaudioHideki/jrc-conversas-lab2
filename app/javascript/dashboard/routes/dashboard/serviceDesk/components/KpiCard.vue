@@ -16,7 +16,7 @@ const { t } = useI18n();
       </span>
       <Icon :icon="icon" class="size-5 text-n-blue-11" />
     </div>
-    <strong class="text-3xl leading-none text-n-slate-10 font-semibold">
+    <strong class="text-3xl leading-none text-n-slate-12 font-semibold">
       {{ value === null ? t('JRC_SERVICE_DESK.COMMON.no_value') : value }}
     </strong>
     <span class="text-xs text-n-slate-11">

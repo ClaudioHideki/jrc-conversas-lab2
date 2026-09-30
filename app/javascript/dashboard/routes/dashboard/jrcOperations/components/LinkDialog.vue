@@ -234,7 +234,7 @@ v-if="kind === 'conversation'" class="flex flex-col gap-1 min-w-0"
             :disabled="busy"
             @keydown.enter.prevent="search"
           /><button
-            class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50"
+            class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
             type="button"
             :disabled="searching || busy"
             @click="search"
@@ -296,13 +296,13 @@ v-if="kind === 'conversation'" class="flex flex-col gap-1 min-w-0"
           }}</small></label>
       <footer class="flex justify-end gap-3 mt-4">
         <button
-          class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50"
+          class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
           type="button"
           :disabled="busy"
           @click="emit('close')"
         >
           {{ projectText('CANCEL', 'Cancelar') }}</button><button
-          class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:opacity-50 bg-n-blue-9 text-white"
+          class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed bg-n-blue-9 text-white"
           :disabled="
             busy || searching || loadingTasks || (requireTask && !taskId)
           "
