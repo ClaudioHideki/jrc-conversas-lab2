@@ -63,6 +63,7 @@
 #
 module JrcCrm
   class Deal < ApplicationRecord
+    include JrcCustomers::CrmMasterLink
     self.table_name = 'jrc_crm_deals'
     belongs_to :account
     belongs_to :pipeline, class_name: 'JrcCrm::Pipeline'
@@ -73,7 +74,7 @@ module JrcCrm
     belongs_to :lead, class_name: 'JrcCrm::Lead', optional: true
     belongs_to :contact, class_name: 'Contact', optional: true
     belongs_to :organization, class_name: 'JrcCrm::Organization', optional: true
-    belongs_to :company, optional: true # Enterprise fallback via CompanyAdapter
+    belongs_to :company, class_name: 'JrcCustomers::Company', optional: true # Enterprise fallback via CompanyAdapter
 
     has_many :deal_contacts, class_name: 'JrcCrm::DealContact', dependent: :destroy
     has_many :contacts, through: :deal_contacts

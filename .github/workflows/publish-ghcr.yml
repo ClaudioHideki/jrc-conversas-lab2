@@ -1,75 +1,17 @@
-name: Legado - Publicar JRC Lab3 (não usar para Flows)
+name: Legado desativado - use build-ghcr.yml
 
 on:
   workflow_dispatch:
-    inputs:
-      image_tag:
-        description: Tag da imagem Docker
-        required: true
-        default: v4.16.2-jrc-lab3.1
-      publish_lab3:
-        description: Atualizar tambem a tag lab3
-        required: false
-        type: boolean
-        default: true
 
 permissions:
   contents: read
-  packages: write
-
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: claudiohideki/jrcconversalab3-voice-quality
 
 jobs:
-  build-and-push:
-    runs-on: ubuntu-latest
-
+  use-official-workflow:
+    runs-on: ubuntu-24.04
     steps:
-      - name: Baixar o código
-        uses: actions/checkout@v4
-
-      - name: Definir a tag da imagem
-        id: image
-        shell: bash
+      - name: Encaminhar ao workflow oficial com SHA aprovado
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            TAG="${{ inputs.image_tag }}"
-          else
-            TAG="${GITHUB_REF_NAME}"
-          fi
-
-          TAG="$(printf '%s' "$TAG" | tr '[:upper:]' '[:lower:]' | tr -cd 'a-z0-9._-')"
-
-          if [ -z "$TAG" ]; then
-            echo "Tag inválida." >&2
-            exit 1
-          fi
-
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          echo "Imagem: ghcr.io/claudiohideki/jrcconversalab3-voice-quality:$TAG"
-
-      - name: Preparar Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Entrar no GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Construir e publicar
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ./docker/Dockerfile
-          platforms: linux/amd64
-          push: true
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.image.outputs.tag }}
-            ${{ (github.event_name != 'workflow_dispatch' || inputs.publish_lab3) && format('{0}/{1}:lab3', env.REGISTRY, env.IMAGE_NAME) || '' }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          provenance: false
-
+          echo 'Use build-ghcr.yml com source_sha completo, component=app e publish=false para validar.' >&2
+          echo 'A publicacao exige publish=true e recusa sobrescrever tags sha existentes.' >&2
+          exit 1

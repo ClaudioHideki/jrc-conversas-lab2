@@ -4,7 +4,7 @@
 class JrcServiceDesk::Presenter
   EVENT_FIELDS = {
     'ticket_created' => %w[status_id priority_id queue_id assignee_membership_id],
-    'ticket_updated' => %w[title description priority_id category_id status_id],
+    'ticket_updated' => %w[title description priority_id category_id status_id company_id],
     'ticket_assigned' => %w[assignee_membership_id queue_id team_id],
     'ticket_transferred' => %w[assignee_membership_id queue_id team_id],
     'note_added' => %w[note_id], 'conversation_linked' => %w[conversation_id link_id],
@@ -24,6 +24,7 @@ class JrcServiceDesk::Presenter
     common(record).merge(title: record.title, number: record.id.to_s, description: record.description,
       service: named(record.service), status: named(record.status), priority: named(record.priority), category: named(record.category),
       requester: policy.view_customer? ? native_named(requester) : nil,
+      **master_company_fields(record, policy),
       assignee: assignee(record.assignee_membership),
       team: native_named(team),
       queue: named(record.queue), source: record.origin_channel, lock_version: record.lock_version,
@@ -94,6 +95,13 @@ class JrcServiceDesk::Presenter
     row
   end
 
+  def master_company_fields(record, policy)
+    return {} unless record.account.feature_enabled?('jrc_customer_master')
+    allowed = policy.view_customer? && JrcCustomers::DirectoryPolicy.new(@context, :directory).access?
+    company = JrcCustomers::Company.where(account_id: record.account_id).find_by(id: record.company_id) if allowed
+    { company: company && named(company) }
+  end
+
   def native_named(record)
     context = JrcServiceDesk::OperationalContext.new(@context)
     record && context.record_in_account?(record) && Pundit.policy!(context.to_h, record).show? ? named(record) : nil
@@ -104,6 +112,7 @@ class JrcServiceDesk::Presenter
     context = JrcServiceDesk::OperationalContext.new(@context)
     return {} if record.event_type == 'note_added' && !context.capability?(:notes_view)
     return {} if record.event_type == 'sla_snapshot_recorded' && !context.capability?(:sla_view)
+    data.delete('company_id') unless context.capability?(:customers_view) && JrcCustomers::DirectoryPolicy.new(@context, :directory).access?
     data.delete('cycle_id') if record.event_type == 'lifecycle_transitioned' && !context.capability?(:sla_view)
     if record.event_type == 'conversation_linked'
       context = JrcServiceDesk::OperationalContext.new(@context)

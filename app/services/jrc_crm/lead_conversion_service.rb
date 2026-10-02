@@ -19,6 +19,13 @@
         else
           contact = find_or_create_contact
           company = find_or_create_company
+          if @account.feature_enabled?('jrc_customer_master') && company
+            if contact.company_id.present? && contact.company_id != company[:id]
+              raise JrcCustomers::LegacyCompanyMapper::Conflict, 'Contact is linked to another company; review it before conversion'
+            end
+            contact.update!(company_id: company[:id]) if contact.company_id.nil?
+            @lead.company_id = company[:id]
+          end
           deal = create_deal(contact, company)
           attach_product(deal)
           @lead.update!(status: 'converted', converted_at: Time.current, contact: contact)
@@ -28,7 +35,8 @@
       end
     end
   rescue ActiveRecord::RecordNotUnique
-    success(@account.jrc_crm_deals.find_by!(conversion_key: conversion_key), false)
+    existing = @account.jrc_crm_deals.find_by(conversion_key: conversion_key)
+    existing ? success(existing, false) : failure('Identificador duplicado; selecione o cadastro existente e tente novamente.')
   rescue StandardError => e
     failure(e.message)
   end
@@ -44,6 +52,7 @@
   end
 
   def find_or_create_contact
+    return JrcCustomers::LeadContactLinker.new(account: @account).call(@lead) if @account.feature_enabled?('jrc_customer_master')
     return @account.contacts.find(@lead.contact_id) if @lead.contact_id.present?
 
     contact = @account.contacts.find_by(email: @lead.email) if @lead.email.present?
@@ -64,6 +73,17 @@
   end
 
   def find_or_create_company
+    if @account.feature_enabled?('jrc_customer_master')
+      id = @params[:company_id].presence || @lead.company_id || @lead.contact&.company_id
+      if id.present?
+        company = @account.master_companies.find(id)
+        return { type: :master_company, record: company, id: company.id }
+      end
+      if @params[:company_name].present? || @lead.company_name.present?
+        raise JrcCustomers::LegacyCompanyMapper::Conflict, 'Select company_id from the master directory before converting this lead'
+      end
+      return nil
+    end
     name = @params[:company_name].presence || @lead.company_name
     return if name.blank?
 
@@ -79,7 +99,7 @@
       title: @params[:deal_title].presence || "NegÃ³cio - #{@lead.name}", pipeline: pipeline, stage: stage,
       owner: selected_owner, team_id: @params[:team_id].presence || @lead.team_id, contact: contact,
       organization_id: company&.dig(:type) == :crm_organization ? company[:id] : nil,
-      company_id: company&.dig(:type) == :enterprise_company ? company[:id] : nil,
+      company_id: [:enterprise_company, :master_company].include?(company&.dig(:type)) ? company[:id] : nil,
       lead: @lead, conversion_key: conversion_key, value_cents: @params[:value_cents].to_i,
       probability: @params[:probability].presence || stage.probability, expected_close_at: @params[:expected_close_at],
       description: @params[:notes].presence || @lead.notes, status: 'open', source: @lead.source,

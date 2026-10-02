@@ -1,112 +1,237 @@
-name: Build JRC Conversas, Flows e Broker
+name: Candidato Cadastro Mestre - build e GHCR por SHA
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches: [main]
   workflow_dispatch:
     inputs:
       publish:
-        description: Publicar as imagens desta revisão no GHCR
+        description: Publicar a imagem aprovada no GHCR
         type: boolean
         default: false
-      component:
-        description: Imagens a construir
-        type: choice
-        options: [all, app]
-        default: all
       source_sha:
-        description: SHA completo do código-fonte (vazio usa a revisão do workflow)
+        description: SHA completo aprovado do codigo-fonte (40 caracteres)
         type: string
-        default: ''
+        required: true
+      component:
+        description: Construir somente o componente afetado (Cadastro Mestre usa app)
+        type: choice
+        options: [app, nico-runtime, flows-sandbox]
+        default: app
+        required: true
 
 permissions:
   contents: read
   packages: write
 
-env:
-  REGISTRY: ghcr.io
-
 jobs:
   build-and-push:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
     concurrency:
-      group: ghcr-${{ matrix.component }}-${{ inputs.source_sha || github.sha }}
+      group: ghcr-jrc-conversas-${{ inputs.component }}
       cancel-in-progress: false
     env:
-      IMAGE: ${{ matrix.component == 'app' && 'claudiohideki/jrc-conversas-nico-v12-2-7-comercial-integrado' || format('claudiohideki/jrc-conversas-nico-v12-2-7-comercial-integrado-{0}', matrix.component) }}
-    strategy:
-      fail-fast: false
-      matrix:
-        component: ${{ fromJSON(inputs.component == 'app' && '["app"]' || '["app","nico-runtime","flows-sandbox"]') }}
+      SOURCE_SHA: ${{ inputs.source_sha }}
+      COMPONENT: ${{ inputs.component }}
+      IMAGE: ${{ inputs.component == 'app' && 'claudiohideki/jrc-conversas-nico-v12-2-7-comercial-integrado' || format('claudiohideki/jrc-conversas-nico-v12-2-7-comercial-integrado-{0}', inputs.component) }}
+      RAILS_ENV: test
+      BUNDLE_FROZEN: 'true'
+      POSTGRES_HOST: localhost
+      POSTGRES_DATABASE: jrc_candidate_test
+      POSTGRES_USERNAME: postgres
+      POSTGRES_PASSWORD: ephemeral-ci-only
+      REDIS_URL: redis://localhost:6379/0
+      SECRET_KEY_BASE: ephemeral-ci-only-not-a-production-secret
+      FRONTEND_URL: http://localhost:3000
+      ACTIVE_STORAGE_SERVICE: local
+      TZ: UTC
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ephemeral-ci-only
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s --health-timeout 5s --health-retries 10
 
     steps:
-      - name: Baixar codigo
+      - name: Validar SHA antes do checkout
+        run: '[[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]'
+
+      - name: Baixar a revisao exata
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.source_sha || github.sha }}
+          ref: ${{ inputs.source_sha }}
+          fetch-depth: 0
+          persist-credentials: false
 
-      - name: Confirmar identidade do código-fonte
-        id: source
-        env:
-          EXPECTED_SHA: ${{ inputs.source_sha || github.sha }}
+      - name: Confirmar identidade e alteracoes do componente
         run: |
-          [[ "$EXPECTED_SHA" =~ ^[0-9a-f]{40}$ ]]
-          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
-          echo "sha=$EXPECTED_SHA" >> "$GITHUB_OUTPUT"
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          git diff --check "$SOURCE_SHA^" "$SOURCE_SHA"
+          case "$COMPONENT" in
+            app) paths=(app config db lib enterprise public Gemfile Gemfile.lock package.json pnpm-lock.yaml docker/Dockerfile docker/entrypoints) ;;
+            nico-runtime) paths=(services/nico-runtime docker/nico-runtime.Dockerfile) ;;
+            flows-sandbox) paths=(services/flows-sandbox) ;;
+            *) exit 1 ;;
+          esac
+          if git diff --quiet "$SOURCE_SHA^" "$SOURCE_SHA" -- "${paths[@]}"; then
+            echo 'Componente nao afetado; nao gerar uma imagem/tag nova.' >&2
+            exit 1
+          fi
+
+      - name: Configurar Node declarado
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Configurar pnpm declarado
+        if: inputs.component == 'app'
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.2.0
+          run_install: false
+
+      - name: Instalar dependencias de sistema dos gates Ruby
+        if: inputs.component == 'app'
+        run: sudo apt-get update && sudo apt-get install -y libpq-dev libvips libvips-dev
+
+      - name: Configurar Ruby e Bundler declarados
+        if: inputs.component == 'app'
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4.4'
+          bundler: 2.5.16
+          bundler-cache: true
+
+      - name: Instalar JavaScript sem alterar lockfile
+        if: inputs.component == 'app'
+        run: pnpm install --frozen-lockfile
+
+      - name: Gates isolados do Cadastro Mestre e modulos preservados
+        if: inputs.component == 'app'
+        run: |
+          ruby test/jrc_customers/identity_pure_test.rb
+          ruby test/jrc_customers/company_link_decision_test.rb
+          node --test test/jrc_customers/*.test.mjs test/jrc_operations/*test.mjs test/jrc_consolidation/commercial_ui.test.mjs
+
+      - name: RSpec em PostgreSQL e Redis descartaveis do runner
+        if: inputs.component == 'app'
+        run: |
+          bundle exec rails db:create db:schema:load
+          # MigrationContext applies pending migrations without rewriting tracked schema.rb.
+          bundle exec rails runner 'ActiveRecord::Base.connection.migration_context.migrate'
+          bundle exec rspec spec/models/jrc_customers spec/services/jrc_customers \
+            spec/controllers/api/v1/accounts/customers spec/services/jrc_service_desk \
+            spec/models/jrc_service_desk spec/requests/api/v1/accounts/jrc_operations \
+            spec/models/jrc_crm spec/services/jrc_crm
+
+      - name: Vitest dos modulos afetados e SIP/WebRTC preservado
+        if: inputs.component == 'app'
+        run: >-
+          pnpm exec vitest run
+          app/javascript/dashboard/routes/dashboard/serviceDesk
+          app/javascript/dashboard/routes/dashboard/jrcOperations
+          app/javascript/dashboard/routes/dashboard/crm
+          app/javascript/dashboard/routes/dashboard/jrcCustomers
+          app/javascript/dashboard/routes/dashboard/webphone
+          --maxWorkers=2 --no-file-parallelism
+
+      - name: Lint direcionado do Cadastro Mestre
+        if: inputs.component == 'app'
+        run: pnpm exec eslint --ext .js,.vue app/javascript/dashboard/routes/dashboard/jrcCustomers app/javascript/dashboard/api/jrcCustomers.js
+
+      - name: Gates NICO sem reconstruir a aplicacao
+        if: inputs.component == 'nico-runtime'
+        working-directory: services/nico-runtime
+        run: npm ci && npm test --if-present && npm run build
+
+      - name: Gates Flows sem reconstruir a aplicacao
+        if: inputs.component == 'flows-sandbox'
+        working-directory: services/flows-sandbox
+        run: npm ci --ignore-scripts && npm test
+
+      - name: Confirmar que os gates nao alteraram o codigo aprovado
+        run: |
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          git diff --exit-code
+          test -z "$(git ls-files --others --exclude-standard)"
 
       - name: Configurar Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Entrar no GHCR
-        if: github.event_name == 'workflow_dispatch' && inputs.publish
+      - name: Construir somente a imagem selecionada (inclui build frontend)
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ inputs.component == 'flows-sandbox' && './services/flows-sandbox' || '.' }}
+          file: ${{ inputs.component == 'app' && './docker/Dockerfile' || inputs.component == 'nico-runtime' && './docker/nico-runtime.Dockerfile' || './services/flows-sandbox/Dockerfile' }}
+          platforms: linux/amd64
+          load: true
+          push: false
+          build-args: GIT_SHA=${{ inputs.source_sha }}
+          tags: ghcr.io/${{ env.IMAGE }}:sha-${{ inputs.source_sha }}
+          labels: |
+            org.opencontainers.image.revision=${{ inputs.source_sha }}
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+          cache-from: type=gha,scope=${{ inputs.component }}
+          cache-to: type=gha,scope=${{ inputs.component }},mode=max
+          provenance: false
+
+      - name: Verificar SHA interno, label e plataforma antes de publicar
+        run: |
+          image="ghcr.io/$IMAGE:sha-$SOURCE_SHA"
+          test "$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' "$image")" = "$SOURCE_SHA"
+          test "$(docker image inspect --format '{{.Os}}/{{.Architecture}}' "$image")" = linux/amd64
+          revision_path=/app/.git_sha
+          if [ "$COMPONENT" = flows-sandbox ]; then revision_path=/srv/.git_sha; fi
+          test "$(docker run --rm --network none --entrypoint cat "$image" "$revision_path")" = "$SOURCE_SHA"
+
+      - name: Autenticar no GHCR somente para publicacao autorizada
+        if: inputs.publish
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Recusar sobrescrita de tag existente
-        if: github.event_name == 'workflow_dispatch' && inputs.publish
+      - name: Confirmar ausencia autenticada da tag imediatamente antes do push
+        if: inputs.publish
         env:
-          SOURCE_SHA: ${{ steps.source.outputs.sha }}
+          GHCR_ACTOR: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 script/ghcr_tag_absent.py "$IMAGE" "$SOURCE_SHA"
+
+      - name: Publicar exclusivamente a tag imutavel do SHA aprovado
+        if: inputs.publish
+        run: docker push "ghcr.io/$IMAGE:sha-$SOURCE_SHA"
+
+      - name: Verificar imagem publicada pelo digest e pela identidade interna
+        if: inputs.publish
         run: |
-          set +e
-          result=$(docker buildx imagetools inspect "$REGISTRY/$IMAGE:sha-$SOURCE_SHA" 2>&1)
-          status=$?
-          set -e
-          if [ "$status" -eq 0 ]; then
-            echo 'A tag já existe; publicação recusada.' >&2
-            exit 1
-          fi
-          if ! grep -Eqi 'manifest unknown|not found' <<< "$result"; then
-            printf '%s\n' "$result" >&2
-            exit 1
-          fi
-
-      - name: Gerar metadados
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE }}
-          tags: |
-            type=raw,value=sha-${{ steps.source.outputs.sha }}
-          labels: |
-            org.opencontainers.image.revision=${{ steps.source.outputs.sha }}
-
-      - name: Construir e publicar ${{ matrix.component }}
-        uses: docker/build-push-action@v6
-        with:
-          context: ${{ matrix.component == 'flows-sandbox' && './services/flows-sandbox' || '.' }}
-          file: ${{ matrix.component == 'app' && './docker/Dockerfile' || matrix.component == 'nico-runtime' && './docker/nico-runtime.Dockerfile' || './services/flows-sandbox/Dockerfile' }}
-          platforms: linux/amd64
-          push: ${{ github.event_name == 'workflow_dispatch' && inputs.publish }}
-          build-args: |
-            GIT_SHA=${{ steps.source.outputs.sha }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha,scope=${{ matrix.component }}
-          cache-to: type=gha,scope=${{ matrix.component }},mode=max
-          provenance: false
+          image="ghcr.io/$IMAGE:sha-$SOURCE_SHA"
+          digest=$(docker buildx imagetools inspect "$image" --format '{{.Manifest.Digest}}')
+          [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]
+          docker pull --platform linux/amd64 "ghcr.io/$IMAGE@$digest"
+          test "$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' "ghcr.io/$IMAGE@$digest")" = "$SOURCE_SHA"
+          test "$(docker image inspect --format '{{.Os}}/{{.Architecture}}' "ghcr.io/$IMAGE@$digest")" = linux/amd64
+          revision_path=/app/.git_sha
+          if [ "$COMPONENT" = flows-sandbox ]; then revision_path=/srv/.git_sha; fi
+          test "$(docker run --rm --network none --entrypoint cat "ghcr.io/$IMAGE@$digest" "$revision_path")" = "$SOURCE_SHA"
+          docker buildx imagetools inspect "ghcr.io/$IMAGE@$digest" --raw > "$RUNNER_TEMP/manifest.json"
+          compressed_bytes=$(python3 -c 'import json,sys; m=json.load(open(sys.argv[1])); print(sum(x["size"] for x in m["layers"]))' "$RUNNER_TEMP/manifest.json")
+          {
+            echo "Imagem: $image"
+            echo "Digest: $digest"
+            echo "SHA interno e label: $SOURCE_SHA"
+            echo 'Plataforma: linux/amd64'
+            echo "Camadas comprimidas: $compressed_bytes bytes (nao inclui config/manifest)"
+            echo "Criacao: $(docker image inspect --format '{{.Created}}' "ghcr.io/$IMAGE@$digest")"
+            echo "Verificacao UTC: $(date -u +%FT%TZ)"
+          } >> "$GITHUB_STEP_SUMMARY"

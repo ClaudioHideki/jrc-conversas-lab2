@@ -2,6 +2,12 @@ module JrcProjects
   class ProjectSerializer
     def self.one(project, account_user:, details: false, task_counts: nil)
       data = project.as_json(only: %i[id key name description status visibility owner_id contact_id starts_on due_on completed_at acceptance_notes lock_version created_at updated_at])
+      if project.account.feature_enabled?('jrc_customer_master') &&
+         JrcCustomers::DirectoryPolicy.new(JrcOperations::Access.user_context(account_user), :directory).access?
+        data['company_id'] = project.company_id
+        company = JrcCustomers::Company.where(account_id: project.account_id).find_by(id: project.company_id)
+        data['company'] = company&.as_json(only: %i[id name])
+      end
       data['priority'] = project.priority
       data['owner'] = project.owner.as_json(only: %i[id name])
       data['contact'] = project.contact&.as_json(only: %i[id name email])

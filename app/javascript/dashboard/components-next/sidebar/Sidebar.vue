@@ -125,6 +125,13 @@ const hasAdvancedAssignment = computed(() => {
   );
 });
 
+const hasCustomerMaster = computed(() =>
+  isFeatureEnabledonAccount.value(
+    accountId.value,
+    FEATURE_FLAGS.JRC_CUSTOMER_MASTER
+  )
+);
+
 const hasJrcCrm = computed(() =>
   isFeatureEnabledonAccount.value(accountId.value, FEATURE_FLAGS.JRC_CRM)
 );
@@ -1193,14 +1200,95 @@ const menuItems = computed(() => {
     operationsStatus.value?.projects_enabled ? {
       name: 'JRC Projects', label: 'Projetos', icon: 'i-lucide-folder-kanban',
       to: accountScopedRoute('jrc_projects_list'),
-      activeOn: ['jrc_projects_list', 'jrc_projects_detail', 'jrc_projects_settings'], ignoreFeatureFlag: true,
+          activeOn: [
+            'jrc_projects_list',
+            'jrc_projects_detail',
+            'jrc_projects_settings',
+          ],
+          ignoreFeatureFlag: true,
     } : null,
     operationsStatus.value?.projects_enabled || operationsStatus.value?.crm_enabled ? {
-      name: 'JRC Agenda', label: 'Minha Agenda', icon: 'i-lucide-calendar-days',
+          name: 'JRC Agenda',
+          label: 'Minha Agenda',
+          icon: 'i-lucide-calendar-days',
       to: accountScopedRoute('jrc_operations_agenda'), activeOn: ['jrc_operations_agenda'], ignoreFeatureFlag: true,
-    } : null,
-    contactsModule ? { ...contactsModule, label: 'Contatos' } : null,
-    companiesModule ? { ...companiesModule, label: 'Empresas' } : null,
+        }
+      : null,
+    hasCustomerMaster.value
+      ? {
+          name: 'Customers',
+          label: 'Clientes',
+          icon: 'i-lucide-building-2',
+          to: accountScopedRoute('jrc_customer_companies'), ignoreFeatureFlag: true,
+          activeOn: [
+            'jrc_customer_companies',
+            'jrc_customer_company',
+            'jrc_customer_segments',
+            'jrc_customer_groups',
+            'jrc_customer_imports',
+            'contacts_dashboard_index',
+            'contacts_dashboard_active',
+            'contacts_edit',
+            'contacts_dashboard_segments_index',
+            'contacts_dashboard_labels_index',
+            'contacts_edit_segment',
+            'contacts_edit_label',
+          ],
+          children: [
+            {
+              name: 'Customer Companies',
+              label: 'Empresas',
+              icon: 'i-lucide-building-2',
+              to: accountScopedRoute('jrc_customer_companies'),
+              activeOn: ['jrc_customer_company'],
+            },
+            {
+              name: 'Customer Contacts',
+              label: 'Contatos',
+              icon: 'i-lucide-contact',
+              to: accountScopedRoute('contacts_dashboard_index'),
+              activeOn: ['contacts_edit'],
+            },
+            {
+              name: 'Customer Segments',
+              label: 'Segmentos',
+              icon: 'i-lucide-list-filter',
+              to: accountScopedRoute('jrc_customer_segments'),
+              activeOn: [
+                'contacts_dashboard_segments_index',
+                'contacts_edit_segment',
+              ],
+            },
+            {
+              name: 'Customer Groups',
+              label: 'Grupos',
+              icon: 'i-lucide-users',
+              to: accountScopedRoute('jrc_customer_groups'),
+              activeOn: [
+                'contacts_dashboard_labels_index',
+                'contacts_edit_label',
+              ],
+            },
+            {
+              name: 'Customer Imports',
+              label: 'Importa\u00e7\u00f5es',
+              icon: 'i-lucide-upload',
+              to: accountScopedRoute('jrc_customer_imports'),
+            },
+            {
+              name: 'Customer Active Contacts',
+              label: 'Contatos ativos',
+              icon: 'i-lucide-activity',
+              to: accountScopedRoute('contacts_dashboard_active'),
+            },
+          ],
+        }
+      : contactsModule
+        ? { ...contactsModule, label: 'Contatos' }
+        : null,
+    !hasCustomerMaster.value && companiesModule
+      ? { ...companiesModule, label: 'Empresas' }
+      : null,
     {
       name: 'JRC AI Agents',
       label: 'Agentes IA',
@@ -1272,10 +1360,18 @@ const menuItems = computed(() => {
         { name: 'CRM Goals', label: 'Metas', icon: 'i-lucide-target', to: accountScopedRoute('crm_goals'), activeOn: ['crm_goals'] },
         { name: 'CRM Commissions', label: 'Comissões', icon: 'i-lucide-badge-dollar-sign', to: accountScopedRoute('crm_commissions'), activeOn: ['crm_commissions'] },
         { name: 'CRM Backoffice', label: 'Backoffice', icon: 'i-lucide-settings-2', to: accountScopedRoute('crm_backoffice'), activeOn: ['crm_backoffice'] },
-        ...(store.getters.getCurrentRole === 'administrator' ? [
-        { name: 'CRM Management', label: 'Gestão de Equipe', icon: 'i-lucide-users-round', to: accountScopedRoute('crm_management'), activeOn: ['crm_management'] },
+        ...(store.getters.getCurrentRole === 'administrator'
+          ? [
+              {
+                name: 'CRM Management',
+                label: 'Gestão de Equipe',
+                icon: 'i-lucide-users-round',
+                to: accountScopedRoute('crm_management'),
+                activeOn: ['crm_management'],
+              },
         { name: 'CRM Settings', label: 'Configurações', icon: 'i-lucide-settings', to: accountScopedRoute('crm_settings'), activeOn: ['crm_settings'] },
-        ] : []),
+            ]
+          : []),
       ],
       disabled: !hasJrcCrm.value || !hasCrmUserAccess.value,
       newBadge: true,
@@ -1359,7 +1455,9 @@ const menuSections = computed(() => {
     'JRC Calls Center', 'WhatsApp Calling', 'Contacts', 'JRC AI Agents',
     'JRC AI Insights', 'Captain', 'JRC Intelligent Automation', 'JRC Flows', 'Companies',
     'CRM', 'Sales', 'JRC Campaigns', 'Reports', 'JRC AI Administration',
-    'Video Conference', 'Settings',
+    'Video Conference',
+    'Settings',
+    'Customers',
     'JRC Broker Connections',
     'JRC Service Desk',
     'JRC Service Desk Structure',
@@ -1400,7 +1498,11 @@ const menuSections = computed(() => {
         'JRC Intelligent Automation',
       ]),
     },
-    { name: 'relationships', label: 'Relacionamentos', items: take(['Companies', 'JRC Projects', 'JRC Agenda']) },
+    {
+      name: 'relationships',
+      label: 'Relacionamentos',
+      items: take(['Customers', 'Companies', 'JRC Projects', 'JRC Agenda']),
+    },
 
 
 

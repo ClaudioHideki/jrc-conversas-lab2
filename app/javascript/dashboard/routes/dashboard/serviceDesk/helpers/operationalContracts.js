@@ -39,7 +39,14 @@ export function decodeDashboard(payload, context, request = {}) {
 }
 const EVENT_KEYS = {
   ticket_created: ['status_id', 'priority_id', 'queue_id', 'assignee_membership_id'],
-  ticket_updated: ['title', 'description', 'priority_id', 'category_id', 'status_id'],
+  ticket_updated: [
+    'title',
+    'description',
+    'priority_id',
+    'category_id',
+    'status_id',
+    'company_id',
+  ],
   ticket_assigned: ['assignee_membership_id', 'queue_id', 'team_id'],
   ticket_transferred: ['assignee_membership_id', 'queue_id', 'team_id'],
   note_added: ['note_id'], conversation_linked: ['conversation_id', 'link_id'],
@@ -99,7 +106,16 @@ export function verifyWrittenFields(action, payload, ticket) {
   if (action === 'create' || action === 'update') {
     const input = payload.ticket;
     ['title', 'description'].forEach(key => { if (Object.hasOwn(input, key)) assert(ticket[key] === (input[key] || '')); });
-    const associations = { requester_id: 'requester', status_id: 'status', priority_id: 'priority', category_id: 'category', queue_id: 'queue', team_id: 'team', assignee_account_user_id: 'assignee' };
+    const associations = {
+      company_id: 'company',
+      requester_id: 'requester',
+      status_id: 'status',
+      priority_id: 'priority',
+      category_id: 'category',
+      queue_id: 'queue',
+      team_id: 'team',
+      assignee_account_user_id: 'assignee',
+    };
     Object.entries(associations).forEach(([key, name]) => { if (Object.hasOwn(input, key)) assert(equalId(ticket[name], input[key])); });
     if (action === 'create') {
       assert(ticket.unit_id === id(payload.unit_id));

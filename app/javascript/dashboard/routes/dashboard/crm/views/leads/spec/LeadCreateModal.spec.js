@@ -2,6 +2,8 @@ import { mount, flushPromises } from '@vue/test-utils';
 import { leadsAPI } from 'dashboard/api/crm';
 import messages from 'dashboard/i18n/locale/en/crm.json';
 import LeadCreateModal from '../LeadCreateModal.vue';
+import { createStore } from 'vuex';
+import { routeLocationKey } from 'vue-router';
 
 vi.mock('dashboard/api/crm', () => ({ leadsAPI: { create: vi.fn() } }));
 vi.mock('dashboard/composables', () => ({ useAlert: vi.fn() }));
@@ -10,6 +12,12 @@ const mountForm = props =>
   mount(LeadCreateModal, {
     props,
     global: {
+      plugins: [
+        createStore({
+          getters: { 'accounts/isFeatureEnabledonAccount': () => () => false },
+        }),
+      ],
+      provide: { [routeLocationKey]: { params: { accountId: '1' } } },
       stubs: { Teleport: true },
     },
   });

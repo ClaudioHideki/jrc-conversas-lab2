@@ -1,5 +1,5 @@
 # pre-build stage
-FROM node:24-alpine as node
+FROM node:24.13.0-alpine AS node
 FROM ruby:3.4.4-alpine3.21 AS pre-builder
 
 ARG NODE_VERSION="24.13.0"
@@ -23,6 +23,7 @@ ARG NODE_OPTIONS="--max-old-space-size=4096 --openssl-legacy-provider"
 ENV NODE_OPTIONS ${NODE_OPTIONS}
 
 ENV BUNDLE_PATH="/gems"
+ENV BUNDLE_FROZEN=true
 
 RUN apk update && apk add --no-cache \
   openssl \
@@ -77,7 +78,7 @@ RUN if [ "$RAILS_ENV" = "production" ]; then \
   fi
 
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm i
+RUN pnpm i --frozen-lockfile
 
 COPY . /app
 
@@ -92,8 +93,9 @@ RUN if [ "$RAILS_ENV" = "production" ]; then \
   fi
 
 # Identify builds even when the Git directory is excluded from the context.
-ARG GIT_SHA=local-development
-RUN printf '%s\n' "$GIT_SHA" > /app/.git_sha
+ARG GIT_SHA
+RUN printf '%s' "$GIT_SHA" | grep -Eq '^[0-9a-f]{40}$' \
+  && printf '%s\n' "$GIT_SHA" > /app/.git_sha
 
 # Remove unnecessary files
 RUN rm -rf /gems/ruby/3.4.0/cache/*.gem \
@@ -103,6 +105,11 @@ RUN rm -rf /gems/ruby/3.4.0/cache/*.gem \
 
 # final build stage
 FROM ruby:3.4.4-alpine3.21
+
+ARG GIT_SHA
+LABEL org.opencontainers.image.revision=$GIT_SHA \
+      org.opencontainers.image.title="JRC Conversas - candidato Cadastro Mestre" \
+      org.opencontainers.image.description="Cadastro Mestre integrado; jrc_customer_master desligada por padrao"
 
 ARG NODE_VERSION="24.13.0"
 ARG PNPM_VERSION="10.2.0"

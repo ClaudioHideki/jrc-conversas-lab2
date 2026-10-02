@@ -13,7 +13,10 @@ class JrcCrm::LeadCreationService
       yield contact if block_given?
       contact.save! if contact.new_record?
       existing = @account.jrc_crm_leads.where(contact_id: contact.id).order(updated_at: :desc, id: :desc).first
-      next { lead: existing, created: false } if existing
+      if existing
+        validate_existing_master_link!(existing, contact)
+        next { lead: existing, created: false }
+      end
 
       lead = @account.jrc_crm_leads.new(@attributes.except(:identifier, :contact_id))
       lead.contact = contact
@@ -28,6 +31,17 @@ class JrcCrm::LeadCreationService
   end
 
   private
+
+  def validate_existing_master_link!(lead, contact)
+    return unless @account.feature_enabled?('jrc_customer_master') && @attributes[:company_id].present?
+
+    requested = JrcCustomers::CompanyLinkDecision.resolve(explicit: @attributes[:company_id])
+    JrcCustomers::Company.where(account_id: @account.id).find(requested)
+    unless lead.company_id == requested && (contact.company_id.nil? || contact.company_id == requested)
+      lead.errors.add(:company_id, 'Lead already exists; review and link its master company explicitly before reusing it')
+      raise ActiveRecord::RecordInvalid, lead
+    end
+  end
 
   def resolve_contact
     # An explicit Contact ID must never fall back to creating another Contact.
@@ -59,7 +73,11 @@ class JrcCrm::LeadCreationService
     # existing person's data with the commercial form's snapshot.
     manager = DataImport::ContactManager.new(@account)
     [manager.find_contact_by_identifier(params), manager.find_contact_by_email(params),
-     manager.find_contact_by_phone_number(params)].compact.uniq(&:id)
+     manager.find_contact_by_phone_number(params)].compact.tap do |records|
+      if @account.feature_enabled?('jrc_customer_master')
+        records.concat(JrcCustomers::IdentityResolver.new(account: @account).call(email: params[:email], phone: params[:phone_number]).to_a)
+      end
+    end.uniq(&:id)
   end
 
   def validate_identity!(contact, params, matches)

@@ -71,6 +71,20 @@ class ContactIdentifyAction
 
   def merge_contacts?(existing_contact, key)
     return if existing_contact.blank?
+    if account.feature_enabled?('jrc_customer_master') && [:email, :phone_number].include?(key)
+      input = key == :email ? { email: params[:email] } : { phone: params[:phone_number] }
+      candidates = JrcCustomers::IdentityResolver.new(account: account).call(**input, exclude_id: @contact.id)
+      if candidates.to_a.size > 1
+        @attributes_to_update.delete(key)
+        return false
+      end
+    end
+    if account.feature_enabled?('jrc_customer_master') && existing_contact.id != @contact.id &&
+       JrcCustomers::MergePreserver.conflict?(account: account, base: existing_contact, source: @contact)
+      # Keep the technical Contact receiving this channel. Do not force a unique identity collision.
+      @attributes_to_update.delete(key)
+      return false
+    end
 
     return true if params[:identifier].blank?
 

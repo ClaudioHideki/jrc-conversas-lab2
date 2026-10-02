@@ -1,6 +1,8 @@
 import { mount } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import CurrentContactCard from './CurrentContactCard.vue';
+import { createStore } from 'vuex';
+import { routeLocationKey } from 'vue-router';
 
 const contact = {
   id: 42,
@@ -16,6 +18,12 @@ const mountCard = props =>
       ...props,
     },
     global: {
+      plugins: [
+        createStore({
+          getters: { 'accounts/isFeatureEnabledonAccount': () => () => false },
+        }),
+      ],
+      provide: { [routeLocationKey]: { params: { accountId: '1' } } },
       stubs: {
         Avatar: true,
         RouterLink: true,

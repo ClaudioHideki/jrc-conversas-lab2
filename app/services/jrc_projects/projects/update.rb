@@ -4,7 +4,8 @@ class JrcProjects::Projects::Update
   def self.call(account:, actor:, project:, attributes:, correlation_id:)
     membership = account.account_users.find_by!(user_id: actor.id)
     project = JrcOperations::Access.projects(membership).find(project.id)
-    values = attributes.to_h.symbolize_keys.slice(*FIELDS, :lock_version)
+    fields = account.feature_enabled?('jrc_customer_master') ? FIELDS + [:company_id] : FIELDS
+    values = attributes.to_h.symbolize_keys.slice(*fields, :lock_version)
     version = values.delete(:lock_version)
     raise ArgumentError, 'Informe a versao do registro (lock_version).' if version.nil?
 
@@ -16,11 +17,16 @@ class JrcProjects::Projects::Update
         end
         raise ActiveRecord::StaleObjectError.new(project, 'update') unless project.lock_version == Integer(version)
 
-        before = project.attributes.slice(*FIELDS.map(&:to_s)).merge('priority' => project.priority)
+        before = project.attributes.slice(*fields.map(&:to_s)).merge('priority' => project.priority)
         if values.key?(:contact_id)
           values[:contact_id] = if values[:contact_id].present?
                                   JrcOperations::Access.contact!(membership, values[:contact_id]).id
                                 end
+        end
+        if values.key?(:company_id)
+          Pundit.authorize(JrcOperations::Access.user_context(membership), :directory, :access?, policy_class: JrcCustomers::DirectoryPolicy)
+          value = JrcCustomers::CompanyLinkDecision.resolve(explicit: values[:company_id].presence)
+          values[:company_id] = value && JrcCustomers::Company.where(account_id: account.id).find(value).id
         end
         previous_owner_id = project.owner_id
         if values.key?(:owner_id) && values[:owner_id].to_s != previous_owner_id.to_s
@@ -53,7 +59,7 @@ class JrcProjects::Projects::Update
         end
         JrcProjects::AuditEvent.record!(
           account: account, actor: actor, action: 'projects.project.updated', auditable: project,
-          before_data: before, after_data: project.attributes.slice(*FIELDS.map(&:to_s)).merge('priority' => project.priority),
+          before_data: before, after_data: project.attributes.slice(*fields.map(&:to_s)).merge('priority' => project.priority),
           correlation_id: correlation_id
         )
       end

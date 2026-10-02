@@ -66,8 +66,12 @@ module JrcOperations
       account.contacts.find(record.contact_id) if record.contact_id.present?
       account.jrc_crm_organizations.find(record.organization_id) if record.organization_id.present?
       if record.company_id.present?
-        raise ActiveRecord::RecordNotFound unless defined?(::Company) && account.respond_to?(:companies)
-        account.companies.find(record.company_id)
+        if account.feature_enabled?('jrc_customer_master')
+          JrcCustomers::Company.where(account_id: account.id).find(record.company_id)
+        else
+          raise ActiveRecord::RecordNotFound unless defined?(::Company) && account.respond_to?(:companies)
+          account.companies.find(record.company_id)
+        end
       end
       record
     end

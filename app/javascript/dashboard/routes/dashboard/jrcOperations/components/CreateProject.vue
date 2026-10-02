@@ -1,9 +1,7 @@
 <script setup>
 import { reactive, ref, onMounted } from 'vue';
-import OpsModal from './OpsModal.vue';
-import ContactPicker from './ContactPicker.vue';
-import { useProjects } from '../../jrcProjects/useProjects';
-import { request, operationKey, errorMessage, priorities } from '../api';
+import CompanyPicker from 'dashboard/routes/dashboard/jrcCustomers/components/CompanyPicker.vue';
+import { useCustomerMaster } from 'dashboard/routes/dashboard/jrcCustomers/useCustomerMaster';
 const props = defineProps({
   ticketId: [String, Number],
   dealId: [String, Number],
@@ -12,6 +10,13 @@ const props = defineProps({
   initialTitle: String,
 });
 const emit = defineEmits(['close', 'created']);
+const { enabled: hasCustomerMaster } = useCustomerMaster();
+const companyId = ref(null);
+
+import OpsModal from './OpsModal.vue';
+import ContactPicker from './ContactPicker.vue';
+import { useProjects } from '../../jrcProjects/useProjects';
+import { request, operationKey, errorMessage, priorities } from '../api';
 const { accountId, projectText } = useProjects();
 const options = ref({});
 const busy = ref(false);
@@ -43,7 +48,12 @@ async function submit() {
       method: 'post',
       key,
       data: {
-        project: { ...form },
+        project: {
+          ...form,
+          ...(hasCustomerMaster.value && companyId.value
+            ? { company_id: companyId.value }
+            : {}),
+        },
         template_id: templateId.value || null,
         ticket_id: props.ticketId || undefined,
         deal_id: props.dealId || undefined,
@@ -100,6 +110,10 @@ required maxlength="240"/></label>
             )
           }}
         </p>
+        <div v-if="hasCustomerMaster" class="col-span-full">
+          <p class="mb-1 text-sm">Empresa do projeto (opcional)</p>
+          <CompanyPicker v-model="companyId" :disabled="busy" />
+        </div>
         <ContactPicker
           v-model="form.contact_id"
           :disabled="

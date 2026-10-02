@@ -12,6 +12,10 @@ module Api
             render json: { errors: [exception.message], code: 'INVALID_COMMERCIAL_TERMS' }, status: :unprocessable_entity
           end
 
+          rescue_from JrcCustomers::LegacyCompanyMapper::Conflict, JrcCustomers::LeadContactLinker::Conflict do |exception|
+            render json: { error: exception.message, errors: [exception.message], code: 'REVIEW_REQUIRED' }, status: :conflict
+          end
+
           private
 
           def ensure_crm_enabled

@@ -8,7 +8,8 @@ module JrcCrm
       {
         id: @lead.id,
         name: @lead.name,
-        company_name: @lead.company_name,
+        company_name: master_company&.name || @lead.company_name,
+        legacy_company_name: @lead.company_name,
         email: @lead.email,
         phone: @lead.phone,
         source: @lead.source,
@@ -17,6 +18,7 @@ module JrcCrm
         owner: @lead.owner_id ? { id: @lead.owner_id, name: @lead.owner.name } : nil,
         team: @lead.team_id ? { id: @lead.team_id, name: @lead.team.name } : nil,
         contact_id: @lead.contact_id,
+        company_id: @lead.has_attribute?(:company_id) ? @lead.company_id : nil,
         conversation_id: @lead.conversation_id,
         conversation: serialize_conversation,
         classified_at: @lead.classified_at,
@@ -33,6 +35,11 @@ module JrcCrm
 
     private
 
+    def master_company
+      return nil unless @lead.account.feature_enabled?('jrc_customer_master') && @lead.has_attribute?(:company_id)
+      @master_company ||= JrcCustomers::Company.where(account_id: @lead.account_id).find_by(id: @lead.company_id)
+    end
+
     def serialize_conversation
       return nil unless @lead.conversation
 
@@ -44,7 +51,7 @@ module JrcCrm
     end
 
     def serialize_history
-      JrcCrm::AuditEvent.for_resource(@lead.class.name, @lead.id).recent.limit(50).map do |event|
+      JrcCrm::AuditEvent.where(account_id: @lead.account_id).for_resource(@lead.class.name, @lead.id).recent.limit(50).map do |event|
         JrcCrm::AuditEventSerializer.new(event).as_json
       end
     end

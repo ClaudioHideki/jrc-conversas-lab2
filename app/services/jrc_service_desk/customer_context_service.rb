@@ -11,7 +11,11 @@ class JrcServiceDesk::CustomerContextService
     Pundit.authorize(@context.to_h, @ticket, :view_customer?)
     contact = Contact.where(account_id: @context.account.id).find(@ticket.requester_id)
     Pundit.authorize(@context.to_h, contact, :show?)
-    company, state = native_company(contact)
+    company, state = if @context.account.feature_enabled?('jrc_customer_master')
+                       master_company(contact)
+                     else
+                       native_company(contact)
+                     end
     { contract_version: 1, account_id: @context.account.id.to_s, unit_id: @ticket.unit_id.to_s,
       ticket_id: @ticket.id.to_s, contact: project(contact), company: company && project(company), company_state: state }
   end
@@ -20,6 +24,14 @@ class JrcServiceDesk::CustomerContextService
 
   def project(record)
     { id: record.id.to_s, account_id: record.account_id.to_s, name: record.name.to_s }
+  end
+
+  def master_company(contact)
+    Pundit.authorize(@context.to_h, :directory, :access?, policy_class: JrcCustomers::DirectoryPolicy)
+    company_id = @ticket.company_id || contact.company_id
+    return [nil, 'not_linked'] unless company_id
+
+    [JrcCustomers::Company.where(account_id: @context.account.id).find(company_id), 'available']
   end
 
   def native_company(contact)

@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue';
-import Avatar from 'dashboard/components-next/avatar/Avatar.vue';
-
+import { useCustomerMaster } from 'dashboard/routes/dashboard/jrcCustomers/useCustomerMaster';
+import { T as CUSTOMER_TEXT } from 'dashboard/routes/dashboard/jrcCustomers/copy';
 const props = defineProps({
   contact: { type: Object, default: null },
   phoneNumber: { type: String, default: '' },
@@ -14,13 +14,14 @@ const props = defineProps({
   loadingMore: { type: Boolean, default: false },
   hasMore: { type: Boolean, default: false },
 });
-
 const emit = defineEmits([
   'update:searchQuery',
   'selectContact',
   'dialContact',
   'loadMore',
 ]);
+const { enabled: hasCustomerMaster, accountScopedRoute } = useCustomerMaster();
+import Avatar from 'dashboard/components-next/avatar/Avatar.vue';
 
 const isDesktop = Boolean(window.jrcSoftphoneDesktop);
 const openInJrc = () =>
@@ -126,6 +127,16 @@ const selectContact = contact => emit('selectContact', contact);
             <span class="i-lucide-building-2 size-3.5 shrink-0" />
             {{ companyName }}
           </p>
+          <RouterLink
+            v-if="hasCustomerMaster && contact?.company_id"
+            :to="
+              accountScopedRoute('jrc_customer_company', {
+                companyId: contact.company_id,
+              })
+            "
+            class="mt-2 block text-xs text-n-brand"
+            >{{ CUSTOMER_TEXT.openCompany }}</RouterLink
+          >
         </div>
         <button
           v-if="contactId && isDesktop"

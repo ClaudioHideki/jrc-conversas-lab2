@@ -16,7 +16,7 @@ module JrcOperations
     end
     def agenda
       render json: Agenda.new(account_user: Current.account_user,
-                             filters: params.permit(:from, :to, :source, :view, :user_id).to_h).call
+                             filters: params.permit(:from, :to, :source, :view, :user_id, :company_id, :contact_id).to_h).call
     end
   end
 end

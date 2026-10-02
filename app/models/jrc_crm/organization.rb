@@ -30,6 +30,8 @@
 module JrcCrm
   class Organization < ApplicationRecord
     self.table_name = 'jrc_crm_organizations'
+    belongs_to :master_company, class_name: 'JrcCustomers::Company', foreign_key: :company_id, optional: true
+    after_save :sync_master_record, if: -> { account.feature_enabled?('jrc_customer_master') }
     belongs_to :account
     belongs_to :owner, class_name: 'User', optional: true
     has_many :deals, class_name: 'JrcCrm::Deal', foreign_key: :organization_id, dependent: :nullify
@@ -37,6 +39,13 @@ module JrcCrm
 
     validates :name, presence: true
     validates :account_id, presence: true
+
+    def sync_master_record
+      master = JrcCustomers::LegacyCompanyMapper.new(account: account, organization: self).apply!
+      master.assign_attributes(name: name, description: description, domain: domain, phone_number: phone,
+                               website: website, owner_id: owner_id, active: active)
+      master.save! if master.changed?
+    end
 
     scope :active, -> { where(active: true) }
     scope :ordered, -> { order(:name) }

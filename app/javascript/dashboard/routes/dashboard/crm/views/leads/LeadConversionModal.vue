@@ -2,17 +2,23 @@
 import { crmControlClasses } from '../../crmControlClasses';
 /* eslint-disable vue/no-bare-strings-in-template, @intlify/vue-i18n/no-raw-text */
 import { computed, reactive, watch } from 'vue';
-
+import CompanyPicker from 'dashboard/routes/dashboard/jrcCustomers/components/CompanyPicker.vue';
+import { useCustomerMaster } from 'dashboard/routes/dashboard/jrcCustomers/useCustomerMaster';
 const props = defineProps({
   lead: { type: Object, required: true },
   pipelines: { type: Array, default: () => [] },
   products: { type: Array, default: () => [] },
   saving: { type: Boolean, default: false },
 });
+
 const emit = defineEmits(['close', 'submit']);
+
+const { enabled: hasCustomerMaster } = useCustomerMaster();
+
 const form = reactive({
   deal_title: '',
   company_name: '',
+  company_id: null,
   product_id: '',
   product_name: '',
   value: '',
@@ -34,6 +40,7 @@ watch(
     Object.assign(form, {
       deal_title: `Negócio - ${lead.name}`,
       company_name: lead.company_name || '',
+      company_id: lead.company_id || null,
       product_name: lead.custom_attributes?.product_interest || '',
       product_id: '',
       value: '',
@@ -116,7 +123,10 @@ const submit = () =>
             disabled
             class="mt-1.5 w-full rounded-xl border border-n-weak bg-n-alpha-2 px-3 py-2.5 text-n-slate-11 disabled:opacity-80"
         /></label>
-        <label class="text-sm font-semibold text-n-slate-11"
+        <CompanyPicker v-if="hasCustomerMaster" v-model="form.company_id" />
+        <label
+          v-if="!hasCustomerMaster"
+          class="text-sm font-semibold text-n-slate-11"
           >Empresa<input
             v-model.trim="form.company_name"
             class="mt-1.5 w-full rounded-xl border border-n-weak bg-n-solid-1 px-3 py-2.5 text-n-slate-12"

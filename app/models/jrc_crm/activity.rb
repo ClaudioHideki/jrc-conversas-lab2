@@ -44,6 +44,7 @@
 #
 module JrcCrm
   class Activity < ApplicationRecord
+    include JrcCustomers::CrmMasterLink
     self.table_name = 'jrc_crm_activities'
     
     belongs_to :account
@@ -51,7 +52,7 @@ module JrcCrm
     belongs_to :deal, class_name: 'JrcCrm::Deal', optional: true
     belongs_to :lead, class_name: 'JrcCrm::Lead', optional: true
     belongs_to :contact, optional: true
-    belongs_to :company, optional: true
+    belongs_to :company, class_name: 'JrcCustomers::Company', optional: true
     belongs_to :conversation, optional: true
     
     validates :title, :activity_type, :user, presence: true

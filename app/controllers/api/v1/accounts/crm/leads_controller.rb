@@ -143,7 +143,7 @@ module Api
           end
 
           def lead_params
-            allowed = [:name, :company_name, :email, :phone, :source, :status, :contact_id, :conversation_id, :team_id,
+            allowed = [:name, :company_name, :email, :phone, :source, :status, :contact_id, :company_id, :conversation_id, :team_id,
                        :temperature, :notes]
             allowed << :identifier if action_name == 'create'
             allowed << :owner_id if crm_admin?
@@ -151,7 +151,7 @@ module Api
           end
 
           def conversion_params
-            allowed = [:deal_title, :company_name, :product_id, :product_name, :value_cents, :pipeline_id,
+            allowed = [:deal_title, :company_id, :company_name, :product_id, :product_name, :value_cents, :pipeline_id,
                        :stage_id, :probability, :expected_close_at, :team_id, :notes]
             allowed << :identifier if action_name == 'create'
             allowed << :owner_id if crm_admin?

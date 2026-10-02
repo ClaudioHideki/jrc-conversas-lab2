@@ -1,6 +1,10 @@
 require 'csv'
 
 class Api::V1::Accounts::JrcCampaigns::CampaignsController < Api::V1::Accounts::JrcCampaigns::BaseController
+  rescue_from JrcCustomers::CampaignFilter::InvalidFilter do |exception|
+    render json: { error: exception.message }, status: :unprocessable_entity
+  end
+
   before_action :set_campaign, only: [:show, :update, :destroy, :launch, :pause, :resume, :cancel, :duplicate, :report, :export, :preview,
                                     :request_review, :approve]
 

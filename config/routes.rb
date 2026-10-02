@@ -264,6 +264,30 @@ Rails.application.routes.draw do
             end
           end
 
+          namespace :customers do
+            get :metadata, to: 'directory#metadata'
+            get :identity, to: 'directory#identity'
+            post 'imports/preview', to: 'imports#preview'
+            post 'imports/apply', to: 'imports#apply'
+            resources :companies, only: [:index, :show, :create, :update] do
+              get :duplicates, on: :collection
+              member do
+                get :overview
+                get :timeline
+                get :records
+              end
+              resources :addresses, only: [:create, :update, :destroy]
+            end
+            resources :contacts, only: [:index, :show, :create, :update] do
+              member do
+                get :duplicates
+                get :timeline
+                post :merge
+              end
+              resources :contact_points, only: [:create, :update, :destroy]
+            end
+          end
+
           resources :companies, only: [:index, :show, :create, :update, :destroy] do
             collection do
               get :search

@@ -2,6 +2,7 @@
 import OperationsLinks from 'dashboard/routes/dashboard/jrcOperations/components/OperationsLinks.vue';
 import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import MasterContactPanel from 'dashboard/routes/dashboard/jrcCustomers/components/MasterContactPanel.vue';
 import ContactPanel from 'dashboard/routes/dashboard/conversation/ContactPanel.vue';
 import ConversationCrmWidget from 'dashboard/routes/dashboard/crm/components/conversation/ConversationCrmWidget.vue';
 import { dealsAPI, leadsAPI } from 'dashboard/api/crm';
@@ -139,6 +140,9 @@ watch(() => [props.currentChat?.id, hasCrm.value], loadCrmLinks, {
         :inbox-id="currentChat.inbox_id"
       />
       <OperationsLinks :conversation-id="currentChat.id" compact />
+      <MasterContactPanel
+        :contact-id="currentChat.contact_id || currentChat.meta?.sender?.id"
+      />
       <ConversationCrmWidget
         v-if="hasCrm"
         :linked-deal="linkedDeal"

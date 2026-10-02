@@ -80,6 +80,7 @@ class JrcCampaigns::AudienceResolver
   end
 
   def contact_entries(scope, source)
+    scope = JrcCustomers::CampaignFilter.apply(scope: scope, account: account, filters: campaign.audience_config['customer_filters'] || {})
     scope.distinct.find_each.map do |contact|
       Entry.new(contact: contact, name: contact.name, phone_number: contact.phone_number, source: source, metadata: {})
     end
@@ -114,6 +115,11 @@ class JrcCampaigns::AudienceResolver
   end
 
   def sanitized_entries
+    values = campaign.audience_config['customer_filters'] || {}
+    raise JrcCustomers::CampaignFilter::InvalidFilter, 'Customer filters must be an object' unless values.is_a?(Hash)
+    if values.values.any?(&:present?)
+      raise JrcCustomers::CampaignFilter::InvalidFilter, 'Company filters require native contacts; sanitized phone lists have no reliable company identity'
+    end
     list_id = campaign.audience_config['sanitized_list_id']
     list = account.jrc_campaign_sanitized_lists.find_by(id: list_id)
     return [] unless list

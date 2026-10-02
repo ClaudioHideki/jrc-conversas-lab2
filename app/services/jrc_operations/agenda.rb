@@ -9,6 +9,7 @@ module JrcOperations
       @member = account_user
       @account = account_user.account
       @filters = filters.to_h.symbolize_keys
+      @customer_context = JrcCustomers::AgendaContext.new(account_user: @member, filters: @filters)
       @zone = Time.find_zone(@account.reporting_timezone) || Time.find_zone!('America/Sao_Paulo')
       @now = now.in_time_zone(@zone)
       @today = @now.to_date
@@ -92,7 +93,7 @@ module JrcOperations
     end
 
     def project_entries
-      scope = JrcProjects::Task.where(account_id: @account.id, project_id: Access.projects(@member).select(:id), due_on: @from..@to)
+      scope = JrcProjects::Task.where(account_id: @account.id, project_id: @customer_context.projects(Access.projects(@member)).select(:id), due_on: @from..@to)
       scope = assigned(scope, :assignee_id)
       scope = scope.where(parent_id: nil).or(scope.where.not(assignee_id: nil))
       rows(scope.includes(:project, :assignee)).filter_map do |task|
@@ -109,7 +110,7 @@ module JrcOperations
       scope = assigned(scope, :user_id)
       scope = scope.where(deal_id: nil).or(scope.where(deal_id: JrcCrm::Deal.where(account_id: @account.id).select(:id)))
       scope = scope.where(lead_id: nil).or(scope.where(lead_id: JrcCrm::Lead.where(account_id: @account.id).select(:id)))
-      timed(scope).includes(:user)
+      @customer_context.crm(timed(scope)).includes(:user)
     end
 
     def activity_entries
@@ -138,7 +139,7 @@ module JrcOperations
         due: local_due.iso8601, due_date: local_due.to_date.iso8601, due_type: date_only ? 'date' : 'datetime',
         responsible_id: responsible&.id, responsible: responsible&.name,
         completed: completed, canceled: canceled, overdue: overdue
-      }
+      }.merge(@customer_context.attributes(record))
     end
 
     def matches_view?(entry, view)

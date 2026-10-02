@@ -42,6 +42,7 @@
 # rubocop:enable Layout/LineLength
 
 class Contact < ApplicationRecord
+  include JrcCustomers::ContactMaster
   has_many :sales_opportunities, dependent: :restrict_with_error
   has_many :jrc_crm_deal_contacts, class_name: 'JrcCrm::DealContact', dependent: :destroy_async
   has_many :jrc_crm_deals, through: :jrc_crm_deal_contacts, source: :deal
@@ -163,7 +164,7 @@ class Contact < ApplicationRecord
       blocked: blocked,
       type: 'contact'
     }
-    data[:company_id] = company_id if account.feature_enabled?('companies')
+    data[:company_id] = company_id if account.feature_enabled?('companies') || account.feature_enabled?('jrc_customer_master')
     data
   end
 

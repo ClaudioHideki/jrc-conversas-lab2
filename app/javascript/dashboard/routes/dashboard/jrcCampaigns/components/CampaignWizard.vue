@@ -1,4 +1,12 @@
 <script setup>
+import CampaignFilters from 'dashboard/routes/dashboard/jrcCustomers/components/CampaignFilters.vue';
+import { useCustomerMaster } from 'dashboard/routes/dashboard/jrcCustomers/useCustomerMaster';
+const props = defineProps({
+  campaign: { type: Object, default: null },
+  metadata: { type: Object, required: true },
+});
+const emit = defineEmits(['close', 'saved']);
+const { enabled: hasCustomerMaster } = useCustomerMaster();
 import {
   computed,
   onBeforeUnmount,
@@ -11,12 +19,6 @@ import { useI18n } from 'vue-i18n';
 import JrcCampaignsAPI from 'dashboard/api/jrcCampaigns';
 import { useAlert } from 'dashboard/composables';
 
-const props = defineProps({
-  campaign: { type: Object, default: null },
-  metadata: { type: Object, required: true },
-});
-
-const emit = defineEmits(['close', 'saved']);
 const { t } = useI18n();
 const stepIndex = ref(0);
 const saving = ref(false);
@@ -67,6 +69,7 @@ const form = reactive({
     pipeline_id: null,
     stage_ids: [],
     sanitized_list_id: null,
+    customer_filters: {},
   },
   inboxLinks: [],
   rotation_mode: 'round_robin',
@@ -821,6 +824,7 @@ const hydrate = campaign => {
     pipeline_id: campaign.audience_config?.pipeline_id || null,
     stage_ids: campaign.audience_config?.stage_ids || [],
     sanitized_list_id: campaign.audience_config?.sanitized_list_id || null,
+    customer_filters: campaign.audience_config?.customer_filters || {},
   };
   form.inboxLinks = (campaign.campaign_inboxes || []).map(item => ({
     ...item,
@@ -886,6 +890,12 @@ watch(
   { deep: true }
 );
 onMounted(refreshAudiencePreview);
+watch(
+  () => form.audience_type,
+  value => {
+    if (value === 'sanitized_list') form.audience_config.customer_filters = {};
+  }
+);
 onBeforeUnmount(() => window.clearTimeout(audienceTimer));
 </script>
 
@@ -1142,6 +1152,12 @@ onBeforeUnmount(() => window.clearTimeout(audienceTimer));
                 </select></label
               >
             </div>
+            <CampaignFilters
+              v-if="
+                hasCustomerMaster && form.audience_type !== 'sanitized_list'
+              "
+              v-model="form.audience_config.customer_filters"
+            />
             <div class="rounded-2xl border border-n-weak p-5">
               <div class="flex items-center justify-between gap-3">
                 <div>

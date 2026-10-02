@@ -55,6 +55,7 @@ export const FEATURE_FLAGS = {
   UNREAD_COUNT_FOR_FILTERS: 'unread_count_for_filters',
   SALES: 'sales',
   JRC_CRM: 'jrc_crm',
+  JRC_CUSTOMER_MASTER: 'jrc_customer_master',
   JRC_CAMPAIGNS: 'jrc_campaigns',
   JRC_SERVICE_DESK: 'jrc_service_desk',
 };

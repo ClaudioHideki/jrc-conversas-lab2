@@ -30,14 +30,14 @@ module JrcProjects
         def update
           project = Projects::Update.call(
             account: Current.account, actor: Current.user, project: scoped_project,
-            attributes: params.require(:project).permit(*Projects::Update::FIELDS, :lock_version).to_h,
+            attributes: params.require(:project).permit(*Projects::Update::FIELDS, :lock_version, *(Current.account.feature_enabled?('jrc_customer_master') ? [:company_id] : [])).to_h,
             correlation_id: correlation_id
           )
           render json: { data: ProjectSerializer.one(project, account_user: Current.account_user, details: true) }
         end
         private
         def project_params
-          params.require(:project).permit(:key, :name, :description, :visibility, :contact_id, :starts_on, :due_on, :priority)
+          params.require(:project).permit(:key, :name, :description, :visibility, :contact_id, :starts_on, :due_on, :priority, *(Current.account.feature_enabled?('jrc_customer_master') ? [:company_id] : []))
         end
       end
     end

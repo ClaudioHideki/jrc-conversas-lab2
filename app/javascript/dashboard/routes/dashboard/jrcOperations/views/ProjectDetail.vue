@@ -1,4 +1,8 @@
 <script setup>
+import CompanyPicker from 'dashboard/routes/dashboard/jrcCustomers/components/CompanyPicker.vue';
+import { useCustomerMaster } from 'dashboard/routes/dashboard/jrcCustomers/useCustomerMaster';
+const { enabled: hasCustomerMaster, accountScopedRoute: masterRoute } =
+  useCustomerMaster();
 import { ref, reactive, computed, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useProjects } from '../../jrcProjects/useProjects';
@@ -55,6 +59,7 @@ const settings = reactive({
   status: '',
   priority: 'medium',
   visibility: 'members',
+  company_id: null,
   contact_id: null,
   owner_id: null,
   starts_on: '',
@@ -379,6 +384,7 @@ async function saveProject() {
   success.value = '';
   try {
     const values = { ...settings, lock_version: project.value.lock_version };
+    if (!hasCustomerMaster.value) delete values.company_id;
     if (!can('project.transfer')) delete values.owner_id;
     await request(accountId.value, `projects/projects/${projectId.value}`, {
       method: 'patch',
@@ -960,7 +966,29 @@ async function exportTasks() {
             class="grid grid-cols-1 md:grid-cols-2 gap-4"
             :disabled="!can('project.update') || busy"
           >
-            <label class="flex flex-col gap-1 min-w-0 col-span-full"><span>Nome *</span><input v-model="settings.name" required maxlength="240" /></label><label class="flex flex-col gap-1 min-w-0 col-span-full"><span>Escopo</span><textarea v-model="settings.description" /></label><ContactPicker
+            <label class="flex flex-col gap-1 min-w-0 col-span-full"
+              ><span>Nome *</span
+              ><input v-model="settings.name" required maxlength="240" /></label
+            ><label class="flex flex-col gap-1 min-w-0 col-span-full"
+              ><span>Escopo</span><textarea v-model="settings.description" />
+            </label>
+            <div v-if="hasCustomerMaster" class="col-span-full">
+              <p class="mb-1 text-sm">Empresa do projeto</p>
+              <CompanyPicker
+                v-model="settings.company_id"
+                :disabled="!can('project.update') || busy"
+              /><RouterLink
+                v-if="project.company"
+                class="text-n-brand underline text-sm"
+                :to="
+                  masterRoute('jrc_customer_company', {
+                    companyId: project.company.id,
+                  })
+                "
+                >Abrir ficha 360</RouterLink
+              >
+            </div>
+            <ContactPicker
               v-model="settings.contact_id"
               :disabled="
                 project.contact_locked || !can('project.update') || busy

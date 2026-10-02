@@ -204,7 +204,7 @@ module Api
               :stage_id,
               :value_cents,
               :currency,
-              :contact_id,
+              :contact_id, :company_id, :organization_id,
               :conversation_id,
               :team_id,
               :source,

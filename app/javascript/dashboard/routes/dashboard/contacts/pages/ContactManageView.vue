@@ -7,6 +7,7 @@ import { useRoute, useRouter } from 'vue-router';
 
 import ContactsDetailsLayout from 'dashboard/components-next/Contacts/ContactsDetailsLayout.vue';
 import Spinner from 'dashboard/components-next/spinner/Spinner.vue';
+import MasterContactPanel from '../../jrcCustomers/components/MasterContactPanel.vue';
 import ContactDetails from 'dashboard/components-next/Contacts/Pages/ContactDetails.vue';
 import TabBar from 'dashboard/components-next/tabbar/TabBar.vue';
 import ContactNotes from 'dashboard/components-next/Contacts/ContactsSidebar/ContactNotes.vue';
@@ -185,6 +186,10 @@ onMounted(() => {
           <Spinner />
         </div>
         <template v-else>
+          <MasterContactPanel
+            :contact-id="selectedContact?.id"
+            @updated="fetchActiveContact"
+          />
           <ContactCustomAttributes
             v-if="activeTab === 'attributes'"
             :selected-contact="selectedContact"

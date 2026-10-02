@@ -3,16 +3,27 @@ class ContactMergeAction
   pattr_initialize [:account!, :base_contact!, :mergee_contact!]
 
   def perform
+    validate_contacts if @account.feature_enabled?('jrc_customer_master')
     # This case happens when an agent updates a contact email in dashboard,
     # while the contact also update his email via email collect box
     return @base_contact if base_contact.id == mergee_contact.id
 
     ActiveRecord::Base.transaction do
       validate_contacts
+      if @account.feature_enabled?('jrc_customer_master')
+        @account.lock! # Same account-first ordering used by project/link creation.
+        @account.contacts.where(id: [@base_contact.id, @mergee_contact.id]).order(:id).lock.load
+        @base_contact.reload
+        @mergee_contact.reload
+        preserver = JrcCustomers::MergePreserver.new(account: @account, base: @base_contact, source: @mergee_contact,
+                                                     actor: Current.user)
+        preserver.call
+      end
       merge_conversations
       merge_messages
       merge_contact_inboxes
       merge_contact_notes
+      preserver&.assert_native_references_moved!
       merge_and_remove_mergee_contact
     end
     @base_contact

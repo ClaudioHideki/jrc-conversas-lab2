@@ -46,6 +46,8 @@
 #
 module JrcCrm
   class Lead < ApplicationRecord
+    belongs_to :company, class_name: 'JrcCustomers::Company', optional: true
+    include JrcCustomers::CrmMasterLink
     self.table_name = 'jrc_crm_leads'
     
     belongs_to :account

@@ -1,4 +1,7 @@
 <script setup>
+import CustomerMasterAPI from 'dashboard/api/jrcCustomers';
+import { useCustomerMaster } from 'dashboard/routes/dashboard/jrcCustomers/useCustomerMaster';
+const { enabled: hasCustomerMaster } = useCustomerMaster();
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { debounce } from '@chatwoot/utils';
@@ -233,7 +236,9 @@ const setCurrentContact = async (contact, version) => {
   if (!companyId) return;
 
   try {
-    const { data } = await CompanyAPI.show(companyId);
+    const { data } = await (hasCustomerMaster.value
+      ? CustomerMasterAPI.company(companyId)
+      : CompanyAPI.show(companyId));
     if (version === contactLookupVersion) {
       currentCompanyName.value = data.payload?.name || '';
     }
@@ -344,6 +349,16 @@ const findContactByPhone = async number => {
   contactLoading.value = true;
   currentContactNumber.value = number;
   try {
+    if (hasCustomerMaster.value) {
+      const identityInput = /^\d{2,6}$/.test(String(number))
+        ? { extension: String(number) }
+        : { phone: number, country: 'BR' };
+      const { data } = await CustomerMasterAPI.identity(identityInput);
+      if (version !== contactLookupVersion) return;
+      if (data.match === 'unique') setCurrentContact(data.payload[0], version);
+      else setUnknownContact(number);
+      return;
+    }
     const { data } = await ContactAPI.search(number);
     if (version !== contactLookupVersion) return;
     const contact = data.payload?.find(item =>

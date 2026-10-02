@@ -1,16 +1,22 @@
 <script setup>
-import { crmControlClasses } from '../../crmControlClasses';
 import { reactive, ref } from 'vue';
+import CompanyPicker from 'dashboard/routes/dashboard/jrcCustomers/components/CompanyPicker.vue';
+import { useCustomerMaster } from 'dashboard/routes/dashboard/jrcCustomers/useCustomerMaster';
+const props = defineProps({ contact: { type: Object, default: null } });
+const emit = defineEmits(['close', 'created']);
+const { enabled: hasCustomerMaster } = useCustomerMaster();
+const companyId = ref(null);
+import { crmControlClasses } from '../../crmControlClasses';
+
 import { useI18n } from 'vue-i18n';
 import { leadsAPI } from 'dashboard/api/crm';
 import { useAlert } from 'dashboard/composables';
 
-const props = defineProps({ contact: { type: Object, default: null } });
-const emit = defineEmits(['close', 'created']);
 const { t } = useI18n();
 const saving = ref(false);
 const errorMessage = ref('');
 const contact = props.contact;
+companyId.value = contact?.company_id || contact?.companyId || null;
 const form = reactive({
   name: contact?.name || '',
   company_name:
@@ -36,7 +42,11 @@ const save = async () => {
   saving.value = true;
   try {
     const { data, status } = await leadsAPI.create({
-      lead: { ...form, ...(contact ? { contact_id: contact.id } : {}) },
+      lead: {
+        ...form,
+        ...(hasCustomerMaster.value ? { company_id: companyId.value } : {}),
+        ...(contact ? { contact_id: contact.id } : {}),
+      },
     });
     useAlert(
       status === 201 ? t('CRM.LEAD_FORM.SUCCESS') : t('CRM.LEAD_FORM.EXISTING')
@@ -103,7 +113,17 @@ const save = async () => {
           />
         </label>
         <div class="grid gap-3 sm:grid-cols-2">
-          <label class="text-sm text-n-slate-11">
+          <CompanyPicker
+            v-if="hasCustomerMaster"
+            v-model="companyId"
+            :disabled="saving"
+            @selected="
+              value => {
+                form.company_name = value?.name || '';
+              }
+            "
+          />
+          <label v-else class="text-sm text-n-slate-11">
             <span class="block">{{ t('CRM.LEAD_FORM.COMPANY') }}</span
             ><input
               v-model="form.company_name"

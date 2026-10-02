@@ -297,3 +297,8 @@
   display_name: JRC Projetos
   enabled: false
   column: feature_flags_ext_1
+
+- name: jrc_customer_master
+  display_name: JRC Cadastro Mestre
+  enabled: false
+  column: feature_flags_ext_1

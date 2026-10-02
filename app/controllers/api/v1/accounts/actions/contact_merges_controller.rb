@@ -2,7 +2,12 @@ class Api::V1::Accounts::Actions::ContactMergesController < Api::V1::Accounts::B
   before_action :set_base_contact, only: [:create]
   before_action :set_mergee_contact, only: [:create]
 
+  rescue_from JrcCustomers::MergePreserver::Conflict do |error|
+    render json: { error: error.message, code: 'REVIEW_REQUIRED' }, status: :conflict
+  end
+
   def create
+    authorize :directory, :administer?, policy_class: JrcCustomers::DirectoryPolicy if Current.account.feature_enabled?('jrc_customer_master')
     contact_merge_action = ContactMergeAction.new(
       account: Current.account,
       base_contact: @base_contact,

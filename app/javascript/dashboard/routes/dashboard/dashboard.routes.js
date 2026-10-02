@@ -5,6 +5,7 @@ import { routes as searchRoutes } from '../../modules/search/search.routes';
 import { routes as callRoutes } from './calls/routes';
 import { routes as contactRoutes } from './contacts/routes';
 import { routes as companyRoutes } from './companies/routes';
+import { routes as customerMasterRoutes } from './jrcCustomers/routes';
 import { routes as notificationRoutes } from './notifications/routes';
 import { routes as inboxRoutes } from './inbox/routes';
 import { frontendURL } from '../../helper/URLHelper';
@@ -43,6 +44,7 @@ export default {
         ...callRoutes,
         ...contactRoutes,
         ...companyRoutes,
+        ...customerMasterRoutes,
         ...searchRoutes,
         ...notificationRoutes,
         ...helpcenterRoutes.routes,

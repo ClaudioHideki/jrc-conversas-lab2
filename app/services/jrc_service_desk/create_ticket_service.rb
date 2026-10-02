@@ -5,11 +5,19 @@ class JrcServiceDesk::CreateTicketService < JrcServiceDesk::BaseService
   IDS = (FIELDS - %w[title description]).freeze
 
   def call(unit_id:, attributes:, idempotency_key:, service_id: nil)
-    values = JrcServiceDesk::Input.attributes(attributes, FIELDS)
+    fields = context.account.feature_enabled?('jrc_customer_master') ? FIELDS + ['company_id'] : FIELDS
+    values = JrcServiceDesk::Input.attributes(attributes, fields)
     normalized = FIELDS.to_h { |name| [name, values[name]] }
     normalized['title'] = text(normalized['title'])
     normalized['description'] = text(normalized['description'], nullable: true)
     IDS.each { |name| normalized[name] = JrcServiceDesk::Input.id(normalized[name]) unless normalized[name].nil? }
+    # Omitted/null company uses the historical fingerprint format for safe replay.
+    if values['company_id'].present?
+      raise Pundit::NotAuthorizedError unless context.capability?(:customers_view)
+      Pundit.authorize(context.to_h, :directory, :access?, policy_class: JrcCustomers::DirectoryPolicy)
+      normalized['company_id'] = JrcServiceDesk::Input.id(values['company_id'])
+      JrcCustomers::Company.where(account_id: context.account.id).find(normalized['company_id'])
+    end
     key = JrcServiceDesk::Input.request_key(idempotency_key)
     service_id = JrcServiceDesk::Input.id(service_id) unless service_id.nil?
     fingerprint = JrcServiceDesk::CanonicalJson.digest(service_id ? normalized.merge('service_id' => service_id) : normalized)
@@ -42,6 +50,7 @@ class JrcServiceDesk::CreateTicketService < JrcServiceDesk::BaseService
         created_by_membership: actor_membership, origin_channel: 'manual', opened_at: Time.current,
         idempotency_key: key, request_fingerprint: fingerprint
       )
+      ticket.company_id = normalized['company_id'] if normalized.key?('company_id')
       ticket.service = reference(JrcServiceDesk::Service, service_id, unit)
       ticket.lifecycle_policy_version = JrcServiceDesk::LifecycleSelector.new(ticket).applicable
       authorize!(ticket, :create?)

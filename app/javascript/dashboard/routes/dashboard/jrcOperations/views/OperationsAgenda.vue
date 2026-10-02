@@ -1,5 +1,15 @@
 <script setup>
+import { T } from 'dashboard/routes/dashboard/jrcCustomers/copy';
 import { ref, reactive, computed, watch } from 'vue';
+import { useRoute } from 'vue-router';
+import CompanyPicker from 'dashboard/routes/dashboard/jrcCustomers/components/CompanyPicker.vue';
+import ContactPicker from '../components/ContactPicker.vue';
+import { useCustomerMaster } from 'dashboard/routes/dashboard/jrcCustomers/useCustomerMaster';
+const { canAccess: hasCustomerMaster, accountScopedRoute: masterRoute } =
+  useCustomerMaster();
+const route = useRoute();
+const customerFilters = reactive({ company_id: null, contact_id: null });
+
 import { useAgenda } from '../useAgenda';
 import { request, errorMessage } from '../api';
 import { agendaTarget, formatAgendaDue } from '../agenda';
@@ -92,7 +102,10 @@ async function load() {
   loading.value = true;
   try {
     const result = await request(accountId.value, 'operations/agenda', {
-      params: { ...filters },
+      params: {
+        ...filters,
+        ...(hasCustomerMaster.value ? customerFilters : {}),
+      },
     });
     if (current !== generation) return;
     data.value = result.data;
@@ -105,6 +118,22 @@ async function load() {
     if (current === generation) loading.value = false;
   }
 }
+watch(
+  () => [
+    route.query.company_id,
+    route.query.contact_id,
+    hasCustomerMaster.value,
+  ],
+  () => {
+    customerFilters.company_id = hasCustomerMaster.value
+      ? route.query.company_id || null
+      : null;
+    customerFilters.contact_id = hasCustomerMaster.value
+      ? route.query.contact_id || null
+      : null;
+    load();
+  }
+);
 function selectView(view) {
   filters.view = view;
   // Let the server calculate the current account date, including after midnight.
@@ -122,6 +151,12 @@ watch(
   ],
   () => {
     meta.value = null;
+    customerFilters.company_id = hasCustomerMaster.value
+      ? route.query.company_id || null
+      : null;
+    customerFilters.contact_id = hasCustomerMaster.value
+      ? route.query.contact_id || null
+      : null;
     Object.assign(filters, {
       from: '',
       to: '',
@@ -192,7 +227,23 @@ watch(
           {{ view[1] }}
         </button>
       </nav>
+      <p
+        v-if="meta?.unavailable_sources?.service_desk"
+        class="rounded-lg border border-n-weak p-3 text-sm text-n-slate-11"
+        role="status"
+      >
+        {{ T.serviceDeskUnavailable }}
+      </p>
       <form class="flex flex-wrap items-center gap-3" @submit.prevent="load">
+        <div v-if="hasCustomerMaster" class="grid w-full gap-3 md:grid-cols-2">
+          <CompanyPicker
+            v-model="customerFilters.company_id"
+            :disabled="loading"
+          /><ContactPicker
+            v-model="customerFilters.contact_id"
+            :disabled="loading"
+          />
+        </div>
         <label class="flex flex-col gap-1 min-w-0"><span>{{ agendaText('FROM', 'De') }}</span><input
             v-model="filters.from"
             type="date"
@@ -340,6 +391,23 @@ watch(
                 >
                   {{ entry.title }}
                 </RouterLink>
+                <p v-if="hasCustomerMaster && entry.company" class="text-sm">
+                  <RouterLink
+                    class="text-n-brand underline"
+                    :to="
+                      masterRoute('jrc_customer_company', {
+                        companyId: entry.company.id,
+                      })
+                    "
+                    >{{ entry.company.name }}</RouterLink
+                  >
+                </p>
+                <p
+                  v-if="hasCustomerMaster && entry.contact"
+                  class="text-xs text-n-slate-11"
+                >
+                  {{ entry.contact.name }}
+                </p>
                 <p v-if="entry.project_key" class="text-n-slate-11 text-sm">
                   {{ entry.project_key
                   }}<span v-if="entry.parent_id">

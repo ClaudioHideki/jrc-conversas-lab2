@@ -71,6 +71,7 @@ export function decodeRecord(row, context, resource) {
     return {
       ...record, title: text(row.title), number: text(row.number),
       service: named(row.service), status: named(row.status), priority: named(row.priority), category: named(row.category),
+      ...(Object.hasOwn(row, 'company') ? { company: named(row.company) } : {}),
       requester: named(row.requester), assignee: named(row.assignee), team: named(row.team), queue: named(row.queue),
       source: text(row.source), lock_version: Number.isInteger(row.lock_version) ? row.lock_version : null,
       // No client clock, synthetic countdown or 'met' inference.

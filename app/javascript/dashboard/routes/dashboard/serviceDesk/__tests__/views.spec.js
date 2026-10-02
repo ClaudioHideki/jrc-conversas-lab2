@@ -1,6 +1,7 @@
 import { beforeEach, afterEach, describe, it, expect, vi } from 'vitest';
 import { reactive, ref, nextTick } from 'vue';
 import { mount, flushPromises } from '@vue/test-utils';
+import { createStore } from 'vuex';
 import { createI18n } from 'vue-i18n';
 import { createRouter, createMemoryHistory } from 'vue-router';
 import messages from 'dashboard/i18n/locale/pt_BR/jrcServiceDesk.json';
@@ -29,7 +30,32 @@ const setupSession = async client => {
 const render = async (component, screen='new') => {
   const router=createRouter({history:createMemoryHistory(),routes:SERVICE_DESK_ROUTES.map(entry=>({path:`/app/accounts/:accountId/service-desk${entry.path?`/${entry.path}`:''}`,name:serviceDeskRouteName(entry.key),component:{template:'<div />'}}))});
   await router.push({name:serviceDeskRouteName(screen),params:{accountId:'1'}});await router.isReady();
-  const wrapper=mount(component,{props:{screen},global:{plugins:[router,createI18n({legacy:false,locale:'pt_BR',messages:{pt_BR:messages}})],stubs:{Button,Input,Select,TextArea,Icon:true,Spinner:true,PaginationFooter:true,TabBar:true}}});
+  const wrapper = mount(component, {
+    props: { screen },
+    global: {
+      plugins: [
+        router,
+        createI18n({
+          legacy: false,
+          locale: 'pt_BR',
+          messages: { pt_BR: messages },
+        }),
+        createStore({
+          getters: { 'accounts/isFeatureEnabledonAccount': () => () => false },
+        }),
+      ],
+      stubs: {
+        Button,
+        Input,
+        Select,
+        TextArea,
+        Icon: true,
+        Spinner: true,
+        PaginationFooter: true,
+        TabBar: true,
+      },
+    },
+  });
   wrappers.push(wrapper);await flushPromises();return wrapper;
 };
 const button = (wrapper, label) => wrapper.findAll('button').find(item=>item.text()===label);

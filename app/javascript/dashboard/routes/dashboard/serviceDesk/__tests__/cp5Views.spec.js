@@ -1,6 +1,8 @@
 import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest';
 import { reactive, ref, defineComponent } from 'vue';
 import { mount, flushPromises } from '@vue/test-utils';
+import { createStore } from 'vuex';
+import { routeLocationKey } from 'vue-router';
 import { createI18n } from 'vue-i18n';
 import { createRouter, createMemoryHistory } from 'vue-router';
 import messages from 'dashboard/i18n/locale/pt_BR/jrcServiceDesk.json';
@@ -20,7 +22,29 @@ let wrappers = [];
 const record = flags => decodeTicket(detail(ticket({ permissions: { show: true, ...flags } })), holder.session.state.context, '20');
 const customerPayload = () => ({ contract_version: 1, account_id: '1', unit_id: '10', ticket_id: '20', contact: { id: '33', account_id: '1', name: 'Fixture original contact' }, company: null, company_state: 'not_linked' });
 const render = (component, props = {}, plugins = []) => {
-  const wrapper = mount(component, { props, global: { plugins: [i18n(), ...plugins], stubs: { Button, Icon: true, Spinner: true, Lookup: true, Select: true, Pagination: true } } }); wrappers.push(wrapper); return wrapper;
+  const wrapper = mount(component, {
+    props,
+    global: {
+      plugins: [
+        i18n(),
+        createStore({
+          getters: { 'accounts/isFeatureEnabledonAccount': () => () => false },
+        }),
+        ...plugins,
+      ],
+      provide: { [routeLocationKey]: { params: { accountId: '1' } } },
+      stubs: {
+        Button,
+        Icon: true,
+        Spinner: true,
+        Lookup: true,
+        Select: true,
+        Pagination: true,
+      },
+    },
+  });
+  wrappers.push(wrapper);
+  return wrapper;
 };
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] }); holder.context.mockReset(); holder.customer.mockReset(); holder.conversation.mockReset();
@@ -75,8 +99,13 @@ describe('CP5 native Vue integration (execution requires project runtime)', () =
   it('the data-free denial screen returns to native Account home without any extra login', async () => {
     const router = createRouter({ history: createMemoryHistory(), routes: [
       { path: '/app/accounts/:accountId/dashboard', name: 'home', component: { template: '<div />' } },
-      { path: '/app/accounts/:accountId/service-desk-access', name: 'jrc_service_desk_denied', component: AccessStateView },
-    ] });
+        {
+          path: '/app/accounts/:accountId/service-desk-access',
+          name: 'jrc_service_desk_denied',
+          component: AccessStateView,
+        },
+      ],
+    });
     await router.push({ name: 'jrc_service_desk_denied', params: { accountId: '1' }, query: { reason: 'denied' } });
     const wrapper = render(AccessStateView, {}, [router]); await wrapper.find('button').trigger('click'); await flushPromises();
     expect(router.currentRoute.value.name).toBe('home'); expect(holder.context).not.toHaveBeenCalled();

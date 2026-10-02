@@ -25,6 +25,12 @@ module JrcCrm
     belongs_to :deal, class_name: 'JrcCrm::Deal'
     belongs_to :contact
     
+    validate :same_account
+
+    def same_account
+      errors.add(:contact_id, 'must belong to the deal account') unless contact&.account_id == deal&.account_id
+    end
+
     validates :deal_id, :contact_id, presence: true
     validates :contact_id, uniqueness: { scope: :deal_id }
   end

@@ -1,4 +1,9 @@
 <script setup>
+import { T } from 'dashboard/routes/dashboard/jrcCustomers/copy';
+import CompanyPicker from 'dashboard/routes/dashboard/jrcCustomers/components/CompanyPicker.vue';
+import { useCustomerMaster } from 'dashboard/routes/dashboard/jrcCustomers/useCustomerMaster';
+const props = defineProps({ screen: { type: String, default: 'new' } });
+const { canAccess: mayUseMasterDirectory } = useCustomerMaster();
 import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -17,9 +22,15 @@ import { canAct } from '../helpers/access';
 import Feedback from '../components/WriteFeedback.vue';
 import { createTicketDraft, updateTicketDraft, newRequestKey } from '../helpers/drafts';
 import { serviceDeskRouteName } from '../routeDefinitions';
-const props = defineProps({ screen: { type: String, default: 'new' } });
 const { t, tm } = useI18n();
 const session = useServiceDesk();
+const hasCustomerMaster = computed(
+  () =>
+    mayUseMasterDirectory.value &&
+    session.state.context?.effective_permissions?.includes(
+      'jrc_service_desk_customers_view'
+    ) === true
+);
 const route = useRoute();
 const router = useRouter();
 const key = 'ticket:edit';
@@ -30,7 +41,20 @@ const mutation = computed(() => session.operations?.mutation(writeKey) || { stat
 const busy = computed(() => mutation.value.status === 'saving');
 const step = ref(0);
 const operatorId = ref('');
-const blank = () => ({ unit_id: '', requester_id: '', priority_id: '', category_id: '', assignee_id: '', team_id: '', queue_id: '', title: '', description: '', conversation_id: '', service_id: '' });
+const blank = () => ({
+  company_id: null,
+  unit_id: '',
+  requester_id: '',
+  priority_id: '',
+  category_id: '',
+  assignee_id: '',
+  team_id: '',
+  queue_id: '',
+  title: '',
+  description: '',
+  conversation_id: '',
+  service_id: '',
+});
 const draft = reactive(blank());
 const edit = computed(() => props.screen === 'edit');
 const result = computed(() => session.resource(key));
@@ -39,13 +63,22 @@ const unit = computed(() => session.state.context?.units.find(item => item.id ==
 const mayEdit = computed(() => edit.value ? !!record.value && canAct(record.value, 'update') : unit.value?.permissions.create_ticket === true);
 const steps = computed(() => tm('JRC_SERVICE_DESK.FORM.steps'));
 const selectedNames = reactive({ requester: null, priority: null, category: null });
-const resetNames = () => { Object.keys(selectedNames).forEach(key => { selectedNames[key] = null; }); };
+const resetNames = () => {
+  Object.keys(selectedNames).forEach(field => {
+    selectedNames[field] = null;
+  });
+};
 const lookupLabels = computed(() => Object.fromEntries(['requester', 'priority', 'category'].map(field => {
   const id = draft[`${field}_id`];
   const selected = selectedNames[field];
   const persisted = record.value?.[field];
   const label = selected?.id === id ? selected.name : persisted?.id === id ? persisted.name : '';
-  return [field, id ? label || t('JRC_SERVICE_DESK.COMMON.selected_identifier', { id }) : t('JRC_SERVICE_DESK.COMMON.no_value')];
+      return [
+        field,
+        id
+          ? label || t('JRC_SERVICE_DESK.COMMON.selected_identifier', { id })
+          : t('JRC_SERVICE_DESK.COMMON.no_value'),
+      ];
 })));
 const changeUnit = value => {
   if (!busy.value && value !== draft.unit_id) {
@@ -67,7 +100,19 @@ watch([() => route.params.ticketId, () => session.state.status], load, { immedia
 watch(record, value => {
   if (!value || !edit.value || !canAct(value, 'update'))
     return;
-  Object.assign(draft, { unit_id: value.unit_id, service_id: value.service?.id || '', requester_id: value.requester?.id || '', priority_id: value.priority?.id || '', category_id: value.category?.id || '', assignee_id: value.assignee?.id || '', team_id: value.team?.id || '', queue_id: value.queue?.id || '', title: value.title, description: value.description });
+  Object.assign(draft, {
+    company_id: value.company?.id || null,
+    unit_id: value.unit_id,
+    service_id: value.service?.id || '',
+    requester_id: value.requester?.id || '',
+    priority_id: value.priority?.id || '',
+    category_id: value.category?.id || '',
+    assignee_id: value.assignee?.id || '',
+    team_id: value.team?.id || '',
+    queue_id: value.queue?.id || '',
+    title: value.title,
+    description: value.description,
+  });
   operatorId.value = session.state.context?.units.find(item => item.id === value.unit_id)?.operator_company.id || '';
 });
 onBeforeUnmount(() => { Object.assign(draft, blank()); session.resetResource(key); session.operations?.cancel(writeKey); });
@@ -79,7 +124,14 @@ const submit = async () => {
   localError.value = false;
   try {
     if (!edit.value) requestKey ||= newRequestKey();
-    const payload = edit.value ? updateTicketDraft(draft, record.value) : createTicketDraft(draft, unit.value, requestKey);
+    const payload = edit.value
+      ? updateTicketDraft(draft, record.value, hasCustomerMaster.value)
+      : createTicketDraft(
+          draft,
+          unit.value,
+          requestKey,
+          hasCustomerMaster.value
+        );
     const confirmed = await session.operations.write(writeKey, edit.value ? 'update' : 'create', payload, record.value);
     if (confirmed) await router.push({ name: serviceDeskRouteName('detail'), params: { accountId: session.accountId.value, ticketId: confirmed.id } });
   } catch { localError.value = true; }
@@ -145,7 +197,19 @@ const submit = async () => {
               <p class="text-xs text-n-slate-11">
                 {{ t('JRC_SERVICE_DESK.FORM.client_help') }}
               </p>
-              <Input :label="t('JRC_SERVICE_DESK.COMMON.client_company')" :placeholder="t('JRC_SERVICE_DESK.NATIVE.company_from_contact')" disabled />
+              <div v-if="hasCustomerMaster">
+                <p class="mb-1 text-sm font-medium">{{ T.servedCompany }}</p>
+                <CompanyPicker
+                  v-model="draft.company_id"
+                  :disabled="!mayEdit || busy"
+                />
+              </div>
+              <Input
+                v-else
+                :label="t('JRC_SERVICE_DESK.COMMON.client_company')"
+                :placeholder="t('JRC_SERVICE_DESK.NATIVE.company_from_contact')"
+                disabled
+              />
               <LookupSelect
                 v-model="draft.requester_id"
                 @selected="selectedNames.requester = $event"

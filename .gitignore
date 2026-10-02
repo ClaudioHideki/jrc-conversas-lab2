@@ -112,4 +112,25 @@ services/nico-runtime/node_modules/
 services/nico-runtime/dist/
 services/flows-sandbox/node_modules/
 !services/flows-sandbox/package-lock.json
+
+# Local credentials and audit artifacts must never be committed.
+.env.*
+*.env
+*.env.*
+!**/.env.example
+!**/*.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+credentials.yml
+*.backup
+*dump*.sql
+__pycache__/
+*.pyc
+vendor/bundle/
+desktop/dist/
+docs/jrc_customer_master/evidencias/
 *.zip

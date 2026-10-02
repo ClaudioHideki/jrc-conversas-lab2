@@ -1,5 +1,6 @@
 module JrcProjects
   class Project < ApplicationRecord
+    include JrcCustomers::OperationalCompanyLink
     STATUSES = %w[planned active on_hold completed canceled].freeze
     VISIBILITIES = %w[members account private].freeze
     PRIORITIES = %w[low medium high urgent].freeze

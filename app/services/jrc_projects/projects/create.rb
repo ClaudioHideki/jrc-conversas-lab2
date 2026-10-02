@@ -6,6 +6,14 @@ module JrcProjects
         membership = account.account_users.find_by!(user_id: actor.id)
         raise Pundit::NotAuthorizedError unless Authorization.allowed?(account_user: membership, capability: 'projects.project.create')
         values = attributes.to_h.symbolize_keys.slice(:key, :name, :description, :visibility, :contact_id, :starts_on, :due_on, :priority)
+        if account.feature_enabled?('jrc_customer_master') && attributes.to_h.symbolize_keys.key?(:company_id)
+          values[:company_id] = attributes.to_h.symbolize_keys[:company_id]
+          if values[:company_id].present?
+            Pundit.authorize(JrcOperations::Access.user_context(membership), :directory, :access?, policy_class: JrcCustomers::DirectoryPolicy)
+            values[:company_id] = JrcCustomers::CompanyLinkDecision.resolve(explicit: values[:company_id])
+            values[:company_id] = JrcCustomers::Company.where(account_id: account.id).find(values[:company_id]).id
+          end
+        end
         source = origin.to_h.symbolize_keys.compact_blank
         raise ArgumentError, 'Escolha apenas uma origem para a criacao.' if source.values.count(&:present?) > 1
         raise ActiveRecord::RecordNotFound if template && template.account_id != account.id
@@ -23,6 +31,11 @@ module JrcProjects
             values[:contact_id] = source_contact.id
           end
           JrcOperations::Access.contact!(membership, values[:contact_id]) if values[:contact_id].present?
+          if account.feature_enabled?('jrc_customer_master')
+            values[:company_id] = JrcCustomers::CompanyLinkDecision.resolve(
+              explicit: values[:company_id], candidates: [deal&.company_id, ticket&.company_id, source_contact&.company_id]
+            )
+          end
           definition = template&.definition || {}
           raise ArgumentError, 'Modelo invalido.' unless definition.is_a?(Hash)
           columns = Array(definition['columns']).presence || DEFAULT_COLUMNS

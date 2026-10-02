@@ -21,6 +21,7 @@
 #  index_companies_on_name_and_account_id  (name,account_id)
 #
 class Company < ApplicationRecord
+  include JrcCustomers::CompanyRules
   include Avatarable
 
   ACTIVITY_ROLLUP_INTERVAL = 5.minutes

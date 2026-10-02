@@ -1,0 +1,13 @@
+.git
+.env
+.env.*
+*.env
+*.env.*
+node_modules
+*.log
+*.pem
+*.key
+*.p12
+*.pfx
+*.dump
+*.zip

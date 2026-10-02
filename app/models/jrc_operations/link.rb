@@ -13,6 +13,7 @@ module JrcOperations
     validate :valid_link_shape
     validate :consistent_customer
     validate :crm_customer_context
+    validate :consistent_master_company
     private
     def derive_ticket_unit
       self.ticket_unit_id = ticket&.unit_id
@@ -29,6 +30,15 @@ module JrcOperations
       ids.uniq!
       errors.add(:base, 'Os registros vinculados devem pertencer ao mesmo cliente.') if ids.length > 1
     end
+    def consistent_master_company
+      return unless account&.feature_enabled?('jrc_customer_master')
+
+      candidates = [project&.company_id, ticket&.company_id, crm_deal&.company_id, conversation&.contact&.company_id]
+      JrcCustomers::CompanyLinkDecision.resolve(candidates: candidates)
+    rescue JrcCustomers::CompanyLinkDecision::Conflict => error
+      errors.add(:base, error.message)
+    end
+
     def crm_customer_context
       Access.deal_context!(crm_deal) if crm_deal
     rescue ActiveRecord::RecordNotFound
