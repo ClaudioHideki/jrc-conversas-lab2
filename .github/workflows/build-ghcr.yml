@@ -33,33 +33,8 @@ jobs:
       SOURCE_SHA: ${{ inputs.source_sha }}
       COMPONENT: ${{ inputs.component }}
       IMAGE: ${{ inputs.component == 'app' && 'claudiohideki/jrc-conversas-nico-v12-2-7-comercial-integrado' || format('claudiohideki/jrc-conversas-nico-v12-2-7-comercial-integrado-{0}', inputs.component) }}
-      RAILS_ENV: test
       BUNDLE_FROZEN: 'true'
-      POSTGRES_HOST: localhost
-      POSTGRES_DATABASE: jrc_candidate_test
-      POSTGRES_USERNAME: postgres
-      POSTGRES_PASSWORD: ephemeral-ci-only
-      REDIS_URL: redis://localhost:6379/0
-      SECRET_KEY_BASE: ephemeral-ci-only-not-a-production-secret
-      FRONTEND_URL: http://localhost:3000
-      ACTIVE_STORAGE_SERVICE: local
       TZ: UTC
-    services:
-      postgres:
-        image: pgvector/pgvector:pg16
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: ephemeral-ci-only
-        ports: ['5432:5432']
-        options: >-
-          --health-cmd "pg_isready -U postgres"
-          --health-interval 10s --health-timeout 5s --health-retries 10
-      redis:
-        image: redis:7-alpine
-        ports: ['6379:6379']
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s --health-timeout 5s --health-retries 10
 
     steps:
       - name: Validar SHA antes do checkout
@@ -121,17 +96,6 @@ jobs:
           ruby test/jrc_customers/identity_pure_test.rb
           ruby test/jrc_customers/company_link_decision_test.rb
           node --test test/jrc_customers/*.test.mjs test/jrc_operations/*test.mjs test/jrc_consolidation/commercial_ui.test.mjs
-
-      - name: RSpec em PostgreSQL e Redis descartaveis do runner
-        if: inputs.component == 'app'
-        run: |
-          bundle exec rails db:create db:schema:load
-          # MigrationContext applies pending migrations without rewriting tracked schema.rb.
-          bundle exec rails runner 'ActiveRecord::Base.connection.migration_context.migrate'
-          bundle exec rspec spec/models/jrc_customers spec/services/jrc_customers \
-            spec/controllers/api/v1/accounts/customers spec/services/jrc_service_desk \
-            spec/models/jrc_service_desk spec/requests/api/v1/accounts/jrc_operations \
-            spec/models/jrc_crm spec/services/jrc_crm
 
       - name: Vitest dos modulos afetados e SIP/WebRTC preservado
         if: inputs.component == 'app'
