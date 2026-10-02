@@ -3,11 +3,11 @@ class JrcCustomers::TaxLookup
   FIELDS = %w[name trade_name tax_id state_registration municipal_registration segment website email phone_number].freeze
 
   def self.configured?
-    Rails.application.config.x.jrc_customer_master.tax_lookup_provider.respond_to?(:call)
+    Rails.application.config.x.fetch(:jrc_customer_master).fetch(:tax_lookup_provider).respond_to?(:call)
   end
 
   def self.call(account:, tax_id:)
-    provider = Rails.application.config.x.jrc_customer_master.tax_lookup_provider
+    provider = Rails.application.config.x.fetch(:jrc_customer_master).fetch(:tax_lookup_provider)
     raise Unconfigured, 'No optional CNPJ provider configured' unless configured?
     normalized = JrcCustomers::TaxIdentifier.normalize(tax_id)
     raise ArgumentError, 'Invalid CNPJ' unless normalized && JrcCustomers::TaxIdentifier.cnpj_valid?(normalized)
