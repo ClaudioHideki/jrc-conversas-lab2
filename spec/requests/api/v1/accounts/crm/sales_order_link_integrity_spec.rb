@@ -78,6 +78,21 @@ RSpec.describe 'Sales order client/deal/proposal integrity', type: :request do
     expect(account.jrc_crm_audit_events.where(event_type: 'order_created_without_proposal', resource_id: order.id)).to exist
   end
 
+  it 'does not allow removing the required customer from an existing direct order' do
+    post "#{url}/sales_orders", headers: headers, as: :json, params: {
+      sales_order: { contact_id: contact.id, order_origin: 'direct_sale', status: 'draft', items: [{ name: 'JRC Conversas', quantity: 1, unit_cents: 100_000 }] }
+    }
+    expect(response).to have_http_status(:created)
+    order = JrcCrm::SalesOrder.find(response.parsed_body.fetch('id'))
+
+    [nil, ''].each do |empty_contact|
+      patch "#{url}/sales_orders/#{order.id}", headers: headers, as: :json, params: { sales_order: { contact_id: empty_contact } }
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response.parsed_body.fetch('errors').join(' ')).to match(/cliente e obrigatorio/i)
+      expect(order.reload.contact_id).to eq(contact.id)
+    end
+  end
+
   it 'persists accepted proposal version, creator and full canonical linkage' do
     post "#{url}/sales_orders", headers: headers, as: :json, params: {
       sales_order: { proposal_id: proposal.id, deal_id: deal.id, contact_id: contact.id, status: 'pending' }

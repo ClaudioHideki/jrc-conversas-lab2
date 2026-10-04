@@ -175,6 +175,10 @@ module Api::V1::Accounts::Crm
       contact_id = attrs.key?('contact_id') ? attrs['contact_id'] : @order&.contact_id
       proposal_id = attrs.key?('proposal_id') ? attrs['proposal_id'] : @order&.proposal_id
 
+      if attrs.key?('contact_id') && contact_id.blank?
+        raise JrcCrm::CommercialFinancials::InvalidTerms, 'Cliente e obrigatorio para o pedido.'
+      end
+
       deal = deal_id.present? ? visible_to_current_user(crm_scope.jrc_crm_deals).find(deal_id) : nil
       contact = contact_id.present? ? crm_scope.contacts.find(contact_id) : nil
       proposal = proposal_id.present? ? visible_to_current_user(crm_scope.jrc_crm_proposals).find(proposal_id) : nil

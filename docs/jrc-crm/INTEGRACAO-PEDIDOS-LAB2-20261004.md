@@ -28,6 +28,7 @@
 - Corrigido o backfill de origem: coluna criada inicialmente sem default, classificacao dos registros existentes, depois default e obrigatoriedade. Evita classificar pedidos antigos com proposta como venda direta.
 - Corrigida a assinatura de `index_exists?` no `down` da migration de Pedidos, encontrada ao testar a reversao real no Rails 7.1/PostgreSQL isolado.
 - Datas do novo servico de implantacao serializadas em ISO 8601 para respeitar o contrato JSON/idempotencia da API existente de Projetos; falha identificada pelo teste ponta a ponta.
+- Edicao via API bloqueia a remocao explicita do cliente obrigatorio (null ou vazio); teste de regressao preserva o vinculo original.
 - Formatacao/lint restritos aos fontes alterados; removida uma variavel nao utilizada da tela de Pedidos e corrigido placeholder para reutilizar o catalogo textual existente.
 - Workflow existente ampliado com sintaxe Ruby, parse Vue/JS/JSON, verificador de timestamps, RSpec afetado e PostgreSQL descartavel. Build continua em `linux/amd64`, tag SHA exclusiva e verificacao antes/depois do push.
 
