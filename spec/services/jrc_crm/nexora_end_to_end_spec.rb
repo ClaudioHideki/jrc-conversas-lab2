@@ -162,7 +162,8 @@ RSpec.describe 'JRC CRM Nexora end-to-end commercial lifecycle' do
     expect(order.backoffice_requests.where(request_kind: 'fulfillment').count).to eq(1)
     backoffice = order.backoffice_requests.first
     expect(backoffice.contract_id).to eq(contract.id)
-    expect(backoffice.metadata['implementation_project_id']).to be_present
+    expect(backoffice.metadata['implementation_project_id']).to be_present,
+      backoffice.metadata['implementation_project_warning']
 
     project = JrcProjects::Project.find(backoffice.metadata['implementation_project_id'])
     expect(project.company_id).to eq(company.id)

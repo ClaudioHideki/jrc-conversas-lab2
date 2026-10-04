@@ -49,6 +49,7 @@ RSpec.describe JrcCustomers::Company do
     expect(company).not_to be_valid
   end
   it 'rejects a cross-tenant contact link at the model layer' do
+    other.enable_features!('jrc_customer_master')
     contact = create(:contact, account: other)
     contact.company_id = company.id
     expect(contact).not_to be_valid
