@@ -26,6 +26,7 @@
 - `20261004170000`: perfil da empresa mestre e segmentos por conta; JSONB, indices e foreign keys PostgreSQL; rollback explicitamente irreversivel para preservar dados comerciais.
 - `20261004183000`: origem, versao aceita e criador do pedido, indices e foreign key; `up`/`down` presentes.
 - Corrigido o backfill de origem: coluna criada inicialmente sem default, classificacao dos registros existentes, depois default e obrigatoriedade. Evita classificar pedidos antigos com proposta como venda direta.
+- Corrigida a assinatura de `index_exists?` no `down` da migration de Pedidos, encontrada ao testar a reversao real no Rails 7.1/PostgreSQL isolado.
 - Formatacao/lint restritos aos fontes alterados; removida uma variavel nao utilizada da tela de Pedidos e corrigido placeholder para reutilizar o catalogo textual existente.
 - Workflow existente ampliado com sintaxe Ruby, parse Vue/JS/JSON, verificador de timestamps, RSpec afetado e PostgreSQL descartavel. Build continua em `linux/amd64`, tag SHA exclusiva e verificacao antes/depois do push.
 

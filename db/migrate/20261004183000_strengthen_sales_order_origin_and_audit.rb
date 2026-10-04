@@ -34,7 +34,7 @@ class StrengthenSalesOrderOriginAndAudit < ActiveRecord::Migration[7.1]
   def down
     remove_foreign_key :jrc_crm_sales_orders, column: :created_by_id if foreign_key_exists?(:jrc_crm_sales_orders, :users, column: :created_by_id)
     remove_index :jrc_crm_sales_orders, :created_by_id if index_exists?(:jrc_crm_sales_orders, :created_by_id)
-    remove_index :jrc_crm_sales_orders, name: 'idx_jrc_crm_orders_account_origin' if index_exists?(:jrc_crm_sales_orders, name: 'idx_jrc_crm_orders_account_origin')
+    remove_index :jrc_crm_sales_orders, name: 'idx_jrc_crm_orders_account_origin' if index_exists?(:jrc_crm_sales_orders, [:account_id, :order_origin], name: 'idx_jrc_crm_orders_account_origin')
     remove_column :jrc_crm_sales_orders, :created_by_id if column_exists?(:jrc_crm_sales_orders, :created_by_id)
     remove_column :jrc_crm_sales_orders, :proposal_version if column_exists?(:jrc_crm_sales_orders, :proposal_version)
     remove_column :jrc_crm_sales_orders, :order_origin if column_exists?(:jrc_crm_sales_orders, :order_origin)
