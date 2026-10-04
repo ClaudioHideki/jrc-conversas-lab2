@@ -14,6 +14,10 @@ const router = useRouter();
 
 const step = ref(1);
 const orders = ref([]);
+const awaitingApproval = ref([]);
+const missingOrderProposals = ref([]);
+const alreadyContracted = ref([]);
+const repairingProposalId = ref(null);
 const templates = ref([]);
 const saving = ref(false);
 const loading = ref(true);
@@ -40,9 +44,7 @@ const form = reactive({
 });
 
 const order = computed(() =>
-  orders.value.find(
-    item => String(item.id) === String(form.sales_order_id)
-  )
+  orders.value.find(item => String(item.id) === String(form.sales_order_id))
 );
 
 const selectedTemplate = computed(() =>
@@ -103,6 +105,42 @@ const renewalLabel = computed(
     })[form.renewal_type] || '—'
 );
 
+const loadOrderOptions = async () => {
+  const { data } = await contractsAPI.orderOptions();
+  orders.value = data?.eligible_orders || [];
+  awaitingApproval.value = data?.awaiting_approval || [];
+  missingOrderProposals.value = data?.accepted_proposals_without_order || [];
+  alreadyContracted.value = data?.already_contracted || [];
+};
+
+const openOrder = item => {
+  router.push({
+    name: 'crm_orders',
+    params: { accountId: route.params.accountId },
+    query: { orderId: item.id },
+  });
+};
+
+const repairProposalOrder = async proposal => {
+  if (repairingProposalId.value) return;
+  repairingProposalId.value = proposal.id;
+  try {
+    const { data } = await salesOrdersAPI.create({ proposal_id: proposal.id });
+    useAlert(
+      `Pedido ${data.order_number} criado/reparado. Aprove o pedido para habilitar a geração do contrato.`
+    );
+    await loadOrderOptions();
+  } catch (error) {
+    useAlert(
+      error.response?.data?.errors?.join(', ') ||
+        error.response?.data?.message ||
+        'Não foi possível criar/reparar o pedido desta proposta aceita.'
+    );
+  } finally {
+    repairingProposalId.value = null;
+  }
+};
+
 const choose = async () => {
   if (!form.sales_order_id) return;
 
@@ -117,11 +155,9 @@ const choose = async () => {
       data
     );
 
-    form.monthly_cents =
-      data.mrr_cents || data.monthly_cents || 0;
+    form.monthly_cents = data.mrr_cents || data.monthly_cents || 0;
 
-    form.one_time_cents =
-      data.one_time_cents || data.total_cents || 0;
+    form.one_time_cents = data.one_time_cents || data.total_cents || 0;
   } catch (error) {
     // Os dados obtidos na listagem continuam disponíveis.
   }
@@ -131,23 +167,41 @@ onMounted(async () => {
   loading.value = true;
 
   try {
-    const [orderResponse, templateResponse] = await Promise.all([
-      salesOrdersAPI.list(),
+    const [, templateResponse] = await Promise.all([
+      loadOrderOptions(),
       contractTemplatesAPI.list(),
     ]);
-
-    orders.value = orderResponse.data || [];
 
     templates.value = (templateResponse.data || []).filter(
       template => template.active
     );
 
-    form.contract_template_id =
-      templates.value[0]?.id || '';
+    form.contract_template_id = templates.value[0]?.id || '';
 
     if (route.query.orderId) {
-      form.sales_order_id = route.query.orderId;
-      await choose();
+      const eligible = orders.value.find(
+        item => String(item.id) === String(route.query.orderId)
+      );
+      if (eligible) {
+        form.sales_order_id = route.query.orderId;
+        await choose();
+      } else {
+        const pending = awaitingApproval.value.find(
+          item => String(item.id) === String(route.query.orderId)
+        );
+        const contracted = alreadyContracted.value.find(
+          item => String(item.id) === String(route.query.orderId)
+        );
+        if (pending) {
+          useAlert(
+            `O pedido ${pending.order_number} existe, mas precisa ser aprovado antes de gerar contrato.`
+          );
+        } else if (contracted) {
+          useAlert(
+            `O pedido ${contracted.order_number} já possui o contrato ${contracted.contract?.contract_number || ''}.`
+          );
+        }
+      }
     }
   } finally {
     loading.value = false;
@@ -165,9 +219,7 @@ const create = async () => {
     created.value = response.data;
     step.value = 4;
 
-    useAlert(
-      'Contrato criado. Agora revise o PDF e defina a assinatura.'
-    );
+    useAlert('Contrato criado. Agora revise o PDF e defina a assinatura.');
   } catch (error) {
     useAlert(
       error.response?.data?.errors?.join(', ') ||
@@ -202,9 +254,17 @@ const prepareSignature = async mode => {
     });
     created.value = { ...created.value, ...data };
     signatureMode.value = mode;
-    useAlert(mode === 'manual' ? 'Assinatura manual preparada.' : 'Fluxo com provedor preparado. O envio externo ainda precisa ser executado pela integração configurada.');
+    useAlert(
+      mode === 'manual'
+        ? 'Assinatura manual preparada.'
+        : 'Fluxo com provedor preparado. O envio externo ainda precisa ser executado pela integração configurada.'
+    );
   } catch (error) {
-    useAlert(error.response?.data?.message || error.response?.data?.errors?.join(', ') || 'Não foi possível preparar a assinatura.');
+    useAlert(
+      error.response?.data?.message ||
+        error.response?.data?.errors?.join(', ') ||
+        'Não foi possível preparar a assinatura.'
+    );
   } finally {
     saving.value = false;
   }
@@ -212,22 +272,33 @@ const prepareSignature = async mode => {
 
 const registerProviderResult = async () => {
   if (!created.value || !signatureExternalId.value) {
-    useAlert('Informe o identificador retornado pelo provedor após um envio externo real.');
+    useAlert(
+      'Informe o identificador retornado pelo provedor após um envio externo real.'
+    );
     return;
   }
   saving.value = true;
   try {
-    const { data } = await contractsAPI.sendForSignature(created.value.id, { external_id: signatureExternalId.value });
+    const { data } = await contractsAPI.sendForSignature(created.value.id, {
+      external_id: signatureExternalId.value,
+    });
     created.value = { ...created.value, ...data };
-    useAlert('Identificador do envio externo registrado. O CRM não simula uma assinatura digital.');
+    useAlert(
+      'Identificador do envio externo registrado. O CRM não simula uma assinatura digital.'
+    );
   } catch (error) {
-    useAlert(error.response?.data?.message || 'Não foi possível registrar o envio do provedor.');
+    useAlert(
+      error.response?.data?.message ||
+        'Não foi possível registrar o envio do provedor.'
+    );
   } finally {
     saving.value = false;
   }
 };
 
-const onSignedFile = event => { signedFile.value = event.target.files?.[0] || null; };
+const onSignedFile = event => {
+  signedFile.value = event.target.files?.[0] || null;
+};
 
 const registerManualSignature = async () => {
   if (!created.value || !signedByName.value.trim()) {
@@ -236,20 +307,26 @@ const registerManualSignature = async () => {
   }
   saving.value = true;
   try {
-    const { data } = await contractsAPI.registerManualSignature(created.value.id, {
-      signed_by_name: signedByName.value,
-      signed_at: signedAt.value,
-      signed_file: signedFile.value,
-    });
+    const { data } = await contractsAPI.registerManualSignature(
+      created.value.id,
+      {
+        signed_by_name: signedByName.value,
+        signed_at: signedAt.value,
+        signed_file: signedFile.value,
+      }
+    );
     created.value = { ...created.value, ...data };
     useAlert('Assinatura manual registrada e contrato ativado.');
   } catch (error) {
-    useAlert(error.response?.data?.message || error.response?.data?.errors?.join(', ') || 'Não foi possível registrar a assinatura manual.');
+    useAlert(
+      error.response?.data?.message ||
+        error.response?.data?.errors?.join(', ') ||
+        'Não foi possível registrar a assinatura manual.'
+    );
   } finally {
     saving.value = false;
   }
 };
-
 
 const back = () => {
   if (step.value === 1) {
@@ -291,13 +368,11 @@ const next = () => {
               Contratos
             </button>
 
-            <h2 class="text-2xl font-bold text-n-slate-12">
-              Novo Contrato
-            </h2>
+            <h2 class="text-2xl font-bold text-n-slate-12">Novo Contrato</h2>
 
             <p class="mt-1 text-sm text-n-slate-11">
-              Crie um contrato a partir de uma venda e acompanhe todo o
-              processo até a assinatura.
+              Crie um contrato a partir de uma venda e acompanhe todo o processo
+              até a assinatura.
             </p>
           </div>
         </div>
@@ -341,16 +416,9 @@ const next = () => {
                     : 'bg-n-slate-3 text-n-slate-11'
               "
             >
-              <i
-                v-if="step > index + 1"
-                class="i-lucide-check size-5"
-              />
+              <i v-if="step > index + 1" class="i-lucide-check size-5" />
 
-              <i
-                v-else
-                :class="item.icon"
-                class="size-5"
-              />
+              <i v-else :class="item.icon" class="size-5" />
             </span>
 
             <div>
@@ -415,9 +483,7 @@ const next = () => {
               </span>
 
               <div>
-                <h3 class="font-bold text-n-slate-12">
-                  Cliente e origem
-                </h3>
+                <h3 class="font-bold text-n-slate-12">Cliente e origem</h3>
 
                 <p class="text-xs text-n-slate-11">
                   Selecione a venda que dará origem ao contrato.
@@ -435,47 +501,170 @@ const next = () => {
                 class="mt-2 w-full rounded-xl border border-slate-200 bg-n-solid-2 p-3 text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                 @change="choose"
               >
-                <option value="">
-                  Selecione um pedido
-                </option>
+                <option value="">Selecione um pedido</option>
 
-                <option
-                  v-for="item in orders"
-                  :key="item.id"
-                  :value="item.id"
-                >
+                <option v-for="item in orders" :key="item.id" :value="item.id">
                   {{ item.order_number }} —
-                  {{ item.contact?.name || item.deal?.title || 'Cliente' }}
-                  — {{ money(item.total_cents) }}
+                  {{
+                    item.company?.trade_name ||
+                    item.company?.name ||
+                    item.contact?.name ||
+                    'Cliente'
+                  }}
+                  — {{ item.deal?.title || 'Venda direta' }} —
+                  {{ money(item.total_cents) }}
                 </option>
               </select>
+
+              <div
+                v-if="!orders.length"
+                class="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"
+              >
+                <strong
+                  >Nenhum pedido aprovado disponível para gerar
+                  contrato.</strong
+                >
+                <p class="mt-1 text-xs">
+                  Verifique abaixo se existe pedido aguardando aprovação ou
+                  proposta aceita que ficou sem pedido.
+                </p>
+              </div>
+
+              <div
+                v-if="missingOrderProposals.length"
+                class="mt-4 rounded-xl border border-red-200 bg-red-50 p-4"
+              >
+                <div class="flex items-start gap-3">
+                  <i
+                    class="i-lucide-triangle-alert mt-0.5 size-5 text-red-600"
+                  />
+                  <div class="min-w-0 flex-1">
+                    <strong class="text-sm text-red-800">
+                      Proposta aceita sem Pedido — CRM-ORD-CONTRACT-01
+                    </strong>
+                    <p class="mt-1 text-xs text-red-700">
+                      O aceite comercial foi preservado, mas o Pedido não foi
+                      encontrado. Use a ação abaixo para reparar o vínculo sem
+                      duplicar a venda.
+                    </p>
+                  </div>
+                </div>
+                <div
+                  v-for="proposal in missingOrderProposals"
+                  :key="proposal.id"
+                  class="mt-3 flex flex-col gap-2 rounded-lg border border-red-100 bg-white p-3 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div class="text-xs">
+                    <strong class="block text-sm text-n-slate-12">
+                      {{ proposal.proposal_number }} v{{
+                        proposal.version_number || 1
+                      }}
+                      —
+                      {{
+                        proposal.company?.trade_name ||
+                        proposal.company?.name ||
+                        proposal.contact?.name ||
+                        'Cliente'
+                      }}
+                    </strong>
+                    <span class="text-n-slate-11">
+                      {{ proposal.deal?.title || proposal.title }} ·
+                      {{ money(proposal.total_cents) }}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    class="rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white disabled:opacity-50"
+                    :disabled="Boolean(repairingProposalId)"
+                    @click="repairProposalOrder(proposal)"
+                  >
+                    {{
+                      repairingProposalId === proposal.id
+                        ? 'Reparando...'
+                        : 'Criar/Reparar pedido'
+                    }}
+                  </button>
+                </div>
+              </div>
+
+              <div
+                v-if="awaitingApproval.length"
+                class="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-4"
+              >
+                <strong class="text-sm text-blue-800"
+                  >Pedidos aguardando aprovação</strong
+                >
+                <p class="mt-1 text-xs text-blue-700">
+                  Estes pedidos existem, mas ainda não podem originar contrato.
+                </p>
+                <div
+                  v-for="pending in awaitingApproval"
+                  :key="pending.id"
+                  class="mt-3 flex items-center justify-between gap-3 rounded-lg border border-blue-100 bg-white p-3 text-xs"
+                >
+                  <div>
+                    <strong class="block text-sm"
+                      >{{ pending.order_number }} —
+                      {{
+                        pending.company?.trade_name ||
+                        pending.company?.name ||
+                        pending.contact?.name ||
+                        'Cliente'
+                      }}</strong
+                    >
+                    <span class="text-n-slate-11"
+                      >{{ pending.deal?.title || 'Venda direta' }} ·
+                      {{ money(pending.total_cents) }} ·
+                      {{ pending.status }}</span
+                    >
+                  </div>
+                  <button
+                    type="button"
+                    class="rounded-lg border border-blue-300 px-3 py-2 font-semibold text-blue-700"
+                    @click="openOrder(pending)"
+                  >
+                    Abrir pedido
+                  </button>
+                </div>
+              </div>
+
+              <div
+                v-if="alreadyContracted.length"
+                class="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4"
+              >
+                <strong class="text-sm text-emerald-800"
+                  >Pedidos que já possuem contrato</strong
+                >
+                <div
+                  v-for="item in alreadyContracted"
+                  :key="item.id"
+                  class="mt-2 text-xs text-emerald-800"
+                >
+                  {{ item.order_number }} —
+                  {{ item.contract?.contract_number || 'Contrato existente' }}
+                </div>
+              </div>
 
               <div
                 v-if="order"
                 class="mt-4 grid gap-3 rounded-xl border border-blue-100 bg-blue-50 p-4 sm:grid-cols-3"
               >
                 <div>
-                  <p class="text-xs font-medium text-blue-600">
-                    Cliente
-                  </p>
+                  <p class="text-xs font-medium text-blue-600">Cliente</p>
                   <strong class="text-sm text-n-slate-12">
                     {{ order.contact?.name || order.deal?.title || '—' }}
                   </strong>
                 </div>
 
                 <div>
-                  <p class="text-xs font-medium text-blue-600">
-                    Negócio
-                  </p>
+                  <p class="text-xs font-medium text-blue-600">Negócio</p>
                   <strong class="text-sm text-n-slate-12">
                     {{ order.deal?.title || '—' }}
                   </strong>
                 </div>
 
                 <div>
-                  <p class="text-xs font-medium text-blue-600">
-                    Pedido
-                  </p>
+                  <p class="text-xs font-medium text-blue-600">Pedido</p>
                   <strong class="text-sm text-n-slate-12">
                     {{ order.order_number }}
                   </strong>
@@ -516,18 +705,10 @@ const next = () => {
                   v-model="form.contract_type"
                   class="mt-2 w-full rounded-xl border border-slate-200 bg-n-solid-2 p-3 outline-none focus:border-violet-400"
                 >
-                  <option value="service">
-                    Prestação de Serviços
-                  </option>
-                  <option value="supply">
-                    Fornecimento
-                  </option>
-                  <option value="commercial">
-                    Comercial / Vendas
-                  </option>
-                  <option value="partnership">
-                    Parceria
-                  </option>
+                  <option value="service">Prestação de Serviços</option>
+                  <option value="supply">Fornecimento</option>
+                  <option value="commercial">Comercial / Vendas</option>
+                  <option value="partnership">Parceria</option>
                 </select>
               </label>
 
@@ -538,9 +719,7 @@ const next = () => {
                   v-model="form.contract_template_id"
                   class="mt-2 w-full rounded-xl border border-slate-200 bg-n-solid-2 p-3 outline-none focus:border-violet-400"
                 >
-                  <option value="">
-                    Sem modelo
-                  </option>
+                  <option value="">Sem modelo</option>
 
                   <option
                     v-for="template in templates"
@@ -580,55 +759,41 @@ const next = () => {
               <i class="i-lucide-file-check-2 size-5" />
             </span>
 
-            <h3 class="mt-4 text-lg font-bold">
-              Resumo do contrato
-            </h3>
+            <h3 class="mt-4 text-lg font-bold">Resumo do contrato</h3>
 
-            <p class="text-sm text-blue-100">
-              Confira os principais dados.
-            </p>
+            <p class="text-sm text-blue-100">Confira os principais dados.</p>
           </div>
 
           <dl class="space-y-4 p-5 text-sm">
             <div>
-              <dt class="text-n-slate-11">
-                Cliente
-              </dt>
+              <dt class="text-n-slate-11">Cliente</dt>
               <dd class="mt-1 font-semibold text-n-slate-12">
                 {{ order?.contact?.name || '—' }}
               </dd>
             </div>
 
             <div>
-              <dt class="text-n-slate-11">
-                Origem
-              </dt>
+              <dt class="text-n-slate-11">Origem</dt>
               <dd class="mt-1 font-semibold text-n-slate-12">
                 {{ order?.order_number || '—' }}
               </dd>
             </div>
 
             <div>
-              <dt class="text-n-slate-11">
-                Tipo
-              </dt>
+              <dt class="text-n-slate-11">Tipo</dt>
               <dd class="mt-1 font-semibold text-n-slate-12">
                 {{ contractTypeLabel }}
               </dd>
             </div>
 
             <div>
-              <dt class="text-n-slate-11">
-                Modelo
-              </dt>
+              <dt class="text-n-slate-11">Modelo</dt>
               <dd class="mt-1 font-semibold text-n-slate-12">
                 {{ selectedTemplate?.name || 'Sem modelo' }}
               </dd>
             </div>
 
-            <div
-              class="rounded-xl bg-emerald-50 p-4"
-            >
+            <div class="rounded-xl bg-emerald-50 p-4">
               <dt class="text-xs font-semibold text-emerald-700">
                 VALOR MENSAL
               </dt>
@@ -679,18 +844,10 @@ const next = () => {
               class="bg-n-slate-2 text-left text-xs uppercase tracking-wide text-n-slate-11"
             >
               <tr>
-                <th class="p-4">
-                  Produto / Serviço
-                </th>
-                <th class="p-4">
-                  Quantidade
-                </th>
-                <th class="p-4">
-                  Valor único
-                </th>
-                <th class="p-4">
-                  MRR
-                </th>
+                <th class="p-4">Produto / Serviço</th>
+                <th class="p-4">Quantidade</th>
+                <th class="p-4">Valor único</th>
+                <th class="p-4">MRR</th>
               </tr>
             </thead>
 
@@ -724,31 +881,18 @@ const next = () => {
                 </td>
 
                 <td class="p-4 font-semibold">
-                  {{
-                    money(
-                      item.initial_total_cents ||
-                        item.one_time_cents
-                    )
-                  }}
+                  {{ money(item.initial_total_cents || item.one_time_cents) }}
                 </td>
 
                 <td class="p-4">
                   <strong class="text-indigo-700">
-                    {{
-                      money(
-                        item.recurring_cents ||
-                          item.monthly_cents
-                      )
-                    }}
+                    {{ money(item.recurring_cents || item.monthly_cents) }}
                   </strong>
                 </td>
               </tr>
 
               <tr v-if="!items.length">
-                <td
-                  colspan="4"
-                  class="p-14 text-center"
-                >
+                <td colspan="4" class="p-14 text-center">
                   <span
                     class="mx-auto grid size-14 place-content-center rounded-2xl bg-violet-50 text-violet-600"
                   >
@@ -760,8 +904,8 @@ const next = () => {
                   </h4>
 
                   <p class="mt-1 text-sm text-n-slate-11">
-                    Os itens serão herdados do pedido durante a geração
-                    do contrato.
+                    Os itens serão herdados do pedido durante a geração do
+                    contrato.
                   </p>
                 </td>
               </tr>
@@ -833,15 +977,9 @@ const next = () => {
                 v-model="form.renewal_type"
                 class="mt-2 w-full rounded-xl border border-slate-200 bg-n-solid-2 p-3 outline-none focus:border-emerald-400"
               >
-                <option value="automatic">
-                  Automática
-                </option>
-                <option value="manual">
-                  Manual
-                </option>
-                <option value="none">
-                  Sem renovação
-                </option>
+                <option value="automatic">Automática</option>
+                <option value="manual">Manual</option>
+                <option value="none">Sem renovação</option>
               </select>
             </label>
 
@@ -861,12 +999,12 @@ const next = () => {
                 type="number"
                 min="0"
                 class="mt-2 w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-emerald-400"
-              readonly title="Valor preservado do pedido de origem" />
+                readonly
+                title="Valor preservado do pedido de origem"
+              />
             </label>
 
-            <label
-              class="text-sm font-medium text-n-slate-12 md:col-span-2"
-            >
+            <label class="text-sm font-medium text-n-slate-12 md:col-span-2">
               Cláusulas / observações
 
               <textarea
@@ -890,9 +1028,7 @@ const next = () => {
               <i class="i-lucide-badge-dollar-sign size-5" />
             </span>
 
-            <p class="mt-5 text-sm text-indigo-100">
-              Valor mensal (MRR)
-            </p>
+            <p class="mt-5 text-sm text-indigo-100">Valor mensal (MRR)</p>
 
             <strong class="mt-1 block text-3xl font-bold">
               {{ money(form.monthly_cents) }}
@@ -900,9 +1036,7 @@ const next = () => {
 
             <div class="my-5 border-t border-white/15" />
 
-            <p class="text-sm text-indigo-100">
-              Valor único
-            </p>
+            <p class="text-sm text-indigo-100">Valor único</p>
 
             <strong class="mt-1 block text-xl">
               {{ money(form.one_time_cents) }}
@@ -912,33 +1046,23 @@ const next = () => {
           <section
             class="rounded-2xl border border-slate-200 bg-n-solid-2 p-5 shadow-sm"
           >
-            <h3 class="font-bold text-n-slate-12">
-              Resumo financeiro
-            </h3>
+            <h3 class="font-bold text-n-slate-12">Resumo financeiro</h3>
 
             <dl class="mt-4 space-y-3 text-sm">
               <div class="flex justify-between gap-3">
-                <dt class="text-n-slate-11">
-                  Vigência
-                </dt>
-                <dd class="font-semibold">
-                  {{ form.term_months }} meses
-                </dd>
+                <dt class="text-n-slate-11">Vigência</dt>
+                <dd class="font-semibold">{{ form.term_months }} meses</dd>
               </div>
 
               <div class="flex justify-between gap-3">
-                <dt class="text-n-slate-11">
-                  Renovação
-                </dt>
+                <dt class="text-n-slate-11">Renovação</dt>
                 <dd class="font-semibold">
                   {{ renewalLabel }}
                 </dd>
               </div>
 
               <div class="flex justify-between gap-3">
-                <dt class="text-n-slate-11">
-                  Reajuste
-                </dt>
+                <dt class="text-n-slate-11">Reajuste</dt>
                 <dd class="font-semibold">
                   {{ form.adjustment_index || '—' }}
                 </dd>
@@ -949,10 +1073,7 @@ const next = () => {
       </div>
 
       <!-- ETAPA 4 -->
-      <div
-        v-else
-        class="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]"
-      >
+      <div v-else class="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
         <section
           class="overflow-hidden rounded-2xl border border-slate-200 bg-n-solid-2 shadow-sm"
         >
@@ -974,8 +1095,8 @@ const next = () => {
                 <p class="text-sm text-emerald-700">
                   Contrato
                   <strong>{{ created?.contract_number }}</strong>
-                  criado com sucesso. Revise o documento e defina a
-                  etapa de assinatura.
+                  criado com sucesso. Revise o documento e defina a etapa de
+                  assinatura.
                 </p>
               </div>
             </div>
@@ -1007,19 +1128,35 @@ const next = () => {
               class="rounded-2xl border border-amber-200 bg-amber-50/50 p-5 text-left transition hover:border-amber-300 hover:bg-amber-50"
               @click="prepareSignature('manual')"
             >
-              <span class="grid size-11 place-content-center rounded-xl bg-amber-100 text-amber-700"><i class="i-lucide-pen-line size-5" /></span>
-              <strong class="mt-4 block text-amber-900">Preparar assinatura manual</strong>
-              <p class="mt-1 text-xs text-n-slate-11">Muda o contrato para aguardando assinatura, sem fingir que houve assinatura digital.</p>
+              <span
+                class="grid size-11 place-content-center rounded-xl bg-amber-100 text-amber-700"
+                ><i class="i-lucide-pen-line size-5"
+              /></span>
+              <strong class="mt-4 block text-amber-900"
+                >Preparar assinatura manual</strong
+              >
+              <p class="mt-1 text-xs text-n-slate-11">
+                Muda o contrato para aguardando assinatura, sem fingir que houve
+                assinatura digital.
+              </p>
             </button>
 
             <button
               type="button"
               class="rounded-2xl border border-indigo-200 bg-indigo-50/50 p-5 text-left transition hover:border-indigo-300 hover:bg-indigo-50"
-              @click="signatureMode='provider'"
+              @click="signatureMode = 'provider'"
             >
-              <span class="grid size-11 place-content-center rounded-xl bg-indigo-100 text-indigo-700"><i class="i-lucide-cloud-cog size-5" /></span>
-              <strong class="mt-4 block text-indigo-900">Assinatura por provedor</strong>
-              <p class="mt-1 text-xs text-n-slate-11">Use somente quando houver integração externa configurada e retorno real do provedor.</p>
+              <span
+                class="grid size-11 place-content-center rounded-xl bg-indigo-100 text-indigo-700"
+                ><i class="i-lucide-cloud-cog size-5"
+              /></span>
+              <strong class="mt-4 block text-indigo-900"
+                >Assinatura por provedor</strong
+              >
+              <p class="mt-1 text-xs text-n-slate-11">
+                Use somente quando houver integração externa configurada e
+                retorno real do provedor.
+              </p>
             </button>
 
             <button
@@ -1044,38 +1181,98 @@ const next = () => {
           </div>
 
           <div class="mx-5 mb-5 grid gap-4 lg:grid-cols-2">
-            <section class="rounded-xl border border-emerald-200 bg-emerald-50/40 p-4">
-              <h4 class="font-bold text-emerald-900">Registrar assinatura manual</h4>
-              <p class="mt-1 text-xs text-n-slate-11">Use quando o documento foi efetivamente assinado fora de um provedor digital.</p>
-              <label class="mt-3 block text-sm">Assinado por<input v-model="signedByName" class="mt-1 w-full rounded-lg border p-2" placeholder="Nome do signatário" /></label>
-              <label class="mt-3 block text-sm">Data/hora<input v-model="signedAt" type="datetime-local" class="mt-1 w-full rounded-lg border p-2" /></label>
-              <label class="mt-3 block text-sm">Documento assinado<input type="file" accept="application/pdf,image/*" class="mt-1 w-full rounded-lg border p-2" @change="onSignedFile" /></label>
-              <button class="mt-3 w-full rounded-lg bg-emerald-600 px-4 py-2 font-semibold text-white" :disabled="saving" @click="registerManualSignature">Confirmar assinatura manual</button>
+            <section
+              class="rounded-xl border border-emerald-200 bg-emerald-50/40 p-4"
+            >
+              <h4 class="font-bold text-emerald-900">
+                Registrar assinatura manual
+              </h4>
+              <p class="mt-1 text-xs text-n-slate-11">
+                Use quando o documento foi efetivamente assinado fora de um
+                provedor digital.
+              </p>
+              <label class="mt-3 block text-sm"
+                >Assinado por<input
+                  v-model="signedByName"
+                  class="mt-1 w-full rounded-lg border p-2"
+                  placeholder="Nome do signatário"
+              /></label>
+              <label class="mt-3 block text-sm"
+                >Data/hora<input
+                  v-model="signedAt"
+                  type="datetime-local"
+                  class="mt-1 w-full rounded-lg border p-2"
+              /></label>
+              <label class="mt-3 block text-sm"
+                >Documento assinado<input
+                  type="file"
+                  accept="application/pdf,image/*"
+                  class="mt-1 w-full rounded-lg border p-2"
+                  @change="onSignedFile"
+              /></label>
+              <button
+                class="mt-3 w-full rounded-lg bg-emerald-600 px-4 py-2 font-semibold text-white"
+                :disabled="saving"
+                @click="registerManualSignature"
+              >
+                Confirmar assinatura manual
+              </button>
             </section>
-            <section class="rounded-xl border border-indigo-200 bg-indigo-50/40 p-4">
+            <section
+              class="rounded-xl border border-indigo-200 bg-indigo-50/40 p-4"
+            >
               <h4 class="font-bold text-indigo-900">Integração com provedor</h4>
-              <p class="mt-1 text-xs text-n-slate-11">O CRM só registra o envio depois que a integração externa retornar um identificador real.</p>
-              <label class="mt-3 block text-sm">Provedor<select v-model="signatureProvider" class="mt-1 w-full rounded-lg border p-2"><option value="">Selecione</option><option value="clicksign">Clicksign</option><option value="docusign">DocuSign</option><option value="zoho_sign">Zoho Sign</option><option value="other">Outro</option></select></label>
-              <button class="mt-3 w-full rounded-lg border border-indigo-300 px-4 py-2 font-semibold text-indigo-700" :disabled="saving || !signatureProvider" @click="prepareSignature('provider')">Preparar integração</button>
-              <label class="mt-3 block text-sm">ID retornado pelo provedor<input v-model="signatureExternalId" class="mt-1 w-full rounded-lg border p-2" placeholder="Somente após envio externo real" /></label>
-              <button class="mt-3 w-full rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white" :disabled="saving || !signatureExternalId" @click="registerProviderResult">Registrar envio real</button>
+              <p class="mt-1 text-xs text-n-slate-11">
+                O CRM só registra o envio depois que a integração externa
+                retornar um identificador real.
+              </p>
+              <label class="mt-3 block text-sm"
+                >Provedor<select
+                  v-model="signatureProvider"
+                  class="mt-1 w-full rounded-lg border p-2"
+                >
+                  <option value="">Selecione</option>
+                  <option value="clicksign">Clicksign</option>
+                  <option value="docusign">DocuSign</option>
+                  <option value="zoho_sign">Zoho Sign</option>
+                  <option value="other">Outro</option>
+                </select></label
+              >
+              <button
+                class="mt-3 w-full rounded-lg border border-indigo-300 px-4 py-2 font-semibold text-indigo-700"
+                :disabled="saving || !signatureProvider"
+                @click="prepareSignature('provider')"
+              >
+                Preparar integração
+              </button>
+              <label class="mt-3 block text-sm"
+                >ID retornado pelo provedor<input
+                  v-model="signatureExternalId"
+                  class="mt-1 w-full rounded-lg border p-2"
+                  placeholder="Somente após envio externo real"
+              /></label>
+              <button
+                class="mt-3 w-full rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white"
+                :disabled="saving || !signatureExternalId"
+                @click="registerProviderResult"
+              >
+                Registrar envio real
+              </button>
             </section>
           </div>
 
           <div
             class="mx-5 mb-5 flex gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"
           >
-            <i
-              class="i-lucide-info mt-0.5 size-5 shrink-0 text-amber-600"
-            />
+            <i class="i-lucide-info mt-0.5 size-5 shrink-0 text-amber-600" />
 
             <div>
               <strong>Integrações de assinatura</strong>
 
               <p class="mt-1 text-amber-800">
-                DocuSign, Clicksign e Zoho Sign exigem credenciais e
-                APIs próprias. O CRM não simula o envio externo quando
-                nenhuma integração estiver configurada.
+                DocuSign, Clicksign e Zoho Sign exigem credenciais e APIs
+                próprias. O CRM não simula o envio externo quando nenhuma
+                integração estiver configurada.
               </p>
             </div>
           </div>
@@ -1091,43 +1288,33 @@ const next = () => {
               <i class="i-lucide-clipboard-check size-5" />
             </span>
 
-            <h3 class="font-bold text-n-slate-12">
-              Resumo
-            </h3>
+            <h3 class="font-bold text-n-slate-12">Resumo</h3>
           </div>
 
           <dl class="mt-5 space-y-4 text-sm">
             <div>
-              <dt class="text-n-slate-11">
-                Cliente
-              </dt>
+              <dt class="text-n-slate-11">Cliente</dt>
               <dd class="mt-1 font-semibold text-n-slate-12">
                 {{ order?.contact?.name || '—' }}
               </dd>
             </div>
 
             <div>
-              <dt class="text-n-slate-11">
-                Contrato
-              </dt>
+              <dt class="text-n-slate-11">Contrato</dt>
               <dd class="mt-1 font-semibold text-n-slate-12">
                 {{ created?.contract_number || '—' }}
               </dd>
             </div>
 
             <div>
-              <dt class="text-n-slate-11">
-                MRR
-              </dt>
+              <dt class="text-n-slate-11">MRR</dt>
               <dd class="mt-1 text-lg font-bold text-indigo-700">
                 {{ money(form.monthly_cents) }}
               </dd>
             </div>
 
             <div>
-              <dt class="text-n-slate-11">
-                Status
-              </dt>
+              <dt class="text-n-slate-11">Status</dt>
 
               <dd class="mt-2">
                 <span
@@ -1152,11 +1339,7 @@ const next = () => {
           @click="back"
         >
           <i
-            :class="
-              step === 1
-                ? 'i-lucide-x'
-                : 'i-lucide-arrow-left'
-            "
+            :class="step === 1 ? 'i-lucide-x' : 'i-lucide-arrow-left'"
             class="size-4"
           />
 

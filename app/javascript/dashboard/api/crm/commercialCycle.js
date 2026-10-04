@@ -32,6 +32,8 @@ salesOrdersAPI.downloadAttachment = (id, attachmentId) =>
   });
 
 export const contractsAPI = make('contracts');
+contractsAPI.orderOptions = () =>
+  axios.get(`${contractsAPI.url}/order_options`);
 contractsAPI.show = id => axios.get(`${contractsAPI.url}/${id}`);
 contractsAPI.pdf = id =>
   axios.get(`${contractsAPI.url}/${id}/pdf`, { responseType: 'blob' });

@@ -478,6 +478,7 @@ Rails.application.routes.draw do
               end
             end
             resources :contracts, only: [:index, :show, :create, :update] do
+              get :order_options, on: :collection
               member do
                 get :pdf
                 get :history

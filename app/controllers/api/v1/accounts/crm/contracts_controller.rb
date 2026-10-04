@@ -13,11 +13,45 @@ module Api::V1::Accounts::Crm
       render json: serialize(@contract, include_history: true)
     end
 
+    # Contract creation has a stricter source gate than the generic sales order
+    # index. Besides the selectable rows, return actionable blockers so an
+    # accepted proposal never disappears behind an empty combo.
+    def order_options
+      order_scope = visible_to_current_user(crm_scope.jrc_crm_sales_orders)
+                    .includes(:contact, :deal, :proposal, :contracts)
+                    .order(updated_at: :desc)
+
+      qualifying = order_scope.where(status: JrcCrm::SalesOrder::CONTRACT_ELIGIBLE_STATUSES).limit(100).to_a
+      eligible, already_contracted = qualifying.partition { |order| primary_contract(order).nil? }
+      awaiting_approval = order_scope.where(status: %w[draft pending]).limit(50).to_a
+
+      active_order_proposals = crm_scope.jrc_crm_sales_orders.where.not(status: 'canceled').where.not(proposal_id: nil).select(:proposal_id)
+      missing_order_proposals = visible_to_current_user(crm_scope.jrc_crm_proposals)
+                                .where(status: 'accepted')
+                                .where.not(id: active_order_proposals)
+                                .includes(:deal, :owner)
+                                .order(accepted_at: :desc, id: :desc)
+                                .limit(50)
+
+      render json: {
+        eligible_orders: eligible.map { |order| serialize_order_option(order) },
+        awaiting_approval: awaiting_approval.map { |order| serialize_order_option(order, blocker: 'approval_required') },
+        accepted_proposals_without_order: missing_order_proposals.map { |proposal| serialize_missing_order_proposal(proposal) },
+        already_contracted: already_contracted.map do |order|
+          contract = primary_contract(order)
+          serialize_order_option(order, blocker: 'contract_exists').merge(
+            contract: contract && { id: contract.id, contract_number: contract.contract_number, status: contract.status }
+          )
+        end
+      }
+    end
+
     def create
-      order = visible_to_current_user(crm_scope.jrc_crm_sales_orders).find(params.dig(:contract, :sales_order_id))
+      order = visible_to_current_user(crm_scope.jrc_crm_sales_orders).includes(:contracts).find(params.dig(:contract, :sales_order_id))
       attributes = normalized_contract_params
       contract = nil
       order.with_lock do
+        ensure_order_eligible_for_contract!(order)
         contract = crm_scope.jrc_crm_contracts.create!(attributes.merge(
           deal: order.deal, contact: order.contact, owner: order.owner, business_unit: order.business_unit
         ))
@@ -167,6 +201,52 @@ module Api::V1::Accounts::Crm
     end
 
     private
+
+    def ensure_order_eligible_for_contract!(order)
+      unless JrcCrm::SalesOrder::CONTRACT_ELIGIBLE_STATUSES.include?(order.status)
+        order.errors.add(:status, 'O pedido precisa estar aprovado antes de gerar contrato.')
+        raise ActiveRecord::RecordInvalid, order
+      end
+
+      existing = primary_contract(order)
+      return unless existing
+
+      order.errors.add(:base, "O pedido #{order.order_number} ja possui o contrato #{existing.contract_number}.")
+      raise ActiveRecord::RecordInvalid, order
+    end
+
+    def primary_contract(order)
+      order.contracts.where(source_contract_id: nil).order(:id).first
+    end
+
+    def serialize_order_option(order, blocker: nil)
+      company = order.deal&.company
+      company ||= JrcCustomers::Company.where(account_id: crm_scope.id).find_by(id: order.contact&.company_id) if order.contact&.respond_to?(:company_id)
+      {
+        id: order.id, order_number: order.order_number, status: order.status,
+        total_cents: order.total_cents, monthly_cents: order.monthly_cents, blocker: blocker,
+        contact: order.contact && { id: order.contact.id, name: order.contact.name, email: order.contact.email, phone_number: order.contact.phone_number },
+        company: company && { id: company.id, name: company.name, trade_name: company.respond_to?(:trade_name) ? company.trade_name : nil },
+        deal: order.deal && { id: order.deal.id, title: order.deal.title, status: order.deal.status },
+        proposal: order.proposal && { id: order.proposal.id, proposal_number: order.proposal.proposal_number, version_number: order.proposal.version_number },
+        updated_at: order.updated_at
+      }
+    end
+
+    def serialize_missing_order_proposal(proposal)
+      deal = proposal.deal
+      contact = proposal.customer_contact
+      company = deal&.company
+      company ||= JrcCustomers::Company.where(account_id: crm_scope.id).find_by(id: contact&.company_id) if contact&.respond_to?(:company_id)
+      {
+        id: proposal.id, proposal_number: proposal.proposal_number, version_number: proposal.version_number,
+        title: proposal.title, status: proposal.status, accepted_at: proposal.accepted_at,
+        total_cents: proposal.financial_summary[:total_cents], monthly_cents: proposal.financial_summary[:monthly_cents],
+        contact: contact && { id: contact.id, name: contact.name, email: contact.email },
+        company: company && { id: company.id, name: company.name, trade_name: company.respond_to?(:trade_name) ? company.trade_name : nil },
+        deal: deal && { id: deal.id, title: deal.title, status: deal.status }
+      }
+    end
 
     def set_contract
       @contract = visible_to_current_user(crm_scope.jrc_crm_contracts).includes(

@@ -1,0 +1,36 @@
+{
+  "delivery": "JRC CRM Metas - Proximas Acoes",
+  "date": "2026-10-04",
+  "scope": "goals-next-actions",
+  "files": [
+    {
+      "path": "app/controllers/api/v1/accounts/crm/goals_controller.rb",
+      "sha256": "1ab452a0815707f3ab596563ca0a78101197c94710e9a9dabad46fea1d6a72de"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/crm/views/goals/GoalsView.vue",
+      "sha256": "d60af4776c6e9a99d2ba7f728cdce596188e6de8f89d1928bcd7d4ac9eb4ca20"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/crm/views/deals/DealsIndex.vue",
+      "sha256": "27cbef613a50d5c3f7826443ba51007cde9b9eb65ae493d2f3ddaade27bf2ecc"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/crm/views/spec/CommercialViews.spec.js",
+      "sha256": "ce76fad4fa750d2cbea0bad52ecf82128567aaf66ecf28ca1cc281cc975bd0ec"
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/crm/commercial_flow_spec.rb",
+      "sha256": "62150c315260a924e718a3e2c6ccfe54c63677be57d18e17a1d7fd2aae9330fb"
+    },
+    {
+      "path": "JRC-CRM-METAS-PROXIMAS-ACOES-EVOLUCAO-20261004.md",
+      "sha256": "7d1eb9b622a379e2f1e8d1c952ffd22d02c0cd619a91b4c8c07180b6e33a990b"
+    },
+    {
+      "path": "JRC-CRM-METAS-HOMOLOGACAO-20261004.md",
+      "sha256": "fab9565928c1a0ae6d3e8845be0b3a85e1ea783846e2fb8c73a97085ce2918e9"
+    }
+  ],
+  "migrations_added": 0
+}

@@ -73,6 +73,7 @@ RSpec.describe 'Consolidated commercial protections', type: :request do
 
   it 'keeps the order financial snapshot in a contract despite contradictory payload values' do
     order = create_order_from_proposal
+    order.update!(status: 'approved')
     post "#{url}/contracts", params: { contract: { sales_order_id: order.id, status: 'draft',
       one_time_cents: 1, monthly_cents: 1, payment_condition: 'cash' } }, headers: headers, as: :json
     expect(response).to have_http_status(:created)
@@ -83,6 +84,41 @@ RSpec.describe 'Consolidated commercial protections', type: :request do
     patch "#{url}/contracts/#{contract.id}", params: { contract: { monthly_cents: 1 } }, headers: headers, as: :json
     expect(response).to have_http_status(:unprocessable_entity)
     expect(contract.reload.monthly_cents).to eq(order.monthly_cents)
+  end
+
+  it 'explains contract source blockers and allows explicit repair of an accepted proposal without an order' do
+    proposal
+    get "#{url}/contracts/order_options", headers: headers, as: :json
+    expect(response).to have_http_status(:ok)
+    missing = response.parsed_body.fetch('accepted_proposals_without_order')
+    expect(missing.map { |row| row.fetch('id') }).to include(proposal.id)
+    expect(response.parsed_body.fetch('eligible_orders')).to be_empty
+
+    post "#{url}/sales_orders", params: { proposal_id: proposal.id }, headers: headers, as: :json
+    expect(response).to have_http_status(:created)
+    order = JrcCrm::SalesOrder.find(response.parsed_body.fetch('id'))
+
+    get "#{url}/contracts/order_options", headers: headers, as: :json
+    pending = response.parsed_body.fetch('awaiting_approval')
+    expect(pending.map { |row| row.fetch('id') }).to include(order.id)
+    expect(response.parsed_body.fetch('accepted_proposals_without_order')).to be_empty
+
+    post "#{url}/contracts", params: { contract: { sales_order_id: order.id, status: 'draft' } }, headers: headers, as: :json
+    expect(response).to have_http_status(:unprocessable_entity)
+
+    order.update!(status: 'approved')
+    get "#{url}/contracts/order_options", headers: headers, as: :json
+    expect(response.parsed_body.fetch('eligible_orders').map { |row| row.fetch('id') }).to include(order.id)
+  end
+
+  it 'prevents a second primary contract for the same approved order' do
+    order = create_order_from_proposal
+    order.update!(status: 'approved')
+    post "#{url}/contracts", params: { contract: { sales_order_id: order.id, status: 'draft' } }, headers: headers, as: :json
+    expect(response).to have_http_status(:created)
+
+    post "#{url}/contracts", params: { contract: { sales_order_id: order.id, status: 'draft' } }, headers: headers, as: :json
+    expect(response).to have_http_status(:unprocessable_entity)
   end
 
   it 'preserves activities when deleting an unconverted lead' do
@@ -108,6 +144,7 @@ RSpec.describe 'Consolidated commercial protections', type: :request do
       items: [{ name: 'Direct', quantity: 1, unit_cents: 10_000 }] } }, headers: headers, as: :json
     expect(response).to have_http_status(:created)
     order_id = response.parsed_body.fetch('id')
+    JrcCrm::SalesOrder.find(order_id).update!(status: 'approved')
     post "#{url}/contracts", params: { contract: { sales_order_id: order_id, status: 'draft' } }, headers: headers, as: :json
     expect(response).to have_http_status(:created)
     get "#{url}/customers/#{contact.id}", headers: headers, as: :json

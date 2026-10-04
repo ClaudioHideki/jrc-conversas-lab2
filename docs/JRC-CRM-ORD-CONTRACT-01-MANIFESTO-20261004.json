@@ -1,0 +1,34 @@
+{
+  "bug": "CRM-ORD-CONTRACT-01",
+  "date": "2026-10-04",
+  "priority": "blocking",
+  "base_package": "JRC-CONVERSAS-LAB2-CRM-PEDIDOS-INTEGRIDADE-VINCULOS-INTEGRADO-CANDIDATO-20261004.zip",
+  "base_sha256": "b3901bf26a6ec23d05d8a33e1dfb018b22931afe0c589bb268e6e1d8c2db7540",
+  "scope": [
+    "contract order source diagnostics",
+    "accepted proposal without order repair",
+    "contract order eligibility gate",
+    "duplicate primary contract protection",
+    "contract wizard UX"
+  ],
+  "eligible_order_statuses": [
+    "approved",
+    "separating",
+    "invoiced",
+    "shipped",
+    "completed"
+  ],
+  "read_only_diagnostic_endpoint": "GET /api/v1/accounts/:account_id/crm/contracts/order_options",
+  "repair_action": "POST existing sales_orders create with proposal_id",
+  "database_migration_required": false,
+  "runtime_hardcode": false,
+  "validation": {
+    "ruby_syntax": "passed",
+    "javascript_syntax": "passed",
+    "vue_script_syntax": "passed",
+    "zip_integrity": "pending_package",
+    "rspec": "not_executed_bundle_unavailable",
+    "vite_build": "not_executed_pnpm_unavailable",
+    "docker": "not_executed"
+  }
+}

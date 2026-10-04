@@ -4,6 +4,7 @@ RSpec.describe 'CRM commercial flow integration', type: :request do
   let(:account) { create(:account) }
   let(:admin) { create(:user, account: account, role: :administrator) }
   let(:headers) { admin.create_new_auth_token }
+  let(:contact) { create(:contact, account: account) }
   let(:orders_url) { "/api/v1/accounts/#{account.id}/crm/sales_orders" }
 
   before do
@@ -32,8 +33,9 @@ RSpec.describe 'CRM commercial flow integration', type: :request do
          params: {
            sales_order: {
              owner_id: admin.id,
+             contact_id: contact.id,
              source_type: 'manual',
-             status: 'approved',
+             status: 'draft',
              sold_at: Time.current,
              discount_cents: 0,
              shipping_cents: 0,
@@ -55,6 +57,7 @@ RSpec.describe 'CRM commercial flow integration', type: :request do
     patch "#{orders_url}/#{order_id}",
           params: {
             sales_order: {
+              status: 'approved',
               items: [
                 { name: 'Licença', quantity: 1, unit_cents: 5_000_000, one_time_cents: 5_000_000,
                   recurring_cents: 250_000 }
@@ -88,6 +91,10 @@ RSpec.describe 'CRM commercial flow integration', type: :request do
     expect(response.parsed_body.slice('realized_cents', 'attainment')).to eq(
       'realized_cents' => 5_000_000, 'attainment' => 50.0
     )
+    expect(response.parsed_body).to include(
+      'pipeline_coverage_percent', 'forecast_coverage_percent', 'expected_progress_percent', 'next_actions'
+    )
+    expect(response.parsed_body['next_actions']).to be_an(Array)
   end
 
   it 'reverses unpaid commission and cancels the operational request when the order is canceled' do
@@ -95,6 +102,7 @@ RSpec.describe 'CRM commercial flow integration', type: :request do
          params: {
            sales_order: {
              owner_id: admin.id,
+             contact_id: contact.id,
              source_type: 'manual',
              status: 'approved',
              items: [{ name: 'Projeto', quantity: 1, unit_cents: 100_000, one_time_cents: 100_000 }]
@@ -152,6 +160,7 @@ RSpec.describe 'CRM commercial flow integration', type: :request do
          params: {
            sales_order: {
              owner_id: admin.id,
+             contact_id: contact.id,
              status: 'approved',
              items: [{ name: 'Implantação', quantity: 1, unit_cents: 300_000, one_time_cents: 300_000 }]
            }

@@ -64,6 +64,7 @@ module JrcCrm
     has_many :backoffice_requests, class_name: 'JrcCrm::BackofficeRequest', dependent: :destroy
     has_many :invoices, class_name: 'JrcCrm::Invoice', dependent: :restrict_with_error
     ORIGINS = %w[proposal_deal direct_sale renewal expansion].freeze
+    CONTRACT_ELIGIBLE_STATUSES = %w[approved separating invoiced shipped completed].freeze
 
     validates :source_type, inclusion: { in: %w[proposal deal manual] }
     validates :order_origin, inclusion: { in: ORIGINS }
