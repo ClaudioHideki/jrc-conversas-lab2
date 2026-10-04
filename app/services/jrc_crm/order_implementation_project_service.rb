@@ -44,8 +44,8 @@ module JrcCrm
           visibility: 'account',
           contact_id: @order.contact_id,
           company_id: company&.id,
-          starts_on: Date.current,
-          due_on: due_on,
+          starts_on: Date.current.iso8601,
+          due_on: due_on.iso8601,
           priority: normalized_priority
         }.compact,
         template: template,
