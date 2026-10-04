@@ -27,7 +27,7 @@ class JrcCustomers::DirectoryQuery
                                                .where('normalized_value LIKE ?', "%#{digits}%").select(:contact_id)
       contacts = contacts.or(@account.contacts.where(id: numeric_points))
     end
-    matched = scope.where('name ILIKE :q OR trade_name ILIKE :q OR domain ILIKE :q OR phone_number ILIKE :q OR email ILIKE :q', q: pattern(term))
+    matched = scope.where('customer_code ILIKE :q OR name ILIKE :q OR trade_name ILIKE :q OR domain ILIKE :q OR phone_number ILIKE :q OR email ILIKE :q', q: pattern(term))
     matched = matched.or(scope.where("regexp_replace(phone_number, '[^0-9]', '', 'g') LIKE ?", "%#{digits}%")) if numeric_query
     normalized = JrcCustomers::TaxIdentifier.normalize(term)
     matched = matched.or(scope.where('tax_id LIKE ?', "#{ActiveRecord::Base.sanitize_sql_like(normalized)}%")) if normalized.present? && normalized.match?(/\A[A-Z0-9]+\z/)

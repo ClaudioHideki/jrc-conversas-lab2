@@ -31,6 +31,7 @@ module JrcCrm
       end
 
       if @proposal.accepted?
+        JrcCrm::AcceptedProposalLifecycleService.new(proposal: @proposal, actor: @proposal.owner).call
         redirect_to jrc_crm_public_proposal_path(account_id: @proposal.account_id, token: params[:token], accepted: 1)
         return
       end
@@ -53,9 +54,8 @@ module JrcCrm
           event_type: 'accepted',
           description: 'Proposta aceita pelo cliente com evidência digital'
         )
-        won_stage = @proposal.deal.pipeline.stages.active.find_by(is_won: true)
-        JrcCrm::DealPipelineService.new(deal: @proposal.deal, stage: won_stage, actor: nil).call if won_stage
       end
+      JrcCrm::AcceptedProposalLifecycleService.new(proposal: @proposal.reload, actor: @proposal.owner).call
       redirect_to jrc_crm_public_proposal_path(account_id: @proposal.account_id, token: params[:token], accepted: 1)
     end
 

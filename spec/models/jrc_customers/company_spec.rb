@@ -34,6 +34,16 @@ RSpec.describe JrcCustomers::Company do
     company.parent_company_id = child.id
     expect(company).not_to be_valid
   end
+
+  it 'supports a primary relationship with separate secondary classifications and tags' do
+    company.relationship_type = 'customer'
+    company.relationship_tags = %w[partner supplier]
+    company.tags = ['VIP', 'Strategic']
+    expect(company).to be_valid
+    company.relationship_tags << 'customer'
+    expect(company).not_to be_valid
+    expect(company.errors[:relationship_tags]).not_to be_empty
+  end
   it 'rejects a responsible user outside the account' do
     company.owner = create(:user, account: other)
     expect(company).not_to be_valid

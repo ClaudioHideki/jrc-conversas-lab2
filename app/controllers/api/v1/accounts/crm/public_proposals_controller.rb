@@ -26,7 +26,12 @@ module Api
 
           def accept
             if @proposal.status == 'accepted'
-              render json: { message: 'Proposta já aceita' }, status: :ok
+              lifecycle = JrcCrm::AcceptedProposalLifecycleService.new(proposal: @proposal, actor: @proposal.owner).call
+              render json: {
+                message: 'Proposta já aceita',
+                sales_order: lifecycle[:order] && { id: lifecycle[:order].id, order_number: lifecycle[:order].order_number },
+                lifecycle_warnings: lifecycle[:warnings]
+              }, status: :ok
               return
             end
 
@@ -54,16 +59,16 @@ module Api
                 event_type: 'accepted',
                 description: 'Proposta aceita pelo cliente via link público com evidência digital'
               )
-
-              if @proposal.deal.present?
-                won_stage = @proposal.deal.pipeline.stages.active.find_by(is_won: true)
-                if won_stage
-                  JrcCrm::DealPipelineService.new(deal: @proposal.deal, stage: won_stage, actor: nil).call
-                end
-              end
             end
 
-            render json: { success: true, message: 'Proposta aceita com sucesso' }, status: :ok
+            lifecycle = JrcCrm::AcceptedProposalLifecycleService.new(proposal: @proposal.reload, actor: @proposal.owner).call
+            render json: {
+              success: true,
+              message: 'Proposta aceita com sucesso',
+              sales_order: lifecycle[:order] && { id: lifecycle[:order].id, order_number: lifecycle[:order].order_number },
+              lifecycle_warnings: lifecycle[:warnings],
+              lifecycle_error: lifecycle[:success] ? nil : lifecycle[:error]
+            }, status: :ok
           rescue ActiveRecord::StaleObjectError
             render json: { error: 'Conflito de versão na proposta', code: 'CONCURRENCY_CONFLICT' }, status: :conflict
           end

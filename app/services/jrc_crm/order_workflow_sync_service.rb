@@ -15,7 +15,9 @@ module JrcCrm
         else
           sync_follow_up! unless @order.draft?
           if QUALIFYING_STATUSES.include?(@order.status)
-            sync_backoffice!
+            contract = sync_contract!
+            implementation = sync_implementation_project!
+            sync_backoffice!(contract: contract, implementation: implementation)
             sync_commission!
           end
         end
@@ -58,7 +60,15 @@ module JrcCrm
       end
     end
 
-    def sync_backoffice!
+    def sync_contract!
+      JrcCrm::OrderContractService.new(order: @order, actor: @actor).call
+    end
+
+    def sync_implementation_project!
+      JrcCrm::OrderImplementationProjectService.new(order: @order, actor: @actor).call
+    end
+
+    def sync_backoffice!(contract: nil, implementation: {})
       request = @order.backoffice_requests.find_or_initialize_by(request_kind: 'fulfillment')
       snap = (@order.snapshot || {}).with_indifferent_access
       existing_metadata = (request.metadata || {}).with_indifferent_access
@@ -77,11 +87,14 @@ module JrcCrm
         'implementation_checklist' => implementation_checklist,
         'finance_required' => existing_metadata.fetch(:finance_required, true),
         'required_documents' => existing_metadata.fetch(:required_documents, Array(snap[:required_documents])),
-        'provisioning_required' => existing_metadata.fetch(:provisioning_required, ActiveModel::Type::Boolean.new.cast(snap[:requires_provisioning]))
+        'provisioning_required' => existing_metadata.fetch(:provisioning_required, ActiveModel::Type::Boolean.new.cast(snap[:requires_provisioning])),
+        'implementation_project_id' => implementation[:project]&.id || existing_metadata[:implementation_project_id],
+        'implementation_project_warning' => implementation[:warning].presence || existing_metadata[:implementation_project_warning]
       )
       request.assign_attributes(
         account: @order.account, business_unit: @order.business_unit, contact: @order.contact,
-        owner: @order.owner, requested_by: @actor || @order.owner, contract: @order.contracts.order(created_at: :desc).first,
+        owner: @order.owner, requested_by: @actor || @order.owner,
+        contract: contract || @order.contracts.order(created_at: :desc).first,
         title: "Processar pedido #{@order.order_number}", due_at: request.due_at || 2.days.from_now,
         metadata: metadata
       )

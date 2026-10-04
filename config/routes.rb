@@ -267,6 +267,7 @@ Rails.application.routes.draw do
           namespace :customers do
             get :metadata, to: 'directory#metadata'
             get :identity, to: 'directory#identity'
+            resources :taxonomies, only: [:index, :create, :update]
             post 'imports/preview', to: 'imports#preview'
             post 'imports/apply', to: 'imports#apply'
             resources :companies, only: [:index, :show, :create, :update] do
@@ -469,6 +470,7 @@ Rails.application.routes.draw do
             end
             resources :sales_orders, only: [:index, :show, :create, :update] do
               post :preview, on: :collection
+              get :selection_options, on: :collection
               member do
                 get :pdf
                 post :attachments, action: :upload_attachments

@@ -1,0 +1,47 @@
+{
+  "name": "JRC CRM fluxo ponta a ponta Nexora",
+  "date": "2026-10-04",
+  "status": "candidate_for_lab_homologation",
+  "source_zip": "JRC-CONVERSAS-LAB2-CADASTRO-MESTRE-EMPRESAS-360-INTEGRADO-CANDIDATO-20261004.zip",
+  "scenario": {
+    "company": "Nexora Tecnologia Ltda.",
+    "trade_name": "Nexora Tech",
+    "contact": "Marcelo Andrade",
+    "owner": "Thiago Ribeiro"
+  },
+  "delta": {
+    "added": [
+      "JRC-CRM-NEXORA-FLUXO-PONTA-A-PONTA-ENTREGA-20261004.md",
+      "JRC-CRM-NEXORA-FLUXO-PONTA-A-PONTA-HOMOLOGACAO-20261004.md",
+      "JRC-CRM-NEXORA-FLUXO-PONTA-A-PONTA-MANIFESTO-20261004.json",
+      "JRC-CRM-NEXORA-FLUXO-PONTA-A-PONTA-SHA256SUMS-20261004.txt",
+      "app/services/jrc_crm/accepted_proposal_lifecycle_service.rb",
+      "app/services/jrc_crm/order_contract_service.rb",
+      "app/services/jrc_crm/order_implementation_project_service.rb",
+      "spec/services/jrc_crm/nexora_end_to_end_spec.rb"
+    ],
+    "modified": [
+      "app/controllers/api/v1/accounts/crm/proposals_controller.rb",
+      "app/controllers/api/v1/accounts/crm/public_proposals_controller.rb",
+      "app/controllers/api/v1/accounts/crm/sales_orders_controller.rb",
+      "app/controllers/jrc_crm/public_proposals_controller.rb",
+      "app/javascript/dashboard/routes/dashboard/crm/views/orders/SalesOrderWizard.vue",
+      "app/services/jrc_crm/order_workflow_sync_service.rb"
+    ],
+    "removed": []
+  },
+  "guarantees": [
+    "no CRM parallel company",
+    "master company/contact reused",
+    "accepted proposal lifecycle is idempotent",
+    "order downstream contract/backoffice/project is idempotent",
+    "manual operational gates remain explicit"
+  ],
+  "runtime_validation_pending": [
+    "PostgreSQL migrations",
+    "RSpec execution",
+    "Vue/Vite build",
+    "browser tests",
+    "Docker build/smoke"
+  ]
+}

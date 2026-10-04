@@ -230,7 +230,21 @@ module Api
               user_agent: request.user_agent
             )
             audit_event!('accepted', 'Proposta aceita internamente com evidência digital')
-            render json: { message: 'Proposta aceita', proposal: serialize(@proposal.reload) }
+            lifecycle = JrcCrm::AcceptedProposalLifecycleService.new(
+              proposal: @proposal.reload,
+              actor: Current.user
+            ).call
+            render json: {
+              message: 'Proposta aceita',
+              proposal: serialize(@proposal.reload),
+              sales_order: lifecycle[:order] && {
+                id: lifecycle[:order].id,
+                order_number: lifecycle[:order].order_number,
+                status: lifecycle[:order].status
+              },
+              lifecycle_warnings: lifecycle[:warnings],
+              lifecycle_error: lifecycle[:success] ? nil : lifecycle[:error]
+            }
           end
 
           def reject

@@ -59,6 +59,15 @@ RSpec.describe 'Customer master service contracts' do
     expect(mapper.apply!.id).to eq(company.id)
     expect(legacy.reload.company_id).to eq(company.id)
   end
+
+  it 'assigns a stable automatic company code and visible audit actors through the writer' do
+    record = account.master_companies.new(name: 'Coded company')
+    writer = JrcCustomers::CompanyWriter.new(account: account, actor: actor)
+    writer.save!(company: record, attributes: { relationship_type: 'prospect' })
+    expect(record.customer_code).to eq(format('EMP-%06d', record.id))
+    expect(record.created_by_id).to eq(actor.id)
+    expect(record.updated_by_id).to eq(actor.id)
+  end
   it 'refuses stale company edits before persisting or writing an audit' do
     stamp = company.updated_at.iso8601(6)
     company.update!(updated_at: company.updated_at + 1.second)
@@ -77,6 +86,7 @@ RSpec.describe 'Customer master service contracts' do
     expect(JrcCustomers::CampaignFilter.apply(scope: scope, account: account, filters: {})).to equal(scope)
   end
   it 'filters the existing Contact scope by company segment and department' do
+    JrcCustomers::Taxonomy.create!(account: account, kind: 'segment', name: 'Health')
     company.update!(segment: 'Health', relationship_type: 'customer')
     first = create(:contact, account: account, company_id: company.id, department: 'Finance')
     create(:contact, account: account, company_id: company.id, department: 'Sales')

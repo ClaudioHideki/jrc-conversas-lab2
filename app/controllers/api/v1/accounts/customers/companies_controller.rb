@@ -71,6 +71,7 @@ class Api::V1::Accounts::Customers::CompaniesController < Api::V1::Accounts::Cus
   def company_params
     params.require(:company).permit(:name, :person_kind, :trade_name, :tax_id, :state_registration, :municipal_registration,
                                    :segment, :size, :website, :domain, :email, :phone_number, :source, :economic_group,
-                                   :parent_company_id, :owner_id, :relationship_type, :active, :description)
+                                   :parent_company_id, :owner_id, :relationship_type, :active, :description,
+                                   relationship_tags: [], tags: [])
   end
 end

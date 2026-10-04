@@ -33,16 +33,32 @@ class JrcCustomers::Customer360
       visibility: 'Counts and items are restricted to the signed-in user. Missing modules are not counted as zero.'
     }
     if @visibility.crm?
-      values.merge!(opportunities: deals.where(status: 'open').count, leads: leads.count,
-                    proposals: proposals.count, pending_activities: activities.pending.count,
-                    contracts_active: contracts.where(status: %w[active expiring]).count)
+      open_deals = deals.where(status: 'open')
+      active_contracts = contracts.where(status: %w[active expiring])
+      next_activity = activities.pending.where.not(due_at: nil).where('due_at >= ?', Time.current).order(:due_at, :id).first
+      values.merge!(
+        opportunities: open_deals.count,
+        opportunities_value_cents: open_deals.sum(:value_cents),
+        leads: leads.count,
+        proposals: proposals.count,
+        pending_activities: activities.pending.count,
+        contracts_active: active_contracts.count,
+        contracts_mrr_cents: active_contracts.sum(:monthly_cents),
+        next_activity: next_activity && { id: next_activity.id, title: next_activity.title, due_at: next_activity.due_at&.iso8601 }
+      )
     end
     if @visibility.service_desk?
       values[:tickets_open] = tickets.joins(:status).where(jrc_service_desk_ticket_statuses: { phase: %w[open waiting] }).count
+      values[:sla_breached] = JrcServiceDesk::SlaClock.where(account_id: @account.id, ticket_id: tickets.select(:id))
+                                                      .where(state: %w[running paused]).where('due_at < ?', Time.current)
+                                                      .select(:ticket_id).distinct.count
     end
     values[:projects_active] = projects.where(status: %w[planned active on_hold]).count if @visibility.projects?
-    interactions = [Message.where(account_id: @account.id, conversation_id: conversations.select(:id), private: false)
-                           .where(message_type: [0, 1]).maximum(:created_at), activities.maximum(:completed_at), calls&.maximum(:started_at), ticket_events.maximum(:created_at), project_events.maximum(:created_at)]
+    last_conversation_at = Message.where(account_id: @account.id, conversation_id: conversations.select(:id), private: false)
+                                  .where(message_type: [0, 1]).maximum(:created_at)
+    interactions = [last_conversation_at, activities.maximum(:completed_at), calls&.maximum(:started_at),
+                    ticket_events.maximum(:created_at), project_events.maximum(:created_at)]
+    values[:last_conversation_at] = last_conversation_at&.iso8601
     values[:last_interaction_at] = interactions.compact.max&.iso8601
     values
   end

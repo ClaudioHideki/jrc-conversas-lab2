@@ -1,0 +1,48 @@
+{
+  "package_date": "2026-10-04",
+  "base_zip": "JRC-CONVERSAS-LAB2-CADASTRO-MESTRE-CRM-ESTRUTURA-ORGANIZACIONAL-INTEGRADO-20261004.zip",
+  "base_sha256": "00cd3bd85263b404315de0e2a3e8e1af2ed1b6ccf96fce08ee1b2f7e79ff5783",
+  "scope": "Cadastro Mestre de Empresas — fechamento funcional antes de Funis e Etapas",
+  "base_file_count": 10274,
+  "current_file_count": 10280,
+  "added": [
+    "JRC-CADASTRO-MESTRE-EMPRESAS-FECHAMENTO-20261004.md",
+    "JRC-CADASTRO-MESTRE-EMPRESAS-MANIFESTO-20261004.json",
+    "app/controllers/api/v1/accounts/customers/taxonomies_controller.rb",
+    "app/models/jrc_customers/taxonomy.rb",
+    "db/migrate/20261004170000_complete_jrc_customer_master_company_profile.rb",
+    "spec/models/jrc_customers/taxonomy_spec.rb"
+  ],
+  "modified": [
+    "app/controllers/api/v1/accounts/customers/companies_controller.rb",
+    "app/controllers/api/v1/accounts/customers/directory_controller.rb",
+    "app/javascript/dashboard/api/jrcCustomers.js",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/CompanyPage.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/TaxonomyPage.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/CompanyEditor.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/copy.js",
+    "app/models/concerns/jrc_customers/company_rules.rb",
+    "app/services/jrc_customers/company_writer.rb",
+    "app/services/jrc_customers/customer360.rb",
+    "app/services/jrc_customers/directory_query.rb",
+    "app/services/jrc_customers/serializer.rb",
+    "config/routes.rb",
+    "spec/models/jrc_customers/company_spec.rb",
+    "spec/services/jrc_customers/master_services_spec.rb"
+  ],
+  "removed": [],
+  "validation": {
+    "ruby_syntax": "passed",
+    "javascript_syntax": "passed",
+    "vue_script_setup_syntax": "passed",
+    "postgres_migration": "pending_lab",
+    "rspec_full": "pending_lab",
+    "vite_build": "pending_lab",
+    "browser": "pending_lab",
+    "docker": "pending_lab"
+  },
+  "not_included": [
+    "automatic company merge",
+    "CRM pipelines and stages"
+  ]
+}

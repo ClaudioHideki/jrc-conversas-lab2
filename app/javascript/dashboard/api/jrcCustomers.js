@@ -13,6 +13,16 @@ class CustomerAPI extends ApiClient {
     return axios.get(`${this.url}/identity`, { params });
   }
 
+  taxonomies(params = {}) {
+    return axios.get(`${this.url}/taxonomies`, { params });
+  }
+
+  saveTaxonomy(taxonomy, id = null) {
+    return id
+      ? axios.patch(`${this.url}/taxonomies/${id}`, { taxonomy })
+      : axios.post(`${this.url}/taxonomies`, { taxonomy });
+  }
+
   companies(params = {}) {
     return axios.get(`${this.url}/companies`, { params });
   }

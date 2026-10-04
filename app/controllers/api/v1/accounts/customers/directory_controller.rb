@@ -1,13 +1,21 @@
 class Api::V1::Accounts::Customers::DirectoryController < Api::V1::Accounts::Customers::BaseController
   def metadata
     users = Current.account.users.order(:name).limit(500).pluck(:id, :name).map { |id, name| { id: id, name: name } }
-    render json: { relationships: JrcCustomers::CompanyRules::RELATIONSHIPS,
-                   person_kinds: JrcCustomers::CompanyRules::PERSON_KINDS,
-                   address_types: JrcCustomers::Address::TYPES, contact_point_kinds: JrcCustomers::ContactPoint::KINDS,
-                   owners: users, can_administer: Current.account_user.administrator?,
-                   external_tax_lookup: { configured: JrcCustomers::TaxLookup.configured?, required: false },
-                   segments: Current.account.master_companies.where.not(segment: [nil, '']).distinct.order(:segment).limit(200).pluck(:segment),
-                   economic_groups: Current.account.master_companies.where.not(economic_group: [nil, '']).distinct.order(:economic_group).limit(200).pluck(:economic_group) }
+    configured_segments = JrcCustomers::Taxonomy.where(account_id: Current.account.id, kind: 'segment', active: true).ordered.limit(200).pluck(:name)
+
+    render json: {
+      relationships: JrcCustomers::CompanyRules::RELATIONSHIPS,
+      person_kinds: JrcCustomers::CompanyRules::PERSON_KINDS,
+      sizes: JrcCustomers::CompanyRules::SIZES,
+      sources: JrcCustomers::CompanyRules::SOURCES,
+      address_types: JrcCustomers::Address::TYPES,
+      contact_point_kinds: JrcCustomers::ContactPoint::KINDS,
+      owners: users,
+      can_administer: Current.account_user.administrator?,
+      external_tax_lookup: { configured: JrcCustomers::TaxLookup.configured?, required: false },
+      segments: configured_segments,
+      economic_groups: Current.account.master_companies.where.not(economic_group: [nil, '']).distinct.order(:economic_group).limit(200).pluck(:economic_group)
+    }
   end
 
   def identity
