@@ -32,7 +32,7 @@ jobs:
     env:
       SOURCE_SHA: ${{ inputs.source_sha }}
       COMPONENT: ${{ inputs.component }}
-      IMAGE: ${{ inputs.component == 'app' && 'claudiohideki/jrc-conversas-nico-v12-2-7-comercial-integrado' || format('claudiohideki/jrc-conversas-nico-v12-2-7-comercial-integrado-{0}', inputs.component) }}
+      IMAGE: ${{ inputs.component == 'app' && 'claudiohideki/jrc-conversas-lab2' || format('claudiohideki/jrc-conversas-nico-v12-2-7-comercial-integrado-{0}', inputs.component) }}
       BUNDLE_FROZEN: 'true'
       TZ: UTC
 
