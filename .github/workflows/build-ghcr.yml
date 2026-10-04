@@ -11,6 +11,10 @@ on:
         description: SHA completo aprovado do codigo-fonte (40 caracteres)
         type: string
         required: true
+      base_sha:
+        description: SHA base da integracao para validar tambem commits de correcao (opcional)
+        type: string
+        required: false
       component:
         description: Construir somente o componente afetado (Cadastro Mestre usa app)
         type: choice
@@ -37,16 +41,17 @@ jobs:
           POSTGRES_PASSWORD: ci-test-only
         ports: ['5432:5432']
         options: >-
-          --health-cmd 'pg_isready -U postgres'
+          --health-cmd "pg_isready -U postgres"
           --health-interval 10s --health-timeout 5s --health-retries 5
       redis:
         image: ${{ inputs.component == 'app' && 'redis:7-alpine' || '' }}
         ports: ['6379:6379']
         options: >-
-          --health-cmd 'redis-cli ping'
+          --health-cmd "redis-cli ping"
           --health-interval 10s --health-timeout 5s --health-retries 5
     env:
       SOURCE_SHA: ${{ inputs.source_sha }}
+      BASE_SHA: ${{ inputs.base_sha }}
       COMPONENT: ${{ inputs.component }}
       IMAGE: ${{ inputs.component == 'app' && 'claudiohideki/jrc-conversas-lab2' || format('claudiohideki/jrc-conversas-nico-v12-2-7-comercial-integrado-{0}', inputs.component) }}
       BUNDLE_FROZEN: 'true'
@@ -66,14 +71,18 @@ jobs:
       - name: Confirmar identidade e alteracoes do componente
         run: |
           test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
-          git diff --check "$SOURCE_SHA^" "$SOURCE_SHA"
+          if [ -z "$BASE_SHA" ]; then BASE_SHA=$(git rev-parse "$SOURCE_SHA^"); fi
+          [[ "$BASE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          git merge-base --is-ancestor "$BASE_SHA" "$SOURCE_SHA"
+          echo "BASE_SHA=$BASE_SHA" >> "$GITHUB_ENV"
+          git diff --check "$BASE_SHA" "$SOURCE_SHA"
           case "$COMPONENT" in
             app) paths=(app config db lib enterprise public Gemfile Gemfile.lock package.json pnpm-lock.yaml docker/Dockerfile docker/entrypoints) ;;
             nico-runtime) paths=(services/nico-runtime docker/nico-runtime.Dockerfile) ;;
             flows-sandbox) paths=(services/flows-sandbox) ;;
             *) exit 1 ;;
           esac
-          if git diff --quiet "$SOURCE_SHA^" "$SOURCE_SHA" -- "${paths[@]}"; then
+          if git diff --quiet "$BASE_SHA" "$SOURCE_SHA" -- "${paths[@]}"; then
             echo 'Componente nao afetado; nao gerar uma imagem/tag nova.' >&2
             exit 1
           fi
@@ -108,8 +117,8 @@ jobs:
       - name: Sintaxe dos fontes alterados e timestamps de migrations
         if: inputs.component == 'app'
         run: |
-          git diff --name-only --diff-filter=ACMR "$SOURCE_SHA^" "$SOURCE_SHA" -- '*.rb' | while IFS= read -r file; do ruby -c "$file"; done
-          node script/validate_changed_source.mjs "$SOURCE_SHA^"
+          git diff --name-only --diff-filter=ACMR "$BASE_SHA" "$SOURCE_SHA" -- '*.rb' | while IFS= read -r file; do ruby -c "$file"; done
+          node script/validate_changed_source.mjs "$BASE_SHA"
 
       - name: PostgreSQL isolado, migrations e RSpec CRM Cadastro Mestre
         if: inputs.component == 'app'
