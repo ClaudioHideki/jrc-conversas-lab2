@@ -39,7 +39,8 @@ module Api
           def visible_to_current_user(relation, owner_column: :owner_id)
             return relation if crm_admin?
 
-            relation.where(owner_column => Current.user.id)
+            legacy_visible = relation.where(owner_column => Current.user.id)
+            JrcCrm::OrganizationalVisibility.new(account: crm_scope, user: Current.user, relation: legacy_visible).call
           end
 
           def ensure_crm_admin!

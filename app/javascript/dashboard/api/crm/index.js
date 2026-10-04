@@ -17,3 +17,4 @@ export { default as importsAPI } from './imports';
 export { default as timelineAPI } from './timeline';
 export { default as lostReasonsAPI } from './lostReasons';
 export { default as campaignsAPI } from './campaigns';
+export { default as organizationStructureAPI } from './organizationStructure';

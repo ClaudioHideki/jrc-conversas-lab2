@@ -139,6 +139,9 @@ class Account < ApplicationRecord
   has_many :jrc_crm_custom_attribute_definitions, class_name: 'JrcCrm::CustomAttributeDefinition', dependent: :destroy_async
   has_many :jrc_crm_organizations, class_name: 'JrcCrm::Organization', dependent: :destroy_async
   has_many :jrc_crm_deal_conversations, class_name: 'JrcCrm::DealConversation', dependent: :destroy_async
+  has_many :jrc_crm_business_units, class_name: 'JrcCrm::BusinessUnit', dependent: :destroy_async
+  has_many :jrc_crm_user_business_units, class_name: 'JrcCrm::UserBusinessUnit', dependent: :destroy_async
+  has_many :jrc_crm_team_scopes, class_name: 'JrcCrm::TeamScope', dependent: :destroy_async
   has_many :jrc_campaigns, class_name: 'JrcCampaigns::Campaign', dependent: :destroy_async
   has_many :jrc_campaign_blacklists, class_name: 'JrcCampaigns::Blacklist', dependent: :destroy_async
   has_many :jrc_campaign_sanitized_lists, class_name: 'JrcCampaigns::SanitizedList', dependent: :destroy_async

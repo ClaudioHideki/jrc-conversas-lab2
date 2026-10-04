@@ -426,6 +426,20 @@ Rails.application.routes.draw do
               end
             end
             resources :management, only: [:index]
+            resource :organization_structure, only: [:show], controller: :organization_structure do
+              patch :settings, action: :update_settings
+              post :companies, action: :create_company
+              patch 'companies/:company_id', action: :update_company
+              post :business_units, action: :create_business_unit
+              patch 'business_units/:business_unit_id', action: :update_business_unit
+              delete 'business_units/:business_unit_id', action: :destroy_business_unit
+              post :team_scopes, action: :create_team_scope
+              patch 'team_scopes/:scope_id', action: :update_team_scope
+              delete 'team_scopes/:scope_id', action: :destroy_team_scope
+              post :user_scopes, action: :create_user_scope
+              patch 'user_scopes/:scope_id', action: :update_user_scope
+              delete 'user_scopes/:scope_id', action: :destroy_user_scope
+            end
             resources :pipelines
             resources :stages do
               post :reorder, on: :collection

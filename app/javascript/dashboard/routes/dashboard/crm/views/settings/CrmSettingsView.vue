@@ -1,15 +1,16 @@
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { pipelinesAPI, stagesAPI, lostReasonsAPI } from 'dashboard/api/crm';
 import { crmControlClasses } from '../../crmControlClasses';
+import OrganizationalStructureSettings from './OrganizationalStructureSettings.vue';
 
 const { t } = useI18n();
 const store = useStore();
 const route = useRoute();
-const tab = ref('pipelines');
+const tab = ref('structure');
 const pipelines = ref([]);
 const stages = ref([]);
 const reasons = ref([]);
@@ -77,17 +78,18 @@ const remove = async (kind, record) => {
   catch (e) { error.value = errorMessage(e); }
   finally { saving.value = false; }
 };
-onMounted(load);
+watch(tab, value => { if (value !== 'structure' && !pipelines.value.length && !loading.value) load(); });
 </script>
 
 <template>
   <div class="h-full overflow-auto bg-n-background p-4 sm:p-6">
-    <header class="mb-5 flex flex-wrap items-center justify-between gap-3"><h2 class="text-2xl font-bold text-n-slate-12">{{ t('CRM.HOMOLOGATION.SETTINGS_TITLE') }}</h2><button class="rounded-xl border border-n-weak bg-n-solid-2 px-4 py-2 text-sm text-n-slate-12" :disabled="loading" @click="load">{{ t('CRM.HOMOLOGATION.REFRESH') }}</button></header>
+    <header class="mb-5 flex flex-wrap items-center justify-between gap-3"><h2 class="text-2xl font-bold text-n-slate-12">{{ t('CRM.HOMOLOGATION.SETTINGS_TITLE') }}</h2><button v-if="tab !== 'structure'" class="rounded-xl border border-n-weak bg-n-solid-2 px-4 py-2 text-sm text-n-slate-12" :disabled="loading" @click="load">{{ t('CRM.HOMOLOGATION.REFRESH') }}</button></header>
     <p v-if="!isAdmin" class="mb-4 rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">{{ t('CRM.HOMOLOGATION.ADMIN_REQUIRED') }}</p>
     <p v-if="error && !editor" role="alert" class="mb-4 rounded-xl border border-red-300 bg-red-50 p-3 text-sm text-red-800">{{ error }}</p>
     <p v-if="notice" role="status" class="mb-4 rounded-xl border border-emerald-300 bg-emerald-50 p-3 text-sm text-emerald-800">{{ notice }}</p>
-    <nav class="mb-5 flex flex-wrap gap-2" role="tablist"><button v-for="key in ['pipelines', 'reasons', 'general']" :key="key" role="tab" :aria-selected="tab === key" class="rounded-xl border px-4 py-2 text-sm font-semibold" :class="tab === key ? 'border-n-brand bg-n-brand text-white' : 'border-n-weak bg-n-solid-2 text-n-slate-11 hover:bg-n-slate-3'" @click="tab = key">{{ t('CRM.HOMOLOGATION.SETTINGS_TABS.' + key) }}</button></nav>
-    <p v-if="loading" role="status" class="p-6 text-n-slate-11">{{ t('CRM.HOMOLOGATION.LOADING') }}</p>
+    <nav class="mb-5 flex flex-wrap gap-2" role="tablist"><button v-for="key in ['structure', 'pipelines', 'reasons', 'general']" :key="key" role="tab" :aria-selected="tab === key" class="rounded-xl border px-4 py-2 text-sm font-semibold" :class="tab === key ? 'border-n-brand bg-n-brand text-white' : 'border-n-weak bg-n-solid-2 text-n-slate-11 hover:bg-n-slate-3'" @click="tab = key">{{ t('CRM.HOMOLOGATION.SETTINGS_TABS.' + key) }}</button></nav>
+    <p v-if="loading && tab !== 'structure'" role="status" class="p-6 text-n-slate-11">{{ t('CRM.HOMOLOGATION.LOADING') }}</p>
+    <OrganizationalStructureSettings v-if="tab === 'structure'" />
     <section v-else-if="tab === 'pipelines'" class="grid gap-5 min-[1280px]:grid-cols-[260px_minmax(0,1fr)]">
       <aside class="rounded-xl border border-n-weak bg-n-solid-2 p-4"><button class="mb-4 w-full rounded-lg bg-n-brand px-3 py-2 text-sm font-semibold text-white" :disabled="!isAdmin" @click="openEditor('pipeline')">{{ t('CRM.HOMOLOGATION.ADD_PIPELINE') }}</button><button v-for="pipeline in pipelines" :key="pipeline.id" class="mb-2 flex w-full items-center justify-between gap-2 rounded-lg border p-3 text-left text-sm" :class="selectedPipeline === pipeline.id ? 'border-n-brand bg-n-blue-2 text-n-blue-11' : 'border-n-weak hover:bg-n-slate-3'" @click="selectPipeline(pipeline.id)"><strong class="break-words">{{ pipeline.name }}</strong><span>{{ pipeline.stages_count }}</span></button></aside>
       <article v-if="selectedPipeline" class="min-w-0 rounded-xl border border-n-weak bg-n-solid-2 p-4">
