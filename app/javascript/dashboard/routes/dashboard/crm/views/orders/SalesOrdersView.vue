@@ -34,12 +34,12 @@ const statusLabel = status =>
   ({
     draft: 'Rascunho',
     pending: 'Pendente',
-    approved: 'Aprovada',
+    approved: 'Aprovado',
     separating: 'Em implantação',
-    invoiced: 'Faturada',
+    invoiced: 'Faturado',
     shipped: 'Em entrega',
-    completed: 'Ativa',
-    canceled: 'Cancelada',
+    completed: 'Ativo',
+    canceled: 'Cancelado',
   })[status] || status;
 const statusTone = status =>
   ({
@@ -283,21 +283,34 @@ const upcoming = computed(() =>
     .slice(0, 4)
 );
 
+const detailLoading = ref(false);
+const open = async row => {
+  editingItems.value = false;
+  selected.value = row;
+  detailLoading.value = true;
+  router.replace({ query: { ...route.query, orderId: row.id } });
+  try {
+    const { data } = await salesOrdersAPI.show(row.id);
+    if (String(selected.value?.id) === String(row.id)) selected.value = data;
+  } catch (e) {
+    useAlert('Não foi possível carregar o detalhe do pedido.');
+  } finally {
+    detailLoading.value = false;
+  }
+};
 const load = async () => {
   loading.value = true;
   try {
     const response = await salesOrdersAPI.list();
     rows.value = response.data || [];
     const q = route.query.orderId;
-    if (q)
-      selected.value = rows.value.find(x => String(x.id) === String(q)) || null;
+    if (q) {
+      const row = rows.value.find(x => String(x.id) === String(q));
+      if (row) await open(row);
+    }
   } finally {
     loading.value = false;
   }
-};
-const open = row => {
-  selected.value = row;
-  router.replace({ query: { ...route.query, orderId: row.id } });
 };
 const close = () => {
   selected.value = null;
@@ -782,7 +795,13 @@ onMounted(load);
                     />
                   </td>
                   <td class="p-3 font-semibold text-blue-700">
-                    {{ row.order_number }}
+                    <button
+                      type="button"
+                      class="underline underline-offset-2"
+                      @click.stop="open(row)"
+                    >
+                      {{ row.order_number }}
+                    </button>
                   </td>
                   <td class="p-3">
                     <b>{{ customerName(row) }}</b>
@@ -809,6 +828,17 @@ onMounted(load);
                   </td>
                   <td class="p-3">
                     <button
+                      type="button"
+                      class="mr-2 rounded-lg border p-2"
+                      title="Ver pedido"
+                      aria-label="Ver pedido"
+                      @click.stop="open(row)"
+                    >
+                      <i class="i-lucide-file-text size-4" />
+                    </button>
+                    <button
+                      title="Baixar PDF"
+                      aria-label="Baixar PDF"
                       class="rounded-lg border p-2"
                       @click.stop="downloadPdf(row, $event)"
                     >
@@ -1044,7 +1074,9 @@ onMounted(load);
         >
           <div class="flex justify-between">
             <div>
-              <p class="text-xs uppercase text-n-slate-11">Pedido / Venda</p>
+              <p class="text-xs uppercase text-n-slate-11">
+                Visão geral do pedido
+              </p>
               <h3 class="text-xl font-bold">{{ selected.order_number }}</h3>
               <p class="text-sm text-n-slate-11">
                 {{ customerName(selected) }}
@@ -1052,6 +1084,9 @@ onMounted(load);
             </div>
             <button class="i-lucide-x size-5" title="Fechar" @click="close" />
           </div>
+          <p v-if="detailLoading" class="mt-3 text-sm" role="status">
+            Carregando detalhe…
+          </p>
           <div class="mt-5 flex gap-2">
             <button
               class="rounded-lg border border-red-200 px-3 py-2 text-red-700"
@@ -1104,6 +1139,76 @@ onMounted(load);
               }}</strong>
             </div>
           </div>
+          <section
+            class="mt-4 grid grid-cols-2 gap-3 rounded-xl border p-4 text-sm"
+          >
+            <div>
+              <span>Empresa</span
+              ><strong class="block">{{
+                selected.company?.name || '—'
+              }}</strong>
+            </div>
+            <div>
+              <span>Negócio</span
+              ><strong class="block">{{
+                selected.deal?.title || 'Pedido direto'
+              }}</strong>
+            </div>
+            <div>
+              <span>Responsável</span
+              ><strong class="block">{{ selected.owner?.name || '—' }}</strong>
+            </div>
+            <div>
+              <span>Contato</span
+              ><strong class="block">{{
+                selected.contact?.email || selected.contact?.phone_number || '—'
+              }}</strong>
+            </div>
+            <div>
+              <span>Condição de pagamento</span
+              ><strong class="block">{{
+                selected.payment_condition || '—'
+              }}</strong>
+            </div>
+            <div>
+              <span>Forma de pagamento</span
+              ><strong class="block">{{
+                selected.payment_method || '—'
+              }}</strong>
+            </div>
+            <div>
+              <span>Entrada</span
+              ><strong class="block">{{
+                money(selected.down_payment_cents)
+              }}</strong>
+            </div>
+            <div>
+              <span>Parcelas</span
+              ><strong class="block">{{
+                selected.installments_count || '—'
+              }}</strong>
+            </div>
+            <div>
+              <span>Criado em</span
+              ><strong class="block">{{
+                dateLabel(selected.created_at)
+              }}</strong>
+            </div>
+            <div>
+              <span>Atualizado em</span
+              ><strong class="block">{{
+                dateLabel(selected.updated_at)
+              }}</strong>
+            </div>
+            <div class="col-span-2">
+              <span>Implantação / observações</span>
+              <p>
+                {{
+                  selected.snapshot?.operation_notes || selected.notes || '—'
+                }}
+              </p>
+            </div>
+          </section>
           <section class="mt-4 rounded-xl border p-4">
             <div class="flex items-center justify-between">
               <h4 class="font-semibold">Itens</h4>
@@ -1191,23 +1296,47 @@ onMounted(load);
             </template>
           </section>
           <section class="mt-4 rounded-xl border p-4">
-            <label class="text-sm font-semibold"
-              >Status<select
-                :value="selected.status"
-                :disabled="saving"
-                class="mt-2 w-full rounded-lg border px-3 py-2"
-                @change="changeStatus($event.target.value)"
+            <h4 class="font-semibold">Fluxo do pedido</h4>
+            <p class="mt-2 text-sm">
+              Pendente → Aprovado → Em implantação → Faturado → Em entrega →
+              Ativo
+            </p>
+            <p class="mt-2 font-semibold">{{ statusLabel(selected.status) }}</p>
+            <div class="mt-3 flex gap-2">
+              <button
+                v-for="status in selected.allowed_statuses || []"
+                :key="status"
+                class="rounded-lg border px-3 py-2"
+                :disabled="saving || detailLoading"
+                @click="changeStatus(status)"
               >
-                <option value="draft">Rascunho</option>
-                <option value="pending">Pendente</option>
-                <option value="approved">Aprovada</option>
-                <option value="separating">Em implantação</option>
-                <option value="invoiced">Faturada</option>
-                <option value="shipped">Em entrega</option>
-                <option value="completed">Ativa</option>
-                <option value="canceled">Cancelada</option>
-              </select></label
-            >
+                {{
+                  status === 'canceled'
+                    ? 'Cancelar pedido'
+                    : statusLabel(status)
+                }}
+              </button>
+            </div>
+          </section>
+          <section class="mt-4 rounded-xl border p-4">
+            <h4 class="font-semibold">Histórico / timeline</h4>
+            <ol class="mt-3 space-y-3">
+              <li
+                v-for="event in selected.history || []"
+                :key="event.id"
+                class="border-l-2 pl-3 text-sm"
+              >
+                <strong>{{ event.event_type }}</strong>
+                <p>{{ new Date(event.created_at).toLocaleString('pt-BR') }}</p>
+                <p v-if="event.metadata?.before?.status">
+                  {{ statusLabel(event.metadata.before.status) }} →
+                  {{ statusLabel(event.metadata.after?.status) }}
+                </p>
+              </li>
+            </ol>
+            <p v-if="!selected.history?.length" class="mt-2 text-sm">
+              Nenhum evento registrado.
+            </p>
           </section>
         </aside>
       </div>

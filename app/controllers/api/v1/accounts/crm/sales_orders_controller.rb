@@ -10,7 +10,13 @@ module Api::V1::Accounts::Crm
     end
 
     def show
-      render json: serialize(@order)
+      company = serialize_selection_contact(@order.contact)
+      render json: serialize(@order).merge(
+        company: company && { id: company[:company_id], name: company[:company_name], tax_id: company[:tax_id] },
+        allowed_statuses: allowed_order_statuses(@order),
+        history: JrcCrm::AuditEvent.where(account_id: crm_scope.id, resource_type: 'JrcCrm::SalesOrder', resource_id: @order.id)
+          .order(created_at: :desc, id: :desc).limit(100).map { |event| { id: event.id, event_type: event.event_type, created_at: event.created_at, metadata: event.metadata } }
+      )
     end
 
     def preview
@@ -67,6 +73,10 @@ module Api::V1::Accounts::Crm
       @order.with_lock do
         before_trace = order_trace(@order)
         attrs = order_params.to_h
+        if attrs['status'].present? && attrs['status'] != @order.status && !allowed_order_statuses(@order).include?(attrs['status'])
+          @order.errors.add(:status, 'Transicao de status nao permitida para este pedido ou usuario.')
+          raise ActiveRecord::RecordInvalid, @order
+        end
         if attrs.key?('proposal_id') && attrs['proposal_id'].to_s != @order.proposal_id.to_s
           @order.errors.add(:proposal, 'O vinculo de origem nao pode ser alterado. Gere um novo pedido pela proposta.')
           raise ActiveRecord::RecordInvalid, @order
@@ -117,6 +127,14 @@ module Api::V1::Accounts::Crm
     end
 
     private
+
+    def allowed_order_statuses(order)
+      next_status = { 'draft' => 'pending', 'pending' => 'approved', 'approved' => 'separating',
+                      'separating' => 'invoiced', 'invoiced' => 'shipped', 'shipped' => 'completed' }[order.status]
+      statuses = [next_status].compact
+      statuses << 'canceled' if crm_admin? && !%w[completed canceled].include?(order.status)
+      statuses
+    end
 
     def build_manual_order
       attrs = order_params.to_h
