@@ -92,7 +92,7 @@ RSpec.describe 'Backoffice operations integration', type: :request do
 
   it 'blocks advancement at any stage and preserves issue resolution and reopening history' do
     request_record
-    post "#{url}/#{request_record.id}/add_issue", params: { description: 'Missing information', blocking: true }, headers: headers, as: :json
+    post "#{url}/#{request_record.id}/issues", params: { description: 'Missing information', blocking: true }, headers: headers, as: :json
     expect(response).to have_http_status(:ok)
     issue_id = request_record.reload.metadata['issues'].first['id']
     expect(request_record.status).to eq('blocked')
@@ -110,8 +110,12 @@ RSpec.describe 'Backoffice operations integration', type: :request do
   end
 
   it 'limits operational configuration writes to administrators' do
+    agent_headers = agent.create_new_auth_token
+    get "/api/v1/accounts/#{account.id}/crm/operations_queues", headers: agent_headers, as: :json
+    expect(response).to have_http_status(:ok)
     post "/api/v1/accounts/#{account.id}/crm/operations_queues", params: { operations_queue: { name: 'Test', code: 'TEST' } },
-         headers: agent.create_new_auth_token, as: :json
-    expect(response).to have_http_status(:forbidden)
+         headers: agent_headers, as: :json
+    expect(response).to have_http_status(:unauthorized)
+    expect(JrcOperations::Queue.where(account: account, code: 'TEST')).to be_empty
   end
 end

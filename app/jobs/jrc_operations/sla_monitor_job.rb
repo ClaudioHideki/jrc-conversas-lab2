@@ -41,7 +41,7 @@ module JrcOperations
       clocks = {
         first_action: [snapshot[:first_action_overdue], snapshot[:first_action_due_at]],
         stage: [snapshot[:stage_overdue], snapshot[:stage_due_at]],
-        total: [snapshot[:state] == 'overdue', snapshot[:total_due_at]]
+        total: [snapshot[:total_overdue], snapshot[:total_due_at]]
       }
       clocks.each do |kind, (overdue, due)|
         next unless overdue

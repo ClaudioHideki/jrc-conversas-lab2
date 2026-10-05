@@ -116,9 +116,11 @@ const stageByTab = {
 };
 
 const isOverdue = item =>
-  item.due_at &&
-  new Date(item.due_at) < new Date() &&
-  !['completed', 'canceled', 'rejected'].includes(item.status);
+  item.sla
+    ? item.sla.state === 'overdue'
+    : item.due_at &&
+      new Date(item.due_at) < new Date() &&
+      !['completed', 'canceled', 'rejected'].includes(item.status);
 
 const filteredRequests = computed(() => {
   let rows = requests.value;

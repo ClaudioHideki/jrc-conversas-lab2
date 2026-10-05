@@ -68,9 +68,12 @@ module JrcOperations
       percent = total && elapsed ? ((elapsed / total) * 100).round(1) : nil
       thresholds = Array(@policy&.alert_thresholds).presence || [50, 75, 90, 100]
       triggered = percent ? thresholds.map(&:to_f).select { |threshold| percent >= threshold } : []
+      total_overdue = !stopped && due.present? && now > due
+      first_action_overdue = !stopped && @request.first_action_at.blank? && @request.first_action_due_at.present? && now > @request.first_action_due_at
+      stage_overdue = !stopped && @request.stage_due_at.present? && now > @request.stage_due_at
       state = if stopped
                 'stopped'
-              elsif due && now > due
+              elsif total_overdue || first_action_overdue || stage_overdue
                 'overdue'
               elsif percent && percent >= 90
                 'critical'
@@ -87,9 +90,10 @@ module JrcOperations
         triggered_thresholds: stopped || @request.sla_paused_at ? [] : triggered,
         first_action_due_at: @request.first_action_due_at,
         first_action_at: @request.first_action_at,
-        first_action_overdue: !stopped && @request.first_action_at.blank? && @request.first_action_due_at.present? && now > @request.first_action_due_at,
+        first_action_overdue: first_action_overdue,
         stage_due_at: @request.stage_due_at,
-        stage_overdue: @request.stage_due_at.present? && now > @request.stage_due_at && !@request.status.in?(%w[completed canceled rejected]),
+        stage_overdue: stage_overdue,
+        total_overdue: total_overdue,
         total_due_at: @request.sla_due_at,
         paused_at: @request.sla_paused_at,
         paused_seconds: @request.sla_paused_seconds.to_i,

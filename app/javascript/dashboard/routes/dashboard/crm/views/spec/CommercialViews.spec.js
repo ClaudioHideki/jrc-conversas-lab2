@@ -84,6 +84,25 @@ vi.mock('dashboard/api/crm/commercialCycle', () => ({
 }));
 
 describe('Commercial screens on an Account without commercial records', () => {
+  it('uses the SLA clock rather than an old manual deadline for overdue alerts', async () => {
+    mocks.backoffice.list.mockResolvedValue({
+      data: [
+        {
+          id: 1,
+          status: 'waiting_customer',
+          stage: 'analysis',
+          priority: 'normal',
+          owner: { id: 1 },
+          due_at: '2020-01-01T00:00:00Z',
+          sla: { state: 'within', paused_at: '2026-10-05T00:00:00Z' },
+        },
+      ],
+    });
+    const wrapper = mount(BackofficeView);
+    await flushPromises();
+    expect(wrapper.vm.criticalAlerts).toEqual([]);
+    wrapper.unmount();
+  });
   it('sends explicit queue and SLA settings without inventing deadline minutes', async () => {
     const wrapper = mount(BackofficeSlaQueues, {
       props: { summary: { within_sla: 2 }, requests: [] },

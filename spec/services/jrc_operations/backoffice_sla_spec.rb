@@ -65,6 +65,19 @@ RSpec.describe 'Backoffice routing and SLA' do
     expect(policy.errors[:business_hours]).to be_present
   end
 
+  it 'audits first action and stage deadlines even without a total SLA' do
+    travel_to Time.zone.parse('2026-10-05 10:00')
+    policy.update!(total_minutes: nil)
+    record
+    travel 61.minutes
+    snapshot = JrcOperations::SlaClock.new(record).snapshot
+    expect(snapshot[:state]).to eq('overdue')
+    expect(snapshot[:total_overdue]).to be(false)
+    JrcOperations::SlaMonitorJob.new.perform(account.id)
+    events = JrcCrm::AuditEvent.for_resource('JrcCrm::BackofficeRequest', record.id).where(event_type: 'operations_sla_violated')
+    expect(events.pluck(:metadata).map { |row| row['clock_kind'] }).to match_array(%w[first_action stage])
+  end
+
   it 'honors configured queues and policies created after the fallback' do
     routing = JrcOperations::BackofficeRouter.new(account: account, order: order, request_kind: 'fulfillment', priority: 'normal').call
     expect(routing.policy.total_minutes).to be_nil
