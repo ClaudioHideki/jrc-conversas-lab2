@@ -1,0 +1,42 @@
+{
+  "id": "CRM-PROP-ACCEPT-01",
+  "date": "2026-10-04",
+  "title": "Aceite digital da proposta",
+  "severity": "blocker",
+  "base_package": "JRC-CONVERSAS-LAB2-CRM-METAS-ACOES-INTELIGENTES-INTEGRADO-CANDIDATO-20261004.zip",
+  "scope": [
+    "public proposal HTML acceptance layout",
+    "public proposal Vue acceptance layout",
+    "public acceptance API validation",
+    "CPF/CNPJ validation",
+    "explicit terms consent",
+    "acceptance evidence",
+    "accepted proposal commercial lifecycle",
+    "clear validation and lifecycle errors"
+  ],
+  "added_files": [
+    "app/services/jrc_crm/proposal_acceptance_service.rb",
+    "docs/JRC-CRM-PROP-ACCEPT-01-ACEITE-DIGITAL-20261004.md",
+    "docs/JRC-CRM-PROP-ACCEPT-01-HOMOLOGACAO-20261004.md",
+    "docs/JRC-CRM-PROP-ACCEPT-01-MANIFESTO-20261004.json",
+    "spec/services/jrc_crm/proposal_acceptance_service_spec.rb"
+  ],
+  "modified_files": [
+    "app/controllers/api/v1/accounts/crm/proposals_controller.rb",
+    "app/controllers/api/v1/accounts/crm/public_proposals_controller.rb",
+    "app/controllers/jrc_crm/public_proposals_controller.rb",
+    "app/javascript/dashboard/routes/dashboard/crm/views/proposals/PublicProposalView.vue",
+    "app/views/jrc_crm/public_proposals/show.html.erb"
+  ],
+  "removed_files": [],
+  "migration_required": false,
+  "runtime_hardcode_test_customer": false,
+  "validation": {
+    "ruby_syntax": "passed",
+    "vue_script_parse": "passed",
+    "full_rspec": "not_executed_bundle_unavailable",
+    "vue_vite_build": "not_executed_pnpm_unavailable",
+    "browser": "pending_lab",
+    "docker": "pending_lab"
+  }
+}

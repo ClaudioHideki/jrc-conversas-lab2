@@ -133,9 +133,11 @@ jobs:
         run: |
           cp db/schema.rb "$RUNNER_TEMP/approved-schema.rb"
           bundle exec rails db:create db:schema:load db:migrate
+          bundle exec rails runner 'require Rails.root.join("db/migrate/20261004234000_create_jrc_operations_routing_and_sla"); require Rails.root.join("db/migrate/20261004234100_backfill_jrc_operations_backoffice_routing"); BackfillJrcOperationsBackofficeRouting.new.migrate(:down); migration = CreateJrcOperationsRoutingAndSla.new; migration.migrate(:down); raise "operations down failed" if ActiveRecord::Base.connection.table_exists?(:jrc_operations_queues); migration.migrate(:up); BackfillJrcOperationsBackofficeRouting.new.migrate(:up); raise "operations up failed" unless ActiveRecord::Base.connection.column_exists?(:jrc_crm_backoffice_requests, :operations_sla_policy_id)'
           bundle exec rails runner 'require Rails.root.join("db/migrate/20261004183000_strengthen_sales_order_origin_and_audit"); migration = StrengthenSalesOrderOriginAndAudit.new; migration.migrate(:down); raise "down failed" if ActiveRecord::Base.connection.column_exists?(:jrc_crm_sales_orders, :order_origin); migration.migrate(:up); raise "up failed" unless ActiveRecord::Base.connection.column_exists?(:jrc_crm_sales_orders, :order_origin)'
-          bundle exec rspec spec/requests/api/v1/accounts/crm/sales_order_link_integrity_spec.rb spec/requests/api/v1/accounts/crm/consolidated_commercial_protection_spec.rb spec/requests/api/v1/accounts/crm/commercial_flow_spec.rb spec/requests/api/v1/accounts/crm/goals_actionable_insights_spec.rb spec/services/jrc_crm/nexora_end_to_end_spec.rb spec/services/jrc_crm/consolidated_financial_guards_spec.rb spec/models/jrc_customers/company_spec.rb spec/models/jrc_customers/taxonomy_spec.rb spec/services/jrc_customers/master_services_spec.rb
+          bundle exec rspec spec/requests/api/v1/accounts/crm/sales_order_link_integrity_spec.rb spec/requests/api/v1/accounts/crm/consolidated_commercial_protection_spec.rb spec/requests/api/v1/accounts/crm/commercial_flow_spec.rb spec/requests/api/v1/accounts/crm/goals_actionable_insights_spec.rb spec/requests/api/v1/accounts/crm/backoffice_operations_spec.rb spec/services/jrc_operations/backoffice_sla_spec.rb spec/services/jrc_operations/business_time_spec.rb spec/services/jrc_crm/proposal_acceptance_service_spec.rb spec/configs/jrc_operations_schedule_spec.rb spec/services/jrc_crm/nexora_end_to_end_spec.rb spec/services/jrc_crm/consolidated_financial_guards_spec.rb spec/models/jrc_customers/company_spec.rb spec/models/jrc_customers/taxonomy_spec.rb spec/services/jrc_customers/master_services_spec.rb
           bundle exec rails runner 'route = Rails.application.routes.recognize_path("/api/v1/accounts/1/crm/contracts/order_options", method: :get); raise "contract route mismatch" unless route[:action] == "order_options"'
+          bundle exec rails runner 'route = Rails.application.routes.recognize_path("/api/v1/accounts/1/crm/backoffice_requests/selection_options", method: :get); raise "backoffice route mismatch" unless route[:action] == "selection_options"; %w[operations_queues operations_sla_policies].each { |resource| route = Rails.application.routes.recognize_path("/api/v1/accounts/1/crm/#{resource}", method: :post); raise "operations route mismatch" unless route[:action] == "create" }'
           cp "$RUNNER_TEMP/approved-schema.rb" db/schema.rb
 
       - name: Gates isolados do Cadastro Mestre e modulos preservados
@@ -165,6 +167,9 @@ jobs:
           app/javascript/dashboard/api/crm/commercialCycle.js
           app/javascript/dashboard/routes/dashboard/crm/helpers/commercialTerms.js
           app/javascript/dashboard/routes/dashboard/crm/views/orders
+          app/javascript/dashboard/routes/dashboard/crm/views/backoffice
+          app/javascript/dashboard/routes/dashboard/crm/views/proposals/PublicProposalView.vue
+          app/javascript/dashboard/routes/dashboard/crm/views/spec/CommercialViews.spec.js
 
       - name: Gates NICO sem reconstruir a aplicacao
         if: inputs.component == 'nico-runtime'

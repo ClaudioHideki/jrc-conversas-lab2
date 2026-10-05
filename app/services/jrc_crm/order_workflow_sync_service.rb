@@ -87,17 +87,25 @@ module JrcCrm
         'implementation_checklist' => implementation_checklist,
         'finance_required' => existing_metadata.fetch(:finance_required, true),
         'required_documents' => existing_metadata.fetch(:required_documents, Array(snap[:required_documents])),
+        'document_requirements' => existing_metadata.fetch(:document_requirements, Array(snap[:document_requirements])),
         'provisioning_required' => existing_metadata.fetch(:provisioning_required, ActiveModel::Type::Boolean.new.cast(snap[:requires_provisioning])),
         'implementation_project_id' => implementation[:project]&.id || existing_metadata[:implementation_project_id],
         'implementation_project_warning' => implementation[:warning].presence || existing_metadata[:implementation_project_warning]
       )
+      routing = JrcOperations::BackofficeRouter.new(
+        account: @order.account, order: @order, request_kind: 'fulfillment',
+        priority: request.priority.presence || 'normal', preferred_owner: request.owner || @order.owner
+      ).call if request.new_record? || request.operations_queue.nil? || request.operations_sla_policy.nil?
       request.assign_attributes(
         account: @order.account, business_unit: @order.business_unit, contact: @order.contact,
-        owner: @order.owner, requested_by: @actor || @order.owner,
+        owner: routing&.owner || request.owner || @order.owner, requested_by: request.requested_by || @actor || @order.owner,
         contract: contract || @order.contracts.order(created_at: :desc).first,
-        title: "Processar pedido #{@order.order_number}", due_at: request.due_at || 2.days.from_now,
+        operations_queue: routing&.queue || request.operations_queue, operations_sla_policy: routing&.policy || request.operations_sla_policy,
+        title: "Processar pedido #{@order.order_number}", due_at: request.due_at,
         metadata: metadata
       )
+      JrcOperations::SlaClock.new(request).start!
+      request.due_at ||= request.sla_due_at
       if request.new_record?
         request.stage = stage_for_order(request)
         request.status = request.stage == 'completed' ? 'completed' : 'in_progress'

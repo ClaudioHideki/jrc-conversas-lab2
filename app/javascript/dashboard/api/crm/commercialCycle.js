@@ -80,6 +80,8 @@ commissionProgramsAPI.simulate = data =>
 export const backofficeAPI = make('backoffice_requests');
 backofficeAPI.show = id => axios.get(`${backofficeAPI.url}/${id}`);
 backofficeAPI.summary = () => axios.get(`${backofficeAPI.url}/summary`);
+backofficeAPI.selectionOptions = params =>
+  axios.get(`${backofficeAPI.url}/selection_options`, { params });
 backofficeAPI.advance = id => axios.post(`${backofficeAPI.url}/${id}/advance`);
 backofficeAPI.uploadDocuments = (id, files) =>
   uploadFiles(`${backofficeAPI.url}/${id}/documents`, files);
@@ -91,13 +93,26 @@ backofficeAPI.documentStatus = (id, data) =>
   axios.post(`${backofficeAPI.url}/${id}/document_status`, data);
 backofficeAPI.addIssue = (id, data) =>
   axios.post(`${backofficeAPI.url}/${id}/issues`, data);
-backofficeAPI.resolveIssue = (id, issueId) =>
-  axios.post(`${backofficeAPI.url}/${id}/resolve_issue`, { issue_id: issueId });
+backofficeAPI.resolveIssue = (id, issueId, resolution) =>
+  axios.post(`${backofficeAPI.url}/${id}/resolve_issue`, {
+    issue_id: issueId,
+    resolution,
+  });
+backofficeAPI.returnIssue = (id, payload) =>
+  axios.post(`${backofficeAPI.url}/${id}/return_issue`, payload);
+backofficeAPI.reopenIssue = (id, payload) =>
+  axios.post(`${backofficeAPI.url}/${id}/reopen_issue`, payload);
+backofficeAPI.uploadIssueEvidence = (id, issueId, files) =>
+  uploadFiles(`${backofficeAPI.url}/${id}/issue_evidence`, files, {
+    issue_id: issueId,
+  });
 backofficeAPI.confirmProvisioning = (id, data) =>
   axios.post(`${backofficeAPI.url}/${id}/confirm_provisioning`, data);
 backofficeAPI.reopen = (id, data = {}) =>
   axios.post(`${backofficeAPI.url}/${id}/reopen`, data);
 
+export const operationsQueuesAPI = make('operations_queues');
+export const operationsSlaPoliciesAPI = make('operations_sla_policies');
 export const invoicesAPI = make('invoices');
 invoicesAPI.show = id => axios.get(`${invoicesAPI.url}/${id}`);
 export const paymentsAPI = make('payments');

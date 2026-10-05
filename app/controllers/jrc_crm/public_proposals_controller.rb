@@ -22,41 +22,30 @@ module JrcCrm
     end
 
     def accept
-      name = params[:accepted_by_name].to_s.strip
-      document = params[:accepted_by_document].to_s.strip
-      if name.blank? || document.blank?
-        @acceptance_error = 'Informe o nome completo e o CPF ou documento do signatário.'
+      result = JrcCrm::ProposalAcceptanceService.new(
+        proposal: @proposal,
+        name: params[:accepted_by_name],
+        document: params[:accepted_by_document],
+        terms_accepted: params[:accepted_terms],
+        remote_ip: request.remote_ip,
+        user_agent: request.user_agent,
+        actor: @proposal.owner,
+        event_description: 'Proposta aceita pelo cliente via link público com evidência digital'
+      ).call
+
+      unless result.success?
+        @acceptance_error = result.errors.join(' ')
         render :show, layout: false, status: :unprocessable_entity
         return
       end
 
-      if @proposal.accepted?
-        JrcCrm::AcceptedProposalLifecycleService.new(proposal: @proposal, actor: @proposal.owner).call
-        redirect_to jrc_crm_public_proposal_path(account_id: @proposal.account_id, token: params[:token], accepted: 1)
-        return
-      end
-
-      unless @proposal.customer_response_allowed?
-        @acceptance_error = 'Esta proposta ainda não está disponível para aceite.'
-        render :show, layout: false, status: :unprocessable_entity
-        return
-      end
-
-      ActiveRecord::Base.transaction do
-        @proposal.accept_by_customer!(
-          name: name,
-          document: document,
-          remote_ip: request.remote_ip,
-          user_agent: request.user_agent
-        )
-        @proposal.events.create!(
-          account_id: @proposal.account_id,
-          event_type: 'accepted',
-          description: 'Proposta aceita pelo cliente com evidência digital'
-        )
-      end
-      JrcCrm::AcceptedProposalLifecycleService.new(proposal: @proposal.reload, actor: @proposal.owner).call
-      redirect_to jrc_crm_public_proposal_path(account_id: @proposal.account_id, token: params[:token], accepted: 1)
+      lifecycle_error = result.lifecycle && !result.lifecycle[:success]
+      redirect_to jrc_crm_public_proposal_path(
+        account_id: @proposal.account_id,
+        token: params[:token],
+        accepted: 1,
+        lifecycle_error: lifecycle_error ? 1 : nil
+      )
     end
 
     def reject

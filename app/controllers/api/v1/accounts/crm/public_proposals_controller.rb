@@ -25,49 +25,33 @@ module Api
           end
 
           def accept
-            if @proposal.status == 'accepted'
-              lifecycle = JrcCrm::AcceptedProposalLifecycleService.new(proposal: @proposal, actor: @proposal.owner).call
-              render json: {
-                message: 'Proposta já aceita',
-                sales_order: lifecycle[:order] && { id: lifecycle[:order].id, order_number: lifecycle[:order].order_number },
-                lifecycle_warnings: lifecycle[:warnings]
-              }, status: :ok
+            result = JrcCrm::ProposalAcceptanceService.new(
+              proposal: @proposal,
+              name: params[:accepted_by_name],
+              document: params[:accepted_by_document],
+              terms_accepted: params[:accepted_terms],
+              remote_ip: request.remote_ip,
+              user_agent: request.user_agent,
+              actor: @proposal.owner,
+              event_description: 'Proposta aceita pelo cliente via link público com evidência digital'
+            ).call
+
+            unless result.success?
+              render json: { error: result.errors.join(' '), errors: result.errors }, status: :unprocessable_entity
               return
             end
 
-            unless @proposal.customer_response_allowed?
-              render json: { error: 'Esta proposta ainda não está disponível para aceite.' }, status: :unprocessable_entity
-              return
-            end
-
-            name = params[:accepted_by_name].to_s.strip
-            document = params[:accepted_by_document].to_s.strip
-            if name.blank? || document.blank?
-              render json: { error: 'Nome completo e CPF ou documento são obrigatórios.' }, status: :unprocessable_entity
-              return
-            end
-
-            ActiveRecord::Base.transaction do
-              @proposal.accept_by_customer!(
-                name: name,
-                document: document,
-                remote_ip: request.remote_ip,
-                user_agent: request.user_agent
-              )
-              @proposal.events.create!(
-                account_id: @proposal.account_id,
-                event_type: 'accepted',
-                description: 'Proposta aceita pelo cliente via link público com evidência digital'
-              )
-            end
-
-            lifecycle = JrcCrm::AcceptedProposalLifecycleService.new(proposal: @proposal.reload, actor: @proposal.owner).call
+            lifecycle = result.lifecycle || {}
             render json: {
               success: true,
-              message: 'Proposta aceita com sucesso',
+              message: lifecycle[:success] == false ?
+                'Proposta aceita. O Pedido não foi gerado automaticamente e precisa de revisão no CRM.' :
+                'Proposta aceita com sucesso',
+              proposal_status: result.proposal.status,
+              accepted_at: result.proposal.accepted_at,
               sales_order: lifecycle[:order] && { id: lifecycle[:order].id, order_number: lifecycle[:order].order_number },
               lifecycle_warnings: lifecycle[:warnings],
-              lifecycle_error: lifecycle[:success] ? nil : lifecycle[:error]
+              lifecycle_error: lifecycle[:success] == false ? lifecycle[:error] : nil
             }, status: :ok
           rescue ActiveRecord::StaleObjectError
             render json: { error: 'Conflito de versão na proposta', code: 'CONCURRENCY_CONFLICT' }, status: :conflict

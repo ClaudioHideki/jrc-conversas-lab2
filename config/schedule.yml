@@ -4,6 +4,11 @@ nico_queue_recovery_job:
   class: 'JrcNico::RecoveryJob'
   queue: scheduled_jobs
 
+jrc_operations_sla_monitor_job:
+  cron: '*/5 * * * *'
+  class: 'JrcOperations::SlaMonitorJob'
+  queue: scheduled_jobs
+
 # use https://crontab.guru/ to validate
 # validations for this file exist in /spec/configs/schedule_spec.rb
 

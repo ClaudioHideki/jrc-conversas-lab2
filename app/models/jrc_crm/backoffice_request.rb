@@ -60,6 +60,8 @@ module JrcCrm
     belongs_to :contact, optional: true
     belongs_to :owner, class_name: 'User'
     belongs_to :requested_by, class_name: 'User'
+    belongs_to :operations_queue, class_name: 'JrcOperations::Queue', optional: true
+    belongs_to :operations_sla_policy, class_name: 'JrcOperations::SlaPolicy', optional: true
     has_many_attached :documents
 
     enum request_kind: { fulfillment: 'fulfillment', approval: 'approval', change: 'change', cancellation: 'cancellation' }
@@ -68,17 +70,24 @@ module JrcCrm
     enum priority: { low: 'low', normal: 'normal', high: 'high', critical: 'critical' }
 
     validates :request_number, :title, presence: true
+    validates :operations_queue, :operations_sla_policy, presence: true, on: :create
     validates :stage, inclusion: { in: STAGES }
     validates :request_number, uniqueness: { scope: :account_id }
     validates :sales_order_id, uniqueness: { scope: %i[account_id request_kind] }, if: :fulfillment?
     validate :associations_belong_to_account
     before_validation :assign_number, on: :create
+    after_update :sync_sla_status, if: :saved_change_to_status?
+    after_save :audit_assignment, if: -> { saved_change_to_owner_id? || saved_change_to_operations_queue_id? }
 
     def advance!
       validate_stage_dependencies!
+      previous_status = status
       target = next_applicable_stage
       update!(stage: target, status: target == 'completed' ? 'completed' : 'in_progress',
               completed_at: target == 'completed' ? Time.current : nil)
+      clock = JrcOperations::SlaClock.new(self)
+      clock.status_changed!(from: previous_status, to: status) if previous_status != status
+      clock.stage_changed! if previous_changes['stage'].present?
       if target == 'finance' && previous_changes['stage']&.first == 'provisioning'
         JrcCrm::OrderWorkflowSyncService.new(order: sales_order, actor: owner, event: 'implementation_completed').call
       end
@@ -116,15 +125,63 @@ module JrcCrm
       end
     end
 
+    def document_requirements
+      data = (metadata || {}).with_indifferent_access
+      configured = Array(data[:document_requirements]).filter_map do |raw|
+        row = raw.respond_to?(:to_h) ? raw.to_h.with_indifferent_access : { label: raw.to_s }
+        next unless document_requirement_matches?(row[:conditions])
+
+        {
+          'key' => row[:key].presence || row[:label].to_s.parameterize,
+          'label' => row[:label].presence || row[:name].presence || row[:key].to_s.humanize,
+          'required' => row.key?(:required) ? bool(row[:required]) : true,
+          'blocking' => row.key?(:blocking) ? bool(row[:blocking]) : true,
+          'conditional' => row[:conditions].present?,
+          'conditions' => row[:conditions] || {}
+        }
+      end
+      legacy = Array(data[:required_documents]).map do |name|
+        { 'key' => name.to_s.parameterize, 'label' => name.to_s, 'required' => true, 'blocking' => true,
+          'conditional' => false, 'conditions' => {} }
+      end
+      (configured + legacy).uniq { |row| row['key'] }
+    end
+
     def required_documents
-      Array((metadata || {})['required_documents'])
+      document_requirements.select { |row| row['required'] }.map { |row| row['label'] }
+    end
+
+    def blocking_document_requirements
+      document_requirements.select { |row| row['required'] && row['blocking'] }
     end
 
     def open_issues
-      Array((metadata || {})['issues']).reject { |issue| %w[resolved canceled].include?((issue['status'] || issue[:status]).to_s) }
+      Array((metadata || {})['issues']).reject do |issue|
+        %w[resolved canceled].include?((issue['status'] || issue[:status]).to_s)
+      end
+    end
+
+    def blocking_open_issues
+      open_issues.select do |issue|
+        issue = issue.with_indifferent_access
+        issue.key?(:blocking) ? bool(issue[:blocking]) : true
+      end
     end
 
     private
+
+    def audit_assignment
+      JrcCrm::AuditEvent.create!(account_id: account_id, actor_type: 'System',
+        event_type: previously_new_record? ? 'operations_assigned' : 'operations_transferred',
+        resource_type: 'JrcCrm::BackofficeRequest', resource_id: id,
+        from_value: { owner_id: owner_id_before_last_save, queue_id: operations_queue_id_before_last_save },
+        to_value: { owner_id: owner_id, queue_id: operations_queue_id }, metadata: { source: 'jrc_operations_routing' })
+    end
+
+    def sync_sla_status
+      from, to = saved_change_to_status
+      JrcOperations::SlaClock.new(self).status_changed!(from: from, to: to)
+    end
 
     def validate_stage_dependencies!
       errors = []
@@ -137,8 +194,10 @@ module JrcCrm
 
       if stage == 'documentation'
         statuses = (data[:document_statuses] || {}).with_indifferent_access
-        pending = required_documents.reject { |name| statuses[name.to_s].to_s == 'approved' }
-        errors << "Documentos obrigatórios pendentes: #{pending.join(', ')}" if pending.any?
+        pending = blocking_document_requirements.reject do |requirement|
+          statuses[requirement['key']].to_s == 'approved' || statuses[requirement['label']].to_s == 'approved'
+        end
+        errors << "Documentos obrigatórios pendentes: #{pending.map { |row| row['label'] }.join(', ')}" if pending.any?
       end
 
       if stage == 'contract' && stage_applicable?('contract')
@@ -157,8 +216,8 @@ module JrcCrm
         errors << 'O provisionamento ainda não possui execução confirmada. Integrações não configuradas não são concluídas automaticamente.' unless completed && %w[manual external].include?(mode)
       end
 
-      if stage == 'issues' && open_issues.any?
-        errors << 'Resolva as pendências abertas antes de concluir o fluxo.'
+      if blocking_open_issues.any?
+        errors << 'Resolva as pendências bloqueantes antes de concluir o fluxo.'
       end
 
       if stage == 'approval' && stage_applicable?('approval')
@@ -173,6 +232,24 @@ module JrcCrm
         errors.each { |message| self.errors.add(:base, message) }
         raise ActiveRecord::RecordInvalid.new(self)
       end
+    end
+
+    def document_requirement_matches?(conditions)
+      rules = (conditions || {}).with_indifferent_access
+      return true if rules.blank?
+
+      snap = (sales_order.snapshot || {}).with_indifferent_access
+      product_ids = sales_order.order_items.map(&:product_id).compact.map(&:to_i)
+      checks = []
+      checks << Array(rules[:order_origins]).map(&:to_s).include?(sales_order.order_origin.to_s) if rules[:order_origins].present?
+      checks << Array(rules[:request_kinds]).map(&:to_s).include?(request_kind.to_s) if rules[:request_kinds].present?
+      checks << Array(rules[:priorities]).map(&:to_s).include?(priority.to_s) if rules[:priorities].present?
+      checks << Array(rules[:product_ids]).map(&:to_i).intersect?(product_ids) if rules[:product_ids].present?
+      checks << Array(rules[:business_unit_ids]).map(&:to_i).include?(sales_order.business_unit_id.to_i) if rules[:business_unit_ids].present?
+      if rules[:snapshot].present?
+        checks << rules[:snapshot].all? { |key, value| snap[key].to_s == value.to_s }
+      end
+      checks.all?
     end
 
     def bool(value)
@@ -190,6 +267,8 @@ module JrcCrm
       errors.add(:contact, 'must belong to account') if contact && contact.account_id != account_id
       errors.add(:owner, 'must belong to account') if owner && !account.users.exists?(owner.id)
       errors.add(:requested_by, 'must belong to account') if requested_by && !account.users.exists?(requested_by.id)
+      errors.add(:operations_queue, 'must belong to account') if operations_queue && operations_queue.account_id != account_id
+      errors.add(:operations_sla_policy, 'must belong to account') if operations_sla_policy && operations_sla_policy.account_id != account_id
     end
   end
 end

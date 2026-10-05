@@ -7,6 +7,7 @@ import ContractTemplates from '../contracts/ContractTemplates.vue';
 import GoalsView from '../goals/GoalsView.vue';
 import CommissionsView from '../commissions/CommissionsView.vue';
 import BackofficeView from '../backoffice/BackofficeView.vue';
+import BackofficeSlaQueues from '../backoffice/components/BackofficeSlaQueues.vue';
 
 const mocks = vi.hoisted(() => {
   const list = () => vi.fn().mockResolvedValue({ data: [] });
@@ -18,6 +19,9 @@ const mocks = vi.hoisted(() => {
     dashboard: vi.fn().mockResolvedValue({ data: {} }),
     history: list(),
     orderOptions: list(),
+    selectionOptions: vi
+      .fn()
+      .mockResolvedValue({ data: { eligible: [], waiting: [], linked: [] } }),
   });
   return {
     orders: api(),
@@ -26,6 +30,8 @@ const mocks = vi.hoisted(() => {
     goals: api(),
     commissions: api(),
     programs: api(),
+    queues: api(),
+    policies: api(),
     backoffice: api(),
     invoices: api(),
     catalog: api(),
@@ -56,6 +62,13 @@ vi.mock('dashboard/api/contacts', () => ({ default: mocks.catalog }));
 vi.mock('dashboard/api/crm/products', () => ({ default: mocks.catalog }));
 vi.mock('dashboard/api/crm/deals', () => ({ default: mocks.catalog }));
 vi.mock('dashboard/api/crm/proposals', () => ({ default: mocks.catalog }));
+vi.mock('dashboard/api/crm/organizationStructure', () => ({
+  default: {
+    load: vi.fn().mockResolvedValue({
+      data: { business_units: [], operating_companies: [] },
+    }),
+  },
+}));
 vi.mock('dashboard/api/crm/commercialCycle', () => ({
   salesOrdersAPI: mocks.orders,
   contractsAPI: mocks.contracts,
@@ -66,9 +79,42 @@ vi.mock('dashboard/api/crm/commercialCycle', () => ({
   backofficeAPI: mocks.backoffice,
   invoicesAPI: mocks.invoices,
   paymentsAPI: {},
+  operationsQueuesAPI: mocks.queues,
+  operationsSlaPoliciesAPI: mocks.policies,
 }));
 
 describe('Commercial screens on an Account without commercial records', () => {
+  it('sends explicit queue and SLA settings without inventing deadline minutes', async () => {
+    const wrapper = mount(BackofficeSlaQueues, {
+      props: { summary: { within_sla: 2 }, requests: [] },
+    });
+    await flushPromises();
+    Object.assign(wrapper.vm.queueForm, {
+      name: 'Operations',
+      code: 'ops',
+      assignment_strategy: 'round_robin',
+      product_id: 7,
+    });
+    await wrapper.vm.saveQueue();
+    expect(mocks.queues.create).toHaveBeenCalledWith({
+      operations_queue: expect.objectContaining({
+        code: 'OPS',
+        assignment_strategy: 'round_robin',
+        settings: { product_ids: [7] },
+      }),
+    });
+    wrapper.vm.policyForm.name = 'Monitor only';
+    await wrapper.vm.savePolicy();
+    expect(mocks.policies.create).toHaveBeenCalledWith({
+      operations_sla_policy: expect.objectContaining({
+        first_action_minutes: null,
+        stage_minutes: null,
+        total_minutes: null,
+        alert_thresholds: [50, 75, 90, 100],
+      }),
+    });
+    wrapper.unmount();
+  });
   beforeEach(() => {
     vi.clearAllMocks();
     Object.values(mocks).forEach(api => {
@@ -187,9 +233,10 @@ describe('Commercial screens on an Account without commercial records', () => {
     await click('Nova meta');
     await click('Equipe');
     await wrapper.get('[name="goal_team_id"]').setValue('42');
-    for (let step = 1; step < 5; step += 1) {
-      await click('Avançar');
-    }
+    await click('Avançar');
+    await click('Avançar');
+    await click('Avançar');
+    await click('Avançar');
     await click('Publicar meta');
     await flushPromises();
     expect(mocks.goals.create).toHaveBeenCalledWith({

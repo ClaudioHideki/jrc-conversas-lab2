@@ -1,0 +1,75 @@
+{
+  "name": "JRC Conversas - Backoffice Integracao SLA Filas Pendencias",
+  "date": "2026-10-04",
+  "base": "JRC-CONVERSAS-LAB2-CRM-PROP-ACCEPT-01-CORRIGIDO-INTEGRADO-CANDIDATO-20261004.zip",
+  "status": "candidate_for_lab_homologation",
+  "features": [
+    "Pedido -> Backoffice eligibility and traceability",
+    "CRM Contract reused by Backoffice",
+    "document checklist with conditional/blocking requirements and validation history",
+    "Backoffice issues with assignment, return, evidence, reopen and mandatory resolution",
+    "central reusable JrcOperations queue/SLA engine",
+    "routing strategies manual/round_robin/least_load/specialty",
+    "first-action/stage/total SLA with business calendar, pause, thresholds and escalation",
+    "SLA/queue dashboard with compliance, average resolution and queue volume"
+  ],
+  "migrations": [
+    "20261004234000_create_jrc_operations_routing_and_sla.rb",
+    "20261004234100_backfill_jrc_operations_backoffice_routing.rb"
+  ],
+  "added": [
+    "JRC-BACKOFFICE-INTEGRACAO-SLA-PENDENCIAS-ENTREGA-20261004.md",
+    "JRC-BACKOFFICE-INTEGRACAO-SLA-PENDENCIAS-HOMOLOGACAO-20261004.md",
+    "JRC-BACKOFFICE-INTEGRACAO-SLA-PENDENCIAS-MANIFESTO-20261004.json",
+    "JRC-BACKOFFICE-INTEGRACAO-SLA-PENDENCIAS-SHA256SUMS-20261004.txt",
+    "app/controllers/api/v1/accounts/crm/operations_queues_controller.rb",
+    "app/controllers/api/v1/accounts/crm/operations_sla_policies_controller.rb",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/components/BackofficeSlaQueues.vue",
+    "app/jobs/jrc_operations/sla_monitor_job.rb",
+    "app/models/jrc_operations/queue.rb",
+    "app/models/jrc_operations/sla_policy.rb",
+    "app/services/jrc_operations/backoffice_router.rb",
+    "app/services/jrc_operations/business_time.rb",
+    "app/services/jrc_operations/sla_clock.rb",
+    "db/migrate/20261004234000_create_jrc_operations_routing_and_sla.rb",
+    "db/migrate/20261004234100_backfill_jrc_operations_backoffice_routing.rb",
+    "spec/services/jrc_operations/business_time_spec.rb"
+  ],
+  "modified": [
+    "app/controllers/api/v1/accounts/crm/backoffice_requests_controller.rb",
+    "app/javascript/dashboard/api/crm/commercialCycle.js",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeView.vue",
+    "app/models/account.rb",
+    "app/models/jrc_crm/audit_event.rb",
+    "app/models/jrc_crm/backoffice_request.rb",
+    "app/services/jrc_crm/order_workflow_sync_service.rb",
+    "config/routes.rb",
+    "config/schedule.yml"
+  ],
+  "removed": [],
+  "validation": {
+    "ruby_syntax": "passed",
+    "schedule_yaml": "passed",
+    "javascript_parse": "passed",
+    "vue_script_parse": "passed",
+    "migration_timestamp_collision": "passed",
+    "runtime_nexora_hardcode": "not_found",
+    "postgres_migrations": "not_executed",
+    "rspec": "not_executed_bundle_unavailable",
+    "vitest_vite": "not_executed_pnpm_unavailable",
+    "browser": "not_executed",
+    "docker": "not_executed"
+  },
+  "not_in_scope_this_iteration": [
+    "redesign generic approvals engine",
+    "redesign reports",
+    "new NICO automation"
+  ],
+  "counts": {
+    "total_files": 10318,
+    "base_files": 10302,
+    "added": 16,
+    "modified": 9,
+    "removed": 0
+  }
+}

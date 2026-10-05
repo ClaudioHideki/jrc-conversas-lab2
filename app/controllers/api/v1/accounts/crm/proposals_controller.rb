@@ -215,35 +215,36 @@ module Api
           end
 
           def accept
-            name = params[:accepted_by_name].presence || Current.user.name
-            document = params[:accepted_by_document].to_s.strip
-            if name.blank? || document.blank?
-              render json: { errors: ['Informe o nome completo e o CPF ou documento do signatário.'] },
-                     status: :unprocessable_entity
+            result = JrcCrm::ProposalAcceptanceService.new(
+              proposal: @proposal,
+              name: params[:accepted_by_name].presence || Current.user.name,
+              document: params[:accepted_by_document],
+              terms_accepted: true,
+              require_terms: false,
+              remote_ip: request.remote_ip,
+              user_agent: request.user_agent,
+              actor: Current.user,
+              event_description: 'Proposta aceita internamente com evidência digital'
+            ).call
+
+            unless result.success?
+              render json: { errors: result.errors }, status: :unprocessable_entity
               return
             end
 
-            @proposal.accept_by_customer!(
-              name: name,
-              document: document,
-              remote_ip: request.remote_ip,
-              user_agent: request.user_agent
-            )
-            audit_event!('accepted', 'Proposta aceita internamente com evidência digital')
-            lifecycle = JrcCrm::AcceptedProposalLifecycleService.new(
-              proposal: @proposal.reload,
-              actor: Current.user
-            ).call
+            lifecycle = result.lifecycle || {}
             render json: {
-              message: 'Proposta aceita',
-              proposal: serialize(@proposal.reload),
+              message: lifecycle[:success] == false ?
+                'Proposta aceita. O Pedido não foi gerado automaticamente e precisa de revisão.' :
+                'Proposta aceita',
+              proposal: serialize(result.proposal),
               sales_order: lifecycle[:order] && {
                 id: lifecycle[:order].id,
                 order_number: lifecycle[:order].order_number,
                 status: lifecycle[:order].status
               },
               lifecycle_warnings: lifecycle[:warnings],
-              lifecycle_error: lifecycle[:success] ? nil : lifecycle[:error]
+              lifecycle_error: lifecycle[:success] == false ? lifecycle[:error] : nil
             }
           end
 

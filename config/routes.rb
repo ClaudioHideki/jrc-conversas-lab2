@@ -501,6 +501,7 @@ Rails.application.routes.draw do
             end
             resources :backoffice_requests, only: [:index, :show, :create, :update] do
               get :summary, on: :collection
+              get :selection_options, on: :collection
               member do
                 post :advance
                 post :documents, action: :upload_documents
@@ -508,10 +509,15 @@ Rails.application.routes.draw do
                 post :document_status
                 post :issues, action: :add_issue
                 post :resolve_issue
+                post :return_issue
+                post :reopen_issue
+                post :issue_evidence, action: :upload_issue_evidence
                 post :confirm_provisioning
                 post :reopen
               end
             end
+            resources :operations_queues, only: [:index, :create, :update]
+            resources :operations_sla_policies, only: [:index, :create, :update]
             resources :invoices, only: [:index, :show, :create, :update]
             resources :payments, only: [:index, :create]
             resources :contract_templates, only: [:index, :show, :create, :update, :destroy]
