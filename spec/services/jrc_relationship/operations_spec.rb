@@ -96,8 +96,9 @@ RSpec.describe 'Relationship operational regression' do
   end
 
   it 'respects direct unit/team restrictions and keeps CS-only queues out of Backoffice' do
-    unit = JrcCrm::BusinessUnit.create!(account: sd_account, company: company, name: 'CS A', code: 'CS-A')
-    other_unit = JrcCrm::BusinessUnit.create!(account: sd_account, company: company, name: 'CS B', code: 'CS-B')
+    internal = sd_account.master_companies.create!(name: 'Internal CS operator', relationship_type: 'internal')
+    unit = JrcCrm::BusinessUnit.create!(account: sd_account, operating_company: internal, name: 'CS A', code: 'CS-A')
+    other_unit = JrcCrm::BusinessUnit.create!(account: sd_account, operating_company: internal, name: 'CS B', code: 'CS-B')
     team = create(:team, account: sd_account)
     assignment.update!(business_unit: unit, team: team)
     wrong = JrcOperations::Queue.create!(account: sd_account, name: 'Other unit', code: 'OTHER', business_unit: other_unit, settings: { scopes: ['relationship'] })
@@ -118,6 +119,7 @@ RSpec.describe 'Relationship operational regression' do
     expect(alerts.count).to eq(1)
     expect(alerts.first.deal_id).to be_nil
     expect(alerts.first.contact_id).to eq(sd_contact.id)
+    expect(alerts.first.company).to eq(company)
     foreign = alerts.first.dup
     foreign.account = sd_foreign_account
     foreign.user = create(:user, account: sd_foreign_account)

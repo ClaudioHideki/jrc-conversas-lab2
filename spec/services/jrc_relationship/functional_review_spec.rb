@@ -105,8 +105,10 @@ RSpec.describe 'Relationship functional review' do
     expect(plan.goals.first).to include('baseline' => 1, 'current' => 2, 'target' => 10, 'activity_id' => activity.id)
     expect(plan.metadata).to include('notes' => 'Observed usage')
     expect(plan.metadata['milestones'].first['activity_id']).to eq(activity.id)
-    foreign = JrcCrm::Activity.create!(account: sd_foreign_account, user: create(:user, account: sd_foreign_account),
-      contact: create(:contact, account: sd_foreign_account), activity_type: 'task', title: 'Foreign task', due_at: 1.day.from_now)
+    foreign_user = create(:user, account: sd_foreign_account)
+    foreign = JrcCrm::Activity.create!(account: sd_foreign_account, user: foreign_user,
+      lead: create(:jrc_crm_lead, account: sd_foreign_account, owner: foreign_user),
+      activity_type: 'task', title: 'Foreign task', due_at: 1.day.from_now)
     expect { workflow.save(kind: 'plans', attributes: data.merge(request_id: SecureRandom.uuid,
       goals: [{ metric: 'usage', activity_id: foreign.id }])) }.to raise_error(ActiveRecord::RecordNotFound)
     expect(JrcRelationship::SuccessPlan.where(account: sd_account).count).to eq(1)

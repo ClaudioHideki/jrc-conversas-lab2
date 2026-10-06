@@ -78,7 +78,7 @@ module JrcOperations
         activity_type: 'task', title: "SLA #{threshold.to_i}% — #{request.request_number}",
         description: "Solicitação #{request.request_number} atingiu #{threshold.to_i}% do SLA total (#{snapshot[:state]}).",
         due_at: snapshot[:total_due_at] || snapshot[:stage_due_at] || snapshot[:first_action_due_at],
-        user: request.owner, deal: order.deal, contact: order.contact, company: order.contact&.company,
+        user: request.owner, deal: order.deal, contact: order.contact, company_id: order.contact&.company_id,
         business_unit: request.business_unit || order.business_unit,
         metadata: marker.merge(source: 'jrc_operations_sla', sales_order_id: order.id)
       )
