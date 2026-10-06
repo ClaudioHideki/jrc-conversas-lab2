@@ -1512,7 +1512,13 @@ const menuSections = computed(() => {
     {
       name: 'relationships',
       label: 'Relacionamentos',
-      items: take(['Customers', 'Companies', 'JRC Projects', 'JRC Agenda']),
+      items: take([
+        'Customers',
+        'Companies',
+        'Relationship',
+        'JRC Projects',
+        'JRC Agenda',
+      ]),
     },
 
 

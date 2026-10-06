@@ -24,6 +24,5 @@ class ExtendRelationshipOperations < ActiveRecord::Migration[7.1]
     add_index :jrc_relationship_actions, [:account_id, :operations_queue_id, :status], name: 'rel_operational_queue'
     add_index :jrc_operations_sla_policies, [:account_id, :operations_queue_id, :scope_kind, :name],
       unique: true, name: 'ops_policy_identity'
-    add_reference :jrc_crm_activities, :business_unit, foreign_key: { to_table: :jrc_crm_business_units }
   end
 end
