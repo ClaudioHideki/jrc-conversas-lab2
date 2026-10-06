@@ -11,8 +11,10 @@ RSpec.describe 'Sales order client/deal/proposal integrity', type: :request do
   let(:deal) { create(:jrc_crm_deal, account: account, owner: admin, pipeline: pipeline, stage: stage, contact: contact, title: 'Nexora - JRC Conversas') }
   let(:other_deal) { create(:jrc_crm_deal, account: account, owner: admin, pipeline: pipeline, stage: stage, contact: other_contact, title: 'Outro negocio') }
   let(:proposal) do
-    create(:jrc_crm_proposal, account: account, owner: admin, deal: deal, status: 'accepted', accepted_at: Time.current,
-      version_number: 3, implementation_cents: 120_000, monthly_cents: 100_000)
+    create(:jrc_crm_proposal, account: account, owner: admin, deal: deal, status: 'sent', sent_at: Time.current,
+      version_number: 3, implementation_cents: 120_000, monthly_cents: 100_000).tap do |record|
+      record.update!(status: 'accepted', accepted_at: Time.current)
+    end
   end
   let(:url) { "/api/v1/accounts/#{account.id}/crm" }
 

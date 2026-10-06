@@ -150,8 +150,8 @@ RSpec.describe 'JRC CRM Nexora end-to-end commercial lifecycle' do
     expect(replay[:order].id).to eq(order.id)
     expect(proposal.sales_orders.count).to eq(1)
 
-    order.update!(status: 'approved')
-    JrcCrm::OrderWorkflowSyncService.new(order: order.reload, actor: seller).call
+    approval = order.backoffice_requests.find_by!(request_kind: 'approval')
+    JrcCrm::OrderApprovalService.new(order: order, actor: seller).decide!(request: approval, decision: 'approved')
 
     expect(order.contracts.count).to eq(1)
     contract = order.contracts.first
@@ -160,8 +160,23 @@ RSpec.describe 'JRC CRM Nexora end-to-end commercial lifecycle' do
     expect(contract.monthly_cents).to eq(order.monthly_cents)
 
     expect(order.backoffice_requests.where(request_kind: 'fulfillment').count).to eq(1)
-    backoffice = order.backoffice_requests.first
+    backoffice = order.backoffice_requests.find_by!(request_kind: 'fulfillment')
     expect(backoffice.contract_id).to eq(contract.id)
+    expect(backoffice.metadata['implementation_project_id']).to be_nil
+
+    # The operational handoff remains explicit: contract signature and the
+    # implementation checklist are real gates and are not auto-completed.
+    File.open(Rails.root.join('spec/assets/sample.pdf')) do |file|
+      contract.signed_document.attach(io: file, filename: 'nexora-assinado.pdf', content_type: 'application/pdf')
+    end
+    contract.update!(
+      status: 'active', signature_status: 'signed', signature_mode: 'manual',
+      signed_by_name: 'Marcelo Andrade', signed_at: Time.current
+    )
+    backoffice.advance! # analysis -> contract
+    expect(backoffice.reload.stage).to eq('contract')
+    backoffice.advance! # contract -> implementation
+    expect(backoffice.reload.stage).to eq('implementation')
     expect(backoffice.metadata['implementation_project_id']).to be_present,
       backoffice.metadata['implementation_project_warning']
 
@@ -176,17 +191,6 @@ RSpec.describe 'JRC CRM Nexora end-to-end commercial lifecycle' do
     expect(order.contracts.count).to eq(1)
     expect(order.backoffice_requests.where(request_kind: 'fulfillment').count).to eq(1)
     expect(JrcProjects::Project.where(account_id: account.id, idempotency_key: "crm-order-implementation-#{order.id}").count).to eq(1)
-
-    # The operational handoff remains explicit: contract signature and the
-    # implementation checklist are real gates and are not auto-completed.
-    contract.update!(
-      status: 'active', signature_status: 'signed', signature_mode: 'manual',
-      signed_by_name: 'Marcelo Andrade', signed_at: Time.current
-    )
-    backoffice.advance! # analysis -> contract
-    expect(backoffice.reload.stage).to eq('contract')
-    backoffice.advance! # contract -> implementation
-    expect(backoffice.reload.stage).to eq('implementation')
 
     operational_metadata = backoffice.metadata.deep_dup
     operational_metadata['implementation_checklist'] = Array(operational_metadata['implementation_checklist']).map do |item|

@@ -1,7 +1,6 @@
 require 'rails_helper'
 
 # Native regression gate: requires the consolidated migrations in PostgreSQL.
-# These examples were written, not executed in the source-only integration lab.
 RSpec.describe 'Consolidated commercial protections', type: :request do
   let(:account) { create(:account) }
   let(:admin) { create(:user, account: account, role: :administrator) }
@@ -11,11 +10,13 @@ RSpec.describe 'Consolidated commercial protections', type: :request do
   let(:stage) { create(:jrc_crm_stage, account: account, pipeline: pipeline) }
   let(:deal) { create(:jrc_crm_deal, account: account, owner: admin, pipeline: pipeline, stage: stage, contact: contact) }
   let(:proposal) do
-    create(:jrc_crm_proposal, account: account, owner: admin, deal: deal, status: 'accepted',
-      accepted_at: Time.current, implementation_cents: 100_000, monthly_cents: 2000,
+    create(:jrc_crm_proposal, account: account, owner: admin, deal: deal, status: 'sent',
+      sent_at: Time.current, implementation_cents: 100_000, monthly_cents: 2000,
       shipping_mode: 'separate', shipping_cents: 5001, shipping_in_installments: false,
       payment_condition: 'down_payment_installments', payment_method: 'boleto',
-      down_payment_cents: 30_000, installments_count: 7)
+      down_payment_cents: 30_000, installments_count: 7).tap do |record|
+      record.update!(status: 'accepted', accepted_at: Time.current)
+    end
   end
   let(:url) { "/api/v1/accounts/#{account.id}/crm" }
   before { account.enable_features!('jrc_crm') }
@@ -73,8 +74,10 @@ RSpec.describe 'Consolidated commercial protections', type: :request do
 
   it 'keeps the order financial snapshot in a contract despite contradictory payload values' do
     order = create_order_from_proposal
+    approval = order.backoffice_requests.find_by!(request_kind: 'approval')
+    JrcCrm::OrderApprovalService.new(order: order, actor: admin).decide!(request: approval, decision: 'approved')
     post "#{url}/contracts", params: { contract: { sales_order_id: order.id, status: 'draft',
-      one_time_cents: 1, monthly_cents: 1, payment_condition: 'cash' } }, headers: headers, as: :json
+      content_override: 'Contrato de homologação', one_time_cents: 1, monthly_cents: 1, payment_condition: 'cash' } }, headers: headers, as: :json
     expect(response).to have_http_status(:created)
     contract = JrcCrm::Contract.find(response.parsed_body.fetch('id'))
     expect(contract.financial_summary.to_h).to eq(order.financial_summary.except(:items).deep_stringify_keys)
@@ -104,11 +107,15 @@ RSpec.describe 'Consolidated commercial protections', type: :request do
   end
 
   it 'includes direct orders and contracts in Customer 360' do
-    post "#{url}/sales_orders", params: { sales_order: { contact_id: contact.id, status: 'draft',
+    post "#{url}/sales_orders", params: { sales_order: { contact_id: contact.id, status: 'pending',
       items: [{ name: 'Direct', quantity: 1, unit_cents: 10_000 }] } }, headers: headers, as: :json
     expect(response).to have_http_status(:created)
     order_id = response.parsed_body.fetch('id')
-    post "#{url}/contracts", params: { contract: { sales_order_id: order_id, status: 'draft' } }, headers: headers, as: :json
+    order = JrcCrm::SalesOrder.find(order_id)
+    approval = order.backoffice_requests.find_by!(request_kind: 'approval')
+    JrcCrm::OrderApprovalService.new(order: order, actor: admin).decide!(request: approval, decision: 'approved')
+    post "#{url}/contracts", params: { contract: { sales_order_id: order_id, status: 'draft',
+      content_override: 'Contrato direto de homologação' } }, headers: headers, as: :json
     expect(response).to have_http_status(:created)
     get "#{url}/customers/#{contact.id}", headers: headers, as: :json
     expect(response).to have_http_status(:ok)
