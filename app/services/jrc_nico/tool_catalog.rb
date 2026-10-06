@@ -64,7 +64,7 @@ class JrcNico::ToolCatalog
       next if group == 'settings_admin' && !@access.membership.administrator?
       next if group == 'campaigns' && !@access.campaigns?
       next if group == 'contacts' && !@access.policy(Contact).public_send(name == 'create_contact' ? :create? : :index?)
-      if %w[service_desk projects projects_create].include?(group)
+      if %w[service_desk projects projects_create relationship].include?(group)
         domain_access ||= JrcNico::DomainAccess.new(@access)
         next unless domain_permissions.fetch(group) { domain_permissions[group] = domain_access.available?(group) }
       end

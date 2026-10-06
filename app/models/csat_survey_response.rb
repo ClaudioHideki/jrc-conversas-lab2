@@ -26,6 +26,7 @@
 #  index_csat_survey_responses_on_review_notes_updated_by_id  (review_notes_updated_by_id)
 #
 class CsatSurveyResponse < ApplicationRecord
+  include JrcRelationship::SignalDispatch
   belongs_to :account
   belongs_to :conversation
   belongs_to :contact

@@ -64,6 +64,7 @@
 #
 module JrcCrm
   class Contract < ApplicationRecord
+    include JrcRelationship::SignalDispatch
     self.table_name = 'jrc_crm_contracts'
     belongs_to :account
     belongs_to :business_unit, class_name: 'JrcCrm::BusinessUnit', optional: true
@@ -83,6 +84,7 @@ module JrcCrm
     validates :signature_status, inclusion: { in: %w[not_started prepared sent signed canceled failed] }, allow_nil: true
     validates :signature_mode, inclusion: { in: %w[manual provider] }, allow_blank: true
     validate :associations_belong_to_account
+    validate :commercial_stage_is_valid
     before_validation :assign_number, on: :create
     before_validation :inherit_order_terms, on: :create
     validate :preserve_financial_snapshot, on: :update
@@ -93,9 +95,25 @@ module JrcCrm
       sales_order.financial_summary.except(:items).with_indifferent_access
     end
 
+    def commercial_stage_is_valid
+      if persisted? && will_save_change_to_signature_status? && attribute_in_database('signature_status') == 'signed' && signature_status != 'signed'
+        errors.add(:signature_status, 'a assinatura registrada deve ser preservada')
+      end
+      if new_record? && sales_order && !JrcCrm::OrderWorkflowSyncService::QUALIFYING_STATUSES.include?(sales_order.status)
+        errors.add(:sales_order, 'precisa estar aprovado antes de gerar contrato')
+      end
+      if will_save_change_to_status? && %w[active expiring renewed].include?(status) && signature_status != 'signed'
+        errors.add(:status, 'exige assinatura registrada')
+      end
+      if will_save_change_to_signature_status? && signature_status == 'signed' &&
+         (signed_at.blank? || signed_by_name.blank? || !signed_document.attached?)
+        errors.add(:signature_status, 'exige documento assinado, data e signatário')
+      end
+    end
+
     def inherit_order_terms
       return unless sales_order
-      terms = source_contract ? source_contract.financial_summary : sales_order.financial_summary
+      terms = source_contract && source_contract.sales_order_id == sales_order_id ? source_contract.financial_summary : sales_order.financial_summary
       self.one_time_cents = terms[:total_cents]
       self.monthly_cents = terms[:monthly_cents]
       self.payment_condition = terms[:payment_condition]

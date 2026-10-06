@@ -38,6 +38,16 @@ class NotificationFinder
 
   def find_all_notifications
     @notifications = current_user.notifications.where(account_id: @current_account.id)
+    relationship = @notifications.where(notification_type: 'relationship_action')
+    member = @current_account.account_users.find_by(user_id: current_user.id)
+    policy = member && JrcRelationship::ModulePolicy.new({ account: @current_account, user: current_user, account_user: member }, @current_account)
+    if policy&.access?
+      allowed = JrcRelationship::Context.new(member).records(JrcRelationship::Action).select(:id)
+      relationship = relationship.where(primary_actor_id: allowed)
+    else
+      relationship = relationship.none
+    end
+    @notifications = @notifications.where.not(notification_type: 'relationship_action').or(relationship)
   end
 
   def filter_snoozed_notifications

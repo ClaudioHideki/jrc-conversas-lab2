@@ -48,6 +48,7 @@
 #
 module JrcCrm
   class BackofficeRequest < ApplicationRecord
+    include JrcRelationship::SignalDispatch
     self.table_name = 'jrc_crm_backoffice_requests'
 
     STAGES = %w[request analysis documentation contract implementation provisioning finance issues approval completed].freeze
@@ -60,6 +61,8 @@ module JrcCrm
     belongs_to :contact, optional: true
     belongs_to :owner, class_name: 'User'
     belongs_to :requested_by, class_name: 'User'
+    belongs_to :operations_queue, class_name: 'JrcOperations::Queue', optional: true
+    belongs_to :operations_sla_policy, class_name: 'JrcOperations::SlaPolicy', optional: true
     has_many_attached :documents
 
     enum request_kind: { fulfillment: 'fulfillment', approval: 'approval', change: 'change', cancellation: 'cancellation' }
@@ -73,12 +76,16 @@ module JrcCrm
     validates :sales_order_id, uniqueness: { scope: %i[account_id request_kind] }, if: :fulfillment?
     validate :associations_belong_to_account
     before_validation :assign_number, on: :create
+    before_validation :prepare_operational_routing, on: :create
+    after_update :sync_operational_status, if: :saved_change_to_status?
+    after_update :sync_operational_stage, if: :saved_change_to_stage?
 
     def advance!
       validate_stage_dependencies!
       target = next_applicable_stage
       update!(stage: target, status: target == 'completed' ? 'completed' : 'in_progress',
               completed_at: target == 'completed' ? Time.current : nil)
+      JrcCrm::OrderWorkflowSyncService.new(order: sales_order, actor: owner, event: 'implementation_ready').call if target == 'implementation'
       if target == 'finance' && previous_changes['stage']&.first == 'provisioning'
         JrcCrm::OrderWorkflowSyncService.new(order: sales_order, actor: owner, event: 'implementation_completed').call
       end
@@ -117,7 +124,12 @@ module JrcCrm
     end
 
     def required_documents
-      Array((metadata || {})['required_documents'])
+      configured = Array((metadata || {})['document_checklist']).select { |row| row['required'] && row['blocking'] }.map { |row| row['key'] }
+      (Array((metadata || {})['required_documents']) + configured).uniq
+    end
+
+    def order_approval?
+      approval? && (metadata || {})['source'] == 'order_approval'
     end
 
     def open_issues
@@ -126,11 +138,37 @@ module JrcCrm
 
     private
 
+    def prepare_operational_routing
+      return unless sales_order && account
+      routing = JrcOperations::BackofficeRouter.new(account: account, order: sales_order, request_kind: request_kind,
+        priority: priority, preferred_owner: owner).call
+      self.operations_queue ||= routing.queue
+      self.operations_sla_policy ||= routing.policy
+      self.owner = routing.owner
+      JrcOperations::SlaClock.new(self).start!
+    end
+
+    def sync_operational_status
+      from, to = saved_change_to_status
+      JrcOperations::SlaClock.new(self).status_changed!(from: from, to: to)
+    end
+
+    def sync_operational_stage
+      JrcOperations::SlaClock.new(self).stage_changed!
+    end
+
     def validate_stage_dependencies!
       errors = []
       data = (metadata || {}).with_indifferent_access
       snap = (sales_order.snapshot || {}).with_indifferent_access
 
+      if fulfillment? && !sales_order.status.in?(%w[approved separating invoiced shipped completed])
+        errors << 'O pedido precisa estar aprovado antes de avançar o Backoffice.'
+      end
+      if fulfillment? && stage.in?(%w[implementation provisioning finance issues completed]) &&
+         stage_applicable?('contract') && contract&.signature_status != 'signed'
+        errors << 'A assinatura do contrato ainda está pendente.'
+      end
       if stage.in?(%w[request analysis]) && !sales_order.status.in?(%w[approved separating invoiced shipped completed])
         errors << 'O pedido precisa estar aprovado antes de iniciar o fluxo operacional.'
       end
@@ -139,6 +177,11 @@ module JrcCrm
         statuses = (data[:document_statuses] || {}).with_indifferent_access
         pending = required_documents.reject { |name| statuses[name.to_s].to_s == 'approved' }
         errors << "Documentos obrigatórios pendentes: #{pending.join(', ')}" if pending.any?
+      end
+
+      if fulfillment? && stage.in?(%w[contract implementation provisioning finance completed])
+        statuses = (data[:document_statuses] || {}).with_indifferent_access
+        errors << 'Existem requisitos documentais bloqueantes pendentes.' if required_documents.any? { |key| statuses[key.to_s] != 'approved' }
       end
 
       if stage == 'contract' && stage_applicable?('contract')
@@ -184,6 +227,8 @@ module JrcCrm
     end
 
     def associations_belong_to_account
+      errors.add(:operations_queue, 'must belong to account') if operations_queue && operations_queue.account_id != account_id
+      errors.add(:operations_sla_policy, 'must belong to account') if operations_sla_policy && operations_sla_policy.account_id != account_id
       errors.add(:sales_order, 'must belong to account') if sales_order && sales_order.account_id != account_id
       errors.add(:contract, 'must belong to account') if contract && contract.account_id != account_id
       errors.add(:business_unit, 'must belong to account') if business_unit && business_unit.account_id != account_id

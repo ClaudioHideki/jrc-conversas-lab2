@@ -1,6 +1,9 @@
 # Native policies remain the authority for both execution and saved-result access.
 class JrcNico::DomainAccess
-  RESOURCE_TYPES = %w[JrcServiceDesk::Ticket JrcServiceDesk::TicketNote JrcServiceDesk::LifecycleTransition
+  RESOURCE_TYPES = %w[JrcRelationship::Assignment JrcRelationship::HealthSnapshot JrcRelationship::Action JrcRelationship::RiskCase
+                      JrcRelationship::SuccessPlan JrcRelationship::Qbr JrcServiceDesk::Ticket JrcServiceDesk::TicketNote JrcServiceDesk::LifecycleTransition
+                      JrcRelationship::Survey JrcCrm::Invoice CsatSurveyResponse Conversation Message Call
+                      JrcServiceDesk::TicketEvent JrcProjects::AuditEvent
                       JrcProjects::Project JrcProjects::Task JrcOperations::Link JrcCrm::SalesOrder
                       JrcCrm::Contract JrcCrm::SalesCommission JrcCrm::BackofficeRequest
                       JrcCrm::SalesGoal JrcCrm::CommissionProgram JrcCrm::FollowUp
@@ -21,6 +24,8 @@ class JrcNico::DomainAccess
 
   def available?(group)
     case group
+    when 'relationship'
+      JrcRelationship::ModulePolicy.new(context, @access.account).access?
     when 'service_desk'
       JrcServiceDesk::ModulePolicy.new(context, @access.account).show?
     when 'projects'
@@ -57,6 +62,24 @@ class JrcNico::DomainAccess
   def self.authorize_resource!(access, type, id)
     domain = new(access)
     case type
+    when 'JrcRelationship::Survey', 'JrcCrm::Invoice', 'CsatSurveyResponse', 'Conversation', 'Message', 'Call',
+         'JrcServiceDesk::TicketEvent', 'JrcProjects::AuditEvent'
+      keys = { 'JrcRelationship::Survey' => 'surveys', 'JrcCrm::Invoice' => 'invoices', 'CsatSurveyResponse' => 'csat',
+        'Conversation' => 'conversations', 'Message' => 'messages', 'Call' => 'calls',
+        'JrcServiceDesk::TicketEvent' => 'ticket_events', 'JrcProjects::AuditEvent' => 'project_events' }
+      JrcRelationship::SnapshotAccess.sources(JrcRelationship::Context.new(access.membership)).fetch(keys.fetch(type)).find(id)
+    when 'JrcRelationship::Assignment'
+      JrcRelationship::Context.new(access.membership).assignment(id)
+    when 'JrcRelationship::Action', 'JrcRelationship::RiskCase', 'JrcRelationship::SuccessPlan', 'JrcRelationship::Qbr'
+      model = { 'JrcRelationship::Action' => JrcRelationship::Action, 'JrcRelationship::RiskCase' => JrcRelationship::RiskCase,
+        'JrcRelationship::SuccessPlan' => JrcRelationship::SuccessPlan, 'JrcRelationship::Qbr' => JrcRelationship::Qbr }.fetch(type)
+      JrcRelationship::Context.new(access.membership).records(model).find(id)
+    when 'JrcRelationship::HealthSnapshot'
+      ctx = JrcRelationship::Context.new(access.membership)
+      relation = JrcRelationship::HealthSnapshot.where(account_id: access.account.id, viewer_id: access.user.id,
+        assignment_id: ctx.assignments.select(:id), access_signature: ctx.access_signature)
+      snapshot = JrcRelationship::SnapshotAccess.scope(ctx, relation).find(id)
+      snapshot
     when 'JrcNico::ServiceDeskContext', 'JrcNico::ServiceDeskLookup', 'JrcNico::ServiceDeskRequesters', 'JrcNico::ServiceDeskTeams'
       raise Pundit::NotAuthorizedError unless id.to_i == access.account.id && domain.available?('service_desk')
       unless type == 'JrcNico::ServiceDeskContext'

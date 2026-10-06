@@ -5,10 +5,14 @@ import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import { managementAPI } from 'dashboard/api/crm';
+import TeamPanel from '../../../jrcRelationship/TeamPanel.vue';
+import { FEATURE_FLAGS } from 'dashboard/featureFlags';
 
 const route = useRoute();
 const store = useStore();
 const { t } = useI18n();
+const mode = ref('commercial');
+const relationshipEnabled = computed(() => store.getters['accounts/isFeatureEnabledonAccount'](route.params.accountId, FEATURE_FLAGS.JRC_RELATIONSHIP));
 const rows = ref([]);
 const loading = ref(false);
 const error = ref('');
@@ -48,7 +52,7 @@ const money = value =>
   );
 
 watch(
-  [() => route.params.accountId, isAdmin, refresh],
+  [() => route.params.accountId, isAdmin, refresh, mode],
   async (_, __, onCleanup) => {
     let canceled = false;
     onCleanup(() => {
@@ -57,7 +61,7 @@ watch(
     rows.value = [];
     error.value = '';
     loading.value = false;
-    if (!isAdmin.value) return;
+    if (!isAdmin.value || mode.value !== 'commercial') return;
     loading.value = true;
     try {
       const { data } = await managementAPI.list({
@@ -112,7 +116,13 @@ watch(
       </form>
     </div>
 
+    <div v-if="relationshipEnabled && isAdmin" class="mb-4 flex flex-wrap gap-2">
+      <button type="button" class="rounded-lg border border-n-weak px-3 py-2 text-sm" :class="mode === 'commercial' ? 'bg-n-brand/10 text-n-brand' : ''" @click="mode = 'commercial'">{{ t('RELATIONSHIP.COMMERCIAL') }}</button>
+      <button type="button" class="rounded-lg border border-n-weak px-3 py-2 text-sm" :class="mode === 'relationship' ? 'bg-n-brand/10 text-n-brand' : ''" @click="mode = 'relationship'">{{ t('RELATIONSHIP.CS_MODE') }}</button>
+    </div>
+    <input v-if="mode === 'relationship'" v-model="search" type="search" :placeholder="t('CRM.TEAM_METRICS.SEARCH')" class="mb-4 rounded border border-n-weak bg-n-solid-2 p-2" />
     <p v-if="!isAdmin" role="status">{{ t('CRM.TEAM_METRICS.RESTRICTED') }}</p>
+    <TeamPanel v-else-if="mode === 'relationship' && relationshipEnabled" :start-date="startDate" :end-date="endDate" :search="search" :refresh="refresh" />
     <template v-else>
       <section v-if="!loading && !error && rows.length" class="mb-4 grid gap-3 sm:grid-cols-3 xl:grid-cols-6">
         <article v-for="metric in summary" :key="metric.label" class="rounded-xl border border-n-weak bg-n-solid-2 p-3">

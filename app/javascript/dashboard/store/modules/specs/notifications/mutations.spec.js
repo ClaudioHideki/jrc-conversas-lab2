@@ -52,6 +52,13 @@ describe('#mutations', () => {
   });
 
   describe('#SET_NOTIFICATIONS', () => {
+    it('preserves native conversation and CS actors with the same numeric ID',()=>{
+      const state={records:{}};
+      mutations[types.SET_NOTIFICATIONS](state,[{id:1,primary_actor_id:5,primary_actor_type:'Conversation'},{id:2,primary_actor_id:5,primary_actor_type:'JrcRelationship::Action'}]);
+      expect(Object.keys(state.records)).toEqual(['1','2']);
+      mutations[types.SET_NOTIFICATIONS](state,[{id:3,primary_actor_id:5,primary_actor_type:'JrcRelationship::Action'}]);
+      expect(Object.keys(state.records)).toEqual(['1','3']);
+    });
     it('set notifications', () => {
       const state = { records: {} };
       mutations[types.SET_NOTIFICATIONS](state, [

@@ -53,7 +53,7 @@ module JrcCrm
     end
 
     def customer_name
-      value(@contact, :name) || @snapshot[:customer_name] || value(value(@record, :deal), :title) || 'Cliente'
+      value(value(@record, :customer_company), :name) || value(@contact, :name) || @snapshot[:customer_name] || value(value(@record, :deal), :title) || 'Cliente'
     end
 
     def issuer

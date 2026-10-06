@@ -16,6 +16,7 @@ import { useI18n } from 'vue-i18n';
 import { useSidebarKeyboardShortcuts } from './useSidebarKeyboardShortcuts';
 import { vOnClickOutside } from '@vueuse/components';
 import { FEATURE_FLAGS } from 'dashboard/featureFlags';
+import { SCREENS as RELATIONSHIP_SCREENS } from 'dashboard/routes/dashboard/jrcRelationship/definitions';
 import {
   SERVICE_DESK_ROUTES,
   serviceDeskRouteName,
@@ -1288,6 +1289,16 @@ const menuItems = computed(() => {
         : null,
     !hasCustomerMaster.value && companiesModule
       ? { ...companiesModule, label: 'Empresas' }
+      : null,
+    hasCustomerMaster.value && isFeatureEnabledonAccount.value(accountId.value, FEATURE_FLAGS.JRC_RELATIONSHIP)
+      ? {
+          name: 'Relationship', label: t('RELATIONSHIP.TITLE'), icon: 'i-lucide-heart-handshake',
+          to: accountScopedRoute('jrc_relationship_overview'),
+          activeOn: RELATIONSHIP_SCREENS.map(screen => `jrc_relationship_${screen}`),
+          children: RELATIONSHIP_SCREENS.map(screen => ({ name: `Relationship ${screen}`,
+            label: t(`RELATIONSHIP.SCREENS.${screen}`), icon: 'i-lucide-circle-small',
+            to: accountScopedRoute(`jrc_relationship_${screen}`), activeOn: [`jrc_relationship_${screen}`] })),
+        }
       : null,
     {
       name: 'JRC AI Agents',

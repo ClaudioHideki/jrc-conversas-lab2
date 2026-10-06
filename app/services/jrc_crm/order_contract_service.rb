@@ -9,6 +9,7 @@ module JrcCrm
 
     def call
       return unless contract_required?
+      return unless OrderWorkflowSyncService::QUALIFYING_STATUSES.include?(@order.status)
 
       existing = primary_contract
       return existing if existing
@@ -24,6 +25,8 @@ module JrcCrm
         term_months = 12 if term_months <= 0
 
         contract = @order.account.jrc_crm_contracts.create!(
+          contract_template: ContractTemplateSelection.select(@order.account.jrc_crm_contract_templates.where(active: true).to_a, ContractTemplateSelection.context(@order)),
+          source_contract: source_contract,
           sales_order: @order,
           deal: @order.deal,
           contact: @order.contact,
@@ -39,12 +42,16 @@ module JrcCrm
           auto_renew: proposal&.renewal_type.to_s == 'automatic',
           renewal_term_months: term_months,
           notes: "Contrato gerado automaticamente a partir do pedido #{@order.order_number}",
-          lifecycle_metadata: { 'source' => 'sales_order_automation' }
+          lifecycle_metadata: { 'source' => 'sales_order_automation', 'relationship_origin' => snapshot[:relationship_origin] }
         )
         copy_items!(contract)
         audit!(contract)
         contract
       end
+    end
+
+    def required?
+      contract_required?
     end
 
     private
@@ -64,7 +71,11 @@ module JrcCrm
     end
 
     def primary_contract
-      @order.contracts.where(source_contract_id: nil).order(:id).first
+      @order.contracts.where(source_contract_id: source_contract&.id).order(:id).first
+    end
+
+    def source_contract
+      @source_contract ||= @order.account.jrc_crm_contracts.find(snapshot[:source_contract_id]) if snapshot[:source_contract_id].present?
     end
 
     def product_term_months

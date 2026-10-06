@@ -133,7 +133,8 @@ module JrcOperations
       canceled = %w[canceled cancelled].include?(status)
       completed = !canceled && (completed || status == 'completed')
       local_due = date_only ? due : due.in_time_zone(@zone)
-      overdue = !completed && !canceled && (date_only ? due < @today : due < @now)
+      paused = record.respond_to?(:metadata) && record.metadata&.dig('relationship_sla_paused_at').present?
+      overdue = !completed && !canceled && !paused && (date_only ? due < @today : due < @now)
       {
         id: "#{kind}:#{record.id}", kind: kind, source: source, title: record.title, status: status,
         due: local_due.iso8601, due_date: local_due.to_date.iso8601, due_type: date_only ? 'date' : 'datetime',

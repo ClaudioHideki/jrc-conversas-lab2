@@ -2,6 +2,7 @@
 import { T } from 'dashboard/routes/dashboard/jrcCustomers/copy';
 import CompanyPicker from 'dashboard/routes/dashboard/jrcCustomers/components/CompanyPicker.vue';
 import { useCustomerMaster } from 'dashboard/routes/dashboard/jrcCustomers/useCustomerMaster';
+import RelationshipAPI from 'dashboard/api/jrcRelationship';
 const props = defineProps({ screen: { type: String, default: 'new' } });
 const { canAccess: mayUseMasterDirectory } = useCustomerMaster();
 import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue';
@@ -18,7 +19,7 @@ import ScopeBar from '../components/ScopeBar.vue';
 import ServiceDefinitionSelect from '../components/ServiceDefinitionSelect.vue';
 import LookupSelect from '../components/LookupSelect.vue';
 import { useServiceDesk } from '../composables/useServiceDesk';
-import { canAct } from '../helpers/access';
+import { canAct, canonicalId } from '../helpers/access';
 import Feedback from '../components/WriteFeedback.vue';
 import { createTicketDraft, updateTicketDraft, newRequestKey } from '../helpers/drafts';
 import { serviceDeskRouteName } from '../routeDefinitions';
@@ -63,6 +64,30 @@ const unit = computed(() => session.state.context?.units.find(item => item.id ==
 const mayEdit = computed(() => edit.value ? !!record.value && canAct(record.value, 'update') : unit.value?.permissions.create_ticket === true);
 const steps = computed(() => tm('JRC_SERVICE_DESK.FORM.steps'));
 const selectedNames = reactive({ requester: null, priority: null, category: null });
+const relationshipCustomer = ref(null);
+let relationshipEpoch = 0;
+const applyRelationshipCustomer = () => {
+  if (edit.value || !relationshipCustomer.value || !hasCustomerMaster.value) return;
+  draft.requester_id = relationshipCustomer.value.id;
+  draft.company_id = relationshipCustomer.value.company_id;
+  selectedNames.requester = relationshipCustomer.value;
+};
+const loadRelationshipCustomer = async () => {
+  relationshipEpoch += 1;
+  const epoch = relationshipEpoch;
+  relationshipCustomer.value = null;
+  const assignmentId = canonicalId(route.query.relationship_assignment_id);
+  const requesterId = canonicalId(route.query.requester_id);
+  if (edit.value || !hasCustomerMaster.value || !assignmentId || !requesterId) return;
+  try {
+    const { data } = await RelationshipAPI.channels(route.params.accountId, assignmentId);
+    if (epoch !== relationshipEpoch || !data.can_service_desk) return;
+    const contact = data.contacts.find(item => canonicalId(item.id) === requesterId);
+    if (!contact) return;
+    relationshipCustomer.value = { id: requesterId, name: contact.name, company_id: data.company_id || null };
+    applyRelationshipCustomer();
+  } catch { /* Native form stays available without an unauthorized prefill. */ }
+};
 const resetNames = () => {
   Object.keys(selectedNames).forEach(field => {
     selectedNames[field] = null;
@@ -84,6 +109,7 @@ const changeUnit = value => {
   if (!busy.value && value !== draft.unit_id) {
     Object.assign(draft, blank(), { unit_id: value });
     resetNames();
+    applyRelationshipCustomer();
   }
 };
 const load = () => {
@@ -92,11 +118,13 @@ const load = () => {
   operatorId.value = '';
   requestKey = null;
   Object.assign(draft, blank());
+  applyRelationshipCustomer();
   if (edit.value)
     return session.load(key, 'tickets', {}, route.params.ticketId);
   return undefined;
 };
 watch([() => route.params.ticketId, () => session.state.status], load, { immediate: true });
+watch([() => route.params.accountId, () => route.query.relationship_assignment_id, () => route.query.requester_id, () => session.userId?.value, hasCustomerMaster, edit], loadRelationshipCustomer, { immediate: true });
 watch(record, value => {
   if (!value || !edit.value || !canAct(value, 'update'))
     return;
@@ -115,7 +143,7 @@ watch(record, value => {
   });
   operatorId.value = session.state.context?.units.find(item => item.id === value.unit_id)?.operator_company.id || '';
 });
-onBeforeUnmount(() => { Object.assign(draft, blank()); session.resetResource(key); session.operations?.cancel(writeKey); });
+onBeforeUnmount(() => { relationshipEpoch += 1; relationshipCustomer.value = null; Object.assign(draft, blank()); session.resetResource(key); session.operations?.cancel(writeKey); });
 const cancel = () => router.push({ name: serviceDeskRouteName(edit.value ? 'detail' : 'tickets'), params: { accountId: session.accountId.value, ...(edit.value ? { ticketId: route.params.ticketId } : {}) } });
 
 const maySave = computed(() => !!session.operations && mayEdit.value && !busy.value && draft.title.trim() && draft.priority_id && (edit.value || (draft.requester_id && unit.value?.initial_status?.id)));

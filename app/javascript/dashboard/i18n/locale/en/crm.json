@@ -351,7 +351,15 @@
       "WAITING_CUSTOMER": "Waiting customer",
       "BLOCKED": "Blocked",
       "ARCHIVED": "Archived",
-      "EXPIRED": "Expired"
+      "EXPIRED": "Expired",
+      "PREPARED": "Preparada",
+      "NOT_STARTED": "Não iniciada",
+      "ANALYSIS": "Análise",
+      "CONTRACT": "Contrato",
+      "DOCUMENTATION": "Documentação",
+      "SIGNED": "Assinada",
+      "RECEIVED": "Recebido",
+      "VALIDATING": "Em validação"
     },
     "ORGANIZATION": {
       "TITLE": "CRM Organizational Structure",
@@ -420,6 +428,41 @@
       "COMMERCIAL": "Commercial",
       "TECHNICAL": "Technical",
       "FINANCIAL": "Financial"
+    },
+    "CREATION": {
+      "CLOSE": "Fechar",
+      "DISCARD": "Descartar rascunho",
+      "RECOVERED": "Rascunho recuperado.",
+      "ORIGIN": "Origem da proposta",
+      "FROM_DEAL": "Negócio existente",
+      "FROM_CUSTOMER": "Cliente/Empresa",
+      "CUSTOMER": "Cliente/Empresa do Cadastro Mestre",
+      "CONTACT": "Contato",
+      "NEW_CONTACT": "+ Novo contato",
+      "CONTACT_SEARCH": "Pesquisar contato por nome, empresa, telefone ou e-mail",
+      "SEARCHING": "Buscando contatos…",
+      "CHANGE": "Trocar",
+      "NAME": "Nome",
+      "EMAIL": "E-mail",
+      "PHONE": "Telefone",
+      "JOB_TITLE": "Cargo",
+      "DEPARTMENT": "Departamento",
+      "SAVE_CONTACT": "Salvar contato",
+      "DUPLICATE_CONTACT": "Já existe um contato com estes dados. Selecione o contato cadastrado.",
+      "DELETE": "Excluir proposta",
+      "DELETE_CONFIRM": "Excluir esta proposta? Os itens serão excluídos e a operação será auditada.",
+      "DELETE_ERROR": "Não foi possível excluir a proposta.",
+      "DELETED": "Proposta excluída.",
+      "UNIT": "Empresa/unidade responsável",
+      "PRODUCTS": "Produtos e valores",
+      "TITLE": "Título",
+      "NOTES": "Observações",
+      "ADD_ITEM": "Adicionar item",
+      "UNIT_PRICE": "Preço unitário",
+      "ITEM_DISCOUNT": "Desconto do item"
+    },
+    "PROPOSALS": {
+      "APPROVED_READY": "Aprovada internamente — pronta para envio"
     }
   }
 }

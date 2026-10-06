@@ -16,7 +16,7 @@ module Api
             activities = activities.where(lead_id: params[:lead_id]) if params[:lead_id].present?
 
             activities = activities
-                         .includes(:user, :deal, :lead)
+                         .includes(:user, :deal, :lead, :contact, :company)
                          .order(due_at: :asc)
 
             serialized_activities = activities.map do |activity|

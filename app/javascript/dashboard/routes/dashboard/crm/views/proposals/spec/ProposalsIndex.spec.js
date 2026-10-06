@@ -31,6 +31,8 @@ const mountPage = async (query = { proposalId: '1' }) => {
     getters: {
       'jrcCrm/proposals/allProposals': () => [proposal],
       getCurrentRole: () => 'agent',
+      getCurrentUser: () => ({ id: 25, accounts: [{ id: 1, role: 'agent' }] }),
+      'accounts/isFeatureEnabledonAccount': () => () => true,
     },
   });
   store.dispatch = vi.fn().mockResolvedValue();

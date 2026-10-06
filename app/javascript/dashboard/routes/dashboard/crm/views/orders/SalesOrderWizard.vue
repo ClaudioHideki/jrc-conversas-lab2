@@ -2,6 +2,7 @@
 /* eslint-disable vue/no-bare-strings-in-template */
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useFormDraft } from '../../helpers/useFormDraft';
 import { useStore } from 'vuex';
 import {
   proposalToOrderForm,
@@ -106,6 +107,16 @@ const form = reactive({
     { label: 'Entregar ao cliente', done: false },
   ],
 });
+
+const orderDraftActive = ref(true);
+const initialOrderForm = JSON.parse(JSON.stringify(form));
+const orderDraft = useFormDraft('crm:new_order', {
+  active: orderDraftActive,
+  snapshot: () => ({ form: { ...form, documents: [] }, step: step.value }),
+  restore: value => { Object.assign(form, value.form || {}, { documents: [] }); step.value = value.step || 1; },
+  reset: () => { Object.assign(form, JSON.parse(JSON.stringify(initialOrderForm))); step.value = 1; },
+});
+const recoveredOrder = orderDraft.open();
 
 const money = value =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
@@ -485,6 +496,7 @@ const payload = status => ({
   },
 });
 const save = async (status = 'pending') => {
+  const savingDraftKey = orderDraft.key.value;
   saving.value = true;
   try {
     if (!form.contact_id) {
@@ -509,6 +521,8 @@ const save = async (status = 'pending') => {
       return;
     }
     const { data } = await salesOrdersAPI.create(payload(status));
+    if (!orderDraft.complete(savingDraftKey)) return;
+    orderDraftActive.value = false;
     const warnings = [];
     if (form.documents.length) {
       try {
@@ -618,9 +632,14 @@ onMounted(async () => {
   const proposalId = route.query.proposalId;
   const dealId = route.query.dealId;
   const contactId = route.query.contactId;
-  if (proposalId) await fetchSelection({ proposal_id: proposalId });
-  else if (dealId) await fetchSelection({ deal_id: dealId });
-  else if (contactId) await fetchSelection({ contact_id: contactId });
+  if (recoveredOrder && form.proposal_id) {
+    const recovered = JSON.parse(JSON.stringify(form));
+    await fetchSelection({ proposal_id: form.proposal_id });
+    Object.assign(form, recovered);
+  }
+  else if (!recoveredOrder && proposalId) await fetchSelection({ proposal_id: proposalId });
+  else if (!recoveredOrder && dealId) await fetchSelection({ deal_id: dealId });
+  else if (!recoveredOrder && contactId) await fetchSelection({ contact_id: contactId });
 });
 </script>
 
@@ -629,6 +648,7 @@ onMounted(async () => {
     class="h-full overflow-auto bg-n-background dark:bg-n-background p-4 sm:p-6"
   >
     <header class="mb-4 flex flex-wrap items-center justify-between gap-4">
+      <button type="button" class="rounded-lg border border-n-weak px-3 py-2" :disabled="saving" @click="orderDraft.discard">{{ t('CRM.CREATION.DISCARD') }}</button>
       <div class="flex gap-3">
         <span
           class="grid size-12 place-content-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-100"

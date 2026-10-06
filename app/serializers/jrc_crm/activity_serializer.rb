@@ -22,7 +22,7 @@ module JrcCrm
         lead: serialize_lead,
         contact: serialize_contact,
         related_type: related_type,
-        related_id: @activity.deal_id || @activity.lead_id,
+        related_id: @activity.deal_id || @activity.lead_id || @activity.contact_id || @activity.company_id,
         related_label: related_label,
         overdue: @activity.overdue?,
         created_at: @activity.created_at,
@@ -56,6 +56,8 @@ module JrcCrm
     def related_label
       return prefixed_label('Negócio', @activity.deal.title) if @activity.deal
       return prefixed_label('Lead', @activity.lead.name) if @activity.lead
+      return @activity.contact.name if @activity.contact
+      return @activity.company.name if @activity.company
 
       'Sem vínculo'
     end
@@ -63,6 +65,8 @@ module JrcCrm
     def related_type
       return 'deal' if @activity.deal_id
       return 'lead' if @activity.lead_id
+      return 'contact' if @activity.contact_id
+      return 'company' if @activity.company_id
 
       nil
     end

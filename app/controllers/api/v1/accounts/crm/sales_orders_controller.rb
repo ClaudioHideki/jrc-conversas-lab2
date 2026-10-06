@@ -29,7 +29,7 @@ module Api::V1::Accounts::Crm
 
     def selection_options
       context = selection_context
-      proposal_options = selection_proposals(context[:deal])
+      proposal_options = selection_proposals(context[:deal], context[:contact])
       render json: {
         contacts: selection_contacts,
         selected_contact: serialize_selection_contact(context[:contact]),
@@ -129,15 +129,20 @@ module Api::V1::Accounts::Crm
     private
 
     def allowed_order_statuses(order)
-      next_status = { 'draft' => 'pending', 'pending' => 'approved', 'approved' => 'separating',
+      next_status = { 'draft' => 'pending', 'approved' => 'separating',
                       'separating' => 'invoiced', 'invoiced' => 'shipped', 'shipped' => 'completed' }[order.status]
       statuses = [next_status].compact
+      statuses = [] unless order.draft? || crm_admin?
+      statuses.delete('separating') if order.contracts.exists? && !order.contracts.where(signature_status: 'signed').exists?
+      statuses.delete('invoiced') unless order.invoices.where(status: %w[issued sent paid overdue]).exists?
+      statuses.delete('completed') unless order.backoffice_requests.where(request_kind: 'fulfillment', status: 'completed').exists?
       statuses << 'canceled' if crm_admin? && !%w[completed canceled].include?(order.status)
       statuses
     end
 
     def build_manual_order
       attrs = order_params.to_h
+      attrs['status'] = attrs['status'] == 'draft' ? 'draft' : 'pending'
       validate_order_links!(attrs)
       raise JrcCrm::CommercialFinancials::InvalidTerms, 'Cliente e obrigatorio para criar o pedido.' if attrs['contact_id'].blank?
 
@@ -183,7 +188,7 @@ module Api::V1::Accounts::Crm
       return if requested[:contact_id].blank?
 
       contact = crm_scope.contacts.find(requested[:contact_id])
-      unless contact_matches_deal?(contact, proposal.deal)
+      unless proposal.customer_contact&.id == contact.id || (proposal.deal && contact_matches_deal?(contact, proposal.deal))
         raise JrcCrm::CommercialFinancials::InvalidTerms, 'A proposta nao pertence ao cliente informado.'
       end
     end
@@ -204,9 +209,13 @@ module Api::V1::Accounts::Crm
 
       if proposal
         raise JrcCrm::CommercialFinancials::InvalidTerms, 'Somente proposta aceita pode gerar pedido.' unless proposal.accepted?
-        if deal.nil? || proposal.deal_id != deal.id
+        if proposal.deal_id != deal&.id
           raise JrcCrm::CommercialFinancials::InvalidTerms, 'A proposta nao pertence ao negocio selecionado.'
         end
+      end
+
+      if proposal && contact && proposal.customer_contact&.id != contact.id
+        raise JrcCrm::CommercialFinancials::InvalidTerms, 'O cliente não corresponde à proposta.'
       end
 
       if deal && contact && !contact_matches_deal?(contact, deal)
@@ -308,10 +317,11 @@ module Api::V1::Accounts::Crm
       scope.includes(:stage, :pipeline, :owner, :contact, :contacts).order(updated_at: :desc).limit(30).map { |deal| serialize_selection_deal(deal) }
     end
 
-    def selection_proposals(deal)
-      return { eligible: [], state: { message: 'Selecione um negocio para consultar propostas.', counts: {} } } unless deal
+    def selection_proposals(deal, contact = nil)
+      return { eligible: [], state: { message: 'Selecione um cliente ou negócio para consultar propostas.', counts: {} } } unless deal || contact
 
-      scope = visible_to_current_user(crm_scope.jrc_crm_proposals).where(deal_id: deal.id)
+      scope = visible_to_current_user(crm_scope.jrc_crm_proposals)
+      scope = deal ? scope.where(deal_id: deal.id) : scope.where(deal_id: nil, contact_id: contact.id)
       counts = scope.group(:status).count
       eligible = scope.where(status: 'accepted').includes(:owner, :deal, { events: :user }, proposal_items: :product).order(accepted_at: :desc, id: :desc).limit(20)
       waiting = counts.slice('pending_approval', 'sent', 'viewed')
@@ -321,7 +331,7 @@ module Api::V1::Accounts::Crm
                 elsif waiting_count.positive?
                   "Nenhuma proposta aceita disponivel. Existem #{waiting_count} proposta(s) aguardando aprovacao/aceite."
                 else
-                  'Nenhuma proposta aceita disponivel para este negocio.'
+                  'Nenhuma proposta aceita disponível para este cliente/negócio.'
                 end
       attention = scope.where(status: %w[pending_approval sent viewed]).order(updated_at: :desc).first
       { eligible: eligible.map { |proposal| JrcCrm::ProposalSerializer.new(proposal).as_json },

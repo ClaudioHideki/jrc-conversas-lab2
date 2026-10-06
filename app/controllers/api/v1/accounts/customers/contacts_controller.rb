@@ -5,10 +5,7 @@ class Api::V1::Accounts::Customers::ContactsController < Api::V1::Accounts::Cust
     scope = Current.account.contacts
     scope = scope.where(company_id: Current.account.master_companies.find(params[:company_id]).id) if params[:company_id].present?
     scope = scope.where(company_id: nil) if params[:unlinked] == 'true'
-    if params[:q].present?
-      value = "%#{ActiveRecord::Base.sanitize_sql_like(params[:q].to_s.first(200))}%"
-      scope = scope.where('name ILIKE :q OR email ILIKE :q OR phone_number ILIKE :q', q: value)
-    end
+    scope = JrcCustomers::ContactQuery.new(account: Current.account, scope: scope, query: params[:q]).call
     records, meta = page_scope(scope.order(:name, :id))
     render json: { payload: serializer.contacts(records.to_a), meta: meta }
   end

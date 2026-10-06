@@ -16,6 +16,10 @@ module JrcCrm
       show?
     end
 
+    def destroy?
+      show?
+    end
+
     def send_proposal?
       same_account? && (admin? || owns_record?)
     end

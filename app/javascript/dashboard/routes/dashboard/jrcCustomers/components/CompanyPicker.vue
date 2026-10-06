@@ -1,5 +1,6 @@
 <script setup>
 import { ref, watch, onBeforeUnmount } from 'vue';
+import { useStore } from 'vuex';
 import API from 'dashboard/api/jrcCustomers';
 import { useCustomerMaster } from '../useCustomerMaster';
 import { T, inputClass, buttonClass, errorMessage } from '../copy';
@@ -9,6 +10,7 @@ const props = defineProps({
   excludeId: { type: [Number, String], default: null },
 });
 const emit = defineEmits(['update:modelValue', 'selected']);
+const store = useStore();
 const { accountId, canAccess } = useCustomerMaster();
 const query = ref('');
 const selected = ref(null);
@@ -46,11 +48,12 @@ const choose = company => {
 };
 watch(query, () => {
   clearTimeout(timer);
+  generation += 1;
   if (query.value.trim().length >= 2) timer = setTimeout(search, 300);
   else results.value = [];
 });
 watch(
-  [accountId, canAccess, () => props.modelValue],
+  [accountId, canAccess, () => store.getters.getCurrentUser?.id, () => props.modelValue],
   async () => {
     selectedGeneration += 1;
     const version = selectedGeneration;

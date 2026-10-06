@@ -23,7 +23,7 @@ class JrcCustomers::Visibility
     return relation.none unless crm?
     return relation if @membership.administrator?
 
-    relation.where(owner => @user.id)
+    JrcCrm::OrganizationalVisibility.new(account: @account, user: @user, relation: relation.where(owner => @user.id)).call
   end
 
   def crm?

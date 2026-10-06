@@ -20,6 +20,10 @@ module JrcCrm
 
     def deliver_under_lock
       raise ArgumentError, 'Canal de envio inválido' unless CHANNELS.include?(@channel)
+      raise ArgumentError, 'Proposta expirada ou encerrada; crie uma nova versão.' if %w[expired canceled accepted rejected].include?(@proposal.public_availability[:state])
+      approvals = [@proposal.approval_status, @proposal.commercial_approval_status,
+                   @proposal.financial_approval_status, @proposal.technical_approval_status]
+      raise ArgumentError, 'Conclua as aprovações internas antes do envio.' unless approvals.all? { |state| %w[approved not_required].include?(state) }
 
       conversation = resolve_conversation
       raise StandardError, channel_error_message unless conversation
@@ -59,7 +63,7 @@ module JrcCrm
     private
 
     def resolve_conversation
-      linked = @proposal.deal.conversations.includes(:inbox).order(updated_at: :desc).to_a
+      linked = @proposal.deal ? @proposal.deal.conversations.includes(:inbox).order(updated_at: :desc).to_a : []
       return linked.first if @channel == 'auto' && linked.any?
 
       requested = @channel == 'auto' ? nil : @channel

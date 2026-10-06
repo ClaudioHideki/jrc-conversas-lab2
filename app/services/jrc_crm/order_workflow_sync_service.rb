@@ -13,10 +13,11 @@ module JrcCrm
         if @order.canceled?
           reverse_downstream!
         else
+          JrcCrm::OrderApprovalService.new(order: @order, actor: @actor).request! if @order.pending?
           sync_follow_up! unless @order.draft?
           if QUALIFYING_STATUSES.include?(@order.status)
             contract = sync_contract!
-            implementation = sync_implementation_project!
+            implementation = {}
             sync_backoffice!(contract: contract, implementation: implementation)
             sync_commission!
           end
@@ -82,7 +83,7 @@ module JrcCrm
         'order_total_cents' => @order.total_cents,
         'monthly_cents' => @order.monthly_cents,
         'implementation_required' => existing_metadata.fetch(:implementation_required) do
-          ActiveModel::Type::Boolean.new.cast(snap[:send_to_implementation]) || implementation_checklist.any?
+          ActiveModel::Type::Boolean.new.cast(snap[:send_to_implementation]) || ActiveModel::Type::Boolean.new.cast(snap[:create_implementation_project]) || implementation_checklist.any?
         end,
         'implementation_checklist' => implementation_checklist,
         'finance_required' => existing_metadata.fetch(:finance_required, true),
@@ -104,6 +105,19 @@ module JrcCrm
         request.completed_at = Time.current if request.stage == 'completed'
       end
       request.save!
+      JrcCrm::BackofficeDocumentChecklist.new(request: request, actor: @actor).sync!
+      if @event == 'contract_signed'
+        begin
+          request.advance! while %w[analysis documentation contract].include?(request.stage)
+        rescue ActiveRecord::RecordInvalid
+          # Manual documentary requirements still block the next operational stage.
+        end
+      end
+      if request.stage == 'implementation'
+        result = sync_implementation_project!
+        request.update!(metadata: request.metadata.merge('implementation_project_id' => result[:project]&.id,
+          'implementation_project_warning' => result[:warning]))
+      end
       complete_after_payment!(request) if @event == 'payment_received'
     end
 

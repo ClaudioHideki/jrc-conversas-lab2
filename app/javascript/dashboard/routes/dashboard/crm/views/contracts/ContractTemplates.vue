@@ -2,9 +2,12 @@
 /* eslint-disable vue/no-bare-strings-in-template, @intlify/vue-i18n/no-raw-text, no-alert */
 import { computed, onMounted, reactive, ref } from 'vue';
 import { contractTemplatesAPI } from 'dashboard/api/crm/commercialCycle';
+import ProductsAPI from 'dashboard/api/crm/products';
+import CompanyPicker from 'dashboard/routes/dashboard/jrcCustomers/components/CompanyPicker.vue';
 import { useAlert } from 'dashboard/composables';
 
 const rows = ref([]);
+const products = ref([]);
 const query = ref('');
 const loading = ref(false);
 const saving = ref(false);
@@ -17,6 +20,7 @@ const form = reactive({
   description: '',
   body: '',
   variables: '',
+  operating_company_id: '', product_ids: [], order_origins: '', payment_conditions: '', term_months: '', customer_kind: '',
   active: true,
 });
 
@@ -61,6 +65,12 @@ const openForm = template => {
   editingId.value = template?.id || null;
 
   Object.assign(form, {
+    operating_company_id: template?.selection_rules?.operating_company_id || '',
+    product_ids: template?.selection_rules?.product_ids || [],
+    order_origins: (template?.selection_rules?.order_origins || []).join(', '),
+    payment_conditions: (template?.selection_rules?.payment_conditions || []).join(', '),
+    term_months: template?.selection_rules?.term_months || '',
+    customer_kind: template?.selection_rules?.customer_kind || '',
     name: template?.name || '',
     category: template?.category || '',
     description: template?.description || '',
@@ -86,6 +96,7 @@ const save = async () => {
       description: form.description,
       body: form.body,
       active: form.active,
+      selection_rules: { operating_company_id: form.operating_company_id || null, product_ids: form.product_ids, order_origins: form.order_origins.split(',').map(v=>v.trim()).filter(Boolean), payment_conditions: form.payment_conditions.split(',').map(v=>v.trim()).filter(Boolean), term_months: form.term_months || null, customer_kind: form.customer_kind || null },
       variables: form.variables
         .split(',')
         .map(value => value.trim())
@@ -133,7 +144,7 @@ const remove = async template => {
   }
 };
 
-onMounted(load);
+onMounted(async()=>{ await load(); try { products.value=(await ProductsAPI.list()).data || []; } catch { products.value=[]; } });
 </script>
 
 <template>
@@ -458,7 +469,7 @@ onMounted(load);
 
         <!-- MODAL BODY -->
         <div class="overflow-y-auto p-6">
-          <div class="grid gap-5 sm:grid-cols-2">
+          <div class="grid gap-5 sm:grid-cols-2"><fieldset class="sm:col-span-2 grid gap-3 rounded-xl border p-4 sm:grid-cols-2"><legend class="px-2 font-semibold">Seleção automática para pedidos</legend><label>Empresa operadora<CompanyPicker v-model="form.operating_company_id" /></label><label>Produtos<select v-model="form.product_ids" multiple class="mt-1 max-h-40 w-full overflow-auto rounded border p-2"><option v-for="product in products" :key="product.id" :value="product.id">{{product.name}}</option></select></label><label>Origem do pedido<select v-model="form.order_origins" class="mt-1 w-full rounded border p-2"><option value="">Todas</option><option value="proposal_deal">Proposta / Negócio</option><option value="direct_sale">Venda direta</option><option value="renewal">Renovação</option><option value="expansion">Expansão</option></select></label><label>Condições de pagamento<input v-model="form.payment_conditions" class="mt-1 w-full rounded border p-2" /></label><label>Prazo (meses)<input v-model="form.term_months" type="number" min="1" class="mt-1 w-full rounded border p-2" /></label><label>Tipo de cliente<select v-model="form.customer_kind" class="mt-1 w-full rounded border p-2"><option value="">Todos</option><option value="pf">Pessoa física</option><option value="pj">Pessoa jurídica</option></select></label></fieldset>
             <label class="text-sm font-medium text-n-slate-12">
               Nome do modelo
               <input

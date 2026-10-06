@@ -1,6 +1,6 @@
 module Api::V1::Accounts::Crm
   class BackofficeRequestsController < BaseController
-    before_action :set_request, only: %i[show update advance upload_documents download_document document_status add_issue resolve_issue confirm_provisioning reopen]
+    before_action :set_request, only: %i[show update advance upload_documents download_document document_status add_issue resolve_issue confirm_provisioning reopen decide_order]
 
     around_action :lock_operational_change, only: %i[update advance document_status add_issue resolve_issue confirm_provisioning reopen]
 
@@ -51,6 +51,9 @@ module Api::V1::Accounts::Crm
     end
 
     def update
+      if @request.order_approval?
+        return render json: { message: 'Use a decisão de aprovação do pedido.' }, status: :unprocessable_entity
+      end
       before = audit_snapshot(@request)
       attributes = request_params.except(:sales_order_id, :contract_id, :owner_id).to_h
       owner_id = request_params[:owner_id]
@@ -62,7 +65,8 @@ module Api::V1::Accounts::Crm
       end
       attributes.delete('stage')
       incoming_metadata = (attributes.delete('metadata') || {}).except('document_statuses', 'provisioning_completed_at',
-        'provisioning_completion_mode', 'provisioning_external_reference', 'provisioning_confirmed_by_id', 'approval_decision')
+        'provisioning_completion_mode', 'provisioning_external_reference', 'provisioning_confirmed_by_id', 'approval_decision',
+        'document_checklist', 'contract_required', 'source', 'implementation_project_id')
       attributes[:metadata] = (@request.metadata || {}).deep_merge(incoming_metadata)
       if %w[approved rejected].include?(attributes['status']) && attributes['status'] != @request.status
         unless crm_admin? && (@request.request_kind.in?(%w[approval change cancellation]) || @request.stage_applicable?('approval'))
@@ -77,7 +81,11 @@ module Api::V1::Accounts::Crm
     end
 
     def advance
+      if @request.order_approval?
+        return render json: { message: 'A aprovação do pedido exige decisão explícita.' }, status: :unprocessable_entity
+      end
       before = audit_snapshot(@request)
+      JrcCrm::BackofficeDocumentChecklist.new(request: @request, actor: Current.user).sync! if @request.fulfillment?
       @request.advance!
       audit!(@request, 'backoffice_stage_changed', before, audit_snapshot(@request))
       render json: serialize(@request.reload)
@@ -104,6 +112,8 @@ module Api::V1::Accounts::Crm
     def document_status
       key = params[:document_key].to_s.presence || params[:attachment_id].to_s
       status = params[:status].to_s
+      automatic = Array(@request.metadata['document_checklist']).any? { |row| row['key'] == key && row['source'] != 'manual' }
+      return render json: { message: 'Este requisito é verificado no módulo de origem.' }, status: :unprocessable_entity if automatic
       return render json: { message: 'Status inválido.' }, status: :unprocessable_entity unless status.in?(%w[pending received validating approved rejected expired])
 
       attachment = params[:attachment_id].present? ? @request.documents.find(params[:attachment_id]) : nil
@@ -126,6 +136,7 @@ module Api::V1::Accounts::Crm
       end
 
       @request.update!(metadata: metadata)
+      JrcCrm::BackofficeDocumentChecklist.new(request: @request, actor: Current.user).sync! if @request.fulfillment?
       audit!(@request, 'backoffice_document_status_changed', { key: key, status: previous }, { key: key, status: status, attachment_id: attachment&.id })
       render json: serialize(@request.reload)
     end
@@ -186,21 +197,36 @@ module Api::V1::Accounts::Crm
     end
 
     def reopen
+      ensure_crm_admin!
+      return render json: { message: 'Crie uma nova solicitação de aprovação para este pedido.' }, status: :unprocessable_entity if @request.order_approval?
       target_stage = params[:stage].to_s.presence || 'analysis'
       unless JrcCrm::BackofficeRequest::STAGES.include?(target_stage) && target_stage != 'completed'
         return render json: { message: 'Etapa de reabertura inválida.' }, status: :unprocessable_entity
       end
 
       before = audit_snapshot(@request)
+      if @request.fulfillment? && %w[implementation provisioning finance completed].include?(target_stage) &&
+         (@request.stage_applicable?('contract') && @request.contract&.signature_status != 'signed')
+        return render json: { message: 'A assinatura do contrato ainda está pendente.' }, status: :unprocessable_entity
+      end
       @request.update!(stage: target_stage, status: 'in_progress', completed_at: nil)
       audit!(@request, 'backoffice_reopened', before, audit_snapshot(@request))
       render json: serialize(@request.reload)
     end
 
+    def decide_order
+      ensure_crm_admin!
+      JrcCrm::OrderApprovalService.new(order: @request.sales_order, actor: Current.user)
+        .decide!(request: @request, decision: params[:decision].to_s, reason: params[:reason])
+      render json: serialize(@request.reload)
+    rescue ArgumentError => error
+      render json: { message: error.message }, status: :unprocessable_entity
+    end
+
     private
 
     def lock_operational_change
-      @request.with_lock { yield }
+      @request.sales_order.with_lock { @request.with_lock { yield } }
     end
 
     def set_request

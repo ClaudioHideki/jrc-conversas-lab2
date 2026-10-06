@@ -5,6 +5,12 @@ module Api::V1::Accounts::Crm
 
     def index
       templates = crm_scope.jrc_crm_contract_templates.order(active: :desc, name: :asc)
+      if params[:order_id].present?
+        order = visible_to_current_user(crm_scope.jrc_crm_sales_orders).find(params[:order_id])
+        selected = JrcCrm::ContractTemplateSelection.select(templates.where(active: true).to_a, JrcCrm::ContractTemplateSelection.context(order))
+        return render json: { templates: templates, suggested_template_id: selected&.id,
+          warning: selected ? nil : 'Nenhum modelo ativo atende aos critérios deste pedido. Selecione um modelo antes de gerar o contrato.' }
+      end
       render json: templates
     end
 
@@ -34,7 +40,8 @@ module Api::V1::Accounts::Crm
     end
 
     def template_params
-      params.require(:contract_template).permit(:name, :category, :description, :body, :active, variables: [])
+      params.require(:contract_template).permit(:name, :category, :description, :body, :active, variables: [],
+        selection_rules: [:operating_company_id, :term_months, :customer_kind, { product_ids: [], order_origins: [], payment_conditions: [] }])
     end
   end
 end

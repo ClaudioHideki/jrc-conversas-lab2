@@ -4,10 +4,11 @@ module JrcCrm
   class OrganizationalVisibility
     SETTINGS_KEY = JrcCrm::OrganizationalStructureService::SETTINGS_KEY
 
-    def initialize(account:, user:, relation:)
+    def initialize(account:, user:, relation:, include_company: true)
       @account = account
       @user = user
       @relation = relation
+      @include_company = include_company
     end
 
     def call
@@ -22,7 +23,7 @@ module JrcCrm
       company_unit_ids = account.jrc_crm_business_units.where(company_id: company_ids).pluck(:id)
       allowed_unit_ids = (direct_unit_ids + company_unit_ids).uniq
 
-      company_column = relation.klass.column_names.include?('company_id')
+      company_column = @include_company && !%w[JrcCrm::Proposal JrcCrm::Activity].include?(relation.klass.name) && relation.klass.column_names.include?('company_id')
       unit_column = relation.klass.column_names.include?('business_unit_id')
       return relation unless company_column || unit_column
 
@@ -32,6 +33,18 @@ module JrcCrm
       condition = combine(condition, table[:business_unit_id].in(allowed_unit_ids)) if unit_column && allowed_unit_ids.any?
 
       condition ? relation.where(condition) : relation.none
+    end
+
+    def allowed_business_unit_ids
+      return nil unless enabled?
+
+      scopes = account.jrc_crm_user_business_units.structure_managed.active.where(user_id: user.id)
+      return nil unless scopes.exists?
+      return nil if scopes.where(scope: 'GROUP').exists?
+
+      company_ids = scopes.where(scope: 'COMPANY').where.not(company_id: nil).pluck(:company_id)
+      (scopes.where(scope: 'BUSINESS_UNIT').where.not(business_unit_id: nil).pluck(:business_unit_id) +
+        account.jrc_crm_business_units.where(company_id: company_ids).pluck(:id)).uniq
     end
 
     private

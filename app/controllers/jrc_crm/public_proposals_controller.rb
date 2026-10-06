@@ -3,11 +3,20 @@ module JrcCrm
     before_action :set_proposal
 
     def show
+      unless @proposal.public_availability[:available]
+        @proposal.record_expiration!
+        render :unavailable, layout: false
+        return
+      end
       record_view! unless ActiveModel::Type::Boolean.new.cast(params[:preview])
       render layout: false
     end
 
     def pdf
+      unless @proposal.public_availability[:available]
+        render :unavailable, layout: false, status: :unprocessable_entity
+        return
+      end
       pdf = JrcCrm::ProposalPdfService.new(@proposal).call
       @proposal.events.create!(
         account_id: @proposal.account_id,
@@ -87,18 +96,13 @@ module JrcCrm
     private
 
     def set_proposal
-      @proposal = JrcCrm::Proposal.includes(:account, :owner, :deal, proposal_items: :product).find_by_raw_token(params[:token])
+      @proposal = JrcCrm::Proposal.includes(:account, :owner, :deal, proposal_items: :product).find_by_raw_token(params[:token], allow_unavailable: true)
       raise ActiveRecord::RecordNotFound if @proposal.blank? || @proposal.account_id != params[:account_id].to_i || !@proposal.account.feature_enabled?('jrc_crm')
     end
 
     def record_view!
-      first_view = @proposal.viewed_count.to_i.zero?
-      @proposal.record_customer_view!
-      @proposal.events.create!(
-        account_id: @proposal.account_id,
-        event_type: first_view ? 'viewed' : 'viewed_again',
-        description: first_view ? 'Proposta visualizada pelo cliente' : 'Proposta visualizada novamente pelo cliente'
-      )
+      @proposal.record_customer_view!(origin: 'public_html', channel: 'web')
     end
+
   end
 end

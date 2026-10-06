@@ -110,6 +110,7 @@ module JrcCrm
     validates :billing_model, inclusion: { in: BILLING_MODELS.values }
     validates :renewal_type, inclusion: { in: RENEWAL_TYPES.values }
     validate :discount_threshold_is_consistent
+    validate :valid_document_rules
 
     before_validation :normalize_commercial_fields
     validate :price_respects_minimum
@@ -147,6 +148,15 @@ module JrcCrm
     end
 
     private
+
+    def valid_document_rules
+      valid = document_rules.is_a?(Array) && document_rules.length <= 30 && document_rules.all? do |row|
+        row.is_a?(Hash) && row['key'].to_s.match?(/\A[a-z0-9_\-]{1,80}\z/) && row['label'].present? &&
+          JrcCrm::BackofficeDocumentChecklist::SOURCES.include?(row['source']) &&
+          [true, false].include?(row['required']) && [true, false].include?(row['blocking'])
+      end
+      errors.add(:document_rules, 'regras documentais inválidas') unless valid
+    end
 
     def discount_threshold_is_consistent
       return if discount_approval_percent.to_f <= maximum_discount_percent.to_f

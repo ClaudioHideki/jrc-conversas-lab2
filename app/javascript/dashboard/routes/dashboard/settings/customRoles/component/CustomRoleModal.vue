@@ -13,6 +13,7 @@ import {
 } from 'dashboard/constants/permissions.js';
 
 import { SERVICE_DESK_CUSTOM_ROLE_PERMISSIONS } from 'dashboard/constants/serviceDeskPermissions';
+import { RELATIONSHIP_CUSTOM_ROLE_PERMISSIONS } from 'dashboard/constants/relationshipPermissions';
 import { PROJECT_CUSTOM_ROLE_PERMISSIONS } from 'dashboard/constants/projectPermissions';
 import { FEATURE_FLAGS } from 'dashboard/featureFlags';
 import Button from 'dashboard/components-next/button/Button.vue';
@@ -35,8 +36,10 @@ const store = useStore();
 const { t } = useI18n();
 const showServiceDeskPermissions = computed(() => store.getters['accounts/isFeatureEnabledonAccount']?.(store.getters.getCurrentAccountId, FEATURE_FLAGS.JRC_SERVICE_DESK) === true);
 const showProjectPermissions = computed(() => store.getters['accounts/isFeatureEnabledonAccount']?.(store.getters.getCurrentAccountId, 'jrc_projects') === true);
+const showRelationshipPermissions = computed(() => store.getters['accounts/isFeatureEnabledonAccount']?.(store.getters.getCurrentAccountId, FEATURE_FLAGS.JRC_RELATIONSHIP) === true);
 const visiblePermissions = computed(() => [
   ...AVAILABLE_CUSTOM_ROLE_PERMISSIONS,
+  ...(showRelationshipPermissions.value ? RELATIONSHIP_CUSTOM_ROLE_PERMISSIONS : []),
   ...(showServiceDeskPermissions.value ? SERVICE_DESK_CUSTOM_ROLE_PERMISSIONS : []),
   ...(showProjectPermissions.value ? PROJECT_CUSTOM_ROLE_PERMISSIONS : []),
 ]);

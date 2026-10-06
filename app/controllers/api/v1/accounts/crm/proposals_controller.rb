@@ -26,11 +26,34 @@ module Api
             render json: serialize(@proposal)
           end
 
+          def creation_options
+            boundary = JrcCrm::OrganizationalVisibility.new(account: crm_scope, user: Current.user,
+              relation: JrcCrm::Proposal.where(account_id: crm_scope.id), include_company: false)
+            units = crm_scope.jrc_crm_business_units.where(active: true)
+            allowed_ids = crm_admin? ? nil : boundary.allowed_business_unit_ids
+            units = units.where(id: allowed_ids) unless allowed_ids.nil?
+            render json: { business_units: units.order(:name).select(:id, :name).as_json,
+                           unit_required: !allowed_ids.nil? }
+          end
+
           def create
-            deal = visible_to_current_user(crm_scope.jrc_crm_deals).find(params[:deal_id])
-            proposal = JrcCrm::ProposalBuilderService.new(deal: deal, actor: Current.user).call
+            deal = visible_to_current_user(crm_scope.jrc_crm_deals).find(params[:deal_id]) if params[:deal_id].present?
+            company = contact = nil
+            unless deal
+              authorize :directory, :access?, policy_class: JrcCustomers::DirectoryPolicy
+              company = crm_scope.master_companies.find(params[:company_id]) if params[:company_id].present?
+              contact = crm_scope.contacts.find(params[:contact_id]) if params[:contact_id].present?
+              authorize contact, :show? if contact
+            end
+            unit = crm_scope.jrc_crm_business_units.find(params[:business_unit_id]) if params[:business_unit_id].present?
+            authorize_operating_unit!(unit)
+            attributes = params[:proposal].present? ? proposal_params.to_h.except('owner_id') : {}
+            attributes.delete('title') if attributes['title'].blank?
+            items = params.permit(items: [:product_id, :quantity, :unit_price_cents, :discount_cents])[:items] || []
+            proposal = JrcCrm::ProposalBuilderService.new(deal: deal, account: crm_scope, company: company, contact: contact,
+              business_unit: unit, attributes: attributes, items: items, actor: Current.user).call
             render json: serialize(proposal), status: :created
-          rescue StandardError => e
+          rescue ActiveRecord::RecordInvalid, JrcCrm::CommercialFinancials::InvalidTerms => e
             render json: { errors: [e.message] }, status: :unprocessable_entity
           end
 
@@ -54,11 +77,19 @@ module Api
           end
 
           def destroy
-            if @proposal.destroy
-              head :no_content
-            else
-              render json: { errors: @proposal.errors.full_messages }, status: :unprocessable_entity
+            authorize @proposal, :destroy?, policy_class: JrcCrm::ProposalPolicy
+            if @proposal.sales_orders.exists?
+              render json: { errors: ['A proposta possui pedido vinculado e não pode ser excluída.'], code: 'PROPOSAL_HAS_DEPENDENCIES' }, status: :conflict
+              return
             end
+            snapshot = @proposal.attributes.except('public_token_digest', 'accepted_from_ip', 'accepted_user_agent')
+            @proposal.destroy!
+            JrcCrm::AuditEvent.create!(account: crm_scope, actor_type: 'User', actor_id: Current.user.id,
+              event_type: 'proposal_deleted', resource_type: 'JrcCrm::Proposal', resource_id: @proposal.id,
+              from_value: snapshot, to_value: {}, metadata: { proposal_number: @proposal.proposal_number })
+            head :no_content
+          rescue ActiveRecord::RecordNotDestroyed, ActiveRecord::InvalidForeignKey
+            render json: { errors: ['A proposta possui vínculos que impedem a exclusão.'], code: 'PROPOSAL_HAS_DEPENDENCIES' }, status: :conflict
           end
 
           def duplicate
@@ -108,6 +139,7 @@ module Api
                 account_id: crm_scope.id,
                 event_type: 'duplicated',
                 user_id: Current.user.id,
+                metadata: { relationship_origin: @proposal.relationship_origin, source_proposal_id: @proposal.id },
                 description: "Nova versão criada a partir da proposta #{@proposal.proposal_number}"
               )
             end
@@ -280,6 +312,15 @@ module Api
 
           private
 
+          def authorize_operating_unit!(unit)
+            return if crm_admin?
+
+            boundary = JrcCrm::OrganizationalVisibility.new(account: crm_scope, user: Current.user,
+              relation: JrcCrm::Proposal.where(account_id: crm_scope.id), include_company: false)
+            return if boundary.allowed_business_unit_ids.nil?
+            raise Pundit::NotAuthorizedError unless unit && boundary.allowed_business_unit_ids.include?(unit.id)
+          end
+
           def lock_proposal_mutation
             @proposal.with_lock do
               if !%w[duplicate send_proposal].include?(action_name) && @proposal.locked_for_editing?
@@ -362,6 +403,7 @@ module Api
               @proposal.update!(approval_status: 'rejected')
             elsif statuses.all? { |status| %w[approved not_required].include?(status) }
               @proposal.update!(approval_status: 'approved', status: 'draft')
+              audit_event!('approved', 'Aprovada internamente — pronta para envio')
             else
               @proposal.update!(approval_status: 'pending', status: 'pending_approval')
             end

@@ -2,7 +2,7 @@ class JrcCustomers::Customer360
   attr_reader :contacts, :conversations, :deals, :leads, :activities, :proposals, :audits, :calls, :recipients, :tickets, :projects, :project_tasks, :ticket_events, :project_events, :contracts, :orders, :follow_ups
 
   def initialize(account:, user:, account_user:, company: nil, contact: nil)
-    @account, @user, @company, @contact = account, user, company, contact
+    @account, @user, @company, @contact, @account_user = account, user, company, contact, account_user
     raise ArgumentError, 'Choose exactly one company or contact' if company.nil? == contact.nil?
     raise ActiveRecord::RecordNotFound unless (company || contact).account_id == account.id
 
@@ -15,13 +15,16 @@ class JrcCustomers::Customer360
     @activities = related(@visibility.crm(account.jrc_crm_activities, owner: :user_id), contact_ids)
     @activities = @activities.or(@visibility.crm(account.jrc_crm_activities, owner: :user_id).where(deal_id: deals.select(:id)))
     @activities = @activities.or(@visibility.crm(account.jrc_crm_activities, owner: :user_id).where(lead_id: leads.select(:id)))
-    @proposals = @visibility.crm(JrcCrm::Proposal.where(account_id: account.id)).where(deal_id: deals.select(:id))
+    proposal_scope = @visibility.crm(JrcCrm::Proposal.where(account_id: account.id))
+    @proposals = proposal_scope.where(deal_id: deals.select(:id)).or(proposal_scope.where(contact_id: contacts.select(:id)))
+    @proposals = @proposals.or(proposal_scope.where(company_id: company.id)) if company
     @calls = @visibility.calls(contact_ids: contact_ids, conversation_ids: conversations.select(:id))
     @recipients = if @visibility.campaigns?
                     JrcCampaigns::Recipient.where(contact_id: contact_ids, campaign_id: account.jrc_campaigns.select(:id))
                   end
     initialize_operations(contact_ids)
     initialize_commercial(contact_ids)
+    initialize_relationship
     initialize_audits
   end
 
@@ -29,7 +32,8 @@ class JrcCustomers::Customer360
     values = {
       contacts: contacts.count, conversations_open: conversations.where(status: :open).count,
       capabilities: { conversations: true, crm: @visibility.crm?, calls: !calls.nil?, campaigns: !recipients.nil?,
-                      service_desk: @visibility.service_desk?, projects: @visibility.projects?, contracts: @visibility.crm?, central_sip_cdr: false },
+                      service_desk: @visibility.service_desk?, projects: @visibility.projects?, contracts: @visibility.crm?, central_sip_cdr: false, relationship: !@relationship_assignment.nil? },
+      relationship: @relationship_assignment && { id: @relationship_assignment.id, status: @relationship_assignment.status },
       visibility: 'Counts and items are restricted to the signed-in user. Missing modules are not counted as zero.'
     }
     if @visibility.crm?
@@ -135,10 +139,30 @@ class JrcCustomers::Customer360
     scope.where(company_id: @company.id).or(scope.where(company_id: nil, contact_id: contact_ids))
   end
 
+  def initialize_relationship
+    return unless @account.feature_enabled?('jrc_relationship')
+    scope = JrcRelationship::AssignmentPolicy::Scope.new({ account: @account, user: @user, account_user: @account_user }, JrcRelationship::Assignment).resolve
+    @relationship_assignment = @company ? scope.find_by(company_id: @company.id) : scope.find_by(contact_id: @contact.id)
+    @relationship_assignment ||= scope.find_by(company_id: @contact.company_id) if @contact&.company_id
+  end
+
   def initialize_audits
     scope = JrcCrm::AuditEvent.where(account_id: @account.id)
     @audits = scope.where(resource_type: 'Contact', resource_id: contacts.select(:id))
     @audits = @audits.or(scope.where(resource_type: 'Company', resource_id: @company.id)) if @company
+    if @relationship_assignment
+      relationship_audits = scope.where(event_type: 'relationship_updated').where("metadata ->> 'assignment_id' = ?", @relationship_assignment.id.to_s)
+      ctx = JrcRelationship::Context.new(@account_user)
+      # Apply the same current source grants to timeline origins and list counts.
+      origins = { 'JrcRelationship::Assignment' => ctx.assignments, 'JrcCrm::Activity' => activities }
+      JrcRelationship::Workflow::MODELS.each_value { |model| origins[model.name] = ctx.records(model) }
+      snapshots = JrcRelationship::HealthSnapshot.where(account_id: @account.id, viewer_id: @user.id,
+        assignment_id: @relationship_assignment.id, access_signature: ctx.access_signature)
+      origins['JrcRelationship::HealthSnapshot'] = JrcRelationship::SnapshotAccess.scope(ctx, snapshots)
+      origins.each do |type, records|
+        @audits = @audits.or(relationship_audits.where(resource_type: type, resource_id: records.select(:id)))
+      end
+    end
     { deals => ['JrcCrm::Deal', 'Deal'], leads => ['JrcCrm::Lead', 'Lead'], proposals => ['JrcCrm::Proposal', 'Proposal'], contracts => ['JrcCrm::Contract'], orders => ['JrcCrm::SalesOrder'] }.each do |records, types|
       @audits = @audits.or(scope.where(resource_type: types, resource_id: records.select(:id)))
     end

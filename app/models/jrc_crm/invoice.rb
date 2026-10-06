@@ -42,6 +42,7 @@
 #
 module JrcCrm
   class Invoice < ApplicationRecord
+    include JrcRelationship::SignalDispatch
     self.table_name = 'jrc_crm_invoices'
     belongs_to :account
     belongs_to :business_unit, class_name: 'JrcCrm::BusinessUnit', optional: true

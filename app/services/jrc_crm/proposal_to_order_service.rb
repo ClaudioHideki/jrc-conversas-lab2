@@ -20,16 +20,19 @@ module JrcCrm
         snapshot = JrcCrm::ProposalSerializer.new(@proposal).as_json.merge(
           'company_name' => business_unit&.name.presence || 'JRC Conversas',
           'document_brand' => 'JRC Conversas', 'origin' => 'proposal',
-          'proposal_number' => @proposal.proposal_number,
+          'proposal_number' => @proposal.proposal_number, 'company_id' => @proposal.customer_company&.id,
+          'customer_name' => @proposal.customer_company&.name || @proposal.customer_contact&.name,
           'proposal_version' => @proposal.version_number,
           'accepted_at' => @proposal.accepted_at,
-          'first_due_date' => terms[:first_due_date]
+          'first_due_date' => terms[:first_due_date],
+          'relationship_origin' => @proposal.relationship_origin,
+          'source_contract_id' => @proposal.relationship_origin['source_contract_id']
         )
         order = JrcCrm::SalesOrder.create!(
           OrderFinancials.attributes_for(terms).merge(
             account: @proposal.account, deal: @proposal.deal, proposal: @proposal,
             contact: @proposal.customer_contact, owner: @proposal.owner || @actor, created_by: @actor,
-            business_unit: business_unit, source_type: 'proposal', order_origin: 'proposal_deal',
+            business_unit: business_unit, source_type: 'proposal', order_origin: order_origin,
             proposal_version: @proposal.version_number, sold_at: Time.current,
             snapshot: OrderFinancials.snapshot_for(terms, snapshot)
           )
@@ -42,6 +45,12 @@ module JrcCrm
     end
 
     private
+
+    def order_origin
+      return 'renewal' if @proposal.relationship_origin['source_contract_id'].present?
+      return 'expansion' if @proposal.relationship_origin['relationship_resource_type'] == 'JrcRelationship::ExpansionSignal'
+      'proposal_deal'
+    end
 
     def audit_created!(order)
       JrcCrm::AuditEvent.create!(

@@ -6,6 +6,11 @@ module Api
           before_action :find_valid_proposal
 
           def show
+            unless @proposal.public_availability[:available]
+              @proposal.record_expiration!
+              render json: { availability: @proposal.public_availability }, status: :ok
+              return
+            end
             render json: JrcCrm::ProposalSerializer.new(@proposal).as_json.merge(
               account: { name: @proposal.account.name },
               customer: serialize_customer,
@@ -14,13 +19,11 @@ module Api
           end
 
           def record_view
-            first_view = @proposal.viewed_count.to_i.zero?
-            @proposal.record_customer_view!
-            @proposal.events.create!(
-              account_id: @proposal.account_id,
-              event_type: first_view ? 'viewed' : 'viewed_again',
-              description: first_view ? 'Proposta visualizada pelo cliente' : 'Proposta visualizada novamente pelo cliente'
-            )
+            unless @proposal.record_customer_view!(origin: 'public_api', channel: 'web')
+              render json: { error: @proposal.public_availability[:message] || 'Esta proposta não permite registrar visualização.',
+                             availability: @proposal.public_availability }, status: :unprocessable_entity
+              return
+            end
             head :ok
           end
 
@@ -92,7 +95,7 @@ module Api
           private
 
           def find_valid_proposal
-            @proposal = JrcCrm::Proposal.find_by_raw_token(params[:token])
+            @proposal = JrcCrm::Proposal.find_by_raw_token(params[:token], allow_unavailable: true)
             if @proposal && (@proposal.account_id != params[:account_id].to_i || !@proposal.account.feature_enabled?('jrc_crm'))
               @proposal = nil
             end
@@ -105,7 +108,7 @@ module Api
           end
 
           def serialize_customer
-            contact = @proposal.deal.contact || @proposal.deal.contacts.first
+            contact = @proposal.customer_contact
             return nil unless contact
 
             { name: contact.name.presence || contact.identifier, email: contact.email }

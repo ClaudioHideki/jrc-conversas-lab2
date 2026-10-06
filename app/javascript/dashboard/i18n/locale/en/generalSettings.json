@@ -150,8 +150,8 @@
       "EMPTY_MESSAGE": "You have no unread notifications"
     },
     "LIST": {
-      "LOADING_MESSAGE": "Loading notifications...",
       "404": "No Notifications",
+      "LOADING_MESSAGE": "Loading notifications...",
       "TABLE_HEADER": [
         "Name",
         "Phone Number",
@@ -167,7 +167,8 @@
       "conversation_mention": "Mention",
       "sla_missed_first_response": "SLA Missed",
       "sla_missed_next_response": "SLA Missed",
-      "sla_missed_resolution": "SLA Missed"
+      "sla_missed_resolution": "SLA Missed",
+      "relationship_action": "Relacionamento / CS"
     }
   },
   "NETWORK": {

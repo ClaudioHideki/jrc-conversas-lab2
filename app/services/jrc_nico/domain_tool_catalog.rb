@@ -1,6 +1,8 @@
 class JrcNico::DomainToolCatalog
   # These are finite commands, never model-provided routes, Ruby names or HTTP verbs.
   TOOLS = {
+    'list_relationship_portfolio' => ['Consultar página de até 20 clientes autorizados da carteira CS e ações prioritárias para preparar o resumo diário', 'relationship', false, %w[query page]],
+    'read_relationship_customer' => ['Explicar saúde, riscos e preparar QBR com evidências autorizadas de Relacionamento. Somente leitura; não envia mensagens nem cria concessões', 'relationship', false, %w[assignment_id*]],
     'service_desk_context' => ['Consultar unidades, estado inicial e capacidades reais do Service Desk R2', 'service_desk', false, []],
     'service_desk_lookup' => ['Consultar página de catálogo R2 sem total: units/operator_companies/queues/priorities/categories/statuses/assignees/requesters/teams; nativos exigem unidade', 'service_desk', false, %w[resource* unit_id operator_company_id q page]],
     'list_service_tickets' => ['Listar página de até 20 chamados R2 autorizados, sem total da conta, com versão atual para alterações', 'service_desk', false, %w[unit_id status_id priority_id category_id queue_id assignee_id q mine page]],

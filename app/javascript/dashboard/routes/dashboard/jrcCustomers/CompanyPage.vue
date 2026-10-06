@@ -2,6 +2,8 @@
 import { computed, ref, watch, onBeforeUnmount } from 'vue';
 import { useRoute } from 'vue-router';
 import API from 'dashboard/api/jrcCustomers';
+import RelationshipPanel from '../jrcRelationship/Customer360Relationship.vue';
+import { useI18n } from 'vue-i18n';
 import CompanyEditor from './components/CompanyEditor.vue';
 import CompanyAddresses from './components/CompanyAddresses.vue';
 import CompanyContacts from './components/CompanyContacts.vue';
@@ -19,6 +21,7 @@ import {
 } from './copy';
 
 const route = useRoute();
+const { t } = useI18n();
 const { accountId, accountScopedRoute, date } = useCustomerMaster();
 const companyId = computed(() => route.params.companyId);
 const company = ref(null);
@@ -51,6 +54,7 @@ const availableTabs = computed(() => {
     base.push('contracts', 'orders', 'follow_ups');
   if (overview.value?.capabilities?.calls) base.push('calls');
   if (overview.value?.capabilities?.campaigns) base.push('campaigns');
+  if (overview.value?.capabilities?.relationship) base.push('relationship');
   return base;
 });
 
@@ -58,7 +62,7 @@ const navigationGroups = computed(() => {
   const definitions = [
     ['overview', ['overview']],
     ['registration', ['general', 'addresses', 'contacts']],
-    ['relationshipArea', ['timeline', 'conversations', 'calls', 'campaigns']],
+    ['relationshipArea', ['relationship', 'timeline', 'conversations', 'calls', 'campaigns']],
     ['commercial', ['leads', 'deals', 'proposals', 'orders', 'contracts']],
     ['operation', ['activities', 'projects', 'project_tasks']],
     ['service', ['tickets', 'follow_ups']],
@@ -330,7 +334,7 @@ onBeforeUnmount(() => {
           :aria-current="tab === key ? 'page' : undefined"
           @click="tab = key"
         >
-          {{ T[key] }}
+          {{ key === 'relationship' ? t('RELATIONSHIP.TITLE') : T[key] }}
         </button>
       </nav>
 
@@ -448,6 +452,7 @@ onBeforeUnmount(() => {
           </div>
         </template>
 
+        <RelationshipPanel v-else-if="tab === 'relationship'" :assignment-id="overview.relationship.id" />
         <CompanyAddresses
           v-else-if="tab === 'addresses'"
           :company-id="company.id"

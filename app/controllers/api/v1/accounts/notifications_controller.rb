@@ -65,11 +65,16 @@ class Api::V1::Accounts::NotificationsController < Api::V1::Accounts::BaseContro
     return unless params[:primary_actor_type]
     return unless Notification::PRIMARY_ACTORS.include?(params[:primary_actor_type])
 
-    @primary_actor = params[:primary_actor_type].safe_constantize.find_by(id: params[:primary_actor_id])
+    if params[:primary_actor_type] == 'JrcRelationship::Action'
+      @primary_actor = JrcRelationship::Context.new(Current.account_user).records(JrcRelationship::Action).find(params[:primary_actor_id])
+    else
+      @primary_actor = params[:primary_actor_type].safe_constantize.find_by(id: params[:primary_actor_id])
+    end
   end
 
   def fetch_notification
     @notification = current_user.notifications.where(account_id: Current.account.id).find(params[:id])
+    raise ActiveRecord::RecordNotFound if @notification.relationship_action? && !JrcRelationship::Notifications.visible?(@notification)
   end
 
   def set_current_page

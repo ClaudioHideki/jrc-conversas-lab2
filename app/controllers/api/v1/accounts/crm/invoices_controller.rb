@@ -15,24 +15,45 @@ module Api::V1::Accounts::Crm
     def create
       attributes = invoice_params.to_h
       order = visible_to_current_user(crm_scope.jrc_crm_sales_orders).find(attributes.delete('sales_order_id'))
+      unless JrcCrm::OrderWorkflowSyncService::QUALIFYING_STATUSES.include?(order.status)
+        return render json: { message: 'Aprove o pedido no Backoffice antes do faturamento.' }, status: :unprocessable_entity
+      end
+      if attributes['status'].present? && !%w[draft issued sent overdue].include?(attributes['status'])
+        return render json: { message: 'O recebimento exige registro de pagamento.' }, status: :unprocessable_entity
+      end
       contract_id = attributes.delete('contract_id')
       contract = contract_id.present? ? order.contracts.find(contract_id) : order.contracts.order(created_at: :desc).first
       subtotal = attributes['subtotal_cents'].presence&.to_i || order.total_cents
       discount = attributes['discount_cents'].to_i
       tax = attributes['tax_cents'].to_i
       total = [subtotal - discount + tax, 0].max
+      invoice = nil
+      order.with_lock do
       invoice = crm_scope.jrc_crm_invoices.create!(
         attributes.merge(sales_order: order, contract: contract, contact: order.contact,
                          business_unit: order.business_unit, subtotal_cents: subtotal,
                          total_cents: total, balance_cents: total)
       )
-      order.update!(status: 'invoiced') unless order.invoiced? || order.shipped? || order.completed?
+      order.update!(status: 'invoiced') unless invoice.draft? || order.invoiced? || order.shipped? || order.completed?
       JrcCrm::OrderWorkflowSyncService.new(order: order, actor: Current.user).call
+      end
       render json: serialize(invoice.reload), status: :created
     end
 
     def update
-      @invoice.update!(invoice_params.except(:sales_order_id, :contract_id, :subtotal_cents, :total_cents, :balance_cents))
+      if invoice_params[:status] == 'paid'
+        return render json: { message: 'Registre o pagamento para confirmar o recebimento.' }, status: :unprocessable_entity
+      end
+      order = @invoice.sales_order
+      JrcCrm::Invoice.transaction do
+        order&.lock!
+        @invoice.lock!
+        @invoice.update!(invoice_params.except(:sales_order_id, :contract_id, :subtotal_cents, :total_cents, :balance_cents))
+        if order && %w[issued sent overdue].include?(@invoice.status) && %w[approved separating].include?(order.status)
+          order.update!(status: 'invoiced')
+          JrcCrm::OrderWorkflowSyncService.new(order: order, actor: Current.user).call
+        end
+      end
       render json: serialize(@invoice.reload)
     end
 

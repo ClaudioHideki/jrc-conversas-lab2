@@ -44,6 +44,7 @@ module JrcCrm
         fiscal_service_code: @product.fiscal_service_code,
         available_for: Array(@product.available_for),
         integrations: Array(@product.integrations),
+        document_rules: @product.document_rules,
         proposal_template_name: @product.proposal_template_name,
         contract_template_name: @product.contract_template_name,
         sales_notes: @product.sales_notes,

@@ -28,6 +28,14 @@ export default {
       this.$store.dispatch('notifications/get', { page });
     },
     openConversation(notification) {
+      if (notification.notification_type === 'relationship_action') {
+        this.$store.dispatch('notifications/read', { id: notification.id,
+          primaryActorId: notification.primary_actor_id, primaryActorType: notification.primary_actor_type,
+          unreadCount: this.meta.unreadCount });
+        this.$router.push({ name: 'jrc_relationship_actions', params: { accountId: this.accountId },
+          query: { assignment_id: notification.primary_actor.assignment_id } });
+        return;
+      }
       const {
         primary_actor_id: primaryActorId,
         primary_actor_type: primaryActorType,

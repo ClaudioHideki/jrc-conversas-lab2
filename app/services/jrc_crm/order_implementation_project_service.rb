@@ -22,7 +22,11 @@ module JrcCrm
     def call
       return result(nil, nil) unless requested?
       return result(nil, 'Projetos não está habilitado para esta conta.') unless JrcOperations::Access.ready? && JrcOperations::Access.enabled?(@account, 'projects')
-      return result(nil, 'O pedido não possui um negócio ganho para vincular ao projeto.') unless @order.deal&.won?
+      return result(nil, 'O pedido ainda aguarda aprovação.') unless OrderWorkflowSyncService::QUALIFYING_STATUSES.include?(@order.status)
+      return result(nil, 'O contrato precisa estar assinado antes da implantação.') if
+        (@order.contracts.exists? && !@order.contracts.where(signature_status: 'signed').exists?) ||
+        (OrderContractService.new(order: @order).required? && !@order.contracts.where(signature_status: 'signed').exists?)
+      return result(nil, 'O negócio vinculado ainda não está ganho.') if @order.deal && !@order.deal.won?
 
       key = idempotency_key
       existing = JrcProjects::Project.find_by(account_id: @account.id, idempotency_key: key)
@@ -33,7 +37,7 @@ module JrcCrm
         return result(nil, 'O responsável atual não possui permissão para criar o Projeto de Implantação.')
       end
 
-      company = @order.deal.company || @order.contact&.company
+      company = @order.deal&.company || @order.contact&.company
       template = implementation_template
       project = JrcProjects::Projects::Create.call(
         account: @account,
@@ -50,7 +54,7 @@ module JrcCrm
         }.compact,
         template: template,
         idempotency_key: key,
-        origin: { deal_id: @order.deal_id },
+        origin: { deal_id: @order.deal_id }.compact,
         correlation_id: "sales-order:#{@order.id}"
       )
       seed_default_tasks!(project) unless template

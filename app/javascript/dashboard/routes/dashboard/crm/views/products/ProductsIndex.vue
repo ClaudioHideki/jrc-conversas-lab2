@@ -2,12 +2,15 @@
 /* eslint-disable vue/no-bare-strings-in-template, @intlify/vue-i18n/no-raw-text */
 import { computed, onMounted, reactive, ref } from 'vue';
 import { useStore } from 'vuex';
+import { useI18n } from 'vue-i18n';
+import { useFormDraft } from '../../helpers/useFormDraft';
 import { useAlert } from 'dashboard/composables';
 import { productsAPI } from 'dashboard/api/crm';
 import { useCrmMetrics } from '../../composables/useCrmMetrics';
 import CrmPageHeader from '../../components/shared/CrmPageHeader.vue';
 import CrmStatCard from '../../components/shared/CrmStatCard.vue';
 
+const { t } = useI18n();
 const store = useStore();
 const { formatBRL } = useCrmMetrics();
 
@@ -32,7 +35,9 @@ const statusFilter = ref('');
 const importInput = ref(null);
 const importing = ref(false);
 
+const documentSources = {contract_generated:'Contrato gerado',contract_signed:'Contrato assinado',customer_registration:'Cadastro do cliente',billing_registration:'Dados de faturamento',technical_owner:'Responsável técnico',financial_owner:'Responsável financeiro',implementation_info:'Dados de implantação',manual:'Documento manual'};
 const defaultForm = () => ({
+  document_rules: [],
   name: '',
   sku: '',
   product_type: 'service',
@@ -358,8 +363,14 @@ const resetForm = () => {
   activeTab.value = 'information';
 };
 
+const createActive = ref(false);
+const productDraft = useFormDraft('crm:new_product', {
+  active: createActive, snapshot: () => ({ ...form }), restore: value => Object.assign(form, value),
+  reset: resetForm,
+});
 const openCreate = () => {
-  resetForm();
+  productDraft.open();
+  createActive.value = true;
   showForm.value = true;
 };
 
@@ -367,6 +378,7 @@ const openEdit = product => {
   Object.assign(form, {
     ...defaultForm(),
     ...product,
+    document_rules: structuredClone(product.document_rules || []),
     tags_text: (product.tags || []).join(', '),
     availability_text: (product.available_for || []).join(', '),
     unit_price: fromCents(product.unit_price_cents),
@@ -384,8 +396,8 @@ const openEdit = product => {
 };
 
 const closeForm = () => {
+  createActive.value = false;
   showForm.value = false;
-  resetForm();
 };
 
 const payload = () => ({
@@ -424,6 +436,7 @@ const payload = () => ({
     ),
     allow_standalone_sale: form.allow_standalone_sale,
     requires_contract: form.requires_contract,
+    document_rules: form.document_rules,
     available_for: splitList(form.availability_text).length
       ? splitList(form.availability_text)
       : ['all'],
@@ -446,6 +459,7 @@ const payload = () => ({
 });
 
 const saveProduct = async () => {
+  const savingDraftKey = productDraft.key.value;
   saving.value = true;
   try {
     if (editingId.value) {
@@ -453,6 +467,7 @@ const saveProduct = async () => {
       useAlert('Produto atualizado com sucesso.');
     } else {
       await productsAPI.create(payload());
+      if (!productDraft.complete(savingDraftKey)) return;
       useAlert('Produto criado com sucesso.');
     }
     closeForm();
@@ -1183,6 +1198,7 @@ onMounted(refresh);
       v-if="showForm"
       class="fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/50 p-2 sm:p-4"
       @click.self="closeForm"
+      @keydown.esc="closeForm"
     >
       <form
         class="flex max-h-[96vh] w-full max-w-[1450px] flex-col overflow-hidden rounded-2xl border border-n-weak bg-n-solid-2 shadow-2xl"
@@ -1630,7 +1646,7 @@ onMounted(refresh);
               </div>
             </section>
 
-            <section v-else class="space-y-5">
+            <section v-else class="space-y-5"><fieldset class="rounded-xl border p-4"><legend class="px-2 font-semibold">Requisitos documentais do Backoffice</legend><div v-for="(rule,index) in form.document_rules" :key="index" class="mb-3 grid gap-2 sm:grid-cols-3"><input v-model="rule.key" placeholder="Identificador" class="rounded border p-2" /><input v-model="rule.label" placeholder="Nome do requisito" class="rounded border p-2" /><select v-model="rule.source" class="rounded border p-2"><option v-for="(name,key) in documentSources" :key="key" :value="key">{{name}}</option></select><label><input v-model="rule.required" type="checkbox" /> Obrigatório</label><label><input v-model="rule.blocking" type="checkbox" /> Bloqueia avanço</label><button type="button" class="rounded border p-2" @click="form.document_rules.splice(index,1)">Remover</button></div><button type="button" class="rounded border px-3 py-2" @click="form.document_rules.push({key:'document_'+(form.document_rules.length+1),label:'',source:'manual',required:true,blocking:true})">Adicionar requisito</button></fieldset>
               <div class="rounded-2xl border border-n-weak p-5">
                 <h4 class="font-bold text-n-slate-12">Integrações internas JRC</h4>
                 <p class="mt-1 text-xs text-n-slate-10">
@@ -1818,6 +1834,7 @@ onMounted(refresh);
             Os valores da proposta serão calculados a partir destes dados comerciais.
           </p>
           <div class="flex gap-3">
+            <button v-if="!editingId" type="button" :disabled="saving" class="mr-auto rounded-lg border border-n-weak px-3 py-2" @click="productDraft.discard">{{ t('CRM.CREATION.DISCARD') }}</button>
             <button
               type="button"
               class="rounded-xl border border-n-weak bg-n-solid-2 px-4 py-2.5 text-sm font-semibold"

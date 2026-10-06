@@ -40,6 +40,10 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  showCloseButton: {
+    type: Boolean,
+    default: false,
+  },
   showConfirmButton: {
     type: Boolean,
     default: true,
@@ -133,6 +137,8 @@ defineExpose({ open, close });
           @submit.prevent="confirm"
           @click.stop
         >
+          <Button v-if="showCloseButton" icon="i-lucide-x" variant="ghost" color="slate"
+            type="button" class="self-end" :aria-label="t('DIALOG.BUTTONS.CANCEL')" @click="close" />
           <div v-if="title || description" class="flex flex-col gap-2">
             <h3 class="text-base font-medium leading-6 text-n-slate-12">
               {{ title }}

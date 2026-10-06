@@ -37,7 +37,7 @@ module JrcCrm
       # backoffice, commission and implementation remain gated by approval.
       JrcCrm::OrderWorkflowSyncService.new(order: order.reload, actor: @actor, event: 'proposal_accepted').call
 
-      { success: true, order: order.reload, deal: @proposal.deal.reload, company: company&.reload, warnings: @warnings }
+      { success: true, order: order.reload, deal: @proposal.deal&.reload, company: company&.reload, warnings: @warnings }
     rescue StandardError => e
       Rails.logger.error("[JRC CRM] accepted proposal lifecycle failed for proposal=#{@proposal.id}: #{e.class}: #{e.message}")
       failure(e.message)
@@ -108,7 +108,7 @@ module JrcCrm
 
       # Preserve explicit choices already made by a salesperson in an existing order.
       defaults.each { |key, value| snapshot[key] = value unless snapshot.key?(key) }
-      snapshot['company_id'] ||= @proposal.deal&.company_id
+      snapshot['company_id'] ||= @proposal.customer_company&.id
       order.update!(snapshot: snapshot)
     end
 
@@ -116,7 +116,7 @@ module JrcCrm
       return unless @account.feature_enabled?('jrc_customer_master')
 
       deal = @proposal.deal
-      company = deal&.company || deal&.contact&.company
+      company = @proposal.customer_company
       return unless company
       return company unless %w[prospect lead].include?(company.relationship_type)
 

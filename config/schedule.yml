@@ -87,3 +87,18 @@ jrc_flows_remote_recovery_job:
   cron: '* * * * *'
   class: 'JrcFlows::RemoteRecoveryJob'
   queue: scheduled_jobs
+
+jrc_relationship_signals_job:
+  cron: '*/15 * * * *'
+  class: 'JrcRelationship::SchedulerJob'
+  queue: low
+
+jrc_operations_sla_monitor_job:
+  cron: '*/5 * * * *'
+  class: 'JrcOperations::SlaMonitorJob'
+  queue: scheduled_jobs
+
+jrc_relationship_sla_monitor_job:
+  cron: '*/5 * * * *'
+  class: 'JrcRelationship::SlaMonitorJob'
+  queue: scheduled_jobs

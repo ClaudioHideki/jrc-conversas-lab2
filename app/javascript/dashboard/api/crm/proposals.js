@@ -3,6 +3,7 @@ import ApiClient from '../ApiClient';
 
 const proposalsAPI = new ApiClient('crm/proposals', { accountScoped: true });
 proposalsAPI.list = params => axios.get(proposalsAPI.url, { params });
+proposalsAPI.creationOptions = () => axios.get(proposalsAPI.url + '/creation_options');
 proposalsAPI.sendProposal = (id, channel = 'auto') =>
   axios.post(`${proposalsAPI.url}/${id}/send_proposal`, { channel });
 proposalsAPI.pdf = id =>

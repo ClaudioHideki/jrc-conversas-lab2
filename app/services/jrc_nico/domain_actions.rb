@@ -19,6 +19,8 @@ class JrcNico::DomainActions
 
     @args = arguments
     case name
+    when 'list_relationship_portfolio' then relationship_portfolio
+    when 'read_relationship_customer' then relationship_customer
     when 'service_desk_context' then service_desk_context
     when 'service_desk_lookup' then service_desk_lookup
     when 'list_service_tickets' then list_service_tickets
@@ -68,6 +70,51 @@ class JrcNico::DomainActions
 
   def presenter
     @presenter ||= JrcServiceDesk::Presenter.new(user_context: context)
+  end
+
+  def relationship_customer
+    ctx = JrcRelationship::Context.new(@access.membership)
+    assignment = ctx.assignment(@args.fetch('assignment_id'))
+    relation = JrcRelationship::HealthSnapshot.where(assignment: assignment, viewer: ctx.user, access_signature: ctx.access_signature)
+    snapshot = JrcRelationship::SnapshotAccess.scope(ctx, relation).order(:id).last
+    signals = snapshot&.signals&.deep_symbolize_keys || { health: { score: nil, band: 'unavailable', factors: [] } }
+    risks = ctx.records(JrcRelationship::RiskCase).where(assignment: assignment).where.not(status: %w[retained churn no_action]).limit(10)
+    actions = ctx.records(JrcRelationship::Action).where(assignment: assignment, status: JrcRelationship::Action::ACTIVE_STATUSES).order(priority: :desc).limit(10)
+    plans = ctx.records(JrcRelationship::SuccessPlan).where(assignment: assignment).limit(10)
+    qbrs = ctx.records(JrcRelationship::Qbr).where(assignment: assignment).order(scheduled_at: :desc).limit(10)
+    work_context = JrcRelationship::WorkContext.new(context: ctx, assignment: assignment).call
+    sources = JrcRelationship::SnapshotAccess.sources(ctx)
+    evidence_resources = work_context.fetch(:_source_ids).flat_map do |key, ids|
+      next [] if Array(ids).empty?
+      native = sources.fetch(key.to_s)
+      Array(ids).map { |id| [native.klass.name, id] }
+    end
+    { customer: assignment.label, health: signals[:health], signals: signals.except(:_source_ids),
+      risks: risks.as_json(only: [:id, :kind, :severity, :reason, :status, :due_at]),
+      actions: actions.as_json(only: [:id, :kind, :reason, :priority, :due_at]),
+      plans: plans.as_json(only: [:id, :title, :status, :goals, :target_on]),
+      qbrs: qbrs.as_json(only: [:id, :title, :scheduled_at, :agenda, :summary, :decisions]),
+      qbr_context: work_context.except(:_source_ids),
+      calculated_at: snapshot&.calculated_at, external_actions_require_confirmation: true,
+      resources: [[assignment.class.name, assignment.id]] + (snapshot ? [[snapshot.class.name, snapshot.id]] : []) +
+        risks.map { |row| [row.class.name, row.id] } + actions.map { |row| [row.class.name, row.id] } +
+        plans.map { |row| [row.class.name, row.id] } + qbrs.map { |row| [row.class.name, row.id] } + evidence_resources }
+  end
+
+  def relationship_portfolio
+    ctx = JrcRelationship::Context.new(@access.membership)
+    scope = ctx.assignments
+    if @args['query'].present?
+      query = "%#{ActiveRecord::Base.sanitize_sql_like(@args['query'])}%"
+      scope = scope.left_joins(:company, :contact).where('companies.name ILIKE :q OR contacts.name ILIKE :q', q: query)
+    end
+    page = @args.fetch('page', 1).to_i.clamp(1, 20)
+    rows = scope.includes(:company, :contact, :owner).order(:id).offset((page - 1) * 20).limit(20)
+    actions = ctx.records(JrcRelationship::Action).where(assignment_id: rows.map(&:id), status: JrcRelationship::Action::ACTIVE_STATUSES)
+      .order(priority: :desc, due_at: :asc, id: :asc).limit(20)
+    { customers: rows.map { |row| { assignment_id: row.id, name: row.label, owner: row.owner&.name, status: row.status } },
+      priority_actions: actions.as_json(only: [:id, :assignment_id, :kind, :reason, :priority, :due_at, :factors]), page: page,
+      resources: rows.map { |row| [row.class.name, row.id] } + actions.map { |row| [row.class.name, row.id] } }
   end
 
   def service_desk_context

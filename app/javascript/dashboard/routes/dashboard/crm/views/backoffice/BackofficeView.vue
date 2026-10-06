@@ -71,7 +71,9 @@ const statusFilter = ref('all');
 const priorityFilter = ref('all');
 const ownerFilter = ref('all');
 const documentFiles = ref([]);
+const documentAttachments = reactive({});
 const issueDescription = ref('');
+const approvalReasons = reactive({});
 const issueType = ref('operational');
 const issueDueAt = ref('');
 const provisioningMode = ref('manual');
@@ -170,7 +172,8 @@ const criticalAlerts = computed(() => {
 });
 const flowStages = computed(() => [
   ['Análise', requests.value.filter(i=>['request','analysis'].includes(i.stage)).length],
-  ['Documentação', requests.value.filter(i=>['documentation','contract'].includes(i.stage)).length],
+  ['Documentação', requests.value.filter(i=>i.stage==='documentation').length],
+  ['Contrato / Assinatura', requests.value.filter(i=>i.stage==='contract').length],
   ['Implantação', requests.value.filter(i=>i.stage==='implementation').length],
   ['Provisionamento', requests.value.filter(i=>i.stage==='provisioning').length],
   ['Financeiro', requests.value.filter(i=>i.stage==='finance').length],
@@ -208,9 +211,15 @@ const documentRows = computed(() => {
       ['documentation', 'contract'].includes(request.stage) ||
       (request.documents || []).length ||
       (request.metadata?.required_documents || []).length
+      || (request.metadata?.document_checklist || []).length
     )
     .forEach(request => {
     const statuses = request.metadata?.document_statuses || {};
+    (request.metadata?.document_checklist || []).forEach(rule => rows.push({
+      key: `${request.id}-${rule.key}`, documentKey: rule.key, request, attachment: null,
+      name: rule.label, status: rule.status, required: rule.required, automatic: rule.source !== 'manual',
+      source: rule.source, blocking: rule.blocking,
+    }));
     (request.documents || []).forEach(file => {
       rows.push({
         key: `${request.id}-${file.id}`,
@@ -363,6 +372,16 @@ const requestStatusLabel = value => ({
 const priorityLabel = value => ({ low: 'Baixa', normal: 'Normal', high: 'Alta', critical: 'Crítica' }[value] || value || '—');
 
 const selectAndUpdate = async (request, attributes) => {
+  if (request.metadata?.source === 'order_approval') {
+    saving.value = true;
+    try {
+      await backofficeAPI.decideOrder(request.id, { decision: attributes.status, reason: approvalReasons[request.id] || '' });
+      await load();
+      await openRequest(request);
+    } catch (error) { useAlert(error.response?.data?.message || 'Não foi possível registrar a decisão.'); }
+    finally { saving.value = false; }
+    return;
+  }
   await openRequest(request);
   await updateRequest(attributes);
 };
@@ -593,8 +612,8 @@ const setDocumentStatus = async (request, row, nextStatus) => {
   saving.value = true;
   try {
     await backofficeAPI.documentStatus(request.id, {
-      document_key: row.attachment?.id || row.name,
-      attachment_id: row.attachment?.id,
+      document_key: row.attachment?.id || row.documentKey || row.name,
+      attachment_id: row.attachment?.id || documentAttachments[row.key] || undefined,
       status: nextStatus,
     });
     await load();
@@ -1020,7 +1039,7 @@ onMounted(load);
       </div>
       <article class="rounded-xl border border-n-weak bg-n-solid-2 p-4">
         <p class="mb-4 text-sm text-n-slate-11">{{ t('CRM.HOMOLOGATION.CONTRACT_QUEUE_HELP') }}</p>
-        <div class="overflow-x-auto"><table class="w-full min-w-[650px] text-sm"><thead class="bg-n-slate-2 text-left text-n-slate-11"><tr><th class="p-3">{{ t('CRM.HOMOLOGATION.REQUEST') }}</th><th>{{ t('CRM.HOMOLOGATION.CONTRACTS') }}</th><th>{{ t('CRM.HOMOLOGATION.SIGNATURE') }}</th><th>{{ t('CRM.HOMOLOGATION.ACTIONS') }}</th></tr></thead><tbody><tr v-for="item in filteredRequests" :key="item.id" class="border-t border-n-weak"><td class="p-3"><strong>{{ item.request_number }}</strong><p class="text-xs text-n-slate-11">{{ item.contact?.name }} · {{ item.order?.order_number }}</p></td><td>{{ item.contract?.contract_number || t('CRM.HOMOLOGATION.NO_CONTRACT') }}</td><td>{{ item.contract?.signature_status || '—' }}</td><td><div class="flex flex-wrap gap-2"><RouterLink v-if="item.contract" :to="{name:'crm_contracts',query:{contractId:item.contract.id}}" class="rounded-lg border border-blue-300 px-3 py-2 text-blue-700">{{ t('CRM.WORKFLOW_UI.OPEN_CONTRACT') }}</RouterLink><RouterLink v-else :to="{name:'crm_contract_new',query:{orderId:item.order?.id}}" class="rounded-lg border px-3 py-2">{{ t('CRM.HOMOLOGATION.CREATE_CONTRACT') }}</RouterLink><button :disabled="saving" class="rounded-lg bg-blue-600 px-3 py-2 text-white" @click="selectAndAdvance(item)">{{ t('CRM.HOMOLOGATION.VALIDATE_SIGNATURE') }}</button></div></td></tr></tbody></table></div>
+        <div class="overflow-x-auto"><table class="w-full min-w-[650px] text-sm"><thead class="bg-n-slate-2 text-left text-n-slate-11"><tr><th class="p-3">{{ t('CRM.HOMOLOGATION.REQUEST') }}</th><th>{{ t('CRM.HOMOLOGATION.CONTRACTS') }}</th><th>{{ t('CRM.HOMOLOGATION.SIGNATURE') }}</th><th>{{ t('CRM.HOMOLOGATION.ACTIONS') }}</th></tr></thead><tbody><tr v-for="item in filteredRequests" :key="item.id" class="border-t border-n-weak"><td class="p-3"><strong>{{ item.request_number }}</strong><p class="text-xs text-n-slate-11">{{ item.contact?.name }} · {{ item.order?.order_number }}</p></td><td>{{ item.contract?.contract_number || t('CRM.HOMOLOGATION.NO_CONTRACT') }}</td><td>{{ commercialStatusLabel(item.contract?.signature_status) }}</td><td><div class="flex flex-wrap gap-2"><RouterLink v-if="item.contract" :to="{name:'crm_contracts',query:{contractId:item.contract.id}}" class="rounded-lg border border-blue-300 px-3 py-2 text-blue-700">{{ t('CRM.WORKFLOW_UI.OPEN_CONTRACT') }}</RouterLink><RouterLink v-else :to="{name:'crm_contract_new',query:{orderId:item.order?.id}}" class="rounded-lg border px-3 py-2">{{ t('CRM.HOMOLOGATION.CREATE_CONTRACT') }}</RouterLink><button :disabled="saving" class="rounded-lg bg-blue-600 px-3 py-2 text-white" @click="selectAndAdvance(item)">{{ t('CRM.HOMOLOGATION.VALIDATE_SIGNATURE') }}</button></div></td></tr></tbody></table></div>
         <p v-if="!filteredRequests.length" class="py-8 text-center text-sm text-n-slate-11">{{ t('CRM.HOMOLOGATION.EMPTY_CONTRACT_QUEUE') }}</p>
       </article>
     </section>
@@ -1029,8 +1048,8 @@ onMounted(load);
       <label class="block rounded-xl border bg-n-solid-2 p-4 text-sm">{{ t('CRM.WORKFLOW_UI.DOCUMENT_REQUEST') }}<select class="mt-2 w-full rounded-lg border p-2" :value="selected?.id || ''" @change="selectRequest"><option value="">{{ t('CRM.WORKFLOW_UI.CHOOSE_DOCUMENT_REQUEST') }}</option><option v-for="request in documentRequests" :key="request.id" :value="request.id">{{ request.request_number }} — {{ request.contact?.name || 'Sem contato' }} — {{ request.stage }}</option></select></label>
       <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"><article class="rounded-2xl border bg-n-solid-2 p-4"><p class="text-xs text-n-slate-11">Documentos</p><strong class="text-2xl">{{documentStats.total}}</strong></article><article class="rounded-2xl border bg-n-solid-2 p-4"><p class="text-xs text-n-slate-11">Em validação</p><strong class="text-2xl text-amber-600">{{documentStats.pending}}</strong></article><article class="rounded-2xl border bg-n-solid-2 p-4"><p class="text-xs text-n-slate-11">Aprovados</p><strong class="text-2xl text-emerald-600">{{documentStats.approved}}</strong></article><article class="rounded-2xl border bg-n-solid-2 p-4"><p class="text-xs text-n-slate-11">Rejeitados</p><strong class="text-2xl text-red-600">{{documentStats.rejected}}</strong></article></div>
       <div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <article class="rounded-2xl border bg-n-solid-2 p-4 shadow-sm"><div class="overflow-x-auto"><table class="w-full min-w-[880px] text-sm"><thead><tr class="border-b text-left text-xs uppercase text-n-slate-11"><th class="p-2">Documento</th><th>Solicitação</th><th>Cliente</th><th>Status</th><th>Obrigatório</th><th>Ações</th></tr></thead><tbody><tr v-for="row in documentRows" :key="row.key" class="border-b"><td class="p-3 font-semibold">{{row.name}}</td><td><button class="text-blue-700" @click="openRequest(row.request)">{{row.request.request_number}}</button></td><td>{{row.request.contact?.name||'Sem contato'}}</td><td>{{row.status}}</td><td>{{row.required?'Sim':'Não'}}</td><td><div class="flex flex-wrap gap-1"><button v-if="row.attachment" class="rounded border px-2 py-1" @click="downloadRequestDocument(row.request,row)">Baixar</button><button class="rounded border border-emerald-300 px-2 py-1 text-emerald-700" :disabled="saving" @click="setDocumentStatus(row.request,row,'approved')">Aprovar</button><button class="rounded border border-red-300 px-2 py-1 text-red-700" :disabled="saving" @click="setDocumentStatus(row.request,row,'rejected')">Rejeitar</button></div></td></tr></tbody></table><p v-if="!documentRows.length" class="py-10 text-center text-n-slate-11">Nenhum documento nesta fila.</p></div></article>
-        <aside class="h-fit rounded-2xl border bg-n-solid-2 p-4 shadow-sm xl:sticky xl:top-3"><template v-if="selected"><p class="text-xs font-semibold text-violet-700">{{selected.request_number}}</p><h3 class="font-bold">Documentos da solicitação</h3><p class="mt-1 text-sm text-n-slate-11">{{selected.contact?.name||'Sem contato'}}</p><label class="mt-4 block rounded-xl border border-dashed p-4 text-center text-sm text-n-slate-11">Selecionar documentos<input type="file" multiple class="mt-2 block w-full text-xs" @change="documentFiles=Array.from($event.target.files||[])" /></label><button class="mt-3 w-full rounded-lg bg-violet-600 p-2 font-semibold text-white disabled:opacity-50" :disabled="saving||!documentFiles.length" @click="uploadRequestDocuments">Enviar e persistir</button><p class="mt-4 text-xs text-n-slate-11">A fila só avança quando os documentos obrigatórios estiverem aprovados.</p><div v-if="selected.stage === 'contract'" class="mt-4 rounded-lg border p-3 text-sm"><p>Contrato: {{selected.contract?.contract_number || 'Não vinculado'}}</p><p>Assinatura: {{selected.contract?.signature_status || 'Pendente'}}</p><button v-if="selected.contract" class="mt-2 rounded border border-blue-300 px-3 py-2 text-blue-700" @click="openContract">{{ t('CRM.WORKFLOW_UI.OPEN_CONTRACT') }}</button></div><button v-if="['documentation','contract'].includes(selected.stage)" class="mt-4 w-full rounded-lg bg-blue-600 p-2 font-semibold text-white" :disabled="saving" @click="advance">{{ t('CRM.WORKFLOW_UI.ADVANCE_DOCUMENTS') }}</button></template><p v-else class="text-sm text-n-slate-11">Clique no número de uma solicitação para anexar documentos.</p></aside>
+        <article class="rounded-2xl border bg-n-solid-2 p-4 shadow-sm"><div class="overflow-x-auto"><table class="w-full min-w-[880px] text-sm"><thead><tr class="border-b text-left text-xs uppercase text-n-slate-11"><th class="p-2">Documento</th><th>Solicitação</th><th>Cliente</th><th>Status</th><th>Obrigatório</th><th>Ações</th></tr></thead><tbody><tr v-for="row in documentRows" :key="row.key" class="border-b"><td class="p-3 font-semibold">{{row.name}}</td><td><button class="text-blue-700" @click="openRequest(row.request)">{{row.request.request_number}}</button></td><td>{{row.request.contact?.name||'Sem contato'}}</td><td>{{commercialStatusLabel(row.status)}}</td><td>{{row.required?'Sim':'Não'}}</td><td><div class="flex flex-wrap gap-1"><select v-if="row.documentKey && !row.automatic" v-model="documentAttachments[row.key]" class="max-w-48 rounded border p-1"><option value="">Vincular anexo</option><option v-for="file in row.request.documents" :key="file.id" :value="file.id">{{file.filename}}</option></select><button v-if="row.attachment" class="rounded border px-2 py-1" @click="downloadRequestDocument(row.request,row)">Baixar</button><button class="rounded border border-emerald-300 px-2 py-1 text-emerald-700" :disabled="saving || row.automatic" @click="setDocumentStatus(row.request,row,'approved')">Aprovar</button><button class="rounded border border-red-300 px-2 py-1 text-red-700" :disabled="saving || row.automatic" @click="setDocumentStatus(row.request,row,'rejected')">Rejeitar</button></div></td></tr></tbody></table><p v-if="!documentRows.length" class="py-10 text-center text-n-slate-11">Nenhum documento nesta fila.</p></div></article>
+        <aside class="h-fit rounded-2xl border bg-n-solid-2 p-4 shadow-sm xl:sticky xl:top-3"><template v-if="selected"><p class="text-xs font-semibold text-violet-700">{{selected.request_number}}</p><h3 class="font-bold">Documentos da solicitação</h3><p class="mt-1 text-sm text-n-slate-11">{{selected.contact?.name||'Sem contato'}}</p><label class="mt-4 block rounded-xl border border-dashed p-4 text-center text-sm text-n-slate-11">Selecionar documentos<input type="file" multiple class="mt-2 block w-full text-xs" @change="documentFiles=Array.from($event.target.files||[])" /></label><button class="mt-3 w-full rounded-lg bg-violet-600 p-2 font-semibold text-white disabled:opacity-50" :disabled="saving||!documentFiles.length" @click="uploadRequestDocuments">Enviar e persistir</button><p class="mt-4 text-xs text-n-slate-11">A fila só avança quando os documentos obrigatórios estiverem aprovados.</p><div v-if="selected.stage === 'contract'" class="mt-4 rounded-lg border p-3 text-sm"><p>Contrato: {{selected.contract?.contract_number || 'Não vinculado'}}</p><p>Assinatura: {{commercialStatusLabel(selected.contract?.signature_status)}}</p><button v-if="selected.contract" class="mt-2 rounded border border-blue-300 px-3 py-2 text-blue-700" @click="openContract">{{ t('CRM.WORKFLOW_UI.OPEN_CONTRACT') }}</button></div><button v-if="['documentation','contract'].includes(selected.stage)" class="mt-4 w-full rounded-lg bg-blue-600 p-2 font-semibold text-white" :disabled="saving" @click="advance">{{ t('CRM.WORKFLOW_UI.ADVANCE_DOCUMENTS') }}</button></template><p v-else class="text-sm text-n-slate-11">Clique no número de uma solicitação para anexar documentos.</p></aside>
       </div>
     </section>
 
@@ -1065,7 +1084,7 @@ onMounted(load);
     <!-- Aprovações: decisões explícitas e separadas da fila genérica. -->
     <section v-if="tab === 'approvals'" class="mt-4 space-y-4">
       <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"><article class="rounded-2xl border bg-n-solid-2 p-4"><p class="text-xs text-n-slate-11">Aprovações</p><strong class="text-2xl">{{approvalStats.total}}</strong></article><article class="rounded-2xl border bg-n-solid-2 p-4"><p class="text-xs text-n-slate-11">Pendentes</p><strong class="text-2xl text-amber-600">{{approvalStats.pending}}</strong></article><article class="rounded-2xl border bg-n-solid-2 p-4"><p class="text-xs text-n-slate-11">Aprovadas</p><strong class="text-2xl text-emerald-600">{{approvalStats.approved}}</strong></article><article class="rounded-2xl border bg-n-solid-2 p-4"><p class="text-xs text-n-slate-11">Rejeitadas</p><strong class="text-2xl text-red-600">{{approvalStats.rejected}}</strong></article></div>
-      <div class="grid gap-3 lg:grid-cols-2"><article v-for="item in filteredRequests" :key="item.id" class="rounded-2xl border bg-n-solid-2 p-5 shadow-sm"><div class="flex justify-between gap-3"><div><p class="text-xs font-semibold text-violet-700">{{item.request_number}}</p><h3 class="font-bold">{{item.title}}</h3><p class="mt-1 text-sm text-n-slate-11">{{item.contact?.name||'Sem contato'}} · {{item.order?.order_number}}</p></div><span class="h-fit rounded-full bg-n-slate-3 px-2 py-1 text-xs">{{requestStatusLabel(item.status)}}</span></div><p class="mt-4 text-sm text-n-slate-11">{{item.description||'Sem justificativa adicional.'}}</p><div class="mt-4 flex gap-2"><button class="flex-1 rounded-lg bg-emerald-600 p-2 font-semibold text-white" :disabled="saving" @click="selectAndUpdate(item,{status:'approved'})">Aprovar</button><button class="flex-1 rounded-lg bg-red-600 p-2 font-semibold text-white" :disabled="saving" @click="selectAndUpdate(item,{status:'rejected'})">Rejeitar</button></div></article><p v-if="!filteredRequests.length" class="rounded-2xl border bg-n-solid-2 p-8 text-center text-n-slate-11 lg:col-span-2">Nenhuma aprovação com os filtros atuais.</p></div>
+      <div class="grid gap-3 lg:grid-cols-2"><article v-for="item in filteredRequests" :key="item.id" class="rounded-2xl border bg-n-solid-2 p-5 shadow-sm"><div class="flex justify-between gap-3"><div><p class="text-xs font-semibold text-violet-700">{{item.request_number}}</p><h3 class="font-bold">{{item.title}}</h3><p class="mt-1 text-sm text-n-slate-11">{{item.contact?.name||'Sem contato'}} · {{item.order?.order_number}}</p></div><span class="h-fit rounded-full bg-n-slate-3 px-2 py-1 text-xs">{{requestStatusLabel(item.status)}}</span></div><p class="mt-4 text-sm text-n-slate-11">{{item.description||'Sem justificativa adicional.'}}</p><label v-if="item.metadata?.source === 'order_approval'" class="mt-3 block text-sm">Motivo da recusa/devolução<textarea v-model="approvalReasons[item.id]" class="mt-1 w-full rounded-lg border p-2" /></label><div class="mt-4 flex gap-2"><button v-if="item.metadata?.source === 'order_approval'" :disabled="saving || !['pending','waiting_customer'].includes(item.status)" class="rounded-lg border p-2" @click="selectAndUpdate(item,{status:'returned'})">Devolver</button><button class="flex-1 rounded-lg bg-emerald-600 p-2 font-semibold text-white" :disabled="saving" @click="selectAndUpdate(item,{status:'approved'})">Aprovar</button><button class="flex-1 rounded-lg bg-red-600 p-2 font-semibold text-white" :disabled="saving" @click="selectAndUpdate(item,{status:'rejected'})">Rejeitar</button></div></article><p v-if="!filteredRequests.length" class="rounded-2xl border bg-n-solid-2 p-8 text-center text-n-slate-11 lg:col-span-2">Nenhuma aprovação com os filtros atuais.</p></div>
     </section>
 
     <!-- Cancelamentos e alterações: fluxo próprio e rastreável. -->

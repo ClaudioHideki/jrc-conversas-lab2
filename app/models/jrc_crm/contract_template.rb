@@ -30,5 +30,19 @@ module JrcCrm
     has_many :contracts, class_name: 'JrcCrm::Contract', dependent: :nullify
     validates :name, :body, presence: true
     validates :name, uniqueness: { scope: :account_id }
+    validate :valid_selection_rules
+
+    def valid_selection_rules
+      if !selection_rules.is_a?(Hash) || (selection_rules.keys - JrcCrm::ContractTemplateSelection::KEYS).any?
+        errors.add(:selection_rules, 'critérios comerciais inválidos')
+      end
+      return unless selection_rules.is_a?(Hash)
+      if selection_rules['operating_company_id'].present? && !JrcCustomers::Company.where(account_id: account_id).exists?(selection_rules['operating_company_id'])
+        errors.add(:selection_rules, 'empresa operadora deve pertencer à conta')
+      end
+      if (Array(selection_rules['product_ids']).map(&:to_i) - account.jrc_crm_products.where(id: selection_rules['product_ids']).pluck(:id)).any?
+        errors.add(:selection_rules, 'produtos devem pertencer à conta')
+      end
+    end
   end
 end

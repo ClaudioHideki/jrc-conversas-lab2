@@ -97,8 +97,15 @@ module JrcCrm
     STATUS_VALUES = %w[draft pending_approval sent viewed accepted rejected canceled].freeze
     APPROVAL_VALUES = %w[not_required pending approved rejected].freeze
 
+    def relationship_origin
+      events.where(event_type: %w[created duplicated]).order(:id).pick(:metadata)&.dig('relationship_origin') || {}
+    end
+
     belongs_to :account
-    belongs_to :deal, class_name: 'JrcCrm::Deal'
+    belongs_to :deal, class_name: 'JrcCrm::Deal', optional: true
+    belongs_to :company, class_name: 'JrcCustomers::Company', optional: true
+    belongs_to :contact, optional: true
+    belongs_to :business_unit, class_name: 'JrcCrm::BusinessUnit', optional: true
     belongs_to :owner, class_name: 'User'
     has_many :items, class_name: 'JrcCrm::ProposalItem', foreign_key: :proposal_id, dependent: :destroy
     has_many :events, class_name: 'JrcCrm::ProposalEvent', foreign_key: :proposal_id, dependent: :destroy
@@ -126,7 +133,9 @@ module JrcCrm
     enum status: STATUS_VALUES.index_with(&:itself)
 
     validate :owner_belongs_to_account
+    validate :customer_identity_is_consistent
     validate :payment_terms_are_consistent
+    validate :customer_transition_is_valid
 
     before_validation :generate_secure_public_token, on: :create
     before_validation :assign_proposal_number, on: :create
@@ -135,18 +144,18 @@ module JrcCrm
     scope :not_expired, -> { where('public_token_expires_at IS NULL OR public_token_expires_at > ?', Time.current) }
     scope :not_revoked, -> { where(public_token_revoked_at: nil) }
 
-    def self.find_by_raw_token(raw_token)
+    def self.find_by_raw_token(raw_token, allow_unavailable: false)
       return nil if raw_token.blank?
 
       digest = Digest::SHA256.hexdigest(raw_token.to_s)
       proposal = find_by(public_token_digest: digest)
-      return proposal if proposal&.token_valid?
+      return proposal if proposal && (allow_unavailable || proposal.token_valid?)
 
       payload = token_verifier.verify(raw_token.to_s, purpose: 'jrc-crm-public-proposal')
       return nil unless payload.is_a?(Hash)
 
       proposal = find_by(id: payload['proposal_id'], account_id: payload['account_id'])
-      proposal&.token_valid? ? proposal : nil
+      proposal && (allow_unavailable || proposal.token_valid?) ? proposal : nil
     rescue ActiveSupport::MessageVerifier::InvalidSignature
       nil
     end
@@ -172,7 +181,21 @@ module JrcCrm
     end
 
     def customer_response_allowed?
-      sent? || viewed?
+      public_availability[:available] && (sent? || viewed?)
+    end
+
+    def public_availability
+      JrcCrm::ProposalPublicState.call(self)
+    end
+
+    def record_expiration!
+      with_lock do
+        return unless public_availability[:state] == 'expired'
+        return if events.where(event_type: 'expired').exists?
+
+        events.create!(account_id: account_id, event_type: 'expired', description: 'Prazo de validade da proposta expirado',
+                       metadata: { origin: 'public_link', channel: 'web', expired_at: public_token_expires_at || valid_until })
+      end
     end
 
     def revoke!(reason = nil)
@@ -187,8 +210,7 @@ module JrcCrm
     def public_token
       raw_public_token.presence || self.class.token_verifier.generate(
         { 'proposal_id' => id, 'account_id' => account_id },
-        purpose: 'jrc-crm-public-proposal',
-        expires_at: public_token_expires_at || 30.days.from_now
+        purpose: 'jrc-crm-public-proposal'
       )
     end
 
@@ -197,11 +219,15 @@ module JrcCrm
     end
 
     def customer_contact
-      deal.contact || deal.contacts.first
+      contact || deal&.contact || deal&.contacts&.first
     end
 
     def linked_conversation
-      deal.conversations.order(updated_at: :desc).first
+      deal&.conversations&.order(updated_at: :desc)&.first || customer_contact&.conversations&.order(updated_at: :desc)&.first
+    end
+
+    def customer_company
+      company || deal&.company || customer_contact&.company
     end
 
     def item_discount_cents
@@ -297,17 +323,19 @@ module JrcCrm
       )
     end
 
-    def record_customer_view!
+    def record_customer_view!(origin: 'public_link', channel: 'web')
       with_lock do
+        return false unless customer_response_allowed?
+
         now = Time.current
-        update_columns(
-          viewed_at: viewed_at || now,
-          last_viewed_at: now,
-          viewed_count: viewed_count.to_i + 1,
-          status: sent? ? 'viewed' : status,
-          updated_at: now
-        )
+        count = viewed_count.to_i + 1
+        update!(viewed_at: viewed_at || now, last_viewed_at: now,
+                viewed_count: count, status: sent? ? 'viewed' : status)
+        events.create!(account_id: account_id, event_type: 'viewed',
+                       description: count == 1 ? 'Proposta visualizada pelo cliente' : 'Proposta visualizada novamente pelo cliente',
+                       metadata: { view_number: count, repeated: count > 1, origin: origin, channel: channel })
       end
+      true
     end
 
     def accept_by_customer!(name:, document:, remote_ip:, user_agent:)
@@ -328,6 +356,29 @@ module JrcCrm
     end
 
     private
+
+    def customer_transition_is_valid
+      return unless will_save_change_to_status?
+      protected_transition = %w[viewed accepted rejected].include?(status)
+      valid = JrcCrm::ProposalPublicState.transition_allowed?(from: status_in_database, to: status, sent_at: sent_at)
+      return if valid && (!protected_transition || public_availability[:available])
+
+      errors.add(:status, 'exige envio oficial antes de visualização, aceite ou recusa')
+    end
+
+    def customer_identity_is_consistent
+      errors.add(:base, 'Selecione um negócio ou um cliente do Cadastro Mestre') unless deal || company || contact
+      [deal, company, contact, business_unit].compact.each do |record|
+        errors.add(:base, 'Referência de outra account não permitida') unless record.account_id == account_id
+      end
+      errors.add(:contact, 'deve pertencer à empresa selecionada') if company && contact && company_id != contact.company_id
+      return unless deal
+
+      errors.add(:company, 'deve corresponder ao negócio') if company_id.present? && deal.company_id != company_id
+      if contact_id.present? && deal.contact_id != contact_id && !deal.deal_contacts.exists?(contact_id: contact_id)
+        errors.add(:contact, 'deve corresponder ao negócio')
+      end
+    end
 
     def owner_belongs_to_account
       errors.add(:owner, 'must belong to account') if owner && !account.users.exists?(owner.id)

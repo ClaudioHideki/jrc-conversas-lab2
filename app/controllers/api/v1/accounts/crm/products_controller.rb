@@ -85,7 +85,8 @@ module Api
               :allow_standalone_sale, :requires_contract, :fiscal_service_code,
               :proposal_template_name, :contract_template_name, :sales_notes,
               :technical_requirements, :scope_included, :scope_excluded,
-              :currency, :active, tags: [], available_for: [], integrations: []
+              :currency, :active, tags: [], available_for: [], integrations: [],
+              document_rules: [:key, :source, :label, :required, :blocking]
             )
           end
         end

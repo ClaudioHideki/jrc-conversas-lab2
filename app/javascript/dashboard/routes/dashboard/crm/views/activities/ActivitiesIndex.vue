@@ -1,4 +1,5 @@
 <script setup>
+import { useFormDraft } from '../../helpers/useFormDraft';
 import { useQuickActionTarget } from 'dashboard/components-next/layout/useQuickActionTarget';
 /* eslint-disable vue/no-bare-strings-in-template, @intlify/vue-i18n/no-raw-text */
 import { computed, onMounted, reactive, ref } from 'vue';
@@ -22,7 +23,7 @@ const route = useRoute();
 const router = useRouter();
 const showForm = ref(false);
 useQuickActionTarget('crm_activities', () => {
-  showForm.value = true;
+  activityDraft.open(); showForm.value = true;
 });
 const saving = ref(false);
 const deals = ref([]);
@@ -32,6 +33,12 @@ const form = reactive({
   title: '',
   due_at: '',
 });
+const initialForm = { ...form };
+const activityDraft = useFormDraft('crm:new_activity', {
+  active: showForm, snapshot: () => ({ ...form }), restore: value => Object.assign(form, value),
+  reset: () => Object.assign(form, initialForm),
+});
+const openForm = () => { activityDraft.open(); showForm.value = true; };
 const activities = computed(
   () => store.getters['jrcCrm/activities/allActivities'] || []
 );
@@ -130,9 +137,11 @@ const complete = async id => {
 };
 
 const save = async () => {
+  const savingDraftKey = activityDraft.key.value;
   saving.value = true;
   try {
     await activitiesAPI.create({ activity: { ...form } });
+    if (!activityDraft.complete(savingDraftKey)) return;
     showForm.value = false;
     await Promise.all([load(), store.dispatch('jrcCrm/deals/fetchDeals')]);
     useAlert('Atividade criada com sucesso.');
@@ -150,7 +159,7 @@ const save = async () => {
 onMounted(async () => {
   const [{ data }] = await Promise.all([dealsAPI.list(), load()]);
   deals.value = data;
-  if (route.query.dealId || route.query.new === '1') showForm.value = true;
+  if (route.query.dealId || route.query.new === '1') openForm();
 });
 </script>
 
@@ -176,7 +185,7 @@ onMounted(async () => {
           </RouterLink>
           <button
             class="rounded-xl bg-n-amber-9 px-4 py-2.5 text-sm font-semibold text-n-on-amber shadow-md transition hover:-translate-y-0.5"
-            @click="showForm = true"
+            @click="openForm"
           >
             <i class="i-lucide-plus mr-1 size-4" /> Nova atividade
           </button>
@@ -439,12 +448,16 @@ onMounted(async () => {
       <div
         v-if="showForm"
         class="fixed inset-0 z-[80] flex items-center justify-center bg-black/40 p-4"
+        @click.self="showForm = false" @keydown.esc="showForm = false"
       >
         <form
           class="w-full max-w-md space-y-3 rounded-xl bg-n-solid-2 p-6 shadow-2xl"
           @submit.prevent="save"
         >
-          <h3 class="text-lg font-semibold text-n-slate-12">Nova atividade</h3>
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-n-slate-12">Nova atividade</h3>
+            <button type="button" class="rounded-lg p-2" :aria-label="t('CRM.CREATION.CLOSE')" @click="showForm = false"><i class="i-lucide-x size-5" /></button>
+          </div>
           <select
             v-model="form.deal_id"
             required
@@ -478,7 +491,7 @@ onMounted(async () => {
             type="datetime-local"
             class="w-full rounded-lg border border-n-weak bg-n-solid-2 px-3 py-2"
           />
-          <div class="flex justify-end gap-2">
+          <div class="flex justify-end gap-2"><button type="button" :disabled="saving" class="mr-auto rounded-lg border border-n-weak px-3 py-2" @click="activityDraft.discard">{{ t('CRM.CREATION.DISCARD') }}</button>
             <button
               type="button"
               class="px-4 py-2 text-sm"

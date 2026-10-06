@@ -14,6 +14,7 @@ const { t } = useI18n();
 const dialogRef = ref(null);
 const contactsFormRef = ref(null);
 const contact = ref(null);
+const submittedDraftKey = ref(null);
 
 const uiFlags = useMapGetter('contacts/getUIFlags');
 const isCreatingContact = computed(() => uiFlags.value.isCreating);
@@ -24,11 +25,12 @@ const createNewContact = contactItem => {
 
 const handleDialogConfirm = async () => {
   if (!contact.value) return;
+  submittedDraftKey.value = contactsFormRef.value.draftKey();
   emit('create', contact.value);
 };
 
 const onSuccess = () => {
-  contactsFormRef.value?.resetForm();
+  if (contactsFormRef.value && !contactsFormRef.value.resetForm(submittedDraftKey.value)) return;
   dialogRef.value.close();
 };
 
@@ -43,6 +45,7 @@ defineExpose({ dialogRef, contactsFormRef, onSuccess });
   <Dialog
     ref="dialogRef"
     width="3xl"
+    show-close-button
     overflow-y-auto
     @confirm="handleDialogConfirm"
   >

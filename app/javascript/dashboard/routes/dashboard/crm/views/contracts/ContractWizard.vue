@@ -122,6 +122,10 @@ const choose = async () => {
 
     form.one_time_cents =
       data.one_time_cents || data.total_cents || 0;
+    const suggestion = (await contractTemplatesAPI.list({ order_id: data.id })).data;
+    templates.value = (suggestion.templates || []).filter(template => template.active);
+    form.contract_template_id = suggestion.suggested_template_id || '';
+    if (suggestion.warning) useAlert(suggestion.warning);
   } catch (error) {
     // Os dados obtidos na listagem continuam disponíveis.
   }
@@ -136,14 +140,13 @@ onMounted(async () => {
       contractTemplatesAPI.list(),
     ]);
 
-    orders.value = orderResponse.data || [];
+    orders.value = (orderResponse.data || []).filter(item => ['approved','separating','invoiced','shipped','completed'].includes(item.status));
 
     templates.value = (templateResponse.data || []).filter(
       template => template.active
     );
 
-    form.contract_template_id =
-      templates.value[0]?.id || '';
+    form.contract_template_id = '';
 
     if (route.query.orderId) {
       form.sales_order_id = route.query.orderId;
@@ -1049,7 +1052,7 @@ const next = () => {
               <p class="mt-1 text-xs text-n-slate-11">Use quando o documento foi efetivamente assinado fora de um provedor digital.</p>
               <label class="mt-3 block text-sm">Assinado por<input v-model="signedByName" class="mt-1 w-full rounded-lg border p-2" placeholder="Nome do signatário" /></label>
               <label class="mt-3 block text-sm">Data/hora<input v-model="signedAt" type="datetime-local" class="mt-1 w-full rounded-lg border p-2" /></label>
-              <label class="mt-3 block text-sm">Documento assinado<input type="file" accept="application/pdf,image/*" class="mt-1 w-full rounded-lg border p-2" @change="onSignedFile" /></label>
+              <label class="mt-3 block text-sm">Documento assinado<input type="file" accept="application/pdf" class="mt-1 w-full rounded-lg border p-2" @change="onSignedFile" /></label>
               <button class="mt-3 w-full rounded-lg bg-emerald-600 px-4 py-2 font-semibold text-white" :disabled="saving" @click="registerManualSignature">Confirmar assinatura manual</button>
             </section>
             <section class="rounded-xl border border-indigo-200 bg-indigo-50/40 p-4">

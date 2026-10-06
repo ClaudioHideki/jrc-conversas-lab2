@@ -2,7 +2,7 @@
 # Does not implement a second merge engine or touch provider/source identifiers.
 class JrcCustomers::MergePreserver
   class Conflict < StandardError; end
-  ACCOUNT_TABLES = %w[jrc_crm_leads jrc_crm_deals jrc_crm_activities sales_opportunities sales_activities
+  ACCOUNT_TABLES = %w[jrc_crm_leads jrc_crm_deals jrc_crm_proposals jrc_crm_activities sales_opportunities sales_activities
                       calls csat_survey_responses jrc_nico_erp_bindings jrc_crm_sales_orders jrc_crm_contracts
                       jrc_crm_invoices jrc_crm_backoffice_requests jrc_projects_projects].freeze
 

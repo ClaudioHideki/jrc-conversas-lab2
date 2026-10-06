@@ -49,7 +49,7 @@
       <div class="meta">
         <div>
           <div class="label">Cliente</div>
-          <div class="value"><%= contact&.name.presence || @proposal.deal.title %></div>
+          <div class="value"><%= @proposal.customer_company&.name.presence || contact&.name.presence || @proposal.deal&.title %></div>
           <% if contact&.email.present? %><div class="product-meta"><%= contact.email %></div><% end %>
         </div>
         <div><div class="label">Responsável</div><div class="value"><%= @proposal.owner&.name.presence || 'Equipe JRC' %></div></div>

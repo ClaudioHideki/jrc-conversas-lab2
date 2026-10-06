@@ -33,6 +33,10 @@
       }
     },
     "PERMISSIONS": {
+      "JRC_RELATIONSHIP_VIEW": "Relacionamento: consultar carteira autorizada",
+      "JRC_RELATIONSHIP_MANAGE": "Relacionamento: executar ações e registrar resultados",
+      "JRC_RELATIONSHIP_TEAM": "Relacionamento: gerir equipe e concessões",
+      "JRC_RELATIONSHIP_CONFIGURE": "Relacionamento: configurar regras e playbooks",
       "JRC_PROJECTS_ATTACHMENT_MANAGE": "Projects: attachment — manage",
       "JRC_PROJECTS_BOARD_MANAGE": "Projects: board — manage",
       "JRC_PROJECTS_BUDGET_MANAGE": "Projects: budget — manage",

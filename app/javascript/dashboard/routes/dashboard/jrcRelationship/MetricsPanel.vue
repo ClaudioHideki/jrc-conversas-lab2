@@ -1,0 +1,91 @@
+<script setup>
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { money as formatMoney } from './definitions';
+const props = defineProps({ metadata: { type: Object, default: () => ({}) }, metrics: { type: Object, default: () => ({}) } });
+const { t } = useI18n();
+const emit = defineEmits(['filter']);
+const keys = [
+  'customers',
+  'active',
+  'mrr_cents',
+  'arr_cents',
+  'health_average',
+  'at_risk',
+  'mrr_at_risk_cents',
+  'churned',
+  'retained',
+  'retention_rate',
+  'nps',
+  'csat',
+  'without_contact',
+  'overdue_activities',
+  'actions_today',
+  'overdue_actions',
+  'waiting_customer_actions',
+  'expansion_potential_cents',
+  'expansion_won_cents',
+  'nrr',
+  'gross_retention',
+  'revenue_churn',
+  'renewal_rate', 'renewed_mrr_cents', 'qbr_completed', 'qbr_scheduled', 'nps_promoters', 'nps_detractors', 'first_action_minutes', 'open_retention_cases',
+];
+const display = key => {
+  const value = props.metrics[key];
+  if (value === null || value === undefined)
+    return t('RELATIONSHIP.UNAVAILABLE');
+  if (key.endsWith('_cents')) return money(value);
+  if (typeof value === 'number') return Number(value.toFixed(1));
+  return value;
+};
+const cards = computed(() => keys.map(key => ({ key, value: display(key) })));
+const drilldown = ['at_risk','mrr_at_risk_cents','active','churned','without_contact','overdue_actions','actions_today','waiting_customer_actions'];
+const money = value => formatMoney(value, props.metadata?.formatting);
+</script>
+
+<template>
+  <p
+    v-if="metrics.health_coverage"
+    class="mb-3 text-xs text-n-slate-11"
+  >
+    {{ t('RELATIONSHIP.HEALTH_COVERAGE', metrics.health_coverage) }}
+  </p>
+  <section class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
+    <button
+      v-for="card in cards"
+      :key="card.key"
+      type="button"
+      :disabled="!drilldown.includes(card.key)"
+      class="rounded-xl border border-n-weak bg-n-solid-2 p-4"
+      @click="emit('filter', card.key)"
+    >
+      <p class="text-xs text-n-slate-11">
+        {{ t(`RELATIONSHIP.METRICS.${card.key}`) }}
+      </p>
+      <strong class="mt-2 block text-lg">{{ card.value }}</strong>
+    </button>
+    <button
+      v-for="days in [15, 30, 60, 90, 120]"
+      :key="days"
+      class="rounded-xl border border-n-weak bg-n-solid-2 p-4"
+      @click="emit('filter', { renewal_days: days })"
+    >
+      <p class="text-xs text-n-slate-11">
+        {{ t('RELATIONSHIP.RENEWAL_WINDOW', { days }) }}
+      </p>
+      <strong class="mt-2 block text-lg">{{
+        metrics.renewals?.[days] ?? '—'
+      }}</strong>
+    </button>
+  </section>
+  <section v-if="metrics.bands" class="mt-4 flex flex-wrap gap-3" :aria-label="t('RELATIONSHIP.DISTRIBUTION')">
+    <button v-for="(count, band) in metrics.bands" :key="band" type="button" :class="'rounded-xl border border-n-weak p-3 text-sm'" @click="emit('filter', { band })">{{ t(`RELATIONSHIP.BANDS.${band}`) }}: {{ count }}</button>
+  </section>
+  <details v-if="metrics.health_trend?.length" class="mt-4 rounded-xl border border-n-weak p-3">
+    <summary>{{ t('RELATIONSHIP.HEALTH_TREND') }}</summary>
+    <table class="mt-3 w-full text-sm"><tbody><tr v-for="point in metrics.health_trend" :key="point.day"><td>{{ point.day }}</td><td><meter min="0" max="100" :value="point.score || 0" :aria-label="point.day" class="w-40" /></td><td>{{ point.score?.toFixed(1) ?? '—' }}</td></tr></tbody></table>
+  </details>
+  <details v-if="metrics.negative_factors?.length" class="mt-4 rounded-xl border border-n-weak p-3"><summary>{{ t('RELATIONSHIP.NEGATIVE_FACTORS') }}</summary><p v-for="row in metrics.negative_factors" :key="row.factor" class="mt-2 text-sm">{{ t(`RELATIONSHIP.FACTORS.${row.factor}`) }}: {{ row.average }} · {{ row.customers }}</p></details>
+  <details v-if="metrics.nps_evolution?.length" class="mt-4 rounded-xl border border-n-weak p-3"><summary>{{ t('RELATIONSHIP.NPS_EVOLUTION') }}</summary><p v-for="row in metrics.nps_evolution" :key="row.day" class="mt-2 text-sm">{{ row.day }}: {{ row.score?.toFixed(1) }}</p></details>
+  <details v-if="metrics.csat_evolution?.length" class="mt-4 rounded-xl border border-n-weak p-3"><summary>{{ t('RELATIONSHIP.CSAT_EVOLUTION') }}</summary><p v-for="row in metrics.csat_evolution" :key="row.day" class="mt-2 text-sm">{{ row.day }}: {{ row.score?.toFixed(1) }}</p></details>
+</template>

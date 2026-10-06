@@ -33,7 +33,14 @@ module JrcCrm
     
     validates :event_type, :description, presence: true
     
-    VALID_TYPES = %w[created updated approval_requested approval_updated sent viewed accepted rejected canceled revoked item_added item_removed pdf_generated].freeze
+    VALID_TYPES = %w[created updated approval_requested approval_updated approved sent viewed accepted rejected expired canceled revoked duplicated item_added item_removed pdf_generated].freeze
     validates :event_type, inclusion: { in: VALID_TYPES }
+    before_validation do
+      self.metadata = (metadata || {}).reverse_merge('origin' => user_id ? 'crm' : 'public_link', 'channel' => 'web')
+    end
+    validate do
+      errors.add(:account, 'must match proposal account') if proposal && proposal.account_id != account_id
+      errors.add(:user, 'must belong to account') if user && !account.users.exists?(user.id)
+    end
   end
 end

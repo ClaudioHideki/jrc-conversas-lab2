@@ -1,5 +1,6 @@
 <script setup>
-import { computed, reactive, watch } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
+import { useFormDraft } from 'dashboard/routes/dashboard/crm/helpers/useFormDraft';
 import { useI18n } from 'vue-i18n';
 import { required, email } from '@vuelidate/validators';
 import { useVuelidate } from '@vuelidate/core';
@@ -80,7 +81,7 @@ const defaultState = {
   },
 };
 
-const state = reactive({ ...defaultState });
+const state = reactive(JSON.parse(JSON.stringify(defaultState)));
 
 const validationRules = {
   firstName: { required },
@@ -251,9 +252,22 @@ const resetValidation = () => {
   v$.value.$reset();
 };
 
-const resetForm = () => {
-  Object.assign(state, defaultState);
+const resetForm = (savedDraftKey = contactDraft.key.value) => {
+  if (props.isNewContact) {
+    if (!contactDraft.complete(savedDraftKey)) return false;
+    activeDraft.value = false;
+  }
+  Object.assign(state, JSON.parse(JSON.stringify(defaultState)));
+  return true;
 };
+
+const activeDraft = ref(props.isNewContact);
+const contactDraft = useFormDraft('crm:native_contact', {
+  active: activeDraft, snapshot: () => ({ ...state }),
+  restore: value => Object.assign(state, value),
+  reset: () => Object.assign(state, JSON.parse(JSON.stringify(defaultState))),
+});
+if (props.isNewContact) contactDraft.open();
 
 watch(
   () => props.contactData?.id,
@@ -269,11 +283,14 @@ defineExpose({
   resetValidation,
   isFormInvalid,
   resetForm,
+  draftKey: () => contactDraft.key.value,
 });
 </script>
 
 <template>
   <div class="flex flex-col gap-6">
+    <button v-if="isNewContact" type="button" class="self-start rounded-lg border border-n-weak px-3 py-2"
+      @click="contactDraft.discard">{{ t('CRM.CREATION.DISCARD') }}</button>
     <div class="flex flex-col items-start gap-2">
       <span class="py-1 text-sm font-medium text-n-slate-12">
         {{ t('CONTACTS_LAYOUT.CARD.EDIT_DETAILS_FORM.TITLE') }}

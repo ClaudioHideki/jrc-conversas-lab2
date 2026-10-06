@@ -8,9 +8,21 @@ describe('JRC Service Desk feature registration', () => {
 
   it('preserves all existing feature identifiers and their order', () => {
     const existing = Object.entries(FEATURE_FLAGS).filter(
-      ([key]) => key !== 'JRC_SERVICE_DESK'
+      // These flags were introduced after the frozen CP1 catalog. Legacy keys
+      // must remain byte-for-byte compatible and in the same relative order.
+      ([key]) =>
+        ![
+          'JRC_SERVICE_DESK',
+          'JRC_CUSTOMER_MASTER',
+          'JRC_RELATIONSHIP',
+        ].includes(key)
     );
     expect(existing).toEqual(Object.entries(baseline.frontend_flags));
+  });
+
+  it('registers native Customer Master and Relationship with independent flags', () => {
+    expect(FEATURE_FLAGS.JRC_CUSTOMER_MASTER).toBe('jrc_customer_master');
+    expect(FEATURE_FLAGS.JRC_RELATIONSHIP).toBe('jrc_relationship');
   });
 
   it('does not alter the existing premium feature list', () => {

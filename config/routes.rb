@@ -406,6 +406,35 @@ Rails.application.routes.draw do
               end
             end
           end
+          namespace :relationship do
+            get :metadata, to: 'dashboard#metadata'
+            get :dashboard, to: 'dashboard#show'
+            get :team, to: 'dashboard#team'
+            resources :portfolio, only: [:index, :show, :create, :update] do
+              member do
+                post :recalculate
+                post :activity
+                get :recommendations
+                get :channels
+                get :work_context
+                post :native_csat
+              end
+            end
+            get 'records/:kind', to: 'records#index'
+            post 'records/:kind', to: 'records#create'
+            patch 'records/:kind/:id', to: 'records#update'
+            post 'records/:kind/:id/opportunity', to: 'records#opportunity'
+            post 'portfolio/batch', to: 'portfolio#batch'
+            post 'actions/batch', to: 'records#batch'
+            post 'surveys/:id/deliver', to: 'records#deliver_survey'
+            get 'surveys/:id/link', to: 'records#survey_link'
+            get :export, to: 'dashboard#export'
+            get :export_history, to: 'dashboard#export_history'
+            resource :configuration, only: [:show, :update], controller: :configuration
+            get :playbooks, to: 'configuration#playbooks'
+            post :playbooks, to: 'configuration#save_playbook'
+            patch 'playbooks/:id', to: 'configuration#save_playbook'
+          end
           namespace :crm do
             resource :dashboard, only: :show, controller: :dashboards
             resources :reports, only: :index
@@ -455,6 +484,7 @@ Rails.application.routes.draw do
               patch :toggle_active, on: :member
             end
             resources :proposals do
+              get :creation_options, on: :collection
               resources :items, controller: :proposal_items, only: [:create, :update, :destroy]
               member do
                 get :pdf
@@ -501,6 +531,7 @@ Rails.application.routes.draw do
             resources :backoffice_requests, only: [:index, :show, :create, :update] do
               get :summary, on: :collection
               member do
+                post :decide_order
                 post :advance
                 post :documents, action: :upload_documents
                 get 'documents/:attachment_id', action: :download_document, as: :document
@@ -511,6 +542,8 @@ Rails.application.routes.draw do
                 post :reopen
               end
             end
+            resources :operations_queues, only: [:index, :create, :update]
+            resources :operations_sla_policies, only: [:index, :create, :update]
             resources :invoices, only: [:index, :show, :create, :update]
             resources :payments, only: [:index, :create]
             resources :contract_templates, only: [:index, :show, :create, :update, :destroy]
@@ -1186,6 +1219,8 @@ Rails.application.routes.draw do
 
   # ---------------------------------------------------------------------
   # JRC CRM public commercial proposals (no Chatwoot session required)
+  get '/jrc/relacionamento/pesquisas/:token', to: 'relationship_surveys#show'
+  post '/jrc/relacionamento/pesquisas/:token', to: 'relationship_surveys#update'
   get '/jrc/propostas/:account_id/:token', to: 'jrc_crm/public_proposals#show', as: :jrc_crm_public_proposal
   get '/jrc/propostas/:account_id/:token/pdf', to: 'jrc_crm/public_proposals#pdf', as: :jrc_crm_public_proposal_pdf
   post '/jrc/propostas/:account_id/:token/accept', to: 'jrc_crm/public_proposals#accept', as: :jrc_crm_public_proposal_accept

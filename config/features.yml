@@ -302,3 +302,8 @@
   display_name: JRC Cadastro Mestre
   enabled: false
   column: feature_flags_ext_1
+
+- name: jrc_relationship
+  display_name: Relacionamento / Customer Success
+  enabled: false
+  column: feature_flags_ext_1
