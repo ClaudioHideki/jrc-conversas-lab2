@@ -53,7 +53,8 @@ contractsAPI.sendForSignature = (id, data = {}) =>
 contractsAPI.registerManualSignature = (id, payload) => {
   const data = new FormData();
   data.append('signed_by_name', payload.signed_by_name || '');
-  if (payload.signed_at) data.append('signed_at', new Date(payload.signed_at).toISOString());
+  if (payload.signed_at)
+    data.append('signed_at', new Date(payload.signed_at).toISOString());
   if (payload.signed_file) data.append('signed_file', payload.signed_file);
   return axios.post(
     `${contractsAPI.url}/${id}/register_manual_signature`,
@@ -76,7 +77,8 @@ commissionProgramsAPI.simulate = data =>
   axios.post(`${commissionProgramsAPI.url}/simulate`, data);
 
 export const backofficeAPI = make('backoffice_requests');
-backofficeAPI.decideOrder = (id, data) => axios.post(`${backofficeAPI.url}/${id}/decide_order`, data);
+backofficeAPI.decideOrder = (id, data) =>
+  axios.post(`${backofficeAPI.url}/${id}/decide_order`, data);
 backofficeAPI.show = id => axios.get(`${backofficeAPI.url}/${id}`);
 backofficeAPI.summary = () => axios.get(`${backofficeAPI.url}/summary`);
 backofficeAPI.advance = id => axios.post(`${backofficeAPI.url}/${id}/advance`);

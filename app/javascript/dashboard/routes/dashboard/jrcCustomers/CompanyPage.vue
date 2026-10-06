@@ -62,7 +62,10 @@ const navigationGroups = computed(() => {
   const definitions = [
     ['overview', ['overview']],
     ['registration', ['general', 'addresses', 'contacts']],
-    ['relationshipArea', ['relationship', 'timeline', 'conversations', 'calls', 'campaigns']],
+    [
+      'relationshipArea',
+      ['relationship', 'timeline', 'conversations', 'calls', 'campaigns'],
+    ],
     ['commercial', ['leads', 'deals', 'proposals', 'orders', 'contracts']],
     ['operation', ['activities', 'projects', 'project_tasks']],
     ['service', ['tickets', 'follow_ups']],
@@ -452,7 +455,10 @@ onBeforeUnmount(() => {
           </div>
         </template>
 
-        <RelationshipPanel v-else-if="tab === 'relationship'" :assignment-id="overview.relationship.id" />
+        <RelationshipPanel
+          v-else-if="tab === 'relationship'"
+          :assignment-id="overview.relationship.id"
+        />
         <CompanyAddresses
           v-else-if="tab === 'addresses'"
           :company-id="company.id"

@@ -16,7 +16,10 @@ describe('CRM team management', () => {
     useRoute.mockReturnValue(route);
     store = createStore({
       state: { role: 'administrator' },
-      getters: { getCurrentRole: state => state.role },
+      getters: {
+        getCurrentRole: state => state.role,
+        'accounts/isFeatureEnabledonAccount': () => () => false,
+      },
     });
     managementAPI.list.mockResolvedValue({
       data: [

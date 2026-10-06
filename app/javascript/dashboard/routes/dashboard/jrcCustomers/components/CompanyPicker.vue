@@ -53,7 +53,12 @@ watch(query, () => {
   else results.value = [];
 });
 watch(
-  [accountId, canAccess, () => store.getters.getCurrentUser?.id, () => props.modelValue],
+  [
+    accountId,
+    canAccess,
+    () => store.getters.getCurrentUser?.id,
+    () => props.modelValue,
+  ],
   async () => {
     selectedGeneration += 1;
     const version = selectedGeneration;
