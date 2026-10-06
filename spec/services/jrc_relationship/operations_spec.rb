@@ -10,7 +10,7 @@ RSpec.describe 'Relationship operational regression' do
   before do
     sd_as_admin!
     sd_account.enable_features!('jrc_customer_master', 'jrc_relationship', 'jrc_crm')
-    sd_contact.update!(company: company)
+    sd_contact.update!(master_company: company)
   end
 
   it 'accepts operations_configured without weakening the audit allowlist' do

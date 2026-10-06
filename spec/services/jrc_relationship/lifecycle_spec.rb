@@ -39,8 +39,10 @@ RSpec.describe 'Relationship native lifecycle' do
     expect(JrcRelationship::Assignment.where(account: sd_account, company: company).count).to eq(1)
     expect(JrcRelationship::Action.where(assignment: assignment, source_key: 'handoff').count).to eq(1)
     activities = JrcCrm::Activity.where(account: sd_account).where("metadata ->> 'relationship_assignment_id' = ?", assignment.id.to_s)
+      .where("metadata ->> 'relationship_source_key' = 'handoff' OR metadata ->> 'relationship_source_key' LIKE 'activity:onboarded:%'")
     expect(activities.count).to eq(5)
-    expect(activities.where(activity_type: 'meeting').count).to eq(1)
+    expect(activities.where(activity_type: 'meeting').count).to eq(2)
+    expect(activities.where(activity_type: 'task').count).to eq(3)
     plans = JrcRelationship::SuccessPlan.where(assignment: assignment)
     expect(plans.count).to eq(1)
     expect(plans.first.metadata['milestones'].size).to eq(3)
@@ -60,10 +62,12 @@ RSpec.describe 'Relationship native lifecycle' do
   it 'evaluates health decline against the previous authorized snapshot once' do
     process
     assignment.update!(created_at: 40.days.ago)
-    2.times { process }
+    decline = process
+    expect(decline.dig(:health_change, :drop)).to be >= 20
+    expect(JrcRelationship::HealthSnapshot.where(assignment: assignment).last.signals.dig('health_change', 'drop')).to be >= 20
+    process
     expect(assignment.actions.where(kind: 'health_drop').count).to eq(1)
     expect(assignment.actions.find_by!(kind: 'health_drop').priority).to be >= 70
-    expect(JrcRelationship::HealthSnapshot.where(assignment: assignment).last.signals.dig('health_change', 'drop')).to be >= 20
   end
 
   it 'REL-003 includes the real critical ticket in health, action and the existing timeline' do

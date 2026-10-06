@@ -13,7 +13,7 @@ RSpec.describe 'Relationship functional review' do
   before do
     sd_as_admin!
     sd_account.enable_features!('jrc_customer_master', 'jrc_relationship', 'jrc_crm', 'jrc_projects')
-    sd_contact.update!(company: company)
+    sd_contact.update!(master_company: company)
   end
 
   it 'REL-01 diagnoses existing eligible orders without writing, then backfills once' do

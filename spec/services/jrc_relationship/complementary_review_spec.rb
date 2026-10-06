@@ -7,7 +7,7 @@ RSpec.describe 'Relationship complementary review' do
   before do
     sd_as_admin!
     sd_account.enable_features!('jrc_customer_master', 'jrc_relationship', 'jrc_crm', 'jrc_projects')
-    sd_contact.update!(company: company)
+    sd_contact.update!(master_company: company)
   end
   it 'creates native plan, welcome meeting and follow-ups idempotently without new customer copies' do
     2.times { JrcRelationship::Playbooks.new(context).run!(assignment, 'onboarded') }
