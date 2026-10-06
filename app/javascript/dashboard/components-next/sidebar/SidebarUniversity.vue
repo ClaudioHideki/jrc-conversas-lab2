@@ -1,5 +1,6 @@
 <script setup>
 import { universityLink } from './university';
+import SidebarNewBadge from './SidebarNewBadge.vue';
 
 defineProps({ collapsed: { type: Boolean, default: false } });
 </script>
@@ -13,21 +14,27 @@ defineProps({ collapsed: { type: Boolean, default: false } });
       :title="universityLink.label"
       :aria-label="universityLink.label"
       class="flex min-h-10 items-center gap-2 rounded-xl text-sidebar-foreground transition-colors hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sidebar-foreground"
-      :class="collapsed ? 'size-10 justify-center' : 'px-3 py-2'"
+      :class="collapsed ? 'size-10 justify-center' : 'px-2.5 py-2'"
     >
       <span
         :class="universityLink.icon"
-        class="size-5 shrink-0 text-sidebar-secondary"
+        class="size-[18px] shrink-0 text-sidebar-secondary"
         aria-hidden="true"
       />
-      <span v-if="!collapsed" class="truncate text-sm font-medium">{{
+      <span v-if="!collapsed" class="flex-1 truncate text-sm font-medium">{{
         universityLink.label
       }}</span>
+      <SidebarNewBadge v-if="!collapsed" />
       <span
         v-if="!collapsed"
-        class="i-lucide-arrow-up-right ml-auto size-3.5 shrink-0 text-sidebar-secondary"
-        aria-hidden="true"
-      />
+        class="grid size-3 shrink-0 place-items-center"
+        data-testid="sidebar-trailing-slot"
+      >
+        <span
+          class="i-lucide-arrow-up-right size-3 text-sidebar-secondary"
+          aria-hidden="true"
+        />
+      </span>
     </a>
   </li>
 </template>

@@ -26,9 +26,9 @@ class OperationsSlaClockTest < Minitest::Test
       fields.each { |key, value| self[key] = value }
     end
   end
-  Policy = Struct.new(:first_action_minutes, :stage_minutes, :total_minutes, :business_hours, :alert_thresholds, keyword_init: true) do
+  Policy = Struct.new(:first_action_minutes, :stage_minutes, :total_minutes, :business_hours, :alert_thresholds, :pause_statuses, keyword_init: true) do
     def pause_status?(status)
-      status == 'waiting_customer'
+      Array(pause_statuses || ['waiting_customer']).include?(status)
     end
   end
 
@@ -110,4 +110,37 @@ class OperationsSlaClockTest < Minitest::Test
       end
     end
   end
+  def test_finance_pause_and_switching_wait_reasons_keep_one_pause_until_resume
+    @policy.pause_statuses = %w[waiting_customer waiting_finance]
+    Time.stub(:current, @start + 1800) do
+      @clock.stub(:audit_clock_event!, nil) { @clock.status_changed!(from: 'open', to: 'waiting_finance') }
+    end
+    Time.stub(:current, @start + 3600) do
+      @clock.stub(:audit_clock_event!, nil) { @clock.status_changed!(from: 'waiting_finance', to: 'waiting_customer') }
+    end
+    assert_equal @start + 1800, @request.sla_paused_at
+    assert_equal 0, @request.sla_paused_seconds
+    assert_equal @request.sla_paused_at.iso8601, @activity.metadata['relationship_sla_paused_at']
+    Time.stub(:current, @start + 9000) do
+      JrcOperations::BusinessTime.stub(:new, @calendar) do
+        @clock.stub(:audit_clock_event!, nil) { @clock.status_changed!(from: 'waiting_customer', to: 'in_progress') }
+      end
+    end
+    assert_equal 7200, @request.sla_paused_seconds
+    assert_equal @start + 10_800, @request.first_action_due_at
+    assert_equal @start + 14_400, @request.sla_due_at
+    assert_equal @request.due_at, @activity.due_at
+    refute @activity.metadata.key?('relationship_sla_paused_at')
+  end
+
+  def test_finance_wait_respects_an_explicit_policy_without_pause
+    @policy.pause_statuses = []
+    Time.stub(:current, @start + 1800) do
+      @clock.status_changed!(from: 'open', to: 'waiting_finance')
+    end
+    assert_nil @request.sla_paused_at
+    assert_equal @start + 7200, @request.sla_due_at
+    refute @activity.metadata.key?('relationship_sla_paused_at')
+  end
+
 end

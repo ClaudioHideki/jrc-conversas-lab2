@@ -13,6 +13,7 @@ class JrcRelationship::Presenter
       status: record.status, settings: record.settings, signals: signals.except(:_source_ids),
       calculated_at: snapshot&.calculated_at,
       next_action: next_action && { id: next_action.id, reason: next_action.reason, status: next_action.status, due_at: next_action.due_at },
+      expansion_potential_cents: (@expansions || {}).fetch(record.id, nil),
       risks: (@risks || {}).fetch(record.id, []),
       customer_360: record.company_id ? { name: 'jrc_customer_company', params: { companyId: record.company_id } } :
                                       { name: 'contacts_edit', params: { contactId: record.contact_id } } }
@@ -22,16 +23,35 @@ class JrcRelationship::Presenter
     attrs = record.attributes.except('token_digest', 'account_id')
     attrs['metadata'] = attrs['metadata'].except('_source_ids') if attrs['metadata'].is_a?(Hash)
     attrs['sla'] = JrcOperations::SlaClock.new(record).snapshot if record.is_a?(JrcRelationship::Action)
+    attrs['source_links'] = JrcRelationship::ActionSources.new(@context, record).call if record.is_a?(JrcRelationship::Action)
     if record.is_a?(JrcRelationship::RiskCase)
       attrs['mrr_cents'] = snapshots[record.assignment_id]&.signals&.dig('mrr_cents')
+      attrs['health'] = snapshots[record.assignment_id]&.signals&.dig('health')&.slice('score', 'band')
+      attrs['origin'] = record.source_key.to_s.start_with?('manual:') ? 'manual' : record.kind
       action = (@risk_actions || {})[record.id.to_s]
       attrs['sla'] = JrcOperations::SlaClock.new(action).snapshot if action
+    end
+    if record.is_a?(JrcRelationship::ExpansionSignal)
+      customer = record.assignment.customer_context(@context.member)
+      deal = record.deal_id && customer.deals.find(record.deal_id)
+      attrs['commercial_context'] = { product_name: record.product&.name,
+        expansion_kind: record.metadata['expansion_kind'] || record.metadata['kind'] || 'upsell',
+        origin: record.metadata['automatic'] ? 'automatic' : 'manual',
+        deal: deal && { id: deal.id, title: deal.title, status: deal.status, value_cents: deal.value_cents },
+        won_cents: deal&.status == 'won' ? deal.value_cents : 0 }
+    end
+    if record.is_a?(JrcRelationship::Survey)
+      attrs['delivery_status'] = record.responded_at ? 'responded' : record.expires_at <= Time.current ? 'expired' : 'awaiting'
+      attrs['channel'] = record.metadata['sent_channel'] || 'public_link'
     end
     if record.is_a?(JrcRelationship::Renewal)
       customer = record.assignment.customer_context(@context.member)
       contract = customer.contracts.find(record.contract_id)
       proposals = customer.proposals.where(deal_id: record.deal_id)
       attrs['commercial_context'] = { contract_number: contract.contract_number, current_mrr_cents: contract.monthly_cents,
+        contract_id: contract.id, ends_on: contract.ends_on, days_remaining: contract.ends_on && (contract.ends_on - Date.current).to_i,
+        health: snapshots[record.assignment_id]&.signals&.dig('health')&.slice('score', 'band'),
+        risks: (@risks || {}).fetch(record.assignment_id, []),
         adjustment_percent: contract.monthly_cents.positive? && record.proposed_mrr_cents ?
           (100.0 * (record.proposed_mrr_cents - contract.monthly_cents) / contract.monthly_cents).round(2) : nil,
         products: JrcCrm::OrderItem.where(sales_order_id: contract.sales_order_id).pluck(:name),
@@ -86,14 +106,16 @@ class JrcRelationship::Presenter
       actions_today: actions.where(sla_paused_at: nil, due_at: Time.current.all_day).count,
       overdue_actions: actions.where(sla_paused_at: nil).where('due_at < ?', Time.current).count,
       waiting_customer_actions: actions.where(status: 'waiting_customer').count,
+      waiting_finance_actions: actions.where(status: 'waiting_finance').count,
       priority_actions: actions.includes(assignment: [:company, :contact]).order(priority: :desc, due_at: :asc, id: :asc).limit(10)
         .map { |action| { assignment_id: action.assignment_id, customer: action.assignment.label, reason: action.reason,
           priority: action.priority, due_at: action.due_at, status: action.status, factors: action.factors } },
-      expansion_potential_cents: visibility.crm? ? expansion.where(status: %w[suggested approved converted]).sum(:potential_cents) : nil,
+      expansion_potential_cents: visibility.crm? ? JrcRelationship::ExpansionPipeline.open(expansion, deals).sum(:potential_cents) : nil,
       expansion_won_cents: visibility.crm? ? visibility.crm(@context.account.jrc_crm_deals).where(id: expansion.select(:deal_id), status: 'won').sum(:value_cents) : nil,
       **revenue_metrics(scope, snapshots, period),
       health_trend: health_history(snapshots, period),
       **JrcRelationship::ReportMetrics.new(context: @context, scope: scope, health: health, period: period, csat: csat).call,
+      **JrcRelationship::HealthInsights.new(scope: scope, snapshots: snapshots, latest: health, period: period).call,
       unavailable: %w[product_telemetry_without_source],
       scope: 'authorized_portfolio', period: period && { from: period.begin, to: period.end }, calculated_at: Time.current }
   end
@@ -108,6 +130,9 @@ class JrcRelationship::Presenter
       .select('DISTINCT ON (assignment_id) jrc_relationship_actions.*').order(:assignment_id, priority: :desc, due_at: :asc, id: :asc).index_by(&:assignment_id)
     @risks = @context.records(JrcRelationship::RiskCase).where(assignment_id: ids, status: %w[detected analyzing planned negotiating])
       .pluck(:assignment_id, :id, :severity, :reason).group_by(&:first).transform_values { |rows| rows.map { |_assignment, id, severity, reason| { id: id, severity: severity, reason: reason } } }
+    @expansions = JrcRelationship::ExpansionPipeline.open(@context.records(JrcRelationship::ExpansionSignal).where(assignment_id: ids),
+      JrcCustomers::Visibility.new(account: @context.account, user: @context.user, account_user: @context.member).crm(@context.account.jrc_crm_deals))
+      .group(:assignment_id).sum(:potential_cents) if JrcOperations::Access.crm?(@context.member)
     @risk_actions = @context.records(JrcRelationship::Action).where(assignment_id: ids)
       .where("metadata ? 'relationship_risk_id'").includes(:operations_sla_policy).to_a.index_by { |action| action.metadata['relationship_risk_id'].to_s }
     missing = records.filter_map do |record|

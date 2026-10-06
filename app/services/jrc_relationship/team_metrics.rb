@@ -6,7 +6,7 @@ class JrcRelationship::TeamMetrics
 
   def call
     result = @scope.where.not(owner_id: nil).group(:owner_id).count.transform_values do |count|
-      { customers: count, mrr_cents: nil, health_average: nil, at_risk: nil, overdue_actions: 0, waiting_customer_actions: 0,
+      { customers: count, mrr_cents: nil, health_average: nil, at_risk: nil, overdue_actions: 0, waiting_customer_actions: 0, waiting_finance_actions: 0,
         churned: 0, retained: 0, retention_rate: nil, overdue_activities: nil, without_contact: nil, expansion_potential_cents: nil, expansion_won_cents: nil,
         nps: nil, csat: nil, renewals_60: JrcOperations::Access.crm?(@context.member) ? 0 : nil, renewals: {} }
     end
@@ -22,17 +22,20 @@ class JrcRelationship::TeamMetrics
     merge!(result, :health_average, grouped(health).average(:score), numeric: true)
     merge!(result, :at_risk, grouped(health.where(band: %w[risk critical])).count)
     merge!(result, :without_contact, grouped(health.where("(signals ->> 'days_without_contact')::integer >= ?", @context.configuration.effective_rules['no_contact_days'])).count)
-    merge!(result, :mrr_cents, grouped(health).sum("(signals ->> 'mrr_cents')::bigint")) if JrcOperations::Access.crm?(@context.member)
+    contract_mrr!(result)
     actions = @context.records(JrcRelationship::Action).where(assignment_id: ids, status: JrcRelationship::Action::ACTIVE_STATUSES)
     merge!(result, :overdue_actions, grouped(actions.where(sla_paused_at: nil).where('due_at < ?', Time.current)).count)
     merge!(result, :waiting_customer_actions, grouped(actions.where(status: 'waiting_customer')).count)
+    merge!(result, :waiting_finance_actions, grouped(actions.where(status: 'waiting_finance')).count)
     risks = @context.records(JrcRelationship::RiskCase).where(assignment_id: ids)
     risks = risks.where(closed_at: @period) if @period
     merge!(result, :retained, grouped(risks.where(status: 'retained')).count)
     churn = @period ? grouped(risks.where(status: 'churn')).count : @scope.where(status: 'churned').group(:owner_id).count
     merge!(result, :churned, churn)
     expansion = @context.records(JrcRelationship::ExpansionSignal).where(assignment_id: ids)
-    merge!(result, :expansion_potential_cents, grouped(expansion.where(status: %w[suggested approved converted])).sum(:potential_cents))
+    visibility = JrcCustomers::Visibility.new(account: @context.account, user: @context.user, account_user: @context.member)
+    merge!(result, :expansion_potential_cents, grouped(JrcRelationship::ExpansionPipeline.open(expansion,
+      visibility.crm(@context.account.jrc_crm_deals))).sum(:potential_cents))
     if JrcOperations::Access.crm?(@context.member)
       visibility = JrcCustomers::Visibility.new(account: @context.account, user: @context.user, account_user: @context.member)
       won = visibility.crm(@context.account.jrc_crm_deals).where(status: 'won').select(:id)
@@ -64,6 +67,50 @@ class JrcRelationship::TeamMetrics
 
   def grouped(relation)
     relation.joins(:assignment).group('jrc_relationship_assignments.owner_id')
+  end
+
+  def contract_mrr!(result)
+    return unless JrcOperations::Access.crm?(@context.member)
+    visibility = JrcCustomers::Visibility.new(account: @context.account, user: @context.user, account_user: @context.member)
+    contracts = visibility.crm(@context.account.jrc_crm_contracts).where(status: %w[active expiring])
+    joins = <<~SQL.squish
+      LEFT JOIN contacts AS cs_contract_contact ON cs_contract_contact.id = jrc_crm_contracts.contact_id
+      LEFT JOIN jrc_crm_deals AS cs_contract_deal ON cs_contract_deal.id = jrc_crm_contracts.deal_id
+      LEFT JOIN contacts AS cs_contract_deal_contact ON cs_contract_deal_contact.id = cs_contract_deal.contact_id
+      LEFT JOIN jrc_crm_sales_orders AS cs_order ON cs_order.id = jrc_crm_contracts.sales_order_id
+      LEFT JOIN contacts AS cs_order_contact ON cs_order_contact.id = cs_order.contact_id
+      LEFT JOIN jrc_crm_deals AS cs_order_deal ON cs_order_deal.id = cs_order.deal_id
+      LEFT JOIN contacts AS cs_order_deal_contact ON cs_order_deal_contact.id = cs_order_deal.contact_id
+      INNER JOIN jrc_relationship_assignments ON (
+        jrc_relationship_assignments.contact_id IN (cs_contract_contact.id, cs_contract_deal.contact_id, cs_order.contact_id, cs_order_deal.contact_id)
+        OR jrc_relationship_assignments.company_id IN (cs_contract_contact.company_id, cs_contract_deal.company_id,
+          cs_contract_deal_contact.company_id, cs_order_contact.company_id, cs_order_deal.company_id, cs_order_deal_contact.company_id))
+    SQL
+    # Match dashboard lineage: hidden deals/orders must not contribute indirect contracts.
+    deals = visibility.crm(@context.account.jrc_crm_deals).select(:id)
+    orders = visibility.crm(@context.account.jrc_crm_sales_orders).select(:id)
+    contracts = contracts.joins(joins).where(jrc_relationship_assignments: { id: @scope.select(:id) })
+    matches = <<~SQL.squish
+      (jrc_relationship_assignments.contact_id = cs_contract_contact.id
+        OR jrc_relationship_assignments.company_id = cs_contract_contact.company_id)
+      OR (jrc_crm_contracts.deal_id IN (?) AND (
+        jrc_relationship_assignments.contact_id = cs_contract_deal.contact_id
+        OR jrc_relationship_assignments.company_id = cs_contract_deal.company_id
+        OR jrc_relationship_assignments.company_id = cs_contract_deal_contact.company_id))
+      OR (jrc_crm_contracts.sales_order_id IN (?) AND (
+        jrc_relationship_assignments.contact_id = cs_order.contact_id
+        OR jrc_relationship_assignments.company_id = cs_order_contact.company_id
+        OR (cs_order.deal_id IN (?) AND (
+          jrc_relationship_assignments.contact_id = cs_order_deal.contact_id
+          OR jrc_relationship_assignments.company_id = cs_order_deal.company_id
+          OR jrc_relationship_assignments.company_id = cs_order_deal_contact.company_id))))
+    SQL
+    contracts = contracts.where(matches, deals, orders, deals)
+    values = contracts.distinct.pluck('jrc_relationship_assignments.owner_id', 'jrc_crm_contracts.id', 'jrc_crm_contracts.monthly_cents')
+    result.each_value { |metrics| metrics[:mrr_cents] = 0 }
+    values.group_by(&:first).each do |owner, rows|
+      result[owner][:mrr_cents] = rows.sum { |row| row[2] } if result[owner]
+    end
   end
 
   def merge!(result, key, values, numeric: false)

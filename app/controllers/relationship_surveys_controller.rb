@@ -8,7 +8,7 @@ class RelationshipSurveysController < ActionController::Base
   end
 
   def show
-    render inline: '<!doctype html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Pesquisa de relacionamento</title></head><body><h1>Pesquisa de relacionamento</h1><%= form_with url: request.path do %><label>Nota de 0 a 10 <%= number_field_tag :score, nil, min: 0, max: 10, required: true %></label><label>Comentário <%= text_area_tag :comment, nil, maxlength: 4000 %></label><%= submit_tag "Enviar resposta" %><% end %></body></html>'
+    render inline: '<!doctype html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Pesquisa de relacionamento</title></head><body><h1>Pesquisa de relacionamento</h1><p><%= @survey.metadata["question"] %></p><%= form_with url: request.path do %><label>Nota de 0 a 10 <%= number_field_tag :score, nil, min: 0, max: 10, required: true %></label><label>Comentário <%= text_area_tag :comment, nil, maxlength: 4000 %></label><%= submit_tag "Enviar resposta" %><% end %></body></html>'
   end
 
   def update
@@ -29,6 +29,6 @@ class RelationshipSurveysController < ActionController::Base
               else
                 JrcRelationship::Survey.find_signed(token.first(4096), purpose: :relationship_survey) || raise(ActiveRecord::RecordNotFound)
               end
-    raise ActiveRecord::RecordNotFound unless @survey.account.feature_enabled?('jrc_relationship') && @survey.responded_at.nil? && @survey.expires_at > Time.current
+    raise ActiveRecord::RecordNotFound unless @survey.account.active? && @survey.account.feature_enabled?('jrc_customer_master') && @survey.account.feature_enabled?('jrc_relationship') && @survey.responded_at.nil? && @survey.expires_at > Time.current
   end
 end

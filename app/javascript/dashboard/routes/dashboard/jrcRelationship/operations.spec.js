@@ -123,7 +123,7 @@ describe('Existing operational configuration controls', () => {
         first_action_minutes: 240,
         total_minutes: 1440,
         stage_minutes: null,
-        pause_statuses: ['waiting_customer'],
+        pause_statuses: ['waiting_customer', 'waiting_finance'],
         alert_thresholds: [50, 90, 100],
         scope_kind: 'relationship',
       }),

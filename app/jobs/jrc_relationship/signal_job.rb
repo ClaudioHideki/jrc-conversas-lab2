@@ -25,7 +25,7 @@ class JrcRelationship::SignalJob < ApplicationJob
       next unless member && JrcRelationship::ModulePolicy.new({ account: record.account, user: member.user, account_user: member }, record.account).access?
       context = JrcRelationship::Context.new(member)
       next unless context.assignments.exists?(id: assignment.id)
-      if (type == 'JrcCrm::SalesOrder' && record.canceled?) || (type == 'JrcCrm::BackofficeRequest' && record.cancellation?)
+      if context.policy.manage? && ((type == 'JrcCrm::SalesOrder' && record.canceled?) || (type == 'JrcCrm::BackofficeRequest' && record.cancellation?))
         assignment.with_lock do
           risk = JrcRelationship::RiskCase.find_or_initialize_by(assignment: assignment, source_key: "cancellation:#{type}:#{id}")
           if risk.new_record?
@@ -38,7 +38,7 @@ class JrcRelationship::SignalJob < ApplicationJob
       end
       processor = JrcRelationship::Processor.new(context: context, assignment: assignment)
       data = processor.call
-      if type == 'JrcServiceDesk::Ticket' && %w[resolved closed].include?(record.status.phase) &&
+      if context.policy.manage? && type == 'JrcServiceDesk::Ticket' && %w[resolved closed].include?(record.status.phase) &&
          context.configuration(assignment).effective_rules['critical_priority_codes'].include?(record.priority.code) &&
          assignment.customer_context(member).tickets.exists?(id: record.id)
         assignment.with_lock do

@@ -1,6 +1,6 @@
 # Pure priority calculation; factors and urgency floor travel with each action.
 class JrcRelationship::Priority
-  def self.call(data:, rules:, kind:, today: Date.today)
+  def self.call(data:, rules:, kind:, today: Date.today, manual_priority: nil)
     score = data.dig(:health, :score)
     days = data[:renewal_on] && (data[:renewal_on] - today).to_i
     raw = { 'health' => score && 100 - score, 'mrr' => data[:mrr_cents] && (data[:mrr_cents].to_f * 100 / rules.fetch('mrr_priority_ceiling_cents')).clamp(0, 100),
@@ -23,6 +23,7 @@ class JrcRelationship::Priority
               else 0
               end
     weighted = factors.values.sum { |factor| factor[:contribution].to_f }
-    { score: [weighted, urgency].max.round.clamp(0, 100), factors: factors.merge('urgency_floor' => urgency) }
+    calculated = [weighted, urgency].max.round.clamp(0, 100)
+    { score: manual_priority.nil? ? calculated : manual_priority, factors: factors.merge('urgency_floor' => urgency) }
   end
 end

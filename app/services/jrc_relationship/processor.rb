@@ -8,7 +8,7 @@ class JrcRelationship::Processor
   def call
     @assignment.with_lock do
       data = JrcRelationship::CustomerSignals.new(assignment: @assignment, context: @context).call
-      reconcile_renewals!
+      reconcile_renewals! if @context.policy.manage?
       configuration = @context.configuration(@assignment)
       fingerprint = Digest::SHA256.hexdigest([Date.current, configuration.scope_key, configuration.version, configuration.effective_weights,
         configuration.effective_rules, @context.access_signature, data.to_json].join(':'))
@@ -31,7 +31,7 @@ class JrcRelationship::Processor
         snapshot.save!
         @context.audit!(snapshot, after: { score: snapshot.score, band: snapshot.band }, action: 'health_calculated')
       end
-      evaluate(data, configuration.effective_rules)
+      evaluate(data, configuration.effective_rules) if @context.policy.manage?
       data
     end
   end
@@ -41,7 +41,8 @@ class JrcRelationship::Processor
     keyed = %w[renewal post_ticket expansion].include?(kind)
     active = active.where(source_key: key) if keyed
     current = active.first
-    priority = JrcRelationship::Priority.call(data: data, rules: rules, kind: kind, today: Date.current)
+    manual = current&.metadata&.dig('manual_priority') == true ? current.priority : nil
+    priority = JrcRelationship::Priority.call(data: data, rules: rules, kind: kind, today: Date.current, manual_priority: manual)
     if current
       if current.priority != priority[:score] || current.factors != priority[:factors].deep_stringify_keys
         before = current.attributes.slice('priority', 'factors')

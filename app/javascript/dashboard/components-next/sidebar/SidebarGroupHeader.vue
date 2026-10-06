@@ -2,6 +2,7 @@
 import { computed } from 'vue';
 import { useMapGetter } from 'dashboard/composables/store.js';
 import Icon from 'next/icon/Icon.vue';
+import SidebarNewBadge from './SidebarNewBadge.vue';
 
 const props = defineProps({
   to: { type: [Object, String], default: '' },
@@ -59,12 +60,7 @@ const count = computed(() =>
       <span class="truncate text-sm font-medium text-inherit">
         {{ label }}
       </span>
-      <span
-        v-if="newBadge"
-        class="inline-flex h-5 items-center rounded-full bg-n-ruby-9 px-2 text-xxs font-semibold text-white flex-shrink-0"
-      >
-        Novo
-      </span>
+      <SidebarNewBadge v-if="newBadge" />
       <span
         v-if="dynamicCount && !expandable"
         class="inline-grid h-5 min-w-5 place-items-center rounded-full bg-white/15 px-1 text-xxs font-medium leading-3 text-white flex-shrink-0"
@@ -73,9 +69,14 @@ const count = computed(() =>
       </span>
     </div>
     <span
-      v-if="expandable"
-      class="i-lucide-chevron-down size-3"
-      :class="{ 'rotate-180': isExpanded }"
-    />
+      class="grid size-3 shrink-0 place-items-center"
+      data-testid="sidebar-trailing-slot"
+    >
+      <span
+        v-if="expandable"
+        class="i-lucide-chevron-down size-3"
+        :class="{ 'rotate-180': isExpanded }"
+      />
+    </span>
   </component>
 </template>

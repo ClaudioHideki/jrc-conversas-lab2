@@ -134,7 +134,7 @@ jobs:
           cp db/schema.rb "$RUNNER_TEMP/approved-schema.rb"
           bundle exec rails db:create db:schema:load db:migrate
           bundle exec rails runner 'require Rails.root.join("db/migrate/20261004183000_strengthen_sales_order_origin_and_audit"); migration = StrengthenSalesOrderOriginAndAudit.new; migration.migrate(:down); raise "down failed" if ActiveRecord::Base.connection.column_exists?(:jrc_crm_sales_orders, :order_origin); migration.migrate(:up); raise "up failed" unless ActiveRecord::Base.connection.column_exists?(:jrc_crm_sales_orders, :order_origin)'
-          bundle exec rspec spec/requests/api/v1/accounts/crm/sales_order_link_integrity_spec.rb spec/requests/api/v1/accounts/crm/consolidated_commercial_protection_spec.rb spec/services/jrc_crm/nexora_end_to_end_spec.rb spec/services/jrc_crm/consolidated_financial_guards_spec.rb spec/models/jrc_customers/company_spec.rb spec/models/jrc_customers/taxonomy_spec.rb spec/services/jrc_customers/master_services_spec.rb
+          bundle exec rspec spec/requests/api/v1/accounts/crm/sales_order_link_integrity_spec.rb spec/requests/api/v1/accounts/crm/consolidated_commercial_protection_spec.rb spec/services/jrc_crm/nexora_end_to_end_spec.rb spec/services/jrc_crm/consolidated_financial_guards_spec.rb spec/models/jrc_customers/company_spec.rb spec/models/jrc_customers/taxonomy_spec.rb spec/services/jrc_customers/master_services_spec.rb spec/services/jrc_relationship spec/requests/api/v1/accounts/relationship
           cp "$RUNNER_TEMP/approved-schema.rb" db/schema.rb
 
       - name: Gates isolados do Cadastro Mestre e modulos preservados
@@ -142,6 +142,7 @@ jobs:
         run: |
           ruby test/jrc_customers/identity_pure_test.rb
           ruby test/jrc_customers/company_link_decision_test.rb
+          ruby -Itest -e 'Dir["test/jrc_relationship/*_test.rb", "test/jrc_operations/*_test.rb"].each { |file| require_relative file }'
           node --test test/jrc_customers/*.test.mjs test/jrc_operations/*test.mjs test/jrc_consolidation/commercial_ui.test.mjs
 
       - name: Vitest dos modulos afetados e SIP/WebRTC preservado
@@ -153,6 +154,8 @@ jobs:
           app/javascript/dashboard/routes/dashboard/crm
           app/javascript/dashboard/routes/dashboard/jrcCustomers
           app/javascript/dashboard/routes/dashboard/webphone
+          app/javascript/dashboard/routes/dashboard/jrcRelationship
+          app/javascript/dashboard/components-next/sidebar/specs
           --maxWorkers=2 --no-file-parallelism
 
       - name: Lint direcionado do Cadastro Mestre e Pedido
@@ -164,6 +167,12 @@ jobs:
           app/javascript/dashboard/api/crm/commercialCycle.js
           app/javascript/dashboard/routes/dashboard/crm/helpers/commercialTerms.js
           app/javascript/dashboard/routes/dashboard/crm/views/orders
+
+      - name: Lint dos fontes alterados de Relacionamento e badges
+        if: inputs.component == 'app'
+        run: |
+          mapfile -t files < <(git diff --name-only --diff-filter=ACMR "$BASE_SHA" "$SOURCE_SHA" -- app/javascript | grep -E '\.(js|vue)$' | grep -E '(/jrcRelationship/|/api/jrcRelationship.js$|/components-next/sidebar/)' | grep -v '/sidebar/Sidebar.vue$')
+          if [ "${#files[@]}" -gt 0 ]; then pnpm exec eslint "${files[@]}"; fi
 
       - name: Gates NICO sem reconstruir a aplicacao
         if: inputs.component == 'nico-runtime'
@@ -210,6 +219,40 @@ jobs:
           if [ "$COMPONENT" = flows-sandbox ]; then revision_path=/srv/.git_sha; fi
           test "$(docker run --rm --network none --entrypoint cat "$image" "$revision_path")" = "$SOURCE_SHA"
 
+      - name: Validar conteudo do produto, migrations e bibliotecas nativas
+        if: inputs.component == 'app'
+        run: |
+          python3 - <<'PYTHON'
+          import hashlib, json, os, pathlib, subprocess
+          paths = subprocess.check_output(['git', 'diff', '--name-only', '--diff-filter=ACMR', os.environ['BASE_SHA'], os.environ['SOURCE_SHA']], text=True).splitlines()
+          paths = [p for p in paths if p.startswith(('app/', 'config/', 'db/', 'lib/', 'enterprise/', 'public/')) and '/spec/' not in p and '/specs/' not in p and not p.endswith(('.spec.js', '.spec.vue'))]
+          migrations = [
+              'db/migrate/20261004234000_create_jrc_operations_routing_and_sla.rb',
+              'db/migrate/20261005180000_create_jrc_relationship.rb',
+              'db/migrate/20261005190000_allow_direct_customer_proposals.rb',
+              'db/migrate/20261005200000_extend_relationship_operations.rb',
+              'db/migrate/20261005210000_add_relationship_playbook_conditions.rb',
+              'db/migrate/20261005220000_extend_commercial_operational_configuration.rb',
+          ]
+          files = {p: hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest() for p in set(paths + migrations)}
+          pathlib.Path(os.environ['RUNNER_TEMP'], 'candidate-files.json').write_text(json.dumps(files))
+          PYTHON
+          docker run --rm -i --network none --read-only --entrypoint bundle --mount "type=bind,source=$RUNNER_TEMP/candidate-files.json,target=/candidate-files.json,readonly" "ghcr.io/$IMAGE:sha-$SOURCE_SHA" exec ruby - <<'RUBY'
+          require 'json'
+          require 'digest'
+          expected = JSON.parse(File.read('/candidate-files.json'))
+          expected.each do |path, sha|
+            raise "Candidate file missing or changed: #{path}" unless File.file?(path) && Digest::SHA256.file(path).hexdigest == sha
+          end
+          %w[verify-image.rb verify-and-save.ps1 finish-image-report.cjs].each do |helper|
+            raise "Local auxiliary entered image: #{helper}" unless Dir.glob("/app/**/#{helper}").empty?
+          end
+          require 'grpc'
+          require 'pg'
+          require 'nokogiri'
+          puts JSON.generate(verified_product_files: expected.size, migrations: 6, grpc: GRPC::VERSION, pg: PG::VERSION, nokogiri: Nokogiri::VERSION)
+          RUBY
+
       - name: Autenticar no GHCR somente para publicacao autorizada
         if: inputs.publish
         uses: docker/login-action@v3
@@ -246,6 +289,8 @@ jobs:
           {
             echo "Imagem: $image"
             echo "Digest: $digest"
+            echo "IMAGE ID: $(docker image inspect --format '{{.Id}}' "ghcr.io/$IMAGE@$digest")"
+            echo "Tamanho local: $(docker image inspect --format '{{.Size}}' "ghcr.io/$IMAGE@$digest") bytes"
             echo "SHA interno e label: $SOURCE_SHA"
             echo 'Plataforma: linux/amd64'
             echo "Camadas comprimidas: $compressed_bytes bytes (nao inclui config/manifest)"

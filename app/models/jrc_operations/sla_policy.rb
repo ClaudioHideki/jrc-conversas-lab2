@@ -33,8 +33,19 @@ module JrcOperations
       true
     end
 
+    def effective_pause_statuses
+      statuses = Array(pause_statuses).map(&:to_s)
+      # Legacy system-generated CS policies only knew waiting_customer. Extend
+      # their default without changing explicit policies or any stored setting.
+      if scope_kind == 'relationship' && conditions['system_default'] == true && statuses == ['waiting_customer']
+        statuses | ['waiting_finance']
+      else
+        statuses
+      end
+    end
+
     def pause_status?(status)
-      Array(pause_statuses).map(&:to_s).include?(status.to_s)
+      effective_pause_statuses.include?(status.to_s)
     end
 
     private

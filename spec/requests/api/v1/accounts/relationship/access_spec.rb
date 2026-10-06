@@ -17,6 +17,37 @@ RSpec.describe 'Relationship portfolio authorization', type: :request do
     expect(response.parsed_body.dig('meta', 'total')).to eq(1)
   end
 
+  it 'REL-02/REL-03/REL-10 reconciles portfolio cards and paginated drilldown with authorized rows' do
+    get "#{url}/portfolio", headers: headers, as: :json
+    portfolio_ids = response.parsed_body['payload'].pluck('id')
+    get "#{url}/dashboard", headers: headers, as: :json
+    count = response.parsed_body['customers']
+    get "#{url}/drilldown", params: { metric: 'customers' }, headers: headers, as: :json
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body['payload'].pluck('id')).to eq(portfolio_ids)
+    expect(response.parsed_body).to include('value' => count, 'total' => count)
+    expect(portfolio_ids).to eq([own.id])
+  end
+
+  it 'REL-10 applies the same agent search to management cards, rows and drilldown' do
+    own.owner.update!(name: 'Scoped CS analyst')
+    params = { agent_q: 'Scoped CS' }
+    admin_headers = admin.create_new_auth_token
+    get "#{url}/team", params: params, headers: admin_headers, as: :json
+    expect(response.parsed_body['payload'].pluck('user').pluck('id')).to eq([agent.id])
+    get "#{url}/dashboard", params: params, headers: admin_headers, as: :json
+    expect(response.parsed_body['customers']).to eq(1)
+    get "#{url}/drilldown", params: params.merge(metric: 'customers'), headers: admin_headers, as: :json
+    expect(response.parsed_body['payload'].pluck('id')).to eq([own.id])
+  end
+
+  it 'REL-10 rejects unknown metrics and malformed dates without broadening the data scope' do
+    get "#{url}/drilldown", params: { metric: 'unknown' }, headers: headers, as: :json
+    expect(response).to have_http_status(:unprocessable_entity)
+    get "#{url}/drilldown", params: { metric: 'health_average', day: 'invalid' }, headers: headers, as: :json
+    expect(response).to have_http_status(:unprocessable_entity)
+  end
+
   it 'CS-10 blocks unauthorized portfolio detail and writes' do
     get "#{url}/portfolio/#{other.id}", headers: headers, as: :json
     expect(response).to have_http_status(:not_found)

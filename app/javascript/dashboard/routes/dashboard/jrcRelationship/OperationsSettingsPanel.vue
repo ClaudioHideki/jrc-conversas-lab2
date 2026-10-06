@@ -57,7 +57,8 @@ const matchingQueues = computed(() =>
 );
 
 const load = async () => {
-  const version = ++generation;
+  generation += 1;
+  const version = generation;
   controller?.abort();
   controller = new AbortController();
   queues.value = [];
@@ -136,7 +137,9 @@ const editPolicy = row => {
       holidays: [],
       ...clone(row?.business_hours || {}),
     },
-    pause_statuses: clone(row?.pause_statuses || ['waiting_customer']),
+    pause_statuses: clone(
+      row?.pause_statuses || ['waiting_customer', 'waiting_finance']
+    ),
     alert_thresholds: clone(row?.alert_thresholds || [50, 75, 90, 100]),
     escalation: clone(row?.escalation || {}),
   };
@@ -637,7 +640,7 @@ onBeforeUnmount(() => {
               }}<input
                 :value="policy.business_hours.holidays?.join(', ') || ''"
                 :class="inputClass"
-                placeholder="2026-12-25, 2027-01-01"
+                :placeholder="t('RELATIONSHIP.OPERATIONS.HOLIDAYS_EXAMPLE')"
                 @input="
                   policy.business_hours.holidays = list($event.target.value)
                 "

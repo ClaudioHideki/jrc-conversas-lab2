@@ -12,6 +12,9 @@ import CustomerPanel from './CustomerPanel.vue';
 import ConfigurationPanel from './ConfigurationPanel.vue';
 import SlaSummary from './SlaSummary.vue';
 import SurveyDeliveryPanel from './SurveyDeliveryPanel.vue';
+import HealthScorePanel from './HealthScorePanel.vue';
+import RenewalPipeline from './RenewalPipeline.vue';
+import MetricDrilldownPanel from './MetricDrilldownPanel.vue';
 import CompanyPicker from '../jrcCustomers/components/CompanyPicker.vue';
 import {
   STATES,
@@ -41,6 +44,7 @@ const newAssignment = ref(false);
 const surveyLink = ref('');
 const surveyDelivery = ref(null);
 const opportunity = ref(null);
+const drilldown = ref(null);
 const batchMode = ref(false);
 const filters = reactive({
   q: '',
@@ -57,10 +61,25 @@ const filters = reactive({
   overdue: false,
   from: '',
   to: '',
-  score_min: '', score_max: '', mrr_min_cents: '', mrr_max_cents: '', band: '', status: '',
+  score_min: '',
+  score_max: '',
+  mrr_min_cents: '',
+  mrr_max_cents: '',
+  band: '',
+  status: '',
   renewal_days: '',
+  renewal_window: '',
+  factor: '',
+  factor_direction: '',
 });
-const portfolioOperation = reactive({ operation: 'activity', owner_id: '', title: '', due_at: '', playbook_id: '', request_id: crypto.randomUUID() });
+const portfolioOperation = reactive({
+  operation: 'activity',
+  owner_id: '',
+  title: '',
+  due_at: '',
+  playbook_id: '',
+  request_id: crypto.randomUUID(),
+});
 const assignment = reactive({
   company_id: null,
   owner_id: '',
@@ -72,7 +91,8 @@ const batch = reactive({
   status: 'completed',
   result: '',
   due_at: '',
-  priority: 50,
+  priority: '',
+  owner_id: '',
 });
 const commercial = reactive({ pipeline_id: '', stage_id: '' });
 const portfolioScreen = computed(() =>
@@ -108,6 +128,7 @@ const load = async () => {
   error.value = '';
   loading.value = true;
   rows.value = [];
+  drilldown.value = null;
   selected.value = [];
   try {
     const meta = await API.metadata(accountId, options);
@@ -130,7 +151,10 @@ const load = async () => {
     rows.value = results[1].data.payload;
     pagination.value = results[1].data.meta;
     customers.value = results[2].data.payload;
-    if (route.query.create && metadata.value.can_manage) editing.value = { assignment_id: Number(route.query.assignment_id) };
+    if (route.query.customer)
+      selectedCustomer.value = Number(route.query.customer);
+    if (route.query.create && metadata.value.can_manage)
+      editing.value = { assignment_id: Number(route.query.assignment_id) };
   } catch (err) {
     if (version === generation && err.code !== 'ERR_CANCELED') {
       error.value = message(err);
@@ -156,7 +180,8 @@ const mutate = async operation => {
       opportunity.value = null;
       batchMode.value = false;
       newAssignment.value = false;
-      if (route.query.create) await router.replace({ query: { ...route.query, create: undefined } });
+      if (route.query.create)
+        await router.replace({ query: { ...route.query, create: undefined } });
       await load();
     }
   } catch (err) {
@@ -200,46 +225,179 @@ const completeBatch = () =>
   mutate(() =>
     API.batch(route.params.accountId, selected.value, {
       ...batch,
+      status: batch.status || undefined,
+      result: batch.result || undefined,
+      priority: batch.priority === '' ? undefined : Number(batch.priority),
+      owner_id: batch.owner_id === '' ? undefined : Number(batch.owner_id),
       due_at: batch.due_at ? new Date(batch.due_at).toISOString() : undefined,
     })
   );
-const updatePortfolioBatch = () => mutate(() => API.portfolioBatch(route.params.accountId, selected.value, {
-  ...portfolioOperation, due_at: portfolioOperation.due_at ? new Date(portfolioOperation.due_at).toISOString() : undefined,
-}));
+const updatePortfolioBatch = () =>
+  mutate(() =>
+    API.portfolioBatch(route.params.accountId, selected.value, {
+      ...portfolioOperation,
+      due_at: portfolioOperation.due_at
+        ? new Date(portfolioOperation.due_at).toISOString()
+        : undefined,
+    })
+  );
 const exportPortfolio = async (history = false) => {
   const version = generation;
   error.value = '';
   try {
-    const { data } = await (history === true ? API.exportHistory : API.exportPortfolio)(route.params.accountId, scope());
+    const { data } = await (
+      history === true ? API.exportHistory : API.exportPortfolio
+    )(route.params.accountId, scope());
     if (version !== generation) return;
     const url = URL.createObjectURL(data);
     const link = document.createElement('a');
-    link.href = url; link.download = history === true ? 'relationship-history.json' : 'relationship-portfolio.csv'; link.click();
+    link.href = url;
+    link.download =
+      history === true
+        ? 'relationship-history.json'
+        : 'relationship-portfolio.csv';
+    link.click();
     URL.revokeObjectURL(url);
-  } catch (err) { if (version === generation) error.value = message(err); }
+  } catch (err) {
+    if (version === generation) error.value = message(err);
+  }
 };
 const getSurveyLink = async row => {
   const version = generation;
-  try { const { data } = await API.surveyLink(route.params.accountId, row.id); if (version === generation) surveyLink.value = data.url; }
-  catch (err) { if (version === generation) error.value = message(err); }
+  try {
+    const { data } = await API.surveyLink(route.params.accountId, row.id);
+    if (version === generation) surveyLink.value = data.url;
+  } catch (err) {
+    if (version === generation) error.value = message(err);
+  }
 };
-const quick = ({ kind, assignmentId }) => router.push({ name: `jrc_relationship_${kind}`, params: { accountId: route.params.accountId }, query: { assignment_id: assignmentId, create: '1' } });
+const quick = ({ kind, assignmentId }) =>
+  router.push({
+    name: `jrc_relationship_${kind}`,
+    params: { accountId: route.params.accountId },
+    query: { assignment_id: assignmentId, create: '1' },
+  });
 const metricFilter = key => {
-  if (typeof key === 'object' && key.renewal_days) { filters.mode = 'renewals'; filters.renewal_days = key.renewal_days; }
-  else if (typeof key === 'object') filters.band = key.band;
-  else if (['at_risk', 'mrr_at_risk_cents'].includes(key)) filters.mode = 'critical';
+  if (typeof key === 'object' && key.renewal_days) {
+    filters.mode = 'renewals';
+    filters.renewal_days = key.renewal_days;
+  } else if (typeof key === 'object' && key.factor) {
+    filters.factor = key.factor;
+    filters.factor_direction = key.direction;
+  } else if (typeof key === 'object') filters.band = key.band;
+  else if (['at_risk', 'mrr_at_risk_cents'].includes(key))
+    filters.mode = 'critical';
   else if (key === 'active') filters.status = 'active';
   else if (key === 'churned') filters.status = 'churned';
   else if (key === 'without_contact') filters.mode = 'without_contact';
   else if (key === 'overdue_actions' || key === 'actions_today') {
-    router.push({ name: 'jrc_relationship_actions', params: { accountId: route.params.accountId },
-      query: key === 'overdue_actions' ? { overdue: 'true' } : { from: new Date().toLocaleDateString('en-CA'), to: new Date().toLocaleDateString('en-CA') } }); return;
-  }
-  else if (key === 'waiting_customer_actions') {
-    router.push({ name: 'jrc_relationship_actions', params: { accountId: route.params.accountId }, query: { status: 'waiting_customer' } }); return;
+    router.push({
+      name: 'jrc_relationship_actions',
+      params: { accountId: route.params.accountId },
+      query:
+        key === 'overdue_actions'
+          ? { overdue: 'true' }
+          : {
+              from: new Date().toLocaleDateString('en-CA'),
+              to: new Date().toLocaleDateString('en-CA'),
+            },
+    });
+    return;
+  } else if (
+    ['waiting_customer_actions', 'waiting_finance_actions'].includes(key)
+  ) {
+    router.push({
+      name: 'jrc_relationship_actions',
+      params: { accountId: route.params.accountId },
+      query: {
+        status:
+          key === 'waiting_finance_actions'
+            ? 'waiting_finance'
+            : 'waiting_customer',
+      },
+    });
+    return;
   } else return;
   refresh();
 };
+const inspectMetric = async (metric, page = 1) => {
+  const requested = typeof metric === 'object' ? metric : { metric };
+  const version = generation;
+  error.value = '';
+  try {
+    const { data } = await API.drilldown(
+      route.params.accountId,
+      { ...scope(), ...requested, page },
+      { signal: controller?.signal }
+    );
+    if (version === generation) drilldown.value = data;
+  } catch (err) {
+    if (version === generation && err.code !== 'ERR_CANCELED')
+      error.value = message(err);
+  }
+};
+const renewalFilter = window => {
+  filters.renewal_window = window;
+  refresh();
+};
+const recordColumns = computed(() => {
+  if (props.screen === 'risks')
+    return [
+      'customer',
+      'severity',
+      'reason',
+      'mrr_at_risk',
+      'owner_id',
+      'due_at',
+      'status',
+      'health',
+      'origin',
+      'updated_at',
+      'actions',
+    ];
+  if (props.screen === 'expansion')
+    return [
+      'customer',
+      'title',
+      'expansion_kind',
+      'product_id',
+      'potential_cents',
+      'evidence',
+      'status',
+      'deal_status',
+      'expansion_won_cents',
+      'owner_id',
+      'actions',
+    ];
+  if (props.screen === 'surveys')
+    return [
+      'customer',
+      'kind',
+      'score',
+      'comment',
+      'channel',
+      'status',
+      'responded_at',
+      'expires_at',
+      'actions',
+    ];
+  if (props.screen === 'renewals')
+    return [
+      'customer',
+      'contract',
+      'renewal',
+      'days_remaining',
+      'current_mrr',
+      'proposed_mrr_cents',
+      'adjustment',
+      'products',
+      'risk',
+      'owner_id',
+      'status',
+      'actions',
+    ];
+  return ['customer', 'title', 'status', 'owner_id', 'due_at', 'actions'];
+});
 const goPage = direction => {
   pagination.value.page += direction;
   load();
@@ -259,6 +417,20 @@ watch(
     () => route.query.create,
     () => route.query.overdue,
     () => route.query.from,
+    () => route.query.to,
+    () => route.query.status,
+    () => route.query.owner_id,
+    () => route.query.agent_q,
+    () => route.query.band,
+    () => route.query.renewal_days,
+    () => route.query.mode,
+    () => route.query.segment_id,
+    () => route.query.product_id,
+    () => route.query.business_unit_id,
+    () => route.query.complexity,
+    () => route.query.factor,
+    () => route.query.factor_direction,
+    () => route.query.customer,
   ],
   () => {
     metadata.value = null;
@@ -280,8 +452,31 @@ watch(
     surveyDelivery.value = null;
     filters.record_status = route.query.status || '';
     filters.overdue = route.query.overdue === 'true';
-    filters.from = route.query.from || ''; filters.to = route.query.to || '';
-    Object.assign(portfolioOperation, { operation: 'assign', owner_id: '', title: '', due_at: '', playbook_id: '', request_id: crypto.randomUUID() });
+    filters.from = route.query.from || '';
+    filters.to = route.query.to || '';
+    [
+      'owner_id',
+      'agent_q',
+      'band',
+      'renewal_days',
+      'mode',
+      'segment_id',
+      'product_id',
+      'business_unit_id',
+      'complexity',
+      'factor',
+      'factor_direction',
+    ].forEach(key => {
+      filters[key] = route.query[key] || '';
+    });
+    Object.assign(portfolioOperation, {
+      operation: 'assign',
+      owner_id: '',
+      title: '',
+      due_at: '',
+      playbook_id: '',
+      request_id: crypto.randomUUID(),
+    });
     pagination.value.page = 1;
     load();
   },
@@ -315,7 +510,20 @@ const money = value => formatMoney(value, metadata.value?.formatting);
           @click="load"
         >
           {{ t('RELATIONSHIP.REFRESH') }}</button
-        ><button v-if="metadata?.can_team && portfolioScreen" type="button" :class="buttonClass" @click="exportPortfolio">{{ t('RELATIONSHIP.EXPORT') }}</button><button v-if="metadata?.can_export_history && screen === 'reports'" :class="buttonClass" :disabled="saving" @click="exportPortfolio(true)">{{t('RELATIONSHIP.EXPORT_HISTORY')}}</button
+        ><button
+          v-if="metadata?.can_team && portfolioScreen"
+          type="button"
+          :class="buttonClass"
+          @click="exportPortfolio"
+        >
+          {{ t('RELATIONSHIP.EXPORT') }}</button
+        ><button
+          v-if="metadata?.can_export_history && screen === 'reports'"
+          :class="buttonClass"
+          :disabled="saving"
+          @click="exportPortfolio(true)"
+        >
+          {{ t('RELATIONSHIP.EXPORT_HISTORY') }}</button
         ><button
           v-if="
             metadata?.can_manage &&
@@ -488,12 +696,63 @@ const money = value => formatMoney(value, metadata.value?.formatting);
               :class="inputClass"
           /></label>
           <template v-if="portfolioScreen">
-            <label v-for="key in ['score_min', 'score_max', 'mrr_min_cents', 'mrr_max_cents']" :key="key" class="text-xs">{{ t(`RELATIONSHIP.FIELDS.${key}`) }}<input v-model="filters[key]" type="number" min="0" :class="inputClass" /></label>
-            <label class="text-xs">{{ t('RELATIONSHIP.FIELDS.health') }}<select v-model="filters.band" :class="inputClass"><option value="">{{ t('RELATIONSHIP.ALL') }}</option><option v-for="band in ['healthy', 'attention', 'risk', 'critical']" :key="band" :value="band">{{ t(`RELATIONSHIP.BANDS.${band}`) }}</option></select></label>
-            <label class="text-xs">{{ t('RELATIONSHIP.FIELDS.status') }}<select v-model="filters.status" :class="inputClass"><option value="">{{ t('RELATIONSHIP.ALL') }}</option><option v-for="status in ['onboarding', 'active', 'at_risk', 'churned', 'inactive']" :key="status" :value="status">{{ t(`RELATIONSHIP.STATES.${status}`) }}</option></select></label>
+            <label
+              v-for="key in [
+                'score_min',
+                'score_max',
+                'mrr_min_cents',
+                'mrr_max_cents',
+              ]"
+              :key="key"
+              class="text-xs"
+              >{{ t(`RELATIONSHIP.FIELDS.${key}`)
+              }}<input
+                v-model="filters[key]"
+                type="number"
+                min="0"
+                :class="inputClass"
+            /></label>
+            <label class="text-xs"
+              >{{ t('RELATIONSHIP.FIELDS.health')
+              }}<select
+                v-model="filters.band"
+                :class="inputClass"
+              >
+                <option value="">{{ t('RELATIONSHIP.ALL') }}</option>
+                <option
+                  v-for="band in ['healthy', 'attention', 'risk', 'critical']"
+                  :key="band"
+                  :value="band"
+                >
+                  {{ t(`RELATIONSHIP.BANDS.${band}`) }}
+                </option>
+              </select></label
+            >
+            <label class="text-xs"
+              >{{ t('RELATIONSHIP.FIELDS.status')
+              }}<select
+                v-model="filters.status"
+                :class="inputClass"
+              >
+                <option value="">{{ t('RELATIONSHIP.ALL') }}</option>
+                <option
+                  v-for="status in [
+                    'onboarding',
+                    'active',
+                    'at_risk',
+                    'churned',
+                    'inactive',
+                  ]"
+                  :key="status"
+                  :value="status"
+                >
+                  {{ t(`RELATIONSHIP.STATES.${status}`) }}
+                </option>
+              </select></label
+            >
           </template>
-          <template v-if="['reports', 'actions', 'overview'].includes(screen)"
-            ><label
+          <template v-if="['reports', 'actions', 'overview'].includes(screen)">
+            <label
               v-for="key in ['from', 'to']"
               :key="key"
               class="text-xs"
@@ -501,8 +760,9 @@ const money = value => formatMoney(value, metadata.value?.formatting);
               }}<input
                 v-model="filters[key]"
                 type="date"
-                :class="inputClass" /></label
-          ></template>
+                :class="inputClass"
+            /></label>
+          </template>
           <template v-if="screen === 'actions'">
             <label class="text-xs"
               >{{ t('RELATIONSHIP.FIELDS.kind')
@@ -523,7 +783,10 @@ const money = value => formatMoney(value, metadata.value?.formatting);
                     'renewal',
                     'onboarding',
                     'activity',
-                    'post_ticket', 'recurring_ticket', 'expansion', 'retention',
+                    'post_ticket',
+                    'recurring_ticket',
+                    'expansion',
+                    'retention',
                   ]"
                   :key="kind"
                   :value="kind"
@@ -555,6 +818,18 @@ const money = value => formatMoney(value, metadata.value?.formatting);
             {{ t('RELATIONSHIP.FILTER') }}
           </button>
         </form>
+        <button
+          v-if="filters.factor"
+          :class="buttonClass"
+          @click="
+            filters.factor = '';
+            filters.factor_direction = '';
+            refresh();
+          "
+        >
+          {{ t('RELATIONSHIP.FACTORS.' + filters.factor) }} ·
+          {{ t('RELATIONSHIP.CLEAR_FACTOR_FILTER') }}
+        </button>
         <form
           v-if="newAssignment"
           class="rounded-xl border border-n-weak p-4"
@@ -655,11 +930,68 @@ const money = value => formatMoney(value, metadata.value?.formatting);
           </button>
         </form>
         <MetricsPanel
-          v-if="metrics && ['overview', 'reports', 'actions'].includes(screen)"
-          :metrics="metrics" :metadata="metadata"
+          v-if="
+            metrics &&
+            [
+              'overview',
+              'reports',
+              'actions',
+              'portfolio',
+              'expansion',
+              'surveys',
+            ].includes(screen)
+          "
+          :metrics="metrics"
+          :metadata="metadata"
+          :mode="
+            ['portfolio', 'actions', 'expansion', 'surveys'].includes(screen)
+              ? screen
+              : 'all'
+          "
+          inspect
           @filter="metricFilter"
+          @inspect="inspectMetric"
         />
-        <NicoSummaryPanel v-if="screen === 'overview' && metrics" :metrics="metrics" :enabled="metadata.can_nico" @customer="selectedCustomer = $event" />
+        <MetricDrilldownPanel
+          v-if="drilldown"
+          :data="drilldown"
+          :metadata="metadata"
+          @close="drilldown = null"
+          @page="
+            inspectMetric(
+              { metric: drilldown.metric, day: drilldown.day },
+              $event
+            )
+          "
+        />
+        <HealthScorePanel
+          v-if="screen === 'health' && metrics"
+          :metrics="metrics"
+          :rows="rows"
+          :metadata="metadata"
+          @open="selectedCustomer = $event"
+          @filter="metricFilter"
+          @inspect="inspectMetric"
+        />
+        <RenewalPipeline
+          v-if="screen === 'renewals'"
+          :windows="pagination.renewal_windows || {}"
+          :selected="filters.renewal_window"
+          @filter="renewalFilter"
+        />
+        <NicoSummaryPanel
+          v-if="screen === 'overview' && metrics"
+          :metrics="metrics"
+          :enabled="metadata.can_nico"
+          :metadata="metadata"
+          @customer="selectedCustomer = $event"
+        />
+        <p
+          v-if="screen === 'surveys'"
+          class="text-sm text-n-slate-11"
+        >
+          {{ t('RELATIONSHIP.NATIVE_CSAT_GUIDANCE') }}
+        </p>
         <RecordEditor
           v-if="editing"
           :key="`${screen}:${editing.id || 'new'}`"
@@ -668,6 +1000,7 @@ const money = value => formatMoney(value, metadata.value?.formatting);
           :customers="customers"
           :metadata="metadata"
           :busy="saving"
+          :read-only="!metadata.can_manage"
           @save="save"
           @close="editing = null"
         />
@@ -690,24 +1023,110 @@ const money = value => formatMoney(value, metadata.value?.formatting);
           @changed="load"
           @close="selectedCustomer = null"
         />
-        <SurveyDeliveryPanel v-if="surveyDelivery" :assignment-id="surveyDelivery.assignment_id" :survey-id="surveyDelivery.id" @sent="surveyDelivery = null; load()" @close="surveyDelivery = null" />
+        <SurveyDeliveryPanel
+          v-if="surveyDelivery"
+          :assignment-id="surveyDelivery.assignment_id"
+          :survey-id="surveyDelivery.id"
+          @sent="
+            surveyDelivery = null;
+            load();
+          "
+          @close="surveyDelivery = null"
+        />
         <PortfolioTable
-          v-if="portfolioScreen && rows.length"
-          :rows="rows"
+          v-if="portfolioScreen && screen !== 'health' && rows.length"
           v-model:selected="selected"
+          :rows="rows"
           :metadata="metadata"
           :can-manage="metadata.can_manage"
           @open="selectedCustomer = $event"
           @quick="quick"
         />
-        <form v-if="portfolioScreen && metadata.can_manage && selected.length" class="rounded-xl border border-n-weak p-4" @submit.prevent="updatePortfolioBatch">
-          <h3 class="mb-3 font-semibold">{{ t('RELATIONSHIP.PORTFOLIO_BATCH', { count: selected.length }) }}</h3>
+        <form
+          v-if="portfolioScreen && metadata.can_manage && selected.length"
+          class="rounded-xl border border-n-weak p-4"
+          @submit.prevent="updatePortfolioBatch"
+        >
+          <h3 class="mb-3 font-semibold">
+            {{ t('RELATIONSHIP.PORTFOLIO_BATCH', { count: selected.length }) }}
+          </h3>
           <div class="flex flex-wrap items-end gap-3">
-            <label>{{ t('RELATIONSHIP.FIELDS.actions') }}<select v-model="portfolioOperation.operation" :class="inputClass"><option v-if="metadata.can_team" value="assign">{{ t('RELATIONSHIP.ASSIGN') }}</option><option value="activity">{{ t('RELATIONSHIP.NEW_ACTIVITY') }}</option><option value="playbook">{{ t('RELATIONSHIP.APPLY_PLAYBOOK') }}</option></select></label>
-            <label v-if="portfolioOperation.operation === 'assign'">{{ t('RELATIONSHIP.FIELDS.owner_id') }}<select v-model="portfolioOperation.owner_id" :class="inputClass"><option value="">{{ t('RELATIONSHIP.UNASSIGNED') }}</option><option v-for="owner in metadata.owners" :key="owner[0]" :value="owner[0]">{{ owner[1] }}</option></select></label>
-            <template v-if="portfolioOperation.operation === 'activity'"><label>{{ t('RELATIONSHIP.FIELDS.title') }}<input v-model="portfolioOperation.title" required :class="inputClass" /></label><label>{{ t('RELATIONSHIP.FIELDS.due_at') }}<input v-model="portfolioOperation.due_at" type="datetime-local" required :class="inputClass" /></label></template>
-            <label v-if="portfolioOperation.operation === 'playbook'">{{ t('RELATIONSHIP.SCREENS.playbooks') }}<select v-model="portfolioOperation.playbook_id" required :class="inputClass"><option value="">{{ t('RELATIONSHIP.SELECT') }}</option><option v-for="book in metadata.playbooks" :key="book[0]" :value="book[0]">{{ book[1] }}</option></select></label>
-            <button type="submit" :class="buttonClass" :disabled="saving || selected.length > 50">{{ t('RELATIONSHIP.SAVE') }}</button>
+            <label
+              >{{ t('RELATIONSHIP.FIELDS.actions')
+              }}<select
+                v-model="portfolioOperation.operation"
+                :class="inputClass"
+              >
+                <option
+                  v-if="metadata.can_team"
+                  value="assign"
+                >
+                  {{ t('RELATIONSHIP.ASSIGN') }}
+                </option>
+                <option value="activity">
+                  {{ t('RELATIONSHIP.NEW_ACTIVITY') }}
+                </option>
+                <option value="playbook">
+                  {{ t('RELATIONSHIP.APPLY_PLAYBOOK') }}
+                </option>
+              </select></label
+            >
+            <label v-if="portfolioOperation.operation === 'assign'"
+              >{{ t('RELATIONSHIP.FIELDS.owner_id')
+              }}<select
+                v-model="portfolioOperation.owner_id"
+                :class="inputClass"
+              >
+                <option value="">{{ t('RELATIONSHIP.UNASSIGNED') }}</option>
+                <option
+                  v-for="owner in metadata.owners"
+                  :key="owner[0]"
+                  :value="owner[0]"
+                >
+                  {{ owner[1] }}
+                </option>
+              </select></label
+            >
+            <template v-if="portfolioOperation.operation === 'activity'">
+              <label
+                >{{ t('RELATIONSHIP.FIELDS.title')
+                }}<input
+                  v-model="portfolioOperation.title"
+                  required
+                  :class="inputClass" /></label
+              ><label
+                >{{ t('RELATIONSHIP.FIELDS.due_at')
+                }}<input
+                  v-model="portfolioOperation.due_at"
+                  type="datetime-local"
+                  required
+                  :class="inputClass"
+              /></label>
+            </template>
+            <label v-if="portfolioOperation.operation === 'playbook'"
+              >{{ t('RELATIONSHIP.SCREENS.playbooks')
+              }}<select
+                v-model="portfolioOperation.playbook_id"
+                required
+                :class="inputClass"
+              >
+                <option value="">{{ t('RELATIONSHIP.SELECT') }}</option>
+                <option
+                  v-for="book in metadata.playbooks"
+                  :key="book[0]"
+                  :value="book[0]"
+                >
+                  {{ book[1] }}
+                </option>
+              </select></label
+            >
+            <button
+              type="submit"
+              :class="buttonClass"
+              :disabled="saving || selected.length > 50"
+            >
+              {{ t('RELATIONSHIP.SAVE') }}
+            </button>
           </div>
         </form>
         <template v-if="!portfolioScreen && rows.length">
@@ -729,9 +1148,11 @@ const money = value => formatMoney(value, metadata.value?.formatting);
             <label class="text-sm"
               >{{ t('RELATIONSHIP.FIELDS.status')
               }}<select
+                data-testid="batch-status"
                 v-model="batch.status"
                 :class="inputClass"
               >
+                <option value="">{{ t('RELATIONSHIP.KEEP_CURRENT') }}</option>
                 <option
                   v-for="status in STATES.actions"
                   :key="status"
@@ -743,6 +1164,7 @@ const money = value => formatMoney(value, metadata.value?.formatting);
             ><label class="flex-1 text-sm"
               >{{ t('RELATIONSHIP.FIELDS.result')
               }}<input
+                data-testid="batch-result"
                 v-model="batch.result"
                 :class="inputClass"
                 :required="batch.status === 'completed'" /></label
@@ -751,8 +1173,39 @@ const money = value => formatMoney(value, metadata.value?.formatting);
               }}<input
                 v-model="batch.due_at"
                 type="datetime-local"
-                :class="inputClass" /></label
-            ><button
+                :class="inputClass"
+            /></label>
+            <label class="text-sm"
+              >{{ t('RELATIONSHIP.FIELDS.priority')
+              }}<input
+                v-model="batch.priority"
+                data-testid="batch-priority"
+                type="number"
+                min="0"
+                max="100"
+                :class="inputClass"
+                :placeholder="t('RELATIONSHIP.KEEP_CURRENT')"
+            /></label>
+            <label
+              v-if="metadata.can_team"
+              class="text-sm"
+              >{{ t('RELATIONSHIP.FIELDS.owner_id')
+              }}<select
+                v-model="batch.owner_id"
+                data-testid="batch-owner"
+                :class="inputClass"
+              >
+                <option value="">{{ t('RELATIONSHIP.KEEP_CURRENT') }}</option>
+                <option
+                  v-for="owner in metadata.owners"
+                  :key="owner[0]"
+                  :value="owner[0]"
+                >
+                  {{ owner[1] }}
+                </option>
+              </select></label
+            >
+            <button
               type="submit"
               :class="buttonClass"
               :disabled="saving"
@@ -771,14 +1224,7 @@ const money = value => formatMoney(value, metadata.value?.formatting);
                     {{ t('RELATIONSHIP.SELECT') }}
                   </th>
                   <th
-                    v-for="key in [
-                      'customer',
-                      'title',
-                      'status',
-                      'owner_id',
-                      'due_at',
-                      'actions',
-                    ]"
+                    v-for="key in recordColumns"
                     :key="key"
                     class="p-3"
                   >
@@ -811,61 +1257,234 @@ const money = value => formatMoney(value, metadata.value?.formatting);
                       {{ row.customer_name }}
                     </button>
                   </td>
-                  <td class="p-3">
-                    {{
-                      row.title ||
-                      row.reason ||
-                      t(`RELATIONSHIP.STATES.${row.kind}`)
-                    }}
-                    <p
-                      v-if="row.priority !== undefined"
-                      class="text-xs text-n-slate-11"
-                    >
+                  <template v-if="screen === 'risks'">
+                    <td class="p-3 font-semibold">
+                      {{ t(`RELATIONSHIP.STATES.${row.severity}`) }}
+                    </td>
+                    <td class="p-3">
+                      <button
+                        class="text-n-brand"
+                        @click="editing = row"
+                      >
+                        {{ row.reason }}
+                      </button>
+                    </td>
+                    <td class="p-3">{{ money(row.mrr_cents) }}</td>
+                    <td class="p-3">
+                      {{ row.owner_name || t('RELATIONSHIP.UNASSIGNED') }}
+                    </td>
+                    <td class="p-3">
+                      {{ date(row.due_at)
+                      }}<SlaSummary
+                        :sla="row.sla"
+                        :metadata="metadata"
+                      />
+                    </td>
+                    <td class="p-3">
+                      {{ t(`RELATIONSHIP.STATES.${row.status}`) }}
+                    </td>
+                    <td class="p-3">{{ row.health?.score ?? '—' }}</td>
+                    <td class="p-3">
+                      {{ t(`RELATIONSHIP.TRIGGERS.${row.origin}`) }}
+                    </td>
+                    <td class="p-3">{{ date(row.updated_at) }}</td>
+                  </template>
+                  <template v-else-if="screen === 'renewals'">
+                    <td class="p-3">
+                      <RouterLink
+                        :to="{
+                          name: 'crm_contracts',
+                          params: { accountId: route.params.accountId },
+                          query: { contractId: row.contract_id },
+                        }"
+                        class="text-n-brand"
+                      >
+                        {{ row.commercial_context?.contract_number }}
+                      </RouterLink>
+                    </td>
+                    <td class="p-3">{{ date(row.renewal_on) }}</td>
+                    <td class="p-3">
+                      {{ row.commercial_context?.days_remaining ?? '—' }}
+                    </td>
+                    <td class="p-3">
+                      {{ money(row.commercial_context?.current_mrr_cents) }}
+                    </td>
+                    <td class="p-3">{{ money(row.proposed_mrr_cents) }}</td>
+                    <td class="p-3">
+                      {{ row.commercial_context?.adjustment_percent ?? '—' }}%
+                    </td>
+                    <td class="p-3">
+                      {{ row.commercial_context?.products.join(', ') }}
+                    </td>
+                    <td class="p-3">
+                      {{ row.commercial_context?.health?.score ?? '—' }}
+                      <p
+                        v-for="risk in row.commercial_context?.risks || []"
+                        :key="risk.id"
+                      >
+                        {{ t(`RELATIONSHIP.STATES.${risk.severity}`) }} ·
+                        {{ risk.reason }}
+                      </p>
+                    </td>
+                    <td class="p-3">
+                      {{ row.owner_name || t('RELATIONSHIP.UNASSIGNED') }}
+                    </td>
+                    <td class="p-3">
+                      {{ t(`RELATIONSHIP.STATES.${row.status}`) }}
+                    </td>
+                  </template>
+                  <template v-else-if="screen === 'expansion'">
+                    <td class="p-3">{{ row.title }}</td>
+                    <td class="p-3">
                       {{
-                        t('RELATIONSHIP.PRIORITY_VALUE', {
-                          priority: row.priority,
-                        })
+                        t(
+                          `RELATIONSHIP.STATES.${row.commercial_context?.expansion_kind || 'upsell'}`
+                        )
                       }}
-                    </p>
-                    <p
-                      v-if="row.potential_cents !== undefined"
-                      class="text-xs"
-                    >
-                      {{ money(row.potential_cents) }}
-                    </p>
-                    <p v-if="screen === 'risks'" class="text-xs">{{ t('RELATIONSHIP.METRICS.mrr_at_risk_cents') }}: {{ money(row.mrr_cents) }}</p>
-                    <p v-if="screen === 'surveys' && row.responded_at" class="text-xs">{{ row.score }} · {{ row.comment }}</p>
-                    <div v-if="row.commercial_context" class="mt-2 text-xs"><p>{{ row.commercial_context.contract_number }} · {{ money(row.commercial_context.current_mrr_cents) }} → {{ money(row.proposed_mrr_cents) }}</p><p>{{ t('RELATIONSHIP.ADJUSTMENT', { percent: row.commercial_context.adjustment_percent ?? '—' }) }}</p><p>{{ row.commercial_context.products.join(', ') }}</p><p>{{ t('RELATIONSHIP.COMMERCIAL_TRACE', { proposals: row.commercial_context.proposal_ids.join(', ') || '—', orders: row.commercial_context.order_ids.join(', ') || '—' }) }}</p></div>
-                  </td>
-                  <td class="p-3">
-                    {{
-                      row.status
-                        ? t(`RELATIONSHIP.STATES.${row.status}`)
-                        : row.responded_at
-                          ? t('RELATIONSHIP.RESPONDED')
-                          : t('RELATIONSHIP.AWAITING')
-                    }}
-                  </td>
-                  <td class="p-3">
-                    {{ row.owner_name || t('RELATIONSHIP.UNASSIGNED') }}
-                  </td>
-                  <td class="p-3">
-                    {{
-                      date(
-                        row.due_at ||
-                          row.scheduled_at ||
-                          row.target_on ||
-                          row.renewal_on ||
-                          row.expires_at
-                      )
-                    }}
-                    <SlaSummary v-if="['actions', 'risks'].includes(screen)" :sla="row.sla" :metadata="metadata" />
-                  </td>
+                    </td>
+                    <td class="p-3">
+                      {{ row.commercial_context?.product_name || '—' }}
+                    </td>
+                    <td class="p-3">{{ money(row.potential_cents) }}</td>
+                    <td class="p-3">{{ row.evidence || '—' }}</td>
+                    <td class="p-3">
+                      {{ t(`RELATIONSHIP.STATES.${row.status}`) }}
+                    </td>
+                    <td class="p-3">
+                      {{
+                        row.commercial_context?.deal
+                          ? t(
+                              `RELATIONSHIP.DEAL_STATES.${row.commercial_context.deal.status}`
+                            )
+                          : '—'
+                      }}
+                    </td>
+                    <td class="p-3">
+                      {{ money(row.commercial_context?.won_cents) }}
+                    </td>
+                    <td class="p-3">
+                      {{ row.owner_name || t('RELATIONSHIP.UNASSIGNED') }}
+                    </td>
+                  </template>
+                  <template v-else-if="screen === 'surveys'">
+                    <td class="p-3">{{ row.kind.toUpperCase() }}</td>
+                    <td class="p-3">{{ row.score ?? '—' }}</td>
+                    <td class="p-3">{{ row.comment || '—' }}</td>
+                    <td class="p-3">
+                      {{
+                        t(
+                          `RELATIONSHIP.SURVEY_CHANNELS.${row.channel || 'public_link'}`
+                        )
+                      }}
+                    </td>
+                    <td class="p-3">
+                      {{
+                        t(
+                          `RELATIONSHIP.STATES.${row.delivery_status || (row.responded_at ? 'responded' : 'awaiting')}`
+                        )
+                      }}
+                    </td>
+                    <td class="p-3">{{ date(row.responded_at) }}</td>
+                    <td class="p-3">{{ date(row.expires_at) }}</td>
+                  </template>
+                  <template v-else>
+                    <td class="p-3">
+                      {{
+                        row.title ||
+                        row.reason ||
+                        t(`RELATIONSHIP.STATES.${row.kind}`)
+                      }}
+                      <p
+                        v-if="row.priority !== undefined"
+                        class="text-xs text-n-slate-11"
+                      >
+                        {{
+                          t('RELATIONSHIP.PRIORITY_VALUE', {
+                            priority: row.priority,
+                          })
+                        }}
+                      </p>
+                      <p
+                        v-if="row.potential_cents !== undefined"
+                        class="text-xs"
+                      >
+                        {{ money(row.potential_cents) }}
+                      </p>
+                      <p
+                        v-if="screen === 'surveys' && row.responded_at"
+                        class="text-xs"
+                      >
+                        {{ row.score }} · {{ row.comment }}
+                      </p>
+                      <div
+                        v-if="screen === 'actions'"
+                        class="mt-2 flex flex-wrap gap-2"
+                      >
+                        <RouterLink
+                          v-for="source in row.source_links || []"
+                          :key="`${source.kind}:${source.id}`"
+                          :to="source.route"
+                          class="text-xs text-n-brand underline"
+                        >
+                          {{ t(`RELATIONSHIP.SOURCES.${source.kind}`) }} #{{
+                            source.id
+                          }}
+                        </RouterLink>
+                      </div>
+                    </td>
+                    <td class="p-3">
+                      {{
+                        row.status
+                          ? t(`RELATIONSHIP.STATES.${row.status}`)
+                          : row.responded_at
+                            ? t('RELATIONSHIP.RESPONDED')
+                            : t('RELATIONSHIP.AWAITING')
+                      }}
+                    </td>
+                    <td class="p-3">
+                      {{ row.owner_name || t('RELATIONSHIP.UNASSIGNED') }}
+                    </td>
+                    <td class="p-3">
+                      {{
+                        date(
+                          row.due_at ||
+                            row.scheduled_at ||
+                            row.target_on ||
+                            row.renewal_on ||
+                            row.expires_at
+                        )
+                      }}
+                      <SlaSummary
+                        v-if="['actions', 'risks'].includes(screen)"
+                        :sla="row.sla"
+                        :metadata="metadata"
+                      />
+                    </td>
+                  </template>
                   <td class="p-3">
                     <div class="flex flex-wrap gap-2">
-                      <template v-if="screen === 'surveys' && !row.responded_at">
-                        <button type="button" :class="buttonClass" @click="getSurveyLink(row)">{{ t('RELATIONSHIP.SURVEY_LINK') }}</button>
-                        <button v-if="metadata.can_manage" type="button" :class="buttonClass" @click="surveyDelivery = row">{{ t('RELATIONSHIP.SEND_SURVEY') }}</button>
+                      <template
+                        v-if="
+                          screen === 'surveys' &&
+                          !row.responded_at &&
+                          row.delivery_status !== 'expired'
+                        "
+                      >
+                        <button
+                          type="button"
+                          :class="buttonClass"
+                          @click="getSurveyLink(row)"
+                        >
+                          {{ t('RELATIONSHIP.SURVEY_LINK') }}
+                        </button>
+                        <button
+                          v-if="metadata.can_manage"
+                          type="button"
+                          :class="buttonClass"
+                          @click="surveyDelivery = row"
+                        >
+                          {{ t('RELATIONSHIP.SEND_SURVEY') }}
+                        </button>
                       </template>
                       <button
                         v-if="metadata.can_manage && screen !== 'surveys'"
@@ -879,7 +1498,8 @@ const money = value => formatMoney(value, metadata.value?.formatting);
                           metadata.can_manage &&
                           metadata.can_crm &&
                           ['expansion', 'renewals'].includes(screen) &&
-                          !row.deal_id
+                          !row.deal_id &&
+                          row.status !== 'rejected'
                         "
                         type="button"
                         :class="buttonClass"
@@ -973,6 +1593,11 @@ const money = value => formatMoney(value, metadata.value?.formatting);
           class="rounded-xl border border-n-weak p-6 text-sm text-n-slate-11"
         >
           {{ t('RELATIONSHIP.EMPTY') }}
+          <span
+            v-if="screen === 'portfolio'"
+            class="mt-2 block"
+            >{{ t('RELATIONSHIP.EMPTY_PORTFOLIO_GUIDANCE') }}</span
+          >
         </p>
         <div
           v-if="pagination.total"

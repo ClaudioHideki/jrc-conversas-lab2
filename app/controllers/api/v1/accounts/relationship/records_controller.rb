@@ -2,7 +2,22 @@ class Api::V1::Accounts::Relationship::RecordsController < Api::V1::Accounts::Re
   def index
     model = JrcRelationship::Workflow::MODELS.fetch(params[:kind])
     scope = relationship_context.records(model).where(assignment_id: filtered_assignments.select(:id))
+    if model == JrcRelationship::Survey && params[:record_status].present?
+      scope = case params[:record_status]
+              when 'responded' then scope.where.not(responded_at: nil)
+              when 'awaiting' then scope.where(responded_at: nil).where('expires_at > ?', Time.current)
+              when 'expired' then scope.where(responded_at: nil).where('expires_at <= ?', Time.current)
+              else raise ArgumentError, 'Invalid survey state'
+              end
+    end
+    if model == JrcRelationship::Survey && params[:from].present?
+      scope = scope.where(responded_at: report_period)
+    end
     scope = scope.where(status: params[:record_status]) if params[:record_status].present? && model.column_names.include?('status')
+    windows = if model == JrcRelationship::Renewal
+                JrcRelationship::RenewalWindow::WINDOWS.keys.to_h { |key| [key, JrcRelationship::RenewalWindow.scope(scope, key).count] }
+              end
+    scope = JrcRelationship::RenewalWindow.scope(scope, params[:renewal_window]) if model == JrcRelationship::Renewal && params[:renewal_window].present?
     if params[:overdue] == 'true' && model.column_names.include?('due_at')
       scope = scope.where('due_at < ?', Time.current)
       scope = scope.where(sla_paused_at: nil) if model == JrcRelationship::Action
@@ -17,8 +32,8 @@ class Api::V1::Accounts::Relationship::RecordsController < Api::V1::Accounts::Re
     order = model == JrcRelationship::Action ? { priority: :desc, due_at: :asc, id: :asc } : { updated_at: :desc, id: :desc }
     records, meta = page(scope.includes(:owner, assignment: [:company, :contact]).order(order))
     records = records.to_a
-    presenter.preload(records.map(&:assignment).uniq(&:id)) if model == JrcRelationship::RiskCase
-    render json: { payload: records.map { |row| presenter.record(row) }, meta: meta }
+    presenter.preload(records.map(&:assignment).uniq(&:id)) if [JrcRelationship::RiskCase, JrcRelationship::Renewal].include?(model)
+    render json: { payload: records.map { |row| presenter.record(row) }, meta: meta.merge(renewal_windows: windows) }
   end
 
   def create
@@ -74,14 +89,15 @@ class Api::V1::Accounts::Relationship::RecordsController < Api::V1::Accounts::Re
       :result, :kind, :severity, :outcome, :title, :target_on, :project_id, :scheduled_at, :agenda, :summary,
       :proposed_mrr_cents, :product_id, :potential_cents, :evidence, :expansion_kind, plan: [:cause, :hypothesis, :strategy, :actions, :concessions], goals: [], participants: [], decisions: [])
     attrs[:plan] = params.require(:record).permit(plan: [:cause, :hypothesis, :strategy, :actions, :concessions, :approval_status])[:plan] if params.dig(:record, :plan)
-    attrs.merge!(params.require(:record).permit(:period_from, :period_to, milestones: [:title, :due_at, :status, :owner_id, :evidence]))
+    attrs.merge!(params.require(:record).permit(:period_from, :period_to, :notes,
+      milestones: [:title, :due_at, :status, :owner_id, :evidence, :notes, :activity_id, :task_id, :ticket_id, :qbr_id]))
     # Structured collections are limited to finite work items, never domain identity copies.
     %w[goals participants decisions].each do |key|
       value = params.dig(:record, key)
       next if value.nil?
       raise ArgumentError, 'Use at most 50 structured work items' unless value.is_a?(Array) && value.length <= 50 && value.all? { |row| row.respond_to?(:permit) }
       attrs[key] = value.map { |row| row.permit(:metric, :baseline, :target, :current, :due_at, :status, :title, :name, :email,
-        :owner_id, :evidence, :task_id, :ticket_id, :qbr_id, :product_id).to_h }
+        :owner_id, :evidence, :notes, :activity_id, :task_id, :ticket_id, :qbr_id, :product_id, :user_id, :participant_type, :decision_key).to_h }
     end
     result = JrcRelationship::Workflow.new(relationship_context).save(kind: params[:kind], attributes: attrs, id: params[:id])
     render json: presenter.record(result[:record]).merge(survey_token: result[:survey_token]), status: params[:id] ? :ok : :created

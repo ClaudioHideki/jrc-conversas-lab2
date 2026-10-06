@@ -29,10 +29,14 @@ class JrcRelationship::Workflow
       raise ArgumentError, 'Cannot change the customer origin' if record.assignment_id != assignment.id
       raise ActiveRecord::StaleObjectError.new(record, 'update') if id && attrs['lock_version'].to_s != record.lock_version.to_s
       audit_fields = FIELDS.fetch(kind) + (kind == 'actions' ? %w[completed_at completed_by_id] : [])
+      audit_fields += %w[metadata] if %w[actions plans qbrs expansion].include?(kind)
       before = record.attributes.slice(*audit_fields)
       record.assign_attributes(attrs.slice(*FIELDS.fetch(kind)))
+      if kind == 'actions' && attrs.key?('priority') && record.will_save_change_to_priority?
+        record.metadata = record.metadata.merge('manual_priority' => true)
+      end
       if %w[plans qbrs].include?(kind)
-        record.metadata = record.metadata.merge(attrs.slice('period_from', 'period_to', 'milestones'))
+        record.metadata = record.metadata.merge(attrs.slice('period_from', 'period_to', 'milestones', 'notes'))
       end
       record.agenda ||= @context.configuration(assignment).effective_rules['qbr_agenda_template'] if kind == 'qbrs'
       if kind == 'expansion' && attrs.key?('expansion_kind')
@@ -86,7 +90,7 @@ class JrcRelationship::Workflow
         fields[:user_id] = record.owner_id if record.owner_id
         fields.merge!(status: 'completed', completed_at: record.completed_at) if record.status == 'completed'
         fields[:status] = 'cancelled' if record.status == 'dismissed'
-        fields.merge!(status: 'scheduled', completed_at: nil) if %w[open in_progress waiting_customer].include?(record.status)
+        fields.merge!(status: 'scheduled', completed_at: nil) if JrcRelationship::Action::ACTIVE_STATUSES.include?(record.status)
         record.activity.update!(fields)
       end
       sync_qbr!(record) if kind == 'qbrs'
@@ -118,12 +122,14 @@ class JrcRelationship::Workflow
   def project_action!(action, kind: 'task')
     return action.activity if action.activity
     return unless action.due_at && action.owner && JrcOperations::Access.crm?(@context.member)
+    metadata = { relationship_assignment_id: action.assignment_id, relationship_action_id: action.id,
+                 relationship_source_key: action.source_key }
+    metadata[:relationship_sla_paused_at] = action.sla_paused_at.iso8601 if action.sla_paused_at
     activity = JrcCrm::Activity.create!(account: @context.account, user: action.owner,
       company: action.assignment.company, contact: action.assignment.contact,
       business_unit: action.assignment.business_unit,
       title: action.reason, activity_type: kind, due_at: action.due_at,
-      metadata: { relationship_assignment_id: action.assignment_id, relationship_action_id: action.id,
-                  relationship_source_key: action.source_key })
+      metadata: metadata)
     action.update!(activity: activity)
     @context.audit!(activity, after: { action_id: action.id, due_at: activity.due_at }, action: 'agenda_projected')
     activity
@@ -168,6 +174,7 @@ class JrcRelationship::Workflow
         @context.assignable_users.find(goal['owner_id']) if goal['owner_id'].present?
         customer = record.assignment.customer_context(@context.member)
         customer.project_tasks.find(goal['task_id']) if goal['task_id'].present?
+        customer.activities.find(goal['activity_id']) if goal['activity_id'].present?
         customer.tickets.find(goal['ticket_id']) if goal['ticket_id'].present?
         @context.records(JrcRelationship::Qbr).where(assignment: record.assignment).find(goal['qbr_id']) if goal['qbr_id'].present?
         @context.account.jrc_crm_products.find(goal['product_id']) if goal['product_id'].present? && JrcOperations::Access.crm?(@context.member)
@@ -176,6 +183,7 @@ class JrcRelationship::Workflow
     end
     if record.is_a?(JrcRelationship::Qbr)
       Array(record.decisions).each { |decision| @context.assignable_users.find(decision['owner_id']) if decision['owner_id'].present? }
+      Array(record.participants).each { |participant| @context.assignable_users.find(participant['user_id']) if participant['user_id'].present? }
     end
     if record.is_a?(JrcRelationship::SuccessPlan) && record.project_id
       project = JrcOperations::Access.projects(@context.member).find(record.project_id)
@@ -196,6 +204,7 @@ class JrcRelationship::Workflow
                      .where('created_at > ?', frequency.days.ago).exists?
     raise ArgumentError, 'Survey frequency limit reached' if recent
     token = SecureRandom.hex(32)
+    record.metadata = record.metadata.merge('question' => @context.configuration(record.assignment).effective_rules["survey_question_#{record.kind}"])
     record.token_digest = Digest::SHA256.hexdigest(token)
     record.expires_at = 30.days.from_now
     token
@@ -211,12 +220,36 @@ class JrcRelationship::Workflow
     record.activity.update!(title: record.title, user_id: record.owner_id || record.activity.user_id, due_at: record.scheduled_at, status: activity_status,
       completed_at: record.status == 'completed' ? record.activity.completed_at || Time.current : nil)
     action = record.assignment.actions.find_by(activity_id: record.activity_id)
-    action.update!(reason: record.title, owner_id: record.owner_id || action.owner_id, due_at: record.scheduled_at) if action
+    if action
+      action.update!(reason: record.title, owner_id: record.owner_id || action.owner_id, due_at: record.scheduled_at)
+      status = { 'completed' => 'completed', 'canceled' => 'dismissed' }[record.status] ||
+        (JrcRelationship::Action::ACTIVE_STATUSES.include?(action.status) ? action.status : 'open')
+      save(kind: 'actions', id: action.id, attributes: { assignment_id: record.assignment_id, lock_version: action.lock_version,
+        status: status, result: record.summary }) if action.status != status
+    end
+    reconcile_qbr_commitments!(record)
     return unless record.status == 'completed'
     Array(record.decisions).each_with_index do |decision, index|
       next unless decision['title'].present?
-      activity!(assignment: record.assignment, title: decision['title'], due_at: decision['due_at'],
-                owner_id: decision['owner_id'].presence, request_id: "qbr:#{record.id}:decision:#{index}")
+      activity = activity!(assignment: record.assignment, title: decision['title'], due_at: decision['due_at'],
+        owner_id: decision['owner_id'].presence, request_id: "qbr:#{record.id}:decision:#{decision['decision_key'].presence || index}")
+      commitment = record.assignment.actions.find_by!(activity_id: activity.id)
+      save(kind: 'actions', id: commitment.id, attributes: { assignment_id: record.assignment_id, lock_version: commitment.lock_version,
+        reason: decision['title'], due_at: decision['due_at'], owner_id: decision['owner_id'].presence || commitment.owner_id })
+      activity.update!(title: decision['title']) if activity.title != decision['title']
+    end
+  end
+
+  def reconcile_qbr_commitments!(record)
+    keys = Array(record.decisions).each_with_index.filter_map do |decision, index|
+      "activity:qbr:#{record.id}:decision:#{decision['decision_key'].presence || index}" if decision['title'].present?
+    end
+    pending = @context.records(JrcRelationship::Action).where(assignment: record.assignment, status: JrcRelationship::Action::ACTIVE_STATUSES)
+      .where('source_key LIKE ?', "activity:qbr:#{record.id}:decision:%")
+    pending = pending.where.not(source_key: keys) unless record.status == 'canceled'
+    pending.each do |action|
+      save(kind: 'actions', id: action.id, attributes: { assignment_id: record.assignment_id, lock_version: action.lock_version,
+        status: 'dismissed', result: 'Compromisso retirado da QBR ou reunião cancelada.' })
     end
   end
 

@@ -35,11 +35,13 @@ class Api::V1::Accounts::Relationship::ConfigurationController < Api::V1::Accoun
   end
 
   def save_playbook
-    attrs = params.require(:playbook).permit(:name, :trigger_kind, :active, steps: [:kind, :title, :after_days], conditions: [:field, :operator, :value])
+    attrs = params.require(:playbook).permit(:name, :trigger_kind, :active, steps: [:kind, :title, :after_days, :step_key], conditions: [:field, :operator, :value])
     record = params[:id] ? JrcRelationship::Playbook.where(account: Current.account).find(params[:id]) : JrcRelationship::Playbook.new(account: Current.account)
     record.transaction do
+      before = record.attributes.slice('name', 'trigger_kind', 'active', 'steps', 'conditions')
       record.update!(attrs)
-      JrcCustomers::Audit.record!(account: Current.account, actor: Current.user, resource: record, event_type: 'relationship_updated', metadata: { action: 'playbook_configured' })
+      JrcCustomers::Audit.record!(account: Current.account, actor: Current.user, resource: record, event_type: 'relationship_updated', from_value: before,
+        to_value: record.attributes.slice('name', 'trigger_kind', 'active', 'steps', 'conditions'), metadata: { action: 'playbook_configured' })
     end
     render json: record
   end

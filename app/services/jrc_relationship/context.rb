@@ -43,11 +43,12 @@ class JrcRelationship::Context
     elsif model == JrcRelationship::SuccessPlan
       relation = relation.where(project_id: nil).or(relation.where(project_id: visibility.projects.select(:id)))
       sources = { 'task_id' => visibility.project_tasks(visibility.projects), 'ticket_id' => visibility.tickets,
+        'activity_id' => visibility.crm(account.jrc_crm_activities, owner: :user_id),
         'qbr_id' => JrcRelationship::Qbr.where(account: account, assignment_id: assignments.select(:id)),
         'product_id' => visibility.crm? ? account.jrc_crm_products : account.jrc_crm_products.none }
       sources.each do |key, native|
         sql = native.reselect(native.klass.arel_table[:id]).reorder(nil).to_sql
-        relation = relation.where("NOT EXISTS (SELECT 1 FROM jsonb_array_elements(jrc_relationship_success_plans.goals) AS goal(value) " \
+        relation = relation.where("NOT EXISTS (SELECT 1 FROM jsonb_array_elements(jrc_relationship_success_plans.goals || COALESCE(NULLIF(jrc_relationship_success_plans.metadata -> 'milestones', 'null'::jsonb), '[]'::jsonb)) AS goal(value) " \
           "WHERE NULLIF(goal.value ->> ?, '') IS NOT NULL AND (goal.value ->> ?)::bigint NOT IN (#{sql}))", key, key)
       end
     end

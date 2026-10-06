@@ -11,7 +11,13 @@ class Api::V1::Accounts::Relationship::PortfolioController < Api::V1::Accounts::
     presenter.preload([record])
     snapshots = JrcRelationship::HealthSnapshot.where(account_id: Current.account.id, assignment_id: record.id, viewer_id: Current.user.id, access_signature: relationship_context.access_signature)
     snapshots = JrcRelationship::SnapshotAccess.scope(relationship_context, snapshots)
-    render json: presenter.assignment(record).merge(health_history: snapshots.order(calculated_at: :desc).limit(30).map { |s| s.attributes.slice('id', 'score', 'band', 'factors', 'calculated_at', 'config_version', 'config_scope_key') })
+    history = snapshots.order(calculated_at: :desc, id: :desc).limit(30).to_a
+    health_history = history.each_with_index.map do |snapshot, index|
+      snapshot.attributes.slice('id', 'score', 'band', 'factors', 'calculated_at', 'config_version', 'config_scope_key').merge(
+        'change' => JrcRelationship::HealthChange.call(previous: history[index + 1]&.attributes&.symbolize_keys,
+          current: snapshot.attributes.symbolize_keys))
+    end
+    render json: presenter.assignment(record).merge(health_history: health_history)
   end
 
   def create

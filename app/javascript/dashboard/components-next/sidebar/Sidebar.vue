@@ -4,6 +4,7 @@ import { h, ref, computed, onMounted, watch } from 'vue';
 import { provideSidebarContext, useSidebarResize } from './provider';
 import { visibleSidebarSections } from './temporaryVisibility';
 import { universityLink } from './university';
+import { withNewBadge } from './newModules';
 import SidebarUniversity from './SidebarUniversity.vue';
 import { useServiceDeskNavigation } from 'dashboard/composables/useServiceDeskNavigation';
 import { useServiceDeskStructure } from 'dashboard/composables/useServiceDeskStructure';
@@ -1454,7 +1455,9 @@ const menuItems = computed(() => {
       activeOn: ['video_conference_index'],
       disabled: false,
     },
-  ].filter(Boolean);
+  ]
+    .filter(Boolean)
+    .map(withNewBadge);
 });
 
 const menuSections = computed(() => {

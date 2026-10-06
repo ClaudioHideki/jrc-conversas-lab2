@@ -8,7 +8,13 @@ import ComposeConversation from 'dashboard/components-next/NewConversation/Compo
 import VoiceCallButton from 'dashboard/components-next/Contacts/VoiceCallButton.vue';
 import SurveyDeliveryPanel from './SurveyDeliveryPanel.vue';
 import NicoSummaryPanel from './NicoSummaryPanel.vue';
-import { buttonClass, inputClass, date as formatDate, money as formatMoney, message } from './definitions';
+import {
+  buttonClass,
+  inputClass,
+  date as formatDate,
+  money as formatMoney,
+  message,
+} from './definitions';
 const props = defineProps({
   assignmentId: { type: [Number, String], required: true },
   metadata: { type: Object, default: () => ({}) },
@@ -129,8 +135,23 @@ const money = value => formatMoney(value, props.metadata?.formatting);
 
 <template>
   <section class="rounded-xl border border-n-weak bg-n-solid-2 p-5">
-    <button v-if="metadata.can_manage" type="button" :class="buttonClass" @click="sendCsat = !sendCsat">{{ t('RELATIONSHIP.NATIVE_CSAT') }}</button>
-    <SurveyDeliveryPanel v-if="sendCsat" :assignment-id="assignmentId" @sent="sendCsat = false; emit('changed')" @close="sendCsat = false" />
+    <button
+      v-if="metadata.can_manage"
+      type="button"
+      :class="buttonClass"
+      @click="sendCsat = !sendCsat"
+    >
+      {{ t('RELATIONSHIP.NATIVE_CSAT') }}
+    </button>
+    <SurveyDeliveryPanel
+      v-if="sendCsat"
+      :assignment-id="assignmentId"
+      @sent="
+        sendCsat = false;
+        emit('changed');
+      "
+      @close="sendCsat = false"
+    />
     <div class="mb-4 flex items-center justify-between">
       <h2 class="text-lg font-semibold">
         {{ record?.name || t('RELATIONSHIP.TITLE') }}
@@ -157,7 +178,11 @@ const money = value => formatMoney(value, props.metadata?.formatting);
       {{ t('RELATIONSHIP.LOADING') }}
     </p>
     <template v-if="record">
-      <NicoSummaryPanel :assignment-id="assignmentId" :enabled="metadata.can_nico" :metadata="metadata" />
+      <NicoSummaryPanel
+        :assignment-id="assignmentId"
+        :enabled="metadata.can_nico"
+        :metadata="metadata"
+      />
       <div class="flex flex-wrap gap-3">
         <strong class="text-2xl">{{
           record.signals.health.score ?? '—'
@@ -234,12 +259,42 @@ const money = value => formatMoney(value, props.metadata?.formatting);
         </table>
       </div>
       <details class="my-4">
-        <summary class="cursor-pointer text-sm font-semibold">{{ t('RELATIONSHIP.PRODUCT_HEALTH') }}</summary>
-        <p class="my-2 text-xs text-n-slate-11">{{ t('RELATIONSHIP.SHARED_PRODUCT_FACTORS') }}</p>
-        <div v-for="product in record.signals.products || []" :key="product.id" class="my-2 rounded-lg border border-n-weak p-3">
-          <strong>{{ product.name }} · {{ record.signals.product_health?.[product.id]?.score ?? '—' }}</strong>
-          <p class="text-xs">{{ t('RELATIONSHIP.VERSION', { version: record.signals.product_health?.[product.id]?.config_version || 1 }) }}</p>
-          <p v-for="factor in record.signals.product_health?.[product.id]?.factors || []" :key="factor.factor" class="text-xs">{{ t(`RELATIONSHIP.FACTORS.${factor.factor}`) }}: {{ factor.normalized ?? t('RELATIONSHIP.UNAVAILABLE') }} · {{ factor.evidence }}</p>
+        <summary class="cursor-pointer text-sm font-semibold">
+          {{ t('RELATIONSHIP.PRODUCT_HEALTH') }}
+        </summary>
+        <p class="my-2 text-xs text-n-slate-11">
+          {{ t('RELATIONSHIP.SHARED_PRODUCT_FACTORS') }}
+        </p>
+        <div
+          v-for="product in record.signals.products || []"
+          :key="product.id"
+          class="my-2 rounded-lg border border-n-weak p-3"
+        >
+          <strong
+            >{{ product.name }} ·
+            {{
+              record.signals.product_health?.[product.id]?.score ?? '—'
+            }}</strong
+          >
+          <p class="text-xs">
+            {{
+              t('RELATIONSHIP.VERSION', {
+                version:
+                  record.signals.product_health?.[product.id]?.config_version ||
+                  1,
+              })
+            }}
+          </p>
+          <p
+            v-for="factor in record.signals.product_health?.[product.id]
+              ?.factors || []"
+            :key="factor.factor"
+            class="text-xs"
+          >
+            {{ t(`RELATIONSHIP.FACTORS.${factor.factor}`) }}:
+            {{ factor.normalized ?? t('RELATIONSHIP.UNAVAILABLE') }} ·
+            {{ factor.evidence }}
+          </p>
         </div>
       </details>
       <details class="my-4">
@@ -257,6 +312,43 @@ const money = value => formatMoney(value, props.metadata?.formatting);
             {{
               t('RELATIONSHIP.VERSION', { version: snapshot.config_version })
             }}
+            <template v-if="snapshot.change">
+              <p>
+                {{
+                  t('RELATIONSHIP.HEALTH_CHANGE', {
+                    delta: snapshot.change.delta,
+                  })
+                }}
+              </p>
+              <p
+                v-if="snapshot.change.configuration_changed"
+                class="text-xs"
+              >
+                {{ t('RELATIONSHIP.CONFIGURATION_CHANGE') }}
+              </p>
+              <details v-if="snapshot.change.factors.length">
+                <summary>{{ t('RELATIONSHIP.EXPLAIN') }}</summary>
+                <p
+                  v-for="change in snapshot.change.factors"
+                  :key="change.factor"
+                  class="text-xs"
+                >
+                  {{ t(`RELATIONSHIP.FACTORS.${change.factor}`) }}:
+                  {{ change.before?.normalized ?? '—' }}
+                  {{ t('RELATIONSHIP.ARROW') }}
+                  {{ change.after?.normalized ?? '—' }} ·
+                  {{ t('RELATIONSHIP.FIELDS.weight') }}
+                  {{ change.before?.weight ?? '—' }}
+                  {{ t('RELATIONSHIP.ARROW') }}
+                  {{ change.after?.weight ?? '—' }} ·
+                  {{ t('RELATIONSHIP.FIELDS.contribution') }}
+                  {{ change.before?.contribution ?? '—' }}
+                  {{ t('RELATIONSHIP.ARROW') }}
+                  {{ change.after?.contribution ?? '—' }} ·
+                  {{ change.after?.evidence || change.before?.evidence }}
+                </p>
+              </details>
+            </template>
           </li>
         </ul>
       </details>

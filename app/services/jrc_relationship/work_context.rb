@@ -24,6 +24,7 @@ class JrcRelationship::WorkContext
         goals: plan.goals, milestones: plan.metadata['milestones'], target_on: plan.target_on,
         summary: "#{plan.title}: #{plan.goals.count { |goal| goal['status'] == 'completed' }}/#{plan.goals.size} objetivos concluídos; prazo #{plan.target_on}." } },
       tasks: @customer.project_tasks.order(:due_on, :id).limit(250).pluck(:id, :title),
+      activities: @customer.activities.order(due_at: :desc).limit(250).pluck(:id, :title),
       linked_tickets: @customer.tickets.order(opened_at: :desc).limit(250).pluck(:id, :title),
       qbrs: qbrs.order(scheduled_at: :desc).limit(100).pluck(:id, :title),
       agenda_template: @context.configuration(@assignment).effective_rules['qbr_agenda_template'],

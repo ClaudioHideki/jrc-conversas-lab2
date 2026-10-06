@@ -108,4 +108,19 @@ class RelationshipHealthPriorityTest < Minitest::Test
     result = priority(health: { score: 50 }, mrr_cents: 50_000, days_without_contact: 15)
     assert_equal result[:score], result[:factors].values.select { |value| value.is_a?(Hash) }.sum { |factor| factor[:contribution].to_f }.round
   end
+  def test_manual_priority_survives_refresh_while_factors_follow_current_signals
+    original = JrcRelationship::Priority.call(data: data, rules: rules, kind: 'health', today: Date.new(2026, 10, 5), manual_priority: 88)
+    updated = JrcRelationship::Priority.call(data: data.merge(health: { score: 20 }), rules: rules, kind: 'health', today: Date.new(2026, 10, 5), manual_priority: 88)
+    assert_equal 88, original[:score]
+    assert_equal 88, updated[:score]
+    refute_equal original[:factors]['health'], updated[:factors]['health']
+    assert_equal 90, updated[:factors]['urgency_floor']
+  end
+
+  def test_manual_zero_priority_is_not_replaced_by_calculated_urgency
+    result = JrcRelationship::Priority.call(data: data.merge(health: { score: 20 }), rules: rules, kind: 'health', today: Date.new(2026, 10, 5), manual_priority: 0)
+    assert_equal 0, result[:score]
+    assert_equal 90, result[:factors]['urgency_floor']
+  end
+
 end

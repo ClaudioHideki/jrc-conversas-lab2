@@ -1,11 +1,17 @@
 <script setup>
-import { computed, ref, watch, reactive } from 'vue';
-import { useRoute } from 'vue-router';
+import { ref, watch, reactive } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcRelationship';
 import MetricsPanel from './MetricsPanel.vue';
-import { message, money as formatMoney, inputClass, buttonClass } from './definitions';
+import MetricDrilldownPanel from './MetricDrilldownPanel.vue';
+import {
+  message,
+  money as formatMoney,
+  inputClass,
+  buttonClass,
+} from './definitions';
 const props = defineProps({
   startDate: String,
   endDate: String,
@@ -13,10 +19,12 @@ const props = defineProps({
   refresh: Number,
 });
 const route = useRoute();
+const router = useRouter();
 const store = useStore();
 const { t } = useI18n();
 const rows = ref([]);
 const metrics = ref(null);
+const drilldown = ref(null);
 const error = ref('');
 const busy = ref(false);
 const metadata = ref(null);
@@ -27,13 +35,42 @@ const filters = reactive({
   business_unit_id: '',
   complexity: '',
 });
-const visibleRows = computed(() =>
-  rows.value.filter(row =>
-    row.user.name
-      .toLocaleLowerCase()
-      .includes(props.search.trim().toLocaleLowerCase())
-  )
-);
+let activeController;
+const query = () => ({
+  ...Object.fromEntries(
+    Object.entries(filters).filter(([, value]) => value !== '')
+  ),
+  from: props.startDate || undefined,
+  to: props.endDate || undefined,
+  agent_q: props.search.trim() || undefined,
+});
+const inspectMetric = async (metric, page = 1) => {
+  const requested = typeof metric === 'object' ? metric : { metric };
+  const controller = activeController;
+  try {
+    const { data } = await API.drilldown(
+      route.params.accountId,
+      { ...query(), ...requested, page },
+      { signal: controller.signal }
+    );
+    if (!controller.signal.aborted) drilldown.value = data;
+  } catch (err) {
+    if (!controller.signal.aborted) error.value = message(err);
+  }
+};
+const filterPortfolio = filter =>
+  router.push({
+    name: 'jrc_relationship_portfolio',
+    params: route.params,
+    query: {
+      ...query(),
+      mode: filter.renewal_days ? 'renewals' : undefined,
+      renewal_days: filter.renewal_days,
+      band: filter.band,
+      factor: filter.factor,
+      factor_direction: filter.direction,
+    },
+  });
 const keys = [
   'customers',
   'mrr_cents',
@@ -43,6 +80,7 @@ const keys = [
   'overdue_actions',
   'overdue_activities',
   'waiting_customer_actions',
+  'waiting_finance_actions',
   'churned',
   'retained',
   'retention_rate',
@@ -61,29 +99,26 @@ watch(
     () => localRefresh.value,
     () => props.startDate,
     () => props.endDate,
+    () => props.search,
   ],
   async (_, __, cleanup) => {
     const controller = new AbortController();
+    activeController = controller;
     cleanup(() => controller.abort());
     rows.value = [];
     metadata.value = null;
     metrics.value = null;
+    drilldown.value = null;
     error.value = '';
     busy.value = true;
     try {
-      const query = {
-        ...Object.fromEntries(
-          Object.entries(filters).filter(([, value]) => value !== '')
-        ),
-        from: props.startDate || undefined,
-        to: props.endDate || undefined,
-      };
+      const params = query();
       const results = await Promise.all([
         API.metadata(route.params.accountId, { signal: controller.signal }),
-        API.team(route.params.accountId, query, {
+        API.team(route.params.accountId, params, {
           signal: controller.signal,
         }),
-        API.dashboard(route.params.accountId, query, {
+        API.dashboard(route.params.accountId, params, {
           signal: controller.signal,
         }),
       ]);
@@ -163,10 +198,23 @@ const money = value => formatMoney(value, metadata.value?.formatting);
     </form>
     <MetricsPanel
       v-if="metrics"
-      :metrics="metrics" :metadata="metadata"
+      :metrics="metrics"
+      :metadata="metadata"
+      inspect
+      @inspect="inspectMetric"
+      @filter="filterPortfolio"
+    />
+    <MetricDrilldownPanel
+      v-if="drilldown"
+      :data="drilldown"
+      :metadata="metadata"
+      @close="drilldown = null"
+      @page="
+        inspectMetric({ metric: drilldown.metric, day: drilldown.day }, $event)
+      "
     />
     <div
-      v-if="visibleRows.length"
+      v-if="rows.length"
       class="overflow-x-auto rounded-xl border border-n-weak"
     >
       <table class="w-full text-left text-sm">
@@ -184,7 +232,7 @@ const money = value => formatMoney(value, metadata.value?.formatting);
         </thead>
         <tbody class="divide-y divide-n-weak">
           <tr
-            v-for="row in visibleRows"
+            v-for="row in rows"
             :key="row.user.id"
           >
             <td class="p-3 font-semibold">{{ row.user.name }}</td>
@@ -204,7 +252,7 @@ const money = value => formatMoney(value, metadata.value?.formatting);
       </table>
     </div>
     <p
-      v-if="!busy && !error && !visibleRows.length"
+      v-if="!busy && !error && !rows.length"
       class="text-sm text-n-slate-11"
     >
       {{ t('RELATIONSHIP.EMPTY') }}

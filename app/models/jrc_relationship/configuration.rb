@@ -26,6 +26,8 @@ class JrcRelationship::Configuration < ApplicationRecord
                     'auto_handoff' => true,
                     'qbr_agenda_template' => "Objetivos e resultados\nSaúde e satisfação\nSuporte e financeiro\nRiscos e renovação\nPróximos passos",
                     'adoption_metric' => 'adoption', 'recurring_ticket_count' => 3, 'growth_threshold_percent' => 20, 'ces_threshold' => 6,
+                    'survey_question_nps' => 'De 0 a 10, quanto você recomendaria nossa empresa?',
+                    'survey_question_ces' => 'De 0 a 10, quanto foi fácil alcançar seu objetivo?',
                     'risk_reasons' => ['Baixa adoção', 'Insatisfação', 'Suporte recorrente', 'Financeiro', 'Renovação', 'Cancelamento solicitado'] }.freeze
 
   def effective_weights
@@ -40,7 +42,7 @@ class JrcRelationship::Configuration < ApplicationRecord
 
   def valid_config
     values = weights.is_a?(Hash) ? effective_weights : {}
-    unless values.keys.sort == DEFAULT_WEIGHTS.keys.sort && values.values.all? { |v| v.is_a?(Numeric) && v >= 0 } && values.values.sum.positive?
+    unless values.keys.sort == DEFAULT_WEIGHTS.keys.sort && values.values.all? { |v| v.is_a?(Numeric) && v.finite? && v >= 0 } && values.values.sum.positive?
       errors.add(:weights, 'must contain valid nonnegative factor weights')
     end
     unless rules.is_a?(Hash) && (rules.keys - DEFAULT_RULES.keys).empty?
@@ -48,13 +50,13 @@ class JrcRelationship::Configuration < ApplicationRecord
       return
     end
     effective_rules.each do |key, value|
-      next if %w[auto_handoff critical_priority_codes qbr_agenda_template adoption_metric risk_reasons].include?(key)
-      errors.add(:rules, "#{key} must be positive") unless value.is_a?(Numeric) && value.positive?
+      next if %w[auto_handoff critical_priority_codes qbr_agenda_template adoption_metric risk_reasons survey_question_nps survey_question_ces].include?(key)
+      errors.add(:rules, "#{key} must be positive") unless value.is_a?(Numeric) && value.finite? && value.positive?
     end
     errors.add(:rules, 'risk bands must be ordered') unless effective_rules['critical_threshold'].to_f < effective_rules['risk_threshold'].to_f && effective_rules['risk_threshold'].to_f < effective_rules['healthy_threshold'].to_f && effective_rules['healthy_threshold'].to_f <= 100
     errors.add(:rules, 'auto_handoff must be boolean') unless [true, false].include?(effective_rules['auto_handoff'])
     codes = effective_rules['critical_priority_codes']
-    %w[qbr_agenda_template adoption_metric].each do |key|
+    %w[qbr_agenda_template adoption_metric survey_question_nps survey_question_ces].each do |key|
       value = effective_rules[key]
       errors.add(:rules, "#{key} must be bounded text") unless value.is_a?(String) && value.length.between?(1, 4000)
     end
@@ -64,6 +66,8 @@ class JrcRelationship::Configuration < ApplicationRecord
       reasons.uniq.size == reasons.size && reasons.all? { |reason| reason.is_a?(String) && reason.strip.length.between?(1, 120) }
     kind, id = scope_key.to_s.split(':')
     target = { 'segment' => JrcCustomers::Taxonomy, 'product' => JrcCrm::Product }[kind]
-    errors.add(:scope_key, 'scope must belong to this account') if target && !target.where(account_id: account_id, id: id).exists?
+    scope = target&.where(account_id: account_id, id: id)
+    scope = scope.where(kind: 'segment') if kind == 'segment' && scope
+    errors.add(:scope_key, 'scope must belong to this account and kind') if scope && !scope.exists?
   end
 end

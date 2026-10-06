@@ -10,6 +10,7 @@ class JrcRelationship::ReportMetrics
     renewed = visibility.crm(@context.account.jrc_crm_contracts).where(source_contract_id: renewals.select(:contract_id), signature_status: 'signed')
     won_count = renewed.distinct.count(:source_contract_id)
     surveys = @context.records(JrcRelationship::Survey).where(assignment_id: ids, kind: 'nps', responded_at: @period)
+    ces = @context.records(JrcRelationship::Survey).where(assignment_id: ids, kind: 'ces', responded_at: @period)
     actions = @context.records(JrcRelationship::Action).where(assignment_id: ids, first_action_at: @period)
     timezone = ActiveRecord::Base.connection.quote(Time.zone.tzinfo.name)
     survey_day = Arel.sql("DATE(responded_at AT TIME ZONE 'UTC' AT TIME ZONE #{timezone})")
@@ -21,6 +22,7 @@ class JrcRelationship::ReportMetrics
     { qbr_completed: qbrs.where(status: 'completed').count, qbr_scheduled: qbrs.where(status: 'scheduled').count,
       renewal_rate: visibility.crm? && renewals.exists? ? 100.0 * won_count / renewals.count : nil,
       renewed_mrr_cents: visibility.crm? ? renewed.sum(:monthly_cents) : nil,
+      ces: ces.average(:score)&.to_f,
       nps_promoters: surveys.where('score >= 9').count, nps_detractors: surveys.where('score <= 6').count,
       nps_evolution: surveys.group(survey_day).order(survey_day).pluck(survey_day, nps_expression, Arel.sql('COUNT(*)'))
         .map { |day, value, count| { day: day, score: value&.to_f, responses: count } },

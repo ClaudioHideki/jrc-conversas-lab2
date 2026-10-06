@@ -3,6 +3,11 @@ class Api::V1::Accounts::Relationship::DashboardController < Api::V1::Accounts::
     render json: presenter.dashboard(filtered_assignments, period: report_period)
   end
 
+  def drilldown
+    render json: JrcRelationship::MetricDrilldown.new(context: relationship_context, scope: filtered_assignments, period: report_period)
+      .call(metric: params.require(:metric), page: params.fetch(:page, 1), day: params[:day])
+  end
+
   def team
     raise Pundit::NotAuthorizedError unless relationship_context.policy.team?
     scope = filtered_assignments
@@ -30,7 +35,7 @@ class Api::V1::Accounts::Relationship::DashboardController < Api::V1::Accounts::
       risk_reasons: ctx.configuration.effective_rules['risk_reasons'], formatting: ctx.formatting,
       can_nico: Current.account.active? && Current.account.custom_attributes['nico_enabled'] == true,
       playbooks: JrcRelationship::Playbook.where(account: Current.account, active: true).order(:name).limit(100).pluck(:id, :name),
-      kinds: JrcRelationship::Workflow::MODELS.keys }
+      playbook_step_kinds: JrcRelationship::PlaybookSteps::KINDS, kinds: JrcRelationship::Workflow::MODELS.keys }
   end
 
   def export

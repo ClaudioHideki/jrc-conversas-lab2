@@ -7,12 +7,15 @@ const base = accountId => {
   }
   return `/api/v1/accounts/${value}/relationship`;
 };
-const operationsBase = accountId => base(accountId).replace(/\/relationship$/, '/crm');
+const operationsBase = accountId =>
+  base(accountId).replace(/\/relationship$/, '/crm');
 export default {
   metadata: (accountId, options) =>
     axios.get(`${base(accountId)}/metadata`, options),
   dashboard: (accountId, params, options) =>
     axios.get(`${base(accountId)}/dashboard`, { ...options, params }),
+  drilldown: (accountId, params, options) =>
+    axios.get(`${base(accountId)}/drilldown`, { ...options, params }),
   team: (accountId, params, options) =>
     axios.get(`${base(accountId)}/team`, { ...options, params }),
   portfolio: (accountId, params, options) =>
@@ -37,15 +40,29 @@ export default {
       options
     ),
   workContext: (accountId, id, params, options) =>
-    axios.get(`${base(accountId)}/portfolio/${Number(id)}/work_context`, { ...options, params }),
+    axios.get(`${base(accountId)}/portfolio/${Number(id)}/work_context`, {
+      ...options,
+      params,
+    }),
   exportPortfolio: (accountId, params) =>
     axios.get(`${base(accountId)}/export`, { params, responseType: 'blob' }),
-  exportHistory: (accountId, params) => axios.get(`${base(accountId)}/export_history`, { params, responseType: 'blob' }),
+  exportHistory: (accountId, params) =>
+    axios.get(`${base(accountId)}/export_history`, {
+      params,
+      responseType: 'blob',
+    }),
   portfolioBatch: (accountId, ids, fields) =>
     axios.post(`${base(accountId)}/portfolio/batch`, { ids, ...fields }),
-  surveyLink: (accountId, id) => axios.get(`${base(accountId)}/surveys/${Number(id)}/link`),
-  deliverSurvey: (accountId, id, conversationId) => axios.post(`${base(accountId)}/surveys/${Number(id)}/deliver`, { conversation_id: conversationId }),
-  nativeCsat: (accountId, id, conversationId) => axios.post(`${base(accountId)}/portfolio/${Number(id)}/native_csat`, { conversation_id: conversationId }),
+  surveyLink: (accountId, id) =>
+    axios.get(`${base(accountId)}/surveys/${Number(id)}/link`),
+  deliverSurvey: (accountId, id, conversationId) =>
+    axios.post(`${base(accountId)}/surveys/${Number(id)}/deliver`, {
+      conversation_id: conversationId,
+    }),
+  nativeCsat: (accountId, id, conversationId) =>
+    axios.post(`${base(accountId)}/portfolio/${Number(id)}/native_csat`, {
+      conversation_id: conversationId,
+    }),
   records: (accountId, kind, params, options) =>
     axios.get(`${base(accountId)}/records/${kind}`, { ...options, params }),
   saveRecord: (accountId, kind, record, id) =>
@@ -71,12 +88,22 @@ export default {
     axios.get(`${operationsBase(accountId)}/operations_sla_policies`, options),
   saveOperationsQueue: (accountId, operations_queue, id) =>
     id
-      ? axios.patch(`${operationsBase(accountId)}/operations_queues/${Number(id)}`, { operations_queue })
-      : axios.post(`${operationsBase(accountId)}/operations_queues`, { operations_queue }),
+      ? axios.patch(
+          `${operationsBase(accountId)}/operations_queues/${Number(id)}`,
+          { operations_queue }
+        )
+      : axios.post(`${operationsBase(accountId)}/operations_queues`, {
+          operations_queue,
+        }),
   saveOperationsPolicy: (accountId, operations_sla_policy, id) =>
     id
-      ? axios.patch(`${operationsBase(accountId)}/operations_sla_policies/${Number(id)}`, { operations_sla_policy })
-      : axios.post(`${operationsBase(accountId)}/operations_sla_policies`, { operations_sla_policy }),
+      ? axios.patch(
+          `${operationsBase(accountId)}/operations_sla_policies/${Number(id)}`,
+          { operations_sla_policy }
+        )
+      : axios.post(`${operationsBase(accountId)}/operations_sla_policies`, {
+          operations_sla_policy,
+        }),
   playbooks: (accountId, options) =>
     axios.get(`${base(accountId)}/playbooks`, options),
   savePlaybook: (accountId, playbook, id) =>

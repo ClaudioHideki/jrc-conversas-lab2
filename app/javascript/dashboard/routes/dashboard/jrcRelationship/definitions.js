@@ -14,7 +14,15 @@ export const SCREENS = [
   'settings',
 ];
 export const STATES = {
-  actions: ['open', 'in_progress', 'waiting_customer', 'completed', 'dismissed'],
+  surveys: ['awaiting', 'responded', 'expired'],
+  actions: [
+    'open',
+    'in_progress',
+    'waiting_customer',
+    'waiting_finance',
+    'completed',
+    'dismissed',
+  ],
   risks: [
     'detected',
     'analyzing',
@@ -31,11 +39,26 @@ export const STATES = {
 };
 export const FIELDS = {
   actions: ['reason', 'status', 'priority', 'due_at', 'result', 'owner_id'],
-  risks: ['reason', 'kind', 'severity', 'status', 'due_at', 'outcome', 'owner_id'],
+  risks: [
+    'reason',
+    'kind',
+    'severity',
+    'status',
+    'due_at',
+    'outcome',
+    'owner_id',
+  ],
   plans: ['title', 'status', 'target_on', 'project_id', 'owner_id'],
   qbrs: ['title', 'status', 'scheduled_at', 'agenda', 'summary', 'owner_id'],
   renewals: ['status', 'proposed_mrr_cents'],
-  expansion: ['title', 'status', 'expansion_kind', 'potential_cents', 'product_id', 'evidence'],
+  expansion: [
+    'title',
+    'status',
+    'expansion_kind',
+    'potential_cents',
+    'product_id',
+    'evidence',
+  ],
   surveys: ['kind'],
 };
 export const inputClass =
@@ -53,7 +76,9 @@ export const date = (value, formatting = {}) =>
   value
     ? new Intl.DateTimeFormat(formatting?.locale || 'pt-BR', {
         dateStyle: 'short',
-        ...(value.length === 10 ? { timeZone: 'UTC' } : { timeStyle: 'short', timeZone: formatting?.timeZone }),
+        ...(value.length === 10
+          ? { timeZone: 'UTC' }
+          : { timeStyle: 'short', timeZone: formatting?.timeZone }),
       }).format(new Date(value.length === 10 ? `${value}T12:00:00Z` : value))
     : '—';
 export const message = error =>

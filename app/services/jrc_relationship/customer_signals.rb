@@ -57,7 +57,8 @@ class JrcRelationship::CustomerSignals
       [id, JrcRelationship::HealthScore.call(observations: product_observations, weights: config.effective_weights, rules: config.effective_rules)
         .merge(config_scope_key: config.scope_key, config_version: config.version)]
     end
-    { health: health, product_health: product_health, products: products.map { |id, name| { id: id, name: name } }, portfolio_status: assignment.status,
+    { segment_id: assignment.settings['segment_id'], product_id: assignment.settings['product_id'], business_unit_id: assignment.business_unit_id,
+      health: health, product_health: product_health, products: products.map { |id, name| { id: id, name: name } }, portfolio_status: assignment.status,
       usage_growth: JrcRelationship::AdoptionMetric.growth(goals: goals, metric: rules['adoption_metric']),
       recurring_tickets: recent_tickets.count, recent_resolved_critical_ticket_ids: recent_tickets.joins(:status, :priority)
         .where(jrc_service_desk_ticket_statuses: { phase: %w[resolved closed] }, jrc_service_desk_priorities: { code: rules['critical_priority_codes'] }).pluck(:id),

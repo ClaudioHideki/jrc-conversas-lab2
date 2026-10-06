@@ -61,7 +61,7 @@ RSpec.describe 'Relationship operational regression' do
     qbr = workflow.save(kind: 'qbrs', attributes: { assignment_id: assignment.id, request_id: 'qbr', title: 'Quarterly review', scheduled_at: 1.day.from_now })[:record]
     assignment.with_lock { JrcRelationship::Playbooks.new(context).run!(assignment, 'onboarded') }
     actions = assignment.actions.where.not(activity_id: nil)
-    expect(actions.count).to eq(4)
+    expect(actions.count).to eq(5)
     expect(actions.where(operations_queue_id: nil).count).to eq(0)
     expect(actions.where(operations_sla_policy_id: nil).count).to eq(0)
     qbr.activity.update!(status: 'completed', completed_at: Time.current)
@@ -142,4 +142,61 @@ RSpec.describe 'Relationship operational regression' do
     JrcRelationship::SlaMonitorJob.perform_now(sd_account.id)
     expect(audits.where(event_type: 'operations_sla_threshold').count).to eq(1)
   end
+  it 'pauses finance waiting through the existing default SLA and preserves one pause across reasons' do
+    assignment.update!(created_at: 40.days.ago)
+    processor = JrcRelationship::Processor.new(context: context, assignment: assignment)
+    processor.call
+    action = assignment.actions.find_by!(kind: 'no_contact')
+    started = Time.current
+    original = action.sla_due_at
+    original_due = action.due_at
+    travel_to(started + 1.hour) do
+      workflow.save(kind: 'actions', id: action.id, attributes: { assignment_id: assignment.id,
+        lock_version: action.reload.lock_version, status: 'waiting_finance' })
+      expect(action.reload.activity.metadata['relationship_sla_paused_at']).to be_present
+      expect(action.activity.status).to eq('scheduled')
+    end
+    travel_to(started + 2.days) do
+      processor.call
+      expect(assignment.actions.where(kind: 'no_contact').pluck(:id)).to eq([action.id])
+      expect(JrcRelationship::Presenter.new(context).dashboard(context.assignments)[:waiting_finance_actions]).to eq(1)
+      expect(JrcRelationship::TeamMetrics.new(context: context, scope: context.assignments).call[sd_user.id][:waiting_finance_actions]).to eq(1)
+      data = JrcRelationship::MetricDrilldown.new(context: context, scope: context.assignments).call(metric: 'waiting_finance_actions')
+      expect(data[:total]).to eq(1)
+      paused = action.reload.sla_paused_at
+      workflow.save(kind: 'actions', id: action.id, attributes: { assignment_id: assignment.id,
+        lock_version: action.lock_version, status: 'waiting_customer' })
+      expect(action.reload.sla_paused_at).to eq(paused)
+      workflow.save(kind: 'actions', id: action.id, attributes: { assignment_id: assignment.id,
+        lock_version: action.lock_version, status: 'in_progress' })
+      expect(action.reload.sla_due_at).to be_within(1.second).of(original + 47.hours)
+      expect(action.due_at).to be_within(1.second).of(original_due + 47.hours)
+      expect(action.activity.reload.due_at).to eq(action.due_at)
+      expect(action.activity.metadata).not_to have_key('relationship_sla_paused_at')
+    end
+  end
+
+  it 'extends legacy CS system policies while preserving explicit custom and other-scope pause settings' do
+    policy = JrcOperations::SlaPolicy.new(account: sd_account, name: 'Legacy', scope_kind: 'relationship',
+      conditions: { system_default: true }, pause_statuses: ['waiting_customer'])
+    expect(policy.pause_status?('waiting_finance')).to be(true)
+    expect(policy.pause_statuses).to eq(['waiting_customer'])
+    policy.conditions = {}
+    expect(policy.pause_status?('waiting_finance')).to be(false)
+    policy.pause_statuses = %w[waiting_customer waiting_finance]
+    expect(policy.pause_status?('waiting_finance')).to be(true)
+    policy.scope_kind = 'backoffice'
+    policy.pause_statuses = ['waiting_customer']
+    policy.conditions = { system_default: true }
+    expect(policy.pause_status?('waiting_finance')).to be(false)
+  end
+
+  it 'projects a newly created finance-waiting action to the same Agenda with its pause marker' do
+    action = workflow.save(kind: 'actions', attributes: { assignment_id: assignment.id, request_id: 'initial-finance-pause',
+      reason: 'Finance confirmation', status: 'waiting_finance', due_at: 2.hours.from_now })[:record]
+    expect(action.sla_paused_at).to be_present
+    expect(action.activity.metadata['relationship_sla_paused_at']).to eq(action.sla_paused_at.iso8601)
+    expect(action.activity.status).to eq('scheduled')
+  end
+
 end

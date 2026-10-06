@@ -70,13 +70,17 @@
       "churned": "Churn",
       "inactive": "Inativo",
       "waiting_customer": "Aguardando cliente",
+      "waiting_finance": "Aguardando financeiro",
       "pending": "Pendente",
       "on_hold": "Em espera",
       "upsell": "Upsell",
       "cross_sell": "Cross-sell",
       "usage": "Crescimento de uso",
       "new_product": "Novo produto",
-      "new_unit": "Nova unidade"
+      "new_unit": "Nova unidade",
+      "awaiting": "Aguardando resposta",
+      "responded": "Respondida",
+      "expired": "Expirada"
     },
     "FIELDS": {
       "customer": "Cliente",
@@ -143,7 +147,27 @@
       "score_max": "Health máximo",
       "mrr_min_cents": "MRR mínimo (centavos)",
       "mrr_max_cents": "MRR máximo (centavos)",
-      "expansion_kind": "Tipo de expansão"
+      "expansion_kind": "Tipo de expansão",
+      "notes": "Observações",
+      "activity_id": "Atividade existente",
+      "user_id": "Participante interno",
+      "participant_type": "Tipo de participante",
+      "last_calculation": "Último cálculo",
+      "origin": "Origem",
+      "updated_at": "Última atualização",
+      "mrr_at_risk": "MRR em risco",
+      "contract": "Contrato",
+      "days_remaining": "Dias restantes",
+      "current_mrr": "MRR atual",
+      "adjustment": "Reajuste",
+      "value": "Valor",
+      "deal_status": "Resultado no CRM",
+      "expansion_won_cents": "Receita ganha",
+      "channel": "Canal",
+      "score": "Nota",
+      "comment": "Comentário",
+      "responded_at": "Respondida em",
+      "expires_at": "Validade"
     },
     "METRICS": {
       "customers": "Clientes na carteira",
@@ -162,11 +186,12 @@
       "overdue_activities": "Atividades vencidas",
       "actions_today": "Ações hoje",
       "overdue_actions": "Ações vencidas",
-      "expansion_potential_cents": "Expansão identificada",
+      "expansion_potential_cents": "Expansão em aberto",
       "expansion_won_cents": "Expansão ganha",
       "nrr": "NRR (%)",
       "renewals_60": "Renovações em até 60 dias",
       "waiting_customer_actions": "Ações aguardando cliente",
+      "waiting_finance_actions": "Ações aguardando financeiro",
       "gross_retention": "GRR (%)",
       "revenue_churn": "Churn de receita (%)",
       "revenue_churn_cents": "Receita perdida",
@@ -177,7 +202,8 @@
       "nps_promoters": "Promotores NPS",
       "nps_detractors": "Detratores NPS",
       "first_action_minutes": "Primeira ação (minutos úteis)",
-      "open_retention_cases": "Retenções abertas"
+      "open_retention_cases": "Retenções abertas",
+      "ces": "CES médio (0–10)"
     },
     "TRIGGERS": {
       "manual": "Alerta manual",
@@ -195,7 +221,8 @@
       "expansion": "Expansão",
       "retention": "Retenção",
       "recurring_ticket": "Reincidência de chamados",
-      "post_ticket": "Chamado crítico resolvido"
+      "post_ticket": "Chamado crítico resolvido",
+      "playbook": "Playbook"
     },
     "MODES": {
       "mine": "Minha carteira",
@@ -287,7 +314,9 @@
       "adoption_metric": "Métrica de adoção dos planos",
       "recurring_ticket_count": "Chamados para reincidência em 30 dias",
       "growth_threshold_percent": "Crescimento mínimo para expansão (%)",
-      "risk_reasons": "Motivos de risco (separados por vírgula)"
+      "risk_reasons": "Motivos de risco (separados por vírgula)",
+      "survey_question_nps": "Pergunta NPS (0–10)",
+      "survey_question_ces": "Pergunta CES (0–10)"
     },
     "ACCOUNT_SCOPE": "Toda a conta",
     "CONFIG_SCOPE": "Configuração por conta, segmento ou produto",
@@ -315,6 +344,7 @@
       "within": "Dentro do prazo"
     },
     "OPERATIONS": {
+      "HOLIDAYS_EXAMPLE": "2026-12-25, 2027-01-01",
       "TITLE": "Filas e SLA operacional",
       "RESTRICTED": "A configuração operacional exige permissão de administrador do CRM.",
       "NEW_QUEUE": "Nova fila",
@@ -418,7 +448,10 @@
       "nps": "NPS",
       "csat": "CSAT",
       "overdue_cents": "Financeiro vencido (centavos)",
-      "delayed_projects": "Projetos/tarefas atrasados"
+      "delayed_projects": "Projetos/tarefas atrasados",
+      "segment_id": "Segmento do Cadastro Mestre",
+      "product_id": "Produto contratado ou da carteira",
+      "business_unit_id": "Empresa / unidade operacional"
     },
     "EXPORT_HISTORY": "Exportar histórico autorizado",
     "NEGATIVE_FACTORS": "Principais fatores negativos",
@@ -443,6 +476,84 @@
       "summary": "Use read_relationship_customer com assignment_id {id} e prepare um resumo executivo 360° com evidências autorizadas. Não execute alterações ou envios.",
       "risk": "Use read_relationship_customer com assignment_id {id} para explicar os riscos e fatores de Health Score, suas evidências e possíveis planos de retenção. Não execute alterações ou envios.",
       "next_action": "Use read_relationship_customer com assignment_id {id} para sugerir a próxima ação de relacionamento, retenção, renovação ou expansão com evidências. Não execute alterações ou envios."
-    }
+    },
+    "NO_HEALTH_HISTORY": "Ainda não há histórico autorizado para este período.",
+    "NO_HEALTH_CHANGE": "Ainda não há duas medições comparáveis com variação neste período.",
+    "CUSTOMER_COUNT": "{count} clientes",
+    "RENEWAL_PIPELINE": "Pipeline de renovações",
+    "RENEWAL_WINDOW_EXPLANATION": "Faixas exclusivas de dias até o vencimento: 91–120, 61–90, 31–60, 16–30 e 0–15. Contratos vencidos aparecem separadamente.",
+    "DRILLDOWN_SOURCE_COUNT": "{count} registros de origem autorizados",
+    "CLEAR_FACTOR_FILTER": "Remover filtro de fator",
+    "EMPTY_PORTFOLIO_GUIDANCE": "A carteira recebe clientes após o go-live elegível ou atribuição autorizada. Clientes cadastrados não entram automaticamente só por existir no Cadastro Mestre. Para clientes já implantados, o administrador pode simular o backfill controlado.",
+    "CONFIGURATION_CHANGE": "A configuração de cálculo mudou entre estas medições.",
+    "HEALTH_CHANGE": "Variação: {delta} pontos",
+    "HEALTH": {
+      "most_declined": "Clientes que mais pioraram",
+      "most_improved": "Clientes que mais melhoraram",
+      "negative_factors": "Principais fatores negativos",
+      "positive_factors": "Principais fatores positivos"
+    },
+    "WINDOWS": {
+      "120": "120 dias",
+      "90": "90 dias",
+      "60": "60 dias",
+      "30": "30 dias",
+      "15": "15 dias",
+      "overdue": "Vencidas",
+      "later": "Acima de 120 dias"
+    },
+    "PARTICIPANTS": {
+      "internal": "Interno",
+      "external": "Externo"
+    },
+    "AGGREGATIONS": {
+      "count": "Contagem",
+      "sum": "Soma dos valores",
+      "average": "Média dos valores disponíveis",
+      "ratio": "Taxa calculada sobre os registros do período",
+      "cohort": "Receita de abertura e fechamento da mesma carteira"
+    },
+    "SOURCES": {
+      "customer": "Cliente e saúde",
+      "assignment": "Carteira",
+      "activity": "Atividade",
+      "action": "Ação de relacionamento",
+      "contract": "Contrato",
+      "order": "Pedido",
+      "invoice": "Financeiro",
+      "ticket": "Chamado",
+      "project": "Projeto",
+      "survey": "Pesquisa",
+      "expansion": "Expansão",
+      "expansion_signal": "Sinal de expansão",
+      "health_snapshot": "Medição de saúde",
+      "qbr": "QBR / reunião",
+      "risk_case": "Caso de risco",
+      "deal": "Negócio",
+      "csat_survey_response": "Resposta CSAT",
+      "project_task": "Tarefa de projeto"
+    },
+    "ARROW": "→",
+    "PLAYBOOK_STEPS": {
+      "activity": "Atividade / tarefa",
+      "action": "Ação operacional",
+      "meeting": "Reunião na Agenda",
+      "success_plan": "Plano de sucesso 30/60/90 dias",
+      "risk": "Caso de risco / retenção"
+    },
+    "DEAL_STATES": {
+      "open": "Negócio aberto",
+      "won": "Negócio ganho",
+      "lost": "Negócio perdido",
+      "archived": "Negócio arquivado"
+    },
+    "SURVEY_CHANNELS": {
+      "Channel::Whatsapp": "WhatsApp",
+      "Channel::TwilioSms": "WhatsApp / Twilio",
+      "Channel::Email": "E-mail",
+      "public_link": "Link público"
+    },
+    "NATIVE_CSAT_GUIDANCE": "NPS e CES relacionais usam as pesquisas abaixo. CSAT é consumido das respostas nativas das Conversas; clique no indicador para consultar as respostas e abrir a conversa de origem. O período filtra respostas recebidas.",
+    "KEEP_CURRENT": "Manter valor atual"
   }
 }

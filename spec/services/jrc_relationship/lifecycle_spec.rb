@@ -39,8 +39,11 @@ RSpec.describe 'Relationship native lifecycle' do
     expect(JrcRelationship::Assignment.where(account: sd_account, company: company).count).to eq(1)
     expect(JrcRelationship::Action.where(assignment: assignment, source_key: 'handoff').count).to eq(1)
     activities = JrcCrm::Activity.where(account: sd_account).where("metadata ->> 'relationship_assignment_id' = ?", assignment.id.to_s)
-    expect(activities.count).to eq(4)
-    expect(activities.pluck(:due_at).uniq.size).to eq(4)
+    expect(activities.count).to eq(5)
+    expect(activities.where(activity_type: 'meeting').count).to eq(1)
+    plans = JrcRelationship::SuccessPlan.where(assignment: assignment)
+    expect(plans.count).to eq(1)
+    expect(plans.first.metadata['milestones'].size).to eq(3)
   end
 
   it 'REL-002/CS-03 changes health band and evaluates critical risk without duplicate actions' do
@@ -93,6 +96,15 @@ RSpec.describe 'Relationship native lifecycle' do
     2.times { process }
     expect(JrcRelationship::Renewal.where(contract: contract).count).to eq(1)
     expect(JrcRelationship::Presenter.new(context).dashboard(context.assignments)[:renewals][60]).to eq(1)
+  end
+
+  it 'REL-03 reconciles management MRR with active native contracts before any health snapshot exists' do
+    signed_contract
+    assignment
+    dashboard = JrcRelationship::Presenter.new(context).dashboard(context.assignments)
+    team = JrcRelationship::TeamMetrics.new(context: context, scope: context.assignments).call
+    expect(dashboard[:mrr_cents]).to eq(100_000)
+    expect(team.fetch(sd_user.id)[:mrr_cents]).to eq(dashboard[:mrr_cents])
   end
 
   it 'REL-007 creates exactly one real CRM opportunity with traceable origin' do

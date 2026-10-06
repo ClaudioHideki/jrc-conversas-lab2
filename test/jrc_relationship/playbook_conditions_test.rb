@@ -36,4 +36,16 @@ class PlaybookConditionsTest < Minitest::Test
       assert JrcRelationship::PlaybookConditions.match?([{ 'field' => 'csat', 'operator' => operator, 'value' => target }], { csat: 5 })
     end
   end
+  def test_native_segment_product_and_unit_conditions_require_matching_real_ids
+    conditions = [{ 'field'=>'segment_id', 'operator'=>'eq', 'value'=>2 },
+      { 'field'=>'product_id', 'operator'=>'eq', 'value'=>9 }, { 'field'=>'business_unit_id', 'operator'=>'eq', 'value'=>3 }]
+    signals = { segment_id:'2', products:[{ id:9 }], business_unit_id:3 }
+    assert JrcRelationship::PlaybookConditions.match?(conditions, signals)
+    refute JrcRelationship::PlaybookConditions.match?(conditions, signals.merge(business_unit_id:4))
+    refute JrcRelationship::PlaybookConditions.match?(conditions, signals.merge(products:[]))
+    refute JrcRelationship::PlaybookConditions.valid?([{ 'field'=>'product_id', 'operator'=>'lt', 'value'=>9 }])
+    refute JrcRelationship::PlaybookConditions.valid?([{ 'field'=>'product_id', 'operator'=>'eq', 'value'=>9.5 }])
+    refute JrcRelationship::PlaybookConditions.valid?([{ 'field'=>'product_id', 'operator'=>'eq', 'value'=>0 }])
+  end
+
 end

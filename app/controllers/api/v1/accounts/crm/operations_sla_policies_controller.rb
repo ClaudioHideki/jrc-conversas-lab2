@@ -53,7 +53,7 @@ module Api::V1::Accounts::Crm
         id: policy.id, name: policy.name, scope_kind: policy.scope_kind, request_kind: policy.request_kind,
         priority: policy.priority, first_action_minutes: policy.first_action_minutes,
         stage_minutes: policy.stage_minutes, total_minutes: policy.total_minutes, active: policy.active,
-        conditions: policy.conditions, business_hours: policy.business_hours, pause_statuses: policy.pause_statuses,
+        conditions: policy.conditions, business_hours: policy.business_hours, pause_statuses: policy.effective_pause_statuses,
         alert_thresholds: policy.alert_thresholds, escalation: policy.escalation,
         queue: policy.operations_queue && { id: policy.operations_queue.id, name: policy.operations_queue.name, code: policy.operations_queue.code },
         created_at: policy.created_at, updated_at: policy.updated_at

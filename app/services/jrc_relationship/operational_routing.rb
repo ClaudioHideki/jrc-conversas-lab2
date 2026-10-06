@@ -60,6 +60,7 @@ class JrcRelationship::OperationalRouting
       request_kind: action.kind) do |row|
       row.first_action_minutes = first_minutes
       row.total_minutes = total_minutes
+      row.pause_statuses = JrcRelationship::Action::WAITING_STATUSES
       row.conditions = { system_default: true, config_scope: configuration.scope_key, config_version: configuration.version }
     end
   end
@@ -77,7 +78,7 @@ class JrcRelationship::OperationalRouting
     scope = JrcRelationship::Action.where(account: @context.account, operations_queue: queue, owner_id: ids)
     case queue.assignment_strategy
     when 'least_load'
-      counts = scope.where(status: %w[open in_progress waiting_customer]).group(:owner_id).count
+      counts = scope.where(status: JrcRelationship::Action::ACTIVE_STATUSES).group(:owner_id).count
       candidates.min_by { |user| [counts.fetch(user.id, 0), user.id] }
     when 'round_robin'
       dates = scope.group(:owner_id).maximum(:created_at)

@@ -409,6 +409,7 @@ Rails.application.routes.draw do
           namespace :relationship do
             get :metadata, to: 'dashboard#metadata'
             get :dashboard, to: 'dashboard#show'
+            get :drilldown, to: 'dashboard#drilldown'
             get :team, to: 'dashboard#team'
             resources :portfolio, only: [:index, :show, :create, :update] do
               member do

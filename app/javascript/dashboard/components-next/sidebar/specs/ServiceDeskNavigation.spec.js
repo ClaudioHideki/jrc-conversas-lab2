@@ -1,6 +1,8 @@
 import { runInNewContext } from 'node:vm';
 import { babelParse } from '@vue/compiler-sfc';
 import sidebarSource from '../Sidebar.vue?raw';
+import { visibleSidebarSections } from '../temporaryVisibility';
+import { universityLink } from '../university';
 
 // Execute the actual section composer: regression for a granted item silently
 // dropped between menuItems and the template's menuSections.
@@ -9,11 +11,15 @@ const node = babelParse(source, { sourceType: 'module' }).program.body.find(
   statement => statement.declarations?.[0]?.id.name === 'menuSections'
 );
 const sections = items =>
+  // The public university link is covered separately; it is not an operational grant.
   runInNewContext(`${source.slice(node.start, node.end)}; menuSections.value`, {
     computed: callback => ({ value: callback() }),
     menuItems: { value: items },
     legacyMenuItems: { value: [] },
-  });
+    visibleSidebarSections,
+    universityLink,
+    t: key => key,
+  }).filter(section => section.name !== 'learning');
 
 describe('Service Desk final sidebar sections', () => {
   it('shows structural access without granting operational navigation', () => {

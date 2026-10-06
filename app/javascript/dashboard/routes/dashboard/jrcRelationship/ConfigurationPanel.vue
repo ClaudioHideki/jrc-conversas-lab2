@@ -4,7 +4,12 @@ import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcRelationship';
-import { buttonClass, inputClass, message, date as formatDate } from './definitions';
+import {
+  buttonClass,
+  inputClass,
+  message,
+  date as formatDate,
+} from './definitions';
 import OperationsSettingsPanel from './OperationsSettingsPanel.vue';
 const props = defineProps({
   screen: { type: String, default: 'settings' },
@@ -59,6 +64,7 @@ const load = async () => {
   }
 };
 const save = async () => {
+  if (busy.value || !props.allowed) return;
   const version = generation;
   const accountId = route.params.accountId;
   busy.value = true;
@@ -66,8 +72,10 @@ const save = async () => {
   try {
     if (props.screen === 'settings')
       await API.saveConfiguration(accountId, {
-        scope_key: config.value.scope_key, version: config.value.version,
-        weights: config.value.weights, rules: config.value.rules,
+        scope_key: config.value.scope_key,
+        version: config.value.version,
+        weights: config.value.weights,
+        rules: config.value.rules,
       });
     else {
       await API.savePlaybook(accountId, book.value, book.value.id);
@@ -83,8 +91,18 @@ const save = async () => {
 const edit = row => {
   book.value = row
     ? JSON.parse(JSON.stringify(row))
-    : { name: '', trigger_kind: 'onboarded', active: true, steps: [], conditions: [] };
+    : {
+        name: '',
+        trigger_kind: 'onboarded',
+        active: true,
+        steps: [],
+        conditions: [],
+      };
   book.value.conditions ||= [];
+  book.value.steps = book.value.steps.map((step, index) => ({
+    ...step,
+    step_key: step.step_key || String(index),
+  }));
 };
 watch(
   () => route.params.accountId,
@@ -93,7 +111,12 @@ watch(
   }
 );
 watch(
-  [() => route.params.accountId, () => store.getters.getCurrentUserID, () => props.screen, () => props.allowed],
+  [
+    () => route.params.accountId,
+    () => store.getters.getCurrentUserID,
+    () => props.screen,
+    () => props.allowed,
+  ],
   load,
   { immediate: true }
 );
@@ -101,6 +124,26 @@ watch(scopeKey, load);
 onBeforeUnmount(() => {
   generation += 1;
 });
+const conditionReferences = field =>
+  ({
+    segment_id: props.metadata.segments,
+    product_id: props.metadata.products,
+    business_unit_id: props.metadata.units,
+  })[field];
+const conditionFields = [
+  'segment_id',
+  'product_id',
+  'business_unit_id',
+  'health_score',
+  'mrr_cents',
+  'days_without_contact',
+  'critical_tickets',
+  'sla_breached',
+  'nps',
+  'csat',
+  'overdue_cents',
+  'delayed_projects',
+];
 const date = value => formatDate(value, props.metadata?.formatting);
 </script>
 
@@ -129,6 +172,12 @@ const date = value => formatDate(value, props.metadata?.formatting);
         </option>
       </select></label
     >
+    <p
+      v-if="busy"
+      role="status"
+    >
+      {{ t('RELATIONSHIP.LOADING') }}
+    </p>
     <p
       v-if="error"
       role="alert"
@@ -168,13 +217,15 @@ const date = value => formatDate(value, props.metadata?.formatting);
           }}<input
             v-if="typeof config.rules[key] === 'boolean'"
             v-model="config.rules[key]"
-            type="checkbox" /><input
+            type="checkbox"
+          /><input
             v-else-if="typeof config.rules[key] === 'number'"
             v-model.number="config.rules[key]"
             type="number"
             step="0.1"
             min="0.01"
-            :class="inputClass" /><input
+            :class="inputClass"
+          /><input
             v-else-if="Array.isArray(config.rules[key])"
             :value="config.rules[key].join(', ')"
             :class="inputClass"
@@ -184,7 +235,12 @@ const date = value => formatDate(value, props.metadata?.formatting);
                 .map(value => value.trim())
                 .filter(Boolean)
             "
-        /><textarea v-else v-model="config.rules[key]" :class="inputClass" /></label>
+          /><textarea
+            v-else
+            v-model="config.rules[key]"
+            :class="inputClass"
+          />
+        </label>
       </div>
       <button
         type="submit"
@@ -195,34 +251,79 @@ const date = value => formatDate(value, props.metadata?.formatting);
         {{ t('RELATIONSHIP.SAVE') }}
       </button>
     </form>
-    <section v-if="config" class="mt-6" aria-labelledby="configuration-history-title">
-      <h3 id="configuration-history-title" class="mb-3 font-semibold">{{ t('RELATIONSHIP.CONFIG_HISTORY') }}</h3>
-      <p v-if="!config.history?.length">{{ t('RELATIONSHIP.CONFIG_HISTORY_EMPTY') }}</p>
-      <details v-for="version in config.history || []" :key="version.version" class="mb-2 rounded-xl border border-n-weak p-3">
+    <section
+      v-if="config"
+      class="mt-6"
+      aria-labelledby="configuration-history-title"
+    >
+      <h3
+        id="configuration-history-title"
+        class="mb-3 font-semibold"
+      >
+        {{ t('RELATIONSHIP.CONFIG_HISTORY') }}
+      </h3>
+      <p v-if="!config.history?.length">
+        {{ t('RELATIONSHIP.CONFIG_HISTORY_EMPTY') }}
+      </p>
+      <details
+        v-for="version in config.history || []"
+        :key="version.version"
+        class="mb-2 rounded-xl border border-n-weak p-3"
+      >
         <summary class="cursor-pointer text-sm">
-          {{ t('RELATIONSHIP.VERSION', { version: version.version }) }} · {{ date(version.created_at) }} ·
-          {{ metadata.owners?.find(owner => owner[0] === version.actor_id)?.[1] || (version.actor_id ? t('RELATIONSHIP.CONFIG_ACTOR', { id: version.actor_id }) : t('RELATIONSHIP.SYSTEM')) }}
+          {{ t('RELATIONSHIP.VERSION', { version: version.version }) }} ·
+          {{ date(version.created_at) }} ·
+          {{
+            metadata.owners?.find(
+              owner => owner[0] === version.actor_id
+            )?.[1] ||
+            (version.actor_id
+              ? t('RELATIONSHIP.CONFIG_ACTOR', { id: version.actor_id })
+              : t('RELATIONSHIP.SYSTEM'))
+          }}
         </summary>
         <h4 class="mt-3 font-semibold">{{ t('RELATIONSHIP.WEIGHTS') }}</h4>
         <dl class="grid gap-2 sm:grid-cols-2">
-          <div v-for="(value, key) in version.weights" :key="key" class="flex justify-between gap-3 text-sm">
-            <dt>{{ t(`RELATIONSHIP.FACTORS.${key}`) }}</dt><dd>{{ value }}</dd>
+          <div
+            v-for="(value, key) in version.weights"
+            :key="key"
+            class="flex justify-between gap-3 text-sm"
+          >
+            <dt>{{ t(`RELATIONSHIP.FACTORS.${key}`) }}</dt>
+            <dd>{{ value }}</dd>
           </div>
         </dl>
         <h4 class="mt-3 font-semibold">{{ t('RELATIONSHIP.RULES') }}</h4>
         <dl class="grid gap-2 sm:grid-cols-2">
-          <div v-for="(value, key) in version.rules" :key="key" class="flex justify-between gap-3 text-sm">
+          <div
+            v-for="(value, key) in version.rules"
+            :key="key"
+            class="flex justify-between gap-3 text-sm"
+          >
             <dt>{{ t(`RELATIONSHIP.RULE_LABELS.${key}`) }}</dt>
-            <dd>{{ Array.isArray(value) ? value.join(', ') : typeof value === 'boolean' ? t(value ? 'RELATIONSHIP.YES' : 'RELATIONSHIP.NO') : value }}</dd>
+            <dd>
+              {{
+                Array.isArray(value)
+                  ? value.join(', ')
+                  : typeof value === 'boolean'
+                    ? t(value ? 'RELATIONSHIP.YES' : 'RELATIONSHIP.NO')
+                    : value
+              }}
+            </dd>
           </div>
         </dl>
       </details>
     </section>
-    <OperationsSettingsPanel v-if="screen === 'settings'" :allowed="allowed && metadata.can_configure_operations" :metadata="metadata" />
+    <OperationsSettingsPanel
+      v-if="screen === 'settings'"
+      :allowed="allowed && metadata.can_configure_operations"
+      :metadata="metadata"
+    />
     <template v-if="screen === 'playbooks'">
       <button
         type="button"
         :class="buttonClass"
+        :disabled="busy"
         @click="edit(null)"
       >
         {{ t('RELATIONSHIP.NEW') }}
@@ -239,6 +340,7 @@ const date = value => formatDate(value, props.metadata?.formatting);
           ><button
             type="button"
             :class="buttonClass"
+            :disabled="busy"
             @click="edit(row)"
           >
             {{ t('RELATIONSHIP.EDIT') }}
@@ -289,17 +391,91 @@ const date = value => formatDate(value, props.metadata?.formatting);
           {{ t('RELATIONSHIP.STATES.active') }}</label
         >
         <h4 class="mt-4 font-semibold">{{ t('RELATIONSHIP.CONDITIONS') }}</h4>
-        <div v-for="(condition, index) in book.conditions" :key="index" class="mt-2 flex gap-2">
-          <select v-model="condition.field" :class="inputClass" :aria-label="t('RELATIONSHIP.FIELDS.metric')">
-            <option v-for="field in ['health_score', 'mrr_cents', 'days_without_contact', 'critical_tickets', 'sla_breached', 'nps', 'csat', 'overdue_cents', 'delayed_projects']" :key="field" :value="field">{{ t(`RELATIONSHIP.CONDITION_FIELDS.${field}`) }}</option>
+        <div
+          v-for="(condition, index) in book.conditions"
+          :key="index"
+          class="mt-2 flex gap-2"
+        >
+          <select
+            v-model="condition.field"
+            @change="
+              condition.operator = 'eq';
+              condition.value =
+                conditionReferences(condition.field)?.[0]?.[0] || 0;
+            "
+            :class="inputClass"
+            :aria-label="t('RELATIONSHIP.FIELDS.metric')"
+          >
+            <option
+              v-for="field in conditionFields"
+              :key="field"
+              :value="field"
+            >
+              {{ t(`RELATIONSHIP.CONDITION_FIELDS.${field}`) }}
+            </option>
           </select>
-          <select v-model="condition.operator" :class="inputClass" :aria-label="t('RELATIONSHIP.OPERATOR')">
-            <option v-for="operator in ['lt', 'lte', 'eq', 'gte', 'gt']" :key="operator" :value="operator">{{ t(`RELATIONSHIP.OPERATORS.${operator}`) }}</option>
+          <select
+            v-model="condition.operator"
+            :class="inputClass"
+            :aria-label="t('RELATIONSHIP.OPERATOR')"
+          >
+            <option
+              v-for="operator in conditionReferences(condition.field)
+                ? ['eq']
+                : ['lt', 'lte', 'eq', 'gte', 'gt']"
+              :key="operator"
+              :value="operator"
+            >
+              {{ t(`RELATIONSHIP.OPERATORS.${operator}`) }}
+            </option>
           </select>
-          <input v-model.number="condition.value" type="number" step="any" required :class="inputClass" :aria-label="t('RELATIONSHIP.FIELDS.target')" />
-          <button type="button" :class="buttonClass" @click="book.conditions.splice(index, 1)">{{ t('RELATIONSHIP.REMOVE_ITEM') }}</button>
+          <select
+            v-if="conditionReferences(condition.field)"
+            v-model="condition.value"
+            :class="inputClass"
+            required
+            :aria-label="t('RELATIONSHIP.FIELDS.target')"
+          >
+            <option
+              v-for="reference in conditionReferences(condition.field)"
+              :key="reference[0]"
+              :value="reference[0]"
+            >
+              {{ reference[1] }}
+            </option>
+          </select>
+          <input
+            v-else
+            v-model.number="condition.value"
+            type="number"
+            step="any"
+            required
+            :class="inputClass"
+            :aria-label="t('RELATIONSHIP.FIELDS.target')"
+          />
+          <button
+            type="button"
+            :class="buttonClass"
+            @click="book.conditions.splice(index, 1)"
+          >
+            {{ t('RELATIONSHIP.REMOVE_ITEM') }}
+          </button>
         </div>
-        <button type="button" :class="buttonClass" class="mt-2" :disabled="book.conditions.length >= 20" @click="book.conditions.push({ field: 'health_score', operator: 'lt', value: 60 })">{{ t('RELATIONSHIP.ADD_CONDITION') }}</button>
+        <button
+          type="button"
+          :class="buttonClass"
+          class="mt-2"
+          :disabled="book.conditions.length >= 20"
+          @click="
+            book.conditions.push({
+              field: 'health_score',
+              operator: 'lt',
+              value: 60,
+            })
+          "
+        >
+          {{ t('RELATIONSHIP.ADD_CONDITION') }}
+        </button>
         <div
           v-for="(step, index) in book.steps"
           :key="index"
@@ -317,11 +493,18 @@ const date = value => formatDate(value, props.metadata?.formatting);
               v-model="step.kind"
               :class="inputClass"
             >
-              <option value="activity">
-                {{ t('RELATIONSHIP.NEW_ACTIVITY') }}
-              </option>
-              <option value="action">
-                {{ t('RELATIONSHIP.SCREENS.actions') }}
+              <option
+                v-for="kind in metadata.playbook_step_kinds || [
+                  'activity',
+                  'action',
+                  'meeting',
+                  'success_plan',
+                  'risk',
+                ]"
+                :key="kind"
+                :value="kind"
+              >
+                {{ t(`RELATIONSHIP.PLAYBOOK_STEPS.${kind}`) }}
               </option>
             </select></label
           ><label class="text-xs"
@@ -344,8 +527,14 @@ const date = value => formatDate(value, props.metadata?.formatting);
           type="button"
           :class="buttonClass"
           class="mt-3"
+          :disabled="book.steps.length >= 50 || busy"
           @click="
-            book.steps.push({ kind: 'activity', title: '', after_days: 0 })
+            book.steps.push({
+              kind: 'activity',
+              title: '',
+              after_days: 0,
+              step_key: crypto.randomUUID(),
+            })
           "
         >
           {{ t('RELATIONSHIP.ADD_ITEM') }}</button
@@ -353,7 +542,7 @@ const date = value => formatDate(value, props.metadata?.formatting);
           type="submit"
           :class="buttonClass"
           class="ml-2"
-          :disabled="busy"
+          :disabled="busy || !book.steps.length"
         >
           {{ t('RELATIONSHIP.SAVE') }}
         </button>

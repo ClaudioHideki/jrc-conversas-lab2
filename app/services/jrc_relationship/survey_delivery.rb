@@ -16,7 +16,7 @@ class JrcRelationship::SurveyDelivery
       previous_id = @survey.metadata['sent_message_id']
       return @context.account.messages.find(previous_id) if previous_id
       url = "#{@base_url}/jrc/relacionamento/pesquisas/#{@survey.signed_id(purpose: :relationship_survey)}"
-      params = { content: "Pesquisa #{@survey.kind.upcase}: #{url}", message_type: 'outgoing',
+      params = { content: "Pesquisa #{@survey.kind.upcase}: #{@survey.metadata['question']}\n#{url}", message_type: 'outgoing',
         content_attributes: { relationship_survey_id: @survey.id } }
       if channel == 'Channel::Email'
         raise ArgumentError, 'The customer has no e-mail address' if conversation.contact.email.blank?

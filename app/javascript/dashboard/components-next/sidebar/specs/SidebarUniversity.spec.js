@@ -11,7 +11,10 @@ describe('UniversidadeJRC public navigation', () => {
         global: { provide: { role } },
       });
       const link = wrapper.get('a');
-      expect(link.text()).toBe('UniversidadeJRC');
+      expect(link.text()).toContain('UniversidadeJRC');
+      expect(wrapper.find('[data-testid="sidebar-new-badge"]').text()).toBe(
+        'Novo'
+      );
       expect(link.attributes('href')).toBe(
         'https://universidadejrc.com.br/portal/layout/910/treynando/login_inicial.asp?V29ya3NwYWNlSUQ9MTQwMCZrdF9kaWRheGlzPXRvcA'
       );
