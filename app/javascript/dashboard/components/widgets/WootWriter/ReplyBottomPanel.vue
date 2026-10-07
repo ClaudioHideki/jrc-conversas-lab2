@@ -352,10 +352,17 @@ export default {
       <NextButton
         v-if="enableWhatsAppTemplates"
         v-tooltip.top-end="$t('CONVERSATION.FOOTER.WHATSAPP_TEMPLATES')"
+        :label="
+          $t('CONVERSATION.FOOTER.WHATSAPP_TEMPLATES').replace(
+            'Whatsapp',
+            'WhatsApp'
+          )
+        "
         icon="i-ph-whatsapp-logo"
-        slate
+        blue
         faded
         sm
+        class="!text-xs"
         @click="$emit('selectWhatsappTemplate')"
       />
       <NextButton
