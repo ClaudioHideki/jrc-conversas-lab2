@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, watch, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMapGetter, useStore } from 'dashboard/composables/store';
 import ConversationApi from 'dashboard/api/inbox/conversation';
@@ -10,10 +10,10 @@ import {
 } from 'dashboard/helper/inbox';
 import Spinner from 'dashboard/components-next/spinner/Spinner.vue';
 import { useSipWebphone } from '../webphone/useSipWebphone';
-import VideoConferenceSettingsAPI from 'dashboard/api/videoConferenceSettings';
 import WhatsappCallingConfigurationAPI from 'dashboard/api/whatsappCallingConfiguration';
-import { FEATURE_FLAGS } from 'dashboard/featureFlags';
-import { hasVideoConferenceUrls } from 'dashboard/helper/videoConference';
+import { useJrcModuleAvailability } from 'dashboard/composables/useJrcModuleAvailability';
+import { homeTones } from 'dashboard/components-next/Conversation/ConversationHome/presentation';
+import { useJrcCopilot } from 'dashboard/components-next/jrcCopilot/useJrcCopilot';
 
 defineProps({
   emptyStateMessage: { type: String, default: '' },
@@ -28,18 +28,16 @@ const { configured, connecting, reconnecting, registered, extensionEnabled } =
   useSipWebphone();
 const openStats = ref(null);
 const pendingStats = ref(null);
-const videoConferenceConfigured = ref(false);
 const whatsappCallingActive = ref(false);
-const isFeatureEnabledonAccount = useMapGetter('accounts/isFeatureEnabledonAccount');
 const accountId = useMapGetter('getCurrentAccountId');
-const currentAccount = useMapGetter('getCurrentAccount');
-const crmEnabled = computed(() =>
-  isFeatureEnabledonAccount.value(accountId.value, FEATURE_FLAGS.JRC_CRM)
-);
-const crmUserAccess = computed(() =>
-  currentAccount.value?.role === 'administrator' ||
-  currentAccount.value?.permissions?.includes('jrc_crm')
-);
+const userId = useMapGetter('getCurrentUserID');
+const { modules, statusLabel: moduleStatusLabel } = useJrcModuleAvailability();
+const { openQuick } = useJrcCopilot();
+const remoteStatus = ref('LOADING');
+const whatsappCallingStatus = computed(() => {
+  if (remoteStatus.value !== 'READY') return remoteStatus.value;
+  return whatsappCallingActive.value ? 'ENABLED' : 'DISABLED_GENERIC';
+});
 const visibleChannelKeys = [
   CHANNEL_TYPES.WEBSITE,
   CHANNEL_TYPES.FACEBOOK,
@@ -64,17 +62,16 @@ const telephonyStatus = computed(() => {
   if (connecting.value || reconnecting.value) return 'RECONNECTING';
   return 'DISCONNECTED';
 });
-const videoConferenceStatus = computed(() =>
-  videoConferenceConfigured.value ? 'CONFIGURED' : 'NOT_CONFIGURED'
-);
 const statusClass = statusKey => {
   if (['ACTIVE', 'CONFIGURED', 'ENABLED'].includes(statusKey)) {
-    return 'bg-n-teal-3 text-n-teal-11';
+    return 'border-n-teal-6 bg-n-teal-3 text-n-teal-11';
   }
   if (['RECONNECTING', 'REAUTHORIZATION_REQUIRED'].includes(statusKey)) {
-    return 'bg-n-amber-3 text-n-amber-11';
+    return 'border-n-amber-6 bg-n-amber-3 text-n-amber-11';
   }
-  return 'bg-n-alpha-2 text-n-slate-11';
+  if (['DISCONNECTED', 'DISABLED', 'DISABLED_GENERIC'].includes(statusKey))
+    return 'border-n-ruby-6 bg-n-ruby-3 text-n-ruby-11';
+  return 'border-n-weak bg-n-alpha-2 text-n-slate-11';
 };
 const statusLabel = statusKey =>
   ({
@@ -89,23 +86,18 @@ const statusLabel = statusKey =>
     NOT_CONFIGURED: t('INBOX.OVERVIEW.CHANNEL_STATUS.NOT_CONFIGURED'),
     ENABLED: t('INBOX.OVERVIEW.CHANNEL_STATUS.ENABLED'),
     DISABLED_GENERIC: t('INBOX.OVERVIEW.CHANNEL_STATUS.DISABLED_GENERIC'),
+    LOADING: moduleStatusLabel('LOADING'),
+    UNAVAILABLE: moduleStatusLabel('UNAVAILABLE'),
   })[statusKey];
 
-const fetchVideoConferenceStatus = async () => {
-  try {
-    const { data } = await VideoConferenceSettingsAPI.getMine();
-    videoConferenceConfigured.value = hasVideoConferenceUrls(data);
-  } catch {
-    videoConferenceConfigured.value = false;
-  }
-};
-
-const fetchWhatsappCallingStatus = async () => {
+const fetchWhatsappCallingStatus = async isCurrent => {
   try {
     const data = await WhatsappCallingConfigurationAPI.get();
+    if (!isCurrent()) return;
     whatsappCallingActive.value = Boolean(data?.active);
+    remoteStatus.value = 'READY';
   } catch {
-    whatsappCallingActive.value = false;
+    if (isCurrent()) remoteStatus.value = 'UNAVAILABLE';
   }
 };
 
@@ -114,28 +106,32 @@ const stats = computed(() => [
     key: 'UNREAD',
     label: t('INBOX.OVERVIEW.STATS.UNREAD'),
     icon: 'i-lucide-mail',
-    iconClass: 'bg-n-blue-3 text-n-blue-10',
+    iconClass: 'bg-n-blue-3 text-n-blue-11',
+    valueClass: 'text-n-blue-11',
     value: notificationMeta.value?.unreadCount ?? 0,
   },
   {
     key: 'PENDING',
     label: t('INBOX.OVERVIEW.STATS.PENDING'),
     icon: 'i-lucide-clock-3',
-    iconClass: 'bg-n-amber-3 text-n-amber-10',
+    iconClass: 'bg-n-amber-3 text-n-amber-11',
+    valueClass: 'text-n-amber-11',
     value: pendingStats.value?.all_count ?? '—',
   },
   {
     key: 'MINE',
     label: t('INBOX.OVERVIEW.STATS.MINE'),
     icon: 'i-lucide-user-round',
-    iconClass: 'bg-n-cyan-3 text-n-cyan-10',
+    iconClass: 'bg-n-teal-3 text-n-teal-11',
+    valueClass: 'text-n-teal-11',
     value: openStats.value?.mine_count ?? '—',
   },
   {
     key: 'OPEN',
     label: t('INBOX.OVERVIEW.STATS.OPEN'),
     icon: 'i-lucide-messages-square',
-    iconClass: 'bg-n-ruby-3 text-n-ruby-10',
+    iconClass: 'bg-n-ruby-3 text-n-ruby-11',
+    valueClass: 'text-n-ruby-11',
     value: openStats.value?.all_count ?? '—',
   },
 ]);
@@ -176,50 +172,50 @@ const channels = computed(() => {
       route: { name: 'ramal_index' },
     },
     {
-      key: 'video_conference',
-      label: t('INBOX.OVERVIEW.CHANNELS.VIDEO_CONFERENCE'),
-      icon: 'i-lucide-video',
-      iconClass: 'text-n-blue-10',
-      status: videoConferenceStatus.value,
-      route: videoConferenceConfigured.value
-        ? { name: 'video_conference_index' }
-        : null,
-    },
-    {
-      key: 'jrc_crm',
-      label: t('INBOX.OVERVIEW.CHANNELS.CRM'),
-      icon: 'i-lucide-target',
-      iconClass: 'text-n-blue-10',
-      status: crmEnabled.value ? 'ENABLED' : 'DISABLED_GENERIC',
-      route: crmEnabled.value && crmUserAccess.value ? { name: 'crm_dashboard' } : null,
-      newBadge: true,
-    },
-    {
       key: 'whatsapp_calling',
       label: t('INBOX.OVERVIEW.CHANNELS.WHATSAPP_CALLING'),
       icon: 'i-lucide-message-circle-more',
       iconClass: 'text-n-teal-10',
-      status: whatsappCallingActive.value ? 'ENABLED' : 'DISABLED_GENERIC',
-      route: whatsappCallingActive.value ? { name: 'whatsapp_calling_index' } : null,
+      status: whatsappCallingStatus.value,
+      route: whatsappCallingActive.value
+        ? { name: 'whatsapp_calling_index' }
+        : null,
     },
+    ...modules.value.map(module => ({
+      ...module,
+      iconClass: homeTones[module.tone],
+      module: true,
+    })),
   ];
 });
 
-onMounted(async () => {
-  if (!inboxes.value?.length) store.dispatch('inboxes/get');
-  const [openResult, pendingResult] = await Promise.allSettled([
-    ConversationApi.meta({ status: 'open' }),
-    ConversationApi.meta({ status: 'pending' }),
-    fetchVideoConferenceStatus(),
-    fetchWhatsappCallingStatus(),
-  ]);
-  if (openResult.status === 'fulfilled') {
-    openStats.value = openResult.value.data.meta;
-  }
-  if (pendingResult.status === 'fulfilled') {
-    pendingStats.value = pendingResult.value.data.meta;
-  }
-});
+watch(
+  [accountId, userId],
+  async (_, __, onCleanup) => {
+    let current = true;
+    onCleanup(() => {
+      current = false;
+    });
+    openStats.value = null;
+    pendingStats.value = null;
+    whatsappCallingActive.value = false;
+    remoteStatus.value = 'LOADING';
+    if (!inboxes.value?.length) store.dispatch('inboxes/get');
+    const [openResult, pendingResult] = await Promise.allSettled([
+      ConversationApi.meta({ status: 'open' }),
+      ConversationApi.meta({ status: 'pending' }),
+      fetchWhatsappCallingStatus(() => current),
+    ]);
+    if (!current) return;
+    if (openResult.status === 'fulfilled') {
+      openStats.value = openResult.value.data.meta;
+    }
+    if (pendingResult.status === 'fulfilled') {
+      pendingStats.value = pendingResult.value.data.meta;
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
@@ -254,7 +250,7 @@ onMounted(async () => {
             </RouterLink>
             <RouterLink
               :to="{ name: 'search' }"
-              class="flex h-10 items-center gap-2 rounded-lg border border-n-blue-7 bg-n-solid-1 px-4 text-sm font-semibold text-n-brand transition hover:bg-n-blue-3"
+              class="flex h-10 items-center gap-2 rounded-lg border border-n-blue-7 bg-n-solid-1 px-4 text-sm font-semibold text-n-blue-11 transition hover:bg-n-blue-3"
             >
               <span class="i-lucide-search size-4" />
               {{ $t('INBOX.OVERVIEW.SEARCH_CONTACT') }}
@@ -276,10 +272,13 @@ onMounted(async () => {
             <span class="size-5" :class="item.icon" />
           </span>
           <div>
-            <strong class="block text-2xl font-semibold text-n-slate-12">
+            <strong
+              class="block text-2xl font-semibold"
+              :class="item.valueClass"
+            >
               {{ item.value }}
             </strong>
-            <span class="text-sm text-n-slate-10">
+            <span class="text-sm text-n-slate-11">
               {{ item.label }}
             </span>
           </div>
@@ -299,21 +298,25 @@ onMounted(async () => {
           class="divide-y divide-n-weak overflow-hidden rounded-xl border border-n-weak"
         >
           <component
-            :is="channel.route ? 'RouterLink' : 'div'"
+            :is="
+              channel.route ? 'RouterLink' : channel.command ? 'button' : 'div'
+            "
             v-for="channel in channels"
             :key="channel.key"
             :to="channel.route"
-            class="flex min-h-14 items-center gap-3 bg-n-solid-1 px-4 transition hover:bg-n-alpha-1"
+            :type="channel.command ? 'button' : undefined"
+            class="flex w-full min-h-14 items-center gap-3 bg-n-solid-1 px-4 text-left transition hover:bg-n-alpha-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-n-brand"
+            @click="channel.command === 'nico' && openQuick()"
           >
-            <span class="size-5" :class="[channel.icon, channel.iconClass]" />
+            <span
+              class="grid size-9 shrink-0 place-items-center rounded-xl"
+              :class="channel.module ? channel.iconClass : 'bg-n-alpha-2'"
+              ><span
+                class="size-5"
+                :class="[channel.icon, !channel.module && channel.iconClass]"
+            /></span>
             <span class="flex-1 text-sm font-medium text-n-slate-12">
               {{ channel.label }}
-              <span
-                v-if="channel.newBadge"
-                class="ml-2 inline-flex rounded-full bg-n-ruby-9 px-2 py-0.5 text-xxs font-semibold text-white"
-              >
-                Novo
-              </span>
               <span
                 v-if="channel.count > 1"
                 class="ml-1 text-xs font-normal text-n-slate-9"
@@ -322,12 +325,15 @@ onMounted(async () => {
               </span>
             </span>
             <span
-              class="rounded-full px-2.5 py-1 text-xs font-medium"
+              class="shrink-0 rounded-full border px-2.5 py-1 text-xs font-semibold"
               :class="statusClass(channel.status)"
             >
               {{ statusLabel(channel.status) }}
             </span>
-            <span v-if="channel.route" class="i-lucide-chevron-right size-4" />
+            <span
+              v-if="channel.route || channel.command"
+              class="i-lucide-chevron-right size-4"
+            />
           </component>
         </div>
       </section>

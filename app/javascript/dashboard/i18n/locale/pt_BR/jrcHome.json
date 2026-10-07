@@ -1,5 +1,31 @@
 {
   "JRC_HOME": {
+    "COCKPIT": {
+      "GREETING": "{greeting}, {name}! 👋",
+      "TITLE": "Cockpit · Central de Atendimento",
+      "MORNING": "Bom dia",
+      "AFTERNOON": "Boa tarde",
+      "EVENING": "Boa noite",
+      "TIME": "Horário atual",
+      "TEAM": "Equipe disponível",
+      "NICO": "NICO aqui!",
+      "PRIORITIES": "Há {count} pontos de atenção no período selecionado. Vamos revisar?",
+      "CLEAR": "Nenhuma prioridade identificada no período selecionado. Continue acompanhando a operação."
+    },
+    "COMPOSE": {
+      "TITLE": "Nova mensagem",
+      "DESCRIPTION": "Envie mensagens pelos canais disponíveis para o seu contato.",
+      "CLOSE": "Fechar e descartar",
+      "RECIPIENT": "Destinatário",
+      "CHANNEL": "Canal de envio",
+      "MESSAGE": "Mensagem",
+      "SAVED": "Mensagens salvas",
+      "SEARCH_SAVED": "Pesquisar mensagens salvas",
+      "SAVED_ERROR": "Não foi possível carregar as mensagens salvas.",
+      "NO_SAVED": "Nenhuma mensagem salva encontrada.",
+      "TEMPLATE_HINT": "Os templates WhatsApp são selecionados pelo botão de modelos do canal escolhido.",
+      "VARIABLE_HINT": "Use o menu de variáveis do editor para inserir as informações disponíveis do contato e do atendente."
+    },
     "TITLE": "Central de trabalho NICO",
     "HEADLINE": "está aqui para te ajudar",
     "GREETING": "Olá, {name}!",

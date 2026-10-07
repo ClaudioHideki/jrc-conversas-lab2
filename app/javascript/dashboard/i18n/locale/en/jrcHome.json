@@ -1,5 +1,31 @@
 {
   "JRC_HOME": {
+    "COCKPIT": {
+      "GREETING": "{greeting}, {name}! 👋",
+      "TITLE": "Cockpit · Service center",
+      "MORNING": "Good morning",
+      "AFTERNOON": "Good afternoon",
+      "EVENING": "Good evening",
+      "TIME": "Current time",
+      "TEAM": "Available agents",
+      "NICO": "NICO is here!",
+      "PRIORITIES": "There are {count} points requiring attention in the selected period. Let’s review them!",
+      "CLEAR": "No priorities were identified in the selected period. Keep following your operation."
+    },
+    "COMPOSE": {
+      "TITLE": "New message",
+      "DESCRIPTION": "Send messages using the channels available for your contact.",
+      "CLOSE": "Close and discard",
+      "RECIPIENT": "Recipient",
+      "CHANNEL": "Sending channel",
+      "MESSAGE": "Message",
+      "SAVED": "Saved responses",
+      "SEARCH_SAVED": "Search saved responses",
+      "SAVED_ERROR": "Unable to load saved responses.",
+      "NO_SAVED": "No saved responses found.",
+      "TEMPLATE_HINT": "WhatsApp templates are selected using the template button for the chosen channel.",
+      "VARIABLE_HINT": "Use the editor’s variable menu to insert supported contact and agent information."
+    },
     "TITLE": "NICO workspace",
     "HEADLINE": "is here to help you",
     "GREETING": "Hello, {name}!",

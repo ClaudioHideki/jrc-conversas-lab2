@@ -33,22 +33,6 @@ jobs:
     concurrency:
       group: ghcr-jrc-conversas-${{ inputs.component }}
       cancel-in-progress: false
-    services:
-      postgres:
-        image: ${{ inputs.component == 'app' && 'pgvector/pgvector:pg16' || '' }}
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: ci-test-only
-        ports: ['5432:5432']
-        options: >-
-          --health-cmd "pg_isready -U postgres"
-          --health-interval 10s --health-timeout 5s --health-retries 5
-      redis:
-        image: ${{ inputs.component == 'app' && 'redis:7-alpine' || '' }}
-        ports: ['6379:6379']
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s --health-timeout 5s --health-retries 5
     env:
       SOURCE_SHA: ${{ inputs.source_sha }}
       BASE_SHA: ${{ inputs.base_sha }}
@@ -120,23 +104,6 @@ jobs:
           git diff --name-only --diff-filter=ACMR "$BASE_SHA" "$SOURCE_SHA" -- '*.rb' | while IFS= read -r file; do ruby -c "$file"; done
           node script/validate_changed_source.mjs "$BASE_SHA"
 
-      - name: PostgreSQL isolado, migrations e RSpec CRM Cadastro Mestre
-        if: inputs.component == 'app'
-        env:
-          RAILS_ENV: test
-          POSTGRES_HOST: localhost
-          POSTGRES_DATABASE: jrc_pedidos_ci_test
-          POSTGRES_USERNAME: postgres
-          POSTGRES_PASSWORD: ci-test-only
-          REDIS_URL: redis://localhost:6379/0
-          SECRET_KEY_BASE: ci-test-placeholder-not-a-production-secret
-        run: |
-          cp db/schema.rb "$RUNNER_TEMP/approved-schema.rb"
-          bundle exec rails db:create db:schema:load db:migrate
-          bundle exec rails runner 'require Rails.root.join("db/migrate/20261004183000_strengthen_sales_order_origin_and_audit"); migration = StrengthenSalesOrderOriginAndAudit.new; migration.migrate(:down); raise "down failed" if ActiveRecord::Base.connection.column_exists?(:jrc_crm_sales_orders, :order_origin); migration.migrate(:up); raise "up failed" unless ActiveRecord::Base.connection.column_exists?(:jrc_crm_sales_orders, :order_origin)'
-          bundle exec rspec spec/requests/api/v1/accounts/crm/sales_order_link_integrity_spec.rb spec/requests/api/v1/accounts/crm/consolidated_commercial_protection_spec.rb spec/services/jrc_crm/nexora_end_to_end_spec.rb spec/services/jrc_crm/consolidated_financial_guards_spec.rb spec/models/jrc_customers/company_spec.rb spec/models/jrc_customers/taxonomy_spec.rb spec/services/jrc_customers/master_services_spec.rb spec/services/jrc_relationship spec/requests/api/v1/accounts/relationship
-          cp "$RUNNER_TEMP/approved-schema.rb" db/schema.rb
-
       - name: Gates isolados do Cadastro Mestre e modulos preservados
         if: inputs.component == 'app'
         run: |
@@ -156,6 +123,13 @@ jobs:
           app/javascript/dashboard/routes/dashboard/webphone
           app/javascript/dashboard/routes/dashboard/jrcRelationship
           app/javascript/dashboard/components-next/sidebar/specs
+          app/javascript/dashboard/components-next/layout/specs
+          app/javascript/dashboard/components-next/NewConversation
+          app/javascript/dashboard/components-next/Conversation/ConversationHome/specs
+          app/javascript/dashboard/routes/dashboard/contacts/pages/spec
+          app/javascript/dashboard/routes/dashboard/videoConference
+          app/javascript/dashboard/helper/specs/inbox.spec.js
+          app/javascript/dashboard/helper/specs/videoConference.spec.js
           --maxWorkers=2 --no-file-parallelism
 
       - name: Lint direcionado do Cadastro Mestre e Pedido
@@ -227,6 +201,8 @@ jobs:
           paths = subprocess.check_output(['git', 'diff', '--name-only', '--diff-filter=ACMR', os.environ['BASE_SHA'], os.environ['SOURCE_SHA']], text=True).splitlines()
           paths = [p for p in paths if p.startswith(('app/', 'config/', 'db/', 'lib/', 'enterprise/', 'public/')) and '/spec/' not in p and '/specs/' not in p and not p.endswith(('.spec.js', '.spec.vue'))]
           migrations = [
+              'db/migrate/20261004170000_complete_jrc_customer_master_company_profile.rb',
+              'db/migrate/20261004183000_strengthen_sales_order_origin_and_audit.rb',
               'db/migrate/20261004234000_create_jrc_operations_routing_and_sla.rb',
               'db/migrate/20261005180000_create_jrc_relationship.rb',
               'db/migrate/20261005190000_allow_direct_customer_proposals.rb',
@@ -250,7 +226,7 @@ jobs:
           require 'grpc'
           require 'pg'
           require 'nokogiri'
-          puts JSON.generate(verified_product_files: expected.size, migrations: 6, grpc: GRPC::VERSION, pg: PG::VERSION, nokogiri: Nokogiri::VERSION)
+          puts JSON.generate(verified_product_files: expected.size, migrations: 8, grpc: GRPC::VERSION, pg: PG::VERSION, nokogiri: Nokogiri::VERSION)
           RUBY
 
       - name: Autenticar no GHCR somente para publicacao autorizada

@@ -137,7 +137,7 @@ const channelToneClass = option => {
     [CHANNEL_TYPES.WHATSAPP]: 'border-n-teal-7 bg-n-teal-3 text-n-teal-11',
     [CHANNEL_TYPES.FACEBOOK]: 'border-n-blue-7 bg-n-blue-3 text-n-blue-11',
     [CHANNEL_TYPES.INSTAGRAM]: 'border-n-ruby-7 bg-n-ruby-3 text-n-ruby-11',
-    [CHANNEL_TYPES.EMAIL]: 'border-n-cyan-7 bg-n-cyan-3 text-n-cyan-11',
+    [CHANNEL_TYPES.EMAIL]: 'border-n-blue-7 bg-n-blue-3 text-n-blue-11',
     [CHANNEL_TYPES.API]: 'border-n-amber-7 bg-n-amber-3 text-n-amber-11',
     [CHANNEL_TYPES.SMS]: 'border-n-violet-7 bg-n-violet-3 text-n-violet-11',
     [CHANNEL_TYPES.WEBSITE]: 'border-n-slate-7 bg-n-slate-3 text-n-slate-11',

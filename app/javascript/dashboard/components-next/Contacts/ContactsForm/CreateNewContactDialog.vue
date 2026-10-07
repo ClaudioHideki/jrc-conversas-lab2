@@ -30,7 +30,11 @@ const handleDialogConfirm = async () => {
 };
 
 const onSuccess = () => {
-  if (contactsFormRef.value && !contactsFormRef.value.resetForm(submittedDraftKey.value)) return;
+  if (
+    contactsFormRef.value &&
+    !contactsFormRef.value.resetForm(submittedDraftKey.value)
+  )
+    return;
   dialogRef.value.close();
 };
 
@@ -38,7 +42,11 @@ const closeDialog = () => {
   dialogRef.value.close();
 };
 
-defineExpose({ dialogRef, contactsFormRef, onSuccess });
+const open = () => {
+  dialogRef.value.open();
+};
+
+defineExpose({ open, dialogRef, contactsFormRef, onSuccess });
 </script>
 
 <template>

@@ -1096,6 +1096,7 @@ const menuItems = computed(() => {
       activeOn: ['jrc_cockpit', 'jrc_service_center'],
       ignoreFeatureFlag: true,
     },
+    find('Inbox'),
     conversationModule
       ? {
           ...conversationModule,
@@ -1465,7 +1466,7 @@ const menuSections = computed(() => {
   const take = names => names.map(name => itemByName.get(name)).filter(Boolean);
 
   const mappedNames = new Set([
-    'JRC Cockpit', 'Conversation', 'JRC Email Center',
+    'JRC Cockpit', 'Inbox', 'Conversation', 'JRC Email Center',
     'JRC Calls Center', 'WhatsApp Calling', 'Contacts', 'JRC AI Agents',
     'JRC AI Insights', 'Captain', 'JRC Intelligent Automation', 'JRC Flows', 'Companies',
     'CRM', 'Sales', 'JRC Campaigns', 'Reports', 'JRC AI Administration',
@@ -1487,6 +1488,7 @@ const menuSections = computed(() => {
       label: 'Atendimento',
       items: take([
         'JRC Cockpit',
+        'Inbox',
         'Conversation',
         'JRC Broker Connections',
 

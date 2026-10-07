@@ -11,6 +11,9 @@ import { useKeyboardEvents } from 'dashboard/composables/useKeyboardEvents';
 import TeleportWithDirection from 'dashboard/components-next/TeleportWithDirection.vue';
 
 const props = defineProps({
+  modal: { type: Boolean, default: false },
+  modalClass: { type: String, default: 'max-w-lg' },
+  modalLabel: { type: String, default: '' },
   align: {
     type: String,
     default: 'end',
@@ -39,7 +42,9 @@ const mobileContentRef = ref(null);
 
 const breakpoints = useBreakpoints(breakpointsTailwind);
 const belowMd = breakpoints.smaller('md');
-const isMobile = computed(() => !props.disableMobileView && belowMd.value);
+const isMobile = computed(
+  () => props.modal || (!props.disableMobileView && belowMd.value)
+);
 const showPopover = computed(() => isActive.value && !isMobile.value);
 
 const { fixedPosition, updatePosition } = useDropdownPosition(
@@ -60,12 +65,17 @@ const show = async () => {
     updatePosition();
   }
   emit('show');
+  if (props.modal) {
+    await nextTick();
+    mobileContentRef.value?.focus();
+  }
 };
 
 const hide = () => {
   if (!isActive.value) return;
   isActive.value = false;
   emit('hide');
+  if (props.modal) triggerRef.value?.querySelector('button')?.focus();
 };
 
 // The teleported popover tracks its trigger while ancestors scroll; allow
@@ -107,6 +117,34 @@ const clickOutsideIgnore = [
   '[data-popover-content]',
 ];
 
+const trapModalFocus = event => {
+  if (!props.modal || event.key !== 'Tab') return;
+  // A nested template popover or editor dialog manages its own focus.
+  if (!mobileContentRef.value.contains(document.activeElement)) return;
+  const elements = Array.from(
+    mobileContentRef.value.querySelectorAll(
+      'button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), a[href], [tabindex="0"], [contenteditable="true"]'
+    )
+  ).filter(element => element.getClientRects().length);
+  const first = elements[0];
+  const last = elements[elements.length - 1];
+  if (
+    event.shiftKey &&
+    (document.activeElement === first ||
+      document.activeElement === mobileContentRef.value)
+  ) {
+    event.preventDefault();
+    last?.focus();
+  } else if (
+    !event.shiftKey &&
+    (document.activeElement === last ||
+      document.activeElement === mobileContentRef.value)
+  ) {
+    event.preventDefault();
+    first?.focus();
+  }
+};
+
 useKeyboardEvents({
   Escape: {
     action: () => isActive.value && hide(),
@@ -127,7 +165,12 @@ defineExpose({ show, hide, toggle });
     <div
       v-if="isActive && isMobile"
       data-popover-backdrop
-      class="fixed inset-0 z-[9999] flex items-start pt-[clamp(3rem,15vh,12rem)] justify-center bg-n-alpha-black1"
+      class="fixed inset-0 z-[9999] flex justify-center bg-n-alpha-black1"
+      :class="
+        modal
+          ? 'items-center p-3 sm:p-6'
+          : 'items-start pt-[clamp(3rem,15vh,12rem)]'
+      "
     >
       <div
         ref="mobileContentRef"
@@ -136,7 +179,20 @@ defineExpose({ show, hide, toggle });
           { ignore: clickOutsideIgnore },
         ]"
         data-popover-content
-        class="relative flex flex-col w-full max-w-lg max-h-[calc(100vh-4rem)] mx-4 bg-n-alpha-3 backdrop-blur-[100px] shadow-xl rounded-xl"
+        :role="modal ? 'dialog' : undefined"
+        :aria-modal="modal ? 'true' : undefined"
+        :aria-label="modalLabel || undefined"
+        :tabindex="modal ? -1 : undefined"
+        :class="
+          modal
+            ? [
+                modalClass,
+                'max-h-[calc(100dvh-3rem)] bg-n-solid-2 rounded-2xl focus:outline-none',
+              ]
+            : 'max-w-lg max-h-[calc(100vh-4rem)] mx-4 bg-n-alpha-3 backdrop-blur-[100px] rounded-xl'
+        "
+        class="relative flex flex-col w-full shadow-xl"
+        @keydown="trapModalFocus"
       >
         <div
           class="flex-1 min-h-0 overflow-y-auto overscroll-contain rounded-xl"

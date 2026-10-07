@@ -148,7 +148,7 @@ export const INBOX_CHANNEL_PRESENTATION = {
   [CHANNEL_TYPES.WEBSITE]: {
     label: 'Chat do site',
     icon: 'i-lucide-message-circle',
-    iconClass: 'text-n-cyan-10',
+    iconClass: 'text-n-blue-11',
   },
   [CHANNEL_TYPES.TELEGRAM]: {
     label: 'Telegram',

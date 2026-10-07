@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useVuelidate } from '@vuelidate/core';
 import { required, requiredIf } from '@vuelidate/validators';
 import { INBOX_TYPES, isVoiceCallEnabled } from 'dashboard/helper/inbox';
@@ -23,11 +24,13 @@ import InboxSelector from './InboxSelector.vue';
 import EmailOptions from './EmailOptions.vue';
 import MessageEditor from './MessageEditor.vue';
 import ActionButtons from './ActionButtons.vue';
+import ComposeWorkspaceTools from './ComposeWorkspaceTools.vue';
 import InboxEmptyState from './InboxEmptyState.vue';
 import AttachmentPreviews from './AttachmentPreviews.vue';
 import CopilotReplyBottomPanel from 'dashboard/components/widgets/WootWriter/CopilotReplyBottomPanel.vue';
 
 const props = defineProps({
+  workspace: { type: Boolean, default: false },
   contacts: { type: Array, default: () => [] },
   contactId: { type: String, default: null },
   selectedContact: { type: Object, default: null },
@@ -52,7 +55,9 @@ const emit = defineEmits([
   'updateTargetInbox',
   'clearSelectedContact',
   'createConversation',
+  'action',
 ]);
+const { t } = useI18n();
 
 const DEFAULT_FORMATTING = 'Context::Default';
 
@@ -363,103 +368,206 @@ useKeyboardEvents({
 
 <template>
   <div
-    class="w-full md:w-[42rem] divide-y divide-n-strong overflow-visible transition-all duration-300 ease-in-out top-full flex flex-col bg-n-alpha-3 border border-n-strong shadow-sm backdrop-blur-[100px] rounded-xl min-w-0 max-h-[calc(100vh-8rem)]"
+    :class="
+      workspace
+        ? 'h-[min(52rem,calc(100dvh-3rem))] !max-h-none !overflow-hidden !bg-n-solid-2'
+        : 'md:w-[42rem]'
+    "
+    class="w-full divide-y divide-n-strong overflow-visible transition-all duration-300 ease-in-out top-full flex flex-col bg-n-alpha-3 border border-n-strong shadow-sm backdrop-blur-[100px] rounded-xl min-w-0 max-h-[calc(100vh-8rem)]"
   >
-    <div class="flex-1 overflow-y-auto divide-y divide-n-strong">
-      <ContactSelector
-        :contacts="contacts"
-        :selected-contact="selectedContact"
-        :show-contacts-dropdown="showContactsDropdown"
-        :is-loading="isLoading"
-        :is-creating-contact="isCreatingContact"
-        :contact-id="contactId"
-        :contactable-inboxes-list="contactableInboxesList"
-        :show-inboxes-dropdown="showInboxesDropdown"
-        :has-errors="validationStates.isContactInvalid"
-        @search-contacts="handleContactSearch"
-        @set-selected-contact="setSelectedContact"
-        @clear-selected-contact="clearSelectedContact"
-        @update-dropdown="handleDropdownUpdate"
-      />
-      <InboxEmptyState v-if="showNoInboxAlert" />
-      <InboxSelector
-        v-else
-        :target-inbox="targetInbox"
-        :selected-contact="selectedContact"
-        :show-inboxes-dropdown="showInboxesDropdown"
-        :contactable-inboxes-list="contactableInboxesList"
-        :has-errors="validationStates.isInboxInvalid"
-        :is-fetching-inboxes="isFetchingInboxes"
-        @update-inbox="removeTargetInbox"
-        @toggle-dropdown="showInboxesDropdown = $event"
-        @handle-inbox-action="handleInboxAction"
-      />
+    <header
+      v-if="workspace"
+      class="flex shrink-0 items-center justify-between gap-4 border-b border-n-weak bg-n-slate-2 p-5"
+    >
+      <div class="flex items-center gap-3">
+        <div
+          class="grid size-12 shrink-0 place-content-center rounded-xl bg-n-brand text-white"
+        >
+          <span class="i-lucide-send size-6" aria-hidden="true" />
+        </div>
+        <div>
+          <h2 class="mb-1 text-xl font-bold text-n-slate-12">
+            {{ t('JRC_HOME.COMPOSE.TITLE') }}
+          </h2>
+          <p class="mb-0 text-sm text-n-slate-11">
+            {{ t('JRC_HOME.COMPOSE.DESCRIPTION') }}
+          </p>
+        </div>
+      </div>
+      <button
+        type="button"
+        :aria-label="t('JRC_HOME.COMPOSE.CLOSE')"
+        class="grid size-10 shrink-0 place-content-center rounded-xl border border-n-weak bg-n-solid-2 text-n-slate-11 hover:bg-n-alpha-2"
+        @click="$emit('discard')"
+      >
+        <span class="i-lucide-x size-5" aria-hidden="true" />
+      </button>
+    </header>
+    <div
+      :class="
+        workspace
+          ? 'flex min-h-0 flex-1 flex-col overflow-y-auto xl:flex-row xl:overflow-hidden'
+          : ''
+      "
+    >
+      <div
+        class="flex min-h-0 min-w-0 flex-col"
+        :class="workspace ? 'shrink-0 xl:flex-1' : 'flex-1'"
+      >
+        <div class="flex-1 overflow-y-auto divide-y divide-n-strong">
+          <h3
+            v-if="workspace"
+            class="mb-0 px-4 pt-4 text-sm font-semibold text-n-slate-12"
+          >
+            {{ t('JRC_HOME.COMPOSE.RECIPIENT') }}
+          </h3>
+          <ContactSelector
+            :workspace="workspace"
+            :contacts="contacts"
+            :selected-contact="selectedContact"
+            :show-contacts-dropdown="showContactsDropdown"
+            :is-loading="isLoading"
+            :is-creating-contact="isCreatingContact"
+            :contact-id="contactId"
+            :contactable-inboxes-list="contactableInboxesList"
+            :show-inboxes-dropdown="showInboxesDropdown"
+            :has-errors="validationStates.isContactInvalid"
+            @search-contacts="handleContactSearch"
+            @set-selected-contact="setSelectedContact"
+            @clear-selected-contact="clearSelectedContact"
+            @update-dropdown="handleDropdownUpdate"
+          />
+          <h3
+            v-if="workspace"
+            class="mb-0 px-4 pt-4 text-sm font-semibold text-n-slate-12"
+          >
+            {{ t('JRC_HOME.COMPOSE.CHANNEL') }}
+          </h3>
+          <InboxEmptyState v-if="showNoInboxAlert" />
+          <InboxSelector
+            v-else
+            :target-inbox="targetInbox"
+            :selected-contact="selectedContact"
+            :show-inboxes-dropdown="showInboxesDropdown"
+            :contactable-inboxes-list="contactableInboxesList"
+            :has-errors="validationStates.isInboxInvalid"
+            :is-fetching-inboxes="isFetchingInboxes"
+            @update-inbox="removeTargetInbox"
+            @toggle-dropdown="showInboxesDropdown = $event"
+            @handle-inbox-action="handleInboxAction"
+          />
 
-      <EmailOptions
-        v-if="inboxTypes.isEmail"
-        v-model:cc-emails="state.ccEmails"
-        v-model:bcc-emails="state.bccEmails"
-        v-model:subject="state.subject"
-        :contacts="contacts"
-        :show-cc-emails-dropdown="showCcEmailsDropdown"
-        :show-bcc-emails-dropdown="showBccEmailsDropdown"
-        :is-loading="isLoading"
-        :has-errors="validationStates.isSubjectInvalid"
-        @search-cc-emails="searchCcEmails"
-        @search-bcc-emails="searchBccEmails"
-        @update-dropdown="handleDropdownUpdate"
-      />
+          <div
+            v-if="workspace && contactableInboxesList.length"
+            class="flex flex-wrap gap-2 px-4 pb-4"
+          >
+            <button
+              v-for="inbox in contactableInboxesList"
+              :key="inbox.id"
+              type="button"
+              :aria-pressed="targetInbox?.id === inbox.id"
+              :disabled="isCreating || isFetchingInboxes"
+              class="flex max-w-full items-center gap-2 rounded-xl border px-3 py-2 text-sm font-medium transition disabled:opacity-50"
+              :class="
+                targetInbox?.id === inbox.id
+                  ? 'border-n-brand bg-n-blue-2 text-n-blue-11'
+                  : 'border-n-weak text-n-slate-12 hover:bg-n-alpha-2'
+              "
+              @click="targetInbox?.id !== inbox.id && handleInboxAction(inbox)"
+            >
+              <span
+                :class="inbox.icon"
+                class="size-5 shrink-0"
+                aria-hidden="true"
+              /><span class="truncate">{{ inbox.label }}</span>
+            </button>
+          </div>
+          <EmailOptions
+            v-if="inboxTypes.isEmail"
+            v-model:cc-emails="state.ccEmails"
+            v-model:bcc-emails="state.bccEmails"
+            v-model:subject="state.subject"
+            :contacts="contacts"
+            :show-cc-emails-dropdown="showCcEmailsDropdown"
+            :show-bcc-emails-dropdown="showBccEmailsDropdown"
+            :is-loading="isLoading"
+            :has-errors="validationStates.isSubjectInvalid"
+            @search-cc-emails="searchCcEmails"
+            @search-bcc-emails="searchBccEmails"
+            @update-dropdown="handleDropdownUpdate"
+          />
 
-      <MessageEditor
-        v-if="shouldShowMessageEditor"
-        v-model="state.message"
-        :message-signature="messageSignature"
-        :send-with-signature="sendWithSignature"
-        :has-errors="validationStates.isMessageInvalid"
-        :channel-type="inboxChannelType"
-        :medium="targetInbox?.medium || ''"
-        :copilot="copilot"
-      />
+          <h3
+            v-if="workspace && shouldShowMessageEditor"
+            class="mb-0 px-4 pt-4 text-sm font-semibold text-n-slate-12"
+          >
+            {{ t('JRC_HOME.COMPOSE.MESSAGE') }}
+          </h3>
+          <MessageEditor
+            v-if="shouldShowMessageEditor"
+            v-model="state.message"
+            :message-signature="messageSignature"
+            :send-with-signature="sendWithSignature"
+            :has-errors="validationStates.isMessageInvalid"
+            :channel-type="inboxChannelType"
+            :medium="targetInbox?.medium || ''"
+            :copilot="copilot"
+          />
 
-      <AttachmentPreviews
-        v-if="state.attachedFiles.length > 0"
-        :attachments="state.attachedFiles"
-        @update:attachments="state.attachedFiles = $event"
+          <AttachmentPreviews
+            v-if="state.attachedFiles.length > 0"
+            :attachments="state.attachedFiles"
+            @update:attachments="state.attachedFiles = $event"
+          />
+        </div>
+
+        <CopilotReplyBottomPanel
+          v-if="isCopilotActive"
+          :is-generating-content="copilot.isButtonDisabled.value"
+          class="h-[3.25rem] !px-4 !py-2"
+          @submit="onSubmitCopilotReply"
+          @cancel="copilot.reset"
+        />
+        <ActionButtons
+          v-else
+          class="shrink-0 border-t border-n-weak bg-n-solid-2"
+          :attached-files="state.attachedFiles"
+          :is-whatsapp-inbox="inboxTypes.isWhatsapp"
+          :is-email-or-web-widget-inbox="inboxTypes.isEmailOrWebWidget"
+          :is-twilio-sms-inbox="inboxTypes.isTwilioSMS"
+          :is-twilio-whats-app-inbox="inboxTypes.isTwilioWhatsapp"
+          :message-templates="whatsappMessageTemplates"
+          :channel-type="inboxChannelType"
+          :voice-enabled="voiceCallEnabled"
+          :is-loading="isCreating"
+          :disable-send-button="isCreating"
+          :has-selected-inbox="!!targetInbox"
+          :inbox-id="targetInbox?.id"
+          :has-no-inbox="showNoInboxAlert"
+          :is-dropdown-active="isAnyDropdownActive"
+          :message-signature="messageSignature"
+          @insert-emoji="onClickInsertEmoji"
+          @add-signature="handleAddSignature"
+          @remove-signature="handleRemoveSignature"
+          @attach-file="handleAttachFile"
+          @discard="$emit('discard')"
+          @send-message="handleSendMessage"
+          @send-whatsapp-message="handleSendWhatsappMessage"
+          @send-twilio-message="handleSendTwilioMessage"
+        />
+      </div>
+      <ComposeWorkspaceTools
+        v-if="workspace"
+        :can-insert="shouldShowMessageEditor && !isCreating"
+        @action="$emit('action', $event)"
+        @insert-response="
+          state.message = stripUnsupportedMarkdown(
+            $event,
+            effectiveChannelType,
+            false
+          )
+        "
       />
     </div>
-
-    <CopilotReplyBottomPanel
-      v-if="isCopilotActive"
-      :is-generating-content="copilot.isButtonDisabled.value"
-      class="h-[3.25rem] !px-4 !py-2"
-      @submit="onSubmitCopilotReply"
-      @cancel="copilot.reset"
-    />
-    <ActionButtons
-      v-else
-      :attached-files="state.attachedFiles"
-      :is-whatsapp-inbox="inboxTypes.isWhatsapp"
-      :is-email-or-web-widget-inbox="inboxTypes.isEmailOrWebWidget"
-      :is-twilio-sms-inbox="inboxTypes.isTwilioSMS"
-      :is-twilio-whats-app-inbox="inboxTypes.isTwilioWhatsapp"
-      :message-templates="whatsappMessageTemplates"
-      :channel-type="inboxChannelType"
-      :voice-enabled="voiceCallEnabled"
-      :is-loading="isCreating"
-      :disable-send-button="isCreating"
-      :has-selected-inbox="!!targetInbox"
-      :inbox-id="targetInbox?.id"
-      :has-no-inbox="showNoInboxAlert"
-      :is-dropdown-active="isAnyDropdownActive"
-      :message-signature="messageSignature"
-      @insert-emoji="onClickInsertEmoji"
-      @add-signature="handleAddSignature"
-      @remove-signature="handleRemoveSignature"
-      @attach-file="handleAttachFile"
-      @discard="$emit('discard')"
-      @send-message="handleSendMessage"
-      @send-whatsapp-message="handleSendWhatsappMessage"
-      @send-twilio-message="handleSendTwilioMessage"
-    />
   </div>
 </template>

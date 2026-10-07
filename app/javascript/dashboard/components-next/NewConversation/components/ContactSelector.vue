@@ -7,6 +7,7 @@ import TagInput from 'dashboard/components-next/taginput/TagInput.vue';
 import Button from 'dashboard/components-next/button/Button.vue';
 
 const props = defineProps({
+  workspace: { type: Boolean, default: false },
   contacts: {
     type: Array,
     required: true,
@@ -98,7 +99,10 @@ const handleInput = value => {
 
 <template>
   <div class="relative flex-1 px-4 py-3 overflow-y-visible">
-    <div class="flex items-baseline w-full gap-3 min-h-7">
+    <div
+      class="flex w-full gap-3 min-h-7"
+      :class="workspace ? 'flex-col items-stretch' : 'items-baseline'"
+    >
       <label class="text-sm font-medium text-n-slate-11 whitespace-nowrap">
         {{ t(`${i18nPrefix}.LABEL`) }}
       </label>
@@ -114,7 +118,10 @@ const handleInput = value => {
       <div
         v-else-if="selectedContact"
         class="flex items-center gap-1.5 rounded-md bg-n-alpha-2 min-h-7 min-w-0"
-        :class="!contactId ? 'ltr:pl-3 rtl:pr-3 ltr:pr-1 rtl:pl-1' : 'px-3'"
+        :class="[
+          !contactId ? 'ltr:pl-3 rtl:pr-3 ltr:pr-1 rtl:pl-1' : 'px-3',
+          { 'border border-n-blue-6 bg-n-blue-2 !p-3': workspace },
+        ]"
       >
         <span class="text-sm truncate text-n-slate-12">
           {{

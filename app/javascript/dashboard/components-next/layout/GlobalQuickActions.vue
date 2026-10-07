@@ -7,10 +7,9 @@ import {
   NavigationFailureType,
 } from 'vue-router';
 import { useEventBus } from '@vueuse/core';
-import { quickActionTarget } from './useQuickActionTarget';
-import { useStore } from 'vuex';
+import { quickActionTarget, quickActionCommand } from './useQuickActionTarget';
 import { useI18n } from 'vue-i18n';
-import { useAlert } from 'dashboard/composables';
+import { useContactCreation } from 'dashboard/composables/useContactCreation';
 import { useJrcCopilot } from 'dashboard/components-next/jrcCopilot/useJrcCopilot';
 import JrcCopilotLauncher from 'dashboard/components-next/jrcCopilot/JrcCopilotLauncher.vue';
 import CreateNewContactDialog from 'dashboard/components-next/Contacts/ContactsForm/CreateNewContactDialog.vue';
@@ -21,7 +20,6 @@ defineProps({ callActive: { type: Boolean, default: false } });
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
-const store = useStore();
 const quickActionEvents = useEventBus(quickActionTarget);
 const { actions, accountId, userId } = useQuickActionAccess();
 const { openQuick } = useJrcCopilot();
@@ -48,7 +46,7 @@ const activate = async key => {
   const action = actions.value.find(item => item.key === key);
   if (!action) return;
   expanded.value = false;
-  if (action.command === 'contact') contactDialog.value?.dialogRef.open();
+  if (action.command === 'contact') contactDialog.value?.open();
   else if (action.command === 'nico') openNico();
   else {
     const alreadyOnTarget = route.name === action.to.name;
@@ -68,21 +66,14 @@ const activate = async key => {
     }
   }
 };
-const createContact = async contact => {
-  if (!canCreateContact.value) return;
-  const identity = contactDialogKey.value;
-  try {
-    await store.dispatch('contacts/create', contact);
-    if (identity !== contactDialogKey.value) return;
-    contactDialog.value?.onSuccess();
-    useAlert(
-      t('CONTACTS_LAYOUT.HEADER.ACTIONS.CONTACT_CREATION.SUCCESS_MESSAGE')
-    );
-  } catch {
-    if (identity === contactDialogKey.value)
-      useAlert(t('JRC_HOME.CONTACT_ERROR'));
-  }
-};
+const createContact = useContactCreation(contactDialog, {
+  allowed: () => canCreateContact.value,
+  getIdentity: () => contactDialogKey.value,
+});
+useEventBus(quickActionCommand).on(request => {
+  if (request.accountId === accountId.value && request.userId === userId.value)
+    activate(request.key);
+});
 </script>
 
 <template>
