@@ -271,11 +271,12 @@ const ask = async prompt => {
       requestId: crypto.randomUUID(),
     };
   }
+  const requestId = pendingRequest.requestId;
   const result = await perform(
     () =>
       api.ask(accountId.value, {
         message,
-        request_id: pendingRequest.requestId,
+        request_id: requestId,
         conversation_id: conversationId.value,
         route_name: route.name,
       }),
@@ -284,6 +285,26 @@ const ask = async prompt => {
   if (result && current === version) {
     if (input.value.trim() === message) input.value = '';
     pendingRequest = undefined;
+    const navigation = state.value.commands.find(
+      command =>
+        command.request_id === requestId &&
+        command.status === 'succeeded' &&
+        command.result?.navigate
+    );
+    if (navigation) {
+      try {
+        if (navigation.result.conversation_id) {
+          // eslint-disable-next-line no-use-before-define -- The submit handler runs after setup.
+          await openConversation(navigation.result.conversation_id);
+        } else {
+          // eslint-disable-next-line no-use-before-define -- The submit handler runs after setup.
+          await navigate(navigation.result);
+        }
+      } catch {
+        if (current === version)
+          error.value = t('JRC_NICO.UX.NAVIGATION_ERROR');
+      }
+    }
   }
   if (current === version) submittingRequest = false;
 };
@@ -308,6 +329,16 @@ const navigate = async result => {
     query,
   });
   if (window.innerWidth < 640) close();
+};
+const downloadSentiment = report => {
+  const url = URL.createObjectURL(
+    new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' })
+  );
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `sentimento-conversa-${report.conversation_id}.json`;
+  link.click();
+  URL.revokeObjectURL(url);
 };
 const openConversation = async id => {
   await router.push(`/app/accounts/${accountId.value}/conversations/${id}`);
@@ -560,6 +591,7 @@ onBeforeUnmount(() => {
         </p>
       </div>
       <button
+        v-if="state.tools.some(tool => tool.name === 'delegate_conversations')"
         type="button"
         class="rounded p-2 hover:bg-n-alpha-3"
         :aria-label="label('DELEGATE')"
@@ -841,6 +873,40 @@ onBeforeUnmount(() => {
           </button>
         </article>
       </details>
+      <section
+        v-if="latest?.result?.sentiment_report"
+        class="space-y-2 rounded-xl border border-n-weak p-3 text-sm"
+        data-testid="nico-sentiment-report"
+      >
+        <h3 class="font-semibold text-n-slate-12">
+          {{ t('JRC_NICO.UX.SENTIMENT_REPORT') }}
+        </h3>
+        <p>{{ latest.result.sentiment_report.summary }}</p>
+        <dl class="grid grid-cols-2 gap-2 text-xs text-n-slate-11">
+          <dt>{{ t('JRC_NICO.UX.CUSTOMER_SENTIMENT') }}</dt>
+          <dd>{{ latest.result.sentiment_report.customer_sentiment }}</dd>
+          <dt>{{ t('JRC_NICO.UX.AGENT_SENTIMENT') }}</dt>
+          <dd>{{ latest.result.sentiment_report.agent_sentiment }}</dd>
+        </dl>
+        <p class="text-xs text-n-slate-11">
+          {{ latest.result.sentiment_report.scope }}
+        </p>
+        <details>
+          <summary class="cursor-pointer text-xs text-n-blue-11">
+            {{ t('JRC_NICO.UX.REPORT_DETAILS') }}
+          </summary>
+          <pre class="mt-2 whitespace-pre-wrap break-words text-xs">{{
+            JSON.stringify(latest.result.sentiment_report, null, 2)
+          }}</pre>
+        </details>
+        <button
+          type="button"
+          class="rounded-lg bg-n-blue-9 px-3 py-2 text-xs font-semibold text-white"
+          @click="downloadSentiment(latest.result.sentiment_report)"
+        >
+          {{ t('JRC_NICO.UX.DOWNLOAD_REPORT') }}
+        </button>
+      </section>
       <details
         class="rounded-xl border border-n-weak p-3"
         :open="Boolean(focusedNoticeId)"

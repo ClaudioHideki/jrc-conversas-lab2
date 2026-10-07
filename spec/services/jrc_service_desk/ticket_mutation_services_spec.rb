@@ -109,5 +109,6 @@ RSpec.describe 'Service Desk updates and assignment' do
     expect do
       update_service.call(ticket_id: other.id, attributes: { title: 'Attempt' }, expected_lock_version: 0)
     end.to raise_error(ActiveRecord::RecordNotFound)
+    expect(other.reload.title).to eq('Test ticket')
   end
 end

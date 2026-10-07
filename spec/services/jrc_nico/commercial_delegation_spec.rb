@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe 'NICO commercial delegation' do
-  let(:account) { create(:account, custom_attributes: { 'nico_enabled' => true }) }
+  let(:account) { create(:account, custom_attributes: { 'nico_enabled' => true, 'nico_customer_delegation_enabled' => true }) }
   let(:user) { create(:user, account: account, role: :administrator) }
   let(:conversation) { create(:conversation, account: account) }
   let(:operator) { JrcNico::OperatorSession.new(account: account, user: user) }
@@ -13,6 +13,12 @@ RSpec.describe 'NICO commercial delegation' do
   end
 
   before { account.enable_features!('jrc_crm') }
+
+  it 'leaves customer attendance to bots unless account delegation is explicitly enabled' do
+    account.update!(custom_attributes: { 'nico_enabled' => true })
+    expect { delegate([]) }.to raise_error(ArgumentError, /assistente interno/)
+    expect(JrcNico::Delegation.where(account: account)).to be_empty
+  end
 
   def delegate(actions)
     with_modified_env NICO_MODE: 'provider' do

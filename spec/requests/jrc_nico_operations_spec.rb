@@ -42,6 +42,20 @@ RSpec.describe 'NICO operational assistant', type: :request do
     expect(response.parsed_body['messages'].last['content']).to eq('Qual é o nome do contato?')
   end
 
+  it 'executes an explicit contact creation once and reuses the same request without creating duplicates' do
+    allow(JrcNico::OperationalInference).to receive(:call).and_return(
+      'reply' => 'Cadastrar contato solicitado', 'tool' => 'create_contact',
+      'arguments' => { 'name' => 'Contato solicitado', 'email' => 'operator-request@example.test' }
+    )
+    params = { request_id: request_id, message: 'Crie um contato com nome Contato solicitado e email operator-request@example.test' }
+    expect { post "#{base}/ask", params: params, headers: headers, as: :json }.to change(account.contacts, :count).by(1)
+    expect(response).to have_http_status(:ok)
+    command = response.parsed_body.fetch('commands').first
+    expect(command['status']).to eq('succeeded')
+    expect(command.dig('authorization', 'mode')).to eq('explicit_request')
+    expect { post "#{base}/ask", params: params, headers: headers, as: :json }.not_to change(Contact, :count)
+  end
+
   it 'does not show or execute CRM tools when the account CRM module is disabled' do
     account.disable_features!('jrc_crm')
     operator = create(:user, account: account, role: :agent)
@@ -49,6 +63,61 @@ RSpec.describe 'NICO operational assistant', type: :request do
     post "#{base}/prepare", params: contact_input.merge(tool: 'create_lead', arguments: { name: 'Denied' }), headers: operator_headers, as: :json
     expect(response).to have_http_status(:forbidden)
     expect(account.jrc_crm_leads).to be_empty
+  end
+
+  it 'persists an explicitly requested lead and activity once across retries of each logical request', :aggregate_failures do
+    account.enable_features!('jrc_crm')
+    allow(JrcNico::OperationalInference).to receive(:call).and_return(
+      'reply' => 'Criar lead solicitado', 'tool' => 'create_lead', 'arguments' => { 'name' => 'Lead solicitado' }
+    )
+    lead_request = { request_id: request_id, message: 'Crie um lead chamado Lead solicitado' }
+    expect { post "#{base}/ask", params: lead_request, headers: headers, as: :json }.to change(account.jrc_crm_leads, :count).by(1)
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('commands').last['status']).to eq('succeeded')
+    expect { post "#{base}/ask", params: lead_request, headers: headers, as: :json }.not_to change(JrcCrm::Lead, :count)
+
+    lead = account.jrc_crm_leads.last
+    allow(JrcNico::OperationalInference).to receive(:call).and_return(
+      'reply' => 'Agendar atividade solicitada', 'tool' => 'create_activity',
+      'arguments' => { 'lead_id' => lead.id, 'activity_type' => 'task', 'title' => 'Retorno solicitado', 'due_at' => 1.day.from_now.iso8601 }
+    )
+    activity_request = { request_id: SecureRandom.uuid, message: 'Crie uma atividade de retorno para este lead' }
+    expect { post "#{base}/ask", params: activity_request, headers: headers, as: :json }.to change(JrcCrm::Activity, :count).by(1)
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('commands').last['status']).to eq('succeeded')
+    expect { post "#{base}/ask", params: activity_request, headers: headers, as: :json }.not_to change(JrcCrm::Activity, :count)
+  end
+
+  %w[assigned_bot inbox_bot flow].each do |owner|
+    it "preserves #{owner} attendance against NICO public sending, routing and delegation" do
+      account.update!(custom_attributes: account.custom_attributes.merge('nico_customer_delegation_enabled' => true))
+      case owner
+      when 'assigned_bot'
+        conversation.update!(assignee_agent_bot: create(:agent_bot))
+      when 'inbox_bot'
+        allow(JrcFlows::Access).to receive(:inbox_bot_owned?).and_return(true)
+      when 'flow'
+        flow_scope = JrcFlowRun.live
+        allow(JrcFlowRun).to receive(:live).and_return(flow_scope)
+        allow(flow_scope).to receive(:exists?).with(account_id: account.id, conversation_id: conversation.id).and_return(true)
+      end
+      access = JrcNico::OperationalAccess.new(account: account, user: admin)
+      executor = JrcNico::ToolExecutor.new(access)
+      original_routing = conversation.attributes.slice('status', 'assignee_id', 'assignee_agent_bot_id', 'team_id')
+      expect do
+        executor.call('send_message', { 'conversation_id' => conversation.display_id, 'content' => 'Não enviar', 'private' => false })
+      end.to raise_error(ArgumentError, /bot ou Flow/)
+      expect(conversation.messages.where(content: 'Não enviar')).to be_empty
+      expect do
+        executor.call('update_conversation', { 'conversation_id' => conversation.display_id, 'status' => 'resolved' })
+      end.to raise_error(ArgumentError, /bot ou Flow/)
+      expect do
+        with_modified_env NICO_MODE: 'provider' do
+          JrcNico::DelegationService.new(access).start('conversation_ids' => [conversation.display_id], 'objective' => 'Atender', 'hours' => 1)
+        end
+      end.to raise_error(ArgumentError, /bot ou Flow/)
+      expect(conversation.reload.attributes.slice(*original_routing.keys)).to eq(original_routing)
+    end
   end
 
   it 'applies native CustomRole CRM permissions to tools and execution' do
@@ -126,6 +195,7 @@ RSpec.describe 'NICO operational assistant', type: :request do
   end
 
   it 'creates separate delegated sessions and replies for three clients without mixing their context' do
+    account.update!(custom_attributes: account.custom_attributes.merge('nico_customer_delegation_enabled' => true))
     conversations = 3.times.map do |index|
       contact = create(:contact, account: account, name: "Cliente #{index}")
       record = create(:conversation, account: account, contact: contact)
@@ -158,6 +228,7 @@ RSpec.describe 'NICO operational assistant', type: :request do
   end
 
   it 'discards a generated response when the operator takes over during generation' do
+    account.update!(custom_attributes: account.custom_attributes.merge('nico_customer_delegation_enabled' => true))
     create(:message, conversation: conversation, account: account, message_type: :incoming, content: 'Quero comprar')
     access = JrcNico::OperationalAccess.new(account: account, user: admin)
     with_modified_env NICO_MODE: 'provider' do

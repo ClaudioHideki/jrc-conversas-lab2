@@ -18,8 +18,9 @@ class ServiceDeskCapabilitiesTest < Minitest::Test
 
   def test_native_admin_has_explicit_catalog_not_wildcards
     admin = C.new(native_role: 'administrator')
-    assert_equal 33, admin.effective.length
-    %w[module_view tickets_view tickets_view_all settings_view lifecycle_policies_manage].each { |key| assert admin.allowed?(key) }
+    assert_equal C::KEYS, admin.effective
+    %w[module_view tickets_view tickets_view_all settings_view lifecycle_policies_manage
+       structure_view operator_companies_manage units_manage unit_memberships_manage].each { |key| assert admin.allowed?(key) }
     %w[unit_membership_manage system_admin financial_manage projects_view unknown].each { |key| refute admin.allowed?(key) }
   end
 

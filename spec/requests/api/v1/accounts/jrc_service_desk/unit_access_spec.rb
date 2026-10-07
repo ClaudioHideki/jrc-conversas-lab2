@@ -115,6 +115,35 @@ RSpec.describe 'Service Desk unit access administration', type: :request do
     expect(sd_membership.reload.active).to be(false)
   end
 
+  it 'allows a native administrator to grant, revoke and reactivate access without changing agent roles' do
+    sd_account_user.update!(custom_role: nil)
+    expect(directory['membership']).to be_nil
+    record = write_membership(true).fetch('record')
+    [false, true].each do |active|
+      record = write_membership(active, record).fetch('record')
+      expect(directory['membership']['active']).to eq(active)
+    end
+    expect(JrcServiceDesk::UnitMembership.where(unit: sd_unit, account_user: recipient).count).to eq(1)
+    expect(recipient.reload.role).to eq('agent')
+    expect(sd_membership.reload.active).to be(false)
+    expect(JrcServiceDesk::UnitMembership.where(unit: sd_other_unit, account_user: recipient)).to be_empty
+  end
+
+  it 'denies native agents every membership administration endpoint' do
+    sd_account_user.update!(role: :agent, custom_role: nil)
+    get "#{root}/members", params: { unit_id: sd_unit.id }, headers: headers
+    expect(response).to have_http_status(:forbidden)
+    post "#{root}/unit_memberships", params: {
+      record: { unit_id: sd_unit.id, account_user_id: recipient.id, active: true }, reason: 'Unauthorized grant'
+    }, as: :json, headers: headers.merge('Idempotency-Key' => SecureRandom.uuid)
+    expect(response).to have_http_status(:forbidden)
+    patch "#{root}/unit_memberships/#{sd_membership.id}", params: {
+      record: { active: true }, reason: 'Unauthorized reactivation',
+      expected_revision: JrcServiceDesk::StructureRecords.revision('unit_memberships', sd_membership)
+    }, as: :json, headers: headers.merge('Idempotency-Key' => SecureRandom.uuid)
+    expect(response).to have_http_status(:forbidden)
+  end
+
   it 'denies membership administration when only structure viewing is delegated' do
     role.update!(permissions: ['jrc_service_desk_structure_view'])
     get "#{root}/members", params: { unit_id: sd_unit.id }, headers: headers

@@ -5,24 +5,24 @@ class JrcServiceDesk::CreateTicketService < JrcServiceDesk::BaseService
   IDS = (FIELDS - %w[title description]).freeze
 
   def call(unit_id:, attributes:, idempotency_key:, service_id: nil)
-    fields = context.account.feature_enabled?('jrc_customer_master') ? FIELDS + ['company_id'] : FIELDS
-    values = JrcServiceDesk::Input.attributes(attributes, fields)
-    normalized = FIELDS.to_h { |name| [name, values[name]] }
-    normalized['title'] = text(normalized['title'])
-    normalized['description'] = text(normalized['description'], nullable: true)
-    IDS.each { |name| normalized[name] = JrcServiceDesk::Input.id(normalized[name]) unless normalized[name].nil? }
-    # Omitted/null company uses the historical fingerprint format for safe replay.
-    if values['company_id'].present?
-      raise Pundit::NotAuthorizedError unless context.capability?(:customers_view)
-      Pundit.authorize(context.to_h, :directory, :access?, policy_class: JrcCustomers::DirectoryPolicy)
-      normalized['company_id'] = JrcServiceDesk::Input.id(values['company_id'])
-      JrcCustomers::Company.where(account_id: context.account.id).find(normalized['company_id'])
-    end
-    key = JrcServiceDesk::Input.request_key(idempotency_key)
-    service_id = JrcServiceDesk::Input.id(service_id) unless service_id.nil?
-    fingerprint = JrcServiceDesk::CanonicalJson.digest(service_id ? normalized.merge('service_id' => service_id) : normalized)
-
     with_unit(unit_id) do |unit|
+      fields = context.account.feature_enabled?('jrc_customer_master') ? FIELDS + ['company_id'] : FIELDS
+      values = JrcServiceDesk::Input.attributes(attributes, fields)
+      normalized = FIELDS.to_h { |name| [name, values[name]] }
+      normalized['title'] = text(normalized['title'])
+      normalized['description'] = text(normalized['description'], nullable: true)
+      IDS.each { |name| normalized[name] = JrcServiceDesk::Input.id(normalized[name]) unless normalized[name].nil? }
+      # Omitted/null company uses the historical fingerprint format for safe replay.
+      if values['company_id'].present?
+        raise Pundit::NotAuthorizedError unless context.capability?(:customers_view)
+        Pundit.authorize(context.to_h, :directory, :access?, policy_class: JrcCustomers::DirectoryPolicy)
+        normalized['company_id'] = JrcServiceDesk::Input.id(values['company_id'])
+        JrcCustomers::Company.where(account_id: context.account.id).find(normalized['company_id'])
+      end
+      key = JrcServiceDesk::Input.request_key(idempotency_key)
+      service_id = JrcServiceDesk::Input.id(service_id) unless service_id.nil?
+      fingerprint = JrcServiceDesk::CanonicalJson.digest(service_id ? normalized.merge('service_id' => service_id) : normalized)
+
       raise Pundit::NotAuthorizedError unless context.capability?(:tickets_create)
       if normalized.values_at('assignee_account_user_id', 'queue_id', 'team_id').any?
         raise Pundit::NotAuthorizedError unless context.capability?(:tickets_assign)

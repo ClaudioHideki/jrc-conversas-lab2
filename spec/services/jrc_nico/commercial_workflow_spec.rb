@@ -52,6 +52,9 @@ RSpec.describe 'NICO commercial workflow' do
       expect { execute('add_proposal_item', proposal_id: proposal.id, product_id: product.id, quantity: quantity) }.to raise_error(ArgumentError)
       expect(proposal.proposal_items).to be_empty
     end
+    expect { proposal.update!(status: 'accepted') }.to raise_error(ActiveRecord::RecordInvalid, /envio oficial/)
+    # Represent the official delivery receipt before exercising the locked state.
+    proposal.update!(status: 'sent', sent_at: Time.current)
     proposal.update!(status: 'accepted')
     expect { execute('add_proposal_item', proposal_id: proposal.id, product_id: product.id, quantity: 2) }.to raise_error(ArgumentError, /bloqueada/)
     expect(proposal.proposal_items).to be_empty
@@ -89,8 +92,12 @@ RSpec.describe 'NICO commercial workflow' do
         { 'tool' => '', 'arguments' => {}, 'reply' => 'Contato e lead cadastrados.' }
       end
     end
-    first = operator.ask(message: 'Crie o contato e gere seu lead', request_id: SecureRandom.uuid)
-    expect { operator.execute(first) }.to have_enqueued_job(JrcNico::ContinueCommandJob).with(first.id)
+    first = nil
+    expect do
+      first = operator.ask(message: 'Crie o contato e gere seu lead', request_id: SecureRandom.uuid)
+    end.to(have_enqueued_job(JrcNico::ContinueCommandJob).with { |id| expect(id).to eq(first.id) })
+    expect(first.status).to eq('succeeded')
+    expect { operator.execute(first) }.not_to have_enqueued_job(JrcNico::ContinueCommandJob)
     JrcNico::ContinueCommandJob.perform_now(first.id)
     second = operator.session.commands.order(:id).last
     expect(second.tool).to eq('create_lead')

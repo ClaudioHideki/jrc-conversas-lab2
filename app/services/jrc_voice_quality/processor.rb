@@ -9,7 +9,7 @@ class JrcVoiceQuality::Processor
     @credential = credential
     @call = call.deep_symbolize_keys
     @supabase = JrcVoiceQuality::SupabaseClient.new
-    @openai = JrcVoiceQuality::OpenaiClient.new
+    @openai = JrcVoiceQuality::OpenaiClient.new(account: account)
   end
 
   def call
@@ -76,7 +76,11 @@ class JrcVoiceQuality::Processor
     raise JrcVoiceQuality::RecordingError.new('Chamada sem recording_url.', code: :missing_recording_url) if @call[:recording_url].blank?
     raise JrcVoiceQuality::RecordingError.new('URL da gravacao invalida.', code: :invalid_recording_url) unless recording_uri.is_a?(URI::HTTP)
     raise JrcVoiceQuality::ConfigurationError.new('Supabase nao configurado.', code: :supabase_not_configured) unless @supabase.configured?
-    raise JrcVoiceQuality::TranscriptionError.new('OPENAI_API_KEY nao configurada para transcricao server-side.', code: :openai_not_configured) unless @openai.configured?
+
+    unless @openai.configured?
+      raise JrcVoiceQuality::TranscriptionError.new('Configure o provedor de IA desta conta para transcricao e monitoria.',
+                                                    code: :openai_not_configured)
+    end
   rescue URI::InvalidURIError
     raise JrcVoiceQuality::RecordingError.new('URL da gravacao invalida.', code: :invalid_recording_url)
   end

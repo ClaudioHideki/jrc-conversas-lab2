@@ -15,7 +15,8 @@ test('real engine/HTTP boundary retries before returning an action, reports cont
   child.stdout.on('data', chunk => { output += chunk.toString(); });
   child.stderr.on('data', chunk => { output += chunk.toString(); });
   const url = 'http://127.0.0.1:3196';
-  const input = { request_id: 'a56905c4-9a03-4c21-a886-b5d18a3e4c57', account_id: 1, kind: 'operator', message: 'valid_second', history: [], context: {} };
+  const input = { request_id: 'a56905c4-9a03-4c21-a886-b5d18a3e4c57', account_id: 1, kind: 'operator', message: 'valid_second', history: [], context: {},
+    provider: { api_key: 'PRIVATE_API_KEY', model: 'test-model', base_url: 'https://api.openai.com/v1' } };
   const headers = { authorization: 'Bearer PRIVATE_SERVICE_TOKEN_MINIMUM_32_CHARS', 'content-type': 'application/json' };
   try {
     let ready = false;
@@ -26,6 +27,10 @@ test('real engine/HTTP boundary retries before returning an action, reports cont
       await new Promise(resolve => setTimeout(resolve, 100));
     }
     assert.ok(ready);
+    const { provider: _provider, ...withoutProvider } = input;
+    const missingProvider = await fetch(`${url}/v1/operate`, { method: 'POST', headers, body: JSON.stringify(withoutProvider) });
+    assert.equal(missingProvider.status, 422);
+    assert.equal((await missingProvider.json()).error, 'account_ai_not_configured');
     const valid = await fetch(`${url}/v1/operate`, { method: 'POST', headers, body: JSON.stringify(input) });
     assert.equal(valid.status, 200);
     const result = await valid.json();

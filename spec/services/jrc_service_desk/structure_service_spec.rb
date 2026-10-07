@@ -23,8 +23,16 @@ RSpec.describe JrcServiceDesk::StructureService do
     expect(repeat.record.id).to eq(result.record.id)
   end
 
-  it 'denies native admin alone and a membership without explicit structural capability' do
+  it 'permits native administrators to manage structure without a CustomRole' do
     sd_account_user.update!(custom_role: nil)
+    result = service.create(resource: 'operator_companies', attributes: { name: 'X', code: 'x', active: true }, reason: 'CHG-1', idempotency_key: 'x')
+    expect(result.record.account_id).to eq(sd_account.id)
+    expect(sd_account_user.reload.custom_role_id).to be_nil
+    expect(sd_account_user.role).to eq('administrator')
+  end
+
+  it 'denies agents with a membership but no structural capability' do
+    sd_account_user.update!(role: :agent, custom_role: nil)
     expect { service.create(resource: 'operator_companies', attributes: { name: 'X', code: 'x', active: true }, reason: 'CHG-1', idempotency_key: 'x') }.to raise_error(Pundit::NotAuthorizedError)
   end
 

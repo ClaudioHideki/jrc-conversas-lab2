@@ -26,12 +26,14 @@ class ServiceDeskStructureContractTest < Minitest::Test
     assert_equal [2, 3], A.ids('2, 3,2')
   end
 
-  def test_default_native_roles_never_receive_structure
-    %w[agent administrator super_admin].each do |role|
+  def test_native_administrator_receives_structure_without_elevating_other_roles
+    %w[agent super_admin].each do |role|
       caps = JrcServiceDesk::Capabilities.new(native_role: role)
       %w[structure_view operator_companies_manage units_manage unit_memberships_manage].each { |key| refute caps.allowed?(key) }
     end
-    assert_equal 33, JrcServiceDesk::Capabilities.new(native_role: 'administrator').effective.size
+    admin = JrcServiceDesk::Capabilities.new(native_role: 'administrator')
+    %w[structure_view operator_companies_manage units_manage unit_memberships_manage].each { |key| assert admin.allowed?(key) }
+    assert_equal 37, admin.effective.size
     assert_equal 23, JrcServiceDesk::Capabilities.new(native_role: 'agent').effective.size
   end
 

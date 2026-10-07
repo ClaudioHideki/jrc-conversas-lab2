@@ -4,11 +4,11 @@ class JrcServiceDesk::UpdateTicketService < JrcServiceDesk::BaseService
   FIELDS = %w[title description priority_id category_id].freeze
 
   def call(ticket_id:, attributes:, expected_lock_version:)
-    fields = context.account.feature_enabled?('jrc_customer_master') ? FIELDS + ['company_id'] : FIELDS
-    values = JrcServiceDesk::Input.attributes(attributes, fields)
-    raise ArgumentError, 'No editable attributes' if values.empty?
-
     with_ticket(ticket_id, :show?) do |ticket|
+      fields = context.account.feature_enabled?('jrc_customer_master') ? FIELDS + ['company_id'] : FIELDS
+      values = JrcServiceDesk::Input.attributes(attributes, fields)
+      raise ArgumentError, 'No editable attributes' if values.empty?
+
       authorize!(ticket, :update?) if (values.keys - ['priority_id']).any?
       authorize!(ticket, :change_priority?) if values.key?('priority_id')
       verify_version!(ticket, expected_lock_version)

@@ -58,8 +58,11 @@ class JrcServiceDesk::StructureService
       Account.where(id: initial.account.id).lock.take!
       User.where(id: initial.user.id).lock('FOR SHARE').take!
       au = AccountUser.where(id: initial.account_user.id, account_id: initial.account.id, user_id: initial.user.id).lock('FOR SHARE').take!
-      raise Pundit::NotAuthorizedError unless au.respond_to?(:custom_role) && au.custom_role
-      au.custom_role.class.where(id: au.custom_role_id, account_id: initial.account.id).lock('FOR SHARE').take!
+      if au.respond_to?(:custom_role_id) && au.custom_role_id.present?
+        raise Pundit::NotAuthorizedError unless au.custom_role
+
+        au.custom_role.class.where(id: au.custom_role_id, account_id: initial.account.id).lock('FOR SHARE').take!
+      end
       @context = fresh_context!
       raise Pundit::NotAuthorizedError unless @context.allowed?(resource)
       yield

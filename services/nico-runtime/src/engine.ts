@@ -9,6 +9,8 @@ import { validateOperation, validateOperationResult, operationPrompt, operationS
 
 import { structuredResponse, type Usage } from './provider.ts';
 import { NicoError } from './errors.ts';
+import type { ProviderConfig } from './provider-config.ts';
+import { analyzeSentiment, type SentimentInput } from './sentiment.ts';
 
 export type Result = Analysis & { usage: Usage | null; model: string; mode: string };
 type Config = { mode: 'fixture' | 'provider'; dataDir?: string; postgresUrl?: string; model?: string; apiKey?: string; baseUrl?: string };
@@ -23,7 +25,6 @@ export async function createEngine(config: Config) {
   quiet.child = () => quiet;
   Object.assign(logger, quiet);
   if (!['fixture', 'provider'].includes(config.mode)) throw new Error('Invalid mode');
-  if (config.mode === 'provider' && (!config.apiKey || !config.model)) throw new Error('Provider configuration missing');
   const baseUrl = new URL(config.baseUrl || 'https://api.openai.com/v1/');
   if (config.mode === 'provider' && baseUrl.protocol !== 'https:') throw new Error('Provider requires HTTPS');
   const id = stringToUuid('jrc:nico:assisted:v1');
@@ -33,6 +34,7 @@ export async function createEngine(config: Config) {
   // Authorized prompts/results belong to Rails audit, never generic model memory.
   adapter.log = async () => {};
   const signals = new AsyncLocalStorage<AbortSignal | undefined>();
+  const providers = new AsyncLocalStorage<ProviderConfig | undefined>();
   const model: Plugin = {
     name: 'nico-bounded-analysis', description: 'Read-only structured analysis with bounded transport',
     models: {
@@ -53,10 +55,12 @@ export async function createEngine(config: Config) {
             usage: null, model: 'fixture-local', mode: 'fixture',
           };
         }
+        const selected = providers.getStore() || config;
+        if (!selected.apiKey || !selected.model) throw new NicoError('account_ai_not_configured');
         const generated = await structuredResponse({
-          url: `${baseUrl.href.replace(/\/$/, '')}/chat/completions`, apiKey: config.apiKey!,
+          url: `${(selected.baseUrl || baseUrl.href).replace(/\/$/, '')}/chat/completions`, apiKey: selected.apiKey,
           signal: signals.getStore(), retryInvalid: operational,
-          body: { model: config.model, temperature: 0, max_completion_tokens: 2000,
+          body: { model: selected.model, temperature: 0, max_completion_tokens: 2000,
             response_format: { type: 'json_schema', json_schema: {
               name: 'nico_assisted_analysis', strict: true,
               schema: operational ? (raw.kind === 'customer' ? customerSchema : operationSchema) : analysisSchema,
@@ -71,7 +75,7 @@ export async function createEngine(config: Config) {
           validate: value => operational ? validateOperationResult(value, raw.kind) : validateAnalysis(value, (input as Input).context),
         });
         return { ...generated.result, usage: generated.usage,
-          ...(generated.usageEstimated ? { usage_estimated: true } : {}), model: config.model, mode: 'provider' };
+          ...(generated.usageEstimated ? { usage_estimated: true } : {}), model: selected.model, mode: 'provider' };
       },
     },
   };
@@ -90,21 +94,28 @@ export async function createEngine(config: Config) {
   }
   return {
     runtime,
-    async analyze(input: Input, signal?: AbortSignal): Promise<Result> {
+    async analyze(input: Input, signal?: AbortSignal, provider?: ProviderConfig): Promise<Result> {
       validateInput(input);
-        const result = await invoke(input, signal) as Result;
+        const result = await providers.run(provider, () => invoke(input, signal)) as Result;
         const { usage, model: modelName, mode, ...analysis } = result;
         validateAnalysis(analysis, input.context);
         return { ...analysis, usage, model: modelName, mode };
     },
-    async operate(input: OperationInput, signal?: AbortSignal) {
+    async operate(input: OperationInput, signal?: AbortSignal, provider?: ProviderConfig) {
       validateOperation(input);
-      return await invoke(input, signal);
+      return await providers.run(provider, () => invoke(input, signal));
     },
-    async transcribe(input: unknown, signal?: AbortSignal) {
+    async transcribe(input: unknown, signal?: AbortSignal, provider?: ProviderConfig) {
       if (active >= concurrency) throw new NicoError('runtime_busy');
       active += 1;
-      try { return await transcribeAudio(input, config, signal); }
+      try { return await transcribeAudio(input, { ...config, ...provider }, signal); }
+      finally { active -= 1; }
+    },
+    async sentiment(input: SentimentInput, signal?: AbortSignal, provider?: ProviderConfig) {
+      if (active >= concurrency) throw new NicoError('runtime_busy');
+      if (config.mode !== 'provider' || !provider) throw new NicoError('account_ai_not_configured');
+      active += 1;
+      try { return await analyzeSentiment(input, provider, signal); }
       finally { active -= 1; }
     },
     async close() { await runtime.stop(); await runtime.close(); },

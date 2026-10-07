@@ -4,6 +4,10 @@ class JrcNico::DelegationService
   end
 
   def start(args)
+    unless @access.account.custom_attributes['nico_customer_delegation_enabled'] == true
+      raise ArgumentError, 'O NICO desta conta atua como assistente interno.'
+    end
+
     hours = args.fetch('hours', 2).clamp(1, 8)
     allowed_actions = args.fetch('allowed_actions', []).uniq
     raise ArgumentError, 'Autorização desconhecida.' if (allowed_actions - JrcNico::DelegatedActions::GROUPS.keys).any?
@@ -17,6 +21,11 @@ class JrcNico::DelegationService
     end
     conversations.map do |conversation|
       conversation.with_lock do
+        if conversation.assignee_agent_bot_id.present? || JrcFlows::Access.inbox_bot_owned?(conversation) ||
+           JrcFlowRun.live.exists?(account_id: @access.account.id, conversation_id: conversation.id)
+          raise ArgumentError, 'Esta conversa já pertence a um bot ou Flow. Preserve o executor atual antes de delegar atendimento.'
+        end
+
         delegation = JrcNico::Delegation.find_or_initialize_by(conversation: conversation)
         raise ArgumentError, 'Esta conversa já está sob atendimento do NICO. Retome antes de alterar a delegação.' if delegation.persisted? && delegation.live?
         # Retain the delegating operator's authorized participation after bot assignment.

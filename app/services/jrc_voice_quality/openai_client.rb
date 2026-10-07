@@ -2,24 +2,27 @@ require 'faraday/multipart'
 
 class JrcVoiceQuality::OpenaiClient
   TRANSCRIPTION_MODEL = 'gpt-4o-mini-transcribe'
-  ANALYSIS_MODEL = 'gpt-4.1-mini'
+
+  def initialize(account:)
+    @account = account
+  end
 
   def configured?
-    api_key.present?
+    provider.present?
   end
 
   def transcription_model
-    ENV.fetch('OPENAI_TRANSCRIPTION_MODEL', TRANSCRIPTION_MODEL).presence || TRANSCRIPTION_MODEL
+    provider.settings['transcription_model'].presence || TRANSCRIPTION_MODEL
   end
 
   def analysis_model
-    ENV.fetch('OPENAI_ANALYSIS_MODEL', ANALYSIS_MODEL).presence || ANALYSIS_MODEL
+    provider.default_model
   end
 
   def transcribe!(tempfile:, filename:, content_type:)
     unless configured?
       raise JrcVoiceQuality::TranscriptionError.new(
-        'OPENAI_API_KEY nao configurada para transcricao server-side.',
+        'Provedor de IA da conta nao configurado para transcricao.',
         code: :openai_not_configured
       )
     end
@@ -54,7 +57,7 @@ class JrcVoiceQuality::OpenaiClient
   def analyze!(transcript)
     unless configured?
       raise JrcVoiceQuality::AnalysisError.new(
-        'OPENAI_API_KEY nao configurada.',
+        'Provedor de IA da conta nao configurado.',
         code: :openai_not_configured
       )
     end
@@ -107,16 +110,17 @@ class JrcVoiceQuality::OpenaiClient
   private
 
   def api_key
-    ENV.fetch('OPENAI_API_KEY', '').to_s.strip
+    provider.api_key
   end
 
   def base_url
-    configured_url = ENV.fetch('OPENAI_BASE_URL', '').to_s.strip
+    provider.request_base_url
+  end
 
-    configured_url = 'https://api.openai.com/v1' if configured_url.blank?
-    configured_url = configured_url.delete_suffix('/')
-
-    configured_url.end_with?('/v1') ? configured_url : "#{configured_url}/v1"
+  def provider
+    @provider ||= JrcAi::AccountProvider.resolve(@account)
+  rescue JrcNico::RuntimeClient::Error
+    nil
   end
 
   def multipart_connection
@@ -146,13 +150,6 @@ class JrcVoiceQuality::OpenaiClient
   def parse_response(response, step)
     return JSON.parse(response.body) if response.success?
 
-    message =
-      begin
-        JSON.parse(response.body).dig('error', 'message')
-      rescue JSON::ParserError
-        response.body.to_s.first(200)
-      end
-
     code =
       step == :transcription ? :transcription_failed : :analysis_failed
 
@@ -164,7 +161,7 @@ class JrcVoiceQuality::OpenaiClient
       end
 
     raise error_class.new(
-      "OpenAI retornou HTTP #{response.status}: #{message}",
+      "O provedor de IA recusou a operação (HTTP #{response.status}). Verifique a configuração e a cota da conta.",
       code: code
     )
   end

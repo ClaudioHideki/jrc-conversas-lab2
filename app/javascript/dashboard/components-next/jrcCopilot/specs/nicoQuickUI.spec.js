@@ -12,9 +12,10 @@ let route;
 let calls;
 let sip;
 let currentChat;
+let routerPush;
 vi.mock('vue-router', () => ({
   useRoute: () => route,
-  useRouter: () => ({ hasRoute: () => true, push: vi.fn() }),
+  useRouter: () => ({ hasRoute: () => true, push: routerPush }),
 }));
 vi.mock('dashboard/composables/store', () => ({
   useMapGetter: () => currentChat,
@@ -59,6 +60,7 @@ describe('Quick NICO and Full Copilot use one operator session', () => {
   beforeEach(async () => {
     vi.useFakeTimers();
     vi.clearAllMocks();
+    routerPush = vi.fn().mockResolvedValue(undefined);
     Object.defineProperty(document, 'visibilityState', {
       configurable: true,
       value: 'visible',
@@ -249,6 +251,64 @@ describe('Quick NICO and Full Copilot use one operator session', () => {
     expect(wrapper.text()).not.toContain(
       translations.JRC_NICO.OPERATOR.LOAD_ERROR
     );
+  });
+
+  it('opens only a navigation result belonging to the current operator request', async () => {
+    ui.openQuick();
+    await flushPromises();
+    api.ask.mockImplementationOnce(async (_account, request) => ({
+      data: {
+        ...snapshot,
+        commands: [
+          {
+            request_id: 'older-request',
+            status: 'succeeded',
+            result: { navigate: true, conversation_id: 99 },
+          },
+          {
+            request_id: request.request_id,
+            status: 'succeeded',
+            result: { navigate: true, conversation_id: 45 },
+          },
+        ],
+      },
+    }));
+    await wrapper.get('textarea').setValue('Abra a conversa 45');
+    await wrapper.get('form').trigger('submit');
+    await flushPromises();
+    expect(routerPush).toHaveBeenCalledExactlyOnceWith(
+      '/app/accounts/1/conversations/45'
+    );
+    expect(api.command).not.toHaveBeenCalled();
+  });
+
+  it('shows the source-bounded sentiment report and keeps delegation hidden for an internal assistant', async () => {
+    snapshot.commands = [
+      {
+        id: 501,
+        status: 'succeeded',
+        tool: 'analyze_conversation_sentiment',
+        result: {
+          sentiment_report: {
+            conversation_id: 14,
+            summary: 'Cliente satisfeito na amostra.',
+            customer_sentiment: 'positive',
+            agent_sentiment: 'insufficient_data',
+            scope: 'Somente mensagens públicas; áudio não analisado.',
+          },
+        },
+      },
+    ];
+    ui.open();
+    await flushPromises();
+    const report = wrapper.get('[data-testid="nico-sentiment-report"]');
+    expect(report.text()).toContain('Cliente satisfeito na amostra.');
+    expect(report.text()).toContain('áudio não analisado');
+    expect(
+      wrapper
+        .find(`[aria-label="${translations.JRC_NICO.OPERATOR.DELEGATE}"]`)
+        .exists()
+    ).toBe(false);
   });
 
   it('does not poll the closed idle session and pauses notices in a hidden tab', async () => {
@@ -511,7 +571,7 @@ describe('Quick NICO and Full Copilot use one operator session', () => {
     );
   });
 
-  it('keeps unread notices while moving from balloon to Quick and Full', async () => {
+  it('keeps unread notices without automatic balloons while moving to Quick and Full', async () => {
     noticeList = [
       {
         id: 7,
@@ -522,10 +582,12 @@ describe('Quick NICO and Full Copilot use one operator session', () => {
       },
     ];
     await vi.advanceTimersByTimeAsync(30000);
-    expect(wrapper.text()).toContain('Revisar oportunidade');
-    await wrapper
-      .get('[aria-label="Recolher balão e manter aviso pendente"]')
-      .trigger('click');
+    expect(
+      wrapper
+        .find('[aria-label="Recolher balão e manter aviso pendente"]')
+        .exists()
+    ).toBe(false);
+    expect(wrapper.text()).not.toContain('Revisar oportunidade');
     expect(wrapper.find('[aria-label="Avisos não lidos: 1"]').exists()).toBe(
       true
     );
@@ -548,7 +610,7 @@ describe('Quick NICO and Full Copilot use one operator session', () => {
     expect(api.command).not.toHaveBeenCalled();
   });
 
-  it('the notice balloon pauses its timer while focused and read remains an explicit action', async () => {
+  it('does not show a balloon on new notices, hover or focus and does not mark them read', async () => {
     noticeList = [
       {
         id: 8,
@@ -559,25 +621,18 @@ describe('Quick NICO and Full Copilot use one operator session', () => {
       },
     ];
     await vi.advanceTimersByTimeAsync(30000);
-    const dismiss = wrapper.get(
-      '[aria-label="Recolher balão e manter aviso pendente"]'
-    );
-    await dismiss.trigger('focusin');
-    await vi.advanceTimersByTimeAsync(13000);
+    const mascot = wrapper.get('[aria-label="Abrir assistente NICO"]');
+    await mascot.trigger('mouseenter');
+    await mascot.trigger('focus');
     expect(
       wrapper
         .find('[aria-label="Recolher balão e manter aviso pendente"]')
         .exists()
-    ).toBe(true);
-    const read = wrapper
-      .findAll('button')
-      .find(button => button.text() === 'Marcar aviso como lido');
-    await read.trigger('click');
-    await flushPromises();
-    expect(api.readNotice).toHaveBeenCalledExactlyOnceWith(1, 8);
+    ).toBe(false);
     expect(wrapper.find('[aria-label="Avisos não lidos: 1"]').exists()).toBe(
-      false
+      true
     );
+    expect(api.readNotice).not.toHaveBeenCalled();
   });
 
   it('uses the backend outcome for success, failure and read-only results', async () => {

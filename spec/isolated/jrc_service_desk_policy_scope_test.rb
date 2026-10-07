@@ -50,6 +50,7 @@ class ScopeFixtureContext
   def initialize(role:, enabled:, grants:, units:, teams: [], memberships: [100])
     @account = OpenStruct.new(id: 1)
     @enabled, @units, @teams, @memberships = enabled, units, teams, memberships
+    @administrator = role == 'administrator' && grants.nil?
     @capabilities = JrcServiceDesk::Capabilities.new(native_role: role, custom: !grants.nil?, permissions: grants || [])
   end
   def capability?(key)
@@ -61,6 +62,17 @@ class ScopeFixtureContext
   def unit_scope
     ScopeFixtureRelation.new(@units.map { |id| OpenStruct.new(id: id) })
   end
+
+  def administrator?
+    @enabled && @administrator
+  end
+
+  def view_unit_scope
+    return unit_scope unless administrator?
+
+    ScopeFixtureRelation.new([10, 11].map { |id| OpenStruct.new(id: id) })
+  end
+
   def active_memberships
     ScopeFixtureRelation.new(@memberships.map { |id| OpenStruct.new(id: id) })
   end

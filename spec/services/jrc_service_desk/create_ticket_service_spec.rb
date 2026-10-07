@@ -25,6 +25,28 @@ RSpec.describe JrcServiceDesk::CreateTicketService do
     expect(first.ticket_events.count).to eq(1)
   end
 
+  it 'creates, reloads and edits without changing ownership, number or relationships' do
+    ticket = create_command
+    identity = ticket.reload.attributes.slice('id', 'account_id', 'unit_id', 'requester_id',
+                                              'status_id', 'priority_id', 'created_by_membership_id')
+    changed = JrcServiceDesk::UpdateTicketService.new(user_context: sd_context).call(
+      ticket_id: ticket.id, attributes: { title: 'Persisted edit' }, expected_lock_version: ticket.lock_version
+    )
+    expect(changed.reload.title).to eq('Persisted edit')
+    expect(changed.attributes.slice(*identity.keys)).to eq(identity)
+    expect(changed.ticket_events.pluck(:event_type)).to eq(%w[ticket_created ticket_updated])
+    replay = create_command
+    expect(replay.reload).to have_attributes(id: ticket.id, title: 'Persisted edit')
+    expect(JrcServiceDesk::Ticket.where(account_id: sd_account.id, unit_id: sd_unit.id).count).to eq(1)
+  end
+
+  it 'rejects creation in another unit for an agent with only its own unit grant' do
+    expect do
+      create_command(unit_id: sd_other_unit.id)
+    end.to raise_error(ActiveRecord::RecordNotFound)
+    expect(JrcServiceDesk::Ticket.where(unit_id: sd_other_unit.id)).to be_empty
+  end
+
   it 'refuses reusing an idempotency key with a changed payload' do
     first = create_command
     expect { create_command(sd_create_attributes.merge(title: 'Different')) }.to raise_error(JrcServiceDesk::IdempotencyConflict)

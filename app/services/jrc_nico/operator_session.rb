@@ -62,6 +62,10 @@ class JrcNico::OperatorSession
             next
           end
           authorization = { 'source' => 'operator', 'user_id' => access.user.id }
+          if command.execution_context['explicit_operator_request'] == true
+            authorization['mode'] = 'explicit_request'
+            authorization['request_id'] = command.request_id
+          end
           if delegation
             delegation.lock!
             raise Pundit::NotAuthorizedError unless JrcNico::DelegatedActions.permitted?(delegation, command, access)
@@ -293,6 +297,10 @@ class JrcNico::OperatorSession
           next
         end
         prepare(command, response['tool'], response['arguments'], response['reply'])
+        if JrcNico::ExecutionPolicy.automatic?(command, response['tool'])
+          command.update!(execution_context: command.execution_context.merge('explicit_operator_request' => true))
+          execute(command)
+        end
         return command
       end
       previous_read = context[:tool_results].reverse.find do |item|
@@ -313,7 +321,7 @@ class JrcNico::OperatorSession
       result = JrcNico::ToolExecutor.new(access, customer_notice: notice, command: command).call(response['tool'], response['arguments'])
       command.update!(tool: response['tool'], arguments: response['arguments'], result: result.as_json)
       session.with_lock { remember_result(response['tool'], result, command: command, remember_selection: !notice) }
-      if response['tool'] == 'open_module'
+      if %w[open_module open_conversation analyze_conversation_sentiment].include?(response['tool'])
         command.update!(status: 'succeeded', reply: result[:message])
         session.with_lock { session.append('assistant', command.reply) }
         return command

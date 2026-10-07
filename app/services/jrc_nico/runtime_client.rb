@@ -5,7 +5,8 @@ class JrcNico::RuntimeClient
     CODES = %w[provider_outer_json_invalid tool_arguments_invalid provider_schema_invalid provider_timeout provider_unauthorized
                provider_forbidden provider_rate_limited provider_unavailable provider_transport_error provider_usage_invalid
                runtime_busy request_cancelled runtime_internal_error unauthorized account_not_configured runtime_transport_error
-               runtime_timeout invalid_response invalid_scope invalid_configuration context_too_large invalid_transcription].freeze
+               runtime_timeout invalid_response invalid_scope invalid_configuration context_too_large invalid_transcription
+               account_ai_not_configured provider_adapter_unavailable provider_quota_exceeded].freeze
     attr_reader :code
 
     def initialize(code = 'invalid_response')
@@ -19,6 +20,11 @@ class JrcNico::RuntimeClient
         unchanged = previous_changes ? 'As etapas já concluídas foram preservadas; esta etapa não realizou alterações.' : 'Nenhuma alteração foi realizada.'
         "O NICO não conseguiu interpretar os dados necessários para executar esta ação. #{unchanged} Tente novamente ou revise os dados informados."
       when 'provider_rate_limited' then 'O provedor de IA atingiu o limite de solicitações ou de uso. Aguarde e verifique a cota do provedor.'
+      when 'provider_quota_exceeded' then 'O provedor informou cota ou saldo de API indisponível. O administrador deve verificar ' \
+                                          'o projeto da API; este erro não confirma um problema no cartão.'
+      when 'account_ai_not_configured' then 'Cadastre uma chave e um modelo em Inteligência Artificial > Provedores desta conta.'
+      when 'provider_adapter_unavailable' then 'O adaptador do provedor escolhido ainda não suporta este recurso. ' \
+                                               'Configure um provedor OpenAI ou compatível nesta conta.'
       when 'provider_timeout' then 'O provedor de IA demorou além do limite. A etapa não foi executada. Tente novamente.'
       when 'provider_unauthorized', 'provider_forbidden' then 'O provedor de IA recusou o acesso. Solicite a revisão da configuração ao administrador.'
       when 'runtime_busy' then 'O NICO está ocupado com outras solicitações. Aguarde e tente novamente.'
@@ -32,6 +38,25 @@ class JrcNico::RuntimeClient
   end
 
   KEYS = %w[request_id account_id summary suggested_reply evidence warnings usage model mode].freeze
+
+  def initialize(provider: nil)
+    @provider = provider
+  end
+
+  def sentiment(payload)
+    body = transport('/v1/sentiment', payload.to_json, account_id: payload.fetch(:account_id))
+    valid = body.is_a?(Hash) && body.keys.sort == %w[account_id mode model report request_id usage]
+    valid &&= body['request_id'] == payload[:request_id] && body['account_id'] == payload[:account_id]
+    valid &&= sentiment_content?(body)
+    raise Error, 'invalid_response' unless valid
+
+    body
+  end
+
+  def sentiment_content?(body)
+    body['mode'] == 'provider' && text?(body['model'], 150, required: true) && valid_usage?(body) && body['report'].is_a?(Hash)
+  end
+  private :sentiment_content?
 
   def transcribe(payload)
     body = transport('/v1/transcribe', payload.to_json, account_id: payload.fetch(:account_id), max_bytes: 5_600_000)
@@ -103,6 +128,11 @@ class JrcNico::RuntimeClient
   end
 
   def transport(path, payload, account_id:, max_bytes: 262_144)
+    if ENV['NICO_MODE'] == 'provider'
+      # This envelope is stripped before inference and is never part of prompts/history.
+      payload = JSON.parse(payload).merge('provider' => JrcAi::AccountProvider.runtime_configuration(Account.find(account_id),
+                                                                                                     provider: @provider)).to_json
+    end
     endpoint, token = runtime_credentials(account_id)
     uri = URI(endpoint)
     raise Error, 'invalid_configuration' unless %w[http https].include?(uri.scheme) && uri.host.present? && uri.userinfo.nil? &&

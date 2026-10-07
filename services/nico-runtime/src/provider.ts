@@ -7,13 +7,9 @@ const REPAIR_INSTRUCTION = 'A resposta estruturada anterior era inválida. Gere 
   + 'Não corrija nem invente IDs, telefones, valores, datas ou destinatários. Use o mesmo contexto original. Nenhuma ferramenta foi executada nesta tentativa.';
 
 async function readJson(response: Response): Promise<any> {
-  if (!response.ok) {
-    await response.body?.cancel();
-    const code = response.status === 401 ? 'provider_unauthorized' : response.status === 403 ? 'provider_forbidden'
-      : response.status === 429 ? 'provider_rate_limited' : 'provider_unavailable';
-    throw new NicoError(code);
-  }
-  if (!response.body) throw new NicoError('provider_outer_json_invalid');
+  const failure = response.status === 401 ? 'provider_unauthorized' : response.status === 403 ? 'provider_forbidden'
+    : response.status === 429 ? 'provider_rate_limited' : 'provider_unavailable';
+  if (!response.body) throw new NicoError(response.ok ? 'provider_outer_json_invalid' : failure);
   const reader = response.body.getReader();
   const parts: Uint8Array[] = [];
   let size = 0;
@@ -25,8 +21,14 @@ async function readJson(response: Response): Promise<any> {
       if (size > 131072) throw new NicoError('provider_schema_invalid');
       parts.push(value);
     }
-    try { return JSON.parse(Buffer.concat(parts).toString('utf8')); }
-    catch { throw new NicoError('provider_outer_json_invalid'); }
+    let payload;
+    try { payload = JSON.parse(Buffer.concat(parts).toString('utf8')); }
+    catch { throw new NicoError(response.ok ? 'provider_outer_json_invalid' : failure); }
+    if (!response.ok) {
+      const quota = ['insufficient_quota', 'billing_hard_limit_reached'].includes(payload?.error?.code);
+      throw new NicoError(response.status === 429 && quota ? 'provider_quota_exceeded' : failure);
+    }
+    return payload;
   } finally { await reader.cancel().catch(() => {}); }
 }
 

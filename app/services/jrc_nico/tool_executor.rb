@@ -98,7 +98,13 @@ class JrcNico::ToolExecutor
 
   def send_message
     conversation = @access.conversation(@args.fetch('conversation_id'))
-    message = Messages::MessageBuilder.new(@user, conversation, @args.slice('content', 'private').symbolize_keys).perform
+    message = conversation.with_lock do
+      if @args['private'] != true && (conversation.assignee_agent_bot_id.present? || JrcFlows::Access.inbox_bot_owned?(conversation) ||
+                                  JrcFlowRun.live.exists?(account_id: @account.id, conversation_id: conversation.id))
+        raise ArgumentError, 'Esta conversa está sob atendimento de um bot ou Flow. Use a transferência para humano antes de enviar pelo NICO.'
+      end
+      Messages::MessageBuilder.new(@user, conversation, @args.slice('content', 'private').symbolize_keys).perform
+    end
     { message: @args['private'] ? 'Nota interna registrada' : 'Mensagem registrada para envio pelo canal',
       id: message.id, status: message.status, conversation_id: conversation.display_id, route_name: 'home' }
   end
@@ -106,6 +112,11 @@ class JrcNico::ToolExecutor
   def update_conversation
     conversation = @access.conversation(@args.fetch('conversation_id'))
     conversation.with_lock do
+      if @args.keys.intersect?(%w[status assignee_id team_id]) &&
+         (conversation.assignee_agent_bot_id.present? || JrcFlows::Access.inbox_bot_owned?(conversation) ||
+          JrcFlowRun.live.exists?(account_id: @account.id, conversation_id: conversation.id))
+        raise ArgumentError, 'Esta conversa pertence a um bot ou Flow. Faça a transferência para humano no fluxo responsável.'
+      end
       JrcNico::DelegationService.stop(conversation, reason: 'operator_action')
       conversation.reload
       if @args['assignee_id']
@@ -177,6 +188,7 @@ class JrcNico::ToolExecutor
       if existing && existing.size > 1
         raise ArgumentError, "Há vários leads para este contato. Selecione o ID: #{existing.map(&:id).join(', ')}."
       end
+
       lead = existing&.first || @account.jrc_crm_leads.create!(attrs.merge(contact: contact, owner: @user, source: 'nico'))
     end
     record_result(lead, 'Lead criado ou reutilizado', 'crm_leads')
@@ -240,6 +252,7 @@ class JrcNico::ToolExecutor
     if @args['activity_type'] == 'meeting' && @account.jrc_crm_activities.where(user: @user, activity_type: 'meeting', status: 'scheduled', due_at: due_at).exists?
       raise ArgumentError, 'Já existe uma reunião do operador neste horário. Confirme outro horário antes de agendar.'
     end
+
     activity = @account.jrc_crm_activities.new(@args.slice('title', 'activity_type', 'description').merge(
       user: @user, lead: lead, deal: deal, due_at: due_at))
     result = JrcCrm::ActivityDispatchService.new(activity: activity, actor: @user).call
@@ -353,7 +366,19 @@ class JrcNico::ToolExecutor
     name = @args.fetch('route_name')
     raise ArgumentError, 'Módulo desconhecido.' unless JrcCopilot::TaskCatalog::ROUTE_GUIDES.key?(name)
 
-    { route_name: name, message: "Abrir #{JrcCopilot::TaskCatalog::ROUTE_GUIDES[name][:title]}" }
+    { route_name: name, navigate: true, message: "Abrir #{JrcCopilot::TaskCatalog::ROUTE_GUIDES[name][:title]}" }
+  end
+
+  def open_conversation
+    conversation = @access.conversation(@args.fetch('conversation_id'))
+    { route_name: 'inbox_dashboard', conversation_id: conversation.display_id, navigate: true,
+      message: "Abrir conversa ##{conversation.display_id}" }
+  end
+
+  def analyze_conversation_sentiment
+    raise Pundit::NotAuthorizedError if @customer_notice || @command&.source_notice_id
+
+    JrcAi::ConversationSentiment.call(@access, @args.fetch('conversation_id'))
   end
 
   def account_profile

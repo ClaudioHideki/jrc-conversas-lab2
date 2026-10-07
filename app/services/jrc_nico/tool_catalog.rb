@@ -9,6 +9,11 @@ class JrcNico::ToolCatalog
     'list_conversations' => ['Listar até 20 conversas visíveis recentes; filtrar por nome e status', 'conversations', false, %w[query status]],
     'conversation_opportunity_batch' => ['Ler lote de 10 conversas visíveis com evidências públicas para analisar oportunidades; todos os status por padrão, page inicia em 1', 'conversations', false, %w[page status]],
     'read_conversation' => ['Ler mensagens públicas e metadados da conversa', 'conversations', false, %w[conversation_id*]],
+    'open_conversation' => ['Abrir uma conversa visível ao operador', 'conversations', false, %w[conversation_id*]],
+    'analyze_conversation_sentiment' => [
+      'Gerar relatório de sentimento e qualidade das mensagens públicas de uma conversa; usa o provedor desta conta',
+      'conversations', false, %w[conversation_id*]
+    ],
     'send_message' => ['Enviar mensagem ao cliente pelo canal da conversa; private=true cria nota interna', 'conversations', true, %w[conversation_id* content* private]],
     'update_conversation' => ['Alterar status (open/resolved/pending/snoozed), prioridade, responsável, equipe ou etiquetas', 'conversations', true,
                               %w[conversation_id* status priority assignee_id team_id labels snoozed_until]],
@@ -58,6 +63,7 @@ class JrcNico::ToolCatalog
     domain_access = nil
     domain_permissions = {}
     TOOLS.filter_map do |name, (description, group, mutation, fields)|
+      next if name == 'delegate_conversations' && @access.account.custom_attributes['nico_customer_delegation_enabled'] != true
       next if group == 'automations' && !(@access.account.feature_enabled?('automations') && @access.policy(AutomationRule).create?)
       next if group == 'crm' && !@access.crm?
       next if group == 'crm_admin' && !(@access.crm? && @access.membership.administrator?)

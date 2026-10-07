@@ -68,7 +68,13 @@
         "error": "Não concluído",
         "unknown": "Confira no módulo",
         "cancelled": "Cancelado"
-      }
+      },
+      "NAVIGATION_ERROR": "A ação foi concluída, mas não foi possível abrir a tela. Use o atalho do resultado.",
+      "SENTIMENT_REPORT": "Relatório de sentimento e atendimento",
+      "CUSTOMER_SENTIMENT": "Sentimento do cliente",
+      "AGENT_SENTIMENT": "Sentimento do atendente",
+      "REPORT_DETAILS": "Ver evidências e recomendações",
+      "DOWNLOAD_REPORT": "Baixar relatório JSON"
     },
     "OPERATOR": {
       "TITLE": "NICO · assistente JRC",

@@ -263,8 +263,19 @@ const resetForm = (savedDraftKey = contactDraft.key.value) => {
 
 const activeDraft = ref(props.isNewContact);
 const contactDraft = useFormDraft('crm:native_contact', {
-  active: activeDraft, snapshot: () => ({ ...state }),
-  restore: value => Object.assign(state, value),
+  active: activeDraft,
+  snapshot: () => ({ ...state }),
+  restore: value => {
+    Object.assign(state, value);
+    state.additionalAttributes = {
+      ...defaultState.additionalAttributes,
+      ...value.additionalAttributes,
+      socialProfiles: {
+        ...defaultState.additionalAttributes.socialProfiles,
+        ...value.additionalAttributes?.socialProfiles,
+      },
+    };
+  },
   reset: () => Object.assign(state, JSON.parse(JSON.stringify(defaultState))),
 });
 if (props.isNewContact) contactDraft.open();
@@ -289,8 +300,14 @@ defineExpose({
 
 <template>
   <div class="flex flex-col gap-6">
-    <button v-if="isNewContact" type="button" class="self-start rounded-lg border border-n-weak px-3 py-2"
-      @click="contactDraft.discard">{{ t('CRM.CREATION.DISCARD') }}</button>
+    <button
+      v-if="isNewContact"
+      type="button"
+      class="self-start rounded-lg border border-n-weak px-3 py-2"
+      @click="contactDraft.discard"
+    >
+      {{ t('CRM.CREATION.DISCARD') }}
+    </button>
     <div class="flex flex-col items-start gap-2">
       <span class="py-1 text-sm font-medium text-n-slate-12">
         {{ t('CONTACTS_LAYOUT.CARD.EDIT_DETAILS_FORM.TITLE') }}

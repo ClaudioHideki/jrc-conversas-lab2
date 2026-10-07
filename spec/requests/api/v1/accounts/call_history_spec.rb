@@ -53,4 +53,33 @@ RSpec.describe 'Call History API', type: :request do
 
     expect(Hodupbx::CallHistoryService).to have_received(:new).with(hash_including(extension: '1110'))
   end
+
+  it 'rejects another account before querying the telephony provider' do
+    foreign_account = create(:account)
+    get api_v1_account_call_history_url(account_id: foreign_account.id), headers: agent.create_new_auth_token, as: :json
+    expect(response).to have_http_status(:unauthorized)
+    expect(Hodupbx::CallHistoryService).not_to have_received(:new)
+  end
+
+  it 'does not borrow another operator extension when the authenticated operator has no configured credential' do
+    other_agent = create(:user, account: account, role: :agent)
+    get api_v1_account_call_history_url(account_id: account.id), headers: other_agent.create_new_auth_token, as: :json
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response.parsed_body['error']).to eq('configuration_missing')
+    expect(Hodupbx::CallHistoryService).not_to have_received(:new)
+  end
+
+  it 'refuses reading or analyzing a call absent from the authenticated operator history' do
+    allow(JrcVoiceQuality::SupabaseClient).to receive(:new).and_call_original
+    allow(JrcVoiceQuality::Processor).to receive(:new).and_call_original
+    path = "/api/v1/accounts/#{account.id}/call_quality_analyses"
+    params = { call: { id: 'foreign-call', extension: '9999', recording_url: 'https://invalid.example/recording' } }
+    get path, params: params, headers: agent.create_new_auth_token, as: :json
+    expect(response).to have_http_status(:not_found)
+    post path, params: params, headers: agent.create_new_auth_token, as: :json
+    expect(response).to have_http_status(:not_found)
+    expect(Hodupbx::CallHistoryService).to have_received(:new).with(hash_including(extension: '1110')).twice
+    expect(JrcVoiceQuality::SupabaseClient).not_to have_received(:new)
+    expect(JrcVoiceQuality::Processor).not_to have_received(:new)
+  end
 end
