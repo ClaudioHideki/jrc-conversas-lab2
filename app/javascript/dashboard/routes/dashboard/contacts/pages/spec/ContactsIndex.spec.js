@@ -241,6 +241,7 @@ describe('Relationship center pagination', () => {
         name: 'CreateNewContactDialog',
         template: '<div />',
         setup: () => ({
+          open: openCreate,
           dialogRef: { open: openCreate },
           onSuccess: createSuccess,
         }),

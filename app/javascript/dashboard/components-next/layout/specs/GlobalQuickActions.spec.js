@@ -42,7 +42,11 @@ vi.mock(
       name: 'CreateNewContactDialog',
       emits: ['create'],
       setup(_, { expose }) {
-        expose({ dialogRef: { open: mocks.open }, onSuccess: mocks.success });
+        expose({
+          open: mocks.open,
+          dialogRef: { open: mocks.open },
+          onSuccess: mocks.success,
+        });
       },
       template: '<div data-contact-dialog />',
     },

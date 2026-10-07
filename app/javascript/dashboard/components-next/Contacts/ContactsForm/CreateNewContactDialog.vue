@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, nextTick } from 'vue';
 import { useMapGetter } from 'dashboard/composables/store';
 import { useI18n } from 'vue-i18n';
 
@@ -36,7 +36,14 @@ const closeDialog = () => {
   dialogRef.value.close();
 };
 
-defineExpose({ dialogRef, contactsFormRef, onSuccess });
+const open = async () => {
+  contact.value = null;
+  dialogRef.value.open();
+  await nextTick();
+  contactsFormRef.value?.resetForm();
+};
+
+defineExpose({ open, dialogRef, contactsFormRef, onSuccess });
 </script>
 
 <template>

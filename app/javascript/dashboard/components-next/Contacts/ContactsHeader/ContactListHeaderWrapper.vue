@@ -7,10 +7,7 @@ import { useAlert, useTrack } from 'dashboard/composables';
 import { CONTACTS_EVENTS } from 'dashboard/helper/AnalyticsHelper/events';
 import filterQueryGenerator from 'dashboard/helper/filterQueryGenerator';
 import contactFilterItems from 'dashboard/routes/dashboard/contacts/contactFilterItems';
-import {
-  DuplicateContactException,
-  ExceptionWithMessage,
-} from 'shared/helpers/CustomErrors';
+import { useContactCreation } from 'dashboard/composables/useContactCreation';
 import { generateValuesForEditCustomViews } from 'dashboard/helper/customViewsHelper';
 import countries from 'shared/constants/countries';
 import {
@@ -69,7 +66,7 @@ const hasActiveSegments = computed(
 const activeSegmentName = computed(() => props.activeSegment?.name);
 
 const openCreateNewContactDialog = () => {
-  createNewContactDialogRef.value?.dialogRef.open();
+  createNewContactDialogRef.value?.open();
 };
 const openContactImportDialog = () =>
   contactImportDialogRef.value?.dialogRef.open();
@@ -80,28 +77,7 @@ const openCreateSegmentDialog = () =>
 const openDeleteSegmentDialog = () =>
   deleteSegmentDialogRef.value?.dialogRef.open();
 
-const onCreate = async contact => {
-  try {
-    await store.dispatch('contacts/create', contact);
-    createNewContactDialogRef.value?.onSuccess();
-    useAlert(
-      t('CONTACTS_LAYOUT.HEADER.ACTIONS.CONTACT_CREATION.SUCCESS_MESSAGE')
-    );
-  } catch (error) {
-    const i18nPrefix = 'CONTACTS_LAYOUT.HEADER.ACTIONS.CONTACT_CREATION';
-    if (error instanceof DuplicateContactException) {
-      if (error.data.includes('email')) {
-        useAlert(t(`${i18nPrefix}.EMAIL_ADDRESS_DUPLICATE`));
-      } else if (error.data.includes('phone_number')) {
-        useAlert(t(`${i18nPrefix}.PHONE_NUMBER_DUPLICATE`));
-      }
-    } else if (error instanceof ExceptionWithMessage) {
-      useAlert(error.data);
-    } else {
-      useAlert(t(`${i18nPrefix}.ERROR_MESSAGE`));
-    }
-  }
-};
+const onCreate = useContactCreation(createNewContactDialogRef, { store });
 
 const onImport = async file => {
   try {

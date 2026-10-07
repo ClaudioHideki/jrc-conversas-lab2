@@ -5,6 +5,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useMapGetter, useStore } from 'dashboard/composables/store';
 import jrcAiAPI from 'dashboard/api/jrcAi';
+import CockpitHero from './CockpitHero.vue';
 import { useJrcCopilot } from 'dashboard/components-next/jrcCopilot/useJrcCopilot';
 
 const { t } = useI18n();
@@ -52,12 +53,6 @@ const displayName = computed(
   () => currentUser.value?.name || currentUser.value?.email || 'Usuário'
 );
 const firstName = computed(() => displayName.value.split(' ')[0]);
-const greeting = computed(() => {
-  const hour = new Date().getHours();
-  if (hour < 12) return 'Bom dia';
-  if (hour < 18) return 'Boa tarde';
-  return 'Boa noite';
-});
 const profileTitle = computed(() =>
   isSupervisor.value ? 'Operação geral' : 'Meu dia'
 );
@@ -404,69 +399,48 @@ onBeforeUnmount(() => window.clearInterval(refreshTimer));
     class="h-full overflow-auto bg-gradient-to-br from-n-blue-2 to-n-background text-n-slate-12 p-4 sm:p-5"
   >
     <div class="mx-auto max-w-[1750px] space-y-4">
-      <header
-        class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#062f57] via-[#075a87] to-n-brand px-6 py-6 text-white shadow-lg"
+      <CockpitHero
+        :name="firstName"
+        :description="`${profileTitle} · ${profileDescription}`"
+        :summary="data.summary"
+        :attention="data.attention"
+        :ready="!!data.generated_at && !error"
+        :loading="loading"
       >
-        <div
-          class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_82%_5%,rgba(80,225,255,0.38),transparent_28%)]"
-        />
-        <div
-          class="relative z-10 flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between"
-        >
-          <div>
-            <span
-              class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider"
-            >
-              <i class="i-lucide-radar size-4" /> Cockpit · Central de
-              Atendimento
-            </span>
-            <h1 class="mt-3 text-3xl font-bold text-white">
-              {{ greeting }}, {{ firstName }}!
-            </h1>
-            <p class="mt-1 text-sm text-white/90">
-              {{ profileTitle }} · {{ profileDescription }}
-            </p>
-            <p class="mt-2 max-w-3xl text-xs leading-5 text-white/90">
-              Uma única central para acompanhar a operação, identificar
-              prioridades e seguir para Conversas, E-mails, Ligações, Agenda e
-              CRM sem duplicar esses módulos.
-            </p>
-            <p class="mt-3 text-xs text-white/90">
-              Atualizado às {{ formatUpdated(data.generated_at) }}
-            </p>
-          </div>
-          <div class="flex flex-wrap items-center gap-2">
-            <select
-              v-model="period"
-              class="h-11 rounded-xl border border-white/20 bg-white/10 px-4 text-sm font-semibold text-white outline-none backdrop-blur [&>option]:text-n-slate-12 [&>option]:bg-n-solid-2"
-            >
-              <option value="today">Hoje</option>
-              <option value="7_days">Últimos 7 dias</option>
-              <option value="30_days">Últimos 30 dias</option>
-            </select>
-            <button
-              type="button"
-              class="inline-flex h-11 items-center gap-2 rounded-xl bg-n-solid-2 px-4 text-sm font-semibold text-n-blue-11 shadow"
-              @click="showPersonalize = true"
-            >
-              <i class="i-lucide-sliders-horizontal size-4" /> Personalizar
-              Cockpit
-            </button>
-            <button
-              type="button"
-              class="grid size-11 place-content-center rounded-xl bg-white/10 transition hover:bg-white/20"
-              :disabled="loading"
-              title="Atualizar"
-              @click="loadCockpit"
-            >
-              <i
-                class="i-lucide-refresh-cw size-5"
-                :class="{ 'animate-spin': loading }"
-              />
-            </button>
-          </div>
+        <p class="mb-0 text-xs text-white/90">
+          Atualizado às {{ formatUpdated(data.generated_at) }}
+        </p>
+        <div class="flex flex-wrap items-center gap-2">
+          <select
+            v-model="period"
+            class="h-11 w-auto rounded-xl border border-white/20 bg-white/10 px-4 text-sm font-semibold text-white outline-none backdrop-blur [&>option]:text-n-slate-12 [&>option]:bg-n-solid-2"
+          >
+            <option value="today">Hoje</option>
+            <option value="7_days">Últimos 7 dias</option>
+            <option value="30_days">Últimos 30 dias</option>
+          </select>
+          <button
+            type="button"
+            class="inline-flex h-11 items-center gap-2 rounded-xl bg-n-solid-2 px-4 text-sm font-semibold text-n-blue-11 shadow"
+            @click="showPersonalize = true"
+          >
+            <i class="i-lucide-sliders-horizontal size-4" /> Personalizar
+            Cockpit
+          </button>
+          <button
+            type="button"
+            class="grid size-11 place-content-center rounded-xl bg-white/10 transition hover:bg-white/20"
+            :disabled="loading"
+            title="Atualizar"
+            @click="loadCockpit"
+          >
+            <i
+              class="i-lucide-refresh-cw size-5"
+              :class="{ 'animate-spin': loading }"
+            />
+          </button>
         </div>
-      </header>
+      </CockpitHero>
 
       <div
         v-if="error"
@@ -495,7 +469,10 @@ onBeforeUnmount(() => window.clearInterval(refreshTimer));
               <p class="truncate text-xs font-semibold text-n-slate-11">
                 {{ card.label }}
               </p>
-              <strong class="mt-3 block text-3xl" :class="toneClasses(card.tone).split(' ')[2]">
+              <strong
+                class="mt-3 block text-3xl"
+                :class="toneClasses(card.tone).split(' ')[2]"
+              >
                 {{ card.value }}
               </strong>
             </div>
@@ -530,7 +507,11 @@ onBeforeUnmount(() => window.clearInterval(refreshTimer));
             </span>
             <div>
               <p class="text-xs text-n-slate-11">{{ card.label }}</p>
-              <strong class="text-xl" :class="toneClasses(card.tone).split(' ')[2]">{{ card.value }}</strong>
+              <strong
+                class="text-xl"
+                :class="toneClasses(card.tone).split(' ')[2]"
+                >{{ card.value }}</strong
+              >
             </div>
           </div>
         </article>

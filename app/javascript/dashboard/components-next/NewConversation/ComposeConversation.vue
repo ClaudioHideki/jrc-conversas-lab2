@@ -1,5 +1,16 @@
 <script setup>
-import { reactive, ref, computed, onMounted, watch } from 'vue';
+import {
+  reactive,
+  ref,
+  computed,
+  onMounted,
+  watch,
+  nextTick,
+  onBeforeUnmount,
+} from 'vue';
+import { useRoute } from 'vue-router';
+import { useEventBus } from '@vueuse/core';
+import { quickActionCommand } from 'dashboard/components-next/layout/useQuickActionTarget';
 import { useStore, useMapGetter } from 'dashboard/composables/store';
 import { useI18n } from 'vue-i18n';
 import { useUISettings } from 'dashboard/composables/useUISettings';
@@ -34,6 +45,7 @@ const emit = defineEmits(['close']);
 
 const searchContacts = createContactSearcher();
 const store = useStore();
+const route = useRoute();
 const { t } = useI18n();
 
 const { fetchSignatureFlagFromUISettings } = useUISettings();
@@ -201,6 +213,18 @@ const onPopoverHide = () => {
   emit('close');
 };
 
+const activateQuickAction = async key => {
+  closeCompose();
+  await nextTick();
+  useEventBus(quickActionCommand).emit({
+    key,
+    accountId: Number(route.params.accountId),
+    userId: store.getters.getCurrentUserID,
+  });
+};
+watch(() => route.params.accountId, discardCompose);
+onBeforeUnmount(() => emitter.emit(BUS_EVENTS.NEW_CONVERSATION_MODAL, false));
+
 watch(
   activeContact,
   (currentContact, previousContact) => {
@@ -235,6 +259,9 @@ onMounted(() => resetContacts());
     :align="align"
     :show-content-border="false"
     :close-on-scroll="false"
+    modal
+    modal-class="max-w-7xl"
+    :modal-label="t('JRC_HOME.COMPOSE.TITLE')"
     @show="onPopoverShow"
     @hide="onPopoverHide"
   >
@@ -257,6 +284,7 @@ onMounted(() => resetContacts());
         :contacts-ui-flags="contactsUiFlags"
         :message-signature="messageSignature"
         :send-with-signature="sendWithSignature"
+        workspace
         @search-contacts="onContactSearch"
         @reset-contact-search="resetContacts"
         @update-selected-contact="handleSelectedContact"
@@ -264,6 +292,7 @@ onMounted(() => resetContacts());
         @clear-selected-contact="clearSelectedContact"
         @create-conversation="createConversation"
         @discard="discardCompose"
+        @action="activateQuickAction"
       />
     </template>
   </Popover>
