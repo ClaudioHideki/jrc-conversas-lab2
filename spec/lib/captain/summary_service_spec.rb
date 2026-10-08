@@ -11,6 +11,8 @@ RSpec.describe Captain::SummaryService do
 
   before do
     create(:installation_config, name: 'CAPTAIN_OPEN_AI_API_KEY', value: 'test-key')
+    JrcAi::Provider.create!(account: account, name: 'Account AI', provider_type: 'openai',
+                            api_key: 'test-account-key', default_model: 'gpt-4.1-mini', default_provider: true)
     allow(Llm::Config).to receive(:with_api_key).and_yield(mock_context)
     allow(mock_chat).to receive(:with_instructions)
     allow(mock_chat).to receive(:ask).and_return(mock_response)

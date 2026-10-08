@@ -317,7 +317,7 @@ RSpec.describe Captain::BaseTaskService do
       end
     end
 
-    context 'when subclass opts into account OpenAI hook usage' do
+    context 'when subclass opts into account AI provider usage' do
       let(:test_service_class) do
         Class.new(described_class) do
           def event_name
@@ -332,15 +332,19 @@ RSpec.describe Captain::BaseTaskService do
 
       before do
         create(:integrations_hook, account: account, app_id: 'openai', status: 'enabled', settings: { 'api_key' => 'hook-key' })
+        JrcAi::Provider.create!(account: account, name: 'Account AI', provider_type: 'openai',
+                                api_key: 'account-provider-key', default_model: 'gpt-4.1-mini', default_provider: true)
       end
 
-      it 'uses api key from hook' do
-        expect(service.send(:api_key)).to eq('hook-key')
+      it 'uses the account provider instead of the hook or system key' do
+        expect(service.send(:api_key)).to eq('account-provider-key')
       end
     end
 
-    it 'uses account OpenAI hook for editor task services' do
+    it 'uses the account AI provider for all editor task services' do
       create(:integrations_hook, account: account, app_id: 'openai', status: 'enabled', settings: { 'api_key' => 'hook-key' })
+      JrcAi::Provider.create!(account: account, name: 'Account AI', provider_type: 'openai',
+                              api_key: 'account-provider-key', default_model: 'gpt-4.1-mini', default_provider: true)
       user = create(:user, account: account)
       follow_up_context = {
         'event_name' => 'professional',
@@ -362,7 +366,7 @@ RSpec.describe Captain::BaseTaskService do
       ]
 
       editor_services.each do |editor_service|
-        expect(editor_service.send(:api_key)).to eq('hook-key')
+        expect(editor_service.send(:api_key)).to eq('account-provider-key')
       end
     end
 

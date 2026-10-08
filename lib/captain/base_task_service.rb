@@ -32,6 +32,8 @@ class Captain::BaseTaskService
   end
 
   def api_base
+    return llm_credential[:base_url] if use_account_openai_hook?
+
     endpoint = InstallationConfig.find_by(name: 'CAPTAIN_OPEN_AI_ENDPOINT')&.value.presence || 'https://api.openai.com/'
     endpoint = endpoint.chomp('/')
     "#{endpoint}/v1"
@@ -57,6 +59,8 @@ class Captain::BaseTaskService
   end
 
   def resolved_model(model:, feature:)
+    return llm_credential[:model] if use_account_openai_hook?
+
     return model if feature.blank?
 
     route = Llm::FeatureRouter.resolve(feature: feature, account: account)
@@ -78,12 +82,19 @@ class Captain::BaseTaskService
       build_ruby_llm_response(chat.ask(conversation_messages.last[:content]), messages)
     end
   rescue StandardError => e
+    return JrcAi::CopilotProvider.error_response(e, account: account, feature: event_name) if credential&.dig(:source) == :account_provider
+
     capture_llm_exception(e, credential: credential)
     { error: e.message, request_messages: messages }
   end
 
   def build_chat(context, model:, messages:, schema: nil, tools: [])
-    chat = context.chat(model: model)
+    options = { model: model }
+    if use_account_openai_hook?
+      options[:provider] = :openai
+      options[:assume_model_exists] = true
+    end
+    chat = context.chat(**options)
     system_msg = messages.find { |m| m[:role] == 'system' }
     chat.with_instructions(system_msg[:content]) if system_msg
     chat.with_schema(schema) if schema
@@ -105,6 +116,8 @@ class Captain::BaseTaskService
   end
 
   def build_ruby_llm_response(response, messages)
+    JrcAi::CopilotProvider.record_usage(response, credential: llm_credential, account: account, feature: event_name) if use_account_openai_hook?
+
     {
       message: response.content,
       usage: {
@@ -165,7 +178,7 @@ class Captain::BaseTaskService
   # exhausted captain_responses quota nor decrements it on success — the call
   # participates in the quota system in neither direction.
   def counts_toward_usage?
-    llm_credential&.dig(:source) != :hook
+    !use_account_openai_hook?
   end
 
   def api_key_configured?
@@ -178,27 +191,22 @@ class Captain::BaseTaskService
 
   def llm_credential
     @llm_credential ||= if use_account_openai_hook?
-                          hook_llm_credential || system_llm_credential
+                          provider = JrcAi::AccountProvider.resolve(account)
+                          JrcAi::AccountProvider.runtime_configuration(account, provider: provider)
+                                                .merge(source: :account_provider, provider: provider)
                         else
                           system_llm_credential
                         end
   end
 
   def use_account_openai_hook?
+    # Retained as the extension point for account-scoped editor/analysis tasks.
+    # These tasks now use the account's AI provider, never an integration hook.
     false
-  end
-
-  def hook_llm_credential
-    key = openai_hook&.settings&.dig('api_key').presence
-    { api_key: key, source: :hook } if key
   end
 
   def system_llm_credential
     { api_key: system_api_key, source: :system } if system_api_key.present?
-  end
-
-  def openai_hook
-    @openai_hook ||= account.hooks.find_by(app_id: 'openai', status: 'enabled')
   end
 
   def system_api_key

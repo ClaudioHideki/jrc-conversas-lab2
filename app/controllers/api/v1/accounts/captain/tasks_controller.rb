@@ -1,5 +1,8 @@
 class Api::V1::Accounts::Captain::TasksController < Api::V1::Accounts::BaseController
   before_action :check_authorization
+  rescue_from JrcNico::RuntimeClient::Error do |error|
+    render json: { error: error.user_message, error_code: error.code }, status: :unprocessable_content
+  end
 
   def rewrite
     result = Captain::RewriteService.new(

@@ -6,6 +6,8 @@ RSpec.describe Captain::CsatUtilityAnalysisService do
 
   before do
     create(:installation_config, name: 'CAPTAIN_OPEN_AI_API_KEY', value: 'test-key')
+    JrcAi::Provider.create!(account: account, name: 'Account AI', provider_type: 'openai',
+                            api_key: 'test-account-key', default_model: 'gpt-4.1-mini', default_provider: true)
     allow(Integrations::Openai::KeyValidator).to receive(:valid?).and_return(true)
   end
 
@@ -41,14 +43,14 @@ RSpec.describe Captain::CsatUtilityAnalysisService do
         create(:integrations_hook, :openai, account: account, settings: { 'api_key' => 'customer-own-key' })
       end
 
-      it 'uses the account hook key' do
-        expect(service.send(:api_key)).to eq('customer-own-key')
+      it 'uses the account provider instead of the old hook key' do
+        expect(service.send(:api_key)).to eq('test-account-key')
       end
     end
 
     context 'when account does not have an OpenAI hook key' do
-      it 'uses the system key' do
-        expect(service.send(:api_key)).to eq('test-key')
+      it 'uses the account provider without requiring an OpenAI hook' do
+        expect(service.send(:api_key)).to eq('test-account-key')
       end
     end
   end

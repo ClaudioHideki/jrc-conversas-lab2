@@ -26,6 +26,8 @@ RSpec.describe Captain::FollowUpService do
   end
 
   before do
+    JrcAi::Provider.create!(account: account, name: 'Account AI', provider_type: 'openai',
+                            api_key: 'test-account-key', default_model: 'gpt-4.1-mini', default_provider: true)
     # Stub captain enabled check to allow specs to test base functionality
     # without enterprise module interference
     allow(account).to receive(:feature_enabled?).and_call_original

@@ -13,6 +13,8 @@ RSpec.describe Captain::LabelSuggestionService do
 
   before do
     create(:installation_config, name: 'CAPTAIN_OPEN_AI_API_KEY', value: 'test-key')
+    JrcAi::Provider.create!(account: account, name: 'Account AI', provider_type: 'openai',
+                            api_key: 'test-account-key', default_model: 'gpt-4.1-mini', default_provider: true)
     label1
     label2
     allow(Llm::Config).to receive(:with_api_key).and_yield(mock_context)

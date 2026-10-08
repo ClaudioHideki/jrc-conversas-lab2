@@ -11,6 +11,8 @@ RSpec.describe Captain::ReplySuggestionService do
 
   before do
     create(:installation_config, name: 'CAPTAIN_OPEN_AI_API_KEY', value: 'test-key')
+    JrcAi::Provider.create!(account: account, name: 'Account AI', provider_type: 'openai',
+                            api_key: 'test-account-key', default_model: 'gpt-4.1-mini', default_provider: true)
     create(:message, conversation: conversation, message_type: :incoming, content: 'I need help')
     allow(account).to receive(:feature_enabled?).and_call_original
     allow(account).to receive(:feature_enabled?).with('captain_tasks').and_return(true)
@@ -31,8 +33,8 @@ RSpec.describe Captain::ReplySuggestionService do
   end
 
   describe '#perform' do
-    it 'routes through the editor feature' do
-      expect(Llm::FeatureRouter).to receive(:resolve).with(feature: 'editor', account: account).and_call_original
+    it 'routes through the account AI provider' do
+      expect(JrcAi::AccountProvider).to receive(:resolve).with(account).and_call_original
 
       service.perform
     end
