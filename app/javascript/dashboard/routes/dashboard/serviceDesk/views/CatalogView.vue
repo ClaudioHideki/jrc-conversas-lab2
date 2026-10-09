@@ -12,6 +12,7 @@ import Panel from '../components/ServiceDeskPanel.vue';
 import State from '../components/ServiceDeskState.vue';
 import ScopeBar from '../components/ScopeBar.vue';
 import ConfigurationManager from '../components/ConfigurationManager.vue';
+import { useServiceDeskStructure } from 'dashboard/composables/useServiceDeskStructure';
 import { useServiceDesk } from '../composables/useServiceDesk';
 import { routeQuery } from '../helpers/query';
 import { CATALOG_COLUMNS, catalogValue } from '../helpers/presentation';
@@ -21,6 +22,11 @@ const props = defineProps({
 });
 const { t } = useI18n();
 const session = useServiceDesk();
+const structure = useServiceDeskStructure(
+  session.accountId,
+  session.userId,
+  session.enabled
+);
 const route = useRoute();
 const router = useRouter();
 const key = computed(() => `catalog:${props.resource}`);
@@ -31,7 +37,7 @@ const mayManage = computed(
 );
 const result = computed(() => session.resource(key.value));
 const selected = ref(null);
-const fieldsVisible = ref(true);
+const fieldsVisible = ref(false);
 const query = ref('');
 const unitId = ref('');
 const operatorId = ref('');
@@ -140,7 +146,7 @@ onBeforeUnmount(() => session.resetResource(key.value));
           size="sm"
           color="slate"
           variant="outline"
-          :label="t('JRC_SERVICE_DESK.COMMON.fields_preview')"
+          :label="t('JRC_SERVICE_DESK.COMMON.preview')"
           :aria-expanded="fieldsVisible"
           @click="fieldsVisible = !fieldsVisible"
         />
@@ -152,6 +158,29 @@ onBeforeUnmount(() => session.resetResource(key.value));
         </p>
       </div>
     </header>
+    <p v-if="resource === 'contracts'" class="text-sm text-n-slate-11 mb-4">
+      {{ t('JRC_SERVICE_DESK.EXPERIENCE.contract_scope') }}
+    </p>
+    <Button
+      v-if="
+        ['units', 'operator_companies', 'assignees'].includes(resource) &&
+        structure.state.context?.capabilities?.[
+          resource === 'assignees' ? 'unit_memberships' : resource
+        ]
+      "
+      class="mb-3"
+      variant="outline"
+      :label="t('JRC_SERVICE_DESK.EXPERIENCE.manage_structure')"
+      @click="
+        router.push({
+          name: 'jrc_service_desk_structure',
+          params: { accountId: session.accountId.value },
+          query: {
+            resource: resource === 'assignees' ? 'unit_memberships' : resource,
+          },
+        })
+      "
+    />
     <form class="sd-filter-card" @submit.prevent="apply">
       <div class="flex items-end gap-3 flex-wrap">
         <Input
@@ -247,16 +276,17 @@ onBeforeUnmount(() => session.resetResource(key.value));
         <p class="text-xs text-n-slate-11">
           {{ t(`JRC_SERVICE_DESK.CATALOG.${hint}`) }}
         </p>
-        <div class="grid gap-3">
-          <Input
-            v-for="field in columns"
-            :key="field"
-            :label="t(`JRC_SERVICE_DESK.FIELDS.${field}`)"
-            :model-value="selected ? String(valueFor(selected, field)) : ''"
-            :placeholder="t('JRC_SERVICE_DESK.COMMON.pending_cp4')"
-            disabled
-          />
-        </div>
+        <dl v-if="selected" class="grid gap-3 mt-3">
+          <div v-for="field in columns" :key="field" class="min-w-0">
+            <dt class="text-xs text-n-slate-11">
+              {{ t(`JRC_SERVICE_DESK.FIELDS.${field}`) }}
+            </dt>
+            <dd class="text-sm break-words">{{ valueFor(selected, field) }}</dd>
+          </div>
+        </dl>
+        <p v-else class="text-sm mt-3">
+          {{ t('JRC_SERVICE_DESK.EXPERIENCE.select_record') }}
+        </p>
         <p class="text-xs text-n-slate-11 mt-4">
           {{
             t(
@@ -266,6 +296,18 @@ onBeforeUnmount(() => session.resetResource(key.value));
             )
           }}
         </p>
+        <Button
+          v-if="selected && resource === 'assignees'"
+          class="mt-3"
+          :label="t('JRC_SERVICE_DESK.SCREENS.tickets')"
+          @click="
+            router.push({
+              name: 'jrc_service_desk_tickets',
+              params: { accountId: session.accountId.value },
+              query: { unit_id: selected.unit_id, assignee_id: selected.id },
+            })
+          "
+        />
         <Button
           v-if="selected && resource === 'queues'"
           :label="t('JRC_SERVICE_DESK.SCREENS.tickets')"

@@ -10,6 +10,7 @@ import { SERVICE_DESK_ROUTES, serviceDeskRouteName } from './routeDefinitions';
 import { screenAccessible, landingScreen } from './helpers/nativeIntegration';
 import Breadcrumb from 'dashboard/components-next/breadcrumb/Breadcrumb.vue';
 import ServiceDeskState from './components/ServiceDeskState.vue';
+import ScreenGuidance from './components/ScreenGuidance.vue';
 import WriteFeedback from './components/WriteFeedback.vue';
 import './serviceDesk.css';
 const { t } = useI18n();
@@ -93,7 +94,10 @@ const blocked = computed(() => ['denied', 'unauthenticated', 'invalid_contract',
         <ServiceDeskState v-if="blocked" :status="state.status" retry @retry="session.retry()" />
         <ServiceDeskState v-else-if="state.status !== 'ready'" :status="state.status" retry @retry="session.retry()" />
         <ServiceDeskState v-else-if="!screenAllowed" status="denied" />
-        <RouterView v-else :key="`${accountId}:${userId}:${activeScreen}`" />
+        <template v-else>
+          <ScreenGuidance :screen="activeScreen" />
+          <RouterView :key="`${accountId}:${userId}:${activeScreen}`" />
+        </template>
       </main>
     </template>
     <ServiceDeskState v-else status="disabled" />

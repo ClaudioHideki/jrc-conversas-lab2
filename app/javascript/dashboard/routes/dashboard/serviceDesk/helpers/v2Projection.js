@@ -63,6 +63,14 @@ export function decodeBoard(payload, context, kind, query) {
   const items = payload.items.map(row => {
     const base = scoped(row, context);
     check(!query.unit_id || query.unit_id === base.unit_id);
+    check(
+      !query.operator_company_id ||
+        context.units.some(
+          item =>
+            item.id === base.unit_id &&
+            item.operator_company.id === query.operator_company_id
+        )
+    );
     const states = {
       tasks: ['open', 'in_progress', 'completed', 'cancelled'],
       approvals: ['pending', 'approved', 'rejected', 'returned'],

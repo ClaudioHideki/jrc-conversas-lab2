@@ -456,3 +456,67 @@ EspacoC:inicio9,48GiB,minimo observado3,58GiB durante carga paralela:processosC3
 C3 CONCLUIDA COM7FALHAS HISTORICAS;NAO DECLARAR R3/R4/R5 HOMOLOGADAS OU PUBLICACAO APROVADA. R6/E2E completo nao iniciado por escopo. Homologacoes reais deSMTP/Meta/voz/QR/Broker/scanner e demais integracoes continuam externas,sem credenciais inventadas,mensagens reais ou ativacao em clientes. Definicoes de negocio FCR/qualidade/autonomia/recatalogacao permanecem explicitas;nao transformar nil em resultado fabricado. Automacoes novas OFF por padrao. Sem commit,push,merge,imagem,deploy,migration em servidor,alteracaoCompose/Runtime/Broker/secrets/providers/lockfiles. PARAR e aguardar autorizacao posterior.
 
 Evidencias:C:/Users/DEV03/Documents/Jrc/validacao-integrada-c3-20261009/RELATORIO-C3-FINAL.txt; c3-rspec-final-proof.json;c3-js-complete-proof.json;c3-build-proof.json;c3-rubocop-gravidade.json;c3-fixtures.diff; c3-fixture-correction-proof.json;c3-c1c2-api-integration.json;provas schema/hashes e logs separados.
+
+
+## CHATGPT-20261009-PROTOCOLO-1 - protocolo e atribuicao na abertura
+
+Base: ZIP da branch codex/relacionamento-servicedesk-v2-20261008, comentario
+1e358150084864a1517777e60d0c76bbe702df02; SHA-256 de entrada
+808c980da9a9d8caa837e552fd047376cc6873025d23eb730c24884c884dee73.
+Sem .git: metadados do arquivo conferidos, nao ancestralidade/GitHub/LAB ao vivo.
+
+Defeito reproduzido no codigo original: createTicketDraft envia impact_code/urgency_code,
+mas o whitelist de create em serviceDeskOperationsClient rejeita esses dois campos
+com TypeError Unsupported fields antes de qualquer POST. Corrigido somente o
+whitelist de criacao; update e campos de numero continuam restritos.
+
+Criacao passa a mostrar recibo apos POST e GET independente validados: protocolo
+oficial, titulo, estado, fila, equipe e responsavel efetivamente persistidos;
+abrir, copiar, lista e criar outro. Sem numero local/prefixo/contador paralelo.
+Confirmacao segue sendo bloqueada em readback pendente, troca de identidade ou
+perda de permissao. O detalhe/lista/previa destacam o protocolo. Busca interna
+aceita numero com # usando TicketSearch nativo; portal e numeracao backend preservados.
+
+A selecao explicita de agente/fila/equipe desmarca roteamento automatico. A escolha
+automatica limpa a selecao manual mostrada, evitando apresentar um agente que o
+payload omite. A fila Minha fila usa o mesmo filtro de membership; ha atualizacao
+manual da lista. Nenhum novo envio/alerta/realtime foi implementado. Atribuicao nao
+e comprovacao de notificacao recebida. Sem agente elegivel, exibir nao atribuido.
+
+Executado AQUI: 416 testes Node PASS (390 existentes + 26 novos), fronteira HTTP
+simulada; 41 testes Ruby puros/112 assertions PASS (38 existentes + 3 novos);
+3665 ruby-c sem erros; 15 scripts/blocos JS com parsing; 6 templates com tags
+balanceadas; 12 chaves CREATION estaticas conferidas; 15 testes do reconciliador PASS.
+As contagens de parsing/Node nao equivalem a Vue compilado ou HTTP/SQL reais.
+
+Escritos, NAO executados aqui: 11 testes Rails/PostgreSQL do protocolo/atribuicao;
+6 testes novos de componentes Vue, 2 novos cenarios no formulario, adaptacoes de
+2 testes anteriores para confirmar antes de navegar e wrapper Vitest dos 26 casos.
+Ruby3.3.8 difere do requerido3.4.4; bundle bloqueado, Rails/RSpec/PG/Docker/Vue e
+lint nativos indisponiveis. Gate puro completo Relacionamento/Operations bloqueou
+por ActiveSupport ausente; nao foi aprovado. Sem alteracao de deps/config/lockfiles.
+
+Nenhuma migration nova/alterada. Nenhum arquivo original removido. Broker, Runtime,
+Compose, providers por Account, SafeLogger e historicos preservados. Defaults OFF e
+pause_waiting inalterados. Cinco continuidades mantidas por prefixo + este apendice.
+
+STATUS=CODIGO_CANDIDATO_COM_TESTES_PUROS_APROVADOS_VALIDACAO_NATIVA_PENDENTE.
+Nao certifica a causa da ocorrencia no LAB sem requisicao/log/versao instalada.
+Nao homologa R3/R4/R5/R6. Sem Git, commit, push, imagem, servidor, envio real ou deploy.
+Proximo passo: reconciliar delta com backup, rodar testes nativos dirigidos, compilar
+Vue/build e validar com dois usuarios sinteticos antes de aprovar publicacao.
+
+
+## Protocolo/atribuicao - validacao nativa controlada - 2026-10-09
+
+Base preservada: 1e358150084864a1517777e60d0c76bbe702df02. Delta:9 novos/15 modificados; zero remocoes. Manifesto:11003 hashes verificados. CRLF resolvido por espelho externo verificado contra os10961 blobs Git, sem normalizar o workspace inteiro. Backup Windows e journal externos;10946 originais fora do delta byte a byte preservados.
+Correcoes adicionais restritas:formatacao apenas de diagnosticos novos de ESLint e dois executores Promise dos testes com bloco explicito; nenhuma assertion removida ou enfraquecida.
+Ruby3.4.4/Bundler2.5.16:136 exemplos PASS(11 novos/125 existentes),zero falhas/pendentes. Concorrencia:5 PASS(2 criacoes PostgreSQL/3 guardas). Numero nativo:3 testes/19 assertions PASS. Node:416 PASS(390 existentes+26 novos). Vitest Service Desk:598 PASS/37 arquivos;reexecucao final afetada38 PASS/4 arquivos. Os26 casos compartilhados Node/Vitest e as reexecucoes nao devem ser somados como cobertura distinta.
+ESLint delta15 arquivos:zero erros novos,62 historicos;13 warnings(12 anteriores+1 novo vue/no-root-v-if). RuboCop3 arquivos:16 convencoes,12 historicas em TicketQuery/4 novas no spec de request(MultipleExpectations1;HashAlignment2;LineLength1). Nenhuma infracao de gravidade warning/error/fatal. Nao refatorado nem reduzida cobertura para zerar estilo.
+Build frontend completo:PASS,2m05s,5383 modulos,apos a ultima alteracao funcional/de testes. Avisos anteriores Browserslist/assets runtime/chunks e sourcemap mantidos.
+Banco novo exclusivamente descartavel:jrc_rel_sd_r345_protocol_test,clone de jrc_rel_sd_r345_preservation_test;242 migrations existentes,pause_waiting NOT NULL sem default. Bootstrap inicial RSpec recarregou automaticamente o schema antigo na copia descartavel C1(242->220),antes de executar exemplos. C1 nao foi apagada/recriada;incidente registrado. A origem preservation/concurrency permaneceu242. Solucao:harness externo usa snapshot real242 do clone novo via SCHEMA oficial e metadado correto nesse clone;verificacao nativa de migrations mantida. Nenhuma migration foi executada nesta etapa. Nenhum schema/migration do repositorio modificado.
+Reconciliador:14 testes PASS;1 nao validado por WinError1314 na criacao de symlink. Tentativas no sandbox bloqueadas por WinError5 registradas separadamente,sem alterar permissoes.
+Browser local:pendente. Preview Vite127.0.0.1 preparado com componente real e fixtures;CUA falhou duas vezes com failed to write kernel assets/os error3. Nenhuma screenshot ou homologacao visual alegada. Fluxo completo com dois operadores no browser/LAB continua pendente;API/PG e componentes testados separadamente.
+Notificacao:este delta confirma atribuicao e visibilidade Minha fila;nao cria envio WhatsApp/email/push/realtime.
+Sem commit/push/merge/GHCR/imagem/deploy/R6;Compose,Runtime,Broker,providers por Account,SafeLogger,lockfiles/workflows/migrations intactos. R3/R4/R5 candidatos;homologacao integral pendente;nao aprovados para producao.
+Evidencias:C:/Users/DEV03/Documents/Jrc/validacao-protocolo-atribuicao-20261009/.

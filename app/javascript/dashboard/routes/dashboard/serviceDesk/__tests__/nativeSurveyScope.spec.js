@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { reactive } from 'vue';
+import { reactive, ref } from 'vue';
 import { flushPromises, shallowMount } from '@vue/test-utils';
 import { fixedSurveyScope } from '../../jrcRelationship/fixedSurveyScope';
 const mocks = vi.hoisted(() => ({
@@ -36,6 +36,9 @@ beforeEach(() => {
   mocks.route = reactive({ params: { accountId: '1' }, query: {} });
   mocks.store = { getters: reactive({ getCurrentUserID: '7' }) };
   mocks.session = {
+    accountId: ref('1'),
+    userId: ref('7'),
+    enabled: ref(true),
     state: reactive({
       status: 'ready',
       context: {
@@ -169,9 +172,25 @@ describe('native Service Desk surveys and contract lookup reuse', () => {
     expect(() => fixedSurveyScope(fixed('10'), 'portfolio')).toThrow();
   });
   it('requires an explicit unit before reading the existing contract lookup and shows only canonical identifiers', async () => {
+    const result = reactive({ status: 'idle', items: [], meta: null });
+    mocks.session.resource = () => result;
     wrapper = shallowMount(CatalogView, {
       props: { resource: 'contracts', screen: 'contracts' },
-      global: { stubs: { Panel: { template: '<section><slot /></section>' } } },
+      global: {
+        stubs: {
+          Panel: { template: '<section><slot /></section>' },
+          BaseTable: {
+            name: 'BaseTable',
+            props: ['headers', 'items'],
+            template: '<table><slot name="row" /></table>',
+          },
+          BaseTableRow: {
+            name: 'BaseTableRow',
+            template: '<tr><slot /></tr>',
+          },
+          BaseTableCell: { template: '<td><slot /></td>' },
+        },
+      },
     });
     await flushPromises();
     expect(mocks.session.load).not.toHaveBeenCalled();
@@ -187,16 +206,57 @@ describe('native Service Desk surveys and contract lookup reuse', () => {
     );
     expect(wrapper.findComponent({ name: 'BaseTable' }).exists()).toBe(false);
     expect(
+      wrapper.findAll('.sd-column-hints span').map(node => node.text())
+    ).toEqual([
+      'JRC_SERVICE_DESK.FIELDS.name',
+      'JRC_SERVICE_DESK.FIELDS.contact_id',
+      'JRC_SERVICE_DESK.FIELDS.company_id',
+    ]);
+    result.status = 'ready';
+    result.items = [
+      {
+        id: '9007199254740993',
+        name: 'Contract LAB',
+        contact_id: '9007199254740995',
+        company_id: '9007199254740997',
+      },
+    ];
+    await flushPromises();
+    expect(
+      wrapper.findComponent({ name: 'BaseTable' }).props('headers')
+    ).toEqual([
+      'JRC_SERVICE_DESK.FIELDS.name',
+      'JRC_SERVICE_DESK.FIELDS.contact_id',
+      'JRC_SERVICE_DESK.FIELDS.company_id',
+      'JRC_SERVICE_DESK.COMMON.actions',
+    ]);
+    wrapper
+      .findComponent({ name: 'BaseTableRow' })
+      .findComponent({ name: 'Button' })
+      .vm.$emit('click');
+    await flushPromises();
+    expect(wrapper.findAll('dl dt').map(node => node.text())).toEqual([
+      'JRC_SERVICE_DESK.FIELDS.name',
+      'JRC_SERVICE_DESK.FIELDS.contact_id',
+      'JRC_SERVICE_DESK.FIELDS.company_id',
+    ]);
+    expect(wrapper.findAll('dl dd').map(node => node.text())).toEqual([
+      'Contract LAB',
+      '9007199254740995',
+      '9007199254740997',
+    ]);
+    expect(
       wrapper
         .findAllComponents({ name: 'Input' })
         .map(node => node.props('label'))
-    ).toEqual(
-      expect.arrayContaining([
-        'JRC_SERVICE_DESK.FIELDS.name',
-        'JRC_SERVICE_DESK.FIELDS.contact_id',
-        'JRC_SERVICE_DESK.FIELDS.company_id',
-      ])
+    ).toEqual(['JRC_SERVICE_DESK.COMMON.search']);
+    expect(wrapper.findComponent({ name: 'CompanyPicker' }).exists()).toBe(
+      false
     );
+    expect(
+      wrapper.findComponent({ name: 'ConfigurationManager' }).exists()
+    ).toBe(false);
+    expect(wrapper.text()).toContain('JRC_SERVICE_DESK.COMMON.read_only');
     expect(wrapper.text()).toContain('JRC_SERVICE_DESK.CATALOG.contract_hint');
   });
 });

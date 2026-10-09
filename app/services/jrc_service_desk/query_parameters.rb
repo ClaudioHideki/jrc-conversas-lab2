@@ -3,7 +3,7 @@
 # Whitelist shared by list and KPI queries. Values are selectors, never grants.
 class JrcServiceDesk::QueryParameters
   IDS = %w[unit_id operator_company_id status_id priority_id category_id queue_id assignee_id].freeze
-  KEYS = (IDS + %w[q page per_page mine source sort]).freeze
+  KEYS = (IDS + %w[q page per_page mine source sort phase assignment]).freeze
   SORTS = %w[updated_at_desc created_at_desc created_at_asc].freeze
   attr_reader :values
 
@@ -18,6 +18,13 @@ class JrcServiceDesk::QueryParameters
     @values['per_page'] = integer(@values.fetch('per_page', 20), 100)
     raise ArgumentError, 'Invalid sort' if @values['sort'] && !SORTS.include?(@values['sort'])
     raise ArgumentError, 'Invalid personal filter' if @values['mine'] && @values['mine'] != 'true'
+    if @values['phase'] && !%w[active open waiting resolved closed cancelled].include?(@values['phase'])
+      raise ArgumentError, 'Invalid phase filter'
+    end
+    if @values['assignment'] && @values['assignment'] != 'unassigned'
+      raise ArgumentError, 'Invalid assignment filter'
+    end
+    raise ArgumentError, 'Personal and unassigned filters are mutually exclusive' if @values['mine'] && @values['assignment']
     %w[q source].each do |key|
       next unless @values[key]
       raise ArgumentError, 'Invalid text filter' unless @values[key].is_a?(String) && @values[key].length <= (key == 'q' ? 200 : 40)

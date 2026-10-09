@@ -4,6 +4,8 @@ import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/serviceDeskResources';
 import Button from 'dashboard/components-next/button/Button.vue';
 import Pagination from 'dashboard/components-next/pagination/PaginationFooter.vue';
+import CompanyPicker from 'dashboard/routes/dashboard/jrcCustomers/components/CompanyPicker.vue';
+import { useCustomerMaster } from 'dashboard/routes/dashboard/jrcCustomers/useCustomerMaster';
 import Lookup from './LookupSelect.vue';
 import State from './ServiceDeskState.vue';
 import { useServiceDesk } from '../composables/useServiceDesk';
@@ -24,6 +26,15 @@ const props = defineProps({
 const { t } = useI18n();
 const labels = computed(() => v2Labels(t));
 const session = useServiceDesk();
+const { canAccess: masterAvailable } = useCustomerMaster();
+const mayChooseCompany = computed(
+  () =>
+    masterAvailable.value &&
+    session.state.status === 'ready' &&
+    session.state.context?.effective_permissions?.includes(
+      'jrc_service_desk_customers_view'
+    )
+);
 const status = ref('idle');
 const result = ref(null);
 const query = ref('');
@@ -40,11 +51,14 @@ const fields = reactive({
   state: '',
   priority: 'normal',
   owner_account_user_id: '',
+  company_id: '',
   approval_id: '',
   planned_start_at: '',
   planned_end_at: '',
   ticket_ids: '',
   serial: '',
+  manufacturer: '',
+  change_type: '',
   location: '',
   risk: '',
   rollback_plan: '',
@@ -131,11 +145,14 @@ const begin = row => {
     state: row?.state || (props.kind === 'asset' ? 'active' : 'requested'),
     priority: row?.priority || 'normal',
     owner_account_user_id: row?.owner_account_user_id || '',
+    company_id: row?.company_id || '',
     approval_id: row?.approval_id || '',
     planned_start_at: localDateTime(row?.planned_start_at),
     planned_end_at: localDateTime(row?.planned_end_at),
     ticket_ids: row?.ticket_ids.join(', ') || '',
     serial: row?.details.serial || '',
+    manufacturer: row?.details.manufacturer || '',
+    change_type: row?.details.change_type || '',
     location: row?.details.location || '',
     risk: row?.details.risk || '',
     rollback_plan: row?.details.rollback_plan || '',
@@ -157,14 +174,22 @@ const save = async () => {
       state: fields.state,
       priority: fields.priority,
       owner_account_user_id: fields.owner_account_user_id || null,
+      ...(mayChooseCompany.value
+        ? { company_id: fields.company_id || null }
+        : {}),
       ticket_ids: fields.ticket_ids
         .split(',')
         .map(value => value.trim())
         .filter(Boolean),
       details:
         props.kind === 'asset'
-          ? { serial: fields.serial, location: fields.location }
+          ? {
+              serial: fields.serial,
+              manufacturer: fields.manufacturer,
+              location: fields.location,
+            }
           : {
+              change_type: fields.change_type,
               risk: fields.risk,
               rollback_plan: fields.rollback_plan,
               resolution: fields.resolution,
@@ -223,6 +248,8 @@ const save = async () => {
     if (
       row.name !== resource.name ||
       row.state !== resource.state ||
+      (Object.hasOwn(resource, 'company_id') &&
+        row.company_id !== resource.company_id) ||
       !resource.ticket_ids.every(id => row.ticket_ids.includes(id))
     )
       throw new Error('Resource readback mismatch');
@@ -355,6 +382,19 @@ onBeforeUnmount(() => {
             class="block w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
           />
         </label>
+        <div v-if="mayChooseCompany" class="grid gap-1">
+          <span class="text-sm">{{
+            t('JRC_SERVICE_DESK.FIELDS.company_id')
+          }}</span
+          ><CompanyPicker
+            :key="`${unitId}:${session.state.context?.user_id}`"
+            :model-value="fields.company_id || null"
+            :disabled="busy"
+            @update:model-value="
+              fields.company_id = $event ? String($event) : ''
+            "
+          />
+        </div>
         <Lookup
           v-model="fields.owner_account_user_id"
           resource="assignees"
@@ -424,7 +464,12 @@ onBeforeUnmount(() => {
               class="block w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
           /></label>
           <label
-            v-for="field in ['risk', 'rollback_plan', 'resolution']"
+            v-for="field in [
+              'change_type',
+              'risk',
+              'rollback_plan',
+              'resolution',
+            ]"
             :key="field"
             >{{ t(`JRC_SERVICE_DESK.R3.details.${field}`)
             }}<textarea
@@ -436,7 +481,7 @@ onBeforeUnmount(() => {
         </template>
         <template v-else>
           <label
-            v-for="field in ['serial', 'location']"
+            v-for="field in ['serial', 'manufacturer', 'location']"
             :key="field"
             class="grid gap-1 text-sm"
             >{{ t(`JRC_SERVICE_DESK.R3.details.${field}`)
@@ -469,6 +514,58 @@ onBeforeUnmount(() => {
           {{ t(`JRC_SERVICE_DESK.R3.states.${row.state}`) }}
         </p>
         <p class="text-sm whitespace-pre-wrap">{{ row.description }}</p>
+        <dl class="grid gap-2 sm:grid-cols-2 text-sm">
+          <div>
+            <dt class="text-xs text-n-slate-11">
+              {{ t('JRC_SERVICE_DESK.FIELDS.code') }}
+            </dt>
+            <dd class="break-words">{{ row.code }}</dd>
+          </div>
+          <div>
+            <dt class="text-xs text-n-slate-11">
+              {{ t('JRC_SERVICE_DESK.FIELDS.priority') }}
+            </dt>
+            <dd>{{ t(`JRC_SERVICE_DESK.R3.priority.${row.priority}`) }}</dd>
+          </div>
+          <div v-if="row.planned_start_at">
+            <dt class="text-xs text-n-slate-11">
+              {{ t('JRC_SERVICE_DESK.R3.planned_start') }}
+            </dt>
+            <dd>{{ row.planned_start_at }}</dd>
+          </div>
+          <div v-if="row.planned_end_at">
+            <dt class="text-xs text-n-slate-11">
+              {{ t('JRC_SERVICE_DESK.R3.planned_end') }}
+            </dt>
+            <dd>{{ row.planned_end_at }}</dd>
+          </div>
+          <div
+            v-for="(value, key) in Object.fromEntries(
+              Object.entries(row.details || {}).filter(([key]) =>
+                [
+                  'serial',
+                  'manufacturer',
+                  'location',
+                  'change_type',
+                  'risk',
+                  'rollback_plan',
+                  'resolution',
+                ].includes(key)
+              )
+            )"
+            :key="key"
+          >
+            <dt class="text-xs text-n-slate-11">
+              {{ t(`JRC_SERVICE_DESK.R3.details.${key}`) }}
+            </dt>
+            <dd class="whitespace-pre-wrap break-words">
+              {{ value || t('JRC_SERVICE_DESK.COMMON.no_value') }}
+            </dd>
+          </div>
+        </dl>
+        <p v-if="kind === 'change'" class="text-xs text-n-slate-11">
+          {{ t('JRC_SERVICE_DESK.EXPERIENCE.change_execution_notice') }}
+        </p>
         <div class="flex gap-2">
           <Button
             v-if="

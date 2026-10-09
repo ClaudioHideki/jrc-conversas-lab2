@@ -5,6 +5,7 @@ import { createStore } from 'vuex';
 import { createRouter, createMemoryHistory } from 'vue-router';
 import { createI18n } from 'vue-i18n';
 import messages from 'dashboard/i18n/locale/pt_BR/jrcServiceDesk.json';
+import sourceMessages from 'dashboard/i18n/locale/en/jrcServiceDesk.json';
 import {
   createServiceDeskSession,
   createSessionState,
@@ -204,7 +205,8 @@ async function render() {
         createI18n({
           legacy: false,
           locale: 'pt_BR',
-          messages: { pt_BR: messages },
+          fallbackLocale: 'en',
+          messages: { pt_BR: messages, en: sourceMessages },
         }),
         router,
         createStore({ getters: { getCurrentUser: () => ({ id: '7' }) } }),
@@ -288,6 +290,15 @@ describe('R3 native ticket wizard uses configured defaults with explicit custome
       category_id: '4',
       service_fields: { asset_tag: 'R3-device' },
     });
+    expect(router.currentRoute.value.name).toBe(serviceDeskRouteName('new'));
+    expect(
+      wrapper.find('[data-testid="ticket-created-receipt"]').exists()
+    ).toBe(true);
+    expect(wrapper.find('[data-testid="ticket-protocol"]').text()).toContain(
+      'TEST-20'
+    );
+    await wrapper.find('[data-testid="open-created-ticket"]').trigger('click');
+    await flushPromises();
     expect(router.currentRoute.value.name).toBe(serviceDeskRouteName('detail'));
   });
 });

@@ -9,7 +9,20 @@ import LookupSelect from './LookupSelect.vue';
 const props = defineProps({ query: { type: Object, default: () => ({}) } });
 const emit = defineEmits(['apply']);
 const { t } = useI18n();
-const draft = reactive({ q: '', unit_id: '', operator_company_id: '', status_id: '', priority_id: '', category_id: '', queue_id: '', assignee_id: '', source: '', sort: 'updated_at_desc' });
+const draft = reactive({
+  q: '',
+  unit_id: '',
+  operator_company_id: '',
+  status_id: '',
+  priority_id: '',
+  category_id: '',
+  queue_id: '',
+  assignee_id: '',
+  source: '',
+  sort: 'updated_at_desc',
+  phase: '',
+  assignment: '',
+});
 const expanded = ref(false);
 watch(() => props.query, query => Object.keys(draft).forEach(key => { draft[key] = typeof query[key] === 'string' ? query[key] : key === 'sort' ? 'updated_at_desc' : ''; }), { immediate: true });
 const clearUnitFields = () => ['status_id', 'priority_id', 'category_id', 'queue_id', 'assignee_id'].forEach(key => { draft[key] = ''; });
@@ -64,6 +77,21 @@ const clear = () => { Object.keys(draft).forEach(key => { draft[key] = key === '
       v-model:operator-id="draft.operator_company_id"
       @update:unit-id="updateUnit"
     />
+    <div
+      v-if="draft.phase || draft.assignment"
+      class="flex flex-wrap gap-2 my-2 text-xs"
+    >
+      <span
+        v-if="draft.phase"
+        class="rounded-full bg-n-blue-3 px-3 py-1 text-n-blue-11"
+        >{{ t(`JRC_SERVICE_DESK.OPS.KPI.${draft.phase}`) }}</span
+      >
+      <span
+        v-if="draft.assignment"
+        class="rounded-full bg-n-blue-3 px-3 py-1 text-n-blue-11"
+        >{{ t('JRC_SERVICE_DESK.EXPERIENCE.unassigned_visible') }}</span
+      >
+    </div>
     <div v-if="expanded" class="sd-fields-grid">
       <LookupSelect
         v-model="draft.status_id"

@@ -6,13 +6,24 @@ import KpiCard from './KpiCard.vue';
 import State from './ServiceDeskState.vue';
 import Button from 'dashboard/components-next/button/Button.vue';
 const props = defineProps({ query: { type: Object, default: () => ({}) }, breakdown: { type: Boolean, default: false } });
-const emit = defineEmits(['status-filter']);
+const emit = defineEmits(['status-filter', 'metric-filter']);
 const { t } = useI18n();
 const session = useServiceDesk();
 const key = `kpis:${getCurrentInstance().uid}`;
 const result = computed(() => session.operations?.resource(key) || { status: 'idle', data: null });
-const metrics = computed(() => ['total', 'active', 'open', 'waiting', 'resolved', 'closed', 'cancelled'].map(name => ({ name,
-  value: result.value.status === 'ready' ? (Object.hasOwn(result.value.data.phases, name) ? result.value.data.phases[name] : result.value.data[name]) : null })));
+const metrics = computed(() =>
+  ['total', 'active', 'open', 'waiting', 'resolved', 'closed', 'cancelled'].map(
+    name => {
+      let value = null;
+      if (result.value.status === 'ready') {
+        value = Object.hasOwn(result.value.data.phases, name)
+          ? result.value.data.phases[name]
+          : result.value.data[name];
+      }
+      return { name, value };
+    }
+  )
+);
 const load = () => {
   if (session.state.status === 'ready' && session.state.context?.capabilities?.dashboard?.index === true) return session.operations?.read(key, 'dashboard', { query: props.query });
   return undefined;
@@ -23,7 +34,14 @@ onBeforeUnmount(() => session.operations?.cancel(key));
 <template>
   <div v-if="session.state.context?.capabilities?.dashboard?.index === true" class="mb-4">
     <div class="sd-kpi-grid">
-      <KpiCard v-for="metric in metrics" :key="metric.name" :label="t(`JRC_SERVICE_DESK.OPS.KPI.${metric.name}`)" :value="metric.value" />
+      <KpiCard
+        v-for="metric in metrics"
+        :key="metric.name"
+        :label="t(`JRC_SERVICE_DESK.OPS.KPI.${metric.name}`)"
+        :value="metric.value"
+        :interactive="result.status === 'ready'"
+        @activate="emit('metric-filter', metric.name)"
+      />
     </div>
     <State v-if="!['ready', 'idle'].includes(result.status)" :status="result.status" compact retry @retry="load" />
     <p v-if="result.status === 'ready'" class="text-xs text-n-slate-11">

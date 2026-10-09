@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { flushPromises, mount } from '@vue/test-utils';
 import { reactive } from 'vue';
+import { createStore } from 'vuex';
+import { routeLocationKey } from 'vue-router';
 import { createI18n } from 'vue-i18n';
 import Panel from '../NativeResourcesPanel.vue';
 const mocks = vi.hoisted(() => ({
@@ -50,6 +52,15 @@ const build = unitId =>
     props: { unitId, kind: 'asset' },
     global: {
       plugins: [
+        createStore({
+          getters: {
+            'accounts/getAccount': () => () => ({ id: 1 }),
+            'accounts/isFeatureEnabledonAccount': () => () => false,
+            'globalConfig/isOnChatwootCloud': () => false,
+            getCurrentRole: () => 'agent',
+            getCurrentUser: () => ({ accounts: [{ id: 1, role: 'agent' }] }),
+          },
+        }),
         createI18n({
           legacy: false,
           locale: 'en',
@@ -57,6 +68,7 @@ const build = unitId =>
           fallbackWarn: false,
         }),
       ],
+      provide: { [routeLocationKey]: reactive({ params: { accountId: '1' } }) },
       stubs: { Button, Pagination: true, Lookup: true, State: true },
     },
   });

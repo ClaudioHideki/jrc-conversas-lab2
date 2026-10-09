@@ -3,6 +3,7 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Button from 'dashboard/components-next/button/Button.vue';
 import API from 'dashboard/api/serviceDeskCockpit';
+import HistoryEventCard from './HistoryEventCard.vue';
 import State from './ServiceDeskState.vue';
 import NotificationControls from './NotificationControls.vue';
 import { useServiceDesk } from '../composables/useServiceDesk';
@@ -14,6 +15,7 @@ import { formatTimestamp } from '../helpers/presentation';
 const props = defineProps({
   ticket: { type: Object, required: true },
   revision: { type: Number, default: 0 },
+  onlyFiles: Boolean,
 });
 const emit = defineEmits(['republish', 'updated']);
 const { t, locale } = useI18n();
@@ -29,6 +31,13 @@ const { items, cursor, status, busy, load } = useTicketTimeline({
   },
 });
 const feedback = ref(null);
+const visibleItems = computed(() =>
+  props.onlyFiles
+    ? items.value.filter(
+        row => row.attachments?.length || row.recordings?.length
+      )
+    : items.value
+);
 const download = async (row, attachment) => {
   const context = session.state.context;
   try {
@@ -63,8 +72,14 @@ const download = async (row, attachment) => {
       @retry="load()"
     />
     <p v-if="status === 'empty'" class="text-sm">{{ labels.empty }}</p>
+    <p
+      v-if="onlyFiles && status === 'ready' && !visibleItems.length"
+      class="text-sm"
+    >
+      {{ t('JRC_SERVICE_DESK.EXPERIENCE.no_files_in_page') }}
+    </p>
     <article
-      v-for="row in items"
+      v-for="row in visibleItems"
       :key="row.key"
       class="grid gap-2 rounded-lg border border-n-weak p-3"
     >
@@ -82,7 +97,12 @@ const download = async (row, attachment) => {
       <p v-if="row.comment" class="whitespace-pre-wrap text-sm">
         {{ row.comment }}
       </p>
-      <p v-if="row.event_type" class="text-sm">
+      <HistoryEventCard
+        v-if="row.kind === 'event' && row.event_type"
+        :event="row"
+        :ticket="ticket"
+      />
+      <p v-else-if="row.event_type" class="text-sm">
         {{ values.event[row.event_type] || labels.kinds.event }}
       </p>
       <p v-if="row.status" class="text-xs">

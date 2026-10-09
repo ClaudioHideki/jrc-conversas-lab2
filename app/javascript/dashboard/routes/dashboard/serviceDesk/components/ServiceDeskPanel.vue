@@ -11,7 +11,7 @@ defineProps({ title: { type: String, default: '' }, icon: { type: String, defaul
           {{ title }}
         </h2>
       </div>
-      <slot name="action" />
+      <slot name="actions"><slot name="action" /></slot>
     </header>
     <div class="sd-panel-body">
       <slot />

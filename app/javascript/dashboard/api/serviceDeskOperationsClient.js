@@ -87,6 +87,8 @@ export function createServiceDeskOperationsClient(http) {
         'description',
         'requester_id',
         'priority_id',
+        'impact_code',
+        'urgency_code',
         'category_id',
         'ticket_type_id',
         'subcategory_id',

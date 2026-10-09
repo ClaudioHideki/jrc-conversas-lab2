@@ -14,6 +14,7 @@ import { useServiceDesk } from '../composables/useServiceDesk';
 import { decodeBoard } from '../helpers/v2Projection';
 import { errorStatus } from '../helpers/session';
 import { formatTimestamp } from '../helpers/presentation';
+import { dueState } from '../helpers/screenExperience.js';
 import { serviceDeskRouteName } from '../routeDefinitions';
 import { v2Labels } from '../helpers/v2Labels';
 const props = defineProps({ screen: { type: String, required: true } });
@@ -30,6 +31,8 @@ const status = ref('idle');
 const search = ref('');
 const stateFilter = ref('');
 const formOpen = ref(false);
+const batchOpen = ref(false);
+const observedAt = ref(new Date().toISOString());
 const editedIncident = ref(null);
 const incidentBoard = computed(() =>
   ['incidents', 'problems'].includes(props.screen)
@@ -67,9 +70,7 @@ const load = async () => {
     ...(unitId.value ? { unit_id: unitId.value } : {}),
     ...(stateFilter.value ? { status: stateFilter.value } : {}),
     ...(search.value ? { query: search.value } : {}),
-    ...(incidentBoard.value && operatorId.value
-      ? { owner_account_user_id: operatorId.value }
-      : {}),
+    ...(operatorId.value ? { operator_company_id: operatorId.value } : {}),
   };
   status.value = 'loading';
   try {
@@ -81,6 +82,7 @@ const load = async () => {
     );
     if (turn !== epoch || context !== session.state.context) return;
     result.value = decodeBoard(payload, context, props.screen, query);
+    observedAt.value = new Date().toISOString();
     status.value = result.value.items.length ? 'ready' : 'empty';
   } catch (error) {
     if (turn === epoch) status.value = errorStatus(error);
@@ -126,7 +128,20 @@ const editIncident = row => {
 
 <template>
   <Panel :title="labels.screen[screen]">
-    <IncidentBatchPanel v-if="incidentBoard" />
+    <p class="text-sm text-n-slate-11 mb-3">
+      {{ t(`JRC_SERVICE_DESK.EXPERIENCE.help.${screen}`) }}
+    </p>
+    <details
+      v-if="incidentBoard"
+      class="mb-4 rounded-xl border border-n-weak p-3"
+      :open="batchOpen"
+      @toggle="batchOpen = $event.target.open"
+    >
+      <summary class="cursor-pointer font-medium text-sm">
+        {{ t('JRC_SERVICE_DESK.EXPERIENCE.reviewed_batch') }}
+      </summary>
+      <IncidentBatchPanel v-if="batchOpen" />
+    </details>
     <ScopeBar v-model:unit-id="unitId" v-model:operator-id="operatorId" />
     <p class="text-sm my-3">{{ t('JRC_SERVICE_DESK.V2.board_help') }}</p>
     <form
@@ -171,18 +186,34 @@ const editIncident = row => {
       @saved="savedIncident"
       @cancel="formOpen = false"
     />
+    <p v-if="result" role="status" class="text-xs text-n-slate-11 my-3">
+      {{ t('JRC_SERVICE_DESK.EXPERIENCE.total', { count: result.meta.total }) }}
+    </p>
     <ul v-if="status === 'ready'" class="grid gap-3">
       <li
         v-for="row in result.items"
         :key="row.id"
         class="flex flex-wrap gap-3 items-center border border-n-weak rounded-lg p-3"
       >
-        <span class="flex-1">{{ row.title }}</span>
+        <div class="min-w-0 flex-1">
+          <p class="font-medium break-words">{{ row.title }}</p>
+          <p class="text-xs text-n-slate-11">
+            {{
+              session.state.context.units.find(unit => unit.id === row.unit_id)
+                ?.name
+            }}
+          </p>
+        </div>
         <span class="text-xs">{{ labels.state[row.status] }}</span>
         <span v-if="row.visibility" class="text-xs">{{
           labels.visibility[row.visibility]
         }}</span>
-        <time v-if="row.due_at" class="text-xs">{{
+        <span
+          v-if="dueState(row, observedAt) === 'overdue'"
+          class="rounded-full bg-n-ruby-3 px-2 py-1 text-xs text-n-ruby-11"
+          >{{ t('JRC_SERVICE_DESK.EXPERIENCE.overdue') }}</span
+        >
+        <time v-if="row.due_at" :datetime="row.due_at" class="text-xs">{{
           formatTimestamp(row.due_at, locale)
         }}</time>
         <Button

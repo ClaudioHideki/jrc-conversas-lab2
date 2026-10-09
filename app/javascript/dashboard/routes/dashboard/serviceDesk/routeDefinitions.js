@@ -62,7 +62,7 @@ export const SERVICE_DESK_ROUTES = Object.freeze([
   {
     key: 'sla',
     path: 'sla',
-    page: 'reports',
+    page: 'sla',
     icon: 'i-lucide-timer',
     group: 'governance',
   },

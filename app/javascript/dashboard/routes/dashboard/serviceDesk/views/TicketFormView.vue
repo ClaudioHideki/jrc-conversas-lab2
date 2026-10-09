@@ -1,5 +1,11 @@
 <script setup>
 import ImpactUrgencySelect from '../components/ImpactUrgencySelect.vue';
+import TicketCreationReceipt from '../components/TicketCreationReceipt.vue';
+import {
+  confirmedCreationTicket,
+  selectAutomaticRouting,
+  selectTicketAssignment,
+} from '../helpers/ticketReceipt';
 import { T } from 'dashboard/routes/dashboard/jrcCustomers/copy';
 import CompanyPicker from 'dashboard/routes/dashboard/jrcCustomers/components/CompanyPicker.vue';
 import { useCustomerMaster } from 'dashboard/routes/dashboard/jrcCustomers/useCustomerMaster';
@@ -44,6 +50,15 @@ const key = 'ticket:edit';
 const writeKey = 'ticket:form:write';
 let requestKey = null;
 const localError = ref(false);
+const creationReceipt = ref(null);
+const createdTicket = computed(() =>
+  confirmedCreationTicket(
+    creationReceipt.value,
+    session.state,
+    session.accountId.value,
+    session.userId.value
+  )
+);
 const mutation = computed(
   () => session.operations?.mutation(writeKey) || { status: 'idle' }
 );
@@ -108,6 +123,9 @@ const selectedNames = reactive({
   ticket_type: null,
   subcategory: null,
   contract: null,
+  assignee: null,
+  queue: null,
+  team: null,
 });
 const applyCatalogue = value => {
   catalogue.value = value;
@@ -124,7 +142,9 @@ const applyCatalogue = value => {
     if (
       !draft[`${field}_id`] &&
       value.defaults[defaultKey] &&
-      (field === 'priority' || unit.value?.permissions.assign_ticket === true)
+      (field === 'priority' ||
+        (draft.use_channel_routing !== true &&
+          unit.value?.permissions.assign_ticket === true))
     ) {
       draft[`${field}_id`] = value.defaults[defaultKey];
       if (field === 'priority')
@@ -230,6 +250,9 @@ const changeUnit = value => {
   }
 };
 const load = () => {
+  creationReceipt.value = null;
+  session.operations?.dismissConfirmation(writeKey);
+  localError.value = false;
   step.value = 0;
   resetNames();
   operatorId.value = '';
@@ -280,6 +303,7 @@ watch(record, value => {
       ?.operator_company.id || '';
 });
 onBeforeUnmount(() => {
+  creationReceipt.value = null;
   relationshipEpoch += 1;
   relationshipCustomer.value = null;
   Object.assign(draft, blank());
@@ -299,6 +323,7 @@ const cancel = () =>
 const maySave = computed(
   () =>
     !!session.operations &&
+    !creationReceipt.value &&
     mayEdit.value &&
     !busy.value &&
     !hashingFiles.value &&
@@ -310,8 +335,20 @@ const maySave = computed(
     catalogueAccess.value &&
     (edit.value || (draft.requester_id && unit.value?.initial_status?.id))
 );
+const openCreatedTicket = ticketId =>
+  router.push({
+    name: serviceDeskRouteName('detail'),
+    params: { accountId: session.accountId.value, ticketId },
+  });
+const chooseAssignment = (field, selected) =>
+  selectTicketAssignment(draft, selectedNames, field, selected);
+const chooseRouting = event =>
+  selectAutomaticRouting(draft, selectedNames, event.target.checked);
 const submit = async () => {
   if (!maySave.value) return;
+  const submissionContext = session.state.context;
+  const submissionAccount = session.accountId.value;
+  const submissionUser = session.userId.value;
   localError.value = false;
   try {
     if (!edit.value) requestKey ||= newRequestKey();
@@ -343,11 +380,22 @@ const submit = async () => {
       payload,
       record.value
     );
-    if (confirmed)
-      await router.push({
-        name: serviceDeskRouteName('detail'),
-        params: { accountId: session.accountId.value, ticketId: confirmed.id },
-      });
+    if (
+      confirmed &&
+      session.state.context === submissionContext &&
+      session.accountId.value === submissionAccount &&
+      session.userId.value === submissionUser
+    ) {
+      if (edit.value) {
+        await openCreatedTicket(confirmed.id);
+      } else {
+        creationReceipt.value = {
+          ticket: confirmed,
+          account_id: submissionContext.account_id,
+          user_id: submissionContext.user_id,
+        };
+      }
+    }
   } catch {
     localError.value = true;
   } finally {
@@ -370,16 +418,27 @@ const submit = async () => {
       <Button
         color="slate"
         variant="ghost"
-        :label="t('JRC_SERVICE_DESK.COMMON.cancel')"
+        :label="
+          createdTicket
+            ? t('JRC_SERVICE_DESK.SCREENS.tickets')
+            : t('JRC_SERVICE_DESK.COMMON.cancel')
+        "
         :disabled="busy"
         @click="cancel"
       />
     </header>
-    <Banner color="amber" class="mb-4">
+    <Banner v-if="!createdTicket" color="amber" class="mb-4">
       {{ t('JRC_SERVICE_DESK.FORM.draft_notice') }}
     </Banner>
+    <TicketCreationReceipt
+      v-if="createdTicket"
+      :ticket="createdTicket"
+      @open="openCreatedTicket"
+      @list="cancel"
+      @create-another="load"
+    />
     <State
-      v-if="edit && result.status !== 'ready'"
+      v-else-if="edit && result.status !== 'ready'"
       :status="result.status"
       retry
       @retry="session.state.status === 'ready' ? load() : session.retry()"
@@ -500,9 +559,10 @@ const submit = async () => {
                 class="flex items-start gap-2 text-sm"
               >
                 <input
-                  v-model="draft.use_channel_routing"
+                  :checked="draft.use_channel_routing"
                   type="checkbox"
                   :disabled="!mayEdit || busy"
+                  @change="chooseRouting"
                 />
                 <span>{{ t('JRC_SERVICE_DESK.COMPLETION.routing_help') }}</span>
               </label>
@@ -564,7 +624,10 @@ const submit = async () => {
                     busy ||
                     unit?.permissions.assign_ticket !== true
                   "
-                  :current-name="record?.assignee?.name || ''"
+                  :current-name="
+                    selectedNames.assignee?.name || record?.assignee?.name || ''
+                  "
+                  @selected="chooseAssignment('assignee', $event)"
                 />
                 <LookupSelect
                   v-model="draft.team_id"
@@ -577,7 +640,10 @@ const submit = async () => {
                     busy ||
                     unit?.permissions.assign_ticket !== true
                   "
-                  :current-name="record?.team?.name || ''"
+                  :current-name="
+                    selectedNames.team?.name || record?.team?.name || ''
+                  "
+                  @selected="chooseAssignment('team', $event)"
                 />
                 <LookupSelect
                   v-model="draft.queue_id"
@@ -590,7 +656,10 @@ const submit = async () => {
                     busy ||
                     unit?.permissions.assign_ticket !== true
                   "
-                  :current-name="record?.queue?.name || ''"
+                  :current-name="
+                    selectedNames.queue?.name || record?.queue?.name || ''
+                  "
+                  @selected="chooseAssignment('queue', $event)"
                 />
                 <Input
                   :model-value="
@@ -610,13 +679,9 @@ const submit = async () => {
                 {{ t('JRC_SERVICE_DESK.FORM.relationships_help') }}
               </p>
               <div class="sd-fields-grid">
-                <Input
-                  v-for="field in ['asset', 'crm', 'parent_ticket']"
-                  :key="field"
-                  :label="t(`JRC_SERVICE_DESK.FIELDS.${field}`)"
-                  :placeholder="t('JRC_SERVICE_DESK.COMMON.pending_cp4')"
-                  disabled
-                />
+                <p class="text-xs text-n-slate-11">
+                  {{ t('JRC_SERVICE_DESK.EXPERIENCE.links_after_creation') }}
+                </p>
               </div>
               <LookupSelect
                 v-model="draft.contract_id"

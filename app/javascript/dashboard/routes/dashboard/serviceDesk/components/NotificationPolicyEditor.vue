@@ -107,6 +107,9 @@ watch([latest, eventType, channel, ticketTypeId, serviceId], () => {
     templateVersion.value = row.template_version;
   }
 });
+watch([template, templateVersion, inboxId, enabled], () => {
+  confirmed.value = false;
+});
 const publish = async () => {
   if (!allowed.value || !confirmed.value || busy.value) return;
   const context = session.state.context;
@@ -264,6 +267,31 @@ onBeforeUnmount(() => {
             labels.enabled
           }}</label
         >
+        <section
+          class="grid gap-2 rounded-xl border border-n-weak bg-n-solid-1 p-4"
+          aria-live="polite"
+        >
+          <h4 class="text-sm font-semibold">
+            {{ t('JRC_SERVICE_DESK.EXPERIENCE.notification_preview') }}
+          </h4>
+          <p class="text-xs text-n-slate-11">
+            {{ t('JRC_SERVICE_DESK.EXPERIENCE.notification_preview_notice') }}
+          </p>
+          <p class="text-sm">
+            {{ labels.events[eventType] }} &middot;
+            {{ values.channel[channel] }}
+          </p>
+          <pre class="whitespace-pre-wrap break-words text-sm">{{
+            template || t('JRC_SERVICE_DESK.COMMON.no_value')
+          }}</pre>
+          <p class="text-xs">
+            {{
+              t('JRC_SERVICE_DESK.LIFECYCLE.version', {
+                version: latest?.version || 0,
+              })
+            }}
+          </p>
+        </section>
         <label class="text-sm"
           ><input v-model="confirmed" type="checkbox" :disabled="busy" />{{
             labels.confirm_policy

@@ -70,7 +70,6 @@ const tabKeys = [
   'tasks',
   'files',
   'sla',
-  'related',
   'history',
   'solution',
 ];
@@ -81,7 +80,6 @@ const visibleTabKeys = computed(() =>
       files: 'view_notes',
       tasks: 'tasks_view',
       history: 'view_history',
-      related: 'view_conversations',
       conversation: 'view_conversations',
       sla: 'view_sla',
       solution: 'lifecycle_inspect',
@@ -279,6 +277,29 @@ watch(() => session.operations?.state.revision, refresh);
           :mode="tab"
           @updated="published"
         />
+        <div v-else-if="tab === 'conversation'" class="grid gap-4">
+          <p class="text-sm text-n-slate-11">
+            {{ t('JRC_SERVICE_DESK.EXPERIENCE.communication_help') }}
+          </p>
+          <TicketCockpit
+            v-if="ticket.permissions.view_notes"
+            :key="`${ticket.id}:communication`"
+            :ticket="ticket"
+            mode="communication"
+            @updated="published"
+          />
+          <details class="rounded-xl border border-n-weak p-3">
+            <summary class="cursor-pointer text-sm font-medium">
+              {{ t('JRC_SERVICE_DESK.EXPERIENCE.linked_conversations') }}
+            </summary>
+            <TicketActivity
+              :key="`${ticket.id}:conversations`"
+              :ticket="ticket"
+              kind="conversations"
+              @updated="refresh"
+            />
+          </details>
+        </div>
         <LifecyclePanel
           v-else-if="
             ['solution', 'sla'].includes(tab) &&
@@ -289,16 +310,12 @@ watch(() => session.operations?.state.revision, refresh);
           @snapshot-recorded="snapshotRecorded"
         />
         <TicketActivity
-          v-else-if="
-            ['sla', 'history', 'related', 'conversation'].includes(tab)
-          "
+          v-else-if="['sla', 'history'].includes(tab)"
           :key="`${ticket.id}:${tab}`"
           :ticket="ticket"
           :kind="
             {
               history: 'events',
-              related: 'conversations',
-              conversation: 'conversations',
             }[tab] || tab
           "
           @updated="refresh"

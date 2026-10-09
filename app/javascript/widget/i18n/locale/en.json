@@ -244,6 +244,14 @@
       "csat": "CSAT survey",
       "ces": "CES survey",
       "custom": "Customer survey"
+    },
+    "EXPERIENCE": {
+      "no_tickets": "No tickets match this authorized view.",
+      "visible_count": "{count} tickets visible in this response",
+      "protocol": "Official ticket protocol",
+      "copy": "Copy protocol",
+      "copied": "Protocol copied",
+      "public_only": "Only public updates and attachments authorized for your identity are shown."
     }
   }
 }

@@ -51,13 +51,19 @@ class JrcServiceDesk::TicketQuery
     if parameters['mine']
       @relation = relation.where(assignee_membership_id: context.active_memberships.select(:id))
     end
+    @relation = relation.where(assignee_membership_id: nil) if parameters['assignment'] == 'unassigned'
+    if parameters['phase']
+      phases = parameters['phase'] == 'active' ? %w[open waiting] : [parameters['phase']]
+      @relation = relation.joins(:status).where(jrc_service_desk_ticket_statuses: { phase: phases })
+    end
     @relation = relation.where(origin_channel: parameters['source']) if parameters['source']
     return if parameters['q'].nil? || parameters['q'].empty?
 
     q = parameters['q']
     like = "%#{ActiveRecord::Base.sanitize_sql_like(q)}%"
     match = relation.where('jrc_service_desk_tickets.title ILIKE :q OR jrc_service_desk_tickets.description ILIKE :q', q: like)
-    match = match.or(relation.where(id: JrcServiceDesk::Input.id(q))) if q.match?(/\A[1-9]\d{0,18}\z/) && q.to_i <= 9_223_372_036_854_775_807
+    number = JrcServiceDesk::TicketSearch.identifier(q)
+    match = match.or(relation.where(id: number)) if number
     @relation = match
   end
 end

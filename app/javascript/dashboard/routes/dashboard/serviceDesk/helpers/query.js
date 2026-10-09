@@ -2,7 +2,17 @@ import { canonicalId } from './access.js';
 export class QueryError extends Error {
 }
 const idFields = ['unit_id', 'operator_company_id', 'status_id', 'priority_id', 'category_id', 'queue_id', 'assignee_id'];
-const fields = new Set(['q', 'page', 'per_page', 'mine', 'source', 'sort', ...idFields]);
+const fields = new Set([
+  'q',
+  'page',
+  'per_page',
+  'mine',
+  'source',
+  'sort',
+  'phase',
+  'assignment',
+  ...idFields,
+]);
 const scalar = value => typeof value === 'string' || typeof value === 'number';
 export function normalizeQuery(query = {}) {
   const result = { page: 1, per_page: 20 };
@@ -32,17 +42,35 @@ export function normalizeQuery(query = {}) {
         throw new QueryError('Invalid personal filter');
       result.mine = 'true';
     }
-    else if (key === 'sort') {
+    else if (key === 'phase') {
+      if (
+        ![
+          'active',
+          'open',
+          'waiting',
+          'resolved',
+          'closed',
+          'cancelled',
+        ].includes(value)
+      )
+        throw new QueryError('Invalid phase');
+      result.phase = value;
+    }
+    else if (key === 'assignment') {
+      if (value !== 'unassigned') throw new QueryError('Invalid assignment');
+      result.assignment = value;
+    } else if (key === 'sort') {
       if (!['updated_at_desc', 'created_at_desc', 'created_at_asc'].includes(value))
         throw new QueryError('Invalid order');
       result.sort = value;
-    }
-    else {
+    } else {
       if (String(value).length > (key === 'q' ? 200 : 40))
         throw new QueryError('Filter too long');
       result[key] = String(value).trim();
     }
   });
+  if (result.mine && result.assignment)
+    throw new QueryError('Incompatible personal filter');
   return result;
 }
 export function queryWithinContext(query, context) {

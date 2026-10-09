@@ -20,6 +20,7 @@ const pages = {
   board: () => import('./views/OperationsBoardView.vue'),
   resources: () => import('./views/ResourcesView.vue'),
   reports: () => import('./views/ReportsView.vue'),
+  sla: () => import('./views/SlaView.vue'),
   planned: () => import('./views/PlannedView.vue'),
   settings: () => import('./views/SettingsView.vue'),
   automations: () => import('./views/AutomationsView.vue'),

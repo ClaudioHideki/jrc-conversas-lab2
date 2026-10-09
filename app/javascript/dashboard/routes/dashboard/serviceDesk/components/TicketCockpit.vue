@@ -13,6 +13,7 @@ import TicketTimeline from './TicketTimeline.vue';
 import { useServiceDesk } from '../composables/useServiceDesk';
 import { decodeCockpit } from '../helpers/cockpitContract';
 import { newRequestKey } from '../helpers/drafts';
+import { dueState } from '../helpers/screenExperience.js';
 import { formatTimestamp } from '../helpers/presentation';
 import { serviceDeskRouteName } from '../routeDefinitions';
 import { v2Labels } from '../helpers/v2Labels';
@@ -36,6 +37,7 @@ const knowledge = () =>
 const separator = '·';
 const numberPrefix = '#';
 const data = ref(null);
+const observedAt = ref(new Date().toISOString());
 const status = ref('loading');
 const feedback = ref(null);
 const busy = ref(false);
@@ -80,7 +82,7 @@ const audiences = computed(() => [
     : []),
 ]);
 const showInteractions = computed(() =>
-  ['all', 'notes', 'files'].includes(props.mode)
+  ['all', 'notes', 'files', 'communication'].includes(props.mode)
 );
 const showTasks = computed(() => ['all', 'tasks'].includes(props.mode));
 const canPublishProgression = computed(
@@ -148,6 +150,7 @@ const load = async () => {
     if (turn !== epoch || context !== session.state.context || !active())
       return null;
     data.value = decodeCockpit(payload, context, props.ticket);
+    observedAt.value = new Date().toISOString();
     status.value = 'ready';
     return data.value;
   } catch (error) {
@@ -449,21 +452,29 @@ onBeforeUnmount(() => {
         <TicketTimeline
           :ticket="ticket"
           :revision="revision"
+          :only-files="mode === 'files'"
           @republish="republish"
           @updated="refreshed"
         />
         <InteractionComposer
-          v-if="permissions.add_note"
+          v-if="permissions.add_note && mode !== 'files'"
           :ticket="ticket"
           :previous="previous"
           @updated="refreshed"
         />
-        <RecipientPreferences :ticket="ticket" @updated="refreshed" />
+        <RecipientPreferences
+          v-if="mode !== 'files'"
+          :ticket="ticket"
+          @updated="refreshed"
+        />
       </div>
       <section v-if="showTasks && permissions.tasks_view" class="grid gap-3">
         <h3 class="font-semibold">
           {{ t('JRC_SERVICE_DESK.TICKET.tabs.tasks') }}
         </h3>
+        <p v-if="!data.tasks.length" class="text-sm text-n-slate-11">
+          {{ t('JRC_SERVICE_DESK.COMMON.no_records') }}
+        </p>
         <article
           v-for="row in data.tasks"
           :key="row.id"
@@ -477,6 +488,25 @@ onBeforeUnmount(() => {
             {{ labels.visibility[row.visibility] }} {{ separator }}
             {{ formatTimestamp(row.due_at, locale) }}
           </p>
+          <p
+            v-if="dueState(row, observedAt) === 'overdue'"
+            class="text-xs text-n-ruby-11"
+          >
+            {{ t('JRC_SERVICE_DESK.EXPERIENCE.overdue') }}
+          </p>
+          <div v-if="row.checklist.length" class="flex items-center gap-3">
+            <progress
+              class="min-w-0 flex-1"
+              :value="row.checklist.filter(item => item.done).length"
+              :max="row.checklist.length"
+              :aria-label="t('JRC_SERVICE_DESK.EXPERIENCE.checklist_progress')"
+            /><span class="text-xs tabular-nums">{{
+              t('JRC_SERVICE_DESK.EXPERIENCE.checklist_count', {
+                done: row.checklist.filter(item => item.done).length,
+                total: row.checklist.length,
+              })
+            }}</span>
+          </div>
           <p v-if="row.parent_task_id" class="text-xs">
             {{ t('JRC_SERVICE_DESK.R3.parent_task') }}:
             {{
@@ -507,6 +537,14 @@ onBeforeUnmount(() => {
               @change="toggleItem(row, index, $event.target.checked)"
             />{{ item.title }}
           </label>
+          <Button
+            v-if="row.permissions.update && row.status === 'open'"
+            size="xs"
+            variant="outline"
+            :disabled="busy"
+            :label="t('JRC_SERVICE_DESK.EXPERIENCE.start_task')"
+            @click="updateTask(row, { status: 'in_progress' })"
+          />
           <Button
             v-if="
               row.permissions.update &&
@@ -647,6 +685,9 @@ onBeforeUnmount(() => {
         <h3 class="font-semibold">
           {{ t('JRC_SERVICE_DESK.COCKPIT.approvals') }}
         </h3>
+        <p v-if="!data.approvals.length" class="text-sm text-n-slate-11">
+          {{ t('JRC_SERVICE_DESK.COMMON.no_records') }}
+        </p>
         <article
           v-for="row in data.approvals"
           :key="row.id"
@@ -656,6 +697,12 @@ onBeforeUnmount(() => {
             {{ row.title }} {{ separator }} {{ labels.approval[row.status] }}
             {{ separator }}
             {{ formatTimestamp(row.due_at, locale) }}
+          </p>
+          <p
+            v-if="dueState(row, observedAt) === 'overdue'"
+            class="text-xs text-n-ruby-11"
+          >
+            {{ t('JRC_SERVICE_DESK.EXPERIENCE.overdue') }}
           </p>
           <p v-if="row.comment" class="text-sm whitespace-pre-wrap">
             {{ row.comment }}

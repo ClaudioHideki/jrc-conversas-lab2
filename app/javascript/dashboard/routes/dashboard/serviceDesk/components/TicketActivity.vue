@@ -8,6 +8,7 @@ import Button from 'dashboard/components-next/button/Button.vue';
 import Input from 'dashboard/components-next/input/Input.vue';
 import TextArea from 'dashboard/components-next/textarea/TextArea.vue';
 import Pagination from 'dashboard/components-next/pagination/PaginationFooter.vue';
+import HistoryEventCard from './HistoryEventCard.vue';
 import State from './ServiceDeskState.vue';
 import Feedback from './WriteFeedback.vue';
 import { useServiceDesk } from '../composables/useServiceDesk';
@@ -69,11 +70,11 @@ onBeforeUnmount(() => { navigationEpoch += 1; navigationController?.abort(); ses
           <p class="text-xs text-n-slate-11">{{ item.author?.name }} &middot; {{ formatTimestamp(item.created_at, locale) }}</p>
           <p class="whitespace-pre-wrap break-words text-sm">{{ item.body }}</p>
         </template>
-        <template v-else-if="kind === 'events'">
-          <p class="text-sm font-medium">{{ t(`JRC_SERVICE_DESK.OPS.EVENTS.${item.event_type}`) }}</p>
-          <p class="text-xs text-n-slate-11">{{ item.author?.name }} &middot; {{ formatTimestamp(item.created_at, locale) }}</p>
-          <pre class="text-xs whitespace-pre-wrap break-words">{{ JSON.stringify(item.data, null, 2) }}</pre>
-        </template>
+        <HistoryEventCard
+          v-else-if="kind === 'events'"
+          :event="item"
+          :ticket="ticket"
+        />
         <template v-else-if="kind === 'conversations'">
           <p class="text-sm">{{ t('JRC_SERVICE_DESK.OPS.linked_conversation', { id: item.conversation_id, display: item.conversation_display_id }) }}</p>
           <Button v-if="ticket.permissions.view_conversations" size="xs" variant="outline" :disabled="navigationStatus === 'loading'" :label="t('JRC_SERVICE_DESK.NATIVE.open_conversation')" @click="openConversation(item)" />

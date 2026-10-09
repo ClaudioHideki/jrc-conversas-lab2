@@ -84,10 +84,23 @@ onBeforeUnmount(() => {
         :key="row.id"
         class="border border-n-weak rounded-lg p-3"
       >
-        <h3 class="font-semibold">{{ row.name }}</h3>
+        <div class="flex items-start justify-between gap-2">
+          <h3 class="font-semibold">{{ row.name }}</h3>
+          <span class="rounded-full bg-n-alpha-2 px-2 py-1 text-xs">{{
+            t(
+              row.active
+                ? 'JRC_SERVICE_DESK.COMMON.active'
+                : 'JRC_SERVICE_DESK.COMMON.inactive'
+            )
+          }}</span>
+        </div>
+        <p class="text-xs text-n-slate-11">{{ row.code }}</p>
         <p class="whitespace-pre-wrap text-sm">{{ row.description }}</p>
         <p v-if="row.approval_required" class="text-xs">
           {{ t('JRC_SERVICE_DESK.V2.approval_required') }}
+        </p>
+        <p class="text-xs text-n-slate-11 mt-3">
+          {{ t('JRC_SERVICE_DESK.EXPERIENCE.form_requirements') }}
         </p>
         <ul class="text-sm mt-2">
           <li v-for="field in row.form_fields" :key="field.key">

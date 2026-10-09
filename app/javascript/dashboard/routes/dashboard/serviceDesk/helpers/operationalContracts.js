@@ -103,6 +103,42 @@ export function decodeDashboard(payload, context, request = {}) {
   };
 }
 const EVENT_KEYS = {
+  operational_rule_applied: [
+    'kind',
+    'rule_version_id',
+    'rule_key',
+    'rule_digest',
+    'snapshot_id',
+  ],
+  clock_threshold_reached: [
+    'clock_id',
+    'clock_kind',
+    'percent',
+    'policy_digest',
+    'elapsed_seconds',
+    'budget_seconds',
+    'due_at',
+    'breached',
+    'target_queue_id',
+  ],
+  clock_violated: [
+    'clock_id',
+    'clock_kind',
+    'policy_digest',
+    'elapsed_seconds',
+    'budget_seconds',
+    'due_at',
+    'observed_at',
+  ],
+  approval_escalated: ['approval_id', 'history_index'],
+  resource_linked: ['resource_id', 'resource_kind'],
+  resource_updated: ['resource_id', 'resource_kind', 'history_index'],
+  resource_archived: ['resource_id', 'resource_kind', 'history_index'],
+  notification_resend_requested: [
+    'original_delivery_id',
+    'delivery_id',
+    'reason',
+  ],
   ticket_created: [
     'status_id',
     'priority_id',

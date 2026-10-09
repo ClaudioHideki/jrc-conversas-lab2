@@ -6,7 +6,7 @@ class JrcServiceDesk::OperationsBoardQuery
 
   def initialize(context:, parameters:)
     @context = JrcServiceDesk::OperationalContext.new(context)
-    @values = JrcServiceDesk::Input.attributes(parameters, %w[kind unit_id page per_page status query owner_account_user_id])
+    @values = JrcServiceDesk::Input.attributes(parameters, %w[kind unit_id operator_company_id page per_page status query owner_account_user_id])
   end
 
   def call
@@ -24,8 +24,16 @@ class JrcServiceDesk::OperationsBoardQuery
 
   def records(model, kind)
     rows = Pundit.policy_scope!(@context.to_h, model)
+    units = @context.unit_scope
+    if @values['operator_company_id']
+      company_id = JrcServiceDesk::Input.id(@values['operator_company_id'])
+      raise ActiveRecord::RecordNotFound unless units.exists?(operator_company_id: company_id)
+
+      units = units.where(operator_company_id: company_id)
+      rows = rows.where(unit_id: units.select(:id))
+    end
     if @values['unit_id']
-      unit = @context.unit_scope.find(JrcServiceDesk::Input.id(@values['unit_id']))
+      unit = units.find(JrcServiceDesk::Input.id(@values['unit_id']))
       rows = rows.where(unit_id: unit.id)
     end
     rows = rows.where(resource_kind: kind == 'problems' ? 'problem' : 'incident') if model == JrcServiceDesk::Incident

@@ -12,6 +12,7 @@ import { contextPayload, identity, collection, ticket, detail, deferred, httpErr
 const holder = vi.hoisted(() => ({ session: null }));
 vi.mock('../composables/useServiceDesk', () => ({ useServiceDesk: () => holder.session }));
 import TicketFormView from '../views/TicketFormView.vue';
+import sourceMessages from 'dashboard/i18n/locale/en/jrcServiceDesk.json';
 import Lookup from '../components/LookupSelect.vue';
 
 // Test-only HTTP transport; application never imports these synthetic records.
@@ -70,7 +71,8 @@ async function renderForm(writeClient) {
         createI18n({
           legacy: false,
           locale: 'pt_BR',
-          messages: { pt_BR: messages },
+          fallbackLocale: 'en',
+          messages: { pt_BR: messages, en: sourceMessages },
         }),
         createStore({
           getters: { 'accounts/isFeatureEnabledonAccount': () => () => false },
@@ -99,6 +101,16 @@ describe('CP4 native Vue create/readback wiring (execution pending)', () => {
     expect(wrapper.text()).not.toContain(messages.JRC_SERVICE_DESK.OPS.STATUS.confirmed);
     read.resolve(detail(ticket({ title: 'Native Vue fixture', description: '', lock_version: 0 })));
     await flushPromises();
+    expect(router.currentRoute.value.name).toBe(serviceDeskRouteName('new'));
+    expect(
+      wrapper.find('[data-testid="ticket-created-receipt"]').exists()
+    ).toBe(true);
+    expect(wrapper.find('[data-testid="ticket-protocol"]').text()).toContain(
+      'TEST-20'
+    );
+    expect(create).toHaveBeenCalledTimes(1);
+    await wrapper.find('[data-testid="open-created-ticket"]').trigger('click');
+    await flushPromises();
     expect(router.currentRoute.value.name).toBe(serviceDeskRouteName('detail'));
     expect(router.currentRoute.value.params.ticketId).toBe('20');
   });
@@ -108,5 +120,70 @@ describe('CP4 native Vue create/readback wiring (execution pending)', () => {
     expect(router.currentRoute.value.name).toBe(serviceDeskRouteName('new'));
     expect(wrapper.text()).toContain(messages.JRC_SERVICE_DESK.OPS.STATUS.invalid_input);
     expect(holder.session.operations.mutation('ticket:form:write').ticket).toBeNull();
+  });
+  it('keeps an unconfirmed creation out of the success receipt when GET fails', async () => {
+    const router = await renderForm({
+      create: async () => ({
+        contract_version: 1,
+        account_id: '1',
+        ticket_id: '20',
+        operation: 'create',
+        applied: true,
+      }),
+      ticket: async () => {
+        throw httpError(500);
+      },
+    });
+    await wrapper.find('form').trigger('submit');
+    await flushPromises();
+    expect(
+      wrapper.find('[data-testid="ticket-created-receipt"]').exists()
+    ).toBe(false);
+    expect(holder.session.operations.mutation('ticket:form:write').status).toBe(
+      'readback_pending'
+    );
+    expect(router.currentRoute.value.name).toBe(serviceDeskRouteName('new'));
+  });
+
+  it('displays automatic routing honestly and honors a subsequently selected agent', async () => {
+    const create = vi.fn(async () => ({
+      contract_version: 1,
+      account_id: '1',
+      ticket_id: '20',
+      operation: 'create',
+      applied: true,
+    }));
+    await renderForm({
+      create,
+      ticket: async () =>
+        detail(
+          ticket({
+            title: 'Native Vue fixture',
+            description: '',
+            lock_version: 0,
+            assignee: { id: '7', name: 'Selected agent' },
+          })
+        ),
+    });
+    await wrapper.findAll('.sd-wizard-step')[1].trigger('click');
+    await flushPromises();
+    const agent = wrapper
+      .findAllComponents(Lookup)
+      .find(item => item.props('resource') === 'assignees');
+    await agent.find('select').setValue('7');
+    const automatic = wrapper.find('input[type="checkbox"]');
+    await automatic.setValue(true);
+    await flushPromises();
+    expect(agent.props('modelValue')).toBe('');
+    await agent.find('select').setValue('7');
+    await flushPromises();
+    expect(automatic.element.checked).toBe(false);
+    await wrapper.findAll('.sd-wizard-step')[3].trigger('click');
+    await wrapper.find('form').trigger('submit');
+    await flushPromises();
+    expect(create.mock.calls[0][1].ticket.assignee_account_user_id).toBe('7');
+    expect(
+      wrapper.find('[data-testid="ticket-created-receipt"]').text()
+    ).toContain('Selected agent');
   });
 });

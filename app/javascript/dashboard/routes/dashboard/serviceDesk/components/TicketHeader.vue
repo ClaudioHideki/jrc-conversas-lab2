@@ -2,6 +2,7 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { formatTimestamp } from '../helpers/presentation';
+import TicketProtocol from './TicketProtocol.vue';
 
 const props = defineProps({ ticket: { type: Object, required: true } });
 const { t, locale } = useI18n();
@@ -51,9 +52,8 @@ const slaStates = computed(() => ({
   <header
     class="sticky top-0 z-10 grid gap-2 rounded-lg border border-n-weak bg-n-solid-1 p-4 mb-4"
   >
-    <h2 class="text-lg font-semibold">
-      {{ ticket.number || ticket.id }} {{ ticket.title }}
-    </h2>
+    <TicketProtocol :ticket="ticket" />
+    <h2 class="break-words text-lg font-semibold">{{ ticket.title }}</h2>
     <dl class="flex flex-wrap gap-x-6 gap-y-2 text-sm">
       <div v-for="field in fields" :key="field.label" class="grid gap-1">
         <dt class="text-xs text-n-slate-11">{{ field.label }}</dt>

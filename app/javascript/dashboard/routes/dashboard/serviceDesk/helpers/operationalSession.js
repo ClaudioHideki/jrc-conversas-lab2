@@ -304,6 +304,9 @@ export function createOperationalSession(
     write,
     clear,
     cancel,
+    dismissConfirmation: key => {
+      if (state.writes[key]?.status === 'confirmed') delete state.writes[key];
+    },
     resource: key => state.reads[key] || { status: 'idle', data: null },
     mutation: key => state.writes[key] || { status: 'idle', ticket: null },
   };

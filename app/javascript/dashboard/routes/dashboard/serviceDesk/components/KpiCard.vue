@@ -1,12 +1,27 @@
 <script setup>
 import { useI18n } from 'vue-i18n';
 import Icon from 'dashboard/components-next/icon/Icon.vue';
-defineProps({ label: { type: String, required: true }, icon: { type: String, default: 'i-lucide-chart-no-axes-combined' }, value: { type: Number, default: null, validator: value => value === null || (Number.isSafeInteger(value) && value >= 0) } });
+defineProps({
+  interactive: { type: Boolean, default: false },
+  label: { type: String, required: true },
+  icon: { type: String, default: 'i-lucide-chart-no-axes-combined' },
+  value: {
+    type: Number,
+    default: null,
+    validator: value =>
+      value === null || (Number.isSafeInteger(value) && value >= 0),
+  },
+});
+defineEmits(['activate']);
 const { t } = useI18n();
 </script>
 <template>
-  <section
-    class="sd-kpi"
+  <component
+    :is="interactive ? 'button' : 'section'"
+    :type="interactive ? 'button' : undefined"
+    class="sd-kpi text-start focus-visible:ring-2 focus-visible:ring-n-blue-9"
+    :class="interactive ? 'cursor-pointer hover:border-n-blue-8' : ''"
+    @click="interactive && $emit('activate')"
     :title="t('JRC_SERVICE_DESK.OVERVIEW.kpi_help')"
     :aria-label="`${label}: ${value === null ? t('JRC_SERVICE_DESK.OVERVIEW.kpi_label') : value}`"
   >
@@ -22,5 +37,5 @@ const { t } = useI18n();
     <span class="text-xs text-n-slate-11">
       {{ t(value === null ? 'JRC_SERVICE_DESK.COMMON.not_available' : 'JRC_SERVICE_DESK.OPS.real_count') }}
     </span>
-  </section>
+  </component>
 </template>

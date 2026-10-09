@@ -1,9 +1,14 @@
 <script setup>
-import { reactive, ref, watch } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Button from 'dashboard/components-next/button/Button.vue';
 import Pagination from 'dashboard/components-next/pagination/PaginationFooter.vue';
 import API from 'dashboard/api/serviceDeskOperationalRules';
+import LookupSelect from './LookupSelect.vue';
+import ServiceSelect from './ServiceDefinitionSelect.vue';
+import CompanyPicker from 'dashboard/routes/dashboard/jrcCustomers/components/CompanyPicker.vue';
+import { useCustomerMaster } from 'dashboard/routes/dashboard/jrcCustomers/useCustomerMaster';
+import { namedReportValue } from '../helpers/screenExperience.js';
 import Panel from './ServiceDeskPanel.vue';
 import ScopeBar from './ScopeBar.vue';
 import TicketTable from './TicketTable.vue';
@@ -16,6 +21,8 @@ import {
 import { decodeRecord } from '../helpers/contracts';
 const emit = defineEmits(['open']);
 const { t } = useI18n();
+const { canAccess: masterAllowed } = useCustomerMaster();
+const advanced = ref(false);
 const unitId = ref('');
 const operatorId = ref('');
 const scope = useOperationalScope(
@@ -34,6 +41,13 @@ const fields = [
 ];
 const filters = reactive(Object.fromEntries(fields.map(key => [key, ''])));
 const result = ref(null);
+const customerAllowed = computed(
+  () =>
+    masterAllowed.value &&
+    scope.session.state.context?.effective_permissions?.includes(
+      'jrc_service_desk_customers_view'
+    )
+);
 const busy = ref(false);
 const feedback = ref('');
 const page = ref(1);
@@ -123,6 +137,32 @@ const exportCsv = async () => {
     if (scope.live(lease)) busy.value = false;
   }
 };
+function dimensionName(dimension, value) {
+  const name = namedReportValue(
+    dimension,
+    value,
+    result.value?.items || [],
+    scope.session.state.context,
+    unitId.value
+  );
+  return (
+    name ||
+    (value === null
+      ? t('JRC_SERVICE_DESK.COMMON.no_value')
+      : t('JRC_SERVICE_DESK.EXPERIENCE.reference', { id: value }))
+  );
+}
+function drilldown(dimension, value) {
+  const field = {
+    by_service: 'service_id',
+    by_category: 'category_id',
+    by_priority: 'priority_id',
+    by_customer: 'company_id',
+  }[dimension];
+  if (!field || value === null || busy.value) return;
+  filters[field] = String(value);
+  load(1);
+}
 </script>
 
 <template>
@@ -143,21 +183,76 @@ const exportCsv = async () => {
       class="grid gap-3 md:grid-cols-2"
       @submit.prevent="load(1)"
     >
+      <ServiceSelect
+        v-model="filters.service_id"
+        :unit-id="unitId"
+        :disabled="busy || !scope.allowed.value"
+      />
+      <div
+        v-if="customerAllowed"
+        class="grid gap-1"
+      >
+        <span class="text-sm">{{
+          t('JRC_SERVICE_DESK.COMPLETION.fields.company_id')
+        }}</span
+        ><CompanyPicker
+          :key="scope.identity.value"
+          :model-value="filters.company_id || null"
+          :disabled="busy || !scope.allowed.value"
+          @update:model-value="
+            filters.company_id = $event ? String($event) : ''
+          "
+        />
+      </div>
+      <LookupSelect
+        v-model="filters.category_id"
+        resource="categories"
+        :unit-id="unitId"
+        :disabled="busy"
+        :label="t('JRC_SERVICE_DESK.FIELDS.category')"
+      />
+      <LookupSelect
+        v-model="filters.priority_id"
+        resource="priorities"
+        :unit-id="unitId"
+        :disabled="busy"
+        :label="t('JRC_SERVICE_DESK.FIELDS.priority')"
+      />
       <label
-        v-for="field in fields"
+        v-for="field in ['from', 'to']"
         :key="field"
         class="grid gap-1 text-sm"
-      >
-        <span>{{ t(`JRC_SERVICE_DESK.COMPLETION.fields.${field}`) }}</span>
-        <input
+        >{{ t(`JRC_SERVICE_DESK.COMPLETION.fields.${field}`)
+        }}<input
           v-model="filters[field]"
           :disabled="busy"
-          :placeholder="
-            ['from', 'to'].includes(field) ? '2026-10-09T00:00:00-03:00' : ''
-          "
+          :placeholder="t('JRC_SERVICE_DESK.EXPERIENCE.timestamp_hint')"
           class="rounded border border-n-weak bg-n-solid-1 p-2"
-        />
-      </label>
+      /></label>
+      <details
+        class="md:col-span-2 rounded-xl border border-n-weak p-3"
+        :open="advanced"
+        @toggle="advanced = $event.target.open"
+      >
+        <summary class="cursor-pointer text-sm">
+          {{ t('JRC_SERVICE_DESK.EXPERIENCE.advanced_filters') }}
+        </summary>
+        <p class="text-xs text-n-slate-11 my-2">
+          {{ t('JRC_SERVICE_DESK.EXPERIENCE.advanced_filters_notice') }}
+        </p>
+        <div class="grid gap-3 md:grid-cols-2">
+          <label
+            v-for="field in ['inbox_id', 'channel_type']"
+            :key="field"
+            class="grid gap-1 text-sm"
+            >{{ t(`JRC_SERVICE_DESK.COMPLETION.fields.${field}`)
+            }}<input
+              v-model="filters[field]"
+              :disabled="busy"
+              class="rounded border border-n-weak bg-n-solid-1 p-2"
+          /></label>
+        </div>
+      </details>
       <div class="flex flex-wrap gap-2 md:col-span-2">
         <Button
           type="submit"
@@ -207,10 +302,18 @@ const exportCsv = async () => {
               :key="row.id ?? 'missing'"
               class="flex justify-between gap-3"
             >
-              <span>{{
-                row.id ?? t('JRC_SERVICE_DESK.COMPLETION.not_available')
-              }}</span
-              ><span>{{ row.count }}</span>
+              <button
+                type="button"
+                class="text-start text-n-blue-11 underline break-words"
+                :disabled="
+                  row.id === null ||
+                  busy ||
+                  ['by_unit', 'by_origin'].includes(dimension)
+                "
+                @click="drilldown(dimension, row.id)"
+              >
+                {{ dimensionName(dimension, row.id) }}</button
+              ><span class="tabular-nums">{{ row.count }}</span>
             </li>
           </ul>
           <p v-if="result.metrics[dimension]?.truncated">
@@ -276,6 +379,13 @@ const exportCsv = async () => {
           </tbody>
         </table>
       </div>
+      <p
+        v-if="!result.items.length"
+        role="status"
+        class="my-4 text-sm"
+      >
+        {{ t('JRC_SERVICE_DESK.COMMON.no_records') }}
+      </p>
       <TicketTable
         :items="result.items"
         @open="emit('open', $event)"

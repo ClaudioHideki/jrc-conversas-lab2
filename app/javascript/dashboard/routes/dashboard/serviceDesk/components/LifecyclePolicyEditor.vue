@@ -10,6 +10,8 @@ import ScopeBar from './ScopeBar.vue';
 import ServiceSelect from './ServiceDefinitionSelect.vue';
 import Panel from './ServiceDeskPanel.vue';
 import State from './ServiceDeskState.vue';
+import ClockThresholdEditor from './ClockThresholdEditor.vue';
+import LifecycleVisualEditor from './LifecycleVisualEditor.vue';
 import ClockAutomationFields from './ClockAutomationFields.vue';
 import { useServiceDesk } from '../composables/useServiceDesk';
 import {
@@ -344,12 +346,32 @@ onBeforeUnmount(() => {
         <p class="text-xs">
           {{ t('JRC_SERVICE_DESK.LIFECYCLE.version', { version }) }}
         </p>
-        <TextArea
+        <LifecycleVisualEditor
           v-model="definition"
-          :disabled="saving"
-          :max-length="100000"
-          resize
-          :label="t('JRC_SERVICE_DESK.LIFECYCLE.json_definition')"
+          :unit-id="unitId"
+          :disabled="saving || !unitId"
+        />
+        <details class="rounded-xl border border-n-weak p-3">
+          <summary class="text-sm font-medium cursor-pointer">
+            {{ t('JRC_SERVICE_DESK.EXPERIENCE.advanced_json') }}
+          </summary>
+          <p class="text-xs text-n-slate-11 my-2">
+            {{ t('JRC_SERVICE_DESK.EXPERIENCE.designer.advanced_notice') }}
+          </p>
+          <TextArea
+            v-model="definition"
+            :disabled="saving"
+            :max-length="100000"
+            resize
+            :label="t('JRC_SERVICE_DESK.LIFECYCLE.json_definition')"
+          />
+        </details>
+        <ClockThresholdEditor
+          v-if="slaMonitoring"
+          :model-value="slaMonitoring"
+          :unit-id="unitId"
+          :disabled="saving || !unitId"
+          @update:model-value="updateSlaMonitoring"
         />
         <ClockAutomationFields
           v-if="slaMonitoring"

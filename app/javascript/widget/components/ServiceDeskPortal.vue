@@ -48,6 +48,7 @@ const articles = ref([]);
 const knowledgeBusy = ref(false);
 const status = ref('idle');
 const feedback = ref('');
+const copied = ref(false);
 const busy = ref(false);
 const selected = computed(() =>
   services.value.find(row => row.id === serviceId.value)
@@ -95,6 +96,7 @@ const clearPublished = () => {
   services.value = [];
   tickets.value = [];
   detail.value = null;
+  copied.value = false;
   open.value = false;
   authorizedIdentity = undefined;
   busy.value = false;
@@ -192,6 +194,7 @@ const show = async ticket => {
   try {
     const payload = await API.ticket(websiteToken(), ticket.id, run.signal);
     if (!current(run)) return;
+    copied.value = false;
     detail.value = portalDetail(payload, ticket.id);
     conversationId.value = selectConversation(detail.value.conversations);
     status.value = 'ready';
@@ -341,6 +344,23 @@ const updateAnswer = (field, event) => {
   if (field.type === 'integer' && raw !== '') value = Number(raw);
   answers.value = { ...answers.value, [field.key]: value };
 };
+const copyProtocol = async () => {
+  const identity = API.identity();
+  const ticketId = detail.value?.ticket.id;
+  if (!API.hasIdentityProof() || !ticketId) return;
+  copied.value = false;
+  try {
+    await navigator.clipboard.writeText(String(ticketId));
+    if (
+      identity === API.identity() &&
+      ticketId === detail.value?.ticket.id &&
+      API.hasIdentityProof()
+    )
+      copied.value = true;
+  } catch {
+    if (identity === API.identity()) copied.value = false;
+  }
+};
 const close = () => {
   generation += 1;
   controller?.abort();
@@ -350,6 +370,7 @@ const close = () => {
   articles.value = [];
   open.value = false;
   detail.value = null;
+  copied.value = false;
   clearDraft();
   busy.value = false;
 };
@@ -403,8 +424,12 @@ onBeforeUnmount(() => {
   <section
     v-if="open"
     class="absolute inset-0 z-50 overflow-y-auto bg-n-background p-4 grid content-start gap-3"
+    :aria-busy="busy || status === 'loading'"
+    :aria-label="t('SERVICE_DESK.open')"
   >
-    <header class="flex justify-between items-center">
+    <header
+      class="sticky top-0 z-10 flex justify-between items-center gap-3 bg-n-background py-2 border-b border-n-weak"
+    >
       <h2>{{ t('SERVICE_DESK.open') }}</h2>
       <button type="button" :disabled="busy" @click="close">
         {{ t('SERVICE_DESK.close') }}
@@ -473,6 +498,18 @@ onBeforeUnmount(() => {
           {{ t('SERVICE_DESK.search') }}
         </button>
       </form>
+      <p
+        v-if="!tickets.length"
+        role="status"
+        class="rounded-lg border border-n-weak p-4 text-sm"
+      >
+        {{ t('SERVICE_DESK.EXPERIENCE.no_tickets') }}
+      </p>
+      <p v-else class="text-xs">
+        {{
+          t('SERVICE_DESK.EXPERIENCE.visible_count', { count: tickets.length })
+        }}
+      </p>
       <button
         v-for="ticket in tickets"
         :key="ticket.id"
@@ -605,17 +642,40 @@ onBeforeUnmount(() => {
       </form>
     </template>
     <template v-if="detail && status === 'ready'">
-      <h3>
-        {{ numberPrefix }}{{ detail.ticket.id }} {{ separator }}
-        {{ detail.ticket.title }} {{ separator }}
-        {{ detail.ticket.status }}
-      </h3>
+      <div class="grid gap-2 rounded-xl border border-n-weak bg-n-alpha-1 p-4">
+        <p class="text-xs">{{ t('SERVICE_DESK.EXPERIENCE.protocol') }}</p>
+        <div class="flex flex-wrap gap-2 justify-between">
+          <strong class="text-xl tabular-nums"
+            >{{ numberPrefix }}{{ detail.ticket.id }}</strong
+          ><button
+            type="button"
+            class="text-sm underline"
+            @click="copyProtocol"
+          >
+            {{
+              t(
+                copied
+                  ? 'SERVICE_DESK.EXPERIENCE.copied'
+                  : 'SERVICE_DESK.EXPERIENCE.copy'
+              )
+            }}
+          </button>
+        </div>
+        <h3 class="font-semibold break-words">{{ detail.ticket.title }}</h3>
+        <p class="text-xs">{{ detail.ticket.status }}</p>
+        <p v-if="copied" role="status" class="text-xs">
+          {{ t('SERVICE_DESK.EXPERIENCE.copied') }}
+        </p>
+      </div>
       <p class="text-sm whitespace-pre-wrap">{{ detail.ticket.description }}</p>
       <ServiceDeskPortalStatus
         :sla="detail.sla"
         :notifications="detail.notification_history"
         :surveys="detail.surveys"
       />
+      <p class="text-xs text-n-slate-11">
+        {{ t('SERVICE_DESK.EXPERIENCE.public_only') }}
+      </p>
       <template v-for="kind in ['notes', 'replies']" :key="kind">
         <article
           v-for="row in detail[kind]"

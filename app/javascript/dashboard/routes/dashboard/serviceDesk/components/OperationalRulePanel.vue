@@ -240,6 +240,7 @@ const publish = async () => {
           v-for="(_, index) in rows"
           :key="index"
           v-model="rows[index]"
+          :unit-id="unitId"
           :kind="kind"
           :disabled="busy"
           @remove="rows.splice(index, 1)"

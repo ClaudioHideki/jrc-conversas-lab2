@@ -1,6 +1,6 @@
 /* global axios */
-import { canonicalId } from '../routes/dashboard/serviceDesk/helpers/access';
-import { normalizeQuery } from '../routes/dashboard/serviceDesk/helpers/query';
+import { canonicalId } from '../routes/dashboard/serviceDesk/helpers/access.js';
+import { normalizeQuery } from '../routes/dashboard/serviceDesk/helpers/query.js';
 const id = value => {
   const result = canonicalId(value);
   if (!result) throw new TypeError('Invalid identifier');
@@ -34,6 +34,7 @@ export default {
         key =>
           ![
             'unit_id',
+            'operator_company_id',
             'page',
             'per_page',
             'status',

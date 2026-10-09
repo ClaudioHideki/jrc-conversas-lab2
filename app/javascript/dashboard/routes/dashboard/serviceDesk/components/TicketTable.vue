@@ -9,7 +9,18 @@ import { formatTimestamp } from '../helpers/presentation';
 defineProps({ items: { type: Array, default: () => [] } });
 const emit = defineEmits(['open', 'preview']);
 const { t, locale } = useI18n();
-const columns = ['number', 'title', 'requester', 'category', 'priority', 'status', 'sla', 'source', 'updated_at'];
+const columns = [
+  'number',
+  'title',
+  'requester',
+  'assignee',
+  'category',
+  'priority',
+  'status',
+  'sla',
+  'source',
+  'updated_at',
+];
 const headers = computed(() => [...columns.map(key => t(`JRC_SERVICE_DESK.FIELDS.${key}`)), t('JRC_SERVICE_DESK.COMMON.actions')]);
 const empty = () => t('JRC_SERVICE_DESK.COMMON.no_value');
 </script>
@@ -19,9 +30,18 @@ const empty = () => t('JRC_SERVICE_DESK.COMMON.no_value');
       <template #row>
         <BaseTableRow v-for="ticket in items" :key="ticket.id" :item="ticket">
           <BaseTableCell>
-            <span class="font-mono text-xs">
+            <button
+              type="button"
+              class="sd-text-link font-mono text-sm"
+              :aria-label="
+                t('JRC_SERVICE_DESK.CREATION.open_number', {
+                  number: ticket.number || ticket.id,
+                })
+              "
+              @click="emit('open', ticket.id)"
+            >
               {{ ticket.number || ticket.id }}
-            </span>
+            </button>
           </BaseTableCell>
           <BaseTableCell>
             <button type="button" class="sd-text-link max-w-72 text-start line-clamp-2" @click="emit('open', ticket.id)">
@@ -30,6 +50,11 @@ const empty = () => t('JRC_SERVICE_DESK.COMMON.no_value');
           </BaseTableCell>
           <BaseTableCell>
             {{ ticket.requester?.name || empty() }}
+          </BaseTableCell>
+          <BaseTableCell>
+            {{
+              ticket.assignee?.name || t('JRC_SERVICE_DESK.CREATION.unassigned')
+            }}
           </BaseTableCell>
           <BaseTableCell>{{ ticket.category?.name || empty() }}</BaseTableCell>
           <BaseTableCell>
