@@ -166,6 +166,8 @@ jobs:
 
       - name: Configurar Docker Buildx
         uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: image=mirror.gcr.io/moby/buildkit:v0.33.1@sha256:98cc6a3fc46220d00f8224ae483f3274fc874e9be8d7dd1e2e2c5481209228b5
 
       - name: Construir somente a imagem selecionada (inclui build frontend)
         uses: docker/build-push-action@v6
