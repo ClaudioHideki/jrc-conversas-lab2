@@ -11,6 +11,9 @@ import {
   date as formatDate,
 } from './definitions';
 import OperationsSettingsPanel from './OperationsSettingsPanel.vue';
+import PlaybookExecutionPanel from './PlaybookExecutionPanel.vue';
+import PlaybookDesignPreview from './PlaybookDesignPreview.vue';
+import PlaybookFlowPolicyForm from './PlaybookFlowPolicyForm.vue';
 const props = defineProps({
   screen: { type: String, default: 'settings' },
   allowed: Boolean,
@@ -25,6 +28,14 @@ const book = ref(null);
 const error = ref('');
 const busy = ref(false);
 const scopeKey = ref('account');
+const invalidFlowPolicy = ref(false);
+const ordinaryRules = computed(() =>
+  Object.fromEntries(
+    Object.entries(config.value?.rules || {}).filter(
+      ([key]) => key !== 'playbook_flow_policy'
+    )
+  )
+);
 const scopeOptions = computed(() => [
   ['account', t('RELATIONSHIP.ACCOUNT_SCOPE')],
   ...(props.metadata.segments || []).map(row => [
@@ -34,6 +45,14 @@ const scopeOptions = computed(() => [
   ...(props.metadata.products || []).map(row => [
     `product:${row[0]}`,
     `${t('RELATIONSHIP.FIELDS.product_id')}: ${row[1]}`,
+  ]),
+  ...(props.metadata.configuration_companies || []).map(row => [
+    `company:${row[0]}`,
+    `${t('RELATIONSHIP.FIELDS.customer')}: ${row[1]}`,
+  ]),
+  ...(props.metadata.units || []).map(row => [
+    `unit:${row[0]}`,
+    `${t('RELATIONSHIP.FIELDS.business_unit_id')}: ${row[1]}`,
   ]),
 ]);
 let generation = 0;
@@ -45,6 +64,7 @@ const load = async () => {
   book.value = null;
   error.value = '';
   busy.value = false;
+  invalidFlowPolicy.value = false;
   if (!props.allowed) return;
   busy.value = true;
   try {
@@ -64,7 +84,7 @@ const load = async () => {
   }
 };
 const save = async () => {
-  if (busy.value || !props.allowed) return;
+  if (busy.value || !props.allowed || invalidFlowPolicy.value) return;
   const version = generation;
   const accountId = route.params.accountId;
   busy.value = true;
@@ -94,7 +114,7 @@ const edit = row => {
     : {
         name: '',
         trigger_kind: 'onboarded',
-        active: true,
+        active: false,
         steps: [],
         conditions: [],
       };
@@ -210,7 +230,7 @@ const date = value => formatDate(value, props.metadata?.formatting);
       <h3 class="mb-3 mt-5 font-semibold">{{ t('RELATIONSHIP.RULES') }}</h3>
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <label
-          v-for="(_, key) in config.rules"
+          v-for="(_, key) in ordinaryRules"
           :key="key"
           class="text-sm"
           >{{ t(`RELATIONSHIP.RULE_LABELS.${key}`)
@@ -218,13 +238,46 @@ const date = value => formatDate(value, props.metadata?.formatting);
             v-if="typeof config.rules[key] === 'boolean'"
             v-model="config.rules[key]"
             type="checkbox"
-          /><input
+          /><select
+            v-else-if="key === 'missing_factor_policy'"
+            v-model="config.rules[key]"
+            :class="inputClass"
+          >
+            <option
+              v-for="policy in ['renormalize', 'neutral', 'block']"
+              :key="policy"
+              :value="policy"
+            >
+              {{ t(`RELATIONSHIP.MISSING_POLICIES.${policy}`) }}
+            </option></select
+          ><select
+            v-else-if="key === 'eligibility_mode'"
+            v-model="config.rules[key]"
+            :class="inputClass"
+          >
+            <option
+              v-for="mode in ['legacy_order', 'active_contract_product']"
+              :key="mode"
+              :value="mode"
+            >
+              {{ t(`RELATIONSHIP.ELIGIBILITY_MODES.${mode}`) }}
+            </option></select
+          ><input
             v-else-if="typeof config.rules[key] === 'number'"
             v-model.number="config.rules[key]"
             type="number"
             step="0.1"
             min="0.01"
             :class="inputClass"
+          /><input
+            v-else-if="key === 'renewal_window_days'"
+            :value="config.rules[key].join(', ')"
+            :class="inputClass"
+            @change="
+              config.rules[key] = $event.target.value
+                .split(',')
+                .map(value => Number(value.trim()))
+            "
           /><input
             v-else-if="Array.isArray(config.rules[key])"
             :value="config.rules[key].join(', ')"
@@ -242,11 +295,17 @@ const date = value => formatDate(value, props.metadata?.formatting);
           />
         </label>
       </div>
+      <PlaybookFlowPolicyForm
+        v-if="config.rules.playbook_flow_policy"
+        v-model="config.rules.playbook_flow_policy"
+        :disabled="busy"
+        @validity="invalidFlowPolicy = !$event"
+      />
       <button
         type="submit"
         :class="buttonClass"
         class="mt-5"
-        :disabled="busy"
+        :disabled="busy || invalidFlowPolicy"
       >
         {{ t('RELATIONSHIP.SAVE') }}
       </button>
@@ -347,6 +406,10 @@ const date = value => formatDate(value, props.metadata?.formatting);
           </button>
         </li>
       </ul>
+      <PlaybookExecutionPanel
+        v-if="metadata.playbook_versions_available"
+        :allowed="allowed"
+      />
       <form
         v-if="book"
         class="mt-4 rounded-xl border border-n-weak p-4"
@@ -398,13 +461,13 @@ const date = value => formatDate(value, props.metadata?.formatting);
         >
           <select
             v-model="condition.field"
+            :class="inputClass"
+            :aria-label="t('RELATIONSHIP.FIELDS.metric')"
             @change="
               condition.operator = 'eq';
               condition.value =
                 conditionReferences(condition.field)?.[0]?.[0] || 0;
             "
-            :class="inputClass"
-            :aria-label="t('RELATIONSHIP.FIELDS.metric')"
           >
             <option
               v-for="field in conditionFields"
@@ -511,6 +574,7 @@ const date = value => formatDate(value, props.metadata?.formatting);
             >{{ t('RELATIONSHIP.AFTER_DAYS')
             }}<input
               v-model.number="step.after_days"
+              :disabled="step.kind === 'flow'"
               type="number"
               min="0"
               max="365"
@@ -523,6 +587,10 @@ const date = value => formatDate(value, props.metadata?.formatting);
             {{ t('RELATIONSHIP.REMOVE_ITEM') }}
           </button>
         </div>
+        <PlaybookDesignPreview
+          :book="book"
+          @update-step="(index, step) => (book.steps[index] = step)"
+        />
         <button
           type="button"
           :class="buttonClass"

@@ -40,6 +40,8 @@
 #  fk_rails_...  (flow_id => jrc_flows.id)
 #
 class JrcFlowRun < ApplicationRecord
+  include JrcRelationship::PlaybookFlowScheduling
+
   belongs_to :flow, class_name: 'JrcFlow'
   belongs_to :account
   belongs_to :conversation

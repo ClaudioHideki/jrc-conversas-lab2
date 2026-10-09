@@ -1,0 +1,5 @@
+en:
+  jrc_nico:
+    helpdesk:
+      mailer_subject: JRC HelpDesk report
+      event_mailer_subject: HelpDesk alert available for review

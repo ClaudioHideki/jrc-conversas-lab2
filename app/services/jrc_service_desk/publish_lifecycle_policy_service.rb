@@ -22,6 +22,7 @@ class JrcServiceDesk::PublishLifecyclePolicyService < JrcServiceDesk::BaseServic
                else
                  validate_statuses!(rules, unit)
                end
+      validate_escalation_targets!(rules, unit)
       policy.name = text(values.fetch('name'))
       policy.enabled = values['enabled']
       policy.save!
@@ -36,6 +37,20 @@ class JrcServiceDesk::PublishLifecyclePolicyService < JrcServiceDesk::BaseServic
   end
 
   private
+
+  def validate_escalation_targets!(rules, unit)
+    policy = JrcServiceDesk::ClockEscalationPolicy.new(rules.definition.dig('sla', 'escalation_policy') || {})
+    JrcServiceDesk::ClockAutomationAuthority.verify!(policy, account: context.account, unit: unit)
+    policy.thresholds.each do |row|
+      next unless row['queue_id']
+
+      target = JrcServiceDesk::Queue.where(account_id: context.account.id, unit: unit, active: true)
+                                   .lock('FOR SHARE').find(row['queue_id'])
+      if row['team_id'] && (target.team_id != row['team_id'] || !Team.exists?(account_id: context.account.id, id: row['team_id']))
+        raise ArgumentError, 'Escalation team must match its active scoped queue'
+      end
+    end
+  end
 
   def validate_statuses!(rules, unit)
     ids = rules.definition['transitions'].flat_map { |r| r['from_status_ids'] + [r['to_status_id']] }

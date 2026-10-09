@@ -2,7 +2,7 @@
 class JrcNico::DomainAccess
   RESOURCE_TYPES = %w[JrcRelationship::Assignment JrcRelationship::HealthSnapshot JrcRelationship::Action JrcRelationship::RiskCase
                       JrcRelationship::SuccessPlan JrcRelationship::Qbr JrcServiceDesk::Ticket JrcServiceDesk::TicketNote JrcServiceDesk::LifecycleTransition
-                      JrcRelationship::Survey JrcCrm::Invoice CsatSurveyResponse Conversation Message Call
+                      JrcRelationship::Survey JrcCrm::Invoice CsatSurveyResponse Contact Conversation Message Call
                       JrcServiceDesk::TicketEvent JrcProjects::AuditEvent
                       JrcProjects::Project JrcProjects::Task JrcOperations::Link JrcCrm::SalesOrder
                       JrcCrm::Contract JrcCrm::SalesCommission JrcCrm::BackofficeRequest
@@ -12,7 +12,9 @@ class JrcNico::DomainAccess
                       JrcNico::ServiceTicketLifecycle JrcNico::ServiceTicketSla JrcNico::ServiceTicketCustomer
                       JrcNico::ServiceTicketNotes JrcNico::ServiceTicketConversations JrcNico::ProjectTasks Team
                       JrcServiceDesk::Unit JrcServiceDesk::OperatorCompany JrcServiceDesk::Queue
-                      JrcServiceDesk::Priority JrcServiceDesk::Category JrcServiceDesk::TicketStatus].freeze
+                      JrcServiceDesk::Priority JrcServiceDesk::Category JrcServiceDesk::TicketStatus
+                      JrcServiceDesk::TicketTask JrcServiceDesk::TicketApproval JrcServiceDesk::Incident
+                      JrcNico::KnowledgeDocument].freeze
 
   def initialize(access)
     @access = access.authorize!
@@ -61,30 +63,29 @@ class JrcNico::DomainAccess
 
   def self.authorize_resource!(access, type, id)
     domain = new(access)
+    reader = JrcNico::ProtectedResourceReader.new(access, domain)
+    return reader.authorize!(type, id) if reader.supported?(type)
+
     case type
-    when 'JrcRelationship::Survey', 'JrcCrm::Invoice', 'CsatSurveyResponse', 'Conversation', 'Message', 'Call',
-         'JrcServiceDesk::TicketEvent', 'JrcProjects::AuditEvent'
-      keys = { 'JrcRelationship::Survey' => 'surveys', 'JrcCrm::Invoice' => 'invoices', 'CsatSurveyResponse' => 'csat',
-        'Conversation' => 'conversations', 'Message' => 'messages', 'Call' => 'calls',
-        'JrcServiceDesk::TicketEvent' => 'ticket_events', 'JrcProjects::AuditEvent' => 'project_events' }
-      JrcRelationship::SnapshotAccess.sources(JrcRelationship::Context.new(access.membership)).fetch(keys.fetch(type)).find(id)
+    when 'Contact' then access.contact(id)
+    when 'JrcNico::KnowledgeDocument'
+      JrcNico::KnowledgeDocument.where(account: access.account).approved.find(id)
     when 'JrcRelationship::Assignment'
       JrcRelationship::Context.new(access.membership).assignment(id)
     when 'JrcRelationship::Action', 'JrcRelationship::RiskCase', 'JrcRelationship::SuccessPlan', 'JrcRelationship::Qbr'
       model = { 'JrcRelationship::Action' => JrcRelationship::Action, 'JrcRelationship::RiskCase' => JrcRelationship::RiskCase,
-        'JrcRelationship::SuccessPlan' => JrcRelationship::SuccessPlan, 'JrcRelationship::Qbr' => JrcRelationship::Qbr }.fetch(type)
+                'JrcRelationship::SuccessPlan' => JrcRelationship::SuccessPlan, 'JrcRelationship::Qbr' => JrcRelationship::Qbr }.fetch(type)
       JrcRelationship::Context.new(access.membership).records(model).find(id)
     when 'JrcRelationship::HealthSnapshot'
       ctx = JrcRelationship::Context.new(access.membership)
       relation = JrcRelationship::HealthSnapshot.where(account_id: access.account.id, viewer_id: access.user.id,
-        assignment_id: ctx.assignments.select(:id), access_signature: ctx.access_signature)
-      snapshot = JrcRelationship::SnapshotAccess.scope(ctx, relation).find(id)
-      snapshot
+                                                       assignment_id: ctx.assignments.select(:id), access_signature: ctx.access_signature)
+      JrcRelationship::SnapshotAccess.scope(ctx, relation).find(id)
+
     when 'JrcNico::ServiceDeskContext', 'JrcNico::ServiceDeskLookup', 'JrcNico::ServiceDeskRequesters', 'JrcNico::ServiceDeskTeams'
       raise Pundit::NotAuthorizedError unless id.to_i == access.account.id && domain.available?('service_desk')
-      unless type == 'JrcNico::ServiceDeskContext'
-        Pundit.authorize(domain.context, :lookup, :index?, policy_class: JrcServiceDesk::LookupPolicy)
-      end
+
+      Pundit.authorize(domain.context, :lookup, :index?, policy_class: JrcServiceDesk::LookupPolicy) unless type == 'JrcNico::ServiceDeskContext'
       if type == 'JrcNico::ServiceDeskRequesters'
         raise Pundit::NotAuthorizedError unless JrcServiceDesk::OperationalContext.new(domain.context).capability?(:customers_view)
 
@@ -127,10 +128,6 @@ class JrcNico::DomainAccess
       record = Pundit.policy_scope!(domain.context, model).find(id)
       Pundit.authorize(domain.context, record, :show?)
     when 'JrcServiceDesk::Ticket' then domain.ticket(id)
-    when 'JrcServiceDesk::TicketNote'
-      record = JrcServiceDesk::TicketNote.where(account_id: access.account.id).find(id)
-      domain.ticket(record.ticket_id)
-      Pundit.authorize(domain.context, record, :show?)
     when 'JrcServiceDesk::LifecycleTransition'
       record = JrcServiceDesk::LifecycleTransition.where(account_id: access.account.id).find(id)
       ticket = domain.ticket(record.ticket_id)

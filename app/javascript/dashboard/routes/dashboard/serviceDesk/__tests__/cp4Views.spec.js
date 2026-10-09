@@ -24,11 +24,14 @@ afterEach(() => { wrapper?.unmount(); holder.session?.operations.clear(); holder
 async function renderForm(writeClient) {
   vi.stubGlobal('crypto', { randomUUID: () => 'cp4-view-test-key' });
   const p = contextPayload(); p.units[0].initial_status = { id: '1', name: 'Configured initial fixture' };
+  p.capabilities.contracts = { index: true };
   const client = { context: async () => p, list: async (_account, resource) => {
       const ids = {
         requesters: '33',
         priorities: '2',
         categories: '4',
+        ticket_types: '5',
+        contracts: '9',
         teams: '8',
         assignees: '7',
         queues: '6',
@@ -40,6 +43,13 @@ async function renderForm(writeClient) {
           unit_id: '10',
           permissions: { show: true },
           name: `Fixture ${resource}`,
+          ...(['categories', 'ticket_types'].includes(resource)
+            ? { form_fields: [] }
+            : {}),
+          ...(resource === 'categories' ? { parent_id: null } : {}),
+          ...(resource === 'contracts'
+            ? { contact_id: '33', company_id: null }
+            : {}),
         },
       ]);
   } };

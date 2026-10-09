@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Pesquisa de relacionamento</title></head>
+<body>
+  <h1><%= @survey.definition_snapshot['name'].presence || 'Pesquisa de relacionamento' %></h1>
+  <%= form_with url: request.path, local: true do %>
+    <% @survey.questions.each do |question| %>
+      <div data-survey-question="<%= question['key'] %>" data-required="<%= question['required'] %>" data-condition="<%= question['condition']&.to_json %>">
+        <label for="answer_<%= question['key'] %>"><%= question['text'] %></label>
+        <% required = question['required'] && !question['condition'] %>
+        <% if question['type'] == 'scale' %>
+          <%= number_field_tag "answers[#{question['key']}]", nil, id: "answer_#{question['key']}", min: question['min'], max: question['max'], required: required %>
+          <span><%= question['min'] %> – <%= question['max'] %></span>
+        <% elsif question['type'] == 'choice' %>
+          <%= select_tag "answers[#{question['key']}]", options_for_select(question['options'].map { |option| [option['label'], option['value']] }), id: "answer_#{question['key']}", include_blank: true, required: required %>
+        <% else %>
+          <%= text_area_tag "answers[#{question['key']}]", nil, id: "answer_#{question['key']}", maxlength: 4000, required: required %>
+        <% end %>
+      </div>
+    <% end %>
+    <label for="comment">Comentário</label><%= text_area_tag :comment, nil, maxlength: 4000 %>
+    <%= submit_tag 'Enviar resposta' %>
+  <% end %>
+  <%= javascript_tag nonce: true do %>
+    const updateSurveyConditions = () => {
+      document.querySelectorAll('[data-condition]').forEach(row => {
+        if (!row.dataset.condition) return;
+        const condition = JSON.parse(row.dataset.condition);
+        const previousField = document.getElementById(`answer_${condition.question}`);
+        const previous = previousField && !previousField.disabled ? previousField.value : '';
+        const visible = previous !== '' && (condition.operator === 'eq' ? String(previous) === String(condition.value) :
+          condition.operator === 'lte' ? Number(previous) <= Number(condition.value) : Number(previous) >= Number(condition.value));
+        row.hidden = !visible;
+        row.querySelectorAll('input, select, textarea').forEach(field => { field.disabled = !visible; field.required = visible && row.dataset.required === 'true'; });
+      });
+    };
+    document.addEventListener('input', updateSurveyConditions);
+    updateSurveyConditions();
+  <% end %>
+</body>
+</html>

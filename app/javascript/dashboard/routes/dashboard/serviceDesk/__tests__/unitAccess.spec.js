@@ -59,6 +59,9 @@ const membership = active => ({
   unit_id: '5',
   account_user_id: '25',
   active,
+  availability: 'unavailable',
+  capacity: null,
+  skills: [],
 });
 let persisted;
 const directory = () => ({

@@ -18,6 +18,9 @@ class JrcFlows::RecoveryJob < ApplicationJob
     JrcFlowRun.where(status: %w[waiting delayed]).where('wake_at <= ?', Time.current).find_each do |run|
       JrcFlows::ResumeJob.perform_later(run.id, run.wake_version)
     end
+    JrcFlowRun.where(status: 'waiting').where('settings ? :key', key: JrcRelationship::PlaybookFlowWebhookJournal::KEY).find_each do |run|
+      JrcRelationship::PlaybookFlowWebhookDelivery.recover(run) if JrcRelationship::PlaybookFlowContinuation.managed?(run)
+    end
     JrcFlowRun.where(status: 'running').where('created_at < ?', 2.minutes.ago).find_each do |run|
       JrcFlows::ResumeJob.perform_later(run.id)
     end

@@ -2,6 +2,13 @@
 
 # Closed resource whitelist; only the five already-authorized unit catalogues.
 class Api::V1::Accounts::JrcServiceDesk::ConfigurationController < Api::V1::Accounts::JrcServiceDesk::OperationsController
+  def portal_options
+    values = ::JrcServiceDesk::Input.attributes(query_values, %w[unit_id inbox_id])
+    unit = policy_scope(::JrcServiceDesk::Unit).find(::JrcServiceDesk::Input.id(values.fetch('unit_id')))
+    authorize ::JrcServiceDesk::Service.new(account: Current.account, unit: unit), :update?
+    render json: ::JrcServiceDesk::PortalConfigurationOptions.new(user_context: pundit_user).call(unit_id: unit.id, inbox_id: values['inbox_id'])
+  end
+
   def index
     authorize resource_model, :manage_index?
     values = ::JrcServiceDesk::Input.attributes(query_values, %w[unit_id q page per_page active])

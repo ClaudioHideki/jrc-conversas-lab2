@@ -10,12 +10,19 @@ import PortfolioTable from './PortfolioTable.vue';
 import RecordEditor from './RecordEditor.vue';
 import CustomerPanel from './CustomerPanel.vue';
 import ConfigurationPanel from './ConfigurationPanel.vue';
+import SurveyAdministrationPanel from './SurveyAdministrationPanel.vue';
+import HandoffPanel from './HandoffPanel.vue';
+import SurveyResponseBox from './SurveyResponseBox.vue';
+import SurveyReportFilters from './SurveyReportFilters.vue';
+import SurveyReportSummary from './SurveyReportSummary.vue';
+import SurveyPreparationPanel from './SurveyPreparationPanel.vue';
 import SlaSummary from './SlaSummary.vue';
 import SurveyDeliveryPanel from './SurveyDeliveryPanel.vue';
 import HealthScorePanel from './HealthScorePanel.vue';
 import RenewalPipeline from './RenewalPipeline.vue';
 import MetricDrilldownPanel from './MetricDrilldownPanel.vue';
 import CompanyPicker from '../jrcCustomers/components/CompanyPicker.vue';
+import { fixedSurveyScope as normalizeFixedSurveyScope } from './fixedSurveyScope';
 import {
   STATES,
   buttonClass,
@@ -24,7 +31,10 @@ import {
   message,
   money as formatMoney,
 } from './definitions';
-const props = defineProps({ screen: { type: String, required: true } });
+const props = defineProps({
+  screen: { type: String, required: true },
+  fixedSurveyScope: { type: Object, default: null },
+});
 const route = useRoute();
 const router = useRouter();
 const store = useStore();
@@ -43,6 +53,8 @@ const selected = ref([]);
 const newAssignment = ref(false);
 const surveyLink = ref('');
 const surveyDelivery = ref(null);
+const surveyPreparation = ref(null);
+const commercialContacts = ref([]);
 const opportunity = ref(null);
 const drilldown = ref(null);
 const batchMode = ref(false);
@@ -61,6 +73,7 @@ const filters = reactive({
   overdue: false,
   from: '',
   to: '',
+  period_basis: 'response',
   score_min: '',
   score_max: '',
   mrr_min_cents: '',
@@ -71,6 +84,16 @@ const filters = reactive({
   renewal_window: '',
   factor: '',
   factor_direction: '',
+  classification: '',
+  treatment_status: '',
+  source_type: '',
+  unit_id: '',
+  channel: '',
+  definition_id: '',
+  rule_id: '',
+  contract_id: '',
+  portfolio_owner_id: '',
+  portfolio_status: '',
 });
 const portfolioOperation = reactive({
   operation: 'activity',
@@ -94,12 +117,15 @@ const batch = reactive({
   priority: '',
   owner_id: '',
 });
-const commercial = reactive({ pipeline_id: '', stage_id: '' });
+const commercial = reactive({ pipeline_id: '', stage_id: '', contact_id: '' });
 const portfolioScreen = computed(() =>
   ['overview', 'portfolio', 'health', 'reports'].includes(props.screen)
 );
 const configScreen = computed(() =>
   ['settings', 'playbooks'].includes(props.screen)
+);
+const dedicatedScreen = computed(() =>
+  ['survey_admin', 'handoffs'].includes(props.screen)
 );
 const stageOptions = computed(
   () =>
@@ -114,7 +140,9 @@ const scope = () => ({
     )
   ),
   assignment_id: route.query.assignment_id || undefined,
+  record_id: route.query.record_id || undefined,
   page: pagination.value.page,
+  ...normalizeFixedSurveyScope(props.fixedSurveyScope, props.screen),
 });
 let generation = 0;
 let controller;
@@ -131,10 +159,28 @@ const load = async () => {
   drilldown.value = null;
   selected.value = [];
   try {
+    const fixed = normalizeFixedSurveyScope(
+      props.fixedSurveyScope,
+      props.screen
+    );
     const meta = await API.metadata(accountId, options);
     if (version !== generation) return;
     metadata.value = meta.data;
-    if (configScreen.value) return;
+    if (configScreen.value || dedicatedScreen.value) return;
+    if (fixed) {
+      const result = await API.records(
+        accountId,
+        props.screen,
+        scope(),
+        options
+      );
+      if (version !== generation) return;
+      rows.value = result.data.payload;
+      pagination.value = result.data.meta;
+      metrics.value = null;
+      customers.value = [];
+      return;
+    }
     const results = await Promise.all([
       API.dashboard(accountId, scope(), options),
       portfolioScreen.value
@@ -221,6 +267,25 @@ const convert = () =>
       commercial
     )
   );
+const chooseOpportunity = async row => {
+  const version = generation;
+  opportunity.value = row;
+  commercialContacts.value = [];
+  Object.assign(commercial, { pipeline_id: '', stage_id: '', contact_id: '' });
+  try {
+    const { data } = await API.workContext(
+      route.params.accountId,
+      row.assignment_id,
+      {},
+      { signal: controller.signal }
+    );
+    if (version === generation && opportunity.value?.id === row.id)
+      commercialContacts.value = data.contacts || [];
+  } catch (err) {
+    if (version === generation && err.code !== 'ERR_CANCELED')
+      error.value = message(err);
+  }
+};
 const completeBatch = () =>
   mutate(() =>
     API.batch(route.params.accountId, selected.value, {
@@ -245,17 +310,21 @@ const exportPortfolio = async (history = false) => {
   const version = generation;
   error.value = '';
   try {
-    const { data } = await (
-      history === true ? API.exportHistory : API.exportPortfolio
-    )(route.params.accountId, scope());
+    let exporter = history === true ? API.exportHistory : API.exportPortfolio;
+    let filename =
+      history === true
+        ? 'relationship-history.json'
+        : 'relationship-portfolio.csv';
+    if (props.screen === 'surveys') {
+      exporter = API.exportSurveyResponses;
+      filename = 'survey-responses.csv';
+    }
+    const { data } = await exporter(route.params.accountId, scope());
     if (version !== generation) return;
     const url = URL.createObjectURL(data);
     const link = document.createElement('a');
     link.href = url;
-    link.download =
-      history === true
-        ? 'relationship-history.json'
-        : 'relationship-portfolio.csv';
+    link.download = filename;
     link.click();
     URL.revokeObjectURL(url);
   } catch (err) {
@@ -413,7 +482,11 @@ watch(
     () => route.params.accountId,
     () => store.getters.getCurrentUserID,
     () => props.screen,
+    () => props.fixedSurveyScope,
+    () => props.fixedSurveyScope?.unit_id,
+    () => props.fixedSurveyScope?.source_type,
     () => route.query.assignment_id,
+    () => route.query.record_id,
     () => route.query.create,
     () => route.query.overdue,
     () => route.query.from,
@@ -446,14 +519,21 @@ watch(
       owner_id: '',
       team_id: '',
       business_unit_id: '',
+      exception_reason: '',
       settings: { segment_id: '', product_id: '', complexity: '' },
     });
     surveyLink.value = '';
     surveyDelivery.value = null;
+    surveyPreparation.value = null;
+    commercialContacts.value = [];
     filters.record_status = route.query.status || '';
     filters.overdue = route.query.overdue === 'true';
     filters.from = route.query.from || '';
     filters.to = route.query.to || '';
+    if (props.fixedSurveyScope) {
+      filters.source_type = props.fixedSurveyScope.source_type;
+      filters.unit_id = props.fixedSurveyScope.unit_id;
+    }
     [
       'owner_id',
       'agent_q',
@@ -518,6 +598,15 @@ const money = value => formatMoney(value, metadata.value?.formatting);
         >
           {{ t('RELATIONSHIP.EXPORT') }}</button
         ><button
+          v-if="metadata && screen === 'surveys'"
+          type="button"
+          :class="buttonClass"
+          :disabled="loading"
+          data-testid="export-survey-responses"
+          @click="exportPortfolio"
+        >
+          {{ t('RELATIONSHIP.EXPORT') }}</button
+        ><button
           v-if="metadata?.can_export_history && screen === 'reports'"
           :class="buttonClass"
           :disabled="saving"
@@ -527,8 +616,10 @@ const money = value => formatMoney(value, metadata.value?.formatting);
         ><button
           v-if="
             metadata?.can_manage &&
+            !fixedSurveyScope &&
             !portfolioScreen &&
             !configScreen &&
+            !dedicatedScreen &&
             screen !== 'renewals' &&
             (!['expansion'].includes(screen) || metadata.can_crm)
           "
@@ -567,6 +658,15 @@ const money = value => formatMoney(value, metadata.value?.formatting);
         :allowed="metadata.can_configure"
         :metadata="metadata"
       />
+      <SurveyAdministrationPanel
+        v-else-if="screen === 'survey_admin'"
+        :allowed="metadata.can_administer_surveys"
+        :metadata="metadata"
+      />
+      <HandoffPanel
+        v-else-if="screen === 'handoffs'"
+        :allowed="metadata.can_team"
+      />
       <template v-else>
         <form
           class="flex flex-wrap items-end gap-3 rounded-xl border border-n-weak p-4"
@@ -587,14 +687,16 @@ const money = value => formatMoney(value, metadata.value?.formatting);
             >
               <option value="">{{ t('RELATIONSHIP.AUTHORIZED') }}</option>
               <option
-                v-for="mode in [
-                  'mine',
-                  'unassigned',
-                  'team',
-                  'critical',
-                  'renewals',
-                  'expansion',
-                ]"
+                v-for="mode in screen === 'surveys'
+                  ? ['mine', 'unassigned']
+                  : [
+                      'mine',
+                      'unassigned',
+                      'team',
+                      'critical',
+                      'renewals',
+                      'expansion',
+                    ]"
                 :key="mode"
                 :value="mode"
               >
@@ -751,7 +853,19 @@ const money = value => formatMoney(value, metadata.value?.formatting);
               </select></label
             >
           </template>
-          <template v-if="['reports', 'actions', 'overview'].includes(screen)">
+          <SurveyReportFilters
+            v-if="screen === 'surveys'"
+            :filters="filters"
+            :metadata="metadata"
+            :report="pagination.survey_report || {}"
+            :fixed-scope="!!fixedSurveyScope"
+            @update="Object.assign(filters, $event)"
+          />
+          <template
+            v-if="
+              ['reports', 'actions', 'overview', 'surveys'].includes(screen)
+            "
+          >
             <label
               v-for="key in ['from', 'to']"
               :key="key"
@@ -920,6 +1034,18 @@ const money = value => formatMoney(value, metadata.value?.formatting);
               v-model="assignment.settings.complexity"
               :class="inputClass"
           /></label>
+          <label class="mt-3 block text-sm"
+            >{{ t('RELATIONSHIP.ELIGIBILITY_EXCEPTION_REASON')
+            }}<textarea
+              v-model="assignment.exception_reason"
+              maxlength="2000"
+              :class="inputClass"
+              data-testid="eligibility-exception-reason"
+            />
+            <span class="text-xs text-n-slate-11">{{
+              t('RELATIONSHIP.ELIGIBILITY_EXCEPTION_GUIDANCE')
+            }}</span></label
+          >
           <button
             type="submit"
             :class="buttonClass"
@@ -976,8 +1102,13 @@ const money = value => formatMoney(value, metadata.value?.formatting);
         <RenewalPipeline
           v-if="screen === 'renewals'"
           :windows="pagination.renewal_windows || {}"
+          :ranges="pagination.renewal_ranges || {}"
           :selected="filters.renewal_window"
           @filter="renewalFilter"
+        />
+        <SurveyReportSummary
+          v-if="screen === 'surveys' && pagination.survey_report"
+          :report="pagination.survey_report"
         />
         <NicoSummaryPanel
           v-if="screen === 'overview' && metrics"
@@ -1022,6 +1153,11 @@ const money = value => formatMoney(value, metadata.value?.formatting);
           :metadata="metadata"
           @changed="load"
           @close="selectedCustomer = null"
+        />
+        <SurveyPreparationPanel
+          v-if="surveyPreparation"
+          :survey="surveyPreparation"
+          @close="surveyPreparation = null"
         />
         <SurveyDeliveryPanel
           v-if="surveyDelivery"
@@ -1148,8 +1284,8 @@ const money = value => formatMoney(value, metadata.value?.formatting);
             <label class="text-sm"
               >{{ t('RELATIONSHIP.FIELDS.status')
               }}<select
-                data-testid="batch-status"
                 v-model="batch.status"
+                data-testid="batch-status"
                 :class="inputClass"
               >
                 <option value="">{{ t('RELATIONSHIP.KEEP_CURRENT') }}</option>
@@ -1361,6 +1497,20 @@ const money = value => formatMoney(value, metadata.value?.formatting);
                     </td>
                     <td class="p-3">
                       {{ money(row.commercial_context?.won_cents) }}
+                      <RouterLink
+                        v-for="result in row.commercial_context
+                          ?.commercial_returns || []"
+                        :key="result.contract_id"
+                        class="mt-1 block text-xs text-n-brand underline"
+                        :to="{
+                          name: 'crm_contracts',
+                          params: { accountId: route.params.accountId },
+                          query: { contractId: result.contract_id },
+                        }"
+                      >
+                        {{ t('RELATIONSHIP.COMMERCIAL_RETURN') }} ·
+                        {{ money(result.monthly_cents) }}
+                      </RouterLink>
                     </td>
                     <td class="p-3">
                       {{ row.owner_name || t('RELATIONSHIP.UNASSIGNED') }}
@@ -1369,7 +1519,14 @@ const money = value => formatMoney(value, metadata.value?.formatting);
                   <template v-else-if="screen === 'surveys'">
                     <td class="p-3">{{ row.kind.toUpperCase() }}</td>
                     <td class="p-3">{{ row.score ?? '—' }}</td>
-                    <td class="p-3">{{ row.comment || '—' }}</td>
+                    <td class="p-3">
+                      {{ row.comment || '—'
+                      }}<SurveyResponseBox
+                        :survey="row"
+                        :can-manage="metadata.can_manage"
+                        @changed="load"
+                      />
+                    </td>
                     <td class="p-3">
                       {{
                         t(
@@ -1467,7 +1624,11 @@ const money = value => formatMoney(value, metadata.value?.formatting);
                         v-if="
                           screen === 'surveys' &&
                           !row.responded_at &&
-                          row.delivery_status !== 'expired'
+                          row.delivery_status !== 'expired' &&
+                          (!row.source_type ||
+                            ['available', 'sent', 'delivered'].includes(
+                              row.delivery_status
+                            ))
                         "
                       >
                         <button
@@ -1478,7 +1639,21 @@ const money = value => formatMoney(value, metadata.value?.formatting);
                           {{ t('RELATIONSHIP.SURVEY_LINK') }}
                         </button>
                         <button
-                          v-if="metadata.can_manage"
+                          v-if="!fixedSurveyScope"
+                          type="button"
+                          :class="buttonClass"
+                          @click="surveyPreparation = row"
+                        >
+                          {{ t('RELATIONSHIP.SURVEY_PREPARATION.TITLE') }}
+                        </button>
+                        <button
+                          v-if="
+                            metadata.can_manage &&
+                            (!row.source_type ||
+                              ['available', 'sent', 'delivered'].includes(
+                                row.status
+                              ))
+                          "
                           type="button"
                           :class="buttonClass"
                           @click="surveyDelivery = row"
@@ -1503,7 +1678,7 @@ const money = value => formatMoney(value, metadata.value?.formatting);
                         "
                         type="button"
                         :class="buttonClass"
-                        @click="opportunity = row"
+                        @click="chooseOpportunity(row)"
                       >
                         {{ t('RELATIONSHIP.CREATE_OPPORTUNITY') }}</button
                       ><button
@@ -1541,6 +1716,24 @@ const money = value => formatMoney(value, metadata.value?.formatting);
             {{ opportunity.title || opportunity.customer_name }}
           </h3>
           <div class="flex flex-wrap items-end gap-3">
+            <label class="flex-1 text-sm"
+              >{{ t('RELATIONSHIP.FIELDS.contact_id') }}
+              <select
+                v-model="commercial.contact_id"
+                required
+                :class="inputClass"
+                data-testid="opportunity-contact"
+              >
+                <option value="">{{ t('RELATIONSHIP.SELECT') }}</option>
+                <option
+                  v-for="contact in commercialContacts"
+                  :key="contact[0]"
+                  :value="contact[0]"
+                >
+                  {{ contact[1] }}
+                </option>
+              </select>
+            </label>
             <label class="flex-1 text-sm"
               >{{ t('RELATIONSHIP.PIPELINE')
               }}<select

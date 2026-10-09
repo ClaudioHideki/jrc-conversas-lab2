@@ -2,9 +2,9 @@
 
 class JrcServiceDesk::CatalogQuery
   MODELS = { 'queues' => JrcServiceDesk::Queue, 'priorities' => JrcServiceDesk::Priority,
-             'categories' => JrcServiceDesk::Category, 'statuses' => JrcServiceDesk::TicketStatus,
+             'categories' => JrcServiceDesk::Category, 'ticket_types' => JrcServiceDesk::TicketType, 'statuses' => JrcServiceDesk::TicketStatus,
              'units' => JrcServiceDesk::Unit, 'operator_companies' => JrcServiceDesk::OperatorCompany }.freeze
-  NATIVE = %w[assignees requesters teams].freeze
+  NATIVE = %w[assignees requesters teams contracts].freeze
   attr_reader :context, :parameters, :unit_id, :resource
 
   def initialize(user_context:, resource:, parameters: {})
@@ -29,16 +29,7 @@ class JrcServiceDesk::CatalogQuery
 
   def collection
     records = MODELS.key?(resource) ? scoped_catalog : scoped_native
-    # Native per-record policies are deliberately evaluated before counting/pagination.
-    # No total includes contacts/teams/users denied by their own policies.
-    if resource == 'assignees'
-      records = records.select do |membership|
-        au = membership.account_user
-        JrcServiceDesk::OperationalContext.new(account: context.account, user: au.user, account_user: au).capability?(:tickets_view)
-      end
-    elsif NATIVE.include?(resource)
-      records = records.select { |record| Pundit.policy!(context.to_h, record).show? }
-    end
+    records = authorized_records(records)
     if records.is_a?(Array)
       { items: records.slice(parameters.offset, parameters.per_page) || [],
         meta: { total: records.length, page: parameters.page, per_page: parameters.per_page } }
@@ -49,6 +40,21 @@ class JrcServiceDesk::CatalogQuery
   end
 
   private
+
+  def authorized_records(records)
+    # Native per-record policies are deliberately evaluated before counting/pagination.
+    # No total includes contacts/teams/users denied by their own policies.
+    if resource == 'assignees'
+      records.select do |membership|
+        au = membership.account_user
+        JrcServiceDesk::OperationalContext.new(account: context.account, user: au.user, account_user: au).capability?(:tickets_view)
+      end
+    elsif NATIVE.include?(resource) && resource != 'contracts'
+      records.select { |record| Pundit.policy!(context.to_h, record).show? }
+    else
+      records
+    end
+  end
 
   def scoped_catalog
     model = MODELS.fetch(resource)
@@ -64,6 +70,8 @@ class JrcServiceDesk::CatalogQuery
 
   def scoped_native
     case resource
+    when 'contracts'
+      scoped_contracts
     when 'requesters'
       Pundit.authorize(context.to_h, Contact, :index?)
       search(Contact.where(account_id: context.account.id), 'contacts', 'name').order(name: :asc, id: :asc)
@@ -75,6 +83,10 @@ class JrcServiceDesk::CatalogQuery
         .joins(account_user: :user).includes(account_user: :user)
       search(records, 'users', 'name').order('users.name ASC', 'jrc_service_desk_unit_memberships.id ASC')
     end
+  end
+
+  def scoped_contracts
+    search(JrcServiceDesk::CatalogueContracts.new(context).scope, 'jrc_crm_contracts', 'contract_number').order(contract_number: :asc, id: :asc)
   end
 
   def search(records, table, field)

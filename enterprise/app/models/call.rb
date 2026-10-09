@@ -61,6 +61,8 @@ class Call < ApplicationRecord
   scope :by_conference_sid, ->(sid) { where("meta->>'conference_sid' = ?", sid) }
   scope :by_twilio_conference_sid, ->(sid) { where("meta->>'twilio_conference_sid' = ?", sid) }
 
+  after_update_commit :evaluate_closure_survey, if: -> { saved_change_to_status? && terminal? }
+
   def self.find_by_provider_call_id(provider, sid)
     find_by(provider: provider, provider_call_id: sid)
   end
@@ -139,5 +141,11 @@ class Call < ApplicationRecord
       recording_url: recording_url,
       transcript: transcript
     }
+  end
+
+  private
+
+  def evaluate_closure_survey
+    JrcRelationship::SurveyClosureJob.perform_later('Call', id, "call:#{id}:#{provider_call_id}")
   end
 end

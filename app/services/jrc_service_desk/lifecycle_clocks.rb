@@ -45,7 +45,8 @@ class JrcServiceDesk::LifecycleClocks
     end
     cal = calendar(cycle)
     clocks = cycle.sla_clocks.order(:kind).to_a
-    raise JrcServiceDesk::LifecycleDependencyError, 'SLA cycle clocks are incomplete' unless clocks.map(&:kind).sort == JrcServiceDesk::LifecycleRules::CLOCKS.sort
+    expected_kinds = cycle.lifecycle_policy_version.rules.clock_kinds
+    raise JrcServiceDesk::LifecycleDependencyError, 'SLA cycle clocks are incomplete' unless clocks.map(&:kind).sort == expected_kinds.sort
     before = projection(clocks)
     clocks.each { |clock| settle!(clock, cal) }
 
@@ -95,12 +96,13 @@ class JrcServiceDesk::LifecycleClocks
       'previous_cycle' => previous_cycle, 'before' => before, 'clocks' => projection(clocks.map(&:reload)) }
   end
 
-  def self.verify_snapshot!(snapshot)
+  def self.verify_snapshot!(snapshot, clock_kinds: nil)
     raise JrcServiceDesk::LifecycleDependencyError, 'SLA/calendar snapshot is required' unless snapshot
     targets = snapshot.policy_conditions['clock_budgets_seconds']
-    unless targets.is_a?(Hash) && targets.keys.sort == JrcServiceDesk::LifecycleRules::CLOCKS.sort &&
+    kinds = clock_kinds || (targets.is_a?(Hash) && targets.key?('attendance') ? JrcServiceDesk::LifecycleRules::ATTENDANCE_CLOCKS : JrcServiceDesk::LifecycleRules::CLOCKS)
+    unless targets.is_a?(Hash) && targets.keys.sort == kinds.sort &&
            targets.values.all? { |n| n.is_a?(Integer) && n.positive? && n <= 2**53 - 1 }
-      raise JrcServiceDesk::LifecycleDependencyError, 'Explicit first-response/resolution budgets are required in the snapshot'
+      raise JrcServiceDesk::LifecycleDependencyError, 'Explicit budgets matching the published clock policy are required in the snapshot'
     end
     JrcServiceDesk::SnapshotCalendar.new(timezone: snapshot.timezone, conditions: snapshot.calendar_conditions)
   end
@@ -108,11 +110,11 @@ class JrcServiceDesk::LifecycleClocks
   private
 
   def calendar(cycle)
-    self.class.verify_snapshot!(cycle.sla_snapshot)
+    self.class.verify_snapshot!(cycle.sla_snapshot, clock_kinds: cycle.lifecycle_policy_version.rules.clock_kinds)
   end
 
   def create_cycle!(snapshot, start)
-    cal = self.class.verify_snapshot!(snapshot)
+    cal = self.class.verify_snapshot!(snapshot, clock_kinds: @version.rules.clock_kinds)
     raise ArgumentError, 'Snapshot or start is outside this ticket' unless snapshot.ticket_id == @ticket.id && snapshot.account_id == @ticket.account_id && snapshot.unit_id == @ticket.unit_id && start <= @now
     cycle = @ticket.sla_cycles.create!(account: @ticket.account, unit: @ticket.unit, lifecycle_policy_version: @version,
       sla_snapshot: snapshot, number: (@ticket.sla_cycles.maximum(:number) || 0) + 1, started_at: start)

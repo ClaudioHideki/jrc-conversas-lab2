@@ -3,9 +3,14 @@
 class JrcServiceDesk::LifecycleRules
   ACTIONS = %w[pause resume resolve close cancel reopen work_status].freeze
   CLOCKS = %w[first_response resolution].freeze
+  ATTENDANCE_CLOCKS = %w[first_response attendance resolution].freeze
   EFFECTS = %w[keep complete stop].freeze
   PHASES = %w[open waiting resolved closed cancelled].freeze
   attr_reader :definition
+
+  def clock_kinds
+    definition['schema_version'] == 2 ? ATTENDANCE_CLOCKS : CLOCKS
+  end
 
   def initialize(definition)
     @definition = JrcServiceDesk::Input.attributes(definition, %w[schema_version transitions pause_reasons reopen sla])
@@ -76,9 +81,11 @@ class JrcServiceDesk::LifecycleRules
   end
 
   def validate!
-    raise ArgumentError, 'Unsupported lifecycle format' unless definition['schema_version'] == 1
+    raise ArgumentError, 'Unsupported lifecycle format' unless [1, 2].include?(definition['schema_version'])
     exact(definition, %w[schema_version transitions pause_reasons reopen sla])
-    sla = exact(definition['sla'], %w[mode initial_start])
+    sla_fields = definition['schema_version'] == 2 ? %w[mode initial_start escalation_policy] : %w[mode initial_start]
+    sla = exact(definition['sla'], sla_fields)
+    JrcServiceDesk::ClockEscalationPolicy.new(sla['escalation_policy']) if definition['schema_version'] == 2
     raise ArgumentError, 'Explicit SLA mode required' unless %w[not_applicable calendar_snapshot].include?(sla['mode']) && sla['initial_start'] == 'opened_at'
     rules = definition['transitions']
     raise ArgumentError, 'Transition list required' unless rules.is_a?(Array) && rules.length.between?(1, 100)
@@ -117,16 +124,20 @@ class JrcServiceDesk::LifecycleRules
               end
       raise ArgumentError, 'Invalid equality requirement' unless valid && spec['required']
     end
-    clocks = exact(r['clocks'], CLOCKS)
+    clocks = exact(r['clocks'], clock_kinds)
     raise ArgumentError, 'Unknown clock effect' unless clocks.values.all? { |effect| EFFECTS.include?(effect) }
     # An internal transition is not evidence of an actual first public response.
     raise ArgumentError, 'First response needs an actual channel event' if clocks['first_response'] == 'complete'
     raise ArgumentError, 'Only resolution may complete its clock' if clocks['resolution'] == 'complete' && r['action'] != 'resolve'
+    if clocks['attendance'] == 'complete' && %w[work_status resolve].exclude?(r['action'])
+      raise ArgumentError, 'Attendance completion requires an explicit work or resolution transition'
+    end
     if definition['sla']['mode'] == 'not_applicable' && clocks.values.any? { |v| v != 'keep' }
       raise ArgumentError, 'Non-applicable SLA cannot mutate clocks'
     end
     if %w[pause resume reopen work_status].include?(r['action'])
-      raise ArgumentError, 'Clock effect belongs to pause/reopen configuration' unless clocks.values.all? { |v| v == 'keep' }
+      effects = r['action'] == 'work_status' ? clocks.except('attendance').values : clocks.values
+      raise ArgumentError, 'Clock effect belongs to pause/reopen configuration' unless effects.all? { |v| v == 'keep' }
     end
   end
 
@@ -137,7 +148,7 @@ class JrcServiceDesk::LifecycleRules
       r = exact(reason, %w[code name status_ids clocks]); token(r['code'])
       raise ArgumentError, 'Pause reason name required' unless r['name'].is_a?(String) && r['name'].size.between?(1, 255)
       raise ArgumentError, 'Pause statuses required' unless r['status_ids'].is_a?(Array) && r['status_ids'].any? && r['status_ids'].all? { |id| JrcServiceDesk::Input.id(id) == id }
-      raise ArgumentError, 'Explicit clock list required' unless r['clocks'].is_a?(Array) && r['clocks'].uniq == r['clocks'] && (r['clocks'] - CLOCKS).empty?
+      raise ArgumentError, 'Explicit clock list required' unless r['clocks'].is_a?(Array) && r['clocks'].uniq == r['clocks'] && (r['clocks'] - clock_kinds).empty?
       raise ArgumentError, 'Non-applicable SLA cannot pause clocks' if definition['sla']['mode'] == 'not_applicable' && r['clocks'].any?
     end
     raise ArgumentError, 'Duplicate pause reason' unless reasons.map { |r| r['code'] }.uniq.length == reasons.length
@@ -151,7 +162,7 @@ class JrcServiceDesk::LifecycleRules
     raise ArgumentError, 'Explicit reopening rule required' unless %w[resolve close cancel].include?(r['anchor_action']) && %w[deny require_new_ticket].include?(r['expired'])
     raise ArgumentError, 'Explicit SLA cycle choice required' unless %w[continue_cycle new_cycle].include?(r['sla_cycle'])
     raise ArgumentError, 'Explicit inactive time rule required' unless %w[count exclude].include?(r['inactive_time'])
-    raise ArgumentError, 'Explicit clock selection required' unless r['resume_clocks'].is_a?(Array) && (r['resume_clocks'] - CLOCKS).empty? && r['resume_clocks'].uniq == r['resume_clocks']
+    raise ArgumentError, 'Explicit clock selection required' unless r['resume_clocks'].is_a?(Array) && (r['resume_clocks'] - clock_kinds).empty? && r['resume_clocks'].uniq == r['resume_clocks']
     raise ArgumentError, 'Explicit snapshot choice required' unless %w[same_snapshot latest_snapshot].include?(r['new_cycle_snapshot'])
   end
 end

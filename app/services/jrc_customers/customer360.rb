@@ -93,11 +93,8 @@ class JrcCustomers::Customer360
       'activity_created' => [activities, :created_at],
       'activity_completed' => [activities.where.not(completed_at: nil), :completed_at]
     }
-    result['ticket_event'] = [ticket_events, :created_at] if @visibility.service_desk?
-    result['project_event'] = [project_events, :created_at] if @visibility.projects?
-    result['call'] = [calls.where.not(started_at: nil), :started_at] if calls
-    result['campaign_sent'] = [recipients.where.not(sent_at: nil), :sent_at] if recipients
-    result
+    append_module_timeline_sources(result)
+    with_relationship_sources(result)
   end
 
   def resource_key
@@ -105,6 +102,25 @@ class JrcCustomers::Customer360
   end
 
   private
+
+  def append_module_timeline_sources(sources)
+    sources['ticket_event'] = [ticket_events, :created_at] if @visibility.service_desk?
+    sources['project_event'] = [project_events, :created_at] if @visibility.projects?
+    sources['call'] = [calls.where.not(started_at: nil), :started_at] if calls
+    sources['campaign_sent'] = [recipients.where.not(sent_at: nil), :sent_at] if recipients
+  end
+
+  def with_relationship_sources(sources)
+    return sources unless @relationship_timeline
+
+    sources.merge(@relationship_timeline.sources)
+  end
+
+  def relationship_audit_origins(context)
+    origins = { 'JrcRelationship::Assignment' => context.assignments, 'JrcCrm::Activity' => activities }
+    origins.merge!(@relationship_timeline.audit_origins) if @relationship_timeline
+    origins
+  end
 
   def initialize_operations(contact_ids)
     ticket_scope = @visibility.tickets
@@ -144,6 +160,10 @@ class JrcCustomers::Customer360
     scope = JrcRelationship::AssignmentPolicy::Scope.new({ account: @account, user: @user, account_user: @account_user }, JrcRelationship::Assignment).resolve
     @relationship_assignment = @company ? scope.find_by(company_id: @company.id) : scope.find_by(contact_id: @contact.id)
     @relationship_assignment ||= scope.find_by(company_id: @contact.company_id) if @contact&.company_id
+    ctx = JrcRelationship::Context.new(@account_user)
+    @relationship_timeline = JrcRelationship::CustomerTimeline.new(context: ctx, customer: self, assignment: @relationship_assignment)
+  rescue Pundit::NotAuthorizedError, ActiveRecord::RecordNotFound
+    @relationship_timeline = nil
   end
 
   def initialize_audits
@@ -154,7 +174,7 @@ class JrcCustomers::Customer360
       relationship_audits = scope.where(event_type: 'relationship_updated').where("metadata ->> 'assignment_id' = ?", @relationship_assignment.id.to_s)
       ctx = JrcRelationship::Context.new(@account_user)
       # Apply the same current source grants to timeline origins and list counts.
-      origins = { 'JrcRelationship::Assignment' => ctx.assignments, 'JrcCrm::Activity' => activities }
+      origins = relationship_audit_origins(ctx)
       JrcRelationship::Workflow::MODELS.each_value { |model| origins[model.name] = ctx.records(model) }
       snapshots = JrcRelationship::HealthSnapshot.where(account_id: @account.id, viewer_id: @user.id,
         assignment_id: @relationship_assignment.id, access_signature: ctx.access_signature)

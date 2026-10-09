@@ -7,25 +7,32 @@ class JrcNico::ToolCatalog
     'create_contact' => ['Cadastrar contato; informe telefone internacional ou email', 'contacts', true, %w[name* phone_number email]],
     'update_contact' => ['Atualizar dados de um contato identificado', 'contacts', true, %w[contact_id* name phone_number email]],
     'list_conversations' => ['Listar até 20 conversas visíveis recentes; filtrar por nome e status', 'conversations', false, %w[query status]],
-    'conversation_opportunity_batch' => ['Ler lote de 10 conversas visíveis com evidências públicas para analisar oportunidades; todos os status por padrão, page inicia em 1', 'conversations', false, %w[page status]],
+    'conversation_opportunity_batch' => [
+      'Ler lote de 10 conversas visíveis com evidências públicas para analisar oportunidades; ' \
+      'todos os status por padrão, page inicia em 1', 'conversations', false, %w[
+        page status
+      ]
+    ],
     'read_conversation' => ['Ler mensagens públicas e metadados da conversa', 'conversations', false, %w[conversation_id*]],
     'open_conversation' => ['Abrir uma conversa visível ao operador', 'conversations', false, %w[conversation_id*]],
     'analyze_conversation_sentiment' => [
       'Gerar relatório de sentimento e qualidade das mensagens públicas de uma conversa; usa o provedor desta conta',
       'conversations', false, %w[conversation_id*]
     ],
-    'send_message' => ['Enviar mensagem ao cliente pelo canal da conversa; private=true cria nota interna', 'conversations', true, %w[conversation_id* content* private]],
+    'send_message' => ['Enviar mensagem ao cliente pelo canal da conversa; private=true cria nota interna', 'conversations', true,
+                       %w[conversation_id* content* private]],
     'update_conversation' => ['Alterar status (open/resolved/pending/snoozed), prioridade, responsável, equipe ou etiquetas', 'conversations', true,
                               %w[conversation_id* status priority assignee_id team_id labels snoozed_until]],
     'list_team' => ['Consultar usuários e equipes disponíveis na conta', 'conversations', false, []],
     'search_knowledge' => ['Consultar orientações aprovadas na base de conhecimento interna', 'conversations', false, %w[query*]],
     'delegate_conversations' => ['NICO atende automaticamente estas conversas por até 8 horas; informe objetivo e permita CRM explicitamente', 'conversations', true,
-                                %w[conversation_ids* objective* hours allow_crm allowed_actions]],
+                                 %w[conversation_ids* objective* hours allow_crm allowed_actions]],
     'take_over' => ['Interromper o NICO e devolver estas conversas ao operador', 'conversations', true, %w[conversation_ids*]],
     'list_leads' => ['Buscar leads visíveis por nome ou contato', 'crm', false, %w[query contact_id]],
     'create_lead' => ['Criar lead da conversa ou contato; sem esses vínculos informe nome', 'crm', true,
                       %w[name contact_id conversation_id company_name email phone notes]],
-    'update_lead' => ['Atualizar lead (status new/in_contact/qualified/unqualified)', 'crm', true, %w[lead_id* name company_name email phone notes status]],
+    'update_lead' => ['Atualizar lead (status new/in_contact/qualified/unqualified)', 'crm', true,
+                      %w[lead_id* name company_name email phone notes status]],
     'convert_lead' => ['Converter lead em negócio usando funil e etapa válidos', 'crm', true, %w[lead_id* deal_title pipeline_id stage_id]],
     'list_deals' => ['Consultar negócios autorizados', 'crm', false, %w[query]],
     'list_pipelines' => ['Consultar funis e etapas', 'crm', false, []],
@@ -38,7 +45,8 @@ class JrcNico::ToolCatalog
     'list_products' => ['Consultar catálogo interno e preços cadastrados', 'crm', false, %w[query]],
     'create_proposal' => ['Preparar proposta com itens do negócio e cálculos do JRC', 'crm', true, %w[deal_id*]],
     'list_proposals' => ['Consultar propostas autorizadas por título ou negócio', 'crm', false, %w[query deal_id]],
-    'read_proposal' => ['Consultar o escopo, itens, quantidades, preços e aprovações de uma proposta antes de alterar ou adicionar produtos', 'crm', false, %w[proposal_id*]],
+    'read_proposal' => ['Consultar o escopo, itens, quantidades, preços e aprovações de uma proposta antes de alterar ou adicionar produtos', 'crm',
+                        false, %w[proposal_id*]],
     'list_campaigns' => ['Consultar campanhas e estados de aprovação', 'campaigns', false, []],
     'create_campaign' => ['Criar rascunho de campanha WhatsApp, sem disparar', 'campaigns', true, %w[name* inbox_id* message_body*]],
     'campaign_action' => ['Ação request_review/launch/pause/resume/cancel; lançamento exige aprovação prévia no módulo', 'campaigns', true,
@@ -47,13 +55,16 @@ class JrcNico::ToolCatalog
     'operational_report' => ['Resumo com contagens de conversas visíveis e atividades; limitações informadas', 'conversations', false, []],
     'channel_status' => ['Consultar caixas, disponibilidade de ramal e videoconferência sem revelar credenciais', 'conversations', false, []],
     'account_profile' => ['Consultar nome, idioma, email de suporte e fuso da conta, sem credenciais', 'settings_admin', false, []],
-    'set_reporting_timezone' => ['Configurar fuso horário IANA da conta para agenda e relatórios, como America/Sao_Paulo', 'settings_admin', true, %w[timezone*]],
-    'call_contact' => ['Discar para contato pelo ramal do operador, no navegador; depende de registro e microfone', 'contacts', true, %w[contact_id*]],
+    'set_reporting_timezone' => ['Configurar fuso horário IANA da conta para agenda e relatórios, como America/Sao_Paulo', 'settings_admin', true,
+                                 %w[timezone*]],
+    'call_contact' => ['Discar para contato pelo ramal do operador, no navegador; depende de registro e microfone', 'contacts', true,
+                       %w[contact_id*]],
     'call_control' => ['Controlar chamada SIP atual: answer/reject/hangup/mute/unmute/hold/unhold/transfer', 'conversations', true,
                        %w[action* destination]],
     'open_video' => ['Abrir sala de videoconferência configurada para o operador', 'conversations', true, []],
     'open_module' => ['Navegar para um módulo existente usando route_name disponível no contexto', 'navigation', false, %w[route_name*]]
-  }.merge(JrcNico::ModuleActions::TOOLS).merge(JrcNico::AutomationActions::TOOLS).merge(JrcNico::DomainToolCatalog::TOOLS).freeze
+  }.merge(JrcNico::ModuleActions::TOOLS).merge(JrcNico::AutomationActions::TOOLS).merge(JrcNico::DomainToolCatalog::TOOLS)
+          .merge(JrcNico::HelpdeskToolCatalog::TOOLS).freeze
 
   def initialize(access)
     @access = access
@@ -66,10 +77,11 @@ class JrcNico::ToolCatalog
       next if name == 'delegate_conversations' && @access.account.custom_attributes['nico_customer_delegation_enabled'] != true
       next if group == 'automations' && !(@access.account.feature_enabled?('automations') && @access.policy(AutomationRule).create?)
       next if group == 'crm' && !@access.crm?
-      next if group == 'crm_admin' && !(@access.crm? && @access.membership.administrator?)
-      next if group == 'settings_admin' && !@access.membership.administrator?
+      next unless admin_tool_available?(group)
       next if group == 'campaigns' && !@access.campaigns?
       next if group == 'contacts' && !@access.policy(Contact).public_send(name == 'create_contact' ? :create? : :index?)
+      next if group == 'service_desk_helpdesk' && !JrcNico::HelpdeskToolCatalog.available?(@access, name)
+
       if %w[service_desk projects projects_create relationship].include?(group)
         domain_access ||= JrcNico::DomainAccess.new(@access)
         next unless domain_permissions.fetch(group) { domain_permissions[group] = domain_access.available?(group) }
@@ -103,19 +115,15 @@ class JrcNico::ToolCatalog
     if name == 'create_activity' && arguments['lead_id'].blank? && arguments['deal_id'].blank?
       raise ArgumentError, 'A atividade precisa de lead_id ou deal_id. Consulte os registros deste contato antes de agendar.'
     end
-    if name == 'update_project_task'
-      if (arguments['clear_assignee'] && arguments['assignee_id']) || (arguments['clear_parent'] && arguments['parent_id'])
-        raise ArgumentError, 'Escolha entre definir ou remover o responsavel/pai da tarefa.'
-      end
-    end
-    arguments.each do |key, value|
-      if JrcNico::DomainToolCatalog::TOOLS.key?(name) || JrcNico::ModuleActions::PROJECT_TASK_TOOLS.include?(name)
-        domain_valid = JrcNico::DomainToolCatalog.valid_value?(key, value)
-        unless domain_valid.nil?
-          raise ArgumentError, "Valor inválido: #{key}." unless domain_valid
 
-          next
-        end
+    raise ArgumentError, 'Escolha entre definir ou remover o responsavel/pai da tarefa.' if conflicting_project_assignment?(name, arguments)
+
+    arguments.each do |key, value|
+      extension_valid = extension_validity(name, key, value)
+      unless extension_valid.nil?
+        raise ArgumentError, "Valor inválido: #{key}." unless extension_valid
+
+        next
       end
       valid = case key
               when 'conversation_ids' then value.is_a?(Array) && value.length.between?(1, 20) && value.all? { |id| id.is_a?(Integer) && id.positive? }
@@ -132,5 +140,30 @@ class JrcNico::ToolCatalog
       raise ArgumentError, "Valor inválido: #{key}." unless valid
     end
     definition
+  end
+
+  private
+
+  def admin_tool_available?(group)
+    case group
+    when 'crm_admin' then @access.crm? && @access.membership.administrator?
+    when 'settings_admin' then @access.membership.administrator?
+    else true
+    end
+  end
+
+  def conflicting_project_assignment?(name, arguments)
+    name == 'update_project_task' && ((arguments['clear_assignee'] && arguments['assignee_id']) ||
+      (arguments['clear_parent'] && arguments['parent_id']))
+  end
+
+  def extension_validity(name, key, value)
+    if JrcNico::HelpdeskToolCatalog::TOOLS.key?(name)
+      valid = JrcNico::HelpdeskToolCatalog.valid_value?(key, value)
+      return valid unless valid.nil?
+    end
+    return unless JrcNico::DomainToolCatalog::TOOLS.key?(name) || JrcNico::ModuleActions::PROJECT_TASK_TOOLS.include?(name)
+
+    JrcNico::DomainToolCatalog.valid_value?(key, value)
   end
 end

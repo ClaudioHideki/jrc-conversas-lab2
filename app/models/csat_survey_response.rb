@@ -27,6 +27,7 @@
 #
 class CsatSurveyResponse < ApplicationRecord
   include JrcRelationship::SignalDispatch
+  after_commit :bridge_shared_survey_response, on: [:create, :update], if: :shared_survey_response_changed?
   belongs_to :account
   belongs_to :conversation
   belongs_to :contact
@@ -45,4 +46,14 @@ class CsatSurveyResponse < ApplicationRecord
   scope :filter_by_team_id, ->(team_id) { joins(:conversation).where(conversations: { team_id: team_id }) if team_id.present? }
   # filter by rating value
   scope :filter_by_rating, ->(rating) { where(rating: rating) if rating.present? }
+
+  private
+
+  def shared_survey_response_changed?
+    account.feature_enabled?('jrc_relationship') && previous_changes.keys.intersect?(%w[rating feedback_message])
+  end
+
+  def bridge_shared_survey_response
+    JrcRelationship::NativeCsatResponseJob.perform_later(id)
+  end
 end

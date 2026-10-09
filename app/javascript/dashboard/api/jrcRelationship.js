@@ -12,6 +12,15 @@ const operationsBase = accountId =>
 export default {
   metadata: (accountId, options) =>
     axios.get(`${base(accountId)}/metadata`, options),
+  playbookOptions: (accountId, params, options) =>
+    axios.get(`${base(accountId)}/playbook_options`, { ...options, params }),
+  previewPlaybook: (accountId, fields) =>
+    axios.post(`${base(accountId)}/playbook_preview`, fields),
+  manualAttendance: (accountId, id, fields) =>
+    axios.post(
+      `${base(accountId)}/portfolio/${Number(id)}/manual_attendance`,
+      fields
+    ),
   dashboard: (accountId, params, options) =>
     axios.get(`${base(accountId)}/dashboard`, { ...options, params }),
   drilldown: (accountId, params, options) =>
@@ -51,13 +60,35 @@ export default {
       params,
       responseType: 'blob',
     }),
+  exportSurveyResponses: (accountId, params) =>
+    axios.get(`${base(accountId)}/survey_responses/export`, {
+      params,
+      responseType: 'blob',
+    }),
   portfolioBatch: (accountId, ids, fields) =>
     axios.post(`${base(accountId)}/portfolio/batch`, { ids, ...fields }),
   surveyLink: (accountId, id) =>
     axios.get(`${base(accountId)}/surveys/${Number(id)}/link`),
-  deliverSurvey: (accountId, id, conversationId) =>
+  surveyVoicePreview: (accountId, id, options) =>
+    axios.get(
+      `${base(accountId)}/surveys/${Number(id)}/voice_preview`,
+      options
+    ),
+  validateSurveyVoice: (accountId, id, inputs, options) =>
+    axios.post(
+      `${base(accountId)}/surveys/${Number(id)}/voice_preview`,
+      { dry_run: true, inputs },
+      options
+    ),
+  deliverSurvey: (accountId, id, conversationId, template) =>
     axios.post(`${base(accountId)}/surveys/${Number(id)}/deliver`, {
       conversation_id: conversationId,
+      ...(template
+        ? {
+            content: template.message,
+            template_params: template.templateParams,
+          }
+        : {}),
     }),
   nativeCsat: (accountId, id, conversationId) =>
     axios.post(`${base(accountId)}/portfolio/${Number(id)}/native_csat`, {
@@ -106,6 +137,51 @@ export default {
         }),
   playbooks: (accountId, options) =>
     axios.get(`${base(accountId)}/playbooks`, options),
+  playbookExecutions: (accountId, options) =>
+    axios.get(`${base(accountId)}/playbook_executions`, options),
+  surveyDefinitions: (accountId, options) =>
+    axios.get(`${base(accountId)}/survey_administration/definitions`, options),
+  surveyRules: (accountId, options) =>
+    axios.get(`${base(accountId)}/survey_administration/rules`, options),
+  saveSurveyConfiguration: (accountId, kind, record) => {
+    if (!['definitions', 'rules'].includes(kind))
+      throw new Error('Invalid survey configuration kind');
+    const path = `${base(accountId)}/survey_administration/${kind}`;
+    return record.id
+      ? axios.patch(`${path}/${Number(record.id)}`, { record })
+      : axios.post(path, { record });
+  },
+  duplicateSurveyConfiguration: (accountId, kind, id, code) => {
+    if (!['definitions', 'rules'].includes(kind))
+      throw new Error('Invalid survey configuration kind');
+    return axios.post(
+      `${base(accountId)}/survey_administration/${kind}/${Number(id)}/duplicate`,
+      { code }
+    );
+  },
+  surveyConfigurationHistory: (accountId, kind, id, options) =>
+    axios.get(
+      `${base(accountId)}/survey_administration/${kind}/${Number(id)}/history`,
+      options
+    ),
+  surveyOrigins: (accountId, options) =>
+    axios.get(`${base(accountId)}/survey_origins`, options),
+  previewSurveyPolicy: (accountId, fields) =>
+    axios.post(`${base(accountId)}/survey_policy_preview`, fields),
+  surveyDecisions: (accountId, params) =>
+    axios.get(`${base(accountId)}/survey_decisions`, { params }),
+  treatSurvey: (accountId, id, record) =>
+    axios.patch(`${base(accountId)}/surveys/${Number(id)}/treatment`, {
+      record,
+    }),
+  handoffs: (accountId, options) =>
+    axios.get(`${base(accountId)}/handoffs`, options),
+  createHandoff: (accountId, fields) =>
+    axios.post(`${base(accountId)}/handoffs`, fields),
+  handoffContext: (accountId, id) =>
+    axios.get(`${base(accountId)}/handoffs/${Number(id)}/context`),
+  decideHandoff: (accountId, id, fields) =>
+    axios.post(`${base(accountId)}/handoffs/${Number(id)}/decide`, fields),
   savePlaybook: (accountId, playbook, id) =>
     id
       ? axios.patch(`${base(accountId)}/playbooks/${Number(id)}`, { playbook })

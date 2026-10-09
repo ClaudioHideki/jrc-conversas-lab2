@@ -23,6 +23,7 @@ const form = reactive({
     props.record.metadata?.expansion_kind ||
     props.record.metadata?.kind ||
     'upsell',
+  renewed_contract_id: props.record.metadata?.renewed_contract_id || '',
 });
 const workContext = ref(null);
 const loadContext = data => {
@@ -39,6 +40,13 @@ const references = key =>
     owner_id: props.metadata.owners,
     user_id: props.metadata.owners,
     product_id: props.metadata.products,
+    source_product_id: props.metadata.products,
+    contract_id: workContext.value?.contracts?.map(row => [row.id, row.number]),
+    source_contract_id: workContext.value?.contracts?.map(row => [
+      row.id,
+      row.number,
+    ]),
+    contact_id: workContext.value?.contacts,
     activity_id: workContext.value?.activities,
     task_id: workContext.value?.tasks,
     ticket_id: workContext.value?.linked_tickets,
@@ -110,6 +118,7 @@ const fieldType = key => {
     return 'number';
   if (key.endsWith('_on')) return 'date';
   if (key.endsWith('_at')) return 'datetime-local';
+  if (key.endsWith('_url')) return 'url';
   return 'text';
 };
 ['due_at', 'scheduled_at'].forEach(key => {
@@ -177,6 +186,11 @@ const submit = () => {
     'owner_id',
     'project_id',
     'product_id',
+    'source_contract_id',
+    'source_product_id',
+    'contract_id',
+    'contact_id',
+    'renewed_contract_id',
   ].forEach(key => {
     if (payload[key] !== undefined)
       payload[key] = payload[key] === '' ? null : Number(payload[key]);
@@ -235,12 +249,34 @@ const submit = () => {
         :metadata="metadata"
       />
       <WorkContextPanel
-        v-if="['qbrs', 'plans'].includes(kind)"
+        v-if="['qbrs', 'plans', 'expansion'].includes(kind)"
         :assignment-id="form.assignment_id"
         :initial-period="record.metadata || {}"
         @loaded="loadContext"
       />
       <div class="grid gap-4 md:grid-cols-2">
+        <label
+          v-if="kind === 'renewals' && form.status === 'won'"
+          class="text-sm"
+        >
+          {{ t('RELATIONSHIP.RENEWAL_NATIVE_PROOF') }}
+          <select
+            v-model="form.renewed_contract_id"
+            required
+            :class="inputClass"
+            data-testid="renewal-successor"
+          >
+            <option value="">{{ t('RELATIONSHIP.SELECT') }}</option>
+            <option
+              v-for="contract in record.commercial_context
+                ?.successor_contracts || []"
+              :key="contract.id"
+              :value="contract.id"
+            >
+              {{ contract.number }}
+            </option>
+          </select>
+        </label>
         <label
           v-for="key in fields"
           :key="key"
@@ -262,15 +298,24 @@ const submit = () => {
             </option>
           </select>
           <select
-            v-else-if="['project_id', 'product_id'].includes(key)"
+            v-else-if="
+              [
+                'project_id',
+                'product_id',
+                'source_product_id',
+                'contract_id',
+                'source_contract_id',
+                'contact_id',
+              ].includes(key)
+            "
             v-model="form[key]"
             :class="inputClass"
           >
             <option value="">{{ t('RELATIONSHIP.SELECT') }}</option>
             <option
-              v-for="item in metadata[
-                key === 'project_id' ? 'projects' : 'products'
-              ] || []"
+              v-for="item in (key === 'project_id'
+                ? metadata.projects
+                : references(key)) || []"
               :key="item[0]"
               :value="item[0]"
             >

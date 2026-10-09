@@ -6,18 +6,18 @@ class RelationshipSurveysController < ActionController::Base
   rescue_from ActiveRecord::RecordInvalid do |error|
     render plain: error.record.errors.full_messages.join('. '), status: :unprocessable_entity
   end
+  rescue_from ArgumentError do |_error|
+    render plain: 'Verifique as respostas conforme as perguntas publicadas.', status: :unprocessable_entity
+  end
 
   def show
-    render inline: '<!doctype html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Pesquisa de relacionamento</title></head><body><h1>Pesquisa de relacionamento</h1><p><%= @survey.metadata["question"] %></p><%= form_with url: request.path do %><label>Nota de 0 a 10 <%= number_field_tag :score, nil, min: 0, max: 10, required: true %></label><label>Comentário <%= text_area_tag :comment, nil, maxlength: 4000 %></label><%= submit_tag "Enviar resposta" %><% end %></body></html>'
+    render :show
   end
 
   def update
-    @survey.with_lock do
-      raise ActiveRecord::RecordNotFound if @survey.responded_at || @survey.expires_at <= Time.current
-      @survey.update!(score: params.require(:score), comment: params[:comment], responded_at: Time.current)
-      JrcCustomers::Audit.record!(account: @survey.account, actor: nil, resource: @survey, event_type: 'relationship_updated', metadata: { action: 'survey_responded', assignment_id: @survey.assignment_id })
-    end
-    render plain: 'Obrigado pela resposta.'
+    answers = params[:answers].present? ? params.require(:answers).to_unsafe_h : { 'score' => params.require(:score) }
+    JrcRelationship::SurveyResponse.new(@survey).call(answers: answers, comment: params[:comment])
+    render plain: @survey.definition_snapshot.dig('settings', 'thank_you').presence || 'Obrigado pela resposta.'
   end
 
   private
@@ -30,5 +30,11 @@ class RelationshipSurveysController < ActionController::Base
                 JrcRelationship::Survey.find_signed(token.first(4096), purpose: :relationship_survey) || raise(ActiveRecord::RecordNotFound)
               end
     raise ActiveRecord::RecordNotFound unless @survey.account.active? && @survey.account.feature_enabled?('jrc_customer_master') && @survey.account.feature_enabled?('jrc_relationship') && @survey.responded_at.nil? && @survey.expires_at > Time.current
+
+    validate_dispatch_state!
+  end
+
+  def validate_dispatch_state!
+    raise ActiveRecord::RecordNotFound if @survey.source_type.present? && %w[available sent delivered].exclude?(@survey.status)
   end
 end

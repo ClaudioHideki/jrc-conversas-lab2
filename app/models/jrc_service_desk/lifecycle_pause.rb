@@ -19,7 +19,8 @@ class JrcServiceDesk::LifecyclePause < JrcServiceDesk::TicketRecord
   def integrity
     %i[lifecycle_policy_version sla_cycle started_by_membership ended_by_membership].each { |name| validate_unit_reference(name) }
     errors.add(:sla_cycle, 'must belong to the same ticket') if sla_cycle && sla_cycle.ticket_id != ticket_id
-    errors.add(:clocks, 'must be an explicit supported list') unless clocks.is_a?(Array) && clocks.uniq == clocks && (clocks - JrcServiceDesk::LifecycleRules::CLOCKS).empty?
+    kinds = lifecycle_policy_version&.rules&.clock_kinds || JrcServiceDesk::LifecycleRules::CLOCKS
+    errors.add(:clocks, 'must be an explicit supported list') unless clocks.is_a?(Array) && clocks.uniq == clocks && (clocks - kinds).empty?
     errors.add(:ended_at, 'invalid pause end') unless (ended_at.nil? && ended_by_membership_id.nil?) || (ended_at && ended_by_membership_id && started_at && ended_at >= started_at)
     errors.add(:ended_at, 'cannot rewrite a closed pause') if persisted? && ended_at_in_database && (will_save_change_to_ended_at? || will_save_change_to_ended_by_membership_id?)
   end

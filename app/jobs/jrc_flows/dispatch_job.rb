@@ -60,13 +60,6 @@ class JrcFlows::DispatchJob < ApplicationJob
   end
 
   def within_hours?(settings)
-    return true unless settings['business_hours'] == true
-
-    local = Time.current.in_time_zone(settings.fetch('timezone'))
-    return false unless Array(settings['days']).include?(local.wday)
-
-    time = local.strftime('%H:%M')
-    opens, closes = settings.values_at('opens_at', 'closes_at')
-    opens <= closes ? (opens <= time && time < closes) : (time >= opens || time < closes)
+    JrcFlows::BusinessHours.open?(settings)
   end
 end

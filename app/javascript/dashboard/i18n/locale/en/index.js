@@ -53,12 +53,14 @@ import crm from './crm.json';
 import whatsappCalling from './whatsappCalling.json';
 import jrcCampaigns from './jrcCampaigns.json';
 import jrcNico from './jrcNico.json';
+import jrcNicoHelpdesk from './jrcNicoHelpdesk.json';
 
 export default {
   ...relationship,
   ...jrcHome,
   ...jrcServiceDesk,
   ...jrcNico,
+  ...jrcNicoHelpdesk,
   ...advancedFilters,
   ...agentBots,
   ...agentMgmt,

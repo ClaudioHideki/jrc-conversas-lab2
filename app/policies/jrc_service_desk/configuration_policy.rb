@@ -4,7 +4,8 @@ class JrcServiceDesk::ConfigurationPolicy < JrcServiceDesk::OperationalPolicy
   MANAGEMENT = {
     'JrcServiceDesk::Queue' => :queues_manage, 'JrcServiceDesk::Category' => :categories_manage,
     'JrcServiceDesk::Priority' => :priorities_manage, 'JrcServiceDesk::TicketStatus' => :statuses_manage,
-    'JrcServiceDesk::Service' => :services_manage, 'JrcServiceDesk::LifecyclePolicy' => :lifecycle_policies_manage
+    'JrcServiceDesk::Service' => :services_manage, 'JrcServiceDesk::TicketType' => :categories_manage,
+    'JrcServiceDesk::LifecyclePolicy' => :lifecycle_policies_manage
   }.freeze
 
   def manage_index?

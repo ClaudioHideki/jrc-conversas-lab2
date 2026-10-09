@@ -4,6 +4,10 @@ class CsatSurveyListener < BaseListener
 
     return unless conversation.resolved?
 
+    cycle = "conversation:#{conversation.id}:#{conversation.updated_at.utc.iso8601(6)}"
+    JrcRelationship::SurveyClosureJob.perform_later('Conversation', conversation.id, cycle)
+    return if JrcRelationship::SurveyEngine.enabled?(conversation.account)
+
     CsatSurveyService.new(conversation: conversation).perform
   end
 

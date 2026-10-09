@@ -102,3 +102,19 @@ jrc_relationship_sla_monitor_job:
   cron: '*/5 * * * *'
   class: 'JrcRelationship::SlaMonitorJob'
   queue: scheduled_jobs
+
+jrc_nico_helpdesk_monitor_job:
+  cron: '* * * * *'
+  class: 'JrcNico::Helpdesk::MonitorJob'
+  queue: default
+
+jrc_service_desk_clock_monitoring_job:
+  cron: '* * * * *'
+  class: 'JrcServiceDesk::ClockMonitoringJob'
+  queue: scheduled_jobs
+
+# Only approvals explicitly bound to an enabled published rule are eligible.
+jrc_service_desk_approval_deadline_job:
+  cron: '* * * * *'
+  class: 'JrcServiceDesk::ApprovalDeadlineJob'
+  queue: scheduled_jobs

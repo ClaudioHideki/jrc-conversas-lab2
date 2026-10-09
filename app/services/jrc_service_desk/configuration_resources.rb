@@ -4,7 +4,7 @@ module JrcServiceDesk::ConfigurationResources
   MODELS = {
     'queues' => JrcServiceDesk::Queue, 'categories' => JrcServiceDesk::Category,
     'priorities' => JrcServiceDesk::Priority, 'statuses' => JrcServiceDesk::TicketStatus,
-    'services' => JrcServiceDesk::Service
+    'services' => JrcServiceDesk::Service, 'ticket_types' => JrcServiceDesk::TicketType
   }.freeze
 
   def self.model(resource)
@@ -12,7 +12,9 @@ module JrcServiceDesk::ConfigurationResources
   end
 
   def self.fields(resource, record)
-    record.attributes.slice(*JrcServiceDesk::ConfigurationContract::FIELDS.fetch(resource.to_s))
+    result = record.attributes.slice(*JrcServiceDesk::ConfigurationContract::FIELDS.fetch(resource.to_s))
+    result['portal_access_until'] = record.portal_access_until&.utc&.iso8601(6) if result.key?('portal_access_until')
+    result
   end
 
   def self.revision(resource, record)

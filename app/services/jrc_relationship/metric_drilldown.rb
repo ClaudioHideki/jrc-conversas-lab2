@@ -18,7 +18,8 @@ class JrcRelationship::MetricDrilldown
     relation, aggregation = sources(metric)
     value = @day && metric == 'health_average' ? relation.average(:score)&.to_f : values.fetch(metric.to_sym)
     number = page.to_i.clamp(1, 10_000)
-    rows = relation.reorder(:id).limit(25).offset((number - 1) * 25).to_a
+    ordering = metric == 'csat' ? [:metric_source, :id] : [:id]
+    rows = relation.reorder(*ordering).limit(25).offset((number - 1) * 25).to_a
     { metric: metric, value: value, aggregation: aggregation, total: relation.count, day: @day&.begin&.to_date,
       calculation: calculation(metric, relation), page: number, per_page: 25, payload: rows.map { |record| present(record, metric) } }
   end
@@ -51,9 +52,9 @@ class JrcRelationship::MetricDrilldown
     { contracts: contracts.where(contact_id: contacts).or(contracts.where(deal_id: deals.select(:id)))
         .or(contracts.where(sales_order_id: orders.select(:id))).where(status: %w[active expiring]),
       activities: activities.where(contact_id: contacts).or(activities.where(company_id: companies)).overdue,
-      csat: CsatSurveyResponse.where(account_id: @context.account.id,
-        conversation_id: @visibility.conversations.where(contact_id: contacts).select(:id),
-        created_at: @period || (90.days.ago..Time.current)) }
+      csat: JrcRelationship::SurveyMetrics.csat(context: @context,
+        surveys: records(JrcRelationship::Survey), conversations: @visibility.conversations.where(contact_id: contacts))
+        .where(created_at: @period || (90.days.ago..Time.current)) }
   end
 
   def sources(metric)
@@ -97,8 +98,7 @@ class JrcRelationship::MetricDrilldown
       period = @period || (90.days.ago..Time.current)
       renewals = records(JrcRelationship::Renewal).where(renewal_on: period.begin.to_date..period.end.to_date)
       return [renewals, 'ratio'] if metric == 'renewal_rate'
-      [@visibility.crm(@context.account.jrc_crm_contracts).where(source_contract_id: renewals.select(:contract_id), signature_status: 'signed'),
-        metric == 'renewal_rate' ? 'ratio' : 'sum']
+      [JrcRelationship::RenewalOutcome.cohort(@context, renewals)[:contracts], 'sum']
     when 'nrr', 'gross_retention', 'revenue_churn'
       # Expose the actual opening/closing cohort, not newly acquired customers.
       snapshots = JrcRelationship::HealthSnapshot.where(account_id: @context.account.id, viewer_id: @context.user.id,
@@ -119,8 +119,10 @@ class JrcRelationship::MetricDrilldown
     when 'retention_rate'
       { numerator: relation.where(status: 'retained').count, denominator: relation.count }
     when 'renewal_rate'
-      renewed = @visibility.crm(@context.account.jrc_crm_contracts).where(source_contract_id: relation.select(:contract_id), signature_status: 'signed')
-      { numerator: renewed.distinct.count(:source_contract_id), denominator: relation.count }
+      cohort = JrcRelationship::RenewalOutcome.cohort(@context, relation)
+      { numerator: cohort[:renewed_count], denominator: cohort[:source_count], ambiguous_sources: cohort[:ambiguous_source_count] }
+    when 'csat', 'ces', 'health_average', 'first_action_minutes'
+      { denominator: relation.count, formula: 'average' }
     end
   end
 
@@ -160,7 +162,14 @@ class JrcRelationship::MetricDrilldown
         route: { name: 'crm_contracts', params: { accountId: @context.account.id }, query: { contractId: contract.id } })
     when CsatSurveyResponse
       row.merge!(score: record.rating, comment: record.feedback_message)
-      row[:route] = { name: 'inbox_conversation', params: { accountId: @context.account.id, conversation_id: record.conversation.display_id } }
+      if record.try(:metric_source) == 'shared_survey'
+        row.merge!(source_type: 'JrcRelationship::Survey', source_kind: 'survey')
+        row[:route] = { name: 'jrc_relationship_surveys', params: { accountId: @context.account.id }, query: { record_id: record.id } }
+        assignment = @context.assignments.find(record[:assignment_id]) if record[:assignment_id]
+        row[:customer] = assignment&.label
+      else
+        row[:route] = { name: 'inbox_conversation', params: { accountId: @context.account.id, conversation_id: record.conversation.display_id } }
+      end
     when JrcRelationship::Action
       row[:elapsed_minutes] = record.metadata['first_action_elapsed_seconds']&.to_f&./(60)
     end

@@ -38,9 +38,14 @@ RSpec.describe JrcNico::DomainActions do
   it 'accepts version zero and preserves the native optimistic lock on a repeated R2 edit' do
     ticket = sd_ticket
     arguments = { 'ticket_id' => ticket.id, 'expected_lock_version' => ticket.lock_version, 'title' => 'Reviewed title' }
-    executor.call('update_service_ticket', arguments)
+    operator = JrcNico::OperatorSession.new(account: sd_account, user: sd_user)
+    prepared = operator.ask(message: 'Review version zero ticket', request_id: SecureRandom.uuid,
+                            prepared: { 'tool' => 'update_service_ticket', 'arguments' => arguments })
+    operator.execute(prepared)
+    expect(prepared.reload.status).to eq('succeeded')
     expect(ticket.reload.title).to eq('Reviewed title')
-    expect { executor.call('update_service_ticket', arguments.merge('title' => 'Stale overwrite')) }.to raise_error(ActiveRecord::StaleObjectError)
+    executed = JrcNico::ToolExecutor.new(access, command: prepared)
+    expect { executed.call('update_service_ticket', arguments.merge('title' => 'Stale overwrite')) }.to raise_error(ActiveRecord::StaleObjectError)
     expect(ticket.reload.title).to eq('Reviewed title')
   end
 
@@ -71,11 +76,11 @@ RSpec.describe JrcNico::DomainActions do
       target_member = create(:account_user, account: sd_account, user: create(:user), role: :agent)
       target_grant = create(:jrc_sd_membership, unit: sd_unit, account_user: target_member)
       ticket = create(:jrc_sd_ticket, unit: sd_unit, requester: sd_contact, status: sd_status, priority: sd_priority,
-                      created_by_membership: target_grant, assignee_membership: sd_membership)
+                                      created_by_membership: target_grant, assignee_membership: sd_membership)
       operator = JrcNico::OperatorSession.new(account: sd_account, user: sd_user)
       prepared = operator.ask(message: 'Hand off reviewed ticket', request_id: SecureRandom.uuid,
-        prepared: { 'tool' => tool, 'arguments' => { 'ticket_id' => ticket.id, 'expected_lock_version' => ticket.lock_version,
-                                                   'assignee_account_user_id' => target_member.id } })
+                              prepared: { 'tool' => tool, 'arguments' => { 'ticket_id' => ticket.id, 'expected_lock_version' => ticket.lock_version,
+                                                                           'assignee_account_user_id' => target_member.id } })
 
       operator.execute(prepared)
 
@@ -151,11 +156,14 @@ RSpec.describe JrcNico::DomainActions do
 
   it 'keeps new domain commands outside customer-request and delegated execution' do
     notice = JrcNico::Notice.create!(account: sd_account, user: sd_user, event_key: SecureRandom.uuid,
-                                   kind: 'action', status: 'new', body: 'Customer request')
+                                     kind: 'action', status: 'new', body: 'Customer request')
     command.update!(source_notice: notice)
     expect { executor.call('read_operations_agenda', {}) }.to raise_error(Pundit::NotAuthorizedError)
     expect(JrcNico::DelegatedActions::GROUPS.values.flatten & JrcNico::DomainToolCatalog::TOOLS.keys).to be_empty
-    expect { executor.call('create_project_task', { 'project_id' => project.id, 'title' => 'Denied' }) }.to raise_error(Pundit::NotAuthorizedError)
+    expect {
+      executor.call('create_project_task', { 'project_id' => project.id, 'board_column_id' => project.board_columns.first!.id,
+                                             'title' => 'Denied' })
+    }.to raise_error(Pundit::NotAuthorizedError)
     expect(JrcNico::DelegatedActions::GROUPS.values.flatten & JrcNico::ModuleActions::PROJECT_TASK_TOOLS).to be_empty
   end
 
@@ -201,13 +209,15 @@ RSpec.describe JrcNico::DomainActions do
     ticket = sd_ticket
     result = executor.call('list_service_tickets', {})
     expect(result[:resources]).to include(['Contact', sd_contact.id], ['JrcNico::ServiceTicketCustomer', ticket.id],
-                                        ['JrcNico::ServiceTicketSla', ticket.id])
+                                          ['JrcNico::ServiceTicketSla', ticket.id])
 
     role = create(:custom_role, account: sd_account, permissions: %w[jrc_service_desk_module_view jrc_service_desk_tickets_view])
     sd_account_user.update!(custom_role_id: role.id)
     expect(JrcNico::DomainAccess.authorize_resource!(access, 'JrcServiceDesk::Ticket', ticket.id)).to eq(ticket)
     expect { JrcNico::DomainAccess.authorize_resource!(access, 'JrcNico::ServiceTicketSla', ticket.id) }.to raise_error(Pundit::NotAuthorizedError)
-    expect { JrcNico::DomainAccess.authorize_resource!(access, 'JrcNico::ServiceTicketCustomer', ticket.id) }.to raise_error(Pundit::NotAuthorizedError)
+    expect {
+      JrcNico::DomainAccess.authorize_resource!(access, 'JrcNico::ServiceTicketCustomer', ticket.id)
+    }.to raise_error(Pundit::NotAuthorizedError)
   end
 
   it 'revalidates a link source even when it has no related records' do
@@ -226,10 +236,12 @@ RSpec.describe JrcNico::DomainActions do
     expect(result[:relations].first.fetch(:contact)).to include('id' => sd_contact.id, 'name' => sd_contact.name)
 
     role = create(:custom_role, account: sd_account,
-                  permissions: %w[jrc_projects_project_view jrc_service_desk_module_view jrc_service_desk_tickets_view])
+                                permissions: %w[jrc_projects_project_view jrc_service_desk_module_view jrc_service_desk_tickets_view])
     sd_account_user.update!(custom_role_id: role.id)
     expect(JrcNico::DomainAccess.authorize_resource!(access, 'JrcServiceDesk::Ticket', ticket.id)).to eq(ticket)
-    expect { JrcNico::DomainAccess.authorize_resource!(access, 'JrcNico::ServiceTicketCustomer', ticket.id) }.to raise_error(Pundit::NotAuthorizedError)
+    expect {
+      JrcNico::DomainAccess.authorize_resource!(access, 'JrcNico::ServiceTicketCustomer', ticket.id)
+    }.to raise_error(Pundit::NotAuthorizedError)
 
     redacted = executor.call('read_operation_links', { 'project_id' => project.id })
     expect(redacted[:tickets].first).not_to have_key('requester_id')
@@ -256,11 +268,14 @@ RSpec.describe JrcNico::DomainActions do
     expect(operator.session.context.fetch('conversation_ids')).to include(conversation.display_id)
 
     role = create(:custom_role, account: sd_account,
-                  permissions: %w[conversation_manage jrc_projects_project_view jrc_service_desk_module_view jrc_service_desk_tickets_view])
+                                permissions: %w[conversation_manage jrc_projects_project_view
+                                                jrc_service_desk_module_view jrc_service_desk_tickets_view])
     sd_account_user.update!(custom_role_id: role.id)
     expect(access.authorize!.conversation(conversation.display_id)).to eq(conversation)
     expect(JrcNico::DomainAccess.authorize_resource!(access, 'JrcServiceDesk::Ticket', ticket.id)).to eq(ticket)
-    expect { JrcNico::DomainAccess.authorize_resource!(access, 'JrcNico::ServiceTicketConversations', ticket.id) }.to raise_error(Pundit::NotAuthorizedError)
+    expect {
+      JrcNico::DomainAccess.authorize_resource!(access, 'JrcNico::ServiceTicketConversations', ticket.id)
+    }.to raise_error(Pundit::NotAuthorizedError)
 
     redacted = executor.call('read_operation_links', { 'ticket_id' => ticket.id })
     expect(redacted[:conversations]).to be_empty
@@ -279,19 +294,24 @@ RSpec.describe JrcNico::DomainActions do
     expect(project.reload).to be_persisted
   end
 
-  it 'prepares task creation as a finite browser action without mutating the project' do
+  it 'creates a real task through the native service in the explicit project column' do
     result = nil
-    arguments = { 'project_id' => project.id, 'title' => 'Reviewed task', 'estimated_minutes' => 0 }
-    expect { result = executor.call('create_project_task', arguments) }.not_to change(JrcProjects::Task, :count)
-    expect(result).to include(browser_action: 'module_action', operation: 'create_project_task', parameters: arguments)
-    expect(result[:resources]).to include(['JrcProjects::Project', project.id], ['JrcNico::ProjectTasks', project.id])
+    column = project.board_columns.find_by!(status_key: 'backlog')
+    arguments = { 'project_id' => project.id, 'board_column_id' => column.id, 'title' => 'Reviewed task', 'estimated_minutes' => 0 }
+    expect { result = executor.call('create_project_task', arguments) }.to change(JrcProjects::Task, :count).by(1)
+    task = project.tasks.find(result.dig(:record, 'id'))
+    expect(task).to have_attributes(title: 'Reviewed task', estimated_minutes: 0, board_column_id: column.id, created_by_id: sd_user.id)
+    expect(result).to include(resource_type: 'JrcProjects::Task')
+    expect(result).not_to have_key(:browser_action)
+    expect(result[:resources]).to include(['JrcProjects::Project', project.id], ['JrcNico::ProjectTasks', project.id], ['JrcProjects::Task', task.id])
     expect do
       executor.call('create_project_task', arguments.merge('status' => 'completed'))
     end.to raise_error(ArgumentError, /Campo/)
   end
 
   it 'uses task scope, native write capability and a reviewed version before a browser edit' do
-    task = project.tasks.create!(account: sd_account, created_by: sd_user, board_column: project.board_columns.first!, status: 'backlog', title: 'Original')
+    task = project.tasks.create!(account: sd_account, created_by: sd_user, board_column: project.board_columns.first!, status: 'backlog',
+                                 title: 'Original')
     arguments = { 'project_id' => project.id, 'task_id' => task.id, 'lock_version' => 0, 'title' => 'Reviewed' }
     result = executor.call('update_project_task', arguments)
     expect(result[:parameters]['lock_version']).to eq(0)
@@ -305,10 +325,14 @@ RSpec.describe JrcNico::DomainActions do
     expect { executor.call('update_project_task', arguments) }.to raise_error(Pundit::NotAuthorizedError)
   end
 
-  it 'claims a browser task command only once and blocks replay after an unknown outcome' do
+  it 'claims a browser task edit only once and blocks replay after an unknown outcome' do
     operator = JrcNico::OperatorSession.new(account: sd_account, user: sd_user)
-    prepared = operator.ask(message: 'Create reviewed task', request_id: SecureRandom.uuid,
-      prepared: { 'tool' => 'create_project_task', 'arguments' => { 'project_id' => project.id, 'title' => 'Reviewed task' } })
+    task = project.tasks.create!(account: sd_account, created_by: sd_user, board_column: project.board_columns.first!, status: 'backlog',
+                                 title: 'Original')
+    prepared = operator.ask(message: 'Edit reviewed task', request_id: SecureRandom.uuid,
+                            prepared: { 'tool' => 'update_project_task', 'arguments' => { 'project_id' => project.id, 'task_id' => task.id,
+                                                                                          'lock_version' => task.lock_version,
+                                                                                          'title' => 'Reviewed task' } })
     expect { operator.execute(prepared) }.not_to change(JrcProjects::Task, :count)
     expect(prepared.reload.status).to eq('browser_pending')
     operator.browser_claim(prepared)
@@ -319,13 +343,27 @@ RSpec.describe JrcNico::DomainActions do
     expect { operator.browser_claim(prepared) }.to raise_error(JrcNico::OperatorSession::Busy)
   end
 
-  it 'revalidates project grants when the browser claims an already approved task command' do
+  it 'revalidates project grants before creating an already prepared native task command' do
     operator = JrcNico::OperatorSession.new(account: sd_account, user: sd_user)
     prepared = operator.ask(message: 'Create reviewed task', request_id: SecureRandom.uuid,
-      prepared: { 'tool' => 'create_project_task', 'arguments' => { 'project_id' => project.id, 'title' => 'Reviewed task' } })
-    operator.execute(prepared)
+                            prepared: { 'tool' => 'create_project_task', 'arguments' => { 'project_id' => project.id,
+                                                                                          'board_column_id' => project.board_columns.first!.id,
+                                                                                          'title' => 'Reviewed task' } })
     sd_account_user.update!(jrc_projects_enabled: false)
-    expect { operator.browser_claim(prepared) }.to raise_error(Pundit::NotAuthorizedError)
-    expect(prepared.reload.status).to eq('browser_pending')
+    expect { operator.execute(prepared) }.to raise_error(Pundit::NotAuthorizedError)
+    expect(JrcProjects::Task.where(project: project)).to be_empty
+    expect(prepared.reload.status).to eq('failed')
+  end
+
+  it 'revalidates native Contact receipts in the current Account and rejects a foreign Account contact' do
+    foreign = create(:contact, account: sd_foreign_account)
+    expect(JrcNico::DomainAccess.authorize_resource!(access, 'Contact', sd_contact.id)).to eq(sd_contact)
+    expect do
+      JrcNico::DomainAccess.authorize_resource!(access, 'Contact', foreign.id)
+    end.to raise_error(ActiveRecord::RecordNotFound)
+    sd_account.update!(custom_attributes: { 'nico_enabled' => false })
+    expect do
+      JrcNico::DomainAccess.authorize_resource!(access, 'Contact', sd_contact.id)
+    end.to raise_error(Pundit::NotAuthorizedError)
   end
 end

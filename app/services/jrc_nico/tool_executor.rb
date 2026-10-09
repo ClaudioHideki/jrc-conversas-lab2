@@ -1,19 +1,20 @@
 class JrcNico::ToolExecutor
   def initialize(access, customer_notice: nil, command: nil)
     @access = access.authorize!
-    @account, @user = access.account, access.user
+    @account = access.account
+    @user = access.user
     @customer_conversation = customer_notice && @access.conversation(customer_notice.conversation.display_id)
-    @customer_notice, @command = customer_notice, command
+    @customer_notice = customer_notice
+    @command = command
   end
 
   def call(name, arguments)
+    JrcNico::Helpdesk::ExecutionGuard.authorize!(@access, @command)
     JrcNico::ToolCatalog.new(@access).validate!(name, arguments)
-    if JrcNico::DomainToolCatalog::TOOLS.key?(name) || JrcNico::ModuleActions::PROJECT_TASK_TOOLS.include?(name)
-      raise Pundit::NotAuthorizedError if @customer_notice || @command&.source_notice_id
-    end
-    if JrcNico::DomainToolCatalog::TOOLS.key?(name)
-      return JrcNico::DomainActions.new(@access, command: @command).call(name, arguments)
-    end
+    raise Pundit::NotAuthorizedError if internal_tool?(name) && (@customer_notice || @command&.source_notice_id)
+
+    return JrcNico::DomainActions.new(@access, command: @command).call(name, arguments) if JrcNico::DomainToolCatalog::TOOLS.key?(name)
+    return JrcNico::HelpdeskToolActions.new(@access, command: @command).call(name, arguments) if JrcNico::HelpdeskToolCatalog::TOOLS.key?(name)
     return JrcNico::AutomationActions.new(@access).call(name, arguments) if JrcNico::AutomationActions::TOOLS.key?(name)
     return JrcNico::CommercialActions.new(@access).call(name, arguments) if JrcNico::CommercialActions::TOOLS.include?(name)
     return JrcNico::ModuleActions.new(@access).prepare(name, arguments) if JrcNico::ModuleActions::TOOLS.key?(name)
@@ -23,12 +24,17 @@ class JrcNico::ToolExecutor
     public_send(name)
   end
 
+  def internal_tool?(name)
+    JrcNico::DomainToolCatalog::TOOLS.key?(name) || JrcNico::HelpdeskToolCatalog::TOOLS.key?(name) ||
+      JrcNico::ModuleActions::PROJECT_TASK_TOOLS.include?(name)
+  end
+
   def search_contacts
     query = "%#{ActiveRecord::Base.sanitize_sql_like(@args.fetch('query'))}%"
     scope = @account.contacts
     scope = scope.where(id: @customer_conversation.contact_id) if @customer_conversation
     scope.where('name ILIKE :q OR email ILIKE :q OR phone_number ILIKE :q', q: query).limit(20)
-            .select { |c| @access.policy(c).show? }.map { |c| contact_snapshot(c) }
+         .select { |c| @access.policy(c).show? }.map { |c| contact_snapshot(c) }
   end
 
   def list_contacts
@@ -83,10 +89,14 @@ class JrcNico::ToolExecutor
       conversations: batch.map do |conversation|
         leads = @access.crm? ? @access.crm_scope(JrcCrm::Lead).where(contact_id: conversation.contact_id).limit(20).pluck(:id) : []
         conversation_snapshot(conversation).merge(lead_ids: leads,
-          messages: conversation.messages.where(private: false, message_type: [:incoming, :outgoing]).order(id: :desc).limit(5).reverse.map do |message|
-            { id: message.id, message_type: message.message_type, content: message.content.to_s.first(300), created_at: message.created_at }
-          end)
+                                                  messages: conversation_sample_messages(conversation))
       end }
+  end
+
+  def conversation_sample_messages(conversation)
+    conversation.messages.where(private: false, message_type: [:incoming, :outgoing]).order(id: :desc).limit(5).reverse.map do |message|
+      { id: message.id, message_type: message.message_type, content: message.content.to_s.first(300), created_at: message.created_at }
+    end
   end
 
   def read_conversation
@@ -103,6 +113,7 @@ class JrcNico::ToolExecutor
                                   JrcFlowRun.live.exists?(account_id: @account.id, conversation_id: conversation.id))
         raise ArgumentError, 'Esta conversa está sob atendimento de um bot ou Flow. Use a transferência para humano antes de enviar pelo NICO.'
       end
+
       Messages::MessageBuilder.new(@user, conversation, @args.slice('content', 'private').symbolize_keys).perform
     end
     { message: @args['private'] ? 'Nota interna registrada' : 'Mensagem registrada para envio pelo canal',
@@ -145,8 +156,8 @@ class JrcNico::ToolExecutor
 
   def search_knowledge
     JrcNico::KnowledgeDocument.where(account: @account).approved
-      .where("to_tsvector('portuguese', title || ' ' || body) @@ plainto_tsquery('portuguese', ?)", @args.fetch('query'))
-      .limit(5).map { |d| { id: d.id, resource_type: d.class.name, title: d.title, body: d.body.first(4000) } }
+                              .where("to_tsvector('portuguese', title || ' ' || body) @@ plainto_tsquery('portuguese', ?)", @args.fetch('query'))
+                              .limit(5).map { |d| { id: d.id, resource_type: d.class.name, title: d.title, body: d.body.first(4000) } }
   end
 
   def delegate_conversations
@@ -185,9 +196,7 @@ class JrcNico::ToolExecutor
       attrs['email'] ||= contact&.email
       attrs['phone'] ||= contact&.phone_number
       existing = contact && @access.crm_scope(JrcCrm::Lead).where(contact_id: contact.id).limit(21).to_a
-      if existing && existing.size > 1
-        raise ArgumentError, "Há vários leads para este contato. Selecione o ID: #{existing.map(&:id).join(', ')}."
-      end
+      raise ArgumentError, "Há vários leads para este contato. Selecione o ID: #{existing.map(&:id).join(', ')}." if existing && existing.size > 1
 
       lead = existing&.first || @account.jrc_crm_leads.create!(attrs.merge(contact: contact, owner: @user, source: 'nico'))
     end
@@ -407,20 +416,15 @@ class JrcNico::ToolExecutor
   end
 
   def record_result(record, message, route)
-    { message: "#{message}: #{record.attributes['name'] || record.attributes['title']} (##{record.id})", resource_type: record.class.name, record: record.attributes.slice('id', 'name', 'title', 'status', 'phone_number', 'email',
-      'contact_id', 'lead_id', 'deal_id', 'due_at', 'total_cents'), route_name: route }
+    JrcNico::ToolResultProjection.new(@access, account: @account).record_result(record, message, route)
   end
 
   def contact_snapshot(contact)
-    conversations = @account.conversations.where(contact_id: contact.id).order(updated_at: :desc).limit(20)
-                            .select { |record| @access.policy(record).show? }
-    contact.slice(:id, :name, :email, :phone_number).merge(conversations: conversations.map { |record| conversation_snapshot(record) })
+    JrcNico::ToolResultProjection.new(@access, account: @account).contact_snapshot(contact)
   end
 
   def conversation_snapshot(conversation)
-    { conversation_id: conversation.display_id, contact_id: conversation.contact_id, contact_name: conversation.contact.name,
-      phone_number: conversation.contact.phone_number, updated_at: conversation.updated_at, assignee_id: conversation.assignee_id,
-      inbox_name: conversation.inbox.name, status: conversation.status, inbox_id: conversation.inbox_id, channel: conversation.inbox.channel_type }
+    JrcNico::ToolResultProjection.new(@access, account: @account).conversation_snapshot(conversation)
   end
 
   def parse_time(value)

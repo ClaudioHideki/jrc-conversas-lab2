@@ -154,5 +154,96 @@
   },
   "FOOTER_REPLY_TO": {
     "REPLY_TO": "Replying to:"
+  },
+  "SERVICE_DESK": {
+    "open": "Service Desk",
+    "close": "Close",
+    "loading": "Loading authorized tickets…",
+    "error": "The operation could not be confirmed. Refresh your authorized session or retry the same request.",
+    "conflict": "The request or catalogue changed. Review the current configuration before retrying.",
+    "service": "Service",
+    "title": "Subject",
+    "description": "Description",
+    "attachments": "Attachments",
+    "create": "Open ticket",
+    "reply": "Customer reply",
+    "send": "Send reply",
+    "conversation": "Linked conversation",
+    "back": "Back to tickets",
+    "saved": "Saved and verified",
+    "scan_unavailable": "Attachment awaits a verified scan",
+    "states": {
+      "open": "Open",
+      "in_progress": "In progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "knowledge": "Knowledge base",
+    "knowledge_before_open": "Check the published answers before opening a ticket.",
+    "knowledge_search": "Search published answers",
+    "knowledge_empty": "No published answers were found.",
+    "search": "Search",
+    "ticket_search": "Search by ticket number or title",
+    "contract": "Contract",
+    "choose_contract": "Choose the eligible contract",
+    "no_eligible_contract": "There is no eligible contract for this service.",
+    "choose_conversation": "Choose the linked conversation for this reply",
+    "sla": "Service deadlines",
+    "breached": "Deadline exceeded",
+    "within_budget": "Within the recorded deadline",
+    "budget": "Allowed time",
+    "elapsed": "Elapsed time",
+    "remaining": "Remaining time",
+    "consumed": "Time consumed",
+    "time_basis": "Time basis",
+    "due": "Due at",
+    "observed": "Snapshot recorded at",
+    "achieved": "Achieved at",
+    "duration_minutes": "{value} minutes",
+    "notifications": "Notification history",
+    "notification_evidence": "Sending and delivery are shown separately using the recorded evidence.",
+    "attempt": "Attempt {value}",
+    "created": "Created at",
+    "updated": "Updated at",
+    "sent_at": "Sent at",
+    "delivered_at": "Delivered at",
+    "surveys": "Customer surveys",
+    "survey_expires": "Available until {value}",
+    "clock_kinds": {
+      "first_response": "First response",
+      "attendance": "Attendance",
+      "resolution": "Resolution",
+      "ola": "Operational deadline"
+    },
+    "clock_states": {
+      "running": "Running",
+      "paused": "Paused",
+      "completed": "Completed",
+      "stopped": "Stopped"
+    },
+    "clock_basis": {
+      "business": "Business hours",
+      "calendar": "Calendar time"
+    },
+    "delivery_channels": {
+      "email": "Email",
+      "whatsapp": "WhatsApp"
+    },
+    "delivery_states": {
+      "blocked": "Blocked",
+      "queued": "Queued",
+      "dispatching": "Sending",
+      "sent": "Sent",
+      "delivered": "Delivered",
+      "read": "Read",
+      "failed": "Failed",
+      "unknown": "Outcome not confirmed"
+    },
+    "survey_kinds": {
+      "nps": "NPS survey",
+      "csat": "CSAT survey",
+      "ces": "CES survey",
+      "custom": "Customer survey"
+    }
   }
 }

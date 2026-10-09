@@ -5,6 +5,7 @@ class JrcServiceDesk::CreateServiceDefinitionService < JrcServiceDesk::BaseServi
   def call(unit_id:, attributes:, idempotency_key: nil)
     JrcServiceDesk::ConfigurationService.new(user_context: @native_context).create(
       resource: 'services', unit_id: unit_id, attributes: attributes,
-      idempotency_key: idempotency_key || SecureRandom.uuid).record
+      idempotency_key: idempotency_key || SecureRandom.uuid
+    ).record
   end
 end

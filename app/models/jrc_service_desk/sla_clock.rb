@@ -2,7 +2,7 @@
 
 class JrcServiceDesk::SlaClock < JrcServiceDesk::TicketRecord
   belongs_to :sla_cycle, class_name: 'JrcServiceDesk::SlaCycle', optional: false
-  validates :kind, inclusion: { in: JrcServiceDesk::LifecycleRules::CLOCKS }, uniqueness: { scope: :sla_cycle_id }
+  validates :kind, inclusion: { in: JrcServiceDesk::LifecycleRules::ATTENDANCE_CLOCKS }, uniqueness: { scope: :sla_cycle_id }
   validates :state, inclusion: { in: %w[running paused completed stopped] }
   validates :budget_seconds, numericality: { only_integer: true, greater_than: 0 }
   validates :elapsed_seconds, numericality: { greater_than_or_equal_to: 0 }
@@ -24,6 +24,7 @@ class JrcServiceDesk::SlaClock < JrcServiceDesk::TicketRecord
   def integrity
     validate_unit_reference(:sla_cycle)
     errors.add(:sla_cycle, 'must belong to the same ticket') unless sla_cycle&.ticket_id == ticket_id
+    errors.add(:kind, 'must match the historical policy version') if sla_cycle && sla_cycle.lifecycle_policy_version.rules.clock_kinds.exclude?(kind)
     errors.add(:achieved_at, 'must match completion state') unless (state == 'completed') == !achieved_at.nil?
   end
 end

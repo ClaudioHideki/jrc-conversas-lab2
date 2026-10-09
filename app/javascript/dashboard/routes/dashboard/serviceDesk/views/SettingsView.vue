@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import Button from 'dashboard/components-next/button/Button.vue';
 import LifecyclePolicyEditor from '../components/LifecyclePolicyEditor.vue';
 import ConfigurationManager from '../components/ConfigurationManager.vue';
+import NotificationPolicyEditor from '../components/NotificationPolicyEditor.vue';
 import Panel from '../components/ServiceDeskPanel.vue';
 import PendingAction from '../components/PendingAction.vue';
 import { useServiceDesk } from '../composables/useServiceDesk';
@@ -23,6 +24,7 @@ const sections = [
   { key: 'statuses', icon: 'i-lucide-list-checks' },
   { key: 'priorities', icon: 'i-lucide-flag' },
   { key: 'categories', icon: 'i-lucide-tags' },
+  { key: 'ticket_types', icon: 'i-lucide-list-filter' },
   { key: 'queues', icon: 'i-lucide-network' },
   { key: 'units', icon: 'i-lucide-building' },
   { key: 'operator_companies', icon: 'i-lucide-building-2' },
@@ -97,6 +99,7 @@ const open = key =>
     </div>
     <ConfigurationManager resource="services" />
     <LifecyclePolicyEditor />
+    <NotificationPolicyEditor />
     <Panel class="mt-4" :title="t('JRC_SERVICE_DESK.PLANNED.portal')">
       <p class="text-sm text-n-slate-11">
         {{ t('JRC_SERVICE_DESK.PLANNED.portal_help') }}

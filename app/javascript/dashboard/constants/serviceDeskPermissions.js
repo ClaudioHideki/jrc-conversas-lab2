@@ -1,5 +1,15 @@
 // Native CustomRole.permissions additions only; no role grants live in the browser.
 export const SERVICE_DESK_CUSTOM_ROLE_PERMISSIONS = Object.freeze([
+  'jrc_service_desk_notifications_manage',
+  'jrc_service_desk_customer_publish',
+  'jrc_service_desk_technical_notes',
+  'jrc_service_desk_tasks_view',
+  'jrc_service_desk_tasks_manage',
+  'jrc_service_desk_approvals_view',
+  'jrc_service_desk_approvals_request',
+  'jrc_service_desk_approvals_decide',
+  'jrc_service_desk_incidents_manage',
+  'jrc_service_desk_tickets_claim',
   "jrc_service_desk_module_view",
   "jrc_service_desk_tickets_view",
   "jrc_service_desk_tickets_view_all",

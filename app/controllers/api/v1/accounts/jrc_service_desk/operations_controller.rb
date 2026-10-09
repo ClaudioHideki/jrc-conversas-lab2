@@ -54,8 +54,10 @@ class Api::V1::Accounts::JrcServiceDesk::OperationsController < Api::V1::Account
     base_payload.merge(items: collection[:items].map { |record| yield record }, meta: collection[:meta])
   end
 
-  def acknowledged(ticket, operation, status: :ok, result_id: nil)
-    render json: base_payload.merge(applied: true, ticket_id: ticket.id.to_s, operation: operation, result_id: result_id&.to_s), status: status
+  def acknowledged(ticket, operation, status: :ok, result_id: nil, opening_note_id: nil)
+    payload = base_payload.merge(applied: true, ticket_id: ticket.id.to_s, operation: operation, result_id: result_id&.to_s)
+    payload[:opening_note_id] = opening_note_id.to_s if opening_note_id
+    render json: payload, status: status
   end
 
   # The native around-handler delegates here for policy errors. Authentication

@@ -45,6 +45,20 @@ const keys = [
   'open_retention_cases',
 ];
 const money = value => formatMoney(value, props.metadata?.formatting);
+const observedMoney = value =>
+  value == null ? t('RELATIONSHIP.UNAVAILABLE') : money(value);
+const revenueReasonKeys = {
+  financial_access_unavailable: 'RELATIONSHIP.MRR_EVOLUTION_FINANCIAL_ACCESS',
+  observation_limit: 'RELATIONSHIP.MRR_EVOLUTION_LIMIT',
+  no_observations: 'RELATIONSHIP.MRR_EVOLUTION_EMPTY',
+  conflicting_customer_observations: 'RELATIONSHIP.MRR_EVIDENCE_CONFLICT',
+  amount_unavailable: 'RELATIONSHIP.MRR_EVIDENCE_UNKNOWN',
+  amount_source_unavailable: 'RELATIONSHIP.MRR_EVIDENCE_SOURCE_UNAVAILABLE',
+  customer_source_changed: 'RELATIONSHIP.MRR_EVIDENCE_CUSTOMER_CHANGED',
+  overlapping_customer_sources: 'RELATIONSHIP.MRR_EVIDENCE_OVERLAP',
+};
+const revenueReason = reason =>
+  t(revenueReasonKeys[reason] || 'RELATIONSHIP.UNAVAILABLE');
 const display = key => {
   const value = props.metrics[key];
   if (value === null || value === undefined)
@@ -158,6 +172,99 @@ const drilldown = [
       {{ t(`RELATIONSHIP.BANDS.${band}`) }}: {{ count }}
     </button>
   </section>
+  <details
+    v-if="
+      !['surveys', 'expansion', 'actions'].includes(mode) &&
+      metrics.mrr_evolution
+    "
+    class="mt-4 rounded-xl border border-n-weak p-3"
+    data-testid="relationship-mrr-evolution"
+  >
+    <summary>{{ t('RELATIONSHIP.MRR_EVOLUTION') }}</summary>
+    <p class="mt-2 text-xs text-n-slate-11">
+      {{ t('RELATIONSHIP.MRR_EVOLUTION_BASIS') }}
+    </p>
+    <p class="mt-2 text-xs">
+      {{ metrics.mrr_evolution.period?.from }} —
+      {{ metrics.mrr_evolution.period?.to }} ·
+      {{ metrics.mrr_evolution.timezone }}
+    </p>
+    <p
+      v-if="metrics.mrr_evolution.reason"
+      class="mt-2 text-xs"
+    >
+      {{ revenueReason(metrics.mrr_evolution.reason) }}
+    </p>
+    <div class="mt-3 overflow-x-auto">
+      <table
+        v-if="metrics.mrr_evolution.points?.length"
+        class="w-full text-sm"
+      >
+        <thead>
+          <tr>
+            <th class="text-left">{{ t('RELATIONSHIP.MRR_EVOLUTION_DAY') }}</th>
+            <th class="text-left">
+              {{ t('RELATIONSHIP.MRR_EVOLUTION_OBSERVED') }}
+            </th>
+            <th class="text-left">
+              {{ t('RELATIONSHIP.MRR_EVOLUTION_COMPLETE') }}
+            </th>
+            <th class="text-left">
+              {{ t('RELATIONSHIP.MRR_EVOLUTION_COVERAGE') }}
+            </th>
+            <th class="text-left">
+              {{ t('RELATIONSHIP.MRR_EVOLUTION_EVIDENCE') }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="point in metrics.mrr_evolution.points"
+            :key="point.day"
+            data-testid="relationship-mrr-observation"
+            class="border-t border-n-weak"
+          >
+            <td class="p-2">{{ point.day }}</td>
+            <td class="p-2">{{ observedMoney(point.observed_mrr_cents) }}</td>
+            <td class="p-2">{{ observedMoney(point.mrr_cents) }}</td>
+            <td class="p-2">
+              {{ t('RELATIONSHIP.MRR_EVOLUTION_COUNTS', point.coverage) }}
+            </td>
+            <td class="p-2">
+              <details>
+                <summary>
+                  {{ t('RELATIONSHIP.MRR_EVOLUTION_EVIDENCE') }}
+                </summary>
+                <dl
+                  v-for="row in point.evidence"
+                  :key="row.customer_key"
+                  class="mt-2 text-xs"
+                >
+                  <dt>
+                    {{ row.customer_key }} · {{ observedMoney(row.mrr_cents) }}
+                  </dt>
+                  <dd>{{ row.observed_at }}</dd>
+                  <dd>
+                    {{ t('RELATIONSHIP.MRR_EVIDENCE_SNAPSHOTS') }}:
+                    {{ row.snapshot_ids.join(', ') }}
+                  </dd>
+                  <dd>
+                    {{ t('RELATIONSHIP.MRR_EVIDENCE_ASSIGNMENTS') }}:
+                    {{ row.assignment_ids.join(', ') }}
+                  </dd>
+                  <dd>
+                    {{ t('RELATIONSHIP.MRR_EVIDENCE_CONTRACTS') }}:
+                    {{ row.contract_ids.join(', ') }}
+                  </dd>
+                  <dd v-if="row.reason">{{ revenueReason(row.reason) }}</dd>
+                </dl>
+              </details>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
   <details
     v-if="
       !['surveys', 'expansion'].includes(mode) && metrics.health_trend?.length

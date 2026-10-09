@@ -1,3 +1,8 @@
+import {
+  membershipV2Fields,
+  settingAttributes,
+  sameSetting,
+} from './v2Configuration';
 import { canonicalId } from './access.js';
 export const STRUCTURE_RESOURCES = Object.freeze([
   'operator_companies',
@@ -45,16 +50,25 @@ export function structureFields(resource, creating) {
       ];
 }
 export function structureAttributes(resource, attrs, creating) {
-  const fields = structureFields(resource, creating);
+  const required = structureFields(resource, creating);
+  const fields = [
+    ...required,
+    ...(resource === 'unit_memberships' ? membershipV2Fields : []),
+  ];
   requireValue(attrs && typeof attrs === 'object' && !Array.isArray(attrs));
   requireValue(
     Object.keys(attrs).length > 0 &&
       Object.keys(attrs).every(key => fields.includes(key))
   );
-  requireValue(!creating || fields.every(key => Object.hasOwn(attrs, key)));
+  requireValue(!creating || required.every(key => Object.hasOwn(attrs, key)));
   return Object.fromEntries(
     Object.entries(attrs).map(([key, value]) => {
       if (key.endsWith('_id')) value = structureId(value);
+      else if (
+        resource === 'unit_memberships' &&
+        membershipV2Fields.includes(key)
+      )
+        value = settingAttributes({ [key]: value })[key];
       else if (key === 'active') requireValue(typeof value === 'boolean');
       else
         requireValue(
@@ -87,7 +101,14 @@ export function structureRecord(payload, ctx, resource) {
   return {
     ...structureAttributes(
       resource,
-      Object.fromEntries(structureFields(resource, true).map(k => [k, row[k]])),
+      Object.fromEntries(
+        [
+          ...structureFields(resource, true),
+          ...(resource === 'unit_memberships' ? membershipV2Fields : []),
+        ]
+          .filter(k => Object.hasOwn(row, k))
+          .map(k => [k, row[k]])
+      ),
       true
     ),
     id: structureId(row.id),
@@ -202,7 +223,9 @@ export function confirmStructure(ack, receiptPayload, fresh, ctx, intent) {
     const auditValue = field.endsWith('_id')
       ? structureId(receipt.after?.[field])
       : receipt.after?.[field];
-    requireValue(auditValue === value && record[field] === value);
+    requireValue(
+      sameSetting(auditValue, value) && sameSetting(record[field], value)
+    );
   });
   return record;
 }

@@ -1,11 +1,12 @@
 class JrcFlows::Simulator
-  def initialize(flow, responses)
+  def initialize(flow, responses, variables: nil)
     @flow = flow
     @responses = Array(responses).map { |value| value.to_s.first(10_000) }.first(150)
+    @variables = variables
   end
 
   def perform
-    variables = { 'contact.name' => 'Cliente de teste', 'message' => 'Olá', 'conversation.id' => 'simulação' }
+    variables = @variables&.deep_dup || { 'contact.name' => 'Cliente de teste', 'message' => 'Olá', 'conversation.id' => 'simulação' }
     nodes = @flow.graph.fetch('nodes')
     current = nodes.find { |node| node['type'] == 'start' }
     trace = []

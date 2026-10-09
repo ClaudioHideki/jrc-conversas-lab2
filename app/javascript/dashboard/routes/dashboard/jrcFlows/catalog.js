@@ -100,7 +100,10 @@ export const NODE_TYPES = [
     type: 'move_deal',
     icon: 'i-lucide-columns-3',
     group: 'crm',
-    fields: [['stage_id', 'stages']],
+    fields: [
+      ['stage_id', 'stages'],
+      ['deal_id', 'text'],
+    ],
     capability: 'crm',
   },
   {

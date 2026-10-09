@@ -8,6 +8,7 @@ import TabBar from 'dashboard/components-next/tabbar/TabBar.vue';
 import Panel from '../components/ServiceDeskPanel.vue';
 import State from '../components/ServiceDeskState.vue';
 import PendingAction from '../components/PendingAction.vue';
+import ClaimNext from '../components/ClaimNext.vue';
 import TicketFilters from '../components/TicketFilters.vue';
 import TicketTable from '../components/TicketTable.vue';
 import LiveKpis from '../components/LiveKpis.vue';
@@ -82,7 +83,7 @@ onBeforeUnmount(() => { session.resetResource(key); session.resetResource(previe
       {{ t('JRC_SERVICE_DESK.FILTERS.mine_hint') }}
     </p>
     <div v-if="screen === 'mine'" class="mb-4">
-      <PendingAction :label="t('JRC_SERVICE_DESK.TICKET.next_ticket')" icon="i-lucide-arrow-right" />
+      <ClaimNext />
     </div>
     <TicketFilters :query="route.query" @apply="apply" />
     <LiveKpis :query="query" />

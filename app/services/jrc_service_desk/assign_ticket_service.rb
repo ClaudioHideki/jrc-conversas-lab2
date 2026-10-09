@@ -24,9 +24,14 @@ class JrcServiceDesk::AssignTicketService < JrcServiceDesk::BaseService
       ticket.assignee_membership = assignee(values['assignee_account_user_id'], ticket.unit) if values.key?('assignee_account_user_id')
       next ticket unless ticket.changed?
 
-      ticket.save!
-      append_event!(ticket, event_type, ticket.saved_changes.slice('assignee_membership_id', 'queue_id', 'team_id'))
+      persist_assignment!(ticket, event_type)
       ticket
     end
+  end
+
+  def persist_assignment!(ticket, event_type)
+    ticket.save!
+    JrcServiceDesk::OlaTracker.sync!(ticket)
+    append_event!(ticket, event_type, ticket.saved_changes.slice('assignee_membership_id', 'queue_id', 'team_id'))
   end
 end

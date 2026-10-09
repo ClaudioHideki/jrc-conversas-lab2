@@ -38,9 +38,20 @@ class JrcServiceDesk::TicketPolicy < JrcServiceDesk::OperationalPolicy
       return records if context.capability?(:tickets_view_all) # Always within the current Account and authorized view scope.
 
       memberships = context.active_memberships.select(:id)
-      records.where(created_by_membership_id: memberships)
-        .or(records.where(assignee_membership_id: memberships))
-        .or(records.where(team_id: context.native_team_ids))
+      permitted = records.where(created_by_membership_id: memberships)
+                         .or(records.where(assignee_membership_id: memberships))
+                         .or(records.where(team_id: context.native_team_ids))
+      permitted = permitted.or(approval_records(records, context, memberships)) if context.capability?(:approvals_view)
+      permitted
+    end
+
+    private
+
+    def approval_records(records, context, memberships)
+      approvals = JrcServiceDesk::TicketApproval.where(
+        account_id: context.account.id, unit_id: context.unit_scope.select(:id), approver_membership_id: memberships
+      ).select(:ticket_id)
+      records.where(id: approvals)
     end
   end
 end

@@ -28,23 +28,12 @@ module JrcProjects
 
         def create
           project = scoped_project
-          project.with_lock do
-            authorize_capability!('projects.task.create', project: project)
-            ensure_project_editable!(project)
-            input = params.require(:task)
-            columns = project.board_columns.where(account_id: Current.account.id)
-            column = input[:board_column_id].present? ? columns.find(input[:board_column_id]) : columns.order(:position).first!
-            raise ArgumentError, 'Crie a tarefa em uma coluna de trabalho.' if column.status_key == 'completed'
-            raise Errors::WipLimit, 'Limite desta coluna atingido.' if column.wip_limit && column.tasks.count >= column.wip_limit
-
-            task = scoped_tasks(project).create!(task_params(project).merge(
-              account: Current.account, created_by: Current.user, board_column: column, status: column.status_key,
-              position: (column.tasks.maximum(:position) || 0) + 1024
-            ))
-            AuditEvent.record!(account: Current.account, actor: Current.user, action: 'projects.task.created', auditable: task,
-                               after_data: task.attributes, correlation_id: correlation_id)
-            render json: { data: serialize(task) }, status: :created
-          end
+          authorize_capability!('projects.task.create', project: project)
+          attributes = params.require(:task).permit(:title, :description, :priority, :assignee_id, :parent_id,
+                                                   :board_column_id, :estimated_minutes, :starts_on, :due_on, labels: [])
+          task = Tasks::Create.call(account_user: Current.account_user, project: project, attributes: attributes,
+                                    correlation_id: correlation_id)
+          render json: { data: serialize(task) }, status: :created
         end
 
         def update

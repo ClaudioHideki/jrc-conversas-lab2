@@ -121,7 +121,15 @@
   "OPEN": "Início",
   "CLOSE": "Fim",
   "DAYS": "Dias da semana",
-  "WEEKDAYS": ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"],
+  "WEEKDAYS": [
+    "Dom",
+    "Seg",
+    "Ter",
+    "Qua",
+    "Qui",
+    "Sex",
+    "Sáb"
+  ],
   "BLOCKS": "Blocos",
   "SEARCH_BLOCK": "Buscar bloco",
   "INSPECTOR": "Configurar bloco",
@@ -171,7 +179,8 @@
     "hours": "Prazo (horas)",
     "body": "Dados enviados",
     "objective": "Objetivo do Nico",
-    "allowed_actions": "Permissões do Nico"
+    "allowed_actions": "Permissões do Nico",
+    "deal_id": "Linked native deal ID (required for a Relationship Flow)"
   },
   "OPERATORS": {
     "equals": "Igual a",

@@ -9,6 +9,13 @@ const key = value => { if (typeof value !== 'string' || !/^[A-Za-z0-9._:-]{1,120
 export function createServiceDeskConfigurationClient(http) {
   const get = (url, params, signal) => http.get(url, { params, signal, timeout: 20000 }).then(r => r.data);
   return Object.freeze({
+    portalOptions(account, unit, inbox, signal) {
+      return get(
+        `/api/v1/accounts/${id(account)}/jrc_service_desk/configuration/portal_options`,
+        { unit_id: id(unit), ...(inbox ? { inbox_id: id(inbox) } : {}) },
+        signal
+      );
+    },
     list(account, resource, unit, { page = 1, q = '', active = 'all' } = {}, signal) {
       if (!Number.isInteger(page) || page < 1 || page > 1000000 || typeof q !== 'string' || q.length > 200 || !['all', 'true', 'false'].includes(active)) throw new TypeError('Invalid query');
       return get(resourcePath(account, resource), { unit_id: id(unit), page, per_page: 20, q, active }, signal);

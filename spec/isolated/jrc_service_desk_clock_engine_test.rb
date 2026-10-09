@@ -5,7 +5,7 @@ require 'minitest/autorun'
 require 'ostruct'
 require 'time'
 module JrcServiceDesk; end
-%w[input canonical_json lifecycle_rules lifecycle_dependency_error snapshot_calendar lifecycle_clocks].each do |name|
+%w[input canonical_json clock_escalation_policy lifecycle_rules lifecycle_dependency_error snapshot_calendar lifecycle_clocks].each do |name|
   require File.expand_path("../../app/services/jrc_service_desk/#{name}", __dir__)
 end
 module TZInfo
@@ -54,8 +54,30 @@ class ClockEngineIsolatedTest < Minitest::Test
       sla_cycles:@cycles,lifecycle_pauses:MemoryRows.new do |values|
         ClockFixture.new(values.merge(sla_cycle_id: values[:sla_cycle]&.id,ended_at:nil))
       end)
-    @version=ClockFixture.new(id:40,definition:{'sla'=>{'mode'=>'calendar_snapshot','initial_start'=>'opened_at'}})
+    definition = clock_policy_definition
+    @version=ClockFixture.new(id:40,definition:definition,rules:JrcServiceDesk::LifecycleRules.new(definition))
     @actor=Object.new
+  end
+  def clock_policy_definition(schema=1)
+    clocks={'first_response'=>'stop','resolution'=>'complete'}
+    clocks['attendance']='stop' if schema==2
+    sla={'mode'=>'calendar_snapshot','initial_start'=>'opened_at'}
+    sla['escalation_policy']={} if schema==2
+    {'schema_version'=>schema,'transitions'=>[
+      {'key'=>'resolve','action'=>'resolve','from_status_ids'=>[1],'to_status_id'=>2,
+       'requirements'=>{'note'=>true,'solution'=>true,'evidence'=>false,'classification'=>false,'fields'=>{}},
+       'clocks'=>clocks,'end_pause'=>true}],
+     'pause_reasons'=>[{'code'=>'customer','name'=>'Explicit customer wait','status_ids'=>[3],
+       'clocks'=>schema==2 ? ['attendance','resolution'] : ['resolution']}],
+     'reopen'=>{'allowed'=>true,'window_seconds'=>86400,'anchor_action'=>'resolve','expired'=>'deny',
+       'sla_cycle'=>'continue_cycle','inactive_time'=>'exclude','resume_clocks'=>['resolution'],'new_cycle_snapshot'=>'same_snapshot'},
+     'sla'=>sla}
+  end
+  def attendance_policy!
+    definition=clock_policy_definition(2)
+    @version.definition=definition
+    @version.rules=JrcServiceDesk::LifecycleRules.new(definition)
+    @snapshot.policy_conditions['clock_budgets_seconds']['attendance']=14400
   end
   def run_engine(action, at:, reason:nil, reopening:nil, effects:{'first_response'=>'keep','resolution'=>'keep'}, end_pause:false)
     rule={'action'=>action,'clocks'=>effects,'end_pause'=>end_pause}
@@ -140,5 +162,39 @@ class ClockEngineIsolatedTest < Minitest::Test
     assert_equal 'not_applicable',result['mode']
     run_engine('resume',at:@start+2,end_pause:true)
     assert_equal @start+2,@ticket.lifecycle_pauses.first.ended_at
+  end
+  def test_pinned_schema_two_preserves_three_clocks_and_pauses_only_selected_work_clocks
+    attendance_policy!
+    effects={'first_response'=>'keep','attendance'=>'keep','resolution'=>'keep'}
+    run_engine('pause',at:@start+3600,effects:effects,reason:{'code'=>'customer','clocks'=>['attendance','resolution']})
+    assert_equal %w[attendance first_response resolution],@cycles.first.sla_clocks.map(&:kind).sort
+    assert_equal 'paused',clock('attendance').state
+    assert_equal 'paused',clock('resolution').state
+    assert_equal 'running',clock('first_response').state
+    assert_equal 3600,clock('attendance').elapsed_seconds
+    run_engine('resume',at:@start+7200,effects:effects,end_pause:true)
+    assert_equal 'running',clock('attendance').state
+    assert_equal 3600,clock('attendance').elapsed_seconds
+    assert_equal 3600,clock('resolution').elapsed_seconds
+    assert_equal 7200,clock('first_response').elapsed_seconds
+    assert_equal Time.iso8601('2026-09-28T17:00:00Z'),clock('attendance').due_at
+    assert_equal ['attendance','resolution'],@ticket.lifecycle_pauses.first.clocks
+  end
+  def test_pinned_schema_two_rejects_a_snapshot_missing_the_attendance_clock
+    attendance_policy!
+    @snapshot.policy_conditions['clock_budgets_seconds'].delete('attendance')
+    effects={'first_response'=>'keep','attendance'=>'keep','resolution'=>'keep'}
+    assert_raises(JrcServiceDesk::LifecycleDependencyError) { run_engine('work_status',at:@start+1,effects:effects) }
+    assert_equal 0,@cycles.size
+  end
+  def test_explicit_resolution_preserves_three_clocks_without_inferred_attendance_or_first_response
+    attendance_policy!
+    result=run_engine('resolve',at:@start+3600,effects:@version.rules.rule('resolve').fetch('clocks'),end_pause:true)
+    assert_equal 'completed',clock('resolution').state
+    assert_equal 'stopped',clock('attendance').state
+    assert_equal 'stopped',clock('first_response').state
+    assert_nil clock('attendance').met?
+    assert_nil clock('first_response').met?
+    assert_equal %w[attendance first_response resolution],result['clocks'].map { |item| item['kind'] }.sort
   end
 end

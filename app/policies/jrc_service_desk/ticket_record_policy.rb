@@ -2,6 +2,7 @@
 
 class JrcServiceDesk::TicketRecordPolicy < JrcServiceDesk::OperationalPolicy
   READ_CAPABILITIES = {
+    'JrcServiceDesk::TicketTask' => :tasks_view, 'JrcServiceDesk::TicketApproval' => :approvals_view,
     'JrcServiceDesk::TicketNote' => :notes_view, 'JrcServiceDesk::TicketEvent' => :history_view,
     'JrcServiceDesk::TicketConversation' => :conversations_view,
     'JrcServiceDesk::SlaMilestone' => :sla_view, 'JrcServiceDesk::SlaSnapshot' => :contract_conditions_view

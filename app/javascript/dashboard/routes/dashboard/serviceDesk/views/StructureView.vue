@@ -13,6 +13,8 @@ import BaseTable from 'dashboard/components-next/table/BaseTable.vue';
 import BaseTableRow from 'dashboard/components-next/table/BaseTableRow.vue';
 import BaseTableCell from 'dashboard/components-next/table/BaseTableCell.vue';
 import Lookup from '../components/StructureLookup.vue';
+import MembershipAvailability from '../components/MembershipAvailability.vue';
+import { membershipV2Fields } from '../helpers/v2Configuration';
 import { hasServiceDeskFeature } from '../helpers/access';
 import {
   STRUCTURE_RESOURCES,
@@ -205,7 +207,12 @@ const edit = async row => {
     const record = structureRecord(payload, run.context, run.resource);
     editor.value = record;
     form.value = Object.fromEntries(
-      structureFields(run.resource, false).map(key => [key, record[key]])
+      [
+        ...structureFields(run.resource, false),
+        ...(run.resource === 'unit_memberships' ? membershipV2Fields : []),
+      ]
+        .filter(key => Object.hasOwn(record, key))
+        .map(key => [key, record[key]])
     );
     feedback.value = 'idle';
   } catch (error) {
@@ -225,8 +232,16 @@ const changeMembership = async row => {
       unit_id: unitId.value,
       account_user_id: row.id,
       active: true,
+      availability: 'unavailable',
+      capacity: null,
+      skills: [],
     };
   }
+  recipient.value = row;
+};
+const configureMembership = async row => {
+  if (!writable.value || locked.value || !row.membership) return;
+  await edit(row.membership);
   recipient.value = row;
 };
 const save = async () => {
@@ -470,6 +485,14 @@ onBeforeUnmount(invalidate);
                   "
                   @click="changeMembership(row)"
                 />
+                <Button
+                  v-if="row.membership"
+                  size="sm"
+                  variant="outline"
+                  :disabled="locked"
+                  :label="t('JRC_SERVICE_DESK.V2_SETTINGS.operator_settings')"
+                  @click="configureMembership(row)"
+                />
               </BaseTableCell>
             </BaseTableRow>
           </template>
@@ -583,6 +606,11 @@ onBeforeUnmount(invalidate);
           :disabled="locked"
           :options="activeOptions"
           :placeholder="t('JRC_SERVICE_DESK.STRUCTURE.choose_state')"
+        />
+        <MembershipAvailability
+          v-if="memberships && Object.hasOwn(form, 'availability')"
+          v-model="form"
+          :disabled="locked"
         />
         <Input
           v-model="reason"

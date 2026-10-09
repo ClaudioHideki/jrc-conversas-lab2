@@ -17,7 +17,7 @@ class JrcServiceDesk::ConfigurationService < JrcServiceDesk::BaseService
       next existing if existing
       values['team_id'] = native_team(values['team_id'])&.id if values.key?('team_id')
       candidate.assign_attributes(values)
-      candidate.save!
+      save_catalogue!(candidate)
       audit = auditor.write!(resource: resource, record: candidate, action: 'create', before: {},
         after: JrcServiceDesk::ConfigurationResources.fields(resource, candidate), key: key, fingerprint: fingerprint)
       Result.new(record: candidate, audit_id: audit.id)
@@ -46,7 +46,7 @@ class JrcServiceDesk::ConfigurationService < JrcServiceDesk::BaseService
       before = JrcServiceDesk::ConfigurationResources.fields(resource, record)
       values['team_id'] = native_team(values['team_id'])&.id if values.key?('team_id')
       record.assign_attributes(values)
-      record.save!
+      save_catalogue!(record)
       audit = auditor.write!(resource: resource, record: record, action: 'update', before: before,
         after: JrcServiceDesk::ConfigurationResources.fields(resource, record), key: key, fingerprint: fingerprint)
       Result.new(record: record, audit_id: audit.id)
@@ -54,6 +54,11 @@ class JrcServiceDesk::ConfigurationService < JrcServiceDesk::BaseService
   end
 
   private
+
+  def save_catalogue!(record)
+    JrcServiceDesk::CatalogueAccess.new(record).validate_configuration!(context) if record.is_a?(JrcServiceDesk::Service)
+    record.save!
+  end
 
   def auditor
     JrcServiceDesk::ConfigurationAudit.new(context: context, membership: actor_membership, unit: @acting_unit)

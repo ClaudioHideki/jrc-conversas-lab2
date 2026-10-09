@@ -4,13 +4,39 @@
 # Defaults describe the existing native profiles, not an administrator bypass.
 class JrcServiceDesk::Capabilities
   PREFIX = 'jrc_service_desk_'
-  KEYS = %w[module_view tickets_view tickets_view_all tickets_create tickets_edit tickets_assign tickets_transfer priority_change work_status_change pause resume resolve close cancel reopen notes_view notes_add history_view conversations_view conversations_link sla_view contract_conditions_view sla_snapshots_record lookups_view customers_view queues_manage categories_manage priorities_manage statuses_manage services_manage lifecycle_policies_manage settings_view dashboard_view structure_view operator_companies_manage units_manage unit_memberships_manage].freeze
+  KEYS = %w[notifications_manage customer_publish technical_notes tasks_view tasks_manage approvals_view approvals_request approvals_decide
+            incidents_manage tickets_claim module_view tickets_view tickets_view_all tickets_create tickets_edit tickets_assign tickets_transfer
+            priority_change work_status_change pause resume resolve close cancel reopen notes_view notes_add history_view conversations_view
+            conversations_link sla_view contract_conditions_view sla_snapshots_record lookups_view customers_view queues_manage categories_manage
+            priorities_manage statuses_manage services_manage lifecycle_policies_manage settings_view dashboard_view structure_view
+            operator_companies_manage units_manage unit_memberships_manage].freeze
   PERMISSIONS = KEYS.map { |key| "#{PREFIX}#{key}" }.freeze
   DEFAULTS = {
-    'agent' => %w[module_view tickets_view tickets_create tickets_edit tickets_assign tickets_transfer priority_change work_status_change pause resume resolve close cancel reopen notes_view notes_add history_view conversations_view conversations_link sla_view lookups_view customers_view dashboard_view].freeze,
-    'administrator' => %w[structure_view operator_companies_manage units_manage unit_memberships_manage module_view tickets_view tickets_view_all tickets_create tickets_edit tickets_assign tickets_transfer priority_change work_status_change pause resume resolve close cancel reopen notes_view notes_add history_view conversations_view conversations_link sla_view contract_conditions_view sla_snapshots_record lookups_view customers_view queues_manage categories_manage priorities_manage statuses_manage services_manage lifecycle_policies_manage settings_view dashboard_view].freeze
+    'agent' => %w[technical_notes tasks_view tasks_manage approvals_view approvals_request approvals_decide
+                  tickets_claim module_view tickets_view
+                  tickets_create tickets_edit tickets_assign tickets_transfer priority_change work_status_change pause resume resolve close cancel
+                  reopen notes_view notes_add history_view conversations_view conversations_link sla_view lookups_view customers_view
+                  dashboard_view].freeze,
+    'administrator' => %w[notifications_manage customer_publish technical_notes tasks_view tasks_manage approvals_view approvals_request
+                          approvals_decide incidents_manage tickets_claim structure_view operator_companies_manage units_manage
+                          unit_memberships_manage
+                          module_view tickets_view tickets_view_all tickets_create tickets_edit tickets_assign tickets_transfer priority_change
+                          work_status_change pause resume resolve close cancel reopen notes_view notes_add history_view conversations_view
+                          conversations_link sla_view contract_conditions_view sla_snapshots_record lookups_view customers_view queues_manage
+                          categories_manage priorities_manage statuses_manage services_manage lifecycle_policies_manage settings_view
+                          dashboard_view].freeze
   }.freeze
   DEPENDENCIES = {
+    'notifications_manage' => %w[settings_view customer_publish].freeze,
+    'customer_publish' => %w[notes_add].freeze,
+    'technical_notes' => %w[notes_view].freeze,
+    'tasks_view' => %w[tickets_view].freeze,
+    'tasks_manage' => %w[tasks_view].freeze,
+    'approvals_view' => %w[tickets_view].freeze,
+    'approvals_request' => %w[approvals_view].freeze,
+    'approvals_decide' => %w[approvals_view].freeze,
+    'incidents_manage' => %w[tickets_view history_view].freeze,
+    'tickets_claim' => %w[tickets_view tickets_assign].freeze,
     'operator_companies_manage' => %w[structure_view].freeze,
     'units_manage' => %w[structure_view].freeze,
     'unit_memberships_manage' => %w[structure_view].freeze,

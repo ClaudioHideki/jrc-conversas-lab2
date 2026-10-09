@@ -1,5 +1,6 @@
 <script>
 import TeamAvailability from 'widget/components/TeamAvailability.vue';
+import ServiceDeskPortal from 'widget/components/ServiceDeskPortal.vue';
 import { mapGetters } from 'vuex';
 import { useRouter } from 'vue-router';
 import configMixin from 'widget/mixins/configMixin';
@@ -9,6 +10,7 @@ export default {
   components: {
     ArticleContainer,
     TeamAvailability,
+    ServiceDeskPortal,
   },
   mixins: [configMixin],
   setup() {
@@ -43,5 +45,6 @@ export default {
     />
 
     <ArticleContainer />
+    <ServiceDeskPortal />
   </div>
 </template>

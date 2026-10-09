@@ -20,26 +20,32 @@ RSpec.describe 'Relationship operational regression' do
     expect(audit).not_to be_valid
   end
 
-  it 'keeps the action and its native Agenda projection synchronized across pause/resume' do
-    action = workflow.save(kind: 'actions', attributes: { assignment_id: assignment.id, request_id: 'pause', reason: 'Pause test', due_at: 2.hours.from_now })[:record]
-    original = action.sla_due_at
-    original_due = action.due_at
-    started = Time.current
-    travel_to(started + 1.hour) do
-      workflow.save(kind: 'actions', id: action.id, attributes: { assignment_id: assignment.id, lock_version: action.reload.lock_version, status: 'waiting_customer' })
-      expect(action.reload.activity.metadata['relationship_sla_paused_at']).to be_present
-      expect(action.activity.overdue?).to be(false)
-    end
-    travel_to(started + 3.hours) do
-      agenda = JrcOperations::Agenda.new(account_user: sd_account_user, filters: { source: 'crm', from: started.to_date.iso8601, to: started.to_date.iso8601 }).call
-      expect(agenda[:data].find { |row| row[:activity_id] == action.activity_id }[:overdue]).to be(false)
-    end
-    travel_to(started + 4.hours) do
-      workflow.save(kind: 'actions', id: action.id, attributes: { assignment_id: assignment.id, lock_version: action.reload.lock_version, status: 'in_progress' })
-      expect(action.reload.sla_due_at).to be_within(1.second).of(original + 3.hours)
-      expect(action.due_at).to be_within(1.second).of(original_due + 3.hours)
-      expect(action.activity.reload.due_at).to eq(action.due_at)
-      expect(action.activity.metadata).not_to have_key('relationship_sla_paused_at')
+  %w[2026-10-09T00:30:00Z 2026-10-09T02:30:00Z].each do |instant|
+    it "keeps the action and its native Agenda projection synchronized across pause/resume at #{instant}" do
+      travel_to(Time.iso8601(instant))
+      action = workflow.save(kind: 'actions', attributes: { assignment_id: assignment.id, request_id: 'pause', reason: 'Pause test', due_at: 2.hours.from_now })[:record]
+      original = action.sla_due_at
+      original_due = action.due_at
+      started = Time.current
+      zone = Time.find_zone(sd_account.reporting_timezone) || Time.find_zone!('America/Sao_Paulo')
+      agenda_day = original_due.in_time_zone(zone).to_date.iso8601
+      travel_to(started + 1.hour) do
+        workflow.save(kind: 'actions', id: action.id, attributes: { assignment_id: assignment.id, lock_version: action.reload.lock_version, status: 'waiting_customer' })
+        expect(action.reload.activity.metadata['relationship_sla_paused_at']).to be_present
+        expect(action.activity.overdue?).to be(false)
+      end
+      travel_to(started + 3.hours) do
+        agenda = JrcOperations::Agenda.new(account_user: sd_account_user, filters: { source: 'crm', from: agenda_day, to: agenda_day }).call
+        row = agenda[:data].find { |entry| entry[:activity_id] == action.activity_id }
+        expect(row).to include(activity_id: action.activity_id, overdue: false)
+      end
+      travel_to(started + 4.hours) do
+        workflow.save(kind: 'actions', id: action.id, attributes: { assignment_id: assignment.id, lock_version: action.reload.lock_version, status: 'in_progress' })
+        expect(action.reload.sla_due_at).to be_within(1.second).of(original + 3.hours)
+        expect(action.due_at).to be_within(1.second).of(original_due + 3.hours)
+        expect(action.activity.reload.due_at).to eq(action.due_at)
+        expect(action.activity.metadata).not_to have_key('relationship_sla_paused_at')
+      end
     end
   end
 

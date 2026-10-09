@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class JrcServiceDesk::Ticket < JrcServiceDesk::UnitRecord
-    include JrcRelationship::SignalDispatch
+  include JrcRelationship::SignalDispatch
   include JrcCustomers::OperationalCompanyLink
   belongs_to :requester, class_name: '::Contact', optional: false
   belongs_to :status, class_name: 'JrcServiceDesk::TicketStatus', optional: false
@@ -13,6 +13,11 @@ class JrcServiceDesk::Ticket < JrcServiceDesk::UnitRecord
   belongs_to :created_by_membership, class_name: 'JrcServiceDesk::UnitMembership', optional: false
 
   belongs_to :service, class_name: 'JrcServiceDesk::Service', optional: true
+  belongs_to :ticket_type, class_name: 'JrcServiceDesk::TicketType', optional: true
+  belongs_to :subcategory, class_name: 'JrcServiceDesk::Category', optional: true
+  belongs_to :contract, class_name: 'JrcCrm::Contract', optional: true
+  has_many :operational_resource_links, class_name: 'JrcServiceDesk::ResourceTicketLink', dependent: :restrict_with_error
+  has_many :operational_resources, through: :operational_resource_links, source: :operational_resource
   belongs_to :lifecycle_policy_version, class_name: 'JrcServiceDesk::LifecyclePolicyVersion', optional: true
   has_many :lifecycle_transitions, class_name: 'JrcServiceDesk::LifecycleTransition', dependent: :restrict_with_error
   has_many :sla_cycles, class_name: 'JrcServiceDesk::SlaCycle', dependent: :restrict_with_error
@@ -21,6 +26,10 @@ class JrcServiceDesk::Ticket < JrcServiceDesk::UnitRecord
 
   has_many :ticket_events, class_name: 'JrcServiceDesk::TicketEvent', dependent: :restrict_with_error
   has_many :ticket_notes, class_name: 'JrcServiceDesk::TicketNote', dependent: :restrict_with_error
+  has_many :ticket_tasks, class_name: 'JrcServiceDesk::TicketTask', dependent: :restrict_with_error
+  has_many :ticket_approvals, class_name: 'JrcServiceDesk::TicketApproval', dependent: :restrict_with_error
+  has_many :ola_clocks, class_name: 'JrcServiceDesk::OlaClock', dependent: :restrict_with_error
+  belongs_to :incident, class_name: 'JrcServiceDesk::Incident', optional: true
   has_many :sla_snapshots, class_name: 'JrcServiceDesk::SlaSnapshot', dependent: :restrict_with_error
   has_many :sla_milestones, class_name: 'JrcServiceDesk::SlaMilestone', dependent: :restrict_with_error
   has_many :ticket_conversations, class_name: 'JrcServiceDesk::TicketConversation', dependent: :restrict_with_error
@@ -29,11 +38,12 @@ class JrcServiceDesk::Ticket < JrcServiceDesk::UnitRecord
   validates :origin_channel, presence: true, length: { maximum: 80 }
   validates :opened_at, presence: true
   validates :idempotency_key, presence: true, length: { maximum: 120 },
-                               uniqueness: { scope: %i[account_id unit_id created_by_membership_id] }
+                              uniqueness: { scope: %i[account_id unit_id created_by_membership_id] }
   validates :request_fingerprint, format: { with: /\A[a-f0-9]{64}\z/ }
   validate :references_are_consistent
   validate :queue_team_is_consistent
   validate :initial_status_required, on: :create
+  validate :service_answers_are_valid
 
   # No duplicated operator_company_id column, no fallback unit, no Project relation.
   def operator_company
@@ -55,10 +65,19 @@ class JrcServiceDesk::Ticket < JrcServiceDesk::UnitRecord
   protected
 
   def ownership_columns
-    super + %i[service_id created_by_membership_id idempotency_key request_fingerprint origin_channel opened_at]
+    super + %i[impact_code urgency_code service_id created_by_membership_id idempotency_key request_fingerprint origin_channel opened_at]
   end
 
   private
+
+  def service_answers_are_valid
+    return unless service || ticket_type || category&.form_fields&.any? || subcategory || catalogue_snapshot['form_fields']
+
+    fields = catalogue_snapshot.fetch('form_fields') { [service, ticket_type, category, subcategory].compact.flat_map(&:form_fields) }
+    JrcServiceDesk::CatalogueAnswers.new(fields).validate!(service_fields)
+  rescue ArgumentError => e
+    errors.add(:service_fields, e.message)
+  end
 
   def lifecycle_binding_integrity
     validate_unit_reference(:service)
@@ -68,11 +87,19 @@ class JrcServiceDesk::Ticket < JrcServiceDesk::UnitRecord
       errors.add(:lifecycle_policy_version_id, 'cannot replace the historical version')
     end
     return unless lifecycle_policy_version
+
     scoped_service = lifecycle_policy_version.lifecycle_policy.service_id
     errors.add(:lifecycle_policy_version, 'service scope does not match') if scoped_service && scoped_service != service_id
   end
 
   def references_are_consistent
+    validate_unit_reference(:incident)
+    %i[ticket_type subcategory].each do |name|
+      validate_unit_reference(name)
+      validate_active_reference(name)
+    end
+    validate_account_reference(:contract)
+    errors.add(:subcategory, 'must belong to the selected category') if subcategory && subcategory.parent_id != category_id
     %i[requester team].each { |name| validate_account_reference(name) }
     %i[status priority category queue assignee_membership created_by_membership].each do |name|
       validate_unit_reference(name)

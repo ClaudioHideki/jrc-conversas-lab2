@@ -32,18 +32,55 @@ const pipelines = ref([]);
 const products = ref([]);
 const filters = reactive({ search: '', status: '' });
 const leads = computed(() => store.getters['jrcCrm/leads/allLeads'] || []);
-const leadSummary = computed(() => ([
-  { label: 'Novos', value: leads.value.filter(item => item.status === 'new').length, tone: 'blue', icon: 'i-lucide-user-round-plus' },
-  { label: 'Aguardando contato', value: leads.value.filter(item => item.status === 'in_contact').length, tone: 'amber', icon: 'i-lucide-clock-3' },
-  { label: 'Em qualificação', value: leads.value.filter(item => item.status === 'qualified').length, tone: 'violet', icon: 'i-lucide-filter' },
-  { label: 'Convertidos', value: leads.value.filter(item => item.status === 'converted').length, tone: 'green', icon: 'i-lucide-chart-no-axes-combined' },
-]));
-const kanbanColumns = computed(() => [
-  { status: 'new', label: 'Novo', className: 'border-blue-200 bg-blue-50/60' },
-  { status: 'in_contact', label: 'Em contato', className: 'border-amber-200 bg-amber-50/60' },
-  { status: 'qualified', label: 'Qualificado', className: 'border-violet-200 bg-violet-50/60' },
-  { status: 'converted', label: 'Convertido', className: 'border-emerald-200 bg-emerald-50/60' },
-].map(column => ({ ...column, items: leads.value.filter(item => item.status === column.status) })));
+const leadSummary = computed(() => [
+  {
+    label: 'Novos',
+    value: leads.value.filter(item => item.status === 'new').length,
+    tone: 'blue',
+    icon: 'i-lucide-user-round-plus',
+  },
+  {
+    label: 'Aguardando contato',
+    value: leads.value.filter(item => item.status === 'in_contact').length,
+    tone: 'amber',
+    icon: 'i-lucide-clock-3',
+  },
+  {
+    label: 'Em qualificação',
+    value: leads.value.filter(item => item.status === 'qualified').length,
+    tone: 'violet',
+    icon: 'i-lucide-filter',
+  },
+  {
+    label: 'Convertidos',
+    value: leads.value.filter(item => item.status === 'converted').length,
+    tone: 'green',
+    icon: 'i-lucide-chart-no-axes-combined',
+  },
+]);
+const kanbanColumns = computed(() =>
+  [
+    { status: 'new', label: 'Novo', className: 'border-n-blue-6 bg-n-blue-2' },
+    {
+      status: 'in_contact',
+      label: 'Em contato',
+      className: 'border-n-amber-6 bg-n-amber-2',
+    },
+    {
+      status: 'qualified',
+      label: 'Qualificado',
+      className: 'border-n-iris-6 bg-n-iris-2',
+    },
+    {
+      status: 'converted',
+      label: 'Convertido',
+      className: 'border-n-teal-6 bg-n-teal-2',
+    },
+  ].map(column => ({
+    ...column,
+    items: leads.value.filter(item => item.status === column.status),
+  }))
+);
 const selectedLead = computed(() =>
   leads.value.find(item => String(item.id) === String(route.query.leadId))
 );
@@ -85,10 +122,18 @@ const changeStatus = async (lead, status) => {
 };
 
 const deleteLead = async lead => {
-  if (!window.confirm(`Excluir o lead ${lead.name}?\n\nO contato continuará cadastrado. Negócios vinculados não serão excluídos.`)) return;
+  if (
+    !window.confirm(
+      `Excluir o lead ${lead.name}?\n\nO contato continuará cadastrado. Negócios vinculados não serão excluídos.`
+    )
+  )
+    return;
   deletingId.value = lead.id;
   try {
-    await store.dispatch('jrcCrm/leads/deleteLead', { leadId: lead.id, params: filters });
+    await store.dispatch('jrcCrm/leads/deleteLead', {
+      leadId: lead.id,
+      params: filters,
+    });
     if (String(route.query.leadId) === String(lead.id)) closeDetails();
     useAlert('Lead excluído com sucesso.');
   } catch (error) {
@@ -160,15 +205,15 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="flex h-full flex-col bg-n-surface-1 p-4 sm:p-6">
-    <header class="mb-6 flex flex-wrap items-center justify-between gap-3">
+  <div class="flex h-full min-h-0 min-w-0 flex-col bg-n-surface-1 p-3 sm:p-4">
+    <header class="mb-3 flex flex-wrap items-center justify-between gap-2">
       <div class="flex items-center gap-3">
         <span
-          class="flex size-11 items-center justify-center rounded-2xl bg-n-iris-3 text-n-iris-11"
+          class="flex size-9 items-center justify-center rounded-xl bg-n-iris-3 text-n-iris-11"
           ><i class="i-lucide-user-round-plus size-5"
         /></span>
         <div>
-          <h2 class="text-2xl font-bold text-n-slate-12">Leads</h2>
+          <h2 class="text-xl font-bold text-n-slate-12">Leads</h2>
           <p class="text-sm text-n-slate-11">
             Potenciais clientes em qualificação
           </p>
@@ -182,27 +227,73 @@ onMounted(async () => {
         <i class="i-lucide-plus mr-2 inline size-4" />Novo lead
       </button>
     </header>
-    <section class="mb-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      <article v-for="item in leadSummary" :key="item.label" class="rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm">
-        <div class="flex items-center justify-between"><span class="text-xs font-semibold text-n-slate-11">{{ item.label }}</span><span class="grid size-10 place-content-center rounded-xl" :class="item.tone === 'blue' ? 'bg-blue-50 text-blue-600' : item.tone === 'amber' ? 'bg-amber-50 text-amber-600' : item.tone === 'violet' ? 'bg-violet-50 text-violet-600' : 'bg-emerald-50 text-emerald-600'"><i class="size-4" :class="item.icon" /></span></div>
-        <strong class="mt-2 block text-2xl text-n-slate-12">{{ item.value }}</strong>
+    <section class="mb-3 grid grid-cols-2 gap-2 lg:grid-cols-4">
+      <article
+        v-for="item in leadSummary"
+        :key="item.label"
+        class="flex min-w-0 items-center gap-2 rounded-xl border border-n-weak bg-n-solid-2 p-3 shadow-sm"
+      >
+        <div class="flex min-w-0 flex-1 items-center gap-2">
+          <span
+            class="grid size-8 shrink-0 place-content-center rounded-lg"
+            :class="
+              item.tone === 'blue'
+                ? 'bg-n-blue-3 text-n-blue-11'
+                : item.tone === 'amber'
+                  ? 'bg-n-amber-3 text-n-amber-11'
+                  : item.tone === 'violet'
+                    ? 'bg-n-iris-3 text-n-iris-11'
+                    : 'bg-n-teal-3 text-n-teal-11'
+            "
+            ><i class="size-4" :class="item.icon" /></span
+          ><span class="min-w-0 text-xs font-semibold text-n-slate-11">{{
+            item.label
+          }}</span>
+        </div>
+        <strong class="shrink-0 text-xl tabular-nums text-n-slate-12">{{
+          item.value
+        }}</strong>
       </article>
     </section>
 
-    <div class="mb-3 flex justify-end"><div class="flex rounded-xl border border-n-weak bg-n-solid-2 p-1 shadow-sm"><button type="button" class="rounded-lg px-3 py-2 text-xs font-semibold" :class="viewMode === 'list' ? 'bg-blue-700 text-white' : 'text-n-slate-11'" @click="viewMode = 'list'"><i class="i-lucide-list mr-1 size-4" />Lista</button><button type="button" class="rounded-lg px-3 py-2 text-xs font-semibold" :class="viewMode === 'kanban' ? 'bg-[#7c3aed] text-white' : 'text-n-slate-11'" @click="viewMode = 'kanban'"><i class="i-lucide-columns-3 mr-1 size-4" />Kanban</button></div></div>
+    <div class="mb-3 flex justify-end">
+      <div
+        class="flex rounded-xl border border-n-weak bg-n-solid-2 p-1 shadow-sm"
+      >
+        <button
+          type="button"
+          class="rounded-lg px-3 py-2 text-xs font-semibold"
+          :class="
+            viewMode === 'list' ? 'bg-n-brand text-white' : 'text-n-slate-11'
+          "
+          @click="viewMode = 'list'"
+        >
+          <i class="i-lucide-list mr-1 size-4" />Lista</button
+        ><button
+          type="button"
+          class="rounded-lg px-3 py-2 text-xs font-semibold"
+          :class="
+            viewMode === 'kanban' ? 'bg-n-iris-9 text-white' : 'text-n-slate-11'
+          "
+          @click="viewMode = 'kanban'"
+        >
+          <i class="i-lucide-columns-3 mr-1 size-4" />Kanban
+        </button>
+      </div>
+    </div>
 
     <form
-      class="mb-4 flex flex-wrap gap-2 rounded-2xl border border-n-weak bg-n-solid-2 p-3 shadow-sm"
+      class="mb-3 grid grid-cols-1 items-center gap-2 rounded-xl border border-n-weak bg-n-solid-2 p-2 sm:grid-cols-[minmax(0,1fr)_12rem_auto]"
       @submit.prevent="load"
     >
       <input
         v-model="filters.search"
         type="search"
         placeholder="Buscar por nome ou e-mail"
-        class="h-10 min-w-64 flex-1 rounded-xl border border-n-weak bg-n-solid-1 px-3 text-sm text-n-slate-12 placeholder:text-n-slate-11 focus:border-n-brand focus:outline-none focus:ring-2 focus:ring-n-brand/20"
+        class="!mb-0 h-10 w-full min-w-0 rounded-lg border border-n-weak bg-n-solid-1 px-3 text-sm text-n-slate-12 placeholder:text-n-slate-11 focus:border-n-brand focus:outline-none focus:ring-2 focus:ring-n-brand/20"
       /><select
         v-model="filters.status"
-        class="h-10 rounded-xl border border-n-weak bg-n-solid-1 px-3 text-sm font-medium text-n-slate-12"
+        class="!mb-0 h-10 w-full min-w-0 rounded-lg border border-n-weak bg-n-solid-1 px-3 text-sm font-medium text-n-slate-12"
         @change="load"
       >
         <option value="">Todos os status</option>
@@ -218,10 +309,11 @@ onMounted(async () => {
         Pesquisar
       </button>
     </form>
-    <div v-if="viewMode === 'list'"
-      class="flex-1 overflow-auto rounded-2xl border border-n-weak bg-n-solid-2 shadow-sm"
+    <div
+      v-if="viewMode === 'list'"
+      class="min-h-0 flex-1 overflow-auto rounded-xl border border-n-weak bg-n-solid-2 shadow-sm"
     >
-      <table class="min-w-full divide-y divide-n-weak text-sm">
+      <table class="w-full min-w-[900px] divide-y divide-n-weak text-sm">
         <thead
           class="bg-n-alpha-2 text-left text-xs font-semibold uppercase text-n-slate-11"
         >
@@ -247,7 +339,12 @@ onMounted(async () => {
             @click="openDetails(lead)"
           >
             <td class="px-4 py-3">
-              <p class="truncate font-semibold text-n-slate-12" :title="lead.name">{{ lead.name }}</p>
+              <p
+                class="truncate font-semibold text-n-slate-12"
+                :title="lead.name"
+              >
+                {{ lead.name }}
+              </p>
               <p class="text-xs text-n-slate-11">
                 {{ lead.company_name || 'Empresa não informada' }}
               </p>
@@ -315,13 +412,52 @@ onMounted(async () => {
         </tbody>
       </table>
     </div>
-    <div v-else class="grid flex-1 gap-4 overflow-auto xl:grid-cols-4">
-      <section v-for="column in kanbanColumns" :key="column.status" class="min-h-[420px] rounded-2xl border p-3" :class="column.className">
-        <div class="mb-3 flex items-center justify-between"><strong class="text-sm text-n-slate-12">{{ column.label }}</strong><span class="rounded-full bg-n-solid-2 px-2 py-0.5 text-xs font-bold text-n-slate-11">{{ column.items.length }}</span></div>
-        <div class="space-y-3"><button v-for="lead in column.items" :key="lead.id" type="button" class="w-full rounded-xl border border-white/80 bg-n-solid-2 p-3 text-left shadow-sm transition hover:-translate-y-0.5" @click="openDetails(lead)"><strong class="block truncate text-sm text-n-slate-12">{{ lead.name }}</strong><span class="mt-1 block truncate text-xs text-n-slate-11">{{ lead.company_name || lead.email || lead.phone || 'Sem empresa' }}</span><div class="mt-3 flex items-center justify-between"><span class="text-[11px] text-n-slate-11">{{ lead.source || 'Origem não informada' }}</span><i class="i-lucide-chevron-right size-4 text-n-slate-11" /></div></button></div>
+    <div
+      v-else
+      class="grid min-h-0 flex-1 gap-3 overflow-auto sm:grid-cols-2 xl:grid-cols-4"
+    >
+      <section
+        v-for="column in kanbanColumns"
+        :key="column.status"
+        class="min-h-48 rounded-xl border p-3"
+        :class="column.className"
+      >
+        <div class="mb-3 flex items-center justify-between">
+          <strong class="text-sm text-n-slate-12">{{ column.label }}</strong
+          ><span
+            class="rounded-full bg-n-solid-2 px-2 py-0.5 text-xs font-bold text-n-slate-11"
+            >{{ column.items.length }}</span
+          >
+        </div>
+        <div class="space-y-3">
+          <button
+            v-for="lead in column.items"
+            :key="lead.id"
+            type="button"
+            class="w-full rounded-xl border border-n-weak bg-n-solid-2 p-3 text-left shadow-sm transition hover:-translate-y-0.5"
+            @click="openDetails(lead)"
+          >
+            <strong class="block truncate text-sm text-n-slate-12">{{
+              lead.name
+            }}</strong
+            ><span class="mt-1 block truncate text-xs text-n-slate-11">{{
+              lead.company_name || lead.email || lead.phone || 'Sem empresa'
+            }}</span>
+            <div class="mt-3 flex items-center justify-between">
+              <span class="text-[11px] text-n-slate-11">{{
+                lead.source || 'Origem não informada'
+              }}</span
+              ><i class="i-lucide-chevron-right size-4 text-n-slate-11" />
+            </div>
+          </button>
+        </div>
       </section>
     </div>
-    <LeadCreateModal v-if="showForm" @close="showForm = false" @created="onLeadCreated" />
+    <LeadCreateModal
+      v-if="showForm"
+      @close="showForm = false"
+      @created="onLeadCreated"
+    />
     <Teleport to="body">
       <LeadDetailModal
         v-if="selectedLead"
@@ -332,7 +468,8 @@ onMounted(async () => {
         @convert="convertingLead = $event"
         @conversation="openConversation"
         @contact="openContact"
-        @deal="openDeal" /><LeadConversionModal
+        @deal="openDeal"
+      /><LeadConversionModal
         v-if="convertingLead"
         :lead="convertingLead"
         :pipelines="pipelines"
@@ -340,6 +477,7 @@ onMounted(async () => {
         :saving="saving"
         @close="convertingLead = null"
         @submit="convertLead"
-    /></Teleport>
+      />
+    </Teleport>
   </div>
 </template>

@@ -14,14 +14,18 @@ class Api::V1::Accounts::JrcServiceDesk::TicketsController < Api::V1::Accounts::
   end
 
   def create
-    values = body_values(%w[unit_id ticket conversation_id service_id])
+    values = body_values(%w[unit_id ticket conversation_id service_id files])
     unit = policy_scope(::JrcServiceDesk::Unit).find(::JrcServiceDesk::Input.id(values.fetch('unit_id')))
     authorize ::JrcServiceDesk::Ticket.new(account: Current.account, unit: unit), :create?
     ticket = ::JrcServiceDesk::CreateTicketWorkflowService.new(user_context: pundit_user).call(
-      unit_id: unit.id, attributes: values.fetch('ticket'), conversation_id: values['conversation_id'], service_id: values['service_id'],
+      unit_id: unit.id, attributes: creation_attributes(values.fetch('ticket')), conversation_id: values['conversation_id'],
+      service_id: values['service_id'], files: values.fetch('files', []),
       idempotency_key: request.headers['Idempotency-Key'])
     link_id = values['conversation_id'] && ticket.ticket_conversations.find_by(conversation_id: ::JrcServiceDesk::Input.id(values['conversation_id']))&.id
-    acknowledged(ticket, 'create', status: :created, result_id: link_id)
+    opening_note = if values.fetch('files', []).any?
+                     ticket.ticket_notes.find_by!(idempotency_key: "opening:#{Digest::SHA256.hexdigest(request.headers['Idempotency-Key'])}")
+                   end
+    acknowledged(ticket, 'create', status: :created, result_id: link_id, opening_note_id: opening_note&.id)
   end
 
   def update
@@ -88,5 +92,16 @@ class Api::V1::Accounts::JrcServiceDesk::TicketsController < Api::V1::Accounts::
     kind = params[:kind].to_s
     result = ::JrcServiceDesk::RelatedRecordsQuery.new(user_context: pundit_user, ticket: strict_ticket, kind: kind, parameters: query_values).collection
     render json: result_for(result) { |record| presenter.related(record, kind) }.merge(ticket_id: strict_ticket.id.to_s, kind: kind)
+  end
+
+  private
+
+  def creation_attributes(value)
+    return value unless value.is_a?(String)
+    raise ArgumentError unless value.bytesize <= 250_000
+
+    JSON.parse(value)
+  rescue JSON::ParserError
+    raise ArgumentError, 'Invalid ticket envelope'
   end
 end

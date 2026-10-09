@@ -49,7 +49,11 @@ const money = value => formatMoney(value, props.metadata.formatting);
       {{
         data.metric === 'nps'
           ? `100 × (${data.calculation.promoters} − ${data.calculation.detractors}) / ${data.calculation.denominator}`
-          : `100 × ${data.calculation.numerator} / ${data.calculation.denominator}`
+          : data.calculation.formula === 'average'
+            ? t('RELATIONSHIP.AVERAGE_DENOMINATOR', {
+                count: data.calculation.denominator,
+              })
+            : `100 × ${data.calculation.numerator} / ${data.calculation.denominator}`
       }}
     </p>
     <div class="overflow-x-auto">

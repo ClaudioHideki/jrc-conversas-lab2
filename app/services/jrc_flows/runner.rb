@@ -8,6 +8,14 @@ class JrcFlows::Runner
 
   # Consistent lock order serializes incoming messages, timers and human takeover.
   def perform(message: nil, wake_version: nil)
+    JrcRelationship::PlaybookFlowContinuation.perform(@run, message: message) do |authorized_message|
+      perform_native(message: authorized_message || message, wake_version: wake_version)
+    end
+  end
+
+  private
+
+  def perform_native(message: nil, wake_version: nil)
     previous_actor = Current.executed_by
     return JrcFlows::WorkflowRunner.new(@run).perform(message: message) if @flow.engine == 'workflow'
 
@@ -17,8 +25,8 @@ class JrcFlows::Runner
           JrcFlowRun.transaction(requires_new: true) { perform_locked(message, wake_version) }
         rescue StandardError => e
           trace = @run.trace
-          @run.reload.update!(status: 'failed', trace: trace, error: e.message.to_s.first(240),
-                             finished_at: Time.current, wake_at: nil)
+          @run.reload.update!(status: 'failed', trace: trace, error: JrcRelationship::PlaybookFlowContinuation.error_message(@run, e),
+                              finished_at: Time.current, wake_at: nil)
           Rails.logger.warn("JRC Flows run=#{@run.id} failed: #{e.class}")
         end
       end
@@ -28,8 +36,6 @@ class JrcFlows::Runner
     # Keep the actor until the outer transaction's after_commit callbacks finish.
     Current.executed_by = previous_actor
   end
-
-  private
 
   def perform_locked(message, wake_version)
     return unless %w[running waiting delayed].include?(@run.status)
@@ -95,8 +101,7 @@ class JrcFlows::Runner
   end
 
   def execute
-    while node
-      current = node
+    while (current = authorized_node)
       @run.steps += 1
       raise 'Limite de execução excedido.' if @run.steps > 200
 
@@ -114,7 +119,8 @@ class JrcFlows::Runner
       when 'start'
         # The trigger is checked by DispatchJob.
       else
-        JrcFlows::Actions.new(@run).execute(type, data)
+        result = JrcFlows::Actions.new(@run).execute(type, data)
+        return if result == JrcRelationship::PlaybookFlowWebhookJournal::PENDING && JrcRelationship::PlaybookFlowContinuation.managed?(@run)
         if JrcFlows::Definition::TERMINAL.include?(type)
           @run.node_id = nil
           break
@@ -125,8 +131,16 @@ class JrcFlows::Runner
     @run.update!(status: 'completed', finished_at: Time.current, wake_at: nil, node_id: nil)
   end
 
+  def authorized_node
+    current = node
+    JrcRelationship::PlaybookFlowContinuation.authorize_node!(@run, current) if current
+    current
+  end
+
   def wait!(seconds, status)
     @run.update!(status: status, wake_at: seconds.seconds.from_now)
-    JrcFlows::ResumeJob.set(wait_until: @run.wake_at).perform_later(@run.id, @run.wake_version)
+    return if JrcRelationship::PlaybookFlowContinuation.managed?(@run)
+
+    JrcRelationship::PlaybookFlowContinuation.resume_job(@run).set(wait_until: @run.wake_at).perform_later(@run.id, @run.wake_version)
   end
 end

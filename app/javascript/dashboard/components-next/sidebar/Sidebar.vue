@@ -1307,7 +1307,26 @@ const menuItems = computed(() => {
       label: 'Agentes IA',
       icon: 'i-lucide-bot',
       to: accountScopedRoute('jrc_ai_agents'),
-      activeOn: ['jrc_ai_agents'],
+      activeOn: ['jrc_ai_agents', 'jrc_nico_helpdesk'],
+      children:
+        hasServiceDesk.value && serviceDeskNavigation.visible
+          ? [
+              {
+                name: 'JRC AI Agent List',
+                label: 'Agentes IA',
+                icon: 'i-lucide-bot',
+                to: accountScopedRoute('jrc_ai_agents'),
+                activeOn: ['jrc_ai_agents'],
+              },
+              {
+                name: 'JRC NICO HelpDesk',
+                label: t('JRC_NICO_HELPDESK.TITLE'),
+                icon: 'i-lucide-headset',
+                to: accountScopedRoute('jrc_nico_helpdesk'),
+                activeOn: ['jrc_nico_helpdesk'],
+              },
+            ]
+          : [],
       ignoreFeatureFlag: true,
     },
     {

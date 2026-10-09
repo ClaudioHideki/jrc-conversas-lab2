@@ -13,7 +13,8 @@ class JrcServiceDesk::LifecycleReadService
     if version && version.definition['sla']['mode'] == 'calendar_snapshot'
       cycle = @ticket.sla_cycles.order(number: :desc).first
       begin
-        JrcServiceDesk::LifecycleClocks.verify_snapshot!(cycle&.sla_snapshot || @ticket.latest_sla_snapshot)
+        JrcServiceDesk::LifecycleClocks.verify_snapshot!(cycle&.sla_snapshot || @ticket.latest_sla_snapshot,
+                                                        clock_kinds: (cycle&.lifecycle_policy_version || version).rules.clock_kinds)
       rescue JrcServiceDesk::LifecycleDependencyError, TZInfo::InvalidTimezoneIdentifier
         dependency = 'calendar_snapshot_required'
       end
@@ -85,7 +86,6 @@ class JrcServiceDesk::LifecycleReadService
   end
 
   def clock(c)
-    { id: c.id.to_s, kind: c.kind, state: c.state, budget_seconds: c.budget_seconds, elapsed_seconds: c.elapsed_seconds.to_f,
-      due_at: c.due_at.iso8601(6), achieved_at: c.achieved_at&.iso8601(6), anchor_at: c.anchor_at.iso8601(6), met: c.met? }
+    JrcServiceDesk::ClockProjection.new(c).call.merge(anchor_at: c.anchor_at.iso8601(6), met: c.met?)
   end
 end

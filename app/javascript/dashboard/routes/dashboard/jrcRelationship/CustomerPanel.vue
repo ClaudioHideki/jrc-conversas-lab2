@@ -8,6 +8,7 @@ import ComposeConversation from 'dashboard/components-next/NewConversation/Compo
 import VoiceCallButton from 'dashboard/components-next/Contacts/VoiceCallButton.vue';
 import SurveyDeliveryPanel from './SurveyDeliveryPanel.vue';
 import NicoSummaryPanel from './NicoSummaryPanel.vue';
+import ManualAttendancePanel from './ManualAttendancePanel.vue';
 import {
   buttonClass,
   inputClass,
@@ -465,6 +466,11 @@ const money = value => formatMoney(value, props.metadata?.formatting);
           {{ t('RELATIONSHIP.SAVE') }}
         </button>
       </form>
+      <ManualAttendancePanel
+        v-if="metadata.can_manage && channels?.can_crm"
+        :assignment-id="assignmentId"
+        @changed="emit('changed')"
+      />
       <nav class="mt-4 flex flex-wrap gap-2">
         <RouterLink
           v-for="screen in [

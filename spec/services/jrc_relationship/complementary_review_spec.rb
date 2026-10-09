@@ -46,7 +46,7 @@ RSpec.describe 'Relationship complementary review' do
     flow = JrcRelationship::Workflow.new(context)
     signal = flow.save(kind: 'expansion', attributes: { assignment_id: assignment.id, request_id: SecureRandom.uuid,
       title: 'Qualified expansion', potential_cents: 200_000 })[:record]
-    deal = flow.opportunity!(signal, pipeline_id: pipeline.id, stage_id: stage.id)
+    deal = flow.opportunity!(signal, pipeline_id: pipeline.id, stage_id: stage.id, contact_id: sd_contact.id)
     expect(JrcRelationship::ExpansionPipeline.open(context.records(JrcRelationship::ExpansionSignal), sd_account.jrc_crm_deals)).to include(signal.reload)
     deal.update!(status: 'won')
     dashboard = JrcRelationship::Presenter.new(context).dashboard(context.assignments)
@@ -55,7 +55,7 @@ RSpec.describe 'Relationship complementary review' do
     data = JrcRelationship::Presenter.new(context).record(signal.reload)
     expect(data['commercial_context']).to include(won_cents: 200_000)
     expect(data['commercial_context'][:deal][:status]).to eq('won')
-    expect(flow.opportunity!(signal, pipeline_id: pipeline.id, stage_id: stage.id).id).to eq(deal.id)
+    expect(flow.opportunity!(signal, pipeline_id: pipeline.id, stage_id: stage.id, contact_id: sd_contact.id).id).to eq(deal.id)
   end
   it 'preserves the configured question in the survey and applies frequency limits' do
     JrcRelationship::Configuration.create!(account: sd_account, rules: { survey_question_nps: 'Configured NPS question?' })

@@ -36,6 +36,7 @@ class JrcNico::DomainActions
     when 'list_project_tasks' then list_project_tasks
     when 'read_project_task' then task_result(@domain.task(@args.fetch('project_id'), @args.fetch('task_id')))
     when 'create_project' then create_project
+    when 'create_project_task' then create_project_task
     when 'update_project' then update_project
     when 'move_project_task' then move_project_task
     when 'read_operations_agenda' then read_operations_agenda
@@ -174,8 +175,10 @@ class JrcNico::DomainActions
     service = { 'update_service_ticket' => JrcServiceDesk::UpdateTicketService,
                 'assign_service_ticket' => JrcServiceDesk::AssignTicketService,
                 'transfer_service_ticket' => JrcServiceDesk::TransferTicketService }.fetch(name)
-    ticket = service.new(user_context: context).call(ticket_id: @args.fetch('ticket_id'),
-      attributes: @args.slice(*service::FIELDS), expected_lock_version: @args.fetch('expected_lock_version'))
+    options = { ticket_id: @args.fetch('ticket_id'), attributes: @args.slice(*service::FIELDS),
+                expected_lock_version: @args.fetch('expected_lock_version') }
+    options[:execution_command] = @command if name == 'update_service_ticket'
+    ticket = service.new(user_context: context).call(**options)
     # Assignment can legitimately remove the actor's read scope. Match the native
     # endpoint's acknowledgement instead of requiring a new post-write read.
     receipt(ticket, { id: ticket.id, applied: true }, message: 'Chamado atualizado pelo Service Desk R2.', route: 'jrc_service_desk_tickets')
@@ -204,7 +207,8 @@ class JrcNico::DomainActions
 
   def transition_service_ticket
     transition = JrcServiceDesk::LifecycleTransitionService.new(user_context: context).call(ticket_id: @args.fetch('ticket_id'),
-      attributes: @args.slice(*JrcServiceDesk::LifecycleTransitionService::FIELDS), idempotency_key: request_key)
+      attributes: @args.slice(*JrcServiceDesk::LifecycleTransitionService::FIELDS), idempotency_key: request_key,
+      execution_command: @command)
     result = ticket_result(@domain.ticket(transition.ticket_id), message: 'Regra de ciclo de vida aplicada pelo Service Desk R2.')
     result[:resources] << ['JrcServiceDesk::LifecycleTransition', transition.id]
     result
@@ -287,6 +291,25 @@ class JrcNico::DomainActions
     project = JrcProjects::Projects::Update.call(account: @access.account, actor: @access.user,
       project: @domain.project(@args.fetch('project_id')), attributes: @args.except('project_id'), correlation_id: request_key)
     project_result(project, message: 'Projeto atualizado pelo módulo de Projetos.')
+  end
+
+  def create_project_task
+    key = request_key
+    @access.account.with_lock do
+      ticket = @domain.ticket(@args['ticket_id']) if @args['ticket_id']
+      project = @domain.project(@args.fetch('project_id'), capability: 'projects.task.create')
+      @domain.authorize_project!(project, 'projects.task.view')
+      task = JrcProjects::Tasks::Create.call(account_user: @access.membership, project: project,
+                                           attributes: @args.except('project_id', 'ticket_id'), correlation_id: key)
+      resources = [[project.class.name, project.id], ['JrcNico::ProjectTasks', project.id], [task.class.name, task.id]]
+      if ticket
+        link = JrcOperations::Linker.new(account_user: @access.membership, correlation_id: key).create!(
+          attributes: { project_id: project.id, task_id: task.id, ticket_id: ticket.id }
+        )
+        resources += [[ticket.class.name, ticket.id], [link.class.name, link.id]]
+      end
+      task_result(task, message: 'Tarefa criada pelo módulo de Projetos.').merge(resources: resources)
+    end
   end
 
   def move_project_task

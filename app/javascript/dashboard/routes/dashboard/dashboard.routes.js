@@ -20,6 +20,7 @@ import { routes as salesRoutes } from './sales/routes';
 import crmRoutes from './crm/crm.routes';
 import { routes as jrcCampaignRoutes } from './jrcCampaigns/routes';
 import { routes as jrcCopilotRoutes } from './jrcCopilot/routes';
+import { routes as jrcNicoRoutes } from './jrcNico/routes';
 import { routes as jrcServiceRoutes } from './jrcService/routes';
 import { routes as jrcAiRoutes } from './jrcAI/routes';
 import { routes as jrcBrokerRoutes } from './jrcBroker/routes';
@@ -58,6 +59,7 @@ export default {
         ...crmRoutes.routes,
         ...jrcCampaignRoutes,
         ...jrcCopilotRoutes,
+        ...jrcNicoRoutes,
         ...jrcServiceRoutes,
         ...jrcAiRoutes,
         ...jrcBrokerRoutes,

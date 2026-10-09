@@ -15,8 +15,15 @@ const pages = {
   detail: () => import('./views/TicketDetailView.vue'),
   form: () => import('./views/TicketFormView.vue'),
   catalog: () => import('./views/CatalogView.vue'),
+  serviceCatalog: () => import('./views/ServiceCatalogView.vue'),
+  knowledge: () => import('./views/KnowledgeView.vue'),
+  board: () => import('./views/OperationsBoardView.vue'),
+  resources: () => import('./views/ResourcesView.vue'),
+  reports: () => import('./views/ReportsView.vue'),
   planned: () => import('./views/PlannedView.vue'),
   settings: () => import('./views/SettingsView.vue'),
+  automations: () => import('./views/AutomationsView.vue'),
+  nativeSurveys: () => import('./views/NativeSurveysView.vue'),
 };
 const meta = { featureFlag: FEATURE_FLAGS.JRC_SERVICE_DESK, permissions: ['administrator', 'agent', 'custom_role'] };
 const guard = createIntegratedGuard(store, async accountId => {

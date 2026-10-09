@@ -7,6 +7,9 @@ class JrcServiceDesk::UnitMembership < JrcServiceDesk::UnitRecord
   validates :account_user_id, uniqueness: { scope: %i[account_id unit_id] }
   validates :active, inclusion: { in: [true, false] }
   validate :account_user_is_consistent
+  validates :availability, inclusion: { in: %w[available paused unavailable] }
+  validates :capacity, numericality: { only_integer: true, greater_than: 0, less_than_or_equal_to: 1000 }, allow_nil: true
+  validate :skills_are_explicit
 
   protected
 
@@ -16,5 +19,9 @@ class JrcServiceDesk::UnitMembership < JrcServiceDesk::UnitRecord
 
   def account_user_is_consistent
     validate_account_reference(:account_user)
+  end
+
+  def skills_are_explicit
+    errors.add(:skills, 'must contain unique skill codes') unless JrcServiceDesk::SkillCodes.valid?(skills)
   end
 end

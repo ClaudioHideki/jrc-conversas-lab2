@@ -11,7 +11,7 @@ class JrcCustomers::Timeline
     events = @context.timeline_sources.flat_map do |source, (relation, clock)|
       relation = before_cursor(relation, clock, source, position) if position
       relation.reorder(clock => :desc, id: :desc).limit(limit + 1).map do |record|
-        event(source, record, clock)
+        timeline_event(source, record, clock)
       end
     end
     events.sort_by! { |row| [row[:at], row[:source], row[:id]] }
@@ -55,6 +55,13 @@ class JrcCustomers::Timeline
       predicate = predicate.or(table[clock].eq(position[:at]).and(table[:id].lt(position[:id])))
     end
     relation.where(predicate)
+  end
+
+  def timeline_event(source, record, clock)
+    return event(source, record, clock) unless source.start_with?('relationship_')
+
+    { source: source, id: record.id, at: record.public_send(clock) }
+      .merge(JrcRelationship::CustomerTimeline.event(source, record))
   end
 
   def event(source, record, clock)

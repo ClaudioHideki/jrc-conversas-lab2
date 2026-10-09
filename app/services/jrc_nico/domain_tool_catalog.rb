@@ -8,7 +8,7 @@ class JrcNico::DomainToolCatalog
     'list_service_tickets' => ['Listar página de até 20 chamados R2 autorizados, sem total da conta, com versão atual para alterações', 'service_desk', false, %w[unit_id status_id priority_id category_id queue_id assignee_id q mine page]],
     'read_service_ticket' => ['Consultar chamado R2 e permissões atuais', 'service_desk', false, %w[ticket_id*]],
     'create_service_ticket' => ['Criar chamado R2 na unidade explícita; consulte os IDs de solicitante, estado inicial e prioridade. conversation_id é display_id da conversa', 'service_desk', true, %w[unit_id* title* requester_id* status_id* priority_id* description category_id queue_id team_id assignee_account_user_id service_id conversation_id]],
-    'update_service_ticket' => ['Alterar título, descrição, prioridade ou categoria R2 usando a versão consultada', 'service_desk', true, %w[ticket_id* expected_lock_version* title description priority_id category_id]],
+    'update_service_ticket' => ['Alterar título, descrição e classificação pelo catálogo nativo R3 usando a versão consultada', 'service_desk', true, %w[ticket_id* expected_lock_version* title description priority_id category_id ticket_type_id subcategory_id contract_id service_fields]],
     'assign_service_ticket' => ['Atribuir chamado R2 a operador, fila ou equipe na mesma unidade', 'service_desk', true, %w[ticket_id* expected_lock_version* assignee_account_user_id queue_id team_id]],
     'transfer_service_ticket' => ['Transferir atribuição R2 dentro da mesma unidade, sob permissão específica', 'service_desk', true, %w[ticket_id* expected_lock_version* assignee_account_user_id queue_id team_id]],
     'add_service_ticket_note' => ['Registrar nota interna no chamado R2', 'service_desk', true, %w[ticket_id* body*]],
@@ -20,6 +20,7 @@ class JrcNico::DomainToolCatalog
     'list_project_tasks' => ['Consultar até 20 tarefas autorizadas do projeto e suas versões', 'projects', false, %w[project_id* status page]],
     'read_project_task' => ['Consultar tarefa autorizada, prazo, responsável e versão', 'projects', false, %w[project_id* task_id*]],
     'create_project' => ['Criar projeto interno ou de uma única origem explícita: negócio ganho, chamado R2 ou conversa; não cria contato', 'projects_create', true, %w[name* key description visibility contact_id starts_on due_on priority template_id deal_id ticket_id conversation_id]],
+    'create_project_task' => ['Criar tarefa nativa em projeto e coluna explícitos, respeitando acesso, WIP, responsável e subtarefas; ticket_id vincula ao chamado autorizado', 'projects', true, %w[project_id* board_column_id* title* description priority assignee_id parent_id estimated_minutes starts_on due_on labels ticket_id]],
     'update_project' => ['Atualizar projeto com lock_version consultado; conclusão exige aceite e tarefas concluídas/canceladas', 'projects', true, %w[project_id* lock_version* name description status visibility contact_id owner_id starts_on due_on acceptance_notes priority]],
     'move_project_task' => ['Mover tarefa para coluna real do projeto com lock_version consultado; respeita WIP e dependências', 'projects', true, %w[project_id* task_id* column_id* lock_version* before_task_id]],
     'read_operations_agenda' => ['Consultar até 50 compromissos autorizados de CRM e Projetos, até 366 dias; reduza período para ver os demais. Service Desk não fornece tarefas à agenda', 'operations', false, %w[from to source view user_id]],
@@ -42,7 +43,7 @@ class JrcNico::DomainToolCatalog
     case key
     when 'expected_lock_version', 'lock_version' then value.is_a?(Integer) && value.between?(0, (2**53) - 1)
     when 'evidence_note_ids' then value.is_a?(Array) && value.size <= 30 && value.all? { |id| id.is_a?(Integer) && id.positive? }
-    when 'fields'
+    when 'fields', 'service_fields'
       value.is_a?(Hash) && value.size <= 30 && value.all? do |field, entry|
         field.is_a?(String) && field.length <= 100 &&
           ((entry.is_a?(String) && entry.length <= 4000) || (entry.is_a?(Numeric) && entry.finite?) || [true, false, nil].include?(entry))
