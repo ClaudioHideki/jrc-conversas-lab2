@@ -27,7 +27,19 @@ class RelationshipPlaybookStepsTest < Minitest::Test
   end
   def test_all_supported_native_steps_validate
     JrcRelationship::PlaybookSteps::KINDS.each do |kind|
-      assert JrcRelationship::PlaybookSteps.valid?([{ 'kind'=>kind, 'title'=>'Native work', 'after_days'=>365 }])
+      step = { 'kind'=>kind, 'title'=>'Native work', 'after_days'=>365 }
+      if kind == 'flow'
+        step.merge!(
+          'after_days' => 0,
+          'step_key' => 'native-flow',
+          'flow_id' => 1,
+          'conversation_id' => 2,
+          'contact_id' => 3,
+          'flow_lock_version' => 0,
+          'flow_digest' => 'a' * 64
+        )
+      end
+      assert JrcRelationship::PlaybookSteps.valid?([step])
     end
   end
 end

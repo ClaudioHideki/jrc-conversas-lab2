@@ -1,10 +1,11 @@
 // Pure tests of real payload helpers. Synthetic data is confined to tests.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createTicketDraft, updateTicketDraft } from '../../app/javascript/dashboard/routes/dashboard/serviceDesk/helpers/drafts.js';
-import { decodeContext, decodeTicket, ContractError } from '../../app/javascript/dashboard/routes/dashboard/serviceDesk/helpers/contracts.js';
-import { verifyWrittenFields } from '../../app/javascript/dashboard/routes/dashboard/serviceDesk/helpers/operationalContracts.js';
-import { contextPayload, identity, ticket, detail } from '../../app/javascript/dashboard/routes/dashboard/serviceDesk/__tests__/fixtures.js';
+import './service_desk_node_harness.mjs';
+const { createTicketDraft, updateTicketDraft } = await import('../../app/javascript/dashboard/routes/dashboard/serviceDesk/helpers/drafts.js');
+const { decodeContext, decodeTicket, ContractError } = await import('../../app/javascript/dashboard/routes/dashboard/serviceDesk/helpers/contracts.js');
+const { verifyWrittenFields } = await import('../../app/javascript/dashboard/routes/dashboard/serviceDesk/helpers/operationalContracts.js');
+const { contextPayload, identity, ticket, detail } = await import('../../app/javascript/dashboard/routes/dashboard/serviceDesk/__tests__/fixtures.js');
 const unit = { id: '10', permissions: { create_ticket: true }, initial_status: { id: '1' } };
 const draft = () => ({ unit_id: '10', title: 'Test only', description: '', requester_id: '33', priority_id: '2', company_id: '42', category_id: '' });
 const context = () => decodeContext(contextPayload(), identity);
