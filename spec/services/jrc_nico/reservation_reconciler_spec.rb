@@ -71,6 +71,16 @@ RSpec.describe JrcNico::ReservationReconciler do
     expect(JrcNico::RunCapacity.snapshot(account)).to include(used_tokens: 0, reserved_tokens: 1000)
   end
 
+  it 'preserves the estimation label when reconciling an already counted conservative receipt' do
+    inference.update!(status: 'unknown')
+    JrcAi::UsageEvent.create!(account: account, agent_key: 'nico', feature: 'nico_operator', total_tokens: 30,
+                             metadata: { inference_id: inference.id, usage_estimated: true })
+    reconciler.call(dry_run: false)
+    expect(inference.reload).to have_attributes(status: 'failed', reserved_tokens: 0)
+    expect(inference.accounting['basis']).to eq('estimated')
+    expect(JrcNico::RunCapacity.snapshot(account)).to include(used_tokens: 30, reserved_tokens: 0)
+  end
+
   it 'never touches another account reservation or accepts a copilot correlation as a NICO receipt' do
     foreign_account = create(:account)
     foreign_user = create(:user, account: foreign_account)

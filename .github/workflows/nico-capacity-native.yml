@@ -66,7 +66,7 @@ jobs:
           test "$RAILS_ENV" = test
           test "$POSTGRES_DATABASE" = jrc_rel_sd_r345_concurrency_test
           redis-server --bind 127.0.0.1 --port 6380 --daemonize yes --save '' --appendonly no
-          bundle exec rails db:create db:schema:load
+          SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
           SCHEMA=/tmp/nico-capacity-native-schema.rb bundle exec rails db:migrate
       - uses: pnpm/action-setup@v4
         with:

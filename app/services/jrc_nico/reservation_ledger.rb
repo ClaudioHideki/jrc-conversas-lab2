@@ -41,6 +41,8 @@ class JrcNico::ReservationLedger
       event = events.first
       if event
         raise JrcNico::RuntimeClient::Error, 'provider_usage_invalid' unless event.total_tokens == usage['total_tokens']
+
+        next if @record.reserved_tokens.zero? && @record.accounting['usage_event_id'] == event.id
       else
         event = JrcAi::UsageEvent.create!(account: @record.account, user: @record.user,
                                          provider_id: @record.accounting['provider_id'],

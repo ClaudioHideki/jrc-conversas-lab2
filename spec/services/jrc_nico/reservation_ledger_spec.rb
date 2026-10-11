@@ -15,7 +15,10 @@ RSpec.describe JrcNico::ReservationLedger do
 
   it 'completes atomically with one account-owned receipt and no duplicate consumption on retry' do
     ledger.dispatched!
-    2.times { ledger.complete!(result) }
+    ledger.complete!(result)
+    before = inference.reload.attributes
+    ledger.complete!(result)
+    expect(inference.reload.attributes).to eq(before)
     expect(inference.reload).to have_attributes(status: 'completed', reserved_tokens: 0)
     expect(ledger.events.count).to eq(1)
     expect(ledger.events.first).to have_attributes(account_id: account.id, user_id: user.id, provider_id: provider.id, total_tokens: 30)

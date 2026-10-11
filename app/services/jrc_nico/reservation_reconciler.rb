@@ -37,7 +37,8 @@ class JrcNico::ReservationReconciler
   def classification(record)
     type = record.is_a?(JrcNico::Run) ? 'run' : 'inference'
     events = JrcNico::ReservationLedger.new(record).events
-    lease = record.lease_expires_at || (type == 'run' ? record.started_at || record.created_at : record.created_at) + JrcNico::ReservationLedger::LEASE
+    fallback = type == 'run' ? record.started_at || record.created_at : record.created_at
+    lease = record.lease_expires_at || (fallback + JrcNico::ReservationLedger::LEASE)
     value = if record.status == 'queued' && record.created_at < JrcNico::ReservationLedger::QUEUE_TTL.ago
               'queued_not_executed'
             elsif record.status == 'queued' || (record.status == 'running' && lease.future?)
@@ -63,7 +64,11 @@ class JrcNico::ReservationReconciler
               'released' => row[:release_tokens] }
     return if record.accounting.dig('reconciliation', 'classification') == row[:classification]
 
-    basis = row[:release_tokens] ? (row[:classification] == 'usage_already_recorded' ? 'confirmed' : 'not_executed') : 'unknown'
+    basis = if row[:classification] == 'usage_already_recorded'
+              JrcNico::ReservationLedger.new(record).events.first.metadata['usage_estimated'] == true ? 'estimated' : 'confirmed'
+            else
+              row[:release_tokens] ? 'not_executed' : 'unknown'
+            end
     history = Array(record.accounting['reconciliation_history']) + [audit]
     record.accounting = record.accounting.merge('basis' => basis, 'reconciliation' => audit, 'reconciliation_history' => history)
     record.reserved_tokens = 0 if row[:release_tokens]
