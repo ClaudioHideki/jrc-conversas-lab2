@@ -116,6 +116,9 @@ export function decodeRecord(row, context, resource) {
       ...record,
       title: text(row.title),
       number: text(row.number),
+      ...(Object.hasOwn(row, 'opened_at')
+        ? { opened_at: stamp(row.opened_at) }
+        : {}),
       ...(Object.hasOwn(row, 'impact_code')
         ? {
             impact_code: row.impact_code == null ? null : text(row.impact_code),

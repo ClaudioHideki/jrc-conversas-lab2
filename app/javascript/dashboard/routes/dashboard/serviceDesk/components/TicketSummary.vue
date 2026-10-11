@@ -19,9 +19,21 @@ const details = computed(() => ({
   status: props.ticket.status?.name,
   priority: props.ticket.priority?.name,
   category: props.ticket.category?.name,
+  subcategory: props.ticket.subcategory?.name,
+  ticket_type: props.ticket.ticket_type?.name,
+  service: props.ticket.service?.name,
   source: props.ticket.source,
+  opened_at: formatTimestamp(props.ticket.opened_at, locale.value),
   created_at: formatTimestamp(props.ticket.created_at, locale.value),
   updated_at: formatTimestamp(props.ticket.updated_at, locale.value),
+  first_response: formatTimestamp(
+    props.ticket.sla?.first_response_due_at,
+    locale.value
+  ),
+  resolution: formatTimestamp(
+    props.ticket.sla?.resolution_due_at,
+    locale.value
+  ),
 }));
 </script>
 

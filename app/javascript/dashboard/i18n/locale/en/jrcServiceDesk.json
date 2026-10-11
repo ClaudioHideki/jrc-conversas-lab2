@@ -160,6 +160,7 @@
       "contract_pending": "Operational context unavailable. Retry or review access and setup."
     },
     "FIELDS": {
+      "opened_at": "Opened at",
       "id": "Identifier",
       "number": "Number",
       "title": "Title",

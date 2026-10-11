@@ -35,6 +35,10 @@ import {
   ticketFileFingerprints,
 } from '../helpers/drafts';
 import { serviceDeskRouteName } from '../routeDefinitions';
+import {
+  ticketListReturn,
+  ticketNavigationContext,
+} from '../helpers/ticketNavigation';
 const { t, tm } = useI18n();
 const session = useServiceDesk();
 const hasCustomerMaster = computed(
@@ -305,6 +309,9 @@ watch(record, value => {
     description: value.description,
     service_fields: { ...(value.service_fields || {}) },
   });
+  Object.keys(selectedNames).forEach(field => {
+    selectedNames[field] = value[field] || null;
+  });
   operatorId.value =
     session.state.context?.units.find(item => item.id === value.unit_id)
       ?.operator_company.id || '';
@@ -321,11 +328,16 @@ onBeforeUnmount(() => {
 const cancel = () => {
   if (busy.value) return undefined;
   return router.push({
-    name: serviceDeskRouteName(edit.value ? 'detail' : 'tickets'),
+    name: serviceDeskRouteName(
+      edit.value ? 'detail' : ticketListReturn(route.query).screen
+    ),
     params: {
       accountId: session.accountId.value,
       ...(edit.value ? { ticketId: route.params.ticketId } : {}),
     },
+    query: edit.value
+      ? ticketNavigationContext(route.query)
+      : ticketListReturn(route.query).query,
   });
 };
 defineExpose({ busy, cancel });
@@ -350,6 +362,7 @@ const openCreatedTicket = ticketId =>
   router.push({
     name: serviceDeskRouteName('detail'),
     params: { accountId: session.accountId.value, ticketId },
+    query: ticketNavigationContext(route.query),
   });
 const chooseAssignment = (field, selected) => {
   if (field === 'team' && selectedNames.team?.id !== selected?.id) {

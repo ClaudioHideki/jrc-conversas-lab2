@@ -36,7 +36,7 @@ class JrcServiceDesk::Presenter
 
     requester = record.requester
     team = record.team
-    common(record).merge(title: record.title, number: record.id.to_s, description: record.description,
+    common(record).merge(title: record.title, number: record.id.to_s, description: record.description, opened_at: stamp(record.opened_at),
                          impact_code: record.impact_code, urgency_code: record.urgency_code,
                          service: named(record.service), status: named(record.status), priority: named(record.priority),
                          category: named(record.category), ticket_type: named(record.ticket_type), subcategory: named(record.subcategory),

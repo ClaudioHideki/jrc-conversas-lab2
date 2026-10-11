@@ -8,6 +8,7 @@ import Icon from 'dashboard/components-next/icon/Icon.vue';
 import { tones } from '../helpers/visualTheme';
 import Panel from '../components/ServiceDeskPanel.vue';
 import State from '../components/ServiceDeskState.vue';
+import WriteFeedback from '../components/WriteFeedback.vue';
 import TicketCockpit from '../components/TicketCockpit.vue';
 import LifecyclePanel from '../components/LifecyclePanel.vue';
 import SlaSnapshotEditor from '../components/SlaSnapshotEditor.vue';
@@ -21,6 +22,10 @@ import { usePublicationConfirmation } from '../composables/usePublicationConfirm
 import { communicationLabels } from '../helpers/communicationLabels';
 import { canAct, canonicalId } from '../helpers/access';
 import { serviceDeskRouteName } from '../routeDefinitions';
+import {
+  ticketListReturn,
+  ticketNavigationContext,
+} from '../helpers/ticketNavigation';
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
@@ -29,6 +34,18 @@ const key = 'ticket:detail';
 const tab = ref('details');
 const result = computed(() => session.resource(key));
 const ticket = computed(() => result.value.record);
+const editConfirmed = computed(() => {
+  const mutation = session.operations?.mutation?.('ticket:form:write');
+  const saved = mutation?.ticket;
+  return (
+    result.value.status === 'ready' &&
+    mutation?.status === 'confirmed' &&
+    saved?.id === ticket.value?.id &&
+    saved?.account_id === session.accountId.value &&
+    saved?.unit_id === ticket.value?.unit_id &&
+    saved?.lock_version === ticket.value?.lock_version
+  );
+});
 const { confirmation, accept } = usePublicationConfirmation(
   session,
   route,
@@ -110,6 +127,7 @@ watch(visibleTabKeys, keys => {
 });
 const load = () => {
   tab.value = 'details';
+  if (!canonicalId(route.params.ticketId)) return session.resetResource(key);
   return session.load(key, 'tickets', {}, route.params.ticketId);
 };
 watch([() => route.params.ticketId, () => session.state.status], load, {
@@ -118,11 +136,17 @@ watch([() => route.params.ticketId, () => session.state.status], load, {
 onBeforeUnmount(() => session.resetResource(key));
 const go = name =>
   router.push({
-    name: serviceDeskRouteName(name),
+    name: serviceDeskRouteName(
+      name === 'tickets' ? ticketListReturn(route.query).screen : name
+    ),
     params: {
       accountId: session.accountId.value,
       ...(name === 'tickets' ? {} : { ticketId: route.params.ticketId }),
     },
+    query:
+      name === 'tickets'
+        ? ticketListReturn(route.query).query
+        : ticketNavigationContext(route.query),
   });
 const refresh = () => session.load(key, 'tickets', {}, route.params.ticketId);
 const published = publication => {
@@ -212,13 +236,14 @@ watch(() => session.operations?.state.revision, refresh);
       </div>
       <Button
         v-if="ticket && canAct(ticket, 'update')"
-        :label="t('JRC_SERVICE_DESK.COMMON.edit')"
+        :label="t('JRC_SERVICE_DESK.SCREENS.edit')"
         icon="i-lucide-pencil"
         size="sm"
         @click="go('edit')"
       />
     </header>
     <TicketHeader v-if="ticket" :ticket="ticket" />
+    <WriteFeedback v-if="editConfirmed" status="confirmed" />
     <p v-if="confirmation" role="status" class="mb-4 text-sm">
       {{ publicationLabels[confirmation.outcome] }}
     </p>
@@ -273,7 +298,7 @@ watch(() => session.operations?.state.revision, refresh);
     <div class="sd-two-columns">
       <Panel :title="t(`JRC_SERVICE_DESK.TICKET.tabs.${tab}`)">
         <State
-          v-if="result.status !== 'ready'"
+          v-if="result.status !== 'ready' || !ticket"
           :status="result.status"
           retry
           @retry="session.state.status === 'ready' ? load() : session.retry()"

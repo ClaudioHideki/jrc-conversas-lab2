@@ -126,6 +126,7 @@
       "contract_pending": "Contexto operacional indisponivel. Repita ou confira acesso e configuracao."
     },
     "FIELDS": {
+      "opened_at": "Aberto em",
       "id": "Identificador",
       "number": "Número",
       "title": "Título",

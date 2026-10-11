@@ -17,6 +17,8 @@ import { useServiceDesk } from '../composables/useServiceDesk';
 import { serviceDeskRouteName } from '../routeDefinitions';
 import { routeQuery } from '../helpers/query';
 import { metricQuery, ticketListQuery } from '../helpers/screenExperience.js';
+import { ticketListContext } from '../helpers/ticketNavigation';
+import { canonicalId } from '../helpers/access';
 const props = defineProps({ screen: { type: String, default: 'tickets' } });
 const { t } = useI18n();
 const session = useServiceDesk();
@@ -31,25 +33,28 @@ const preview = computed(() => session.resource(previewKey));
 const query = computed(() => ticketListQuery(props.screen, route.query));
 const status = computed(() => filterError.value ? 'invalid_request' : result.value.status);
 const tabs = computed(() => ['tickets', 'mine'].map(value => ({ value, label: t(`JRC_SERVICE_DESK.SCREENS.${value}`) })));
-const go = (name, ticketId) =>
-  router.push({
+const go = (name, ticketId) => {
+  let navigationQuery = {};
+  if (['tickets', 'mine'].includes(name)) {
+    navigationQuery = {
+      ...route.query,
+      mine:
+        name === 'mine' && route.query.assignment !== 'unassigned'
+          ? 'true'
+          : undefined,
+    };
+  } else if (['detail', 'edit'].includes(name)) {
+    navigationQuery = ticketListContext(props.screen, route.query);
+  }
+  return router.push({
     name: serviceDeskRouteName(name),
     params: {
       accountId: session.accountId.value,
       ...(ticketId ? { ticketId } : {}),
     },
-    ...(['tickets', 'mine'].includes(name)
-      ? {
-          query: {
-            ...route.query,
-            mine:
-              name === 'mine' && route.query.assignment !== 'unassigned'
-                ? 'true'
-                : undefined,
-          },
-        }
-      : {}),
+    query: navigationQuery,
   });
+};
 const load = () => { selection.value = ''; filterError.value = false; session.resetResource(previewKey); return session.load(key, 'tickets', query.value); };
 watch([query, () => session.state.status, () => session.operations?.state.revision], load, { immediate: true });
 const apply = filters => {
@@ -200,11 +205,22 @@ onBeforeUnmount(() => { session.resetResource(key); session.resetResource(previe
             @click="selection = ''; session.resetResource(previewKey)"
           />
         </template>
-        <template v-if="preview.status === 'ready'">
+        <template
+          v-if="
+            preview.status === 'ready' &&
+            preview.record?.id === canonicalId(selection)
+          "
+        >
           <TicketProtocol :ticket="preview.record" />
           <h3 class="text-base mb-4 break-words">
             {{ preview.record.title }}
           </h3>
+          <p class="mb-4 whitespace-pre-wrap break-words text-sm line-clamp-4">
+            {{
+              preview.record.description ||
+              t('JRC_SERVICE_DESK.COMMON.no_value')
+            }}
+          </p>
           <TicketSummary :ticket="preview.record" />
           <Button class="mt-4" :label="t('JRC_SERVICE_DESK.COMMON.open')" size="sm" @click="go('detail', selection)" />
         </template>
