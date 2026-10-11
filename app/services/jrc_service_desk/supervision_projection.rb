@@ -80,7 +80,7 @@ class JrcServiceDesk::SupervisionProjection
 
   def capacities
     units = @relation.reselect(:unit_id).distinct
-    grants = JrcServiceDesk::UnitMembership.where(account_id: @context.account.id, unit_id: units, active: true).includes(account_user: :user)
+    grants = JrcServiceDesk::UnitMembership.operational.where(account_id: @context.account.id, unit_id: units, active: true).includes(account_user: :user)
     scope = JrcServiceDesk::TicketPolicy::Scope.new(@context.to_h, JrcServiceDesk::Ticket).resolve.where(unit_id: units)
     loads = active(scope).group(:assignee_membership_id).count
     grants.order(:id).map { |row| capacity(row, loads.fetch(row.id, 0)) }

@@ -36,6 +36,7 @@ class JrcServiceDesk::Service < JrcServiceDesk::NamedUnitRecord
       validate_unit_reference(key)
       validate_active_reference(key)
     end
+    errors.add(:default_assignee_membership, 'must be an operational unit grant') if default_assignee_membership&.administrative_actor?
     fields = JrcServiceDesk::CatalogueFields.new(form_fields)
     errors.add(:form_fields, 'must define explicit supported fields') unless fields.valid?
     errors.add(:form_fields, 'contains duplicate keys') if fields.duplicate_keys?

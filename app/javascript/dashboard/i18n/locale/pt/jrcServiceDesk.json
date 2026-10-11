@@ -251,6 +251,7 @@
         "Relacionamentos",
         "Revisão"
       ],
+      "initial_status_required": "Esta unidade não possui um status inicial ativo configurado. Peça ao administrador da conta para configurar os status dos chamados antes de criar um chamado.",
       "draft_notice": "Somente Salvar envia os dados. Cada escrita e confirmada por nova leitura da API.",
       "summary": "Resumo do chamado",
       "client_context": "Contexto do cliente",

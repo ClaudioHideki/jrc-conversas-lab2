@@ -78,9 +78,7 @@ describe('CP3 view structures and explicit non-persistence (native Vue pending)'
         })
       );
       const wrapper = await render(TicketListView, 'tickets');
-      expect(Boolean(button(wrapper, keys.COMMON.open_structure))).toBe(
-        allowed
-      );
+      expect(Boolean(button(wrapper, keys.SCREENS.new))).toBe(allowed);
     }
   );
   it('missing API renders pending rather than a fabricated ticket table or zero count',async()=>{

@@ -30,10 +30,14 @@ RSpec.describe 'JRC Service Desk CP4 HTTP operations', type: :request do
     expect(response.headers['Cache-Control']).to include('no-store')
   end
 
-  it 'does not invent an initial status or permit creation without configuration' do
+  it 'keeps creation authority separate from configuration without inventing an initial status' do
     expect { get "#{base}/ui_context", headers: headers }.not_to change(JrcServiceDesk::TicketStatus, :count)
     expect(payload['units'].first['initial_status']).to be_nil
-    expect(payload['units'].first['permissions']['create_ticket']).to be(false)
+    expect(payload['units'].first['permissions']['create_ticket']).to be(true)
+    post "#{base}/tickets", params: { unit_id: sd_unit.id, ticket: sd_create_attributes.merge(status_id: nil) },
+                             headers: request_headers('missing-status'), as: :json
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(JrcServiceDesk::Ticket.where(account_id: sd_account.id)).to be_empty
     expect(JrcServiceDesk::TicketStatus.where(account_id: sd_account.id).count).to eq(0)
   end
 

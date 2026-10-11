@@ -20,8 +20,7 @@ class JrcServiceDesk::LifecyclePolicyVersion < JrcServiceDesk::UnitRecord
 
   def valid_definition
     validate_unit_reference(:lifecycle_policy)
-    validate_unit_reference(:actor_membership)
-    validate_active_reference(:actor_membership)
+    validate_actor_reference(:actor_membership)
     rules
     raise ArgumentError unless publication.is_a?(Hash) && publication.keys.sort == %w[enabled name service_id].sort && [true, false].include?(publication['enabled']) && publication['name'].is_a?(String)
     raise ArgumentError unless status_phases.is_a?(Hash) && status_phases.any? && status_phases.values.all? { |v| JrcServiceDesk::LifecycleRules::PHASES.include?(v) }

@@ -35,6 +35,7 @@ class JrcServiceDesk::Ticket < JrcServiceDesk::UnitRecord
   has_many :ticket_conversations, class_name: 'JrcServiceDesk::TicketConversation', dependent: :restrict_with_error
 
   validates :title, presence: true, length: { maximum: 255 }
+  validates :description, presence: true, on: :create
   validates :origin_channel, presence: true, length: { maximum: 80 }
   validates :opened_at, presence: true
   validates :idempotency_key, presence: true, length: { maximum: 120 },
@@ -98,10 +99,12 @@ class JrcServiceDesk::Ticket < JrcServiceDesk::UnitRecord
       validate_unit_reference(name)
       validate_active_reference(name)
     end
+    errors.add(:assignee_membership, 'must be an operational unit grant') if assignee_membership&.administrative_actor?
     validate_account_reference(:contract)
     errors.add(:subcategory, 'must belong to the selected category') if subcategory && subcategory.parent_id != category_id
     %i[requester team].each { |name| validate_account_reference(name) }
-    %i[status priority category queue assignee_membership created_by_membership].each do |name|
+    validate_actor_reference(:created_by_membership)
+    %i[status priority category queue assignee_membership].each do |name|
       validate_unit_reference(name)
       validate_active_reference(name)
     end

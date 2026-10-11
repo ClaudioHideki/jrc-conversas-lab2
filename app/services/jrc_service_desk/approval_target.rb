@@ -27,7 +27,7 @@ class JrcServiceDesk::ApprovalTarget
   private
 
   def memberships
-    JrcServiceDesk::UnitMembership.where(account_id: @context.account.id, unit_id: @unit.id, active: true).joins(:account_user)
+    JrcServiceDesk::UnitMembership.operational.where(account_id: @context.account.id, unit_id: @unit.id, active: true).joins(:account_user)
   end
 
   def membership_target(value)

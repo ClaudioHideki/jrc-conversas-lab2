@@ -137,7 +137,8 @@ RSpec.describe 'Service Desk ticket protocol and assigned-agent readback', type:
     expect(response.parsed_body).not_to have_key('ticket_id')
   end
 
-  it 'does not expose another unit when its number is known' do
+  it 'does not expose an ungranted unit to an agent when its number is known' do
+    sd_account_user.update!(role: :agent)
     row = sd_ticket(unit: sd_other_unit, status: create(:jrc_sd_status, unit: sd_other_unit),
                     priority: create(:jrc_sd_priority, unit: sd_other_unit), created_by_membership: create(:jrc_sd_membership, unit: sd_other_unit))
     get "#{base}/tickets", params: { unit_id: sd_unit.id, q: "##{row.id}" }, headers: headers

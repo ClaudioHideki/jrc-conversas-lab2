@@ -32,7 +32,7 @@ class JrcServiceDesk::CreateTicketService < JrcServiceDesk::BaseService
         raise Pundit::NotAuthorizedError unless context.capability?(:tickets_assign)
       end
       existing = JrcServiceDesk::Ticket.find_by(account_id: context.account.id, unit_id: unit.id,
-                                                created_by_membership_id: actor_membership.id, idempotency_key: key)
+                                                created_by_membership_id: context.creator_memberships(unit), idempotency_key: key)
       if existing
         raise Pundit::NotAuthorizedError unless context.capability?(:tickets_create)
 

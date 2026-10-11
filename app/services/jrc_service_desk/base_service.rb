@@ -34,8 +34,11 @@ class JrcServiceDesk::BaseService
       unit = scope.lock('FOR UPDATE OF jrc_service_desk_units').find(unit_id)
       @acting_unit = unit
       JrcServiceDesk::OperatorCompany.where(account_id: context.account.id, id: unit.operator_company_id, active: true).lock('FOR SHARE').take!
-      memberships = context.active_memberships.where(unit_id: unit.id).lock('FOR SHARE')
-      @actor_membership = administrative && context.administrator? ? memberships.take : memberships.take!
+      @actor_membership = if administrative && context.administrator?
+                            context.active_memberships.where(unit_id: unit.id).order(:administrative_actor).first
+                          else
+                            context.actor_for(unit, lock: true).tap { |member| member.save! unless member.persisted? }
+                          end
       yield unit
     end
   end
@@ -73,7 +76,7 @@ class JrcServiceDesk::BaseService
   def assignee(value, unit)
     return nil if value.nil?
 
-    result = JrcServiceDesk::UnitMembership.where(account_id: context.account.id, unit_id: unit.id, active: true,
+    result = JrcServiceDesk::UnitMembership.operational.where(account_id: context.account.id, unit_id: unit.id, active: true,
                                                    account_user_id: JrcServiceDesk::Input.id(value)).lock('FOR SHARE').take!
     account_user = AccountUser.where(id: result.account_user_id, account_id: context.account.id).lock('FOR SHARE').take!
     if account_user.respond_to?(:custom_role_id) && account_user.custom_role_id

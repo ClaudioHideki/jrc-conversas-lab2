@@ -38,7 +38,7 @@ class JrcServiceDesk::AutomaticRoutingService < JrcServiceDesk::BaseService
   end
 
   def candidates(ticket, queue)
-    memberships = JrcServiceDesk::UnitMembership.where(account_id: context.account.id, unit_id: ticket.unit_id,
+    memberships = JrcServiceDesk::UnitMembership.operational.where(account_id: context.account.id, unit_id: ticket.unit_id,
                                                        active: true, availability: 'available').where.not(capacity: nil)
     memberships.order(:id).lock.filter_map do |membership|
       next unless eligible?(membership, ticket, queue)

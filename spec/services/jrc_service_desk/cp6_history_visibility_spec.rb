@@ -45,11 +45,11 @@ RSpec.describe 'CP6 lifecycle field visibility' do
     expect(row.reload.status_id).to eq(sd_status.id)
   end
 
-  it 'does not claim creation is available without an initial status record' do
+  it 'keeps creation permission separate from the configured initial status' do
     sd_as_admin!
     data = JrcServiceDesk::UiContextService.new(user_context: sd_context).call
     expect(data[:units].first[:initial_status]).to be_nil
-    expect(data[:units].first[:permissions][:create_ticket]).to be(false)
+    expect(data[:units].first[:permissions][:create_ticket]).to be(true)
     sd_status
     data = JrcServiceDesk::UiContextService.new(user_context: sd_context).call
     expect(data[:units].first[:permissions][:create_ticket]).to be(true)

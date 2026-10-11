@@ -18,9 +18,11 @@ RSpec.describe JrcServiceDesk::OperationalContext do
     expect(described_class.new(sd_context).unit_scope).not_to include(sd_other_unit)
   end
 
-  it 'does not bypass grants for administrator' do
+  it 'lets native administrators manage active units only in their own Account without operational grants' do
     sd_as_admin!
-    expect(described_class.new(sd_context).unit_scope).not_to include(sd_other_unit)
+    expect(described_class.new(sd_context).unit_scope).to contain_exactly(sd_unit, sd_other_unit)
+    expect(described_class.new(sd_context).unit_scope).not_to include(sd_foreign_unit)
+    expect(JrcServiceDesk::UnitMembership.operational.where(account_user: sd_account_user).count).to eq(1)
   end
 
   it 'refreshes a feature flag changed in the database while the input object is stale' do

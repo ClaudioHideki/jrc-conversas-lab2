@@ -60,15 +60,16 @@ RSpec.describe JrcServiceDesk::OperationalContext do
     expect(described_class.new(forged).native_operator?).to be(false)
   end
 
-  it 'preserves native role deletion semantics without bypassing revoked unit access' do
+  it 'restores native administrator scope after delegated role deletion without activating an agent grant' do
     sd_as_admin!
     role = native_custom_role('module_view', 'tickets_view')
     sd_membership.update!(active: false)
     role.destroy!
     expect(sd_account_user.reload.custom_role_id).to be_nil
     expect(JrcServiceDesk::ModulePolicy.new(sd_context, :service_desk).show?).to be(true)
-    expect(JrcServiceDesk::OperationalContext.new(sd_context).unit_scope).to be_empty
-    expect(JrcServiceDesk::TicketPolicy.new(sd_context, JrcServiceDesk::Ticket.new(account: sd_account, unit: sd_unit)).create?).to be(false)
+    expect(JrcServiceDesk::OperationalContext.new(sd_context).unit_scope).to include(sd_unit)
+    expect(JrcServiceDesk::TicketPolicy.new(sd_context, JrcServiceDesk::Ticket.new(account: sd_account, unit: sd_unit)).create?).to be(true)
+    expect(sd_membership.reload.active).to be(false)
   end
 
 end

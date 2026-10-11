@@ -71,8 +71,9 @@ RSpec.describe 'CP4-D01 lifecycle HTTP persistence and readback', type: :request
     get "#{base}/tickets/#{foreign.id}/lifecycle", headers: headers
     expect(response).to have_http_status(:not_found)
     sd_as_admin!
-    get "#{base}/lifecycle_policies", headers: headers, params: { unit_id: sd_other_unit.id }
+    get "#{base}/lifecycle_policies", headers: headers, params: { unit_id: sd_foreign_unit.id }
     expect([403, 404]).to include(response.status)
+    sd_account_user.update!(role: :agent)
     sd_membership.update!(active: false)
     get "#{base}/tickets/#{row.id}/lifecycle", headers: headers
     expect(response).to have_http_status(:not_found)

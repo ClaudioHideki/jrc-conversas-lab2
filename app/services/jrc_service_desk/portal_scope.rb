@@ -24,7 +24,7 @@ class JrcServiceDesk::PortalScope
     records = JrcServiceDesk::Service.where(account_id: @account.id, active: true, portal_enabled: true, portal_inbox_id: @identity.inbox_id)
                                      .joins(unit: :operator_company)
                                      .where(jrc_service_desk_units: { active: true }, jrc_service_desk_operator_companies: { active: true })
-                                     .joins(:portal_execution_membership).where(jrc_service_desk_unit_memberships: { active: true })
+                                     .joins(:portal_execution_membership).where(jrc_service_desk_unit_memberships: { active: true, administrative_actor: false })
     allowed = records.select { |service| JrcServiceDesk::PortalCatalogue.new(contact: @contact, service: service).allowed? }
     records.where(id: allowed.map(&:id))
   end

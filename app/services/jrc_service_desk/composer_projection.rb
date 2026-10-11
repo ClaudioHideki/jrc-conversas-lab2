@@ -2,7 +2,7 @@ class JrcServiceDesk::ComposerProjection
   def initialize(ticket:, context:)
     @ticket = ticket
     @context = context
-    @membership = context.active_memberships.find_by!(unit_id: ticket.unit_id)
+    @membership = context.actor_for(ticket.unit)
   end
 
   def call

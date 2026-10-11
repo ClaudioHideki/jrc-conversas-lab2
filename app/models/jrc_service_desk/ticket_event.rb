@@ -31,8 +31,7 @@ class JrcServiceDesk::TicketEvent < JrcServiceDesk::TicketRecord
   end
 
   def actor_scope_is_consistent
-    validate_unit_reference(:actor_membership)
-    validate_active_reference(:actor_membership)
+    validate_actor_reference(:actor_membership)
   end
 
   def payload_is_safe_json

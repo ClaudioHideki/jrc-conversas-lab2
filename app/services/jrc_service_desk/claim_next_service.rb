@@ -7,6 +7,8 @@ class JrcServiceDesk::ClaimNextService < JrcServiceDesk::BaseService
     with_unit(unit_id) do |unit|
       raise Pundit::NotAuthorizedError unless context.capability?(:tickets_claim)
 
+      raise Pundit::NotAuthorizedError, 'An operational unit grant is required to claim tickets' if actor_membership.administrative_actor?
+
       membership = actor_membership.reload
       previous = authorized_replay(unit, membership, key)
       next previous if previous

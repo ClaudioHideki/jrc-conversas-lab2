@@ -146,8 +146,9 @@ RSpec.describe 'Service Desk historical SLA snapshot HTTP wrapper', type: :reque
     expect(response).to have_http_status(:not_found)
   end
 
-  it 'denies readback and recording after the unit membership is revoked' do
+  it 'denies readback and recording after the agent unit membership is revoked' do
     snapshot = JrcServiceDesk::RecordSlaSnapshotService.new(user_context: sd_context).call(ticket_id: ticket.id, attributes: sd_snapshot_attributes)
+    sd_account_user.update!(role: :agent)
     sd_membership.update!(active: false)
     get "#{base}/sla_snapshots/#{snapshot.id}", headers: headers
     expect(response).to have_http_status(:not_found)
@@ -158,8 +159,8 @@ RSpec.describe 'Service Desk historical SLA snapshot HTTP wrapper', type: :reque
     expect(response).to have_http_status(:not_found)
   end
 
-  it 'does not expand an administrator write or read into another ungranted unit' do
-    other = create(:jrc_sd_ticket, unit: sd_other_unit)
+  it 'does not expand an administrator write or read into another Account' do
+    other = create(:jrc_sd_ticket, unit: sd_foreign_unit)
     snapshot = create(:jrc_sd_snapshot, ticket: other)
     get "/api/v1/accounts/#{sd_account.id}/jrc_service_desk/tickets/#{other.id}/sla_snapshots/#{snapshot.id}", headers: headers
     expect(response).to have_http_status(:not_found)

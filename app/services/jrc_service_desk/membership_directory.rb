@@ -9,7 +9,7 @@ class JrcServiceDesk::MembershipDirectory
 
   def project(members)
     memberships = if @unit
-                    JrcServiceDesk::UnitMembership.where(account: @account, unit: @unit, account_user_id: members.map(&:id))
+                    JrcServiceDesk::UnitMembership.operational.where(account: @account, unit: @unit, account_user_id: members.map(&:id))
                                                   .index_by(&:account_user_id)
                   else
                     {}

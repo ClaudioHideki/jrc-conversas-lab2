@@ -24,7 +24,7 @@ class JrcServiceDesk::StructureContext
     return false unless native.available?
     # Delegated custom roles require an existing structure. Native Account Admin can
     # initialize its enabled module without becoming an operational unit member.
-    JrcServiceDesk::UnitMembership.where(account_id: account.id).exists? ||
+    JrcServiceDesk::UnitMembership.operational.where(account_id: account.id).exists? ||
       Audited::Audit.where(request_uuid: JrcServiceDesk::InitializeAccountService.marker(account.id)).exists?
   end
 end

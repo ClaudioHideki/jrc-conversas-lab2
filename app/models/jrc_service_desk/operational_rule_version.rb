@@ -22,7 +22,7 @@ class JrcServiceDesk::OperationalRuleVersion < JrcServiceDesk::UnitRecord
 
   def publisher_scope
     validate_unit_reference(:published_by_membership)
-    validate_active_reference(:published_by_membership)
+    validate_actor_reference(:published_by_membership)
   end
 
   def configuration_contract

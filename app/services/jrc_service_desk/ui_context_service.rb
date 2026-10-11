@@ -26,13 +26,13 @@ class JrcServiceDesk::UiContextService
     initial = initial_status(unit)
     { id: unit.id.to_s, account_id: @context.account.id.to_s, name: unit.name, active: true,
       operator_company: { id: unit.operator_company.id.to_s, account_id: unit.account_id.to_s, name: unit.operator_company.name },
-      initial_status: initial ? { id: initial.id.to_s, name: initial.name } : nil, permissions: unit_permissions(unit, initial) }
+      initial_status: initial ? { id: initial.id.to_s, name: initial.name } : nil, permissions: unit_permissions(unit) }
   end
 
-  def unit_permissions(unit, initial)
+  def unit_permissions(unit)
     candidate = JrcServiceDesk::Ticket.new(account: @context.account, unit: unit)
     operational = @context.unit_scope.exists?(id: unit.id)
-    { create_ticket: initial.present? && Pundit.policy!(@context.to_h, candidate).create?,
+    { create_ticket: Pundit.policy!(@context.to_h, candidate).create?,
       assign_ticket: operational && @context.capability?(:tickets_assign),
       link_conversation: operational && @context.capability?(:conversations_link),
       manage_services: @context.capability?(:services_manage), manage_lifecycle_policies: @context.capability?(:lifecycle_policies_manage) }

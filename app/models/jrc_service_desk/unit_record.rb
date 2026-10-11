@@ -16,6 +16,12 @@ class JrcServiceDesk::UnitRecord < JrcServiceDesk::AccountRecord
     validate_account_reference(:unit)
   end
 
+  def validate_actor_reference(name)
+    validate_unit_reference(name)
+    related = public_send(name)
+    validate_active_reference(name) unless related.is_a?(JrcServiceDesk::UnitMembership) && related.administrative_actor?
+  end
+
   def validate_unit_reference(name)
     validate_account_reference(name)
     related = public_send(name)

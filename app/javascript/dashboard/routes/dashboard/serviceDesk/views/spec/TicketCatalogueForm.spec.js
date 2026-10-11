@@ -162,7 +162,7 @@ async function render() {
         detail(
           ticket({
             title: 'Native issue',
-            description: '',
+            description: 'Test description',
             lock_version: 0,
             company: { id: '80', name: 'Chosen company' },
             service: { id: '40', name: 'Configured IT' },
@@ -233,6 +233,7 @@ async function render() {
     .find(row => row.props('label') === messages.JRC_SERVICE_DESK.FIELDS.title)
     .find('input')
     .setValue('Native issue');
+  await wrapper.find('textarea').setValue('Test description');
   await wrapper.findAll('.sd-wizard-step')[2].trigger('click');
   await flushPromises();
   await wrapper

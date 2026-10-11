@@ -49,7 +49,7 @@ RSpec.describe 'Service Desk atomic claim HTTP boundary', type: :request do
     sd_membership.update!(availability: 'available', capacity: 1)
     ticket = sd_ticket
     post path, params: { unit_id: sd_other_unit.id }, headers: headers, as: :json
-    expect(response).to have_http_status(:not_found)
+    expect(response).to have_http_status(:forbidden)
     expect(ticket.reload.assignee_membership_id).to be_nil
   end
 end

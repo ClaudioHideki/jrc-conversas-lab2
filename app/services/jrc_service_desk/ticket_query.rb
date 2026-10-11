@@ -43,7 +43,7 @@ class JrcServiceDesk::TicketQuery
       @relation = relation.where(key => parameters[key])
     end
     if parameters['assignee_id']
-      grants = JrcServiceDesk::UnitMembership.where(account_id: context.account.id, unit_id: units.select(:id),
+      grants = JrcServiceDesk::UnitMembership.operational.where(account_id: context.account.id, unit_id: units.select(:id),
                                                       account_user_id: parameters['assignee_id'])
       raise ActiveRecord::RecordNotFound unless grants.exists?
       @relation = relation.where(assignee_membership_id: grants.select(:id))

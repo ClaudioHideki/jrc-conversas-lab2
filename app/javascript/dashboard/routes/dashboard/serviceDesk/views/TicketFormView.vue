@@ -332,6 +332,7 @@ const maySave = computed(
     !hashingFiles.value &&
     files.value.length <= 5 &&
     draft.title.trim() &&
+    (edit.value || draft.description.trim()) &&
     (draft.priority_id ||
       (!edit.value && draft.impact_code && draft.urgency_code)) &&
     serviceReady.value &&
@@ -480,6 +481,13 @@ const submit = async () => {
             <Feedback
               :status="localError ? 'invalid_input' : mutation.status"
             />
+            <Banner
+              v-if="!edit && unit && !unit.initial_status"
+              color="amber"
+              class="mb-4"
+            >
+              {{ t('JRC_SERVICE_DESK.FORM.initial_status_required') }}
+            </Banner>
             <div v-if="step === 0" class="grid gap-4">
               <ScopeBar
                 v-if="!edit"

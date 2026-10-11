@@ -79,7 +79,7 @@ class JrcServiceDesk::CatalogQuery
       Pundit.authorize(context.to_h, Team, :index?)
       search(Team.where(account_id: context.account.id), 'teams', 'name').order(name: :asc, id: :asc)
     when 'assignees'
-      records = JrcServiceDesk::UnitMembership.where(account_id: context.account.id, unit_id: unit_id, active: true)
+      records = JrcServiceDesk::UnitMembership.operational.where(account_id: context.account.id, unit_id: unit_id, active: true)
         .joins(account_user: :user).includes(account_user: :user)
       search(records, 'users', 'name').order('users.name ASC', 'jrc_service_desk_unit_memberships.id ASC')
     end

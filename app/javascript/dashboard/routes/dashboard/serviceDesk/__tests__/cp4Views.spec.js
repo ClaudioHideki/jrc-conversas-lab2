@@ -83,6 +83,7 @@ async function renderForm(writeClient) {
   });
   await wrapper.findAll('select')[1].setValue('10'); await flushPromises();
   await wrapper.findAll('label').find(label => label.text().startsWith(messages.JRC_SERVICE_DESK.FIELDS.title)).find('input').setValue('Native Vue fixture');
+  await wrapper.find('textarea').setValue('Test description');
   await wrapper.findAllComponents(Lookup).find(item => item.props('resource') === 'requesters').find('select').setValue('33');
   await wrapper.findAll('.sd-wizard-step')[1].trigger('click'); await flushPromises();
   await wrapper.findAllComponents(Lookup).find(item => item.props('resource') === 'priorities').find('select').setValue('2');
@@ -99,7 +100,15 @@ describe('CP4 native Vue create/readback wiring (execution pending)', () => {
     expect(create.mock.calls[0][1].ticket.status_id).toBe('1');
     expect(router.currentRoute.value.name).toBe(serviceDeskRouteName('new'));
     expect(wrapper.text()).not.toContain(messages.JRC_SERVICE_DESK.OPS.STATUS.confirmed);
-    read.resolve(detail(ticket({ title: 'Native Vue fixture', description: '', lock_version: 0 })));
+    read.resolve(
+      detail(
+        ticket({
+          title: 'Native Vue fixture',
+          description: 'Test description',
+          lock_version: 0,
+        })
+      )
+    );
     await flushPromises();
     expect(router.currentRoute.value.name).toBe(serviceDeskRouteName('new'));
     expect(
@@ -159,7 +168,7 @@ describe('CP4 native Vue create/readback wiring (execution pending)', () => {
         detail(
           ticket({
             title: 'Native Vue fixture',
-            description: '',
+            description: 'Test description',
             lock_version: 0,
             assignee: { id: '7', name: 'Selected agent' },
           })

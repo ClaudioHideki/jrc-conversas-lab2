@@ -49,7 +49,7 @@ class JrcServiceDesk::CreateTicketWorkflowService < JrcServiceDesk::BaseService
 
   def existing_ticket(unit, key, inputs)
     existing = JrcServiceDesk::Ticket.find_by(account_id: context.account.id, unit_id: unit.id,
-                                              created_by_membership_id: actor_membership.id, idempotency_key: key)
+                                              created_by_membership_id: context.creator_memberships(unit), idempotency_key: key)
     return unless existing
 
     authorize!(existing, :show?)

@@ -59,9 +59,9 @@ RSpec.describe JrcServiceDesk::RecordSlaSnapshotService do
     expect { service.call(ticket_id: ticket.id, attributes: sd_snapshot_attributes.merge(due_at: Time.current)) }.to raise_error(ArgumentError)
   end
 
-  it 'does not bypass the unit boundary for an administrator' do
+  it 'does not bypass the Account boundary for an administrator' do
     sd_as_admin!
-    other = create(:jrc_sd_ticket, unit: sd_other_unit)
+    other = create(:jrc_sd_ticket, unit: sd_foreign_unit)
     expect { service.call(ticket_id: other.id, attributes: sd_snapshot_attributes) }.to raise_error(ActiveRecord::RecordNotFound)
   end
 

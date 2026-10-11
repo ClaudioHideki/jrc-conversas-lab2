@@ -34,7 +34,7 @@ class JrcServiceDesk::PortalConfigurationOptions
   end
 
   def members(unit, inbox)
-    JrcServiceDesk::UnitMembership.where(account_id: @context.account.id, unit_id: unit.id, active: true)
+    JrcServiceDesk::UnitMembership.operational.where(account_id: @context.account.id, unit_id: unit.id, active: true)
                                   .includes(account_user: :user).order(:id).select { |row| eligible?(row, unit, inbox) }
   end
 

@@ -13,7 +13,6 @@ class JrcServiceDesk::TicketConversation < JrcServiceDesk::TicketRecord
 
   def conversation_and_actor_are_consistent
     validate_account_reference(:conversation)
-    validate_unit_reference(:linked_by_membership)
-    validate_active_reference(:linked_by_membership)
+    validate_actor_reference(:linked_by_membership)
   end
 end

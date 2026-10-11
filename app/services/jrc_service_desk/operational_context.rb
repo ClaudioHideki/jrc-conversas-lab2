@@ -23,24 +23,44 @@ class JrcServiceDesk::OperationalContext < JrcServiceDesk::AccessContext
   def unit_scope
     return JrcServiceDesk::Unit.none unless available?
 
-    granted = JrcServiceDesk::UnitMembership.where(account_id: account.id, account_user_id: account_user.id, active: true).select(:unit_id)
-    JrcServiceDesk::Unit.where(account_id: account.id, active: true, id: granted)
-      .joins(:operator_company)
+    units = JrcServiceDesk::Unit.where(account_id: account.id, active: true).joins(:operator_company)
       .where(jrc_service_desk_operator_companies: { account_id: account.id, active: true })
+    return units if administrator?
+
+    granted = JrcServiceDesk::UnitMembership.operational.where(account_id: account.id, account_user_id: account_user.id, active: true).select(:unit_id)
+    units.where(id: granted)
   end
 
   def view_unit_scope
-    return unit_scope unless administrator?
-
-    JrcServiceDesk::Unit.where(account_id: account.id, active: true).joins(:operator_company)
-      .where(jrc_service_desk_operator_companies: { account_id: account.id, active: true })
+    unit_scope
   end
 
   def active_memberships
     return JrcServiceDesk::UnitMembership.none unless available?
 
-    JrcServiceDesk::UnitMembership.where(account_id: account.id, account_user_id: account_user.id, active: true,
-                                          unit_id: unit_scope.select(:id))
+    memberships = JrcServiceDesk::UnitMembership.where(account_id: account.id, account_user_id: account_user.id,
+                                                       unit_id: unit_scope.select(:id))
+    return memberships.operational.where(active: true) unless administrator?
+
+    memberships.where(active: true).or(memberships.where(administrative_actor: true))
+  end
+
+  # A preview may use an unsaved audit actor. Only a locked domain command persists it.
+  # This row records authorship and never grants an agent access to a unit.
+  def actor_for(unit, lock: false)
+    raise Pundit::NotAuthorizedError unless native_operator? && unit_allowed?(unit)
+
+    memberships = active_memberships.where(unit_id: unit.id).order(:administrative_actor)
+    memberships = memberships.lock('FOR SHARE') if lock
+    return memberships.take! unless administrator?
+
+    memberships.first || JrcServiceDesk::UnitMembership.new(account: account, unit: unit, account_user: account_user,
+                                                           administrative_actor: true, active: false, availability: 'unavailable')
+  end
+
+  def creator_memberships(unit = nil)
+    units = unit ? unit.id : unit_scope.select(:id)
+    JrcServiceDesk::UnitMembership.where(account_id: account.id, unit_id: units, account_user_id: account_user.id).select(:id)
   end
 
   def unit_allowed?(unit)

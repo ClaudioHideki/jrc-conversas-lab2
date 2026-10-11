@@ -10,7 +10,7 @@ class JrcServiceDesk::ServicePortalConfiguration
 
   def ready?
     active_catalogue? && @service.portal_inbox&.channel_type == 'Channel::WebWidget' &&
-      @service.portal_execution_membership&.active? && @member
+      @service.portal_execution_membership&.active? && !@service.portal_execution_membership.administrative_actor? && @member
   end
 
   def active_catalogue?

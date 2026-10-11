@@ -43,7 +43,7 @@ class JrcServiceDesk::NotificationResendPreview
   end
 
   def membership
-    @context.active_memberships.where(unit_id: @row.unit_id).take!
+    @context.actor_for(@row.unit)
   end
 
   def authorize!

@@ -285,6 +285,7 @@
         "Relationships",
         "Review"
       ],
+      "initial_status_required": "This unit has no active initial status configured. Ask an Account administrator to configure ticket statuses before creating a ticket.",
       "draft_notice": "Only Save submits data. A fresh API read confirms each write.",
       "summary": "Ticket summary",
       "client_context": "Customer context",

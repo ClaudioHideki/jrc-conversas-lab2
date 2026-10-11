@@ -15,7 +15,8 @@ class JrcServiceDesk::StructurePolicy
   end
 
   def show?
-    index? && @record.respond_to?(:account_id) && @record.account_id == @context.account.id
+    index? && @record.respond_to?(:account_id) && @record.account_id == @context.account.id &&
+      !(@record.is_a?(JrcServiceDesk::UnitMembership) && @record.administrative_actor?)
   end
 
   def create?
@@ -51,7 +52,8 @@ class JrcServiceDesk::StructurePolicy
     def resolve
       allowed = JrcServiceDesk::StructureContract::RESOURCES.any? { |r| @scope == JrcServiceDesk::StructureRecords.model(r) }
       return @scope.none unless allowed && @context.available?
-      @scope.where(account_id: @context.account.id)
+      records = @scope.where(account_id: @context.account.id)
+      @scope == JrcServiceDesk::UnitMembership ? records.operational : records
     end
   end
 end

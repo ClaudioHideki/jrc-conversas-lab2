@@ -90,7 +90,7 @@ class JrcServiceDesk::InitializeAccountService
     info = summary(audit)
     operator = JrcServiceDesk::OperatorCompany.where(account_id: @account.id).find(info.fetch('operator_company_id'))
     unit = JrcServiceDesk::Unit.where(account_id: @account.id, operator_company_id: operator.id).find(info.fetch('unit_id'))
-    membership = JrcServiceDesk::UnitMembership.where(account_id: @account.id, unit_id: unit.id,
+    membership = JrcServiceDesk::UnitMembership.operational.where(account_id: @account.id, unit_id: unit.id,
       account_user_id: info.fetch('recipient_account_user_id')).find(info.fetch('membership_id'))
     info.except('key', 'fingerprint').merge('audit_id' => audit.id.to_s, 'occurred_at' => audit.created_at.iso8601(6),
       'current_records' => { 'operator_companies' => JrcServiceDesk::StructureRecords.project('operator_companies', operator),

@@ -43,7 +43,6 @@ class JrcServiceDesk::TicketNote < JrcServiceDesk::TicketRecord
   end
 
   def author_scope_is_consistent
-    validate_unit_reference(:author_membership)
-    validate_active_reference(:author_membership)
+    validate_actor_reference(:author_membership)
   end
 end

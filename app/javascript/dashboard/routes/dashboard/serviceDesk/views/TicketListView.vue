@@ -105,7 +105,7 @@ onBeforeUnmount(() => { session.resetResource(key); session.resetResource(previe
               unit => unit.permissions.create_ticket === true
             )
           "
-          :label="t('JRC_SERVICE_DESK.COMMON.open_structure')"
+          :label="t('JRC_SERVICE_DESK.SCREENS.new')"
           icon="i-lucide-plus"
           size="sm"
           @click="go('new')"

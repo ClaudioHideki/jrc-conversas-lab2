@@ -64,9 +64,14 @@ RSpec.describe JrcServiceDesk::CreateTicketService do
     expect { create_command(unit_id: sd_foreign_unit.id) }.to raise_error(ActiveRecord::RecordNotFound)
   end
 
-  it 'rejects an ungranted unit even for administrator' do
+  it 'allows native administrator creation in another configured unit without an operational grant' do
     sd_as_admin!
-    expect { create_command(unit_id: sd_other_unit.id) }.to raise_error(ActiveRecord::RecordNotFound)
+    status = create(:jrc_sd_status, unit: sd_other_unit)
+    priority = create(:jrc_sd_priority, unit: sd_other_unit)
+    ticket = create_command(sd_create_attributes.merge(status_id: status.id, priority_id: priority.id), unit_id: sd_other_unit.id)
+    expect(ticket.reload.unit_id).to eq(sd_other_unit.id)
+    expect(ticket.created_by_membership).to have_attributes(administrative_actor: true, active: false, account_user_id: sd_account_user.id)
+    expect(JrcServiceDesk::UnitMembership.operational.where(unit: sd_other_unit, account_user: sd_account_user)).to be_empty
   end
 
   it 'rejects a requester from another Account' do
