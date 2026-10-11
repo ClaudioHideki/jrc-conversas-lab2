@@ -139,7 +139,8 @@ RSpec.describe JrcNico::LegacyReservationReview do
 
   it 'associates reviewed unlinked events without duplicate accounting and preserves metadata' do
     event = JrcAi::UsageEvent.create!(account: account, user: user, agent_key: 'nico', feature: 'nico_operator',
-                                     input_tokens: 20, output_tokens: 10, total_tokens: 30, created_at: record.created_at, metadata: { retained: true })
+                                     input_tokens: 20, output_tokens: 10, total_tokens: 30, created_at: record.created_at,
+                                     metadata: { retained: true })
     input = decision.merge('classification' => 'confirmed', 'source' => 'recorded_usage', 'usage_event_ids' => [event.id])
     expect { apply_decision(input) }.not_to change(account.jrc_ai_usage_events, :count)
     expect(event.reload.metadata).to include('retained' => true, 'inference_id' => record.id)
@@ -158,7 +159,8 @@ RSpec.describe JrcNico::LegacyReservationReview do
     foreign = create(:account)
     events = [
       JrcAi::UsageEvent.create!(account: foreign, agent_key: 'nico', feature: 'nico_operator', input_tokens: 30, total_tokens: 30, metadata: {}),
-      JrcAi::UsageEvent.create!(account: account, user: user, agent_key: 'copilot', feature: 'assistant', input_tokens: 30, total_tokens: 30, metadata: {}),
+      JrcAi::UsageEvent.create!(account: account, user: user, agent_key: 'copilot', feature: 'assistant',
+                               input_tokens: 30, total_tokens: 30, metadata: {}),
       JrcAi::UsageEvent.create!(account: account, user: user, agent_key: 'nico', feature: 'nico_operator', input_tokens: 30, total_tokens: 30,
                                created_at: record.created_at, metadata: { inference_id: record.id + 1 })
     ]
@@ -240,7 +242,8 @@ RSpec.describe JrcNico::LegacyReservationReview do
     input = decision
     apply_decision(input)
     expect do
-      review.call(type: 'inference', id: record.id, decision: input.merge('justification' => 'A different administrative decision.'), apply: true, authorized: true)
+      review.call(type: 'inference', id: record.id, decision: input.merge('justification' => 'A different administrative decision.'),
+                  apply: true, authorized: true)
     end.to raise_error(described_class::Conflict, 'review_request_conflict')
     other = JrcNico::Inference.create!(account: account, user: user, status: 'unknown', reserved_tokens: 1000, created_at: 1.hour.ago)
     expect { review.call(type: 'inference', id: other.id, decision: input, apply: true, authorized: true) }
@@ -285,7 +288,8 @@ RSpec.describe JrcNico::LegacyReservationReview do
   it 'supports legacy runs and requires association of exact request-ID receipts' do
     run = JrcNico::Run.create!(account: account, user: user, conversation: create(:conversation, account: account),
                               request_id: SecureRandom.uuid, message: 'Local test', status: 'failed', reserved_tokens: 1000, created_at: 1.hour.ago)
-    event = JrcAi::UsageEvent.create!(account: account, user: user, agent_key: 'nico', feature: 'assisted_analysis', input_tokens: 30, total_tokens: 30,
+    event = JrcAi::UsageEvent.create!(account: account, user: user, agent_key: 'nico', feature: 'assisted_analysis',
+                                     input_tokens: 30, total_tokens: 30,
                                      created_at: run.created_at + 10.minutes, metadata: { request_id: run.request_id })
     input = decision.merge('fingerprint' => report.describe(run, 'run')[:fingerprint], 'excluded_usage_event_ids' => [event.id])
     expect { review.call(type: 'run', id: run.id, decision: input) }.to raise_error(described_class::Conflict, 'request_usage_requires_association')

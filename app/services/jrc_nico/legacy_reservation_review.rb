@@ -72,7 +72,8 @@ class JrcNico::LegacyReservationReview
     raise Conflict, 'legacy_review_already_settled' if settled && settled != 'unknown'
     raise ArgumentError, 'invalid_review_request' unless input['request_id'].is_a?(String) && UUID.match?(input['request_id'])
     raise ArgumentError, 'invalid_classification' unless OUTCOMES.include?(input['classification']) && SOURCES.include?(input['source'])
-    raise ArgumentError, 'review_justification_required' unless input['justification'].is_a?(String) && input['justification'].length.between?(20, 1000)
+    justified = input['justification'].is_a?(String) && input['justification'].length.between?(20, 1000)
+    raise ArgumentError, 'review_justification_required' unless justified
 
     evidence = input['evidence']
     valid = evidence.is_a?(Array) && evidence.size.between?(1, 10) && evidence.all? do |entry|
@@ -81,7 +82,8 @@ class JrcNico::LegacyReservationReview
         entry['sha256'].is_a?(String) && /\A[0-9a-f]{64}\z/.match?(entry['sha256'])
     end
     raise ArgumentError, 'review_evidence_required' unless valid
-    raise ArgumentError, 'sensitive_review_content' if /sk-[\w-]{12,}|Bearer\s|gh[pousr]_\w{15,}|github_pat_|-----BEGIN.*PRIVATE KEY/i.match?(input.to_json)
+    sensitive = /sk-[\w-]{12,}|Bearer\s|gh[pousr]_\w{15,}|github_pat_|-----BEGIN.*PRIVATE KEY/i
+    raise ArgumentError, 'sensitive_review_content' if sensitive.match?(input.to_json)
 
     @events = JrcNico::ReservationLedger.new(@record).events.order(:id).to_a
     validate_source!(input)
@@ -107,7 +109,9 @@ class JrcNico::LegacyReservationReview
         expected = source == 'external_receipt' ? 'confirmed' : 'estimated'
         raise ArgumentError, 'receipt_classification_mismatch' unless outcome == expected
         raise ArgumentError, 'conservative_estimate_required' if outcome == 'estimated' && input['conservative_upper_bound'] != true
-        raise ArgumentError, 'estimate_cannot_lower_unknown_bound' if outcome == 'estimated' && input['usage']['total_tokens'] < @record.reserved_tokens
+        if outcome == 'estimated' && input['usage']['total_tokens'] < @record.reserved_tokens
+          raise ArgumentError, 'estimate_cannot_lower_unknown_bound'
+        end
       elsif source == 'runtime_not_executed'
         raise ArgumentError, 'non_execution_proof_required' unless outcome == 'not_executed' &&
                                                                 %w[not_dispatched rejected_before_provider].include?(input['runtime_outcome'])
@@ -120,7 +124,8 @@ class JrcNico::LegacyReservationReview
 
   def validate_events!(input)
     ids = input['usage_event_ids']
-    raise ArgumentError, 'invalid_usage_events' unless ids.is_a?(Array) && ids.any? && ids.all? { |id| id.is_a?(Integer) && id.positive? } && ids.uniq == ids
+    valid_ids = ids.is_a?(Array) && ids.any? && ids.all? { |id| id.is_a?(Integer) && id.positive? } && ids.uniq == ids
+    raise ArgumentError, 'invalid_usage_events' unless valid_ids
 
     selected = @report.account.jrc_ai_usage_events.where(id: ids).order(:id).to_a
     raise ArgumentError, 'invalid_usage_events' unless selected.size == ids.size && (@events.map(&:id) - ids).empty?

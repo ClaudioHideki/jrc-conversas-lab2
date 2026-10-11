@@ -10,7 +10,8 @@ RSpec.describe 'Legacy NICO review concurrency', :sd_concurrency do
   let(:decision) do
     report = JrcNico::LegacyReservations.new(member: member)
     { 'request_id' => SecureRandom.uuid, 'fingerprint' => report.describe(record, 'inference')[:fingerprint], 'classification' => 'not_executed',
-      'source' => 'runtime_not_executed', 'runtime_outcome' => 'not_dispatched', 'justification' => 'Verified explicit non-dispatch evidence for this operation.',
+      'source' => 'runtime_not_executed', 'runtime_outcome' => 'not_dispatched',
+      'justification' => 'Verified explicit non-dispatch evidence for this operation.',
       'excluded_usage_event_ids' => [], 'evidence' => [{ 'reference' => 'local-evidence', 'sha256' => Digest::SHA256.hexdigest('local evidence') }] }
   end
 
@@ -21,7 +22,7 @@ RSpec.describe 'Legacy NICO review concurrency', :sd_concurrency do
     outcomes = concurrently(Array.new(2) do
       lambda do
         JrcNico::LegacyReservationReview.new(member: AccountUser.find(member_id))
-                                       .call(type: 'inference', id: record_id, decision: input, apply: true, authorized: true, simulation_token: token)
+          .call(type: 'inference', id: record_id, decision: input, apply: true, authorized: true, simulation_token: token)
       end
     end)
     expect(outcomes).to all(be_a(Hash))
@@ -39,7 +40,7 @@ RSpec.describe 'Legacy NICO review concurrency', :sd_concurrency do
     outcomes = concurrently(inputs.zip(tokens).map do |input, token|
       lambda do
         JrcNico::LegacyReservationReview.new(member: AccountUser.find(member_id))
-                                       .call(type: 'inference', id: record_id, decision: input, apply: true, authorized: true, simulation_token: token)
+          .call(type: 'inference', id: record_id, decision: input, apply: true, authorized: true, simulation_token: token)
       end
     end)
     expect(outcomes.count { |value| value.is_a?(Hash) }).to eq(1)
@@ -63,7 +64,7 @@ RSpec.describe 'Legacy NICO review concurrency', :sd_concurrency do
     outcomes = concurrently(inputs.zip(tokens, [record.id, other.id]).map do |input, token, record_id|
       lambda do
         JrcNico::LegacyReservationReview.new(member: AccountUser.find(member_id))
-                                       .call(type: 'inference', id: record_id, decision: input, apply: true, authorized: true, simulation_token: token)
+          .call(type: 'inference', id: record_id, decision: input, apply: true, authorized: true, simulation_token: token)
       end
     end)
     expect(outcomes.count { |value| value.is_a?(Hash) }).to eq(1)
