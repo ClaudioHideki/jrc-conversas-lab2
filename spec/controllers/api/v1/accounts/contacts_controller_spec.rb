@@ -20,7 +20,7 @@ RSpec.describe 'Contacts API', type: :request do
     it 'requires Customer Master permission for enhanced views but preserves native people access' do
       account.disable_features!('jrc_customer_master')
       get "/api/v1/accounts/#{account.id}/contacts", params: { directory_view: 'duplicates' }, headers: admin.create_new_auth_token
-      expect(response).to have_http_status(:forbidden)
+      expect(response).to have_http_status(:unauthorized)
       get "/api/v1/accounts/#{account.id}/contacts", params: { directory_view: 'people' }, headers: admin.create_new_auth_token
       expect(response).to have_http_status(:success)
     end

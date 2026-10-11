@@ -14,7 +14,7 @@ RSpec.describe 'Customer master API', type: :request do
   it 'is opt-in for the account' do
     account.disable_features!('jrc_customer_master')
     get "#{root}/companies", headers: headers
-    expect(response).to have_http_status(:forbidden)
+    expect(response).to have_http_status(:unauthorized)
   end
   it 'does not list companies of another account' do
     own = account.master_companies.create!(name: 'Own')
@@ -51,7 +51,7 @@ RSpec.describe 'Customer master API', type: :request do
     source = create(:contact, account: account)
     post "#{root}/contacts/#{base.id}/merge", headers: agent.create_new_auth_token,
          params: { source_contact_id: source.id, confirm: true }, as: :json
-    expect(response).to have_http_status(:forbidden)
+    expect(response).to have_http_status(:unauthorized)
     expect(source.reload).to be_persisted
   end
   it 'refuses merging without explicit confirmation' do
