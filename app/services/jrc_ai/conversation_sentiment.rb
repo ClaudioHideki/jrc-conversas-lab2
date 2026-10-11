@@ -10,8 +10,9 @@ class JrcAi::ConversationSentiment
     payload = { account_id: account.id, request_id: SecureRandom.uuid, conversation_id: conversation.display_id,
                 channel: conversation.inbox.channel_type, messages: message_rows(messages) }
     result = JrcNico::OperationalInference.metered(account: account, user: access.user, kind: 'sentiment',
-                                                   reservation_tokens: payload.to_json.bytesize + 16_000) do |provider|
-      JrcNico::RuntimeClient.new(provider: provider).sentiment(payload)
+                                                   reservation_tokens: payload.to_json.bytesize + 16_000,
+                                                   request_id: payload[:request_id]) do |provider, ledger|
+      JrcNico::RuntimeClient.new(provider: provider, ledger: ledger).sentiment(payload)
     end
     result_summary(result, access, conversation, messages)
   end

@@ -33,8 +33,8 @@ class Api::V1::Accounts::JrcNico::RunsController < Api::V1::Accounts::BaseContro
     end
     JrcNico::AnalyzeJob.perform_later(@run.id) if created
     render json: @run.snapshot, status: :accepted
-  rescue JrcNico::RunCapacity::Exceeded
-    render json: { error: 'too_many_requests' }, status: :too_many_requests
+  rescue JrcNico::RunCapacity::Exceeded => error
+    render json: { error: error.code, message: error.user_message }, status: :too_many_requests
   end
 
   def show
@@ -42,9 +42,14 @@ class Api::V1::Accounts::JrcNico::RunsController < Api::V1::Accounts::BaseContro
   end
 
   def cancel
-    @run.with_lock do
-      @run.reserved_tokens = 0 if @run.status == 'queued'
-      @run.update!(status: 'cancelled', finished_at: Time.current) if %w[queued running].include?(@run.status)
+    Current.account.with_lock do
+      @run.with_lock do
+        if @run.status == 'queued'
+          @run.reserved_tokens = 0
+          @run.accounting = @run.accounting.merge('basis' => 'not_executed', 'cancelled_at' => Time.current.iso8601(6))
+        end
+        @run.update!(status: 'cancelled', finished_at: Time.current) if %w[queued running].include?(@run.status)
+      end
     end
     render json: @run.snapshot
   end

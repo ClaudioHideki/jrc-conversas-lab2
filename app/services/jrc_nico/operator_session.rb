@@ -517,7 +517,7 @@ class JrcNico::OperatorSession
                previous_changes = workflow && session.commands.where("execution_context ->> 'workflow_id' = ?", workflow)
                                                      .exists?(status: 'succeeded', tool: tools)
                error.user_message(previous_changes: previous_changes)
-             when JrcNico::RunCapacity::Exceeded then 'Limite de uso ou capacidade atingido. Aguarde ou revise os limites da conta.'
+             when JrcNico::RunCapacity::Exceeded then error.user_message
              else 'Não foi possível concluir. Verifique o estado do recurso antes de tentar novamente.'
              end
     command.update!(status: command.status == 'executing' ? 'unknown' : 'failed', reply: detail)

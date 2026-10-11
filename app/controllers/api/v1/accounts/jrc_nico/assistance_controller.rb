@@ -30,8 +30,8 @@ class Api::V1::Accounts::JrcNico::AssistanceController < Api::V1::Accounts::Base
     forbidden
   rescue ActiveRecord::RecordNotFound
     render json: { error: 'recommendation_unavailable' }, status: :not_found
-  rescue JrcNico::RunCapacity::Exceeded
-    render json: { error: 'too_many_requests' }, status: :too_many_requests
+  rescue JrcNico::RunCapacity::Exceeded => error
+    render json: { error: error.code, message: error.user_message }, status: :too_many_requests
   rescue ArgumentError, ActiveRecord::RecordInvalid, JrcNico::ErpClient::Error
     render json: { error: 'authorization_invalid' }, status: :unprocessable_entity
   end

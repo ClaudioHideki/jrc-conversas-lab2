@@ -25,4 +25,7 @@ class JrcNico::Inference < ApplicationRecord
   self.table_name = 'jrc_nico_inferences'
   belongs_to :account
   belongs_to :user
+
+  validates :status, inclusion: { in: %w[running completed unknown failed] }
+  validates :reserved_tokens, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 end

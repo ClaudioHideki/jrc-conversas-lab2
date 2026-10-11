@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import { useMapGetter } from 'dashboard/composables/store';
 import { useAlert } from 'dashboard/composables';
 import jrcAiAPI from 'dashboard/api/jrcAi';
+import NicoCapacitySummary from 'dashboard/components-next/jrcCopilot/NicoCapacitySummary.vue';
 
 const props = defineProps({
   initialTab: { type: String, default: 'providers' },
@@ -303,6 +304,7 @@ onMounted(load);
         </div>
 
         <section v-if="activeTab === 'providers'" class="space-y-4">
+          <NicoCapacitySummary :capacity="usage.nico_capacity" />
           <div
             class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm"
           >
@@ -385,7 +387,9 @@ onMounted(load);
                   </dd>
                 </div>
                 <div>
-                  <dt class="text-n-slate-11">Limite mensal</dt>
+                  <dt class="text-n-slate-11">
+                    {{ t('JRC_NICO.CAPACITY.PROVIDER_LIMIT') }}
+                  </dt>
                   <dd class="mt-1 font-semibold text-n-slate-12">
                     {{
                       provider.monthly_token_limit
@@ -508,6 +512,7 @@ onMounted(load);
         </section>
 
         <section v-else-if="activeTab === 'usage'" class="space-y-4">
+          <NicoCapacitySummary :capacity="usage.nico_capacity" />
           <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             <article
               v-for="card in [

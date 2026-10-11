@@ -315,6 +315,16 @@
       "API_KEY": "API key",
       "API_KEY_REQUIRED": "Enter the API key."
     },
-    "SPECIALIST_RESTRICTED": "This specialist is unavailable with your current access. Contact your account administrator."
+    "SPECIALIST_RESTRICTED": "This specialist is unavailable with your current access. Contact your account administrator.",
+    "CAPACITY": {
+      "SUMMARY": "NICO da conta: {remaining} de {limit} tokens disponíveis no mês",
+      "USED": "Consumo registrado",
+      "RESERVED": "Reservas pendentes",
+      "UNCERTAIN": "Consumo incerto",
+      "EXECUTIONS": "Execuções no mês",
+      "CONCURRENCY": "Em andamento",
+      "PROVIDER_LIMIT": "Limite mensal do provedor",
+      "RATIO": "{value} / {limit}"
+    }
   }
 }

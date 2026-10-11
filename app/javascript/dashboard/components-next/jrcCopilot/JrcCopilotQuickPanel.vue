@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 import NicoComposer from './NicoComposer.vue';
 import NicoInteractionStatus from './NicoInteractionStatus.vue';
 import NicoWorkflowSummary from './NicoWorkflowSummary.vue';
+import NicoCapacitySummary from './NicoCapacitySummary.vue';
 
 defineProps({
   modelValue: { type: String, default: '' },
@@ -18,6 +19,7 @@ defineProps({
   needsReview: { type: Boolean, default: false },
   unreadCount: { type: Number, default: 0 },
   workflow: { type: Object, default: null },
+  capacity: { type: Object, default: null },
 });
 const emit = defineEmits([
   'update:modelValue',
@@ -75,6 +77,7 @@ onMounted(async () => {
       </button>
     </header>
     <div class="min-h-0 space-y-3 overflow-y-auto p-3">
+      <NicoCapacitySummary :capacity="capacity" />
       <NicoInteractionStatus
         :state="interactionState"
         :show-timeline="hasOperation"

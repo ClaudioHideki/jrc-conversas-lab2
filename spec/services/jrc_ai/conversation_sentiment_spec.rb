@@ -10,7 +10,7 @@ RSpec.describe JrcAi::ConversationSentiment do
 
   before do
     allow(JrcNico::OperationalInference).to receive(:metered).and_yield(nil)
-    allow(JrcNico::RuntimeClient).to receive(:new).with(provider: nil).and_return(runtime)
+    allow(JrcNico::RuntimeClient).to receive(:new).with(provider: nil, ledger: nil).and_return(runtime)
     allow(runtime).to receive(:sentiment).and_return('report' => report, 'model' => 'test-model')
   end
 

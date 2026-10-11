@@ -22,6 +22,7 @@ import JrcCopilotQuickPanel from './JrcCopilotQuickPanel.vue';
 import NicoComposer from './NicoComposer.vue';
 import NicoInteractionStatus from './NicoInteractionStatus.vue';
 import NicoWorkflowSummary from './NicoWorkflowSummary.vue';
+import NicoCapacitySummary from './NicoCapacitySummary.vue';
 import { nicoInteractionState } from './nicoInteractionState';
 import NicoKnowledgePanel from './NicoKnowledgePanel.vue';
 import NicoConversationPanel from './NicoConversationPanel.vue';
@@ -78,6 +79,7 @@ const syncError = ref('');
 let pendingRequest;
 let submittingRequest = false;
 const emptyState = () => ({
+  capacity: null,
   messages: [],
   commands: [],
   delegations: [],
@@ -552,6 +554,7 @@ onBeforeUnmount(() => {
     :reply="quickReply"
     :error="error || syncError"
     :workflow="state.workflow"
+    :capacity="state.capacity"
     :needs-review="
       pending.some(command =>
         ['awaiting_confirmation', 'browser_pending'].includes(command.status)
@@ -619,6 +622,7 @@ onBeforeUnmount(() => {
       </button>
     </header>
     <div class="shrink-0 px-3 pt-3">
+      <NicoCapacitySummary :capacity="state.capacity" />
       <NicoInteractionStatus
         :state="interactionState"
         :show-timeline="hasOperation"

@@ -10,6 +10,7 @@ module Api
             today = Current.account.jrc_ai_usage_events.today
 
             render json: {
+              nico_capacity: ::JrcNico::RunCapacity.snapshot(Current.account),
               totals: totals(month).merge(
                 tokens_today: today.sum(:total_tokens),
                 cost_today_cents: known_cost(today)

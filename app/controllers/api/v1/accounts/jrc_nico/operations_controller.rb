@@ -16,7 +16,7 @@ class Api::V1::Accounts::JrcNico::OperationsController < Api::V1::Accounts::Base
       c.custom_attributes.dig('nico_assistance', 'status') == 'pending' && c.custom_attributes['nico_control'] != 'active' &&
         %w[open pending].include?(c.status) && c.custom_attributes.dig('nico_assistance', 'message_id').to_i > answered.fetch(c.id, 0)
     end.first(8).map { |c| { conversation_id: c.display_id, name: c.contact.name, recommendation: c.custom_attributes['nico_assistance'] } }
-    render json: { messages: @operator.session.messages,
+    render json: { messages: @operator.session.messages, capacity: JrcNico::RunCapacity.snapshot(Current.account),
                    workflow: JrcNico::WorkflowSummary.for(@operator.session),
                    can_manage_knowledge: @operator.access.membership.administrator?,
                    commands: @operator.session.commands.where('created_at >= ?', @operator.session.context['visible_since'] || Time.current)
@@ -107,8 +107,8 @@ class Api::V1::Accounts::JrcNico::OperationsController < Api::V1::Accounts::Base
     forbidden
   rescue ArgumentError, ActiveRecord::RecordInvalid, ActiveRecord::RecordNotFound
     invalid
-  rescue JrcNico::OperatorSession::Busy, JrcNico::RunCapacity::Exceeded
-    busy
+  rescue JrcNico::OperatorSession::Busy, JrcNico::RunCapacity::Exceeded => error
+    busy(error)
   rescue JrcNico::RuntimeClient::Error => error
     unavailable(error)
   end
@@ -129,8 +129,12 @@ class Api::V1::Accounts::JrcNico::OperationsController < Api::V1::Accounts::Base
     render json: { error: 'invalid_operation' }, status: :unprocessable_entity
   end
 
-  def busy
-    render json: { error: 'capacity_unavailable' }, status: :too_many_requests
+  def busy(error)
+    if error.is_a?(JrcNico::RunCapacity::Exceeded)
+      render json: { error: error.code, message: error.user_message }, status: :too_many_requests
+    else
+      render json: { error: 'capacity_unavailable', message: 'O NICO está processando outra solicitação desta sessão. Aguarde.' }, status: :too_many_requests
+    end
   end
 
   def unavailable(error)

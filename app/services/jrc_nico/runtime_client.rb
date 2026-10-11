@@ -1,4 +1,5 @@
 require 'net/http'
+require 'timeout'
 
 class JrcNico::RuntimeClient
   class Error < StandardError
@@ -9,9 +10,14 @@ class JrcNico::RuntimeClient
                account_ai_not_configured provider_adapter_unavailable provider_quota_exceeded].freeze
     attr_reader :code
 
-    def initialize(code = 'invalid_response')
+    def initialize(code = 'invalid_response', not_executed: false)
       @code = CODES.include?(code) ? code : 'invalid_response'
+      @not_executed = not_executed
       super(@code)
+    end
+
+    def not_executed?
+      @not_executed
     end
 
     def user_message(previous_changes: false)
@@ -19,28 +25,29 @@ class JrcNico::RuntimeClient
       when 'provider_outer_json_invalid', 'tool_arguments_invalid', 'provider_schema_invalid', 'invalid_response'
         unchanged = previous_changes ? 'As etapas já concluídas foram preservadas; esta etapa não realizou alterações.' : 'Nenhuma alteração foi realizada.'
         "O NICO não conseguiu interpretar os dados necessários para executar esta ação. #{unchanged} Tente novamente ou revise os dados informados."
-      when 'provider_rate_limited' then 'O provedor de IA atingiu o limite de solicitações ou de uso. Aguarde e verifique a cota do provedor.'
+      when 'provider_rate_limited' then 'O provedor de IA atingiu o limite temporário de solicitações. Aguarde antes de tentar novamente.'
       when 'provider_quota_exceeded' then 'O provedor informou cota ou saldo de API indisponível. O administrador deve verificar ' \
                                           'o projeto da API; este erro não confirma um problema no cartão.'
       when 'account_ai_not_configured' then 'Cadastre uma chave e um modelo em Inteligência Artificial > Provedores desta conta.'
       when 'provider_adapter_unavailable' then 'O adaptador do provedor escolhido ainda não suporta este recurso. ' \
                                                'Configure um provedor OpenAI ou compatível nesta conta.'
-      when 'provider_timeout' then 'O provedor de IA demorou além do limite. A etapa não foi executada. Tente novamente.'
+      when 'provider_timeout' then 'O provedor de IA excedeu o tempo de resposta. O consumo desta tentativa pode ser incerto e permanece reservado.'
       when 'provider_unauthorized', 'provider_forbidden' then 'O provedor de IA recusou o acesso. Solicite a revisão da configuração ao administrador.'
       when 'runtime_busy' then 'O NICO está ocupado com outras solicitações. Aguarde e tente novamente.'
       when 'account_not_configured' then 'Esta conta não está autorizada no runtime do NICO. Solicite a revisão ao administrador.'
       when 'unauthorized' then 'A autenticação entre o JRC e o runtime do NICO foi recusada. Solicite a revisão ao administrador.'
       when 'runtime_transport_error', 'runtime_timeout' then 'O JRC não conseguiu se comunicar com o runtime do NICO. Tente novamente quando o serviço estiver disponível.'
-      when 'request_cancelled' then 'A solicitação do NICO foi cancelada antes da execução desta etapa.'
-      else 'O serviço de IA está indisponível. Esta etapa não foi executada. Aguarde e tente novamente.'
+      when 'request_cancelled' then 'A solicitação do NICO foi interrompida. Confira o estado da etapa antes de tentar novamente.'
+      else 'O serviço de IA está indisponível. O consumo pode exigir conciliação. Aguarde e confira o estado da etapa.'
       end
     end
   end
 
   KEYS = %w[request_id account_id summary suggested_reply evidence warnings usage model mode].freeze
 
-  def initialize(provider: nil)
+  def initialize(provider: nil, ledger: nil)
     @provider = provider
+    @ledger = ledger
   end
 
   def sentiment(payload)
@@ -144,26 +151,39 @@ class JrcNico::RuntimeClient
     request.body = payload
     body = +''
     status = nil
-    Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == 'https', open_timeout: 3, read_timeout: 55, write_timeout: 10) do |http|
-      http.request(request) do |response|
-        status = response.code
+    Timeout.timeout(75) do
+      Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == 'https', open_timeout: 3, read_timeout: 55, write_timeout: 10) do |http|
+        @ledger&.dispatched!
+        http.request(request) do |response|
+          status = response.code
 
-        response.read_body do |chunk|
-          body << chunk
-          raise Error, 'invalid_response' if body.bytesize > 131_072
+          response.read_body do |chunk|
+            body << chunk
+            raise Error, 'invalid_response' if body.bytesize > 131_072
+          end
         end
       end
     end
     parsed = JSON.parse(body)
     unless status == '200'
       code = parsed.is_a?(Hash) && parsed['error']
-      raise Error, code.is_a?(String) && Error::CODES.include?(code) ? code : 'runtime_transport_error'
+      code = 'runtime_transport_error' unless code.is_a?(String) && Error::CODES.include?(code)
+      # Provider errors can follow a billed repair attempt. Only pre-engine rejections prove zero consumption.
+      not_executed = { 'unauthorized' => '401', 'account_not_configured' => '403',
+                       'runtime_busy' => '429', 'account_ai_not_configured' => '422' }[code] == status
+      raise Error.new(code, not_executed: not_executed)
+    end
+    input = JSON.parse(payload)
+    if parsed.is_a?(Hash) && parsed['account_id'] == account_id && parsed['request_id'] == input['request_id'] &&
+       parsed['mode'] == 'provider' && [nil, true].include?(parsed['usage_estimated']) &&
+       text?(parsed['model'], 150, required: true) && valid_usage?(parsed)
+      @ledger&.receipt!(parsed)
     end
     parsed
   rescue KeyError, URI::InvalidURIError
     raise Error, 'invalid_configuration'
   rescue JSON::ParserError
-    raise Error, 'invalid_response'
+    raise Error, (status && status != '200' ? 'runtime_transport_error' : 'invalid_response')
   rescue Timeout::Error
     raise Error, 'runtime_timeout'
   rescue IOError, SystemCallError, SocketError, OpenSSL::SSL::SSLError, Net::HTTPBadResponse, Net::ProtocolError

@@ -226,6 +226,57 @@ describe('Quick NICO and Full Copilot use one operator session', () => {
     expect(wrapper.text()).toContain(message);
   });
 
+  it('shows effective account capacity in Quick and Full and resets it when changing account', async () => {
+    snapshot.capacity = {
+      token_limit: 2000000,
+      remaining_tokens: 69945,
+      used_tokens: 487149,
+      reserved_tokens: 1442906,
+      uncertain_tokens: 1442906,
+      executions: 20,
+      execution_limit: 1000,
+      active_operations: 0,
+      concurrency_limit: 3,
+    };
+    ui.openQuick();
+    await flushPromises();
+    expect(wrapper.text()).toContain('2,000,000');
+    expect(wrapper.text()).toContain('69,945');
+    await wrapper.get('[aria-label="Abrir Full Copilot"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.text()).toContain('2,000,000');
+    snapshot = { ...snapshot, capacity: null };
+    route.params.accountId = '2';
+    await nextTick();
+    await flushPromises();
+    expect(wrapper.text()).not.toContain('2,000,000');
+  });
+
+  it.each([
+    'monthly_token_limit',
+    'monthly_execution_limit',
+    'concurrency_limit',
+    'reservation_reconciliation_required',
+    'provider_rate_limited',
+    'provider_quota_exceeded',
+    'runtime_transport_error',
+  ])(
+    'preserves the distinct backend message for %s without executing a tool',
+    async code => {
+      const message = `Safe capacity explanation: ${code}`;
+      api.ask.mockRejectedValueOnce({
+        response: { data: { error: code, message } },
+      });
+      ui.openQuick();
+      await flushPromises();
+      await wrapper.get('textarea').setValue('Consulte o contato');
+      await wrapper.get('form').trigger('submit');
+      await flushPromises();
+      expect(wrapper.text()).toContain(message);
+      expect(api.command).not.toHaveBeenCalled();
+    }
+  );
+
   it('preserves the draft and request identity after a failed send', async () => {
     ui.openQuick();
     await flushPromises();

@@ -309,6 +309,16 @@
       "API_KEY": "Chave da API",
       "API_KEY_REQUIRED": "Informe a chave da API."
     },
-    "SPECIALIST_RESTRICTED": "Este especialista está indisponível para seu acesso atual. Consulte o administrador da conta."
+    "SPECIALIST_RESTRICTED": "Este especialista está indisponível para seu acesso atual. Consulte o administrador da conta.",
+    "CAPACITY": {
+      "SUMMARY": "NICO da conta: {remaining} de {limit} tokens disponíveis no mês",
+      "USED": "Consumo registrado",
+      "RESERVED": "Reservas pendentes",
+      "UNCERTAIN": "Consumo incerto",
+      "EXECUTIONS": "Execuções no mês",
+      "CONCURRENCY": "Em andamento",
+      "PROVIDER_LIMIT": "Limite mensal do provedor",
+      "RATIO": "{value} / {limit}"
+    }
   }
 }
