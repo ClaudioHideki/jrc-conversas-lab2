@@ -14,7 +14,7 @@ RSpec.describe 'Captain tasks account provider', type: :request do
 
   before do
     account.enable_features!('captain_tasks')
-    create(:installation_config, name: 'CAPTAIN_OPEN_AI_API_KEY', value: 'test-global-key')
+    InstallationConfig.find_or_initialize_by(name: 'CAPTAIN_OPEN_AI_API_KEY').update!(value: 'test-global-key')
     allow(Integrations::Openai::KeyValidator).to receive(:valid?).and_return(true)
     create(:integrations_hook, :openai, account: account, settings: { 'api_key' => 'test-old-hook-key' })
   end

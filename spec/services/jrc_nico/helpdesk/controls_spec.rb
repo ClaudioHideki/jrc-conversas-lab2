@@ -57,13 +57,17 @@ RSpec.describe JrcNico::Helpdesk::Controls do
     expect(JrcNico::Helpdesk::Capture.call(ticket: ticket, trigger: 'monitor', origin_key: 'synthetic-monitor', member: sd_account_user)).to be_empty
   end
 
-  it 'rejects foreign policy IDs, changed audit requests and missing Unit grants' do
+  it 'rejects foreign policy IDs, changed audit requests and inactive Units while preserving administrator access' do
     service = described_class.new(sd_account_user)
     expect { service.disable(id: 9_999_999, reason: 'Synthetic stop', request_key: 'synthetic-halt') }.to raise_error(ActiveRecord::RecordNotFound)
     service.disable(id: policy.id, reason: 'Synthetic stop', request_key: 'synthetic-halt')
     expect { service.disable(id: policy.id, reason: 'Different reason', request_key: 'synthetic-halt') }.to raise_error(ArgumentError)
     sd_membership.update!(active: false)
+    expect { service.disable(id: policy.id, reason: 'Synthetic stop', request_key: 'admin-account-unit') }.not_to raise_error
+    sd_unit.update!(active: false)
+    audits = JrcNico::Helpdesk::ControlEvent.count
     expect { service.disable(id: policy.id, reason: 'Synthetic stop', request_key: 'another-halt') }.to raise_error(Pundit::NotAuthorizedError)
+    expect(JrcNico::Helpdesk::ControlEvent.count).to eq(audits)
   end
 
   it 'rechecks a revoked administrator after the service was constructed' do
