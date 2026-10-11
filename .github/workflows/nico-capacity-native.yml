@@ -81,7 +81,6 @@ jobs:
         run: |
           bundle exec rspec spec/services/jrc_nico/reservation_ledger_spec.rb \
             spec/services/jrc_nico/reservation_reconciler_spec.rb \
-            spec/services/jrc_nico/reservation_concurrency_spec.rb \
             spec/services/jrc_nico/run_capacity_spec.rb \
             spec/services/jrc_nico/operational_inference_spec.rb \
             spec/services/jrc_nico/runtime_client_spec.rb \
@@ -104,6 +103,38 @@ jobs:
           result = json.load(open('/tmp/nico-capacity-native-rspec.json'))['summary']
           print(result)
           assert result['failure_count'] == 0 and result['pending_count'] == 0
+          PY
+      - name: Concorrencia em processo separado com fixtures commitadas
+        if: always()
+        run: |
+          bundle exec rspec spec/services/jrc_nico/reservation_concurrency_spec.rb --format progress --format json --out /tmp/nico-capacity-concurrency-rspec.json
+          python3 - <<'PY'
+          import json
+          result = json.load(open('/tmp/nico-capacity-concurrency-rspec.json'))['summary']
+          print(result)
+          assert result['failure_count'] == 0 and result['pending_count'] == 0
+          PY
+      - name: Diagnostico de preservacao na referencia F7 sem alterar o candidato
+        if: always()
+        run: |
+          git worktree add --detach /tmp/nico-capacity-reference f7cfe4638e7aeb5414685583bd99d4b4e6602480
+          export BUNDLE_GEMFILE="$GITHUB_WORKSPACE/Gemfile"
+          export POSTGRES_DATABASE=jrc_nico_reference_test
+          export SCHEMA=/tmp/nico-capacity-reference-schema.rb
+          cd /tmp/nico-capacity-reference
+          SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
+          bundle exec rails db:migrate
+          set +e
+          bundle exec rspec spec/services/jrc_nico/helpdesk/controls_spec.rb spec/requests/captain_tasks_account_provider_spec.rb --format progress --format json --out /tmp/nico-capacity-reference-rspec.json
+          reference_exit=$?
+          set -e
+          test "$reference_exit" -le 1
+          python3 - <<'PY'
+          import json
+          result = json.load(open('/tmp/nico-capacity-reference-rspec.json'))
+          print(result['summary'])
+          print('Reference failures:', [item['id'] for item in result['examples'] if item['status'] == 'failed'])
+          assert result['summary']['example_count'] == 10 and result['summary']['errors_outside_of_examples_count'] == 0
           PY
       - name: RuboCop - classificar base e delta sem desabilitar regras
         if: always()
@@ -155,4 +186,6 @@ jobs:
             /tmp/nico-capacity-native-vitest.json
             /tmp/nico-capacity-native-rubocop.json
             /tmp/nico-capacity-native-schema.rb
+            /tmp/nico-capacity-concurrency-rspec.json
+            /tmp/nico-capacity-reference-rspec.json
           retention-days: 14
