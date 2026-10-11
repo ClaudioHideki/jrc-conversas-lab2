@@ -147,9 +147,10 @@ describe('global quick action authorization', () => {
     state.serviceDesk.context.units = [];
     expect(home.actions.value.some(item => item.key === 'TICKET')).toBe(false);
     state.denied.splice(state.denied.indexOf('whatsapp_calling_index'), 1);
+    expect(home.actions.value.some(item => item.key === 'CALL')).toBe(false);
+    state.denied.splice(state.denied.indexOf('ramal_index'), 1);
     expect(home.actions.value.find(item => item.key === 'CALL').modes).toEqual({
-      softphone: false,
-      whatsapp: true,
+      softphone: true,
       conference: false,
     });
   });
@@ -161,7 +162,7 @@ describe('global quick action authorization', () => {
     expect(home.accountId.value).toBe(2);
     expect(home.actions.value.find(item => item.key === 'CALL')).toMatchObject({
       command: 'call',
-      modes: { softphone: true, whatsapp: true },
+      modes: { softphone: true },
     });
     expect(api.cockpit).not.toHaveBeenCalled();
     state.route.params.accountId = '999';

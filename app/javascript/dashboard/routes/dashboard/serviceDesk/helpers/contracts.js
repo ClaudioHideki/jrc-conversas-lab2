@@ -142,7 +142,14 @@ export function decodeRecord(row, context, resource) {
           }
         : {}),
       ...(Object.hasOwn(row, 'company') ? { company: named(row.company) } : {}),
-      requester: named(row.requester),
+      requester: object(row.requester)
+        ? {
+            ...named(row.requester),
+            ...(Object.hasOwn(row.requester, 'phone_number')
+              ? { phone_number: text(row.requester.phone_number) }
+              : {}),
+          }
+        : null,
       assignee: named(row.assignee),
       team: named(row.team),
       queue: named(row.queue),
@@ -188,6 +195,9 @@ export function decodeRecord(row, context, resource) {
             ? { parent_id: row.parent_id == null ? null : id(row.parent_id) }
             : {}),
         }
+      : {}),
+    ...(resource === 'requesters'
+      ? { phone_number: text(row.phone_number) }
       : {}),
     ...(resource === 'assignees' && row.membership_id
       ? { membership_id: id(row.membership_id) }

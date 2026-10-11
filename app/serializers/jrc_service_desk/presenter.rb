@@ -41,7 +41,7 @@ class JrcServiceDesk::Presenter
                          service: named(record.service), status: named(record.status), priority: named(record.priority),
                          category: named(record.category), ticket_type: named(record.ticket_type), subcategory: named(record.subcategory),
                          **catalogue_fields(record, policy),
-                         requester: policy.view_customer? ? native_named(requester) : nil,
+                         requester: policy.view_customer? ? requester_details(requester) : nil,
                          **master_company_fields(record, policy),
                          assignee: assignee(record.assignee_membership),
                          team: native_named(team),
@@ -67,7 +67,9 @@ class JrcServiceDesk::Presenter
                                               Pundit.policy!(@context, record).show?
 
       { id: record.id.to_s, account_id: record.account_id.to_s, unit_id: unit_id.to_s,
-        name: record.name.to_s, permissions: { show: true } }
+        name: record.name.to_s, permissions: { show: true } }.tap do |row|
+        row[:phone_number] = record.phone_number if resource == 'requesters'
+      end
     else
       Pundit.authorize(@context, record, :show?)
       row = common(record).merge(name: record.name, code: record.code, active: record.active,
@@ -154,6 +156,11 @@ class JrcServiceDesk::Presenter
   def native_named(record)
     context = JrcServiceDesk::OperationalContext.new(@context)
     record && context.record_in_account?(record) && Pundit.policy!(context.to_h, record).show? ? named(record) : nil
+  end
+
+  def requester_details(record)
+    value = native_named(record)
+    value && value.merge(phone_number: record.phone_number)
   end
 
   def note_deliveries(record)

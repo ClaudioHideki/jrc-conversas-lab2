@@ -86,7 +86,7 @@ export function useQuickActionAccess() {
           },
         ]
       : []),
-    ...(routeAllowed('ramal_index') || routeAllowed('whatsapp_calling_index')
+    ...(routeAllowed('ramal_index')
       ? [
           {
             key: 'CALL',
@@ -95,7 +95,6 @@ export function useQuickActionAccess() {
             command: 'call',
             modes: {
               softphone: routeAllowed('ramal_index'),
-              whatsapp: routeAllowed('whatsapp_calling_index'),
               conference: routeAllowed('video_conference_index'),
             },
           },

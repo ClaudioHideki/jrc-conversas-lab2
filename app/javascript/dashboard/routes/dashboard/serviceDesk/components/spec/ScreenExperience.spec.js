@@ -71,10 +71,13 @@ describe('Service Desk screen interaction contract', () => {
     expect(wrapper.emitted('activate')).toHaveLength(1);
     expect(wrapper.find('strong').text()).not.toBe('0');
   });
-  it('renders authorized names and hides technical data until expanded', () => {
+  it('renders authorized names as readable fields without a raw JSON block', () => {
     const wrapper = mount(HistoryEventCard, createOptions({ ticket, event }));
     expect(wrapper.text()).toContain('Working');
-    expect(wrapper.find('details').attributes('open')).toBeUndefined();
+    expect(wrapper.find('dt').text()).toBeTruthy();
+    expect(wrapper.find('dd').text()).toBe('Working');
+    expect(wrapper.find('pre').exists()).toBe(false);
+    expect(wrapper.text()).not.toContain('status_id');
   });
   it('does not render a history event belonging to another ticket', () => {
     const wrapper = mount(

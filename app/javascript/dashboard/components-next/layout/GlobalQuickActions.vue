@@ -139,7 +139,6 @@ useEventBus(quickActionCommand).on(request => {
       v-if="phoneOpen && callAction"
       :key="contactDialogKey"
       :allow-softphone="callAction.modes.softphone"
-      :allow-whatsapp="callAction.modes.whatsapp"
       :allow-conference="callAction.modes.conference"
       @close="closePhone"
     />

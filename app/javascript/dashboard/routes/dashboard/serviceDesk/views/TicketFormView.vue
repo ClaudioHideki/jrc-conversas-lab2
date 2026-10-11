@@ -212,6 +212,7 @@ const loadRelationshipCustomer = async () => {
     relationshipCustomer.value = {
       id: requesterId,
       name: contact.name,
+      phone_number: contact.phone_number,
       company_id: data.company_id || null,
     };
     applyRelationshipCustomer();
@@ -241,6 +242,12 @@ const lookupLabels = computed(() =>
     })
   )
 );
+const requesterPhone = computed(() => {
+  const selected = [selectedNames.requester, record.value?.requester].find(
+    item => item?.id === draft.requester_id
+  );
+  return selected?.phone_number || '';
+});
 const changeUnit = value => {
   if (!busy.value && value !== draft.unit_id) {
     Object.assign(draft, blank(), { unit_id: value });
@@ -344,8 +351,13 @@ const openCreatedTicket = ticketId =>
     name: serviceDeskRouteName('detail'),
     params: { accountId: session.accountId.value, ticketId },
   });
-const chooseAssignment = (field, selected) =>
+const chooseAssignment = (field, selected) => {
+  if (field === 'team' && selectedNames.team?.id !== selected?.id) {
+    draft.assignee_id = '';
+    selectedNames.assignee = null;
+  }
   selectTicketAssignment(draft, selectedNames, field, selected);
+};
 const chooseRouting = event =>
   selectAutomaticRouting(draft, selectedNames, event.target.checked);
 const submit = async () => {
@@ -522,7 +534,10 @@ const submit = async () => {
                 :label="t('JRC_SERVICE_DESK.FIELDS.requester')"
                 :unit-id="draft.unit_id"
                 :disabled="edit || !mayEdit || busy"
-                :current-name="record?.requester?.name || ''"
+                :current-name="
+                  selectedNames.requester?.name || record?.requester?.name || ''
+                "
+                :current-phone="requesterPhone"
                 @selected="selectedNames.requester = $event"
               />
               <Input
@@ -630,38 +645,53 @@ const submit = async () => {
                   :current-name="record?.ticket_type?.name || ''"
                   @selected="selectedNames.ticket_type = $event"
                 />
-                <LookupSelect
-                  v-model="draft.assignee_id"
-                  resource="assignees"
-                  :label="t('JRC_SERVICE_DESK.FIELDS.assignee')"
-                  :unit-id="draft.unit_id"
-                  :disabled="
-                    edit ||
-                    !mayEdit ||
-                    busy ||
-                    unit?.permissions.assign_ticket !== true
-                  "
-                  :current-name="
-                    selectedNames.assignee?.name || record?.assignee?.name || ''
-                  "
-                  @selected="chooseAssignment('assignee', $event)"
-                />
-                <LookupSelect
-                  v-model="draft.team_id"
-                  resource="teams"
-                  :label="t('JRC_SERVICE_DESK.FIELDS.team')"
-                  :unit-id="draft.unit_id"
-                  :disabled="
-                    edit ||
-                    !mayEdit ||
-                    busy ||
-                    unit?.permissions.assign_ticket !== true
-                  "
-                  :current-name="
-                    selectedNames.team?.name || record?.team?.name || ''
-                  "
-                  @selected="chooseAssignment('team', $event)"
-                />
+                <fieldset
+                  class="col-span-full grid gap-3 rounded-xl border border-n-blue-6 bg-n-blue-2 p-4"
+                >
+                  <legend class="px-2 text-sm font-semibold text-n-blue-11">
+                    {{ t('JRC_SERVICE_DESK.FORM.assignment_title') }}
+                  </legend>
+                  <p class="m-0 text-xs text-n-slate-11">
+                    {{ t('JRC_SERVICE_DESK.FORM.assignment_help') }}
+                  </p>
+                  <div class="grid gap-4 md:grid-cols-2">
+                    <LookupSelect
+                      v-model="draft.team_id"
+                      resource="teams"
+                      :label="t('JRC_SERVICE_DESK.FIELDS.team')"
+                      :unit-id="draft.unit_id"
+                      :disabled="
+                        edit ||
+                        !mayEdit ||
+                        busy ||
+                        unit?.permissions.assign_ticket !== true
+                      "
+                      :current-name="
+                        selectedNames.team?.name || record?.team?.name || ''
+                      "
+                      @selected="chooseAssignment('team', $event)"
+                    />
+                    <LookupSelect
+                      v-model="draft.assignee_id"
+                      resource="assignees"
+                      :team-id="draft.team_id"
+                      :label="t('JRC_SERVICE_DESK.FIELDS.assignee')"
+                      :unit-id="draft.unit_id"
+                      :disabled="
+                        edit ||
+                        !mayEdit ||
+                        busy ||
+                        unit?.permissions.assign_ticket !== true
+                      "
+                      :current-name="
+                        selectedNames.assignee?.name ||
+                        record?.assignee?.name ||
+                        ''
+                      "
+                      @selected="chooseAssignment('assignee', $event)"
+                    />
+                  </div>
+                </fieldset>
                 <LookupSelect
                   v-model="draft.queue_id"
                   resource="queues"
@@ -835,6 +865,12 @@ const submit = async () => {
               </dt>
               <dd>
                 {{ value }}
+                <span
+                  v-if="field === 'requester' && requesterPhone"
+                  class="block text-xs text-n-slate-11"
+                >
+                  {{ requesterPhone }}
+                </span>
               </dd>
             </template>
             <dt>

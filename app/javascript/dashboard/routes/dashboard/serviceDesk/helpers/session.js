@@ -90,7 +90,7 @@ export function createServiceDeskSession(client, state = createSessionState()) {
     }
     let request;
     try {
-      request = normalizeQuery(query);
+      request = normalizeQuery(query, resourceName);
       if (!queryWithinContext(request, state.context))
         throw new QueryError('Unauthorized scope selector');
       if (ticketId !== null && !canonicalId(ticketId))

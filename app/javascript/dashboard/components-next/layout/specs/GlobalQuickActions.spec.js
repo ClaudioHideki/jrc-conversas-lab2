@@ -12,7 +12,7 @@ import GlobalCallPanel from '../GlobalCallPanel.vue';
 vi.mock('../GlobalCallPanel.vue', () => ({
   default: {
     name: 'GlobalCallPanel',
-    props: ['allowSoftphone', 'allowWhatsapp'],
+    props: ['allowSoftphone'],
     emits: ['close'],
     template: '<div data-phone-panel />',
   },
@@ -143,7 +143,6 @@ describe('Global quick actions preserve existing handlers', () => {
     expect(mocks.push).not.toHaveBeenCalled();
     expect(wrapper.findComponent(GlobalCallPanel).props()).toEqual({
       allowSoftphone: true,
-      allowWhatsapp: true,
     });
     wrapper.findComponent(GlobalCallPanel).vm.$emit('close');
     await flushPromises();

@@ -14,16 +14,16 @@ const fields = new Set([
   ...idFields,
 ]);
 const scalar = value => typeof value === 'string' || typeof value === 'number';
-export function normalizeQuery(query = {}) {
+export function normalizeQuery(query = {}, resource = null) {
   const result = { page: 1, per_page: 20 };
   Object.entries(query).forEach(([key, value]) => {
-    if (!fields.has(key))
+    if (!fields.has(key) && !(resource === 'assignees' && key === 'team_id'))
       throw new QueryError('Unknown filter');
     if (value === '' || value === undefined || value === null)
       return;
     if (!scalar(value))
       throw new QueryError('Invalid filter');
-    if (idFields.includes(key)) {
+    if (idFields.includes(key) || key === 'team_id') {
       const parsed = canonicalId(value);
       if (!parsed)
         throw new QueryError('Invalid identifier');

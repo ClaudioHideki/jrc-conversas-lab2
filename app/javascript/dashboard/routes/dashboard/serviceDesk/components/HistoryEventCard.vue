@@ -63,17 +63,5 @@ const changes = computed(() => historyChanges(props.event, props.ticket));
         </dd>
       </div>
     </dl>
-    <details class="text-xs text-n-slate-11">
-      <summary class="cursor-pointer">
-        {{ t('JRC_SERVICE_DESK.EXPERIENCE.history.technical') }}
-      </summary>
-      <p class="my-2">
-        {{ t('JRC_SERVICE_DESK.EXPERIENCE.history.projected_only') }}
-      </p>
-      <pre
-        class="max-h-48 overflow-auto whitespace-pre-wrap break-words rounded-lg border border-n-weak p-3"
-        >{{ JSON.stringify(event.data, null, 2) }}</pre
-      >
-    </details>
   </div>
 </template>

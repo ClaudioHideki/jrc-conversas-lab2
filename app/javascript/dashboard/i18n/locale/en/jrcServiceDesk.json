@@ -278,6 +278,8 @@
       "next_ticket": "Take next ticket"
     },
     "FORM": {
+      "assignment_title": "Team and assignee",
+      "assignment_help": "Assign to a team, an assignee or both. The assignee must have an active unit membership; selecting a team does not grant access.",
       "subtitle": "Choose an authorized unit and requester, classify the ticket and review before saving through the API.",
       "steps": [
         "General information",

@@ -26,7 +26,6 @@ import LinearIssuesList from 'dashboard/components/widgets/conversation/linear/I
 import LinearSetupCTA from 'dashboard/components/widgets/conversation/linear/LinearSetupCTA.vue';
 import Button from 'dashboard/components-next/button/Button.vue';
 import SalesOpportunityForm from 'dashboard/routes/dashboard/sales/SalesOpportunityForm.vue';
-import WhatsappCallingPanel from './components/WhatsappCallingPanel.vue';
 
 const props = defineProps({
   conversationId: {
@@ -143,10 +142,6 @@ onMounted(() => {
     <SidebarActionsHeader
       :title="$t('CONVERSATION.SIDEBAR.CONTACT')"
       @close="closeContactPanel"
-    />
-    <WhatsappCallingPanel
-      :contact="contact"
-      :conversation-id="conversationId"
     />
     <ContactInfo :contact="contact" :channel-type="channelType" />
     <div v-if="isSalesEnabled" class="px-3 pb-3">

@@ -15,6 +15,7 @@ class JrcServiceDesk::CatalogQuery
     raise ArgumentError, 'Unknown lookup' unless MODELS.key?(@resource) || NATIVE.include?(@resource)
     @parameters = JrcServiceDesk::QueryParameters.new(parameters, catalog: true)
     @unit_id = @parameters['unit_id']
+    raise ArgumentError, 'Team filter requires assignees' if @parameters['team_id'] && @resource != 'assignees'
     @units = context.view_unit_scope
     if @parameters['operator_company_id']
       raise ActiveRecord::RecordNotFound unless @units.exists?(operator_company_id: @parameters['operator_company_id'])
@@ -81,6 +82,11 @@ class JrcServiceDesk::CatalogQuery
     when 'assignees'
       records = JrcServiceDesk::UnitMembership.operational.where(account_id: context.account.id, unit_id: unit_id, active: true)
         .joins(account_user: :user).includes(account_user: :user)
+      if parameters['team_id']
+        team = Team.where(account_id: context.account.id).find(parameters['team_id'])
+        Pundit.authorize(context.to_h, team, :show?)
+        records = records.where(users: { id: TeamMember.where(team_id: team.id).select(:user_id) })
+      end
       search(records, 'users', 'name').order('users.name ASC', 'jrc_service_desk_unit_memberships.id ASC')
     end
   end

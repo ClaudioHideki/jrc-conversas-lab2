@@ -13,6 +13,8 @@ const props = defineProps({
   unitId: { type: String, default: '' },
   disabled: { type: Boolean, default: false },
   currentName: { type: String, default: '' },
+  currentPhone: { type: String, default: '' },
+  teamId: { type: String, default: '' },
   valueKey: {
     type: String,
     default: 'id',
@@ -65,6 +67,16 @@ const options = computed(() => {
     values.unshift({ value: props.modelValue, label: props.currentName });
   return [{ value: '', label: t('JRC_SERVICE_DESK.COMMON.select') }, ...values];
 });
+const selectedPhone = computed(() =>
+  props.resource === 'requesters' &&
+  session.state.status === 'ready' &&
+  canRead(session.state.context, 'requesters') &&
+  session.state.context.units.some(unit => unit.id === props.unitId)
+    ? availableItems.value.find(item => item.id === props.modelValue)
+        ?.phone_number ||
+      (props.modelValue && props.currentName ? props.currentPhone : '')
+    : null
+);
 const choose = value => {
   if (!allowed.value) return;
   const id = String(value || '');
@@ -83,10 +95,13 @@ const load = () => {
     q: search.value,
     page: page.value,
     per_page: 20,
+    ...(props.resource === 'assignees' && props.teamId
+      ? { team_id: props.teamId }
+      : {}),
   });
 };
 watch(
-  [allowed, () => props.unitId, () => props.resource],
+  [allowed, () => props.unitId, () => props.resource, () => props.teamId],
   () => {
     clearTimeout(timer);
     page.value = 1;
@@ -121,6 +136,13 @@ onBeforeUnmount(() => {
         @update:model-value="choose"
       />
     </label>
+    <p
+      v-if="selectedPhone"
+      class="m-0 flex items-center gap-2 text-sm text-n-slate-11"
+    >
+      <span class="i-lucide-phone size-4" aria-hidden="true" />
+      <span>{{ selectedPhone }}</span>
+    </p>
     <Input
       v-if="allowed"
       v-model="search"

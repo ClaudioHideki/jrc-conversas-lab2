@@ -244,6 +244,8 @@
       "next_ticket": "Assumir próximo chamado"
     },
     "FORM": {
+      "assignment_title": "Equipe e responsável",
+      "assignment_help": "Atribua à equipe, a um responsável ou a ambos. O responsável precisa ter vínculo ativo com a unidade; selecionar uma equipe não concede acesso.",
       "subtitle": "Selecione unidade e solicitante permitidos, classifique o chamado e revise antes de salvar pela API.",
       "steps": [
         "Informações gerais",

@@ -1,0 +1,128 @@
+name: Service Desk contato e softphone - testes nativos isolados
+
+on:
+  push:
+    branches: [codex/sd-contato-softphone-20261011]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rails-postgres:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: disposable-test-only
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 6
+    env:
+      RAILS_ENV: test
+      POSTGRES_HOST: 127.0.0.1
+      POSTGRES_PORT: '5432'
+      POSTGRES_USERNAME: postgres
+      POSTGRES_PASSWORD: disposable-test-only
+      POSTGRES_DATABASE: jrc_rel_sd_r345_concurrency_test
+      REDIS_URL: redis://127.0.0.1:6380/15
+      SECRET_KEY_BASE: service-desk-isolated-test-only-not-an-installation-secret
+      BUNDLE_FROZEN: 'true'
+      TZ: UTC
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Confirmar branch, commit e recursos
+        run: |
+          test "$GITHUB_REF" = refs/heads/codex/sd-contato-softphone-20261011
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git merge-base --is-ancestor 9f9cf83cceae9e4ea8e636fecc80a08666cccb53 HEAD
+          git diff --check 9f9cf83cceae9e4ea8e636fecc80a08666cccb53 HEAD
+          free -h
+          df -h /
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Dependencias nativas de teste
+        run: sudo apt-get update && sudo apt-get install -y libpq-dev libvips libvips-dev redis-server
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4.4'
+          bundler: 2.5.16
+          bundler-cache: true
+      - name: Redis descartavel e banco de teste
+        run: |
+          test "$RAILS_ENV" = test
+          test "$POSTGRES_DATABASE" = jrc_rel_sd_r345_concurrency_test
+          redis-server --bind 127.0.0.1 --port 6380 --daemonize yes --save '' --appendonly no
+          bundle exec rails db:create db:schema:load
+          SCHEMA=/tmp/sd-contact-softphone-native-schema.rb bundle exec rails db:migrate
+      - name: RSpec projecao de telefone, atribuicao e preservacao por Account
+        run: |
+          bundle exec rspec spec/requests/api/v1/accounts/jrc_service_desk/requester_assignment_spec.rb \
+            spec/requests/api/v1/accounts/jrc_service_desk/operations_spec.rb \
+            spec/requests/api/v1/accounts/jrc_service_desk/security_spec.rb \
+            spec/requests/api/v1/accounts/jrc_service_desk/global_creation_spec.rb \
+            spec/services/jrc_service_desk/cp4_queries_spec.rb \
+            spec/services/jrc_service_desk/create_ticket_service_spec.rb \
+            spec/services/jrc_service_desk/cp4_workflow_spec.rb \
+            spec/controllers/api/v1/accounts/contacts_controller_spec.rb \
+            --format progress --format json --out /tmp/sd-contact-softphone-native-rspec.json
+      - name: RuboCop - classificar base e delta sem desabilitar regras
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import collections, json, pathlib, subprocess
+          base = '9f9cf83cceae9e4ea8e636fecc80a08666cccb53'
+          files = subprocess.check_output(['git', 'diff', '--name-only', '--diff-filter=ACMR', base, 'HEAD', '--', '*.rb'], text=True).splitlines()
+          rows, blockers = [], []
+          for path in files:
+              previous = subprocess.run(['git', 'show', f'{base}:{path}'], capture_output=True, text=True)
+              reports = {}
+              for label, content in [('current', pathlib.Path(path).read_text()), ('baseline', previous.stdout if previous.returncode == 0 else None)]:
+                  if content is None:
+                      reports[label] = []
+                      continue
+                  result = subprocess.run(['bundle', 'exec', 'rubocop', '--stdin', path, '--format', 'json'], input=content, capture_output=True, text=True)
+                  if result.returncode not in (0, 1):
+                      raise RuntimeError(f'RuboCop could not inspect {path} ({label}, exit {result.returncode})')
+                  reports[label] = json.loads(result.stdout)['files'][0]['offenses']
+              baseline = collections.Counter((r['cop_name'], r['message']) for r in reports['baseline'])
+              new = []
+              for item in reports['current']:
+                  key = (item['cop_name'], item['message'])
+                  if baseline[key]:
+                      baseline[key] -= 1
+                  else:
+                      new.append(item)
+                      if item['severity'] in ('warning', 'error', 'fatal') or item['cop_name'].startswith(('Lint/', 'Security/')):
+                          blockers.append({'path': path, **item})
+              rows.append({'path': path, **reports, 'new': new})
+          report = {'base': base, 'files': rows, 'new_risk_offenses': blockers}
+          pathlib.Path('/tmp/sd-contact-softphone-native-rubocop.json').write_text(json.dumps(report, indent=2))
+          print(json.dumps({'files': len(rows), 'baseline_offenses': sum(len(r['baseline']) for r in rows), 'current_offenses': sum(len(r['current']) for r in rows), 'new_offenses': sum(len(r['new']) for r in rows), 'new_risk_offenses': blockers}))
+          raise SystemExit(1 if blockers else 0)
+          PY
+      - name: Integridade final
+        if: always()
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git diff --exit-code
+          test -z "$(git ls-files --others --exclude-standard)"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sd-contact-softphone-native-${{ github.sha }}
+          path: |
+            /tmp/sd-contact-softphone-native-rspec.json
+            /tmp/sd-contact-softphone-native-rubocop.json
+            /tmp/sd-contact-softphone-native-schema.rb
+          retention-days: 14
