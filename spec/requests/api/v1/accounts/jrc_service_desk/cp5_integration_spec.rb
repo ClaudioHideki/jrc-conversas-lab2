@@ -47,7 +47,18 @@ RSpec.describe 'CP5 native integrations', type: :request do
   it 'does not expose a Company from another Account on a malformed native contact' do
     skip 'Native Company extension unavailable' unless defined?(::Company) && sd_contact.respond_to?(:company_id)
     foreign = Company.create!(account: sd_foreign_account, name: 'Foreign company secret')
-    sd_contact.update_columns(company_id: foreign.id) # Deliberate test-only corruption.
+    row
+    expect do
+      Contact.transaction(requires_new: true) { sd_contact.update_columns(company_id: foreign.id) }
+    end.to raise_error(ActiveRecord::InvalidForeignKey)
+    expect(sd_contact.reload.company_id).not_to eq(foreign.id)
+
+    # Simulate malformed legacy input in memory while keeping the database constraint active.
+    contact_scope = Contact.where(account_id: sd_account.id)
+    allow(Contact).to receive(:where).and_call_original
+    allow(Contact).to receive(:where).with(account_id: sd_account.id).and_return(contact_scope)
+    sd_contact.company_id = foreign.id
+    allow(contact_scope).to receive(:find).with(sd_contact.id).and_return(sd_contact)
     get "#{base}/tickets/#{row.id}/customer_context", headers: headers
     expect(response).to have_http_status(:not_found)
     expect(response.body).not_to include('Foreign company secret')

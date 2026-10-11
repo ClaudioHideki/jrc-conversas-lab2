@@ -156,7 +156,7 @@ RSpec.describe 'Service Desk historical SLA snapshot HTTP wrapper', type: :reque
     expect do
       post "#{base}/sla_snapshots", headers: headers, as: :json, params: { snapshot: sd_snapshot_attributes.merge(source_version: 'v2') }
     end.not_to change(JrcServiceDesk::SlaSnapshot, :count)
-    expect(response).to have_http_status(:not_found)
+    expect(response).to have_http_status(:forbidden)
   end
 
   it 'does not expand an administrator write or read into another Account' do

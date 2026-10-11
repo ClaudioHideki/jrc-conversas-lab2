@@ -57,6 +57,6 @@ RSpec.describe 'R3 catalogue and real opening attachments', type: :request do
     sd_account_user.update!(role: :agent)
     sd_membership.update!(active: false)
     get "#{base}/catalogue_form", params: { unit_id: sd_unit.id, ticket_type_id: type.id }, headers: headers
-    expect(response).to have_http_status(:not_found)
+    expect(response).to have_http_status(:forbidden)
   end
 end
