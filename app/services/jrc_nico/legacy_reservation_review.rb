@@ -17,7 +17,7 @@ class JrcNico::LegacyReservationReview
       @report.authorize!(lock: true)
       @record = @report.record(type, id)
       @record.with_lock do
-        digest = Digest::SHA256.hexdigest(canonical(input).to_json)
+        digest = JrcNico::LegacyReservations.digest(input)
         prior = replay(input, digest, apply)
         next prior if prior
 
@@ -26,7 +26,7 @@ class JrcNico::LegacyReservationReview
         raise Pundit::NotAuthorizedError if apply && !@authorized
 
         result = projection(input)
-        proof = [digest, @row[:fingerprint], Digest::SHA256.hexdigest(@events.map(&:attributes).to_json)]
+        proof = [digest, @row[:fingerprint], JrcNico::LegacyReservations.digest(@events.map(&:attributes))]
         verifier = Rails.application.message_verifier('nico-legacy-review')
         unless apply
           next result.merge('simulation_token' => verifier.generate(proof, purpose: 'individual-review', expires_in: 15.minutes))
@@ -40,13 +40,6 @@ class JrcNico::LegacyReservationReview
   end
 
   private
-
-  def canonical(value)
-    return value.sort.to_h.transform_values { |child| canonical(child) } if value.is_a?(Hash)
-    return value.map { |child| canonical(child) } if value.is_a?(Array)
-
-    value
-  end
 
   def replay(input, digest, apply)
     return unless apply
@@ -73,7 +66,7 @@ class JrcNico::LegacyReservationReview
     raise ArgumentError, 'invalid_review_fields' if (input.keys - allowed).any?
     raise ArgumentError, 'new_accounting_record' unless @row[:legacy]
     raise Conflict, 'review_snapshot_changed' unless input['fingerprint'] == @row[:fingerprint]
-    active = @record.status == 'queued' || (@record.status == 'running' && (@record.lease_expires_at || @record.created_at + 3.minutes).future?)
+    active = @record.status == 'queued' || (@record.status == 'running' && (@record.lease_expires_at || (@record.created_at + 3.minutes)).future?)
     raise Conflict, 'operation_still_active' if active
     settled = @record.accounting.dig('legacy_review', 'classification')
     raise Conflict, 'legacy_review_already_settled' if settled && settled != 'unknown'

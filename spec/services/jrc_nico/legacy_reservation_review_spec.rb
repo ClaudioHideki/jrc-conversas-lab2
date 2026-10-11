@@ -58,11 +58,10 @@ RSpec.describe JrcNico::LegacyReservationReview do
         .to raise_error(described_class::Conflict)
     end
     simulation = review.call(type: 'inference', id: record.id, decision: input)
-    travel 16.minutes do
-      expect do
-        review.call(type: 'inference', id: record.id, decision: input, apply: true, authorized: true, simulation_token: simulation['simulation_token'])
-      end.to raise_error(described_class::Conflict)
-    end
+    travel 16.minutes
+    expect do
+      review.call(type: 'inference', id: record.id, decision: input, apply: true, authorized: true, simulation_token: simulation['simulation_token'])
+    end.to raise_error(described_class::Conflict)
   end
 
   it 'requires justification and a sanitized evidence reference with a SHA-256' do
@@ -83,13 +82,15 @@ RSpec.describe JrcNico::LegacyReservationReview do
     record.update!(accounting: { version: 1 })
     expect { review.call(type: 'inference', id: record.id, decision: decision) }.to raise_error(ArgumentError, 'new_accounting_record')
     record.update!(accounting: {}, status: 'running', lease_expires_at: 1.minute.from_now)
-    expect { review.call(type: 'inference', id: record.id, decision: decision) }.to raise_error(described_class::Conflict, 'operation_still_active')
+    input = decision.merge('fingerprint' => report.describe(record, 'inference')[:fingerprint])
+    expect { review.call(type: 'inference', id: record.id, decision: input) }.to raise_error(described_class::Conflict, 'operation_still_active')
   end
 
   it 'rejects agents and a membership demoted after constructing the service' do
+    input = decision
     review
     member.update!(role: :agent)
-    expect { review.call(type: 'inference', id: record.id, decision: decision) }.to raise_error(Pundit::NotAuthorizedError)
+    expect { review.call(type: 'inference', id: record.id, decision: input) }.to raise_error(Pundit::NotAuthorizedError)
     expect { described_class.new(member: member) }.to raise_error(Pundit::NotAuthorizedError)
   end
 
@@ -98,6 +99,7 @@ RSpec.describe JrcNico::LegacyReservationReview do
     foreign_user = create(:user, account: other)
     foreign = JrcNico::Inference.create!(account: other, user: foreign_user, reserved_tokens: 2000)
     expect { review.call(type: 'inference', id: foreign.id, decision: decision) }.to raise_error(ActiveRecord::RecordNotFound)
+    expect { report.describe(foreign, 'inference') }.to raise_error(Pundit::NotAuthorizedError)
     provider.update!(account: other)
     input = decision.merge('classification' => 'confirmed', 'source' => 'external_receipt', 'provider_id' => provider.id,
                            'model' => 'test-model', 'usage' => { 'input_tokens' => 20, 'output_tokens' => 10, 'total_tokens' => 30 })
@@ -275,7 +277,8 @@ RSpec.describe JrcNico::LegacyReservationReview do
   it 'does not reinterpret already settled legacy decisions' do
     input = decision.merge('classification' => 'not_executed', 'source' => 'runtime_not_executed', 'runtime_outcome' => 'not_dispatched')
     apply_decision(input)
-    expect { apply_decision(decision.merge('request_id' => SecureRandom.uuid)) }
+    next_decision = decision.merge('request_id' => SecureRandom.uuid, 'fingerprint' => report.describe(record.reload, 'inference')[:fingerprint])
+    expect { apply_decision(next_decision) }
       .to raise_error(described_class::Conflict, 'legacy_review_already_settled')
   end
 
@@ -301,5 +304,13 @@ RSpec.describe JrcNico::LegacyReservationReview do
     expect(result[:records].first).to include(legacy: true, automatically_releasable: false, request_id: nil)
     expect(record.reload.attributes).to eq(before)
     expect { report.report(period: '2026-13') }.to raise_error(ArgumentError)
+  end
+
+  it 'keeps fingerprints stable across JSONB key ordering while still detecting real state changes' do
+    record.update!(accounting: { retained: true, reconciliation_history: [{ classification: 'unknown', actor: 'system' }] })
+    initial = report.describe(record, 'inference')[:fingerprint]
+    expect(report.describe(record.reload, 'inference')[:fingerprint]).to eq(initial)
+    record.update!(reserved_tokens: 2000)
+    expect(report.describe(record.reload, 'inference')[:fingerprint]).not_to eq(initial)
   end
 end

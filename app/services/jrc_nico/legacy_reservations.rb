@@ -1,6 +1,19 @@
 class JrcNico::LegacyReservations
   MODELS = { 'inference' => JrcNico::Inference, 'run' => JrcNico::Run }.freeze
 
+  def self.digest(value)
+    canonical = lambda do |item|
+      if item.is_a?(Hash)
+        item.stringify_keys.sort.to_h.transform_values { |child| canonical.call(child) }
+      elsif item.is_a?(Array)
+        item.map { |child| canonical.call(child) }
+      else
+        item
+      end
+    end
+    Digest::SHA256.hexdigest(canonical.call(value).to_json)
+  end
+
   def initialize(member:)
     @member = member
     authorize!
@@ -41,6 +54,8 @@ class JrcNico::LegacyReservations
   end
 
   def describe(value, type)
+    raise Pundit::NotAuthorizedError unless value.account_id == account.id
+
     events = JrcNico::ReservationLedger.new(value).events.order(:id).to_a
     candidates = candidates_for(value).order(:id).to_a
     classification = if events.any?
@@ -58,6 +73,8 @@ class JrcNico::LegacyReservations
   end
 
   def candidates_for(value)
+    raise Pundit::NotAuthorizedError unless value.account_id == account.id
+
     key = value.is_a?(JrcNico::Run) ? 'run_id' : 'inference_id'
     scope = account.jrc_ai_usage_events.where(agent_key: value.is_a?(JrcNico::Run) ? value.agent_key : 'nico')
     scope = scope.where(value.is_a?(JrcNico::Run) ? "feature = 'assisted_analysis'" : "feature LIKE 'nico_%'")
@@ -75,7 +92,7 @@ class JrcNico::LegacyReservations
   def fingerprint(value, events, candidates)
     data = [value.attributes.slice('id', 'account_id', 'status', 'reserved_tokens', 'created_at', 'updated_at', 'accounting', 'lease_expires_at'),
             (events + candidates).map { |event| event.attributes }.sort_by { |event| event['id'] }]
-    Digest::SHA256.hexdigest(data.to_json)
+    self.class.digest(data)
   end
 
   def event_summary(event)
