@@ -59,10 +59,11 @@ class JrcServiceDesk::NotificationReceipt
   end
 
   def audit(state)
-    return unless @row.execution_membership.reload.active?
+    actor = @row.execution_membership.reload
+    return unless actor.active? || actor.administrative_actor?
 
     JrcServiceDesk::TicketEvent.create!(account: @row.account, unit: @row.unit, ticket: @row.ticket,
-                                        actor_membership: @row.execution_membership, event_type: 'notification_delivery_updated',
+                                        actor_membership: actor, event_type: 'notification_delivery_updated',
                                         visibility: 'internal',
                                         data: { 'delivery_id' => @row.id, 'channel' => @row.channel, 'state' => state })
   end

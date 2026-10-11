@@ -68,7 +68,7 @@ class JrcServiceDesk::OperationalRuleReferences
   def verify_deadline!(definition)
     member = AccountUser.where(account_id: @context.account.id).find(definition.fetch('executor_account_user_id'))
     executor = JrcServiceDesk::OperationalContext.new(account: @context.account, user: member.user, account_user: member)
-    unless executor.unit_allowed?(@unit) && executor.capability?(:approvals_request) &&
+    unless executor.operational_unit_allowed?(@unit) && executor.capability?(:approvals_request) &&
            executor.capability?(:approvals_view) && executor.capability?(:tickets_view_all)
       raise Pundit::NotAuthorizedError, 'Deadline executor is not currently authorized'
     end

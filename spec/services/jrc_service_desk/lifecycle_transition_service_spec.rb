@@ -88,11 +88,12 @@ RSpec.describe JrcServiceDesk::LifecycleTransitionService, type: :service do
     expect { lc_execute(row, 'resume') }.to raise_error(ArgumentError)
   end
 
-  it 'rejects revoked grant, disabled flag, another Account and a unit without grant even for admin' do
+  it 'rejects revoked agent grants, disabled flags and foreign Accounts even for a native administrator' do
     lc_publish; row = sd_ticket
     sd_as_admin!
     foreign = create(:jrc_sd_ticket, unit: sd_foreign_unit)
     expect { lc_execute(foreign, 'resolve') }.to raise_error(ActiveRecord::RecordNotFound)
+    sd_account_user.update!(role: :agent)
     sd_membership.update!(active: false)
     expect { lc_execute(row, 'resolve') }.to raise_error(ActiveRecord::RecordNotFound)
     sd_membership.update!(active: true)

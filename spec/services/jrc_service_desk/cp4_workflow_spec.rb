@@ -80,13 +80,17 @@ RSpec.describe 'JRC Service Desk CP4 transactional workflows', type: :service do
     expect(row.reload.status_id).to eq(sd_status.id)
   end
 
-  it 'denies status changes after membership revocation and to admin outside a granted unit' do
+  it 'denies a revoked agent and still requires a configured lifecycle for a native administrator' do
     row = sd_ticket
-    sd_as_admin!
     sd_membership.update!(active: false)
     expect(JrcServiceDesk::WorkStatusPolicy.new(sd_context, row).change_work_status?).to be(false)
     expect do
       JrcServiceDesk::ChangeWorkStatusService.new(user_context: sd_context).call(ticket_id: row.id, status_id: row.status_id, expected_lock_version: 0)
     end.to raise_error(ActiveRecord::RecordNotFound)
+    sd_as_admin!
+    expect(JrcServiceDesk::WorkStatusPolicy.new(sd_context, row).change_work_status?).to be(false)
+    expect do
+      JrcServiceDesk::ChangeWorkStatusService.new(user_context: sd_context).call(ticket_id: row.id, status_id: row.status_id, expected_lock_version: 0)
+    end.to raise_error(Pundit::NotAuthorizedError)
   end
 end

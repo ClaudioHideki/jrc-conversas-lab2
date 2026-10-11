@@ -23,7 +23,10 @@ class JrcServiceDesk::NotificationEligibility
   end
 
   def operator_allowed?
-    @context.unit_allowed?(@row.unit) && @context.capability?(:customer_publish)
+    actor = @row.execution_membership
+    actor.reload if actor.persisted?
+    grant = actor.administrative_actor? ? @context.administrator? : actor.active?
+    grant && @context.unit_allowed?(@row.unit) && @context.capability?(:customer_publish)
   end
 
   def task_allowed?

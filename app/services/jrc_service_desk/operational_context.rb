@@ -67,6 +67,14 @@ class JrcServiceDesk::OperationalContext < JrcServiceDesk::AccessContext
     unit && record_in_account?(unit) && unit_scope.exists?(id: unit.id)
   end
 
+  # Automatic executors still need an explicit operational grant, even when they
+  # are native Account administrators allowed to manage tickets manually.
+  def operational_unit_allowed?(unit)
+    unit_allowed?(unit) && JrcServiceDesk::UnitMembership.operational.where(
+      account_id: account.id, account_user_id: account_user.id, unit_id: unit.id, active: true
+    ).exists?
+  end
+
   def native_team_ids
     return Team.none.select(:id) unless available?
 

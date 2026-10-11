@@ -34,7 +34,9 @@ RSpec.describe 'JRC Service Desk CP4 HTTP operations', type: :request do
     expect { get "#{base}/ui_context", headers: headers }.not_to change(JrcServiceDesk::TicketStatus, :count)
     expect(payload['units'].first['initial_status']).to be_nil
     expect(payload['units'].first['permissions']['create_ticket']).to be(true)
-    post "#{base}/tickets", params: { unit_id: sd_unit.id, ticket: sd_create_attributes.merge(status_id: nil) },
+    input = { title: 'Configuration test', description: 'No initial status configured', requester_id: sd_contact.id,
+              status_id: nil, priority_id: sd_priority.id }
+    post "#{base}/tickets", params: { unit_id: sd_unit.id, ticket: input },
                              headers: request_headers('missing-status'), as: :json
     expect(response).to have_http_status(:unprocessable_entity)
     expect(JrcServiceDesk::Ticket.where(account_id: sd_account.id)).to be_empty

@@ -65,4 +65,16 @@ RSpec.describe 'JRC Service Desk CP4 real concurrent creation', :sd_concurrency,
     expect(outcomes.count { |value| value.is_a?(JrcServiceDesk::IdempotencyConflict) }).to eq(1)
     expect(JrcServiceDesk::Ticket.where(account_id: sd_account.id, unit_id: sd_unit.id).count).to eq(1)
   end
+
+  it 'serializes a native administrator without a grant into one audit actor and one ticket' do
+    sd_as_admin!
+    sd_membership.update!(active: false)
+    values = sd_create_attributes
+    outcomes = simultaneous_creates([values, values])
+    expect(outcomes.all? { |value| value.is_a?(Integer) }).to be(true)
+    expect(outcomes.uniq.length).to eq(1)
+    expect(JrcServiceDesk::UnitMembership.where(account: sd_account, unit: sd_unit, administrative_actor: true).count).to eq(1)
+    expect(JrcServiceDesk::Ticket.where(account: sd_account, unit: sd_unit).count).to eq(1)
+    expect(sd_membership.reload.active).to be(false)
+  end
 end

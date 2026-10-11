@@ -151,7 +151,7 @@ RSpec.describe 'Service Desk historical SLA snapshot HTTP wrapper', type: :reque
     sd_account_user.update!(role: :agent)
     sd_membership.update!(active: false)
     get "#{base}/sla_snapshots/#{snapshot.id}", headers: headers
-    expect(response).to have_http_status(:not_found)
+    expect(response).to have_http_status(:forbidden)
     expect(response.body).not_to include(snapshot.payload_digest, 'test-contract')
     expect do
       post "#{base}/sla_snapshots", headers: headers, as: :json, params: { snapshot: sd_snapshot_attributes.merge(source_version: 'v2') }

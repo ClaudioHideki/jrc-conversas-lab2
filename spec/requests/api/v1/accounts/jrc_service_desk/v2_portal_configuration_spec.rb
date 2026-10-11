@@ -41,12 +41,16 @@ RSpec.describe 'Service Desk real portal configuration choices', type: :request 
     expect(response.parsed_body['execution_memberships'].map { |row| row['id'] }).not_to include(grant.id.to_s)
     sd_membership.update!(active: false)
     get path, params: { unit_id: sd_unit.id }, headers: headers
-    expect(response).to have_http_status(:not_found)
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body['execution_memberships'].map { |row| row['id'] }).not_to include(sd_membership.id.to_s)
   end
 
-  it 'rejects another unit and foreign widget without returning choices' do
+  it 'allows a native administrator to configure another own unit but rejects foreign units and widgets' do
     sd_as_admin!
     get path, params: { unit_id: sd_other_unit.id }, headers: headers
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body['execution_memberships']).to be_empty
+    get path, params: { unit_id: sd_foreign_unit.id }, headers: headers
     expect(response).to have_http_status(:not_found)
     foreign = create(:channel_widget, account: sd_foreign_account)
     get path, params: { unit_id: sd_unit.id, inbox_id: foreign.inbox.id }, headers: headers

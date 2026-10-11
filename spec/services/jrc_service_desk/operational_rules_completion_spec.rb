@@ -69,12 +69,11 @@ RSpec.describe JrcServiceDesk::PublishOperationalRulesService do
     expect(JrcServiceDesk::OperationalRuleVersionPolicy::Scope.new(sd_context, JrcServiceDesk::OperationalRuleVersion).resolve).to be_empty
   end
 
-  it 'rejects a publisher whose unit membership was revoked' do
+  it 'allows native administrative configuration without reactivating a revoked operational grant' do
     sd_membership.update!(active: false)
-    expect do
-      publish('recurrence', 'window_days' => 14, 'minimum_occurrences' => 2,
-                            'group_by' => ['service_id'])
-    end.to raise_error(ActiveRecord::RecordNotFound)
+    version = publish('recurrence', 'window_days' => 14, 'minimum_occurrences' => 2, 'group_by' => ['service_id'])
+    expect(version.published_by_membership).to have_attributes(administrative_actor: true, active: false)
+    expect(sd_membership.reload.active).to be(false)
   end
 
   it 'resolves impact and urgency at creation and persists the published rule reference' do

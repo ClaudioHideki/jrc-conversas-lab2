@@ -50,10 +50,11 @@ RSpec.describe 'R3 catalogue and real opening attachments', type: :request do
     expect(JrcServiceDesk::TicketNote.where(account: sd_account).sole.files.count).to eq(1)
   end
 
-  it 'returns the explicit catalogue selection then denies it after membership revocation' do
+  it 'returns the explicit catalogue selection then denies a revoked agent' do
     get "#{base}/catalogue_form", params: { unit_id: sd_unit.id, ticket_type_id: type.id }, headers: headers
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.dig('ticket_type', 'id')).to eq(type.id.to_s)
+    sd_account_user.update!(role: :agent)
     sd_membership.update!(active: false)
     get "#{base}/catalogue_form", params: { unit_id: sd_unit.id, ticket_type_id: type.id }, headers: headers
     expect(response).to have_http_status(:not_found)

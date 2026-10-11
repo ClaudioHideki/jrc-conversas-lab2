@@ -104,9 +104,11 @@ RSpec.describe JrcServiceDesk::NotificationEngine do
 
   it 'revalidates a revoked actor after preview and keeps legacy internal publication independent' do
     receipt = preview.fetch(:receipt)
+    sd_account_user.update!(role: :agent)
     sd_membership.update!(active: false)
     expect { publish(receipt) }.to raise_error(ActiveRecord::RecordNotFound)
     sd_membership.update!(active: true)
+    sd_as_admin!
     note = JrcServiceDesk::AddNoteService.new(user_context: sd_context).call(
       ticket_id: ticket.id, attributes: { body: 'Legacy internal note' }, idempotency_key: 'legacy'
     )
@@ -205,6 +207,36 @@ RSpec.describe JrcServiceDesk::NotificationEngine do
     row.message.update!(content: 'Unapproved evidence', status: :delivered)
     JrcServiceDesk::NotificationReceipt.new(row.reload).call
     expect(row.reload.state).to eq('unknown')
+  end
+
+  it 'keeps receipt audit for an administrative author without granting availability or sending externally' do
+    sd_membership.update!(active: false)
+    row = delivery
+    expect(row.execution_membership).to have_attributes(administrative_actor: true, active: false)
+    JrcServiceDesk::NotificationDeliveryJob.perform_now(row.id)
+    row.reload
+    JrcServiceDesk::NotificationExecution.new(row.message).perform do
+      row.message.update!(source_id: 'test-only-administrative-receipt', status: :sent)
+    end
+    row.message.update!(status: :delivered)
+    expect do
+      JrcServiceDesk::NotificationReceipt.new(row.reload).call
+    end.to change { ticket.ticket_events.where(event_type: 'notification_delivery_updated').count }.by(1)
+    expect(row.reload.state).to eq('delivered')
+    expect(row.execution_membership.reload.active).to be(false)
+    expect(sd_membership.reload.active).to be(false)
+    expect(ticket.ticket_events.where(event_type: 'notification_delivery_updated').sole.actor_membership_id).to eq(row.execution_membership_id)
+  end
+
+  it 'rejects a queued administrative author after demotion without using its audit actor as a grant' do
+    sd_membership.update!(active: false)
+    row = delivery
+    expect(row.execution_membership.administrative_actor).to be(true)
+    JrcServiceDesk::NotificationDeliveryJob.perform_now(row.id)
+    sd_account_user.update!(role: :agent)
+    expect { |block| JrcServiceDesk::NotificationExecution.new(row.reload.message).perform(&block) }.not_to yield_control
+    expect(row.reload.reason).to eq('authorization_revoked')
+    expect(row.execution_membership.reload.active).to be(false)
   end
 
   it 'creates a separately approved resend attempt without duplicating the immutable interaction' do

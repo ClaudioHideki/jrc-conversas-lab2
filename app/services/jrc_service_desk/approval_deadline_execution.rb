@@ -6,6 +6,8 @@ class JrcServiceDesk::ApprovalDeadlineExecution < JrcServiceDesk::BaseService
     initial = fresh_context!
     candidate = JrcServiceDesk::TicketApprovalPolicy::Scope.new(initial.to_h, JrcServiceDesk::TicketApproval).resolve.find(approval_id)
     with_ticket(candidate.ticket_id, :show?) do |ticket|
+      JrcServiceDesk::UnitMembership.operational.where(account: context.account, unit: ticket.unit,
+                                                       account_user: context.account_user, active: true).lock('FOR SHARE').take!
       approval = ticket.ticket_approvals.lock.find(candidate.id)
       rule = approval.deadline_rule_version
       current = JrcServiceDesk::OperationalRuleVersion.current(account_id: ticket.account_id, unit_id: ticket.unit_id, kind: 'approval_deadline')

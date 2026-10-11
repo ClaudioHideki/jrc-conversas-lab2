@@ -15,7 +15,7 @@ class JrcServiceDesk::ClockAutomationAuthority
     lock_current_role!(member, account)
     context = JrcServiceDesk::OperationalContext.new(account: account, user: member.user, account_user: member)
     required = CAPABILITIES + (policy.thresholds.any? { |row| row['queue_id'] } ? [:tickets_transfer] : [])
-    raise Pundit::NotAuthorizedError unless context.unit_allowed?(unit) && required.all? { |key| context.capability?(key) }
+    raise Pundit::NotAuthorizedError unless context.operational_unit_allowed?(unit) && required.all? { |key| context.capability?(key) }
 
     member
   end

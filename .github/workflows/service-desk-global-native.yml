@@ -12,6 +12,10 @@ jobs:
   rails-postgres:
     runs-on: ubuntu-24.04
     timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [standard, concurrent]
     services:
       postgres:
         image: pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a
@@ -67,16 +71,15 @@ jobs:
           bundle exec rails db:create db:schema:load
           SCHEMA=/tmp/service-desk-global-schema.rb bundle exec rails db:migrate
       - name: RSpec Service Desk e preservacao dirigida
-        run: >-
-          bundle exec rspec
-          spec/models/jrc_service_desk
-          spec/policies/jrc_service_desk
-          spec/services/jrc_service_desk
-          spec/requests/api/v1/accounts/jrc_service_desk
-          spec/migrations/service_desk_administrative_actors_spec.rb
-          --format progress --format json --out /tmp/service-desk-global-rspec.json
+        env:
+          TEST_SUITE: ${{ matrix.suite }}
+        run: |
+          if [ "$TEST_SUITE" = concurrent ]; then tags=(--tag sd_concurrency); else tags=(--tag '~sd_concurrency'); fi
+          bundle exec rspec spec/models/jrc_service_desk spec/policies/jrc_service_desk spec/services/jrc_service_desk \
+            spec/requests/api/v1/accounts/jrc_service_desk spec/migrations/service_desk_administrative_actors_spec.rb \
+            "${tags[@]}" --format progress --format json --out /tmp/service-desk-global-rspec.json
       - name: RuboCop - classificar base e delta sem desabilitar regras
-        if: always()
+        if: always() && matrix.suite == 'standard'
         run: |
           python3 - <<'PY'
           import collections, json, pathlib, subprocess
@@ -119,7 +122,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: service-desk-global-native-${{ github.sha }}
+          name: service-desk-global-native-${{ matrix.suite }}-${{ github.sha }}
           path: |
             /tmp/service-desk-global-rspec.json
             /tmp/service-desk-global-rubocop.json
