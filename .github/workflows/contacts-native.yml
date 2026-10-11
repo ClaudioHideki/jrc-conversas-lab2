@@ -68,7 +68,7 @@ jobs:
       - name: RSpec contatos, Cadastro Mestre e isolamento por Account
         run: |
           bundle exec rspec spec/controllers/api/v1/accounts/contacts_controller_spec.rb \
-            spec/services/jrc_customers/master_services_spec.rb spec/requests/api/v1/accounts/jrc_customers \
+            spec/services/jrc_customers/master_services_spec.rb spec/controllers/api/v1/accounts/customers/master_api_spec.rb \
             --format progress --format json --out /tmp/contacts-native-rspec.json
       - name: RuboCop - classificar base e delta sem desabilitar regras
         if: always()
