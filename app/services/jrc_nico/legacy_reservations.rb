@@ -41,6 +41,7 @@ class JrcNico::LegacyReservations
 
     month = Time.zone.strptime(period, '%Y-%m')
     account.with_lock do
+      authorize!(lock: true)
       rows = MODELS.flat_map do |type, model|
         model.where(account: account, created_at: month.all_month).where("accounting ->> 'version' IS NULL")
              .where("reserved_tokens > 0 OR accounting ? 'legacy_reviews'").order(:id).map { |value| describe(value, type) }

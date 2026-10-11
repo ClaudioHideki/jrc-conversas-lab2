@@ -50,6 +50,26 @@ ao limite de outubro. IDs 116 e 122 possuem histórico que deve ser preservado.
    `used_tokens + effective_legacy_reserved_tokens` no mesmo mês e conferir os outros
    holds não legados no endpoint de consumo/capacidade existente.
 
+Para inventariar TODOS os meses dos 33 registros, se houver acesso administrativo
+ao Rails, o seguinte trecho é exclusivamente de leitura. Substituir o identificador
+de **AccountUser administrador**, não o User ID. A conta é obtida da associação,
+não é fixada. Executar via `bundle exec rails runner` somente como diagnóstico
+autorizado; este trecho não chama `reconcile`, não escreve e não libera reservas:
+
+```ruby
+member = AccountUser.find(ADMIN_ACCOUNT_USER_ID)
+report = JrcNico::LegacyReservations.new(member: member)
+periods = [JrcNico::Inference, JrcNico::Run].flat_map do |model|
+  model.where(account: report.account).where("accounting ->> 'version' IS NULL")
+       .where('reserved_tokens > 0').pluck(:created_at).map { |at| at.strftime('%Y-%m') }
+end.uniq.sort
+puts JSON.pretty_generate(periods.to_h { |period| [period, report.report(period: period)] })
+```
+
+O arquivo de diagnóstico contém histórico administrativo; guardá-lo com acesso
+restrito. Conferir o total dos registros entre os meses contra o inventário de 33.
+Nenhum comando de aplicação em lote acompanha o procedimento.
+
 ## Classificações e prova exigida
 
 | Classificação | Fonte | Efeito autorizado |

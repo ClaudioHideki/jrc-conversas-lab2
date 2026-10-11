@@ -313,4 +313,33 @@ RSpec.describe JrcNico::LegacyReservationReview do
     record.update!(reserved_tokens: 2000)
     expect(report.describe(record.reload, 'inference')[:fingerprint]).not_to eq(initial)
   end
+
+  it 'rejects zero, negative, fractional, oversized and inconsistent external usage without writing a receipt' do
+    input = decision.merge('classification' => 'confirmed', 'source' => 'external_receipt', 'provider_id' => provider.id, 'model' => 'test-model')
+    invalid = [
+      { 'input_tokens' => 0, 'output_tokens' => 0, 'total_tokens' => 0 },
+      { 'input_tokens' => -1, 'output_tokens' => 2, 'total_tokens' => 1 },
+      { 'input_tokens' => 1.5, 'output_tokens' => 1.5, 'total_tokens' => 3 },
+      { 'input_tokens' => 270_001, 'output_tokens' => 0, 'total_tokens' => 270_001 },
+      { 'input_tokens' => 20, 'output_tokens' => 10, 'total_tokens' => 31 }
+    ]
+    invalid.each do |usage|
+      expect { review.call(type: 'inference', id: record.id, decision: input.merge('usage' => usage)) }
+        .to raise_error(ArgumentError, 'invalid_review_usage')
+    end
+    expect(account.jrc_ai_usage_events.count).to eq(0)
+    expect(record.reload.reserved_tokens).to eq(1000)
+  end
+
+  it 'permits a later evidence-backed decision after an unknown review while retaining both audits' do
+    apply_decision
+    input = decision.merge('request_id' => SecureRandom.uuid, 'fingerprint' => report.describe(record.reload, 'inference')[:fingerprint],
+                           'classification' => 'confirmed', 'source' => 'external_receipt', 'provider_id' => provider.id,
+                           'model' => 'test-model', 'usage' => { 'input_tokens' => 20, 'output_tokens' => 10, 'total_tokens' => 30 })
+    apply_decision(input)
+    expect(record.reload.reserved_tokens).to eq(0)
+    expect(record.accounting['legacy_reviews'].map { |entry| entry['classification'] }).to eq(%w[unknown confirmed])
+    expect(record.accounting['reconciliation_history'].size).to eq(2)
+    expect(account.jrc_ai_usage_events.count).to eq(1)
+  end
 end
