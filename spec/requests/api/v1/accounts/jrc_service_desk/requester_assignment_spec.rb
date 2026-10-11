@@ -9,8 +9,7 @@ RSpec.describe 'Service Desk requester phone and team assignment', type: :reques
   let(:team) { create(:team, account: sd_account) }
 
   it 'projects actual opening time separately from persistence time for detail and list' do
-    row = sd_ticket
-    row.update!(opened_at: 2.days.ago.change(usec: 0))
+    row = sd_ticket(opened_at: 2.days.ago.change(usec: 0))
     get "#{base}/tickets/#{row.id}", headers: headers
     expect(response).to have_http_status(:ok)
     actual = response.parsed_body.fetch('ticket')
