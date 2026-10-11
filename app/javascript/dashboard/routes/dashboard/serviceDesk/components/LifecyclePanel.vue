@@ -16,6 +16,7 @@ import {
   createLifecycleState,
 } from '../helpers/lifecycle.js';
 import { newRequestKey } from '../helpers/drafts.js';
+import { tones } from '../helpers/visualTheme';
 const props = defineProps({ ticket: { type: Object, required: true } });
 const emit = defineEmits(['updated', 'snapshotRecorded']);
 const { t } = useI18n();
@@ -26,6 +27,15 @@ const lifecycle = createLifecycleSession(
   () => (session.state.status === 'ready' ? session.state.context : null),
   state
 );
+const actionLabels = computed(() => ({
+  pause: t('JRC_SERVICE_DESK.LIFECYCLE.actions.pause'),
+  resume: t('JRC_SERVICE_DESK.LIFECYCLE.actions.resume'),
+  resolve: t('JRC_SERVICE_DESK.LIFECYCLE.actions.resolve'),
+  close: t('JRC_SERVICE_DESK.LIFECYCLE.actions.close'),
+  cancel: t('JRC_SERVICE_DESK.LIFECYCLE.actions.cancel'),
+  reopen: t('JRC_SERVICE_DESK.LIFECYCLE.actions.reopen'),
+  work_status: t('JRC_SERVICE_DESK.LIFECYCLE.actions.work_status'),
+}));
 const selected = ref('');
 const reason = ref('');
 const note = ref('');
@@ -42,6 +52,14 @@ const maySeeNotes = computed(
   () => props.ticket.permissions.view_notes === true
 );
 const busy = computed(() => state.writeStatus === 'saving');
+const actionTone = action =>
+  ({
+    resolve: 'teal',
+    close: 'teal',
+    pause: 'amber',
+    cancel: 'ruby',
+    reopen: 'blue',
+  })[action] || 'blue';
 const load = () => lifecycle.load(props.ticket, page.value);
 const resetDraft = () => {
   pendingCommand.value = null;
@@ -193,6 +211,20 @@ onBeforeUnmount(() => lifecycle.clear());
           class="grid gap-3"
           @submit.prevent="submit"
         >
+          <div class="flex flex-wrap gap-2" data-testid="lifecycle-shortcuts">
+            <Button
+              v-for="option in state.data.options"
+              :key="option.key"
+              type="button"
+              variant="outline"
+              :color="actionTone(option.action)"
+              :class="tones[actionTone(option.action)].soft"
+              :disabled="busy || !!pendingCommand"
+              :aria-pressed="selected === option.key"
+              :label="`${actionLabels[option.action]}: ${option.to_status_name}`"
+              @click="selected = option.key"
+            />
+          </div>
           <Select
             v-model="selected"
             :disabled="busy || !!pendingCommand"
@@ -256,20 +288,23 @@ onBeforeUnmount(() => lifecycle.clear());
                 v-if="Object.hasOwn(spec, 'equals')"
                 class="text-xs"
                 data-testid="lifecycle-expected-value"
-                >{{ t('JRC_SERVICE_DESK.LIFECYCLE.expected_value') }}:
-                {{ spec.equals }}</span
               >
+                {{
+                  `${t('JRC_SERVICE_DESK.LIFECYCLE.expected_value')}: ${spec.equals}`
+                }}
+              </span>
               <label
                 v-if="spec.type === 'boolean'"
                 class="text-sm"
                 data-testid="lifecycle-boolean-field"
-                ><input
+              >
+                <input
                   v-model="fields[field]"
                   type="checkbox"
                   :disabled="busy || !!pendingCommand"
                 />
-                {{ spec.label }}{{ spec.required ? ' *' : '' }}</label
-              >
+                <span>{{ spec.label }}{{ spec.required ? ' *' : '' }}</span>
+              </label>
               <Input
                 v-else
                 v-model="fields[field]"
@@ -283,7 +318,14 @@ onBeforeUnmount(() => lifecycle.clear());
               :disabled="
                 busy || !!pendingCommand || (rule.action === 'pause' && !reason)
               "
-              :label="t('JRC_SERVICE_DESK.LIFECYCLE.apply')"
+              :color="
+                ['resolve', 'close'].includes(rule.action)
+                  ? 'teal'
+                  : rule.action === 'cancel'
+                    ? 'ruby'
+                    : 'blue'
+              "
+              :label="actionLabels[rule.action]"
             />
           </template>
         </form>

@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import { v2Labels } from '../helpers/v2Labels';
 import { useI18n } from 'vue-i18n';
 import Panel from './ServiceDeskPanel.vue';
+import { tones, metricTones } from '../helpers/visualTheme';
 const props = defineProps({
   data: { type: Object, default: null },
   compact: { type: Boolean, default: false },
@@ -32,7 +33,7 @@ const maximum = rows => Math.max(1, ...rows.map(row => row.count));
                 <dt class="text-xs text-n-slate-11">
                   {{ t('JRC_SERVICE_DESK.EXPERIENCE.pending') }}
                 </dt>
-                <dd class="text-xl tabular-nums">
+                <dd class="text-xl font-bold tabular-nums text-n-amber-11">
                   {{
                     kind === 'tasks' ? data.tasks.open : data.approvals.pending
                   }}
@@ -58,18 +59,48 @@ const maximum = rows => Math.max(1, ...rows.map(row => row.count));
         {{ t('JRC_SERVICE_DESK.EXPERIENCE.sla_unavailable') }}
       </p>
       <Panel v-if="data.sla" :title="t('JRC_SERVICE_DESK.V2.sla')">
-        <dl class="grid grid-cols-2 gap-3">
-          <template v-for="(value, key) in data.sla" :key="key">
-            <dt>{{ labels.supervisor[key] }}</dt>
-            <dd class="tabular-nums">
+        <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div
+            v-for="(value, key) in data.sla"
+            :key="key"
+            class="rounded-xl p-3"
+            :class="tones[metricTones[key] || 'iris'].soft"
+          >
+            <dt class="text-xs font-medium">{{ labels.supervisor[key] }}</dt>
+            <dd class="mt-2 text-xl font-bold tabular-nums">
               {{
                 value === null
                   ? t('JRC_SERVICE_DESK.COMMON.no_value')
                   : Number(value.toFixed(2))
               }}
             </dd>
-          </template>
+          </div>
         </dl>
+        <div class="mt-4 grid gap-3" data-testid="sla-measured-bars">
+          <div
+            v-for="key in [
+              'running_breached',
+              'completed_met',
+              'completed_breached',
+            ]"
+            :key="key"
+            class="flex flex-wrap items-center gap-3 text-sm"
+          >
+            <span class="w-48 shrink-0" :class="tones[metricTones[key]].text">{{
+              labels.supervisor[key]
+            }}</span>
+            <progress
+              class="min-w-0 flex-1 accent-blue-700"
+              :class="tones[metricTones[key]].accent"
+              :value="data.sla[key]"
+              :max="Math.max(data.sla.observed_cycles, data.sla[key], 1)"
+              :aria-label="labels.supervisor[key]"
+            />
+            <strong :class="tones[metricTones[key]].text">{{
+              data.sla[key]
+            }}</strong>
+          </div>
+        </div>
       </Panel>
       <div v-if="!compact" class="grid gap-4 lg:grid-cols-2">
         <Panel
@@ -91,14 +122,16 @@ const maximum = rows => Math.max(1, ...rows.map(row => row.count));
               }}
             </p>
             <progress
-              class="min-w-0 flex-1"
+              class="min-w-0 flex-1 accent-blue-700"
               :value="row.count"
               :max="maximum(data[kind])"
               :aria-label="
                 row.date || row.name || t('JRC_SERVICE_DESK.COMMON.no_value')
               "
             />
-            <span class="tabular-nums">{{ row.count }} </span>
+            <span class="tabular-nums font-bold text-n-blue-11">
+              {{ row.count }}
+            </span>
           </div>
         </Panel>
         <Panel :title="t('JRC_SERVICE_DESK.V2.capacity')">
@@ -112,7 +145,7 @@ const maximum = rows => Math.max(1, ...rows.map(row => row.count));
           >
             <span class="flex-1">{{ row.name }} </span>
             <span>{{ labels.availability[row.availability] }} </span>
-            <span class="tabular-nums">
+            <span class="tabular-nums font-bold text-n-blue-11">
               {{ row.active_tickets }} {{ capacitySeparator }}
               {{
                 row.capacity === null

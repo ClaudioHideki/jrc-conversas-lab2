@@ -39,7 +39,7 @@ const copy = async () => {
       {{ t('JRC_SERVICE_DESK.CREATION.protocol') }}
     </span>
     <div class="flex flex-wrap items-center gap-2">
-      <strong class="select-all break-all font-mono text-xl">{{
+      <strong class="select-all break-all font-mono text-xl text-n-blue-11">{{
         protocol
       }}</strong>
       <Button

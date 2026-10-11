@@ -4,7 +4,8 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import OperationsLinks from '../../jrcOperations/components/OperationsLinks.vue';
 import Button from 'dashboard/components-next/button/Button.vue';
-import TabBar from 'dashboard/components-next/tabbar/TabBar.vue';
+import Icon from 'dashboard/components-next/icon/Icon.vue';
+import { tones } from '../helpers/visualTheme';
 import Panel from '../components/ServiceDeskPanel.vue';
 import State from '../components/ServiceDeskState.vue';
 import TicketCockpit from '../components/TicketCockpit.vue';
@@ -87,6 +88,16 @@ const visibleTabKeys = computed(() =>
     return !permission || ticket.value?.permissions?.[permission] === true;
   })
 );
+const tabTheme = {
+  details: ['blue', 'i-lucide-ticket'],
+  conversation: ['teal', 'i-lucide-messages-square'],
+  notes: ['iris', 'i-lucide-sticky-note'],
+  tasks: ['blue', 'i-lucide-list-checks'],
+  files: ['iris', 'i-lucide-paperclip'],
+  sla: ['amber', 'i-lucide-timer'],
+  history: ['blue', 'i-lucide-history'],
+  solution: ['teal', 'i-lucide-circle-check'],
+};
 const tabs = computed(() =>
   visibleTabKeys.value.map(value => ({
     value,
@@ -238,13 +249,27 @@ watch(() => session.operations?.state.revision, refresh);
         {{ confirmedSnapshot.payload_digest }}
       </p>
     </div>
-    <div class="overflow-x-auto mb-4">
-      <TabBar
-        :tabs="tabs"
-        :initial-active-tab="visibleTabKeys.indexOf(tab)"
-        @tab-changed="tab = $event.value"
-      />
-    </div>
+    <nav
+      class="flex gap-2 overflow-x-auto mb-4 py-1"
+      :aria-label="t('JRC_SERVICE_DESK.SCREENS.detail')"
+    >
+      <button
+        v-for="item in tabs"
+        :key="item.value"
+        :data-tab="item.value"
+        type="button"
+        class="flex shrink-0 items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold focus-visible:ring-2 focus-visible:ring-n-blue-9"
+        :class="
+          tab === item.value
+            ? tones[tabTheme[item.value][0]].solid
+            : tones[tabTheme[item.value][0]].soft
+        "
+        :aria-current="tab === item.value ? 'page' : undefined"
+        @click="tab = item.value"
+      >
+        <Icon :icon="tabTheme[item.value][1]" class="size-4" />{{ item.label }}
+      </button>
+    </nav>
     <div class="sd-two-columns">
       <Panel :title="t(`JRC_SERVICE_DESK.TICKET.tabs.${tab}`)">
         <State

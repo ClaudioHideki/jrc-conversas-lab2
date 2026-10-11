@@ -6,6 +6,7 @@ import { useI18n } from 'vue-i18n';
 import { useResizeObserver } from '@vueuse/core';
 import Button from 'dashboard/components-next/button/Button.vue';
 import Icon from 'dashboard/components-next/icon/Icon.vue';
+import { crmControlClasses } from './crmControlClasses';
 
 const route = useRoute();
 const store = useStore();
@@ -123,7 +124,16 @@ const visibleNavigation = computed(() =>
 );
 
 const activeTabClass = item => {
-  if (route.name !== item.name) return '';
+  if (route.name !== item.name)
+    return {
+      blue: 'border-n-blue-6 bg-n-blue-2 text-n-blue-11 hover:bg-n-blue-3',
+      cyan: 'border-n-teal-6 bg-n-teal-2 text-n-teal-11 hover:bg-n-teal-3',
+      violet: 'border-n-iris-6 bg-n-iris-2 text-n-iris-11 hover:bg-n-iris-3',
+      orange:
+        'border-n-amber-6 bg-n-amber-2 text-n-amber-11 hover:bg-n-amber-3',
+      green: 'border-n-teal-6 bg-n-teal-2 text-n-teal-11 hover:bg-n-teal-3',
+      rose: 'border-n-ruby-6 bg-n-ruby-2 text-n-ruby-11 hover:bg-n-ruby-3',
+    }[item.tone];
   const tones = {
     blue: 'bg-n-brand',
     cyan: 'bg-cyan-700',
@@ -173,6 +183,7 @@ onMounted(revealActiveTab);
 <template>
   <div
     class="jrc-crm-shell flex h-full min-w-0 flex-1 flex-col bg-n-background text-n-slate-12"
+    :class="crmControlClasses"
   >
     <header
       class="jrc-crm-top relative shrink-0 border-b border-n-weak bg-n-solid-2 px-4 pt-4 sm:px-6"

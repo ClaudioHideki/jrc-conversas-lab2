@@ -311,14 +311,17 @@ onBeforeUnmount(() => {
   session.resetResource(key);
   session.operations?.cancel(writeKey);
 });
-const cancel = () =>
-  router.push({
+const cancel = () => {
+  if (busy.value) return undefined;
+  return router.push({
     name: serviceDeskRouteName(edit.value ? 'detail' : 'tickets'),
     params: {
       accountId: session.accountId.value,
       ...(edit.value ? { ticketId: route.params.ticketId } : {}),
     },
   });
+};
+defineExpose({ busy, cancel });
 
 const maySave = computed(
   () =>
@@ -408,7 +411,7 @@ const submit = async () => {
   <section>
     <header class="sd-page-heading">
       <div>
-        <h2 class="sd-page-title">
+        <h2 id="sd-ticket-form-title" class="sd-page-title">
           {{ t(`JRC_SERVICE_DESK.SCREENS.${screen}`) }}
         </h2>
         <p class="sd-page-subtitle">
@@ -453,11 +456,17 @@ const submit = async () => {
           v-for="(label, index) in steps"
           :key="index"
           type="button"
-          class="sd-wizard-step"
+          class="sd-wizard-step !rounded-xl !p-3 transition focus-visible:ring-2 focus-visible:ring-n-blue-9"
+          :class="
+            index === step
+              ? '!bg-blue-700 !text-white'
+              : '!bg-n-blue-3 !text-n-blue-11'
+          "
+          :disabled="busy"
           :aria-current="index === step ? 'step' : undefined"
           @click="step = index"
         >
-          <span class="sd-badge">
+          <span class="sd-badge !bg-transparent !text-current font-bold">
             {{ index + 1 }}
           </span>
           <span>
@@ -465,7 +474,7 @@ const submit = async () => {
           </span>
         </button>
       </div>
-      <div class="sd-two-columns">
+      <div class="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_18rem]">
         <Panel :title="steps[step]">
           <form @submit.prevent="submit">
             <Feedback
@@ -770,12 +779,13 @@ const submit = async () => {
                 color="slate"
                 variant="outline"
                 :label="t('JRC_SERVICE_DESK.COMMON.previous')"
-                :disabled="step === 0"
+                :disabled="step === 0 || busy"
                 @click="step -= 1"
               />
               <Button
                 v-if="step < 3"
                 type="button"
+                :disabled="busy"
                 :label="t('JRC_SERVICE_DESK.COMMON.next')"
                 @click="step += 1"
               />

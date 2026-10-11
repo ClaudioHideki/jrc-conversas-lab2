@@ -51,7 +51,10 @@ const toneClasses = {
     <div class="flex items-start justify-between gap-3">
       <div class="min-w-0">
         <p class="text-sm font-semibold text-n-slate-11">{{ label }}</p>
-        <p class="mt-2 truncate text-2xl font-bold text-n-slate-12">
+        <p
+          class="mt-2 truncate text-2xl font-bold tabular-nums"
+          :class="toneClasses[tone].icon.split(' ')[1]"
+        >
           {{ value }}
         </p>
         <p v-if="detail" class="mt-1 text-xs text-n-slate-10">

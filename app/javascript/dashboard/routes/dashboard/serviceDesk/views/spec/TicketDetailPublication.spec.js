@@ -107,10 +107,8 @@ describe('verified publication confirmation in the ticket detail', () => {
       };
       const wrapper = render();
       await flushPromises();
-      const nativeTabEvent = 'tab-changed';
-      wrapper
-        .findComponent({ name: 'TabBar' })
-        .vm.$emit(nativeTabEvent, { value: 'sla' });
+
+      await wrapper.get('[data-tab="sla"]').trigger('click');
       await flushPromises();
       expect(
         wrapper.findAllComponents({ name: 'SlaSnapshotEditor' })
@@ -299,10 +297,8 @@ const submitSnapshot = async (show = true) => {
   mocks.snapshot.mockResolvedValue(snapshotPayload());
   const wrapper = render(snapshotStubs);
   await flushPromises();
-  const nativeTabEvent = 'tab-changed';
-  wrapper
-    .findComponent({ name: 'TabBar' })
-    .vm.$emit(nativeTabEvent, { value: 'sla' });
+
+  await wrapper.get('[data-tab="sla"]').trigger('click');
   await flushPromises();
   await wrapper
     .findComponent(SlaSnapshotEditor)

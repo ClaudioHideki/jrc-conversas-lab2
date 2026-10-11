@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import Button from 'dashboard/components-next/button/Button.vue';
 import LifecyclePolicyEditor from '../components/LifecyclePolicyEditor.vue';
 import SupervisorPanel from '../components/SupervisorPanel.vue';
+import LiveKpis from '../components/LiveKpis.vue';
 import TicketFilters from '../components/TicketFilters.vue';
 import State from '../components/ServiceDeskState.vue';
 import { useServiceDesk } from '../composables/useServiceDesk';
@@ -18,19 +19,7 @@ const { result, status, load } = useSupervisionReport(
   session,
   () => filters.value
 );
-const slaData = computed(() =>
-  result.value?.supervision
-    ? {
-        ...result.value.supervision,
-        by_agent: [],
-        top_categories: [],
-        evolution: [],
-        capacity: [],
-        tasks: null,
-        approvals: null,
-      }
-    : null
-);
+const slaData = computed(() => result.value?.supervision || null);
 </script>
 
 <template>
@@ -44,7 +33,8 @@ const slaData = computed(() =>
       </div>
     </header>
     <TicketFilters :query="filters" @apply="filters = $event" />
-    <SupervisorPanel v-if="status === 'ready'" :data="slaData" compact />
+    <LiveKpis :query="filters" />
+    <SupervisorPanel v-if="status === 'ready'" :data="slaData" />
     <State v-else :status="status" retry @retry="load" />
     <Button
       v-if="session.state.context?.capabilities?.lifecycle_policies?.index"
