@@ -690,6 +690,9 @@ Rails.application.routes.draw do
           end
           get 'jrc_copilot/context', to: 'jrc_copilot#context'
           namespace :jrc_ai do
+            get 'legacy_reservations', to: 'legacy_reservations#index'
+            post 'legacy_reservations/:type/:id/simulate', to: 'legacy_reservations#simulate'
+            post 'legacy_reservations/:type/:id/reconcile', to: 'legacy_reservations#reconcile'
             resource :cockpit, only: :show, controller: :cockpit
             resources :agents, only: :index
             resources :providers do

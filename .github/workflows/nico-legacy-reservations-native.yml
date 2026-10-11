@@ -1,0 +1,193 @@
+name: NICO - revisao administrativa de reservas legadas
+
+on:
+  push:
+    branches: [codex/nico-reservas-legadas-20261011]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rails-postgres:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: disposable-test-only
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 6
+    env:
+      RAILS_ENV: test
+      POSTGRES_HOST: 127.0.0.1
+      POSTGRES_PORT: '5432'
+      POSTGRES_USERNAME: postgres
+      POSTGRES_PASSWORD: disposable-test-only
+      POSTGRES_DATABASE: jrc_rel_sd_r345_concurrency_test
+      REDIS_URL: redis://127.0.0.1:6380/15
+      SECRET_KEY_BASE: service-desk-isolated-test-only-not-an-installation-secret
+      BUNDLE_FROZEN: 'true'
+      TZ: UTC
+      JRC_SD_CONCURRENCY: '1'
+      DB_POOL_SIZE: '8'
+      SCHEMA: /tmp/nico-capacity-native-schema.rb
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Confirmar branch, commit e recursos
+        run: |
+          test "$GITHUB_REF" = refs/heads/codex/nico-reservas-legadas-20261011
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git merge-base --is-ancestor ac0f8da801ede52772f25d5ef407de5d4d4b534a HEAD
+          git diff --check ac0f8da801ede52772f25d5ef407de5d4d4b534a HEAD
+          free -h
+          df -h /
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Dependencias nativas de teste
+        run: sudo apt-get update && sudo apt-get install -y libpq-dev libvips libvips-dev redis-server
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4.4'
+          bundler: 2.5.16
+          bundler-cache: true
+      - name: Redis descartavel e banco de teste
+        run: |
+          test "$RAILS_ENV" = test
+          test "$POSTGRES_DATABASE" = jrc_rel_sd_r345_concurrency_test
+          redis-server --bind 127.0.0.1 --port 6380 --daemonize yes --save '' --appendonly no
+          SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
+          SCHEMA=/tmp/nico-capacity-native-schema.rb bundle exec rails db:migrate
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - name: JavaScript congelado e testes dirigidos
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm exec vitest run app/javascript/dashboard/components-next/jrcCopilot/specs app/javascript/dashboard/routes/dashboard/jrcAI/specs --maxWorkers=2 --no-file-parallelism --reporter=json --outputFile=/tmp/nico-capacity-native-vitest.json
+          pnpm exec eslint app/javascript/dashboard/components-next/jrcCopilot/NicoCapacitySummary.vue app/javascript/dashboard/components-next/jrcCopilot/JrcCopilotPanel.vue app/javascript/dashboard/components-next/jrcCopilot/JrcCopilotQuickPanel.vue app/javascript/dashboard/components-next/jrcCopilot/specs/nicoQuickUI.spec.js app/javascript/dashboard/routes/dashboard/jrcAI/JrcAiSettingsPage.vue
+          node --test --test-concurrency=1 services/nico-runtime/test/provider-reliability.test.ts services/nico-runtime/test/provider-config.test.ts services/nico-runtime/test/sentiment.test.ts services/nico-runtime/test/contract.test.ts services/nico-runtime/test/erp-contract.test.ts
+      - name: RSpec ciclo de reservas, concorrencia, Quick, HelpDesk e providers
+        run: |
+          bundle exec rspec spec/services/jrc_nico/reservation_ledger_spec.rb \
+            spec/services/jrc_nico/reservation_reconciler_spec.rb \
+            spec/services/jrc_nico/legacy_reservation_review_spec.rb \
+            spec/requests/jrc_nico_legacy_reservations_spec.rb \
+            spec/services/jrc_nico/run_capacity_spec.rb \
+            spec/services/jrc_nico/operational_inference_spec.rb \
+            spec/services/jrc_nico/runtime_client_spec.rb \
+            spec/jobs/jrc_nico/analyze_job_spec.rb \
+            spec/jobs/jrc_nico/recovery_job_spec.rb \
+            spec/requests/jrc_nico_capacity_spec.rb \
+            spec/requests/jrc_nico_operations_spec.rb \
+            spec/requests/jrc_nico_runs_spec.rb \
+            spec/requests/jrc_nico_assistance_spec.rb \
+            spec/requests/jrc_nico_json_reliability_spec.rb \
+            spec/requests/jrc_nico_helpdesk_spec.rb \
+            spec/services/jrc_nico/helpdesk/controls_spec.rb \
+            spec/services/jrc_nico/helpdesk/policies_spec.rb \
+            spec/services/jrc_ai/account_provider_spec.rb \
+            spec/services/jrc_ai/conversation_sentiment_spec.rb \
+            spec/requests/captain_tasks_account_provider_spec.rb \
+            --format progress --format json --out /tmp/nico-capacity-native-rspec.json
+          python3 - <<'PY'
+          import json
+          result = json.load(open('/tmp/nico-capacity-native-rspec.json'))['summary']
+          print(result)
+          assert result['failure_count'] == 0 and result['pending_count'] == 0
+          PY
+      - name: Concorrencia em processo separado com fixtures commitadas
+        if: always()
+        run: |
+          bundle exec rspec spec/services/jrc_nico/reservation_concurrency_spec.rb spec/services/jrc_nico/legacy_reservation_concurrency_spec.rb --format progress --format json --out /tmp/nico-capacity-concurrency-rspec.json
+          python3 - <<'PY'
+          import json
+          result = json.load(open('/tmp/nico-capacity-concurrency-rspec.json'))['summary']
+          print(result)
+          assert result['failure_count'] == 0 and result['pending_count'] == 0
+          PY
+      - name: Diagnostico de preservacao na referencia F7 sem alterar o candidato
+        if: always()
+        run: |
+          git worktree add --detach /tmp/nico-capacity-reference ac0f8da801ede52772f25d5ef407de5d4d4b534a
+          export BUNDLE_GEMFILE="$GITHUB_WORKSPACE/Gemfile"
+          export POSTGRES_DATABASE=jrc_nico_reference_test
+          export SCHEMA=/tmp/nico-capacity-reference-schema.rb
+          cd /tmp/nico-capacity-reference
+          SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
+          bundle exec rails db:migrate
+          set +e
+          bundle exec rspec spec/services/jrc_nico/helpdesk/controls_spec.rb spec/requests/captain_tasks_account_provider_spec.rb --format progress --format json --out /tmp/nico-capacity-reference-rspec.json
+          reference_exit=$?
+          set -e
+          test "$reference_exit" -le 1
+          python3 - <<'PY'
+          import json
+          result = json.load(open('/tmp/nico-capacity-reference-rspec.json'))
+          print(result['summary'])
+          print('Reference failures:', [item['id'] for item in result['examples'] if item['status'] == 'failed'])
+          assert result['summary']['example_count'] == 10 and result['summary']['errors_outside_of_examples_count'] == 0
+          PY
+      - name: RuboCop - classificar base e delta sem desabilitar regras
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import collections, json, pathlib, subprocess
+          base = 'ac0f8da801ede52772f25d5ef407de5d4d4b534a'
+          files = subprocess.check_output(['git', 'diff', '--name-only', '--diff-filter=ACMR', base, 'HEAD', '--', '*.rb'], text=True).splitlines()
+          rows, blockers = [], []
+          for path in files:
+              previous = subprocess.run(['git', 'show', f'{base}:{path}'], capture_output=True, text=True)
+              reports = {}
+              for label, content in [('current', pathlib.Path(path).read_text()), ('baseline', previous.stdout if previous.returncode == 0 else None)]:
+                  if content is None:
+                      reports[label] = []
+                      continue
+                  result = subprocess.run(['bundle', 'exec', 'rubocop', '--stdin', path, '--format', 'json'], input=content, capture_output=True, text=True)
+                  if result.returncode not in (0, 1):
+                      raise RuntimeError(f'RuboCop could not inspect {path} ({label}, exit {result.returncode})')
+                  reports[label] = json.loads(result.stdout)['files'][0]['offenses']
+              baseline = collections.Counter((r['cop_name'], r['message']) for r in reports['baseline'])
+              new = []
+              for item in reports['current']:
+                  key = (item['cop_name'], item['message'])
+                  if baseline[key]:
+                      baseline[key] -= 1
+                  else:
+                      new.append(item)
+                      if item['severity'] in ('warning', 'error', 'fatal') or item['cop_name'].startswith(('Lint/', 'Security/')):
+                          blockers.append({'path': path, **item})
+              rows.append({'path': path, **reports, 'new': new})
+          report = {'base': base, 'files': rows, 'new_risk_offenses': blockers}
+          pathlib.Path('/tmp/nico-capacity-native-rubocop.json').write_text(json.dumps(report, indent=2))
+          print(json.dumps({'files': len(rows), 'baseline_offenses': sum(len(r['baseline']) for r in rows), 'current_offenses': sum(len(r['current']) for r in rows), 'new_offenses': sum(len(r['new']) for r in rows), 'new_risk_offenses': blockers}))
+          raise SystemExit(1 if blockers else 0)
+          PY
+      - name: Integridade final
+        if: always()
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git diff --exit-code
+          test -z "$(git ls-files --others --exclude-standard)"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nico-capacity-native-${{ github.sha }}
+          path: |
+            /tmp/nico-capacity-native-rspec.json
+            /tmp/nico-capacity-native-vitest.json
+            /tmp/nico-capacity-native-rubocop.json
+            /tmp/nico-capacity-native-schema.rb
+            /tmp/nico-capacity-concurrency-rspec.json
+            /tmp/nico-capacity-reference-rspec.json
+          retention-days: 14
