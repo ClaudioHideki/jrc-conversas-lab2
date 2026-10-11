@@ -37,7 +37,7 @@ class Api::V1::Accounts::ContactsController < Api::V1::Accounts::BaseController
       )
       contacts = contacts.or(normalized_phone_scope)
     end
-    @contacts = fetch_contacts_with_has_more(contacts)
+    @contacts = fetch_contacts_with_has_more(directory_contacts(contacts))
   end
 
   def import
@@ -62,7 +62,7 @@ class Api::V1::Accounts::ContactsController < Api::V1::Accounts::BaseController
   def active
     contacts = Current.account.contacts.where(id: ::OnlineStatusTracker
                   .get_available_contact_ids(Current.account.id))
-    @contacts = fetch_contacts(contacts)
+    @contacts = fetch_contacts(directory_contacts(contacts))
     @contacts_count = @contacts.total_count
   end
 
@@ -70,8 +70,8 @@ class Api::V1::Accounts::ContactsController < Api::V1::Accounts::BaseController
 
   def filter
     result = ::Contacts::FilterService.new(Current.account, Current.user, params.permit!).perform
-    contacts = result[:contacts]
-    @contacts_count = result[:count]
+    contacts = directory_contacts(result[:contacts])
+    @contacts_count = params[:directory_view].present? ? contacts.count : result[:count]
     @contacts = fetch_contacts(contacts)
   rescue CustomExceptions::CustomFilter::InvalidAttribute,
          CustomExceptions::CustomFilter::InvalidOperator,
@@ -132,7 +132,17 @@ class Api::V1::Accounts::ContactsController < Api::V1::Accounts::BaseController
     @resolved_contacts = Current.account.contacts.resolved_contacts(use_crm_v2: Current.account.feature_enabled?('crm_v2'))
 
     @resolved_contacts = @resolved_contacts.tagged_with(params[:labels], any: true) if params[:labels].present?
+    @resolved_contacts = directory_contacts(@resolved_contacts)
     @resolved_contacts
+  end
+
+  def directory_contacts(contacts)
+    return contacts if params[:directory_view].blank?
+
+    if params[:directory_view] != 'people'
+      authorize :directory, :access?, policy_class: JrcCustomers::DirectoryPolicy
+    end
+    JrcCustomers::ContactQuery.new(account: Current.account, scope: contacts, query: nil, view: params[:directory_view]).call
   end
 
   def normalized_phone_candidates(value)

@@ -51,6 +51,9 @@ vi.mock('../useQuickActionAccess', () => ({
     userId: { value: 7 },
   }),
 }));
+vi.mock('../GlobalCallPanel.vue', () => ({
+  default: { template: '<div data-phone-panel />' },
+}));
 vi.mock('dashboard/store', () => ({
   default: { getters: {}, commit: vi.fn(), dispatch: vi.fn() },
 }));
@@ -136,7 +139,8 @@ describe('Quick actions in the real authenticated route shell', () => {
       },
       {
         key: 'CALL',
-        to: { name: 'ramal_index', params: { accountId: 1 } },
+        command: 'call',
+        modes: { softphone: true, whatsapp: true },
         icon: 'i-lucide-phone-call',
         tone: 'teal',
       },
@@ -226,6 +230,8 @@ describe('Quick actions in the real authenticated route shell', () => {
   ])(
     'keeps one global rail and the same instance when navigating to %s',
     async path => {
+      await wrapper.get('button[aria-label="Nova ligação"]').trigger('click');
+      expect(wrapper.find('[data-phone-panel]').exists()).toBe(true);
       const rail = wrapper.get('[data-global-quick-actions]').element;
       await router.push(`/app/accounts/1${path}`);
       await flushPromises();
@@ -239,6 +245,7 @@ describe('Quick actions in the real authenticated route shell', () => {
         true
       );
       expect(wrapper.findAll('[data-nico-launcher]')).toHaveLength(1);
+      expect(wrapper.find('[data-phone-panel]').exists()).toBe(true);
       expect(
         wrapper.findComponent(GlobalQuickActions).find('[data-page]').exists()
       ).toBe(false);

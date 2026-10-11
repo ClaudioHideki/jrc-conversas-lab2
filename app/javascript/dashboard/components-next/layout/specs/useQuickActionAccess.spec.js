@@ -18,6 +18,8 @@ vi.mock('vue-router', () => ({
       [
         'contacts_dashboard_index',
         'ramal_index',
+        'whatsapp_calling_index',
+        'video_conference_index',
         'crm_leads',
         'crm_deals',
         'crm_activities',
@@ -107,6 +109,13 @@ describe('global quick action authorization', () => {
       'jrc_service_desk_new'
     );
     expect(api.cockpit).not.toHaveBeenCalled();
+    expect(
+      home.actions.value.find(item => item.key === 'CALL').modes.conference
+    ).toBe(true);
+    state.denied.push('video_conference_index');
+    expect(
+      home.actions.value.find(item => item.key === 'CALL').modes.conference
+    ).toBe(false);
   });
   it('removes CRM when its flag or user grant is missing', async () => {
     start();
@@ -123,7 +132,12 @@ describe('global quick action authorization', () => {
   });
   it('reuses route policy denials and requires an affirmative R2 create permission', () => {
     start();
-    state.denied.push('contacts_dashboard_index', 'ramal_index');
+    state.denied.push(
+      'contacts_dashboard_index',
+      'ramal_index',
+      'whatsapp_calling_index',
+      'video_conference_index'
+    );
     state.serviceDesk.context.units[0].permissions.create_ticket = false;
     expect(
       home.actions.value.some(item =>
@@ -132,15 +146,25 @@ describe('global quick action authorization', () => {
     ).toBe(false);
     state.serviceDesk.context.units = [];
     expect(home.actions.value.some(item => item.key === 'TICKET')).toBe(false);
+    state.denied.splice(state.denied.indexOf('whatsapp_calling_index'), 1);
+    expect(home.actions.value.find(item => item.key === 'CALL').modes).toEqual({
+      softphone: false,
+      whatsapp: true,
+      conference: false,
+    });
   });
   it('uses the newly selected account immediately without loading Home metrics', () => {
     start();
     state.serviceDesk.visible = false;
     state.route.params.accountId = '2';
     expect(home.actions.value.some(item => item.key === 'LEAD')).toBe(false);
-    expect(
-      home.actions.value.find(item => item.key === 'CALL').to.params.accountId
-    ).toBe(2);
+    expect(home.accountId.value).toBe(2);
+    expect(home.actions.value.find(item => item.key === 'CALL')).toMatchObject({
+      command: 'call',
+      modes: { softphone: true, whatsapp: true },
+    });
     expect(api.cockpit).not.toHaveBeenCalled();
+    state.route.params.accountId = '999';
+    expect(home.actions.value.some(item => item.key === 'CALL')).toBe(false);
   });
 });

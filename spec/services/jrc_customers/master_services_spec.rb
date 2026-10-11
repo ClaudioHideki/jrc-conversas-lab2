@@ -42,6 +42,46 @@ RSpec.describe 'Customer master service contracts' do
     create(:contact, account: foreign, email: 'foreign@example.test')
     expect(JrcCustomers::IdentityResolver.new(account: account).call(email: 'foreign@example.test')).to be_empty
   end
+  it 'finds account-wide duplicate candidates across primary and alternate identities without self-duplicates' do
+    first = create(:contact, account: account, email: 'shared@example.test')
+    second = create(:contact, account: account)
+    second.contact_points.create!(account: account, kind: 'corporate_email', value: 'SHARED@example.test')
+    first.contact_points.create!(account: account, kind: 'email', value: first.email)
+    alone = create(:contact, account: account, email: 'alone@example.test')
+    alone.contact_points.create!(account: account, kind: 'alternate_email', value: alone.email)
+    create(:contact, account: create(:account), email: first.email)
+    result = JrcCustomers::IdentityResolver.new(account: account).duplicates
+    expect(result.pluck(:id)).to match_array([first.id, second.id])
+    expect(Contact.where(id: [first.id, second.id]).count).to eq(2)
+  end
+  it 'groups telephone channels as one identity' do
+    first, second = 2.times.map { create(:contact, account: account) }
+    first.contact_points.create!(account: account, kind: 'phone', value: '+551133334444')
+    second.contact_points.create!(account: account, kind: 'whatsapp', value: '+55 11 3333-4444')
+    expect(JrcCustomers::IdentityResolver.new(account: account).duplicates.pluck(:id)).to match_array([first.id, second.id])
+  end
+  it 'does not mark an identity shared only with another tenant as duplicated' do
+    contact = create(:contact, account: account, email: 'tenant@example.test')
+    create(:contact, account: create(:account), email: contact.email)
+    expect(JrcCustomers::IdentityResolver.new(account: account).duplicates).to be_empty
+  end
+  it 'filters unassigned contacts by canonical company owner while preserving the supplied contact scope' do
+    without_company = create(:contact, account: account)
+    without_owner = create(:contact, account: account, company_id: company.id)
+    owned = account.master_companies.create!(name: 'Owned', owner_id: actor.id)
+    create(:contact, account: account, company_id: owned.id)
+    result = JrcCustomers::ContactQuery.new(account: account, scope: account.contacts, query: nil, view: 'unassigned').call
+    expect(result.pluck(:id)).to match_array([without_company.id, without_owner.id])
+    limited = JrcCustomers::ContactQuery.new(account: account, scope: account.contacts.where(id: without_owner.id), query: nil, view: 'unassigned').call
+    expect(limited.pluck(:id)).to eq([without_owner.id])
+  end
+  it 'rejects unsupported directory views and keeps canonical persons intact' do
+    contact = create(:contact, account: account, company_id: company.id)
+    result = JrcCustomers::ContactQuery.new(account: account, scope: account.contacts, query: nil, view: 'people').call
+    expect(result.pluck(:id)).to eq([contact.id])
+    expect { JrcCustomers::ContactQuery.new(account: account, scope: account.contacts, query: nil, view: 'invalid') }
+      .to raise_error(ActionController::BadRequest)
+  end
   it 'requires review instead of linking companies based only on similar names' do
     account.disable_features!('jrc_customer_master')
     company

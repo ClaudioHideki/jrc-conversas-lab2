@@ -1,5 +1,23 @@
 {
   "SOFTPHONE": {
+    "EXTENSION_OFF": "Ramal desligado",
+    "TABS": {
+      "PHONE": "Telefone",
+      "CONTACTS": "Contatos",
+      "HISTORY": "Histórico"
+    },
+    "TITLE": "Softphone",
+    "WHATSAPP": "WhatsApp",
+    "MINIMIZE": "Recolher telefone; manter a chamada conectada",
+    "EXTENSION": "Ramal {number}",
+    "DESTINATION": "Número de telefone ou ramal",
+    "LOADING": "Carregando seu ramal...",
+    "NOT_CONFIGURED": "Seu ramal ainda não foi configurado. Consulte o administrador.",
+    "OTHER_CALL_BUSY": "Encerre a chamada atual antes de iniciar outra.",
+    "ENABLE_EXTENSION": "Ligar ramal",
+    "REJECT": "Recusar",
+    "HOLD": "Espera",
+    "RESUME": "Retomar",
     "ENABLE_NOTIFICATIONS": "Ativar notificações de chamadas",
     "NOTIFICATIONS_DENIED": "As notificações de chamadas estão bloqueadas. Permita as notificações nas configurações do navegador.",
     "OPEN_IN_JRC": "Abrir no JRC Conversas"

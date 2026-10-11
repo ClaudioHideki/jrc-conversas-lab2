@@ -86,13 +86,18 @@ export function useQuickActionAccess() {
           },
         ]
       : []),
-    ...(routeAllowed('ramal_index')
+    ...(routeAllowed('ramal_index') || routeAllowed('whatsapp_calling_index')
       ? [
           {
             key: 'CALL',
             icon: 'i-lucide-phone-call',
             tone: 'teal',
-            to: destination('ramal_index'),
+            command: 'call',
+            modes: {
+              softphone: routeAllowed('ramal_index'),
+              whatsapp: routeAllowed('whatsapp_calling_index'),
+              conference: routeAllowed('video_conference_index'),
+            },
           },
         ]
       : []),

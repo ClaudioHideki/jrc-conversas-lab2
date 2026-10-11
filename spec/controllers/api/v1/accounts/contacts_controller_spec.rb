@@ -13,6 +13,56 @@ RSpec.describe 'Contacts API', type: :request do
     }
   end
 
+  describe 'native contact directory views' do
+    let(:admin) { create(:user, account: account, role: :administrator) }
+    before { account.enable_features!('jrc_customer_master') }
+
+    it 'requires Customer Master permission for enhanced views but preserves native people access' do
+      account.disable_features!('jrc_customer_master')
+      get "/api/v1/accounts/#{account.id}/contacts", params: { directory_view: 'duplicates' }, headers: admin.create_new_auth_token
+      expect(response).to have_http_status(:forbidden)
+      get "/api/v1/accounts/#{account.id}/contacts", params: { directory_view: 'people' }, headers: admin.create_new_auth_token
+      expect(response).to have_http_status(:success)
+    end
+
+    it 'filters and counts before pagination without including owned companies or other accounts' do
+      16.times { create(:contact, :with_email, account: account) }
+      owned = account.master_companies.create!(name: 'Owned', owner_id: admin.id)
+      create(:contact, :with_email, account: account, company_id: owned.id)
+      create(:contact, :with_email, account: create(:account))
+      get "/api/v1/accounts/#{account.id}/contacts", params: { directory_view: 'unassigned', page: 2 }, headers: admin.create_new_auth_token
+      expect(response).to have_http_status(:success)
+      expect(response.parsed_body['meta']['count']).to eq(16)
+      expect(response.parsed_body['payload'].size).to eq(1)
+      expect(response.parsed_body['payload'].pluck('id') - account.contacts.pluck(:id)).to be_empty
+    end
+
+    it 'preserves duplicate scope during native search and custom filtering' do
+      first = create(:contact, account: account, name: 'Directory Alice', email: 'directory@example.test')
+      second = create(:contact, :with_email, account: account, name: 'Directory Bob')
+      second.contact_points.create!(account: account, kind: 'email', value: first.email)
+      create(:contact, :with_email, account: account, name: 'Directory Unique')
+      get "/api/v1/accounts/#{account.id}/contacts/search", params: { directory_view: 'duplicates', q: 'Directory Alice' },
+          headers: admin.create_new_auth_token
+      expect(response).to have_http_status(:success)
+      expect(response.parsed_body['payload'].pluck('id')).to eq([first.id])
+      post "/api/v1/accounts/#{account.id}/contacts/filter?directory_view=duplicates", headers: admin.create_new_auth_token,
+           params: { payload: [{ attribute_key: 'name', filter_operator: 'contains', values: ['Directory'], query_operator: nil }] }, as: :json
+      expect(response).to have_http_status(:success)
+      expect(response.parsed_body['meta']['count']).to eq(2)
+      expect(response.parsed_body['payload'].pluck('id')).to match_array([first.id, second.id])
+    end
+
+    it 'rejects unsupported views and cross-account directory requests' do
+      get "/api/v1/accounts/#{account.id}/contacts", params: { directory_view: 'invalid' }, headers: admin.create_new_auth_token
+      expect(response).to have_http_status(:bad_request)
+      foreign = create(:account)
+      foreign.enable_features!('jrc_customer_master')
+      get "/api/v1/accounts/#{foreign.id}/contacts", params: { directory_view: 'duplicates' }, headers: admin.create_new_auth_token
+      expect(response).to have_http_status(:unauthorized)
+    end
+  end
+
   describe 'GET /api/v1/accounts/{account.id}/contacts' do
     context 'when it is an unauthenticated user' do
       it 'returns unauthorized' do

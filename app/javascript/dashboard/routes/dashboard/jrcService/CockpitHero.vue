@@ -13,7 +13,7 @@ const props = defineProps({
 });
 const { t, locale } = useI18n();
 const now = useNow({ interval: 1000 });
-const nicoImage = '/brand-assets/jrc-copilot-character.png';
+const nicoImage = '/brand-assets/jrc-copilot-character-transparent.png';
 const language = computed(() => locale.value.replace('_', '-'));
 const greeting = computed(() => {
   const hour = now.value.getHours();
@@ -109,10 +109,10 @@ const priorities = computed(
       </div>
       <div class="flex items-center justify-center gap-3">
         <div
-          class="relative max-w-xs rounded-2xl bg-white p-4 text-n-slate-12 shadow-sm"
+          class="relative max-w-xs rounded-2xl border border-white/20 bg-[#062f57]/60 p-4 text-white shadow-sm backdrop-blur-sm"
         >
           <strong class="text-sm">{{ t('JRC_HOME.COCKPIT.NICO') }}</strong>
-          <p class="mb-0 mt-2 text-sm leading-6">
+          <p class="mb-0 mt-2 text-sm leading-6 text-white/90">
             {{
               !ready
                 ? t(loading ? 'JRC_HOME.LOADING' : 'JRC_HOME.UNAVAILABLE')
@@ -125,7 +125,7 @@ const priorities = computed(
         <img
           :src="nicoImage"
           alt="NICO"
-          class="w-28 shrink-0 rounded-3xl object-contain shadow-lg sm:w-40 xl:w-44"
+          class="w-28 shrink-0 object-contain drop-shadow-lg sm:w-40 xl:w-44"
         />
       </div>
     </div>

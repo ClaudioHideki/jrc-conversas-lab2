@@ -3,6 +3,12 @@ import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
+import {
+  buildHelpdeskLabels,
+  buildHelpdeskText,
+  helpdeskFieldLabel,
+  helpdeskRowValue,
+} from './helpdeskLabels';
 import api from 'dashboard/api/jrcNicoHelpdesk';
 import HelpdeskPolicyForm from './HelpdeskPolicyForm.vue';
 import HelpdeskKpis from './HelpdeskKpis.vue';
@@ -11,11 +17,17 @@ import HelpdeskReportHistory from './HelpdeskReportHistory.vue';
 import HelpdeskGroupPreview from './HelpdeskGroupPreview.vue';
 import HelpdeskReportFilters from './HelpdeskReportFilters.vue';
 import { helpdeskRows, helpdeskValue } from './helpdeskPresentation';
-import { buildHelpdeskLabels } from './helpdeskLabels';
 
 const route = useRoute();
 const store = useStore();
-const { t } = useI18n();
+const { t, tm, rt } = useI18n();
+const text = buildHelpdeskText(
+  () => tm('JRC_NICO_HELPDESK.TECHNICAL'),
+  rt,
+  () => t('JRC_NICO_HELPDESK.NO_DATA')
+);
+const field = key => helpdeskFieldLabel(key, text);
+const rowValue = row => helpdeskRowValue(row, text);
 const label = computed(() => buildHelpdeskLabels(t));
 const emptyState = () => ({
   catalog: [],
@@ -272,7 +284,9 @@ onMounted(() => perform(refresh));
         :key="group.key"
         class="rounded-xl border border-n-weak p-4"
       >
-        <h2 class="font-semibold">{{ group.key }} {{ group.name }}</h2>
+        <h2 class="font-semibold">
+          {{ group.key }} {{ label('groups', group.key) }}
+        </h2>
         <p class="mt-2 text-sm">
           {{ label('catalog', group.status) }}
         </p>
@@ -290,7 +304,7 @@ onMounted(() => perform(refresh));
           </summary>
           <ul class="mt-2 list-inside list-disc">
             <li v-for="dependency in group.missing" :key="dependency">
-              {{ dependency }}
+              {{ text(dependency) }}
             </li>
           </ul>
         </details>
@@ -517,10 +531,10 @@ onMounted(() => perform(refresh));
                   class="mb-1"
                 >
                   <dt class="text-xs text-n-slate-11">
-                    {{ row.field }}
+                    {{ field(row.field) }}
                   </dt>
                   <dd>
-                    {{ row.value }}
+                    {{ rowValue(row) }}
                   </dd>
                 </div>
               </dl>
@@ -659,7 +673,7 @@ onMounted(() => perform(refresh));
         class="mb-4 rounded-lg bg-n-alpha-1 p-4"
       >
         <h3 class="font-medium">
-          {{ approval.tool }}
+          {{ text(approval.tool) }}
           {{ label('states', approval.state) }}
         </h3>
         <dl class="mt-3 grid gap-3 text-sm md:grid-cols-3">
@@ -696,10 +710,10 @@ onMounted(() => perform(refresh));
               class="border-t border-n-weak"
             >
               <th class="p-2 font-medium">
-                {{ row.field }}
+                {{ field(row.field) }}
               </th>
               <td class="whitespace-pre-wrap p-2">
-                {{ row.value }}
+                {{ rowValue(row) }}
               </td>
             </tr>
           </tbody>
@@ -777,10 +791,10 @@ onMounted(() => perform(refresh));
             class="mt-2 text-sm"
           >
             <dt class="text-n-slate-11">
-              {{ row.field }}
+              {{ field(row.field) }}
             </dt>
             <dd>
-              {{ row.value }}
+              {{ rowValue(row) }}
             </dd>
           </div>
         </dl>

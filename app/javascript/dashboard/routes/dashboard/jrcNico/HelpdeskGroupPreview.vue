@@ -1,6 +1,12 @@
 <script setup>
 import { ref, computed, watch, onBeforeUnmount } from 'vue';
 import { useI18n } from 'vue-i18n';
+import {
+  buildHelpdeskLabels,
+  buildHelpdeskText,
+  helpdeskFieldLabel,
+  helpdeskRowValue,
+} from './helpdeskLabels';
 import { RouterLink } from 'vue-router';
 import api from 'dashboard/api/jrcNicoHelpdesk';
 import HelpdeskGroupFields from './HelpdeskGroupFields.vue';
@@ -18,7 +24,15 @@ const props = defineProps({
   contextKey: { type: String, required: true },
 });
 const emit = defineEmits(['prepared', 'revoked']);
-const { t } = useI18n();
+const { t, tm, rt } = useI18n();
+const groupLabel = computed(() => buildHelpdeskLabels(t));
+const text = buildHelpdeskText(
+  () => tm('JRC_NICO_HELPDESK.TECHNICAL'),
+  rt,
+  () => t('JRC_NICO_HELPDESK.NO_DATA')
+);
+const field = key => helpdeskFieldLabel(key, text);
+const rowValue = row => helpdeskRowValue(row, text);
 const groupKey = ref('');
 const input = ref({
   query: '',
@@ -241,7 +255,7 @@ onBeforeUnmount(clear);
           :key="group.key"
           :value="group.key"
         >
-          {{ group.key }} {{ group.name }}
+          {{ group.key }} {{ groupLabel('groups', group.key) }}
         </option>
       </select></label
     >
@@ -452,11 +466,11 @@ onBeforeUnmount(clear);
       </p>
       <p v-if="result.missing.length">
         {{ t('JRC_NICO_HELPDESK.DEPENDENCIES') }}
-        {{ result.missing.join(', ') }}
+        {{ result.missing.map(text).join(', ') }}
       </p>
       <p v-if="result.required_fields.length">
         {{ t('JRC_NICO_HELPDESK.GROUP_REQUIRED') }}
-        {{ result.required_fields.join(', ') }}
+        {{ result.required_fields.map(field).join(', ') }}
       </p>
       <dl>
         <div
@@ -464,8 +478,8 @@ onBeforeUnmount(clear);
           :key="row.field"
           class="mt-1 text-xs"
         >
-          <dt>{{ row.field }}</dt>
-          <dd>{{ row.value }}</dd>
+          <dt>{{ field(row.field) }}</dt>
+          <dd>{{ rowValue(row) }}</dd>
         </div>
       </dl>
       <dl v-if="result.broker">
@@ -474,8 +488,8 @@ onBeforeUnmount(clear);
           :key="row.field"
           class="mt-1 break-all text-xs"
         >
-          <dt>{{ row.field }}</dt>
-          <dd>{{ row.value }}</dd>
+          <dt>{{ field(row.field) }}</dt>
+          <dd>{{ rowValue(row) }}</dd>
         </div>
       </dl>
       <article
@@ -483,19 +497,19 @@ onBeforeUnmount(clear);
         :key="`${action.tool}:${index}`"
         class="rounded border border-n-weak p-3"
       >
-        <h4 class="font-medium">{{ action.tool }}</h4>
+        <h4 class="font-medium">{{ text(action.tool) }}</h4>
         <dl>
           <div
             v-for="row in rows(action.arguments)"
             :key="row.field"
             class="mt-1 text-xs"
           >
-            <dt>{{ row.field }}</dt>
-            <dd>{{ row.value }}</dd>
+            <dt>{{ field(row.field) }}</dt>
+            <dd>{{ rowValue(row) }}</dd>
           </div>
         </dl>
         <p v-if="action.blocked_reason" class="text-xs">
-          {{ action.blocked_reason }}
+          {{ text(action.blocked_reason) }}
         </p>
         <button
           :disabled="

@@ -44,6 +44,7 @@ describe('JRC pt-BR catalogs and display labels', () => {
   it.each([
     'CRM',
     'JRC_NICO',
+    'JRC_NICO_HELPDESK',
     'JRC_SERVICE_DESK',
     'CALLS_PAGE',
     'SOFTPHONE',

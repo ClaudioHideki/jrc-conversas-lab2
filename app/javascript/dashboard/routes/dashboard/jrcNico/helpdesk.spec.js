@@ -29,7 +29,9 @@ vi.mock('vuex', async original => ({
   ...(await original()),
   useStore: () => mocks.store,
 }));
-vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }));
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({ t: key => key, tm: () => ({}), rt: value => value }),
+}));
 vi.mock('dashboard/api/jrcNicoHelpdesk', () => ({ default: mocks.api }));
 
 const response = account => ({

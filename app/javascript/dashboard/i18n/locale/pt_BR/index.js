@@ -2,6 +2,7 @@ import jrcHome from './jrcHome.json';
 import jrcBroker from './jrcBroker.json';
 import calls from './calls.json';
 import jrcNico from './jrcNico.json';
+import jrcNicoHelpdesk from './jrcNicoHelpdesk.json';
 import crm from './crm.json';
 import jrcServiceDesk from './jrcServiceDesk.json';
 import advancedFilters from './advancedFilters.json';
@@ -56,6 +57,7 @@ export default {
   ...jrcBroker,
   ...calls,
   ...jrcNico,
+  ...jrcNicoHelpdesk,
   ...crm,
   ...jrcServiceDesk,
   ...advancedFilters,

@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { buildHelpdeskText } from './helpdeskLabels';
 import HelpdeskDailyReport from './HelpdeskDailyReport.vue';
 import { helpdeskDate, helpdeskValue } from './helpdeskPresentation';
 defineProps({
@@ -10,7 +11,12 @@ defineProps({
   busy: Boolean,
 });
 defineEmits(['select', 'next']);
-const { t } = useI18n();
+const { t, tm, rt } = useI18n();
+const text = buildHelpdeskText(
+  () => tm('JRC_NICO_HELPDESK.TECHNICAL'),
+  rt,
+  () => t('JRC_NICO_HELPDESK.NO_DATA')
+);
 const value = item => helpdeskValue(item, t('JRC_NICO_HELPDESK.NO_DATA'));
 const date = (item, zone) =>
   helpdeskDate(item, t('JRC_NICO_HELPDESK.NO_DATA'), zone);
@@ -74,7 +80,7 @@ const receiptStates = computed(() => ({
             <td class="p-2">{{ receipt.channel }}</td>
             <td class="p-2">
               {{ receiptStates[receipt.state] || value(receipt.state) }}
-              <p>{{ value(receipt.reason) }}</p>
+              <p>{{ text(receipt.reason) }}</p>
             </td>
             <td class="p-2">
               {{

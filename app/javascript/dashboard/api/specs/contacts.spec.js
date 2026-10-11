@@ -107,6 +107,28 @@ describe('#ContactsAPI', () => {
       );
     });
 
+    it('preserves the directory view across native list, search, active and filter requests', () => {
+      contactAPI.get(2, '-name', '', 'unassigned');
+      expect(axiosMock.get).toHaveBeenCalledWith(
+        '/api/v1/contacts?include_contact_inboxes=false&page=2&sort=-name&directory_view=unassigned'
+      );
+      contactAPI.search('Ana', 2, 'name', '', { directoryView: 'duplicates' });
+      expect(axiosMock.get).toHaveBeenCalledWith(
+        '/api/v1/contacts/search?include_contact_inboxes=false&page=2&sort=name&q=Ana&directory_view=duplicates',
+        { signal: undefined }
+      );
+      contactAPI.active(2, 'name', 'people');
+      expect(axiosMock.get).toHaveBeenCalledWith(
+        '/api/v1/contacts/active?include_contact_inboxes=false&page=2&sort=name&directory_view=people'
+      );
+      const query = { payload: [] };
+      contactAPI.filter(2, 'name', query, 'duplicates');
+      expect(axiosMock.post).toHaveBeenCalledWith(
+        '/api/v1/contacts/filter?include_contact_inboxes=false&page=2&sort=name&directory_view=duplicates',
+        query
+      );
+    });
+
     it('#filter', () => {
       const queryPayload = {
         payload: [

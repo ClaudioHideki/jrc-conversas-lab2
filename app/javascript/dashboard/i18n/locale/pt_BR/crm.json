@@ -112,7 +112,22 @@
       "PREVIOUS": "Anterior",
       "NEXT": "Próxima",
       "RESTRICTED": "Lead vinculado — solicite acesso ao administrador",
-      "REFRESH_ERROR": "Lead salvo. Não foi possível atualizar o contato; atualize a lista para consultar o vínculo."
+      "REFRESH_ERROR": "Lead salvo. Não foi possível atualizar o contato; atualize a lista para consultar o vínculo.",
+      "VIEWS": {
+        "all": "Todos",
+        "people": "Pessoas",
+        "companies": "Empresas",
+        "groups": "Grupos e listas",
+        "unassigned": "Sem responsável",
+        "duplicates": "Duplicados"
+      },
+      "VIEW_HINTS": {
+        "all": "Contatos nativos. Empresas e grupos usam os cadastros existentes do Cadastro Mestre.",
+        "people": "Pessoas usam os contatos existentes, incluindo pessoas vinculadas a empresas.",
+        "unassigned": "Contatos sem empresa ou cuja empresa no Cadastro Mestre não possui responsável.",
+        "duplicates": "Possíveis duplicados compartilham e-mail, telefone ou ramal nesta conta. Nenhum registro é mesclado automaticamente."
+      },
+      "MASTER_REQUIRED": "Habilite o Cadastro Mestre e conceda acesso aos contatos para usar esta opção."
     },
     "ACTIVITY_FILTERS": {
       "OPEN": "Em aberto",

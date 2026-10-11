@@ -1,13 +1,22 @@
 /* global axios */
 import ApiClient from './ApiClient';
 
-export const buildContactParams = (page, sortAttr, label, search) => {
+export const buildContactParams = (
+  page,
+  sortAttr,
+  label,
+  search,
+  directoryView
+) => {
   let params = `include_contact_inboxes=false&page=${page}&sort=${sortAttr}`;
   if (search) {
     params = `${params}&q=${search}`;
   }
   if (label) {
     params = `${params}&labels[]=${label}`;
+  }
+  if (directoryView) {
+    params = `${params}&directory_view=${encodeURIComponent(directoryView)}`;
   }
   return params;
 };
@@ -17,12 +26,13 @@ class ContactAPI extends ApiClient {
     super('contacts', { accountScoped: true });
   }
 
-  get(page, sortAttr = 'name', label = '') {
+  get(page, sortAttr = 'name', label = '', directoryView = '') {
     let requestURL = `${this.url}?${buildContactParams(
       page,
       sortAttr,
       label,
-      ''
+      '',
+      directoryView
     )}`;
     return axios.get(requestURL);
   }
@@ -70,19 +80,20 @@ class ContactAPI extends ApiClient {
       page,
       sortAttr,
       label,
-      search
+      search,
+      options.directoryView
     )}`;
     return axios.get(requestURL, { signal: options.signal });
   }
 
-  active(page = 1, sortAttr = 'name') {
-    let requestURL = `${this.url}/active?${buildContactParams(page, sortAttr)}`;
+  active(page = 1, sortAttr = 'name', directoryView = '') {
+    let requestURL = `${this.url}/active?${buildContactParams(page, sortAttr, '', '', directoryView)}`;
     return axios.get(requestURL);
   }
 
   // eslint-disable-next-line default-param-last
-  filter(page = 1, sortAttr = 'name', queryPayload) {
-    let requestURL = `${this.url}/filter?${buildContactParams(page, sortAttr)}`;
+  filter(page = 1, sortAttr = 'name', queryPayload, directoryView = '') {
+    let requestURL = `${this.url}/filter?${buildContactParams(page, sortAttr, '', '', directoryView)}`;
     return axios.post(requestURL, queryPayload);
   }
 

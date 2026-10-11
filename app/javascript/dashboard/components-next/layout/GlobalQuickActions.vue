@@ -15,6 +15,7 @@ import JrcCopilotLauncher from 'dashboard/components-next/jrcCopilot/JrcCopilotL
 import CreateNewContactDialog from 'dashboard/components-next/Contacts/ContactsForm/CreateNewContactDialog.vue';
 import ConversationQuickActions from 'dashboard/components-next/Conversation/ConversationHome/ConversationQuickActions.vue';
 import { useQuickActionAccess } from './useQuickActionAccess';
+import GlobalCallPanel from './GlobalCallPanel.vue';
 
 defineProps({ callActive: { type: Boolean, default: false } });
 const { t } = useI18n();
@@ -26,6 +27,11 @@ const { openQuick } = useJrcCopilot();
 const expanded = ref(false);
 const toggle = ref(null);
 const contactDialog = ref(null);
+const phoneOpen = ref(false);
+const phoneTrigger = ref(null);
+const callAction = computed(() =>
+  actions.value.find(action => action.key === 'CALL')
+);
 const canCreateContact = computed(() =>
   actions.value.some(action => action.key === 'CONTACT')
 );
@@ -33,6 +39,16 @@ const contactDialogKey = computed(() => `${accountId.value}:${userId.value}`);
 watch([() => route.fullPath, contactDialogKey], () => {
   expanded.value = false;
 });
+watch(contactDialogKey, () => {
+  phoneOpen.value = false;
+});
+watch(callAction, action => {
+  if (!action) phoneOpen.value = false;
+});
+const closePhone = () => {
+  phoneOpen.value = false;
+  phoneTrigger.value?.focus({ preventScroll: true });
+};
 const openNico = () => {
   expanded.value = false;
   openQuick();
@@ -48,7 +64,10 @@ const activate = async key => {
   expanded.value = false;
   if (action.command === 'contact') contactDialog.value?.open();
   else if (action.command === 'nico') openNico();
-  else {
+  else if (action.command === 'call') {
+    phoneTrigger.value = document.activeElement;
+    phoneOpen.value = true;
+  } else {
     const alreadyOnTarget = route.name === action.to.name;
     const identity = contactDialogKey.value;
     const failure = await router.push(action.to);
@@ -115,6 +134,14 @@ useEventBus(quickActionCommand).on(request => {
       :key="contactDialogKey"
       ref="contactDialog"
       @create="createContact"
+    />
+    <GlobalCallPanel
+      v-if="phoneOpen && callAction"
+      :key="contactDialogKey"
+      :allow-softphone="callAction.modes.softphone"
+      :allow-whatsapp="callAction.modes.whatsapp"
+      :allow-conference="callAction.modes.conference"
+      @close="closePhone"
     />
   </aside>
 </template>

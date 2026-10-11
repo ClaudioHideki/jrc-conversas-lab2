@@ -1,6 +1,7 @@
 class JrcCustomers::ContactQuery
-  def initialize(account:, scope:, query:)
+  def initialize(account:, scope:, query:, view: nil)
     @account, @scope, @term = account, scope, query.to_s.strip.first(200)
+    @scope = directory_scope(view)
   end
 
   def call
@@ -16,5 +17,21 @@ class JrcCustomers::ContactQuery
       matched = matched.or(@scope.where("regexp_replace(COALESCE(contacts.phone_number, ''), '[^0-9]', '', 'g') LIKE :q OR regexp_replace(COALESCE(contacts.identifier, ''), '[^0-9]', '', 'g') LIKE :q", q: "%#{digits}%"))
     end
     matched
+  end
+
+  private
+
+  def directory_scope(view)
+    case view
+    when nil, '', 'people'
+      @scope
+    when 'unassigned'
+      companies = @account.master_companies.where(owner_id: nil).select(:id)
+      @scope.where(company_id: nil).or(@scope.where(company_id: companies))
+    when 'duplicates'
+      @scope.where(id: JrcCustomers::IdentityResolver.new(account: @account).duplicates.select(:id))
+    else
+      raise ActionController::BadRequest, 'Invalid contact directory view'
+    end
   end
 end

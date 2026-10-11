@@ -1,5 +1,23 @@
 {
   "SOFTPHONE": {
+    "EXTENSION_OFF": "Extension off",
+    "TABS": {
+      "PHONE": "Phone",
+      "CONTACTS": "Contacts",
+      "HISTORY": "History"
+    },
+    "TITLE": "Softphone",
+    "WHATSAPP": "WhatsApp",
+    "MINIMIZE": "Minimize phone; keep the call connected",
+    "EXTENSION": "Extension {number}",
+    "DESTINATION": "Phone number or extension",
+    "LOADING": "Loading your extension...",
+    "NOT_CONFIGURED": "Your extension has not been configured yet. Contact your administrator.",
+    "OTHER_CALL_BUSY": "Finish the current call before starting another.",
+    "ENABLE_EXTENSION": "Enable extension",
+    "REJECT": "Reject",
+    "HOLD": "Hold",
+    "RESUME": "Resume",
     "ENABLE_NOTIFICATIONS": "Enable call notifications",
     "NOTIFICATIONS_DENIED": "Call notifications are blocked. Allow notifications in your browser settings.",
     "OPEN_IN_JRC": "Open in JRC Conversas"

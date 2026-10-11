@@ -1,6 +1,11 @@
 <script setup>
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import {
+  buildHelpdeskText,
+  helpdeskFieldLabel,
+  helpdeskRowValue,
+} from './helpdeskLabels';
 import HelpdeskKpis from './HelpdeskKpis.vue';
 import {
   helpdeskDate,
@@ -11,7 +16,14 @@ const props = defineProps({
   report: { type: Object, required: true },
   options: { type: Object, default: () => ({}) },
 });
-const { t } = useI18n();
+const { t, tm, rt } = useI18n();
+const text = buildHelpdeskText(
+  () => tm('JRC_NICO_HELPDESK.TECHNICAL'),
+  rt,
+  () => t('JRC_NICO_HELPDESK.NO_DATA')
+);
+const field = key => helpdeskFieldLabel(key, text);
+const rowValue = row => helpdeskRowValue(row, text);
 const value = item => helpdeskValue(item, t('JRC_NICO_HELPDESK.NO_DATA'));
 const date = item =>
   helpdeskDate(item, t('JRC_NICO_HELPDESK.NO_DATA'), props.report.timezone);
@@ -142,8 +154,8 @@ const hours = seconds =>
       <summary>{{ t('JRC_NICO_HELPDESK.EVIDENCE') }}</summary>
       <dl>
         <div v-for="row in rows" :key="row.field" class="mt-2">
-          <dt>{{ row.field }}</dt>
-          <dd>{{ row.value }}</dd>
+          <dt>{{ field(row.field) }}</dt>
+          <dd>{{ rowValue(row) }}</dd>
         </div>
       </dl>
     </details>

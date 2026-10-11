@@ -1,9 +1,15 @@
 <script setup>
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { buildHelpdeskText } from './helpdeskLabels';
 import { helpdeskMetricValue, helpdeskValue } from './helpdeskPresentation';
 const props = defineProps({ metric: { type: Object, required: true } });
-const { t } = useI18n();
+const { t, tm, rt } = useI18n();
+const text = buildHelpdeskText(
+  () => tm('JRC_NICO_HELPDESK.TECHNICAL'),
+  rt,
+  () => t('JRC_NICO_HELPDESK.NO_DATA')
+);
 const evidence = computed(() => props.metric.evidence || {});
 const value = item => helpdeskValue(item, t('JRC_NICO_HELPDESK.NO_DATA'));
 const coverageLabels = computed(() => ({
@@ -53,7 +59,7 @@ const observationLabels = computed(() => ({
         {{ observationLabels[observation.key] || observation.key }}
       </h3>
       <p>
-        {{ t('JRC_NICO_HELPDESK.TIME_BASIS') }} {{ value(observation.basis) }}
+        {{ t('JRC_NICO_HELPDESK.TIME_BASIS') }} {{ text(observation.basis) }}
       </p>
       <p>
         {{ t('JRC_NICO_HELPDESK.NUMERATOR') }}

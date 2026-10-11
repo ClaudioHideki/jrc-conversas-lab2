@@ -19,6 +19,7 @@ import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import BulkActionsAPI from 'dashboard/api/bulkActions';
 import ContactLeadAction from '../components/ContactLeadAction.vue';
 import { FEATURE_FLAGS } from 'dashboard/featureFlags';
+import { useCustomerMaster } from '../../jrcCustomers/useCustomerMaster';
 
 const DEFAULT_SORT_FIELD = 'last_activity_at';
 const DEBOUNCE_DELAY = 300;
@@ -27,6 +28,7 @@ const store = useStore();
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
+const { canAccess: canUseCustomerMaster } = useCustomerMaster();
 
 const { updateUISettings, uiSettings } = useUISettings();
 
@@ -87,10 +89,45 @@ const bulkDeleteDialogRef = ref(null);
 const selectedCount = computed(() => selectedContactIds.value.length);
 const crmSelectedContact = ref();
 const contactHeaderRef = ref(null);
-const relationshipTab = ref('Todos');
-const relationshipTabs = ['Todos', 'Pessoas', 'Empresas', 'Grupos e listas', 'Sem responsável', 'Duplicados'];
+const relationshipTabs = [
+  'all',
+  'people',
+  'companies',
+  'groups',
+  'unassigned',
+  'duplicates',
+];
+const relationshipTab = computed(() => {
+  const view = route.query?.directory_view;
+  if (view === 'people') return view;
+  if (canUseCustomerMaster.value && ['unassigned', 'duplicates'].includes(view))
+    return view;
+  return 'all';
+});
+const relationshipLabels = computed(() => ({
+  all: t('CRM.CONTACT_LEAD.VIEWS.all'),
+  people: t('CRM.CONTACT_LEAD.VIEWS.people'),
+  companies: t('CRM.CONTACT_LEAD.VIEWS.companies'),
+  groups: t('CRM.CONTACT_LEAD.VIEWS.groups'),
+  unassigned: t('CRM.CONTACT_LEAD.VIEWS.unassigned'),
+  duplicates: t('CRM.CONTACT_LEAD.VIEWS.duplicates'),
+}));
+const relationshipHint = computed(
+  () =>
+    ({
+      all: t('CRM.CONTACT_LEAD.VIEW_HINTS.all'),
+      people: t('CRM.CONTACT_LEAD.VIEW_HINTS.people'),
+      unassigned: t('CRM.CONTACT_LEAD.VIEW_HINTS.unassigned'),
+      duplicates: t('CRM.CONTACT_LEAD.VIEW_HINTS.duplicates'),
+    })[relationshipTab.value]
+);
+const tabDisabled = tab =>
+  isFetchingList.value ||
+  (!['all', 'people'].includes(tab) && !canUseCustomerMaster.value);
 
-const totalContactsMetric = computed(() => Number(totalItems.value || contacts.value.length || 0));
+const totalContactsMetric = computed(() =>
+  Number(totalItems.value || contacts.value.length || 0)
+);
 
 const selectedRelationshipContact = computed(() =>
   crmSelectedContact.value === undefined
@@ -98,11 +135,16 @@ const selectedRelationshipContact = computed(() =>
     : crmSelectedContact.value
 );
 
-const contactPhone = contact => contact?.phoneNumber || contact?.phone_number || '—';
+const contactPhone = contact =>
+  contact?.phoneNumber || contact?.phone_number || '—';
 const contactCompany = contact =>
-  contact?.company?.name || contact?.companyName || contact?.additionalAttributes?.company_name || '—';
+  contact?.company?.name ||
+  contact?.companyName ||
+  contact?.additionalAttributes?.company_name ||
+  '—';
 const contactStatus = contact => {
-  const availability = contact?.availabilityStatus || contact?.availability_status;
+  const availability =
+    contact?.availabilityStatus || contact?.availability_status;
   if (availability === 'online') return t('CRM.CONTACT_LEAD.ONLINE');
   if (availability === 'offline') return t('CRM.CONTACT_LEAD.OFFLINE');
   return t('CRM.CONTACT_LEAD.UNKNOWN');
@@ -127,7 +169,11 @@ const selectRelationshipContact = contact => {
 
 const openSelectedContact = async contact => {
   if (!contact?.id) return;
-  await router.push({ name: 'contacts_edit', params: { accountId: route.params.accountId, contactId: contact.id }, query: route.query });
+  await router.push({
+    name: 'contacts_edit',
+    params: { accountId: route.params.accountId, contactId: contact.id },
+    query: route.query,
+  });
 };
 
 const openWhatsappCalling = async contact => {
@@ -259,7 +305,28 @@ const getCommonFetchParams = (page = 1) => ({
   page,
   sortAttr: buildSortAttr(),
   label: activeLabel.value,
+  ...(relationshipTab.value !== 'all'
+    ? { directoryView: relationshipTab.value }
+    : {}),
 });
+
+const selectRelationshipTab = async tab => {
+  if (tabDisabled(tab) || tab === relationshipTab.value) return;
+  if (['companies', 'groups'].includes(tab)) {
+    await router.push({
+      name: `jrc_customer_${tab}`,
+      params: { accountId: route.params.accountId },
+    });
+    return;
+  }
+  clearSelection();
+  crmSelectedContact.value = undefined;
+  searchPageNumber.value = 1;
+  const query = { ...route.query, page: '1' };
+  if (tab === 'all') delete query.directory_view;
+  else query.directory_view = tab;
+  await router.replace({ query });
+};
 
 const fetchContacts = async (page = 1, options = {}) => {
   const { clearSelection: shouldClearSelection = true } = options;
@@ -298,8 +365,7 @@ const fetchActiveContacts = async (page = 1, options = {}) => {
 
   await store.dispatch('contacts/clearContactFilters');
   await store.dispatch('contacts/active', {
-    page,
-    sortAttr: buildSortAttr(),
+    ...getCommonFetchParams(page),
   });
   updatePageParam(page);
 };
@@ -516,7 +582,7 @@ watch(
 );
 
 watch(
-  [activeLabel, activeSegment, isActiveView],
+  [activeLabel, activeSegment, isActiveView, relationshipTab],
   () => {
     fetchContactsBasedOnContext(pageNumber.value);
   },
@@ -611,11 +677,30 @@ onMounted(async () => {
       <main class="min-w-0 overflow-hidden rounded-2xl border border-n-weak bg-n-solid-2 shadow-sm">
         <div class="border-b border-n-weak px-4 pt-3">
           <div class="flex gap-1 overflow-x-auto">
-            <button v-for="tab in relationshipTabs" :key="tab" type="button" :disabled="tab !== 'Todos'" :title="tab !== 'Todos' ? t('CRM.CONTACT_LEAD.UNAVAILABLE_ACTION') : undefined" class="whitespace-nowrap border-b-2 px-3 py-3 text-sm font-medium disabled:opacity-100 disabled:text-n-slate-11 disabled:cursor-not-allowed" :class="relationshipTab === tab ? 'border-blue-500 text-n-blue-11' : 'border-transparent text-n-slate-11'" @click="fetchContacts()">
-              {{ tab }}
+            <button
+              v-for="tab in relationshipTabs"
+              :key="tab"
+              type="button"
+              :disabled="tabDisabled(tab)"
+              :title="
+                tabDisabled(tab) && !isFetchingList
+                  ? t('CRM.CONTACT_LEAD.MASTER_REQUIRED')
+                  : undefined
+              "
+              :aria-pressed="relationshipTab === tab"
+              :data-contact-view="tab"
+              class="whitespace-nowrap border-b-2 px-3 py-3 text-sm font-medium disabled:opacity-60 disabled:cursor-not-allowed"
+              :class="
+                relationshipTab === tab
+                  ? 'border-blue-500 text-n-blue-11'
+                  : 'border-transparent text-n-slate-11'
+              "
+              @click="selectRelationshipTab(tab)"
+            >
+              {{ relationshipLabels[tab] }}
             </button>
           </div>
-          <p class="mt-2 text-xs text-n-slate-11">{{ t('CRM.CONTACT_LEAD.UNAVAILABLE_VIEWS') }}</p>
+          <p class="mt-2 text-xs text-n-slate-11">{{ relationshipHint }}</p>
         </div>
 
         <ContactsActiveFiltersPreview

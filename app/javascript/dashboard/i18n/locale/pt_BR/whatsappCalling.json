@@ -55,6 +55,20 @@
       "CHECK_ACTION": "Verificar permissão novamente",
       "REQUEST_ACTION": "Solicitar permissão"
     },
+    "SIDEBAR": {
+      "TITLE": "WhatsApp Calling",
+      "GENERAL_DIALER": "Discar pelo WhatsApp",
+      "NUMBER_HELP": "Use o telefone do contato ou digite um número com DDI.",
+      "AVAILABLE": "Disponível",
+      "NOT_CONFIGURED": "Ative as chamadas do WhatsApp nas configurações.",
+      "ENTER_NUMBER": "Digite um número para fazer a ligação.",
+      "CHECKING_PERMISSION": "Verificando autorização para ligar...",
+      "KEYPAD": "Teclado",
+      "HIDE_KEYPAD": "Ocultar teclado",
+      "ANSWER": "Atender",
+      "BACKSPACE": "Apagar último dígito",
+      "CLEAR": "Limpar"
+    },
     "HISTORY": {
       "TITLE": "Histórico de chamadas",
       "TOTAL": "Total de chamadas",

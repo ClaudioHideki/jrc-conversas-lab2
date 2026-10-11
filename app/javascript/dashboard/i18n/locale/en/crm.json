@@ -112,7 +112,22 @@
       "PREVIOUS": "Anterior",
       "NEXT": "Próxima",
       "RESTRICTED": "Lead vinculado — solicite acesso ao administrador",
-      "REFRESH_ERROR": "Lead salvo. Não foi possível atualizar o contato; atualize a lista para consultar o vínculo."
+      "REFRESH_ERROR": "Lead salvo. Não foi possível atualizar o contato; atualize a lista para consultar o vínculo.",
+      "VIEWS": {
+        "all": "All",
+        "people": "People",
+        "companies": "Companies",
+        "groups": "Groups and lists",
+        "unassigned": "Unassigned",
+        "duplicates": "Duplicates"
+      },
+      "VIEW_HINTS": {
+        "all": "Native contacts. Companies and groups use the existing Customer Master directories.",
+        "people": "People use the existing contact records, including people linked to companies.",
+        "unassigned": "Contacts without a company or whose Customer Master company has no assigned owner.",
+        "duplicates": "Possible duplicates share an email, phone or extension within this account. Records are never merged automatically."
+      },
+      "MASTER_REQUIRED": "Enable Customer Master and grant contact access to use this view."
     },
     "ACTIVITY_FILTERS": {
       "OPEN": "Em aberto",

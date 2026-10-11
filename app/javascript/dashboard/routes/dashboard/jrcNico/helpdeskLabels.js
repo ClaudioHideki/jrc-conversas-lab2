@@ -8,6 +8,19 @@ export const buildHelpdeskLabels = t => {
         'JRC_NICO_HELPDESK.CATALOG_STATES.blocked_dependency'
       ),
     },
+    groups: {
+      A1: t('JRC_NICO_HELPDESK.GROUP_NAMES.A1'),
+      A2: t('JRC_NICO_HELPDESK.GROUP_NAMES.A2'),
+      A3: t('JRC_NICO_HELPDESK.GROUP_NAMES.A3'),
+      A4: t('JRC_NICO_HELPDESK.GROUP_NAMES.A4'),
+      B1: t('JRC_NICO_HELPDESK.GROUP_NAMES.B1'),
+      B2: t('JRC_NICO_HELPDESK.GROUP_NAMES.B2'),
+      C1: t('JRC_NICO_HELPDESK.GROUP_NAMES.C1'),
+      C2: t('JRC_NICO_HELPDESK.GROUP_NAMES.C2'),
+      D1: t('JRC_NICO_HELPDESK.GROUP_NAMES.D1'),
+      D2: t('JRC_NICO_HELPDESK.GROUP_NAMES.D2'),
+      E: t('JRC_NICO_HELPDESK.GROUP_NAMES.E'),
+    },
     states: {
       draft: t('JRC_NICO_HELPDESK.STATES.draft'),
       published: t('JRC_NICO_HELPDESK.STATES.published'),
@@ -94,4 +107,47 @@ export const buildHelpdeskLabels = t => {
   const noData = t('JRC_NICO_HELPDESK.NO_DATA');
   return (group, key) =>
     Object.hasOwn(groups[group], key) ? groups[group][key] : noData;
+};
+
+export const buildHelpdeskText = (getMessages, render, noData) => item => {
+  if (item === null || item === undefined) return noData();
+  const value = String(item);
+  const key = value.replaceAll('.', '_');
+  const messages = getMessages();
+  return Object.hasOwn(messages, key) ? render(messages[key]) : value;
+};
+
+export const helpdeskFieldLabel = (field, text) =>
+  field.replace(/[A-Za-z_][A-Za-z_0-9]*/g, text);
+
+// Free-form customer text and proposed message bodies must remain exact.
+export const helpdeskRowValue = (row, text) => {
+  const key = row.field
+    .split(/[.[\]]/)
+    .filter(Boolean)
+    .at(-1);
+  const labels = [
+    'state',
+    'status',
+    'reason',
+    'blocked_reason',
+    'kind',
+    'basis',
+    'unit',
+    'tool',
+    'channel',
+    'case_kind',
+    'enabled',
+    'automatic_execution',
+    'preview',
+    'persisted',
+    'executable',
+    'can_prepare',
+    'private',
+    'identity_approved',
+    'pair_allowed',
+    'handoff_required',
+    'resolved',
+  ];
+  return labels.includes(key) ? text(row.value) : row.value;
 };

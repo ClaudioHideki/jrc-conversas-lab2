@@ -7,6 +7,16 @@ import ptBR from 'dashboard/i18n/locale/pt_BR';
 import en from 'dashboard/i18n/locale/en';
 import GlobalQuickActions from '../GlobalQuickActions.vue';
 import ConversationQuickActions from '../../Conversation/ConversationHome/ConversationQuickActions.vue';
+import GlobalCallPanel from '../GlobalCallPanel.vue';
+
+vi.mock('../GlobalCallPanel.vue', () => ({
+  default: {
+    name: 'GlobalCallPanel',
+    props: ['allowSoftphone', 'allowWhatsapp'],
+    emits: ['close'],
+    template: '<div data-phone-panel />',
+  },
+}));
 
 const mocks = vi.hoisted(() => ({
   home: null,
@@ -94,7 +104,8 @@ describe('Global quick actions preserve existing handlers', () => {
         },
         {
           key: 'CALL',
-          to: { name: 'ramal_index', params: { accountId: 1 } },
+          command: 'call',
+          modes: { softphone: true, whatsapp: true },
           icon: 'i-lucide-phone-call',
           tone: 'teal',
         },
@@ -129,10 +140,14 @@ describe('Global quick actions preserve existing handlers', () => {
     await wrapper.get('button[aria-label="Novo contato"]').trigger('click');
     expect(mocks.open).toHaveBeenCalledOnce();
     await wrapper.get('button[aria-label="Nova ligação"]').trigger('click');
-    expect(mocks.push).toHaveBeenCalledWith({
-      name: 'ramal_index',
-      params: { accountId: 1 },
+    expect(mocks.push).not.toHaveBeenCalled();
+    expect(wrapper.findComponent(GlobalCallPanel).props()).toEqual({
+      allowSoftphone: true,
+      allowWhatsapp: true,
     });
+    wrapper.findComponent(GlobalCallPanel).vm.$emit('close');
+    await flushPromises();
+    expect(wrapper.findComponent(GlobalCallPanel).exists()).toBe(false);
     await wrapper.get('button[aria-label="Novo lead"]').trigger('click');
     expect(mocks.push).toHaveBeenLastCalledWith({
       name: 'crm_leads',
@@ -142,9 +157,13 @@ describe('Global quick actions preserve existing handlers', () => {
     expect(mocks.dispatch).not.toHaveBeenCalled();
   });
 
-  it('rejects a stale action after permissions are removed', () => {
+  it('rejects a stale action after permissions are removed', async () => {
     wrapper = mount(GlobalQuickActions);
+    await wrapper.get('button[aria-label="Nova ligação"]').trigger('click');
+    expect(wrapper.findComponent(GlobalCallPanel).exists()).toBe(true);
     mocks.home.actions.value = [];
+    await flushPromises();
+    expect(wrapper.findComponent(GlobalCallPanel).exists()).toBe(false);
     wrapper.findComponent(ConversationQuickActions).vm.$emit('select', 'LEAD');
     expect(mocks.push).not.toHaveBeenCalled();
   });
@@ -222,12 +241,15 @@ describe('Global quick actions preserve existing handlers', () => {
         })
     );
     wrapper = mount(GlobalQuickActions);
+    await wrapper.get('button[aria-label="Nova ligação"]').trigger('click');
+    expect(wrapper.findComponent(GlobalCallPanel).exists()).toBe(true);
     const original = wrapper.findComponent({
       name: 'CreateNewContactDialog',
     }).vm;
     original.$emit('create', { name: 'Teste' });
     mocks.home.accountId.value = 2;
     await flushPromises();
+    expect(wrapper.findComponent(GlobalCallPanel).exists()).toBe(false);
     expect(
       wrapper.findComponent({ name: 'CreateNewContactDialog' }).vm === original
     ).toBe(false);

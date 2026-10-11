@@ -52,7 +52,12 @@ describe('Relationship center pagination', () => {
       query: { page: '1' },
     });
     useRoute.mockReturnValue(route);
-    useRouter.mockReturnValue({ replace: vi.fn(), push: vi.fn() });
+    useRouter.mockReturnValue({
+      replace: vi.fn(({ query }) => {
+        route.query = query;
+      }),
+      push: vi.fn(),
+    });
     store = {
       dispatch: vi.fn().mockResolvedValue(true),
       getters: reactive({
@@ -63,10 +68,118 @@ describe('Relationship center pagination', () => {
         'customViews/getContactCustomViews': [],
         'contacts/getAppliedContactFilters': [],
         'accounts/isFeatureEnabledonAccount': () => true,
+        getCurrentRole: 'administrator',
+        getCurrentUser: {
+          id: 1,
+          accounts: [
+            { id: 1, role: 'administrator' },
+            { id: 2, role: 'administrator' },
+          ],
+        },
       }),
     };
   });
   afterEach(() => wrapper?.unmount());
+
+  it.each(['people', 'unassigned', 'duplicates'])(
+    'selects %s using the native account-wide directory and resets pagination',
+    async view => {
+      route.query.page = '3';
+      wrapper = page();
+      await flushPromises();
+      store.dispatch.mockClear();
+      await wrapper.get(`[data-contact-view="${view}"]`).trigger('click');
+      await flushPromises();
+      expect(route.query).toMatchObject({ page: '1', directory_view: view });
+      expect(store.dispatch).toHaveBeenCalledWith(
+        'contacts/get',
+        expect.objectContaining({ page: 1, directoryView: view })
+      );
+      expect(
+        wrapper.get(`[data-contact-view="${view}"]`).attributes('aria-pressed')
+      ).toBe('true');
+      await button('Próxima').trigger('click');
+      expect(store.dispatch).toHaveBeenCalledWith(
+        'contacts/get',
+        expect.objectContaining({ page: 2, directoryView: view })
+      );
+    }
+  );
+
+  it('retains the selected view during search and sort, then restores all native contacts', async () => {
+    route.query = {
+      page: '1',
+      search: 'Cliente',
+      directory_view: 'duplicates',
+    };
+    wrapper = page();
+    await flushPromises();
+    expect(store.dispatch).toHaveBeenCalledWith(
+      'contacts/search',
+      expect.objectContaining({
+        directoryView: 'duplicates',
+        search: 'Cliente',
+      })
+    );
+    await wrapper
+      .findComponent(ContactListHeaderWrapper)
+      .vm.$emit('update:sort', { sort: 'name', order: '' });
+    await flushPromises();
+    expect(store.dispatch).toHaveBeenLastCalledWith(
+      'contacts/search',
+      expect.objectContaining({ directoryView: 'duplicates' })
+    );
+    await wrapper.get('[data-contact-view="all"]').trigger('click');
+    await flushPromises();
+    expect(route.query.directory_view).toBeUndefined();
+    expect(store.dispatch).toHaveBeenLastCalledWith(
+      'contacts/search',
+      expect.not.objectContaining({ directoryView: 'duplicates' })
+    );
+  });
+
+  it.each(['companies', 'groups'])(
+    'opens the existing %s directory in the current account',
+    async view => {
+      route.params.accountId = '2';
+      wrapper = page();
+      await flushPromises();
+      await wrapper.get(`[data-contact-view="${view}"]`).trigger('click');
+      expect(useRouter().push).toHaveBeenCalledWith({
+        name: `jrc_customer_${view}`,
+        params: { accountId: '2' },
+      });
+    }
+  );
+
+  it('respects master feature and custom role permissions while preserving native contacts', async () => {
+    store.getters.getCurrentUser.accounts[0] = {
+      id: 1,
+      role: 'agent',
+      custom_role_id: 9,
+      permissions: [],
+    };
+    wrapper = page();
+    await flushPromises();
+    ['companies', 'groups', 'unassigned', 'duplicates'].forEach(view => {
+      expect(
+        wrapper.get(`[data-contact-view="${view}"]`).element.disabled
+      ).toBe(true);
+    });
+    expect(wrapper.get('[data-contact-view="people"]').element.disabled).toBe(
+      false
+    );
+    store.getters.getCurrentUser.accounts[0].permissions = ['contact_manage'];
+    await flushPromises();
+    expect(
+      wrapper.get('[data-contact-view="duplicates"]').element.disabled
+    ).toBe(false);
+    store.getters['accounts/isFeatureEnabledonAccount'] = () => false;
+    await flushPromises();
+    expect(
+      wrapper.get('[data-contact-view="duplicates"]').element.disabled
+    ).toBe(true);
+  });
 
   it('uses count for regular pagination, even without has_more', async () => {
     wrapper = page();
@@ -201,8 +314,8 @@ describe('Relationship center pagination', () => {
     header.vm.$emit('update:sort', { sort: 'name', order: '-' });
     await flushPromises();
     expect(store.dispatch).toHaveBeenCalledWith(
-      'contacts/get',
-      expect.objectContaining({ sortAttr: '-name', page: 1 })
+      'contacts/search',
+      expect.objectContaining({ search: 'Example', sortAttr: '-name', page: 1 })
     );
     const queryPayload = {
       payload: [
@@ -302,17 +415,27 @@ describe('Relationship center pagination', () => {
     expect(store.dispatch).toHaveBeenCalledWith('contacts/export', query);
   });
 
-  it('disables unsupported relationship views and actions with an explanation', async () => {
+  it('enables the supported directory views and preserves unavailable sidecard actions', async () => {
     wrapper = page();
     await flushPromises();
-    expect(button('Pessoas').element.disabled).toBe(true);
-    expect(button('Empresas').element.disabled).toBe(true);
+    [
+      'all',
+      'people',
+      'companies',
+      'groups',
+      'unassigned',
+      'duplicates',
+    ].forEach(view => {
+      expect(
+        wrapper.get(`[data-contact-view="${view}"]`).element.disabled
+      ).toBe(false);
+    });
     expect(button('Agenda').element.disabled).toBe(true);
     expect(button('Agenda').attributes('title')).toBe(
       'This action is not available in this view.'
     );
     expect(wrapper.text()).toContain(
-      'The disabled views and actions are not available in this contact list.'
+      'Native contacts. Companies and groups use the existing Customer Master directories.'
     );
   });
 

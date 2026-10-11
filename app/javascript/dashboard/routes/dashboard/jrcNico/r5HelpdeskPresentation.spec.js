@@ -13,6 +13,11 @@ import {
   helpdeskRows,
   helpdeskGroupInput,
 } from './helpdeskPresentation';
+import {
+  buildHelpdeskText,
+  helpdeskFieldLabel,
+  helpdeskRowValue,
+} from './helpdeskLabels';
 
 const mocks = vi.hoisted(() => ({
   api: { groupPreview: vi.fn(), groupPrepare: vi.fn() },
@@ -20,7 +25,40 @@ const mocks = vi.hoisted(() => ({
 vi.mock('dashboard/api/jrcNicoHelpdesk', () => ({ default: mocks.api }));
 const translate = (key, params) =>
   `${key}${params ? ` ${Object.values(params).join(' ')}` : ''}`;
-vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: translate }) }));
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({ t: translate, tm: () => ({}), rt: value => value }),
+}));
+
+describe('Localized HelpDesk presentation preserves native evidence', () => {
+  const messages = {
+    state: 'Situação',
+    pending: 'Pendente',
+    broker_health: 'Estado do Broker',
+    ticket_id: 'ID do chamado',
+  };
+  const text = buildHelpdeskText(
+    () => messages,
+    value => value,
+    () => 'Sem dados'
+  );
+  it('translates dependency names and nested evidence labels without rewriting identifiers', () => {
+    expect(text('broker.health')).toBe('Estado do Broker');
+    expect(helpdeskFieldLabel('source[0].ticket_id', text)).toBe(
+      'source[0].ID do chamado'
+    );
+    expect(text('sha256:abc123')).toBe('sha256:abc123');
+  });
+  it('translates enum values while preserving exact proposed content and free-form evidence', () => {
+    expect(helpdeskRowValue({ field: 'state', value: 'pending' }, text)).toBe(
+      'Pendente'
+    );
+    ['content', 'body', 'description', 'title', 'name'].forEach(field => {
+      expect(helpdeskRowValue({ field, value: 'pending' }, text)).toBe(
+        'pending'
+      );
+    });
+  });
+});
 const globals = {
   mocks: { $t: translate },
   stubs: { HelpdeskGroupFields: true },

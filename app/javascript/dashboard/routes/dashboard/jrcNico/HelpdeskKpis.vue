@@ -1,7 +1,12 @@
 <script setup>
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { buildHelpdeskLabels } from './helpdeskLabels';
+import {
+  buildHelpdeskLabels,
+  buildHelpdeskText,
+  helpdeskFieldLabel,
+  helpdeskRowValue,
+} from './helpdeskLabels';
 import HelpdeskMetricEvidence from './HelpdeskMetricEvidence.vue';
 import {
   helpdeskRows,
@@ -10,7 +15,14 @@ import {
 } from './helpdeskPresentation';
 
 defineProps({ report: { type: Object, required: true } });
-const { t } = useI18n();
+const { t, tm, rt } = useI18n();
+const text = buildHelpdeskText(
+  () => tm('JRC_NICO_HELPDESK.TECHNICAL'),
+  rt,
+  () => t('JRC_NICO_HELPDESK.NO_DATA')
+);
+const field = key => helpdeskFieldLabel(key, text);
+const rowValue = row => helpdeskRowValue(row, text);
 const label = computed(() => buildHelpdeskLabels(t));
 const value = item => helpdeskValue(item, t('JRC_NICO_HELPDESK.NO_DATA'));
 const rows = item => helpdeskRows(item, t('JRC_NICO_HELPDESK.NO_DATA'));
@@ -54,7 +66,10 @@ const rows = item => helpdeskRows(item, t('JRC_NICO_HELPDESK.NO_DATA'));
           </th>
           <td class="p-2">
             {{ label('kpiFormulas', metric.key) }}
-            <p class="mt-1 text-xs text-n-slate-11">{{ metric.formula }}</p>
+            <details class="mt-1 text-xs text-n-slate-11">
+              <summary>{{ t('JRC_NICO_HELPDESK.FORMULA') }}</summary>
+              <code>{{ metric.formula }}</code>
+            </details>
             <p class="mt-1 text-xs text-n-slate-11">
               {{ t('JRC_NICO_HELPDESK.REPORT_INTERVAL', metric.window) }}
             </p>
@@ -70,8 +85,8 @@ const rows = item => helpdeskRows(item, t('JRC_NICO_HELPDESK.NO_DATA'));
                   :key="row.field"
                   class="mt-1"
                 >
-                  <dt>{{ row.field }}</dt>
-                  <dd>{{ row.value }}</dd>
+                  <dt>{{ field(row.field) }}</dt>
+                  <dd>{{ rowValue(row) }}</dd>
                 </div>
               </dl>
             </details>
@@ -81,7 +96,7 @@ const rows = item => helpdeskRows(item, t('JRC_NICO_HELPDESK.NO_DATA'));
           <td class="p-2">
             {{ helpdeskMetricValue(metric, t('JRC_NICO_HELPDESK.NO_DATA')) }}
             <p v-if="metric.reason" class="mt-1 text-xs text-n-slate-11">
-              {{ metric.reason }}
+              {{ text(metric.reason) }}
             </p>
           </td>
         </tr>

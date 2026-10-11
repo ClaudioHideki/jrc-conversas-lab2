@@ -24,8 +24,9 @@ const props = defineProps({
   },
   conversationId: {
     type: [Number, String],
-    required: true,
+    default: null,
   },
+  externalBusy: { type: Boolean, default: false },
 });
 
 const { t } = useI18n();
@@ -125,6 +126,7 @@ const currentWhatsappCall = computed(
 
 const isBusy = computed(
   () =>
+    props.externalBusy ||
     callsStore.hasActiveCall ||
     callsStore.hasIncomingCall ||
     whatsappCallSession.isInitiating.value
@@ -190,6 +192,7 @@ const statusLabel = computed(() => {
 });
 
 const helperMessage = computed(() => {
+  if (props.externalBusy) return t('SOFTPHONE.OTHER_CALL_BUSY');
   if (!configuration.value.active)
     return t('WHATSAPP_CALLING.SIDEBAR.NOT_CONFIGURED');
   if (!hasWhatsappInbox.value) return t('WHATSAPP_CALLING.HELP.NO_INBOX');
@@ -585,21 +588,21 @@ onMounted(async () => {
 
       <div
         class="mt-2 rounded-lg px-3 py-2 text-[11px]"
-        :class="canCall ? 'bg-emerald-500/10 text-emerald-700' : 'bg-n-alpha-2 text-n-slate-10'"
+        :class="canCall ? 'bg-n-teal-3 text-n-teal-11' : 'bg-n-alpha-2 text-n-slate-10'"
       >
         {{ helperMessage }}
       </div>
 
       <div
         v-if="showKeypad"
-        class="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3"
+        class="mt-3 rounded-xl border border-n-amber-6 bg-n-amber-2 p-3"
       >
         <div class="grid grid-cols-3 gap-2">
           <button
             v-for="key in KEYPAD_KEYS"
             :key="key"
             type="button"
-            class="rounded-lg border border-amber-100 bg-white py-2 text-sm font-bold text-n-slate-12 shadow-sm hover:bg-amber-100 disabled:opacity-40"
+            class="rounded-lg border border-n-amber-6 bg-n-solid-2 py-2 text-sm font-bold text-n-slate-12 shadow-sm hover:bg-n-amber-3 disabled:opacity-40"
             :disabled="isBusy"
             @click="pressKey(key)"
           >
@@ -609,7 +612,7 @@ onMounted(async () => {
         <div class="mt-2 grid grid-cols-3 gap-2">
           <button
             type="button"
-            class="rounded-lg border border-amber-200 bg-white py-2 text-sm font-bold text-n-slate-12 hover:bg-amber-100 disabled:opacity-40"
+            class="rounded-lg border border-n-amber-6 bg-n-solid-2 py-2 text-sm font-bold text-n-slate-12 hover:bg-n-amber-3 disabled:opacity-40"
             :disabled="isBusy"
             @click="addPlus"
           >
@@ -617,7 +620,7 @@ onMounted(async () => {
           </button>
           <button
             type="button"
-            class="rounded-lg border border-amber-200 bg-white py-2 text-n-slate-12 hover:bg-amber-100 disabled:opacity-40"
+            class="rounded-lg border border-n-amber-6 bg-n-solid-2 py-2 text-n-slate-12 hover:bg-n-amber-3 disabled:opacity-40"
             :disabled="isBusy || !destination"
             :title="$t('WHATSAPP_CALLING.SIDEBAR.BACKSPACE')"
             @click="eraseLastDigit"
@@ -626,7 +629,7 @@ onMounted(async () => {
           </button>
           <button
             type="button"
-            class="rounded-lg border border-amber-200 bg-white py-2 text-[11px] font-semibold text-n-slate-11 hover:bg-amber-100 disabled:opacity-40"
+            class="rounded-lg border border-n-amber-6 bg-n-solid-2 py-2 text-[11px] font-semibold text-n-slate-11 hover:bg-n-amber-3 disabled:opacity-40"
             :disabled="isBusy || !destination"
             @click="clearNumber"
           >

@@ -8,7 +8,9 @@ const mocks = vi.hoisted(() => ({
   api: { groupPreview: vi.fn(), groupPrepare: vi.fn() },
 }));
 vi.mock('dashboard/api/jrcNicoHelpdesk', () => ({ default: mocks.api }));
-vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }));
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({ t: key => key, tm: () => ({}), rt: value => value }),
+}));
 const choices = {
   campaign: {
     incidents: [{ id: 51, title: 'Exact incident' }],

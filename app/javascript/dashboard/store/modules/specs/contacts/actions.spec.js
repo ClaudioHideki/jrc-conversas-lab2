@@ -26,6 +26,28 @@ global.axios = axios;
 vi.mock('axios');
 
 describe('#actions', () => {
+  it.each(['get', 'search', 'active', 'filter'])(
+    'passes the directory view through the %s action without rewriting the native payload',
+    async action => {
+      const data = { payload: [], meta: { count: 0, current_page: 2 } };
+      axios.get.mockResolvedValue({ data });
+      axios.post.mockResolvedValue({ data });
+      const params = {
+        directoryView: 'duplicates',
+        page: 2,
+        sortAttr: 'name',
+        search: 'Ana',
+        queryPayload: filterQueryData,
+      };
+      await actions[action]({ commit }, params);
+      const calls =
+        action === 'filter' ? axios.post.mock.calls : axios.get.mock.calls;
+      expect(calls.at(-1)[0]).toContain('directory_view=duplicates');
+      expect(calls.at(-1)[0]).toContain('page=2');
+      if (action === 'filter') expect(calls.at(-1)[1]).toEqual(filterQueryData);
+    }
+  );
+
   describe('#search continuation', () => {
     it('reports success only after appending records and updating pagination', async () => {
       const meta = { current_page: 2, has_more: true };
