@@ -225,7 +225,7 @@ class CommercialPriceEvaluationTest < Minitest::Test
       assert_equal 'evaluated', result[:status]
       assert_equal discount, (result[:items].sum { |row| row[:global_discount_cents] })
       assert_equal gross - discount, (result[:items].sum { |row| row[:effective_line_cents] })
-      assert (result[:items].all? { |row| row[:effective_line_cents] >= 0 })
+      assert(result[:items].all? { |row| row[:effective_line_cents] >= 0 })
       assert_equal result[:financials][:total_cents], (result[:items].sum { |row| row[:effective_line_cents] })
     end
   end
