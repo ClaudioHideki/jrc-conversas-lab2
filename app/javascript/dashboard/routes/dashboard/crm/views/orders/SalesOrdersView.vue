@@ -1079,7 +1079,10 @@ onMounted(load);
                 Visão geral do pedido
               </p>
               <h3 class="text-xl font-bold">{{ selected.order_number }}</h3>
-              <ApprovalGateBadge resource-key="crm.order_price" :resource-id="selected.id" />
+              <ApprovalGateBadge
+                resource-key="crm.order_price"
+                :resource-id="selected.id"
+              />
               <p class="text-sm text-n-slate-11">
                 {{ customerName(selected) }}
               </p>

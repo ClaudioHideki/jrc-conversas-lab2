@@ -20,7 +20,7 @@ class CommercialPriceEvaluationTest < Minitest::Test
   def test_above_equal_and_one_cent_below
     result = evaluate([item(unit_price_cents: 901), item(unit_price_cents: 900), item(unit_price_cents: 899)])
     assert_equal 'evaluated', result[:status]
-    assert_equal %w[above equal below], result[:items].map { |row| row[:comparison] }
+    assert_equal %w[above equal below], (result[:items].map { |row| row[:comparison] })
     assert_equal [2], result[:below_minimum_item_indexes]
   end
 
@@ -44,14 +44,14 @@ class CommercialPriceEvaluationTest < Minitest::Test
 
   def test_remainder_uses_net_weights_and_stable_input_order
     result = evaluate([item, item, item], { discount_cents: 2 })
-    assert_equal [1, 1, 0], result[:items].map { |row| row[:global_discount_cents] }
-    assert_equal 2, result[:items].sum { |row| row[:global_discount_cents] }
-    assert_equal [1, 1, 0], evaluate([item, item, item], { discount_cents: 2 })[:items].map { |row| row[:global_discount_cents] }
+    assert_equal [1, 1, 0], (result[:items].map { |row| row[:global_discount_cents] })
+    assert_equal 2, (result[:items].sum { |row| row[:global_discount_cents] })
+    assert_equal [1, 1, 0], (evaluate([item, item, item], { discount_cents: 2 })[:items].map { |row| row[:global_discount_cents] })
   end
 
   def test_rateio_is_proportional_after_item_discount
     result = evaluate([item(discount_cents: 500), item], { discount_cents: 3 })
-    assert_equal [1, 2], result[:items].map { |row| row[:global_discount_cents] }
+    assert_equal [1, 2], (result[:items].map { |row| row[:global_discount_cents] })
   end
 
   def test_excludes_setup_freight_and_taxes_from_minimum
@@ -64,8 +64,8 @@ class CommercialPriceEvaluationTest < Minitest::Test
 
   def test_ineligible_items_keep_their_line_price
     result = evaluate([item(eligible_for_global_discount: false), item], { discount_cents: 100 })
-    assert_equal [0, 100], result[:items].map { |row| row[:global_discount_cents] }
-    assert_equal %w[above equal], result[:items].map { |row| row[:comparison] }
+    assert_equal [0, 100], (result[:items].map { |row| row[:global_discount_cents] })
+    assert_equal %w[above equal], (result[:items].map { |row| row[:comparison] })
   end
 
   def test_discount_beyond_eligible_base_is_pending_not_clamped_silently
@@ -78,8 +78,8 @@ class CommercialPriceEvaluationTest < Minitest::Test
 
   def test_zero_net_lines_conserve_zero_global_discount
     result = evaluate([item(discount_cents: 1000), item(discount_cents: 1000)])
-    assert_equal [0, 0], result[:items].map { |row| row[:global_discount_cents] }
-    assert_equal %w[below below], result[:items].map { |row| row[:comparison] }
+    assert_equal [0, 0], (result[:items].map { |row| row[:global_discount_cents] })
+    assert_equal %w[below below], (result[:items].map { |row| row[:comparison] })
   end
 
   def test_does_not_round_unit_price_before_comparison
@@ -204,7 +204,7 @@ class CommercialPriceEvaluationTest < Minitest::Test
     assert_equal legacy, evaluated[:financials]
     assert_equal legacy, calculator.call
     assert_equal before, Marshal.dump([attributes, items])
-    assert_equal legacy[:total_cents], legacy[:payments].sum { |payment| payment[:value] }
+    assert_equal legacy[:total_cents], (legacy[:payments].sum { |payment| payment[:value] })
     assert JSON.parse(JSON.generate(evaluated))
   end
 
@@ -223,10 +223,10 @@ class CommercialPriceEvaluationTest < Minitest::Test
       discount = random.rand(0..gross)
       result = evaluate(items, { discount_cents: discount })
       assert_equal 'evaluated', result[:status]
-      assert_equal discount, result[:items].sum { |row| row[:global_discount_cents] }
-      assert_equal gross - discount, result[:items].sum { |row| row[:effective_line_cents] }
-      assert result[:items].all? { |row| row[:effective_line_cents] >= 0 }
-      assert_equal result[:financials][:total_cents], result[:items].sum { |row| row[:effective_line_cents] }
+      assert_equal discount, (result[:items].sum { |row| row[:global_discount_cents] })
+      assert_equal gross - discount, (result[:items].sum { |row| row[:effective_line_cents] })
+      assert (result[:items].all? { |row| row[:effective_line_cents] >= 0 })
+      assert_equal result[:financials][:total_cents], (result[:items].sum { |row| row[:effective_line_cents] })
     end
   end
 
@@ -305,8 +305,8 @@ class CommercialPriceEvaluationTest < Minitest::Test
     allocated = JrcCrm::CommercialItemAllocation.call(items: legacy[:items], discount_cents: 30)
     legacy_discounts = legacy[:items].each_with_index.map { |row, index| row[:one_time_cents] - allocated[index][:revenue_cents] }
     assert_equal [26, 4], legacy_discounts
-    assert_equal [15, 15], result[:items].map { |row| row[:global_discount_cents] }
-    assert_equal [985, 985], result[:items].map { |row| row[:effective_line_cents] }
+    assert_equal [15, 15], (result[:items].map { |row| row[:global_discount_cents] })
+    assert_equal [985, 985], (result[:items].map { |row| row[:effective_line_cents] })
     assert_equal 6970, legacy[:total_cents]
     assert_equal legacy, result[:financials]
     assert_equal legacy, calculator.call
