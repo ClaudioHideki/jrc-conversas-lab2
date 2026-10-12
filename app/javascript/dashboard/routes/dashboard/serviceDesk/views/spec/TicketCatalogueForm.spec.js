@@ -234,7 +234,7 @@ async function render() {
     .find('input')
     .setValue('Native issue');
   await wrapper.find('textarea').setValue('Test description');
-  await wrapper.findAll('.sd-wizard-step')[2].trigger('click');
+
   await flushPromises();
   await wrapper
     .findComponent(ServiceDefinitionSelect)
@@ -243,12 +243,12 @@ async function render() {
   await flushPromises();
   return { create, router };
 }
-describe('R3 native ticket wizard uses configured defaults with explicit customer/contract authority', () => {
+describe('R3 native ticket form uses configured defaults with explicit customer/contract authority', () => {
   it('does not choose the first company/contract or submit before the configured required answer', async () => {
     const { create } = await render();
-    await wrapper.findAll('.sd-wizard-step')[0].trigger('click');
+
     expect(wrapper.findComponent(CompanyPicker).props('modelValue')).toBeNull();
-    await wrapper.findAll('.sd-wizard-step')[2].trigger('click');
+
     const contract = wrapper
       .findAllComponents(LookupSelect)
       .find(row => row.props('resource') === 'contracts');
@@ -258,17 +258,17 @@ describe('R3 native ticket wizard uses configured defaults with explicit custome
       category_id: '4',
       ticket_type_id: '5',
     });
-    await wrapper.findAll('.sd-wizard-step')[3].trigger('click');
+
     await wrapper.find('form').trigger('submit');
     await flushPromises();
     expect(create).not.toHaveBeenCalled();
   });
   it('sends the explicitly chosen canonical customer/contract and merged answers through native write/readback', async () => {
     const { create, router } = await render();
-    await wrapper.findAll('.sd-wizard-step')[0].trigger('click');
+
     wrapper.findComponent(CompanyPicker).vm.$emit('update:modelValue', '80');
     await flushPromises();
-    await wrapper.findAll('.sd-wizard-step')[2].trigger('click');
+
     await flushPromises();
     const contract = wrapper
       .findAllComponents(LookupSelect)
@@ -280,7 +280,7 @@ describe('R3 native ticket wizard uses configured defaults with explicit custome
       .find('input')
       .setValue('R3-device');
     await flushPromises();
-    await wrapper.findAll('.sd-wizard-step')[3].trigger('click');
+
     await wrapper.find('form').trigger('submit');
     await flushPromises();
     expect(create).toHaveBeenCalledTimes(1);

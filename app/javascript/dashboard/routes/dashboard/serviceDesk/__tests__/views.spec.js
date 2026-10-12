@@ -87,12 +87,12 @@ describe('CP3 view structures and explicit non-persistence (native Vue pending)'
     expect(wrapper.text()).toContain(keys.STATES.pending);expect(wrapper.find('tbody').exists()).toBe(false);
     expect(wrapper.findComponent({name:'PaginationFooter'}).exists()).toBe(false);
   });
-  it('a four-step form remains inspectable but inputs need a backend grant',async()=>{
+  it('a sectioned form remains inspectable but inputs need a backend grant',async()=>{
     await setupSession(fakeClient({context:async()=>{throw httpError(404);}}));
     const wrapper=await render(TicketFormView);
-    expect(wrapper.findAll('.sd-wizard-step')).toHaveLength(4);
+    expect(wrapper.findAll('.sd-wizard-step')).toHaveLength(0);
+    expect(wrapper.findAll('section').length).toBeGreaterThanOrEqual(4);
     expect(wrapper.findAll('input').every(input=>input.attributes('disabled')!==undefined)).toBe(true);
-    await button(wrapper,keys.COMMON.next).trigger('click');await button(wrapper,keys.COMMON.next).trigger('click');await button(wrapper,keys.COMMON.next).trigger('click');
     expect(button(wrapper,keys.COMMON.create).attributes('disabled')).toBeDefined();
     expect(wrapper.text()).toContain(keys.FORM.draft_notice);
   });
@@ -111,7 +111,7 @@ describe('CP3 view structures and explicit non-persistence (native Vue pending)'
   it('tab/form navigation does not post data even with a known context',async()=>{
     const writes=vi.fn();const client={...fakeClient(),create:writes,update:writes,delete:writes};
     await setupSession(client);const wrapper=await render(TicketFormView);
-    for(const step of wrapper.findAll('.sd-wizard-step')) await step.trigger('click');
+    expect(wrapper.findAll('section').length).toBeGreaterThanOrEqual(4);
     expect(button(wrapper,keys.COMMON.create).attributes('disabled')).toBeDefined();expect(writes).not.toHaveBeenCalled();
   });
   it('a confirmed empty API response shows an empty state, not an unavailable API',async()=>{

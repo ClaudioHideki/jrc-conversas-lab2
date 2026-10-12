@@ -2,7 +2,6 @@
 import { computed } from 'vue';
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import Banner from 'dashboard/components-next/banner/Banner.vue';
 import Icon from 'dashboard/components-next/icon/Icon.vue';
 import Button from 'dashboard/components-next/button/Button.vue';
 import { provideServiceDesk } from './composables/useServiceDesk';
@@ -182,14 +181,6 @@ const blocked = computed(() =>
             :items="breadcrumbs"
             @click="item => item.route && router.push(item.route)"
           />
-          <Banner color="amber" class="mb-4 shrink-0">
-            <strong>
-              {{ t('JRC_SERVICE_DESK.COMMON.structure') }}
-            </strong>
-            <span class="mx-2">
-              {{ t('JRC_SERVICE_DESK.SCOPE.native_pending') }}
-            </span>
-          </Banner>
           <div
             v-if="state.status !== 'ready' && !blocked"
             class="sd-context-notice"

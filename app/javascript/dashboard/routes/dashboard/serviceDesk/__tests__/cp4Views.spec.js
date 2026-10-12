@@ -85,9 +85,9 @@ async function renderForm(writeClient) {
   await wrapper.findAll('label').find(label => label.text().startsWith(messages.JRC_SERVICE_DESK.FIELDS.title)).find('input').setValue('Native Vue fixture');
   await wrapper.find('textarea').setValue('Test description');
   await wrapper.findAllComponents(Lookup).find(item => item.props('resource') === 'requesters').find('select').setValue('33');
-  await wrapper.findAll('.sd-wizard-step')[1].trigger('click'); await flushPromises();
+  await flushPromises();
   await wrapper.findAllComponents(Lookup).find(item => item.props('resource') === 'priorities').find('select').setValue('2');
-  await wrapper.findAll('.sd-wizard-step')[3].trigger('click');
+
   return router;
 }
 
@@ -109,7 +109,7 @@ describe('CP4 native Vue create/readback wiring (execution pending)', () => {
         })
       )
     );
-    await flushPromises();
+   await flushPromises();
     expect(router.currentRoute.value.name).toBe(serviceDeskRouteName('new'));
     expect(
       wrapper.find('[data-testid="ticket-created-receipt"]').exists()
@@ -119,7 +119,7 @@ describe('CP4 native Vue create/readback wiring (execution pending)', () => {
     );
     expect(create).toHaveBeenCalledTimes(1);
     await wrapper.find('[data-testid="open-created-ticket"]').trigger('click');
-    await flushPromises();
+   await flushPromises();
     expect(router.currentRoute.value.name).toBe(serviceDeskRouteName('detail'));
     expect(router.currentRoute.value.params.ticketId).toBe('20');
   });
@@ -144,7 +144,7 @@ describe('CP4 native Vue create/readback wiring (execution pending)', () => {
       },
     });
     await wrapper.find('form').trigger('submit');
-    await flushPromises();
+   await flushPromises();
     expect(
       wrapper.find('[data-testid="ticket-created-receipt"]').exists()
     ).toBe(false);
@@ -174,22 +174,22 @@ describe('CP4 native Vue create/readback wiring (execution pending)', () => {
           })
         ),
     });
-    await wrapper.findAll('.sd-wizard-step')[1].trigger('click');
-    await flushPromises();
+
+   await flushPromises();
     const agent = wrapper
       .findAllComponents(Lookup)
       .find(item => item.props('resource') === 'assignees');
     await agent.find('select').setValue('7');
     const automatic = wrapper.find('input[type="checkbox"]');
     await automatic.setValue(true);
-    await flushPromises();
+   await flushPromises();
     expect(agent.props('modelValue')).toBe('');
     await agent.find('select').setValue('7');
-    await flushPromises();
+   await flushPromises();
     expect(automatic.element.checked).toBe(false);
-    await wrapper.findAll('.sd-wizard-step')[3].trigger('click');
+
     await wrapper.find('form').trigger('submit');
-    await flushPromises();
+   await flushPromises();
     expect(create.mock.calls[0][1].ticket.assignee_account_user_id).toBe('7');
     expect(
       wrapper.find('[data-testid="ticket-created-receipt"]').text()
