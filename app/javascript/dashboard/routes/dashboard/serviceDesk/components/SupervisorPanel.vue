@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import { v2Labels } from '../helpers/v2Labels';
 import { useI18n } from 'vue-i18n';
 import Panel from './ServiceDeskPanel.vue';
+import MetricRing from './MetricRing.vue';
 import { tones, metricTones } from '../helpers/visualTheme';
 const props = defineProps({
   data: { type: Object, default: null },
@@ -76,7 +77,10 @@ const maximum = rows => Math.max(1, ...rows.map(row => row.count));
             </dd>
           </div>
         </dl>
-        <div class="mt-4 grid gap-3" data-testid="sla-measured-bars">
+        <div
+          class="mt-4 grid gap-3 md:grid-cols-3"
+          data-testid="sla-measured-bars"
+        >
           <div
             v-for="key in [
               'running_breached',
@@ -84,21 +88,19 @@ const maximum = rows => Math.max(1, ...rows.map(row => row.count));
               'completed_breached',
             ]"
             :key="key"
-            class="flex flex-wrap items-center gap-3 text-sm"
+            class="flex items-center gap-3 rounded-2xl border border-n-weak bg-n-solid-2 p-3 text-sm"
           >
-            <span class="w-48 shrink-0" :class="tones[metricTones[key]].text">{{
-              labels.supervisor[key]
-            }}</span>
-            <progress
-              class="min-w-0 flex-1 accent-blue-700"
-              :class="tones[metricTones[key]].accent"
+            <span
+              class="min-w-0 flex-1 font-medium"
+              :class="tones[metricTones[key]].text"
+              >{{ labels.supervisor[key] }}</span
+            >
+            <MetricRing
+              :class="tones[metricTones[key]].text"
               :value="data.sla[key]"
-              :max="Math.max(data.sla.observed_cycles, data.sla[key], 1)"
-              :aria-label="labels.supervisor[key]"
+              :maximum="Math.max(data.sla.observed_cycles, data.sla[key], 1)"
+              :label="labels.supervisor[key]"
             />
-            <strong :class="tones[metricTones[key]].text">{{
-              data.sla[key]
-            }}</strong>
           </div>
         </div>
       </Panel>
@@ -114,24 +116,27 @@ const maximum = rows => Math.max(1, ...rows.map(row => row.count));
           <div
             v-for="row in data[kind]"
             :key="row.date || row.id || 'unassigned'"
-            class="flex items-center gap-3 mb-2"
+            class="mb-3 flex items-center justify-between gap-3 rounded-xl border border-n-weak bg-n-solid-2 p-3"
           >
             <p class="text-sm w-28 shrink-0 break-words sm:w-36">
               {{
                 row.date || row.name || t('JRC_SERVICE_DESK.COMMON.no_value')
               }}
             </p>
-            <progress
-              class="min-w-0 flex-1 accent-blue-700"
+            <MetricRing
+              :class="
+                kind === 'top_categories'
+                  ? 'text-n-iris-11'
+                  : kind === 'by_agent'
+                    ? 'text-n-teal-11'
+                    : 'text-n-blue-11'
+              "
               :value="row.count"
-              :max="maximum(data[kind])"
-              :aria-label="
+              :maximum="maximum(data[kind])"
+              :label="
                 row.date || row.name || t('JRC_SERVICE_DESK.COMMON.no_value')
               "
             />
-            <span class="tabular-nums font-bold text-n-blue-11">
-              {{ row.count }}
-            </span>
           </div>
         </Panel>
         <Panel :title="t('JRC_SERVICE_DESK.V2.capacity')">
@@ -141,7 +146,7 @@ const maximum = rows => Math.max(1, ...rows.map(row => row.count));
           <div
             v-for="row in data.capacity"
             :key="row.id"
-            class="flex flex-wrap items-center gap-3 mb-2 text-sm"
+            class="mb-3 flex flex-wrap items-center gap-3 rounded-xl border border-n-weak bg-n-solid-2 p-3 text-sm"
           >
             <span class="flex-1">{{ row.name }} </span>
             <span>{{ labels.availability[row.availability] }} </span>

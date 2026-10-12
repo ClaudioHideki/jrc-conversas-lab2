@@ -8,6 +8,8 @@ import { useFormDraft } from '../../helpers/useFormDraft';
 import { useI18n } from 'vue-i18n';
 import CompanyPicker from 'dashboard/routes/dashboard/jrcCustomers/components/CompanyPicker.vue';
 import { useCustomerMaster } from 'dashboard/routes/dashboard/jrcCustomers/useCustomerMaster';
+const props = defineProps({ creationOnly: { type: Boolean, default: false } });
+const emit = defineEmits(['close']);
 const { enabled: hasCustomerMaster } = useCustomerMaster();
 /* eslint-disable vue/no-bare-strings-in-template, @intlify/vue-i18n/no-raw-text */
 import { computed, onMounted, onBeforeUnmount, reactive, ref, watch } from 'vue';
@@ -28,9 +30,15 @@ const { t } = useI18n();
 const store = useStore();
 const route = useRoute();
 const router = useRouter();
-const showForm = ref(false);
+const showForm = ref(props.creationOnly);
+watch(showForm, visible => {
+  if (props.creationOnly && !visible) emit('close');
+});
 const showContactForm = ref(false);
 const saving = ref(false);
+const closeForm = () => {
+  if (!saving.value) showForm.value = false;
+};
 const pipelines = ref([]);
 const stages = ref([]);
 const contacts = ref([]);
@@ -76,6 +84,7 @@ const detailError = ref('');
 const loadedDetailKey = ref('');
 const detailKey = () => `${route.params.accountId}:${route.query.dealId || ''}`;
 const selectedDeal = computed(() => {
+  if (props.creationOnly) return null;
   if (!route.query.dealId || detailLoading.value || detailError.value || loadedDetailKey.value !== detailKey()) return null;
   const current = store.getters['jrcCrm/deals/currentDeal'];
   return String(current?.id) === String(route.query.dealId) ? current : null;
@@ -131,8 +140,8 @@ const dealDraft = useFormDraft('crm:new_deal', {
 const openForm = async () => {
   const restored = dealDraft.open();
   if (!restored) {
-    form.contact_id = route.query.contactId || '';
-    form.conversation_id = route.query.conversationId || '';
+    form.contact_id = props.creationOnly ? '' : route.query.contactId || '';
+    form.conversation_id = props.creationOnly ? '' : route.query.conversationId || '';
   } else useAlert(t('CRM.CREATION.RECOVERED'));
   showForm.value = true;
   await loadStages();
@@ -285,6 +294,7 @@ const save = async () => {
 };
 let detailGeneration = 0;
 async function loadDetails() {
+  if (props.creationOnly) return;
   const current = ++detailGeneration;
   const key = detailKey();
   const dealId = route.query.dealId;
@@ -309,17 +319,18 @@ onBeforeUnmount(() => { detailGeneration += 1; });
 watch(() => form.pipeline_id, loadStages);
 onMounted(async () => {
   const [pipelinesResponse] = await Promise.all([
-    pipelinesAPI.list(), loadContacts(), loadProducts(), AgentsAPI.get().then(({ data }) => { agents.value = data || []; }), store.dispatch('jrcCrm/deals/fetchDeals'),
+    pipelinesAPI.list(), loadContacts(), loadProducts(), ...(props.creationOnly ? [] : [AgentsAPI.get().then(({ data }) => { agents.value = data || []; }), store.dispatch('jrcCrm/deals/fetchDeals')]),
   ]);
   pipelines.value = pipelinesResponse.data;
   form.pipeline_id = pipelines.value[0]?.id || '';
   await loadStages();
-  if (route.query.new === '1' || route.query.conversationId || route.query.contactId) openForm();
+  if (props.creationOnly || route.query.new === '1' || route.query.conversationId || route.query.contactId) openForm();
 });
 </script>
 
 <template>
-  <div class="flex h-full flex-col bg-n-surface-1 p-6">
+  <div :class="props.creationOnly ? 'contents' : 'flex h-full flex-col bg-n-surface-1 p-6'">
+    <template v-if="!props.creationOnly">
     <div class="mb-6 flex items-center justify-between gap-3">
       <div class="flex items-center gap-3"><span class="flex size-11 items-center justify-center rounded-2xl bg-n-blue-3 text-n-blue-11"><i class="i-lucide-handshake size-5" /></span><div><h2 class="text-2xl font-bold text-n-slate-12">Negócios</h2><p class="text-sm text-n-slate-9">Oportunidades comerciais em andamento</p></div></div>
       <div class="flex gap-2"><RouterLink :to="{ name: 'crm_funnel' }" class="rounded-xl border border-n-weak bg-n-solid-2 px-4 py-2.5 text-sm font-semibold text-n-slate-12 shadow-sm">Ver Funil</RouterLink><button type="button" class="rounded-xl bg-n-brand px-4 py-2.5 text-sm font-semibold text-white shadow-md" @click="openForm">Novo Negócio</button></div>
@@ -374,17 +385,18 @@ onMounted(async () => {
       </table>
     </div>
 
+    </template>
     <Teleport to="body">
-      <div v-if="route.query.dealId && (detailLoading || detailError)" class="fixed inset-0 z-[80] flex justify-end bg-black/40" @click.self="closeDetails">
+      <div v-if="!props.creationOnly && route.query.dealId && (detailLoading || detailError)" class="fixed inset-0 z-[80] flex justify-end bg-black/40" @click.self="closeDetails">
         <aside class="h-full w-full max-w-2xl overflow-auto bg-n-solid-2 p-6 shadow-2xl">
           <button class="mb-4 rounded-lg border border-n-weak px-3 py-2" @click="closeDetails">{{ projectText('CLOSE_RELATED', 'Fechar') }}</button>
           <p v-if="detailLoading" role="status">{{ projectText('RELATED_DEAL_LOADING', 'Carregando negócio...') }}</p>
           <div v-else role="alert"><p>{{ detailError }}</p><button class="mt-4 rounded-lg border border-n-weak px-3 py-2" @click="loadDetails">{{ projectText('RETRY', 'Tentar novamente') }}</button></div>
         </aside>
       </div>
-      <div v-if="showForm" :class="crmControlClasses" class="fixed inset-0 z-[80] flex items-center justify-center bg-black/45 p-4" @click.self="showForm = false" @keydown.esc="showForm = false">
-        <form class="max-h-[94vh] w-full max-w-4xl overflow-auto rounded-2xl bg-n-solid-2 p-6 shadow-2xl" @submit.prevent="save">
-          <div class="flex items-start justify-between gap-4"><div><div class="flex items-center gap-3"><span class="grid size-11 place-content-center rounded-xl bg-blue-700 text-white"><i class="i-lucide-briefcase-business size-5" /></span><div><h3 class="text-xl font-bold text-n-slate-12">Novo negócio</h3><p class="text-xs text-n-slate-9">Registre uma nova oportunidade comercial</p></div></div><p v-if="form.conversation_id" class="mt-2 text-xs text-n-teal-11">Criando a partir da conversa #{{ form.conversation_id }}.</p></div><button type="button" :aria-label="t('CRM.CREATION.CLOSE')" class="i-lucide-x size-5" @click="showForm = false" /></div>
+      <div v-if="showForm" :class="crmControlClasses" class="fixed inset-0 z-[80] flex items-center justify-center bg-black/45 p-4" @click.self="closeForm" @keydown.esc="closeForm">
+        <form role="dialog" aria-modal="true" aria-labelledby="deal-create-title" class="max-h-[94vh] w-full max-w-4xl overflow-auto rounded-2xl bg-n-solid-2 p-6 shadow-2xl" @submit.prevent="save">
+          <div class="flex items-start justify-between gap-4"><div><div class="flex items-center gap-3"><span class="grid size-11 place-content-center rounded-xl bg-blue-700 text-white"><i class="i-lucide-briefcase-business size-5" /></span><div><h3 class="text-xl font-bold text-n-slate-12">Novo negócio</h3><p class="text-xs text-n-slate-9">Registre uma nova oportunidade comercial</p></div></div><p v-if="form.conversation_id" class="mt-2 text-xs text-n-teal-11">Criando a partir da conversa #{{ form.conversation_id }}.</p></div><button type="button" :aria-label="t('CRM.CREATION.CLOSE')" class="i-lucide-x size-5" @click="closeForm" /></div>
           <div class="my-5 grid grid-cols-3 gap-3 text-xs font-semibold"><div class="rounded-xl bg-blue-50 p-3 text-blue-700"><span class="mr-2 inline-grid size-6 place-content-center rounded-full bg-blue-600 text-white">1</span>Informações</div><div class="rounded-xl bg-violet-50 p-3 text-violet-700"><span class="mr-2 inline-grid size-6 place-content-center rounded-full bg-violet-600 text-white">2</span>Produtos e valores</div><div class="rounded-xl bg-emerald-50 p-3 text-emerald-700"><span class="mr-2 inline-grid size-6 place-content-center rounded-full bg-emerald-600 text-white">3</span>Próxima ação</div></div>
           <section class="rounded-2xl border border-n-weak p-4">
             <h4
@@ -483,7 +495,7 @@ onMounted(async () => {
           </section>
           <section class="mt-4 rounded-2xl border border-n-weak p-4"><h4 class="mb-3 flex items-center gap-2 font-semibold text-n-slate-12"><i class="i-lucide-package-plus size-4 text-violet-600" />Produtos e valores</h4><div class="grid gap-2 md:grid-cols-[1.5fr_80px_130px_120px_auto]"><select v-model="productForm.product_id" class="rounded-lg border border-n-weak px-3 py-2 text-sm" @change="selectProduct"><option value="">Selecionar produto</option><option v-for="product in products" :key="product.id" :value="product.id">{{ product.name }}</option></select><input v-model.number="productForm.quantity" type="number" min="1" class="rounded-lg border border-n-weak px-2 py-2" placeholder="Qtd" /><input v-model="productForm.unit_price" type="number" min="0" step="0.01" class="rounded-lg border border-n-weak px-2 py-2" placeholder="Preço" /><input v-model="productForm.discount" type="number" min="0" step="0.01" class="rounded-lg border border-n-weak px-2 py-2" placeholder="Desconto" /><button type="button" class="rounded-lg bg-blue-700 px-3 py-2 text-sm font-semibold text-white" @click="addProductDraft">+ Adicionar</button></div><div v-if="dealItems.length" class="mt-4 overflow-auto"><table class="min-w-full text-sm"><thead><tr class="border-b border-n-weak text-left text-xs uppercase text-n-slate-10"><th class="py-2">Produto</th><th class="py-2 text-right">Qtd</th><th class="py-2 text-right">Unitário</th><th class="py-2 text-right">Desconto</th><th class="py-2 text-right">Total</th><th></th></tr></thead><tbody><tr v-for="(item,index) in dealItems" :key="`${item.product_id}-${index}`" class="border-b border-n-weak"><td class="py-2">{{ item.product.name }}</td><td class="py-2 text-right">{{ item.quantity }}</td><td class="py-2 text-right">R$ {{ moneyInput(item.unit_price_cents) }}</td><td class="py-2 text-right">R$ {{ moneyInput(item.discount_cents) }}</td><td class="py-2 text-right font-semibold">R$ {{ moneyInput(item.unit_price_cents * item.quantity - item.discount_cents) }}</td><td class="text-right"><button type="button" class="i-lucide-trash-2 text-red-500" @click="removeProductDraft(index)" /></td></tr></tbody></table><div class="ml-auto mt-3 grid max-w-xs gap-1 text-sm"><div class="flex justify-between"><span>Subtotal</span><strong>R$ {{ moneyInput(itemsSubtotal) }}</strong></div><div class="flex justify-between"><span>Desconto</span><strong>R$ {{ moneyInput(itemsDiscount) }}</strong></div><div class="flex justify-between border-t border-n-weak pt-2 text-lg"><span>Valor total</span><strong class="text-emerald-600">R$ {{ moneyInput(itemsTotal) }}</strong></div></div></div><input v-else v-model="form.value" type="number" min="0" step="0.01" placeholder="Valor do negócio (R$)" class="mt-3 w-full rounded-lg border border-n-weak px-3 py-2" /></section>
           <section class="mt-4 rounded-2xl border border-n-weak p-4"><h4 class="mb-3 flex items-center gap-2 font-semibold text-n-slate-12"><i class="i-lucide-calendar-plus size-4 text-emerald-600" />Próxima ação</h4><div class="grid gap-3 md:grid-cols-3"><label class="text-xs font-semibold">Tipo<select v-model="form.next_activity_type" class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"><option value="call">Ligação</option><option value="meeting">Reunião</option><option value="whatsapp">WhatsApp</option><option value="email">E-mail</option><option value="follow_up">Acompanhamento</option></select></label><label class="text-xs font-semibold">Data e hora<input v-model="form.next_activity_at" type="datetime-local" class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2" /></label><label class="text-xs font-semibold">Título<input v-model="form.next_activity_title" class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2" placeholder="Ex.: Ligação de retorno" /></label></div></section>
-          <div class="mt-5 flex justify-end gap-2"><button type="button" class="mr-auto rounded-xl border border-n-weak px-4 py-2.5 text-sm" :disabled="saving" @click="dealDraft.discard">{{ t('CRM.CREATION.DISCARD') }}</button><button type="button" class="rounded-xl border border-n-weak px-4 py-2.5 text-sm font-semibold" @click="showForm = false">Cancelar</button><button type="submit" :disabled="saving" class="rounded-xl bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white shadow-md disabled:opacity-50"><i class="i-lucide-check mr-1 size-4" /> Criar negócio</button></div>
+          <div class="mt-5 flex justify-end gap-2"><button type="button" class="mr-auto rounded-xl border border-n-weak px-4 py-2.5 text-sm" :disabled="saving" @click="dealDraft.discard">{{ t('CRM.CREATION.DISCARD') }}</button><button type="button" class="rounded-xl border border-n-weak px-4 py-2.5 text-sm font-semibold" @click="closeForm">Cancelar</button><button type="submit" :disabled="saving" class="rounded-xl bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white shadow-md disabled:opacity-50"><i class="i-lucide-check mr-1 size-4" /> Criar negócio</button></div>
         </form>
       </div>
 

@@ -30,6 +30,7 @@ vi.mock('dashboard/api/serviceDeskLifecycle', () => ({
 }));
 import LifecyclePanel from '../components/LifecyclePanel.vue';
 import SupervisorPanel from '../components/SupervisorPanel.vue';
+import MetricRing from '../components/MetricRing.vue';
 import TicketDialogView from '../views/TicketDialogView.vue';
 
 // jsdom has no native dialog API. Restore its original descriptor afterwards.
@@ -144,9 +145,9 @@ describe('Service Desk presentation preserves operational authority', () => {
     wrappers.push(wrapper);
     const bars = wrapper
       .get('[data-testid="sla-measured-bars"]')
-      .findAll('progress');
-    expect(bars.map(bar => bar.attributes('value'))).toEqual(['2', '3', '1']);
-    expect(bars.every(bar => bar.attributes('max') === '8')).toBe(true);
+      .findAllComponents(MetricRing);
+    expect(bars.map(bar => bar.props('value'))).toEqual([2, 3, 1]);
+    expect(bars.every(bar => bar.props('maximum') === 8)).toBe(true);
     expect(wrapper.text()).toContain('100.25');
     expect(wrapper.text()).toContain('—');
     expect(wrapper.text()).not.toContain('%');
@@ -161,7 +162,7 @@ describe('Service Desk presentation preserves operational authority', () => {
       global: globals(),
     });
     wrappers.push(wrapper);
-    expect(wrapper.find('progress').exists()).toBe(false);
+    expect(wrapper.findComponent(MetricRing).exists()).toBe(false);
     expect(wrapper.text()).toContain(
       messages.JRC_SERVICE_DESK.EXPERIENCE.sla_unavailable
     );

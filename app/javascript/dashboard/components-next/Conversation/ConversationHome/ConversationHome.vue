@@ -6,7 +6,7 @@ import { useConversationHome } from './useConversationHome';
 import { homeMetrics, homeTones } from './presentation';
 
 const { t, locale } = useI18n();
-const avatarUrl = '/brand-assets/jrc-copilot-avatar.png';
+const avatarUrl = '/brand-assets/jrc-copilot-character-transparent.png';
 const emit = defineEmits(['navigate']);
 const home = useConversationHome();
 const { user, summary, crmAllowed, failed, loading, generatedAt } = home;
@@ -76,7 +76,7 @@ const suggestedPrompts = computed(() => [
           <img
             :src="avatarUrl"
             alt=""
-            class="size-24 object-contain 2xl:size-32"
+            class="size-24 object-contain drop-shadow-lg 2xl:size-32"
           />
           <span class="font-bold text-n-blue-11">NICO</span>
         </button>

@@ -229,7 +229,7 @@ export default {
       @conversation-load="onConversationLoad"
     >
       <button
-        v-if="isOnExpandedLayout && !conversationId"
+        v-if="!conversationId"
         type="button"
         class="m-3 flex min-h-10 items-center justify-center gap-2 rounded-xl border border-n-blue-6 bg-n-blue-2 px-3 text-sm font-semibold text-n-blue-11 hover:bg-n-blue-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-n-brand"
         @click="$refs.homeDialog.open()"

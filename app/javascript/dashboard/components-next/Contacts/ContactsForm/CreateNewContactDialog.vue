@@ -57,6 +57,18 @@ defineExpose({ open, dialogRef, contactsFormRef, onSuccess });
     overflow-y-auto
     @confirm="handleDialogConfirm"
   >
+    <header
+      class="mb-5 flex items-center gap-4 rounded-2xl border border-n-blue-6 bg-gradient-to-br from-n-blue-2 via-n-solid-2 to-n-teal-2 p-5"
+    >
+      <span
+        class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-n-blue-3 text-n-blue-11"
+      >
+        <span class="i-lucide-user-round-plus size-6" aria-hidden="true" />
+      </span>
+      <h2 class="text-xl font-bold text-n-slate-12">
+        {{ t('JRC_HOME.ACTIONS.CONTACT') }}
+      </h2>
+    </header>
     <ContactsForm
       ref="contactsFormRef"
       is-new-contact

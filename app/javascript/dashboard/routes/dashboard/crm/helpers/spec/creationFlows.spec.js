@@ -199,3 +199,23 @@ it('DEAL-03 submits inline contact to the official master endpoint and returns i
   expect(wrapper.emitted('created')[0][0].id).toBe(81);
   expect(readDraft(key('crm:new_contact:33'))).toBeNull();
 });
+
+
+it('opens the existing opportunity form over the current page without following its detail query', async () => {
+  route.name = 'jrc_cockpit';
+  route.query = { dealId: '999', page: '3', search: 'preservar' };
+  const wrapper = await page(DealsIndex, false, { creationOnly: true });
+  expect(wrapper.find('form[role="dialog"]').exists()).toBe(true);
+  expect(wrapper.find('table').exists()).toBe(false);
+  expect(input(wrapper, 'Título do negócio').element.value).toBe('');
+  await input(wrapper, 'Título do negócio').setValue('Oportunidade no contexto atual');
+  await wrapper.get('form').trigger('submit');
+  await flushPromises();
+  expect(dealsAPI.create).toHaveBeenCalledWith(expect.objectContaining({
+    deal: expect.objectContaining({ title: 'Oportunidade no contexto atual', pipeline_id: 10, stage_id: 11 }),
+  }));
+  expect(useRouter().push).not.toHaveBeenCalled();
+  expect(useRouter().replace).not.toHaveBeenCalled();
+  expect(route.query).toEqual({ dealId: '999', page: '3', search: 'preservar' });
+  expect(wrapper.emitted('close')).toHaveLength(1);
+});

@@ -1,13 +1,20 @@
 import { config, mount, flushPromises } from '@vue/test-utils';
 import { ref } from 'vue';
-import { useEventBus } from '@vueuse/core';
-import { quickActionTarget } from '../useQuickActionTarget';
 import { createI18n } from 'vue-i18n';
 import ptBR from 'dashboard/i18n/locale/pt_BR';
 import en from 'dashboard/i18n/locale/en';
 import GlobalQuickActions from '../GlobalQuickActions.vue';
 import ConversationQuickActions from '../../Conversation/ConversationHome/ConversationQuickActions.vue';
 import GlobalCallPanel from '../GlobalCallPanel.vue';
+
+vi.mock('../GlobalCrmCreation.vue', () => ({
+  default: {
+    name: 'GlobalCrmCreation',
+    props: ['kind'],
+    emits: ['close'],
+    template: '<div data-crm-dialog />',
+  },
+}));
 
 vi.mock('../GlobalCallPanel.vue', () => ({
   default: {
@@ -148,11 +155,10 @@ describe('Global quick actions preserve existing handlers', () => {
     await flushPromises();
     expect(wrapper.findComponent(GlobalCallPanel).exists()).toBe(false);
     await wrapper.get('button[aria-label="Novo lead"]').trigger('click');
-    expect(mocks.push).toHaveBeenLastCalledWith({
-      name: 'crm_leads',
-      params: { accountId: 1 },
-      query: { new: '1' },
-    });
+    expect(mocks.push).not.toHaveBeenCalled();
+    expect(
+      wrapper.findComponent({ name: 'GlobalCrmCreation' }).props('kind')
+    ).toBe('LEAD');
     expect(mocks.dispatch).not.toHaveBeenCalled();
   });
 
@@ -167,27 +173,18 @@ describe('Global quick actions preserve existing handlers', () => {
     expect(mocks.push).not.toHaveBeenCalled();
   });
 
-  it('reopens the existing CRM form on repeated shortcut clicks without changing its destination', async () => {
-    mocks.route.name = 'crm_leads';
-    mocks.push.mockResolvedValue(undefined);
-    const listener = vi.fn();
-    const stop = useEventBus(quickActionTarget).on(listener);
+  it('keeps the current route on repeated CRM clicks and closes on account change', async () => {
     wrapper = mount(GlobalQuickActions);
     await wrapper.get('button[aria-label="Novo lead"]').trigger('click');
-    await flushPromises();
+    const dialog = wrapper.findComponent({ name: 'GlobalCrmCreation' });
     await wrapper.get('button[aria-label="Novo lead"]').trigger('click');
-    await flushPromises();
-    expect(mocks.push).toHaveBeenLastCalledWith({
-      name: 'crm_leads',
-      params: { accountId: 1 },
-      query: { new: '1' },
-    });
-    expect(listener).toHaveBeenCalledTimes(2);
-    expect(listener).toHaveBeenLastCalledWith(
-      { name: 'crm_leads', accountId: 1 },
-      undefined
+    expect(wrapper.findComponent({ name: 'GlobalCrmCreation' }).vm).toBe(
+      dialog.vm
     );
-    stop();
+    expect(mocks.push).not.toHaveBeenCalled();
+    mocks.home.accountId.value = 2;
+    await flushPromises();
+    expect(wrapper.find('[data-crm-dialog]').exists()).toBe(false);
   });
 
   it('uses the existing NICO and shows only one docked avatar', async () => {

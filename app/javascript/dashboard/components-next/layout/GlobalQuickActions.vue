@@ -16,6 +16,7 @@ import CreateNewContactDialog from 'dashboard/components-next/Contacts/ContactsF
 import ConversationQuickActions from 'dashboard/components-next/Conversation/ConversationHome/ConversationQuickActions.vue';
 import { useQuickActionAccess } from './useQuickActionAccess';
 import GlobalCallPanel from './GlobalCallPanel.vue';
+import GlobalCrmCreation from './GlobalCrmCreation.vue';
 
 defineProps({ callActive: { type: Boolean, default: false } });
 const { t } = useI18n();
@@ -28,6 +29,12 @@ const expanded = ref(false);
 const toggle = ref(null);
 const contactDialog = ref(null);
 const phoneOpen = ref(false);
+const crmCreation = ref(null);
+const activeCrmCreation = computed(() =>
+  actions.value.some(action => action.key === crmCreation.value)
+    ? crmCreation.value
+    : null
+);
 const phoneTrigger = ref(null);
 const callAction = computed(() =>
   actions.value.find(action => action.key === 'CALL')
@@ -38,9 +45,13 @@ const canCreateContact = computed(() =>
 const contactDialogKey = computed(() => `${accountId.value}:${userId.value}`);
 watch([() => route.fullPath, contactDialogKey], () => {
   expanded.value = false;
+  crmCreation.value = null;
 });
 watch(contactDialogKey, () => {
   phoneOpen.value = false;
+});
+watch(activeCrmCreation, value => {
+  if (!value) crmCreation.value = null;
 });
 watch(callAction, action => {
   if (!action) phoneOpen.value = false;
@@ -67,6 +78,8 @@ const activate = async key => {
   else if (action.command === 'call') {
     phoneTrigger.value = document.activeElement;
     phoneOpen.value = true;
+  } else if (['LEAD', 'DEAL'].includes(key)) {
+    crmCreation.value = key;
   } else {
     const alreadyOnTarget = route.name === action.to.name;
     const identity = contactDialogKey.value;
@@ -134,6 +147,12 @@ useEventBus(quickActionCommand).on(request => {
       :key="contactDialogKey"
       ref="contactDialog"
       @create="createContact"
+    />
+    <GlobalCrmCreation
+      v-if="activeCrmCreation"
+      :key="`${contactDialogKey}:${activeCrmCreation}`"
+      :kind="activeCrmCreation"
+      @close="crmCreation = null"
     />
     <GlobalCallPanel
       v-if="phoneOpen && callAction"
