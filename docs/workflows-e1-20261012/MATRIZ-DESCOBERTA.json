@@ -1,0 +1,493 @@
+{
+  "schema_version": 1,
+  "scope": "descoberta estatica sem importacao",
+  "rows": [
+    {
+      "origem": "Helpedesk",
+      "entidade": "Clientes, empresas atendidas e contatos",
+      "destino_existente": [
+        "app/models/jrc_customers/company.rb",
+        "app/models/contact.rb",
+        "app/services/jrc_customers/company_import.rb",
+        "app/models/jrc_service_desk/ticket.rb"
+      ],
+      "vinculo_chave": "DataImportMapping: account + source_provider + source_object_type + source_object_id; prefixo de instalacao deve ser definido se IDs nao forem globais. Nao usar IDs numericos locais como IDs externos.; Company.id + Contact.company_id + Ticket.requester_id/company_id",
+      "lacunas": "Importador completo Helpedesk ausente; CSV Company e contatos nao preserva sozinho todo o historico. Codigo ERP/documento fiscal nao substitui PK de origem.",
+      "documentacao_necessaria": "Dicionario de clientes/contatos, documentos, empresa dona, chaves, amostra sanitizada e regras de merge.",
+      "criterio_reconciliacao": "Mapa explicito por tenant; documento fiscal como candidato, confirmar empresa/unidade e ambiguidades; zero fusoes cruzadas.",
+      "permissoes": "JrcCustomers::DirectoryPolicy; account_id; jrc_customer_master (desabilitado no Grupo JRC); JrcServiceDesk::AccessContext e policies; account_id + unit_id + UnitMembership; sem ampliar concessoes"
+    },
+    {
+      "origem": "Helpedesk",
+      "entidade": "Empresa operadora e unidades operacionais",
+      "destino_existente": [
+        "app/models/jrc_service_desk/operator_company.rb",
+        "app/models/jrc_service_desk/unit.rb",
+        "app/models/jrc_crm/business_unit.rb"
+      ],
+      "vinculo_chave": "OperatorCompany.id -> Unit.operator_company_id; BusinessUnit.id e BusinessUnit.company_id sao dominios distintos.",
+      "lacunas": "Operadora SD nao e automaticamente Company cliente/emissora; SD Unit nao e BusinessUnit CRM.",
+      "documentacao_necessaria": "Definicao oficial de empresa, filial, unidade comercial e unidade operacional na origem.",
+      "criterio_reconciliacao": "Correspondencia aprovada de cada dominio; nunca intercambiar os IDs.",
+      "permissoes": "JrcServiceDesk::AccessContext e policies; account_id + unit_id + UnitMembership; sem ampliar concessoes; permissao estrutural"
+    },
+    {
+      "origem": "Helpedesk",
+      "entidade": "Usuarios, agentes, grupos, equipes, filas e atribuicoes",
+      "destino_existente": [
+        "app/models/user.rb",
+        "app/models/account_user.rb",
+        "app/models/team.rb",
+        "app/models/team_member.rb",
+        "app/models/jrc_service_desk/queue.rb",
+        "app/models/jrc_service_desk/unit_membership.rb"
+      ],
+      "vinculo_chave": "DataImportMapping: account + source_provider + source_object_type + source_object_id; prefixo de instalacao deve ser definido se IDs nao forem globais. Nao usar IDs numericos locais como IDs externos.; User != AccountUser != UnitMembership; Queue.team_id -> Team.id",
+      "lacunas": "Autoria de inativos requer tratamento preservador; nomes/e-mails nao concedem direitos operacionais.",
+      "documentacao_necessaria": "PK/FK de usuarios/equipes, perfis, escopos e usuarios excluidos/inativos; sem senhas ou tokens.",
+      "criterio_reconciliacao": "Todos os autores historicos identificaveis; filas/equipes corretas; nenhum grant ativo criado por inferencia.",
+      "permissoes": "JrcServiceDesk::AccessContext e policies; account_id + unit_id + UnitMembership; sem ampliar concessoes; roles/custom roles por conta"
+    },
+    {
+      "origem": "Helpedesk",
+      "entidade": "Categorias, subcategorias, tipos, prioridades e status",
+      "destino_existente": [
+        "app/models/jrc_service_desk/category.rb",
+        "app/models/jrc_service_desk/ticket_type.rb",
+        "app/models/jrc_service_desk/priority.rb",
+        "app/models/jrc_service_desk/ticket_status.rb"
+      ],
+      "vinculo_chave": "DataImportMapping: account + source_provider + source_object_type + source_object_id; prefixo de instalacao deve ser definido se IDs nao forem globais. Nao usar IDs numericos locais como IDs externos.; category.parent_id; catalogos por unit_id",
+      "lacunas": "Enums, fases e codigos nao sao equivalentes so pelo nome; registros inativos devem sobreviver historicamente.",
+      "documentacao_necessaria": "Dicionario de codigos e hierarquias, status inicial, terminal, espera e cancelamento.",
+      "criterio_reconciliacao": "Contagens por codigo/fase e hierarquia, sem reclassificacao silenciosa de encerrados.",
+      "permissoes": "JrcServiceDesk::AccessContext e policies; account_id + unit_id + UnitMembership; sem ampliar concessoes; ConfigurationPolicy"
+    },
+    {
+      "origem": "Helpedesk",
+      "entidade": "Campos personalizados e valores",
+      "destino_existente": [
+        "app/services/jrc_service_desk/catalogue_fields.rb",
+        "app/services/jrc_service_desk/catalogue_answers.rb",
+        "app/models/jrc_service_desk/ticket.rb"
+      ],
+      "vinculo_chave": "Ticket.service_fields; schema de catalogo versionado por servico/classificacao",
+      "lacunas": "Nao ha mapa pronto de campos legados; tipos/opcoes e campos restritos precisam de conversao explicita.",
+      "documentacao_necessaria": "Tipos, nulidade, listas, versoes e visibilidade de cada campo.",
+      "criterio_reconciliacao": "Preservar valor original e conversao aprovada; valores nao convertidos em staging, nao descartados.",
+      "permissoes": "JrcServiceDesk::AccessContext e policies; account_id + unit_id + UnitMembership; sem ampliar concessoes; CatalogueAccess"
+    },
+    {
+      "origem": "Helpedesk",
+      "entidade": "SLA, calendarios, horarios e feriados",
+      "destino_existente": [
+        "app/services/jrc_service_desk/snapshot_calendar.rb",
+        "app/models/jrc_service_desk/sla_snapshot.rb",
+        "app/models/jrc_service_desk/sla_cycle.rb",
+        "app/models/jrc_service_desk/sla_clock.rb",
+        "app/models/jrc_service_desk/operational_rule_version.rb"
+      ],
+      "vinculo_chave": "Snapshots/versionamentos por account/unit/ticket, timezone explicito",
+      "lacunas": "Catalogos de SLA legados nao sao politica ativa; cronologias antigas nao devem iniciar clocks atuais.",
+      "documentacao_necessaria": "Regras, calendario historico, timezone/DST, feriados/excecoes, prazos e violacoes.",
+      "criterio_reconciliacao": "Comparar deadlines, duracoes e ciclos; historico conservado sem recalculo retroativo nem ativacao.",
+      "permissoes": "JrcServiceDesk::AccessContext e policies; account_id + unit_id + UnitMembership; sem ampliar concessoes; SlaSnapshotPolicy"
+    },
+    {
+      "origem": "Helpedesk",
+      "entidade": "Contratos de suporte, pausas e motivos de encerramento",
+      "destino_existente": [
+        "app/models/jrc_crm/contract.rb",
+        "app/models/jrc_service_desk/lifecycle_pause.rb",
+        "app/models/jrc_service_desk/lifecycle_transition.rb",
+        "app/models/jrc_service_desk/lifecycle_policy_version.rb"
+      ],
+      "vinculo_chave": "Ticket.contract_id; ciclos/pausas/transicoes por ticket; versao da politica",
+      "lacunas": "Pausa contratual nao inferida de um status; motivos obrigatorios e contrato de origem precisam de tradutor.",
+      "documentacao_necessaria": "Contrato vigente na data, regras de pausa/retomada e motivos de fechamento.",
+      "criterio_reconciliacao": "Preservar motivo/data/autor e autorizacao historica; nao fabricar pausa contratual nem politica ativa.",
+      "permissoes": "JrcServiceDesk::AccessContext e policies; account_id + unit_id + UnitMembership; sem ampliar concessoes; lifecycle permissions"
+    },
+    {
+      "origem": "Helpedesk",
+      "entidade": "Chamados abertos e encerrados, protocolo, descricao e datas",
+      "destino_existente": [
+        "app/models/jrc_service_desk/ticket.rb",
+        "app/services/jrc_service_desk/create_ticket_service.rb"
+      ],
+      "vinculo_chave": "DataImportMapping: account + source_provider + source_object_type + source_object_id; prefixo de instalacao deve ser definido se IDs nao forem globais. Nao usar IDs numericos locais como IDs externos.; protocolo original em referencia de origem, separado do id nativo",
+      "lacunas": "CreateTicketService operacional exige status inicial, membership, fingerprint e idempotencia; nao serve sem adaptacao para carga de chamados fechados.",
+      "documentacao_necessaria": "Exportacao completa, PK/FK, protocolo, status e todas as datas ISO8601 com timezone.",
+      "criterio_reconciliacao": "100% abertos, totais por status/cliente/periodo, protocolos unicos no escopo; dados atuais nao sobrescritos.",
+      "permissoes": "JrcServiceDesk::AccessContext e policies; account_id + unit_id + UnitMembership; sem ampliar concessoes"
+    },
+    {
+      "origem": "Helpedesk",
+      "entidade": "Primeira resposta, atribuicao, pausas, reaberturas, escalonamentos e encerramento",
+      "destino_existente": [
+        "app/models/jrc_service_desk/ticket_event.rb",
+        "app/models/jrc_service_desk/lifecycle_transition.rb",
+        "app/models/jrc_service_desk/sla_cycle.rb"
+      ],
+      "vinculo_chave": "IDs de eventos/ciclos de origem; timestamp, autor e ordem originais",
+      "lacunas": "Event types fechados; nem todo evento externo tem correspondencia nativa. Protocolo de parceiro nao prova resposta tecnica.",
+      "documentacao_necessaria": "Semantica dos eventos, origem de resposta tecnica vs protocolo, estados e autores.",
+      "criterio_reconciliacao": "Ordem/data/fuso/autor e contagem por evento; desconhecidos classificados sem fabricar eventos operacionais.",
+      "permissoes": "JrcServiceDesk::AccessContext e policies; account_id + unit_id + UnitMembership; sem ampliar concessoes; TicketEventPolicy"
+    },
+    {
+      "origem": "Helpedesk",
+      "entidade": "Mensagens publicas, notas internas e comentarios",
+      "destino_existente": [
+        "app/models/jrc_service_desk/ticket_note.rb",
+        "app/services/jrc_service_desk/interaction_publication.rb",
+        "app/services/jrc_service_desk/interaction_visibility.rb"
+      ],
+      "vinculo_chave": "TicketNote.ticket_id/author_membership_id; visibilidade e anterior/versao",
+      "lacunas": "Carga externa inexistente; publicacoes append-only e autores exigem identidade correta. Nao usar autor de importacao como autor original.",
+      "documentacao_necessaria": "ID, corpo, audiencia, autor, datas, edicoes e exclusoes logicas.",
+      "criterio_reconciliacao": "Contagem, hashes de corpo e audiencia; usuarios inativos identificaveis; notas privadas nunca publicadas.",
+      "permissoes": "JrcServiceDesk::AccessContext e policies; account_id + unit_id + UnitMembership; sem ampliar concessoes; TicketNotePolicy"
+    },
+    {
+      "origem": "Helpedesk",
+      "entidade": "Anexos, imagens e documentos",
+      "destino_existente": [
+        "app/models/jrc_service_desk/ticket_note.rb",
+        "app/services/jrc_service_desk/interaction_attachments.rb",
+        "app/services/jrc_service_desk/timeline_attachment.rb"
+      ],
+      "vinculo_chave": "ActiveStorage em TicketNote.files; manifesto origem -> blob/attachment/nota",
+      "lacunas": "UI atual prepara no maximo 5 anexos/20MiB por upload e exige scan; carga historica precisa transporte controlado para volumes maiores, sem perda.",
+      "documentacao_necessaria": "Manifesto de nome/MIME/tamanho/SHA256/ID e storage autorizado.",
+      "criterio_reconciliacao": "Hash dos bytes, tamanho e vinculo; scan real, quarentena para nao verificaveis, nunca marcar clean por suposicao.",
+      "permissoes": "JrcServiceDesk::AccessContext e policies; account_id + unit_id + UnitMembership; sem ampliar concessoes; acesso ao storage e TimelineAttachment"
+    },
+    {
+      "origem": "Helpedesk",
+      "entidade": "Ativos, servicos, incidentes e relacoes entre chamados",
+      "destino_existente": [
+        "app/models/jrc_service_desk/operational_resource.rb",
+        "app/models/jrc_service_desk/resource_ticket_link.rb",
+        "app/models/jrc_service_desk/service.rb",
+        "app/models/jrc_service_desk/incident.rb"
+      ],
+      "vinculo_chave": "OperationalResource/ResourceTicketLink; Service.id; Ticket.incident_id",
+      "lacunas": "Pais/filhos e relacoes arbitrarias nao estao todos representados por estes vinculos; nao presumir equivalencia.",
+      "documentacao_necessaria": "Inventario de ativos/servicos e tipos de relacao/pai-filho, contratos e referencias.",
+      "criterio_reconciliacao": "Todas as FK resolvidas ou listadas como orfaos; tipo de relacao preservado, sem links inventados.",
+      "permissoes": "JrcServiceDesk::AccessContext e policies; account_id + unit_id + UnitMembership; sem ampliar concessoes; OperationalResourcePolicy"
+    },
+    {
+      "origem": "Helpedesk",
+      "entidade": "Pesquisas de satisfacao e apontamentos de tempo",
+      "destino_existente": [
+        "app/models/csat_survey_response.rb",
+        "app/models/jrc_relationship/survey.rb",
+        "app/models/jrc_projects/time_entry.rb"
+      ],
+      "vinculo_chave": "CSAT nativo de Conversation; Survey Relacionamento; TimeEntry de Projetos",
+      "lacunas": "Nao sao substitutos diretos de CSAT/esforco do chamado: vinculos, questoes, escalas e escopo diferem. Relacionamento permanece desabilitado.",
+      "documentacao_necessaria": "Questionarios, respostas, escala, duracoes, ator e vinculo do apontamento.",
+      "criterio_reconciliacao": "Valores/contagens/duracoes por origem; nao converter duracao SLA em tempo trabalhado nem habilitar Relacionamento.",
+      "permissoes": "JrcServiceDesk::AccessContext e policies; account_id + unit_id + UnitMembership; sem ampliar concessoes; policies de origem/destino e flags"
+    },
+    {
+      "origem": "Veccio",
+      "entidade": "Clientes, enderecos, documentos e contatos",
+      "destino_existente": [
+        "app/models/jrc_customers/company.rb",
+        "app/models/contact.rb",
+        "app/services/jrc_customers/company_import.rb",
+        "app/models/jrc_customers/address.rb",
+        "app/models/jrc_customers/contact_point.rb"
+      ],
+      "vinculo_chave": "DataImportMapping: account + source_provider + source_object_type + source_object_id; prefixo de instalacao deve ser definido se IDs nao forem globais. Nao usar IDs numericos locais como IDs externos.; Company.tax_id/person_kind/relationship_type; Contact.company_id",
+      "lacunas": "Amostra Veccio ausente; CompanyImport limitado a 500 linhas/1MiB e preview vinculado ao ator. Importacoes nao equivalem a merge completo.",
+      "documentacao_necessaria": "PK/FK, CNPJ/CPF, filiais, enderecos, status/responsavel e politica de deduplicacao.",
+      "criterio_reconciliacao": "IDs preservados, tipos/documentos reconciliados, contatos sem duplicacao por ambiguidade; empresa atendida separada da interna.",
+      "permissoes": "JrcCustomers::DirectoryPolicy; account_id; jrc_customer_master (desabilitado no Grupo JRC)"
+    },
+    {
+      "origem": "Veccio",
+      "entidade": "Leads, origem, qualificacao e conversao",
+      "destino_existente": [
+        "app/models/jrc_crm/lead.rb",
+        "app/services/jrc_crm/import_processor_service.rb",
+        "app/models/jrc_crm/import_batch.rb",
+        "app/services/jrc_customers/lead_contact_linker.rb"
+      ],
+      "vinculo_chave": "DataImportMapping: account + source_provider + source_object_type + source_object_id; prefixo de instalacao deve ser definido se IDs nao forem globais. Nao usar IDs numericos locais como IDs externos.; Lead.contact_id/company_id e mapa de conversao",
+      "lacunas": "ImportProcessor trata leads por email/telefone; insuficiente para lineage por PK e historico. ImportBatch enum inclui deals mas processador nao implementa esse ramo.",
+      "documentacao_necessaria": "Estados, campos de qualificacao, fonte, PK e FK de conversao/cliente.",
+      "criterio_reconciliacao": "100% em andamento e nenhum contato/lead duplicado em reexecucao; nao juntar apenas por telefone/email.",
+      "permissoes": "CRM BaseController, OrganizationalVisibility e CrmPolicy; account + unidade comercial + ownership/equipe; JrcCustomers::DirectoryPolicy; account_id; jrc_customer_master (desabilitado no Grupo JRC)"
+    },
+    {
+      "origem": "Veccio",
+      "entidade": "Campanhas e origem comercial",
+      "destino_existente": [
+        "app/models/jrc_crm/campaign.rb",
+        "app/services/jrc_campaigns/approval_service.rb"
+      ],
+      "vinculo_chave": "Campanha CRM != campanha de mensagens; IDs por origem",
+      "lacunas": "Nao disparar campanha nem reutilizar automaticamente aprovacao de mensagens.",
+      "documentacao_necessaria": "Dicionario distingue marketing comercial de campanha de envio, IDs e vinculacoes.",
+      "criterio_reconciliacao": "Links e contagens reconciliados; nenhuma mensagem/execucao real; aprovacoes nativas preservadas.",
+      "permissoes": "CRM BaseController, OrganizationalVisibility e CrmPolicy; account + unidade comercial + ownership/equipe; gates de Campanhas"
+    },
+    {
+      "origem": "Veccio",
+      "entidade": "Oportunidades e produtos associados",
+      "destino_existente": [
+        "app/models/jrc_crm/deal.rb",
+        "app/models/jrc_crm/deal_product.rb",
+        "app/services/jrc_crm/sales_import_service.rb"
+      ],
+      "vinculo_chave": "DataImportMapping: account + source_provider + source_object_type + source_object_id; prefixo de instalacao deve ser definido se IDs nao forem globais. Nao usar IDs numericos locais como IDs externos.; Deal.contact_id/company_id, DealProduct.product_id",
+      "lacunas": "SalesImportService migra modulo Sales interno, nao Veccio; legacy_sales_* nao pode guardar PK externa sem mapa separado.",
+      "documentacao_necessaria": "PK/FK, itens, responsavel, valor, moeda, fonte e estados aberto/ganho/perdido.",
+      "criterio_reconciliacao": "100% processos em curso, totais/itens por negocio e reexecucao sem duplicados nem gates de venda reais.",
+      "permissoes": "CRM BaseController, OrganizationalVisibility e CrmPolicy; account + unidade comercial + ownership/equipe"
+    },
+    {
+      "origem": "Veccio",
+      "entidade": "Funis, etapas, probabilidades e motivos de ganho/perda",
+      "destino_existente": [
+        "app/models/jrc_crm/pipeline.rb",
+        "app/models/jrc_crm/stage.rb",
+        "app/models/jrc_crm/lost_reason.rb",
+        "app/services/jrc_crm/sales_import_service.rb"
+      ],
+      "vinculo_chave": "DataImportMapping: account + source_provider + source_object_type + source_object_id; prefixo de instalacao deve ser definido se IDs nao forem globais. Nao usar IDs numericos locais como IDs externos.; Stage.pipeline_id; motivo e probabilidades",
+      "lacunas": "Estados/terminais precisam de crosswalk; codigo interno legacy_sales_* tem escopo exclusivo do Sales.",
+      "documentacao_necessaria": "Codigos, ordem, fase terminal, probabilidade e motivos historicos.",
+      "criterio_reconciliacao": "Mesma ordenacao/terminalidade e contagens por etapa; nao marcar oportunidade ganha por traducao de nome.",
+      "permissoes": "CRM BaseController, OrganizationalVisibility e CrmPolicy; account + unidade comercial + ownership/equipe"
+    },
+    {
+      "origem": "Veccio",
+      "entidade": "Atividades, tarefas, compromissos e reunioes",
+      "destino_existente": [
+        "app/models/jrc_crm/activity.rb",
+        "app/models/jrc_projects/task.rb"
+      ],
+      "vinculo_chave": "DataImportMapping: account + source_provider + source_object_type + source_object_id; prefixo de instalacao deve ser definido se IDs nao forem globais. Nao usar IDs numericos locais como IDs externos.; Activity.deal_id/owner_id/related_to; datas e autores",
+      "lacunas": "Task de Projeto nao e Activity de CRM; importar passado nao deve criar lembretes ou nova agenda sem politica.",
+      "documentacao_necessaria": "Tipos, timezone, conclusao, participantes, vinculos e observacoes.",
+      "criterio_reconciliacao": "Datas/status/autores e FK reconciliados; zero novos lembretes da carga historica.",
+      "permissoes": "CRM BaseController, OrganizationalVisibility e CrmPolicy; account + unidade comercial + ownership/equipe; policies de Projetos para tarefas especificas"
+    },
+    {
+      "origem": "Veccio",
+      "entidade": "Catalogo de produtos e servicos",
+      "destino_existente": [
+        "app/models/jrc_crm/product.rb",
+        "app/serializers/jrc_crm/product_serializer.rb"
+      ],
+      "vinculo_chave": "DataImportMapping: account + source_provider + source_object_type + source_object_id; prefixo de instalacao deve ser definido se IDs nao forem globais. Nao usar IDs numericos locais como IDs externos.; SKU unico por account; billing_model/currency/unit",
+      "lacunas": "SKU nao garante identidade ERP nem tabela de preco; floor zero e recorrencia precisam de decisao.",
+      "documentacao_necessaria": "PK, SKU, unidade, recorrencia, moeda, pisos e fonte oficial.",
+      "criterio_reconciliacao": "Nao duplicar produto existente; comparar unidades/modelos monetarios sem converter por suposicao.",
+      "permissoes": "CRM BaseController, OrganizationalVisibility e CrmPolicy; account + unidade comercial + ownership/equipe; crm_admin? catalogo atual preservado"
+    },
+    {
+      "origem": "Veccio",
+      "entidade": "Propostas, versoes, itens, descontos e condicoes",
+      "destino_existente": [
+        "app/models/jrc_crm/proposal.rb",
+        "app/models/jrc_crm/proposal_item.rb",
+        "app/services/jrc_crm/commercial_financials.rb",
+        "app/services/jrc_crm/proposal_to_order_service.rb"
+      ],
+      "vinculo_chave": "DataImportMapping: account + source_provider + source_object_type + source_object_id; prefixo de instalacao deve ser definido se IDs nao forem globais. Nao usar IDs numericos locais como IDs externos.; Proposal.version_number e eventos; ProposalItem.proposal_id",
+      "lacunas": "Versoes/pisos de origem nao sao novas aprovacoes nativas; documentos aceitos nao podem ser revalorados silenciosamente pelo importador.",
+      "documentacao_necessaria": "Todas as versoes, itens, impostos/frete/setup, moedas, datas e documentos aceitos.",
+      "criterio_reconciliacao": "Totais exatos de cada versao, PDF original/hash, vinculo ao negocio; divergencias reportadas sem recalculo destrutivo.",
+      "permissoes": "CRM BaseController, OrganizationalVisibility e CrmPolicy; account + unidade comercial + ownership/equipe"
+    },
+    {
+      "origem": "Veccio",
+      "entidade": "Pedidos e Backoffice",
+      "destino_existente": [
+        "app/models/jrc_crm/sales_order.rb",
+        "app/models/jrc_crm/order_item.rb",
+        "app/models/jrc_crm/backoffice_request.rb",
+        "app/services/jrc_crm/order_approval_service.rb"
+      ],
+      "vinculo_chave": "DataImportMapping: account + source_provider + source_object_type + source_object_id; prefixo de instalacao deve ser definido se IDs nao forem globais. Nao usar IDs numericos locais como IDs externos.; Pedido -> Proposta/Negocio/Cliente; snapshot de termos",
+      "lacunas": "SalesOrder.after_save pede aprovacao em pending; carga precisa modo historico separado, sem bypass global de autorizacao.",
+      "documentacao_necessaria": "IDs/estados, itens, pedido direto vs proposta, aprovadores e ocorrencias.",
+      "criterio_reconciliacao": "Totais/estados/FK e decisoes antigas preservadas; nenhuma solicitacao nova gerada ao importar.",
+      "permissoes": "CRM BaseController, OrganizationalVisibility e CrmPolicy; account + unidade comercial + ownership/equipe; OrderApprovalService preservado"
+    },
+    {
+      "origem": "Veccio",
+      "entidade": "Contratos, itens, documentos e assinaturas",
+      "destino_existente": [
+        "app/models/jrc_crm/contract.rb",
+        "app/models/jrc_crm/contract_item.rb",
+        "app/services/jrc_crm/signed_pdf_validation.rb"
+      ],
+      "vinculo_chave": "DataImportMapping: account + source_provider + source_object_type + source_object_id; prefixo de instalacao deve ser definido se IDs nao forem globais. Nao usar IDs numericos locais como IDs externos.; Contract.sales_order_id, itens e storage",
+      "lacunas": "Validacao estrutural de PDF/nome manual nao prova identidade de signatario CEO. Fonte de evidencias pendente.",
+      "documentacao_necessaria": "Provedor, envelope, documento, partes, status, datas, integridade e repositorio oficial.",
+      "criterio_reconciliacao": "Bytes/hash e estados originais; evidencias incompletas marcadas para revisao, nao gerar novas assinaturas.",
+      "permissoes": "CRM BaseController, OrganizationalVisibility e CrmPolicy; account + unidade comercial + ownership/equipe; acesso documental autorizado"
+    },
+    {
+      "origem": "Veccio",
+      "entidade": "E-mails, interacoes, anexos e trilha de alteracoes",
+      "destino_existente": [
+        "app/models/conversation.rb",
+        "app/models/message.rb",
+        "app/models/jrc_crm/deal_conversation.rb",
+        "app/models/jrc_crm/proposal_event.rb",
+        "app/models/jrc_crm/audit_event.rb",
+        "app/models/data_import_mapping.rb"
+      ],
+      "vinculo_chave": "DataImportMapping: account + source_provider + source_object_type + source_object_id; prefixo de instalacao deve ser definido se IDs nao forem globais. Nao usar IDs numericos locais como IDs externos.; autoria e datas; storage/message/CRM FK",
+      "lacunas": "Adaptador Intercom nao importa Veccio automaticamente; eventos historicos nao significam envio confirmado agora.",
+      "documentacao_necessaria": "Corpos/visibilidade, mailbox/inbox, autoria, datas, versoes/edicoes, manifestos e relacionamento com documento.",
+      "criterio_reconciliacao": "Contagem/hash/autoria/privacidade, nenhuma mensagem enviada e nenhuma publicacao reencenada.",
+      "permissoes": "CRM BaseController, OrganizationalVisibility e CrmPolicy; account + unidade comercial + ownership/equipe; Conversation/Inbox/Message policies"
+    },
+    {
+      "origem": "Bentivi",
+      "entidade": "Identificacao da instalacao e integracoes existentes",
+      "destino_existente": [
+        "app/models/jrc_nico/erp_binding.rb",
+        "app/services/jrc_nico/erp_client.rb",
+        "app/services/jrc_nico/erp_context.rb",
+        "docs/INTEGRACAO-ERP-BEMTEVI-HELPDESK.md"
+      ],
+      "vinculo_chave": "ErpBinding cnpj + bemtevi_customer_id + helpdesk_company_id; ErpClient apenas resolve/context via sidecar",
+      "lacunas": "Equivalencia BEMTEVI/Bentivi/Bentevi confirmada pelo usuario em 12/10/2026. Consumidores de conversa NICO nao sao ETL de dados completos. Sidecar externo e APIs atuais nao verificados.",
+      "documentacao_necessaria": "Instalacao e fornecedor, documentacao vigente de API, owners, ambiente e efeitos de cada operacao; grafias equivalentes ja confirmadas.",
+      "criterio_reconciliacao": "Identificar instalacao/escopos/interfaces do mesmo ERP; nenhuma consulta/escrita externa nesta rodada.",
+      "permissoes": "ErpContext: allowlist de contas + admin + binding habilitado e contato autorizado; segredos no cofre"
+    },
+    {
+      "origem": "Bentivi",
+      "entidade": "Clientes oficiais, filiais, grupos e fornecedores",
+      "destino_existente": [
+        "app/models/jrc_customers/company.rb",
+        "app/models/contact.rb",
+        "app/services/jrc_customers/company_import.rb"
+      ],
+      "vinculo_chave": "DataImportMapping: account + source_provider + source_object_type + source_object_id; prefixo de instalacao deve ser definido se IDs nao forem globais. Nao usar IDs numericos locais como IDs externos.; codigo ERP estavel via mapa, CNPJ/CPF como candidato; Company.relationship_type supplier/internal/customer",
+      "lacunas": "Autoridade por campo nao definida; grupo economico/filial requer PK oficial. Fornecedor nao e automaticamente cliente. Nao ha model completo de grupo economico identificado; Company.parent_company_id cobre hierarquia de filiais, nao todas as relacoes ERP.",
+      "documentacao_necessaria": "Codigo ERP, dados fiscais/endereco/status, grupos/filiais e empresa JRC responsavel; dono de cada campo.",
+      "criterio_reconciliacao": "ERP permanece mestre aprovado; relacionamentos e nulos reconciliados, sem juntar empresas por mesmo nome.",
+      "permissoes": "JrcCustomers::DirectoryPolicy; account_id; jrc_customer_master (desabilitado no Grupo JRC); allowlist ERP futura"
+    },
+    {
+      "origem": "Bentivi",
+      "entidade": "Empresa JRC emissora e unidade comercial",
+      "destino_existente": [
+        "app/models/jrc_customers/company.rb",
+        "app/models/jrc_crm/business_unit.rb",
+        "app/models/jrc_service_desk/operator_company.rb"
+      ],
+      "vinculo_chave": "BusinessUnit.company_id -> Company interna; separado de OperatorCompany/Unit SD",
+      "lacunas": "ERP company ID nao corresponde automaticamente a nenhuma das tres PK nativas.",
+      "documentacao_necessaria": "Organograma oficial, emissor fiscal, empresa dona e equivalencias aprovadas.",
+      "criterio_reconciliacao": "FK por dominio e tenant; escopo operacional nao concedido ao mapear emissor.",
+      "permissoes": "CRM BaseController, OrganizationalVisibility e CrmPolicy; account + unidade comercial + ownership/equipe; JrcServiceDesk::AccessContext e policies; account_id + unit_id + UnitMembership; sem ampliar concessoes; JrcCustomers::DirectoryPolicy; account_id; jrc_customer_master (desabilitado no Grupo JRC)"
+    },
+    {
+      "origem": "Bentivi",
+      "entidade": "Catalogo oficial, familias e tributacao de referencia",
+      "destino_existente": [
+        "app/models/jrc_crm/product.rb"
+      ],
+      "vinculo_chave": "DataImportMapping: account + source_provider + source_object_type + source_object_id; prefixo de instalacao deve ser definido se IDs nao forem globais. Nao usar IDs numericos locais como IDs externos.; Product.currency/billing_model/sales_unit; metadata para referencia aprovada",
+      "lacunas": "Codigo ERP nao foi mapeado; familia/tributacao detalhada nao deve virar autoridade fiscal no JRC.",
+      "documentacao_necessaria": "Produtos, servicos, tipo, unidade, moeda, familia, status e campos tributarios permitidos.",
+      "criterio_reconciliacao": "Codigos/estado e unidade iguais ao mestre; apenas tributacao pertinente e autorizada armazenada.",
+      "permissoes": "CRM BaseController, OrganizationalVisibility e CrmPolicy; account + unidade comercial + ownership/equipe; permissoes de catalogo atuais"
+    },
+    {
+      "origem": "Bentivi",
+      "entidade": "Tabelas de precos, vigencias e regras de piso",
+      "destino_existente": [
+        "app/models/jrc_crm/product.rb",
+        "app/services/jrc_crm/commercial_financials.rb",
+        "app/services/jrc_crm/commercial_price_evaluation.rb"
+      ],
+      "vinculo_chave": "PriceReference DTO E1: minimo, moeda, billing_model, unit_name; dados de tabela/emissora/versao podem acompanhar referencia",
+      "lacunas": "Nao foi encontrado model nativo completo de tabelas/vigencias de preco. Snapshot oficial de tabela por empresa e fonte pendentes; E1 nao inventa conversao.",
+      "documentacao_necessaria": "Identificador/versionamento da tabela, vigencia, moeda, unidades, recorrencia, piso zero e elegibilidade de descontos.",
+      "criterio_reconciliacao": "Comparacao exata somente com bases compativeis; metadados ausentes/diferentes retornam pending; nao ativar politica.",
+      "permissoes": "CRM BaseController, OrganizationalVisibility e CrmPolicy; account + unidade comercial + ownership/equipe; permissao fina de piso/catalogo fica para E2/E3"
+    },
+    {
+      "origem": "Bentivi",
+      "entidade": "Condicoes de pagamento e termos comerciais",
+      "destino_existente": [
+        "app/services/jrc_crm/order_financials.rb",
+        "app/services/jrc_crm/commercial_financials.rb",
+        "app/models/jrc_crm/sales_order.rb"
+      ],
+      "vinculo_chave": "snapshot financeiro + payment_condition/entry/installments",
+      "lacunas": "Enums atuais cash/installments/down_payment_installments nao cobrem automaticamente todo termo ERP.",
+      "documentacao_necessaria": "Dicionario de termos, entrada, vencimentos, impostos/frete e equivalencias autorizadas.",
+      "criterio_reconciliacao": "Conservacao de centavos/vencimentos; condicoes sem equivalencia ficam pendentes, nao arredondadas por regra inventada.",
+      "permissoes": "CRM BaseController, OrganizationalVisibility e CrmPolicy; account + unidade comercial + ownership/equipe"
+    },
+    {
+      "origem": "Bentivi",
+      "entidade": "Contratos, itens, aditivos, vigencias e reajustes",
+      "destino_existente": [
+        "app/models/jrc_crm/contract.rb",
+        "app/models/jrc_crm/contract_item.rb",
+        "app/models/jrc_crm/product.rb"
+      ],
+      "vinculo_chave": "DataImportMapping: account + source_provider + source_object_type + source_object_id; prefixo de instalacao deve ser definido se IDs nao forem globais. Nao usar IDs numericos locais como IDs externos.; contrato/item/versao; campos de termos e recorrencia",
+      "lacunas": "Nao ha prova de representacao completa de aditivos/centros de custo ERP; nao editar oficial nem remodelar Relacionamento.",
+      "documentacao_necessaria": "Dicionario, PK/FK, vigencias, recorrencia/reajuste e autoridade de status.",
+      "criterio_reconciliacao": "Referencias/totais/vigencia por versao; lacunas preservadas em staging ou arquivo autorizado, sem conversao implicita.",
+      "permissoes": "CRM BaseController, OrganizationalVisibility e CrmPolicy; account + unidade comercial + ownership/equipe; ERP mestre"
+    },
+    {
+      "origem": "Bentivi",
+      "entidade": "Pedidos, faturamento, titulos e status financeiros",
+      "destino_existente": [
+        "app/models/jrc_crm/sales_order.rb",
+        "app/models/jrc_crm/invoice.rb",
+        "app/models/jrc_crm/payment.rb",
+        "app/services/jrc_nico/erp_context.rb"
+      ],
+      "vinculo_chave": "DataImportMapping: account + source_provider + source_object_type + source_object_id; prefixo de instalacao deve ser definido se IDs nao forem globais. Nao usar IDs numericos locais como IDs externos.; referencia ERP separada de Invoice/Payment nativo",
+      "lacunas": "Invoice/Payment locais nao comprovam liquidacao ou contabilidade ERP. Leitura NICO nao equivale a historico/replicacao.",
+      "documentacao_necessaria": "IDs, estados, resumo financeiro permitido, data/hora, links, efeitos de consulta e fonte de verdade.",
+      "criterio_reconciliacao": "Conciliar resumo com mestre; nunca marcar pago por inferencia ou criar titulo financeiro duplicado.",
+      "permissoes": "ERP autorizado por cliente; dados pessoais/bancarios minimizados"
+    },
+    {
+      "origem": "Bentivi",
+      "entidade": "Incremental, cursor, excluidos/inativos e idempotencia",
+      "destino_existente": [
+        "app/models/data_import.rb",
+        "app/models/data_import_mapping.rb",
+        "app/models/data_import_item.rb",
+        "app/models/data_import_error.rb"
+      ],
+      "vinculo_chave": "cursor/source_metadata/stats e mapa origem por tenant",
+      "lacunas": "DataImport aceita contatos/Intercom atualmente, nao Bentivi. Nenhum adaptador ou endpoint externo inventado neste lote.",
+      "documentacao_necessaria": "API/export documentados, paginacao, cursor, watermark, exclusoes, ordenacao, retries, autenticacao e ownership por campo.",
+      "criterio_reconciliacao": "Reexecucao com mesmo hash sem efeitos duplicados; delta sem perda/reordenacao; conflitados preservados; nenhuma escrita ERP.",
+      "permissoes": "DataImportPolicy + autorizacao ERP especifica futura"
+    }
+  ],
+  "confirmacoes_usuario": [
+    {
+      "data": "2026-10-12",
+      "referencia": "Autorizacao para ambiente local descartavel e validacao executada do delta final da E1",
+      "declaracao": "BEMTEVI = Bentivi = Bentevi: mesmo ERP, diferencas de grafia.",
+      "estado": "confirmado pelo usuario; nao permanece decisao pendente",
+      "limites": "Nao comprova cobertura de API, endpoints, ambientes ou interfaces externas. Identificadores tecnicos existentes preservados.",
+      "historico": "Matriz anterior preservada no inventario/copia before; RELATORIO.txt e FECHAMENTO-TECNICO.txt anteriores nao reescritos."
+    }
+  ]
+}

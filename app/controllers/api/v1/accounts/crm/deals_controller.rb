@@ -102,6 +102,7 @@ module Api
             # Serialize source edits with Linker, which locks this deal before linking.
             updated = @deal.with_lock do
               saved = @deal.update(attributes)
+              JrcApprovals::CommercialInvalidation.call(resource: @deal.reload, user: Current.user) if saved
               link_conversation!(@deal, conversation_id) if saved && conversation_id.present?
               saved
             end

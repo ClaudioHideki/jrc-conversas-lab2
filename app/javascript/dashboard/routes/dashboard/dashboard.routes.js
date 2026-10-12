@@ -1,3 +1,4 @@
+import { routes as approvalRoutes } from './approvals/routes';
 import { routes as jrcFlowRoutes } from './jrcFlows/routes';
 import settings from './settings/settings.routes';
 import conversation from './conversation/conversation.routes';
@@ -67,6 +68,7 @@ export default {
         ...serviceDeskRoutes,
         ...jrcProjectRoutes,
         ...operationsRoutes,
+        ...approvalRoutes,
       ],
     },
     {

@@ -1,0 +1,150 @@
+E3 — FECHAMENTO TÉCNICO E PREPARAÇÃO BACKEND E4
+
+Resultado: E3 tecnicamente aprovada no escopo executado. Isto não homologa produção, não conclui E0 e não autoriza rollout.
+Branch: codex/sd-contato-softphone-20261011
+HEAD-base preservado: 09b0cc85e32e8a99d5ca4308a6e4fd920ef7468a
+A base inclui o delta local, não foi reconstruída do HEAD. 48 arquivos before foram conferidos/backupados;
+36 continuam byte a byte; 12 foram estendidos com causa abaixo e originals no backup.
+Nenhum commit/push/merge/imagem/deploy/acesso LAB/Grupo JRC/ERP ocorreu. Nenhuma política real ou flag real foi publicada/alterada.
+
+Implementação: reutiliza CommercialFinancials/CommercialPriceEvaluation, Proposal/ProposalItem/ProposalToOrderService,
+SalesOrder/OrderItem/OrderApprovalService/BackofficeRequest/Contract, locks nativos, permissões e auditorias.
+Instala seis adapters comerciais e um modelo compartilhado crm.price_exception, sem criar segundo fluxo transacional.
+Fonte de piso é o Product da conta, com revisão UTC local; nenhuma referência frontend autoriza.
+Deal usa a referência explícita metadata.business_unit_id já usada pelo ProposalBuilder; não ganhou tabela/unidade paralela.
+Modo disabled/shadow preserva operação; enforcement é explícito e usado exclusivamente em tenants sintéticos.
+Preço acima/igual não abre exceção; abaixo seleciona política; pending bloqueia enforcement. As aprovações legadas são cumulativas.
+Guard revalida snapshot/fingerprint/versão/prazo/votos/quórum e a solicitação mais recente por política, sem reviver aprovação antiga.
+Conversão preserva lock/idempotência/pedido único e exige envio/data de aceite + disponibilidade/token legítimos.
+Envio protegido exige chave idempotente e mantém PDF/anexo/auditoria nativos. Payload financeiro e datas têm identidade estável em UTC.
+Edição/referência nativa invalida requests sem apagar votos/histórico. Mudanças não capturadas por endpoints ainda não podem liberar efeito com fingerprint velho.
+Backoffice consulta/atua no seu vínculo autorizado; não recebe decide ou administração de catálogo automaticamente.
+Elegibilidade comercial exige acesso jrc_crm além de decide/cobertura/roster, revalidado na publicação, criação, simulação e decisão.
+Contrato separa registro do cliente de evidência empresarial: nome/PDF/metadata não bastam; verified exige digest server-side;
+trocar digest muda fingerprint. Provedor real não instalado; teste usa somente fixture. Cliente pode assinar sem ativar contrato retido.
+Preparação E4: serializers, catálogos, versões, paginação/filtros autorizados, escolhas de decisão, status/gates, simulador e auditoria.
+Nenhum Vue/UI/badge/menu foi criado. Ler CONTRATOS-E4.txt para payloads, precedência, permissões e limitações.
+
+Schema: versão anterior 2026_09_29_140200; final 2026_10_12_160000.
+245 migrations executáveis aplicadas uma por uma em banco vazio; 251 arquivos históricos (244 raiz +7 suporte) preservados por hash;
+migration E2 adicional preservada byte a byte. Não há migration E3.
+5718 objetos estruturais rastreados; 1481 diferenças: 1322 históricas, 159 E2, zero sem origem comprovada.
+O dump determinístico deriva apenas do banco migrado. O HairTrigger anterior perdia triggers de nome igual em tabelas diferentes;
+o hook existente é reutilizado com representação PostgreSQL completa, preservando seis funções/oito triggers, checks NOT VALID e índices parciais.
+Schema load+migrations em outro banco vazio foi equivalente: 26 diferenças de casts de arrays provaram-se a releitura do DDL original
+pelo próprio PostgreSQL em tabelas temporárias LIKE. Não foram ignoradas/reinterpretadas manualmente.
+db/schema.rb SHA256: 0acff42b544d488d6bc244f371e63e5c8aa599e1ce8fcd467c67117fb7dbd12c. Relatório de cada objeto/origem e provas estão em schema-divergence-final.json.
+Também passaram os 85 testes E2/regressões em banco criado pelo novo schema; esta repetição não entra na soma.
+
+Testes finais únicos: 191 RSpec =54 E3 +85 E2/regressões adicionais +52 anteriores; 0 falhas, pendências ou erros externos.
+35 E1 /637 assertions e31 regressões puras/6312 assertions: 0 falhas/erros/skips. Não foram usados testes Ruby portátil como substituto Rails.
+Rails 7.1.5.2, Ruby3.4.4, Bundler2.5.16, pg1.5.3, BigDecimal4.1.2, PostgreSQL16.15/vector0.8.6, Redis7.4.11.
+Mailer test, storage test, jobs TestAdapter/Sidekiq fake, WebMock, rede interna sem portas publicadas, volumes próprios.
+Conexões independentes com pg_backend_pid distinto comprovaram concorrência em criação, votos, envio, conversão e invalidação.
+Autoload, Zeitwerk, sintaxe Ruby, git diff --check e hashes do código executado aprovados. O manifesto completo identifica10462 arquivos.
+E1 hashes originais e seus35 testes preservados; 385 arquivos de domínios sensíveis/dependências/modelos nativos protegidos por hash.
+Os recursos Docker antigos foram inspecionados somente por leitura, sem exportar suas variáveis:16 containers/46 redes/33 volumes preservados.
+Apenas containers/rede/quatro volumes desta validação foram removidos, junto com os bancos sintéticos.
+
+Achados/correções durante validação: privilégio CRM ausente da lista de custom roles (agora cadastrável, sem concedê-lo a ninguém);
+unidade de Deal localizada em metadata nativa, não em associação inexistente; idempotência não pode desaparecer ao preço virar igual ao piso;
+catálogo serializado como Enumerator corrigido para DTO; PDF sintético passou a usar o gerador nativo, sem mudar dependências;
+expectativa de etapa inicial Backoffice ajustada à etapa real com assertion de ausência de alteração preservada;
+fusos estabilizados no fingerprint/replay; latest pending/negativa e approved sem votos não liberam efeito;
+assinaturas cliente/empresa separadas; aprovação publicada agora exclui candidato sem acesso ao domínio.
+Logs de tentativas/falhas e resultados finais permanecem no pacote, sem somar execuções sobrepostas.
+
+Pendências E0: Quórum/maioria/unanimidade JRC e impasse, Efeito/identidade empresarial do CEO, Mínimo zero/gratuidade, Equivalências mensal/anual/setup/consumo, Tabela oficial e vigência, Empresa emissora oficial, Provedor/evidência oficial da assinatura da empresa.
+Não foi escolhida pessoa nominal, tabela/vigência oficial, gratuidade, equivalência de recorrência ou política Grupo JRC.
+BEMTEVI=Bentivi=Bentevi permanece o mesmo ERP; identificadores técnicos não foram renomeados.
+Helpedesk/Veccio/Bentivi foram lidos apenas como referência de preservação. Nenhuma extração/importação/chamada/escrita externa ocorreu.
+Limites: provedor/evidência empresarial e dados oficiais ainda são E0; não há UI, performance de produção, notificações/outbox ou rollout.
+A paginação autoriza candidatos antes de recortar em memória; otimização/benchmark de grande volume não executados.
+Não declarar este relatório como aprovação gerencial das decisões pendentes ou homologação real.
+
+Arquivos completos (A anteriores, B E3, C schema, D testes, E docs; F auxiliares ficam fora do produto):
+B E3 product/extension | new/untracked | app/controllers/api/v1/accounts/approvals/base_controller.rb
+B E3 product/extension | new/untracked | app/controllers/api/v1/accounts/approvals/catalogs_controller.rb
+A previous | new/untracked | app/controllers/api/v1/accounts/approvals/delegations_controller.rb
+B E3 product/extension | new/untracked | app/controllers/api/v1/accounts/approvals/gates_controller.rb
+B E3 product/extension | new/untracked | app/controllers/api/v1/accounts/approvals/policies_controller.rb
+B E3 product/extension | new/untracked | app/controllers/api/v1/accounts/approvals/requests_controller.rb
+B E3 product/extension | tracked | app/controllers/api/v1/accounts/crm/backoffice_requests_controller.rb
+B E3 product/extension | tracked | app/controllers/api/v1/accounts/crm/base_controller.rb
+B E3 product/extension | tracked | app/controllers/api/v1/accounts/crm/contracts_controller.rb
+B E3 product/extension | tracked | app/controllers/api/v1/accounts/crm/deal_products_controller.rb
+B E3 product/extension | tracked | app/controllers/api/v1/accounts/crm/deals_controller.rb
+B E3 product/extension | tracked | app/controllers/api/v1/accounts/crm/products_controller.rb
+B E3 product/extension | tracked | app/controllers/api/v1/accounts/crm/proposal_items_controller.rb
+B E3 product/extension | tracked | app/controllers/api/v1/accounts/crm/proposals_controller.rb
+A previous | tracked | app/controllers/api/v1/accounts/crm/public_proposals_controller.rb
+B E3 product/extension | tracked | app/controllers/api/v1/accounts/crm/sales_orders_controller.rb
+A previous | tracked | app/controllers/jrc_crm/public_proposals_controller.rb
+A previous | new/untracked | app/models/jrc_approvals/audit_event.rb
+A previous | new/untracked | app/models/jrc_approvals/decision.rb
+A previous | new/untracked | app/models/jrc_approvals/delegation.rb
+A previous | new/untracked | app/models/jrc_approvals/immutable.rb
+A previous | new/untracked | app/models/jrc_approvals/policy.rb
+A previous | new/untracked | app/models/jrc_approvals/policy_version.rb
+A previous | new/untracked | app/models/jrc_approvals/request.rb
+B E3 product/extension | tracked | app/models/jrc_crm/backoffice_request.rb
+B E3 product/extension | new/untracked | app/serializers/jrc_approvals/request_serializer.rb
+A previous | new/untracked | app/services/jrc_approvals/authorization.rb
+B E3 product/extension | new/untracked | app/services/jrc_approvals/catalog.rb
+B E3 product/extension | new/untracked | app/services/jrc_approvals/commercial_catalog.rb
+B E3 product/extension | new/untracked | app/services/jrc_approvals/commercial_gate.rb
+B E3 product/extension | new/untracked | app/services/jrc_approvals/commercial_invalidation.rb
+A previous | new/untracked | app/services/jrc_approvals/conditions.rb
+B E3 product/extension | new/untracked | app/services/jrc_approvals/decision_options.rb
+B E3 product/extension | new/untracked | app/services/jrc_approvals/decisions.rb
+A previous | new/untracked | app/services/jrc_approvals/definition.rb
+A previous | new/untracked | app/services/jrc_approvals/delegations.rb
+B E3 product/extension | new/untracked | app/services/jrc_approvals/eligibility.rb
+A previous | new/untracked | app/services/jrc_approvals/error.rb
+A previous | new/untracked | app/services/jrc_approvals/ledger.rb
+B E3 product/extension | new/untracked | app/services/jrc_approvals/native_price_context.rb
+B E3 product/extension | new/untracked | app/services/jrc_approvals/policies.rb
+B E3 product/extension | new/untracked | app/services/jrc_approvals/request_visibility.rb
+B E3 product/extension | new/untracked | app/services/jrc_approvals/requests.rb
+B E3 product/extension | new/untracked | app/services/jrc_approvals/selection.rb
+B E3 product/extension | new/untracked | app/services/jrc_approvals/signature_evidence.rb
+B E3 product/extension | new/untracked | app/services/jrc_approvals/simulation.rb
+A previous | tracked | app/services/jrc_crm/commercial_financials.rb
+A previous | new/untracked | app/services/jrc_crm/commercial_price_evaluation.rb
+B E3 product/extension | tracked | app/services/jrc_crm/order_approval_service.rb
+B E3 product/extension | tracked | app/services/jrc_crm/order_workflow_sync_service.rb
+B E3 product/extension | new/untracked | app/services/jrc_crm/proposal_approval_requirements.rb
+B E3 product/extension | tracked | app/services/jrc_crm/proposal_delivery_service.rb
+B E3 product/extension | tracked | app/services/jrc_crm/proposal_to_order_service.rb
+A previous | tracked | config/features.yml
+B E3 product/extension | new/untracked | config/initializers/jrc_commercial_approvals.rb
+B E3 product/extension | new/untracked | config/initializers/jrc_postgres_schema_dump.rb
+A previous | tracked | config/routes.rb
+B E3 product/extension | new/untracked | config/routes/jrc_approvals.rb
+A previous | new/untracked | db/migrate/20261012160000_create_configurable_approval_core.rb
+C schema synchronization | tracked | db/schema.rb
+E documentation | new/untracked | docs/workflows-e1-20261012/CORRECAO-PROPOSTAS.txt
+E documentation | new/untracked | docs/workflows-e1-20261012/FECHAMENTO-TECNICO.txt
+E documentation | new/untracked | docs/workflows-e1-20261012/MATRIZ-DESCOBERTA.json
+E documentation | new/untracked | docs/workflows-e1-20261012/RELATORIO.txt
+E documentation | new/untracked | docs/workflows-e1-20261012/VALIDACAO-EXECUTADA.txt
+E documentation | new/untracked | docs/workflows-e2-20261012/CONTRATOS-E-REUTILIZACAO.txt
+E documentation | new/untracked | docs/workflows-e2-20261012/MATRIZ-REQUISITOS.json
+E documentation | new/untracked | docs/workflows-e2-20261012/RELATORIO-E2.txt
+E documentation | new/untracked | docs/workflows-e3-20261012/CONTRATOS-E4.txt
+E documentation | new/untracked | docs/workflows-e3-20261012/MATRIZ-E3-E4.json
+B E3 product/extension | tracked | enterprise/app/models/custom_role.rb
+B E3 product/extension | new/untracked | lib/jrc_postgres_schema_dumper.rb
+D tests | tracked | spec/requests/api/v1/accounts/crm/proposal_homologation_spec.rb
+D tests | new/untracked | spec/requests/api/v1/accounts/jrc_approvals/commercial_api_spec.rb
+D tests | new/untracked | spec/requests/api/v1/accounts/jrc_approvals/core_spec.rb
+D tests | new/untracked | spec/services/jrc_approvals/commercial_concurrency_spec.rb
+D tests | new/untracked | spec/services/jrc_approvals/commercial_effects_spec.rb
+D tests | new/untracked | spec/services/jrc_approvals/commercial_integration_spec.rb
+D tests | new/untracked | spec/services/jrc_approvals/concurrency_spec.rb
+D tests | new/untracked | spec/services/jrc_approvals/conditions_spec.rb
+D tests | new/untracked | spec/services/jrc_approvals/core_spec.rb
+D tests | new/untracked | spec/support/jrc_approvals_commercial_helpers.rb
+D tests | new/untracked | spec/support/jrc_approvals_core_helpers.rb
+D tests | new/untracked | test/jrc_crm/commercial_price_evaluation_test.rb
+E documentation | new/untracked | docs/workflows-e3-20261012/RELATORIO-E3.txt

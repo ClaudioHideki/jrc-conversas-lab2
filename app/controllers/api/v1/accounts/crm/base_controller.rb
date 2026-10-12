@@ -8,6 +8,9 @@ module Api
           around_action :use_account_timezone
 
           rescue_from ActiveRecord::StaleObjectError, with: :handle_stale_object_conflict
+          rescue_from JrcApprovals::Error do |exception|
+            render json: { error: exception.code, code: exception.code }, status: :conflict
+          end
           rescue_from JrcCrm::CommercialFinancials::InvalidTerms do |exception|
             render json: { errors: [exception.message], code: 'INVALID_COMMERCIAL_TERMS' }, status: :unprocessable_entity
           end

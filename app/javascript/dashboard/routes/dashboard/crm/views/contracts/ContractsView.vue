@@ -1,5 +1,6 @@
 <script setup>
 /* eslint-disable vue/no-bare-strings-in-template */
+import ApprovalGateBadge from 'dashboard/routes/dashboard/approvals/ApprovalGateBadge.vue';
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { contractsAPI } from 'dashboard/api/crm/commercialCycle';
@@ -1094,6 +1095,7 @@ const updateStatus = async (contract, nextStatus) => {
               <div>
                 <p class="text-xs font-semibold uppercase tracking-wide text-violet-600">Gestão do contrato</p>
                 <h3 class="text-xl font-bold">{{ manageContract.contract_number }}</h3>
+                <ApprovalGateBadge resource-key="contracts.company_signature" :resource-id="manageContract.id" :client-signature="manageContract.signature_status" />
                 <p class="text-sm text-n-slate-11">{{ manageContract.contact?.name || 'Cliente' }} · {{ label(normalized(manageContract)) }}</p>
               </div>
               <button class="grid size-9 place-content-center rounded-lg border text-xl" @click="manageContract=null">×</button>

@@ -1,0 +1,107 @@
+CORREÇÃO DIRIGIDA DAS PROPOSTAS — 12/10/2026
+
+Resultado: APROVADO SOMENTE O ESCOPO TÉCNICO EXECUTADO.
+Não é homologação completa do produto, aprovação comercial da E0, publicação ou autorização de produção.
+Branch: codex/sd-contato-softphone-20261011
+HEAD/base preservado: 09b0cc85e32e8a99d5ca4308a6e4fd920ef7468a
+Alterações locais anteriores e untracked preservadas. Nenhum reset, clean, checkout, commit ou push.
+
+CAUSAS DAS TRÊS FALHAS E CORREÇÕES
+1. [1:10] "rejects an expired or revoked public token": divergência da expectativa do teste.
+   Reproduzido novamente antes da correção, com a mesma mensagem da base. A rota reconhecida é
+   api/v1/accounts/crm/public_proposals#show, resposta application/json, não uma página genérica HTML.
+   O controller usa find_by_raw_token(... allow_unavailable: true) para apresentar disponibilidade.
+   Tokens reconhecidos, mas expirados/revogados, recebem HTTP 200 com SOMENTE {availability: ...}.
+   Expirado: state=expired, available=false. Revogado: state=canceled, available=false.
+   Token inválido e token pertencente a outra conta recebem 404; a verificação de feature permanece.
+   Não se alterou show nem o contrato de visibilidade para obter verde. O exemplo combinado foi substituído
+   por casos independentes e assertions de payload EXATO, ausência de dados, bloqueio de view/accept/reject,
+   PDF, imutabilidade do estado, ausência de pedidos e auditoria. Deadline exato testado com tempo controlado.
+   Revogação, antes não alcançada, agora executa independentemente. Propostas pré-envio permanecem bloqueadas.
+
+2. [1:12] "PROP-09 preserves the proposal, order and contract when deletion is blocked": preparação desatualizada.
+3. [1:14] "preserves identity, accepted values and idempotency when a direct proposal becomes an order": mesma preparação desatualizada.
+   Ambos falhavam em accept_by_customer! ANTES da ação que pretendiam testar: status=sent sem sent_at.
+   O guard do modelo foi preservado. Os exemplos agora passam pelo endpoint real send_proposal:
+   item do catálogo e conversa sintética legítimos, cálculo e aprovação existentes, ProposalDeliveryService,
+   mensagem, PDF, sent_at e evento sent com ator e IDs da mensagem/conversa. Sem update_columns, skips,
+   validações desabilitadas ou estados aceitos forçados. O aceite posterior usa o método existente.
+   Acrescentados negativos para draft, pending_approval e sent sem envio; APIs e método do modelo continuam negando aceite/conversão.
+   Preservadas identidade, valores aceitos, unicidade do pedido, auditoria e isolamento por conta.
+   PROP-09 historicamente só afirma preservação da proposta e vínculo do pedido (apesar do título mencionar contrato).
+   Não se inventou um contrato nesse fixture; a cobertura real de contratos permanece nos outros arquivos executados.
+
+DEFEITOS DO PRODUTO DEMONSTRADOS NA INVESTIGAÇÃO
+* HTML accept renderizava :show em erro de signatário ou estado, expondo cliente, e-mail, título e protocolo
+  de proposta indisponível. Novo before_action em accept/reject reutiliza public_availability e renderiza
+  exclusivamente :unavailable com 422 antes de validar o formulário ou executar replay.
+* JSON accept processava uma proposta já aceita antes de verificar a disponibilidade. Replay de token
+  expirado criou um pedido no probe anterior à correção. A verificação existente de disponibilidade agora
+  antecede o branch idempotente. Expirado/revogado recebe 422 sem conversão; válido conserva replay 200 e um pedido.
+* Envio real do PDF: build_message apagava o Tempfile no ensure; Active Storage tentava abri-lo no after_commit
+  da transação externa do lock e levantava Errno::ENOENT. A execução real demonstrou a falha.
+  ProposalDeliveryService agora usa StringIO e ActiveStorage::Blob.create_and_upload! antes de passar o
+  signed_id ao MessageBuilder existente. Não há dependência do arquivo temporário após o commit.
+  Testes passam pelo envio real, baixam o anexo do storage de testes e confirmam PDF e content_type.
+  Não foram alterados os guards de aprovação, canais, autorização ou callbacks globais.
+
+EXECUÇÕES DESTA RODADA (SEM REUTILIZAR RESULTADOS ANTIGOS COMO APROVAÇÃO)
+* Reprodução original: 3 exemplos, 3 falhas idênticas às da base; evidência guardada.
+* Testes novos antes da correção: detectar HTML com dados e replay 200; evidências red guardadas.
+* Dirigidos após a correção: 26 exemplos, 0 failures, 0 pending e 0 erros fora de exemplos.
+* Quatro arquivos RSpec completos: 52 exemplos, 0 failures, 0 pending, 0 erros fora de exemplos.
+  consolidated_commercial_protection: 11; proposal_homologation: 26; sales_order_link_integrity: 8;
+  consolidated_financial_guards: 7. Antes eram 42, sendo 16 de propostas. Cobertura anterior mapeada por descrição.
+* E1 preservada: 35 testes, 637 assertions, 0 failures/errors/skips.
+* Regressões puras: 31 testes, 6312 assertions, 0 failures/errors/skips.
+* Carregamento/autoload real Rails, Zeitwerk, sintaxe Ruby e git diff --check: passaram.
+* Ruby 3.4.4, Bundler 2.5.16, Rails 7.1.5.2, pg 1.5.3, BigDecimal 4.1.2, Minitest 5.25.5,
+  rspec-rails 7.0.1, PostgreSQL 16.15, pgvector 0.8.6, Redis 7.4.11.
+* Foram verificados 10.408 arquivos por SHA-256 dentro do runtime, incluindo as quatro alterações desta
+  rodada, os serviços/testes da E1, dependências travadas e logo usado pelo PDF. Relatório escrito após os testes.
+* Comandos completos, stdout/stderr, versões, JSON RSpec e hashes estão no pacote de evidências.
+
+HARNESS E ISOLAMENTO
+Docker local inspecionado antes. Rede nova interna, sem portas publicadas; containers, quatro volumes e banco
+próprios, código somente leitura. Sem .env, credenciais ou dados antigos; credenciais de teste fictícias.
+RAILS_ENV=test; mail/job/storage adapters de teste; WebMock bloqueia transporte externo e a rede não tem saída.
+Nenhum servidor Rails, worker Sidekiq ou envio a provedor foi iniciado.
+Dois problemas de harness estão registrados, separados de defeitos do produto:
+(a) Docker mapeia os paths Windows para /run/desktop/mnt/host/c; conferência foi ajustada aos mounts reais
+antes de inicializar o banco. (b) O snapshot inicial omitira public/brand-assets/logo-jrc.png. Incluído o asset
+real já rastreado, identificado por hash; nenhuma substituição fake, alteração de branding ou bypass do PDF.
+O probe inicial também usou as: :html indevidamente no encoder de formulário; corrigido somente no auxiliar.
+Tentativas anteriores permanecem como evidências locais; erro HTML com sessão sintética foi resumido/redigido no ZIP.
+Somente os recursos próprios foram removidos após os testes. Configuração, mounts, redes e estado dos 16
+containers antigos, 46 redes e 33 volumes foram reconferidos e preservados. Sem prune.
+
+PRESERVAÇÃO E LIMITES
+Os sete arquivos do lote anterior permanecem byte a byte por hash, inclusive os dois serviços e os 35 testes
+da E1, matriz e três relatórios históricos. ZIP histórico também preservado por SHA-256.
+251 arquivos db/migrate preservados: 244 migrations na raiz e sete auxiliares, sem nova migration.
+Gemfile, locks, Compose, .env, schema do produto e workflows intactos. Onze arquivos protegidos reconferidos.
+Flags, permissões, aprovações legadas, SLA e reservas NICO sem alteração nesta rodada.
+Account 1 do GRUPO JRC não acessada: jrc_customer_master=false/jrc_relationship=false não foram modificadas.
+BEMTEVI = Bentivi = Bentevi continua confirmado na matriz; identificadores técnicos intactos.
+Sem LAB/Grupo JRC, ERP, importação, notificações, assinaturas reais, nova imagem, deploy ou E2/E3.
+
+PENDÊNCIAS E RISCOS LIMITADOS
+Não há falha pendente nos testes dirigidos pedidos. Decisões comerciais da E0 continuam pendentes.
+Não houve homologação completa de UI, entrega em transporte externo WhatsApp/e-mail ou storage de produção;
+estas execuções usam somente banco e storage descartáveis e jobs de teste.
+O upload do PDF passa a ocorrer antes do commit, pelo mecanismo padrão do Active Storage. Falhas de storage
+ainda podem abortar o envio; limpeza padrão de blobs não anexados permanece a do projeto. Não foi criado
+um fluxo paralelo de retenção/cleanup de storage nem alterado o comportamento de pedidos/contratos.
+Warnings históricos: Rails.application.secrets, fixture_path, alias_attribute de User, RubyParser e Rack 422;
+registrados, sem alterar dependências ou esconder falhas.
+
+ENTREGA
+Delta novo de produto: os dois public_proposals_controller.rb e proposal_delivery_service.rb.
+Teste alterado: spec/requests/api/v1/accounts/crm/proposal_homologation_spec.rb.
+Documento novo: docs/workflows-e1-20261012/CORRECAO-PROPOSTAS.txt.
+Delta inicial E1 permanece identificado separadamente no inventário e no pacote.
+ZIP contém todos os arquivos modificados E untracked, conteúdo integral, diff rastreado total, patch da rodada,
+patch dos arquivos novos, cópias anteriores, referências de testes, manifestos e evidências executadas.
+Auxiliares externos ficam separados de arquivos do produto. Sem .env, chaves, bancos, volumes ou dados reais.
+O ZIP e os links são SOMENTE arquivos neste computador; não foram anexados, enviados ou publicados externamente.
+Parada para revisão. Nenhuma próxima fase iniciada.

@@ -1,0 +1,70 @@
+[
+  {
+    "requirement": "Adapters and shared pricing policy",
+    "status": "ATENDIDO",
+    "evidence": "commercial_catalog/native_price_context/price_exception family"
+  },
+  {
+    "requirement": "Legacy financial valuation and E1",
+    "status": "ATENDIDO",
+    "evidence": "35/637 + 31/6312; original service hashes retained"
+  },
+  {
+    "requirement": "Shadow vs enforcement",
+    "status": "ATENDIDO",
+    "evidence": "explicit modes, default false/shadow, synthetic-only activation"
+  },
+  {
+    "requirement": "Send/convert/manual/Backoffice guards",
+    "status": "ATENDIDO",
+    "evidence": "real effects, source locks, approved quorum/context, old approval gates preserved"
+  },
+  {
+    "requirement": "Invalidation",
+    "status": "ATENDIDO",
+    "evidence": "native editing/reference endpoints + effect-time fingerprint validation"
+  },
+  {
+    "requirement": "Customer/company signatures distinct",
+    "status": "ATENDIDO_TECNICO",
+    "evidence": "customer document retained; company gate/digest blocks activation; provider synthetic only"
+  },
+  {
+    "requirement": "E4 backend",
+    "status": "ATENDIDO_NO_ESCOPO",
+    "evidence": "catalog/policies/versions/pages/scoped requests/decision choices/gates/simulation/audit; no UI"
+  },
+  {
+    "requirement": "Schema synchronization",
+    "status": "ATENDIDO",
+    "evidence": "245 executable migrations/251 historical files, 5718 objects, 1481 differences proven, deterministic dumps and load"
+  },
+  {
+    "requirement": "Real PostgreSQL concurrency",
+    "status": "ATENDIDO",
+    "evidence": "two independent pids per case; creation/votes/delivery/conversion/invalidation"
+  },
+  {
+    "requirement": "Business policy JRC / official price / CEO provider",
+    "status": "PENDENTE_E0",
+    "evidence": [
+      "Quórum/maioria/unanimidade JRC e impasse",
+      "Efeito/identidade empresarial do CEO",
+      "Mínimo zero/gratuidade",
+      "Equivalências mensal/anual/setup/consumo",
+      "Tabela oficial e vigência",
+      "Empresa emissora oficial",
+      "Provedor/evidência oficial da assinatura da empresa"
+    ]
+  },
+  {
+    "requirement": "High-volume pagination benchmark",
+    "status": "NAO_EXECUTADO",
+    "evidence": "authorized filtering before in-memory paging; no production scalability approval"
+  },
+  {
+    "requirement": "UI/rollout/external migration/publication/deploy",
+    "status": "FORA_DO_ESCOPO_NAO_EXECUTADO",
+    "evidence": "explicit prohibition preserved"
+  }
+]

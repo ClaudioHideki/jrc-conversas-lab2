@@ -38,6 +38,8 @@ module JrcCrm
         })
         request.update!(status: decision == 'returned' ? 'waiting_customer' : decision, metadata: metadata)
         if decision == 'approved'
+          JrcApprovals::CommercialGate.check!(resource: @order, user: @actor, key: 'crm.order_price')
+          JrcApprovals::CommercialGate.check!(resource: request, user: @actor, key: 'backoffice.release')
           @order.approval_authorized = true
           @order.update!(status: 'approved')
           OrderWorkflowSyncService.new(order: @order, actor: @actor).call

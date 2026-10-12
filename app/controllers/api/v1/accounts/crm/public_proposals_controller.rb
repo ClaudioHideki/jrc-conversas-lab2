@@ -28,6 +28,11 @@ module Api
           end
 
           def accept
+            unless @proposal.public_availability[:available]
+              render json: { error: 'Esta proposta ainda não está disponível para aceite.' }, status: :unprocessable_entity
+              return
+            end
+
             if @proposal.status == 'accepted'
               lifecycle = JrcCrm::AcceptedProposalLifecycleService.new(proposal: @proposal, actor: @proposal.owner).call
               render json: {

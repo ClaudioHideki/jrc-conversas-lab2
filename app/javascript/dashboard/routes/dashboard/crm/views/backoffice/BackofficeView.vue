@@ -1,5 +1,6 @@
 <script setup>
 /* eslint-disable vue/no-bare-strings-in-template, @intlify/vue-i18n/no-raw-text */
+import ApprovalGateBadge from 'dashboard/routes/dashboard/approvals/ApprovalGateBadge.vue';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -1018,7 +1019,7 @@ onMounted(load);
         </div>
       </article>
       <aside class="h-fit rounded-2xl border bg-n-solid-2 p-4 shadow-sm xl:sticky xl:top-3">
-        <template v-if="selected"><p class="text-xs font-semibold text-blue-700">{{ selected.request_number }}</p><h3 class="mt-1 font-bold">{{ selected.title }}</h3><button class="mt-3 w-full rounded-lg bg-blue-600 p-2 font-semibold text-white" @click="continueRequest">{{ t('CRM.WORKFLOW_UI.CONTINUE_STAGE') }}</button><p class="mt-3 text-sm text-n-slate-11">{{ selected.description || 'Sem observações.' }}</p><dl class="mt-4 space-y-2 text-sm"><div><dt class="text-n-slate-11">Pedido</dt><dd class="font-semibold">{{ selected.order?.order_number }}</dd></div><div><dt class="text-n-slate-11">Cliente</dt><dd>{{ selected.contact?.name || 'Sem contato' }}</dd></div><div><dt class="text-n-slate-11">Fluxo</dt><dd>{{ selected.stage }} · {{ requestStatusLabel(selected.status) }}</dd></div><div><dt class="text-n-slate-11">Responsável</dt><dd>{{ selected.owner?.name || 'Sem responsável' }}</dd></div></dl><select class="mt-4 w-full rounded-lg border p-2 text-sm" :value="selected.owner?.id || ''" @change="assignOwner(selected,$event.target.value)"><option disabled value="">Atribuir responsável</option><option v-for="agent in agents" :key="agent.id" :value="agent.id">{{agent.name}}</option></select></template>
+        <template v-if="selected"><ApprovalGateBadge resource-key="backoffice.release" :resource-id="selected.id" /><p class="text-xs font-semibold text-blue-700">{{ selected.request_number }}</p><h3 class="mt-1 font-bold">{{ selected.title }}</h3><button class="mt-3 w-full rounded-lg bg-blue-600 p-2 font-semibold text-white" @click="continueRequest">{{ t('CRM.WORKFLOW_UI.CONTINUE_STAGE') }}</button><p class="mt-3 text-sm text-n-slate-11">{{ selected.description || 'Sem observações.' }}</p><dl class="mt-4 space-y-2 text-sm"><div><dt class="text-n-slate-11">Pedido</dt><dd class="font-semibold">{{ selected.order?.order_number }}</dd></div><div><dt class="text-n-slate-11">Cliente</dt><dd>{{ selected.contact?.name || 'Sem contato' }}</dd></div><div><dt class="text-n-slate-11">Fluxo</dt><dd>{{ selected.stage }} · {{ requestStatusLabel(selected.status) }}</dd></div><div><dt class="text-n-slate-11">Responsável</dt><dd>{{ selected.owner?.name || 'Sem responsável' }}</dd></div></dl><select class="mt-4 w-full rounded-lg border p-2 text-sm" :value="selected.owner?.id || ''" @change="assignOwner(selected,$event.target.value)"><option disabled value="">Atribuir responsável</option><option v-for="agent in agents" :key="agent.id" :value="agent.id">{{agent.name}}</option></select></template>
         <p v-else class="text-sm text-n-slate-11">Selecione uma solicitação para visualizar os detalhes.</p>
       </aside>
     </section>

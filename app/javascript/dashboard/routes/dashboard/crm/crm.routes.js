@@ -39,7 +39,10 @@ const ensureCrmEnabled = async to => {
     Number(to.params.accountId),
     FEATURE_FLAGS.JRC_CRM
   );
-  const currentAccount = store.getters.getCurrentAccount || {};
+  const currentAccount =
+    store.getters.getCurrentUser?.accounts?.find(
+      account => Number(account.id) === Number(to.params.accountId)
+    ) || {};
   const hasUserAccess = currentAccount.permissions?.includes('jrc_crm');
   return enabled && hasUserAccess
     ? true
@@ -130,8 +133,18 @@ export default {
           component: ContractTemplates,
           meta,
         },
-        { path: 'management', name: 'crm_management', component: ManagementView, meta: { ...meta, permissions: ['administrator'] } },
-        { path: 'settings', name: 'crm_settings', component: CrmSettingsView, meta: { ...meta, permissions: ['administrator'] } },
+        {
+          path: 'management',
+          name: 'crm_management',
+          component: ManagementView,
+          meta: { ...meta, permissions: ['administrator'] },
+        },
+        {
+          path: 'settings',
+          name: 'crm_settings',
+          component: CrmSettingsView,
+          meta: { ...meta, permissions: ['administrator'] },
+        },
         { path: 'goals', name: 'crm_goals', component: GoalsView, meta },
         {
           path: 'commissions/:section?',

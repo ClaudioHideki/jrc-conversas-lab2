@@ -13,6 +13,14 @@ module JrcCrm
       @proposal.with_lock do
         raise CommercialFinancials::InvalidTerms, 'A proposta precisa estar aceita' unless @proposal.accepted?
         raise CommercialFinancials::InvalidTerms, 'A proposta precisa ter um cliente vinculado' unless @proposal.customer_contact
+        unless @proposal.sent_at && @proposal.accepted_at
+          raise CommercialFinancials::InvalidTerms, 'O aceite exige envio e registro da data do aceite.'
+        end
+        if @proposal.public_token_revoked_at || (@proposal.public_token_expires_at && @proposal.public_token_expires_at <= Time.current) ||
+           (@proposal.valid_until && @proposal.valid_until < Date.current)
+          raise CommercialFinancials::InvalidTerms, 'Proposta expirada ou revogada não pode gerar pedido.'
+        end
+        JrcApprovals::CommercialGate.check!(resource: @proposal, user: @actor, key: 'crm.proposal_convert')
         existing = @proposal.sales_orders.where.not(status: 'canceled').order(:id).first
         next existing if existing
 

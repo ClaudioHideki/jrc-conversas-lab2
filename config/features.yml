@@ -307,3 +307,8 @@
   display_name: Relacionamento / Customer Success
   enabled: false
   column: feature_flags_ext_1
+
+- name: jrc_approvals
+  display_name: Configurable Approval Core
+  enabled: false
+  column: feature_flags_ext_1

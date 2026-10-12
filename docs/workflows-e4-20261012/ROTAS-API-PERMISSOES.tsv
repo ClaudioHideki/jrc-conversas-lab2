@@ -1,0 +1,12 @@
+Tela	Rota frontend	API (prefixo /api/v1/accounts/:account_id/approvals)	Permissão
+Menu Administração	Central de Aprovações	GET /context	Feature + capability real em algum escopo; sem decisão automática para admin
+Modelos/Políticas	/app/accounts/:accountId/approvals/policies	GET /policies; GET /policies/:id	policy_manage + cobertura organizacional
+Editor	/app/accounts/:accountId/approvals/policies/:id	GET /catalogs; GET /options; POST /policies; PATCH /policies/:id	policy_manage; identidades nativas da conta/unidade
+Validar/Publicar/Retirar	Editor + dialog de confirmação	POST /policies/:id/validate|publish|retire	policy_manage + expected_version + validação backend
+Versões	Editor, somente leitura	GET /policies/:id/versions	policy_manage; versões imutáveis
+Minhas Aprovações	/app/accounts/:accountId/approvals/inbox	GET /requests; GET /resources; POST /requests	Visibilidade backend; request_create no recurso para criar
+Detalhe/Decisão	/app/accounts/:accountId/approvals/inbox/:id	GET /requests/:id; POST /requests/:id/decide	Solicitante/auditor/aprovador conforme backend; voto somente allowed_decisions + decide + elegibilidade atual
+Delegações	/app/accounts/:accountId/approvals/delegations	GET /delegations; POST /delegations; DELETE /delegations/:id	policy_manage; escopo/vigência validados; revogação preserva histórico
+Simulador	/app/accounts/:accountId/approvals/simulate	POST /requests/simulate; GET /catalogs; GET /resources	policy_manage + escopo autorizado; effects=[]
+Histórico	/app/accounts/:accountId/approvals/history/:id	GET /requests/:id/audit	view_audit + visibilidade da solicitação
+Badges CRM/Backoffice	Telas existentes de negócio, proposta, pedido, contrato e Backoffice	GET /gates?key&resource_id; GET /context	Domínio/recurso autorizado; Shadow distinto de aprovação; sem controle de rollout

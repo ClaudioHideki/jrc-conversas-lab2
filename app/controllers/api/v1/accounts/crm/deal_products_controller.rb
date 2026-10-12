@@ -5,6 +5,7 @@ module Api
         class DealProductsController < BaseController
           before_action :set_deal
           before_action :set_deal_product, only: [:update, :destroy]
+          around_action :lock_commercial_edit, only: %i[create update destroy]
 
           def index
             render json: serialize_products
@@ -39,6 +40,13 @@ module Api
           end
 
           private
+
+          def lock_commercial_edit
+            @deal.with_lock do
+              yield
+              JrcApprovals::CommercialInvalidation.call(resource: @deal.reload, user: Current.user) if response.successful?
+            end
+          end
 
           def set_deal
             @deal = visible_to_current_user(crm_scope.jrc_crm_deals).find(params[:deal_id])

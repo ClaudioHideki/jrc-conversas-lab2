@@ -59,6 +59,7 @@ export const FEATURE_FLAGS = {
   JRC_RELATIONSHIP: 'jrc_relationship',
   JRC_CAMPAIGNS: 'jrc_campaigns',
   JRC_SERVICE_DESK: 'jrc_service_desk',
+  JRC_APPROVALS: 'jrc_approvals',
 };
 
 export const PREMIUM_FEATURES = [

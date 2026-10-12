@@ -1,5 +1,6 @@
 <script setup>
 /* eslint-disable vue/no-bare-strings-in-template, @intlify/vue-i18n/no-raw-text */
+import ApprovalGateBadge from 'dashboard/routes/dashboard/approvals/ApprovalGateBadge.vue';
 import { computed, onMounted, reactive, ref } from 'vue';
 import CompanyPicker from 'dashboard/routes/dashboard/jrcCustomers/components/CompanyPicker.vue';
 import ContactPicker from 'dashboard/routes/dashboard/jrcCustomers/components/ContactPicker.vue';
@@ -969,6 +970,8 @@ onMounted(async () => {
               <h3 class="mt-1 text-2xl font-bold text-n-slate-12">
                 {{ selectedProposal.title }}
               </h3>
+              <ApprovalGateBadge resource-key="crm.proposal_send" :resource-id="selectedProposal.id" />
+              <ApprovalGateBadge resource-key="crm.proposal_convert" :resource-id="selectedProposal.id" />
               <p class="mt-1 text-sm text-n-slate-10">
                 {{
                   selectedProposal.customer?.name ||

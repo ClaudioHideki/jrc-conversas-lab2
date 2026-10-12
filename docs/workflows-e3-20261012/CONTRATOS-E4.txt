@@ -1,0 +1,88 @@
+E3 — CONTRATOS BACKEND PARA E4 (SEM TELAS)
+
+Todas as rotas estão em /api/v1/accounts/:account_id/approvals, com autenticação nativa da conta.
+Feature jrc_approvals=false continua o padrão. Nenhuma flag real foi consultada/alterada.
+
+Catálogo GET /catalogs?issuer_company_id=:id&business_unit_id=:id
+Exige policy_manage e cobertura organizacional. Retorna key/version/fields/resource_type/policy_only.
+Contratos: crm.deal_price, crm.proposal_send, crm.proposal_convert, crm.order_price,
+backoffice.release, contracts.company_signature. crm.price_exception é modelo de política, não recurso executável.
+Uma versão crm.price_exception pode atender negócio, envio, conversão e pedido direto. Solicitações continuam
+vinculadas ao recurso e ao evento concreto; aprovação de uma proposta não autoriza outro pedido/recurso.
+Políticas específicas e de família passam pela mesma seleção/prioridade/conflitos/accumulate.
+
+Campos server-side: price_status (evaluated/pending), below_minimum_count, context_digest, signature_evidence,
+total_cents, currency, item_count, order_origin, customer_relationship. O total é a valoração nativa preservada.
+currency='unavailable' e customer_relationship='unknown' são marcadores de indisponibilidade, sem autorização implícita.
+Alçadas por cents devem declarar sua moeda nos critérios. Não existe conversão monetária/recorrência nova.
+Relacionamento corrente do cliente não é prova oficial de que aquela contratação é a primeira venda.
+Não inferir novo cliente pela ausência de contrato. A regra nominal e a evidência oficial permanecem E0.
+
+Políticas: GET /policies, GET /policies/:id, GET /policies/:id/versions,
+POST /policies, PATCH /policies/:id, POST /policies/:id/{validate,publish,retire}.
+Campos de criação/edição e expected_version continuam o contrato E2. Versões publicadas são imutáveis.
+Nenhuma política real/nominal foi criada nesta rodada; as publicações dos testes são sintéticas e descartadas.
+
+Solicitações: GET /requests, GET /requests/:id, POST /requests;
+POST /requests/:id/{decide,transition}, GET /requests/:id/audit.
+Criação: {approval_request:{key,resource_id,idempotency_key}}.
+Ignora account_id/aprovadores/piso/price_reference/evaluated enviados pelo cliente.
+Acima/igual ao piso retorna [] sem abrir exceção de preço. Pending não cria autorização.
+Decisão: {decision:{step_code,decision,reason,expected_version,idempotency_key,delegation_id?}}.
+Transição: {action_key,reason,expected_version}; contratos/ciclos/reabertura seguem E2.
+O detalhe acrescenta allowed_decisions: [{step_code,choices:[{delegation_id,actions}]}], calculado no servidor.
+Não libera efeitos: é apenas orientação para futuras telas. O endpoint de decisão revalida todas as condições.
+
+Leitura: solicitante com request_create; auditor com view_audit; aprovador/delegado designado com decide e
+cobertura atual. Para contexto comercial, aprovador precisa também jrc_crm; publicar/criar/simular/redecidir
+refaz elegibilidade de domínio, evitando selecionar um aprovador incapaz de capturar o contexto.
+Administrador genérico não recebe decide. Operador Backoffice não recebe alçada ou edição de catálogo.
+O acesso a contexto técnico pelo Backoffice usa seu vínculo nativo autorizado, sem ampliar CRM/decisão.
+
+Paginação: page>=1, per_page=1..100 (padrão 25). O corpo permanece array por compatibilidade.
+Headers: X-Total-Count, X-Page, X-Per-Page. Contagens/páginas consideram somente registros autorizados.
+Filtros requests: state, issuer_company_id, business_unit_id, module_key,event_key,resource_type,resource_id,mine=true.
+Filtros policies: state,issuer_company_id,business_unit_id,module_key,event_key. Auditoria é paginada e exige view_audit.
+Limitação de escala: leitura de políticas/solicitações autoriza os candidatos antes de recortar a página em memória.
+Correção/isolamento foram testados; benchmark e otimização SQL para grandes volumes não foram executados.
+
+GET /gates?key=:key&resource_id=:id retorna mode,status,required,context_digest,policy_version_ids e requests resumidas.
+Não inclui snapshot, financials, mínimo por item, tokens, roster completo ou evidência de assinatura.
+Um approved isolado não basta: guard confirma versão selecionada, contexto, fingerprint, prazo, quórum/votos
+do ciclo e a solicitação mais recente por política/evento/recurso. Pending/negativa nova não revive aprovação antiga.
+
+POST /requests/simulate: {key,resource_id} OU {key,context:{issuer_company_id,business_unit_id,values}}.
+Exige policy_manage/cobertura; contexto sintético deve ter exatamente todos os campos tipados do catálogo.
+Retorna versões/planos/elegíveis, conflito ou resultado previsto, effects:[]; não cria requests/votos/CRM/pedido/envio/assinatura.
+Os IDs de elegíveis do simulador ficam restritos à permissão específica de gestão da política.
+
+Modos: account.custom_attributes.jrc_approval_gates contém key:'shadow'|'enforcement'.
+Feature desligada ignora gates e preserva os fluxos anteriores. Feature ligada sem modo explícito usa shadow.
+Shadow observa e registra apenas estado técnico em log; não bloqueia/substitui gate legado.
+Enforcement exige ativação explícita, políticas completas e todos os guards. Nenhuma API de rollout foi criada.
+Envio em enforcement exige idempotency_key. POST CRM /proposals/:id/send_proposal recebe channel e idempotency_key.
+A mesma chave/conteúdo reapresenta mensagem/PDF/evento; conteúdo diferente retorna IDEMPOTENCY_CONTENT_CONFLICT.
+Sem chave, reenvios legados continuam compatíveis em disabled/shadow. Uma intenção nova usa uma chave nova.
+Conversão continua idempotente pelo lock da proposta e pelo pedido nativo existente.
+Pedido direto: em enforcement, rascunho pode ser persistido para solicitar a exceção; envio a pending/release
+revalida a mesma avaliação/política. Criar pending incompatível faz rollback inclusive da aprovação operacional nativa.
+
+Preço: fonte é Product nativo da mesma conta, ativo, com mínimo, moeda, unidade e recorrência explícitos.
+Product.updated_at em UTC identifica a revisão local; não representa tabela/vigência oficial Bentivi.
+Snapshot do cliente não fornece autorização. Mínimo ausente/zero, incompatibilidade e dados necessários ausentes ficam pendentes.
+E1 conserva centavos/valoração; evaluated != autorização. O gate novo acumula com os gates comercial/financeiro/técnico legados.
+
+Contrato: verifier server-side ausente em produção. Contrato da evidência:
+{state:'verified'|'pending'|'invalid',evidence_digest:SHA256}. Verified exige digest válido e vinculação real pelo provedor futuro.
+O digest entra no fingerprint; trocar evidência invalida a autorização. Não há endpoint para aceitar evidência do cliente.
+Nome/PDF do cliente/metadata não comprovam assinatura empresarial. Em enforcement, assinatura manual do cliente
+pode ser registrada com signature_status=signed e status=awaiting_signature, mantendo ativação/liberação retidas.
+A ativação posterior exige gate empresarial + os requisitos nativos do cliente. Em disabled/shadow o fluxo legado é preservado.
+Nenhum provedor foi chamado/configurado, nenhuma pessoa nominal foi selecionada, nenhuma assinatura real foi enviada.
+
+Erros: autenticação/Pundit nativa 401; referência fora da conta 404; validação 422; conflitos/versionamento 409.
+Gates CRM usam code/error estáveis (APPROVAL_REQUIRED, PRICE_CONTEXT_PENDING, COMPANY_SIGNATURE_EVIDENCE_REQUIRED,
+IDEMPOTENCY_KEY_REQUIRED, IDEMPOTENCY_CONTENT_CONFLICT, INVALID_GATE_MODE). Registro manual mantém SIGN-004 legado.
+Policies/requests/decisions/delegations preservam o contrato E2; DELETE de delegação revoga, não apaga histórico.
+
+Não há menu, Vue, tela, badge, notificação/outbox, rollout ou integração externa nova.

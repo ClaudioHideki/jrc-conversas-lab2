@@ -15,6 +15,7 @@ module Api
 
             if item.save
               @proposal.reset_approvals!
+              JrcApprovals::CommercialInvalidation.call(resource: @proposal.reload, user: Current.user)
               render json: serialize_proposal, status: :created
             else
               render json: { errors: item.errors.full_messages }, status: :unprocessable_entity
@@ -27,6 +28,7 @@ module Api
 
             if @item.save
               @proposal.reset_approvals!
+              JrcApprovals::CommercialInvalidation.call(resource: @proposal.reload, user: Current.user)
               render json: serialize_proposal
             else
               render json: { errors: @item.errors.full_messages }, status: :unprocessable_entity
@@ -36,6 +38,7 @@ module Api
           def destroy
             @item.destroy!
             @proposal.reset_approvals!
+            JrcApprovals::CommercialInvalidation.call(resource: @proposal.reload, user: Current.user)
             render json: serialize_proposal
           end
 

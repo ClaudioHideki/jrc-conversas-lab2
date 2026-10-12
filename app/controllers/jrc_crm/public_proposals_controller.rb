@@ -1,6 +1,7 @@
 module JrcCrm
   class PublicProposalsController < ApplicationController
     before_action :set_proposal
+    before_action :ensure_public_availability, only: %i[accept reject]
 
     def show
       unless @proposal.public_availability[:available]
@@ -94,6 +95,12 @@ module JrcCrm
     end
 
     private
+
+    def ensure_public_availability
+      return if @proposal.public_availability[:available]
+
+      render :unavailable, layout: false, status: :unprocessable_entity
+    end
 
     def set_proposal
       @proposal = JrcCrm::Proposal.includes(:account, :owner, :deal, proposal_items: :product).find_by_raw_token(params[:token], allow_unavailable: true)

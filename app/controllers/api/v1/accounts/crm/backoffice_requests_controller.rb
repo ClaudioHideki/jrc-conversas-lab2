@@ -85,8 +85,10 @@ module Api::V1::Accounts::Crm
         return render json: { message: 'A aprovação do pedido exige decisão explícita.' }, status: :unprocessable_entity
       end
       before = audit_snapshot(@request)
+      JrcApprovals::CommercialGate.check!(resource: @request.sales_order, user: Current.user, key: 'crm.order_price')
+      JrcApprovals::CommercialGate.check!(resource: @request, user: Current.user, key: 'backoffice.release')
       JrcCrm::BackofficeDocumentChecklist.new(request: @request, actor: Current.user).sync! if @request.fulfillment?
-      @request.advance!
+      @request.advance!(actor: Current.user)
       audit!(@request, 'backoffice_stage_changed', before, audit_snapshot(@request))
       render json: serialize(@request.reload)
     rescue ActiveRecord::RecordInvalid => e
@@ -226,7 +228,17 @@ module Api::V1::Accounts::Crm
     private
 
     def lock_operational_change
-      @request.sales_order.with_lock { @request.with_lock { yield } }
+      @request.sales_order.with_lock do
+        @request.with_lock do
+          releasing = action_name == 'confirm_provisioning' ||
+            (action_name == 'update' && %w[approved completed].include?(params.dig(:backoffice_request, :status)))
+          if releasing
+            JrcApprovals::CommercialGate.check!(resource: @request.sales_order, user: Current.user, key: 'crm.order_price')
+            JrcApprovals::CommercialGate.check!(resource: @request, user: Current.user, key: 'backoffice.release')
+          end
+          yield
+        end
+      end
     end
 
     def set_request

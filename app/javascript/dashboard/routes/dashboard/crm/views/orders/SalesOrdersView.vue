@@ -1,5 +1,6 @@
 <script setup>
 /* eslint-disable vue/no-bare-strings-in-template */
+import ApprovalGateBadge from 'dashboard/routes/dashboard/approvals/ApprovalGateBadge.vue';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { salesOrdersAPI } from 'dashboard/api/crm/commercialCycle';
@@ -1078,6 +1079,7 @@ onMounted(load);
                 Visão geral do pedido
               </p>
               <h3 class="text-xl font-bold">{{ selected.order_number }}</h3>
+              <ApprovalGateBadge resource-key="crm.order_price" :resource-id="selected.id" />
               <p class="text-sm text-n-slate-11">
                 {{ customerName(selected) }}
               </p>

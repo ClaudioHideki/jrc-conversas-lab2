@@ -1,3 +1,4 @@
+import jrcApprovals from './jrcApprovals.json';
 import jrcHome from './jrcHome.json';
 import relationship from './relationship.json';
 import jrcServiceDesk from './jrcServiceDesk.json';
@@ -112,4 +113,5 @@ export default {
   ...whatsappCalling,
   ...jrcCampaigns,
   ...jrcBroker,
+  ...jrcApprovals,
 };

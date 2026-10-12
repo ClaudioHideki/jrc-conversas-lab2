@@ -28,6 +28,15 @@ export const defaultRedirectPage = (to, permissions) => {
     { permissions: [CONTACT_PERMISSIONS], path: 'contacts' },
     { permissions: [REPORTS_PERMISSIONS], path: 'reports/overview' },
     { permissions: [PORTAL_PERMISSIONS], path: 'portals' },
+    {
+      permissions: ['jrc_approvals_policy_manage'],
+      path: 'approvals/policies',
+    },
+    {
+      permissions: ['jrc_approvals_request_create', 'jrc_approvals_decide'],
+      path: 'approvals/inbox',
+    },
+    { permissions: ['jrc_approvals_view_audit'], path: 'approvals/history' },
   ];
 
   const route = permissionRoutes.find(({ permissions: routePermissions }) =>

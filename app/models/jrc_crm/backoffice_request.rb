@@ -80,14 +80,23 @@ module JrcCrm
     after_update :sync_operational_status, if: :saved_change_to_status?
     after_update :sync_operational_stage, if: :saved_change_to_stage?
 
-    def advance!
-      validate_stage_dependencies!
-      target = next_applicable_stage
-      update!(stage: target, status: target == 'completed' ? 'completed' : 'in_progress',
-              completed_at: target == 'completed' ? Time.current : nil)
-      JrcCrm::OrderWorkflowSyncService.new(order: sales_order, actor: owner, event: 'implementation_ready').call if target == 'implementation'
-      if target == 'finance' && previous_changes['stage']&.first == 'provisioning'
-        JrcCrm::OrderWorkflowSyncService.new(order: sales_order, actor: owner, event: 'implementation_completed').call
+    def advance!(actor: owner)
+      sales_order.with_lock do
+        with_lock do
+          JrcApprovals::CommercialGate.check!(resource: sales_order, user: actor, key: 'crm.order_price')
+          JrcApprovals::CommercialGate.check!(resource: self, user: actor, key: 'backoffice.release')
+          if %w[contract implementation provisioning finance issues approval].include?(stage)
+            JrcApprovals::CommercialGate.check_contracts!(order: sales_order, user: actor)
+          end
+          validate_stage_dependencies!
+          target = next_applicable_stage
+          update!(stage: target, status: target == 'completed' ? 'completed' : 'in_progress',
+                  completed_at: target == 'completed' ? Time.current : nil)
+          JrcCrm::OrderWorkflowSyncService.new(order: sales_order, actor: actor, event: 'implementation_ready').call if target == 'implementation'
+          if target == 'finance' && previous_changes['stage']&.first == 'provisioning'
+            JrcCrm::OrderWorkflowSyncService.new(order: sales_order, actor: actor, event: 'implementation_completed').call
+          end
+        end
       end
       self
     end

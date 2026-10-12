@@ -16,6 +16,8 @@ module JrcCrm
           JrcCrm::OrderApprovalService.new(order: @order, actor: @actor).request! if @order.pending?
           sync_follow_up! unless @order.draft?
           if QUALIFYING_STATUSES.include?(@order.status)
+            JrcApprovals::CommercialGate.check!(resource: @order, user: @actor, key: 'crm.order_price')
+            JrcApprovals::CommercialGate.check_contracts!(order: @order, user: @actor) unless @order.status == 'approved'
             contract = sync_contract!
             implementation = {}
             sync_backoffice!(contract: contract, implementation: implementation)

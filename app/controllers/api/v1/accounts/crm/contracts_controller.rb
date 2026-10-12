@@ -44,6 +44,10 @@ module Api::V1::Accounts::Crm
           attributes['lifecycle_metadata'] = (@contract.lifecycle_metadata || {}).deep_merge(attributes['lifecycle_metadata'])
         end
         @contract.update!(attributes)
+        JrcApprovals::CommercialInvalidation.call(resource: @contract.reload, user: Current.user)
+        if %w[active expiring renewed].include?(@contract.status)
+          JrcApprovals::CommercialGate.check!(resource: @contract, user: Current.user, key: 'contracts.company_signature')
+        end
         sync_signature_status_from_contract_status!(@contract)
         sync_order_after_signature!(@contract)
         audit!(@contract, 'contract_updated', before, audit_snapshot(@contract))
@@ -148,17 +152,24 @@ module Api::V1::Accounts::Crm
       @contract.sales_order.with_lock do
         @contract.lock!
         raise ArgumentError, 'A assinatura já foi registrada. O documento existente foi preservado.' if @contract.signature_status == 'signed'
+        gate_mode = JrcApprovals::CommercialGate.mode(crm_scope, 'contracts.company_signature')
+        gate_result = if gate_mode == 'enforcement'
+                        JrcApprovals::CommercialGate.new(account: crm_scope, user: Current.user)
+                          .evaluate(key: 'contracts.company_signature', resource_id: @contract.id, lock: true)
+                      end
+        company_pending = gate_result && gate_result[:status] != 'ready'
         file = params[:signed_file]
         blob = ActiveStorage::Blob.create_and_upload!(io: file.tempfile, filename: file.original_filename,
           content_type: 'application/pdf', identify: false)
         @contract.signed_document.attach(blob)
         @contract.update!(signature_mode: 'manual', signature_provider: nil, signature_status: 'signed',
-          signed_by_name: signed_name, signed_at: signed_time, status: 'active')
+          signed_by_name: signed_name, signed_at: signed_time, status: company_pending ? 'awaiting_signature' : 'active')
         sync_order_after_signature!(@contract)
         audit!(@contract, 'contract_manual_signature_registered', {}, {
           signed_by_name: signed_name, signed_at: signed_time, recorded_at: Time.current,
           recorded_by_id: Current.user.id, source: 'manual', document_id: blob.id,
-          filename: blob.filename.to_s, byte_size: blob.byte_size, content_type: blob.content_type, request_id: request.request_id })
+          filename: blob.filename.to_s, byte_size: blob.byte_size, content_type: blob.content_type, request_id: request.request_id,
+          company_signature_gate: gate_result&.dig(:status) })
       end
       render json: serialize(@contract.reload)
     rescue ArgumentError, ActiveRecord::RecordInvalid => error
@@ -253,6 +264,11 @@ module Api::V1::Accounts::Crm
 
     def sync_order_after_signature!(contract)
       return unless contract.signature_status == 'signed'
+      if JrcApprovals::CommercialGate.mode(crm_scope, 'contracts.company_signature') == 'enforcement'
+        return unless %w[active expiring renewed].include?(contract.status)
+
+        JrcApprovals::CommercialGate.check!(resource: contract, user: Current.user, key: 'contracts.company_signature')
+      end
       JrcCrm::OrderWorkflowSyncService.new(order: contract.sales_order, actor: Current.user, event: 'contract_signed').call
     end
 

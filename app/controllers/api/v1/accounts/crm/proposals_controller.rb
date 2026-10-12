@@ -69,6 +69,7 @@ module Api
               commercial_changes = @proposal.saved_changes.keys - %w[updated_at]
               @proposal.reset_approvals! if commercial_changes.any?
               @proposal.recalculate_totals!
+              JrcApprovals::CommercialInvalidation.call(resource: @proposal.reload, user: Current.user)
               audit_event!('updated', 'Proposta atualizada no CRM')
               render json: serialize(@proposal.reload)
             else
@@ -145,6 +146,8 @@ module Api
             end
 
             render json: serialize(duplicate.reload), status: :created
+          rescue JrcApprovals::Error => e
+            render json: { error: e.code, code: e.code }, status: :conflict
           rescue StandardError => e
             render json: { errors: [e.message] }, status: :unprocessable_entity
           end
@@ -228,7 +231,8 @@ module Api
               proposal: @proposal,
               actor: Current.user,
               channel: params[:channel].presence || 'auto',
-              base_url: request.base_url
+              base_url: request.base_url,
+              idempotency_key: params[:idempotency_key]
             ).call
 
             render json: {
@@ -306,6 +310,8 @@ module Api
           def convert_to_order
             order = JrcCrm::ProposalToOrderService.new(proposal: @proposal, actor: Current.user).call
             render json: { id: order.id, order_number: order.order_number, status: order.status, total_cents: order.total_cents }, status: :created
+          rescue JrcApprovals::Error => e
+            render json: { error: e.code, code: e.code }, status: :conflict
           rescue StandardError => e
             render json: { errors: [e.message] }, status: :unprocessable_entity
           end
@@ -362,23 +368,15 @@ module Api
           end
 
           def commercial_approval_required?
-            general_discount_percent > 10 || @proposal.proposal_items.any? do |item|
-              threshold = item.product&.discount_approval_percent.to_f
-              threshold.positive? && item_discount_percent(item) > threshold
-            end
+            JrcCrm::ProposalApprovalRequirements.new(@proposal).commercial?
           end
 
           def financial_approval_required?
-            return false if @proposal.subtotal_cents.to_i.zero?
-
-            total_discount_percent = (@proposal.total_discount_cents.to_f / @proposal.subtotal_cents.to_i) * 100
-            total_discount_percent > 10
+            JrcCrm::ProposalApprovalRequirements.new(@proposal).financial?
           end
 
           def technical_approval_required?
-            @proposal.proposal_items.any? do |item|
-              item.product&.requires_contract? || item.product&.technical_requirements.present?
-            end
+            JrcCrm::ProposalApprovalRequirements.new(@proposal).technical?
           end
 
           def general_discount_percent

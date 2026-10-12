@@ -1,0 +1,99 @@
+E2 — NÚCLEO CONFIGURÁVEL DE APROVAÇÕES — RELATÓRIO DE 12/10/2026
+
+Resultado: núcleo implementado e testes do recorte técnico executados com sucesso; SEM ATIVAÇÃO OPERACIONAL.
+Há limitação técnica de atualização do schema-base e limites de domínios/adaptadores explicitados abaixo.
+Não é homologação integral do produto, aceite comercial da E0 ou autorização para produção.
+Branch codex/sd-contato-softphone-20261011
+HEAD-base 09b0cc85e32e8a99d5ca4308a6e4fd920ef7468a MAIS todo o delta local anterior.
+
+BASE/PRESERVAÇÃO
+Backup local antes das alterações: delta-acumulado-before.zip, com os 12 arquivos anteriores, untracked e hashes.
+Nenhuma alteração desconhecida detectada. Os 12 arquivos continuam byte a byte: E1, 35 testes, matriz,
+relatórios e correções dirigidas de propostas (GET disponibilidade, HTML, replay, envio/sent_at, PDF/anexo).
+ZIP anterior também preservado por hash; não reescrito como se fosse resultado E2.
+251 arquivos históricos db/migrate intactos: 244 na raiz e sete auxiliares. Agora existe UMA migration aditiva nova.
+Gemfile, Gemfile.lock, pnpm-lock, Compose, .env, db/schema.rb, workflows de publicação e motores legados intactos.
+Flags anteriores não reordenadas/modificadas. Nova jrc_approvals false, no final de feature_flags_ext_1.
+Permissões existentes preservadas; quatro capabilities novas adicionadas ao CustomRole nativo.
+Sem acesso à account 1 GRUPO JRC; jrc_customer_master=false/jrc_relationship=false não foram alteradas.
+SLA/reservas NICO e BEMTEVI=Bentivi=Bentevi preservados. Sem acesso ao ERP ou demais sistemas externos.
+
+O QUE FOI IMPLEMENTADO
+Políticas/rascunhos, validação e publicações imutáveis; requests pinados à versão original; desativação.
+Condições tipadas, seleção por prioridade exclusiva ou acumulação explícita, bloqueio de conflitos/ausência.
+Elegibilidade usando identidades, permissões, equipes e cobertura organizacional existentes, rechecadas na decisão.
+Quóruns/etapas/autoridade/delegação/autoaprovação como parâmetros obrigatórios, sem regra nominal do Grupo JRC.
+Snapshot/fingerprint calculados no servidor, origem e usuário reais, decisões individualizadas e auditoria append-only.
+Versões esperadas, idempotência com validação de conteúdo, locks e índices/constraints PostgreSQL.
+Contrato de invalidação explícito e ciclo de reinício declarado, sem integrar callbacks/gates de CRM/Backoffice.
+APIs autenticadas de administração do núcleo, serialização mínima e autorização de recurso antes da captura.
+O catálogo nasce vazio: adaptadores comerciais NÃO instalados. Somente fixtures registram synthetic.review.
+
+REUTILIZAÇÃO E ESTRUTURAS NOVAS
+A auditoria verificou OrderApprovalService, BackofficeRequest, Proposal/SalesOrder/Contract, audit CRM,
+Campanhas, Service Desk, NICO, Flows, Relacionamento, roles e estrutura organizacional.
+Não há motor genérico equivalente: Backoffice exige SalesOrder/processamento operacional, Flows executa grafos,
+e os outros motores têm estados/digests/escopos próprios. Nenhum foi substituído ou duplicado operacionalmente.
+AccountUser/User/CustomRole + UserBusinessUnit/TeamScope/TeamMember e CanonicalJson/AppendOnly foram reutilizados.
+Seis tabelas novas de governança justificadas no contrato: policies, versions, requests, decisions, audit, delegations.
+Etapas/regras ficam no JSON validado e imutável de cada versão, evitando tabelas adicionais editáveis.
+
+EXECUÇÕES REAIS E CONTAGEM
+E2 final + regressões adicionais: 85 exemplos, 0 failures, 0 pending, 0 erros fora dos exemplos.
+  71 E2: 46 core, 14 condições, nove API, duas concorrências com pg_backend_pid distintos.
+  14 regressões adicionais: seis CustomRole e oito estrutura organizacional.
+Quatro arquivos da rodada anterior: 52 exemplos, todos preservados por ID/descrição, 0 failures/pending/erros.
+  11 commercial protection, 26 proposal homologation, oito order integrity, sete financial guards.
+E1: 35 testes, 637 assertions, 0 failures/errors/skips.
+Regressões puras: 31 testes, 6312 assertions, 0 failures/errors/skips, processo separado de Rails.
+Autoload Rails real, Zeitwerk, sintaxe de 31 arquivos Ruby e git diff --check passaram.
+10.439 arquivos foram verificados por hash no runtime; manifest final identifica bytes efetivamente executados.
+Ruby 3.4.4/Bundler 2.5.16/Rails 7.1.5.2/pg 1.5.3/BigDecimal 4.1.2/Minitest 5.25.5/rspec-rails 7.0.1;
+PostgreSQL 16.15/pgvector 0.8.6/Redis 7.4.11. Gemfiles travados, nenhuma instalação forçada para verde.
+Comandos/versões/logs/JSON completos no pacote. Execuções sobrepostas anteriores (64/68/83/85) NÃO somadas.
+Primeira tentativa: quatro falhas de testes, mantidas como evidência. TimeHelpers truncava microssegundos de
+deadlines; corrigido with_usec=true. Pundit nativo retorna 401, não 403; expectations agora testam contrato e
+mensagem de autorização. Não se alteraram os controles do produto para contornar essas falhas.
+Revisão acrescentou FK de versão à própria política, cobertura de TeamScope, autorização nativa obrigatória
+antes do snapshot, invalidação após aprovação, rollback de acumulação e INSERT SQL cruzado negado pela FK.
+
+MIGRATION/SCHEMA
+20261012160000_create_configurable_approval_core.rb aplicada, revertida e reaplicada SOMENTE no banco de teste.
+Comparação de colunas/índices e contagens de 264 tabelas nativas confirmou preservação; único índice novo
+em tabela nativa é a referência composta BusinessUnit(account,company,id), estritamente necessária à FK.
+Fks multi-tenant e de parent policy/version, uniques de idempotência/votos, checks e triggers testados.
+Nenhum histórico ou dado legado reescrito. A reversão remove só objetos E2; destruição de história E2 é operação
+de rollback que exige cuidado em eventual rollout, não foi executada em dados reais.
+db/schema.rb da base declara 2026_09_29_140200 e já omite várias migrations históricas posteriores.
+Regenerá-lo integralmente traria alterações antigas fora desta autorização; inserir blocos à mão foi evitado.
+Arquivo original mantido intacto. Dump gerado pela execução está em evidence/generated-schema-e2.rb, somente
+como evidência externa. A sincronização controlada do schema completo permanece pendência técnica antes
+de implantação; para reproduzir este recorte usar schema:load seguido de db:migrate, como o harness executou.
+
+ISOLAMENTO E RECURSOS
+Somente Docker desktop-linux local; rede interna nova, sem host ports; código RO, volumes/banco/Redis/storage
+de teste próprios, sem .env/credenciais/dados antigos. Credenciais fictícias; mail/jobs/storage adapters de teste;
+WebMock e isolamento de rede. Nenhum Rails server/worker, assinatura ou notificação externa foi iniciado.
+Removidos somente os três containers, quatro volumes e rede identificados desta execução após validação.
+16 containers antigos, 46 redes e 33 volumes preservados, inclusive configuração/mounts/estado/redes por hash.
+
+PENDÊNCIAS E LIMITES, SEM CONFUNDIR E0 COM FALHAS TÉCNICAS
+E0: quórum/alçadas JRC, impasse/efeito CEO, mínimo zero, equivalências recorrência/setup/consumo,
+tabela oficial/emissora/vigência e evidência/provedor de assinatura continuam sem decisão. Nenhuma suposta.
+E3: adaptadores comerciais e guards de envio/conversão/liberação/assinatura não instalados nem substituídos.
+E4/E5/E6, notificações/outbox, calendário útil, interfaces e rollout fora desta entrega. O prazo core é corrido
+em segundos explícitos, sem substituir SLA. Tipos de domínio adicionais precisam de contratos próprios.
+Voto exige capabilities finas existentes; ambientes sem CustomRole/fine permissions ficam bloqueados,
+sem fallback de administrador. Retenção/purga de vínculos referenciados por história exige revisão antes de rollout.
+Técnica: schema-base defasado permanece sem atualização ampla não autorizada, com evidência gerada disponível.
+Risco operacional futuro: requests approved NÃO autorizam efeitos comerciais hoje. E3 deve verificar contexto
+e todas as políticas acumuladas antes de qualquer efeito. Não usar evaluated da E1 como autorização.
+
+ENTREGA
+CONTRATOS-E-REUTILIZACAO.txt detalha modelos/estados/API/permissões/seleção/migration; MATRIZ-REQUISITOS.json
+classifica atendido/parcial/pendente por requisito do Word e escopo atual. Inventário lista TODOS os arquivos.
+ZIP local inclui delta acumulado completo, patch E2, tracked/untracked, conteúdo integral, antes/backup,
+testes, documentação, hashes, resultados executados, auxiliares externos e pacotes históricos.
+Sem chaves/credenciais reais, .env, volumes, dumps de dados ou sistemas externos. Scripts usam dados fictícios.
+Os arquivos são SOMENTE deste computador, não foram anexados/enviados/publicados fora dele.
+Sem commit/push/merge/imagem/deploy. HEAD/branch originais mantidos. Parada para revisão; E3/E4 não iniciadas.

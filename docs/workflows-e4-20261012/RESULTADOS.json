@@ -1,0 +1,286 @@
+{
+  "scope": "E4 only; local execution; review pending; no E5 or operational rollout",
+  "branch": "codex/sd-contato-softphone-20261011",
+  "head_base": "09b0cc85e32e8a99d5ca4308a6e4fd920ef7468a",
+  "frontend": {
+    "distinct_passed": 93,
+    "current_directed_passed": 63,
+    "native_regressions_preserved_passed": 30,
+    "native_suites_unchanged_by_hash": true,
+    "errors": 0,
+    "note": "30 unchanged native tests reused from the approved run; affected E4 suites reexecuted."
+  },
+  "rspec": {
+    "duration": 81.668405341,
+    "example_count": 201,
+    "failure_count": 0,
+    "pending_count": 0,
+    "errors_outside_of_examples_count": 0
+  },
+  "rspec_composition": {
+    "preserved_E3": 191,
+    "new_E4": 10
+  },
+  "E1": {
+    "tests": 35,
+    "assertions": 637,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0
+  },
+  "pure_regressions": {
+    "tests": 31,
+    "assertions": 6312,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0
+  },
+  "rails_autoload": "passed",
+  "zeitwerk": "passed",
+  "ruby_syntax": "passed",
+  "ruby_lint": {
+    "offense_count": 0,
+    "target_file_count": 10,
+    "inspected_file_count": 10
+  },
+  "frontend_lint": {
+    "errors": 0,
+    "warnings": 157
+  },
+  "build": {
+    "status": "passed",
+    "command": "node --max-old-space-size=5120 node_modules/vite/bin/vite.js build --mode production",
+    "frontend_source_files": [
+      {
+        "path": "app/javascript/dashboard/api/approvals.js",
+        "sha256": "4a093ad138fe674d6b0501c92e2ed5882ed245fcb3eebf32b2a6f52094acc5d6"
+      },
+      {
+        "path": "app/javascript/dashboard/components-next/sidebar/Sidebar.vue",
+        "sha256": "2ffbf09bf665bf9db7f1d8afd083900f59a6106581a2fb88b78dce2fb411e98c"
+      },
+      {
+        "path": "app/javascript/dashboard/composables/useApprovalAccess.js",
+        "sha256": "660f2b9683d979578c4571ea65b54dcf38d2647be6c6f15b8b9689a60272d95c"
+      },
+      {
+        "path": "app/javascript/dashboard/featureFlags.js",
+        "sha256": "5b83a3562b7e715cfa05fd4b7d082c170b23e40a95f40ce5eea4e3508bf063e4"
+      },
+      {
+        "path": "app/javascript/dashboard/helper/routeHelpers.js",
+        "sha256": "65f30c41fca2be0e0851585f92e941cacb3fa4a1fc382b588dedf0db96f208cf"
+      },
+      {
+        "path": "app/javascript/dashboard/i18n/locale/en/index.js",
+        "sha256": "5d5cf6b6672e1bd0af597f1cad0d9aed6e427aca92d6a552f01f1bbc743112bc"
+      },
+      {
+        "path": "app/javascript/dashboard/i18n/locale/en/jrcApprovals.json",
+        "sha256": "503ddfd388d23481f3cd2d6d02c9fff2e93f2a3fe149ccf3bd28f91005fdd669"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/approvals/ApprovalGateBadge.vue",
+        "sha256": "1985a0e2e99d83a2e9e63b56b5efe39e6640b0e6bcb23dd04aa1ce757cdefbb6"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/approvals/ApprovalsPage.vue",
+        "sha256": "8dd39affd9a05ed31cc4eddca1bc483d93c936e4daac0ed991a7263b3e4e4971"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/approvals/ConditionEditor.vue",
+        "sha256": "332615b77521ebb72dc8827b69c251a69571b97207491fd176ab95091bd20972"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/approvals/DelegationView.vue",
+        "sha256": "a4e2616bea92b9cb81a02861049ba0f11ce7f1434487116f1322526dc220a6f3"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/approvals/PolicyEditor.vue",
+        "sha256": "47b17e3b7dd2a9278a316e04ace79a8d482b20a1861a941430f994153646ecb4"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/approvals/RequestDetail.vue",
+        "sha256": "6817548048d5ba9d43ce3326bd727db91d0c4858601a07b5ed22fac224183f98"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/approvals/ResourcePicker.vue",
+        "sha256": "d9085e585cd66647e2fb2833904ddc3e82447dc81c1f61c46233cb09527693a4"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/approvals/SimulatorView.vue",
+        "sha256": "1e66f370a2bb728dbd275febae978e0998644acf8eba0ee6b3ecc37c0ca92da5"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/approvals/StepEditor.vue",
+        "sha256": "129bed3e973117e658cf54e0370d5a129062e4e4dcf06a9c6fc570eb5405a1bc"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/approvals/TypedValue.vue",
+        "sha256": "d22e36b3dde132b3bb7f76e9552330ecf49ee8b39ac19c235c6adfc74a29babb"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/approvals/model.js",
+        "sha256": "101698026b6723f6888f75d5f88b7a30c770d262b6433f1f231f7ce0be8683a0"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/approvals/routes.js",
+        "sha256": "afa80508e7fb4a637558d1090a5de413f0e87ef6bad122a5a35616f8c8e2f986"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/approvals/specs/approvals.spec.js",
+        "sha256": "02df1385474a8f3bdb48253e44e6e6cb5a30ee1981f556cc66c5f54ea7473e00"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/approvals/specs/nativeNavigation.spec.js",
+        "sha256": "14be703b192b6d81ab1b59bd3a14e9af4a822e6f2acca5a6ea44df3a0dc3f1a2"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/approvals/useApprovals.js",
+        "sha256": "b2984d5cc82c0fabe7091eb68dd99732e27d3209bfd197ce9150e1e936971f4c"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/crm/crm.routes.js",
+        "sha256": "0c2c4bcc5d637fdb571dd1d520313ee8d02f6675e7dcab9b8072ae0a3b5ba410"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeView.vue",
+        "sha256": "fedbc4c5d77c84c3596472e79b9c749a78471d03f4ad882f74626f44edaa3598"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/crm/views/contracts/ContractsView.vue",
+        "sha256": "0cd54afe29f45e6479e61ad904e216200c6362d1ffce9664b512c13ff3250f2e"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/crm/views/deals/DealDetailView.vue",
+        "sha256": "d1df68d23536efe57073ca0c88d131bf48e753c0032753f33eb752898a5f5e97"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/crm/views/orders/SalesOrdersView.vue",
+        "sha256": "a5543592c0ca288facd8bbb256cd70efca8843e4145e8b29c36cfdfe039fc82c"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/crm/views/proposals/ProposalsIndex.vue",
+        "sha256": "897803a5fd0f8ee487697b065d00683d46b98e69e18c41718d8a78d865c20d73"
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/dashboard.routes.js",
+        "sha256": "476a65c9798970cc632fe2b2247ef190605a61f2c1fdf1d219f08c59ea9922dc"
+      }
+    ],
+    "manifest_sha256": "f2998c7d83a679eee95439ad6a3f754e0af049a4d5cee3cb2f231505c7457854",
+    "approval_chunk": "assets/ApprovalsPage-C9mnfsRU.js",
+    "approval_chunk_bytes": 55732,
+    "approval_chunk_gzip_bytes": 14423,
+    "approval_chunk_sha256": "5b441661b7c635f20906b059694acfc05cf7dfa8a4476ff85ffd1cf40707487a",
+    "sdk_build": "passed",
+    "size_limit": "passed",
+    "warnings": [
+      "Existing large dashboard/icon chunks",
+      "Webphone static/dynamic import overlap",
+      "Missing native dependency sourcemap in Vitest"
+    ],
+    "no_dependency_or_lockfile_changes": true,
+    "build_log": "frontend-build-closure-final.log"
+  },
+  "browser": {
+    "initial_completed_steps": 13,
+    "resumed_completed_steps": 6,
+    "errors": [],
+    "blocked_external": 0,
+    "status": "passed in the aggregate executed scope",
+    "narrow_layout": {
+      "width": 390,
+      "scrollWidth": 390,
+      "documentWidth": 390,
+      "documentScrollWidth": 390
+    },
+    "evidence": [
+      "browser-e2e-third.json",
+      "browser-e2e-closure-ready.json"
+    ]
+  },
+  "performance": {
+    "measurements": [
+      {
+        "endpoint": "policies",
+        "records": 201,
+        "seconds": 0.842404,
+        "queries": 14,
+        "tables": {
+          "users": 3,
+          "portals": 1,
+          "accounts": 1,
+          "account_users": 2,
+          "jrc_approvals_policies": 1,
+          "jrc_approvals_policy_versions": 1,
+          "companies": 1,
+          "jrc_crm_business_units": 1,
+          "custom_roles": 1,
+          "jrc_crm_user_business_units": 1,
+          "user_sessions": 1
+        },
+        "returned": 25,
+        "scope": "authorized synthetic unit"
+      },
+      {
+        "endpoint": "requests",
+        "records": 120,
+        "seconds": 0.564614,
+        "queries": 15,
+        "tables": {
+          "users": 3,
+          "portals": 1,
+          "accounts": 1,
+          "account_users": 2,
+          "jrc_approvals_requests": 1,
+          "jrc_approvals_policy_versions": 1,
+          "jrc_approvals_decisions": 1,
+          "companies": 1,
+          "jrc_crm_business_units": 1,
+          "custom_roles": 1,
+          "jrc_crm_user_business_units": 1,
+          "user_sessions": 1
+        },
+        "returned": 25,
+        "scope": "authorized synthetic unit"
+      },
+      {
+        "endpoint": "requests/:synthetic_id/audit",
+        "records": 241,
+        "seconds": 0.069154,
+        "queries": 13,
+        "tables": {
+          "users": 3,
+          "portals": 1,
+          "accounts": 1,
+          "account_users": 1,
+          "jrc_approvals_requests": 1,
+          "companies": 1,
+          "jrc_crm_business_units": 1,
+          "custom_roles": 1,
+          "jrc_crm_user_business_units": 1,
+          "jrc_approvals_audit_events": 1,
+          "user_sessions": 1
+        },
+        "returned": 25,
+        "scope": "authorized synthetic unit"
+      }
+    ],
+    "note": "Basic local measurement; no production benchmark or volume SLA inferred."
+  },
+  "migrations": {
+    "historical": 251,
+    "E2_additive": 1,
+    "E4_new": 0,
+    "hashes_preserved": true
+  },
+  "no_commit_push_image_deploy_real_access": true,
+  "limitations": [
+    "E0 business decisions remain open",
+    "Memory pagination is bounded at response level, not SQL candidate level",
+    "Synthetic local benchmark is not a production capacity guarantee",
+    "Existing frontend warnings remain",
+    "No real rollout, notifications, signature provider or ERP integration"
+  ]
+}

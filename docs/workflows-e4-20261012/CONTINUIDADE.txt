@@ -1,0 +1,8 @@
+CONTINUIDADE E4 — PARAR PARA REVISÃO
+Usar exatamente a branch e o HEAD-base do relatório + todo o delta local. Não reconstruir do HEAD limpo.
+O ZIP entrega conteúdo local acumulado, não representa commit ou imagem. Não executar generators de implementação para retomar.
+Revisar docs, delta, patches, manifests e capturas; E0 permanece pendente e E5 não está autorizada.
+As suites nativas frontend de 30 testes não foram repetidas porque testes e consumidores permaneceram preservados por hash.
+Somente suites afetadas pela revisão final foram reexecutadas. Todos os checks Rails requeridos foram executados no projeto real.
+Credenciais/browser state/banco não são entregues. Para outra execução, usar novo namespace descartável e identidades sintéticas,
+respeitando os recursos antigos; não carregar .env real nem conectar LAB/Grupo JRC.

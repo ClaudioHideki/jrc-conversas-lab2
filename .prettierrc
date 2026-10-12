@@ -5,8 +5,15 @@
   "arrowParens": "avoid",
   "overrides": [
     {
-      "files": ["app/javascript/dashboard/routes/dashboard/jrcCustomers/**/*.vue", "app/javascript/dashboard/routes/dashboard/jrcRelationship/**/*.vue", "app/javascript/dashboard/routes/dashboard/serviceDesk/components/OperationalReportPanel.vue"],
-      "options": { "singleAttributePerLine": true }
+      "files": [
+        "app/javascript/dashboard/routes/dashboard/jrcCustomers/**/*.vue",
+        "app/javascript/dashboard/routes/dashboard/jrcRelationship/**/*.vue",
+        "app/javascript/dashboard/routes/dashboard/serviceDesk/components/OperationalReportPanel.vue",
+        "app/javascript/dashboard/routes/dashboard/approvals/**/*.vue"
+      ],
+      "options": {
+        "singleAttributePerLine": true
+      }
     }
   ]
 }

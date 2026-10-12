@@ -1,0 +1,106 @@
+{
+  "reference": "Word V3 §§1,2,4,8,9,10,11,12,13; current user scope prevails over historical rollout instructions",
+  "historical_word_head_not_used_as_base": true,
+  "rows": [
+    {
+      "requisito": "§1/8 tenant e escopo organizacional",
+      "estado": "ATENDIDO",
+      "evidencia": "FKs compostas; emissora Company interna e unidade JrcCrm::BusinessUnit, sem IDs de cliente/Service Desk intercambiáveis."
+    },
+    {
+      "requisito": "§2/2.1 reutilização",
+      "estado": "ATENDIDO",
+      "evidencia": "AccountUser/User/CustomRole, UserBusinessUnit/TeamScope/TeamMember e CanonicalJson/AppendOnly reutilizados; motores operacionais intactos."
+    },
+    {
+      "requisito": "§4/8 policy lifecycle e versões",
+      "estado": "ATENDIDO",
+      "evidencia": "Draft, validated, published, retired; edição gera draft e nova versão ao publicar; versões e requests pinados imutáveis."
+    },
+    {
+      "requisito": "§4 seleção e conflitos",
+      "estado": "ATENDIDO",
+      "evidencia": "Exclusive/accumulate explícitos, prioridade inteira explícita, empate bloqueado; sobreposição conservadora por escopo."
+    },
+    {
+      "requisito": "§4 condições tipadas",
+      "estado": "ATENDIDO",
+      "evidencia": "Catálogo de campos confiável do servidor; operadores finitos; limites de profundidade/nós/tamanho; dinheiro/decimal exatos sem eval/SQL livre."
+    },
+    {
+      "requisito": "§4/6 etapas e alçadas",
+      "estado": "ATENDIDO",
+      "evidencia": "Sequential/parallel, any/all/quorum explícitos, autoridade tipada por etapa e ações permitidas; sem regra nominal JRC."
+    },
+    {
+      "requisito": "§8/10 elegibilidade",
+      "estado": "ATENDIDO",
+      "evidencia": "Conta ativa, usuário autenticável, vínculo e permissões nativas, escopos atuais, alvo de etapa e roster congelado; autoaprovação explícita."
+    },
+    {
+      "requisito": "§8/10 delegação",
+      "estado": "ATENDIDO",
+      "evidencia": "Principal e delegado válidos no mesmo escopo; ações, versão, etapa e janela; revogação auditada; identidade principal/ator separadas."
+    },
+    {
+      "requisito": "§5.1/8 solicitações e snapshots",
+      "estado": "ATENDIDO",
+      "evidencia": "Contexto capturado do registro pelo servidor após autorização nativa obrigatória; snapshot/fingerprint e política pinada."
+    },
+    {
+      "requisito": "§8.1 estados/transições",
+      "estado": "ATENDIDO",
+      "evidencia": "Requests nascem pending após contrato completo; approved/rejected/returned/escalated/expired/canceled/stale; restart_all explícito por ciclo."
+    },
+    {
+      "requisito": "§8.2/10 idempotência/concorrência",
+      "estado": "ATENDIDO",
+      "evidencia": "Locks transacionais advisory/linha, versões esperadas e uniques; chaves iguais com conteúdo diferente geram conflito; conexões PG independentes."
+    },
+    {
+      "requisito": "§9 APIs",
+      "estado": "ATENDIDO",
+      "evidencia": "Namespace /api/v1/accounts/:account_id/approvals, autenticação existente, permissões e escopos; whitelist e serialização mínima."
+    },
+    {
+      "requisito": "§10 auditoria",
+      "estado": "ATENDIDO",
+      "evidencia": "Append-only no AR e em triggers PG; ator AccountUser real, razão, hash, estado, ciclo e correlação; sem notificações externas."
+    },
+    {
+      "requisito": "§5.1 invalidação",
+      "estado": "ATENDIDO",
+      "evidencia": "Contrato explícito transition(invalidate), inclusive após aprovação; mudança relevante bloqueia decisões; nenhum callback E3 instalado."
+    },
+    {
+      "requisito": "§11 migrations",
+      "estado": "ATENDIDO",
+      "evidencia": "Uma migration aditiva, seis tabelas, índices/FKs/checks/triggers; down/up testado; 251 históricos preservados."
+    },
+    {
+      "requisito": "§11 db/schema.rb",
+      "estado": "PARCIAL",
+      "evidencia": "Schema da base em 29/09 defasado; regeneração completa traria estruturas históricas fora do delta. Arquivo preservado; dump derivado fornecido como evidência, não schema de produção."
+    },
+    {
+      "requisito": "§4 prazos/calendários/notificações",
+      "estado": "PARCIAL",
+      "evidencia": "Prazo corrido em segundos explícitos, expiração e delegação presentes; calendário comercial, lembretes e entregas externas reservados a adaptadores/etapas posteriores."
+    },
+    {
+      "requisito": "§5/7/14.1 configuração real JRC",
+      "estado": "PENDENTE_E0",
+      "evidencia": "Quóruns/alçadas, impasse/CEO, mínimo zero, recorrências/setup/consumo, tabela/emissora/vigência e assinatura verificável sem decisão nesta E2."
+    },
+    {
+      "requisito": "E3 adaptadores e gates operacionais",
+      "estado": "FORA_DE_ESCOPO",
+      "evidencia": "Nenhum adaptador comercial registrado em produção; no controller/callback/job comercial conectado; sem envio/conversão/liberação/assinatura."
+    },
+    {
+      "requisito": "E4/E5/E6 e importação",
+      "estado": "FORA_DE_ESCOPO",
+      "evidencia": "Sem menus/telas/rollout/expansão ou acesso a sistemas externos."
+    }
+  ]
+}

@@ -1,0 +1,119 @@
+CONTRATOS E MAPA DE REUTILIZAÇÃO — E2
+
+Não há política nominal JRC nem adaptador comercial instalado. jrc_approvals nasce false, no final do bitset
+feature_flags_ext_1, sem reordenar flags anteriores. Fixtures ativam somente tenants sintéticos.
+O catálogo de contratos do servidor nasce vazio. register exige key/version/model/schema/authorize/capture,
+fornecidos por código confiável. Não existe endpoint de registro de scripts. authorize precisa retornar true
+antes de capture. Adaptadores E3 devem reutilizar o guard de visibilidade do domínio. Nenhum foi instalado.
+Nos testes, synthetic.review lê JrcCrm::BusinessUnit e settings explicitamente identificados como dados de teste.
+
+DOMÍNIOS
+account_id: tenant, do Current.account e da associação autenticada. Não vem do payload.
+issuer_company_id: Company interna da tabela companies, via JrcCustomers::Company, não empresa cliente.
+business_unit_id: JrcCrm::BusinessUnit ligada àquela Company e account. Não é unit_id do Service Desk.
+Company cliente, Company interna/emissora, BusinessUnit CRM e OperatorCompany/Unit Service Desk não são
+identificadores intercambiáveis. O núcleo E2 valida o domínio organizacional CRM existente; outros domínios
+precisam de contratos próprios antes de futuros adaptadores. Não se definiu a emissora oficial do Grupo JRC.
+
+REUTILIZAÇÃO
+AccountUser/User/CustomRole: identidade real e permissões; sem store paralelo de alçadas/permissões.
+JrcCrm::UserBusinessUnit: cobertura estrutural ativa GROUP/COMPANY/BUSINESS_UNIT. Sem fallback permissivo
+para cobertura legada ausente. TeamMember + JrcCrm::TeamScope: integrantes e abrangência válida de equipes.
+JrcServiceDesk::CanonicalJson: cópia/canonização/digest limitado; nenhuma regra operacional SD é chamada.
+JrcServiceDesk::AppendOnly: comportamento AR reutilizado; novos triggers complementam proteção em SQL.
+OrderApprovalService/BackofficeRequest: obrigatoriamente transacionais para pedido; não substituídos.
+AuditEvent CRM: enum e semântica comercial nativos; não usado para registrar governança genérica com escopos
+e imutabilidade distintos. Flows usa grafos/ações operacionais, não política de aprovação com snapshot pinado.
+Campanhas/Service Desk/NICO/Relacionamento: digests, alvos e processos auditados e preservados; zero adaptadores.
+
+JUSTIFICATIVA DAS SEIS TABELAS
+policies: identidade/escopo imutáveis, rascunho editável, estado, enabled, lock_version e ponteiro da publicação.
+policy_versions: definição, metadados da publicação, autor, versão e SHA-256; imutável também em SQL.
+requests: origem/recurso autorizado, solicitante, contexto/roster/quóruns congelados, fingerprints e prazo.
+decisions: um voto por principal E por ator/etapa/ciclo; motivo e decisão individual imutáveis.
+audit_events: trilha append-only com refs multi-tenant, ator e correlação única; não é aprovação operacional.
+delegations: autorização temporária explícita por versão/etapa/principal/delegado/ações, com revogação auditada.
+Etapas e regras de alçada ficam no JSON validado da versão: sem tabelas editáveis duplicadas de steps/rules.
+
+MIGRATION 20261012160000
+Seis tabelas novas; account FKs e refs compostas account/id; publisher/requester/actor/principal referenciam
+AccountUser com account/id. Company e AccountUser usam chaves compostas históricas já existentes.
+Um índice aditivo em BusinessUnit (account,company,id) garante parentesco da unidade com a emissora.
+Ponteiro current_version usa (account,policy_id,version_id), impedindo versão de outra política na mesma conta.
+Uniques: policy code; policy/version; request por account/solicitante/chave/versão; decisão por account/ator/chave;
+voto por request/ciclo/etapa/principal e por ator; auditoria por account/correlação.
+Checks SQL de estados, versão positiva, motivo e janela; quóruns são validados no contrato; triggers bloqueiam
+update/delete de versões/votos/auditoria e mutação/exclusão do snapshot, além de avanços inválidos de requests.
+Down remove exclusivamente objetos E2 e o novo índice de referência, sem reescrever dados legados.
+FKs de histórico retêm identidades/referências: remoção física de vínculos com histórico exige estratégia
+de retenção revisada antes de rollout; revogar permissões/cobertura bloqueia novas decisões imediatamente.
+
+POLÍTICAS E SELEÇÃO
+create: draft/disabled. validate: schema, catálogo instalado, ações/quóruns e elegibilidade completas.
+publish: versão append-only, enabled, actor e digest; conflito impede commit. Retire desativa seleção nova.
+Edição de publicada altera só o rascunho; versão antiga permanece ativa até publicação/desativação explícita.
+Requests existentes continuam na versão original, mesmo após publicação de outra versão ou retirement.
+exclusive: a maior prioridade declarada entre as que casam; empate bloqueado, sem desempate por ID/pessoa.
+accumulate: todas as políticas aplicáveis geram requests em uma transação. Não há autorização agregada automática.
+Mistura de modos em escopos sobrepostos bloqueia publicação. Conflitos são conservadores por abrangência:
+não se tenta provar disjunção de condições. Prioridades ou abrangências diferentes precisam ser explícitas.
+Ausência de política/catálogo/contexto válido causa erro, nunca status approved por omissão.
+
+SCHEMA DE DEFINIÇÃO
+schema_version=1; condition; selection={mode: exclusive|accumulate, priority: Integer};
+execution=sequential|parallel; completion=all_steps; expires_in_seconds explícito (1..31536000);
+allow_self_approval Boolean; delegation_allowed Boolean; reopen_mode=disabled|restart_all; steps[1..16].
+Cada step: code, mode=all|any|quorum, quorum Integer positivo, assignees, authority, actions, on_reject.
+Assignees: {type: account_user|team|custom_role, id: ID da account}. Não há nomes ou perfis JRC implícitos.
+all exige unanimidade explícita e quorum igual ao tamanho declarado do roster elegível; any exige 1;
+quorum é inteiro explícito. Remoção/perda de elegibilidade não diminui automaticamente o quorum congelado.
+Requester excluído salvo allow_self_approval=true; roster impossível impede criação, não aprova automaticamente.
+Authority é condição tipada por etapa. Ações: approved/rejected/returned/escalated. on_reject é explícito.
+Escalated é estado auditado, sem regra de impasse/CEO ou substituição automática.
+
+CONDIÇÕES
+Árvore: const Boolean, all/any com 1..8 filhos, ou field/op/value. Até 4 níveis e 32 nós por árvore.
+Campos somente do schema do catálogo, sem eval, SQL, scripts, regex livres ou constantize fornecido pelo usuário.
+Tipos: integer; decimal como string exata; string; boolean; money={currency ISO uppercase,amount_cents Integer};
+datetime ISO com timezone. Dinheiro de moedas diferentes bloqueia comparação; não há conversões implícitas.
+Operadores tipados: eq/neq; lt/lte/gt/gte/between/in para tipos ordenáveis; contains/in para strings.
+Não existe autorização comercial derivada de evaluated. A E1 não é invocada nem exposta pelo núcleo.
+
+PERMISSÕES
+jrc_approvals_policy_manage, request_create, decide, view_audit no CustomRole existente.
+Administrador nativo pode gerir/consultar com cobertura organizacional explícita; não recebe decide nativo.
+Votar exige decide explícito E designação atual E participação no roster congelado E etapa/alçada/ação válida.
+Operador de Backoffice não recebe alçada pelo módulo. Delegado requer permissão e cobertura próprias.
+Instalação sem suporte a permissões finas/CustomRole deve manter decisão bloqueada até um vínculo legítimo;
+não foi criado um grant paralelo ou fallback de administrador para contornar essa ausência.
+
+REQUESTS/DECISÕES
+Contexto é capturado do recurso pelo servidor após o guard de visibilidade; mínimo, aprovadores, account e
+resultado de autorização do cliente não entram no contrato. Snapshot/origem + requester/versão/roster dão
+input_digest/fingerprint canônicos. Serialização padrão omite snapshot, financials, roster e chaves internas.
+Creation idempotente por tenant/solicitante/key; uma request por versão selecionada, batch atômico.
+Voto idempotente por tenant/ator/key, com request/etapa/decisão/motivo/expected_version/delegação no digest.
+Repetição idêntica reautoriza elegibilidade e contexto e não avança versão nem duplica evento/voto.
+Mesma chave/conteúdo diferente é conflito; mudança de ciclo, expiração, cancelamento ou stale bloqueia replay.
+Locks advisory transacionais e locks de linha, lock_version esperado e constraints protegem conexões independentes.
+Requests nascem pending somente após contrato completo. Todos os steps precisam satisfazer seu quorum explícito.
+Retorno/escalonamento só reinicia todos os steps se restart_all estiver declarado; incrementa ciclo e preserva
+votos antigos sem contá-los. Approved pode virar stale mediante alteração relevante demonstrada.
+transition(invalidate) é o contrato de invalidação E3; ainda não há callbacks nos recursos comerciais.
+
+API AUTENTICADA — /api/v1/accounts/:account_id/approvals
+policies: GET/POST; PATCH :id; POST :id/validate|publish|retire (expected_version inteiro obrigatório).
+requests: GET/POST; GET :id; POST simulate; POST :id/decide|transition; GET :id/audit.
+delegations: POST e DELETE :id (revogação, não exclusão física).
+Request body: approval_request={key do catálogo,resource_id,idempotency_key}.
+Decision body: decision={step_code,decision,reason,expected_version,idempotency_key,delegation_id opcional}.
+Transition body: action_key=cancel|expire|invalidate|reopen, expected_version, reason.
+HTTP 401 mantém o contrato nativo de Pundit/autorização; 404 para referência fora da conta;
+409 para versão/conteúdo/conflito real; 422 para configuração/input inválido. Sem rotas públicas.
+
+LIMITES
+Só cadastro/validação/publicação/simulação/instâncias/decisões/auditoria do kernel; nenhum efeito comercial.
+Calendário útil e entregas de notificações não estão implementados; expiração é prazo corrido explícito.
+Quórum JRC, CEO/impasse, piso zero, unidades de recorrência/setup, emissora/tabela/vigência e assinatura
+continuam E0 pendentes. Políticas sintéticas não são templates aprovados de produção.
+Sem interface E4, integração E3, rollout E5, expansão E6 ou importação. Sem aprovação real e sem sign provider.

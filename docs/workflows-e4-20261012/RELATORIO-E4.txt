@@ -1,0 +1,83 @@
+JRC CONVERSAS — E4 — FECHAMENTO TÉCNICO LOCAL — 12/10/2026
+
+E4 tecnicamente aprovada no escopo executado. Entrega local para revisão, sem aprovação de rollout/produção.
+Branch: codex/sd-contato-softphone-20261011
+HEAD-base preservado: 09b0cc85e32e8a99d5ca4308a6e4fd920ef7468a
+Base efetiva: HEAD + todo o delta E1/E2/E3 e E4. Nenhum reset, clean, checkout, rollback, commit, push, imagem ou deploy.
+
+PRESERVAÇÃO E RETOMADA
+Conferidos branch, HEAD, status completo, tracked e untracked. Não foram encontrados processos órfãos de validação no host.
+Os 85 arquivos do lote anterior têm backup before com os hashes originais. 79 permanecem byte a byte; seis extensões
+previstas de controllers/serializer/rotas constituem integração de leitura E4. Serviços/modelos/testes E1/E2/E3 preservados.
+Os 251 arquivos históricos de db/migrate (244 raiz + sete suporte), migration E2, schema, flags e lockfiles conferem por hash.
+Nenhuma migration E4. Gemfile/locks, Compose, .env e workflows de publicação não foram modificados.
+
+IMPLEMENTAÇÃO
+Central no menu administrativo nativo por capabilities. Lista filtrável/paginada com estado, versão, seleção, autor e escopo.
+Editor Composition API com abas, condição tipada finita, passos/assignees/quórum explícitos, alçadas, comportamento,
+segurança, resumo e validação. Publicar/retirar exigem confirmação humana e expected_version; versões históricas são somente leitura.
+Inbox separa solicitadas, acionáveis, devolvidas/escalonadas e histórico. Detalhe DTO limitado; decisões vêm exclusivamente
+de allowed_decisions. Intenção idempotente tem conta/recurso/conteúdo; 409 exige revisar estado, sem retry destrutivo.
+Gestão de delegação com identidades nativas, política publicada imutável, paginação do seletor e vigência/revogação visíveis.
+Simulação por recurso autorizado ou contexto tipado, sem efeitos. Histórico paginado, sem editar ou apagar auditoria.
+Badges nas cinco telas comerciais existentes com leitura de gate autorizada; Shadow informa observação, sem habilitar enforcement.
+Assinatura do cliente e estado da evidência empresarial são distintos; nenhum CEO/provedor/digest pode ser criado pela UI.
+Composables mantêm instâncias locais e descartam respostas tardias de outra conta. Tailwind e componentes-next reutilizados.
+I18n alterado somente na fonte en conforme AGENTS.md; outras traduções dependem do fluxo nativo, sem editar Crowdin.
+
+ACHADOS E CORREÇÕES FINAIS
+A navegação CRM por URL fria usava a conta da rota anterior; o guard agora resolve as permissões da conta de destino.
+O destino inicial para roles com capabilities granulares de aprovação passou a considerar a Central autorizada.
+Editor money mantém quantidade/moeda em qualquer ordem, rejeita entrada incompleta/insegura e não reutiliza um valor válido antigo.
+Abas suportam teclado e foco; erros money têm associação acessível. Removido main aninhado no layout nativo.
+Seletor de delegação inicialmente limitava a primeira centena e compartilhou geração entre operações distintas; paginação e
+gerações independentes corrigidas, identidades reiniciadas ao trocar política. Histórico distingue janela futura/ativa/expirada/revogada,
+sem transformar vigência em autorização de voto. Autor e nomes autorizados de empresa/unidade agora aparecem nas telas.
+Controllers/projeções de leitura decompostos para atender lint nativo, preservando regras, filtros e asserções; nenhum core E2/E3 alterado.
+
+RESULTADOS
+Frontend: 93 testes distintos aprovados — 63 dirigidos executados no delta final e 30 regressões nativas aprovadas preservadas por hash.
+RSpec: 201 exemplos, zero falhas/pending/erros fora dos exemplos — os 191 E3 integrais e dez adicionais E4.
+E1: 35 testes/637 asserções, zero falhas/erros/skips. Regressões puras: 31 testes/6312 asserções, zero falhas/erros/skips.
+Autoload Rails, Zeitwerk, sintaxe Ruby e git diff --check: aprovados. RuboCop nativo: dez arquivos, zero infrações.
+ESLint dirigido: zero erros, 157 warnings (i18n dinâmico/estilo do padrão existente), documentados.
+Build Vite de produção local aprovado, SDK nativo aprovado e size-limit aprovado; sem instalação/atualização de dependências.
+Chunk Central: assets/ApprovalsPage-C9mnfsRU.js; 55732 bytes, gzip 14423 bytes.
+Manifest build SHA256: f2998c7d83a679eee95439ad6a3f754e0af049a4d5cee3cb2f231505c7457854
+Warnings remanescentes: chunks nativos grandes, importação estática/dinâmica Webphone, Browserslist antigo, sourcemap nativo ausente.
+
+NAVEGADOR E ISOLAMENTO
+Chrome real/Playwright 1.62.1 contra Rails local. Treze passos já aprovados preservados e continuação concluída sem recriar
+políticas/solicitações: tabs por teclado, projeções finais, auditoria, delegação, cold-route CRM, badges Shadow, claro/escuro,
+desktop 1440px, médio 820px e estreito 390px. Nenhum pageerror. Capturas reais, sem mockups.
+Falhas anteriores foram registradas: guard CRM corrigido no produto; seletores de auditoria/loading ambíguos corrigidos no harness;
+uma tentativa antecipou a prontidão HTTP após reiniciar apenas o servidor próprio, depois aguardada e concluída.
+Administrador sem decide teve voto direto negado; usuário sem acesso sem menu e API negada; segundo tenant isolado.
+O simulador preservou as contagens e effects=[]; RSpec cobre requests/votos/envios/pedidos/contratos sem efeitos externos.
+Runtime: Ruby 3.4.4, Rails 7.1.5.2, Bundler 2.5.16, pg 1.5.3, BigDecimal 4.1.2, Minitest 5.25.5,
+RSpec Rails 7.0.1, PostgreSQL 16.15/vector 0.8.6, Redis 7.4.11; dependências carregadas do projeto, não Ruby portátil.
+Banco próprio jrc_e4_20261012_5b9e9364_test; redes/volumes próprios, código somente leitura nos serviços, mailer/jobs test,
+WebMock bloqueia HTTP externo, navegador aborta fora de localhost. Porta somente 127.0.0.1:18084; sem dados/credenciais antigas.
+Docker foi reaberto manualmente pelo usuário. A engine recriou o ID da bridge padrão e mudou StartedAt do PostgreSQL
+que já estava ativo; esses eventos foram registrados, sem alegar igualdade literal do estado anterior. Nenhum recurso antigo
+foi iniciado/parado/removido/configurado pelo agente. A prova final de limpeza/preservação acompanha as evidências.
+
+PERFORMANCE E LIMITES
+Medição local com 201 políticas, 120 solicitações e 241 eventos; página de 25, tempos/queries em RESULTADOS.json.
+Paginação ainda autoriza candidatos antes de recortar em memória, conforme contrato E3. Não extrapolar capacidade de produção;
+avaliar SQL/escopo separadamente diante de volume representativo. Sem redesenho prematuro ou redução de autorização.
+Descrição/duplicação/comparação semântica de políticas não são inventadas quando ausentes do contrato existente.
+Não há interface de rollout, edição de gate, prova de CEO, provider real ou integração ERP.
+
+E0 E PARADA
+Continuam abertas decisões reais de quórum/maioria/unanimidade/impasse/CEO, mínimo zero, equivalência recorrência/setup/consumo,
+tabela/vigência Bentivi, empresa emissora e evidência/provedor de assinatura empresarial. Sem política comercial Grupo JRC por suposição.
+jrc_approvals permanece false por padrão. Não foram consultadas/alteradas flags reais de LAB/Grupo JRC, SLA ou reservas NICO.
+Parar para revisão. Não iniciar E5, extração piloto, rollout, commit, push, imagem ou deploy.
+
+ENTREGA
+ZIP é um arquivo LOCAL nesta máquina, não enviado/anexado externamente. Inclui conteúdo completo tracked/untracked acumulado,
+patch HEAD e patch E4 contra o before real, documentação, testes, screenshots, logs redigidos e manifestos SHA256.
+before-E4 contém os 85 arquivos originais e originais tracked adicionais conferidos por hash; não confundir backups de iteração
+de arquivos E4 novos com o before inicial. Arquivos externos de validação ficam separados de arquivos do produto.
+Sem .env, credenciais, tokens de autenticação, banco, volumes, node_modules ou tar do runtime completo.

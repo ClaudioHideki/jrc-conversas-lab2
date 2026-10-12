@@ -38,6 +38,7 @@ module Api
           def update
             ensure_crm_admin!
             if @product.update(product_params)
+              JrcApprovals::CommercialInvalidation.reference_changed!(product: @product, user: Current.user)
               render json: serialize(@product)
             else
               render json: { errors: @product.errors.full_messages }, status: :unprocessable_entity
@@ -56,6 +57,7 @@ module Api
           def toggle_active
             ensure_crm_admin!
             if @product.update(active: !@product.active)
+              JrcApprovals::CommercialInvalidation.reference_changed!(product: @product, user: Current.user)
               render json: serialize(@product)
             else
               render json: { errors: @product.errors.full_messages }, status: :unprocessable_entity

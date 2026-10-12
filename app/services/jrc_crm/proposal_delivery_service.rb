@@ -1,15 +1,16 @@
 require 'cgi'
-require 'tempfile'
+require 'stringio'
 
 module JrcCrm
   class ProposalDeliveryService
     CHANNELS = %w[auto whatsapp email].freeze
 
-    def initialize(proposal:, actor:, channel: 'auto', base_url: nil)
+    def initialize(proposal:, actor:, channel: 'auto', base_url: nil, idempotency_key: nil)
       @proposal = proposal
       @actor = actor
       @channel = channel.to_s.presence || 'auto'
       @base_url = base_url.to_s.sub(%r{/$}, '')
+      @idempotency_key = idempotency_key
     end
 
     def call
@@ -24,6 +25,37 @@ module JrcCrm
       approvals = [@proposal.approval_status, @proposal.commercial_approval_status,
                    @proposal.financial_approval_status, @proposal.technical_approval_status]
       raise ArgumentError, 'Conclua as aprovações internas antes do envio.' unless approvals.all? { |state| %w[approved not_required].include?(state) }
+      if JrcCrm::ProposalApprovalRequirements.new(@proposal).required? && @proposal.approval_status != 'approved'
+        raise ArgumentError, 'Os descontos ou requisitos técnicos exigem aprovação interna antes do envio.'
+      end
+
+      gate = JrcApprovals::CommercialGate.check!(resource: @proposal, user: @actor, key: 'crm.proposal_send')
+      if gate[:mode] == 'enforcement' && @idempotency_key.blank?
+        raise JrcApprovals::Error, 'IDEMPOTENCY_KEY_REQUIRED'
+      end
+      if @idempotency_key
+        JrcApprovals::Ledger.key!(@idempotency_key)
+        document = @proposal.attributes.except('updated_at', 'lock_version', 'status', 'sent_at',
+          'last_sent_channel', 'last_sent_message_id', 'last_sent_conversation_id', 'viewed_at', 'last_viewed_at', 'viewed_count')
+          .transform_values do |value|
+            case value
+            when Time, ActiveSupport::TimeWithZone then value.getutc.iso8601(6)
+            when DateTime then value.new_offset(0).iso8601(6)
+            else value
+            end
+          end
+        @delivery_digest = JrcApprovals::Ledger.digest({ 'terms' => @proposal.financial_items,
+          'document' => document,
+          'channel' => @channel, 'actor_id' => @actor&.id, 'base_url' => @base_url }.as_json)
+        previous = @proposal.events.where(event_type: 'sent').where("metadata ->> 'delivery_key' = ?", @idempotency_key).first
+        if previous
+          raise JrcApprovals::Error, 'IDEMPOTENCY_CONTENT_CONFLICT' unless previous.metadata['delivery_digest'] == @delivery_digest
+
+          conversation = @proposal.account.conversations.find(previous.metadata.fetch('conversation_id'))
+          return { proposal: @proposal.reload, message: conversation.messages.find(previous.metadata.fetch('message_id')),
+                   conversation: conversation }
+        end
+      end
 
       conversation = resolve_conversation
       raise StandardError, channel_error_message unless conversation
@@ -53,7 +85,8 @@ module JrcCrm
           conversation_id: conversation.id,
           message_id: message.id,
           inbox_id: conversation.inbox_id,
-          public_url: public_url
+          public_url: public_url,
+          delivery_key: @idempotency_key, delivery_digest: @delivery_digest
         }
       )
 
@@ -80,21 +113,18 @@ module JrcCrm
     end
 
     def build_message(conversation, pdf_bytes)
-      tempfile = Tempfile.new([pdf_filename.delete_suffix('.pdf'), '.pdf'])
-      tempfile.binmode
-      tempfile.write(pdf_bytes)
-      tempfile.rewind
-
-      upload = ActionDispatch::Http::UploadedFile.new(
-        tempfile: tempfile,
+      # Message attachments upload after commit, outside the proposal row lock.
+      # Persist the bytes first so that no deferred upload relies on a deleted tempfile.
+      blob = ActiveStorage::Blob.create_and_upload!(
+        io: StringIO.new(pdf_bytes),
         filename: pdf_filename,
-        type: 'application/pdf'
+        content_type: 'application/pdf'
       )
 
       params = {
         content: message_text,
         message_type: 'outgoing',
-        attachments: [upload],
+        attachments: [blob.signed_id],
         content_attributes: {
           jrc_crm_proposal_id: @proposal.id,
           jrc_crm_public_url: public_url
@@ -108,9 +138,6 @@ module JrcCrm
       end
 
       Messages::MessageBuilder.new(@actor, conversation, params).perform
-    ensure
-      tempfile&.close
-      tempfile&.unlink
     end
 
     def message_text

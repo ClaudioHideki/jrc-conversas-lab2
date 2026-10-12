@@ -98,6 +98,8 @@ module Api::V1::Accounts::Crm
           @order.order_items.destroy_all
           proposed[:items].each { |item| @order.order_items.create!(item) }
         end
+        JrcApprovals::CommercialInvalidation.call(resource: @order.reload, user: Current.user)
+        JrcApprovals::CommercialGate.check!(resource: @order, user: Current.user, key: 'crm.order_price') unless @order.draft?
         sync_downstream!(@order)
         audit_order!(@order, 'order_updated', { before: before_trace, after: order_trace(@order.reload) })
       end
@@ -169,6 +171,7 @@ module Api::V1::Accounts::Crm
                 snapshot: JrcCrm::OrderFinancials.snapshot_for(result, snapshot))
       )
       result[:items].each { |item| order.order_items.create!(item) }
+        JrcApprovals::CommercialGate.check!(resource: order.reload, user: Current.user, key: 'crm.order_price') unless order.draft?
       order
     end
 

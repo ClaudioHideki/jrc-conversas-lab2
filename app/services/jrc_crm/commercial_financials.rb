@@ -157,6 +157,13 @@ module JrcCrm
       raise InvalidTerms, 'Data do primeiro vencimento invalida.'
     end
 
+    # Opt-in E1 evaluation. Existing valuation and approval callers keep using call.
+    # No policy is activated and no record is written by this calculation.
+    def evaluate_prices(zero_minimum: 'pending')
+      CommercialPriceEvaluation.new(calculator: self, attributes: @attributes, items: @items,
+                                    currency: setting(:currency, nil), zero_minimum: zero_minimum).call
+    end
+
     private
 
     def monthly_enabled?

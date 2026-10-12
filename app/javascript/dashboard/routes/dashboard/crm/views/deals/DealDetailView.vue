@@ -17,6 +17,7 @@
           {{ deal?.title || 'Carregando...' }}
           <CrmStatusBadge v-if="deal" :value="deal.status" />
         </h2>
+          <ApprovalGateBadge v-if="deal" resource-key="crm.deal_price" :resource-id="deal.id" />
         <div
           class="text-sm text-n-slate-10 mt-1 flex items-center gap-4"
           v-if="deal"
@@ -100,6 +101,7 @@
 import { computed, onMounted, ref } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
+import ApprovalGateBadge from 'dashboard/routes/dashboard/approvals/ApprovalGateBadge.vue';
 import CrmStatusBadge from '../../components/shared/CrmStatusBadge.vue';
 import CrmValueDisplay from '../../components/shared/CrmValueDisplay.vue';
 import ActivityTimeline from '../../components/shared/ActivityTimeline.vue';
@@ -122,5 +124,3 @@ onMounted(async () => {
   }
 });
 </script>
-
-
