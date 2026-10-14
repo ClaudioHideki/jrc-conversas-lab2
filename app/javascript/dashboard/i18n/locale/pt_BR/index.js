@@ -1,3 +1,4 @@
+import jrcOperator from './jrcOperator.json';
 import jrcApprovals from './jrcApprovals.json';
 import jrcHome from './jrcHome.json';
 import jrcBroker from './jrcBroker.json';
@@ -54,6 +55,7 @@ import whatsappCalling from './whatsappCalling.json';
 import yearInReview from './yearInReview.json';
 
 export default {
+  ...jrcOperator,
   ...jrcApprovals,
   ...jrcHome,
   ...jrcBroker,

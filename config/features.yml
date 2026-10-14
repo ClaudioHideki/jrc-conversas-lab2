@@ -312,3 +312,8 @@
   display_name: Configurable Approval Core
   enabled: false
   column: feature_flags_ext_1
+
+- name: jrc_operator
+  display_name: JRC Operadora Integrations
+  enabled: false
+  column: feature_flags_ext_1

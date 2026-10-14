@@ -78,7 +78,7 @@ RSpec.describe JrcCrm::Proposal, type: :model do
   end
 
   it 'bloqueia edição depois do aceite' do
-    proposal.update!(status: 'sent')
+    proposal.update!(status: 'sent', sent_at: Time.current)
     proposal.accept_by_customer!(
       name: 'Cliente Teste',
       document: '000.000.000-00',

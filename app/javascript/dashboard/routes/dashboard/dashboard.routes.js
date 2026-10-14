@@ -1,3 +1,4 @@
+import { routes as operatorRoutes } from './jrcOperator/routes';
 import { routes as approvalRoutes } from './approvals/routes';
 import { routes as jrcFlowRoutes } from './jrcFlows/routes';
 import settings from './settings/settings.routes';
@@ -48,6 +49,7 @@ export default {
         ...contactRoutes,
         ...companyRoutes,
         ...customerMasterRoutes,
+        ...operatorRoutes,
         ...relationshipRoutes,
         ...searchRoutes,
         ...notificationRoutes,

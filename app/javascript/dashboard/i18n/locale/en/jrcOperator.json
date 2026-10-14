@@ -1,0 +1,61 @@
+{
+  "JRC_OPERATOR": {
+    "title": "Operator integrations",
+    "authority": "JRC manages the operation. REDE controls numbering; Bem Te Vi controls official invoices and settlements.",
+    "unavailable": "Unavailable or access not granted.",
+    "binding": "Company / customer",
+    "select": "Select",
+    "error": "Operation not completed",
+    "recorded": "Recorded (confirmation is not proof of channel delivery)",
+    "customer": "Customer",
+    "plans": "Plans",
+    "charges": "Charges",
+    "snapshot": "Read snapshot; unavailable or unknown states do not mean paid. This query is not a complete ledger.",
+    "charge": "Charge",
+    "amount": "Reported amount",
+    "due": "Due date",
+    "status": "Official status",
+    "actions": "Actions",
+    "prepare": "Obtain PDF",
+    "numbers": "Numbering",
+    "ddd": "DDD",
+    "search": "Search availability",
+    "order": "Order",
+    "expiry": "Reservation expiry",
+    "purpose": "Reservation purpose",
+    "reserve": "Reserve",
+    "availability": "Up to 100 scoped numbers; availability may change before reservation.",
+    "operations": "Operations",
+    "refresh": "Refresh",
+    "reason": "Release reason",
+    "release": "Release",
+    "download": "Download PDF",
+    "conversation": "Customer conversation",
+    "message": "Message to customer",
+    "send": "Send boleto",
+    "reconcile": "Reconcile with REDE",
+    "statuses": {
+      "open": "open",
+      "overdue": "overdue",
+      "partial": "partial",
+      "paid": "paid",
+      "unknown": "unknown",
+      "cancelled": "cancelled"
+    },
+    "kinds": {
+      "reserve": "Reservation",
+      "release": "Release",
+      "prepare_boleto": "PDF retrieval",
+      "send_boleto": "Boleto delivery"
+    },
+    "states": {
+      "pending": "Pending confirmation",
+      "confirmed": "Recorded",
+      "rejected": "Rejected",
+      "scheduled": "Message scheduled"
+    },
+    "pair": "{first} / {second}",
+    "operationDetail": "{kind} / {state}",
+    "errorDetail": "Operation not completed. Reference: {code}"
+  }
+}

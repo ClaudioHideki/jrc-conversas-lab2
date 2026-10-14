@@ -1,0 +1,61 @@
+{
+  "JRC_OPERATOR": {
+    "title": "Integrações da Operadora",
+    "authority": "O JRC organiza a operação. O REDE controla a numeração; o Bem Te Vi controla faturas e baixas oficiais.",
+    "unavailable": "Indisponível ou acesso não concedido.",
+    "binding": "Empresa / cliente",
+    "select": "Selecione",
+    "error": "Operação não concluída",
+    "recorded": "Registrado (a confirmação não comprova entrega pelo canal)",
+    "customer": "Cliente",
+    "plans": "Planos",
+    "charges": "Cobranças",
+    "snapshot": "Retrato da consulta; estado desconhecido não significa pagamento. Esta consulta não representa o financeiro completo.",
+    "charge": "Título",
+    "amount": "Valor informado",
+    "due": "Vencimento",
+    "status": "Estado oficial",
+    "actions": "Ações",
+    "prepare": "Obter PDF",
+    "numbers": "Numeração",
+    "ddd": "DDD",
+    "search": "Consultar disponibilidade",
+    "order": "Pedido",
+    "expiry": "Validade da reserva",
+    "purpose": "Motivo da reserva",
+    "reserve": "Reservar",
+    "availability": "Até 100 números do escopo; a disponibilidade pode mudar antes da reserva.",
+    "operations": "Operações",
+    "refresh": "Atualizar",
+    "reason": "Motivo da liberação",
+    "release": "Liberar",
+    "download": "Baixar PDF",
+    "conversation": "Conversa do cliente",
+    "message": "Mensagem ao cliente",
+    "send": "Enviar boleto",
+    "reconcile": "Conferir no REDE",
+    "statuses": {
+      "open": "Aberto",
+      "overdue": "Vencido",
+      "partial": "Pagamento parcial",
+      "paid": "Pago",
+      "unknown": "Não confirmado",
+      "cancelled": "Cancelado"
+    },
+    "kinds": {
+      "reserve": "Reserva",
+      "release": "Liberação",
+      "prepare_boleto": "Obtenção de PDF",
+      "send_boleto": "Envio de boleto"
+    },
+    "states": {
+      "pending": "Pendente de confirmação",
+      "confirmed": "Registrada",
+      "rejected": "Recusada",
+      "scheduled": "Mensagem agendada"
+    },
+    "pair": "{first} / {second}",
+    "operationDetail": "{kind} / {state}",
+    "errorDetail": "Operação não concluída. Referência: {code}"
+  }
+}

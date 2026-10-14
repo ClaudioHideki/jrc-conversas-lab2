@@ -1,0 +1,111 @@
+JRC CONVERSAS — INTEGRAÇÕES DA OPERADORA — ETAPAS INICIAIS
+Data: 13/10/2026. Implementação local, sem ativação nem homologação integral.
+
+1. LIMITES DESTA ENTREGA
+O JRC oferece consulta de cliente, planos e cobranças no BemTeVi, obtenção de
+PDF e envio manual por conversa autorizada, e consulta/reserva/liberação de um
+DID por operação no REDE. A confirmação recebida do usuário foi: segundaVia
+retorna PDF e não envia mensagem ao cliente. O envio é uma ação separada JRC.
+BemTeVi continua sendo a autoridade de faturas e baixas; REDE, da numeração.
+Esta entrega não substitui o ERP, não emite faturas, não registra baixas, não
+ativa números, não provisiona telefonia, não configura réguas ou aprovações.
+Portabilidade, reserva de faixas, webhooks, expiração automática nova e demais
+APIs do escopo integral REDE ficam em etapas posteriores.
+
+2. PADRÃO OFF / IDENTIDADES
+A feature jrc_operator tem enabled: false. Não foi habilitada em nenhuma conta.
+Uma binding JrcOperator::Binding associa conta, empresa emissora interna ativa,
+unidade empresarial ativa, contato e código cliente BemTeVi. Nasce inativa;
+a identidade não pode ser editada: criar novo vínculo para outra identidade.
+allowed_inbox_ids é uma lista explícita de caixas da própria conta; vazia
+impede o envio. Não copiar vínculos, IDs, tokens ou caixas entre LAB e produção.
+O módulo reutiliza JrcCrm::UserBusinessUnit (structure_managed + active) e
+ContactPolicy/ConversationPolicy. A permissão de administrador não concede
+as novas ações implicitamente. Capacidades independentes:
+jrc_operator_read, jrc_operator_reserve, jrc_operator_release,
+jrc_operator_prepare_boleto, jrc_operator_send_boleto.
+Reserva também exige a feature/grant CRM e pedido nativo visível do mesmo
+contato e unidade. order_ref externo é gerado no servidor, não aceito livremente.
+Não foram concedidas permissões ou ativadas contas por esta implementação.
+
+3. CONFIGURAÇÃO DE SERVIDOR (PENDENTE DE HOMOLOGAÇÃO)
+JRC_OPERATOR_ROUTES: objeto JSON indexado por "<account_id>:<company_id>".
+Cada entrada contém btv_origin, rede_origin, btv_token_env, rede_token_env,
+second_copy_verified e status_codes. Origins: HTTPS sem credenciais, caminho,
+query ou fragmento. Exceção HTTP: somente 127.0.0.1 em Rails test.
+btv_token_env/rede_token_env são NOMES de variáveis JRC_OPERATOR_* contendo os
+segredos no servidor. Nunca colocar seus valores em JSON, frontend ou Git.
+second_copy_verified deve ser true apenas após validar transporte/contrato do
+PDF no ambiente escolhido. A ausência de configuração falha fechada.
+status_codes mapeia os códigos oficiais realmente validados para open,
+overdue, partial, paid ou cancelled. Não foram inventados códigos do BemTeVi.
+Código desconhecido ou ausente permanece unknown, mesmo havendo um mapeamento
+vazio indevido, e bloqueia obtenção/envio.
+O adapter aceita hoje envelope JSON {"data": ...}, cliente/planos com cod_cliente,
+e cobranças com cod_cliente, codcobranca, valorcobranca, datavencimento,
+situacao. Esses formatos devem ser confirmados com respostas REDIGIDAS reais
+ou ambiente homologado. A documentação recebida não comprova todos eles.
+O PDF precisa vir como bytes com Content-Type application/pdf e prefixo %PDF-.
+Se o fornecedor usar base64/link/envelope, adaptar e testar explicitamente.
+Não seguir redirecionamentos. Limite de resposta: 4 MB. Sem retries automáticos.
+A consulta não afirma completude da carteira/paginação: complete=false.
+
+4. CONTRATO LOCAL JRC
+Base: /api/v1/accounts/:account_id/operator
+GET /context; GET /bindings
+Base do vínculo: /bindings/:binding_id
+GET /options, /customer, /plans, /charges, /availability?ddd_id=UUID, /operations
+POST /reserve: {key, reservation:{number_id,order_ref,purpose,expires_at}}
+order_ref no JRC é ID do pedido nativo autorizado; no REDE vira
+jrc:<account_id>:order:<order_id>. Horário inclui offset UTC no request externo.
+POST /release: {key,operation_id,reason}; operation_id é reserva persistida JRC.
+POST /reconcile: {operation_id}; consulta resultado REDE por chave original.
+POST /prepare_boleto: {key,charge_id}
+GET /operations/:operation_id/pdf (somente vínculo autorizado)
+POST /send_boleto: {key,operation_id,conversation_id,content}
+key: 16–128 caracteres ASCII alfanuméricos, underscore/hífen. Recomenda-se UUID.
+Erro: {error:{code}}. Sem tokens, payload remoto ou detalhes SQL no erro público.
+
+5. COMANDOS / BOLETO
+Reserva/liberação registram intenção local antes da chamada REDE. Chave+pedido
+iguais não criam nova intenção. Mudança de conteúdo/ator na mesma chave conflita.
+Timeout permanece pending; conferir por chave, nunca afirmar sucesso local.
+O botão de reconciliação só consulta. Se a consulta confirmar NOT_FOUND,
+investigar a operação pendente e sua chave antes de nova solicitação. Não há
+reenvio POST automático nem recuperação automática desse caso nesta versão.
+REDE confirma gravação transacional; JRC não altera inventário diretamente.
+Obter PDF não cria Message, Invoice ou Payment. Enviar reconsulta o estado do
+título, valida conta/contato/unidade/caixa/política nativa e janela do canal.
+O lock e o índice impedem duas mensagens para o mesmo PDF/conversa mesmo com
+outra chave. O retorno é scheduled: não comprova entrega pelo canal.
+O MessageBuilder nativo preserva os callbacks e a interrupção de delegação
+NICO de uma mensagem humana. Jobs reais de canal não foram executados.
+PDF armazenado não tem política nova de expurgo/validade temporal nesta etapa;
+antes de rollout definir retenção e frescor do documento, além da reconsulta do
+estado que já é obrigatória no envio. Download exige a permissão de obter PDF.
+
+6. MIGRATION E PRESERVAÇÃO
+Adição: 20261013173000_create_jrc_operator_integration.rb, duas tabelas e índices.
+Não aplicar no LAB/Grupo JRC nesta entrega. Não executar db:chatwoot_prepare
+contra instâncias reais para testar. Os 252 arquivos de migrations da base
+(245 na raiz e 7 auxiliares, incluindo E2) estão preservados; nenhuma alteração
+em Gemfile/locks/Compose/.env ou políticas legadas.
+Binding/operação ficam no banco JRC; anexo usa o storage nativo privado.
+O módulo não altera o bridge ERP NICO existente nem flags/permissões reais.
+Os caminhos financeiros CRM legados continuam existindo: a proteção específica
+para impedir emissão/baixa local oficial da Operadora no produto inteiro NÃO
+está implementada nesta rodada. Tratar antes de ampliar o rollout financeiro.
+
+7. VALIDAÇÃO / ATIVAÇÃO FUTURA
+Fechamento técnico local em 13/10/2026: RuboCop sem ocorrências, 76 RSpec,
+migration reversível/autoload e assets:precompile de produção aprovados.
+Transporte HTTP separado em JrcOperator::Transport; guardas e contratos
+preservados. A candidata deve manter todas as integrações desativadas.
+Consultar o relatório local e seus hashes: os testes Rails/PostgreSQL dirigidos,
+SQL de TTL/limites/revogação, disputa simultânea e HTTP dos seis handlers REDE
+foram executados em recursos descartáveis. O contrato real BTV e a homologação
+operacional continuam pendentes; os testes BTV usam somente stubs sintéticos.
+Para piloto: backup/restore verificado, migrations revisadas, credenciais próprias,
+mapeamento empresa/unidade/contato/caixa aprovado, destinatários, canais,
+permissões e flag somente no tenant expressamente autorizado. Não habilitar
+através de IDs copiados de outro ambiente. Nenhum deploy, push ou imagem aqui.

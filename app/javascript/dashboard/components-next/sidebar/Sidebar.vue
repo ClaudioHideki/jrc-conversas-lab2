@@ -7,6 +7,7 @@ import { universityLink } from './university';
 import { withNewBadge } from './newModules';
 import SidebarUniversity from './SidebarUniversity.vue';
 import { useServiceDeskNavigation } from 'dashboard/composables/useServiceDeskNavigation';
+import { useOperatorAccess } from 'dashboard/composables/useOperatorAccess';
 import { useApprovalAccess } from 'dashboard/composables/useApprovalAccess';
 import { useServiceDeskStructure } from 'dashboard/composables/useServiceDeskStructure';
 import { useAccount } from 'dashboard/composables/useAccount';
@@ -159,6 +160,8 @@ const hasServiceDesk = computed(() =>
 
 const { status: operationsStatus } = useOperations();
 const serviceDeskNavigation = useServiceDeskNavigation(accountId, currentUserId, hasServiceDesk);
+const operatorEnabled = computed(() => isFeatureEnabledonAccount.value(accountId.value, 'jrc_operator'));
+const operatorAccess = useOperatorAccess(accountId, currentUserId, operatorEnabled);
 const approvalEnabled = computed(() => isFeatureEnabledonAccount.value(accountId.value, 'jrc_approvals'));
 const approvalAccess = useApprovalAccess(accountId, currentUserId, approvalEnabled);
 const serviceDeskStructure = useServiceDeskStructure(accountId, currentUserId, hasServiceDesk);
@@ -1198,6 +1201,7 @@ const menuItems = computed(() => {
           ),
         }
       : null,
+    operatorAccess.visible.value ? { name: 'JRC Operator', label: t('JRC_OPERATOR.title'), icon: 'i-lucide-network', to: accountScopedRoute('jrc_operator'), activeOn: ['jrc_operator'] } : null,
     approvalAccess.visible.value ? { name: 'JRC Approvals', label: t('JRC_APPROVALS.title'), icon: 'i-lucide-shield-check', to: { name: 'jrc_approvals', params: { accountId: accountId.value, screen: approvalAccess.context.value.scopes.some(row => row.capabilities.includes('policy_manage')) ? 'policies' : 'inbox' } }, activeOn: ['jrc_approvals'] } : null,
     hasServiceDesk.value && serviceDeskStructure.state.visible
       ? { name: 'JRC Service Desk Structure', label: t('JRC_SERVICE_DESK.STRUCTURE.title'),

@@ -1,3 +1,4 @@
+import jrcOperator from './jrcOperator.json';
 import jrcApprovals from './jrcApprovals.json';
 import jrcHome from './jrcHome.json';
 import relationship from './relationship.json';
@@ -57,6 +58,7 @@ import jrcNico from './jrcNico.json';
 import jrcNicoHelpdesk from './jrcNicoHelpdesk.json';
 
 export default {
+  ...jrcOperator,
   ...relationship,
   ...jrcHome,
   ...jrcServiceDesk,
