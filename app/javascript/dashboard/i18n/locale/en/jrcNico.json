@@ -120,6 +120,14 @@
       "REVIEW": "Revisar atendimento",
       "CONFIRM": "Confirmar e executar",
       "CANCEL": "Cancelar",
+      "BROKER_RECIPIENT": "{contact} · #{conversation}",
+      "BROKER_DELIVERY": {
+        "sent": "Mensagem registrada na central",
+        "delivered": "Entrega informada pelo canal",
+        "read": "Leitura informada pelo canal",
+        "failed": "Falha informada pelo canal",
+        "unknown": "Estado do canal ainda não confirmado"
+      },
       "RUN_HERE": "Executar nesta aba",
       "OPEN_RESULT": "Abrir no módulo",
       "HISTORY": "Expandir ou recolher histórico",

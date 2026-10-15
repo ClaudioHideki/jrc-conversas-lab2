@@ -3,7 +3,8 @@ require 'timeout'
 module JrcServiceDeskConcurrency
   extend ActiveSupport::Concern
 
-  DISPOSABLE_DATABASES = %w[jrc_rel_sd_candidate_test jrc_rel_sd_r2_concurrency_test jrc_rel_sd_r345_concurrency_test].freeze
+  DISPOSABLE_DATABASES = %w[jrc_rel_sd_candidate_test jrc_rel_sd_r2_concurrency_test jrc_rel_sd_r345_concurrency_test
+                            jrc_flow_modules_test jrc_flow_effects_test].freeze
 
   included do
     around do |example|

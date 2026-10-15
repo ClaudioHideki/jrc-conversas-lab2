@@ -33,6 +33,21 @@ RSpec.describe 'NICO operational assistant', type: :request do
     expect(response).to have_http_status(:unprocessable_entity)
   end
 
+  it 'returns a safe temporary failure when the Broker cannot prepare a public-send preview' do
+    allow(JrcNico::BrokerSendCoordinator).to receive(:prepare)
+      .and_raise(JrcBroker::Client::Error.new('JRC_BROKER_UNAVAILABLE', status: 503))
+    expect do
+      post "#{base}/prepare", params: { request_id: request_id, message: 'Envie uma resposta', tool: 'send_message',
+                                       arguments: { conversation_id: conversation.display_id, content: 'Resposta de teste', private: false } },
+                              headers: headers, as: :json
+    end.not_to change(Message, :count)
+
+    expect(response).to have_http_status(:service_unavailable)
+    expect(response.parsed_body).to eq(
+      'error' => 'broker_unavailable', 'message' => 'Não foi possível consultar o Broker. Tente novamente para preparar a prévia.'
+    )
+  end
+
   it 'keeps incomplete requests in conversation without creating a resource' do
     allow(JrcNico::OperationalInference).to receive(:call).and_return('reply' => 'Qual é o nome do contato?', 'tool' => '', 'arguments' => {})
     expect do

@@ -1,0 +1,2 @@
+class JrcFlowOwnershipEffect < ApplicationRecord
+end

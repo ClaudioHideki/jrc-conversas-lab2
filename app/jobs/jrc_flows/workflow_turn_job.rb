@@ -9,3 +9,5 @@ class JrcFlows::WorkflowTurnJob < ApplicationJob
     JrcFlows::WorkflowRunner.new(run).perform(message: message) if message
   end
 end
+
+JrcFlows::WorkflowTurnJob.prepend(JrcFlows::OwnershipEntrypoints::WorkflowTurn)

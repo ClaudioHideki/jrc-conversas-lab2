@@ -44,6 +44,13 @@ const administrator = computed(
         {{ t('CONNECTIONS') }}
       </RouterLink>
     </div>
+    <RouterLink
+      v-if="enabled"
+      class="px-6 py-2 text-n-blue-11"
+      :to="accountScopedRoute('jrc_flows_native')"
+    >
+      {{ t('BROKER_FLOW') }}
+    </RouterLink>
     <p v-if="!enabled" class="p-6 text-n-slate-11">{{ t('DISABLED') }}</p>
     <FlowsPage v-else-if="administrator" :key="accountId" />
     <AgentFlowsPage v-else :key="accountId" />

@@ -1,0 +1,1011 @@
+{
+  "schemaVersion": 1,
+  "component": "jrc-native-flow-editor",
+  "sourceRepository": "ClaudioHideki/BrokerJRCIA",
+  "sourceSha": "fc4ae8a1f3c940dc8ab2d1e369f3b658eab463a3",
+  "sourceCommitted": true,
+  "lockfileSha256": "d094a0da20f404512f64a6529490903524aecb95e883d81258b859544b3c0f86",
+  "inputs": [
+    {
+      "path": "apps/web/public/THIRD_PARTY_NOTICES.txt",
+      "sha256": "289db5060637c9fa381d89a21979bf1843257353341ec5b6189a5e9f871476c3",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/api/client.ts",
+      "sha256": "373285fb7b94d5a6296ad2416a0ff925ba0d970144f296e209eb5ca771a39c59",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/app/console.css",
+      "sha256": "c7e9481b68e26f50dc2b4cd251ca60f8afe8cfe15809784b8e6c1e0c3af01c3c",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/auth/SessionProvider.tsx",
+      "sha256": "d1dfbeec31673883574f4e3d7e641399a46af99e3c27681f9d157eecf99f5369",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/automations/ActionSimulationControl.tsx",
+      "sha256": "5c8c1e08e498a1c5c190ad10395d9c4aa7fd0a62eba6ff6b09fdf7838fba9ad7",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/automations/AiEffectDetails.tsx",
+      "sha256": "51b5ed9e8e0950d6711e072ff3c7bede61fb85344bb3caa1a7629ff1f11c2603",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/automations/AiSimulationControl.tsx",
+      "sha256": "38a805450793e34f777a8dfa04fdf868bb927ad3b209a6ad313bd1737cbcb346",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/automations/AvailabilityNotice.tsx",
+      "sha256": "cc1f1fa86a5e35c0f52b671c3ed53b8c9acd1b2070420583cacaae21086a2402",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/automations/HttpSimulationControl.tsx",
+      "sha256": "26b451db44b2746bbfcceec57d58da6c8df92d4450527a2a811a02ec181f1b74",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/automations/ImportReview.tsx",
+      "sha256": "43d579da5041069e2c7bf0e80ba0007dc81c923a6532b1a28cc7d55b1f62be09",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/automations/LegacyMigrationPanel.tsx",
+      "sha256": "7897e634df5dcb4adfb4bb199adbe61158db4a6a189cdb5804737d4881ec14a0",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/automations/SimulationWaitControl.tsx",
+      "sha256": "0e032fc4e3ab2bc5ab406ae3f856c32e4b6319548800c0b25003f9864feb1728",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/automations/api.ts",
+      "sha256": "ff46779c1f1fcba4f6c09b6a9d915335dbd7e266d88f344c0c7937b0bad54ae9",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/automations/conversation-api.ts",
+      "sha256": "6f3def640ce338cc664e03be30a5da10c300996975f99d1b1caa5f31038bef09",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/automations/node-editors/AiNodeEditor.tsx",
+      "sha256": "9b7eb2a34eb3ff6e99fd62772f1226124ad0342c817a5870a9584f91f032ebc5",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/automations/node-editors/ConversationActionEditor.tsx",
+      "sha256": "33b553431155a605e1cc9500a2d2ff9d683010a54e5f4fbe9e74cc950f2c0b7d",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/automations/node-editors/DataNodeEditor.tsx",
+      "sha256": "1bf2094132b1bc4ddd4017a62b063034238e7fe2fc011f8cc5beedbd8cb3f6b0",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/automations/node-editors/DataReferencePicker.tsx",
+      "sha256": "b40f7221b36738c05933d065df7a7934a3408111488c066d8cc8c8f5800b5fef",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/automations/node-editors/HandoffEditor.tsx",
+      "sha256": "7e8bb46ddf9b54dd2339dea24255b0bc16b63db1d90e3e0684e8606bdbfea95e",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/automations/node-editors/HttpQueryEditor.tsx",
+      "sha256": "118fda8a7fdcdbeacaa176e8d2b631861c71cfcd8dfd97c7b544d89ef0fd86ba",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/automations/node-editors/InputEditor.tsx",
+      "sha256": "f0ef0a9d22e14ccda7b713b900ec58946c314927246bfb5ee07f934e2d3fcdcb",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/automations/node-editors/JsonValueEditor.tsx",
+      "sha256": "c8692750701928916fca458fc0991bca0524d2d0722b075857e3f94403d588fb",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/automations/node-editors/LocalHandoffEditor.tsx",
+      "sha256": "f7af59d0abb83f24d3d677a6fb6fe341403b8198941e58f74f7ec532718e4462",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/automations/node-editors/MenuEditor.tsx",
+      "sha256": "a36bd85e9d129c665431f6099b6ec935989f7e959a94006a3dacc2faee277549",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/automations/node-editors/ScheduleEditor.tsx",
+      "sha256": "d223741d1278c23035f87bc8960041b442ff7dc275abea7cfbe4dac2025263df",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/automations/node-editors/SubflowEditor.tsx",
+      "sha256": "5c4de9f96851c55cddc86aba99cb23f2d5198e924ddc37515dfd750aceb16ad4",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/automations/studio.css",
+      "sha256": "ffef123f553d02c344b00f25112a07b57dde80686e623c9c8e31c0cdbed3536f",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/channels/setup-navigation.ts",
+      "sha256": "36c645a0ea66f2edbcdf9fd1803eb84c86d858b654f0de2451cb3e80976e77fb",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/flows/FlowCanvas.tsx",
+      "sha256": "cc7ab9ae9fbab9d230a84af21000a9101b2a4ce0657740ea396697b13e8f8b4b",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/flows/flows.css",
+      "sha256": "68445bc826ff1f80a2da5d7f666a183e9042ed4a03576dddb0d5e78720914092",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/native-flow/Binding.tsx",
+      "sha256": "d0fe674fec064ef6cc0e521bc673e50b96a591f65f48b630dda39b9f78b96109",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/native-flow/entry.tsx",
+      "sha256": "d46e79cecf619cd26be1ccdb7dd27d06ec4b1e29c181bdd0ed152fc87ee5c567",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/native-flow/native.css",
+      "sha256": "778dcf3cc905ab99cf849c1eab68a7125350245ece8c444fda6fad7845b327e5",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/native-flow/transport.ts",
+      "sha256": "e268f53d7500d27dc2f1e95a8750199cab8b038a736b56a8cdcb3c693d727e27",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/native-flow/workspace.tsx",
+      "sha256": "94a9e6f095a00f7fd086bd9b4481b2b125a2f112485b37ad9fce6e764aa571d7",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/pages/AttendanceDiagnosticNotice.tsx",
+      "sha256": "9fdf124a7c82c0bc76ca69115a07a38ff5408670dcb871d0522a927252159042",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/pages/AutomationStudio.tsx",
+      "sha256": "94e2fc0899e71d98f9d158978b0a36220115de17d835441b345fb1f5210f89a8",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/pages/NewAutomation.tsx",
+      "sha256": "84ea8243ae7fc3a22cf0002a6c8b6770741f2ded4b87c3c576816cd384d6e75f",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/tsconfig.json",
+      "sha256": "ae029eeac3b6fc2c23ddb300bc914ca2255bb9da0d3c059423ab5e305284c166",
+      "dependency": false
+    },
+    {
+      "path": "node_modules/cookie/dist/index.js",
+      "sha256": "b67c70355a2b0dbd2e78b479b94107f34d5340e54f1479dc0974224a2a5d69dd",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/react-dom/cjs/react-dom-client.production.js",
+      "sha256": "6cf4932e0c20a4572ae395035ca2e512a42d7d49c1a659fa73d6197069c28df0",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/react-dom/cjs/react-dom.production.js",
+      "sha256": "291e0682e8b69643e8e213b6bc13849527fdd97800fef587d5be7b4a8f6a58ca",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/react-dom/client.js",
+      "sha256": "00e348ab3d6bc2eef908345d0bc4e008c95bcfecec060dfda5c4967953761396",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/react-dom/index.js",
+      "sha256": "ba1a3e33489f868371561777607e3ee5091df0f7ea3f1a10f789d6b86e4c1505",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/react-router/dist/development/chunk-BV7QT456.mjs",
+      "sha256": "35d09e308c28a1f1ff7ada9055c8f31ff80113e33d63c80bec069a7d7cd45d23",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/react-router/dist/development/chunk-HT4INDD5.mjs",
+      "sha256": "aa513a6b063241e0a3cb93ef3a06f5a51061a04a2f3cb4c7dc9c831438eb3585",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/react-router/dist/development/index.mjs",
+      "sha256": "f72ef98b721ab90e7fa9fbcf0e7a368eb9fa8ed9c709a0904177df3b9d623020",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/react/cjs/react-jsx-runtime.production.js",
+      "sha256": "1e46f15002696985e80c61d47aaa30dabb03c954270a690f5f7dfbbacfa9002b",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/react/cjs/react.production.js",
+      "sha256": "d348b80a78c8ea0bd02b1990c7b7b514f5c276f9e74fee6e3976297585385961",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/react/index.js",
+      "sha256": "60caffdecbdc5db3bc4ec4e83df9488345ccb271d07533b9210bf5750918d97e",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/react/jsx-runtime.js",
+      "sha256": "b392951a77d0a2e6a6bd017e49d768481ae5b63c4109c6c31f622cf7b2433edc",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/scheduler/cjs/scheduler.production.js",
+      "sha256": "679adff761d31e9426604f80c0e99be44a3e6f4c6834b0218ecf0312a67c171f",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/scheduler/index.js",
+      "sha256": "145965504d60007bc25486ab930b0367867dcd5d579ccd343c148d69349a7cfb",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/set-cookie-parser/lib/set-cookie.js",
+      "sha256": "610b576bca244b789f23a1f361e8ab89b31c2a4588b3388b4bc71ad4986700f9",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/index.js",
+      "sha256": "32e7efd49a94a765f6d10a1a0a3c02c50c246def17c80c6f0225f85525d98505",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/classic/checks.js",
+      "sha256": "7543391a9ad5e7df287bbfecaa79844d46af44c75c1de0d43a411d65795d9dd1",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/classic/coerce.js",
+      "sha256": "fb2efe3b6eacc475c77cbb571b5fb8650d92a10f316dc869e49b722973d83c3c",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/classic/compat.js",
+      "sha256": "0e948b101771cc0e7b753e54b3f5b486929d3db9bd4c09d98fe4ce86271bcf7b",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/classic/deep-partial.js",
+      "sha256": "0abffcc9838e04dc6f091229c1d522fbfd43aab9563316b52d3eb8ff2bacf26d",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/classic/errors.js",
+      "sha256": "d32f7c1ef8e2c70072f6f0ec8ba7081bbc331353cc3a7cb4429e5ece91409543",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/classic/external.js",
+      "sha256": "92a7244eb7306dd5035e3d2002a5f447cd6b4ec2f510adf08f11df090b0de610",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/classic/from-json-schema.js",
+      "sha256": "e47add3abea25a4980f56df7c7e2fcb31a9fd8ae627c49fa07104e83f4697e91",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/classic/in-out.js",
+      "sha256": "34370913842ff02d14a9796b11c5ec2af160bdb35a7148edc286e9a9c6fb5c17",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/classic/iso.js",
+      "sha256": "deaa026b7c5302e59719f401248e7866691d8d8a892884dd2b6868b1cb7252d8",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/classic/parse.js",
+      "sha256": "11941573401bbef138842c7a523dff554873343fccbf0e8b0a144259d2d703f1",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/classic/schemas.js",
+      "sha256": "5f05c8227d5ab4579552303f6f3204f8bc57e1341226007dc5fcc8479b055a8a",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/core/api.js",
+      "sha256": "4c147782e1baaf518dc52e4041a898e718a171e03fdb5fd2b8dcbffa8545ea54",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/core/checks.js",
+      "sha256": "92a4400fe5964b5bc6db6e9cb37470959d4594ad932e347ca691c59462deeca0",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/core/compile.js",
+      "sha256": "888783d09a521996f26f35de24c38460577ee094b433489e5119d0830d922bfc",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/core/core.js",
+      "sha256": "db75715d529e69c9dec49651c020aa8b67a9620e76024c8a46e917ed8b111ff4",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/core/doc.js",
+      "sha256": "8f49aae02f25258170291bb99ece6f58e50480db51ed2ef9f1e1621ebc54540d",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/core/errors.js",
+      "sha256": "2c02617e5e7bfebffa8176901a6ed4894d62d4942ed2ed2804c81239385c0bf9",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/core/index.js",
+      "sha256": "2a0e452323aa5b75b7d7de4879289e2579b9dd2d6af291c0416ba6806ca2199d",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/core/json-schema-generator.js",
+      "sha256": "c2e74b910ee71c0d07148442d8306c78860c13fa2d0a215ebd5c9166f6cb8a9e",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/core/json-schema-processors.js",
+      "sha256": "de52da8e4c33d4c54b44c1515e702a3fac2663b4772d4a343b4891ac2d46af03",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/core/json-schema.js",
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/core/memoizer.js",
+      "sha256": "c0f46352b24c7457bd5b89df4d3847aced732d6d74a11f2d44502b8c035a7821",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/core/parse.js",
+      "sha256": "cb65fa29960a4b0becfb3538d5afd5d5ff1fa4c52e8d53e531a9967b71905116",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/core/regexes.js",
+      "sha256": "a401e10ad34078b4cfe8da337c21d2d8e20cc2c82b43406b95ae8523100d3c45",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/core/registries.js",
+      "sha256": "f04d4b2c0bc5b4ac2d6610ea34edf2e5260eade18f20976b79916dcdbeb9fa4d",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/core/schemas.js",
+      "sha256": "d19d514ab02c347143f129e2212d63496f2dda4c6ba607cb939f7aa5eb4d8846",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/core/to-json-schema.js",
+      "sha256": "16cb6032d2810d664102af0dca07d50af7a6a808b5036e33415b38492fc00564",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/core/util.js",
+      "sha256": "e50c63d70e8b1abf2968936acf22c9e4e96e735f0af6d367785e0948e46553fa",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/core/versions.js",
+      "sha256": "0040e7f6554f6d3d1569388cde7dbd66c017ad1d3dfcfd731f9e810c429b4811",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/core/visit.js",
+      "sha256": "a804062900869e09ea0b975cfa569fd3c70dc33bad7fc30b63872d451cae29f7",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/ar.js",
+      "sha256": "954b1ecdf9beae18b24a078d888b741d498c4475527b63666cbde681636ce597",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/az.js",
+      "sha256": "0f3c71cd60e4bb4c0506b0fc2ffdf615abc56dc351517b734953796e9daac5fd",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/be.js",
+      "sha256": "08c0d312d33bb213b8c8a2688e4e32ac156b980c6786fe1435795fa457b1e735",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/bg.js",
+      "sha256": "c9dc2ff4a430959c226a28ec71cceda54a4b9c83eb28ad9f27fa984ecc4bbaa0",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/bn.js",
+      "sha256": "c438a45fb8f142d0c715abdd5bde85f97fdcd7a4ecbb19baa22fa5544b931cf8",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/ca.js",
+      "sha256": "6525cce3d7a7a6486be11a603325ffb40a7a67b88ce2ad5605387f4762c4b4bc",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/ckb.js",
+      "sha256": "858c8ff792ead63bc21433a9d5134cc1a12d6b43fe40a247ade2759f0f5217c3",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/cs.js",
+      "sha256": "1d5d88fdfc2ddfcb9719f70f8b1367acc87cb7f7f541dfbaa380ee3477119422",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/da.js",
+      "sha256": "0a16ebf92bc38487863c29be28d49cf015b00d40a72f4723b570e4bca07af306",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/de.js",
+      "sha256": "b75e66c589a7e664b6527cab5495851c87e9d69e754caa192460642280c164f9",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/el.js",
+      "sha256": "1d6f7c0a139fc18d7741749cbbe0a385f5737af7563a4915c70deecd878f18ee",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/en.js",
+      "sha256": "bf9bc721244e649eaf1f69c34c33c6a8ebd08c2e0f65cff8ad4ed0c9005977c3",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/eo.js",
+      "sha256": "43371beb2bb1cb02591167d95ea6de356ee2f7a6753b6d539ab1d5625676f361",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/es.js",
+      "sha256": "5610ea1773e87f333322946c0b6e9fcfd0fc0a3155eb773cc1e767aa0e9a6c88",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/fa.js",
+      "sha256": "c69ee6bdf38106800a979cb5383a4de3f3d45af7d66807ae4abd6fde877a9418",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/fi.js",
+      "sha256": "703ba6e565c7ce2d442b8e8e0b0051e38171b07e17e249ff522e7125fbfce5a0",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/fr-CA.js",
+      "sha256": "daef8904651e0d426b54d5642b4e1b6a2e91e1db25bf11a470209550621fd04a",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/fr.js",
+      "sha256": "4ecf245f7f8f22a8af9ba710ebf1bbfd9c69dca2b69972d86e8ae6dba31c4552",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/gu.js",
+      "sha256": "7a72be7ef3e973003d0ea87d4a1f525e1273bff0504143977199bea8e7dd09c9",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/he.js",
+      "sha256": "29455674b3c042f12719f76096b968363f614e5dc2454d1e2c7b480724dc8d95",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/hi.js",
+      "sha256": "5cd963e4293c850c29e929f9905d982f1efebaca6560209ab03e14e9b4136e05",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/hr.js",
+      "sha256": "645d68ac923f8ebc21533e6b08bf349600eedb7751f9dd630691cb50d4150a5b",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/hu.js",
+      "sha256": "3f3f0630d4d0444a41e59cdde46accc9c2ea495083066a9299cf0c40001aca90",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/hy.js",
+      "sha256": "b9500a95d63ef1280673934af9ccffcc7a9c68e53e5cc4820a1cfb72893684f3",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/id.js",
+      "sha256": "1ac54626137d02dfd3a7a24edf42a6f06f9f8a01fc920db8c4d18c9320729987",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/index.js",
+      "sha256": "2d7e03f825285ae178748fe7186ad8e80bfb1a0eb55ef1e160b4e5f800d8f014",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/is.js",
+      "sha256": "d16df422e9bce5fa866dc66c89e11a854c78b875368250b2dc6d309bca2ee8c8",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/it.js",
+      "sha256": "753d91ff007abf517212631a0012370a0b178a7fa787e026e7f5bffcf0f84053",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/ja.js",
+      "sha256": "e86ae224917fd95945de947b3af81c55f9ab250a69e53f3f7ad0635f3f7c0022",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/ka.js",
+      "sha256": "031b439f4720482b427b953d60307cbd2fe2c89079b309c4df23f645d7b709cc",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/kh.js",
+      "sha256": "78c3d1991041bb8c8fc0f7c5d745aae422d4c2e4e8f30bae44f3fef4765900a8",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/km.js",
+      "sha256": "02c05625e6ade1ff10935a4509555ee4d1f778ddc946ea7aaf016311cb5c3fd4",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/kn.js",
+      "sha256": "cd46ade57ca318fd6128884dbdc581a6fae77d349adc3965ee8e768cef67abb2",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/ko.js",
+      "sha256": "8f3a1013116b364df91d6d7fb4d73558277d6cc6b8c36b15771a1a1271cf00ad",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/lt.js",
+      "sha256": "075f0d917ccca164aaf033e74f20323eac29ba6e6e5f9a7727b756e3ad396760",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/mk.js",
+      "sha256": "3867d845830499ef1fdb942705a7fd2b4925518cb848e0c44effd8fce66ecf10",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/ms.js",
+      "sha256": "cf6c69c51fc57a63d571ef10b10b9fff5956f2ba9691eb9bf3a35e65a35e4e2e",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/ne.js",
+      "sha256": "5a503c5fb2cd676114fa54d3085758796f63b45d6a0c5a8ef25a8c579625f5a7",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/nl.js",
+      "sha256": "dd4d6293dd962769503a77de077b2e0ecb4f35879e541a9c525e642ec1172d27",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/nn.js",
+      "sha256": "de30d64d6c0affc8076c91b3eb15f5a59aa30bc8d705569336dc7878f50a0efc",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/no.js",
+      "sha256": "909d5b032afc4593c80b33d40c365d7e92933e491d075feb3736471ba30ab432",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/ota.js",
+      "sha256": "7ac7db9c471408796059ae98182b89319d2d220b54e31eab7f6c5bc9da36e048",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/pl.js",
+      "sha256": "7deb22313f5547c8a76240d155fbc3889366f10b78113c7343ff16a7726a98cc",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/ps.js",
+      "sha256": "bff575c5ea157ba66f882763f047c742fe82b3d88ee58ffc8e2d0089a47b46c1",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/pt-BR.js",
+      "sha256": "6ed21969db4af569b0e7bddd86be996cc4e311f3b2f1279de84029f37988c463",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/pt.js",
+      "sha256": "6976fd2b1afa35abe404a04bd2a6780c474fdf3680dc430bea37873a86b0026f",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/ro.js",
+      "sha256": "a9d953e9295f181aad6b4a1b841a271071aa0ad49993c64c9096298f9ac27c7c",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/ru.js",
+      "sha256": "69711d561391804b9ef55d8429b50a4ab0da960aeda8e26d44d9c12e858c7432",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/sk.js",
+      "sha256": "8368e3997cdb66290adade3353b246cf80f33836860ce23560dab5252ad18a3a",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/sl.js",
+      "sha256": "76af13e027fd69fc90c66337a9e25da67eecb1414a565407e7fdecd6db485e3a",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/sv.js",
+      "sha256": "dd4b5a0b37ebe65edf6bed4d0f3889eed08825b7561db424ac65f6be8da58588",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/ta.js",
+      "sha256": "70f11a941273beedbccfa0bd06e7699c46b2591895632b2b5cfd136e3134b09c",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/th.js",
+      "sha256": "7c43bf69b788629e15e5f569cbb5db86c684d03f8a2143ecabe8fd9b56b67569",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/tk.js",
+      "sha256": "033b56bbedf63901978158b747636e45efa7f6b3599cba13d9675ebc1908a3cf",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/tr.js",
+      "sha256": "dad0163bc78c77c600eeea79e22dad5c1826f351e56002ad7099e2212c9d7f3b",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/ua.js",
+      "sha256": "9391169ffbc72f777a83230b6ffcc3f4cf46ab5945ec540de9ef4609dca1f4cc",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/uk.js",
+      "sha256": "91b29aabf7b30aa72cb4d67dd2de9d7a1eb33e027dc3603bf2fbbb63870b4a6e",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/ur.js",
+      "sha256": "42de4029904c64a22a31fb1432ba53b423338f0ac1822d2a326f52e764de9da8",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/uz.js",
+      "sha256": "0428527e1ab1a35f68815786bcb5170c21087fac4a9cf4f1d0160a9abde18c3f",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/vi.js",
+      "sha256": "9ece89e06392bdbd0b4f36d5b0c18468f0a8cd5755f5ddd0d44adff61072c7d4",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/yo.js",
+      "sha256": "0194dd8af94d993ea43ce59bd5b27b8bb0b12a45a43203d669c0483ac25a723b",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/zh-CN.js",
+      "sha256": "149874e8079020bdd9fff6d1e7b411cea32745088479590a4b5d9eaa716b0941",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/zh-TW.js",
+      "sha256": "b9bbf30d36a4d6bbd32e1ada333baf45fff3ad5b0f13a2caf3ae580c041bb5d8",
+      "dependency": true
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "d094a0da20f404512f64a6529490903524aecb95e883d81258b859544b3c0f86",
+      "dependency": false
+    },
+    {
+      "path": "package.json",
+      "sha256": "ac6cbc75c2664a4990f866119f80167465d7f378c96637ddb73ccbb236c30fcf",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/api-keys/schemas.ts",
+      "sha256": "daf7519ad0b871c87deb88bc509091a72a626f6deb5996f3031b2a60f1002128",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/attendance-catalog.ts",
+      "sha256": "c20ccfeb94666ddb1e017f4740b4f7c16c7ddeffff0d8ac40251a6e8a9ead498",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/attendance-destination-v2.ts",
+      "sha256": "551b0e523b9ff8de9a0d11244d96cb9da66f096c45014f32f2c8abc835c9d196",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/attendance-resume-v1.ts",
+      "sha256": "28dc88e1af44cdc820ed1ee204e47eff06d4fef0821312d048d4e37470a69adc",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/attendance-v1.ts",
+      "sha256": "6902df36cc3a6ab91678aa48b5ad201dcd15d95468bd309546eeef184bc0711a",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/auth/schemas.ts",
+      "sha256": "6f46ad005ffee23afdb05625f845b3d06f798922a7abac765f3a0853fca15096",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/automation-ai.ts",
+      "sha256": "778cb8bd017ed0071483d6f7789b1e257eaf080787e7ce96d76af19482d8fa37",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/automation-conversation-effects.ts",
+      "sha256": "1f4d9e835ad8d235f603658e2703a51de7bd0bf820a6b9037022ca057afeca6d",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/automation-data-v2.ts",
+      "sha256": "e6cd067b8f1968432192c9f62c9f56dcea171c12df5fa309e37d51dd3a9fa51e",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/automation-handoff-v1.ts",
+      "sha256": "e16f4c81bdda0582de0b23f6b531441ffff97c6a8bf615312368c2ef92a82e11",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/automation-http-query.ts",
+      "sha256": "be3dd8cd4648840eb9203df9f23d366e40c497f7102b9a6080cc327790396b52",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/automation-input.ts",
+      "sha256": "7860b5c5ec9df23cc555ba21d9ee8f716b468f2411b6693f9f9c9e6c53cad03d",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/automation-node-definitions.ts",
+      "sha256": "ba2a93f67839d3129981d99c8bcb562e6381829bf486eefdc587b5385980a2c4",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/automation-schedule.ts",
+      "sha256": "e07b4b9ea9003ee9891e6f041548a15884ec57dcfde5a927f48a5c076dfb6c42",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/automation-subflow.ts",
+      "sha256": "a82427136399d1caa09f375655da7548ae3ed69bdc470164cd90d6158169c012",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/automations-v1.ts",
+      "sha256": "53000dda301e6958dcb23855e7d9e958fbfb9cc7944bb795274d02076addbaac",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/broker/schemas.ts",
+      "sha256": "2433b7ec69921d238038f997e682dd6d48dbf7f4e1eadf3752a20a212ab2dc42",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/channel-operation-profile.ts",
+      "sha256": "6c97668682af46335be678cba9e9bbcffe252351a426a2c66337f37af5aab4b6",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/channels-v1.ts",
+      "sha256": "694b68eb9ceb8db049c8dc64ad6563d3b5cfdaa764534e9c7851ea9c78fef1b0",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/commercial-plans.ts",
+      "sha256": "3b0efa6933c405a56da80d8a66283c6608ff79b65cd768fe538589789304d765",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/console/schemas.ts",
+      "sha256": "d1d97ae9ccd6504df7161e5457f08984be0b76aedca7e8c89eef0de0bfcbd1d8",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/economic-groups.ts",
+      "sha256": "4d20dcfa51dfc8d83e1fae5776a73e2e18207abe08f32db592384179cd849f67",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/flow-delegation-constants.ts",
+      "sha256": "7c55c879805ff334ad85a1addf8ff6385d5555e64024d5410ad5ab0be24724a5",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/flow-delegation.ts",
+      "sha256": "1dacc983281940c506ba26099e3f21c023fbdaf36c12cb70e0c39ff3dd0231cb",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/flows.ts",
+      "sha256": "b603a110fac4062c4d7dbc9af01b1d912db98f19e6a4c09be1b750ced77aaa82",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/group-company-removal.ts",
+      "sha256": "5dfdc324fd3734988a126674a2b3e2c6c1c6359c795adf1b606d724b1996b222",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/index.ts",
+      "sha256": "30a016df56d5f939cb37f89e81a542114ee67a9cc4d45ada4fe9964140a74dca",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/instances/schemas.ts",
+      "sha256": "cac477b25d0d5800e0116f9e94c2e7100dea5963a08bb32eb8270ee6d164eef4",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/integrations/control.ts",
+      "sha256": "55e6ed693b45138b4e4025120876314b58723354adfac56ed333276aec5b2938",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/integrations/destinations.ts",
+      "sha256": "7dc1836cc2511b16464802ab126d3eaefa2b93595f99520924e7a7ce8f82ca29",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/integrations/embed.ts",
+      "sha256": "780635513c1b2c6870eda42af78995fdbd8932a493f15bbd7e9e8985455c6528",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/integrations/nico-takeovers.ts",
+      "sha256": "d5051bdfe3dfe7f9e1ff93490a4b1250b3d9c68250cfb7ed8eabd9c48b302480",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/integrations/schemas.ts",
+      "sha256": "2838eae2aad91c6abd4cb44dfcf606bec587181b01e79124b3813d65c66e5486",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/lifecycle.ts",
+      "sha256": "19d0004864f02a517d7b2d89814b823553ef4d8fbe9a7ba52dd07ccd7c56b860",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/messaging/schemas.ts",
+      "sha256": "543c93b11d3e7256d8e623d7c73d17532ad01a966722145650b40187146b0d08",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/pagination.ts",
+      "sha256": "f15b9780617b932694e1ba87439e6a528e9b726dc0c602ce18b1d77a8fc4e736",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/problems.ts",
+      "sha256": "006e9e5851756b01c19b9b6ecf61b42309203bbbe42957aaa29d59e0df22117d",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/provider-accounts/schemas.ts",
+      "sha256": "0fb6e53a0cac1ea8c794cc880db0c3ae370b9571ed1f4cc69dc2958e7e9adf15",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/support.ts",
+      "sha256": "aed8129c5ff7ab5b0d34c283ddc0dc3127e8735de173f2b871950b24a5d6678c",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/whatsapp-groups.ts",
+      "sha256": "d4d080d73f60e17ebfea2aeea83dd8908a91c99e387354892345dfc4f482368c",
+      "dependency": false
+    },
+    {
+      "path": "packages/ui/src/index.ts",
+      "sha256": "2d46ed635a9ca641adc78cf8435d2465fc359fb7147adedfbe95220624888177",
+      "dependency": false
+    },
+    {
+      "path": "packages/ui/src/tokens.ts",
+      "sha256": "dbec3bac580a696d438f9427b79aceeeb1e9e036a793a30ed6a9f93799552808",
+      "dependency": false
+    },
+    {
+      "path": "scripts/build-native-flow-editor.mjs",
+      "sha256": "2de3f1f2c167d57cf203738d3bf204443da1be340d26171bcd45ffcdd85a52d2",
+      "dependency": false
+    },
+    {
+      "path": "scripts/security/check-web-bundle.mjs",
+      "sha256": "d9f539651fd9feb9f69fb014971f707efc721e81918be6207fa3fa16b9270880",
+      "dependency": false
+    },
+    {
+      "path": "tsconfig.base.json",
+      "sha256": "dfd292c38081f1ba1fb64f06998e97346a8c592e43349ba9ce0cd4a47292d38a",
+      "dependency": false
+    }
+  ],
+  "outputs": [
+    {
+      "path": "THIRD_PARTY_NOTICES.txt",
+      "bytes": 8663,
+      "sha256": "289db5060637c9fa381d89a21979bf1843257353341ec5b6189a5e9f871476c3"
+    },
+    {
+      "path": "editor.css",
+      "bytes": 26865,
+      "sha256": "c65a52b9b1caeab057e7bf88bded09fa08e83868373438602a9ce4cead5e8ee4"
+    },
+    {
+      "path": "editor.js",
+      "bytes": 890757,
+      "sha256": "a5321737f3a349fa5c3d7be0072818e46176b5dbcb11609dea24a1871657ca99"
+    },
+    {
+      "path": "editor.js.LEGAL.txt",
+      "bytes": 1863,
+      "sha256": "7066aa717376ca1236a5d6112725fd01632e36f10e77f904f024624b6fcfbbf3"
+    }
+  ],
+  "inspection": {
+    "fileCount": 2,
+    "findings": []
+  }
+}

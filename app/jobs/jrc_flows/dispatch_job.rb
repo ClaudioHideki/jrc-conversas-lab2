@@ -30,9 +30,9 @@ class JrcFlows::DispatchJob < ApplicationJob
           'inbox.name' => conversation.inbox.name
         }
         run = flow.runs.create!(account: account, conversation: conversation, event_key: event_key,
-                               graph: flow.graph, settings: flow.settings.merge('_flow_version' => flow.lock_version), variables: variables,
-                               node_id: flow.graph.fetch('nodes').find { |n| n['type'] == 'start' }.fetch('id'),
-                               last_message_id: message&.id || 0)
+                                graph: flow.graph, settings: flow.settings.merge('_flow_version' => flow.lock_version), variables: variables,
+                                node_id: flow.graph.fetch('nodes').find { |n| n['type'] == 'start' }.fetch('id'),
+                                last_message_id: message&.id || 0)
         message = nil
       end
     end
@@ -52,6 +52,7 @@ class JrcFlows::DispatchJob < ApplicationJob
     return false if settings.fetch('pause_on_team', false) && conversation.team_id.present?
     return false if event == 'label_added' && settings['label'] != label
     return false if settings['keyword'].present? && !message&.content.to_s.downcase.include?(settings['keyword'].downcase)
+
     if flow.kind == 'chatbot'
       previous = flow.runs.where(conversation: conversation).order(:id).last
       return false if previous && !(settings.fetch('restart_on_resolve', true) && previous.reset_at)
@@ -63,3 +64,5 @@ class JrcFlows::DispatchJob < ApplicationJob
     JrcFlows::BusinessHours.open?(settings)
   end
 end
+
+JrcFlows::DispatchJob.prepend(JrcFlows::OwnershipEntrypoints::Dispatch)

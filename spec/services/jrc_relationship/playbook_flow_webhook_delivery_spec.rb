@@ -66,6 +66,7 @@ RSpec.describe JrcRelationship::PlaybookFlowWebhookDelivery, :sd_concurrency do
     run = start_continuation
     observations = []
     request = stub_request(:post, 'https://example.com/approved-hook').with do |http|
+      expect(JrcFlowRun.connection.transaction_open?).to eq(false)
       observations << Timeout.timeout(30) do
         Thread.new do
           ActiveRecord::Base.connection_pool.with_connection do
@@ -75,7 +76,7 @@ RSpec.describe JrcRelationship::PlaybookFlowWebhookDelivery, :sd_concurrency do
       end
       body = JSON.parse(http.body)
       expect(body).to eq('event' => 'jrc.flow', 'flow_id' => flow.id, 'run_id' => run.id,
-                        'conversation_id' => conversation.display_id, 'data' => 'Explicit approved value')
+                         'conversation_id' => conversation.display_id, 'data' => 'Explicit approved value')
       expect(http.headers['Idempotency-Key']).to eq("jrc-flow-#{run.id}-node1")
       true
     end.to_return(status: 200, body: '{"accepted":true}')
@@ -85,6 +86,22 @@ RSpec.describe JrcRelationship::PlaybookFlowWebhookDelivery, :sd_concurrency do
     expect(webhook_record(run)).to include('state' => 'response_received', 'response_digest' => Digest::SHA256.hexdigest('{"accepted":true}'))
     expect(run.status).to eq('completed')
     expect(flow_messages(run).map(&:content)).to eq(['Native continuation after receipt'])
+  end
+
+  it 'keeps the external result unknown when the original authority is revoked during POST' do
+    run = start_continuation
+    request = stub_request(:post, 'https://example.com/approved-hook').with do
+      expect(JrcFlowRun.connection.transaction_open?).to eq(false)
+      sd_membership.update!(active: false)
+      true
+    end.to_return(status: 200, body: '{"accepted":true}')
+    deliver_webhook(run)
+    expect(request).to have_been_requested.once
+    expect(webhook_record(run)['state']).to eq('unknown')
+    expect(run.status).to eq('paused')
+    expect(flow_messages(run)).to be_empty
+    deliver_webhook(run)
+    expect(request).to have_been_requested.once
   end
 
   it 'replays the same approved origin and duplicate jobs without another POST or downstream message' do
@@ -233,6 +250,7 @@ RSpec.describe JrcRelationship::PlaybookFlowWebhookDelivery, :sd_concurrency do
     let(:publisher) { create(:user) }
 
     around { |example| with_modified_env(NICO_MODE: 'provider') { example.run } }
+
     before do
       create(:account_user, account: sd_account, user: publisher, role: :administrator)
       sd_account.update!(custom_attributes: sd_account.custom_attributes.merge('nico_enabled' => true, 'nico_customer_delegation_enabled' => true))
@@ -268,7 +286,9 @@ RSpec.describe JrcRelationship::PlaybookFlowWebhookDelivery, :sd_concurrency do
       expect(jobs.length).to eq(1)
       expect(jobs.fetch(0)[:at]).to be_within(0.000001).of(run.wake_at.to_f)
       expect(start_continuation.id).to eq(run.id)
-      expect(enqueued_jobs.select { |job| job[:job] == JrcRelationship::PlaybookFlowResumeJob && job[:args] == [run.id, run.wake_version] }.length).to eq(1)
+      expect(enqueued_jobs.select do |job|
+        job[:job] == JrcRelationship::PlaybookFlowResumeJob && job[:args] == [run.id, run.wake_version]
+      end.length).to eq(1)
       wake_continuation(run)
       expect(run.status).to eq('completed')
       expect(flow_messages(run).map(&:content)).to eq(['After committed native timer'])

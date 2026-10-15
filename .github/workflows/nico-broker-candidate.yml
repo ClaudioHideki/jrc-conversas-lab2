@@ -32,6 +32,7 @@ jobs:
       POSTGRES_USERNAME: postgres
       POSTGRES_PASSWORD: disposable-test-only
       POSTGRES_DATABASE: jrc_nico_broker_candidate_test
+      JRC_NICO_GATE_CONCURRENCY: '1'
       REDIS_URL: redis://127.0.0.1:6379/15
       SECRET_KEY_BASE: isolated-nico-broker-ci-not-a-production-secret
       BUNDLE_FROZEN: 'true'
@@ -50,6 +51,15 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version-file: .nvmrc
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - name: Interface NICO com dependencias congeladas
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm exec vitest run --config vitest.nico.config.ts --reporter=json --outputFile=/tmp/nico-broker-vitest.json
+          pnpm exec eslint app/javascript/dashboard/components-next/jrcCopilot/JrcCopilotPanel.vue app/javascript/dashboard/components-next/jrcCopilot/specs/nicoQuickUI.spec.js
+          node -e 'const r=require("/tmp/nico-broker-vitest.json");if(!r.success||r.numFailedTests||r.numPendingTests||r.numTotalTests<83)process.exit(1)'
       - name: Dependencias nativas dos testes Rails
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libpq-dev libvips libvips-dev
       - uses: ruby/setup-ruby@v1
@@ -66,12 +76,18 @@ jobs:
       - name: Historico, ferramentas, confirmacao e delegacao NICO
         run: |
           bundle exec rspec spec/services/jrc_nico/operator_session_recent_history_spec.rb \
+            spec/services/jrc_nico/operator_session_broker_send_spec.rb \
+            spec/services/jrc_nico/broker_send_commit_gate_spec.rb \
+            spec/services/jrc_nico/broker_send_coordinator_binding_scope_spec.rb \
             spec/services/jrc_nico/context_builder_spec.rb \
             spec/services/jrc_nico/commercial_delegation_spec.rb \
             spec/services/jrc_nico/commercial_workflow_spec.rb \
             spec/requests/jrc_nico_operations_spec.rb \
             spec/requests/jrc_nico_assistance_spec.rb \
             spec/requests/jrc_nico_notices_spec.rb \
+            spec/requests/api/v1/accounts/jrc_broker_spec.rb \
+            spec/requests/api/v1/accounts/jrc_broker_inbox_spec.rb \
+            spec/requests/api/v1/accounts/jrc_broker_contract_spec.rb \
             --format progress --format json --out /tmp/nico-broker-rspec.json
           python3 - <<'PYTHON'
           import json
@@ -79,7 +95,19 @@ jobs:
           print(result)
           assert result['failure_count'] == 0
           assert result['pending_count'] == 0
-          assert result['example_count'] >= 80
+          assert result['example_count'] >= 150
           PYTHON
+      - name: Estilo dos arquivos novos de coordenacao
+        run: |
+          bundle exec rubocop app/models/jrc_nico/broker_send_operation.rb \
+            app/services/jrc_nico/broker_send_coordinator.rb \
+            app/services/jrc_nico/broker_send_cancellation.rb \
+            app/services/jrc_nico/broker_send_commit_gate.rb \
+            app/services/jrc_nico/broker_send_binding.rb \
+            app/jobs/jrc_nico/broker_send_job.rb \
+            db/migrate/20261015130000_create_nico_broker_send_operations.rb \
+            spec/services/jrc_nico/operator_session_broker_send_spec.rb \
+            spec/services/jrc_nico/broker_send_commit_gate_spec.rb \
+            spec/services/jrc_nico/broker_send_coordinator_binding_scope_spec.rb
       - name: Preservar o fonte e o lockfile
         run: git diff --exit-code

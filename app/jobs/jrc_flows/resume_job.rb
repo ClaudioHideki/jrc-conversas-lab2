@@ -6,3 +6,5 @@ class JrcFlows::ResumeJob < ApplicationJob
     JrcFlows::Runner.new(run).perform(wake_version: wake_version) if run
   end
 end
+
+JrcFlows::ResumeJob.prepend(JrcFlows::OwnershipEntrypoints::Resume)

@@ -49,7 +49,9 @@ class JrcFlows::WorkflowRunner
       inflight = @run.variables['_workflow_inflight']
       if inflight
         if Time.iso8601(inflight['at']) < 2.minutes.ago
-          @run.update!(status: 'failed', error: 'Execução interrompida; resultado de integrações incerto. Confira o histórico antes de tentar novamente.', finished_at: Time.current)
+          @run.update!(status: 'failed',
+                       error: 'Execução interrompida; resultado de integrações incerto. Confira o histórico antes de tentar novamente.',
+                       finished_at: Time.current)
         elsif message
           JrcFlows::WorkflowTurnJob.set(wait: 3.seconds).perform_later(@run.id, message.id)
         end
@@ -115,7 +117,8 @@ class JrcFlows::WorkflowRunner
   end
 
   def handoff_team(response)
-    key = { 'SUPORTE' => 'workflow_support_team_id', 'FINANCEIRO' => 'workflow_financial_team_id', 'COMERCIAL' => 'workflow_commercial_team_id' }[response['destination'].to_s.upcase]
+    key = { 'SUPORTE' => 'workflow_support_team_id', 'FINANCEIRO' => 'workflow_financial_team_id',
+            'COMERCIAL' => 'workflow_commercial_team_id' }[response['destination'].to_s.upcase]
     id = @run.settings[key].presence || @run.settings['workflow_team_id']
     @run.account.teams.find(id)
   end
@@ -135,3 +138,5 @@ class JrcFlows::WorkflowRunner
     nil
   end
 end
+
+JrcFlows::WorkflowRunner.prepend(JrcFlows::OwnershipEntrypoints::WorkflowRunner)

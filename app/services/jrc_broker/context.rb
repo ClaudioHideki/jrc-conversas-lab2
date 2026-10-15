@@ -1,12 +1,12 @@
 class JrcBroker::Context
   attr_reader :account, :user, :integration, :client
 
-  def initialize(account:, user:)
+  def initialize(account:, user: nil, actor_id: nil)
     @account = account
     @user = user
     @integration = JrcBrokerIntegration.find_by!(account_id: account.id)
     token = JrcBroker::Configuration.credential_store.decrypt(account_id: account.id, ciphertext: integration.encrypted_control_key)
-    @client = JrcBroker::Client.new(origin: integration.broker_origin, token: token, actor_id: user.id)
+    @client = JrcBroker::Client.new(origin: integration.broker_origin, token: token, actor_id: resolve_actor_id(actor_id))
     remote = client.context
     JrcBroker::Configuration.validate_context!(remote, account.id, integration.organization_id)
     return if remote['destinationRevision'] == integration.destination_revision
@@ -51,6 +51,13 @@ class JrcBroker::Context
   end
 
   private
+
+  def resolve_actor_id(actor_id)
+    value = actor_id || user&.id
+    raise ArgumentError, 'Ator interno inválido.' unless value.is_a?(Integer) && value.positive?
+
+    value
+  end
 
   def save_binding!(inbox, operation)
     inbox.with_lock do

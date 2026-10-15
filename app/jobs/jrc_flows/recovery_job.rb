@@ -3,14 +3,16 @@ class JrcFlows::RecoveryJob < ApplicationJob
 
   def perform
     return unless ENV['JRC_FLOWS_ENABLED'] == 'true'
+
     JrcFlow.active.where("settings ->> 'trigger' = ?", 'schedule').where('next_run_at <= ?', Time.current).find_each do |flow|
       flow.with_lock do
         next unless flow.status == 'active' && flow.next_run_at && flow.next_run_at <= Time.current
 
         scheduled_at = flow.next_run_at.to_i
-        flow.account.conversations.where(display_id: Array(flow.settings['conversation_ids']), inbox_id: Array(flow.settings['inbox_ids'])).find_each do |conversation|
+        flow.account.conversations.where(display_id: Array(flow.settings['conversation_ids']),
+                                         inbox_id: Array(flow.settings['inbox_ids'])).find_each do |conversation|
           JrcFlows::DispatchJob.perform_later(flow.account_id, conversation.id, 'schedule',
-            "schedule:#{scheduled_at}:#{conversation.id}", nil, nil, flow.id)
+                                              "schedule:#{scheduled_at}:#{conversation.id}", nil, nil, flow.id)
         end
         flow.update_columns(next_run_at: flow.settings['interval_minutes'].to_i.minutes.from_now)
       end
@@ -26,3 +28,5 @@ class JrcFlows::RecoveryJob < ApplicationJob
     end
   end
 end
+
+JrcFlows::RecoveryJob.prepend(JrcFlows::OwnershipEntrypoints::Recovery)

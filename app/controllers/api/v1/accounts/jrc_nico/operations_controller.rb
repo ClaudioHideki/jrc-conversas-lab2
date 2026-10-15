@@ -5,6 +5,7 @@ class Api::V1::Accounts::JrcNico::OperationsController < Api::V1::Accounts::Base
   rescue_from ArgumentError, ActiveRecord::RecordInvalid, ActiveRecord::RecordNotFound, with: :invalid
   rescue_from JrcNico::OperatorSession::Busy, JrcNico::RunCapacity::Exceeded, with: :busy
   rescue_from JrcNico::RuntimeClient::Error, with: :unavailable
+  rescue_from JrcBroker::Client::Error, with: :broker_unavailable
 
   def show
     delegations = JrcNico::Delegation.where(account: Current.account, user: Current.user).order(updated_at: :desc).limit(30)
@@ -20,6 +21,7 @@ class Api::V1::Accounts::JrcNico::OperationsController < Api::V1::Accounts::Base
                    workflow: JrcNico::WorkflowSummary.for(@operator.session),
                    can_manage_knowledge: @operator.access.membership.administrator?,
                    commands: @operator.session.commands.where('created_at >= ?', @operator.session.context['visible_since'] || Time.current)
+                                      .includes(broker_send_operation: [:message, { conversation: :contact }])
                                       .order(id: :desc).limit(100).map(&:snapshot),
                    tools: JrcNico::ToolCatalog.new(@operator.access).available, delegations: delegations.map(&:snapshot), suggestions: suggestions }
   end
@@ -111,6 +113,8 @@ class Api::V1::Accounts::JrcNico::OperationsController < Api::V1::Accounts::Base
     busy(error)
   rescue JrcNico::RuntimeClient::Error => error
     unavailable(error)
+  rescue JrcBroker::Client::Error
+    broker_unavailable
   end
 
   def operator_session
@@ -139,5 +143,10 @@ class Api::V1::Accounts::JrcNico::OperationsController < Api::V1::Accounts::Base
 
   def unavailable(error)
     render json: { error: error.code, message: error.user_message }, status: :service_unavailable
+  end
+
+  def broker_unavailable
+    render json: { error: 'broker_unavailable', message: 'Não foi possível consultar o Broker. Tente novamente para preparar a prévia.' },
+           status: :service_unavailable
   end
 end

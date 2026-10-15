@@ -109,6 +109,9 @@ class JrcNico::ToolExecutor
   def send_message
     conversation = @access.conversation(@args.fetch('conversation_id'))
     message = conversation.with_lock do
+      if @args['private'] != true && JrcNico::BrokerSendBinding.resolve(account_id: @account.id, inbox_id: conversation.inbox_id)
+        raise ArgumentError, 'Esta caixa possui um vínculo Flow/Broker. Prepare uma nova prévia de envio coordenado.'
+      end
       if @args['private'] != true && (conversation.assignee_agent_bot_id.present? || JrcFlows::Access.inbox_bot_owned?(conversation) ||
                                   JrcFlowRun.live.exists?(account_id: @account.id, conversation_id: conversation.id))
         raise ArgumentError, 'Esta conversa está sob atendimento de um bot ou Flow. Use a transferência para humano antes de enviar pelo NICO.'
