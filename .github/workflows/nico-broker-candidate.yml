@@ -1,0 +1,85 @@
+name: NICO e Broker - candidato coordenado
+
+on:
+  push:
+    branches: [codex/nico-broker-coordenado-20261015]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  nico-regression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: disposable-test-only
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s --health-timeout 5s --health-retries 12
+      redis:
+        image: redis:7.4.0-alpine@sha256:c35af3bbcef51a62c8bae5a9a563c6f1b60d7ebaea4cb5a3ccbcc157580ae098
+        ports: ['6379:6379']
+    env:
+      RAILS_ENV: test
+      POSTGRES_HOST: 127.0.0.1
+      POSTGRES_PORT: '5432'
+      POSTGRES_USERNAME: postgres
+      POSTGRES_PASSWORD: disposable-test-only
+      POSTGRES_DATABASE: jrc_nico_broker_candidate_test
+      REDIS_URL: redis://127.0.0.1:6379/15
+      SECRET_KEY_BASE: isolated-nico-broker-ci-not-a-production-secret
+      BUNDLE_FROZEN: 'true'
+      SCHEMA: /tmp/nico-broker-candidate-schema.rb
+      TZ: UTC
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Confirmar branch e preservar a base de producao
+        run: |
+          test "$GITHUB_REF" = refs/heads/codex/nico-broker-coordenado-20261015
+          git merge-base --is-ancestor b58e093dd3a32fe97829a4566660b83ee48b9eca HEAD
+          git diff --check b58e093dd3a32fe97829a4566660b83ee48b9eca HEAD
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+      - name: Dependencias nativas dos testes Rails
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libpq-dev libvips libvips-dev
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4.4'
+          bundler: 2.5.16
+          bundler-cache: true
+      - name: Preparar banco descartavel do candidato
+        run: |
+          test "$RAILS_ENV" = test
+          test "$POSTGRES_DATABASE" = jrc_nico_broker_candidate_test
+          SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
+          bundle exec rails db:migrate
+      - name: Historico, ferramentas, confirmacao e delegacao NICO
+        run: |
+          bundle exec rspec spec/services/jrc_nico/operator_session_recent_history_spec.rb \
+            spec/services/jrc_nico/context_builder_spec.rb \
+            spec/services/jrc_nico/commercial_delegation_spec.rb \
+            spec/services/jrc_nico/commercial_workflow_spec.rb \
+            spec/requests/jrc_nico_operations_spec.rb \
+            spec/requests/jrc_nico_assistance_spec.rb \
+            spec/requests/jrc_nico_notices_spec.rb \
+            --format progress --format json --out /tmp/nico-broker-rspec.json
+          python3 - <<'PYTHON'
+          import json
+          result = json.load(open('/tmp/nico-broker-rspec.json'))['summary']
+          print(result)
+          assert result['failure_count'] == 0
+          assert result['pending_count'] == 0
+          assert result['example_count'] >= 80
+          PYTHON
+      - name: Preservar o fonte e o lockfile
+        run: git diff --exit-code

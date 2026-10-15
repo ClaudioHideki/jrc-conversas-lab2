@@ -7,7 +7,7 @@ class JrcNico::ContextBuilder
     @access.authorize!
     {
       conversation: @access.conversation.messages.where(account_id: @access.account.id, private: false).where.not(content: [nil, ''])
-                           .order(id: :desc).limit(40).to_a.reverse.map do |entry|
+                           .reorder(id: :desc).limit(40).to_a.reverse.map do |entry|
         { source: 'conversation', reference: "message:#{entry.id}", text: "#{entry.message_type}: #{entry.content.to_s.first(1000)}" }
       end,
       crm: crm_context,

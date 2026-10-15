@@ -456,7 +456,7 @@ class JrcNico::OperatorSession
   end
 
   def public_history(conversation)
-    conversation.messages.where(private: false, message_type: [:incoming, :outgoing]).order(id: :desc).limit(30).reverse.map do |message|
+    conversation.messages.where(private: false, message_type: [:incoming, :outgoing]).reorder(id: :desc).limit(30).reverse.map do |message|
       { role: message.incoming? ? 'customer' : 'assistant', content: message.content.to_s.first(1000) }
     end
   end

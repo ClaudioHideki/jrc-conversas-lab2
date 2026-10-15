@@ -94,14 +94,14 @@ class JrcNico::ToolExecutor
   end
 
   def conversation_sample_messages(conversation)
-    conversation.messages.where(private: false, message_type: [:incoming, :outgoing]).order(id: :desc).limit(5).reverse.map do |message|
+    conversation.messages.where(private: false, message_type: [:incoming, :outgoing]).reorder(id: :desc).limit(5).reverse.map do |message|
       { id: message.id, message_type: message.message_type, content: message.content.to_s.first(300), created_at: message.created_at }
     end
   end
 
   def read_conversation
     conversation = @access.conversation(@args.fetch('conversation_id'))
-    conversation_snapshot(conversation).merge(messages: conversation.messages.where(private: false).order(id: :desc).limit(30).reverse.map do |m|
+    conversation_snapshot(conversation).merge(messages: conversation.messages.where(private: false).reorder(id: :desc).limit(30).reverse.map do |m|
       m.slice(:id, :message_type, :content, :status, :created_at)
     end)
   end
