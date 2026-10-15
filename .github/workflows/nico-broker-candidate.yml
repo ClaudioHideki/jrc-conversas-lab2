@@ -33,6 +33,7 @@ jobs:
       POSTGRES_PASSWORD: disposable-test-only
       POSTGRES_DATABASE: jrc_nico_broker_candidate_test
       JRC_NICO_GATE_CONCURRENCY: '1'
+      FRONTEND_URL: https://host.example.test
       REDIS_URL: redis://127.0.0.1:6379/15
       SECRET_KEY_BASE: isolated-nico-broker-ci-not-a-production-secret
       BUNDLE_FROZEN: 'true'
