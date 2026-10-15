@@ -88,7 +88,7 @@ jobs:
       - name: Observador e manifestos da composicao
         if: matrix.suite == 'modules'
         run: |
-          node --test deploy/jrc/ownership-observer.test.mjs deploy/jrc/module-manifest.test.mjs
+          node --test deploy/jrc/ownership-observer.test.mjs deploy/jrc/module-manifest.test.mjs script/validate_migration_timestamps.test.mjs
           node script/jrc_native_module_manifest.mjs
       - name: Dependencias nativas dos testes Rails
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libpq-dev libvips libvips-dev

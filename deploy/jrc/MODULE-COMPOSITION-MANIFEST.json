@@ -4,7 +4,7 @@
   "provenanceSourceSha": "80f7305ad0eac310d661071856f67a7e048881de",
   "encoding": "Git text payloads with LF line endings",
   "installedProof": false,
-  "compositionCount": 121,
+  "compositionCount": 124,
   "editorStatus": {
     "sourceRepository": "ClaudioHideki/BrokerJRCIA",
     "sourceSha": "fc4ae8a1f3c940dc8ab2d1e369f3b658eab463a3",
@@ -506,7 +506,7 @@
     {
       "path": "config/jrc_flow_ownership_guards.json",
       "baseSha256": null,
-      "sha256": "a47e1336df460eeea6e3b2debde88f7c0557c97306af96e1213b9ee3a0ea4538",
+      "sha256": "c3bfc9b81a30abe915f6d79dc5ee99c2cafbf20f72acf25e961cf9f79628bb54",
       "bytes": 10730
     },
     {
@@ -534,7 +534,7 @@
       "bytes": 3618
     },
     {
-      "path": "db/migrate/20261009180000_create_jrc_flow_native_registrations.rb",
+      "path": "db/migrate/20261013140000_create_jrc_flow_native_registrations.rb",
       "baseSha256": null,
       "sha256": "f3c2be944a8e78ba160a53eeb8188dc90524ee06d7bb674942fb92537e9ef598",
       "bytes": 6616
@@ -590,8 +590,8 @@
     {
       "path": "deploy/jrc/module-composition-input.json",
       "baseSha256": null,
-      "sha256": "876aa524a613c5b4e87f2c2f9c9a8f633a0705c507f872403b7e8195907ea739",
-      "bytes": 12354
+      "sha256": "5c3741f7839800811d0f863c7e4b0deadbbe75285a45ef0dffb20c75ce7816b4",
+      "bytes": 12497
     },
     {
       "path": "deploy/jrc/module-manifest.test.mjs",
@@ -664,6 +664,24 @@
       "baseSha256": null,
       "sha256": "ae2bec0a702984eadfd132b76f1458400940a0d14c47b827875c1b97c0ae9492",
       "bytes": 3697
+    },
+    {
+      "path": "script/validate_changed_source.mjs",
+      "baseSha256": "b108658ee82d4af68e913f321603d173eb19383a00367ffddf57a503855b6542",
+      "sha256": "4b8431469e04fcf150152a49bad4a1d6b518a82bc403253fd35230c25a64f4b2",
+      "bytes": 2387
+    },
+    {
+      "path": "script/validate_migration_timestamps.mjs",
+      "baseSha256": null,
+      "sha256": "d9d2e69219c19ba23c70ddd0e4bca4f91b37b31a8c09cf0c9ef662afd27b8f36",
+      "bytes": 931
+    },
+    {
+      "path": "script/validate_migration_timestamps.test.mjs",
+      "baseSha256": null,
+      "sha256": "19403fb6b179dca404406f1e14e8e45be513f6ef4183e372967996faf72828a3",
+      "bytes": 3540
     },
     {
       "path": "spec/requests/jrc_flow_effects_spec.rb",
