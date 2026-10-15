@@ -259,18 +259,6 @@ RSpec.describe 'NICO operational assistant', type: :request do
     expect(delegation.turns.last.status).to eq('cancelled')
   end
 
-  it 'does not send a queued bot reply after a public human message' do
-    bot = AgentBot.create!(account: account, name: 'NICO QA')
-    delegation = JrcNico::Delegation.create!(account: account, user: admin, conversation: conversation, agent_bot: bot, objective: 'Qualificar', expires_at: 1.hour.from_now)
-    conversation.update!(status: 'pending', assignee_agent_bot: bot)
-    message = Messages::MessageBuilder.new(bot, conversation, content: 'Pendente', content_attributes: { nico_delegation: { id: delegation.id, version: delegation.version } }).perform
-    Messages::MessageBuilder.new(admin, conversation, content: 'Assumi o atendimento').perform
-    job = SendReplyJob.new
-    expect(job).not_to receive(:deliver)
-    job.perform(message.id)
-    expect(message.reload.status).to eq('failed')
-  end
-
   it 'keeps internal notes out of commercial customer context' do
     JrcNico::KnowledgeDocument.create!(account: account, author: admin, approved_by: admin, approved_at: Time.current,
                                        title: 'Uso interno', body: 'SEGREDO DO DOCUMENTO INTERNO')
@@ -347,41 +335,5 @@ RSpec.describe 'NICO operational assistant', type: :request do
     end
   end
 
-  it 'does not retry a customer delivery with uncertain channel outcome' do
-    bot = AgentBot.create!(account: account, name: 'NICO QA')
-    delegation = JrcNico::Delegation.create!(account: account, user: admin, conversation: conversation, agent_bot: bot, objective: 'Qualificar', expires_at: 1.hour.from_now)
-    conversation.update!(status: 'pending', assignee_agent_bot: bot)
-    incoming = create(:message, conversation: conversation, account: account, message_type: :incoming, content: 'Olá')
-    turn = delegation.turns.create!(message_id: incoming.id, version: delegation.version, status: 'queued')
-    outgoing = Messages::MessageBuilder.new(bot, conversation, content: 'Olá!', content_attributes: { nico_turn_id: turn.id, nico_delegation: { id: delegation.id, version: delegation.version } }).perform
-    turn.update!(outgoing_message_id: outgoing.id)
-    job = SendReplyJob.new
-    expect(job).to receive(:deliver).once.and_raise(Timeout::Error)
-    job.perform(outgoing.id)
-    job.perform(outgoing.id)
-    expect(delegation.reload.status).to eq('needs_human')
-    expect(turn.reload.status).to eq('cancelled')
-  end
-
-  it 'hands definitive channel failures to the operator without retrying delivery' do
-    bot = AgentBot.create!(account: account, name: 'NICO QA')
-    delegation = JrcNico::Delegation.create!(account: account, user: admin, conversation: conversation, agent_bot: bot,
-      objective: 'Qualificar', expires_at: 1.hour.from_now)
-    conversation.update!(status: 'pending', assignee_agent_bot: bot)
-    incoming = create(:message, conversation: conversation, account: account, message_type: :incoming, content: 'Olá')
-    turn = delegation.turns.create!(message_id: incoming.id, version: delegation.version, status: 'queued')
-    outgoing = Messages::MessageBuilder.new(bot, conversation, content: 'Olá!', content_attributes: {
-      nico_turn_id: turn.id, nico_delegation: { id: delegation.id, version: delegation.version }
-    }).perform
-    turn.update!(outgoing_message_id: outgoing.id)
-    job = SendReplyJob.new
-    expect(job).to(receive(:deliver).once { |message| message.update!(status: :failed) })
-    job.perform(outgoing.id)
-    expect(turn.reload.status).to eq('failed')
-    expect(delegation.reload).to have_attributes(status: 'needs_human', reason: 'delivery_failed')
-    expect(conversation.reload).to have_attributes(status: 'open', assignee_id: admin.id, assignee_agent_bot_id: nil)
-    expect(JrcNico::Notice.where(account: account, user: admin, conversation: conversation, kind: 'attention').count).to eq(1)
-    expect { job.perform(outgoing.id) }.not_to change(JrcNico::Notice, :count)
-  end
 end
 

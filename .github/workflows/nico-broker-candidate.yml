@@ -83,6 +83,7 @@ jobs:
             spec/services/jrc_nico/context_builder_spec.rb \
             spec/services/jrc_nico/commercial_delegation_spec.rb \
             spec/services/jrc_nico/commercial_workflow_spec.rb \
+            spec/jobs/send_reply_job_nico_composition_spec.rb \
             spec/requests/jrc_nico_operations_spec.rb \
             spec/requests/jrc_nico_assistance_spec.rb \
             spec/requests/jrc_nico_notices_spec.rb \
@@ -109,6 +110,7 @@ jobs:
             db/migrate/20261015130000_create_nico_broker_send_operations.rb \
             spec/services/jrc_nico/operator_session_broker_send_spec.rb \
             spec/services/jrc_nico/broker_send_commit_gate_spec.rb \
-            spec/services/jrc_nico/broker_send_coordinator_binding_scope_spec.rb
+            spec/services/jrc_nico/broker_send_coordinator_binding_scope_spec.rb \
+            spec/jobs/send_reply_job_nico_composition_spec.rb
       - name: Preservar o fonte e o lockfile
         run: git diff --exit-code
