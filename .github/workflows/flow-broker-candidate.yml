@@ -2,7 +2,7 @@ name: Flow e QR - composicao candidata
 
 on:
   push:
-    branches: [codex/nico-broker-coordenado-20261015]
+    branches: [codex/nico-broker-coordenado-20261015, codex/nico-jornada-candidato-20261016]
   workflow_dispatch:
 
 permissions:
@@ -79,9 +79,13 @@ jobs:
           persist-credentials: false
       - name: Confirmar branch e preservar a base do outro desenvolvedor
         run: |
-          test "$GITHUB_REF" = refs/heads/codex/nico-broker-coordenado-20261015
-          git merge-base --is-ancestor b58e093dd3a32fe97829a4566660b83ee48b9eca HEAD
-          git diff --check b58e093dd3a32fe97829a4566660b83ee48b9eca HEAD
+          case "$GITHUB_REF" in
+            refs/heads/codex/nico-broker-coordenado-20261015) baseline=b58e093dd3a32fe97829a4566660b83ee48b9eca ;;
+            refs/heads/codex/nico-jornada-candidato-20261016) baseline=98a4be7714be41d33bf9ff52b254ebb773864769 ;;
+            *) echo 'Branch fora das candidatas autorizadas'; exit 1 ;;
+          esac
+          git merge-base --is-ancestor "$baseline" HEAD
+          git diff --check "$baseline" HEAD
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version-file: .nvmrc

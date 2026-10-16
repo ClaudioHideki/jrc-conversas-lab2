@@ -362,6 +362,48 @@ describe('Quick NICO and Full Copilot use one operator session', () => {
     ).toBe(false);
   });
 
+  it.each(['en', 'pt_BR'])(
+    'shows inferred analysis provenance using locale %s',
+    async locale => {
+      wrapper.vm.$i18n.locale = locale;
+      snapshot.commands = [
+        {
+          id: 502,
+          status: 'succeeded',
+          tool: 'analyze_conversation_sentiment',
+          result: {
+            sentiment_report: {
+              summary: 'Amostra de atendimento.',
+              analysis_version: 1,
+              inferred: true,
+              model: 'test-model',
+              message_count: 2,
+              source_window: {
+                first_message_at: '2026-10-16T12:00:00Z',
+                last_message_at: '2026-10-16T12:05:00Z',
+                truncated_message_count: 1,
+              },
+            },
+          },
+        },
+      ];
+      ui.open();
+      await flushPromises();
+      const provenance = wrapper.get(
+        '[data-testid="nico-analysis-provenance"]'
+      );
+      expect(provenance.text()).toContain(
+        translations.JRC_NICO.UX.ANALYSIS_INFERRED
+      );
+      expect(provenance.text()).toContain('test-model');
+      expect(
+        provenance.findAll('time').map(time => time.attributes('datetime'))
+      ).toEqual(['2026-10-16T12:00:00Z', '2026-10-16T12:05:00Z']);
+      expect(provenance.text()).toContain('2');
+      expect(provenance.text()).toContain('1');
+    }
+  );
+
   it('does not poll the closed idle session and pauses notices in a hidden tab', async () => {
     const initialShows = api.show.mock.calls.length;
     await vi.advanceTimersByTimeAsync(30000);

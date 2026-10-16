@@ -23,6 +23,7 @@ import NicoComposer from './NicoComposer.vue';
 import NicoInteractionStatus from './NicoInteractionStatus.vue';
 import NicoWorkflowSummary from './NicoWorkflowSummary.vue';
 import NicoCapacitySummary from './NicoCapacitySummary.vue';
+import NicoAnalysisProvenance from './NicoAnalysisProvenance.vue';
 import { nicoInteractionState } from './nicoInteractionState';
 import NicoKnowledgePanel from './NicoKnowledgePanel.vue';
 import NicoConversationPanel from './NicoConversationPanel.vue';
@@ -938,6 +939,7 @@ onBeforeUnmount(() => {
           {{ t('JRC_NICO.UX.SENTIMENT_REPORT') }}
         </h3>
         <p>{{ latest.result.sentiment_report.summary }}</p>
+        <NicoAnalysisProvenance :report="latest.result.sentiment_report" />
         <dl class="grid grid-cols-2 gap-2 text-xs text-n-slate-11">
           <dt>{{ t('JRC_NICO.UX.CUSTOMER_SENTIMENT') }}</dt>
           <dd>{{ latest.result.sentiment_report.customer_sentiment }}</dd>

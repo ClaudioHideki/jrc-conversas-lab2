@@ -74,7 +74,13 @@
       "CUSTOMER_SENTIMENT": "Sentimento do cliente",
       "AGENT_SENTIMENT": "Sentimento do atendente",
       "REPORT_DETAILS": "Ver evidências e recomendações",
-      "DOWNLOAD_REPORT": "Baixar relatório JSON"
+      "DOWNLOAD_REPORT": "Baixar relatório JSON",
+      "ANALYSIS_INFERRED": "Análise inferida por IA sobre esta amostra. Não representa satisfação medida nem certeza sobre o cliente.",
+      "ANALYSIS_MESSAGES": "Mensagens analisadas",
+      "ANALYSIS_MODEL": "Modelo utilizado",
+      "ANALYSIS_FROM": "Início da amostra",
+      "ANALYSIS_TO": "Fim da amostra",
+      "ANALYSIS_TRUNCATED": "Textos limitados a 1000 caracteres"
     },
     "OPERATOR": {
       "TITLE": "NICO · assistente JRC",

@@ -61,4 +61,40 @@ RSpec.describe JrcAi::ConversationSentiment do
     expect { described_class.call(access, conversation.display_id) }.to raise_error(Pundit::NotAuthorizedError)
     expect(runtime).not_to have_received(:sentiment)
   end
+
+  it 'records server-owned provenance and the exact source window without accepting model metadata' do
+    first = create(:message, account: account, conversation: conversation, message_type: :incoming,
+                             content: 'a' * 1001, private: false, created_at: 2.minutes.ago)
+    second = create(:message, account: account, conversation: conversation, message_type: :incoming, content: 'Obrigada', private: false)
+    report.merge!('analysis_version' => 999, 'inferred' => false, 'source_window' => { 'message_ids' => [999] })
+
+    result = described_class.call(access, conversation.display_id).fetch(:sentiment_report)
+
+    expect(result).to include('analysis_version' => 1, 'inferred' => true)
+    expect(result.fetch('source_window')).to include(
+      'message_ids' => [first.id, second.id], 'message_limit' => 100, 'characters_per_message' => 1000,
+      'truncated_message_count' => 1, 'first_message_at' => first.created_at.iso8601, 'last_message_at' => second.created_at.iso8601
+    )
+    expect(result.fetch('source_window').fetch('digest')).to match(/\A[0-9a-f]{64}\z/)
+    expect(runtime).to have_received(:sentiment) do |payload|
+      expect(result.fetch('source_window').fetch('digest')).to eq(Digest::SHA256.hexdigest(payload.fetch(:messages).to_json))
+    end
+  end
+
+  it 'rejects evidence referring to a private or unsupplied message even if an older runtime accepts it' do
+    create(:message, account: account, conversation: conversation, message_type: :incoming, content: 'Olá', private: false)
+    private_note = create(:message, account: account, conversation: conversation, message_type: :outgoing,
+                                    content: 'Nota privada', private: true)
+    report['evidence'] = [{ 'message_id' => private_note.id, 'observation' => 'Não faz parte da amostra' }]
+
+    expect { described_class.call(access, conversation.display_id) }.to raise_error(JrcNico::RuntimeClient::Error, 'invalid_response')
+  end
+
+  it 'preserves evidence referring to a public message in the supplied source window' do
+    message = create(:message, account: account, conversation: conversation, message_type: :incoming, content: 'Obrigada', private: false)
+    report['evidence'] = [{ 'message_id' => message.id, 'observation' => 'Agradecimento' }]
+
+    result = described_class.call(access, conversation.display_id).fetch(:sentiment_report)
+    expect(result.fetch('evidence')).to eq(report.fetch('evidence'))
+  end
 end

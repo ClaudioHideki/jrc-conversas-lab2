@@ -2,7 +2,7 @@ name: NICO e Broker - candidato coordenado
 
 on:
   push:
-    branches: [codex/nico-broker-coordenado-20261015]
+    branches: [codex/nico-broker-coordenado-20261015, codex/nico-jornada-candidato-20261016]
   workflow_dispatch:
 
 permissions:
@@ -46,9 +46,13 @@ jobs:
           persist-credentials: false
       - name: Confirmar branch e preservar a base de producao
         run: |
-          test "$GITHUB_REF" = refs/heads/codex/nico-broker-coordenado-20261015
-          git merge-base --is-ancestor b58e093dd3a32fe97829a4566660b83ee48b9eca HEAD
-          git diff --check b58e093dd3a32fe97829a4566660b83ee48b9eca HEAD
+          case "$GITHUB_REF" in
+            refs/heads/codex/nico-broker-coordenado-20261015) baseline=b58e093dd3a32fe97829a4566660b83ee48b9eca ;;
+            refs/heads/codex/nico-jornada-candidato-20261016) baseline=98a4be7714be41d33bf9ff52b254ebb773864769 ;;
+            *) echo 'Branch fora das candidatas autorizadas'; exit 1 ;;
+          esac
+          git merge-base --is-ancestor "$baseline" HEAD
+          git diff --check "$baseline" HEAD
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version-file: .nvmrc
@@ -59,7 +63,7 @@ jobs:
         run: |
           pnpm install --frozen-lockfile
           pnpm exec vitest run --config vitest.nico.config.ts --reporter=json --outputFile=/tmp/nico-broker-vitest.json
-          pnpm exec eslint app/javascript/dashboard/components-next/jrcCopilot/JrcCopilotPanel.vue app/javascript/dashboard/components-next/jrcCopilot/specs/nicoQuickUI.spec.js
+          pnpm exec eslint app/javascript/dashboard/components-next/jrcCopilot/JrcCopilotPanel.vue app/javascript/dashboard/components-next/jrcCopilot/NicoAnalysisProvenance.vue app/javascript/dashboard/components-next/jrcCopilot/specs/nicoQuickUI.spec.js
           node -e 'const r=require("/tmp/nico-broker-vitest.json");if(!r.success||r.numFailedTests||r.numPendingTests||r.numTotalTests<83)process.exit(1)'
       - name: Dependencias nativas dos testes Rails
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libpq-dev libvips libvips-dev
@@ -77,6 +81,7 @@ jobs:
       - name: Historico, ferramentas, confirmacao e delegacao NICO
         run: |
           bundle exec rspec spec/services/jrc_nico/operator_session_recent_history_spec.rb \
+            spec/services/jrc_ai/conversation_sentiment_spec.rb \
             spec/services/jrc_nico/operator_session_broker_send_spec.rb \
             spec/services/jrc_nico/broker_send_commit_gate_spec.rb \
             spec/services/jrc_nico/broker_send_coordinator_binding_scope_spec.rb \
@@ -102,6 +107,8 @@ jobs:
       - name: Estilo dos arquivos novos de coordenacao
         run: |
           bundle exec rubocop app/models/jrc_nico/broker_send_operation.rb \
+            app/services/jrc_ai/conversation_sentiment.rb \
+            spec/services/jrc_ai/conversation_sentiment_spec.rb \
             app/services/jrc_nico/broker_send_coordinator.rb \
             app/services/jrc_nico/broker_send_cancellation.rb \
             app/services/jrc_nico/broker_send_commit_gate.rb \
