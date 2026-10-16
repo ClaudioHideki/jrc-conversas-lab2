@@ -9,6 +9,7 @@ import CompanyAddresses from './components/CompanyAddresses.vue';
 import CompanyContacts from './components/CompanyContacts.vue';
 import TimelinePanel from './components/TimelinePanel.vue';
 import RecordsPanel from './components/RecordsPanel.vue';
+import RelationshipMapPanel from './components/RelationshipMapPanel.vue';
 import { useCustomerMaster } from './useCustomerMaster';
 import {
   T,
@@ -143,6 +144,13 @@ const displayValue = (key, value) => {
 const chooseSection = group => {
   section.value = group.key;
   if (!group.tabs.includes(tab.value)) tab.value = group.tabs[0];
+};
+
+const selectRelationKind = kind => {
+  const group = navigationGroups.value.find(item => item.tabs.includes(kind));
+  if (!group) return;
+  section.value = group.key;
+  tab.value = kind;
 };
 
 const load = async () => {
@@ -382,6 +390,11 @@ onBeforeUnmount(() => {
           </div>
 
           <p class="mt-5 text-sm text-n-slate-10">{{ T.permissionsHelp }}</p>
+          <RelationshipMapPanel
+            :company-id="company.id"
+            :company-name="company.name"
+            @select-kind="selectRelationKind"
+          />
           <TimelinePanel
             class="mt-6"
             :resource-id="company.id"

@@ -67,10 +67,11 @@ class JrcCustomers::Visibility
 
   def project_tasks(project_scope)
     scope = JrcProjects::Task.where(account_id: @account.id, project_id: project_scope.select(:id))
-    if @membership.custom_role_id.present? && !Array(@membership.custom_role&.permissions).include?('jrc_projects_task_view')
-      return scope.none
-    end
-    scope
+    project_tasks_visible? ? scope : scope.none
+  end
+
+  def project_tasks_visible?
+    @membership.custom_role_id.blank? || Array(@membership.custom_role&.permissions).include?('jrc_projects_task_view')
   end
 
   def service_desk_context

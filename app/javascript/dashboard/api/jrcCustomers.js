@@ -41,6 +41,10 @@ class CustomerAPI extends ApiClient {
     return axios.get(`${this.url}/companies/${id}/overview`);
   }
 
+  relationships(id) {
+    return axios.get(`${this.url}/companies/${id}/relationships`);
+  }
+
   records(id, params) {
     return axios.get(`${this.url}/companies/${id}/records`, { params });
   }

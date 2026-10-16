@@ -44,6 +44,10 @@ class Api::V1::Accounts::Customers::CompaniesController < Api::V1::Accounts::Cus
     render json: context(company: @company).overview
   end
 
+  def relationships
+    render json: context(company: @company).relationship_map
+  end
+
   def timeline
     value = JrcCustomers::Timeline.new(context: context(company: @company), account: Current.account, user: Current.user)
     render json: value.call(cursor: params[:cursor], limit: params.fetch(:per_page, 30))

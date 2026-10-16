@@ -98,6 +98,13 @@ class JrcCustomers::Customer360
     @company ? "company:#{@company.id}" : "contact:#{@contact.id}"
   end
 
+  def relationship_map
+    visible_sources = sources
+    visible_sources.except!('leads', 'deals', 'proposals', 'activities') unless @visibility.crm?
+    visible_sources.except!('project_tasks') unless @visibility.project_tasks_visible?
+    JrcCustomers::RelationshipMap.new(root_key: resource_key, sources: visible_sources).call
+  end
+
   private
 
   def append_module_timeline_sources(sources)

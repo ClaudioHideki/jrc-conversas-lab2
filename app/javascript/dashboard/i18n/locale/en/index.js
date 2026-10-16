@@ -56,6 +56,7 @@ import whatsappCalling from './whatsappCalling.json';
 import jrcCampaigns from './jrcCampaigns.json';
 import jrcNico from './jrcNico.json';
 import jrcNicoHelpdesk from './jrcNicoHelpdesk.json';
+import jrcCustomerRelations from './jrcCustomerRelations.json';
 
 export default {
   ...jrcOperator,
@@ -64,6 +65,7 @@ export default {
   ...jrcServiceDesk,
   ...jrcNico,
   ...jrcNicoHelpdesk,
+  ...jrcCustomerRelations,
   ...advancedFilters,
   ...agentBots,
   ...agentMgmt,

@@ -1,0 +1,10 @@
+{
+  "CUSTOMER_RELATIONS": {
+    "TITLE": "Mapa de relações do cliente",
+    "DESCRIPTION": "Relações existentes nos módulos aos quais você tem acesso. Esta consulta não altera dados nem inicia automações.",
+    "LOAD": "Consultar relações",
+    "REFERENCE": "Registro #{id}",
+    "SAMPLE": "Amostra de até {limit} registros recentes. Há mais registros na lista completa.",
+    "OPEN_LIST": "Abrir lista completa"
+  }
+}

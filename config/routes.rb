@@ -380,6 +380,7 @@ Rails.application.routes.draw do
               get :duplicates, on: :collection
               member do
                 get :overview
+                get :relationships
                 get :timeline
                 get :records
               end

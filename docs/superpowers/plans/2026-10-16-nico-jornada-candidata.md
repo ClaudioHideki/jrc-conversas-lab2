@@ -9,6 +9,7 @@ Execução direta autorizada pelo usuário, em incrementos. Não alterar produç
 - Testes locais sintéticos; nenhum envio, publicação/vínculo de automação ou alteração de flags no servidor.
 - Reutilizar políticas e serviços atuais. Metadados de origem vêm do servidor, não do modelo.
 - Não alterar digest de produção nem colocar credenciais nos artefatos.
+- Orientação adicional do usuário: somente publicar quando toda a atualização estiver concluída. Depois do primeiro incremento 8859f585 já enviado, manter os próximos desenvolvimentos/testes locais; não fazer novos pushes, publicar imagens ou implantar incrementos isolados.
 
 ## Tarefa 1 — integrar base atual
 
