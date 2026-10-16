@@ -7,7 +7,7 @@
   "compositionCount": 124,
   "editorStatus": {
     "sourceRepository": "ClaudioHideki/BrokerJRCIA",
-    "sourceSha": "fc4ae8a1f3c940dc8ab2d1e369f3b658eab463a3",
+    "sourceSha": "51dbab1f26120a0235f7e6b92ac37c1261573ba1",
     "sourceCommitted": true,
     "buildManifest": "public/jrc-flow-editor/EDITOR-BUILD-MANIFEST.json"
   },
@@ -62,7 +62,7 @@
     {
       "path": "app/javascript/dashboard/routes/dashboard/jrcFlows/nativeEditorBuild.js",
       "baseSha256": null,
-      "sha256": "06f413626ac96519fa0d90025929a612eee287c655484d856940bca193d34b1f",
+      "sha256": "51bce81dc2a5ae1b7cca1aa1437c7517357a027a52f21172d472fafcfa681466",
       "bytes": 161
     },
     {
@@ -590,7 +590,7 @@
     {
       "path": "deploy/jrc/module-composition-input.json",
       "baseSha256": null,
-      "sha256": "5c3741f7839800811d0f863c7e4b0deadbbe75285a45ef0dffb20c75ce7816b4",
+      "sha256": "92efcbead3479bb9f5199a7855b414759dc80a75e6acc4480af2c4c2021f5b70",
       "bytes": 12497
     },
     {
@@ -626,8 +626,8 @@
     {
       "path": "public/jrc-flow-editor/EDITOR-BUILD-MANIFEST.json",
       "baseSha256": null,
-      "sha256": "59f94896260cf2cd6eb60edcb18139d9509440e4873e0607526ec76f1dd62c45",
-      "bytes": 35900
+      "sha256": "a983ee84eb202a34115ae7812f2100c26e1a91bee04abba77c6fdcd09cf21934",
+      "bytes": 36464
     },
     {
       "path": "public/jrc-flow-editor/editor.css",
@@ -638,8 +638,8 @@
     {
       "path": "public/jrc-flow-editor/editor.js",
       "baseSha256": null,
-      "sha256": "a5321737f3a349fa5c3d7be0072818e46176b5dbcb11609dea24a1871657ca99",
-      "bytes": 890757
+      "sha256": "afe9941b70adcc8892b5ca50cf9b8e1af64e6ce0d0d2073c2e758d19ebc70971",
+      "bytes": 896462
     },
     {
       "path": "public/jrc-flow-editor/editor.js.LEGAL.txt",
