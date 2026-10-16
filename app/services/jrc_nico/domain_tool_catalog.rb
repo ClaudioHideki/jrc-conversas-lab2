@@ -1,6 +1,11 @@
 class JrcNico::DomainToolCatalog
   # These are finite commands, never model-provided routes, Ruby names or HTTP verbs.
   TOOLS = {
+    'read_conversation_radar' => [
+      'Consultar radar autorizado do backlog open/pending: espera nativa, espera acima de dez minutos, sem agente/bot e inatividade de 24h. ' \
+      'Não é SLA nem prova de abandono. Até 20 registros por categoria/página; refine inbox_id após 20 páginas',
+      'conversations', false, %w[inbox_id page]
+    ],
     'list_relationship_portfolio' => ['Consultar página de até 20 clientes autorizados da carteira CS e ações prioritárias para preparar o resumo diário', 'relationship', false, %w[query page]],
     'read_relationship_customer' => ['Explicar saúde, riscos e preparar QBR com evidências autorizadas de Relacionamento. Somente leitura; não envia mensagens nem cria concessões', 'relationship', false, %w[assignment_id*]],
     'service_desk_context' => ['Consultar unidades, estado inicial e capacidades reais do Service Desk R2', 'service_desk', false, []],

@@ -97,11 +97,13 @@ RSpec.describe JrcNico::DomainActions do
     expect { executor.call('create_service_ticket', arguments.merge('idempotency_key' => 'model-key')) }.to raise_error(ArgumentError, /Campo/)
   end
 
-  it 'requires an explicit unit grant for admin ticket execution and saved-result access' do
+  it 'requires an explicit unit grant for an admin with an operational custom role and saved-result access' do
     ticket = sd_ticket
     sd_as_admin!
+    role = create(:custom_role, account: sd_account, permissions: JrcServiceDesk::Capabilities::PERMISSIONS)
+    sd_account_user.update!(custom_role: role)
     sd_membership.update!(active: false)
-    expect { executor.call('read_service_ticket', { 'ticket_id' => ticket.id }) }.to raise_error(ActiveRecord::RecordNotFound)
+    expect { executor.call('read_service_ticket', { 'ticket_id' => ticket.id }) }.to raise_error(Pundit::NotAuthorizedError)
 
     sd_membership.update!(active: true)
     result = executor.call('read_service_ticket', { 'ticket_id' => ticket.id })
@@ -109,8 +111,18 @@ RSpec.describe JrcNico::DomainActions do
     expect(JrcNico::DomainAccess.authorize_resource!(access, 'JrcServiceDesk::Ticket', ticket.id)).to eq(ticket)
 
     sd_membership.update!(active: false)
-    expect { executor.call('read_service_ticket', { 'ticket_id' => ticket.id }) }.to raise_error(ActiveRecord::RecordNotFound)
+    expect { executor.call('read_service_ticket', { 'ticket_id' => ticket.id }) }.to raise_error(Pundit::NotAuthorizedError)
     expect { JrcNico::DomainAccess.authorize_resource!(access, 'JrcServiceDesk::Ticket', ticket.id) }.to raise_error(ActiveRecord::RecordNotFound)
+  end
+
+  it 'preserves native administrator read access while still enforcing module revocation' do
+    ticket = sd_ticket
+    sd_as_admin!
+    sd_membership.update!(active: false)
+
+    expect(executor.call('read_service_ticket', 'ticket_id' => ticket.id)[:resources]).to include(['JrcServiceDesk::Ticket', ticket.id])
+    sd_account.disable_features!('jrc_service_desk')
+    expect { executor.call('read_service_ticket', 'ticket_id' => ticket.id) }.to raise_error(Pundit::NotAuthorizedError)
   end
 
   it 'creates a project idempotently and applies native completion requirements' do

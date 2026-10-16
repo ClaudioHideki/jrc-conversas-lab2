@@ -419,6 +419,11 @@ class JrcNico::OperatorSession
     case tool
     when 'count_contacts'
       "Há #{data['count']} contatos cadastrados na conta."
+    when 'read_conversation_radar'
+      counts = data.fetch('categories').transform_values { |group| group.fetch('total') }
+      "Radar em #{data['generated_at']}: #{counts['waiting']} aguardando atendimento, #{counts['waiting_alert']} há pelo menos dez minutos, " \
+        "#{counts['unassigned']} sem agente/bot e #{counts['inactive']} sem atividade há pelo menos 24 horas. " \
+        'As categorias podem se sobrepor. Os limiares não representam SLA nem prova de abandono.'
     when 'list_contacts'
       rows = JrcNico::OperatorContext.contact_rows(data)
       "Contatos encontrados: #{rows.join('; ').presence || 'nenhum'}."

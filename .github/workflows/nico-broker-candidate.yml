@@ -65,6 +65,11 @@ jobs:
           pnpm exec vitest run --config vitest.nico.config.ts --reporter=json --outputFile=/tmp/nico-broker-vitest.json
           pnpm exec eslint app/javascript/dashboard/components-next/jrcCopilot/JrcCopilotPanel.vue app/javascript/dashboard/components-next/jrcCopilot/NicoAnalysisProvenance.vue app/javascript/dashboard/components-next/jrcCopilot/specs/nicoQuickUI.spec.js
           node -e 'const r=require("/tmp/nico-broker-vitest.json");if(!r.success||r.numFailedTests||r.numPendingTests||r.numTotalTests<83)process.exit(1)'
+      - name: Mapa Customer360 e troca de Account
+        run: |
+          pnpm exec vitest run app/javascript/dashboard/routes/dashboard/jrcCustomers/components/RelationshipMapPanel.spec.js app/javascript/dashboard/routes/dashboard/jrcCustomers/useCustomerMaster.spec.js --maxWorkers=1 --minWorkers=1 --reporter=json --outputFile=/tmp/customer-relations-vitest.json
+          pnpm exec eslint app/javascript/dashboard/routes/dashboard/jrcCustomers/components/RelationshipMapPanel.vue app/javascript/dashboard/routes/dashboard/jrcCustomers/components/RelationshipMapPanel.spec.js
+          node -e 'const r=require("/tmp/customer-relations-vitest.json");if(!r.success||r.numFailedTests||r.numPendingTests||r.numTotalTests<8)process.exit(1)'
       - name: Dependencias nativas dos testes Rails
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libpq-dev libvips libvips-dev
       - uses: ruby/setup-ruby@v1
@@ -85,6 +90,12 @@ jobs:
             spec/services/jrc_nico/operator_session_broker_send_spec.rb \
             spec/services/jrc_nico/broker_send_commit_gate_spec.rb \
             spec/services/jrc_nico/broker_send_coordinator_binding_scope_spec.rb \
+            spec/services/jrc_nico/conversation_radar_spec.rb \
+            spec/services/jrc_nico/domain_actions_spec.rb \
+            spec/enterprise/services/enterprise/conversations/permission_filter_service_spec.rb \
+            spec/services/jrc_customers/customer360_relationship_map_spec.rb \
+            spec/services/jrc_customers/timeline_spec.rb \
+            spec/requests/api/v1/accounts/customer_relationships_spec.rb \
             spec/services/jrc_nico/context_builder_spec.rb \
             spec/services/jrc_nico/commercial_delegation_spec.rb \
             spec/services/jrc_nico/commercial_workflow_spec.rb \
@@ -113,6 +124,12 @@ jobs:
             app/services/jrc_nico/broker_send_cancellation.rb \
             app/services/jrc_nico/broker_send_commit_gate.rb \
             app/services/jrc_nico/broker_send_binding.rb \
+            app/services/jrc_nico/conversation_radar.rb \
+            spec/services/jrc_nico/conversation_radar_spec.rb \
+            app/services/jrc_customers/relationship_map.rb \
+            app/services/jrc_customers/visibility.rb \
+            spec/services/jrc_customers/customer360_relationship_map_spec.rb \
+            spec/requests/api/v1/accounts/customer_relationships_spec.rb \
             app/jobs/jrc_nico/broker_send_job.rb \
             db/migrate/20261015130000_create_nico_broker_send_operations.rb \
             spec/services/jrc_nico/operator_session_broker_send_spec.rb \

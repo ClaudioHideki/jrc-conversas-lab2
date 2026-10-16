@@ -19,6 +19,7 @@ class JrcNico::DomainActions
 
     @args = arguments
     case name
+    when 'read_conversation_radar' then JrcNico::ConversationRadar.new(access: @access, arguments: @args).call
     when 'list_relationship_portfolio' then relationship_portfolio
     when 'read_relationship_customer' then relationship_customer
     when 'service_desk_context' then service_desk_context

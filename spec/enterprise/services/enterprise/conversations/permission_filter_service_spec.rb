@@ -29,6 +29,29 @@ RSpec.describe Enterprise::Conversations::PermissionFilterService do
         expect(result).to include(another_assigned_conversation)
         expect(result.count).to eq(4)
       end
+
+      it 'applies the same participating custom-role restriction as the resource policy' do
+        role = create(:custom_role, account: account, permissions: ['conversation_participating_manage'])
+        membership = account.account_users.find_by!(user: admin)
+        membership.update!(custom_role: role)
+        own = create(:conversation, account: account, inbox: inbox2, assignee: admin)
+        create(:conversation_participant, account: account, conversation: another_assigned_conversation, user: admin)
+
+        result = Conversations::PermissionFilterService.new(account.conversations, admin, account).perform
+
+        expect(result).to contain_exactly(own, another_assigned_conversation)
+        policy_context = { account: account, user: admin, account_user: membership }
+        expect(result.all? { |record| ConversationPolicy.new(policy_context, record).show? }).to be(true)
+      end
+
+      it 'preserves account-wide access for an administrator custom role with conversation_manage' do
+        role = create(:custom_role, account: account, permissions: ['conversation_manage'])
+        account.account_users.find_by!(user: admin).update!(custom_role: role)
+
+        result = Conversations::PermissionFilterService.new(account.conversations, admin, account).perform
+
+        expect(result).to contain_exactly(assigned_conversation, unassigned_conversation, another_assigned_conversation, another_inbox_conversation)
+      end
     end
 
     context 'when user is a regular agent' do
