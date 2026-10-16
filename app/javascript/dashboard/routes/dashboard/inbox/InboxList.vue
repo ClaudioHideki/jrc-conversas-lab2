@@ -29,7 +29,6 @@ const TEXT = Object.freeze({
 });
 
 const page = ref(1);
-const conversationsPerPage = 25;
 const channelFilter = ref(route.query.channel || 'all');
 const isListExpanded = ref(false);
 
@@ -37,6 +36,7 @@ const inboxes = useMapGetter('inboxes/getAllInboxes');
 const inboxById = useMapGetter('inboxes/getInboxById');
 const allOpenConversations = useMapGetter('getAllStatusChats');
 const isLoading = useMapGetter('getChatListLoadingStatus');
+const hasEndReached = useMapGetter('conversationPage/getHasEndReached');
 
 const conversationFilters = computed(() => ({
   assigneeType: wootConstants.ASSIGNEE_TYPE.ALL,
@@ -86,8 +86,7 @@ const layoutToggleTitle = computed(() =>
 );
 const canLoadMore = computed(
   () =>
-    !isLoading.value &&
-    conversations.value.length >= page.value * conversationsPerPage
+    !isLoading.value && !hasEndReached.value(wootConstants.ASSIGNEE_TYPE.ALL)
 );
 
 const fetchConversations = async ({ reset = false } = {}) => {
