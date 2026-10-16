@@ -74,6 +74,26 @@ class JrcBroker::Client
     request(:put, connection_path(id, 'agents'), body: { agentIds: agent_ids }, key: key)
   end
 
+  def conversation_attendance(id, conversation_id)
+    request(:get, conversation_path(id, conversation_id, 'attendance'))
+  end
+
+  def start_conversation_takeover(id, conversation_id, body, key:)
+    request(:post, conversation_path(id, conversation_id, 'takeovers'), body: body, key: key)
+  end
+
+  def conversation_takeover(id, conversation_id, takeover_id)
+    request(:get, conversation_path(id, conversation_id, "takeovers/#{identifier!(takeover_id)}"))
+  end
+
+  def complete_conversation_takeover(id, conversation_id, takeover_id, message_id:)
+    request(:post, conversation_path(id, conversation_id, "takeovers/#{identifier!(takeover_id)}/complete"), body: { messageId: message_id })
+  end
+
+  def cancel_conversation_takeover(id, conversation_id, request_id:, fingerprint:)
+    request(:post, conversation_path(id, conversation_id, 'takeovers/cancel'), body: { requestId: request_id, fingerprint: fingerprint })
+  end
+
   private
 
   def identifier!(id)
@@ -84,6 +104,14 @@ class JrcBroker::Client
 
   def connection_path(id, action)
     "/connections/#{identifier!(id)}/#{action}"
+  end
+
+  def conversation_path(id, conversation_id, action)
+    unless conversation_id.is_a?(Integer) && conversation_id.positive? && conversation_id <= 9_007_199_254_740_991
+      raise Error.new('JRC_BROKER_INVALID_REQUEST', status: 400)
+    end
+
+    connection_path(id, "conversations/#{conversation_id}/#{action}")
   end
 
   def request(method, path, body: nil, key: nil)

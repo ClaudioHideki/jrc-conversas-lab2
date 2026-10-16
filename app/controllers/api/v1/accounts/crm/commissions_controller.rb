@@ -13,7 +13,7 @@ module Api::V1::Accounts::Crm
     end
 
     def summary
-      scope = filtered_scope(relation: crm_scope.jrc_crm_sales_commissions)
+      scope = filtered_scope(relation: corporate_records(:jrc_crm_sales_commissions))
       render json: {
         commissionable_base_cents: scope.where.not(status: 'reversed').sum(:base_cents),
         forecast_cents: scope.where(status: %w[forecast pending_approval]).sum(:commission_cents),
@@ -27,7 +27,7 @@ module Api::V1::Accounts::Crm
     end
 
     def history
-      scope = filtered_scope(relation: crm_scope.jrc_crm_sales_commissions)
+      scope = filtered_scope(relation: corporate_records(:jrc_crm_sales_commissions))
       allowed_ids = scope.pluck(:id)
       events = JrcCrm::AuditEvent
                .where(account_id: crm_scope.id, resource_type: 'JrcCrm::SalesCommission', resource_id: allowed_ids)
@@ -38,7 +38,7 @@ module Api::V1::Accounts::Crm
     def create
       ensure_crm_admin!
       attributes = commission_params.to_h
-      order = crm_scope.jrc_crm_sales_orders.find(attributes.delete('sales_order_id'))
+      order = corporate_records(:jrc_crm_sales_orders).find(attributes.delete('sales_order_id'))
       user = crm_scope.users.find(attributes.delete('user_id'))
       commission = crm_scope.jrc_crm_sales_commissions.create!(attributes.merge(sales_order: order, user: user))
       audit_commission!(commission, 'commission_created', {}, serialize(commission))
@@ -47,34 +47,25 @@ module Api::V1::Accounts::Crm
 
     def update
       ensure_crm_admin!
-      commission = crm_scope.jrc_crm_sales_commissions.find(params[:id])
+      commission = corporate_records(:jrc_crm_sales_commissions).find(params[:id])
       commission.with_lock do
-      before = serialize(commission)
-      previous_status = commission.status
-      attributes = commission_params.except(:sales_order_id, :user_id).to_h
-      reason = attributes.delete('reversal_reason').to_s.strip
-      if attributes['status'] == 'reversed' && commission.status != 'reversed' && reason.blank?
-        commission.errors.add(:base, 'Informe o motivo do estorno.')
-        raise ActiveRecord::RecordInvalid, commission
-      end
-      attributes['notes'] = [commission.notes.presence, "Estorno: #{reason}"].compact.join("\n") if reason.present?
-      validate_transition!(commission, attributes['status']) if attributes['status'].present?
-      attributes[:released_at] = Time.current if attributes['status'] == 'released' && commission.status != 'released'
-      attributes[:paid_at] = Time.current if attributes['status'] == 'paid' && commission.status != 'paid'
-      if manual_amount_change?(attributes, commission)
-        result = JrcCrm::CommissionRulesEngine.new(
-          rules: { base: 'total_cents', rate_percent: attributes.fetch('rate_percent', commission.rate_percent) },
-          sale: { total_cents: attributes.fetch('base_cents', commission.base_cents) },
-          share_percent: attributes.fetch('share_percent', commission.share_percent)
-        ).call
-        attributes[:commission_cents] = result[:commission_cents]
-        attributes[:calculation] = result[:calculation].deep_stringify_keys.merge(
-          'manual_adjustment' => true, 'adjusted_by_id' => Current.user&.id)
-      end
-      commission.update!(attributes)
-      commission.reload
-      event_type = previous_status != commission.status ? 'commission_status_changed' : 'commission_updated'
-      audit_commission!(commission, event_type, before, serialize(commission))
+        before = serialize(commission)
+        previous_status = commission.status
+        attributes = commission_params.except(:sales_order_id, :user_id).to_h
+        reason = attributes.delete('reversal_reason').to_s.strip
+        if attributes['status'] == 'reversed' && commission.status != 'reversed' && reason.blank?
+          commission.errors.add(:base, 'Informe o motivo do estorno.')
+          raise ActiveRecord::RecordInvalid, commission
+        end
+        attributes['notes'] = [commission.notes.presence, "Estorno: #{reason}"].compact.join("\n") if reason.present?
+        validate_transition!(commission, attributes['status']) if attributes['status'].present?
+        attributes[:released_at] = Time.current if attributes['status'] == 'released' && commission.status != 'released'
+        attributes[:paid_at] = Time.current if attributes['status'] == 'paid' && commission.status != 'paid'
+        recalculate_manual_amount!(attributes, commission) if manual_amount_change?(attributes, commission)
+        commission.update!(attributes)
+        commission.reload
+        event_type = previous_status == commission.status ? 'commission_updated' : 'commission_status_changed'
+        audit_commission!(commission, event_type, before, serialize(commission))
       end
       render json: serialize(commission)
     end
@@ -82,7 +73,8 @@ module Api::V1::Accounts::Crm
     private
 
     def base_scope
-      scope = crm_scope.jrc_crm_sales_commissions.includes(:user, :commission_program, sales_order: :order_items).order(created_at: :desc)
+      scope = corporate_records(:jrc_crm_sales_commissions).includes(:user, :commission_program,
+                                                                     sales_order: :order_items).order(created_at: :desc)
       scope = scope.where(user_id: Current.user.id) unless crm_admin?
       scope
     end
@@ -117,6 +109,18 @@ module Api::V1::Accounts::Crm
 
       commission.errors.add(:status, "transição #{commission.status} → #{target} não permitida")
       raise ActiveRecord::RecordInvalid, commission
+    end
+
+    def recalculate_manual_amount!(attributes, commission)
+      result = JrcCrm::CommissionRulesEngine.new(
+        rules: { base: 'total_cents', rate_percent: attributes.fetch('rate_percent', commission.rate_percent) },
+        sale: { total_cents: attributes.fetch('base_cents', commission.base_cents) },
+        share_percent: attributes.fetch('share_percent', commission.share_percent)
+      ).call
+      attributes[:commission_cents] = result[:commission_cents]
+      attributes[:calculation] = result[:calculation].deep_stringify_keys.merge(
+        'manual_adjustment' => true, 'adjusted_by_id' => Current.user&.id
+      )
     end
 
     def manual_amount_change?(attributes, commission)

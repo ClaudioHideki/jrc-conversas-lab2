@@ -88,6 +88,8 @@
     "decision": "Decision",
     "decisions": "Recorded decisions",
     "reason": "Required reason",
+    "absenceAuthorization": "Formal absence or substitution authorization reference",
+    "gratuityDraft": "Prepare gratuity draft: Jose → Karen",
     "noDecision": "There is no authorized decision available to you for this request.",
     "saved": "Saved and reloaded from the server.",
     "concurrent": "Another operation changed this request. Its current version has been reloaded. Review it before sending a new decision.",
@@ -177,6 +179,9 @@
     "window_expired": "Expired — history preserved",
     "window_unknown": "Validity unavailable",
     "author": "Author",
-    "groupScope": "Account-wide scope"
+    "groupScope": "Account-wide scope",
+    "status_GRATUITY_POLICY_REQUIRED": "Gratuity blocked: configure and enable enforcement after validation",
+    "status_GRATUITY_VALUE_PENDING": "Gratuity impact pending an official reference",
+    "status_GRATUITY_AUTHORITIES_PENDING": "Principals and formal authorization pending"
   }
 }

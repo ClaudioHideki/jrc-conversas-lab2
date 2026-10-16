@@ -16,17 +16,16 @@ class JrcRelationship::AssignmentPolicy < JrcRelationship::ModulePolicy
       boundary = JrcRelationship::ModulePolicy.new(user_context, account)
       relation = scope.where(account_id: account.id)
       return relation.none unless boundary.access?
+
+      relation = JrcCrm::OrganizationalVisibility.new(account: account, user: user, relation: relation, include_company: false).call
       return relation if boundary.admin?
 
-      relation = if boundary.team?
-                   ids = account.teams.joins(:team_members).where(team_members: { user_id: user.id }).select(:id)
-                   relation.where(owner_id: user.id).or(relation.where(team_id: ids)).or(relation.where(owner_id: nil, team_id: nil))
-                 else
-                   relation.where(owner_id: user.id)
-                 end
-      # Assignment.company is the served customer; organizational Company is
-      # internal. Only its native business_unit is an operational boundary here.
-      JrcCrm::OrganizationalVisibility.new(account: account, user: user, relation: relation, include_company: false).call
+      if boundary.team?
+        ids = account.teams.joins(:team_members).where(team_members: { user_id: user.id }).select(:id)
+        relation.where(owner_id: user.id).or(relation.where(team_id: ids)).or(relation.where(owner_id: nil, team_id: nil))
+      else
+        relation.where(owner_id: user.id)
+      end
     end
   end
 end

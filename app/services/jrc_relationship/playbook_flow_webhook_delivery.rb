@@ -16,12 +16,13 @@ class JrcRelationship::PlaybookFlowWebhookDelivery
     claimed = with_current_sources { claim! }
     return unless claimed
 
-    completed = with_current_sources { dispatch! }
+    response = dispatch!(claimed)
+    completed = with_current_sources { complete!(response) }
     JrcFlows::Runner.new(@run.reload).perform if completed
   rescue JrcRelationship::PlaybookFlowSourceDenied, Pundit::NotAuthorizedError, ActiveRecord::RecordNotFound, ArgumentError, KeyError
     halt!(claimed ? 'unknown' : 'cancelled')
-  rescue StandardError => error
-    Rails.logger.warn("JRC Flow webhook run=#{@run.id} node=#{@node_id} failed: #{error.class}")
+  rescue StandardError => e
+    Rails.logger.warn("JRC Flow webhook run=#{@run.id} node=#{@node_id} failed: #{e.class}")
     halt!('unknown')
   end
 
@@ -31,7 +32,7 @@ class JrcRelationship::PlaybookFlowWebhookDelivery
       if record['state'] == 'queued'
         JrcRelationship::PlaybookFlowWebhookJob.perform_later(run.id, node_id)
       elsif record['state'] == 'dispatching' && Time.iso8601(record.fetch('claimed_at')) < 2.minutes.ago
-        new(run, node_id).send(:halt!, 'unknown')
+        new(run, node_id).send(:halt!, 'unknown', expected_claim: record['claim'])
       end
     end
   rescue ArgumentError, KeyError
@@ -81,17 +82,22 @@ class JrcRelationship::PlaybookFlowWebhookDelivery
 
     @claim = SecureRandom.uuid
     @journal.update!(@node_id, state: 'dispatching', claim: @claim, claimed_at: Time.current.iso8601(6))
-    true
+    node = @run.graph.fetch('nodes').find { |item| item['id'] == @node_id }
+    { 'url' => node.fetch('data').fetch('url'), 'payload' => record.fetch('payload').deep_dup }
   end
 
-  def dispatch!
+  def dispatch!(intent)
+    raise ArgumentError, 'playbook_flow_webhook_requires_committed_intent' if JrcFlowRun.connection.transaction_open?
+
+    fetch_response(intent.fetch('url'), intent.fetch('payload'))
+  end
+
+  def complete!(response)
     record = @journal.verify_integrity!.fetch(@node_id)
     return false unless record['state'] == 'dispatching' && record['claim'] == @claim && @run.status == 'waiting' && @run.node_id == @node_id
 
-    node = @run.graph.fetch('nodes').find { |item| item['id'] == @node_id }
-    response = fetch_response(node.fetch('data').fetch('url'), record.fetch('payload'))
     @journal.update!(@node_id, state: 'response_received', response_digest: Digest::SHA256.hexdigest(response),
-                              completed_at: Time.current.iso8601(6))
+                               completed_at: Time.current.iso8601(6))
     @run.variables['webhook_response'] = response
     edge = @run.graph.fetch('edges').find { |item| item['source'] == @node_id && item['port'] == 'next' }
     raise ArgumentError, 'playbook_flow_webhook_edge_missing' unless edge
@@ -103,17 +109,17 @@ class JrcRelationship::PlaybookFlowWebhookDelivery
   def fetch_response(url, payload)
     response = nil
     SafeFetch.fetch(url, method: :post, body: payload.to_json, max_bytes: 100_000, validate_content_type: false, read_timeout: 10,
-                        headers: { 'Content-Type' => 'application/json', 'Idempotency-Key' => "jrc-flow-#{@run.id}-#{@node_id}" }) do |result|
+                         headers: { 'Content-Type' => 'application/json', 'Idempotency-Key' => "jrc-flow-#{@run.id}-#{@node_id}" }) do |result|
       response = result.tempfile.read.first(10_000)
     end
     response
   end
 
-  def halt!(state)
+  def halt!(state, expected_claim: @claim)
     @run.with_lock do
       record = @journal.verify_integrity![@node_id]
       return unless record && %w[queued dispatching].include?(record['state'])
-      return if record['state'] == 'dispatching' && @claim && record['claim'] != @claim
+      return if record['state'] == 'dispatching' && record['claim'] != expected_claim
 
       @journal.update!(@node_id, state: state, completed_at: Time.current.iso8601(6))
       @run.update!(status: 'paused', wake_at: nil, finished_at: Time.current, error: 'playbook_flow_webhook_outcome_unconfirmed')

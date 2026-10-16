@@ -4,7 +4,7 @@ module Api::V1::Accounts::Crm
     before_action :set_program, only: %i[show update]
 
     def index
-      programs = crm_scope.jrc_crm_commission_programs.includes(:business_unit).order(active: :desc, created_at: :desc)
+      programs = corporate_records(:jrc_crm_commission_programs).includes(:business_unit).order(active: :desc, created_at: :desc)
       render json: programs.map { |program| serialize(program) }
     end
 
@@ -26,7 +26,7 @@ module Api::V1::Accounts::Crm
       rules = raw_rules
       sale = raw_sale
       if params[:sales_order_id].present?
-        order = crm_scope.jrc_crm_sales_orders.includes(:order_items).find(params[:sales_order_id])
+        order = corporate_records(:jrc_crm_sales_orders).includes(:order_items).find(params[:sales_order_id])
         sale = {
           total_cents: order.total_cents,
           monthly_cents: order.monthly_cents,
@@ -44,7 +44,7 @@ module Api::V1::Accounts::Crm
     private
 
     def set_program
-      @program = crm_scope.jrc_crm_commission_programs.find(params[:id])
+      @program = corporate_records(:jrc_crm_commission_programs).find(params[:id])
     end
 
     def program_params

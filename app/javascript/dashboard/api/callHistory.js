@@ -10,6 +10,17 @@ class CallHistoryAPI extends ApiClient {
   get(params = {}) {
     return axios.get(this.url, { params });
   }
+
+  recording(id, options = {}) {
+    return axios.get(`${this.url}/${id}/recording`, {
+      responseType: 'blob',
+      signal: options.signal,
+    });
+  }
+
+  recordingMetadata(id) {
+    return axios.get(`${this.url}/${id}/recording_metadata`);
+  }
 }
 
 export default new CallHistoryAPI();

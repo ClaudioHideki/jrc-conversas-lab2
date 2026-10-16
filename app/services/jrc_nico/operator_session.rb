@@ -42,6 +42,10 @@ class JrcNico::OperatorSession
   end
 
   def execute(command, delegation: nil)
+    if delegation.nil? && command.broker_send_operation
+      return JrcNico::BrokerSendCoordinator.confirm(access: access, command: command)
+    end
+
     if delegation
       delegation.conversation.with_lock { execute_authorized(command, delegation: delegation) }
     else
@@ -89,6 +93,8 @@ class JrcNico::OperatorSession
   end
 
   def cancel(command)
+    return JrcNico::BrokerSendCancellation.request(access: access, command: command) if command.broker_send_operation
+
     command.with_lock do
       command.update!(status: 'cancelled', reply: 'Ação cancelada.') if %w[awaiting_confirmation browser_pending].include?(command.status)
     end
@@ -456,7 +462,7 @@ class JrcNico::OperatorSession
   end
 
   def public_history(conversation)
-    conversation.messages.where(private: false, message_type: [:incoming, :outgoing]).order(id: :desc).limit(30).reverse.map do |message|
+    conversation.messages.where(private: false, message_type: [:incoming, :outgoing]).reorder(id: :desc).limit(30).reverse.map do |message|
       { role: message.incoming? ? 'customer' : 'assistant', content: message.content.to_s.first(1000) }
     end
   end
@@ -466,8 +472,16 @@ class JrcNico::OperatorSession
     raise ArgumentError, 'Esta ferramenta é de consulta.' unless definition[:confirmation]
 
     require_recipient_choice!(command, name, arguments)
-    command.update!(tool: name, arguments: arguments, status: 'awaiting_confirmation', reply: reply.presence || definition[:description])
-    session.with_lock { session.append('assistant', "Prévia: #{command.reply}") }
+    coordinated = JrcNico::BrokerSendCoordinator.prepare(access: access, command: command, arguments: arguments) if name == 'send_message'
+    command.update!(tool: name, arguments: arguments, status: 'awaiting_confirmation',
+                    reply: coordinated ? coordinated[:reply] : reply.presence || definition[:description], result: coordinated ? coordinated[:result] : {})
+    session.with_lock do
+      if coordinated
+        ids = (Array(session.context['conversation_ids']) + [arguments.fetch('conversation_id')]).uniq
+        session.update!(context: session.context.merge('conversation_ids' => ids))
+      end
+      session.append('assistant', "Prévia: #{command.reply}")
+    end
   end
 
   def remember_result(tool, result, command:, remember_selection: true, source_tool: true)

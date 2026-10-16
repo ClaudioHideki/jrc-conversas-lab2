@@ -18,7 +18,7 @@ class Api::V1::Accounts::Approvals::DelegationsController < Api::V1::Accounts::A
 
   def create
     values = params.require(:delegation).permit(:policy_version_id, :step_code, :principal_id, :delegate_id,
-                                                :reason, :starts_at, :ends_at, actions: []).to_h.symbolize_keys
+                                                :reason, :absence_authorization, :starts_at, :ends_at, actions: []).to_h.symbolize_keys
     values[:starts_at] = Time.iso8601(values.fetch(:starts_at))
     values[:ends_at] = Time.iso8601(values.fetch(:ends_at))
     record = service(JrcApprovals::Delegations).create!(**values)

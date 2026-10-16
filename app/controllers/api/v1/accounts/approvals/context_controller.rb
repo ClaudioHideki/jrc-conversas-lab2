@@ -7,7 +7,9 @@ class Api::V1::Accounts::Approvals::ContextController < Api::V1::Accounts::Appro
       capabilities = authorized_capabilities(scope)
       scope.merge(capabilities: capabilities) if capabilities.any?
     end
-    render json: { account_id: Current.account.id, member_id: member.id, scopes: rows }
+    settings = Current.account.custom_attributes.fetch(JrcCrm::OrganizationalStructureService::SETTINGS_KEY, {})
+    render json: { account_id: Current.account.id, member_id: member.id, group_name: settings['group_name'].presence || Current.account.name,
+                   scopes: rows }
   end
 
   private

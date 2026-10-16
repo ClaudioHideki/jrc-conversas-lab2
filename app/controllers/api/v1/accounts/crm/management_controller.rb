@@ -13,8 +13,7 @@ module Api
             end_date = params[:end_date] ? Date.parse(params[:end_date]) : Date.current
 
             users_metrics = crm_scope.users.map do |user|
-              metrics = JrcCrm::MetricsCalculatorService.new(
-                account: crm_scope,
+              metrics = crm_metrics(
                 owner_id: user.id,
                 start_date: start_date,
                 end_date: end_date

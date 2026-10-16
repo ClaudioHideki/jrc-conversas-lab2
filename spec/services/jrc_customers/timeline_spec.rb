@@ -36,9 +36,16 @@ RSpec.describe JrcCustomers::Timeline do
     expect { other_service.call(cursor: cursor) }.to raise_error(described_class::InvalidCursor)
   end
   it 'does not invent data for missing modules' do
+    account.disable_features!('jrc_crm')
     overview = context.overview
     expect(overview[:capabilities]).to include(service_desk: false, projects: false, contracts: false, central_sip_cdr: false)
     expect(overview).not_to have_key(:tickets_open)
     expect(overview).not_to have_key(:contracts_active)
+  end
+
+  it 'reports native contracts as available with a real zero when CRM is enabled' do
+    expect(context.overview[:capabilities]).to include(crm: true, contracts: true)
+    expect(context.overview[:contracts_active]).to eq(0)
+    expect(context.contracts).to be_empty
   end
 end

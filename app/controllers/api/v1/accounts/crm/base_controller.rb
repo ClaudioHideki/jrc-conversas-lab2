@@ -5,6 +5,7 @@ module Api
         class BaseController < Api::V1::Accounts::BaseController
           before_action :ensure_crm_enabled
           before_action :ensure_crm_access
+          before_action :authorize_submitted_corporate_units!
           around_action :use_account_timezone
 
           rescue_from ActiveRecord::StaleObjectError, with: :handle_stale_object_conflict
@@ -40,9 +41,7 @@ module Api
           end
 
           def visible_to_current_user(relation, owner_column: :owner_id)
-            return relation if crm_admin?
-
-            legacy_visible = relation.where(owner_column => Current.user.id)
+            legacy_visible = crm_admin? ? relation : relation.where(owner_column => Current.user.id)
             JrcCrm::OrganizationalVisibility.new(account: crm_scope, user: Current.user, relation: legacy_visible).call
           end
 
@@ -50,9 +49,57 @@ module Api
             raise Pundit::NotAuthorizedError unless crm_admin?
           end
 
-          def use_account_timezone(&block)
+          def corporate_scope(relation)
+            JrcCrm::CorporateCoverage.new(account: crm_scope, user: Current.user).restrict(relation)
+          end
+
+          def corporate_records(association)
+            corporate_scope(crm_scope.public_send(association))
+          end
+
+          def corporate_product(id, unit:)
+            JrcCrm::CorporateIssuer.product!(account: crm_scope, user: Current.user, id: id, unit: unit)
+          end
+
+          def crm_metrics(**)
+            JrcCrm::MetricsCalculatorService.new(account: crm_scope, actor: Current.user, **)
+          end
+
+          def goal_progress(goal, user_id: crm_admin? ? nil : Current.user.id)
+            JrcCrm::GoalProgressService.new(goal: goal, actor: Current.user, user_id: user_id)
+          end
+
+          def authorize_submitted_corporate_units!
+            return unless %w[create update preview].include?(action_name)
+            return if controller_name == 'organization_structure'
+
+            corporate_parameter_nodes.each { |node| authorize_corporate_unit_node!(node) }
+            authorize_queue_company!
+          end
+
+          def corporate_parameter_nodes
+            keys = %w[proposal sales_order product deal lead goal commission_program operations_queue]
+            nodes = [params, *keys.filter_map { |key| params[key] }]
+            nodes + nodes.filter_map { |node| node[:metadata] if node.respond_to?(:permit) }
+          end
+
+          def authorize_corporate_unit_node!(node)
+            return unless node.respond_to?(:permit) && node[:business_unit_id].present?
+
+            unit = crm_scope.jrc_crm_business_units.find(node[:business_unit_id])
+            JrcCrm::CorporateIssuer.authorize!(account: crm_scope, user: Current.user, unit: unit)
+          end
+
+          def authorize_queue_company!
+            queue = params[:operations_queue]
+            return if queue&.dig(:operating_company_id).blank?
+            raise Pundit::NotAuthorizedError unless JrcCrm::CorporateCoverage.new(account: crm_scope, user: Current.user)
+                                                                             .company_allowed?(queue[:operating_company_id])
+          end
+
+          def use_account_timezone(&)
             timezone = Time.find_zone(Current.account.reporting_timezone) || Time.zone
-            Time.use_zone(timezone, &block)
+            Time.use_zone(timezone, &)
           end
 
           def parse_crm_time(value)

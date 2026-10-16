@@ -1186,7 +1186,7 @@ const menuItems = computed(() => {
           label: 'Flows',
           icon: 'i-lucide-workflow',
           to: accountScopedRoute('jrc_flows'),
-          activeOn: ['jrc_flows'],
+          activeOn: ['jrc_flows', 'jrc_flows_native'],
           ignoreFeatureFlag: true,
         }
       : null,

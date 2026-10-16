@@ -173,9 +173,27 @@ const unreadNotices = computed(() =>
 );
 const quickReply = computed(
   () =>
-    state.value.messages.filter(message => message.role === 'assistant').at(-1)
-      ?.content || ''
+    (activeCommand.value?.result?.broker_send
+      ? activeCommand.value.reply
+      : state.value.messages
+          .filter(message => message.role === 'assistant')
+          .at(-1)?.content) || ''
 );
+const brokerReceipt = computed(() => latest.value?.result?.broker_send);
+const brokerDeliveryLabel = computed(() => {
+  switch (brokerReceipt.value?.delivery) {
+    case 'sent':
+      return t('JRC_NICO.OPERATOR.BROKER_DELIVERY.sent');
+    case 'delivered':
+      return t('JRC_NICO.OPERATOR.BROKER_DELIVERY.delivered');
+    case 'read':
+      return t('JRC_NICO.OPERATOR.BROKER_DELIVERY.read');
+    case 'failed':
+      return t('JRC_NICO.OPERATOR.BROKER_DELIVERY.failed');
+    default:
+      return t('JRC_NICO.OPERATOR.BROKER_DELIVERY.unknown');
+  }
+});
 const receipts = computed(() =>
   state.value.commands
     .filter(c => c.status === 'succeeded' && c.result?.record?.id)
@@ -784,6 +802,22 @@ onBeforeUnmount(() => {
           {{ t(`JRC_NICO.OPERATOR.STATES.${command.status}`) }}
         </p>
         <p class="text-sm">{{ toolLabel(command) }}</p>
+        <p v-if="command.result?.broker_send" class="text-sm" role="status">
+          {{ command.reply }}
+        </p>
+        <button
+          v-if="command.result?.broker_send?.conversation_id"
+          type="button"
+          class="text-xs text-n-blue-11"
+          @click="openConversation(command.result.broker_send.conversation_id)"
+        >
+          {{
+            t('JRC_NICO.OPERATOR.BROKER_RECIPIENT', {
+              contact: command.result.broker_send.contact,
+              conversation: command.result.broker_send.conversation_id,
+            })
+          }}
+        </button>
         <p
           v-if="command.status === 'awaiting_confirmation'"
           class="text-xs text-n-slate-11"
@@ -831,7 +865,7 @@ onBeforeUnmount(() => {
             v-if="
               ['awaiting_confirmation', 'browser_pending'].includes(
                 command.status
-              )
+              ) || command.result?.broker_send?.cancelable === true
             "
             type="button"
             :disabled="busy"
@@ -842,6 +876,24 @@ onBeforeUnmount(() => {
           </button>
         </div>
       </article>
+      <section
+        v-if="brokerReceipt?.message_id"
+        data-testid="nico-broker-message-receipt"
+        class="space-y-2 rounded-xl border border-n-weak p-3 text-sm"
+        role="status"
+      >
+        <p>{{ latest.reply }}</p>
+        <p class="font-medium">
+          {{ brokerDeliveryLabel }}
+        </p>
+        <button
+          type="button"
+          class="text-xs text-n-blue-11"
+          @click="openConversation(brokerReceipt.conversation_id)"
+        >
+          {{ label('OPEN_CONVERSATION') }}
+        </button>
+      </section>
       <button
         v-if="latest?.status === 'succeeded' && latest.result?.route_name"
         type="button"

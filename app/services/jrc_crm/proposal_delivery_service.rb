@@ -13,8 +13,10 @@ module JrcCrm
       @idempotency_key = idempotency_key
     end
 
-    def call
-      @proposal.with_lock { deliver_under_lock }
+    def call(delivery: nil)
+      @delivery = delivery&.deep_stringify_keys
+      @target = nil
+      @proposal.with_lock(requires_new: true) { deliver_under_lock }
     end
 
     private
@@ -30,6 +32,14 @@ module JrcCrm
       end
 
       gate = JrcApprovals::CommercialGate.check!(resource: @proposal, user: @actor, key: 'crm.proposal_send')
+      if @delivery
+        raise ArgumentError, 'Canal de envio inválido' unless @channel == 'whatsapp'
+        raise JrcApprovals::Error, 'IDEMPOTENCY_KEY_REQUIRED' if @idempotency_key.blank?
+
+        @target = JrcCrm::ProposalDeliveryTarget.new(proposal: @proposal, actor: @actor,
+                                                     delivery: @delivery, public_url: public_url)
+        @target.authorize!
+      end
       if gate[:mode] == 'enforcement' && @idempotency_key.blank?
         raise JrcApprovals::Error, 'IDEMPOTENCY_KEY_REQUIRED'
       end
@@ -44,21 +54,27 @@ module JrcCrm
             else value
             end
           end
-        @delivery_digest = JrcApprovals::Ledger.digest({ 'terms' => @proposal.financial_items,
-          'document' => document,
-          'channel' => @channel, 'actor_id' => @actor&.id, 'base_url' => @base_url }.as_json)
+        digest_payload = { 'terms' => @proposal.financial_items,
+                           'document' => document,
+                           'channel' => @channel, 'actor_id' => @actor&.id, 'base_url' => @base_url }
+        digest_payload['delivery'] = @delivery if @delivery
+        @delivery_digest = JrcApprovals::Ledger.digest(digest_payload.as_json)
         previous = @proposal.events.where(event_type: 'sent').where("metadata ->> 'delivery_key' = ?", @idempotency_key).first
         if previous
           raise JrcApprovals::Error, 'IDEMPOTENCY_CONTENT_CONFLICT' unless previous.metadata['delivery_digest'] == @delivery_digest
 
           conversation = @proposal.account.conversations.find(previous.metadata.fetch('conversation_id'))
+          raise Pundit::NotAuthorizedError if @target && !@target.authorized_conversation?(conversation)
+
           return { proposal: @proposal.reload, message: conversation.messages.find(previous.metadata.fetch('message_id')),
                    conversation: conversation }
         end
       end
 
-      conversation = resolve_conversation
+      conversation = @target ? @target.conversation : resolve_conversation
       raise StandardError, channel_error_message unless conversation
+
+      @target&.validate_message!(conversation)
 
       # Preserve the schedule actually printed, even after subsequent resends.
       # Use existing event metadata rather than a parallel proposal table.
@@ -85,6 +101,7 @@ module JrcCrm
           conversation_id: conversation.id,
           message_id: message.id,
           inbox_id: conversation.inbox_id,
+          recipient_contact_id: conversation.contact_id,
           public_url: public_url,
           delivery_key: @idempotency_key, delivery_digest: @delivery_digest
         }
@@ -92,8 +109,6 @@ module JrcCrm
 
       { proposal: @proposal.reload, message: message, conversation: conversation }
     end
-
-    private
 
     def resolve_conversation
       linked = @proposal.deal ? @proposal.deal.conversations.includes(:inbox).order(updated_at: :desc).to_a : []
@@ -104,12 +119,24 @@ module JrcCrm
       return matched_linked if matched_linked
 
       contact = @proposal.customer_contact
-      return nil unless contact
+      return previous_recipient_conversation(requested) unless contact
 
       candidates = contact.conversations.includes(:inbox).order(updated_at: :desc).to_a
       return candidates.first if requested.nil?
 
       candidates.find { |conversation| channel_key(conversation) == requested }
+    end
+
+    def previous_recipient_conversation(requested)
+      conversation = @proposal.account.conversations.includes(:inbox).find_by(id: @proposal.last_sent_conversation_id)
+      return unless conversation && (requested.nil? || channel_key(conversation) == requested)
+
+      @target = JrcCrm::ProposalDeliveryTarget.new(proposal: @proposal, actor: @actor, public_url: public_url,
+                                                   delivery: { contact_id: conversation.contact_id, inbox_id: conversation.inbox_id })
+      @target.authorize!
+      raise Pundit::NotAuthorizedError unless @target.authorized_conversation?(conversation)
+
+      conversation
     end
 
     def build_message(conversation, pdf_bytes)
@@ -122,7 +149,7 @@ module JrcCrm
       )
 
       params = {
-        content: message_text,
+        content: @target ? @target.content : message_text,
         message_type: 'outgoing',
         attachments: [blob.signed_id],
         content_attributes: {
@@ -130,6 +157,7 @@ module JrcCrm
           jrc_crm_public_url: public_url
         }
       }
+      params[:template_params] = @target.template_params if @target&.template_params.present?
       if channel_key(conversation) == 'email'
         email = @proposal.customer_contact&.email
         raise StandardError, 'O cliente não possui e-mail cadastrado.' if email.blank?
@@ -161,11 +189,15 @@ module JrcCrm
     end
 
     def channel_key(conversation)
-      channel = conversation.inbox&.channel_type.to_s
-      return 'whatsapp' if channel.match?(/Whatsapp|WhatsApp/i) || conversation.inbox&.name.to_s.match?(/whatsapp/i)
-      return 'email' if channel.match?(/Email/i) || conversation.inbox&.inbox_type.to_s.match?(/Email/i)
+      return 'whatsapp' if whatsapp_conversation?(conversation)
+      return 'email' if conversation.inbox&.channel_type.to_s.match?(/Email/i) || conversation.inbox&.inbox_type.to_s.match?(/Email/i)
 
       'other'
+    end
+
+    def whatsapp_conversation?(conversation)
+      conversation.inbox&.channel_type.to_s.match?(/Whatsapp|WhatsApp/i) || conversation.inbox&.twilio_whatsapp? ||
+        conversation.inbox&.name.to_s.match?(/whatsapp/i)
     end
 
     def channel_label(conversation)

@@ -1,0 +1,118 @@
+name: Flow e QR - composicao candidata
+
+on:
+  push:
+    branches: [codex/nico-broker-coordenado-20261015]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  installed-modules:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - suite: modules
+            database: jrc_flow_modules_test
+            minimum_examples: 64
+            specs: >-
+              spec/services/jrc_flows/ownership_identity_spec.rb
+              spec/services/jrc_flows/ownership_heartbeat_spec.rb
+              spec/services/jrc_flows/native_responders_spec.rb
+              spec/services/jrc_relationship/playbook_flow_webhook_delivery_spec.rb
+              spec/requests/jrc_flow_native_boundary_spec.rb
+              spec/requests/jrc_flow_native_editor_installation_spec.rb
+              spec/requests/jrc_flow_native_ownership_spec.rb
+              spec/requests/api/v1/accounts/jrc_flows_spec.rb
+              spec/models/jrc_broker_integration_spec.rb
+              spec/jobs/jrc_broker_webhook_job_spec.rb
+              spec/migrations/relocate_jrc_broker_feature_flag_spec.rb
+              spec/services/jrc_broker
+          - suite: conversation-effects
+            database: jrc_flow_effects_test
+            minimum_examples: 38
+            specs: >-
+              spec/services/jrc_flow_effects/control_revision_spec.rb
+              spec/services/jrc_flow_effects/request_digest_spec.rb
+              spec/services/jrc_flow_effects/concurrency_spec.rb
+              spec/requests/jrc_flow_effects_spec.rb
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: disposable-test-only
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s --health-timeout 5s --health-retries 12
+      redis:
+        image: redis:7.4.0-alpine@sha256:c35af3bbcef51a62c8bae5a9a563c6f1b60d7ebaea4cb5a3ccbcc157580ae098
+        ports: ['6379:6379']
+    env:
+      RAILS_ENV: test
+      POSTGRES_HOST: 127.0.0.1
+      POSTGRES_PORT: '5432'
+      POSTGRES_USERNAME: postgres
+      POSTGRES_PASSWORD: disposable-test-only
+      POSTGRES_DATABASE: ${{ matrix.database }}
+      JRC_SD_CONCURRENCY: '1'
+      JRC_FLOWS_ENABLED: 'true'
+      JRC_FLOWS_EXTERNAL_BETA: 'true'
+      FRONTEND_URL: https://host.example.test
+      REDIS_URL: redis://127.0.0.1:6379/15
+      FLOW_TEST_REDIS_URL: redis://127.0.0.1:6379/14
+      SECRET_KEY_BASE: isolated-flow-broker-ci-not-a-production-secret
+      BUNDLE_FROZEN: 'true'
+      SCHEMA: /tmp/flow-broker-candidate-schema.rb
+      TZ: UTC
+      SPEC_ARGS: ${{ matrix.specs }}
+      MINIMUM_EXAMPLES: ${{ matrix.minimum_examples }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Confirmar branch e preservar a base do outro desenvolvedor
+        run: |
+          test "$GITHUB_REF" = refs/heads/codex/nico-broker-coordenado-20261015
+          git merge-base --is-ancestor b58e093dd3a32fe97829a4566660b83ee48b9eca HEAD
+          git diff --check b58e093dd3a32fe97829a4566660b83ee48b9eca HEAD
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+      - name: Observador e manifestos da composicao
+        if: matrix.suite == 'modules'
+        run: |
+          node --test deploy/jrc/ownership-observer.test.mjs deploy/jrc/module-manifest.test.mjs script/validate_migration_timestamps.test.mjs
+          node script/jrc_native_module_manifest.mjs
+      - name: Dependencias nativas dos testes Rails
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libpq-dev libvips libvips-dev
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4.4'
+          bundler: 2.5.16
+          bundler-cache: true
+      - name: Preparar banco descartavel da suite
+        run: |
+          test "$RAILS_ENV" = test
+          case "$POSTGRES_DATABASE" in jrc_flow_modules_test|jrc_flow_effects_test) ;; *) exit 1 ;; esac
+          SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
+          bundle exec rails db:migrate
+      - name: Executar contratos e corridas contra PostgreSQL
+        run: |
+          bundle exec rspec $SPEC_ARGS --format progress --format json --out /tmp/flow-broker-rspec.json
+          python3 - <<'PYTHON'
+          import json, os
+          summary = json.load(open('/tmp/flow-broker-rspec.json'))['summary']
+          print(summary)
+          assert summary['failure_count'] == 0
+          assert summary['pending_count'] == 0
+          assert summary['example_count'] >= int(os.environ['MINIMUM_EXAMPLES'])
+          PYTHON
+      - name: Preservar fonte e schema versionados
+        run: git diff --exit-code

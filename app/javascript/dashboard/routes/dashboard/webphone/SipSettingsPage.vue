@@ -4,6 +4,10 @@ import { useMapGetter } from 'dashboard/composables/store';
 import { useAlert } from 'dashboard/composables';
 import AgentsAPI from 'dashboard/api/agents';
 import SipCredentialsAPI from 'dashboard/api/sipCredentials';
+import PabxSettingsPanel from './PabxSettingsPanel.vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const TEXT = Object.freeze({
   kicker: 'CONFIGURAÇÃO',
@@ -52,6 +56,7 @@ const form = reactive({
   wss_server: 'wss://cloud.jrcpabx.com.br:7443',
   sip_domain: 'cloud.jrcpabx.com.br',
   extension: '',
+  call_history_extension: '',
   username: '',
   password: '',
   enabled: true,
@@ -86,6 +91,8 @@ const resetForm = () => {
   form.wss_server = credential?.wss_server || 'wss://cloud.jrcpabx.com.br:7443';
   form.sip_domain = credential?.sip_domain || 'cloud.jrcpabx.com.br';
   form.extension = credential?.extension || '';
+  form.call_history_extension =
+    credential?.call_history_extension || credential?.extension || '';
   form.username = credential?.username || credential?.extension || '';
   form.password = '';
   form.enabled = credential?.enabled ?? true;
@@ -168,6 +175,7 @@ onMounted(() => loadData());
         {{ TEXT.restricted }}
       </div>
       <div v-else>
+        <PabxSettingsPanel />
         <header class="mb-6">
           <p class="text-xs font-bold tracking-[0.14em] text-n-teal-11">
             {{ TEXT.kicker }}
@@ -335,6 +343,13 @@ onMounted(() => loadData());
               <label class="jrc-field">
                 <span>{{ TEXT.username }}</span>
                 <input v-model.trim="form.username" required />
+              </label>
+              <label class="jrc-field">
+                <span>{{ t('SOFTPHONE.PABX.HISTORY_EXTENSION') }}</span>
+                <input
+                  v-model.trim="form.call_history_extension"
+                  inputmode="numeric"
+                />
               </label>
               <label class="jrc-field">
                 <span>{{ TEXT.password }}</span>

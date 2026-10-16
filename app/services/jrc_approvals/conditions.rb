@@ -5,30 +5,43 @@ class JrcApprovals::Conditions
   OPERATORS = {
     'integer' => %w[eq neq lt lte gt gte between in], 'decimal' => %w[eq neq lt lte gt gte between in],
     'money' => %w[eq neq lt lte gt gte between in], 'datetime' => %w[eq neq lt lte gt gte between in],
-    'string' => %w[eq neq contains in], 'boolean' => %w[eq neq]
+    'string' => %w[eq neq contains in], 'string_list' => %w[contains], 'boolean' => %w[eq neq]
+  }.freeze
+
+  VALIDATORS = {
+    'integer' => ->(value) { value.is_a?(Integer) },
+    'string' => ->(value) { value.is_a?(String) && value.bytesize <= 4096 },
+    'boolean' => ->(value) { [true, false].include?(value) },
+    'decimal' => ->(value) { valid_decimal?(value) },
+    'datetime' => ->(value) { value.is_a?(String) && value.match?(/(?:Z|[+-]\d{2}:\d{2})\z/) },
+    'money' => ->(value) { valid_money?(value) },
+    'string_list' => ->(value) { valid_string_list?(value) }
   }.freeze
 
   def self.value!(type, value)
-    case type
-    when 'integer'
-      return value if value.is_a?(Integer)
-    when 'decimal'
-      return BigDecimal(value).to_r if value.is_a?(String) && value.match?(/\A-?\d+(?:\.\d+)?\z/) && value.size <= 100
-    when 'string'
-      return value if value.is_a?(String) && value.bytesize <= 4096
-    when 'boolean'
-      return value if [true, false].include?(value)
-    when 'money'
-      if value.is_a?(Hash) && value.keys.sort == %w[amount_cents currency] && value['amount_cents'].is_a?(Integer) &&
-         value['currency'].is_a?(String) && value['currency'].match?(/\A[A-Z]{3}\z/)
-        return [value['currency'], value['amount_cents']]
-      end
-    when 'datetime'
-      return Time.iso8601(value) if value.is_a?(String) && value.match?(/(?:Z|[+-]\d{2}:\d{2})\z/)
-    end
-    raise JrcApprovals::Error, 'INVALID_TYPED_VALUE'
+    raise JrcApprovals::Error, 'INVALID_TYPED_VALUE' unless VALIDATORS[type]&.call(value)
+
+    return BigDecimal(value).to_r if type == 'decimal'
+    return [value['currency'], value['amount_cents']] if type == 'money'
+    return Time.iso8601(value) if type == 'datetime'
+
+    value
   rescue ArgumentError
     raise JrcApprovals::Error, 'INVALID_TYPED_VALUE'
+  end
+
+  def self.valid_decimal?(value)
+    value.is_a?(String) && value.size <= 100 && value.match?(/\A-?\d+(?:\.\d+)?\z/)
+  end
+
+  def self.valid_money?(value)
+    value.is_a?(Hash) && value.keys.sort == %w[amount_cents currency] && value['amount_cents'].is_a?(Integer) &&
+      value['currency'].is_a?(String) && value['currency'].match?(/\A[A-Z]{3}\z/)
+  end
+
+  def self.valid_string_list?(value)
+    value.is_a?(Array) && value.length <= 32 && value.uniq == value &&
+      value.all? { |entry| entry.is_a?(String) && entry.length.between?(1, 80) }
   end
 
   def initialize(schema)
@@ -51,7 +64,7 @@ class JrcApprovals::Conditions
       values = %w[in between].include?(node['op']) ? node['value'] : [node['value']]
       reject! unless values.is_a?(Array) && values.size.between?(1, 32)
       reject! if node['op'] == 'between' && values.size != 2
-      values.each { |value| self.class.value!(type, value) }
+      values.each { |value| validate_operand!(type, value) }
       reject! if type == 'money' && values.map { |v| v['currency'] }.uniq.size != 1
       reject! if node['op'] == 'between' && comparable(type, values[0], values[1]) > 0
     end
@@ -64,6 +77,10 @@ class JrcApprovals::Conditions
   end
 
   private
+
+  def validate_operand!(type, value)
+    self.class.value!(type == 'string_list' ? 'string' : type, value)
+  end
 
   def evaluate(node, values)
     return node['const'] if node.key?('const')
@@ -90,7 +107,8 @@ class JrcApprovals::Conditions
     if type == 'money'
       raise JrcApprovals::Error, 'INCOMPATIBLE_CURRENCY' unless a[0] == b[0]
 
-      a, b = a[1], b[1]
+      a = a[1]
+      b = b[1]
     end
     return a == b ? 0 : 1 if type == 'boolean'
 

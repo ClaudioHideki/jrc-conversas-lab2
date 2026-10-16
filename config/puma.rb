@@ -36,3 +36,8 @@ preload_app!
 
 # Allow puma to be restarted by `rails restart` command.
 plugin :tmp_restart
+
+# preload_app! forks must report their own PID/startticks after the fork.
+on_worker_boot do
+  JrcFlows::OwnershipHeartbeat.start!(role: 'rails')
+end

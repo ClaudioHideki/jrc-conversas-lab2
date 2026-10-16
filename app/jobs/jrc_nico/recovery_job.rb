@@ -8,5 +8,8 @@ class JrcNico::RecoveryJob < ApplicationJob
     JrcNico::Run.where(status: 'queued').where('created_at < ?', 2.minutes.ago).find_each do |run|
       JrcNico::AnalyzeJob.perform_later(run.id)
     end
+    JrcNico::BrokerSendOperation.where(state: JrcNico::BrokerSendOperation::ACTIVE_STATES)
+      .where('next_attempt_at <= ? AND (lease_expires_at IS NULL OR lease_expires_at <= ?)', Time.current, Time.current)
+      .order(:next_attempt_at, :id).limit(100).pluck(:id).each { |id| JrcNico::BrokerSendJob.perform_later(id) }
   end
 end

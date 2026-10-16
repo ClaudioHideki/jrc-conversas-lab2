@@ -27,17 +27,18 @@
 module JrcCrm
   class DealProduct < ApplicationRecord
     self.table_name = 'jrc_crm_deal_products'
-    
+    include JrcCrm::CommercialGratuityIntent
+
     belongs_to :deal, class_name: 'JrcCrm::Deal'
     belongs_to :product, class_name: 'JrcCrm::Product', optional: true
-    
+
     validates :quantity, numericality: { greater_than: 0 }
     validates :unit_price_cents, numericality: { greater_than_or_equal_to: 0 }
-    
+
     before_validation :calculate_total
-    
+
     private
-    
+
     def calculate_total
       return unless unit_price_cents && quantity
       self.total_cents = [(unit_price_cents * quantity) - (discount_cents || 0), 0].max

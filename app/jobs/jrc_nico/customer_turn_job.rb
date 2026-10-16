@@ -55,7 +55,7 @@ class JrcNico::CustomerTurnJob < ApplicationJob
       end
       next if running.exists?
 
-      message = incoming_scope(conversation).where('id > ?', delegation.last_message_id).order(id: :desc).first
+      message = incoming_scope(conversation).where('id > ?', delegation.last_message_id).reorder(id: :desc).first
       next unless message
       if message.content.blank?
         JrcNico::DelegationService.stop(conversation, reason: 'attachment_needs_human', status: 'needs_human')
@@ -80,7 +80,7 @@ class JrcNico::CustomerTurnJob < ApplicationJob
       authorized_actions: delegation.allowed_actions,
       completed_actions: completed_actions(delegation),
       modules: JrcCopilot::TaskCatalog::ROUTE_GUIDES.transform_values { |guide| guide[:title] },
-      conversation: conversation.messages.where(private: false, message_type: [:incoming, :outgoing]).order(id: :desc).limit(40).reverse.map do |m|
+      conversation: conversation.messages.where(private: false, message_type: [:incoming, :outgoing]).reorder(id: :desc).limit(40).reverse.map do |m|
         { role: m.incoming? ? 'customer' : 'assistant', content: m.content.to_s.first(1000) }
       end,
       knowledge: JrcNico::KnowledgeDocument.where(account: delegation.account, customer_visible: true).approved.order(updated_at: :desc).limit(10)

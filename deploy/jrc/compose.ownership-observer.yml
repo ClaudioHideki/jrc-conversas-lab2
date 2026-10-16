@@ -1,0 +1,31 @@
+# Add to the candidate application Compose project. Both application services
+# must use the same pinned image. The signing key is never mounted here.
+services:
+  rails:
+    environment:
+      JRC_FLOW_OWNERSHIP_CHALLENGE_DIR: /run/jrc-ownership/challenge
+      JRC_FLOW_OWNERSHIP_ATTESTATION_DIR: /run/jrc-ownership/attestation
+      JRC_FLOW_OWNERSHIP_HEARTBEAT_DIR: /tmp/jrc-flow-ownership-heartbeat
+    volumes:
+      - type: bind
+        source: ${JRC_OWNERSHIP_STATE_DIR:?set an external observer state directory}/challenge
+        target: /run/jrc-ownership/challenge
+        read_only: true
+      - type: bind
+        source: ${JRC_OWNERSHIP_STATE_DIR:?set an external observer state directory}/attestation
+        target: /run/jrc-ownership/attestation
+        read_only: true
+  sidekiq:
+    environment:
+      JRC_FLOW_OWNERSHIP_CHALLENGE_DIR: /run/jrc-ownership/challenge
+      JRC_FLOW_OWNERSHIP_ATTESTATION_DIR: /run/jrc-ownership/attestation
+      JRC_FLOW_OWNERSHIP_HEARTBEAT_DIR: /tmp/jrc-flow-ownership-heartbeat
+    volumes:
+      - type: bind
+        source: ${JRC_OWNERSHIP_STATE_DIR:?set an external observer state directory}/challenge
+        target: /run/jrc-ownership/challenge
+        read_only: true
+      - type: bind
+        source: ${JRC_OWNERSHIP_STATE_DIR:?set an external observer state directory}/attestation
+        target: /run/jrc-ownership/attestation
+        read_only: true

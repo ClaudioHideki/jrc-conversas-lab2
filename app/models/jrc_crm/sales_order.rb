@@ -49,6 +49,7 @@
 #
 module JrcCrm
   class SalesOrder < ApplicationRecord
+    include JrcCrm::CorporateUnitBinding
     include JrcRelationship::SignalDispatch
     self.table_name = 'jrc_crm_sales_orders'
     belongs_to :account
@@ -68,13 +69,15 @@ module JrcCrm
 
     validates :source_type, inclusion: { in: %w[proposal deal manual] }
     validates :order_origin, inclusion: { in: ORIGINS }
-    enum status: { draft: 'draft', pending: 'pending', approved: 'approved', separating: 'separating', invoiced: 'invoiced', shipped: 'shipped', completed: 'completed', canceled: 'canceled' }
+    enum status: { draft: 'draft', pending: 'pending', approved: 'approved', separating: 'separating', invoiced: 'invoiced', shipped: 'shipped',
+                   completed: 'completed', canceled: 'canceled' }
     validates :order_number, presence: true, uniqueness: { scope: :account_id }
     validate :same_account
     validate :commercial_link_integrity
     validate :order_origin_requires_links
     before_validation :assign_number, on: :create
     attr_accessor :approval_authorized
+
     validate :approval_requires_backoffice
     validate :operational_transition_is_valid
     after_save :request_order_approval, if: -> { pending? && (previous_changes.key?('id') || saved_change_to_status?) }
@@ -90,9 +93,10 @@ module JrcCrm
 
     def operational_transition_is_valid
       return unless persisted? && will_save_change_to_status?
+
       transitions = { 'draft' => %w[pending canceled], 'pending' => %w[approved canceled],
-        'approved' => %w[separating invoiced canceled], 'separating' => %w[invoiced canceled],
-        'invoiced' => %w[shipped canceled], 'shipped' => %w[completed canceled] }
+                      'approved' => %w[separating invoiced canceled], 'separating' => %w[invoiced canceled],
+                      'invoiced' => %w[shipped canceled], 'shipped' => %w[completed canceled] }
       errors.add(:status, 'transição operacional inválida') unless transitions.fetch(attribute_in_database('status'), []).include?(status)
       if %w[separating invoiced shipped completed].include?(status) && JrcCrm::OrderContractService.new(order: self).required? &&
          !contracts.where(signature_status: 'signed').exists?
@@ -104,13 +108,14 @@ module JrcCrm
       if status == 'completed' && !backoffice_requests.where(request_kind: 'fulfillment', status: 'completed').exists?
         errors.add(:status, 'exige conclusão do Backoffice antes da ativação')
       end
-      if status == 'completed'
-        ids = backoffice_requests.where(request_kind: 'fulfillment').pluck(Arel.sql("metadata ->> 'implementation_project_id'")).compact
-        if JrcProjects::Project.where(account_id: account_id, id: ids).where.not(status: 'completed').exists?
-          errors.add(:status, 'o Projeto de Implantação ainda não está concluído')
-        end
-      end
+      return unless status == 'completed'
+
+      ids = backoffice_requests.where(request_kind: 'fulfillment').pluck(Arel.sql("metadata ->> 'implementation_project_id'")).compact
+      return unless JrcProjects::Project.where(account_id: account_id, id: ids).where.not(status: 'completed').exists?
+
+      errors.add(:status, 'o Projeto de Implantação ainda não está concluído')
     end
+
     def same_account
       errors.add(:deal, 'must belong to account') if deal && deal.account_id != account_id
       errors.add(:business_unit, 'must belong to account') if business_unit && business_unit.account_id != account_id
@@ -119,6 +124,7 @@ module JrcCrm
       errors.add(:owner, 'must belong to account') if owner && !account.users.exists?(owner.id)
       errors.add(:created_by, 'must belong to account') if created_by && !account.users.exists?(created_by.id)
     end
+
     def financial_summary
       OrderFinancials.new(attributes: attributes, items: order_items.order(:id).map(&:attributes)).call
     end

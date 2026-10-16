@@ -70,6 +70,34 @@ const fields = computed(
   () => catalogs.value.find(row => row.key === key.value)?.fields || {}
 );
 const definition = computed(() => draft.value.draft_definition);
+const gratuityDraft = () => {
+  const authorities = options.value.gratuity_authorities || {};
+  draft.value.draft_definition = {
+    ...emptyDefinition(),
+    condition: { field: 'has_commercial_gratuity', op: 'eq', value: true },
+    selection: { mode: 'accumulate', priority: 0 },
+    execution: 'sequential',
+    delegation_allowed: true,
+    reopen_mode: 'restart_all',
+    steps: ['commercial', 'financial'].map((role, index) => ({
+      ...emptyStep(),
+      code: index === 0 ? 'gratuidade_comercial' : 'gratuidade_financeira',
+      mode: 'all',
+      quorum: 1,
+      authority: { const: true },
+      actions: ['approved', 'rejected', 'returned'],
+      on_reject: 'rejected',
+      assignees: authorities[`${role}_gratuity_principal_id`]
+        ? [
+            {
+              type: 'account_user',
+              id: authorities[`${role}_gratuity_principal_id`],
+            },
+          ]
+        : [],
+    })),
+  };
+};
 const dirty = computed(
   () =>
     !props.policy ||
@@ -243,7 +271,12 @@ const confirm = () => {
             :key="index"
             :value="String(index)"
           >
-            {{ row.company_name || 'GROUP' }} / {{ row.unit_name || '—' }}
+            {{
+              row.company_name ||
+              context.group_name ||
+              t('JRC_APPROVALS.groupScope')
+            }}
+            / {{ row.unit_name || '—' }}
           </option>
         </select></label
       >
@@ -265,6 +298,21 @@ const confirm = () => {
         </select></label
       >
     </div>
+    <Button
+      v-if="
+        !policy &&
+        [
+          'gratuity_request',
+          'deal_gratuity',
+          'proposal_gratuity',
+          'order_gratuity',
+        ].includes(draft.event_key)
+      "
+      variant="faded"
+      :disabled="busy"
+      :label="t('JRC_APPROVALS.gratuityDraft')"
+      @click="gratuityDraft"
+    />
     <ConditionEditor
       v-if="tab === 'conditions'"
       v-model="definition.condition"

@@ -1,5 +1,6 @@
 import { config, flushPromises, shallowMount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
+import { createStore } from 'vuex';
 import ptBR from 'dashboard/i18n/locale/pt_BR';
 import en from 'dashboard/i18n/locale/en';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -74,6 +75,9 @@ describe('transfer form', () => {
         fallbackLocale: 'en',
         messages: { pt_BR: ptBR, en },
       }),
+      createStore({
+        getters: { getCurrentUser: () => ({ id: 1, type: 'User' }) },
+      }),
     ];
     vi.stubGlobal('Notification', { permission: 'default' });
     mockState.transferring.value = false;
@@ -99,6 +103,33 @@ describe('transfer form', () => {
     expect(wrapper.text()).toContain('Ativar notificações de chamadas');
     expect(wrapper.text()).not.toContain('Enable call notifications');
   });
+  it.each([
+    [false, 'supervised', 'Transferência assistida'],
+    [false, 'immediate', 'Transferência cega'],
+    [true, 'supervised', 'Transferência assistida'],
+    [true, 'immediate', 'Transferência cega'],
+  ])(
+    'submits the human extension unchanged from the UI (compact=%s, mode=%s)',
+    async (compact, mode, label) => {
+      await wrapper.setProps({ compact });
+      const transferButton = wrapper
+        .findAll('button')
+        .find(button => button.text() === 'Transferir');
+      await transferButton.trigger('click');
+      const option = wrapper
+        .find('.jrc-transfer-menu')
+        .findAll('button')
+        .find(button => button.text() === label);
+      await option.trigger('click');
+      await wrapper.find('.jrc-transfer-input').setValue('1410');
+      mockState.transferCall.mockResolvedValue(true);
+      await wrapper.find('.jrc-transfer-submit').trigger('click');
+      await flushPromises();
+      expect(mockState.transferCall).toHaveBeenCalledOnce();
+      expect(mockState.transferCall).toHaveBeenCalledWith(mode, '1410');
+      expect(wrapper.find('.jrc-transfer-panel').exists()).toBe(false);
+    }
+  );
   it('preserves mode and destination after failure, clears only after successful sequence', async () => {
     wrapper.vm.selectTransferMode('supervised');
     wrapper.vm.transferDestination = '202';

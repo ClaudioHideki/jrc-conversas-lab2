@@ -1,23 +1,23 @@
 module Api::V1::Accounts::Crm
   class PaymentsController < BaseController
     def index
-      scope = crm_scope.jrc_crm_payments.includes(invoice: :sales_order).order(paid_at: :desc)
+      scope = corporate_records(:jrc_crm_payments).includes(invoice: :sales_order).order(paid_at: :desc)
       scope = scope.joins(invoice: :sales_order).where(jrc_crm_sales_orders: { owner_id: Current.user.id }) unless crm_admin?
       render json: scope.map { |payment| serialize(payment) }
     end
 
     def create
       attributes = payment_params.to_h
-      invoice = crm_scope.jrc_crm_invoices.includes(:sales_order).find(attributes.delete('invoice_id'))
-      unless crm_admin? || invoice.sales_order&.owner_id == Current.user.id
-        raise ActiveRecord::RecordNotFound
-      end
+      invoice = corporate_records(:jrc_crm_invoices).includes(:sales_order).find(attributes.delete('invoice_id'))
+      raise ActiveRecord::RecordNotFound unless crm_admin? || invoice.sales_order&.owner_id == Current.user.id
+
       payment = nil
       # Same lock order as order synchronization: order, then invoice.
       JrcCrm::Payment.transaction do
         invoice.sales_order&.lock!
         invoice.lock!
         raise ActionController::BadRequest, 'Fatura cancelada nao pode receber pagamento.' if invoice.canceled?
+
         payment = crm_scope.jrc_crm_payments.create!(
           attributes.merge(invoice: invoice, business_unit: invoice.business_unit)
         )

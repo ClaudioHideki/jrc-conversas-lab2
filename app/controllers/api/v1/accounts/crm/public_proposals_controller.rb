@@ -11,7 +11,7 @@ module Api
               render json: { availability: @proposal.public_availability }, status: :ok
               return
             end
-            render json: JrcCrm::ProposalSerializer.new(@proposal).as_json.merge(
+            render json: JrcCrm::ProposalSerializer.new(@proposal, include_gratuity_intent: false).as_json.merge(
               account: { name: @proposal.account.name },
               customer: serialize_customer,
               items: @proposal.proposal_items.map { |item| serialize_item(item) }

@@ -5,6 +5,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { debounce } from '@chatwoot/utils';
 import { useI18n } from 'vue-i18n';
+import { useMapGetter } from 'dashboard/composables/store';
 import VideoConferenceSettingsAPI from 'dashboard/api/videoConferenceSettings';
 import { openVideoConferencePopup } from 'dashboard/helper/videoConference';
 import { normalizeSipDialNumber } from './phoneNumber';
@@ -30,6 +31,7 @@ const CONTACT_PAGE_SIZE = 15;
 const CONTACT_SEARCH_DEBOUNCE = 300;
 
 const { t } = useI18n();
+const currentUser = useMapGetter('getCurrentUser');
 const activeTab = ref('phone');
 const keypadOpen = ref(false);
 const phoneTabs = computed(() => [
@@ -56,8 +58,6 @@ const TEXT = Object.freeze({
   destination: 'Numero ou ramal de destino',
   transfer: 'Transferir',
   transferDestination: 'Ramal ou numero',
-  supervisedTransfer: 'Transf. supervis.',
-  immediateTransfer: 'Transf. imediata',
   confirmTransfer: 'Enviar transf.',
   conference: 'Conferencia',
   incoming: 'Chamada recebida',
@@ -555,6 +555,16 @@ watch(hasCall, active => {
         : 'h-full w-full overflow-y-auto bg-n-background p-4 lg:p-6 xl:overflow-hidden'
     "
   >
+    <RouterLink
+      v-if="!compact && currentUser?.type === 'SuperAdmin'"
+      :to="{
+        name: 'ramal_settings',
+        params: { accountId: route.params.accountId },
+      }"
+      class="mb-3 inline-flex rounded-lg border border-n-weak px-3 py-2 text-sm"
+    >
+      {{ t('SOFTPHONE.PABX.TITLE') }}
+    </RouterLink>
     <nav
       v-if="compact"
       :aria-label="t('SOFTPHONE.TITLE')"
@@ -772,14 +782,14 @@ watch(hasCall, active => {
                     @click="selectTransferMode('supervised')"
                   >
                     <span class="i-lucide-eye size-4" />
-                    {{ TEXT.supervisedTransfer }}
+                    {{ t('SOFTPHONE.TRANSFER.ASSISTED') }}
                   </button>
                   <button
                     type="button"
                     @click="selectTransferMode('immediate')"
                   >
                     <span class="i-lucide-eye-off size-4" />
-                    {{ TEXT.immediateTransfer }}
+                    {{ t('SOFTPHONE.TRANSFER.BLIND') }}
                   </button>
                 </div>
               </div>
@@ -808,10 +818,17 @@ watch(hasCall, active => {
               v-if="transferMode"
               class="jrc-transfer-panel grid grid-cols-[1fr_auto] gap-2 rounded-xl border border-white/10 bg-white/10 p-3"
             >
+              <p class="col-span-2 text-xs text-white/80">
+                {{
+                  transferMode === 'supervised'
+                    ? t('SOFTPHONE.TRANSFER.ASSISTED_HELP')
+                    : t('SOFTPHONE.TRANSFER.BLIND_HELP')
+                }}
+              </p>
               <input
                 v-model="transferDestination"
                 type="tel"
-                :placeholder="TEXT.transferDestination"
+                :placeholder="t('SOFTPHONE.TRANSFER.DESTINATION')"
                 class="jrc-transfer-input"
                 :disabled="transferring || holdPending || !established"
                 @keyup.enter="submitTransfer"

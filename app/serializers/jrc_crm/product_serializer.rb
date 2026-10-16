@@ -5,9 +5,10 @@ module JrcCrm
       @include_commercial_sensitive = include_commercial_sensitive
     end
 
-    def as_json(options = {})
+    def as_json(_options = {})
       data = {
         id: @product.id,
+        business_unit_id: @product.business_unit_id,
         name: @product.name,
         sku: @product.sku,
         product_type: @product.product_type,
@@ -59,11 +60,17 @@ module JrcCrm
 
       return data unless @include_commercial_sensitive
 
-      data.merge(
+      data.merge(commercial_sensitive_fields)
+    end
+
+    private
+
+    def commercial_sensitive_fields
+      {
         cost_cents: @product.cost_cents,
         estimated_margin_cents: @product.estimated_margin_cents,
         estimated_margin_percent: @product.estimated_margin_percent
-      )
+      }
     end
   end
 end

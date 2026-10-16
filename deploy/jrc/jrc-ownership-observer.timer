@@ -1,0 +1,11 @@
+[Unit]
+Description=Refresh short-lived JRC candidate ownership observation
+
+[Timer]
+OnBootSec=10s
+OnUnitInactiveSec=15s
+AccuracySec=1s
+Unit=jrc-ownership-observer.service
+
+[Install]
+WantedBy=timers.target

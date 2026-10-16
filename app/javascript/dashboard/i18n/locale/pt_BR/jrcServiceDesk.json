@@ -278,6 +278,7 @@
       "definition": "Campos e estrutura",
       "new_record": "Novo registro",
       "edit_record": "Editar registro",
+      "editor_title": "Editar serviço: {name}",
       "form_notice": "As ações dependem do recurso e das capacidades autorizadas. Operações ainda não implementadas permanecem pendentes.",
       "unit_hint": "Uma unidade pertence a uma empresa operadora da mesma Account. Nenhuma unidade padrão é criada.",
       "assignee_hint": "Responsáveis precisam de AccountUser e vínculo ativo com esta unidade. Equipe não substitui esse vínculo.",

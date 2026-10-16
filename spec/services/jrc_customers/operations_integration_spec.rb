@@ -142,7 +142,14 @@ RSpec.describe 'Customer master on official operations modules' do
     ticket = create_ticket
     project = create_project
     order = JrcCrm::SalesOrder.create!(account: sd_account, owner: sd_user, contact: sd_contact, source_type: 'manual', snapshot: { preserved: true })
-    contract = JrcCrm::Contract.create!(account: sd_account, owner: sd_user, contact: sd_contact, sales_order: order, status: 'active')
+    approval = order.backoffice_requests.find_by!(request_kind: 'approval')
+    JrcCrm::OrderApprovalService.new(order: order, actor: sd_user).decide!(request: approval, decision: 'approved')
+    contract = JrcCrm::Contract.create!(account: sd_account, owner: sd_user, contact: sd_contact, sales_order: order)
+    File.open(Rails.root.join('spec/assets/sample.pdf')) do |file|
+      contract.signed_document.attach(io: file, filename: 'synthetic-signed.pdf', content_type: 'application/pdf')
+    end
+    contract.update!(status: 'active', signature_status: 'signed', signature_mode: 'manual',
+                     signed_by_name: 'Synthetic customer', signed_at: Time.current)
     snapshot = contract.lifecycle_metadata.deep_dup
     base = create(:contact, account: sd_account, company_id: company.id)
     ContactMergeAction.new(account: sd_account, base_contact: base, mergee_contact: sd_contact).perform
@@ -155,7 +162,14 @@ RSpec.describe 'Customer master on official operations modules' do
   end
   it 'includes the real commercial contract in Customer360 without changing its content' do
     order = JrcCrm::SalesOrder.create!(account: sd_account, owner: sd_user, contact: sd_contact, source_type: 'manual')
-    contract = JrcCrm::Contract.create!(account: sd_account, owner: sd_user, contact: sd_contact, sales_order: order, status: 'active')
+    approval = order.backoffice_requests.find_by!(request_kind: 'approval')
+    JrcCrm::OrderApprovalService.new(order: order, actor: sd_user).decide!(request: approval, decision: 'approved')
+    contract = JrcCrm::Contract.create!(account: sd_account, owner: sd_user, contact: sd_contact, sales_order: order)
+    File.open(Rails.root.join('spec/assets/sample.pdf')) do |file|
+      contract.signed_document.attach(io: file, filename: 'synthetic-signed.pdf', content_type: 'application/pdf')
+    end
+    contract.update!(status: 'active', signature_status: 'signed', signature_mode: 'manual',
+                     signed_by_name: 'Synthetic customer', signed_at: Time.current)
     expect(context.contracts.pluck(:id)).to eq([contract.id])
     expect(context.overview[:contracts_active]).to eq(1)
   end

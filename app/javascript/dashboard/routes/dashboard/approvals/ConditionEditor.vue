@@ -113,7 +113,16 @@ const setValue = (index, value) => {
           }}<select
             :value="modelValue.field"
             class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 p-2"
-            @change="patch({ field: $event.target.value, op: 'eq', value: '' })"
+            @change="
+              patch({
+                field: $event.target.value,
+                op:
+                  fields[$event.target.value] === 'string_list'
+                    ? 'contains'
+                    : 'eq',
+                value: '',
+              })
+            "
           >
             <option value="">{{ t('JRC_APPROVALS.select') }}</option>
             <option
@@ -144,7 +153,7 @@ const setValue = (index, value) => {
         v-for="(value, index) in values"
         :key="index"
         :model-value="value"
-        :type="type"
+        :type="type === 'string_list' ? 'string' : type"
         :label="`${t('JRC_APPROVALS.value')} ${index + 1}`"
         @update:model-value="setValue(index, $event)"
         @error="invalid = $event"

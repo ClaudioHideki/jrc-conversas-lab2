@@ -4,6 +4,7 @@ RSpec.describe 'CRM commercial flow integration', type: :request do
   let(:account) { create(:account) }
   let(:admin) { create(:user, account: account, role: :administrator) }
   let(:headers) { admin.create_new_auth_token }
+  let(:contact) { create(:contact, account: account) }
   let(:orders_url) { "/api/v1/accounts/#{account.id}/crm/sales_orders" }
 
   before do
@@ -27,13 +28,26 @@ RSpec.describe 'CRM commercial flow integration', type: :request do
     )
   end
 
+  # Exercise the recorded Backoffice decision instead of bypassing approval.
+  def approve_order(order_id)
+    order = JrcCrm::SalesOrder.find(order_id)
+    expect(order).to be_pending
+    expect(order.commissions).to be_empty
+    approval = order.backoffice_requests.find_by!(request_kind: 'approval')
+    post "/api/v1/accounts/#{account.id}/crm/backoffice_requests/#{approval.id}/decide_order",
+         params: { decision: 'approved' }, headers: headers, as: :json
+    expect(response).to have_http_status(:ok)
+    expect(order.reload).to be_approved
+    order
+  end
+
   it 'recalculates order totals and propagates the new value to goals, commissions and backoffice' do
     post orders_url,
          params: {
            sales_order: {
-             owner_id: admin.id,
+             owner_id: admin.id, contact_id: contact.id,
              source_type: 'manual',
-             status: 'approved',
+             status: 'pending',
              sold_at: Time.current,
              discount_cents: 0,
              shipping_cents: 0,
@@ -69,9 +83,9 @@ RSpec.describe 'CRM commercial flow integration', type: :request do
       'products_cents' => 5_000_000, 'monthly_cents' => 250_000, 'total_cents' => 5_000_000
     )
 
-    order = JrcCrm::SalesOrder.find(order_id)
+    order = approve_order(order_id)
     commission = order.commissions.sole
-    backoffice_request = order.backoffice_requests.sole
+    backoffice_request = order.backoffice_requests.find_by!(request_kind: 'fulfillment')
     expect(commission.attributes.slice('base_cents', 'commission_cents', 'status')).to eq(
       'base_cents' => 5_000_000, 'commission_cents' => 500_000, 'status' => 'pending_approval'
     )
@@ -96,19 +110,21 @@ RSpec.describe 'CRM commercial flow integration', type: :request do
            sales_order: {
              owner_id: admin.id,
              source_type: 'manual',
-             status: 'approved',
+             status: 'pending',
+             contact_id: contact.id,
              items: [{ name: 'Projeto', quantity: 1, unit_cents: 100_000, one_time_cents: 100_000 }]
            }
          },
          headers: headers,
          as: :json
-    order = JrcCrm::SalesOrder.find(response.parsed_body['id'])
+    expect(response).to have_http_status(:created)
+    order = approve_order(response.parsed_body.fetch('id'))
 
     patch "#{orders_url}/#{order.id}", params: { sales_order: { status: 'canceled' } }, headers: headers, as: :json
 
     expect(response).to have_http_status(:ok)
     expect(order.commissions.sole.reload).to be_reversed
-    expect(order.backoffice_requests.sole.reload).to be_canceled
+    expect(order.backoffice_requests.find_by!(request_kind: 'fulfillment').reload).to be_canceled
   end
 
   it 'persists commission plans through the API after refresh' do
@@ -152,13 +168,15 @@ RSpec.describe 'CRM commercial flow integration', type: :request do
          params: {
            sales_order: {
              owner_id: admin.id,
-             status: 'approved',
+             status: 'pending',
+             contact_id: contact.id,
              items: [{ name: 'Implantação', quantity: 1, unit_cents: 300_000, one_time_cents: 300_000 }]
            }
          },
          headers: headers,
          as: :json
-    order = JrcCrm::SalesOrder.find(response.parsed_body['id'])
+    expect(response).to have_http_status(:created)
+    order = approve_order(response.parsed_body.fetch('id'))
 
     post "/api/v1/accounts/#{account.id}/crm/invoices",
          params: { invoice: { sales_order_id: order.id, status: 'issued', due_on: 30.days.from_now.to_date } },
@@ -184,7 +202,30 @@ RSpec.describe 'CRM commercial flow integration', type: :request do
 
     expect(response).to have_http_status(:created)
     expect(JrcCrm::Invoice.find(invoice_id)).to be_paid
-    request = order.backoffice_requests.sole.reload
+    request = order.backoffice_requests.find_by!(request_kind: 'fulfillment').reload
     expect(request.attributes.slice('stage', 'status')).to eq('stage' => 'completed', 'status' => 'completed')
+  end
+
+  it 'rejects later financial changes after recorded approval creates a contractual snapshot' do
+    post orders_url, params: { sales_order: {
+      contact_id: contact.id, status: 'approved', items: [{
+        name: 'Synthetic contracted service', quantity: 1, unit_cents: 100_000,
+        one_time_cents: 100_000, recurring_cents: 2000
+      }]
+    } }, headers: headers, as: :json
+    expect(response).to have_http_status(:created)
+    order = approve_order(response.parsed_body.fetch('id'))
+    contract = order.contracts.sole
+    expect(contract).to be_draft
+    before = order.financial_summary.deep_dup
+    contract_snapshot = contract.lifecycle_metadata.deep_dup
+    patch "#{orders_url}/#{order.id}", params: { sales_order: { items: [{
+      name: 'Synthetic attempted change', quantity: 1, unit_cents: 1, one_time_cents: 1
+    }] } }, headers: headers, as: :json
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response.body).to include('Condicoes aceitas/contratadas sao imutaveis')
+    expect(order.reload.financial_summary).to eq(before)
+    expect(contract.reload.lifecycle_metadata).to eq(contract_snapshot)
+    expect(order.commissions.sole.base_cents).to eq(100_000)
   end
 end

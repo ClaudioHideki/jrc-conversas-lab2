@@ -147,7 +147,8 @@ const trapModalFocus = event => {
 
 useKeyboardEvents({
   Escape: {
-    action: () => isActive.value && hide(),
+    action: () =>
+      isActive.value && !document.querySelector('dialog[open]') && hide(),
     allowOnFocusedInput: true,
   },
 });

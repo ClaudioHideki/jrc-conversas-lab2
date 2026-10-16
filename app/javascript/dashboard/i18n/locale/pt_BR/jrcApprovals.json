@@ -88,6 +88,8 @@
     "decision": "Decisão",
     "decisions": "Decisões registradas",
     "reason": "Motivo obrigatório",
+    "absenceAuthorization": "Referência da autorização formal de ausência ou substituição",
+    "gratuityDraft": "Preparar rascunho de gratuidade: Jose → Karen",
     "noDecision": "Não há nenhuma decisão disponível para você nesta solicitação.",
     "saved": "Salvo e atualizado com os dados do servidor.",
     "concurrent": "Outra operação alterou esta solicitação. A versão atual foi recarregada. Revise antes de enviar uma nova decisão.",
@@ -177,6 +179,9 @@
     "window_expired": "Expirada — histórico preservado",
     "window_unknown": "Período de validade indisponível",
     "author": "Autor",
-    "groupScope": "Escopo de toda a conta"
+    "groupScope": "Escopo de toda a conta",
+    "status_GRATUITY_POLICY_REQUIRED": "Gratuidade bloqueada: configure e habilite o controle após homologação",
+    "status_GRATUITY_VALUE_PENDING": "Impacto da gratuidade pendente de referência oficial",
+    "status_GRATUITY_AUTHORITIES_PENDING": "Titulares e autorização formal pendentes"
   }
 }

@@ -59,7 +59,7 @@ module JrcCrm
     def issuer
       # This is business data, NOT the product brand. Legitimate client/legal
       # entity names are preserved; no blind replacement of business records.
-      value(@record, :issuer_company_name) || value(value(@order, :business_unit), :name) || @snapshot[:company_name] || DocumentBranding::NAME
+      JrcCrm::CorporateIssuer.document_name(@record, @order, @snapshot)
     end
 
     def identity

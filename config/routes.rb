@@ -47,6 +47,56 @@ Rails.application.routes.draw do
   get '/api', to: 'api#index'
   namespace :api, defaults: { format: 'json' } do
     namespace :v1 do
+      scope 'accounts/:account_id/jrc_flow_delegation', module: 'accounts', controller: 'jrc_flow_delegation' do
+        get 'configuration', action: :configuration
+        put 'configuration', action: :configure
+        post 'registration', action: :register
+        delete 'registration/:id', action: :revoke_registration
+        post 'sessions', action: :create_session
+        delete 'sessions/:id', action: :close_session
+        get 'sessions/:session_id/editor-context', action: :editor_context
+        post 'installations', action: :claim_installation
+        delete 'installations/:id', action: :revoke_installation
+        scope 'sessions/:session_id/flows' do
+          get '', action: :editor, defaults: { editor_operation: 'list' }
+          post '', action: :editor, defaults: { editor_operation: 'create' }
+          post 'import-preview', action: :editor, defaults: { editor_operation: 'import_preview' }
+          get 'targets', action: :editor, defaults: { editor_operation: 'targets' }
+          get 'status', action: :editor, defaults: { editor_operation: 'status' }
+          get 'nodes', action: :editor, defaults: { editor_operation: 'nodes' }
+          get 'integrations/:id/cutover', action: :editor, defaults: { editor_operation: 'cutover_get' }
+          post 'integrations/:id/cutover/prepare', action: :editor, defaults: { editor_operation: 'cutover_prepare' }
+          post 'integrations/:id/cutover/reconcile', action: :editor, defaults: { editor_operation: 'cutover_reconcile' }
+          get ':id/http-credentials', action: :editor, defaults: { editor_operation: 'http_catalog' }
+          get ':id/subflow-catalog', action: :editor, defaults: { editor_operation: 'subflow_catalog' }
+          get ':id/ai-credentials', action: :editor, defaults: { editor_operation: 'ai_catalog' }
+          get ':id/handoff-connections', action: :editor, defaults: { editor_operation: 'handoff_connections' }
+          get ':id/local-handoff-channels', action: :editor, defaults: { editor_operation: 'local_handoff_channels' }
+          get ':id/integrations/:target_id/attendance-catalog', action: :editor, defaults: { editor_operation: 'handoff_catalog' }
+          get ':id/channels/:target_id/local-attendance-catalog', action: :editor, defaults: { editor_operation: 'local_handoff_catalog' }
+          post ':id/channels/:channel_id/media', action: :upload_media
+          get ':id/resource-channels', action: :editor, defaults: { editor_operation: 'resource_channels' }
+          get ':id/channels/:target_id/action-catalog', action: :editor, defaults: { editor_operation: 'action_catalog' }
+          post ':id/channels/:target_id/action-resources', action: :editor, defaults: { editor_operation: 'save_action_resource' }
+          get ':id/channels/:target_id/media', action: :editor, defaults: { editor_operation: 'media_catalog' }
+          post ':id/channels/:target_id/media/:resource_id/revoke', action: :editor, defaults: { editor_operation: 'revoke_media' }
+          get ':id', action: :editor, defaults: { editor_operation: 'get' }
+          put ':id', action: :editor, defaults: { editor_operation: 'save' }
+          get ':id/scope', action: :editor, defaults: { editor_operation: 'scope' }
+          post ':id/validate', action: :editor, defaults: { editor_operation: 'validate' }
+          post ':id/simulate', action: :editor, defaults: { editor_operation: 'simulate' }
+          post ':id/publish', action: :editor, defaults: { editor_operation: 'publish' }
+          get ':id/versions', action: :editor, defaults: { editor_operation: 'versions' }
+          post ':id/bindings', action: :editor, defaults: { editor_operation: 'bind' }
+        end
+      end
+      post 'jrc_flow_native/ownership/fence', to: 'jrc_flow_ownership#fence'
+      post 'jrc_flow_native/ownership/observe', to: 'jrc_flow_ownership#observe'
+      post 'jrc_flow_native/ownership/retire', to: 'jrc_flow_ownership#retire'
+      post 'jrc_flow_native/ownership/rollback', to: 'jrc_flow_ownership#rollback'
+      post 'jrc_flow_native/introspect', to: 'jrc_flow_native#introspect'
+      post 'jrc_flow_native/registration-challenge', to: 'jrc_flow_native#registration_challenge'
+      post 'jrc_flow_native/installation-challenge', to: 'jrc_flow_native#installation_challenge'
       # ----------------------------------
       # start of account scoped api routes
       resources :accounts, only: [:create, :show, :update] do
@@ -129,7 +179,8 @@ Rails.application.routes.draw do
             post 'notification_policies', to: 'cockpit#publish_notification_policy'
             get 'notification_policies', to: 'communication#notification_policies'
             get 'catalogue_form', to: 'catalogue_forms#show'
-            %w[queues priorities categories ticket_types statuses units operator_companies assignees requesters teams contracts].each do |resource|
+            %w[queues priorities categories ticket_types statuses units operator_companies assignees requesters teams
+               contracts].each do |resource|
               get resource, to: 'lookups#index', defaults: { resource: resource }
             end
             resources :tickets, only: [:index, :show, :create, :update] do
@@ -169,6 +220,12 @@ Rails.application.routes.draw do
             get :me, on: :collection
           end
           resource :call_history, only: :show, controller: :call_history
+          resource :telephony_integration, only: [:show, :update], controller: :telephony_integration do
+            post :test_connection
+            post :synchronize
+          end
+          get 'call_history/:id/recording', to: 'call_history#recording', as: :call_history_recording
+          get 'call_history/:id/recording_metadata', to: 'call_history#recording_metadata'
           resources :call_quality_analyses, only: [:index, :create]
           namespace :captain do
             resource :preferences, only: [:show, :update]
@@ -413,6 +470,10 @@ Rails.application.routes.draw do
               end
             end
           end
+          get 'jrc_flow_effects/capabilities', to: 'jrc_flow_effects#capabilities'
+          get 'conversations/:conversation_id/jrc_flow_effects/context', to: 'jrc_flow_effects#context'
+          post 'conversations/:conversation_id/jrc_flow_effects', to: 'jrc_flow_effects#create'
+          get 'conversations/:conversation_id/jrc_flow_effects/:operation_id', to: 'jrc_flow_effects#show'
           resources :jrc_flows do
             get :metadata, on: :collection
             post :import_preview, on: :collection

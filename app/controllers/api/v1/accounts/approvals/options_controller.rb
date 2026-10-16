@@ -7,7 +7,8 @@ class Api::V1::Accounts::Approvals::OptionsController < Api::V1::Accounts::Appro
     roles = Current.account.custom_roles.where(id: members.filter_map(&:custom_role_id))
     render json: {
       account_users: members.map { |member| { id: member.id, name: member.user.name } },
-      teams: team_options(members), custom_roles: named_options(roles)
+      teams: team_options(members), custom_roles: named_options(roles),
+      gratuity_authorities: JrcApprovals::GratuityAuthorities.new(account: Current.account, company_id: company_id).profile
     }
   end
 

@@ -21,10 +21,11 @@ export function useContactCreation(dialog, options = {}) {
     if (!allowed()) return;
     const startedFor = identity();
     try {
-      await store.dispatch('contacts/create', contact);
+      const createdContact = await store.dispatch('contacts/create', contact);
       if (startedFor !== identity() || !allowed()) return;
       dialog.value?.onSuccess();
       useAlert(t(`${prefix}.SUCCESS_MESSAGE`));
+      await options.onCreated?.(createdContact);
     } catch (error) {
       if (startedFor !== identity() || !allowed()) return;
       if (error instanceof DuplicateContactException) {

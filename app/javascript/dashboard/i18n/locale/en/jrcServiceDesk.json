@@ -312,6 +312,7 @@
       "definition": "Fields and structure",
       "new_record": "New record",
       "edit_record": "Edit record",
+      "editor_title": "Edit service: {name}",
       "form_notice": "Actions depend on the resource and the authorized capabilities. Unimplemented operations remain explicitly pending.",
       "unit_hint": "A unit belongs to an operating company in the same Account. No default unit is created.",
       "assignee_hint": "Assignees need AccountUser and active unit membership. A team does not replace that membership.",

@@ -2,6 +2,9 @@ require 'cgi'
 
 module JrcCrm
   class ProposalSerializer
+    ITEM_FIELDS = %i[id product_id name_snapshot description_snapshot quantity unit_name billing_model unit_price_cents setup_fee_cents
+                     commercial_gratuity discount_cents total_cents recurring_total_cents initial_total_cents included_quantity included_unit
+                     overage_unit_price_cents activation_days validation_period_days notes].freeze
     STATUS_LABELS = {
       'draft' => 'Rascunho',
       'pending_approval' => 'Aprovação interna',
@@ -19,12 +22,13 @@ module JrcCrm
       'rejected' => 'Reprovada'
     }.freeze
 
-    def initialize(proposal, base_url: nil)
+    def initialize(proposal, base_url: nil, include_gratuity_intent: true)
       @proposal = proposal
+      @include_gratuity_intent = include_gratuity_intent
       @base_url = base_url.to_s.sub(%r{/$}, '')
     end
 
-    def as_json(options = {})
+    def as_json(_options = {})
       contact = @proposal.customer_contact
       conversation = @proposal.linked_conversation
       last_sent_event = @proposal.events.where(event_type: 'sent').order(created_at: :desc).includes(:user).first
@@ -36,8 +40,11 @@ module JrcCrm
         version_number: @proposal.version_number,
         title: @proposal.title,
         status: @proposal.status,
-        status_display: @proposal.approval_status == 'approved' && @proposal.draft? ?
-          'Aprovada internamente — pronta para envio' : STATUS_LABELS.fetch(@proposal.status, @proposal.status),
+        status_display: if @proposal.approval_status == 'approved' && @proposal.draft?
+                          'Aprovada internamente — pronta para envio'
+                        else
+                          STATUS_LABELS.fetch(@proposal.status, @proposal.status)
+                        end,
         public_availability: @proposal.public_availability,
         locked: @proposal.locked_for_editing?,
         locked_at: @proposal.locked_at,
@@ -97,15 +104,11 @@ module JrcCrm
         last_sent_message_id: @proposal.last_sent_message_id,
         last_sent_conversation_id: @proposal.last_sent_conversation_id,
         last_sent_by: last_sent_event&.user && { id: last_sent_event.user_id, name: last_sent_event.user.name },
-        items: @proposal.proposal_items.map { |item| serialize_item(item) },
+        items: serialize_items,
         items_count: association_count(@proposal.proposal_items),
         owner: @proposal.owner_id ? { id: @proposal.owner_id, name: @proposal.owner.name } : nil,
         deal_id: @proposal.deal_id,
         deal: serialize_deal,
-        company_id: @proposal.customer_company&.id,
-        contact_id: contact&.id,
-        company: @proposal.customer_company && { id: @proposal.customer_company.id, name: @proposal.customer_company.name,
-                                               tax_id: @proposal.customer_company.tax_id },
         origin: @proposal.deal_id.present? ? 'deal' : 'customer',
         deletable: !@proposal.locked_for_editing? && !@proposal.sales_orders.exists?,
         customer: serialize_contact(contact),
@@ -114,47 +117,35 @@ module JrcCrm
         created_at_display: format_datetime(@proposal.created_at),
         updated_at: @proposal.updated_at,
         updated_at_display: format_datetime(@proposal.updated_at)
-      }
+      }.merge(customer_identity(contact), JrcCrm::CorporateIssuer.reference(@proposal))
     end
 
     private
 
+    def customer_identity(contact)
+      { company_id: @proposal.customer_company&.id,
+        contact_id: contact&.id,
+        company: @proposal.customer_company && { id: @proposal.customer_company.id, name: @proposal.customer_company.name,
+                                                 tax_id: @proposal.customer_company.tax_id } }
+    end
+
+    def serialize_items
+      @proposal.proposal_items.map { |item| serialize_item(item) }
+    end
+
     def serialize_item(item)
-      {
-        id: item.id,
-        product_id: item.product_id,
-        product: item.product && {
-          id: item.product_id,
-          name: item.product.name,
-          sku: item.product.sku,
-          product_type: item.product.product_type
-        },
-        name_snapshot: item.name_snapshot,
-        description_snapshot: item.description_snapshot,
-        quantity: item.quantity,
-        unit_name: item.unit_name,
-        billing_model: item.billing_model,
-        unit_price_cents: item.unit_price_cents,
-        setup_fee_cents: item.setup_fee_cents,
-        discount_cents: item.discount_cents,
-        total_cents: item.total_cents,
-        recurring_total_cents: item.recurring_total_cents,
-        initial_total_cents: item.initial_total_cents,
-        included_quantity: item.included_quantity,
-        included_unit: item.included_unit,
-        overage_unit_price_cents: item.overage_unit_price_cents,
-        activation_days: item.activation_days,
-        validation_period_days: item.validation_period_days,
-        notes: item.notes
-      }
+      data = item.attributes.symbolize_keys.slice(*ITEM_FIELDS)
+      data.delete(:commercial_gratuity) unless @include_gratuity_intent
+      data.merge(product: item.product && {
+                   id: item.product_id,
+                   name: item.product.name,
+                   sku: item.product.sku,
+                   product_type: item.product.product_type
+                 })
     end
 
     def serialize_issuer
-      {
-        company_name: @proposal.issuer_company_name,
-        tax_id: @proposal.issuer_tax_id,
-        unit: @proposal.issuer_unit
-      }
+      JrcCrm::CorporateIssuer.payload(@proposal)
     end
 
     def serialize_payment

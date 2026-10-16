@@ -21,14 +21,12 @@ class JrcFlows::Runner
 
     @conversation.with_lock do
       @run.with_lock do
-        begin
-          JrcFlowRun.transaction(requires_new: true) { perform_locked(message, wake_version) }
-        rescue StandardError => e
-          trace = @run.trace
-          @run.reload.update!(status: 'failed', trace: trace, error: JrcRelationship::PlaybookFlowContinuation.error_message(@run, e),
-                              finished_at: Time.current, wake_at: nil)
-          Rails.logger.warn("JRC Flows run=#{@run.id} failed: #{e.class}")
-        end
+        JrcFlowRun.transaction(requires_new: true) { perform_locked(message, wake_version) }
+      rescue StandardError => e
+        trace = @run.trace
+        @run.reload.update!(status: 'failed', trace: trace, error: JrcRelationship::PlaybookFlowContinuation.error_message(@run, e),
+                            finished_at: Time.current, wake_at: nil)
+        Rails.logger.warn("JRC Flows run=#{@run.id} failed: #{e.class}")
       end
     end
     @run
@@ -121,6 +119,7 @@ class JrcFlows::Runner
       else
         result = JrcFlows::Actions.new(@run).execute(type, data)
         return if result == JrcRelationship::PlaybookFlowWebhookJournal::PENDING && JrcRelationship::PlaybookFlowContinuation.managed?(@run)
+
         if JrcFlows::Definition::TERMINAL.include?(type)
           @run.node_id = nil
           break
@@ -144,3 +143,5 @@ class JrcFlows::Runner
     JrcRelationship::PlaybookFlowContinuation.resume_job(@run).set(wait_until: @run.wake_at).perform_later(@run.id, @run.wake_version)
   end
 end
+
+JrcFlows::Runner.prepend(JrcFlows::OwnershipEntrypoints::Runner)

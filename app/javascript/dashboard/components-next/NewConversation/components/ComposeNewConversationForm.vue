@@ -421,6 +421,7 @@ useKeyboardEvents({
           >
             {{ t('JRC_HOME.COMPOSE.RECIPIENT') }}
           </h3>
+          <slot name="recipient-actions" />
           <ContactSelector
             :workspace="workspace"
             :contacts="contacts"

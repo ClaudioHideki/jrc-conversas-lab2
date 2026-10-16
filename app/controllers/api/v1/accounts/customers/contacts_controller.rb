@@ -3,7 +3,7 @@ class Api::V1::Accounts::Customers::ContactsController < Api::V1::Accounts::Cust
 
   def index
     scope = Current.account.contacts
-    scope = scope.where(company_id: Current.account.master_companies.find(params[:company_id]).id) if params[:company_id].present?
+    scope = scope.where(company_id: corporate_companies.find(params[:company_id]).id) if params[:company_id].present?
     scope = scope.where(company_id: nil) if params[:unlinked] == 'true'
     scope = JrcCustomers::ContactQuery.new(account: Current.account, scope: scope, query: params[:q]).call
     records, meta = page_scope(scope.order(:name, :id))
@@ -85,6 +85,9 @@ class Api::V1::Accounts::Customers::ContactsController < Api::V1::Accounts::Cust
   end
 
   def contact_params
-    params.require(:contact).permit(:name, :email, :phone_number, :company_id, :job_title, :department, :registration_status)
+    values = params.require(:contact).permit(:name, :email, :phone_number, :company_id, :job_title, :department, :registration_status)
+    company = Current.account.master_companies.find_by(id: values[:company_id])
+    corporate_companies.find(company.id) if company
+    values
   end
 end

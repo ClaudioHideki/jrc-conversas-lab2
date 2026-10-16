@@ -1,0 +1,15 @@
+[Unit]
+Description=Measure JRC candidate Rails and workers before signing ownership evidence
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+User=root
+ExecStart=/usr/bin/node /opt/jrc-ownership-observer/ownership-observer.mjs --config /etc/jrc-ownership-observer/observer.json
+TimeoutStartSec=90
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/jrc-ownership-observer

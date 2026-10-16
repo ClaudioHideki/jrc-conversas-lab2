@@ -1,9 +1,10 @@
 <script setup>
 /* global globalThis */
-import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Button from 'dashboard/components-next/button/Button.vue';
 import Input from 'dashboard/components-next/input/Input.vue';
+import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import Select from 'dashboard/components-next/select/Select.vue';
 import Pagination from 'dashboard/components-next/pagination/PaginationFooter.vue';
 import BaseTable from 'dashboard/components-next/table/BaseTable.vue';
@@ -42,6 +43,8 @@ const total = ref(0);
 const page = ref(1);
 const status = ref('idle');
 const editor = ref(null);
+const editorDialog = ref(null);
+const modalEditor = computed(() => props.resource === 'services');
 const form = ref({});
 const saving = ref(false);
 const feedback = ref('idle');
@@ -95,6 +98,12 @@ const clearEditor = () => {
   pending.value = null;
   feedback.value = 'idle';
 };
+watch(editor, async value => {
+  if (value && modalEditor.value) {
+    await nextTick();
+    editorDialog.value?.open();
+  }
+});
 const load = async () => {
   if (!allowed.value || !unitId.value || saving.value) return;
   const run = begin();
@@ -185,11 +194,17 @@ const edit = async row => {
       run.resource,
       run.unit
     );
+    if (record.id !== row.id)
+      throw new TypeError('Unexpected configuration record');
     editor.value = record;
-    form.value = Object.fromEntries(
-      fields.value
-        .filter(field => Object.hasOwn(record, field))
-        .map(field => [field, record[field]])
+    form.value = JSON.parse(
+      JSON.stringify(
+        Object.fromEntries(
+          fields.value
+            .filter(field => Object.hasOwn(record, field))
+            .map(field => [field, record[field]])
+        )
+      )
     );
     feedback.value = 'idle';
   } catch (error) {
@@ -259,6 +274,11 @@ const save = async () => {
       run.resource,
       run.unit
     );
+    if (
+      attempt.intent.action === 'update' &&
+      first.id !== attempt.intent.recordId
+    )
+      throw new TypeError('Unexpected configuration acknowledgement');
     const auditId = canonicalId(ack.audit_id);
     if (!auditId) throw new TypeError('Missing audit receipt');
     const receipt = await API.receipt(
@@ -290,6 +310,12 @@ const save = async () => {
     pending.value = null;
     feedback.value = 'confirmed';
     saving.value = false;
+    if (modalEditor.value && attempt.intent.action === 'update') {
+      rows.value = rows.value.map(row => (row.id === record.id ? record : row));
+      clearEditor();
+      feedback.value = 'confirmed';
+      return;
+    }
     await load();
     await session.revalidate();
   } catch (error) {
@@ -411,99 +437,134 @@ onBeforeUnmount(() => {
       :total-items="total"
       @update:current-page="paginate"
     />
-    <form
+    <component
+      :is="modalEditor ? Dialog : 'div'"
       v-if="editor"
-      class="grid gap-3 border-t border-n-weak mt-4 pt-4"
-      @submit.prevent="save"
+      ref="editorDialog"
+      v-bind="
+        modalEditor
+          ? {
+              width: '5xl',
+              contained: true,
+              useForm: false,
+              closeOnClickOutside: false,
+              dismissible: !saving,
+              showCloseButton: true,
+              showCancelButton: false,
+              showConfirmButton: false,
+              title: t('JRC_SERVICE_DESK.CATALOG.editor_title', {
+                name: editor.name || t('JRC_SERVICE_DESK.CATALOG.new_record'),
+              }),
+            }
+          : {}
+      "
+      @close="clearEditor"
     >
-      <Input
-        v-model="form.name"
-        :disabled="saving || !!pending"
-        :label="t('JRC_SERVICE_DESK.FIELDS.name')"
-        maxlength="255"
-      />
-      <Input
-        v-model="form.code"
-        :disabled="!!editor.id || saving || !!pending"
-        :label="t('JRC_SERVICE_DESK.FIELDS.code')"
-        maxlength="80"
-      />
-      <label class="text-sm"
-        ><input
-          v-model="form.active"
-          type="checkbox"
-          :disabled="saving || !!pending"
-        />
-        {{ t('JRC_SERVICE_DESK.ADMIN.active_label') }}</label
+      <form
+        class="grid gap-3"
+        :class="modalEditor ? '' : 'border-t border-n-weak mt-4 pt-4'"
+        data-configuration-editor
+        @submit.prevent="save"
       >
-      <Input
-        v-if="fields.includes('position')"
-        v-model="form.position"
-        type="number"
-        min="0"
-        :disabled="saving || !!pending"
-        :label="t('JRC_SERVICE_DESK.ADMIN.position')"
-      />
-      <Select
-        v-if="resource === 'statuses'"
-        v-model="form.phase"
-        :options="phases"
-        :disabled="saving || !!pending"
-        :aria-label="t('JRC_SERVICE_DESK.ADMIN.phase')"
-      />
-      <label v-if="resource === 'statuses'" class="text-sm">
-        <input
-          v-model="form.initial"
-          type="checkbox"
+        <Input
+          v-model="form.name"
           :disabled="saving || !!pending"
+          :label="t('JRC_SERVICE_DESK.FIELDS.name')"
+          maxlength="255"
         />
-        {{ t('JRC_SERVICE_DESK.ADMIN.initial') }}
-      </label>
-      <LookupSelect
-        v-if="resource === 'queues'"
-        v-model="form.team_id"
-        resource="teams"
-        :unit-id="unitId"
-        :disabled="saving || !!pending"
-        :label="t('JRC_SERVICE_DESK.FIELDS.team')"
-      />
-      <ConfigurationV2Fields
-        v-if="
-          ['services', 'queues', 'categories', 'ticket_types'].includes(
-            resource
-          )
-        "
-        v-model="form"
-        :resource="resource"
-        :unit-id="unitId"
-        :context="session.state.context"
-        :disabled="saving || !!pending"
-      />
-      <p class="text-xs text-n-slate-11">
-        {{ t('JRC_SERVICE_DESK.ADMIN.deactivation_warning') }}
-      </p>
-      <div class="flex gap-3">
-        <Button
-          type="submit"
-          :disabled="saving || !unitId"
-          :label="
-            t(
-              pending
-                ? 'JRC_SERVICE_DESK.ADMIN.retry_same'
-                : 'JRC_SERVICE_DESK.COMMON.save'
+        <Input
+          v-model="form.code"
+          :disabled="!!editor.id || saving || !!pending"
+          :label="t('JRC_SERVICE_DESK.FIELDS.code')"
+          maxlength="80"
+        />
+        <label class="text-sm"
+          ><input
+            v-model="form.active"
+            type="checkbox"
+            :disabled="saving || !!pending"
+          />
+          {{ t('JRC_SERVICE_DESK.ADMIN.active_label') }}</label
+        >
+        <Input
+          v-if="fields.includes('position')"
+          v-model="form.position"
+          type="number"
+          min="0"
+          :disabled="saving || !!pending"
+          :label="t('JRC_SERVICE_DESK.ADMIN.position')"
+        />
+        <Select
+          v-if="resource === 'statuses'"
+          v-model="form.phase"
+          :options="phases"
+          :disabled="saving || !!pending"
+          :aria-label="t('JRC_SERVICE_DESK.ADMIN.phase')"
+        />
+        <label v-if="resource === 'statuses'" class="text-sm">
+          <input
+            v-model="form.initial"
+            type="checkbox"
+            :disabled="saving || !!pending"
+          />
+          {{ t('JRC_SERVICE_DESK.ADMIN.initial') }}
+        </label>
+        <LookupSelect
+          v-if="resource === 'queues'"
+          v-model="form.team_id"
+          resource="teams"
+          :unit-id="unitId"
+          :disabled="saving || !!pending"
+          :label="t('JRC_SERVICE_DESK.FIELDS.team')"
+        />
+        <ConfigurationV2Fields
+          v-if="
+            ['services', 'queues', 'categories', 'ticket_types'].includes(
+              resource
             )
           "
+          v-model="form"
+          :resource="resource"
+          :unit-id="unitId"
+          :context="session.state.context"
+          :disabled="saving || !!pending"
         />
-        <Button
-          type="button"
-          variant="ghost"
-          :disabled="saving"
-          :label="t('JRC_SERVICE_DESK.COMMON.cancel')"
-          @click="clearEditor"
-        />
-      </div>
-    </form>
-    <p v-if="feedback !== 'idle'" role="status" class="text-sm mt-3">
+        <p class="text-xs text-n-slate-11">
+          {{ t('JRC_SERVICE_DESK.ADMIN.deactivation_warning') }}
+        </p>
+        <p v-if="feedback !== 'idle'" role="status" class="text-sm">
+          {{ t(`JRC_SERVICE_DESK.ADMIN.feedback.${feedback}`) }}
+        </p>
+        <div
+          class="flex gap-3"
+          :class="
+            modalEditor
+              ? 'sticky bottom-0 z-10 border-t border-n-weak bg-n-solid-2 py-3'
+              : ''
+          "
+        >
+          <Button
+            type="submit"
+            :disabled="saving || !unitId"
+            :label="
+              t(
+                pending
+                  ? 'JRC_SERVICE_DESK.ADMIN.retry_same'
+                  : 'JRC_SERVICE_DESK.COMMON.save'
+              )
+            "
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            :disabled="saving"
+            :label="t('JRC_SERVICE_DESK.COMMON.cancel')"
+            @click="clearEditor"
+          />
+        </div>
+      </form>
+    </component>
+    <p v-if="feedback !== 'idle' && !editor" role="status" class="text-sm mt-3">
       {{ t(`JRC_SERVICE_DESK.ADMIN.feedback.${feedback}`) }}
     </p>
   </Panel>

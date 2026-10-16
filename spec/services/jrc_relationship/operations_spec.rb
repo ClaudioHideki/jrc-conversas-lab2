@@ -109,6 +109,13 @@ RSpec.describe 'Relationship operational regression' do
     assignment.update!(business_unit: unit, team: team)
     wrong = JrcOperations::Queue.create!(account: sd_account, name: 'Other unit', code: 'OTHER', business_unit: other_unit, settings: { scopes: ['relationship'] })
     correct = JrcOperations::Queue.create!(account: sd_account, name: 'Assigned unit/team', code: 'CORRECT', business_unit: unit, team: team, settings: { scopes: ['relationship'] })
+    expect do
+      workflow.save(kind: 'actions', attributes: { assignment_id: assignment.id, request_id: 'unit', reason: 'Unit routing' })
+    end.to raise_error(ActiveRecord::RecordNotFound)
+    expect(assignment.reload.actions).to be_empty
+    JrcCrm::UserBusinessUnit.create!(account: sd_account, user: sd_user, company: internal, business_unit: unit,
+                                   scope: 'BUSINESS_UNIT', structure_managed: true)
+    expect(context.assignments.pluck(:id)).to eq([assignment.id])
     action = workflow.save(kind: 'actions', attributes: { assignment_id: assignment.id, request_id: 'unit', reason: 'Unit routing' })[:record]
     expect(action.operations_queue_id).to eq(correct.id)
     expect(wrong.supports_scope?('backoffice')).to be(false)

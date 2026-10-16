@@ -6,6 +6,7 @@ require 'ostruct'
 ROOT = File.expand_path('../..', __dir__) unless defined?(ROOT)
 require File.join(ROOT, 'app/services/jrc_crm/commercial_financials')
 require File.join(ROOT, 'app/services/jrc_crm/commercial_item_allocation')
+require File.join(ROOT, 'app/services/jrc_crm/corporate_coverage')
 require File.join(ROOT, 'app/services/jrc_crm/goal_progress_service')
 class Object
   def present?; !nil? && self != false && (!respond_to?(:empty?) || !empty?); end unless method_defined?(:present?)

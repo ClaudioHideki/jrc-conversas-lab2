@@ -1,0 +1,2 @@
+class JrcFlowOwnershipExecution < ApplicationRecord
+end

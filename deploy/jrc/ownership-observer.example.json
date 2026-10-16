@@ -1,0 +1,21 @@
+{
+  "project": "jrc-candidate",
+  "services": {
+    "rails": { "role": "rails", "minimumReplicas": 1 },
+    "sidekiq": { "role": "worker", "minimumReplicas": 1 }
+  },
+  "ignoredServices": ["postgres", "redis"],
+  "imageRepository": "REPLACE_WITH_PUBLISHED_CANDIDATE_REPOSITORY",
+  "expectedImageDigest": "REPLACE_WITH_ACTUAL_OCI_REPODIGEST",
+  "expectedSourceSha": "REPLACE_WITH_VERIFIED_CANDIDATE_GIT_SHA",
+  "guardManifestFile": "/etc/jrc-ownership-observer/jrc_flow_ownership_guards.json",
+  "appRoot": "/app",
+  "challengeDirectory": "/var/lib/jrc-ownership-observer/public/challenge",
+  "challengeContainerDirectory": "/run/jrc-ownership/challenge",
+  "attestationDirectory": "/var/lib/jrc-ownership-observer/public/attestation",
+  "attestationContainerDirectory": "/run/jrc-ownership/attestation",
+  "privateKeyFile": "/var/lib/jrc-ownership-observer/private/signing-key.pem",
+  "ttlSeconds": 120,
+  "maxHeartbeatAgeSeconds": 20,
+  "maxWaitSeconds": 15
+}

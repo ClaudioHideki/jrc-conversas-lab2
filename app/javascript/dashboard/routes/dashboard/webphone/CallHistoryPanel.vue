@@ -1,7 +1,68 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import CallHistoryAPI from 'dashboard/api/callHistory';
 import CallQualityAnalysesAPI from 'dashboard/api/callQualityAnalyses';
+
+const { t } = useI18n();
+const recordings = ref({});
+const recordingBusy = ref({});
+const recordingErrors = ref({});
+const recordingControllers = new Map();
+let recordingGeneration = 0;
+let disposed = false;
+const page = ref(1);
+const provider = ref('');
+const sync = ref({});
+
+const clearRecordings = () => {
+  recordingGeneration += 1;
+  recordingControllers.forEach(controller => controller.abort());
+  recordingControllers.clear();
+  Object.values(recordings.value).forEach(url => URL.revokeObjectURL(url));
+  recordings.value = {};
+  recordingBusy.value = {};
+};
+
+const loadRecording = async call => {
+  if (recordingBusy.value[call.id] || call.recording_state !== 'requestable')
+    return;
+  clearRecordings();
+  const generation = recordingGeneration;
+  const controller = new AbortController();
+  recordingControllers.set(call.id, controller);
+  delete recordingErrors.value[call.id];
+  recordingBusy.value[call.id] = true;
+  try {
+    const { data } = await CallHistoryAPI.recording(call.id, {
+      signal: controller.signal,
+    });
+    if (disposed || generation !== recordingGeneration) return;
+    recordings.value[call.id] = URL.createObjectURL(data);
+  } catch (error) {
+    if (
+      disposed ||
+      generation !== recordingGeneration ||
+      error?.code === 'ERR_CANCELED'
+    )
+      return;
+    recordingErrors.value[call.id] =
+      {
+        403: t('SOFTPHONE.PABX.RECORDING_FORBIDDEN'),
+        404: t('SOFTPHONE.PABX.RECORDING_UNAVAILABLE'),
+        410: t('SOFTPHONE.PABX.RECORDING_EXPIRED'),
+      }[error?.response?.status] || t('SOFTPHONE.PABX.RECORDING_ERROR');
+  } finally {
+    if (!disposed && generation === recordingGeneration)
+      recordingBusy.value[call.id] = false;
+    if (recordingControllers.get(call.id) === controller)
+      recordingControllers.delete(call.id);
+  }
+};
+onUnmounted(() => {
+  disposed = true;
+  clearRecordings();
+});
 
 const TEXT = Object.freeze({
   kicker: 'TELEFONIA',
@@ -38,14 +99,17 @@ const DIRECTION_OPTIONS = [
   ['inbound', TEXT.inbound],
   ['outbound', TEXT.outbound],
   ['local', TEXT.local],
+  ['api', 'API'],
 ];
 const STATUS_OPTIONS = [
   ['', TEXT.allStatuses],
   ['answered', TEXT.answered],
   ['unanswered', TEXT.unanswered],
+  ['missed', 'Perdidas (recebidas não atendidas)'],
   ['busy', TEXT.busy],
   ['cancelled', TEXT.cancelled],
   ['failed', TEXT.failed],
+  ['congestion', 'Congestionada'],
 ];
 
 const loading = ref(false);
@@ -67,10 +131,19 @@ const SAO_PAULO_TIME_ZONE = 'America/Sao_Paulo';
 const AUTO_REFRESH_INTERVAL_MS = 60000;
 let autoRefreshTimer = null;
 
-const today = () => new Date().toISOString().slice(0, 10);
+const today = () => {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: SAO_PAULO_TIME_ZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(new Date());
+  const values = Object.fromEntries(parts.map(part => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+};
 const isoDaysAgo = days => {
-  const value = new Date();
-  value.setDate(value.getDate() - days);
+  const value = new Date(`${today()}T12:00:00Z`);
+  value.setUTCDate(value.getUTCDate() - days);
   return value.toISOString().slice(0, 10);
 };
 
@@ -113,8 +186,15 @@ const fetchHistory = async () => {
       direction: direction.value || undefined,
       status: status.value || undefined,
       per_page: 100,
+      page: page.value,
+      time_zone: SAO_PAULO_TIME_ZONE,
     });
+    if (disposed) return;
+    clearRecordings();
+    recordingErrors.value = {};
     calls.value = data.calls;
+    provider.value = data.provider || '';
+    sync.value = data.sync || {};
     total.value = data.count;
     summary.value =
       data.summary ||
@@ -130,11 +210,17 @@ const fetchHistory = async () => {
     fetchedAt.value = data.fetched_at;
     loaded.value = true;
   } catch (error) {
+    if (disposed) return;
+    clearRecordings();
+    recordingErrors.value = {};
+    calls.value = [];
+    total.value = 0;
+    summary.value = { total: 0, answered: 0, unanswered: 0 };
+    provider.value = '';
+    sync.value = {};
     errorMessage.value =
       error?.response?.data?.message ||
       'Não foi possível consultar o PABX. Tente novamente.';
-    calls.value = [];
-    summary.value = { total: 0, answered: 0, unanswered: 0 };
     loaded.value = true;
   } finally {
     loading.value = false;
@@ -142,7 +228,12 @@ const fetchHistory = async () => {
 };
 
 const setPeriod = value => {
+  page.value = 1;
   period.value = value;
+};
+const applyFilters = () => {
+  page.value = 1;
+  fetchHistory();
 };
 
 const canAutoRefresh = () => {
@@ -192,6 +283,7 @@ const updatedText = computed(() =>
 );
 
 const formatDuration = seconds => {
+  if (seconds === null || seconds === undefined) return '—';
   const value = Number(seconds || 0);
   const minutes = Math.floor(value / 60);
   const remainder = value % 60;
@@ -203,6 +295,7 @@ const directionMeta = value =>
     outbound: { label: 'Realizada', icon: 'i-lucide-phone-outgoing' },
     inbound: { label: 'Recebida', icon: 'i-lucide-phone-incoming' },
     local: { label: 'Interna', icon: 'i-lucide-phone-forwarded' },
+    api: { label: 'API', icon: 'i-lucide-phone' },
   })[value] || { label: 'Chamada', icon: 'i-lucide-phone' };
 
 const statusLabel = value =>
@@ -212,6 +305,7 @@ const statusLabel = value =>
     busy: 'Ocupado',
     cancelled: 'Cancelada',
     failed: 'Falha',
+    congestion: 'Congestionada',
   })[value] || value;
 
 const statusClass = value =>
@@ -370,6 +464,43 @@ onUnmounted(() => {
       </button>
     </header>
 
+    <div v-if="provider" class="mb-3 space-y-2 text-xs text-n-slate-11">
+      <p>{{ t('SOFTPHONE.PABX.HISTORY_PROVIDER', { provider }) }}</p>
+      <p>
+        {{
+          t('SOFTPHONE.PABX.HISTORY_SYNC', {
+            time: sync.last_success_at || '—',
+          })
+        }}
+      </p>
+      <p v-if="sync.last_error" role="status">
+        {{ t('SOFTPHONE.PABX.HISTORY_ERROR', { code: sync.last_error }) }}
+      </p>
+    </div>
+    <nav v-if="loaded && total > 100" class="mb-3 flex items-center gap-3">
+      <button
+        type="button"
+        :disabled="loading || page <= 1"
+        @click="
+          page -= 1;
+          fetchHistory();
+        "
+      >
+        {{ t('SOFTPHONE.PABX.PREVIOUS') }}
+      </button>
+      <span>{{ t('SOFTPHONE.PABX.PAGE', { page }) }}</span>
+      <button
+        type="button"
+        :disabled="loading || page * 100 >= total"
+        @click="
+          page += 1;
+          fetchHistory();
+        "
+      >
+        {{ t('SOFTPHONE.PABX.NEXT') }}
+      </button>
+    </nav>
+
     <div v-if="loaded" class="mb-4 grid grid-cols-3 gap-2">
       <div
         class="rounded-xl border border-n-blue-7 bg-n-blue-3 p-3 text-n-blue-11"
@@ -449,7 +580,7 @@ onUnmounted(() => {
         type="button"
         class="w-full rounded-xl bg-n-brand px-4 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-50"
         :disabled="loading"
-        @click="fetchHistory"
+        @click="applyFilters"
       >
         {{ actionLabel }}
       </button>
@@ -467,9 +598,11 @@ onUnmounted(() => {
       class="flex flex-1 flex-col items-center justify-center px-5 text-center"
     >
       <span class="i-lucide-loader-2 mb-3 size-9 animate-spin text-n-brand" />
-      <p class="font-medium text-n-slate-11">Buscando histórico...</p>
+      <p class="font-medium text-n-slate-11">
+        {{ t('SOFTPHONE.PABX.HISTORY_LOADING') }}
+      </p>
       <p class="mt-1 text-sm text-n-slate-10">
-        O histórico será exibido assim que a consulta terminar.
+        {{ t('SOFTPHONE.PABX.HISTORY_LOADING_HELP') }}
       </p>
     </div>
 
@@ -537,6 +670,49 @@ onUnmounted(() => {
               :src="call.recording_url"
               @contextmenu.prevent
             />
+            <button
+              v-if="
+                call.has_recording &&
+                call.provider === 'pabx_v1' &&
+                call.recording_state === 'requestable' &&
+                !recordings[call.id]
+              "
+              type="button"
+              :disabled="recordingBusy[call.id]"
+              class="mt-3 rounded-lg border border-n-weak px-3 py-2 text-xs"
+              @click="loadRecording(call)"
+            >
+              {{ t('SOFTPHONE.PABX.LOAD_RECORDING') }}
+            </button>
+            <audio
+              v-if="recordings[call.id]"
+              :src="recordings[call.id]"
+              controls
+              preload="none"
+              class="mt-3 h-9 w-full"
+            />
+            <p
+              v-if="
+                call.provider === 'pabx_v1' &&
+                call.recording_state === 'mapping_pending'
+              "
+              class="mt-2 text-xs text-n-slate-10"
+            >
+              {{ t('SOFTPHONE.PABX.RECORDING_PENDING') }}
+            </p>
+            <p
+              v-if="call.provider === 'pabx_v1' && !call.has_recording"
+              class="mt-2 text-xs text-n-slate-10"
+            >
+              {{ t('SOFTPHONE.PABX.RECORDING_NONE') }}
+            </p>
+            <p
+              v-if="recordingErrors[call.id]"
+              role="alert"
+              class="mt-2 text-xs text-n-ruby-11"
+            >
+              {{ recordingErrors[call.id] }}
+            </p>
             <div
               v-if="call.recording_url"
               class="mt-3 flex flex-wrap items-center gap-2"

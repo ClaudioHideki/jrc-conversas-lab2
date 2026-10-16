@@ -1,12 +1,11 @@
 class JrcCustomers::Customer360
-  attr_reader :contacts, :conversations, :deals, :leads, :activities, :proposals, :audits, :calls, :recipients, :tickets, :projects, :project_tasks, :ticket_events, :project_events, :contracts, :orders, :follow_ups
+  attr_reader :contacts, :conversations, :deals, :leads, :activities, :proposals, :audits, :calls, :recipients, :tickets, :projects, :project_tasks,
+              :ticket_events, :project_events, :contracts, :orders, :follow_ups
 
   def initialize(account:, user:, account_user:, company: nil, contact: nil)
     @account, @user, @company, @contact, @account_user = account, user, company, contact, account_user
-    raise ArgumentError, 'Choose exactly one company or contact' if company.nil? == contact.nil?
-    raise ActiveRecord::RecordNotFound unless (company || contact).account_id == account.id
-
     @visibility = JrcCustomers::Visibility.new(account: account, user: user, account_user: account_user)
+    @visibility.authorize_subject!(company: company, contact: contact)
     @contacts = contact ? account.contacts.where(id: contact.id) : account.contacts.where(company_id: company.id)
     contact_ids = @contacts.select(:id)
     @conversations = @visibility.conversations.where(contact_id: contact_ids)
@@ -19,9 +18,7 @@ class JrcCustomers::Customer360
     @proposals = proposal_scope.where(deal_id: deals.select(:id)).or(proposal_scope.where(contact_id: contacts.select(:id)))
     @proposals = @proposals.or(proposal_scope.where(company_id: company.id)) if company
     @calls = @visibility.calls(contact_ids: contact_ids, conversation_ids: conversations.select(:id))
-    @recipients = if @visibility.campaigns?
-                    JrcCampaigns::Recipient.where(contact_id: contact_ids, campaign_id: account.jrc_campaigns.select(:id))
-                  end
+    @recipients = (JrcCampaigns::Recipient.where(contact_id: contact_ids, campaign_id: account.jrc_campaigns.select(:id)) if @visibility.campaigns?)
     initialize_operations(contact_ids)
     initialize_commercial(contact_ids)
     initialize_relationship

@@ -15,6 +15,7 @@ export const OPERATORS = {
   money: ['eq', 'neq', 'lt', 'lte', 'gt', 'gte', 'between', 'in'],
   datetime: ['eq', 'neq', 'lt', 'lte', 'gt', 'gte', 'between', 'in'],
   string: ['eq', 'neq', 'contains', 'in'],
+  string_list: ['contains'],
   boolean: ['eq', 'neq'],
 };
 export const copy = value => JSON.parse(JSON.stringify(value));

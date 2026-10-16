@@ -69,3 +69,5 @@ class JrcFlowsListener < BaseListener
     end
   end
 end
+
+JrcFlowsListener.prepend(JrcFlows::OwnershipEntrypoints::Listener)

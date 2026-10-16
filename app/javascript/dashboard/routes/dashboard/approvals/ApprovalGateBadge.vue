@@ -65,6 +65,8 @@ watch(
   { immediate: true }
 );
 const label = computed(() => {
+  if (gate.value?.gratuity_required && gate.value?.mode !== 'enforcement')
+    return 'GRATUITY_POLICY_REQUIRED';
   if (gate.value?.mode === 'shadow') return 'shadow';
   if (gate.value?.status === 'ready')
     return gate.value.required ? 'approved' : 'notRequired';
@@ -125,7 +127,7 @@ const create = async () => {
         />
       </div>
       <p
-        v-if="gate.mode === 'shadow'"
+        v-if="gate.mode === 'shadow' && !gate.gratuity_required"
         class="text-xs text-n-slate-11"
       >
         {{ t('JRC_APPROVALS.shadowNotice') }}

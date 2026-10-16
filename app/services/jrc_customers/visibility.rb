@@ -2,7 +2,18 @@
 # Re-evaluated for every request and used for BOTH totals and list/timeline items.
 class JrcCustomers::Visibility
   def initialize(account:, user:, account_user:)
-    @account, @user, @membership = account, user, account_user
+    @account = account
+    @user = user
+    @membership = account_user
+  end
+
+  def authorize_subject!(company:, contact:)
+    raise ArgumentError, 'Choose exactly one company or contact' if company.nil? == contact.nil?
+    raise ActiveRecord::RecordNotFound unless (company || contact).account_id == @account.id
+    return unless company
+
+    companies = JrcCrm::CorporateCoverage.new(account: @account, user: @user).companies(@account.master_companies)
+    raise ActiveRecord::RecordNotFound unless companies.exists?(id: company.id)
   end
 
   def conversations
@@ -21,9 +32,9 @@ class JrcCustomers::Visibility
 
   def crm(relation, owner: :owner_id)
     return relation.none unless crm?
-    return relation if @membership.administrator?
 
-    JrcCrm::OrganizationalVisibility.new(account: @account, user: @user, relation: relation.where(owner => @user.id)).call
+    visible = @membership.administrator? ? relation : relation.where(owner => @user.id)
+    JrcCrm::OrganizationalVisibility.new(account: @account, user: @user, relation: visible).call
   end
 
   def crm?

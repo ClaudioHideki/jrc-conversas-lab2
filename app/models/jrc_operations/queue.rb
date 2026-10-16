@@ -15,6 +15,7 @@ module JrcOperations
     validates :code, uniqueness: { scope: :account_id }
     validates :assignment_strategy, inclusion: { in: ASSIGNMENT_STRATEGIES }
     validate :same_account
+    validate :company_matches_business_unit
 
     scope :active, -> { where(active: true) }
 
@@ -47,6 +48,12 @@ module JrcOperations
     end
 
     private
+
+    def company_matches_business_unit
+      return unless business_unit && operating_company_id
+
+      errors.add(:operating_company, 'must match business unit') unless business_unit.company_id == operating_company_id
+    end
 
     def matches_list?(configured, value)
       values = Array(configured).map(&:to_s).reject(&:blank?)

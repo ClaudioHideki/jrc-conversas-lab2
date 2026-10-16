@@ -4,7 +4,7 @@ class AgentBotListener < BaseListener
     inbox = conversation.inbox
     event_name = __method__.to_s
     payload = conversation.webhook_data.merge(event: event_name)
-    agent_bots_for(inbox, conversation).each { |agent_bot| process_webhook_bot_event(agent_bot, payload) }
+    agent_bots_for(inbox, conversation).each { |agent_bot| process_webhook_bot_event(agent_bot, payload, inbox: inbox) }
   end
 
   def conversation_opened(event)
@@ -12,7 +12,7 @@ class AgentBotListener < BaseListener
     inbox = conversation.inbox
     event_name = __method__.to_s
     payload = conversation.webhook_data.merge(event: event_name)
-    agent_bots_for(inbox, conversation).each { |agent_bot| process_webhook_bot_event(agent_bot, payload) }
+    agent_bots_for(inbox, conversation).each { |agent_bot| process_webhook_bot_event(agent_bot, payload, inbox: inbox) }
   end
 
   def conversation_status_changed(event)
@@ -21,7 +21,7 @@ class AgentBotListener < BaseListener
     inbox = conversation.inbox
     event_name = __method__.to_s
     payload = conversation.webhook_data.merge(event: event_name, changed_attributes: changed_attributes)
-    agent_bots_for(inbox, conversation).each { |agent_bot| process_webhook_bot_event(agent_bot, payload) }
+    agent_bots_for(inbox, conversation).each { |agent_bot| process_webhook_bot_event(agent_bot, payload, inbox: inbox) }
   end
 
   def conversation_updated(event)
@@ -30,7 +30,7 @@ class AgentBotListener < BaseListener
     inbox = conversation.inbox
     event_name = __method__.to_s
     payload = conversation.webhook_data.merge(event: event_name, changed_attributes: changed_attributes)
-    agent_bots_for(inbox, conversation).each { |agent_bot| process_webhook_bot_event(agent_bot, payload) }
+    agent_bots_for(inbox, conversation).each { |agent_bot| process_webhook_bot_event(agent_bot, payload, inbox: inbox) }
   end
 
   def message_created(event)
@@ -57,7 +57,7 @@ class AgentBotListener < BaseListener
     event_name = __method__.to_s
     payload = contact_inbox.webhook_data.merge(event: event_name)
     payload[:event_info] = event.data[:event_info]
-    agent_bots_for(inbox).each { |agent_bot| process_webhook_bot_event(agent_bot, payload) }
+    agent_bots_for(inbox).each { |agent_bot| process_webhook_bot_event(agent_bot, payload, inbox: inbox) }
   end
 
   private
@@ -82,13 +82,15 @@ class AgentBotListener < BaseListener
 
     # Only webhook bots are supported
     payload = message.webhook_data.merge(event: method_name)
-    process_webhook_bot_event(agent_bot, payload)
+    process_webhook_bot_event(agent_bot, payload, inbox: message.inbox)
   end
 
-  def process_webhook_bot_event(agent_bot, payload)
+  def process_webhook_bot_event(agent_bot, payload, inbox:)
     return if agent_bot.outgoing_url.blank?
 
     AgentBots::WebhookJob.perform_later(agent_bot.outgoing_url, payload, :agent_bot_webhook,
-                                        secret: agent_bot.secret, delivery_id: SecureRandom.uuid)
+                                        secret: agent_bot.secret, delivery_id: SecureRandom.uuid,
+                                        native_account_id: inbox.account_id, native_inbox_id: inbox.id, native_bot_id: agent_bot.id,
+                                        native_epoch_id: JrcFlows::NativeResponders.scope_for(inbox)&.current_epoch_id)
   end
 end

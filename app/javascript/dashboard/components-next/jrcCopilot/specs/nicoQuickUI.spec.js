@@ -781,6 +781,64 @@ describe('Quick NICO and Full Copilot use one operator session', () => {
     );
   });
 
+  it('shows the Broker pause status and lets the operator cancel before a message exists', async () => {
+    snapshot = {
+      ...snapshot,
+      messages: [{ role: 'assistant', content: 'Prévia anterior' }],
+      tools: [{ name: 'send_message', description: 'Enviar mensagem' }],
+      commands: [
+        {
+          id: 42,
+          tool: 'send_message',
+          status: 'executing',
+          arguments: { conversation_id: 14, content: 'Resposta aprovada' },
+          reply:
+            'Pausa solicitada. A mensagem aguarda a confirmação do Broker.',
+          result: { broker_send: { phase: 'DRAINING', cancelable: true } },
+        },
+      ],
+    };
+    ui.open();
+    await flushPromises();
+    const card = wrapper.get('[data-nico-command]');
+    expect(card.text()).toContain(snapshot.commands[0].reply);
+    const cancel = card
+      .findAll('button')
+      .find(button => button.text() === translations.JRC_NICO.OPERATOR.CANCEL);
+    expect(cancel).toBeDefined();
+    await cancel.trigger('click');
+    await flushPromises();
+    expect(api.command).toHaveBeenCalledWith(1, 42, 'cancel');
+  });
+
+  it('uses the current Broker command reply in Quick instead of a stale assistant message', async () => {
+    snapshot = {
+      ...snapshot,
+      messages: [{ role: 'assistant', content: 'Prévia anterior' }],
+      commands: [
+        {
+          id: 43,
+          tool: 'send_message',
+          status: 'succeeded',
+          reply:
+            'Mensagem registrada para envio pelo canal. O bot permanece pausado nesta conversa.',
+          result: {
+            broker_send: {
+              phase: 'COMPLETED',
+              message_id: 7,
+              delivery: 'delivered',
+              cancelable: false,
+            },
+          },
+        },
+      ],
+    };
+    ui.openQuick();
+    await flushPromises();
+    expect(wrapper.text()).toContain(snapshot.commands[0].reply);
+    expect(wrapper.text()).not.toContain('Prévia anterior');
+  });
+
   it('shows understanding and working while waiting, never completion before the backend confirms it', async () => {
     ui.openQuick();
     await flushPromises();

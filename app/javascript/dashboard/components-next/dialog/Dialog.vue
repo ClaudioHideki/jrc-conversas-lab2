@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onBeforeUnmount } from 'vue';
 import { OnClickOutside } from '@vueuse/components';
 import { useI18n } from 'vue-i18n';
 
@@ -7,6 +7,11 @@ import Button from 'dashboard/components-next/button/Button.vue';
 import TeleportWithDirection from 'dashboard/components-next/TeleportWithDirection.vue';
 
 const props = defineProps({
+  nestedPopover: { type: Boolean, default: false },
+  contained: { type: Boolean, default: false },
+  useForm: { type: Boolean, default: true },
+  dismissible: { type: Boolean, default: true },
+  closeOnClickOutside: { type: Boolean, default: true },
   type: {
     type: String,
     default: 'edit',
@@ -55,7 +60,8 @@ const props = defineProps({
   width: {
     type: String,
     default: 'lg',
-    validator: value => ['3xl', '2xl', 'xl', 'lg', 'md', 'sm'].includes(value),
+    validator: value =>
+      ['5xl', '3xl', '2xl', 'xl', 'lg', 'md', 'sm'].includes(value),
   },
   position: {
     type: String,
@@ -74,6 +80,7 @@ const isOpen = ref(false);
 
 const maxWidthClass = computed(() => {
   const classesMap = {
+    '5xl': 'max-w-5xl',
     '3xl': 'max-w-3xl',
     '2xl': 'max-w-2xl',
     xl: 'max-w-xl',
@@ -95,18 +102,25 @@ const open = () => {
 };
 
 const close = () => {
-  emit('close');
   dialogRef.value?.close();
   isOpen.value = false;
+  emit('close');
 };
 
 // Only close if the close event originated from this dialog,
 // not from a child dialog (e.g. ProseMirror prompt) bubbling up.
 const handleDialogClose = e => e.target === dialogRef.value && close();
+const handleDialogCancel = event => {
+  if (event.target !== dialogRef.value) return;
+  event.preventDefault();
+  if (props.dismissible) close();
+};
 
 // Only close on click-outside if this dialog is the topmost one.
 // If another dialog (e.g. ProseMirror prompt) is open on top, ignore.
-const handleClickOutside = () => {
+const handleClickOutside = event => {
+  if (!props.dismissible || !props.closeOnClickOutside) return;
+  if (event?.target?.closest('[data-popover-content]')) return;
   const dialogs = document.querySelectorAll('dialog[open]');
   if (dialogs[dialogs.length - 1] === dialogRef.value) close();
 };
@@ -116,29 +130,44 @@ const confirm = () => {
 };
 
 defineExpose({ open, close });
+onBeforeUnmount(() => dialogRef.value?.close());
 </script>
 
 <template>
   <TeleportWithDirection to="body">
     <dialog
       ref="dialogRef"
+      :data-popover-content="nestedPopover ? '' : undefined"
       class="w-full transition-all duration-300 ease-in-out shadow-xl rounded-xl"
       :class="[
         maxWidthClass,
         positionClass,
         overflowYAuto ? 'overflow-y-auto' : 'overflow-visible',
+        contained ? 'max-h-[calc(100dvh-3rem)]' : '',
       ]"
       @close.prevent="handleDialogClose"
+      @cancel="handleDialogCancel"
     >
       <OnClickOutside @trigger="handleClickOutside">
-        <form
+        <component
+          :is="useForm ? 'form' : 'div'"
           ref="dialogContentRef"
           class="flex flex-col w-full h-auto gap-6 p-6 overflow-visible text-start align-middle transition-all duration-300 ease-in-out transform bg-n-alpha-3 backdrop-blur-[100px] shadow-xl rounded-xl"
+          :class="contained ? 'max-h-[calc(100dvh-3rem)] min-h-0' : ''"
           @submit.prevent="confirm"
           @click.stop
         >
-          <Button v-if="showCloseButton" icon="i-lucide-x" variant="ghost" color="slate"
-            type="button" class="self-end" :aria-label="t('DIALOG.BUTTONS.CANCEL')" @click="close" />
+          <Button
+            v-if="showCloseButton"
+            :disabled="!dismissible"
+            icon="i-lucide-x"
+            variant="ghost"
+            color="slate"
+            type="button"
+            class="self-end"
+            :aria-label="t('DIALOG.BUTTONS.CANCEL')"
+            @click="close"
+          />
           <div v-if="title || description" class="flex flex-col gap-2">
             <h3 class="text-base font-medium leading-6 text-n-slate-12">
               {{ title }}
@@ -149,7 +178,13 @@ defineExpose({ open, close });
               </p>
             </slot>
           </div>
-          <slot v-if="isOpen" />
+          <div
+            v-if="isOpen && contained"
+            class="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+          >
+            <slot />
+          </div>
+          <slot v-else-if="isOpen" />
           <!-- Dialog content will be injected here -->
           <slot name="footer">
             <div
@@ -176,7 +211,7 @@ defineExpose({ open, close });
               />
             </div>
           </slot>
-        </form>
+        </component>
       </OnClickOutside>
     </dialog>
   </TeleportWithDirection>
