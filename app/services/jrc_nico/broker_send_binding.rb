@@ -1,5 +1,7 @@
 class JrcNico::BrokerSendBinding
   UNAVAILABLE = 'O vínculo Flow/controle desta caixa mudou ou está indisponível. Prepare uma nova prévia coordenada.'.freeze
+  ADOPTION_REQUIRED = 'Esta caixa usa a rota do Broker, mas falta concluir a adoção em Configurações do Broker. ' \
+                      'Peça ao administrador para adotar a conexão existente e depois prepare uma nova prévia coordenada.'.freeze
   QR_FIELDS = %w[id account_id inbox_id integration_id instance_id].freeze
   NATIVE_FIELDS = %w[id account_id inbox_id registration_id integration_id channel_id transport provider registration_revision].freeze
   REGISTRATION_FIELDS = %w[id account_id broker_origin host_origin organization_id credential_id credential_revision destination_revision
@@ -12,11 +14,31 @@ class JrcNico::BrokerSendBinding
       qr_scope = qr_scope.lock(lock) if lock
       qr = qr_scope.first
       native, registration = native_records(account_id, inbox_id, lock)
+      require_legacy_adoption!(account_id, inbox_id) unless qr || native
       return unless qr || native
 
       new(account_id, inbox_id, qr, native, registration).tap(&:validate!)
     end
   end
+
+  # This routing hint only prevents an uncoordinated send. It never authorizes
+  # adoption or supplies a credential; Context.adopt! verifies the remote tuple.
+  def self.require_legacy_adoption!(account_id, inbox_id)
+    integration = JrcBrokerIntegration.find_by(account_id: account_id)
+    inbox = Inbox.find_by(account_id: account_id, id: inbox_id, channel_type: 'Channel::Api')
+    return unless integration && inbox
+
+    callback = URI.parse(inbox.channel.webhook_url.to_s)
+    origin = URI.parse(integration.broker_origin)
+    route = %r{\A/v1/integrations/chatwoot/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/events\z}i
+    return unless [callback.scheme, callback.host.to_s.downcase, callback.port] == [origin.scheme, origin.host.to_s.downcase, origin.port]
+    return unless route.match?(callback.path)
+
+    raise ArgumentError, ADOPTION_REQUIRED
+  rescue URI::InvalidURIError
+    nil
+  end
+  private_class_method :require_legacy_adoption!
 
   def self.native_records(account_id, inbox_id, lock)
     scope = JrcFlowNativeBinding.where(account_id: account_id, inbox_id: inbox_id)

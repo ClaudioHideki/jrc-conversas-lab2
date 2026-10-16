@@ -138,6 +138,68 @@ RSpec.describe JrcNico::BrokerSendCoordinator do
     expect(command.reload.broker_send_operation).to be_nil
   end
 
+  it 'requires adoption before previewing a legacy Inbox routed to the configured Broker' do
+    account_control
+    inbox.channel.update!(webhook_url: "https://broker.example.test/v1/integrations/chatwoot/#{integration_id}/events")
+
+    expect { prepare_send }.to raise_error(ArgumentError, /adoção|adotar/)
+    expect(conversation.messages.outgoing.count).to eq(0)
+    expect(a_request(:get, "#{base}/attendance")).not_to have_been_made
+  end
+
+  it 'revalidates a legacy Broker route installed after ordinary approval' do
+    command = prepare_send
+    account_control
+    inbox.channel.update!(webhook_url: "https://broker.example.test/v1/integrations/chatwoot/#{integration_id}/events")
+
+    expect { operator.execute(command) }.to raise_error(ArgumentError, /adoção|adotar/)
+    expect(conversation.messages.outgoing.count).to eq(0)
+  end
+
+  it 'allows a private note in a legacy Broker Inbox without taking over or sending publicly' do
+    account_control
+    inbox.channel.update!(webhook_url: "https://broker.example.test/v1/integrations/chatwoot/#{integration_id}/events")
+    command = prepare_send(private_note: true)
+    operator.execute(command)
+
+    expect(conversation.messages.where(private: true).count).to eq(1)
+    expect(command.reload.broker_send_operation).to be_nil
+    expect(a_request(:get, "#{base}/attendance")).not_to have_been_made
+  end
+
+  it 'uses coordinated preview and send after the existing administrative adoption verifies the legacy connection' do
+    account_control
+    inbox.channel.update!(webhook_url: "https://broker.example.test/v1/integrations/chatwoot/#{integration_id}/events")
+    stub_request(:get, "https://broker.example.test/v1/integrations/chatwoot/control/connections/#{integration_id}/status")
+      .to_return(status: 200, body: { integrationId: integration_id, integrationStatus: 'READY',
+                                      inboxId: inbox.id, instanceId: SecureRandom.uuid }.to_json)
+
+    JrcBroker::Context.new(account: account, user: user).adopt!(integration_id)
+    command = prepare_send
+    expect(command.result.dig('broker_send', 'phase')).to eq('PREVIEW')
+    stub_pause_and_completion(command)
+    operator.execute(command)
+    2.times { JrcNico::BrokerSendJob.perform_now(command.broker_send_operation.id) }
+
+    expect(command.reload.broker_send_operation.state).to eq('COMPLETED')
+    expect(conversation.messages.outgoing.where(private: false).count).to eq(1)
+    expect(a_request(:post, "#{base}/takeovers")).to have_been_made.once
+  end
+
+  ['https://broker.example.test.other.test', 'https://unrelated.example.test',
+   'http://broker.example.test', 'https://broker.example.test:8443'].each do |origin|
+    it "does not grant Broker authority from a different webhook origin #{origin}" do
+      account_control
+      inbox.channel.update!(webhook_url: "#{origin}/v1/integrations/chatwoot/#{integration_id}/events")
+      command = prepare_send
+      operator.execute(command)
+
+      expect(command.reload.broker_send_operation).to be_nil
+      expect(conversation.messages.outgoing.where(private: false).count).to eq(1)
+      expect(a_request(:get, "#{base}/attendance")).not_to have_been_made
+    end
+  end
+
   %w[BROKER_TRANSPORT CENTRAL_TRANSPORT].each do |transport|
     it "coordinates native #{transport} through Account control without creating a QR binding" do
       native_binding(transport: transport)
