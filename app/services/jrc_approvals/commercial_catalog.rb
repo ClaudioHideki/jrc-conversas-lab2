@@ -37,6 +37,13 @@ class JrcApprovals::CommercialCatalog
 
   def self.selection_events(module_key, event_key)
     return [event_key] unless module_key == 'crm'
+
+    if JrcApprovals::GratuityCatalog.gratuity_key?("#{module_key}.#{event_key}")
+      gratuity_events = JrcApprovals::GratuityCatalog::EVENTS.keys.map { |key| key.split('.', 2).last }
+      return gratuity_events + ['gratuity_request'] if event_key == 'gratuity_request'
+
+      return [event_key, 'gratuity_request']
+    end
     return PRICE_EVENTS + ['price_exception'] if event_key == 'price_exception'
     return [event_key, 'price_exception'] if PRICE_EVENTS.include?(event_key)
 
@@ -80,8 +87,10 @@ class JrcApprovals::CommercialCatalog
   def self.business_unit(resource)
     return resource.business_unit unless resource.is_a?(JrcCrm::Deal)
 
-    # The same explicit native metadata reference already used by ProposalBuilderService.
-    JrcCrm::BusinessUnit.where(account_id: resource.account_id).find_by(id: resource.metadata['business_unit_id'])
+    reference = resource.metadata['business_unit_id'].presence
+    raise JrcApprovals::Error, 'INVALID_SCOPE' if reference && resource.business_unit_id && reference.to_s != resource.business_unit_id.to_s
+
+    JrcCrm::BusinessUnit.where(account_id: resource.account_id).find_by(id: resource.business_unit_id || reference)
   end
 
   def self.capture(resource)

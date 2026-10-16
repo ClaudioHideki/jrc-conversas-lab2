@@ -29,6 +29,9 @@ class TelephonyIntegration < ApplicationRecord
   belongs_to :account
 
   encrypts :cdr_token
+  encrypts :pabx_username, :pabx_password
+
+  validate :valid_pabx_settings
 
   validates :account_id, uniqueness: true
   validates :provider, inclusion: { in: PROVIDERS }
@@ -44,6 +47,12 @@ class TelephonyIntegration < ApplicationRecord
   end
 
   private
+
+  def valid_pabx_settings
+    Pabx::Settings.new(self).validate! if pabx_settings.present?
+  rescue Pabx::Error => e
+    errors.add(:pabx_settings, e.code)
+  end
 
   def secure_cdr_base_url
     uri = URI.parse(cdr_base_url.to_s)

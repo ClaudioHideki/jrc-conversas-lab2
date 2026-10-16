@@ -1,6 +1,7 @@
 class JrcApprovals::Decisions
   def initialize(account:, user:)
-    @account, @user = account, user
+    @account = account
+    @user = user
     @authorization = JrcApprovals::Authorization.new(account: account, user: user)
   end
 
@@ -66,27 +67,50 @@ class JrcApprovals::Decisions
 
   def principal!(request, step_code, actor, delegation_id, decision)
     definition = request.policy_version.definition
+    validate_gratuity_definition!(request)
     step = definition.fetch('steps').find { |item| item['code'] == step_code }
     plan = request.stage_plan.find { |item| item['code'] == step_code }
     raise JrcApprovals::Error, 'INVALID_STEP_ACTION' unless step && plan && step['actions'].include?(decision)
-    delegation = nil
-    principal = actor
-    if delegation_id
-      delegation = JrcApprovals::Delegation.where(account_id: @account.id, policy_version_id: request.policy_version_id,
-                                                 delegate_id: actor.id, step_code: step_code).find(delegation_id)
-      unless definition['delegation_allowed'] && delegation.revoked_at.nil? && delegation.starts_at <= Time.current &&
-             delegation.ends_at > Time.current && delegation.actions.include?(decision)
-        raise JrcApprovals::Error, 'INVALID_DELEGATION'
-      end
-      principal = delegation.principal
-    end
+
+    delegation = authorized_delegation!(request, step_code, actor, delegation_id, decision) if delegation_id
+    principal = delegation ? delegation.principal : actor
     eligible = JrcApprovals::Eligibility.new(account: @account, company_id: request.issuer_company_id, unit_id: request.business_unit_id,
-      catalog_key: "#{request.module_key}.#{request.event_key}")
+                                             catalog_key: "#{request.module_key}.#{request.event_key}")
     raise Pundit::NotAuthorizedError unless plan['principal_ids'].include?(principal.id) && eligible.candidates(step).include?(principal.id)
-    if !definition['allow_self_approval'] && [actor.id, principal.id].include?(request.requester_id)
-      raise Pundit::NotAuthorizedError
-    end
+    raise Pundit::NotAuthorizedError if !definition['allow_self_approval'] && [actor.id, principal.id].include?(request.requester_id)
+
     [principal, delegation]
+  end
+
+  def authorized_delegation!(request, step_code, actor, delegation_id, decision)
+    definition = request.policy_version.definition
+    delegation = JrcApprovals::Delegation.where(account_id: @account.id, policy_version_id: request.policy_version_id,
+                                                delegate_id: actor.id, step_code: step_code).find(delegation_id)
+    unless definition['delegation_allowed'] && delegation.revoked_at.nil? && delegation.starts_at <= Time.current &&
+           delegation.ends_at > Time.current && delegation.actions.include?(decision)
+      raise JrcApprovals::Error, 'INVALID_DELEGATION'
+    end
+
+    validate_gratuity_delegation!(request, delegation)
+    delegation
+  end
+
+  def validate_gratuity_definition!(request)
+    return unless JrcApprovals::GratuityCatalog.gratuity_key?("#{request.module_key}.#{request.event_key}")
+
+    JrcApprovals::GratuityAuthorities.new(account: @account, company_id: request.policy_version.publication['issuer_company_id'])
+                                     .validate_definition!(request.policy_version.definition)
+  end
+
+  def validate_gratuity_delegation!(request, delegation)
+    return unless JrcApprovals::GratuityCatalog.gratuity_key?("#{request.module_key}.#{request.event_key}")
+
+    audit = JrcApprovals::AuditEvent.find_by!(account_id: @account.id, correlation_key: "delegation:#{delegation.id}:grant")
+    authorities = JrcApprovals::GratuityAuthorities.new(account: @account, company_id: request.policy_version.publication['issuer_company_id'])
+    authorities.validate_delegation!(
+      step_code: delegation.step_code, principal_id: delegation.principal_id, delegate_id: delegation.delegate_id,
+      absence_authorization: audit.data['absence_authorization']
+    )
   end
 
   def pending_steps(request)

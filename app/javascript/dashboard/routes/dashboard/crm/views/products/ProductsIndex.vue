@@ -5,7 +5,7 @@ import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import { useFormDraft } from '../../helpers/useFormDraft';
 import { useAlert } from 'dashboard/composables';
-import { productsAPI } from 'dashboard/api/crm';
+import { productsAPI, proposalsAPI } from 'dashboard/api/crm';
 import { useCrmMetrics } from '../../composables/useCrmMetrics';
 import CrmPageHeader from '../../components/shared/CrmPageHeader.vue';
 import CrmStatCard from '../../components/shared/CrmStatCard.vue';
@@ -34,10 +34,31 @@ const billingFilter = ref('');
 const statusFilter = ref('');
 const importInput = ref(null);
 const importing = ref(false);
+const operatingUnits = ref([]);
+const loadOperatingUnits = async () => {
+  if (!isAdmin.value) return;
+  try {
+    operatingUnits.value = (
+      await proposalsAPI.creationOptions()
+    ).data.business_units;
+  } catch {
+    useAlert(t('CRM.ORGANIZATION.ERROR'));
+  }
+};
 
-const documentSources = {contract_generated:'Contrato gerado',contract_signed:'Contrato assinado',customer_registration:'Cadastro do cliente',billing_registration:'Dados de faturamento',technical_owner:'Responsável técnico',financial_owner:'Responsável financeiro',implementation_info:'Dados de implantação',manual:'Documento manual'};
+const documentSources = {
+  contract_generated: 'Contrato gerado',
+  contract_signed: 'Contrato assinado',
+  customer_registration: 'Cadastro do cliente',
+  billing_registration: 'Dados de faturamento',
+  technical_owner: 'Responsável técnico',
+  financial_owner: 'Responsável financeiro',
+  implementation_info: 'Dados de implantação',
+  manual: 'Documento manual',
+};
 const defaultForm = () => ({
   document_rules: [],
+  business_unit_id: null,
   name: '',
   sku: '',
   product_type: 'service',
@@ -102,9 +123,17 @@ const billingOptions = [
 
 const tabs = [
   { id: 'information', label: 'Informações', icon: 'i-lucide-package-search' },
-  { id: 'pricing', label: 'Preços e cobrança', icon: 'i-lucide-badge-dollar-sign' },
+  {
+    id: 'pricing',
+    label: 'Preços e cobrança',
+    icon: 'i-lucide-badge-dollar-sign',
+  },
   { id: 'rules', label: 'Regras comerciais', icon: 'i-lucide-shield-check' },
-  { id: 'integrations', label: 'Documentos e integrações', icon: 'i-lucide-files' },
+  {
+    id: 'integrations',
+    label: 'Documentos e integrações',
+    icon: 'i-lucide-files',
+  },
 ];
 
 const toCents = value => Math.round(Number(value || 0) * 100);
@@ -189,45 +218,51 @@ const parseCsv = text => {
 
 const productTypeFromImport = value => {
   const normalized = normalizeImportKey(value);
-  return {
-    produto: 'product',
-    product: 'product',
-    servico: 'service',
-    service: 'service',
-    licenca: 'license',
-    license: 'license',
-    projeto: 'project',
-    project: 'project',
-  }[normalized] || 'service';
+  return (
+    {
+      produto: 'product',
+      product: 'product',
+      servico: 'service',
+      service: 'service',
+      licenca: 'license',
+      license: 'license',
+      projeto: 'project',
+      project: 'project',
+    }[normalized] || 'service'
+  );
 };
 
 const billingFromImport = value => {
   const normalized = normalizeImportKey(value);
-  return {
-    cobrancaunica: 'one_time',
-    unica: 'one_time',
-    onetime: 'one_time',
-    mensal: 'monthly',
-    monthly: 'monthly',
-    anual: 'annual',
-    annual: 'annual',
-    poruso: 'usage',
-    uso: 'usage',
-    usage: 'usage',
-  }[normalized] || 'monthly';
+  return (
+    {
+      cobrancaunica: 'one_time',
+      unica: 'one_time',
+      onetime: 'one_time',
+      mensal: 'monthly',
+      monthly: 'monthly',
+      anual: 'annual',
+      annual: 'annual',
+      poruso: 'usage',
+      uso: 'usage',
+      usage: 'usage',
+    }[normalized] || 'monthly'
+  );
 };
 
 const renewalFromImport = value => {
   const normalized = normalizeImportKey(value);
-  return {
-    automatica: 'automatic',
-    automatico: 'automatic',
-    automatic: 'automatic',
-    manual: 'manual',
-    semrenovacao: 'none',
-    nenhuma: 'none',
-    none: 'none',
-  }[normalized] || 'automatic';
+  return (
+    {
+      automatica: 'automatic',
+      automatico: 'automatic',
+      automatic: 'automatic',
+      manual: 'manual',
+      semrenovacao: 'none',
+      nenhuma: 'none',
+      none: 'none',
+    }[normalized] || 'automatic'
+  );
 };
 
 const productTypeLabel = value =>
@@ -239,9 +274,11 @@ const renewalLabel = value =>
     value
   ] || 'Automática';
 const integrationLabel = value =>
-  ({ financial: 'Financeiro', contracts: 'Contratos', implementation: 'Implantação' })[
-    value
-  ] || value;
+  ({
+    financial: 'Financeiro',
+    contracts: 'Contratos',
+    implementation: 'Implantação',
+  })[value] || value;
 
 const filteredProducts = computed(() => {
   const query = search.value.trim().toLocaleLowerCase('pt-BR');
@@ -279,8 +316,7 @@ const recurringProducts = computed(() =>
 );
 const monthlyRevenue = computed(() =>
   recurringProducts.value.reduce(
-    (total, product) =>
-      total + Number(product.monthly_equivalent_cents || 0),
+    (total, product) => total + Number(product.monthly_equivalent_cents || 0),
     0
   )
 );
@@ -365,7 +401,9 @@ const resetForm = () => {
 
 const createActive = ref(false);
 const productDraft = useFormDraft('crm:new_product', {
-  active: createActive, snapshot: () => ({ ...form }), restore: value => Object.assign(form, value),
+  active: createActive,
+  snapshot: () => ({ ...form }),
+  restore: value => Object.assign(form, value),
   reset: resetForm,
 });
 const openCreate = () => {
@@ -388,7 +426,9 @@ const openEdit = product => {
     overage_unit_price: fromCents(product.overage_unit_price_cents),
     integration_financial: (product.integrations || []).includes('financial'),
     integration_contracts: (product.integrations || []).includes('contracts'),
-    integration_implementation: (product.integrations || []).includes('implementation'),
+    integration_implementation: (product.integrations || []).includes(
+      'implementation'
+    ),
   });
   editingId.value = product.id;
   activeTab.value = 'information';
@@ -402,6 +442,7 @@ const closeForm = () => {
 
 const payload = () => ({
   product: {
+    business_unit_id: form.business_unit_id || null,
     name: form.name,
     sku: form.sku || null,
     product_type: form.product_type,
@@ -425,9 +466,7 @@ const payload = () => ({
     included_unit: form.included_unit || null,
     overage_unit_price_cents: toCents(form.overage_unit_price),
     maximum_discount_percent: Number(form.maximum_discount_percent || 0),
-    discount_approval_percent: Number(
-      form.discount_approval_percent || 0
-    ),
+    discount_approval_percent: Number(form.discount_approval_percent || 0),
     renewal_type: form.renewal_type,
     adjustment_index: form.adjustment_index || 'IPCA',
     adjustment_period_months: Number(form.adjustment_period_months || 12),
@@ -624,7 +663,10 @@ const buildImportedProduct = record => {
       0,
       Math.round(
         parseLocalizedNumber(
-          importRowValue(record, ['período de validação', 'periodo de validacao'])
+          importRowValue(record, [
+            'período de validação',
+            'periodo de validacao',
+          ])
         )
       )
     ),
@@ -646,8 +688,10 @@ const buildImportedProduct = record => {
       importRowValue(record, ['renovação', 'renovacao'])
     ),
     adjustment_index:
-      importRowValue(record, ['índice de reajuste', 'indice de reajuste']).trim() ||
-      'IPCA',
+      importRowValue(record, [
+        'índice de reajuste',
+        'indice de reajuste',
+      ]).trim() || 'IPCA',
     adjustment_period_months: Math.max(
       1,
       Math.round(
@@ -682,17 +726,23 @@ const buildImportedProduct = record => {
     fiscal_service_code:
       importRowValue(record, ['código fiscal', 'codigo fiscal']).trim() || null,
     sales_notes:
-      importRowValue(record, ['observações comerciais', 'observacoes comerciais']).trim() ||
-      null,
+      importRowValue(record, [
+        'observações comerciais',
+        'observacoes comerciais',
+      ]).trim() || null,
     technical_requirements:
-      importRowValue(record, ['requisitos técnicos', 'requisitos tecnicos']).trim() ||
-      null,
+      importRowValue(record, [
+        'requisitos técnicos',
+        'requisitos tecnicos',
+      ]).trim() || null,
     scope_included:
       importRowValue(record, ['escopo incluído', 'escopo incluido']).trim() ||
       null,
     scope_excluded:
-      importRowValue(record, ['escopo não incluído', 'escopo nao incluido']).trim() ||
-      null,
+      importRowValue(record, [
+        'escopo não incluído',
+        'escopo nao incluido',
+      ]).trim() || null,
     active: parseImportBoolean(
       importRowValue(record, ['status', 'ativo']),
       true
@@ -902,6 +952,7 @@ const exportCatalog = () => {
 const refresh = () => store.dispatch('jrcCrm/products/fetchProducts');
 
 onMounted(refresh);
+onMounted(loadOperatingUnits);
 </script>
 
 <template>
@@ -967,7 +1018,9 @@ onMounted(refresh);
       <section
         class="rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm"
       >
-        <div class="grid gap-3 lg:grid-cols-[minmax(260px,1fr)_190px_190px_170px_auto]">
+        <div
+          class="grid gap-3 lg:grid-cols-[minmax(260px,1fr)_190px_190px_170px_auto]"
+        >
           <label class="relative">
             <i
               class="i-lucide-search absolute left-3 top-1/2 size-4 -translate-y-1/2 text-n-slate-9"
@@ -1059,13 +1112,19 @@ onMounted(refresh);
             </thead>
             <tbody class="divide-y divide-n-weak">
               <tr v-if="isLoading">
-                <td :colspan="isAdmin ? 8 : 6" class="px-6 py-14 text-center text-n-slate-10">
+                <td
+                  :colspan="isAdmin ? 8 : 6"
+                  class="px-6 py-14 text-center text-n-slate-10"
+                >
                   <i class="i-lucide-loader-circle mr-2 size-5 animate-spin" />
                   Carregando catálogo...
                 </td>
               </tr>
               <tr v-else-if="!filteredProducts.length">
-                <td :colspan="isAdmin ? 8 : 6" class="px-6 py-14 text-center text-n-slate-10">
+                <td
+                  :colspan="isAdmin ? 8 : 6"
+                  class="px-6 py-14 text-center text-n-slate-10"
+                >
                   <div
                     class="mx-auto mb-3 flex size-12 items-center justify-center rounded-2xl bg-n-alpha-3"
                   >
@@ -1081,11 +1140,16 @@ onMounted(refresh);
                 class="transition hover:bg-n-alpha-2"
               >
                 <td class="px-5 py-4">
-                  <p class="font-semibold text-n-slate-12">{{ product.name }}</p>
+                  <p class="font-semibold text-n-slate-12">
+                    {{ product.name }}
+                  </p>
                   <p class="mt-0.5 text-xs text-n-slate-10">
                     {{ product.sku || 'Sem SKU' }}
                   </p>
-                  <div v-if="product.tags?.length" class="mt-2 flex flex-wrap gap-1">
+                  <div
+                    v-if="product.tags?.length"
+                    class="mt-2 flex flex-wrap gap-1"
+                  >
                     <span
                       v-for="tag in product.tags.slice(0, 3)"
                       :key="tag"
@@ -1103,7 +1167,9 @@ onMounted(refresh);
                   </span>
                   <p class="mt-2 text-xs text-n-slate-11">
                     {{ product.category || 'Sem categoria' }}
-                    <span v-if="product.subcategory"> · {{ product.subcategory }}</span>
+                    <span v-if="product.subcategory">
+                      · {{ product.subcategory }}</span
+                    >
                   </p>
                 </td>
                 <td class="px-5 py-4">
@@ -1176,13 +1242,21 @@ onMounted(refresh);
                           ? 'bg-n-ruby-3 text-n-ruby-11 hover:bg-n-ruby-4'
                           : 'bg-n-teal-3 text-n-teal-11 hover:bg-n-teal-4'
                       "
-                      :aria-label="product.active ? 'Desativar produto' : 'Ativar produto'"
-                      :title="product.active ? 'Desativar produto' : 'Ativar produto'"
+                      :aria-label="
+                        product.active ? 'Desativar produto' : 'Ativar produto'
+                      "
+                      :title="
+                        product.active ? 'Desativar produto' : 'Ativar produto'
+                      "
                       @click="toggleActive(product)"
                     >
                       <i
                         class="size-4"
-                        :class="product.active ? 'i-lucide-package-x' : 'i-lucide-package-check'"
+                        :class="
+                          product.active
+                            ? 'i-lucide-package-x'
+                            : 'i-lucide-package-check'
+                        "
                       />
                     </button>
                   </div>
@@ -1215,10 +1289,15 @@ onMounted(refresh);
             </span>
             <div>
               <h3 class="text-lg font-bold text-n-slate-12">
-                {{ editingId ? 'Editar produto ou serviço' : 'Novo produto ou serviço' }}
+                {{
+                  editingId
+                    ? 'Editar produto ou serviço'
+                    : 'Novo produto ou serviço'
+                }}
               </h3>
               <p class="text-xs text-n-slate-10">
-                Configure informações comerciais, cobrança e regras de venda da JRC.
+                Configure informações comerciais, cobrança e regras de venda da
+                JRC.
               </p>
             </div>
           </div>
@@ -1232,7 +1311,9 @@ onMounted(refresh);
           </button>
         </header>
 
-        <nav class="shrink-0 overflow-x-auto border-b border-n-weak px-4 py-3 sm:px-6">
+        <nav
+          class="shrink-0 overflow-x-auto border-b border-n-weak px-4 py-3 sm:px-6"
+        >
           <div class="flex min-w-max gap-2">
             <button
               v-for="(tab, index) in tabs"
@@ -1248,19 +1329,46 @@ onMounted(refresh);
             >
               <span
                 class="flex size-6 items-center justify-center rounded-lg text-xs font-bold"
-                :class="activeTab === tab.id ? 'bg-n-iris-9 text-white' : 'bg-n-alpha-3'"
-              >{{ index + 1 }}</span>
-              <i :class="[tab.icon, 'size-4']" />
+                :class="
+                  activeTab === tab.id
+                    ? 'bg-n-iris-9 text-white'
+                    : 'bg-n-alpha-3'
+                "
+                >{{ index + 1 }}</span
+              >
+              <i class="size-4" :class="[tab.icon]" />
               {{ tab.label }}
             </button>
           </div>
         </nav>
 
-        <div class="grid min-h-0 flex-1 overflow-hidden xl:grid-cols-[minmax(0,1fr)_340px]">
+        <div
+          class="grid min-h-0 flex-1 overflow-hidden xl:grid-cols-[minmax(0,1fr)_340px]"
+        >
           <div class="overflow-y-auto p-4 sm:p-6">
             <section v-if="activeTab === 'information'" class="space-y-5">
+              <label class="block text-sm font-medium text-n-slate-11">
+                {{ t('CRM.CREATION.UNIT') }}
+                <select
+                  v-model="form.business_unit_id"
+                  class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 px-3 py-2"
+                >
+                  <option :value="null">
+                    {{ t('CRM.CORPORATE.SHARED_CATALOG') }}
+                  </option>
+                  <option
+                    v-for="unit in operatingUnits"
+                    :key="unit.id"
+                    :value="unit.id"
+                  >
+                    {{ unit.name }}
+                  </option>
+                </select>
+              </label>
               <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                <label class="text-sm font-medium text-n-slate-11 md:col-span-2">
+                <label
+                  class="text-sm font-medium text-n-slate-11 md:col-span-2"
+                >
                   Nome do produto ou serviço *
                   <input
                     v-model.trim="form.name"
@@ -1308,7 +1416,9 @@ onMounted(refresh);
                     placeholder="Autenticação de chamadas"
                   />
                 </label>
-                <label class="text-sm font-medium text-n-slate-11 md:col-span-2 xl:col-span-3">
+                <label
+                  class="text-sm font-medium text-n-slate-11 md:col-span-2 xl:col-span-3"
+                >
                   Descrição comercial
                   <textarea
                     v-model.trim="form.description"
@@ -1317,7 +1427,9 @@ onMounted(refresh);
                     placeholder="Descreva o benefício, o escopo e o que será apresentado ao cliente."
                   />
                 </label>
-                <label class="text-sm font-medium text-n-slate-11 md:col-span-2">
+                <label
+                  class="text-sm font-medium text-n-slate-11 md:col-span-2"
+                >
                   Tags, separadas por vírgula
                   <input
                     v-model.trim="form.tags_text"
@@ -1465,7 +1577,9 @@ onMounted(refresh);
               <div class="rounded-2xl border border-n-teal-6 bg-n-teal-2 p-5">
                 <div class="mb-4 flex items-center gap-2">
                   <i class="i-lucide-gauge size-5 text-n-teal-11" />
-                  <h4 class="font-bold text-n-slate-12">Franquia e excedentes</h4>
+                  <h4 class="font-bold text-n-slate-12">
+                    Franquia e excedentes
+                  </h4>
                 </div>
                 <div class="grid gap-4 md:grid-cols-3">
                   <label class="text-sm font-medium text-n-slate-11">
@@ -1503,8 +1617,12 @@ onMounted(refresh);
                   class="flex items-center justify-between gap-4 rounded-2xl border border-n-weak p-4"
                 >
                   <span>
-                    <span class="block font-semibold text-n-slate-12">Receita recorrente</span>
-                    <span class="text-xs text-n-slate-10">Compõe a recorrência mensal da proposta.</span>
+                    <span class="block font-semibold text-n-slate-12"
+                      >Receita recorrente</span
+                    >
+                    <span class="text-xs text-n-slate-10"
+                      >Compõe a recorrência mensal da proposta.</span
+                    >
                   </span>
                   <input
                     :checked="form.billing_model !== 'one_time'"
@@ -1517,8 +1635,12 @@ onMounted(refresh);
                   class="flex items-center justify-between gap-4 rounded-2xl border border-n-weak p-4"
                 >
                   <span>
-                    <span class="block font-semibold text-n-slate-12">Quantidade variável</span>
-                    <span class="text-xs text-n-slate-10">Permite ajustar o consumo na venda.</span>
+                    <span class="block font-semibold text-n-slate-12"
+                      >Quantidade variável</span
+                    >
+                    <span class="text-xs text-n-slate-10"
+                      >Permite ajustar o consumo na venda.</span
+                    >
                   </span>
                   <input
                     v-model="form.allow_variable_quantity"
@@ -1530,8 +1652,12 @@ onMounted(refresh);
                   class="flex items-center justify-between gap-4 rounded-2xl border border-n-weak p-4"
                 >
                   <span>
-                    <span class="block font-semibold text-n-slate-12">Acumular franquia</span>
-                    <span class="text-xs text-n-slate-10">Permite carregar saldo para o próximo ciclo.</span>
+                    <span class="block font-semibold text-n-slate-12"
+                      >Acumular franquia</span
+                    >
+                    <span class="text-xs text-n-slate-10"
+                      >Permite carregar saldo para o próximo ciclo.</span
+                    >
                   </span>
                   <input
                     v-model="form.rollover_allowance"
@@ -1605,7 +1731,9 @@ onMounted(refresh);
                     class="mt-1.5 w-full rounded-xl border border-n-weak bg-n-solid-2 px-3 py-2.5"
                   />
                 </label>
-                <label class="text-sm font-medium text-n-slate-11 md:col-span-2 xl:col-span-3">
+                <label
+                  class="text-sm font-medium text-n-slate-11 md:col-span-2 xl:col-span-3"
+                >
                   Disponível para empresas, separadas por vírgula
                   <input
                     v-model.trim="form.availability_text"
@@ -1620,56 +1748,150 @@ onMounted(refresh);
                   class="flex items-center justify-between gap-3 rounded-2xl border border-n-weak p-4"
                 >
                   <span>
-                    <span class="block font-semibold text-n-slate-12">Venda avulsa</span>
-                    <span class="text-xs text-n-slate-10">Pode ser contratado isoladamente.</span>
+                    <span class="block font-semibold text-n-slate-12"
+                      >Venda avulsa</span
+                    >
+                    <span class="text-xs text-n-slate-10"
+                      >Pode ser contratado isoladamente.</span
+                    >
                   </span>
-                  <input v-model="form.allow_standalone_sale" type="checkbox" class="size-5 accent-n-teal-9" />
+                  <input
+                    v-model="form.allow_standalone_sale"
+                    type="checkbox"
+                    class="size-5 accent-n-teal-9"
+                  />
                 </label>
                 <label
                   class="flex items-center justify-between gap-3 rounded-2xl border border-n-weak p-4"
                 >
                   <span>
-                    <span class="block font-semibold text-n-slate-12">Exigir contrato</span>
-                    <span class="text-xs text-n-slate-10">Bloqueia envio sem documento.</span>
+                    <span class="block font-semibold text-n-slate-12"
+                      >Exigir contrato</span
+                    >
+                    <span class="text-xs text-n-slate-10"
+                      >Bloqueia envio sem documento.</span
+                    >
                   </span>
-                  <input v-model="form.requires_contract" type="checkbox" class="size-5 accent-n-iris-9" />
+                  <input
+                    v-model="form.requires_contract"
+                    type="checkbox"
+                    class="size-5 accent-n-iris-9"
+                  />
                 </label>
                 <label
                   class="flex items-center justify-between gap-3 rounded-2xl border border-n-weak p-4"
                 >
                   <span>
-                    <span class="block font-semibold text-n-slate-12">Produto ativo</span>
-                    <span class="text-xs text-n-slate-10">Disponível no catálogo e propostas.</span>
+                    <span class="block font-semibold text-n-slate-12"
+                      >Produto ativo</span
+                    >
+                    <span class="text-xs text-n-slate-10"
+                      >Disponível no catálogo e propostas.</span
+                    >
                   </span>
-                  <input v-model="form.active" type="checkbox" class="size-5 accent-n-blue-9" />
+                  <input
+                    v-model="form.active"
+                    type="checkbox"
+                    class="size-5 accent-n-blue-9"
+                  />
                 </label>
               </div>
             </section>
 
-            <section v-else class="space-y-5"><fieldset class="rounded-xl border p-4"><legend class="px-2 font-semibold">Requisitos documentais do Backoffice</legend><div v-for="(rule,index) in form.document_rules" :key="index" class="mb-3 grid gap-2 sm:grid-cols-3"><input v-model="rule.key" placeholder="Identificador" class="rounded border p-2" /><input v-model="rule.label" placeholder="Nome do requisito" class="rounded border p-2" /><select v-model="rule.source" class="rounded border p-2"><option v-for="(name,key) in documentSources" :key="key" :value="key">{{name}}</option></select><label><input v-model="rule.required" type="checkbox" /> Obrigatório</label><label><input v-model="rule.blocking" type="checkbox" /> Bloqueia avanço</label><button type="button" class="rounded border p-2" @click="form.document_rules.splice(index,1)">Remover</button></div><button type="button" class="rounded border px-3 py-2" @click="form.document_rules.push({key:'document_'+(form.document_rules.length+1),label:'',source:'manual',required:true,blocking:true})">Adicionar requisito</button></fieldset>
+            <section v-else class="space-y-5">
+              <fieldset class="rounded-xl border p-4">
+                <legend class="px-2 font-semibold">
+                  Requisitos documentais do Backoffice
+                </legend>
+                <div
+                  v-for="(rule, index) in form.document_rules"
+                  :key="index"
+                  class="mb-3 grid gap-2 sm:grid-cols-3"
+                >
+                  <input
+                    v-model="rule.key"
+                    placeholder="Identificador"
+                    class="rounded border p-2"
+                  /><input
+                    v-model="rule.label"
+                    placeholder="Nome do requisito"
+                    class="rounded border p-2"
+                  /><select v-model="rule.source" class="rounded border p-2">
+                    <option
+                      v-for="(name, key) in documentSources"
+                      :key="key"
+                      :value="key"
+                    >
+                      {{ name }}
+                    </option></select
+                  ><label
+                    ><input v-model="rule.required" type="checkbox" />
+                    Obrigatório</label
+                  ><label
+                    ><input v-model="rule.blocking" type="checkbox" /> Bloqueia
+                    avanço</label
+                  ><button
+                    type="button"
+                    class="rounded border p-2"
+                    @click="form.document_rules.splice(index, 1)"
+                  >
+                    Remover
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  class="rounded border px-3 py-2"
+                  @click="
+                    form.document_rules.push({
+                      key: 'document_' + (form.document_rules.length + 1),
+                      label: '',
+                      source: 'manual',
+                      required: true,
+                      blocking: true,
+                    })
+                  "
+                >
+                  Adicionar requisito
+                </button>
+              </fieldset>
               <div class="rounded-2xl border border-n-weak p-5">
-                <h4 class="font-bold text-n-slate-12">Integrações internas JRC</h4>
+                <h4 class="font-bold text-n-slate-12">
+                  Integrações internas JRC
+                </h4>
                 <p class="mt-1 text-xs text-n-slate-10">
-                  Selecione os fluxos internos que devem ser acionados após a venda.
+                  Selecione os fluxos internos que devem ser acionados após a
+                  venda.
                 </p>
                 <div class="mt-4 grid gap-3 md:grid-cols-3">
                   <label
                     class="flex items-center justify-between rounded-xl border border-n-weak p-4"
                   >
                     <span class="font-medium text-n-slate-11">Financeiro</span>
-                    <input v-model="form.integration_financial" type="checkbox" class="size-5 accent-n-teal-9" />
+                    <input
+                      v-model="form.integration_financial"
+                      type="checkbox"
+                      class="size-5 accent-n-teal-9"
+                    />
                   </label>
                   <label
                     class="flex items-center justify-between rounded-xl border border-n-weak p-4"
                   >
                     <span class="font-medium text-n-slate-11">Contratos</span>
-                    <input v-model="form.integration_contracts" type="checkbox" class="size-5 accent-n-iris-9" />
+                    <input
+                      v-model="form.integration_contracts"
+                      type="checkbox"
+                      class="size-5 accent-n-iris-9"
+                    />
                   </label>
                   <label
                     class="flex items-center justify-between rounded-xl border border-n-weak p-4"
                   >
                     <span class="font-medium text-n-slate-11">Implantação</span>
-                    <input v-model="form.integration_implementation" type="checkbox" class="size-5 accent-n-blue-9" />
+                    <input
+                      v-model="form.integration_implementation"
+                      type="checkbox"
+                      class="size-5 accent-n-blue-9"
+                    />
                   </label>
                 </div>
               </div>
@@ -1736,9 +1958,13 @@ onMounted(refresh);
                 <div class="flex gap-3">
                   <i class="i-lucide-info size-5 shrink-0 text-n-blue-11" />
                   <div>
-                    <h4 class="font-semibold text-n-slate-12">Documentos comerciais</h4>
+                    <h4 class="font-semibold text-n-slate-12">
+                      Documentos comerciais
+                    </h4>
                     <p class="mt-1 text-sm text-n-slate-10">
-                      Os nomes cadastrados ficam vinculados ao produto e servem como referência na elaboração da proposta. O envio físico do arquivo depende do módulo de anexos do ambiente.
+                      Os nomes cadastrados ficam vinculados ao produto e servem
+                      como referência na elaboração da proposta. O envio físico
+                      do arquivo depende do módulo de anexos do ambiente.
                     </p>
                   </div>
                 </div>
@@ -1746,19 +1972,29 @@ onMounted(refresh);
             </section>
           </div>
 
-          <aside class="overflow-y-auto border-l border-n-weak bg-n-alpha-2 p-5">
-            <div class="rounded-2xl border border-n-teal-6 bg-n-solid-2 p-5 shadow-sm">
-              <p class="text-xs font-semibold uppercase tracking-wider text-n-teal-11">
+          <aside
+            class="overflow-y-auto border-l border-n-weak bg-n-alpha-2 p-5"
+          >
+            <div
+              class="rounded-2xl border border-n-teal-6 bg-n-solid-2 p-5 shadow-sm"
+            >
+              <p
+                class="text-xs font-semibold uppercase tracking-wider text-n-teal-11"
+              >
                 Resumo do produto
               </p>
               <h4 class="mt-3 text-xl font-bold text-n-slate-12">
                 {{ form.name || 'Novo produto' }}
               </h4>
               <div class="mt-2 flex flex-wrap gap-2">
-                <span class="rounded-full bg-n-teal-3 px-2.5 py-1 text-xs font-semibold text-n-teal-11">
+                <span
+                  class="rounded-full bg-n-teal-3 px-2.5 py-1 text-xs font-semibold text-n-teal-11"
+                >
                   {{ productTypeLabel(form.product_type) }}
                 </span>
-                <span class="rounded-full bg-n-iris-3 px-2.5 py-1 text-xs font-semibold text-n-iris-11">
+                <span
+                  class="rounded-full bg-n-iris-3 px-2.5 py-1 text-xs font-semibold text-n-iris-11"
+                >
                   {{ billingLabel(form.billing_model) }}
                 </span>
               </div>
@@ -1766,48 +2002,74 @@ onMounted(refresh);
               <dl class="mt-5 space-y-3 text-sm">
                 <div class="flex items-center justify-between gap-3">
                   <dt class="text-n-slate-10">Preço</dt>
-                  <dd class="font-bold text-n-slate-12">{{ formatBRL(toCents(form.unit_price)) }}</dd>
+                  <dd class="font-bold text-n-slate-12">
+                    {{ formatBRL(toCents(form.unit_price)) }}
+                  </dd>
                 </div>
                 <div class="flex items-center justify-between gap-3">
                   <dt class="text-n-slate-10">Implantação</dt>
-                  <dd class="font-medium text-n-slate-12">{{ formatBRL(toCents(form.setup_fee)) }}</dd>
+                  <dd class="font-medium text-n-slate-12">
+                    {{ formatBRL(toCents(form.setup_fee)) }}
+                  </dd>
                 </div>
                 <div class="flex items-center justify-between gap-3">
                   <dt class="text-n-slate-10">Equivalente mensal</dt>
-                  <dd class="font-medium text-n-teal-11">{{ formatBRL(monthlyPreview) }}</dd>
+                  <dd class="font-medium text-n-teal-11">
+                    {{ formatBRL(monthlyPreview) }}
+                  </dd>
                 </div>
                 <div class="flex items-center justify-between gap-3">
                   <dt class="text-n-slate-10">Margem estimada</dt>
                   <dd
                     class="font-bold"
-                    :class="marginPreview >= 30 ? 'text-n-teal-11' : 'text-n-amber-11'"
+                    :class="
+                      marginPreview >= 30 ? 'text-n-teal-11' : 'text-n-amber-11'
+                    "
                   >
                     {{ marginPreview }}%
                   </dd>
                 </div>
                 <div class="flex items-center justify-between gap-3">
                   <dt class="text-n-slate-10">Vigência</dt>
-                  <dd class="font-medium text-n-slate-12">{{ form.contract_term_months }} meses</dd>
+                  <dd class="font-medium text-n-slate-12">
+                    {{ form.contract_term_months }} meses
+                  </dd>
                 </div>
-                <div v-if="form.included_quantity" class="border-t border-n-weak pt-3">
+                <div
+                  v-if="form.included_quantity"
+                  class="border-t border-n-weak pt-3"
+                >
                   <dt class="text-n-slate-10">Franquia incluída</dt>
                   <dd class="mt-1 font-medium text-n-slate-12">
-                    {{ form.included_quantity }} {{ form.included_unit || 'unidades' }}
+                    {{ form.included_quantity }}
+                    {{ form.included_unit || 'unidades' }}
                   </dd>
-                  <dd v-if="form.overage_unit_price" class="mt-1 text-xs text-n-slate-10">
-                    Excedente: {{ formatBRL(toCents(form.overage_unit_price)) }} por unidade
+                  <dd
+                    v-if="form.overage_unit_price"
+                    class="mt-1 text-xs text-n-slate-10"
+                  >
+                    Excedente:
+                    {{ formatBRL(toCents(form.overage_unit_price)) }} por
+                    unidade
                   </dd>
                 </div>
               </dl>
             </div>
 
             <div class="mt-4 rounded-2xl border border-n-weak bg-n-solid-2 p-5">
-              <p class="text-xs font-semibold uppercase tracking-wider text-n-slate-10">
+              <p
+                class="text-xs font-semibold uppercase tracking-wider text-n-slate-10"
+              >
                 Como aparecerá na proposta
               </p>
-              <h5 class="mt-3 font-bold text-n-slate-12">{{ form.name || 'Produto JRC' }}</h5>
+              <h5 class="mt-3 font-bold text-n-slate-12">
+                {{ form.name || 'Produto JRC' }}
+              </h5>
               <p class="mt-2 text-sm text-n-slate-10">
-                {{ form.description || 'A descrição comercial será apresentada ao cliente neste espaço.' }}
+                {{
+                  form.description ||
+                  'A descrição comercial será apresentada ao cliente neste espaço.'
+                }}
               </p>
               <div class="mt-4 rounded-xl bg-n-alpha-2 p-3 text-sm">
                 <div class="flex justify-between gap-3">
@@ -1831,10 +2093,19 @@ onMounted(refresh);
           class="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-n-weak bg-n-solid-2 px-5 py-4 sm:px-6"
         >
           <p class="text-xs text-n-slate-10">
-            Os valores da proposta serão calculados a partir destes dados comerciais.
+            Os valores da proposta serão calculados a partir destes dados
+            comerciais.
           </p>
           <div class="flex gap-3">
-            <button v-if="!editingId" type="button" :disabled="saving" class="mr-auto rounded-lg border border-n-weak px-3 py-2" @click="productDraft.discard">{{ t('CRM.CREATION.DISCARD') }}</button>
+            <button
+              v-if="!editingId"
+              type="button"
+              :disabled="saving"
+              class="mr-auto rounded-lg border border-n-weak px-3 py-2"
+              @click="productDraft.discard"
+            >
+              {{ t('CRM.CREATION.DISCARD') }}
+            </button>
             <button
               type="button"
               class="rounded-xl border border-n-weak bg-n-solid-2 px-4 py-2.5 text-sm font-semibold"
@@ -1849,7 +2120,11 @@ onMounted(refresh);
             >
               <i
                 class="mr-1 size-4"
-                :class="saving ? 'i-lucide-loader-circle animate-spin' : 'i-lucide-check'"
+                :class="
+                  saving
+                    ? 'i-lucide-loader-circle animate-spin'
+                    : 'i-lucide-check'
+                "
               />
               {{ editingId ? 'Salvar alterações' : 'Criar produto' }}
             </button>

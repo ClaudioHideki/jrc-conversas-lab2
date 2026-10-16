@@ -91,6 +91,7 @@ require 'securerandom'
 
 module JrcCrm
   class Proposal < ApplicationRecord
+    include JrcCrm::CorporateUnitBinding
     self.table_name = 'jrc_crm_proposals'
     attr_accessor :raw_public_token
 
@@ -107,9 +108,9 @@ module JrcCrm
     belongs_to :contact, optional: true
     belongs_to :business_unit, class_name: 'JrcCrm::BusinessUnit', optional: true
     belongs_to :owner, class_name: 'User'
-    has_many :items, class_name: 'JrcCrm::ProposalItem', foreign_key: :proposal_id, dependent: :destroy
-    has_many :events, class_name: 'JrcCrm::ProposalEvent', foreign_key: :proposal_id, dependent: :destroy
-    has_many :proposal_items, class_name: 'JrcCrm::ProposalItem', foreign_key: :proposal_id, dependent: :destroy
+    has_many :items, class_name: 'JrcCrm::ProposalItem', dependent: :destroy
+    has_many :events, class_name: 'JrcCrm::ProposalEvent', dependent: :destroy
+    has_many :proposal_items, class_name: 'JrcCrm::ProposalItem', dependent: :destroy
     has_many :sales_orders, class_name: 'JrcCrm::SalesOrder', dependent: :restrict_with_error
 
     validates :title, presence: true
@@ -140,7 +141,7 @@ module JrcCrm
     before_validation :generate_secure_public_token, on: :create
     before_validation :assign_proposal_number, on: :create
 
-    scope :active, -> { where.not(status: ['canceled', 'rejected']) }
+    scope :active, -> { where.not(status: %w[canceled rejected]) }
     scope :not_expired, -> { where('public_token_expires_at IS NULL OR public_token_expires_at > ?', Time.current) }
     scope :not_revoked, -> { where(public_token_revoked_at: nil) }
 
@@ -254,15 +255,13 @@ module JrcCrm
     # Same engine and initial-period semantics used by SalesOrder.
     def financial_items
       records = proposal_items.to_a
-      return records.map do |item|
-        { product_id: item.product_id, name: item.name_snapshot, quantity: item.quantity,
-          unit_cents: item.unit_price_cents, discount_cents: item.discount_cents,
-          snapshot: { description: item.description_snapshot, billing_model: item.billing_model,
-                      unit_name: item.unit_name, setup_fee_cents: item.setup_fee_cents,
-                      included_quantity: item.included_quantity, included_unit: item.included_unit,
-                      overage_unit_price_cents: item.overage_unit_price_cents,
-                      activation_days: item.activation_days, validation_period_days: item.validation_period_days } }
-      end if records.any?
+      if records.any?
+        return records.map do |item|
+          { product_id: item.product_id, name: item.name_snapshot, quantity: item.quantity,
+            unit_cents: item.unit_price_cents, discount_cents: item.discount_cents,
+            snapshot: JrcCrm::CommercialProductSnapshot.from_item(item) }
+        end
+      end
 
       rows = [{ name: 'Valor inicial', quantity: 1, unit_cents: implementation_cents.to_i,
                 snapshot: { billing_model: 'one_time' } }]
@@ -375,9 +374,9 @@ module JrcCrm
       return unless deal
 
       errors.add(:company, 'deve corresponder ao negócio') if company_id.present? && deal.company_id != company_id
-      if contact_id.present? && deal.contact_id != contact_id && !deal.deal_contacts.exists?(contact_id: contact_id)
-        errors.add(:contact, 'deve corresponder ao negócio')
-      end
+      return unless contact_id.present? && deal.contact_id != contact_id && !deal.deal_contacts.exists?(contact_id: contact_id)
+
+      errors.add(:contact, 'deve corresponder ao negócio')
     end
 
     def owner_belongs_to_account

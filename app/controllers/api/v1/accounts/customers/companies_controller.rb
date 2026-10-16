@@ -2,13 +2,20 @@ class Api::V1::Accounts::Customers::CompaniesController < Api::V1::Accounts::Cus
   before_action :set_company, except: [:index, :create, :duplicates]
 
   def index
-    records, meta = page_scope(JrcCustomers::DirectoryQuery.new(account: Current.account, filters: params.permit(:q, :relationship_type, :person_kind, :segment, :owner_id, :city, :active, :parent_company_id, :economic_group)).call)
+    scope = JrcCustomers::DirectoryQuery.new(account: Current.account,
+                                             filters: params.permit(:q, :relationship_type,
+                                                                    :person_kind, :segment, :owner_id,
+                                                                    :city, :active, :parent_company_id, :economic_group)).call
+    records, meta = page_scope(corporate_companies(scope))
     render json: { payload: serializer.companies(records.to_a), meta: meta }
   end
 
   def show
-    render json: { payload: serializer.company(@company), branches_total: Current.account.master_companies.where(parent_company_id: @company.id).count, addresses: @company.addresses.where(account_id: Current.account.id).order(:id).as_json,
-                   branches: serializer.companies(Current.account.master_companies.where(parent_company_id: @company.id).order(:name, :id).limit(50).to_a) }
+    branches = corporate_companies.where(parent_company_id: @company.id)
+    render json: { payload: serializer.company(@company), branches_total: branches.count,
+                   addresses: @company.addresses.where(account_id: Current.account.id).order(:id).as_json,
+
+                   branches: serializer.companies(branches.order(:name, :id).limit(50).to_a) }
   end
 
   def create
@@ -28,7 +35,7 @@ class Api::V1::Accounts::Customers::CompaniesController < Api::V1::Accounts::Cus
 
   def duplicates
     normalized = JrcCustomers::TaxIdentifier.normalize(params[:tax_id])
-    scope = normalized.present? ? Current.account.master_companies.where(tax_id: normalized) : Current.account.master_companies.none
+    scope = normalized.present? ? corporate_companies.where(tax_id: normalized) : corporate_companies.none
     scope = scope.where.not(id: params[:exclude_id]) if params[:exclude_id].present?
     render json: { payload: serializer.companies(scope.limit(50).to_a), matching: 'exact_normalized_tax_id' }
   end
@@ -65,7 +72,7 @@ class Api::V1::Accounts::Customers::CompaniesController < Api::V1::Accounts::Cus
   private
 
   def set_company
-    @company = Current.account.master_companies.find(params[:id])
+    @company = corporate_companies.find(params[:id])
   end
 
   def company_params

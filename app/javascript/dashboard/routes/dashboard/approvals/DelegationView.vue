@@ -21,6 +21,7 @@ const form = ref({
   starts_at: '',
   ends_at: '',
   reason: '',
+  absence_authorization: '',
   actions: [],
 });
 const error = ref('');
@@ -244,8 +245,28 @@ const create = () =>
           v-model="form.reason"
           required
           class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 p-2"
-        /></label
-      ><Button
+        />
+      </label>
+      <label
+        v-if="
+          [
+            'gratuity_request',
+            'deal_gratuity',
+            'proposal_gratuity',
+            'order_gratuity',
+          ].includes(policy?.event_key)
+        "
+        class="block text-sm"
+      >
+        {{ t('JRC_APPROVALS.absenceAuthorization') }}
+        <input
+          v-model="form.absence_authorization"
+          required
+          maxlength="500"
+          class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 p-2"
+        />
+      </label>
+      <Button
         type="submit"
         :disabled="
           busy ||

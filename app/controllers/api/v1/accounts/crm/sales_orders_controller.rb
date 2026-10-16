@@ -191,9 +191,9 @@ module Api::V1::Accounts::Crm
       return if requested[:contact_id].blank?
 
       contact = crm_scope.contacts.find(requested[:contact_id])
-      unless proposal.customer_contact&.id == contact.id || (proposal.deal && contact_matches_deal?(contact, proposal.deal))
-        raise JrcCrm::CommercialFinancials::InvalidTerms, 'A proposta nao pertence ao cliente informado.'
-      end
+      return if proposal.customer_contact&.id == contact.id || (proposal.deal && contact_matches_deal?(contact, proposal.deal))
+
+      raise JrcCrm::CommercialFinancials::InvalidTerms, 'A proposta nao pertence ao cliente informado.'
     end
 
     def validate_order_links!(attrs)
@@ -201,9 +201,7 @@ module Api::V1::Accounts::Crm
       contact_id = attrs.key?('contact_id') ? attrs['contact_id'] : @order&.contact_id
       proposal_id = attrs.key?('proposal_id') ? attrs['proposal_id'] : @order&.proposal_id
 
-      if attrs.key?('contact_id') && contact_id.blank?
-        raise JrcCrm::CommercialFinancials::InvalidTerms, 'Cliente e obrigatorio para o pedido.'
-      end
+      raise JrcCrm::CommercialFinancials::InvalidTerms, 'Cliente e obrigatorio para o pedido.' if attrs.key?('contact_id') && contact_id.blank?
 
       deal = deal_id.present? ? visible_to_current_user(crm_scope.jrc_crm_deals).find(deal_id) : nil
       contact = contact_id.present? ? crm_scope.contacts.find(contact_id) : nil
@@ -212,9 +210,7 @@ module Api::V1::Accounts::Crm
 
       if proposal
         raise JrcCrm::CommercialFinancials::InvalidTerms, 'Somente proposta aceita pode gerar pedido.' unless proposal.accepted?
-        if proposal.deal_id != deal&.id
-          raise JrcCrm::CommercialFinancials::InvalidTerms, 'A proposta nao pertence ao negocio selecionado.'
-        end
+        raise JrcCrm::CommercialFinancials::InvalidTerms, 'A proposta nao pertence ao negocio selecionado.' if proposal.deal_id != deal&.id
       end
 
       if proposal && contact && proposal.customer_contact&.id != contact.id
@@ -225,9 +221,9 @@ module Api::V1::Accounts::Crm
         raise JrcCrm::CommercialFinancials::InvalidTerms, 'O negocio nao pertence ao mesmo cliente do pedido.'
       end
 
-      if attrs['owner_id'].present? && attrs['owner_id'].to_i != Current.user.id && !crm_admin?
-        raise Pundit::NotAuthorizedError
-      end
+      return unless attrs['owner_id'].present? && attrs['owner_id'].to_i != Current.user.id && !crm_admin?
+
+      raise Pundit::NotAuthorizedError
     end
 
     def contact_matches_deal?(contact, deal)
@@ -258,14 +254,17 @@ module Api::V1::Accounts::Crm
 
     def submitted_items
       Array(params.dig(:sales_order, :items)).map do |item|
-        item.respond_to?(:to_unsafe_h) ? item.to_unsafe_h : item.to_h
+        row = item.respond_to?(:to_unsafe_h) ? item.to_unsafe_h : item.to_h
+        unit_id = params.dig(:sales_order, :business_unit_id).presence || @order&.business_unit_id
+        unit = crm_scope.jrc_crm_business_units.find(unit_id) if unit_id
+        JrcCrm::CorporateIssuer.product!(account: crm_scope, user: Current.user, id: row['product_id'], unit: unit) if row['product_id'].present?
+        row
       end
     end
 
     def sync_downstream!(order)
       JrcCrm::OrderWorkflowSyncService.new(order: order.reload, actor: Current.user).call
     end
-
 
     def selection_context
       proposal = if params[:proposal_id].present?

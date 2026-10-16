@@ -28,7 +28,12 @@ RSpec.describe 'Commercial operational reconciliation', type: :request do
   end
   it 'enforces administrator permission for the native approval decision' do
     post "#{base}/backoffice_requests/#{approval.id}/decide_order", params: { decision: 'approved' }, headers: agent.create_new_auth_token, as: :json
-    expect(response).to have_http_status(:forbidden)
+    expect(response).to have_http_status(:unauthorized)
+    expect(response.parsed_body['error']).to eq('You are not authorized to do this action')
+    expect(approval.reload).to be_pending
+    expect(approval.metadata).not_to have_key('approval_decision')
+    expect(order.contracts).to be_empty
+    expect(order.commissions).to be_empty
     expect(order.reload).to be_pending
   end
   it 'records administrator approval atomically with the order and its audit trail' do

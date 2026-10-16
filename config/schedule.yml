@@ -119,6 +119,12 @@ jrc_service_desk_approval_deadline_job:
   class: 'JrcServiceDesk::ApprovalDeadlineJob'
   queue: scheduled_jobs
 
+# No job is enqueued unless an administrator explicitly enables this API and sync.
+pabx_cdr_sync_job:
+  cron: '* * * * *'
+  class: 'Pabx::ScheduleJob'
+  queue: scheduled_jobs
+
 jrc_flow_native_installation_renew_job:
   cron: '* * * * *'
   class: 'JrcFlows::NativeInstallationRenewJob'

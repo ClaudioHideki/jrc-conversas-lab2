@@ -67,6 +67,7 @@ describe('SIP confirmed controls and registration', () => {
     vi.spyOn(console, 'info').mockImplementation(() => {});
     errorLog = vi.spyOn(console, 'error').mockImplementation(() => {});
     callbacks = {
+      onMute: vi.fn(),
       onHold: vi.fn(),
       onHoldPending: vi.fn(),
       onTransferPending: vi.fn(),
@@ -136,8 +137,8 @@ describe('SIP confirmed controls and registration', () => {
     expect(track.enabled).toBe(true);
   });
   it.each([
-    ['immediate', '*3202#'],
-    ['supervised', '*4202#'],
+    ['immediate', '#202'],
+    ['supervised', '*1202'],
   ])(
     'preserves %s transfer sequence and prevents concurrent sends',
     async (type, expected) => {
@@ -162,9 +163,175 @@ describe('SIP confirmed controls and registration', () => {
       'DTMF failed'
     );
     expect(client.transferInProgress).toBe(false);
+    expect(callbacks.onLog).not.toHaveBeenCalled();
     expect(callbacks.onTransferPending.mock.calls.map(args => args[0])).toEqual(
       [true, false]
     );
+  });
+  it.each([
+    ['immediate', '#1410'],
+    ['supervised', '*11410'],
+  ])(
+    'sends the exact new %s sequence for human extension 1410',
+    async (type, expected) => {
+      const transfer = client.transfer(type, '1410');
+      await vi.runAllTimersAsync();
+      await transfer;
+      const tones = session.sessionDescriptionHandler.sendDtmf.mock.calls
+        .map(args => args[0])
+        .join('');
+      expect(tones).toBe(expected);
+      expect(tones).not.toMatch(/^\*[34]/);
+      expect(tones).not.toContain('81410');
+    }
+  );
+  it.each(['', '+1410', '1410#', 'abc', '1410;hangup'])(
+    'rejects invalid transfer destination %s without tones',
+    async value => {
+      await expect(client.transfer('immediate', value)).rejects.toThrow(
+        'ramal interno'
+      );
+      expect(session.sessionDescriptionHandler.sendDtmf).not.toHaveBeenCalled();
+    }
+  );
+  it('rejects an unknown transfer type instead of silently choosing a mode', async () => {
+    await expect(client.transfer('unknown', '1410')).rejects.toThrow(
+      'Tipo de transferência'
+    );
+    expect(session.sessionDescriptionHandler.sendDtmf).not.toHaveBeenCalled();
+  });
+  it.each([null, 'Terminated', 'Establishing'])(
+    'requires a valid SIP session %s',
+    async state => {
+      if (state) session.state = state;
+      else client.session = null;
+      await expect(client.transfer('supervised', '1410')).rejects.toThrow(
+        'chamada estabelecida'
+      );
+      expect(session.sessionDescriptionHandler.sendDtmf).not.toHaveBeenCalled();
+    }
+  );
+  it('rejects missing media and failed WebRTC without altering the call', async () => {
+    session.sessionDescriptionHandler.peerConnection.connectionState = 'failed';
+    await expect(client.transfer('immediate', '1410')).rejects.toThrow('mídia');
+    expect(session.sessionDescriptionHandler.sendDtmf).not.toHaveBeenCalled();
+    expect(client.session).toBe(session);
+  });
+  it.each(['onReject', 'onRedirect'])(
+    'does not report a successful transfer after SIP INFO %s',
+    async response => {
+      session.sessionDescriptionHandler.sendDtmf.mockReturnValue(false);
+      session.info.mockImplementation(async options => {
+        options.requestDelegate?.[response]({ message: { statusCode: 403 } });
+      });
+      const transfer = client.transfer('immediate', '1410');
+      const rejected = expect(transfer).rejects.toThrow('DTMF');
+      await vi.runAllTimersAsync();
+      await rejected;
+      expect(session.info).toHaveBeenCalledOnce();
+      expect(callbacks.onLog).not.toHaveBeenCalled();
+      expect(client.transferInProgress).toBe(false);
+      expect(
+        callbacks.onTransferPending.mock.calls.map(args => args[0])
+      ).toEqual([true, false]);
+    }
+  );
+  it.each([
+    ['immediate', '#1410'],
+    ['supervised', '*11410'],
+  ])(
+    'preserves exact %s transfer tones through SIP INFO',
+    async (type, expected) => {
+      session.sessionDescriptionHandler.sendDtmf.mockReturnValue(false);
+      session.info.mockImplementation(async options => {
+        options.requestDelegate?.onAccept();
+      });
+      const transfer = client.transfer(type, '1410');
+      await vi.runAllTimersAsync();
+      await transfer;
+      const tones = session.info.mock.calls.map(
+        ([options]) =>
+          options.requestOptions.body.content.match(
+            /^Signal=(.)\r\nDuration=160$/
+          )[1]
+      );
+      expect(tones).toEqual([...expected]);
+      expect(callbacks.onLog).toHaveBeenCalledOnce();
+    }
+  );
+  it('waits for SIP INFO acceptance before advancing to the next tone or reporting success', async () => {
+    session.sessionDescriptionHandler.sendDtmf.mockReturnValue(false);
+    const transfer = client.transfer('immediate', '1410');
+    await vi.runAllTimersAsync();
+    expect(session.info).toHaveBeenCalledOnce();
+    expect(client.transferInProgress).toBe(true);
+    expect(callbacks.onLog).not.toHaveBeenCalled();
+    for (let index = 0; index < '#1410'.length; index += 1) {
+      session.info.mock.calls[index][0].requestDelegate.onAccept();
+      // Each acceptance allows the existing per-tone timer to advance.
+      // eslint-disable-next-line no-await-in-loop
+      await vi.runAllTimersAsync();
+    }
+    await transfer;
+    expect(callbacks.onLog).toHaveBeenCalledOnce();
+    expect(client.transferInProgress).toBe(false);
+  });
+  it('stops after an INFO transport failure and does not emit success', async () => {
+    session.sessionDescriptionHandler.sendDtmf.mockReturnValue(false);
+    session.info.mockRejectedValue(new Error('INFO transport failed'));
+    await expect(client.transfer('supervised', '1410')).rejects.toThrow(
+      'INFO transport failed'
+    );
+    expect(session.info).toHaveBeenCalledOnce();
+    expect(callbacks.onLog).not.toHaveBeenCalled();
+    expect(client.transferInProgress).toBe(false);
+  });
+  it.each(['terminated', 'replaced'])(
+    'does not report success when the session is %s during the last tone',
+    async change => {
+      session.sessionDescriptionHandler.sendDtmf.mockImplementation(tone => {
+        if (tone === '0') {
+          if (change === 'terminated') session.state = 'Terminated';
+          else client.session = { ...session };
+        }
+        return true;
+      });
+      const transfer = client.transfer('supervised', '1410');
+      const rejected = expect(transfer).rejects.toThrow('encerrada');
+      await vi.runAllTimersAsync();
+      await rejected;
+      expect(callbacks.onLog).not.toHaveBeenCalled();
+      expect(client.transferInProgress).toBe(false);
+    }
+  );
+  it('keeps mute and microphone state consistent across accepted hold and resume', async () => {
+    client.setMuted(true);
+    expect(track.enabled).toBe(false);
+    expect(callbacks.onMute).toHaveBeenLastCalledWith(true);
+    const hold = client.setHold(true);
+    session.invite.mock.calls[0][0].requestDelegate.onAccept();
+    await hold;
+    client.setMuted(false);
+    expect(track.enabled).toBe(false);
+    const resume = client.setHold(false);
+    session.invite.mock.calls[1][0].requestDelegate.onAccept();
+    await resume;
+    expect(client.held).toBe(false);
+    expect(client.muted).toBe(false);
+    expect(track.enabled).toBe(true);
+    expect(callbacks.onHold.mock.calls.map(args => args[0])).toEqual([
+      true,
+      false,
+    ]);
+  });
+  it('prevents transfer while a hold request is pending', async () => {
+    const hold = client.setHold(true);
+    await expect(client.transfer('immediate', '1410')).rejects.toThrow(
+      'Aguarde'
+    );
+    expect(session.sessionDescriptionHandler.sendDtmf).not.toHaveBeenCalled();
+    session.invite.mock.calls[0][0].requestDelegate.onAccept();
+    await hold;
   });
   it('does not continue an old sequence into a replacement call', async () => {
     const transfer = client.transfer('immediate', '202');
@@ -182,8 +349,16 @@ describe('SIP confirmed controls and registration', () => {
         .join('')
     ).toBe('0123456789*#');
     session.sessionDescriptionHandler.sendDtmf.mockReturnValue(false);
+    session.info.mockImplementation(async options => {
+      options.requestDelegate.onAccept();
+    });
     await client.sendDtmf('#');
     expect(session.info).toHaveBeenCalledWith({
+      requestDelegate: {
+        onAccept: expect.any(Function),
+        onReject: expect.any(Function),
+        onRedirect: expect.any(Function),
+      },
       requestOptions: {
         body: {
           contentDisposition: 'render',

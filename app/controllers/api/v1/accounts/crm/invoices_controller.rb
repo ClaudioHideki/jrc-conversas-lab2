@@ -3,7 +3,7 @@ module Api::V1::Accounts::Crm
     before_action :set_invoice, only: %i[show update]
 
     def index
-      invoices = crm_scope.jrc_crm_invoices.includes(:sales_order, :contract, :contact, :payments).order(created_at: :desc)
+      invoices = corporate_records(:jrc_crm_invoices).includes(:sales_order, :contract, :contact, :payments).order(created_at: :desc)
       invoices = invoices.joins(:sales_order).where(jrc_crm_sales_orders: { owner_id: Current.user.id }) unless crm_admin?
       render json: invoices.map { |invoice| serialize(invoice) }
     end
@@ -60,7 +60,7 @@ module Api::V1::Accounts::Crm
     private
 
     def set_invoice
-      scope = crm_scope.jrc_crm_invoices
+      scope = corporate_records(:jrc_crm_invoices)
       scope = scope.joins(:sales_order).where(jrc_crm_sales_orders: { owner_id: Current.user.id }) unless crm_admin?
       @invoice = scope.includes(:sales_order, :contract, :contact, :payments).find(params[:id])
     end

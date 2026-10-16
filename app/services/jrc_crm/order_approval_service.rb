@@ -2,7 +2,8 @@ module JrcCrm
   # Uses the existing Backoffice approval queue, keeping the order and decision atomic.
   class OrderApprovalService
     def initialize(order:, actor: nil)
-      @order, @actor = order, actor || order.created_by || order.owner
+      @order = order
+      @actor = actor || order.created_by || order.owner
     end
 
     def request!
@@ -23,19 +24,21 @@ module JrcCrm
     end
 
     def decide!(request:, decision:, reason: nil)
-      membership = @order.account.account_users.find_by(user_id: @actor&.id)
-      raise Pundit::NotAuthorizedError unless membership&.administrator? && membership.permissions.include?('jrc_crm')
+      authorize_decision!
       raise ArgumentError, 'Decisão inválida.' unless %w[approved rejected returned].include?(decision)
       raise ArgumentError, 'Informe o motivo da recusa/devolução.' if decision != 'approved' && reason.to_s.strip.empty?
+
       @order.with_lock do
         request.lock!
         unless request.account_id == @order.account_id && request.sales_order_id == @order.id &&
                request.order_approval? && @order.pending? && request.status.in?(BackofficeRequest::ACTIVE_STATUSES)
           raise ArgumentError, 'Esta aprovação não está pendente para este pedido.'
         end
+
         metadata = (request.metadata || {}).merge('approval_decision' => {
-          'status' => decision, 'reason' => reason.to_s.strip, 'actor_id' => @actor.id, 'at' => Time.current.iso8601
-        })
+                                                    'status' => decision, 'reason' => reason.to_s.strip,
+                                                    'actor_id' => @actor.id, 'at' => Time.current.iso8601
+                                                  })
         request.update!(status: decision == 'returned' ? 'waiting_customer' : decision, metadata: metadata)
         if decision == 'approved'
           JrcApprovals::CommercialGate.check!(resource: @order, user: @actor, key: 'crm.order_price')
@@ -45,16 +48,25 @@ module JrcCrm
           OrderWorkflowSyncService.new(order: @order, actor: @actor).call
         end
         AuditEvent.create!(account: @order.account, actor_type: 'User', actor_id: @actor.id,
-          resource_type: 'JrcCrm::BackofficeRequest', resource_id: request.id, event_type: 'backoffice_updated',
-          from_value: { status: 'pending' }, to_value: { status: request.status }, metadata: metadata['approval_decision'])
+                           resource_type: 'JrcCrm::BackofficeRequest', resource_id: request.id, event_type: 'backoffice_updated',
+                           from_value: { status: 'pending' }, to_value: { status: request.status }, metadata: metadata['approval_decision'])
         AuditEvent.create!(account: @order.account, actor_type: 'User', actor_id: @actor.id,
-          resource_type: 'JrcCrm::SalesOrder', resource_id: @order.id, event_type: 'order_updated',
-          from_value: { status: 'pending' }, to_value: { status: @order.status },
-          metadata: { source: 'backoffice_approval', request_id: request.id, decision: decision })
+                           resource_type: 'JrcCrm::SalesOrder', resource_id: @order.id, event_type: 'order_updated',
+                           from_value: { status: 'pending' }, to_value: { status: @order.status },
+                           metadata: { source: 'backoffice_approval', request_id: request.id, decision: decision })
       ensure
         @order.approval_authorized = false
       end
       request
+    end
+
+    private
+
+    def authorize_decision!
+      membership = @order.account.account_users.find_by(user_id: @actor&.id)
+      raise Pundit::NotAuthorizedError unless membership&.administrator? && membership.permissions.include?('jrc_crm')
+
+      JrcCrm::CorporateIssuer.authorize!(account: @order.account, user: @actor, unit: @order.business_unit)
     end
   end
 end

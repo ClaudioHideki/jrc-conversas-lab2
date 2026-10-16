@@ -16,6 +16,8 @@ import CrmStatusBadge from '../../components/shared/CrmStatusBadge.vue';
 import CrmValueDisplay from '../../components/shared/CrmValueDisplay.vue';
 import CrmPageHeader from '../../components/shared/CrmPageHeader.vue';
 import CrmStatCard from '../../components/shared/CrmStatCard.vue';
+import ProposalRecipientDelivery from './ProposalRecipientDelivery.vue';
+import CommercialGratuityFields from './CommercialGratuityFields.vue';
 import { formatCrmDate } from '../../utils/dateTime';
 
 const store = useStore();
@@ -53,7 +55,13 @@ const itemSaving = ref(false);
 const sendingChannel = ref('');
 const actionWorking = ref('');
 const proposalDiscount = ref('');
-const itemForm = reactive({ product_id: '', quantity: 1, unit_price: '', discount: '' });
+const itemForm = reactive({
+  product_id: '',
+  quantity: 1,
+  unit_price: '',
+  discount: '',
+  commercial_gratuity: {},
+});
 const hasPendingItem = computed(() => Boolean(itemForm.product_id));
 const proposalForm = reactive({
   title: '',
@@ -88,9 +96,17 @@ const proposalForm = reactive({
 const initialProposalForm = { ...proposalForm };
 const creationDraft = useFormDraft('crm:new_proposal', {
   active: showForm,
-  snapshot: () => ({ origin: origin.value, deal_id: dealId.value, company_id: companyId.value,
-    contact_id: contactId.value, business_unit_id: businessUnitId.value, commercial: { ...proposalForm },
-    discount: proposalDiscount.value, items: creationItems.value, pending_item: { ...itemForm } }),
+  snapshot: () => ({
+    origin: origin.value,
+    deal_id: dealId.value,
+    company_id: companyId.value,
+    contact_id: contactId.value,
+    business_unit_id: businessUnitId.value,
+    commercial: { ...proposalForm },
+    discount: proposalDiscount.value,
+    items: creationItems.value,
+    pending_item: { ...itemForm },
+  }),
   restore: draft => {
     origin.value = draft.origin || 'deal';
     dealId.value = draft.deal_id || '';
@@ -103,10 +119,21 @@ const creationDraft = useFormDraft('crm:new_proposal', {
     Object.assign(itemForm, draft.pending_item || {});
   },
   reset: () => {
-    origin.value = 'deal'; dealId.value = ''; companyId.value = null; contactId.value = null;
-    businessUnitId.value = null; creationItems.value = []; proposalDiscount.value = '';
+    origin.value = 'deal';
+    dealId.value = '';
+    companyId.value = null;
+    contactId.value = null;
+    businessUnitId.value = null;
+    creationItems.value = [];
+    proposalDiscount.value = '';
     Object.assign(proposalForm, initialProposalForm);
-    Object.assign(itemForm, { product_id: '', quantity: 1, unit_price: '', discount: '' });
+    Object.assign(itemForm, {
+      product_id: '',
+      quantity: 1,
+      unit_price: '',
+      discount: '',
+      commercial_gratuity: {},
+    });
   },
 });
 const formSnapshot = () =>
@@ -116,14 +143,19 @@ const hasUnsavedChanges = computed(
 );
 const withoutMonthlyFee = computed({
   get: () => !proposalForm.has_monthly_fee,
-  set: value => { proposalForm.has_monthly_fee = !value; },
+  set: value => {
+    proposalForm.has_monthly_fee = !value;
+  },
 });
 const installmentPreview = computed(() => {
   const values = selectedProposal.value?.installment_plan_cents || [];
   if (!values.length) return '';
   const unique = [...new Set(values)];
-  if (unique.length === 1) return `${values.length} x R$ ${moneyInput(unique[0]).replace('.', ',')}`;
-  return values.map(value => `R$ ${moneyInput(value).replace('.', ',')}`).join(' + ');
+  if (unique.length === 1)
+    return `${values.length} x R$ ${moneyInput(unique[0]).replace('.', ',')}`;
+  return values
+    .map(value => `R$ ${moneyInput(value).replace('.', ',')}`)
+    .join(' + ');
 });
 const proposalStats = computed(() => [
   {
@@ -221,12 +253,14 @@ const openForm = async () => {
           )
         : data;
     const restored = creationDraft.open();
-    if (!restored) dealId.value = deals.value.length === 1 ? deals.value[0].id : '';
+    if (!restored)
+      dealId.value = deals.value.length === 1 ? deals.value[0].id : '';
     else useAlert(t('CRM.CREATION.RECOVERED'));
     if (proposalsAPI.creationOptions) {
       const options = await proposalsAPI.creationOptions();
       operatingUnits.value = options.data.business_units || [];
-      if (!businessUnitId.value && operatingUnits.value.length === 1) businessUnitId.value = operatingUnits.value[0].id;
+      if (!businessUnitId.value && operatingUnits.value.length === 1)
+        businessUnitId.value = operatingUnits.value[0].id;
     }
     await loadProducts();
     showForm.value = true;
@@ -272,17 +306,26 @@ const hydrateProposalForm = data => {
 
 const detailActive = ref(false);
 const detailDraftId = ref(null);
-const detailDraft = useFormDraft(() => 'crm:proposal_edit:' + detailDraftId.value, {
-  active: detailActive,
-  snapshot: () => ({ proposal_id: selectedProposal.value?.id, commercial: { ...proposalForm }, discount: proposalDiscount.value, pending_item: { ...itemForm } }),
-  reset: () => {}, restore: draft => {
-    if (String(draft.proposal_id) === String(selectedProposal.value?.id)) {
-      Object.assign(proposalForm, draft.commercial || {});
-      proposalDiscount.value = draft.discount || '';
-      Object.assign(itemForm, draft.pending_item || {});
-    }
-  },
-});
+const detailDraft = useFormDraft(
+  () => 'crm:proposal_edit:' + detailDraftId.value,
+  {
+    active: detailActive,
+    snapshot: () => ({
+      proposal_id: selectedProposal.value?.id,
+      commercial: { ...proposalForm },
+      discount: proposalDiscount.value,
+      pending_item: { ...itemForm },
+    }),
+    reset: () => {},
+    restore: draft => {
+      if (String(draft.proposal_id) === String(selectedProposal.value?.id)) {
+        Object.assign(proposalForm, draft.commercial || {});
+        proposalDiscount.value = draft.discount || '';
+        Object.assign(itemForm, draft.pending_item || {});
+      }
+    },
+  }
+);
 const openProposal = async proposal => {
   detailDraft.flush();
   detailActive.value = false;
@@ -297,7 +340,10 @@ const openProposal = async proposal => {
     ]);
     selectedProposal.value = data;
     hydrateProposalForm(data);
-    if (!data.locked) { detailDraft.open(); detailActive.value = true; }
+    if (!data.locked) {
+      detailDraft.open();
+      detailActive.value = true;
+    }
   } catch {
     selectedProposal.value = null;
     useAlert('Não foi possível abrir a proposta.');
@@ -320,37 +366,60 @@ const createProposal = async () => {
   if (saving.value) return;
   saving.value = true;
   try {
-    const payload = origin.value === 'deal' ? { deal_id: dealId.value, business_unit_id: businessUnitId.value } : {
-      company_id: companyId.value, contact_id: contactId.value, business_unit_id: businessUnitId.value,
-      proposal: {
-        title: proposalForm.title || undefined, solution_description: proposalForm.solution_description,
-        commercial_notes: proposalForm.commercial_notes, notes: proposalForm.notes,
-        payment_method: proposalForm.payment_method, payment_condition: proposalForm.payment_condition,
-        installments_count: Number(proposalForm.installments_count || 1),
-        down_payment_cents: centsFromInput(proposalForm.down_payment),
-        discount_cents: centsFromInput(proposalDiscount.value), valid_until: proposalForm.valid_until || undefined,
-        term_months: Number(proposalForm.term_months || 12), next_steps: proposalForm.next_steps,
-        has_monthly_fee: proposalForm.has_monthly_fee,
-        monthly_cents: centsFromInput(proposalForm.monthly),
-        shipping_cents: centsFromInput(proposalForm.shipping),
-        shipping_mode: proposalForm.shipping_mode, shipping_in_installments: proposalForm.shipping_in_installments,
-        issuer_company_name: proposalForm.issuer_company_name,
-        issuer_tax_id: proposalForm.issuer_tax_id || null, issuer_unit: proposalForm.issuer_unit || null,
-        billing_day: proposalForm.billing_day ? Number(proposalForm.billing_day) : null,
-        first_billing_days: Number(proposalForm.first_billing_days || 0), taxes_included: proposalForm.taxes_included,
-        annual_adjustment_index: proposalForm.annual_adjustment_index, renewal_type: proposalForm.renewal_type,
-        cancellation_penalty_percent: Number(proposalForm.cancellation_penalty_percent || 0),
-        follow_up_enabled: proposalForm.follow_up_enabled, follow_up_days: Number(proposalForm.follow_up_days || 0),
-      },
-      items: creationItems.value,
-    };
+    const payload =
+      origin.value === 'deal'
+        ? { deal_id: dealId.value, business_unit_id: businessUnitId.value }
+        : {
+            company_id: companyId.value,
+            contact_id: contactId.value,
+            business_unit_id: businessUnitId.value,
+            proposal: {
+              title: proposalForm.title || undefined,
+              solution_description: proposalForm.solution_description,
+              commercial_notes: proposalForm.commercial_notes,
+              notes: proposalForm.notes,
+              payment_method: proposalForm.payment_method,
+              payment_condition: proposalForm.payment_condition,
+              installments_count: Number(proposalForm.installments_count || 1),
+              down_payment_cents: centsFromInput(proposalForm.down_payment),
+              discount_cents: centsFromInput(proposalDiscount.value),
+              valid_until: proposalForm.valid_until || undefined,
+              term_months: Number(proposalForm.term_months || 12),
+              next_steps: proposalForm.next_steps,
+              has_monthly_fee: proposalForm.has_monthly_fee,
+              monthly_cents: centsFromInput(proposalForm.monthly),
+              shipping_cents: centsFromInput(proposalForm.shipping),
+              shipping_mode: proposalForm.shipping_mode,
+              shipping_in_installments: proposalForm.shipping_in_installments,
+              issuer_company_name: proposalForm.issuer_company_name,
+              issuer_tax_id: proposalForm.issuer_tax_id || null,
+              issuer_unit: proposalForm.issuer_unit || null,
+              billing_day: proposalForm.billing_day
+                ? Number(proposalForm.billing_day)
+                : null,
+              first_billing_days: Number(proposalForm.first_billing_days || 0),
+              taxes_included: proposalForm.taxes_included,
+              annual_adjustment_index: proposalForm.annual_adjustment_index,
+              renewal_type: proposalForm.renewal_type,
+              cancellation_penalty_percent: Number(
+                proposalForm.cancellation_penalty_percent || 0
+              ),
+              follow_up_enabled: proposalForm.follow_up_enabled,
+              follow_up_days: Number(proposalForm.follow_up_days || 0),
+            },
+            items: creationItems.value,
+          };
     const { data } = await proposalsAPI.create(payload);
     if (!creationDraft.complete(savingDraftKey)) return;
     showForm.value = false;
     dealId.value = '';
     await refresh();
     await openProposal(data);
-    useAlert(origin.value === 'deal' ? 'Proposta criada com os dados do negócio.' : 'Proposta criada para o cliente do Cadastro Mestre.');
+    useAlert(
+      origin.value === 'deal'
+        ? 'Proposta criada com os dados do negócio.'
+        : 'Proposta criada para o cliente do Cadastro Mestre.'
+    );
   } catch (requestError) {
     useAlert(
       requestError.response?.data?.errors?.join(', ') ||
@@ -363,9 +432,20 @@ const createProposal = async () => {
 
 const addCreationItem = () => {
   if (!itemForm.product_id) return;
-  creationItems.value.push({ product_id: itemForm.product_id, quantity: Number(itemForm.quantity || 1),
-    unit_price_cents: centsFromInput(itemForm.unit_price), discount_cents: centsFromInput(itemForm.discount) });
-  Object.assign(itemForm, { product_id: '', quantity: 1, unit_price: '', discount: '' });
+  creationItems.value.push({
+    product_id: itemForm.product_id,
+    quantity: Number(itemForm.quantity || 1),
+    unit_price_cents: centsFromInput(itemForm.unit_price),
+    discount_cents: centsFromInput(itemForm.discount),
+    commercial_gratuity: itemForm.commercial_gratuity,
+  });
+  Object.assign(itemForm, {
+    product_id: '',
+    quantity: 1,
+    unit_price: '',
+    discount: '',
+    commercial_gratuity: {},
+  });
 };
 const deleteProposal = async proposal => {
   if (!window.confirm(t('CRM.CREATION.DELETE_CONFIRM'))) return;
@@ -375,7 +455,10 @@ const deleteProposal = async proposal => {
     await refresh();
     useAlert(t('CRM.CREATION.DELETED'));
   } catch (requestError) {
-    useAlert(requestError.response?.data?.errors?.join(', ') || t('CRM.CREATION.DELETE_ERROR'));
+    useAlert(
+      requestError.response?.data?.errors?.join(', ') ||
+        t('CRM.CREATION.DELETE_ERROR')
+    );
   }
 };
 
@@ -395,7 +478,9 @@ const persistCommercialData = async (showSuccess = true) => {
         title: proposalForm.title,
         solution_description: proposalForm.solution_description,
         implementation_cents: centsFromInput(proposalForm.implementation),
-        monthly_cents: proposalForm.has_monthly_fee ? centsFromInput(proposalForm.monthly) : 0,
+        monthly_cents: proposalForm.has_monthly_fee
+          ? centsFromInput(proposalForm.monthly)
+          : 0,
         has_monthly_fee: proposalForm.has_monthly_fee,
         shipping_cents: centsFromInput(proposalForm.shipping),
         shipping_mode: proposalForm.shipping_mode,
@@ -452,7 +537,7 @@ const selectProduct = () => {
 };
 
 const addItem = async () => {
-  if (!selectedProposal.value) return;
+  if (!selectedProposal.value || itemSaving.value) return;
   itemSaving.value = true;
   try {
     const { data } = await proposalsAPI.createItem(selectedProposal.value.id, {
@@ -460,12 +545,14 @@ const addItem = async () => {
         product_id: itemForm.product_id,
         quantity: Number(itemForm.quantity || 1),
         unit_price_cents: centsFromInput(itemForm.unit_price),
+        commercial_gratuity: itemForm.commercial_gratuity,
       },
     });
     await applyProposalResponse(data);
     itemForm.product_id = '';
     itemForm.quantity = 1;
     itemForm.unit_price = '';
+    itemForm.commercial_gratuity = {};
   } catch (requestError) {
     useAlert(
       requestError.response?.data?.errors?.join(', ') ||
@@ -488,6 +575,7 @@ const updateItem = async item => {
           quantity: Number(item.quantity || 1),
           unit_price_cents: Number(item.unit_price_cents || 0),
           discount_cents: Number(item.discount_cents || 0),
+          commercial_gratuity: item.commercial_gratuity || {},
         },
       }
     );
@@ -691,6 +779,11 @@ const sendProposal = async channel => {
   }
 };
 
+const recipientDeliverySubmitted = async data => {
+  if (data.proposal?.id !== selectedProposal.value?.id) return;
+  await applyProposalResponse(data.proposal);
+};
+
 const convertProposalToOrder = async () => {
   if (!selectedProposal.value || actionWorking.value) return;
   if (selectedProposal.value.status !== 'accepted') {
@@ -699,11 +792,20 @@ const convertProposalToOrder = async () => {
   }
   actionWorking.value = 'order';
   try {
-    const { data } = await proposalsAPI.convertToOrder(selectedProposal.value.id);
+    const { data } = await proposalsAPI.convertToOrder(
+      selectedProposal.value.id
+    );
     useAlert(`Pedido ${data.order_number || data.id} criado com sucesso.`);
-    router.push({ name: 'crm_orders', params: { accountId: route.params.accountId }, query: { orderId: data.id } });
+    router.push({
+      name: 'crm_orders',
+      params: { accountId: route.params.accountId },
+      query: { orderId: data.id },
+    });
   } catch (requestError) {
-    useAlert(requestError.response?.data?.errors?.join(', ') || 'Não foi possível converter a proposta em pedido.');
+    useAlert(
+      requestError.response?.data?.errors?.join(', ') ||
+        'Não foi possível converter a proposta em pedido.'
+    );
   } finally {
     actionWorking.value = null;
   }
@@ -808,11 +910,24 @@ onMounted(async () => {
               </p>
             </td>
             <td class="px-5 py-4 text-n-slate-11">
-              {{ proposal.deal?.title || proposal.company?.name || proposal.customer?.name || 'Cliente sem negócio' }}
+              {{
+                proposal.deal?.title ||
+                proposal.company?.name ||
+                proposal.customer?.name ||
+                'Cliente sem negócio'
+              }}
             </td>
             <td class="px-5 py-4">
               <CrmStatusBadge :value="proposal.status" />
-              <p v-if="proposal.status === 'draft' && proposal.approval?.status === 'approved'" class="mt-1 text-xs font-medium text-n-teal-11">{{ $t('CRM.PROPOSALS.APPROVED_READY') }}</p>
+              <p
+                v-if="
+                  proposal.status === 'draft' &&
+                  proposal.approval?.status === 'approved'
+                "
+                class="mt-1 text-xs font-medium text-n-teal-11"
+              >
+                {{ $t('CRM.PROPOSALS.APPROVED_READY') }}
+              </p>
             </td>
             <td class="px-5 py-4 text-n-slate-11">
               {{ proposal.items_count || 0 }}
@@ -828,8 +943,15 @@ onMounted(async () => {
             </td>
             <td class="px-5 py-4">
               <div class="flex justify-end gap-1">
-                <button v-if="proposal.deletable" type="button" class="rounded-lg border border-n-weak p-2 text-n-ruby-11"
-                  :title="t('CRM.CREATION.DELETE')" @click="deleteProposal(proposal)"><i class="i-lucide-trash-2 size-4" /></button>
+                <button
+                  v-if="proposal.deletable"
+                  type="button"
+                  class="rounded-lg border border-n-weak p-2 text-n-ruby-11"
+                  :title="t('CRM.CREATION.DELETE')"
+                  @click="deleteProposal(proposal)"
+                >
+                  <i class="i-lucide-trash-2 size-4" />
+                </button>
                 <button
                   type="button"
                   class="rounded-lg border border-n-weak p-2"
@@ -890,50 +1012,227 @@ onMounted(async () => {
       >
         <div class="flex items-center justify-between gap-3">
           <h3 class="text-lg font-bold text-n-slate-12">Criar proposta</h3>
-          <button type="button" class="rounded-lg p-2" :aria-label="t('CRM.CREATION.CLOSE')" :disabled="saving" @click="showForm = false"><i class="i-lucide-x size-5" /></button>
+          <button
+            type="button"
+            class="rounded-lg p-2"
+            :aria-label="t('CRM.CREATION.CLOSE')"
+            :disabled="saving"
+            @click="showForm = false"
+          >
+            <i class="i-lucide-x size-5" />
+          </button>
         </div>
         <fieldset class="mt-4 flex flex-wrap gap-3">
-          <legend class="mb-2 text-sm font-semibold">{{ t('CRM.CREATION.ORIGIN') }}</legend>
-          <label><input v-model="origin" type="radio" value="deal" /> {{ t('CRM.CREATION.FROM_DEAL') }}</label>
-          <label v-if="hasCustomerMaster"><input v-model="origin" type="radio" value="customer" /> {{ t('CRM.CREATION.FROM_CUSTOMER') }}</label>
+          <legend class="mb-2 text-sm font-semibold">
+            {{ t('CRM.CREATION.ORIGIN') }}
+          </legend>
+          <label
+            ><input v-model="origin" type="radio" value="deal" />
+            {{ t('CRM.CREATION.FROM_DEAL') }}</label
+          >
+          <label v-if="hasCustomerMaster"
+            ><input v-model="origin" type="radio" value="customer" />
+            {{ t('CRM.CREATION.FROM_CUSTOMER') }}</label
+          >
         </fieldset>
-        <label v-if="origin === 'deal'" class="mt-5 block text-sm font-medium text-n-slate-11">Negócio
-          <select v-model="dealId" required class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2">
+        <label
+          v-if="origin === 'deal'"
+          class="mt-5 block text-sm font-medium text-n-slate-11"
+          >Negócio
+          <select
+            v-model="dealId"
+            required
+            class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"
+          >
             <option disabled value="">Selecione</option>
-            <option v-for="deal in deals" :key="deal.id" :value="deal.id">{{ deal.title }}{{ deal.contact?.name ? ' — ' + deal.contact.name : '' }}</option>
+            <option v-for="deal in deals" :key="deal.id" :value="deal.id">
+              {{ deal.title
+              }}{{ deal.contact?.name ? ' — ' + deal.contact.name : '' }}
+            </option>
           </select>
         </label>
-        <label v-if="operatingUnits.length" class="mt-4 block text-sm">{{ t('CRM.CREATION.UNIT') }}
-          <select v-model="businessUnitId" required class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2">
-            <option value="">Selecione</option><option v-for="unit in operatingUnits" :key="unit.id" :value="unit.id">{{ unit.name }}</option>
-          </select>
-        </label>
-        <div v-if="origin === 'customer'" class="mt-4 space-y-4">
-          <div><span class="text-sm font-semibold">{{ t('CRM.CREATION.CUSTOMER') }}</span><CompanyPicker v-model="companyId" /></div>
-          <div><span class="text-sm font-semibold">{{ t('CRM.CREATION.CONTACT') }}</span><ContactPicker v-model="contactId" :company-id="companyId" />
-            <button type="button" class="mt-2 rounded-lg border border-n-weak px-3 py-2" @click="showContactForm = true">{{ t('CRM.CREATION.NEW_CONTACT') }}</button>
-          </div>
-          <label class="block">{{ t('CRM.CREATION.TITLE') }}<input v-model="proposalForm.title" class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2" /></label>
-          <fieldset class="space-y-2"><legend class="text-sm font-semibold">{{ t('CRM.CREATION.PRODUCTS') }}</legend>
-            <select v-model="itemForm.product_id" class="w-full rounded-lg border border-n-weak px-3 py-2" @change="selectProduct">
-              <option value="">Selecione produto</option><option v-for="product in products" :key="product.id" :value="product.id">{{ product.name }}</option>
+        <template v-if="operatingUnits.length">
+          <label class="mt-4 block text-sm"
+            >{{ t('CRM.CREATION.UNIT') }}
+            <select
+              v-model="businessUnitId"
+              required
+              class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"
+            >
+              <option value="">Selecione</option>
+              <option
+                v-for="unit in operatingUnits"
+                :key="unit.id"
+                :value="unit.id"
+              >
+                {{ unit.name }}
+              </option>
             </select>
-            <div class="grid grid-cols-2 gap-2"><label>Quantidade<input v-model="itemForm.quantity" type="number" min="0.01" step="0.01" class="w-full rounded-lg border border-n-weak px-3 py-2" /></label>
-              <label>{{ t('CRM.CREATION.UNIT_PRICE') }}<input v-model="itemForm.unit_price" type="number" min="0" step="0.01" class="w-full rounded-lg border border-n-weak px-3 py-2" /></label>
-              <label>{{ t('CRM.CREATION.ITEM_DISCOUNT') }}<input v-model="itemForm.discount" type="number" min="0" step="0.01" class="w-full rounded-lg border border-n-weak px-3 py-2" /></label></div>
-            <button type="button" class="rounded-lg border border-n-weak px-3 py-2" @click="addCreationItem">{{ t('CRM.CREATION.ADD_ITEM') }}</button>
-            <div v-for="(item, index) in creationItems" :key="index" class="flex items-center justify-between gap-2 text-sm">
-              <span>{{ products.find(product => String(product.id) === String(item.product_id))?.name }} · {{ item.quantity }} × {{ moneyInput(item.unit_price_cents) }}</span>
-              <button type="button" class="rounded-lg p-2" :aria-label="t('CRM.CREATION.DISCARD')" @click="creationItems.splice(index, 1)"><i class="i-lucide-trash-2 size-4" /></button>
+          </label>
+        </template>
+        <div v-if="origin === 'customer'" class="mt-4 space-y-4">
+          <div>
+            <span class="text-sm font-semibold">{{
+              t('CRM.CREATION.CUSTOMER')
+            }}</span
+            ><CompanyPicker v-model="companyId" />
+          </div>
+          <div>
+            <span class="text-sm font-semibold">{{
+              t('CRM.CREATION.CONTACT')
+            }}</span
+            ><ContactPicker v-model="contactId" :company-id="companyId" />
+            <button
+              type="button"
+              class="mt-2 rounded-lg border border-n-weak px-3 py-2"
+              @click="showContactForm = true"
+            >
+              {{ t('CRM.CREATION.NEW_CONTACT') }}
+            </button>
+          </div>
+          <label class="block"
+            >{{ t('CRM.CREATION.TITLE')
+            }}<input
+              v-model="proposalForm.title"
+              class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"
+          /></label>
+          <fieldset class="space-y-2">
+            <legend class="text-sm font-semibold">
+              {{ t('CRM.CREATION.PRODUCTS') }}
+            </legend>
+            <select
+              v-model="itemForm.product_id"
+              class="w-full rounded-lg border border-n-weak px-3 py-2"
+              @change="selectProduct"
+            >
+              <option value="">Selecione produto</option>
+              <option
+                v-for="product in products"
+                :key="product.id"
+                :value="product.id"
+              >
+                {{ product.name }}
+              </option>
+            </select>
+            <div class="grid grid-cols-2 gap-2">
+              <label
+                >Quantidade<input
+                  v-model="itemForm.quantity"
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  class="w-full rounded-lg border border-n-weak px-3 py-2"
+              /></label>
+              <label
+                >{{ t('CRM.CREATION.UNIT_PRICE')
+                }}<input
+                  v-model="itemForm.unit_price"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  class="w-full rounded-lg border border-n-weak px-3 py-2"
+              /></label>
+              <label
+                >{{ t('CRM.CREATION.ITEM_DISCOUNT')
+                }}<input
+                  v-model="itemForm.discount"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  class="w-full rounded-lg border border-n-weak px-3 py-2"
+              /></label>
+            </div>
+            <button
+              type="button"
+              class="rounded-lg border border-n-weak px-3 py-2"
+              @click="addCreationItem"
+            >
+              {{ t('CRM.CREATION.ADD_ITEM') }}
+            </button>
+            <CommercialGratuityFields v-model="itemForm.commercial_gratuity" />
+            <div
+              v-for="(item, index) in creationItems"
+              :key="index"
+              class="flex items-center justify-between gap-2 text-sm"
+            >
+              <span
+                >{{
+                  products.find(
+                    product => String(product.id) === String(item.product_id)
+                  )?.name
+                }}
+                · {{ item.quantity }} ×
+                {{ moneyInput(item.unit_price_cents) }}</span
+              >
+              <button
+                type="button"
+                class="rounded-lg p-2"
+                :aria-label="t('CRM.CREATION.DISCARD')"
+                @click="creationItems.splice(index, 1)"
+              >
+                <i class="i-lucide-trash-2 size-4" />
+              </button>
             </div>
           </fieldset>
-          <label class="block">Desconto geral<input v-model="proposalDiscount" type="number" min="0" step="0.01" class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2" /></label>
-          <label class="block">Condição de pagamento<select v-model="proposalForm.payment_condition" class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"><option value="cash">À vista</option><option value="installments">Parcelas</option><option value="down_payment_installments">Entrada + parcelas</option></select></label>
-          <label v-if="proposalForm.payment_condition !== 'cash'" class="block">Parcelas<input v-model="proposalForm.installments_count" type="number" min="1" max="120" class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2" /></label>
-          <label v-if="proposalForm.payment_condition === 'down_payment_installments'" class="block">Entrada<input v-model="proposalForm.down_payment" type="number" min="0" step="0.01" class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2" /></label>
-          <label class="block">{{ t('CRM.CREATION.NOTES') }}<textarea v-model="proposalForm.commercial_notes" class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2" /></label>
+          <label class="block"
+            >Desconto geral<input
+              v-model="proposalDiscount"
+              type="number"
+              min="0"
+              step="0.01"
+              class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"
+          /></label>
+          <label class="block"
+            >Condição de pagamento<select
+              v-model="proposalForm.payment_condition"
+              class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"
+            >
+              <option value="cash">À vista</option>
+              <option value="installments">Parcelas</option>
+              <option value="down_payment_installments">
+                Entrada + parcelas
+              </option>
+            </select></label
+          >
+          <template v-if="proposalForm.payment_condition !== 'cash'">
+            <label class="block"
+              >Parcelas<input
+                v-model="proposalForm.installments_count"
+                type="number"
+                min="1"
+                max="120"
+                class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"
+            /></label>
+          </template>
+          <label
+            v-if="
+              proposalForm.payment_condition === 'down_payment_installments'
+            "
+            class="block"
+            >Entrada<input
+              v-model="proposalForm.down_payment"
+              type="number"
+              min="0"
+              step="0.01"
+              class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"
+          /></label>
+          <label class="block"
+            >{{ t('CRM.CREATION.NOTES')
+            }}<textarea
+              v-model="proposalForm.commercial_notes"
+              class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"
+            />
+          </label>
         </div>
-        <div class="mt-6 flex justify-end gap-3"><button type="button" class="mr-auto rounded-lg border border-n-weak px-3 py-2" :disabled="saving" @click="creationDraft.discard">{{ t('CRM.CREATION.DISCARD') }}</button>
+        <div class="mt-6 flex justify-end gap-3">
+          <button
+            type="button"
+            class="mr-auto rounded-lg border border-n-weak px-3 py-2"
+            :disabled="saving"
+            @click="creationDraft.discard"
+          >
+            {{ t('CRM.CREATION.DISCARD') }}
+          </button>
           <button
             type="button"
             class="rounded-lg border border-n-weak px-4 py-2"
@@ -941,7 +1240,9 @@ onMounted(async () => {
           >
             Cancelar</button
           ><button
-:disabled="saving || (origin === 'customer' && !companyId && !contactId)"
+            :disabled="
+              saving || (origin === 'customer' && !companyId && !contactId)
+            "
             class="rounded-lg bg-n-brand px-4 py-2 font-semibold text-white disabled:opacity-50"
           >
             Criar proposta
@@ -970,8 +1271,14 @@ onMounted(async () => {
               <h3 class="mt-1 text-2xl font-bold text-n-slate-12">
                 {{ selectedProposal.title }}
               </h3>
-              <ApprovalGateBadge resource-key="crm.proposal_send" :resource-id="selectedProposal.id" />
-              <ApprovalGateBadge resource-key="crm.proposal_convert" :resource-id="selectedProposal.id" />
+              <ApprovalGateBadge
+                resource-key="crm.proposal_send"
+                :resource-id="selectedProposal.id"
+              />
+              <ApprovalGateBadge
+                resource-key="crm.proposal_convert"
+                :resource-id="selectedProposal.id"
+              />
               <p class="mt-1 text-sm text-n-slate-10">
                 {{
                   selectedProposal.customer?.name ||
@@ -1047,6 +1354,25 @@ onMounted(async () => {
                     : 'Enviar WhatsApp'
                 }}
               </button>
+              <ProposalRecipientDelivery
+                :key="`${route.params.accountId}:${store.getters.getCurrentUserID}:${selectedProposal.id}`"
+                :proposal-id="selectedProposal.id"
+                :public-url="publicProposalUrl(selectedProposal)"
+                :disabled="
+                  Boolean(sendingChannel) ||
+                  Boolean(actionWorking) ||
+                  saving ||
+                  itemSaving ||
+                  loadingDetails ||
+                  hasUnsavedChanges ||
+                  hasPendingItem ||
+                  itemUpdateFailed ||
+                  ['accepted', 'canceled', 'rejected', 'expired'].includes(
+                    selectedProposal.status
+                  )
+                "
+                @submitted="recipientDeliverySubmitted"
+              />
               <button
                 type="button"
                 class="rounded-xl bg-n-brand px-3 py-2 text-sm font-semibold text-white shadow-sm disabled:opacity-50"
@@ -1135,7 +1461,15 @@ onMounted(async () => {
             <div>
               <p class="text-xs text-n-slate-10">Status</p>
               <CrmStatusBadge class="mt-1" :value="selectedProposal.status" />
-              <p v-if="selectedProposal.status === 'draft' && selectedProposal.approval?.status === 'approved'" class="mt-1 text-xs font-medium text-n-teal-11">{{ $t('CRM.PROPOSALS.APPROVED_READY') }}</p>
+              <p
+                v-if="
+                  selectedProposal.status === 'draft' &&
+                  selectedProposal.approval?.status === 'approved'
+                "
+                class="mt-1 text-xs font-medium text-n-teal-11"
+              >
+                {{ $t('CRM.PROPOSALS.APPROVED_READY') }}
+              </p>
             </div>
             <div>
               <p class="text-xs text-n-slate-10">Implantação</p>
@@ -1224,18 +1558,39 @@ onMounted(async () => {
                   Identificação e conteúdo
                 </h5>
                 <div class="grid gap-4 md:grid-cols-2">
-                  <label v-if="isAdmin" class="text-sm font-medium text-n-slate-11">
+                  <label
+                    v-if="isAdmin"
+                    class="text-sm font-medium text-n-slate-11"
+                  >
                     Responsável da proposta
-                    <select v-model="proposalForm.owner_id" class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 px-3 py-2">
+                    <select
+                      v-model="proposalForm.owner_id"
+                      class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 px-3 py-2"
+                    >
                       <option value="">Responsável atual</option>
-                      <option v-for="agent in agents" :key="agent.id" :value="agent.id">{{ agent.name || agent.email }}</option>
+                      <option
+                        v-for="agent in agents"
+                        :key="agent.id"
+                        :value="agent.id"
+                      >
+                        {{ agent.name || agent.email }}
+                      </option>
                     </select>
                   </label>
-                  <div class="rounded-xl border border-n-weak bg-n-alpha-2 p-3 text-sm">
-                    <span class="block text-xs font-semibold uppercase text-n-slate-9">Responsável salvo</span>
-                    <strong class="mt-1 block text-n-slate-12">{{ selectedProposal.owner?.name || 'Não definido' }}</strong>
+                  <div
+                    class="rounded-xl border border-n-weak bg-n-alpha-2 p-3 text-sm"
+                  >
+                    <span
+                      class="block text-xs font-semibold uppercase text-n-slate-9"
+                      >Responsável salvo</span
+                    >
+                    <strong class="mt-1 block text-n-slate-12">{{
+                      selectedProposal.owner?.name || 'Não definido'
+                    }}</strong>
                   </div>
-                  <label class="text-sm font-medium text-n-slate-11 md:col-span-2">
+                  <label
+                    class="text-sm font-medium text-n-slate-11 md:col-span-2"
+                  >
                     Título
                     <input
                       v-model="proposalForm.title"
@@ -1244,7 +1599,9 @@ onMounted(async () => {
                       class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"
                     />
                   </label>
-                  <label class="text-sm font-medium text-n-slate-11 md:col-span-2">
+                  <label
+                    class="text-sm font-medium text-n-slate-11 md:col-span-2"
+                  >
                     Descrição da solução
                     <textarea
                       v-model="proposalForm.solution_description"
@@ -1253,11 +1610,27 @@ onMounted(async () => {
                       class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"
                     />
                   </label>
-                  <label class="flex items-center justify-between gap-3 rounded-xl border border-n-weak bg-n-alpha-2 p-3 text-sm font-medium text-n-slate-11 md:col-span-2">
-                    <span><strong class="block text-n-slate-12">Sem mensalidade</strong><span class="text-xs text-n-slate-9">Quando marcado, a proposta não possui cobrança recorrente.</span></span>
-                    <input v-model="withoutMonthlyFee" type="checkbox" class="size-5 accent-emerald-600" />
+                  <label
+                    class="flex items-center justify-between gap-3 rounded-xl border border-n-weak bg-n-alpha-2 p-3 text-sm font-medium text-n-slate-11 md:col-span-2"
+                  >
+                    <span
+                      ><strong class="block text-n-slate-12"
+                        >Sem mensalidade</strong
+                      ><span class="text-xs text-n-slate-9"
+                        >Quando marcado, a proposta não possui cobrança
+                        recorrente.</span
+                      ></span
+                    >
+                    <input
+                      v-model="withoutMonthlyFee"
+                      type="checkbox"
+                      class="size-5 accent-emerald-600"
+                    />
                   </label>
-                  <label v-if="proposalForm.has_monthly_fee" class="text-sm font-medium text-n-slate-11">
+                  <label
+                    v-if="proposalForm.has_monthly_fee"
+                    class="text-sm font-medium text-n-slate-11"
+                  >
                     Mensalidade (R$)
                     <input
                       v-model="proposalForm.monthly"
@@ -1267,37 +1640,103 @@ onMounted(async () => {
                       :readonly="selectedProposal.items_count > 0"
                       class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2 read-only:bg-n-alpha-2"
                     />
-                    <span v-if="selectedProposal.items_count > 0" class="mt-1 block text-xs text-n-slate-9">
+                    <span
+                      v-if="selectedProposal.items_count > 0"
+                      class="mt-1 block text-xs text-n-slate-9"
+                    >
                       Calculada automaticamente pelos itens recorrentes.
                     </span>
                   </label>
-                  <label v-if="proposalForm.shipping_mode === 'separate'" class="text-sm font-medium text-n-slate-11">
+                  <label
+                    v-if="proposalForm.shipping_mode === 'separate'"
+                    class="text-sm font-medium text-n-slate-11"
+                  >
                     Frete (R$)
-                    <input v-model="proposalForm.shipping" type="number" min="0" step="0.01" class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2" />
+                    <input
+                      v-model="proposalForm.shipping"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"
+                    />
                   </label>
                   <label class="text-sm font-medium text-n-slate-11">
                     Condição do frete
-                    <select v-model="proposalForm.shipping_mode" class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"><option value="not_applicable">Sem frete</option><option value="included">Incluso</option><option value="separate">Cobrado à parte</option></select>
+                    <select
+                      v-model="proposalForm.shipping_mode"
+                      class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"
+                    >
+                      <option value="not_applicable">Sem frete</option>
+                      <option value="included">Incluso</option>
+                      <option value="separate">Cobrado à parte</option>
+                    </select>
                   </label>
-                  <label v-if="proposalForm.shipping_mode === 'separate'" class="flex items-center gap-2 rounded-xl border border-n-weak p-3 text-sm font-medium text-n-slate-11 md:col-span-2">
-                    <input v-model="proposalForm.shipping_in_installments" type="checkbox" class="size-4 accent-n-brand" />
+                  <label
+                    v-if="proposalForm.shipping_mode === 'separate'"
+                    class="flex items-center gap-2 rounded-xl border border-n-weak p-3 text-sm font-medium text-n-slate-11 md:col-span-2"
+                  >
+                    <input
+                      v-model="proposalForm.shipping_in_installments"
+                      type="checkbox"
+                      class="size-4 accent-n-brand"
+                    />
                     Incluir o frete no valor parcelável
                   </label>
                   <label class="text-sm font-medium text-n-slate-11">
                     Condição de pagamento
-                    <select v-model="proposalForm.payment_condition" class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"><option value="cash">À vista</option><option value="down_payment_installments">Entrada + parcelas</option><option value="installments">Parcelado sem entrada</option></select>
+                    <select
+                      v-model="proposalForm.payment_condition"
+                      class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"
+                    >
+                      <option value="cash">À vista</option>
+                      <option value="down_payment_installments">
+                        Entrada + parcelas
+                      </option>
+                      <option value="installments">
+                        Parcelado sem entrada
+                      </option>
+                    </select>
                   </label>
-                  <label v-if="proposalForm.payment_condition === 'down_payment_installments'" class="text-sm font-medium text-n-slate-11">
+                  <label
+                    v-if="
+                      proposalForm.payment_condition ===
+                      'down_payment_installments'
+                    "
+                    class="text-sm font-medium text-n-slate-11"
+                  >
                     Entrada (R$)
-                    <input v-model="proposalForm.down_payment" type="number" min="0" step="0.01" class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2" />
+                    <input
+                      v-model="proposalForm.down_payment"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"
+                    />
                   </label>
-                  <label v-if="proposalForm.payment_condition !== 'cash'" class="text-sm font-medium text-n-slate-11">
+                  <label
+                    v-if="proposalForm.payment_condition !== 'cash'"
+                    class="text-sm font-medium text-n-slate-11"
+                  >
                     Quantidade de parcelas
-                    <input v-model.number="proposalForm.installments_count" type="number" min="1" max="60" class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2" />
+                    <input
+                      v-model.number="proposalForm.installments_count"
+                      type="number"
+                      min="1"
+                      max="60"
+                      class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"
+                    />
                   </label>
-                  <div v-if="proposalForm.payment_condition !== 'cash'" class="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm">
-                    <span class="block text-xs font-semibold uppercase text-emerald-700">Parcelamento calculado</span>
-                    <strong class="mt-1 block text-emerald-800">{{ installmentPreview || 'Salve para calcular as parcelas' }}</strong>
+                  <div
+                    v-if="proposalForm.payment_condition !== 'cash'"
+                    class="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm"
+                  >
+                    <span
+                      class="block text-xs font-semibold uppercase text-emerald-700"
+                      >Parcelamento calculado</span
+                    >
+                    <strong class="mt-1 block text-emerald-800">{{
+                      installmentPreview || 'Salve para calcular as parcelas'
+                    }}</strong>
                   </div>
                   <label class="text-sm font-medium text-n-slate-11">
                     Implantação (R$)
@@ -1368,6 +1807,7 @@ onMounted(async () => {
                     Empresa emissora
                     <input
                       v-model="proposalForm.issuer_company_name"
+                      :disabled="!!selectedProposal.issuer_company_id"
                       class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"
                     />
                   </label>
@@ -1375,6 +1815,7 @@ onMounted(async () => {
                     CNPJ da emissora
                     <input
                       v-model="proposalForm.issuer_tax_id"
+                      :disabled="!!selectedProposal.issuer_company_id"
                       class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"
                       placeholder="00.000.000/0000-00"
                     />
@@ -1383,6 +1824,7 @@ onMounted(async () => {
                     Unidade JRC
                     <input
                       v-model="proposalForm.issuer_unit"
+                      :disabled="!!selectedProposal.issuer_company_id"
                       class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"
                     />
                   </label>
@@ -1558,6 +2000,11 @@ onMounted(async () => {
               >
                 + Adicionar
               </button>
+              <CommercialGratuityFields
+                v-model="itemForm.commercial_gratuity"
+                class="md:col-span-4"
+                :disabled="itemSaving"
+              />
             </form>
 
             <div class="mt-4 overflow-auto rounded-xl border border-n-weak">
@@ -1588,6 +2035,23 @@ onMounted(async () => {
                       <p class="font-medium text-n-slate-12">
                         {{ item.name_snapshot }}
                       </p>
+                      <form
+                        v-if="!selectedProposal.locked"
+                        class="mt-3 space-y-2"
+                        @submit.prevent="updateItem(item)"
+                      >
+                        <CommercialGratuityFields
+                          v-model="item.commercial_gratuity"
+                          :disabled="itemSaving"
+                        />
+                        <button
+                          type="submit"
+                          :disabled="itemSaving"
+                          class="rounded-lg border border-n-weak px-3 py-2 text-sm"
+                        >
+                          {{ t('CRM.GRATUITY.SAVE') }}
+                        </button>
+                      </form>
                       <p
                         v-if="item.product?.sku"
                         class="text-xs text-n-slate-10"
@@ -1850,6 +2314,15 @@ onMounted(async () => {
       </aside>
     </div>
   </div>
-  <ContactCreateModal v-if="showForm && showContactForm" :company-id="companyId"
-    @close="showContactForm = false" @created="contact => { contactId = contact.id; showContactForm = false; }" />
+  <ContactCreateModal
+    v-if="showForm && showContactForm"
+    :company-id="companyId"
+    @close="showContactForm = false"
+    @created="
+      contact => {
+        contactId = contact.id;
+        showContactForm = false;
+      }
+    "
+  />
 </template>

@@ -63,6 +63,7 @@
 #
 module JrcCrm
   class Deal < ApplicationRecord
+    include JrcCrm::CorporateUnitBinding
     include JrcCustomers::CrmMasterLink
     self.table_name = 'jrc_crm_deals'
     belongs_to :account
@@ -81,9 +82,9 @@ module JrcCrm
     has_many :deal_products, class_name: 'JrcCrm::DealProduct', dependent: :destroy
     has_many :products, through: :deal_products
     has_many :proposals, class_name: 'JrcCrm::Proposal', dependent: :destroy
-    has_many :activities, class_name: 'JrcCrm::Activity', foreign_key: :deal_id, dependent: :destroy
-    has_many :follow_ups, class_name: 'JrcCrm::FollowUp', foreign_key: :deal_id, dependent: :destroy
-    has_many :deal_conversations, class_name: 'JrcCrm::DealConversation', foreign_key: :deal_id, dependent: :destroy
+    has_many :activities, class_name: 'JrcCrm::Activity', dependent: :destroy
+    has_many :follow_ups, class_name: 'JrcCrm::FollowUp', dependent: :destroy
+    has_many :deal_conversations, class_name: 'JrcCrm::DealConversation', dependent: :destroy
     has_many :conversations, through: :deal_conversations
     has_many :audit_events, -> { where(resource_type: 'JrcCrm::Deal') }, class_name: 'JrcCrm::AuditEvent', foreign_key: :resource_id
 
@@ -165,11 +166,10 @@ module JrcCrm
     end
 
     def lost_reason_required_when_lost
-      if status == 'lost' && lost_reason_id.blank? && lost_reason_note.blank?
-        errors.add(:base, 'Lost reason is required when deal is lost')
-      end
-    end
+      return unless status == 'lost' && lost_reason_id.blank? && lost_reason_note.blank?
 
+      errors.add(:base, 'Lost reason is required when deal is lost')
+    end
 
     def associations_belong_to_account
       errors.add(:pipeline, 'must belong to account') if pipeline && pipeline.account_id != account_id

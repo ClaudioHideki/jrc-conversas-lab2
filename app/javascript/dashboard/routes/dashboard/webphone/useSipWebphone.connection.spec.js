@@ -151,6 +151,15 @@ describe('softphone reconnect coordinator', () => {
     mock.transfer.mockResolvedValue(undefined);
     await expect(api.transferCall('immediate', '202')).resolves.toBe(true);
   });
+  it.each(['supervised', 'immediate'])(
+    'passes the human extension unchanged to the native SIP client for %s',
+    async mode => {
+      await expect(api.transferCall(mode, '1410')).resolves.toBe(true);
+      expect(mock.transfer).toHaveBeenCalledOnce();
+      expect(mock.transfer).toHaveBeenCalledWith(mode, '1410');
+      expect(api.credential.value.extension).toBe('101');
+    }
+  );
   it('does not send another transfer or keypad tones while a transfer is pending', async () => {
     mock.callbacks.onTransferPending(true);
     mock.callbacks.onEstablished();

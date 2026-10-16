@@ -38,6 +38,7 @@
 module JrcCrm
   class ProposalItem < ApplicationRecord
     self.table_name = 'jrc_crm_proposal_items'
+    include JrcCrm::CommercialGratuityIntent
 
     BILLING_MODELS = %w[one_time monthly annual usage].freeze
 
@@ -56,8 +57,8 @@ module JrcCrm
 
     before_validation :normalize_fields
     before_validation :calculate_totals
-    after_save :recalculate_proposal_totals
     after_destroy :recalculate_proposal_totals
+    after_save :recalculate_proposal_totals
 
     def recurring?
       %w[monthly annual usage].include?(billing_model)
@@ -109,6 +110,7 @@ module JrcCrm
     end
 
     def price_respects_product_minimum
+      return if declared_free_draft?
       return unless product&.minimum_price_cents.to_i.positive?
       return if unit_price_cents.to_i >= product.minimum_price_cents.to_i
 

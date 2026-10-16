@@ -17,6 +17,10 @@ class Api::V1::Accounts::Customers::BaseController < Api::V1::Accounts::BaseCont
     authorize :directory, :administer?, policy_class: JrcCustomers::DirectoryPolicy
   end
 
+  def corporate_companies(relation = Current.account.master_companies)
+    JrcCrm::CorporateCoverage.new(account: Current.account, user: Current.user).companies(relation)
+  end
+
   def serializer
     @serializer ||= JrcCustomers::Serializer.new(account: Current.account)
   end

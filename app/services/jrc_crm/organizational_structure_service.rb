@@ -16,23 +16,46 @@ module JrcCrm
         users: user_payload,
         team_scopes: team_scope_payload,
         user_scopes: user_scope_payload,
+        service_desk_units: service_desk_unit_payload,
         legacy_user_scope_count: account.jrc_crm_user_business_units.where(structure_managed: false).count,
         permissions_source: 'native_roles_and_custom_roles'
       }
     end
 
     def update_settings!(attributes)
+      authorize_group_settings!
       current = organization_settings
       allowed = attributes.to_h.symbolize_keys.slice(:group_name, :scope_enforcement_enabled)
       allowed[:group_name] = allowed[:group_name].to_s.strip.presence || account.name if allowed.key?(:group_name)
-      allowed[:scope_enforcement_enabled] = ActiveModel::Type::Boolean.new.cast(allowed[:scope_enforcement_enabled]) if allowed.key?(:scope_enforcement_enabled)
-      account.update!(custom_attributes: account.custom_attributes.merge(SETTINGS_KEY => current.merge(allowed.stringify_keys)))
+      if allowed.key?(:scope_enforcement_enabled)
+        allowed[:scope_enforcement_enabled] = ActiveModel::Type::Boolean.new.cast(allowed[:scope_enforcement_enabled])
+      end
+      merge_authorities!(allowed, attributes, current)
+      persist_settings!(current.merge(allowed.stringify_keys))
       group_payload
     end
 
     private
 
     attr_reader :account, :actor
+
+    def persist_settings!(settings)
+      account.update!(custom_attributes: account.custom_attributes.merge(SETTINGS_KEY => settings))
+    end
+
+    def authorize_group_settings!
+      coverage = JrcCrm::CorporateCoverage.new(account: account, user: actor)
+      raise Pundit::NotAuthorizedError if coverage.configured? && !coverage.group?
+    end
+
+    def merge_authorities!(allowed, attributes, current)
+      authorities = attributes.to_h.with_indifferent_access[:approval_authorities]
+      return unless authorities
+
+      allowed[:approval_authorities] = JrcCrm::CorporateProfile.authorities(
+        account: account, current: current.fetch('approval_authorities', {}), attributes: authorities
+      )
+    end
 
     def organization_settings
       value = account.custom_attributes.fetch(SETTINGS_KEY, {})
@@ -45,7 +68,8 @@ module JrcCrm
         id: account.id,
         name: settings['group_name'].presence || account.name,
         scope_enforcement_enabled: ActiveModel::Type::Boolean.new.cast(settings['scope_enforcement_enabled']),
-        account_name: account.name
+        account_name: account.name,
+        approval_authorities: settings.fetch('approval_authorities', {})
       }
     end
 
@@ -58,17 +82,26 @@ module JrcCrm
           segment: company.try(:segment),
           active: company.try(:active) != false,
           relationship_type: company.try(:relationship_type),
+          tax_id: company.tax_id,
+          state_registration: company.state_registration,
+          municipal_registration: company.municipal_registration,
+          owner_id: company.owner_id,
+          economic_group: company.economic_group,
+          profile: JrcCrm::CorporateProfile.read(company),
+          fiscal_addresses: company.addresses.map { |address| { id: address.id, label: [address.street, address.city].compact.join(', ') } },
           revision: company.updated_at&.iso8601(6)
         }
       end
     end
 
     def internal_companies
-      @internal_companies ||= account.master_companies.where(relationship_type: 'internal').order(:name, :id).to_a
+      coverage = JrcCrm::CorporateCoverage.new(account: account, user: actor)
+      @internal_companies ||= account.master_companies.where(relationship_type: 'internal', id: coverage.company_ids).order(:name, :id).to_a
     end
 
     def business_unit_payload
-      account.jrc_crm_business_units.includes(:operating_company).order(:name, :id).map do |unit|
+      coverage = JrcCrm::CorporateCoverage.new(account: account, user: actor)
+      coverage.restrict(account.jrc_crm_business_units).includes(:operating_company).order(:name, :id).map do |unit|
         {
           id: unit.id,
           name: unit.name,
@@ -112,15 +145,27 @@ module JrcCrm
     end
 
     def team_scope_payload
-      account.jrc_crm_team_scopes.includes(:team, :company, :business_unit).order(:team_id, :id).map do |record|
+      covered_scopes(account.jrc_crm_team_scopes).includes(:team, :company, :business_unit).order(:team_id, :id).map do |record|
         serialize_scope(record).merge(team_name: record.team.name)
       end
     end
 
     def user_scope_payload
-      account.jrc_crm_user_business_units.structure_managed.includes(:user, :team, :company, :business_unit).order(:user_id, :team_id, :id).map do |record|
+      scopes = covered_scopes(account.jrc_crm_user_business_units.structure_managed)
+      scopes.includes(:user, :team, :company, :business_unit).order(:user_id, :team_id, :id).map do |record|
         serialize_scope(record).merge(user_id: record.user_id, user_name: record.user.name, team_name: record.team&.name)
       end
+    end
+
+    def covered_scopes(relation)
+      coverage = JrcCrm::CorporateCoverage.new(account: account, user: actor)
+      relation.where(company_id: nil).or(relation.where(company_id: coverage.company_ids))
+    end
+
+    def service_desk_unit_payload
+      context = JrcServiceDesk::OperationalContext.new(account: account, user: actor,
+                                                       account_user: account.account_users.find_by(user_id: actor.id))
+      context.unit_scope.order(:name).map { |unit| { id: unit.id, name: unit.name, operator_company_id: unit.operator_company_id } }
     end
 
     def serialize_scope(record)

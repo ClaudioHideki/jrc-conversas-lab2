@@ -1,14 +1,16 @@
 class JrcApprovals::Policies
   def initialize(account:, user:)
-    @account, @user = account, user
+    @account = account
+    @user = user
     @authorization = JrcApprovals::Authorization.new(account: account, user: user)
   end
 
-  def create!(code:, name:, module_key:, event_key:, issuer_company_id: nil, business_unit_id: nil, definition:)
+  def create!(code:, name:, module_key:, event_key:, definition:, issuer_company_id: nil, business_unit_id: nil)
     actor = @authorization.authorize!('policy_manage', company_id: issuer_company_id, unit_id: business_unit_id)
     JrcApprovals::Policy.transaction do
       policy = JrcApprovals::Policy.create!(account: @account, author: actor, code: code, name: name, module_key: module_key,
-        event_key: event_key, issuer_company_id: issuer_company_id, business_unit_id: business_unit_id, draft_definition: definition)
+                                            event_key: event_key, issuer_company_id: issuer_company_id,
+                                            business_unit_id: business_unit_id, draft_definition: definition)
       audit!(policy, actor, 'policy_drafted')
       policy
     end
@@ -69,8 +71,11 @@ class JrcApprovals::Policies
   def validate_definition!(policy)
     entry = JrcApprovals::Catalog.fetch("#{policy.module_key}.#{policy.event_key}")
     definition = JrcApprovals::Definition.validate!(policy.draft_definition, entry)
+    if JrcApprovals::GratuityCatalog.gratuity_key?(entry.key)
+      JrcApprovals::GratuityAuthorities.new(account: @account, company_id: policy.issuer_company_id).validate_definition!(definition)
+    end
     JrcApprovals::Eligibility.new(account: @account, company_id: policy.issuer_company_id,
-      unit_id: policy.business_unit_id, catalog_key: entry.key).plan!(definition)
+                                  unit_id: policy.business_unit_id, catalog_key: entry.key).plan!(definition)
     definition
   end
 

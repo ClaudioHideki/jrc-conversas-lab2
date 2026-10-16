@@ -1,6 +1,9 @@
 class JrcApprovals::Eligibility
   def initialize(account:, company_id:, unit_id:, catalog_key: nil)
-    @account, @company_id, @unit_id, @catalog_key = account, company_id, unit_id, catalog_key
+    @account = account
+    @company_id = company_id
+    @unit_id = unit_id
+    @catalog_key = catalog_key
   end
 
   def candidates(step)
@@ -25,17 +28,23 @@ class JrcApprovals::Eligibility
   end
 
   def capable?(member)
-    commercial = @catalog_key && (JrcApprovals::CommercialCatalog::EVENTS.key?(@catalog_key) ||
-      @catalog_key == JrcApprovals::CommercialCatalog::PRICE_FAMILY)
-    if commercial
-      return false unless @account.feature_enabled?('jrc_crm') && member.permissions.include?('jrc_crm')
-    end
+    return false unless commercial_capable?(member)
+
     JrcApprovals::Authorization.new(account: @account, user: member.user)
-      .authorize!('decide', company_id: @company_id, unit_id: @unit_id)
+                               .authorize!('decide', company_id: @company_id, unit_id: @unit_id)
     true
   rescue Pundit::NotAuthorizedError, ActiveRecord::RecordNotFound
     false
   end
+
+  def commercial_capable?(member)
+    keys = JrcApprovals::CommercialCatalog::EVENTS.keys + [JrcApprovals::CommercialCatalog::PRICE_FAMILY] +
+           JrcApprovals::GratuityCatalog::EVENTS.keys + [JrcApprovals::GratuityCatalog::FAMILY]
+    return true unless keys.include?(@catalog_key)
+
+    @account.feature_enabled?('jrc_crm') && member.permissions.include?('jrc_crm')
+  end
+  private :commercial_capable?
 
   def plan!(definition, requester_id: nil)
     definition.fetch('steps').map do |step|

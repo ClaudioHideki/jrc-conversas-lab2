@@ -8,8 +8,7 @@ module Api
             start_date = params[:start_date] ? Date.parse(params[:start_date]) : 30.days.ago.to_date
             end_date = params[:end_date] ? Date.parse(params[:end_date]) : Date.current
 
-            metrics = JrcCrm::MetricsCalculatorService.new(
-              account: crm_scope,
+            metrics = crm_metrics(
               pipeline_id: params[:pipeline_id],
               owner_id: crm_admin? ? params[:owner_id] : Current.user.id,
               start_date: start_date,

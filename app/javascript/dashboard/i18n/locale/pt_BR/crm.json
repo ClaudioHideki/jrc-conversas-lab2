@@ -158,6 +158,16 @@
       "OVERDUE": "Atividades atrasadas",
       "STALLED": "Negócios parados"
     },
+    "PROPOSAL_RECIPIENT": {
+      "BUTTON": "Cadastrar / selecionar e enviar",
+      "DESCRIPTION": "Selecione o destinatário ou cadastre uma nova pessoa sem alterar o cliente e o negócio da proposta.",
+      "TEMPLATE_HINT": "O PDF fica no histórico da conversa. Quando o canal exigir um modelo, escolha um aprovado com o link da proposta, ou um modelo de documento com o link do PDF. Salvar o contato não envia mensagem.",
+      "LINK": "Link da proposta para a mensagem ou o modelo",
+      "PDF_LINK": "Link do PDF para um modelo de documento",
+      "MESSAGE": "Olá, segue sua proposta comercial JRC:\n\n{url}\n\nO PDF da proposta está anexado a esta mensagem.",
+      "SUCCESS": "Proposta registrada para envio ao destinatário selecionado. A mensagem e o PDF ficam no histórico da conversa.",
+      "ERROR": "Não foi possível enviar a proposta. O destinatário e a mensagem foram mantidos; confira o canal e tente novamente."
+    },
     "PROPOSAL_PDF": {
       "DOWNLOAD": "Baixar PDF",
       "LOADING": "Gerando PDF…",
@@ -435,6 +445,48 @@
       "COMMERCIAL": "Comercial",
       "TECHNICAL": "Técnica",
       "FINANCIAL": "Financeira"
+    },
+    "CORPORATE": {
+      "SHARED_CATALOG": "Catálogo compartilhado de referência",
+      "PROFILE": "Dados corporativos e autoridades de gratuidade",
+      "PENDING_NOTE": "Dados fiscais podem ficar pendentes. Cadastre os endereços no Cadastro Mestre da empresa.",
+      "AUTHORITY_NOTE": "Titulares: Jose Rubens (comercial) e Karen Cavalari (financeiro). Thiago e Patricia atuam apenas por substituição formal. Este cadastro não publica políticas.",
+      "PENDING": "Pendente / sem vínculo",
+      "TAX_ID": "CNPJ",
+      "INITIAL_COMPANIES": "Preparar cadastro das empresas iniciais",
+      "OWNER": "Responsável principal",
+      "legal_name": "Razão social",
+      "legal_representative": "Responsável legal",
+      "authorization_reference": "Referência da autorização formal",
+      "commercial_gratuity_principal_id": "Titular comercial — Jose Rubens",
+      "commercial_gratuity_substitute_id": "Substituto comercial — Thiago Ribeiro",
+      "financial_gratuity_principal_id": "Titular financeiro — Karen Cavalari",
+      "financial_gratuity_substitute_id": "Substituta financeira — Patricia Machado",
+      "fiscal_address_id": "Endereço fiscal",
+      "responsible_account_user_ids": "Responsáveis da empresa",
+      "SD_LINK": "Unidade do Service Desk (vínculo explícito)",
+      "tax_id": "CNPJ",
+      "state_registration": "Inscrição estadual",
+      "municipal_registration": "Inscrição municipal",
+      "owner_id": "Responsável principal",
+      "EDIT": "Editar dados corporativos"
+    },
+    "GRATUITY": {
+      "TITLE": "Gratuidade comercial",
+      "TYPE": "Tipo de gratuidade",
+      "NONE": "Sem declaração adicional",
+      "REASON": "Motivo comercial (obrigatório)",
+      "HELP": "A instalação declarada fica gratuita. Para os demais tipos, ajuste o valor/desconto do item. O servidor calcula o impacto; a declaração não autoriza o envio.",
+      "SAVE": "Salvar declaração",
+      "TYPES": {
+        "installation": "Instalação",
+        "monthly_fee": "Mensalidade",
+        "product": "Produto",
+        "service": "Serviço",
+        "benefit": "Benefício",
+        "promotion": "Promoção",
+        "bonus": "Bonificação"
+      }
     }
   }
 }

@@ -4,7 +4,9 @@ module Api::V1::Accounts::Crm
     before_action :set_queue, only: :update
 
     def index
-      scope = JrcOperations::Queue.where(account_id: crm_scope.id).includes(:operating_company, :business_unit, :team).order(active: :desc, name: :asc)
+      scope = corporate_scope(JrcOperations::Queue.where(account_id: crm_scope.id)).includes(:operating_company, :business_unit, :team).order(
+        active: :desc, name: :asc
+      )
       render json: scope.map { |queue| serialize(queue) }
     end
 
@@ -34,7 +36,7 @@ module Api::V1::Accounts::Crm
     end
 
     def set_queue
-      @queue = JrcOperations::Queue.where(account_id: crm_scope.id).find(params[:id])
+      @queue = corporate_scope(JrcOperations::Queue.where(account_id: crm_scope.id)).find(params[:id])
     end
 
     def queue_params

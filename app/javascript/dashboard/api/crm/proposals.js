@@ -3,9 +3,16 @@ import ApiClient from '../ApiClient';
 
 const proposalsAPI = new ApiClient('crm/proposals', { accountScoped: true });
 proposalsAPI.list = params => axios.get(proposalsAPI.url, { params });
-proposalsAPI.creationOptions = () => axios.get(proposalsAPI.url + '/creation_options');
+proposalsAPI.creationOptions = () =>
+  axios.get(proposalsAPI.url + '/creation_options');
 proposalsAPI.sendProposal = (id, channel = 'auto') =>
   axios.post(`${proposalsAPI.url}/${id}/send_proposal`, { channel });
+proposalsAPI.sendToRecipient = (id, delivery, idempotencyKey) =>
+  axios.post(`${proposalsAPI.url}/${id}/send_proposal`, {
+    channel: 'whatsapp',
+    delivery,
+    idempotency_key: idempotencyKey,
+  });
 proposalsAPI.pdf = id =>
   axios.get(`${proposalsAPI.url}/${id}/pdf`, { responseType: 'blob' });
 proposalsAPI.pdfUrl = (id, download = false) =>

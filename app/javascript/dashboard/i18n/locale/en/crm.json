@@ -158,6 +158,16 @@
       "OVERDUE": "Overdue activities",
       "STALLED": "Stalled deals"
     },
+    "PROPOSAL_RECIPIENT": {
+      "BUTTON": "Register / select and send",
+      "DESCRIPTION": "Select a recipient or register a new person without changing the proposal's customer or deal.",
+      "TEMPLATE_HINT": "The PDF stays in conversation history. When the channel requires a template, choose an approved one containing the proposal link, or a document template with the PDF link. Saving a contact does not send a message.",
+      "LINK": "Proposal link for the message or template",
+      "PDF_LINK": "PDF link for a document template",
+      "MESSAGE": "Hello, here is your JRC commercial proposal:\n\n{url}\n\nThe proposal PDF is attached to this message.",
+      "SUCCESS": "Proposal registered for sending to the selected recipient. The conversation history records the message and PDF.",
+      "ERROR": "Unable to send the proposal. Your recipient and message were kept; check the channel and try again."
+    },
     "PROPOSAL_PDF": {
       "DOWNLOAD": "Baixar PDF",
       "LOADING": "Gerando PDF…",
@@ -478,6 +488,48 @@
     },
     "PROPOSALS": {
       "APPROVED_READY": "Aprovada internamente — pronta para envio"
+    },
+    "CORPORATE": {
+      "SHARED_CATALOG": "Shared reference catalog",
+      "PROFILE": "Corporate details and gratuity authorities",
+      "PENDING_NOTE": "Fiscal details may remain pending. Register addresses in the company master directory.",
+      "AUTHORITY_NOTE": "Principals: Jose Rubens (commercial) and Karen Cavalari (financial). Thiago and Patricia require formal substitution. This configuration does not publish policies.",
+      "PENDING": "Pending / unassigned",
+      "TAX_ID": "Tax ID",
+      "INITIAL_COMPANIES": "Prepare initial company registrations",
+      "OWNER": "Primary owner",
+      "legal_name": "Legal name",
+      "legal_representative": "Legal representative",
+      "authorization_reference": "Formal authorization reference",
+      "commercial_gratuity_principal_id": "Commercial principal — Jose Rubens",
+      "commercial_gratuity_substitute_id": "Commercial substitute — Thiago Ribeiro",
+      "financial_gratuity_principal_id": "Financial principal — Karen Cavalari",
+      "financial_gratuity_substitute_id": "Financial substitute — Patricia Machado",
+      "fiscal_address_id": "Fiscal address",
+      "responsible_account_user_ids": "Company owners",
+      "SD_LINK": "Service Desk unit (explicit link)",
+      "tax_id": "Tax ID",
+      "state_registration": "State registration",
+      "municipal_registration": "Municipal registration",
+      "owner_id": "Primary owner",
+      "EDIT": "Edit corporate details"
+    },
+    "GRATUITY": {
+      "TITLE": "Commercial gratuity",
+      "TYPE": "Gratuity type",
+      "NONE": "No additional declaration",
+      "REASON": "Commercial reason (required)",
+      "HELP": "Declared installation becomes free. For other types, adjust the item value/discount. The server calculates the impact; a declaration does not authorize delivery.",
+      "SAVE": "Save declaration",
+      "TYPES": {
+        "installation": "Installation",
+        "monthly_fee": "Monthly fee",
+        "product": "Product",
+        "service": "Service",
+        "benefit": "Benefit",
+        "promotion": "Promotion",
+        "bonus": "Bonus"
+      }
     }
   }
 }

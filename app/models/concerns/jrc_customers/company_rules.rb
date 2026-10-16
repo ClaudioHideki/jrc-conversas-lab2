@@ -19,10 +19,18 @@ module JrcCustomers::CompanyRules
     validate :validate_master_tax_identifier, if: :master_columns?
     validate :validate_master_classifications, if: :master_columns?
     validate :validate_master_taxonomies, if: :master_columns?
+    validate :preserve_internal_company_identity, if: :master_columns?
     after_save :synchronize_legacy_company_fields, if: :master_columns?
   end
 
   private
+
+  def preserve_internal_company_identity
+    return unless relationship_type_in_database == 'internal' && relationship_type != 'internal'
+    return unless JrcCrm::BusinessUnit.exists?(account_id: account_id, company_id: id)
+
+    errors.add(:relationship_type, 'cannot remove an established corporate issuer')
+  end
 
   def master_columns?
     has_attribute?(:relationship_type) && (is_a?(JrcCustomers::Company) || account&.feature_enabled?('jrc_customer_master'))

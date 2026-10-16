@@ -7,6 +7,8 @@ import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import Button from 'dashboard/components-next/button/Button.vue';
 import ContactsForm from 'dashboard/components-next/Contacts/ContactsForm/ContactsForm.vue';
 
+defineProps({ nestedPopover: { type: Boolean, default: false } });
+
 const emit = defineEmits(['create']);
 
 const { t } = useI18n();
@@ -53,6 +55,7 @@ defineExpose({ open, dialogRef, contactsFormRef, onSuccess });
   <Dialog
     ref="dialogRef"
     width="3xl"
+    :nested-popover="nestedPopover"
     show-close-button
     overflow-y-auto
     @confirm="handleDialogConfirm"

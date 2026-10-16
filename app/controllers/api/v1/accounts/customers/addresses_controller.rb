@@ -32,7 +32,7 @@ class Api::V1::Accounts::Customers::AddressesController < Api::V1::Accounts::Cus
   private
 
   def set_company
-    @company = Current.account.master_companies.find(params[:company_id])
+    @company = corporate_companies.find(params[:company_id])
   end
 
   def address_params

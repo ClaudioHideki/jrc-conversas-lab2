@@ -9,9 +9,10 @@ module JrcCrm
 
     attr_reader :goal
 
-    def initialize(goal:, user_id: nil)
+    def initialize(goal:, user_id: nil, actor: nil)
       @goal = goal
       @user_id = user_id
+      @actor = actor
     end
 
     def call
@@ -142,6 +143,7 @@ module JrcCrm
     end
 
     def scoped_responsibility(scope)
+      scope = JrcCrm::CorporateCoverage.for_actor(goal.account, @actor, scope)
       # A user drill-down INTERSECTS the original goal, never replaces its scope.
       scope = scope.where(owner_id: goal.user_id) if goal.user_id.present?
       if goal.scope_kind == 'user' && goal.user_id.blank?
@@ -150,11 +152,7 @@ module JrcCrm
       end
       scope = scope.where(owner_id: @user_id) if @user_id.present?
       scope = scope.where(business_unit_id: goal.business_unit_id) if goal.business_unit_id.present?
-      if goal.team_id.present?
-        team_ids = goal.account.teams.where(id: goal.team_id).select(:id)
-        member_ids = ::TeamMember.where(team_id: team_ids).select(:user_id)
-        scope = scope.where(owner_id: member_ids)
-      end
+      scope = scope.where(owner_id: JrcCrm::CorporateCoverage.goal_team_members(goal)) if goal.team_id.present?
       scope
     end
 

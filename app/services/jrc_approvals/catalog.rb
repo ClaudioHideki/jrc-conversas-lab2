@@ -9,16 +9,18 @@ class JrcApprovals::Catalog
     def register(key:, version:, model:, fields:, authorize:, capture:, policy_only: false)
       valid_model = policy_only == true ? model.nil? : model.is_a?(Class) && model < ApplicationRecord
       raise JrcApprovals::Error, 'INVALID_CATALOG' unless key.match?(/\A[a-z][a-z0-9_]*\.[a-z][a-z0-9_.]*\z/) &&
-        version.is_a?(Integer) && version.positive? && valid_model && [true, false].include?(policy_only) &&
-        authorize.respond_to?(:call) && capture.respond_to?(:call)
+                                                          version.is_a?(Integer) && version.positive? && valid_model &&
+                                                          [true, false].include?(policy_only) &&
+                                                          authorize.respond_to?(:call) && capture.respond_to?(:call)
 
       schema = JrcServiceDesk::CanonicalJson.normalize(fields).deep_dup
       raise JrcApprovals::Error, 'INVALID_CATALOG' unless schema.any? && schema.all? do |name, type|
-        name.match?(/\A[a-z][a-z0-9_]*\z/) && %w[integer decimal string boolean money datetime].include?(type)
+        name.match?(/\A[a-z][a-z0-9_]*\z/) && %w[integer decimal string string_list boolean money datetime].include?(type)
       end
+
       schema.each_value(&:freeze)
       entry = Entry.new(key: key, version: version, model: model, fields: schema.freeze,
-        authorize: authorize, capture: capture, policy_only: policy_only).freeze
+                        authorize: authorize, capture: capture, policy_only: policy_only).freeze
       @mutex.synchronize do
         raise JrcApprovals::Error, 'DUPLICATE_CATALOG' if @entries.key?(key)
 

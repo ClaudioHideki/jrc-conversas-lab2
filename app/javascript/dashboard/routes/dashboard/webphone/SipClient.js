@@ -11,10 +11,9 @@ import { sanitizeSipMessage } from './sipErrors';
 const CONNECTION_TIMEOUT_SECONDS = 10;
 const DTMF_SEQUENCE_GAP_MS = 300;
 const TRANSFER_ACTIVATION_DELAY_MS = 900;
-const TRANSFER_CONFIRM_DELAY_MS = 500;
 const TRANSFER_DTMF_CODES = Object.freeze({
-  immediate: { prefix: '*3', suffix: '#' },
-  supervised: { prefix: '*4', suffix: '#' },
+  immediate: { prefix: '#' },
+  supervised: { prefix: '*1' },
 });
 const REGISTRATION_ERRORS = Object.freeze({
   401: 'Usuário ou senha SIP não autorizados (401)',
@@ -482,19 +481,30 @@ export class SipClient {
   }
 
   async sendDtmf(tone) {
-    const handler = this.session?.sessionDescriptionHandler;
-    if (!handler || this.session?.state !== SessionState.Established) {
+    const session = this.session;
+    const handler = session?.sessionDescriptionHandler;
+    if (!handler || session?.state !== SessionState.Established) {
       throw new Error('Não existe chamada estabelecida para enviar DTMF');
     }
     if (handler.sendDtmf?.(tone, { duration: 160, interToneGap: 70 })) return;
-    await this.session.info({
-      requestOptions: {
-        body: {
-          contentDisposition: 'render',
-          contentType: 'application/dtmf-relay',
-          content: `Signal=${tone}\r\nDuration=160`,
-        },
-      },
+    await new Promise((resolve, reject) => {
+      const refused = () => reject(new Error('O PABX recusou o envio DTMF'));
+      session
+        .info({
+          requestDelegate: {
+            onAccept: resolve,
+            onReject: refused,
+            onRedirect: refused,
+          },
+          requestOptions: {
+            body: {
+              contentDisposition: 'render',
+              contentType: 'application/dtmf-relay',
+              content: `Signal=${tone}\r\nDuration=160`,
+            },
+          },
+        })
+        .catch(reject);
     });
   }
 
@@ -515,6 +525,12 @@ export class SipClient {
       await new Promise(resolve => {
         window.setTimeout(resolve, DTMF_SEQUENCE_GAP_MS);
       });
+      if (
+        this.session !== session ||
+        session.state !== SessionState.Established
+      ) {
+        throw new Error('A chamada foi encerrada');
+      }
     }
   }
 
@@ -522,12 +538,21 @@ export class SipClient {
     if (this.transferInProgress || this.holdPending) {
       throw new Error('Aguarde a operação de chamada em andamento');
     }
-    const cleanDestination = String(destination || '').replace(/[^\d+]/g, '');
-    if (!cleanDestination)
-      throw new Error('Informe o ramal ou numero de destino');
+    const cleanDestination = String(destination || '').trim();
+    if (!/^\d{1,20}$/.test(cleanDestination))
+      throw new Error('Informe um ramal interno válido');
     const session = this.session;
-    const transferCode =
-      TRANSFER_DTMF_CODES[type] || TRANSFER_DTMF_CODES.immediate;
+    const transferCode = TRANSFER_DTMF_CODES[type];
+    if (!transferCode) throw new Error('Tipo de transferência inválido');
+    const handler = session?.sessionDescriptionHandler;
+    if (session?.state !== SessionState.Established || !handler)
+      throw new Error('Não existe chamada estabelecida para transferir');
+    if (
+      ['failed', 'closed', 'disconnected'].includes(
+        handler.peerConnection?.connectionState
+      )
+    )
+      throw new Error('A mídia da chamada está indisponível');
     this.transferInProgress = true;
     this.emit('onTransferPending', true);
     try {
@@ -536,13 +561,9 @@ export class SipClient {
         window.setTimeout(resolve, TRANSFER_ACTIVATION_DELAY_MS);
       });
       await this.sendDtmfSequence(cleanDestination, session);
-      await new Promise(resolve => {
-        window.setTimeout(resolve, TRANSFER_CONFIRM_DELAY_MS);
-      });
-      await this.sendDtmfSequence(transferCode.suffix, session);
       this.log(
         'TRANSFERENCIA',
-        `${type === 'supervised' ? 'Supervisionada' : 'Imediata'} enviada`
+        `${type === 'supervised' ? 'Assistida' : 'Cega'} enviada`
       );
     } finally {
       this.transferInProgress = false;

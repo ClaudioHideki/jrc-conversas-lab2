@@ -24,10 +24,12 @@ class JrcServiceDesk::OperationalContext < JrcServiceDesk::AccessContext
     return JrcServiceDesk::Unit.none unless available?
 
     units = JrcServiceDesk::Unit.where(account_id: account.id, active: true).joins(:operator_company)
-      .where(jrc_service_desk_operator_companies: { account_id: account.id, active: true })
+                                .where(jrc_service_desk_operator_companies: { account_id: account.id, active: true })
+    units = JrcCrm::CorporateCoverage.new(account: account, user: user).service_desk_units(units)
     return units if administrator?
 
-    granted = JrcServiceDesk::UnitMembership.operational.where(account_id: account.id, account_user_id: account_user.id, active: true).select(:unit_id)
+    granted = JrcServiceDesk::UnitMembership.operational.where(account_id: account.id, account_user_id: account_user.id,
+                                                               active: true).select(:unit_id)
     units.where(id: granted)
   end
 

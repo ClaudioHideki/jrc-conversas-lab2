@@ -1,7 +1,7 @@
 module Api::V1::Accounts::Crm
   class GoalsController < BaseController
     def index
-      goals = crm_scope.jrc_crm_sales_goals.includes(:user, :team, :product).order(period_start: :desc, id: :desc)
+      goals = corporate_records(:jrc_crm_sales_goals).includes(:user, :team, :product).order(period_start: :desc, id: :desc)
       goals = visible_goals(goals)
       render json: goals.map { |goal| serialize(goal, include_progress: true) }
     end
@@ -17,7 +17,7 @@ module Api::V1::Accounts::Crm
 
     def update
       ensure_crm_admin!
-      goal = crm_scope.jrc_crm_sales_goals.find(params[:id])
+      goal = corporate_records(:jrc_crm_sales_goals).find(params[:id])
       attrs = normalized_params
       attrs[:published_at] = Time.current if attrs[:status] == 'active' && goal.status != 'active'
       data = goal.transaction do
@@ -30,16 +30,16 @@ module Api::V1::Accounts::Crm
     def dashboard
       start_date = parse_date(params[:start_date]) || Time.zone.today.beginning_of_month
       end_date = parse_date(params[:end_date]) || start_date.end_of_month
-      goals = crm_scope.jrc_crm_sales_goals.includes(:user, :team, :product)
-                       .where(period_start: ..end_date, period_end: start_date..)
+      goals = corporate_records(:jrc_crm_sales_goals).includes(:user, :team, :product)
+                                                     .where(period_start: ..end_date, period_end: start_date..)
       active = visible_goals(goals.where(status: 'active'))
       active = visible_goals(goals) if active.none?
 
-      progress_rows = active.map { |goal| [goal, JrcCrm::GoalProgressService.new(goal: goal, user_id: crm_admin? ? nil : Current.user.id).call] }
+      progress_rows = active.map { |goal| [goal, goal_progress(goal).call] }
       target = progress_rows.sum { |goal, progress| monetary_goal?(goal) ? progress[:target].to_i : 0 }
       realized = progress_rows.sum { |goal, progress| monetary_goal?(goal) ? progress[:realized].to_i : 0 }
 
-      deals = crm_scope.jrc_crm_deals.where(status: 'open')
+      deals = corporate_records(:jrc_crm_deals).where(status: 'open')
       deals = deals.where(owner_id: Current.user.id) unless crm_admin?
       pipeline = deals.sum(:value_cents)
       weighted_pipeline = deals.sum { |deal| deal.weighted_value_cents.to_i }
@@ -54,17 +54,23 @@ module Api::V1::Accounts::Crm
         by_type: active.group(:metric).count,
         status_summary: status_summary(active),
         history: history_rows(end_date),
-        scope_options: crm_admin? ? {
-          teams: crm_scope.teams.order(:name).select(:id, :name),
-          business_units: JrcCrm::BusinessUnit.where(account_id: crm_scope.id, active: true).order(:name).select(:id, :name)
-        } : {}
+        scope_options: corporate_goal_options
       }
     end
 
     private
 
+    def corporate_goal_options
+      return {} unless crm_admin?
+
+      { teams: crm_scope.teams.order(:name).select(:id, :name),
+        business_units: corporate_records(:jrc_crm_business_units).active.order(:name).select(:id, :name) }
+    end
+
     def visible_goals(scope)
+      scope = corporate_scope(scope)
       return scope if crm_admin?
+
       uid = Current.user.id
       scope.where('user_id = :uid OR allocations @> :allocation::jsonb', uid: uid, allocation: [{ user_id: uid }].to_json)
     end
@@ -109,7 +115,7 @@ module Api::V1::Accounts::Crm
         allocations: goal.allocations, product_targets: goal.product_targets, indicators: goal.indicators,
         settings: goal.settings, published_at: goal.published_at
       }
-      data.merge!(JrcCrm::GoalProgressService.new(goal: goal, user_id: crm_admin? ? nil : Current.user.id).call) if include_progress
+      data.merge!(goal_progress(goal).call) if include_progress
       data
     end
 
@@ -117,16 +123,21 @@ module Api::V1::Accounts::Crm
       allocations = goals.flat_map { |goal| Array(goal.allocations).map { |allocation| [goal, allocation] } }
       allocations.group_by { |_goal, allocation| (allocation['user_id'] || allocation[:user_id]).to_i }.filter_map do |uid, rows|
         next if !crm_admin? && uid != Current.user.id
+
         user = crm_scope.users.find_by(id: uid)
         next unless user
+
         target = rows.sum { |_g, allocation| (allocation['target_cents'] || allocation[:target_cents]).to_i }
-        realized = rows.sum { |goal, _allocation| JrcCrm::GoalProgressService.new(goal: goal, user_id: uid).call[:realized].to_i }
+        realized = rows.sum do |goal, _allocation|
+          goal_progress(goal, user_id: uid).call[:realized].to_i
+        end
         { user_id: uid, name: user.name, target_cents: target, realized_cents: realized, percent: percent(realized, target) }
       end.sort_by { |row| -row[:percent] }
     end
 
     def product_performance(goals)
-      grouped = goals.flat_map { |goal| JrcCrm::GoalProgressService.new(goal: goal, user_id: crm_admin? ? nil : Current.user.id).product_results }.group_by { |row| row[:product_id] }
+      results = goals.flat_map { |goal| goal_progress(goal).product_results }
+      grouped = results.group_by { |row| row[:product_id] }
       grouped.map do |pid, rows|
         target = rows.sum { |row| row[:target_cents].to_i }
         realized = rows.sum { |row| row[:realized_cents].to_i }
@@ -135,24 +146,30 @@ module Api::V1::Accounts::Crm
     end
 
     def evolution(start_date, end_date)
-      orders = crm_scope.jrc_crm_sales_orders.where(status: %w[approved separating invoiced shipped completed])
-                        .where('COALESCE(sold_at, closed_at, created_at) BETWEEN ? AND ?', start_date.beginning_of_day, end_date.end_of_day)
+      orders = corporate_records(:jrc_crm_sales_orders).where(status: %w[approved separating invoiced shipped completed])
+                                                       .where('COALESCE(sold_at, closed_at, created_at) BETWEEN ? AND ?',
+                                                              start_date.beginning_of_day, end_date.end_of_day)
       orders = orders.where(owner_id: Current.user.id) unless crm_admin?
       totals = orders.to_a.group_by { |order| (order.sold_at || order.closed_at || order.created_at).to_date }
                      .transform_values { |rows| rows.sum(&:total_cents) }
       running = 0
-      (start_date..end_date).map { |date| running += totals.fetch(date, 0); { date: date, realized_cents: running } }
+      (start_date..end_date).map do |date|
+        running += totals.fetch(date, 0)
+        { date: date, realized_cents: running }
+      end
     end
 
     def status_summary(goals)
-      rows = goals.map { |goal| JrcCrm::GoalProgressService.new(goal: goal, user_id: crm_admin? ? nil : Current.user.id).attainment_percent }
+      rows = goals.map do |goal|
+        goal_progress(goal).attainment_percent
+      end
       { achieved: rows.count { |p| p >= 100 }, on_track: rows.count { |p| p >= 75 && p < 100 },
         at_risk: rows.count { |p| p >= 50 && p < 75 }, not_achieved: rows.count { |p| p.positive? && p < 50 },
         not_started: rows.count(&:zero?) }
     end
 
     def history_rows(end_date)
-      scope = visible_goals(crm_scope.jrc_crm_sales_goals.where('period_end < ?', end_date).order(period_end: :desc).limit(24))
+      scope = visible_goals(corporate_records(:jrc_crm_sales_goals).where('period_end < ?', end_date).order(period_end: :desc).limit(24))
       scope.map { |goal| serialize(goal, include_progress: true) }
     end
 

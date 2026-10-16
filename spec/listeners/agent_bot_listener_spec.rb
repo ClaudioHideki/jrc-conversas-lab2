@@ -27,7 +27,8 @@ describe AgentBotListener do
         create(:agent_bot_inbox, inbox: inbox, agent_bot: agent_bot)
         expect(AgentBots::WebhookJob).to receive(:perform_later).with(
           agent_bot.outgoing_url, message.webhook_data.merge(event: 'message_created'),
-          :agent_bot_webhook, secret: agent_bot.secret, delivery_id: instance_of(String)
+          :agent_bot_webhook, secret: agent_bot.secret, delivery_id: instance_of(String),
+          native_account_id: account.id, native_inbox_id: inbox.id, native_bot_id: agent_bot.id, native_epoch_id: nil
         ).once
         listener.message_created(event)
       end
@@ -52,11 +53,13 @@ describe AgentBotListener do
 
           expect(AgentBots::WebhookJob).to receive(:perform_later).with(
             agent_bot.outgoing_url, payload, :agent_bot_webhook,
-            secret: agent_bot.secret, delivery_id: instance_of(String)
+            secret: agent_bot.secret, delivery_id: instance_of(String),
+            native_account_id: account.id, native_inbox_id: inbox.id, native_bot_id: agent_bot.id, native_epoch_id: nil
           ).once
           expect(AgentBots::WebhookJob).to receive(:perform_later).with(
             conversation_bot.outgoing_url, payload, :agent_bot_webhook,
-            secret: conversation_bot.secret, delivery_id: instance_of(String)
+            secret: conversation_bot.secret, delivery_id: instance_of(String),
+            native_account_id: account.id, native_inbox_id: inbox.id, native_bot_id: conversation_bot.id, native_epoch_id: nil
           ).once
 
           listener.message_created(event)
@@ -84,7 +87,8 @@ describe AgentBotListener do
           agent_bot.outgoing_url,
           hash_including(event: 'conversation_status_changed', account: account.webhook_data, changed_attributes: anything),
           :agent_bot_webhook,
-          hash_including(secret: agent_bot.secret)
+          { secret: agent_bot.secret, delivery_id: instance_of(String), native_account_id: account.id,
+            native_inbox_id: inbox.id, native_bot_id: agent_bot.id, native_epoch_id: nil }
         ).once
         listener.conversation_status_changed(event)
       end
@@ -100,7 +104,8 @@ describe AgentBotListener do
           agent_bot.outgoing_url,
           hash_including(event: 'conversation_status_changed', changed_attributes: anything),
           :agent_bot_webhook,
-          hash_including(secret: agent_bot.secret)
+          { secret: agent_bot.secret, delivery_id: instance_of(String), native_account_id: account.id,
+            native_inbox_id: inbox.id, native_bot_id: agent_bot.id, native_epoch_id: nil }
         ).once
         listener.conversation_status_changed(event)
       end
@@ -127,7 +132,8 @@ describe AgentBotListener do
         expect(AgentBots::WebhookJob).to receive(:perform_later).with(
           agent_bot.outgoing_url,
           conversation.webhook_data.merge(event: 'conversation_updated', changed_attributes: nil),
-          :agent_bot_webhook, secret: agent_bot.secret, delivery_id: instance_of(String)
+          :agent_bot_webhook, secret: agent_bot.secret, delivery_id: instance_of(String),
+          native_account_id: account.id, native_inbox_id: inbox.id, native_bot_id: agent_bot.id, native_epoch_id: nil
         ).once
         listener.conversation_updated(event)
       end
@@ -151,7 +157,8 @@ describe AgentBotListener do
             event: 'conversation_updated',
             changed_attributes: expected_changed_attributes
           ),
-          :agent_bot_webhook, secret: agent_bot.secret, delivery_id: instance_of(String)
+          :agent_bot_webhook, secret: agent_bot.secret, delivery_id: instance_of(String),
+          native_account_id: account.id, native_inbox_id: inbox.id, native_bot_id: agent_bot.id, native_epoch_id: nil
         ).once
         listener.conversation_updated(event)
       end
@@ -169,7 +176,8 @@ describe AgentBotListener do
           agent_bot.outgoing_url,
           hash_including(event: 'conversation_resolved', account: account.webhook_data),
           :agent_bot_webhook,
-          hash_including(secret: agent_bot.secret)
+          { secret: agent_bot.secret, delivery_id: instance_of(String), native_account_id: account.id,
+            native_inbox_id: inbox.id, native_bot_id: agent_bot.id, native_epoch_id: nil }
         ).once
         listener.conversation_resolved(event)
       end
@@ -195,7 +203,8 @@ describe AgentBotListener do
           .with(
             agent_bot.outgoing_url,
             conversation.contact_inbox.webhook_data.merge(event: 'webwidget_triggered', event_info: { country: 'US' }),
-            :agent_bot_webhook, secret: agent_bot.secret, delivery_id: instance_of(String)
+            :agent_bot_webhook, secret: agent_bot.secret, delivery_id: instance_of(String),
+            native_account_id: account.id, native_inbox_id: inbox.id, native_bot_id: agent_bot.id, native_epoch_id: nil
           ).once
 
         listener.webwidget_triggered(event)

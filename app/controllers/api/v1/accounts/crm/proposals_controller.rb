@@ -3,6 +3,7 @@ module Api
     module Accounts
       module Crm
         class ProposalsController < BaseController
+          include JrcCrm::CorporateProposalParameters
           before_action :set_proposal, only: [
             :show, :update, :destroy, :send_proposal, :pdf, :accept, :reject,
             :cancel, :duplicate, :request_approval, :approve, :convert_to_order
@@ -17,7 +18,7 @@ module Api
             proposals = proposals.where(status: params[:status]) if params[:status].present?
             proposals = proposals.where(owner_id: params[:owner_id]) if params[:owner_id].present?
 
-            render json: proposals.includes(:owner, :deal, { events: :user }, proposal_items: :product)
+            render json: proposals.includes(:owner, :deal, { events: :user }, { business_unit: :operating_company }, proposal_items: :product)
                                   .order(updated_at: :desc)
                                   .map { |proposal| serialize(proposal) }
           end
@@ -26,22 +27,12 @@ module Api
             render json: serialize(@proposal)
           end
 
-          def creation_options
-            boundary = JrcCrm::OrganizationalVisibility.new(account: crm_scope, user: Current.user,
-              relation: JrcCrm::Proposal.where(account_id: crm_scope.id), include_company: false)
-            units = crm_scope.jrc_crm_business_units.where(active: true)
-            allowed_ids = crm_admin? ? nil : boundary.allowed_business_unit_ids
-            units = units.where(id: allowed_ids) unless allowed_ids.nil?
-            render json: { business_units: units.order(:name).select(:id, :name).as_json,
-                           unit_required: !allowed_ids.nil? }
-          end
-
           def create
             deal = visible_to_current_user(crm_scope.jrc_crm_deals).find(params[:deal_id]) if params[:deal_id].present?
             company = contact = nil
             unless deal
               authorize :directory, :access?, policy_class: JrcCustomers::DirectoryPolicy
-              company = crm_scope.master_companies.find(params[:company_id]) if params[:company_id].present?
+              company = corporate_records(:master_companies).find(params[:company_id]) if params[:company_id].present?
               contact = crm_scope.contacts.find(params[:contact_id]) if params[:contact_id].present?
               authorize contact, :show? if contact
             end
@@ -49,21 +40,17 @@ module Api
             authorize_operating_unit!(unit)
             attributes = params[:proposal].present? ? proposal_params.to_h.except('owner_id') : {}
             attributes.delete('title') if attributes['title'].blank?
-            items = params.permit(items: [:product_id, :quantity, :unit_price_cents, :discount_cents])[:items] || []
-            proposal = JrcCrm::ProposalBuilderService.new(deal: deal, account: crm_scope, company: company, contact: contact,
-              business_unit: unit, attributes: attributes, items: items, actor: Current.user).call
+            proposal = build_corporate_proposal(deal, company, contact, unit, attributes)
             render json: serialize(proposal), status: :created
           rescue ActiveRecord::RecordInvalid, JrcCrm::CommercialFinancials::InvalidTerms => e
             render json: { errors: [e.message] }, status: :unprocessable_entity
           end
 
           def update
-            attributes = proposal_params.to_h.symbolize_keys
+            attributes = corporate_proposal_attributes
             validate_proposal_owner!(attributes[:owner_id]) if attributes[:owner_id].present?
             normalize_payment_attributes!(attributes)
-            if @proposal.proposal_items.exists?
-              attributes.except!(:implementation_cents, :monthly_cents, :subtotal_cents, :total_cents)
-            end
+            attributes.except!(:implementation_cents, :monthly_cents, :subtotal_cents, :total_cents) if @proposal.proposal_items.exists?
 
             if @proposal.update(attributes)
               commercial_changes = @proposal.saved_changes.keys - %w[updated_at]
@@ -233,7 +220,7 @@ module Api
               channel: params[:channel].presence || 'auto',
               base_url: request.base_url,
               idempotency_key: params[:idempotency_key]
-            ).call
+            ).call(delivery: recipient_delivery_params)
 
             render json: {
               message: 'Proposta enviada com sucesso',
@@ -246,6 +233,12 @@ module Api
                 channel: result[:proposal].last_sent_channel
               }
             }
+          rescue Pundit::NotAuthorizedError
+            head :forbidden
+          rescue ActiveRecord::RecordNotFound
+            head :not_found
+          rescue JrcApprovals::Error => e
+            render json: { error: e.code, code: e.code }, status: :conflict
           rescue StandardError => e
             render json: { errors: [e.message] }, status: :unprocessable_entity
           end
@@ -318,15 +311,6 @@ module Api
 
           private
 
-          def authorize_operating_unit!(unit)
-            return if crm_admin?
-
-            boundary = JrcCrm::OrganizationalVisibility.new(account: crm_scope, user: Current.user,
-              relation: JrcCrm::Proposal.where(account_id: crm_scope.id), include_company: false)
-            return if boundary.allowed_business_unit_ids.nil?
-            raise Pundit::NotAuthorizedError unless unit && boundary.allowed_business_unit_ids.include?(unit.id)
-          end
-
           def lock_proposal_mutation
             @proposal.with_lock do
               if !%w[duplicate send_proposal].include?(action_name) && @proposal.locked_for_editing?
@@ -339,7 +323,7 @@ module Api
 
           def set_proposal
             @proposal = visible_to_current_user(crm_scope.jrc_crm_proposals).includes(
-              :owner, :deal, { events: :user }, proposal_items: :product
+              :owner, :deal, { events: :user }, { business_unit: :operating_company }, proposal_items: :product
             ).find(params[:id])
           end
 
@@ -352,6 +336,12 @@ module Api
 
           def serialize(proposal)
             JrcCrm::ProposalSerializer.new(proposal, base_url: request.base_url).as_json
+          end
+
+          def recipient_delivery_params
+            return unless params.key?(:delivery)
+
+            params.require(:delivery).permit(:contact_id, :inbox_id, :content, template_params: {}).to_h
           end
 
           def audit_event!(event_type, description)

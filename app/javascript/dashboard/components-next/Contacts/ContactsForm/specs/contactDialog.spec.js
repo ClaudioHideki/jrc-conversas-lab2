@@ -64,6 +64,7 @@ describe('the shared contact dialog in a conversation', () => {
     });
     await router.push('/app/accounts/1/conversations/45');
     wrapper = mount(CreateNewContactDialog, {
+      props: { nestedPopover: Boolean(draft?.additionalAttributes.city) },
       attachTo: document.body,
       global: {
         plugins: [
@@ -85,6 +86,9 @@ describe('the shared contact dialog in a conversation', () => {
     });
     wrapper.vm.open();
     await flushPromises();
+    expect(
+      document.querySelector('dialog').hasAttribute('data-popover-content')
+    ).toBe(Boolean(draft?.additionalAttributes.city));
     expect(document.querySelector('dialog input')).not.toBeNull();
     expect(document.querySelector('dialog').textContent).toContain(
       'EDIT_DETAILS_FORM'

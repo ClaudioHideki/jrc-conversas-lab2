@@ -1,9 +1,12 @@
 module JrcCrm
   class MetricsCalculatorService
-    def initialize(account:, pipeline_id: nil, owner_id: nil, start_date:, end_date:)
+    def initialize(account:, start_date:, end_date:, pipeline_id: nil, **context)
       @account = account
+      @actor = context.fetch(:actor, nil)
+      raise ArgumentError, 'Unknown metrics context' unless (context.keys - [:actor, :owner_id]).empty?
+
       @pipeline_id = pipeline_id
-      @owner_id = owner_id
+      @owner_id = context.fetch(:owner_id, nil)
       @start_date = start_date.beginning_of_day
       @end_date = end_date.end_of_day
     end
@@ -32,20 +35,22 @@ module JrcCrm
     private
 
     def base_deals
-      deals = @account.jrc_crm_deals.where(created_at: @start_date..@end_date)
+      deals = JrcCrm::CorporateCoverage.new(account: @account,
+                                            user: @actor).restrict(@account.jrc_crm_deals).where(created_at: @start_date..@end_date)
       deals = deals.where(pipeline_id: @pipeline_id) if @pipeline_id.present?
       deals = deals.where(owner_id: @owner_id) if @owner_id.present?
       deals
     end
 
     def count_leads
-      leads = @account.jrc_crm_leads.where(created_at: @start_date..@end_date)
+      leads = JrcCrm::CorporateCoverage.new(account: @account,
+                                            user: @actor).restrict(@account.jrc_crm_leads).where(created_at: @start_date..@end_date)
       leads = leads.where(owner_id: @owner_id) if @owner_id.present?
       leads.count
     end
 
     def count_new_leads
-      leads = @account.jrc_crm_leads.where(status: 'new')
+      leads = JrcCrm::CorporateCoverage.new(account: @account, user: @actor).restrict(@account.jrc_crm_leads).where(status: 'new')
       leads = leads.where(owner_id: @owner_id) if @owner_id.present?
       leads.count
     end
@@ -91,7 +96,10 @@ module JrcCrm
     end
 
     def overdue_activities_count
-      activities = @account.jrc_crm_activities.where(completed_at: nil).where('due_at < ?', Time.current)
+      activities = JrcCrm::CorporateCoverage.new(account: @account, user: @actor)
+                                            .restrict(@account.jrc_crm_activities).where(completed_at: nil).where(
+                                              'due_at < ?', Time.current
+                                            )
       activities = activities.where(user_id: @owner_id) if @owner_id.present?
       activities.count
     end

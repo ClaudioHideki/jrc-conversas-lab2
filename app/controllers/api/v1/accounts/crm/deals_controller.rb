@@ -231,7 +231,7 @@ module Api
           def create_initial_products!(deal)
             items = params.permit(items: [:product_id, :quantity, :unit_price_cents, :discount_cents])[:items] || []
             items.each do |values|
-              product = crm_scope.jrc_crm_products.active.find(values.fetch(:product_id))
+              product = corporate_product(values.fetch(:product_id), unit: JrcApprovals::CommercialCatalog.business_unit(deal))
               deal.deal_products.create!(values.merge(product: product, description_snapshot: product.description))
             end
             deal.update!(value_cents: deal.deal_products.sum(:total_cents)) if items.any?

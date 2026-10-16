@@ -25,6 +25,7 @@ module Api
           def update
             @item.assign_attributes(item_params)
             hydrate_product_snapshot(@item) if @item.product_id_changed?
+            @item.setup_fee_cents = 0 if @item.commercial_gratuity['type'] == 'installation'
 
             if @item.save
               @proposal.reset_approvals!
@@ -74,26 +75,20 @@ module Api
               :product_id, :name_snapshot, :description_snapshot, :quantity,
               :unit_price_cents, :discount_cents, :notes, :billing_model,
               :unit_name, :setup_fee_cents, :included_quantity, :included_unit,
-              :overage_unit_price_cents, :activation_days, :validation_period_days
+              :overage_unit_price_cents, :activation_days, :validation_period_days,
+              commercial_gratuity: [:type, :reason]
             )
           end
 
           def hydrate_product_snapshot(item)
             return if item.product_id.blank?
 
-            product = crm_scope.jrc_crm_products.active.find(item.product_id)
+            product = JrcCrm::CorporateIssuer.product!(account: crm_scope, user: Current.user, id: item.product_id, unit: @proposal.business_unit)
             item.product = product
             item.name_snapshot = product.name if item.name_snapshot.blank?
             item.description_snapshot = product.description if item.description_snapshot.blank?
-            item.unit_price_cents = product.unit_price_cents if item.unit_price_cents.blank? || item.unit_price_cents.zero?
-            item.billing_model = product.billing_model
-            item.unit_name = product.sales_unit.presence || 'unidade'
-            item.setup_fee_cents = product.setup_fee_cents
-            item.included_quantity = product.included_quantity
-            item.included_unit = product.included_unit
-            item.overage_unit_price_cents = product.overage_unit_price_cents
-            item.activation_days = product.activation_days
-            item.validation_period_days = product.validation_period_days
+            item.unit_price_cents = product.unit_price_cents unless item_params.key?(:unit_price_cents)
+            item.assign_attributes(JrcCrm::CommercialProductSnapshot.from_product(product, intent: item.commercial_gratuity))
           end
 
           def serialize_proposal

@@ -65,6 +65,7 @@
 #
 module JrcCrm
   class Product < ApplicationRecord
+    include JrcCrm::CorporateUnitBinding
     self.table_name = 'jrc_crm_products'
 
     PRODUCT_TYPES = {

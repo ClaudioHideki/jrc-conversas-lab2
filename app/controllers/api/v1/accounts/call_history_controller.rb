@@ -1,9 +1,12 @@
 class Api::V1::Accounts::CallHistoryController < Api::V1::Accounts::BaseController
   MAX_PERIOD_DAYS = 31
   MAX_PER_PAGE = 100
+  before_action :private_recording_response, only: [:recording, :recording_metadata]
 
   def show
     integration = Current.account.telephony_integration
+    return show_pabx(integration) if integration && Pabx::Settings.new(integration).enabled?
+
     credential = Current.account.sip_credentials.find_by(user: Current.user)
     return render_error(:configuration_missing, :unprocessable_entity) unless integration && credential&.configured?
 
@@ -22,7 +25,58 @@ class Api::V1::Accounts::CallHistoryController < Api::V1::Accounts::BaseControll
     render_error(e.code, status_for(e.code))
   end
 
+  def recording
+    record = Pabx::Access.new(account: Current.account, user: Current.user).records.find(params[:id])
+    raise Pabx::Error, 'RECORDING_UNAVAILABLE' unless record.has_recording?
+
+    result = Pabx::Provider.new(Current.account.telephony_integration).recording(record)
+    send_data result[:body], type: result[:content_type], filename: "call-#{record.id}.audio", disposition: 'attachment'
+  end
+
+  def recording_metadata
+    record = Pabx::Access.new(account: Current.account, user: Current.user).records.find(params[:id])
+    settings = Pabx::Settings.new(Current.account.telephony_integration)
+    render json: { id: record.id, has_recording: record.has_recording?, recording_state: record.recording_state(settings) }
+  end
+
+  rescue_from Pabx::Error do |error|
+    render json: { error: error.code, message: 'Histórico PABX indisponível. Verifique a configuração e o tenant no diagnóstico.' },
+           status: { 'NOT_FOUND' => :not_found, 'RECORDING_UNAVAILABLE' => :not_found, 'FORBIDDEN' => :forbidden,
+                     'RECORDING_FORBIDDEN' => :forbidden, 'EXPIRED' => :gone, 'TIMEOUT' => :gateway_timeout }
+                     .fetch(error.code, :unprocessable_entity)
+  end
+
   private
+
+  def private_recording_response
+    response.headers['Cache-Control'] = 'private, no-store'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+  end
+
+  def show_pabx(integration)
+    start_date, end_date = date_range(integration)
+    records = Pabx::Access.new(account: Current.account, user: Current.user).records
+    zone = Time.find_zone!(params[:time_zone].presence || 'UTC')
+    records = records.where(started_at: start_date.in_time_zone(zone).beginning_of_day..end_date.in_time_zone(zone).end_of_day)
+                     .order(started_at: :desc, id: :desc)
+    records = records.where(direction: params[:direction]) if params[:direction].present?
+    if params[:status] == 'missed'
+      records = records.where(direction: 'inbound', status: 'unanswered')
+    elsif params[:status].present?
+      records = records.where(status: params[:status])
+    end
+    page = [params.fetch(:page, 1).to_i, 1].max
+    per_page = params.fetch(:per_page, 30).to_i.clamp(1, MAX_PER_PAGE)
+    settings = Pabx::Settings.new(integration)
+    calls = records.offset((page - 1) * per_page).limit(per_page).map { |record| record.public_payload(settings: settings) }
+    render json: { calls: calls, count: records.count, page: page, per_page: per_page,
+                   summary: { total: records.count, answered: records.where(status: 'answered').count,
+                              unanswered: records.where(status: 'unanswered').count },
+                   extension: Current.account.sip_credentials.find_by!(user: Current.user).history_extension,
+                   provider: Pabx::Settings::PROVIDER, sync: integration.pabx_sync_state.except('diagnostic'),
+                   fetched_at: Time.current.iso8601, start_date: start_date.iso8601, end_date: end_date.iso8601 }
+  end
 
   def date_range(integration)
     end_date = params[:end_date].present? ? Date.iso8601(params[:end_date]) : Time.zone.today
