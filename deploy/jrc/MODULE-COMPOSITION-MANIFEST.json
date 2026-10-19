@@ -21,8 +21,8 @@
     {
       "path": ".github/workflows/nico-broker-candidate.yml",
       "baseSha256": null,
-      "sha256": "4150eac288152ac0264cc71a2ced74a40804cb69fadbb62fe89ad379756b0c71",
-      "bytes": 10870
+      "sha256": "5b8dcbe7ae071a16d998fd73238368e846e46b3b88ac6a98bcf28aebe2a91164",
+      "bytes": 10991
     },
     {
       "path": "app/controllers/api/v1/accounts/jrc_domain_commands_controller.rb",
@@ -81,8 +81,8 @@
     {
       "path": "app/javascript/dashboard/api/jrcRelationship.js",
       "baseSha256": "a94dcf716d45fff0ede49486d7f2c3f6ed5e739e3b06d6abadb77e491e488dae",
-      "sha256": "d7d258e284bd5644004e79a18154ed48a51d8f2a2d3deaa489e8ff941cbff7a0",
-      "bytes": 9025
+      "sha256": "b906c509f0fdeda27da1c591e11a2b9b29e4a8cbdde9f66706757b529cbec7e4",
+      "bytes": 9121
     },
     {
       "path": "app/javascript/dashboard/components-next/jrcCopilot/JrcCopilotPanel.vue",
@@ -165,8 +165,8 @@
     {
       "path": "app/javascript/dashboard/routes/dashboard/jrcRelationship/ModulePage.vue",
       "baseSha256": "bfea2100a3e5f8dccf3163c899bac9eb5f8369b0a674c3513a5859c1b5a97d74",
-      "sha256": "2db14af9d727e81c72d1bbec0ef125d2a4ae20487ccfdb182d1bd07fb8cbbd9f",
-      "bytes": 62730
+      "sha256": "10948dbdff2a533e8c33f31b4ce924faef7c08681877318ac877ba76bf8876e3",
+      "bytes": 63161
     },
     {
       "path": "app/javascript/dashboard/routes/dashboard/jrcRelationship/reviewedCadence.spec.js",

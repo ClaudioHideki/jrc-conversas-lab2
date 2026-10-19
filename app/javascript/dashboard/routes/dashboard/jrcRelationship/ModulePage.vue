@@ -303,13 +303,34 @@ const completeBatch = () =>
   );
 const updatePortfolioBatch = () => {
   portfolioReviewProposal.value = {
-    ...portfolioOperation, ids: [...selected.value], request_id: crypto.randomUUID(),
-    due_at: portfolioOperation.due_at ? new Date(portfolioOperation.due_at).toISOString() : undefined,
-    starts_at: portfolioOperation.starts_at ? new Date(portfolioOperation.starts_at).toISOString() : undefined,
+    ...portfolioOperation,
+    ids: [...selected.value],
+    request_id: crypto.randomUUID(),
+    due_at: portfolioOperation.due_at
+      ? new Date(portfolioOperation.due_at).toISOString()
+      : undefined,
+    starts_at: portfolioOperation.starts_at
+      ? new Date(portfolioOperation.starts_at).toISOString()
+      : undefined,
   };
 };
-watch([selected, portfolioOperation], () => { portfolioReviewProposal.value = null; }, { deep: true });
-watch([() => route.params.accountId, () => store.getters.getCurrentUserID, () => props.screen], () => { portfolioReviewProposal.value = null; });
+watch(
+  [selected, portfolioOperation],
+  () => {
+    portfolioReviewProposal.value = null;
+  },
+  { deep: true }
+);
+watch(
+  [
+    () => route.params.accountId,
+    () => store.getters.getCurrentUserID,
+    () => props.screen,
+  ],
+  () => {
+    portfolioReviewProposal.value = null;
+  }
+);
 const exportPortfolio = async (history = false) => {
   const version = generation;
   error.value = '';
@@ -1248,7 +1269,10 @@ const money = value => formatMoney(value, metadata.value?.formatting);
                   :class="inputClass"
               /></label>
             </template>
-            <label v-if="['playbook', 'cadence'].includes(portfolioOperation.operation)"
+            <label
+              v-if="
+                ['playbook', 'cadence'].includes(portfolioOperation.operation)
+              "
               >{{ t('RELATIONSHIP.SCREENS.playbooks')
               }}<select
                 v-model="portfolioOperation.playbook_id"
@@ -1266,18 +1290,36 @@ const money = value => formatMoney(value, metadata.value?.formatting);
               </select></label
             >
             <template v-if="portfolioOperation.operation === 'cadence'">
-              <label>{{ t('RELATIONSHIP.REVIEWED_BATCH.CONVERSATION') }}
-                <input v-model="portfolioOperation.conversation_id" type="number" min="1" required :class="inputClass" />
+              <label
+                >{{ t('RELATIONSHIP.REVIEWED_BATCH.CONVERSATION') }}
+                <input
+                  v-model="portfolioOperation.conversation_id"
+                  type="number"
+                  min="1"
+                  required
+                  :class="inputClass"
+                />
               </label>
-              <label>{{ t('RELATIONSHIP.REVIEWED_BATCH.STARTS_AT') }}
-                <input v-model="portfolioOperation.starts_at" type="datetime-local" required :class="inputClass" />
+              <label
+                >{{ t('RELATIONSHIP.REVIEWED_BATCH.STARTS_AT') }}
+                <input
+                  v-model="portfolioOperation.starts_at"
+                  type="datetime-local"
+                  required
+                  :class="inputClass"
+                />
               </label>
               <p>{{ t('RELATIONSHIP.REVIEWED_BATCH.CADENCE_HELP') }}</p>
             </template>
             <button
               type="submit"
               :class="buttonClass"
-              :disabled="saving || selected.length > 50 || (portfolioOperation.operation === 'cadence' && selected.length !== 1)"
+              :disabled="
+                saving ||
+                selected.length > 50 ||
+                (portfolioOperation.operation === 'cadence' &&
+                  selected.length !== 1)
+              "
             >
               {{ t('RELATIONSHIP.REVIEWED_BATCH.PREVIEW') }}
             </button>

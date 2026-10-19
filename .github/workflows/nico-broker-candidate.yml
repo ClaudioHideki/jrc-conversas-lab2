@@ -105,7 +105,7 @@ jobs:
       - name: Interface dos lotes e cadencias revisadas
         run: |
           pnpm exec vitest run app/javascript/dashboard/routes/dashboard/jrcRelationship/reviewedPortfolioBatch.spec.js app/javascript/dashboard/routes/dashboard/jrcRelationship/reviewedCadence.spec.js app/javascript/dashboard/routes/dashboard/jrcRelationship/nativeCompletions.spec.js app/javascript/dashboard/routes/dashboard/jrcRelationship/api.spec.js --maxWorkers=1 --minWorkers=1
-          pnpm exec eslint app/javascript/dashboard/routes/dashboard/jrcRelationship/ReviewedPortfolioBatchPanel.vue app/javascript/dashboard/routes/dashboard/jrcRelationship/ReviewedCadencePanel.vue
+          pnpm exec eslint app/javascript/dashboard/api/jrcRelationship.js app/javascript/dashboard/routes/dashboard/jrcRelationship/ModulePage.vue app/javascript/dashboard/routes/dashboard/jrcRelationship/ReviewedPortfolioBatchPanel.vue app/javascript/dashboard/routes/dashboard/jrcRelationship/ReviewedCadencePanel.vue
       - name: Conhecimento por empresa, limites e incerteza do NICO
         run: |
           bundle exec rspec spec/services/jrc_nico/bounded_workflow_knowledge_spec.rb spec/services/jrc_nico/run_capacity_spec.rb spec/services/jrc_nico/reservation_reconciler_spec.rb spec/services/jrc_nico/runtime_client_spec.rb spec/requests/jrc_nico_knowledge_spec.rb --format progress --format json --out /tmp/bounded-knowledge-rspec.json

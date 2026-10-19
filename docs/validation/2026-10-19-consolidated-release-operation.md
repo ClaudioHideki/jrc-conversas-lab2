@@ -27,3 +27,5 @@ Nenhum destes comandos foi executado no servidor durante o desenvolvimento desta
 ## Compatibilidade e retorno
 
 As migrations são aditivas. Recibos e dados nativos não devem ser apagados para tentar retornar versões. A reversão da coluna de domínio recusa dados já existentes. O histórico usa uma fila separada `HISTORY_PENDING`, que o worker antigo de mensagens normais não consome. Um retorno real deve ser ensaiado com backup e as imagens exatas; o teste de migration local não substitui esse ensaio.
+
+O primeiro build remoto do aplicativo (`39315643651`) aprovou as suítes de interface e parou antes da imagem por15 erros Prettier em dois arquivos de Relacionamento. Correção exclusiva de formatação, sem redução de regras; o CI coordenado passou a verificar também a API e o host ModulePage. A rodada de publicação anterior não produziu uma nova imagem aprovada.
