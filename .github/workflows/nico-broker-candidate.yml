@@ -2,7 +2,7 @@ name: NICO e Broker - candidato coordenado
 
 on:
   push:
-    branches: [codex/nico-broker-coordenado-20261015, codex/nico-jornada-candidato-20261016]
+    branches: [main, codex/nico-broker-coordenado-20261015, codex/nico-jornada-candidato-20261016]
   workflow_dispatch:
 
 permissions:
@@ -48,7 +48,7 @@ jobs:
         run: |
           case "$GITHUB_REF" in
             refs/heads/codex/nico-broker-coordenado-20261015) baseline=b58e093dd3a32fe97829a4566660b83ee48b9eca ;;
-            refs/heads/codex/nico-jornada-candidato-20261016) baseline=98a4be7714be41d33bf9ff52b254ebb773864769 ;;
+            refs/heads/main|refs/heads/codex/nico-jornada-candidato-20261016) baseline=98a4be7714be41d33bf9ff52b254ebb773864769 ;;
             *) echo 'Branch fora das candidatas autorizadas'; exit 1 ;;
           esac
           git merge-base --is-ancestor "$baseline" HEAD
@@ -83,6 +83,41 @@ jobs:
           test "$POSTGRES_DATABASE" = jrc_nico_broker_candidate_test
           SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
           bundle exec rails db:migrate
+      - name: Historico silencioso e operacoes revisadas da carteira
+        env:
+          JRC_REVIEWED_CONCURRENCY: '1'
+        run: |
+          bundle exec rspec spec/requests/jrc_history_import_spec.rb \
+            spec/requests/jrc_domain_commands_spec.rb \
+            spec/requests/jrc_flow_effects_spec.rb \
+            spec/services/jrc_relationship/reviewed_portfolio_batch_spec.rb \
+            spec/services/jrc_relationship/reviewed_cadence_spec.rb \
+            spec/services/jrc_relationship/reviewed_batch_concurrency_spec.rb \
+            spec/services/jrc_relationship/reviewed_operations_upgrade_spec.rb \
+            spec/requests/api/v1/accounts/relationship/reviewed_batches_spec.rb \
+            --format progress --format json --out /tmp/reviewed-operations-rspec.json
+          python3 - <<'PYTHON'
+          import json
+          result = json.load(open('/tmp/reviewed-operations-rspec.json'))['summary']
+          assert result['failure_count'] == 0 and result['pending_count'] == 0
+          assert result['example_count'] >= 66
+          PYTHON
+      - name: Interface dos lotes e cadencias revisadas
+        run: |
+          pnpm exec vitest run app/javascript/dashboard/routes/dashboard/jrcRelationship/reviewedPortfolioBatch.spec.js app/javascript/dashboard/routes/dashboard/jrcRelationship/reviewedCadence.spec.js app/javascript/dashboard/routes/dashboard/jrcRelationship/nativeCompletions.spec.js app/javascript/dashboard/routes/dashboard/jrcRelationship/api.spec.js --maxWorkers=1 --minWorkers=1
+          pnpm exec eslint app/javascript/dashboard/routes/dashboard/jrcRelationship/ReviewedPortfolioBatchPanel.vue app/javascript/dashboard/routes/dashboard/jrcRelationship/ReviewedCadencePanel.vue
+      - name: Conhecimento por empresa, limites e incerteza do NICO
+        run: |
+          bundle exec rspec spec/services/jrc_nico/bounded_workflow_knowledge_spec.rb spec/services/jrc_nico/run_capacity_spec.rb spec/services/jrc_nico/reservation_reconciler_spec.rb spec/services/jrc_nico/runtime_client_spec.rb spec/requests/jrc_nico_knowledge_spec.rb --format progress --format json --out /tmp/bounded-knowledge-rspec.json
+          python3 - <<'PYTHON'
+          import json
+          result = json.load(open('/tmp/bounded-knowledge-rspec.json'))['summary']
+          assert result['failure_count'] == 0 and result['pending_count'] == 0 and result['example_count'] >= 44
+          PYTHON
+      - name: Voz interna do operador e cancelamento de contexto
+        run: |
+          pnpm exec vitest run app/javascript/dashboard/components-next/jrcCopilot/specs/nicoVoiceConversation.spec.js app/javascript/dashboard/components-next/jrcCopilot/specs/nicoVoiceInteraction.spec.js app/javascript/dashboard/components-next/jrcCopilot/specs/nicoVoice.spec.js --maxWorkers=1 --minWorkers=1
+          pnpm exec eslint app/javascript/dashboard/components-next/jrcCopilot/useNicoVoiceConversation.js app/javascript/dashboard/components-next/jrcCopilot/useNicoVoice.js app/javascript/dashboard/components-next/jrcCopilot/NicoComposer.vue app/javascript/dashboard/components-next/jrcCopilot/JrcCopilotPanel.vue
       - name: Historico, ferramentas, confirmacao e delegacao NICO
         run: |
           bundle exec rspec spec/services/jrc_nico/operator_session_recent_history_spec.rb \
@@ -117,6 +152,9 @@ jobs:
           PYTHON
       - name: Estilo dos arquivos novos de coordenacao
         run: |
+          bundle exec rubocop app/services/jrc_domain_commands \
+            app/controllers/api/v1/accounts/jrc_domain_commands_controller.rb \
+            spec/requests/jrc_domain_commands_spec.rb
           bundle exec rubocop app/models/jrc_nico/broker_send_operation.rb \
             app/services/jrc_ai/conversation_sentiment.rb \
             spec/services/jrc_ai/conversation_sentiment_spec.rb \

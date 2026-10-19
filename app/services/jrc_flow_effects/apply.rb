@@ -9,6 +9,7 @@ class JrcFlowEffects::Apply
 
     Conversation.transaction do
       @authority.authorize!(lock: true)
+      JrcDomainCommands::Scope.new(@authority).authorize!(input) if input['operation'] == 'domain'
       conversation = @authority.account.conversations.lock.find_by!(display_id: JrcFlowEffects::Request.integer(display_id))
       digest = JrcFlowEffects::Request.digest(input, account_id: @authority.account.id, conversation_id: conversation.display_id)
       replay(conversation, input, digest) || perform(conversation, input, value, digest)
@@ -26,7 +27,7 @@ class JrcFlowEffects::Apply
   def perform(conversation, input, value, digest)
     snapshot = JrcFlowEffects::ControlRevision.snapshot(conversation)
     verify_snapshot!(snapshot, input)
-    message = apply_action(conversation, input, value)
+    result = apply_action(conversation, input, value)
     after = JrcFlowEffects::ControlRevision.snapshot(conversation.reload)
     raise ArgumentError, 'destination_changed' unless snapshot.except('control_revision') == after.except('control_revision')
 
@@ -36,7 +37,8 @@ class JrcFlowEffects::Apply
                                    conversation: conversation, actor_user_id: @authority.user.id, request_hash: digest,
                                    dispatch_proof_hash: Digest::SHA256.hexdigest(input['dispatch_proof']),
                                    control_revision_before: snapshot['control_revision'], control_revision_after: after['control_revision'],
-                                   message_id: message&.id
+                                   message_id: input['operation'] == 'domain' ? nil : result&.id,
+                                   domain_result: input['operation'] == 'domain' ? result : nil
                                  ))
   end
 
@@ -49,11 +51,10 @@ class JrcFlowEffects::Apply
 
   def apply_action(conversation, input, value)
     case input['operation']
+    when 'domain'
+      JrcDomainCommands::Apply.new(@authority, conversation, input, value).call
     when 'note'
-      raise ArgumentError, 'value' unless value.is_a?(String) && value.present? && value.bytesize.between?(1, 4096)
-
-      metadata = { jrc_flow_effect_id: input['operation_id'], jrc_flow_effect_organization_id: input['organization_id'] }
-      Messages::MessageBuilder.new(@authority.user, conversation, content: value, private: true, content_attributes: metadata).perform
+      apply_note(conversation, input, value)
     when 'resolve'
       raise ArgumentError, 'value' unless value == 'RESOLVED'
 
@@ -63,6 +64,13 @@ class JrcFlowEffects::Apply
       apply_resource(conversation, input, value)
       nil
     end
+  end
+
+  def apply_note(conversation, input, value)
+    raise ArgumentError, 'value' unless value.is_a?(String) && value.present? && value.bytesize.between?(1, 4096)
+
+    metadata = { jrc_flow_effect_id: input['operation_id'], jrc_flow_effect_organization_id: input['organization_id'] }
+    Messages::MessageBuilder.new(@authority.user, conversation, content: value, private: true, content_attributes: metadata).perform
   end
 
   def apply_resource(conversation, input, value)

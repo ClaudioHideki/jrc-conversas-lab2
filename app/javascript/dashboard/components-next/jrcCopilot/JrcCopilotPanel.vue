@@ -17,7 +17,7 @@ import { openVideoConferencePopup } from 'dashboard/helper/videoConference';
 import { useCallsStore } from 'dashboard/stores/calls';
 import { useSipWebphone } from 'dashboard/routes/dashboard/webphone/useSipWebphone';
 import { useJrcCopilot } from './useJrcCopilot';
-import { useNicoVoice } from './useNicoVoice';
+import { useNicoVoiceConversation } from './useNicoVoiceConversation';
 import JrcCopilotQuickPanel from './JrcCopilotQuickPanel.vue';
 import NicoComposer from './NicoComposer.vue';
 import NicoInteractionStatus from './NicoInteractionStatus.vue';
@@ -120,17 +120,32 @@ const sip = useSipWebphone();
 const whatsapp = useWhatsappCallSession();
 const calls = useCallsStore();
 const inCall = computed(
-  () => sip.hasCall.value || calls.hasActiveCall || calls.hasIncomingCall
+  () =>
+    sip.hasCall.value ||
+    calls.hasActiveCall ||
+    calls.hasIncomingCall ||
+    whatsapp.isInitiating?.value
 );
-const voice = useNicoVoice({
+const voice = useNicoVoiceConversation({
   transcribe: (audio, signal) => api.transcribe(accountId.value, audio, signal),
   onTranscript: text => {
     input.value = text;
   },
   // eslint-disable-next-line no-use-before-define -- The callback runs after setup and shares the manual ask handler.
-  onSubmit: text => ask(text),
+  onSubmit: text => ask(text, { voiceTurn: true }),
   context: computed(() => `${accountId.value}:${conversationId.value || ''}`),
   canSubmit: computed(() => visible.value && !busy.value),
+  active: visible,
+  pendingApproval: computed(() =>
+    state.value.commands.some(command =>
+      [
+        'awaiting_confirmation',
+        'browser_pending',
+        'executing',
+        'unknown',
+      ].includes(command.status)
+    )
+  ),
   inCall,
 });
 const pending = computed(() =>
@@ -274,13 +289,14 @@ const perform = async (action, nextPhase = 'working') => {
   }
   return undefined;
 };
-const ask = async prompt => {
+const ask = async (prompt, { voiceTurn = false } = {}) => {
   const message = String(prompt ?? input.value).trim();
-  if (!message || busy.value || submittingRequest) return;
+  if (!message || busy.value || submittingRequest) return false;
   submittingRequest = true;
   const current = version;
   focusedNoticeId.value = null;
-  voice.stop();
+  if (voiceTurn) voice.suspendCapture();
+  else voice.stop();
   const requestContext = `${accountId.value}:${conversationId.value || ''}:${String(route.name || '')}`;
   if (
     pendingRequest?.message !== message ||
@@ -328,6 +344,7 @@ const ask = async prompt => {
     }
   }
   if (current === version) submittingRequest = false;
+  return Boolean(result && current === version);
 };
 const navigate = async result => {
   if (!result?.route_name || !router.hasRoute(result.route_name)) return;

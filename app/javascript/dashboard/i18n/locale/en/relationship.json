@@ -1,5 +1,33 @@
 {
   "RELATIONSHIP": {
+    "REVIEWED_BATCH": {
+      "TITLE": "Lote revisado",
+      "DESCRIPTION": "Confira os clientes e a operação antes de confirmar. Cada item terá seu próprio resultado. Cancelar preserva o que já foi aplicado. Este lote não autoriza mensagens nem um Flow de atendimento.",
+      "PREVIEW": "Revisar lote",
+      "APPROVE": "Confirmar esta prévia",
+      "ADVANCE": "Continuar processamento",
+      "CANCEL": "Cancelar itens pendentes",
+      "REFRESH": "Consultar lote salvo",
+      "WORKING": "Consultando o lote…",
+      "IDENTITY": "Lote {id} · Revisão {revision}",
+      "OWNER": "Responsável: {name}",
+      "BOOK": "{name} · Versão {version}",
+      "CADENCE": "Cadência de atividades nativas",
+      "CONVERSATION": "Número da conversa do cliente nesta conta",
+      "STARTS_AT": "Início da cadência",
+      "CADENCE_HELP": "Selecione um único cliente e informe a conversa dele. A prévia mostra a versão e as datas. Resposta do cliente, intervenção humana ou cancelamento interrompem os passos restantes. Não envia WhatsApp.",
+      "CADENCE_TARGET": "{name} · Conversa #{number}",
+      "ITEM_FAILED": "Não executado; revise a configuração e as permissões.",
+      "ERROR": "Não foi possível confirmar o resultado. Consulte o lote salvo antes de repetir a ação.",
+      "OPERATIONS": {"assign": "Alteração de responsável", "activity": "Criação de atividade", "playbook": "Aplicação do playbook e da versão revisada", "cadence": "Inscrição na cadência revisada"},
+      "STATES": {"previewed": "Aguardando sua confirmação", "running": "Processando itens aprovados", "completed": "Operações nativas aplicadas", "canceled": "Cancelado", "attention": "Precisa de revisão", "pending": "Aguardando", "applied": "Aplicado", "failed": "Falhou sem aplicar"}
+    },
+    "CADENCE": {
+      "ADVANCE": "Processar o próximo passo vencido",
+      "REFRESH": "Consultar cadência",
+      "STATES": {"active": "Ativa: aguardando o próximo passo", "completed": "Atividades nativas criadas", "stopped": "Interrompida", "pending": "Aguardando a data", "applied": "Atividade criada", "canceled": "Passo cancelado"},
+      "REASONS": {"CONTACT_REPLIED": "O cliente respondeu; os passos restantes foram cancelados.", "CONVERSATION_CHANGED": "Houve intervenção ou mudança na conversa.", "CANCELED_BY_OPERATOR": "Cancelada pelo operador.", "AUTHORITY_CHANGED": "As permissões mudaram.", "AUTHORITY_REVOKED": "O operador perdeu a autorização.", "CONDITIONS_CHANGED": "O cliente não atende mais às condições do playbook.", "CUSTOMER_CHANGED": "O cadastro ou o responsável pelo cliente mudou; revise antes de inscrever novamente."}
+    },
     "TITLE": "Relacionamento",
     "SUBTITLE": "Customer Success, saúde, renovação e retenção",
     "COMMERCIAL": "Comercial",

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "component": "jrc-native-flow-editor",
   "sourceRepository": "ClaudioHideki/BrokerJRCIA",
-  "sourceSha": "51dbab1f26120a0235f7e6b92ac37c1261573ba1",
+  "sourceSha": "42848bf68f9c07fdc6e102de37ccb4a845e463db",
   "sourceCommitted": true,
   "lockfileSha256": "d094a0da20f404512f64a6529490903524aecb95e883d81258b859544b3c0f86",
   "inputs": [
@@ -83,7 +83,7 @@
     },
     {
       "path": "apps/web/src/automations/node-editors/ConversationActionEditor.tsx",
-      "sha256": "33b553431155a605e1cc9500a2d2ff9d683010a54e5f4fbe9e74cc950f2c0b7d",
+      "sha256": "0fec11ab74de347f1ca9887178111f43ee5001ebfb617af999e9e9d3e3df10b8",
       "dependency": false
     },
     {
@@ -94,6 +94,11 @@
     {
       "path": "apps/web/src/automations/node-editors/DataReferencePicker.tsx",
       "sha256": "b40f7221b36738c05933d065df7a7934a3408111488c066d8cc8c8f5800b5fef",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/automations/node-editors/DomainCommandFields.tsx",
+      "sha256": "5f1256b7b8151ebacf22cfaa328d9644b9b7e6858177d2ea25c7434812ce32e2",
       "dependency": false
     },
     {
@@ -153,7 +158,7 @@
     },
     {
       "path": "apps/web/src/flows/FlowCanvas.tsx",
-      "sha256": "428cb59ad68401f5896f7dece772f0c180d222ca4030722e3ec63418401bf041",
+      "sha256": "ce0c16b071e1e7c52cec5ded27c6bfe55d459e6962c41a92d9a645a98834e4cb",
       "dependency": false
     },
     {
@@ -198,7 +203,7 @@
     },
     {
       "path": "apps/web/src/pages/NewAutomation.tsx",
-      "sha256": "f8c2d27ea7e6bb8f82c1dfaad610a6c862c319d1fd3769f8591aab7076bfebac",
+      "sha256": "9a3ca892c9f6b4fbb7d644c1a690db3bc067e337883978d50eca74326a2e1008",
       "dependency": false
     },
     {
@@ -798,12 +803,17 @@
     },
     {
       "path": "packages/contracts/src/automation-conversation-effects.ts",
-      "sha256": "1f4d9e835ad8d235f603658e2703a51de7bd0bf820a6b9037022ca057afeca6d",
+      "sha256": "9d21b72107b8afcdab9d9481044bf6d22ef52d3b66e39e9848b0d1cc5a5bb3d0",
       "dependency": false
     },
     {
       "path": "packages/contracts/src/automation-data-v2.ts",
       "sha256": "e6cd067b8f1968432192c9f62c9f56dcea171c12df5fa309e37d51dd3a9fa51e",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/automation-domain-command.ts",
+      "sha256": "46018646f0e3bede1a1de0da9cb64711e50941daf7ad4601a4e83f93dcf16d37",
       "dependency": false
     },
     {
@@ -823,7 +833,7 @@
     },
     {
       "path": "packages/contracts/src/automation-node-definitions.ts",
-      "sha256": "94f7bc56ce8a6309a241893a4b13d6b5122fb8d866562b9aff287b4d87695442",
+      "sha256": "6f2b2e6a089fd9f0b6f6b23770d3af5cbdde9af9b22bf1562b49a97c37810f18",
       "dependency": false
     },
     {
@@ -843,7 +853,7 @@
     },
     {
       "path": "packages/contracts/src/automations-v1.ts",
-      "sha256": "53000dda301e6958dcb23855e7d9e958fbfb9cc7944bb795274d02076addbaac",
+      "sha256": "58fda4015f724664a8c1e8c632b9740b910636ce98686a6727aa9dfbd4eafa51",
       "dependency": false
     },
     {
@@ -897,8 +907,13 @@
       "dependency": false
     },
     {
+      "path": "packages/contracts/src/history-import.ts",
+      "sha256": "9e22b69f71afe0cb2c56ac1295fa35f8cb8530e2d440d4cccf31663777666538",
+      "dependency": false
+    },
+    {
       "path": "packages/contracts/src/index.ts",
-      "sha256": "6ea394251561fe276b5dec111fc1645d0a72da270684738e71102a9270051091",
+      "sha256": "bffb17e799bdc07eda6395e963de389c4789dd2b95152c2b00ed12e6066d6d6e",
       "dependency": false
     },
     {
@@ -928,7 +943,7 @@
     },
     {
       "path": "packages/contracts/src/integrations/schemas.ts",
-      "sha256": "048af4f178910a9581ca05d07d9e9584c344dffa4867eff2d42f5e8a63fbc7e1",
+      "sha256": "d9ec3205ee3f22c3597ebd9acf083696f7b2353be32e6d5dda175708ff2cf7c6",
       "dependency": false
     },
     {
@@ -1010,8 +1025,8 @@
     },
     {
       "path": "editor.js",
-      "bytes": 896462,
-      "sha256": "afe9941b70adcc8892b5ca50cf9b8e1af64e6ce0d0d2073c2e758d19ebc70971"
+      "bytes": 902736,
+      "sha256": "bfce628e20cae7354cb7797dd1bfefe76d1b323f526602aa275725b69767a6c1"
     },
     {
       "path": "editor.js.LEGAL.txt",

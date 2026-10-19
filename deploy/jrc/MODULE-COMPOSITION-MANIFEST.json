@@ -4,19 +4,32 @@
   "provenanceSourceSha": "80f7305ad0eac310d661071856f67a7e048881de",
   "encoding": "Git text payloads with LF line endings",
   "installedProof": false,
-  "compositionCount": 124,
+  "compositionCount": 174,
   "editorStatus": {
     "sourceRepository": "ClaudioHideki/BrokerJRCIA",
-    "sourceSha": "51dbab1f26120a0235f7e6b92ac37c1261573ba1",
+    "sourceSha": "42848bf68f9c07fdc6e102de37ccb4a845e463db",
     "sourceCommitted": true,
     "buildManifest": "public/jrc-flow-editor/EDITOR-BUILD-MANIFEST.json"
   },
   "limitations": [
     "The initial merge comprised 66 product paths. compositionCount now counts all final artifact files, including product, tests, deployment configuration and editor assets.",
     "The final source still requires the candidate CI gates. No installed attestation or running deployment is claimed by this inventory.",
-    "The 19 paths cover the implemented Flow, message, attachment, assignment, status, webhook, AgentBot and legacy API paths. AutomationRule email and transcript actions retain their existing behavior and are outside this ownership proof."
+    "The 19 paths cover the implemented Flow, message, attachment, assignment, status, webhook, AgentBot and legacy API paths. AutomationRule email and transcript actions retain their existing behavior and are outside this ownership proof.",
+    "Native domain commands enforce CRM coverage; operator voice is not WhatsApp-call media. History v1 covers individual text after the verified identity boundary, excluding group/media history. Capacity and external-provider acceptance remain separate."
   ],
   "files": [
+    {
+      "path": ".github/workflows/nico-broker-candidate.yml",
+      "baseSha256": null,
+      "sha256": "4150eac288152ac0264cc71a2ced74a40804cb69fadbb62fe89ad379756b0c71",
+      "bytes": 10870
+    },
+    {
+      "path": "app/controllers/api/v1/accounts/jrc_domain_commands_controller.rb",
+      "baseSha256": null,
+      "sha256": "0d2e1827d17d953a122cc7bd2cbee5025c5f41522a9dea02276af67c9c84e0bf",
+      "bytes": 2630
+    },
     {
       "path": "app/controllers/api/v1/accounts/jrc_flow_delegation_controller.rb",
       "baseSha256": null,
@@ -26,8 +39,26 @@
     {
       "path": "app/controllers/api/v1/accounts/jrc_flow_effects_controller.rb",
       "baseSha256": null,
-      "sha256": "e07d6286bf32bc53aa973ffb4eed1178700c05479b3057fc08c443664b8a0b17",
-      "bytes": 3530
+      "sha256": "f15d4b88b3905d079e13ea3ad3db7763fcebbe037b00dc6a8b29734c5f7af56e",
+      "bytes": 3699
+    },
+    {
+      "path": "app/controllers/api/v1/accounts/jrc_history_imports_controller.rb",
+      "baseSha256": null,
+      "sha256": "603db519fc7cb7e86c491c949fe3e0311ca50aa78758687296e5cd834c903fe7",
+      "bytes": 1410
+    },
+    {
+      "path": "app/controllers/api/v1/accounts/relationship/cadences_controller.rb",
+      "baseSha256": null,
+      "sha256": "96635a8b8ebf8f70b2ffcf8bd6a88c56439c7809c1d70fbb628fe8b8f2dc1005",
+      "bytes": 708
+    },
+    {
+      "path": "app/controllers/api/v1/accounts/relationship/reviewed_batches_controller.rb",
+      "baseSha256": null,
+      "sha256": "bdb1c0cb9b3c2c9c191422b11ae597199ff3ccee2b4371b6f1a05079ef87d07c",
+      "bytes": 1188
     },
     {
       "path": "app/controllers/api/v1/jrc_flow_native_controller.rb",
@@ -48,10 +79,58 @@
       "bytes": 2364
     },
     {
+      "path": "app/javascript/dashboard/api/jrcRelationship.js",
+      "baseSha256": "a94dcf716d45fff0ede49486d7f2c3f6ed5e739e3b06d6abadb77e491e488dae",
+      "sha256": "d7d258e284bd5644004e79a18154ed48a51d8f2a2d3deaa489e8ff941cbff7a0",
+      "bytes": 9025
+    },
+    {
+      "path": "app/javascript/dashboard/components-next/jrcCopilot/JrcCopilotPanel.vue",
+      "baseSha256": "c8e6559825c8adaebdea8fd4556747ef074332ef75aa89e737b574f5f4560b19",
+      "sha256": "22558a6165031a0a47138f8e6bba537b8ad40a6eae42c8637fb1d3c075267dc2",
+      "bytes": 37922
+    },
+    {
+      "path": "app/javascript/dashboard/components-next/jrcCopilot/NicoComposer.vue",
+      "baseSha256": "45c73a9e2ef513b265ed7a78ec7f694ae9ebc7a2eb48f6e6edde0e0f5fdbd2ff",
+      "sha256": "34e3d8791860b9f5bec7427a8169edc992288a73450c063068c46ae97b95301f",
+      "bytes": 6013
+    },
+    {
+      "path": "app/javascript/dashboard/components-next/jrcCopilot/specs/nicoVoiceConversation.spec.js",
+      "baseSha256": null,
+      "sha256": "a49a39621bc4eeca4f7707c0ababd59af8904ca37a69df4ccaa456ecc999d5d2",
+      "bytes": 7164
+    },
+    {
+      "path": "app/javascript/dashboard/components-next/jrcCopilot/useNicoVoice.js",
+      "baseSha256": "3c6291ab531051013537befefa02aec1e100dbbe254cc91ce54faffae4f341c7",
+      "sha256": "5630689a46140bd4611f5ae0080e43d9e4abe3cba195fe20036279a984159622",
+      "bytes": 6372
+    },
+    {
+      "path": "app/javascript/dashboard/components-next/jrcCopilot/useNicoVoiceConversation.js",
+      "baseSha256": null,
+      "sha256": "e99215fe22ed68836f131a35c84d119b3b7d8cffcff5d028fe93354efa6f7585",
+      "bytes": 6141
+    },
+    {
       "path": "app/javascript/dashboard/components-next/sidebar/Sidebar.vue",
       "baseSha256": "4eb35689e3727861a17007c90d86e85cdfae3955409b6150261010e992406358",
       "sha256": "4e45eb13b79bf563d24dd4dca7abeea33ec775cb06deeba843a3bcf9fc7e684b",
       "bytes": 60493
+    },
+    {
+      "path": "app/javascript/dashboard/i18n/locale/en/jrcNico.json",
+      "baseSha256": "66619881bc818ddf4e8c699821b6a1456098e1156c55936751a1d69cdc9280c8",
+      "sha256": "e1a4f9d69e8a3f6511c5e60920be7e48bb91091eec809ff4e569ff8df808998e",
+      "bytes": 17969
+    },
+    {
+      "path": "app/javascript/dashboard/i18n/locale/en/relationship.json",
+      "baseSha256": "ef6d35ee197367f4838da764aa653f40818e83091e0b702674c937b16ff070f3",
+      "sha256": "6414029600066dc37f486b5b7611ee63c67ab9c8119a5091dc4f4e441a85d3a2",
+      "bytes": 45107
     },
     {
       "path": "app/javascript/dashboard/routes/dashboard/jrcFlows/FlowsWorkspace.vue",
@@ -62,7 +141,7 @@
     {
       "path": "app/javascript/dashboard/routes/dashboard/jrcFlows/nativeEditorBuild.js",
       "baseSha256": null,
-      "sha256": "51bce81dc2a5ae1b7cca1aa1437c7517357a027a52f21172d472fafcfa681466",
+      "sha256": "26750904b97d51d5de2148d94b4d8e3952363b74a14015c8a07bea386354dbd3",
       "bytes": 161
     },
     {
@@ -82,6 +161,36 @@
       "baseSha256": "67cdb885064de5741f8818f426367e55ca6a5b0a9ec33505894c043dba24335a",
       "sha256": "d77dbf01555a8e7e8b9ad800104d27aeeaa08334d308d2ccd4f6375147c6adc0",
       "bytes": 3855
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcRelationship/ModulePage.vue",
+      "baseSha256": "bfea2100a3e5f8dccf3163c899bac9eb5f8369b0a674c3513a5859c1b5a97d74",
+      "sha256": "2db14af9d727e81c72d1bbec0ef125d2a4ae20487ccfdb182d1bd07fb8cbbd9f",
+      "bytes": 62730
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcRelationship/reviewedCadence.spec.js",
+      "baseSha256": null,
+      "sha256": "d72d1478e7ea587098d6568ae79e60f95b9060aa9475d08c8e3cf0d37d908f66",
+      "bytes": 2428
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcRelationship/ReviewedCadencePanel.vue",
+      "baseSha256": null,
+      "sha256": "2768e94d8a3f2df458fe5d917addfab186686c0f4b7238b841e17c4c96b396d1",
+      "bytes": 3891
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcRelationship/reviewedPortfolioBatch.spec.js",
+      "baseSha256": null,
+      "sha256": "17d82a2b5c39c5cc06f8c19209b2629f923da269ad9d9e6b1ef064b4b2eec3b4",
+      "bytes": 5004
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcRelationship/ReviewedPortfolioBatchPanel.vue",
+      "baseSha256": null,
+      "sha256": "0fac7d2f0cbf1b004841cda8d38ff8590824fac74085d9e0872188379992f0c5",
+      "bytes": 8642
     },
     {
       "path": "app/jobs/agent_bots/webhook_job.rb",
@@ -144,6 +253,18 @@
       "bytes": 462
     },
     {
+      "path": "app/jobs/jrc_relationship/batch_execution_job.rb",
+      "baseSha256": null,
+      "sha256": "9068aafbd76731ded42f5607f892d9430bedd1942eb1003aab34d8593e6c66df",
+      "bytes": 1191
+    },
+    {
+      "path": "app/jobs/jrc_relationship/cadence_execution_job.rb",
+      "baseSha256": null,
+      "sha256": "76a668c0272b96476bce9a7854e21ab838ce5178bc4e4adaf8077174eb18649e",
+      "bytes": 823
+    },
+    {
       "path": "app/jobs/jrc_relationship/playbook_flow_resume_job.rb",
       "baseSha256": "edad59cd78a5565a900e97e6c280fca0adc91273e2b8cbe1586a8de36f868f97",
       "sha256": "edad59cd78a5565a900e97e6c280fca0adc91273e2b8cbe1586a8de36f868f97",
@@ -176,8 +297,8 @@
     {
       "path": "app/models/jrc_flow_effect_receipt.rb",
       "baseSha256": null,
-      "sha256": "e90753e46887f41311bfa9851d766fbcdf59f8a9d0254a70fc455bc3dbecc2ab",
-      "bytes": 1003
+      "sha256": "8b4b3a8ee2829187c6899c2c8e99e4816cf1900839431ebd2192cdac42b386f2",
+      "bytes": 1254
     },
     {
       "path": "app/models/jrc_flow_native_binding.rb",
@@ -234,16 +355,76 @@
       "bytes": 169
     },
     {
+      "path": "app/models/jrc_relationship/batch_item.rb",
+      "baseSha256": null,
+      "sha256": "7f3f0863f401c7fdb5f133641644b8560499ab4cf1d1815bcdb1079f8fc74793",
+      "bytes": 467
+    },
+    {
+      "path": "app/models/jrc_relationship/batch_review.rb",
+      "baseSha256": null,
+      "sha256": "306542e57e75a2dfd2ad5558a692f85055ce62416a3d5627eb0705f65dff9636",
+      "bytes": 482
+    },
+    {
+      "path": "app/models/jrc_relationship/cadence_enrollment.rb",
+      "baseSha256": null,
+      "sha256": "396021395231b1df144e37022a95c51d3f7b10633a02bee5ccb7be7d0f20b4cf",
+      "bytes": 529
+    },
+    {
+      "path": "app/models/jrc_relationship/cadence_step.rb",
+      "baseSha256": null,
+      "sha256": "510b2f3a180d624289e816000c8bbf09c8c7a4a8827825c27963ecbde8ccb1d8",
+      "bytes": 388
+    },
+    {
       "path": "app/services/automation_rules/action_service.rb",
       "baseSha256": "81148f9e565f311adb6fa8eea0a519b60d850838f7228acd6e59cdcf4b4b7a6f",
       "sha256": "81148f9e565f311adb6fa8eea0a519b60d850838f7228acd6e59cdcf4b4b7a6f",
       "bytes": 1951
     },
     {
+      "path": "app/services/jrc_broker/history_bootstrap.rb",
+      "baseSha256": null,
+      "sha256": "6d16c254633e81c27aea851752ab39b5a5a542c7c752e489285008ac8935fb51",
+      "bytes": 4494
+    },
+    {
+      "path": "app/services/jrc_broker/history_import.rb",
+      "baseSha256": null,
+      "sha256": "52313eae8d39e2112097fb55351c2b01524e7a8b7b20198b620e06727760fe95",
+      "bytes": 6050
+    },
+    {
+      "path": "app/services/jrc_domain_commands/apply.rb",
+      "baseSha256": null,
+      "sha256": "3e8afb55f018cb24565bee7e5f2355af45c180a979a751994f1221c0c3329f56",
+      "bytes": 3920
+    },
+    {
+      "path": "app/services/jrc_domain_commands/request.rb",
+      "baseSha256": null,
+      "sha256": "1a62d7d1f8363648bb30236bd48581c4c3b7eebbcf86c362797ac6672788f0ae",
+      "bytes": 1540
+    },
+    {
+      "path": "app/services/jrc_domain_commands/resource_scope.rb",
+      "baseSha256": null,
+      "sha256": "0981ed615451d5cb7c5db8a6c7aa03a49717422582536ad5cc6c244d6fbc1d88",
+      "bytes": 2068
+    },
+    {
+      "path": "app/services/jrc_domain_commands/scope.rb",
+      "baseSha256": null,
+      "sha256": "5caf5216178392c55b76f7c933fa6a688775c3669b9c3c4a0a71f7edb6bbc5e0",
+      "bytes": 1877
+    },
+    {
       "path": "app/services/jrc_flow_effects/apply.rb",
       "baseSha256": null,
-      "sha256": "fff8b36138de7960fa74abfcaeb18c734cdeb1d72c5c99f995dc2922d0ef5063",
-      "bytes": 4488
+      "sha256": "6973e4d9cb5689897b2698d9ebf942dcc9c6201a062186eae4bd62856a9f484b",
+      "bytes": 4910
     },
     {
       "path": "app/services/jrc_flow_effects/authority.rb",
@@ -260,8 +441,8 @@
     {
       "path": "app/services/jrc_flow_effects/request.rb",
       "baseSha256": null,
-      "sha256": "b93dd645c3d1c08877cfab1c334e161ed98ee6108b226ad362beed92d205efed",
-      "bytes": 2724
+      "sha256": "627b532e726df888f1b550814da9c908b224a2eae630d262e9999cbfd25c2665",
+      "bytes": 2950
     },
     {
       "path": "app/services/jrc_flow_effects/resources.rb",
@@ -468,10 +649,52 @@
       "bytes": 6147
     },
     {
+      "path": "app/services/jrc_relationship/batch_native_receipt.rb",
+      "baseSha256": null,
+      "sha256": "e7885141355631ec8a56d51a939428fc902dd242e2c957a0e7afcd501272cca0",
+      "bytes": 2755
+    },
+    {
+      "path": "app/services/jrc_relationship/batch_review_authority.rb",
+      "baseSha256": null,
+      "sha256": "b8fe764a7b92d4b6b70cfed10afb9806c5c8987a4db7d51334105125e56befe8",
+      "bytes": 1420
+    },
+    {
+      "path": "app/services/jrc_relationship/batch_review_plan.rb",
+      "baseSha256": null,
+      "sha256": "b604ce231d36bdaeb4791016cc454f6bae90edfcedc3e96d0ca82165626ad87f",
+      "bytes": 5642
+    },
+    {
+      "path": "app/services/jrc_relationship/cadence_plan.rb",
+      "baseSha256": null,
+      "sha256": "976fae1025de10881940b12de7542b6b117164ee843a33e5623fca540955e5da",
+      "bytes": 1953
+    },
+    {
       "path": "app/services/jrc_relationship/playbook_flow_webhook_delivery.rb",
       "baseSha256": "2d2cd239669d4dbd3b3393048a19f5fff5762f9d1e3418e1e77ffb40a74b265c",
       "sha256": "61431531c254823a485486ebfe889f5de6200ddadbe40a38781b7d582b5f608e",
       "bytes": 6180
+    },
+    {
+      "path": "app/services/jrc_relationship/playbooks.rb",
+      "baseSha256": "c200858771893ac2719c95dfdebf7bf911cd3b4d26d8edd4f5184d54fc63446e",
+      "sha256": "2294f03b97a4fbc6063e411657a5bdebd701d5efc27361c815dcf94c2aa26def",
+      "bytes": 10108
+    },
+    {
+      "path": "app/services/jrc_relationship/reviewed_cadence.rb",
+      "baseSha256": null,
+      "sha256": "dcb79a907383401d18f2df28177bae312fb4968f11152409953233dbd9687a0c",
+      "bytes": 6218
+    },
+    {
+      "path": "app/services/jrc_relationship/reviewed_portfolio_batch.rb",
+      "baseSha256": null,
+      "sha256": "37641cc9e0a164f9d40e0db86360c9b810169de54547e3b9c79c7b5166fcd41d",
+      "bytes": 6428
     },
     {
       "path": "config/initializers/jrc_flow_effect_filter.rb",
@@ -506,8 +729,8 @@
     {
       "path": "config/jrc_flow_ownership_guards.json",
       "baseSha256": null,
-      "sha256": "0d194895aea4a3d9c27e06e9d62ce76edc1b53d02f7851bcbf3be0286e0bee9d",
-      "bytes": 10730
+      "sha256": "da231b9ca8c44b56234f106aee2e8d5acd34caf41fa63787d5a69655db81a3f0",
+      "bytes": 11350
     },
     {
       "path": "config/puma.rb",
@@ -518,8 +741,8 @@
     {
       "path": "config/routes.rb",
       "baseSha256": "a00b0f9b8f9735ec0673eed1719ac5b5df16f8b19e24bbd20cb7bd2cfee38596",
-      "sha256": "f4ec0cf3a16ed4ce92d432b9594fc95dba335b6674d0b0a429b1d075cd62c7b8",
-      "bytes": 62121
+      "sha256": "35425836a070f749bb09f3b729047a4254adc31f81635025941d0f3104ca3534",
+      "bytes": 63099
     },
     {
       "path": "config/schedule.yml",
@@ -570,6 +793,24 @@
       "bytes": 2809
     },
     {
+      "path": "db/migrate/20261019120000_create_reviewed_relationship_batches.rb",
+      "baseSha256": null,
+      "sha256": "1a2e1ae60b5882450b524bd80298be1a2005aadb323562a2c6d35b45bee92aef",
+      "bytes": 4610
+    },
+    {
+      "path": "db/migrate/20261019130000_create_reviewed_relationship_cadences.rb",
+      "baseSha256": null,
+      "sha256": "eba319f4cdef6f34bc13a5b4cb5ff65e28062ae20b0436065a1bd7c426bc9c54",
+      "bytes": 4394
+    },
+    {
+      "path": "db/migrate/20261019140000_add_flow_domain_results.rb",
+      "baseSha256": null,
+      "sha256": "134719a1631fd6cd815cc37b26cf5a056b1d9b908e7a0498b375fc5cd70434f7",
+      "bytes": 1333
+    },
+    {
       "path": "deploy/jrc/compose.ownership-observer.yml",
       "baseSha256": null,
       "sha256": "5f81cc6b0ee373acc8fbbdc51df3aba2e1f758d3b98078f6bbafcbd2156f6b0c",
@@ -590,8 +831,8 @@
     {
       "path": "deploy/jrc/module-composition-input.json",
       "baseSha256": null,
-      "sha256": "92efcbead3479bb9f5199a7855b414759dc80a75e6acc4480af2c4c2021f5b70",
-      "bytes": 12497
+      "sha256": "f73270523de08250fa0daeb64bb4b8ebe766804e72b7afef0380a91dcdaad96f",
+      "bytes": 16314
     },
     {
       "path": "deploy/jrc/module-manifest.test.mjs",
@@ -626,8 +867,8 @@
     {
       "path": "public/jrc-flow-editor/EDITOR-BUILD-MANIFEST.json",
       "baseSha256": null,
-      "sha256": "a983ee84eb202a34115ae7812f2100c26e1a91bee04abba77c6fdcd09cf21934",
-      "bytes": 36464
+      "sha256": "44f89bdafc88c3ef1ba8b9e3011c0b0cfe70ae941438c71890865cb21779b4fe",
+      "bytes": 37039
     },
     {
       "path": "public/jrc-flow-editor/editor.css",
@@ -638,8 +879,8 @@
     {
       "path": "public/jrc-flow-editor/editor.js",
       "baseSha256": null,
-      "sha256": "afe9941b70adcc8892b5ca50cf9b8e1af64e6ce0d0d2073c2e758d19ebc70971",
-      "bytes": 896462
+      "sha256": "bfce628e20cae7354cb7797dd1bfefe76d1b323f526602aa275725b69767a6c1",
+      "bytes": 902736
     },
     {
       "path": "public/jrc-flow-editor/editor.js.LEGAL.txt",
@@ -684,6 +925,24 @@
       "bytes": 3540
     },
     {
+      "path": "spec/jobs/send_reply_job_nico_composition_spec.rb",
+      "baseSha256": null,
+      "sha256": "887e51d2fb05c381d12ed5952faef6c9c018b32afa6d12668f2632cc6ecb8eb2",
+      "bytes": 5995
+    },
+    {
+      "path": "spec/requests/api/v1/accounts/relationship/reviewed_batches_spec.rb",
+      "baseSha256": null,
+      "sha256": "8917397fe0109504ab66cd3d20ce0d3d2ea360b3860c459c81873884b446adb6",
+      "bytes": 4549
+    },
+    {
+      "path": "spec/requests/jrc_domain_commands_spec.rb",
+      "baseSha256": null,
+      "sha256": "7e72378f6aa53f6c1f12b52cce11bc3744f244bfeb842f302d0a18fa5cb906f6",
+      "bytes": 12374
+    },
+    {
       "path": "spec/requests/jrc_flow_effects_spec.rb",
       "baseSha256": null,
       "sha256": "cd74370853f1600d056f46be4d1d9af960203f28ca007f5d85d4296e5d1b3b48",
@@ -706,6 +965,12 @@
       "baseSha256": null,
       "sha256": "0e02d338fcda3ba60a2c5b06cadbdee57741c41a58b167192e51323970cdbf42",
       "bytes": 7945
+    },
+    {
+      "path": "spec/requests/jrc_history_import_spec.rb",
+      "baseSha256": null,
+      "sha256": "d56067d74c8202a12384bdb3d13bd1baec16f44a71cc42d2ea8e7cc1be5a2a50",
+      "bytes": 6478
     },
     {
       "path": "spec/services/jrc_flow_effects/concurrency_spec.rb",
@@ -750,10 +1015,46 @@
       "bytes": 5800
     },
     {
+      "path": "spec/services/jrc_nico/bounded_workflow_knowledge_spec.rb",
+      "baseSha256": null,
+      "sha256": "e6474f6c449e7b38f0b0f88656cfca00c6255c8ab0e92b1c83e190961eb7a2e0",
+      "bytes": 2754
+    },
+    {
+      "path": "spec/services/jrc_nico/broker_send_commit_gate_spec.rb",
+      "baseSha256": null,
+      "sha256": "fa26f7d0850cf565c066be9cc3f1190ac07426314afe287cc8fa2ed0e44fb3b5",
+      "bytes": 18237
+    },
+    {
       "path": "spec/services/jrc_relationship/playbook_flow_webhook_delivery_spec.rb",
       "baseSha256": "e95a4c2290930ad725e978ab8b219310b65f0944c5eb80be08c46cbc8290e52c",
       "sha256": "9a86b7b7e7eab5ddb7b0aea64d3d2b5ef6f2d1420ab3593c52b1a63b0716b4a0",
       "bytes": 13719
+    },
+    {
+      "path": "spec/services/jrc_relationship/reviewed_batch_concurrency_spec.rb",
+      "baseSha256": null,
+      "sha256": "e110203431fc5595e32f2bcebf2528cad01d2d4c443c70a56b53d352fca0ff31",
+      "bytes": 7936
+    },
+    {
+      "path": "spec/services/jrc_relationship/reviewed_cadence_spec.rb",
+      "baseSha256": null,
+      "sha256": "13de744e4be9a7cc0c9f53a647d8c7c2a3ed4c54cbfcef337aae0c25f7b90501",
+      "bytes": 6878
+    },
+    {
+      "path": "spec/services/jrc_relationship/reviewed_operations_upgrade_spec.rb",
+      "baseSha256": null,
+      "sha256": "18e927181a1bd1f90e606ddc6fb6f0b2b1f01f333a4bf994837a57df7f1cfd8b",
+      "bytes": 2116
+    },
+    {
+      "path": "spec/services/jrc_relationship/reviewed_portfolio_batch_spec.rb",
+      "baseSha256": null,
+      "sha256": "d3d196df4ae0297cb7ed25cbc2bff45b0aa94e09299ca35bc194d6ea4229e953",
+      "bytes": 9739
     },
     {
       "path": "spec/support/jrc_service_desk_concurrency.rb",

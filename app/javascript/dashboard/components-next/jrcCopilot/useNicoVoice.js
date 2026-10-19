@@ -10,6 +10,7 @@ export const useNicoVoice = ({
   inCall,
   context,
   canSubmit,
+  captureObserver,
 }) => {
   const supported = Boolean(
     navigator.mediaDevices?.getUserMedia && window.MediaRecorder
@@ -28,6 +29,7 @@ export const useNicoVoice = ({
   let request;
   let generation = 0;
   let speechGeneration = 0;
+  let captureCleanup;
 
   const cancelReview = () => {
     clearTimeout(reviewTimer);
@@ -35,6 +37,8 @@ export const useNicoVoice = ({
   };
   const release = () => {
     clearTimeout(timer);
+    captureCleanup?.();
+    captureCleanup = undefined;
     stream?.getTracks().forEach(track => track.stop());
     stream = undefined;
   };
@@ -154,6 +158,13 @@ export const useNicoVoice = ({
       recorder.start(1000);
       listening.value = true;
       requesting.value = false;
+      captureCleanup = captureObserver?.({
+        stream,
+        finish: () => {
+          if (current === generation && recorder?.state === 'recording')
+            recorder.stop();
+        },
+      });
       timer = setTimeout(
         () => recorder?.state === 'recording' && recorder.stop(),
         60000
@@ -185,7 +196,13 @@ export const useNicoVoice = ({
     };
     utterance.onend = finish;
     utterance.onerror = finish;
-    window.speechSynthesis.speak(utterance);
+    speaking.value = true;
+    try {
+      window.speechSynthesis.speak(utterance);
+    } catch {
+      finish();
+      error.value = 'speech_unavailable';
+    }
   };
   watch(speakingEnabled, value => {
     if (!value) stopSpeaking();

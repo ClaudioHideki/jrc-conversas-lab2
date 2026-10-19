@@ -471,7 +471,13 @@ Rails.application.routes.draw do
               end
             end
           end
+          get 'jrc_history_import/inboxes/:inbox_id', to: 'jrc_history_imports#capability'
+          post 'jrc_history_import/inboxes/:inbox_id/bootstrap', to: 'jrc_history_imports#bootstrap'
+          post 'conversations/:conversation_id/jrc_history_import', to: 'jrc_history_imports#create'
           get 'jrc_flow_effects/capabilities', to: 'jrc_flow_effects#capabilities'
+          get 'jrc_domain_commands/capabilities', to: 'jrc_domain_commands#capabilities'
+          post 'conversations/:conversation_id/jrc_domain_commands', to: 'jrc_domain_commands#create'
+          get 'conversations/:conversation_id/jrc_domain_commands/:operation_id', to: 'jrc_domain_commands#show'
           get 'conversations/:conversation_id/jrc_flow_effects/context', to: 'jrc_flow_effects#context'
           post 'conversations/:conversation_id/jrc_flow_effects', to: 'jrc_flow_effects#create'
           get 'conversations/:conversation_id/jrc_flow_effects/:operation_id', to: 'jrc_flow_effects#show'
@@ -538,6 +544,19 @@ Rails.application.routes.draw do
             patch 'records/:kind/:id', to: 'records#update'
             post 'records/:kind/:id/opportunity', to: 'records#opportunity'
             post 'portfolio/batch', to: 'portfolio#batch'
+            resources :reviewed_batches, only: [:create, :show] do
+              member do
+                post :approve
+                post :advance
+                post :cancel
+              end
+            end
+            resources :cadences, only: [:show] do
+              member do
+                post :advance
+                post :cancel
+              end
+            end
             post 'actions/batch', to: 'records#batch'
             post 'surveys/:id/deliver', to: 'records#deliver_survey'
             get 'surveys/:id/link', to: 'records#survey_link'

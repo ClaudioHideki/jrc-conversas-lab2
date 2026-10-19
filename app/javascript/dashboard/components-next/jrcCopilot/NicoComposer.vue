@@ -32,6 +32,39 @@ defineExpose({ focus: () => input.value?.focus({ preventScroll: true }) });
 <template>
   <footer class="shrink-0 space-y-2 border-t border-n-weak bg-n-solid-2 p-3">
     <div
+      v-if="voice.continuousSupported"
+      class="space-y-1 rounded-xl border border-n-weak p-2 text-xs"
+    >
+      <button
+        v-if="!voice.continuousActive.value"
+        type="button"
+        class="font-semibold text-n-blue-11"
+        :disabled="!voice.continuousCanStart.value"
+        @click="voice.startConversation"
+      >
+        {{ t('JRC_NICO.UX.VOICE_CONVERSATION_START') }}
+      </button>
+      <template v-else>
+        <p role="status">
+          {{
+            t('JRC_NICO.UX.VOICE_CONVERSATION_ACTIVE', {
+              turns: voice.continuousTurns.value,
+            })
+          }}
+        </p>
+        <button
+          type="button"
+          class="font-semibold text-n-blue-11"
+          @click="voice.stopConversation"
+        >
+          {{ t('JRC_NICO.UX.VOICE_CONVERSATION_STOP') }}
+        </button>
+      </template>
+      <p class="text-n-slate-11">
+        {{ t('JRC_NICO.UX.VOICE_CONVERSATION_HINT') }}
+      </p>
+    </div>
+    <div
       v-if="voice.reviewing.value"
       class="space-y-2 rounded-xl border border-n-amber-6 bg-n-amber-2 p-2.5 text-xs text-n-amber-11"
       data-testid="nico-voice-review"

@@ -16,6 +16,20 @@ class JrcRelationship::Playbooks
     assignment.with_lock { execute!(assignment, trigger, source_key, playbook_id, flow_approvals.stringify_keys) }
   end
 
+  # A reviewed cadence supplies one immutable native step, never a public send.
+  def apply_scheduled_step!(assignment:, step:, key:, starts_at:)
+    @context.assignment(assignment.id, write: true)
+    unless JrcRelationship::PlaybookSteps.valid?([step]) && step['kind'] != 'flow'
+      raise ArgumentError, 'Cadence requires a finite native step; public Flow needs separate approval'
+    end
+
+    native_step!(assignment, step, key, { trigger: 'cadence', start: starts_at })
+    record = native_result(assignment, step, key)
+    raise Pundit::NotAuthorizedError unless record
+
+    { 'resource_type' => record.class.name, 'resource_id' => record.id, 'activity_id' => record.try(:activity_id) }
+  end
+
   private
 
   def validate_handoff!(assignment, trigger)

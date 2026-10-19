@@ -35,6 +35,7 @@ class Api::V1::Accounts::JrcFlowEffectsController < Api::V1::Accounts::BaseContr
       conversation = authority.account.conversations.find_by!(display_id: JrcFlowEffects::Request.integer(params[:conversation_id]))
       row = JrcFlowEffectReceipt.find_by!(account_id: authority.account.id, conversation_id: conversation.id,
                                           organization_id: params[:organization_id], operation_id: params[:operation_id])
+      raise ArgumentError, 'domain_endpoint_required' if row.operation == 'domain'
       row.verify!(conversation: conversation, user: authority.user, proof: params[:dispatch_proof], request_hash: row.request_hash)
     end
     render json: receipt.protocol_receipt
@@ -44,6 +45,7 @@ class Api::V1::Accounts::JrcFlowEffectsController < Api::V1::Accounts::BaseContr
     raise ArgumentError, 'request_bound' if request.raw_post.bytesize > 16_384
 
     input = params.permit(*JrcFlowEffects::Request::KEYS).to_h
+    raise ArgumentError, 'domain_endpoint_required' if input['operation'] == 'domain'
     receipt = JrcFlowEffects::Apply.new(account: Current.account, user: @resource, access_token: @access_token)
                                    .call(params[:conversation_id], input)
     render json: receipt.protocol_receipt

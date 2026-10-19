@@ -67,6 +67,22 @@ export default {
     }),
   portfolioBatch: (accountId, ids, fields) =>
     axios.post(`${base(accountId)}/portfolio/batch`, { ids, ...fields }),
+  cadence: (accountId, id, options) =>
+    axios.get(`${base(accountId)}/cadences/${Number(id)}`, options),
+  advanceCadence: (accountId, id, options) =>
+    axios.post(`${base(accountId)}/cadences/${Number(id)}/advance`, {}, options),
+  cancelCadence: (accountId, id, options) =>
+    axios.post(`${base(accountId)}/cadences/${Number(id)}/cancel`, {}, options),
+  previewPortfolioBatch: (accountId, fields, options) =>
+    axios.post(`${base(accountId)}/reviewed_batches`, fields, options),
+  portfolioBatchReview: (accountId, id, options) =>
+    axios.get(`${base(accountId)}/reviewed_batches/${Number(id)}`, options),
+  approvePortfolioBatch: (accountId, id, digest, options) =>
+    axios.post(`${base(accountId)}/reviewed_batches/${Number(id)}/approve`, { digest }, options),
+  advancePortfolioBatch: (accountId, id, options) =>
+    axios.post(`${base(accountId)}/reviewed_batches/${Number(id)}/advance`, {}, options),
+  cancelPortfolioBatch: (accountId, id, options) =>
+    axios.post(`${base(accountId)}/reviewed_batches/${Number(id)}/cancel`, {}, options),
   surveyLink: (accountId, id) =>
     axios.get(`${base(accountId)}/surveys/${Number(id)}/link`),
   surveyVoicePreview: (accountId, id, options) =>

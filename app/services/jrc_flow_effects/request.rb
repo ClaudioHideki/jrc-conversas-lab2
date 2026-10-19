@@ -6,7 +6,7 @@ class JrcFlowEffects::Request
   SHA = /\A[0-9a-f]{64}\z/
   MAX_SAFE_INTEGER = 9_007_199_254_740_991
   KEYS = %w[organization_id operation_id dispatch_proof inbox_id remote_contact_id expected_control_revision operation
-            resource_id resource_revision value_json].freeze
+            resource_id resource_revision value_json integration_id].freeze
 
   def self.integer(value, zero: false)
     pattern = zero ? /\A(?:0|[1-9][0-9]*)\z/ : /\A[1-9][0-9]*\z/
@@ -17,10 +17,12 @@ class JrcFlowEffects::Request
 
   def self.validate(input)
     raise ArgumentError, 'identity' unless %w[organization_id operation_id dispatch_proof].all? { |key| UUID.match?(input[key].to_s) }
-    raise ArgumentError, 'operation' unless %w[tag attribute note resolve].include?(input['operation'])
+    raise ArgumentError, 'operation' unless %w[tag attribute note resolve domain].include?(input['operation'])
 
     validate_scope(input)
     validate_resource(input)
+    return JrcDomainCommands::Request.parse(input['value_json']) if input['operation'] == 'domain'
+
     scalar(input['value_json'])
   end
 
@@ -59,11 +61,13 @@ class JrcFlowEffects::Request
   end
 
   def self.digest(input, account_id:, conversation_id:)
-    Digest::SHA256.hexdigest([
+    material = [
       PROTOCOL, input.fetch('organization_id'), input.fetch('operation_id'), account_id.to_s,
       input.fetch('inbox_id').to_s, conversation_id.to_s, input.fetch('remote_contact_id').to_s,
       input.fetch('expected_control_revision').to_s, input.fetch('operation'), input['resource_id'].to_s,
       input['resource_revision'].to_s, Digest::SHA256.hexdigest(input.fetch('value_json'))
-    ].join("\n"))
+    ]
+    material << input.fetch('integration_id') if input['operation'] == 'domain'
+    Digest::SHA256.hexdigest(material.join("\n"))
   end
 end

@@ -22,7 +22,7 @@ RSpec.describe JrcNico::BrokerSendCommitGate do
   end
 
   around do |example|
-    disposable = %w[jrc_nico_gate_test jrc_nico_broker_candidate_test]
+    disposable = %w[jrc_nico_gate_test jrc_nico_broker_candidate_test jrc_jornada_candidate_test]
     database = ENV.fetch('POSTGRES_DATABASE', nil)
     enabled = Rails.env.test? && ENV['JRC_NICO_GATE_CONCURRENCY'] == '1' && disposable.include?(database) &&
               ActiveRecord::Base.connection_db_config.database == database &&
@@ -47,7 +47,9 @@ RSpec.describe JrcNico::BrokerSendCommitGate do
     previous_timeout = connection.select_value('SHOW lock_timeout')
     connection.execute("SET lock_timeout='2s'")
     begin
-      connection.execute("TRUNCATE #{tables.map { |name| connection.quote_table_name(name) }.join(', ')} RESTART IDENTITY CASCADE")
+      # The complete application-table set is explicit. Keep monotonic IDs and
+      # avoid resetting hundreds of unrelated sequences for every example.
+      connection.execute("TRUNCATE #{tables.map { |name| connection.quote_table_name(name) }.join(', ')}")
     rescue ActiveRecord::LockWaitTimeout
       activity = connection.select_all('SELECT pid,state,wait_event_type FROM pg_stat_activity WHERE datname=current_database()')
       raise "Fixture cleanup was blocked; disposable DB sessions: #{activity.to_a.inspect}"

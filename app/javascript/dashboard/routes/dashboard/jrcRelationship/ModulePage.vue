@@ -22,6 +22,7 @@ import HealthScorePanel from './HealthScorePanel.vue';
 import RenewalPipeline from './RenewalPipeline.vue';
 import MetricDrilldownPanel from './MetricDrilldownPanel.vue';
 import CompanyPicker from '../jrcCustomers/components/CompanyPicker.vue';
+import ReviewedPortfolioBatchPanel from './ReviewedPortfolioBatchPanel.vue';
 import { fixedSurveyScope as normalizeFixedSurveyScope } from './fixedSurveyScope';
 import {
   STATES,
@@ -50,6 +51,7 @@ const error = ref('');
 const editing = ref(null);
 const selectedCustomer = ref(null);
 const selected = ref([]);
+const portfolioReviewProposal = ref(null);
 const newAssignment = ref(false);
 const surveyLink = ref('');
 const surveyDelivery = ref(null);
@@ -97,6 +99,8 @@ const filters = reactive({
 });
 const portfolioOperation = reactive({
   operation: 'activity',
+  conversation_id: '',
+  starts_at: '',
   owner_id: '',
   title: '',
   due_at: '',
@@ -297,15 +301,15 @@ const completeBatch = () =>
       due_at: batch.due_at ? new Date(batch.due_at).toISOString() : undefined,
     })
   );
-const updatePortfolioBatch = () =>
-  mutate(() =>
-    API.portfolioBatch(route.params.accountId, selected.value, {
-      ...portfolioOperation,
-      due_at: portfolioOperation.due_at
-        ? new Date(portfolioOperation.due_at).toISOString()
-        : undefined,
-    })
-  );
+const updatePortfolioBatch = () => {
+  portfolioReviewProposal.value = {
+    ...portfolioOperation, ids: [...selected.value], request_id: crypto.randomUUID(),
+    due_at: portfolioOperation.due_at ? new Date(portfolioOperation.due_at).toISOString() : undefined,
+    starts_at: portfolioOperation.starts_at ? new Date(portfolioOperation.starts_at).toISOString() : undefined,
+  };
+};
+watch([selected, portfolioOperation], () => { portfolioReviewProposal.value = null; }, { deep: true });
+watch([() => route.params.accountId, () => store.getters.getCurrentUserID, () => props.screen], () => { portfolioReviewProposal.value = null; });
 const exportPortfolio = async (history = false) => {
   const version = generation;
   error.value = '';
@@ -551,6 +555,8 @@ watch(
     });
     Object.assign(portfolioOperation, {
       operation: 'assign',
+      conversation_id: '',
+      starts_at: '',
       owner_id: '',
       title: '',
       due_at: '',
@@ -1205,6 +1211,9 @@ const money = value => formatMoney(value, metadata.value?.formatting);
                 <option value="playbook">
                   {{ t('RELATIONSHIP.APPLY_PLAYBOOK') }}
                 </option>
+                <option value="cadence">
+                  {{ t('RELATIONSHIP.REVIEWED_BATCH.CADENCE') }}
+                </option>
               </select></label
             >
             <label v-if="portfolioOperation.operation === 'assign'"
@@ -1239,7 +1248,7 @@ const money = value => formatMoney(value, metadata.value?.formatting);
                   :class="inputClass"
               /></label>
             </template>
-            <label v-if="portfolioOperation.operation === 'playbook'"
+            <label v-if="['playbook', 'cadence'].includes(portfolioOperation.operation)"
               >{{ t('RELATIONSHIP.SCREENS.playbooks')
               }}<select
                 v-model="portfolioOperation.playbook_id"
@@ -1256,15 +1265,32 @@ const money = value => formatMoney(value, metadata.value?.formatting);
                 </option>
               </select></label
             >
+            <template v-if="portfolioOperation.operation === 'cadence'">
+              <label>{{ t('RELATIONSHIP.REVIEWED_BATCH.CONVERSATION') }}
+                <input v-model="portfolioOperation.conversation_id" type="number" min="1" required :class="inputClass" />
+              </label>
+              <label>{{ t('RELATIONSHIP.REVIEWED_BATCH.STARTS_AT') }}
+                <input v-model="portfolioOperation.starts_at" type="datetime-local" required :class="inputClass" />
+              </label>
+              <p>{{ t('RELATIONSHIP.REVIEWED_BATCH.CADENCE_HELP') }}</p>
+            </template>
             <button
               type="submit"
               :class="buttonClass"
-              :disabled="saving || selected.length > 50"
+              :disabled="saving || selected.length > 50 || (portfolioOperation.operation === 'cadence' && selected.length !== 1)"
             >
-              {{ t('RELATIONSHIP.SAVE') }}
+              {{ t('RELATIONSHIP.REVIEWED_BATCH.PREVIEW') }}
             </button>
           </div>
         </form>
+        <ReviewedPortfolioBatchPanel
+          v-if="portfolioScreen && metadata.can_manage"
+          :key="`${route.params.accountId}:${store.getters.getCurrentUserID}`"
+          :account-id="route.params.accountId"
+          :actor-id="store.getters.getCurrentUserID"
+          :proposal="portfolioReviewProposal"
+          @updated="load"
+        />
         <template v-if="!portfolioScreen && rows.length">
           <button
             v-if="

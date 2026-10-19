@@ -20,6 +20,10 @@
       "answered": "Resposta informativa; nenhuma nova ação registrada"
     },
     "UX": {
+      "VOICE_CONVERSATION_START": "Conversar por voz com o NICO",
+      "VOICE_CONVERSATION_STOP": "Encerrar conversa por voz",
+      "VOICE_CONVERSATION_ACTIVE": "Conversa por voz ativa · {turns}/12 pedidos",
+      "VOICE_CONVERSATION_HINT": "Até 5 minutos ou 12 pedidos, com revisão da frase. Ações continuam exigindo confirmação. Este microfone é do operador e não atende chamadas WhatsApp.",
       "QUICK_TITLE": "Quick NICO",
       "FULL_TITLE": "Full Copilot · NICO",
       "EXPAND": "Abrir Full Copilot",
