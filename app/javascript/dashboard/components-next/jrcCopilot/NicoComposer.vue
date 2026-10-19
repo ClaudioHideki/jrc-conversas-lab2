@@ -11,6 +11,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'send']);
 const { t } = useI18n();
 const input = ref(null);
+const voiceOptionsOpen = ref(false);
 const edit = async () => {
   props.voice.cancelReview();
   await nextTick();
@@ -31,46 +32,27 @@ defineExpose({ focus: () => input.value?.focus({ preventScroll: true }) });
 
 <template>
   <footer class="shrink-0 space-y-2 border-t border-n-weak bg-n-solid-2 p-3">
-    <div
-      v-if="voice.continuousSupported"
-      class="space-y-1 rounded-xl border border-n-weak p-2 text-xs"
+    <section
+      v-if="voiceOptionsOpen"
+      data-testid="nico-voice-options"
+      class="space-y-2 rounded-xl border border-n-weak p-3 text-xs text-n-slate-11"
     >
-      <button
-        v-if="!voice.continuousActive.value"
-        type="button"
-        class="font-semibold text-n-blue-11"
-        :disabled="!voice.continuousCanStart.value"
-        @click="voice.startConversation"
-      >
-        {{ t('JRC_NICO.UX.VOICE_CONVERSATION_START') }}
-      </button>
-      <template v-else>
-        <p role="status">
-          {{
-            t('JRC_NICO.UX.VOICE_CONVERSATION_ACTIVE', {
-              turns: voice.continuousTurns.value,
-            })
-          }}
-        </p>
-        <button
-          type="button"
-          class="font-semibold text-n-blue-11"
-          @click="voice.stopConversation"
-        >
-          {{ t('JRC_NICO.UX.VOICE_CONVERSATION_STOP') }}
-        </button>
-      </template>
-      <p class="text-n-slate-11">
+      <h3 class="font-semibold text-n-slate-12">
+        {{ t('JRC_NICO.CHAT.VOICE_OPTIONS') }}
+      </h3>
+      <p>{{ t('JRC_NICO.UX.VOICE_HINT') }}</p>
+      <p v-if="voice.continuousSupported">
         {{ t('JRC_NICO.UX.VOICE_CONVERSATION_HINT') }}
       </p>
-    </div>
+      <p>{{ t('JRC_NICO.CHAT.VOICE_SCOPE') }}</p>
+    </section>
     <div
       v-if="voice.reviewing.value"
-      class="space-y-2 rounded-xl border border-n-amber-6 bg-n-amber-2 p-2.5 text-xs text-n-amber-11"
+      class="space-y-2 rounded-xl bg-n-amber-2 p-3 text-xs text-n-amber-11"
       data-testid="nico-voice-review"
     >
-      <p>{{ t('JRC_NICO.UX.AUTO_SEND_REVIEW') }}</p>
-      <div class="flex flex-wrap gap-3">
+      <p>{{ t('JRC_NICO.CHAT.REVIEW_TRANSCRIPT') }}</p>
+      <div class="flex gap-3">
         <button type="button" class="font-semibold underline" @click="edit">
           {{ t('JRC_NICO.UX.EDIT_TRANSCRIPT') }}
         </button>
@@ -79,19 +61,22 @@ defineExpose({ focus: () => input.value?.focus({ preventScroll: true }) });
         </button>
       </div>
     </div>
-    <form class="space-y-2" @submit.prevent="emit('send')">
+    <form
+      class="space-y-2 rounded-2xl border border-n-weak bg-n-alpha-1 p-2 focus-within:ring-2 focus-within:ring-n-blue-7"
+      @submit.prevent="emit('send')"
+    >
       <textarea
         ref="input"
         :value="modelValue"
-        :aria-label="t('JRC_NICO.OPERATOR.INPUT')"
-        :placeholder="t('JRC_NICO.UX.INPUT_HINT')"
+        :aria-label="t('JRC_NICO.CHAT.INPUT')"
+        :placeholder="t('JRC_NICO.CHAT.INPUT')"
         maxlength="4000"
         rows="2"
-        class="block w-full min-w-0 resize-none rounded-xl border border-n-weak bg-n-alpha-1 p-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-n-blue-7"
+        class="block w-full min-w-0 resize-none border-0 bg-transparent p-2 text-sm text-n-slate-12 focus:outline-none focus:ring-0"
         @input="update"
         @keydown.enter.exact.prevent="emit('send')"
       />
-      <div class="flex items-center gap-2">
+      <div class="flex flex-wrap items-center gap-1">
         <button
           type="button"
           :disabled="
@@ -101,17 +86,18 @@ defineExpose({ focus: () => input.value?.focus({ preventScroll: true }) });
             voice.transcribing.value ||
             voice.requesting.value
           "
-          class="grid size-11 shrink-0 place-items-center rounded-full text-white shadow-sm focus-visible:ring-2 focus-visible:ring-n-blue-7 disabled:opacity-40"
+          class="grid size-10 shrink-0 place-items-center rounded-full focus-visible:ring-2 focus-visible:ring-n-blue-7 disabled:opacity-40"
           :class="
             voice.listening.value
-              ? 'bg-n-ruby-9 motion-safe:animate-pulse'
-              : 'bg-n-blue-9'
+              ? 'bg-n-ruby-9 text-white motion-safe:animate-pulse'
+              : 'text-n-slate-11 hover:bg-n-alpha-2'
           "
           :aria-label="
             voice.listening.value
               ? t('JRC_NICO.OPERATOR.STOP_VOICE')
-              : t('JRC_NICO.OPERATOR.VOICE')
+              : t('JRC_NICO.CHAT.DICTATE')
           "
+          :title="t('JRC_NICO.CHAT.DICTATE')"
           :aria-pressed="voice.listening.value"
           @click="voice.start"
         >
@@ -121,43 +107,98 @@ defineExpose({ focus: () => input.value?.focus({ preventScroll: true }) });
             aria-hidden="true"
           />
         </button>
-        <p class="min-w-0 flex-1 text-[11px] leading-relaxed text-n-slate-11">
+        <button
+          v-if="voice.continuousSupported"
+          type="button"
+          :disabled="
+            !voice.continuousActive.value && !voice.continuousCanStart.value
+          "
+          class="flex h-10 items-center gap-1.5 rounded-full px-3 text-xs font-semibold disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-n-blue-7"
+          :class="
+            voice.continuousActive.value
+              ? 'bg-n-ruby-3 text-n-ruby-11'
+              : 'bg-n-blue-3 text-n-blue-11'
+          "
+          :aria-label="
+            voice.continuousActive.value
+              ? t('JRC_NICO.CHAT.END_VOICE')
+              : t('JRC_NICO.CHAT.START_VOICE')
+          "
+          :aria-pressed="voice.continuousActive.value"
+          @click="
+            voice.continuousActive.value
+              ? voice.stopConversation()
+              : voice.startConversation()
+          "
+        >
+          <span
+            class="size-4"
+            :class="
+              voice.continuousActive.value
+                ? 'i-lucide-square'
+                : 'i-lucide-audio-lines'
+            "
+            aria-hidden="true"
+          />
           {{
-            inCall
-              ? t('JRC_NICO.UX.CALL_PRIORITY')
-              : voice.listening.value
-                ? t('JRC_NICO.UX.RECORDING_HINT')
-                : voice.supported
-                  ? t('JRC_NICO.UX.VOICE_HINT')
-                  : t('JRC_NICO.OPERATOR.VOICE_UNAVAILABLE')
+            voice.continuousActive.value
+              ? t('JRC_NICO.CHAT.END_VOICE_SHORT')
+              : t('JRC_NICO.CHAT.VOICE')
           }}
-        </p>
+        </button>
+        <div class="flex-1" />
+        <button
+          type="button"
+          :disabled="inCall"
+          class="grid size-10 shrink-0 place-items-center rounded-full text-n-slate-11 hover:bg-n-alpha-2 focus-visible:ring-2 focus-visible:ring-n-blue-7 disabled:opacity-40"
+          :class="
+            voice.speakingEnabled.value ? 'bg-n-blue-3 text-n-blue-11' : ''
+          "
+          :aria-label="t('JRC_NICO.CHAT.READ_REPLIES')"
+          :title="t('JRC_NICO.CHAT.READ_REPLIES')"
+          :aria-pressed="voice.speakingEnabled.value"
+          @click="voice.setSpeakingEnabled(!voice.speakingEnabled.value)"
+        >
+          <span
+            :class="
+              voice.speakingEnabled.value
+                ? 'i-lucide-volume-2'
+                : 'i-lucide-volume-x'
+            "
+            class="size-4"
+            aria-hidden="true"
+          />
+        </button>
+        <button
+          type="button"
+          class="grid size-10 shrink-0 place-items-center rounded-full text-n-slate-11 hover:bg-n-alpha-2 focus-visible:ring-2 focus-visible:ring-n-blue-7"
+          :aria-label="t('JRC_NICO.CHAT.VOICE_OPTIONS')"
+          :title="t('JRC_NICO.CHAT.VOICE_OPTIONS')"
+          :aria-expanded="voiceOptionsOpen"
+          @click="voiceOptionsOpen = !voiceOptionsOpen"
+        >
+          <span class="i-lucide-ellipsis size-4" aria-hidden="true" />
+        </button>
         <button
           type="submit"
           :disabled="busy || !modelValue.trim()"
-          class="grid size-10 shrink-0 place-items-center rounded-xl bg-n-blue-9 text-white focus-visible:ring-2 focus-visible:ring-n-blue-7 disabled:opacity-40"
+          class="grid size-10 shrink-0 place-items-center rounded-full bg-n-blue-9 text-white focus-visible:ring-2 focus-visible:ring-n-blue-7 disabled:opacity-40"
           :aria-label="t('JRC_NICO.OPERATOR.SEND')"
         >
-          <span class="i-lucide-send size-4" aria-hidden="true" />
+          <span class="i-lucide-arrow-up size-5" aria-hidden="true" />
         </button>
       </div>
     </form>
-    <div
-      class="flex flex-wrap items-center justify-between gap-2 text-[11px] text-n-slate-11"
-    >
-      <label class="flex items-center gap-2">
-        <input
-          :checked="voice.speakingEnabled.value"
-          type="checkbox"
-          :disabled="inCall"
-          @change="voice.setSpeakingEnabled($event.target.checked)"
-        />
-        {{ t('JRC_NICO.OPERATOR.SPEAK') }}
-      </label>
+    <p v-if="inCall" class="text-xs text-n-slate-11">
+      {{ t('JRC_NICO.UX.CALL_PRIORITY') }}
+    </p>
+    <p v-else-if="!voice.supported" class="text-xs text-n-slate-11">
+      {{ t('JRC_NICO.OPERATOR.VOICE_UNAVAILABLE') }}
+    </p>
+    <div class="flex flex-wrap gap-3 text-xs text-n-blue-11">
       <button
         v-if="voice.speaking.value"
         type="button"
-        class="font-semibold text-n-blue-11"
         @click="voice.stopSpeaking"
       >
         {{ t('JRC_NICO.UX.STOP_SPEAKING') }}
@@ -169,7 +210,6 @@ defineExpose({ focus: () => input.value?.focus({ preventScroll: true }) });
           voice.transcribing.value
         "
         type="button"
-        class="font-semibold text-n-blue-11"
         @click="voice.stop"
       >
         {{ t('JRC_NICO.UX.CANCEL_RECORDING') }}

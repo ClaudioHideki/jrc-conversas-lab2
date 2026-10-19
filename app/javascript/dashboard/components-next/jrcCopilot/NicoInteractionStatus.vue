@@ -5,7 +5,7 @@ import { nicoTimeline } from './nicoInteractionState';
 
 const props = defineProps({
   state: { type: String, default: 'idle' },
-  showTimeline: { type: Boolean, default: true },
+  showTimeline: { type: Boolean, default: false },
 });
 const { t } = useI18n();
 const timeline = computed(() =>
@@ -39,9 +39,10 @@ const tone = computed(() => {
 
 <template>
   <section
+    v-if="!['idle', 'answered', 'success', 'cancelled'].includes(state)"
     data-testid="nico-interaction-status"
     :data-state="state"
-    class="rounded-xl px-3 py-2.5"
+    class="rounded-lg px-3 py-2"
     :class="tone"
     role="status"
     aria-live="polite"
@@ -62,7 +63,7 @@ const tone = computed(() => {
         aria-hidden="true"
       />
       <p class="text-xs font-semibold">
-        {{ t('JRC_NICO.UX.PHASES.' + state) }}
+        {{ t('JRC_NICO.CHAT.PHASES.' + state) }}
       </p>
     </div>
     <ol

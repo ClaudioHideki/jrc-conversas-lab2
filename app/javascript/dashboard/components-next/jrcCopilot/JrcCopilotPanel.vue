@@ -22,7 +22,7 @@ import JrcCopilotQuickPanel from './JrcCopilotQuickPanel.vue';
 import NicoComposer from './NicoComposer.vue';
 import NicoInteractionStatus from './NicoInteractionStatus.vue';
 import NicoWorkflowSummary from './NicoWorkflowSummary.vue';
-import NicoCapacitySummary from './NicoCapacitySummary.vue';
+import NicoChatMessages from './NicoChatMessages.vue';
 import NicoAnalysisProvenance from './NicoAnalysisProvenance.vue';
 import { nicoInteractionState } from './nicoInteractionState';
 import NicoKnowledgePanel from './NicoKnowledgePanel.vue';
@@ -98,6 +98,26 @@ const scrollToCurrent = () => {
 const panelRoot = ref(null);
 const delegateForm = ref(false);
 const knowledgeOpen = ref(false);
+const secondaryOpen = ref(false);
+const secondaryPanel = ref(null);
+const delegationPanel = ref(null);
+const knowledgePanel = ref(null);
+const focusPanel = async panel => {
+  await nextTick();
+  panel.value?.scrollIntoView({ block: 'nearest' });
+  const control = panel.value?.querySelector('input, textarea, select, button');
+  (control || panel.value)?.focus();
+};
+const toggleKnowledge = async () => {
+  knowledgeOpen.value = !knowledgeOpen.value;
+  if (knowledgeOpen.value) await focusPanel(knowledgePanel);
+};
+const openOptions = async () => {
+  secondaryOpen.value = true;
+  open();
+  await nextTick();
+  secondaryPanel.value?.scrollIntoView({ block: 'nearest' });
+};
 const choices = ref([]);
 const selected = ref([]);
 const objective = ref('');
@@ -171,9 +191,6 @@ const activeCommand = computed(() =>
         command => command.source_notice_id === focusedNoticeId.value
       )
     : latest.value
-);
-const hasOperation = computed(() =>
-  Boolean((busy.value || activeCommand.value) && !voice.error.value)
 );
 const interactionState = computed(() =>
   nicoInteractionState({
@@ -393,6 +410,7 @@ const prepareDelegation = async () => {
   } catch {
     if (current === version) error.value = label('LOAD_ERROR');
   }
+  if (current === version) await focusPanel(delegationPanel);
 };
 const submitDelegation = async () => {
   await perform(() =>
@@ -514,6 +532,8 @@ watch(
     automaticAttempts.clear();
     delegateForm.value = false;
     knowledgeOpen.value = false;
+    secondaryOpen.value = false;
+    expandedHistory.value = false;
     state.value = emptyState();
     suggestionCount.value = 0;
     await load();
@@ -586,11 +606,11 @@ onBeforeUnmount(() => {
     :in-call="inCall"
     :context-label="contextLabel"
     :interaction-state="interactionState"
-    :has-operation="hasOperation"
+    :messages="activeCommand?.result?.broker_send ? [] : messages"
+    :has-earlier-messages="state.messages.length > 8"
     :reply="quickReply"
     :error="error || syncError"
     :workflow="state.workflow"
-    :capacity="state.capacity"
     :needs-review="
       pending.some(command =>
         ['awaiting_confirmation', 'browser_pending'].includes(command.status)
@@ -601,6 +621,8 @@ onBeforeUnmount(() => {
     @expand="open"
     @close="close"
     @notice="openNotice(unreadNotices[0].id)"
+    @history="expandedHistory = !expandedHistory"
+    @options="openOptions"
   />
   <aside
     v-if="fullVisible"
@@ -624,28 +646,19 @@ onBeforeUnmount(() => {
     >
       <img :src="avatarUrl" alt="" class="size-9 rounded-full" />
       <div class="min-w-0 flex-1">
-        <h2 class="text-sm font-semibold">{{ t('JRC_NICO.UX.FULL_TITLE') }}</h2>
+        <h2 class="text-sm font-semibold">{{ t('JRC_NICO.CHAT.TITLE') }}</h2>
         <p class="truncate text-xs text-n-slate-11">
           {{ contextLabel }}
         </p>
       </div>
       <button
-        v-if="state.tools.some(tool => tool.name === 'delegate_conversations')"
         type="button"
         class="rounded p-2 hover:bg-n-alpha-3"
-        :aria-label="label('DELEGATE')"
-        @click="prepareDelegation"
+        :aria-label="t('JRC_NICO.CHAT.OPTIONS')"
+        :aria-expanded="secondaryOpen"
+        @click="secondaryOpen ? (secondaryOpen = false) : openOptions()"
       >
-        <span class="i-lucide-bot size-5" />
-      </button>
-      <button
-        v-if="state.can_manage_knowledge"
-        type="button"
-        class="rounded p-2 hover:bg-n-alpha-3"
-        :aria-label="label('KNOWLEDGE')"
-        @click="knowledgeOpen = !knowledgeOpen"
-      >
-        <span class="i-lucide-book-open size-5" />
+        <span class="i-lucide-ellipsis size-5" aria-hidden="true" />
       </button>
       <button
         v-if="!embedded"
@@ -657,13 +670,19 @@ onBeforeUnmount(() => {
         <span class="i-lucide-chevron-down size-5" />
       </button>
     </header>
-    <div class="shrink-0 px-3 pt-3">
-      <NicoCapacitySummary :capacity="state.capacity" />
-      <NicoInteractionStatus
-        :state="interactionState"
-        :show-timeline="hasOperation"
+    <div
+      v-if="
+        !['idle', 'answered', 'success', 'cancelled'].includes(
+          interactionState
+        ) || ['partial', 'failed'].includes(state.workflow?.state)
+      "
+      class="shrink-0 px-3 pt-3"
+    >
+      <NicoInteractionStatus :state="interactionState" />
+      <NicoWorkflowSummary
+        v-if="['partial', 'failed'].includes(state.workflow?.state)"
+        :workflow="state.workflow"
       />
-      <NicoWorkflowSummary :workflow="state.workflow" />
     </div>
     <div
       ref="scroller"
@@ -678,6 +697,8 @@ onBeforeUnmount(() => {
       </p>
       <form
         v-if="delegateForm"
+        ref="delegationPanel"
+        tabindex="-1"
         class="space-y-3 rounded border border-n-weak p-3"
         @submit.prevent="submitDelegation"
       >
@@ -755,13 +776,16 @@ onBeforeUnmount(() => {
           </button>
         </div>
       </form>
-      <NicoKnowledgePanel
+      <div
         v-if="knowledgeOpen && state.can_manage_knowledge"
-        :account-id="accountId"
-      />
+        ref="knowledgePanel"
+        tabindex="-1"
+      >
+        <NicoKnowledgePanel :account-id="accountId" />
+      </div>
       <h3 class="sr-only">{{ t('JRC_NICO.UX.CHAT_TITLE') }}</h3>
       <p v-if="!state.messages.length" class="text-sm text-n-slate-11">
-        {{ label('GREETING') }}
+        {{ t('JRC_NICO.CHAT.GREETING') }}
       </p>
       <button
         v-if="state.messages.length > 8"
@@ -771,22 +795,7 @@ onBeforeUnmount(() => {
       >
         {{ label('HISTORY') }}
       </button>
-      <div
-        v-for="(message, index) in messages"
-        :key="`${message.at}-${index}`"
-        :data-nico-last-message="
-          index === messages.length - 1 ? 'true' : undefined
-        "
-        class="flex"
-        :class="message.role === 'user' ? 'justify-end' : ''"
-      >
-        <p
-          class="max-w-full whitespace-pre-wrap break-words rounded-xl px-3 py-2 text-sm"
-          :class="message.role === 'user' ? 'bg-n-blue-3' : 'bg-n-alpha-2'"
-        >
-          {{ message.content }}
-        </p>
-      </div>
+      <NicoChatMessages :messages="messages" />
       <article
         v-for="command in pending"
         :key="command.id"
@@ -982,14 +991,40 @@ onBeforeUnmount(() => {
           {{ t('JRC_NICO.UX.DOWNLOAD_REPORT') }}
         </button>
       </section>
-      <details
+      <section
+        v-if="secondaryOpen || focusedNoticeId"
+        ref="secondaryPanel"
+        data-testid="nico-secondary-options"
         class="rounded-xl border border-n-weak p-3"
-        :open="Boolean(focusedNoticeId)"
       >
-        <summary class="cursor-pointer text-xs font-semibold text-n-slate-11">
-          {{ t('JRC_NICO.UX.SECONDARY') }}
-        </summary>
+        <h3 class="text-xs font-semibold text-n-slate-11">
+          {{ t('JRC_NICO.CHAT.OPTIONS') }}
+        </h3>
         <div class="mt-3 space-y-3">
+          <button
+            v-if="
+              state.tools.some(tool => tool.name === 'delegate_conversations')
+            "
+            type="button"
+            class="text-xs text-n-blue-11"
+            :aria-label="label('DELEGATE')"
+            @click="prepareDelegation"
+          >
+            {{ label('DELEGATE') }}
+          </button>
+          <button
+            v-if="state.can_manage_knowledge"
+            type="button"
+            class="text-xs text-n-blue-11"
+            :aria-label="label('KNOWLEDGE')"
+            @click="toggleKnowledge"
+          >
+            {{ label('KNOWLEDGE') }}
+          </button>
+          <NicoWorkflowSummary
+            v-if="!['partial', 'failed'].includes(state.workflow?.state)"
+            :workflow="state.workflow"
+          />
           <section
             v-if="notices.length"
             class="space-y-2 rounded border border-n-weak p-2"
@@ -1134,7 +1169,7 @@ onBeforeUnmount(() => {
             </button>
           </details>
         </div>
-      </details>
+      </section>
     </div>
     <NicoComposer
       v-model="input"

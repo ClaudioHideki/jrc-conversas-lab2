@@ -1,5 +1,36 @@
 {
   "JRC_NICO": {
+    "CHAT": {
+      "TITLE": "NICO",
+      "YOU": "Você",
+      "INPUT": "Pergunte ou peça uma tarefa…",
+      "GREETING": "Como posso ajudar?",
+      "EXPAND": "Ampliar conversa",
+      "CLOSE": "Fechar conversa com NICO",
+      "OPTIONS": "Mais opções do NICO",
+      "REVIEW": "Revisar ação",
+      "DICTATE": "Ditar mensagem",
+      "START_VOICE": "Conversar com o NICO",
+      "END_VOICE": "Encerrar conversa por voz",
+      "END_VOICE_SHORT": "Encerrar",
+      "VOICE": "Voz",
+      "READ_REPLIES": "Ouvir respostas",
+      "VOICE_OPTIONS": "Opções de voz",
+      "VOICE_SCOPE": "Você fala com o assistente nesta conversa privada. Ligações para contatos são ações separadas.",
+      "REVIEW_TRANSCRIPT": "Confira a frase. Ela será enviada ao NICO em 1,5 segundo. Você pode editar ou cancelar.",
+      "PHASES": {
+        "requesting": "Permita o acesso ao microfone…",
+        "listening": "Ouvindo…",
+        "transcribing": "Transcrevendo…",
+        "reviewing": "Confira sua mensagem",
+        "submitting": "Pensando…",
+        "working": "Executando…",
+        "confirmation": "Sua confirmação é necessária",
+        "error": "Não foi possível concluir",
+        "unknown": "Resultado ainda não confirmado",
+        "speaking": "Respondendo…"
+      }
+    },
     "WORKFLOW": {
       "TITLE": "Etapas deste pedido",
       "COUNT": "{count} ação(ões) com execução registrada",

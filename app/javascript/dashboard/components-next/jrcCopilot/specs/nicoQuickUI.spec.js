@@ -37,7 +37,9 @@ vi.mock('../NicoConversationPanel.vue', () => ({
   default: { template: '<div />' },
 }));
 vi.mock('../NicoKnowledgePanel.vue', () => ({
-  default: { template: '<div />' },
+  default: {
+    template: '<button type="button">Consultar conhecimento</button>',
+  },
 }));
 vi.mock('dashboard/api/jrcNicoOperations', () => ({
   default: {
@@ -184,6 +186,119 @@ describe('Quick NICO and Full Copilot use one operator session', () => {
     });
     await flushPromises();
   });
+  it.each(['quick', 'full'])(
+    'keeps the %s chat free of token counters and execution banners',
+    async view => {
+      snapshot.capacity = { token_limit: 1000000, remaining_tokens: 189157 };
+      snapshot.messages = [
+        { role: 'user', content: 'Como converso por voz com você?' },
+        {
+          role: 'assistant',
+          content: 'Use o botão de voz para conversar comigo.',
+        },
+      ];
+      snapshot.workflow = { state: 'answered', completed_count: 0, steps: [] };
+      snapshot.commands = [{ id: 15, status: 'succeeded', tool: null }];
+      if (view === 'quick') ui.openQuick();
+      else ui.open();
+      await flushPromises();
+      expect(wrapper.text()).toContain(snapshot.messages[0].content);
+      expect(wrapper.text()).toContain(snapshot.messages[1].content);
+      expect(wrapper.text()).not.toContain('189,157');
+      expect(
+        wrapper.find('[data-testid="nico-interaction-status"]').exists()
+      ).toBe(false);
+      expect(
+        wrapper.find('[data-testid="nico-workflow-summary"]').exists()
+      ).toBe(false);
+      expect(wrapper.get('textarea').attributes('placeholder')).toBe(
+        'Pergunte ou peça uma tarefa…'
+      );
+      expect(api.ask).not.toHaveBeenCalled();
+      expect(api.command).not.toHaveBeenCalled();
+    }
+  );
+
+  it('opens contextual options explicitly instead of placing suggestions below every answer', async () => {
+    snapshot.suggestions = [{ conversation_id: 90, name: 'Contato de teste' }];
+    ui.open();
+    await flushPromises();
+    expect(
+      wrapper.find('[data-testid="nico-secondary-options"]').exists()
+    ).toBe(false);
+    await wrapper.get('[aria-label="Mais opções do NICO"]').trigger('click');
+    expect(
+      wrapper.get('[data-testid="nico-secondary-options"]').text()
+    ).toContain('Contato de teste');
+    expect(wrapper.text()).not.toContain('tokens disponíveis');
+    await wrapper.get('[aria-label="Mais opções do NICO"]').trigger('click');
+    expect(
+      wrapper.find('[data-testid="nico-secondary-options"]').exists()
+    ).toBe(false);
+  });
+
+  it('keeps voice help out of the chat until the operator opens it', async () => {
+    ui.openQuick();
+    await flushPromises();
+    expect(wrapper.text()).not.toContain(translations.JRC_NICO.UX.VOICE_HINT);
+    await wrapper.get('[aria-label="Opções de voz"]').trigger('click');
+    expect(wrapper.get('[data-testid="nico-voice-options"]').text()).toContain(
+      translations.JRC_NICO.UX.VOICE_HINT
+    );
+    expect(navigator.mediaDevices.getUserMedia).not.toHaveBeenCalled();
+  });
+
+  it('closes secondary options when changing company', async () => {
+    ui.open();
+    await flushPromises();
+    await wrapper.get('[aria-label="Mais opções do NICO"]').trigger('click');
+    expect(
+      wrapper.find('[data-testid="nico-secondary-options"]').exists()
+    ).toBe(true);
+    route.params.accountId = '2';
+    await flushPromises();
+    expect(
+      wrapper.find('[data-testid="nico-secondary-options"]').exists()
+    ).toBe(false);
+  });
+
+  it('brings knowledge controls into view from options after a long conversation', async () => {
+    snapshot.can_manage_knowledge = true;
+    snapshot.messages = Array.from({ length: 12 }, (_, index) => ({
+      role: 'assistant',
+      content: `Mensagem de teste ${index}`,
+    }));
+    ui.open();
+    await flushPromises();
+    await wrapper.get('[aria-label="Mais opções do NICO"]').trigger('click');
+    await wrapper
+      .get(`[aria-label="${translations.JRC_NICO.OPERATOR.KNOWLEDGE}"]`)
+      .trigger('click');
+    await flushPromises();
+    const control = wrapper
+      .findAll('button')
+      .find(button => button.text() === 'Consultar conhecimento');
+    expect(document.activeElement).toBe(control.element);
+  });
+
+  it('brings delegation controls into view without starting the delegation', async () => {
+    snapshot.tools.push({ name: 'delegate_conversations' });
+    api.conversations.mockResolvedValueOnce({
+      data: [{ id: 14, name: 'Contato de teste' }],
+    });
+    ui.open();
+    await flushPromises();
+    await wrapper.get('[aria-label="Mais opções do NICO"]').trigger('click');
+    await wrapper
+      .get(`[aria-label="${translations.JRC_NICO.OPERATOR.DELEGATE}"]`)
+      .trigger('click');
+    await flushPromises();
+    expect(wrapper.get('form').element.contains(document.activeElement)).toBe(
+      true
+    );
+    expect(api.command).not.toHaveBeenCalled();
+  });
+
   it('keeps the existing notice session and quick panel when docked in the global rail', async () => {
     const launcher = wrapper.findComponent(JrcCopilotLauncher);
     const reads = api.notices.mock.calls.length;
@@ -221,12 +336,12 @@ describe('Quick NICO and Full Copilot use one operator session', () => {
     await flushPromises();
     expect(wrapper.text()).toContain(message);
     expect(api.command).not.toHaveBeenCalled();
-    await wrapper.get('[aria-label="Abrir Full Copilot"]').trigger('click');
+    await wrapper.get('[aria-label="Ampliar conversa"]').trigger('click');
     await flushPromises();
     expect(wrapper.text()).toContain(message);
   });
 
-  it('shows effective account capacity in Quick and Full and resets it when changing account', async () => {
+  it('keeps account capacity out of both chat views while preserving account changes', async () => {
     snapshot.capacity = {
       token_limit: 2000000,
       remaining_tokens: 69945,
@@ -240,11 +355,11 @@ describe('Quick NICO and Full Copilot use one operator session', () => {
     };
     ui.openQuick();
     await flushPromises();
-    expect(wrapper.text()).toContain('2,000,000');
-    expect(wrapper.text()).toContain('69,945');
-    await wrapper.get('[aria-label="Abrir Full Copilot"]').trigger('click');
+    expect(wrapper.text()).not.toContain('2,000,000');
+    expect(wrapper.text()).not.toContain('69,945');
+    await wrapper.get('[aria-label="Ampliar conversa"]').trigger('click');
     await flushPromises();
-    expect(wrapper.text()).toContain('2,000,000');
+    expect(wrapper.text()).not.toContain('2,000,000');
     snapshot = { ...snapshot, capacity: null };
     route.params.accountId = '2';
     await nextTick();
@@ -460,7 +575,7 @@ describe('Quick NICO and Full Copilot use one operator session', () => {
       wrapper.get('[data-testid="nico-workflow-summary"]').text()
     ).toContain('Envio recusado');
     expect(wrapper.text()).toContain(translations.JRC_NICO.WORKFLOW.partial);
-    await wrapper.get('[aria-label="Abrir Full Copilot"]').trigger('click');
+    await wrapper.get('[aria-label="Ampliar conversa"]').trigger('click');
     await flushPromises();
     expect(
       wrapper.get('[data-testid="nico-workflow-summary"]').text()
@@ -490,7 +605,7 @@ describe('Quick NICO and Full Copilot use one operator session', () => {
     await flushPromises();
     await wrapper.get('textarea').setValue('Minha tarefa ainda não enviada');
     expect(wrapper.text()).toContain('Contexto: Marina');
-    await wrapper.get('[aria-label="Abrir Full Copilot"]').trigger('click');
+    await wrapper.get('[aria-label="Ampliar conversa"]').trigger('click');
     await flushPromises();
     expect(ui.mode.value).toBe('full');
     expect(wrapper.find('#nico-quick-panel').exists()).toBe(false);
@@ -520,7 +635,7 @@ describe('Quick NICO and Full Copilot use one operator session', () => {
   it('closing Quick with Escape cancels its review and returns focus', async () => {
     ui.openQuick();
     await flushPromises();
-    await wrapper.get('[aria-label="Falar com NICO"]').trigger('click');
+    await wrapper.get('[aria-label="Ditar mensagem"]').trigger('click');
     await flushPromises();
     await wrapper.get('[aria-label="Parar escuta"]').trigger('click');
     await flushPromises();
@@ -538,7 +653,7 @@ describe('Quick NICO and Full Copilot use one operator session', () => {
   it('auto submits a voice request once but only explicit confirmation executes a mutation', async () => {
     ui.openQuick();
     await flushPromises();
-    await wrapper.get('[aria-label="Falar com NICO"]').trigger('click');
+    await wrapper.get('[aria-label="Ditar mensagem"]').trigger('click');
     await flushPromises();
     expect(
       wrapper
@@ -571,23 +686,21 @@ describe('Quick NICO and Full Copilot use one operator session', () => {
         .get('[data-testid="nico-interaction-status"]')
         .attributes('data-state')
     ).toBe('confirmation');
-    await wrapper.get('[aria-label="Abrir Full Copilot"]').trigger('click');
+    await wrapper.get('[aria-label="Ampliar conversa"]').trigger('click');
     await flushPromises();
     expect(wrapper.text()).toContain('Pessoa de teste');
     await wrapper.get('[data-nico-command] button').trigger('click');
     await flushPromises();
     expect(api.command).toHaveBeenCalledExactlyOnceWith(1, 101, 'confirm');
     expect(
-      wrapper
-        .get('[data-testid="nico-interaction-status"]')
-        .attributes('data-state')
-    ).toBe('success');
+      wrapper.find('[data-testid="nico-interaction-status"]').exists()
+    ).toBe(false);
   });
 
   it('manual send during voice review cannot be followed by a duplicate auto ask', async () => {
     ui.openQuick();
     await flushPromises();
-    await wrapper.get('[aria-label="Falar com NICO"]').trigger('click');
+    await wrapper.get('[aria-label="Ditar mensagem"]').trigger('click');
     await flushPromises();
     await wrapper.get('[aria-label="Parar escuta"]').trigger('click');
     await flushPromises();
@@ -601,7 +714,7 @@ describe('Quick NICO and Full Copilot use one operator session', () => {
   it('editing the transcript cancels auto send and uses the edited manual text', async () => {
     ui.openQuick();
     await flushPromises();
-    await wrapper.get('[aria-label="Falar com NICO"]').trigger('click');
+    await wrapper.get('[aria-label="Ditar mensagem"]').trigger('click');
     await flushPromises();
     await wrapper.get('[aria-label="Parar escuta"]').trigger('click');
     await flushPromises();
@@ -618,7 +731,7 @@ describe('Quick NICO and Full Copilot use one operator session', () => {
   it('the review cancel button prevents auto send while keeping the draft', async () => {
     ui.openQuick();
     await flushPromises();
-    await wrapper.get('[aria-label="Falar com NICO"]').trigger('click');
+    await wrapper.get('[aria-label="Ditar mensagem"]').trigger('click');
     await flushPromises();
     await wrapper.get('[aria-label="Parar escuta"]').trigger('click');
     await flushPromises();
@@ -636,7 +749,7 @@ describe('Quick NICO and Full Copilot use one operator session', () => {
   it('switching account clears the voice draft and prevents a stale request', async () => {
     ui.openQuick();
     await flushPromises();
-    await wrapper.get('[aria-label="Falar com NICO"]').trigger('click');
+    await wrapper.get('[aria-label="Ditar mensagem"]').trigger('click');
     await flushPromises();
     await wrapper.get('[aria-label="Parar escuta"]').trigger('click');
     await flushPromises();
@@ -649,17 +762,17 @@ describe('Quick NICO and Full Copilot use one operator session', () => {
   it('an incoming call stops capture and disables the microphone in both views', async () => {
     ui.openQuick();
     await flushPromises();
-    await wrapper.get('[aria-label="Falar com NICO"]').trigger('click');
+    await wrapper.get('[aria-label="Ditar mensagem"]').trigger('click');
     await flushPromises();
     calls.hasIncomingCall = true;
     await nextTick();
     expect(track.stop).toHaveBeenCalledOnce();
     expect(api.transcribe).not.toHaveBeenCalled();
-    expect(wrapper.get('[aria-label="Falar com NICO"]').element.disabled).toBe(
+    expect(wrapper.get('[aria-label="Ditar mensagem"]').element.disabled).toBe(
       true
     );
-    await wrapper.get('[aria-label="Abrir Full Copilot"]').trigger('click');
-    expect(wrapper.get('[aria-label="Falar com NICO"]').element.disabled).toBe(
+    await wrapper.get('[aria-label="Ampliar conversa"]').trigger('click');
+    expect(wrapper.get('[aria-label="Ditar mensagem"]').element.disabled).toBe(
       true
     );
   });
@@ -757,10 +870,8 @@ describe('Quick NICO and Full Copilot use one operator session', () => {
     await flushPromises();
     expect(wrapper.text()).toContain('Localizei Marina.');
     expect(
-      wrapper
-        .get('[data-testid="nico-interaction-status"]')
-        .attributes('data-state')
-    ).toBe('success');
+      wrapper.find('[data-testid="nico-interaction-status"]').exists()
+    ).toBe(false);
     expect(api.command).not.toHaveBeenCalled();
   });
 
@@ -778,7 +889,7 @@ describe('Quick NICO and Full Copilot use one operator session', () => {
     await wrapper.get('form').trigger('submit');
     await flushPromises();
     expect(wrapper.text()).toContain('Qual é o nome do contato?');
-    expect(wrapper.text()).toContain('Resposta pronta para você');
+    expect(wrapper.text()).not.toContain('Resposta pronta para você');
     expect(wrapper.text()).not.toContain('Pedido concluído');
     expect(api.command).not.toHaveBeenCalled();
   });
@@ -789,7 +900,7 @@ describe('Quick NICO and Full Copilot use one operator session', () => {
     );
     ui.openQuick();
     await flushPromises();
-    await wrapper.get('[aria-label="Falar com NICO"]').trigger('click');
+    await wrapper.get('[aria-label="Ditar mensagem"]').trigger('click');
     await flushPromises();
     expect(
       wrapper
@@ -811,7 +922,7 @@ describe('Quick NICO and Full Copilot use one operator session', () => {
   it('all listening animations are gated by reduced-motion support', async () => {
     ui.openQuick();
     await flushPromises();
-    await wrapper.get('[aria-label="Falar com NICO"]').trigger('click');
+    await wrapper.get('[aria-label="Ditar mensagem"]').trigger('click');
     await flushPromises();
     const animations = wrapper
       .findAll('*')
@@ -911,7 +1022,7 @@ describe('Quick NICO and Full Copilot use one operator session', () => {
     };
     reply({ data: snapshot });
     await flushPromises();
-    await wrapper.get('[aria-label="Abrir Full Copilot"]').trigger('click');
+    await wrapper.get('[aria-label="Ampliar conversa"]').trigger('click');
     await flushPromises();
     let complete;
     api.command.mockImplementationOnce(
@@ -977,7 +1088,7 @@ describe('Quick NICO and Full Copilot use one operator session', () => {
     );
     ui.openQuick();
     await flushPromises();
-    await wrapper.get('[aria-label="Falar com NICO"]').trigger('click');
+    await wrapper.get('[aria-label="Ditar mensagem"]').trigger('click');
     await flushPromises();
     await wrapper.get('[aria-label="Parar escuta"]').trigger('click');
     await flushPromises();
@@ -1000,11 +1111,11 @@ describe('Quick NICO and Full Copilot use one operator session', () => {
   it('expanding during voice review retains one timer and the same request context', async () => {
     ui.openQuick();
     await flushPromises();
-    await wrapper.get('[aria-label="Falar com NICO"]').trigger('click');
+    await wrapper.get('[aria-label="Ditar mensagem"]').trigger('click');
     await flushPromises();
     await wrapper.get('[aria-label="Parar escuta"]').trigger('click');
     await flushPromises();
-    await wrapper.get('[aria-label="Abrir Full Copilot"]').trigger('click');
+    await wrapper.get('[aria-label="Ampliar conversa"]').trigger('click');
     await flushPromises();
     expect(wrapper.find('[data-testid="nico-voice-review"]').exists()).toBe(
       true

@@ -13,7 +13,7 @@ const tone = status => {
 
 <template>
   <section
-    v-if="workflow"
+    v-if="workflow && workflow.state !== 'answered'"
     class="mt-2 rounded-lg border border-n-weak p-2 text-xs text-n-slate-12"
     aria-live="polite"
     data-testid="nico-workflow-summary"

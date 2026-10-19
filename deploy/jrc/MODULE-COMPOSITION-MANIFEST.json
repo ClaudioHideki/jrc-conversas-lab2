@@ -4,7 +4,7 @@
   "provenanceSourceSha": "80f7305ad0eac310d661071856f67a7e048881de",
   "encoding": "Git text payloads with LF line endings",
   "installedProof": false,
-  "compositionCount": 174,
+  "compositionCount": 180,
   "editorStatus": {
     "sourceRepository": "ClaudioHideki/BrokerJRCIA",
     "sourceSha": "42848bf68f9c07fdc6e102de37ccb4a845e463db",
@@ -87,14 +87,50 @@
     {
       "path": "app/javascript/dashboard/components-next/jrcCopilot/JrcCopilotPanel.vue",
       "baseSha256": "c8e6559825c8adaebdea8fd4556747ef074332ef75aa89e737b574f5f4560b19",
-      "sha256": "22558a6165031a0a47138f8e6bba537b8ad40a6eae42c8637fb1d3c075267dc2",
-      "bytes": 37922
+      "sha256": "3a4b2a290dce693ceed8dfe9085096d6db9ee72a2d5e208a537a10944d35748d",
+      "bytes": 39138
+    },
+    {
+      "path": "app/javascript/dashboard/components-next/jrcCopilot/JrcCopilotQuickPanel.vue",
+      "baseSha256": "07ee59180278d2e31c8db1d6cb992a176f8e814a06a87202f6ac7e0a69175bb4",
+      "sha256": "425a1589a9d273ca9871ddac7430c356d3bf01b0ea7f2d6af0b00b29a75a847d",
+      "bytes": 4966
+    },
+    {
+      "path": "app/javascript/dashboard/components-next/jrcCopilot/NicoChatMessages.vue",
+      "baseSha256": null,
+      "sha256": "030e6d7de0c53f25b14fa6f7c3afcac8e0368321f0f85c634b461103efac7ef1",
+      "bytes": 1118
     },
     {
       "path": "app/javascript/dashboard/components-next/jrcCopilot/NicoComposer.vue",
       "baseSha256": "45c73a9e2ef513b265ed7a78ec7f694ae9ebc7a2eb48f6e6edde0e0f5fdbd2ff",
-      "sha256": "34e3d8791860b9f5bec7427a8169edc992288a73450c063068c46ae97b95301f",
-      "bytes": 6013
+      "sha256": "db66a967c9a0cfb414b5b3e09efc17a040c07f014d75260ce82d2f7c5067537f",
+      "bytes": 7771
+    },
+    {
+      "path": "app/javascript/dashboard/components-next/jrcCopilot/NicoInteractionStatus.vue",
+      "baseSha256": "968b9dfdaf36e1299c853aff06a5a38b6f7a6ce36f4dd672c64974513d2dfdff",
+      "sha256": "ca58f394596409f25798bd7b066082e53a4b4c7698d0bc7811dc4f411c61cb48",
+      "bytes": 2495
+    },
+    {
+      "path": "app/javascript/dashboard/components-next/jrcCopilot/NicoWorkflowSummary.vue",
+      "baseSha256": "72735e93670f0256a5ba5c152382622290be061ffbc35f1f6d1e17f6b76552cf",
+      "sha256": "aaac3705f13f59bfbdbd2a56dcdff0c365d21062bb89bcb41a81e5cc545a17be",
+      "bytes": 1562
+    },
+    {
+      "path": "app/javascript/dashboard/components-next/jrcCopilot/specs/nicoComposerUX.spec.js",
+      "baseSha256": null,
+      "sha256": "d37ac30d338bd542a65cb1566dba192b0f11151f181404962d6da06f54644495",
+      "bytes": 2648
+    },
+    {
+      "path": "app/javascript/dashboard/components-next/jrcCopilot/specs/nicoQuickUI.spec.js",
+      "baseSha256": "fcf4e8a3c8a103023337792eeb909e6123eedad61389d857e52b72b5005925fb",
+      "sha256": "adcd4ed50beb484540292031ca39933881b69605cb1c0683597b37e4a9d33ba9",
+      "bytes": 39602
     },
     {
       "path": "app/javascript/dashboard/components-next/jrcCopilot/specs/nicoVoiceConversation.spec.js",
@@ -123,8 +159,8 @@
     {
       "path": "app/javascript/dashboard/i18n/locale/en/jrcNico.json",
       "baseSha256": "66619881bc818ddf4e8c699821b6a1456098e1156c55936751a1d69cdc9280c8",
-      "sha256": "e1a4f9d69e8a3f6511c5e60920be7e48bb91091eec809ff4e569ff8df808998e",
-      "bytes": 17969
+      "sha256": "fc2f296ad1ad4dc08858fa0647c73485ca9d0eaf75d0c6b312a7c6f63fbe0d4b",
+      "bytes": 19275
     },
     {
       "path": "app/javascript/dashboard/i18n/locale/en/relationship.json",
@@ -831,8 +867,8 @@
     {
       "path": "deploy/jrc/module-composition-input.json",
       "baseSha256": null,
-      "sha256": "f73270523de08250fa0daeb64bb4b8ebe766804e72b7afef0380a91dcdaad96f",
-      "bytes": 16314
+      "sha256": "4fef81298fe437c576fa4845a67ff8952fb065594e23a4b809689fd37f833235",
+      "bytes": 16819
     },
     {
       "path": "deploy/jrc/module-manifest.test.mjs",
