@@ -1,5 +1,8 @@
+// @vitest-environment jsdom
 import { ref } from 'vue';
 import { mount } from '@vue/test-utils';
+import { createI18n } from 'vue-i18n';
+import translations from 'dashboard/i18n/locale/en/jrcNico.json';
 import NicoComposer from '../NicoComposer.vue';
 
 describe('NICO chat voice controls', () => {
@@ -26,7 +29,18 @@ describe('NICO chat voice controls', () => {
       stopConversation: vi.fn(),
       setSpeakingEnabled: vi.fn(),
     };
-    wrapper = mount(NicoComposer, { props: { voice } });
+    wrapper = mount(NicoComposer, {
+      props: { voice },
+      global: {
+        plugins: [
+          createI18n({
+            legacy: false,
+            locale: 'en',
+            messages: { en: translations },
+          }),
+        ],
+      },
+    });
   });
   afterEach(() => wrapper.unmount());
 

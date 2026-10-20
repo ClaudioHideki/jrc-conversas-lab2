@@ -62,7 +62,7 @@ jobs:
       - name: Interface NICO com dependencias congeladas
         run: |
           pnpm install --frozen-lockfile
-          pnpm exec vitest run --config vitest.nico.config.ts --reporter=json --outputFile=/tmp/nico-broker-vitest.json
+          pnpm exec vitest run --config vitest.nico.config.ts --reporter=default --reporter=json --outputFile=/tmp/nico-broker-vitest.json
           pnpm exec eslint app/javascript/dashboard/components-next/jrcCopilot/JrcCopilotPanel.vue app/javascript/dashboard/components-next/jrcCopilot/NicoAnalysisProvenance.vue app/javascript/dashboard/components-next/jrcCopilot/specs/nicoQuickUI.spec.js
           node -e 'const r=require("/tmp/nico-broker-vitest.json");if(!r.success||r.numFailedTests||r.numPendingTests||r.numTotalTests<83)process.exit(1)'
       - name: Mapa Customer360 e troca de Account
