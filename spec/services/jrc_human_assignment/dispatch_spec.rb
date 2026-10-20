@@ -101,7 +101,8 @@ RSpec.describe JrcHumanAssignment::Dispatch do
     expect(AutoAssignment::AssignmentService.new(inbox: inbox).perform_bulk_assignment).to eq(0)
   end
 
-  it 'preserves native assignment in an inbox outside the selected URA inboxes' do
+  it 'preserves native legacy assignment in an inbox outside the selected URA inboxes' do
+    account.disable_features!('assignment_v2')
     account.update!(custom_attributes: account.custom_attributes.deep_merge(
       'jrc_human_assignment' => { 'inbox_ids' => [inbox.id] }
     ))
@@ -109,6 +110,17 @@ RSpec.describe JrcHumanAssignment::Dispatch do
     create(:inbox_member, inbox: unrelated, user: agent)
     arrival = create(:conversation, account: account, inbox: unrelated, status: :open)
     expect(arrival.reload.assignee_id).to eq(agent.id)
+  end
+
+  it 'preserves native queued assignment V2 outside the selected URA inboxes' do
+    account.enable_features!('assignment_v2')
+    unrelated = create(:inbox, account: account, enable_auto_assignment: true)
+    create(:inbox_member, inbox: unrelated, user: agent)
+    arrival = create(:conversation, account: account, inbox: unrelated, status: :open)
+    expect(arrival.reload.assignee_id).to be_nil
+    expect(AutoAssignment::AssignmentService.new(inbox: unrelated).perform_bulk_assignment).to eq(1)
+    expect(arrival.reload.assignee_id).to eq(agent.id)
+    expect(conversation.reload.assignee_id).to be_nil
   end
 
   it 'continues beyond a page of unavailable teams instead of starving another inbox' do
