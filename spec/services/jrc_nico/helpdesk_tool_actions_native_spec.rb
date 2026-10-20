@@ -39,8 +39,21 @@ RSpec.describe JrcNico::HelpdeskToolActions do
     expect(incident.tickets.pluck(:id).sort).to eq([ticket.id, other.id].sort)
     expect(result[:resources]).to include(['JrcServiceDesk::Incident', incident.id], ['JrcServiceDesk::Ticket', other.id])
     sd_membership.update!(active: false)
+    expect(JrcNico::DomainAccess.authorize_resource!(access, 'JrcServiceDesk::Incident', incident.id)).to eq(incident)
+    sd_account_user.update!(role: :agent)
     expect { JrcNico::DomainAccess.authorize_resource!(access, 'JrcServiceDesk::Incident', incident.id) }
       .to raise_error(Pundit::NotAuthorizedError)
+  end
+
+  it 'preserves native administrator reads without granting automatic Helpdesk execution' do
+    sd_as_admin!
+    record = ticket
+    sd_membership.update!(active: false)
+
+    expect(JrcNico::DomainAccess.new(access).ticket(record.id)).to eq(record)
+    expect(JrcNico::Helpdesk::Context.new(sd_account_user).tickets).not_to include(record)
+    expect { JrcNico::Helpdesk::Context.new(sd_account_user).ticket(record.id) }
+      .to raise_error(ActiveRecord::RecordNotFound)
   end
 
   it 'rejects a foreign child ticket without an incident or partial link' do

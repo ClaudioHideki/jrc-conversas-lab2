@@ -2,7 +2,7 @@ name: NICO e Broker - candidato coordenado
 
 on:
   push:
-    branches: [main, codex/nico-broker-coordenado-20261015, codex/nico-jornada-candidato-20261016]
+    branches: [main, codex/nico-broker-coordenado-20261015, codex/nico-jornada-candidato-20261016, codex/nico-chat-ux-20261019]
   workflow_dispatch:
 
 permissions:
@@ -48,7 +48,7 @@ jobs:
         run: |
           case "$GITHUB_REF" in
             refs/heads/codex/nico-broker-coordenado-20261015) baseline=b58e093dd3a32fe97829a4566660b83ee48b9eca ;;
-            refs/heads/main|refs/heads/codex/nico-jornada-candidato-20261016) baseline=98a4be7714be41d33bf9ff52b254ebb773864769 ;;
+            refs/heads/main|refs/heads/codex/nico-jornada-candidato-20261016|refs/heads/codex/nico-chat-ux-20261019) baseline=98a4be7714be41d33bf9ff52b254ebb773864769 ;;
             *) echo 'Branch fora das candidatas autorizadas'; exit 1 ;;
           esac
           git merge-base --is-ancestor "$baseline" HEAD
@@ -70,6 +70,10 @@ jobs:
           pnpm exec vitest run app/javascript/dashboard/routes/dashboard/jrcCustomers/components/RelationshipMapPanel.spec.js app/javascript/dashboard/routes/dashboard/jrcCustomers/useCustomerMaster.spec.js --maxWorkers=1 --minWorkers=1 --reporter=json --outputFile=/tmp/customer-relations-vitest.json
           pnpm exec eslint app/javascript/dashboard/routes/dashboard/jrcCustomers/components/RelationshipMapPanel.vue app/javascript/dashboard/routes/dashboard/jrcCustomers/components/RelationshipMapPanel.spec.js
           node -e 'const r=require("/tmp/customer-relations-vitest.json");if(!r.success||r.numFailedTests||r.numPendingTests||r.numTotalTests<8)process.exit(1)'
+      - name: Configuracao administrativa da distribuicao humana
+        run: |
+          pnpm exec vitest run app/javascript/dashboard/components-next/jrc-broker/__tests__/ConnectionsPage.spec.js app/javascript/dashboard/components-next/jrc-broker/specs/HumanAssignmentPolicy.spec.js --maxWorkers=1 --minWorkers=1
+          pnpm exec eslint app/javascript/dashboard/components-next/jrc-broker/HumanAssignmentPolicy.vue app/javascript/dashboard/components-next/jrcCopilot/nicoAsyncCompletion.js
       - name: Dependencias nativas dos testes Rails
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libpq-dev libvips libvips-dev
       - uses: ruby/setup-ruby@v1
@@ -113,6 +117,23 @@ jobs:
           import json
           result = json.load(open('/tmp/bounded-knowledge-rspec.json'))['summary']
           assert result['failure_count'] == 0 and result['pending_count'] == 0 and result['example_count'] >= 44
+          PYTHON
+      - name: Planejamento assincrono e distribuicao entre caixas
+        env:
+          JRC_SD_CONCURRENCY: '1'
+          DB_POOL_SIZE: '10'
+        run: |
+          bundle exec rspec spec/requests/jrc_nico_async_planning_spec.rb \
+            spec/requests/jrc_human_assignment_spec.rb \
+            spec/services/jrc_human_assignment \
+            spec/services/jrc_nico/runtime_connection_spec.rb \
+            spec/services/jrc_nico/helpdesk_tool_actions_native_spec.rb \
+            --format progress --format json --out /tmp/nico-stability-rspec.json
+          python3 - <<'PYTHON'
+          import json
+          result = json.load(open('/tmp/nico-stability-rspec.json'))['summary']
+          assert result['failure_count'] == 0 and result['pending_count'] == 0
+          assert result['example_count'] >= 30
           PYTHON
       - name: Voz interna do operador e cancelamento de contexto
         run: |

@@ -8,6 +8,7 @@ class Api::V1::Accounts::JrcNico::OperationsController < Api::V1::Accounts::Base
   rescue_from JrcBroker::Client::Error, with: :broker_unavailable
 
   def show
+    @operator.session.reload
     delegations = JrcNico::Delegation.where(account: Current.account, user: Current.user).order(updated_at: :desc).limit(30)
                                     .select { |d| @operator.access.policy(d.conversation).show? }
     visible = @operator.access.conversations
@@ -57,7 +58,7 @@ class Api::V1::Accounts::JrcNico::OperationsController < Api::V1::Accounts::Base
   def ask
     input = params.permit(:message, :request_id, :conversation_id, :route_name)
     @operator.ask(message: input.fetch(:message), request_id: input.fetch(:request_id), conversation_id: input[:conversation_id],
-                  route_name: input[:route_name])
+                  route_name: input[:route_name], async: true)
     show
   end
 

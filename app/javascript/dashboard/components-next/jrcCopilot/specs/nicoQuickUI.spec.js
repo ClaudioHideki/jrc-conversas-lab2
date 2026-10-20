@@ -186,6 +186,57 @@ describe('Quick NICO and Full Copilot use one operator session', () => {
     });
     await flushPromises();
   });
+  it('waits for an asynchronous reply and navigates once when polling confirms completion', async () => {
+    api.ask.mockImplementation(async (_id, request) => {
+      snapshot = {
+        ...snapshot,
+        messages: [{ role: 'user', content: request.message }],
+        commands: [
+          {
+            id: 222,
+            request_id: request.request_id,
+            status: 'planning',
+            result: {},
+          },
+        ],
+      };
+      return { data: snapshot };
+    });
+    ui.openQuick();
+    await flushPromises();
+    await wrapper.get('textarea').setValue('Abra a conversa');
+    await wrapper.get('form').trigger('submit');
+    await flushPromises();
+    expect(routerPush).not.toHaveBeenCalled();
+    await wrapper.get('textarea').setValue('Próximo pedido');
+    expect(
+      wrapper.get('button[type="submit"]').attributes('disabled')
+    ).toBeDefined();
+    snapshot = {
+      ...snapshot,
+      messages: [
+        ...snapshot.messages,
+        { role: 'assistant', content: 'Conversa encontrada.' },
+      ],
+      commands: [
+        {
+          ...snapshot.commands[0],
+          status: 'succeeded',
+          reply: 'Conversa encontrada.',
+          result: { navigate: true, conversation_id: 45 },
+        },
+      ],
+    };
+    await vi.advanceTimersByTimeAsync(5000);
+    await flushPromises();
+    expect(wrapper.text()).toContain('Conversa encontrada.');
+    expect(routerPush).toHaveBeenCalledExactlyOnceWith(
+      '/app/accounts/1/conversations/45'
+    );
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(routerPush).toHaveBeenCalledOnce();
+  });
+
   it.each(['quick', 'full'])(
     'keeps the %s chat free of token counters and execution banners',
     async view => {

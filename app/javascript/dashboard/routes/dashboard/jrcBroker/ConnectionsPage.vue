@@ -3,13 +3,16 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAccount } from 'dashboard/composables/useAccount';
 import { useStore } from 'dashboard/composables/store';
+import { useAdmin } from 'dashboard/composables/useAdmin';
 import { createJrcBrokerApi } from 'dashboard/api/jrcBroker';
 import Button from 'dashboard/components-next/button/Button.vue';
 import ConnectionPanel from 'dashboard/components-next/jrc-broker/ConnectionPanel.vue';
+import HumanAssignmentPolicy from 'dashboard/components-next/jrc-broker/HumanAssignmentPolicy.vue';
 
 const { t } = useI18n();
 const { accountId, currentAccount } = useAccount();
 const store = useStore();
+const { isAdmin } = useAdmin();
 const inboxes = ref([]);
 const selectedId = ref(null);
 const loading = ref(false);
@@ -120,6 +123,11 @@ onBeforeUnmount(() => {
           :inbox-id="selectedInbox.id"
         />
       </template>
+      <HumanAssignmentPolicy
+        v-if="enabled && isAdmin"
+        :key="accountId"
+        :account-id="accountId"
+      />
     </div>
   </main>
 </template>

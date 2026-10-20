@@ -1,6 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe 'NICO platform integration', type: :request do
+  around { |example| perform_enqueued_jobs(only: JrcNico::PlanCommandJob) { example.run } }
   let(:account) { create(:account, custom_attributes: { 'nico_enabled' => true }) }
   let(:user) { create(:user, account: account, role: :administrator) }
   let(:access) { JrcNico::OperationalAccess.new(account: account, user: user).authorize! }

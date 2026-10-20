@@ -8,7 +8,7 @@ class JrcNico::OperatorSession
     check_history_access!
   end
 
-  def ask(message:, request_id:, conversation_id: nil, prepared: nil, route_name: nil)
+  def ask(message:, request_id:, conversation_id: nil, prepared: nil, route_name: nil, async: false)
     command = nil
     existing = session.with_lock do
       existing = session.commands.find_by(request_id: request_id)
@@ -17,13 +17,14 @@ class JrcNico::OperatorSession
 
         next existing
       end
-      raise Busy if session.commands.where(status: 'planning').where('created_at > ?', 2.minutes.ago).exists?
+      raise Busy if session.commands.where(status: 'planning').exists?
 
       session.commands.where(source_notice_id: nil, status: %w[awaiting_confirmation browser_pending]).update_all(status: 'cancelled',
                                                                                                                   updated_at: Time.current)
       workflow = prepared ? nil : request_id
       session.update!(context: session.context.merge('active_workflow_id' => workflow))
       values = JrcNico::OperatorContext.command_context(workflow, conversation_id, route_name)
+      values[:async_planning] = true if async && !prepared
       command = session.commands.create!(request_id: request_id, message: message, execution_context: values)
       session.append('user', message)
       nil
@@ -32,12 +33,21 @@ class JrcNico::OperatorSession
 
     if prepared
       prepare(command, prepared.fetch('tool'), prepared.fetch('arguments'))
-    else
+    elsif !async
       plan(command, conversation_id)
     end
     command
   rescue StandardError => e
     fail_command(command, e) if command
+    raise
+  end
+
+  def plan_queued(command)
+    raise Pundit::NotAuthorizedError unless command.session_id == session.id
+
+    plan(command, command.execution_context['conversation_id'])
+  rescue StandardError => e
+    fail_command(command, e)
     raise
   end
 
@@ -225,6 +235,7 @@ class JrcNico::OperatorSession
   end
 
   def plan(command, conversation_id, notice: nil)
+    access_boundary = session.context['visible_since']
     resolve_recipient_choice(command) unless notice
     catalog = JrcNico::ToolCatalog.new(access)
     selected = conversation_id.present? ? access.conversation(conversation_id) : nil
@@ -266,12 +277,14 @@ class JrcNico::OperatorSession
       }
     end
     8.times do |attempt|
+      ensure_planning_access!(access_boundary)
       # Keep a final model turn for synthesis, within transport and token reservations.
       final_read = attempt == 7 || context.to_json.bytesize > 80_000
       context[:tools] = [] if final_read
       context[:finalize] = final_read
       response = JrcNico::OperationalInference.call(account: access.account, user: access.user, kind: 'operator', message: command.message,
                                                     context: context, history: native_context.history)
+      ensure_planning_access!(access_boundary)
       response = continue_opportunity_read(command.message, context, response, final_read)
       if response['tool'].blank?
         reply = response['reply']
@@ -541,5 +554,14 @@ class JrcNico::OperatorSession
              end
     command.update!(status: command.status == 'executing' ? 'unknown' : 'failed', reply: detail)
     session.with_lock { session.append('assistant', detail) }
+  end
+
+  def ensure_planning_access!(boundary)
+    access.authorize!
+    session.reload
+    check_history_access!
+    # A delayed provider answer must not restore history that a permission
+    # change just invalidated, including inbox, team and native resource access.
+    raise Pundit::NotAuthorizedError unless session.context['visible_since'] == boundary
   end
 end

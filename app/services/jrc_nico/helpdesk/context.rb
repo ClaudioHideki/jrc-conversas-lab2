@@ -27,11 +27,13 @@ class JrcNico::Helpdesk::Context
   end
 
   def ticket(id)
+    tickets.find(id)
     JrcNico::DomainAccess.new(access).ticket(id)
   end
 
   def tickets
-    JrcOperations::Access.tickets(member)
+    units = JrcServiceDesk::UnitMembership.operational.where(account_id: account.id, account_user_id: member.id, active: true).select(:unit_id)
+    JrcOperations::Access.tickets(member).where(unit_id: units)
   end
 
   def policy(id)

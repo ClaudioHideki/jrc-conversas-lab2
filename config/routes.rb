@@ -307,6 +307,8 @@ Rails.application.routes.draw do
           resources :campaigns, only: [:index, :create, :show, :update, :destroy]
           resources :dashboard_apps, only: [:index, :show, :create, :update, :destroy]
           resource :jrc_broker, only: [:show, :update], controller: 'jrc_broker' do
+            get :assignment_policy
+            put :assignment_policy, action: :update_assignment_policy
             get :resources
             post :adopt
             get :onboarding, action: :onboardings

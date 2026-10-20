@@ -13,13 +13,21 @@ let accountId;
 let currentAccount;
 let api;
 let store;
+let role;
 beforeEach(() => {
   accountId = ref(1);
   currentAccount = ref({ features: { jrc_broker: true } });
   useAccount.mockReturnValue({ accountId, currentAccount });
   window.chatwootConfig = { jrcBrokerEnabled: true };
-  store = createStore({ mutations: { LOGOUT: () => {} } });
+  role = ref('agent');
+  store = createStore({
+    getters: { getCurrentRole: () => role.value },
+    mutations: { LOGOUT: () => {} },
+  });
   api = {
+    assignmentPolicy: vi
+      .fn()
+      .mockResolvedValue({ enabled: false, max_open: 10, inbox_ids: [] }),
     inboxes: vi.fn().mockResolvedValue([
       { id: 7, name: 'Support', jrc_broker_bound: true },
       { id: 8, name: 'Sales', jrc_broker_bound: true },
@@ -44,6 +52,17 @@ beforeEach(() => {
     }),
   };
   createJrcBrokerApi.mockReturnValue(api);
+});
+
+it('shows distribution settings only to an administrator, without enabling them', async () => {
+  role.value = 'administrator';
+  wrapper = mount(ConnectionsPage, { global: { plugins: [store] } });
+  await flushPromises();
+  expect(api.assignmentPolicy).toHaveBeenCalledOnce();
+  expect(wrapper.find('input[type="checkbox"]').exists()).toBe(true);
+  role.value = 'agent';
+  await flushPromises();
+  expect(wrapper.find('input[type="checkbox"]').exists()).toBe(false);
 });
 afterEach(() => {
   wrapper?.unmount();

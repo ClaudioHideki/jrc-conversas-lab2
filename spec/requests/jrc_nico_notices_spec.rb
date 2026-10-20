@@ -1,6 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe 'NICO customer actions and notices', type: :request do
+  around { |example| perform_enqueued_jobs(only: JrcNico::PlanCommandJob) { example.run } }
   let(:account) { create(:account, custom_attributes: { 'nico_enabled' => true }) }
   let(:admin) { create(:user, account: account, role: :administrator) }
   let(:headers) { admin.create_new_auth_token }

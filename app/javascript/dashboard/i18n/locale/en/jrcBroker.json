@@ -1,5 +1,16 @@
 {
   "JRC_BROKER": {
+    "ASSIGNMENT": {
+      "TITLE": "Human service distribution",
+      "HELP": "After the flow selects a team, assign to an online member of both that team and the original inbox, with the fewest open conversations across this account. If nobody is available, keep the conversation in the human queue. The reply number stays unchanged.",
+      "ENABLED": "Distribute team conversations automatically",
+      "INBOXES": "Apply only to these inboxes. Other inboxes keep their current assignment rules.",
+      "NO_INBOXES": "Create an inbox before enabling distribution.",
+      "CAPACITY": "Maximum open conversations per agent across all inboxes",
+      "SAVE": "Save distribution",
+      "SAVED": "Distribution settings saved.",
+      "ERROR": "Could not load or save the settings. Refresh and try again."
+    },
     "ADOPT_HELP": "Link an existing Broker inbox without recreating it or changing its conversation history.",
     "ADOPT": "Link existing inbox: {name}",
     "CONNECT_WHATSAPP": "Connect your WhatsApp",

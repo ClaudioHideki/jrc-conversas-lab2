@@ -25,6 +25,7 @@ import NicoWorkflowSummary from './NicoWorkflowSummary.vue';
 import NicoChatMessages from './NicoChatMessages.vue';
 import NicoAnalysisProvenance from './NicoAnalysisProvenance.vue';
 import { nicoInteractionState } from './nicoInteractionState';
+import { createNicoAsyncCompletion } from './nicoAsyncCompletion';
 import NicoKnowledgePanel from './NicoKnowledgePanel.vue';
 import NicoConversationPanel from './NicoConversationPanel.vue';
 import { runNicoBrowserAction } from './nicoBrowserActions';
@@ -88,6 +89,12 @@ const emptyState = () => ({
   tools: [],
 });
 const state = ref(emptyState());
+const completions = createNicoAsyncCompletion();
+const processing = computed(
+  () =>
+    busy.value ||
+    state.value.commands.some(command => command.status === 'planning')
+);
 const scroller = ref(null);
 const scrollToCurrent = () => {
   const target =
@@ -154,7 +161,7 @@ const voice = useNicoVoiceConversation({
   // eslint-disable-next-line no-use-before-define -- The callback runs after setup and shares the manual ask handler.
   onSubmit: text => ask(text, { voiceTurn: true }),
   context: computed(() => `${accountId.value}:${conversationId.value || ''}`),
-  canSubmit: computed(() => visible.value && !busy.value),
+  canSubmit: computed(() => visible.value && !processing.value),
   active: visible,
   pendingApproval: computed(() =>
     state.value.commands.some(command =>
@@ -195,7 +202,7 @@ const activeCommand = computed(() =>
 const interactionState = computed(() =>
   nicoInteractionState({
     voice,
-    busy: busy.value,
+    busy: processing.value,
     phase: phase.value,
     error: error.value,
     command: activeCommand.value,
@@ -236,11 +243,30 @@ let version = 0;
 let loadVersion = 0;
 let poll;
 let abort;
-const apply = data => {
+const apply = async data => {
   state.value = data;
   suggestionCount.value =
     data.suggestions.length +
     data.delegations.filter(d => d.status === 'needs_human').length;
+  const current = version;
+  await completions.consume(data.commands).reduce(async (previous, command) => {
+    await previous;
+    if (!visible.value || current !== version) return;
+    if (command.reply) voice.speak(command.reply);
+    if (command.status === 'succeeded' && command.result?.navigate) {
+      try {
+        if (command.result.conversation_id) {
+          // eslint-disable-next-line no-use-before-define
+          await openConversation(command.result.conversation_id);
+        } else {
+          // eslint-disable-next-line no-use-before-define
+          await navigate(command.result);
+        }
+      } catch {
+        error.value = t('JRC_NICO.UX.NAVIGATION_ERROR');
+      }
+    }
+  }, Promise.resolve());
 };
 const load = async () => {
   if (!accountId.value || busy.value || (abort && !abort.signal.aborted))
@@ -253,7 +279,7 @@ const load = async () => {
   try {
     const { data } = await api.show(accountId.value, request.signal);
     if (current === version && currentLoad === loadVersion) {
-      apply(data);
+      await apply(data);
       syncError.value = '';
     }
   } catch (e) {
@@ -287,9 +313,10 @@ const perform = async (action, nextPhase = 'working') => {
   try {
     const { data } = await action();
     if (current !== version) return undefined;
-    apply(data);
+    await apply(data);
     syncError.value = '';
-    if (visible.value) voice.speak(data.messages.at(-1)?.content);
+    if (visible.value && nextPhase !== 'submitting')
+      voice.speak(data.messages.at(-1)?.content);
     await nextTick();
     if (fullVisible.value) scrollToCurrent();
     return data;
@@ -308,7 +335,7 @@ const perform = async (action, nextPhase = 'working') => {
 };
 const ask = async (prompt, { voiceTurn = false } = {}) => {
   const message = String(prompt ?? input.value).trim();
-  if (!message || busy.value || submittingRequest) return false;
+  if (!message || processing.value || submittingRequest) return false;
   submittingRequest = true;
   const current = version;
   focusedNoticeId.value = null;
@@ -326,6 +353,7 @@ const ask = async (prompt, { voiceTurn = false } = {}) => {
     };
   }
   const requestId = pendingRequest.requestId;
+  completions.track(requestId);
   const result = await perform(
     () =>
       api.ask(accountId.value, {
@@ -339,26 +367,6 @@ const ask = async (prompt, { voiceTurn = false } = {}) => {
   if (result && current === version) {
     if (input.value.trim() === message) input.value = '';
     pendingRequest = undefined;
-    const navigation = state.value.commands.find(
-      command =>
-        command.request_id === requestId &&
-        command.status === 'succeeded' &&
-        command.result?.navigate
-    );
-    if (navigation) {
-      try {
-        if (navigation.result.conversation_id) {
-          // eslint-disable-next-line no-use-before-define -- The submit handler runs after setup.
-          await openConversation(navigation.result.conversation_id);
-        } else {
-          // eslint-disable-next-line no-use-before-define -- The submit handler runs after setup.
-          await navigate(navigation.result);
-        }
-      } catch {
-        if (current === version)
-          error.value = t('JRC_NICO.UX.NAVIGATION_ERROR');
-      }
-    }
   }
   if (current === version) submittingRequest = false;
   return Boolean(result && current === version);
@@ -470,7 +478,7 @@ const browserAction = async command => {
           status,
           detail,
         });
-        if (current === version) apply(data);
+        if (current === version) await apply(data);
       } else if (current === version)
         error.value = label('BROWSER_CLAIM_ERROR');
     } catch {
@@ -530,6 +538,7 @@ watch(
     allowCrm.value = false;
     allowedActions.value = [];
     automaticAttempts.clear();
+    completions.clear();
     delegateForm.value = false;
     knowledgeOpen.value = false;
     secondaryOpen.value = false;
@@ -602,7 +611,7 @@ onBeforeUnmount(() => {
     v-if="!embedded && mode === 'quick'"
     v-model="input"
     :voice="voice"
-    :busy="busy"
+    :busy="processing"
     :in-call="inCall"
     :context-label="contextLabel"
     :interaction-state="interactionState"
@@ -1174,7 +1183,7 @@ onBeforeUnmount(() => {
     <NicoComposer
       v-model="input"
       :voice="voice"
-      :busy="busy"
+      :busy="processing"
       :in-call="inCall"
       @send="ask()"
     />

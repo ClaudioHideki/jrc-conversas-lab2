@@ -154,6 +154,11 @@ class JrcNico::RuntimeClient
     Timeout.timeout(75) do
       Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == 'https', open_timeout: 3, read_timeout: 55, write_timeout: 10) do |http|
         @ledger&.dispatched!
+        # Provider latency must not monopolize a pooled database connection.
+        # A caller's transaction retains its connection until that transaction ends.
+        pool = ActiveRecord::Base.connection_pool
+        connection = pool.active_connection?
+        pool.release_connection if connection && !connection.transaction_open?
         http.request(request) do |response|
           status = response.code
 
@@ -189,8 +194,6 @@ class JrcNico::RuntimeClient
   rescue IOError, SystemCallError, SocketError, OpenSSL::SSL::SSLError, Net::HTTPBadResponse, Net::ProtocolError
     raise Error, 'runtime_transport_error'
   end
-
-  private
 
   def validate!(body, run, context)
     valid = body.is_a?(Hash) && body.keys.sort == KEYS.sort

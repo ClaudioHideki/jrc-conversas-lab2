@@ -2,6 +2,7 @@ class AutoAssignment::AssignmentService
   pattr_initialize [:inbox!]
 
   def perform_bulk_assignment(limit: 100)
+    return 0 if JrcHumanAssignment::Policy.enabled_for?(inbox.account, inbox.id)
     return 0 unless inbox.auto_assignment_v2_enabled?
     return 0 unless inbox.enable_auto_assignment?
 
@@ -115,6 +116,7 @@ class AutoAssignment::AssignmentService
                     .lock('FOR UPDATE SKIP LOCKED')
                     .first
       next false unless locked
+      next false if JrcHumanAssignment::Policy.enabled_for?(inbox.account.reload, inbox.id)
 
       locked.update!(assignee: agent)
       true

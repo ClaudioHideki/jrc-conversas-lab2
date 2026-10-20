@@ -22,7 +22,7 @@ RSpec.describe JrcNico::BrokerSendCommitGate do
   end
 
   around do |example|
-    disposable = %w[jrc_nico_gate_test jrc_nico_broker_candidate_test jrc_jornada_candidate_test]
+    disposable = %w[jrc_nico_gate_test jrc_nico_broker_candidate_test jrc_jornada_candidate_test jrc_production_stability_test]
     database = ENV.fetch('POSTGRES_DATABASE', nil)
     enabled = Rails.env.test? && ENV['JRC_NICO_GATE_CONCURRENCY'] == '1' && disposable.include?(database) &&
               ActiveRecord::Base.connection_db_config.database == database &&

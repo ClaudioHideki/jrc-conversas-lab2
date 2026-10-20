@@ -108,6 +108,16 @@ jrc_nico_helpdesk_monitor_job:
   class: 'JrcNico::Helpdesk::MonitorJob'
   queue: default
 
+jrc_nico_planning_recovery_job:
+  cron: '* * * * *'
+  class: 'JrcNico::PlanningRecoveryJob'
+  queue: scheduled_jobs
+
+jrc_human_assignment_recovery_job:
+  cron: '* * * * *'
+  class: 'JrcHumanAssignment::RecoveryJob'
+  queue: scheduled_jobs
+
 jrc_service_desk_clock_monitoring_job:
   cron: '* * * * *'
   class: 'JrcServiceDesk::ClockMonitoringJob'

@@ -34,6 +34,18 @@ class Api::V1::Accounts::JrcBrokerController < Api::V1::Accounts::BaseController
                    agents: Current.account.users.select(:id, :name).map { |user| { id: user.id, name: user.name } } }
   end
 
+  def assignment_policy
+    render json: JrcHumanAssignment::Policy.for(Current.account).slice(:enabled, :max_open, :inbox_ids)
+  end
+
+  def update_assignment_policy
+    input = body!('enabled', 'max_open', 'inbox_ids')
+    render json: JrcHumanAssignment::Policy.update!(Current.account, enabled: input['enabled'], max_open: input['max_open'],
+                                                                  inbox_ids: input['inbox_ids'])
+  rescue ArgumentError
+    render json: { code: 'JRC_BROKER_INVALID_ASSIGNMENT_POLICY' }, status: :unprocessable_entity
+  end
+
   def onboardings
     render json: { data: broker.client.operations.fetch('data').map { |value| JrcBroker::Response.operation(value) } }
   end

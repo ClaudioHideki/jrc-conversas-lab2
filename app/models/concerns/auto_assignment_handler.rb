@@ -38,6 +38,7 @@ module AutoAssignmentHandler
   end
 
   def should_run_auto_assignment?
+    return false if JrcHumanAssignment::Policy.enabled_for?(account, inbox_id)
     return false unless inbox.enable_auto_assignment?
     # Assignment V2: Resolved/snoozed conversations still have an assignee, so bypass the
     # assignee-blank check below. The AssignmentJob needs to run to rebalance assignments.

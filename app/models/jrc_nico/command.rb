@@ -33,6 +33,7 @@ class JrcNico::Command < ApplicationRecord
   belongs_to :source_notice, class_name: 'JrcNico::Notice', optional: true
   has_one :broker_send_operation, class_name: 'JrcNico::BrokerSendOperation', dependent: :nullify
   after_commit :publish_notice, on: [:create, :update]
+  after_create_commit :enqueue_planning
   validates :request_id, format: { with: /\A[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\z/i }
   validates :message, presence: true, length: { maximum: 4000 }
   validates :status, inclusion: { in: %w[planning awaiting_confirmation executing browser_pending succeeded failed cancelled unknown] }
@@ -59,5 +60,9 @@ class JrcNico::Command < ApplicationRecord
     if source_notice_id.nil? && execution_context['workflow_id'] && status == 'succeeded' && JrcNico::ToolCatalog::TOOLS.dig(tool, 2) == true
       JrcNico::ContinueCommandJob.perform_later(id)
     end
+  end
+
+  def enqueue_planning
+    JrcNico::PlanCommandJob.perform_later(id) if status == 'planning' && execution_context['async_planning'] == true
   end
 end

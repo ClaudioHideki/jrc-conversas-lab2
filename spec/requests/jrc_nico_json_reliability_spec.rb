@@ -1,6 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe 'NICO JSON execution boundary', type: :request do
+  around { |example| perform_enqueued_jobs(only: JrcNico::PlanCommandJob) { example.run } }
   let(:account) { create(:account, reporting_timezone: 'America/Sao_Paulo', custom_attributes: { 'nico_enabled' => true }) }
   let(:user) { create(:user, account: account, role: :administrator) }
   let(:headers) { user.create_new_auth_token }
@@ -19,9 +20,9 @@ RSpec.describe 'NICO JSON execution boundary', type: :request do
       expect(JrcNico::ToolExecutor).not_to receive(:new)
       counts = [Contact.count, JrcCrm::Lead.count, JrcCrm::Activity.count, JrcCrm::Deal.count]
       post "#{base}/ask", params: { request_id: SecureRandom.uuid, message: 'Crie um contato e lead' }, headers: headers, as: :json
-      expect(response).to have_http_status(:service_unavailable)
-      expect(response.parsed_body).to include('error' => 'tool_arguments_invalid')
-      expect(response.parsed_body['message']).to include('Nenhuma alteração foi realizada')
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body.fetch('commands').first.fetch('status')).to eq('failed')
+      expect(response.parsed_body.fetch('commands').first.fetch('reply')).to include('Nenhuma alteração foi realizada')
       expect([Contact.count, JrcCrm::Lead.count, JrcCrm::Activity.count, JrcCrm::Deal.count]).to eq(counts)
       expect(JrcNico::Command.last).to have_attributes(status: 'failed', tool: nil)
       expect(JrcNico::Command.last.reply).to include('interpretar os dados')
@@ -41,7 +42,7 @@ RSpec.describe 'NICO JSON execution boundary', type: :request do
           post "#{base}/ask", params: { request_id: request_id, message: 'Crie Telmo' }, headers: headers, as: :json
         end.not_to change(Contact, :count)
       end
-      command = JrcNico::Command.sole
+      command = operator.session.commands.where(request_id: request_id).sole
       expect(command.status).to eq('awaiting_confirmation')
       expect { post "#{base}/commands/#{command.id}/confirm", headers: headers, as: :json }.to change(Contact, :count).by(1)
       expect { post "#{base}/commands/#{command.id}/confirm", headers: headers, as: :json }.not_to change(Contact, :count)
