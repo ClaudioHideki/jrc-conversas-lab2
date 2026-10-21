@@ -23,12 +23,42 @@ class JrcCampaignsAPI extends ApiClient {
     return axios.get(`${super.baseUrl()}/jrc_campaigns/consents`);
   }
 
+  testAuthorizations() {
+    return axios.get(`${super.baseUrl()}/jrc_campaigns/test_authorizations`);
+  }
+
+  createTestAuthorization(testAuthorization) {
+    return axios.post(`${super.baseUrl()}/jrc_campaigns/test_authorizations`, {
+      test_authorization: testAuthorization,
+    });
+  }
+
+  revokeTestAuthorization(id) {
+    return axios.delete(
+      `${super.baseUrl()}/jrc_campaigns/test_authorizations/${id}`
+    );
+  }
+
   createConsent(consent) {
     return axios.post(`${super.baseUrl()}/jrc_campaigns/consents`, { consent });
   }
 
   revokeConsent(id) {
     return axios.delete(`${super.baseUrl()}/jrc_campaigns/consents/${id}`);
+  }
+
+  previewConsentImport(csv) {
+    return axios.post(
+      `${super.baseUrl()}/jrc_campaigns/consents/import_preview`,
+      { csv }
+    );
+  }
+
+  importConsents(csv, operatorConfirmed) {
+    return axios.post(`${super.baseUrl()}/jrc_campaigns/consents/import_csv`, {
+      csv,
+      operator_confirmed: operatorConfirmed,
+    });
   }
 
   pause(id) {
@@ -57,6 +87,10 @@ class JrcCampaignsAPI extends ApiClient {
 
   testMessage(payload) {
     return axios.post(`${this.url}/test_message`, { test_message: payload });
+  }
+
+  testDelivery(id) {
+    return axios.get(`${super.baseUrl()}/jrc_campaigns/test_deliveries/${id}`);
   }
 
   preview(id) {

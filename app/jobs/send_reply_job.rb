@@ -31,6 +31,8 @@ class SendReplyJob < ApplicationJob
   end
 
   def deliver(message)
+    return if message.additional_attributes.to_h['jrc_campaign_evolution'] == true
+
     channel_name = message.conversation.inbox.channel.class.to_s
 
     return send_on_facebook_page(message) if channel_name == 'Channel::FacebookPage'

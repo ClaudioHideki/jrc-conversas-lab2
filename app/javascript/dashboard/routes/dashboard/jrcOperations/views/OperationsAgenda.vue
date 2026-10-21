@@ -35,7 +35,10 @@ const meta = ref(null);
 const error = ref('');
 const loading = ref(false);
 const enabled = computed(
-  () => status.value?.crm_enabled || status.value?.projects_enabled
+  () =>
+    status.value?.crm_enabled ||
+    status.value?.projects_enabled ||
+    status.value?.contact_center_enabled
 );
 const sources = computed(() => [
   {
@@ -58,6 +61,12 @@ const sources = computed(() => [
     label: agendaText('PROJECTS', 'Projetos'),
     enabled: status.value?.projects_enabled,
     tone: 'bg-n-teal-3 text-n-teal-11',
+  },
+  {
+    value: 'contact_center',
+    label: agendaText('CONTACT_CENTER', 'Contact Center'),
+    enabled: status.value?.contact_center_enabled,
+    tone: 'bg-n-amber-3 text-n-amber-11',
   },
 ]);
 const views = computed(() => [
@@ -88,6 +97,7 @@ const stateLabel = entry => {
     in_progress: ['IN_PROGRESS', 'Em andamento'],
     review: ['REVIEW', 'Validação'],
     blocked: ['BLOCKED', 'Bloqueado'],
+    failed: ['FAILED', 'Falhou'],
   };
   const [key, fallback] = labels[entry.status] || ['OPEN', 'Em aberto'];
   return agendaText(key, fallback);
@@ -148,6 +158,7 @@ watch(
     status.value?.ready,
     status.value?.crm_enabled,
     status.value?.projects_enabled,
+    status.value?.contact_center_enabled,
   ],
   () => {
     meta.value = null;

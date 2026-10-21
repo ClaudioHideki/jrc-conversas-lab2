@@ -32,6 +32,29 @@ RSpec.describe 'Relationship survey administration and handoff boundaries', type
     expect(JrcRelationship::Survey.where(account: sd_account)).not_to exist
   end
 
+  it 'keeps contact center survey origins hidden until the account module is enabled' do
+    JrcContactCenter::CallSession.create!(account: sd_account, correlation_id: 'native-call', direction: 'inbound', started_at: Time.current)
+    get "#{url}/metadata", headers: headers, as: :json
+    expect(response.parsed_body['contact_center_surveys']).to be(false)
+    get "#{url}/survey_origins", headers: headers, as: :json
+
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body['payload'].pluck('type')).not_to include('JrcContactCenter::CallSession')
+  end
+
+  it 'lists only authorized account call sessions as contact center survey origins' do
+    sd_account.enable_features!('jrc_contact_center')
+    session = JrcContactCenter::CallSession.create!(account: sd_account, correlation_id: 'native-call', direction: 'inbound',
+                                                    started_at: Time.current)
+    JrcContactCenter::CallSession.create!(account: sd_foreign_account, correlation_id: 'foreign-call', direction: 'inbound', started_at: Time.current)
+    get "#{url}/metadata", headers: headers, as: :json
+    expect(response.parsed_body['contact_center_surveys']).to be(true)
+    get "#{url}/survey_origins", headers: headers, as: :json
+
+    rows = response.parsed_body['payload'].select { |row| row['type'] == session.class.name }
+    expect(rows.pluck('id')).to eq([session.id])
+  end
+
   it 'blocks a normal agent from administering account-wide definitions and rules' do
     sd_account_user.update!(role: :agent)
     get "#{url}/survey_administration/definitions", headers: headers, as: :json

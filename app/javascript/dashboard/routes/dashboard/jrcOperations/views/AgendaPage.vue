@@ -20,7 +20,7 @@ const { accountId, agendaText } = useAgenda();
             {{
               agendaText(
                 'AGENDA_DESCRIPTION',
-                'Compromissos de CRM e Projetos sem duplicar os registros de origem.'
+                'Compromissos de CRM, Projetos e Contact Center sem duplicar os registros de origem.'
               )
             }}
           </p>

@@ -40,6 +40,16 @@ const rows = computed(() =>
 const recordKind = computed(() =>
   tab.value === 'rules' ? 'rules' : 'definitions'
 );
+const sourceTypes = computed(() => [
+  'Conversation',
+  'JrcServiceDesk::Ticket',
+  'JrcRelationship::Qbr',
+  'JrcCrm::Activity',
+  'Call',
+  ...(props.metadata.contact_center_surveys
+    ? ['JrcContactCenter::CallSession']
+    : []),
+]);
 const label = key => t(`RELATIONSHIP.SURVEY_ADMIN.${key}`);
 const templateSummary = settings => {
   const template = settings.whatsapp_template.template_params;
@@ -733,13 +743,7 @@ onBeforeUnmount(() => {
             >
               <option value="">{{ label('ALL') }}</option>
               <option
-                v-for="type in [
-                  'Conversation',
-                  'JrcServiceDesk::Ticket',
-                  'JrcRelationship::Qbr',
-                  'JrcCrm::Activity',
-                  'Call',
-                ]"
+                v-for="type in sourceTypes"
                 :key="type"
                 :value="type"
               >

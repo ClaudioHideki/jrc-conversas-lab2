@@ -41,7 +41,7 @@ class Api::V1::Accounts::JrcCampaigns::SanitizedListsController < Api::V1::Accou
     return payload unless include_entries
 
     payload.merge(entries: list.entries.order(:id).map do |entry|
-      entry.as_json(only: [:id, :name, :phone_number, :normalized_phone, :status, :reason, :metadata])
+      entry.as_json(only: [:id, :name, :phone_number, :normalized_phone, :email, :normalized_email, :status, :reason, :metadata])
     end)
   end
 end

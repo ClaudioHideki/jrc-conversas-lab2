@@ -179,7 +179,7 @@ RSpec.describe 'HelpDesk exact incident campaign drafts', type: :request do
     expect(JrcCampaigns::Campaign.where(account: sd_account).count).to eq(1)
   end
 
-  %w[normalized_phone audience_type cohort_child inbox_link].each do |mutation|
+  %w[normalized_phone email normalized_email audience_type cohort_child inbox_link].each do |mutation|
     it "hides the exact receipt when its persisted #{mutation} proof is changed" do
       approval = prepare_native(draft_input, 'prepare_incident_campaign')
       approve_native(approval)
@@ -189,6 +189,9 @@ RSpec.describe 'HelpDesk exact incident campaign drafts', type: :request do
       when 'normalized_phone'
         list = sd_account.jrc_campaign_sanitized_lists.find(row.audience_config.fetch('sanitized_list_id'))
         list.entries.first.update!(normalized_phone: '+5511999990000')
+      when 'email', 'normalized_email'
+        list = sd_account.jrc_campaign_sanitized_lists.find(row.audience_config.fetch('sanitized_list_id'))
+        list.entries.first.update!(mutation => 'unreviewed@example.test')
       when 'audience_type' then row.update!(audience_type: 'all_contacts', audience_config: {})
       when 'cohort_child' then sd_ticket(company_id: company.id).update!(incident: incident)
       when 'inbox_link' then row.campaign_inboxes.first.update!(enabled: true)

@@ -1,7 +1,8 @@
 <script setup>
 import { useI18n } from 'vue-i18n';
+import { computed } from 'vue';
 import { inputClass } from './definitions';
-defineProps({
+const props = defineProps({
   filters: { type: Object, required: true },
   metadata: { type: Object, required: true },
   report: { type: Object, default: () => ({}) },
@@ -9,13 +10,16 @@ defineProps({
 });
 const emit = defineEmits(['update']);
 const { t } = useI18n();
-const sources = [
+const sources = computed(() => [
   'Conversation',
   'JrcServiceDesk::Ticket',
   'JrcRelationship::Qbr',
   'Call',
   'JrcCrm::Activity',
-];
+  ...(props.metadata.contact_center_surveys
+    ? ['JrcContactCenter::CallSession']
+    : []),
+]);
 const classifications = [
   'detractor',
   'neutral',

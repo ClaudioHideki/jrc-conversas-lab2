@@ -54,7 +54,7 @@ onMounted(() => load(1));
               <thead class="bg-n-alpha-2 text-xs text-n-slate-10">
                 <tr>
                   <th class="px-4 py-3">{{ $t('JRC_CAMPAIGNS.TABLE.NAME') }}</th>
-                  <th class="px-4 py-3">{{ $t('JRC_CAMPAIGNS.REPORTS.PHONE') }}</th>
+                  <th class="px-4 py-3">{{ $t('JRC_CAMPAIGNS.REPORTS.DESTINATION') }}</th>
                   <th class="px-4 py-3">{{ $t('JRC_CAMPAIGNS.REPORTS.INBOX') }}</th>
                   <th class="px-4 py-3">{{ $t('JRC_CAMPAIGNS.REPORTS.EXECUTION') }}</th>
                   <th class="px-4 py-3">{{ $t('JRC_CAMPAIGNS.REPORTS.STATUS') }}</th>
@@ -65,7 +65,7 @@ onMounted(() => load(1));
               <tbody>
                 <tr v-for="recipient in report.recipients" :key="recipient.id" class="border-t border-n-weak">
                   <td class="px-4 py-3 font-medium text-n-slate-12">{{ recipient.name || '-' }}</td>
-                  <td class="px-4 py-3 text-n-slate-11">{{ recipient.phone_number }}</td>
+                  <td class="px-4 py-3 text-n-slate-11">{{ recipient.destination || recipient.email || recipient.phone_number }}</td>
                   <td class="px-4 py-3 text-n-slate-11">{{ recipient.inbox_name || '-' }}</td>
                   <td class="px-4 py-3 text-n-slate-11">#{{ recipient.execution_number }}</td>
                   <td class="px-4 py-3"><span class="rounded-full bg-n-alpha-2 px-2 py-1 text-xs text-n-slate-11">{{ recipient.status }}</span></td>

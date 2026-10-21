@@ -6,7 +6,7 @@ class JrcCampaigns::RotationSelector
   end
 
   def inbox_for(index)
-    raise ActiveRecord::RecordNotFound, 'Nenhuma caixa WhatsApp selecionada' if items.empty?
+    raise ActiveRecord::RecordNotFound, 'Nenhuma caixa de envio selecionada' if items.empty?
 
     case campaign.rotation_mode
     when 'random' then items.sample.inbox

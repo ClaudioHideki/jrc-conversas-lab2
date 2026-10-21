@@ -45,7 +45,7 @@ RSpec.describe 'Campaign governance', type: :request do
 
   it 'records consent evidence and revokes it within the account' do
     post "#{base}/consents", headers: admin.create_new_auth_token,
-                             params: { consent: { phone_number: '+5511999999999', evidence: 'Customer form 2026-09-07' } }, as: :json
+                             params: { consent: { phone_number: '+5511999999999', evidence: 'Customer form 2026-09-07', operator_confirmed: true } }, as: :json
     expect(response).to have_http_status(:created)
     id = response.parsed_body.fetch('id')
     delete "#{base}/consents/#{id}", headers: admin.create_new_auth_token

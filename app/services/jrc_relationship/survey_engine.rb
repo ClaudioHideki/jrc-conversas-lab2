@@ -21,6 +21,8 @@ class JrcRelationship::SurveyEngine
   end
 
   def self.closure_candidate?(rule, source)
+    return false if source.is_a?(JrcContactCenter::CallSession) && rule.matchers['source_type'] != source.class.name
+
     rule.execution_member && (rule.matchers['source_type'].blank? || rule.matchers['source_type'] == source.class.name)
   end
   private_class_method :closure_rule, :closure_candidate?
@@ -93,8 +95,12 @@ class JrcRelationship::SurveyEngine
   def matching_rule(origin)
     attributes = origin.attributes
     rows = JrcRelationship::SurveyRule.where(account_id: @account.id).includes(:definition).to_a
-    rows.select { |row| row.matchers.all? { |key, value| value.to_s == attributes[key].to_s } }
+    rows.select { |row| explicit_contact_center_rule?(row) && row.matchers.all? { |key, value| value.to_s == attributes[key].to_s } }
         .max_by { |row| [row.specificity, row.priority, row.version, row.id] }
+  end
+
+  def explicit_contact_center_rule?(rule)
+    !@source.is_a?(JrcContactCenter::CallSession) || rule.matchers['source_type'] == @source.class.name
   end
 
   def origin_eligibility(origin)

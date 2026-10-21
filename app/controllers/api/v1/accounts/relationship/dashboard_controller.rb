@@ -78,7 +78,8 @@ class Api::V1::Accounts::Relationship::DashboardController < Api::V1::Accounts::
       owners: metadata_owners(ctx),
       can_crm: JrcOperations::Access.crm?(ctx.member),
       can_configure_operations: ctx.policy.configure? && JrcOperations::Access.crm?(ctx.member) && ctx.member.administrator?,
-      can_nico: Current.account.active? && Current.account.custom_attributes['nico_enabled'] == true }
+      can_nico: Current.account.active? && Current.account.custom_attributes['nico_enabled'] == true,
+      contact_center_surveys: JrcContactCenter::ModulePolicy.new(ctx.to_h, :contact_center).access? }
   end
 
   def metadata_owners(ctx)
@@ -104,7 +105,12 @@ class Api::V1::Accounts::Relationship::DashboardController < Api::V1::Accounts::
 
   def metadata_survey_admin(ctx)
     { survey_inboxes: ctx.policy.admin? ? Current.account.inboxes.order(:name).pluck(:id, :name) : [],
-      survey_whatsapp_inboxes: ctx.policy.admin? ? Current.account.inboxes.where(channel_type: 'Channel::Whatsapp').order(:name).pluck(:id, :name) : [],
+      survey_whatsapp_inboxes: if ctx.policy.admin?
+                                 Current.account.inboxes.where(channel_type: 'Channel::Whatsapp').order(:name).pluck(:id,
+                                                                                                                     :name)
+                               else
+                                 []
+                               end,
       survey_companies: ctx.policy.admin? ? Current.account.master_companies.order(:name).limit(500).pluck(:id, :name) : [] }
   end
 

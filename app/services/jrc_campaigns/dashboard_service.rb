@@ -8,10 +8,11 @@ class JrcCampaigns::DashboardService
   }.freeze
   PERIODS = [7, 30, 90].freeze
 
-  def initialize(account, period: 30, campaign_id: nil)
+  def initialize(account, period: 30, campaign_id: nil, delivery_channel: nil)
     @account = account
     @period_days = PERIODS.include?(period.to_i) ? period.to_i : nil
     @campaign_id = campaign_id.presence
+    @delivery_channel = delivery_channel.presence_in(JrcCampaigns::Campaign::DELIVERY_CHANNELS)
   end
 
   def as_json
@@ -26,12 +27,13 @@ class JrcCampaigns::DashboardService
 
   private
 
-  attr_reader :account, :period_days, :campaign_id
+  attr_reader :account, :period_days, :campaign_id, :delivery_channel
 
   def campaigns
     @campaigns ||= begin
       relation = account.jrc_campaigns
       relation = relation.where(id: campaign_id) if campaign_id
+      relation = relation.where(delivery_channel: delivery_channel) if delivery_channel
       relation
     end
   end
@@ -98,7 +100,7 @@ class JrcCampaigns::DashboardService
     return 'invalid_number' if value.match?(/invalid|inv[aá]lid|phone|telefone|number|n[uú]mero|wa_id/i)
     return 'opt_out' if value.match?(/opt.?out|blacklist|bloque|recus|unsubscribe/i)
     return 'temporary' if value.match?(/tempor|timeout|rate.?limit|thrott|indispon|unavailable/i)
-    return 'provider' if value.match?(/provider|meta|whatsapp|twilio|360dialog|api|token|template/i)
+    return 'provider' if value.match?(/provider|meta|whatsapp|twilio|360dialog|api|token|template|smtp|oauth|e-?mail/i)
 
     'other'
   end

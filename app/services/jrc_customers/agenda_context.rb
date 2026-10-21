@@ -7,6 +7,8 @@ class JrcCustomers::AgendaContext
     @allowed = @account.feature_enabled?('jrc_customer_master') &&
                JrcCustomers::DirectoryPolicy.new(JrcOperations::Access.user_context(@member), :directory).access?
     @contexts = []
+    @company_id = filters[:company_id].presence
+    @contact_id = filters[:contact_id].presence
     %i[company_id contact_id].each do |key|
       next if filters[key].blank?
       raise Pundit::NotAuthorizedError unless @allowed
@@ -26,6 +28,15 @@ class JrcCustomers::AgendaContext
     source = scope.klass == JrcCrm::FollowUp ? :follow_ups : :activities
     result = @contexts.reduce(scope) { |rows, context| rows.where(id: context.public_send(source).select(:id)) }
     @allowed ? result.includes(:deal, :lead) : result
+  end
+
+  def contact_center_callbacks(scope)
+    return scope unless @allowed
+
+    result = scope
+    result = result.where(contact_id: @contact_id) if @contact_id
+    result = result.where(contact_id: @account.contacts.where(company_id: @company_id).select(:id)) if @company_id
+    result
   end
 
   def attributes(record)

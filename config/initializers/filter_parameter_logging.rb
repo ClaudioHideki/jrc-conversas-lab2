@@ -15,3 +15,5 @@ filter_regex = /\A(?!.*\bwebsite_token\b).*token/i
 Rails.application.config.filter_parameters += [filter_regex]
 Rails.application.config.filter_parameters += [:encrypted_control_key, :control_key, :controlKey, :pairing_code, :qrcode, :qr_code]
 Rails.application.config.filter_parameters += [:pabx_username, :api_username]
+
+Rails.application.config.filter_parameters += [:csv]

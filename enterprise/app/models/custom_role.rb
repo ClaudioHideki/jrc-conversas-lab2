@@ -42,7 +42,8 @@ class CustomRole < ApplicationRecord
     jrc_crm
   ].concat(::JrcServiceDesk::Capabilities::PERMISSIONS).concat(::JrcProjects::Authorization::PERMISSIONS)
                 .concat(::JrcRelationship::ModulePolicy::PERMISSIONS).concat(::JrcApprovals::Authorization::PERMISSIONS)
-                .concat(::JrcOperator::Access::PERMISSIONS).freeze
+                .concat(::JrcOperator::Access::PERMISSIONS)
+                .concat(::JrcContactCenter::ModulePolicy::PERMISSIONS).freeze
 
   validates :name, presence: true
   validates :permissions, inclusion: { in: PERMISSIONS }

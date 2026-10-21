@@ -17,7 +17,7 @@ class JrcRelationship::Survey < JrcRelationship::Record
   validates :comment, length: { maximum: 4000 }
   validates :status, inclusion: { in: %w[awaiting scheduled available queued dispatching sent delivered responded expired failed blocked unknown] }
   validates :treatment_status, inclusion: { in: %w[untreated in_progress treated] }
-  validates :source_type, inclusion: { in: %w[Conversation JrcServiceDesk::Ticket JrcRelationship::Qbr Call JrcCrm::Activity] }, allow_nil: true
+  validates :source_type, inclusion: { in: JrcRelationship::SurveySource::TYPES }, allow_nil: true
   validates :contact, :definition, :rule, :source_id, :cycle_key, :rule_version, :definition_version,
             presence: true, if: -> { source_type.present? }
   validates :execution_member, presence: true, on: :create, if: -> { source_type.present? }

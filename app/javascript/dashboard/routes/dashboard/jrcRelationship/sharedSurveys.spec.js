@@ -44,6 +44,19 @@ beforeEach(() => {
   mocks.api.treatSurvey.mockResolvedValue({ data: {} });
 });
 describe('Shared surveys administration and response treatment', () => {
+  it('exposes PABX report origins only when authorized metadata enables the module', async () => {
+    const wrapper = mount(SurveyReportFilters, {
+      props: { filters: {}, metadata: {} },
+    });
+    expect(
+      wrapper.find('option[value="JrcContactCenter::CallSession"]').exists()
+    ).toBe(false);
+    await wrapper.setProps({ metadata: { contact_center_surveys: true } });
+    expect(
+      wrapper.find('option[value="JrcContactCenter::CallSession"]').exists()
+    ).toBe(true);
+    wrapper.unmount();
+  });
   it('offers only declared response filters and emits them without changing activation', async () => {
     const filters = {
       type: '',

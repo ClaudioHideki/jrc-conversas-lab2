@@ -81,10 +81,29 @@ const approve = async () => {
         </button>
       </div>
       <p class="my-4 text-sm">{{ t('JRC_CAMPAIGNS.GOVERNANCE.POLICY') }}</p>
+      <p
+        v-if="
+          review?.review_snapshot?.configuration?.evolution_connectors?.length
+        "
+        class="my-4 text-sm text-n-amber-11"
+        role="note"
+      >
+        {{ t('JRC_CAMPAIGNS.EVOLUTION.WARNING') }}
+      </p>
       <p v-if="errorMessage" role="alert" class="my-3 text-n-ruby-11">
         {{ errorMessage }}
       </p>
       <template v-if="review">
+        <p
+          v-for="connector in review.review_snapshot?.configuration
+            ?.evolution_connectors || []"
+          :key="connector.inbox_id"
+          class="my-3 text-sm font-medium"
+        >
+          {{ t('JRC_CAMPAIGNS.EVOLUTION.SENDER') }}
+          {{ connector.sender_number }} ·
+          {{ t('JRC_CAMPAIGNS.EVOLUTION.CONNECTOR_LABEL') }}
+        </p>
         <div class="space-y-3 rounded-lg border border-n-weak p-4">
           <p>
             {{
@@ -130,6 +149,7 @@ const approve = async () => {
             <p class="font-medium">
               {{ `${step.kind} · ${step.template_name || step.body}` }}
             </p>
+            <p v-if="step.subject">{{ step.subject }}</p>
             <p v-if="step.template_language">{{ step.template_language }}</p>
             <p v-if="step.media_url" class="break-all">{{ step.media_url }}</p>
             <p v-if="step.follow_up_after_hours">
@@ -176,10 +196,12 @@ const approve = async () => {
         >
           <p
             v-for="recipient in review.review_snapshot.recipients"
-            :key="recipient.phone_number"
+            :key="recipient.destination || recipient.phone_number"
             class="py-1 text-sm"
           >
-            {{ `${recipient.name || ''} · ${recipient.phone_number}` }}
+            {{
+              `${recipient.name || ''} · ${recipient.destination || recipient.email || recipient.phone_number}`
+            }}
           </p>
           <p v-if="!review.review_snapshot.recipients.length">
             {{ t('JRC_CAMPAIGNS.GOVERNANCE.EMPTY_AUDIENCE') }}

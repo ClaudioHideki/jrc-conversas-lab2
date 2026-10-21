@@ -33,6 +33,38 @@ RSpec.describe 'Campaign sending governance' do # rubocop:disable RSpec/Describe
     expect(JrcCampaigns::AudienceResolver.new(campaign).entries).to be_empty
   end
 
+  context 'with a GoPure email campaign' do
+    let(:inbox) { create(:inbox, account: account, channel: create(:channel_email, account: account)) }
+    let(:contact) { create(:contact, account: account, email: 'campaign@example.test', phone_number: nil) }
+    let(:campaign) { JrcCampaigns::Campaign.create!(account: account, inbox: inbox, created_by: admin, name: 'Email GoPure', delivery_channel: 'email') }
+    let(:step) { campaign.steps.create!(kind: 'email', position: 0, subject: 'GoPure', body: 'Olá') }
+
+    it 'approves the email destination and sends once through the existing email sender' do
+      contact
+      campaign.request_review!
+      campaign.approve!(admin, campaign.review_digest)
+      execution = JrcCampaigns::LaunchService.new(campaign).perform
+      recipient = execution.recipients.sole
+      expect(recipient.destination).to eq(contact.email)
+      mail_conversation = create(:conversation, account: account, inbox: inbox, contact: contact)
+      message = create(:message, account: account, inbox: inbox, conversation: mail_conversation, message_type: :outgoing)
+      sender = instance_double(JrcCampaigns::EmailSender)
+      allow(JrcCampaigns::EmailSender).to receive(:new).and_return(sender)
+      expect(sender).to receive(:perform).once.and_return(external_id: 'qa-mail-id', contact: contact, conversation: mail_conversation, message: message)
+      2.times { JrcCampaigns::DispatchStepService.new(recipient: recipient, step: step).perform }
+      expect(recipient.reload).to be_sent
+      expect(recipient.deliveries.sole.external_id).to eq('qa-mail-id')
+    end
+
+    it 'requires a new review after the email subject changes' do
+      contact
+      campaign.request_review!
+      campaign.approve!(admin, campaign.review_digest)
+      step.update!(subject: 'Outro assunto')
+      expect(campaign.reload.approval_valid?).to be_falsey
+    end
+  end
+
   context 'with recorded consent' do
     before do
       JrcCampaigns::Consent.create!(account: account, phone_number: contact.phone_number, evidence: 'Signed form', recorded_by: admin,
@@ -92,7 +124,8 @@ RSpec.describe 'Campaign sending governance' do # rubocop:disable RSpec/Describe
     context 'with a queued recipient' do
       let(:execution) { campaign.executions.create!(run_number: 1, status: 'running') }
       let(:recipient) do
-        execution.recipients.create!(campaign: campaign, inbox: inbox, contact: contact, phone_number: contact.phone_number)
+        execution.recipients.create!(campaign: campaign, inbox: inbox, contact: contact, phone_number: contact.phone_number,
+                                     destination: contact.phone_number)
       end
       let(:service) { JrcCampaigns::DispatchStepService.new(recipient: recipient, step: step) }
 

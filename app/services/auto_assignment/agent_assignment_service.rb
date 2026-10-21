@@ -9,8 +9,10 @@ class AutoAssignment::AgentAssignmentService
   end
 
   def perform
-    new_assignee = find_assignee
-    conversation.update(assignee: new_assignee) if new_assignee
+    conversation.account.with_lock do
+      new_assignee = find_assignee
+      conversation.update(assignee: new_assignee) if new_assignee
+    end
   end
 
   private

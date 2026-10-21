@@ -6,6 +6,7 @@ class JrcOperations::SettingsController < JrcOperations::BaseController
       service_desk_enabled: JrcServiceDesk::ModulePolicy.new(JrcOperations::Access.r2_context(Current.account_user), Current.account).show?,
       projects_enabled: JrcOperations::Access.project_access?(Current.account_user),
       crm_enabled: JrcOperations::Access.crm?(Current.account_user),
+      contact_center_enabled: JrcOperations::Access.contact_center?(Current.account_user),
       can_create_project: JrcOperations::Access.project_creator?(Current.account_user)
     } }
   end

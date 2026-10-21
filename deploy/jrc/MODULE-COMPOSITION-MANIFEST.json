@@ -21,8 +21,8 @@
     {
       "path": ".github/workflows/nico-broker-candidate.yml",
       "baseSha256": null,
-      "sha256": "5b8dcbe7ae071a16d998fd73238368e846e46b3b88ac6a98bcf28aebe2a91164",
-      "bytes": 10991
+      "sha256": "1cf643cf2950e0c206e7a7d446adc6cd7869573baf5f57a9580f3e233fccea76",
+      "bytes": 12407
     },
     {
       "path": "app/controllers/api/v1/accounts/jrc_domain_commands_controller.rb",
@@ -87,8 +87,8 @@
     {
       "path": "app/javascript/dashboard/components-next/jrcCopilot/JrcCopilotPanel.vue",
       "baseSha256": "c8e6559825c8adaebdea8fd4556747ef074332ef75aa89e737b574f5f4560b19",
-      "sha256": "3a4b2a290dce693ceed8dfe9085096d6db9ee72a2d5e208a537a10944d35748d",
-      "bytes": 39138
+      "sha256": "d0bfd2e352cf3f87efceaafff4958baeda08bcc2446fdfcefdea86a38d8eb5fd",
+      "bytes": 39521
     },
     {
       "path": "app/javascript/dashboard/components-next/jrcCopilot/JrcCopilotQuickPanel.vue",
@@ -123,14 +123,14 @@
     {
       "path": "app/javascript/dashboard/components-next/jrcCopilot/specs/nicoComposerUX.spec.js",
       "baseSha256": null,
-      "sha256": "d37ac30d338bd542a65cb1566dba192b0f11151f181404962d6da06f54644495",
-      "bytes": 2648
+      "sha256": "8e485f503781c4c7fc59d35c79680570488000c2d6ffe260c889998cbcc81707",
+      "bytes": 2982
     },
     {
       "path": "app/javascript/dashboard/components-next/jrcCopilot/specs/nicoQuickUI.spec.js",
       "baseSha256": "fcf4e8a3c8a103023337792eeb909e6123eedad61389d857e52b72b5005925fb",
-      "sha256": "adcd4ed50beb484540292031ca39933881b69605cb1c0683597b37e4a9d33ba9",
-      "bytes": 39602
+      "sha256": "5f8d8d05cf576f1fbb67548fdb1f57953e45aa16239cbe7a604e6933e445a8f3",
+      "bytes": 41206
     },
     {
       "path": "app/javascript/dashboard/components-next/jrcCopilot/specs/nicoVoiceConversation.spec.js",
@@ -153,8 +153,8 @@
     {
       "path": "app/javascript/dashboard/components-next/sidebar/Sidebar.vue",
       "baseSha256": "4eb35689e3727861a17007c90d86e85cdfae3955409b6150261010e992406358",
-      "sha256": "4e45eb13b79bf563d24dd4dca7abeea33ec775cb06deeba843a3bcf9fc7e684b",
-      "bytes": 60493
+      "sha256": "7f5973a75831138fdf3b2e10d8a7d5af7e79751972d666dd358bbe1b891f4020",
+      "bytes": 64601
     },
     {
       "path": "app/javascript/dashboard/i18n/locale/en/jrcNico.json",
@@ -165,8 +165,8 @@
     {
       "path": "app/javascript/dashboard/i18n/locale/en/relationship.json",
       "baseSha256": "ef6d35ee197367f4838da764aa653f40818e83091e0b702674c937b16ff070f3",
-      "sha256": "6414029600066dc37f486b5b7611ee63c67ab9c8119a5091dc4f4e441a85d3a2",
-      "bytes": 45107
+      "sha256": "65c56463c6e769fede51d211e26a366df71c92c9012ca6035e8e081943a0af16",
+      "bytes": 45159
     },
     {
       "path": "app/javascript/dashboard/routes/dashboard/jrcFlows/FlowsWorkspace.vue",
@@ -309,8 +309,8 @@
     {
       "path": "app/jobs/send_reply_job.rb",
       "baseSha256": "439ead02ef0873d96f511a3dd6ff1f1c8e23d02fd1d53654abc26af666982884",
-      "sha256": "439ead02ef0873d96f511a3dd6ff1f1c8e23d02fd1d53654abc26af666982884",
-      "bytes": 3410
+      "sha256": "da6b4251a8d78ab8357078f30c8764dc7cc7c88866b537d3d9643a0864e86521",
+      "bytes": 3494
     },
     {
       "path": "app/jobs/webhook_job.rb",
@@ -765,7 +765,7 @@
     {
       "path": "config/jrc_flow_ownership_guards.json",
       "baseSha256": null,
-      "sha256": "da231b9ca8c44b56234f106aee2e8d5acd34caf41fa63787d5a69655db81a3f0",
+      "sha256": "2197d3f521557bc1c7bda59c989180f3ed10165348534a1bfcc3a2bb2b459cff",
       "bytes": 11350
     },
     {
@@ -777,14 +777,14 @@
     {
       "path": "config/routes.rb",
       "baseSha256": "a00b0f9b8f9735ec0673eed1719ac5b5df16f8b19e24bbd20cb7bd2cfee38596",
-      "sha256": "35425836a070f749bb09f3b729047a4254adc31f81635025941d0f3104ca3534",
-      "bytes": 63099
+      "sha256": "9c1c6ee23c4eec7e98dd5f21b18c865f51b835771571d37ea3b15e12a1e38f01",
+      "bytes": 63506
     },
     {
       "path": "config/schedule.yml",
       "baseSha256": "be8bbc19451f6acb9d15919a08b6cc860bc8dbb4bc0630f1a4a58a9ef8ad751d",
-      "sha256": "ddb57f1fa42f722022e0020485695226be3a67308dd13b475048532c55f4c2ed",
-      "bytes": 3725
+      "sha256": "5cbb87b34c7b7c287f505ebf662853ce46c7bf22055c83bf5f8abff0a75f600a",
+      "bytes": 3965
     },
     {
       "path": "db/functions/20261015160000_native_responder_config_fence.sql",
@@ -963,8 +963,8 @@
     {
       "path": "spec/jobs/send_reply_job_nico_composition_spec.rb",
       "baseSha256": null,
-      "sha256": "887e51d2fb05c381d12ed5952faef6c9c018b32afa6d12668f2632cc6ecb8eb2",
-      "bytes": 5995
+      "sha256": "ac9dd18d3b448a372248bc173507ab6a4abf69e210a3defb349a36850706d41d",
+      "bytes": 6024
     },
     {
       "path": "spec/requests/api/v1/accounts/relationship/reviewed_batches_spec.rb",
@@ -1059,8 +1059,8 @@
     {
       "path": "spec/services/jrc_nico/broker_send_commit_gate_spec.rb",
       "baseSha256": null,
-      "sha256": "fa26f7d0850cf565c066be9cc3f1190ac07426314afe287cc8fa2ed0e44fb3b5",
-      "bytes": 18237
+      "sha256": "0a27a6cba7799ad752d8287f62f121132af21e9aba17e42104f09e541de82b53",
+      "bytes": 18316
     },
     {
       "path": "spec/services/jrc_relationship/playbook_flow_webhook_delivery_spec.rb",
@@ -1095,8 +1095,8 @@
     {
       "path": "spec/support/jrc_service_desk_concurrency.rb",
       "baseSha256": "20e912cab5dac9c2a1dec52c8a40df87b9895c201302033e0b59f6200c9c5084",
-      "sha256": "6668db652f0932969b22f3388c824d1a22d5456826bb87f0e60e6ffbc545ec44",
-      "bytes": 1699
+      "sha256": "de7f93a493fa3388b55ea9bf3d1d4677d3c4fd2b2b258b1e9a456bd869296351",
+      "bytes": 1817
     }
   ]
 }

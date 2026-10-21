@@ -3,9 +3,6 @@
 # Table name: jrc_campaigns
 #
 #  id                   :bigint           not null, primary key
-#  approval_expires_at  :datetime
-#  approved_at          :datetime
-#  approved_digest      :string
 #  audience_config      :jsonb            not null
 #  audience_type        :string           default("all_contacts"), not null
 #  clicked_count        :integer          default(0), not null
@@ -14,6 +11,7 @@
 #  delay_max_seconds    :integer          default(20), not null
 #  delay_min_seconds    :integer          default(5), not null
 #  delivered_count      :integer          default(0), not null
+#  delivery_channel     :string           default("whatsapp"), not null
 #  estimated_recipients :integer          default(0), not null
 #  failed_count         :integer          default(0), not null
 #  follow_up_config     :jsonb            not null
@@ -26,8 +24,6 @@
 #  read_count           :integer          default(0), not null
 #  recurrence_config    :jsonb            not null
 #  replied_count        :integer          default(0), not null
-#  review_digest        :string
-#  review_snapshot      :jsonb
 #  rotation_mode        :string           default("round_robin"), not null
 #  scheduled_at         :datetime
 #  sending_window       :jsonb            not null
@@ -38,23 +34,21 @@
 #  created_at           :datetime         not null
 #  updated_at           :datetime         not null
 #  account_id           :bigint           not null
-#  approved_by_id       :bigint
 #  created_by_id        :bigint
 #  inbox_id             :bigint
 #
 # Indexes
 #
-#  index_jrc_campaigns_on_account_id                   (account_id)
-#  index_jrc_campaigns_on_account_id_and_scheduled_at  (account_id,scheduled_at)
-#  index_jrc_campaigns_on_account_id_and_status        (account_id,status)
-#  index_jrc_campaigns_on_approved_by_id               (approved_by_id)
-#  index_jrc_campaigns_on_created_by_id                (created_by_id)
-#  index_jrc_campaigns_on_inbox_id                     (inbox_id)
+#  index_jrc_campaigns_on_account_id                       (account_id)
+#  index_jrc_campaigns_on_account_id_and_delivery_channel  (account_id,delivery_channel)
+#  index_jrc_campaigns_on_account_id_and_scheduled_at      (account_id,scheduled_at)
+#  index_jrc_campaigns_on_account_id_and_status            (account_id,status)
+#  index_jrc_campaigns_on_created_by_id                    (created_by_id)
+#  index_jrc_campaigns_on_inbox_id                         (inbox_id)
 #
 # Foreign Keys
 #
 #  fk_rails_...  (account_id => accounts.id)
-#  fk_rails_...  (approved_by_id => users.id)
 #  fk_rails_...  (created_by_id => users.id)
 #  fk_rails_...  (inbox_id => inboxes.id)
 #
@@ -82,6 +76,7 @@ class JrcCampaigns::Campaign < ApplicationRecord
   ROTATIONS = %w[round_robin least_used priority random weighted].freeze
   CONVERSATION_MODES = %w[reply_only pending open].freeze
   RECURRENCES = %w[none daily weekly monthly custom].freeze
+  DELIVERY_CHANNELS = %w[whatsapp email].freeze
   InboxLink = Data.define(:inbox, :weight)
 
   enum :status, STATUSES.index_with(&:itself)
@@ -92,6 +87,7 @@ class JrcCampaigns::Campaign < ApplicationRecord
   validates :audience_type, inclusion: { in: AUDIENCES }
   validates :rotation_mode, inclusion: { in: ROTATIONS }
   validates :conversation_mode, inclusion: { in: CONVERSATION_MODES }
+  validates :delivery_channel, inclusion: { in: DELIVERY_CHANNELS }
   validates :delay_min_seconds, :delay_max_seconds, numericality: { greater_than_or_equal_to: 0 }
   validates :scheduled_at, presence: true, if: -> { trigger_type == 'scheduled' }
   validate :delay_range_is_valid
@@ -161,13 +157,54 @@ class JrcCampaigns::Campaign < ApplicationRecord
   def sending_inbox_links
     links = enabled_campaign_inboxes
     return links if links.any?
-    return [] unless inbox&.channel_type == 'Channel::Whatsapp'
+    return [] unless accepts_sending_inbox?(inbox)
 
     [InboxLink.new(inbox: inbox, weight: 1)]
   end
 
+  def accepts_sending_inbox?(candidate)
+    return false unless candidate && candidate.account_id == account_id
+    return true if candidate.channel_type == expected_channel_type
+
+    whatsapp? && JrcCampaigns::EvolutionConnector.for(candidate).present?
+  end
+
+  def evolution_connectors
+    sending_inbox_links.filter_map { |link| JrcCampaigns::EvolutionConnector.for(link.inbox) }
+  end
+
+  def ensure_sender_compatibility!
+    invalid = sending_inbox_links.any? { |link| !accepts_sending_inbox?(link.inbox) }
+    connectors = evolution_connectors
+    reason = if invalid
+               'Caixa remetente não autorizada para esta conta e canal.'
+             elsif connectors.any? && sending_inbox_links.size != connectors.size
+               'Use campanhas separadas para Evolution Demo e WhatsApp oficial.'
+             elsif connectors.any? && steps.any? { |step| step.kind == 'template' }
+               'Templates Meta exigem uma caixa WhatsApp oficial.'
+             elsif connectors.any? && delay_min_seconds < connectors.map(&:min_interval_seconds).max
+               'O intervalo da campanha Evolution deve respeitar o mínimo configurado para a caixa.'
+             end
+    return unless reason
+
+    errors.add(:base, reason)
+    raise ActiveRecord::RecordInvalid, self
+  end
+
   def latest_execution
     executions.first
+  end
+
+  def whatsapp?
+    delivery_channel == 'whatsapp'
+  end
+
+  def email?
+    delivery_channel == 'email'
+  end
+
+  def expected_channel_type
+    email? ? 'Channel::Email' : 'Channel::Whatsapp'
   end
 
   def editable?
@@ -190,6 +227,7 @@ class JrcCampaigns::Campaign < ApplicationRecord
   def legacy_inbox_belongs_to_account
     errors.add(:inbox, 'deve pertencer à mesma conta') if inbox && inbox.account_id != account_id
   end
+
 
   def ensure_status!(*allowed)
     return if status.in?(allowed)
@@ -236,7 +274,8 @@ class JrcCampaigns::Campaign < ApplicationRecord
   end
 
   def audience_changed?
-    new_record? || will_save_change_to_audience_type? || will_save_change_to_audience_config? || will_save_change_to_inbox_id?
+    new_record? || will_save_change_to_audience_type? || will_save_change_to_audience_config? ||
+      will_save_change_to_inbox_id? || will_save_change_to_delivery_channel?
   end
 
   def refresh_estimated_recipients

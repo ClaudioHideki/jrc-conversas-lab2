@@ -158,6 +158,27 @@ const hasServiceDesk = computed(() =>
   ) === true
 );
 
+const hasContactCenter = computed(
+  () =>
+    isFeatureEnabledonAccount.value(
+      accountId.value,
+      FEATURE_FLAGS.JRC_CONTACT_CENTER
+    ) === true
+);
+
+const hasContactCenterAccess = computed(() => {
+  if (!hasContactCenter.value) return false;
+  const currentAccount = currentUser.value?.accounts?.find(
+    account => Number(account.id) === Number(accountId.value)
+  );
+  const permissions = currentAccount?.permissions || [];
+  return (
+    permissions.includes('administrator') ||
+    permissions.includes('agent') ||
+    permissions.includes('jrc_contact_center_view')
+  );
+});
+
 const { status: operationsStatus } = useOperations();
 const serviceDeskNavigation = useServiceDeskNavigation(accountId, currentUserId, hasServiceDesk);
 const operatorEnabled = computed(() => isFeatureEnabledonAccount.value(accountId.value, 'jrc_operator'));
@@ -1080,6 +1101,32 @@ const flattenModule = (item, overrides = {}) => {
   };
 };
 
+const contactCenterRouteNames = [
+  'jrc_contact_center_cockpit',
+  'jrc_contact_center_call',
+  'jrc_contact_center_after_call',
+  'jrc_contact_center_occurrences',
+  'jrc_contact_center_customer_360',
+  'jrc_contact_center_supervisor',
+  'jrc_contact_center_finance',
+  'jrc_contact_center_coes',
+  'jrc_contact_center_control_desk',
+  'jrc_contact_center_ivr',
+  'jrc_contact_center_order_lookup',
+  'jrc_contact_center_pabx',
+  'jrc_contact_center_recordings',
+  'jrc_contact_center_reports',
+  'jrc_contact_center_surveys',
+  'jrc_contact_center_security',
+  'jrc_contact_center_migration',
+  'jrc_contact_center_settings',
+  'ramal_index',
+];
+
+const useUnifiedAttendanceNavigation = computed(
+  () => hasContactCenterAccess.value
+);
+
 const menuItems = computed(() => {
   const items = legacyMenuItems.value;
   const find = name => items.find(item => item.name === name);
@@ -1094,6 +1141,21 @@ const menuItems = computed(() => {
   );
 
   return [
+    useUnifiedAttendanceNavigation.value
+      ? {
+          name: 'JRC Call Center',
+          label: t('JRC_CONTACT_CENTER.NAVIGATION.CALL_CENTER'),
+          icon: 'i-lucide-headset',
+          to: accountScopedRoute('jrc_contact_center_cockpit'),
+          activeOn: contactCenterRouteNames,
+        }
+      : null,
+    useUnifiedAttendanceNavigation.value
+      ? {
+          ...find('Inbox'),
+          label: t('JRC_CONTACT_CENTER.NAVIGATION.ATTENDANCE'),
+        }
+      : find('Inbox'),
     {
       name: 'JRC Cockpit',
       label: 'Cockpit',
@@ -1102,8 +1164,7 @@ const menuItems = computed(() => {
       activeOn: ['jrc_cockpit', 'jrc_service_center'],
       ignoreFeatureFlag: true,
     },
-    find('Inbox'),
-    conversationModule
+    !useUnifiedAttendanceNavigation.value && conversationModule
       ? {
           ...conversationModule,
           label: 'Conversas',
@@ -1113,14 +1174,16 @@ const menuItems = computed(() => {
           ),
         }
       : null,
-    {
-      name: 'JRC Email Center',
-      label: 'E-mails',
-      icon: 'i-lucide-mail',
-      to: accountScopedRoute('jrc_email_center'),
-      activeOn: ['jrc_email_center', 'conversation_through_inbox'],
-      ignoreFeatureFlag: true,
-    },
+    !useUnifiedAttendanceNavigation.value
+      ? {
+          name: 'JRC Email Center',
+          label: 'E-mails',
+          icon: 'i-lucide-mail',
+          to: accountScopedRoute('jrc_email_center'),
+          activeOn: ['jrc_email_center', 'conversation_through_inbox'],
+          ignoreFeatureFlag: true,
+        }
+      : null,
     hasJrcBroker.value
       ? {
           name: 'JRC Broker Connections',
@@ -1131,49 +1194,55 @@ const menuItems = computed(() => {
           ignoreFeatureFlag: true,
         }
       : null,
-    {
-      name: 'JRC Calls Center',
-      label: 'Ligações',
-      icon: 'i-lucide-phone-call',
-      to: accountScopedRoute('jrc_calls_center'),
-      activeOn: [
-        'jrc_calls_center',
-        'ramal_index',
-        'calls_dashboard_index',
-      ],
-      children: [
-        {
-          name: 'Calls Overview',
-          label: 'Visão geral',
-          icon: 'i-lucide-layout-dashboard',
+    !useUnifiedAttendanceNavigation.value
+      ? {
+          name: 'JRC Calls Center',
+          label: 'Ligações',
+          icon: 'i-lucide-phone-call',
           to: accountScopedRoute('jrc_calls_center'),
-          activeOn: ['jrc_calls_center'],
-        },
-        {
-          name: 'Webphone',
-          label: sipConfigured.value ? 'Ramal JRC' : 'Ramal não configurado',
-          icon: 'i-lucide-phone',
-          to: accountScopedRoute('ramal_index'),
-          activeOn: ['ramal_index'],
-          disabled: false,
-        },
-        ...(isCallsAvailable.value
-          ? [
-              {
-                name: 'Call History',
-                label: 'Histórico de ligações',
-                icon: 'i-lucide-history',
-                to: accountScopedRoute('calls_dashboard_index'),
-                activeOn: ['calls_dashboard_index'],
-              },
-            ]
-          : []),
-      ],
-      ignoreFeatureFlag: true,
-    },
+          activeOn: [
+            'jrc_calls_center',
+            'ramal_index',
+            'calls_dashboard_index',
+          ],
+          children: [
+            {
+              name: 'Calls Overview',
+              label: 'Visão geral',
+              icon: 'i-lucide-layout-dashboard',
+              to: accountScopedRoute('jrc_calls_center'),
+              activeOn: ['jrc_calls_center'],
+            },
+            {
+              name: 'Webphone',
+              label: sipConfigured.value
+                ? 'Ramal JRC'
+                : 'Ramal não configurado',
+              icon: 'i-lucide-phone',
+              to: accountScopedRoute('ramal_index'),
+              activeOn: ['ramal_index'],
+              disabled: false,
+            },
+            ...(isCallsAvailable.value
+              ? [
+                  {
+                    name: 'Call History',
+                    label: 'Histórico de ligações',
+                    icon: 'i-lucide-history',
+                    to: accountScopedRoute('calls_dashboard_index'),
+                    activeOn: ['calls_dashboard_index'],
+                  },
+                ]
+              : []),
+          ],
+          ignoreFeatureFlag: true,
+        }
+      : null,
     {
       name: 'WhatsApp Calling',
-      label: 'WhatsApp',
+      label: useUnifiedAttendanceNavigation.value
+        ? t('JRC_CONTACT_CENTER.NAVIGATION.WHATSAPP_CALLING')
+        : 'WhatsApp',
       icon: 'i-ri-whatsapp-fill',
       to: accountScopedRoute('whatsapp_calling_index'),
       activeOn: ['whatsapp_calling_index'],
@@ -1222,7 +1291,9 @@ const menuItems = computed(() => {
           name: 'JRC Agenda',
           label: 'Minha Agenda',
           icon: 'i-lucide-calendar-days',
-      to: accountScopedRoute('jrc_operations_agenda'), activeOn: ['jrc_operations_agenda'], ignoreFeatureFlag: true,
+          to: accountScopedRoute('jrc_operations_agenda'),
+          activeOn: ['jrc_operations_agenda'],
+          ignoreFeatureFlag: true,
         }
       : null,
     hasCustomerMaster.value
@@ -1493,10 +1564,25 @@ const menuSections = computed(() => {
   const take = names => names.map(name => itemByName.get(name)).filter(Boolean);
 
   const mappedNames = new Set([
-    'JRC Cockpit', 'Inbox', 'Conversation', 'JRC Email Center',
-    'JRC Calls Center', 'WhatsApp Calling', 'Contacts', 'JRC AI Agents',
-    'JRC AI Insights', 'Captain', 'JRC Intelligent Automation', 'JRC Flows', 'Companies',
-    'CRM', 'Sales', 'JRC Campaigns', 'Reports', 'JRC AI Administration',
+    'JRC Cockpit',
+    'Inbox',
+    'Conversation',
+    'JRC Email Center',
+    'JRC Calls Center',
+    'JRC Call Center',
+    'WhatsApp Calling',
+    'Contacts',
+    'JRC AI Agents',
+    'JRC AI Insights',
+    'Captain',
+    'JRC Intelligent Automation',
+    'JRC Flows',
+    'Companies',
+    'CRM',
+    'Sales',
+    'JRC Campaigns',
+    'Reports',
+    'JRC AI Administration',
     'Video Conference',
     'Settings',
     'Customers',
@@ -1509,6 +1595,75 @@ const menuSections = computed(() => {
     .filter(item => item && !mappedNames.has(item.name))
     .map(item => ({ ...item }))
     .filter(Boolean);
+
+  const sharedSections = [
+    {
+      name: 'intelligence',
+      label: t('JRC_CONTACT_CENTER.NAVIGATION.INTELIGENCIA'),
+      items: take([
+        'JRC Flows',
+        'JRC AI Agents',
+        'JRC AI Insights',
+        'Captain',
+        'JRC Intelligent Automation',
+      ]),
+    },
+    {
+      name: 'administration',
+      label: t('JRC_CONTACT_CENTER.NAVIGATION.ADMINISTRACAO'),
+      items: take([
+        'JRC Service Desk Structure',
+        'JRC Approvals',
+        'JRC AI Administration',
+        'Settings',
+      ]),
+    },
+    {
+      name: 'learning',
+      label: t('JRC_HOME.LEARNING'),
+      items: [universityLink],
+    },
+    {
+      name: 'legacy-tools',
+      label: t('JRC_CONTACT_CENTER.NAVIGATION.OUTROS_RECURSOS'),
+      items: legacyExtras,
+    },
+  ];
+
+  if (useUnifiedAttendanceNavigation.value) {
+    return visibleSidebarSections([
+      {
+        name: 'attendance',
+        label: t('JRC_CONTACT_CENTER.NAV_GROUPS.ATTENDANCE'),
+        items: take(['JRC Call Center', 'Inbox', 'JRC Cockpit']),
+      },
+      {
+        name: 'crm',
+        label: t('JRC_CONTACT_CENTER.VISUAL.CRM'),
+        items: take(['CRM', 'Relationship']),
+      },
+      {
+        name: 'operations',
+        label: t('JRC_CONTACT_CENTER.NAVIGATION.OPERACOES'),
+        items: take([
+          'JRC Service Desk',
+          'JRC Projects',
+          'JRC Campaigns',
+          'Reports',
+        ]),
+      },
+      {
+        name: 'additional-channels',
+        label: t('JRC_CONTACT_CENTER.NAVIGATION.CANAIS_ADICIONAIS'),
+        items: take([
+          'WhatsApp Calling',
+          'JRC Broker Connections',
+          'Video Conference',
+        ]),
+      },
+      ...sharedSections,
+    ]);
+  }
 
   return visibleSidebarSections([
     {
@@ -1601,7 +1756,7 @@ const menuSections = computed(() => {
       class="pointer-events-none absolute inset-0 bg-[url('/brand-assets/jrc-background.jpeg')] bg-cover bg-center opacity-[0.08]"
     />
     <section
-      class="relative z-10 grid"
+      class="relative z-20 grid"
       :class="isEffectivelyCollapsed ? 'mt-3 mb-6 gap-4' : 'mt-4 mb-5 gap-4'"
     >
       <div

@@ -7,6 +7,7 @@ class JrcCampaigns::ExecutionCompletionService
   def check!
     execution.refresh_counters!
     campaign.refresh_counters!
+    return if campaign.paused? || campaign.canceled?
     return if execution.recipients.where(status: %w[queued processing]).exists?
     return if execution.recipients.where("metadata ? 'pending_step_id'").exists?
 

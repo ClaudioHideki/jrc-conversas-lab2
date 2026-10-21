@@ -27,14 +27,15 @@ class JrcCampaigns::TemplateRenderer
 
   def context
     contact = recipient.contact
+    email = recipient.respond_to?(:email) ? recipient.email : contact&.email
     {
       'nome' => recipient.name.to_s,
       'telefone' => recipient.phone_number.to_s,
-      'email' => contact&.email.to_s,
+      'email' => email.to_s,
       'contact' => {
         'name' => recipient.name.to_s,
         'phone_number' => recipient.phone_number.to_s,
-        'email' => contact&.email.to_s
+        'email' => email.to_s
       },
       'inbox' => { 'name' => inbox.name.to_s },
       'account' => { 'name' => recipient.campaign.account.name.to_s }

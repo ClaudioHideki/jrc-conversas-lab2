@@ -39,6 +39,8 @@ class JrcCampaigns::LaunchService
         contact: campaign.account.contacts.find_by(id: entry['contact_id']),
         inbox: rotation.inbox_for(index),
         name: entry['name'],
+        email: entry['email'],
+        destination: entry['destination'],
         phone_number: entry['phone_number'],
         source: entry['source'],
         metadata: entry['metadata']

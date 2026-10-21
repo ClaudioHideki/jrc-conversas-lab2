@@ -3,7 +3,10 @@ import { createStore } from 'vuex';
 import InboxList from '../InboxList.vue';
 
 vi.mock('vue-router', () => ({
-  useRoute: () => ({ query: { channel: 'whatsapp' }, params: {} }),
+  useRoute: () => ({
+    query: { channel: 'whatsapp' },
+    params: { accountId: '1' },
+  }),
   useRouter: () => ({ replace: vi.fn(), push: vi.fn() }),
 }));
 vi.mock(
@@ -33,6 +36,13 @@ describe('InboxList channel pagination', () => {
           ended: false,
         },
         getters: {
+          getCurrentUser: () => ({
+            id: 1,
+            accounts: [{ id: 1, permissions: ['administrator'] }],
+          }),
+          getCurrentRole: () => 'administrator',
+          getCurrentCustomRoleId: () => null,
+          'accounts/isFeatureEnabledonAccount': () => () => false,
           'inboxes/getAllInboxes': () => inboxes,
           'inboxes/getInboxById': () => id =>
             inboxes.find(inbox => inbox.id === id),
@@ -58,7 +68,7 @@ describe('InboxList channel pagination', () => {
       );
       const loadMore = wrapper
         .findAll('button')
-        .find(button => button.text() === 'Carregar mais conversas');
+        .find(button => button.text() === 'Carregar mais atendimentos');
       expect(loadMore).toBeDefined();
       await loadMore.trigger('click');
       expect(dispatch).toHaveBeenCalledWith(
@@ -75,7 +85,7 @@ describe('InboxList channel pagination', () => {
       expect(
         wrapper
           .findAll('button')
-          .some(button => button.text() === 'Carregar mais conversas')
+          .some(button => button.text() === 'Carregar mais atendimentos')
       ).toBe(false);
       wrapper.unmount();
     }

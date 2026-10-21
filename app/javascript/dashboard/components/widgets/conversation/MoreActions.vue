@@ -17,7 +17,7 @@ import {
   CMD_UNMUTE_CONVERSATION,
 } from 'dashboard/helper/commandbar/events';
 
-// No props needed as we're getting currentChat from the store directly
+defineProps({ requestClosing: { type: Function, default: null } });
 const store = useStore();
 const { t } = useI18n();
 
@@ -135,6 +135,7 @@ onUnmounted(() => {
 <template>
   <div class="actions--container relative flex items-center gap-2">
     <ResolveAction
+      :request-closing="requestClosing"
       :conversation-id="currentChat.id"
       :status="currentChat.status"
       prominent

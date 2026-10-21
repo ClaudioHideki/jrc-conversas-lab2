@@ -33,9 +33,11 @@ export const hasMessageFailedWithExternalError = pendingMessage => {
 
 // actions
 const actions = {
-  getConversation: async ({ commit }, conversationId) => {
+  getConversation: async ({ commit, rootGetters }, conversationId) => {
+    const accountId = rootGetters.getCurrentAccountId;
     try {
       const response = await ConversationApi.show(conversationId);
+      if (rootGetters.getCurrentAccountId !== accountId) return;
       commit(types.UPDATE_CONVERSATION, response.data);
       commit(`contacts/${types.SET_CONTACT_ITEM}`, response.data.meta.sender);
     } catch (error) {
@@ -43,13 +45,19 @@ const actions = {
     }
   },
 
-  fetchAllConversations: async ({ commit, state, dispatch }) => {
+  fetchAllConversations: async ({ commit, state, dispatch, rootGetters }) => {
+    const accountId = rootGetters.getCurrentAccountId;
     commit(types.SET_LIST_LOADING_STATUS);
     try {
       const params = state.conversationFilters;
       const {
         data: { data },
       } = await ConversationApi.get(params);
+      if (
+        rootGetters.getCurrentAccountId !== accountId ||
+        state.conversationFilters !== params
+      )
+        return;
       buildConversationList(
         { commit, dispatch },
         params,

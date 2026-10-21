@@ -9,6 +9,8 @@ class JrcCampaigns::DispatchStepService
   def perform
     @provider_attempted = false
     @accepted_external_id = nil
+    @deferred_for_campaign_state = false
+    @evolution_connector = JrcCampaigns::EvolutionConnector.for(inbox)
     delivery = recipient.deliveries.find_by(step: step)
     return reconcile_delivery(delivery) if delivery&.sent_at.present?
 
@@ -35,11 +37,22 @@ class JrcCampaigns::DispatchStepService
     rejection = sending_rejection
     return skip_delivery(delivery, rejection) if rejection
 
-    @accepted_external_id = dispatch_message
+    @accepted_external_id = dispatch_message(delivery)
+    return if @deferred_for_campaign_state
     raise 'O provedor não retornou o identificador da mensagem' if @accepted_external_id.blank?
 
     delivery.update!(external_id: @accepted_external_id, status: 'sent', sent_at: Time.current, error_message: nil)
+    JrcCampaigns::EvolutionSafetyGate.new(@evolution_connector).complete! if @evolution_connector
     reconcile_delivery(delivery)
+  rescue JrcCampaigns::EvolutionSafetyGate::Throttled => e
+    delivery.update!(status: 'queued')
+    recipient.update!(status: 'queued', metadata: recipient.metadata.to_h.merge('pending_step_id' => step.id))
+    target_time = JrcCampaigns::ScheduleWindow.new(campaign).next_time(e.retry_at)
+    JrcCampaigns::DispatchStepJob.set(wait_until: target_time).perform_later(recipient.id, step.id)
+  rescue JrcCampaigns::EvolutionSafetyGate::Halted => e
+    delivery.update!(status: 'queued', error_message: e.message)
+    recipient.update!(status: 'queued', error_message: e.message, metadata: recipient.metadata.to_h.merge('pending_step_id' => step.id))
+    campaign.pause! if campaign.reload.running?
   rescue StandardError => e
     handle_failure(delivery, e)
   end
@@ -63,6 +76,9 @@ class JrcCampaigns::DispatchStepService
 
   def sending_rejection
     campaign.reload.ensure_approved!
+    return 'Contato bloqueado.' if recipient.contact&.reload&.blocked?
+    return nil if campaign.email?
+
     eligibility.rejection_reason
   rescue ActiveRecord::RecordInvalid => e
     e.record.errors.full_messages.join(', ')
@@ -85,7 +101,8 @@ class JrcCampaigns::DispatchStepService
   end
 
   def eligibility
-    JrcCampaigns::EligibilityPolicy.new(account: campaign.account, phone_number: recipient.phone_number, contact: recipient.contact)
+    JrcCampaigns::EligibilityPolicy.new(account: campaign.account, phone_number: recipient.phone_number, contact: recipient.contact,
+                                       purpose: @evolution_connector ? 'whatsapp_campaigns' : nil)
   end
 
   def skip_delivery(delivery, reason)
@@ -106,9 +123,15 @@ class JrcCampaigns::DispatchStepService
         campaign: campaign, execution: recipient.execution, recipient: recipient, event_type: 'message_sent',
         payload: { step_id: step.id, external_id: delivery.external_id, inbox_id: inbox.id, kind: step.kind }
       )
-      attach_existing_conversation
-      create_conversation_if_requested
-      record_conversation_message(delivery, delivery.external_id)
+      unless campaign.email?
+        if @evolution_connector
+          record_evolution_message(delivery)
+        else
+          attach_existing_conversation
+          create_conversation_if_requested
+          record_conversation_message(delivery, delivery.external_id)
+        end
+      end
       advance_execution
       delivery.update!(metadata: delivery.metadata.to_h.except('reconciliation_error').merge('reconciled_at' => Time.current.iso8601))
     end
@@ -121,7 +144,14 @@ class JrcCampaigns::DispatchStepService
     schedule_next_step_or_finish
   end
 
-  def dispatch_message
+  def dispatch_message(delivery)
+    return dispatch_evolution(delivery) if @evolution_connector
+
+    if campaign.email?
+      @provider_attempted = true
+      return dispatch_email(delivery).fetch(:external_id)
+    end
+
     channel = inbox.channel
     raise 'A caixa selecionada não é WhatsApp' unless channel.is_a?(Channel::Whatsapp)
 
@@ -142,6 +172,76 @@ class JrcCampaigns::DispatchStepService
 
       external_id
     end
+  end
+
+  def dispatch_evolution(delivery)
+    next_time = JrcCampaigns::ScheduleWindow.new(campaign).next_time(Time.current)
+    raise JrcCampaigns::EvolutionSafetyGate::Throttled, next_time if next_time.future?
+
+    raise ArgumentError, 'Template Meta exige uma caixa WhatsApp oficial.' if step.kind == 'template'
+    if recipient.phone_number.delete_prefix('+') == @evolution_connector.sender_number
+      raise ArgumentError, 'O número remetente não pode ser o destinatário da campanha.'
+    end
+
+    client = JrcCampaigns::EvolutionClient.new(@evolution_connector)
+    delivery.update!(metadata: delivery.metadata.to_h.merge('evolution_connector' => @evolution_connector.public_configuration))
+    client.verify_sender!
+    # Preflight may take time: recheck approval, cancellation and revocation at the send boundary.
+    @deferred_for_campaign_state = defer_for_campaign_state(delivery)
+    return if @deferred_for_campaign_state
+
+    rejection = sending_rejection
+    raise ArgumentError, rejection if rejection
+
+    JrcCampaigns::EvolutionSafetyGate.new(@evolution_connector).reserve!
+    @provider_attempted = true
+    raw_id = client.send_message(
+      phone_number: recipient.phone_number, kind: step.kind, body: renderer.render(effective_value('body', step.body)),
+      media_url: effective_value('media_url', step.media_url), file_name: effective_value('file_name', step.file_name)
+    )
+    @accepted_external_id = "evolution:#{inbox.account_id}:#{inbox.id}:#{raw_id}"
+    delivery.update!(metadata: delivery.metadata.to_h.merge('evolution_id' => raw_id))
+    @accepted_external_id
+  end
+
+  def record_evolution_message(delivery)
+    raw_id = delivery.metadata.to_h['evolution_id'].presence || delivery.external_id.split(':', 4).last
+    message = JrcCampaigns::EvolutionMessageRecorder.call(
+      account: campaign.account, inbox: inbox, phone_number: recipient.phone_number, external_id: raw_id,
+      kind: step.kind, body: renderer.render(effective_value('body', step.body)), media_url: effective_value('media_url', step.media_url),
+      attributes: { 'jrc_campaign_id' => campaign.id, 'jrc_campaign_execution_id' => recipient.execution_id, 'jrc_campaign_step_id' => step.id }
+    )
+    recipient.update!(contact: message.conversation.contact, conversation: message.conversation)
+    delivery.update!(metadata: delivery.metadata.to_h.merge('message_id' => message.id, 'evolution_id' => raw_id))
+    JrcCampaigns::EvolutionStatusJob.set(wait: 1.minute).perform_later('campaign', delivery.id)
+  end
+
+  def dispatch_email(delivery)
+    result = JrcCampaigns::EmailSender.new(
+      account: campaign.account,
+      user: campaign.created_by,
+      inbox: inbox,
+      email: recipient.email,
+      name: recipient.name,
+      subject: renderer.render(effective_value('subject', step.subject)),
+      body: renderer.render(effective_value('body', step.body)),
+      media_asset_id: effective_value('media_asset_id', step.media_asset_id),
+      conversation: recipient.conversation,
+      conversation_status: email_conversation_status,
+      additional_attributes: {
+        'campaign_id' => campaign.id,
+        'jrc_campaign_id' => campaign.id,
+        'jrc_campaign_execution_id' => recipient.execution_id,
+        'jrc_campaign_step_id' => step.id
+      }
+    ).perform
+    recipient.update!(contact: result[:contact], conversation: result[:conversation])
+    delivery.update!(metadata: delivery.metadata.to_h.merge('message_id' => result[:message].id))
+    result
+  end
+
+  def email_conversation_status
+    campaign.conversation_mode == 'open' ? 'open' : 'pending'
   end
 
   def send_template(channel)
@@ -266,6 +366,11 @@ class JrcCampaigns::DispatchStepService
   end
 
   def handle_failure(delivery, error)
+    campaign.pause! if @evolution_connector && @accepted_external_id.blank? && campaign.reload.running?
+    if @evolution_connector && @provider_attempted
+      JrcCampaigns::EvolutionSafetyGate.new(@evolution_connector).halt!(error.message) if @accepted_external_id.blank?
+      return fail_delivery(error) if error.is_a?(JrcCampaigns::EvolutionClient::Rejected)
+    end
     if @accepted_external_id.present? && delivery.reload.sent_at.blank?
       delivery.update!(external_id: @accepted_external_id, status: 'sent', sent_at: Time.current)
     end

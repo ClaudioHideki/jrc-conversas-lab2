@@ -658,6 +658,7 @@
       "JrcServiceDesk::Ticket": "Ticket",
       "JrcRelationship::Qbr": "QBR / meeting",
       "Call": "Call",
+      "JrcContactCenter::CallSession": "PABX call",
       "company_id": "Customer / company",
       "unit_id": "Service Desk unit",
       "team_id": "Team",

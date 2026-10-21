@@ -52,7 +52,7 @@ class JrcNico::Helpdesk::GroupDraftActions
       raise ArgumentError, 'Incident event already has a native campaign draft' if existing
 
       list = JrcCampaigns::Sanitizer.new(account: @context.account, user: @context.member.user,
-        name: @command.arguments.fetch('name'), entries: @native.cohort.entries).perform
+        name: @command.arguments.fetch('name'), entries: @native.cohort.entries, include_channel_statuses: false).perform
       row = @context.account.jrc_campaigns.create!(name: @command.arguments.fetch('name'), created_by: @context.member.user,
         status: 'draft', trigger_type: 'manual', audience_type: 'sanitized_list', inbox_id: nil,
         audience_config: { 'sanitized_list_id' => list.id }, metadata: { 'nico_helpdesk' => draft_origin })
@@ -75,12 +75,13 @@ class JrcNico::Helpdesk::GroupDraftActions
   def campaign_result
     row = @context.account.jrc_campaigns.find(@command.result.fetch('id'))
     list = @context.account.jrc_campaign_sanitized_lists.find(row.audience_config.fetch('sanitized_list_id'))
-    actual = list.entries.order(:id).map { |entry| [entry.name, entry.phone_number, entry.metadata] }
-    expected = @native.cohort.entries.map { |entry| [entry.fetch('name'), entry.fetch('phone'), entry.except('name', 'phone')] }
+    actual = list.entries.order(:id).map { |entry| [entry.name, entry.phone_number, entry.email, entry.normalized_email, entry.metadata] }
+    expected = @native.cohort.entries.map { |entry| [entry.fetch('name'), entry.fetch('phone'), nil, nil, entry.except('name', 'phone')] }
     link = row.campaign_inboxes.find_by!(inbox_id: @native.inbox.id)
     valid = row.status == 'draft' && row.trigger_type == 'manual' && row.audience_type == 'sanitized_list' && row.inbox_id.nil? &&
       row.metadata == { 'nico_helpdesk' => draft_origin } && row.name == @command.arguments.fetch('name') &&
-      row.created_by_id == @context.member.user_id && list.created_by_id == @context.member.user_id && actual == expected &&
+      row.delivery_channel == 'whatsapp' && row.created_by_id == @context.member.user_id &&
+      list.created_by_id == @context.member.user_id && actual == expected &&
       !link.enabled? && row.campaign_inboxes.count == 1 && row.approved_at.nil? && row.approved_by_id.nil?
     raise Pundit::NotAuthorizedError unless valid
 
@@ -113,7 +114,7 @@ class JrcNico::Helpdesk::GroupDraftActions
     if row.is_a?(JrcCampaigns::Campaign)
       list = @context.account.jrc_campaign_sanitized_lists.find(row.audience_config.fetch('sanitized_list_id'))
       value['list_digest'] = JrcNico::Helpdesk::Definition.digest(list.entries.order(:id)
-        .map { |entry| entry.attributes.slice('id', 'name', 'phone_number', 'normalized_phone', 'status', 'reason', 'metadata') })
+        .map { |entry| entry.attributes.slice('id', 'name', 'phone_number', 'normalized_phone', 'email', 'normalized_email', 'status', 'reason', 'metadata') })
     end
     value
   end

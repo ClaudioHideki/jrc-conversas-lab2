@@ -14,6 +14,8 @@ class Api::V1::Accounts::SipCredentialsController < Api::V1::Accounts::BaseContr
 
     render json: {
       configured: true,
+      contact_center_enabled: Current.account.feature_enabled?('jrc_contact_center'),
+      contact_center_acw_pending: JrcContactCenter::Qualification.pending.exists?(account: Current.account, account_user: Current.account_user),
       enabled: credential.enabled?,
       wss_server: credential.wss_server,
       sip_domain: credential.sip_domain,

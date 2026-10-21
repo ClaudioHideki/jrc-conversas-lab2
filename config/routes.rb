@@ -2,6 +2,7 @@ Rails.application.routes.draw do
   draw :jrc_operations
   draw :jrc_approvals
   draw :jrc_operator
+  draw :jrc_contact_center
   get '/flows/portal(/:public_id)', to: 'jrc_flows/portal#show'
   post '/jrc_flows/events/:public_id', to: 'jrc_flows/events#create'
   # AUTH STARTS
@@ -500,7 +501,14 @@ Rails.application.routes.draw do
             end
           end
           namespace :jrc_campaigns do
-            resources :consents, only: [:index, :create, :destroy]
+            resources :test_authorizations, only: [:index, :create, :destroy]
+            resources :test_deliveries, only: [:index, :show]
+            resources :consents, only: [:index, :create, :destroy] do
+              collection do
+                post :import_preview
+                post :import_csv
+              end
+            end
             resource :metadata, only: :show, controller: :metadata
             resources :blacklists, only: [:index, :create, :destroy]
             resources :sanitized_lists, only: [:index, :show, :create, :destroy]

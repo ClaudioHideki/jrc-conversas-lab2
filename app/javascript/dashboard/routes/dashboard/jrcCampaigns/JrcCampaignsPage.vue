@@ -17,6 +17,8 @@ const metadata = ref({
   labels: [],
   source_inboxes: [],
   inboxes: [],
+  whatsapp_inboxes: [],
+  email_inboxes: [],
   pipelines: [],
   sanitized_lists: [],
   contacts_count: 0,
@@ -37,10 +39,16 @@ const reportCampaign = ref(null);
 const reviewCampaign = ref(null);
 const period = ref('30');
 const campaignFilter = ref('');
+const channelFilter = ref('');
 const showAdvancedFilters = ref(false);
 const statusFilters = ref([]);
 
 const tabs = computed(() => [
+  {
+    key: 'consents',
+    label: t('JRC_CAMPAIGNS.GOVERNANCE.CONSENTS'),
+    icon: 'i-lucide-shield-check',
+  },
   {
     key: 'dispatches',
     label: t('JRC_CAMPAIGNS.TABS.DISPATCHES'),
@@ -145,6 +153,11 @@ const filteredCampaigns = computed(() =>
       !statusFilters.value.includes(campaign.status)
     )
       return false;
+    if (
+      channelFilter.value &&
+      campaign.delivery_channel !== channelFilter.value
+    )
+      return false;
     return (
       !periodStart.value || new Date(campaign.created_at) >= periodStart.value
     );
@@ -234,6 +247,7 @@ const fetchAnalytics = async () => {
     const { data } = await JrcCampaignsAPI.analytics({
       period: period.value,
       campaign_id: campaignFilter.value || undefined,
+      delivery_channel: channelFilter.value || undefined,
     });
     analytics.value = data;
   } catch {
@@ -270,16 +284,15 @@ const closeWizard = () => {
   showWizard.value = false;
   editingCampaign.value = null;
 };
-const saved = async campaignToReview => {
+const saved = async () => {
   closeWizard();
-  await fetchData();
-  if (campaignToReview) reviewCampaign.value = campaignToReview;
-};
-const approvalFinished = async () => {
-  reviewCampaign.value = null;
   await fetchData();
 };
 const runAction = async (campaign, action) => {
+  if (action === 'launch' && !campaign.approval_valid) {
+    reviewCampaign.value = campaign;
+    return;
+  }
   try {
     await JrcCampaignsAPI[action](campaign.id);
     useAlert(t('JRC_CAMPAIGNS.ALERTS.ACTION_OK'));
@@ -326,7 +339,7 @@ const exportSelected = () => {
   window.open(JrcCampaignsAPI.exportUrl(campaign.id), '_blank');
 };
 
-watch([period, campaignFilter], fetchAnalytics);
+watch([period, campaignFilter, channelFilter], fetchAnalytics);
 onMounted(fetchData);
 </script>
 
@@ -424,13 +437,20 @@ onMounted(fetchData);
             </label>
             <label class="text-xs font-medium text-n-slate-10">
               {{ $t('JRC_CAMPAIGNS.FILTERS.CHANNEL') }}
-              <span
-                class="mt-1.5 flex items-center gap-2 rounded-xl border border-n-weak bg-n-alpha-1 px-3 py-2.5 text-sm text-n-slate-12"
+              <select
+                v-model="channelFilter"
+                class="mt-1.5 w-full rounded-xl border border-n-weak bg-n-background px-3 py-2.5 text-sm text-n-slate-12"
               >
-                <span class="i-lucide-message-circle size-4 text-n-teal-11" />{{
-                  $t('JRC_CAMPAIGNS.CHANNEL_WHATSAPP')
-                }}
-              </span>
+                <option value="">
+                  {{ $t('JRC_CAMPAIGNS.FILTERS.ALL_CHANNELS') }}
+                </option>
+                <option value="whatsapp">
+                  {{ $t('JRC_CAMPAIGNS.CHANNEL_WHATSAPP') }}
+                </option>
+                <option value="email">
+                  {{ $t('JRC_CAMPAIGNS.CHANNEL_EMAIL') }}
+                </option>
+              </select>
             </label>
             <button
               type="button"
@@ -753,8 +773,19 @@ onMounted(fetchData);
                     </td>
                     <td class="px-4 py-4 text-n-slate-11">
                       <span
-                        class="i-lucide-message-circle mr-1 inline-block size-3 text-n-teal-11"
-                      />{{ $t('JRC_CAMPAIGNS.CHANNEL_WHATSAPP') }}
+                        class="mr-1 inline-block size-3 text-n-teal-11"
+                        :class="
+                          campaign.delivery_channel === 'email'
+                            ? 'i-lucide-mail'
+                            : 'i-lucide-message-circle'
+                        "
+                      />{{
+                        $t(
+                          campaign.delivery_channel === 'email'
+                            ? 'JRC_CAMPAIGNS.CHANNEL_EMAIL'
+                            : 'JRC_CAMPAIGNS.CHANNEL_WHATSAPP'
+                        )
+                      }}
                     </td>
                     <td class="px-4 py-4 text-n-slate-11">
                       {{ formatNumber(campaign.sent_count) }}
@@ -783,21 +814,6 @@ onMounted(fetchData);
                         class="rounded-full bg-n-alpha-2 px-2.5 py-1 text-xs text-n-slate-11"
                         >{{ statusLabel(campaign.status) }}</span
                       >
-                      <p
-                        v-if="campaign.approval_valid"
-                        class="mt-2 text-xs text-n-teal-11"
-                      >
-                        {{ $t('JRC_CAMPAIGNS.GOVERNANCE.APPROVAL_UNTIL') }}
-                        {{ campaign.approval_expires_at }}
-                      </p>
-                      <p
-                        v-else-if="
-                          ['draft', 'scheduled'].includes(campaign.status)
-                        "
-                        class="mt-2 text-xs text-n-amber-11"
-                      >
-                        {{ $t('JRC_CAMPAIGNS.GOVERNANCE.REVIEW_REQUIRED') }}
-                      </p>
                     </td>
                     <td class="px-4 py-4">
                       <div class="flex justify-end gap-1">
@@ -806,7 +822,7 @@ onMounted(fetchData);
                             ['draft', 'scheduled'].includes(campaign.status)
                           "
                           type="button"
-                          class="rounded-lg p-2 text-n-brand hover:bg-n-alpha-2"
+                          class="rounded-lg p-2 text-n-violet-11 hover:bg-n-violet-3"
                           :title="$t('JRC_CAMPAIGNS.GOVERNANCE.REVIEW')"
                           @click="reviewCampaign = campaign"
                         >
@@ -817,7 +833,6 @@ onMounted(fetchData);
                           type="button"
                           class="rounded-lg p-2 text-n-teal-11 hover:bg-n-teal-3"
                           :title="$t('JRC_CAMPAIGNS.START')"
-                          :disabled="!campaign.approval_valid"
                           @click="runAction(campaign, 'launch')"
                         >
                           <span class="i-lucide-play size-4" />
@@ -905,10 +920,8 @@ onMounted(fetchData);
         :lists="metadata.sanitized_lists"
         @changed="fetchData"
       />
-      <div v-else-if="activeTab === 'blacklist'">
-        <BlacklistPanel />
-        <ConsentPanel />
-      </div>
+      <BlacklistPanel v-else-if="activeTab === 'blacklist'" />
+      <ConsentPanel v-else-if="activeTab === 'consents'" />
       <template v-else>
         <div class="mb-5">
           <h2 class="text-xl font-semibold text-n-slate-12">
@@ -956,12 +969,6 @@ onMounted(fetchData);
       </template>
     </div>
 
-    <CampaignApproval
-      v-if="reviewCampaign"
-      :campaign="reviewCampaign"
-      @close="approvalFinished"
-      @approved="approvalFinished"
-    />
     <CampaignWizard
       v-if="showWizard"
       :campaign="editingCampaign"
@@ -973,6 +980,15 @@ onMounted(fetchData);
       v-if="reportCampaign"
       :campaign="reportCampaign"
       @close="reportCampaign = null"
+    />
+    <CampaignApproval
+      v-if="reviewCampaign"
+      :campaign="reviewCampaign"
+      @close="reviewCampaign = null"
+      @approved="
+        reviewCampaign = null;
+        fetchData();
+      "
     />
   </div>
 </template>

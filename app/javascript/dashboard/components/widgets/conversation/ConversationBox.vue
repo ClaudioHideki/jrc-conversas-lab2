@@ -13,6 +13,10 @@ export default {
     MessagesView,
   },
   props: {
+    hideHeader: {
+      type: Boolean,
+      default: false,
+    },
     inboxId: {
       type: [Number, String],
       default: '',
@@ -100,7 +104,7 @@ export default {
     }"
   >
     <ConversationHeader
-      v-if="currentChat.id"
+      v-if="currentChat.id && !hideHeader"
       :chat="currentChat"
       :show-back-button="isOnExpandedLayout && !isInboxView"
       :class="{

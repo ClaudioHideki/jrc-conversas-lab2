@@ -21,6 +21,7 @@ import Button from 'dashboard/components-next/button/Button.vue';
 import ConversationResolveAttributesModal from 'dashboard/components-next/ConversationWorkflow/ConversationResolveAttributesModal.vue';
 
 const props = defineProps({
+  requestClosing: { type: Function, default: null },
   prominent: { type: Boolean, default: false },
   hideAdditionalActions: { type: Boolean, default: false },
 });
@@ -123,6 +124,10 @@ const onCmdOpenConversation = () => {
 };
 
 const onCmdResolveConversation = () => {
+  if (props.requestClosing) {
+    props.requestClosing();
+    return;
+  }
   const currentCustomAttributes = currentChat.value.custom_attributes || {};
   const { hasMissing, missing } = checkMissingAttributes(
     currentCustomAttributes
@@ -157,6 +162,10 @@ const keyboardEvents = {
     action: async event => {
       const { all, activeIndex, lastIndex } = getConversationParams();
       onCmdResolveConversation();
+      if (props.requestClosing) {
+        event.preventDefault();
+        return;
+      }
 
       if (activeIndex < lastIndex) {
         all[activeIndex + 1].click();

@@ -87,9 +87,14 @@ class AutoAssignment::AssignmentService
   end
 
   def filter_agents_by_rate_limit(agents)
+    blocked = if inbox.account.feature_enabled?('jrc_contact_center')
+                JrcContactCenter::Qualification.pending.where(account_id: inbox.account_id).joins(:account_user).pluck('account_users.user_id')
+              else
+                []
+              end
     agents.select do |agent_member|
       rate_limiter = build_rate_limiter(agent_member.user)
-      rate_limiter.within_limit?
+      !blocked.include?(agent_member.user_id) && rate_limiter.within_limit?
     end
   end
 
@@ -110,7 +115,12 @@ class AutoAssignment::AssignmentService
   def claim_and_assign(conversation, agent)
     Current.executed_by = inbox.assignment_policy || inbox
 
-    Conversation.transaction do
+    inbox.account.with_lock do
+      if inbox.account.feature_enabled?('jrc_contact_center') &&
+         JrcContactCenter::Qualification.pending.where(account_id: inbox.account_id).joins(:account_user)
+                                       .exists?(account_users: { user_id: agent.id })
+        next false
+      end
       locked = inbox.conversations
                     .where(id: conversation.id, assignee_id: nil)
                     .lock('FOR UPDATE SKIP LOCKED')

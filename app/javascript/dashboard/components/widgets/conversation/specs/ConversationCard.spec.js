@@ -31,6 +31,22 @@ const mountComponent = (chat, currentContact = {}) =>
   });
 
 describe('ConversationCard', () => {
+  it('keeps the default card and offers a dense operational presentation without reserving name space for the clock', async () => {
+    const wrapper = mountComponent({});
+    expect(wrapper.get('.conversation--user').classes()).toContain('ltr:pr-16');
+    await wrapper.setProps({
+      operational: true,
+      compact: true,
+      showAssignee: true,
+      assignee: { name: 'Assigned operator' },
+    });
+    expect(wrapper.get('.conversation--user').classes()).not.toContain(
+      'ltr:pr-16'
+    );
+    expect(wrapper.text()).toContain('Jane Doe');
+    expect(wrapper.text()).toContain('Assigned operator');
+    expect(wrapper.findComponent({ name: 'TimeAgo' }).exists()).toBe(true);
+  });
   it('does not reserve the labels row when only a persisted SLA policy id is present', () => {
     const wrapper = mountComponent({ sla_policy_id: 1, applied_sla: null });
 

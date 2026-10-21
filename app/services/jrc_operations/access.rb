@@ -8,7 +8,7 @@ module JrcOperations
       AccountUser.find_by(id: member.id, account_id: member.account_id, user_id: member.user_id)
     end
     def self.enabled?(account, kind)
-      flag = { 'projects' => 'jrc_projects', 'service_desk' => 'jrc_service_desk' }.fetch(kind)
+      flag = { 'projects' => 'jrc_projects', 'service_desk' => 'jrc_service_desk', 'contact_center' => 'jrc_contact_center' }.fetch(kind)
       account.reload.active? && account.feature_enabled?(flag)
     end
     def self.admin?(member)
@@ -54,6 +54,17 @@ module JrcOperations
     def self.crm?(account_user)
       account_user && account_user.account.feature_enabled?('jrc_crm') && account_user.permissions.include?('jrc_crm')
     end
+    def self.contact_center?(account_user)
+      member = refresh(account_user)
+      return false unless member && enabled?(member.account, 'contact_center')
+
+      JrcContactCenter::ModulePolicy.new(r2_context(member), :contact_center).access?
+    end
+    def self.contact_center_callbacks(account_user)
+      return JrcContactCenter::Callback.none unless contact_center?(account_user)
+
+      JrcContactCenter::AccessScope.new(user_context: r2_context(account_user)).callbacks
+    end
     def self.ticket!(account_user, id, write: false, lock: false)
       scope = tickets(account_user)
       record = (lock ? scope.lock : scope).find(id)
@@ -61,6 +72,7 @@ module JrcOperations
       raise Pundit::NotAuthorizedError unless write ? policy.update? : policy.show?
       record
     end
+
     def self.deal_context!(record)
       account = record.account
       account.contacts.find(record.contact_id) if record.contact_id.present?
@@ -75,6 +87,7 @@ module JrcOperations
       end
       record
     end
+
     def self.deal!(account_user, id, won: false, write: false, lock: false)
       raise Pundit::NotAuthorizedError unless crm?(account_user)
       scope = JrcCrm::Deal.where(account_id: account_user.account_id)

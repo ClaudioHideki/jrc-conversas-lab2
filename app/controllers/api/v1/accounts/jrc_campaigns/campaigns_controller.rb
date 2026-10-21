@@ -5,8 +5,7 @@ class Api::V1::Accounts::JrcCampaigns::CampaignsController < Api::V1::Accounts::
     render json: { error: exception.message }, status: :unprocessable_entity
   end
 
-  before_action :set_campaign, only: [:show, :update, :destroy, :launch, :pause, :resume, :cancel, :duplicate, :report, :export, :preview,
-                                    :request_review, :approve]
+  before_action :set_campaign, only: [:show, :update, :destroy, :launch, :pause, :resume, :cancel, :duplicate, :report, :export, :preview, :request_review, :approve]
 
   def request_review
     @campaign.request_review!
@@ -31,22 +30,27 @@ class Api::V1::Accounts::JrcCampaigns::CampaignsController < Api::V1::Accounts::
     render json: JrcCampaigns::DashboardService.new(
       Current.account,
       period: params[:period],
-      campaign_id: params[:campaign_id]
+      campaign_id: params[:campaign_id],
+      delivery_channel: params[:delivery_channel]
     ).as_json
   end
 
   def audience_preview
     campaign = scope.new(audience_preview_params)
-    render json: audience_preview_json(campaign)
+    render json: audience_preview_json(campaign, recipient_preview_params)
   end
 
   def test_message
     result = JrcCampaigns::TestMessageService.new(
       account: Current.account,
       user: Current.user,
+      delivery_channel: test_message_params[:delivery_channel],
       phone_number: test_message_params[:phone_number],
+      email: test_message_params[:email],
       inbox_id: test_message_params[:inbox_id],
-      step: test_message_params[:step]
+      step: test_message_params[:step],
+      idempotency_key: test_message_params[:idempotency_key],
+      operator_confirmed: test_message_params[:operator_confirmed]
     ).perform
     render json: result
   rescue StandardError => e
@@ -89,7 +93,7 @@ class Api::V1::Accounts::JrcCampaigns::CampaignsController < Api::V1::Accounts::
     @campaign.launch!
     render json: serialize(@campaign.reload)
   rescue ActiveRecord::RecordInvalid => e
-    render json: { errors: e.record.errors.full_messages.presence || ['Selecione uma caixa WhatsApp e adicione ao menos uma mensagem.'] },
+    render json: { errors: e.record.errors.full_messages.presence || ['Selecione uma caixa de envio e adicione ao menos uma mensagem.'] },
            status: :unprocessable_entity
   end
 
@@ -133,11 +137,15 @@ class Api::V1::Accounts::JrcCampaigns::CampaignsController < Api::V1::Accounts::
   def export
     report_scope = @campaign.recipients.includes(:inbox, :execution).order(:id)
     csv = CSV.generate(headers: true) do |output|
-      output << ['Nome', 'Telefone', 'Caixa', 'Execução', 'Status', 'Agendado em', 'Enviado em', 'Entregue em', 'Lido em', 'Respondido em', 'Erro']
+      output << ['Nome', 'Canal', 'Destino', 'Telefone', 'E-mail', 'Caixa', 'Execução', 'Status', 'Agendado em', 'Enviado em', 'Entregue em',
+                 'Lido em', 'Respondido em', 'Erro']
       report_scope.find_each do |recipient|
         output << [
           recipient.name,
+          @campaign.delivery_channel,
+          recipient.destination,
           recipient.phone_number,
+          recipient.email,
           recipient.inbox&.name,
           recipient.execution&.run_number,
           recipient.status,
@@ -164,15 +172,20 @@ class Api::V1::Accounts::JrcCampaigns::CampaignsController < Api::V1::Accounts::
   end
 
   def audience_preview_params
-    params.require(:campaign).permit(:audience_type, audience_config: {})
+    params.require(:campaign).permit(:audience_type, :delivery_channel, :inbox_id,
+                                    campaign_inboxes_attributes: [:inbox_id, :enabled, :position], audience_config: {})
   end
 
   def test_message_params
     params.require(:test_message).permit(
+      :delivery_channel,
       :phone_number,
+      :email,
       :inbox_id,
+      :idempotency_key,
+      :operator_confirmed,
       step: [
-        :kind, :body, :media_url, :file_name, :template_name, :template_namespace, :template_language,
+        :kind, :subject, :body, :media_url, :file_name, :media_asset_id, :template_name, :template_namespace, :template_language,
         { template_params: {}, inbox_overrides: {} }
       ]
     )
@@ -180,11 +193,13 @@ class Api::V1::Accounts::JrcCampaigns::CampaignsController < Api::V1::Accounts::
 
   def campaign_params
     params.require(:campaign).permit(
-      :name, :trigger_type, :scheduled_at, :audience_type, :message_body, :inbox_id, :rotation_mode, :delay_min_seconds, :delay_max_seconds,
+      :name, :delivery_channel, :trigger_type, :scheduled_at, :audience_type, :message_body, :inbox_id, :rotation_mode, :delay_min_seconds,
+      :delay_max_seconds,
       :conversation_mode,
       audience_config: {}, sending_window: {}, recurrence_config: {}, follow_up_config: {},
       campaign_inboxes_attributes: [:id, :inbox_id, :position, :weight, :enabled, :_destroy],
-      steps_attributes: [:id, :position, :kind, :body, :media_url, :file_name, :template_name, :template_namespace, :template_language,
+      steps_attributes: [:id, :position, :kind, :subject, :body, :media_url, :file_name, :media_asset_id, :template_name, :template_namespace,
+                         :template_language,
                          :delay_after_seconds, :only_if_no_reply, :follow_up_after_hours, :_destroy, { template_params: {}, inbox_overrides: {} }]
     )
   end
@@ -193,13 +208,56 @@ class Api::V1::Accounts::JrcCampaigns::CampaignsController < Api::V1::Accounts::
     JrcCampaigns::CampaignSerializer.new(campaign).as_json
   end
 
-  def audience_preview_json(campaign)
+  def audience_preview_json(campaign, recipient_options = {})
     preview = JrcCampaigns::AudienceResolver.new(campaign).preview
-    preview.except(:entries).merge(
+    response = preview.except(:entries, :selectable_entries).merge(
       sample: preview[:entries].first(20).map do |entry|
-        { name: entry.name, phone_number: entry.phone_number, source: entry.source }
+        recipient_json(entry, selected: true)
       end
     )
+    return response unless ActiveModel::Type::Boolean.new.cast(recipient_options[:include_recipients])
+
+    entries = filter_recipient_entries(preview[:selectable_entries], recipient_options[:recipient_search])
+    page = [recipient_options[:recipient_page].to_i, 1].max
+    per_page = (recipient_options[:recipient_per_page].presence || 50).to_i.clamp(1, 100)
+    total = entries.size
+    selected_keys = preview[:entries].map(&:selection_key).to_set
+    response.merge(
+      recipients: entries.slice((page - 1) * per_page, per_page).to_a.map do |entry|
+        recipient_json(entry, selected: selected_keys.include?(entry.selection_key))
+      end,
+      recipient_pagination: {
+        page: page,
+        per_page: per_page,
+        total: total,
+        total_pages: [(total.to_f / per_page).ceil, 1].max
+      }
+    )
+  end
+
+  def recipient_preview_params
+    params.permit(:include_recipients, :recipient_search, :recipient_page, :recipient_per_page)
+  end
+
+  def filter_recipient_entries(entries, search)
+    query = search.to_s.strip.downcase
+    return entries if query.blank?
+
+    entries.select do |entry|
+      [entry.name, entry.phone_number, entry.email].compact.any? { |value| value.to_s.downcase.include?(query) }
+    end
+  end
+
+  def recipient_json(entry, selected:)
+    {
+      selection_key: entry.selection_key,
+      contact_id: entry.contact&.id,
+      name: entry.name,
+      phone_number: entry.phone_number,
+      email: entry.email,
+      source: entry.source,
+      selected: selected
+    }
   end
 
   def reschedule_pending_launch
@@ -216,7 +274,7 @@ class Api::V1::Accounts::JrcCampaigns::CampaignsController < Api::V1::Accounts::
 
   def duplicate_attributes
     @campaign.attributes.slice(
-      'audience_type', 'audience_config', 'message_body', 'inbox_id', 'rotation_mode', 'delay_min_seconds',
+      'delivery_channel', 'audience_type', 'audience_config', 'message_body', 'inbox_id', 'rotation_mode', 'delay_min_seconds',
       'delay_max_seconds', 'sending_window', 'conversation_mode', 'recurrence_config', 'follow_up_config'
     ).merge(
       'name' => "#{@campaign.name} (cópia)",

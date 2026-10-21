@@ -1,5 +1,6 @@
 import jrcOperator from './jrcOperator.json';
 import jrcApprovals from './jrcApprovals.json';
+import jrcContactCenter from './jrcContactCenter.json';
 import jrcHome from './jrcHome.json';
 import relationship from './relationship.json';
 import jrcServiceDesk from './jrcServiceDesk.json';
@@ -118,4 +119,5 @@ export default {
   ...jrcCampaigns,
   ...jrcBroker,
   ...jrcApprovals,
+  ...jrcContactCenter,
 };

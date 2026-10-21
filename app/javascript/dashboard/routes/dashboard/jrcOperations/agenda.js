@@ -20,6 +20,12 @@ export function agendaTarget(entry, accountId) {
       params: { ...params, projectId: entry.project_id },
       query: { taskId: entry.task_id },
     };
+  if (entry.kind === 'contact_center_callback')
+    return {
+      name: 'jrc_contact_center_cockpit',
+      params,
+      query: { callbackId: entry.callback_id },
+    };
   return {
     name: 'crm_activities',
     params,

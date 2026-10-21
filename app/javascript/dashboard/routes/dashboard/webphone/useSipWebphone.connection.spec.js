@@ -6,6 +6,9 @@ const mock = vi.hoisted(() => ({
   disconnect: vi.fn(),
   transfer: vi.fn(),
   call: vi.fn(),
+  answer: vi.fn(),
+  acwEnabled: false,
+  acwPending: false,
   sendDtmf: vi.fn(),
   clearNotification: vi.fn(),
 }));
@@ -17,6 +20,7 @@ vi.mock('./SipClient', () => ({
       this.disconnect = mock.disconnect;
       this.transfer = mock.transfer;
       this.call = mock.call;
+      this.answer = mock.answer;
       this.sendDtmf = mock.sendDtmf;
     }
   },
@@ -27,6 +31,8 @@ vi.mock('dashboard/api/sipCredentials', () => ({
       data: {
         configured: true,
         enabled: true,
+        contact_center_enabled: mock.acwEnabled,
+        contact_center_acw_pending: mock.acwPending,
         extension: '101',
         password: 'SYNTHETIC_SECRET',
       },
@@ -44,6 +50,8 @@ describe('softphone reconnect coordinator', () => {
     vi.resetModules();
     vi.useFakeTimers();
     vi.clearAllMocks();
+    mock.acwEnabled = false;
+    mock.acwPending = false;
     window.localStorage.clear();
     vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(true);
     mock.connect.mockImplementation(async () => {
@@ -63,6 +71,13 @@ describe('softphone reconnect coordinator', () => {
     vi.clearAllTimers();
     vi.useRealTimers();
     vi.restoreAllMocks();
+  });
+  it('exposes the active Account reactively and clears it on shutdown', async () => {
+    expect(api.accountId.value).toBe(1);
+    await api.initialize(2);
+    expect(api.accountId.value).toBe(2);
+    await api.shutdown();
+    expect(api.accountId.value).toBeUndefined();
   });
   it('reconnects after Registered to Unregistered without a transport disconnect', async () => {
     mock.callbacks.onRegister('Unregistered');
@@ -183,5 +198,18 @@ describe('softphone reconnect coordinator', () => {
     mock.callbacks.onEstablished();
     mock.callbacks.onEnded();
     expect(mock.clearNotification).toHaveBeenCalledTimes(2);
+  });
+  it('blocks native originate and answer using fresh persisted ACW state', async () => {
+    await api.shutdown();
+    mock.acwEnabled = true;
+    await api.initialize(1);
+    mock.acwPending = true;
+    await expect(api.call()).resolves.toBe(false);
+    await expect(api.answer()).resolves.toBe(false);
+    expect(mock.call).not.toHaveBeenCalled();
+    expect(mock.answer).not.toHaveBeenCalled();
+    mock.acwPending = false;
+    await api.answer();
+    expect(mock.answer).toHaveBeenCalledTimes(1);
   });
 });

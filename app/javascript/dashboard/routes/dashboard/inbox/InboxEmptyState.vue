@@ -16,6 +16,7 @@ import { homeTones } from 'dashboard/components-next/Conversation/ConversationHo
 import { useJrcCopilot } from 'dashboard/components-next/jrcCopilot/useJrcCopilot';
 
 defineProps({
+  embedded: { type: Boolean, default: false },
   emptyStateMessage: { type: String, default: '' },
 });
 
@@ -220,6 +221,19 @@ watch(
 
 <template>
   <div
+    v-if="embedded"
+    class="grid h-full min-w-0 flex-1 place-content-center px-8 text-center"
+  >
+    <span class="i-lucide-headset mx-auto mb-4 block size-10 text-n-blue-9" />
+    <h3 class="text-base font-semibold text-n-slate-12">
+      {{ t('JRC_CONTACT_CENTER.INBOX_360.SELECT_INTERACTION') }}
+    </h3>
+    <p class="max-w-sm text-sm leading-6 text-n-slate-10">
+      {{ t('JRC_CONTACT_CENTER.INBOX_360.SELECT_HINT') }}
+    </p>
+  </div>
+  <div
+    v-else
     class="hidden h-full w-full overflow-y-auto bg-n-background p-5 lg:block"
   >
     <div v-if="uiFlags.isFetching" class="grid h-full place-items-center">

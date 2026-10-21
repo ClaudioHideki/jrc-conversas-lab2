@@ -28,9 +28,23 @@ class JrcCampaigns::Consent < ApplicationRecord
 
   belongs_to :account
   belongs_to :recorded_by, class_name: 'User'
+  belongs_to :supersedes, class_name: 'JrcCampaigns::Consent', optional: true
+  has_one :superseding_consent, class_name: 'JrcCampaigns::Consent', foreign_key: :supersedes_id, inverse_of: :supersedes
   scope :active, -> { where(revoked_at: nil).where('granted_at <= ?', Time.current) }
 
   before_validation { self.phone_number = JrcCampaigns::PhoneNormalizer.call(phone_number) }
   validates :phone_number, :evidence, :granted_at, presence: true
+  validates :phone_number, format: { with: /\A\+[1-9]\d{7,14}\z/ }
+  validates :purpose, inclusion: { in: %w[whatsapp_campaigns] }, allow_nil: true
   validates :phone_number, uniqueness: { scope: :account_id, conditions: -> { where(revoked_at: nil) } }, if: -> { revoked_at.nil? }
+  validate :supersedes_same_destination
+
+  private
+
+  def supersedes_same_destination
+    return unless supersedes
+    return if supersedes.account_id == account_id && supersedes.phone_number == phone_number && supersedes.revoked_at.present?
+
+    errors.add(:supersedes, 'deve ser um registro encerrado da mesma conta e telefone')
+  end
 end

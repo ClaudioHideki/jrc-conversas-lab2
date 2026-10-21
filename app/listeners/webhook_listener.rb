@@ -121,6 +121,9 @@ class WebhookListener < BaseListener
 
   def deliver_api_inbox_webhooks(payload, inbox)
     return unless inbox.channel_type == 'Channel::Api'
+    # Campaigns sent directly through Evolution are already at the provider.
+    # Replaying their message_created event would send the message a second time.
+    return if payload.dig(:additional_attributes, 'jrc_campaign_evolution') == true
     return if inbox.channel.webhook_url.blank?
 
     WebhookJob.perform_later(inbox.channel.webhook_url, payload, :api_inbox_webhook,

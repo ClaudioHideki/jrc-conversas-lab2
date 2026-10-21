@@ -61,16 +61,28 @@ class Api::V1::Accounts::Relationship::SurveyAdministrationController < Api::V1:
 
   def origins
     visibility = JrcCustomers::Visibility.new(account: Current.account, user: Current.user, account_user: Current.account_user)
-    calls = visibility.calls(contact_ids: Current.account.contacts.select(:id), conversation_ids: visibility.conversations.select(:id))
     rows = mapped_origins(visibility.conversations) { |row| "Atendimento ##{row.display_id}" }
     rows += mapped_origins(visibility.tickets, &:title)
     rows += mapped_origins(relationship_context.records(JrcRelationship::Qbr), &:title)
-    rows += mapped_origins(calls) { |row| "Ligação ##{row.id}" } if calls
+    rows += native_call_origins(visibility)
     rows += attendance_origins(visibility)
+    rows += contact_center_origins
     render json: { payload: rows }
   end
 
   private
+
+  def native_call_origins(visibility)
+    calls = visibility.calls(contact_ids: Current.account.contacts.select(:id), conversation_ids: visibility.conversations.select(:id))
+    calls ? mapped_origins(calls) { |row| "Ligação ##{row.id}" } : []
+  end
+
+  def contact_center_origins
+    access = JrcContactCenter::AccessScope.new(user_context: relationship_context.to_h)
+    return [] unless access.policy.access?
+
+    mapped_origins(access.call_sessions, &:correlation_id)
+  end
 
   def mapped_origins(scope)
     scope.order(id: :desc).limit(100).map { |row| { type: row.class.name, id: row.id, label: yield(row) } }

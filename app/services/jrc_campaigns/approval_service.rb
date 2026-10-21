@@ -1,7 +1,7 @@
 require 'digest'
 
 class JrcCampaigns::ApprovalService
-  CONFIGURATION_FIELDS = %w[name inbox_id trigger_type scheduled_at audience_type audience_config message_body rotation_mode delay_min_seconds
+  CONFIGURATION_FIELDS = %w[delivery_channel name inbox_id trigger_type scheduled_at audience_type audience_config message_body rotation_mode delay_min_seconds
                             delay_max_seconds sending_window conversation_mode recurrence_config follow_up_config].freeze
 
   def initialize(campaign)
@@ -11,10 +11,12 @@ class JrcCampaigns::ApprovalService
   def request_review!
     campaign.with_lock do
       reject!('A revisão exige campanha em rascunho ou agendada.') unless campaign.editable?
+      campaign.ensure_sender_compatibility!
       snapshot = {
         'configuration' => configuration,
         'recipients' => JrcCampaigns::AudienceResolver.new(campaign).entries.map do |entry|
           { 'contact_id' => entry.contact&.id, 'name' => entry.name, 'phone_number' => entry.phone_number,
+            'email' => entry.email, 'destination' => entry.destination(campaign.delivery_channel),
             'source' => entry.source, 'metadata' => entry.metadata }
         end
       }
@@ -42,6 +44,7 @@ class JrcCampaigns::ApprovalService
   end
 
   def ensure_valid!
+    campaign.ensure_sender_compatibility!
     reject!('A campanha exige aprovação humana válida. Revise e aprove novamente; a validade é de 48 horas.') unless valid?
   end
 
@@ -55,10 +58,13 @@ class JrcCampaigns::ApprovalService
   end
 
   def configuration
-    campaign.as_json(only: CONFIGURATION_FIELDS).merge(
+    result = campaign.as_json(only: CONFIGURATION_FIELDS).merge(
       'steps' => campaign.steps.order(:position, :id).map { |step| step.as_json.except('created_at', 'updated_at') },
       'inboxes' => campaign.campaign_inboxes.order(:position, :id).map { |link| link.as_json.except('created_at', 'updated_at') }
     )
+    connectors = campaign.evolution_connectors
+    result['evolution_connectors'] = connectors.map(&:public_configuration) if connectors.any?
+    result
   end
 
   def digest(value)

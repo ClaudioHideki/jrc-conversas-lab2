@@ -31,15 +31,18 @@ class JrcCampaigns::CampaignInbox < ApplicationRecord
   validates :inbox_id, uniqueness: { scope: :campaign_id }
   validates :weight, numericality: { greater_than: 0 }
   validate :inbox_belongs_to_campaign_account
-  validate :whatsapp_inbox
+  validate :channel_matches_campaign
 
   private
 
   def inbox_belongs_to_campaign_account
     errors.add(:inbox, 'deve pertencer à mesma conta') if inbox && inbox.account_id != campaign.account_id
   end
+  def channel_matches_campaign
+    return unless inbox && campaign
+    return if campaign.accepts_sending_inbox?(inbox)
 
-  def whatsapp_inbox
-    errors.add(:inbox, 'deve ser uma caixa de WhatsApp') if inbox && inbox.channel_type != 'Channel::Whatsapp'
+    channel_name = campaign.email? ? 'E-mail' : 'WhatsApp'
+    errors.add(:inbox, "deve ser uma caixa de #{channel_name}")
   end
 end

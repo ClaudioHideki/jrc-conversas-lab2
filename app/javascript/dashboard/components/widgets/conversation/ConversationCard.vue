@@ -24,6 +24,7 @@ const props = defineProps({
   showInboxName: { type: Boolean, default: false },
   hideThumbnail: { type: Boolean, default: false },
   compact: { type: Boolean, default: false },
+  operational: { type: Boolean, default: false },
 });
 
 const emit = defineEmits([
@@ -52,9 +53,10 @@ const voiceCallData = computed(() => {
 
 const showMetaSection = computed(() => {
   return (
-    props.showInboxName ||
-    (props.showAssignee && props.assignee.name) ||
-    props.chat.priority
+    !props.operational &&
+    (props.showInboxName ||
+      (props.showAssignee && props.assignee.name) ||
+      props.chat.priority)
   );
 });
 
@@ -116,6 +118,8 @@ watch(
       'selected bg-n-slate-2 !border-n-surface-1': selected,
       'px-0': compact,
       'px-3': !compact,
+      '!mx-0 !my-0 !rounded-none !border-x-0 !border-b-0 !px-2 !shadow-none':
+        operational,
     }"
     @click="$emit('click', $event)"
     @contextmenu="$emit('contextmenu', $event)"
@@ -129,9 +133,9 @@ watch(
         v-if="!hideThumbnail"
         :name="currentContact.name"
         :src="currentContact.thumbnail"
-        :size="44"
+        :size="operational ? 32 : 44"
         :status="currentContact.availability_status"
-        :class="!showInboxName ? 'mt-4' : 'mt-7'"
+        :class="operational ? 'mt-3' : !showInboxName ? 'mt-4' : 'mt-7'"
         hide-offline-status
       >
         <template #overlay="{ size }">
@@ -146,7 +150,10 @@ watch(
         </template>
       </Avatar>
     </div>
-    <div class="px-0 py-3.5 flex-1 min-w-0 border-line">
+    <div
+      class="px-0 py-3.5 flex-1 min-w-0 border-line"
+      :class="operational ? '!py-2' : ''"
+    >
       <div
         v-if="showMetaSection"
         class="flex items-center min-w-0 gap-1"
@@ -172,7 +179,9 @@ watch(
               "
               class="size-3 text-n-slate-11 flex-shrink-0"
             />
-            <span class="truncate">{{ assignee.name }}</span>
+            <span class="truncate">
+              {{ assignee.name }}
+            </span>
           </span>
           <CardPriorityIcon
             :priority="chat.priority"
@@ -181,8 +190,11 @@ watch(
         </div>
       </div>
       <h4
-        class="conversation--user text-base my-0 mx-2 capitalize pt-0.5 text-ellipsis overflow-hidden whitespace-nowrap flex-1 min-w-0 ltr:pr-16 rtl:pl-16 text-n-slate-12"
-        :class="hasUnread ? 'font-semibold' : 'font-medium'"
+        class="conversation--user text-base my-0 mx-2 capitalize pt-0.5 text-ellipsis overflow-hidden whitespace-nowrap flex-1 min-w-0 text-n-slate-12"
+        :class="[
+          hasUnread ? 'font-semibold' : 'font-medium',
+          operational ? '!text-sm' : 'ltr:pr-16 rtl:pl-16',
+        ]"
       >
         {{ currentContact.name }}
       </h4>
@@ -198,7 +210,7 @@ watch(
         key="message-preview"
         :message="lastMessageInChat"
         class="my-0 mx-2 leading-6 h-6 flex-1 min-w-0 text-sm"
-        :class="messagePreviewClass"
+        :class="[messagePreviewClass, operational ? '!text-xs' : '']"
       />
       <p
         v-else
@@ -216,9 +228,22 @@ watch(
         </span>
       </p>
       <div
-        class="absolute flex flex-col ltr:right-3 rtl:left-3"
-        :class="showMetaSection ? 'top-8' : 'top-4'"
+        class="flex"
+        :class="
+          operational
+            ? 'static mx-2 mt-1 items-center gap-2'
+            : [
+                'absolute flex-col ltr:right-3 rtl:left-3',
+                showMetaSection ? 'top-8' : 'top-4',
+              ]
+        "
       >
+        <span
+          v-if="operational && showAssignee && assignee.name"
+          class="min-w-0 flex-1 truncate text-[10px] text-n-slate-10"
+        >
+          {{ assignee.name }}
+        </span>
         <span class="ml-auto font-normal leading-4 text-xxs">
           <TimeAgo
             :last-activity-timestamp="chat.timestamp"
@@ -230,6 +255,7 @@ watch(
           v-if="hasUnread"
           :count="unreadCount"
           class="ltr:ml-auto rtl:mr-auto mt-1"
+          :class="operational ? '!mt-0' : ''"
         />
       </div>
       <CardLabels

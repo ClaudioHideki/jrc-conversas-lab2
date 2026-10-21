@@ -1,7 +1,7 @@
 module JrcOperations
   # Read-only projection. Source records remain in CRM and Projects.
   class Agenda
-    SOURCES = %w[all crm service_desk projects].freeze
+    SOURCES = %w[all crm service_desk projects contact_center].freeze
     VIEWS = %w[all open today upcoming overdue completed canceled].freeze
     LIMIT_PER_SOURCE = 1000
 
@@ -25,17 +25,9 @@ module JrcOperations
     end
 
     def call
-      entries = []
-      entries.concat(project_entries) if source?('projects') && Access.project_access?(@member)
-      if source?('crm') && Access.crm?(@member)
-        entries.concat(activity_entries)
-        entries.concat(follow_up_entries)
-      end
+      entries = source_entries
       counts = VIEWS.index_with { |view| entries.count { |entry| matches_view?(entry, view) } }
-      data = entries.select { |entry| matches_view?(entry, @view) }.sort_by do |entry|
-        date_only = entry[:due_type] == 'date'
-        [entry[:due_date], date_only ? 0 : 1, date_only ? 0 : Time.iso8601(entry[:due]).to_f, entry[:id]]
-      end
+      data = entries.select { |entry| matches_view?(entry, @view) }.sort_by { |entry| agenda_sort_key(entry) }
       {
         data: data,
         meta: {
@@ -51,6 +43,22 @@ module JrcOperations
     end
 
     private
+
+    def agenda_sort_key(entry)
+      date_only = entry[:due_type] == 'date'
+      [entry[:due_date], date_only ? 0 : 1, date_only ? 0 : Time.iso8601(entry[:due]).to_f, entry[:id]]
+    end
+
+    def source_entries
+      entries = []
+      entries.concat(project_entries) if source?('projects') && Access.project_access?(@member)
+      if source?('crm') && Access.crm?(@member)
+        entries.concat(activity_entries)
+        entries.concat(follow_up_entries)
+      end
+      entries.concat(contact_center_entries)
+      entries
+    end
 
     def default_period
       case @view
@@ -79,11 +87,15 @@ module JrcOperations
     end
 
     def timed(scope)
+      timed_on(scope, :due_at)
+    end
+
+    def timed_on(scope, column)
       # Half-open local-day bounds preserve timezone and DST without inventing times.
       start_at = @zone.local(@from.year, @from.month, @from.day)
       next_date = @to + 1
       end_at = @zone.local(next_date.year, next_date.month, next_date.day)
-      scope.where(due_at: start_at...end_at)
+      scope.where(column => start_at...end_at)
     end
 
     def rows(scope)
@@ -93,7 +105,9 @@ module JrcOperations
     end
 
     def project_entries
-      scope = JrcProjects::Task.where(account_id: @account.id, project_id: @customer_context.projects(Access.projects(@member)).select(:id), due_on: @from..@to)
+      scope = JrcProjects::Task.where(
+        account_id: @account.id, project_id: @customer_context.projects(Access.projects(@member)).select(:id), due_on: @from..@to
+      )
       scope = assigned(scope, :assignee_id)
       scope = scope.where(parent_id: nil).or(scope.where.not(assignee_id: nil))
       rows(scope.includes(:project, :assignee)).filter_map do |task|
@@ -125,6 +139,16 @@ module JrcOperations
         completed = follow_up.is_completed? || follow_up.completed_at.present?
         entry(follow_up, kind: 'crm_follow_up', source: 'crm', due: follow_up.due_at, responsible: follow_up.user,
               completed: completed).merge(follow_up_id: follow_up.id, activity_type: 'follow_up')
+      end
+    end
+
+    def contact_center_entries
+      callbacks = JrcContactCenter::AgendaCallbacks.new(
+        account_user: @member, period: { from: @from, to: @to, zone: @zone }, responsible: @responsible, customer_context: @customer_context
+      )
+      callbacks.call(source: @source) do |callback, owner|
+        entry(callback, kind: 'contact_center_callback', source: 'contact_center', due: callback.scheduled_at,
+                        responsible: owner, completed: callback.state == 'completed').merge(callback_id: callback.id, queue_id: callback.queue_id)
       end
     end
 

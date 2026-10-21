@@ -28,10 +28,13 @@ class JrcCampaigns::ReplyTrackerService
   def self.matching_recipient(scope, contact)
     by_contact = scope.where(contact: contact)
     normalized_phone = JrcCampaigns::PhoneNormalizer.call(contact&.phone_number)
-    return by_contact.order(sent_at: :desc).first if normalized_phone.blank?
+    normalized_email = JrcCampaigns::EmailNormalizer.call(contact&.email)
+    by_destination = scope.none
+    by_destination = by_destination.or(scope.where(phone_number: normalized_phone)) if normalized_phone.present?
+    by_destination = by_destination.or(scope.where(email: normalized_email)) if normalized_email.present?
+    return by_contact.order(sent_at: :desc).first if normalized_phone.blank? && normalized_email.blank?
 
-    by_phone = scope.where(phone_number: normalized_phone)
-    by_contact.or(by_phone).order(sent_at: :desc).first
+    by_contact.or(by_destination).order(sent_at: :desc).first
   end
   private_class_method :matching_recipient
 

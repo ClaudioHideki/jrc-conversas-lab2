@@ -28,6 +28,11 @@ class JrcHumanAssignment::Dispatch
   def select_agent
     policy = JrcHumanAssignment::Policy.for(@account)
     ids = eligible_agent_ids
+    if @account.feature_enabled?('jrc_contact_center')
+      pending_agent_ids = JrcContactCenter::Qualification.pending.where(account_id: @account.id)
+                                               .joins(:account_user).pluck('account_users.user_id')
+      ids -= pending_agent_ids
+    end
     loads = @account.conversations.open.where(assignee_id: ids).group(:assignee_id).count
     ids = ids.select { |id| loads.fetch(id, 0) < policy[:max_open] }
     minimum = ids.map { |id| loads.fetch(id, 0) }.min

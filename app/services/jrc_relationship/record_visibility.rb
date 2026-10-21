@@ -40,6 +40,8 @@ class JrcRelationship::RecordVisibility
                 'JrcCrm::Activity' => native.crm(@context.account.jrc_crm_activities, owner: :user_id) }
     calls = native.calls(contact_ids: @context.account.contacts.select(:id), conversation_ids: native.conversations.select(:id))
     sources['Call'] = calls if calls
+    access = JrcContactCenter::AccessScope.new(user_context: @context.to_h)
+    sources['JrcContactCenter::CallSession'] = access.call_sessions if access.policy.access?
     sources
   end
 end

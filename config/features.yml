@@ -317,3 +317,8 @@
   display_name: JRC Operadora Integrations
   enabled: false
   column: feature_flags_ext_1
+
+- name: jrc_contact_center
+  display_name: JRC Contact Center
+  enabled: false
+  column: feature_flags_ext_1

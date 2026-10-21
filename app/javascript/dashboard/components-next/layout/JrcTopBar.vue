@@ -38,11 +38,11 @@ const availability = computed(() => {
 
 <template>
   <header
-    class="hidden md:flex h-[78px] flex-shrink-0 items-center justify-between gap-8 border-b border-n-weak bg-n-solid-1 px-7"
+    class="hidden md:flex h-[78px] flex-shrink-0 items-center justify-between gap-3 border-b border-n-weak bg-n-solid-1 px-4 xl:gap-8 xl:px-7"
   >
     <RouterLink
       :to="{ name: 'search' }"
-      class="group flex h-12 w-full max-w-3xl items-center gap-3 rounded-xl border border-n-weak bg-n-surface-1 px-4 shadow-sm transition hover:border-n-blue-7 hover:shadow"
+      class="group flex h-12 min-w-0 w-full max-w-3xl items-center gap-3 rounded-xl border border-n-weak bg-n-surface-1 px-4 shadow-sm transition hover:border-n-blue-7 hover:shadow"
     >
       <span
         class="i-lucide-search size-5 flex-shrink-0 text-n-slate-10 group-hover:text-n-brand"
@@ -51,7 +51,7 @@ const availability = computed(() => {
         {{ SEARCH_PLACEHOLDER }}
       </span>
       <kbd
-        class="rounded-md border border-n-weak bg-n-solid-2 px-2 py-0.5 text-xs text-n-slate-10"
+        class="hidden rounded-md border border-n-weak bg-n-solid-2 px-2 py-0.5 text-xs text-n-slate-10 xl:block"
       >
         {{ searchShortcut }}
       </kbd>

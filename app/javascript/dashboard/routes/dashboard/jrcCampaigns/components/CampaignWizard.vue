@@ -1,12 +1,11 @@
 <script setup>
 import CampaignFilters from 'dashboard/routes/dashboard/jrcCustomers/components/CampaignFilters.vue';
 import { useCustomerMaster } from 'dashboard/routes/dashboard/jrcCustomers/useCustomerMaster';
-const props = defineProps({
-  campaign: { type: Object, default: null },
-  metadata: { type: Object, required: true },
-});
-const emit = defineEmits(['close', 'saved']);
-const { enabled: hasCustomerMaster } = useCustomerMaster();
+import {
+  sourceInboxesForChannel,
+  evolutionMinimumInterval,
+  testResultAlert,
+} from '../evolutionHelpers';
 import {
   computed,
   onBeforeUnmount,
@@ -19,33 +18,60 @@ import { useI18n } from 'vue-i18n';
 import JrcCampaignsAPI from 'dashboard/api/jrcCampaigns';
 import { useAlert } from 'dashboard/composables';
 
+const props = defineProps({
+  campaign: { type: Object, default: null },
+  metadata: { type: Object, required: true },
+});
+
+const emit = defineEmits(['close', 'saved']);
 const { t } = useI18n();
+const { enabled: hasCustomerMaster } = useCustomerMaster();
 const stepIndex = ref(0);
 const saving = ref(false);
 const uploadingStep = ref(null);
 const previewingAudience = ref(false);
 const audiencePreview = ref({
   found_count: null,
+  available_recipients: null,
   estimated_recipients: null,
+  manually_excluded_count: 0,
+  without_destination_count: 0,
   without_whatsapp_count: 0,
+  without_email_count: 0,
   blacklisted_count: 0,
   blocked_count: 0,
   duplicate_count: 0,
   sample: [],
 });
 const activeMessageIndex = ref(0);
-const showAudienceSample = ref(false);
-const testPhone = ref('');
+const showRecipientManager = ref(false);
+const recipientManagerLoading = ref(false);
+const recipientSearch = ref('');
+const recipientRows = ref([]);
+const recipientPagination = ref({
+  page: 1,
+  per_page: 50,
+  total: 0,
+  total_pages: 1,
+});
+const testDestination = ref('');
 const testSending = ref(false);
+const latestTest = ref(null);
+const latestTestSignature = ref(null);
+const newTestCoolingDown = ref(false);
+let newTestTimer;
 let audienceTimer;
+let recipientSearchTimer;
 
-const defaultMessage = () => ({
+const defaultMessage = (kind = 'template') => ({
   id: null,
   position: 0,
-  kind: 'template',
+  kind,
+  subject: '',
   body: '',
   media_url: '',
   file_name: '',
+  media_asset_id: null,
   template_name: '',
   template_namespace: '',
   template_language: 'pt_BR',
@@ -62,6 +88,7 @@ const defaultMessage = () => ({
 
 const form = reactive({
   name: '',
+  delivery_channel: 'whatsapp',
   audience_type: 'all_contacts',
   audience_config: {
     label_ids: [],
@@ -70,6 +97,8 @@ const form = reactive({
     stage_ids: [],
     sanitized_list_id: null,
     customer_filters: {},
+    recipient_selection_mode: 'exclude',
+    recipient_selection_keys: [],
   },
   inboxLinks: [],
   rotation_mode: 'round_robin',
@@ -92,11 +121,60 @@ const selectedPipeline = computed(() =>
 const selectedInboxIds = computed(() =>
   form.inboxLinks.map(item => Number(item.inbox_id))
 );
+const isEmail = computed(() => form.delivery_channel === 'email');
+const audienceSourceSignature = computed(() =>
+  JSON.stringify({
+    delivery_channel: form.delivery_channel,
+    audience_type: form.audience_type,
+    label_ids: form.audience_config.label_ids,
+    inbox_ids: form.audience_config.inbox_ids,
+    pipeline_id: form.audience_config.pipeline_id,
+    stage_ids: form.audience_config.stage_ids,
+    sanitized_list_id: form.audience_config.sanitized_list_id,
+    customer_filters: form.audience_config.customer_filters,
+    sending_inbox_ids: selectedInboxIds.value,
+  })
+);
+const deliveryChannelLabel = computed(() =>
+  t(
+    isEmail.value
+      ? 'JRC_CAMPAIGNS.CHANNEL_EMAIL'
+      : 'JRC_CAMPAIGNS.CHANNEL_WHATSAPP'
+  )
+);
+const availableSendingInboxes = computed(() =>
+  isEmail.value
+    ? props.metadata.email_inboxes || []
+    : props.metadata.whatsapp_inboxes || props.metadata.inboxes || []
+);
+const availableSourceInboxes = computed(() =>
+  sourceInboxesForChannel(props.metadata, isEmail.value)
+);
 const selectedSendingInboxes = computed(() =>
-  (props.metadata.inboxes || []).filter(inbox =>
+  availableSendingInboxes.value.filter(inbox =>
     selectedInboxIds.value.includes(Number(inbox.id))
   )
 );
+const usesEvolution = computed(() =>
+  selectedSendingInboxes.value.some(inbox => inbox.connector === 'evolution')
+);
+watch(selectedSendingInboxes, inboxes => {
+  const minimum = evolutionMinimumInterval(inboxes);
+  if (minimum) {
+    form.delay_min_seconds = Math.max(form.delay_min_seconds, minimum);
+    form.delay_max_seconds = Math.max(form.delay_max_seconds, minimum);
+    form.steps.forEach(message => {
+      if (
+        message.kind === 'template' &&
+        !message.id &&
+        !message.template_name &&
+        !message.body
+      )
+        message.kind = 'text';
+    });
+  }
+});
+const testKeys = new Map();
 const templates = computed(() => {
   const uniqueTemplates = new Map();
   selectedSendingInboxes.value.forEach(inbox => {
@@ -157,6 +235,20 @@ const sourceCards = computed(() => [
     label: t('JRC_CAMPAIGNS.WIZARD.SOURCE_SANITIZED'),
     description: t('JRC_CAMPAIGNS.WIZARD.SOURCE_SANITIZED_HELP'),
     icon: 'i-lucide-list-checks',
+  },
+]);
+const channelCards = computed(() => [
+  {
+    key: 'whatsapp',
+    label: t('JRC_CAMPAIGNS.CHANNEL_WHATSAPP'),
+    description: t('JRC_CAMPAIGNS.WIZARD.CHANNEL_WHATSAPP_HELP'),
+    icon: 'i-lucide-message-circle',
+  },
+  {
+    key: 'email',
+    label: t('JRC_CAMPAIGNS.CHANNEL_EMAIL'),
+    description: t('JRC_CAMPAIGNS.WIZARD.CHANNEL_EMAIL_HELP'),
+    icon: 'i-lucide-mail',
   },
 ]);
 const rotationModes = computed(() => [
@@ -275,6 +367,8 @@ const configValid = computed(
       Number(form.recurrence_config.interval_days) > 0)
 );
 const messageValid = message => {
+  if (message.kind === 'email')
+    return Boolean(message.subject.trim() && message.body.trim());
   if (message.kind === 'text') return Boolean(message.body.trim());
   if (message.kind === 'template') {
     return (
@@ -294,10 +388,18 @@ const messageValid = message => {
 const messagesValid = computed(
   () => form.steps.length > 0 && form.steps.every(messageValid)
 );
+const eligibleCount = computed(() =>
+  Number(audiencePreview.value.estimated_recipients || 0)
+);
 const currentStepValid = computed(() => {
   if (stepIndex.value === 0)
-    return Boolean(form.name.trim()) && sourceValid.value;
-  if (stepIndex.value === 1) return true; // TEMP: liberar navegacao para teste visual
+    return (
+      Boolean(form.name.trim()) &&
+      sourceValid.value &&
+      audiencePreview.value.estimated_recipients !== null &&
+      eligibleCount.value > 0
+    );
+  if (stepIndex.value === 1) return configValid.value;
   if (stepIndex.value === 2) return messagesValid.value;
   return true;
 });
@@ -322,9 +424,6 @@ const audienceDescription = computed(() => {
 });
 const activeMessage = computed(
   () => form.steps[activeMessageIndex.value] || form.steps[0]
-);
-const eligibleCount = computed(() =>
-  Number(audiencePreview.value.estimated_recipients || 0)
 );
 const estimatedMessageCount = computed(
   () => eligibleCount.value * form.steps.length
@@ -381,6 +480,15 @@ const preflightItems = computed(() => {
       severity: 'error',
       text: t('JRC_CAMPAIGNS.WIZARD.VALIDATION_AUDIENCE'),
     });
+  if (
+    sourceValid.value &&
+    audiencePreview.value.estimated_recipients !== null &&
+    eligibleCount.value === 0
+  )
+    items.push({
+      severity: 'error',
+      text: t('JRC_CAMPAIGNS.WIZARD.VALIDATION_RECIPIENTS'),
+    });
   if (!form.inboxLinks.length)
     items.push({
       severity: 'error',
@@ -391,12 +499,17 @@ const preflightItems = computed(() => {
       severity: 'error',
       text: t('JRC_CAMPAIGNS.WIZARD.VALIDATION_MESSAGE'),
     });
-  if (audiencePreview.value.without_whatsapp_count)
+  if (audiencePreview.value.without_destination_count)
     items.push({
       severity: 'warning',
-      text: t('JRC_CAMPAIGNS.WIZARD.WARNING_NO_WHATSAPP', {
-        count: formatNumber(audiencePreview.value.without_whatsapp_count),
-      }),
+      text: t(
+        isEmail.value
+          ? 'JRC_CAMPAIGNS.WIZARD.WARNING_NO_EMAIL'
+          : 'JRC_CAMPAIGNS.WIZARD.WARNING_NO_WHATSAPP',
+        {
+          count: formatNumber(audiencePreview.value.without_destination_count),
+        }
+      ),
     });
   if (audiencePreview.value.blacklisted_count)
     items.push({
@@ -417,6 +530,13 @@ const preflightItems = computed(() => {
       severity: 'warning',
       text: t('JRC_CAMPAIGNS.WIZARD.WARNING_DUPLICATES', {
         count: formatNumber(audiencePreview.value.duplicate_count),
+      }),
+    });
+  if (audiencePreview.value.manually_excluded_count)
+    items.push({
+      severity: 'warning',
+      text: t('JRC_CAMPAIGNS.WIZARD.WARNING_MANUAL_EXCLUSIONS', {
+        count: formatNumber(audiencePreview.value.manually_excluded_count),
       }),
     });
   if (configuredInboxProblems.value.length)
@@ -479,6 +599,65 @@ const toggleArrayValue = (array, value) => {
 const selectAudience = audienceType => {
   form.audience_type = audienceType;
 };
+const resetRecipientSelection = () => {
+  form.audience_config.recipient_selection_mode = 'exclude';
+  form.audience_config.recipient_selection_keys = [];
+  audiencePreview.value = {
+    ...audiencePreview.value,
+    found_count: null,
+    available_recipients: null,
+    estimated_recipients: null,
+    manually_excluded_count: 0,
+    sample: [],
+  };
+  recipientSearch.value = '';
+  recipientRows.value = [];
+  recipientPagination.value = {
+    page: 1,
+    per_page: 50,
+    total: 0,
+    total_pages: 1,
+  };
+  showRecipientManager.value = false;
+};
+const updateRecipientSelection = (selectionKey, selected) => {
+  const mode = form.audience_config.recipient_selection_mode;
+  const keys = form.audience_config.recipient_selection_keys;
+  const index = keys.indexOf(selectionKey);
+  const shouldStoreKey = mode === 'include' ? selected : !selected;
+  if (shouldStoreKey && index < 0) keys.push(selectionKey);
+  if (!shouldStoreKey && index >= 0) keys.splice(index, 1);
+};
+const toggleRecipient = recipient => {
+  const selected = !recipient.selected;
+  updateRecipientSelection(recipient.selection_key, selected);
+  recipient.selected = selected;
+  const difference = selected ? 1 : -1;
+  audiencePreview.value.estimated_recipients = Math.max(
+    0,
+    eligibleCount.value + difference
+  );
+  audiencePreview.value.manually_excluded_count = Math.max(
+    0,
+    Number(audiencePreview.value.available_recipients || 0) -
+      Number(audiencePreview.value.estimated_recipients || 0)
+  );
+};
+const setAllRecipients = selected => {
+  form.audience_config.recipient_selection_mode = selected
+    ? 'exclude'
+    : 'include';
+  form.audience_config.recipient_selection_keys = [];
+  recipientRows.value.forEach(recipient => {
+    recipient.selected = selected;
+  });
+  audiencePreview.value.estimated_recipients = selected
+    ? Number(audiencePreview.value.available_recipients || 0)
+    : 0;
+  audiencePreview.value.manually_excluded_count = selected
+    ? 0
+    : Number(audiencePreview.value.available_recipients || 0);
+};
 const toggleSendingInbox = inbox => {
   const index = form.inboxLinks.findIndex(
     item => Number(item.inbox_id) === Number(inbox.id)
@@ -505,7 +684,9 @@ const moveInbox = (inboxId, direction) => {
   ];
 };
 const addMessage = () => {
-  const message = defaultMessage();
+  let kind = usesEvolution.value ? 'text' : 'template';
+  if (isEmail.value) kind = 'email';
+  const message = defaultMessage(kind);
   message.position = form.steps.length;
   form.steps.push(message);
   activeMessageIndex.value = form.steps.length - 1;
@@ -577,9 +758,13 @@ const uploadMedia = async (event, message, index) => {
   if (!file) return;
   uploadingStep.value = index;
   try {
-    const { data } = await JrcCampaignsAPI.uploadMedia(file, message.kind);
+    const { data } = await JrcCampaignsAPI.uploadMedia(
+      file,
+      message.kind === 'email' ? 'document' : message.kind
+    );
     message.media_url = data.url;
     message.file_name = data.file_name;
+    message.media_asset_id = data.id;
     useAlert(t('JRC_CAMPAIGNS.ALERTS.MEDIA_UPLOADED'));
   } finally {
     uploadingStep.value = null;
@@ -620,9 +805,11 @@ const serializeStep = (message, position = 0) => ({
   id: message.id,
   position,
   kind: message.kind,
+  subject: message.subject,
   body: message.body,
   media_url: message.media_url,
   file_name: message.file_name,
+  media_asset_id: message.media_asset_id,
   template_name: message.template_name,
   template_namespace: message.template_namespace,
   template_language: message.template_language,
@@ -652,6 +839,7 @@ const buildPayload = () => {
   });
   return {
     name: form.name,
+    delivery_channel: form.delivery_channel,
     audience_type: form.audience_type,
     audience_config: form.audience_config,
     rotation_mode: form.rotation_mode,
@@ -675,7 +863,9 @@ const refreshAudiencePreview = async () => {
   previewingAudience.value = true;
   try {
     const { data } = await JrcCampaignsAPI.audiencePreview({
+      inbox_id: form.inboxLinks[0]?.inbox_id,
       audience_type: form.audience_type,
+      delivery_channel: form.delivery_channel,
       audience_config: form.audience_config,
     });
     audiencePreview.value = data;
@@ -683,12 +873,55 @@ const refreshAudiencePreview = async () => {
     audiencePreview.value = {
       ...audiencePreview.value,
       found_count: null,
+      available_recipients: null,
       estimated_recipients: null,
       sample: [],
     };
   } finally {
     previewingAudience.value = false;
   }
+};
+const refreshRecipientManager = async () => {
+  if (!sourceValid.value || !showRecipientManager.value) return;
+  recipientManagerLoading.value = true;
+  try {
+    const { data } = await JrcCampaignsAPI.audiencePreview(
+      {
+        inbox_id: form.inboxLinks[0]?.inbox_id,
+        audience_type: form.audience_type,
+        delivery_channel: form.delivery_channel,
+        audience_config: form.audience_config,
+      },
+      {
+        include_recipients: true,
+        recipient_search: recipientSearch.value,
+        recipient_page: recipientPagination.value.page,
+        recipient_per_page: recipientPagination.value.per_page,
+      }
+    );
+    recipientRows.value = data.recipients || [];
+    recipientPagination.value = data.recipient_pagination || {
+      page: 1,
+      per_page: 50,
+      total: 0,
+      total_pages: 1,
+    };
+  } catch {
+    recipientRows.value = [];
+    useAlert(t('JRC_CAMPAIGNS.ALERTS.RECIPIENTS_LOAD_FAILED'));
+  } finally {
+    recipientManagerLoading.value = false;
+  }
+};
+const openRecipientManager = async () => {
+  showRecipientManager.value = true;
+  recipientPagination.value.page = 1;
+  await refreshRecipientManager();
+};
+const changeRecipientPage = async page => {
+  if (page < 1 || page > recipientPagination.value.total_pages) return;
+  recipientPagination.value.page = page;
+  await refreshRecipientManager();
 };
 const nextStep = async () => {
   if (!currentStepValid.value) return;
@@ -712,6 +945,7 @@ const save = async startAfterSave => {
     const response = props.campaign
       ? await JrcCampaignsAPI.update(props.campaign.id, payload)
       : await JrcCampaignsAPI.create(payload);
+    if (startAfterSave) await JrcCampaignsAPI.launch(response.data.id);
     useAlert(
       t(
         props.campaign
@@ -719,7 +953,7 @@ const save = async startAfterSave => {
           : 'JRC_CAMPAIGNS.ALERTS.SAVED'
       )
     );
-    emit('saved', startAfterSave ? response.data : null);
+    emit('saved');
   } catch (error) {
     useAlert(
       error?.response?.data?.errors?.join(', ') ||
@@ -730,22 +964,68 @@ const save = async startAfterSave => {
   }
 };
 const sendTest = async (message = activeMessage.value) => {
-  if (!testPhone.value.trim()) {
-    useAlert(t('JRC_CAMPAIGNS.ALERTS.TEST_PHONE_REQUIRED'));
+  if (testSending.value) return;
+  if (!testDestination.value.trim()) {
+    useAlert(
+      t(
+        isEmail.value
+          ? 'JRC_CAMPAIGNS.ALERTS.TEST_EMAIL_REQUIRED'
+          : 'JRC_CAMPAIGNS.ALERTS.TEST_PHONE_REQUIRED'
+      )
+    );
     return;
   }
   if (!message || !messageValid(message) || !form.inboxLinks.length) {
     useAlert(t('JRC_CAMPAIGNS.ALERTS.TEST_CONFIG_REQUIRED'));
     return;
   }
+  const inbox = selectedSendingInboxes.value.find(
+    item => Number(item.id) === Number(form.inboxLinks[0].inbox_id)
+  );
+  const evolution = inbox?.connector === 'evolution';
+  if (
+    evolution &&
+    !window.confirm(
+      t('JRC_CAMPAIGNS.EVOLUTION.CONFIRM_TEST', {
+        sender: inbox.phone_number,
+        recipient: testDestination.value,
+      })
+    )
+  )
+    return;
   testSending.value = true;
   try {
-    await JrcCampaignsAPI.testMessage({
-      phone_number: testPhone.value,
+    const payload = {
+      delivery_channel: form.delivery_channel,
+      phone_number: isEmail.value ? null : testDestination.value,
+      email: isEmail.value ? testDestination.value : null,
       inbox_id: form.inboxLinks[0].inbox_id,
       step: serializeStep(message),
-    });
-    useAlert(t('JRC_CAMPAIGNS.ALERTS.TEST_SENT'));
+    };
+    let signature = null;
+    if (evolution) {
+      signature = JSON.stringify(payload);
+      if (!testKeys.has(signature))
+        testKeys.set(signature, crypto.randomUUID());
+      payload.idempotency_key = testKeys.get(signature);
+      payload.operator_confirmed = true;
+    }
+    const { data } = await JrcCampaignsAPI.testMessage(payload);
+    if (data.test_delivery_id) {
+      latestTest.value = { ...data, id: data.test_delivery_id };
+      latestTestSignature.value = signature;
+      if (data.status === 'sent') {
+        clearTimeout(newTestTimer);
+        newTestCoolingDown.value = true;
+        newTestTimer = setTimeout(
+          () => {
+            newTestCoolingDown.value = false;
+          },
+          Math.max(60, Number(inbox.min_interval_seconds) || 60) * 1000
+        );
+      }
+    }
+    useAlert(t(testResultAlert(data)));
   } catch (error) {
     useAlert(
       error?.response?.data?.errors?.join(', ') ||
@@ -755,6 +1035,20 @@ const sendTest = async (message = activeMessage.value) => {
     testSending.value = false;
   }
 };
+const prepareNewTest = () => {
+  if (
+    testSending.value ||
+    newTestCoolingDown.value ||
+    latestTest.value?.status !== 'sent' ||
+    !latestTestSignature.value
+  )
+    return;
+  if (!window.confirm(t('JRC_CAMPAIGNS.EVOLUTION.NEW_TEST_CONFIRM'))) return;
+  testKeys.delete(latestTestSignature.value);
+  latestTestSignature.value = null;
+  latestTest.value = null;
+};
+onBeforeUnmount(() => clearTimeout(newTestTimer));
 const validateMessage = message => {
   useAlert(
     t(
@@ -763,6 +1057,14 @@ const validateMessage = message => {
         : 'JRC_CAMPAIGNS.ALERTS.MESSAGE_INVALID'
     )
   );
+};
+const refreshTestResult = async () => {
+  try {
+    const { data } = await JrcCampaignsAPI.testDelivery(latestTest.value.id);
+    latestTest.value = data;
+  } catch {
+    useAlert(t('JRC_CAMPAIGNS.ALERTS.ACTION_FAILED'));
+  }
 };
 const previewVariableValue = (message, variable) => {
   const mapping = message.variableMappings[variable];
@@ -775,7 +1077,9 @@ const previewVariableValue = (message, variable) => {
     '{{telefone}}':
       audiencePreview.value.sample?.[0]?.phone_number ||
       t('JRC_CAMPAIGNS.WIZARD.PREVIEW_PHONE'),
-    '{{email}}': t('JRC_CAMPAIGNS.WIZARD.PREVIEW_EMAIL'),
+    '{{email}}':
+      audiencePreview.value.sample?.[0]?.email ||
+      t('JRC_CAMPAIGNS.WIZARD.PREVIEW_EMAIL'),
     '{{account.name}}':
       props.metadata.account_name || t('JRC_CAMPAIGNS.WIZARD.PREVIEW_ACCOUNT'),
     '{{inbox.name}}':
@@ -817,6 +1121,7 @@ const messageTypeLabel = kind =>
 const hydrate = campaign => {
   if (!campaign) return;
   form.name = campaign.name || '';
+  form.delivery_channel = campaign.delivery_channel || 'whatsapp';
   form.audience_type = campaign.audience_type || 'all_contacts';
   form.audience_config = {
     label_ids: campaign.audience_config?.label_ids || [],
@@ -825,6 +1130,12 @@ const hydrate = campaign => {
     stage_ids: campaign.audience_config?.stage_ids || [],
     sanitized_list_id: campaign.audience_config?.sanitized_list_id || null,
     customer_filters: campaign.audience_config?.customer_filters || {},
+    recipient_selection_mode:
+      campaign.audience_config?.recipient_selection_mode === 'include'
+        ? 'include'
+        : 'exclude',
+    recipient_selection_keys:
+      campaign.audience_config?.recipient_selection_keys || [],
   };
   form.inboxLinks = (campaign.campaign_inboxes || []).map(item => ({
     ...item,
@@ -837,7 +1148,11 @@ const hydrate = campaign => {
     end: '18:00',
     days: [1, 2, 3, 4, 5],
   };
-  form.conversation_mode = campaign.conversation_mode || 'reply_only';
+  form.conversation_mode =
+    form.delivery_channel === 'email' &&
+    campaign.conversation_mode === 'reply_only'
+      ? 'pending'
+      : campaign.conversation_mode || 'reply_only';
   form.trigger_type = campaign.trigger_type || 'manual';
   form.scheduled_at = campaign.scheduled_at
     ? new Date(campaign.scheduled_at).toISOString().slice(0, 16)
@@ -853,7 +1168,13 @@ const hydrate = campaign => {
     ...(campaign.follow_up_config || {}),
   };
   form.steps = (
-    campaign.steps?.length ? campaign.steps : [defaultMessage()]
+    campaign.steps?.length
+      ? campaign.steps
+      : [
+          defaultMessage(
+            form.delivery_channel === 'email' ? 'email' : 'template'
+          ),
+        ]
   ).map((message, position) => {
     const hydrated = {
       ...defaultMessage(),
@@ -874,6 +1195,43 @@ const hydrate = campaign => {
 
 hydrate(props.campaign);
 watch(
+  () => form.delivery_channel,
+  (value, previous) => {
+    if (previous === undefined || value === previous) return;
+    form.inboxLinks = [];
+    form.audience_config.inbox_ids = [];
+    form.steps = [defaultMessage(value === 'email' ? 'email' : 'template')];
+    form.conversation_mode = value === 'email' ? 'pending' : 'reply_only';
+    activeMessageIndex.value = 0;
+    testDestination.value = '';
+  }
+);
+watch(audienceSourceSignature, (value, previous) => {
+  if (previous !== undefined && value !== previous) resetRecipientSelection();
+});
+watch(
+  availableSendingInboxes,
+  inboxes => {
+    const availableIds = new Set(inboxes.map(inbox => Number(inbox.id)));
+    const usableInboxes = inboxes.filter(
+      inbox => inboxHealth(inbox).state !== 'error'
+    );
+    form.inboxLinks = form.inboxLinks.filter(item =>
+      availableIds.has(Number(item.inbox_id))
+    );
+    if (usableInboxes.length === 1 && !form.inboxLinks.length) {
+      form.inboxLinks.push({
+        id: null,
+        inbox_id: usableInboxes[0].id,
+        weight: 1,
+        position: 0,
+        enabled: true,
+      });
+    }
+  },
+  { immediate: true }
+);
+watch(
   () => form.audience_config.pipeline_id,
   (value, previous) => {
     if (previous !== undefined && Number(value) !== Number(previous))
@@ -881,7 +1239,11 @@ watch(
   }
 );
 watch(
-  [() => form.audience_type, () => form.audience_config],
+  [
+    () => form.delivery_channel,
+    () => form.audience_type,
+    () => form.audience_config,
+  ],
   () => {
     window.clearTimeout(audienceTimer);
     if (!sourceValid.value) return;
@@ -889,14 +1251,22 @@ watch(
   },
   { deep: true }
 );
+watch(recipientSearch, () => {
+  window.clearTimeout(recipientSearchTimer);
+  recipientPagination.value.page = 1;
+  recipientSearchTimer = window.setTimeout(refreshRecipientManager, 350);
+});
 onMounted(refreshAudiencePreview);
+onBeforeUnmount(() => {
+  window.clearTimeout(audienceTimer);
+  window.clearTimeout(recipientSearchTimer);
+});
 watch(
   () => form.audience_type,
   value => {
     if (value === 'sanitized_list') form.audience_config.customer_filters = {};
   }
 );
-onBeforeUnmount(() => window.clearTimeout(audienceTimer));
 </script>
 
 <template>
@@ -978,6 +1348,38 @@ onBeforeUnmount(() => window.clearTimeout(audienceTimer));
         class="mx-auto grid w-full max-w-[1540px] gap-5 p-5 lg:grid-cols-12 lg:p-8"
       >
         <section class="lg:col-span-9">
+          <div
+            v-if="latestTest"
+            class="mb-4 rounded-lg border border-n-weak p-3 text-sm"
+            role="status"
+          >
+            {{ t('JRC_CAMPAIGNS.EVOLUTION.TEST_RESULT') }} #{{
+              latestTest.id
+            }}
+            · {{ latestTest.provider_status || latestTest.status }}
+            <p v-if="latestTest.error_message">
+              {{ latestTest.error_message }}
+            </p>
+            <button
+              type="button"
+              class="mt-2 rounded-lg border border-n-strong px-3 py-2"
+              @click="refreshTestResult"
+            >
+              {{ t('JRC_CAMPAIGNS.REFRESH') }}
+            </button>
+            <button
+              v-if="latestTest.status === 'sent' && latestTestSignature"
+              type="button"
+              class="ml-2 mt-2 rounded-lg border border-n-brand px-3 py-2 text-n-brand disabled:opacity-40"
+              :disabled="testSending || newTestCoolingDown"
+              @click="prepareNewTest"
+            >
+              {{ t('JRC_CAMPAIGNS.EVOLUTION.NEW_TEST') }}
+            </button>
+            <p v-if="newTestCoolingDown" class="mt-2 text-n-slate-11">
+              {{ t('JRC_CAMPAIGNS.EVOLUTION.WAIT_INTERVAL') }}
+            </p>
+          </div>
           <div v-if="stepIndex === 0" class="space-y-5">
             <div>
               <h3 class="text-xl font-semibold text-n-slate-12">
@@ -994,7 +1396,49 @@ onBeforeUnmount(() => window.clearTimeout(audienceTimer));
                 class="mt-1.5 w-full rounded-xl border border-n-weak bg-n-background px-3 py-2.5"
                 :placeholder="$t('JRC_CAMPAIGNS.WIZARD.NAME_PLACEHOLDER')"
             /></label>
-            <div class="rounded-2xl border border-n-weak p-5">
+            <div class="campaign-channel-panel rounded-2xl border p-5">
+              <h4 class="text-sm font-semibold text-n-slate-12">
+                {{ $t('JRC_CAMPAIGNS.WIZARD.DELIVERY_CHANNEL') }}
+              </h4>
+              <p class="mt-1 text-xs text-n-slate-10">
+                {{ $t('JRC_CAMPAIGNS.WIZARD.DELIVERY_CHANNEL_HELP') }}
+              </p>
+              <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                <button
+                  v-for="channel in channelCards"
+                  :key="channel.key"
+                  type="button"
+                  class="relative rounded-xl border p-4 text-left transition-colors"
+                  :class="
+                    form.delivery_channel === channel.key
+                      ? 'border-n-brand bg-n-brand/5'
+                      : 'border-n-weak hover:border-n-strong'
+                  "
+                  @click="form.delivery_channel = channel.key"
+                >
+                  <span
+                    class="flex size-9 items-center justify-center rounded-xl bg-n-alpha-2 text-n-slate-11"
+                    ><span
+                      class="size-5 shrink-0"
+                      :class="channel.icon"
+                      aria-hidden="true"
+                  /></span>
+                  <span
+                    class="mt-3 block text-sm font-semibold text-n-slate-12"
+                  >
+                    {{ channel.label }}
+                  </span>
+                  <span class="mt-1 block text-xs leading-5 text-n-slate-10">
+                    {{ channel.description }}
+                  </span>
+                  <span
+                    v-if="form.delivery_channel === channel.key"
+                    class="i-lucide-circle-check absolute right-3 top-3 size-5 text-n-brand"
+                  />
+                </button>
+              </div>
+            </div>
+            <div class="campaign-source-panel rounded-2xl border p-5">
               <h4 class="text-sm font-semibold text-n-slate-12">
                 {{ $t('JRC_CAMPAIGNS.WIZARD.SOURCE') }}
               </h4>
@@ -1064,7 +1508,7 @@ onBeforeUnmount(() => window.clearTimeout(audienceTimer));
                 </p>
                 <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                   <label
-                    v-for="inbox in metadata.source_inboxes || metadata.inboxes"
+                    v-for="inbox in availableSourceInboxes"
                     :key="inbox.id"
                     class="flex items-center gap-2 rounded-xl border border-n-weak p-3 text-sm"
                     ><input
@@ -1082,6 +1526,16 @@ onBeforeUnmount(() => window.clearTimeout(audienceTimer));
                       "
                     /><span>{{ inbox.name }}</span></label
                   >
+                </div>
+                <div
+                  v-if="!availableSourceInboxes.length"
+                  class="rounded-xl bg-n-alpha-2 p-4 text-sm text-n-slate-10"
+                >
+                  {{
+                    $t('JRC_CAMPAIGNS.WIZARD.NO_SOURCE_INBOXES', {
+                      channel: deliveryChannelLabel,
+                    })
+                  }}
                 </div>
               </div>
               <div
@@ -1152,13 +1606,7 @@ onBeforeUnmount(() => window.clearTimeout(audienceTimer));
                 </select></label
               >
             </div>
-            <CampaignFilters
-              v-if="
-                hasCustomerMaster && form.audience_type !== 'sanitized_list'
-              "
-              v-model="form.audience_config.customer_filters"
-            />
-            <div class="rounded-2xl border border-n-weak p-5">
+            <div class="campaign-preview-panel rounded-2xl border p-5">
               <div class="flex items-center justify-between gap-3">
                 <div>
                   <h4 class="text-sm font-semibold text-n-slate-12">
@@ -1180,9 +1628,9 @@ onBeforeUnmount(() => window.clearTimeout(audienceTimer));
                   />{{ $t('JRC_CAMPAIGNS.REFRESH') }}
                 </button>
               </div>
-              <div class="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+              <div class="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
                 <div
-                  v-for="item in [
+                  v-for="(item, index) in [
                     {
                       key: 'found_count',
                       label: $t('JRC_CAMPAIGNS.WIZARD.FOUND'),
@@ -1194,8 +1642,12 @@ onBeforeUnmount(() => window.clearTimeout(audienceTimer));
                       className: 'text-n-teal-11',
                     },
                     {
-                      key: 'without_whatsapp_count',
-                      label: $t('JRC_CAMPAIGNS.WIZARD.NO_WHATSAPP'),
+                      key: 'without_destination_count',
+                      label: $t(
+                        isEmail
+                          ? 'JRC_CAMPAIGNS.WIZARD.NO_EMAIL'
+                          : 'JRC_CAMPAIGNS.WIZARD.NO_WHATSAPP'
+                      ),
                       className: 'text-n-amber-11',
                     },
                     {
@@ -1208,9 +1660,15 @@ onBeforeUnmount(() => window.clearTimeout(audienceTimer));
                       label: $t('JRC_CAMPAIGNS.WIZARD.DUPLICATES'),
                       className: 'text-n-slate-11',
                     },
+                    {
+                      key: 'manually_excluded_count',
+                      label: $t('JRC_CAMPAIGNS.WIZARD.MANUALLY_EXCLUDED'),
+                      className: 'text-n-ruby-11',
+                    },
                   ]"
                   :key="item.key"
-                  class="rounded-xl bg-n-alpha-1 p-4"
+                  class="campaign-preview-card rounded-xl border p-4"
+                  :class="`campaign-preview-card-${index + 1}`"
                 >
                   <p class="text-xs text-n-slate-10">{{ item.label }}</p>
                   <p class="mt-2 text-xl font-semibold" :class="item.className">
@@ -1222,41 +1680,178 @@ onBeforeUnmount(() => window.clearTimeout(audienceTimer));
                   </p>
                 </div>
               </div>
+              <div
+                v-if="audiencePreview.rejections?.length"
+                class="mt-4 max-h-48 overflow-y-auto rounded-lg border border-n-weak p-3 text-sm"
+                role="status"
+              >
+                <p class="font-medium">
+                  {{ t('JRC_CAMPAIGNS.EVOLUTION.REJECTIONS') }}
+                </p>
+                <p
+                  v-for="rejection in audiencePreview.rejections"
+                  :key="rejection.selection_key"
+                  class="mt-2"
+                >
+                  {{
+                    rejection.name || rejection.phone_number || rejection.email
+                  }}
+                  · {{ rejection.reason }}
+                </p>
+              </div>
               <button
-                v-if="audiencePreview.sample?.length"
+                v-if="Number(audiencePreview.available_recipients || 0) > 0"
                 type="button"
-                class="mt-4 text-xs font-medium text-n-brand"
-                @click="showAudienceSample = !showAudienceSample"
+                class="mt-4 rounded-xl border border-n-brand px-3 py-2 text-xs font-medium text-n-brand"
+                @click="
+                  showRecipientManager
+                    ? (showRecipientManager = false)
+                    : openRecipientManager()
+                "
               >
                 {{
                   $t(
-                    showAudienceSample
-                      ? 'JRC_CAMPAIGNS.WIZARD.HIDE_CONTACTS'
-                      : 'JRC_CAMPAIGNS.WIZARD.VIEW_CONTACTS'
+                    showRecipientManager
+                      ? 'JRC_CAMPAIGNS.WIZARD.CLOSE_RECIPIENT_MANAGER'
+                      : 'JRC_CAMPAIGNS.WIZARD.MANAGE_RECIPIENTS'
                   )
                 }}
               </button>
               <div
-                v-if="showAudienceSample"
-                class="mt-3 overflow-hidden rounded-xl border border-n-weak"
+                v-if="showRecipientManager"
+                class="mt-4 rounded-xl border border-n-weak p-4"
               >
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p class="text-sm font-semibold text-n-slate-12">
+                      {{ $t('JRC_CAMPAIGNS.WIZARD.RECIPIENT_MANAGER_TITLE') }}
+                    </p>
+                    <p class="mt-1 text-xs text-n-slate-10">
+                      {{
+                        $t('JRC_CAMPAIGNS.WIZARD.RECIPIENT_SELECTION_COUNT', {
+                          selected: formatNumber(eligibleCount),
+                          total: formatNumber(
+                            audiencePreview.available_recipients
+                          ),
+                        })
+                      }}
+                    </p>
+                  </div>
+                  <div class="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      class="rounded-lg border border-n-strong px-3 py-1.5 text-xs font-medium text-n-slate-11"
+                      @click="setAllRecipients(true)"
+                    >
+                      {{ $t('JRC_CAMPAIGNS.WIZARD.SELECT_ALL_RECIPIENTS') }}
+                    </button>
+                    <button
+                      type="button"
+                      class="rounded-lg border border-n-strong px-3 py-1.5 text-xs font-medium text-n-slate-11"
+                      @click="setAllRecipients(false)"
+                    >
+                      {{ $t('JRC_CAMPAIGNS.WIZARD.DESELECT_ALL_RECIPIENTS') }}
+                    </button>
+                  </div>
+                </div>
+                <div class="relative mt-4">
+                  <span
+                    class="i-lucide-search absolute left-3 top-1/2 size-4 -translate-y-1/2 text-n-slate-9"
+                  />
+                  <input
+                    v-model="recipientSearch"
+                    type="search"
+                    class="w-full rounded-xl border border-n-weak bg-n-background py-2.5 pl-9 pr-3 text-sm"
+                    :placeholder="$t('JRC_CAMPAIGNS.WIZARD.SEARCH_RECIPIENTS')"
+                  />
+                </div>
                 <div
-                  v-for="contact in audiencePreview.sample"
-                  :key="contact.phone_number"
-                  class="flex items-center justify-between border-b border-n-weak px-3 py-2 text-xs last:border-b-0"
+                  class="mt-3 overflow-hidden rounded-xl border border-n-weak"
                 >
-                  <span class="font-medium text-n-slate-12">{{
-                    contact.name || $t('JRC_CAMPAIGNS.WIZARD.UNNAMED_CONTACT')
-                  }}</span
-                  ><span class="text-n-slate-10">{{
-                    contact.phone_number
-                  }}</span>
+                  <p
+                    v-if="recipientManagerLoading"
+                    class="px-3 py-6 text-center text-xs text-n-slate-10"
+                  >
+                    {{ $t('JRC_CAMPAIGNS.WIZARD.LOADING_RECIPIENTS') }}
+                  </p>
+                  <p
+                    v-else-if="!recipientRows.length"
+                    class="px-3 py-6 text-center text-xs text-n-slate-10"
+                  >
+                    {{ $t('JRC_CAMPAIGNS.WIZARD.NO_RECIPIENTS_FOUND') }}
+                  </p>
+                  <template v-else>
+                    <label
+                      v-for="contact in recipientRows"
+                      :key="contact.selection_key"
+                      class="flex cursor-pointer items-center gap-3 border-b border-n-weak px-3 py-2.5 text-xs last:border-b-0 hover:bg-n-alpha-1"
+                    >
+                      <input
+                        type="checkbox"
+                        :checked="contact.selected"
+                        @change="toggleRecipient(contact)"
+                      />
+                      <span class="min-w-0 flex-1">
+                        <span
+                          class="block truncate font-medium text-n-slate-12"
+                          >{{
+                            contact.name ||
+                            $t('JRC_CAMPAIGNS.WIZARD.UNNAMED_CONTACT')
+                          }}</span
+                        >
+                        <span class="block truncate text-n-slate-10">{{
+                          isEmail ? contact.email : contact.phone_number
+                        }}</span>
+                      </span>
+                    </label>
+                  </template>
+                </div>
+                <div
+                  v-if="recipientPagination.total_pages > 1"
+                  class="mt-3 flex items-center justify-between gap-3"
+                >
+                  <button
+                    type="button"
+                    class="rounded-lg border border-n-strong px-3 py-1.5 text-xs disabled:opacity-40"
+                    :disabled="
+                      recipientManagerLoading || recipientPagination.page <= 1
+                    "
+                    @click="changeRecipientPage(recipientPagination.page - 1)"
+                  >
+                    {{ $t('JRC_CAMPAIGNS.WIZARD.PREVIOUS_PAGE') }}
+                  </button>
+                  <span class="text-xs text-n-slate-10">
+                    {{
+                      $t('JRC_CAMPAIGNS.WIZARD.RECIPIENT_PAGE', {
+                        page: recipientPagination.page,
+                        total: recipientPagination.total_pages,
+                      })
+                    }}
+                  </span>
+                  <button
+                    type="button"
+                    class="rounded-lg border border-n-strong px-3 py-1.5 text-xs disabled:opacity-40"
+                    :disabled="
+                      recipientManagerLoading ||
+                      recipientPagination.page >=
+                        recipientPagination.total_pages
+                    "
+                    @click="changeRecipientPage(recipientPagination.page + 1)"
+                  >
+                    {{ $t('JRC_CAMPAIGNS.WIZARD.NEXT_PAGE') }}
+                  </button>
                 </div>
               </div>
             </div>
           </div>
 
           <div v-else-if="stepIndex === 1" class="space-y-5">
+            <CampaignFilters
+              v-if="
+                hasCustomerMaster && form.audience_type !== 'sanitized_list'
+              "
+              v-model="form.audience_config.customer_filters"
+            />
             <div>
               <h3 class="text-xl font-semibold text-n-slate-12">
                 {{ $t('JRC_CAMPAIGNS.WIZARD.CONFIG_TITLE') }}
@@ -1268,14 +1863,20 @@ onBeforeUnmount(() => window.clearTimeout(audienceTimer));
             <div class="grid gap-4 xl:grid-cols-3">
               <article class="rounded-2xl border border-n-weak p-5">
                 <h4 class="text-sm font-semibold text-n-slate-12">
-                  {{ $t('JRC_CAMPAIGNS.WIZARD.SENDING_INBOXES') }}
+                  {{
+                    $t(
+                      isEmail
+                        ? 'JRC_CAMPAIGNS.WIZARD.EMAIL_SENDING_INBOXES'
+                        : 'JRC_CAMPAIGNS.WIZARD.SENDING_INBOXES'
+                    )
+                  }}
                 </h4>
                 <p class="mt-1 text-xs text-n-slate-10">
                   {{ $t('JRC_CAMPAIGNS.WIZARD.SENDING_INBOXES_HELP') }}
                 </p>
                 <div class="mt-4 space-y-2">
                   <div
-                    v-for="inbox in metadata.inboxes"
+                    v-for="inbox in availableSendingInboxes"
                     :key="inbox.id"
                     class="rounded-xl border border-n-weak p-3"
                   >
@@ -1290,7 +1891,13 @@ onBeforeUnmount(() => window.clearTimeout(audienceTimer));
                           class="block truncate text-sm font-medium text-n-slate-12"
                           >{{ inbox.name }}</span
                         ><span class="block truncate text-xs text-n-slate-9"
-                          >{{ inbox.phone_number }} · {{ inbox.provider }}</span
+                          >{{
+                            inbox.connector === 'evolution'
+                              ? t('JRC_CAMPAIGNS.EVOLUTION.SENDER')
+                              : ''
+                          }}
+                          {{ inbox.email_address || inbox.phone_number }} ·
+                          {{ inbox.provider }}</span
                         ></span
                       ><span
                         class="rounded-full px-2 py-1 text-[10px] font-medium"
@@ -1300,6 +1907,7 @@ onBeforeUnmount(() => window.clearTimeout(audienceTimer));
                     >
                     <div
                       v-if="
+                        selectedInboxIds.length > 1 &&
                         form.rotation_mode === 'priority' &&
                         selectedInboxIds.includes(Number(inbox.id))
                       "
@@ -1322,13 +1930,23 @@ onBeforeUnmount(() => window.clearTimeout(audienceTimer));
                       </button>
                     </div>
                   </div>
+                  <div
+                    v-if="!availableSendingInboxes.length"
+                    class="rounded-xl bg-n-amber-2 p-4 text-sm text-n-amber-11"
+                  >
+                    {{
+                      $t('JRC_CAMPAIGNS.WIZARD.NO_SENDING_INBOXES', {
+                        channel: deliveryChannelLabel,
+                      })
+                    }}
+                  </div>
                 </div>
               </article>
               <article class="rounded-2xl border border-n-weak p-5">
                 <h4 class="text-sm font-semibold text-n-slate-12">
                   {{ $t('JRC_CAMPAIGNS.WIZARD.ROTATION') }}
                 </h4>
-                <div class="mt-4 space-y-2">
+                <div v-if="selectedInboxIds.length > 1" class="mt-4 space-y-2">
                   <label
                     v-for="mode in rotationModes"
                     :key="mode.key"
@@ -1355,7 +1973,22 @@ onBeforeUnmount(() => window.clearTimeout(audienceTimer));
                   >
                 </div>
                 <div
-                  v-if="['random', 'weighted'].includes(form.rotation_mode)"
+                  v-else
+                  class="mt-4 rounded-xl bg-n-alpha-2 p-4 text-sm text-n-slate-10"
+                >
+                  {{
+                    $t(
+                      selectedInboxIds.length === 1
+                        ? 'JRC_CAMPAIGNS.WIZARD.SINGLE_SENDING_INBOX'
+                        : 'JRC_CAMPAIGNS.WIZARD.SELECT_SENDING_INBOX'
+                    )
+                  }}
+                </div>
+                <div
+                  v-if="
+                    selectedInboxIds.length > 1 &&
+                    ['random', 'weighted'].includes(form.rotation_mode)
+                  "
                   class="mt-3 rounded-xl bg-n-amber-2 p-3 text-xs text-n-amber-11"
                 >
                   {{ $t('JRC_CAMPAIGNS.WIZARD.LEGACY_ROTATION') }}
@@ -1445,7 +2078,7 @@ onBeforeUnmount(() => window.clearTimeout(audienceTimer));
                       v-model="form.conversation_mode"
                       class="mt-1.5 w-full rounded-xl border border-n-weak bg-n-background px-3 py-2.5 text-sm"
                     >
-                      <option value="reply_only">
+                      <option v-if="!isEmail" value="reply_only">
                         {{ $t('JRC_CAMPAIGNS.WIZARD.REPLY_ONLY') }}
                       </option>
                       <option value="pending">
@@ -1571,7 +2204,11 @@ onBeforeUnmount(() => window.clearTimeout(audienceTimer));
               class="rounded-2xl border border-n-amber-7 bg-n-amber-2 p-4 text-sm text-n-amber-11"
             >
               <span class="i-lucide-shield-check mr-2 inline-block size-4" />{{
-                $t('JRC_CAMPAIGNS.WIZARD.COMPLIANCE')
+                $t(
+                  isEmail
+                    ? 'JRC_CAMPAIGNS.WIZARD.EMAIL_COMPLIANCE'
+                    : 'JRC_CAMPAIGNS.WIZARD.COMPLIANCE'
+                )
               }}
             </div>
             <div class="grid gap-4 xl:grid-cols-12">
@@ -1611,6 +2248,7 @@ onBeforeUnmount(() => window.clearTimeout(audienceTimer));
                           ><span
                             class="mt-1 block truncate text-[11px] text-n-slate-9"
                             >{{
+                              message.subject ||
                               message.template_name ||
                               message.file_name ||
                               message.body ||
@@ -1688,11 +2326,17 @@ onBeforeUnmount(() => window.clearTimeout(audienceTimer));
                 <div class="mt-4 grid grid-cols-2 gap-3">
                   <label class="text-xs font-medium text-n-slate-10"
                     >{{ $t('JRC_CAMPAIGNS.WIZARD.TYPE')
-                    }}<select
+                    }}<input
+                      v-if="isEmail"
+                      :value="$t('JRC_CAMPAIGNS.WIZARD.EMAIL')"
+                      disabled
+                      class="mt-1.5 w-full rounded-xl border border-n-weak bg-n-alpha-1 px-3 py-2.5 text-sm"
+                    /><select
+                      v-else
                       v-model="activeMessage.kind"
                       class="mt-1.5 w-full rounded-xl border border-n-weak bg-n-background px-3 py-2.5 text-sm"
                     >
-                      <option value="template">
+                      <option value="template" :disabled="usesEvolution">
                         {{ $t('JRC_CAMPAIGNS.WIZARD.TEMPLATE') }}
                       </option>
                       <option value="text">
@@ -1721,7 +2365,49 @@ onBeforeUnmount(() => window.clearTimeout(audienceTimer));
                   /></label>
                 </div>
                 <div
-                  v-if="activeMessage.kind === 'template'"
+                  v-if="activeMessage.kind === 'email'"
+                  class="mt-4 space-y-4"
+                >
+                  <label class="block text-xs font-medium text-n-slate-10"
+                    >{{ $t('JRC_CAMPAIGNS.WIZARD.EMAIL_SUBJECT')
+                    }}<input
+                      v-model="activeMessage.subject"
+                      class="mt-1.5 w-full rounded-xl border border-n-weak bg-n-background px-3 py-2.5 text-sm"
+                      :placeholder="
+                        $t('JRC_CAMPAIGNS.WIZARD.EMAIL_SUBJECT_PLACEHOLDER')
+                      "
+                  /></label>
+                  <label class="block text-xs font-medium text-n-slate-10"
+                    >{{ $t('JRC_CAMPAIGNS.WIZARD.EMAIL_BODY')
+                    }}<textarea
+                      v-model="activeMessage.body"
+                      rows="10"
+                      class="mt-1.5 w-full rounded-xl border border-n-weak bg-n-background px-3 py-2.5 text-sm"
+                      :placeholder="$t('JRC_CAMPAIGNS.WIZARD.BODY_PLACEHOLDER')"
+                    />
+                  </label>
+                  <label class="block text-xs font-medium text-n-slate-10"
+                    >{{ $t('JRC_CAMPAIGNS.WIZARD.EMAIL_ATTACHMENT') }}
+                    <input
+                      type="file"
+                      class="mt-1.5 block w-full rounded-xl border border-n-weak bg-n-background px-3 py-2 text-sm"
+                      @change="
+                        uploadMedia($event, activeMessage, activeMessageIndex)
+                      "
+                    />
+                    <span
+                      v-if="uploadingStep === activeMessageIndex"
+                      class="mt-1 block text-xs text-n-slate-9"
+                      >{{ $t('JRC_CAMPAIGNS.WIZARD.UPLOADING') }}</span
+                    ><span
+                      v-else-if="activeMessage.file_name"
+                      class="mt-1 block text-xs text-n-slate-9"
+                      >{{ activeMessage.file_name }}</span
+                    >
+                  </label>
+                </div>
+                <div
+                  v-else-if="activeMessage.kind === 'template'"
                   class="mt-4 space-y-4"
                 >
                   <div class="grid gap-3 sm:grid-cols-2">
@@ -1952,9 +2638,16 @@ onBeforeUnmount(() => window.clearTimeout(audienceTimer));
               <aside class="space-y-4 xl:col-span-4">
                 <article class="rounded-2xl border border-n-weak p-4">
                   <h4 class="text-sm font-semibold text-n-slate-12">
-                    {{ $t('JRC_CAMPAIGNS.WIZARD.WHATSAPP_PREVIEW') }}
+                    {{
+                      $t(
+                        isEmail
+                          ? 'JRC_CAMPAIGNS.WIZARD.EMAIL_PREVIEW'
+                          : 'JRC_CAMPAIGNS.WIZARD.WHATSAPP_PREVIEW'
+                      )
+                    }}
                   </h4>
                   <div
+                    v-if="!isEmail"
                     class="mx-auto mt-4 max-w-sm overflow-hidden rounded-[28px] border-4 border-n-slate-12 bg-n-slate-12 p-1 shadow-lg"
                   >
                     <div class="overflow-hidden rounded-[22px] bg-[#e9e3d7]">
@@ -1985,6 +2678,36 @@ onBeforeUnmount(() => window.clearTimeout(audienceTimer));
                       </div>
                     </div>
                   </div>
+                  <div
+                    v-else
+                    class="mt-4 overflow-hidden rounded-xl border border-n-weak bg-white text-slate-800 shadow-sm"
+                  >
+                    <div class="border-b border-slate-200 px-4 py-3">
+                      <p class="text-xs text-slate-500">
+                        {{ selectedSendingInboxes[0]?.email_address || '—' }}
+                      </p>
+                      <p class="mt-1 font-semibold">
+                        {{
+                          activeMessage.subject ||
+                          $t('JRC_CAMPAIGNS.WIZARD.EMAIL_NO_SUBJECT')
+                        }}
+                      </p>
+                    </div>
+                    <p
+                      class="min-h-56 whitespace-pre-wrap p-4 text-sm leading-6"
+                    >
+                      {{ previewText(activeMessage) }}
+                    </p>
+                    <p
+                      v-if="activeMessage.file_name"
+                      class="border-t border-slate-200 px-4 py-3 text-xs text-slate-500"
+                    >
+                      <span
+                        class="i-lucide-paperclip mr-1 inline-block size-3"
+                      />
+                      {{ activeMessage.file_name }}
+                    </p>
+                  </div>
                 </article>
                 <article class="rounded-2xl border border-n-weak p-4">
                   <h4 class="text-sm font-semibold text-n-slate-12">
@@ -1993,11 +2716,18 @@ onBeforeUnmount(() => window.clearTimeout(audienceTimer));
                   <p class="mt-1 text-xs text-n-slate-10">
                     {{ $t('JRC_CAMPAIGNS.WIZARD.MESSAGE_TEST_HELP') }}
                   </p>
+                  <p v-if="usesEvolution" class="mt-2 text-xs text-n-slate-11">
+                    {{ t('JRC_CAMPAIGNS.EVOLUTION.CONTINUOUS_HELP') }}
+                  </p>
                   <input
-                    v-model="testPhone"
+                    v-model="testDestination"
                     class="mt-3 w-full rounded-xl border border-n-weak bg-n-background px-3 py-2.5 text-sm"
                     :placeholder="
-                      $t('JRC_CAMPAIGNS.WIZARD.TEST_PHONE_PLACEHOLDER')
+                      $t(
+                        isEmail
+                          ? 'JRC_CAMPAIGNS.WIZARD.TEST_EMAIL_PLACEHOLDER'
+                          : 'JRC_CAMPAIGNS.WIZARD.TEST_PHONE_PLACEHOLDER'
+                      )
                     "
                   />
                   <div class="mt-3 grid grid-cols-2 gap-2">
@@ -2010,7 +2740,7 @@ onBeforeUnmount(() => window.clearTimeout(audienceTimer));
                     ><button
                       type="button"
                       class="rounded-xl bg-n-brand px-3 py-2 text-xs font-medium text-white disabled:opacity-50"
-                      :disabled="testSending"
+                      :disabled="testSending || newTestCoolingDown"
                       @click="sendTest(activeMessage)"
                     >
                       {{ $t('JRC_CAMPAIGNS.WIZARD.SEND_TEST') }}
@@ -2033,7 +2763,8 @@ onBeforeUnmount(() => window.clearTimeout(audienceTimer));
               </div>
               <button
                 type="button"
-                class="rounded-xl border border-n-brand px-3 py-2 text-xs font-medium text-n-brand"
+                class="rounded-xl border border-n-brand px-3 py-2 text-xs font-medium text-n-brand disabled:opacity-50"
+                :disabled="testSending || newTestCoolingDown"
                 @click="sendTest()"
               >
                 <span class="i-lucide-send mr-1 inline-block size-3" />{{
@@ -2043,7 +2774,7 @@ onBeforeUnmount(() => window.clearTimeout(audienceTimer));
             </div>
             <div class="grid gap-4 xl:grid-cols-3">
               <article
-                v-for="card in [
+                v-for="(card, index) in [
                   {
                     icon: 'i-lucide-users-round',
                     title: $t('JRC_CAMPAIGNS.WIZARD.REVIEW_CONTACTS'),
@@ -2058,6 +2789,7 @@ onBeforeUnmount(() => window.clearTimeout(audienceTimer));
                     icon: 'i-lucide-sliders-horizontal',
                     title: $t('JRC_CAMPAIGNS.WIZARD.REVIEW_CONFIG'),
                     lines: [
+                      deliveryChannelLabel,
                       $t('JRC_CAMPAIGNS.WIZARD.REVIEW_BOXES', {
                         count: form.inboxLinks.length,
                       }),
@@ -2077,13 +2809,14 @@ onBeforeUnmount(() => window.clearTimeout(audienceTimer));
                       }),
                       ...form.steps.map(
                         (message, index) =>
-                          `${index + 1}. ${messageTypeLabel(message.kind)} — ${message.template_name || message.file_name || message.body}`
+                          `${index + 1}. ${messageTypeLabel(message.kind)} — ${message.subject || message.template_name || message.file_name || message.body}`
                       ),
                     ],
                   },
                 ]"
                 :key="card.title"
-                class="rounded-2xl border border-n-weak p-5"
+                class="campaign-review-card rounded-2xl border p-5"
+                :class="`campaign-review-card-${index + 1}`"
               >
                 <div class="flex items-center gap-2">
                   <span
@@ -2165,6 +2898,20 @@ onBeforeUnmount(() => window.clearTimeout(audienceTimer));
                     class="i-lucide-triangle-alert mr-2 inline-block size-4 text-n-amber-11"
                   />{{ $t('JRC_CAMPAIGNS.WIZARD.ATTENTION') }}
                 </h4>
+                <p
+                  v-if="eligibleCount === 0"
+                  class="mt-3 text-xs text-n-slate-12"
+                >
+                  {{ t('JRC_CAMPAIGNS.CONSENT_IMPORT.AUDIENCE_HELP') }}
+                </p>
+                <button
+                  type="button"
+                  class="mt-3 rounded-lg border border-n-strong px-3 py-2 text-xs text-n-slate-12 disabled:opacity-40"
+                  :disabled="previewingAudience || !sourceValid"
+                  @click="refreshAudiencePreview"
+                >
+                  {{ t('JRC_CAMPAIGNS.CONSENT_IMPORT.REFRESH') }}
+                </button>
                 <div class="mt-4 space-y-3">
                   <div
                     v-for="item in preflightItems"
@@ -2196,17 +2943,24 @@ onBeforeUnmount(() => window.clearTimeout(audienceTimer));
               <h4 class="text-sm font-semibold text-n-slate-12">
                 {{ $t('JRC_CAMPAIGNS.WIZARD.MESSAGE_TEST') }}
               </h4>
+              <p v-if="usesEvolution" class="mt-2 text-xs text-n-slate-11">
+                {{ t('JRC_CAMPAIGNS.EVOLUTION.CONTINUOUS_HELP') }}
+              </p>
               <div class="mt-3 flex flex-wrap gap-3">
                 <input
-                  v-model="testPhone"
+                  v-model="testDestination"
                   class="min-w-64 flex-1 rounded-xl border border-n-weak bg-n-background px-3 py-2.5 text-sm"
                   :placeholder="
-                    $t('JRC_CAMPAIGNS.WIZARD.TEST_PHONE_PLACEHOLDER')
+                    $t(
+                      isEmail
+                        ? 'JRC_CAMPAIGNS.WIZARD.TEST_EMAIL_PLACEHOLDER'
+                        : 'JRC_CAMPAIGNS.WIZARD.TEST_PHONE_PLACEHOLDER'
+                    )
                   "
                 /><button
                   type="button"
                   class="rounded-xl border border-n-brand px-4 py-2.5 text-sm font-medium text-n-brand disabled:opacity-50"
-                  :disabled="testSending"
+                  :disabled="testSending || newTestCoolingDown"
                   @click="sendTest()"
                 >
                   {{ $t('JRC_CAMPAIGNS.WIZARD.SEND_TEST') }}
@@ -2219,7 +2973,7 @@ onBeforeUnmount(() => window.clearTimeout(audienceTimer));
         <aside class="lg:col-span-3">
           <div class="space-y-4 lg:sticky lg:top-0">
             <article
-              class="rounded-2xl border border-n-weak bg-n-background p-5 shadow-sm"
+              class="campaign-summary-panel rounded-2xl border p-5 shadow-sm"
             >
               <p
                 class="text-xs font-semibold uppercase tracking-wide text-n-slate-10"
@@ -2243,9 +2997,11 @@ onBeforeUnmount(() => window.clearTimeout(audienceTimer));
                             }),
                     },
                     {
-                      icon: 'i-lucide-message-circle',
+                      icon: isEmail
+                        ? 'i-lucide-mail'
+                        : 'i-lucide-message-circle',
                       label: $t('JRC_CAMPAIGNS.FILTERS.CHANNEL'),
-                      value: $t('JRC_CAMPAIGNS.CHANNEL_WHATSAPP'),
+                      value: deliveryChannelLabel,
                     },
                     {
                       icon: 'i-lucide-inbox',
@@ -2372,10 +3128,79 @@ onBeforeUnmount(() => window.clearTimeout(audienceTimer));
           @click="save(true)"
         >
           <span class="i-lucide-rocket mr-1 inline-block size-4" />{{
-            $t('JRC_CAMPAIGNS.GOVERNANCE.SAVE_FOR_REVIEW')
+            $t(
+              campaign
+                ? 'JRC_CAMPAIGNS.UPDATE_START'
+                : 'JRC_CAMPAIGNS.START_CAMPAIGN'
+            )
           }}
         </button>
       </div>
     </footer>
   </div>
 </template>
+
+<style scoped>
+.campaign-channel-panel {
+  background: #eff6ff !important;
+  border-color: #93c5fd !important;
+}
+.campaign-source-panel {
+  background: #f5f3ff !important;
+  border-color: #c4b5fd !important;
+}
+.campaign-preview-panel {
+  background: #ecfeff !important;
+  border-color: #67e8f9 !important;
+}
+.campaign-preview-card-1 {
+  background: #eff6ff !important;
+  border-color: #93c5fd !important;
+  border-top: 4px solid #2563eb !important;
+}
+.campaign-preview-card-2 {
+  background: #ecfdf5 !important;
+  border-color: #86efac !important;
+  border-top: 4px solid #16a34a !important;
+}
+.campaign-preview-card-3 {
+  background: #fff7ed !important;
+  border-color: #fdba74 !important;
+  border-top: 4px solid #f97316 !important;
+}
+.campaign-preview-card-4 {
+  background: #fff1f2 !important;
+  border-color: #fda4af !important;
+  border-top: 4px solid #e11d48 !important;
+}
+.campaign-preview-card-5 {
+  background: #f5f3ff !important;
+  border-color: #c4b5fd !important;
+  border-top: 4px solid #7c3aed !important;
+}
+.campaign-preview-card-6 {
+  background: #fdf2f8 !important;
+  border-color: #f9a8d4 !important;
+  border-top: 4px solid #ec4899 !important;
+}
+.campaign-review-card-1 {
+  background: #eff6ff !important;
+  border-color: #93c5fd !important;
+  border-top: 4px solid #2563eb !important;
+}
+.campaign-review-card-2 {
+  background: #ecfdf5 !important;
+  border-color: #86efac !important;
+  border-top: 4px solid #16a34a !important;
+}
+.campaign-review-card-3 {
+  background: #f5f3ff !important;
+  border-color: #c4b5fd !important;
+  border-top: 4px solid #7c3aed !important;
+}
+.campaign-summary-panel {
+  background: #fff7ed !important;
+  border-color: #fdba74 !important;
+  border-top: 4px solid #f97316 !important;
+}
+</style>

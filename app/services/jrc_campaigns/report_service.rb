@@ -6,7 +6,7 @@ class JrcCampaigns::ReportService
   end
 
   def as_json
-    scope = campaign.recipients.includes(:contact, :inbox, :execution).order(id: :desc)
+    scope = campaign.recipients.includes(:contact, :inbox, :execution, :deliveries).order(id: :desc)
     total = scope.count
     recipients = scope.offset((page - 1) * per_page).limit(per_page)
 
@@ -39,11 +39,13 @@ class JrcCampaigns::ReportService
   end
 
   def recipient_json(recipient)
-    recipient.as_json(only: [:id, :name, :phone_number, :source, :status, :scheduled_at, :sent_at, :delivered_at, :read_at, :replied_at,
+    recipient.as_json(only: [:id, :name, :phone_number, :email, :destination, :source, :status, :scheduled_at, :sent_at, :delivered_at, :read_at,
+                              :replied_at,
                               :failed_at, :error_message]).merge(
       contact_id: recipient.contact_id,
       inbox_id: recipient.inbox_id,
       inbox_name: recipient.inbox&.name,
+      deliveries: recipient.deliveries.map { |delivery| delivery.as_json(only: [:id, :step_id, :status, :external_id, :error_message, :metadata]) },
       execution_number: recipient.execution&.run_number
     )
   end

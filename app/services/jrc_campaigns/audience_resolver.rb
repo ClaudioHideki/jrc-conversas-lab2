@@ -1,7 +1,16 @@
-require 'set'
-
 class JrcCampaigns::AudienceResolver
-  Entry = Data.define(:contact, :name, :phone_number, :source, :metadata)
+  Entry = Data.define(:contact, :name, :phone_number, :email, :source, :metadata) do
+    def destination(channel)
+      channel == 'email' ? email : phone_number
+    end
+
+    def selection_key
+      return "contact:#{contact.id}" if contact
+
+      sanitized_entry_id = metadata.to_h.with_indifferent_access[:sanitized_entry_id]
+      "sanitized_entry:#{sanitized_entry_id}"
+    end
+  end
 
   def initialize(campaign)
     @campaign = campaign
@@ -17,57 +26,97 @@ class JrcCampaigns::AudienceResolver
   end
 
   def preview
-    @preview ||= begin
-      resolved = resolved_entries
-      without_whatsapp = 0
-      blacklisted = 0
-      blocked = 0
-      without_consent = 0
-      eligible = resolved.filter_map do |entry|
-        phone = JrcCampaigns::PhoneNormalizer.call(entry.phone_number)
-        if phone.blank?
-          without_whatsapp += 1
-          next
-        end
-        if blacklisted_phones.include?(phone)
-          blacklisted += 1
-          next
-        end
-        if blocked_phones.include?(phone)
-          blocked += 1
-          next
-        end
-        unless consented_phones.include?(phone)
-          without_consent += 1
-          next
-        end
-
-        Entry.new(
-          contact: entry.contact,
-          name: entry.name,
-          phone_number: phone,
-          source: entry.source,
-          metadata: entry.metadata || {}
-        )
-      end
-      unique_entries = eligible.uniq { |entry| entry.phone_number }
-
-      {
-        found_count: resolved.size,
-        estimated_recipients: unique_entries.size,
-        without_whatsapp_count: without_whatsapp,
-        blacklisted_count: blacklisted,
-        blocked_count: blocked,
-        without_consent_count: without_consent,
-        duplicate_count: eligible.size - unique_entries.size,
-        entries: unique_entries
-      }
-    end
+    @preview ||= build_preview
   end
 
   private
 
   attr_reader :campaign, :account
+
+  def build_preview
+    resolved = resolved_entries
+    counters = Hash.new(0)
+    rejections = []
+    evolution = campaign.whatsapp? && campaign.evolution_connectors.any?
+    eligible = resolved.filter_map do |entry|
+      normalized = normalized_entry(entry)
+      destination = normalized.destination(campaign.delivery_channel)
+      if destination.blank?
+        counters[:without_destination_count] += 1
+        rejections << rejection_json(entry, normalized, campaign.email? ? 'E-mail inválido.' : 'Telefone inválido.')
+        next
+      end
+      if campaign.whatsapp? && blacklisted_phones.include?(destination)
+        counters[:blacklisted_count] += 1
+        rejections << rejection_json(entry, normalized, 'Destinatário na blacklist.')
+        next
+      end
+      if entry.contact&.blocked?
+        counters[:blocked_count] += 1
+        rejections << rejection_json(entry, normalized, 'Contato bloqueado.')
+        next
+      end
+
+      if campaign.whatsapp?
+        reason = JrcCampaigns::EligibilityPolicy.new(account: account, phone_number: destination, contact: entry.contact,
+                                                     purpose: evolution ? 'whatsapp_campaigns' : nil).rejection_reason
+        if reason
+          counters[reason == 'Telefone inválido.' ? :without_destination_count : :without_consent_count] += 1
+          rejections << rejection_json(entry, normalized, reason)
+          next
+        end
+      end
+
+      normalized
+    end
+    selectable_entries = eligible.uniq { |entry| entry.destination(campaign.delivery_channel) }
+    selected_entries = selectable_entries.select { |entry| selected_by_user?(entry) }
+
+    {
+      found_count: resolved.size,
+      available_recipients: selectable_entries.size,
+      estimated_recipients: selected_entries.size,
+      manually_excluded_count: selectable_entries.size - selected_entries.size,
+      without_destination_count: counters[:without_destination_count],
+      without_whatsapp_count: campaign.whatsapp? ? counters[:without_destination_count] : 0,
+      without_email_count: campaign.email? ? counters[:without_destination_count] : 0,
+      blacklisted_count: counters[:blacklisted_count],
+      blocked_count: counters[:blocked_count],
+      without_consent_count: counters[:without_consent_count],
+      duplicate_count: eligible.size - selectable_entries.size,
+      rejections: rejections,
+      selectable_entries: selectable_entries,
+      entries: selected_entries
+    }
+  end
+
+  def rejection_json(entry, normalized, reason)
+    { selection_key: entry.selection_key, name: entry.name, phone_number: normalized.phone_number, email: normalized.email, reason: reason }
+  end
+
+  def selected_by_user?(entry)
+    selected = recipient_selection_keys.include?(entry.selection_key)
+    recipient_selection_mode == 'include' ? selected : !selected
+  end
+
+  def recipient_selection_mode
+    @recipient_selection_mode ||= campaign.audience_config['recipient_selection_mode'] == 'include' ? 'include' : 'exclude'
+  end
+
+  def recipient_selection_keys
+    @recipient_selection_keys ||= Array(campaign.audience_config['recipient_selection_keys']).compact_blank.map(&:to_s).to_set
+  end
+
+  def normalized_entry(entry)
+    Entry.new(
+      contact: entry.contact,
+      name: entry.name,
+      phone_number: JrcCampaigns::PhoneNormalizer.call(entry.phone_number),
+      email: JrcCampaigns::EmailNormalizer.call(entry.email),
+      source: entry.source,
+      metadata: entry.metadata || {}
+    )
+  end
 
   def resolved_entries
     case campaign.audience_type
@@ -82,7 +131,14 @@ class JrcCampaigns::AudienceResolver
   def contact_entries(scope, source)
     scope = JrcCustomers::CampaignFilter.apply(scope: scope, account: account, filters: campaign.audience_config['customer_filters'] || {})
     scope.distinct.find_each.map do |contact|
-      Entry.new(contact: contact, name: contact.name, phone_number: contact.phone_number, source: source, metadata: {})
+      Entry.new(
+        contact: contact,
+        name: contact.name,
+        phone_number: contact.phone_number,
+        email: contact.email,
+        source: source,
+        metadata: {}
+      )
     end
   end
 
@@ -115,20 +171,16 @@ class JrcCampaigns::AudienceResolver
   end
 
   def sanitized_entries
-    values = campaign.audience_config['customer_filters'] || {}
-    raise JrcCustomers::CampaignFilter::InvalidFilter, 'Customer filters must be an object' unless values.is_a?(Hash)
-    if values.values.any?(&:present?)
-      raise JrcCustomers::CampaignFilter::InvalidFilter, 'Company filters require native contacts; sanitized phone lists have no reliable company identity'
-    end
     list_id = campaign.audience_config['sanitized_list_id']
     list = account.jrc_campaign_sanitized_lists.find_by(id: list_id)
     return [] unless list
 
-    list.entries.where(status: 'valid').find_each.map do |entry|
+    list.entries.find_each.map do |entry|
       Entry.new(
         contact: nil,
         name: entry.name,
-        phone_number: entry.normalized_phone,
+        phone_number: entry.normalized_phone.presence || entry.phone_number,
+        email: entry.normalized_email.presence || entry.email,
         source: 'sanitized_list',
         metadata: { sanitized_entry_id: entry.id, sanitized_list_id: list.id }
       )
@@ -137,16 +189,5 @@ class JrcCampaigns::AudienceResolver
 
   def blacklisted_phones
     @blacklisted_phones ||= account.jrc_campaign_blacklists.pluck(:phone_number).to_set
-  end
-
-  def consented_phones
-    @consented_phones ||= JrcCampaigns::Consent.active.where(account: account).pluck(:phone_number).to_set
-  end
-
-  def blocked_phones
-    @blocked_phones ||= account.contacts.where(blocked: true).where.not(phone_number: [nil, '']).pluck(:phone_number).filter_map do |phone|
-      normalized = JrcCampaigns::PhoneNormalizer.call(phone)
-      normalized.presence
-    end.to_set
   end
 end

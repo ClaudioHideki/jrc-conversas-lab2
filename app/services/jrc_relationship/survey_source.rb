@@ -1,5 +1,5 @@
 class JrcRelationship::SurveySource
-  TYPES = %w[Conversation JrcServiceDesk::Ticket JrcRelationship::Qbr Call JrcCrm::Activity].freeze
+  TYPES = %w[Conversation JrcServiceDesk::Ticket JrcRelationship::Qbr Call JrcCrm::Activity JrcContactCenter::CallSession].freeze
   attr_reader :source, :context
 
   def initialize(source, context, contract_id: nil, product_id: nil)
@@ -30,6 +30,10 @@ class JrcRelationship::SurveySource
   end
 
   def completed?
+    source.is_a?(JrcContactCenter::CallSession) ? contact_center_completed? : native_completed?
+  end
+
+  def native_completed?
     case source.class.name
     when 'Conversation' then source.resolved?
     when 'JrcServiceDesk::Ticket' then %w[resolved closed].include?(source.status.phase)
@@ -93,6 +97,10 @@ class JrcRelationship::SurveySource
   end
 
   def visible_sources
+    source.is_a?(JrcContactCenter::CallSession) ? contact_center_sources : native_visible_sources
+  end
+
+  def native_visible_sources
     visibility = JrcCustomers::Visibility.new(account: context.account, user: context.user, account_user: context.member)
     case source.class.name
     when 'Conversation' then visibility.conversations
@@ -102,6 +110,15 @@ class JrcRelationship::SurveySource
     when 'Call'
       visibility.calls(contact_ids: context.account.contacts.select(:id), conversation_ids: visibility.conversations.select(:id))
     end
+  end
+
+  def contact_center_completed?
+    source.status == 'ended' && source.answered_at.present? && source.ended_at.present?
+  end
+
+  def contact_center_sources
+    access = JrcContactCenter::AccessScope.new(user_context: context.to_h)
+    access.call_sessions if access.policy.access?
   end
 
   def validate_attendance!
@@ -132,6 +149,7 @@ class JrcRelationship::SurveySource
   def channel_type(conversation)
     case source.class.name
     when 'Call' then "call_#{source.direction}"
+    when 'JrcContactCenter::CallSession' then "pabx_#{source.direction}"
     else conversation&.inbox&.channel_type || source.try(:origin_channel) || 'meeting'
     end
   end

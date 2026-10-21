@@ -78,6 +78,23 @@ RSpec.describe JrcHumanAssignment::Dispatch do
     expect(described_class.new(conversation).perform).to be(false)
   end
 
+  it 'skips an agent with pending contact-center tabulation without bypassing the assignment guard' do
+    account.enable_features!('jrc_contact_center')
+    member = account.account_users.find_by!(user: agent)
+    ended_call = JrcContactCenter::CallSession.create!(
+      account: account, provider: 'jrc_pabx', correlation_id: 'synthetic-pending-acw',
+      direction: 'inbound', status: 'ended', started_at: 2.minutes.ago, ended_at: Time.current
+    )
+    JrcContactCenter::Qualification.create!(
+      account: account, account_user: member, call_session: ended_call, channel: 'voice',
+      started_at: Time.current, acw_limit_seconds: 180
+    )
+
+    expect(described_class.new(conversation).perform).to be(true)
+    expect(conversation.reload.assignee_id).to eq(other_agent.id)
+    expect(JrcContactCenter::Qualification.pending.where(account: account, account_user: member)).to exist
+  end
+
   it 'waits for NICO and a live native flow to release the conversation' do
     conversation.update_columns(custom_attributes: { 'nico_control' => 'active' })
     expect(described_class.new(conversation).perform).to be(false)

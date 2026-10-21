@@ -4,11 +4,13 @@
 #
 #  id              :bigint           not null, primary key
 #  delivered_at    :datetime
+#  destination     :string           not null
+#  email           :string
 #  error_message   :text
 #  failed_at       :datetime
 #  metadata        :jsonb            not null
 #  name            :string
-#  phone_number    :string           not null
+#  phone_number    :string
 #  read_at         :datetime
 #  replied_at      :datetime
 #  scheduled_at    :datetime
@@ -26,11 +28,13 @@
 # Indexes
 #
 #  index_jrc_campaign_recipients_on_campaign_id                    (campaign_id)
+#  index_jrc_campaign_recipients_on_campaign_id_and_email          (campaign_id,email)
 #  index_jrc_campaign_recipients_on_campaign_id_and_phone_number   (campaign_id,phone_number)
 #  index_jrc_campaign_recipients_on_contact_id                     (contact_id)
 #  index_jrc_campaign_recipients_on_conversation_id                (conversation_id)
 #  index_jrc_campaign_recipients_on_execution_id                   (execution_id)
-#  index_jrc_campaign_recipients_on_execution_id_and_phone_number  (execution_id,phone_number) UNIQUE
+#  index_jrc_campaign_recipients_on_execution_id_and_email         (execution_id,email) UNIQUE WHERE (email IS NOT NULL)
+#  index_jrc_campaign_recipients_on_execution_id_and_phone_number  (execution_id,phone_number) UNIQUE WHERE (phone_number IS NOT NULL)
 #  index_jrc_campaign_recipients_on_execution_id_and_status        (execution_id,status)
 #  index_jrc_campaign_recipients_on_inbox_id                       (inbox_id)
 #
@@ -58,6 +62,8 @@ class JrcCampaigns::Recipient < ApplicationRecord
   has_many :deliveries, class_name: 'JrcCampaigns::Delivery', dependent: :destroy
   has_many :events, class_name: 'JrcCampaigns::Event', dependent: :destroy
 
-  validates :phone_number, presence: true
+  validates :phone_number, presence: true, if: -> { campaign&.whatsapp? }
+  validates :email, presence: true, if: -> { campaign&.email? }
+  validates :destination, presence: true
   validates :status, inclusion: { in: STATUSES }
 end
