@@ -15,6 +15,7 @@ export const getSelectedChatConversation = ({
   allConversations.filter(conversation => conversation.id === selectedChatId);
 
 const getters = {
+  getChatListErrorStatus: ({ listErrorStatus }) => listErrorStatus === true,
   getAllConversations: ({ allConversations, chatSortFilter: sortKey }) => {
     return allConversations.sort((a, b) => sortComparator(a, b, sortKey));
   },

@@ -48,6 +48,7 @@ describe('InboxList channel pagination', () => {
             inboxes.find(inbox => inbox.id === id),
           getAllStatusChats: state => () => state.rows,
           getChatListLoadingStatus: () => false,
+          getChatListErrorStatus: () => false,
           'conversationPage/getHasEndReached': state => () => state.ended,
         },
       });

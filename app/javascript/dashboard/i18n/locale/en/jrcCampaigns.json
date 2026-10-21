@@ -389,7 +389,17 @@
       "VALID_PHONE": "Telefones válidos",
       "VALID_EMAIL": "E-mails válidos",
       "LISTS": "Listas sanitizadas",
-      "NO_LISTS": "Nenhuma lista sanitizada criada."
+      "NO_LISTS": "Nenhuma lista sanitizada criada.",
+      "FORMAT_HELP": "Aceita CSV com vírgula, ponto e vírgula ou tabulação, com cabeçalho nome,telefone,email opcional. Campos com separadores devem usar aspas. A validação final ocorre antes de criar a lista.",
+      "NOT_AUTHORIZATION": "Contato válido não significa envio autorizado. Para WhatsApp, registre a autorização em Consentimentos; na campanha, confira o público elegível e selecione a caixa/número remetente.",
+      "PARSED": "{count} contatos lidos. Confira os dados antes de sanitizar.",
+      "PARSE_ERROR": "Não foi possível ler a lista. Confira o separador e as aspas dos campos antes de continuar.",
+      "FILE_ERROR": "Não foi possível ler o arquivo. Escolha novamente ou cole os contatos.",
+      "USE_LIST": "Usar esta lista em uma campanha",
+      "DETAILS": "Resultado por contato (até 50 linhas)",
+      "CONTACT": "Contato",
+      "DESTINATION": "Telefone / e-mail",
+      "RESULT": "Resultado"
     },
     "BLACKLIST": {
       "TITLE": "Blacklist",
@@ -554,6 +564,21 @@
       "STEP_REVIEW": "3. Confira e confirme",
       "LOAD_FAILED": "Não foi possível carregar os números. Tente novamente.",
       "RETRY": "Tentar novamente"
+    },
+    "GUIDE": {
+      "TITLE": "Como preparar e enviar sua campanha",
+      "PREPARE": "1. Organize os contatos",
+      "PREPARE_HELP": "Importe ou cole a lista para conferir telefones, e-mails, duplicados e bloqueios. Sanitizar prepara a lista; não registra autorização de envio.",
+      "AUTHORIZE": "2. Registre a autorização de WhatsApp",
+      "AUTHORIZE_HELP": "Para um número, use Adicionar número. Para vários, importe o CSV de autorizações com origem, data e evidência da permissão já obtida.",
+      "STATUS_HELP": "Autorizados: podem entrar no público. Precisa confirmar: falta comprovar a finalidade. Histórico: autorização revogada ou substituída.",
+      "SEND": "3. Escolha o remetente e revise",
+      "SEND_HELP": "Na campanha, escolha o canal, a lista, a caixa/número remetente, mensagens e horários. Confira o público final, aprove e então inicie. A autorização não envia mensagens automaticamente.",
+      "EVIDENCE_HELP": "Descreva onde e quando a pessoa autorizou mensagens de campanhas e testes WhatsApp e indique a referência do registro. Este formulário registra uma permissão existente; não envia um pedido de autorização ao cliente.",
+      "WIZARD_CONSENT_HELP": "Se faltarem autorizações, registre-as aqui sem perder a campanha. O público será atualizado após o registro. A lista sanitizada e o consentimento são etapas diferentes.",
+      "MANAGE_CONSENTS": "Gerenciar autorizações sem sair da campanha",
+      "SENDER_HELP": "Escolha a caixa e o número que enviarão as mensagens. A caixa de origem dos contatos não define o remetente. Com uma selecionada, todos os envios usam essa caixa; com várias, escolha a distribuição.",
+      "SEPARATE_SENDERS": "Use campanhas separadas para WhatsApp oficial e Evolution. Para distribuir a mesma lista entre números, selecione caixas do mesmo tipo de conexão."
     }
   }
 }

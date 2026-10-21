@@ -35,6 +35,7 @@ export default {
       inboxesList: 'inboxes/getInboxes',
       uiFlags: 'inboxes/getUIFlags',
       loadingChatList: 'getChatListLoadingStatus',
+      chatListError: 'getChatListErrorStatus',
     }),
     loadingIndicatorMessage() {
       if (this.uiFlags.isFetching) {
@@ -72,21 +73,39 @@ export default {
       v-if="uiFlags.isFetching || loadingChatList"
       :message="loadingIndicatorMessage"
     />
+    <div
+      v-else-if="chatListError"
+      role="alert"
+      class="p-4 text-center text-sm text-n-amber-11"
+    >
+      {{ $t('CHAT_LIST.LOAD_ERROR') }}
+    </div>
     <!-- No inboxes attached -->
     <div
-      v-if="!inboxesList.length && !uiFlags.isFetching && !loadingChatList"
+      v-if="
+        !inboxesList.length &&
+        !uiFlags.isFetching &&
+        !loadingChatList &&
+        !chatListError
+      "
       class="clearfix mx-auto"
     >
       <OnboardingView v-if="isAdmin" />
       <EmptyStateMessage v-else :message="$t('CONVERSATION.NO_INBOX_AGENT')" />
     </div>
     <ConversationHome
-      v-else-if="!uiFlags.isFetching && !loadingChatList && !isOnExpandedLayout && !currentChat.id"
+      v-else-if="
+        !uiFlags.isFetching &&
+        !loadingChatList &&
+        !chatListError &&
+        !isOnExpandedLayout &&
+        !currentChat.id
+      "
     />
     <!-- Preserve loading, onboarding and unavailable-conversation states. -->
 
     <div
-      v-else-if="!uiFlags.isFetching && !loadingChatList"
+      v-else-if="!uiFlags.isFetching && !loadingChatList && !chatListError"
       class="flex flex-col items-center justify-center h-full"
     >
       <!-- No conversations available -->

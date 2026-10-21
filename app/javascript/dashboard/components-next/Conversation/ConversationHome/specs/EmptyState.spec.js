@@ -11,6 +11,45 @@ vi.mock('../ConversationHome.vue', () => ({
   default: { template: '<div data-home />' },
 }));
 describe('conversation home preserves existing empty states', () => {
+  it.each([0, 1])(
+    'shows a load error instead of onboarding or an empty result with %s inboxes',
+    inboxCount => {
+      const store = createStore({
+        getters: {
+          getSelectedChat: () => ({}),
+          getAllConversations: () => [],
+          'inboxes/getInboxes': () =>
+            Array.from({ length: inboxCount }, () => ({ id: 1 })),
+          'inboxes/getUIFlags': () => ({ isFetching: false }),
+          getChatListLoadingStatus: () => false,
+          getChatListErrorStatus: () => true,
+        },
+      });
+      const wrapper = mount(EmptyState, {
+        global: {
+          plugins: [store],
+          stubs: {
+            OnboardingView: true,
+            EmptyStateMessage: true,
+            'woot-loading-state': true,
+          },
+        },
+      });
+      expect(wrapper.get('[role="alert"]').text()).toBe(
+        wrapper.vm.$t('CHAT_LIST.LOAD_ERROR')
+      );
+      expect(wrapper.find('[data-home]').exists()).toBe(false);
+      expect(wrapper.findComponent({ name: 'OnboardingView' }).exists()).toBe(
+        false
+      );
+      expect(
+        wrapper.findComponent({ name: 'EmptyStateMessage' }).exists()
+      ).toBe(false);
+      expect(wrapper.find('woot-loading-state-stub').exists()).toBe(false);
+      wrapper.unmount();
+    }
+  );
+
   it.each([
     [false, false, 1, true],
     [true, false, 1, false],
@@ -27,6 +66,7 @@ describe('conversation home preserves existing empty states', () => {
             Array.from({ length: inboxCount }, () => ({ id: 1 })),
           'inboxes/getUIFlags': () => ({ isFetching: loading }),
           getChatListLoadingStatus: () => false,
+          getChatListErrorStatus: () => false,
         },
       });
       const wrapper = mount(EmptyState, {

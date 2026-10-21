@@ -7,6 +7,8 @@ import { useLocale } from 'shared/composables/useLocale';
 import TestAuthorizationPanel from './TestAuthorizationPanel.vue';
 import ConsentImportPanel from './ConsentImportPanel.vue';
 
+defineProps({ embedded: { type: Boolean, default: false } });
+const emit = defineEmits(['changed', 'navigate']);
 const { t } = useI18n();
 const { resolvedLocale } = useLocale();
 const entries = ref([]);
@@ -145,6 +147,7 @@ const add = async () => {
     filter.value = 'all';
     useAlert(t('JRC_CAMPAIGNS.GOVERNANCE.CONTINUOUS_RECORDED'));
     await load();
+    emit('changed');
   } catch (error) {
     useAlert(
       error?.response?.data?.errors?.join(', ') ||
@@ -158,6 +161,7 @@ const revoke = async id => {
   try {
     await JrcCampaignsAPI.revokeConsent(id);
     await load();
+    emit('changed');
   } catch (error) {
     useAlert(
       error?.response?.data?.errors?.join(', ') ||
@@ -206,6 +210,56 @@ onMounted(load);
         </button>
       </div>
     </header>
+    <div class="rounded-xl border border-n-blue-5 bg-n-blue-2 p-5">
+      <h3 class="font-semibold text-n-slate-12">
+        {{ t('JRC_CAMPAIGNS.GUIDE.TITLE') }}
+      </h3>
+      <ol class="mt-4 grid gap-4 lg:grid-cols-3">
+        <li class="rounded-lg bg-n-background p-4">
+          <h4 class="text-sm font-semibold text-n-slate-12">
+            {{ t('JRC_CAMPAIGNS.GUIDE.PREPARE') }}
+          </h4>
+          <p class="mt-2 text-sm text-n-slate-11">
+            {{ t('JRC_CAMPAIGNS.GUIDE.PREPARE_HELP') }}
+          </p>
+          <button
+            v-if="!embedded"
+            type="button"
+            class="mt-3 text-sm font-semibold text-n-blue-11"
+            @click="emit('navigate', 'sanitize')"
+          >
+            {{ t('JRC_CAMPAIGNS.TABS.SANITIZE') }}
+          </button>
+        </li>
+        <li class="rounded-lg bg-n-background p-4">
+          <h4 class="text-sm font-semibold text-n-slate-12">
+            {{ t('JRC_CAMPAIGNS.GUIDE.AUTHORIZE') }}
+          </h4>
+          <p class="mt-2 text-sm text-n-slate-11">
+            {{ t('JRC_CAMPAIGNS.GUIDE.AUTHORIZE_HELP') }}
+          </p>
+          <p class="mt-2 text-xs text-n-slate-11">
+            {{ t('JRC_CAMPAIGNS.GUIDE.STATUS_HELP') }}
+          </p>
+        </li>
+        <li class="rounded-lg bg-n-background p-4">
+          <h4 class="text-sm font-semibold text-n-slate-12">
+            {{ t('JRC_CAMPAIGNS.GUIDE.SEND') }}
+          </h4>
+          <p class="mt-2 text-sm text-n-slate-11">
+            {{ t('JRC_CAMPAIGNS.GUIDE.SEND_HELP') }}
+          </p>
+          <button
+            v-if="!embedded"
+            type="button"
+            class="mt-3 text-sm font-semibold text-n-blue-11"
+            @click="emit('navigate', 'campaign')"
+          >
+            {{ t('JRC_CAMPAIGNS.NEW_CAMPAIGN') }}
+          </button>
+        </li>
+      </ol>
+    </div>
     <section
       v-if="editor === 'add'"
       id="consent-add-form"
@@ -235,6 +289,9 @@ onMounted(load);
         }}
       </p>
       <form class="space-y-4" @submit.prevent="add">
+        <p class="text-sm text-n-slate-11">
+          {{ t('JRC_CAMPAIGNS.GUIDE.EVIDENCE_HELP') }}
+        </p>
         <div class="grid gap-4 md:grid-cols-3">
           <label
             class="flex flex-col gap-2 text-sm font-medium text-n-slate-12"
@@ -303,7 +360,7 @@ onMounted(load);
     </section>
     <div v-if="editor === 'import'" id="consent-import-form">
       <ConsentImportPanel
-        @imported="load"
+        @imported="load().then(() => emit('changed'))"
         @close="closeEditor"
         @busy-change="importing = $event"
       />

@@ -48,6 +48,7 @@ const props = defineProps({
   context: { type: Object, default: null },
   loading: { type: Boolean, default: false },
   voiceError: { type: Boolean, default: false },
+  conversationError: { type: Boolean, default: false },
   canLoadMore: { type: Boolean, default: false },
   ready: { type: Boolean, default: true },
 });
@@ -58,6 +59,7 @@ const emit = defineEmits([
   'assigneeChange',
   'loadMore',
   'refresh',
+  'retryConversations',
 ]);
 const { t } = useI18n();
 const store = useStore();
@@ -733,6 +735,20 @@ onBeforeUnmount(() => {
           />
           <div v-if="loading" class="flex justify-center py-5">
             <Spinner />
+          </div>
+          <div
+            v-else-if="conversationError"
+            role="alert"
+            class="rounded-lg border border-n-amber-6 bg-n-amber-2 p-3 text-xs text-n-amber-11"
+          >
+            <p class="m-0">{{ t('CHAT_LIST.LOAD_ERROR') }}</p>
+            <button
+              type="button"
+              class="mt-2 min-h-9 rounded-lg px-3 font-semibold hover:bg-n-amber-3"
+              @click="emit('retryConversations')"
+            >
+              {{ t('CHAT_LIST.RETRY') }}
+            </button>
           </div>
           <p
             v-else-if="voiceError"

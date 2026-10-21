@@ -92,6 +92,7 @@ describe('omnichannel inbox', () => {
           { id: 13, channel_type: INBOX_TYPES.INSTAGRAM },
         ],
         conversations: [],
+        conversationError: false,
         ended: false,
         conversationPayload: [],
         filters: {},
@@ -114,6 +115,7 @@ describe('omnichannel inbox', () => {
         'accounts/isFeatureEnabledonAccount': state => () => state.feature,
         getAllStatusChats: state => () => state.conversations,
         getChatListLoadingStatus: () => false,
+        getChatListErrorStatus: state => state.conversationError,
       },
       actions: {
         'inboxes/get': vi.fn(),
@@ -126,6 +128,7 @@ describe('omnichannel inbox', () => {
           state.filters = filters;
         },
         fetchAllConversations: ({ state }) => {
+          state.conversationError = false;
           state.conversations = [...state.conversationPayload];
         },
       },
@@ -138,6 +141,36 @@ describe('omnichannel inbox', () => {
       data: { capabilities: { operate: true } },
     });
   });
+
+  it.each([false, true])(
+    'requires an explicit retry after a conversation error with Contact Center enabled=%s',
+    async feature => {
+      store.state.feature = feature;
+      const dispatch = vi.spyOn(store, 'dispatch');
+      const wrapper = mountInbox();
+      await flushPromises();
+      dispatch.mockClear();
+      store.state.conversationError = true;
+      await flushPromises();
+      expect(wrapper.get('[role="alert"]').text()).toContain(
+        'CHAT_LIST.LOAD_ERROR'
+      );
+      expect(wrapper.text()).not.toContain('Carregar mais atendimentos');
+      expect(dispatch).not.toHaveBeenCalledWith('fetchAllConversations');
+      const retry = wrapper
+        .findAll('button')
+        .find(button => button.text() === 'CHAT_LIST.RETRY');
+      expect(retry).toBeDefined();
+      await retry.trigger('click');
+      await flushPromises();
+      expect(dispatch).toHaveBeenCalledWith('fetchAllConversations');
+      expect(store.state.filters).toEqual(
+        expect.objectContaining({ page: 1, assigneeType: 'me' })
+      );
+      expect(store.state.conversationError).toBe(false);
+      expect(wrapper.find('[role="alert"]').exists()).toBe(false);
+    }
+  );
 
   it('defaults ordinary agents to mine and rejects an all-assignees URL', async () => {
     mocks.route.query.assignee = 'all';

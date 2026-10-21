@@ -97,6 +97,7 @@ const allChatList = useMapGetter('getAllStatusChats');
 const unAssignedChatsList = useMapGetter('getUnAssignedChats');
 const participatingChatsList = useMapGetter('getParticipatingChats');
 const chatListLoading = useMapGetter('getChatListLoadingStatus');
+const chatListError = useMapGetter('getChatListErrorStatus');
 const activeInbox = useMapGetter('getSelectedInbox');
 const conversationStats = useMapGetter('conversationStats/getStats');
 const appliedFilters = useMapGetter('getAppliedConversationFiltersV2');
@@ -937,7 +938,9 @@ watch(conversationFilters, (newVal, oldVal) => {
     class="flex flex-col flex-shrink-0 conversations-list-wrap bg-n-surface-1 relative"
     :class="[
       { hidden: !showConversationList },
-      isOnExpandedLayout ? 'basis-full' : 'w-[340px] xl:w-[360px] 2xl:w-[380px]',
+      isOnExpandedLayout
+        ? 'basis-full'
+        : 'w-[340px] xl:w-[360px] 2xl:w-[380px]',
     ]"
   >
     <slot />
@@ -985,8 +988,22 @@ watch(conversationFilters, (newVal, oldVal) => {
       @chat-tab-change="updateAssigneeTab"
     />
 
+    <div
+      v-if="chatListError"
+      role="alert"
+      class="m-3 rounded-xl border border-n-amber-6 bg-n-amber-2 p-3 text-sm text-n-amber-11"
+    >
+      <p class="m-0">{{ $t('CHAT_LIST.LOAD_ERROR') }}</p>
+      <button
+        type="button"
+        class="mt-2 min-h-9 rounded-lg px-3 font-semibold hover:bg-n-amber-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-n-brand"
+        @click="resetAndFetchData"
+      >
+        {{ $t('CHAT_LIST.RETRY') }}
+      </button>
+    </div>
     <p
-      v-if="!chatListLoading && !conversationList.length"
+      v-if="!chatListLoading && !chatListError && !conversationList.length"
       class="flex overflow-auto justify-center items-center p-4"
     >
       {{ $t('CHAT_LIST.LIST.404') }}
@@ -1004,6 +1021,7 @@ watch(conversationFilters, (newVal, oldVal) => {
     <ConversationList
       :conversation-list="conversationList"
       :is-loading="chatListLoading"
+      :has-error="chatListError"
       :show-end-of-list-message="showEndOfListMessage"
       :label="label"
       :team-id="teamId"

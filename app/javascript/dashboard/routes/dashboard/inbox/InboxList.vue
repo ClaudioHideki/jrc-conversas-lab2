@@ -46,6 +46,7 @@ const inboxes = useMapGetter('inboxes/getAllInboxes');
 const inboxById = useMapGetter('inboxes/getInboxById');
 const allOpenConversations = useMapGetter('getAllStatusChats');
 const isLoading = useMapGetter('getChatListLoadingStatus');
+const conversationError = useMapGetter('getChatListErrorStatus');
 const hasEndReached = useMapGetter('conversationPage/getHasEndReached');
 const isFeatureEnabledOnAccount = useMapGetter(
   'accounts/isFeatureEnabledonAccount'
@@ -212,6 +213,7 @@ const canLoadMore = computed(
   () =>
     channelFilter.value !== 'voice' &&
     !isLoading.value &&
+    !conversationError.value &&
     !hasEndReached.value(assigneeFilter.value)
 );
 
@@ -435,6 +437,7 @@ onBeforeUnmount(() => {
     :loading="isCurrentListLoading"
     :ready="!isInitializing"
     :voice-error="voiceError"
+    :conversation-error="channelFilter !== 'voice' && conversationError"
     :can-load-more="canLoadMore"
     @select-call="openVoiceCall"
     @select-conversation="openConversation"
@@ -442,6 +445,7 @@ onBeforeUnmount(() => {
     @assignee-change="setAssigneeFilter"
     @load-more="loadMore"
     @refresh="fetchVoiceCalls"
+    @retry-conversations="fetchConversations({ reset: true })"
   />
   <section v-else class="flex h-full w-full bg-n-surface-1">
     <aside
@@ -614,6 +618,20 @@ onBeforeUnmount(() => {
 
         <div v-if="isCurrentListLoading" class="flex justify-center py-6">
           <Spinner class="text-n-brand" />
+        </div>
+        <div
+          v-else-if="channelFilter !== 'voice' && conversationError"
+          role="alert"
+          class="m-4 rounded-xl border border-n-amber-6 bg-n-amber-2 p-3 text-sm text-n-amber-11"
+        >
+          <p class="m-0">{{ t('CHAT_LIST.LOAD_ERROR') }}</p>
+          <button
+            type="button"
+            class="mt-2 min-h-9 rounded-lg px-3 font-semibold hover:bg-n-amber-3"
+            @click="fetchConversations({ reset: true })"
+          >
+            {{ t('CHAT_LIST.RETRY') }}
+          </button>
         </div>
         <p
           v-else-if="['all', 'voice'].includes(channelFilter) && voiceError"

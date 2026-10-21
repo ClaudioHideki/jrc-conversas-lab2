@@ -3,11 +3,12 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import JrcCampaignsAPI from 'dashboard/api/jrcCampaigns';
 import { useAlert } from 'dashboard/composables';
+import { parseContactList } from '../contactListParser';
 
-const props = defineProps({
+defineProps({
   lists: { type: Array, default: () => [] },
 });
-const emit = defineEmits(['changed']);
+const emit = defineEmits(['changed', 'useList']);
 const { t } = useI18n();
 
 const name = ref('');
@@ -15,59 +16,34 @@ const inputText = ref('');
 const saving = ref(false);
 const result = ref(null);
 
-const parsedEntries = computed(() => {
-  const rows = inputText.value
-    .split(/\r?\n/)
-    .map(line => line.trim())
-    .filter(Boolean)
-    .map(line => line.split(/[;,\t]/).map(value => value.trim()));
-  if (!rows.length) return [];
-
-  const aliases = {
-    name: ['nome', 'name'],
-    phone: ['telefone', 'phone', 'phone_number', 'celular'],
-    email: ['email', 'e-mail', 'e_mail'],
-  };
-  const header = rows[0].map(value => value.toLowerCase());
-  const indexes = Object.fromEntries(
-    Object.entries(aliases).map(([key, values]) => [
-      key,
-      header.findIndex(value => values.includes(value)),
-    ])
-  );
-  const hasHeader = Object.values(indexes).some(index => index >= 0);
-  const dataRows = hasHeader ? rows.slice(1) : rows;
-
-  return dataRows.map(parts => {
-    if (hasHeader) {
-      return {
-        name: indexes.name >= 0 ? parts[indexes.name] : '',
-        phone: indexes.phone >= 0 ? parts[indexes.phone] : '',
-        email: indexes.email >= 0 ? parts[indexes.email] : '',
-      };
-    }
-    if (parts.length === 1)
-      return parts[0].includes('@') ? { email: parts[0] } : { phone: parts[0] };
-    if (parts.length === 2 && parts[1].includes('@'))
-      return { name: parts[0], email: parts[1] };
-    return { name: parts[0], phone: parts[1], email: parts[2] || '' };
-  });
+const error = ref('');
+const parsed = computed(() => {
+  try {
+    return { entries: parseContactList(inputText.value), failed: false };
+  } catch {
+    return { entries: [], failed: true };
+  }
 });
-
-const loadCsv = event => {
+const parsedEntries = computed(() => parsed.value.entries);
+const loadCsv = async event => {
   const file = event.target.files?.[0];
   if (!file) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    inputText.value = String(reader.result || '');
+  error.value = '';
+  result.value = null;
+  try {
+    inputText.value = await file.text();
     if (!name.value) name.value = file.name.replace(/\.csv$/i, '');
-  };
-  reader.readAsText(file);
+  } catch {
+    inputText.value = '';
+    error.value = t('JRC_CAMPAIGNS.SANITIZE.FILE_ERROR');
+  }
 };
 
 const sanitize = async () => {
-  if (!name.value.trim() || parsedEntries.value.length === 0) return;
+  if (saving.value || !name.value.trim() || !parsedEntries.value.length) return;
+  error.value = '';
   saving.value = true;
+  result.value = null;
   try {
     const { data } = await JrcCampaignsAPI.createSanitizedList({
       name: name.value,
@@ -78,6 +54,10 @@ const sanitize = async () => {
     inputText.value = '';
     useAlert(t('JRC_CAMPAIGNS.ALERTS.SANITIZED'));
     emit('changed');
+  } catch (failure) {
+    error.value =
+      failure?.response?.data?.errors?.join(', ') ||
+      t('JRC_CAMPAIGNS.ALERTS.ACTION_FAILED');
   } finally {
     saving.value = false;
   }
@@ -97,6 +77,9 @@ const removeList = async id => {
       </h2>
       <p class="mt-1 text-sm text-n-slate-10">
         {{ $t('JRC_CAMPAIGNS.SANITIZE.SUBTITLE') }}
+      </p>
+      <p class="mt-3 rounded-lg bg-n-blue-2 p-3 text-sm text-n-slate-11">
+        {{ t('JRC_CAMPAIGNS.SANITIZE.NOT_AUTHORIZATION') }}
       </p>
     </div>
 
@@ -126,8 +109,27 @@ const removeList = async id => {
           v-model="inputText"
           rows="9"
           class="mt-1 w-full rounded-lg border border-n-weak bg-n-background px-3 py-2 font-mono text-xs"
-        ></textarea>
+        />
       </label>
+      <p class="mt-2 text-xs text-n-slate-11">
+        {{ t('JRC_CAMPAIGNS.SANITIZE.FORMAT_HELP') }}
+      </p>
+      <p
+        v-if="parsed.failed || error"
+        role="alert"
+        class="mt-3 text-sm text-n-ruby-11"
+      >
+        {{ parsed.failed ? t('JRC_CAMPAIGNS.SANITIZE.PARSE_ERROR') : error }}
+      </p>
+      <p
+        v-else-if="parsedEntries.length"
+        role="status"
+        class="mt-3 text-sm text-n-slate-11"
+      >
+        {{
+          t('JRC_CAMPAIGNS.SANITIZE.PARSED', { count: parsedEntries.length })
+        }}
+      </p>
       <div class="mt-4 flex justify-end">
         <button
           type="button"
@@ -202,6 +204,53 @@ const removeList = async id => {
       </div>
     </div>
 
+    <section
+      v-if="result"
+      class="space-y-3 rounded-xl border border-n-weak p-4"
+    >
+      <button
+        type="button"
+        class="rounded-lg bg-n-brand px-4 py-2 text-sm font-medium text-white"
+        @click="emit('useList', result)"
+      >
+        {{ t('JRC_CAMPAIGNS.SANITIZE.USE_LIST') }}
+      </button>
+      <details v-if="result.entries?.length">
+        <summary class="cursor-pointer text-sm text-n-slate-12">
+          {{ t('JRC_CAMPAIGNS.SANITIZE.DETAILS') }}
+        </summary>
+        <div class="mt-3 overflow-auto">
+          <table class="w-full text-left text-sm text-n-slate-11">
+            <thead>
+              <tr>
+                <th class="p-2">{{ t('JRC_CAMPAIGNS.SANITIZE.CONTACT') }}</th>
+                <th class="p-2">
+                  {{ t('JRC_CAMPAIGNS.SANITIZE.DESTINATION') }}
+                </th>
+                <th class="p-2">{{ t('JRC_CAMPAIGNS.SANITIZE.RESULT') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="entry in result.entries.slice(0, 50)"
+                :key="entry.id"
+                class="border-t border-n-weak"
+              >
+                <td class="p-2">{{ entry.name }}</td>
+                <td class="p-2">
+                  {{ entry.normalized_phone || entry.phone_number }}<br />{{
+                    entry.normalized_email || entry.email
+                  }}
+                </td>
+                <td class="p-2">
+                  {{ entry.reason || t('JRC_CAMPAIGNS.SANITIZE.VALID') }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </section>
     <div>
       <h3 class="mb-3 font-semibold text-n-slate-12">
         {{ $t('JRC_CAMPAIGNS.SANITIZE.LISTS') }}
@@ -230,14 +279,23 @@ const removeList = async id => {
               }}
             </div>
           </div>
-          <button
-            type="button"
-            class="rounded-lg p-2 text-n-ruby-11 hover:bg-n-ruby-3"
-            :title="$t('JRC_CAMPAIGNS.DELETE')"
-            @click="removeList(list.id)"
-          >
-            <span class="i-lucide-trash-2 size-4" />
-          </button>
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              class="rounded-lg border border-n-strong px-3 py-2 text-sm text-n-blue-11"
+              @click="emit('useList', list)"
+            >
+              {{ t('JRC_CAMPAIGNS.SANITIZE.USE_LIST') }}
+            </button>
+            <button
+              type="button"
+              class="rounded-lg p-2 text-n-ruby-11 hover:bg-n-ruby-3"
+              :title="$t('JRC_CAMPAIGNS.DELETE')"
+              @click="removeList(list.id)"
+            >
+              <span class="i-lucide-trash-2 size-4" />
+            </button>
+          </div>
         </div>
       </div>
     </div>

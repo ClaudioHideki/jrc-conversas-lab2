@@ -59,7 +59,6 @@ export const buildConversationList = (
     'conversationLabels/setBulkConversationLabels',
     conversationList
   );
-  context.commit(types.CLEAR_LIST_LOADING_STATUS);
   setContacts(context.commit, conversationList);
   setPageFilter({
     dispatch: context.dispatch,

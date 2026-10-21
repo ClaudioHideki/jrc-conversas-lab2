@@ -73,6 +73,26 @@ const global = {
   },
 };
 describe('inbox native SIP action guards', () => {
+  it('reports a conversation load failure and emits an explicit retry without operating SIP', async () => {
+    const wrapper = mount(HoyaInboxWorkspace, {
+      props: {
+        ...props,
+        currentCallId: null,
+        calls: [],
+        conversationError: true,
+      },
+      global,
+    });
+    await flushPromises();
+    const alert = wrapper.get('[role="alert"]');
+    expect(alert.text()).toContain('CHAT_LIST.LOAD_ERROR');
+    await alert.get('button').trigger('click');
+    expect(wrapper.emitted('retryConversations')).toEqual([[]]);
+    expect(sip.initialize).not.toHaveBeenCalled();
+    expect(sip.connect).not.toHaveBeenCalled();
+    expect(sip.answer).not.toHaveBeenCalled();
+  });
+
   it('does not invent a ringing state or elapsed time for an unknown call', async () => {
     const wrapper = mount(HoyaInboxWorkspace, {
       props: { ...props, currentCallId: 99, calls: [] },

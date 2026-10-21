@@ -12,6 +12,7 @@ import wootConstants from 'dashboard/constants/globals';
 const props = defineProps({
   conversationList: { type: Array, default: () => [] },
   isLoading: { type: Boolean, default: false },
+  hasError: { type: Boolean, default: false },
   showEndOfListMessage: { type: Boolean, default: false },
   label: { type: String, default: '' },
   teamId: { type: [String, Number], default: 0 },
@@ -86,7 +87,7 @@ defineExpose({ conversationListRef });
       {{ $t('CHAT_LIST.EOF') }}
     </p>
     <IntersectionObserver
-      v-else
+      v-else-if="!hasError"
       :options="intersectionObserverOptions"
       @observed="loadMoreConversations"
     />

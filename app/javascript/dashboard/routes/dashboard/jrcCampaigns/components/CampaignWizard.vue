@@ -1,5 +1,6 @@
 <script setup>
 import CampaignFilters from 'dashboard/routes/dashboard/jrcCustomers/components/CampaignFilters.vue';
+import ConsentPanel from './ConsentPanel.vue';
 import { useCustomerMaster } from 'dashboard/routes/dashboard/jrcCustomers/useCustomerMaster';
 import {
   sourceInboxesForChannel,
@@ -21,13 +22,15 @@ import { useAlert } from 'dashboard/composables';
 const props = defineProps({
   campaign: { type: Object, default: null },
   metadata: { type: Object, required: true },
+  initialSanitizedListId: { type: [Number, String], default: null },
 });
 
-const emit = defineEmits(['close', 'saved']);
+const emit = defineEmits(['close', 'saved', 'reviewRequested']);
 const { t } = useI18n();
 const { enabled: hasCustomerMaster } = useCustomerMaster();
 const stepIndex = ref(0);
 const saving = ref(false);
+const showConsents = ref(false);
 const uploadingStep = ref(null);
 const previewingAudience = ref(false);
 const audiencePreview = ref({
@@ -119,7 +122,9 @@ const selectedPipeline = computed(() =>
   )
 );
 const selectedInboxIds = computed(() =>
-  form.inboxLinks.map(item => Number(item.inbox_id))
+  form.inboxLinks
+    .filter(item => item.enabled !== false)
+    .map(item => Number(item.inbox_id))
 );
 const isEmail = computed(() => form.delivery_channel === 'email');
 const audienceSourceSignature = computed(() =>
@@ -157,6 +162,12 @@ const selectedSendingInboxes = computed(() =>
 );
 const usesEvolution = computed(() =>
   selectedSendingInboxes.value.some(inbox => inbox.connector === 'evolution')
+);
+const mixesWhatsAppConnectors = computed(
+  () =>
+    !isEmail.value &&
+    usesEvolution.value &&
+    selectedSendingInboxes.value.some(inbox => inbox.connector !== 'evolution')
 );
 watch(selectedSendingInboxes, inboxes => {
   const minimum = evolutionMinimumInterval(inboxes);
@@ -358,7 +369,8 @@ const sourceValid = computed(() => {
 });
 const configValid = computed(
   () =>
-    form.inboxLinks.length > 0 &&
+    selectedInboxIds.value.length > 0 &&
+    !mixesWhatsAppConnectors.value &&
     form.sending_window.days.length > 0 &&
     Number(form.delay_min_seconds) >= 0 &&
     Number(form.delay_max_seconds) >= Number(form.delay_min_seconds) &&
@@ -489,10 +501,15 @@ const preflightItems = computed(() => {
       severity: 'error',
       text: t('JRC_CAMPAIGNS.WIZARD.VALIDATION_RECIPIENTS'),
     });
-  if (!form.inboxLinks.length)
+  if (!selectedInboxIds.value.length)
     items.push({
       severity: 'error',
       text: t('JRC_CAMPAIGNS.WIZARD.VALIDATION_INBOX'),
+    });
+  if (mixesWhatsAppConnectors.value)
+    items.push({
+      severity: 'error',
+      text: t('JRC_CAMPAIGNS.GUIDE.SEPARATE_SENDERS'),
     });
   if (!messagesValid.value)
     items.push({
@@ -556,41 +573,6 @@ const preflightItems = computed(() => {
 const hasCriticalErrors = computed(() =>
   preflightItems.value.some(item => item.severity === 'error')
 );
-const jarvisMessage = computed(() => {
-  if (stepIndex.value === 0) {
-    if (audiencePreview.value.found_count === null)
-      return t('JRC_CAMPAIGNS.WIZARD.JARVIS_AUDIENCE_WAITING');
-    const excluded =
-      Number(audiencePreview.value.found_count) - eligibleCount.value;
-    return t('JRC_CAMPAIGNS.WIZARD.JARVIS_AUDIENCE', {
-      found: formatNumber(audiencePreview.value.found_count),
-      excluded: formatNumber(excluded),
-    });
-  }
-  if (stepIndex.value === 1)
-    return t('JRC_CAMPAIGNS.WIZARD.JARVIS_CONFIG', {
-      boxes: form.inboxLinks.length,
-      duration: durationLabel.value,
-    });
-  if (stepIndex.value === 2) {
-    const variables = form.steps.reduce(
-      (total, message) => total + variablesForMessage(message).length,
-      0
-    );
-    return t(
-      messagesValid.value
-        ? 'JRC_CAMPAIGNS.WIZARD.JARVIS_MESSAGES_OK'
-        : 'JRC_CAMPAIGNS.WIZARD.JARVIS_MESSAGES_PENDING',
-      { messages: form.steps.length, variables }
-    );
-  }
-  return t(
-    hasCriticalErrors.value
-      ? 'JRC_CAMPAIGNS.WIZARD.JARVIS_REVIEW_BLOCKED'
-      : 'JRC_CAMPAIGNS.WIZARD.JARVIS_REVIEW_READY'
-  );
-});
-
 const toggleArrayValue = (array, value) => {
   const index = array.findIndex(item => Number(item) === Number(value));
   if (index >= 0) array.splice(index, 1);
@@ -662,7 +644,9 @@ const toggleSendingInbox = inbox => {
   const index = form.inboxLinks.findIndex(
     item => Number(item.inbox_id) === Number(inbox.id)
   );
-  if (index >= 0) form.inboxLinks.splice(index, 1);
+  if (index >= 0 && form.inboxLinks[index].enabled === false)
+    form.inboxLinks[index].enabled = true;
+  else if (index >= 0) form.inboxLinks.splice(index, 1);
   else
     form.inboxLinks.push({
       id: null,
@@ -863,7 +847,7 @@ const refreshAudiencePreview = async () => {
   previewingAudience.value = true;
   try {
     const { data } = await JrcCampaignsAPI.audiencePreview({
-      inbox_id: form.inboxLinks[0]?.inbox_id,
+      inbox_id: selectedInboxIds.value[0],
       audience_type: form.audience_type,
       delivery_channel: form.delivery_channel,
       audience_config: form.audience_config,
@@ -887,7 +871,7 @@ const refreshRecipientManager = async () => {
   try {
     const { data } = await JrcCampaignsAPI.audiencePreview(
       {
-        inbox_id: form.inboxLinks[0]?.inbox_id,
+        inbox_id: selectedInboxIds.value[0],
         audience_type: form.audience_type,
         delivery_channel: form.delivery_channel,
         audience_config: form.audience_config,
@@ -945,6 +929,11 @@ const save = async startAfterSave => {
     const response = props.campaign
       ? await JrcCampaignsAPI.update(props.campaign.id, payload)
       : await JrcCampaignsAPI.create(payload);
+    if (startAfterSave && !response.data.approval_valid) {
+      useAlert(t('JRC_CAMPAIGNS.GOVERNANCE.REVIEW_REQUIRED'));
+      emit('reviewRequested', response.data);
+      return;
+    }
     if (startAfterSave) await JrcCampaignsAPI.launch(response.data.id);
     useAlert(
       t(
@@ -1194,6 +1183,10 @@ const hydrate = campaign => {
 };
 
 hydrate(props.campaign);
+if (!props.campaign && props.initialSanitizedListId) {
+  form.audience_type = 'sanitized_list';
+  form.audience_config.sanitized_list_id = props.initialSanitizedListId;
+}
 watch(
   () => form.delivery_channel,
   (value, previous) => {
@@ -1381,6 +1374,27 @@ watch(
             </p>
           </div>
           <div v-if="stepIndex === 0" class="space-y-5">
+            <section
+              v-if="!isEmail"
+              class="rounded-xl border border-n-blue-5 bg-n-blue-2 p-4"
+            >
+              <p class="text-sm text-n-slate-12">
+                {{ t('JRC_CAMPAIGNS.GUIDE.WIZARD_CONSENT_HELP') }}
+              </p>
+              <button
+                type="button"
+                class="mt-2 text-sm font-semibold text-n-blue-11"
+                :aria-expanded="showConsents"
+                @click="showConsents = !showConsents"
+              >
+                {{ t('JRC_CAMPAIGNS.GUIDE.MANAGE_CONSENTS') }}
+              </button>
+              <ConsentPanel
+                v-if="showConsents"
+                embedded
+                @changed="refreshAudiencePreview"
+              />
+            </section>
             <div>
               <h3 class="text-xl font-semibold text-n-slate-12">
                 {{ $t('JRC_CAMPAIGNS.WIZARD.AUDIENCE_TITLE') }}
@@ -1859,6 +1873,13 @@ watch(
               <p class="mt-1 text-sm text-n-slate-10">
                 {{ $t('JRC_CAMPAIGNS.WIZARD.CONFIG_SUBTITLE') }}
               </p>
+              <p
+                v-if="mixesWhatsAppConnectors"
+                role="alert"
+                class="mt-3 rounded-lg bg-n-amber-2 p-3 text-sm text-n-amber-11"
+              >
+                {{ t('JRC_CAMPAIGNS.GUIDE.SEPARATE_SENDERS') }}
+              </p>
             </div>
             <div class="grid gap-4 xl:grid-cols-3">
               <article class="rounded-2xl border border-n-weak p-5">
@@ -1872,7 +1893,7 @@ watch(
                   }}
                 </h4>
                 <p class="mt-1 text-xs text-n-slate-10">
-                  {{ $t('JRC_CAMPAIGNS.WIZARD.SENDING_INBOXES_HELP') }}
+                  {{ $t('JRC_CAMPAIGNS.GUIDE.SENDER_HELP') }}
                 </p>
                 <div class="mt-4 space-y-2">
                   <div
@@ -1885,12 +1906,17 @@ watch(
                         type="checkbox"
                         class="mt-1"
                         :checked="selectedInboxIds.includes(Number(inbox.id))"
+                        :disabled="
+                          inboxHealth(inbox).state === 'error' &&
+                          !selectedInboxIds.includes(Number(inbox.id))
+                        "
                         @change="toggleSendingInbox(inbox)"
                       /><span class="min-w-0 flex-1"
                         ><span
-                          class="block truncate text-sm font-medium text-n-slate-12"
+                          class="block break-words text-sm font-medium text-n-slate-12"
                           >{{ inbox.name }}</span
-                        ><span class="block truncate text-xs text-n-slate-9"
+                        ><span
+                          class="block break-words text-xs tabular-nums text-n-slate-11"
                           >{{
                             inbox.connector === 'evolution'
                               ? t('JRC_CAMPAIGNS.EVOLUTION.SENDER')
@@ -3063,27 +3089,6 @@ watch(
                 }}
               </div>
             </article>
-            <article
-              class="rounded-2xl border border-n-violet-5 bg-n-violet-2 p-5"
-            >
-              <div class="flex items-center gap-2">
-                <span
-                  class="flex size-9 items-center justify-center rounded-xl bg-n-violet-4 text-n-violet-11"
-                  ><span class="i-lucide-bot size-5"
-                /></span>
-                <div>
-                  <p class="text-sm font-semibold text-n-slate-12">
-                    {{ $t('JRC_CAMPAIGNS.JARVIS.TITLE') }}
-                  </p>
-                  <p class="text-[11px] text-n-slate-9">
-                    {{ $t('JRC_CAMPAIGNS.JARVIS.SUBTITLE') }}
-                  </p>
-                </div>
-              </div>
-              <p class="mt-4 text-sm leading-6 text-n-slate-11">
-                {{ jarvisMessage }}
-              </p>
-            </article>
           </div>
         </aside>
       </div>
@@ -3128,11 +3133,9 @@ watch(
           @click="save(true)"
         >
           <span class="i-lucide-rocket mr-1 inline-block size-4" />{{
-            $t(
-              campaign
-                ? 'JRC_CAMPAIGNS.UPDATE_START'
-                : 'JRC_CAMPAIGNS.START_CAMPAIGN'
-            )
+            campaign?.approval_valid
+              ? $t('JRC_CAMPAIGNS.UPDATE_START')
+              : $t('JRC_CAMPAIGNS.GOVERNANCE.SAVE_FOR_REVIEW')
           }}
         </button>
       </div>

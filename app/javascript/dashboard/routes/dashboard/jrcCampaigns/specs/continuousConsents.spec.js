@@ -34,6 +34,9 @@ describe('Continuous recipient consent', () => {
       'JRC_CAMPAIGNS.CONSENT_SCREEN.TITLE'
     );
     expect(wrapper.find('details').attributes('open')).toBeUndefined();
+    expect(wrapper.text()).toContain('JRC_CAMPAIGNS.GUIDE.PREPARE_HELP');
+    expect(wrapper.text()).toContain('JRC_CAMPAIGNS.GUIDE.AUTHORIZE_HELP');
+    expect(wrapper.text()).toContain('JRC_CAMPAIGNS.GUIDE.SEND_HELP');
   });
 
   it('requires explicit confirmation of recurring tests and campaigns', async () => {
@@ -66,6 +69,7 @@ describe('Continuous recipient consent', () => {
     });
     expect(wrapper.find('form').exists()).toBe(false);
     expect(wrapper.vm.form.operator_confirmed).toBe(false);
+    expect(wrapper.emitted('changed')).toEqual([[]]);
   });
 
   it('asks for fresh evidence when confirming a historical phone without altering it', async () => {
