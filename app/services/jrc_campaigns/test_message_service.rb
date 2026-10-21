@@ -32,6 +32,12 @@ class JrcCampaigns::TestMessageService
     raise ArgumentError, 'Informe um número válido para o teste.' if phone_number.blank?
     connector = JrcCampaigns::EvolutionConnector.for(inbox)
     return send_evolution(connector) if connector
+    broker = JrcCampaigns::BrokerConnector.for(inbox)
+    if broker
+      return JrcCampaigns::BrokerTestService.new(connector: broker, user: user, phone_number: phone_number,
+                                                step: %w[kind body media_url file_name media_asset_id].index_with { |key| renderer.render(effective_value(key)) },
+                                                idempotency_key: @idempotency_key, operator_confirmed: @operator_confirmed).perform
+    end
 
     raise ArgumentError, 'A caixa selecionada não é WhatsApp.' unless channel.is_a?(Channel::Whatsapp)
 

@@ -32,6 +32,13 @@ class Api::V1::Accounts::JrcCampaigns::MetadataController < Api::V1::Accounts::J
                connector: 'evolution', health_status: 'UNKNOWN', health_error: false, templates: [],
                min_interval_seconds: connector.min_interval_seconds, daily_limit: connector.daily_limit })
       end
+      if JrcCampaigns::BrokerConnector.candidate?(inbox)
+        next broker_inbox(inbox)
+      end
+      if evolution_setup_candidate?(inbox)
+        next({ id: inbox.id, name: inbox.name, provider: 'Evolution / WhatsApp QR', connector: 'evolution', templates: [],
+               health_status: 'DISCONNECTED', health_error: true, setup_reason: 'DIRECT_EVOLUTION_CONFIGURATION_REQUIRED' })
+      end
       next unless inbox.channel_type == 'Channel::Whatsapp'
 
       channel = inbox.channel
@@ -46,6 +53,26 @@ class Api::V1::Accounts::JrcCampaigns::MetadataController < Api::V1::Accounts::J
         templates: Array(channel.message_templates).select { |template| template['status'].to_s.casecmp('approved').zero? }
       }
     end
+  end
+
+  def evolution_setup_candidate?(inbox)
+    return false unless inbox.channel_type == 'Channel::Api'
+
+    uri = URI.parse(inbox.channel.webhook_url.to_s)
+    uri.is_a?(URI::HTTPS) && %r{\A/chatwoot/webhook/[A-Za-z0-9_.-]{1,100}\z}.match?(uri.path)
+  rescue URI::InvalidURIError
+    false
+  end
+
+  def broker_inbox(inbox)
+    connector = JrcCampaigns::BrokerConnector.for(inbox)
+    data = connector&.transport(Current.user)
+    { id: inbox.id, name: inbox.name, phone_number: data&.fetch('numberSuffix', nil)&.then { |suffix| "•••• #{suffix}" },
+      provider: 'Broker JRC / WhatsApp QR', connector: 'broker', health_status: data&.fetch('ready', false) ? 'CONNECTED' : 'DISCONNECTED',
+      health_error: data&.fetch('ready', false) != true, templates: [], setup_reason: data&.fetch('reason', nil) || (connector ? nil : 'CONFIGURATION_REQUIRED') }
+  rescue JrcBroker::Client::Error, JrcBroker::Configuration::InvalidConfiguration, JrcBroker::CredentialStore::InvalidCredential, ActiveRecord::RecordNotFound
+    { id: inbox.id, name: inbox.name, provider: 'Broker JRC / WhatsApp QR', connector: 'broker', health_status: 'DISCONNECTED',
+      health_error: true, templates: [], setup_reason: 'BROKER_UPDATE_OR_CONFIGURATION_REQUIRED' }
   end
 
   def email_inboxes

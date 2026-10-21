@@ -73,6 +73,18 @@ const global = {
   },
 };
 describe('inbox native SIP action guards', () => {
+  it('does not load agent state or enable telephone actions without Contact Center context', async () => {
+    CCAPI.agentState.mockClear();
+    const wrapper = mount(HoyaInboxWorkspace, {
+      props: { ...props, context: null, currentCallId: null },
+      global,
+    });
+    await flushPromises();
+    expect(CCAPI.agentState).not.toHaveBeenCalled();
+    expect(wrapper.find('[data-testid="hoya-inbox-workspace"]').exists()).toBe(
+      true
+    );
+  });
   it('reports a conversation load failure and emits an explicit retry without operating SIP', async () => {
     const wrapper = mount(HoyaInboxWorkspace, {
       props: {

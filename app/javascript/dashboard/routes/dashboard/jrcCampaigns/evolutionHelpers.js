@@ -2,7 +2,7 @@ export const sourceInboxesForChannel = (metadata, isEmail) => {
   const channelType = isEmail ? 'Channel::Email' : 'Channel::Whatsapp';
   const evolutionIds = new Set(
     (metadata.whatsapp_inboxes || [])
-      .filter(inbox => inbox.connector === 'evolution')
+      .filter(inbox => ['evolution', 'broker'].includes(inbox.connector))
       .map(inbox => Number(inbox.id))
   );
   return (metadata.source_inboxes || []).filter(
@@ -21,6 +21,8 @@ export const evolutionMinimumInterval = inboxes =>
   );
 
 export const testResultAlert = data => {
+  if (data.test_delivery_id && data.status === 'sending')
+    return 'JRC_CAMPAIGNS.BROKER.TEST_QUEUED';
   if (!data.test_delivery_id) return 'JRC_CAMPAIGNS.ALERTS.TEST_SENT';
   return data.status === 'sent'
     ? 'JRC_CAMPAIGNS.EVOLUTION.TEST_ACCEPTED'

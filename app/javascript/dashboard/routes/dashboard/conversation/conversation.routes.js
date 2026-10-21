@@ -47,6 +47,11 @@ export default {
     {
       path: frontendURL('accounts/:accountId/dashboard'),
       name: 'home',
+      redirect: route => ({
+        name: 'inbox_view',
+        params: { accountId: route.params.accountId },
+        query: route.query,
+      }),
       meta: {
         permissions: CONVERSATION_PERMISSIONS,
       },
@@ -58,6 +63,15 @@ export default {
     {
       path: frontendURL('accounts/:accountId/conversations/:conversation_id'),
       name: 'inbox_conversation',
+      redirect: route => ({
+        name: 'inbox_view_conversation',
+        params: {
+          accountId: route.params.accountId,
+          type: 'conversation',
+          id: route.params.conversation_id,
+        },
+        query: route.query,
+      }),
       meta: {
         permissions: CONVERSATION_PERMISSIONS,
       },

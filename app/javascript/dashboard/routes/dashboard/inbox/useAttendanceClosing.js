@@ -4,6 +4,7 @@ import ContactCenterAPI from 'dashboard/api/jrcContactCenter';
 export const useAttendanceClosing = ({
   props,
   supportsClosing,
+  enabled = computed(() => true),
   isVoice,
   now,
   showClosing,
@@ -63,6 +64,7 @@ export const useAttendanceClosing = ({
   );
 
   const load = async () => {
+    if (!enabled.value) return;
     const version = generation;
     const key = identity();
     request += 1;
@@ -190,6 +192,7 @@ export const useAttendanceClosing = ({
     { immediate: true }
   );
   watch(supportsClosing, load);
+  watch(enabled, load);
   const poll = setInterval(() => {
     if (!saving.value && !loading.value && props.ready) load();
   }, 5000);

@@ -25,7 +25,12 @@ const props = defineProps({
   initialSanitizedListId: { type: [Number, String], default: null },
 });
 
-const emit = defineEmits(['close', 'saved', 'reviewRequested']);
+const emit = defineEmits([
+  'close',
+  'saved',
+  'reviewRequested',
+  'refreshSenders',
+]);
 const { t } = useI18n();
 const { enabled: hasCustomerMaster } = useCustomerMaster();
 const stepIndex = ref(0);
@@ -161,19 +166,58 @@ const selectedSendingInboxes = computed(() =>
   )
 );
 const usesEvolution = computed(() =>
-  selectedSendingInboxes.value.some(inbox => inbox.connector === 'evolution')
+  selectedSendingInboxes.value.some(inbox =>
+    ['evolution', 'broker'].includes(inbox.connector)
+  )
 );
+const usesBroker = computed(() =>
+  selectedSendingInboxes.value.some(inbox => inbox.connector === 'broker')
+);
+const testResultTitle = computed(() =>
+  usesBroker.value
+    ? t('JRC_CAMPAIGNS.BROKER.TEST_RESULT')
+    : t('JRC_CAMPAIGNS.EVOLUTION.TEST_RESULT')
+);
+const brokerReasonLabels = computed(() => ({
+  DIRECT_EVOLUTION_CONFIGURATION_REQUIRED: t(
+    'JRC_CAMPAIGNS.BROKER.REASONS.DIRECT_EVOLUTION_CONFIGURATION_REQUIRED'
+  ),
+  CONFIGURATION_REQUIRED: t(
+    'JRC_CAMPAIGNS.BROKER.REASONS.CONFIGURATION_REQUIRED'
+  ),
+  BROKER_UPDATE_OR_CONFIGURATION_REQUIRED: t(
+    'JRC_CAMPAIGNS.BROKER.REASONS.BROKER_UPDATE_OR_CONFIGURATION_REQUIRED'
+  ),
+  CAMPAIGN_BROKER_TRANSPORT_REQUIRED: t(
+    'JRC_CAMPAIGNS.BROKER.REASONS.CAMPAIGN_BROKER_TRANSPORT_REQUIRED'
+  ),
+  CAMPAIGN_EXECUTOR_EXTERNAL_REQUIRED: t(
+    'JRC_CAMPAIGNS.BROKER.REASONS.CAMPAIGN_EXECUTOR_EXTERNAL_REQUIRED'
+  ),
+  CAMPAIGN_CALLBACK_NOT_READY: t(
+    'JRC_CAMPAIGNS.BROKER.REASONS.CAMPAIGN_CALLBACK_NOT_READY'
+  ),
+  CAMPAIGN_IDENTITY_NOT_READY: t(
+    'JRC_CAMPAIGNS.BROKER.REASONS.CAMPAIGN_IDENTITY_NOT_READY'
+  ),
+}));
 const mixesWhatsAppConnectors = computed(
   () =>
     !isEmail.value &&
     usesEvolution.value &&
-    selectedSendingInboxes.value.some(inbox => inbox.connector !== 'evolution')
+    new Set(
+      selectedSendingInboxes.value.map(inbox => inbox.connector || 'official')
+    ).size > 1
 );
 watch(selectedSendingInboxes, inboxes => {
   const minimum = evolutionMinimumInterval(inboxes);
   if (minimum) {
     form.delay_min_seconds = Math.max(form.delay_min_seconds, minimum);
     form.delay_max_seconds = Math.max(form.delay_max_seconds, minimum);
+  }
+  if (
+    inboxes.some(inbox => ['evolution', 'broker'].includes(inbox.connector))
+  ) {
     form.steps.forEach(message => {
       if (
         message.kind === 'template' &&
@@ -971,14 +1015,19 @@ const sendTest = async (message = activeMessage.value) => {
   const inbox = selectedSendingInboxes.value.find(
     item => Number(item.id) === Number(form.inboxLinks[0].inbox_id)
   );
-  const evolution = inbox?.connector === 'evolution';
+  const evolution = ['evolution', 'broker'].includes(inbox?.connector);
   if (
     evolution &&
     !window.confirm(
-      t('JRC_CAMPAIGNS.EVOLUTION.CONFIRM_TEST', {
-        sender: inbox.phone_number,
-        recipient: testDestination.value,
-      })
+      inbox.connector === 'broker'
+        ? t('JRC_CAMPAIGNS.BROKER.CONFIRM_TEST', {
+            sender: inbox.phone_number,
+            recipient: testDestination.value,
+          })
+        : t('JRC_CAMPAIGNS.EVOLUTION.CONFIRM_TEST', {
+            sender: inbox.phone_number,
+            recipient: testDestination.value,
+          })
     )
   )
     return;
@@ -1346,10 +1395,13 @@ watch(
             class="mb-4 rounded-lg border border-n-weak p-3 text-sm"
             role="status"
           >
-            {{ t('JRC_CAMPAIGNS.EVOLUTION.TEST_RESULT') }} #{{
-              latestTest.id
+            <span>{{ testResultTitle }}</span>
+            {{
+              t('JRC_CAMPAIGNS.BROKER.RESULT_STATUS', {
+                id: latestTest.id,
+                status: latestTest.provider_status || latestTest.status,
+              })
             }}
-            · {{ latestTest.provider_status || latestTest.status }}
             <p v-if="latestTest.error_message">
               {{ latestTest.error_message }}
             </p>
@@ -1895,6 +1947,13 @@ watch(
                 <p class="mt-1 text-xs text-n-slate-10">
                   {{ $t('JRC_CAMPAIGNS.GUIDE.SENDER_HELP') }}
                 </p>
+                <button
+                  type="button"
+                  class="mt-3 text-xs font-medium text-n-brand"
+                  @click="emit('refreshSenders')"
+                >
+                  {{ t('JRC_CAMPAIGNS.BROKER.REFRESH_SENDERS') }}
+                </button>
                 <div class="mt-4 space-y-2">
                   <div
                     v-for="inbox in availableSendingInboxes"
@@ -1931,6 +1990,15 @@ watch(
                         >{{ inboxHealth(inbox).label }}</span
                       ></label
                     >
+                    <p
+                      v-if="inbox.setup_reason"
+                      class="mt-2 text-xs text-n-amber-11"
+                    >
+                      {{
+                        brokerReasonLabels[inbox.setup_reason] ||
+                        brokerReasonLabels.BROKER_UPDATE_OR_CONFIGURATION_REQUIRED
+                      }}
+                    </p>
                     <div
                       v-if="
                         selectedInboxIds.length > 1 &&

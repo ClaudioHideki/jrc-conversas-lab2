@@ -30,6 +30,7 @@ class WebhookListener < BaseListener
 
     payload = message.webhook_data.merge(event: __method__.to_s)
     deliver_webhook_payloads(payload, inbox)
+    JrcCampaigns::BrokerStatusJob.enqueue_for(message)
   end
 
   def message_updated(event)

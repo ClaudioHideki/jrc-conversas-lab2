@@ -1,9 +1,14 @@
 import { mount, flushPromises } from '@vue/test-utils';
+import { createStore } from 'vuex';
 import CampaignWizard from '../components/CampaignWizard.vue';
 import api from 'dashboard/api/jrcCampaigns';
 import { useAlert } from 'dashboard/composables';
 
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }));
+vi.mock('vue-router', async importOriginal => ({
+  ...(await importOriginal()),
+  useRoute: () => ({ params: { accountId: '1' } }),
+}));
 vi.mock('dashboard/composables', () => ({ useAlert: vi.fn() }));
 vi.mock('dashboard/api/jrcCampaigns', () => ({
   default: {
@@ -45,7 +50,17 @@ describe('Evolution campaign test confirmation', () => {
           steps: [{ kind: 'text', body: 'Teste', position: 0 }],
         },
       },
-      global: { mocks: { $t: key => key } },
+      global: {
+        mocks: { $t: key => key },
+        plugins: [
+          createStore({
+            getters: {
+              'accounts/isFeatureEnabledonAccount': () => () => false,
+              'accounts/getAccount': () => () => ({ id: 1 }),
+            },
+          }),
+        ],
+      },
     });
     wrapper.vm.testDestination = '5511999999000';
   });
@@ -58,6 +73,64 @@ describe('Evolution campaign test confirmation', () => {
   it('does not send when the operator declines confirmation', async () => {
     window.confirm.mockReturnValue(false);
     await wrapper.vm.sendTest();
+    expect(api.testMessage).not.toHaveBeenCalled();
+  });
+
+  it('selects the Broker inbox and preserves one test key while the actual provider result is pending', async () => {
+    await wrapper.setProps({
+      metadata: {
+        whatsapp_inboxes: [
+          {
+            id: 8,
+            name: 'Synthetic Broker QR',
+            connector: 'broker',
+            phone_number: '•••• 0000',
+            health_status: 'CONNECTED',
+          },
+        ],
+      },
+    });
+    api.testMessage.mockResolvedValue({
+      data: { test_delivery_id: 9, status: 'sending' },
+    });
+    await wrapper.vm.sendTest();
+    const first = api.testMessage.mock.calls[0][0];
+    await wrapper.vm.sendTest();
+    expect(first).toMatchObject({ inbox_id: 8, operator_confirmed: true });
+    expect(api.testMessage.mock.calls[1][0].idempotency_key).toBe(
+      first.idempotency_key
+    );
+    expect(window.confirm).toHaveBeenCalledWith(
+      'JRC_CAMPAIGNS.BROKER.CONFIRM_TEST'
+    );
+    expect(useAlert).toHaveBeenCalledWith('JRC_CAMPAIGNS.BROKER.TEST_QUEUED');
+    expect(useAlert).not.toHaveBeenCalledWith('JRC_CAMPAIGNS.ALERTS.TEST_SENT');
+  });
+
+  it('explains an unavailable sender and does not allow selecting it', async () => {
+    await wrapper.setProps({
+      metadata: {
+        whatsapp_inboxes: [
+          {
+            id: 9,
+            name: 'Synthetic QR',
+            connector: 'broker',
+            health_status: 'DISCONNECTED',
+            health_error: true,
+            setup_reason: 'CAMPAIGN_IDENTITY_NOT_READY',
+          },
+        ],
+      },
+    });
+    wrapper.vm.stepIndex = 1;
+    await flushPromises();
+    const label = wrapper
+      .findAll('label')
+      .find(item => item.text().includes('Synthetic QR'));
+    expect(label.find('input').element.disabled).toBe(true);
+    expect(wrapper.text()).toContain(
+      'JRC_CAMPAIGNS.BROKER.REASONS.CAMPAIGN_IDENTITY_NOT_READY'
+    );
     expect(api.testMessage).not.toHaveBeenCalled();
   });
 

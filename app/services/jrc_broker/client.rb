@@ -54,6 +54,16 @@ class JrcBroker::Client
     request(:get, connection_path(id, 'status'))
   end
 
+  def campaign_transport(id)
+    request(:get, connection_path(id, 'campaign-transport'))
+  end
+
+  def campaign_receipt(id, conversation_id, message_id)
+    raise Error.new('JRC_BROKER_INVALID_REQUEST', status: 400) unless message_id.is_a?(Integer) && message_id.positive?
+
+    request(:get, conversation_path(id, conversation_id, "campaign-messages/#{message_id}"))
+  end
+
   def pair(id, key:)
     request(:post, connection_path(id, 'pair'), body: {}, key: key)
   end

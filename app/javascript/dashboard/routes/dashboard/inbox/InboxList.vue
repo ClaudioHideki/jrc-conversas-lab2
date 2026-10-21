@@ -12,9 +12,6 @@ import {
 } from 'dashboard/helper/inbox';
 import JrcContactCenterAPI from 'dashboard/api/jrcContactCenter';
 
-import ConversationCard from 'dashboard/components/widgets/conversation/ConversationCard.vue';
-import Spinner from 'dashboard/components-next/spinner/Spinner.vue';
-import CallWorkspace from 'dashboard/routes/dashboard/jrcContactCenter/views/CallWorkspace.vue';
 import HoyaInboxWorkspace from './HoyaInboxWorkspace.vue';
 import {
   ASSIGNEE_FILTERS,
@@ -31,7 +28,6 @@ const { t } = useI18n();
 const page = ref(1);
 const channelFilter = ref(route.query.channel || 'all');
 const assigneeFilter = ref(ASSIGNEE_FILTERS.ME);
-const isListExpanded = ref(false);
 const voiceCalls = ref([]);
 const voiceLoading = ref(false);
 const contactCenterContext = ref(null);
@@ -178,37 +174,12 @@ const currentConversationId = computed(() =>
 const currentCallId = computed(() =>
   route.params.type === 'call' ? Number(route.params.id) : null
 );
-const visibleItemCount = computed(
-  () =>
-    conversations.value.length +
-    (['all', 'voice'].includes(channelFilter.value)
-      ? voiceCalls.value.length
-      : 0)
-);
-const inboxDescription = computed(
-  () =>
-    ({
-      me: t('JRC_CONTACT_CENTER.INBOX.DESCRIPTIONS.ME'),
-      unassigned: t('JRC_CONTACT_CENTER.INBOX.DESCRIPTIONS.UNASSIGNED'),
-      all: t('JRC_CONTACT_CENTER.INBOX.DESCRIPTIONS.ALL'),
-    })[assigneeFilter.value]
-);
 const isCurrentListLoading = computed(() =>
   channelFilter.value === 'voice'
     ? voiceLoading.value
     : isLoading.value || (channelFilter.value === 'all' && voiceLoading.value)
 );
 
-const asideWidthClass = computed(() =>
-  isListExpanded.value
-    ? 'lg:w-[48%] lg:min-w-[520px] lg:max-w-[680px] xl:w-[50%] xl:min-w-[600px] xl:max-w-[760px]'
-    : 'lg:w-[40%] lg:min-w-[420px] lg:max-w-[500px] xl:w-[38%] xl:min-w-[460px] xl:max-w-[580px] 2xl:max-w-[640px]'
-);
-const layoutToggleTitle = computed(() =>
-  isListExpanded.value
-    ? t('JRC_CONTACT_CENTER.INBOX.COLLAPSE_LIST')
-    : t('JRC_CONTACT_CENTER.INBOX.EXPAND_LIST')
-);
 const canLoadMore = computed(
   () =>
     channelFilter.value !== 'voice' &&
@@ -321,48 +292,7 @@ const loadMore = async () => {
   await fetchConversations();
 };
 
-const contactFor = conversation => conversation.meta?.sender || {};
-const assigneeFor = conversation => conversation.meta?.assignee || {};
 const inboxFor = conversation => inboxById.value(conversation.inbox_id) || {};
-const channelToneClass = option => {
-  const tones = {
-    all: 'border-n-blue-6 bg-n-blue-3 text-n-blue-11',
-    voice: 'border-n-teal-7 bg-n-teal-3 text-n-teal-11',
-    social: 'border-n-ruby-7 bg-n-ruby-3 text-n-ruby-11',
-    [CHANNEL_TYPES.WHATSAPP]: 'border-n-teal-7 bg-n-teal-3 text-n-teal-11',
-    [CHANNEL_TYPES.FACEBOOK]: 'border-n-blue-7 bg-n-blue-3 text-n-blue-11',
-    [CHANNEL_TYPES.INSTAGRAM]: 'border-n-ruby-7 bg-n-ruby-3 text-n-ruby-11',
-    [CHANNEL_TYPES.EMAIL]: 'border-n-blue-7 bg-n-blue-3 text-n-blue-11',
-    [CHANNEL_TYPES.API]: 'border-n-amber-7 bg-n-amber-3 text-n-amber-11',
-    [CHANNEL_TYPES.SMS]: 'border-n-violet-7 bg-n-violet-3 text-n-violet-11',
-    [CHANNEL_TYPES.WEBSITE]: 'border-n-slate-7 bg-n-slate-3 text-n-slate-11',
-    [CHANNEL_TYPES.TELEGRAM]: 'border-n-blue-7 bg-n-blue-3 text-n-blue-11',
-    [CHANNEL_TYPES.LINE]: 'border-n-teal-7 bg-n-teal-3 text-n-teal-11',
-    [CHANNEL_TYPES.TIKTOK]: 'border-n-slate-7 bg-n-slate-3 text-n-slate-12',
-  };
-  return tones[option.key] || 'border-n-weak bg-n-alpha-2 text-n-slate-11';
-};
-const filterButtonClass = option =>
-  channelFilter.value === option.key
-    ? `${channelToneClass(option)} shadow-sm`
-    : 'border-transparent text-n-slate-11 hover:border-n-weak hover:bg-n-alpha-2 hover:text-n-slate-12';
-const filterIconClass = option =>
-  channelFilter.value === option.key
-    ? ''
-    : option.iconClass || 'text-n-slate-10';
-const callDirectionLabel = call =>
-  call.direction === 'outbound'
-    ? t('JRC_CONTACT_CENTER.INBOX.DIRECTIONS.OUTBOUND')
-    : t('JRC_CONTACT_CENTER.INBOX.DIRECTIONS.INBOUND');
-const callIdentifier = call => call.ani || call.dnis || `#${call.id}`;
-const callTime = call => {
-  const value = call.started_at || call.answered_at;
-  if (!value) return '';
-  return new Intl.DateTimeFormat('pt-BR', {
-    dateStyle: 'short',
-    timeStyle: 'short',
-  }).format(new Date(value));
-};
 
 watch(
   () => route.query.channel,
@@ -421,7 +351,6 @@ onBeforeUnmount(() => {
 
 <template>
   <HoyaInboxWorkspace
-    v-if="hasContactCenter"
     :key="accountId"
     :account-id="accountId"
     :calls="voiceCalls"
@@ -447,271 +376,4 @@ onBeforeUnmount(() => {
     @refresh="fetchVoiceCalls"
     @retry-conversations="fetchConversations({ reset: true })"
   />
-  <section v-else class="flex h-full w-full bg-n-surface-1">
-    <aside
-      class="flex h-full w-full flex-col border-n-weak bg-n-solid-1 shadow-[6px_0_24px_rgba(8,43,82,0.04)] transition-[width,max-width,min-width] duration-200 ltr:border-r rtl:border-l"
-      :class="[
-        !currentConversationId && !currentCallId ? 'flex' : 'hidden xl:flex',
-        asideWidthClass,
-      ]"
-    >
-      <header class="border-b border-n-weak px-4 pb-3 pt-5">
-        <div class="flex items-center justify-between gap-3">
-          <div>
-            <div class="flex items-center gap-2">
-              <h1 class="text-2xl font-semibold tracking-tight text-n-slate-12">
-                {{ t('JRC_CONTACT_CENTER.INBOX.TITLE') }}
-              </h1>
-              <span
-                class="rounded-full bg-n-blue-3 px-2 py-0.5 text-xs font-semibold text-n-blue-11"
-              >
-                {{ visibleItemCount }}
-              </span>
-            </div>
-            <p class="mt-1 text-xs text-n-slate-10">
-              {{ inboxDescription }}
-            </p>
-          </div>
-          <div class="flex shrink-0 items-center gap-2">
-            <button
-              type="button"
-              class="grid size-9 place-items-center rounded-lg border border-n-weak text-n-slate-11 transition hover:border-n-blue-7 hover:bg-n-alpha-2 hover:text-n-brand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-n-brand"
-              :title="layoutToggleTitle"
-              @click="isListExpanded = !isListExpanded"
-            >
-              <span
-                class="size-4"
-                :class="
-                  isListExpanded
-                    ? 'i-lucide-panel-left-close'
-                    : 'i-lucide-panel-left-open'
-                "
-              />
-            </button>
-            <RouterLink
-              :to="{ name: 'home' }"
-              class="grid size-9 place-items-center rounded-lg border border-n-weak text-n-slate-11 transition hover:border-n-blue-7 hover:text-n-brand"
-              :title="t('JRC_CONTACT_CENTER.INBOX.OPEN_CONVERSATION_HUB')"
-            >
-              <span class="i-lucide-messages-square size-4" />
-            </RouterLink>
-          </div>
-        </div>
-        <RouterLink
-          :to="{ name: 'search' }"
-          class="mt-4 flex h-10 items-center gap-2 rounded-xl border border-n-weak bg-n-surface-1 px-3 text-sm text-n-slate-10 transition hover:border-n-blue-7"
-        >
-          <span class="i-lucide-search size-4" />
-          <span>{{ t('JRC_CONTACT_CENTER.INBOX.SEARCH') }}</span>
-        </RouterLink>
-      </header>
-
-      <nav
-        class="flex gap-2 overflow-x-auto border-b border-n-weak px-3 py-3"
-        :aria-label="t('JRC_CONTACT_CENTER.INBOX.ASSIGNEE_FILTER_LABEL')"
-      >
-        <button
-          v-for="option in assigneeFilterOptions"
-          :key="option.key"
-          type="button"
-          class="flex h-9 shrink-0 items-center gap-2 rounded-xl border px-3 text-xs font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-n-brand"
-          :class="
-            assigneeFilter === option.key
-              ? 'border-n-blue-6 bg-n-blue-3 text-n-blue-11 shadow-sm'
-              : 'border-transparent text-n-slate-11 hover:border-n-weak hover:bg-n-alpha-2'
-          "
-          :aria-pressed="assigneeFilter === option.key"
-          @click="setAssigneeFilter(option.key)"
-        >
-          <span class="size-3.5" :class="option.icon" />
-          {{ option.label }}
-        </button>
-      </nav>
-
-      <nav
-        class="flex gap-2 overflow-x-auto border-b border-n-weak px-3 py-3"
-        :aria-label="t('JRC_CONTACT_CENTER.INBOX.CHANNEL_FILTER_LABEL')"
-      >
-        <button
-          v-for="option in channelFilterOptions"
-          :key="option.key"
-          type="button"
-          class="flex h-9 shrink-0 items-center gap-2 rounded-xl border px-3 text-xs font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-n-brand"
-          :class="filterButtonClass(option)"
-          :aria-pressed="channelFilter === option.key"
-          @click="setChannelFilter(option.key)"
-        >
-          <span
-            class="grid size-5 place-items-center rounded-lg"
-            :class="
-              channelFilter === option.key ? 'bg-n-solid-1/70' : 'bg-n-alpha-1'
-            "
-          >
-            <span
-              class="size-3.5"
-              :class="[option.icon, filterIconClass(option)]"
-            />
-          </span>
-          {{ option.label }}
-        </button>
-      </nav>
-
-      <div class="min-h-0 flex-1 overflow-y-auto py-2">
-        <template v-if="['all', 'voice'].includes(channelFilter)">
-          <button
-            v-for="call in voiceCalls"
-            :key="call.id"
-            type="button"
-            class="flex w-full items-center gap-3 border-b border-n-weak px-4 py-4 text-left transition hover:bg-n-alpha-1"
-            :class="currentCallId === call.id ? 'bg-n-blue-2' : ''"
-            @click="openVoiceCall(call)"
-          >
-            <span
-              class="grid size-11 shrink-0 place-items-center rounded-2xl bg-n-teal-3 text-n-teal-11"
-            >
-              <span
-                class="size-5"
-                :class="
-                  call.direction === 'outbound'
-                    ? 'i-lucide-phone-outgoing'
-                    : 'i-lucide-phone-incoming'
-                "
-              />
-            </span>
-            <span class="min-w-0 flex-1">
-              <span
-                class="block break-words text-sm font-semibold text-n-slate-12"
-              >
-                {{ callIdentifier(call) }}
-              </span>
-              <span class="mt-1 block break-words text-xs text-n-slate-10">
-                {{
-                  t('JRC_CONTACT_CENTER.COMMON.CODE_DETAIL', {
-                    code: callDirectionLabel(call),
-                    detail: callTime(call),
-                  })
-                }}
-              </span>
-            </span>
-            <span
-              class="rounded-full bg-n-alpha-2 px-2.5 py-1 text-[10px] font-semibold uppercase text-n-slate-10"
-            >
-              {{ call.status }}
-            </span>
-          </button>
-        </template>
-
-        <template v-if="channelFilter !== 'voice'">
-          <ConversationCard
-            v-for="conversation in conversations"
-            :key="conversation.id"
-            :chat="conversation"
-            :current-contact="contactFor(conversation)"
-            :assignee="assigneeFor(conversation)"
-            :inbox="inboxFor(conversation)"
-            :is-active-chat="currentConversationId === conversation.id"
-            show-assignee
-            show-inbox-name
-            @click="openConversation(conversation)"
-          />
-        </template>
-
-        <div v-if="isCurrentListLoading" class="flex justify-center py-6">
-          <Spinner class="text-n-brand" />
-        </div>
-        <div
-          v-else-if="channelFilter !== 'voice' && conversationError"
-          role="alert"
-          class="m-4 rounded-xl border border-n-amber-6 bg-n-amber-2 p-3 text-sm text-n-amber-11"
-        >
-          <p class="m-0">{{ t('CHAT_LIST.LOAD_ERROR') }}</p>
-          <button
-            type="button"
-            class="mt-2 min-h-9 rounded-lg px-3 font-semibold hover:bg-n-amber-3"
-            @click="fetchConversations({ reset: true })"
-          >
-            {{ t('CHAT_LIST.RETRY') }}
-          </button>
-        </div>
-        <p
-          v-else-if="['all', 'voice'].includes(channelFilter) && voiceError"
-          role="alert"
-          class="p-5 text-sm text-n-ruby-11"
-        >
-          {{ t('JRC_CONTACT_CENTER.COMMON.ERROR') }}
-        </p>
-        <div
-          v-else-if="visibleItemCount === 0"
-          class="mx-4 my-8 rounded-xl border border-dashed border-n-weak bg-n-alpha-1 px-5 py-8 text-center"
-        >
-          <span
-            class="i-lucide-message-circle-off mx-auto mb-3 block size-7 text-n-slate-9"
-          />
-          <p class="text-sm font-medium text-n-slate-11">
-            {{ t('JRC_CONTACT_CENTER.INBOX.EMPTY') }}
-          </p>
-        </div>
-        <button
-          v-if="canLoadMore"
-          type="button"
-          class="mx-auto my-4 block rounded-lg border border-n-weak px-4 py-2 text-sm font-medium text-n-slate-11 hover:border-n-blue-7 hover:text-n-brand"
-          @click="loadMore"
-        >
-          {{ t('JRC_CONTACT_CENTER.INBOX.LOAD_MORE') }}
-        </button>
-      </div>
-    </aside>
-
-    <main
-      v-if="currentCallId"
-      class="min-h-0 min-w-0 flex-1 overflow-y-auto bg-n-background p-4 sm:p-6"
-    >
-      <div class="mx-auto max-w-6xl">
-        <RouterLink
-          :to="{
-            name: 'inbox_view',
-            params: { accountId },
-            query: route.query,
-          }"
-          class="mb-4 inline-flex items-center gap-2 text-sm font-medium text-n-blue-11 xl:hidden"
-        >
-          <span class="i-lucide-arrow-left size-4" />
-          {{ t('JRC_CONTACT_CENTER.INBOX.BACK_TO_LIST') }}
-        </RouterLink>
-        <div class="mb-4 flex items-center gap-3">
-          <span
-            class="grid size-10 place-items-center rounded-xl bg-n-teal-3 text-n-teal-11"
-          >
-            <span class="i-lucide-phone-call size-5" />
-          </span>
-          <h2 class="text-lg font-semibold text-n-slate-12">
-            {{ t('JRC_CONTACT_CENTER.INBOX.CALL_WORKSPACE') }}
-          </h2>
-        </div>
-        <CallWorkspace
-          v-if="contactCenterContext"
-          :key="`${accountId}-${currentCallId}`"
-          :account-id="accountId"
-          :call-id="currentCallId"
-          :context="contactCenterContext"
-          @created="fetchVoiceCalls"
-        />
-        <p
-          v-else-if="voiceError || !hasContactCenter"
-          role="alert"
-          class="p-5 text-sm text-n-ruby-11"
-        >
-          {{ t('JRC_CONTACT_CENTER.COMMON.ERROR') }}
-        </p>
-        <div v-else class="flex justify-center py-16">
-          <Spinner class="text-n-brand" />
-        </div>
-      </div>
-    </main>
-
-    <router-view
-      v-else-if="!isInitializing"
-      :key="`${accountId}-${currentConversationId}`"
-    />
-  </section>
 </template>

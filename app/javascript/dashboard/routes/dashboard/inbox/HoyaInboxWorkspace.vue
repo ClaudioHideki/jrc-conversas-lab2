@@ -181,6 +181,7 @@ const channelKey = computed(() =>
 );
 const isWhatsApp = computed(() => channelKey.value === 'whatsapp');
 const requiresWhatsAppClosing = computed(() => {
+  if (!props.context) return false;
   const inbox = props.inboxFor(conversation.value || {});
   const type = inbox.channel_type || inbox.channelType;
   return (
@@ -189,7 +190,8 @@ const requiresWhatsAppClosing = computed(() => {
   );
 });
 const supportsClosing = computed(
-  () => isVoice.value || requiresWhatsAppClosing.value
+  () =>
+    Boolean(props.context) && (isVoice.value || requiresWhatsAppClosing.value)
 );
 const workspaceTabs = computed(() => [
   'CONVERSATION',
@@ -332,6 +334,7 @@ const runAction = async action => {
 };
 const closing = useAttendanceClosing({
   props,
+  enabled: computed(() => Boolean(props.context)),
   supportsClosing,
   isVoice,
   now,
@@ -511,11 +514,12 @@ watch(
   }
 );
 watch(
-  () => props.accountId,
+  () => [props.accountId, Boolean(props.context)],
   async () => {
     agentGeneration += 1;
     const version = agentGeneration;
     agent.value = null;
+    if (!props.context) return;
     try {
       const response = await ContactCenterAPI.agentState(props.accountId);
       if (version === agentGeneration) agent.value = response.data.item;
@@ -1160,6 +1164,7 @@ onBeforeUnmount(() => {
       width="3xl"
     >
       <AgentStatePanel
+        v-if="context"
         compact
         :account-id="accountId"
         :can-operate="canOperate"

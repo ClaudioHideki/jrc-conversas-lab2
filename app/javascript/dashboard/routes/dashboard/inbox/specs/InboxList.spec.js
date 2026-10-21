@@ -57,6 +57,7 @@ describe('InboxList channel pagination', () => {
         global: {
           plugins: [store],
           stubs: {
+            Dialog: { methods: { open() {}, close() {} }, template: '<div />' },
             RouterLink: { template: '<a><slot /></a>' },
             RouterView: true,
             Spinner: true,

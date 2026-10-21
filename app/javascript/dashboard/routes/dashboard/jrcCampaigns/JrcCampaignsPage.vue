@@ -243,6 +243,14 @@ const fetchData = async () => {
     loading.value = false;
   }
 };
+const refreshSenders = async () => {
+  try {
+    const { data } = await JrcCampaignsAPI.metadata();
+    metadata.value = data;
+  } catch {
+    useAlert(t('JRC_CAMPAIGNS.ALERTS.LOAD_FAILED'));
+  }
+};
 const openNew = () => {
   initialListId.value = null;
   editingCampaign.value = null;
@@ -925,6 +933,7 @@ onMounted(fetchData);
       @close="closeWizard"
       @saved="saved"
       @review-requested="reviewSavedCampaign"
+      @refresh-senders="refreshSenders"
     />
     <CampaignReport
       v-if="reportCampaign"

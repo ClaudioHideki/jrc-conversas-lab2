@@ -1123,9 +1123,7 @@ const contactCenterRouteNames = [
   'ramal_index',
 ];
 
-const useUnifiedAttendanceNavigation = computed(
-  () => hasContactCenterAccess.value
-);
+const useUnifiedAttendanceNavigation = computed(() => true);
 
 const menuItems = computed(() => {
   const items = legacyMenuItems.value;
@@ -1141,7 +1139,7 @@ const menuItems = computed(() => {
   );
 
   return [
-    useUnifiedAttendanceNavigation.value
+    hasContactCenterAccess.value
       ? {
           name: 'JRC Call Center',
           label: t('JRC_CONTACT_CENTER.NAVIGATION.CALL_CENTER'),

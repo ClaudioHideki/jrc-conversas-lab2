@@ -11,6 +11,8 @@ class Messages::StatusUpdateService
     return false unless valid_status_transition?
 
     update_message_status
+    JrcCampaigns::BrokerStatusJob.enqueue_for(message)
+    true
   end
 
   private

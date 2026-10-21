@@ -64,6 +64,12 @@ class JrcCampaigns::ApprovalService
     )
     connectors = campaign.evolution_connectors
     result['evolution_connectors'] = connectors.map(&:public_configuration) if connectors.any?
+    brokers = campaign.broker_connectors
+    if brokers.any?
+      result['broker_connectors'] = brokers.map do |connector|
+        connector.public_configuration.merge('identity_revision' => connector.transport(campaign.created_by).fetch('identityRevision'))
+      end
+    end
     result
   end
 

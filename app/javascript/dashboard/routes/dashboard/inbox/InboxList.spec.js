@@ -57,6 +57,18 @@ const mountInbox = () =>
   });
 
 describe('omnichannel inbox', () => {
+  it('uses the HOYA workspace without enabling Call Center or requesting voice data', async () => {
+    store.state.feature = false;
+    const wrapper = mountInbox();
+    await flushPromises();
+    expect(wrapper.find('[data-testid="hoya-inbox-workspace"]').exists()).toBe(
+      true
+    );
+    expect(wrapper.find('[data-testid="customer-column"]').exists()).toBe(true);
+    expect(JrcContactCenterAPI.calls).not.toHaveBeenCalled();
+    expect(JrcContactCenterAPI.context).not.toHaveBeenCalled();
+    expect(JrcContactCenterAPI.agentState).not.toHaveBeenCalled();
+  });
   beforeEach(() => {
     mocks.route = reactive({ params: { accountId: '1' }, query: {} });
     mocks.router = {

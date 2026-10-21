@@ -11,6 +11,7 @@ class JrcCampaigns::DispatchStepService
     @accepted_external_id = nil
     @deferred_for_campaign_state = false
     @evolution_connector = JrcCampaigns::EvolutionConnector.for(inbox)
+    @broker_connector = JrcCampaigns::BrokerConnector.for(inbox)
     delivery = recipient.deliveries.find_by(step: step)
     return reconcile_delivery(delivery) if delivery&.sent_at.present?
 
@@ -22,7 +23,12 @@ class JrcCampaigns::DispatchStepService
       return
     end
     return if recipient.status.in?(%w[failed canceled skipped])
-    return if delivery && !delivery.queued?
+    if delivery && !delivery.queued?
+      if delivery.status == 'sending' && delivery.metadata.to_h['broker_connector'] && delivery.metadata['message_id']
+        JrcCampaigns::BrokerStatusJob.perform_later('campaign', delivery.id)
+      end
+      return
+    end
 
     recipient.update!(metadata: recipient.metadata.to_h.except('pending_step_id')) if recipient.metadata.to_h.key?('pending_step_id')
     if step.only_if_no_reply? && recipient.replied_at.present?
@@ -36,6 +42,8 @@ class JrcCampaigns::DispatchStepService
 
     rejection = sending_rejection
     return skip_delivery(delivery, rejection) if rejection
+
+    return dispatch_broker(delivery) if @broker_connector
 
     @accepted_external_id = dispatch_message(delivery)
     return if @deferred_for_campaign_state
@@ -102,7 +110,7 @@ class JrcCampaigns::DispatchStepService
 
   def eligibility
     JrcCampaigns::EligibilityPolicy.new(account: campaign.account, phone_number: recipient.phone_number, contact: recipient.contact,
-                                       purpose: @evolution_connector ? 'whatsapp_campaigns' : nil)
+                                       purpose: (@evolution_connector || @broker_connector) ? 'whatsapp_campaigns' : nil)
   end
 
   def skip_delivery(delivery, reason)
@@ -123,7 +131,7 @@ class JrcCampaigns::DispatchStepService
         campaign: campaign, execution: recipient.execution, recipient: recipient, event_type: 'message_sent',
         payload: { step_id: step.id, external_id: delivery.external_id, inbox_id: inbox.id, kind: step.kind }
       )
-      unless campaign.email?
+      unless campaign.email? || delivery.metadata.to_h['broker_connector']
         if @evolution_connector
           record_evolution_message(delivery)
         else
@@ -172,6 +180,22 @@ class JrcCampaigns::DispatchStepService
 
       external_id
     end
+  end
+
+  def dispatch_broker(delivery)
+    @broker_connector.ready!(campaign.created_by)
+    return if defer_for_campaign_state(delivery)
+    rejection = sending_rejection
+    return skip_delivery(delivery, rejection) if rejection
+
+    delivery.update!(metadata: delivery.metadata.to_h.merge('broker_connector' => @broker_connector.public_configuration))
+    values = %w[kind body media_url file_name media_asset_id].index_with { |key| renderer.render(effective_value(key, step.public_send(key))) }
+    message = JrcCampaigns::BrokerMessageSender.call(delivery: delivery, user: campaign.created_by, phone_number: recipient.phone_number, step: values,
+                                                    conversation_status: campaign.conversation_mode == 'open' ? 'open' : 'pending',
+                                                    attributes: { 'campaign_id' => campaign.id, 'jrc_campaign_id' => campaign.id,
+                                                                  'jrc_campaign_broker_delivery_id' => delivery.id,
+                                                                  'jrc_campaign_execution_id' => recipient.execution_id, 'jrc_campaign_step_id' => step.id })
+    recipient.update!(contact: message.conversation.contact, conversation: message.conversation)
   end
 
   def dispatch_evolution(delivery)
