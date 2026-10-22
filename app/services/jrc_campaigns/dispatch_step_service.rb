@@ -192,7 +192,7 @@ class JrcCampaigns::DispatchStepService
     values = %w[kind body media_url file_name media_asset_id].index_with { |key| renderer.render(effective_value(key, step.public_send(key))) }
     message = JrcCampaigns::BrokerMessageSender.call(delivery: delivery, user: campaign.created_by, phone_number: recipient.phone_number, step: values,
                                                     conversation_status: campaign.conversation_mode == 'open' ? 'open' : 'pending',
-                                                    attributes: { 'campaign_id' => campaign.id, 'jrc_campaign_id' => campaign.id,
+                                                    attributes: { 'campaign_id' => campaign.id.to_s, 'jrc_campaign_id' => campaign.id,
                                                                   'jrc_campaign_broker_delivery_id' => delivery.id,
                                                                   'jrc_campaign_execution_id' => recipient.execution_id, 'jrc_campaign_step_id' => step.id })
     recipient.update!(contact: message.conversation.contact, conversation: message.conversation)

@@ -3,18 +3,10 @@ class JrcCampaigns::EligibilityPolicy
     @account = account
     @phone_number = JrcCampaigns::PhoneNormalizer.call(phone_number)
     @contact = contact
-    @purpose = purpose
   end
 
   def rejection_reason
-    safety_reason = safety_rejection_reason
-    return safety_reason if safety_reason
-
-    consent = JrcCampaigns::Consent.active.where(account: account, phone_number: phone_number)
-    return 'Consentimento positivo não registrado ou revogado.' unless consent.exists?
-    return 'Consentimento sem finalidade confirmada para campanhas e testes WhatsApp.' if @purpose && !consent.exists?(purpose: @purpose)
-
-    nil
+    list_rejection_reason
   end
 
   def safety_rejection_reason
@@ -25,7 +17,7 @@ class JrcCampaigns::EligibilityPolicy
     nil
   end
 
-  # QR campaigns use the explicitly selected list, without manufacturing consent.
+  # Campaigns and explicit individual tests use the selected destination without manufacturing consent.
   # A recorded withdrawal still wins over a subsequent CSV/manual import.
   def list_rejection_reason
     reason = safety_rejection_reason

@@ -15,7 +15,11 @@ class JrcBroker::WebhookDelivery
     return unless webhook_type == :api_inbox_webhook && payload[:event] == 'message_created'
 
     message = Message.find_by(id: payload[:id], message_type: :outgoing, private: false)
-    return unless message && JrcBrokerInboxBinding.exists?(account_id: message.account_id, inbox_id: message.inbox_id)
+    attributes = payload[:additional_attributes].to_h
+    marked_message = message && message.additional_attributes.to_h['jrc_campaign_broker'] == true
+    campaign = attributes['jrc_campaign_broker'] == true || marked_message
+    bound = message && JrcBrokerInboxBinding.exists?(account_id: message.account_id, inbox_id: message.inbox_id)
+    return unless campaign || bound
 
     new(message)
   end
@@ -25,6 +29,8 @@ class JrcBroker::WebhookDelivery
   end
 
   def validate!(url:, secret:, delivery_id:)
+    raise ContextChanged unless @message
+    @message.reload
     channel = @message.inbox.channel
     valid = channel.is_a?(Channel::Api) && channel.webhook_url == url && delivery_id.present? && secret.present? &&
             ActiveSupport::SecurityUtils.secure_compare(channel.secret.to_s, secret)
@@ -32,6 +38,7 @@ class JrcBroker::WebhookDelivery
   end
 
   def retryable?(error)
+    return error.status >= 500 || [408, 425, 429].include?(error.status) if error.is_a?(JrcBroker::Client::Error)
     return true if error.is_a?(SafeFetch::FetchError) || error.is_a?(Errno::ECONNREFUSED) || error.is_a?(Errno::ECONNRESET)
     return false unless error.is_a?(SafeFetch::HttpError)
 
@@ -39,7 +46,12 @@ class JrcBroker::WebhookDelivery
     [408, 425, 429].include?(status) || (500..599).cover?(status)
   end
 
+  def prepare_campaign_intent!(payload)
+    JrcCampaigns::BrokerIntentReservation.new(@message).prepare!(payload)
+  end
+
   def handle_failure(error)
+    return unless @message
     code = if error.is_a?(Unavailable) || error.is_a?(ContextChanged)
              error.message
            else

@@ -120,6 +120,7 @@ jobs:
           app/javascript/dashboard/routes/dashboard/jrcOperations
           app/javascript/dashboard/routes/dashboard/crm
           app/javascript/dashboard/routes/dashboard/jrcCustomers
+          app/javascript/dashboard/routes/dashboard/jrcCampaigns/specs
           app/javascript/dashboard/routes/dashboard/webphone
           app/javascript/dashboard/routes/dashboard/jrcRelationship
           app/javascript/dashboard/components-next/sidebar/specs

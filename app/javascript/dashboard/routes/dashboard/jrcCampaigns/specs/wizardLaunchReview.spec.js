@@ -316,7 +316,10 @@ describe('campaign wizard launch and required human review', () => {
     expect(api.launch).not.toHaveBeenCalled();
   });
 
-  it('refreshes official-channel eligibility after recording consent without clearing the draft or sending a campaign', async () => {
+  it('uses the official-channel audience without requiring a consent panel or sending the draft', async () => {
+    api.audiencePreview.mockResolvedValueOnce({
+      data: { estimated_recipients: 2, sample: [] },
+    });
     const wrapper = mount(CampaignWizard, {
       props: {
         metadata: {
@@ -331,34 +334,19 @@ describe('campaign wizard launch and required human review', () => {
           source_inboxes: [],
         },
       },
-      global: {
-        stubs: {
-          ConsentPanel: {
-            name: 'ConsentPanel',
-            emits: ['changed'],
-            template: '<div data-consents />',
-          },
-        },
-        mocks: { $t: key => key },
-      },
+      global: { mocks: { $t: key => key } },
     });
     await flushPromises();
     wrapper.vm.form.name = 'Retained draft';
-    const manage = wrapper
-      .findAll('button')
-      .find(button => button.text() === 'JRC_CAMPAIGNS.GUIDE.MANAGE_CONSENTS');
-    await manage.trigger('click');
-    api.audiencePreview.mockResolvedValueOnce({
-      data: { estimated_recipients: 2, sample: [] },
-    });
-    wrapper.getComponent({ name: 'ConsentPanel' }).vm.$emit('changed');
-    await flushPromises();
+    expect(wrapper.text()).not.toContain('JRC_CAMPAIGNS.GUIDE.MANAGE_CONSENTS');
+    expect(wrapper.findComponent({ name: 'ConsentPanel' }).exists()).toBe(
+      false
+    );
     expect(wrapper.vm.form.name).toBe('Retained draft');
     expect(wrapper.vm.eligibleCount).toBe(2);
     expect(api.create).not.toHaveBeenCalled();
     expect(api.launch).not.toHaveBeenCalled();
   });
-
   it('requires a new review when updating an approved draft invalidates its approval', async () => {
     api.update.mockResolvedValueOnce({
       data: { id: 17, status: 'draft', approval_valid: false },

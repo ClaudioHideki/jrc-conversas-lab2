@@ -87,6 +87,7 @@ describe('campaign page preserves the saved draft through review and launch', ()
     const wrapper = mount(JrcCampaignsPage, { global });
     await flushPromises();
     expect(wrapper.text()).not.toMatch(/JARVIS|JEV/);
+    expect(wrapper.text()).not.toContain('JRC_CAMPAIGNS.GOVERNANCE.CONSENTS');
     const create = wrapper
       .findAll('button')
       .find(button => button.text() === 'JRC_CAMPAIGNS.NEW_CAMPAIGN');

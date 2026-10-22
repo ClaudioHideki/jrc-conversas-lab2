@@ -25,6 +25,8 @@ class Webhooks::Trigger
 
   def execute
     jrc_delivery&.validate!(url: @url, secret: @secret, delivery_id: @delivery_id)
+    jrc_delivery&.prepare_campaign_intent!(@payload)
+    jrc_delivery&.validate!(url: @url, secret: @secret, delivery_id: @delivery_id)
     perform_request
   rescue StandardError => e
     raise RetryableError.new(status: http_status(e), message: e.message) if retryable_agent_bot_error?(e)

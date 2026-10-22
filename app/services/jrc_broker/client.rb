@@ -58,6 +58,10 @@ class JrcBroker::Client
     request(:get, connection_path(id, 'campaign-transport'))
   end
 
+  def campaign_intent(id, body, key:)
+    request(:post, connection_path(id, 'campaign-intents'), body: body, key: key)
+  end
+
   def campaign_receipt(id, conversation_id, message_id)
     raise Error.new('JRC_BROKER_INVALID_REQUEST', status: 400) unless message_id.is_a?(Integer) && message_id.positive?
 
@@ -150,7 +154,7 @@ class JrcBroker::Client
     status = response.code.to_i
     code = { 400 => 'INVALID_REQUEST', 401 => 'FORBIDDEN', 403 => 'FORBIDDEN', 404 => 'NOT_FOUND', 409 => 'CONFLICT' }[status]
     raise Error.new("JRC_BROKER_#{code}", status: status == 401 ? 403 : status) if code
-    raise Error, 'JRC_BROKER_UNAVAILABLE' unless [200, 202].include?(status)
+    raise Error, 'JRC_BROKER_UNAVAILABLE' unless [200, 201, 202].include?(status)
 
     body = +''
     response.read_body do |chunk|

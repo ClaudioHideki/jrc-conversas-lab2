@@ -108,7 +108,7 @@ describe Webhooks::Trigger do
         expect(SafeFetch).to receive(:fetch).and_raise(SafeFetch::HttpError.new('404 Not Found'))
 
         expect do
-          perform_enqueued_jobs do
+          perform_enqueued_jobs(only: Conversations::ActivityMessageJob) do
             trigger.execute(url, payload, webhook_type)
           end
         end.not_to(change { pending_message.reload.status })
@@ -152,7 +152,7 @@ describe Webhooks::Trigger do
         expect(SafeFetch).to receive(:fetch).and_raise(SafeFetch::HttpError.new('404 Not Found'))
 
         expect do
-          perform_enqueued_jobs do
+          perform_enqueued_jobs(only: Conversations::ActivityMessageJob) do
             trigger.execute(url, payload, webhook_type)
           end
         end.not_to(change { pending_message.reload.status })

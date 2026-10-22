@@ -8,13 +8,14 @@ RSpec.describe JrcCampaigns::EligibilityPolicy do
 
   it 'allows a list destination without creating positive consent records' do
     expect { expect(policy.list_rejection_reason).to be_nil }.not_to change(JrcCampaigns::Consent, :count)
-    expect(policy.rejection_reason).to match(/Consentimento/)
+    expect(policy.rejection_reason).to be_nil
   end
 
   it 'preserves a recorded withdrawal even after importing the number again' do
     JrcCampaigns::Consent.create!(account: account, recorded_by: admin, phone_number: phone, evidence: 'Historical',
                                  granted_at: 2.days.ago, revoked_at: 1.day.ago)
     expect(policy.list_rejection_reason).to match(/revogad/)
+    expect(policy.rejection_reason).to match(/revogad/)
   end
 
   it 'accepts a subsequent active consent without deleting the withdrawal history' do

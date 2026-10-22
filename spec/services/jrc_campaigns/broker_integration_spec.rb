@@ -11,7 +11,7 @@ RSpec.describe 'Broker campaign transport', type: :request do
   let(:prefix) { "#{origin}/v1/integrations/chatwoot/control" }
   let(:transport) do
     { protocol: 'chatwoot-campaigns/v1', integrationId: integration_id, instanceId: instance_id, inboxId: inbox.id,
-      destinationRevision: 1, identityRevision: 2, numberSuffix: '0000', ready: true, reason: nil }
+      destinationRevision: 1, identityRevision: 2, ownerRevision: 0, numberSuffix: '0000', ready: true, reason: nil }
   end
   let(:campaign) { JrcCampaigns::Campaign.create!(account: account, inbox: inbox, created_by: admin, name: 'Synthetic Broker campaign') }
   let(:step) { campaign.steps.create!(kind: 'text', body: 'Synthetic message', position: 0) }
@@ -76,6 +76,100 @@ RSpec.describe 'Broker campaign transport', type: :request do
       campaign.update!(status: 'running')
     end
 
+    it 'reserves the committed canonical message before its only callback and reuses the persisted intent' do
+      service.perform
+      delivery = recipient.deliveries.sole
+      message = account.messages.find(delivery.metadata.fetch('message_id'))
+      intent_id = SecureRandom.uuid
+      payload = message.webhook_data.merge(event: 'message_created')
+      reservation = stub_request(:post, "#{prefix}/connections/#{integration_id}/campaign-intents")
+        .with(headers: { 'X-JRC-External-Actor' => admin.id.to_s, 'Idempotency-Key' => "campaign:#{delivery.id}" },
+              body: hash_including('messageId' => message.id, 'conversationId' => message.conversation.display_id,
+                                   'campaignId' => campaign.id.to_s, 'kind' => 'text', 'text' => step.body,
+                                   'destinationRevision' => 1, 'identityRevision' => 2, 'ownerRevision' => 0))
+        .to_return(status: 201, headers: { 'Content-Type' => 'application/json' }, body: {
+          protocol: 'chatwoot-campaigns/v1', intentId: intent_id, state: 'RESERVED', expiresAt: 5.minutes.from_now.iso8601, replayed: false
+        }.to_json)
+      expect(SafeFetch).to receive(:fetch).once do |url, **options|
+        expect(url).to eq(inbox.channel.webhook_url)
+        expect(JSON.parse(options.fetch(:body)).fetch('additional_attributes').fetch('jrc_campaign_intent_id')).to eq(intent_id)
+        timestamp = options.fetch(:headers).fetch('X-Chatwoot-Timestamp')
+        expected = OpenSSL::HMAC.hexdigest('SHA256', inbox.channel.secret, "#{timestamp}.#{options.fetch(:body)}")
+        expect(options.fetch(:headers).fetch('X-Chatwoot-Signature')).to eq("sha256=#{expected}")
+      end
+      Webhooks::Trigger.execute(inbox.channel.webhook_url, payload, :api_inbox_webhook, secret: inbox.channel.secret, delivery_id: SecureRandom.uuid)
+      JrcBroker::WebhookDelivery.new(message).prepare_campaign_intent!(payload)
+      expect(reservation).to have_been_requested.once
+      expect(message.reload.additional_attributes['jrc_campaign_intent_id']).to eq(intent_id)
+      expect(payload[:additional_attributes]['jrc_campaign_intent_id']).to eq(intent_id)
+      expect(account.messages.count).to eq(1)
+      expect(delivery.reload.sent_at).to be_nil
+    end
+
+    it 'does not authorize a campaign marker without the matching server delivery correlation' do
+      service.perform
+      delivery = recipient.deliveries.sole
+      message = account.messages.find(delivery.metadata.fetch('message_id'))
+      delivery.update!(metadata: delivery.metadata.merge('message_id' => message.id + 1))
+      expect { JrcBroker::WebhookDelivery.new(message).prepare_campaign_intent!(message.webhook_data) }
+        .to raise_error(JrcBroker::WebhookDelivery::ContextChanged)
+      expect(WebMock).not_to have_requested(:post, "#{prefix}/connections/#{integration_id}/campaign-intents")
+    end
+
+    it 'honors a withdrawal recorded between local message commit and the callback' do
+      service.perform
+      message = account.messages.find(recipient.deliveries.sole.metadata.fetch('message_id'))
+      JrcCampaigns::Consent.where(account: account).update_all(revoked_at: Time.current)
+      expect { JrcBroker::WebhookDelivery.new(message).prepare_campaign_intent!(message.webhook_data) }
+        .to raise_error(JrcBroker::WebhookDelivery::ContextChanged)
+      expect(WebMock).not_to have_requested(:post, "#{prefix}/connections/#{integration_id}/campaign-intents")
+    end
+
+    it 'suppresses the callback if the binding was removed after the message committed' do
+      service.perform
+      message = account.messages.find(recipient.deliveries.sole.metadata.fetch('message_id'))
+      JrcBrokerInboxBinding.where(account: account, inbox: inbox).delete_all
+      expect(SafeFetch).not_to receive(:fetch)
+      Webhooks::Trigger.execute(inbox.channel.webhook_url, message.webhook_data.merge(event: 'message_created'), :api_inbox_webhook,
+                               secret: inbox.channel.secret, delivery_id: SecureRandom.uuid)
+      expect(message.reload).to be_failed
+    end
+
+    it 'suppresses a queued campaign payload if its canonical campaign marker was removed' do
+      service.perform
+      message = account.messages.find(recipient.deliveries.sole.metadata.fetch('message_id'))
+      payload = message.webhook_data.merge(event: 'message_created')
+      message.update_columns(additional_attributes: {})
+      expect(SafeFetch).not_to receive(:fetch)
+      Webhooks::Trigger.execute(inbox.channel.webhook_url, payload, :api_inbox_webhook,
+                               secret: inbox.channel.secret, delivery_id: SecureRandom.uuid)
+      expect(message.reload).to be_failed
+    end
+
+    it 'retries only the reservation after timeout and never posts an unsigned campaign intent' do
+      service.perform
+      message = account.messages.find(recipient.deliveries.sole.metadata.fetch('message_id'))
+      stub_request(:post, "#{prefix}/connections/#{integration_id}/campaign-intents").to_timeout
+      expect(SafeFetch).not_to receive(:fetch)
+      expect do
+        Webhooks::Trigger.execute(inbox.channel.webhook_url, message.webhook_data.merge(event: 'message_created'), :api_inbox_webhook,
+                                 secret: inbox.channel.secret, delivery_id: SecureRandom.uuid)
+      end.to raise_error(JrcBroker::WebhookDelivery::Unavailable)
+      expect(message.reload.additional_attributes).not_to have_key('jrc_campaign_intent_id')
+      expect(account.messages.count).to eq(1)
+    end
+
+    it 'fails a rejected reservation without posting the campaign callback' do
+      service.perform
+      message = account.messages.find(recipient.deliveries.sole.metadata.fetch('message_id'))
+      stub_request(:post, "#{prefix}/connections/#{integration_id}/campaign-intents").to_return(status: 409)
+      expect(SafeFetch).not_to receive(:fetch)
+      Webhooks::Trigger.execute(inbox.channel.webhook_url, message.webhook_data.merge(event: 'message_created'), :api_inbox_webhook,
+                               secret: inbox.channel.secret, delivery_id: SecureRandom.uuid)
+      expect(message.reload).to be_failed
+      expect(account.messages.count).to eq(1)
+    end
+
     it 'uses the selected list without requiring or inventing a separate positive consent record' do
       JrcCampaigns::Consent.where(account: account, phone_number: contact.phone_number).delete_all
       expect(JrcCampaigns::AudienceResolver.new(campaign).entries.map(&:phone_number)).to include(contact.phone_number)
@@ -90,7 +184,7 @@ RSpec.describe 'Broker campaign transport', type: :request do
       expect(delivery).to have_attributes(status: 'sending', sent_at: nil)
       message = account.messages.find(delivery.metadata.fetch('message_id'))
       expect(message).to have_attributes(sender: admin, private: false)
-      expect(message.additional_attributes).to include('campaign_id' => campaign.id, 'jrc_campaign_broker' => true)
+      expect(message.additional_attributes).to include('campaign_id' => campaign.id.to_s, 'jrc_campaign_broker' => true)
       expect(message.additional_attributes).not_to have_key('jrc_campaign_evolution')
       expect(account.messages.where("additional_attributes->>'jrc_campaign_id' = ?", campaign.id.to_s).count).to eq(1)
       expect(recipient.reload).to be_processing
@@ -175,6 +269,9 @@ RSpec.describe 'Broker campaign transport', type: :request do
     expect(first).to include(status: 'sending', delivery_confirmed: false)
     expect(account.messages.count).to eq(1)
     expect(JrcCampaigns::TestDelivery.where(account: account).count).to eq(1)
+    expect { JrcCampaigns::TestMessageService.new(**options.merge(idempotency_key: SecureRandom.uuid)).perform }
+      .to raise_error(ArgumentError, /pendente/)
+    expect(account.messages.count).to eq(1)
   end
 
   it 'does not allow a test without explicit confirmation or revoked consent' do

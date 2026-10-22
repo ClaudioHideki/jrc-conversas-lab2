@@ -1,6 +1,9 @@
 class JrcCampaigns::BrokerConnector
   PROTOCOL = 'chatwoot-campaigns/v1'.freeze
-  REASONS = %w[CAMPAIGN_BROKER_TRANSPORT_REQUIRED CAMPAIGN_EXECUTOR_EXTERNAL_REQUIRED CAMPAIGN_CALLBACK_NOT_READY CAMPAIGN_IDENTITY_NOT_READY].freeze
+  REASONS = %w[
+    CAMPAIGN_BROKER_TRANSPORT_REQUIRED CAMPAIGN_EXECUTOR_EXTERNAL_REQUIRED CAMPAIGN_CALLBACK_NOT_READY
+    CAMPAIGN_IDENTITY_NOT_READY CAMPAIGN_ATTENDANCE_POLICY_REQUIRES_CONFIGURATION
+  ].freeze
   attr_reader :inbox, :binding, :integration
 
   def self.for(inbox)
@@ -46,6 +49,7 @@ class JrcCampaigns::BrokerConnector
     valid = data['protocol'] == PROTOCOL && data.values_at('integrationId', 'inboxId', 'instanceId', 'destinationRevision') ==
       [binding.integration_id, inbox.id, binding.instance_id, integration.destination_revision]
     valid &&= [true, false].include?(data['ready']) && data['identityRevision'].is_a?(Integer) && data['identityRevision'] >= 0
+    valid &&= data['ownerRevision'].is_a?(Integer) && data['ownerRevision'] >= 0
     valid &&= data['numberSuffix'].nil? || /\A\d{4}\z/.match?(data['numberSuffix'].to_s)
     valid &&= data['ready'] ? data['reason'].nil? : REASONS.include?(data['reason'])
     valid &&= data['identityRevision'].positive? if data['ready'] == true && valid

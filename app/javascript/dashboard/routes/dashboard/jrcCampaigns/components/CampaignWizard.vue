@@ -1,6 +1,5 @@
 <script setup>
 import CampaignFilters from 'dashboard/routes/dashboard/jrcCustomers/components/CampaignFilters.vue';
-import ConsentPanel from './ConsentPanel.vue';
 import CampaignAudienceInput from './CampaignAudienceInput.vue';
 import { useCustomerMaster } from 'dashboard/routes/dashboard/jrcCustomers/useCustomerMaster';
 import {
@@ -36,7 +35,6 @@ const { t } = useI18n();
 const { enabled: hasCustomerMaster } = useCustomerMaster();
 const stepIndex = ref(0);
 const saving = ref(false);
-const showConsents = ref(false);
 const audienceInputMode = ref(null);
 const addedLists = ref([]);
 const audienceLists = computed(() => [
@@ -1455,31 +1453,6 @@ watch(
             </p>
           </div>
           <div v-if="stepIndex === 0" class="space-y-5">
-            <section
-              v-if="
-                !isEmail &&
-                ((!usesEvolution && selectedInboxIds.length > 0) ||
-                  showConsents)
-              "
-              class="rounded-xl border border-n-blue-5 bg-n-blue-2 p-4"
-            >
-              <p class="text-sm text-n-slate-12">
-                {{ t('JRC_CAMPAIGNS.GUIDE.WIZARD_CONSENT_HELP') }}
-              </p>
-              <button
-                type="button"
-                class="mt-2 text-sm font-semibold text-n-blue-11"
-                :aria-expanded="showConsents"
-                @click="showConsents = !showConsents"
-              >
-                {{ t('JRC_CAMPAIGNS.GUIDE.MANAGE_CONSENTS') }}
-              </button>
-              <ConsentPanel
-                v-if="showConsents"
-                embedded
-                @changed="refreshAudiencePreview"
-              />
-            </section>
             <div>
               <h3 class="text-xl font-semibold text-n-slate-12">
                 {{ $t('JRC_CAMPAIGNS.WIZARD.AUDIENCE_TITLE') }}
@@ -3073,7 +3046,7 @@ watch(
                   v-if="eligibleCount === 0"
                   class="mt-3 text-xs text-n-slate-12"
                 >
-                  {{ t('JRC_CAMPAIGNS.CONSENT_IMPORT.AUDIENCE_HELP') }}
+                  {{ t('JRC_CAMPAIGNS.WIZARD.AUDIENCE_RECHECK_HELP') }}
                 </p>
                 <button
                   type="button"

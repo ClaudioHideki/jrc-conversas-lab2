@@ -18,6 +18,8 @@ class JrcCampaigns::BrokerTestService
     account.with_lock do
       @delivery = JrcCampaigns::TestDelivery.find_by(account: account, idempotency_key: @key)
       unless @delivery
+        unresolved = JrcCampaigns::TestDelivery.where(account: account, inbox: @connector.inbox, phone_number: @phone, status: %w[sending unknown])
+        raise ArgumentError, 'Teste anterior pendente ou desconhecido; reconcilie o resultado antes de reenviar.' if unresolved.exists?
         reason = JrcCampaigns::EligibilityPolicy.new(account: account, phone_number: @phone, purpose: 'whatsapp_campaigns').rejection_reason
         raise ArgumentError, reason if reason
 
