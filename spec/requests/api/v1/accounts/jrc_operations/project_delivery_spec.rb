@@ -7,7 +7,7 @@ RSpec.describe 'Project delivery portfolio and serializers', type: :request do
   let(:headers) { admin.create_new_auth_token }
   let(:project) do
     JrcProjects::Projects::Create.call(account: account, actor: admin,
-      attributes: { name: 'Visible delivery', due_on: Date.current + 7 }, idempotency_key: SecureRandom.uuid)
+      attributes: { name: 'Visible delivery', due_on: (Date.current + 7).iso8601 }, idempotency_key: SecureRandom.uuid)
   end
   let(:base) { "/api/v1/accounts/#{account.id}/projects" }
   let(:task) do
@@ -24,7 +24,7 @@ RSpec.describe 'Project delivery portfolio and serializers', type: :request do
     project.project_members.create!(account: account, user: agent, role: 'viewer')
     project.update!(contact: create(:contact, account: account))
     hidden = JrcProjects::Projects::Create.call(account: account, actor: admin,
-      attributes: { name: 'Private delivery', due_on: Date.current + 7 }, idempotency_key: SecureRandom.uuid)
+      attributes: { name: 'Private delivery', due_on: (Date.current + 7).iso8601 }, idempotency_key: SecureRandom.uuid)
     hidden.update!(visibility: 'private', contact: create(:contact, account: account))
     task
     get "#{base}/portfolio", headers: agent.create_new_auth_token

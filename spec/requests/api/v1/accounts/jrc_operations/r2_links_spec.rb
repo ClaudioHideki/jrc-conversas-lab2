@@ -105,44 +105,45 @@ RSpec.describe 'Projects linked exclusively to Service Desk R2', type: :request 
     expect(ticket.ticket_conversations.count).to eq(1)
   end
 
-  it 'keeps admin configuration scope separate from explicitly granted ticket access' do
+  it 'preserves native administrator scope within the Account without granting automatic executors access' do
     ticket; other_ticket
+    foreign = create(:jrc_sd_ticket)
     native = JrcServiceDesk::OperationalContext.new(context)
-    expect(native.unit_scope).to be_empty
+    expect(native.unit_scope).to contain_exactly(unit, other_unit)
     expect(native.view_unit_scope).to contain_exactly(unit, other_unit)
-    expect(JrcServiceDesk::TicketPolicy::Scope.new(context, JrcServiceDesk::Ticket).resolve).to be_empty
-    expect(JrcServiceDesk::TicketPolicy.new(context, ticket).update?).to be(false)
-    expect(JrcServiceDesk::UnitMembership.where(account_user: admin_member)).to be_empty
-    create(:jrc_sd_membership, unit: unit, account_user: admin_member)
-    expect(JrcServiceDesk::TicketPolicy::Scope.new(context, JrcServiceDesk::Ticket).resolve).to contain_exactly(ticket)
+    expect(JrcServiceDesk::TicketPolicy::Scope.new(context, JrcServiceDesk::Ticket).resolve).to contain_exactly(ticket, other_ticket)
     expect(JrcServiceDesk::TicketPolicy.new(context, ticket).update?).to be(true)
-    expect(JrcServiceDesk::TicketPolicy.new(context, other_ticket).update?).to be(false)
+    expect(JrcServiceDesk::TicketPolicy.new(context, foreign).update?).to be(false)
+    expect(JrcServiceDesk::UnitMembership.where(account_user: admin_member)).to be_empty
+    expect(native.operational_unit_allowed?(unit)).to be(false)
+    create(:jrc_sd_membership, unit: unit, account_user: admin_member)
+    expect(native.operational_unit_allowed?(unit)).to be(true)
+    expect(native.operational_unit_allowed?(other_unit)).to be(false)
   end
 
-  it 'rechecks an admin unit grant for ticket lists, details and history' do
+  it 'rechecks an agent unit grant for ticket lists, details and history' do
     ticket
     other_ticket
-    admin_headers = admin.create_new_auth_token
+    grant.update!(active: false)
     tickets_path = "/api/v1/accounts/#{account.id}/jrc_service_desk/tickets"
-    get tickets_path, headers: admin_headers
-    expect(response).to have_http_status(:ok)
-    expect(response.parsed_body['items']).to be_empty
-    get "#{tickets_path}/#{ticket.id}", headers: admin_headers
-    expect(response).to have_http_status(:not_found)
+    get tickets_path, headers: headers
+    expect(response).to have_http_status(:forbidden)
+    get "#{tickets_path}/#{ticket.id}", headers: headers
+    expect(response).to have_http_status(:forbidden)
 
-    access_grant = create(:jrc_sd_membership, unit: unit, account_user: admin_member)
-    get tickets_path, headers: admin_headers
+    grant.update!(active: true)
+    get tickets_path, headers: headers
     expect(response.parsed_body['items'].map { |row| row['id'] }).to eq([ticket.id.to_s])
-    get "#{tickets_path}/#{other_ticket.id}", headers: admin_headers
+    get "#{tickets_path}/#{other_ticket.id}", headers: headers
     expect(response).to have_http_status(:not_found)
-    get "#{tickets_path}/#{ticket.id}/events", headers: admin_headers
+    get "#{tickets_path}/#{ticket.id}/events", headers: headers
     expect(response).to have_http_status(:ok)
 
-    access_grant.update!(active: false)
-    get "#{tickets_path}/#{ticket.id}/events", headers: admin_headers
-    expect(response).to have_http_status(:not_found)
-    get tickets_path, headers: admin_headers
-    expect(response.parsed_body['items']).to be_empty
+    grant.update!(active: false)
+    get "#{tickets_path}/#{ticket.id}/events", headers: headers
+    expect(response).to have_http_status(:forbidden)
+    get tickets_path, headers: headers
+    expect(response).to have_http_status(:forbidden)
   end
 
   it 'lets admin configure a unit and grant agent scope without creating an admin operational membership' do
