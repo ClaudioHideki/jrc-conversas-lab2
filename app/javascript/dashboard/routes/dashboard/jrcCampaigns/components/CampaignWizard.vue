@@ -2369,6 +2369,7 @@ watch(
               </p>
             </div>
             <div
+              v-if="!usesEvolution"
               class="rounded-2xl border border-n-amber-7 bg-n-amber-2 p-4 text-sm text-n-amber-11"
             >
               <span class="i-lucide-shield-check mr-2 inline-block size-4" />{{
@@ -2877,10 +2878,12 @@ watch(
                     </p>
                   </div>
                 </article>
-                <article class="rounded-2xl border border-n-weak p-4">
-                  <h4 class="text-sm font-semibold text-n-slate-12">
-                    {{ $t('JRC_CAMPAIGNS.WIZARD.MESSAGE_TEST') }}
-                  </h4>
+                <details class="rounded-2xl border border-n-weak p-4">
+                  <summary
+                    class="cursor-pointer text-sm font-semibold text-n-slate-12"
+                  >
+                    {{ $t('JRC_CAMPAIGNS.WIZARD.OPTIONAL_TEST') }}
+                  </summary>
                   <p class="mt-1 text-xs text-n-slate-10">
                     {{ $t('JRC_CAMPAIGNS.WIZARD.MESSAGE_TEST_HELP') }}
                   </p>
@@ -2914,7 +2917,7 @@ watch(
                       {{ $t('JRC_CAMPAIGNS.WIZARD.SEND_TEST') }}
                     </button>
                   </div>
-                </article>
+                </details>
               </aside>
             </div>
           </div>
@@ -3107,10 +3110,12 @@ watch(
                 </div>
               </article>
             </div>
-            <article class="rounded-2xl border border-n-weak p-5">
-              <h4 class="text-sm font-semibold text-n-slate-12">
-                {{ $t('JRC_CAMPAIGNS.WIZARD.MESSAGE_TEST') }}
-              </h4>
+            <details class="rounded-2xl border border-n-weak p-5">
+              <summary
+                class="cursor-pointer text-sm font-semibold text-n-slate-12"
+              >
+                {{ $t('JRC_CAMPAIGNS.WIZARD.OPTIONAL_TEST') }}
+              </summary>
               <p v-if="usesEvolution" class="mt-2 text-xs text-n-slate-11">
                 {{ t('JRC_CAMPAIGNS.EVOLUTION.CONTINUOUS_HELP') }}
               </p>
@@ -3134,7 +3139,7 @@ watch(
                   {{ $t('JRC_CAMPAIGNS.WIZARD.SEND_TEST') }}
                 </button>
               </div>
-            </article>
+            </details>
           </div>
         </section>
 

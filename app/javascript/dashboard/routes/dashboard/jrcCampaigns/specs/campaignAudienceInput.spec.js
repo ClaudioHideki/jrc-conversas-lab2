@@ -68,6 +68,27 @@ describe('audience input inside the campaign', () => {
     expect(wrapper.vm.audiencePreview.estimated_recipients).toBe(2);
   });
 
+  it('does not present the Meta message-window instruction for a QR sender', async () => {
+    const wrapper = mount(CampaignWizard, {
+      props: {
+        metadata: {
+          whatsapp_inboxes: [
+            {
+              id: 8,
+              name: 'QR',
+              connector: 'broker',
+              health_status: 'CONNECTED',
+            },
+          ],
+        },
+      },
+      global: { mocks: { $t: key => key } },
+    });
+    wrapper.vm.stepIndex = 2;
+    await flushPromises();
+    expect(wrapper.text()).not.toContain('JRC_CAMPAIGNS.WIZARD.COMPLIANCE');
+  });
+
   it('adds manually entered numbers to a list without granting consent or launching', async () => {
     const wrapper = mount(CampaignAudienceInput, {
       props: { mode: 'manual', campaignName: 'Pilot' },

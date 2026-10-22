@@ -337,6 +337,7 @@
       "PREVIEW_INBOX": "Nome da caixa",
       "PREVIEW_EMPTY": "Configure a mensagem para visualizar o conteúdo.",
       "MESSAGE_TEST": "Teste de mensagem",
+      "OPTIONAL_TEST": "Teste individual (opcional)",
       "MESSAGE_TEST_HELP": "O teste usa a primeira caixa selecionada e o mesmo provider do disparo.",
       "TEST_PHONE_PLACEHOLDER": "Número com DDI e DDD",
       "TEST_EMAIL_PLACEHOLDER": "E-mail que receberá o teste",
