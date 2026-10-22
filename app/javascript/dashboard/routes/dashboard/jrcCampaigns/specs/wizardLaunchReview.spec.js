@@ -316,9 +316,21 @@ describe('campaign wizard launch and required human review', () => {
     expect(api.launch).not.toHaveBeenCalled();
   });
 
-  it('refreshes eligibility after recording consent without clearing the draft or sending a campaign', async () => {
+  it('refreshes official-channel eligibility after recording consent without clearing the draft or sending a campaign', async () => {
     const wrapper = mount(CampaignWizard, {
-      props: { metadata: { whatsapp_inboxes: [], source_inboxes: [] } },
+      props: {
+        metadata: {
+          whatsapp_inboxes: [
+            {
+              id: 8,
+              name: 'Official',
+              connector: 'official',
+              health_status: 'CONNECTED',
+            },
+          ],
+          source_inboxes: [],
+        },
+      },
       global: {
         stubs: {
           ConsentPanel: {

@@ -261,7 +261,7 @@ RSpec.describe 'Evolution campaign integration', type: :request do
       expect(first[:status]).to eq('sent')
       expect(authorization.reload).to have_attributes(test_delivery_id: first[:test_delivery_id], consumed_at: Time.current)
       expect(consent.reload.attributes).to eq(historical_attributes)
-      expect(JrcCampaigns::AudienceResolver.new(campaign).preview[:rejections].sole[:reason]).to match(/finalidade/)
+      expect(JrcCampaigns::AudienceResolver.new(campaign).entries.map(&:phone_number)).to include(contact.phone_number)
       expect(JrcCampaigns::TestMessageService.new(**test_options).perform[:test_delivery_id]).to eq(first[:test_delivery_id])
       expect do
         JrcCampaigns::TestMessageService.new(**test_options.merge(idempotency_key: SecureRandom.uuid)).perform
@@ -356,7 +356,7 @@ RSpec.describe 'Evolution campaign integration', type: :request do
   it 'does not invent campaign purpose for historical consent evidence' do
     JrcCampaigns::Consent.find_by!(account: account, phone_number: contact.phone_number).update!(purpose: nil)
     expect { JrcCampaigns::TestMessageService.new(**test_options).perform }.to raise_error(ArgumentError, /finalidade/)
-    expect(JrcCampaigns::AudienceResolver.new(campaign).preview[:rejections].sole[:reason]).to match(/finalidade/)
+    expect(JrcCampaigns::AudienceResolver.new(campaign).entries.map(&:phone_number)).to include(contact.phone_number)
   end
 
   it 'rejects a blocked or malformed destination' do

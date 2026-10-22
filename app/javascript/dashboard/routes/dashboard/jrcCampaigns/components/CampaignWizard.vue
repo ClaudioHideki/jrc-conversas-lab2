@@ -1,6 +1,7 @@
 <script setup>
 import CampaignFilters from 'dashboard/routes/dashboard/jrcCustomers/components/CampaignFilters.vue';
 import ConsentPanel from './ConsentPanel.vue';
+import CampaignAudienceInput from './CampaignAudienceInput.vue';
 import { useCustomerMaster } from 'dashboard/routes/dashboard/jrcCustomers/useCustomerMaster';
 import {
   sourceInboxesForChannel,
@@ -36,6 +37,15 @@ const { enabled: hasCustomerMaster } = useCustomerMaster();
 const stepIndex = ref(0);
 const saving = ref(false);
 const showConsents = ref(false);
+const audienceInputMode = ref(null);
+const addedLists = ref([]);
+const audienceLists = computed(() => [
+  ...addedLists.value,
+  ...(props.metadata.sanitized_lists || []).filter(
+    list =>
+      !addedLists.value.some(added => Number(added.id) === Number(list.id))
+  ),
+]);
 const uploadingStep = ref(null);
 const previewingAudience = ref(false);
 const audiencePreview = ref({
@@ -69,6 +79,7 @@ const latestTestSignature = ref(null);
 const newTestCoolingDown = ref(false);
 let newTestTimer;
 let audienceTimer;
+let audienceRequest = 0;
 let recipientSearchTimer;
 
 const defaultMessage = (kind = 'template') => ({
@@ -178,29 +189,6 @@ const testResultTitle = computed(() =>
     ? t('JRC_CAMPAIGNS.BROKER.TEST_RESULT')
     : t('JRC_CAMPAIGNS.EVOLUTION.TEST_RESULT')
 );
-const brokerReasonLabels = computed(() => ({
-  DIRECT_EVOLUTION_CONFIGURATION_REQUIRED: t(
-    'JRC_CAMPAIGNS.BROKER.REASONS.DIRECT_EVOLUTION_CONFIGURATION_REQUIRED'
-  ),
-  CONFIGURATION_REQUIRED: t(
-    'JRC_CAMPAIGNS.BROKER.REASONS.CONFIGURATION_REQUIRED'
-  ),
-  BROKER_UPDATE_OR_CONFIGURATION_REQUIRED: t(
-    'JRC_CAMPAIGNS.BROKER.REASONS.BROKER_UPDATE_OR_CONFIGURATION_REQUIRED'
-  ),
-  CAMPAIGN_BROKER_TRANSPORT_REQUIRED: t(
-    'JRC_CAMPAIGNS.BROKER.REASONS.CAMPAIGN_BROKER_TRANSPORT_REQUIRED'
-  ),
-  CAMPAIGN_EXECUTOR_EXTERNAL_REQUIRED: t(
-    'JRC_CAMPAIGNS.BROKER.REASONS.CAMPAIGN_EXECUTOR_EXTERNAL_REQUIRED'
-  ),
-  CAMPAIGN_CALLBACK_NOT_READY: t(
-    'JRC_CAMPAIGNS.BROKER.REASONS.CAMPAIGN_CALLBACK_NOT_READY'
-  ),
-  CAMPAIGN_IDENTITY_NOT_READY: t(
-    'JRC_CAMPAIGNS.BROKER.REASONS.CAMPAIGN_IDENTITY_NOT_READY'
-  ),
-}));
 const mixesWhatsAppConnectors = computed(
   () =>
     !isEmail.value &&
@@ -261,6 +249,18 @@ const wizardSteps = computed(() => [
   },
 ]);
 const sourceCards = computed(() => [
+  {
+    key: 'import_csv',
+    label: t('JRC_CAMPAIGNS.WIZARD.SOURCE_IMPORT'),
+    description: t('JRC_CAMPAIGNS.WIZARD.SOURCE_IMPORT_HELP'),
+    icon: 'i-lucide-file-up',
+  },
+  {
+    key: 'manual_numbers',
+    label: t('JRC_CAMPAIGNS.WIZARD.SOURCE_MANUAL'),
+    description: t('JRC_CAMPAIGNS.WIZARD.SOURCE_MANUAL_HELP'),
+    icon: 'i-lucide-list-plus',
+  },
   {
     key: 'all_contacts',
     label: t('JRC_CAMPAIGNS.WIZARD.SOURCE_ALL'),
@@ -623,6 +623,13 @@ const toggleArrayValue = (array, value) => {
   else array.push(value);
 };
 const selectAudience = audienceType => {
+  if (['import_csv', 'manual_numbers'].includes(audienceType)) {
+    audienceInputMode.value = audienceType === 'import_csv' ? 'csv' : 'manual';
+    form.audience_type = 'sanitized_list';
+    form.audience_config.sanitized_list_id = null;
+    return;
+  }
+  audienceInputMode.value = null;
   form.audience_type = audienceType;
 };
 const resetRecipientSelection = () => {
@@ -888,6 +895,9 @@ const buildPayload = () => {
 };
 const refreshAudiencePreview = async () => {
   if (!sourceValid.value) return;
+  audienceRequest += 1;
+  const request = audienceRequest;
+  const sourceSignature = audienceSourceSignature.value;
   previewingAudience.value = true;
   try {
     const { data } = await JrcCampaignsAPI.audiencePreview({
@@ -896,8 +906,17 @@ const refreshAudiencePreview = async () => {
       delivery_channel: form.delivery_channel,
       audience_config: form.audience_config,
     });
-    audiencePreview.value = data;
+    if (
+      request === audienceRequest &&
+      sourceSignature === audienceSourceSignature.value
+    )
+      audiencePreview.value = data;
   } catch {
+    if (
+      request !== audienceRequest ||
+      sourceSignature !== audienceSourceSignature.value
+    )
+      return;
     audiencePreview.value = {
       ...audiencePreview.value,
       found_count: null,
@@ -906,8 +925,16 @@ const refreshAudiencePreview = async () => {
       sample: [],
     };
   } finally {
-    previewingAudience.value = false;
+    if (request === audienceRequest) previewingAudience.value = false;
   }
+};
+const selectCreatedList = async list => {
+  addedLists.value.unshift(list);
+  form.audience_type = 'sanitized_list';
+  form.audience_config.sanitized_list_id = list.id;
+  audienceInputMode.value = null;
+  emit('refreshSenders');
+  await refreshAudiencePreview();
 };
 const refreshRecipientManager = async () => {
   if (!sourceValid.value || !showRecipientManager.value) return;
@@ -1285,6 +1312,7 @@ watch(
     () => form.delivery_channel,
     () => form.audience_type,
     () => form.audience_config,
+    () => selectedInboxIds.value,
   ],
   () => {
     window.clearTimeout(audienceTimer);
@@ -1300,6 +1328,7 @@ watch(recipientSearch, () => {
 });
 onMounted(refreshAudiencePreview);
 onBeforeUnmount(() => {
+  audienceRequest += 1;
   window.clearTimeout(audienceTimer);
   window.clearTimeout(recipientSearchTimer);
 });
@@ -1427,7 +1456,11 @@ watch(
           </div>
           <div v-if="stepIndex === 0" class="space-y-5">
             <section
-              v-if="!isEmail"
+              v-if="
+                !isEmail &&
+                ((!usesEvolution && selectedInboxIds.length > 0) ||
+                  showConsents)
+              "
               class="rounded-xl border border-n-blue-5 bg-n-blue-2 p-4"
             >
               <p class="text-sm text-n-slate-12">
@@ -1510,12 +1543,16 @@ watch(
               </h4>
               <div class="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 <button
-                  v-for="source in sourceCards"
+                  v-for="source in sourceCards.slice(0, 3)"
                   :key="source.key"
                   type="button"
                   class="relative rounded-xl border p-4 text-left transition-colors"
                   :class="
-                    form.audience_type === source.key
+                    (audienceInputMode === 'csv' &&
+                      source.key === 'import_csv') ||
+                    (audienceInputMode === 'manual' &&
+                      source.key === 'manual_numbers') ||
+                    (!audienceInputMode && form.audience_type === source.key)
                       ? 'border-n-brand bg-n-brand/5'
                       : 'border-n-weak hover:border-n-strong'
                   "
@@ -1531,11 +1568,45 @@ watch(
                     source.description
                   }}</span
                   ><span
-                    v-if="form.audience_type === source.key"
+                    v-if="
+                      (audienceInputMode === 'csv' &&
+                        source.key === 'import_csv') ||
+                      (audienceInputMode === 'manual' &&
+                        source.key === 'manual_numbers') ||
+                      (!audienceInputMode && form.audience_type === source.key)
+                    "
                     class="i-lucide-circle-check absolute right-3 top-3 size-5 text-n-brand"
                   />
                 </button>
               </div>
+              <CampaignAudienceInput
+                v-if="audienceInputMode"
+                :key="audienceInputMode"
+                :mode="audienceInputMode"
+                :campaign-name="form.name"
+                @selected="selectCreatedList"
+              />
+              <details class="mt-4 rounded-xl border border-n-weak p-3">
+                <summary
+                  class="cursor-pointer text-sm font-medium text-n-slate-11"
+                >
+                  {{ t('JRC_CAMPAIGNS.WIZARD.OTHER_SOURCES') }}
+                </summary>
+                <div class="mt-3 flex flex-wrap gap-2">
+                  <button
+                    v-for="source in sourceCards.slice(3)"
+                    :key="source.key"
+                    type="button"
+                    class="rounded-lg border border-n-weak px-3 py-2 text-sm text-n-slate-12"
+                    :aria-pressed="
+                      !audienceInputMode && form.audience_type === source.key
+                    "
+                    @click="selectAudience(source.key)"
+                  >
+                    {{ source.label }}
+                  </button>
+                </div>
+              </details>
               <div
                 v-if="form.audience_type === 'label'"
                 class="mt-5 border-t border-n-weak pt-5"
@@ -1652,7 +1723,9 @@ watch(
                 </div>
               </div>
               <label
-                v-if="form.audience_type === 'sanitized_list'"
+                v-if="
+                  form.audience_type === 'sanitized_list' && !audienceInputMode
+                "
                 class="mt-5 block max-w-xl border-t border-n-weak pt-5 text-sm font-medium text-n-slate-12"
                 >{{ $t('JRC_CAMPAIGNS.WIZARD.SANITIZED_LIST')
                 }}<select
@@ -1663,7 +1736,7 @@ watch(
                     {{ $t('JRC_CAMPAIGNS.WIZARD.SELECT_OPTION') }}
                   </option>
                   <option
-                    v-for="list in metadata.sanitized_lists"
+                    v-for="list in audienceLists"
                     :key="list.id"
                     :value="list.id"
                   >
@@ -1746,14 +1819,18 @@ watch(
                   </p>
                 </div>
               </div>
-              <div
+              <details
                 v-if="audiencePreview.rejections?.length"
                 class="mt-4 max-h-48 overflow-y-auto rounded-lg border border-n-weak p-3 text-sm"
                 role="status"
               >
-                <p class="font-medium">
-                  {{ t('JRC_CAMPAIGNS.EVOLUTION.REJECTIONS') }}
-                </p>
+                <summary class="cursor-pointer font-medium">
+                  {{
+                    t('JRC_CAMPAIGNS.WIZARD.REJECTION_SUMMARY', {
+                      count: audiencePreview.rejections.length,
+                    })
+                  }}
+                </summary>
                 <p
                   v-for="rejection in audiencePreview.rejections"
                   :key="rejection.selection_key"
@@ -1764,7 +1841,7 @@ watch(
                   }}
                   · {{ rejection.reason }}
                 </p>
-              </div>
+              </details>
               <button
                 v-if="Number(audiencePreview.available_recipients || 0) > 0"
                 type="button"
@@ -1994,10 +2071,7 @@ watch(
                       v-if="inbox.setup_reason"
                       class="mt-2 text-xs text-n-amber-11"
                     >
-                      {{
-                        brokerReasonLabels[inbox.setup_reason] ||
-                        brokerReasonLabels.BROKER_UPDATE_OR_CONFIGURATION_REQUIRED
-                      }}
+                      {{ t('JRC_CAMPAIGNS.WIZARD.SENDER_UNAVAILABLE') }}
                     </p>
                     <div
                       v-if="

@@ -87,7 +87,7 @@ class JrcCampaigns::DispatchStepService
     return 'Contato bloqueado.' if recipient.contact&.reload&.blocked?
     return nil if campaign.email?
 
-    eligibility.rejection_reason
+    (@evolution_connector || @broker_connector) ? eligibility.list_rejection_reason : eligibility.rejection_reason
   rescue ActiveRecord::RecordInvalid => e
     e.record.errors.full_messages.join(', ')
   end

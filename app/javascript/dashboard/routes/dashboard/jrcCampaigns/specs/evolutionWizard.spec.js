@@ -129,7 +129,7 @@ describe('Evolution campaign test confirmation', () => {
       .find(item => item.text().includes('Synthetic QR'));
     expect(label.find('input').element.disabled).toBe(true);
     expect(wrapper.text()).toContain(
-      'JRC_CAMPAIGNS.BROKER.REASONS.CAMPAIGN_IDENTITY_NOT_READY'
+      'JRC_CAMPAIGNS.WIZARD.SENDER_UNAVAILABLE'
     );
     expect(api.testMessage).not.toHaveBeenCalled();
   });

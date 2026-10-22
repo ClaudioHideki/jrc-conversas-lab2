@@ -76,6 +76,14 @@ RSpec.describe 'Broker campaign transport', type: :request do
       campaign.update!(status: 'running')
     end
 
+    it 'uses the selected list without requiring or inventing a separate positive consent record' do
+      JrcCampaigns::Consent.where(account: account, phone_number: contact.phone_number).delete_all
+      expect(JrcCampaigns::AudienceResolver.new(campaign).entries.map(&:phone_number)).to include(contact.phone_number)
+      expect { service.perform }.not_to change(JrcCampaigns::Consent, :count)
+      expect(recipient.deliveries.sole.status).to eq('sending')
+      expect(account.messages.count).to eq(1)
+    end
+
     it 'creates one legitimate automation message and waits for actual provider evidence before advancing' do
       2.times { service.perform }
       delivery = recipient.deliveries.sole

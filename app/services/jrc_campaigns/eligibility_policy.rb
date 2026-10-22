@@ -25,6 +25,20 @@ class JrcCampaigns::EligibilityPolicy
     nil
   end
 
+  # QR campaigns use the explicitly selected list, without manufacturing consent.
+  # A recorded withdrawal still wins over a subsequent CSV/manual import.
+  def list_rejection_reason
+    reason = safety_rejection_reason
+    return reason if reason
+
+    records = JrcCampaigns::Consent.where(account: account, phone_number: phone_number)
+    if records.where.not(revoked_at: nil).exists? && !records.active.exists?
+      return 'Consentimento positivo revogado para este destinatário.'
+    end
+
+    nil
+  end
+
   def freeform_conversation!(inbox)
     conversation = conversation_for_phone(inbox)
     unless conversation && Conversations::MessageWindowService.new(conversation).can_reply?

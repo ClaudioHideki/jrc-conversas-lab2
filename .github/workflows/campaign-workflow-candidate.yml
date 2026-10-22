@@ -1,0 +1,76 @@
+name: Campanhas - fluxo de lista candidato
+
+on:
+  push:
+    branches: [codex/campaign-list-workflow-20261022]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  campaign-regression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: disposable-test-only
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 12
+      redis:
+        image: redis:7.4.0-alpine@sha256:c35af3bbcef51a62c8bae5a9a563c6f1b60d7ebaea4cb5a3ccbcc157580ae098
+        ports: ['6379:6379']
+    env:
+      RAILS_ENV: test
+      POSTGRES_HOST: 127.0.0.1
+      POSTGRES_PORT: '5432'
+      POSTGRES_USERNAME: postgres
+      POSTGRES_PASSWORD: disposable-test-only
+      POSTGRES_DATABASE: jrc_campaign_workflow_candidate_test
+      REDIS_URL: redis://127.0.0.1:6379/15
+      FRONTEND_URL: https://central.example.test
+      SECRET_KEY_BASE: isolated-campaign-ci-not-a-production-secret
+      BUNDLE_FROZEN: 'true'
+      SCHEMA: /tmp/campaign-workflow-candidate-schema.rb
+      TZ: UTC
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Preservar a base instalada
+        run: |
+          git merge-base --is-ancestor 9b1393a47782c4e2734dea09519787bb532df71b HEAD
+          git diff --check 9b1393a47782c4e2734dea09519787bb532df71b HEAD
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - name: Interface de campanhas
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm exec vitest run app/javascript/dashboard/routes/dashboard/jrcCampaigns/specs --maxWorkers=1 --minWorkers=1
+          pnpm exec eslint app/javascript/dashboard/routes/dashboard/jrcCampaigns/components/CampaignAudienceInput.vue app/javascript/dashboard/routes/dashboard/jrcCampaigns/components/CampaignWizard.vue app/javascript/dashboard/routes/dashboard/jrcCampaigns/specs/campaignAudienceInput.spec.js --quiet
+      - name: Dependencias nativas
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libpq-dev libvips libvips-dev
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4.4'
+          bundler: 2.5.16
+          bundler-cache: true
+      - name: Banco descartavel de teste
+        run: |
+          test "$RAILS_ENV" = test
+          test "$POSTGRES_DATABASE" = jrc_campaign_workflow_candidate_test
+          SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
+          bundle exec rails db:migrate
+      - name: Regressao Rails, isolamento, bloqueios e transportes
+        run: |
+          bundle exec rspec spec/services/jrc_campaigns spec/requests/api/v1/accounts/jrc_campaigns --format progress
+      - name: Fonte preservada
+        run: git diff --exit-code
