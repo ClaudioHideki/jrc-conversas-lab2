@@ -81,4 +81,41 @@ RSpec.describe 'Project delivery portfolio and serializers', type: :request do
     get "#{base}/projects/#{project.id}", headers: headers
     expect(response.parsed_body.dig('data', 'budget')).to include('configured' => false, 'planned_cents' => 0)
   end
+
+  it 'requires finished tasks and explicit acceptance before completing a project' do
+    task
+    path = "#{base}/projects/#{project.id}"
+    patch path, params: { project: { status: 'completed', acceptance_notes: 'Approved delivery', lock_version: project.reload.lock_version } }, headers: headers, as: :json
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(project.reload.completed_at).to be_nil
+    task.update!(status: 'completed', board_column: project.board_columns.find_by!(status_key: 'completed'))
+    patch path, params: { project: { status: 'completed', lock_version: project.reload.lock_version } }, headers: headers, as: :json
+    expect(response).to have_http_status(:unprocessable_entity)
+    patch path, params: { project: { status: 'completed', acceptance_notes: 'Approved delivery', lock_version: project.reload.lock_version } }, headers: headers, as: :json
+    expect(response).to have_http_status(:ok)
+    expect(project.reload).to have_attributes(status: 'completed', acceptance_notes: 'Approved delivery', accepted_by_id: admin.id)
+    expect(project.completed_at).to be_present
+  end
+
+  it 'approves and rejects submitted hours without allowing a member to self-approve or set financial cost' do
+    project.project_members.create!(account: account, user: agent, role: 'member')
+    path = "#{base}/projects/#{project.id}/time_entries"
+    post path, params: { time_entry: { task_id: task.id, minutes: 90, worked_on: Date.current.iso8601 } }, headers: agent.create_new_auth_token, as: :json
+    expect(response).to have_http_status(:created)
+    entry = project.time_entries.find(response.parsed_body.dig('data', 'id'))
+    patch "#{path}/#{entry.id}", params: { time_entry: { status: 'approved', hourly_cost_cents: 6000 } }, headers: agent.create_new_auth_token, as: :json
+    expect(response).to have_http_status(:ok)
+    expect(entry.reload).to have_attributes(status: 'submitted', hourly_cost_cents: nil)
+    patch "#{path}/#{entry.id}", params: { time_entry: { status: 'approved', hourly_cost_cents: 6000 } }, headers: headers, as: :json
+    expect(response).to have_http_status(:ok)
+    expect(entry.reload.status).to eq('approved')
+    get "#{base}/projects/#{project.id}/budget", headers: headers
+    expect(response.parsed_body.dig('data', 'actual_cents')).to eq(9000)
+    patch "#{path}/#{entry.id}", params: { time_entry: { status: 'rejected' } }, headers: headers, as: :json
+    expect(response).to have_http_status(:ok)
+    expect(entry.reload.status).to eq('rejected')
+    get "#{base}/projects/#{project.id}/budget", headers: headers
+    expect(response.parsed_body.dig('data', 'actual_cents')).to eq(0)
+  end
+
 end
