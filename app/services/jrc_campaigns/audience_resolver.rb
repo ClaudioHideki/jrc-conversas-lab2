@@ -38,7 +38,7 @@ class JrcCampaigns::AudienceResolver
     counters = Hash.new(0)
     rejections = []
     evolution = campaign.whatsapp? && (campaign.evolution_connectors.any? || campaign.broker_connectors.any?)
-    list_preview = evolution || campaign.sending_inbox_links.empty?
+    list_preview = evolution || (campaign.new_record? && campaign.inbox_id.nil? && campaign.campaign_inboxes.empty?)
     eligible = resolved.filter_map do |entry|
       normalized = normalized_entry(entry)
       destination = normalized.destination(campaign.delivery_channel)

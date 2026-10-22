@@ -48,4 +48,11 @@ RSpec.describe JrcCampaigns::EligibilityPolicy do
     create(:contact, account: account, phone_number: phone, blocked: true)
     expect(policy.list_rejection_reason).to eq('Contato bloqueado.')
   end
+
+  it 'does not treat an unrelated API inbox as a configured QR campaign connector' do
+    create(:contact, account: account, phone_number: phone)
+    inbox = create(:inbox, account: account, channel: create(:channel_api, account: account))
+    campaign = JrcCampaigns::Campaign.create!(account: account, inbox: inbox, created_by: admin, name: 'Unconfigured inbox')
+    expect(JrcCampaigns::AudienceResolver.new(campaign).entries).to be_empty
+  end
 end
