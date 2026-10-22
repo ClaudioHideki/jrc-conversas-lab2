@@ -72,11 +72,12 @@ module JrcOperations
       end
       if @source[:ticket_id].present? || @source[:project_id].present? || @source[:deal_id].present?
         linker = Linker.new(account_user: @member)
-        candidates = matching.where(project_id: Access.projects(@member).select(:id)).order(id: :desc).limit(100)
+        candidates = matching.where(project_id: Access.projects(@member).select(:id)).includes(:created_by).order(id: :desc).limit(100)
         data[:relations] = candidates.filter_map do |link|
           records = linker.read(link)
           {
-            id: link.id, can_remove: linker.removable?(link),
+            id: link.id, can_remove: linker.removable?(link), created_at: link.created_at,
+            created_by: link.created_by.as_json(only: %i[id name]),
             project: records[:project]&.as_json(only: %i[id key name status contact_id]),
             ticket: records[:ticket] && ticket_payload(records[:ticket]),
             task: records[:task]&.as_json(only: %i[id title status project_id]),

@@ -33,7 +33,8 @@ export async function request(
 }
 export async function allPages(accountId, path, params = {}) {
   const rows = [];
-  for (let page = 1; page <= 100; page += 1) {
+  async function loadPage(page) {
+    if (page > 100) throw new Error('Limite de paginacao atingido.');
     const result = await request(accountId, path, {
       params: { ...params, page, per_page: 100 },
     });
@@ -44,8 +45,9 @@ export async function allPages(accountId, path, params = {}) {
       );
     if (!result.meta || rows.length >= result.meta.total || !result.data.length)
       return rows;
+    return loadPage(page + 1);
   }
-  throw new Error('Limite de paginacao atingido.');
+  return loadPage(1);
 }
 export async function downloadCsv(accountId, path, filename) {
   const blob = await request(accountId, path, { responseType: 'blob' });
@@ -58,9 +60,9 @@ export async function downloadCsv(accountId, path, filename) {
 }
 export const projectStatuses = {
   planned: 'Planejado',
-  active: 'Em execucao',
+  active: 'Em andamento',
   on_hold: 'Pausado',
-  completed: 'Concluido',
+  completed: 'Concluído',
   canceled: 'Cancelado',
 };
 export const taskStatuses = {
@@ -68,7 +70,7 @@ export const taskStatuses = {
   pending: 'Pendente',
   in_progress: 'Em andamento',
   review: 'Em validacao',
-  completed: 'Concluido',
+  completed: 'Concluído',
   blocked: 'Bloqueado',
   canceled: 'Cancelado',
   scheduled: 'Agendado',
@@ -76,7 +78,7 @@ export const taskStatuses = {
 };
 export const priorities = {
   low: 'Baixa',
-  medium: 'Media',
+  medium: 'Média',
   high: 'Alta',
   urgent: 'Urgente',
 };

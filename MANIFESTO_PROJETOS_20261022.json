@@ -1,0 +1,195 @@
+{
+  "delivery": "JRC Conversas - Projetos - 2026-10-22",
+  "source_filename": "jrc-conversas-lab2-codex-unificacao-jrc-hoya-gopure-20261021(1).zip",
+  "source_sha256": "5bd842de96b72946590178a76bd04493aa13c6e4e6d599fb78c6ec5b114eb928",
+  "source_git_archive_comment": "9b1393a47782c4e2734dea09519787bb532df71b",
+  "source_original_files": 11597,
+  "original_files_unchanged": 11579,
+  "modified_existing_files": [
+    {
+      "path": "app/controllers/jrc_projects/api/v1/portfolio_controller.rb",
+      "before_sha256": "0a638cf97c0f99083d414b632a91e6dbbd93409bbc8666a05a69a1530cfe72f0",
+      "after_sha256": "59a84ba879ba087a334cb5c5d2c30ae9fc48fc69356e7a3433fffae957c89ed5"
+    },
+    {
+      "path": "app/controllers/jrc_projects/api/v1/projects_controller.rb",
+      "before_sha256": "581f35ec375ddf0ad6c508f97a8968bffa607d80cb21c0e3dcf572376dee8dd6",
+      "after_sha256": "15c1e4aecb09c4eea218822f1439db4e0a7403218d92fa2869d17f984ecb5dfa"
+    },
+    {
+      "path": "app/controllers/jrc_projects/api/v1/tasks_controller.rb",
+      "before_sha256": "f475c18138bcd35235f5a877ac6757ba794808a62e628e1794a0aa5014faf841",
+      "after_sha256": "f2b641ebe174e4a4547e780ccf4058d6dc6220d37b2878100ae2229145cc17c7"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcOperations/api.js",
+      "before_sha256": "3e3325967e3c6c339c73d42c4c280938f28cac4f82d14ef1ced9676e38d77ed1",
+      "after_sha256": "08cd78ead7b8f0735b4fa336c37bdd84d6672bc8b0d2c088e34d6b202ce4b6bd"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcOperations/components/FilesBox.vue",
+      "before_sha256": "f393cf3207ca09bd19fd999574046a3357dc3948f3ca582e359b7bbbbbf50737",
+      "after_sha256": "788b228d7c15253d6e12f44a5a26fcbbd697a230362a1eccf701e0f011629dd7"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcOperations/components/OperationsLinks.vue",
+      "before_sha256": "046e49a26c62e5e7d602daa0f44f21b9aefb67a4ee7736ce2db4a07c5a7fe450",
+      "after_sha256": "89b6dffb54bd557e861d1e98674315898bef286a2b4e686c6567e099c9f073b3"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcOperations/components/OpsModal.vue",
+      "before_sha256": "dd4b671aaee13d96d5b0252aff556ff57c9508b46482ad4402c9cf2951c7fa2f",
+      "after_sha256": "c130757ea3679f034da1eaa1151717184340b75e7acdda9bf94cfbd9c184cf1d"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcOperations/components/ProjectHours.vue",
+      "before_sha256": "ce55e6f87c8ec05e9919cf853cb14632923c6578c961d94c6ffeb6b302e053e1",
+      "after_sha256": "290d810e47eacba49c23af36d428c6270f7882555b4e22b81b9f257ed25709af"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcOperations/components/ProjectPlanning.vue",
+      "before_sha256": "b2541dac6fce037c5f5042d73da74a633394abe8fb2ef0c5c8fb8a458a54b563",
+      "after_sha256": "3dcefd8e3bd8429f80f0f58cc9b137eaed573550a20e3aead93c53a895ae5574"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcOperations/components/TaskEditor.vue",
+      "before_sha256": "06476588742bd170269260be6c4b55da247929812269777d879b256c42a5c485",
+      "after_sha256": "43d666bd683cd896e6c781c5793b1c4c6a78abefa611f2693b2d7a1d8de02d6e"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcOperations/views/ProjectDetail.vue",
+      "before_sha256": "ba851ef1265bc46a4a9ef1e75966ad9c291d6cbf431001cc46742e1c8f9fba1a",
+      "after_sha256": "060d41309c35e61c40e9d9ac79581bfe3bba6bf6ddeafc5cd5d4a67d688814b2"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcOperations/views/ProjectList.vue",
+      "before_sha256": "d8189c6cbea9ac58a5fd91c632e5a4c3a3fd89641f5fbf6769061859a8cf2538",
+      "after_sha256": "7b8c4c7c405c277d68edabac177e62b97d6b2d7f58de8aafeb6b43f6b49689d6"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcProjects/ProjectsLayout.vue",
+      "before_sha256": "3fb056cd4930b25a0d82e3dab350bbc59e56604f8005e0211577735f3de3ab40",
+      "after_sha256": "3d711ba5e78d94b26272b9c5b6ff4de260316ed8911b7e1ab83cddda93bf95ab"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcProjects/en.json",
+      "before_sha256": "d3f75993ddb522d3bae7d07e4a6389821ca7ca3ed03e5a82ae62f6910318e84f",
+      "after_sha256": "5e7e0a2706c66b5618d199595493f960cc0bd38e3121c8e27769b4a1f207f6cc"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcProjects/taskBoard.js",
+      "before_sha256": "77237ad60f3b29959777c4608fc30413f8605d23f84ee00938d3752c1781dace",
+      "after_sha256": "c965080a2c64540bd9c427920ca099514e25276fae5833ac7447201262f8cb71"
+    },
+    {
+      "path": "app/serializers/jrc_projects/project_serializer.rb",
+      "before_sha256": "b9114a26783dd9b0fde604f265e88cb37a98d98362d41e4ab31613dcaa48a66d",
+      "after_sha256": "6b9eca959ef4f9cad33204afd1b3216f9f5c5d855fceb518e83365d7ec15d481"
+    },
+    {
+      "path": "app/services/jrc_operations/related.rb",
+      "before_sha256": "5e7e88ed62f2d3fd87d2b54b4ee5e0b0ce62b125ed2d88d05f27a7a765370436",
+      "after_sha256": "7c47884724cfe1e1f3ba1333e9fa7922df62cc78b369208df8fb6aec99629465"
+    },
+    {
+      "path": "app/services/jrc_projects/reporting/financial_projection.rb",
+      "before_sha256": "7dd0e4b3a6214ff87152613acd7aca16f52f86632b8eb286072a86b042d1e574",
+      "after_sha256": "9d000849761bb847d54afe18d2f0534b8c12e5bd4b19b55d3a597948b27f4748"
+    }
+  ],
+  "new_files": [
+    {
+      "path": "ENTREGA_PROJETOS_20261022.txt",
+      "sha256": "6eb4a5a93e0f3cae44c49a11e284aab95973185d9243db14e8cba8721a58371b"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcProjects/components/PlanningGantt.vue",
+      "sha256": "7f52fb0ccc256dc07e52f53ca4ecbd7f4974396c9b3ca1ca5089bafe3b77fa2a"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcProjects/components/ProjectConfiguration.vue",
+      "sha256": "2a79cb02b7f83a96ee808cfef8d9b31ee67e89324387a020bf0ec6e4bd2d061a"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcProjects/components/ProjectExecution.vue",
+      "sha256": "fecf7bfe45503d12f403f690a102209242e20c1cac488ae8305d322b0d9684b9"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcProjects/components/ProjectOverview.vue",
+      "sha256": "64788ff0cb16bdf659e76afed2c0e2e697db87a381ae6e9ce03e143afafcb7b9"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcProjects/components/ProjectPortfolioSummary.vue",
+      "sha256": "7d4faab3c0be3d4fae03d172ba2a1f4b0e5ff054d6930fc5e2e16525095b835d"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcProjects/components/ProjectTeam.vue",
+      "sha256": "e8c3982809e2bb6c390abc1c758ae82176dd407f9bced520ce783c3bdf50225b"
+    },
+    {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcProjects/projectPresentation.js",
+      "sha256": "ef3211c198b981691bd3f6013f947ee68150590af5a7857af410e032a68e79f7"
+    }
+  ],
+  "removed_original_files": [],
+  "manifest_integrity_note": "This manifest excludes its own hash. The delivered ZIP has a separate SHA-256.",
+  "preserved": [
+    "dependency manifests and lockfiles",
+    "database schema and migrations",
+    "Docker configuration",
+    "authentication configuration",
+    "original files outside listed paths"
+  ],
+  "validation": {
+    "vue_components_compiled": 15,
+    "existing_node_tests": {
+      "passed": 12,
+      "failed": 0,
+      "task_board": 8,
+      "planning_projection": 4
+    },
+    "ruby_syntax_files": 6,
+    "ruby_parser": "tree-sitter-ruby; not a Ruby/Rails runtime test",
+    "eslint": {
+      "files": 18,
+      "new_errors": 0,
+      "preexisting_errors": 1,
+      "preexisting_rule": "no-await-in-loop",
+      "preexisting_path": "app/javascript/dashboard/routes/dashboard/jrcOperations/api.js",
+      "warnings": 470
+    },
+    "browser": {
+      "screenshots": 21,
+      "desktop": 17,
+      "tablet": 4,
+      "flow_checks_passed": 12,
+      "javascript_errors": 0,
+      "console_warnings": 0,
+      "unexpected_endpoints": 0,
+      "page_overflow": false,
+      "api": "deterministic mock; real Vue components, router, store and composables",
+      "checks": [
+        "Portfolio search returns one authorized fixture",
+        "Task search retained when moving List to Gantt",
+        "Shared Gantt assignee replaces Execution assignee; clear resets hidden due filter",
+        "Inline priority sends task PATCH with lock_version and refreshes",
+        "Task move uses move endpoint with column_id/lock_version and synchronizes",
+        "Gantt day/week/month controls work",
+        "HH:MM log time submits exactly 90 minutes",
+        "Approval updates time entry and financial projection refresh",
+        "KeepAlive budget and cost drafts survive another tab task mutation and project refresh",
+        "File category filter uses actual file extensions",
+        "Multiple file upload uses files[] FormData and refreshes metadata",
+        "Capabilities without budget.view/time_entry.manage hide financial panel and cost editing"
+      ]
+    },
+    "independent_review_open_findings": 0,
+    "not_run": [
+      "Rails/RSpec integration",
+      "real database and storage integration",
+      "full application build",
+      "Docker image build",
+      "production deployment"
+    ]
+  }
+}

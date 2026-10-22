@@ -3,20 +3,36 @@ module JrcProjects
     module V1
       class ProjectsController < BaseController
         def index
-          scope = JrcOperations::Access.projects(Current.account_user).includes(:owner, :contact).order(updated_at: :desc)
+          scope = JrcOperations::Access.projects(Current.account_user).includes(:owner, :contact).order(updated_at: :desc, id: :desc)
           scope = scope.where(status: params[:status]) if params[:status].present?
+          scope = scope.where(owner_id: params[:owner_id]) if params[:owner_id].present?
+          scope = scope.where(contact_id: params[:contact_id]) if params[:contact_id].present?
+          if ActiveModel::Type::Boolean.new.cast(params[:overdue])
+            scope = scope.where.not(status: %w[completed canceled]).where('jrc_projects_projects.due_on < ?', Date.current)
+          end
           if params[:priority].present?
             raise ArgumentError, 'Prioridade invalida.' unless Project::PRIORITIES.include?(params[:priority])
 
             scope = scope.where("COALESCE(NULLIF(jrc_projects_projects.settings ->> 'priority', ''), 'medium') = ?", params[:priority])
           end
-          scope = scope.where('jrc_projects_projects.name ILIKE ?', "%#{Project.sanitize_sql_like(params[:q].to_s)}%") if params[:q].present?
+          if params[:q].present?
+            query = "%#{Project.sanitize_sql_like(params[:q].to_s.strip)}%"
+            scope = scope.left_joins(:owner, :contact).where(
+              'jrc_projects_projects.name ILIKE :q OR jrc_projects_projects.key ILIKE :q OR users.name ILIKE :q OR ' \
+              '(contacts.account_id = jrc_projects_projects.account_id AND contacts.name ILIKE :q)', q: query
+            )
+          end
           records, meta = pagination(scope)
           project_ids = records.map(&:id)
           total_by_project = Task.where(account_id: Current.account.id, project_id: project_ids).group(:project_id).count
           completed_by_project = Task.where(account_id: Current.account.id, project_id: project_ids, status: 'completed').group(:project_id).count
           task_counts = project_ids.to_h { |project_id| [project_id, { total: total_by_project.fetch(project_id, 0), completed: completed_by_project.fetch(project_id, 0) }] }
-          render json: { data: records.map { |project| ProjectSerializer.one(project, account_user: Current.account_user, task_counts: task_counts[project.id]) }, meta: meta }
+          card_counts = ProjectSerializer.card_counts(account_id: Current.account.id, project_ids: project_ids)
+          data = records.map do |project|
+            ProjectSerializer.one(project, account_user: Current.account_user,
+                                  task_counts: task_counts[project.id], card_counts: card_counts[project.id])
+          end
+          render json: { data: data, meta: meta }
         end
         def show
           project = scoped_project

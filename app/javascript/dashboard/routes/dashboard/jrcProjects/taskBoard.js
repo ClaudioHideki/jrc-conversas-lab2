@@ -20,7 +20,15 @@ export function filterProjectTasks(tasks, filters, today) {
   weekEnd.setUTCDate(weekEnd.getUTCDate() + 6);
   const lastDay = weekEnd.toISOString().slice(0, 10);
   return tasks.filter(task => {
-    if (query && !task.title.toLocaleLowerCase().includes(query)) return false;
+    if (
+      query &&
+      ![task.title, task.assignee?.name, ...(task.labels || []), '#' + task.id]
+        .filter(Boolean)
+        .join(' ')
+        .toLocaleLowerCase()
+        .includes(query)
+    )
+      return false;
     if (
       filters.assignee &&
       String(task.assignee_id) !== String(filters.assignee)

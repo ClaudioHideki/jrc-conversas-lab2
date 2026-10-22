@@ -1,18 +1,17 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { useProjects } from '../../jrcProjects/useProjects';
-import {
-  projectTimeline,
-  timelineBar,
-} from '../../jrcProjects/planningProjection';
-import { request, allPages, errorMessage, formatDate } from '../api';
+import PlanningGantt from '../../jrcProjects/components/PlanningGantt.vue';
+import { request, allPages, errorMessage } from '../api';
 import { projectResources } from '../resources';
 import ResourceManager from './ResourceManager.vue';
 const props = defineProps({
   project: { type: Object, required: true },
   tasks: { type: Array, default: () => [] },
+  filteredTasks: { type: Array, default: null },
+  filters: { type: Object, default: null },
 });
-const emit = defineEmits(['changed', 'openTask']);
+const emit = defineEmits(['changed', 'openTask', 'filter']);
 const { accountId, projectText } = useProjects();
 const tab = ref('timeline');
 const error = ref('');
@@ -41,9 +40,6 @@ const canManageResource = computed(
         : 'projects.project.update'
     )
 );
-const timeline = computed(() =>
-  projectTimeline(props.project, props.tasks, milestones.value)
-);
 const schema = computed(() => {
   const resource = projectResources.find(item => item.key === tab.value);
   if (!resource || resource.key !== 'milestones') return resource;
@@ -60,20 +56,11 @@ const schema = computed(() => {
     ],
   };
 });
-const kindLabel = kind =>
-  ({
-    project: projectText('PROJECT', 'Projeto'),
-    task: projectText('TASK', 'Tarefa'),
-    subtask: projectText('SUBTASK', 'Subtarefa'),
-    milestone: projectText('MILESTONE', 'Marco'),
-  })[kind];
-const bar = row => timelineBar(row, timeline.value.range);
 const title = id => props.tasks.find(task => task.id === id)?.title || `#${id}`;
-const predecessorsFor = id =>
-  dependencies.value.filter(edge => edge.successor_id === id);
 let generation = 0;
 async function load() {
-  const n = ++generation;
+  generation += 1;
+  const n = generation;
   loading.value = true;
   error.value = '';
   try {
@@ -153,16 +140,32 @@ async function remove(edge) {
 </script>
 
 <template>
-  <section class="flex flex-col gap-4">
+  <section class="flex min-w-0 flex-col gap-4">
+    <header>
+      <h2 class="m-0 text-lg font-semibold">
+        {{ projectText('PLANNING', 'Planejamento') }}
+      </h2>
+      <p class="mb-0 mt-1 text-sm text-n-slate-11">
+        {{
+          projectText(
+            'PLANNING_SUBTITLE',
+            'Organize prazos, dependências e entregas do projeto.'
+          )
+        }}
+      </p>
+    </header>
     <nav
-      class="flex gap-3 overflow-x-auto py-3 [&_button]:rounded-lg [&_button]:px-3 [&_button]:py-2 [&_a]:px-3 [&_a]:py-2 [&_.active]:bg-n-blue-9 [&_.active]:text-white [&_.router-link-exact-active]:text-n-blue-11"
+      class="flex gap-1 overflow-x-auto border-b border-n-weak pb-3 text-sm [&_button]:whitespace-nowrap [&_button]:rounded-lg [&_button]:px-3 [&_button]:py-2 [&_.active]:bg-n-blue-9 [&_.active]:text-white"
+      :aria-label="projectText('PLANNING', 'Planejamento')"
     >
       <button :class="{ active: tab === 'timeline' }" @click="tab = 'timeline'">
-        {{ projectText('TIMELINE', 'Cronograma') }}</button><button
+        {{ projectText('TIMELINE', 'Cronograma') }}</button
+      ><button
         :class="{ active: tab === 'dependencies' }"
         @click="tab = 'dependencies'"
       >
-        {{ projectText('DEPENDENCIES', 'Dependências') }}</button><button
+        {{ projectText('DEPENDENCIES', 'Dependências') }}</button
+      ><button
         v-for="item in projectResources.filter(item => item.key !== 'members')"
         :key="item.key"
         :class="{ active: tab === item.key }"
@@ -195,95 +198,17 @@ async function remove(edge) {
     <p v-if="loading" role="status">
       {{ projectText('PLANNING_LOADING', 'Carregando planejamento...') }}
     </p>
-    <div
+    <PlanningGantt
       v-if="tab === 'timeline'"
-      class="rounded-xl border border-n-weak bg-n-solid-1 p-4 flex flex-col gap-4"
-    >
-      <h3>{{ projectText('TIMELINE', 'Cronograma') }}</h3>
-      <p class="text-n-slate-11 text-sm">
-        {{
-          projectText(
-            'TIMELINE_HELP',
-            'Projeção das datas do projeto, tarefas, subtarefas e marcos. Para alterar datas, abra o cadastro correspondente.'
-          )
-        }}
-      </p>
-      <p v-if="!timeline.range" class="text-sm text-n-slate-11">
-        {{
-          projectText(
-            'TIMELINE_NO_DATES',
-            'Os registros ainda não possuem datas previstas.'
-          )
-        }}
-      </p>
-      <div
-        v-for="row in timeline.rows"
-        :key="row.key"
-        class="grid grid-cols-[minmax(170px,35%)_1fr] gap-4 py-3 border-t border-n-weak"
-      >
-        <div>
-          <span class="rounded px-2 py-1 text-xs border border-n-weak">{{
-            kindLabel(row.kind)
-          }}</span>
-          <button
-            v-if="['task', 'subtask'].includes(row.kind)"
-            class="text-n-blue-11 underline"
-            @click="emit('openTask', row.record)"
-          >
-            {{ row.title }}</button><strong v-else>{{ row.title }}</strong>
-          <p v-if="row.parent" class="text-n-slate-11 text-sm">
-            {{ projectText('PARENT_TASK', 'Tarefa pai') }}:
-            {{ row.parent.title }}
-          </p>
-          <p class="text-n-slate-11 text-sm">
-            {{ formatDate(row.record.starts_on) }} →
-            {{ formatDate(row.record.due_on) }}
-          </p>
-          <p
-            v-if="
-              ['task', 'subtask'].includes(row.kind) &&
-              predecessorsFor(row.record.id).length
-            "
-            class="text-n-slate-11 text-sm"
-          >
-            {{ projectText('PREDECESSORS', 'Predecessoras') }}:
-            {{
-              predecessorsFor(row.record.id)
-                .map(edge => title(edge.predecessor_id))
-                .join(', ')
-            }}
-          </p>
-        </div>
-        <svg
-          v-if="bar(row)"
-          viewBox="0 0 1000 28"
-          preserveAspectRatio="none"
-          class="w-full h-7"
-          role="img"
-          :aria-label="`${row.title}: ${formatDate(row.record.starts_on)} → ${formatDate(row.record.due_on)}`"
-        >
-          <rect
-            x="0"
-            y="9"
-            width="1000"
-            height="10"
-            rx="5"
-            class="fill-current text-n-weak"
-          />
-          <rect
-            :x="bar(row).x"
-            y="4"
-            :width="bar(row).width"
-            height="20"
-            rx="4"
-            class="fill-current text-n-brand"
-          />
-        </svg>
-        <p v-else class="text-n-slate-11 text-sm">
-          {{ projectText('NO_DATE', 'Sem prazo') }}
-        </p>
-      </div>
-    </div>
+      :project="project"
+      :tasks="tasks"
+      :filtered-tasks="filteredTasks"
+      :filters="filters"
+      :milestones="milestones"
+      :dependencies="dependencies"
+      @open-task="emit('openTask', $event)"
+      @filter="emit('filter', $event)"
+    />
     <section
       v-else-if="tab === 'dependencies'"
       class="rounded-xl border border-n-weak bg-n-solid-1 p-4 flex flex-col gap-4"
@@ -302,8 +227,10 @@ async function remove(edge) {
         :key="edge.id"
         class="flex flex-wrap items-center gap-3 justify-between"
       >
-        <span>{{ title(edge.predecessor_id) }} →
-          {{ title(edge.successor_id) }}</span><button
+        <span>{{
+          `${title(edge.predecessor_id)} → ${title(edge.successor_id)}`
+        }}</span
+        ><button
           v-if="canEdit"
           class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed text-xs text-n-ruby-11"
           :disabled="busy"
@@ -320,14 +247,19 @@ async function remove(edge) {
         class="flex flex-wrap items-center gap-3"
         @submit.prevent="add"
       >
-        <label class="flex flex-col gap-1 min-w-0 flex-1"><span>{{ projectText('PREDECESSOR', 'Predecessora') }}</span><select v-model="predecessor" required>
+        <label class="flex flex-col gap-1 min-w-0 flex-1"
+          ><span>{{ projectText('PREDECESSOR', 'Predecessora') }}</span
+          ><select v-model="predecessor" required>
             <option value="">
               {{ projectText('SELECT_TASK', 'Selecione uma tarefa') }}
             </option>
             <option v-for="task in tasks" :key="task.id" :value="task.id">
               {{ task.title }}
             </option>
-          </select></label><label class="flex flex-col gap-1 min-w-0 flex-1"><span>{{ projectText('SUCCESSOR', 'Sucessora') }}</span><select v-model="successor" required>
+          </select></label
+        ><label class="flex flex-col gap-1 min-w-0 flex-1"
+          ><span>{{ projectText('SUCCESSOR', 'Sucessora') }}</span
+          ><select v-model="successor" required>
             <option value="">
               {{ projectText('SELECT_TASK', 'Selecione uma tarefa') }}
             </option>
@@ -340,7 +272,8 @@ async function remove(edge) {
             >
               {{ task.title }}
             </option>
-          </select></label><button
+          </select></label
+        ><button
           class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
           :disabled="busy"
         >
@@ -348,12 +281,14 @@ async function remove(edge) {
         </button>
       </form>
       <div v-if="path" class="text-sm text-n-slate-11">
-        <strong>{{
+        <strong
+          >{{
             projectText(
               'CRITICAL_PATH',
               'Caminho mais longo estimado (minutos de trabalho)'
             )
-          }}: {{ path.duration_minutes }}</strong>
+          }}: {{ path.duration_minutes }}</strong
+        >
         <p>{{ (path.task_ids || []).map(title).join(' → ') || '—' }}</p>
         <p>
           {{

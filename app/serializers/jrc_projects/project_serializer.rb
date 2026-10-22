@@ -1,6 +1,6 @@
 module JrcProjects
   class ProjectSerializer
-    def self.one(project, account_user:, details: false, task_counts: nil)
+    def self.one(project, account_user:, details: false, task_counts: nil, card_counts: nil)
       data = project.as_json(only: %i[id key name description status visibility owner_id contact_id starts_on due_on completed_at acceptance_notes lock_version created_at updated_at])
       if project.account.feature_enabled?('jrc_customer_master') &&
          JrcCustomers::DirectoryPolicy.new(JrcOperations::Access.user_context(account_user), :directory).access?
@@ -16,10 +16,12 @@ module JrcProjects
       data['tasks_total'] = counts[:total]
       data['tasks_completed'] = counts[:completed]
       data['progress'] = data['tasks_total'].zero? ? 0 : (data['tasks_completed'] * 100.0 / data['tasks_total']).round
+      data.merge!(card_counts || self.card_counts(account_id: project.account_id, project_ids: [project.id]).fetch(project.id))
       if details
         data['contact_locked'] = project.contact_locked?
+        data['accepted_by'] = project.accepted_by&.as_json(only: %i[id name])
         data['columns'] = project.board_columns.order(:board_id, :position, :id).as_json(only: %i[id board_id name status_key position wip_limit])
-        data['members'] = project.project_members.where(account_id: project.account_id, project_id: project.id).includes(:user).map { |m| m.as_json(only: %i[id user_id role allocation_percent], include: { user: { only: %i[id name] } }) }
+        data['members'] = members(project)
         data['phases'] = project.phases.where(account_id: project.account_id, project_id: project.id).order(:id).as_json(only: %i[id name])
         data['overview'] = overview(project)
         financial = data['capabilities'].include?('projects.budget.view')
@@ -29,17 +31,59 @@ module JrcProjects
       data
     end
 
+    def self.card_counts(account_id:, project_ids:)
+      members = ProjectMember.where(account_id: account_id, project_id: project_ids).group(:project_id).count
+      comments = TaskComment.joins(:task).where(account_id: account_id, jrc_projects_tasks: { account_id: account_id, project_id: project_ids })
+                            .group('jrc_projects_tasks.project_id').count
+      project_files = ActiveStorage::Attachment.where(record_type: 'JrcProjects::Project', record_id: project_ids, name: 'attachments')
+                                               .group(:record_id).count
+      task_files = ActiveStorage::Attachment
+                   .joins('INNER JOIN jrc_projects_tasks ON jrc_projects_tasks.id = active_storage_attachments.record_id')
+                   .where(record_type: 'JrcProjects::Task', name: 'attachments',
+                          jrc_projects_tasks: { account_id: account_id, project_id: project_ids })
+                   .group('jrc_projects_tasks.project_id').count
+      project_ids.to_h do |id|
+        [id, { 'members_count' => members.fetch(id, 0), 'comments_count' => comments.fetch(id, 0),
+               'attachments_count' => project_files.fetch(id, 0) + task_files.fetch(id, 0) }]
+      end
+    end
+
+    def self.members(project)
+      members = project.project_members.where(account_id: project.account_id, project_id: project.id).includes(:user).order(:id).to_a
+      tasks = project.tasks.where(account_id: project.account_id, project_id: project.id)
+      assigned = tasks.group(:assignee_id).count
+      open_tasks = tasks.where.not(status: %w[completed canceled]).group(:assignee_id).count
+      # Only aggregate workload is returned; names and IDs of other projects remain private.
+      active_projects = Project.where(account_id: project.account_id, status: %w[planned active]).select(:id)
+      allocations = ProjectMember.where(account_id: project.account_id, user_id: members.map(&:user_id), project_id: active_projects)
+                                 .group(:user_id).sum(:allocation_percent)
+      members.map do |member|
+        allocation = allocations.fetch(member.user_id, 0)
+        member.as_json(only: %i[id user_id role allocation_percent], include: { user: { only: %i[id name] } }).merge(
+          'assigned_tasks_count' => assigned.fetch(member.user_id, 0), 'open_tasks_count' => open_tasks.fetch(member.user_id, 0),
+          'total_allocation_percent' => allocation, 'available_percent' => [100 - allocation, 0].max,
+          'overallocated' => allocation > 100, 'allocation_basis' => 'planned_and_active_projects'
+        )
+      end
+    end
+
     def self.overview(project)
       tasks = project.tasks.where(account_id: project.account_id, project_id: project.id)
       time = project.time_entries.where(account_id: project.account_id, project_id: project.id)
+      milestones = project.milestones.where(account_id: project.account_id, project_id: project.id)
       {
+        status_counts: tasks.group(:status).count,
         overdue_tasks: tasks.where('due_on < ?', Date.current).where.not(status: %w[completed canceled]).count,
         team_size: project.project_members.where(account_id: project.account_id, project_id: project.id).count,
         estimated_minutes: tasks.sum(:estimated_minutes),
+        estimated_configured: tasks.where('estimated_minutes > 0').exists?,
         worked_minutes: time.where.not(status: 'rejected').sum(:minutes),
         approved_minutes: time.where(status: 'approved').sum(:minutes),
-        upcoming_milestones: project.milestones.where(account_id: project.account_id, project_id: project.id, status: 'open')
-                                    .where.not(due_on: nil).order(:due_on, :id).limit(5).as_json(only: %i[id name due_on status phase_id])
+        milestones_total: milestones.where.not(status: 'canceled').count,
+        milestones: milestones.where.not(status: 'canceled').order(Arel.sql('due_on ASC NULLS LAST'), :id)
+                              .limit(8).as_json(only: %i[id name due_on status phase_id]),
+        upcoming_milestones: milestones.where(status: 'open').where.not(due_on: nil).order(:due_on, :id)
+                                      .limit(5).as_json(only: %i[id name due_on status phase_id])
       }
     end
 

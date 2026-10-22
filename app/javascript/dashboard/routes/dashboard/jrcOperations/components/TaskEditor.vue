@@ -5,6 +5,11 @@ import FilesBox from './FilesBox.vue';
 import { useProjects } from '../../jrcProjects/useProjects';
 import { projectTaskStatuses } from '../../jrcProjects/taskBoard';
 import {
+  statusTone,
+  priorityTone,
+  taskProgress,
+} from '../../jrcProjects/projectPresentation';
+import {
   request,
   errorMessage,
   priorities,
@@ -14,6 +19,7 @@ import {
 const props = defineProps({
   project: { type: Object, required: true },
   task: Object,
+  initialColumnId: { type: [Number, String], default: null },
   tasks: { type: Array, default: () => [] },
 });
 const emit = defineEmits(['close', 'changed', 'open']);
@@ -63,9 +69,40 @@ const form = reactive({
   due_on: props.task?.due_on || '',
   board_column_id:
     props.task?.board_column_id ||
+    props.initialColumnId ||
     props.project.columns.find(x => x.status_key === 'backlog')?.id ||
     props.project.columns[0]?.id,
 });
+const snapshot = () => JSON.stringify({ ...form, labels: labelsText.value });
+const savedSnapshot = ref(snapshot());
+const dirty = computed(
+  () =>
+    snapshot() !== savedSnapshot.value ||
+    Boolean(comment.value.trim()) ||
+    Boolean(checklistText.value.trim())
+);
+const taskTabs = computed(() => [
+  ['details', projectText('DETAILS', 'Detalhes')],
+  ['checklist', projectText('CHECKLIST', 'Checklist')],
+  ['comments', projectText('COMMENTS', 'Comentários')],
+  ['files', projectText('FILES', 'Arquivos')],
+  ['dependencies', projectText('DEPENDENCIES', 'Dependências')],
+  ['hours', projectText('TASK_HOURS', 'Horas')],
+  ['history', projectText('HISTORY', 'Histórico')],
+]);
+function requestClose() {
+  if (busy.value) return;
+  if (
+    !dirty.value ||
+    window.confirm(
+      projectText(
+        'DISCARD_TASK_CHANGES',
+        'Fechar e descartar as alterações ainda não salvas nesta tarefa?'
+      )
+    )
+  )
+    emit('close');
+}
 const timeForm = reactive({
   minutes: 60,
   worked_on: dateInput(new Date()),
@@ -83,9 +120,12 @@ async function load(syncForm = false) {
     .data;
   detail.value = record;
   if (syncForm) {
-    for (const field of Object.keys(form)) form[field] = record[field] ?? '';
+    Object.keys(form).forEach(field => {
+      form[field] = record[field] ?? '';
+    });
     labelsText.value = (record.labels || []).join(', ');
     formVersion.value = record.lock_version;
+    savedSnapshot.value = snapshot();
   }
 }
 async function refresh() {
@@ -211,20 +251,111 @@ async function attachmentsChanged() {
     error.value = errorMessage(err);
   }
 }
+async function moveTask(event) {
+  const column = props.project.columns.find(
+    item => String(item.id) === event.target.value
+  );
+  if (
+    ['completed', 'canceled'].includes(column?.status_key) &&
+    !window.confirm(
+      projectText(
+        'CONFIRM_TASK_TRANSITION',
+        'Confirmar esta mudança de situação? As dependências e os limites do quadro serão validados.'
+      )
+    )
+  ) {
+    event.target.value = detail.value.board_column_id;
+    return;
+  }
+  busy.value = true;
+  error.value = '';
+  try {
+    const result = await request(
+      accountId.value,
+      base + '/' + props.task.id + '/move',
+      {
+        method: 'post',
+        data: {
+          column_id: Number(event.target.value),
+          lock_version: formVersion.value,
+        },
+      }
+    );
+    detail.value = { ...detail.value, ...result.data };
+    formVersion.value = result.data.lock_version;
+    const wasDirty = snapshot() !== savedSnapshot.value;
+    form.board_column_id = result.data.board_column_id;
+    if (!wasDirty) savedSnapshot.value = snapshot();
+    emit('changed');
+  } catch (err) {
+    event.target.value = detail.value.board_column_id;
+    error.value = errorMessage(err);
+  } finally {
+    busy.value = false;
+  }
+}
+function taskEventLabel(eventAction) {
+  const labels = {
+    'projects.task.created': ['EVENT_TASK_CREATED', 'Tarefa criada'],
+    'projects.task.updated': ['EVENT_TASK_UPDATED', 'Tarefa atualizada'],
+    'projects.task.moved': ['EVENT_TASK_MOVED', 'Tarefa movimentada'],
+    'projects.task.comment_added': ['EVENT_COMMENT', 'Comentário registrado'],
+    'projects.task.checklist_added': [
+      'EVENT_CHECKLIST',
+      'Checklist atualizado',
+    ],
+    'projects.task.checklist_updated': [
+      'EVENT_CHECKLIST',
+      'Checklist atualizado',
+    ],
+    'projects.task.checklist_removed': [
+      'EVENT_CHECKLIST',
+      'Checklist atualizado',
+    ],
+    'projects.attachment.added': ['EVENT_ATTACHMENT_ADDED', 'Arquivo enviado'],
+    'projects.attachment.removed': [
+      'EVENT_ATTACHMENT_REMOVED',
+      'Arquivo removido',
+    ],
+    'projects.task.dependency_added': [
+      'EVENT_DEPENDENCY_ADDED',
+      'Dependência adicionada',
+    ],
+    'projects.task.dependency_removed': [
+      'EVENT_DEPENDENCY_REMOVED',
+      'Dependência removida',
+    ],
+  };
+  const [key, fallback] = labels[eventAction] || [
+    'EVENT_REGISTERED',
+    'Atividade registrada',
+  ];
+  return projectText(key, fallback);
+}
 function openSubtask(id) {
   const task = props.tasks.find(row => row.id === id);
-  if (task) emit('open', task);
+  if (
+    task &&
+    (!dirty.value ||
+      window.confirm(
+        projectText(
+          'DISCARD_TASK_CHANGES',
+          'Descartar alterações não salvas e abrir a subtarefa?'
+        )
+      ))
+  )
+    emit('open', task);
 }
 </script>
 
 <template>
   <OpsModal
-    :title="task ? task.title : 'Nova tarefa'"
+    :title="task ? task.title : projectText('NEW_TASK', 'Nova tarefa')"
     :busy="busy"
-    wide
-    @close="emit('close')"
+    drawer
+    @close="requestClose"
   >
-    <div class="flex flex-col gap-4">
+    <div class="flex flex-col gap-4 text-sm">
       <div
         v-if="error"
         class="rounded border border-n-ruby-7 bg-n-ruby-2 p-3"
@@ -243,33 +374,79 @@ function openSubtask(id) {
       <p v-if="task && !detail && busy" role="status">
         {{ projectText('TASK_LOADING', 'Carregando tarefa...') }}
       </p>
-      <p v-if="detail" class="flex flex-wrap items-center gap-3">
-        <span class="rounded px-2 py-1 text-xs border border-n-weak">{{
-          projectTaskStatuses[detail.status]
-        }}</span><span>{{ projectText('ESTIMATED_HOURS', 'Horas previstas') }}:
-          {{ hours(detail.estimated_minutes) }} h</span><span>{{
-            projectText(
-              'WORKED_HOURS',
-              'Horas registradas (enviadas ou aprovadas)'
-            )
-          }}: {{ hours(detail.worked_minutes) }} h</span>
-      </p>
+      <section
+        v-if="detail"
+        class="rounded-xl border border-n-weak bg-n-slate-2 p-4"
+      >
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <span class="text-xs text-n-blue-11"
+            >{{ project.key }} / #{{ detail.id }}</span
+          ><span
+            class="rounded-md px-2 py-1 text-xs font-medium"
+            :class="priorityTone(detail.priority)"
+            >{{ priorities[detail.priority] }}</span
+          >
+        </div>
+        <div class="mt-3 flex flex-wrap items-center gap-2">
+          <select
+            v-if="detail.can_move && openProject"
+            :value="detail.board_column_id"
+            class="rounded-lg border border-n-weak px-2 py-1 text-xs"
+            :class="statusTone(detail.status)"
+            :disabled="busy"
+            :aria-label="projectText('MOVE_TASK', 'Mover tarefa')"
+            @change="moveTask($event)"
+          >
+            <option
+              v-for="column in project.columns"
+              :key="column.id"
+              :value="column.id"
+            >
+              {{ column.name }}
+            </option></select
+          ><span
+            v-else
+            class="rounded-md px-2 py-1 text-xs"
+            :class="statusTone(detail.status)"
+            >{{ projectTaskStatuses[detail.status] }}</span
+          ><span class="text-xs text-n-slate-11"
+            >{{ projectText('ESTIMATED_HOURS', 'Horas previstas') }}:
+            {{ hours(detail.estimated_minutes) }}
+            {{ projectText('HOUR_UNIT', 'h') }} ·
+            {{ projectText('LOGGED_HOURS', 'Registradas') }}:
+            {{ hours(detail.worked_minutes) }}
+            {{ projectText('HOUR_UNIT', 'h') }}</span
+          >
+        </div>
+        <div v-if="detail.checklist_total" class="mt-3 flex items-center gap-2">
+          <progress
+            :value="taskProgress(detail)"
+            max="100"
+            class="h-1.5 flex-1 overflow-hidden rounded-full accent-n-blue-9 [&::-webkit-progress-bar]:bg-n-slate-4 [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:bg-n-blue-9 [&::-moz-progress-bar]:bg-n-blue-9"
+            :aria-label="
+              projectText('CHECKLIST_PROGRESS', 'Progresso do checklist')
+            "
+          /><span class="text-xs">{{ taskProgress(detail) }}%</span>
+        </div>
+      </section>
       <nav
         v-if="task"
-        class="flex gap-3 overflow-x-auto py-3 [&_button]:rounded-lg [&_button]:px-3 [&_button]:py-2 [&_a]:px-3 [&_a]:py-2 [&_.active]:bg-n-blue-9 [&_.active]:text-white [&_.router-link-exact-active]:text-n-blue-11"
+        class="flex gap-1 overflow-x-auto border-b border-n-weak pb-2"
+        :aria-label="projectText('TASK_SECTIONS', 'Abas da tarefa')"
       >
-        <button :class="{ active: tab === 'details' }" @click="tab = 'details'">
-          Detalhes</button><button
-          :class="{ active: tab === 'history' }"
-          @click="tab = 'history'"
+        <button
+          v-for="item in taskTabs"
+          :key="item[0]"
+          class="shrink-0 rounded-md px-3 py-2 text-xs font-medium"
+          :class="
+            tab === item[0]
+              ? 'bg-n-blue-9 text-white'
+              : 'text-n-slate-11 hover:bg-n-slate-3'
+          "
+          :aria-pressed="tab === item[0]"
+          @click="tab = item[0]"
         >
-          Checklist e comentarios</button><button
-          :class="{ active: tab === 'dependencies' }"
-          @click="tab = 'dependencies'"
-        >
-          {{ projectText('DEPENDENCIES', 'Dependências') }}</button><button :class="{ active: tab === 'hours' }" @click="tab = 'hours'">
-          {{ projectText('TASK_HOURS', 'Horas da tarefa') }}</button><button :class="{ active: tab === 'files' }" @click="tab = 'files'">
-          Arquivos
+          {{ item[1] }}
         </button>
       </nav>
       <form
@@ -278,22 +455,40 @@ function openSubtask(id) {
         @submit.prevent="submit"
       >
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <label class="flex flex-col gap-1 min-w-0 col-span-full"><span>Titulo *</span><input
+          <label class="flex flex-col gap-1 min-w-0 col-span-full"
+            ><span>{{ projectText('TASK_TITLE', 'Título') }} *</span
+            ><input
               v-model="form.title"
               required
               maxlength="240"
-              :disabled="!editable" /></label><label class="flex flex-col gap-1 min-w-0 col-span-full"><span>Descricao</span><textarea v-model="form.description" :disabled="!editable" />
+              :disabled="!editable" /></label
+          ><label class="flex flex-col gap-1 min-w-0 col-span-full"
+            ><span>{{ projectText('DESCRIPTION', 'Descrição') }}</span
+            ><textarea v-model="form.description" :disabled="!editable" />
           </label>
-          <label class="flex flex-col gap-1 min-w-0"><span>Responsavel</span><select v-model="form.assignee_id" :disabled="!editable">
-              <option value="">Nao atribuido</option>
+          <label class="flex flex-col gap-1 min-w-0"
+            ><span>{{ projectText('ASSIGNEE', 'Responsável') }}</span
+            ><select v-model="form.assignee_id" :disabled="!editable">
+              <option value="">
+                {{ projectText('UNASSIGNED', 'Não atribuído') }}
+              </option>
               <option
                 v-for="member in project.members"
                 :key="member.user_id"
                 :value="member.user_id"
               >
                 {{ member.user.name }}
-              </option></select><small>Inclua o usuario na equipe antes de atribuir tarefas.</small></label>
-          <label class="flex flex-col gap-1 min-w-0"><span>Prioridade</span><select v-model="form.priority" :disabled="!editable">
+              </option></select
+            ><small>{{
+              projectText(
+                'TASK_MEMBER_HELP',
+                'Inclua o usuário na equipe antes de atribuir tarefas.'
+              )
+            }}</small></label
+          >
+          <label class="flex flex-col gap-1 min-w-0"
+            ><span>{{ projectText('PRIORITY', 'Prioridade') }}</span
+            ><select v-model="form.priority" :disabled="!editable">
               <option
                 v-for="(label, key) in priorities"
                 :key="key"
@@ -301,29 +496,47 @@ function openSubtask(id) {
               >
                 {{ label }}
               </option>
-            </select></label>
-          <label class="flex flex-col gap-1 min-w-0"><span>Inicio previsto</span><input
+            </select></label
+          >
+          <label class="flex flex-col gap-1 min-w-0"
+            ><span>{{ projectText('PLANNED_START', 'Início previsto') }}</span
+            ><input
               v-model="form.starts_on"
               type="date"
-              :disabled="!editable" /></label><label class="flex flex-col gap-1 min-w-0"><span>Prazo</span><input
+              :disabled="!editable" /></label
+          ><label class="flex flex-col gap-1 min-w-0"
+            ><span>{{ projectText('DUE_FILTER', 'Prazo') }}</span
+            ><input
               v-model="form.due_on"
               type="date"
               :min="form.starts_on || undefined"
               :disabled="!editable"
           /></label>
-          <label class="flex flex-col gap-1 min-w-0"><span>Estimativa em minutos</span><input
+          <label class="flex flex-col gap-1 min-w-0"
+            ><span>{{
+              projectText('ESTIMATE_MINUTES', 'Estimativa em minutos')
+            }}</span
+            ><input
               v-model.number="form.estimated_minutes"
               type="number"
               min="0"
               step="1"
               :disabled="!editable"
           /></label>
-          <label class="flex flex-col gap-1 min-w-0"><span>{{
+          <label class="flex flex-col gap-1 min-w-0"
+            ><span>{{
               projectText('LABELS', 'Etiquetas (separadas por vírgula)')
-            }}</span><input
-v-model="labelsText" :disabled="!editable"
+            }}</span
+            ><input
+              v-model="labelsText"
+              type="text"
+              maxlength="2000"
+              class="w-full"
+              :disabled="!editable"
           /></label>
-          <label class="flex flex-col gap-1 min-w-0"><span>{{ projectText('PARENT_TASK', 'Tarefa pai') }}</span><select v-model="form.parent_id" :disabled="!editable">
+          <label class="flex flex-col gap-1 min-w-0"
+            ><span>{{ projectText('PARENT_TASK', 'Tarefa pai') }}</span
+            ><select v-model="form.parent_id" :disabled="!editable">
               <option value="">
                 {{ projectText('NO_PARENT', 'Sem tarefa pai') }}
               </option>
@@ -334,10 +547,13 @@ v-model="labelsText" :disabled="!editable"
               >
                 {{ candidate.title }}
               </option>
-            </select></label>
+            </select></label
+          >
           <label
-v-if="!task" class="flex flex-col gap-1 min-w-0"
-            ><span>Coluna inicial</span><select
+            v-if="!task"
+            class="col-span-full flex min-w-0 flex-col gap-1 md:col-span-1"
+            ><span>{{ projectText('INITIAL_COLUMN', 'Coluna inicial') }}</span
+            ><select
               v-model="form.board_column_id"
               required
               :disabled="!editable"
@@ -351,7 +567,8 @@ v-if="!task" class="flex flex-col gap-1 min-w-0"
               >
                 {{ column.name }}
               </option>
-            </select></label>
+            </select></label
+          >
         </div>
         <section v-if="detail?.subtasks?.length" class="flex flex-col gap-4">
           <h3>{{ projectText('SUBTASKS', 'Subtarefas') }}</h3>
@@ -366,33 +583,43 @@ v-if="!task" class="flex flex-col gap-1 min-w-0"
           </button>
         </section>
         <p v-if="task" class="text-n-slate-11 text-sm">
-          A movimentacao entre colunas e feita no quadro, preservando limites e
-          dependencias.
+          {{
+            projectText(
+              'TASK_MOVE_HELP',
+              'A movimentação preserva os limites do quadro e as dependências da tarefa.'
+            )
+          }}
         </p>
         <footer class="flex justify-end gap-3 mt-4">
           <button
             class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
             type="button"
             :disabled="busy"
-            @click="emit('close')"
+            @click="requestClose"
           >
-            Fechar</button><button
+            {{ projectText('CLOSE', 'Fechar') }}</button
+          ><button
             v-if="editable"
             class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed bg-n-blue-9 text-white"
             :disabled="busy"
           >
-            {{ task ? 'Salvar tarefa' : 'Criar tarefa' }}
+            {{
+              task
+                ? projectText('SAVE_TASK', 'Salvar tarefa')
+                : projectText('CREATE_TASK', 'Criar tarefa')
+            }}
           </button>
         </footer>
       </form>
-      <section v-else-if="tab === 'history'" class="flex flex-col gap-4">
-        <h3>Checklist</h3>
+      <section v-else-if="tab === 'checklist'" class="flex flex-col gap-4">
+        <h3>{{ projectText('CHECKLIST', 'Checklist') }}</h3>
         <div
           v-for="item in detail?.checklist || []"
           :key="item.id"
           class="flex flex-wrap items-center gap-3 justify-between"
         >
-          <label class="flex gap-2 items-center"><input
+          <label class="flex gap-2 items-center"
+            ><input
               type="checkbox"
               :checked="item.completed"
               :disabled="busy || !editable"
@@ -401,7 +628,8 @@ v-if="!task" class="flex flex-col gap-1 min-w-0"
                   item: { completed: $event.target.checked },
                 })
               "
-            />{{ item.text }}</label><button
+            />{{ item.text }}</label
+          ><button
             v-if="editable"
             class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed text-xs"
             :disabled="busy"
@@ -419,22 +647,35 @@ v-if="!task" class="flex flex-col gap-1 min-w-0"
             v-model="checklistText"
             class="rounded border border-n-weak bg-n-solid-1 p-2 max-w-[460px]"
             required
-            placeholder="Novo item de verificacao"
+            :placeholder="
+              projectText('NEW_CHECKLIST_ITEM', 'Novo item de verificação')
+            "
           /><button
             class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
             :disabled="busy"
           >
-            Adicionar item
+            {{ projectText('ADD_ITEM', 'Adicionar item') }}
           </button>
         </form>
-        <h3>Comentarios internos</h3>
+      </section>
+      <section v-else-if="tab === 'comments'" class="flex flex-col gap-4">
+        <h3>{{ projectText('INTERNAL_COMMENTS', 'Comentários internos') }}</h3>
+        <p
+          v-if="!detail?.comments?.length"
+          class="py-6 text-center text-n-slate-11"
+        >
+          {{ projectText('NO_COMMENTS', 'Nenhum comentário nesta tarefa.') }}
+        </p>
         <article
           v-for="entry in detail?.comments || []"
           :key="entry.id"
           class="rounded-xl border border-n-weak bg-n-solid-1 p-4"
         >
           <div class="flex flex-wrap items-center gap-3 justify-between">
-            <strong>{{ entry.user?.name || 'Equipe' }}</strong><small>{{ formatDate(entry.created_at) }}</small>
+            <strong>{{
+              entry.user?.name || projectText('TEAM', 'Equipe')
+            }}</strong
+            ><small>{{ formatDate(entry.created_at) }}</small>
           </div>
           <p class="whitespace-pre-wrap break-words">{{ entry.body }}</p>
         </article>
@@ -442,18 +683,28 @@ v-if="!task" class="flex flex-col gap-1 min-w-0"
           v-if="detail?.comments?.length >= 100"
           class="text-n-slate-11 text-sm"
         >
-          Exibindo os 100 comentarios mais recentes.
+          {{
+            projectText(
+              'COMMENTS_LIMIT',
+              'Exibindo os 100 comentários mais recentes.'
+            )
+          }}
         </p>
         <form
           v-if="editable"
           class="flex flex-col gap-4"
           @submit.prevent="addComment"
         >
-          <label class="flex flex-col gap-1 min-w-0"><span>Comentario interno</span><textarea v-model="comment" required maxlength="20000" /></label><button
+          <label class="flex flex-col gap-1 min-w-0"
+            ><span>{{
+              projectText('INTERNAL_COMMENT', 'Comentário interno')
+            }}</span
+            ><textarea v-model="comment" required maxlength="20000" /></label
+          ><button
             class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
             :disabled="busy"
           >
-            Registrar comentario
+            {{ projectText('ADD_COMMENT', 'Registrar comentário') }}
           </button>
         </form>
       </section>
@@ -471,7 +722,14 @@ v-if="!task" class="flex flex-col gap-1 min-w-0"
           :key="edge.id"
           class="flex flex-wrap items-center gap-3 justify-between"
         >
-          <span>{{ taskTitle(edge.predecessor_id) }} → {{ task.title }}</span><button
+          <span
+            >{{ taskTitle(edge.predecessor_id) }}
+            <span
+              class="i-lucide-arrow-right inline-block size-3"
+              aria-hidden="true"
+            />
+            {{ task.title }}</span
+          ><button
             v-if="canDependencies"
             class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed text-xs"
             :disabled="busy"
@@ -488,7 +746,9 @@ v-if="!task" class="flex flex-col gap-1 min-w-0"
           class="flex flex-wrap items-center gap-3"
           @submit.prevent="dependency()"
         >
-          <label class="flex flex-col gap-1 min-w-0"><span>{{ projectText('PREDECESSOR', 'Predecessora') }}</span><select v-model="predecessor" required>
+          <label class="flex flex-col gap-1 min-w-0"
+            ><span>{{ projectText('PREDECESSOR', 'Predecessora') }}</span
+            ><select v-model="predecessor" required>
               <option value="">
                 {{ projectText('SELECT_TASK', 'Selecione uma tarefa') }}
               </option>
@@ -499,7 +759,8 @@ v-if="!task" class="flex flex-col gap-1 min-w-0"
               >
                 {{ candidate.title }}
               </option>
-            </select></label><button
+            </select></label
+          ><button
             class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
             :disabled="busy"
           >
@@ -514,7 +775,8 @@ v-if="!task" class="flex flex-col gap-1 min-w-0"
               'WORKED_HOURS',
               'Horas registradas (enviadas ou aprovadas)'
             )
-          }}: {{ hours(detail?.worked_minutes) }} h
+          }}: {{ hours(detail?.worked_minutes) }}
+          {{ projectText('HOUR_UNIT', 'h') }}
         </p>
         <p v-if="!openProject" class="text-sm text-n-slate-11">
           {{
@@ -529,21 +791,50 @@ v-if="!task" class="flex flex-col gap-1 min-w-0"
           class="flex flex-col gap-4"
           @submit.prevent="logTime"
         >
-          <label class="flex flex-col gap-1 min-w-0"><span>{{ projectText('TIME_DATE', 'Data') }}</span><input v-model="timeForm.worked_on" type="date" required /></label><label class="flex flex-col gap-1 min-w-0"><span>{{
+          <label class="flex flex-col gap-1 min-w-0"
+            ><span>{{ projectText('TIME_DATE', 'Data') }}</span
+            ><input v-model="timeForm.worked_on" type="date" required /></label
+          ><label class="flex flex-col gap-1 min-w-0"
+            ><span>{{
               projectText('TIME_MINUTES', 'Minutos trabalhados')
-            }}</span><input
+            }}</span
+            ><input
               v-model.number="timeForm.minutes"
               type="number"
               min="1"
               max="1440"
               step="1"
-              required /></label><label class="flex flex-col gap-1 min-w-0"><span>{{ projectText('TIME_NOTES', 'Observação') }}</span><input v-model="timeForm.notes" maxlength="2000" /></label><button
+              required /></label
+          ><label class="flex flex-col gap-1 min-w-0"
+            ><span>{{ projectText('TIME_NOTES', 'Observação') }}</span
+            ><input v-model="timeForm.notes" maxlength="2000" /></label
+          ><button
             class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed bg-n-blue-9 text-white"
             :disabled="busy"
           >
             {{ projectText('REGISTER_HOURS', 'Registrar horas') }}
           </button>
         </form>
+      </section>
+      <section v-else-if="tab === 'history'" class="flex flex-col gap-3">
+        <h3>{{ projectText('TASK_ACTIVITY', 'Histórico da tarefa') }}</h3>
+        <article
+          v-for="event in detail?.recent_activity || []"
+          :key="event.id"
+          class="border-l-2 border-n-blue-5 py-2 pl-4"
+        >
+          <p class="font-medium">{{ taskEventLabel(event.action) }}</p>
+          <p class="mt-1 text-xs text-n-slate-11">
+            {{ event.actor?.name || projectText('SYSTEM', 'Sistema') }} ·
+            {{ formatDate(event.created_at) }}
+          </p>
+        </article>
+        <p
+          v-if="!detail?.recent_activity?.length"
+          class="py-6 text-center text-n-slate-11"
+        >
+          {{ projectText('NO_ACTIVITY', 'Nenhuma atividade registrada.') }}
+        </p>
       </section>
       <FilesBox
         v-else-if="task && tab === 'files'"

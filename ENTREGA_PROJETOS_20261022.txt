@@ -1,0 +1,145 @@
+JRC CONVERSAS — TELAS E FLUXOS DE PROJETOS
+Entrega de código-fonte: 22/10/2026
+
+1. BASE E OBJETIVO
+
+Esta versão parte integralmente do arquivo:
+jrc-conversas-lab2-codex-unificacao-jrc-hoya-gopure-20261021(1).zip
+
+SHA-256 da base:
+5bd842de96b72946590178a76bd04493aa13c6e4e6d599fb78c6ec5b114eb928
+
+O objetivo é apresentar o módulo de Projetos conforme o PDF e as imagens
+fornecidos, aproveitando as regras e rotas existentes: visão da carteira,
+visão geral de cada projeto e navegação das abas do projeto selecionado.
+O arquivo contém o código-fonte completo, com o mesmo diretório raiz da base.
+
+2. TELAS ENTREGUES
+
+CARTEIRA DE PROJETOS
+- Visão geral com indicadores, distribuição por situação e entregas mensais.
+- Cartões com cliente, responsável, prazo, progresso e contadores reais.
+- Busca por nome, código, cliente ou responsável; filtros de situação,
+  prioridade, cliente e responsável; paginação e exportação CSV autorizada.
+- Filtros persistidos por conta e usuário.
+
+VISÃO GERAL DO PROJETO
+- Cabeçalho único com situação, prioridade, responsável, entrega e progresso.
+- Indicadores de tarefas e horas; distribuição por situação; marcos,
+  tarefas recentes, atividades e informações financeiras autorizadas.
+- Campos sem configuração são apresentados explicitamente como tal.
+
+EXECUÇÃO
+- Kanban com seis situações reais, contadores, limites de coluna e cartões.
+- Lista com edição de responsável, prioridade e prazo, paginação e seleção.
+- Movimentação individual e em lote com lock_version e recarga do servidor.
+- Painel lateral da tarefa: detalhes, checklist, comentários, arquivos,
+  dependências, horas e histórico recente; proteção de alterações pendentes.
+- Progresso de checklist calculado por itens concluídos, sem presumir 100%
+  apenas porque a tarefa tem situação concluída.
+
+PLANEJAMENTO
+- Gantt com escalas de dia, semana e mês, marcador de hoje, hierarquia,
+  intervalos reais, marcos e dependências.
+- Filtros compartilhados com a Execução, sem uma segunda filtragem oculta.
+- Subabas existentes de dependências, marcos, ciclos, riscos, impedimentos
+  e decisões preservadas e integradas.
+
+EQUIPE
+- Três indicadores, busca e filtros, tabela e manutenção dos participantes.
+- Papéis, tarefas atribuídas e alocação apresentados a partir dos dados reais.
+- Proteção do proprietário e regras de permissão existentes preservadas.
+
+HORAS E ORÇAMENTO
+- Indicadores de horas previstas, registradas, aprovadas e pendentes.
+- Registro em HH:MM convertido para minutos; revisão, aprovação/rejeição,
+  custo autorizado, filtros, paginação, relatório por pessoa e CSV.
+- Orçamento separado dos apontamentos e condicionado às permissões.
+- Rascunhos de orçamento e custos preservados durante atualizações externas.
+- Fórmula financeira existente preservada: saldo = previsto menos custo
+  das horas aprovadas. O comprometido informado permanece separado.
+
+ARQUIVOS
+- Categorias derivadas do tipo real do arquivo, busca, ordenação, metadados,
+  visualização, download, remoção e envio múltiplo.
+- Limites existentes mantidos: até 10 arquivos, 20 MB por arquivo.
+- Os anexos permanecem internos e dependem do acesso ao projeto/tarefa.
+
+RELACIONADOS
+- Origem disponível do projeto e vínculos com chamados, CRM e conversas.
+- Busca, tabela, paginação, abertura e desvinculação conforme autorização.
+- Histórico de origem não é inventado quando o dado não existe.
+
+PROJETO E ACEITE
+- Subabas Dados gerais, Escopo, Aceite e homologação e Configuração do quadro.
+- Edição de dados, escopo, aceite e colunas aproveita os endpoints existentes.
+- Encerramento continua exigindo as condições do serviço existente: tarefas
+  concluídas ou canceladas e registro do aceite.
+- Rascunhos são mantidos ao alternar as abas principais do mesmo projeto.
+
+3. INTEGRAÇÃO E LIMITES
+
+Foram alterados 18 arquivos existentes e acrescentados 7 arquivos de código.
+O manifesto lista os caminhos e os hashes antes/depois. Nenhum arquivo
+original foi removido. Este relatório e o manifesto são os dois documentos
+adicionais de entrega.
+
+Os ajustes backend complementam buscas, filtros, contadores, dados de marcos,
+alocação, origem e histórico. A revisão manteve os escopos de conta/projeto,
+as capacidades financeiras, locks, WIP e validações de dependências.
+Não há nova migração, alteração de schema, dependência, lockfile, Dockerfile,
+configuração de autenticação ou deploy nesta entrega.
+
+Os mockups são referências visuais; seus nomes, valores e percentuais não
+foram inseridos na aplicação como dados de produção. Os componentes usam
+as respostas reais dos endpoints. O ambiente temporário de QA, seus dados
+simulados e as capturas não fazem parte deste ZIP.
+
+Recursos que não existiam no backend da base não foram simulados como ações
+funcionais: pastas persistentes e versões de arquivos, compartilhamento com
+clientes, antivírus, discussão independente do projeto, integração nativa
+com uma central de aprovações e reagendamento por arraste no Gantt.
+Comentários continuam disponíveis nas tarefas; o Gantt é uma visualização
+interativa e abre a tarefa para edição pelos fluxos existentes.
+
+4. VERIFICAÇÃO REALIZADA
+
+- 15 componentes Vue: parse, script setup e template compilados com sucesso.
+- 12 testes existentes aprovados:
+    node test/jrc_operations/project_task_board_test.mjs          (8/8)
+    node test/jrc_operations/project_planning_projection_test.mjs (4/4)
+- 6 arquivos Ruby alterados: sintaxe analisada sem erros com tree-sitter-ruby.
+  Essa análise não equivale a executar ruby -c, Rails ou RSpec.
+- ESLint nos 18 arquivos JavaScript/Vue: nenhum erro novo. Permanece 1 erro
+  preexistente no-await-in-loop em jrcOperations/api.js, confirmado também
+  no arquivo extraído do ZIP original; existem 470 avisos de lint.
+- Navegador: 21 capturas, sendo 17 em desktop (1440 x 1000) e 4 em tablet
+  (900 x 1000); 12 verificações de fluxo concluídas, sem erros JavaScript,
+  avisos de console, endpoints inesperados ou overflow horizontal da página.
+- Fluxos exercitados: busca, abas, filtros compartilhados, edição inline,
+  movimentação com lock_version, painel/checklist, escalas do Gantt,
+  apontamento 01:30 convertido em 90 minutos, aprovação, manutenção de
+  rascunhos, filtro e upload múltiplo de arquivos e ocultação financeira
+  sem as capacidades correspondentes.
+- Revisão independente confirmou que o destino e os dados das requisições
+  de um lote permanecem fixos durante sua execução. A neutralização de
+  fórmulas na exportação CSV também foi verificada.
+
+O QA visual importa os componentes reais, router, store, composables e i18n,
+mas usa uma API determinística simulada e substitutos nas fronteiras externas.
+Não havia Ruby/Bundler, banco e Docker disponíveis para executar o backend
+completo. Portanto, esta entrega não declara homologação Rails, integração
+com armazenamento real, build completo da aplicação ou validação em produção.
+
+5. APLICAÇÃO NO AMBIENTE DE DESENVOLVIMENTO
+
+Aplicar este código à mesma base em um ambiente de desenvolvimento isolado,
+usando o processo de build já adotado pelo projeto. Confirmar os fluxos acima
+com o Rails, banco e armazenamento reais, incluindo diferentes papéis de
+acesso e duas sessões editando tarefas para conferir os conflitos de versão.
+Não é necessário criar ou executar uma migração específica desta alteração.
+Pendências de migração já existentes na base seguem o processo normal do
+ambiente. A publicação de imagem e o deploy não foram executados.
+
+MANIFESTO_PROJETOS_20261022.json contém a comparação de integridade com a
+base e os resultados resumidos da validação para apoiar a revisão técnica.
