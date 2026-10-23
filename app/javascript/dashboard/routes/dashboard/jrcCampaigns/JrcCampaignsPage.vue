@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import JrcCampaignsAPI from 'dashboard/api/jrcCampaigns';
 import { useAlert } from 'dashboard/composables';
@@ -42,6 +42,10 @@ const campaignFilter = ref('');
 const channelFilter = ref('');
 const showAdvancedFilters = ref(false);
 const statusFilters = ref([]);
+let disposed = false;
+let refreshVersion = 0;
+let metadataVersion = 0;
+let analyticsVersion = 0;
 
 const tabs = computed(() => [
   {
@@ -207,6 +211,9 @@ const progress = campaign => {
   return total ? Math.min(100, Math.round((processed / total) * 100)) : 0;
 };
 const fetchAnalytics = async () => {
+  if (disposed) return;
+  analyticsVersion += 1;
+  const request = analyticsVersion;
   analyticsLoading.value = true;
   try {
     const { data } = await JrcCampaignsAPI.analytics({
@@ -214,35 +221,52 @@ const fetchAnalytics = async () => {
       campaign_id: campaignFilter.value || undefined,
       delivery_channel: channelFilter.value || undefined,
     });
-    analytics.value = data;
+    if (!disposed && request === analyticsVersion) analytics.value = data;
   } catch {
-    useAlert(t('JRC_CAMPAIGNS.ALERTS.ANALYTICS_FAILED'));
+    if (!disposed && request === analyticsVersion) {
+      useAlert(t('JRC_CAMPAIGNS.ALERTS.ANALYTICS_FAILED'));
+    }
   } finally {
-    analyticsLoading.value = false;
+    if (!disposed && request === analyticsVersion)
+      analyticsLoading.value = false;
   }
 };
 const fetchData = async () => {
+  if (disposed) return;
+  refreshVersion += 1;
+  metadataVersion += 1;
+  const request = refreshVersion;
+  const metadataRequest = metadataVersion;
   loading.value = true;
   try {
     const [campaignResponse, metadataResponse] = await Promise.all([
       JrcCampaignsAPI.get(),
       JrcCampaignsAPI.metadata(),
     ]);
+    if (disposed || request !== refreshVersion) return;
     campaigns.value = campaignResponse.data;
-    metadata.value = metadataResponse.data;
+    if (metadataRequest === metadataVersion)
+      metadata.value = metadataResponse.data;
     await fetchAnalytics();
   } catch {
-    useAlert(t('JRC_CAMPAIGNS.ALERTS.LOAD_FAILED'));
+    if (!disposed && request === refreshVersion) {
+      useAlert(t('JRC_CAMPAIGNS.ALERTS.LOAD_FAILED'));
+    }
   } finally {
-    loading.value = false;
+    if (!disposed && request === refreshVersion) loading.value = false;
   }
 };
 const refreshSenders = async () => {
+  if (disposed) return;
+  metadataVersion += 1;
+  const request = metadataVersion;
   try {
     const { data } = await JrcCampaignsAPI.metadata();
-    metadata.value = data;
+    if (!disposed && request === metadataVersion) metadata.value = data;
   } catch {
-    useAlert(t('JRC_CAMPAIGNS.ALERTS.LOAD_FAILED'));
+    if (!disposed && request === metadataVersion) {
+      useAlert(t('JRC_CAMPAIGNS.ALERTS.LOAD_FAILED'));
+    }
   }
 };
 const openNew = () => {
@@ -325,6 +349,12 @@ const exportSelected = () => {
 
 watch([period, campaignFilter, channelFilter], fetchAnalytics);
 onMounted(fetchData);
+onBeforeUnmount(() => {
+  disposed = true;
+  refreshVersion += 1;
+  metadataVersion += 1;
+  analyticsVersion += 1;
+});
 </script>
 
 <template>

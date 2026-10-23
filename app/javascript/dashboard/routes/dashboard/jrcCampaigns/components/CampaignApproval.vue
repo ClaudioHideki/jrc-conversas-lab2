@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onBeforeUnmount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import JrcCampaignsAPI from 'dashboard/api/jrcCampaigns';
 import { useAlert } from 'dashboard/composables';
@@ -11,6 +11,8 @@ const review = ref(null);
 const accepted = ref(false);
 const saving = ref(false);
 const errorMessage = ref('');
+let closed = false;
+let reviewVersion = 0;
 const detail = (key, value) => {
   const labels = {
     REVIEW: t('JRC_CAMPAIGNS.GOVERNANCE.REVIEW'),
@@ -27,33 +29,62 @@ const detail = (key, value) => {
   return `${labels[key]}: ${value}`;
 };
 
-onMounted(async () => {
+const loadReview = async campaignId => {
+  if (closed) return;
+  reviewVersion += 1;
+  const request = reviewVersion;
+  review.value = null;
+  accepted.value = false;
+  errorMessage.value = '';
   try {
-    const { data } = await JrcCampaignsAPI.requestReview(props.campaign.id);
+    const { data } = await JrcCampaignsAPI.requestReview(campaignId);
+    if (closed || request !== reviewVersion) return;
     review.value = data;
   } catch (error) {
+    if (closed || request !== reviewVersion) return;
     errorMessage.value =
       error?.response?.data?.errors?.join(', ') ||
       t('JRC_CAMPAIGNS.ALERTS.ACTION_FAILED');
   }
+};
+
+watch(() => props.campaign.id, loadReview, { immediate: true });
+const close = () => {
+  closed = true;
+  reviewVersion += 1;
+  emit('close');
+};
+onBeforeUnmount(() => {
+  closed = true;
+  reviewVersion += 1;
 });
 
 const approve = async () => {
-  if (!accepted.value || !review.value) return;
+  if (
+    closed ||
+    saving.value ||
+    !accepted.value ||
+    !review.value ||
+    review.value.id !== props.campaign.id
+  )
+    return;
+  const request = reviewVersion;
+  const campaignId = props.campaign.id;
+  const digest = review.value.review_digest;
   saving.value = true;
   try {
-    await JrcCampaignsAPI.approve(
-      props.campaign.id,
-      review.value.review_digest
-    );
+    await JrcCampaignsAPI.approve(campaignId, digest);
+    if (closed || request !== reviewVersion) return;
+    closed = true;
     useAlert(t('JRC_CAMPAIGNS.GOVERNANCE.APPROVED'));
     emit('approved');
   } catch (error) {
+    if (closed || request !== reviewVersion) return;
     errorMessage.value =
       error?.response?.data?.errors?.join(', ') ||
       t('JRC_CAMPAIGNS.ALERTS.ACTION_FAILED');
   } finally {
-    saving.value = false;
+    if (!closed) saving.value = false;
   }
 };
 </script>
@@ -75,7 +106,7 @@ const approve = async () => {
         <button
           type="button"
           class="rounded-lg border border-n-weak px-3 py-2"
-          @click="emit('close')"
+          @click="close"
         >
           {{ t('JRC_CAMPAIGNS.CLOSE') }}
         </button>

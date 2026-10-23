@@ -98,7 +98,8 @@ class JrcCampaigns::Campaign < ApplicationRecord
   before_save :refresh_estimated_recipients, if: :audience_changed?
 
   def launch!
-    with_lock { launch_approved! }
+    prepared = JrcCampaigns::ApprovalService.new(self).prepare_validation!
+    with_lock { launch_approved!(prepared: prepared) }
   end
 
   def request_review!
@@ -113,13 +114,13 @@ class JrcCampaigns::Campaign < ApplicationRecord
     JrcCampaigns::ApprovalService.new(self).valid?
   end
 
-  def ensure_approved!
-    JrcCampaigns::ApprovalService.new(self).ensure_valid!
+  def ensure_approved!(prepared: nil)
+    JrcCampaigns::ApprovalService.new(self).ensure_valid!(prepared: prepared)
   end
 
-  def launch_approved!
+  def launch_approved!(prepared:)
     ensure_status!('draft')
-    ensure_approved!
+    ensure_approved!(prepared: prepared)
     raise ActiveRecord::RecordInvalid, self if steps.empty?
     raise ActiveRecord::RecordInvalid, self if sending_inbox_links.empty?
 

@@ -4,31 +4,56 @@ class JrcCampaigns::LaunchService
   end
 
   def perform
+    campaign.reload
+    return if stopped?
+    return campaign.latest_execution if running_execution?
+
+    recovery_state = campaign.attributes.slice('account_id', 'status', 'updated_at')
+    prepared = JrcCampaigns::ApprovalService.new(campaign).prepare_validation!
     campaign.with_lock do
-      next if campaign.canceled? || campaign.paused? || campaign.completed?
-      next campaign.latest_execution if campaign.running? && campaign.latest_execution&.running?
+      next if stopped?
+      next campaign.latest_execution if running_execution?
 
-      campaign.ensure_approved!
-
-      campaign.update!(status: 'running', started_at: campaign.started_at || Time.current, last_execution_at: Time.current, last_error: nil)
-      execution = campaign.executions.create!(
-        run_number: campaign.executions.maximum(:run_number).to_i + 1,
-        status: 'running',
-        started_at: Time.current
-      )
-      build_recipients(execution)
-      schedule_recipients(execution)
-      JrcCampaigns::EventLogger.call(campaign: campaign, execution: execution, event_type: 'execution_started')
-      execution
+      campaign.ensure_approved!(prepared: prepared)
+      start_execution!
     end
   rescue StandardError => e
-    campaign.update_columns(status: 'draft', last_error: e.message) # rubocop:disable Rails/SkipsModelValidations
+    recover_failure(e, recovery_state)
     raise
   end
 
   private
 
   attr_reader :campaign
+
+  def stopped?
+    campaign.canceled? || campaign.paused? || campaign.completed?
+  end
+
+  def running_execution?
+    campaign.running? && campaign.latest_execution&.running?
+  end
+
+  def start_execution!
+    campaign.update!(status: 'running', started_at: campaign.started_at || Time.current, last_execution_at: Time.current, last_error: nil)
+    execution = campaign.executions.create!(
+      run_number: campaign.executions.maximum(:run_number).to_i + 1,
+      status: 'running',
+      started_at: Time.current
+    )
+    build_recipients(execution)
+    schedule_recipients(execution)
+    JrcCampaigns::EventLogger.call(campaign: campaign, execution: execution, event_type: 'execution_started')
+    execution
+  end
+
+  def recover_failure(error, expected_state)
+    return unless expected_state
+
+    # A failed remote read cannot undo a newer pause/cancellation or another launch.
+    JrcCampaigns::Campaign.where(expected_state.merge('id' => campaign.id))
+                          .update_all(status: 'draft', last_error: error.message, updated_at: Time.current) # rubocop:disable Rails/SkipsModelValidations
+  end
 
   def build_recipients(execution)
     rotation = JrcCampaigns::RotationSelector.new(campaign)

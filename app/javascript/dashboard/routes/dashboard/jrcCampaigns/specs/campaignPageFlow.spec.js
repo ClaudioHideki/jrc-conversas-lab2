@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import JrcCampaignsPage from '../JrcCampaignsPage.vue';
 import api from 'dashboard/api/jrcCampaigns';
+import { useAlert } from 'dashboard/composables';
 
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }));
 vi.mock('dashboard/composables', () => ({ useAlert: vi.fn() }));
@@ -130,5 +131,122 @@ describe('campaign page preserves the saved draft through review and launch', ()
     expect(wrapper.getComponent(Wizard).props('campaign')).toBe(null);
     expect(api.requestReview).not.toHaveBeenCalled();
     expect(api.launch).not.toHaveBeenCalled();
+  });
+
+  it('keeps a newer full refresh when an older campaign request completes later', async () => {
+    const wrapper = mount(JrcCampaignsPage, { global });
+    await flushPromises();
+    let resolveOlder;
+    api.get.mockImplementationOnce(
+      () =>
+        new Promise(resolve => {
+          resolveOlder = resolve;
+        })
+    );
+    const older = wrapper.vm.fetchData();
+    api.get.mockResolvedValueOnce({
+      data: [{ ...campaign, id: 18, name: 'Latest' }],
+    });
+    await wrapper.vm.fetchData();
+    resolveOlder({ data: [{ ...campaign, name: 'Obsolete' }] });
+    await older;
+    expect(wrapper.vm.campaigns.map(item => item.id)).toEqual([18]);
+    expect(wrapper.text()).not.toContain('Obsolete');
+  });
+
+  it('does not finish the loading state while the latest full refresh is still pending', async () => {
+    const wrapper = mount(JrcCampaignsPage, { global });
+    await flushPromises();
+    let resolveOlder;
+    let resolveLatest;
+    api.get
+      .mockImplementationOnce(
+        () =>
+          new Promise(resolve => {
+            resolveOlder = resolve;
+          })
+      )
+      .mockImplementationOnce(
+        () =>
+          new Promise(resolve => {
+            resolveLatest = resolve;
+          })
+      );
+    const older = wrapper.vm.fetchData();
+    const latest = wrapper.vm.fetchData();
+    resolveOlder({ data: [] });
+    await older;
+    expect(wrapper.vm.loading).toBe(true);
+    resolveLatest({ data: [] });
+    await latest;
+    expect(wrapper.vm.loading).toBe(false);
+  });
+
+  it('keeps a newer sender refresh when older metadata from a full refresh arrives later', async () => {
+    const wrapper = mount(JrcCampaignsPage, { global });
+    await flushPromises();
+    let resolveOlder;
+    api.metadata.mockImplementationOnce(
+      () =>
+        new Promise(resolve => {
+          resolveOlder = resolve;
+        })
+    );
+    const older = wrapper.vm.fetchData();
+    const latest = {
+      ...wrapper.vm.metadata,
+      whatsapp_inboxes: [{ id: 8, name: 'Latest sender' }],
+    };
+    api.metadata.mockResolvedValueOnce({ data: latest });
+    await wrapper.vm.refreshSenders();
+    resolveOlder({ data: { ...latest, whatsapp_inboxes: [] } });
+    await older;
+    expect(wrapper.vm.metadata.whatsapp_inboxes).toEqual(
+      latest.whatsapp_inboxes
+    );
+  });
+
+  it('keeps analytics for the latest filter when an older filter finishes later', async () => {
+    const wrapper = mount(JrcCampaignsPage, { global });
+    await flushPromises();
+    let resolveOlder;
+    api.analytics.mockImplementationOnce(
+      () =>
+        new Promise(resolve => {
+          resolveOlder = resolve;
+        })
+    );
+    wrapper.vm.period = '7';
+    await flushPromises();
+    const latest = {
+      summary: { sent: 7 },
+      previous_summary: {},
+      series: [],
+      failure_reasons: [],
+    };
+    api.analytics.mockResolvedValueOnce({ data: latest });
+    wrapper.vm.period = 'all';
+    await flushPromises();
+    resolveOlder({ data: { ...latest, summary: { sent: 99 } } });
+    await flushPromises();
+    expect(wrapper.vm.analytics.summary.sent).toBe(7);
+    expect(wrapper.vm.analyticsLoading).toBe(false);
+  });
+
+  it('does not show a late refresh error after the page was disposed', async () => {
+    const wrapper = mount(JrcCampaignsPage, { global });
+    await flushPromises();
+    let rejectPending;
+    api.get.mockImplementationOnce(
+      () =>
+        new Promise((_resolve, reject) => {
+          rejectPending = reject;
+        })
+    );
+    const pending = wrapper.vm.fetchData();
+    wrapper.unmount();
+    rejectPending(new Error('Synthetic failure'));
+    await pending;
+    expect(useAlert).not.toHaveBeenCalled();
   });
 });

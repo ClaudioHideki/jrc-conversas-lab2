@@ -283,13 +283,13 @@ RSpec.describe 'Broker campaign transport', type: :request do
       expect(response.parsed_body).to include('contact_inbox' => nil)
     end
 
-    it 'reports a persisted pause with approval unavailable instead of failing its response when Broker transport is down' do
+    it 'reports a persisted pause and local approval without calling an unavailable Broker while execution remains blocked' do
       stub_request(:get, "#{prefix}/connections/#{integration_id}/campaign-transport").to_return(status: 503)
 
       post "/api/v1/accounts/#{account.id}/jrc_campaigns/campaigns/#{campaign.id}/pause", headers: admin.create_new_auth_token
 
       expect(response).to have_http_status(:ok)
-      expect(response.parsed_body).to include('status' => 'paused', 'approval_valid' => false)
+      expect(response.parsed_body).to include('status' => 'paused', 'approval_valid' => true)
       expect(campaign.reload).to be_paused
       expect(account.messages.count).to eq(0)
       expect { campaign.ensure_approved! }.to raise_error(JrcBroker::Client::Error)

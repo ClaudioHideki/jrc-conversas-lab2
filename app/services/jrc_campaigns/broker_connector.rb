@@ -37,15 +37,15 @@ class JrcCampaigns::BrokerConnector
       'configuration_revision' => integration.updated_at.iso8601(6) }
   end
 
-  def context(user)
-    JrcBroker::Context.new(account: inbox.account, user: user)
+  def context(user, release_connection: false)
+    JrcBroker::Context.new(account: inbox.account, user: user, release_connection: release_connection)
   end
 
-  def transport(user)
+  def transport(user, release_connection: false)
     expected = "#{integration.broker_origin}/v1/integrations/chatwoot/#{binding.integration_id}/events"
     raise JrcBroker::Client::Error, 'JRC_BROKER_CALLBACK_MISMATCH' unless inbox.channel.webhook_url == expected
 
-    data = context(user).client.campaign_transport(binding.integration_id)
+    data = context(user, release_connection: release_connection).client.campaign_transport(binding.integration_id)
     valid = data['protocol'] == PROTOCOL && data.values_at('integrationId', 'inboxId', 'instanceId', 'destinationRevision') ==
       [binding.integration_id, inbox.id, binding.instance_id, integration.destination_revision]
     valid &&= [true, false].include?(data['ready']) && data['identityRevision'].is_a?(Integer) && data['identityRevision'] >= 0
