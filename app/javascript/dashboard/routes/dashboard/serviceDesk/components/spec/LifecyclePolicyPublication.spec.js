@@ -96,16 +96,27 @@ describe('Lifecycle publication busy state', () => {
     await flushPromises();
     await wrapper
       .findAll('button')
-      .find(button => button.text() === 'Suporte v1')
+      .find(button => button.text() === messages.JRC_SERVICE_DESK.COMMON.edit)
       .trigger('click');
     holder.policies.mockResolvedValue({ ...envelope, items: [next] });
-    await wrapper.get('form').trigger('submit');
+    await wrapper.get('nav button:last-child').trigger('click');
+    await wrapper.findAll('input[type="checkbox"]').at(-1).setValue(true);
+    await wrapper
+      .findAll('button')
+      .find(
+        button => button.text() === messages.JRC_SERVICE_DESK.LIFECYCLE.publish
+      )
+      .trigger('click');
     await flushPromises();
     expect(holder.publish).toHaveBeenCalledOnce();
     expect(holder.policy).toHaveBeenCalledOnce();
     expect(wrapper.text()).toContain(
       messages.JRC_SERVICE_DESK.LIFECYCLE.feedback.confirmed
     );
+    await wrapper
+      .findAll('button')
+      .find(button => button.text() === messages.JRC_SERVICE_DESK.COMMON.cancel)
+      .trigger('click');
     const newButton = wrapper
       .findAll('button')
       .find(

@@ -7,7 +7,7 @@ class JrcCampaigns::CampaignSerializer
     campaign.as_json(only: scalar_fields).merge(
       campaign_inboxes: campaign.campaign_inboxes.sort_by(&:position).map { |link| inbox_json(link) },
       steps: campaign.steps.map { |step| step_json(step) },
-      approval_valid: campaign.approval_valid?,
+      approval_valid: approval_valid?,
       latest_execution: execution_json(campaign.latest_execution)
     )
   end
@@ -15,6 +15,13 @@ class JrcCampaigns::CampaignSerializer
   private
 
   attr_reader :campaign
+
+  def approval_valid?
+    campaign.approval_valid?
+  rescue JrcBroker::Client::Error
+    # A failed remote read cannot approve a send or turn an already persisted pause into an API error.
+    false
+  end
 
   def scalar_fields
     [:id, :name, :status, :trigger_type, :scheduled_at, :audience_type, :audience_config, :message_body, :inbox_id,

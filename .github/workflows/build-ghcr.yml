@@ -84,7 +84,22 @@ jobs:
 
       - name: Instalar dependencias de sistema dos gates Ruby
         if: inputs.component == 'app'
-        run: sudo apt-get update && sudo apt-get install -y libpq-dev libvips libvips-dev
+        timeout-minutes: 8
+        run: |
+          set -euo pipefail
+          # The hosted Azure mirror stalled this release before any product gate.
+          # Keep APT signature/TLS verification and use the official HTTPS archives.
+          for source in /etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources /etc/apt/apt-mirrors*.txt; do
+            if [ -f "$source" ]; then
+              sudo sed -i -E \
+                -e 's|https?://azure[.]archive[.]ubuntu[.]com/ubuntu/?|https://archive.ubuntu.com/ubuntu/|g' \
+                -e 's#http://(archive|security)[.]ubuntu[.]com/ubuntu/?#https://\1.ubuntu.com/ubuntu/#g' \
+                "$source"
+            fi
+          done
+          apt_options=(-o Acquire::Retries=2 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20)
+          sudo apt-get "${apt_options[@]}" -o APT::Update::Error-Mode=any update
+          sudo apt-get "${apt_options[@]}" install -y --no-install-recommends libpq-dev libvips libvips-dev
 
       - name: Configurar Ruby e Bundler declarados
         if: inputs.component == 'app'
@@ -120,6 +135,7 @@ jobs:
           app/javascript/dashboard/routes/dashboard/jrcOperations
           app/javascript/dashboard/routes/dashboard/crm
           app/javascript/dashboard/routes/dashboard/jrcCustomers
+          app/javascript/dashboard/routes/dashboard/jrcCampaigns/specs
           app/javascript/dashboard/routes/dashboard/webphone
           app/javascript/dashboard/routes/dashboard/jrcRelationship
           app/javascript/dashboard/components-next/sidebar/specs

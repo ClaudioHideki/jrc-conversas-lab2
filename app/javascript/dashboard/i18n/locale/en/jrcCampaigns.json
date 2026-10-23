@@ -6,12 +6,12 @@
       "REJECTIONS": "Destinatários inelegíveis e motivo da rejeição",
       "SENDER": "Remetente:",
       "WARNING": "Evolution Demo é uma integração não oficial. Volumes baixos não eliminam o risco de bloqueio. Os limites incluem campanhas e testes desta caixa; envios normais da conversa não entram nesses limites.",
-      "CONFIRM_TEST": "Confirmar teste Evolution? Remetente: {sender}. Destinatário: {recipient}. O consentimento será verificado antes do envio. Uma resposta aceita não confirma entrega ao WhatsApp.",
+      "CONFIRM_TEST": "Confirmar teste Evolution? Remetente: {sender}. Destinatário: {recipient}. Bloqueios e revogações serão verificados antes do envio. Uma resposta aceita não confirma entrega ao WhatsApp.",
       "TEST_ACCEPTED": "Evolution retornou o ID da mensagem. A confirmação de entrega ainda está pendente.",
       "TEST_UNCONFIRMED": "Teste sem confirmação de envio. Não reenviar antes de conferir o resultado; consulte o histórico do teste.",
-      "CONTINUOUS_HELP": "Cadastre o consentimento contínuo deste destinatário uma vez em Consentimentos para campanhas para realizar novos testes e disparos até a revogação. A autorização de teste único é uma alternativa limitada a uma solicitação. O teste individual não exige público de campanha, mas exige uma autorização válida para seu destinatário.",
+      "CONTINUOUS_HELP": "O teste individual usa o destinatário informado e exige sua confirmação explícita. Blacklist, bloqueios e revogações continuam válidos. Nenhum registro de consentimento será criado pelo teste.",
       "NEW_TEST": "Preparar novo teste",
-      "NEW_TEST_CONFIRM": "Preparar outra solicitação de teste? Isso permite enviar novamente, inclusive o mesmo conteúdo, e exige consentimento válido. Nenhuma mensagem será enviada até clicar em Enviar teste e confirmar remetente e destinatário.",
+      "NEW_TEST_CONFIRM": "Preparar outra solicitação de teste? Isso permite enviar novamente, inclusive o mesmo conteúdo, e respeita blacklist, bloqueios e revogações. Nenhuma mensagem será enviada até clicar em Enviar teste e confirmar remetente e destinatário.",
       "WAIT_INTERVAL": "Aguarde o intervalo configurado da caixa antes de preparar outro teste. A consulta do resultado anterior permanece disponível."
     },
     "TITLE": "Campanhas",
@@ -126,6 +126,7 @@
       "canceled": "Cancelada"
     },
     "WIZARD": {
+      "AUDIENCE_RECHECK_HELP": "Revise a seleção e os telefones válidos. Destinatários bloqueados, na blacklist ou com revogação registrada ficam fora do público.",
       "NEW_TITLE": "Novo Disparo",
       "EDIT_TITLE": "Editar Disparo",
       "STEP_CONTACTS": "1. Contatos",
@@ -401,7 +402,7 @@
       "LISTS": "Listas sanitizadas",
       "NO_LISTS": "Nenhuma lista sanitizada criada.",
       "FORMAT_HELP": "Aceita CSV com vírgula, ponto e vírgula ou tabulação, com cabeçalho nome,telefone,email opcional. Campos com separadores devem usar aspas. A validação final ocorre antes de criar a lista.",
-      "NOT_AUTHORIZATION": "Contato válido não significa envio autorizado. Para WhatsApp, registre a autorização em Consentimentos; na campanha, confira o público elegível e selecione a caixa/número remetente.",
+      "NOT_AUTHORIZATION": "Revise os contatos da lista e selecione a caixa/número remetente antes de iniciar. Blacklist, bloqueios, revogações e as regras do canal continuam respeitados.",
       "PARSED": "{count} contatos lidos. Confira os dados antes de sanitizar.",
       "PARSE_ERROR": "Não foi possível ler a lista. Confira o separador e as aspas dos campos antes de continuar.",
       "FILE_ERROR": "Não foi possível ler o arquivo. Escolha novamente ou cole os contatos.",
@@ -594,14 +595,15 @@
       "TEST_QUEUED": "Teste enfileirado no Broker. Aguarde e consulte o resultado antes de tentar outro envio.",
       "TEST_RESULT": "Resultado do teste Broker",
       "REFRESH_SENDERS": "Atualizar caixas e números remetentes",
-      "CONFIRM_TEST": "Confirmar teste pelo Broker? Caixa/número: {sender}. Destinatário: {recipient}. O consentimento será verificado. Aguarde o recibo antes de reenviar.",
+      "CONFIRM_TEST": "Confirmar teste pelo Broker? Caixa/número: {sender}. Destinatário: {recipient}. Bloqueios e revogações serão verificados. Aguarde o recibo antes de reenviar.",
       "REASONS": {
-        "CONFIGURATION_REQUIRED": "Vincule esta caixa em Conectar seu WhatsApp e configure a integração do Broker nesta conta.",
+        "CONFIGURATION_REQUIRED": "Esta caixa ainda está sendo vinculada à integração do Broker desta conta. Atualize os remetentes em instantes. Se persistir, confira a integração em Conectar seu WhatsApp.",
         "BROKER_UPDATE_OR_CONFIGURATION_REQUIRED": "Atualize a API e os workers do Broker para a versão compatível e confira o vínculo desta caixa em Conectar seu WhatsApp.",
         "CAMPAIGN_BROKER_TRANSPORT_REQUIRED": "Esta caixa precisa usar o transporte WhatsApp do Broker.",
         "CAMPAIGN_EXECUTOR_EXTERNAL_REQUIRED": "O executor desta caixa não permite campanhas externas. Revise a operação no Broker antes de habilitar campanhas.",
+        "CAMPAIGN_ATTENDANCE_POLICY_REQUIRES_CONFIGURATION": "A caixa precisa manter saudação e atribuição automática desativadas para receber campanhas pelo Broker. Revise as configurações de atendimento; nenhum ajuste será feito automaticamente.",
         "CAMPAIGN_CALLBACK_NOT_READY": "A conexão entre o Broker e esta caixa ainda não foi validada. Confira o vínculo e o webhook.",
-        "CAMPAIGN_IDENTITY_NOT_READY": "Conecte e confirme o número desta caixa em Conectar seu WhatsApp; depois atualize os remetentes.",
+        "CAMPAIGN_IDENTITY_NOT_READY": "O WhatsApp desta caixa ainda não está pronto para enviar. Confira a conexão e o número em Conectar seu WhatsApp; depois atualize os remetentes.",
         "DIRECT_EVOLUTION_CONFIGURATION_REQUIRED": "Esta caixa usa a Evolution diretamente. Configure o remetente desta conta para campanhas ou migre a conexão pelo procedimento do Broker. O nome da caixa, sozinho, não autoriza disparos."
       },
       "RESULT_STATUS": "#{id} · {status}"

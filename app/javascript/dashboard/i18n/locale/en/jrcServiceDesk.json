@@ -1548,6 +1548,202 @@
       "sla_after_save": "The deadline follows the SLA policy bound to the ticket.",
       "linked_context_conflict": "Unlink projects and tasks in Relationships before changing the requester or company. You can link them again after saving.",
       "edit_assignment_help": "To change the team, assignee or queue, use Assign or Transfer in the ticket details. Save your other changes before returning."
+    },
+    "REFINEMENT": {
+      "closure": {
+        "title": "Close ticket",
+        "help": "Review the solution and confirm an authorized transition. The ticket changes only after server confirmation.",
+        "resolve_first": "The policy allows resolution now. Resolving is not closing; closure still follows the policy and customer validation.",
+        "unavailable": "No resolution or closure transition is authorized in this state. Check the policy, permissions and ticket requirements.",
+        "confirm": "I confirm these details and the transition to \"{status}\".",
+        "close": "Confirm closure",
+        "resolve": "Confirm resolution",
+        "additional": "Outcome, validation and additional information"
+      },
+      "history": {
+        "status": {
+          "open": "Open",
+          "pending": "Pending",
+          "waiting": "Waiting",
+          "in_progress": "In progress",
+          "resolved": "Resolved",
+          "closed": "Closed",
+          "cancelled": "Cancelled",
+          "canceled": "Canceled",
+          "reopened": "Reopened",
+          "completed": "Completed",
+          "approved": "Approved",
+          "rejected": "Rejected"
+        },
+        "notification_state": {
+          "not_requested": "Not requested",
+          "pending": "Pending",
+          "queued": "Queued",
+          "sent": "Sent",
+          "delivered": "Delivered",
+          "read": "Read",
+          "failed": "Failed",
+          "skipped": "Skipped",
+          "suppressed": "Suppressed"
+        },
+        "action": {
+          "pause": "Pause",
+          "resume": "Resume",
+          "resolve": "Resolve",
+          "close": "Close",
+          "cancel": "Cancel",
+          "reopen": "Reopen",
+          "work_status": "Work status",
+          "create": "Create",
+          "update": "Update",
+          "delete": "Delete"
+        },
+        "channel": {
+          "whatsapp": "Whatsapp",
+          "email": "Email",
+          "portal": "Portal",
+          "manual": "Manual",
+          "internal": "Internal"
+        },
+        "clock_kind": {
+          "first_response": "First response",
+          "attendance": "Attendance",
+          "resolution": "Resolution"
+        },
+        "state": {
+          "running": "Running",
+          "paused": "Paused",
+          "completed": "Completed",
+          "stopped": "Stopped",
+          "pending": "Pending",
+          "sent": "Sent",
+          "failed": "Failed"
+        },
+        "mode": {
+          "manual": "Manual",
+          "automatic": "Automatic",
+          "business": "Business",
+          "calendar": "Calendar"
+        },
+        "priority": {
+          "low": "Low",
+          "normal": "Normal",
+          "medium": "Medium",
+          "high": "High",
+          "urgent": "Urgent",
+          "critical": "Critical"
+        },
+        "kind": {
+          "note": "Note",
+          "message": "Message",
+          "event": "Event",
+          "delivery": "Delivery",
+          "call": "Call"
+        },
+        "severity": {
+          "low": "Low",
+          "normal": "Normal",
+          "medium": "Medium",
+          "high": "High",
+          "critical": "Critical",
+          "urgent": "Urgent"
+        },
+        "resource_kind": {
+          "asset": "Asset",
+          "problem": "Problem",
+          "incident": "Incident",
+          "change": "Change",
+          "contract": "Contract",
+          "task": "Task",
+          "project": "Project"
+        }
+      },
+      "links_notice": "The links below have their own confirmation and are saved immediately. Canceling this form does not undo confirmed links.",
+      "form_notice": "Ticket fields are saved only at final confirmation. Links to existing records are separate actions saved immediately, and Cancel does not undo them.",
+      "catalog": {
+        "steps": {
+          "information": "Information",
+          "categorization": "Categorization",
+          "rules": "SLA and rules",
+          "form": "Form",
+          "permissions": "Permissions",
+          "publication": "Publication"
+        },
+        "title": "Configure service",
+        "save_notice": "All steps share a local draft. Nothing is written until Save in the last step.",
+        "preview": "Service preview",
+        "preview_notice": "Draft preview; this does not confirm publication to the portal.",
+        "sla_title": "SLA and service policy",
+        "sla_help": "Deadlines follow the versioned policy and applicable calendar/contract conditions. This record does not replace server SLA calculations. Policy settings open in another tab without discarding the draft.",
+        "open_policy": "Configure policy and SLA in another tab"
+      },
+      "yes": "Yes",
+      "no": "No",
+      "back": "Back",
+      "overview": {
+        "resolution": "Average resolution time",
+        "csat": "Satisfaction (CSAT)",
+        "unmeasured": "Unavailable in this scope or no valid measurement.",
+        "measured_resolution": "Completed resolution clocks in the authorized scope.",
+        "csat_unavailable": "No linked CSAT aggregation for this dashboard.",
+        "risk": "SLA at risk",
+        "team": "Team availability",
+        "activity": "Recent activity",
+        "activity_notice": "Recent ticket updates in this query; not a replacement for the audit history.",
+        "breached_clocks": "Running clocks past their deadline. A ticket may have more than one clock.",
+        "risk_limits": "Preventive risk bands by priority are not provided by this projection.",
+        "capacity": "{active} tickets / capacity {total}",
+        "no_capacity": "Capacity is not configured; no percentage is calculated.",
+        "more": "More operational indicators"
+      },
+      "policy": {
+        "steps": {
+          "general": "Basic",
+          "lifecycle": "Lifecycle",
+          "monitoring": "SLA and deadlines",
+          "routing": "Routing",
+          "notifications": "Notifications",
+          "review": "Review"
+        },
+        "filter_page": "Search policies on this page",
+        "version": "Version",
+        "summary": "Policy summary",
+        "save_draft": "Save draft in this browser",
+        "restore": "Restore local draft",
+        "draft_saved": "Draft saved locally for this account, unit and user. Nothing was published.",
+        "draft_restored": "Draft restored. The server will revalidate version and authorization on publication.",
+        "draft_unavailable": "Unable to store or restore the local draft.",
+        "confirm": "I reviewed the requirements and confirm publication of this lifecycle policy version.",
+        "no_auto_publish": "Moving through steps does not publish the lifecycle. Review each configuration scope before confirmation.",
+        "separate_routing": "Routing uses existing queues. Saving a queue applies its configuration immediately with its own confirmation; canceling the lifecycle draft does not undo it.",
+        "separate_notifications": "Notifications have their own version, scope and publication. Review event, service, channel and recipient; saving here does not wait for lifecycle publication.",
+        "publish_scope": "Publish here saves only the lifecycle policy. Queues and notifications have separate confirmations, identified in their steps."
+      },
+      "notification": {
+        "steps": {
+          "general": "Event",
+          "conditions": "Conditions",
+          "channels": "Channel and inbox",
+          "message": "Message",
+          "preview": "Preview",
+          "review": "Review and publish"
+        },
+        "conditions_hint": "Event, unit, type and service define this policy scope. Additional conditions remain in operational rules.",
+        "variables": "Available variables",
+        "review": "Review notification",
+        "publish_hint": "This confirmation publishes only the notification policy. The server still verifies preferences, consent and channel rules. Preview sends no messages.",
+        "required_message": "Fill in the message and its version before confirming."
+      },
+      "conversations": {
+        "title": "Ticket conversations",
+        "loaded_only": "Conversations from loaded messages. Load more to read older items.",
+        "conversation": "Conversation #{id}",
+        "updates": "Ticket updates",
+        "other": "Other channel",
+        "draft_lock": "Finish or clear the draft before changing conversations. Check the recipient in the preview before sending.",
+        "reply_here": "Reply in this conversation",
+        "portal": "Portal / ticket"
+      }
     }
   }
 }

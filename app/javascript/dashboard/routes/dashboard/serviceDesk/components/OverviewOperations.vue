@@ -4,7 +4,14 @@ import { useI18n } from 'vue-i18n';
 import Button from 'dashboard/components-next/button/Button.vue';
 import Panel from './ServiceDeskPanel.vue';
 import { v2Labels } from '../helpers/v2Labels';
-const props = defineProps({ data: { type: Object, default: null } });
+const props = defineProps({
+  data: { type: Object, default: null },
+  section: {
+    type: String,
+    default: 'all',
+    validator: value => ['all', 'charts', 'summary'].includes(value),
+  },
+});
 const emit = defineEmits(['navigate']);
 const { t, locale } = useI18n();
 const labels = computed(() => v2Labels(t));
@@ -25,12 +32,28 @@ const chart = computed(() => {
 const line = computed(() =>
   chart.value.map(row => `${row.x},${row.y}`).join(' ')
 );
+const categories = computed(() => props.data?.top_categories.slice(0, 5) || []);
 const categoriesTotal = computed(() =>
-  (props.data?.top_categories || []).reduce(
-    (total, row) => total + row.count,
-    0
-  )
+  categories.value.reduce((total, row) => total + row.count, 0)
 );
+const categoryArcs = computed(() => {
+  let offset = 0;
+  return categories.value.map(row => {
+    const length = categoriesTotal.value
+      ? (100 * row.count) / categoriesTotal.value
+      : 0;
+    const arc = { length, offset };
+    offset -= length;
+    return arc;
+  });
+});
+const categoryTones = [
+  'text-n-blue-9',
+  'text-n-iris-9',
+  'text-n-teal-9',
+  'text-n-amber-9',
+  'text-n-slate-9',
+];
 const date = value =>
   new Intl.DateTimeFormat(locale.value.replace('_', '-'), {
     day: '2-digit',
@@ -52,7 +75,7 @@ const duration = seconds => {
 
 <template>
   <div v-if="data" class="mb-4 grid gap-4">
-    <div class="grid gap-4 xl:grid-cols-3">
+    <div v-if="section !== 'summary'" class="grid gap-4 xl:grid-cols-3">
       <Panel
         :title="labels.supervisor.evolution"
         icon="i-lucide-chart-no-axes-combined"
@@ -65,7 +88,8 @@ const duration = seconds => {
         </template>
         <template v-if="chart.length">
           <svg
-            class="h-40 w-full text-n-blue-9"
+            class="w-full text-n-blue-9"
+            :class="section === 'charts' ? 'h-28' : 'h-40'"
             viewBox="0 0 500 154"
             role="img"
             :aria-label="labels.supervisor.evolution"
@@ -131,15 +155,58 @@ const duration = seconds => {
         </p>
       </Panel>
       <Panel :title="labels.supervisor.top_categories" icon="i-lucide-tags">
-        <p v-if="!data.top_categories.length" class="text-sm text-n-slate-11">
+        <p v-if="!categories.length" class="text-sm text-n-slate-11">
           {{ t('JRC_SERVICE_DESK.COMMON.no_records') }}
         </p>
         <div
-          v-for="row in data.top_categories.slice(0, 5)"
+          v-else
+          class="relative mx-auto mb-3 flex size-28 items-center justify-center"
+        >
+          <svg
+            viewBox="0 0 100 100"
+            class="size-28 -rotate-90"
+            role="img"
+            :aria-label="labels.supervisor.top_categories"
+          >
+            <circle
+              cx="50"
+              cy="50"
+              r="38"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="13"
+              class="text-n-slate-3"
+            />
+            <circle
+              v-for="(arc, index) in categoryArcs"
+              :key="index"
+              cx="50"
+              cy="50"
+              r="38"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="13"
+              pathLength="100"
+              :stroke-dasharray="`${arc.length} ${100 - arc.length}`"
+              :stroke-dashoffset="arc.offset"
+              :class="categoryTones[index]"
+            />
+          </svg>
+          <strong class="absolute text-xl font-semibold tabular-nums">{{
+            categoriesTotal
+          }}</strong>
+        </div>
+        <div
+          v-for="(row, index) in categories"
           :key="row.id || 'uncategorized'"
           class="mb-3 grid gap-1"
         >
           <div class="flex items-center justify-between gap-3 text-xs">
+            <span
+              class="size-2 shrink-0 rounded-full bg-current"
+              :class="categoryTones[index]"
+              aria-hidden="true"
+            />
             <button
               v-if="row.id"
               type="button"
@@ -158,18 +225,14 @@ const duration = seconds => {
             }}</span>
             <strong class="tabular-nums">{{ row.count }}</strong>
           </div>
-          <progress
-            class="h-1.5 w-full accent-blue-700"
-            :value="row.count"
-            :max="Math.max(categoriesTotal, 1)"
-            :aria-label="
-              row.name || t('JRC_SERVICE_DESK.REDESIGN_LIST.uncategorized')
-            "
-          />
         </div>
       </Panel>
     </div>
-    <div class="grid gap-4 lg:grid-cols-3">
+    <div
+      v-if="section !== 'charts'"
+      class="grid gap-4"
+      :class="section === 'summary' ? 'content-start' : 'lg:grid-cols-3'"
+    >
       <Panel
         :title="t('JRC_SERVICE_DESK.REDESIGN_LIST.sla_summary')"
         icon="i-lucide-timer"

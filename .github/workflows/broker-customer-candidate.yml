@@ -1,0 +1,168 @@
+name: Broker e Cadastro Mestre - regressao candidata
+
+on:
+  push:
+    branches: [codex/jrc-campaign-direct-audience-20261022]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: broker-customer-candidate-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  TZ: UTC
+  CANDIDATE_BASE_SHA: dc23e8e0348cae7881ce47a9f6ecca0803313b6c
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  full-vitest:
+    if: github.ref == 'refs/heads/codex/jrc-campaign-direct-audience-20261022'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Confirmar candidato e preservar a base instalada
+        run: |
+          test "$GITHUB_REF" = refs/heads/codex/jrc-campaign-direct-audience-20261022
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git merge-base --is-ancestor "$CANDIDATE_BASE_SHA" HEAD
+          git diff --check "$CANDIDATE_BASE_SHA" HEAD
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - name: Instalar JavaScript sem alterar o lockfile
+        timeout-minutes: 15
+        run: pnpm install --frozen-lockfile
+      - name: Vitest completo com dois workers
+        run: |
+          pnpm exec vitest run --maxWorkers=2 --minWorkers=1 --no-coverage --reporter=default --reporter=json --outputFile=/tmp/broker-customer-vitest.json
+          node <<'NODE'
+          const fs = require('node:fs');
+          const result = JSON.parse(fs.readFileSync('/tmp/broker-customer-vitest.json', 'utf8'));
+          console.log({ files: result.testResults.length, tests: result.numTotalTests, failed: result.numFailedTests, pending: result.numPendingTests });
+          if (!result.success || result.numFailedTestSuites || result.numFailedTests || result.numPendingTests || result.testResults.length < 568) process.exit(1);
+          NODE
+      - name: Preservar fonte, snapshots e lockfiles
+        if: always()
+        run: git diff --exit-code
+
+  rails-postgres:
+    if: github.ref == 'refs/heads/codex/jrc-campaign-direct-audience-20261022'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [standard, concurrent]
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: disposable-test-only
+        ports: ['5432:5432']
+        options: --health-cmd "pg_isready -U postgres -d postgres" --health-interval 5s --health-timeout 5s --health-retries 12
+      redis:
+        image: redis:7.4.0-alpine@sha256:c35af3bbcef51a62c8bae5a9a563c6f1b60d7ebaea4cb5a3ccbcc157580ae098
+        ports: ['6379:6379']
+    env:
+      RAILS_ENV: test
+      POSTGRES_HOST: 127.0.0.1
+      POSTGRES_PORT: '5432'
+      POSTGRES_USERNAME: postgres
+      POSTGRES_PASSWORD: disposable-test-only
+      POSTGRES_DATABASE: jrc_rel_sd_r345_concurrency_test
+      REDIS_URL: redis://127.0.0.1:6379/15
+      FRONTEND_URL: https://central.example.test
+      SECRET_KEY_BASE: isolated-broker-customer-ci-not-a-production-secret
+      BUNDLE_FROZEN: 'true'
+      SCHEMA: /tmp/broker-customer-candidate-schema.rb
+      MINIMUM_EXAMPLES: ${{ matrix.suite == 'concurrent' && '11' || '1044' }}
+      JRC_SD_CONCURRENCY: '1'
+      TEST_SUITE: ${{ matrix.suite }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Confirmar candidato e preservar a base instalada
+        run: |
+          test "$GITHUB_REF" = refs/heads/codex/jrc-campaign-direct-audience-20261022
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git merge-base --is-ancestor "$CANDIDATE_BASE_SHA" HEAD
+          git diff --check "$CANDIDATE_BASE_SHA" HEAD
+      - name: Dependencias nativas dos testes Rails
+        timeout-minutes: 8
+        run: |
+          set -euo pipefail
+          for source in /etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources /etc/apt/apt-mirrors*.txt; do
+            if [ -f "$source" ]; then
+              sudo sed -i -E \
+                -e 's|https?://azure[.]archive[.]ubuntu[.]com/ubuntu/?|https://archive.ubuntu.com/ubuntu/|g' \
+                -e 's#http://(archive|security)[.]ubuntu[.]com/ubuntu/?#https://\1.ubuntu.com/ubuntu/#g' \
+                "$source"
+            fi
+          done
+          apt_options=(-o Acquire::Retries=2 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20)
+          sudo apt-get "${apt_options[@]}" -o APT::Update::Error-Mode=any update
+          sudo apt-get "${apt_options[@]}" install -y --no-install-recommends libpq-dev libvips libvips-dev
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4.4'
+          bundler: 2.5.16
+          bundler-cache: true
+      - name: Preparar banco descartavel exclusivo desta execucao
+        run: |
+          test "$RAILS_ENV" = test
+          test "$POSTGRES_HOST" = 127.0.0.1
+          test -z "${DATABASE_URL:-}"
+          # Each job gets a fresh PostgreSQL service; use the existing approved concurrency profile.
+          test "$POSTGRES_DATABASE" = jrc_rel_sd_r345_concurrency_test
+          test "$JRC_SD_CONCURRENCY" = 1
+          SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
+          bundle exec rails db:migrate
+      - name: Regressao Broker, clientes, campanhas e modulos integrados
+        run: |
+          case "$TEST_SUITE" in
+            standard) tags=(--tag '~sd_concurrency') ;;
+            concurrent) tags=(--tag sd_concurrency) ;;
+            *) exit 1 ;;
+          esac
+          bundle exec rspec \
+            spec/services/jrc_broker \
+            spec/services/jrc_customers \
+            spec/requests/api/v1/accounts/jrc_broker_spec.rb \
+            spec/requests/api/v1/accounts/jrc_broker_inbox_spec.rb \
+            spec/requests/api/v1/accounts/jrc_broker_contract_spec.rb \
+            spec/services/jrc_campaigns \
+            spec/requests/api/v1/accounts/jrc_campaigns \
+            spec/jobs/jrc_broker_webhook_job_spec.rb \
+            spec/requests/api/v1/accounts/jrc_contact_center \
+            spec/requests/api/v1/accounts/jrc_operations \
+            spec/requests/api/v1/accounts/jrc_service_desk \
+            spec/services/jrc_service_desk \
+            "${tags[@]}" --format progress --format json --out /tmp/broker-customer-rspec.json
+          python3 - <<'PYTHON'
+          import json, os
+          with open('/tmp/broker-customer-rspec.json') as report:
+              summary = json.load(report)['summary']
+          print(summary)
+          assert summary['failure_count'] == 0
+          assert summary['pending_count'] == 0
+          assert summary['example_count'] >= int(os.environ['MINIMUM_EXAMPLES'])
+          PYTHON
+      - name: Preservar fonte, schema e lockfiles
+        if: always()
+        run: git diff --exit-code

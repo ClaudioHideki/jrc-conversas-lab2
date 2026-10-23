@@ -37,10 +37,14 @@ class JrcCampaigns::AudienceResolver
     resolved = resolved_entries
     counters = Hash.new(0)
     rejections = []
-    evolution = campaign.whatsapp? && (campaign.evolution_connectors.any? || campaign.broker_connectors.any?)
-    list_preview = evolution || (campaign.new_record? && campaign.inbox_id.nil? && campaign.campaign_inboxes.empty?)
+    sender_selected = campaign.inbox_id.present? || campaign.campaign_inboxes.any?
+    sender_unavailable = sender_selected && campaign.sending_inbox_links.empty?
     eligible = resolved.filter_map do |entry|
       normalized = normalized_entry(entry)
+      if sender_unavailable
+        rejections << rejection_json(entry, normalized, 'Caixa remetente não autorizada para esta conta e canal.')
+        next
+      end
       destination = normalized.destination(campaign.delivery_channel)
       if destination.blank?
         counters[:without_destination_count] += 1
@@ -59,9 +63,8 @@ class JrcCampaigns::AudienceResolver
       end
 
       if campaign.whatsapp?
-        policy = JrcCampaigns::EligibilityPolicy.new(account: account, phone_number: destination, contact: entry.contact,
-                                                      purpose: evolution ? 'whatsapp_campaigns' : nil)
-        reason = list_preview ? policy.list_rejection_reason : policy.rejection_reason
+        policy = JrcCampaigns::EligibilityPolicy.new(account: account, phone_number: destination, contact: entry.contact)
+        reason = policy.rejection_reason
         if reason
           counters[reason == 'Telefone inválido.' ? :without_destination_count : :without_consent_count] += 1
           rejections << rejection_json(entry, normalized, reason)

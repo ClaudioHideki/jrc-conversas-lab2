@@ -232,7 +232,7 @@ export const T = Object.freeze({
   review: 'Revise todas as linhas antes de aplicar.',
   campaignFilters: 'Filtrar pelo Cadastro Mestre',
   campaignHelp:
-    'Os filtros complementam a audi\u00eancia. Consentimento, bloqueios e deduplica\u00e7\u00e3o continuam obrigat\u00f3rios.',
+    'Refine o p\u00fablico por empresa, v\u00ednculo, segmento ou departamento. Bloqueios e revoga\u00e7\u00f5es continuam respeitados.',
 });
 export const inputClass =
   'mt-1 w-full rounded-lg border border-n-weak bg-n-solid-1 px-3 py-2 text-sm text-n-slate-12';

@@ -5,13 +5,16 @@ import {
   historyFields,
   historyChanges,
   sameHistoryScope,
+  historyValue,
 } from '../helpers/historyPresentation.js';
 import { formatTimestamp } from '../helpers/presentation.js';
 const props = defineProps({
   event: { type: Object, required: true },
   ticket: { type: Object, required: true },
 });
-const { t, locale } = useI18n();
+const { t, te, locale } = useI18n();
+const display = (key, value, named = false) =>
+  historyValue(key, value, t, te, named);
 const fields = computed(() => historyFields(props.event, props.ticket));
 const changes = computed(() => historyChanges(props.event, props.ticket));
 </script>
@@ -42,7 +45,9 @@ const changes = computed(() => historyChanges(props.event, props.ticket));
         <dt class="text-xs text-n-slate-11">
           {{ t(`JRC_SERVICE_DESK.EXPERIENCE.history.fields.${field.key}`) }}
         </dt>
-        <dd class="text-sm break-words">{{ field.value }}</dd>
+        <dd class="text-sm break-words">
+          {{ display(field.key, field.value, field.named) }}
+        </dd>
       </div>
     </dl>
     <p v-if="!fields.length && !changes.length" class="text-xs text-n-slate-11">
@@ -56,8 +61,8 @@ const changes = computed(() => historyChanges(props.event, props.ticket));
         <dd class="text-sm break-words">
           {{
             t('JRC_SERVICE_DESK.EXPERIENCE.history.changed', {
-              before: change.before ?? t('JRC_SERVICE_DESK.COMMON.no_value'),
-              after: change.after ?? t('JRC_SERVICE_DESK.COMMON.no_value'),
+              before: display(change.key, change.before),
+              after: display(change.key, change.after),
             })
           }}
         </dd>

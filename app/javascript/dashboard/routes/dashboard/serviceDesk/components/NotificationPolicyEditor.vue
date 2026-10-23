@@ -6,12 +6,21 @@ import Button from 'dashboard/components-next/button/Button.vue';
 import Panel from './ServiceDeskPanel.vue';
 import State from './ServiceDeskState.vue';
 import ScopeBar from './ScopeBar.vue';
+import ServiceDeskStepper from './ServiceDeskStepper.vue';
+import { NOTIFICATION_STEPS, nextStep } from '../helpers/presentationSteps';
 import LookupSelect from './LookupSelect.vue';
 import ServiceDefinitionSelect from './ServiceDefinitionSelect.vue';
 import { useServiceDesk } from '../composables/useServiceDesk';
 import { communicationLabels } from '../helpers/communicationLabels';
 import { v2Labels } from '../helpers/v2Labels';
 
+const props = defineProps({
+  initialUnitId: { type: String, default: '' },
+  initialServiceId: { type: String, default: '' },
+});
+const emit = defineEmits(['busyChange']);
+const step = ref('general');
+const publicationUncertain = ref(false);
 const { t } = useI18n();
 const session = useServiceDesk();
 const labels = computed(() => communicationLabels(t));
@@ -39,6 +48,8 @@ const inboxId = ref('');
 const enabled = ref(false);
 const confirmed = ref(false);
 const busy = ref(false);
+const locked = computed(() => busy.value || publicationUncertain.value);
+watch(locked, value => emit('busyChange', value));
 const feedback = ref(null);
 let generation = 0;
 let controller;
@@ -135,6 +146,7 @@ const load = async () => {
       unitId.value
     );
     if (!active(context, turn)) return;
+    publicationUncertain.value = false;
     policies.value = result.policies;
     events.value = result.event_types;
     inboxes.value = (result.inboxes || []).filter(
@@ -155,8 +167,20 @@ watch([unitId, () => session.state.context, () => session.state.status], () => {
 });
 watch(unitId, () => {
   ticketTypeId.value = '';
-  serviceId.value = '';
+  serviceId.value =
+    props.initialUnitId === unitId.value ? props.initialServiceId : '';
 });
+watch(
+  [() => props.initialUnitId, () => session.state.context],
+  () => {
+    if (!props.initialUnitId || busy.value) return;
+    if (
+      session.state.context?.units.some(row => row.id === props.initialUnitId)
+    )
+      unitId.value = props.initialUnitId;
+  },
+  { immediate: true }
+);
 watch([latest, eventType, channel, ticketTypeId, serviceId], () => {
   clear();
   const row = latest.value;
@@ -176,7 +200,8 @@ watch([template, templateVersion, inboxId, enabled], () => {
   previewed.value = false;
 });
 const selectPolicy = row => {
-  if (busy.value) return;
+  if (locked.value) return;
+  step.value = 'general';
   eventType.value = row.event_type;
   channel.value = row.channel;
   ticketTypeId.value = row.ticket_type_id || '';
@@ -239,6 +264,12 @@ const publish = async () => {
     !allowed.value ||
     !confirmed.value ||
     busy.value ||
+    publicationUncertain.value ||
+    step.value !== 'review' ||
+    !unitId.value ||
+    !events.value.includes(eventType.value) ||
+    !template.value.trim() ||
+    !templateVersion.value.trim() ||
     invalidTokens.value.length ||
     (enabled.value &&
       !permittedInboxes.value.some(row => row.id === inboxId.value))
@@ -301,6 +332,7 @@ const publish = async () => {
         feedback.value = 'denied';
       else
         feedback.value = error.response?.status === 422 ? 'error' : 'uncertain';
+      publicationUncertain.value = feedback.value === 'uncertain';
       confirmed.value = false;
     }
   } finally {
@@ -308,6 +340,7 @@ const publish = async () => {
   }
 };
 onBeforeUnmount(() => {
+  emit('busyChange', false);
   generation += 1;
   controller?.abort();
   policies.value = [];
@@ -323,7 +356,7 @@ onBeforeUnmount(() => {
         v-model:unit-id="unitId"
         v-model:operator-id="operatorId"
         required
-        :disabled="busy"
+        :disabled="locked"
       />
       <State v-if="loading" status="loading" compact />
       <div
@@ -338,7 +371,7 @@ onBeforeUnmount(() => {
           :key="row.id"
           type="button"
           class="flex flex-wrap items-center gap-3 rounded-lg border border-n-weak p-3 text-start text-xs hover:bg-n-slate-2 focus-visible:ring-2 focus-visible:ring-n-blue-9"
-          :disabled="busy"
+          :disabled="locked"
           @click="selectPolicy(row)"
         >
           <span class="min-w-0 flex-1 font-medium">{{
@@ -367,196 +400,285 @@ onBeforeUnmount(() => {
       >
         {{ t('JRC_SERVICE_DESK.REDESIGN_AUTOMATIONS.no_policies') }}
       </p>
-      <form
+      <section
         v-if="unitId && events.length && !loading"
-        class="grid gap-3 mt-4"
-        @submit.prevent="publish"
+        class="grid gap-4 mt-4"
       >
-        <div class="grid gap-3 md:grid-cols-2">
-          <LookupSelect
-            v-model="ticketTypeId"
-            resource="ticket_types"
-            :unit-id="unitId"
-            :disabled="busy"
-            :label="t('JRC_SERVICE_DESK.FIELDS.ticket_type')"
-          />
-          <ServiceDefinitionSelect
-            v-model="serviceId"
-            :unit-id="unitId"
-            :disabled="busy"
-          />
-          <label class="text-sm"
-            >{{ labels.event_type
-            }}<select
-              v-model="eventType"
-              :disabled="busy"
-              class="w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
-            >
-              <option v-for="event in events" :key="event" :value="event">
-                {{ labels.events[event] }}
-              </option>
-            </select></label
+        <ServiceDeskStepper
+          v-model="step"
+          :steps="NOTIFICATION_STEPS"
+          label-root="JRC_SERVICE_DESK.REFINEMENT.notification.steps"
+          :label="t('JRC_SERVICE_DESK.R2.notification_policies')"
+          :disabled="locked"
+        />
+        <div class="grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(15rem,1fr)]">
+          <div
+            class="min-w-0 grid content-start gap-4 rounded-xl border border-n-weak p-4"
           >
-          <label class="text-sm"
-            >{{ labels.channel
-            }}<select
-              v-model="channel"
-              :disabled="busy"
-              class="w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
-            >
-              <option
-                v-for="value in ['email', 'whatsapp']"
-                :key="value"
-                :value="value"
+            <template v-if="step === 'general'">
+              <label class="grid gap-1 text-sm"
+                >{{ labels.event_type }}
+                <select
+                  v-model="eventType"
+                  :disabled="locked"
+                  class="rounded-lg border border-n-weak bg-n-solid-1 p-2"
+                >
+                  <option v-for="event in events" :key="event" :value="event">
+                    {{ labels.events[event] }}
+                  </option>
+                </select>
+              </label>
+              <label class="text-sm"
+                ><input v-model="enabled" type="checkbox" :disabled="locked" />
+                {{ labels.enabled }}</label
               >
-                {{ values.channel[value] }}
-              </option>
-            </select></label
+              <p class="text-xs text-n-slate-11">{{ labels.default_off }}</p>
+            </template>
+            <template v-else-if="step === 'conditions'">
+              <p class="text-xs text-n-slate-11">
+                {{
+                  t('JRC_SERVICE_DESK.REFINEMENT.notification.conditions_hint')
+                }}
+              </p>
+              <LookupSelect
+                v-model="ticketTypeId"
+                resource="ticket_types"
+                :unit-id="unitId"
+                :disabled="locked"
+                :label="t('JRC_SERVICE_DESK.FIELDS.ticket_type')"
+              />
+              <ServiceDefinitionSelect
+                v-model="serviceId"
+                :unit-id="unitId"
+                :disabled="locked"
+              />
+            </template>
+            <template v-else-if="step === 'channels'">
+              <label class="grid gap-1 text-sm"
+                >{{ labels.channel }}
+                <select
+                  v-model="channel"
+                  :disabled="locked"
+                  class="rounded-lg border border-n-weak bg-n-solid-1 p-2"
+                >
+                  <option
+                    v-for="value in ['email', 'whatsapp']"
+                    :key="value"
+                    :value="value"
+                  >
+                    {{ values.channel[value] }}
+                  </option>
+                </select>
+              </label>
+              <label class="grid gap-1 text-sm"
+                >{{ labels.inbox }}
+                <select
+                  v-model="inboxId"
+                  :disabled="locked"
+                  class="rounded-lg border border-n-weak bg-n-solid-1 p-2"
+                >
+                  <option value="">
+                    {{ t('JRC_SERVICE_DESK.COMMON.select') }}
+                  </option>
+                  <option
+                    v-for="inbox in permittedInboxes"
+                    :key="inbox.id"
+                    :value="inbox.id"
+                  >
+                    {{ inbox.name }}
+                  </option>
+                </select>
+              </label>
+              <p
+                v-if="!permittedInboxes.length"
+                class="text-xs text-n-slate-11"
+              >
+                {{ t('JRC_SERVICE_DESK.REDESIGN_AUTOMATIONS.no_inboxes') }}
+              </p>
+            </template>
+            <template v-else-if="step === 'message'">
+              <label class="grid gap-1 text-sm"
+                >{{ labels.template }}
+                <textarea
+                  v-model="template"
+                  maxlength="10000"
+                  rows="9"
+                  :disabled="locked"
+                  class="w-full rounded-lg border border-n-weak bg-n-solid-1 p-3"
+                />
+              </label>
+              <label class="grid gap-1 text-sm"
+                >{{ labels.template_version }}
+                <input
+                  v-model="templateVersion"
+                  maxlength="80"
+                  :disabled="locked"
+                  class="rounded-lg border border-n-weak bg-n-solid-1 p-2"
+                />
+              </label>
+              <p class="text-xs font-medium">
+                {{ t('JRC_SERVICE_DESK.REFINEMENT.notification.variables') }}
+              </p>
+              <div class="flex flex-wrap gap-1">
+                <Button
+                  v-for="token in tokens"
+                  :key="token"
+                  size="xs"
+                  variant="outline"
+                  :label="token"
+                  :disabled="
+                    locked || template.length + token.length + 4 > 10000
+                  "
+                  @click="template += '{{' + token + '}}'"
+                />
+              </div>
+            </template>
+            <template v-else-if="step === 'preview'">
+              <p class="text-sm">
+                {{
+                  t('JRC_SERVICE_DESK.EXPERIENCE.notification_preview_notice')
+                }}
+              </p>
+              <Button
+                :disabled="
+                  locked || !template.trim() || invalidTokens.length > 0
+                "
+                :label="
+                  t('JRC_SERVICE_DESK.REDESIGN_AUTOMATIONS.test_template')
+                "
+                @click="previewed = true"
+              />
+              <p v-if="previewed" class="text-xs text-n-slate-11">
+                {{ t('JRC_SERVICE_DESK.REDESIGN_AUTOMATIONS.example_notice') }}
+              </p>
+            </template>
+            <template v-else>
+              <h4 class="font-semibold text-sm">
+                {{ t('JRC_SERVICE_DESK.REFINEMENT.notification.review') }}
+              </h4>
+              <p class="text-sm">
+                {{ labels.events[eventType] }} / {{ values.channel[channel] }}
+              </p>
+              <p class="text-xs">
+                {{
+                  t('JRC_SERVICE_DESK.LIFECYCLE.version', {
+                    version: latest?.version || 0,
+                  })
+                }}
+              </p>
+              <p class="text-xs text-n-slate-11">
+                {{ t('JRC_SERVICE_DESK.REFINEMENT.notification.publish_hint') }}
+              </p>
+              <label class="text-sm"
+                ><input
+                  v-model="confirmed"
+                  type="checkbox"
+                  :disabled="locked"
+                />
+                {{ labels.confirm_policy }}</label
+              >
+              <p
+                v-if="!template.trim() || !templateVersion.trim()"
+                role="alert"
+                class="text-xs text-n-amber-11"
+              >
+                {{
+                  t('JRC_SERVICE_DESK.REFINEMENT.notification.required_message')
+                }}
+              </p>
+            </template>
+            <p
+              v-if="invalidTokens.length"
+              role="alert"
+              class="text-xs text-n-ruby-11"
+            >
+              {{
+                t('JRC_SERVICE_DESK.REDESIGN_AUTOMATIONS.invalid_tokens', {
+                  tokens: invalidTokens.join(', '),
+                })
+              }}
+            </p>
+          </div>
+          <aside
+            class="min-w-0 grid content-start gap-3 rounded-xl border border-n-weak bg-n-solid-1 p-4"
+            aria-live="polite"
           >
-          <label class="text-sm">
-            {{ labels.inbox }}
-            <select
-              v-model="inboxId"
-              :disabled="busy"
-              :required="enabled"
-              class="w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
+            <h4 class="text-sm font-semibold">
+              {{ t('JRC_SERVICE_DESK.EXPERIENCE.notification_preview') }}
+            </h4>
+            <p class="text-xs text-n-slate-11">
+              {{ t('JRC_SERVICE_DESK.EXPERIENCE.notification_preview_notice') }}
+            </p>
+            <p class="text-sm">
+              {{ labels.events[eventType] }} / {{ values.channel[channel] }}
+            </p>
+            <pre
+              class="whitespace-pre-wrap break-words rounded-xl bg-n-slate-2 p-3 text-sm"
+              >{{
+                (previewed ? examplePreview : template) ||
+                t('JRC_SERVICE_DESK.COMMON.no_value')
+              }}</pre
             >
-              <option value="">
-                {{ t('JRC_SERVICE_DESK.COMMON.select') }}
-              </option>
-              <option
-                v-for="inbox in permittedInboxes"
-                :key="inbox.id"
-                :value="inbox.id"
-              >
-                {{ inbox.name }}
-              </option>
-            </select>
-            <span
-              v-if="!permittedInboxes.length"
-              class="mt-1 block text-xs text-n-slate-11"
-              >{{ t('JRC_SERVICE_DESK.REDESIGN_AUTOMATIONS.no_inboxes') }}</span
-            >
-          </label>
+            <p class="text-xs">
+              {{ labels.template_version }}:
+              {{ templateVersion || t('JRC_SERVICE_DESK.COMMON.no_value') }}
+            </p>
+          </aside>
         </div>
-        <label class="text-sm"
-          >{{ labels.template
-          }}<textarea
-            v-model="template"
-            required
-            maxlength="10000"
-            :disabled="busy"
-            class="w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
-          />
-        </label>
-        <label class="text-sm"
-          >{{ labels.template_version
-          }}<input
-            v-model="templateVersion"
-            required
-            maxlength="80"
-            :disabled="busy"
-            class="w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
-        /></label>
-        <label class="text-sm"
-          ><input v-model="enabled" type="checkbox" :disabled="busy" />{{
-            labels.enabled
-          }}</label
-        >
-        <div class="flex flex-wrap gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            :disabled="busy || !template || invalidTokens.length > 0"
-            :label="t('JRC_SERVICE_DESK.REDESIGN_AUTOMATIONS.test_template')"
-            @click="previewed = true"
-          />
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            :disabled="busy"
-            :label="t('JRC_SERVICE_DESK.REDESIGN_AUTOMATIONS.save_draft')"
-            @click="saveDraft"
-          />
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            :disabled="busy"
-            :label="t('JRC_SERVICE_DESK.REDESIGN_AUTOMATIONS.restore_draft')"
-            @click="restoreDraft"
-          />
-        </div>
-        <p
-          v-if="invalidTokens.length"
-          role="alert"
-          class="text-xs text-n-ruby-11"
-        >
-          {{
-            t('JRC_SERVICE_DESK.REDESIGN_AUTOMATIONS.invalid_tokens', {
-              tokens: invalidTokens.join(', '),
-            })
-          }}
-        </p>
         <p v-if="draftFeedback" role="status" class="text-xs text-n-slate-11">
           {{ t(`JRC_SERVICE_DESK.REDESIGN_AUTOMATIONS.${draftFeedback}`) }}
         </p>
-        <section
-          class="grid gap-2 rounded-xl border border-n-weak bg-n-solid-1 p-4"
-          aria-live="polite"
+        <footer
+          class="flex flex-wrap justify-between gap-2 border-t border-n-weak pt-4"
         >
-          <h4 class="text-sm font-semibold">
-            {{ t('JRC_SERVICE_DESK.EXPERIENCE.notification_preview') }}
-          </h4>
-          <p class="text-xs text-n-slate-11">
-            {{ t('JRC_SERVICE_DESK.EXPERIENCE.notification_preview_notice') }}
-          </p>
-          <p class="text-sm">
-            {{ labels.events[eventType] }} &middot;
-            {{ values.channel[channel] }}
-          </p>
-          <pre class="whitespace-pre-wrap break-words text-sm">{{
-            (previewed ? examplePreview : template) ||
-            t('JRC_SERVICE_DESK.COMMON.no_value')
-          }}</pre>
-          <p v-if="previewed" class="text-xs text-n-slate-11">
-            {{ t('JRC_SERVICE_DESK.REDESIGN_AUTOMATIONS.example_notice') }}
-          </p>
-          <p class="text-xs">
-            {{
-              t('JRC_SERVICE_DESK.LIFECYCLE.version', {
-                version: latest?.version || 0,
-              })
-            }}
-          </p>
-        </section>
-        <label class="text-sm"
-          ><input v-model="confirmed" type="checkbox" :disabled="busy" />{{
-            labels.confirm_policy
-          }}</label
-        >
-        <Button
-          type="submit"
-          :disabled="
-            busy ||
-            !confirmed ||
-            invalidTokens.length > 0 ||
-            feedback === 'uncertain' ||
-            (enabled && !permittedInboxes.some(row => row.id === inboxId))
-          "
-          :label="labels.save_policy"
-        />
-        <Button
-          v-if="feedback === 'uncertain'"
-          type="button"
-          variant="outline"
-          :disabled="busy"
-          :label="t('JRC_SERVICE_DESK.COMMON.refresh')"
-          @click="load"
-        />
-      </form>
+          <div class="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              :disabled="locked || step === NOTIFICATION_STEPS[0]"
+              :label="t('JRC_SERVICE_DESK.REFINEMENT.back')"
+              @click="step = nextStep(NOTIFICATION_STEPS, step, -1)"
+            />
+            <Button
+              variant="ghost"
+              :disabled="locked"
+              :label="t('JRC_SERVICE_DESK.REDESIGN_AUTOMATIONS.save_draft')"
+              @click="saveDraft"
+            />
+            <Button
+              variant="ghost"
+              :disabled="locked"
+              :label="t('JRC_SERVICE_DESK.REDESIGN_AUTOMATIONS.restore_draft')"
+              @click="restoreDraft"
+            />
+          </div>
+          <Button
+            v-if="step !== 'review'"
+            :disabled="locked"
+            :label="t('JRC_SERVICE_DESK.COMMON.next')"
+            @click="step = nextStep(NOTIFICATION_STEPS, step, 1)"
+          />
+          <Button
+            v-else
+            :disabled="
+              locked ||
+              !confirmed ||
+              !template.trim() ||
+              !templateVersion.trim() ||
+              invalidTokens.length > 0 ||
+              (enabled && !permittedInboxes.some(row => row.id === inboxId))
+            "
+            :label="labels.save_policy"
+            @click="publish"
+          />
+          <Button
+            v-if="publicationUncertain"
+            variant="outline"
+            :disabled="locked"
+            :label="t('JRC_SERVICE_DESK.COMMON.refresh')"
+            @click="load"
+          />
+        </footer>
+      </section>
       <Button
         v-if="feedback === 'unavailable'"
         type="button"

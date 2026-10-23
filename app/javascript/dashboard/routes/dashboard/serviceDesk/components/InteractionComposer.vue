@@ -1,18 +1,20 @@
 <script setup>
-import { computed, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Button from 'dashboard/components-next/button/Button.vue';
 import { useInteractionComposer } from '../composables/useInteractionComposer';
 import { communicationLabels } from '../helpers/communicationLabels';
 import { v2Labels } from '../helpers/v2Labels';
+import { authorizedConversationDestination } from '../helpers/conversationPresentation';
 import { validInteractionFiles } from '../helpers/detailExperience';
 
 const props = defineProps({
   ticket: { type: Object, required: true },
+  conversation: { type: Object, default: null },
   previous: { type: Object, default: null },
   mode: { type: String, default: 'all' },
 });
-const emit = defineEmits(['updated']);
+const emit = defineEmits(['updated', 'draftChange', 'busyChange']);
 const { t } = useI18n();
 const labels = computed(() => communicationLabels(t));
 const values = computed(() => v2Labels(t));
@@ -46,6 +48,38 @@ const {
   },
   emit
 );
+const dirty = computed(() => !!body.value.trim() || files.value.length > 0);
+const selectedDestination = computed(() =>
+  authorizedConversationDestination(options.value, props.conversation)
+);
+const selectDestination = async () => {
+  if (
+    busy.value ||
+    dirty.value ||
+    !selectedDestination.value ||
+    !allowedAudiences.value.includes('customer')
+  )
+    return;
+  const target = selectedDestination.value;
+  const ticketId = props.ticket.id;
+  audience.value = 'customer';
+  await nextTick();
+  if (
+    busy.value ||
+    dirty.value ||
+    props.ticket.id !== ticketId ||
+    selectedDestination.value !== target
+  )
+    return;
+  channels.value = { [target.channel]: true };
+  destinations.value = { [target.channel]: target.conversationId };
+};
+watch(dirty, value => emit('draftChange', value), { immediate: true });
+watch(busy, value => emit('busyChange', value));
+onBeforeUnmount(() => {
+  emit('draftChange', false);
+  emit('busyChange', false);
+});
 const appearance = computed(
   () =>
     ({
@@ -72,6 +106,22 @@ watch(files, selected => {
       {{ t('JRC_SERVICE_DESK.R2.unavailable') }}
     </p>
     <template v-else>
+      <div
+        v-if="mode === 'conversation' && selectedDestination"
+        class="flex flex-wrap items-center gap-2 rounded-lg bg-n-blue-2 p-3"
+      >
+        <span class="text-xs break-all">{{
+          selectedDestination.recipient
+        }}</span>
+        <Button
+          size="xs"
+          type="button"
+          variant="outline"
+          :disabled="busy || dirty"
+          :label="t('JRC_SERVICE_DESK.REFINEMENT.conversations.reply_here')"
+          @click="selectDestination"
+        />
+      </div>
       <p
         v-if="mode === 'internal'"
         class="rounded-lg bg-n-amber-3 p-3 text-sm text-n-amber-11"
@@ -104,7 +154,7 @@ watch(files, selected => {
         "
         :disabled="busy"
         maxlength="50000"
-        rows="5"
+        :rows="mode === 'conversation' ? 3 : 5"
         class="w-full rounded-lg border border-n-weak bg-n-solid-1 p-3"
       />
       <label

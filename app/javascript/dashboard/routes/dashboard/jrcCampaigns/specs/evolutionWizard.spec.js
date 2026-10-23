@@ -129,8 +129,30 @@ describe('Evolution campaign test confirmation', () => {
       .find(item => item.text().includes('Synthetic QR'));
     expect(label.find('input').element.disabled).toBe(true);
     expect(wrapper.text()).toContain(
-      'JRC_CAMPAIGNS.WIZARD.SENDER_UNAVAILABLE'
+      'JRC_CAMPAIGNS.BROKER.REASONS.CAMPAIGN_IDENTITY_NOT_READY'
     );
+    expect(api.testMessage).not.toHaveBeenCalled();
+  });
+
+  it('shows a safe fallback for unknown sender problems without exposing the raw response', async () => {
+    await wrapper.setProps({
+      metadata: {
+        whatsapp_inboxes: [
+          {
+            id: 9,
+            name: 'Synthetic sender',
+            connector: 'broker',
+            health_status: 'DISCONNECTED',
+            health_error: true,
+            setup_reason: 'PRIVATE_REMOTE_DIAGNOSTIC',
+          },
+        ],
+      },
+    });
+    wrapper.vm.stepIndex = 1;
+    await flushPromises();
+    expect(wrapper.text()).toContain('JRC_CAMPAIGNS.WIZARD.SENDER_UNAVAILABLE');
+    expect(wrapper.text()).not.toContain('PRIVATE_REMOTE_DIAGNOSTIC');
     expect(api.testMessage).not.toHaveBeenCalled();
   });
 

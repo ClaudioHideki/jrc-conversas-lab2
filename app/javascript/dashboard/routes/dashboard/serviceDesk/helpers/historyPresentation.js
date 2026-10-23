@@ -100,3 +100,27 @@ export function historyChanges(event, ticket) {
     )
     .map(([key, values]) => ({ key, before: values[0], after: values[1] }));
 }
+
+const ENUM_FIELDS = new Set([
+  'status',
+  'action',
+  'mode',
+  'kind',
+  'clock_kind',
+  'resource_kind',
+  'notification_state',
+  'channel',
+  'state',
+  'priority',
+  'severity',
+]);
+export function historyValue(key, value, translate, exists, named = false) {
+  if (value === null || value === undefined)
+    return translate('JRC_SERVICE_DESK.COMMON.no_value');
+  const text = String(value);
+  if (!named && ENUM_FIELDS.has(key) && /^[a-z][a-z0-9_]*$/.test(text)) {
+    const path = `JRC_SERVICE_DESK.REFINEMENT.history.${key}.${text}`;
+    if (exists(path)) return translate(path);
+  }
+  return text;
+}

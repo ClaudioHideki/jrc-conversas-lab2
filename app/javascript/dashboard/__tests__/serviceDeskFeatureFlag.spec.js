@@ -15,6 +15,8 @@ describe('JRC Service Desk feature registration', () => {
           'JRC_SERVICE_DESK',
           'JRC_CUSTOMER_MASTER',
           'JRC_RELATIONSHIP',
+          'JRC_CONTACT_CENTER',
+          'JRC_APPROVALS',
         ].includes(key)
     );
     expect(existing).toEqual(Object.entries(baseline.frontend_flags));
@@ -23,6 +25,11 @@ describe('JRC Service Desk feature registration', () => {
   it('registers native Customer Master and Relationship with independent flags', () => {
     expect(FEATURE_FLAGS.JRC_CUSTOMER_MASTER).toBe('jrc_customer_master');
     expect(FEATURE_FLAGS.JRC_RELATIONSHIP).toBe('jrc_relationship');
+  });
+
+  it('registers Contact Center and Approvals with independent flags', () => {
+    expect(FEATURE_FLAGS.JRC_CONTACT_CENTER).toBe('jrc_contact_center');
+    expect(FEATURE_FLAGS.JRC_APPROVALS).toBe('jrc_approvals');
   });
 
   it('does not alter the existing premium feature list', () => {

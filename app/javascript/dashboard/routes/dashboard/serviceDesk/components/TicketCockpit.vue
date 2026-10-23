@@ -26,6 +26,8 @@ const props = defineProps({
   createTaskOnOpen: Boolean,
 });
 const emit = defineEmits(['updated', 'taskEditorOpened']);
+const communicationDirty = ref(false);
+const communicationBusy = ref(false);
 const { t, locale } = useI18n();
 const labels = computed(() => v2Labels(t));
 const session = useServiceDesk();
@@ -563,6 +565,8 @@ onBeforeUnmount(() => {
         <TicketTimeline
           :ticket="ticket"
           :revision="revision"
+          :conversations="data.conversations"
+          :selection-locked="communicationDirty || communicationBusy"
           :only-files="mode === 'files'"
           :view="
             mode === 'notes'
@@ -575,9 +579,25 @@ onBeforeUnmount(() => {
           "
           @republish="republish"
           @updated="refreshed"
-        />
+        >
+          <template
+            v-if="mode === 'communication'"
+            #composer="{ conversation }"
+          >
+            <InteractionComposer
+              v-if="permissions.add_note"
+              :ticket="ticket"
+              :previous="previous"
+              :conversation="conversation"
+              mode="conversation"
+              @draft-change="communicationDirty = $event"
+              @busy-change="communicationBusy = $event"
+              @updated="refreshed"
+            />
+          </template>
+        </TicketTimeline>
         <InteractionComposer
-          v-if="permissions.add_note"
+          v-if="permissions.add_note && mode !== 'communication'"
           :ticket="ticket"
           :previous="previous"
           :mode="
@@ -799,8 +819,8 @@ onBeforeUnmount(() => {
               class="rounded-lg border border-n-weak bg-n-solid-1 p-3"
             />
             <textarea
-              :disabled="busy || terminalTask"
               v-model="checklistText"
+              :disabled="busy || terminalTask"
               :aria-label="t('JRC_SERVICE_DESK.COCKPIT.checklist')"
               :placeholder="t('JRC_SERVICE_DESK.COCKPIT.checklist')"
               class="border border-n-weak rounded-lg bg-n-solid-1 p-2"
@@ -1114,147 +1134,153 @@ onBeforeUnmount(() => {
             </div>
           </template>
         </article>
-        <form
+        <details
           v-if="permissions.approvals_request"
-          class="grid gap-3"
-          @submit.prevent="requestApproval"
+          class="rounded-lg border border-n-weak p-3"
         >
-          <input
-            v-model="approvalTitle"
-            required
-            maxlength="255"
-            :aria-label="t('JRC_SERVICE_DESK.COCKPIT.approval_title')"
-            :placeholder="t('JRC_SERVICE_DESK.COCKPIT.approval_title')"
-            class="border border-n-weak rounded-lg bg-n-solid-1 p-2"
-          />
-          <select
-            v-model="approvalTarget"
-            :aria-label="t('JRC_SERVICE_DESK.R3.approval_target')"
-            class="rounded-lg border border-n-weak bg-n-solid-1 p-2"
-          >
-            <option
-              v-for="value in ['person', 'team', 'role']"
-              :key="value"
-              :value="value"
-            >
-              {{ t(`JRC_SERVICE_DESK.R3.targets.${value}`) }}
-            </option>
-          </select>
-          <Lookup
-            v-if="approvalTarget === 'team'"
-            v-model="approvalTeam"
-            resource="teams"
-            :unit-id="ticket.unit_id"
-            :label="t('JRC_SERVICE_DESK.FIELDS.team')"
-            :disabled="busy"
-          />
-          <select
-            v-else-if="approvalTarget === 'role'"
-            v-model="approvalRole"
-            :aria-label="t('JRC_SERVICE_DESK.R3.approval_role')"
-            class="rounded-lg border border-n-weak bg-n-solid-1 p-2"
-          >
-            <option value="">{{ t('JRC_SERVICE_DESK.COMMON.select') }}</option>
-            <option
-              v-for="value in ['agent', 'administrator']"
-              :key="value"
-              :value="value"
-            >
-              {{ t(`JRC_SERVICE_DESK.R3.roles.${value}`) }}
-            </option>
-          </select>
-          <select
-            v-else
-            v-model="approver"
-            required
-            :aria-label="t('JRC_SERVICE_DESK.COCKPIT.approver')"
-            class="border border-n-weak rounded-lg bg-n-solid-1 p-2"
-          >
-            <option value="">
-              {{ t('JRC_SERVICE_DESK.COCKPIT.approver') }}
-            </option>
-            <option
-              v-for="member in data.approvers"
-              :key="member.id"
-              :value="member.id"
-            >
-              {{ member.name }}
-            </option>
-          </select>
-          <input
-            v-model="approvalDue"
-            required
-            type="datetime-local"
-            :aria-label="t('JRC_SERVICE_DESK.COCKPIT.deadline')"
-            class="border border-n-weak rounded-lg bg-n-solid-1 p-2"
-          />
-          <template v-if="permissions.lifecycle_inspect">
-            <Button
-              size="xs"
-              variant="outline"
-              :label="t('JRC_SERVICE_DESK.R3.approval_waiting')"
-              :disabled="busy"
-              @click="loadLifecycle"
+          <summary class="cursor-pointer text-sm font-medium">
+            {{ t('JRC_SERVICE_DESK.COCKPIT.request_approval') }}
+          </summary>
+          <form class="grid gap-3 mt-3" @submit.prevent="requestApproval">
+            <input
+              v-model="approvalTitle"
+              required
+              maxlength="255"
+              :aria-label="t('JRC_SERVICE_DESK.COCKPIT.approval_title')"
+              :placeholder="t('JRC_SERVICE_DESK.COCKPIT.approval_title')"
+              class="border border-n-weak rounded-lg bg-n-solid-1 p-2"
             />
-            <template v-if="lifecycleStatus === 'ready'">
-              <select
-                v-model="waitingRule"
-                :aria-label="t('JRC_SERVICE_DESK.R3.approval_waiting')"
-                class="rounded-lg border border-n-weak bg-n-solid-1 p-2"
-                @change="waitingReason = ''"
+            <select
+              v-model="approvalTarget"
+              :aria-label="t('JRC_SERVICE_DESK.R3.approval_target')"
+              class="rounded-lg border border-n-weak bg-n-solid-1 p-2"
+            >
+              <option
+                v-for="value in ['person', 'team', 'role']"
+                :key="value"
+                :value="value"
               >
-                <option value="">
-                  {{ t('JRC_SERVICE_DESK.COMMON.none') }}
-                </option>
-                <option
-                  v-for="row in waitingOptions"
-                  :key="row.key"
-                  :value="row.key"
-                >
-                  {{ row.to_status_name }}
-                </option></select
-              ><select
-                v-if="selectedWaiting"
-                v-model="waitingReason"
-                required
-                :aria-label="t('JRC_SERVICE_DESK.R3.waiting_reason')"
-                class="rounded-lg border border-n-weak bg-n-solid-1 p-2"
+                {{ t(`JRC_SERVICE_DESK.R3.targets.${value}`) }}
+              </option>
+            </select>
+            <Lookup
+              v-if="approvalTarget === 'team'"
+              v-model="approvalTeam"
+              resource="teams"
+              :unit-id="ticket.unit_id"
+              :label="t('JRC_SERVICE_DESK.FIELDS.team')"
+              :disabled="busy"
+            />
+            <select
+              v-else-if="approvalTarget === 'role'"
+              v-model="approvalRole"
+              :aria-label="t('JRC_SERVICE_DESK.R3.approval_role')"
+              class="rounded-lg border border-n-weak bg-n-solid-1 p-2"
+            >
+              <option value="">
+                {{ t('JRC_SERVICE_DESK.COMMON.select') }}
+              </option>
+              <option
+                v-for="value in ['agent', 'administrator']"
+                :key="value"
+                :value="value"
               >
-                <option value="">
-                  {{ t('JRC_SERVICE_DESK.COMMON.select') }}
-                </option>
-                <option
-                  v-for="reason in selectedWaiting.reasons"
-                  :key="reason.code"
-                  :value="reason.code"
-                >
-                  {{ reason.name }}
-                </option></select
-              ><textarea
-                v-if="selectedWaiting?.requirements.note"
-                v-model="waitingNote"
-                required
-                :aria-label="t('JRC_SERVICE_DESK.R3.waiting_note')"
-                class="rounded-lg border border-n-weak bg-n-solid-1 p-2"
+                {{ t(`JRC_SERVICE_DESK.R3.roles.${value}`) }}
+              </option>
+            </select>
+            <select
+              v-else
+              v-model="approver"
+              required
+              :aria-label="t('JRC_SERVICE_DESK.COCKPIT.approver')"
+              class="border border-n-weak rounded-lg bg-n-solid-1 p-2"
+            >
+              <option value="">
+                {{ t('JRC_SERVICE_DESK.COCKPIT.approver') }}
+              </option>
+              <option
+                v-for="member in data.approvers"
+                :key="member.id"
+                :value="member.id"
+              >
+                {{ member.name }}
+              </option>
+            </select>
+            <input
+              v-model="approvalDue"
+              required
+              type="datetime-local"
+              :aria-label="t('JRC_SERVICE_DESK.COCKPIT.deadline')"
+              class="border border-n-weak rounded-lg bg-n-solid-1 p-2"
+            />
+            <template v-if="permissions.lifecycle_inspect">
+              <Button
+                size="xs"
+                variant="outline"
+                :label="t('JRC_SERVICE_DESK.R3.approval_waiting')"
+                :disabled="busy"
+                @click="loadLifecycle"
               />
+              <template v-if="lifecycleStatus === 'ready'">
+                <select
+                  v-model="waitingRule"
+                  :aria-label="t('JRC_SERVICE_DESK.R3.approval_waiting')"
+                  class="rounded-lg border border-n-weak bg-n-solid-1 p-2"
+                  @change="waitingReason = ''"
+                >
+                  <option value="">
+                    {{ t('JRC_SERVICE_DESK.COMMON.none') }}
+                  </option>
+                  <option
+                    v-for="row in waitingOptions"
+                    :key="row.key"
+                    :value="row.key"
+                  >
+                    {{ row.to_status_name }}
+                  </option></select
+                ><select
+                  v-if="selectedWaiting"
+                  v-model="waitingReason"
+                  required
+                  :aria-label="t('JRC_SERVICE_DESK.R3.waiting_reason')"
+                  class="rounded-lg border border-n-weak bg-n-solid-1 p-2"
+                >
+                  <option value="">
+                    {{ t('JRC_SERVICE_DESK.COMMON.select') }}
+                  </option>
+                  <option
+                    v-for="reason in selectedWaiting.reasons"
+                    :key="reason.code"
+                    :value="reason.code"
+                  >
+                    {{ reason.name }}
+                  </option></select
+                ><textarea
+                  v-if="selectedWaiting?.requirements.note"
+                  v-model="waitingNote"
+                  required
+                  :aria-label="t('JRC_SERVICE_DESK.R3.waiting_note')"
+                  class="rounded-lg border border-n-weak bg-n-solid-1 p-2"
+                />
+              </template>
             </template>
-          </template>
-          <Button
-            type="submit"
-            :disabled="
-              busy ||
-              !approvalTitle.trim() ||
-              !(approvalTarget === 'person'
-                ? approver
-                : approvalTarget === 'team'
-                  ? approvalTeam
-                  : approvalRole) ||
-              !approvalDue ||
-              (waitingRule && !waitingReason)
-            "
-            :label="t('JRC_SERVICE_DESK.COCKPIT.request_approval')"
-          />
-        </form>
+            <Button
+              type="submit"
+              :disabled="
+                busy ||
+                !approvalTitle.trim() ||
+                !(approvalTarget === 'person'
+                  ? approver
+                  : approvalTarget === 'team'
+                    ? approvalTeam
+                    : approvalRole) ||
+                !approvalDue ||
+                (waitingRule && !waitingReason)
+              "
+              :label="t('JRC_SERVICE_DESK.COCKPIT.request_approval')"
+            />
+          </form>
+        </details>
       </section>
       <section v-if="mode === 'all' && permissions.view_sla" class="grid gap-3">
         <h3 class="font-semibold">{{ t('JRC_SERVICE_DESK.R3.ola_title') }}</h3>

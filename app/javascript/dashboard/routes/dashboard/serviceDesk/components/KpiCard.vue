@@ -3,6 +3,8 @@ import { useI18n } from 'vue-i18n';
 import Icon from 'dashboard/components-next/icon/Icon.vue';
 import { tones } from '../helpers/visualTheme';
 defineProps({
+  displayValue: { type: String, default: '' },
+  hint: { type: String, default: '' },
   compact: { type: Boolean, default: false },
   interactive: { type: Boolean, default: false },
   label: { type: String, required: true },
@@ -29,8 +31,13 @@ const { t } = useI18n();
     :type="interactive ? 'button' : undefined"
     class="flex flex-col gap-2 rounded-xl border border-n-weak bg-n-solid-1 p-3 text-start focus-visible:ring-2 focus-visible:ring-n-blue-9"
     :class="interactive ? 'cursor-pointer hover:border-n-blue-8' : ''"
-    :title="t('JRC_SERVICE_DESK.OVERVIEW.kpi_help')"
-    :aria-label="`${label}: ${value === null ? t('JRC_SERVICE_DESK.OVERVIEW.kpi_label') : value}`"
+    :title="
+      hint ||
+      (value === null
+        ? t('JRC_SERVICE_DESK.OVERVIEW.kpi_help')
+        : t('JRC_SERVICE_DESK.OPS.kpi_rule'))
+    "
+    :aria-label="`${label}: ${value === null ? t('JRC_SERVICE_DESK.OVERVIEW.kpi_label') : displayValue || value}`"
     @click="interactive && $emit('activate')"
   >
     <div class="flex items-center justify-between gap-2">
@@ -48,10 +55,15 @@ const { t } = useI18n();
       class="text-3xl leading-none font-bold tabular-nums"
       :class="value === null ? 'text-n-slate-11' : tones[tone].text"
     >
-      {{ value === null ? t('JRC_SERVICE_DESK.COMMON.no_value') : value }}
+      {{
+        value === null
+          ? t('JRC_SERVICE_DESK.COMMON.no_value')
+          : displayValue || value
+      }}
     </strong>
     <span v-if="!compact" class="text-xs text-n-slate-11">
       {{
+        hint ||
         t(
           value === null
             ? 'JRC_SERVICE_DESK.COMMON.not_available'

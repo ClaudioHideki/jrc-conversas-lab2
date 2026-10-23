@@ -1,6 +1,6 @@
 # Candidato: Atendimento unificado e remetentes de campanhas
 
-Bases preservadas: JRC `c03d96e477389fd1287e7365f29ccda6f3eaf009`; Broker `2e04b8f970dbbe9bee5d70b4368731177e7943e0`.
+Base JRC desta revisão: `abc1f7c57f55a7d9871101cd5b70c8b93becc7ca`. O Broker precisa da revisão compatível com a reserva canônica `chatwoot-campaigns/v1`, descrita abaixo.
 Este documento não confirma publicação, instalação nem envio real. Nenhuma configuração produtiva foi alterada nesta correção.
 
 ## Componentes que precisam de versão compatível
@@ -8,7 +8,7 @@ Este documento não confirma publicação, instalação nem envio real. Nenhuma 
 - JRC Rails e Sidekiq: a mesma nova imagem consolidada, preservando os comandos distintos de cada serviço.
 - Broker API e messaging worker: a mesma nova imagem API com o contrato `chatwoot-campaigns/v1`.
 - O frontend web do Broker e a imagem da Evolution não foram alterados por este delta.
-- Não há migration nova nesta correção. Antes da promoção, conferir migrations pendentes da instalação existente com backup; não presumir que versões mais antigas já tenham recebido a consolidação anterior.
+- Este delta não adiciona migration no JRC. O Broker precisa de `0072_chatwoot_campaign_intents.sql` e runtime compatível com baseline `0072`. Antes da promoção, conferir migrations pendentes de ambos os produtos com backup; não presumir que versões mais antigas já tenham recebido a consolidação anterior.
 - O layout HOYA passa a ser o Atendimento padrão, inclusive para as entradas antigas `/dashboard` e `/conversations/:id`. Contextos antigos de caixa/etiqueta/filtro continuam disponíveis. O layout não habilita Call Center, PABX, alçadas ou operações de voz.
 
 ## Configuração necessária no JRC
@@ -25,8 +25,8 @@ Conferir a configuração existente, sem substituir chaves de criptografia:
 
 - API/worker com controle Chatwoot habilitado conforme a configuração existente (`CHATWOOT_CONTROL_ENABLED`), destino aprovado, Account/inbox corretas, credencial válida, callback verificado e identidade confirmada. Manter o worker de mensagens saudável: ele processa o webhook e os recibos reais.
 - O envio desta integração usa **o transporte existente do Broker**, uma vez, através de `message_created` assinado. A mensagem conserva `campaign_id` e usuário legítimo; continua classificada como automação.
-- A política atual do Broker permite esse envio automático externo apenas com executor **EXTERNAL** na caixa. Não trocar automaticamente o executor de uma caixa com Flow/Broker/NICO responsável. Se esse for o caso, revisar a operação antes da promoção. A aplicação apresenta a incompatibilidade e mantém o bloqueio.
-- Não é necessário conceder acesso à API genérica de mensagens nem usar JWT de usuário em jobs. Os dois endpoints novos são somente leitura, com `chatwoot:read`, isolamento por organização, destino, Account, caixa, conversa e mensagem.
+- A versão compatível reserva um intent canônico para a mensagem já gravada, antes do único callback assinado. O Broker valida ator, Account, caixa, conversa, mensagem, conteúdo e revisões; o fluxo não altera o executor da caixa. Saudação e atribuição automática incompatíveis mantêm o remetente indisponível e exigem configuração explícita.
+- Não é necessário conceder acesso à API genérica de mensagens nem usar JWT de usuário em jobs. O controle usa `chatwoot:read` para prontidão/recibo e `chatwoot:manage` para reservar o intent. Credenciais ficam no servidor; cada operação é isolada por organização, destino, Account, caixa, conversa, mensagem e ator.
 - Para arquivos, manter storage/downloads da central acessíveis pelos mecanismos autorizados já existentes do Broker. Arquivos importados são vinculados por Active Storage; URLs externas exigem o guard público SSRF. Não autorizar redes privadas para contornar falhas de mídia.
 
 ## As duas caixas observadas anteriormente
@@ -37,12 +37,18 @@ Conferir a configuração existente, sem substituir chaves de criptografia:
 
 ## Fluxo de campanha e aceite posterior
 
-Importar/sanitizar lista → registrar consentimentos aplicáveis → escolher lista/público → escolher caixa(s) remetente(s) e distribuição → configurar mensagens/janela/intervalo → revisar → aprovação humana → iniciar explicitamente.
+Importar, colar ou selecionar contatos → escolher lista/público → escolher caixa(s) remetente(s) e distribuição → configurar mensagens/janela/intervalo → revisar → aprovação humana → iniciar explicitamente.
 
-Consentimento, blacklist, bloqueio do contato e isolamento permanecem obrigatórios. Template Meta continua exigindo caixa oficial; campanhas Broker, Evolution direta e oficiais usam campanhas separadas. NICO permanece assistente da plataforma; não é requisito para despachar a campanha. Nenhum JARVIS/JEV é reativado por esta correção.
+A lista selecionada alimenta o público sem exigir cadastro positivo extra de consentimento. Não se cria nem se altera evidência histórica para autorizar o envio. Blacklist, bloqueios, revogações registradas e isolamento continuam obrigatórios; opt-out de e-mail legado permanece preservado. Template Meta continua exigindo caixa oficial; campanhas Broker, Evolution direta e oficiais usam campanhas separadas. NICO permanece assistente da plataforma; não é requisito para despachar a campanha. Nenhum JARVIS/JEV é reativado por esta correção.
 
 Um ID local significa enfileiramento, não envio pelo provedor. Apenas o recibo Broker derivado do estado real do transporte contabiliza envio/entrega/leitura e libera o próximo passo. Resultado incerto pausa e bloqueia reenvio automático; uma confirmação posterior pode reconciliar o registro sem repetir o envio.
 
-Na homologação autorizada, testar um destinatário consentido por caixa, texto e arquivo, retorno à mesma conversa, nota privada não encaminhada, repetição da mesma solicitação sem duplicar, revogação, pausa e identidade divergente. Conferir **Todas** como administrador e **Minhas** com atribuição e acesso à caixa. PABX permanece desligado pela divergência tenant 8/accountcode 12.
+Na homologação autorizada, testar um destinatário explicitamente selecionado por caixa, texto e arquivo, retorno à mesma conversa, nota privada não encaminhada, repetição da mesma solicitação sem duplicar, revogação, pausa e identidade divergente. Conferir **Todas** como administrador e **Minhas** com atribuição e acesso à caixa. PABX permanece desligado pela divergência tenant 8/accountcode 12.
 
 Não realizar disparo real, alteração de executor, ativação de integração, migration em produção ou deploy apenas com base nos testes simulados.
+
+## Reserva canônica e resultados incertos (delta de 22/10)
+
+Depois do commit da mensagem nativa e antes de transmiti-la ao callback, o Sidekiq chama `POST /v1/integrations/chatwoot/control/connections/:integrationId/campaign-intents` com a chave estável `campaign:<deliveryId>` ou `test:<testDeliveryId>`. A reserva inclui os IDs canônicos de mensagem/conversa, campanha, tipo/texto e revisões de destino, identidade e responsabilidade. A chamada HTTP ocorre fora de locks/transações locais; a correlação `jrc_campaign_intent_id` é persistida em uma transação curta. O callback existente continua sendo o único transporte.
+
+Timeout ou falha temporária repete somente a reserva/callback da mesma mensagem e chave; nenhum segundo registro de mensagem é criado. Uma reserva recusada suprime o callback. O intent do Broker expira em 24 horas e não é rearmado automaticamente. Mudança de vínculo, ator, identidade, revisão ou revogação exige reconciliação, sem criar nova mensagem para contornar o bloqueio. Testes anteriores pendentes ou desconhecidos impedem outra chave para o mesmo destinatário/caixa até a reconciliação. Teste individual continua exigindo início explícito e os controles operacionais do canal.

@@ -29,9 +29,9 @@ const data = {
   tasks: { open: 2, overdue: 1 },
   approvals: null,
 };
-const render = () => {
+const render = (props = {}) => {
   wrapper = mount(Overview, {
-    props: { data },
+    props: { data, ...props },
     global: {
       plugins: [
         createI18n({
@@ -50,6 +50,20 @@ const render = () => {
   });
 };
 describe('Overview uses measured backend data', () => {
+  it('separates the chart row from the summary sidebar without duplicating measured panels', () => {
+    render({ section: 'summary' });
+    expect(wrapper.find('svg').exists()).toBe(false);
+    expect(wrapper.text()).toContain('2 h 0 min');
+    expect(wrapper.text()).not.toContain('Telefonia');
+  });
+  it('draws category shares from the same displayed scoped counts', () => {
+    render({ section: 'charts' });
+    expect(wrapper.text()).toContain('Telefonia');
+    expect(wrapper.text()).not.toContain('2 h 0 min');
+    const arcs = wrapper.findAll('circle[pathLength="100"]');
+    expect(arcs).toHaveLength(1);
+    expect(arcs[0].attributes('stroke-dasharray')).toBe('100 0');
+  });
   it('uses AccountUser and unit for assignee drilldown rather than membership identity', async () => {
     render();
     await wrapper

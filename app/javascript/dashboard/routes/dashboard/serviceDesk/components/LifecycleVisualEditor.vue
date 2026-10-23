@@ -20,6 +20,7 @@ const props = defineProps({
   modelValue: { type: String, default: '' },
   unitId: { type: String, required: true },
   disabled: Boolean,
+  section: { type: String, default: 'all' },
 });
 const emit = defineEmits(['update:modelValue']);
 const { t } = useI18n();
@@ -111,6 +112,7 @@ function start() {
     </p>
     <template v-if="d">
       <fieldset
+        v-if="['all', 'monitoring'].includes(section)"
         class="rounded-xl border border-n-weak p-4 grid gap-3"
         :disabled="disabled"
       >
@@ -133,7 +135,7 @@ function start() {
           </option>
         </select>
       </fieldset>
-      <section class="grid gap-3">
+      <section v-if="['all', 'lifecycle'].includes(section)" class="grid gap-3">
         <div class="flex flex-wrap justify-between gap-2">
           <h4 class="font-semibold">{{ t(`${root}.transitions`) }}</h4>
           <Button
@@ -297,7 +299,7 @@ function start() {
           >
         </article>
       </section>
-      <section class="grid gap-3">
+      <section v-if="['all', 'lifecycle'].includes(section)" class="grid gap-3">
         <div class="flex flex-wrap justify-between gap-2">
           <h4 class="font-semibold">{{ t(`${root}.pauses`) }}</h4>
           <Button
@@ -373,6 +375,7 @@ function start() {
         </article>
       </section>
       <fieldset
+        v-if="['all', 'lifecycle'].includes(section)"
         class="grid gap-3 rounded-xl border border-n-weak p-4"
         :disabled="disabled"
       >
@@ -449,7 +452,10 @@ function start() {
           </fieldset>
         </div>
       </fieldset>
-      <section class="grid gap-3 rounded-xl border border-n-weak p-4">
+      <section
+        v-if="['all', 'review'].includes(section)"
+        class="grid gap-3 rounded-xl border border-n-weak p-4"
+      >
         <h4 class="font-semibold text-sm">{{ t(`${root}.simulation`) }}</h4>
         <p class="text-xs text-n-slate-11">
           {{ t(`${root}.simulation_notice`) }}

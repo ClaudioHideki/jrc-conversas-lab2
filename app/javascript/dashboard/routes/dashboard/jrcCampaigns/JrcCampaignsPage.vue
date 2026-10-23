@@ -9,7 +9,6 @@ import CampaignPerformanceChart from './components/CampaignPerformanceChart.vue'
 import SanitizedLists from './components/SanitizedLists.vue';
 import BlacklistPanel from './components/BlacklistPanel.vue';
 import CampaignApproval from './components/CampaignApproval.vue';
-import ConsentPanel from './components/ConsentPanel.vue';
 
 const { t } = useI18n();
 const campaigns = ref([]);
@@ -45,11 +44,6 @@ const showAdvancedFilters = ref(false);
 const statusFilters = ref([]);
 
 const tabs = computed(() => [
-  {
-    key: 'consents',
-    label: t('JRC_CAMPAIGNS.GOVERNANCE.CONSENTS'),
-    icon: 'i-lucide-shield-check',
-  },
   {
     key: 'dispatches',
     label: t('JRC_CAMPAIGNS.TABS.DISPATCHES'),
@@ -874,10 +868,6 @@ onMounted(fetchData);
         @use-list="openFromList"
       />
       <BlacklistPanel v-else-if="activeTab === 'blacklist'" />
-      <ConsentPanel
-        v-else-if="activeTab === 'consents'"
-        @navigate="$event === 'campaign' ? openNew() : (activeTab = 'sanitize')"
-      />
       <template v-else>
         <div class="mb-5">
           <h2 class="text-xl font-semibold text-n-slate-12">

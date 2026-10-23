@@ -1,6 +1,5 @@
 <script setup>
 import CampaignFilters from 'dashboard/routes/dashboard/jrcCustomers/components/CampaignFilters.vue';
-import ConsentPanel from './ConsentPanel.vue';
 import CampaignAudienceInput from './CampaignAudienceInput.vue';
 import { useCustomerMaster } from 'dashboard/routes/dashboard/jrcCustomers/useCustomerMaster';
 import {
@@ -36,7 +35,6 @@ const { t } = useI18n();
 const { enabled: hasCustomerMaster } = useCustomerMaster();
 const stepIndex = ref(0);
 const saving = ref(false);
-const showConsents = ref(false);
 const audienceInputMode = ref(null);
 const addedLists = ref([]);
 const audienceLists = computed(() => [
@@ -399,6 +397,23 @@ const inboxHealth = inbox => {
     className: 'bg-n-blue-3 text-n-blue-11',
   };
 };
+
+const senderSetupReasons = new Set([
+  'CONFIGURATION_REQUIRED',
+  'BROKER_UPDATE_OR_CONFIGURATION_REQUIRED',
+  'CAMPAIGN_BROKER_TRANSPORT_REQUIRED',
+  'CAMPAIGN_EXECUTOR_EXTERNAL_REQUIRED',
+  'CAMPAIGN_ATTENDANCE_POLICY_REQUIRES_CONFIGURATION',
+  'CAMPAIGN_CALLBACK_NOT_READY',
+  'CAMPAIGN_IDENTITY_NOT_READY',
+  'DIRECT_EVOLUTION_CONFIGURATION_REQUIRED',
+]);
+const senderSetupMessage = inbox =>
+  t(
+    senderSetupReasons.has(inbox.setup_reason)
+      ? `JRC_CAMPAIGNS.BROKER.REASONS.${inbox.setup_reason}`
+      : 'JRC_CAMPAIGNS.WIZARD.SENDER_UNAVAILABLE'
+  );
 
 const sourceValid = computed(() => {
   if (form.audience_type === 'label')
@@ -1455,31 +1470,6 @@ watch(
             </p>
           </div>
           <div v-if="stepIndex === 0" class="space-y-5">
-            <section
-              v-if="
-                !isEmail &&
-                ((!usesEvolution && selectedInboxIds.length > 0) ||
-                  showConsents)
-              "
-              class="rounded-xl border border-n-blue-5 bg-n-blue-2 p-4"
-            >
-              <p class="text-sm text-n-slate-12">
-                {{ t('JRC_CAMPAIGNS.GUIDE.WIZARD_CONSENT_HELP') }}
-              </p>
-              <button
-                type="button"
-                class="mt-2 text-sm font-semibold text-n-blue-11"
-                :aria-expanded="showConsents"
-                @click="showConsents = !showConsents"
-              >
-                {{ t('JRC_CAMPAIGNS.GUIDE.MANAGE_CONSENTS') }}
-              </button>
-              <ConsentPanel
-                v-if="showConsents"
-                embedded
-                @changed="refreshAudiencePreview"
-              />
-            </section>
             <div>
               <h3 class="text-xl font-semibold text-n-slate-12">
                 {{ $t('JRC_CAMPAIGNS.WIZARD.AUDIENCE_TITLE') }}
@@ -1744,6 +1734,12 @@ watch(
                   </option>
                 </select></label
               >
+              <CampaignFilters
+                v-if="
+                  hasCustomerMaster && form.audience_type !== 'sanitized_list'
+                "
+                v-model="form.audience_config.customer_filters"
+              />
             </div>
             <div class="campaign-preview-panel rounded-2xl border p-5">
               <div class="flex items-center justify-between gap-3">
@@ -1989,12 +1985,6 @@ watch(
           </div>
 
           <div v-else-if="stepIndex === 1" class="space-y-5">
-            <CampaignFilters
-              v-if="
-                hasCustomerMaster && form.audience_type !== 'sanitized_list'
-              "
-              v-model="form.audience_config.customer_filters"
-            />
             <div>
               <h3 class="text-xl font-semibold text-n-slate-12">
                 {{ $t('JRC_CAMPAIGNS.WIZARD.CONFIG_TITLE') }}
@@ -2010,7 +2000,9 @@ watch(
                 {{ t('JRC_CAMPAIGNS.GUIDE.SEPARATE_SENDERS') }}
               </p>
             </div>
-            <div class="grid gap-4 xl:grid-cols-3">
+            <div
+              class="grid grid-cols-[repeat(auto-fit,minmax(min(100%,18rem),1fr))] gap-4"
+            >
               <article class="rounded-2xl border border-n-weak p-5">
                 <h4 class="text-sm font-semibold text-n-slate-12">
                   {{
@@ -2037,7 +2029,8 @@ watch(
                     :key="inbox.id"
                     class="rounded-xl border border-n-weak p-3"
                   >
-                    <label class="flex items-start gap-3"
+                    <label
+                      class="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-x-3 gap-y-2"
                       ><input
                         type="checkbox"
                         class="mt-1"
@@ -2047,7 +2040,7 @@ watch(
                           !selectedInboxIds.includes(Number(inbox.id))
                         "
                         @change="toggleSendingInbox(inbox)"
-                      /><span class="min-w-0 flex-1"
+                      /><span class="min-w-0"
                         ><span
                           class="block break-words text-sm font-medium text-n-slate-12"
                           >{{ inbox.name }}</span
@@ -2062,7 +2055,7 @@ watch(
                           {{ inbox.provider }}</span
                         ></span
                       ><span
-                        class="rounded-full px-2 py-1 text-[10px] font-medium"
+                        class="col-start-2 justify-self-start rounded-full px-2 py-1 text-[10px] font-medium"
                         :class="inboxHealth(inbox).className"
                         >{{ inboxHealth(inbox).label }}</span
                       ></label
@@ -2071,7 +2064,7 @@ watch(
                       v-if="inbox.setup_reason"
                       class="mt-2 text-xs text-n-amber-11"
                     >
-                      {{ t('JRC_CAMPAIGNS.WIZARD.SENDER_UNAVAILABLE') }}
+                      {{ senderSetupMessage(inbox) }}
                     </p>
                     <div
                       v-if="
@@ -3073,7 +3066,7 @@ watch(
                   v-if="eligibleCount === 0"
                   class="mt-3 text-xs text-n-slate-12"
                 >
-                  {{ t('JRC_CAMPAIGNS.CONSENT_IMPORT.AUDIENCE_HELP') }}
+                  {{ t('JRC_CAMPAIGNS.WIZARD.AUDIENCE_RECHECK_HELP') }}
                 </p>
                 <button
                   type="button"

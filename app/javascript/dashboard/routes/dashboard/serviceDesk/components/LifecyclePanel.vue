@@ -18,11 +18,16 @@ import {
 import { newRequestKey } from '../helpers/drafts.js';
 import { tones } from '../helpers/visualTheme';
 import { formatTimestamp } from '../helpers/presentation';
+import {
+  closureOptions,
+  preferredClosure,
+  closureFieldsValid,
+} from '../helpers/closurePresentation';
 const props = defineProps({
   ticket: { type: Object, required: true },
   mode: { type: String, default: 'all' },
 });
-const emit = defineEmits(['updated', 'snapshotRecorded']);
+const emit = defineEmits(['updated', 'snapshotRecorded', 'busyChange']);
 const { t, locale } = useI18n();
 const session = useServiceDesk();
 const state = reactive(createLifecycleState());
@@ -46,8 +51,14 @@ const note = ref('');
 const solution = ref('');
 const outcome = ref('');
 const validation = ref('');
+const isClosure = computed(() => props.mode === 'closure');
+const isSolution = computed(() => ['solution', 'closure'].includes(props.mode));
+const confirmed = ref(false);
 const actionOptions = computed(() =>
-  (state.data?.options || []).filter(
+  (isClosure.value
+    ? closureOptions(state.data)
+    : state.data?.options || []
+  ).filter(
     option =>
       props.mode !== 'sla' &&
       (props.mode !== 'solution' ||
@@ -74,6 +85,30 @@ const maySeeNotes = computed(
   () => props.ticket.permissions.view_notes === true
 );
 const busy = computed(() => state.writeStatus === 'saving');
+// Keep the modal mounted while the outcome is uncertain, so recovery reuses
+// the same request key instead of creating a second closing command.
+watch(
+  [busy, pendingCommand],
+  ([saving, pending]) => emit('busyChange', saving || !!pending),
+  { immediate: true }
+);
+const closureValid = computed(() =>
+  closureFieldsValid(
+    rule.value,
+    {
+      note: note.value,
+      solution: solution.value,
+      evidence: evidence.value,
+      fields,
+    },
+    maySeeNotes.value
+  )
+);
+watch([actionOptions, isClosure], () => {
+  if (!isClosure.value || busy.value || pendingCommand.value) return;
+  if (!actionOptions.value.some(row => row.key === selected.value))
+    selected.value = preferredClosure(actionOptions.value);
+});
 const actionTone = action =>
   ({
     resolve: 'teal',
@@ -86,6 +121,7 @@ const load = () => lifecycle.load(props.ticket, page.value);
 const resetDraft = () => {
   pendingCommand.value = null;
   selected.value = '';
+  confirmed.value = false;
   reason.value = '';
   note.value = '';
   solution.value = '';
@@ -117,12 +153,15 @@ watch(
   }
 );
 watch(selected, () => {
+  confirmed.value = false;
   reason.value = '';
   if (!pendingCommand.value) requestKey = null;
   Object.keys(fields).forEach(key => delete fields[key]);
 });
 const submit = async () => {
-  if (!rule.value || busy.value || !state.data?.policy) return;
+  if (!rule.value || busy.value || pendingCommand.value || !state.data?.policy)
+    return;
+  if (isClosure.value && (!confirmed.value || !closureValid.value)) return;
   try {
     requestKey ||= newRequestKey();
     const custom = Object.fromEntries(
@@ -140,24 +179,23 @@ const submit = async () => {
       expected_lock_version: state.data.lock_version,
       expected_policy_version_id: state.data.policy.id,
       note: note.value,
-      solution:
-        props.mode === 'solution'
-          ? [
-              solution.value,
-              ...(outcome.value.trim()
-                ? [
-                    `${t('JRC_SERVICE_DESK.REDESIGN_DETAIL.outcome')}: ${outcome.value.trim()}`,
-                  ]
-                : []),
-              ...(validation.value
-                ? [
-                    `${t('JRC_SERVICE_DESK.REDESIGN_DETAIL.customer_validation')}: ${t(`JRC_SERVICE_DESK.REDESIGN_DETAIL.validation.${validation.value}`)}`,
-                  ]
-                : []),
-            ]
-              .filter(Boolean)
-              .join('\n\n')
-          : solution.value,
+      solution: isSolution.value
+        ? [
+            solution.value,
+            ...(outcome.value.trim()
+              ? [
+                  `${t('JRC_SERVICE_DESK.REDESIGN_DETAIL.outcome')}: ${outcome.value.trim()}`,
+                ]
+              : []),
+            ...(validation.value
+              ? [
+                  `${t('JRC_SERVICE_DESK.REDESIGN_DETAIL.customer_validation')}: ${t(`JRC_SERVICE_DESK.REDESIGN_DETAIL.validation.${validation.value}`)}`,
+                ]
+              : []),
+          ]
+            .filter(Boolean)
+            .join('\n\n')
+        : solution.value,
       fields: custom,
       evidence_note_ids: evidence.value.trim()
         ? evidence.value.split(',').map(value => value.trim())
@@ -200,14 +238,17 @@ const recover = async () => {
   )
     pendingCommand.value = null;
 };
-onBeforeUnmount(() => lifecycle.clear());
+onBeforeUnmount(() => {
+  lifecycle.clear();
+  emit('busyChange', false);
+});
 </script>
 
 <template>
   <Panel
     :title="
       t(
-        mode === 'solution'
+        isSolution
           ? 'JRC_SERVICE_DESK.TICKET.tabs.solution'
           : mode === 'sla'
             ? 'JRC_SERVICE_DESK.REDESIGN_DETAIL.sla_title'
@@ -257,6 +298,19 @@ onBeforeUnmount(() => lifecycle.clear());
             }}
           </p>
         </div>
+        <div
+          v-if="isClosure"
+          class="rounded-xl border border-n-blue-5 bg-n-blue-2 p-4 text-sm"
+          role="status"
+        >
+          <p>{{ t('JRC_SERVICE_DESK.REFINEMENT.closure.help') }}</p>
+          <p v-if="rule?.action === 'resolve'" class="mt-2 font-medium">
+            {{ t('JRC_SERVICE_DESK.REFINEMENT.closure.resolve_first') }}
+          </p>
+          <p v-if="!actionOptions.length" class="mt-2">
+            {{ t('JRC_SERVICE_DESK.REFINEMENT.closure.unavailable') }}
+          </p>
+        </div>
         <form
           v-if="actionOptions.length"
           class="grid gap-3"
@@ -302,13 +356,13 @@ onBeforeUnmount(() => lifecycle.clear());
               "
             />
             <TextArea
-              v-if="maySeeNotes"
+              v-if="maySeeNotes && (!isClosure || rule.requirements.note)"
               v-model="note"
               :disabled="busy || !!pendingCommand"
               :max-length="20000"
               :label="
                 t(
-                  mode === 'solution'
+                  isSolution
                     ? 'JRC_SERVICE_DESK.REDESIGN_DETAIL.diagnosis'
                     : 'JRC_SERVICE_DESK.LIFECYCLE.note'
                 ) + (rule.requirements.note ? ' *' : '')
@@ -324,37 +378,67 @@ onBeforeUnmount(() => lifecycle.clear());
                 (rule.requirements.solution ? ' *' : '')
               "
             />
-            <template v-if="mode === 'solution' && maySeeNotes">
+            <details
+              v-if="isSolution && maySeeNotes"
+              :open="!isClosure"
+              class="rounded-xl border border-n-weak p-3"
+            >
+              <summary class="mb-3 cursor-pointer text-sm font-medium">
+                {{ t('JRC_SERVICE_DESK.REFINEMENT.closure.additional') }}
+              </summary>
               <TextArea
-                v-model="outcome"
+                v-if="isClosure && !rule.requirements.note"
+                v-model="note"
                 :disabled="busy || !!pendingCommand"
-                :max-length="4000"
-                :label="t('JRC_SERVICE_DESK.REDESIGN_DETAIL.outcome')"
+                :max-length="20000"
+                :label="t('JRC_SERVICE_DESK.REDESIGN_DETAIL.diagnosis')"
               />
-              <label class="grid gap-1 text-sm"
-                >{{ t('JRC_SERVICE_DESK.REDESIGN_DETAIL.customer_validation') }}
-                <select
-                  v-model="validation"
+              <div class="grid gap-3">
+                <TextArea
+                  v-model="outcome"
                   :disabled="busy || !!pendingCommand"
-                  class="rounded-lg border border-n-weak bg-n-solid-1 p-2"
-                >
-                  <option value="">
-                    {{ t('JRC_SERVICE_DESK.COMMON.not_informed') }}
-                  </option>
-                  <option
-                    v-for="value in ['awaiting', 'confirmed', 'not_confirmed']"
-                    :key="value"
-                    :value="value"
+                  :max-length="4000"
+                  :label="t('JRC_SERVICE_DESK.REDESIGN_DETAIL.outcome')"
+                />
+                <label class="grid gap-1 text-sm"
+                  >{{
+                    t('JRC_SERVICE_DESK.REDESIGN_DETAIL.customer_validation')
+                  }}
+                  <select
+                    v-model="validation"
+                    :disabled="busy || !!pendingCommand"
+                    class="rounded-lg border border-n-weak bg-n-solid-1 p-2"
                   >
-                    {{
-                      t(`JRC_SERVICE_DESK.REDESIGN_DETAIL.validation.${value}`)
-                    }}
-                  </option>
-                </select>
-              </label>
-            </template>
+                    <option value="">
+                      {{ t('JRC_SERVICE_DESK.COMMON.not_informed') }}
+                    </option>
+                    <option
+                      v-for="value in [
+                        'awaiting',
+                        'confirmed',
+                        'not_confirmed',
+                      ]"
+                      :key="value"
+                      :value="value"
+                    >
+                      {{
+                        t(
+                          `JRC_SERVICE_DESK.REDESIGN_DETAIL.validation.${value}`
+                        )
+                      }}
+                    </option>
+                  </select>
+                </label>
+                <Input
+                  v-if="isClosure && !rule.requirements.evidence"
+                  v-model="evidence"
+                  :disabled="busy || !!pendingCommand"
+                  :label="t('JRC_SERVICE_DESK.LIFECYCLE.evidence')"
+                />
+              </div>
+            </details>
             <Input
-              v-if="maySeeNotes"
+              v-if="maySeeNotes && (!isClosure || rule.requirements.evidence)"
               v-model="evidence"
               :disabled="busy || !!pendingCommand"
               :label="
@@ -400,11 +484,28 @@ onBeforeUnmount(() => lifecycle.clear());
                 :label="spec.label + (spec.required ? ' *' : '')"
               />
             </template>
+            <label
+              v-if="isClosure"
+              class="flex items-start gap-2 rounded-lg border border-n-weak p-3 text-sm"
+            >
+              <input
+                v-model="confirmed"
+                type="checkbox"
+                :disabled="busy || !!pendingCommand"
+                class="mt-1"
+              />
+              <span>{{
+                t('JRC_SERVICE_DESK.REFINEMENT.closure.confirm', {
+                  status: rule.to_status_name,
+                })
+              }}</span>
+            </label>
             <Button
               type="submit"
               :disabled="
                 busy ||
                 !!pendingCommand ||
+                (isClosure && (!confirmed || !closureValid)) ||
                 (rule.action === 'pause' && !reason) ||
                 (rule.requirements.solution && !solution.trim()) ||
                 (rule.requirements.note && !note.trim()) ||
@@ -417,7 +518,11 @@ onBeforeUnmount(() => lifecycle.clear());
                     ? 'ruby'
                     : 'blue'
               "
-              :label="actionLabels[rule.action]"
+              :label="
+                isClosure
+                  ? t(`JRC_SERVICE_DESK.REFINEMENT.closure.${rule.action}`)
+                  : actionLabels[rule.action]
+              "
             />
           </template>
         </form>
