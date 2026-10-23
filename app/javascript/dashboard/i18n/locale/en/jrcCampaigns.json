@@ -402,7 +402,7 @@
       "LISTS": "Listas sanitizadas",
       "NO_LISTS": "Nenhuma lista sanitizada criada.",
       "FORMAT_HELP": "Aceita CSV com vírgula, ponto e vírgula ou tabulação, com cabeçalho nome,telefone,email opcional. Campos com separadores devem usar aspas. A validação final ocorre antes de criar a lista.",
-      "NOT_AUTHORIZATION": "Contato válido não significa envio autorizado. Para WhatsApp, registre a autorização em Consentimentos; na campanha, confira o público elegível e selecione a caixa/número remetente.",
+      "NOT_AUTHORIZATION": "Revise os contatos da lista e selecione a caixa/número remetente antes de iniciar. Blacklist, bloqueios, revogações e as regras do canal continuam respeitados.",
       "PARSED": "{count} contatos lidos. Confira os dados antes de sanitizar.",
       "PARSE_ERROR": "Não foi possível ler a lista. Confira o separador e as aspas dos campos antes de continuar.",
       "FILE_ERROR": "Não foi possível ler o arquivo. Escolha novamente ou cole os contatos.",
@@ -597,13 +597,13 @@
       "REFRESH_SENDERS": "Atualizar caixas e números remetentes",
       "CONFIRM_TEST": "Confirmar teste pelo Broker? Caixa/número: {sender}. Destinatário: {recipient}. Bloqueios e revogações serão verificados. Aguarde o recibo antes de reenviar.",
       "REASONS": {
-        "CONFIGURATION_REQUIRED": "Vincule esta caixa em Conectar seu WhatsApp e configure a integração do Broker nesta conta.",
+        "CONFIGURATION_REQUIRED": "Esta caixa ainda está sendo vinculada à integração do Broker desta conta. Atualize os remetentes em instantes. Se persistir, confira a integração em Conectar seu WhatsApp.",
         "BROKER_UPDATE_OR_CONFIGURATION_REQUIRED": "Atualize a API e os workers do Broker para a versão compatível e confira o vínculo desta caixa em Conectar seu WhatsApp.",
         "CAMPAIGN_BROKER_TRANSPORT_REQUIRED": "Esta caixa precisa usar o transporte WhatsApp do Broker.",
         "CAMPAIGN_EXECUTOR_EXTERNAL_REQUIRED": "O executor desta caixa não permite campanhas externas. Revise a operação no Broker antes de habilitar campanhas.",
         "CAMPAIGN_ATTENDANCE_POLICY_REQUIRES_CONFIGURATION": "A caixa precisa manter saudação e atribuição automática desativadas para receber campanhas pelo Broker. Revise as configurações de atendimento; nenhum ajuste será feito automaticamente.",
         "CAMPAIGN_CALLBACK_NOT_READY": "A conexão entre o Broker e esta caixa ainda não foi validada. Confira o vínculo e o webhook.",
-        "CAMPAIGN_IDENTITY_NOT_READY": "Conecte e confirme o número desta caixa em Conectar seu WhatsApp; depois atualize os remetentes.",
+        "CAMPAIGN_IDENTITY_NOT_READY": "O WhatsApp desta caixa ainda não está pronto para enviar. Confira a conexão e o número em Conectar seu WhatsApp; depois atualize os remetentes.",
         "DIRECT_EVOLUTION_CONFIGURATION_REQUIRED": "Esta caixa usa a Evolution diretamente. Configure o remetente desta conta para campanhas ou migre a conexão pelo procedimento do Broker. O nome da caixa, sozinho, não autoriza disparos."
       },
       "RESULT_STATUS": "#{id} · {status}"

@@ -37,12 +37,29 @@ describe('useReportMetrics', () => {
     expect(isAverageMetricType('conversations_count')).toBe(false);
   });
 
-  it('displays metrics correctly for account', () => {
-    const { displayMetric } = useReportMetrics();
+  it.each([
+    ['en-US', '5,000'],
+    ['pt-BR', '5.000'],
+  ])(
+    'displays account metrics using the runtime locale (%s)',
+    (locale, conversationCount) => {
+      const nativeFormat = Number.prototype.toLocaleString;
+      const format = vi
+        .spyOn(Number.prototype, 'toLocaleString')
+        .mockImplementation(function withLocale(locales, options) {
+          return nativeFormat.call(this, locales ?? locale, options);
+        });
 
-    expect(displayMetric('conversations_count')).toBe('5,000');
-    expect(displayMetric('incoming_messages_count')).toBe('5');
-  });
+      try {
+        const { displayMetric } = useReportMetrics();
+
+        expect(displayMetric('conversations_count')).toBe(conversationCount);
+        expect(displayMetric('incoming_messages_count')).toBe('5');
+      } finally {
+        format.mockRestore();
+      }
+    }
+  );
 
   it('displays the metric for bot', () => {
     const customKey = 'getBotSummary';

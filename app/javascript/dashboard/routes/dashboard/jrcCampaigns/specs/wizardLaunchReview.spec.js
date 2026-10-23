@@ -3,11 +3,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import CampaignWizard from '../components/CampaignWizard.vue';
 import api from 'dashboard/api/jrcCampaigns';
 import { useAlert } from 'dashboard/composables';
+import CampaignFilters from 'dashboard/routes/dashboard/jrcCustomers/components/CampaignFilters.vue';
+
+const { customerMaster } = vi.hoisted(() => ({
+  customerMaster: { enabled: false },
+}));
 
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }));
 vi.mock('dashboard/composables', () => ({ useAlert: vi.fn() }));
 vi.mock('dashboard/routes/dashboard/jrcCustomers/useCustomerMaster', () => ({
-  useCustomerMaster: () => ({ enabled: false }),
+  useCustomerMaster: () => customerMaster,
 }));
 vi.mock('dashboard/api/jrcCampaigns', () => ({
   default: {
@@ -23,6 +28,7 @@ describe('campaign wizard launch and required human review', () => {
   beforeEach(() => {
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
     vi.clearAllMocks();
+    customerMaster.enabled = false;
     api.audiencePreview.mockResolvedValue({
       data: { estimated_recipients: 1, sample: [] },
     });
@@ -45,6 +51,57 @@ describe('campaign wizard launch and required human review', () => {
     api.launch.mockResolvedValue({ data: { id: 17, status: 'running' } });
   });
   afterEach(() => vi.useRealTimers());
+
+  it('refines the audience inside Contacts and keeps customer filters out of sender configuration', async () => {
+    customerMaster.enabled = true;
+    const wrapper = mount(CampaignWizard, {
+      props: { metadata: { source_inboxes: [] } },
+      global: {
+        stubs: { CompanyPicker: true },
+        mocks: { $t: key => key },
+      },
+    });
+    await flushPromises();
+    const source = wrapper.get('.campaign-source-panel');
+    const filters = source.getComponent(CampaignFilters);
+    expect(filters.text()).not.toMatch(/Consentimento.*obrigat/i);
+    await filters.get('select').setValue('customer');
+    await filters.findAll('input')[0].setValue('Synthetic segment');
+    expect(wrapper.vm.buildPayload().audience_config.customer_filters).toEqual({
+      relationship_type: 'customer',
+      segment: 'Synthetic segment',
+    });
+    wrapper.vm.stepIndex = 1;
+    await flushPromises();
+    expect(wrapper.findComponent(CampaignFilters).exists()).toBe(false);
+    expect(api.create).not.toHaveBeenCalled();
+    expect(api.launch).not.toHaveBeenCalled();
+  });
+
+  it('clears customer filters when selecting a sanitized list and keeps them hidden in that audience', async () => {
+    customerMaster.enabled = true;
+    const wrapper = mount(CampaignWizard, {
+      props: { metadata: { source_inboxes: [], sanitized_lists: [] } },
+      global: {
+        stubs: { CompanyPicker: true },
+        mocks: { $t: key => key },
+      },
+    });
+    await flushPromises();
+    wrapper.vm.form.audience_config.customer_filters = { company_id: 17 };
+    wrapper.vm.form.audience_type = 'sanitized_list';
+    await flushPromises();
+    expect(wrapper.findComponent(CampaignFilters).exists()).toBe(false);
+    expect(wrapper.vm.buildPayload().audience_config.customer_filters).toEqual(
+      {}
+    );
+    wrapper.vm.form.audience_type = 'all_contacts';
+    await flushPromises();
+    expect(wrapper.getComponent(CampaignFilters).props('modelValue')).toEqual(
+      {}
+    );
+    expect(api.launch).not.toHaveBeenCalled();
+  });
 
   it.each([
     ['evolution', 'whatsapp', 'text'],
