@@ -501,7 +501,13 @@ const submit = async () => {
       />
     </header>
     <Banner v-if="!createdTicket" color="amber" class="mb-4">
-      {{ t('JRC_SERVICE_DESK.FORM.draft_notice') }}
+      {{
+        t(
+          edit
+            ? 'JRC_SERVICE_DESK.REFINEMENT.form_notice'
+            : 'JRC_SERVICE_DESK.FORM.draft_notice'
+        )
+      }}
     </Banner>
     <TicketCreationReceipt
       v-if="createdTicket"
@@ -838,7 +844,13 @@ const submit = async () => {
                 }}
               </h3>
               <p class="text-sm text-n-slate-11">
-                {{ t('JRC_SERVICE_DESK.FORM.relationships_help') }}
+                {{
+                  t(
+                    edit
+                      ? 'JRC_SERVICE_DESK.REFINEMENT.links_notice'
+                      : 'JRC_SERVICE_DESK.FORM.relationships_help'
+                  )
+                }}
               </p>
               <div class="sd-fields-grid">
                 <p class="text-xs text-n-slate-11">
@@ -1010,7 +1022,13 @@ const submit = async () => {
               </dd>
             </dl>
             <p class="text-xs text-n-slate-11 mt-4">
-              {{ t('JRC_SERVICE_DESK.FORM.draft_notice') }}
+              {{
+                t(
+                  edit
+                    ? 'JRC_SERVICE_DESK.REFINEMENT.form_notice'
+                    : 'JRC_SERVICE_DESK.FORM.draft_notice'
+                )
+              }}
             </p>
             <p class="mt-3 text-xs text-n-slate-11">
               {{ t('JRC_SERVICE_DESK.REDESIGN_FORM.sla_after_save') }}

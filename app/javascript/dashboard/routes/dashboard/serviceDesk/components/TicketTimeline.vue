@@ -13,6 +13,10 @@ import { useTicketTimeline } from '../composables/useTicketTimeline';
 import { communicationLabels } from '../helpers/communicationLabels';
 import { v2Labels } from '../helpers/v2Labels';
 import { formatTimestamp } from '../helpers/presentation';
+import {
+  conversationGroups,
+  filterConversations,
+} from '../helpers/conversationPresentation';
 import { visibleTimelineItems } from '../helpers/detailExperience';
 import { newRequestKey } from '../helpers/drafts';
 
@@ -20,6 +24,8 @@ const props = defineProps({
   ticket: { type: Object, required: true },
   revision: { type: Number, default: 0 },
   onlyFiles: Boolean,
+  selectionLocked: Boolean,
+  conversations: { type: Array, default: () => [] },
   view: { type: String, default: 'all' },
 });
 const emit = defineEmits(['republish', 'updated']);
@@ -69,6 +75,53 @@ const currentRequest = (context, ticket, turn) =>
   ticket.id === props.ticket.id;
 const visibleItems = computed(() =>
   visibleTimelineItems(items.value, effectiveView.value)
+);
+const conversationFilter = ref('all');
+const conversationSearch = ref('');
+const selectedConversation = ref('');
+const isConversation = computed(() => effectiveView.value === 'conversations');
+const groups = computed(() =>
+  conversationGroups(visibleItems.value, props.conversations)
+);
+const conversationChannels = computed(() => [
+  ...new Set(groups.value.map(group => group.channel)),
+]);
+const shownGroups = computed(() =>
+  filterConversations(
+    groups.value,
+    conversationFilter.value,
+    conversationSearch.value
+  )
+);
+const activeConversation = computed(
+  () =>
+    shownGroups.value.find(group => group.key === selectedConversation.value) ||
+    shownGroups.value[0] ||
+    null
+);
+const displayedItems = computed(() =>
+  isConversation.value
+    ? activeConversation.value?.rows || []
+    : visibleItems.value
+);
+const channelLabel = key =>
+  values.value.channel[key] ||
+  t(
+    `JRC_SERVICE_DESK.REFINEMENT.conversations.${key === 'portal' ? 'portal' : 'other'}`
+  );
+const groupTitle = group =>
+  group.conversationId
+    ? t('JRC_SERVICE_DESK.REFINEMENT.conversations.conversation', {
+        id: group.conversationId,
+      })
+    : t('JRC_SERVICE_DESK.REFINEMENT.conversations.updates');
+watch(
+  () => props.ticket.id,
+  () => {
+    conversationFilter.value = 'all';
+    conversationSearch.value = '';
+    selectedConversation.value = '';
+  }
 );
 const historyTypes = computed(() =>
   Object.entries(tm('JRC_SERVICE_DESK.OPS.EVENTS')).map(([value, label]) => ({
@@ -327,202 +380,321 @@ onBeforeUnmount(() => {
         />
       </div>
     </form>
-    <State
-      v-if="!['ready', 'empty'].includes(status)"
-      :status="status"
-      retry
-      @retry="load()"
-    />
-    <p
-      v-if="['ready', 'empty'].includes(status) && !visibleItems.length"
-      class="py-6 text-center text-sm text-n-slate-11"
-    >
-      {{ labels.empty }}
-    </p>
-    <article
-      v-for="row in visibleItems"
-      :key="row.key"
-      class="grid gap-2 rounded-xl border border-n-weak p-4"
+    <div
       :class="
-        effectiveView === 'notes'
-          ? 'bg-n-amber-2'
-          : row.message_type === 'outgoing'
-            ? 'bg-n-blue-2'
-            : 'bg-n-solid-1'
+        isConversation
+          ? 'grid min-w-0 gap-3 min-[1100px]:grid-cols-[minmax(150px,0.7fr)_minmax(0,2fr)]'
+          : ''
       "
     >
-      <div
-        v-if="row.kind !== 'event'"
-        class="flex flex-wrap items-start justify-between gap-2 text-xs text-n-slate-11"
+      <aside
+        v-if="isConversation"
+        class="min-w-0 self-start rounded-xl border border-n-weak bg-n-solid-1 p-3"
       >
-        <p>
-          <span class="font-semibold text-n-slate-12">{{
-            row.author?.name || t('JRC_SERVICE_DESK.COMMON.not_informed')
-          }}</span>
-          · {{ labels.kinds[row.kind] }}
-          <span v-if="row.channel">· {{ values.channel[row.channel] }}</span>
+        <h3 class="text-sm font-semibold">
+          {{ t('JRC_SERVICE_DESK.REFINEMENT.conversations.title') }}
+        </h3>
+        <p class="my-2 text-xs text-n-slate-11">
+          {{ t('JRC_SERVICE_DESK.REFINEMENT.conversations.loaded_only') }}
         </p>
-        <time :datetime="row.created_at">{{
-          formatTimestamp(row.created_at, locale)
-        }}</time>
-      </div>
-      <p v-if="row.visibility" class="text-xs font-medium text-n-slate-11">
-        {{ values.visibility[row.visibility] }}
-      </p>
-      <p v-if="row.title" class="font-medium text-sm">{{ row.title }}</p>
-      <p
-        v-if="row.body && !onlyFiles"
-        class="whitespace-pre-wrap break-words text-sm"
-      >
-        {{ row.body }}
-      </p>
-      <p v-if="row.comment && !onlyFiles" class="whitespace-pre-wrap text-sm">
-        {{ row.comment }}
-      </p>
-      <HistoryEventCard
-        v-if="row.kind === 'event' && row.event_type"
-        :event="row"
-        :ticket="ticket"
-      />
-      <p v-if="row.status && !onlyFiles" class="text-xs text-n-slate-11">
-        {{ messageState(row) }}
-      </p>
-      <template v-if="row.kind === 'delivery'">
-        <p class="text-sm">
-          {{ values.channel[row.channel] }} · {{ values.delivery[row.state] }} ·
-          {{ row.recipient }}
-        </p>
-        <p v-if="row.reason" class="text-xs text-n-amber-11">
-          {{ labels.reasons[row.reason] || labels.unavailable }}
-        </p>
-        <p class="whitespace-pre-wrap break-words text-sm">{{ row.content }}</p>
-        <details class="text-xs text-n-slate-11">
-          <summary class="cursor-pointer">
-            {{ t('JRC_SERVICE_DESK.REDESIGN_DETAIL.delivery_details') }}
-          </summary>
-          <p>
-            {{ labels.attempt }} {{ row.attempt_number }} ·
-            {{ labels.policy_version }} {{ row.policy_version }}
-          </p>
-          <p>
-            {{ labels.provider }} {{ row.provider }} · {{ labels.receipt }}
-            {{ row.provider_id }}
-          </p>
-          <p>
-            {{
-              formatTimestamp(
-                row.read_at || row.delivered_at || row.sent_at,
-                locale
-              )
-            }}
-          </p>
-        </details>
-        <NotificationControls
-          :row="row"
-          :ticket="ticket"
-          @updated="
-            load();
-            emit('updated');
-          "
+        <input
+          v-model="conversationSearch"
+          :disabled="selectionLocked"
+          :aria-label="t('JRC_SERVICE_DESK.COMMON.search')"
+          :placeholder="t('JRC_SERVICE_DESK.COMMON.search')"
+          class="w-full rounded-lg border border-n-weak bg-n-solid-1 p-2 text-xs"
         />
-      </template>
+        <div class="my-3 flex flex-wrap gap-1">
+          <Button
+            size="xs"
+            :variant="conversationFilter === 'all' ? 'solid' : 'ghost'"
+            :disabled="selectionLocked"
+            :label="t('JRC_SERVICE_DESK.COMMON.all')"
+            @click="conversationFilter = 'all'"
+          />
+          <Button
+            v-for="channel in conversationChannels"
+            :key="channel"
+            size="xs"
+            :variant="conversationFilter === channel ? 'solid' : 'ghost'"
+            :disabled="selectionLocked"
+            :label="channelLabel(channel)"
+            @click="conversationFilter = channel"
+          />
+        </div>
+        <div class="grid gap-2">
+          <button
+            v-for="group in shownGroups"
+            :key="group.key"
+            type="button"
+            :disabled="selectionLocked"
+            :aria-pressed="activeConversation?.key === group.key"
+            class="min-w-0 rounded-lg border p-3 text-start"
+            :class="
+              activeConversation?.key === group.key
+                ? 'border-n-blue-6 bg-n-blue-2'
+                : 'border-n-weak bg-n-solid-1'
+            "
+            @click="selectedConversation = group.key"
+          >
+            <span class="block text-xs font-medium"
+              >{{ channelLabel(group.channel) }} / {{ groupTitle(group) }}</span
+            >
+            <span class="mt-1 block truncate text-xs text-n-slate-11">{{
+              group.latest?.body ||
+              group.latest?.content ||
+              group.latest?.title ||
+              labels.empty
+            }}</span>
+            <time
+              class="mt-1 block text-xs text-n-slate-10"
+              :datetime="group.latest?.created_at"
+              >{{ formatTimestamp(group.latest?.created_at, locale) }}</time
+            >
+          </button>
+        </div>
+        <p v-if="selectionLocked" class="mt-3 text-xs text-n-amber-11">
+          {{ t('JRC_SERVICE_DESK.REFINEMENT.conversations.draft_lock') }}
+        </p>
+      </aside>
       <div
-        v-for="attachment in [
-          ...(row.attachments || []),
-          ...(row.recordings || []),
-        ]"
-        :key="attachment.id"
-        class="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-n-solid-2 p-3"
+        class="min-w-0 grid content-start gap-3"
+        :class="
+          isConversation
+            ? 'rounded-xl border border-n-weak bg-n-solid-1 p-3'
+            : ''
+        "
       >
-        <div class="min-w-0 flex-1">
-          <p class="break-all text-sm font-medium">{{ attachment.filename }}</p>
-          <p v-if="attachment.byte_size" class="text-xs text-n-slate-11">
-            {{ fileSize(attachment.byte_size) }} · {{ attachment.content_type }}
-          </p>
-        </div>
-        <div class="flex flex-wrap gap-1">
-          <Button
-            v-if="canPreview(attachment)"
-            size="xs"
-            color="slate"
-            variant="ghost"
-            :label="t('JRC_SERVICE_DESK.COMMON.preview')"
-            :disabled="attachment.scan_state !== 'clean'"
-            @click="download(row, attachment, true)"
-          />
-          <Button
-            size="xs"
-            color="slate"
-            variant="outline"
-            icon="i-lucide-download"
-            :label="t('JRC_SERVICE_DESK.REDESIGN_DETAIL.download')"
-            :disabled="attachment.scan_state !== 'clean'"
-            @click="download(row, attachment)"
-          />
-          <Button
-            v-if="row.kind === 'note' && attachment.permissions?.destroy"
-            size="xs"
-            color="ruby"
-            variant="ghost"
-            icon="i-lucide-trash-2"
-            :label="t('JRC_SERVICE_DESK.REDESIGN_DETAIL.delete')"
-            @click="openAction('file', row, attachment)"
-          />
-        </div>
-        <p
-          v-if="attachment.scan_state !== 'clean'"
-          class="w-full text-xs text-n-slate-11"
+        <header
+          v-if="isConversation && activeConversation"
+          class="border-b border-n-weak pb-3 text-sm font-semibold"
         >
-          {{ t('JRC_SERVICE_DESK.COCKPIT.scan_unavailable') }}
+          {{ channelLabel(activeConversation.channel) }} /
+          {{ groupTitle(activeConversation) }}
+        </header>
+        <State
+          v-if="!['ready', 'empty'].includes(status)"
+          :status="status"
+          retry
+          @retry="load()"
+        />
+        <p
+          v-if="['ready', 'empty'].includes(status) && !displayedItems.length"
+          class="py-6 text-center text-sm text-n-slate-11"
+        >
+          {{ labels.empty }}
         </p>
+        <article
+          v-for="row in displayedItems"
+          :key="row.key"
+          class="grid gap-2 rounded-xl border border-n-weak p-4"
+          :class="[
+            effectiveView === 'notes'
+              ? 'bg-n-amber-2'
+              : row.message_type === 'outgoing' || row.kind === 'delivery'
+                ? 'bg-n-blue-2'
+                : 'bg-n-solid-1',
+            isConversation
+              ? row.message_type === 'outgoing' || row.kind === 'delivery'
+                ? 'w-fit max-w-[92%] justify-self-end'
+                : 'w-fit max-w-[92%] justify-self-start'
+              : '',
+          ]"
+        >
+          <div
+            v-if="row.kind !== 'event'"
+            class="flex flex-wrap items-start justify-between gap-2 text-xs text-n-slate-11"
+          >
+            <p>
+              <span class="font-semibold text-n-slate-12">{{
+                row.author?.name || t('JRC_SERVICE_DESK.COMMON.not_informed')
+              }}</span>
+              · {{ labels.kinds[row.kind] }}
+              <span v-if="row.channel"
+                >· {{ values.channel[row.channel] }}</span
+              >
+            </p>
+            <time :datetime="row.created_at">{{
+              formatTimestamp(row.created_at, locale)
+            }}</time>
+          </div>
+          <p v-if="row.visibility" class="text-xs font-medium text-n-slate-11">
+            {{ values.visibility[row.visibility] }}
+          </p>
+          <p v-if="row.title" class="font-medium text-sm">{{ row.title }}</p>
+          <p
+            v-if="row.body && !onlyFiles"
+            class="whitespace-pre-wrap break-words text-sm"
+          >
+            {{ row.body }}
+          </p>
+          <p
+            v-if="row.comment && !onlyFiles"
+            class="whitespace-pre-wrap text-sm"
+          >
+            {{ row.comment }}
+          </p>
+          <HistoryEventCard
+            v-if="row.kind === 'event' && row.event_type"
+            :event="row"
+            :ticket="ticket"
+          />
+          <p v-if="row.status && !onlyFiles" class="text-xs text-n-slate-11">
+            {{ messageState(row) }}
+          </p>
+          <template v-if="row.kind === 'delivery'">
+            <p class="text-sm">
+              {{ values.channel[row.channel] }} ·
+              {{ values.delivery[row.state] }} ·
+              {{ row.recipient }}
+            </p>
+            <p v-if="row.reason" class="text-xs text-n-amber-11">
+              {{ labels.reasons[row.reason] || labels.unavailable }}
+            </p>
+            <p class="whitespace-pre-wrap break-words text-sm">
+              {{ row.content }}
+            </p>
+            <details class="text-xs text-n-slate-11">
+              <summary class="cursor-pointer">
+                {{ t('JRC_SERVICE_DESK.REDESIGN_DETAIL.delivery_details') }}
+              </summary>
+              <p>
+                {{ labels.attempt }} {{ row.attempt_number }} ·
+                {{ labels.policy_version }} {{ row.policy_version }}
+              </p>
+              <p>
+                {{ labels.provider }} {{ row.provider }} · {{ labels.receipt }}
+                {{ row.provider_id }}
+              </p>
+              <p>
+                {{
+                  formatTimestamp(
+                    row.read_at || row.delivered_at || row.sent_at,
+                    locale
+                  )
+                }}
+              </p>
+            </details>
+            <NotificationControls
+              :row="row"
+              :ticket="ticket"
+              @updated="
+                load();
+                emit('updated');
+              "
+            />
+          </template>
+          <div
+            v-for="attachment in [
+              ...(row.attachments || []),
+              ...(row.recordings || []),
+            ]"
+            :key="attachment.id"
+            class="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-n-solid-2 p-3"
+          >
+            <div class="min-w-0 flex-1">
+              <p class="break-all text-sm font-medium">
+                {{ attachment.filename }}
+              </p>
+              <p v-if="attachment.byte_size" class="text-xs text-n-slate-11">
+                {{ fileSize(attachment.byte_size) }} ·
+                {{ attachment.content_type }}
+              </p>
+            </div>
+            <div class="flex flex-wrap gap-1">
+              <Button
+                v-if="canPreview(attachment)"
+                size="xs"
+                color="slate"
+                variant="ghost"
+                :label="t('JRC_SERVICE_DESK.COMMON.preview')"
+                :disabled="attachment.scan_state !== 'clean'"
+                @click="download(row, attachment, true)"
+              />
+              <Button
+                size="xs"
+                color="slate"
+                variant="outline"
+                icon="i-lucide-download"
+                :label="t('JRC_SERVICE_DESK.REDESIGN_DETAIL.download')"
+                :disabled="attachment.scan_state !== 'clean'"
+                @click="download(row, attachment)"
+              />
+              <Button
+                v-if="row.kind === 'note' && attachment.permissions?.destroy"
+                size="xs"
+                color="ruby"
+                variant="ghost"
+                icon="i-lucide-trash-2"
+                :label="t('JRC_SERVICE_DESK.REDESIGN_DETAIL.delete')"
+                @click="openAction('file', row, attachment)"
+              />
+            </div>
+            <p
+              v-if="attachment.scan_state !== 'clean'"
+              class="w-full text-xs text-n-slate-11"
+            >
+              {{ t('JRC_SERVICE_DESK.COCKPIT.scan_unavailable') }}
+            </p>
+          </div>
+          <div
+            v-if="row.kind === 'note' && !onlyFiles"
+            class="flex flex-wrap gap-2"
+          >
+            <Button
+              v-if="
+                row.permissions?.update &&
+                ['internal', 'technical_team'].includes(row.visibility)
+              "
+              size="xs"
+              color="slate"
+              variant="ghost"
+              icon="i-lucide-pencil"
+              :label="t('JRC_SERVICE_DESK.COMMON.edit')"
+              @click="openAction('edit', row)"
+            />
+            <Button
+              v-if="row.permissions?.destroy"
+              size="xs"
+              color="ruby"
+              variant="ghost"
+              icon="i-lucide-trash-2"
+              :label="t('JRC_SERVICE_DESK.REDESIGN_DETAIL.delete')"
+              @click="openAction('delete', row)"
+            />
+            <Button
+              v-if="
+                effectiveView !== 'notes' &&
+                ticket.permissions.add_note &&
+                ['customer', 'public_without_notification'].includes(
+                  row.visibility
+                )
+              "
+              size="xs"
+              color="slate"
+              variant="ghost"
+              :label="t('JRC_SERVICE_DESK.COCKPIT.republish')"
+              @click="emit('republish', row)"
+            />
+          </div>
+        </article>
+        <Button
+          v-if="cursor"
+          variant="outline"
+          :disabled="busy"
+          :label="labels.more"
+          @click="load(true)"
+        />
+        <p v-if="feedback" role="status" class="text-sm">
+          {{ labels[feedback] }}
+        </p>
+        <slot
+          v-if="isConversation"
+          name="composer"
+          :conversation="activeConversation"
+        />
       </div>
-      <div
-        v-if="row.kind === 'note' && !onlyFiles"
-        class="flex flex-wrap gap-2"
-      >
-        <Button
-          v-if="
-            row.permissions?.update &&
-            ['internal', 'technical_team'].includes(row.visibility)
-          "
-          size="xs"
-          color="slate"
-          variant="ghost"
-          icon="i-lucide-pencil"
-          :label="t('JRC_SERVICE_DESK.COMMON.edit')"
-          @click="openAction('edit', row)"
-        />
-        <Button
-          v-if="row.permissions?.destroy"
-          size="xs"
-          color="ruby"
-          variant="ghost"
-          icon="i-lucide-trash-2"
-          :label="t('JRC_SERVICE_DESK.REDESIGN_DETAIL.delete')"
-          @click="openAction('delete', row)"
-        />
-        <Button
-          v-if="
-            effectiveView !== 'notes' &&
-            ticket.permissions.add_note &&
-            ['customer', 'public_without_notification'].includes(row.visibility)
-          "
-          size="xs"
-          color="slate"
-          variant="ghost"
-          :label="t('JRC_SERVICE_DESK.COCKPIT.republish')"
-          @click="emit('republish', row)"
-        />
-      </div>
-    </article>
-    <Button
-      v-if="cursor"
-      variant="outline"
-      :disabled="busy"
-      :label="labels.more"
-      @click="load(true)"
-    />
-    <p v-if="feedback" role="status" class="text-sm">{{ labels[feedback] }}</p>
+    </div>
     <ServiceDeskDialog
       :open="!!action"
       :title="actionTitle"

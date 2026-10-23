@@ -37,6 +37,7 @@ const session = useServiceDesk();
 const key = 'ticket:detail';
 const tab = ref('details');
 const action = ref('');
+const lifecycleBusy = ref(false);
 const sidebarOpen = ref(true);
 const createTaskOnOpen = ref(false);
 const deletionReason = ref('');
@@ -290,7 +291,9 @@ const actionUpdated = async () => {
   await refresh();
 };
 const actionTitle = computed(() =>
-  t(`JRC_SERVICE_DESK.REDESIGN_DETAIL.actions.${action.value || 'status'}`)
+  action.value === 'closure'
+    ? t('JRC_SERVICE_DESK.REFINEMENT.closure.title')
+    : t(`JRC_SERVICE_DESK.REDESIGN_DETAIL.actions.${action.value || 'status'}`)
 );
 const deleteTicket = async () => {
   if (
@@ -374,8 +377,19 @@ const deleteTicket = async () => {
     <TicketHeader v-if="ticket" :ticket="ticket">
       <template #actions>
         <Button
+          v-if="ticket.permissions.lifecycle_inspect"
+          data-testid="close-ticket-shortcut"
+          size="sm"
+          color="teal"
+          icon="i-lucide-circle-check"
+          :label="t('JRC_SERVICE_DESK.REFINEMENT.closure.title')"
+          @click="action = 'closure'"
+        />
+        <Button
           v-if="ticket.permissions.view_conversations"
           size="xs"
+          color="slate"
+          variant="outline"
           icon="i-lucide-reply"
           :label="t('JRC_SERVICE_DESK.REDESIGN_DETAIL.reply')"
           @click="selectTab('conversation')"
@@ -488,9 +502,9 @@ const deleteTicket = async () => {
     >
       <button
         v-for="item in tabs"
+        :id="`sd-tab-${item.value}`"
         :key="item.value"
         :data-tab="item.value"
-        :id="`sd-tab-${item.value}`"
         type="button"
         role="tab"
         :aria-selected="tab === item.value"
@@ -625,7 +639,7 @@ const deleteTicket = async () => {
     <ServiceDeskDialog
       :open="!!action && !!ticket"
       :title="actionTitle"
-      :busy="deleting"
+      :busy="deleting || lifecycleBusy"
       @close="action = ''"
     >
       <form
@@ -660,9 +674,11 @@ const deleteTicket = async () => {
         />
       </form>
       <LifecyclePanel
-        v-else-if="action === 'status'"
+        v-else-if="['status', 'closure'].includes(action)"
+        :key="action"
         :ticket="ticket"
-        mode="actions"
+        :mode="action === 'closure' ? 'closure' : 'actions'"
+        @busy-change="lifecycleBusy = $event"
         @updated="actionUpdated"
         @snapshot-recorded="snapshotRecorded"
       />

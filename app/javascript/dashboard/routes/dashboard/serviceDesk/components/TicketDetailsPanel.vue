@@ -34,7 +34,7 @@ const sourceLabel = computed(() => {
 <template>
   <div class="grid gap-4 md:grid-cols-2">
     <Panel :title="t('JRC_SERVICE_DESK.REDESIGN_DETAIL.general')">
-      <div class="mb-3 flex justify-end">
+      <template #actions>
         <Button
           v-if="ticket.permissions.update"
           size="xs"
@@ -44,7 +44,7 @@ const sourceLabel = computed(() => {
           :label="t('JRC_SERVICE_DESK.COMMON.edit')"
           @click="emit('edit', 0)"
         />
-      </div>
+      </template>
       <dl class="grid gap-3 text-sm">
         <div>
           <dt class="text-xs text-n-slate-11">
@@ -83,7 +83,7 @@ const sourceLabel = computed(() => {
       </dl>
     </Panel>
     <Panel :title="t('JRC_SERVICE_DESK.REDESIGN_DETAIL.classification')">
-      <div class="mb-3 flex justify-end">
+      <template #actions>
         <Button
           v-if="ticket.permissions.update"
           size="xs"
@@ -93,7 +93,7 @@ const sourceLabel = computed(() => {
           :label="t('JRC_SERVICE_DESK.COMMON.edit')"
           @click="emit('edit', 1)"
         />
-      </div>
+      </template>
       <dl class="grid gap-3 sm:grid-cols-2 text-sm">
         <div v-for="field in classification" :key="field">
           <dt class="text-xs text-n-slate-11">
@@ -122,7 +122,7 @@ const sourceLabel = computed(() => {
       </div>
     </Panel>
     <Panel :title="t('JRC_SERVICE_DESK.REDESIGN_DETAIL.customer')">
-      <div class="mb-3 flex justify-end">
+      <template #actions>
         <Button
           v-if="ticket.permissions.update"
           size="xs"
@@ -132,7 +132,7 @@ const sourceLabel = computed(() => {
           :label="t('JRC_SERVICE_DESK.COMMON.edit')"
           @click="emit('edit', 0)"
         />
-      </div>
+      </template>
       <p class="text-sm font-medium">{{ ticket.requester?.name || noValue }}</p>
       <p v-if="ticket.company?.name" class="mt-1 text-sm">
         {{ ticket.company.name }}

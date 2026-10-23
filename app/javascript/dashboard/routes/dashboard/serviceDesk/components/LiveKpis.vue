@@ -6,8 +6,11 @@ import KpiCard from './KpiCard.vue';
 import { metricTones, metricIcons } from '../helpers/visualTheme';
 import State from './ServiceDeskState.vue';
 import Button from 'dashboard/components-next/button/Button.vue';
+import { finiteDuration } from '../helpers/dashboardPresentation';
 const props = defineProps({
   query: { type: Object, default: () => ({}) },
+  referenceLayout: Boolean,
+  supervision: { type: Object, default: null },
   breakdown: { type: Boolean, default: false },
   compact: { type: Boolean, default: false },
 });
@@ -18,11 +21,11 @@ const key = `kpis:${getCurrentInstance().uid}`;
 const result = computed(
   () => session.operations?.resource(key) || { status: 'idle', data: null }
 );
-const metrics = computed(() =>
-  (props.compact
-    ? ['total', 'active', 'waiting', 'resolved']
-    : ['total', 'active', 'open', 'waiting', 'resolved']
-  ).map(name => {
+const metrics = computed(() => {
+  let names = ['total', 'active', 'open', 'waiting', 'resolved'];
+  if (props.referenceLayout) names = ['active', 'open', 'waiting', 'resolved'];
+  if (props.compact) names = ['total', 'active', 'waiting', 'resolved'];
+  return names.map(name => {
     let value = null;
     if (result.value.status === 'ready') {
       value = Object.hasOwn(result.value.data.phases, name)
@@ -30,8 +33,21 @@ const metrics = computed(() =>
         : result.value.data[name];
     }
     return { name, value };
-  })
+  });
+});
+const resolutionSeconds = computed(() =>
+  finiteDuration(props.supervision?.sla?.resolution_average_seconds)
 );
+const resolutionLabel = computed(() => {
+  if (resolutionSeconds.value === null) return '';
+  const minutes = Math.round(resolutionSeconds.value / 60);
+  return minutes < 60
+    ? t('JRC_SERVICE_DESK.REDESIGN_LIST.minutes', { count: minutes })
+    : t('JRC_SERVICE_DESK.REDESIGN_LIST.hours_minutes', {
+        hours: Math.floor(minutes / 60),
+        minutes: minutes % 60,
+      });
+});
 const load = () => {
   if (
     session.state.status === 'ready' &&
@@ -59,7 +75,13 @@ onBeforeUnmount(() => session.operations?.cancel(key));
   >
     <div
       class="mb-3 grid grid-cols-2 gap-3"
-      :class="compact ? 'lg:grid-cols-4' : 'xl:grid-cols-5'"
+      :class="
+        compact
+          ? 'lg:grid-cols-4'
+          : referenceLayout
+            ? 'lg:grid-cols-3 xl:grid-cols-6'
+            : 'xl:grid-cols-5'
+      "
     >
       <KpiCard
         v-for="metric in metrics"
@@ -71,6 +93,29 @@ onBeforeUnmount(() => session.operations?.cancel(key));
         :icon="metricIcons[metric.name]"
         :interactive="result.status === 'ready'"
         @activate="emit('metric-filter', metric.name)"
+      />
+      <KpiCard
+        v-if="referenceLayout"
+        :label="t('JRC_SERVICE_DESK.REFINEMENT.overview.resolution')"
+        :value="resolutionSeconds"
+        :display-value="resolutionLabel"
+        tone="iris"
+        icon="i-lucide-timer"
+        :hint="
+          t(
+            resolutionSeconds === null
+              ? 'JRC_SERVICE_DESK.REFINEMENT.overview.unmeasured'
+              : 'JRC_SERVICE_DESK.REFINEMENT.overview.measured_resolution'
+          )
+        "
+      />
+      <KpiCard
+        v-if="referenceLayout"
+        :label="t('JRC_SERVICE_DESK.REFINEMENT.overview.csat')"
+        :value="null"
+        tone="teal"
+        icon="i-lucide-smile"
+        :hint="t('JRC_SERVICE_DESK.REFINEMENT.overview.csat_unavailable')"
       />
     </div>
     <State

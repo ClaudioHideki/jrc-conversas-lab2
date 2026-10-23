@@ -168,35 +168,39 @@ describe('Service Desk presentation preserves operational authority', () => {
     );
   });
 
-  it('prevents Escape from discarding the existing form while a write is pending', async () => {
-    const busy = ref(true);
-    const cancel = vi.fn();
-    const show = vi
-      .spyOn(HTMLDialogElement.prototype, 'showModal')
-      .mockImplementation(() => {});
-    const wrapper = mount(TicketDialogView, {
-      global: {
-        stubs: {
-          TicketFormView: {
-            setup(_, { expose }) {
-              expose({ busy, cancel });
-              return {};
+  it.each(['new', 'edit'])(
+    'prevents Escape from discarding the %s form while a write is pending',
+    async screen => {
+      const busy = ref(true);
+      const cancel = vi.fn();
+      const show = vi
+        .spyOn(HTMLDialogElement.prototype, 'showModal')
+        .mockImplementation(() => {});
+      const wrapper = mount(TicketDialogView, {
+        props: { screen },
+        global: {
+          stubs: {
+            TicketFormView: {
+              setup(_, { expose }) {
+                expose({ busy, cancel });
+                return {};
+              },
+              template: '<section />',
             },
-            template: '<section />',
           },
         },
-      },
-    });
-    wrappers.push(wrapper);
-    expect(show).toHaveBeenCalledOnce();
-    await wrapper.get('dialog').trigger('cancel');
-    expect(cancel).not.toHaveBeenCalled();
-    busy.value = false;
-    await wrapper.get('dialog').trigger('cancel');
-    expect(cancel).toHaveBeenCalledOnce();
-  });
+      });
+      wrappers.push(wrapper);
+      expect(show).toHaveBeenCalledOnce();
+      await wrapper.get('dialog').trigger('cancel');
+      expect(cancel).not.toHaveBeenCalled();
+      busy.value = false;
+      await wrapper.get('dialog').trigger('cancel');
+      expect(cancel).toHaveBeenCalledOnce();
+    }
+  );
 
-  it('keeps edit on its existing route without opening a creation dialog', () => {
+  it('opens the existing edit form in a dialog while preserving its edit mode', () => {
     const show = vi
       .spyOn(HTMLDialogElement.prototype, 'showModal')
       .mockImplementation(() => {});
@@ -205,8 +209,8 @@ describe('Service Desk presentation preserves operational authority', () => {
       global: { stubs: { TicketFormView: true } },
     });
     wrappers.push(wrapper);
-    expect(wrapper.find('dialog').exists()).toBe(false);
-    expect(show).not.toHaveBeenCalled();
+    expect(wrapper.find('dialog').exists()).toBe(true);
+    expect(show).toHaveBeenCalledOnce();
     expect(
       wrapper.findComponent({ name: 'TicketFormView' }).props('screen')
     ).toBe('edit');

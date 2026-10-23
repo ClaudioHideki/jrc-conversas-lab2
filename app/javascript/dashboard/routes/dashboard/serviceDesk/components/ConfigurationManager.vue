@@ -13,6 +13,7 @@ import BaseTableCell from 'dashboard/components-next/table/BaseTableCell.vue';
 import API from 'dashboard/api/serviceDeskConfiguration';
 import ScopeBar from './ScopeBar.vue';
 import ConfigurationV2Fields from './ConfigurationV2Fields.vue';
+import ServiceCatalogWizard from './ServiceCatalogWizard.vue';
 import {
   configurationV2Fields,
   operationalDefaults,
@@ -31,7 +32,11 @@ import {
   decodeConfigurationEnvelope,
   confirmConfiguration,
 } from '../helpers/configuration';
-const props = defineProps({ resource: { type: String, required: true } });
+const props = defineProps({
+  resource: { type: String, required: true },
+  initialUnitId: { type: String, default: '' },
+});
+const emit = defineEmits(['busyChange']);
 const { t } = useI18n();
 const session = useServiceDesk();
 const unitId = ref('');
@@ -161,6 +166,17 @@ watch(
       unitId.value = '';
     load();
   }
+);
+watch(
+  [() => props.initialUnitId, () => session.state.context],
+  () => {
+    if (!props.initialUnitId || saving.value || pending.value) return;
+    if (
+      session.state.context?.units.some(row => row.id === props.initialUnitId)
+    )
+      unitId.value = props.initialUnitId;
+  },
+  { immediate: true }
 );
 const create = () => {
   clearEditor();
@@ -338,6 +354,11 @@ onBeforeUnmount(() => {
   controller?.abort();
   clearEditor();
 });
+watch(
+  () => saving.value || !!pending.value,
+  value => emit('busyChange', value)
+);
+onBeforeUnmount(() => emit('busyChange', false));
 </script>
 
 <template>
@@ -448,8 +469,8 @@ onBeforeUnmount(() => {
               contained: true,
               useForm: false,
               closeOnClickOutside: false,
-              dismissible: !saving,
-              showCloseButton: true,
+              dismissible: !saving && !pending,
+              showCloseButton: !saving && !pending,
               showCancelButton: false,
               showConfirmButton: false,
               title: t('JRC_SERVICE_DESK.CATALOG.editor_title', {
@@ -460,7 +481,21 @@ onBeforeUnmount(() => {
       "
       @close="clearEditor"
     >
+      <ServiceCatalogWizard
+        v-if="modalEditor"
+        :key="`${unitId}:${editor.id || 'new'}`"
+        v-model="form"
+        :record="editor"
+        :unit-id="unitId"
+        :context="session.state.context"
+        :saving="saving"
+        :pending="!!pending"
+        :feedback="feedback"
+        @save="save"
+        @cancel="clearEditor"
+      />
       <form
+        v-else
         class="grid gap-3"
         :class="modalEditor ? '' : 'border-t border-n-weak mt-4 pt-4'"
         data-configuration-editor

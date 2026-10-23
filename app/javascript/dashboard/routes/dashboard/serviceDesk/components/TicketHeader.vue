@@ -15,12 +15,15 @@ const source = computed(() => {
 
 <template>
   <header
-    class="sticky top-0 z-10 mb-4 rounded-xl border border-n-weak bg-n-solid-1 p-4"
+    class="sticky top-0 z-10 mb-3 rounded-xl border border-n-weak bg-n-solid-1 p-3"
   >
     <div class="flex flex-wrap items-start justify-between gap-4">
       <div class="min-w-0 flex-1">
         <div class="flex flex-wrap items-center gap-2">
-          <TicketProtocol :ticket="ticket" />
+          <TicketProtocol :ticket="ticket" compact />
+          <h2 class="m-0 min-w-0 break-words text-lg font-semibold">
+            {{ ticket.title }}
+          </h2>
           <span
             v-if="ticket.status"
             class="rounded-full bg-n-blue-3 px-2 py-1 text-xs font-medium text-n-blue-11"
@@ -32,9 +35,6 @@ const source = computed(() => {
             >{{ ticket.priority.name }}</span
           >
         </div>
-        <h2 class="mt-2 break-words text-lg font-semibold">
-          {{ ticket.title }}
-        </h2>
         <p class="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-n-slate-11">
           <span
             >{{ t('JRC_SERVICE_DESK.FIELDS.opened_at') }}

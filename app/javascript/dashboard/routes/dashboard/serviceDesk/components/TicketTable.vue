@@ -5,9 +5,11 @@ import { formatTimestamp } from '../helpers/presentation';
 defineProps({
   items: { type: Array, default: () => [] },
   allowEdit: { type: Boolean, default: false },
+  compact: Boolean,
 });
 const emit = defineEmits(['open', 'preview', 'edit']);
 const { t, te, locale } = useI18n();
+const numberPrefix = '#';
 const empty = () => t('JRC_SERVICE_DESK.COMMON.no_value');
 const sourceName = source => {
   const key = `JRC_SERVICE_DESK.REDESIGN_LIST.sources.${source}`;
@@ -30,7 +32,13 @@ const assigneeName = ticket =>
     <table class="hidden w-full table-fixed text-start text-xs md:table">
       <thead class="border-b border-n-weak text-n-slate-11">
         <tr>
-          <th class="w-[29%] py-3 pr-2 text-start font-medium">
+          <th class="w-[7%] py-3 pr-2 text-start font-medium">
+            <span class="sr-only">{{
+              t('JRC_SERVICE_DESK.CREATION.protocol')
+            }}</span
+            >{{ numberPrefix }}
+          </th>
+          <th class="w-[22%] py-3 pr-2 text-start font-medium">
             {{ t('JRC_SERVICE_DESK.FIELDS.title') }}
           </th>
           <th class="w-[16%] py-3 pr-2 text-start font-medium">
@@ -61,7 +69,10 @@ const assigneeName = ticket =>
           :key="ticket.id"
           class="align-top hover:bg-n-slate-2"
         >
-          <td class="py-3 pr-2">
+          <td class="py-2 pr-2 font-mono text-n-blue-11">
+            {{ numberPrefix }}{{ ticket.number || ticket.id }}
+          </td>
+          <td class="py-2 pr-2">
             <button
               type="button"
               class="grid w-full gap-1 break-words text-start text-n-blue-11 focus-visible:ring-2 focus-visible:ring-n-blue-9"
@@ -72,12 +83,11 @@ const assigneeName = ticket =>
               "
               @click="emit('open', ticket.id)"
             >
-              <span class="font-mono text-[10px] text-n-slate-11"
-                >#{{ ticket.number || ticket.id }}</span
-              >
               <span class="font-semibold line-clamp-2">{{ ticket.title }}</span>
             </button>
-            <span class="mt-1 block break-words text-[10px] text-n-slate-11"
+            <span
+              v-if="!compact"
+              class="mt-1 block break-words text-[10px] text-n-slate-11"
               >{{ sourceName(ticket.source) }} ·
               {{ formatTimestamp(ticket.updated_at, locale) || empty() }}</span
             >

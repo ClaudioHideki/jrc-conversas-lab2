@@ -9,7 +9,10 @@ import LookupSelect from './LookupSelect.vue';
 import { useServiceDesk } from '../composables/useServiceDesk';
 import { normalizeQuery } from '../helpers/query';
 import { readSavedFilters, writeSavedFilters } from '../helpers/savedFilters';
-const props = defineProps({ query: { type: Object, default: () => ({}) } });
+const props = defineProps({
+  query: { type: Object, default: () => ({}) },
+  compact: Boolean,
+});
 const emit = defineEmits(['apply']);
 const { t } = useI18n();
 const session = useServiceDesk();
@@ -163,15 +166,17 @@ const removeSaved = () => {
       <div class="min-w-0 flex-1 basis-56">
         <Input
           v-model="draft.q"
-          :label="t('JRC_SERVICE_DESK.COMMON.search')"
+          :label="compact ? undefined : t('JRC_SERVICE_DESK.COMMON.search')"
+          :aria-label="t('JRC_SERVICE_DESK.COMMON.search')"
           :placeholder="t('JRC_SERVICE_DESK.FILTERS.placeholder')"
           maxlength="200"
         />
       </div>
       <label class="sd-label min-w-40">
-        <span>{{ t('JRC_SERVICE_DESK.FILTERS.sort') }}</span>
+        <span v-if="!compact">{{ t('JRC_SERVICE_DESK.FILTERS.sort') }}</span>
         <Select
           v-model="draft.sort"
+          :aria-label="t('JRC_SERVICE_DESK.FILTERS.sort')"
           :options="
             ['updated_at_desc', 'created_at_desc', 'created_at_asc'].map(
               value => ({
@@ -305,7 +310,7 @@ const removeSaved = () => {
       </div>
     </template>
     <div
-      v-if="canSave"
+      v-if="canSave && (!compact || expanded)"
       class="flex flex-wrap items-end gap-2 border-t border-n-weak pt-3"
     >
       <label v-if="saved.length" class="sd-label min-w-0 flex-1 basis-56">

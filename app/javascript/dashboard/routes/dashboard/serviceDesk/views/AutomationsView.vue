@@ -82,7 +82,11 @@ const active = computed(
         @click="select(row.key)"
       />
     </nav>
-    <LifecyclePolicyEditor v-if="active === 'lifecycle'" />
+    <LifecyclePolicyEditor
+      v-if="active === 'lifecycle'"
+      :initial-unit-id="String(route?.query?.unit_id || '')"
+      :initial-service-id="String(route?.query?.service_id || '')"
+    />
     <ConfigurationManager v-else-if="active === 'ola'" resource="queues" />
     <NotificationPolicyEditor v-else-if="active === 'notifications'" />
     <OperationalRulePanel v-else-if="active === 'operational'" />

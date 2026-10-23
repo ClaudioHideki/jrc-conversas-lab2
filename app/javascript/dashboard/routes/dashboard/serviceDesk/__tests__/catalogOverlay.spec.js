@@ -142,6 +142,9 @@ const inputName = async value => {
   await flushPromises();
 };
 const submit = async () => {
+  const publication = [...editor().querySelectorAll('nav button')].at(-1);
+  publication.click();
+  await flushPromises();
   editor()
     .querySelector('form')
     .dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
@@ -245,6 +248,8 @@ describe('Service catalog uses the same editor in a native overlay', () => {
     reject({ response: { status: 422 } });
     await flushPromises();
     expect(editor()).not.toBeNull();
+    editor().querySelector('nav button').click();
+    await flushPromises();
     expect(nameInput().value).toBe('Keep this value');
     expect(editor().textContent).toContain(
       messages.JRC_SERVICE_DESK.ADMIN.feedback.invalid_request

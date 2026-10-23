@@ -1548,6 +1548,202 @@
       "sla_after_save": "O prazo será exibido conforme a política de SLA vinculada ao chamado.",
       "linked_context_conflict": "Desvincule os projetos e as tarefas em Relacionamentos antes de alterar o solicitante ou a empresa. Depois de salvar, você poderá criar os vínculos novamente.",
       "edit_assignment_help": "Para mudar a equipe, o responsável ou a fila, use Atribuir ou Transferir nos detalhes do chamado. Salve as demais alterações antes de voltar."
+    },
+    "REFINEMENT": {
+      "closure": {
+        "title": "Encerrar chamado",
+        "help": "Confira a solução e confirme a transição permitida. O chamado só será alterado após a confirmação do servidor.",
+        "resolve_first": "Esta política permite resolver o chamado agora. Resolver não equivale a encerrar; o encerramento seguirá as regras e as validações da política.",
+        "unavailable": "Nenhuma transição de resolução ou encerramento está autorizada neste estado. Confira a política, as permissões e os requisitos do chamado.",
+        "confirm": "Confirmo as informações e a alteração para \"{status}\".",
+        "close": "Confirmar encerramento",
+        "resolve": "Confirmar resolução",
+        "additional": "Resultado, validação e informações adicionais"
+      },
+      "history": {
+        "status": {
+          "open": "Aberto",
+          "pending": "Pendente",
+          "waiting": "Aguardando",
+          "in_progress": "Em andamento",
+          "resolved": "Resolvido",
+          "closed": "Encerrado",
+          "cancelled": "Cancelado",
+          "canceled": "Cancelado",
+          "reopened": "Reaberto",
+          "completed": "Concluído",
+          "approved": "Aprovado",
+          "rejected": "Rejeitado"
+        },
+        "notification_state": {
+          "not_requested": "Não solicitada",
+          "pending": "Pendente",
+          "queued": "Na fila",
+          "sent": "Enviada",
+          "delivered": "Entregue",
+          "read": "Lida",
+          "failed": "Falhou",
+          "skipped": "Não enviada",
+          "suppressed": "Suprimida"
+        },
+        "action": {
+          "pause": "Pausar",
+          "resume": "Retomar",
+          "resolve": "Resolver",
+          "close": "Encerrar",
+          "cancel": "Cancelar",
+          "reopen": "Reabrir",
+          "work_status": "Alterar status",
+          "create": "Criar",
+          "update": "Atualizar",
+          "delete": "Excluir"
+        },
+        "channel": {
+          "whatsapp": "WhatsApp",
+          "email": "E-mail",
+          "portal": "Portal",
+          "manual": "Manual",
+          "internal": "Interno"
+        },
+        "clock_kind": {
+          "first_response": "Primeira resposta",
+          "attendance": "Atendimento",
+          "resolution": "Resolução"
+        },
+        "state": {
+          "running": "Em contagem",
+          "paused": "Pausado",
+          "completed": "Concluído",
+          "stopped": "Parado",
+          "pending": "Pendente",
+          "sent": "Enviado",
+          "failed": "Falhou"
+        },
+        "mode": {
+          "manual": "Manual",
+          "automatic": "Automático",
+          "business": "Horário de atendimento",
+          "calendar": "Tempo corrido"
+        },
+        "priority": {
+          "low": "Baixa",
+          "normal": "Normal",
+          "medium": "Média",
+          "high": "Alta",
+          "urgent": "Urgente",
+          "critical": "Crítica"
+        },
+        "kind": {
+          "note": "Nota",
+          "message": "Mensagem",
+          "event": "Evento",
+          "delivery": "Entrega",
+          "call": "Ligação"
+        },
+        "severity": {
+          "low": "Baixa",
+          "normal": "Normal",
+          "medium": "Média",
+          "high": "Alta",
+          "critical": "Crítica",
+          "urgent": "Urgente"
+        },
+        "resource_kind": {
+          "asset": "Ativo",
+          "problem": "Problema",
+          "incident": "Incidente",
+          "change": "Mudança",
+          "contract": "Contrato",
+          "task": "Tarefa",
+          "project": "Projeto"
+        }
+      },
+      "links_notice": "Os vínculos abaixo têm confirmação e gravação próprias. Cancelar este formulário não desfaz vínculos já confirmados.",
+      "form_notice": "Os campos do chamado serão salvos somente na confirmação final. Os vínculos com registros existentes são ações separadas, salvas imediatamente e não desfeitas por Cancelar.",
+      "catalog": {
+        "steps": {
+          "information": "Informações",
+          "categorization": "Categorização",
+          "rules": "SLA e regras",
+          "form": "Formulário",
+          "permissions": "Permissões",
+          "publication": "Publicação"
+        },
+        "title": "Configurar serviço",
+        "save_notice": "As etapas compartilham um rascunho local. Nada é gravado até Salvar na última etapa.",
+        "preview": "Pré-visualização do serviço",
+        "preview_notice": "Prévia do rascunho; não confirma publicação no portal.",
+        "sla_title": "SLA e política de atendimento",
+        "sla_help": "Os prazos são definidos pela política versionada e pelas condições/calendário aplicáveis ao chamado. Este cadastro não substitui o cálculo do servidor. A configuração de SLA abre em outra aba, sem descartar o rascunho.",
+        "open_policy": "Configurar política e SLA em outra aba"
+      },
+      "yes": "Sim",
+      "no": "Não",
+      "back": "Voltar",
+      "overview": {
+        "resolution": "Tempo médio de resolução",
+        "csat": "Satisfação (CSAT)",
+        "unmeasured": "Métrica indisponível neste escopo ou sem medição válida.",
+        "measured_resolution": "Relógios de resolução concluídos no escopo.",
+        "csat_unavailable": "Sem agregação CSAT vinculada a este painel.",
+        "risk": "SLA em risco",
+        "team": "Disponibilidade da equipe",
+        "activity": "Atividade recente",
+        "activity_notice": "Últimas atualizações dos chamados desta consulta; não substitui o histórico de auditoria.",
+        "breached_clocks": "Relógios em andamento com prazo vencido. Um chamado pode ter mais de um relógio.",
+        "risk_limits": "As faixas preventivas por prioridade ainda não são fornecidas nesta projeção.",
+        "capacity": "{active} atendimentos / capacidade {total}",
+        "no_capacity": "Capacidade não configurada; percentual não calculado.",
+        "more": "Mais indicadores operacionais"
+      },
+      "policy": {
+        "steps": {
+          "general": "Básico",
+          "lifecycle": "Ciclo de vida",
+          "monitoring": "SLA e prazos",
+          "routing": "Direcionamento",
+          "notifications": "Notificações",
+          "review": "Revisão"
+        },
+        "filter_page": "Buscar políticas nesta página",
+        "version": "Versão",
+        "summary": "Resumo da política",
+        "save_draft": "Salvar rascunho neste navegador",
+        "restore": "Recuperar rascunho local",
+        "draft_saved": "Rascunho salvo neste navegador, para esta conta, unidade e usuário. Nada foi publicado.",
+        "draft_restored": "Rascunho recuperado. A versão e a autorização serão revalidadas pelo servidor na publicação.",
+        "draft_unavailable": "Não foi possível salvar ou recuperar o rascunho local.",
+        "confirm": "Conferi os requisitos e confirmo a publicação desta versão da política de ciclo de vida.",
+        "no_auto_publish": "Avançar entre etapas não publica o ciclo de vida. Verifique o alcance de cada configuração antes de confirmar.",
+        "separate_routing": "O direcionamento utiliza as filas existentes. Salvar uma fila aplica sua configuração imediatamente e tem confirmação própria; Cancelar o rascunho de ciclo de vida não a desfaz.",
+        "separate_notifications": "Notificações possuem versão, escopo e publicação próprios. Revise evento, serviço, canal e destinatário; salvar aqui não aguarda a publicação do ciclo de vida.",
+        "publish_scope": "Publicar nesta etapa grava somente a política de ciclo de vida. Filas e notificações têm confirmações separadas, identificadas nas etapas correspondentes."
+      },
+      "notification": {
+        "steps": {
+          "general": "Evento",
+          "conditions": "Condições",
+          "channels": "Canal e caixa",
+          "message": "Mensagem",
+          "preview": "Prévia",
+          "review": "Revisão e publicação"
+        },
+        "conditions_hint": "O evento, a unidade, o tipo e o serviço definem o escopo desta política. As condições adicionais continuam nas regras operacionais.",
+        "variables": "Variáveis disponíveis",
+        "review": "Revisar notificação",
+        "publish_hint": "Esta confirmação publica somente a política de notificação. Preferências, consentimentos e regras do canal continuam sendo verificados pelo servidor. A prévia não envia mensagens.",
+        "required_message": "Preencha a mensagem e sua versão antes de confirmar."
+      },
+      "conversations": {
+        "title": "Conversas do chamado",
+        "loaded_only": "Conversas das mensagens carregadas. Use Carregar mais para consultar o restante.",
+        "conversation": "Conversa #{id}",
+        "updates": "Atualizações do chamado",
+        "other": "Outro canal",
+        "draft_lock": "Conclua ou limpe o rascunho antes de trocar a conversa. Confira o destinatário na prévia antes de enviar.",
+        "reply_here": "Responder nesta conversa",
+        "portal": "Portal / chamado"
+      }
     }
   }
 }

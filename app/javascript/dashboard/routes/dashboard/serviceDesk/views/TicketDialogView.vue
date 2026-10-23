@@ -13,9 +13,7 @@ onMounted(() => dialog.value?.showModal());
 </script>
 
 <template>
-  <TicketFormView v-if="screen === 'edit'" :screen="screen" />
   <dialog
-    v-else
     ref="dialog"
     aria-labelledby="sd-ticket-form-title"
     class="w-[calc(100%-2rem)] max-w-6xl max-h-[90vh] overflow-y-auto rounded-2xl border border-n-weak bg-n-background p-0 text-n-slate-12 shadow-xl backdrop:bg-black/50 backdrop:backdrop-blur-sm"

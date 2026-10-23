@@ -4,6 +4,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import Button from 'dashboard/components-next/button/Button.vue';
 import LiveKpis from '../components/LiveKpis.vue';
+import OverviewSignals from '../components/OverviewSignals.vue';
 import TicketFilters from '../components/TicketFilters.vue';
 import Panel from '../components/ServiceDeskPanel.vue';
 import State from '../components/ServiceDeskState.vue';
@@ -85,7 +86,7 @@ const filterStatus = statusId =>
     <header class="sd-page-heading">
       <div>
         <h2 class="sd-page-title">
-          {{ t('JRC_SERVICE_DESK.SCREENS.overview') }}
+          {{ t('JRC_SERVICE_DESK.MODULE') }}
         </h2>
         <p class="sd-page-subtitle">
           {{ t('JRC_SERVICE_DESK.SUBTITLE') }}
@@ -104,10 +105,13 @@ const filterStatus = statusId =>
       />
     </header>
     <TicketFilters
+      compact
       :query="route.query"
       @apply="router.push({ query: $event })"
     />
     <LiveKpis
+      reference-layout
+      :supervision="reportStatus === 'ready' ? supervision?.supervision : null"
       :query="route.query"
       @status-filter="filterStatus"
       @metric-filter="
@@ -118,50 +122,82 @@ const filterStatus = statusId =>
         })
       "
     />
-    <div
-      v-if="session.state.context?.capabilities?.reports?.index"
-      class="mb-4"
-    >
-      <OverviewOperations
-        v-if="reportStatus === 'ready'"
-        :data="supervision.supervision"
-        @navigate="go($event.name, null, $event.query || {})"
-      />
-      <State
-        v-else
-        :status="reportStatus"
-        compact
-        retry
-        @retry="reloadReport"
-      />
-    </div>
-    <div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_14rem]">
-      <Panel
-        :title="t('JRC_SERVICE_DESK.OVERVIEW.recent')"
-        icon="i-lucide-ticket"
-      >
-        <template #actions>
-          <Button
-            size="xs"
-            variant="ghost"
-            :label="t('JRC_SERVICE_DESK.OVERVIEW.recent_link')"
-            @click="go('tickets')"
+    <div class="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_17rem]">
+      <div class="min-w-0">
+        <template v-if="session.state.context?.capabilities?.reports?.index">
+          <OverviewOperations
+            v-if="reportStatus === 'ready'"
+            section="charts"
+            :data="supervision.supervision"
+            @navigate="go($event.name, null, $event.query || {})"
+          />
+          <State
+            v-else
+            :status="reportStatus"
+            compact
+            retry
+            @retry="reloadReport"
           />
         </template>
-        <TicketTable
-          v-if="recent.status === 'ready'"
-          :items="recent.items"
-          @open="go('detail', $event)"
-          @preview="go('detail', $event)"
-        />
-        <State
-          v-else
-          :status="recent.status"
-          retry
-          @retry="session.state.status === 'ready' ? load() : session.retry()"
-        />
-      </Panel>
+        <Panel
+          :title="t('JRC_SERVICE_DESK.OVERVIEW.recent')"
+          icon="i-lucide-ticket"
+        >
+          <template #actions>
+            <Button
+              size="xs"
+              variant="ghost"
+              :label="t('JRC_SERVICE_DESK.OVERVIEW.recent_link')"
+              @click="go('tickets')"
+            />
+          </template>
+          <TicketTable
+            v-if="recent.status === 'ready'"
+            compact
+            :items="recent.items"
+            @open="go('detail', $event)"
+            @preview="go('detail', $event)"
+          />
+          <State
+            v-else
+            :status="recent.status"
+            retry
+            @retry="session.state.status === 'ready' ? load() : session.retry()"
+          />
+        </Panel>
+      </div>
       <div class="grid content-start gap-4">
+        <OverviewSignals
+          kind="risk"
+          :data="reportStatus === 'ready' ? supervision?.supervision : null"
+          :can-view-sla="
+            session.state.context?.effective_permissions?.includes(
+              'jrc_service_desk_sla_view'
+            ) === true
+          "
+          @sla="go('sla')"
+        />
+        <OverviewSignals
+          kind="team"
+          :data="reportStatus === 'ready' ? supervision?.supervision : null"
+        />
+        <OverviewSignals
+          kind="activity"
+          :tickets="recent.status === 'ready' ? recent.items : []"
+          :loading="recent.status === 'loading'"
+          @open="go('detail', $event)"
+        />
+        <details class="rounded-xl border border-n-weak bg-n-solid-1 p-3">
+          <summary class="cursor-pointer text-sm font-medium">
+            {{ t('JRC_SERVICE_DESK.REFINEMENT.overview.more') }}
+          </summary>
+          <OverviewOperations
+            v-if="reportStatus === 'ready'"
+            section="summary"
+            :data="supervision.supervision"
+            @navigate="go($event.name, null, $event.query || {})"
+          />
+        </details>
         <Panel :title="t('JRC_SERVICE_DESK.OVERVIEW.shortcuts')">
           <div class="grid gap-2">
             <Button

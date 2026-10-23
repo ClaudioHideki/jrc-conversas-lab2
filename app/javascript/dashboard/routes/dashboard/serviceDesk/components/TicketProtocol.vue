@@ -5,7 +5,10 @@ import Button from 'dashboard/components-next/button/Button.vue';
 import { copyTextToClipboard } from 'shared/helpers/clipboard';
 import { ticketProtocol } from '../helpers/ticketReceipt';
 
-const props = defineProps({ ticket: { type: Object, required: true } });
+const props = defineProps({
+  ticket: { type: Object, required: true },
+  compact: Boolean,
+});
 const { t } = useI18n();
 const protocol = computed(() => ticketProtocol(props.ticket));
 const feedback = ref('');
@@ -35,7 +38,7 @@ const copy = async () => {
 
 <template>
   <div v-if="protocol" class="grid gap-1" data-testid="ticket-protocol">
-    <span class="text-xs text-n-slate-11">
+    <span v-if="!compact" class="text-xs text-n-slate-11">
       {{ t('JRC_SERVICE_DESK.CREATION.protocol') }}
     </span>
     <div class="flex flex-wrap items-center gap-2">
@@ -47,7 +50,8 @@ const copy = async () => {
         variant="ghost"
         color="slate"
         icon="i-lucide-copy"
-        :label="t('JRC_SERVICE_DESK.CREATION.copy')"
+        :label="compact ? undefined : t('JRC_SERVICE_DESK.CREATION.copy')"
+        :aria-label="t('JRC_SERVICE_DESK.CREATION.copy')"
         :disabled="copying"
         data-testid="copy-ticket-protocol"
         @click="copy"

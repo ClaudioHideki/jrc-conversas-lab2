@@ -88,17 +88,25 @@ describe('Notification policy editor', () => {
     render();
     await wrapper.get('[data-unit]').trigger('click');
     await flushPromises();
+    wrapper
+      .findComponent({ name: 'ServiceDeskStepper' })
+      .vm.$emit('update:modelValue', 'channels');
+    await flushPromises();
     const selects = wrapper.findAll('select');
-    expect(selects[2].text()).toContain('Suporte');
-    expect(selects[2].text()).not.toContain('WhatsApp');
-    await selects[1].setValue('whatsapp');
-    expect(selects[2].text()).toContain('WhatsApp');
-    expect(selects[2].text()).not.toContain('Suporte');
+    expect(selects[1].text()).toContain('Suporte');
+    expect(selects[1].text()).not.toContain('WhatsApp');
+    await selects[0].setValue('whatsapp');
+    expect(selects[1].text()).toContain('WhatsApp');
+    expect(selects[1].text()).not.toContain('Suporte');
     expect(holder.publishPolicy).not.toHaveBeenCalled();
   });
   it('tests a model visibly with examples without publishing or sending', async () => {
     render();
     await wrapper.get('[data-unit]').trigger('click');
+    await flushPromises();
+    wrapper
+      .findComponent({ name: 'ServiceDeskStepper' })
+      .vm.$emit('update:modelValue', 'preview');
     await flushPromises();
     await wrapper
       .findAll('button')
@@ -108,7 +116,7 @@ describe('Notification policy editor', () => {
           messages.JRC_SERVICE_DESK.REDESIGN_AUTOMATIONS.test_template
       )
       .trigger('click');
-    expect(wrapper.get('pre').text()).toBe(
+    expect(wrapper.findAll('pre')[0].text()).toBe(
       messages.JRC_SERVICE_DESK.REDESIGN_AUTOMATIONS.examples.body
     );
     expect(wrapper.text()).toContain(
@@ -125,11 +133,24 @@ describe('Notification policy editor', () => {
       ...envelope,
       policies: [{ ...policy, id: '91', version: 2 }],
     });
-    await wrapper.findAll('input[type="checkbox"]')[1].setValue(true);
-    await wrapper.get('form').trigger('submit');
+    wrapper
+      .findComponent({ name: 'ServiceDeskStepper' })
+      .vm.$emit('update:modelValue', 'review');
+    await flushPromises();
+    await wrapper.get('input[type="checkbox"]').setValue(true);
+    await wrapper
+      .findAll('button')
+      .find(
+        button => button.text() === messages.JRC_SERVICE_DESK.R2.save_policy
+      )
+      .trigger('click');
     await flushPromises();
     expect(holder.publishPolicy).toHaveBeenCalledOnce();
     expect(wrapper.text()).toContain(messages.JRC_SERVICE_DESK.R2.saved);
+    wrapper
+      .findComponent({ name: 'ServiceDeskStepper' })
+      .vm.$emit('update:modelValue', 'message');
+    await flushPromises();
     expect(wrapper.get('textarea').attributes('disabled')).toBeUndefined();
   });
   it('recovers the editor after a failed initial read and keeps publication gated', async () => {
@@ -143,7 +164,20 @@ describe('Notification policy editor', () => {
       .find(button => button.text() === messages.JRC_SERVICE_DESK.COMMON.retry)
       .trigger('click');
     await flushPromises();
-    expect(wrapper.find('form').exists()).toBe(true);
+    expect(wrapper.findComponent({ name: 'ServiceDeskStepper' }).exists()).toBe(
+      true
+    );
+    wrapper
+      .findComponent({ name: 'ServiceDeskStepper' })
+      .vm.$emit('update:modelValue', 'review');
+    await flushPromises();
+    expect(
+      wrapper
+        .findAll('button')
+        .find(
+          button => button.text() === messages.JRC_SERVICE_DESK.R2.save_policy
+        ).element.disabled
+    ).toBe(true);
     expect(wrapper.text()).not.toContain(
       messages.JRC_SERVICE_DESK.R2.unavailable
     );

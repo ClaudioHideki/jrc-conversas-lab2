@@ -7,15 +7,21 @@ import ClockAutomationFields from './ClockAutomationFields.vue';
 import CompanyPicker from 'dashboard/routes/dashboard/jrcCustomers/components/CompanyPicker.vue';
 import { canonicalId } from '../helpers/access';
 import { DISTRIBUTION_MODES, portalOptions } from '../helpers/v2Configuration';
+import { serviceFieldSection } from '../helpers/presentationSteps';
 const props = defineProps({
   modelValue: { type: Object, required: true },
   resource: { type: String, required: true },
   unitId: { type: String, required: true },
   context: { type: Object, required: true },
   disabled: Boolean,
+  section: { type: String, default: 'all' },
 });
 const emit = defineEmits(['update:modelValue']);
 const { t } = useI18n();
+const showField = field =>
+  props.resource !== 'services' ||
+  props.section === 'all' ||
+  serviceFieldSection(field) === props.section;
 const modes = computed(() => ({
   manual: t('JRC_SERVICE_DESK.V2_SETTINGS.mode_manual'),
   round_robin: t('JRC_SERVICE_DESK.V2_SETTINGS.mode_round_robin'),
@@ -346,6 +352,7 @@ onBeforeUnmount(() => {
       "
     >
       <fieldset
+        v-if="resource !== 'services' || section !== 'publication'"
         class="grid gap-3 border border-n-weak rounded-lg p-3"
         :disabled="disabled"
       >
@@ -359,7 +366,10 @@ onBeforeUnmount(() => {
           :label="t('JRC_SERVICE_DESK.V2_SETTINGS.parent_category')"
           @update:model-value="update('parent_id', $event || null)"
         />
-        <label v-if="resource === 'services'" class="grid gap-1 text-sm">
+        <label
+          v-if="resource === 'services' && showField('description')"
+          class="grid gap-1 text-sm"
+        >
           {{ t('JRC_SERVICE_DESK.V2_SETTINGS.description') }}
           <textarea
             :value="modelValue.description || ''"
@@ -369,7 +379,7 @@ onBeforeUnmount(() => {
           />
         </label>
         <LookupSelect
-          v-if="resource === 'services'"
+          v-if="resource === 'services' && showField('default_priority_id')"
           :model-value="modelValue.default_priority_id || ''"
           resource="priorities"
           :unit-id="unitId"
@@ -378,7 +388,7 @@ onBeforeUnmount(() => {
           @update:model-value="update('default_priority_id', $event || null)"
         />
         <LookupSelect
-          v-if="resource === 'services'"
+          v-if="resource === 'services' && showField('default_queue_id')"
           :model-value="modelValue.default_queue_id || ''"
           resource="queues"
           :unit-id="unitId"
@@ -388,7 +398,9 @@ onBeforeUnmount(() => {
         />
         <template v-if="resource === 'services'">
           <LookupSelect
-            v-for="item in serviceDefaults"
+            v-for="item in serviceDefaults.filter(item =>
+              showField(item.field)
+            )"
             :key="item.field"
             :model-value="modelValue[item.field] || ''"
             :resource="item.resource"
@@ -398,60 +410,65 @@ onBeforeUnmount(() => {
             :label="item.label"
             @update:model-value="update(item.field, $event || null)"
           />
-          <p class="text-xs text-n-slate-11">
-            {{ t('JRC_SERVICE_DESK.V2_SETTINGS.restrictions_help') }}
-          </p>
-          <div v-if="mayChooseCompany" class="grid gap-2">
-            <label class="text-sm">{{
-              t('JRC_SERVICE_DESK.V2_SETTINGS.allowed_companies')
-            }}</label>
-            <CompanyPicker v-model="companyChoice" :disabled="disabled" />
+          <template v-if="showField('allowed_company_ids')">
+            <p class="text-xs text-n-slate-11">
+              {{ t('JRC_SERVICE_DESK.V2_SETTINGS.restrictions_help') }}
+            </p>
+            <div v-if="mayChooseCompany" class="grid gap-2">
+              <label class="text-sm">{{
+                t('JRC_SERVICE_DESK.V2_SETTINGS.allowed_companies')
+              }}</label>
+              <CompanyPicker v-model="companyChoice" :disabled="disabled" />
+              <button
+                type="button"
+                :disabled="disabled || !companyChoice"
+                @click="addSelection('allowed_company_ids', companyChoice)"
+              >
+                {{ t('JRC_SERVICE_DESK.V2_SETTINGS.add_selection') }}
+              </button>
+            </div>
+            <LookupSelect
+              v-model="contractChoice"
+              resource="contracts"
+              :unit-id="unitId"
+              :disabled="disabled"
+              :label="t('JRC_SERVICE_DESK.V2_SETTINGS.allowed_contracts')"
+            />
             <button
               type="button"
-              :disabled="disabled || !companyChoice"
-              @click="addSelection('allowed_company_ids', companyChoice)"
+              :disabled="disabled || !contractChoice"
+              @click="addSelection('allowed_contract_ids', contractChoice)"
             >
               {{ t('JRC_SERVICE_DESK.V2_SETTINGS.add_selection') }}
             </button>
-          </div>
-          <LookupSelect
-            v-model="contractChoice"
-            resource="contracts"
-            :unit-id="unitId"
-            :disabled="disabled"
-            :label="t('JRC_SERVICE_DESK.V2_SETTINGS.allowed_contracts')"
-          />
-          <button
-            type="button"
-            :disabled="disabled || !contractChoice"
-            @click="addSelection('allowed_contract_ids', contractChoice)"
-          >
-            {{ t('JRC_SERVICE_DESK.V2_SETTINGS.add_selection') }}
-          </button>
-          <div
-            v-for="field in ['allowed_company_ids', 'allowed_contract_ids']"
-            :key="field"
-            class="flex flex-wrap gap-2"
-          >
-            <button
-              v-for="id in modelValue[field] || []"
-              :key="id"
-              type="button"
-              :disabled="disabled"
-              class="rounded-lg border border-n-weak px-2 py-1 text-xs"
-              @click="
-                update(
-                  field,
-                  modelValue[field].filter(value => value !== id)
-                )
-              "
+            <div
+              v-for="field in ['allowed_company_ids', 'allowed_contract_ids']"
+              :key="field"
+              class="flex flex-wrap gap-2"
             >
-              {{ t('JRC_SERVICE_DESK.COMMON.selected_identifier', { id }) }}
-              {{ t('JRC_SERVICE_DESK.V2_SETTINGS.remove_selection') }}
-            </button>
-          </div>
+              <button
+                v-for="id in modelValue[field] || []"
+                :key="id"
+                type="button"
+                :disabled="disabled"
+                class="rounded-lg border border-n-weak px-2 py-1 text-xs"
+                @click="
+                  update(
+                    field,
+                    modelValue[field].filter(value => value !== id)
+                  )
+                "
+              >
+                {{ t('JRC_SERVICE_DESK.COMMON.selected_identifier', { id }) }}
+                {{ t('JRC_SERVICE_DESK.V2_SETTINGS.remove_selection') }}
+              </button>
+            </div>
+          </template>
         </template>
-        <label v-if="resource === 'services'" class="text-sm">
+        <label
+          v-if="resource === 'services' && showField('approval_required')"
+          class="text-sm"
+        >
           <input
             type="checkbox"
             :checked="modelValue.approval_required"
@@ -459,96 +476,104 @@ onBeforeUnmount(() => {
           />
           {{ t('JRC_SERVICE_DESK.V2_SETTINGS.approval_required') }}
         </label>
-        <div
-          v-for="(field, index) in modelValue.form_fields"
-          :key="index"
-          class="grid gap-2 border border-n-weak rounded-lg p-3"
-        >
-          <label class="grid gap-1 text-sm">
-            {{ t('JRC_SERVICE_DESK.V2_SETTINGS.field_key') }}
-            <input
-              :value="field.key"
-              maxlength="80"
-              required
-              class="border border-n-weak rounded-lg p-2"
-              @input="updateField(index, 'key', $event.target.value)"
-            />
-          </label>
-          <label class="grid gap-1 text-sm">
-            {{ t('JRC_SERVICE_DESK.V2_SETTINGS.field_label') }}
-            <input
-              :value="field.label"
-              maxlength="255"
-              required
-              class="border border-n-weak rounded-lg p-2"
-              @input="updateField(index, 'label', $event.target.value)"
-            />
-          </label>
-          <label class="grid gap-1 text-sm">
-            {{ t('JRC_SERVICE_DESK.V2_SETTINGS.field_type') }}
-            <select
-              :value="field.type"
-              class="border border-n-weak rounded-lg p-2"
-              @change="updateField(index, 'type', $event.target.value)"
-            >
-              <option
-                v-for="(label, value) in fieldTypes"
-                :key="value"
-                :value="value"
+        <template v-if="showField('form_fields')">
+          <div
+            v-for="(field, index) in modelValue.form_fields"
+            :key="index"
+            class="grid gap-2 border border-n-weak rounded-lg p-3"
+          >
+            <label class="grid gap-1 text-sm">
+              {{ t('JRC_SERVICE_DESK.V2_SETTINGS.field_key') }}
+              <input
+                :value="field.key"
+                maxlength="80"
+                required
+                class="border border-n-weak rounded-lg p-2"
+                @input="updateField(index, 'key', $event.target.value)"
+              />
+            </label>
+            <label class="grid gap-1 text-sm">
+              {{ t('JRC_SERVICE_DESK.V2_SETTINGS.field_label') }}
+              <input
+                :value="field.label"
+                maxlength="255"
+                required
+                class="border border-n-weak rounded-lg p-2"
+                @input="updateField(index, 'label', $event.target.value)"
+              />
+            </label>
+            <label class="grid gap-1 text-sm">
+              {{ t('JRC_SERVICE_DESK.V2_SETTINGS.field_type') }}
+              <select
+                :value="field.type"
+                class="border border-n-weak rounded-lg p-2"
+                @change="updateField(index, 'type', $event.target.value)"
               >
-                {{ label }}
-              </option>
-            </select>
-          </label>
-          <label class="text-sm">
-            <input
-              type="checkbox"
-              :checked="field.required"
-              @change="updateField(index, 'required', $event.target.checked)"
-            />
-            {{ t('JRC_SERVICE_DESK.V2_SETTINGS.required') }}
-          </label>
-          <label v-if="field.type === 'select'" class="grid gap-1 text-sm">
-            {{ t('JRC_SERVICE_DESK.V2_SETTINGS.options') }}
-            <textarea
-              :value="field.options.join('\n')"
-              class="border border-n-weak rounded-lg p-2"
-              @input="
-                updateField(
-                  index,
-                  'options',
-                  $event.target.value.split(/\r?\n/).filter(Boolean)
+                <option
+                  v-for="(label, value) in fieldTypes"
+                  :key="value"
+                  :value="value"
+                >
+                  {{ label }}
+                </option>
+              </select>
+            </label>
+            <label class="text-sm">
+              <input
+                type="checkbox"
+                :checked="field.required"
+                @change="updateField(index, 'required', $event.target.checked)"
+              />
+              {{ t('JRC_SERVICE_DESK.V2_SETTINGS.required') }}
+            </label>
+            <label v-if="field.type === 'select'" class="grid gap-1 text-sm">
+              {{ t('JRC_SERVICE_DESK.V2_SETTINGS.options') }}
+              <textarea
+                :value="field.options.join('\n')"
+                class="border border-n-weak rounded-lg p-2"
+                @input="
+                  updateField(
+                    index,
+                    'options',
+                    $event.target.value.split(/\r?\n/).filter(Boolean)
+                  )
+                "
+              />
+            </label>
+            <button
+              type="button"
+              @click="
+                update(
+                  'form_fields',
+                  modelValue.form_fields.filter((_, at) => at !== index)
                 )
               "
-            />
-          </label>
+            >
+              {{ t('JRC_SERVICE_DESK.V2_SETTINGS.remove_field') }}
+            </button>
+          </div>
           <button
             type="button"
-            @click="
-              update(
-                'form_fields',
-                modelValue.form_fields.filter((_, at) => at !== index)
-              )
-            "
+            :disabled="modelValue.form_fields.length >= 50"
+            @click="addField"
           >
-            {{ t('JRC_SERVICE_DESK.V2_SETTINGS.remove_field') }}
+            {{ t('JRC_SERVICE_DESK.V2_SETTINGS.add_field') }}
           </button>
-        </div>
-        <button
-          type="button"
-          :disabled="modelValue.form_fields.length >= 50"
-          @click="addField"
-        >
-          {{ t('JRC_SERVICE_DESK.V2_SETTINGS.add_field') }}
-        </button>
+        </template>
       </fieldset>
       <fieldset
-        v-if="resource === 'services'"
+        v-if="
+          resource === 'services' &&
+          ['all', 'permissions', 'publication'].includes(section)
+        "
         class="grid gap-3 border border-n-weak rounded-lg p-3"
         :disabled="disabled"
       >
         <legend>{{ t('JRC_SERVICE_DESK.V2_SETTINGS.portal') }}</legend>
-        <label class="grid gap-1 text-sm">
+        <label
+          v-if="showField('portal_history_days')"
+          class="grid gap-1 text-sm"
+        >
           {{ t('JRC_SERVICE_DESK.V2_SETTINGS.portal_history_days') }}
           <input
             type="number"
@@ -563,7 +588,10 @@ onBeforeUnmount(() => {
             "
           />
         </label>
-        <label class="grid gap-1 text-sm">
+        <label
+          v-if="showField('portal_access_until')"
+          class="grid gap-1 text-sm"
+        >
           {{ t('JRC_SERVICE_DESK.V2_SETTINGS.portal_access_until') }}
           <input
             type="text"
@@ -573,80 +601,82 @@ onBeforeUnmount(() => {
             @input="update('portal_access_until', $event.target.value || null)"
           />
         </label>
-        <p class="text-sm">
-          {{ t('JRC_SERVICE_DESK.V2_SETTINGS.portal_help') }}
-        </p>
-        <p v-if="optionsStatus === 'loading'">
-          {{ t('JRC_SERVICE_DESK.V2_SETTINGS.loading_options') }}
-        </p>
-        <p v-if="optionsStatus === 'error'" role="alert">
-          {{ t('JRC_SERVICE_DESK.V2_SETTINGS.options_unavailable') }}
-        </p>
-        <template v-if="optionsStatus === 'ready'">
-          <label class="grid gap-1 text-sm">
-            {{ t('JRC_SERVICE_DESK.V2_SETTINGS.widget') }}
-            <select
-              :value="modelValue.portal_inbox_id || ''"
-              class="border border-n-weak rounded-lg p-2"
-              @change="update('portal_inbox_id', $event.target.value || null)"
-            >
-              <option value="">
-                {{ t('JRC_SERVICE_DESK.COMMON.select') }}
-              </option>
-              <option
-                v-for="row in options.inboxes"
-                :key="row.id"
-                :value="row.id"
+        <template v-if="showField('portal_enabled')">
+          <p class="text-sm">
+            {{ t('JRC_SERVICE_DESK.V2_SETTINGS.portal_help') }}
+          </p>
+          <p v-if="optionsStatus === 'loading'">
+            {{ t('JRC_SERVICE_DESK.V2_SETTINGS.loading_options') }}
+          </p>
+          <p v-if="optionsStatus === 'error'" role="alert">
+            {{ t('JRC_SERVICE_DESK.V2_SETTINGS.options_unavailable') }}
+          </p>
+          <template v-if="optionsStatus === 'ready'">
+            <label class="grid gap-1 text-sm">
+              {{ t('JRC_SERVICE_DESK.V2_SETTINGS.widget') }}
+              <select
+                :value="modelValue.portal_inbox_id || ''"
+                class="border border-n-weak rounded-lg p-2"
+                @change="update('portal_inbox_id', $event.target.value || null)"
               >
-                {{ row.name }}
-              </option>
-            </select>
-          </label>
-          <label class="grid gap-1 text-sm">
-            {{ t('JRC_SERVICE_DESK.V2_SETTINGS.executor') }}
-            <select
-              :value="modelValue.portal_execution_membership_id || ''"
-              :disabled="!modelValue.portal_inbox_id"
-              class="border border-n-weak rounded-lg p-2"
-              @change="
-                update(
-                  'portal_execution_membership_id',
-                  $event.target.value || null
-                )
+                <option value="">
+                  {{ t('JRC_SERVICE_DESK.COMMON.select') }}
+                </option>
+                <option
+                  v-for="row in options.inboxes"
+                  :key="row.id"
+                  :value="row.id"
+                >
+                  {{ row.name }}
+                </option>
+              </select>
+            </label>
+            <label class="grid gap-1 text-sm">
+              {{ t('JRC_SERVICE_DESK.V2_SETTINGS.executor') }}
+              <select
+                :value="modelValue.portal_execution_membership_id || ''"
+                :disabled="!modelValue.portal_inbox_id"
+                class="border border-n-weak rounded-lg p-2"
+                @change="
+                  update(
+                    'portal_execution_membership_id',
+                    $event.target.value || null
+                  )
+                "
+              >
+                <option value="">
+                  {{ t('JRC_SERVICE_DESK.COMMON.select') }}
+                </option>
+                <option
+                  v-for="row in options.execution_memberships"
+                  :key="row.id"
+                  :value="row.id"
+                >
+                  {{ row.name }}
+                </option>
+              </select>
+            </label>
+          </template>
+          <label class="text-sm">
+            <input
+              type="checkbox"
+              :checked="modelValue.portal_enabled"
+              :disabled="
+                !modelValue.portal_enabled &&
+                (!modelValue.active ||
+                  !modelValue.default_priority_id ||
+                  !options?.inboxes.some(
+                    row => row.id === modelValue.portal_inbox_id
+                  ) ||
+                  !options?.execution_memberships.some(
+                    row => row.id === modelValue.portal_execution_membership_id
+                  ))
               "
-            >
-              <option value="">
-                {{ t('JRC_SERVICE_DESK.COMMON.select') }}
-              </option>
-              <option
-                v-for="row in options.execution_memberships"
-                :key="row.id"
-                :value="row.id"
-              >
-                {{ row.name }}
-              </option>
-            </select>
+              @change="update('portal_enabled', $event.target.checked)"
+            />
+            {{ t('JRC_SERVICE_DESK.V2_SETTINGS.portal_enabled') }}
           </label>
         </template>
-        <label class="text-sm">
-          <input
-            type="checkbox"
-            :checked="modelValue.portal_enabled"
-            :disabled="
-              !modelValue.portal_enabled &&
-              (!modelValue.active ||
-                !modelValue.default_priority_id ||
-                !options?.inboxes.some(
-                  row => row.id === modelValue.portal_inbox_id
-                ) ||
-                !options?.execution_memberships.some(
-                  row => row.id === modelValue.portal_execution_membership_id
-                ))
-            "
-            @change="update('portal_enabled', $event.target.checked)"
-          />
-          {{ t('JRC_SERVICE_DESK.V2_SETTINGS.portal_enabled') }}
-        </label>
       </fieldset>
     </template>
   </div>
