@@ -130,8 +130,38 @@ describe('central shared voice panel', () => {
     });
     expect(openEmbeddedSoftphone(1)).toBe(true);
   });
-  it('does not claim the phone when SIP is unavailable', () => {
-    mount(InboxVoicePanel, { props: { ...props, capabilities: {} } });
+  it('owns and operates the existing SIP session without Contact Center provider capabilities', async () => {
+    const wrapper = mount(InboxVoicePanel, {
+      props: { ...props, capabilities: {} },
+    });
+    expect(openEmbeddedSoftphone(1, '1411')).toBe(true);
+    await flushPromises();
+    await wrapper.get('[data-central-dialer]').trigger('submit');
+    expect(state.sip.call).toHaveBeenCalledOnce();
+    state.sip.hasCall.value = true;
+    state.sip.established.value = true;
+    await flushPromises();
+    await button(wrapper, 'HOLD').trigger('click');
+    expect(state.sip.setHold).toHaveBeenCalledWith(true);
+    await flushPromises();
+    expect(button(wrapper, 'TRANSFER').attributes('disabled')).toBeUndefined();
+    await wrapper.vm.endCall();
+    expect(state.sip.hangup).toHaveBeenCalledOnce();
+    expect(API.saveCallObservations).not.toHaveBeenCalled();
+  });
+  it('cannot bypass a selected record capability by requesting the independent session view', async () => {
+    state.sip.established.value = true;
+    state.sip.hasCall.value = true;
+    const wrapper = mount(InboxVoicePanel, {
+      props: { ...selected, sessionView: true, capabilities: {} },
+    });
+    await button(wrapper, 'MUTE').trigger('click');
+    await wrapper.vm.endCall();
+    expect(state.sip.setMuted).not.toHaveBeenCalled();
+    expect(state.sip.hangup).not.toHaveBeenCalled();
+  });
+  it('does not claim a selected server record when its SIP capability is unavailable', () => {
+    mount(InboxVoicePanel, { props: { ...selected, capabilities: {} } });
     expect(openEmbeddedSoftphone(1)).toBe(false);
   });
   it.each(['qualification', 'active', 'incoming', 'initiating'])(

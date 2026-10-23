@@ -5,6 +5,7 @@ import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import { useSipWebphone } from 'dashboard/routes/dashboard/webphone/useSipWebphone';
 import CCAPI from 'dashboard/api/jrcContactCenter';
 import HoyaInboxWorkspace from './HoyaInboxWorkspace.vue';
+import { openEmbeddedSoftphone } from '../webphone/useEmbeddedSoftphone';
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({ t: key => key, locale: ref('pt_BR') }),
 }));
@@ -82,7 +83,7 @@ const global = {
   },
 };
 describe('inbox native SIP action guards', () => {
-  it('does not load agent state or enable telephone actions without Contact Center context', async () => {
+  it('opens the authorized SIP session centrally without requesting Contact Center state', async () => {
     CCAPI.agentState.mockClear();
     const wrapper = mount(HoyaInboxWorkspace, {
       props: { ...props, context: null, currentCallId: null },
@@ -93,6 +94,33 @@ describe('inbox native SIP action guards', () => {
     expect(wrapper.find('[data-testid="hoya-inbox-workspace"]').exists()).toBe(
       true
     );
+    expect(openEmbeddedSoftphone(1)).toBe(true);
+    await flushPromises();
+    expect(wrapper.get('[data-central-voice]').isVisible()).toBe(true);
+    await wrapper.get('[data-voice-action="MUTE"]').trigger('click');
+    expect(sip.setMuted).toHaveBeenCalledWith(true);
+    expect(CCAPI.qualifications).not.toHaveBeenCalled();
+    expect(sip.initialize).not.toHaveBeenCalled();
+    expect(sip.connect).not.toHaveBeenCalled();
+  });
+  it('does not operate a selected native record when its Contact Center permission is denied', async () => {
+    const wrapper = mount(HoyaInboxWorkspace, {
+      props: {
+        ...props,
+        context: { ...props.context, capabilities: { operate: false } },
+      },
+      global,
+    });
+    await flushPromises();
+    wrapper.findComponent({ name: 'CallWorkspace' }).vm.$emit('loaded', {
+      call: { id: 7, external_session_id: 'native-7', status: 'connected' },
+      customer: { contacts: [] },
+    });
+    await flushPromises();
+    const mute = wrapper.get('[data-voice-action="MUTE"]');
+    expect(mute.attributes('disabled')).toBeDefined();
+    await mute.trigger('click');
+    expect(sip.setMuted).not.toHaveBeenCalled();
   });
   it('reports a conversation load failure and emits an explicit retry without operating SIP', async () => {
     const wrapper = mount(HoyaInboxWorkspace, {

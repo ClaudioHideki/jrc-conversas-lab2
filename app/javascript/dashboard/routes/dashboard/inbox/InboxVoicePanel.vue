@@ -45,18 +45,23 @@ const lastDuration = ref('');
 const sameAccount = computed(
   () => Number(sip.accountId.value) === props.accountId
 );
+const independentSession = computed(
+  () => !props.nativeCallId && !props.callRecord
+);
 const available = computed(
   () =>
     props.allowed &&
     sameAccount.value &&
-    ['available', 'pending_contract'].includes(props.capabilities.sip_webrtc)
+    (independentSession.value ||
+      ['available', 'pending_contract'].includes(props.capabilities.sip_webrtc))
 );
 // A selected server record may only control its exact native SIP session.
 const matches = computed(
   () =>
     available.value &&
-    (props.sessionView ||
-      (props.capabilities.sip_webrtc === 'available' &&
+    ((independentSession.value && props.sessionView) ||
+      (!independentSession.value &&
+        props.capabilities.sip_webrtc === 'available' &&
         Boolean(props.callRecord?.external_session_id) &&
         props.callRecord.external_session_id === sip.callId.value))
 );
@@ -80,6 +85,7 @@ const canControl = computed(
 const canDial = computed(
   () =>
     available.value &&
+    independentSession.value &&
     props.sessionView &&
     !sip.hasCall.value &&
     !otherBusy.value &&
@@ -154,6 +160,7 @@ const duration = computed(() => {
   return props.elapsed || (matches.value ? lastDuration.value : '');
 });
 const supportsTransfer = mode =>
+  independentSession.value ||
   props.capabilities[
     mode === 'immediate' ? 'transfer_blind' : 'transfer_attended'
   ] === 'available';
@@ -286,7 +293,7 @@ const controls = computed(() => [
     icon: matches.value && sip.held.value ? 'i-lucide-play' : 'i-lucide-pause',
     enabled:
       canControl.value &&
-      props.capabilities.hold === 'available' &&
+      (independentSession.value || props.capabilities.hold === 'available') &&
       !sip.holdPending.value,
     action: () => sip.setHold(!sip.held.value),
   },

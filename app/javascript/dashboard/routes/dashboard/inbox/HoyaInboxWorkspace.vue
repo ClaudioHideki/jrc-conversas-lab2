@@ -102,7 +102,6 @@ const voiceView = computed(() => isVoice.value || phoneOpen.value);
 const listCalls = computed(() => {
   if (
     !props.softphoneAccess ||
-    !canOperate.value ||
     Number(sip.accountId.value) !== props.accountId ||
     !sip.hasCall.value ||
     props.calls.some(item => item.external_session_id === sip.callId.value)
@@ -532,7 +531,6 @@ const updateCall = record => {
 const pendingIncoming = computed(
   () =>
     props.softphoneAccess &&
-    canOperate.value &&
     Number(sip.accountId.value) === props.accountId &&
     sip.incoming.value &&
     Boolean(closing.pending.value || closing.pendingAttendance.value)
@@ -545,7 +543,6 @@ watch([() => sip.incoming.value, closing.loading], () => {
     sip.incoming.value &&
     !closing.loading.value &&
     props.softphoneAccess &&
-    canOperate.value &&
     Number(sip.accountId.value) === props.accountId
   )
     openPhone();
@@ -964,7 +961,7 @@ onBeforeUnmount(() => {
             v-if="softphoneAccess || isVoice"
             ref="voicePanel"
             :account-id="accountId"
-            :allowed="softphoneAccess && canOperate"
+            :allowed="softphoneAccess && (!isVoice || canOperate)"
             :capabilities="context?.provider?.capabilities || {}"
             :qualification-pending="
               Boolean(closing.pending.value || closing.pendingAttendance.value)
