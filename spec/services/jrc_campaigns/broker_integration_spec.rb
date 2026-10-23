@@ -32,6 +32,7 @@ RSpec.describe 'Broker campaign transport', type: :request do
       body: { organizationId: JrcBrokerIntegration.find_by!(account: account).organization_id, accountId: account.id, destinationRevision: 1, chatwootOrigin: 'https://central.example.test' }.to_json)
     stub_request(:get, "#{prefix}/connections/#{integration_id}/campaign-transport").to_return(headers: { 'Content-Type' => 'application/json' }, body: transport.to_json)
     stub_request(:get, "#{prefix}/connections/#{integration_id}/status").to_return(headers: { 'Content-Type' => 'application/json' }, body: {}.to_json)
+    stub_request(:get, %r{#{Regexp.escape(prefix)}/connections/#{integration_id}/conversations/\d+/attendance}).to_return(status: 404)
     JrcCampaigns::Consent.create!(account: account, recorded_by: admin, phone_number: contact.phone_number, evidence: 'Synthetic fixture authorization', purpose: 'whatsapp_campaigns', granted_at: Time.current)
   end
 
@@ -104,6 +105,288 @@ RSpec.describe 'Broker campaign transport', type: :request do
       expect(payload[:additional_attributes]['jrc_campaign_intent_id']).to eq(intent_id)
       expect(account.messages.count).to eq(1)
       expect(delivery.reload.sent_at).to be_nil
+    end
+
+    ['jrc-00000000-0000-4000-8000-000000000123', '243589774893072@lid'].each do |source_id|
+      it "preserves an existing opaque contact-inbox identity #{source_id} when creating the selected sender message" do
+        link = create(:contact_inbox, contact: contact, inbox: inbox, source_id: source_id)
+
+        2.times { service.perform }
+
+        expect(recipient.deliveries.sole).to have_attributes(status: 'sending', sent_at: nil)
+        message = account.messages.sole
+        expect(message.inbox_id).to eq(inbox.id)
+        expect(message.conversation.contact_id).to eq(contact.id)
+        expect(message.conversation.contact_inbox_id).to eq(link.id)
+        expect(link.reload.source_id).to eq(source_id)
+        expect(contact.contact_inboxes.where(inbox: inbox).count).to eq(1)
+      end
+
+      it "reserves a canonical campaign message whose current source identity is #{source_id}" do
+        service.perform
+        delivery = recipient.deliveries.sole
+        message = account.messages.find(delivery.metadata.fetch('message_id'))
+        link = message.conversation.contact_inbox
+        link.update!(source_id: source_id)
+        intent_id = SecureRandom.uuid
+        reservation = stub_request(:post, "#{prefix}/connections/#{integration_id}/campaign-intents")
+        reservation.with(body: hash_including('conversationId' => message.conversation.display_id, 'messageId' => message.id,
+                                             'kind' => 'text', 'text' => 'Synthetic message'))
+        reservation.to_return(status: 201, headers: { 'Content-Type' => 'application/json' }, body: {
+          protocol: 'chatwoot-campaigns/v1', intentId: intent_id, state: 'RESERVED', expiresAt: 5.minutes.from_now.iso8601, replayed: false
+        }.to_json)
+
+        JrcBroker::WebhookDelivery.new(message).prepare_campaign_intent!(message.webhook_data)
+
+        expect(message.reload.additional_attributes['jrc_campaign_intent_id']).to eq(intent_id)
+        expect(reservation).to have_been_requested.once
+        expect(link.reload.source_id).to eq(source_id)
+        expect(account.messages.count).to eq(1)
+      end
+    end
+
+    it 'rejects a selected campaign contact whose canonical phone changed before message creation' do
+      row = recipient
+      contact.update!(phone_number: '+5511888888000')
+
+      service.perform
+
+      expect(row.deliveries.sole).to be_failed
+      expect(account.messages.count).to eq(0)
+      expect(account.contacts.where(phone_number: '+5511999999000')).to be_empty
+    end
+
+    it 'rejects a selected contact from another Account before creating a message' do
+      foreign = create(:contact, account: create(:account), phone_number: '+5511999999000')
+      recipient.update!(contact: foreign)
+
+      service.perform
+
+      expect(recipient.deliveries.sole).to be_failed
+      expect(account.messages.count).to eq(0)
+      expect(foreign.contact_inboxes).to be_empty
+    end
+
+    it 'uses the exact existing conversation link when the same contact has three identities in the selected inbox' do
+      create(:contact_inbox, contact: contact, inbox: inbox, source_id: '00000000-0000-4000-8000-000000000122')
+      older_link = create(:contact_inbox, contact: contact, inbox: inbox, source_id: 'jrc-00000000-0000-4000-8000-000000000123')
+      current_link = create(:contact_inbox, contact: contact, inbox: inbox, source_id: '00000000-0000-4000-8000-000000000124')
+      create(:conversation, account: account, inbox: inbox, contact: contact, contact_inbox: older_link, created_at: 2.minutes.ago)
+      current = create(:conversation, account: account, inbox: inbox, contact: contact, contact_inbox: current_link, created_at: 1.minute.ago)
+
+      2.times { service.perform }
+
+      message = account.messages.sole
+      expect(recipient.deliveries.sole).to have_attributes(status: 'sending', sent_at: nil)
+      expect(message.conversation_id).to eq(current.id)
+      expect(message.conversation.contact_inbox_id).to eq(current_link.id)
+      expect(contact.contact_inboxes.where(inbox: inbox).pluck(:source_id)).to contain_exactly(
+        '00000000-0000-4000-8000-000000000122', 'jrc-00000000-0000-4000-8000-000000000123', '00000000-0000-4000-8000-000000000124'
+      )
+      expect(contact.conversations.where(inbox: inbox).count).to eq(2)
+    end
+
+    it 'preserves the conversation already assigned to the recipient instead of switching to a newer identity' do
+      selected_link = create(:contact_inbox, contact: contact, inbox: inbox, source_id: '243589774893072@lid')
+      selected = create(:conversation, account: account, inbox: inbox, contact: contact, contact_inbox: selected_link, created_at: 2.minutes.ago)
+      newer_link = create(:contact_inbox, contact: contact, inbox: inbox, source_id: 'jrc-00000000-0000-4000-8000-000000000123')
+      create(:conversation, account: account, inbox: inbox, contact: contact, contact_inbox: newer_link, created_at: 1.minute.ago)
+      recipient.update!(conversation: selected)
+      stub_request(:get, "#{prefix}/connections/#{integration_id}/conversations/#{selected.display_id}/attendance").to_return(
+        headers: { 'Content-Type' => 'application/json' }, body: {
+          organizationId: JrcBrokerIntegration.find_by!(account: account).organization_id, integrationId: integration_id,
+          channelId: SecureRandom.uuid, conversationId: SecureRandom.uuid, accountId: account.id, inboxId: inbox.id,
+          remoteContactId: contact.id, remoteConversationId: selected.display_id, destinationRevision: 1,
+          credentialRevision: 1, ownerRevision: 0, attendanceRevision: 1, controlRevision: 1, mode: 'HUMAN'
+        }.to_json
+      )
+
+      service.perform
+
+      expect(recipient.deliveries.sole).to have_attributes(status: 'sending', sent_at: nil)
+      expect(account.messages.sole.conversation_id).to eq(selected.id)
+      expect(contact.contact_inboxes.where(inbox: inbox).count).to eq(2)
+    end
+
+    it 'rejects multiple identities without an existing canonical conversation rather than choosing the first' do
+      create(:contact_inbox, contact: contact, inbox: inbox, source_id: '5511999999000')
+      create(:contact_inbox, contact: contact, inbox: inbox, source_id: 'jrc-00000000-0000-4000-8000-000000000123')
+
+      service.perform
+
+      expect(recipient.deliveries.sole).to be_failed
+      expect(account.messages.count).to eq(0)
+      expect(contact.contact_inboxes.where(inbox: inbox).count).to eq(2)
+    end
+
+    it 'rejects a recipient conversation belonging to another selected inbox' do
+      other_inbox = create(:inbox, account: account, channel: create(:channel_api, account: account))
+      other_link = create(:contact_inbox, contact: contact, inbox: other_inbox)
+      conversation = create(:conversation, account: account, inbox: other_inbox, contact: contact, contact_inbox: other_link)
+      recipient.update!(conversation: conversation)
+
+      service.perform
+
+      expect(recipient.deliveries.sole).to be_failed
+      expect(account.messages.count).to eq(0)
+      expect(contact.contact_inboxes.where(inbox: inbox)).to be_empty
+    end
+
+    it 'rejects an existing conversation whose contact-inbox link points to another contact' do
+      other = create(:contact, account: account)
+      mismatched_link = create(:contact_inbox, contact: other, inbox: inbox)
+      create(:conversation, account: account, inbox: inbox, contact: contact, contact_inbox: mismatched_link)
+
+      service.perform
+
+      expect(recipient.deliveries.sole).to be_failed
+      expect(account.messages.count).to eq(0)
+      expect(mismatched_link.reload.contact_id).to eq(other.id)
+    end
+
+    it 'returns only the exact conversation binding in the authenticated canonical GET' do
+      link = create(:contact_inbox, contact: contact, inbox: inbox, source_id: '243589774893072@lid')
+      conversation = create(:conversation, account: account, inbox: inbox, contact: contact, contact_inbox: link)
+      create(:contact_inbox, contact: contact, inbox: inbox, source_id: 'jrc-00000000-0000-4000-8000-000000000123')
+
+      get "/api/v1/accounts/#{account.id}/conversations/#{conversation.display_id}", headers: admin.create_new_auth_token
+
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body.fetch('contact_inbox')).to eq(
+        'id' => link.id, 'contact_id' => contact.id, 'inbox_id' => inbox.id, 'source_id' => '243589774893072@lid'
+      )
+      expect(response.body).not_to include(link.pubsub_token)
+    end
+
+    it 'does not expose the canonical binding to an unauthenticated request or a different Account' do
+      link = create(:contact_inbox, contact: contact, inbox: inbox, source_id: '243589774893072@lid')
+      conversation = create(:conversation, account: account, inbox: inbox, contact: contact, contact_inbox: link)
+      path = "/api/v1/accounts/#{account.id}/conversations/#{conversation.display_id}"
+
+      get path
+      expect(response).to have_http_status(:unauthorized)
+      expect(response.parsed_body).not_to have_key('contact_inbox')
+
+      other_admin = create(:user, account: create(:account), role: :administrator)
+      get path, headers: other_admin.create_new_auth_token
+      expect(response).to have_http_status(:unauthorized)
+      expect(response.parsed_body).not_to have_key('contact_inbox')
+    end
+
+    it 'keeps the authenticated GET available for a legacy conversation without a contact-inbox link' do
+      conversation = create(:conversation, account: account, inbox: inbox, contact: contact)
+      conversation.update_column(:contact_inbox_id, nil) # rubocop:disable Rails/SkipsModelValidations
+
+      get "/api/v1/accounts/#{account.id}/conversations/#{conversation.display_id}", headers: admin.create_new_auth_token
+
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body).to include('contact_inbox' => nil)
+    end
+
+    it 'reports a persisted pause with approval unavailable instead of failing its response when Broker transport is down' do
+      stub_request(:get, "#{prefix}/connections/#{integration_id}/campaign-transport").to_return(status: 503)
+
+      post "/api/v1/accounts/#{account.id}/jrc_campaigns/campaigns/#{campaign.id}/pause", headers: admin.create_new_auth_token
+
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body).to include('status' => 'paused', 'approval_valid' => false)
+      expect(campaign.reload).to be_paused
+      expect(account.messages.count).to eq(0)
+      expect { campaign.ensure_approved! }.to raise_error(JrcBroker::Client::Error)
+    end
+
+    it 'commits a manual recipient correlation together with its canonical message before dispatching the callback' do
+      recipient.update!(contact: nil)
+      delivery = recipient.deliveries.create!(step: step, inbox: inbox, status: 'sending')
+
+      message = JrcCampaigns::BrokerMessageSender.call(
+        delivery: delivery, user: admin, phone_number: recipient.phone_number, step: { 'kind' => 'text', 'body' => 'Synthetic message' },
+        attributes: { 'campaign_id' => campaign.id.to_s, 'jrc_campaign_broker_delivery_id' => delivery.id }
+      )
+
+      expect(recipient.reload.contact_id).to eq(message.conversation.contact_id)
+      expect(recipient.conversation_id).to eq(message.conversation_id)
+      expect(delivery.reload.metadata).to include('message_id' => message.id, 'conversation_id' => message.conversation.display_id)
+      expect(account.messages.count).to eq(1)
+    end
+
+    it 'rolls back the manual recipient correlation when the message cannot be saved' do
+      recipient.update!(contact: nil)
+      delivery = recipient.deliveries.create!(step: step, inbox: inbox, status: 'sending')
+
+      expect do
+        JrcCampaigns::BrokerMessageSender.call(
+          delivery: delivery, user: admin, phone_number: recipient.phone_number,
+          step: { 'kind' => 'image', 'body' => 'Synthetic caption', 'media_asset_id' => -1 }, attributes: { 'campaign_id' => campaign.id.to_s }
+        )
+      end.to raise_error(ActiveRecord::RecordNotFound)
+
+      expect(recipient.reload).to have_attributes(contact_id: nil, conversation_id: nil)
+      expect(delivery.reload.metadata).not_to have_key('message_id')
+      expect(account.messages.count).to eq(0)
+      expect(contact.contact_inboxes.where(inbox: inbox)).to be_empty
+      expect(contact.conversations.where(inbox: inbox)).to be_empty
+    end
+
+    context 'when the canonical recipient changes before the callback' do
+      before do
+        stub_request(:post, "#{prefix}/connections/#{integration_id}/campaign-intents")
+          .to_return(status: 201, headers: { 'Content-Type' => 'application/json' }, body: {
+            protocol: 'chatwoot-campaigns/v1', intentId: SecureRandom.uuid, state: 'RESERVED', expiresAt: 5.minutes.from_now.iso8601, replayed: false
+          }.to_json)
+      end
+
+      it 'rejects a changed canonical contact phone before reserving the callback intent' do
+        service.perform
+        message = account.messages.find(recipient.deliveries.sole.metadata.fetch('message_id'))
+        contact.update!(phone_number: '+5511888888000')
+
+        expect { JrcBroker::WebhookDelivery.new(message).prepare_campaign_intent!(message.webhook_data) }
+          .to raise_error(JrcBroker::WebhookDelivery::ContextChanged)
+        expect(WebMock).not_to have_requested(:post, "#{prefix}/connections/#{integration_id}/campaign-intents")
+      end
+
+      it 'rejects a contact moved to another Account before reserving the callback intent' do
+        service.perform
+        message = account.messages.find(recipient.deliveries.sole.metadata.fetch('message_id'))
+        contact.update_column(:account_id, create(:account).id) # rubocop:disable Rails/SkipsModelValidations
+
+        expect { JrcBroker::WebhookDelivery.new(message).prepare_campaign_intent!(message.webhook_data) }
+          .to raise_error(JrcBroker::WebhookDelivery::ContextChanged)
+        expect(WebMock).not_to have_requested(:post, "#{prefix}/connections/#{integration_id}/campaign-intents")
+      end
+
+      it 'rejects a recipient reassigned to a different contact before reserving the callback intent' do
+        service.perform
+        message = account.messages.find(recipient.deliveries.sole.metadata.fetch('message_id'))
+        recipient.update!(contact: create(:contact, account: account, phone_number: '+5511888888000'))
+
+        expect { JrcBroker::WebhookDelivery.new(message).prepare_campaign_intent!(message.webhook_data) }
+          .to raise_error(JrcBroker::WebhookDelivery::ContextChanged)
+        expect(WebMock).not_to have_requested(:post, "#{prefix}/connections/#{integration_id}/campaign-intents")
+      end
+
+      it 'rejects a contact-inbox link reassigned to another contact before reserving the callback intent' do
+        service.perform
+        message = account.messages.find(recipient.deliveries.sole.metadata.fetch('message_id'))
+        link = message.conversation.contact_inbox
+        link.update_column(:contact_id, create(:contact, account: account).id) # rubocop:disable Rails/SkipsModelValidations
+
+        expect { JrcBroker::WebhookDelivery.new(message).prepare_campaign_intent!(message.webhook_data) }
+          .to raise_error(JrcBroker::WebhookDelivery::ContextChanged)
+        expect(WebMock).not_to have_requested(:post, "#{prefix}/connections/#{integration_id}/campaign-intents")
+      end
+
+      it 'rejects a contact-inbox link reassigned to another inbox before reserving the callback intent' do
+        service.perform
+        message = account.messages.find(recipient.deliveries.sole.metadata.fetch('message_id'))
+        link = message.conversation.contact_inbox
+        link.update_column(:inbox_id, create(:inbox, account: account).id) # rubocop:disable Rails/SkipsModelValidations
+
+        expect { JrcBroker::WebhookDelivery.new(message).prepare_campaign_intent!(message.webhook_data) }
+          .to raise_error(JrcBroker::WebhookDelivery::ContextChanged)
+        expect(WebMock).not_to have_requested(:post, "#{prefix}/connections/#{integration_id}/campaign-intents")
+      end
     end
 
     it 'does not authorize a campaign marker without the matching server delivery correlation' do
@@ -258,6 +541,39 @@ RSpec.describe 'Broker campaign transport', type: :request do
       service.perform
       expect(recipient.deliveries.sole).to be_failed
       expect(account.messages.count).to eq(0)
+    end
+
+    context 'with an image campaign' do
+      let(:step) do
+        image = JrcCampaigns::MediaAsset.create!(account: account, created_by: admin, kind: 'image',
+                                                file: fixture_file_upload(Rails.root.join('spec/assets/sample.png'), 'image/png'))
+        campaign.steps.create!(kind: 'image', body: 'Synthetic image caption', position: 0, media_asset_id: image.id,
+                                media_url: 'https://storage.example.test/not-requested')
+      end
+
+      it 'keeps the caption and private account-owned image on the selected inbox and reserves one image intent' do
+        link = create(:contact_inbox, contact: contact, inbox: inbox, source_id: 'jrc-00000000-0000-4000-8000-000000000123')
+        intent_id = SecureRandom.uuid
+        reservation = stub_request(:post, "#{prefix}/connections/#{integration_id}/campaign-intents")
+        reservation.with(body: hash_including('kind' => 'image', 'text' => 'Synthetic image caption'))
+        reservation.to_return(status: 201, headers: { 'Content-Type' => 'application/json' }, body: {
+          protocol: 'chatwoot-campaigns/v1', intentId: intent_id, state: 'RESERVED', expiresAt: 5.minutes.from_now.iso8601, replayed: false
+        }.to_json)
+
+        2.times { service.perform }
+        message = account.messages.sole
+        image = account.jrc_campaign_media_assets.find(step.media_asset_id)
+        JrcBroker::WebhookDelivery.new(message).prepare_campaign_intent!(message.webhook_data)
+
+        expect(message.reload).to have_attributes(content: 'Synthetic image caption', inbox_id: inbox.id,
+                                                  additional_attributes: hash_including('jrc_campaign_intent_id' => intent_id))
+        expect(message.conversation.contact_inbox_id).to eq(link.id)
+        expect(message.attachments.sole).to have_attributes(file_type: 'image', account_id: account.id)
+        expect(message.attachments.sole.file.blob).to eq(image.file.blob)
+        expect(reservation).to have_been_requested.once
+        expect(a_request(:get, 'https://storage.example.test/not-requested')).not_to have_been_made
+        expect(recipient.deliveries.sole.sent_at).to be_nil
+      end
     end
   end
 

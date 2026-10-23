@@ -14,6 +14,7 @@ class JrcCampaigns::BrokerTestService
     return result(existing, digest) if existing
 
     @connector.ready!(@user)
+    conversation = JrcCampaigns::BrokerConversationResolver.new(connector: @connector, user: @user, phone_number: @phone).call
     # Account lock only covers local claims. No provider call takes place under it.
     account.with_lock do
       @delivery = JrcCampaigns::TestDelivery.find_by(account: account, idempotency_key: @key)
@@ -26,8 +27,10 @@ class JrcCampaigns::BrokerTestService
         @delivery = JrcCampaigns::TestDelivery.create!(account: account, inbox: @connector.inbox, requested_by: @user, phone_number: @phone,
                                                        idempotency_key: @key, payload_digest: digest, status: 'sending',
                                                        metadata: { 'broker_connector' => @connector.public_configuration })
-        JrcCampaigns::BrokerMessageSender.call(delivery: @delivery, user: @user, phone_number: @phone, step: @step,
-                                              attributes: { 'campaign_id' => "test:#{@delivery.id}", 'jrc_campaign_test_delivery_id' => @delivery.id })
+        JrcCampaigns::BrokerMessageSender.call(
+          delivery: @delivery, user: @user, phone_number: @phone, step: @step, conversation: conversation,
+          attributes: { 'campaign_id' => "test:#{@delivery.id}", 'jrc_campaign_test_delivery_id' => @delivery.id }
+        )
       end
     end
     JrcCampaigns::BrokerStatusJob.set(wait: 10.seconds).perform_later('test', @delivery.id)

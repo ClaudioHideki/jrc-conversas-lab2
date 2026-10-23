@@ -184,18 +184,23 @@ class JrcCampaigns::DispatchStepService
 
   def dispatch_broker(delivery)
     @broker_connector.ready!(campaign.created_by)
+    conversation = JrcCampaigns::BrokerConversationResolver.new(
+      connector: @broker_connector, user: campaign.created_by, phone_number: recipient.phone_number,
+      contact: recipient.contact, conversation: recipient.conversation
+    ).call
     return if defer_for_campaign_state(delivery)
+
     rejection = sending_rejection
     return skip_delivery(delivery, rejection) if rejection
 
     delivery.update!(metadata: delivery.metadata.to_h.merge('broker_connector' => @broker_connector.public_configuration))
     values = %w[kind body media_url file_name media_asset_id].index_with { |key| renderer.render(effective_value(key, step.public_send(key))) }
-    message = JrcCampaigns::BrokerMessageSender.call(delivery: delivery, user: campaign.created_by, phone_number: recipient.phone_number, step: values,
-                                                    conversation_status: campaign.conversation_mode == 'open' ? 'open' : 'pending',
-                                                    attributes: { 'campaign_id' => campaign.id.to_s, 'jrc_campaign_id' => campaign.id,
-                                                                  'jrc_campaign_broker_delivery_id' => delivery.id,
-                                                                  'jrc_campaign_execution_id' => recipient.execution_id, 'jrc_campaign_step_id' => step.id })
-    recipient.update!(contact: message.conversation.contact, conversation: message.conversation)
+    JrcCampaigns::BrokerMessageSender.call(
+      delivery: delivery, user: campaign.created_by, phone_number: recipient.phone_number, step: values, conversation: conversation,
+      conversation_status: campaign.conversation_mode == 'open' ? 'open' : 'pending',
+      attributes: { 'campaign_id' => campaign.id.to_s, 'jrc_campaign_id' => campaign.id, 'jrc_campaign_broker_delivery_id' => delivery.id,
+                    'jrc_campaign_execution_id' => recipient.execution_id, 'jrc_campaign_step_id' => step.id }
+    )
   end
 
   def dispatch_evolution(delivery)

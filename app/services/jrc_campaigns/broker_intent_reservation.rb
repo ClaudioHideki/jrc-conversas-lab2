@@ -93,10 +93,28 @@ class JrcCampaigns::BrokerIntentReservation
 
   def validate_destination!(delivery)
     phone = delivery.is_a?(JrcCampaigns::TestDelivery) ? delivery.phone_number : delivery.recipient.phone_number
-    policy = JrcCampaigns::EligibilityPolicy.new(account: @message.account, phone_number: phone, contact: @message.conversation.contact)
+    conversation = @message.conversation.reload
+    reject! unless canonical_conversation?(conversation)
+    contact = conversation.contact
+    reject! unless canonical_recipient?(delivery, contact, phone)
+
+    policy = JrcCampaigns::EligibilityPolicy.new(account: @message.account, phone_number: phone, contact: contact)
     reject! if policy.rejection_reason
-    actual = JrcCampaigns::PhoneNormalizer.call(@message.conversation.contact_inbox.source_id.to_s.split('@').first)
-    reject! unless actual == JrcCampaigns::PhoneNormalizer.call(phone)
+  end
+
+  def canonical_conversation?(conversation)
+    link = conversation.contact_inbox
+    link && [conversation.account_id, conversation.inbox_id] == [@message.account_id, @message.inbox_id] &&
+      conversation.contact.account_id == @message.account_id &&
+      [link.contact_id, link.inbox_id] == [conversation.contact_id, @message.inbox_id] && link.source_id.present?
+  end
+
+  def canonical_recipient?(delivery, contact, phone)
+    return false unless JrcCampaigns::PhoneNormalizer.call(contact.phone_number) == JrcCampaigns::PhoneNormalizer.call(phone)
+    return true if delivery.is_a?(JrcCampaigns::TestDelivery)
+
+    recipient = delivery.recipient
+    [recipient.inbox_id, recipient.contact_id] == [@message.inbox_id, contact.id]
   end
 
   def message_kind
