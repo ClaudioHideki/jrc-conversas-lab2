@@ -24,15 +24,13 @@ class Webhooks::Trigger
   end
 
   def execute
-    jrc_delivery&.validate!(url: @url, secret: @secret, delivery_id: @delivery_id)
-    jrc_delivery&.prepare_campaign_intent!(@payload)
-    jrc_delivery&.validate!(url: @url, secret: @secret, delivery_id: @delivery_id)
+    prepare_jrc_delivery
+    @jrc_delivery_phase = 'callback'
+    jrc_delivery&.callback_started!
     perform_request
+    jrc_delivery&.callback_accepted!
   rescue StandardError => e
-    raise RetryableError.new(status: http_status(e), message: e.message) if retryable_agent_bot_error?(e)
-    raise JrcBroker::WebhookDelivery::Unavailable if jrc_delivery&.retryable?(e)
-
-    handle_failure(e)
+    handle_delivery_error(e)
   end
 
   def handle_failure(error)
@@ -43,6 +41,23 @@ class Webhooks::Trigger
   end
 
   private
+
+  def prepare_jrc_delivery
+    @jrc_delivery_phase = 'validate'
+    jrc_delivery&.validate!(url: @url, secret: @secret, delivery_id: @delivery_id)
+    @jrc_delivery_phase = 'campaign_intent'
+    jrc_delivery&.prepare_campaign_intent!(@payload)
+    @jrc_delivery_phase = 'validate'
+    jrc_delivery&.validate!(url: @url, secret: @secret, delivery_id: @delivery_id)
+  end
+
+  def handle_delivery_error(error)
+    jrc_delivery&.record_failure(error, phase: @jrc_delivery_phase)
+    raise RetryableError.new(status: http_status(error), message: error.message) if retryable_agent_bot_error?(error)
+    raise JrcBroker::WebhookDelivery::Unavailable if jrc_delivery&.retryable?(error)
+
+    handle_failure(error)
+  end
 
   def jrc_delivery
     return @jrc_delivery if defined?(@jrc_delivery)

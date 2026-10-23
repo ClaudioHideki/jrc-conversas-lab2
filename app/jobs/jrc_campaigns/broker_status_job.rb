@@ -20,11 +20,14 @@ class JrcCampaigns::BrokerStatusJob < ApplicationJob
     delivery = (type == 'test' ? JrcCampaigns::TestDelivery : JrcCampaigns::Delivery).find_by(id: id)
     return unless delivery&.metadata.to_h&.dig('broker_connector') && delivery.metadata['message_id']
 
+    return if local_failure?(delivery)
+
     campaign = delivery.recipient.campaign if type == 'campaign'
     connector = JrcCampaigns::BrokerConnector.for(delivery.inbox)
     unless connector && delivery.metadata['broker_connector'] == connector.public_configuration
       return uncertain!(delivery, campaign, 'Configuração do Broker alterada; reconciliar antes de qualquer reenvio.')
     end
+
     user = type == 'test' ? delivery.requested_by : campaign.created_by
     status = connector.receipt(user, delivery.metadata.fetch('conversation_id'), delivery.metadata.fetch('message_id'))
     delivery.update!(metadata: delivery.metadata.merge('provider_status' => status, 'status_checked_at' => Time.current.iso8601))
@@ -49,7 +52,11 @@ class JrcCampaigns::BrokerStatusJob < ApplicationJob
       return uncertain!(delivery, campaign, 'Resultado do Broker desconhecido; reenvio automático bloqueado.')
     end
     return if status == 'read'
-    return uncertain!(delivery, campaign, 'Broker sem confirmação; reconciliar no histórico antes de reenviar.') if attempt >= 19 && delivery.status == 'sending'
+
+    if attempt >= 19 && delivery.status == 'sending'
+      return uncertain!(delivery, campaign,
+                        'Broker sem confirmação; reconciliar no histórico antes de reenviar.')
+    end
 
     self.class.set(wait: 1.minute).perform_later(type, id, attempt + 1) if attempt < 19
   rescue JrcBroker::Client::Error, JrcBroker::Configuration::InvalidConfiguration, JrcBroker::CredentialStore::InvalidCredential
@@ -61,6 +68,11 @@ class JrcCampaigns::BrokerStatusJob < ApplicationJob
   end
 
   private
+
+  def local_failure?(delivery)
+    message = delivery.inbox.account.messages.find_by(id: delivery.metadata['message_id'], inbox_id: delivery.inbox_id)
+    JrcCampaigns::BrokerDeliveryFailure.call(message: message, delivery: delivery)
+  end
 
   def uncertain!(delivery, campaign, reason)
     return if delivery.status.in?(%w[sent delivered read failed])

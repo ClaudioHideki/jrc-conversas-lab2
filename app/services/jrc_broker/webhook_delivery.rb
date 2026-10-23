@@ -30,6 +30,7 @@ class JrcBroker::WebhookDelivery
 
   def validate!(url:, secret:, delivery_id:)
     raise ContextChanged unless @message
+
     @message.reload
     channel = @message.inbox.channel
     valid = channel.is_a?(Channel::Api) && channel.webhook_url == url && delivery_id.present? && secret.present? &&
@@ -50,15 +51,45 @@ class JrcBroker::WebhookDelivery
     JrcCampaigns::BrokerIntentReservation.new(@message).prepare!(payload)
   end
 
+  def callback_started!
+    diagnostic.callback_started!
+  end
+
+  def callback_accepted!
+    diagnostic.callback_accepted!
+  end
+
+  def record_failure(error, phase:)
+    diagnostic.failure!(error, phase: phase)
+  end
+
   def handle_failure(error)
     return unless @message
-    code = if error.is_a?(Unavailable) || error.is_a?(ContextChanged)
-             error.message
-           else
-             'JRC_BROKER_DELIVERY_REJECTED'
-           end
+
+    diagnostic.failure!(error) if diagnostic.read.empty?
+    code = failure_code(error)
+    mark_failure(code)
+    Rails.logger.warn({ event: 'jrc_broker_webhook_failure', code: code, message_id: @message.id,
+                        **diagnostic.read.slice('phase', 'error_class', 'http_status', 'outcome') }.to_json)
+  end
+
+  private
+
+  def failure_code(error)
+    return 'JRC_BROKER_DELIVERY_UNAVAILABLE' if error.is_a?(Unavailable)
+    return 'JRC_BROKER_DELIVERY_CONTEXT_CHANGED' if error.is_a?(ContextChanged)
+
+    'JRC_BROKER_DELIVERY_REJECTED'
+  end
+
+  def mark_failure(code)
     # A late failed attempt must not overwrite delivery/read confirmation.
-    Messages::StatusUpdateService.new(@message, 'failed', code).perform unless @message.reload.delivered? || @message.read?
-    Rails.logger.warn("[JrcBroker::WebhookDelivery] #{code} message_id=#{@message.id}")
+    return if JrcCampaigns::BrokerDeliveryFailure.call(message: @message, failure_code: code) || @message.reload.delivered? || @message.read?
+
+    Messages::StatusUpdateService.new(@message, 'failed', code).perform
+  end
+
+  def diagnostic
+    @diagnostic ||= JrcBroker::WebhookDiagnostic.new(@message)
   end
 end
