@@ -208,6 +208,32 @@ RSpec.describe 'Conversation Messages API', type: :request do
         expect(response).to conform_schema(200)
         expect(JSON.parse(response.body, symbolize_names: true)[:meta][:contact][:id]).to eq(conversation.contact_id)
       end
+
+      %w[text image].each do |kind|
+        it "returns persisted campaign authority for a canonical #{kind} message read" do
+          attributes = {
+            'jrc_campaign_broker' => true, 'campaign_id' => '7',
+            'jrc_campaign_broker_delivery_id' => 6,
+            'jrc_campaign_intent_id' => '11111111-1111-4111-8111-111111111111'
+          }
+          message = create(:message, account: account, inbox: conversation.inbox, conversation: conversation,
+                                     sender: agent, message_type: :outgoing, private: false, additional_attributes: attributes)
+          if kind == 'image'
+            message.attachments.create!(account: account, file_type: :image,
+                                        file: fixture_file_upload(Rails.root.join('spec/assets/avatar.png'), 'image/png'))
+          end
+
+          get "/api/v1/accounts/#{account.id}/conversations/#{conversation.display_id}/messages",
+              params: { before: message.id + 1 }, headers: agent.create_new_auth_token, as: :json
+
+          expect(response).to have_http_status(:success)
+          canonical = response.parsed_body.fetch('payload').find { |item| item['id'] == message.id }
+          expect(canonical).to include('additional_attributes' => attributes, 'conversation_id' => conversation.display_id,
+                                       'inbox_id' => conversation.inbox_id, 'message_type' => 1, 'private' => false)
+          expect(canonical.fetch('sender')).to include('id' => agent.id, 'type' => 'user')
+          expect(Array(canonical['attachments']).map { |item| item['file_type'] }).to eq(kind == 'image' ? ['image'] : [])
+        end
+      end
     end
   end
 
