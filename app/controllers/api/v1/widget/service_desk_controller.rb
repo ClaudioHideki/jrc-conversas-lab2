@@ -63,7 +63,9 @@ class Api::V1::Widget::ServiceDeskController < Api::V1::Widget::BaseController
   def attachment
     ticket = portal_ticket
     note = portal_scope.notes(ticket).find(JrcServiceDesk::Input.id(params[:note_id]))
-    file = note.files.find(JrcServiceDesk::Input.id(params[:attachment_id]))
+    identifier = JrcServiceDesk::Input.id(params[:attachment_id])
+    file = JrcServiceDesk::RecordWithdrawal.attachments(note).find { |attachment| attachment.id == identifier }
+    raise ActiveRecord::RecordNotFound unless file
     return render json: { code: 'attachment_scan_unavailable' }, status: :conflict unless file.blob.metadata['service_desk_scan_state'] == 'clean'
 
     send_data file.download, filename: file.filename.to_s, type: 'application/octet-stream', disposition: 'attachment'

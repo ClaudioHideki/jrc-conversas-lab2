@@ -41,7 +41,7 @@ class JrcServiceDesk::ClaimNextService < JrcServiceDesk::BaseService
       raise JrcServiceDesk::LifecycleDependencyError, 'Explicit availability and capacity required'
     end
 
-    active = JrcServiceDesk::Ticket.where(account_id: context.account.id, unit_id: unit.id, assignee_membership_id: membership.id)
+    active = JrcServiceDesk::RecordWithdrawal.excluding(JrcServiceDesk::Ticket.all, :ticket).where(account_id: context.account.id, unit_id: unit.id, assignee_membership_id: membership.id)
                                    .joins(:status).where(jrc_service_desk_ticket_statuses: { phase: %w[open waiting] }).count
     raise JrcServiceDesk::LifecycleDependencyError, 'Agent capacity reached' if active >= membership.capacity
   end

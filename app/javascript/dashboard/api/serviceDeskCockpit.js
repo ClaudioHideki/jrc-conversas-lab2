@@ -68,11 +68,15 @@ export default {
         options(signal)
       )
       .then(r => r.data),
-  timeline: (account, ticket, cursor, signal) =>
+  timeline: (account, ticket, cursor, signal, view = 'all', filters = {}) =>
     axios
       .get(`${base(account, ticket)}/timeline`, {
         ...options(signal),
-        params: { ...(cursor ? { cursor } : {}) },
+        params: {
+          ...(cursor ? { cursor } : {}),
+          ...(view !== 'all' ? { view } : {}),
+          ...filters,
+        },
       })
       .then(r => r.data),
   timelineAttachment: (account, ticket, kind, record, attachment, signal) => {
@@ -124,16 +128,60 @@ export default {
         options(signal)
       )
       .then(r => r.data),
-  interaction: (account, ticket, note, files, key, signal, receipt) => {
+  interaction: (
+    account,
+    ticket,
+    note,
+    files,
+    key,
+    signal,
+    receipt,
+    onUploadProgress
+  ) => {
     const payload = interactionPayload(note, files, receipt);
     return axios
-      .post(
-        `${base(account, ticket)}/interactions`,
-        payload,
-        options(signal, key)
-      )
+      .post(`${base(account, ticket)}/interactions`, payload, {
+        ...options(signal, key),
+        ...(onUploadProgress ? { onUploadProgress } : {}),
+      })
       .then(r => r.data);
   },
+  deleteTicket: (account, record, reason, signal) =>
+    axios
+      .delete(base(account, record.id), {
+        ...options(signal),
+        data: { expected_lock_version: record.lock_version, reason },
+      })
+      .then(r => r.data),
+  deleteTask: (account, ticket, record, reason, signal) =>
+    axios
+      .delete(`${base(account, ticket)}/tasks/${id(record.id)}`, {
+        ...options(signal),
+        data: { expected_lock_version: record.lock_version, reason },
+      })
+      .then(r => r.data),
+  updateNote: (account, ticket, note, body, reason, key, signal) =>
+    axios
+      .patch(
+        `${base(account, ticket)}/notes/${id(note)}`,
+        { note: { body }, reason },
+        options(signal, key)
+      )
+      .then(r => r.data),
+  deleteNote: (account, ticket, note, reason, signal) =>
+    axios
+      .delete(`${base(account, ticket)}/notes/${id(note)}`, {
+        ...options(signal),
+        data: { reason },
+      })
+      .then(r => r.data),
+  deleteAttachment: (account, ticket, note, attachment, reason, signal) =>
+    axios
+      .delete(
+        `${base(account, ticket)}/notes/${id(note)}/attachments/${id(attachment)}`,
+        { ...options(signal), data: { reason } }
+      )
+      .then(r => r.data),
   task: (account, ticket, task, key, signal) =>
     axios
       .post(`${base(account, ticket)}/tasks`, { task }, options(signal, key))

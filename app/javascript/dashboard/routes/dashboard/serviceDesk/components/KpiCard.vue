@@ -3,6 +3,7 @@ import { useI18n } from 'vue-i18n';
 import Icon from 'dashboard/components-next/icon/Icon.vue';
 import { tones } from '../helpers/visualTheme';
 defineProps({
+  compact: { type: Boolean, default: false },
   interactive: { type: Boolean, default: false },
   label: { type: String, required: true },
   tone: {
@@ -26,7 +27,7 @@ const { t } = useI18n();
   <component
     :is="interactive ? 'button' : 'section'"
     :type="interactive ? 'button' : undefined"
-    class="flex flex-col gap-3 rounded-2xl border border-n-weak bg-n-solid-2 p-4 text-start shadow-sm focus-visible:ring-2 focus-visible:ring-n-blue-9"
+    class="flex flex-col gap-2 rounded-xl border border-n-weak bg-n-solid-1 p-3 text-start focus-visible:ring-2 focus-visible:ring-n-blue-9"
     :class="interactive ? 'cursor-pointer hover:border-n-blue-8' : ''"
     :title="t('JRC_SERVICE_DESK.OVERVIEW.kpi_help')"
     :aria-label="`${label}: ${value === null ? t('JRC_SERVICE_DESK.OVERVIEW.kpi_label') : value}`"
@@ -37,7 +38,7 @@ const { t } = useI18n();
         {{ label }}
       </span>
       <span
-        class="grid size-10 shrink-0 place-content-center rounded-xl"
+        class="grid size-8 shrink-0 place-content-center rounded-lg"
         :class="tones[tone].soft"
       >
         <Icon :icon="icon" class="size-5" />
@@ -49,7 +50,7 @@ const { t } = useI18n();
     >
       {{ value === null ? t('JRC_SERVICE_DESK.COMMON.no_value') : value }}
     </strong>
-    <span class="text-xs text-n-slate-11">
+    <span v-if="!compact" class="text-xs text-n-slate-11">
       {{
         t(
           value === null

@@ -164,6 +164,10 @@ Rails.application.routes.draw do
             post 'tickets/:id/interactions', to: 'cockpit#add_interaction'
             post 'tickets/:id/tasks', to: 'cockpit#create_task'
             patch 'tickets/:id/tasks/:record_id', to: 'cockpit#update_task'
+            delete 'tickets/:id/tasks/:record_id', to: 'cockpit#destroy_task'
+            patch 'tickets/:id/notes/:record_id', to: 'tickets#update_note'
+            delete 'tickets/:id/notes/:record_id', to: 'tickets#destroy_note'
+            delete 'tickets/:id/notes/:record_id/attachments/:attachment_id', to: 'tickets#destroy_attachment'
             post 'tickets/:id/approvals', to: 'cockpit#request_approval'
             post 'tickets/:id/approvals/:record_id/decision', to: 'cockpit#decide_approval'
             post 'tickets/:id/approvals/:record_id/escalate', to: 'cockpit#escalate_approval'
@@ -173,6 +177,7 @@ Rails.application.routes.draw do
             patch 'resources/:resource_id', to: 'resources#update'
             delete 'resources/:resource_id', to: 'resources#destroy'
             post 'resources/:resource_id/tickets', to: 'resources#link_tickets'
+            delete 'resources/:resource_id/tickets/:ticket_id', to: 'resources#unlink_ticket'
             get 'tickets/:id/notes/:record_id/attachments/:attachment_id', to: 'cockpit#attachment'
             post 'claim_next', to: 'cockpit#claim_next'
             post 'incidents', to: 'cockpit#create_incident'
@@ -184,7 +189,7 @@ Rails.application.routes.draw do
                contracts].each do |resource|
               get resource, to: 'lookups#index', defaults: { resource: resource }
             end
-            resources :tickets, only: [:index, :show, :create, :update] do
+            resources :tickets, only: [:index, :show, :create, :update, :destroy] do
               member do
                 get 'lifecycle', to: 'lifecycle#show'
                 post 'lifecycle', to: 'lifecycle#create'

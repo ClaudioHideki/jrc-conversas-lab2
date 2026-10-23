@@ -17,7 +17,8 @@ class JrcServiceDesk::Ticket < JrcServiceDesk::UnitRecord
   belongs_to :subcategory, class_name: 'JrcServiceDesk::Category', optional: true
   belongs_to :contract, class_name: 'JrcCrm::Contract', optional: true
   has_many :operational_resource_links, class_name: 'JrcServiceDesk::ResourceTicketLink', dependent: :restrict_with_error
-  has_many :operational_resources, through: :operational_resource_links, source: :operational_resource
+  has_many :active_operational_resource_links, -> { active }, class_name: 'JrcServiceDesk::ResourceTicketLink', foreign_key: :ticket_id
+  has_many :operational_resources, through: :active_operational_resource_links, source: :operational_resource
   belongs_to :lifecycle_policy_version, class_name: 'JrcServiceDesk::LifecyclePolicyVersion', optional: true
   has_many :lifecycle_transitions, class_name: 'JrcServiceDesk::LifecycleTransition', dependent: :restrict_with_error
   has_many :sla_cycles, class_name: 'JrcServiceDesk::SlaCycle', dependent: :restrict_with_error

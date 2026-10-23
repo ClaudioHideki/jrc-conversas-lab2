@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import Button from 'dashboard/components-next/button/Button.vue';
@@ -19,6 +19,10 @@ import { routeQuery } from '../helpers/query';
 import { metricQuery, ticketListQuery } from '../helpers/screenExperience.js';
 import { ticketListContext } from '../helpers/ticketNavigation';
 import { canonicalId } from '../helpers/access';
+import {
+  rememberTicketListPosition,
+  consumeTicketListPosition,
+} from '../helpers/ticketListPosition';
 const props = defineProps({ screen: { type: String, default: 'tickets' } });
 const { t } = useI18n();
 const session = useServiceDesk();
@@ -27,12 +31,21 @@ const router = useRouter();
 const key = 'tickets:list';
 const previewKey = 'tickets:preview';
 const selection = ref('');
+const sectionRef = ref(null);
+const identity = () => [session.accountId?.value, session.userId?.value];
 const filterError = ref(false);
 const result = computed(() => session.resource(key));
 const preview = computed(() => session.resource(previewKey));
 const query = computed(() => ticketListQuery(props.screen, route.query));
-const status = computed(() => filterError.value ? 'invalid_request' : result.value.status);
-const tabs = computed(() => ['tickets', 'mine'].map(value => ({ value, label: t(`JRC_SERVICE_DESK.SCREENS.${value}`) })));
+const status = computed(() =>
+  filterError.value ? 'invalid_request' : result.value.status
+);
+const tabs = computed(() =>
+  ['tickets', 'mine'].map(value => ({
+    value,
+    label: t(`JRC_SERVICE_DESK.SCREENS.${value}`),
+  }))
+);
 const go = (name, ticketId) => {
   let navigationQuery = {};
   if (['tickets', 'mine'].includes(name)) {
@@ -44,6 +57,12 @@ const go = (name, ticketId) => {
           : undefined,
     };
   } else if (['detail', 'edit'].includes(name)) {
+    rememberTicketListPosition(
+      identity(),
+      props.screen,
+      query.value,
+      sectionRef.value?.closest('.sd-main')?.scrollTop || 0
+    );
     navigationQuery = ticketListContext(props.screen, route.query);
   }
   return router.push({
@@ -55,8 +74,32 @@ const go = (name, ticketId) => {
     query: navigationQuery,
   });
 };
-const load = () => { selection.value = ''; filterError.value = false; session.resetResource(previewKey); return session.load(key, 'tickets', query.value); };
-watch([query, () => session.state.status, () => session.operations?.state.revision], load, { immediate: true });
+const load = () => {
+  selection.value = '';
+  filterError.value = false;
+  session.resetResource(previewKey);
+  return session.load(key, 'tickets', query.value);
+};
+watch(
+  [query, () => session.state.status, () => session.operations?.state.revision],
+  load,
+  { immediate: true }
+);
+watch(
+  () => result.value.status,
+  async value => {
+    if (!['ready', 'empty'].includes(value)) return;
+    const top = consumeTicketListPosition(
+      identity(),
+      props.screen,
+      query.value
+    );
+    if (top === null) return;
+    await nextTick();
+    const scroller = sectionRef.value?.closest('.sd-main');
+    if (scroller) scroller.scrollTop = top;
+  }
+);
 const apply = filters => {
   selection.value = '';
   session.resetResource(previewKey);
@@ -66,18 +109,25 @@ const apply = filters => {
     );
     filterError.value = false;
     router.push({ query: next });
-  }
-  catch {
+  } catch {
     filterError.value = true;
     session.resetResource(key, 'invalid_request');
   }
 };
-const page = value => router.push({ query: { ...route.query, page: String(value) } });
-const showPreview = id => { selection.value = id; return session.load(previewKey, 'tickets', {}, id); };
-onBeforeUnmount(() => { session.resetResource(key); session.resetResource(previewKey); });
+const page = value =>
+  router.push({ query: { ...route.query, page: String(value) } });
+const showPreview = id => {
+  selection.value = id;
+  return session.load(previewKey, 'tickets', {}, id);
+};
+onBeforeUnmount(() => {
+  session.resetResource(key);
+  session.resetResource(previewKey);
+});
 </script>
+
 <template>
-  <section>
+  <section ref="sectionRef">
     <header class="sd-page-heading">
       <div>
         <h2 class="sd-page-title">
@@ -118,7 +168,11 @@ onBeforeUnmount(() => { session.resetResource(key); session.resetResource(previe
       </div>
     </header>
     <div class="overflow-x-auto mb-4">
-      <TabBar :tabs="tabs" :initial-active-tab="screen === 'mine' ? 1 : 0" @tab-changed="go($event.value)" />
+      <TabBar
+        :tabs="tabs"
+        :initial-active-tab="screen === 'mine' ? 1 : 0"
+        @tab-changed="go($event.value)"
+      />
     </div>
     <p v-if="screen === 'mine'" class="text-xs text-n-slate-11">
       {{ t('JRC_SERVICE_DESK.FILTERS.mine_hint') }}
@@ -166,27 +220,48 @@ onBeforeUnmount(() => { session.resetResource(key); session.resetResource(previe
     </div>
     <TicketFilters :query="route.query" @apply="apply" />
     <LiveKpis
+      compact
       :query="query"
       @metric-filter="router.push({ query: metricQuery(query, $event) })"
     />
-    <p class="text-xs text-n-slate-11">
-      {{ t('JRC_SERVICE_DESK.FILTERS.local_hint') }}
-    </p>
     <div :class="selection ? 'sd-two-columns' : ''">
       <Panel :title="t('JRC_SERVICE_DESK.SCREENS.tickets')">
+        <template #actions>
+          <span v-if="result.meta" class="text-xs text-n-slate-11">{{
+            t('JRC_SERVICE_DESK.REDESIGN_LIST.total_results', {
+              total: result.meta.total,
+            })
+          }}</span>
+        </template>
         <TicketTable
           v-if="status === 'ready'"
           :items="result.items"
+          allow-edit
           @open="go('detail', $event)"
           @preview="showPreview"
+          @edit="go('edit', $event)"
         />
         <template v-else>
           <div class="sd-column-hints">
-            <span v-for="field in ['number', 'title', 'requester', 'priority', 'status', 'sla']" :key="field">
+            <span
+              v-for="field in [
+                'number',
+                'title',
+                'requester',
+                'priority',
+                'status',
+                'sla',
+              ]"
+              :key="field"
+            >
               {{ t(`JRC_SERVICE_DESK.FIELDS.${field}`) }}
             </span>
           </div>
-          <State :status="status" retry @retry="session.state.status === 'ready' ? load() : session.retry()" />
+          <State
+            :status="status"
+            retry
+            @retry="session.state.status === 'ready' ? load() : session.retry()"
+          />
         </template>
         <PaginationFooter
           v-if="result.meta && result.meta.total > 0"
@@ -196,13 +271,20 @@ onBeforeUnmount(() => { session.resetResource(key); session.resetResource(previe
           @update:current-page="page"
         />
       </Panel>
-      <Panel v-if="selection" :title="t('JRC_SERVICE_DESK.TICKET.preview')" class="sd-sticky">
+      <Panel
+        v-if="selection"
+        :title="t('JRC_SERVICE_DESK.TICKET.preview')"
+        class="sd-sticky"
+      >
         <template #actions>
           <Button
             size="xs"
             variant="ghost"
             :label="t('JRC_SERVICE_DESK.COMMON.close')"
-            @click="selection = ''; session.resetResource(previewKey)"
+            @click="
+              selection = '';
+              session.resetResource(previewKey);
+            "
           />
         </template>
         <template
@@ -222,9 +304,20 @@ onBeforeUnmount(() => { session.resetResource(key); session.resetResource(previe
             }}
           </p>
           <TicketSummary :ticket="preview.record" />
-          <Button class="mt-4" :label="t('JRC_SERVICE_DESK.COMMON.open')" size="sm" @click="go('detail', selection)" />
+          <Button
+            class="mt-4"
+            :label="t('JRC_SERVICE_DESK.COMMON.open')"
+            size="sm"
+            @click="go('detail', selection)"
+          />
         </template>
-        <State v-else :status="preview.status" compact retry @retry="showPreview(selection)" />
+        <State
+          v-else
+          :status="preview.status"
+          compact
+          retry
+          @retry="showPreview(selection)"
+        />
       </Panel>
     </div>
   </section>

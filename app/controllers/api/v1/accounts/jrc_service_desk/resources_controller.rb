@@ -3,7 +3,7 @@
 class Api::V1::Accounts::JrcServiceDesk::ResourcesController < Api::V1::Accounts::JrcServiceDesk::OperationsController
   def index
     authorize ::JrcServiceDesk::OperationalResource, :index?
-    values = ::JrcServiceDesk::Input.attributes(query_values, %w[unit_id resource_kind state query page per_page])
+    values = ::JrcServiceDesk::Input.attributes(query_values, %w[unit_id ticket_id resource_kind state query page per_page])
     rows = filtered_resources(values)
     paging = ::JrcServiceDesk::QueryParameters.new(values.slice('page', 'per_page'))
     items = rows.order(updated_at: :desc, id: :desc).offset(paging.offset).limit(paging.per_page)
@@ -52,6 +52,14 @@ class Api::V1::Accounts::JrcServiceDesk::ResourcesController < Api::V1::Accounts
     render json: base_payload.merge(applied: true, resource: resource_payload(row))
   end
 
+  def unlink_ticket
+    values = body_values(%w[unit_id expected_lock_version])
+    authorize scoped_resource, :update?
+    row = command.unlink(unit_id: values.fetch('unit_id'), resource_id: params[:resource_id], ticket_id: params[:ticket_id],
+                         expected_lock_version: values.fetch('expected_lock_version'))
+    render json: base_payload.merge(applied: true, resource: resource_payload(row))
+  end
+
   private
 
   def filtered_resources(values)
@@ -59,6 +67,11 @@ class Api::V1::Accounts::JrcServiceDesk::ResourcesController < Api::V1::Accounts
     if values['unit_id']
       unit = policy_scope(::JrcServiceDesk::Unit).find(::JrcServiceDesk::Input.id(values['unit_id']))
       rows = rows.where(unit: unit)
+    end
+    if values['ticket_id']
+      ticket = policy_scope(::JrcServiceDesk::Ticket).find(::JrcServiceDesk::Input.id(values['ticket_id']))
+      authorize ticket, :show?
+      rows = rows.where(id: ticket.operational_resource_links.active.select(:operational_resource_id))
     end
     %w[resource_kind state].each { |key| rows = rows.where(key => values[key]) if values[key] }
     search_resources(rows, values['query'])

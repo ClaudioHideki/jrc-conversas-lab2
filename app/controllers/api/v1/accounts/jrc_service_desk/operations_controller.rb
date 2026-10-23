@@ -10,6 +10,8 @@ class Api::V1::Accounts::JrcServiceDesk::OperationsController < Api::V1::Account
   rescue_from ArgumentError, KeyError, ActionController::ParameterMissing, with: :bad_input
   rescue_from ActiveRecord::StaleObjectError, ::JrcServiceDesk::IdempotencyConflict, with: :write_conflict
   rescue_from ActiveRecord::RecordNotUnique, ActiveRecord::InvalidForeignKey, ActiveRecord::NotNullViolation, with: :constraint_conflict
+  rescue_from ::JrcServiceDesk::DeletionBlockedError, with: :deletion_blocked
+  rescue_from ::JrcServiceDesk::LinkedContextConflict, with: :linked_context_conflict
 
   private
 
@@ -64,26 +66,34 @@ class Api::V1::Accounts::JrcServiceDesk::OperationsController < Api::V1::Account
   # still uses the native 401; operational authorization is explicitly 403.
   def render_unauthorized(_message)
     response.headers['Cache-Control'] = 'no-store'
-    render json: { error: 'Service Desk access denied', code: 'forbidden' }, status: :forbidden
+    render json: { error: 'Acesso ao Service Desk não autorizado.', code: 'forbidden' }, status: :forbidden
   end
 
   def render_not_found_error(_message)
-    render json: { error: 'Service Desk resource unavailable', code: 'not_found' }, status: :not_found
+    render json: { error: 'Registro do Service Desk indisponível.', code: 'not_found' }, status: :not_found
   end
 
   def bad_input(_error)
-    render json: { error: 'Invalid or unsupported Service Desk input', code: 'invalid_input' }, status: :unprocessable_entity
+    render json: { error: 'Dados inválidos ou não suportados pelo Service Desk.', code: 'invalid_input' }, status: :unprocessable_entity
   end
 
   def write_conflict(_error)
-    render json: { error: 'Conflict: refresh the record or review the request key', code: 'conflict' }, status: :conflict
+    render json: { error: 'O registro foi alterado. Atualize os dados e revise a solicitação.', code: 'conflict' }, status: :conflict
   end
 
   def constraint_conflict(_error)
-    render json: { error: 'Related records changed or are outside the permitted scope', code: 'constraint_conflict' }, status: :conflict
+    render json: { error: 'Os registros vinculados foram alterados ou estão fora do seu escopo de acesso.', code: 'constraint_conflict' }, status: :conflict
+  end
+
+  def deletion_blocked(error)
+    render json: { error: error.message, code: 'deletion_blocked' }, status: :conflict
+  end
+
+  def linked_context_conflict(error)
+    render json: { error: error.message, code: 'linked_context_conflict' }, status: :conflict
   end
 
   def render_record_invalid(error)
-    render json: { error: 'Record validation failed', code: 'validation_failed', fields: error.record.errors.attribute_names }, status: :unprocessable_entity
+    render json: { error: 'Não foi possível validar os dados do registro.', code: 'validation_failed', fields: error.record.errors.attribute_names }, status: :unprocessable_entity
   end
 end

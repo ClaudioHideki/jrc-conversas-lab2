@@ -63,13 +63,13 @@ export function createOperationalSession(
   const read = async (key, kind, { ticket = null, query = {} } = {}) => {
     cancel(key);
     state.reads[key] = { status: 'loading', data: null };
-    const turn = epoch,
-      seq = sequences.get(key),
-      controller = new AbortController();
+    const turn = epoch;
+    const seq = sequences.get(key);
+    const controller = new AbortController();
     controllers.set(key, controller);
     try {
-      const context = current(),
-        normalized = normalizeQuery(query);
+      const context = current();
+      const normalized = normalizeQuery(query);
       if (
         !queryWithinContext(normalized, context) ||
         !canRead(context, 'tickets')
@@ -129,9 +129,9 @@ export function createOperationalSession(
   const write = async (key, action, payload, ticket = null) => {
     if (state.writes[key]?.status === 'saving') return null;
     cancel(key);
-    const turn = epoch,
-      seq = sequences.get(key),
-      controller = new AbortController();
+    const turn = epoch;
+    const seq = sequences.get(key);
+    const controller = new AbortController();
     controllers.set(key, controller);
     state.notice = null;
     state.writes[key] = { status: 'saving', ticket: null };
@@ -196,13 +196,13 @@ export function createOperationalSession(
         payload,
         decodeTicket(result, context, ticketId)
       );
-      const relation =
-        action === 'add_note'
-          ? 'notes'
-          : action === 'link_conversation' ||
-              (action === 'create' && payload.conversation_id)
-            ? 'conversations'
-            : null;
+      let relation = null;
+      if (action === 'add_note') relation = 'notes';
+      else if (
+        action === 'link_conversation' ||
+        (action === 'create' && payload.conversation_id)
+      )
+        relation = 'conversations';
       if (relation) {
         const recordId = canonicalId(ack.result_id);
         if (!recordId) throw new ContractError();
@@ -282,14 +282,12 @@ export function createOperationalSession(
       else {
         state.writes[key] = {
           status:
-            status === 409
-              ? 'conflict'
-              : status === 422
-                ? 'invalid_input'
-                : error instanceof ContractError
-                  ? 'invalid_contract'
-                  : 'error',
+            { 409: 'conflict', 422: 'invalid_input' }[status] ||
+            (error instanceof ContractError ? 'invalid_contract' : 'error'),
           ticket: null,
+          ...(error?.response?.data?.code === 'linked_context_conflict'
+            ? { reason: 'linked_context_conflict' }
+            : {}),
         };
         if (status === 422) intents.delete(key); // Rejected request did not commit.
       }

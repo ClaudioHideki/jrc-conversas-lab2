@@ -365,6 +365,12 @@ onBeforeUnmount(() => {
     :context="contactCenterContext"
     :loading="isCurrentListLoading"
     :ready="!isInitializing"
+    :softphone-access="
+      hasContactCenter &&
+      accountPermissions.some(permission =>
+        ['administrator', 'agent', 'custom_role'].includes(permission)
+      )
+    "
     :voice-error="voiceError"
     :conversation-error="channelFilter !== 'voice' && conversationError"
     :can-load-more="canLoadMore"

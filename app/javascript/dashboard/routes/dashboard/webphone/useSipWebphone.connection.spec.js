@@ -206,6 +206,7 @@ describe('softphone reconnect coordinator', () => {
     mock.acwPending = true;
     await expect(api.call()).resolves.toBe(false);
     await expect(api.answer()).resolves.toBe(false);
+    expect(api.errorMessage.value).toContain('qualificação pendente');
     expect(mock.call).not.toHaveBeenCalled();
     expect(mock.answer).not.toHaveBeenCalled();
     mock.acwPending = false;

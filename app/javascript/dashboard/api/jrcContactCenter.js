@@ -59,6 +59,10 @@ export default {
     axios.get(`${base(accountId)}/call_sessions`, { params }),
   call: (accountId, id) =>
     axios.get(`${base(accountId)}/call_sessions/${Number(id)}`),
+  saveCallObservations: (accountId, id, observations) =>
+    axios.patch(`${base(accountId)}/call_sessions/${Number(id)}/observations`, {
+      observations,
+    }),
   cases: (accountId, params = {}) =>
     axios.get(`${base(accountId)}/cases`, { params }),
   case: (accountId, id) => axios.get(`${base(accountId)}/cases/${Number(id)}`),

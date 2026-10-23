@@ -238,9 +238,21 @@ async function render() {
   await flushPromises();
   await wrapper
     .findComponent(ServiceDefinitionSelect)
-    .find('select')
-    .setValue('40');
+    .findAll('button')
+    .find(button => button.text().includes('Configured IT'))
+    .trigger('click');
   await flushPromises();
+  const advanceStep = async () => {
+    const next = wrapper
+      .findAll('button')
+      .find(button => button.text() === messages.JRC_SERVICE_DESK.COMMON.next);
+    expect(next.attributes('disabled')).toBeUndefined();
+    await next.trigger('click');
+    await flushPromises();
+  };
+  await advanceStep();
+  await advanceStep();
+  await advanceStep();
   return { create, router };
 }
 describe('R3 native ticket form uses configured defaults with explicit customer/contract authority', () => {
@@ -258,6 +270,13 @@ describe('R3 native ticket form uses configured defaults with explicit customer/
       category_id: '4',
       ticket_type_id: '5',
     });
+
+    expect(
+      wrapper
+        .findAll('button')
+        .find(button => button.text() === messages.JRC_SERVICE_DESK.COMMON.next)
+        .attributes('disabled')
+    ).toBeDefined();
 
     await wrapper.find('form').trigger('submit');
     await flushPromises();
@@ -280,7 +299,11 @@ describe('R3 native ticket form uses configured defaults with explicit customer/
       .find('input')
       .setValue('R3-device');
     await flushPromises();
-
+    await wrapper
+      .findAll('button')
+      .find(button => button.text() === messages.JRC_SERVICE_DESK.COMMON.next)
+      .trigger('click');
+    await flushPromises();
     await wrapper.find('form').trigger('submit');
     await flushPromises();
     expect(create).toHaveBeenCalledTimes(1);

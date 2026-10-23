@@ -9,12 +9,22 @@ class JrcServiceDesk::TicketNotePolicy < JrcServiceDesk::TicketRecordPolicy
   end
 
   def show?
-    super && JrcServiceDesk::InteractionVisibility.readable?(record, operational_context)
+    super && JrcServiceDesk::InteractionVisibility.readable?(record, operational_context) &&
+      !JrcServiceDesk::RecordWithdrawal.withdrawn?(record, :note)
+  end
+
+  def update?
+    destroy? && %w[internal technical_team].include?(record.visibility)
+  end
+
+  def destroy?
+    show? && parent_policy.add_note? &&
+      (operational_context.administrator? || record.author_membership.account_user_id == operational_context.account_user.id)
   end
 
   class Scope < JrcServiceDesk::TicketRecordPolicy::Scope
     def resolve
-      JrcServiceDesk::InteractionVisibility.scope(super, operational_context)
+      JrcServiceDesk::RecordWithdrawal.excluding(JrcServiceDesk::InteractionVisibility.scope(super, operational_context), :note)
     end
   end
 end

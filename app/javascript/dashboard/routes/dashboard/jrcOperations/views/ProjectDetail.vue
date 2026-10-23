@@ -23,6 +23,7 @@ import ProjectOverview from '../../jrcProjects/components/ProjectOverview.vue';
 import ProjectExecution from '../../jrcProjects/components/ProjectExecution.vue';
 import ProjectTeam from '../../jrcProjects/components/ProjectTeam.vue';
 import ProjectConfiguration from '../../jrcProjects/components/ProjectConfiguration.vue';
+import DeleteProjectButton from '../../jrcProjects/components/DeleteProjectButton.vue';
 import TaskEditor from '../components/TaskEditor.vue';
 import ProjectPlanning from '../components/ProjectPlanning.vue';
 import ProjectHours from '../components/ProjectHours.vue';
@@ -297,7 +298,7 @@ async function exportTasks() {
             </p>
           </div>
           <div class="flex flex-col items-end gap-3">
-            <div class="flex gap-2">
+            <div class="flex flex-wrap justify-end gap-2">
               <button
                 v-if="can('project.update')"
                 class="flex items-center gap-2 rounded-lg border border-n-weak bg-n-solid-1 px-3 py-2 text-xs"
@@ -316,6 +317,12 @@ async function exportTasks() {
                   projectText('EXPORT_TASKS', 'Exportar tarefas')
                 }}
               </button>
+              <DeleteProjectButton
+                :project="project"
+                :disabled="loading"
+                @deleted="router.push(routeTo('jrc_projects_list', accountId))"
+                @error="error = $event"
+              />
             </div>
             <div class="w-64 max-w-full">
               <div class="mb-1.5 flex justify-between gap-3 text-xs">

@@ -6,6 +6,7 @@ import en from 'dashboard/i18n/locale/en';
 import GlobalQuickActions from '../GlobalQuickActions.vue';
 import ConversationQuickActions from '../../Conversation/ConversationHome/ConversationQuickActions.vue';
 import GlobalCallPanel from '../GlobalCallPanel.vue';
+import { useEmbeddedSoftphone } from 'dashboard/routes/dashboard/webphone/useEmbeddedSoftphone';
 
 vi.mock('../GlobalCrmCreation.vue', () => ({
   default: {
@@ -171,6 +172,21 @@ describe('Global quick actions preserve existing handlers', () => {
     expect(wrapper.findComponent(GlobalCallPanel).exists()).toBe(false);
     wrapper.findComponent(ConversationQuickActions).vm.$emit('select', 'LEAD');
     expect(mocks.push).not.toHaveBeenCalled();
+  });
+  it('opens the Account-scoped embedded phone instead of a second panel', async () => {
+    const open = vi.fn();
+    const host = mount({
+      setup() {
+        useEmbeddedSoftphone(ref(1), ref(true), open);
+      },
+      template: '<div />',
+    });
+    wrapper = mount(GlobalQuickActions);
+    await wrapper.get('button[aria-label="Nova ligação"]').trigger('click');
+    expect(open).toHaveBeenCalledOnce();
+    expect(wrapper.findComponent(GlobalCallPanel).exists()).toBe(false);
+    expect(mocks.push).not.toHaveBeenCalled();
+    host.unmount();
   });
 
   it('keeps the current route on repeated CRM clicks and closes on account change', async () => {

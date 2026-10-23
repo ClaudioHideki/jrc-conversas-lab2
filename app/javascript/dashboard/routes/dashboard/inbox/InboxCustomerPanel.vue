@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { openEmbeddedSoftphone } from '../webphone/useEmbeddedSoftphone';
 import {
   inbox360Labels,
   orderStateLabels,
@@ -25,6 +26,10 @@ const props = defineProps({
 const emit = defineEmits(['showTab', 'more', 'close']);
 const { t, locale } = useI18n();
 const labels = computed(() => inbox360Labels(t));
+const callContact = event => {
+  if (openEmbeddedSoftphone(props.accountId, props.contact?.phone_number))
+    event.preventDefault();
+};
 const priorityLabels = computed(() => casePriorityLabels(t));
 const orderLabels = computed(() => orderStateLabels(t));
 const formatDate = value =>
@@ -171,6 +176,7 @@ const details = computed(() =>
                 :href="`tel:${contact.phone_number}`"
                 class="grid size-7 place-items-center rounded-md border border-n-weak bg-n-blue-2 text-n-brand"
                 :aria-label="t('JRC_CONTACT_CENTER.INBOX_360.PHONE')"
+                @click="callContact"
               >
                 <span class="i-lucide-phone size-4" />
               </a>

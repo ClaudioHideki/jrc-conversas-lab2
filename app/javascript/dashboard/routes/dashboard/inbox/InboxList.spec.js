@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { defineComponent, reactive } from 'vue';
 import { createStore } from 'vuex';
+import { createPinia } from 'pinia';
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import { INBOX_TYPES } from 'dashboard/helper/inbox';
 import JrcContactCenterAPI from 'dashboard/api/jrcContactCenter';
@@ -33,7 +34,7 @@ let store;
 const mountInbox = () =>
   mount(InboxList, {
     global: {
-      plugins: [store],
+      plugins: [store, createPinia()],
       stubs: {
         Dialog: { methods: { open() {}, close() {} }, template: '<div />' },
         RouterLink: {
@@ -397,8 +398,13 @@ describe('omnichannel inbox', () => {
     const voiceGroup = wrapper.get('[data-channel="voice"] > button');
     await voiceGroup.trigger('click');
     expect(voiceGroup.attributes('aria-expanded')).toBe('false');
-    expect(wrapper.text()).not.toContain(call.ani);
+    expect(
+      wrapper.get('[data-channel="voice"] > div').element.style.display
+    ).toBe('none');
     await voiceGroup.trigger('click');
+    expect(
+      wrapper.get('[data-channel="voice"] > div').element.style.display
+    ).toBe('');
     expect(wrapper.text()).toContain(call.ani);
     const tabs = wrapper
       .get('nav[aria-label="JRC_CONTACT_CENTER.INBOX_360.WORKSPACE_TABS"]')

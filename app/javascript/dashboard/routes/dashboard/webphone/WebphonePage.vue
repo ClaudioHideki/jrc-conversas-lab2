@@ -1,7 +1,14 @@
 <script setup>
 import CustomerMasterAPI from 'dashboard/api/jrcCustomers';
 import { useCustomerMaster } from 'dashboard/routes/dashboard/jrcCustomers/useCustomerMaster';
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+} from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { debounce } from '@chatwoot/utils';
 import { useI18n } from 'vue-i18n';
@@ -23,6 +30,8 @@ const props = defineProps({
   compact: { type: Boolean, default: false },
   externalBusy: { type: Boolean, default: false },
   allowConference: { type: Boolean, default: true },
+  embedded: { type: Boolean, default: false },
+  capabilities: { type: Object, default: null },
 });
 const emit = defineEmits(['dialing']);
 const { enabled: hasCustomerMaster } = useCustomerMaster();
@@ -41,12 +50,14 @@ const phoneTabs = computed(() => [
 ]);
 const startingCall = ref(false);
 const conferenceMessage = ref('');
+const phoneActionPending = ref(false);
+const transferSent = ref(false);
 
 const TEXT = Object.freeze({
   extension: 'Ramal',
   activeExtension: 'Ramal ativo',
-  loading: 'Carregando configuracao do ramal...',
-  unavailable: 'Seu ramal ainda nao foi configurado pelo Super Admin.',
+  loading: 'Carregando configuração do ramal...',
+  unavailable: 'Seu ramal ainda não foi configurado pelo Super Admin.',
   call: 'Ligar',
   answer: 'Atender',
   reject: 'Recusar',
@@ -55,15 +66,12 @@ const TEXT = Object.freeze({
   unmute: 'Reativar',
   hold: 'Espera',
   resume: 'Retomar',
-  destination: 'Numero ou ramal de destino',
+  destination: 'Número ou ramal de destino',
   transfer: 'Transferir',
-  transferDestination: 'Ramal ou numero',
+  transferDestination: 'Ramal ou número',
   confirmTransfer: 'Enviar transf.',
-  conference: 'Conferencia',
+  conference: 'Videoconferência',
   incoming: 'Chamada recebida',
-  codec: 'Codec: Opus',
-  quality: 'Qualidade: Excelente',
-  network: 'Rede: Estavel',
   turnOnExtension: 'Ligar Ramal',
   turnOffExtension: 'Desligar Ramal',
 });
@@ -76,6 +84,8 @@ const {
   loading,
   connecting,
   status,
+  registration,
+  transport,
   destination,
   duration,
   incoming,
@@ -104,6 +114,21 @@ const {
 } = useSipWebphone();
 
 const remoteAudio = ref(null);
+const destinationInput = ref(null);
+defineExpose({
+  prepareDestination: number => {
+    if (hasCall.value || props.externalBusy || startingCall.value) return false;
+    const target = normalizeSipDialNumber(number);
+    if (!target) return false;
+    destination.value = target;
+    return true;
+  },
+  focusDestination: async () => {
+    activeTab.value = 'phone';
+    await nextTick();
+    destinationInput.value?.focus({ preventScroll: true });
+  },
+});
 const transferMenuOpen = ref(false);
 const transferMode = ref('');
 const transferDestination = ref('');
@@ -161,7 +186,27 @@ const agentExtension = computed(() => credential.value?.extension || '--');
 const extensionTitle = computed(
   () => `${TEXT.extension}: ${agentExtension.value}`
 );
-const canTransfer = computed(() => established.value);
+const supportsTransfer = mode =>
+  !props.embedded ||
+  props.capabilities?.[
+    mode === 'immediate' ? 'transfer_blind' : 'transfer_attended'
+  ] === 'available';
+const canTransfer = computed(
+  () =>
+    established.value &&
+    (supportsTransfer('immediate') || supportsTransfer('supervised'))
+);
+const canHold = computed(
+  () => !props.embedded || props.capabilities?.hold === 'available'
+);
+const registrationLabel = computed(
+  () =>
+    ({
+      Registered: t('SOFTPHONE.INBOX.REGISTERED'),
+      Unregistered: t('SOFTPHONE.INBOX.UNREGISTERED'),
+      Terminated: t('SOFTPHONE.INBOX.UNREGISTERED'),
+    })[registration?.value] || registration?.value
+);
 const canDial = computed(
   () =>
     registered.value &&
@@ -223,6 +268,8 @@ const stopRingtone = () => {
 };
 
 const selectTransferMode = mode => {
+  if (!supportsTransfer(mode)) return;
+  transferSent.value = false;
   transferMode.value = mode;
   transferMenuOpen.value = false;
 };
@@ -231,6 +278,7 @@ const submitTransfer = async () => {
   if (
     !established.value ||
     !transferMode.value ||
+    !supportsTransfer(transferMode.value) ||
     !transferDestination.value ||
     transferring.value ||
     holdPending.value
@@ -241,12 +289,22 @@ const submitTransfer = async () => {
     transferDestination.value
   );
   if (!sent) return;
+  transferSent.value = true;
   transferMode.value = '';
   transferDestination.value = '';
 };
 
-const toggleHold = () => setHold(!held.value);
+const toggleHold = () => canHold.value && setHold(!held.value);
 const toggleMute = () => setMuted(!muted.value);
+const runPhoneAction = async action => {
+  if (phoneActionPending.value) return;
+  phoneActionPending.value = true;
+  try {
+    await action();
+  } finally {
+    phoneActionPending.value = false;
+  }
+};
 const toggleExtension = () =>
   extensionEnabled.value ? turnOffExtension() : turnOnExtension();
 const openVideoConference = () => {
@@ -448,10 +506,10 @@ const findContactByPhone = async number => {
     }
     const { data } = await ContactAPI.search(number);
     if (version !== contactLookupVersion) return;
-    const contact = data.payload?.find(item =>
+    const matches = data.payload?.filter(item =>
       phonesMatch(item.phone_number || item.phoneNumber, number)
     );
-    if (contact) setCurrentContact(contact, version);
+    if (matches?.length === 1) setCurrentContact(matches[0], version);
     else setUnknownContact(number);
   } catch {
     if (version === contactLookupVersion) currentContact.value = null;
@@ -551,7 +609,7 @@ watch(hasCall, active => {
   <section
     :class="
       compact
-        ? 'w-full space-y-3 px-3 pb-3'
+        ? 'w-full min-w-0 space-y-3 px-1 pb-2'
         : 'h-full w-full overflow-y-auto bg-n-background p-4 lg:p-6 xl:overflow-hidden'
     "
   >
@@ -617,21 +675,31 @@ watch(hasCall, active => {
         class="mx-auto w-full max-w-[420px]"
         :class="{ 'xl:h-full xl:min-h-0': !compact }"
       >
-        <div class="jrc-softphone" :class="{ '!p-3': compact }">
-          <div class="flex items-start justify-between gap-3">
+        <div
+          class="jrc-softphone"
+          :class="
+            compact ? (embedded ? '!rounded-xl !p-2 !shadow-none' : '!p-3') : ''
+          "
+        >
+          <div class="flex flex-wrap items-start justify-between gap-2">
             <div>
               <span class="jrc-status-pill">{{
-                extensionEnabled
-                  ? TEXT.activeExtension
-                  : t('SOFTPHONE.EXTENSION_OFF')
+                registered
+                  ? t('SOFTPHONE.INBOX.REGISTERED')
+                  : extensionEnabled
+                    ? t('SOFTPHONE.INBOX.UNREGISTERED')
+                    : t('SOFTPHONE.EXTENSION_OFF')
               }}</span>
-              <h1 class="jrc-extension-title text-xl font-semibold text-white">
+              <h1
+                class="jrc-extension-title text-xl font-semibold text-white"
+                :class="{ '!mt-1 !text-base': embedded }"
+              >
                 {{ extensionTitle }}
               </h1>
               <p class="mt-1 flex items-center gap-1.5 text-sm text-white">
                 <span
                   class="size-2 rounded-full"
-                  :class="extensionEnabled ? 'bg-emerald-400' : 'bg-slate-400'"
+                  :class="registered ? 'bg-emerald-400' : 'bg-slate-400'"
                 />
                 {{ status }}
               </p>
@@ -640,12 +708,30 @@ watch(hasCall, active => {
               v-if="configured"
               type="button"
               class="min-h-9 rounded-lg bg-white/10 px-3 text-xs font-bold text-white transition hover:brightness-110 disabled:opacity-60"
-              :disabled="loading || connecting || hasCall || startingCall"
-              @click="toggleExtension"
+              :class="{ '!px-2': embedded }"
+              :aria-label="extensionToggleLabel"
+              :title="extensionToggleLabel"
+              :disabled="
+                loading ||
+                connecting ||
+                hasCall ||
+                startingCall ||
+                phoneActionPending
+              "
+              @click="runPhoneAction(toggleExtension)"
             >
-              {{ extensionToggleLabel }}
+              <span v-if="embedded" class="i-lucide-power size-4" />
+              <template v-else>{{ extensionToggleLabel }}</template>
             </button>
           </div>
+
+          <p
+            v-if="errorMessage"
+            role="alert"
+            class="mt-3 rounded-lg border border-red-400/40 bg-red-500/10 p-2 text-xs text-red-100"
+          >
+            {{ errorMessage }}
+          </p>
 
           <p v-if="loading" class="mt-8 rounded-xl bg-white/10 p-5 text-white">
             {{ TEXT.loading }}
@@ -673,22 +759,40 @@ watch(hasCall, active => {
             <p
               v-if="callNotificationPermission === 'denied'"
               class="mt-3 text-sm text-white"
+              :class="{ '!mt-2 !text-[10px] !leading-4': embedded }"
             >
-              {{ $t('SOFTPHONE.NOTIFICATIONS_DENIED') }}
+              {{
+                t(
+                  embedded
+                    ? 'SOFTPHONE.INBOX.NOTIFICATIONS_BLOCKED'
+                    : 'SOFTPHONE.NOTIFICATIONS_DENIED'
+                )
+              }}
             </p>
             <div
               class="jrc-caller-card"
-              :class="{ '!mt-3 !gap-2 !p-3': compact }"
+              :class="
+                compact
+                  ? embedded
+                    ? '!mt-2 !gap-1 !p-2'
+                    : '!mt-3 !gap-2 !p-3'
+                  : ''
+              "
             >
               <div class="min-w-0 flex-1">
-                <p class="truncate text-base font-semibold text-white">
+                <p
+                  v-if="!embedded || incoming"
+                  class="truncate text-base font-semibold text-white"
+                >
                   {{ callTargetName }}
                 </p>
                 <input
+                  ref="destinationInput"
                   v-show="!compact || !hasCall"
                   v-model="destination"
                   type="tel"
                   :placeholder="TEXT.destination"
+                  :aria-label="TEXT.destination"
                   class="jrc-destination-input"
                   :disabled="hasCall || (compact && externalBusy)"
                   @keyup.enter="compact ? startCall() : call()"
@@ -706,7 +810,7 @@ watch(hasCall, active => {
                   <span class="i-lucide-delete size-4" />
                 </button>
                 <p
-                  v-if="hasCall && !compact"
+                  v-if="hasCall && (!compact || embedded)"
                   class="mt-2 text-sm font-semibold text-white"
                 >
                   {{ callTargetNumber }}
@@ -719,7 +823,10 @@ watch(hasCall, active => {
                   {{ duration }}
                 </p>
               </div>
-              <span class="i-lucide-signal-high size-7 shrink-0 text-white" />
+              <span
+                v-if="!embedded"
+                class="i-lucide-signal-high size-7 shrink-0 text-white"
+              />
             </div>
 
             <p
@@ -736,19 +843,31 @@ watch(hasCall, active => {
               {{ conferenceMessage }}
             </p>
             <p
-              v-if="errorMessage"
-              class="mt-4 rounded-xl border border-red-400/40 bg-red-500/10 px-4 py-3 text-sm text-red-100"
+              v-if="transferSent"
+              role="status"
+              class="mt-3 rounded-lg bg-white/10 p-2 text-xs text-white"
             >
-              {{ errorMessage }}
+              {{ t('SOFTPHONE.INBOX.TRANSFER_SENT') }}
             </p>
 
             <div
               class="jrc-action-grid"
-              :class="{ '!mt-3 !grid-cols-3': compact }"
+              :class="
+                compact
+                  ? embedded
+                    ? '!mt-3 !grid-cols-2'
+                    : '!mt-3 !grid-cols-3'
+                  : ''
+              "
             >
               <button
+                v-if="!embedded || (!hasCall && !incoming)"
                 type="button"
                 class="jrc-action-button jrc-call-button"
+                :class="{
+                  'col-span-2 !min-h-9 !flex-row !gap-1 !py-1 !text-xs':
+                    embedded,
+                }"
                 :disabled="
                   compact ? !canDial : !registered || hasCall || !destination
                 "
@@ -758,18 +877,36 @@ watch(hasCall, active => {
                 <span>{{ TEXT.call }}</span>
               </button>
               <button
+                v-if="!embedded || incoming"
                 type="button"
                 class="jrc-action-button bg-blue-600"
-                :disabled="!incoming || (compact && externalBusy)"
-                @click="answer"
+                :class="{
+                  'col-span-2 !min-h-9 !flex-row !gap-1 !py-1 !text-xs':
+                    embedded,
+                }"
+                :disabled="
+                  !incoming || phoneActionPending || (compact && externalBusy)
+                "
+                @click="runPhoneAction(answer)"
               >
                 <span class="i-lucide-phone-call" />
                 <span>{{ TEXT.answer }}</span>
               </button>
-              <div class="relative">
+              <div
+                v-if="
+                  !embedded ||
+                  (established &&
+                    (supportsTransfer('immediate') ||
+                      supportsTransfer('supervised')))
+                "
+                class="relative"
+              >
                 <button
                   type="button"
                   class="jrc-action-button bg-white/10"
+                  :class="{
+                    '!min-h-9 !flex-row !gap-1 !py-1 !text-xs': embedded,
+                  }"
                   :disabled="!canTransfer || transferring || holdPending"
                   @click="transferMenuOpen = !transferMenuOpen"
                 >
@@ -778,6 +915,7 @@ watch(hasCall, active => {
                 </button>
                 <div v-if="transferMenuOpen" class="jrc-transfer-menu">
                   <button
+                    v-if="supportsTransfer('supervised')"
                     type="button"
                     @click="selectTransferMode('supervised')"
                   >
@@ -785,6 +923,7 @@ watch(hasCall, active => {
                     {{ t('SOFTPHONE.TRANSFER.ASSISTED') }}
                   </button>
                   <button
+                    v-if="supportsTransfer('immediate')"
                     type="button"
                     @click="selectTransferMode('immediate')"
                   >
@@ -794,9 +933,13 @@ watch(hasCall, active => {
                 </div>
               </div>
               <button
+                v-if="canHold && (!embedded || established)"
                 type="button"
                 class="jrc-action-button bg-white/10"
-                :class="{ 'jrc-hold-active': held }"
+                :class="{
+                  'jrc-hold-active': held,
+                  '!min-h-9 !flex-row !gap-1 !py-1 !text-xs': embedded,
+                }"
                 :disabled="!established || holdPending || transferring"
                 @click="toggleHold"
               >
@@ -813,6 +956,23 @@ watch(hasCall, active => {
                 <span>{{ TEXT.conference }}</span>
               </button>
             </div>
+
+            <details
+              v-if="
+                embedded &&
+                (!canHold ||
+                  (!supportsTransfer('immediate') &&
+                    !supportsTransfer('supervised')))
+              "
+              class="mt-2 text-[11px] leading-4 text-white/80"
+            >
+              <summary class="cursor-pointer">
+                {{ t('SOFTPHONE.INBOX.CAPABILITIES_HELP') }}
+              </summary>
+              <p class="my-1">
+                {{ t('SOFTPHONE.INBOX.CAPABILITIES_PENDING') }}
+              </p>
+            </details>
 
             <div
               v-if="transferMode"
@@ -885,6 +1045,7 @@ watch(hasCall, active => {
             </div>
 
             <div
+              v-if="!embedded || established"
               class="jrc-mute-row flex justify-center"
               :class="{ '!mt-3': compact }"
             >
@@ -906,8 +1067,8 @@ watch(hasCall, active => {
               :aria-label="incoming ? TEXT.reject : TEXT.hangup"
               class="jrc-hangup-button mx-auto flex items-center justify-center rounded-full bg-red-500 text-white shadow-lg shadow-red-950/40 transition hover:brightness-110 disabled:opacity-60"
               :class="{ '!mt-3 !size-12': compact }"
-              :disabled="!hasCall && !incoming"
-              @click="incoming ? reject() : hangup()"
+              :disabled="phoneActionPending || (!hasCall && !incoming)"
+              @click="runPhoneAction(incoming ? reject : hangup)"
             >
               <span class="i-lucide-phone-off size-7" />
             </button>
@@ -918,19 +1079,19 @@ watch(hasCall, active => {
             >
               <span class="flex items-center gap-1">
                 <span class="i-lucide-bar-chart-3 text-emerald-400" />
-                {{ TEXT.codec }}
+                {{ t('SOFTPHONE.INBOX.REGISTRATION') }}: {{ registrationLabel }}
               </span>
               <span
                 class="flex items-center gap-1 border-l border-white/20 pl-4"
               >
                 <span class="size-2 rounded-full bg-emerald-400" />
-                {{ TEXT.quality }}
+                {{ t('SOFTPHONE.INBOX.CONNECTION') }}: {{ transport }}
               </span>
               <span
                 class="flex items-center gap-1 border-l border-white/20 pl-4"
               >
                 <span class="i-lucide-wifi text-emerald-400" />
-                {{ TEXT.network }}
+                {{ status }}
               </span>
             </div>
           </template>

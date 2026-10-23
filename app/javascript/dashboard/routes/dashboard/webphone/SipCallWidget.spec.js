@@ -3,6 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { mockRoute, mockRouter } from 'vue-router';
 import { mockSipState } from './useSipWebphone';
 import SipCallWidget from './SipCallWidget.vue';
+import { ref as vueRef } from 'vue';
+import { useEmbeddedSoftphone } from './useEmbeddedSoftphone';
 
 vi.mock('vue-router', async () => {
   const { reactive } = await import('vue');
@@ -19,6 +21,7 @@ vi.mock('vue-router', async () => {
 vi.mock('./useSipWebphone', async () => {
   const { ref, shallowRef } = await import('vue');
   const sipState = {
+    accountId: ref(1),
     status: ref('Chamada recebida'),
     incoming: ref(false),
     established: ref(false),
@@ -36,7 +39,8 @@ describe('SipCallWidget', () => {
   let wrapper;
   beforeEach(() => {
     mockRoute.name = 'ramal_index';
-    mockRoute.params = {};
+    mockRoute.params = { accountId: '1' };
+    mockSipState.accountId.value = 1;
     mockRouter.replace.mockClear();
     mockRouter.replace.mockResolvedValue(undefined);
     mockSipState.incoming.value = false;
@@ -84,6 +88,52 @@ describe('SipCallWidget', () => {
     await wrapper.vm.$nextTick();
 
     expect(wrapper.find('aside').exists()).toBe(false);
+  });
+  it('never renders controls or audio for the previously active Account', async () => {
+    mockRoute.name = 'inbox_view';
+    mockRoute.params = { accountId: '2' };
+    mockSipState.incoming.value = true;
+    wrapper = mount(SipCallWidget);
+    await flushPromises();
+    expect(wrapper.find('aside').exists()).toBe(false);
+    expect(wrapper.find('audio').exists()).toBe(false);
+    expect(Audio.mock.results[0].value.play).not.toHaveBeenCalled();
+  });
+  it('rechecks Account identity before handling a stale answer click', async () => {
+    mockSipState.incoming.value = true;
+    wrapper = mount(SipCallWidget);
+    const button = wrapper
+      .findAll('button')
+      .find(item => item.text() === 'Atender');
+    mockRoute.params = { accountId: '2' };
+    await button.trigger('click');
+    expect(mockSipState.answer).not.toHaveBeenCalled();
+  });
+  it('keeps a single global audio renderer and ringtone while embedded controls hide the floating widget', async () => {
+    mockRoute.name = 'inbox_view';
+    mockRoute.params = { accountId: '1' };
+    mockSipState.incoming.value = true;
+    const enabled = vueRef(true);
+    const host = mount({
+      setup() {
+        useEmbeddedSoftphone(vueRef(1), enabled, vi.fn());
+      },
+      template: '<div />',
+    });
+    wrapper = mount(SipCallWidget);
+    await flushPromises();
+    expect(wrapper.find('aside').exists()).toBe(false);
+    expect(wrapper.findAll('audio')).toHaveLength(1);
+    const audio = wrapper.get('audio').element;
+    expect(Audio).toHaveBeenCalledOnce();
+    const ringtone = Audio.mock.results[0].value;
+    expect(ringtone.play).toHaveBeenCalledOnce();
+    enabled.value = false;
+    await flushPromises();
+    expect(wrapper.find('aside').exists()).toBe(true);
+    expect(wrapper.get('audio').element).toBe(audio);
+    expect(ringtone.play).toHaveBeenCalledOnce();
+    host.unmount();
   });
 
   it('opens Ramal on desktop account entry without reloading the renderer', async () => {

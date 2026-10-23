@@ -37,6 +37,7 @@ const page = ref(1);
 const status = ref('idle');
 const feedback = ref('idle');
 const saving = ref(false);
+const editorTab = ref('general');
 let epoch = 0;
 let controller;
 const mayPublish = computed(
@@ -71,7 +72,8 @@ const updateSlaMonitoring = policy => {
   definition.value = JSON.stringify(value, null, 2);
 };
 const fresh = () => {
-  const turn = ++epoch;
+  epoch += 1;
+  const turn = epoch;
   controller?.abort();
   controller = new AbortController();
   return { turn, context: session.state.context, signal: controller.signal };
@@ -107,6 +109,7 @@ const load = async () => {
   }
 };
 const reset = () => {
+  editorTab.value = 'general';
   name.value = '';
   enabled.value = false;
   version.value = 0;
@@ -126,12 +129,19 @@ watch([unitId, () => session.state.context, () => session.state.status], () => {
 });
 watch(page, load);
 const edit = item => {
+  editorTab.value = 'general';
   name.value = item.name;
   enabled.value = item.enabled;
   version.value = item.version;
   serviceId.value = item.service_id || '';
   definition.value = JSON.stringify(item.definition, null, 2);
   feedback.value = 'idle';
+};
+const publicationFeedback = (code, committed, attempted) => {
+  if ([401, 403].includes(code)) return 'denied';
+  if (!committed && code === 409) return 'conflict';
+  if (!committed && code === 422) return 'invalid_input';
+  return attempted ? 'readback_pending' : 'invalid_input';
 };
 const publish = async () => {
   if (!mayPublish.value || !unitId.value || saving.value) return;
@@ -187,19 +197,12 @@ const publish = async () => {
       throw new Error('Readback mismatch');
     edit(confirmed);
     feedback.value = 'confirmed';
+    saving.value = false;
     await load();
   } catch (error) {
     if (!same(run)) return;
     const code = error.response?.status;
-    feedback.value = [401, 403].includes(code)
-      ? 'denied'
-      : !committed && code === 409
-        ? 'conflict'
-        : !committed && code === 422
-          ? 'invalid_input'
-          : attempted
-            ? 'readback_pending'
-            : 'invalid_input';
+    feedback.value = publicationFeedback(code, committed, attempted);
     if ([401, 403].includes(code)) session.retry();
   } finally {
     if (same(run)) saving.value = false;
@@ -259,15 +262,7 @@ const createService = async () => {
   } catch (error) {
     if (!same(run)) return;
     const code = error.response?.status;
-    feedback.value = [401, 403].includes(code)
-      ? 'denied'
-      : !committed && code === 422
-        ? 'invalid_input'
-        : !committed && code === 409
-          ? 'conflict'
-          : attempted
-            ? 'readback_pending'
-            : 'invalid_input';
+    feedback.value = publicationFeedback(code, committed, attempted);
     if ([401, 403].includes(code)) session.retry();
   } finally {
     if (same(run)) saving.value = false;
@@ -279,6 +274,7 @@ onBeforeUnmount(() => {
   reset();
 });
 </script>
+
 <template>
   <Panel
     v-if="permitted"
@@ -328,69 +324,134 @@ onBeforeUnmount(() => {
         @update:current-page="page = $event"
       />
       <form v-if="mayPublish" class="grid gap-3" @submit.prevent="publish">
-        <ServiceSelect
-          v-model="serviceId"
-          :unit-id="unitId"
-          :disabled="saving"
-        />
-        <Input
-          v-model="name"
-          :disabled="saving"
-          :label="t('JRC_SERVICE_DESK.LIFECYCLE.policy_name')"
-          maxlength="255"
-        />
-        <label class="text-sm"
-          ><input v-model="enabled" type="checkbox" :disabled="saving" />
-          {{ t('JRC_SERVICE_DESK.LIFECYCLE.enable') }}</label
+        <nav
+          class="flex flex-wrap gap-1 border-b border-n-weak pb-3"
+          :aria-label="t('JRC_SERVICE_DESK.LIFECYCLE.configuration')"
         >
-        <p class="text-xs">
-          {{ t('JRC_SERVICE_DESK.LIFECYCLE.version', { version }) }}
-        </p>
+          <Button
+            v-for="tab in ['general', 'lifecycle', 'monitoring', 'review']"
+            :key="tab"
+            type="button"
+            size="sm"
+            :variant="editorTab === tab ? 'solid' : 'ghost'"
+            :label="t(`JRC_SERVICE_DESK.REDESIGN_AUTOMATIONS.tabs.${tab}`)"
+            :disabled="saving"
+            @click="editorTab = tab"
+          />
+        </nav>
+        <div v-show="editorTab === 'general'" class="grid gap-3 md:grid-cols-2">
+          <ServiceSelect
+            v-model="serviceId"
+            :unit-id="unitId"
+            :disabled="saving"
+          />
+          <Input
+            v-model="name"
+            :disabled="saving"
+            :label="t('JRC_SERVICE_DESK.LIFECYCLE.policy_name')"
+            maxlength="255"
+          />
+          <label class="text-sm"
+            ><input v-model="enabled" type="checkbox" :disabled="saving" />
+            {{ t('JRC_SERVICE_DESK.LIFECYCLE.enable') }}</label
+          >
+          <p class="text-xs">
+            {{ t('JRC_SERVICE_DESK.LIFECYCLE.version', { version }) }}
+          </p>
+        </div>
         <LifecycleVisualEditor
+          v-show="editorTab === 'lifecycle'"
           v-model="definition"
           :unit-id="unitId"
           :disabled="saving || !unitId"
         />
-        <details class="rounded-xl border border-n-weak p-3">
-          <summary class="text-sm font-medium cursor-pointer">
-            {{ t('JRC_SERVICE_DESK.EXPERIENCE.advanced_json') }}
-          </summary>
-          <p class="text-xs text-n-slate-11 my-2">
-            {{ t('JRC_SERVICE_DESK.EXPERIENCE.designer.advanced_notice') }}
+        <div v-show="editorTab === 'review'" class="grid gap-3">
+          <p class="text-sm text-n-slate-11">
+            {{ t('JRC_SERVICE_DESK.REDESIGN_AUTOMATIONS.review_help') }}
           </p>
-          <TextArea
-            v-model="definition"
-            :disabled="saving"
-            :max-length="100000"
-            resize
-            :label="t('JRC_SERVICE_DESK.LIFECYCLE.json_definition')"
+          <dl
+            class="grid gap-2 rounded-xl bg-n-slate-2 p-3 text-sm sm:grid-cols-2"
+          >
+            <div>
+              <dt class="text-xs text-n-slate-11">
+                {{ t('JRC_SERVICE_DESK.LIFECYCLE.policy_name') }}
+              </dt>
+              <dd class="m-0">
+                {{ name || t('JRC_SERVICE_DESK.COMMON.no_value') }}
+              </dd>
+            </div>
+            <div>
+              <dt class="text-xs text-n-slate-11">
+                {{ t('JRC_SERVICE_DESK.REDESIGN_AUTOMATIONS.next_version') }}
+              </dt>
+              <dd class="m-0">{{ version + 1 }}</dd>
+            </div>
+          </dl>
+          <details class="rounded-xl border border-n-weak p-3">
+            <summary class="text-sm font-medium cursor-pointer">
+              {{ t('JRC_SERVICE_DESK.EXPERIENCE.advanced_json') }}
+            </summary>
+            <p class="text-xs text-n-slate-11 my-2">
+              {{ t('JRC_SERVICE_DESK.EXPERIENCE.designer.advanced_notice') }}
+            </p>
+            <TextArea
+              v-model="definition"
+              :disabled="saving"
+              :max-length="100000"
+              resize
+              :label="t('JRC_SERVICE_DESK.LIFECYCLE.json_definition')"
+            />
+          </details>
+        </div>
+        <div v-show="editorTab === 'monitoring'" class="grid gap-3">
+          <p v-if="!slaMonitoring" class="text-sm text-n-slate-11">
+            {{ t('JRC_SERVICE_DESK.REDESIGN_AUTOMATIONS.start_lifecycle') }}
+          </p>
+          <ClockThresholdEditor
+            v-if="slaMonitoring"
+            :model-value="slaMonitoring"
+            :unit-id="unitId"
+            :disabled="saving || !unitId"
+            @update:model-value="updateSlaMonitoring"
           />
-        </details>
-        <ClockThresholdEditor
-          v-if="slaMonitoring"
-          :model-value="slaMonitoring"
-          :unit-id="unitId"
-          :disabled="saving || !unitId"
-          @update:model-value="updateSlaMonitoring"
-        />
-        <ClockAutomationFields
-          v-if="slaMonitoring"
-          :model-value="slaMonitoring"
-          :unit-id="unitId"
-          :disabled="saving || !unitId"
-          @update:model-value="updateSlaMonitoring"
-        />
-        <Button
-          type="submit"
-          :disabled="
-            saving ||
-            feedback === 'readback_pending' ||
-            !unitId ||
-            !definition ||
-            !name
-          "
-          :label="t('JRC_SERVICE_DESK.LIFECYCLE.publish')"
-        />
+          <ClockAutomationFields
+            v-if="slaMonitoring"
+            :model-value="slaMonitoring"
+            :unit-id="unitId"
+            :disabled="saving || !unitId"
+            @update:model-value="updateSlaMonitoring"
+          />
+        </div>
+        <div
+          class="flex flex-wrap justify-end gap-2 border-t border-n-weak pt-3"
+        >
+          <Button
+            v-if="editorTab !== 'review'"
+            type="button"
+            variant="outline"
+            :disabled="saving"
+            :label="t('JRC_SERVICE_DESK.COMMON.next')"
+            @click="
+              editorTab = ['general', 'lifecycle', 'monitoring', 'review'][
+                ['general', 'lifecycle', 'monitoring', 'review'].indexOf(
+                  editorTab
+                ) + 1
+              ]
+            "
+          />
+          <Button
+            v-else
+            type="submit"
+            :disabled="
+              saving ||
+              feedback === 'readback_pending' ||
+              !unitId ||
+              !definition ||
+              !name
+            "
+            :label="t('JRC_SERVICE_DESK.LIFECYCLE.publish')"
+          />
+        </div>
       </form>
       <form
         v-if="mayCreateService"

@@ -1,14 +1,16 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Button from 'dashboard/components-next/button/Button.vue';
 import { useInteractionComposer } from '../composables/useInteractionComposer';
 import { communicationLabels } from '../helpers/communicationLabels';
 import { v2Labels } from '../helpers/v2Labels';
+import { validInteractionFiles } from '../helpers/detailExperience';
 
 const props = defineProps({
   ticket: { type: Object, required: true },
   previous: { type: Object, default: null },
+  mode: { type: String, default: 'all' },
 });
 const emit = defineEmits(['updated']);
 const { t } = useI18n();
@@ -25,6 +27,8 @@ const {
   preview,
   busy,
   feedback,
+  allowedAudiences,
+  uploadProgress,
   valid,
   review,
   submit,
@@ -35,6 +39,9 @@ const {
     },
     get previous() {
       return props.previous;
+    },
+    get mode() {
+      return props.mode;
     },
   },
   emit
@@ -52,6 +59,11 @@ const channelReason = channel =>
   channel.reason ||
   channel.destinations.find(destination => destination.reason)?.reason ||
   'channel_unavailable';
+const filesValid = computed(() => validInteractionFiles(files.value));
+watch(files, selected => {
+  if (props.mode === 'files' && selected.length && !body.value.trim())
+    body.value = t('JRC_SERVICE_DESK.REDESIGN_DETAIL.attached_files');
+});
 </script>
 
 <template>
@@ -60,6 +72,15 @@ const channelReason = channel =>
       {{ t('JRC_SERVICE_DESK.R2.unavailable') }}
     </p>
     <template v-else>
+      <p
+        v-if="mode === 'internal'"
+        class="rounded-lg bg-n-amber-3 p-3 text-sm text-n-amber-11"
+      >
+        {{ t('JRC_SERVICE_DESK.REDESIGN_DETAIL.internal_help') }}
+      </p>
+      <p v-else-if="mode === 'conversation'" class="text-sm text-n-slate-11">
+        {{ t('JRC_SERVICE_DESK.REDESIGN_DETAIL.communication_help') }}
+      </p>
       <label class="text-sm">
         {{ t('JRC_SERVICE_DESK.COCKPIT.audience') }}
         <select
@@ -67,30 +88,83 @@ const channelReason = channel =>
           :disabled="busy"
           class="w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
         >
-          <option
-            v-for="value in options.audiences"
-            :key="value"
-            :value="value"
-          >
+          <option v-for="value in allowedAudiences" :key="value" :value="value">
             {{ values.visibility[value] }}
           </option>
         </select>
       </label>
       <textarea
         v-model="body"
-        :aria-label="t('JRC_SERVICE_DESK.FIELDS.note')"
+        :aria-label="
+          t(
+            mode === 'internal' || mode === 'all'
+              ? 'JRC_SERVICE_DESK.FIELDS.note'
+              : 'JRC_SERVICE_DESK.REDESIGN_DETAIL.message'
+          )
+        "
         :disabled="busy"
         maxlength="50000"
         rows="5"
         class="w-full rounded-lg border border-n-weak bg-n-solid-1 p-3"
       />
-      <input
-        type="file"
-        multiple
-        :aria-label="t('JRC_SERVICE_DESK.TICKET.upload')"
-        :disabled="busy"
-        @change="files = Array.from($event.target.files)"
-      />
+      <label
+        class="inline-flex w-fit cursor-pointer rounded-lg border border-n-weak bg-n-solid-1 px-3 py-2 text-sm focus-within:ring-2 focus-within:ring-n-blue-9"
+      >
+        {{ t('JRC_SERVICE_DESK.TICKET.upload') }}
+        <input
+          type="file"
+          class="sr-only"
+          multiple
+          :aria-label="t('JRC_SERVICE_DESK.TICKET.upload')"
+          :disabled="busy"
+          @change="files = Array.from($event.target.files)"
+        />
+      </label>
+      <p class="text-xs text-n-slate-11">
+        {{ t('JRC_SERVICE_DESK.REDESIGN_DETAIL.file_limits') }}
+      </p>
+      <ul v-if="files.length" class="grid gap-1">
+        <li
+          v-for="(file, index) in files"
+          :key="index"
+          class="flex items-center justify-between gap-2 text-xs"
+        >
+          <span class="break-all"
+            >{{ file.name }} ({{
+              t('JRC_SERVICE_DESK.REDESIGN_DETAIL.file_size_kb', {
+                size: Math.ceil(file.size / 1024),
+              })
+            }})</span
+          >
+          <Button
+            type="button"
+            size="xs"
+            color="slate"
+            variant="ghost"
+            :disabled="busy"
+            :label="t('JRC_SERVICE_DESK.REDESIGN_DETAIL.remove_selection')"
+            @click="files = files.filter((_, at) => at !== index)"
+          />
+        </li>
+      </ul>
+      <p v-if="!filesValid" role="alert" class="text-sm text-n-ruby-11">
+        {{ t('JRC_SERVICE_DESK.REDESIGN_DETAIL.invalid_files') }}
+      </p>
+      <div v-if="busy && uploadProgress !== null" class="grid gap-1">
+        <progress
+          :value="uploadProgress"
+          max="100"
+          class="w-full"
+          :aria-label="t('JRC_SERVICE_DESK.REDESIGN_DETAIL.uploading')"
+        />
+        <p class="text-xs">
+          {{
+            t('JRC_SERVICE_DESK.REDESIGN_DETAIL.upload_progress', {
+              value: uploadProgress,
+            })
+          }}
+        </p>
+      </div>
       <label v-if="previous" class="text-sm">
         {{ t('JRC_SERVICE_DESK.COCKPIT.publication_reason') }}
         <input

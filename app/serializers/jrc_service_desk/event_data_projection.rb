@@ -5,12 +5,14 @@ class JrcServiceDesk::EventDataProjection
   TASK_EVENTS = %w[task_created task_updated].freeze
   DELIVERY_EVENTS = %w[notification_delivery_updated notification_resend_requested].freeze
   CAPABILITIES = {
+    'task_deleted' => :tasks_view, 'note_withdrawn' => :notes_view, 'attachment_withdrawn' => :notes_view,
     'operational_rule_applied' => :sla_view,
     'note_added' => :notes_view, 'approval_requested' => :approvals_view, 'approval_decided' => :approvals_view,
     'incident_linked' => :incidents_manage, 'incident_updated' => :incidents_manage,
     'sla_snapshot_recorded' => :sla_view, 'first_response_recorded' => :sla_view,
     'clock_threshold_reached' => :sla_view, 'clock_violated' => :sla_view, 'approval_escalated' => :approvals_view,
-    'resource_linked' => :incidents_manage, 'resource_updated' => :incidents_manage, 'resource_archived' => :incidents_manage
+    'resource_linked' => :incidents_manage, 'resource_unlinked' => :incidents_manage,
+    'resource_updated' => :incidents_manage, 'resource_archived' => :incidents_manage
   }.freeze
 
   def initialize(context)
@@ -72,6 +74,7 @@ class JrcServiceDesk::EventDataProjection
   def redact(record, data)
     allowed = @context.capability?(:customers_view) && JrcCustomers::DirectoryPolicy.new(@context.to_h, :directory).access?
     data.delete('company_id') unless allowed
+    %w[requester_id contract_id service_fields].each { |key| data.delete(key) } unless @context.capability?(:customers_view)
     data.delete('cycle_id') if record.event_type == 'lifecycle_transitioned' && !@context.capability?(:sla_view)
     data
   end

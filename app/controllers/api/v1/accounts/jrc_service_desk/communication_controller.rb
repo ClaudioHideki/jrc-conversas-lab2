@@ -19,6 +19,7 @@ class Api::V1::Accounts::JrcServiceDesk::CommunicationController < Api::V1::Acco
   end
 
   def update_recipient_preferences
+    authorize strict_ticket, :view_customer?
     values = body_values(%w[channels])
     channels = ::JrcServiceDesk::ContactNotificationPreferences.new(user_context: pundit_user)
                                                               .call(ticket_id: strict_ticket.id, channels: values.fetch('channels'))
@@ -36,7 +37,7 @@ class Api::V1::Accounts::JrcServiceDesk::CommunicationController < Api::V1::Acco
 
   def timeline
     authorize strict_ticket, :show?
-    values = ::JrcServiceDesk::Input.attributes(query_values, %w[cursor per_page])
+    values = ::JrcServiceDesk::Input.attributes(query_values, %w[cursor per_page view event_type author_id date_from date_to])
     result = ::JrcServiceDesk::TicketTimeline.new(ticket: strict_ticket, context: operational_context).call(**values.symbolize_keys)
     render json: base_payload.merge(ticket_id: strict_ticket.id.to_s, unit_id: strict_ticket.unit_id.to_s, timeline: result)
   end
@@ -51,7 +52,7 @@ class Api::V1::Accounts::JrcServiceDesk::CommunicationController < Api::V1::Acco
     rows = ::JrcServiceDesk::NotificationPolicyVersion.where(account_id: context.account.id, unit_id: unit.id).order(:event_type, :channel,
                                                                                                                      version: :desc)
     render json: base_payload.merge(unit_id: unit.id.to_s, event_types: ::JrcServiceDesk::NotificationEvent::TYPES,
-                                    policies: rows.map { |row| policy_payload(row) })
+                                    policies: rows.map { |row| policy_payload(row) }, inboxes: authorized_inboxes(context))
   end
 
   def timeline_attachment
@@ -112,11 +113,22 @@ class Api::V1::Accounts::JrcServiceDesk::CommunicationController < Api::V1::Acco
       execution_account_user_id: row.published_by_membership.account_user_id.to_s, created_at: row.created_at.iso8601(6), digest: row.digest }
   end
 
+  def authorized_inboxes(context)
+    ::JrcServiceDesk::NativeExecutionContext.with(context.to_h) do
+      context.account.inboxes.order(:name, :id).filter_map do |inbox|
+        next unless Pundit.policy!(context.to_h, inbox).show?
+
+        channel = ::JrcServiceDesk::NotificationEngine.channel(inbox)
+        { id: inbox.id.to_s, name: inbox.name, channel: channel } if channel
+      end
+    end
+  end
+
   def preview_invalid
-    render json: { code: 'preview_invalid', error: 'Publication preview expired or changed; review the current preview' }, status: :conflict
+    render json: { code: 'preview_invalid', error: 'A prévia expirou ou foi alterada. Revise a prévia atual antes de confirmar.' }, status: :conflict
   end
 
   def scan_unavailable
-    render json: { code: 'attachment_scan_unavailable', error: 'Attachment awaits a verified malware scan' }, status: :conflict
+    render json: { code: 'attachment_scan_unavailable', error: 'O anexo aguarda a verificação de segurança.' }, status: :conflict
   end
 end

@@ -121,18 +121,18 @@ class Api::V1::Accounts::JrcServiceDesk::StructureController < Api::V1::Accounts
   end
 
   def render_unauthorized(_message)
-    render json: { code: 'forbidden', error: 'Structural authority required' }, status: :forbidden
+    render json: { code: 'forbidden', error: 'Você não tem permissão para administrar a estrutura.' }, status: :forbidden
   end
 
   def render_not_found_error(_message)
-    render json: { code: 'not_found', error: 'Record unavailable' }, status: :not_found
+    render json: { code: 'not_found', error: 'Registro indisponível.' }, status: :not_found
   end
 
   def bad_input(_error)
-    render json: { code: 'invalid_input', error: 'Invalid structural request' }, status: :unprocessable_entity
+    render json: { code: 'invalid_input', error: 'Dados inválidos para esta alteração de estrutura.' }, status: :unprocessable_entity
   end
 
   def conflict(_error)
-    render json: { code: 'conflict', error: 'Refresh the record or recover the same request' }, status: :conflict
+    render json: { code: 'conflict', error: 'Atualize o registro ou retome a mesma solicitação.' }, status: :conflict
   end
 end

@@ -9,6 +9,7 @@ import Button from 'dashboard/components-next/button/Button.vue';
 const props = defineProps({
   query: { type: Object, default: () => ({}) },
   breakdown: { type: Boolean, default: false },
+  compact: { type: Boolean, default: false },
 });
 const emit = defineEmits(['status-filter', 'metric-filter']);
 const { t } = useI18n();
@@ -18,17 +19,18 @@ const result = computed(
   () => session.operations?.resource(key) || { status: 'idle', data: null }
 );
 const metrics = computed(() =>
-  ['total', 'active', 'open', 'waiting', 'resolved', 'closed', 'cancelled'].map(
-    name => {
-      let value = null;
-      if (result.value.status === 'ready') {
-        value = Object.hasOwn(result.value.data.phases, name)
-          ? result.value.data.phases[name]
-          : result.value.data[name];
-      }
-      return { name, value };
+  (props.compact
+    ? ['total', 'active', 'waiting', 'resolved']
+    : ['total', 'active', 'open', 'waiting', 'resolved']
+  ).map(name => {
+    let value = null;
+    if (result.value.status === 'ready') {
+      value = Object.hasOwn(result.value.data.phases, name)
+        ? result.value.data.phases[name]
+        : result.value.data[name];
     }
-  )
+    return { name, value };
+  })
 );
 const load = () => {
   if (
@@ -55,10 +57,14 @@ onBeforeUnmount(() => session.operations?.cancel(key));
     v-if="session.state.context?.capabilities?.dashboard?.index === true"
     class="mb-4"
   >
-    <div class="grid grid-cols-2 gap-3 mb-4 md:grid-cols-3 2xl:grid-cols-4">
+    <div
+      class="mb-3 grid grid-cols-2 gap-3"
+      :class="compact ? 'lg:grid-cols-4' : 'xl:grid-cols-5'"
+    >
       <KpiCard
         v-for="metric in metrics"
         :key="metric.name"
+        :compact="compact"
         :label="t(`JRC_SERVICE_DESK.OPS.KPI.${metric.name}`)"
         :value="metric.value"
         :tone="metricTones[metric.name]"
@@ -74,10 +80,16 @@ onBeforeUnmount(() => session.operations?.cancel(key));
       retry
       @retry="load"
     />
-    <p v-if="result.status === 'ready'" class="text-xs text-n-slate-11">
+    <p
+      v-if="result.status === 'ready' && !compact"
+      class="text-xs text-n-slate-11"
+    >
       {{ t('JRC_SERVICE_DESK.OPS.kpi_rule') }}
     </p>
-    <div v-if="breakdown && result.status === 'ready'" class="grid gap-2 my-4">
+    <div
+      v-if="breakdown && result.status === 'ready'"
+      class="mb-4 grid gap-2 rounded-xl border border-n-weak bg-n-solid-1 p-3"
+    >
       <h3 class="text-sm font-semibold">
         {{ t('JRC_SERVICE_DESK.OVERVIEW.distribution') }}
       </h3>

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class JrcServiceDesk::UpdateTicketService < JrcServiceDesk::BaseService
-  FIELDS = %w[title description priority_id category_id ticket_type_id subcategory_id contract_id service_fields].freeze
+  FIELDS = %w[title description requester_id priority_id category_id ticket_type_id subcategory_id contract_id service_fields].freeze
 
   def call(ticket_id:, attributes:, expected_lock_version:, execution_command: nil)
     with_ticket(ticket_id, :show?) do |ticket|
@@ -14,6 +14,7 @@ class JrcServiceDesk::UpdateTicketService < JrcServiceDesk::BaseService
       apply_values(ticket, values)
       next ticket unless ticket.changed?
 
+      preserve_linked_customer!(ticket)
       ticket.save!
       append_event!(ticket, 'ticket_updated', ticket.saved_changes.slice(*editable_fields).merge('origin' => origin))
       ticket
@@ -21,6 +22,14 @@ class JrcServiceDesk::UpdateTicketService < JrcServiceDesk::BaseService
   end
 
   private
+
+  def preserve_linked_customer!(ticket)
+    return unless ticket.will_save_change_to_requester_id? || ticket.will_save_change_to_company_id?
+    return unless JrcOperations::Link.where(account_id: ticket.account_id, ticket_id: ticket.id).exists?
+
+    raise JrcServiceDesk::LinkedContextConflict,
+          'Desvincule os projetos e as tarefas em Relacionamentos antes de alterar o solicitante ou a empresa deste chamado.'
+  end
 
   def editable_fields
     context.account.feature_enabled?('jrc_customer_master') ? FIELDS + ['company_id'] : FIELDS
@@ -36,7 +45,7 @@ class JrcServiceDesk::UpdateTicketService < JrcServiceDesk::BaseService
   def authorize_update!(ticket, values)
     authorize!(ticket, :update?) if (values.keys - ['priority_id']).any?
     authorize!(ticket, :change_priority?) if values.key?('priority_id')
-    authorize!(ticket, :view_customer?) if values.keys.intersect?(%w[contract_id service_fields])
+    authorize!(ticket, :view_customer?) if values.keys.intersect?(%w[requester_id contract_id service_fields])
     return unless values.key?('contract_id') && ticket.contract_id
     return if JrcServiceDesk::CatalogueContracts.new(context).scope.exists?(id: ticket.contract_id)
 
@@ -45,10 +54,15 @@ class JrcServiceDesk::UpdateTicketService < JrcServiceDesk::BaseService
 
   def apply_values(ticket, values)
     apply_text_values(ticket, values)
+    if values.key?('requester_id')
+      requester = Contact.where(account_id: context.account.id).find(JrcServiceDesk::Input.id(values['requester_id']))
+      authorize!(requester, :show?)
+      ticket.requester = requester
+    end
     ticket.priority = reference(JrcServiceDesk::Priority, values['priority_id'], ticket.unit) if values.key?('priority_id')
     ticket.category = reference(JrcServiceDesk::Category, values['category_id'], ticket.unit) if values.key?('category_id')
     apply_company(ticket, values['company_id']) if values.key?('company_id')
-    bind_catalogue(ticket, values) if values.keys.intersect?(%w[ticket_type_id subcategory_id contract_id category_id company_id])
+    bind_catalogue(ticket, values) if values.keys.intersect?(%w[ticket_type_id subcategory_id contract_id category_id company_id requester_id])
     ticket.service_fields = values['service_fields'] if values.key?('service_fields')
   end
 

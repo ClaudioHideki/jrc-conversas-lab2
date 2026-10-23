@@ -60,7 +60,7 @@ class JrcServiceDesk::NotificationExecution
 
   def reject(reason)
     @row.with_lock { @row.update!(state: 'blocked', reason: reason) }
-    @message.update!(status: :failed, external_error: 'Service Desk delivery blocked by current policy')
+    @message.update!(status: :failed, external_error: 'Envio do Service Desk bloqueado pela política vigente')
     false
   end
 

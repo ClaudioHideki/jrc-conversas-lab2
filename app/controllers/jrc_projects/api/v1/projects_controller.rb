@@ -51,6 +51,30 @@ module JrcProjects
           )
           render json: { data: ProjectSerializer.one(project, account_user: Current.account_user, details: true) }
         end
+
+        def destroy
+          project = scoped_project
+          # Link creation takes the account lock first; keep the same lock order.
+          Current.account.with_lock do
+            project.with_lock do
+              authorize_capability!('projects.project.delete', project: project)
+              assert_lock!(project, params[:lock_version])
+              if project.operation_links.exists? || JrcRelationship::SuccessPlan.where(account_id: Current.account.id, project_id: project.id).exists?
+                raise ArgumentError, 'Remova os vínculos com chamados, CRM, conversas e planos de sucesso antes de excluir o projeto.'
+              end
+              if project.time_entries.exists?
+                raise ArgumentError, 'O projeto possui apontamentos de horas. Revise os apontamentos antes de excluir; horas aprovadas devem ser preservadas.'
+              end
+
+              before = project.attributes
+              project.destroy!
+              AuditEvent.record!(account: Current.account, actor: Current.user, action: 'projects.project.deleted', auditable: project,
+                                 before_data: before, correlation_id: correlation_id)
+            end
+          end
+          head :no_content
+        end
+
         private
         def project_params
           params.require(:project).permit(:key, :name, :description, :visibility, :contact_id, :starts_on, :due_on, :priority, *(Current.account.feature_enabled?('jrc_customer_master') ? [:company_id] : []))

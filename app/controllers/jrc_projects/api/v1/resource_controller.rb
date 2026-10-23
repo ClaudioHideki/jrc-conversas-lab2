@@ -6,7 +6,9 @@ module JrcProjects
         def index
           project = resource_project
           authorize_read!(project)
-          records, meta = pagination(scope_for(project).order(created_at: :desc))
+          scope = scope_for(project)
+          scope = catalog_model == Phase ? scope.order(:position, :id) : scope.order(created_at: :desc)
+          records, meta = pagination(scope)
           render json: { data: records, meta: meta }
         end
         def show
@@ -65,9 +67,15 @@ module JrcProjects
           project ? project.with_lock(&block) : catalog_model.transaction(&block)
         end
         def audit_change!(record, action, before: {}, after: {})
-          return unless record.is_a?(Milestone) || record.is_a?(ProjectMember)
+          return unless record.is_a?(Milestone) || record.is_a?(ProjectMember) || record.is_a?(Phase)
 
-          resource = record.is_a?(Milestone) ? 'milestone' : 'member'
+          resource = if record.is_a?(Milestone)
+                       'milestone'
+                     elsif record.is_a?(Phase)
+                       'phase'
+                     else
+                       'member'
+                     end
           AuditEvent.record!(account: Current.account, actor: Current.user, action: "projects.#{resource}.#{action}", auditable: record,
                              before_data: before, after_data: after, correlation_id: correlation_id)
         end
