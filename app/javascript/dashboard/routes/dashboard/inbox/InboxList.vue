@@ -5,6 +5,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useStore, useMapGetter } from 'dashboard/composables/store';
 import wootConstants from 'dashboard/constants/globals';
 import { FEATURE_FLAGS } from 'dashboard/featureFlags';
+import { hasPermissions } from 'dashboard/helper/permissionsHelper';
 import {
   CHANNEL_TYPES,
   getInboxChannelKey,
@@ -56,6 +57,19 @@ const currentAccount = computed(() =>
 
 const accountPermissions = computed(
   () => currentAccount.value?.permissions || []
+);
+// SIP already has its own authorized route and credential checks. Its central
+// presentation must not depend on enabling the external Contact Center API.
+const hasSoftphoneAccess = computed(
+  () =>
+    Boolean(currentAccount.value) &&
+    hasPermissions(
+      router.resolve({
+        name: 'ramal_index',
+        params: { accountId: accountId.value },
+      }).meta.permissions,
+      accountPermissions.value
+    )
 );
 
 const canManageAssignments = computed(() =>
@@ -123,7 +137,7 @@ const channelFilterOptions = computed(() => [
     icon: 'i-lucide-inbox',
     iconClass: 'text-n-blue-10',
   },
-  ...(hasContactCenter.value
+  ...(hasContactCenter.value || hasSoftphoneAccess.value
     ? [
         {
           key: 'voice',
@@ -365,6 +379,7 @@ onBeforeUnmount(() => {
     :context="contactCenterContext"
     :loading="isCurrentListLoading"
     :ready="!isInitializing"
+    :softphone-access="hasSoftphoneAccess"
     :voice-error="voiceError"
     :conversation-error="channelFilter !== 'voice' && conversationError"
     :can-load-more="canLoadMore"

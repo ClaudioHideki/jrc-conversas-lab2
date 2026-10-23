@@ -1,13 +1,19 @@
 import { mount, flushPromises } from '@vue/test-utils';
 import { createStore } from 'vuex';
+import { createPinia } from 'pinia';
 import InboxList from '../InboxList.vue';
+import { routes as webphoneRoutes } from '../../webphone/routes';
 
 vi.mock('vue-router', () => ({
   useRoute: () => ({
     query: { channel: 'whatsapp' },
     params: { accountId: '1' },
   }),
-  useRouter: () => ({ replace: vi.fn(), push: vi.fn() }),
+  useRouter: () => ({
+    replace: vi.fn(),
+    push: vi.fn(),
+    resolve: target => webphoneRoutes.find(row => row.name === target.name),
+  }),
 }));
 vi.mock(
   'dashboard/components/widgets/conversation/ConversationCard.vue',
@@ -55,7 +61,7 @@ describe('InboxList channel pagination', () => {
       const dispatch = vi.spyOn(store, 'dispatch').mockResolvedValue();
       const wrapper = mount(InboxList, {
         global: {
-          plugins: [store],
+          plugins: [store, createPinia()],
           stubs: {
             Dialog: { methods: { open() {}, close() {} }, template: '<div />' },
             RouterLink: { template: '<a><slot /></a>' },

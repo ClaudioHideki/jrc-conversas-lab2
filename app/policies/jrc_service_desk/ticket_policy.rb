@@ -24,6 +24,10 @@ class JrcServiceDesk::TicketPolicy < JrcServiceDesk::OperationalPolicy
     end
   end
 
+  def destroy?
+    show? && record_unit_allowed? && operational_context.administrator?
+  end
+
   # LifecycleActionPolicy and the pinned policy authorize individual transitions.
   def transition?
     false
@@ -34,7 +38,7 @@ class JrcServiceDesk::TicketPolicy < JrcServiceDesk::OperationalPolicy
       context = operational_context
       return scope.none unless context.capability?(:tickets_view)
 
-      records = scope.where(account_id: context.account.id, unit_id: context.unit_scope.select(:id))
+      records = JrcServiceDesk::RecordWithdrawal.excluding(scope.where(account_id: context.account.id, unit_id: context.unit_scope.select(:id)), :ticket)
       return records if context.capability?(:tickets_view_all) # Always within the current Account and authorized view scope.
 
       memberships = context.active_memberships.select(:id)

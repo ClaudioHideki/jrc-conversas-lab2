@@ -1,12 +1,18 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { defineComponent, reactive } from 'vue';
+import { defineComponent, reactive, ref } from 'vue';
 import { createStore } from 'vuex';
+import { createPinia } from 'pinia';
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import { INBOX_TYPES } from 'dashboard/helper/inbox';
 import JrcContactCenterAPI from 'dashboard/api/jrcContactCenter';
 import InboxList from './InboxList.vue';
+import { routes as webphoneRoutes } from '../webphone/routes';
+import { openEmbeddedSoftphone } from '../webphone/useEmbeddedSoftphone';
 
-const mocks = vi.hoisted(() => ({ route: null, router: null }));
+const mocks = vi.hoisted(() => ({ route: null, router: null, sip: null }));
+vi.mock('dashboard/routes/dashboard/webphone/useSipWebphone', () => ({
+  useSipWebphone: () => mocks.sip,
+}));
 vi.mock('vue-router', async importOriginal => ({
   ...(await importOriginal()),
   useRoute: () => mocks.route,
@@ -33,7 +39,7 @@ let store;
 const mountInbox = () =>
   mount(InboxList, {
     global: {
-      plugins: [store],
+      plugins: [store, createPinia()],
       stubs: {
         Dialog: { methods: { open() {}, close() {} }, template: '<div />' },
         RouterLink: {
@@ -57,6 +63,35 @@ const mountInbox = () =>
   });
 
 describe('omnichannel inbox', () => {
+  it('keeps Voice and the central dialer for an authorized SIP extension when Contact Center is off', async () => {
+    store.state.feature = false;
+    const wrapper = mountInbox();
+    await flushPromises();
+    expect(wrapper.find('[data-channel="voice"]').exists()).toBe(true);
+    expect(
+      wrapper.findAll('[data-channel]')[0].attributes('data-channel')
+    ).toBe('voice');
+    expect(openEmbeddedSoftphone(1, '1411')).toBe(true);
+    await flushPromises();
+    expect(wrapper.get('[data-central-voice]').isVisible()).toBe(true);
+    expect(wrapper.get('[data-central-dialer] input').element.value).toBe(
+      '1411'
+    );
+    expect(mocks.sip.call).not.toHaveBeenCalled();
+    expect(JrcContactCenterAPI.calls).not.toHaveBeenCalled();
+    expect(JrcContactCenterAPI.context).not.toHaveBeenCalled();
+    expect(JrcContactCenterAPI.agentState).not.toHaveBeenCalled();
+  });
+  it('does not expose SIP presentation to an Account member without the existing webphone permission', async () => {
+    store.state.feature = false;
+    store.state.currentUser.accounts[0].permissions = ['contact_manage'];
+    const wrapper = mountInbox();
+    await flushPromises();
+    expect(wrapper.find('[data-channel="voice"]').exists()).toBe(false);
+    expect(openEmbeddedSoftphone(1)).toBe(false);
+    expect(wrapper.find('[data-inbox-softphone]').exists()).toBe(false);
+    expect(JrcContactCenterAPI.context).not.toHaveBeenCalled();
+  });
   it('uses the HOYA workspace without enabling Call Center or requesting voice data', async () => {
     store.state.feature = false;
     const wrapper = mountInbox();
@@ -70,6 +105,40 @@ describe('omnichannel inbox', () => {
     expect(JrcContactCenterAPI.agentState).not.toHaveBeenCalled();
   });
   beforeEach(() => {
+    mocks.sip = Object.fromEntries(
+      Object.entries({
+        accountId: 1,
+        callId: '',
+        incoming: false,
+        hasCall: false,
+        established: false,
+        held: false,
+        muted: false,
+        holdPending: false,
+        transferring: false,
+        errorMessage: '',
+        credential: { extension: '1410' },
+        remoteNumber: '',
+        duration: '',
+        destination: '',
+        sessionState: '',
+        configured: true,
+        registered: true,
+        extensionEnabled: true,
+        connecting: false,
+      }).map(([key, value]) => [key, ref(value)])
+    );
+    [
+      'call',
+      'answer',
+      'reject',
+      'hangup',
+      'setMuted',
+      'setHold',
+      'pressKey',
+    ].forEach(key => {
+      mocks.sip[key] = vi.fn();
+    });
     mocks.route = reactive({ params: { accountId: '1' }, query: {} });
     mocks.router = {
       replace: vi.fn(async target => {
@@ -77,6 +146,9 @@ describe('omnichannel inbox', () => {
         mocks.route.params = target.params;
       }),
       push: vi.fn(),
+      resolve: vi.fn(target =>
+        webphoneRoutes.find(row => row.name === target.name)
+      ),
     };
     store = createStore({
       state: () => ({
@@ -341,17 +413,18 @@ describe('omnichannel inbox', () => {
     expect(wrapper.text()).not.toContain('PEER-CALL');
   });
 
-  it('keeps voice unavailable when the feature is disabled', async () => {
+  it('keeps Contact Center records unavailable while allowing the independently authorized SIP presentation', async () => {
     store.state.feature = false;
     const wrapper = mountInbox();
     await flushPromises();
     expect(JrcContactCenterAPI.calls).not.toHaveBeenCalled();
-    expect(wrapper.text()).not.toContain(
-      'JRC_CONTACT_CENTER.INBOX.CHANNELS.VOICE'
-    );
+    expect(JrcContactCenterAPI.context).not.toHaveBeenCalled();
+    expect(wrapper.text()).not.toContain(call.ani);
+    expect(wrapper.find('[data-channel="voice"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="call-workspace"]').exists()).toBe(false);
   });
 
-  it('loads voice after account features arrive and clears it when access is removed', async () => {
+  it('clears Contact Center records when its feature is removed without removing authorized SIP presentation', async () => {
     store.state.feature = false;
     const wrapper = mountInbox();
     await flushPromises();
@@ -368,9 +441,8 @@ describe('omnichannel inbox', () => {
     store.state.feature = false;
     await flushPromises();
     expect(wrapper.text()).not.toContain(call.ani);
-    expect(wrapper.text()).not.toContain(
-      'JRC_CONTACT_CENTER.INBOX.CHANNELS.VOICE'
-    );
+    expect(wrapper.find('[data-channel="voice"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="call-workspace"]').exists()).toBe(false);
   });
 
   it('shows an error instead of an endless voice workspace spinner', async () => {
@@ -397,8 +469,13 @@ describe('omnichannel inbox', () => {
     const voiceGroup = wrapper.get('[data-channel="voice"] > button');
     await voiceGroup.trigger('click');
     expect(voiceGroup.attributes('aria-expanded')).toBe('false');
-    expect(wrapper.text()).not.toContain(call.ani);
+    expect(
+      wrapper.get('[data-channel="voice"] > div').element.style.display
+    ).toBe('none');
     await voiceGroup.trigger('click');
+    expect(
+      wrapper.get('[data-channel="voice"] > div').element.style.display
+    ).toBe('');
     expect(wrapper.text()).toContain(call.ani);
     const tabs = wrapper
       .get('nav[aria-label="JRC_CONTACT_CENTER.INBOX_360.WORKSPACE_TABS"]')

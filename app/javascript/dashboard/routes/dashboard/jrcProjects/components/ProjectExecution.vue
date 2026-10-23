@@ -233,6 +233,38 @@ async function inlineEdit(task, key, event) {
     busy.value = false;
   }
 }
+async function removeTask(task) {
+  if (busy.value || !props.synced || !editable.value || !task.can_delete)
+    return;
+  if (
+    !window.confirm(
+      projectText(
+        'DELETE_TASK_CONFIRM',
+        'Excluir esta tarefa e suas subtarefas? Apontamentos de horas e vínculos com outros registros impedem a exclusão.'
+      )
+    )
+  )
+    return;
+  busy.value = true;
+  error.value = '';
+  notice.value = '';
+  try {
+    await persistTaskMove(
+      () =>
+        request(accountId.value, taskUrl(task), {
+          method: 'delete',
+          data: { lock_version: task.lock_version },
+        }),
+      props.refresh
+    );
+  } catch (err) {
+    error.value = Array.isArray(err.errors)
+      ? err.errors.map(errorMessage).join(' | ')
+      : errorMessage(err);
+  } finally {
+    busy.value = false;
+  }
+}
 async function bulkMove() {
   if (!bulkColumn.value || busy.value || !props.synced || !editable.value)
     return;
@@ -673,6 +705,29 @@ function drop(event, column) {
               {{ destination.name }}
             </option>
           </select>
+          <div
+            v-if="editable && (task.can_update || task.can_delete)"
+            class="mt-2 flex justify-end gap-2"
+          >
+            <button
+              v-if="task.can_update"
+              type="button"
+              class="rounded-md px-2 py-1 text-xs text-n-blue-11 hover:bg-n-blue-2"
+              :disabled="busy || !synced"
+              @click="emit('openTask', task)"
+            >
+              {{ projectText('EDIT', 'Editar') }}
+            </button>
+            <button
+              v-if="task.can_delete"
+              type="button"
+              class="rounded-md px-2 py-1 text-xs text-n-ruby-11 hover:bg-n-ruby-2"
+              :disabled="busy || !synced"
+              @click="removeTask(task)"
+            >
+              {{ projectText('DELETE', 'Excluir') }}
+            </button>
+          </div>
         </article>
         <p
           v-if="!column.tasks.length"
@@ -925,6 +980,21 @@ function drop(event, column) {
                   @click="emit('openTask', task)"
                 >
                   <span class="i-lucide-panel-right-open block size-4" />
+                </button>
+                <button
+                  v-if="task.can_delete && editable"
+                  type="button"
+                  class="rounded-md p-1.5 text-n-ruby-11 hover:bg-n-ruby-2"
+                  :disabled="busy || !synced"
+                  :aria-label="
+                    projectText('DELETE_TASK', 'Excluir tarefa') +
+                    ': ' +
+                    task.title
+                  "
+                  :title="projectText('DELETE_TASK', 'Excluir tarefa')"
+                  @click="removeTask(task)"
+                >
+                  <span class="i-lucide-trash-2 block size-4" />
                 </button>
               </td>
             </tr>

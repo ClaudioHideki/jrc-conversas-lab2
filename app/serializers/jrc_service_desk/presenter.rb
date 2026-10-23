@@ -3,14 +3,17 @@
 # Explicit projection; never ActiveRecord#as_json of a ticket/snapshot/blob.
 class JrcServiceDesk::Presenter
   EVENT_FIELDS = {
+    'ticket_deleted' => %w[reason], 'task_deleted' => %w[task_id reason],
+    'note_withdrawn' => %w[note_id replacement_note_id reason], 'attachment_withdrawn' => %w[note_id attachment_id filename reason],
     'operational_rule_applied' => %w[kind rule_version_id rule_key rule_digest snapshot_id],
     'clock_threshold_reached' => %w[clock_id clock_kind percent policy_digest elapsed_seconds budget_seconds due_at breached target_queue_id],
     'clock_violated' => %w[clock_id clock_kind policy_digest elapsed_seconds budget_seconds due_at observed_at],
     'approval_escalated' => %w[approval_id history_index],
-    'resource_linked' => %w[resource_id resource_kind], 'resource_updated' => %w[resource_id resource_kind history_index],
+    'resource_linked' => %w[resource_id resource_kind], 'resource_unlinked' => %w[resource_id resource_kind],
+    'resource_updated' => %w[resource_id resource_kind history_index],
     'resource_archived' => %w[resource_id resource_kind history_index],
     'ticket_created' => %w[status_id priority_id queue_id assignee_membership_id],
-    'ticket_updated' => %w[title description priority_id category_id status_id company_id],
+    'ticket_updated' => %w[title description requester_id priority_id category_id ticket_type_id subcategory_id contract_id service_fields status_id company_id],
     'ticket_assigned' => %w[assignee_membership_id queue_id team_id],
     'ticket_transferred' => %w[assignee_membership_id queue_id team_id],
     'note_added' => %w[note_id notification_state], 'interaction_republished' => %w[note_id previous_note_id notification_state],
@@ -114,15 +117,19 @@ class JrcServiceDesk::Presenter
   end
 
   def note_fields(record)
+    policy = Pundit.policy!(@context, record)
     common(record).merge(ticket_id: record.ticket_id.to_s, body: record.body, visibility: record.visibility,
                          audience_team_id: record.audience_team_id&.to_s, previous_note_id: record.previous_note_id&.to_s,
                          notification_state: record.notification_state, deliveries: note_deliveries(record),
-                         attachments: note_attachments(record), author: assignee(record.author_membership))
+                         attachments: note_attachments(record), author: assignee(record.author_membership),
+                         permissions: { show: true, update: policy.update?, destroy: policy.destroy? })
   end
 
   def note_attachments(record)
-    record.files.map do |file|
+    JrcServiceDesk::RecordWithdrawal.attachments(record).map do |file|
       { id: file.id.to_s, filename: file.filename.to_s, byte_size: file.blob.byte_size,
+        content_type: file.blob.content_type,
+        permissions: { destroy: Pundit.policy!(@context, record).destroy? },
         scan_state: file.blob.metadata['service_desk_scan_state'] || 'unavailable' }
     end
   end
@@ -160,7 +167,7 @@ class JrcServiceDesk::Presenter
 
   def requester_details(record)
     value = native_named(record)
-    value && value.merge(phone_number: record.phone_number)
+    value && value.merge(phone_number: record.phone_number, email: record.email)
   end
 
   def note_deliveries(record)

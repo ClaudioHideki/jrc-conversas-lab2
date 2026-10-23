@@ -33,6 +33,7 @@ import {
 import { useInboxCustomer360 } from './useInboxCustomer360';
 import { useAttendanceClosing } from './useAttendanceClosing';
 import QualificationHistory from './QualificationHistory.vue';
+import InboxVoicePanel from './InboxVoicePanel.vue';
 
 const props = defineProps({
   accountId: { type: Number, required: true },
@@ -51,6 +52,7 @@ const props = defineProps({
   conversationError: { type: Boolean, default: false },
   canLoadMore: { type: Boolean, default: false },
   ready: { type: Boolean, default: true },
+  softphoneAccess: { type: Boolean, default: false },
 });
 const emit = defineEmits([
   'selectCall',
@@ -72,6 +74,8 @@ const sip = useSipWebphone();
 const tab = ref('CONVERSATION');
 const voiceSection = ref('journey');
 const listOpen = ref(false);
+const phoneOpen = ref(false);
+const voicePanel = ref(null);
 const callDetails = ref(null);
 const agent = ref(null);
 const actionError = ref(false);
@@ -91,9 +95,38 @@ let actionGeneration = 0;
 const canOperate = computed(
   () => props.context?.capabilities?.operate === true
 );
-const isVoice = computed(() => Boolean(props.currentCallId));
-const hasSelection = computed(() =>
-  Boolean(props.currentCallId || props.currentConversationId)
+const isVoice = computed(
+  () => Boolean(props.currentCallId) && !phoneOpen.value
+);
+const voiceView = computed(() => isVoice.value || phoneOpen.value);
+const listCalls = computed(() => {
+  if (
+    !props.softphoneAccess ||
+    Number(sip.accountId.value) !== props.accountId ||
+    !sip.hasCall.value ||
+    props.calls.some(item => item.external_session_id === sip.callId.value)
+  )
+    return props.calls;
+  let status = 'created';
+  if (sip.established.value) status = 'connected';
+  if (sip.held.value) status = 'held';
+  if (sip.incoming.value) status = 'ringing';
+  return [
+    {
+      id: 'live-sip',
+      local: true,
+      ani: sip.remoteNumber.value,
+      status,
+      duration: sip.established.value ? sip.duration.value : '',
+      provider: 'sip',
+    },
+    ...props.calls,
+  ];
+});
+const hasSelection = computed(
+  () =>
+    !phoneOpen.value &&
+    Boolean(props.currentCallId || props.currentConversationId)
 );
 const conversation = computed(
   () =>
@@ -104,22 +137,26 @@ const conversation = computed(
 );
 const nativeConversationReady = computed(() =>
   Boolean(
-    props.currentConversationId &&
+    !phoneOpen.value &&
+      props.currentConversationId &&
       selectedChat.value?.id === props.currentConversationId
   )
 );
 const call = computed(() => callDetails.value?.call);
+const contactId = computed(() => {
+  if (phoneOpen.value) return null;
+  if (!isVoice.value) return conversation.value?.meta?.sender?.id;
+  if (call.value?.contact_id) return call.value.contact_id;
+  const customer = callDetails.value?.customer;
+  return !customer?.ambiguous && customer?.contacts?.length === 1
+    ? customer.contacts[0].id
+    : null;
+});
 const identity = computed(() => ({
   accountId: props.accountId,
   callId: props.currentCallId,
   conversationId: props.currentConversationId,
-  contactId: isVoice.value
-    ? call.value?.contact_id ||
-      (!callDetails.value?.customer?.ambiguous &&
-      callDetails.value?.customer?.contacts?.length === 1
-        ? callDetails.value.customer.contacts[0].id
-        : null)
-    : conversation.value?.meta?.sender?.id,
+  contactId: contactId.value,
 }));
 const features = computed(() => ({
   crm: featureEnabled.value(props.accountId, FEATURE_FLAGS.JRC_CRM) === true,
@@ -239,6 +276,7 @@ const duration = computed(() => {
   const end = call.value?.ended_at
     ? new Date(call.value.ended_at).getTime()
     : now.value;
+  if (!start) return '';
   const seconds = start
     ? Math.max(0, Math.floor((end - new Date(start).getTime()) / 1000))
     : 0;
@@ -253,6 +291,7 @@ const duration = computed(() => {
 // Never operate the singleton webphone for a different call or account.
 const matchingSip = computed(
   () =>
+    props.softphoneAccess &&
     canOperate.value &&
     props.context?.provider?.capabilities?.sip_webrtc === 'available' &&
     Number(sip.accountId.value) === props.accountId &&
@@ -264,48 +303,11 @@ const phoneError = computed(() =>
 );
 const voiceActions = computed(() => [
   {
-    key: 'ANSWER',
-    icon: 'i-lucide-phone',
-    enabled: matchingSip.value && sip.incoming.value,
-    action: () => sip.answer(),
-  },
-  {
     key: 'HANGUP',
     icon: 'i-lucide-phone-off',
     enabled: matchingSip.value && sip.hasCall.value,
     action: () => sip.hangup(),
     danger: true,
-  },
-  {
-    key: 'MUTE',
-    icon: sip.muted.value ? 'i-lucide-mic-off' : 'i-lucide-mic',
-    enabled: matchingSip.value && sip.established.value,
-    action: () => sip.setMuted(!sip.muted.value),
-  },
-  {
-    key: 'HOLD',
-    icon: 'i-lucide-pause-circle',
-    enabled:
-      matchingSip.value &&
-      sip.established.value &&
-      !sip.holdPending.value &&
-      props.context?.provider?.capabilities?.hold === 'available',
-    action: () => sip.setHold(!sip.held.value),
-  },
-  {
-    key: 'TRANSFER',
-    icon: 'i-lucide-phone-forwarded',
-    enabled:
-      canOperate.value &&
-      ['transfer_blind', 'transfer_attended'].some(
-        key => props.context?.provider?.capabilities?.[key] === 'available'
-      ) &&
-      call.value &&
-      !['ended', 'failed'].includes(call.value.status),
-    action: () => {
-      tab.value = 'CONVERSATION';
-      voiceSection.value = 'transfer';
-    },
   },
 ]);
 const runAction = async action => {
@@ -479,13 +481,35 @@ const showTab = value => {
   tab.value = value;
   customerDialog.value?.close();
 };
+const openPhone = () => {
+  if (closing.loading.value) return;
+  const native = props.calls.find(
+    item =>
+      item.external_session_id &&
+      item.external_session_id === sip.callId.value &&
+      sip.hasCall.value
+  );
+  if (!closing.allowSelection('voice', native?.id || null)) return;
+  listOpen.value = false;
+  tab.value = 'CONVERSATION';
+  if (native) {
+    phoneOpen.value = false;
+    emit('selectCall', native);
+  } else phoneOpen.value = true;
+};
 const selectCall = value => {
+  if (value.local) {
+    openPhone();
+    return;
+  }
   if (!closing.allowSelection('voice', value.id)) return;
+  phoneOpen.value = false;
   listOpen.value = false;
   emit('selectCall', value);
 };
 const selectConversation = value => {
   if (!closing.allowSelection('whatsapp', value.id)) return;
+  phoneOpen.value = false;
   listOpen.value = false;
   emit('selectConversation', value);
 };
@@ -497,11 +521,46 @@ const loaded = value => {
   callDetails.value = value;
   if (value?.agent) agent.value = value.agent;
 };
+const updateCall = record => {
+  if (record.id === props.currentCallId && callDetails.value)
+    callDetails.value = {
+      ...callDetails.value,
+      call: { ...callDetails.value.call, ...record },
+    };
+};
+const pendingIncoming = computed(
+  () =>
+    props.softphoneAccess &&
+    Number(sip.accountId.value) === props.accountId &&
+    sip.incoming.value &&
+    Boolean(closing.pending.value || closing.pendingAttendance.value)
+);
+const rejectPendingIncoming = () => {
+  if (pendingIncoming.value) sip.reject();
+};
+watch([() => sip.incoming.value, closing.loading], () => {
+  if (
+    sip.incoming.value &&
+    !closing.loading.value &&
+    props.softphoneAccess &&
+    Number(sip.accountId.value) === props.accountId
+  )
+    openPhone();
+});
+watch([() => props.calls, () => sip.callId.value], () => {
+  if (
+    phoneOpen.value &&
+    sip.hasCall.value &&
+    props.calls.some(item => item.external_session_id === sip.callId.value)
+  )
+    openPhone();
+});
 
 watch(
   () => [props.accountId, props.currentCallId, props.currentConversationId],
   () => {
     actionGeneration += 1;
+    phoneOpen.value = false;
     tab.value = 'CONVERSATION';
     voiceSection.value = 'journey';
     callDetails.value = null;
@@ -554,27 +613,8 @@ onBeforeUnmount(() => {
       >
         <span class="i-lucide-panel-left size-4" />
       </button>
-      <template v-if="isVoice">
-        <button
-          v-for="action in voiceActions"
-          :key="action.key"
-          type="button"
-          :disabled="!action.enabled"
-          :title="labels[action.key]"
-          :aria-label="labels[action.key]"
-          class="grid size-8 shrink-0 place-items-center rounded-md border border-n-weak transition disabled:cursor-not-allowed disabled:opacity-40"
-          :class="
-            action.danger
-              ? 'bg-n-ruby-9 text-white'
-              : 'bg-n-blue-2 text-n-brand hover:bg-n-blue-3'
-          "
-          @click="runAction(action)"
-        >
-          <span class="size-4" :class="action.icon" />
-        </button>
-      </template>
       <MoreActions
-        v-else-if="nativeConversationReady"
+        v-if="nativeConversationReady"
         class="shrink-0"
         :request-closing="requiresWhatsAppClosing ? startClosing : null"
       />
@@ -678,7 +718,7 @@ onBeforeUnmount(() => {
                   count:
                     conversations.length +
                     (['all', 'voice'].includes(channelFilter)
-                      ? calls.length
+                      ? listCalls.length
                       : 0),
                 })
               }}
@@ -726,14 +766,15 @@ onBeforeUnmount(() => {
         </header>
         <div class="min-h-0 flex-1 overflow-y-auto p-2">
           <InboxChannelGroups
-            :calls="calls"
+            :calls="listCalls"
             :conversations="conversations"
             :channels="channels"
             :channel-filter="channelFilter"
             :inbox-for="inboxFor"
-            :current-call-id="currentCallId"
+            :current-call-id="phoneOpen ? 'live-sip' : currentCallId"
             :current-conversation-id="currentConversationId"
             :selected-customer-name="customerName"
+            :now="now"
             @select-call="selectCall"
             @select-conversation="selectConversation"
           />
@@ -776,26 +817,37 @@ onBeforeUnmount(() => {
         data-testid="interaction-workspace"
       >
         <header
-          class="flex h-12 shrink-0 items-center justify-between gap-3 bg-n-brand px-4 text-white"
+          class="flex min-h-12 shrink-0 flex-wrap items-center justify-between gap-3 bg-n-brand px-4 py-2 text-white"
         >
-          <div class="flex min-w-0 items-center gap-2.5">
+          <div
+            class="flex min-w-0 basis-full items-center gap-2.5 sm:basis-auto"
+          >
             <span
               class="size-5 shrink-0"
-              :class="channel?.icon || 'i-lucide-inbox'"
+              :class="
+                voiceView ? 'i-lucide-phone' : channel?.icon || 'i-lucide-inbox'
+              "
             />
             <h2 class="m-0 truncate text-sm font-medium text-white">
-              {{ hasSelection ? title : t('JRC_CONTACT_CENTER.INBOX.TITLE') }}
-              <span v-if="hasSelection" class="ml-2 text-xs opacity-80">
+              {{
+                voiceView || !hasSelection
+                  ? t('JRC_CONTACT_CENTER.INBOX.TITLE')
+                  : title
+              }}
+              <span
+                v-if="hasSelection && !voiceView"
+                class="ml-2 text-xs opacity-80"
+              >
                 {{ statusLabel }}
               </span>
             </h2>
           </div>
           <span
-            v-if="isVoice && call"
+            v-if="voiceView && (voicePanel?.duration || (isVoice && duration))"
             class="flex shrink-0 items-center gap-2 text-xs tabular-nums"
           >
             <span class="size-2 rounded-full bg-n-ruby-9" />
-            {{ duration }}
+            {{ voicePanel?.duration || (isVoice ? duration : '') }}
           </span>
           <span
             v-else-if="hasSelection"
@@ -805,26 +857,28 @@ onBeforeUnmount(() => {
           </span>
           <button
             v-if="
+              (voiceView && voicePanel?.canEnd) ||
               (isVoice && call && !['ended', 'failed'].includes(call.status)) ||
               (requiresWhatsAppClosing && conversation?.status !== 'resolved')
             "
             type="button"
-            class="ml-auto flex h-8 shrink-0 items-center gap-2 rounded-md bg-n-ruby-9 px-3 text-xs font-semibold text-white hover:bg-n-ruby-10"
-            :disabled="
-              closingSaving ||
-              (isVoice &&
-                !voiceActions.find(action => action.key === 'HANGUP')?.enabled)
+            :aria-label="
+              voiceView
+                ? t('JRC_CONTACT_CENTER.INBOX_360.HANGUP')
+                : t('JRC_CONTACT_CENTER.INBOX_360.END_ATTENDANCE')
             "
-            @click="startClosing"
+            class="ml-auto flex h-8 shrink-0 items-center gap-2 rounded-md bg-n-ruby-9 px-3 text-xs font-semibold text-white hover:bg-n-ruby-10"
+            :disabled="closingSaving || (voiceView && !voicePanel?.canEnd)"
+            @click="phoneOpen ? voicePanel?.endCall() : startClosing()"
           >
             <span
               class="size-4"
               :class="
-                isVoice ? 'i-lucide-phone-off' : 'i-lucide-message-square-off'
+                voiceView ? 'i-lucide-phone-off' : 'i-lucide-message-square-off'
               "
             />
             {{
-              isVoice
+              voiceView
                 ? t('JRC_CONTACT_CENTER.INBOX_360.END_CALL')
                 : t('JRC_CONTACT_CENTER.INBOX_360.END_ATTENDANCE')
             }}
@@ -879,36 +933,60 @@ onBeforeUnmount(() => {
             </span>
           </button>
         </nav>
+        <div
+          v-if="pendingIncoming"
+          data-pending-incoming
+          class="flex shrink-0 flex-wrap items-center gap-3 border-b border-n-weak bg-n-amber-2 p-3 text-xs text-n-amber-11"
+          role="status"
+        >
+          <span class="min-w-0 flex-1"
+            >{{ t('SOFTPHONE.CENTRAL.STATES.incoming') }} ·
+            {{ sip.remoteNumber.value }}.
+            {{ t('SOFTPHONE.INBOX.QUALIFICATION_PENDING') }}</span
+          >
+          <button
+            type="button"
+            class="rounded-md bg-n-ruby-9 px-4 py-2 font-semibold text-white"
+            @click="rejectPendingIncoming"
+          >
+            {{ t('SOFTPHONE.CENTRAL.REJECT') }}
+          </button>
+        </div>
+        <div
+          v-show="voiceView && tab === 'CONVERSATION'"
+          class="min-h-0 flex-1 overflow-y-auto"
+          data-central-voice
+        >
+          <InboxVoicePanel
+            v-if="softphoneAccess || isVoice"
+            ref="voicePanel"
+            :account-id="accountId"
+            :allowed="softphoneAccess && (!isVoice || canOperate)"
+            :capabilities="context?.provider?.capabilities || {}"
+            :qualification-pending="
+              Boolean(closing.pending.value || closing.pendingAttendance.value)
+            "
+            :native-call-id="isVoice ? currentCallId : null"
+            :call-record="isVoice ? call || null : null"
+            :customer="
+              isVoice && !callDetails?.customer?.ambiguous
+                ? contact || callDetails?.customer?.contacts?.[0] || null
+                : null
+            "
+            :ambiguous="isVoice && Boolean(callDetails?.customer?.ambiguous)"
+            :session-view="phoneOpen"
+            :elapsed="isVoice ? duration : ''"
+            @open="openPhone"
+            @ended="
+              closing.load();
+              emit('refresh');
+            "
+            @updated="updateCall"
+          />
+        </div>
         <template v-if="isVoice">
-          <div v-show="tab === 'CONVERSATION'" class="shrink-0 p-4 pb-0">
-            <div
-              class="flex items-center gap-3 rounded-lg border border-n-weak bg-n-alpha-1 p-3"
-            >
-              <span
-                class="grid size-10 shrink-0 place-items-center rounded-full bg-n-teal-3 text-n-teal-11"
-              >
-                <span class="i-lucide-phone-incoming size-5" />
-              </span>
-              <div class="min-w-0 flex-1">
-                <h3 class="m-0 text-sm font-semibold text-n-slate-12">
-                  {{ t('JRC_CONTACT_CENTER.INBOX_360.CURRENT_CALL') }}
-                </h3>
-                <p class="mb-0 mt-1 truncate text-xs text-n-slate-10">
-                  {{ title }}
-                  <span v-if="customerName">
-                    {{ customerName }}
-                  </span>
-                </p>
-              </div>
-              <span
-                class="rounded-full bg-n-blue-3 px-2 py-1 text-[10px] text-n-blue-11"
-              >
-                {{ statusLabel }}
-              </span>
-            </div>
-          </div>
           <div
-            v-show="['CONVERSATION', 'CASES', 'TASKS'].includes(tab)"
+            v-show="['CASES', 'TASKS', 'HISTORY'].includes(tab)"
             class="min-h-0 flex-1 overflow-y-auto"
           >
             <InboxContextContent
@@ -945,7 +1023,11 @@ onBeforeUnmount(() => {
             </div>
           </div>
         </template>
-        <div v-else v-show="tab === 'CONVERSATION'" class="flex min-h-0 flex-1">
+        <div
+          v-else
+          v-show="!voiceView && tab === 'CONVERSATION'"
+          class="flex min-h-0 flex-1"
+        >
           <RouterView
             v-if="ready"
             :key="`${accountId}-${currentConversationId}`"

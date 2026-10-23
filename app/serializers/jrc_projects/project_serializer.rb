@@ -22,7 +22,7 @@ module JrcProjects
         data['accepted_by'] = project.accepted_by&.as_json(only: %i[id name])
         data['columns'] = project.board_columns.order(:board_id, :position, :id).as_json(only: %i[id board_id name status_key position wip_limit])
         data['members'] = members(project)
-        data['phases'] = project.phases.where(account_id: project.account_id, project_id: project.id).order(:id).as_json(only: %i[id name])
+        data['phases'] = project.phases.where(account_id: project.account_id, project_id: project.id).order(:position, :id).as_json(only: %i[id name])
         data['overview'] = overview(project)
         financial = data['capabilities'].include?('projects.budget.view')
         data['budget'] = Reporting::FinancialProjection.call(project: project) if financial
@@ -91,7 +91,7 @@ module JrcProjects
       scope = AuditEvent.where(account_id: project.account_id)
       events = scope.where(auditable_type: 'JrcProjects::Project', auditable_id: project.id)
       resources = {
-        'JrcProjects::Task' => project.tasks, 'JrcProjects::Milestone' => project.milestones,
+        'JrcProjects::Task' => project.tasks, 'JrcProjects::Milestone' => project.milestones, 'JrcProjects::Phase' => project.phases,
         'JrcProjects::ProjectMember' => project.project_members, 'JrcProjects::TimeEntry' => project.time_entries
       }
       resources.each do |type, records|

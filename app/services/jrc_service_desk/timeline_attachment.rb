@@ -19,7 +19,12 @@ class JrcServiceDesk::TimelineAttachment
   private
 
   def file_for(kind, record, identifier)
-    return record.files.find(identifier) if kind == 'note'
+    if kind == 'note'
+      file = JrcServiceDesk::RecordWithdrawal.attachments(record).find { |attachment| attachment.id == identifier }
+      return file if file
+
+      raise ActiveRecord::RecordNotFound
+    end
     return record.attachments.find(identifier).file if kind == 'message'
     return record.recording if record.recording.attached? && record.recording.id == identifier
 

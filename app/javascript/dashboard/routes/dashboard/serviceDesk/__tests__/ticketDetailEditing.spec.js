@@ -37,6 +37,7 @@ import TicketListView from '../views/TicketListView.vue';
 import TicketDetailView from '../views/TicketDetailView.vue';
 import TicketFormView from '../views/TicketFormView.vue';
 import TicketSummary from '../components/TicketSummary.vue';
+import LookupSelect from '../components/LookupSelect.vue';
 
 const Button = {
   props: ['label', 'type', 'disabled'],
@@ -328,6 +329,56 @@ describe('ticket details, preview and authorized editing', () => {
     expect(wrapper.text()).toContain(
       messages.JRC_SERVICE_DESK.OPS.STATUS.invalid_input
     );
+  });
+  it('edits the requester and confirms the persisted association before returning', async () => {
+    const row = ticket({ lock_version: 0 });
+    let saved = row;
+    const update = vi.fn(async (_account, payload) => {
+      saved = {
+        ...row,
+        requester: {
+          id: payload.ticket.requester_id,
+          name: 'Novo solicitante',
+        },
+        lock_version: 1,
+      };
+      return {
+        contract_version: 1,
+        account_id: '1',
+        ticket_id: row.id,
+        operation: 'update',
+        applied: true,
+      };
+    });
+    const { router } = await render(
+      TicketFormView,
+      'edit',
+      row,
+      {},
+      { update, ticket: async () => detail(saved) }
+    );
+    const requester = wrapper
+      .findAllComponents(LookupSelect)
+      .find(component => component.props('resource') === 'requesters');
+    expect(requester.props('disabled')).toBe(false);
+    requester.vm.$emit('update:modelValue', '34');
+    await flushPromises();
+    await click('Próxima etapa');
+    await click('Próxima etapa');
+    await click('Próxima etapa');
+    await wrapper.find('form').trigger('submit');
+    await flushPromises();
+    expect(update).toHaveBeenCalledWith(
+      '1',
+      expect.objectContaining({
+        ticket: expect.objectContaining({ requester_id: '34' }),
+      }),
+      expect.any(AbortSignal)
+    );
+    expect(holder.session.operations.mutation('ticket:form:write').status).toBe(
+      'confirmed'
+    );
+    expect(router.currentRoute.value.name).toBe(serviceDeskRouteName('detail'));
   });
   it('loads existing values and saves only editable fields with optional assignments empty', async () => {
     const row = ticket({

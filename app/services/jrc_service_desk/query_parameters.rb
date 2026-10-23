@@ -2,8 +2,8 @@
 
 # Whitelist shared by list and KPI queries. Values are selectors, never grants.
 class JrcServiceDesk::QueryParameters
-  IDS = %w[unit_id operator_company_id status_id priority_id category_id queue_id assignee_id].freeze
-  KEYS = (IDS + %w[q page per_page mine source sort phase assignment]).freeze
+  IDS = %w[unit_id operator_company_id status_id priority_id category_id queue_id assignee_id team_id].freeze
+  KEYS = (IDS + %w[q page per_page mine source sort phase assignment created_from created_to]).freeze
   SORTS = %w[updated_at_desc created_at_desc created_at_asc].freeze
   attr_reader :values
 
@@ -25,6 +25,17 @@ class JrcServiceDesk::QueryParameters
       raise ArgumentError, 'Invalid assignment filter'
     end
     raise ArgumentError, 'Personal and unassigned filters are mutually exclusive' if @values['mine'] && @values['assignment']
+    %w[created_from created_to].each do |key|
+      next unless @values[key]
+
+      value = @values[key]
+      raise ArgumentError, 'Use uma data no formato AAAA-MM-DD' unless value.is_a?(String) && value.match?(/\A\d{4}-\d{2}-\d{2}\z/)
+
+      Date.iso8601(value)
+    end
+    if @values['created_from'] && @values['created_to'] && @values['created_from'] > @values['created_to']
+      raise ArgumentError, 'A data final deve ser igual ou posterior à data inicial'
+    end
     %w[q source].each do |key|
       next unless @values[key]
       raise ArgumentError, 'Invalid text filter' unless @values[key].is_a?(String) && @values[key].length <= (key == 'q' ? 200 : 40)

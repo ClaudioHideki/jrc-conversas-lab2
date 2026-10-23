@@ -13,11 +13,17 @@ RSpec.describe 'P1-P3 additive migration reversibility', type: :model do
     ticket = create(:jrc_sd_ticket, unit: unit, created_by_membership: membership)
     original = ticket.attributes
     flags = account.reload.feature_flags_ext_1
+    connection = ActiveRecord::Base.connection
+    # Relationship was added after P1-P3. Suspend its later foreign key inside
+    # this rolled-back test transaction to exercise the original migration boundary.
+    relationship_key = connection.foreign_keys(:jrc_relationship_success_plans).find { |key| key.to_table == 'jrc_projects_projects' }
+    connection.remove_foreign_key(:jrc_relationship_success_plans, name: relationship_key.name)
     migrations = [CreateIndependentJrcProjects, CreateR2ProjectLinks, EnforceR2ProjectLinkScope]
     migrations.reverse_each { |migration| migration.new.migrate(:down) }
     expect(ActiveRecord::Base.connection.table_exists?(:jrc_projects_projects)).to be(false)
     expect(JrcServiceDesk::Ticket.find(ticket.id).attributes).to eq(original)
     migrations.each { |migration| migration.new.migrate(:up) }
+    connection.add_foreign_key(:jrc_relationship_success_plans, relationship_key.to_table, **relationship_key.options)
     AccountUser.reset_column_information
     expect(account.reload.feature_flags_ext_1).to eq(flags)
     expect(account.feature_enabled?('jrc_projects')).to be(false)
@@ -25,6 +31,7 @@ RSpec.describe 'P1-P3 additive migration reversibility', type: :model do
     expect(JrcServiceDesk::Ticket.find(ticket.id).attributes).to eq(original)
     expect(JrcServiceDesk::UnitMembership.find(membership.id).active).to be(true)
     expect(ActiveRecord::Base.connection.foreign_keys(:jrc_operations_links).map(&:name)).to include('fk_project_links_r2_unit')
+    expect(connection.foreign_keys(:jrc_relationship_success_plans).map(&:name)).to include(relationship_key.name)
   ensure
     AccountUser.reset_column_information
   end

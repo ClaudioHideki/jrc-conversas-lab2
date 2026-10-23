@@ -117,7 +117,10 @@ export function decodeCockpit(payload, context, ticket) {
         : 0,
       checklist,
       lock_version: row.lock_version,
-      permissions: { update: row.permissions.update === true },
+      permissions: {
+        update: row.permissions.update === true,
+        destroy: row.permissions.destroy === true,
+      },
     };
   });
   const approvals = list(data.approvals, row => {

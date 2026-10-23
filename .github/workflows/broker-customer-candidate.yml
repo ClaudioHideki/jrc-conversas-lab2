@@ -69,7 +69,7 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: disposable-test-only
         ports: ['5432:5432']
-        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 12
+        options: --health-cmd "pg_isready -U postgres -d postgres" --health-interval 5s --health-timeout 5s --health-retries 12
       redis:
         image: redis:7.4.0-alpine@sha256:c35af3bbcef51a62c8bae5a9a563c6f1b60d7ebaea4cb5a3ccbcc157580ae098
         ports: ['6379:6379']
@@ -85,7 +85,7 @@ jobs:
       SECRET_KEY_BASE: isolated-broker-customer-ci-not-a-production-secret
       BUNDLE_FROZEN: 'true'
       SCHEMA: /tmp/broker-customer-candidate-schema.rb
-      MINIMUM_EXAMPLES: '230'
+      MINIMUM_EXAMPLES: '305'
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
@@ -127,7 +127,7 @@ jobs:
           [[ "$POSTGRES_DATABASE" =~ ^jrc_broker_customer_candidate_[0-9]+_[0-9]+_test$ ]]
           SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
           bundle exec rails db:migrate
-      - name: Regressao Broker, Cadastro Mestre, Bemtevi e campanhas
+      - name: Regressao Broker, clientes, campanhas e modulos integrados
         run: |
           bundle exec rspec \
             spec/services/jrc_broker \
@@ -138,6 +138,10 @@ jobs:
             spec/services/jrc_campaigns \
             spec/requests/api/v1/accounts/jrc_campaigns \
             spec/jobs/jrc_broker_webhook_job_spec.rb \
+            spec/requests/api/v1/accounts/jrc_contact_center \
+            spec/requests/api/v1/accounts/jrc_operations \
+            spec/requests/api/v1/accounts/jrc_service_desk \
+            spec/services/jrc_service_desk \
             --format progress --format json --out /tmp/broker-customer-rspec.json
           python3 - <<'PYTHON'
           import json, os

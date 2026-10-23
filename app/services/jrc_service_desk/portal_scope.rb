@@ -31,7 +31,7 @@ class JrcServiceDesk::PortalScope
 
   def tickets
     links = JrcServiceDesk::TicketConversation.where(account_id: @account.id, conversation_id: conversations.select(:id)).select(:ticket_id)
-    scope = JrcServiceDesk::Ticket.where(account_id: @account.id, requester_id: @contact.id, id: links)
+    scope = JrcServiceDesk::RecordWithdrawal.excluding(JrcServiceDesk::Ticket.all, :ticket).where(account_id: @account.id, requester_id: @contact.id, id: links)
                                   .joins(unit: :operator_company)
                                   .where(jrc_service_desk_units: { active: true }, jrc_service_desk_operator_companies: { active: true })
                                   .left_outer_joins(:service)
@@ -40,11 +40,15 @@ class JrcServiceDesk::PortalScope
   end
 
   def notes(ticket)
-    JrcServiceDesk::InteractionVisibility.portal_scope(ticket.ticket_notes.where(account_id: @account.id, unit_id: ticket.unit_id))
+    JrcServiceDesk::RecordWithdrawal.excluding(
+      JrcServiceDesk::InteractionVisibility.portal_scope(ticket.ticket_notes.where(account_id: @account.id, unit_id: ticket.unit_id)), :note
+    )
   end
 
   def tasks(ticket)
-    JrcServiceDesk::InteractionVisibility.portal_scope(ticket.ticket_tasks.where(account_id: @account.id, unit_id: ticket.unit_id))
+    JrcServiceDesk::RecordWithdrawal.excluding(
+      JrcServiceDesk::InteractionVisibility.portal_scope(ticket.ticket_tasks.where(account_id: @account.id, unit_id: ticket.unit_id)), :task
+    )
   end
 
   def knowledge(query = '')

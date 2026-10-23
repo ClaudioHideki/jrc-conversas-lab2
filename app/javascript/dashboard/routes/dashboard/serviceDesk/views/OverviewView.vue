@@ -8,7 +8,8 @@ import TicketFilters from '../components/TicketFilters.vue';
 import Panel from '../components/ServiceDeskPanel.vue';
 import State from '../components/ServiceDeskState.vue';
 import TicketTable from '../components/TicketTable.vue';
-import SupervisorPanel from '../components/SupervisorPanel.vue';
+import OverviewOperations from '../components/OverviewOperations.vue';
+import { ticketListContext } from '../helpers/ticketNavigation';
 import { useSupervisionReport } from '../composables/useSupervisionReport.js';
 import { metricQuery } from '../helpers/screenExperience.js';
 import { useServiceDesk } from '../composables/useServiceDesk';
@@ -28,25 +29,49 @@ const {
   per_page: 5,
   page: 1,
 }));
-const load = () => session.load(key, 'tickets', { ...route.query, page: 1, per_page: 5, sort: 'updated_at_desc' });
-watch([() => session.state.status, () => route.query, () => session.operations?.state.revision], load, { immediate: true });
+const load = () =>
+  session.load(key, 'tickets', {
+    ...route.query,
+    page: 1,
+    per_page: 5,
+    sort: 'updated_at_desc',
+  });
+watch(
+  [
+    () => session.state.status,
+    () => route.query,
+    () => session.operations?.state.revision,
+  ],
+  load,
+  { immediate: true }
+);
 onBeforeUnmount(() => session.resetResource(key));
-const go = (name, ticketId) =>
-  router.push({
+const go = (name, ticketId, filters = {}) => {
+  let query;
+  if (['tickets', 'mine', 'sla'].includes(name)) {
+    query = {
+      ...route.query,
+      ...filters,
+      ...(name === 'mine' ? { mine: 'true', assignment: undefined } : {}),
+    };
+  } else if (['queues', 'tasks', 'approvals'].includes(name)) {
+    query = {
+      unit_id: route.query.unit_id,
+      operator_company_id: route.query.operator_company_id,
+      ...(filters.status ? { status: filters.status } : {}),
+    };
+  } else if (name === 'detail') {
+    query = ticketListContext('tickets', route.query);
+  }
+  return router.push({
     name: serviceDeskRouteName(name),
     params: {
       accountId: session.accountId.value,
       ...(ticketId ? { ticketId } : {}),
     },
-    ...(['tickets', 'mine', 'queues'].includes(name)
-      ? {
-          query: {
-            ...route.query,
-            ...(name === 'mine' ? { mine: 'true', assignment: undefined } : {}),
-          },
-        }
-      : {}),
+    ...(query ? { query } : {}),
   });
+};
 const filterStatus = statusId =>
   router.push({
     name: serviceDeskRouteName('tickets'),
@@ -54,6 +79,7 @@ const filterStatus = statusId =>
     query: { ...route.query, phase: undefined, status_id: statusId, page: '1' },
   });
 </script>
+
 <template>
   <section>
     <header class="sd-page-heading">
@@ -66,17 +92,23 @@ const filterStatus = statusId =>
         </p>
       </div>
       <Button
-        v-if="session.state.context?.units.some(unit => unit.permissions.create_ticket === true)"
+        v-if="
+          session.state.context?.units.some(
+            unit => unit.permissions.create_ticket === true
+          )
+        "
         :label="t('JRC_SERVICE_DESK.COMMON.open_structure')"
         icon="i-lucide-plus"
         size="sm"
         @click="go('new')"
       />
     </header>
-    <TicketFilters :query="route.query" @apply="router.push({ query: $event })" />
+    <TicketFilters
+      :query="route.query"
+      @apply="router.push({ query: $event })"
+    />
     <LiveKpis
       :query="route.query"
-      breakdown
       @status-filter="filterStatus"
       @metric-filter="
         router.push({
@@ -90,9 +122,10 @@ const filterStatus = statusId =>
       v-if="session.state.context?.capabilities?.reports?.index"
       class="mb-4"
     >
-      <SupervisorPanel
+      <OverviewOperations
         v-if="reportStatus === 'ready'"
         :data="supervision.supervision"
+        @navigate="go($event.name, null, $event.query || {})"
       />
       <State
         v-else
@@ -102,8 +135,11 @@ const filterStatus = statusId =>
         @retry="reloadReport"
       />
     </div>
-    <div class="sd-two-columns">
-      <Panel :title="t('JRC_SERVICE_DESK.OVERVIEW.recent')" icon="i-lucide-ticket">
+    <div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_14rem]">
+      <Panel
+        :title="t('JRC_SERVICE_DESK.OVERVIEW.recent')"
+        icon="i-lucide-ticket"
+      >
         <template #actions>
           <Button
             size="xs"
@@ -125,20 +161,22 @@ const filterStatus = statusId =>
           @retry="session.state.status === 'ready' ? load() : session.retry()"
         />
       </Panel>
-      <div class="grid gap-4">
+      <div class="grid content-start gap-4">
         <Panel :title="t('JRC_SERVICE_DESK.OVERVIEW.shortcuts')">
           <div class="grid gap-2">
-            <Button variant="outline" color="slate" :label="t('JRC_SERVICE_DESK.SCREENS.mine')" @click="go('mine')" />
-            <Button variant="outline" color="slate" :label="t('JRC_SERVICE_DESK.SCREENS.queues')" @click="go('queues')" />
+            <Button
+              variant="outline"
+              color="slate"
+              :label="t('JRC_SERVICE_DESK.SCREENS.mine')"
+              @click="go('mine')"
+            />
+            <Button
+              variant="outline"
+              color="slate"
+              :label="t('JRC_SERVICE_DESK.SCREENS.queues')"
+              @click="go('queues')"
+            />
           </div>
-        </Panel>
-        <Panel :title="t('JRC_SERVICE_DESK.OVERVIEW.copilot')">
-          <p class="text-sm text-n-slate-11">
-            {{ t('JRC_SERVICE_DESK.OVERVIEW.copilot_help') }}
-          </p>
-          <p class="text-xs text-n-slate-11 mt-2">
-            {{ t('JRC_SERVICE_DESK.EXPERIENCE.contextual_nico') }}
-          </p>
         </Panel>
       </div>
     </div>

@@ -157,6 +157,12 @@ export function decodeSupervision(value, context) {
     sla,
     by_agent: rows('by_agent', row => ({
       id: row.id === null ? null : id(row.id),
+      ...(row.account_user_id && row.unit_id
+        ? {
+            account_user_id: id(row.account_user_id),
+            unit_id: unit(row.unit_id, context),
+          }
+        : {}),
       name: row.name === null ? null : text(row.name),
       count: count(row.count),
     })),

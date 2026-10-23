@@ -27,7 +27,8 @@ module JrcProjects
             manager = Authorization.allowed?(account_user: Current.account_user, capability: 'projects.time_entry.manage', project: project)
             raise Pundit::NotAuthorizedError unless manager || (record.user_id == Current.user.id && record.status == 'submitted' &&
               Authorization.allowed?(account_user: Current.account_user, capability: 'projects.time_entry.create', project: project))
-            values = params.require(:time_entry).permit(:minutes, :worked_on, :notes)
+            values = params.require(:time_entry).permit(:task_id, :minutes, :worked_on, :notes)
+            scoped_tasks(project).find(values[:task_id]) if values[:task_id].present?
             if manager
               values[:status] = params[:time_entry][:status] if params[:time_entry].key?(:status)
               if Authorization.allowed?(account_user: Current.account_user, capability: 'projects.budget.manage', project: project) && params[:time_entry].key?(:hourly_cost_cents)
@@ -43,10 +44,35 @@ module JrcProjects
             render json: { data: serialize(record, project) }
           end
         end
+
+        def destroy
+          project = scoped_project
+          project.with_lock do
+            ensure_project_editable!(project)
+            record = project.time_entries.where(account_id: Current.account.id, project_id: project.id).find(params[:id])
+            manager = Authorization.allowed?(account_user: Current.account_user, capability: 'projects.time_entry.manage', project: project)
+            own_pending = record.user_id == Current.user.id && record.status == 'submitted' &&
+                          Authorization.allowed?(account_user: Current.account_user, capability: 'projects.time_entry.create', project: project)
+            raise Pundit::NotAuthorizedError unless manager || own_pending
+            raise ArgumentError, 'Apontamentos aprovados não podem ser excluídos. Revise a aprovação antes de continuar.' if record.status == 'approved'
+
+            before = record.attributes
+            record.destroy!
+            AuditEvent.record!(account: Current.account, actor: Current.user, action: 'projects.time_entry.deleted', auditable: record,
+                               before_data: before, correlation_id: correlation_id)
+          end
+          head :no_content
+        end
+
         private
         def serialize(record, project)
           data = record.as_json(include: { user: { only: %i[id name] } })
           data.delete('hourly_cost_cents') unless Authorization.allowed?(account_user: Current.account_user, capability: 'projects.budget.view', project: project)
+          manager = Authorization.allowed?(account_user: Current.account_user, capability: 'projects.time_entry.manage', project: project)
+          own_pending = record.user_id == Current.user.id && record.status == 'submitted' &&
+                        Authorization.allowed?(account_user: Current.account_user, capability: 'projects.time_entry.create', project: project)
+          data['can_update'] = manager || own_pending
+          data['can_delete'] = (manager || own_pending) && record.status != 'approved' && !%w[completed canceled].include?(project.status)
           data
         end
       end

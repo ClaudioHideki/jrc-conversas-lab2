@@ -14,20 +14,20 @@ scope '/api/v1/accounts/:account_id', defaults: { format: 'json' } do
     resource :settings, only: %i[show update]
     resource :portfolio, only: :show, controller: :portfolio
     resources :project_templates, only: %i[index show create update destroy]
-    resources :projects, only: %i[index show create update] do
-      resources :members, :milestones, :sprints, :risks, :issues, :decisions, only: %i[index show create update destroy]
+    resources :projects, only: %i[index show create update destroy] do
+      resources :members, :phases, :milestones, :sprints, :risks, :issues, :decisions, only: %i[index show create update destroy]
       resources :boards, only: :index do
         resources :columns, only: %i[index create update destroy]
       end
       resources :tasks do
         member { post :move }
-        resources :comments, only: %i[index create]
+        resources :comments, only: %i[index create update destroy]
         resources :checklist_items, only: %i[create update destroy]
         resources :files, only: %i[index create destroy]
       end
       resources :files, only: %i[index create destroy]
       resource :budget, only: %i[show update]
-      resources :time_entries, only: %i[index create update]
+      resources :time_entries, only: %i[index create update destroy]
       get 'reports/export', to: 'reports#export'
       resources :reports, only: :index
       get :critical_path, to: 'planning#critical_path'

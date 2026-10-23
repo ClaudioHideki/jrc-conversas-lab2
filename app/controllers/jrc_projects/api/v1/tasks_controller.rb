@@ -75,6 +75,8 @@ module JrcProjects
           authorize_capability!('projects.task.delete', project: project, record: task)
           project.with_lock do
             ensure_project_editable!(project)
+            task.reload
+            assert_lock!(task, params[:lock_version]) if params.key?(:lock_version)
             before = task.attributes
             task.destroy!
             AuditEvent.record!(account: Current.account, actor: Current.user, action: 'projects.task.deleted', auditable: task,
@@ -131,6 +133,7 @@ module JrcProjects
                                                         .where.not(status: 'rejected').sum(:minutes)
           data['can_update'] = Authorization.allowed?(account_user: Current.account_user, capability: 'projects.task.update', project: task.project, record: task)
           data['can_move'] = Authorization.allowed?(account_user: Current.account_user, capability: 'projects.task.move', project: task.project, record: task)
+          data['can_delete'] = Authorization.allowed?(account_user: Current.account_user, capability: 'projects.task.delete', project: task.project, record: task)
           data
         end
       end

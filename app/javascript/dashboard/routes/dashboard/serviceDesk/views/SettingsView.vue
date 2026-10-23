@@ -22,8 +22,6 @@ const sections = [
   { key: 'categories', icon: 'i-lucide-tags' },
   { key: 'ticket_types', icon: 'i-lucide-list-filter' },
   { key: 'queues', icon: 'i-lucide-network' },
-  { key: 'units', icon: 'i-lucide-building' },
-  { key: 'operator_companies', icon: 'i-lucide-building-2' },
   { key: 'assignees', icon: 'i-lucide-users' },
   { key: 'catalog', icon: 'i-lucide-book-open-check' },
   { key: 'sla', icon: 'i-lucide-clock' },
@@ -114,6 +112,29 @@ const open = key =>
           color="slate"
           :label="t('JRC_SERVICE_DESK.COMMON.open')"
           @click="open(section.key)"
+        />
+      </Panel>
+      <Panel
+        v-if="session.state.context?.capabilities?.notifications?.manage"
+        :title="
+          t('JRC_SERVICE_DESK.REDESIGN_AUTOMATIONS.communication_settings')
+        "
+        icon="i-lucide-mail"
+      >
+        <p class="mb-4 text-xs text-n-slate-11">
+          {{ t('JRC_SERVICE_DESK.REDESIGN_AUTOMATIONS.communication_help') }}
+        </p>
+        <Button
+          size="sm"
+          variant="outline"
+          :label="t('JRC_SERVICE_DESK.COMMON.open')"
+          @click="
+            router.push({
+              name: serviceDeskRouteName('automations'),
+              params: { accountId: session.accountId.value },
+              query: { section: 'notifications' },
+            })
+          "
         />
       </Panel>
     </div>

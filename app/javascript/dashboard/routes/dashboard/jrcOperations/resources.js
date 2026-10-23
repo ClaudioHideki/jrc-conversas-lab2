@@ -73,6 +73,16 @@ export const projectResources = [
     ],
   },
   {
+    key: 'phases',
+    title: 'Fases do projeto',
+    fields: [
+      text('name', 'Nome', true),
+      number('position', 'Ordem', 0, 0),
+      date('starts_on', 'Início'),
+      date('ends_on', 'Término'),
+    ],
+  },
+  {
     key: 'milestones',
     title: 'Marcos de entrega',
     fields: [

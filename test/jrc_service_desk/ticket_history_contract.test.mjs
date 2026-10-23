@@ -36,7 +36,7 @@ const labels = JSON.parse(
 ).JRC_SERVICE_DESK.OPS.EVENTS;
 
 test('every native event has a matching literal Presenter contract', () => {
-  assert.equal(types.length, 29);
+  assert.equal(types.length, 34);
   assert.deepEqual(Object.keys(fields).sort(), [...types].sort());
 });
 

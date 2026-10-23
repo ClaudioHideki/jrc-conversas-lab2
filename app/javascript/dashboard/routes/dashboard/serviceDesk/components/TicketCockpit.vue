@@ -6,6 +6,7 @@ import API from 'dashboard/api/serviceDeskCockpit';
 import LifecycleAPI from 'dashboard/api/serviceDeskLifecycle';
 import Button from 'dashboard/components-next/button/Button.vue';
 import State from './ServiceDeskState.vue';
+import ServiceDeskDialog from './ServiceDeskDialog.vue';
 import InteractionComposer from './InteractionComposer.vue';
 import RecipientPreferences from './RecipientPreferences.vue';
 import Lookup from './LookupSelect.vue';
@@ -22,8 +23,9 @@ import { decodeLifecycle } from '../helpers/lifecycle';
 const props = defineProps({
   ticket: { type: Object, required: true },
   mode: { type: String, default: 'all' },
+  createTaskOnOpen: Boolean,
 });
-const emit = defineEmits(['updated']);
+const emit = defineEmits(['updated', 'taskEditorOpened']);
 const { t, locale } = useI18n();
 const labels = computed(() => v2Labels(t));
 const session = useServiceDesk();
@@ -40,11 +42,17 @@ const data = ref(null);
 const observedAt = ref(new Date().toISOString());
 const status = ref('loading');
 const feedback = ref(null);
+const failureReason = ref('');
 const busy = ref(false);
 const visibility = ref('internal');
 const previous = ref(null);
 const revision = ref(0);
 const taskTitle = ref('');
+const taskDescription = ref('');
+const taskDialog = ref(false);
+const editingTask = ref(null);
+const deletingTask = ref(null);
+const taskDeleteReason = ref('');
 const checklistText = ref('');
 const taskDue = ref('');
 const taskPriority = ref('normal');
@@ -182,6 +190,7 @@ const write = async (operation, payload, send, verify) => {
   if (busy.value || !active()) return false;
   busy.value = true;
   feedback.value = null;
+  failureReason.value = '';
   const context = session.state.context;
   const ticketId = props.ticket.id;
   const turn = epoch;
@@ -212,6 +221,8 @@ const write = async (operation, payload, send, verify) => {
     return true;
   } catch (error) {
     if (context === session.state.context && active()) {
+      if (error?.response?.data?.code === 'deletion_blocked')
+        failureReason.value = error.response.data.error || '';
       if (error?.response?.status === 409) feedback.value = 'conflict';
       else if ([401, 403].includes(error?.response?.status))
         feedback.value = 'denied';
@@ -242,6 +253,7 @@ const createTask = async () => {
     return;
   const task = {
     title: taskTitle.value,
+    description: taskDescription.value,
     ...audience(),
     checklist: checklistText.value
       .split('\n')
@@ -276,7 +288,9 @@ const createTask = async () => {
         )
     )
   ) {
+    taskDialog.value = false;
     taskTitle.value = '';
+    taskDescription.value = '';
     checklistText.value = '';
     taskDue.value = '';
     parentTask.value = '';
@@ -300,6 +314,101 @@ const updateTask = async (row, changes) =>
               JSON.stringify(changes.checklist))
       )
   );
+const localDateTime = value => {
+  if (!value) return '';
+  const date = new Date(value);
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+    .toISOString()
+    .slice(0, 16);
+};
+const openTaskEditor = (row = null) => {
+  editingTask.value = row;
+  taskTitle.value = row?.title || '';
+  taskDescription.value = row?.description || '';
+  taskDue.value = localDateTime(row?.due_at);
+  taskPriority.value = row?.priority || 'normal';
+  taskAssignee.value = row?.assignee_account_user_id || '';
+  parentTask.value = row?.parent_task_id || '';
+  checklistText.value = row?.checklist.map(item => item.title).join('\n') || '';
+  visibility.value = row?.visibility || 'internal';
+  progressionEnabled.value = false;
+  nextTaskTitle.value = '';
+  taskDialog.value = true;
+};
+watch(
+  () => props.createTaskOnOpen,
+  value => {
+    if (value && props.mode === 'tasks') {
+      openTaskEditor();
+      emit('taskEditorOpened');
+    }
+  },
+  { immediate: true }
+);
+const terminalTask = computed(() =>
+  ['completed', 'cancelled'].includes(editingTask.value?.status)
+);
+const saveTask = async () => {
+  if (!editingTask.value) return createTask();
+  const row = editingTask.value;
+  const changes = {
+    title: taskTitle.value,
+    description: taskDescription.value,
+  };
+  if (!terminalTask.value)
+    Object.assign(changes, {
+      due_at: taskDue.value ? new Date(taskDue.value).toISOString() : null,
+      priority: taskPriority.value,
+      assignee_account_user_id: taskAssignee.value || null,
+      checklist: checklistText.value
+        .split('\n')
+        .filter(line => line.trim())
+        .map((line, index) => ({
+          title: line.trim(),
+          done:
+            row.checklist[index]?.title === line.trim() &&
+            row.checklist[index]?.done === true,
+        })),
+    });
+  const saved = await write(
+    'update_task',
+    { id: row.id, changes, version: row.lock_version },
+    (account, ticket, _key, signal) =>
+      API.updateTask(account, ticket, row, changes, signal),
+    result =>
+      result.tasks.some(
+        item =>
+          item.id === row.id &&
+          item.title === changes.title &&
+          (item.description || '') === (changes.description || '')
+      )
+  );
+  if (saved) taskDialog.value = false;
+  return saved;
+};
+const removeTask = async () => {
+  const row = deletingTask.value;
+  if (
+    !row ||
+    !row.permissions.destroy ||
+    taskDeleteReason.value.trim().length < 3
+  )
+    return;
+  const saved = await write(
+    'delete_task',
+    { id: row.id, version: row.lock_version, reason: taskDeleteReason.value },
+    (account, ticket, _key, signal) =>
+      API.deleteTask(
+        account,
+        ticket,
+        row,
+        taskDeleteReason.value.trim(),
+        signal
+      ),
+    result => !result.tasks.some(item => item.id === row.id)
+  );
+  if (saved) deletingTask.value = null;
+};
 const toggleItem = (row, index, done) =>
   updateTask(row, {
     checklist: row.checklist.map((item, at) => ({
@@ -432,7 +541,9 @@ onBeforeUnmount(() => {
 <template>
   <div class="grid gap-5">
     <Button
-      v-if="session.state.context?.capabilities?.knowledge?.index"
+      v-if="
+        mode === 'all' && session.state.context?.capabilities?.knowledge?.index
+      "
       size="xs"
       variant="outline"
       :label="t('JRC_SERVICE_DESK.SCREENS.knowledge')"
@@ -453,25 +564,56 @@ onBeforeUnmount(() => {
           :ticket="ticket"
           :revision="revision"
           :only-files="mode === 'files'"
+          :view="
+            mode === 'notes'
+              ? 'notes'
+              : mode === 'communication'
+                ? 'conversations'
+                : mode === 'files'
+                  ? 'files'
+                  : 'all'
+          "
           @republish="republish"
           @updated="refreshed"
         />
         <InteractionComposer
-          v-if="permissions.add_note && mode !== 'files'"
+          v-if="permissions.add_note"
           :ticket="ticket"
           :previous="previous"
+          :mode="
+            mode === 'notes'
+              ? 'internal'
+              : mode === 'communication'
+                ? 'conversation'
+                : mode === 'files'
+                  ? 'files'
+                  : 'all'
+          "
           @updated="refreshed"
         />
         <RecipientPreferences
-          v-if="mode !== 'files'"
+          v-if="['communication', 'all'].includes(mode)"
           :ticket="ticket"
           @updated="refreshed"
         />
       </div>
       <section v-if="showTasks && permissions.tasks_view" class="grid gap-3">
-        <h3 class="font-semibold">
-          {{ t('JRC_SERVICE_DESK.TICKET.tabs.tasks') }}
-        </h3>
+        <div class="flex items-center justify-between gap-3">
+          <p class="text-sm text-n-slate-11">
+            {{
+              t('JRC_SERVICE_DESK.REDESIGN_DETAIL.task_count', {
+                count: data.tasks.length,
+              })
+            }}
+          </p>
+          <Button
+            v-if="permissions.tasks_manage"
+            size="sm"
+            icon="i-lucide-plus"
+            :label="t('JRC_SERVICE_DESK.COCKPIT.create_task')"
+            @click="openTaskEditor()"
+          />
+        </div>
         <p v-if="!data.tasks.length" class="text-sm text-n-slate-11">
           {{ t('JRC_SERVICE_DESK.COMMON.no_records') }}
         </p>
@@ -480,9 +622,59 @@ onBeforeUnmount(() => {
           :key="row.id"
           class="rounded-lg border border-n-weak p-3 grid gap-2"
         >
-          <p class="font-medium text-sm">
-            {{ row.title }} {{ separator }}
-            {{ labels.task[row.status] }}
+          <div class="flex flex-wrap items-start justify-between gap-2">
+            <div class="min-w-0 flex-1">
+              <p class="break-words font-medium text-sm">{{ row.title }}</p>
+              <p class="mt-1 text-xs text-n-slate-11">
+                {{ labels.task[row.status] }} ·
+                {{
+                  t(`JRC_SERVICE_DESK.R3.priority.${row.priority || 'normal'}`)
+                }}
+                ·
+                {{
+                  data.approvers.find(
+                    person => person.id === row.assignee_account_user_id
+                  )?.name ||
+                  t(
+                    row.assignee_account_user_id
+                      ? 'JRC_SERVICE_DESK.COMMON.selected_identifier'
+                      : 'JRC_SERVICE_DESK.REDESIGN_DETAIL.unassigned',
+                    { id: row.assignee_account_user_id }
+                  )
+                }}
+              </p>
+            </div>
+            <div class="flex gap-1">
+              <Button
+                v-if="row.permissions.update"
+                size="xs"
+                color="slate"
+                variant="ghost"
+                icon="i-lucide-pencil"
+                :label="t('JRC_SERVICE_DESK.COMMON.edit')"
+                :disabled="busy"
+                @click="openTaskEditor(row)"
+              />
+              <Button
+                v-if="row.permissions.destroy"
+                size="xs"
+                color="ruby"
+                variant="ghost"
+                icon="i-lucide-trash-2"
+                :label="t('JRC_SERVICE_DESK.REDESIGN_DETAIL.delete')"
+                :disabled="busy"
+                @click="
+                  deletingTask = row;
+                  taskDeleteReason = '';
+                "
+              />
+            </div>
+          </div>
+          <p
+            v-if="row.description"
+            class="whitespace-pre-wrap break-words text-sm text-n-slate-11"
+          >
+            {{ row.description }}
           </p>
           <p class="text-xs">
             {{ labels.visibility[row.visibility] }} {{ separator }}
@@ -560,123 +752,215 @@ onBeforeUnmount(() => {
             @click="updateTask(row, { status: 'completed' })"
           />
         </article>
-        <form
-          v-if="permissions.tasks_manage"
-          class="grid gap-3"
-          @submit.prevent="createTask"
+        <ServiceDeskDialog
+          :open="taskDialog"
+          :title="
+            t(
+              editingTask
+                ? 'JRC_SERVICE_DESK.REDESIGN_DETAIL.edit_task'
+                : 'JRC_SERVICE_DESK.COCKPIT.create_task'
+            )
+          "
+          :busy="busy"
+          @close="taskDialog = false"
         >
-          <label class="text-sm">
-            {{ t('JRC_SERVICE_DESK.COCKPIT.audience') }}
-            <select
-              v-model="visibility"
+          <form
+            v-if="permissions.tasks_manage"
+            class="grid gap-3"
+            @submit.prevent="saveTask"
+          >
+            <label class="text-sm">
+              {{ t('JRC_SERVICE_DESK.COCKPIT.audience') }}
+              <select
+                v-model="visibility"
+                :disabled="busy || !!editingTask"
+                class="w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
+              >
+                <option v-for="value in audiences" :key="value" :value="value">
+                  {{ labels.visibility[value] }}
+                </option>
+              </select>
+            </label>
+            <input
+              v-model="taskTitle"
+              required
+              maxlength="255"
+              :aria-label="t('JRC_SERVICE_DESK.COCKPIT.task_title')"
+              :placeholder="t('JRC_SERVICE_DESK.COCKPIT.task_title')"
+              class="border border-n-weak rounded-lg bg-n-solid-1 p-2"
+            />
+            <textarea
+              v-model="taskDescription"
+              :aria-label="t('JRC_SERVICE_DESK.FIELDS.description')"
+              :placeholder="t('JRC_SERVICE_DESK.FIELDS.description')"
+              rows="3"
+              maxlength="20000"
               :disabled="busy"
-              class="w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
-            >
-              <option v-for="value in audiences" :key="value" :value="value">
-                {{ labels.visibility[value] }}
-              </option>
-            </select>
-          </label>
-          <input
-            v-model="taskTitle"
-            required
-            maxlength="255"
-            :aria-label="t('JRC_SERVICE_DESK.COCKPIT.task_title')"
-            :placeholder="t('JRC_SERVICE_DESK.COCKPIT.task_title')"
-            class="border border-n-weak rounded-lg bg-n-solid-1 p-2"
-          />
-          <textarea
-            v-model="checklistText"
-            :aria-label="t('JRC_SERVICE_DESK.COCKPIT.checklist')"
-            :placeholder="t('JRC_SERVICE_DESK.COCKPIT.checklist')"
-            class="border border-n-weak rounded-lg bg-n-solid-1 p-2"
-          />
-          <input
-            v-model="taskDue"
-            type="datetime-local"
-            :aria-label="t('JRC_SERVICE_DESK.COCKPIT.deadline')"
-            class="border border-n-weak rounded-lg bg-n-solid-1 p-2"
-          />
-          <Lookup
-            v-model="taskAssignee"
-            resource="assignees"
-            :unit-id="ticket.unit_id"
-            :label="t('JRC_SERVICE_DESK.FIELDS.assignee')"
-            :disabled="busy"
-          />
-          <label
-            >{{ t('JRC_SERVICE_DESK.FIELDS.priority')
-            }}<select
-              v-model="taskPriority"
-              class="block w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
-            >
-              <option
-                v-for="value in ['low', 'normal', 'high', 'urgent']"
-                :key="value"
-                :value="value"
+              class="rounded-lg border border-n-weak bg-n-solid-1 p-3"
+            />
+            <textarea
+              :disabled="busy || terminalTask"
+              v-model="checklistText"
+              :aria-label="t('JRC_SERVICE_DESK.COCKPIT.checklist')"
+              :placeholder="t('JRC_SERVICE_DESK.COCKPIT.checklist')"
+              class="border border-n-weak rounded-lg bg-n-solid-1 p-2"
+            />
+            <input
+              v-model="taskDue"
+              :disabled="busy || terminalTask"
+              type="datetime-local"
+              :aria-label="t('JRC_SERVICE_DESK.COCKPIT.deadline')"
+              class="border border-n-weak rounded-lg bg-n-solid-1 p-2"
+            />
+            <Lookup
+              v-model="taskAssignee"
+              resource="assignees"
+              :unit-id="ticket.unit_id"
+              :label="t('JRC_SERVICE_DESK.FIELDS.assignee')"
+              :disabled="busy || terminalTask"
+            />
+            <label
+              >{{ t('JRC_SERVICE_DESK.FIELDS.priority')
+              }}<select
+                v-model="taskPriority"
+                :disabled="busy || terminalTask"
+                class="block w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
               >
-                {{ t(`JRC_SERVICE_DESK.R3.priority.${value}`) }}
-              </option>
-            </select></label
-          >
-          <label
-            >{{ t('JRC_SERVICE_DESK.R3.parent_task')
-            }}<select
-              v-model="parentTask"
-              class="block w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
+                <option
+                  v-for="value in ['low', 'normal', 'high', 'urgent']"
+                  :key="value"
+                  :value="value"
+                >
+                  {{ t(`JRC_SERVICE_DESK.R3.priority.${value}`) }}
+                </option>
+              </select></label
             >
-              <option value="">{{ t('JRC_SERVICE_DESK.COMMON.none') }}</option>
-              <option
-                v-for="row in data.tasks.filter(
-                  task => !['completed', 'cancelled'].includes(task.status)
-                )"
-                :key="row.id"
-                :value="row.id"
-              >
-                {{ row.title }}
-              </option>
-            </select></label
-          >
-          <template
-            v-if="canPublishProgression && permissions.lifecycle_inspect"
-          >
-            <label class="flex gap-2 text-sm"
-              ><input
-                v-model="progressionEnabled"
-                type="checkbox"
-                @change="progressionEnabled && loadLifecycle()"
-              />{{ t('JRC_SERVICE_DESK.R3.task_progression') }}</label
-            >
-            <template v-if="progressionEnabled">
-              <State
-                v-if="lifecycleStatus !== 'ready'"
-                :status="lifecycleStatus"
-                compact
-                retry
-                @retry="loadLifecycle"
-              /><input
-                v-model="nextTaskTitle"
-                :aria-label="t('JRC_SERVICE_DESK.R3.next_task')"
-                :placeholder="t('JRC_SERVICE_DESK.R3.next_task')"
-                maxlength="255"
-                class="rounded-lg border border-n-weak bg-n-solid-1 p-2"
+            <details class="rounded-lg border border-n-weak p-3">
+              <summary class="cursor-pointer text-sm font-medium">
+                {{ t('JRC_SERVICE_DESK.REDESIGN_DETAIL.advanced_task') }}
+              </summary>
+              <div class="mt-3 grid gap-3">
+                <label
+                  >{{ t('JRC_SERVICE_DESK.R3.parent_task')
+                  }}<select
+                    v-model="parentTask"
+                    :disabled="busy || !!editingTask"
+                    class="block w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
+                  >
+                    <option value="">
+                      {{ t('JRC_SERVICE_DESK.COMMON.none') }}
+                    </option>
+                    <option
+                      v-for="row in data.tasks.filter(
+                        task =>
+                          !['completed', 'cancelled'].includes(task.status)
+                      )"
+                      :key="row.id"
+                      :value="row.id"
+                    >
+                      {{ row.title }}
+                    </option>
+                  </select></label
+                >
+                <template
+                  v-if="
+                    !editingTask &&
+                    canPublishProgression &&
+                    permissions.lifecycle_inspect
+                  "
+                >
+                  <label class="flex gap-2 text-sm"
+                    ><input
+                      v-model="progressionEnabled"
+                      type="checkbox"
+                      @change="progressionEnabled && loadLifecycle()"
+                    />{{ t('JRC_SERVICE_DESK.R3.task_progression') }}</label
+                  >
+                  <template v-if="progressionEnabled">
+                    <State
+                      v-if="lifecycleStatus !== 'ready'"
+                      :status="lifecycleStatus"
+                      compact
+                      retry
+                      @retry="loadLifecycle"
+                    /><input
+                      v-model="nextTaskTitle"
+                      :aria-label="t('JRC_SERVICE_DESK.R3.next_task')"
+                      :placeholder="t('JRC_SERVICE_DESK.R3.next_task')"
+                      maxlength="255"
+                      class="rounded-lg border border-n-weak bg-n-solid-1 p-2"
+                    />
+                    <p class="text-xs">
+                      {{ t('JRC_SERVICE_DESK.R3.published_progression_help') }}
+                    </p>
+                  </template>
+                </template>
+              </div>
+            </details>
+            <Button
+              type="submit"
+              :disabled="
+                busy ||
+                !taskTitle.trim() ||
+                (progressionEnabled &&
+                  (!lifecycle?.policy || !nextTaskTitle.trim()))
+              "
+              :label="
+                t(
+                  editingTask
+                    ? 'JRC_SERVICE_DESK.COMMON.save'
+                    : 'JRC_SERVICE_DESK.COCKPIT.create_task'
+                )
+              "
+            />
+            <p v-if="feedback" role="status" class="text-sm">
+              {{ labels.feedback[feedback] }}
+            </p>
+            <p v-if="failureReason" role="alert" class="text-sm text-n-ruby-11">
+              {{ failureReason }}
+            </p>
+          </form>
+        </ServiceDeskDialog>
+        <ServiceDeskDialog
+          :open="!!deletingTask"
+          :title="t('JRC_SERVICE_DESK.REDESIGN_DETAIL.delete_task')"
+          :busy="busy"
+          @close="deletingTask = null"
+        >
+          <form class="grid gap-4" @submit.prevent="removeTask">
+            <p class="text-sm">
+              {{
+                t('JRC_SERVICE_DESK.REDESIGN_DETAIL.delete_task_help', {
+                  title: deletingTask?.title,
+                })
+              }}
+            </p>
+            <label class="grid gap-2 text-sm"
+              >{{ t('JRC_SERVICE_DESK.REDESIGN_DETAIL.reason')
+              }}<textarea
+                v-model="taskDeleteReason"
+                required
+                minlength="3"
+                maxlength="1000"
+                rows="3"
+                :disabled="busy"
+                class="rounded-lg border border-n-weak bg-n-solid-1 p-3"
               />
-              <p class="text-xs">
-                {{ t('JRC_SERVICE_DESK.R3.published_progression_help') }}
-              </p>
-            </template>
-          </template>
-          <Button
-            type="submit"
-            :disabled="
-              busy ||
-              !taskTitle.trim() ||
-              (progressionEnabled &&
-                (!lifecycle?.policy || !nextTaskTitle.trim()))
-            "
-            :label="t('JRC_SERVICE_DESK.COCKPIT.create_task')"
-          />
-        </form>
+            </label>
+            <p v-if="feedback" role="status" class="text-sm">
+              {{ labels.feedback[feedback] }}
+            </p>
+            <p v-if="failureReason" role="alert" class="text-sm text-n-ruby-11">
+              {{ failureReason }}
+            </p>
+            <Button
+              type="submit"
+              color="ruby"
+              :disabled="busy || taskDeleteReason.trim().length < 3"
+              :label="t('JRC_SERVICE_DESK.REDESIGN_DETAIL.confirm_delete')"
+            />
+          </form>
+        </ServiceDeskDialog>
       </section>
       <section
         v-if="showTasks && permissions.approvals_view"

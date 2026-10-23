@@ -31,7 +31,7 @@ export function createServiceDeskClient(http) {
       get(`${baseUrl(accountId)}/ui_context`, {}, signal),
     list: (accountId, resource, query, signal) => {
       if (!RESOURCES.has(resource)) throw new TypeError('Unknown resource');
-      const normalized = normalizeQuery(query);
+      const normalized = normalizeQuery(query, resource);
       if (
         resource !== 'tickets' &&
         Object.keys(normalized).some(
@@ -43,6 +43,7 @@ export function createServiceDeskClient(http) {
               'unit_id',
               'operator_company_id',
               'sort',
+              ...(resource === 'assignees' ? ['team_id'] : []),
             ].includes(key)
         )
       ) {

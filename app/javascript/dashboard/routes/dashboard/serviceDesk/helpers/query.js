@@ -1,7 +1,15 @@
 import { canonicalId } from './access.js';
-export class QueryError extends Error {
-}
-const idFields = ['unit_id', 'operator_company_id', 'status_id', 'priority_id', 'category_id', 'queue_id', 'assignee_id'];
+export class QueryError extends Error {}
+const idFields = [
+  'unit_id',
+  'operator_company_id',
+  'status_id',
+  'priority_id',
+  'category_id',
+  'queue_id',
+  'assignee_id',
+  'team_id',
+];
 const fields = new Set([
   'q',
   'page',
@@ -11,38 +19,51 @@ const fields = new Set([
   'sort',
   'phase',
   'assignment',
+  'created_from',
+  'created_to',
   ...idFields,
 ]);
 const scalar = value => typeof value === 'string' || typeof value === 'number';
 export function normalizeQuery(query = {}, resource = null) {
   const result = { page: 1, per_page: 20 };
   Object.entries(query).forEach(([key, value]) => {
+    if (
+      key === 'team_id' &&
+      ![null, 'tickets', 'assignees', 'dashboard', 'reports'].includes(resource)
+    )
+      throw new QueryError('Unknown filter');
     if (!fields.has(key) && !(resource === 'assignees' && key === 'team_id'))
       throw new QueryError('Unknown filter');
-    if (value === '' || value === undefined || value === null)
-      return;
-    if (!scalar(value))
-      throw new QueryError('Invalid filter');
+    if (value === '' || value === undefined || value === null) return;
+    if (!scalar(value)) throw new QueryError('Invalid filter');
     if (idFields.includes(key) || key === 'team_id') {
       const parsed = canonicalId(value);
-      if (!parsed)
-        throw new QueryError('Invalid identifier');
+      if (!parsed) throw new QueryError('Invalid identifier');
       result[key] = parsed;
-    }
-    else if (['page', 'per_page'].includes(key)) {
+    } else if (['page', 'per_page'].includes(key)) {
       if (!/^[1-9]\d*$/.test(String(value)))
         throw new QueryError('Invalid pagination');
       const number = Number(value);
-      if (!Number.isSafeInteger(number) || number > (key === 'per_page' ? 100 : 1000000))
+      if (
+        !Number.isSafeInteger(number) ||
+        number > (key === 'per_page' ? 100 : 1000000)
+      )
         throw new QueryError('Invalid pagination');
       result[key] = number;
-    }
-    else if (key === 'mine') {
+    } else if (['created_from', 'created_to'].includes(key)) {
+      if (
+        typeof value !== 'string' ||
+        !/^\d{4}-\d{2}-\d{2}$/.test(value) ||
+        !Number.isFinite(Date.parse(`${value}T00:00:00Z`)) ||
+        new Date(`${value}T00:00:00Z`).toISOString().slice(0, 10) !== value
+      )
+        throw new QueryError('Invalid date');
+      result[key] = value;
+    } else if (key === 'mine') {
       if (String(value) !== 'true')
         throw new QueryError('Invalid personal filter');
       result.mine = 'true';
-    }
-    else if (key === 'phase') {
+    } else if (key === 'phase') {
       if (
         ![
           'active',
@@ -55,12 +76,15 @@ export function normalizeQuery(query = {}, resource = null) {
       )
         throw new QueryError('Invalid phase');
       result.phase = value;
-    }
-    else if (key === 'assignment') {
+    } else if (key === 'assignment') {
       if (value !== 'unassigned') throw new QueryError('Invalid assignment');
       result.assignment = value;
     } else if (key === 'sort') {
-      if (!['updated_at_desc', 'created_at_desc', 'created_at_asc'].includes(value))
+      if (
+        !['updated_at_desc', 'created_at_desc', 'created_at_asc'].includes(
+          value
+        )
+      )
         throw new QueryError('Invalid order');
       result.sort = value;
     } else {
@@ -69,6 +93,12 @@ export function normalizeQuery(query = {}, resource = null) {
       result[key] = String(value).trim();
     }
   });
+  if (
+    result.created_from &&
+    result.created_to &&
+    result.created_from > result.created_to
+  )
+    throw new QueryError('Invalid date range');
   if (result.mine && result.assignment)
     throw new QueryError('Incompatible personal filter');
   return result;
@@ -77,12 +107,25 @@ export function queryWithinContext(query, context) {
   const units = context?.units || [];
   if (query.unit_id && !units.some(unit => unit.id === query.unit_id))
     return false;
-  if (query.operator_company_id && !units.some(unit => unit.operator_company.id === query.operator_company_id))
+  if (
+    query.operator_company_id &&
+    !units.some(unit => unit.operator_company.id === query.operator_company_id)
+  )
     return false;
-  if (query.unit_id && query.operator_company_id && !units.some(unit => unit.id === query.unit_id && unit.operator_company.id === query.operator_company_id))
+  if (
+    query.unit_id &&
+    query.operator_company_id &&
+    !units.some(
+      unit =>
+        unit.id === query.unit_id &&
+        unit.operator_company.id === query.operator_company_id
+    )
+  )
     return false;
   return true;
 }
 export function routeQuery(query) {
-  return Object.fromEntries(Object.entries(normalizeQuery(query)).filter(([, value]) => value !== ''));
+  return Object.fromEntries(
+    Object.entries(normalizeQuery(query)).filter(([, value]) => value !== '')
+  );
 }

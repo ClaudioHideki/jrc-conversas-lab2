@@ -11,7 +11,7 @@ class JrcServiceDesk::OperationalResourcePresenter
 
     identity(row).merge(ownership(row)).merge(planning(row)).merge(
       details: row.details, history: history(row), lock_version: row.lock_version,
-      ticket_ids: visible_ticket_ids(row.resource_ticket_links.select(:ticket_id)),
+      ticket_ids: visible_ticket_ids(row.resource_ticket_links.active.select(:ticket_id)),
       permissions: { show: true, update: policy.update?, destroy: policy.destroy? }
     )
   end

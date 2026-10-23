@@ -17,9 +17,13 @@ import {
 } from '../helpers/lifecycle.js';
 import { newRequestKey } from '../helpers/drafts.js';
 import { tones } from '../helpers/visualTheme';
-const props = defineProps({ ticket: { type: Object, required: true } });
+import { formatTimestamp } from '../helpers/presentation';
+const props = defineProps({
+  ticket: { type: Object, required: true },
+  mode: { type: String, default: 'all' },
+});
 const emit = defineEmits(['updated', 'snapshotRecorded']);
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const session = useServiceDesk();
 const state = reactive(createLifecycleState());
 const lifecycle = createLifecycleSession(
@@ -40,6 +44,24 @@ const selected = ref('');
 const reason = ref('');
 const note = ref('');
 const solution = ref('');
+const outcome = ref('');
+const validation = ref('');
+const actionOptions = computed(() =>
+  (state.data?.options || []).filter(
+    option =>
+      props.mode !== 'sla' &&
+      (props.mode !== 'solution' ||
+        ['resolve', 'close', 'reopen', 'work_status'].includes(option.action))
+  )
+);
+const solutionHistory = computed(() =>
+  (state.data?.history || []).filter(
+    item =>
+      props.mode === 'all' ||
+      (props.mode === 'solution' &&
+        (item.solution || ['resolve', 'close', 'reopen'].includes(item.action)))
+  )
+);
 const evidence = ref('');
 const pendingCommand = ref(null);
 const fields = reactive({});
@@ -67,6 +89,8 @@ const resetDraft = () => {
   reason.value = '';
   note.value = '';
   solution.value = '';
+  outcome.value = '';
+  validation.value = '';
   evidence.value = '';
   requestKey = null;
   Object.keys(fields).forEach(key => delete fields[key]);
@@ -116,7 +140,24 @@ const submit = async () => {
       expected_lock_version: state.data.lock_version,
       expected_policy_version_id: state.data.policy.id,
       note: note.value,
-      solution: solution.value,
+      solution:
+        props.mode === 'solution'
+          ? [
+              solution.value,
+              ...(outcome.value.trim()
+                ? [
+                    `${t('JRC_SERVICE_DESK.REDESIGN_DETAIL.outcome')}: ${outcome.value.trim()}`,
+                  ]
+                : []),
+              ...(validation.value
+                ? [
+                    `${t('JRC_SERVICE_DESK.REDESIGN_DETAIL.customer_validation')}: ${t(`JRC_SERVICE_DESK.REDESIGN_DETAIL.validation.${validation.value}`)}`,
+                  ]
+                : []),
+            ]
+              .filter(Boolean)
+              .join('\n\n')
+          : solution.value,
       fields: custom,
       evidence_note_ids: evidence.value.trim()
         ? evidence.value.split(',').map(value => value.trim())
@@ -163,7 +204,17 @@ onBeforeUnmount(() => lifecycle.clear());
 </script>
 
 <template>
-  <Panel :title="t('JRC_SERVICE_DESK.LIFECYCLE.title')">
+  <Panel
+    :title="
+      t(
+        mode === 'solution'
+          ? 'JRC_SERVICE_DESK.TICKET.tabs.solution'
+          : mode === 'sla'
+            ? 'JRC_SERVICE_DESK.REDESIGN_DETAIL.sla_title'
+            : 'JRC_SERVICE_DESK.REDESIGN_DETAIL.actions.status'
+      )
+    "
+  >
     <div class="grid gap-3">
       <State
         v-if="state.status !== 'ready'"
@@ -207,13 +258,17 @@ onBeforeUnmount(() => lifecycle.clear());
           </p>
         </div>
         <form
-          v-if="state.data.options.length"
+          v-if="actionOptions.length"
           class="grid gap-3"
           @submit.prevent="submit"
         >
-          <div class="flex flex-wrap gap-2" data-testid="lifecycle-shortcuts">
+          <div
+            v-if="mode === 'all'"
+            class="flex flex-wrap gap-2"
+            data-testid="lifecycle-shortcuts"
+          >
             <Button
-              v-for="option in state.data.options"
+              v-for="option in actionOptions"
               :key="option.key"
               type="button"
               variant="outline"
@@ -230,7 +285,7 @@ onBeforeUnmount(() => lifecycle.clear());
             :disabled="busy || !!pendingCommand"
             :placeholder="t('JRC_SERVICE_DESK.LIFECYCLE.choose_action')"
             :options="
-              state.data.options.map(row => ({
+              actionOptions.map(row => ({
                 value: row.key,
                 label: `${t(`JRC_SERVICE_DESK.LIFECYCLE.actions.${row.action}`)}: ${row.to_status_name}`,
               }))
@@ -252,8 +307,11 @@ onBeforeUnmount(() => lifecycle.clear());
               :disabled="busy || !!pendingCommand"
               :max-length="20000"
               :label="
-                t('JRC_SERVICE_DESK.LIFECYCLE.note') +
-                (rule.requirements.note ? ' *' : '')
+                t(
+                  mode === 'solution'
+                    ? 'JRC_SERVICE_DESK.REDESIGN_DETAIL.diagnosis'
+                    : 'JRC_SERVICE_DESK.LIFECYCLE.note'
+                ) + (rule.requirements.note ? ' *' : '')
               "
             />
             <TextArea
@@ -266,6 +324,35 @@ onBeforeUnmount(() => lifecycle.clear());
                 (rule.requirements.solution ? ' *' : '')
               "
             />
+            <template v-if="mode === 'solution' && maySeeNotes">
+              <TextArea
+                v-model="outcome"
+                :disabled="busy || !!pendingCommand"
+                :max-length="4000"
+                :label="t('JRC_SERVICE_DESK.REDESIGN_DETAIL.outcome')"
+              />
+              <label class="grid gap-1 text-sm"
+                >{{ t('JRC_SERVICE_DESK.REDESIGN_DETAIL.customer_validation') }}
+                <select
+                  v-model="validation"
+                  :disabled="busy || !!pendingCommand"
+                  class="rounded-lg border border-n-weak bg-n-solid-1 p-2"
+                >
+                  <option value="">
+                    {{ t('JRC_SERVICE_DESK.COMMON.not_informed') }}
+                  </option>
+                  <option
+                    v-for="value in ['awaiting', 'confirmed', 'not_confirmed']"
+                    :key="value"
+                    :value="value"
+                  >
+                    {{
+                      t(`JRC_SERVICE_DESK.REDESIGN_DETAIL.validation.${value}`)
+                    }}
+                  </option>
+                </select>
+              </label>
+            </template>
             <Input
               v-if="maySeeNotes"
               v-model="evidence"
@@ -316,7 +403,12 @@ onBeforeUnmount(() => lifecycle.clear());
             <Button
               type="submit"
               :disabled="
-                busy || !!pendingCommand || (rule.action === 'pause' && !reason)
+                busy ||
+                !!pendingCommand ||
+                (rule.action === 'pause' && !reason) ||
+                (rule.requirements.solution && !solution.trim()) ||
+                (rule.requirements.note && !note.trim()) ||
+                (rule.requirements.evidence && !evidence.trim())
               "
               :color="
                 ['resolve', 'close'].includes(rule.action)
@@ -330,12 +422,15 @@ onBeforeUnmount(() => lifecycle.clear());
           </template>
         </form>
         <p
-          v-else-if="!state.data.unavailable_reason"
+          v-else-if="mode !== 'sla' && !state.data.unavailable_reason"
           class="text-xs text-n-slate-11"
         >
           {{ t('JRC_SERVICE_DESK.LIFECYCLE.no_actions') }}
         </p>
-        <div v-if="state.data.cycle" class="grid gap-2 text-xs">
+        <div
+          v-if="['sla', 'all'].includes(mode) && state.data.cycle"
+          class="grid gap-3 text-sm"
+        >
           <p>
             {{
               t('JRC_SERVICE_DESK.LIFECYCLE.cycle', {
@@ -344,24 +439,40 @@ onBeforeUnmount(() => lifecycle.clear());
             }}
             / {{ state.data.cycle.timezone }}
           </p>
-          <p v-for="clock in state.data.cycle.clocks" :key="clock.id">
-            {{ t(`JRC_SERVICE_DESK.LIFECYCLE.clocks.${clock.kind}`) }}:
-            {{ t(`JRC_SERVICE_DESK.LIFECYCLE.states.${clock.state}`) }} /
-            {{ clock.due_at }}
-          </p>
+          <div
+            v-for="clock in state.data.cycle.clocks"
+            :key="clock.id"
+            class="grid gap-1 rounded-lg border border-n-weak bg-n-solid-2 p-4"
+          >
+            <p class="font-semibold">
+              {{ t(`JRC_SERVICE_DESK.LIFECYCLE.clocks.${clock.kind}`) }}
+            </p>
+            <p>{{ t(`JRC_SERVICE_DESK.LIFECYCLE.states.${clock.state}`) }}</p>
+            <p class="text-xs text-n-slate-11">
+              {{ t('JRC_SERVICE_DESK.FIELDS.due_at') }}:
+              {{ formatTimestamp(clock.due_at, locale) }}
+            </p>
+          </div>
           <p>{{ t('JRC_SERVICE_DESK.LIFECYCLE.clock_notice') }}</p>
         </div>
-        <h4 class="text-sm font-medium">
+        <p
+          v-if="mode === 'sla' && !state.data.cycle"
+          class="rounded-lg bg-n-amber-2 p-4 text-sm"
+        >
+          {{ t('JRC_SERVICE_DESK.REDESIGN_DETAIL.sla_unconfigured') }}
+        </p>
+        <h4 v-if="solutionHistory.length" class="text-sm font-medium">
           {{ t('JRC_SERVICE_DESK.LIFECYCLE.history') }}
         </h4>
         <article
-          v-for="item in state.data.history"
+          v-for="item in solutionHistory"
           :key="item.id"
           class="border-t border-n-weak pt-2 text-xs break-words"
         >
           <p>
             {{ t(`JRC_SERVICE_DESK.LIFECYCLE.actions.${item.action}`) }} /
-            {{ item.author.name }} / {{ item.occurred_at }}
+            {{ item.author.name }} /
+            {{ formatTimestamp(item.occurred_at, locale) }}
           </p>
           <p>
             {{
@@ -387,7 +498,9 @@ onBeforeUnmount(() => lifecycle.clear());
           </p>
         </article>
         <Pagination
-          v-if="state.data.meta.total > 20"
+          v-if="
+            ['solution', 'all'].includes(mode) && state.data.meta.total > 20
+          "
           :current-page="page"
           :items-per-page="20"
           :total-items="state.data.meta.total"
@@ -416,7 +529,10 @@ onBeforeUnmount(() => lifecycle.clear());
         @click="load"
       />
       <SlaSnapshotEditor
-        v-if="ticket.permissions.record_sla_snapshot"
+        v-if="
+          ['sla', 'all'].includes(mode) &&
+          ticket.permissions.record_sla_snapshot
+        "
         :ticket="ticket"
         @snapshot-recorded="emit('snapshotRecorded', $event)"
       />

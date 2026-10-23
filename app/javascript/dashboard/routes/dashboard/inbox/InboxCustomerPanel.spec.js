@@ -3,6 +3,7 @@ import { mount } from '@vue/test-utils';
 import { ref } from 'vue';
 import InboxCustomerPanel from './InboxCustomerPanel.vue';
 import InboxContextContent from './InboxContextContent.vue';
+import { useEmbeddedSoftphone } from '../webphone/useEmbeddedSoftphone';
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({ t: key => key, locale: ref('pt_BR') }),
 }));
@@ -48,6 +49,38 @@ const global = {
   },
 };
 describe('existing customer 360 bridge', () => {
+  it('prepares the contact number in the embedded phone of the same Account', () => {
+    const open = vi.fn();
+    const host = mount({
+      setup() {
+        useEmbeddedSoftphone(ref(2), ref(true), open);
+      },
+      template: '<div />',
+    });
+    const wrapper = mount(InboxCustomerPanel, { props, global });
+    const event = new MouseEvent('click', { cancelable: true, bubbles: true });
+    wrapper.get('a[href^="tel:"]').element.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(true);
+    expect(open).toHaveBeenCalledWith('+550000000022');
+    host.unmount();
+    wrapper.unmount();
+  });
+  it('does not forward a contact to an embedded phone owned by another Account', () => {
+    const open = vi.fn();
+    const host = mount({
+      setup() {
+        useEmbeddedSoftphone(ref(1), ref(true), open);
+      },
+      template: '<div />',
+    });
+    const wrapper = mount(InboxCustomerPanel, { props, global });
+    const event = new MouseEvent('click', { cancelable: true });
+    wrapper.vm.callContact(event);
+    expect(event.defaultPrevented).toBe(false);
+    expect(open).not.toHaveBeenCalled();
+    host.unmount();
+    wrapper.unmount();
+  });
   it('keeps CRM order states and timeline dates readable in the contextual tabs', async () => {
     const wrapper = mount(InboxContextContent, {
       props: {

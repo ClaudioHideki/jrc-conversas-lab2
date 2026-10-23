@@ -37,6 +37,19 @@ class JrcServiceDesk::TicketQuery
       units = units.where(id: parameters['unit_id'])
     end
     @relation = relation.where(unit_id: units.select(:id))
+    if parameters['team_id']
+      team = Team.where(account_id: context.account.id).find(parameters['team_id'])
+      Pundit.authorize(context.to_h, team, :show?)
+      @relation = relation.where(team_id: team.id)
+    end
+    %w[created_from created_to].each do |key|
+      next unless parameters[key]
+
+      date = Date.iso8601(parameters[key])
+      date = date.next_day if key == 'created_to'
+      boundary = Time.zone.local(date.year, date.month, date.day)
+      @relation = relation.where("jrc_service_desk_tickets.created_at #{key == 'created_from' ? '>=' : '<'} ?", boundary)
+    end
     CATALOGS.each do |key, model|
       next unless parameters[key]
       model.where(account_id: context.account.id, unit_id: units.select(:id)).find(parameters[key])

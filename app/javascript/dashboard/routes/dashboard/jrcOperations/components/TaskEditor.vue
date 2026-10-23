@@ -23,12 +23,16 @@ const props = defineProps({
   tasks: { type: Array, default: () => [] },
 });
 const emit = defineEmits(['close', 'changed', 'open']);
-const { accountId, projectText } = useProjects();
+const { accountId, userId, projectText } = useProjects();
 const busy = ref(false);
 const error = ref('');
 const detail = ref(null);
 const comment = ref('');
 const checklistText = ref('');
+const editingComment = ref(null);
+const commentDraft = ref('');
+const editingChecklist = ref(null);
+const checklistDraft = ref('');
 const tab = ref('details');
 const predecessor = ref('');
 const labelsText = ref((props.task?.labels || []).join(', '));
@@ -79,7 +83,9 @@ const dirty = computed(
   () =>
     snapshot() !== savedSnapshot.value ||
     Boolean(comment.value.trim()) ||
-    Boolean(checklistText.value.trim())
+    Boolean(checklistText.value.trim()) ||
+    editingComment.value !== null ||
+    editingChecklist.value !== null
 );
 const taskTabs = computed(() => [
   ['details', projectText('DETAILS', 'Detalhes')],
@@ -172,6 +178,16 @@ async function submit() {
 }
 async function action(path, method, data) {
   if (busy.value || !editable.value) return;
+  if (
+    method === 'delete' &&
+    !window.confirm(
+      projectText(
+        'DELETE_ITEM_CONFIRM',
+        'Excluir este item? Esta ação é definitiva e será registrada no histórico.'
+      )
+    )
+  )
+    return;
   busy.value = true;
   error.value = '';
   try {
@@ -187,6 +203,53 @@ async function action(path, method, data) {
     busy.value = false;
   }
 }
+async function removeTask() {
+  if (busy.value || !openProject.value || !detail.value?.can_delete) return;
+  if (
+    !window.confirm(
+      projectText(
+        'DELETE_TASK_CONFIRM',
+        'Excluir esta tarefa e suas subtarefas? Apontamentos de horas e vínculos com outros registros impedem a exclusão.'
+      )
+    )
+  )
+    return;
+  busy.value = true;
+  error.value = '';
+  try {
+    await request(accountId.value, `${base}/${props.task.id}`, {
+      method: 'delete',
+      data: { lock_version: detail.value.lock_version },
+    });
+    emit('close');
+    emit('changed');
+  } catch (err) {
+    error.value = errorMessage(err);
+  } finally {
+    busy.value = false;
+  }
+}
+function canEditComment(entry) {
+  return (
+    editable.value &&
+    (String(entry.user_id) === String(userId.value) ||
+      props.project.capabilities.includes('projects.project.update'))
+  );
+}
+async function saveComment() {
+  if (!commentDraft.value.trim()) return;
+  await action(`comments/${editingComment.value}`, 'patch', {
+    comment: { body: commentDraft.value },
+  });
+  if (!error.value) editingComment.value = null;
+}
+async function saveChecklist() {
+  if (!checklistDraft.value.trim()) return;
+  await action(`checklist_items/${editingChecklist.value}`, 'patch', {
+    item: { text: checklistDraft.value },
+  });
+  if (!error.value) editingChecklist.value = null;
+}
 async function addComment() {
   await action('comments', 'post', { comment: { body: comment.value } });
   if (!error.value) comment.value = '';
@@ -199,6 +262,13 @@ async function addChecklist() {
 }
 async function dependency(edge = null) {
   if (busy.value || !canDependencies.value) return;
+  if (
+    edge &&
+    !window.confirm(
+      projectText('REMOVE_DEPENDENCY_CONFIRM', 'Remover esta dependência?')
+    )
+  )
+    return;
   busy.value = true;
   error.value = '';
   try {
@@ -300,6 +370,14 @@ function taskEventLabel(eventAction) {
     'projects.task.updated': ['EVENT_TASK_UPDATED', 'Tarefa atualizada'],
     'projects.task.moved': ['EVENT_TASK_MOVED', 'Tarefa movimentada'],
     'projects.task.comment_added': ['EVENT_COMMENT', 'Comentário registrado'],
+    'projects.task.comment_updated': [
+      'EVENT_COMMENT_UPDATED',
+      'Comentário editado',
+    ],
+    'projects.task.comment_deleted': [
+      'EVENT_COMMENT_DELETED',
+      'Comentário excluído',
+    ],
     'projects.task.checklist_added': [
       'EVENT_CHECKLIST',
       'Checklist atualizado',
@@ -592,6 +670,15 @@ function openSubtask(id) {
         </p>
         <footer class="flex justify-end gap-3 mt-4">
           <button
+            v-if="detail?.can_delete && openProject"
+            type="button"
+            class="mr-auto rounded-md border border-n-weak px-3 py-2 text-sm text-n-ruby-11 hover:bg-n-ruby-2 disabled:opacity-50"
+            :disabled="busy"
+            @click="removeTask"
+          >
+            {{ projectText('DELETE_TASK', 'Excluir tarefa') }}
+          </button>
+          <button
             class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
             type="button"
             :disabled="busy"
@@ -618,7 +705,36 @@ function openSubtask(id) {
           :key="item.id"
           class="flex flex-wrap items-center gap-3 justify-between"
         >
-          <label class="flex gap-2 items-center"
+          <form
+            v-if="editingChecklist === item.id"
+            class="flex w-full flex-wrap items-center gap-2"
+            @submit.prevent="saveChecklist"
+          >
+            <input
+              v-model="checklistDraft"
+              required
+              maxlength="1000"
+              class="min-w-0 flex-1 rounded border border-n-weak bg-n-solid-1 p-2"
+              :aria-label="projectText('CHECKLIST_ITEM_TEXT', 'Texto do item')"
+            />
+            <button
+              :disabled="busy"
+              class="rounded border border-n-weak px-3 py-2"
+            >
+              {{ projectText('SAVE', 'Salvar') }}
+            </button>
+            <button
+              type="button"
+              :disabled="busy"
+              class="rounded border border-n-weak px-3 py-2"
+              @click="editingChecklist = null"
+            >
+              {{ projectText('CANCEL', 'Cancelar') }}
+            </button>
+          </form>
+          <label
+            v-else
+            class="flex min-w-0 flex-1 items-center gap-2 break-words"
             ><input
               type="checkbox"
               :checked="item.completed"
@@ -629,8 +745,21 @@ function openSubtask(id) {
                 })
               "
             />{{ item.text }}</label
-          ><button
-            v-if="editable"
+          >
+          <button
+            v-if="editable && editingChecklist !== item.id"
+            type="button"
+            class="ml-auto rounded border border-n-weak px-3 py-2 text-xs"
+            :disabled="busy"
+            @click="
+              editingChecklist = item.id;
+              checklistDraft = item.text;
+            "
+          >
+            {{ projectText('EDIT', 'Editar') }}
+          </button>
+          <button
+            v-if="editable && editingChecklist !== item.id"
             class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed text-xs"
             :disabled="busy"
             @click="action(`checklist_items/${item.id}`, 'delete')"
@@ -677,7 +806,64 @@ function openSubtask(id) {
             }}</strong
             ><small>{{ formatDate(entry.created_at) }}</small>
           </div>
-          <p class="whitespace-pre-wrap break-words">{{ entry.body }}</p>
+          <form
+            v-if="editingComment === entry.id"
+            class="mt-3 flex flex-col gap-2"
+            @submit.prevent="saveComment"
+          >
+            <textarea
+              v-model="commentDraft"
+              required
+              maxlength="20000"
+              class="w-full rounded border border-n-weak bg-n-solid-1 p-2"
+              :aria-label="
+                projectText('INTERNAL_COMMENT', 'Comentário interno')
+              "
+            />
+            <div class="flex justify-end gap-2">
+              <button
+                type="button"
+                :disabled="busy"
+                class="rounded border border-n-weak px-3 py-2"
+                @click="editingComment = null"
+              >
+                {{ projectText('CANCEL', 'Cancelar') }}
+              </button>
+              <button
+                :disabled="busy"
+                class="rounded bg-n-blue-9 px-3 py-2 text-white"
+              >
+                {{ projectText('SAVE', 'Salvar') }}
+              </button>
+            </div>
+          </form>
+          <template v-else>
+            <p class="whitespace-pre-wrap break-words">{{ entry.body }}</p>
+            <div
+              v-if="canEditComment(entry)"
+              class="mt-2 flex justify-end gap-2"
+            >
+              <button
+                type="button"
+                class="rounded border border-n-weak px-3 py-1 text-xs"
+                :disabled="busy"
+                @click="
+                  editingComment = entry.id;
+                  commentDraft = entry.body;
+                "
+              >
+                {{ projectText('EDIT', 'Editar') }}
+              </button>
+              <button
+                type="button"
+                class="rounded border border-n-weak px-3 py-1 text-xs text-n-ruby-11"
+                :disabled="busy"
+                @click="action(`comments/${entry.id}`, 'delete')"
+              >
+                {{ projectText('DELETE', 'Excluir') }}
+              </button>
+            </div>
+          </template>
         </article>
         <p
           v-if="detail?.comments?.length >= 100"

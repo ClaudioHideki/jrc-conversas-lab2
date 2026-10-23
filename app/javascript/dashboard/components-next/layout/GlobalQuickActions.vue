@@ -17,6 +17,10 @@ import ConversationQuickActions from 'dashboard/components-next/Conversation/Con
 import { useQuickActionAccess } from './useQuickActionAccess';
 import GlobalCallPanel from './GlobalCallPanel.vue';
 import GlobalCrmCreation from './GlobalCrmCreation.vue';
+import {
+  embeddedSoftphoneAccount,
+  openEmbeddedSoftphone,
+} from 'dashboard/routes/dashboard/webphone/useEmbeddedSoftphone';
 
 defineProps({ callActive: { type: Boolean, default: false } });
 const { t } = useI18n();
@@ -77,7 +81,7 @@ const activate = async key => {
   else if (action.command === 'nico') openNico();
   else if (action.command === 'call') {
     phoneTrigger.value = document.activeElement;
-    phoneOpen.value = true;
+    phoneOpen.value = !openEmbeddedSoftphone(accountId.value);
   } else if (['LEAD', 'DEAL'].includes(key)) {
     crmCreation.value = key;
   } else {
@@ -155,7 +159,7 @@ useEventBus(quickActionCommand).on(request => {
       @close="crmCreation = null"
     />
     <GlobalCallPanel
-      v-if="phoneOpen && callAction"
+      v-if="phoneOpen && callAction && embeddedSoftphoneAccount !== accountId"
       :key="contactDialogKey"
       :allow-softphone="callAction.modes.softphone"
       :allow-conference="callAction.modes.conference"

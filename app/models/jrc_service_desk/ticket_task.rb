@@ -49,7 +49,7 @@ class JrcServiceDesk::TicketTask < JrcServiceDesk::TicketRecord
   end
 
   def published_audience_is_stable
-    %w[visibility audience_team_id title description created_by_membership_id idempotency_key request_fingerprint parent_task_id completion_policy completion_policy_digest].each do |key|
+    %w[visibility audience_team_id created_by_membership_id idempotency_key request_fingerprint parent_task_id completion_policy completion_policy_digest].each do |key|
       errors.add(key, 'is immutable; create a new explicit publication') if will_save_change_to_attribute?(key)
     end
   end
@@ -57,10 +57,12 @@ class JrcServiceDesk::TicketTask < JrcServiceDesk::TicketRecord
   def parent_and_progression_are_consistent
     validate_unit_reference(:parent_task)
     if parent_task
-      errors.add(:parent_task, 'must belong to this ticket and remain open') unless parent_task.ticket_id == ticket_id &&
-        parent_task.id != id && %w[open in_progress].include?(parent_task.status)
+      errors.add(:parent_task, 'must belong to this ticket') unless parent_task.ticket_id == ticket_id && parent_task.id != id
+      if (new_record? || will_save_change_to_parent_task_id?) && !%w[open in_progress].include?(parent_task.status)
+        errors.add(:parent_task, 'must remain open when a subtask is attached')
+      end
     end
-    if status == 'completed' && subtasks.where.not(status: %w[completed cancelled]).exists?
+    if status == 'completed' && JrcServiceDesk::RecordWithdrawal.excluding(subtasks, :task).where.not(status: %w[completed cancelled]).exists?
       errors.add(:status, 'requires all subtasks to be complete')
     end
     policy = JrcServiceDesk::TaskCompletionPolicy.new(completion_policy)

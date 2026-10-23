@@ -1,4 +1,6 @@
 <script setup>
+import TicketAssetLinks from '../components/TicketAssetLinks.vue';
+import OperationsLinks from '../../jrcOperations/components/OperationsLinks.vue';
 import ImpactUrgencySelect from '../components/ImpactUrgencySelect.vue';
 import TicketCreationReceipt from '../components/TicketCreationReceipt.vue';
 import {
@@ -119,7 +121,17 @@ const mayEdit = computed(() =>
     ? !!record.value && canAct(record.value, 'update')
     : unit.value?.permissions.create_ticket === true
 );
-const steps = computed(() => tm('JRC_SERVICE_DESK.FORM.steps'));
+const steps = computed(() =>
+  edit.value
+    ? tm('JRC_SERVICE_DESK.FORM.steps')
+    : [
+        t('JRC_SERVICE_DESK.REDESIGN_FORM.request_type'),
+        ...tm('JRC_SERVICE_DESK.FORM.steps'),
+      ]
+);
+const formStep = index => (edit.value ? index : index + 1);
+const finalStep = computed(() => (edit.value ? 3 : 4));
+const furthestStep = ref(0);
 const selectedNames = reactive({
   requester: null,
   priority: null,
@@ -264,7 +276,11 @@ const load = () => {
   creationReceipt.value = null;
   session.operations?.dismissConfirmation(writeKey);
   localError.value = false;
-  step.value = 0;
+  step.value =
+    edit.value && /^[0-3]$/.test(String(route.query.edit_section))
+      ? Number(route.query.edit_section)
+      : 0;
+  furthestStep.value = edit.value ? 3 : 0;
   resetNames();
   operatorId.value = '';
   requestKey = null;
@@ -356,7 +372,8 @@ const maySave = computed(
       (!edit.value && draft.impact_code && draft.urgency_code)) &&
     serviceReady.value &&
     catalogueAccess.value &&
-    (edit.value || (draft.requester_id && unit.value?.initial_status?.id))
+    draft.requester_id &&
+    (edit.value || unit.value?.initial_status?.id)
 );
 const openCreatedTicket = ticketId =>
   router.push({
@@ -373,7 +390,34 @@ const chooseAssignment = (field, selected) => {
 };
 const chooseRouting = event =>
   selectAutomaticRouting(draft, selectedNames, event.target.checked);
+const stepValid = computed(() => {
+  if (!edit.value && step.value === 0)
+    return !!unit.value?.initial_status?.id && mayEdit.value;
+  if (step.value === formStep(0))
+    return (
+      !!draft.requester_id &&
+      !!draft.title.trim() &&
+      (edit.value || !!draft.description.trim())
+    );
+  if (step.value === formStep(1))
+    return (
+      !!draft.priority_id ||
+      (!edit.value && !!draft.impact_code && !!draft.urgency_code)
+    );
+  if (step.value === formStep(2))
+    return serviceReady.value && catalogueAccess.value;
+  return true;
+});
+const nextStep = () => {
+  if (busy.value || !stepValid.value || step.value >= finalStep.value) return;
+  step.value += 1;
+  furthestStep.value = Math.max(furthestStep.value, step.value);
+};
 const submit = async () => {
+  if (step.value < finalStep.value) {
+    nextStep();
+    return;
+  }
   if (!maySave.value) return;
   const submissionContext = session.state.context;
   const submissionAccount = session.accountId.value;
@@ -475,9 +519,9 @@ const submit = async () => {
     <State v-else-if="edit && !mayEdit" status="denied" />
     <template v-else>
       <div
-        v-if="edit"
-        class="sd-wizard-steps"
-        :aria-label="t('JRC_SERVICE_DESK.SCREENS.new')"
+        class="mb-4 grid gap-2 sm:grid-cols-2"
+        :class="edit ? 'xl:grid-cols-4' : 'xl:grid-cols-5'"
+        :aria-label="t(`JRC_SERVICE_DESK.SCREENS.${screen}`)"
       >
         <button
           v-for="(label, index) in steps"
@@ -489,7 +533,7 @@ const submit = async () => {
               ? '!bg-blue-700 !text-white'
               : '!bg-n-blue-3 !text-n-blue-11'
           "
-          :disabled="busy"
+          :disabled="busy || (!edit && index > furthestStep)"
           :aria-current="index === step ? 'step' : undefined"
           @click="step = index"
         >
@@ -502,11 +546,18 @@ const submit = async () => {
         </button>
       </div>
       <div class="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_18rem]">
-        <Panel :title="edit ? steps[step] : t('JRC_SERVICE_DESK.SCREENS.new')">
+        <Panel :title="steps[step]">
           <form @submit.prevent="submit">
             <Feedback
               :status="localError ? 'invalid_input' : mutation.status"
             />
+            <p
+              v-if="mutation.reason === 'linked_context_conflict'"
+              role="alert"
+              class="mb-4 text-sm text-n-ruby-11"
+            >
+              {{ t('JRC_SERVICE_DESK.REDESIGN_FORM.linked_context_conflict') }}
+            </p>
             <Banner
               v-if="!edit && unit && !unit.initial_status"
               color="amber"
@@ -514,8 +565,26 @@ const submit = async () => {
             >
               {{ t('JRC_SERVICE_DESK.FORM.initial_status_required') }}
             </Banner>
+            <section v-if="!edit && step === 0" class="grid gap-4">
+              <p class="text-sm text-n-slate-11">
+                {{ t('JRC_SERVICE_DESK.REDESIGN_FORM.request_type_help') }}
+              </p>
+              <ScopeBar
+                v-model:operator-id="operatorId"
+                :unit-id="draft.unit_id"
+                required
+                :disabled="busy"
+                @update:unit-id="changeUnit"
+              />
+              <ServiceDefinitionSelect
+                v-model="draft.service_id"
+                :unit-id="draft.unit_id"
+                :disabled="!mayEdit || busy"
+                cards
+              />
+            </section>
             <section
-              v-if="!edit || step === 0"
+              v-show="step === formStep(0)"
               class="grid gap-4"
               :class="
                 !edit
@@ -530,17 +599,9 @@ const submit = async () => {
                 <span
                   class="i-lucide-users-round size-5"
                   aria-hidden="true"
-                />{{ steps[0] }}
+                />{{ steps[formStep(0)] }}
               </h3>
-              <ScopeBar
-                v-if="!edit"
-                v-model:operator-id="operatorId"
-                :unit-id="draft.unit_id"
-                required
-                :disabled="busy"
-                @update:unit-id="changeUnit"
-              />
-              <p v-else class="text-sm text-n-slate-11">
+              <p class="text-sm text-n-slate-11">
                 {{ unit?.operator_company.name }} / {{ unit?.name }}
               </p>
               <p class="text-xs text-n-slate-11">
@@ -564,14 +625,14 @@ const submit = async () => {
                 resource="requesters"
                 :label="t('JRC_SERVICE_DESK.FIELDS.requester')"
                 :unit-id="draft.unit_id"
-                :disabled="edit || !mayEdit || busy"
+                :disabled="!mayEdit || busy"
                 :current-name="
                   selectedNames.requester?.name || record?.requester?.name || ''
                 "
                 :current-phone="requesterPhone"
                 @selected="selectedNames.requester = $event"
               />
-              <template v-if="edit">
+              <div class="grid gap-4">
                 <Input
                   v-model="draft.title"
                   :label="t('JRC_SERVICE_DESK.FIELDS.title')"
@@ -589,13 +650,13 @@ const submit = async () => {
                   "
                   :disabled="!mayEdit || busy"
                 />
-              </template>
+              </div>
               <p v-if="!mayEdit" class="text-xs text-n-slate-11">
                 {{ t('JRC_SERVICE_DESK.FORM.no_permission') }}
               </p>
             </section>
             <section
-              v-if="!edit || step === 1"
+              v-show="step === formStep(1)"
               class="grid gap-4"
               :class="
                 !edit
@@ -608,7 +669,7 @@ const submit = async () => {
                 class="flex items-center gap-2 text-base font-semibold text-n-iris-11"
               >
                 <span class="i-lucide-tags size-5" aria-hidden="true" />{{
-                  steps[1]
+                  steps[formStep(1)]
                 }}
               </h3>
               <ImpactUrgencySelect
@@ -684,7 +745,13 @@ const submit = async () => {
                     {{ t('JRC_SERVICE_DESK.FORM.assignment_title') }}
                   </legend>
                   <p class="m-0 text-xs text-n-slate-11">
-                    {{ t('JRC_SERVICE_DESK.FORM.assignment_help') }}
+                    {{
+                      t(
+                        edit
+                          ? 'JRC_SERVICE_DESK.REDESIGN_FORM.edit_assignment_help'
+                          : 'JRC_SERVICE_DESK.FORM.assignment_help'
+                      )
+                    }}
                   </p>
                   <div class="grid gap-4 md:grid-cols-2">
                     <LookupSelect
@@ -754,36 +821,7 @@ const submit = async () => {
               </p>
             </section>
             <section
-              v-if="!edit"
-              class="mb-5 grid gap-4 rounded-2xl border border-n-blue-6 bg-n-solid-2 p-4 sm:p-5"
-            >
-              <h3
-                class="flex items-center gap-2 text-base font-semibold text-n-blue-11"
-              >
-                <span class="i-lucide-file-text size-5" aria-hidden="true" />{{
-                  t('JRC_SERVICE_DESK.FIELDS.description')
-                }}
-              </h3>
-              <Input
-                v-model="draft.title"
-                :label="t('JRC_SERVICE_DESK.FIELDS.title')"
-                :placeholder="t('JRC_SERVICE_DESK.FORM.title_placeholder')"
-                :disabled="!mayEdit || busy"
-                maxlength="255"
-              />
-              <TextArea
-                v-model="draft.description"
-                :max-length="20000"
-                resize
-                :label="t('JRC_SERVICE_DESK.FIELDS.description')"
-                :placeholder="
-                  t('JRC_SERVICE_DESK.FORM.description_placeholder')
-                "
-                :disabled="!mayEdit || busy"
-              />
-            </section>
-            <section
-              v-if="!edit || step === 2"
+              v-show="step === formStep(2)"
               class="grid gap-4"
               :class="
                 !edit
@@ -796,7 +834,7 @@ const submit = async () => {
                 class="flex items-center gap-2 text-base font-semibold text-n-teal-11"
               >
                 <span class="i-lucide-link size-5" aria-hidden="true" />{{
-                  steps[2]
+                  steps[formStep(2)]
                 }}
               </h3>
               <p class="text-sm text-n-slate-11">
@@ -819,12 +857,7 @@ const submit = async () => {
                 :current-name="record?.contract?.name || ''"
                 @selected="selectedNames.contract = $event"
               />
-              <ServiceDefinitionSelect
-                v-if="!edit"
-                v-model="draft.service_id"
-                :unit-id="draft.unit_id"
-                :disabled="!mayEdit || busy"
-              />
+
               <p v-if="edit" class="text-xs">
                 {{
                   record?.service?.name ||
@@ -845,11 +878,20 @@ const submit = async () => {
               <p class="text-xs text-n-slate-11">
                 {{ t('JRC_SERVICE_DESK.OPS.conversation_help') }}
               </p>
-              <p class="text-xs text-n-slate-11">
+              <template v-if="edit && record">
+                <p class="text-xs text-n-slate-11">
+                  {{
+                    t('JRC_SERVICE_DESK.REDESIGN_FORM.links_saved_separately')
+                  }}
+                </p>
+                <OperationsLinks :ticket-id="record.id" :title="record.title" />
+                <TicketAssetLinks :ticket="record" />
+              </template>
+              <p v-else class="text-xs text-n-slate-11">
                 {{ t('JRC_SERVICE_DESK.FORM.projects_help') }}
               </p>
             </section>
-            <div v-if="edit && step === 3" class="grid gap-4">
+            <div v-if="step === finalStep" class="grid gap-4">
               <p class="text-sm text-n-slate-11">
                 {{ t('JRC_SERVICE_DESK.FORM.review_help') }}
               </p>
@@ -862,14 +904,21 @@ const submit = async () => {
               <p class="text-xs text-n-slate-11">
                 {{ t('JRC_SERVICE_DESK.FORM.required_help') }}
               </p>
-              <State
-                status="pending"
-                compact
-                :description="t('JRC_SERVICE_DESK.TICKET.sla_pending')"
-              />
+              <dl class="grid gap-3 sm:grid-cols-2">
+                <div
+                  v-for="(value, field) in lookupLabels"
+                  :key="field"
+                  class="rounded-lg border border-n-weak p-3 text-sm"
+                >
+                  <dt class="text-xs text-n-slate-11">
+                    {{ t(`JRC_SERVICE_DESK.FIELDS.${field}`) }}
+                  </dt>
+                  <dd class="mt-1 break-words">{{ value }}</dd>
+                </div>
+              </dl>
             </div>
             <CatalogueAnswers
-              v-show="!edit || step === 2"
+              v-show="step === formStep(2)"
               v-model="draft.service_fields"
               :service-id="draft.service_id"
               :ticket-type-id="draft.ticket_type_id"
@@ -895,17 +944,16 @@ const submit = async () => {
                 type="button"
                 color="slate"
                 variant="outline"
-                v-if="edit"
                 :label="t('JRC_SERVICE_DESK.COMMON.previous')"
                 :disabled="step === 0 || busy"
                 @click="step -= 1"
               />
               <Button
-                v-if="edit && step < 3"
+                v-if="step < finalStep"
                 type="button"
-                :disabled="busy"
+                :disabled="busy || !stepValid"
                 :label="t('JRC_SERVICE_DESK.COMMON.next')"
-                @click="step += 1"
+                @click="nextStep"
               />
               <Button
                 v-else
@@ -964,13 +1012,14 @@ const submit = async () => {
             <p class="text-xs text-n-slate-11 mt-4">
               {{ t('JRC_SERVICE_DESK.FORM.draft_notice') }}
             </p>
-            <State
-              status="pending"
-              compact
-              :description="t('JRC_SERVICE_DESK.TICKET.sla_pending')"
-            />
+            <p class="mt-3 text-xs text-n-slate-11">
+              {{ t('JRC_SERVICE_DESK.REDESIGN_FORM.sla_after_save') }}
+            </p>
           </Panel>
-          <Panel v-if="!edit" :title="t('JRC_SERVICE_DESK.TICKET.tabs.files')">
+          <Panel
+            v-if="!edit && step > 0"
+            :title="t('JRC_SERVICE_DESK.TICKET.tabs.files')"
+          >
             <div
               class="grid gap-3 rounded-xl border border-dashed border-n-blue-6 bg-n-blue-2/20 p-4"
             >
@@ -978,18 +1027,36 @@ const submit = async () => {
                 class="i-lucide-cloud-upload mx-auto size-8 text-n-blue-11"
                 aria-hidden="true"
               />
-              <label v-if="!edit" class="grid gap-1 text-sm">
+              <label
+                v-if="!edit"
+                class="grid cursor-pointer gap-1 rounded-lg border border-n-weak bg-n-solid-1 px-3 py-2 text-sm focus-within:ring-2 focus-within:ring-n-blue-9"
+              >
                 {{ t('JRC_SERVICE_DESK.TICKET.upload') }}
                 <input
                   type="file"
+                  class="sr-only"
                   multiple
                   :disabled="!mayEdit || busy || hashingFiles"
                   @change="files = Array.from($event.target.files)"
                 />
               </label>
               <ul v-if="files.length" class="m-0 text-xs text-n-slate-11">
-                <li v-for="(file, index) in files" :key="index">
-                  {{ file.name }}
+                <li
+                  v-for="(file, index) in files"
+                  :key="index"
+                  class="flex items-center justify-between gap-2"
+                >
+                  <span class="min-w-0 break-all">{{ file.name }}</span>
+                  <Button
+                    size="xs"
+                    variant="ghost"
+                    color="slate"
+                    :disabled="busy || hashingFiles"
+                    :label="t('JRC_SERVICE_DESK.REDESIGN_DETAIL.remove_file')"
+                    @click="
+                      files = files.filter((_, position) => position !== index)
+                    "
+                  />
                 </li>
               </ul>
               <p class="text-xs text-n-slate-11">

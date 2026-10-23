@@ -31,6 +31,6 @@ class Api::V1::Accounts::JrcServiceDesk::LifecycleController < Api::V1::Accounts
   end
 
   def dependency_missing(_error)
-    render json: { error: 'Explicit compatible SLA/calendar configuration is required; no operation was applied', code: 'lifecycle_dependency' }, status: :unprocessable_entity
+    render json: { error: 'Configure uma política de SLA e um calendário compatíveis antes de aplicar esta ação.', code: 'lifecycle_dependency' }, status: :unprocessable_entity
   end
 end

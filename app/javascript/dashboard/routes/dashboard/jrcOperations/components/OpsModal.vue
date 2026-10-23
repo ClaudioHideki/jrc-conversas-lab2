@@ -2,6 +2,7 @@
 import { onMounted, onBeforeUnmount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import en from '../../jrcProjects/en.json';
+import pt_BR from 'dashboard/i18n/locale/pt_BR/jrcProjects.json';
 const props = defineProps({
   title: { type: String, required: true },
   wide: Boolean,
@@ -11,7 +12,7 @@ const props = defineProps({
 const emit = defineEmits(['close']);
 const { t } = useI18n({
   useScope: 'local',
-  messages: { en },
+  messages: { en, pt_BR },
   fallbackLocale: false,
   fallbackRoot: false,
 });

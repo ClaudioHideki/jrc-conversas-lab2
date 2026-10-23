@@ -87,6 +87,10 @@ export function updateTicketDraft(draft, record, customerMaster = false) {
     ticket: {
       title: text(draft.title),
       description: text(draft.description),
+      ...(Object.hasOwn(draft, 'requester_id') &&
+      String(draft.requester_id) !== String(record.requester?.id)
+        ? { requester_id: id(draft.requester_id) }
+        : {}),
       ...(customerMaster &&
       String(draft.company_id || '') !== String(record.company?.id || '')
         ? { company_id: draft.company_id ? id(draft.company_id) : null }

@@ -3,7 +3,7 @@
 class JrcServiceDesk::TicketEvent < JrcServiceDesk::TicketRecord
   include JrcServiceDesk::AppendOnly
 
-  TYPES = %w[operational_rule_applied clock_threshold_reached clock_violated approval_escalated resource_linked resource_updated resource_archived
+  TYPES = %w[ticket_deleted task_deleted note_withdrawn attachment_withdrawn resource_unlinked operational_rule_applied clock_threshold_reached clock_violated approval_escalated resource_linked resource_updated resource_archived
              first_response_recorded ticket_auto_routed notification_delivery_updated notification_resend_requested interaction_republished
              task_created task_updated approval_requested approval_decided incident_linked incident_updated ticket_claimed ticket_created
              ticket_updated ticket_assigned ticket_transferred note_added conversation_linked sla_snapshot_recorded creation_context_recorded

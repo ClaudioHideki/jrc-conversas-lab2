@@ -1,7 +1,9 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import Button from 'dashboard/components-next/button/Button.vue';
+import State from '../components/ServiceDeskState.vue';
 import LifecyclePolicyEditor from '../components/LifecyclePolicyEditor.vue';
 import NotificationPolicyEditor from '../components/NotificationPolicyEditor.vue';
 import ConfigurationManager from '../components/ConfigurationManager.vue';
@@ -9,7 +11,20 @@ import OperationalRulePanel from '../components/OperationalRulePanel.vue';
 import { useServiceDesk } from '../composables/useServiceDesk';
 const { t } = useI18n();
 const session = useServiceDesk();
-const selected = ref('lifecycle');
+const route = useRoute();
+const router = useRouter();
+const selected = ref(route?.query?.section || 'lifecycle');
+watch(
+  () => route?.query?.section,
+  value => {
+    if (typeof value === 'string') selected.value = value;
+  }
+);
+const select = key => {
+  selected.value = key;
+  if (route && router)
+    router.replace({ query: { ...route.query, section: key } });
+};
 const sections = computed(() => {
   if (
     session.state.status !== 'ready' ||
@@ -55,7 +70,7 @@ const active = computed(
       </div>
     </header>
     <nav
-      class="flex flex-wrap gap-2"
+      class="grid gap-2 sm:grid-cols-2 xl:grid-cols-4"
       :aria-label="t('JRC_SERVICE_DESK.SCREENS.automations')"
     >
       <Button
@@ -64,7 +79,7 @@ const active = computed(
         size="sm"
         :variant="active === row.key ? 'solid' : 'outline'"
         :label="t(`JRC_SERVICE_DESK.CLOCK_AUTOMATION.sections.${row.key}`)"
-        @click="selected = row.key"
+        @click="select(row.key)"
       />
     </nav>
     <LifecyclePolicyEditor v-if="active === 'lifecycle'" />
@@ -72,4 +87,5 @@ const active = computed(
     <NotificationPolicyEditor v-else-if="active === 'notifications'" />
     <OperationalRulePanel v-else-if="active === 'operational'" />
   </section>
+  <State v-else-if="session.state.status === 'ready'" status="denied" />
 </template>

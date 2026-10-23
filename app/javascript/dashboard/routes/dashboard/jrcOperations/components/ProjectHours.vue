@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, computed, watch } from 'vue';
+import { ref, reactive, computed, watch, nextTick } from 'vue';
 import { useProjects } from '../../jrcProjects/useProjects';
 import { request, allPages, errorMessage, dateInput, formatDate } from '../api';
 
@@ -26,6 +26,8 @@ const dateFrom = ref('');
 const dateTo = ref('');
 const budgetEditing = ref(false);
 const duration = ref('01:00');
+const editingEntry = ref(null);
+const entryForm = ref(null);
 const base = computed(() => `projects/projects/${props.project.id}`);
 const form = reactive({ task_id: '', worked_on: dateInput(), notes: '' });
 const budget = ref(props.project.budget || null);
@@ -234,13 +236,20 @@ watch(
       Object.assign(budgetForm, { planned: 0, committed: 0 });
       Object.keys(costs).forEach(id => delete costs[id]);
       savedCosts.clear();
+      editingEntry.value = null;
     }
     load();
   },
   { immediate: true }
 );
+function cancelEdit() {
+  editingEntry.value = null;
+  Object.assign(form, { task_id: '', worked_on: dateInput(), notes: '' });
+  duration.value = '01:00';
+}
 async function save() {
-  if (busy.value || !canLogHours.value) return;
+  if (busy.value || !(editingEntry.value?.can_update || canLogHours.value))
+    return;
   const match = /^(\d{1,2}):([0-5]\d)$/.exec(duration.value);
   const minutes = match ? Number(match[1]) * 60 + Number(match[2]) : 0;
   if (minutes < 1 || minutes > 1440) {
@@ -254,16 +263,67 @@ async function save() {
   error.value = '';
   success.value = '';
   try {
-    await request(accountId.value, `${base.value}/time_entries`, {
-      method: 'post',
-      data: { time_entry: { ...form, minutes, task_id: form.task_id || null } },
-    });
-    form.notes = '';
+    const editing = Boolean(editingEntry.value);
+    await request(
+      accountId.value,
+      `${base.value}/time_entries${editing ? `/${editingEntry.value.id}` : ''}`,
+      {
+        method: editing ? 'patch' : 'post',
+        data: {
+          time_entry: { ...form, minutes, task_id: form.task_id || null },
+        },
+      }
+    );
+    cancelEdit();
     if (await load())
       success.value = projectText(
-        'TIME_CREATED',
-        'Horas enviadas para análise e aprovação.'
+        editing ? 'TIME_UPDATED' : 'TIME_CREATED',
+        editing
+          ? 'Apontamento atualizado.'
+          : 'Horas enviadas para análise e aprovação.'
       );
+    emit('changed');
+  } catch (err) {
+    error.value = errorMessage(err);
+  } finally {
+    busy.value = false;
+  }
+}
+async function editEntry(row) {
+  if (busy.value || !row.can_update) return;
+  editingEntry.value = row;
+  Object.assign(form, {
+    task_id: row.task_id || '',
+    worked_on: row.worked_on,
+    notes: row.notes || '',
+  });
+  duration.value = hours(row.minutes).padStart(5, '0');
+  await nextTick(() => {
+    entryForm.value?.scrollIntoView?.({ block: 'center', behavior: 'smooth' });
+    entryForm.value?.querySelector('input')?.focus();
+  });
+}
+async function removeEntry(row) {
+  if (busy.value || !row.can_delete) return;
+  if (
+    !window.confirm(
+      projectText(
+        'DELETE_TIME_CONFIRM',
+        'Excluir este apontamento de horas? O histórico da ação será preservado.'
+      )
+    )
+  )
+    return;
+  busy.value = true;
+  error.value = '';
+  success.value = '';
+  try {
+    await request(accountId.value, `${base.value}/time_entries/${row.id}`, {
+      method: 'delete',
+    });
+    if (editingEntry.value?.id === row.id) cancelEdit();
+    savedCosts.delete(row.id);
+    await load();
     emit('changed');
   } catch (err) {
     error.value = errorMessage(err);
@@ -537,12 +597,17 @@ function exportEntries() {
       }}
     </p>
     <form
-      v-if="canLogHours"
+      v-if="canLogHours || editingEntry"
+      ref="entryForm"
       class="rounded-xl border border-n-weak bg-n-solid-1 p-4"
       @submit.prevent="save"
     >
       <h3 class="mb-3 mt-0 text-sm font-semibold">
-        {{ projectText('REGISTER_HOURS', 'Registrar horas') }}
+        {{
+          editingEntry
+            ? projectText('EDIT_TIME', 'Editar apontamento')
+            : projectText('REGISTER_HOURS', 'Registrar horas')
+        }}
       </h3>
       <div
         class="grid grid-cols-2 items-end gap-3 xl:grid-cols-[minmax(180px,1.6fr)_145px_105px_minmax(180px,1.5fr)_auto]"
@@ -594,9 +659,22 @@ function exportEntries() {
           class="col-span-2 rounded-lg bg-n-blue-9 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 xl:col-span-1"
           :disabled="busy || loading"
         >
-          {{ projectText('REGISTER_HOURS', 'Registrar horas') }}
+          {{
+            editingEntry
+              ? projectText('SAVE', 'Salvar')
+              : projectText('REGISTER_HOURS', 'Registrar horas')
+          }}
         </button>
       </div>
+      <button
+        v-if="editingEntry"
+        type="button"
+        class="mt-3 rounded border border-n-weak px-3 py-2 text-sm"
+        :disabled="busy"
+        @click="cancelEdit"
+      >
+        {{ projectText('CANCEL', 'Cancelar') }}
+      </button>
     </form>
     <div
       class="min-w-0 overflow-hidden rounded-xl border border-n-weak bg-n-solid-1"
@@ -756,8 +834,8 @@ function exportEntries() {
               <th class="px-4 py-3">
                 {{ projectText('TIME_NOTES', 'Observação') }}
               </th>
-              <th v-if="can('time_entry.manage')" class="px-4 py-3 text-right">
-                {{ projectText('REVIEW', 'Revisão') }}
+              <th class="px-4 py-3 text-right">
+                {{ projectText('ACTIONS', 'Ações') }}
               </th>
             </tr>
           </thead>
@@ -807,10 +885,31 @@ function exportEntries() {
                   row.notes || '—'
                 }}</span>
               </td>
-              <td v-if="can('time_entry.manage')" class="px-4 py-3">
-                <div class="flex justify-end gap-2">
+              <td class="px-4 py-3">
+                <div class="flex flex-wrap justify-end gap-2">
                   <button
-                    v-if="row.status !== 'approved' || can('budget.manage')"
+                    v-if="row.can_update"
+                    type="button"
+                    class="rounded-lg border border-n-weak px-2 py-1.5 text-xs"
+                    :disabled="busy || loading"
+                    @click="editEntry(row)"
+                  >
+                    {{ projectText('EDIT', 'Editar') }}
+                  </button>
+                  <button
+                    v-if="row.can_delete"
+                    type="button"
+                    class="rounded-lg px-2 py-1.5 text-xs text-n-ruby-11 hover:bg-n-ruby-2"
+                    :disabled="busy || loading"
+                    @click="removeEntry(row)"
+                  >
+                    {{ projectText('DELETE', 'Excluir') }}
+                  </button>
+                  <button
+                    v-if="
+                      can('time_entry.manage') &&
+                      (row.status !== 'approved' || can('budget.manage'))
+                    "
                     class="whitespace-nowrap rounded-lg bg-n-blue-2 px-2 py-1.5 text-xs font-medium text-n-blue-11 disabled:opacity-50"
                     :disabled="busy || loading"
                     @click="review(row, 'approved')"
@@ -821,7 +920,7 @@ function exportEntries() {
                         : projectText('APPROVE', 'Aprovar')
                     }}</button
                   ><button
-                    v-if="row.status !== 'rejected'"
+                    v-if="can('time_entry.manage') && row.status !== 'rejected'"
                     class="rounded-lg px-2 py-1.5 text-xs text-n-ruby-11 hover:bg-n-ruby-2 disabled:opacity-50"
                     :disabled="busy || loading"
                     @click="review(row, 'rejected')"

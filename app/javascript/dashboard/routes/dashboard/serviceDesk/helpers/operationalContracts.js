@@ -103,6 +103,10 @@ export function decodeDashboard(payload, context, request = {}) {
   };
 }
 const EVENT_KEYS = {
+  ticket_deleted: ['reason'],
+  task_deleted: ['task_id', 'reason'],
+  note_withdrawn: ['note_id', 'replacement_note_id', 'reason'],
+  attachment_withdrawn: ['note_id', 'attachment_id', 'filename', 'reason'],
   operational_rule_applied: [
     'kind',
     'rule_version_id',
@@ -132,6 +136,7 @@ const EVENT_KEYS = {
   ],
   approval_escalated: ['approval_id', 'history_index'],
   resource_linked: ['resource_id', 'resource_kind'],
+  resource_unlinked: ['resource_id', 'resource_kind'],
   resource_updated: ['resource_id', 'resource_kind', 'history_index'],
   resource_archived: ['resource_id', 'resource_kind', 'history_index'],
   notification_resend_requested: [
@@ -146,6 +151,11 @@ const EVENT_KEYS = {
     'assignee_membership_id',
   ],
   ticket_updated: [
+    'requester_id',
+    'ticket_type_id',
+    'subcategory_id',
+    'contract_id',
+    'service_fields',
     'title',
     'description',
     'priority_id',
@@ -238,8 +248,8 @@ export function decodeRelated(payload, context, ticket, kind, request) {
         typeof row.calculation_pending === 'boolean' &&
           (row.met === null || typeof row.met === 'boolean')
       );
-      const due = maybeStamp(row.due_at),
-        achieved = maybeStamp(row.achieved_at);
+      const due = maybeStamp(row.due_at);
+      const achieved = maybeStamp(row.achieved_at);
       assert(row.calculation_pending === (due === null));
       assert((due !== null && achieved !== null) || row.met === null);
       return {

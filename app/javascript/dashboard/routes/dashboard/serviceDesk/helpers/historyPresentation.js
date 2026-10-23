@@ -39,6 +39,8 @@ const VISIBLE_FIELDS = Object.freeze([
   'notification_state',
   'channel',
   'state',
+  'reason',
+  'filename',
 ]);
 const scalar = value =>
   typeof value === 'string' ||

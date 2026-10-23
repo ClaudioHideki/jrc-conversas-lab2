@@ -4,6 +4,10 @@ import { useServiceDesk } from './useServiceDesk';
 import { decodeCockpit } from '../helpers/cockpitContract';
 import { newRequestKey } from '../helpers/drafts';
 import { decodeComposer } from '../helpers/communicationContract';
+import {
+  audiencesForMode,
+  validInteractionFiles,
+} from '../helpers/detailExperience';
 
 export function useInteractionComposer(props, emit) {
   const session = useServiceDesk();
@@ -17,6 +21,10 @@ export function useInteractionComposer(props, emit) {
   const preview = ref(null);
   const busy = ref(false);
   const feedback = ref(null);
+  const uploadProgress = ref(null);
+  const allowedAudiences = computed(() =>
+    audiencesForMode(options.value?.audiences || [], props.mode || 'all')
+  );
   let epoch = 0;
   let controller;
   const requestKeys = new Map();
@@ -55,7 +63,10 @@ export function useInteractionComposer(props, emit) {
   const valid = computed(
     () =>
       body.value.trim() &&
-      files.value.length <= 5 &&
+      validInteractionFiles(files.value) &&
+      allowedAudiences.value.includes(audience.value) &&
+      (audience.value !== 'customer' ||
+        note.value.notification_channels.length > 0) &&
       (!props.previous || reason.value.trim()) &&
       note.value.notification_channels.every(
         channel => destinations.value[channel]
@@ -81,13 +92,15 @@ export function useInteractionComposer(props, emit) {
       if (turn !== epoch || context !== session.state.context || !active())
         return;
       options.value = decodeComposer(result, context, props.ticket);
+      if (!allowedAudiences.value.includes(audience.value))
+        audience.value = allowedAudiences.value[0] || '';
     } catch (error) {
       if (turn === epoch) feedback.value = 'unavailable';
     }
   };
   const reset = () => {
     body.value = props.previous?.body || '';
-    audience.value = 'internal';
+    audience.value = props.mode === 'conversation' ? 'customer' : 'internal';
     files.value = [];
     reason.value = '';
     destinations.value = {};
@@ -103,6 +116,7 @@ export function useInteractionComposer(props, emit) {
       () => session.state.context,
       () => session.state.status,
       () => props.previous,
+      () => props.mode,
     ],
     reset,
     { immediate: true }
@@ -155,6 +169,8 @@ export function useInteractionComposer(props, emit) {
     if (
       !active() ||
       busy.value ||
+      !valid.value ||
+      !preview.value?.can_publish ||
       !preview.value?.receipt ||
       Date.parse(preview.value.expires_at) <= Date.now()
     )
@@ -165,6 +181,7 @@ export function useInteractionComposer(props, emit) {
     const submitted = note.value;
     const original = fingerprint.value;
     const approved = preview.value;
+    uploadProgress.value = files.value.length ? 0 : null;
     const turn = epoch;
     if (!requestKeys.has(original)) requestKeys.set(original, newRequestKey());
     try {
@@ -175,7 +192,13 @@ export function useInteractionComposer(props, emit) {
         files.value,
         requestKeys.get(original),
         controller.signal,
-        approved.receipt
+        approved.receipt,
+        event => {
+          if (turn === epoch && event.total)
+            uploadProgress.value = Math.round(
+              (event.loaded * 100) / event.total
+            );
+        }
       );
       if (
         turn !== epoch ||
@@ -259,6 +282,8 @@ export function useInteractionComposer(props, emit) {
     preview,
     busy,
     feedback,
+    allowedAudiences,
+    uploadProgress,
     valid,
     review,
     submit,

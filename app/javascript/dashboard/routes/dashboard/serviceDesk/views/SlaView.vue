@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import Button from 'dashboard/components-next/button/Button.vue';
 import LifecyclePolicyEditor from '../components/LifecyclePolicyEditor.vue';
@@ -9,9 +9,12 @@ import LiveKpis from '../components/LiveKpis.vue';
 import TicketFilters from '../components/TicketFilters.vue';
 import State from '../components/ServiceDeskState.vue';
 import { useServiceDesk } from '../composables/useServiceDesk';
+import { metricQuery } from '../helpers/screenExperience';
+import { serviceDeskRouteName } from '../routeDefinitions';
 import { useSupervisionReport } from '../composables/useSupervisionReport.js';
 const { t } = useI18n();
 const route = useRoute();
+const router = useRouter();
 const session = useServiceDesk();
 const filters = ref({ ...route.query });
 const policyOpen = ref(false);
@@ -33,11 +36,20 @@ const slaData = computed(() => result.value?.supervision || null);
       </div>
     </header>
     <TicketFilters :query="filters" @apply="filters = $event" />
-    <LiveKpis :query="filters" />
+    <LiveKpis
+      :query="filters"
+      @metric-filter="
+        router.push({
+          name: serviceDeskRouteName('tickets'),
+          params: { accountId: session.accountId.value },
+          query: metricQuery(filters, $event),
+        })
+      "
+    />
     <SupervisorPanel v-if="status === 'ready'" :data="slaData" />
     <State v-else :status="status" retry @retry="load" />
     <Button
-      v-if="session.state.context?.capabilities?.lifecycle_policies?.index"
+      v-if="session.state.context?.capabilities?.lifecycle_policies?.publish"
       variant="outline"
       :aria-expanded="policyOpen"
       :label="t('JRC_SERVICE_DESK.EXPERIENCE.manage_policies')"
@@ -46,7 +58,7 @@ const slaData = computed(() => result.value?.supervision || null);
     <LifecyclePolicyEditor
       v-if="
         policyOpen &&
-        session.state.context?.capabilities?.lifecycle_policies?.index
+        session.state.context?.capabilities?.lifecycle_policies?.publish
       "
     />
   </section>

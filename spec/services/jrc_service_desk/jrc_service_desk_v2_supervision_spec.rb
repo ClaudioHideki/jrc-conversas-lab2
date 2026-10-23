@@ -30,7 +30,8 @@ RSpec.describe JrcServiceDesk do
 
     it 'computes actual ticket, operator and capacity aggregates' do
       expect(result[:total]).to eq(1)
-      expect(data[:by_agent]).to eq([{ id: sd_membership.id.to_s, name: sd_user.name, count: 1 }])
+      expect(data[:by_agent]).to eq([{ id: sd_membership.id.to_s, account_user_id: sd_account_user.id.to_s,
+                                     unit_id: sd_unit.id.to_s, name: sd_user.name, count: 1 }])
       expect(data[:capacity].map { |row| row[:unit_id] }).to eq([sd_unit.id.to_s])
       expect(data[:capacity].first.values_at(:active_tickets, :capacity)).to eq([1, 3])
       expect(data[:evolution].sum { |row| row[:count] }).to eq(1)

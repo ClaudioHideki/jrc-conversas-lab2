@@ -26,7 +26,7 @@ class JrcServiceDesk::TicketPermissions
   end
 
   def native
-    { show: true, update: @policy.update?, change_priority: @policy.change_priority?, assign: @policy.assign?, transfer: @policy.transfer?,
+    { show: true, destroy: @policy.destroy?, update: @policy.update?, change_priority: @policy.change_priority?, assign: @policy.assign?, transfer: @policy.transfer?,
       view_notes: @policy.view_notes?, view_history: @policy.view_history?, view_conversations: @policy.view_conversations?,
       view_sla: @policy.view_sla?, view_customer: @policy.view_customer?, add_note: @policy.add_note?, link_conversation: @policy.link_conversation? }
   end
