@@ -59,7 +59,15 @@ Uma sessão desconectada não deve ser mostrada como pronta para enviar.
 
 ## Estado de entrega
 
-Fonte na branch candidata separada do JRC. Ainda sem commit/push, imagem ou
-implantação desta revisão. Não importou clientes BemTeVi nem alterou reservas
-incertas de IA. A mudança operacional autorizada do NICO foi o aumento do limite
-interno; os testes completos do assistente continuam separados deste escopo.
+Fonte publicada na branch candidata separada do JRC, commit `a268bac3`.
+O job frontend do CI39970029768 passou os568 arquivos e5.570 testes sem falhas
+ou pendências. A seleção ampliada Rails executou305 exemplos e encontrou um
+teste legado de consentimento com fixture de remetente inapto. O cenário foi
+atualizado para verificar a restauração do público após nova autorização de um
+destinatário anteriormente revogado, sem selecionar caixa nem iniciar campanha;
+os14 exemplos focais passaram e o RuboCop do arquivo passou. A nova revisão
+precisa repetir a regressão CI antes de gerar imagem/implantar.
+
+Não importou clientes BemTeVi nem alterou reservas incertas de IA. A mudança
+operacional autorizada do NICO foi o aumento do limite interno; os testes
+completos do assistente continuam separados deste escopo.

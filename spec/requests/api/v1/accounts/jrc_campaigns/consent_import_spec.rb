@@ -7,7 +7,11 @@ RSpec.describe 'Campaign consent CSV import', type: :request do
   let(:base) { "/api/v1/accounts/#{account.id}/jrc_campaigns/consents" }
   let(:phone) { '+5511999999000' }
   let(:date) { 1.day.ago.iso8601 }
-  let(:csv) { CSV.generate_line(%w[phone_number source granted_at evidence]) + CSV.generate_line([phone, 'Synthetic form', date, 'Recurring tests and campaigns authorized']) }
+  let(:csv) do
+    CSV.generate_line(%w[phone_number source granted_at evidence]) +
+      CSV.generate_line([phone, 'Synthetic form', date, 'Recurring tests and campaigns authorized'])
+  end
+
   before { account.enable_features!('jrc_campaigns') }
 
   it 'previews a BOM semicolon CSV without creating consent or sending' do
@@ -61,7 +65,8 @@ RSpec.describe 'Campaign consent CSV import', type: :request do
 
   it 'rejects malformed CSV, incorrect columns, empty input, oversized files and row counts' do
     ["phone_number,source,granted_at,evidence\n\"unclosed", "phone\n#{phone}", 'phone_number,source,granted_at,evidence', 'x' * (1.megabyte + 1),
-     CSV.generate_line(%w[phone_number source granted_at evidence]) + (CSV.generate_line([phone, 'Form', date, 'Permission']) * 501)].each do |content|
+     CSV.generate_line(%w[phone_number source granted_at evidence]) +
+       (CSV.generate_line([phone, 'Form', date, 'Permission']) * 501)].each do |content|
       post "#{base}/import_preview", headers: admin.create_new_auth_token, params: { csv: content }, as: :json
       expect(response).to have_http_status(:unprocessable_entity)
     end
@@ -90,7 +95,7 @@ RSpec.describe 'Campaign consent CSV import', type: :request do
     post "#{base}/import_preview", headers: admin.create_new_auth_token, params: { csv: csv }, as: :json
     expect(response.parsed_body['ready']).to eq(1)
     JrcCampaigns::Consent.create!(account: account, recorded_by: admin, phone_number: phone, purpose: 'whatsapp_campaigns',
-                                 granted_at: 2.days.ago, revoked_at: 1.hour.ago, evidence: 'Revoked')
+                                  granted_at: 2.days.ago, revoked_at: 1.hour.ago, evidence: 'Revoked')
     post "#{base}/import_csv", headers: admin.create_new_auth_token, params: { csv: csv, operator_confirmed: true }, as: :json
     expect(response).to have_http_status(:unprocessable_entity)
     expect(JrcCampaigns::Consent.active.where(account: account)).to be_empty
@@ -98,7 +103,7 @@ RSpec.describe 'Campaign consent CSV import', type: :request do
 
   it 'accepts a genuinely new grant after revocation and preserves the revoked record' do
     old = JrcCampaigns::Consent.create!(account: account, recorded_by: admin, phone_number: phone, purpose: 'whatsapp_campaigns',
-                                      granted_at: 4.days.ago, revoked_at: 2.days.ago, evidence: 'Original revoked permission')
+                                        granted_at: 4.days.ago, revoked_at: 2.days.ago, evidence: 'Original revoked permission')
     original = old.attributes
     post "#{base}/import_csv", headers: admin.create_new_auth_token, params: { csv: csv, operator_confirmed: true }, as: :json
     expect(response).to have_http_status(:created)
@@ -106,15 +111,17 @@ RSpec.describe 'Campaign consent CSV import', type: :request do
     expect(JrcCampaigns::Consent.active.where(account: account).sole.granted_at).to eq(Time.iso8601(date))
   end
 
-  it 'makes an existing sanitized-list recipient eligible on refresh without launching the campaign' do
-    inbox = create(:inbox, account: account, channel: create(:channel_api, account: account))
+  it 'restores a revoked sanitized-list recipient after a new grant without launching the draft campaign' do
+    revoked = JrcCampaigns::Consent.create!(account: account, recorded_by: admin, phone_number: phone, purpose: 'whatsapp_campaigns',
+                                            granted_at: 3.days.ago, revoked_at: 2.days.ago, evidence: 'Prior withdrawn grant')
     list = JrcCampaigns::Sanitizer.new(account: account, user: admin, name: 'Synthetic list', entries: [{ phone: phone }]).perform
-    campaign = JrcCampaigns::Campaign.create!(account: account, inbox: inbox, created_by: admin, name: 'Import QA',
-                                             audience_type: 'sanitized_list', audience_config: { sanitized_list_id: list.id })
+    campaign = JrcCampaigns::Campaign.create!(account: account, created_by: admin, name: 'Import QA',
+                                              audience_type: 'sanitized_list', audience_config: { sanitized_list_id: list.id })
     expect(JrcCampaigns::AudienceResolver.new(campaign).estimated_count).to eq(0)
     post "#{base}/import_csv", headers: admin.create_new_auth_token, params: { csv: csv, operator_confirmed: true }, as: :json
     expect(response).to have_http_status(:created)
     expect(JrcCampaigns::AudienceResolver.new(campaign).estimated_count).to eq(1)
+    expect(revoked.reload.revoked_at).to be_present
     expect(campaign.reload).to be_draft
     expect(campaign.executions).to be_empty
   end
@@ -125,7 +132,8 @@ RSpec.describe 'Campaign consent CSV import', type: :request do
     account.jrc_campaign_blacklists.create!(phone_number: phone, reason: 'Do not send')
     post "#{base}/import_csv", headers: admin.create_new_auth_token, params: { csv: csv, operator_confirmed: true }, as: :json
     expect(response).to have_http_status(:created)
-    expect(JrcCampaigns::EligibilityPolicy.new(account: account, phone_number: phone, purpose: 'whatsapp_campaigns').rejection_reason).to match(/blacklist/)
+    expect(JrcCampaigns::EligibilityPolicy.new(account: account, phone_number: phone,
+                                               purpose: 'whatsapp_campaigns').rejection_reason).to match(/blacklist/)
     expect(JrcCampaigns::Consent.where(account: other).sole.evidence).to eq('Other account')
   end
 
