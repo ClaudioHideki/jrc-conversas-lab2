@@ -40,7 +40,10 @@ test('real engine/HTTP boundary retries before returning an action, reports cont
     assert.equal(result.request_id, input.request_id);
     const invalid = await fetch(`${url}/v1/operate`, { method: 'POST', headers, body: JSON.stringify({ ...input, message: 'invalid_twice' }) });
     assert.equal(invalid.status, 502);
-    assert.deepEqual(await invalid.json(), { error: 'tool_arguments_invalid' });
+    assert.deepEqual(await invalid.json(), { error: 'tool_arguments_invalid', accounting: {
+      version: 1, complete: true, attempts: 2, model: 'test-model', mode: 'provider', account_id: 1,
+      request_id: input.request_id, usage: { input_tokens: 20, output_tokens: 10, total_tokens: 30 },
+    } });
     const limited = await fetch(`${url}/v1/operate`, { method: 'POST', headers, body: JSON.stringify({ ...input, message: 'rate_limit' }) });
     assert.equal(limited.status, 429);
     assert.deepEqual(await limited.json(), { error: 'provider_rate_limited' });

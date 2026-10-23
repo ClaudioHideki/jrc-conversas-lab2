@@ -80,6 +80,79 @@ RSpec.describe JrcNico::OperationalInference do
     expect(account.jrc_ai_usage_events.sum(:total_tokens)).to eq(30)
   end
 
+  context 'with terminal runtime accounting' do
+    let(:receipt) do
+      { 'version' => 1, 'complete' => true, 'attempts' => 2, 'request_id' => payload_id, 'account_id' => account.id,
+        'mode' => 'provider', 'model' => 'test-model', 'usage' => { 'input_tokens' => 20, 'output_tokens' => 10, 'total_tokens' => 30 } }
+    end
+
+    it 'records complete failed-attempt usage once without changing unrelated unknown reservations or exposing an action' do
+      unknown = JrcNico::Inference.create!(account: account, user: user, status: 'unknown', reserved_tokens: 500)
+      before = unknown.attributes
+      stub_request(:post, 'http://runtime:3108/v1/operate')
+        .to_return(status: 502, body: { error: 'tool_arguments_invalid', accounting: receipt }.to_json)
+
+      expect { call_operation }.to raise_error(JrcNico::RuntimeClient::Error, 'tool_arguments_invalid')
+      inference = JrcNico::Inference.where.not(id: unknown.id).sole
+      expect(inference).to have_attributes(status: 'failed', reserved_tokens: 0)
+      expect(account.jrc_ai_usage_events.sole).to have_attributes(total_tokens: 30, provider_id: provider.id)
+
+      ledger = JrcNico::ReservationLedger.new(inference)
+      ledger.receipt!(receipt)
+      ledger.failed!(JrcNico::RuntimeClient::Error.new('tool_arguments_invalid'))
+      expect(account.jrc_ai_usage_events.count).to eq(1)
+      expect(unknown.reload.attributes).to eq(before)
+      expect(JrcNico::RunCapacity.snapshot(account)).to include(used_tokens: 30, reserved_tokens: 500)
+      expect(WebMock).to have_requested(:post, 'http://runtime:3108/v1/operate').once
+    end
+
+    it 'keeps an explicitly estimated terminal receipt counted and labelled estimated' do
+      stub_request(:post, 'http://runtime:3108/v1/operate')
+        .to_return(status: 502, body: { error: 'provider_schema_invalid', accounting: receipt.merge('usage_estimated' => true) }.to_json)
+      expect { call_operation }.to raise_error(JrcNico::RuntimeClient::Error, 'provider_schema_invalid')
+      expect(JrcNico::Inference.last).to have_attributes(status: 'failed', reserved_tokens: 0)
+      expect(JrcNico::Inference.last.accounting['basis']).to eq('estimated')
+      expect(account.jrc_ai_usage_events.sole.metadata['usage_estimated']).to be(true)
+    end
+
+    it 'rejects a complete receipt from another existing Account without charging either tenant' do
+      foreign = create(:account)
+      stub_request(:post, 'http://runtime:3108/v1/operate')
+        .to_return(status: 502, body: { error: 'tool_arguments_invalid', accounting: receipt.merge('account_id' => foreign.id) }.to_json)
+      expect { call_operation }.to raise_error(JrcNico::RuntimeClient::Error)
+      expect(JrcNico::Inference.last).to have_attributes(status: 'unknown', reserved_tokens: 1000)
+      expect(JrcAi::UsageEvent.where(account: [account, foreign])).to be_empty
+    end
+
+    {
+      'foreign request' => { 'request_id' => '6c3aebf4-777a-4847-b4dc-4c828bcc47c5' },
+      'incomplete attempts' => { 'complete' => false }, 'missing complete proof' => { 'complete' => nil },
+      'future version' => { 'version' => 2 }, 'non-integer version' => { 'version' => 1.0 },
+      'excessive attempts' => { 'attempts' => 3 }, 'zero attempts' => { 'attempts' => 0 },
+      'non-integer attempts' => { 'attempts' => 2.0 }, 'wrong provider model' => { 'model' => 'other-model' },
+      'fixture mode' => { 'mode' => 'fixture' }, 'invalid estimate marker' => { 'usage_estimated' => false },
+      'null estimate marker' => { 'usage_estimated' => nil },
+      'invalid usage total' => { 'usage' => { 'input_tokens' => 20, 'output_tokens' => 10, 'total_tokens' => 31 } },
+      'extra output fields' => { 'arguments' => '{}' }
+    }.each do |description, change|
+      it "retains the full hold on #{description} in an error receipt" do
+        stub_request(:post, 'http://runtime:3108/v1/operate')
+          .to_return(status: 502, body: { error: 'tool_arguments_invalid', accounting: receipt.merge(change) }.to_json)
+        expect { call_operation }.to raise_error(JrcNico::RuntimeClient::Error)
+        expect(JrcNico::Inference.last).to have_attributes(status: 'unknown', reserved_tokens: 1000)
+        expect(account.jrc_ai_usage_events).to be_empty
+      end
+    end
+
+    it 'never accepts a partial first receipt after a later timeout' do
+      stub_request(:post, 'http://runtime:3108/v1/operate')
+        .to_return(status: 504, body: { error: 'provider_timeout', accounting: receipt }.to_json)
+      expect { call_operation }.to raise_error(JrcNico::RuntimeClient::Error)
+      expect(JrcNico::Inference.last).to have_attributes(status: 'unknown', reserved_tokens: 1000)
+      expect(account.jrc_ai_usage_events).to be_empty
+    end
+  end
+
   it 'does not trust a receipt from another account or an invalid estimation flag' do
     [wire.merge('account_id' => account.id + 1), wire.merge('usage_estimated' => 'true')].each do |response_body|
       stub_request(:post, 'http://runtime:3108/v1/operate').to_return(status: 200, body: response_body.to_json)

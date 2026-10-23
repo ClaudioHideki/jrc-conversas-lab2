@@ -170,7 +170,9 @@ class JrcNico::RuntimeClient
       end
     end
     parsed = JSON.parse(body)
+    input = JSON.parse(payload)
     unless status == '200'
+      terminal_receipt!(parsed, input)
       code = parsed.is_a?(Hash) && parsed['error']
       code = 'runtime_transport_error' unless code.is_a?(String) && Error::CODES.include?(code)
       # Provider errors can follow a billed repair attempt. Only pre-engine rejections prove zero consumption.
@@ -178,7 +180,6 @@ class JrcNico::RuntimeClient
                        'runtime_busy' => '429', 'account_ai_not_configured' => '422' }[code] == status
       raise Error.new(code, not_executed: not_executed)
     end
-    input = JSON.parse(payload)
     if parsed.is_a?(Hash) && parsed['account_id'] == account_id && parsed['request_id'] == input['request_id'] &&
        parsed['mode'] == 'provider' && [nil, true].include?(parsed['usage_estimated']) &&
        text?(parsed['model'], 150, required: true) && valid_usage?(parsed)
@@ -193,6 +194,15 @@ class JrcNico::RuntimeClient
     raise Error, 'runtime_timeout'
   rescue IOError, SystemCallError, SocketError, OpenSSL::SSL::SSLError, Net::HTTPBadResponse, Net::ProtocolError
     raise Error, 'runtime_transport_error'
+  end
+
+  def terminal_receipt!(body, input)
+    return unless body.is_a?(Hash) && body.key?('accounting')
+
+    receipt = JrcNico::TerminalAccounting.receipt!(body, input)
+    raise Error, 'provider_usage_invalid' unless valid_usage?(receipt)
+
+    @ledger&.receipt!(receipt)
   end
 
   def validate!(body, run, context)

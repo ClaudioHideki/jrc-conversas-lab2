@@ -46,6 +46,81 @@ test('two invalid answers return a controlled code and never expose an action', 
   assert.equal(fetch.mock.callCount(), 2);
 });
 
+test('two fully metered invalid answers preserve one complete terminal receipt without an executable action', async t => {
+  const requests: unknown[] = [];
+  t.mock.method(globalThis, 'fetch', async (_url, init) => {
+    requests.push(JSON.parse(init.body));
+    return envelope({ ...valid, arguments: '{' });
+  });
+  await assert.rejects(structuredResponse(options), error => {
+    assert.equal(error.code, 'tool_arguments_invalid');
+    assert.deepEqual(error.accounting, { version: 1, complete: true, attempts: 2, model: 'test-model',
+      usage: { input_tokens: 20, output_tokens: 10, total_tokens: 30 } });
+    assert.equal(Object.hasOwn(error, 'result'), false);
+    return true;
+  });
+  assert.equal(requests.length, 2);
+});
+
+test('a fully metered non-retrying invalid answer retains its exact single-attempt receipt', async t => {
+  t.mock.method(globalThis, 'fetch', async () => envelope([]));
+  await assert.rejects(structuredResponse({ ...options, retryInvalid: false }), error => {
+    assert.equal(error.code, 'provider_schema_invalid');
+    assert.deepEqual(error.accounting, { version: 1, complete: true, attempts: 1, model: 'test-model',
+      usage: { input_tokens: 10, output_tokens: 5, total_tokens: 15 } });
+    return true;
+  });
+});
+
+test('a conservative first-attempt estimate stays explicit when the measured repair is also invalid', async t => {
+  let calls = 0;
+  t.mock.method(globalThis, 'fetch', async () => ++calls === 1 ? new Response('PRIVATE_UNPARSEABLE_BODY') : envelope([]));
+  await assert.rejects(structuredResponse(options), error => {
+    assert.ok(error.accounting, 'the complete estimated receipt must survive terminal output validation');
+    assert.equal(error.accounting.complete, true);
+    assert.equal(error.accounting.attempts, 2);
+    assert.equal(error.accounting.usage_estimated, true);
+    assert.equal(error.accounting.usage.output_tokens, 2005);
+    assert.ok(error.accounting.usage.total_tokens > 12015);
+    assert.equal(JSON.stringify(error.accounting).includes('PRIVATE'), false);
+    return true;
+  });
+});
+
+for (const laterFailure of ['transport', 'http', 'unmetered', 'invalid_usage']) {
+  test(`a measured first answer followed by ${laterFailure} never exposes partial usage as a complete receipt`, async t => {
+    let calls = 0;
+    t.mock.method(globalThis, 'fetch', async () => {
+      if (++calls === 1) return envelope({ ...valid, arguments: '{' });
+      if (laterFailure === 'transport') throw new TypeError('PRIVATE_TRANSPORT_DETAIL');
+      if (laterFailure === 'http') return Response.json({ error: { code: 'insufficient_quota' } }, { status: 429 });
+      if (laterFailure === 'unmetered') return new Response('PRIVATE_UNPARSEABLE_BODY');
+      return Response.json({ choices: [{ message: { content: JSON.stringify(valid) } }],
+        usage: { prompt_tokens: 10, completion_tokens: 5, total_tokens: 999 } });
+    });
+    await assert.rejects(structuredResponse(options), error => {
+      assert.equal(error.accounting, undefined);
+      return true;
+    });
+    assert.equal(calls, 2);
+  });
+}
+
+test('complete error receipts are scoped by the validated request and omitted from operational logs', async t => {
+  t.mock.method(globalThis, 'fetch', async () => envelope({ ...valid, arguments: '{' }));
+  await assert.rejects(structuredResponse(options), error => {
+    const result = errorResponse(error, '/v1/operate', { account_id: 7, request_id: 'a56905c4-9a03-4c21-a886-b5d18a3e4c57' });
+    assert.deepEqual(result.body, { error: 'tool_arguments_invalid', accounting: {
+      version: 1, complete: true, attempts: 2, model: 'test-model', mode: 'provider', account_id: 7,
+      request_id: 'a56905c4-9a03-4c21-a886-b5d18a3e4c57', usage: { input_tokens: 20, output_tokens: 10, total_tokens: 30 },
+    } });
+    assert.deepEqual(result.log, { event: 'nico_request_failed', route: '/v1/operate', code: 'tool_arguments_invalid' });
+    assert.deepEqual(errorResponse(error, '/v1/operate').body, { error: 'tool_arguments_invalid' });
+    assert.equal(JSON.stringify(result).includes('PRIVATE'), false);
+    return true;
+  });
+});
+
 test('outer JSON and schema errors are distinct; outer envelope failure charges marked estimated usage', async t => {
   let calls = 0;
   t.mock.method(globalThis, 'fetch', async () => ++calls === 1 ? new Response('PRIVATE_MALFORMED_BODY') : envelope(valid));
@@ -86,7 +161,13 @@ test('timeout covers retry and response-body wait; cancellation stops all attemp
     return new Promise((_resolve, reject) => init.signal.addEventListener('abort', () => reject(init.signal.reason), { once: true }));
   });
   const keepAlive = setTimeout(() => {}, 1000);
-  try { await assert.rejects(structuredResponse({ ...options, timeoutMs: 20 }), { code: 'provider_timeout' }); }
+  try {
+    await assert.rejects(structuredResponse({ ...options, timeoutMs: 20 }), error => {
+      assert.equal(error.code, 'provider_timeout');
+      assert.equal(error.accounting, undefined);
+      return true;
+    });
+  }
   finally { clearTimeout(keepAlive); }
   assert.equal(calls, 2);
   const cancellation = new AbortController(); cancellation.abort();
