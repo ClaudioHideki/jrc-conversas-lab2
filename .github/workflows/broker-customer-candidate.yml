@@ -62,6 +62,10 @@ jobs:
     if: github.ref == 'refs/heads/codex/jrc-campaign-direct-audience-20261022'
     runs-on: ubuntu-24.04
     timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [standard, concurrent]
     services:
       postgres:
         image: pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a
@@ -85,8 +89,9 @@ jobs:
       SECRET_KEY_BASE: isolated-broker-customer-ci-not-a-production-secret
       BUNDLE_FROZEN: 'true'
       SCHEMA: /tmp/broker-customer-candidate-schema.rb
-      MINIMUM_EXAMPLES: '305'
+      MINIMUM_EXAMPLES: ${{ matrix.suite == 'concurrent' && '11' || '1044' }}
       JRC_SD_CONCURRENCY: '1'
+      TEST_SUITE: ${{ matrix.suite }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
@@ -130,6 +135,11 @@ jobs:
           bundle exec rails db:migrate
       - name: Regressao Broker, clientes, campanhas e modulos integrados
         run: |
+          case "$TEST_SUITE" in
+            standard) tags=(--tag '~sd_concurrency') ;;
+            concurrent) tags=(--tag sd_concurrency) ;;
+            *) exit 1 ;;
+          esac
           bundle exec rspec \
             spec/services/jrc_broker \
             spec/services/jrc_customers \
@@ -143,7 +153,7 @@ jobs:
             spec/requests/api/v1/accounts/jrc_operations \
             spec/requests/api/v1/accounts/jrc_service_desk \
             spec/services/jrc_service_desk \
-            --format progress --format json --out /tmp/broker-customer-rspec.json
+            "${tags[@]}" --format progress --format json --out /tmp/broker-customer-rspec.json
           python3 - <<'PYTHON'
           import json, os
           with open('/tmp/broker-customer-rspec.json') as report:
