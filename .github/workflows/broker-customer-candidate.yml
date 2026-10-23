@@ -79,13 +79,14 @@ jobs:
       POSTGRES_PORT: '5432'
       POSTGRES_USERNAME: postgres
       POSTGRES_PASSWORD: disposable-test-only
-      POSTGRES_DATABASE: jrc_broker_customer_candidate_${{ github.run_id }}_${{ github.run_attempt }}_test
+      POSTGRES_DATABASE: jrc_rel_sd_r345_concurrency_test
       REDIS_URL: redis://127.0.0.1:6379/15
       FRONTEND_URL: https://central.example.test
       SECRET_KEY_BASE: isolated-broker-customer-ci-not-a-production-secret
       BUNDLE_FROZEN: 'true'
       SCHEMA: /tmp/broker-customer-candidate-schema.rb
       MINIMUM_EXAMPLES: '305'
+      JRC_SD_CONCURRENCY: '1'
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
@@ -122,9 +123,9 @@ jobs:
           test "$RAILS_ENV" = test
           test "$POSTGRES_HOST" = 127.0.0.1
           test -z "${DATABASE_URL:-}"
-          expected_database="jrc_broker_customer_candidate_${GITHUB_RUN_ID}_${GITHUB_RUN_ATTEMPT}_test"
-          test "$POSTGRES_DATABASE" = "$expected_database"
-          [[ "$POSTGRES_DATABASE" =~ ^jrc_broker_customer_candidate_[0-9]+_[0-9]+_test$ ]]
+          # Each job gets a fresh PostgreSQL service; use the existing approved concurrency profile.
+          test "$POSTGRES_DATABASE" = jrc_rel_sd_r345_concurrency_test
+          test "$JRC_SD_CONCURRENCY" = 1
           SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
           bundle exec rails db:migrate
       - name: Regressao Broker, clientes, campanhas e modulos integrados
