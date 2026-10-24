@@ -155,6 +155,20 @@ export function decodeSupervision(value, context) {
         })();
   return {
     sla,
+    sla_coverage:
+      value.sla_coverage == null
+        ? null
+        : Object.fromEntries(
+            [
+              'total_tickets',
+              'measured_tickets',
+              'unmeasured_tickets',
+              'tickets_with_pending_result',
+              'completed_clocks',
+              'met_clocks',
+              'breached_clocks',
+            ].map(key => [key, count(value.sla_coverage[key])])
+          ),
     by_agent: rows('by_agent', row => ({
       id: row.id === null ? null : id(row.id),
       ...(row.account_user_id && row.unit_id

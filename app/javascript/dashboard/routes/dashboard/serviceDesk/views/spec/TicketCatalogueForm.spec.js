@@ -221,6 +221,11 @@ async function render() {
       },
     },
   });
+  await wrapper
+    .findAll('button')
+    .find(row => row.text() === messages.JRC_SERVICE_DESK.QUICK.advanced)
+    .trigger('click');
+  await flushPromises();
   await wrapper.findAll('select')[1].setValue('10');
   await flushPromises();
   await wrapper

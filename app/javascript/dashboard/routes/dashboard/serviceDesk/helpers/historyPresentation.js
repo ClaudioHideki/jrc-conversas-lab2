@@ -40,6 +40,7 @@ const VISIBLE_FIELDS = Object.freeze([
   'channel',
   'state',
   'reason',
+  'closing_reason',
   'filename',
 ]);
 const scalar = value =>

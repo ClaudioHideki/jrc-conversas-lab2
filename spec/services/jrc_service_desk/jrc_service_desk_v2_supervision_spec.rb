@@ -39,10 +39,10 @@ RSpec.describe JrcServiceDesk do
       expect(own.reload.assignee_membership_id).to eq(sd_membership.id)
     end
 
-    it 'reports unavailable response observations and the required calendar' do
-      expect(data[:sla][:observed_cycles]).to eq(0)
-      expect(data[:sla][:first_response_average_seconds]).to be_nil
-      expect(data[:availability][:calendar_required]).to be(true)
+    it 'reports unavailable observations without imposing a calendar when no policy requires it' do
+      expect(data[:sla]).to be_nil
+      expect(result[:unavailable]).to include('sla_breached')
+      expect(data[:availability][:calendar_required]).to be(false)
     end
   end
 

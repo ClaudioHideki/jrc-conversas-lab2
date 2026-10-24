@@ -1,4 +1,5 @@
 <script setup>
+import CloseTicketForm from '../components/CloseTicketForm.vue';
 import TicketAssetLinks from '../components/TicketAssetLinks.vue';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -257,7 +258,13 @@ watch(
       snapshotReceipt.value = null;
   }
 );
-watch(() => session.operations?.state.revision, refresh);
+watch(
+  () => session.operations?.state.revision,
+  () => {
+    // The active form closes after its verified write; refreshing now would unmount it first.
+    if (!action.value) refresh();
+  }
+);
 watch(
   () => route.query?.tab,
   value => {
@@ -639,6 +646,7 @@ const deleteTicket = async () => {
     <ServiceDeskDialog
       :open="!!action && !!ticket"
       :title="actionTitle"
+      :compact="action === 'closure'"
       :busy="deleting || lifecycleBusy"
       @close="action = ''"
     >
@@ -673,11 +681,19 @@ const deleteTicket = async () => {
           :label="t('JRC_SERVICE_DESK.REDESIGN_DETAIL.confirm_delete')"
         />
       </form>
+      <CloseTicketForm
+        v-else-if="action === 'closure'"
+        :ticket="ticket"
+        @busy-change="lifecycleBusy = $event"
+        @updated="actionUpdated"
+        @cancel="action = ''"
+        @refresh="refresh"
+      />
       <LifecyclePanel
-        v-else-if="['status', 'closure'].includes(action)"
+        v-else-if="action === 'status'"
         :key="action"
         :ticket="ticket"
-        :mode="action === 'closure' ? 'closure' : 'actions'"
+        mode="actions"
         @busy-change="lifecycleBusy = $event"
         @updated="actionUpdated"
         @snapshot-recorded="snapshotRecorded"

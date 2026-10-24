@@ -44,6 +44,7 @@ export function createServiceDeskClient(http) {
               'operator_company_id',
               'sort',
               ...(resource === 'assignees' ? ['team_id'] : []),
+              ...(resource === 'requesters' ? ['company_id'] : []),
             ].includes(key)
         )
       ) {

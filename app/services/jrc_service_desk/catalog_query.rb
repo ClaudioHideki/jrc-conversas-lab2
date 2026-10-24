@@ -16,6 +16,7 @@ class JrcServiceDesk::CatalogQuery
     @parameters = JrcServiceDesk::QueryParameters.new(parameters, catalog: true)
     @unit_id = @parameters['unit_id']
     raise ArgumentError, 'Team filter requires assignees' if @parameters['team_id'] && @resource != 'assignees'
+    raise ArgumentError, 'Company filter requires requesters' if @parameters['company_id'] && @resource != 'requesters'
     @units = context.view_unit_scope
     if @parameters['operator_company_id']
       raise ActiveRecord::RecordNotFound unless @units.exists?(operator_company_id: @parameters['operator_company_id'])
@@ -74,8 +75,7 @@ class JrcServiceDesk::CatalogQuery
     when 'contracts'
       scoped_contracts
     when 'requesters'
-      Pundit.authorize(context.to_h, Contact, :index?)
-      search(Contact.where(account_id: context.account.id), 'contacts', 'name').order(name: :asc, id: :asc)
+      JrcServiceDesk::RequesterDirectory.new(context).scope(company_id: parameters['company_id'], query: parameters['q']).order(name: :asc, id: :asc)
     when 'teams'
       Pundit.authorize(context.to_h, Team, :index?)
       search(Team.where(account_id: context.account.id), 'teams', 'name').order(name: :asc, id: :asc)

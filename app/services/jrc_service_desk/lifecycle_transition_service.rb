@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class JrcServiceDesk::LifecycleTransitionService < JrcServiceDesk::BaseService
-  FIELDS = %w[rule_key expected_lock_version expected_policy_version_id reason_code note solution evidence_note_ids fields].freeze
+  FIELDS = %w[rule_key expected_lock_version expected_policy_version_id reason_code closing_reason note solution evidence_note_ids fields].freeze
 
   def call(ticket_id:, attributes:, idempotency_key:, execution_command: nil)
     data = JrcServiceDesk::Input.attributes(attributes, FIELDS)
@@ -28,7 +28,8 @@ class JrcServiceDesk::LifecycleTransitionService < JrcServiceDesk::BaseService
       raise Pundit::NotAuthorizedError, 'No applicable lifecycle policy' unless version
       raise JrcServiceDesk::IdempotencyConflict, 'Policy selection changed; reload' unless version.id == expected_policy
 
-      rule = version.rules.rule(normalized.fetch('rule_key'))
+      revision = JrcServiceDesk::ClosureRevisionBinding.new(ticket, version)
+      rule = revision.rule(version.rules.rule(normalized.fetch('rule_key')))
       raise Pundit::NotAuthorizedError unless JrcServiceDesk::LifecycleActionPolicy.new(context.to_h, ticket).action?(rule.fetch('action'))
       unless JrcServiceDesk::LifecycleActionPolicy.new(context.to_h, ticket).requirements_allowed?(rule.fetch('requirements'))
         raise Pundit::NotAuthorizedError, 'Required lifecycle evidence is outside the permitted content scope'
@@ -54,14 +55,15 @@ class JrcServiceDesk::LifecycleTransitionService < JrcServiceDesk::BaseService
         ticket.save!
         append_event!(ticket, 'lifecycle_policy_bound', 'policy_version_id' => version.id, 'version' => version.version, 'digest' => version.digest)
       end
-      sla = JrcServiceDesk::LifecycleClocks.new(ticket: ticket, version: version, actor: actor_membership, now: now)
+      sla = JrcServiceDesk::LifecycleClocks.new(ticket: ticket, version: version, actor: actor_membership, now: now, closure_rules: revision.closure_rules)
                                            .run!(rule: rule, reason: reason, reopening: reopening)
+      closure_revision = revision.projection
       previous = persist_status!(ticket, target, now)
       transition = ticket.lifecycle_transitions.create!(
         account: context.account, unit: ticket.unit,
         lifecycle_policy_version: version, actor_membership: actor_membership, from_status: previous, to_status: target,
         action: rule['action'], rule_key: rule['key'], request_key: key, fingerprint: fingerprint, occurred_at: now,
-        payload: transition_payload(normalized, previous, target, version, sla).merge('origin' => origin)
+        payload: transition_payload(normalized, previous, target, version, sla).merge('origin' => origin, 'closure_revision' => closure_revision&.stringify_keys)
       )
       append_transition_event!(ticket, transition, previous, sla)
       transition
@@ -89,11 +91,13 @@ class JrcServiceDesk::LifecycleTransitionService < JrcServiceDesk::BaseService
 
   def append_transition_event!(ticket, transition, previous, sla)
     version = transition.lifecycle_policy_version
-    append_event!(ticket, 'lifecycle_transitioned', 'transition_id' => transition.id, 'action' => transition.action,
+    data = { 'transition_id' => transition.id, 'action' => transition.action,
                                                     'from_status_id' => previous.id, 'to_status_id' => transition.to_status_id,
                                                     'policy_version_id' => version.id,
                                                     'policy_version' => version.version, 'cycle_id' => sla['cycle_id'],
-                                                    'origin' => transition.payload['origin'])
+             'origin' => transition.payload['origin'] }
+    data['closing_reason'] = transition.payload['closing_reason'] if transition.payload.key?('closing_reason')
+    append_event!(ticket, 'lifecycle_transitioned', data)
   end
 
   def validate_service_approval!(ticket, rule)

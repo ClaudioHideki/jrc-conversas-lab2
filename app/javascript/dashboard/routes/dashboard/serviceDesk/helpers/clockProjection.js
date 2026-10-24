@@ -20,6 +20,16 @@ export function decodeClockProjection(row) {
     id: canonicalId(row.id),
     kind: row.kind,
     state: row.state,
+    deadline_state: [
+      'on_time',
+      'near_due',
+      'overdue',
+      'paused',
+      'completed',
+      'stopped',
+    ].includes(row.deadline_state)
+      ? row.deadline_state
+      : null,
     budget_seconds: row.budget_seconds,
     elapsed_seconds: row.elapsed_seconds,
     remaining_seconds: row.remaining_seconds,

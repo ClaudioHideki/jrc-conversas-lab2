@@ -189,10 +189,13 @@ const EVENT_KEYS = {
     'achieved_at',
     'snapshot_id',
   ],
+  first_response_observed: ['message_id', 'conversation_id', 'achieved_at'],
   sla_snapshot_recorded: ['snapshot_id', 'version'],
   creation_context_recorded: [],
+  closure_policy_revised: ['source_version_id', 'target_version_id', 'effects'],
   lifecycle_policy_bound: ['policy_version_id', 'version', 'digest'],
   lifecycle_transitioned: [
+    'closing_reason',
     'transition_id',
     'action',
     'from_status_id',

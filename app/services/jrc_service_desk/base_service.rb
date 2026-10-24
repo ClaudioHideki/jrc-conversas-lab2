@@ -95,6 +95,13 @@ class JrcServiceDesk::BaseService
     raise ActiveRecord::StaleObjectError.new(ticket, 'update')
   end
 
+  def verify_assignee_team!(ticket)
+    return unless ticket.assignee_membership && ticket.team_id
+
+    TeamMember.where(team_id: ticket.team_id, user_id: ticket.assignee_membership.account_user.user_id)
+              .lock('FOR SHARE').take!
+  end
+
   def append_event!(ticket, type, data)
     JrcServiceDesk::TicketEvent.create!(account: context.account, unit: ticket.unit, ticket: ticket,
                                          actor_membership: actor_membership, event_type: type,

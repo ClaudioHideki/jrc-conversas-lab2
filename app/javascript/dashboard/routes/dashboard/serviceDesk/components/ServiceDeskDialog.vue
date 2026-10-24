@@ -7,6 +7,7 @@ const props = defineProps({
   open: Boolean,
   title: { type: String, required: true },
   busy: Boolean,
+  compact: Boolean,
 });
 const emit = defineEmits(['close']);
 const { t } = useI18n();
@@ -40,7 +41,8 @@ onBeforeUnmount(() => {
     <dialog
       ref="dialog"
       :aria-label="title"
-      class="m-auto w-[calc(100%-2rem)] max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border border-n-weak bg-n-background p-0 text-n-slate-12 shadow-xl backdrop:bg-black/50"
+      class="m-auto w-[calc(100%-2rem)] max-h-[90vh] overflow-y-auto rounded-2xl border border-n-weak bg-n-background p-0 text-n-slate-12 shadow-xl backdrop:bg-black/50"
+      :class="compact ? 'max-w-lg' : 'max-w-3xl'"
       @cancel.prevent="close"
     >
       <header

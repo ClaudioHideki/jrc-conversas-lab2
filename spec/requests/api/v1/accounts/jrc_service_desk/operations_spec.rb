@@ -129,6 +129,13 @@ RSpec.describe 'JRC Service Desk CP4 HTTP operations', type: :request do
     grant = create(:jrc_sd_membership, unit: sd_unit, account_user: target)
     team = create(:team, account: sd_account)
     queue = create(:jrc_sd_queue, unit: sd_unit, team: team)
+    # Same-unit membership alone does not make an operator eligible for this team.
+    post "#{base}/tickets/#{row.id}/transfer", headers: headers, as: :json, params: {
+      assignment: { assignee_account_user_id: target.id, queue_id: queue.id }, expected_lock_version: row.lock_version
+    }
+    expect(response).to have_http_status(:not_found)
+    expect(row.reload.assignee_membership_id).to be_nil
+    create(:team_member, team: team, user: target.user)
     post "#{base}/tickets/#{row.id}/transfer", headers: headers, as: :json, params: {
       assignment: { assignee_account_user_id: target.id, queue_id: queue.id }, expected_lock_version: row.lock_version
     }

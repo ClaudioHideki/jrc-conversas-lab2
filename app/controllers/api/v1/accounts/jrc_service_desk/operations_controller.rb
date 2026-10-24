@@ -12,6 +12,7 @@ class Api::V1::Accounts::JrcServiceDesk::OperationsController < Api::V1::Account
   rescue_from ActiveRecord::RecordNotUnique, ActiveRecord::InvalidForeignKey, ActiveRecord::NotNullViolation, with: :constraint_conflict
   rescue_from ::JrcServiceDesk::DeletionBlockedError, with: :deletion_blocked
   rescue_from ::JrcServiceDesk::LinkedContextConflict, with: :linked_context_conflict
+  rescue_from ::JrcServiceDesk::RequestValidationError, with: :request_validation_failed
 
   private
 
@@ -75,6 +76,10 @@ class Api::V1::Accounts::JrcServiceDesk::OperationsController < Api::V1::Account
 
   def bad_input(_error)
     render json: { error: 'Dados inválidos ou não suportados pelo Service Desk.', code: 'invalid_input' }, status: :unprocessable_entity
+  end
+
+  def request_validation_failed(error)
+    render json: { error: error.message, code: error.code, fields: ['requester_id'] }, status: :unprocessable_entity
   end
 
   def write_conflict(_error)

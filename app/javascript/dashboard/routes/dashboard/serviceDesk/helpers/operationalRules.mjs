@@ -1,4 +1,5 @@
 import { canonicalId } from './access.js';
+import { targetBudgets } from './slaTargets.js';
 
 export const ruleKinds = Object.freeze([
   'routing',
@@ -129,6 +130,7 @@ export function rulesDefinition(kind, rows) {
       snapshotObjectFields.forEach(field => {
         snapshot[field] = jsonObject(row.snapshot[field]);
       });
+      targetBudgets(snapshot.policy_conditions);
       output = { snapshot };
     } else
       output = {

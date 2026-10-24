@@ -9,9 +9,9 @@ class JrcServiceDesk::SupervisionProjection
   def call
     return nil unless @context.capability?(:dashboard_view) && @context.capability?(:tickets_view_all)
 
-    { sla: sla, by_agent: agent_loads, capacity: capacities, tasks: tasks, approvals: approvals,
+    { sla: sla, sla_coverage: coverage, by_agent: agent_loads, capacity: capacities, tasks: tasks, approvals: approvals,
       evolution: evolution, top_categories: top_categories, timezone: 'UTC',
-      availability: { csat: 'shared_survey_report', calendar_required: cycles.empty? } }
+      availability: { csat: 'shared_survey_report', calendar_required: calendar_required? } }
   end
 
   private
@@ -29,17 +29,39 @@ class JrcServiceDesk::SupervisionProjection
   end
 
   def sla
-    return nil unless @context.capability?(:sla_view)
+    return nil unless @context.capability?(:sla_view) && cycles.any?
 
     clocks = JrcServiceDesk::SlaClock.where(account_id: @context.account.id, sla_cycle_id: cycles)
     completed = clocks.where(state: 'completed')
     { observed_cycles: cycles.length,
-      running_breached: clocks.where(state: 'running').where('due_at < ?', Time.current).count,
+      running_breached: JrcServiceDesk::ClockBreachQuery.count(clocks),
       completed_met: completed.where('achieved_at <= due_at').count,
       completed_breached: completed.where('achieved_at > due_at').count,
       first_response_average_seconds: completed.where(kind: 'first_response').average(:elapsed_seconds)&.to_f,
       attendance_average_seconds: completed.where(kind: 'attendance').average(:elapsed_seconds)&.to_f,
       resolution_average_seconds: completed.where(kind: 'resolution').average(:elapsed_seconds)&.to_f }
+  end
+
+  def calendar_required?
+    # Group identical selectors; do not turn missing observations into a universal SLA requirement.
+    @relation.distinct.pluck(:unit_id, :service_id, :lifecycle_policy_version_id).any? do |unit_id, service_id, version_id|
+      ticket = JrcServiceDesk::Ticket.new(account_id: @context.account.id, unit_id: unit_id,
+                                         service_id: service_id, lifecycle_policy_version_id: version_id)
+      JrcServiceDesk::LifecycleSelector.new(ticket).applicable&.definition&.dig('sla', 'mode') == 'calendar_snapshot'
+    end
+  end
+
+  def coverage
+    return nil unless @context.capability?(:sla_view)
+
+    total = @relation.count
+    pending = JrcServiceDesk::LifecycleTransition.where(account_id: @context.account.id, ticket_id: ids)
+                .where("payload->'sla'->>'calculation_pending' = 'true'").distinct.count(:ticket_id)
+    completed = JrcServiceDesk::SlaClock.where(account_id: @context.account.id, sla_cycle_id: cycles, state: 'completed')
+    { total_tickets: total, measured_tickets: cycles.length, unmeasured_tickets: total - cycles.length,
+      tickets_with_pending_result: pending, completed_clocks: completed.count,
+      met_clocks: completed.where('achieved_at <= due_at').count,
+      breached_clocks: completed.where('achieved_at > due_at').count }
   end
 
   def agent_loads
@@ -68,7 +90,7 @@ class JrcServiceDesk::SupervisionProjection
 
   def evolution
     counts = @relation.where('jrc_service_desk_tickets.created_at >= ?', 90.days.ago)
-                      .group(Arel.sql('jrc_service_desk_tickets.created_at::date')).count
+                      .group(Arel.sql("(jrc_service_desk_tickets.created_at AT TIME ZONE 'UTC')::date")).count
     counts.sort_by { |date, _| date }.map { |date, count| { date: date.iso8601, count: count } }
   end
 

@@ -1,11 +1,26 @@
-import { computed, inject, onBeforeUnmount, onMounted, provide, reactive, watch } from 'vue';
+import {
+  computed,
+  inject,
+  onBeforeUnmount,
+  onMounted,
+  provide,
+  reactive,
+  watch,
+} from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import ServiceDeskAPI from 'dashboard/api/serviceDesk';
 import ServiceDeskOperations from 'dashboard/api/serviceDeskOperations';
-import { createOperationalSession, createOperationalState } from '../helpers/operationalSession.js';
+import {
+  createOperationalSession,
+  createOperationalState,
+} from '../helpers/operationalSession.js';
 import { canonicalId, hasServiceDeskFeature } from '../helpers/access.js';
-import { createServiceDeskSession, createSessionState } from '../helpers/session.js';
+import {
+  createServiceDeskSession,
+  createSessionState,
+} from '../helpers/session.js';
+import { serviceDeskRouteName } from '../routeDefinitions';
 const KEY = Symbol('jrc-service-desk-session');
 export function provideServiceDesk() {
   const route = useRoute();
@@ -16,26 +31,59 @@ export function provideServiceDesk() {
   const enabled = computed(() => hasServiceDeskFeature(store, accountId.value));
   const state = reactive(createSessionState());
   const session = createServiceDeskSession(ServiceDeskAPI, state);
-  const operations = createOperationalSession(ServiceDeskOperations, session, reactive(createOperationalState()));
-  watch([accountId, userId, enabled], ([account, user, flag]) => {
-    operations.clear();
-    session.start({ accountId: account, userId: user, enabled: flag });
-    if (!flag && account && route.name?.startsWith('jrc_service_desk_')) {
-      router.replace({ name: 'home', params: { accountId: account } });
-    }
-  }, { immediate: true, flush: 'sync' });
-  watch(() => state.status, status => { if (status !== 'ready') operations.clear(); }, { flush: 'sync' });
+  const operations = createOperationalSession(
+    ServiceDeskOperations,
+    session,
+    reactive(createOperationalState())
+  );
+  watch(
+    [accountId, userId, enabled],
+    ([account, user, flag]) => {
+      operations.clear();
+      session.start({ accountId: account, userId: user, enabled: flag });
+      if (!flag && account && route.name?.startsWith('jrc_service_desk_')) {
+        router.replace({ name: 'home', params: { accountId: account } });
+      }
+    },
+    { immediate: true, flush: 'sync' }
+  );
+  watch(
+    () => state.status,
+    status => {
+      if (status !== 'ready') operations.clear();
+    },
+    { flush: 'sync' }
+  );
   let timer;
-  const revalidate = () => { if (document.visibilityState !== 'hidden') session.revalidate(); };
+  const revalidate = async () => {
+    if (document.visibilityState === 'hidden') return;
+    await session.revalidate();
+    const readScreens = [
+      'overview',
+      'tickets',
+      'mine',
+      'queues',
+      'assignees',
+      'sla',
+      'reports',
+    ];
+    if (
+      state.status === 'ready' &&
+      readScreens.some(name => route.name === serviceDeskRouteName(name))
+    )
+      operations.state.revision += 1;
+  };
   onMounted(() => {
     window.addEventListener('focus', revalidate);
     document.addEventListener('visibilitychange', revalidate);
     timer = window.setInterval(revalidate, 60000);
   });
   onBeforeUnmount(() => {
-    window.clearInterval(timer); window.removeEventListener('focus', revalidate);
+    window.clearInterval(timer);
+    window.removeEventListener('focus', revalidate);
     document.removeEventListener('visibilitychange', revalidate);
-    operations.clear(); session.dispose();
+    operations.clear();
+    session.dispose();
   });
   const value = { ...session, state, accountId, userId, enabled, operations };
   provide(KEY, value);
@@ -43,7 +91,6 @@ export function provideServiceDesk() {
 }
 export function useServiceDesk() {
   const value = inject(KEY);
-  if (!value)
-    throw new Error('Service Desk provider missing');
+  if (!value) throw new Error('Service Desk provider missing');
   return value;
 }

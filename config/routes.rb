@@ -134,6 +134,13 @@ Rails.application.routes.draw do
               get '/:id', to: 'configuration#show'
               patch '/:id', to: 'configuration#update'
             end
+            get 'closure_revisions/versions', to: 'closure_revisions#versions'
+            post 'closure_revisions/proposal', to: 'closure_revisions#proposal'
+            get 'closure_revisions', to: 'closure_revisions#index'
+            post 'closure_revisions/preview', to: 'closure_revisions#preview'
+            post 'closure_revisions', to: 'closure_revisions#create'
+            get 'closure_revisions/result', to: 'closure_revisions#result'
+            post 'closure_revisions/resume', to: 'closure_revisions#resume'
             resources :lifecycle_policies, only: [:index, :show, :create]
             resources :service_definitions, only: [:index, :show, :create]
             get 'ui_context', to: 'ui_context#show'

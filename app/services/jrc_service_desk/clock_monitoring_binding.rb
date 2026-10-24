@@ -28,7 +28,10 @@ class JrcServiceDesk::ClockMonitoringBinding
     cycle = clock.sla_cycle
     version = cycle.lifecycle_policy_version
     current = JrcServiceDesk::LifecycleSelector.new(clock.ticket).applicable
-    valid = current&.id == version.id && version.lifecycle_policy.current_version_id == version.id &&
+    revision = JrcServiceDesk::ClosureRevisionBinding.new(clock.ticket, current)
+    publication_current = version.lifecycle_policy.current_version_id == version.id ||
+      (revision.active? && revision.target.id == version.lifecycle_policy.current_version_id)
+    valid = current&.id == version.id && publication_current &&
             version.digest == version.expected_digest && clock.ticket.lifecycle_policy_version_id == version.id
     raise JrcServiceDesk::IdempotencyConflict, 'Historical SLA monitoring publication is not current' unless valid
 

@@ -435,3 +435,38 @@ describe('native append-only SLA snapshot editor', () => {
     );
   });
 });
+
+describe('closure command over the official HTTP client', () => {
+  it('sends the actual closing reason and idempotency key without allowing arbitrary fields', async () => {
+    const http = {
+      post: vi.fn().mockResolvedValue({ data: { transition_id: '8' } }),
+    };
+    const client = createServiceDeskLifecycleClient(http);
+    const command = {
+      rule_key: 'resolve',
+      expected_lock_version: 0,
+      expected_policy_version_id: '2',
+      closing_reason: 'Atendimento concluído',
+      fields: { closing_reason: 'Atendimento concluído' },
+    };
+    await expect(
+      client.apply('1', '20', command, 'synthetic-closure')
+    ).resolves.toEqual({ transition_id: '8' });
+    expect(http.post).toHaveBeenCalledWith(
+      '/api/v1/accounts/1/jrc_service_desk/tickets/20/lifecycle',
+      command,
+      expect.objectContaining({
+        headers: { 'Idempotency-Key': 'synthetic-closure' },
+      })
+    );
+    expect(() =>
+      client.apply(
+        '1',
+        '20',
+        { ...command, account_id: '99' },
+        'synthetic-denied'
+      )
+    ).toThrow('Invalid lifecycle fields');
+    expect(http.post).toHaveBeenCalledOnce();
+  });
+});

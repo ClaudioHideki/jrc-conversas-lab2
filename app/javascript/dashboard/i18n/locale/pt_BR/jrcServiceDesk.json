@@ -337,7 +337,12 @@
         "unavailable": "Sem condições aplicadas",
         "pending": "Cálculo pendente",
         "calculated": "Prazo calculado",
-        "paused": "Prazo pausado"
+        "paused": "Prazo pausado",
+        "on_time": "Dentro do prazo",
+        "near_due": "Próximo do vencimento — faixa configurada atingida",
+        "overdue": "Vencido",
+        "completed": "Concluído",
+        "stopped": "Interrompido sem conclusão"
       },
       "EVENTS": {
         "ticket_created": "Chamado criado",
@@ -373,7 +378,9 @@
         "task_deleted": "Tarefa excluída",
         "note_withdrawn": "Nota retirada ou substituída",
         "attachment_withdrawn": "Anexo excluído",
-        "resource_unlinked": "Recurso desvinculado"
+        "resource_unlinked": "Recurso desvinculado",
+        "first_response_observed": "Primeira resposta comprovada, independente da meta de SLA",
+        "closure_policy_revised": "Requisitos futuros de fechamento revisados"
       },
       "STATUS": {
         "idle": "",
@@ -978,7 +985,8 @@
         "notifications": "Notificações ao cliente",
         "ola": "OLA da fila",
         "lifecycle": "Ciclo de vida e SLA",
-        "operational": "Direcionamento, matriz e políticas operacionais"
+        "operational": "Direcionamento, matriz e políticas operacionais",
+        "closure_revisions": "Revisar fechamento de chamados existentes"
       },
       "notice": "Desativado até aprovação explícita. Cada avaliação usa o operador selecionado, as permissões atuais e a política publicada. Alterar o operador desativa o monitoramento automático.",
       "automations_help": "Configure regras de ciclo, monitoramento OLA das filas e notificações ao cliente. Novas políticas ficam desativadas até configuração e aprovação explícitas.",
@@ -1126,7 +1134,7 @@
       "report_definition": "Conjunto: chamados abertos em [de, até). Reaberturas são contadas no mesmo período. Resolução no primeiro contato e qualidade ficam indisponíveis até aprovação das definições.",
       "channel_overlap": "Um chamado vinculado a vários canais autorizados pode aparecer em mais de uma contagem por canal.",
       "reopen_summary": "Reaberturas: {events} eventos / {tickets} chamados, em um conjunto de {cohort_ticket_count}.",
-      "sla_summary": "Último ciclo SLA: prazos concluídos",
+      "sla_summary": "Último ciclo SLA: observado = relógios existentes; violações consideram apenas relógios concluídos. Sem conclusão, resultado indisponível.",
       "clock": "Prazo",
       "clocks": {
         "first_response": "Primeira resposta",
@@ -1254,7 +1262,8 @@
           "owner_account_user_id": "Vínculo do proprietário na conta",
           "severity": "Gravidade",
           "reason": "Motivo",
-          "filename": "Arquivo"
+          "filename": "Arquivo",
+          "closing_reason": "Motivo do encerramento"
         }
       },
       "designer": {
@@ -1694,7 +1703,8 @@
         "risk_limits": "As faixas preventivas por prioridade ainda não são fornecidas nesta projeção.",
         "capacity": "{active} atendimentos / capacidade {total}",
         "no_capacity": "Capacidade não configurada; percentual não calculado.",
-        "more": "Mais indicadores operacionais"
+        "more": "Mais indicadores operacionais",
+        "observed_cycles": "Ciclos observados: {count}. Chamados sem ciclo medido não entram neste número."
       },
       "policy": {
         "steps": {
@@ -1744,6 +1754,175 @@
         "reply_here": "Responder nesta conversa",
         "portal": "Portal / chamado"
       }
+    },
+    "QUICK": {
+      "service_approval_required": "Este serviço exige uma aprovação concluída neste ciclo antes do encerramento. Consulte as aprovações do chamado.",
+      "subtitle": "Informe o cliente, o solicitante e o que precisa ser atendido.",
+      "advanced": "Modo avançado (5 etapas)",
+      "quick_mode": "Formulário rápido",
+      "new_requester": "Cadastrar solicitante",
+      "person_name": "Nome completo",
+      "email": "E-mail (opcional)",
+      "phone": "Telefone (opcional)",
+      "save_requester": "Salvar solicitante",
+      "requester_created": "Solicitante cadastrado e selecionado.",
+      "duplicate_requester": "Já existe um contato com esse telefone ou e-mail. Busque e selecione a pessoa existente.",
+      "requester_create_failed": "Não foi possível cadastrar. Confira o nome, o telefone, o e-mail e sua permissão de acesso.",
+      "remember_type": "Usar este tipo como padrão nesta unidade e neste navegador.",
+      "requester_company_mismatch": "Selecione um solicitante vinculado à empresa atendida.",
+      "requester_is_company": "Selecione uma pessoa como solicitante. Esse registro representa uma empresa.",
+      "catalogue_required": "Preencha os campos exigidos pelo tipo de chamado ou serviço selecionado.",
+      "recover_creation": "Conferir criação anterior",
+      "resolution": "Resolução",
+      "required_diagnosis": "Diagnóstico exigido pela política",
+      "required_evidence": "IDs das evidências exigidas pela política",
+      "classification_required": "Esta política exige classificação. Edite a categoria do chamado antes de encerrar.",
+      "confirm_close": "Confirmar encerramento",
+      "recover_closure": "Conferir e continuar encerramento",
+      "partial_closure": "O chamado foi resolvido, mas o encerramento ainda não foi confirmado. Continue para concluir sem repetir a resolução.",
+      "closure_unavailable": "A política deste chamado não autoriza um fluxo completo de encerramento para seu usuário. Solicite revisão da configuração ao administrador.",
+      "calendar_snapshot_required": "A política deste chamado exige um calendário de SLA e metas válidos. O administrador precisa configurar ou registrar esses dados antes do encerramento.",
+      "no_applicable_policy": "Este chamado não possui uma política de encerramento aplicável. Solicite a configuração ao administrador.",
+      "dependency": "O encerramento depende de uma configuração de SLA ou calendário exigida pela política. Solicite a revisão ao administrador.",
+      "denied": "Você não tem permissão para concluir este encerramento.",
+      "conflict": "O chamado ou a política mudou. Atualize os dados e revise os requisitos antes de continuar.",
+      "closure_failed": "Não foi possível confirmar o encerramento. Confira os requisitos e use a recuperação se o resultado ainda estiver pendente."
+    },
+    "SIMPLE_SLA": {
+      "closing_reason": "Motivo do encerramento",
+      "closing_help": "Descreva brevemente por que o chamado está sendo encerrado.",
+      "specific_requirements": "Esta política específica exige as informações adicionais abaixo. Os dados anteriores serão preservados.",
+      "observed_title": "Tempos observados nos eventos",
+      "observed_help": "Tempo corrido desde o início do ciclo atual, calculado pelos eventos oficiais. Não representa tempo útil nem resultado de SLA.",
+      "result_unavailable": "Resultado de SLA indisponível.",
+      "pending": {
+        "targets_and_calendar_missing": "Meta e calendário de SLA não configurados.",
+        "targets_missing": "Meta de SLA não configurada ou incompatível.",
+        "calendar_missing": "Calendário de SLA não configurado ou incompatível.",
+        "result_unavailable": "Ainda não existe um ciclo de SLA calculado."
+      },
+      "times": {
+        "first_response": "Primeira resposta válida",
+        "resolution": "Resolução",
+        "closure": "Encerramento"
+      },
+      "wall_seconds": "{seconds} segundos corridos",
+      "no_event": "Sem evento comprovado",
+      "targets_title": "Metas e calendário do SLA",
+      "targets_help": "Informe as metas aprovadas. Não há prazo padrão. Zero ou valor vazio não significa SLA dispensado. Os valores são armazenados em segundos.",
+      "invalid_json": "Revise o JSON das condições antes de usar o editor visual.",
+      "invalid_target": "Informe uma duração positiva que resulte em segundos inteiros. A meta está incompleta e não pode ser publicada.",
+      "targets": {
+        "first_response": "Meta de primeira resposta",
+        "resolution": "Meta de resolução",
+        "attendance": "Meta de atendimento"
+      },
+      "duration_unit": "Unidade de tempo",
+      "units": {
+        "seconds": "Segundos",
+        "minutes": "Minutos",
+        "hours": "Horas"
+      },
+      "calendar_help": "Expediente por dia: informe intervalos HH:MM-HH:MM separados por ponto e vírgula. Vazio significa dia sem expediente. Fuso, feriados e exceções permanecem nas condições abaixo; confirme todos antes de publicar.",
+      "weekdays": {
+        "1": "Segunda-feira",
+        "2": "Terça-feira",
+        "3": "Quarta-feira",
+        "4": "Quinta-feira",
+        "5": "Sexta-feira",
+        "6": "Sábado",
+        "7": "Domingo"
+      },
+      "missing_behavior": "Quando faltarem metas ou calendário",
+      "legacy_strict": "Preservar bloqueio das políticas anteriores",
+      "operational": "Atendimento comum: permitir conclusão, sem resultado de SLA",
+      "contractual": "SLA contratual: exigir configuração válida",
+      "missing_help": "Esta escolha só vale após publicação autorizada de uma nova versão. Não desativa o SLA, não altera chamados fixados e não dispensa obrigações contratuais.",
+      "coverage": "Cobertura: {measured_tickets} de {total_tickets} chamados com ciclo medido. {unmeasured_tickets} sem ciclo (inclui não aplicáveis). {tickets_with_pending_result} com conclusão registrada sem cálculo. Cumprimento considera somente relógios concluídos elegíveis: {met_clocks} dentro e {breached_clocks} fora do prazo, de {completed_clocks} observados.",
+      "publication_preview": "Prévia — unidade {unit}, versão atual {version}",
+      "new_tickets_only": "A publicação cria uma nova versão para a seleção de novos chamados. Metas, resultados e versões fixados em chamados existentes não serão reescritos.",
+      "target_summary": "Regra {key}: primeira resposta {first} s; resolução {resolution} s; fuso {timezone}.",
+      "whole_unit": "Sem predicado adicional: alcance da unidade inteira."
+    },
+    "CLOSURE_REVISION": {
+      "title": "Revisar fechamento de chamados existentes",
+      "notice": "Account {account}. Esta ação administrativa altera somente os requisitos futuros de fechamento dos chamados selecionados.",
+      "restricted": "Selecione uma unidade e utilize um perfil com gestão de políticas, supervisão, histórico e condições de SLA.",
+      "source": "Política e versão de origem",
+      "target": "Revisão publicada de destino",
+      "select": "Selecione explicitamente",
+      "older": "Carregar versões anteriores",
+      "source_notice": "Origem V{version}: obrigação {obligation}; SLA {mode}. A ausência de declaração não significa atendimento operacional.",
+      "undeclared": "não declarada — decisão administrativa obrigatória",
+      "reviewed": "Revisei o escopo e confirmo que a seleção é de atendimento operacional comum, sem obrigação contratual específica.",
+      "review_reason": "Justificativa da revisão administrativa",
+      "propose": "Preparar rascunho de revisão simples",
+      "draft": "Proposta ainda não publicada",
+      "future_notice": "Publicar cria uma nova versão oficial para a seleção futura. Os chamados existentes só recebem a revisão após a prévia e a aplicação explícita abaixo.",
+      "reason_only": "somente Motivo do encerramento obrigatório; sem nota, solução ou nova classificação",
+      "clock_preserved": "Estado, responsável, fila, histórico, versão original do ciclo, metas, snapshots, relógios, pausas e atrasos permanecem preservados. Nenhum recálculo retroativo.",
+      "publish": "Publicar revisão pelo serviço oficial",
+      "list": "Consultar elegibilidade e impedimentos",
+      "totals": "{total} chamados vinculados à origem; {eligible} elegíveis em todo o escopo consultado.",
+      "select_page": "Selecionar elegíveis desta página",
+      "selected": "Selecionar",
+      "ticket": "Chamado",
+      "state": "Estado atual",
+      "eligibility": "Elegibilidade / impedimento",
+      "select_ticket": "Selecionar chamado {id}",
+      "previous": "Página anterior",
+      "next": "Próxima página",
+      "selection": "{count} chamados selecionados. Limite de 100 por lote.",
+      "preview": "Gerar prévia administrativa",
+      "preview_title": "Prévia antes da confirmação",
+      "preview_counts": "{eligible} elegíveis; {blocked} com impedimento. Apenas os elegíveis e sem alteração posterior serão aplicados.",
+      "apply": "Confirmar aplicação da revisão",
+      "operation": "Operação em lote: {id}",
+      "recover": "Conferir resultado persistido",
+      "resume": "Retomar itens pendentes com segurança",
+      "results": "Resultado por chamado",
+      "confirmed_notice": "Resultado consultado independentemente no servidor. Conflitos e impedimentos exigem nova prévia; não são tratados como sucesso.",
+      "failed": "Não foi possível confirmar a operação. Confira o resultado persistido antes de repetir.",
+      "published": "Revisão publicada e confirmada por releitura. Nenhum chamado antigo foi alterado por essa publicação.",
+      "confirmed": "Aplicação relida e confirmada por chamado.",
+      "statuses": {
+        "applied": "Aplicado",
+        "blocked": "Não aplicado — impedimento",
+        "conflict": "Não aplicado — alterado após a prévia",
+        "pending": "Pendente de retomada"
+      },
+      "reasons": {
+        "eligible": "Elegível após decisão administrativa explícita",
+        "source_changed": "Vínculo de origem diferente",
+        "policy_disabled": "Política desativada",
+        "target_not_current": "Destino deixou de ser a revisão atual",
+        "revision_incompatible": "Revisão incompatível com o ciclo, estados ou regras de SLA existentes",
+        "contractual_policy": "Política contratual — revisão específica necessária",
+        "specific_requirement": "Evidência ou campo específico obrigatório preservado",
+        "terminal_ticket": "Chamado encerrado/cancelado — permanece intacto",
+        "contractual_ticket": "Contrato, condições específicas ou aprovação obrigatória — revisão individual necessária",
+        "already_revised": "Revisão administrativa já registrada",
+        "cycle_incompatible": "Ciclo, relógios ou calendário incompatíveis — não aplicado",
+        "changed_after_preview": "O chamado ou suas condições mudaram após a prévia",
+        "item_rolled_back": "Item revertido; pode ser retomado sem repetir os aplicados",
+        "status_incompatible": "Estado atual fora das transições de fechamento publicadas",
+        "pause_requires_resume": "Pausa exige retomada oficial antes de revisar o fechamento",
+        "approval_pending": "Aprovação pendente, rejeitada ou devolvida — decisão específica preservada"
+      },
+      "version_option": "{name} — V{version} (#{id})",
+      "applied_notice": "Revisão de fechamento V{revision} aplicada administrativamente. O SLA mantém sua versão histórica V{original}.",
+      "inactive_notice": "A revisão registrada não é aplicável às condições atuais. Os requisitos originais e impedimentos específicos continuam valendo.",
+      "inspect_source": "Inspecionar requisitos, pausas e configuração original publicada",
+      "service_scope": "Escopo de serviço: {id}",
+      "unit_default": "padrão da unidade",
+      "recover_id": "Identificador de lote anterior para consulta ou retomada (opcional)",
+      "count_item": "{label}: {count}",
+      "ticket_item": "#{id} {title}",
+      "preview_item": "#{id} — {state}",
+      "result_item": "#{id} — {state} {reason}",
+      "rule_summary": "{action}: somente o motivo do encerramento é obrigatório.",
+      "source_definition": "Conferir a definição original publicada",
+      "all_services": "Todos os serviços desta unidade"
     }
   }
 }

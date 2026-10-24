@@ -37,6 +37,8 @@ class JrcServiceDesk::IntakeRuleApplication
 
     JrcServiceDesk::LifecycleClocks.verify_snapshot!(snapshot, clock_kinds: bound_policy.rules.clock_kinds)
     created = JrcServiceDesk::RecordSlaSnapshotService.new(user_context: @context.to_h).call(ticket_id: @ticket.id, attributes: attributes)
+    JrcServiceDesk::LifecycleClocks.new(ticket: @ticket, version: bound_policy,
+                                      actor: @ticket.created_by_membership, now: @ticket.opened_at).start!
     @ticket.ticket_events.create!(account: @ticket.account, unit: @ticket.unit,
                                   actor_membership: @ticket.created_by_membership, event_type: 'operational_rule_applied',
                                   data: { 'kind' => 'sla_selection', 'rule_version_id' => version.id, 'rule_key' => rule['key'],

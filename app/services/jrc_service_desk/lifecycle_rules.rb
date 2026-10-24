@@ -12,6 +12,12 @@ class JrcServiceDesk::LifecycleRules
     definition['schema_version'] == 2 ? ATTENDANCE_CLOCKS : CLOCKS
   end
 
+  def permits_unconfigured_closure?(action)
+    %w[resolve close].include?(action) && definition.dig('sla', 'mode') == 'calendar_snapshot' &&
+      definition.dig('sla', 'obligation') == 'operational' &&
+      definition.dig('sla', 'missing_configuration') == 'allow_operational_closure'
+  end
+
   def initialize(definition)
     @definition = JrcServiceDesk::Input.attributes(definition, %w[schema_version transitions pause_reasons reopen sla])
     validate!
@@ -38,6 +44,15 @@ class JrcServiceDesk::LifecycleRules
 
   def validate_payload!(rule, payload, classified:)
     req = rule.fetch('requirements')
+    if payload.key?('closing_reason')
+      value = payload['closing_reason']
+      unless %w[resolve close].include?(rule['action']) && value.is_a?(String) && value.strip.present? && value.bytesize <= 4000
+        raise ArgumentError, 'A nonempty closing reason is required for closure'
+      end
+      if payload.dig('fields', 'closing_reason') && payload.dig('fields', 'closing_reason') != value
+        raise ArgumentError, 'Closing reason fields disagree'
+      end
+    end
     %w[note solution].each do |key|
       val = payload[key]
       raise ArgumentError, "Invalid #{key}" unless val.nil? || (val.is_a?(String) && val.bytesize <= 20_000)
@@ -84,7 +99,17 @@ class JrcServiceDesk::LifecycleRules
     raise ArgumentError, 'Unsupported lifecycle format' unless [1, 2].include?(definition['schema_version'])
     exact(definition, %w[schema_version transitions pause_reasons reopen sla])
     sla_fields = definition['schema_version'] == 2 ? %w[mode initial_start escalation_policy] : %w[mode initial_start]
+    extended = definition['sla'].is_a?(Hash) && (definition['sla'].keys & %w[obligation missing_configuration]).any?
+    sla_fields += %w[obligation missing_configuration] if extended
     sla = exact(definition['sla'], sla_fields)
+    if extended
+      raise ArgumentError, 'Explicit SLA obligation required' unless %w[operational contractual].include?(sla['obligation'])
+      raise ArgumentError, 'Explicit missing SLA behavior required' unless %w[block allow_operational_closure].include?(sla['missing_configuration'])
+      raise ArgumentError, 'Contractual SLA requires calendar calculation' if sla['obligation'] == 'contractual' && sla['mode'] != 'calendar_snapshot'
+      if sla['missing_configuration'] == 'allow_operational_closure' && (sla['obligation'] != 'operational' || sla['mode'] != 'calendar_snapshot')
+        raise ArgumentError, 'Contractual SLA cannot waive required configuration'
+      end
+    end
     JrcServiceDesk::ClockEscalationPolicy.new(sla['escalation_policy']) if definition['schema_version'] == 2
     raise ArgumentError, 'Explicit SLA mode required' unless %w[not_applicable calendar_snapshot].include?(sla['mode']) && sla['initial_start'] == 'opened_at'
     rules = definition['transitions']

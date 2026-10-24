@@ -26,6 +26,11 @@ const fields = reactive({
   status_id: '',
   priority_id: '',
 });
+const queueSelected = queue => {
+  const teamId = queue?.team?.id || '';
+  if (teamId !== fields.team_id) fields.assignee_account_user_id = '';
+  fields.team_id = teamId;
+};
 const mutation = computed(
   () => session.operations?.mutation(key) || { status: 'idle' }
 );
@@ -139,7 +144,11 @@ onBeforeUnmount(() => {
           :team-id="fields.team_id"
           :unit-id="ticket.unit_id"
           :label="t('JRC_SERVICE_DESK.FIELDS.assignee')"
-          :current-name="ticket.assignee?.name || ''"
+          :current-name="
+            fields.assignee_account_user_id === ticket.assignee?.id
+              ? ticket.assignee?.name || ''
+              : ''
+          "
           :disabled="busy"
         />
         <Lookup
@@ -149,7 +158,7 @@ onBeforeUnmount(() => {
           :label="t('JRC_SERVICE_DESK.FIELDS.queue')"
           :current-name="ticket.queue?.name || ''"
           :disabled="busy"
-          @update:model-value="fields.team_id = ''"
+          @selected="queueSelected"
         />
         <Lookup
           v-model="fields.team_id"
@@ -157,7 +166,9 @@ onBeforeUnmount(() => {
           :unit-id="ticket.unit_id"
           @update:model-value="fields.assignee_account_user_id = ''"
           :label="t('JRC_SERVICE_DESK.FIELDS.team')"
-          :current-name="ticket.team?.name || ''"
+          :current-name="
+            fields.team_id === ticket.team?.id ? ticket.team?.name || '' : ''
+          "
           :disabled="busy"
         />
       </template>

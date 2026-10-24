@@ -10,15 +10,33 @@ class JrcServiceDesk::ClockProjection
   def call
     elapsed = current_elapsed
     budget = @clock.budget_seconds
-    { id: @clock.id.to_s, kind: kind, state: @clock.state, budget_seconds: budget,
+    breached = elapsed > budget
+    { id: @clock.id.to_s, kind: kind, state: @clock.state, deadline_state: deadline_state(elapsed, budget, breached), budget_seconds: budget,
       elapsed_seconds: elapsed, remaining_seconds: [budget - elapsed, 0].max,
-      consumed_percent: elapsed * 100.0 / budget, breached: elapsed > budget,
+      consumed_percent: elapsed * 100.0 / budget, breached: breached,
       due_at: @clock.due_at.iso8601(6), observed_at: @now.iso8601(6),
       achieved_at: @clock.respond_to?(:achieved_at) ? @clock.achieved_at&.iso8601(6) : @clock.ended_at&.iso8601(6),
       timezone: snapshot&.timezone, time_basis: @clock.respond_to?(:time_basis) ? @clock.time_basis : 'business' }
   end
 
   private
+
+  def deadline_state(elapsed, budget, breached)
+    return @clock.state unless @clock.state == 'running'
+    return 'overdue' if breached
+
+    settings = if @clock.respond_to?(:sla_cycle)
+                 @clock.sla_cycle.lifecycle_policy_version.definition.dig('sla', 'escalation_policy') || {}
+               else
+                 @clock.escalation_snapshot
+               end
+    policy = JrcServiceDesk::ClockEscalationPolicy.new(settings)
+    if policy.enabled? && policy.thresholds.any? { |row| row['percent'] < 100 && elapsed * 100.0 / budget >= row['percent'] }
+      return 'near_due'
+    end
+
+    'on_time'
+  end
 
   def kind
     @clock.respond_to?(:kind) ? @clock.kind : 'ola'

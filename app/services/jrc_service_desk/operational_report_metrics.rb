@@ -58,7 +58,7 @@ class JrcServiceDesk::OperationalReportMetrics
       [kind, { observed: selected.count, completed: completed.count,
                mean_elapsed_seconds: completed.average(:elapsed_seconds)&.to_f,
                completed_breached: completed.where('achieved_at > due_at').count,
-               running_overdue: selected.where(state: 'running').where('due_at < ?', Time.current).count,
+               running_overdue: JrcServiceDesk::ClockBreachQuery.count(selected),
                basis: 'latest_native_cycle_clock_elapsed_seconds', missing_is_not_zero: true }]
     end
   end

@@ -200,7 +200,11 @@ export function decodeRecord(row, context, resource) {
         }
       : {}),
     ...(resource === 'requesters'
-      ? { phone_number: text(row.phone_number) }
+      ? {
+          phone_number: text(row.phone_number),
+          email: text(row.email),
+          company_id: row.company_id == null ? null : id(row.company_id),
+        }
       : {}),
     ...(resource === 'assignees' && row.membership_id
       ? { membership_id: id(row.membership_id) }

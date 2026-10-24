@@ -72,7 +72,20 @@ class JrcServiceDesk::NativeResponseRecorder
     command = JrcServiceDesk::BaseService.new(user_context: context.to_h)
     command.send(:with_ticket, ticket.id, :show?) do |locked|
       policy = JrcServiceDesk::LifecycleSelector.new(locked).applicable
-      next unless policy && policy.definition.dig('sla', 'mode') == 'calendar_snapshot'
+      next unless policy
+
+      start = locked.lifecycle_transitions.where(action: 'reopen').maximum(:occurred_at) || locked.opened_at
+      next if achieved < start
+      observed = locked.ticket_events.where(event_type: 'first_response_observed').where('created_at >= ?', start).exists?
+      unless observed
+        command.send(:append_event!, locked, 'first_response_observed', 'message_id' => @message.id,
+                     'conversation_id' => @message.conversation_id, 'achieved_at' => achieved.iso8601(6))
+      end
+      next unless policy.definition.dig('sla', 'mode') == 'calendar_snapshot'
+      unless locked.sla_cycles.exists?
+        next if locked.lifecycle_transitions.where(action: %w[resolve close]).exists?
+        next if JrcServiceDesk::SlaConfigurationState.reason(locked.latest_sla_snapshot, policy.rules.clock_kinds)
+      end
 
       cycle = cycle(locked, policy, context.account)
       clock = cycle.sla_clocks.lock.find_by(kind: 'first_response')

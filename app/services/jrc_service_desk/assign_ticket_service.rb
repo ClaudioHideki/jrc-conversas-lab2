@@ -24,6 +24,7 @@ class JrcServiceDesk::AssignTicketService < JrcServiceDesk::BaseService
       ticket.assignee_membership = assignee(values['assignee_account_user_id'], ticket.unit) if values.key?('assignee_account_user_id')
       next ticket unless ticket.changed?
 
+      verify_assignee_team!(ticket)
       persist_assignment!(ticket, event_type)
       ticket
     end

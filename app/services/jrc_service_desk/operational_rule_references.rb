@@ -18,7 +18,17 @@ class JrcServiceDesk::OperationalRuleReferences
       definition.fetch('rules').each do |rule|
         validate_facts!(rule.fetch('match'))
         validate_facts!(rule.fetch('output'))
-        verify_snapshot!(rule['output']['snapshot']) if kind == 'sla_selection'
+        if kind == 'sla_selection'
+          verify_snapshot!(rule['output']['snapshot'])
+          services = rule['match'].key?('service_id') ? [rule['match']['service_id']] :
+            JrcServiceDesk::LifecyclePolicy.where(account_id: @context.account.id, unit_id: @unit.id, enabled: true).pluck(:service_id).push(nil).uniq
+          services.each do |service_id|
+            ticket = JrcServiceDesk::Ticket.new(account_id: @context.account.id, unit_id: @unit.id, service_id: service_id)
+            version = JrcServiceDesk::LifecycleSelector.new(ticket).applicable
+            next unless version && version.definition.dig('sla', 'mode') == 'calendar_snapshot'
+            verify_snapshot!(rule['output']['snapshot'], clock_kinds: version.rules.clock_kinds)
+          end
+        end
       end
     end
   end
@@ -39,13 +49,13 @@ class JrcServiceDesk::OperationalRuleReferences
     end
   end
 
-  def verify_snapshot!(attributes)
+  def verify_snapshot!(attributes, clock_kinds: nil)
     keys = JrcServiceDesk::RecordSlaSnapshotService::FIELDS - ['captured_at']
     values = JrcServiceDesk::Input.attributes(attributes, keys)
     raise ArgumentError, 'All snapshot conditions required' unless (keys - values.keys).empty?
 
     snapshot = JrcServiceDesk::SlaSnapshot.new(values.merge(account: @context.account, unit: @unit))
-    JrcServiceDesk::LifecycleClocks.verify_snapshot!(snapshot)
+    JrcServiceDesk::LifecycleClocks.verify_snapshot!(snapshot, clock_kinds: clock_kinds)
     snapshot.expected_digest # also checks canonical JSON types/limits
   rescue JrcServiceDesk::LifecycleDependencyError
     raise ArgumentError, 'Published snapshot requires a valid calendar and matching budgets'

@@ -371,7 +371,12 @@
         "unavailable": "No applied conditions",
         "pending": "Calculation pending",
         "calculated": "Calculated deadline",
-        "paused": "Paused"
+        "paused": "Paused",
+        "on_time": "Within deadline",
+        "near_due": "Approaching deadline — configured threshold reached",
+        "overdue": "Overdue",
+        "completed": "Completed",
+        "stopped": "Stopped without completion"
       },
       "EVENTS": {
         "ticket_created": "Ticket created",
@@ -407,7 +412,9 @@
         "task_deleted": "Task deleted",
         "note_withdrawn": "Note withdrawn or replaced",
         "attachment_withdrawn": "Attachment deleted",
-        "resource_unlinked": "Resource unlinked"
+        "resource_unlinked": "Resource unlinked",
+        "first_response_observed": "Verified first response independent of SLA targets",
+        "closure_policy_revised": "Future closure requirements revised"
       },
       "STATUS": {
         "idle": "",
@@ -978,7 +985,8 @@
         "notifications": "Customer notifications",
         "ola": "Queue OLA",
         "lifecycle": "Lifecycle and SLA",
-        "operational": "Routing, matrix and operational policies"
+        "operational": "Routing, matrix and operational policies",
+        "closure_revisions": "Review closure requirements on existing tickets"
       },
       "notice": "Disabled until explicitly approved. Each evaluation uses the selected operator, current unit permissions and the exact published clock policy. Changing the operator turns automatic monitoring off.",
       "automations_help": "Configure native lifecycle rules, queue OLA monitoring and customer notifications. New policies stay disabled until explicitly configured and approved.",
@@ -1126,7 +1134,7 @@
       "report_definition": "Cohort: tickets opened in [from, to). Reopen events are counted within the same period. First-contact resolution and quality remain unavailable until their definitions are approved.",
       "channel_overlap": "A ticket linked to several authorized channels may appear in more than one channel count.",
       "reopen_summary": "Reopens: {events} events / {tickets} tickets, in a cohort of {cohort_ticket_count}.",
-      "sla_summary": "Latest native SLA cycle: completed clocks",
+      "sla_summary": "Latest SLA cycle: observed means existing clocks; violations use completed clocks only. Without completion, the result is unavailable.",
       "clock": "Clock",
       "clocks": {
         "first_response": "First response",
@@ -1254,7 +1262,8 @@
           "owner_account_user_id": "Owner account membership",
           "severity": "Severity",
           "reason": "Reason",
-          "filename": "File"
+          "filename": "File",
+          "closing_reason": "Reason for closing"
         }
       },
       "designer": {
@@ -1694,7 +1703,8 @@
         "risk_limits": "Preventive risk bands by priority are not provided by this projection.",
         "capacity": "{active} tickets / capacity {total}",
         "no_capacity": "Capacity is not configured; no percentage is calculated.",
-        "more": "More operational indicators"
+        "more": "More operational indicators",
+        "observed_cycles": "Observed cycles: {count}. Tickets without a measured cycle are excluded."
       },
       "policy": {
         "steps": {
@@ -1744,6 +1754,175 @@
         "reply_here": "Reply in this conversation",
         "portal": "Portal / ticket"
       }
+    },
+    "QUICK": {
+      "service_approval_required": "This service requires a completed approval in the current cycle before closure. Review the ticket approvals.",
+      "subtitle": "Select the customer and requester, then describe the request.",
+      "advanced": "Advanced mode (5 steps)",
+      "quick_mode": "Quick form",
+      "new_requester": "Add requester",
+      "person_name": "Full name",
+      "email": "Email (optional)",
+      "phone": "Phone (optional)",
+      "save_requester": "Save requester",
+      "requester_created": "Requester saved and selected.",
+      "duplicate_requester": "A contact already has this phone or email. Search for and select the existing person.",
+      "requester_create_failed": "Could not save the requester. Check the name, phone, email and your access permission.",
+      "remember_type": "Use this type by default for this unit in this browser.",
+      "requester_company_mismatch": "Select a requester linked to the served company.",
+      "requester_is_company": "Select a person as requester. This record represents a company.",
+      "catalogue_required": "Complete the fields required by the selected ticket type or service.",
+      "recover_creation": "Check previous creation",
+      "resolution": "Resolution",
+      "required_diagnosis": "Diagnosis required by the policy",
+      "required_evidence": "Evidence IDs required by the policy",
+      "classification_required": "This policy requires classification. Edit the ticket category before closing.",
+      "confirm_close": "Confirm closure",
+      "recover_closure": "Check and continue closure",
+      "partial_closure": "The ticket was resolved, but closure is still unconfirmed. Continue without repeating resolution.",
+      "closure_unavailable": "The ticket policy does not authorize a complete closure flow for your user. Ask an administrator to review the configuration.",
+      "calendar_snapshot_required": "This ticket policy requires a valid SLA calendar and targets. An administrator must configure or record them before closure.",
+      "no_applicable_policy": "No closure policy applies to this ticket. Ask an administrator to configure it.",
+      "dependency": "Closure depends on an SLA or calendar configuration required by the policy. Ask an administrator to review it.",
+      "denied": "You do not have permission to complete this closure.",
+      "conflict": "The ticket or policy changed. Refresh and review the requirements before continuing.",
+      "closure_failed": "Could not confirm closure. Check the requirements and recover if the outcome is still pending."
+    },
+    "SIMPLE_SLA": {
+      "closing_reason": "Reason for closing",
+      "closing_help": "Briefly explain why this ticket is being closed.",
+      "specific_requirements": "This specific policy requires the additional information below. Existing data will be preserved.",
+      "observed_title": "Times observed from events",
+      "observed_help": "Wall time since the start of the current lifecycle, calculated from official events. This is neither business time nor an SLA result.",
+      "result_unavailable": "SLA result unavailable.",
+      "pending": {
+        "targets_and_calendar_missing": "SLA target and calendar are not configured.",
+        "targets_missing": "SLA target is not configured or is incompatible.",
+        "calendar_missing": "SLA calendar is not configured or is incompatible.",
+        "result_unavailable": "No calculated SLA cycle is available yet."
+      },
+      "times": {
+        "first_response": "First verified response",
+        "resolution": "Resolution",
+        "closure": "Closure"
+      },
+      "wall_seconds": "{seconds} elapsed wall seconds",
+      "no_event": "No verified event",
+      "targets_title": "SLA targets and calendar",
+      "targets_help": "Enter approved targets. There is no default duration. Zero or a blank value does not waive SLA. Values are stored in seconds.",
+      "invalid_json": "Review the conditions JSON before using the visual editor.",
+      "invalid_target": "Enter a positive duration that converts to whole seconds. Incomplete targets cannot be published.",
+      "targets": {
+        "first_response": "First response target",
+        "resolution": "Resolution target",
+        "attendance": "Attendance target"
+      },
+      "duration_unit": "Duration unit",
+      "units": {
+        "seconds": "Seconds",
+        "minutes": "Minutes",
+        "hours": "Hours"
+      },
+      "calendar_help": "Daily working intervals: enter HH:MM-HH:MM pairs separated by semicolons. Blank means no work that day. Timezone, holidays and exceptions remain in the conditions below; confirm all before publishing.",
+      "weekdays": {
+        "1": "Monday",
+        "2": "Tuesday",
+        "3": "Wednesday",
+        "4": "Thursday",
+        "5": "Friday",
+        "6": "Saturday",
+        "7": "Sunday"
+      },
+      "missing_behavior": "When targets or calendar are missing",
+      "legacy_strict": "Preserve blocking behavior of earlier policies",
+      "operational": "Ordinary service: allow completion without an SLA result",
+      "contractual": "Contractual SLA: require valid configuration",
+      "missing_help": "This choice only takes effect after an authorized new version is published. It does not disable SLA, change pinned tickets or waive contractual obligations.",
+      "coverage": "Coverage: {measured_tickets} of {total_tickets} tickets have a measured cycle. {unmeasured_tickets} have no cycle (including nonapplicable tickets). {tickets_with_pending_result} have completion recorded without calculation. Compliance uses only eligible completed clocks: {met_clocks} within and {breached_clocks} outside deadline, out of {completed_clocks} observed clocks.",
+      "publication_preview": "Preview — unit {unit}, current version {version}",
+      "new_tickets_only": "Publishing creates a new version for new-ticket selection. Existing pinned targets, results and versions will not be rewritten.",
+      "target_summary": "Rule {key}: first response {first} s; resolution {resolution} s; timezone {timezone}.",
+      "whole_unit": "No additional predicate: entire unit."
+    },
+    "CLOSURE_REVISION": {
+      "title": "Review closure requirements on existing tickets",
+      "notice": "Account {account}. This administrative operation changes only future closure requirements on selected tickets.",
+      "restricted": "Select a unit and use an authorized policy administrator with ticket supervision, history and SLA condition access.",
+      "source": "Source policy and version",
+      "target": "Published destination revision",
+      "select": "Select explicitly",
+      "older": "Load older versions",
+      "source_notice": "Source V{version}: obligation {obligation}; SLA {mode}. Missing declarations do not classify a policy as operational.",
+      "undeclared": "undeclared — explicit administrative decision required",
+      "reviewed": "I reviewed the scope and explicitly classified this selection as ordinary operational service without specific contractual obligations.",
+      "review_reason": "Administrative review reason",
+      "propose": "Prepare a simple closure revision draft",
+      "draft": "Unpublished proposal",
+      "future_notice": "Publication creates a native version for future selection. Existing tickets change only through the explicit preview and application below.",
+      "reason_only": "only a closing reason is required; no extra note, solution or classification",
+      "clock_preserved": "Current state, assignee, queue, history, original cycle version, targets, snapshots, clocks, pauses and breaches are preserved. No historical recalculation.",
+      "publish": "Publish through the official service",
+      "list": "Inspect eligibility and blockers",
+      "totals": "{total} tickets bound to the source; {eligible} eligible across the entire queried scope.",
+      "select_page": "Select eligible tickets on this page",
+      "selected": "Select",
+      "ticket": "Ticket",
+      "state": "Current state",
+      "eligibility": "Eligibility / blocker",
+      "select_ticket": "Select ticket {id}",
+      "previous": "Previous page",
+      "next": "Next page",
+      "selection": "{count} tickets selected. Maximum100 per batch.",
+      "preview": "Generate administrative preview",
+      "preview_title": "Preview before confirmation",
+      "preview_counts": "{eligible} eligible; {blocked} blocked. Only eligible tickets unchanged since preview will be applied.",
+      "apply": "Confirm revision application",
+      "operation": "Batch operation: {id}",
+      "recover": "Read persisted batch results",
+      "resume": "Safely resume pending items",
+      "results": "Per-ticket results",
+      "confirmed_notice": "Results independently read from the server. Conflicts and blockers need a fresh preview and are not reported as success.",
+      "failed": "The operation could not be confirmed. Read persisted results before retrying.",
+      "published": "Revision published and independently confirmed. Publication did not change any old ticket.",
+      "confirmed": "Per-ticket application independently confirmed.",
+      "statuses": {
+        "applied": "Applied",
+        "blocked": "Not applied — blocked",
+        "conflict": "Not applied — changed after preview",
+        "pending": "Pending safe resumption"
+      },
+      "reasons": {
+        "eligible": "eligible",
+        "source_changed": "source changed",
+        "policy_disabled": "policy disabled",
+        "target_not_current": "target not current",
+        "revision_incompatible": "revision incompatible",
+        "contractual_policy": "contractual policy",
+        "specific_requirement": "specific requirement",
+        "terminal_ticket": "terminal ticket",
+        "contractual_ticket": "contractual ticket",
+        "already_revised": "already revised",
+        "cycle_incompatible": "cycle incompatible",
+        "changed_after_preview": "changed after preview",
+        "item_rolled_back": "item rolled back",
+        "status_incompatible": "Current status has no published closure transition",
+        "pause_requires_resume": "The active pause requires an official resume first",
+        "approval_pending": "Pending, rejected or returned approval — specific decision preserved"
+      },
+      "version_option": "{name} — V{version} (#{id})",
+      "applied_notice": "Closure revision V{revision} was explicitly applied. SLA retains its historical version V{original}.",
+      "inactive_notice": "The recorded revision is not applicable to current conditions. Original and specific requirements remain in force.",
+      "inspect_source": "Inspect the published source requirements, pauses and settings",
+      "service_scope": "Service scope: {id}",
+      "unit_default": "unit default",
+      "recover_id": "Previous batch ID for readback or resumption (optional)",
+      "count_item": "{label}: {count}",
+      "ticket_item": "#{id} {title}",
+      "preview_item": "#{id} — {state}",
+      "result_item": "#{id} — {state} {reason}",
+      "rule_summary": "{action}: only closing reason is required.",
+      "source_definition": "Inspect the original published definition",
+      "all_services": "All services in this unit"
     }
   }
 }

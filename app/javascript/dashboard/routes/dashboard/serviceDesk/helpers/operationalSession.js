@@ -285,6 +285,28 @@ export function createOperationalSession(
             { 409: 'conflict', 422: 'invalid_input' }[status] ||
             (error instanceof ContractError ? 'invalid_contract' : 'error'),
           ticket: null,
+          ...([
+            'requester_company_mismatch',
+            'requester_is_company',
+            'validation_failed',
+          ].includes(error?.response?.data?.code)
+            ? {
+                reason: error.response.data.code,
+                fields: Array.isArray(error.response.data.fields)
+                  ? error.response.data.fields.filter(value =>
+                      [
+                        'requester_id',
+                        'company_id',
+                        'service_fields',
+                        'status',
+                        'priority',
+                        'title',
+                        'description',
+                      ].includes(value)
+                    )
+                  : [],
+              }
+            : {}),
           ...(error?.response?.data?.code === 'linked_context_conflict'
             ? { reason: 'linked_context_conflict' }
             : {}),

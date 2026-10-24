@@ -41,6 +41,25 @@ const confirmed = ref(false);
 const busy = ref(false);
 const feedback = ref('');
 const latest = computed(() => versions.value[0]);
+const targetPreview = computed(() =>
+  rows.value.map(row => {
+    try {
+      const policy = JSON.parse(row.snapshot.policy_conditions || '{}');
+      return {
+        key: row.key,
+        match: Object.entries(row.match)
+          .filter(([, value]) => value !== '')
+          .map(([key, value]) => `${key}: ${value}`)
+          .join(', '),
+        first: policy.clock_budgets_seconds?.first_response ?? null,
+        resolution: policy.clock_budgets_seconds?.resolution ?? null,
+        timezone: row.snapshot.timezone || '',
+      };
+    } catch {
+      return { key: row.key };
+    }
+  })
+);
 const deadline = reactive({
   executor_account_user_id: '',
   after_due_seconds: '',
@@ -233,6 +252,35 @@ const publish = async () => {
       {{ t('JRC_SERVICE_DESK.COMPLETION.unit_required') }}
     </p>
     <form v-else class="grid gap-4" @submit.prevent="publish">
+      <section
+        v-if="kind === 'sla_selection'"
+        class="grid gap-2 rounded-lg border border-n-weak p-3"
+        data-testid="sla-publication-preview"
+      >
+        <h4 class="font-semibold">
+          {{
+            t('JRC_SERVICE_DESK.SIMPLE_SLA.publication_preview', {
+              version: latest?.version || 0,
+              unit: unitId,
+            })
+          }}
+        </h4>
+        <p class="text-sm">
+          {{ t('JRC_SERVICE_DESK.SIMPLE_SLA.new_tickets_only') }}
+        </p>
+        <p v-for="row in targetPreview" :key="row.key" class="text-sm">
+          {{
+            t('JRC_SERVICE_DESK.SIMPLE_SLA.target_summary', {
+              key: row.key,
+              first: row.first ?? '—',
+              resolution: row.resolution ?? '—',
+              timezone: row.timezone || '—',
+            })
+          }}
+          <span v-if="row.match">{{ row.match }}</span>
+          <span v-else>{{ t('JRC_SERVICE_DESK.SIMPLE_SLA.whole_unit') }}</span>
+        </p>
+      </section>
       <template
         v-if="['routing', 'priority_matrix', 'sla_selection'].includes(kind)"
       >

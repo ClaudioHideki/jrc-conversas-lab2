@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import Button from 'dashboard/components-next/button/Button.vue';
 import LookupSelect from './LookupSelect.vue';
 import StatusSetEditor from './StatusSetEditor.vue';
+import { closureConfiguration } from '../helpers/slaTargets';
 import {
   ACTIONS,
   readLifecycleDraft,
@@ -46,6 +47,10 @@ watch(
   }
 );
 const root = 'JRC_SERVICE_DESK.EXPERIENCE.designer';
+const configureClosure = value => {
+  if (!props.disabled)
+    emit('update:modelValue', closureConfiguration(props.modelValue, value));
+};
 function update(path, value) {
   if (props.disabled) return;
   try {
@@ -130,10 +135,35 @@ function start() {
             v-for="value in ['calendar_snapshot', 'not_applicable']"
             :key="value"
             :value="value"
+            :disabled="value === 'not_applicable' && !!d.sla.obligation"
           >
             {{ t(`${root}.values.${value}`) }}
           </option>
         </select>
+        <label
+          v-if="d.sla.mode === 'calendar_snapshot'"
+          class="grid gap-2 text-sm"
+        >
+          {{ t('JRC_SERVICE_DESK.SIMPLE_SLA.missing_behavior') }}
+          <select
+            :value="d.sla.obligation || 'strict'"
+            class="rounded border border-n-weak bg-n-solid-1 p-2"
+            @change="configureClosure($event.target.value)"
+          >
+            <option value="strict">
+              {{ t('JRC_SERVICE_DESK.SIMPLE_SLA.legacy_strict') }}
+            </option>
+            <option value="operational">
+              {{ t('JRC_SERVICE_DESK.SIMPLE_SLA.operational') }}
+            </option>
+            <option value="contractual">
+              {{ t('JRC_SERVICE_DESK.SIMPLE_SLA.contractual') }}
+            </option>
+          </select>
+          <span class="text-xs text-n-slate-11">{{
+            t('JRC_SERVICE_DESK.SIMPLE_SLA.missing_help')
+          }}</span>
+        </label>
       </fieldset>
       <section v-if="['all', 'lifecycle'].includes(section)" class="grid gap-3">
         <div class="flex flex-wrap justify-between gap-2">

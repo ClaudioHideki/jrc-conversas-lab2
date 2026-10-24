@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import Button from 'dashboard/components-next/button/Button.vue';
 import State from '../components/ServiceDeskState.vue';
 import LifecyclePolicyEditor from '../components/LifecyclePolicyEditor.vue';
+import ClosureRevisionPanel from '../components/ClosureRevisionPanel.vue';
 import NotificationPolicyEditor from '../components/NotificationPolicyEditor.vue';
 import ConfigurationManager from '../components/ConfigurationManager.vue';
 import OperationalRulePanel from '../components/OperationalRulePanel.vue';
@@ -35,6 +36,10 @@ const sections = computed(() => {
   return [
     {
       key: 'lifecycle',
+      allowed: capabilities.lifecycle_policies?.publish === true,
+    },
+    {
+      key: 'closure_revisions',
       allowed: capabilities.lifecycle_policies?.publish === true,
     },
     { key: 'ola', allowed: capabilities.configuration?.queues === true },
@@ -87,6 +92,7 @@ const active = computed(
       :initial-unit-id="String(route?.query?.unit_id || '')"
       :initial-service-id="String(route?.query?.service_id || '')"
     />
+    <ClosureRevisionPanel v-else-if="active === 'closure_revisions'" />
     <ConfigurationManager v-else-if="active === 'ola'" resource="queues" />
     <NotificationPolicyEditor v-else-if="active === 'notifications'" />
     <OperationalRulePanel v-else-if="active === 'operational'" />

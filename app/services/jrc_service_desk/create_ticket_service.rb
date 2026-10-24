@@ -44,6 +44,7 @@ class JrcServiceDesk::CreateTicketService < JrcServiceDesk::BaseService
 
       requester = Contact.where(account_id: context.account.id).find(JrcServiceDesk::Input.id(normalized['requester_id']))
       authorize!(requester, :show?)
+      JrcServiceDesk::RequesterDirectory.new(context).validate!(requester, company_id: normalized['company_id'])
       service, queue = catalogue_references(service_id, normalized, unit)
       ticket = JrcServiceDesk::Ticket.new(
         account: context.account, unit: unit, title: normalized['title'], description: normalized['description'], requester: requester,
@@ -59,6 +60,7 @@ class JrcServiceDesk::CreateTicketService < JrcServiceDesk::BaseService
       JrcServiceDesk::TicketCatalogue.new(ticket, context: context).bind!(normalized)
       intake = JrcServiceDesk::IntakeRuleApplication.new(ticket: ticket, context: context, supplied: values, conversation: intake_conversation)
       intake.apply!
+      verify_assignee_team!(ticket)
       authorize!(ticket, :create?)
       ticket.save!
       intake.record_sla!

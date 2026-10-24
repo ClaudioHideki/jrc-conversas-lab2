@@ -12,6 +12,7 @@ const props = defineProps({
   resource: { type: String, required: true },
   unitId: { type: String, default: '' },
   disabled: { type: Boolean, default: false },
+  compact: Boolean,
   currentName: { type: String, default: '' },
   currentPhone: { type: String, default: '' },
   teamId: { type: String, default: '' },
@@ -57,7 +58,12 @@ const availableItems = computed(() =>
 const options = computed(() => {
   const values = availableItems.value.map(item => ({
     value: item[props.valueKey],
-    label: item.name,
+    label:
+      props.resource === 'requesters'
+        ? [item.name, item.email || item.phone_number]
+            .filter(Boolean)
+            .join(' — ')
+        : item.name,
   }));
   if (
     props.modelValue &&
@@ -95,13 +101,22 @@ const load = () => {
     q: search.value,
     page: page.value,
     per_page: 20,
+    ...(props.resource === 'requesters' && props.companyId
+      ? { company_id: props.companyId }
+      : {}),
     ...(props.resource === 'assignees' && props.teamId
       ? { team_id: props.teamId }
       : {}),
   });
 };
 watch(
-  [allowed, () => props.unitId, () => props.resource, () => props.teamId],
+  [
+    allowed,
+    () => props.unitId,
+    () => props.resource,
+    () => props.teamId,
+    () => props.companyId,
+  ],
   () => {
     clearTimeout(timer);
     page.value = 1;
@@ -144,7 +159,7 @@ onBeforeUnmount(() => {
       <span>{{ selectedPhone }}</span>
     </p>
     <Input
-      v-if="allowed"
+      v-if="allowed && (!compact || result.meta?.total > 20 || search)"
       v-model="search"
       size="sm"
       :aria-label="`${label}: ${t('JRC_SERVICE_DESK.COMMON.search_options')}`"

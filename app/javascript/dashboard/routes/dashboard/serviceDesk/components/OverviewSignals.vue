@@ -38,12 +38,22 @@ const members = computed(() =>
     "
   >
     <template v-if="kind === 'risk'">
+      <p v-if="data?.sla_coverage" class="mb-3 text-xs text-n-slate-11">
+        {{ t('JRC_SERVICE_DESK.SIMPLE_SLA.coverage', data.sla_coverage) }}
+      </p>
       <template v-if="data?.sla">
         <p class="text-2xl font-semibold text-n-ruby-11">
           {{ data.sla.running_breached }}
         </p>
         <p class="mt-2 text-xs text-n-slate-11">
           {{ t('JRC_SERVICE_DESK.REFINEMENT.overview.breached_clocks') }}
+        </p>
+        <p class="mt-2 text-xs text-n-slate-11">
+          {{
+            t('JRC_SERVICE_DESK.REFINEMENT.overview.observed_cycles', {
+              count: data.sla.observed_cycles,
+            })
+          }}
         </p>
         <p class="mt-2 text-xs text-n-slate-11">
           {{ t('JRC_SERVICE_DESK.REFINEMENT.overview.risk_limits') }}

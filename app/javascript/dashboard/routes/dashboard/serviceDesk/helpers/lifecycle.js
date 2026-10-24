@@ -83,6 +83,118 @@ function requirements(value) {
     fields,
   };
 }
+function decodeReopening(row) {
+  check(
+    object(row) &&
+      ['deny', 'require_new_ticket'].includes(row.expired_behavior) &&
+      ['continue_cycle', 'new_cycle'].includes(row.sla_cycle)
+  );
+  return {
+    window_seconds: integer(row.window_seconds),
+    expired_behavior: row.expired_behavior,
+    sla_cycle: row.sla_cycle,
+    expires_at: optionalStamp(row.expires_at),
+  };
+}
+export function decodeLifecycleTransition(row, context, ticket) {
+  check(
+    object(row) &&
+      id(row.account_id) === context.account_id &&
+      id(row.unit_id) === ticket.unit_id &&
+      id(row.ticket_id) === ticket.id
+  );
+  check(
+    actions.includes(row.action) && object(row.payload) && object(row.author)
+  );
+  const p = row.payload;
+  // Display only user-entered text and provenance; no raw financial/calendar payload is forwarded.
+  return {
+    id: id(row.id),
+    policy_version_id: id(row.policy_version_id),
+    policy_version: integer(row.policy_version),
+    action: row.action,
+    rule_key: string(row.rule_key),
+    request_key: string(row.request_key),
+    from_status_id: id(row.from_status_id),
+    to_status_id: id(row.to_status_id),
+    occurred_at: stamp(row.occurred_at),
+    author: {
+      account_user_id: id(row.author.account_user_id),
+      name: string(row.author.name),
+    },
+    note: p.note == null ? '' : string(p.note),
+    solution: p.solution == null ? '' : string(p.solution),
+    ...(p.closing_reason == null
+      ? {}
+      : { closing_reason: string(p.closing_reason) }),
+    reason_code: p.reason_code == null ? '' : string(p.reason_code),
+    evidence_note_ids: Array.isArray(p.evidence_note_ids)
+      ? p.evidence_note_ids.map(id)
+      : [],
+    fields: object(p.fields)
+      ? Object.fromEntries(
+          Object.entries(p.fields).filter(
+            ([key, value]) =>
+              !['__proto__', 'constructor', 'prototype'].includes(key) &&
+              ['string', 'number', 'boolean'].includes(typeof value)
+          )
+        )
+      : {},
+    cycle_id: p.sla?.cycle_id == null ? null : id(p.sla.cycle_id),
+    cycle_rule: p.sla?.reopening?.sla_cycle || null,
+  };
+}
+function decodeObservedMeasurement(value) {
+  if (value == null) return null;
+  check(
+    object(value) &&
+      value.basis === 'elapsed_wall_time' &&
+      ['available', 'unavailable', 'not_applicable'].includes(value.result)
+  );
+  const fact = row => {
+    if (row === null) return null;
+    check(
+      object(row) &&
+        Number.isFinite(row.elapsed_seconds) &&
+        row.elapsed_seconds >= 0
+    );
+    return {
+      occurred_at: stamp(row.occurred_at),
+      elapsed_seconds: row.elapsed_seconds,
+    };
+  };
+  check(
+    value.pending_reason == null ||
+      [
+        'targets_and_calendar_missing',
+        'targets_missing',
+        'calendar_missing',
+        'result_unavailable',
+      ].includes(value.pending_reason)
+  );
+  return {
+    basis: value.basis,
+    started_at: stamp(value.started_at),
+    result: value.result,
+    pending_reason: value.pending_reason,
+    first_response: fact(value.first_response),
+    resolution: fact(value.resolution),
+    closure: fact(value.closure),
+  };
+}
+function decodeClosureRevision(value) {
+  if (value == null) return null;
+  check(object(value) && typeof value.active === 'boolean');
+  return {
+    source_version_id: id(value.source_version_id),
+    target_version_id: id(value.target_version_id),
+    target_version: integer(value.target_version),
+    batch_id: string(value.batch_id),
+    applied_at: stamp(value.applied_at),
+    active: value.active,
+  };
+}
+
 export function decodeLifecycle(payload, context, ticket) {
   scope(payload, context, ticket);
   let policy = null;
@@ -158,6 +270,16 @@ export function decodeLifecycle(payload, context, ticket) {
           id: id(row.id),
           kind: row.kind,
           state: row.state,
+          deadline_state: [
+            'on_time',
+            'near_due',
+            'overdue',
+            'paused',
+            'completed',
+            'stopped',
+          ].includes(row.deadline_state)
+            ? row.deadline_state
+            : null,
           due_at: stamp(row.due_at),
           achieved_at: optionalStamp(row.achieved_at),
           budget_seconds: integer(row.budget_seconds),
@@ -190,6 +312,8 @@ export function decodeLifecycle(payload, context, ticket) {
     lock_version: integer(payload.lock_version),
     service_id: payload.service_id === null ? null : id(payload.service_id),
     policy,
+    closure_revision: decodeClosureRevision(payload.closure_revision),
+    measurement: decodeObservedMeasurement(payload.measurement),
     reopening:
       payload.reopening == null ? null : decodeReopening(payload.reopening),
     unavailable_reason:
@@ -197,6 +321,40 @@ export function decodeLifecycle(payload, context, ticket) {
         ? null
         : string(payload.unavailable_reason),
     options,
+    closure_unavailable_reason:
+      payload.closure_unavailable_reason == null
+        ? null
+        : string(payload.closure_unavailable_reason),
+    closure_options: (payload.closure_options || []).map(plan => {
+      check(
+        object(plan) &&
+          Array.isArray(plan.steps) &&
+          [1, 2].includes(plan.steps.length)
+      );
+      const steps = plan.steps.map(row => {
+        check(object(row) && ['resolve', 'close'].includes(row.action));
+        return {
+          key: string(row.key),
+          action: row.action,
+          to_status_id: id(row.to_status_id),
+          to_status_name: string(row.to_status_name),
+          requirements: requirements(row.requirements),
+        };
+      });
+      check(
+        steps.at(-1).action === 'close' &&
+          (steps.length === 1 || steps[0].action === 'resolve')
+      );
+      check(
+        options.some(
+          row =>
+            row.key === steps[0].key &&
+            row.action === steps[0].action &&
+            row.to_status_id === steps[0].to_status_id
+        )
+      );
+      return { key: string(plan.key), steps };
+    }),
     pause,
     cycle,
     history: payload.history.map(row =>
@@ -205,92 +363,7 @@ export function decodeLifecycle(payload, context, ticket) {
     meta,
   };
 }
-function decodeReopening(row) {
-  check(
-    object(row) &&
-      ['deny', 'require_new_ticket'].includes(row.expired_behavior) &&
-      ['continue_cycle', 'new_cycle'].includes(row.sla_cycle)
-  );
-  return {
-    window_seconds: integer(row.window_seconds),
-    expired_behavior: row.expired_behavior,
-    sla_cycle: row.sla_cycle,
-    expires_at: optionalStamp(row.expires_at),
-  };
-}
-export function decodeLifecycleTransition(row, context, ticket) {
-  check(
-    object(row) &&
-      id(row.account_id) === context.account_id &&
-      id(row.unit_id) === ticket.unit_id &&
-      id(row.ticket_id) === ticket.id
-  );
-  check(
-    actions.includes(row.action) && object(row.payload) && object(row.author)
-  );
-  const p = row.payload;
-  // Display only user-entered text and provenance; no raw financial/calendar payload is forwarded.
-  return {
-    id: id(row.id),
-    policy_version_id: id(row.policy_version_id),
-    policy_version: integer(row.policy_version),
-    action: row.action,
-    rule_key: string(row.rule_key),
-    request_key: string(row.request_key),
-    from_status_id: id(row.from_status_id),
-    to_status_id: id(row.to_status_id),
-    occurred_at: stamp(row.occurred_at),
-    author: {
-      account_user_id: id(row.author.account_user_id),
-      name: string(row.author.name),
-    },
-    note: p.note == null ? '' : string(p.note),
-    solution: p.solution == null ? '' : string(p.solution),
-    reason_code: p.reason_code == null ? '' : string(p.reason_code),
-    evidence_note_ids: Array.isArray(p.evidence_note_ids)
-      ? p.evidence_note_ids.map(id)
-      : [],
-    fields: object(p.fields)
-      ? Object.fromEntries(
-          Object.entries(p.fields).filter(
-            ([key, value]) =>
-              !['__proto__', 'constructor', 'prototype'].includes(key) &&
-              ['string', 'number', 'boolean'].includes(typeof value)
-          )
-        )
-      : {},
-    cycle_id: p.sla?.cycle_id == null ? null : id(p.sla.cycle_id),
-    cycle_rule: p.sla?.reopening?.sla_cycle || null,
-  };
-}
-export function decodeConfigurationList(payload, context, unit, kind) {
-  check(
-    object(payload) &&
-      payload.contract_version === 1 &&
-      id(payload.account_id) === context.account_id &&
-      id(payload.unit_id) === id(unit)
-  );
-  check(
-    context.units.some(u => u.id === id(unit)) &&
-      Array.isArray(payload.items) &&
-      object(payload.meta)
-  );
-  const items = payload.items.map(row =>
-    decodeConfiguration(row, context, unit, kind)
-  );
-  const meta = {
-    page: integer(payload.meta.page),
-    total: integer(payload.meta.total),
-    per_page: integer(payload.meta.per_page),
-  };
-  check(
-    meta.page > 0 &&
-      meta.per_page === 20 &&
-      items.length <= 20 &&
-      items.length <= Math.max(0, meta.total - (meta.page - 1) * 20)
-  );
-  return { items, meta };
-}
+
 export function decodeConfiguration(row, context, unit, kind) {
   check(
     object(row) &&
@@ -339,16 +412,44 @@ export function decodeConfiguration(row, context, unit, kind) {
     definition: JSON.parse(JSON.stringify(row.definition)),
   };
 }
-const canonicalValue = value =>
-  Array.isArray(value)
-    ? value.map(canonicalValue)
-    : object(value)
-      ? Object.fromEntries(
-          Object.keys(value)
-            .sort()
-            .map(key => [key, canonicalValue(value[key])])
-        )
-      : value;
+export function decodeConfigurationList(payload, context, unit, kind) {
+  check(
+    object(payload) &&
+      payload.contract_version === 1 &&
+      id(payload.account_id) === context.account_id &&
+      id(payload.unit_id) === id(unit)
+  );
+  check(
+    context.units.some(u => u.id === id(unit)) &&
+      Array.isArray(payload.items) &&
+      object(payload.meta)
+  );
+  const items = payload.items.map(row =>
+    decodeConfiguration(row, context, unit, kind)
+  );
+  const meta = {
+    page: integer(payload.meta.page),
+    total: integer(payload.meta.total),
+    per_page: integer(payload.meta.per_page),
+  };
+  check(
+    meta.page > 0 &&
+      meta.per_page === 20 &&
+      items.length <= 20 &&
+      items.length <= Math.max(0, meta.total - (meta.page - 1) * 20)
+  );
+  return { items, meta };
+}
+const canonicalValue = value => {
+  if (Array.isArray(value)) return value.map(canonicalValue);
+  if (object(value))
+    return Object.fromEntries(
+      Object.keys(value)
+        .sort()
+        .map(key => [key, canonicalValue(value[key])])
+    );
+  return value;
+};
 export const sameLifecycleDefinition = (a, b) =>
   JSON.stringify(canonicalValue(a)) === JSON.stringify(canonicalValue(b));
 export function verifyLifecycleIntent(transition, command) {
@@ -358,6 +459,8 @@ export function verifyLifecycleIntent(transition, command) {
       transition.reason_code === (command.reason_code || '')
   );
   check(sameLifecycleDefinition(transition.fields, command.fields || {}));
+  if (command.closing_reason !== undefined)
+    check(transition.closing_reason === command.closing_reason);
   check(
     sameLifecycleDefinition(
       transition.evidence_note_ids,
@@ -376,9 +479,9 @@ export function createLifecycleSession(
   contextProvider,
   state = createLifecycleState()
 ) {
-  let epoch = 0,
-    controller = null,
-    intent = null;
+  let epoch = 0;
+  let controller = null;
+  let intent = null;
   const clear = () => {
     epoch += 1;
     controller?.abort();
@@ -518,17 +621,14 @@ export function createLifecycleSession(
     } catch (error) {
       if (!matches(run)) return null;
       const code = error.response?.status;
-      state.writeStatus = acknowledged
-        ? 'readback_pending'
-        : code === 409
-          ? 'conflict'
-          : code === 422
-            ? error.response?.data?.code === 'lifecycle_dependency'
-              ? 'dependency'
-              : 'invalid_input'
-            : code === 403 || code === 401
-              ? 'denied'
-              : 'error';
+      if (acknowledged) state.writeStatus = 'readback_pending';
+      else if (code === 409) state.writeStatus = 'conflict';
+      else if (code === 422)
+        state.writeStatus =
+          error.response?.data?.code === 'lifecycle_dependency'
+            ? 'dependency'
+            : 'invalid_input';
+      else state.writeStatus = [401, 403].includes(code) ? 'denied' : 'error';
       if (!acknowledged && [409, 422].includes(code)) intent = null;
       if ([401, 403, 404].includes(code)) {
         state.data = null;
