@@ -192,6 +192,9 @@ Rails.application.routes.draw do
             post 'notification_policies', to: 'cockpit#publish_notification_policy'
             get 'notification_policies', to: 'communication#notification_policies'
             get 'catalogue_form', to: 'catalogue_forms#show'
+            resources :requester_people, only: [:index, :show, :create] do
+              patch :link, on: :member
+            end
             %w[queues priorities categories ticket_types statuses units operator_companies assignees requesters teams
                contracts].each do |resource|
               get resource, to: 'lookups#index', defaults: { resource: resource }

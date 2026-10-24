@@ -1786,7 +1786,8 @@
       "dependency": "O encerramento depende de uma configuração de SLA ou calendário exigida pela política. Solicite a revisão ao administrador.",
       "denied": "Você não tem permissão para concluir este encerramento.",
       "conflict": "O chamado ou a política mudou. Atualize os dados e revise os requisitos antes de continuar.",
-      "closure_failed": "Não foi possível confirmar o encerramento. Confira os requisitos e use a recuperação se o resultado ainda estiver pendente."
+      "closure_failed": "Não foi possível confirmar o encerramento. Confira os requisitos e use a recuperação se o resultado ainda estiver pendente.",
+      "requester_review_required": "Cadastro importado ou técnico sem classificação de pessoa confirmada. Revise no Cadastro Mestre."
     },
     "SIMPLE_SLA": {
       "closing_reason": "Motivo do encerramento",
@@ -1923,6 +1924,36 @@
       "rule_summary": "{action}: somente o motivo do encerramento é obrigatório.",
       "source_definition": "Conferir a definição original publicada",
       "all_services": "Todos os serviços desta unidade"
+    },
+    "REQUESTERS": {
+      "empty": "Nenhum solicitante cadastrado para esta empresa.",
+      "search": "Buscar pessoa existente",
+      "new": "Cadastrar novo solicitante",
+      "name": "Nome da pessoa",
+      "email": "E-mail (quando disponível)",
+      "phone": "Telefone (quando disponível)",
+      "company": "Empresa vinculada",
+      "save": "Salvar e selecionar solicitante",
+      "save_help": "Somente o nome é obrigatório. O contato será vinculado à empresa selecionada. Salvar não cria nem envia o chamado.",
+      "search_label": "Nome, e-mail, telefone ou identificador",
+      "selected": "Solicitante salvo ou vinculado e selecionado. Os dados do chamado foram mantidos.",
+      "company_changed": "A empresa mudou. Selecione um solicitante vinculado a ela. Os demais dados foram mantidos.",
+      "load_failed": "Não foi possível consultar as pessoas. Tente novamente.",
+      "no_results": "Nenhuma pessoa encontrada. Pesquise outro termo ou cadastre um novo solicitante.",
+      "unlinked": "Sem empresa vinculada",
+      "organization": "Este registro representa uma empresa, não uma pessoa solicitante.",
+      "import_review": "Cadastro importado ou técnico sem classificação de pessoa confirmada. Revise no Cadastro Mestre.",
+      "other_company": "Já existe vínculo com outra empresa. O modelo atual aceita uma empresa por pessoa; revise o cadastro sem remover o vínculo anterior.",
+      "use": "Selecionar pessoa",
+      "link": "Vincular pessoa",
+      "confirm_link": "Confirmar vínculo e selecionar",
+      "confirm_help": "Confirmar o vínculo desta pessoa com a empresa selecionada? O chamado ainda não será criado.",
+      "link_failed": "Não foi possível vincular. Confira as permissões e se a pessoa já está vinculada a outra empresa.",
+      "duplicate": "Encontramos cadastros semelhantes. Confira os dados abaixo e reutilize a pessoa correta. Registros de empresa ou ambíguos precisam de revisão. Nenhum novo contato foi criado.",
+      "create_failed": "Não foi possível salvar. Confira os dados e as permissões. Não crie outra pessoa para contornar uma duplicidade.",
+      "separation": "Solicitante é a pessoa da empresa atendida. O agente responsável é o colaborador interno que atenderá o chamado.",
+      "agent_help": "Opcional. Sem escolha manual, vale a distribuição oficial da fila. Sem agente elegível, o chamado permanece não atribuído para a triagem autorizada.",
+      "confirm_distinct": "Revisei os registros com o mesmo nome e confirmo que esta é uma pessoa diferente. E-mail e telefone já cadastrados continuam protegidos contra duplicidade."
     }
   }
 }

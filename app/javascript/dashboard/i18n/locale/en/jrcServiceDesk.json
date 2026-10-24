@@ -1786,7 +1786,8 @@
       "dependency": "Closure depends on an SLA or calendar configuration required by the policy. Ask an administrator to review it.",
       "denied": "You do not have permission to complete this closure.",
       "conflict": "The ticket or policy changed. Refresh and review the requirements before continuing.",
-      "closure_failed": "Could not confirm closure. Check the requirements and recover if the outcome is still pending."
+      "closure_failed": "Could not confirm closure. Check the requirements and recover if the outcome is still pending.",
+      "requester_review_required": "Imported or technical record without confirmed person classification. Review it in the master directory."
     },
     "SIMPLE_SLA": {
       "closing_reason": "Reason for closing",
@@ -1923,6 +1924,36 @@
       "rule_summary": "{action}: only closing reason is required.",
       "source_definition": "Inspect the original published definition",
       "all_services": "All services in this unit"
+    },
+    "REQUESTERS": {
+      "empty": "No requester is registered for this company.",
+      "search": "Find existing person",
+      "new": "Register new requester",
+      "name": "Person name",
+      "email": "Email (if available)",
+      "phone": "Phone (if available)",
+      "company": "Linked company",
+      "save": "Save and select requester",
+      "save_help": "Only the name is required. The contact will be linked to the selected company. Saving does not submit a ticket.",
+      "search_label": "Name, email, phone or identifier",
+      "selected": "Requester saved or linked and selected. Ticket fields have been preserved.",
+      "company_changed": "The company changed. Select a requester linked to it. Other fields have been preserved.",
+      "load_failed": "Could not load people. Try again.",
+      "no_results": "No person found. Search again or register a requester.",
+      "unlinked": "No linked company",
+      "organization": "This record represents an organization, not a requester.",
+      "import_review": "Imported or technical record without confirmed person classification. Review it in the master directory.",
+      "other_company": "Already linked to another company. The current model supports one company per person; review without removing the existing link.",
+      "use": "Select person",
+      "link": "Link person",
+      "confirm_link": "Confirm link and select",
+      "confirm_help": "Confirm linking this person to the selected company? This does not create a ticket.",
+      "link_failed": "Could not link. Check permissions and the existing company relationship.",
+      "duplicate": "Similar records found. Review below and reuse the correct person. Organization or ambiguous records need review. No new contact was created.",
+      "create_failed": "Could not save. Check the data and permissions. Do not create another person to bypass a duplicate.",
+      "separation": "The requester is a person at the served company. The assignee is the internal agent handling the ticket.",
+      "agent_help": "Optional. Without manual assignment, the queue uses its official distribution. Without an eligible agent, the ticket stays unassigned for authorized triage.",
+      "confirm_distinct": "I reviewed the records with the same name and confirm this is a different person. Existing email and phone identities remain protected against duplicates."
     }
   }
 }

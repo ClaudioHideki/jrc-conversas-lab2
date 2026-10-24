@@ -9,9 +9,11 @@ export function ticketTypePreferenceKey(context, unitId) {
 // Transport errors never supply arbitrary HTML, stack traces or user content.
 export function intakeErrorKey(mutation) {
   if (
-    ['requester_company_mismatch', 'requester_is_company'].includes(
-      mutation.reason
-    )
+    [
+      'requester_company_mismatch',
+      'requester_is_company',
+      'requester_review_required',
+    ].includes(mutation.reason)
   )
     return `JRC_SERVICE_DESK.QUICK.${mutation.reason}`;
   if (

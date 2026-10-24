@@ -21,15 +21,15 @@ const mocks = vi.hoisted(() => ({
   apply: vi.fn(),
   transition: vi.fn(),
   ticket: vi.fn(),
-  saveContact: vi.fn(),
+  register: vi.fn(),
+  search: vi.fn(),
+  validate: vi.fn(),
 }));
 vi.mock('../../composables/useServiceDesk', () => ({
   useServiceDesk: () => mocks.session,
 }));
 vi.mock('dashboard/api/serviceDeskLifecycle', () => ({ default: mocks }));
-vi.mock('dashboard/api/jrcCustomers', () => ({
-  default: { saveContact: (...args) => mocks.saveContact(...args) },
-}));
+vi.mock('dashboard/api/serviceDeskRequesters', () => ({ default: mocks }));
 vi.mock('dashboard/routes/dashboard/jrcCustomers/useCustomerMaster', () => ({
   useCustomerMaster: () => ({ canAccess: ref(true) }),
 }));
@@ -88,6 +88,10 @@ const globals = () => ({
       props: ['ticket'],
       template: '<p data-receipt>{{ ticket.id }}</p>',
     },
+    ServiceDeskDialog: {
+      props: ['open'],
+      template: '<section v-if="open"><slot /></section>',
+    },
     CatalogueAnswers: true,
     WriteFeedback: true,
   },
@@ -123,6 +127,10 @@ const close = () => ({
 });
 let wrapper;
 beforeEach(() => {
+  mocks.search.mockResolvedValue({
+    data: { items: [], meta: { total: 0 }, can_create: true },
+  });
+  mocks.validate.mockRejectedValue({ response: { status: 422 } });
   vi.stubGlobal('crypto', { randomUUID: () => 'synthetic-intent' });
   localStorage.clear();
   mocks.session = {
@@ -513,6 +521,16 @@ describe('quick intake without discarding advanced mode', () => {
   });
 
   it('restores an authorized advanced or relationship prefill without discarding its title or company', async () => {
+    mocks.validate.mockResolvedValueOnce({
+      data: {
+        person: {
+          id: 33,
+          company_id: 80,
+          name: 'Pessoa autorizada',
+          requester_eligible: true,
+        },
+      },
+    });
     await renderQuick();
     await wrapper.setProps({
       initialDraft: {
@@ -585,32 +603,34 @@ describe('quick intake without discarding advanced mode', () => {
     await wrapper.get('[data-company]').trigger('click');
     await wrapper
       .findAll('button')
-      .find(row => row.text() === messages.JRC_SERVICE_DESK.QUICK.new_requester)
+      .find(row => row.text() === messages.JRC_SERVICE_DESK.REQUESTERS.new)
       .trigger('click');
     await wrapper
       .findAllComponents(Input)
       .find(
-        row =>
-          row.props('label') === messages.JRC_SERVICE_DESK.QUICK.person_name
+        row => row.props('label') === messages.JRC_SERVICE_DESK.REQUESTERS.name
       )
       .find('input')
       .setValue('Nova pessoa sintética');
-    mocks.saveContact.mockResolvedValue({
+    mocks.register.mockResolvedValue({
       data: {
-        payload: { id: 33, company_id: 80, name: 'Nova pessoa sintética' },
+        person: {
+          id: 33,
+          company_id: 80,
+          name: 'Nova pessoa sintética',
+          requester_eligible: true,
+        },
       },
     });
     await wrapper
       .findAll('button')
-      .find(
-        row => row.text() === messages.JRC_SERVICE_DESK.QUICK.save_requester
-      )
+      .find(row => row.text() === messages.JRC_SERVICE_DESK.REQUESTERS.save)
       .trigger('click');
     await flushPromises();
-    expect(mocks.saveContact).toHaveBeenCalledWith(
+    expect(mocks.register).toHaveBeenCalledWith(
       expect.objectContaining({
-        name: 'Nova pessoa sintética',
-        company_id: '80',
+        contact: expect.objectContaining({ name: 'Nova pessoa sintética' }),
+        company_id: 80,
       })
     );
     expect(wrapper.get('[data-resource="requesters"]').element.value).toBe(

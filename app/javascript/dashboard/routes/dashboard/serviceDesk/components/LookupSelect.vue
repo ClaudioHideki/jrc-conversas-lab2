@@ -26,6 +26,8 @@ const props = defineProps({
   allowedIds: { type: Array, default: () => [] },
   companyId: { type: [String, Number], default: null },
   contactId: { type: String, default: '' },
+  emptyText: { type: String, default: '' },
+  refreshKey: { type: Number, default: 0 },
 });
 const emit = defineEmits(['update:modelValue', 'selected']);
 const { t } = useI18n();
@@ -116,11 +118,13 @@ watch(
     () => props.resource,
     () => props.teamId,
     () => props.companyId,
+    () => props.refreshKey,
   ],
   () => {
     clearTimeout(timer);
     page.value = 1;
     search.value = '';
+    session.resetResource(key);
     load();
   },
   { immediate: true }
@@ -177,7 +181,11 @@ onBeforeUnmount(() => {
       "
       class="m-0 text-xs text-n-slate-11"
     >
-      {{ t(`JRC_SERVICE_DESK.STATES.${result.status}`) }}
+      {{
+        result.status === 'empty' && !search && emptyText
+          ? emptyText
+          : t(`JRC_SERVICE_DESK.STATES.${result.status}`)
+      }}
     </p>
     <div
       v-if="result.meta && result.meta.total > 20"

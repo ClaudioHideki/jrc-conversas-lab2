@@ -6,7 +6,6 @@ import Input from 'dashboard/components-next/input/Input.vue';
 import TextArea from 'dashboard/components-next/textarea/TextArea.vue';
 import CompanyPicker from 'dashboard/routes/dashboard/jrcCustomers/components/CompanyPicker.vue';
 import { useCustomerMaster } from 'dashboard/routes/dashboard/jrcCustomers/useCustomerMaster';
-import CustomersAPI from 'dashboard/api/jrcCustomers';
 import { useServiceDesk } from '../composables/useServiceDesk';
 import { createTicketDraft, newRequestKey } from '../helpers/drafts';
 import { confirmedCreationTicket } from '../helpers/ticketReceipt';
@@ -16,6 +15,7 @@ import {
 } from '../helpers/quickIntake';
 import { canonicalId } from '../helpers/access';
 import LookupSelect from './LookupSelect.vue';
+import RequesterSelect from './RequesterSelect.vue';
 import ScopeBar from './ScopeBar.vue';
 import CatalogueAnswers from './CatalogueAnswers.vue';
 import TicketCreationReceipt from './TicketCreationReceipt.vue';
@@ -47,6 +47,9 @@ const blank = () => ({
   priority_id: '',
   ticket_type_id: '',
   service_fields: {},
+  assignee_id: '',
+  team_id: '',
+  queue_id: '',
 });
 const draft = reactive(blank());
 const operator = ref('');
@@ -69,11 +72,7 @@ const locked = computed(
       mutation.value.status
     )
 );
-const person = reactive({ name: '', email: '', phone_number: '' });
 const creatingPerson = ref(false);
-const personOpen = ref(false);
-const personError = ref('');
-const personMessage = ref('');
 const rememberType = ref(false);
 const catalogueReady = ref(true);
 const created = computed(() =>
@@ -91,12 +90,8 @@ let restoredDraft = null;
 const reset = (restore = false) => {
   epoch += 1;
   Object.assign(draft, blank());
-  Object.assign(person, { name: '', email: '', phone_number: '' });
   selectedRequester.value = null;
   receipt.value = null;
-  personOpen.value = false;
-  personError.value = '';
-  personMessage.value = '';
   requestKey = null;
   session.operations?.dismissConfirmation(key);
   const candidates = units.value;
@@ -118,9 +113,7 @@ const reset = (restore = false) => {
       unit_id: seed.draft.unit_id || draft.unit_id,
       service_fields: { ...seed.draft.service_fields },
     });
-    selectedRequester.value = seed.requester
-      ? { ...seed.requester, company_id: draft.company_id }
-      : null;
+    selectedRequester.value = seed.requester ? { ...seed.requester } : null;
     restoredDraft = { ...draft };
   }
   defaultsVersion.value += 1;
@@ -195,19 +188,6 @@ watch(
   { immediate: true }
 );
 watch(
-  () => draft.company_id,
-  () => {
-    if (
-      String(selectedRequester.value?.company_id || '') !==
-      String(draft.company_id || '')
-    ) {
-      draft.requester_id = '';
-      selectedRequester.value = null;
-    }
-    personError.value = '';
-  }
-);
-watch(
   () => draft.ticket_type_id,
   () => {
     catalogueReady.value = !draft.ticket_type_id;
@@ -258,49 +238,6 @@ const submit = async () => {
     } catch {
       /* Ticket persistence does not depend on browser storage. */
     }
-  }
-};
-const createPerson = async () => {
-  if (
-    !master.value ||
-    !person.name.trim() ||
-    !draft.company_id ||
-    creatingPerson.value ||
-    locked.value
-  )
-    return;
-  const context = session.state.context;
-  const company = String(draft.company_id);
-  const turn = epoch;
-  creatingPerson.value = true;
-  personError.value = '';
-  try {
-    const { data } = await CustomersAPI.saveContact({
-      ...person,
-      name: person.name.trim(),
-      company_id: company,
-    });
-    if (
-      turn !== epoch ||
-      context !== session.state.context ||
-      company !== String(draft.company_id)
-    )
-      return;
-    const row = data.payload;
-    if (!canonicalId(row?.id) || String(row.company_id) !== company)
-      throw new TypeError('Invalid contact response');
-    draft.requester_id = canonicalId(row.id);
-    selectedRequester.value = { ...row, id: draft.requester_id };
-    personOpen.value = false;
-    personMessage.value = t('JRC_SERVICE_DESK.QUICK.requester_created');
-    Object.assign(person, { name: '', email: '', phone_number: '' });
-  } catch (error) {
-    if (turn !== epoch || context !== session.state.context) return;
-    personError.value = t(
-      `JRC_SERVICE_DESK.QUICK.${error.response?.data?.code === 'POSSIBLE_DUPLICATE' ? 'duplicate_requester' : 'requester_create_failed'}`
-    );
-  } finally {
-    creatingPerson.value = false;
   }
 };
 onBeforeUnmount(() => {
@@ -371,76 +308,19 @@ defineExpose({ busy: locked });
         </p>
         <CompanyPicker
           v-model="draft.company_id"
-          :disabled="locked || creatingPerson"
+          :disabled="locked || creatingPerson || !unit"
         />
       </div>
-      <LookupSelect
+      <RequesterSelect
         v-model="draft.requester_id"
-        resource="requesters"
         :company-id="draft.company_id"
         :unit-id="draft.unit_id"
-        :label="t('JRC_SERVICE_DESK.FIELDS.requester')"
         :current-name="selectedRequester?.name || ''"
         :current-phone="selectedRequester?.phone_number || ''"
         :disabled="locked || !unit"
         @selected="selectedRequester = $event"
+        @busy="creatingPerson = $event"
       />
-      <p v-if="personMessage" role="status" class="m-0 text-sm text-n-teal-11">
-        {{ personMessage }}
-      </p>
-      <Button
-        v-if="master && draft.company_id && !personOpen"
-        type="button"
-        size="sm"
-        class="justify-self-start"
-        variant="ghost"
-        :label="t('JRC_SERVICE_DESK.QUICK.new_requester')"
-        :disabled="locked"
-        @click="personOpen = true"
-      />
-      <fieldset
-        v-if="personOpen"
-        class="grid gap-3 rounded-xl border border-n-blue-6 bg-n-blue-2 p-4"
-      >
-        <legend class="px-2 text-sm font-medium">
-          {{ t('JRC_SERVICE_DESK.QUICK.new_requester') }}
-        </legend>
-        <Input
-          v-model="person.name"
-          :label="t('JRC_SERVICE_DESK.QUICK.person_name')"
-          :disabled="creatingPerson || locked"
-        />
-        <div class="grid gap-3 sm:grid-cols-2">
-          <Input
-            v-model="person.email"
-            type="email"
-            :label="t('JRC_SERVICE_DESK.QUICK.email')"
-            :disabled="creatingPerson || locked"
-          /><Input
-            v-model="person.phone_number"
-            :label="t('JRC_SERVICE_DESK.QUICK.phone')"
-            :disabled="creatingPerson || locked"
-          />
-        </div>
-        <p v-if="personError" role="alert" class="m-0 text-sm text-n-ruby-11">
-          {{ personError }}
-        </p>
-        <div class="flex flex-wrap gap-2">
-          <Button
-            type="button"
-            :label="t('JRC_SERVICE_DESK.QUICK.save_requester')"
-            :disabled="!person.name.trim() || creatingPerson || locked"
-            @click="createPerson"
-          /><Button
-            type="button"
-            variant="ghost"
-            color="slate"
-            :label="t('JRC_SERVICE_DESK.COMMON.cancel')"
-            :disabled="creatingPerson"
-            @click="personOpen = false"
-          />
-        </div>
-      </fieldset>
       <Input
         v-model="draft.title"
         :label="t('JRC_SERVICE_DESK.FIELDS.title')"
@@ -477,6 +357,20 @@ defineExpose({ busy: locked });
           :disabled="locked || !unit"
           @selected="selectedType = $event"
         />
+      </div>
+      <div v-if="unit?.permissions.assign_ticket" class="grid gap-2">
+        <LookupSelect
+          v-model="draft.assignee_id"
+          resource="assignees"
+          compact
+          :unit-id="draft.unit_id"
+          :team-id="draft.team_id"
+          :label="t('JRC_SERVICE_DESK.FIELDS.assignee')"
+          :disabled="locked || !unit"
+        />
+        <p class="m-0 text-xs text-n-slate-11">
+          {{ t('JRC_SERVICE_DESK.REQUESTERS.agent_help') }}
+        </p>
       </div>
       <label class="flex items-start gap-2 text-sm"
         ><input

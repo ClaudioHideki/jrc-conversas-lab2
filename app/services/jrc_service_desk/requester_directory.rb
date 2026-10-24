@@ -9,8 +9,7 @@ class JrcServiceDesk::RequesterDirectory
 
   def scope(company_id: nil, query: nil)
     Pundit.authorize(@context.to_h, Contact, :index?)
-    records = Contact.where(account_id: @context.account.id)
-      .where("COALESCE(contacts.additional_attributes->>'entity_type', '') <> 'company'")
+    records = JrcCustomers::RequesterIdentity.people(visible_contacts)
     if company_id
       company = company!(company_id)
       records = records.where(company_id: company.id)
@@ -18,20 +17,16 @@ class JrcServiceDesk::RequesterDirectory
     term = query.to_s.strip
     return records if term.empty?
 
-    pattern = "%#{ActiveRecord::Base.sanitize_sql_like(term)}%"
-    matched = records.where('contacts.name ILIKE :q OR contacts.email ILIKE :q OR contacts.phone_number ILIKE :q', q: pattern)
-    digits = term.gsub(/\D/, '')
-    if term.match?(/\A[+0-9().\s\/-]+\z/) && digits.length >= 4
-      matched = matched.or(records.where("regexp_replace(COALESCE(contacts.phone_number, ''), '[^0-9]', '', 'g') LIKE ?", "%#{digits}%"))
-    end
-    matched
+    JrcCustomers::ContactQuery.new(account: @context.account, scope: records, query: term, include_company: false).call
   end
 
   def validate!(contact, company_id: nil)
     raise Pundit::NotAuthorizedError unless contact.account_id == @context.account.id
     Pundit.authorize(@context.to_h, contact, :show?)
-    if contact.additional_attributes['entity_type'] == 'company'
-      raise JrcServiceDesk::RequestValidationError, 'requester_is_company'
+    raise ActiveRecord::RecordNotFound unless visible_contacts.exists?(id: contact.id)
+    reason = JrcCustomers::RequesterIdentity.reason(contact)
+    if reason
+      raise JrcServiceDesk::RequestValidationError, reason == 'organization' ? 'requester_is_company' : 'requester_review_required'
     end
     return unless company_id
 
@@ -41,7 +36,12 @@ class JrcServiceDesk::RequesterDirectory
     end
   end
 
-  private
+  def visible_contacts
+    Pundit.authorize(@context.to_h, Contact, :index?)
+    companies = JrcCrm::CorporateCoverage.new(account: @context.account, user: @context.user)
+      .companies(@context.account.master_companies).select(:id)
+    @context.account.contacts.where(company_id: nil).or(@context.account.contacts.where(company_id: companies))
+  end
 
   def company!(id)
     raise Pundit::NotAuthorizedError unless @context.capability?(:customers_view)

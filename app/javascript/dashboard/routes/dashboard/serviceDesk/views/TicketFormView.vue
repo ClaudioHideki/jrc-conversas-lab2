@@ -28,6 +28,7 @@ import ScopeBar from '../components/ScopeBar.vue';
 import ServiceDefinitionSelect from '../components/ServiceDefinitionSelect.vue';
 import CatalogueAnswers from '../components/CatalogueAnswers.vue';
 import LookupSelect from '../components/LookupSelect.vue';
+import RequesterSelect from '../components/RequesterSelect.vue';
 import { useServiceDesk } from '../composables/useServiceDesk';
 import { canAct, canonicalId } from '../helpers/access';
 import Feedback from '../components/WriteFeedback.vue';
@@ -70,8 +71,12 @@ const mutation = computed(
   () => session.operations?.mutation(writeKey) || { status: 'idle' }
 );
 const hashingFiles = ref(false);
+const requesterBusy = ref(false);
 const busy = computed(
-  () => mutation.value.status === 'saving' || hashingFiles.value
+  () =>
+    mutation.value.status === 'saving' ||
+    hashingFiles.value ||
+    requesterBusy.value
 );
 const step = ref(0);
 const advanced = ref(false);
@@ -680,9 +685,8 @@ const submit = async () => {
                 :placeholder="t('JRC_SERVICE_DESK.NATIVE.company_from_contact')"
                 disabled
               />
-              <LookupSelect
+              <RequesterSelect
                 v-model="draft.requester_id"
-                resource="requesters"
                 :company-id="draft.company_id"
                 :label="t('JRC_SERVICE_DESK.FIELDS.requester')"
                 :unit-id="draft.unit_id"
@@ -692,6 +696,7 @@ const submit = async () => {
                 "
                 :current-phone="requesterPhone"
                 @selected="selectedNames.requester = $event"
+                @busy="requesterBusy = $event"
               />
               <div class="grid gap-4">
                 <Input
