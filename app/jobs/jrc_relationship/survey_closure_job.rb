@@ -7,6 +7,6 @@ class JrcRelationship::SurveyClosureJob < ApplicationJob
     source = source_type.constantize.find_by(id: source_id)
     return unless source
 
-    JrcRelationship::SurveyEngine.evaluate_closure(source: source, cycle_key: cycle_key)
+    JrcRelationship::SurveyEngine.evaluate_event(source: source, cycle_key: cycle_key, event: 'closure')
   end
 end

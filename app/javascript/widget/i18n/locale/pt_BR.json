@@ -154,5 +154,8 @@
   },
   "FOOTER_REPLY_TO": {
     "REPLY_TO": "Respondendo a:"
+  },
+  "SERVICE_DESK": {
+    "own_survey_response": "Sua resposta"
   }
 }

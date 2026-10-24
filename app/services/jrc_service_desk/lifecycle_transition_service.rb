@@ -121,10 +121,13 @@ class JrcServiceDesk::LifecycleTransitionService < JrcServiceDesk::BaseService
   def dispatch_survey(result)
     ticket = result.ticket
     reopening = ticket.lifecycle_transitions.where(action: 'reopen').order(:id).last
-    JrcRelationship::SurveyEngine.new(
-      source: ticket, cycle_key: "service-desk:ticket:#{ticket.id}:cycle:#{reopening&.id || 'initial'}",
-      member: actor_membership.account_user
-    ).call
+    JrcRelationship::SurveyClosureJob.perform_later(
+      ticket.class.name, ticket.id, "service-desk:ticket:#{ticket.id}:cycle:#{reopening&.id || 'initial'}"
+    )
+  rescue StandardError => error
+    # Closing the ticket must not turn into a failed request after the transition
+    # committed merely because the asynchronous survey queue is unavailable.
+    Rails.logger.error("survey_closure_enqueue_failed ticket=#{ticket.id} class=#{error.class.name}")
   end
 
   def normalize(data)

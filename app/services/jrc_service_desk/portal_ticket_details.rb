@@ -49,11 +49,22 @@ class JrcServiceDesk::PortalTicketDetails
   end
 
   def surveys
-    JrcRelationship::Survey.where(account_id: @ticket.account_id, contact_id: @scope.contact.id,
-                                  source_type: 'JrcServiceDesk::Ticket', source_id: @ticket.id,
-                                  status: %w[available sent delivered]).where('expires_at > ?', Time.current).filter_map do |survey|
-      next if survey.responded_at || JrcRelationship::SurveyExecutionContext.new(survey).blocker
-
+    rows = JrcRelationship::Survey.where(account_id: @ticket.account_id, contact_id: @scope.contact.id,
+      source_type: 'JrcServiceDesk::Ticket', source_id: @ticket.id)
+    rows.where(status: %w[available sent delivered responded]).order(id: :desc).limit(50).filter_map do |survey|
+      if survey.responded_at
+        config = survey.definition_snapshot.dig('settings', 'service_desk_model')
+        current = survey.definition&.settings&.dig('service_desk_model')
+        next unless config&.dig('permissions', 'customer_own_response') == true && current&.dig('permissions', 'customer_own_response') == true
+        next { id: survey.id.to_s, kind: survey.kind, responded_at: survey.responded_at.iso8601(6),
+               response: survey.questions.filter_map do |q|
+                 next unless survey.answers.key?(q['key'])
+                 value = survey.answers[q['key']]
+                 value = q['options'].find { |option| option['value'] == value }&.fetch('label', value) || value if q['type'] == 'choice'
+                 { question: q['text'], value: value }
+               end }
+      end
+      next if survey.expires_at <= Time.current || JrcRelationship::SurveyExecutionContext.new(survey).blocker
       { id: survey.id.to_s, kind: survey.kind, expires_at: survey.expires_at.iso8601(6),
         path: "/jrc/relacionamento/pesquisas/#{survey.signed_id(purpose: :relationship_survey)}" }
     end

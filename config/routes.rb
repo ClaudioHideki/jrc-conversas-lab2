@@ -549,6 +549,17 @@ Rails.application.routes.draw do
             end
           end
           namespace :relationship do
+            resources :survey_models, only: [:index, :show, :create, :update] do
+              collection { get :options }
+              member do
+                post :validate
+                post :publish
+                post :duplicate
+                post :deactivate
+                post :dispatch, action: :evaluate_dispatch
+                get :history
+              end
+            end
             get :metadata, to: 'dashboard#metadata'
             get :dashboard, to: 'dashboard#show'
             get :drilldown, to: 'dashboard#drilldown'

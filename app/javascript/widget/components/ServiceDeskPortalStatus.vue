@@ -175,8 +175,24 @@ const duration = seconds =>
     data-testid="portal-surveys"
   >
     <h4 class="font-medium">{{ t('SERVICE_DESK.surveys') }}</h4>
+    <article
+      v-for="survey in surveys.filter(row => row.response)"
+      :key="`response-${survey.id}`"
+      class="rounded-lg border border-n-weak p-3 text-sm"
+    >
+      <h5>
+        {{ t('SERVICE_DESK.own_survey_response') }}
+        {{ $t('RELATIONSHIP.SURVEY_MODELS_V3.COPY.SYMBOL_3973E0') }}
+        {{ labels.surveys[survey.kind] }}
+      </h5>
+      <p v-for="(answer, index) in survey.response" :key="index">
+        {{ answer.question
+        }}{{ $t('RELATIONSHIP.SURVEY_MODELS_V3.COPY.SYMBOL_E7AC07') }}
+        {{ answer.value }}
+      </p>
+    </article>
     <a
-      v-for="survey in surveys"
+      v-for="survey in surveys.filter(row => row.path)"
       :key="survey.id"
       :href="survey.path"
       target="_blank"

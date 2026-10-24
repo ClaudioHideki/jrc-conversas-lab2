@@ -27,7 +27,8 @@ class JrcRelationship::MetricDrilldown
   private
 
   def records(model)
-    @context.records(model).where(assignment_id: @ids)
+    rows = @context.records(model).where(assignment_id: @ids)
+    model == JrcRelationship::Survey ? JrcRelationship::SurveyModelAccess.visible_scope(@context, rows, action: 'report', share: 'share_relationship') : rows
   end
 
   def health

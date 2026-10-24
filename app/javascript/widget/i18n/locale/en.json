@@ -252,6 +252,7 @@
       "copy": "Copy protocol",
       "copied": "Protocol copied",
       "public_only": "Only public updates and attachments authorized for your identity are shown."
-    }
+    },
+    "own_survey_response": "Your response"
   }
 }

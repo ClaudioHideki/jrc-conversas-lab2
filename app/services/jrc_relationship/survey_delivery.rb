@@ -141,6 +141,10 @@ class JrcRelationship::SurveyDelivery
   end
 
   def link_content
+    configured = @survey.rule_snapshot.dig('settings', 'model_message')
+    return @template_content if @template_content
+    return configured.gsub('{{survey_link}}', survey_url) if configured.is_a?(String) && configured.include?('{{survey_link}}')
+
     @template_content || "Pesquisa #{@survey.kind.upcase}: #{@survey.metadata['question']}\n#{survey_url}"
   end
 

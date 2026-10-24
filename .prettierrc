@@ -14,6 +14,15 @@
       "options": {
         "singleAttributePerLine": true
       }
+    },
+    {
+      "files": [
+        "app/javascript/dashboard/routes/dashboard/serviceDesk/surveys/**/*.vue"
+      ],
+      "options": {
+        "singleAttributePerLine": true,
+        "htmlWhitespaceSensitivity": "ignore"
+      }
     }
   ]
 }

@@ -36,5 +36,8 @@ class RelationshipSurveysController < ActionController::Base
 
   def validate_dispatch_state!
     raise ActiveRecord::RecordNotFound if @survey.source_type.present? && %w[available sent delivered].exclude?(@survey.status)
+    return unless @survey.definition_snapshot.dig('settings', 'service_desk_model')
+
+    raise ActiveRecord::RecordNotFound if JrcRelationship::SurveyExecutionContext.new(@survey).blocker
   end
 end

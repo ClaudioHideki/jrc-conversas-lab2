@@ -17,6 +17,7 @@ class JrcServiceDesk::TicketEvent < JrcServiceDesk::TicketRecord
   validate :payload_is_safe_json
   before_create :capture_notification_fields
   after_create_commit :schedule_notification_event
+  after_create_commit :schedule_survey_response_event
 
   private
 
@@ -28,6 +29,15 @@ class JrcServiceDesk::TicketEvent < JrcServiceDesk::TicketRecord
 
   def schedule_notification_event
     JrcServiceDesk::NotificationEventJob.perform_later(id) if JrcServiceDesk::NotificationEvent.active?(self)
+  end
+
+  def schedule_survey_response_event
+    return unless event_type == 'first_response_observed'
+    return unless JrcRelationship::SurveyEngine.enabled?(account)
+
+    JrcRelationship::SurveyResponseEventJob.perform_later(id)
+  rescue StandardError => error
+    Rails.logger.error("survey_response_enqueue_failed event=#{id} class=#{error.class.name}")
   end
 
   def actor_scope_is_consistent
