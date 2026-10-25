@@ -145,6 +145,10 @@ Rails.application.routes.draw do
               patch '/:id', to: 'configuration#update'
             end
             get 'automation_drafts', to: 'automation_drafts#show'
+            resources :automation_publications, only: [:index, :show, :create] do
+              post :preview, on: :collection
+              get :options, on: :collection
+            end
             put 'automation_drafts', to: 'automation_drafts#update'
             get 'queue_policy_versions', to: 'automation_drafts#queue_versions'
             get 'automation_insights/ola', to: 'automation_insights#ola'

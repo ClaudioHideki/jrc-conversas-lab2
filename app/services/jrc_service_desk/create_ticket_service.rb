@@ -63,6 +63,7 @@ class JrcServiceDesk::CreateTicketService < JrcServiceDesk::BaseService
       verify_assignee_team!(ticket)
       authorize!(ticket, :create?)
       ticket.save!
+      intake.record_actions!
       intake.record_sla!
       if ticket.lifecycle_policy_version
         version = ticket.lifecycle_policy_version

@@ -169,6 +169,13 @@ describe('native clock controls and automation view', () => {
   });
   it('reuses the native policy, queue and notification editors only under affirmative backend grants', async () => {
     renderAutomations();
+    const openNativeEditor = async () => {
+      const section = wrapper.get('details');
+      section.element.open = true;
+      await section.trigger('toggle');
+      await flushPromises();
+    };
+    await openNativeEditor();
     expect(wrapper.find('[data-lifecycle-native]').exists()).toBe(true);
     await wrapper
       .findAll('button')
@@ -191,6 +198,7 @@ describe('native clock controls and automation view', () => {
     holder.session.state.context.capabilities.notifications.manage = false;
     await flushPromises();
     expect(wrapper.find('[data-notification-native]').exists()).toBe(false);
+    await openNativeEditor();
     expect(wrapper.find('[data-lifecycle-native]').exists()).toBe(true);
   });
   it('clears automation controls after current account authorization is revoked', async () => {

@@ -70,7 +70,7 @@ class JrcServiceDesk::LifecycleRules
       next if val.nil?
       valid = case spec['type']
               when 'text' then val.is_a?(String) && val.bytesize <= 4000
-              when 'integer' then val.is_a?(Integer) && val.abs <= 2**53 - 1
+              when 'integer' then val.is_a?(Integer) && val.abs <= ((2**53) - 1)
               when 'boolean' then [true, false].include?(val)
               end
       raise ArgumentError, "Invalid field #{key}" unless valid
@@ -122,7 +122,13 @@ class JrcServiceDesk::LifecycleRules
   end
 
   def validate_rule(rule)
-    r = exact(rule, %w[key action from_status_ids to_status_id requirements clocks end_pause])
+    fields = %w[key action from_status_ids to_status_id requirements clocks end_pause]
+    fields += ['allowed_account_roles'] if rule.key?('allowed_account_roles')
+    r = exact(rule, fields)
+    if r.key?('allowed_account_roles')
+      roles = r['allowed_account_roles']
+      raise ArgumentError, 'Explicit restrictive native roles required' unless roles.is_a?(Array) && roles.any? && roles.uniq == roles && (roles - %w[agent administrator]).empty?
+    end
     token(r['key'])
     raise ArgumentError, 'Unknown action' unless ACTIONS.include?(r['action'])
     ids = r['from_status_ids']
@@ -144,7 +150,7 @@ class JrcServiceDesk::LifecycleRules
       value = spec['equals']
       valid = case spec['type']
               when 'text' then value.is_a?(String) && value.bytesize <= 4000
-              when 'integer' then value.is_a?(Integer) && value.abs <= 2**53 - 1
+              when 'integer' then value.is_a?(Integer) && value.abs <= ((2**53) - 1)
               when 'boolean' then [true, false].include?(value)
               end
       raise ArgumentError, 'Invalid equality requirement' unless valid && spec['required']
@@ -183,7 +189,7 @@ class JrcServiceDesk::LifecycleRules
     r = exact(definition['reopen'], %w[allowed window_seconds anchor_action expired sla_cycle inactive_time resume_clocks new_cycle_snapshot])
     bool(r['allowed'])
     return unless r['allowed']
-    raise ArgumentError, 'Explicit positive reopening window required' unless r['window_seconds'].is_a?(Integer) && r['window_seconds'].positive? && r['window_seconds'] <= 2**53 - 1
+    raise ArgumentError, 'Explicit positive reopening window required' unless r['window_seconds'].is_a?(Integer) && r['window_seconds'].positive? && r['window_seconds'] <= ((2**53) - 1)
     raise ArgumentError, 'Explicit reopening rule required' unless %w[resolve close cancel].include?(r['anchor_action']) && %w[deny require_new_ticket].include?(r['expired'])
     raise ArgumentError, 'Explicit SLA cycle choice required' unless %w[continue_cycle new_cycle].include?(r['sla_cycle'])
     raise ArgumentError, 'Explicit inactive time rule required' unless %w[count exclude].include?(r['inactive_time'])

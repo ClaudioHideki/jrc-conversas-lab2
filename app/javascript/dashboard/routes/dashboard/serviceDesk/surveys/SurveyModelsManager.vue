@@ -1,6 +1,7 @@
 <script setup>
 import { surveyClasses } from './surveyClasses';
 import { reactive, toRefs, computed, onBeforeUnmount, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import SurveyModelsAPI from 'dashboard/api/serviceDeskSurveyModels';
 import SurveyModelWizard from './SurveyModelWizard.vue';
 import { messageErrors } from './modelForm';
@@ -11,6 +12,8 @@ const props = defineProps({
   api: { type: Object, default: () => SurveyModelsAPI },
 });
 defineOptions({ name: 'SurveyModelsManager' });
+const { t } = useI18n();
+const globalCopy = key => t(`JRC_SERVICE_DESK.COORDINATED.${key}`);
 const state = reactive(
   (() => {
     return {
@@ -119,6 +122,10 @@ async function closeEditor() {
   await load();
 }
 function confirm(type, row) {
+  if (type === 'dispatch' && options.value?.automation_enabled !== true) {
+    state.error = globalCopy('survey_manual_off');
+    return;
+  }
   state.pendingAction = { type, row };
   state.ticketId = '';
   state.error = '';
@@ -153,6 +160,13 @@ function reasonLabel(value) {
 }
 async function execute() {
   if (!state.pendingAction || state.busy) return;
+  if (
+    state.pendingAction.type === 'dispatch' &&
+    options.value?.automation_enabled !== true
+  ) {
+    state.error = globalCopy('survey_manual_off');
+    return;
+  }
   const action = state.pendingAction;
   const requestIdentity = identity.value;
   state.busy = true;
@@ -382,16 +396,32 @@ defineExpose({
           </span>
         </article>
       </div>
-      <p
+      <section
         v-if="!options.automation_enabled"
         :class="surveyClasses('sv-alert sv-alert-warning')"
+        role="status"
       >
-        {{
-          $t(
-            'RELATIONSHIP.SURVEY_MODELS_V3.COPY.A_AUTOMACAO_DE_PESQUISAS_ESTA_A07D56'
-          )
-        }}
-      </p>
+        <strong class="block text-sm">
+          {{ globalCopy('survey_off_title') }}
+        </strong>
+        <p class="mt-2 text-sm">{{ globalCopy('survey_off_help') }}</p>
+        <RouterLink
+          v-if="options.can_configure"
+          :to="{
+            name: 'jrc_relationship_settings',
+            params: { accountId: String(accountId) },
+          }"
+          class="mt-3 inline-flex rounded-lg border border-n-amber-5 bg-n-solid-1 px-3 py-2 text-sm text-n-blue-11"
+        >
+          {{ globalCopy('survey_configure') }}
+        </RouterLink>
+        <p
+          v-else
+          class="mt-2 text-sm"
+        >
+          {{ globalCopy('survey_admin_help') }}
+        </p>
+      </section>
       <div
         v-if="!rows.length"
         :class="surveyClasses('sv-empty')"
@@ -449,7 +479,11 @@ defineExpose({
             >
               {{
                 row.active
-                  ? 'Publicada e ativa'
+                  ? globalCopy(
+                      options.automation_enabled
+                        ? 'survey_on_status'
+                        : 'survey_off_status'
+                    )
                   : row.published_at
                     ? 'Desativada'
                     : 'Rascunho'
@@ -526,6 +560,7 @@ defineExpose({
                   !row.changed
                 "
                 type="button"
+                :disabled="busy || !options.automation_enabled"
                 @click="confirm('dispatch', row)"
               >
                 {{

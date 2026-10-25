@@ -27,6 +27,8 @@
     {
       "files": [
         "app/javascript/dashboard/routes/dashboard/serviceDesk/automationStudio/**/*.vue",
+        "app/javascript/dashboard/routes/dashboard/serviceDesk/components/LifecycleVisualEditor.vue",
+        "app/javascript/dashboard/routes/dashboard/serviceDesk/components/OperationalRulePanel.vue",
         "app/javascript/dashboard/routes/dashboard/serviceDesk/caseWorkspace/**/*.vue"
       ],
       "options": {

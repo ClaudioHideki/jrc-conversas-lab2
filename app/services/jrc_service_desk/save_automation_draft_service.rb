@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 class JrcServiceDesk::SaveAutomationDraftService < JrcServiceDesk::BaseService
-  CAPS = { 'queue' => :queues_manage, 'notification' => :notifications_manage, 'closure_revision' => :lifecycle_policies_manage }.freeze
+  CAPS = { 'queue' => :queues_manage, 'notification' => :notifications_manage, 'closure_revision' => :lifecycle_policies_manage,
+           'lifecycle' => :lifecycle_policies_manage, 'operational' => :queues_manage }.freeze
 
   def call(unit_id:, kind:, code:, payload:, expected_version:)
     capability = CAPS.fetch(kind) { raise ArgumentError }

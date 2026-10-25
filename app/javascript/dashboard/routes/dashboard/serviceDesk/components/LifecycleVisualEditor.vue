@@ -22,6 +22,8 @@ const props = defineProps({
   unitId: { type: String, required: true },
   disabled: Boolean,
   section: { type: String, default: 'all' },
+  compact: Boolean,
+  statuses: { type: Array, default: () => [] },
 });
 const emit = defineEmits(['update:modelValue']);
 const { t } = useI18n();
@@ -30,6 +32,21 @@ const clocks = computed(() => (d.value ? clockKinds(d.value) : []));
 const issues = computed(() => lifecycleDraftIssues(props.modelValue));
 const localError = ref(false);
 const checked = ref(false);
+const selectedTransition = ref(0);
+const displayedTransitions = computed(() =>
+  (d.value?.transitions || [])
+    .map((row, index) => ({ row, index }))
+    .filter(item => !props.compact || item.index === selectedTransition.value)
+);
+watch(
+  () => d.value?.transitions.length,
+  length => {
+    selectedTransition.value = Math.max(
+      0,
+      Math.min(selectedTransition.value, (length || 1) - 1)
+    );
+  }
+);
 const simulatorState = ref('');
 const simulation = computed(() => {
   try {
@@ -51,6 +68,13 @@ const configureClosure = value => {
   if (!props.disabled)
     emit('update:modelValue', closureConfiguration(props.modelValue, value));
 };
+function setRoles(index, value) {
+  if (props.disabled || !d.value) return;
+  const draft = JSON.parse(props.modelValue);
+  if (value) draft.transitions[index].allowed_account_roles = value.split(',');
+  else delete draft.transitions[index].allowed_account_roles;
+  emit('update:modelValue', JSON.stringify(draft));
+}
 function update(path, value) {
   if (props.disabled) return;
   try {
@@ -79,6 +103,7 @@ function add(kind) {
       ? blankTransition(d.value)
       : { code: '', name: '', status_ids: [], clocks: [] };
   update([kind], [...rows, row]);
+  if (kind === 'transitions') selectedTransition.value = rows.length;
 }
 function remove(kind, index) {
   if (d.value)
@@ -102,7 +127,10 @@ function start() {
 </script>
 
 <template>
-  <div class="grid gap-4" data-testid="lifecycle-visual-editor">
+  <div
+    class="grid gap-4"
+    data-testid="lifecycle-visual-editor"
+  >
     <p class="text-sm text-n-slate-11">{{ t(`${root}.notice`) }}</p>
     <Button
       v-if="!modelValue.trim()"
@@ -112,7 +140,11 @@ function start() {
       :label="t(`${root}.start`)"
       @click="start"
     />
-    <p v-else-if="!d" role="alert" class="text-sm text-n-ruby-11">
+    <p
+      v-else-if="!d"
+      role="alert"
+      class="text-sm text-n-ruby-11"
+    >
       {{ t(`${root}.advanced_required`) }}
     </p>
     <template v-if="d">
@@ -160,12 +192,15 @@ function start() {
               {{ t('JRC_SERVICE_DESK.SIMPLE_SLA.contractual') }}
             </option>
           </select>
-          <span class="text-xs text-n-slate-11">{{
-            t('JRC_SERVICE_DESK.SIMPLE_SLA.missing_help')
-          }}</span>
+          <span class="text-xs text-n-slate-11">
+            {{ t('JRC_SERVICE_DESK.SIMPLE_SLA.missing_help') }}
+          </span>
         </label>
       </fieldset>
-      <section v-if="['all', 'lifecycle'].includes(section)" class="grid gap-3">
+      <section
+        v-if="['all', 'lifecycle'].includes(section)"
+        class="grid gap-3"
+      >
         <div class="flex flex-wrap justify-between gap-2">
           <h4 class="font-semibold">{{ t(`${root}.transitions`) }}</h4>
           <Button
@@ -177,8 +212,29 @@ function start() {
             @click="add('transitions')"
           />
         </div>
+        <nav
+          v-if="compact && d.transitions.length"
+          class="grid gap-2 sm:grid-cols-2 xl:grid-cols-3"
+          :aria-label="t(`${root}.transitions`)"
+        >
+          <button
+            v-for="(transition, index) in d.transitions"
+            :key="index"
+            type="button"
+            class="rounded-lg border border-n-blue-5 px-3 py-2 text-left text-xs"
+            :class="
+              selectedTransition === index
+                ? 'bg-n-blue-9 text-white'
+                : 'bg-n-blue-2 text-n-blue-11'
+            "
+            :disabled="disabled"
+            @click="selectedTransition = index"
+          >
+            {{ t(`${root}.actions.${transition.action}`) }}
+          </button>
+        </nav>
         <article
-          v-for="(row, index) in d.transitions"
+          v-for="{ row, index } in displayedTransitions"
           :key="index"
           class="grid gap-4 rounded-xl border border-n-weak bg-n-solid-1 p-4"
         >
@@ -196,9 +252,9 @@ function start() {
             />
           </div>
           <div class="grid gap-3 md:grid-cols-2">
-            <label class="grid gap-1 text-sm"
-              >{{ t(`${root}.key`)
-              }}<input
+            <label class="grid gap-1 text-sm">
+              {{ t(`${root}.key`) }}
+              <input
                 class="rounded border border-n-weak bg-n-solid-1 p-2"
                 :disabled="disabled"
                 :value="row.key"
@@ -206,10 +262,11 @@ function start() {
                 @input="
                   update(['transitions', index, 'key'], $event.target.value)
                 "
-            /></label>
-            <label class="grid gap-1 text-sm"
-              >{{ t(`${root}.action`)
-              }}<select
+              />
+            </label>
+            <label class="grid gap-1 text-sm">
+              {{ t(`${root}.action`) }}
+              <select
                 class="rounded border border-n-weak bg-n-solid-1 p-2"
                 :disabled="disabled"
                 :value="row.action"
@@ -220,13 +277,18 @@ function start() {
                 <option value="">
                   {{ t('JRC_SERVICE_DESK.COMMON.select') }}
                 </option>
-                <option v-for="action in ACTIONS" :key="action" :value="action">
+                <option
+                  v-for="action in ACTIONS"
+                  :key="action"
+                  :value="action"
+                >
                   {{ t(`${root}.actions.${action}`) }}
                 </option>
-              </select></label
-            >
+              </select>
+            </label>
             <StatusSetEditor
               :model-value="row.from_status_ids || []"
+              :options="statuses"
               :unit-id="unitId"
               :disabled="disabled"
               :label="t(`${root}.from`)"
@@ -236,6 +298,11 @@ function start() {
             />
             <LookupSelect
               :model-value="String(row.to_status_id || '')"
+              :current-name="
+                statuses.find(
+                  status => String(status.id) === String(row.to_status_id)
+                )?.name || ''
+              "
               resource="statuses"
               :unit-id="unitId"
               :disabled="disabled"
@@ -245,6 +312,31 @@ function start() {
               "
             />
           </div>
+          <label class="grid gap-1 text-sm">
+            {{ t('JRC_SERVICE_DESK.COORDINATED.allowed_roles') }}
+            <select
+              class="rounded-lg border border-n-weak bg-n-solid-1 p-3 text-sm"
+              :value="row.allowed_account_roles?.join(',') || ''"
+              :disabled="disabled"
+              @change="setRoles(index, $event.target.value)"
+            >
+              <option value="">
+                {{ t('JRC_SERVICE_DESK.COORDINATED.native_roles') }}
+              </option>
+              <option value="agent,administrator">
+                {{ t('JRC_SERVICE_DESK.COORDINATED.native_roles') }}
+              </option>
+              <option value="administrator">
+                {{ t('JRC_SERVICE_DESK.COORDINATED.administrator_only') }}
+              </option>
+              <option value="agent">
+                {{ t('JRC_SERVICE_DESK.COORDINATED.agent_only') }}
+              </option>
+            </select>
+            <span class="text-xs text-n-slate-11">
+              {{ t('JRC_SERVICE_DESK.COORDINATED.roles_help') }}
+            </span>
+          </label>
           <fieldset
             v-if="row.requirements"
             :disabled="disabled"
@@ -262,7 +354,8 @@ function start() {
               ]"
               :key="field"
               class="text-sm flex items-center gap-2"
-              ><input
+            >
+              <input
                 type="checkbox"
                 :checked="row.requirements[field]"
                 @change="
@@ -271,8 +364,9 @@ function start() {
                     $event.target.checked
                   )
                 "
-              />{{ t(`${root}.require.${field}`) }}</label
-            >
+              />
+              {{ t(`${root}.require.${field}`) }}
+            </label>
           </fieldset>
           <p
             v-if="Object.keys(row.requirements?.fields || {}).length"
@@ -284,13 +378,17 @@ function start() {
               })
             }}
           </p>
-          <div v-if="row.clocks" class="grid gap-3 sm:grid-cols-3">
+          <div
+            v-if="row.clocks"
+            class="grid gap-3 sm:grid-cols-3"
+          >
             <label
               v-for="clock in clocks"
               :key="clock"
               class="grid gap-1 text-sm"
-              >{{ t(`JRC_SERVICE_DESK.COMPLETION.clocks.${clock}`)
-              }}<select
+            >
+              {{ t(`JRC_SERVICE_DESK.COMPLETION.clocks.${clock}`) }}
+              <select
                 class="rounded border border-n-weak bg-n-solid-1 p-2"
                 :disabled="disabled"
                 :value="row.clocks[clock]"
@@ -310,11 +408,11 @@ function start() {
                 >
                   {{ t(`${root}.effects.${effect}`) }}
                 </option>
-              </select></label
-            >
+              </select>
+            </label>
           </div>
-          <label class="text-sm"
-            ><input
+          <label class="text-sm">
+            <input
               type="checkbox"
               :disabled="disabled"
               :checked="row.end_pause"
@@ -325,11 +423,14 @@ function start() {
                 )
               "
             />
-            {{ t(`${root}.end_pause`) }}</label
-          >
+            {{ t(`${root}.end_pause`) }}
+          </label>
         </article>
       </section>
-      <section v-if="['all', 'lifecycle'].includes(section)" class="grid gap-3">
+      <section
+        v-if="['all', 'lifecycle'].includes(section)"
+        class="grid gap-3"
+      >
         <div class="flex flex-wrap justify-between gap-2">
           <h4 class="font-semibold">{{ t(`${root}.pauses`) }}</h4>
           <Button
@@ -351,8 +452,9 @@ function start() {
               v-for="field in ['code', 'name']"
               :key="field"
               class="grid gap-1 text-sm"
-              >{{ t(`JRC_SERVICE_DESK.FIELDS.${field}`)
-              }}<input
+            >
+              {{ t(`JRC_SERVICE_DESK.FIELDS.${field}`) }}
+              <input
                 class="rounded border border-n-weak bg-n-solid-1 p-2"
                 :value="row[field]"
                 :disabled="disabled"
@@ -360,7 +462,8 @@ function start() {
                 @input="
                   update(['pause_reasons', index, field], $event.target.value)
                 "
-            /></label>
+              />
+            </label>
           </div>
           <StatusSetEditor
             :model-value="row.status_ids || []"
@@ -371,7 +474,10 @@ function start() {
               update(['pause_reasons', index, 'status_ids'], $event)
             "
           />
-          <fieldset class="flex flex-wrap gap-3" :disabled="disabled">
+          <fieldset
+            class="flex flex-wrap gap-3"
+            :disabled="disabled"
+          >
             <legend class="text-xs text-n-slate-11 mb-2">
               {{ t(`${root}.paused_clocks`) }}
             </legend>
@@ -379,7 +485,8 @@ function start() {
               v-for="clock in clocks"
               :key="clock"
               class="inline-flex items-center gap-2 text-sm"
-              ><input
+            >
+              <input
                 type="checkbox"
                 :checked="row.clocks?.includes(clock)"
                 @change="
@@ -391,8 +498,8 @@ function start() {
                   )
                 "
               />
-              {{ t(`JRC_SERVICE_DESK.COMPLETION.clocks.${clock}`) }}</label
-            >
+              {{ t(`JRC_SERVICE_DESK.COMPLETION.clocks.${clock}`) }}
+            </label>
           </fieldset>
           <Button
             type="button"
@@ -412,27 +519,29 @@ function start() {
         <legend class="font-semibold text-sm">
           {{ t(`${root}.reopening`) }}
         </legend>
-        <label class="text-sm"
-          ><input
+        <label class="text-sm">
+          <input
             type="checkbox"
             :checked="d.reopen.allowed"
             @change="update(['reopen', 'allowed'], $event.target.checked)"
           />
-          {{ t(`${root}.allow_reopen`) }}</label
+          {{ t(`${root}.allow_reopen`) }}
+        </label>
+        <div
+          v-if="d.reopen.allowed"
+          class="grid gap-3 sm:grid-cols-2"
         >
-        <div v-if="d.reopen.allowed" class="grid gap-3 sm:grid-cols-2">
-          <label class="grid gap-1 text-sm"
-            >{{ t(`${root}.window_seconds`)
-            }}<input
+          <label class="grid gap-1 text-sm">
+            {{ t(`${root}.window_seconds`) }}
+            <input
               class="rounded border border-n-weak bg-n-solid-1 p-2"
               type="number"
               min="1"
               step="1"
               :value="d.reopen.window_seconds"
-              @input="
-                number(['reopen', 'window_seconds'], $event.target.value)
-              "
-          /></label>
+              @input="number(['reopen', 'window_seconds'], $event.target.value)"
+            />
+          </label>
           <label
             v-for="(values, field) in {
               anchor_action: ['resolve', 'close', 'cancel'],
@@ -443,8 +552,9 @@ function start() {
             }"
             :key="field"
             class="grid gap-1 text-sm"
-            >{{ t(`${root}.reopen_fields.${field}`)
-            }}<select
+          >
+            {{ t(`${root}.reopen_fields.${field}`) }}
+            <select
               class="rounded border border-n-weak bg-n-solid-1 p-2"
               :value="d.reopen[field] || ''"
               @change="update(['reopen', field], $event.target.value)"
@@ -452,11 +562,15 @@ function start() {
               <option value="">
                 {{ t('JRC_SERVICE_DESK.COMMON.select') }}
               </option>
-              <option v-for="value in values" :key="value" :value="value">
+              <option
+                v-for="value in values"
+                :key="value"
+                :value="value"
+              >
                 {{ t(`${root}.values.${value}`) }}
               </option>
-            </select></label
-          >
+            </select>
+          </label>
           <fieldset class="flex flex-wrap gap-2 sm:col-span-2">
             <legend class="text-xs text-n-slate-11 mb-2">
               {{ t(`${root}.resumed_clocks`) }}
@@ -465,7 +579,8 @@ function start() {
               v-for="clock in clocks"
               :key="clock"
               class="inline-flex items-center gap-2 text-sm"
-              ><input
+            >
+              <input
                 type="checkbox"
                 :checked="d.reopen.resume_clocks?.includes(clock)"
                 @change="
@@ -477,8 +592,8 @@ function start() {
                   )
                 "
               />
-              {{ t(`JRC_SERVICE_DESK.COMPLETION.clocks.${clock}`) }}</label
-            >
+              {{ t(`JRC_SERVICE_DESK.COMPLETION.clocks.${clock}`) }}
+            </label>
           </fieldset>
         </div>
       </fieldset>
@@ -510,17 +625,34 @@ function start() {
           role="alert"
           class="text-sm text-n-ruby-11 list-disc ps-5"
         >
-          <li v-for="issue in issues" :key="issue">
+          <li
+            v-for="issue in issues"
+            :key="issue"
+          >
             {{ t(`${root}.issues.${issue}`) }}
           </li>
         </ul>
-        <p v-else-if="checked" role="status" class="text-sm">
+        <p
+          v-else-if="checked"
+          role="status"
+          class="text-sm"
+        >
           {{ t(`${root}.locally_valid`) }}
         </p>
-        <ul v-if="simulatorState" class="grid gap-2">
-          <li v-for="row in simulation" :key="row.key" class="text-sm">
+        <ul
+          v-if="simulatorState"
+          class="grid gap-2"
+        >
+          <li
+            v-for="row in simulation"
+            :key="row.key"
+            class="text-sm"
+          >
             {{ row.key }}: {{ t(`${root}.actions.${row.action}`) }}
-            <Icon icon="i-lucide-arrow-right" class="inline-block size-3" />
+            <Icon
+              icon="i-lucide-arrow-right"
+              class="inline-block size-3"
+            />
             {{
               t('JRC_SERVICE_DESK.EXPERIENCE.reference', {
                 id: row.to_status_id,
@@ -536,7 +668,11 @@ function start() {
         </p>
       </section>
     </template>
-    <p v-if="localError" role="alert" class="text-sm text-n-ruby-11">
+    <p
+      v-if="localError"
+      role="alert"
+      class="text-sm text-n-ruby-11"
+    >
       {{ t(`${root}.advanced_required`) }}
     </p>
   </div>

@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
+require_relative 'operational_rule_conditions'
+
 # Explicit numeric precedence; equal-precedence matches are an error, not a guess.
 class JrcServiceDesk::OperationalRuleMatcher
   class Ambiguous < ArgumentError; end
 
-  def self.call(rows, facts)
-    matches = rows.select { |row| row.fetch('match').all? { |key, value| !facts[key].nil? && facts[key] == value } }
+  def self.call(rows, facts, now: Time.now.utc)
+    matches = rows.select { |row| JrcServiceDesk::OperationalRuleConditions.match?(row, facts, now: now) }
     return nil if matches.empty?
 
     precedence = matches.map { |row| row.fetch('precedence') }.min

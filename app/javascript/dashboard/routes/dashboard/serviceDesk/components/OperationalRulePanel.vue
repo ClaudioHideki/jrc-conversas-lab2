@@ -41,6 +41,34 @@ const confirmed = ref(false);
 const busy = ref(false);
 const feedback = ref('');
 const latest = computed(() => versions.value[0]);
+const coordinated = computed(
+  () =>
+    latest.value?.definition?.rules?.some(
+      row =>
+        row.key.startsWith('studio.') ||
+        Object.keys(row).some(
+          key => !['key', 'precedence', 'match', 'output'].includes(key)
+        ) ||
+        Object.keys(row.match).some(
+          key =>
+            ![
+              'inbox_id',
+              'channel_type',
+              'company_id',
+              'contract_id',
+              'category_id',
+              'service_id',
+              'priority_id',
+              'ticket_type_id',
+              'impact',
+              'urgency',
+            ].includes(key)
+        ) ||
+        Object.keys(row.output).some(
+          key => !['queue_id', 'priority_id', 'snapshot'].includes(key)
+        )
+    ) === true
+);
 const targetPreview = computed(() =>
   rows.value.map(row => {
     try {
@@ -91,6 +119,7 @@ const reset = () => {
 const adopt = record => {
   if (!record) return;
   enabled.value = record.enabled === true;
+  if (coordinated.value) return;
   if (record.definition.rules) rows.value = loadRules(record.definition);
   if (kind.value === 'recurrence')
     Object.assign(recurrence, {
@@ -159,7 +188,7 @@ watch(
   { deep: true, flush: 'sync' }
 );
 const publish = async () => {
-  if (busy.value || !confirmed.value) return;
+  if (busy.value || !confirmed.value || coordinated.value) return;
   let definition;
   try {
     if (kind.value === 'approval_deadline') {
@@ -227,7 +256,10 @@ const publish = async () => {
 </script>
 
 <template>
-  <Panel v-if="kinds.length" :title="t('JRC_SERVICE_DESK.COMPLETION.title')">
+  <Panel
+    v-if="kinds.length"
+    :title="t('JRC_SERVICE_DESK.COMPLETION.title')"
+  >
     <ScopeBar
       v-model:unit-id="unitId"
       v-model:operator-id="operatorId"
@@ -244,14 +276,25 @@ const publish = async () => {
       :aria-label="t('JRC_SERVICE_DESK.COMPLETION.title')"
       class="my-3 rounded border border-n-weak bg-n-solid-1 p-2"
     >
-      <option v-for="value in kinds" :key="value" :value="value">
+      <option
+        v-for="value in kinds"
+        :key="value"
+        :value="value"
+      >
         {{ t(kindLabels[value]) }}
       </option>
     </select>
-    <p v-if="!unitId" class="text-sm">
+    <p
+      v-if="!unitId"
+      class="text-sm"
+    >
       {{ t('JRC_SERVICE_DESK.COMPLETION.unit_required') }}
     </p>
-    <form v-else class="grid gap-4" @submit.prevent="publish">
+    <form
+      v-else
+      class="grid gap-4"
+      @submit.prevent="publish"
+    >
       <section
         v-if="kind === 'sla_selection'"
         class="grid gap-2 rounded-lg border border-n-weak p-3"
@@ -268,7 +311,11 @@ const publish = async () => {
         <p class="text-sm">
           {{ t('JRC_SERVICE_DESK.SIMPLE_SLA.new_tickets_only') }}
         </p>
-        <p v-for="row in targetPreview" :key="row.key" class="text-sm">
+        <p
+          v-for="row in targetPreview"
+          :key="row.key"
+          class="text-sm"
+        >
           {{
             t('JRC_SERVICE_DESK.SIMPLE_SLA.target_summary', {
               key: row.key,
@@ -316,15 +363,17 @@ const publish = async () => {
           ]"
           :key="field"
           class="grid gap-1 text-sm"
-          ><span>{{ t(`JRC_SERVICE_DESK.COMPLETION.fields.${field}`) }}</span
-          ><input
+        >
+          <span>{{ t(`JRC_SERVICE_DESK.COMPLETION.fields.${field}`) }}</span>
+          <input
             v-model="deadline[field]"
             inputmode="numeric"
             class="rounded border border-n-weak bg-n-solid-1 p-2"
-        /></label>
-        <label class="grid gap-1 text-sm"
-          ><span>{{ t('JRC_SERVICE_DESK.COMPLETION.target_kind') }}</span
-          ><select
+          />
+        </label>
+        <label class="grid gap-1 text-sm">
+          <span>{{ t('JRC_SERVICE_DESK.COMPLETION.target_kind') }}</span>
+          <select
             v-model="deadline.target_kind"
             class="rounded border border-n-weak bg-n-solid-1 p-2"
           >
@@ -338,17 +387,18 @@ const publish = async () => {
             >
               {{ t(`JRC_SERVICE_DESK.COMPLETION.targets.${target}`) }}
             </option>
-          </select></label
-        >
-        <label class="grid gap-1 text-sm"
-          ><span>{{ t('JRC_SERVICE_DESK.COMPLETION.target_value') }}</span
-          ><input
+          </select>
+        </label>
+        <label class="grid gap-1 text-sm">
+          <span>{{ t('JRC_SERVICE_DESK.COMPLETION.target_value') }}</span>
+          <input
             v-model="deadline.target_value"
             class="rounded border border-n-weak bg-n-solid-1 p-2"
-        /></label>
-        <label class="grid gap-1 text-sm"
-          ><span>{{ t('JRC_SERVICE_DESK.COMPLETION.reason') }}</span
-          ><textarea
+          />
+        </label>
+        <label class="grid gap-1 text-sm">
+          <span>{{ t('JRC_SERVICE_DESK.COMPLETION.reason') }}</span>
+          <textarea
             v-model="deadline.reason"
             maxlength="1000"
             class="rounded border border-n-weak bg-n-solid-1 p-2"
@@ -367,55 +417,81 @@ const publish = async () => {
           v-for="field in ['window_days', 'minimum_occurrences']"
           :key="field"
           class="grid gap-1 text-sm"
-          ><span>{{ t(`JRC_SERVICE_DESK.COMPLETION.fields.${field}`) }}</span
-          ><input
+        >
+          <span>{{ t(`JRC_SERVICE_DESK.COMPLETION.fields.${field}`) }}</span>
+          <input
             v-model="recurrence[field]"
             inputmode="numeric"
             class="rounded border border-n-weak bg-n-solid-1 p-2"
-        /></label>
+          />
+        </label>
         <label
           v-for="field in groupingFields"
           :key="field"
           class="flex gap-2 text-sm"
-          ><input
+        >
+          <input
             v-model="recurrence.group_by"
             type="checkbox"
             :value="field"
-          /><span>{{
-            t(`JRC_SERVICE_DESK.COMPLETION.fields.${field}`)
-          }}</span></label
-        >
+          />
+          <span>{{ t(`JRC_SERVICE_DESK.COMPLETION.fields.${field}`) }}</span>
+        </label>
       </fieldset>
-      <label class="flex items-center gap-2 text-sm"
-        ><input v-model="enabled" type="checkbox" :disabled="busy" />{{
-          t('JRC_SERVICE_DESK.COMPLETION.enabled')
-        }}</label
-      >
-      <label class="flex items-center gap-2 text-sm"
-        ><input v-model="confirmed" type="checkbox" :disabled="busy" />{{
-          t('JRC_SERVICE_DESK.COMPLETION.confirmed')
-        }}</label
-      >
+      <label class="flex items-center gap-2 text-sm">
+        <input
+          v-model="enabled"
+          type="checkbox"
+          :disabled="busy"
+        />
+        {{ t('JRC_SERVICE_DESK.COMPLETION.enabled') }}
+      </label>
+      <label class="flex items-center gap-2 text-sm">
+        <input
+          v-model="confirmed"
+          type="checkbox"
+          :disabled="busy"
+        />
+        {{ t('JRC_SERVICE_DESK.COMPLETION.confirmed') }}
+      </label>
       <div class="flex flex-wrap gap-2">
         <Button
           type="submit"
-          :disabled="busy || !confirmed || !scope.allowed.value"
+          :disabled="busy || !confirmed || !scope.allowed.value || coordinated"
           :label="t('JRC_SERVICE_DESK.COMPLETION.publish')"
-        /><Button
+        />
+        <Button
           variant="outline"
           :disabled="busy"
           :label="t('JRC_SERVICE_DESK.COMPLETION.load')"
           @click="load"
         />
       </div>
-      <p v-if="feedback" role="status" class="text-sm">
+      <p
+        v-if="feedback"
+        role="status"
+        class="text-sm"
+      >
         {{ t(`JRC_SERVICE_DESK.COMPLETION.${feedback}`) }}
       </p>
+      <p
+        v-if="coordinated"
+        role="status"
+        class="rounded-lg bg-n-amber-2 p-3 text-sm text-n-amber-11"
+      >
+        {{ t('JRC_SERVICE_DESK.COORDINATED.native_managed') }}
+      </p>
     </form>
-    <details v-if="versions.length" class="mt-4">
+    <details
+      v-if="versions.length"
+      class="mt-4"
+    >
       <summary>{{ t('JRC_SERVICE_DESK.COMPLETION.history') }}</summary>
       <ol class="grid gap-1 text-xs">
-        <li v-for="version in versions" :key="version.id">
+        <li
+          v-for="version in versions"
+          :key="version.id"
+        >
           {{ t('JRC_SERVICE_DESK.COMPLETION.version') }} {{ version.version }}:
           {{ version.created_at }} / {{ version.digest }}
         </li>

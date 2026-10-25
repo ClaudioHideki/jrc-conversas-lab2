@@ -8,11 +8,15 @@ const props = defineProps({
   unitId: { type: String, required: true },
   disabled: Boolean,
   label: { type: String, required: true },
+  options: { type: Array, default: () => [] },
 });
 const emit = defineEmits(['update:modelValue']);
 const { t } = useI18n();
 const selected = ref('');
 const names = ref({});
+const statusName = id =>
+  props.options.find(row => String(row.id) === String(id))?.name ||
+  names.value[id];
 watch(
   () => props.unitId,
   () => {
@@ -47,20 +51,22 @@ function remove(id) {
       :disabled="disabled"
       @selected="choose"
     />
-    <ul class="flex flex-wrap gap-2" :aria-label="label">
+    <ul class="m-0 flex list-none flex-wrap gap-2 p-0" :aria-label="label">
       <li
         v-for="id in modelValue"
         :key="id"
         class="rounded-full border border-n-weak px-3 py-1 text-xs"
       >
-        {{ names[id] || t('JRC_SERVICE_DESK.EXPERIENCE.reference', { id }) }}
+        {{
+          statusName(id) || t('JRC_SERVICE_DESK.EXPERIENCE.reference', { id })
+        }}
         <button
           type="button"
           class="ms-2 underline"
           :disabled="disabled"
           :aria-label="
             t('JRC_SERVICE_DESK.EXPERIENCE.remove_item', {
-              name: names[id] || id,
+              name: statusName(id) || id,
             })
           "
           @click="remove(id)"

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class JrcServiceDesk::Ticket < JrcServiceDesk::UnitRecord
+  include Labelable
   include JrcRelationship::SignalDispatch
   include JrcCustomers::OperationalCompanyLink
   belongs_to :requester, class_name: '::Contact', optional: false

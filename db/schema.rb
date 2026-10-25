@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_10_24_235901) do
+ActiveRecord::Schema[7.1].define(version: 2026_10_25_110000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -4631,6 +4631,26 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_24_235901) do
     t.index ["account_id", "unit_id", "account_user_id", "kind", "code"], name: "jrc_sd_draft_identity", unique: true
   end
 
+  create_table "jrc_service_desk_automation_publications", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "unit_id", null: false
+    t.bigint "published_by_membership_id", null: false
+    t.string "kind", null: false
+    t.string "code", null: false
+    t.string "name", null: false
+    t.text "description", default: "", null: false
+    t.bigint "service_id"
+    t.integer "version", null: false
+    t.boolean "enabled", default: false, null: false
+    t.jsonb "definition", null: false
+    t.jsonb "native_versions", null: false
+    t.string "digest", limit: 64, null: false
+    t.datetime "created_at", null: false
+    t.index ["account_id", "unit_id", "id"], name: "jrc_sd_automation_publication_scope", unique: true
+    t.index ["account_id", "unit_id", "kind", "code", "version"], name: "jrc_sd_automation_publication_version", unique: true
+    t.check_constraint "(kind::text = ANY (ARRAY['lifecycle'::character varying, 'operational'::character varying]::text[])) AND version > 0", name: "jrc_sd_automation_publication_kind"
+  end
+
   create_table "jrc_service_desk_case_links", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.bigint "unit_id", null: false
@@ -6595,6 +6615,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_24_235901) do
   add_foreign_key "jrc_service_desk_automation_drafts", "account_users", column: ["account_id", "account_user_id"], primary_key: ["account_id", "id"], name: "jrc_sd_draft_member"
   add_foreign_key "jrc_service_desk_automation_drafts", "accounts"
   add_foreign_key "jrc_service_desk_automation_drafts", "jrc_service_desk_units", column: ["account_id", "unit_id"], primary_key: ["account_id", "id"], name: "jrc_sd_draft_unit"
+  add_foreign_key "jrc_service_desk_automation_publications", "jrc_service_desk_services", column: ["account_id", "unit_id", "service_id"], primary_key: ["account_id", "unit_id", "id"], name: "jrc_sd_ap_service"
+  add_foreign_key "jrc_service_desk_automation_publications", "jrc_service_desk_unit_memberships", column: ["account_id", "unit_id", "published_by_membership_id"], primary_key: ["account_id", "unit_id", "id"], name: "jrc_sd_ap_publisher"
+  add_foreign_key "jrc_service_desk_automation_publications", "jrc_service_desk_units", column: ["account_id", "unit_id"], primary_key: ["account_id", "id"], name: "jrc_sd_ap_unit"
   add_foreign_key "jrc_service_desk_case_links", "jrc_service_desk_incidents", column: ["account_id", "unit_id", "incident_id"], primary_key: ["account_id", "unit_id", "id"], name: "jrc_sd_case_link_source_fk"
   add_foreign_key "jrc_service_desk_case_links", "jrc_service_desk_incidents", column: ["account_id", "unit_id", "related_incident_id"], primary_key: ["account_id", "unit_id", "id"], name: "jrc_sd_case_link_target_fk"
   add_foreign_key "jrc_service_desk_case_links", "jrc_service_desk_tickets", column: ["account_id", "unit_id", "ticket_id"], primary_key: ["account_id", "unit_id", "id"], name: "jrc_sd_case_link_ticket_fk"
@@ -7524,6 +7547,14 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_24_235901) do
   execute <<~'JRC_SCHEMA_SQL_0bdc96bb434b'
     ALTER TABLE "jrc_relationship_cadence_steps" ADD CONSTRAINT "rel_cadence_step_state" CHECK ((((state)::text = ANY ((ARRAY['pending'::character varying, 'applied'::character varying, 'canceled'::character varying])::text[])) AND ((ordinal >= 0) AND (ordinal <= 49)) AND (((state)::text = 'applied'::text) = (receipt IS NOT NULL))));
   JRC_SCHEMA_SQL_0bdc96bb434b
+
+  execute <<~'JRC_SCHEMA_SQL_6b3255b193bb'
+    ALTER TABLE "jrc_service_desk_automation_publications" DROP CONSTRAINT "jrc_sd_automation_publication_kind";
+  JRC_SCHEMA_SQL_6b3255b193bb
+
+  execute <<~'JRC_SCHEMA_SQL_4ce5b70a3ba8'
+    ALTER TABLE "jrc_service_desk_automation_publications" ADD CONSTRAINT "jrc_sd_automation_publication_kind" CHECK ((((kind)::text = ANY ((ARRAY['lifecycle'::character varying, 'operational'::character varying])::text[])) AND (version > 0)));
+  JRC_SCHEMA_SQL_4ce5b70a3ba8
 
   execute <<~'JRC_SCHEMA_SQL_3fa9232f87de'
     ALTER TABLE "jrc_service_desk_case_links" DROP CONSTRAINT "jrc_sd_case_link_one_target";

@@ -417,7 +417,7 @@ function acceptPublication(row) {
   state.confirmPublication = false;
   state.publicationKey = null;
   state.operationUnknown = false;
-  state.success = `Versão ${row.published_version} publicada e relida. Nenhuma mensagem foi enviada por esta ação.`;
+  state.success = `Versão ${row.published_version} publicada e relida. Nenhuma mensagem foi enviada por esta ação.${props.options.automation_enabled ? '' : ' Motor automático de pesquisas: desligado. Publicar não liga o motor.'}`;
   emit('published', row);
 }
 async function publish() {
@@ -1925,11 +1925,7 @@ defineExpose({
                   v-if="!options.automation_enabled"
                   :class="surveyClasses('sv-alert sv-alert-warning')"
                 >
-                  {{
-                    $t(
-                      'RELATIONSHIP.SURVEY_MODELS_V3.COPY.A_AUTOMACAO_DE_PESQUISAS_ESTA_8FB16D'
-                    )
-                  }}
+                  {{ $t('JRC_SERVICE_DESK.COORDINATED.survey_off_help') }}
                 </div>
               </div>
               <div
