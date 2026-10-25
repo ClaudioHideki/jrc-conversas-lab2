@@ -1,5 +1,10 @@
 export const NOTIFICATION_TYPES = [
   {
+    label: 'JRC_SERVICE_DESK.AUTOMATION_STUDIO.monitoring.alerts',
+    value: 'service_desk_clock',
+    emailOnly: true,
+  },
+  {
     label: 'PROFILE_SETTINGS.FORM.NOTIFICATIONS.TYPES.CONVERSATION_CREATED',
     value: 'conversation_creation',
   },

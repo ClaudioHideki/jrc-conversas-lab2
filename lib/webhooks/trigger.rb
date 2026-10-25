@@ -24,6 +24,18 @@ class Webhooks::Trigger
   end
 
   def execute
+    if @webhook_type == :api_inbox_webhook && @payload[:event] == 'message_created' &&
+       message && JrcRelationship::SurveyMessageExecution.applies?(message)
+      JrcRelationship::SurveyMessageExecution.new(message).perform { execute_delivery }
+    elsif @webhook_type == :api_inbox_webhook && @payload[:event] == 'message_created' &&
+          message && message.content_attributes['service_desk_delivery_id']
+      JrcServiceDesk::NotificationExecution.new(message).perform { execute_delivery }
+    else
+      execute_delivery
+    end
+  end
+
+  def execute_delivery
     jrc_delivery&.validate!(url: @url, secret: @secret, delivery_id: @delivery_id)
     jrc_delivery&.prepare_campaign_intent!(@payload)
     jrc_delivery&.validate!(url: @url, secret: @secret, delivery_id: @delivery_id)
@@ -34,6 +46,8 @@ class Webhooks::Trigger
 
     handle_failure(e)
   end
+
+  private :execute_delivery
 
   def handle_failure(error)
     return jrc_delivery.handle_failure(error) if jrc_delivery

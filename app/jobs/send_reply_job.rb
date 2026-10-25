@@ -18,8 +18,14 @@ class SendReplyJob < ApplicationJob
   def perform(message_id)
     message = Message.find(message_id)
     if message.content_attributes.to_h['service_desk_delivery_id']
+      return if message.inbox.channel_type == 'Channel::Api'
+
       JrcServiceDesk::NotificationExecution.new(message).perform { deliver(message) }
     elsif JrcRelationship::SurveyMessageExecution.applies?(message)
+      # API inboxes send through WebhookJob. Claim and revalidate there, at I/O,
+      # rather than consuming the survey claim in an e-mail-notification job.
+      return if message.inbox.channel_type == 'Channel::Api'
+
       JrcRelationship::SurveyMessageExecution.new(message).perform { deliver(message) }
     elsif message.content_attributes.to_h['jrc_flow_run_id']
       JrcFlows::Delivery.new(message).perform { deliver(message) }
@@ -49,7 +55,8 @@ class SendReplyJob < ApplicationJob
     turn = JrcNico::Turn.find_by(id: message.content_attributes['nico_turn_id'], outgoing_message_id: message.id)
     claimed = message.conversation.with_lock do
       unless JrcNico::DelegationService.delivery_allowed?(message)
-        message.update!(status: :failed, content_attributes: message.content_attributes.merge('external_error' => 'NICO: atendimento retomado ou autorização expirada.'))
+        message.update!(status: :failed,
+                        content_attributes: message.content_attributes.merge('external_error' => 'NICO: atendimento retomado ou autorização expirada.'))
         turn&.update!(status: 'cancelled')
         next false
       end
@@ -69,9 +76,7 @@ class SendReplyJob < ApplicationJob
       end
       deliver(message)
       turn.update!(status: message.reload.failed? ? 'failed' : 'channel_processed')
-      if message.failed?
-        JrcNico::DelegationService.stop(message.conversation, reason: 'delivery_failed', status: 'needs_human')
-      end
+      JrcNico::DelegationService.stop(message.conversation, reason: 'delivery_failed', status: 'needs_human') if message.failed?
     end
   rescue StandardError
     turn&.update!(status: 'unknown')

@@ -24,7 +24,10 @@ class JrcServiceDesk::TicketEvent < JrcServiceDesk::TicketRecord
   def capture_notification_fields
     return unless JrcServiceDesk::NotificationEvent.active?(self)
 
-    self.data = data.merge('notification_fields' => JrcServiceDesk::NotificationSource.new(self).current_fields)
+    context = ticket.attributes.slice(*JrcServiceDesk::NotificationControls::CONDITION_FIELDS)
+                    .merge('assignee_account_user_id' => ticket.assignee_membership&.account_user_id)
+    self.data = data.merge('notification_context' => context,
+                           'notification_fields' => JrcServiceDesk::NotificationSource.new(self).current_fields)
   end
 
   def schedule_notification_event
@@ -36,8 +39,8 @@ class JrcServiceDesk::TicketEvent < JrcServiceDesk::TicketRecord
     return unless JrcRelationship::SurveyEngine.enabled?(account)
 
     JrcRelationship::SurveyResponseEventJob.perform_later(id)
-  rescue StandardError => error
-    Rails.logger.error("survey_response_enqueue_failed event=#{id} class=#{error.class.name}")
+  rescue StandardError => e
+    Rails.logger.error("survey_response_enqueue_failed event=#{id} class=#{e.class.name}")
   end
 
   def actor_scope_is_consistent

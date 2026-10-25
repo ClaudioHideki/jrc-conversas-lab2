@@ -28,12 +28,30 @@ export default {
       this.$store.dispatch('notifications/get', { page });
     },
     openConversation(notification) {
+      if (notification.notification_type === 'service_desk_clock') {
+        this.$store.dispatch('notifications/read', {
+          id: notification.id,
+          primaryActorId: notification.primary_actor_id,
+          primaryActorType: notification.primary_actor_type,
+          unreadCount: this.meta.unreadCount,
+        });
+        this.$router.push(
+          `/app/accounts/${this.accountId}/service-desk/tickets/${notification.primary_actor_id}`
+        );
+        return;
+      }
       if (notification.notification_type === 'relationship_action') {
-        this.$store.dispatch('notifications/read', { id: notification.id,
-          primaryActorId: notification.primary_actor_id, primaryActorType: notification.primary_actor_type,
-          unreadCount: this.meta.unreadCount });
-        this.$router.push({ name: 'jrc_relationship_actions', params: { accountId: this.accountId },
-          query: { assignment_id: notification.primary_actor.assignment_id } });
+        this.$store.dispatch('notifications/read', {
+          id: notification.id,
+          primaryActorId: notification.primary_actor_id,
+          primaryActorType: notification.primary_actor_type,
+          unreadCount: this.meta.unreadCount,
+        });
+        this.$router.push({
+          name: 'jrc_relationship_actions',
+          params: { accountId: this.accountId },
+          query: { assignment_id: notification.primary_actor.assignment_id },
+        });
         return;
       }
       const {

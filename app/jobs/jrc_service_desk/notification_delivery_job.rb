@@ -8,6 +8,8 @@ class JrcServiceDesk::NotificationDeliveryJob < ApplicationJob
     row.with_lock do
       next unless row.state == 'queued' && row.message_id.nil?
 
+      next if row.not_before && row.not_before > Time.current
+
       blocker = JrcServiceDesk::NotificationEngine.blocker(row)
       if blocker
         row.update!(state: 'blocked', reason: blocker)
@@ -33,7 +35,15 @@ class JrcServiceDesk::NotificationDeliveryJob < ApplicationJob
     params = { content: JrcServiceDesk::NotificationSource.render(row.notification_policy_version.template, fields),
                message_type: 'outgoing', private: false,
                content_attributes: { service_desk_delivery_id: row.id, service_desk_ticket_id: row.ticket_id } }
-    params[:to_emails] = row.recipient if row.channel == 'email'
+    if row.channel == 'email'
+      params[:to_emails] = row.recipient
+      ids = JrcServiceDesk::NotificationControls.new(row.notification_policy_version.settings).copy_ids(row.source_snapshot)
+      params[:cc_emails] = row.account.account_users.where(id: ids).includes(:user).map { |member| member.user.email }.join(',') if ids.any?
+    elsif row.notification_policy_version.settings['whatsapp_template'].present?
+      selection = JrcServiceDesk::NotificationWhatsappTemplate.new(inbox: row.conversation.inbox,
+                                                                   configuration: row.notification_policy_version.settings['whatsapp_template'])
+      params.merge!(selection.message_parameters(fields))
+    end
     params
   end
 end

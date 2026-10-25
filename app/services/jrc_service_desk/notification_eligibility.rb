@@ -43,8 +43,9 @@ class JrcServiceDesk::NotificationEligibility
 
   def conversation_blocker
     conversation = @row.conversation
-    return 'recipient_missing' unless conversation && conversation.contact_id == @row.ticket.requester_id
+    return 'recipient_missing' unless conversation && conversation.contact_id == (@row.recipient_contact_id || @row.ticket.requester_id)
     return 'recipient_blocked' if conversation.contact.blocked?
+    return 'recipient_denied' unless JrcServiceDesk::NotificationControls.contact_allowed?(@row.ticket, conversation.contact, @context)
     return 'conversation_not_linked' unless @row.ticket.ticket_conversations.exists?(conversation_id: conversation.id)
 
     permitted = JrcServiceDesk::NativeExecutionContext.with(@context.to_h) { ConversationPolicy.new(@context.to_h, conversation).show? }
@@ -62,7 +63,16 @@ class JrcServiceDesk::NotificationEligibility
   end
 
   def native_channel_ready?(conversation)
-    JrcServiceDesk::NotificationEngine.channel(conversation.inbox) == @row.channel && conversation.can_reply?
+    return false unless JrcServiceDesk::NotificationEngine.channel(conversation.inbox) == @row.channel
+
+    configured = @row.notification_policy_version.settings['whatsapp_template']
+    if @row.channel == 'whatsapp' && configured.present?
+      JrcServiceDesk::NotificationWhatsappTemplate.new(inbox: conversation.inbox, configuration: configured).validate!
+      return true
+    end
+    conversation.can_reply?
+  rescue ArgumentError, KeyError
+    false
   end
 
   def smtp_ready?(email)
@@ -74,7 +84,14 @@ class JrcServiceDesk::NotificationEligibility
   end
 
   def recipient_blocker
-    return 'recipient_preference' unless JrcServiceDesk::ContactNotificationPreferences.channels(@row.ticket.requester).include?(@row.channel)
+    unless JrcServiceDesk::ContactNotificationPreferences.channels(@row.recipient_contact || @row.ticket.requester).include?(@row.channel)
+      return 'recipient_preference'
+    end
+
+    controls = JrcServiceDesk::NotificationControls.new(@row.notification_policy_version.settings)
+    return 'recipient_removed' unless controls.recipient_ids(@row.ticket).include?(@row.recipient_contact_id || @row.ticket.requester_id)
+
+    return 'internal_copy_revoked' if @row.channel == 'email' && !controls.authorized_copies?(@row.ticket, @row.source_snapshot)
 
     current = JrcServiceDesk::NotificationEngine.recipient(@row.conversation, @row.channel)
     return 'recipient_missing' if current.blank?

@@ -74,8 +74,24 @@ export function decodeBoard(payload, context, kind, query) {
     const states = {
       tasks: ['open', 'in_progress', 'completed', 'cancelled'],
       approvals: ['pending', 'approved', 'rejected', 'returned'],
-      incidents: ['open', 'investigating', 'monitoring', 'resolved'],
-      problems: ['open', 'investigating', 'monitoring', 'resolved'],
+      incidents: [
+        'open',
+        'investigating',
+        'in_progress',
+        'waiting',
+        'monitoring',
+        'resolved',
+        'closed',
+      ],
+      problems: [
+        'open',
+        'investigating',
+        'in_progress',
+        'waiting',
+        'monitoring',
+        'resolved',
+        'closed',
+      ],
     }[kind];
     const relatedTicket = ['incidents', 'problems'].includes(kind)
       ? row.primary_ticket_id || row.ticket_ids[0]

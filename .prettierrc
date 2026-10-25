@@ -23,6 +23,16 @@
         "singleAttributePerLine": true,
         "htmlWhitespaceSensitivity": "ignore"
       }
+    },
+    {
+      "files": [
+        "app/javascript/dashboard/routes/dashboard/serviceDesk/automationStudio/**/*.vue",
+        "app/javascript/dashboard/routes/dashboard/serviceDesk/caseWorkspace/**/*.vue"
+      ],
+      "options": {
+        "singleAttributePerLine": true,
+        "htmlWhitespaceSensitivity": "ignore"
+      }
     }
   ]
 }

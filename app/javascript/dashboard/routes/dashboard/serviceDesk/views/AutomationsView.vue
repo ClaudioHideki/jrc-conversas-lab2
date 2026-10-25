@@ -5,8 +5,8 @@ import { useI18n } from 'vue-i18n';
 import Button from 'dashboard/components-next/button/Button.vue';
 import State from '../components/ServiceDeskState.vue';
 import LifecyclePolicyEditor from '../components/LifecyclePolicyEditor.vue';
-import ClosureRevisionPanel from '../components/ClosureRevisionPanel.vue';
-import NotificationPolicyEditor from '../components/NotificationPolicyEditor.vue';
+import ClosureRevisionWorkbench from '../automationStudio/ClosureRevisionWorkbench.vue';
+import NotificationWorkbench from '../automationStudio/NotificationWorkbench.vue';
 import ConfigurationManager from '../components/ConfigurationManager.vue';
 import OperationalRulePanel from '../components/OperationalRulePanel.vue';
 import { useServiceDesk } from '../composables/useServiceDesk';
@@ -92,9 +92,13 @@ const active = computed(
       :initial-unit-id="String(route?.query?.unit_id || '')"
       :initial-service-id="String(route?.query?.service_id || '')"
     />
-    <ClosureRevisionPanel v-else-if="active === 'closure_revisions'" />
-    <ConfigurationManager v-else-if="active === 'ola'" resource="queues" />
-    <NotificationPolicyEditor v-else-if="active === 'notifications'" />
+    <ClosureRevisionWorkbench v-else-if="active === 'closure_revisions'" />
+    <ConfigurationManager
+      v-else-if="active === 'ola'"
+      resource="queues"
+      ola-view
+    />
+    <NotificationWorkbench v-else-if="active === 'notifications'" />
     <OperationalRulePanel v-else-if="active === 'operational'" />
   </section>
   <State v-else-if="session.state.status === 'ready'" status="denied" />

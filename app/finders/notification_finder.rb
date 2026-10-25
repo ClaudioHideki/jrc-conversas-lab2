@@ -48,6 +48,20 @@ class NotificationFinder
       relationship = relationship.none
     end
     @notifications = @notifications.where.not(notification_type: 'relationship_action').or(relationship)
+    clocks = @notifications.where(notification_type: 'service_desk_clock')
+    if member
+      ctx = JrcServiceDesk::OperationalContext.new(account: current_account, user: current_user, account_user: member)
+      ids = if ctx.capability?(:sla_view)
+              JrcServiceDesk::TicketPolicy::Scope.new(ctx.to_h,
+                                                      JrcServiceDesk::Ticket).resolve.select(:id)
+            else
+              JrcServiceDesk::Ticket.none.select(:id)
+            end
+      clocks = clocks.where(primary_actor_id: ids)
+    else
+      clocks = clocks.none
+    end
+    @notifications = @notifications.where.not(notification_type: 'service_desk_clock').or(clocks)
   end
 
   def filter_snoozed_notifications

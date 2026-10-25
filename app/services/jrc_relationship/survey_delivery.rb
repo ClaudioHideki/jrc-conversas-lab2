@@ -54,7 +54,8 @@ class JrcRelationship::SurveyDelivery
   end
 
   def whatsapp_channel?(conversation, channel)
-    channel == 'Channel::Whatsapp' || (channel == 'Channel::TwilioSms' && conversation.inbox.twilio_whatsapp?)
+    channel == 'Channel::Whatsapp' || (channel == 'Channel::TwilioSms' && conversation.inbox.twilio_whatsapp?) ||
+      (@survey.source_type.present? && JrcBroker::OutboundChannel.available?(conversation.inbox))
   end
 
   def validate_template!(conversation)

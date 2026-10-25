@@ -98,14 +98,14 @@ export const SERVICE_DESK_ROUTES = Object.freeze([
   {
     key: 'incidents',
     path: 'incidents',
-    page: 'board',
+    page: 'cases',
     icon: 'i-lucide-siren',
     group: 'governance',
   },
   {
     key: 'problems',
     path: 'problems',
-    page: 'board',
+    page: 'cases',
     icon: 'i-lucide-circle-alert',
     group: 'governance',
   },

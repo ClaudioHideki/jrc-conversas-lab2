@@ -19,6 +19,7 @@ export function decodeClockProjection(row) {
   return {
     id: canonicalId(row.id),
     kind: row.kind,
+    metric_kind: row.metric_kind || null,
     state: row.state,
     deadline_state: [
       'on_time',

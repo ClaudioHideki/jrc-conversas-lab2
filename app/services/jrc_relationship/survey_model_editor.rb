@@ -1,10 +1,12 @@
 # frozen_string_literal: true
+
 require 'digest'
 
 # Coordinates the six-step workspace with native SurveyAdministration.
 # Saving/publishing never enqueues a survey, message or callback.
 class JrcRelationship::SurveyModelEditor
   attr_reader :context, :access
+
   def initialize(context)
     @context = context
     @access = JrcRelationship::SurveyModelAccess.new(context)
@@ -25,13 +27,18 @@ class JrcRelationship::SurveyModelEditor
     validate_draft!(payload)
     unit = access.unit!(payload.fetch('unit_id'))
     raise Pundit::NotAuthorizedError unless unit.operator_company_id.to_s == payload['operator_id'].to_s
+
     row = if id
             find(id, action: 'edit')
           else
             existing = scope(unit.id).find_by(code: payload['code'])
             if existing
               access.authorize!(existing, 'edit')
-              raise ActiveRecord::StaleObjectError.new(existing, 'create') unless existing.creator_id == context.user.id && existing.payload == payload
+              unless existing.creator_id == context.user.id && existing.payload == payload
+                raise ActiveRecord::StaleObjectError.new(existing,
+                                                         'create')
+              end
+
               return existing
             end
             new_draft(unit, payload)
@@ -40,6 +47,7 @@ class JrcRelationship::SurveyModelEditor
       access.authorize!(row, 'edit') if row.persisted?
       check_version!(row, expected_version) if row.persisted?
       raise ArgumentError, 'Duplique o modelo para alterar sua unidade ou código.' unless row.unit_id == unit.id && row.code == payload['code']
+
       enforce_permissions!(row, payload)
       row.payload = payload.deep_dup
       row.save!
@@ -49,6 +57,7 @@ class JrcRelationship::SurveyModelEditor
   rescue ActiveRecord::RecordNotUnique
     prior = scope(unit.id).find_by!(code: payload['code'])
     raise ActiveRecord::StaleObjectError.new(prior, 'create') unless prior.creator_id == context.user.id && prior.payload == payload
+
     access.authorize!(prior, 'edit')
     prior
   end
@@ -57,11 +66,13 @@ class JrcRelationship::SurveyModelEditor
     row = find(id, action: 'publish')
     key = request_key.to_s
     raise ArgumentError, 'Chave de publicação inválida.' unless key.match?(/\A[a-zA-Z0-9_-]{16,100}\z/)
+
     row.with_lock do
       access.authorize!(row, 'publish')
       digest = Digest::SHA256.hexdigest(JrcServiceDesk::CanonicalJson.dump(row.payload))
       if row.publication_key == key
         raise ActiveRecord::StaleObjectError.new(row, 'publish') unless row.publication_digest == digest
+
         next row
       end
       check_version!(row, expected_version)
@@ -71,7 +82,8 @@ class JrcRelationship::SurveyModelEditor
       persist_rule(row, definition)
       row.update!(definition: definition, published_payload: row.payload.deep_dup,
                   publication_key: key, publication_digest: digest, published_at: Time.current)
-      context.audit!(row, after: { definition_id: definition.id, version: definition.version, unit_id: row.unit_id }, action: 'survey_model_published')
+      context.audit!(row, after: { definition_id: definition.id, version: definition.version, unit_id: row.unit_id },
+                          action: 'survey_model_published')
     end
     row
   end
@@ -79,6 +91,7 @@ class JrcRelationship::SurveyModelEditor
   def duplicate(id:)
     source = find(id, action: 'edit')
     raise Pundit::NotAuthorizedError unless access.create?
+
     payload = source.payload.deep_dup
     payload['name'] = "#{payload['name']} (cópia)".first(120)
     payload['code'] = "copy_#{SecureRandom.hex(8)}"
@@ -98,7 +111,8 @@ class JrcRelationship::SurveyModelEditor
           administration.save(kind: 'rules', id: rule.id, expected_version: rule.version, attributes: { active: false })
         end
       end
-      row.update!(published_payload: row.published_payload.merge('active' => false), payload: row.payload.merge('active' => false), publication_key: nil, publication_digest: nil)
+      row.update!(published_payload: row.published_payload.merge('active' => false), payload: row.payload.merge('active' => false),
+                  publication_key: nil, publication_digest: nil)
       context.audit!(row, after: { definition_id: definition&.id, active: false }, action: 'survey_model_deactivated')
     end
     row
@@ -108,6 +122,7 @@ class JrcRelationship::SurveyModelEditor
     JrcRelationship::SurveyModelContract.new(payload).validate!
     unit = access.unit!(payload.fetch('unit_id'))
     raise Pundit::NotAuthorizedError unless unit.operator_company_id.to_s == payload['operator_id'].to_s
+
     validate_native_filters!(payload, unit)
     validate_executor!(payload, unit)
     validate_channels!(payload)
@@ -132,16 +147,16 @@ class JrcRelationship::SurveyModelEditor
     unit = access.unit!(unit_id)
     members = context.account.account_users.includes(:user).where(user_id: context.assignable_users.select(:id))
     executors = members.filter_map do |member|
-      begin
-        c = JrcRelationship::Context.new(member)
-        op = JrcServiceDesk::OperationalContext.new(c.to_h)
-        { id: member.id, name: member.user.name } if c.policy.manage? && op.unit_allowed?(unit) && op.capability?(:tickets_view)
-      rescue Pundit::NotAuthorizedError, ActiveRecord::RecordNotFound
-        nil
-      end
+      c = JrcRelationship::Context.new(member)
+      op = JrcServiceDesk::OperationalContext.new(c.to_h)
+      { id: member.id, name: member.user.name } if c.policy.manage? && op.unit_allowed?(unit) && op.capability?(:tickets_view)
+    rescue Pundit::NotAuthorizedError, ActiveRecord::RecordNotFound
+      nil
     end
     inboxes = assigned_inboxes(context.member).includes(:channel)
-    { units: access.units.includes(:operator_company).map { |u| { id: u.id, name: u.name, operator_id: u.operator_company_id, operator_name: u.operator_company.name } },
+    { units: access.units.includes(:operator_company).map do |u|
+      { id: u.id, name: u.name, operator_id: u.operator_company_id, operator_name: u.operator_company.name }
+    end,
       teams: team_scope.order(:name).map { |team| { id: team.id, name: team.name } },
       queues: choices(JrcServiceDesk::Queue, unit), ticket_types: choices(JrcServiceDesk::TicketType, unit), priorities: choices(JrcServiceDesk::Priority, unit),
       executors: executors, inboxes: inboxes.filter_map { |inbox| inbox_choice(inbox) },
@@ -160,6 +175,7 @@ class JrcRelationship::SurveyModelEditor
 
   def new_draft(unit, payload)
     raise Pundit::NotAuthorizedError unless access.create?
+
     JrcRelationship::SurveyModelDraft.new(account: context.account, unit: unit, creator: context.user, code: payload.fetch('code'))
   end
 
@@ -167,9 +183,12 @@ class JrcRelationship::SurveyModelEditor
     unless payload.is_a?(Hash) && (payload.keys - JrcRelationship::SurveyModelContract::TOP_KEYS).empty? && payload.to_json.bytesize <= 100_000
       raise ArgumentError, 'Rascunho inválido ou muito grande.'
     end
-    unless payload['name'].is_a?(String) && payload['description'].is_a?(String) && %w[channels rules permissions settings].all? { |key| payload[key].is_a?(Hash) } && payload['questions'].is_a?(Array)
+    unless payload['name'].is_a?(String) && payload['description'].is_a?(String) && %w[channels rules permissions settings].all? do |key|
+      payload[key].is_a?(Hash)
+    end && payload['questions'].is_a?(Array)
       raise ArgumentError, 'Estrutura de rascunho incompatível com o editor.'
     end
+
     valid = payload['kind'].is_a?(String) && [true, false].include?(payload['active'])
     valid &&= payload['channels'].keys.sort == JrcRelationship::SurveyModelContract::CHANNELS.sort
     valid &&= payload['channels'].values.all? { |value| value.is_a?(Hash) && [true, false].include?(value['enabled']) }
@@ -183,20 +202,23 @@ class JrcRelationship::SurveyModelEditor
 
   def enforce_permissions!(row, payload)
     return if context.policy.admin?
+
     original = row.published_payload.presence || row.payload
     raise Pundit::NotAuthorizedError unless original['permissions'] == payload['permissions']
   end
 
   def check_version!(row, version)
-    unless version.to_s.match?(/\A\d+\z/) && row.lock_version.to_s == version.to_s
-      raise ActiveRecord::StaleObjectError.new(row, 'update')
-    end
+    return if version.to_s.match?(/\A\d+\z/) && row.lock_version.to_s == version.to_s
+
+    raise ActiveRecord::StaleObjectError.new(row, 'update')
   end
 
   def validate_native_filters!(payload, unit)
     rules = payload.fetch('rules')
-    { 'queue_id' => JrcServiceDesk::Queue, 'priority_id' => JrcServiceDesk::Priority, 'ticket_type_id' => JrcServiceDesk::TicketType }.each do |key, model|
-      fail_step!(3, key, 'Filtro indisponível nesta unidade.') if rules[key].present? && !model.exists?(account_id: context.account.id, unit_id: unit.id, active: true, id: rules[key])
+    { 'queue_id' => JrcServiceDesk::Queue, 'priority_id' => JrcServiceDesk::Priority,
+      'ticket_type_id' => JrcServiceDesk::TicketType }.each do |key, model|
+      fail_step!(3, key, 'Filtro indisponível nesta unidade.') if rules[key].present? && !model.exists?(account_id: context.account.id,
+                                                                                                        unit_id: unit.id, active: true, id: rules[key])
     end
     ids = Array(payload.dig('permissions', 'team_ids')).map(&:to_s)
     ids << rules['team_id'].to_s if rules['team_id'].present?
@@ -208,13 +230,17 @@ class JrcRelationship::SurveyModelEditor
     fail_step!(3, 'execution_member_id', 'Executor não autorizado.') unless context.assignable_users.exists?(id: member.user_id)
     executor = JrcRelationship::Context.new(member)
     sd = JrcServiceDesk::OperationalContext.new(executor.to_h)
-    fail_step!(3, 'execution_member_id', 'O executor precisa de acesso operacional à unidade e ao motor de pesquisas.') unless executor.policy.manage? && sd.unit_allowed?(unit) && sd.capability?(:tickets_view)
+    return if executor.policy.manage? && sd.unit_allowed?(unit) && sd.capability?(:tickets_view)
+
+    fail_step!(3, 'execution_member_id',
+               'O executor precisa de acesso operacional à unidade e ao motor de pesquisas.')
   end
 
   def validate_channels!(payload)
     executor = context.account.account_users.find(payload.dig('rules', 'execution_member_id'))
     payload.fetch('channels').each do |channel, cfg|
       next unless cfg['enabled'] && channel != 'public_link'
+
       inbox = assigned_inboxes(context.member).find_by(id: cfg['inbox_id'])
       unless inbox && assigned_inboxes(executor).exists?(id: inbox.id) && inbox_choice(inbox)&.dig(:channel) == channel
         fail_step!(2, channel, 'A caixa deve estar disponível para você e para o executor.')
@@ -225,8 +251,9 @@ class JrcRelationship::SurveyModelEditor
   def normalize_templates!(payload)
     config = payload.dig('channels', 'whatsapp')
     return unless config && config['enabled'] && config['whatsapp_template']
+
     rule = JrcRelationship::SurveyRule.new(account: context.account, execution_member_id: payload.dig('rules', 'execution_member_id'),
-      settings: { 'channel' => 'whatsapp', 'delivery_inbox_id' => config['inbox_id'], 'whatsapp_template' => config['whatsapp_template'] })
+                                           settings: { 'channel' => 'whatsapp', 'delivery_inbox_id' => config['inbox_id'], 'whatsapp_template' => config['whatsapp_template'] })
     JrcRelationship::SurveyRuleTemplate.new(rule).normalize!
     config['whatsapp_template'] = rule.settings['whatsapp_template']
   rescue ArgumentError, Pundit::NotAuthorizedError, ActiveRecord::RecordNotFound
@@ -251,6 +278,7 @@ class JrcRelationship::SurveyModelEditor
     channel = case inbox.channel_type
               when 'Channel::Email' then 'email'
               when 'Channel::Whatsapp' then 'whatsapp'
+              when 'Channel::Api' then 'whatsapp' if JrcBroker::OutboundChannel.available?(inbox)
               when 'Channel::TwilioSms' then 'whatsapp' if inbox.twilio_whatsapp?
               end
     { id: inbox.id, name: inbox.name, channel: channel } if channel

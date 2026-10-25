@@ -15,18 +15,30 @@ class Api::V1::Accounts::JrcServiceDesk::ClosureRevisionsController < Api::V1::A
   end
 
   def index
-    values = ::JrcServiceDesk::Input.attributes(query_values, %w[unit_id source_version_id target_version_id page])
+    values = ::JrcServiceDesk::Input.attributes(query_values, %w[unit_id source_version_id target_version_id page filters])
     render json: base_payload.merge(service.candidates(**values.symbolize_keys))
   end
 
   def preview
-    values = body_values(%w[unit_id source_version_id target_version_id ticket_ids operational_review review_reason])
+    values = body_values(%w[unit_id source_version_id target_version_id ticket_ids operational_review review_reason review_name])
     render json: base_payload.merge(preview: service.preview(**values.symbolize_keys))
   end
 
   def create
     values = body_values(%w[unit_id receipt])
-    render json: base_payload.merge(result: service.call(**values.symbolize_keys, idempotency_key: request.headers['Idempotency-Key'])), status: :created
+    render json: base_payload.merge(result: service.call(**values.symbolize_keys, idempotency_key: request.headers['Idempotency-Key'])),
+           status: :created
+  end
+
+  def enqueue
+    values = body_values(%w[unit_id receipt])
+    result = service.enqueue(**values.symbolize_keys, idempotency_key: request.headers['Idempotency-Key'])
+    render json: base_payload.merge(result), status: :accepted
+  end
+
+  def resume_async
+    values = body_values(%w[unit_id idempotency_key])
+    render json: base_payload.merge(service.enqueue_registered(**values.symbolize_keys)), status: :accepted
   end
 
   def resume

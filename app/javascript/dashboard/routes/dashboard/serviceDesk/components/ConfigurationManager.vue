@@ -14,6 +14,8 @@ import API from 'dashboard/api/serviceDeskConfiguration';
 import ScopeBar from './ScopeBar.vue';
 import ConfigurationV2Fields from './ConfigurationV2Fields.vue';
 import ServiceCatalogWizard from './ServiceCatalogWizard.vue';
+import QueueOlaWizard from '../automationStudio/QueueOlaWizard.vue';
+import QueueOlaOverview from '../automationStudio/QueueOlaOverview.vue';
 import {
   configurationV2Fields,
   operationalDefaults,
@@ -34,6 +36,7 @@ import {
 } from '../helpers/configuration';
 const props = defineProps({
   resource: { type: String, required: true },
+  olaView: Boolean,
   initialUnitId: { type: String, default: '' },
 });
 const emit = defineEmits(['busyChange']);
@@ -48,8 +51,15 @@ const total = ref(0);
 const page = ref(1);
 const status = ref('idle');
 const editor = ref(null);
+const insightRevision = ref(0);
+watch(status, value => {
+  if (value === 'ready') insightRevision.value += 1;
+});
 const editorDialog = ref(null);
-const modalEditor = computed(() => props.resource === 'services');
+const modalEditor = computed(() =>
+  ['services', 'queues'].includes(props.resource)
+);
+const catalogueEditor = computed(() => props.resource === 'services');
 const form = ref({});
 const saving = ref(false);
 const feedback = ref('idle');
@@ -104,7 +114,7 @@ const clearEditor = () => {
   feedback.value = 'idle';
 };
 watch(editor, async value => {
-  if (value && modalEditor.value) {
+  if (value && catalogueEditor.value) {
     await nextTick();
     editorDialog.value?.open();
   }
@@ -365,7 +375,11 @@ onBeforeUnmount(() => emit('busyChange', false));
   <Panel
     v-if="allowed"
     class="mt-4"
-    :title="t(`JRC_SERVICE_DESK.ADMIN.resources.${resource}`)"
+    :title="
+      olaView
+        ? t('JRC_SERVICE_DESK.AUTOMATION_STUDIO.ola.title')
+        : t(`JRC_SERVICE_DESK.ADMIN.resources.${resource}`)
+    "
   >
     <p class="text-sm text-n-slate-11 mb-3">
       {{ t('JRC_SERVICE_DESK.ADMIN.notice') }}
@@ -375,6 +389,12 @@ onBeforeUnmount(() => emit('busyChange', false));
       v-model:operator-id="operatorId"
       required
       :disabled="saving || !!pending"
+    />
+    <QueueOlaOverview
+      v-if="olaView && resource === 'queues'"
+      :context="session.state.context"
+      :unit-id="unitId"
+      :revision="insightRevision"
     />
     <form
       class="flex flex-wrap gap-3 items-end my-3"
@@ -459,11 +479,11 @@ onBeforeUnmount(() => emit('busyChange', false));
       @update:current-page="paginate"
     />
     <component
-      :is="modalEditor ? Dialog : 'div'"
+      :is="catalogueEditor ? Dialog : 'div'"
       v-if="editor"
       ref="editorDialog"
       v-bind="
-        modalEditor
+        catalogueEditor
           ? {
               width: '5xl',
               contained: true,
@@ -482,7 +502,20 @@ onBeforeUnmount(() => emit('busyChange', false));
       @close="clearEditor"
     >
       <ServiceCatalogWizard
-        v-if="modalEditor"
+        v-if="catalogueEditor"
+        :key="`${unitId}:${editor.id || 'new'}`"
+        v-model="form"
+        :record="editor"
+        :unit-id="unitId"
+        :context="session.state.context"
+        :saving="saving"
+        :pending="!!pending"
+        :feedback="feedback"
+        @save="save"
+        @cancel="clearEditor"
+      />
+      <QueueOlaWizard
+        v-else-if="resource === 'queues'"
         :key="`${unitId}:${editor.id || 'new'}`"
         v-model="form"
         :record="editor"

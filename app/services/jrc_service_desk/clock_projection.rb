@@ -16,7 +16,8 @@ class JrcServiceDesk::ClockProjection
       consumed_percent: elapsed * 100.0 / budget, breached: breached,
       due_at: @clock.due_at.iso8601(6), observed_at: @now.iso8601(6),
       achieved_at: @clock.respond_to?(:achieved_at) ? @clock.achieved_at&.iso8601(6) : @clock.ended_at&.iso8601(6),
-      timezone: snapshot&.timezone, time_basis: @clock.respond_to?(:time_basis) ? @clock.time_basis : 'business' }
+      metric_kind: @clock.is_a?(JrcServiceDesk::OlaClock) ? @clock.kind : nil,
+      timezone: @clock.respond_to?(:calendar_snapshot) && @clock.calendar_snapshot.present? ? @clock.calendar_snapshot['timezone'] : snapshot&.timezone, time_basis: @clock.respond_to?(:time_basis) ? @clock.time_basis : 'business' }
   end
 
   private
@@ -31,15 +32,13 @@ class JrcServiceDesk::ClockProjection
                  @clock.escalation_snapshot
                end
     policy = JrcServiceDesk::ClockEscalationPolicy.new(settings)
-    if policy.enabled? && policy.thresholds.any? { |row| row['percent'] < 100 && elapsed * 100.0 / budget >= row['percent'] }
-      return 'near_due'
-    end
+    return 'near_due' if policy.enabled? && policy.thresholds.any? { |row| row['percent'] < 100 && elapsed * 100.0 / budget >= row['percent'] }
 
     'on_time'
   end
 
   def kind
-    @clock.respond_to?(:kind) ? @clock.kind : 'ola'
+    @clock.is_a?(JrcServiceDesk::OlaClock) ? 'ola' : @clock.kind
   end
 
   def snapshot
@@ -51,7 +50,11 @@ class JrcServiceDesk::ClockProjection
     return elapsed unless @clock.state == 'running' && @now > @clock.anchor_at
     return elapsed + (@now - @clock.anchor_at) if @clock.respond_to?(:time_basis) && @clock.time_basis == 'calendar'
 
-    calendar = JrcServiceDesk::SnapshotCalendar.new(timezone: snapshot.timezone, conditions: snapshot.calendar_conditions)
+    calendar = if @clock.respond_to?(:calendar_snapshot) && @clock.calendar_snapshot.present?
+                 JrcServiceDesk::OlaMeasurements.calendar_for(@clock.calendar_snapshot)
+               else
+                 JrcServiceDesk::SnapshotCalendar.new(timezone: snapshot.timezone, conditions: snapshot.calendar_conditions)
+               end
     elapsed + calendar.elapsed(@clock.anchor_at, @now)
   end
 end

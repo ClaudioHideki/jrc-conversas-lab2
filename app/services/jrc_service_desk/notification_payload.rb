@@ -8,6 +8,7 @@ class JrcServiceDesk::NotificationPayload
 
   def digest
     fields = identity.merge(content, authorization)
+    fields['broker_binding'] = JrcBroker::OutboundChannel.configuration(@message.inbox) if @message.inbox.channel_type == 'Channel::Api'
     if @row.source_digest.present?
       fields.merge!('source_digest' => @row.source_digest, 'attempt_number' => @row.attempt_number,
                     'original_delivery_id' => @row.original_delivery_id)

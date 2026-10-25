@@ -561,6 +561,32 @@ onBeforeUnmount(() => {
         }}{{ data.incident.id }} {{ separator }} {{ data.incident.title }}
         {{ separator }} {{ data.incident.severity }}
       </div>
+      <div
+        v-if="
+          data.relatedIncidents?.length && ['all', 'history'].includes(mode)
+        "
+        class="flex flex-wrap gap-2 rounded-xl border border-n-weak p-3"
+      >
+        <button
+          v-for="item in data.relatedIncidents"
+          :key="item.id"
+          type="button"
+          class="rounded-lg bg-n-blue-2 px-3 py-2 text-xs text-n-blue-11"
+          @click="
+            router.push({
+              name: serviceDeskRouteName(
+                item.resource_kind === 'problem' ? 'problems' : 'incidents'
+              ),
+              params: { accountId: ticket.account_id },
+              query: { unit_id: ticket.unit_id, case_id: item.id },
+            })
+          "
+        >
+          {{ t(`JRC_SERVICE_DESK.CASES.${item.resource_kind}`) }} #{{
+            item.id
+          }}: {{ item.title }}
+        </button>
+      </div>
       <div v-if="showInteractions" class="grid gap-3">
         <TicketTimeline
           :ticket="ticket"

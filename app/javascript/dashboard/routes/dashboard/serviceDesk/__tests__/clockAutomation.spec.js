@@ -72,7 +72,7 @@ const renderAutomations = () => {
           props: ['resource'],
           template: '<div data-ola-native :data-resource="resource" />',
         },
-        NotificationPolicyEditor: {
+        NotificationWorkbench: {
           template: '<div data-notification-native />',
         },
       },

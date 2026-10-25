@@ -110,6 +110,16 @@ Rails.application.routes.draw do
           # JRC Service Desk CP4: all endpoints inherit the native Account authentication.
           namespace :jrc_service_desk do
             get 'knowledge', to: 'knowledge#index'
+            # Incidents/problems: contextual workspace over the existing native records.
+            get 'case_workspaces', to: 'case_workspaces#index'
+            post 'case_workspaces', to: 'case_workspaces#create'
+            get 'case_workspaces/:case_id', to: 'case_workspaces#show'
+            post 'case_workspaces/:case_id/commands', to: 'case_workspaces#command'
+            get 'case_workspaces/:case_id/related', to: 'case_workspaces#related'
+            get 'case_workspaces/:case_id/resources', to: 'case_workspaces#resources'
+            get 'case_workspaces/:case_id/resource_options', to: 'case_workspaces#resource_options'
+            get 'case_workspaces/:case_id/entries', to: 'case_workspaces#entries'
+            get 'case_workspaces/:case_id/entries/:entry_id/attachments/:attachment_id', to: 'case_workspaces#attachment'
             get 'board', to: 'cockpit#board'
             patch 'incidents/:incident_id', to: 'cockpit#update_incident'
             get 'reports', to: 'dashboard#report'
@@ -134,6 +144,15 @@ Rails.application.routes.draw do
               get '/:id', to: 'configuration#show'
               patch '/:id', to: 'configuration#update'
             end
+            get 'automation_drafts', to: 'automation_drafts#show'
+            put 'automation_drafts', to: 'automation_drafts#update'
+            get 'queue_policy_versions', to: 'automation_drafts#queue_versions'
+            get 'automation_insights/ola', to: 'automation_insights#ola'
+            get 'automation_insights/clock_alerts', to: 'automation_insights#clock_alerts'
+            post 'automation_insights/clock_alerts/retry', to: 'automation_insights#retry_clock_alert'
+            get 'automation_insights/notifications', to: 'automation_insights#notifications'
+            post 'closure_revisions/enqueue', to: 'closure_revisions#enqueue'
+            post 'closure_revisions/resume_async', to: 'closure_revisions#resume_async'
             get 'closure_revisions/versions', to: 'closure_revisions#versions'
             post 'closure_revisions/proposal', to: 'closure_revisions#proposal'
             get 'closure_revisions', to: 'closure_revisions#index'

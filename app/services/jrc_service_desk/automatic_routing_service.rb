@@ -10,7 +10,14 @@ class JrcServiceDesk::AutomaticRoutingService < JrcServiceDesk::BaseService
       next nil unless ticket
 
       chosen = choose(candidates(ticket, queue), queue.distribution_mode)
-      next ticket unless chosen
+      unless chosen
+        proof = { 'routing_no_candidate' => true, 'queue_id' => queue.id, 'mode' => queue.distribution_mode,
+                  'queue_policy_revision' => queue.current_policy_version&.digest }
+        unless ticket.ticket_events.where(event_type: 'resource_updated').exists?(['data @> ?::jsonb', proof.to_json])
+          append_event!(ticket, 'resource_updated', proof.merge('reason' => 'No available authorized member with matching skills and capacity'))
+        end
+        next ticket
+      end
 
       ticket.assignee_membership = assignee(chosen[:membership].account_user_id, ticket.unit)
       ticket.save!
@@ -39,7 +46,7 @@ class JrcServiceDesk::AutomaticRoutingService < JrcServiceDesk::BaseService
 
   def candidates(ticket, queue)
     memberships = JrcServiceDesk::UnitMembership.operational.where(account_id: context.account.id, unit_id: ticket.unit_id,
-                                                       active: true, availability: 'available').where.not(capacity: nil)
+                                                                   active: true, availability: 'available').where.not(capacity: nil)
     memberships.order(:id).lock.filter_map do |membership|
       next unless eligible?(membership, ticket, queue)
 
@@ -61,8 +68,9 @@ class JrcServiceDesk::AutomaticRoutingService < JrcServiceDesk::BaseService
   end
 
   def load(membership, ticket)
-    JrcServiceDesk::RecordWithdrawal.excluding(JrcServiceDesk::Ticket.all, :ticket).where(account_id: context.account.id, unit_id: ticket.unit_id, assignee_membership_id: membership.id)
-                          .joins(:status).where(jrc_service_desk_ticket_statuses: { phase: %w[open waiting] }).count
+    JrcServiceDesk::RecordWithdrawal.excluding(JrcServiceDesk::Ticket.all, :ticket).where(account_id: context.account.id, unit_id: ticket.unit_id,
+                                                                                          assignee_membership_id: membership.id)
+                                    .joins(:status).where(jrc_service_desk_ticket_statuses: { phase: %w[open waiting] }).count
   end
 
   def last_assignment(membership, ticket)
