@@ -54,6 +54,34 @@ jobs:
           console.log({ files: result.testResults.length, tests: result.numTotalTests, failed: result.numFailedTests, pending: result.numPendingTests });
           if (!result.success || result.numFailedTestSuites || result.numFailedTests || result.numPendingTests || result.testResults.length < 568) process.exit(1);
           NODE
+      - name: Preservar fonte, snapshots e lockfiles
+        if: always()
+        run: git diff --exit-code
+
+  frontend-build:
+    if: github.ref == 'refs/heads/codex/jrc-campaign-direct-audience-20261022'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Confirmar revisao e base consolidada
+        run: |
+          test "$GITHUB_REF" = refs/heads/codex/jrc-campaign-direct-audience-20261022
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git merge-base --is-ancestor "$CANDIDATE_BASE_SHA" HEAD
+          git diff --check "$CANDIDATE_BASE_SHA" HEAD
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - name: Instalar JavaScript com lockfile preservado
+        timeout-minutes: 15
+        run: pnpm install --frozen-lockfile
       - name: Build frontend nativo sem imagem Docker
         env:
           RAILS_ENV: production
