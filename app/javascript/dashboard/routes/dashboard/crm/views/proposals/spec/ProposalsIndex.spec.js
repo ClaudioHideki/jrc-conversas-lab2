@@ -94,6 +94,25 @@ it('downloads an authenticated blob without window.open or navigating the JRC re
   );
 });
 
+it('shows the fixed monthly schedule separately from one-time installments', async () => {
+  proposal.financial_version = 3;
+  proposal.financials = {
+    financial_version: 3,
+    recurring_months_count: 36,
+    recurring_monthly_cents: 29500,
+    recurring_total_cents: 1062000,
+  };
+  proposal.installment_plan_cents = [];
+  await mountPage();
+  const schedule = wrapper
+    .get('[data-testid="proposal-fixed-recurrence"]')
+    .text();
+  expect(schedule).toContain('36 mensalidades de R$ 295,00');
+  expect(schedule).toContain('10620,00');
+  expect(schedule).not.toContain('8,20');
+  expect(wrapper.text()).toContain('Condição dos valores únicos');
+});
+
 it.each([401, 403, 500])(
   'reports download error %s and releases the busy state',
   async status => {
@@ -248,12 +267,22 @@ it('requires adding or clearing a draft product before downloading', async () =>
 });
 
 it('converts an accepted proposal using the server endpoint and opens the order', async () => {
-  proposal.status = 'accepted'; proposal.locked = true;
-  proposalsAPI.convertToOrder.mockResolvedValue({ data: { id: 9, order_number: 'PED-JRC' } });
+  proposal.status = 'accepted';
+  proposal.locked = true;
+  proposalsAPI.convertToOrder.mockResolvedValue({
+    data: { id: 9, order_number: 'PED-JRC' },
+  });
   await mountPage();
-  await wrapper.findAll('button').find(button => button.text().includes('Converter em pedido')).trigger('click');
+  await wrapper
+    .findAll('button')
+    .find(button => button.text().includes('Converter em pedido'))
+    .trigger('click');
   await flushPromises();
   expect(proposalsAPI.convertToOrder).toHaveBeenCalledWith(1);
-  expect(useRouter().push).toHaveBeenCalledWith({ name: 'crm_orders', params: { accountId: '1' }, query: { orderId: 9 } });
+  expect(useRouter().push).toHaveBeenCalledWith({
+    name: 'crm_orders',
+    params: { accountId: '1' },
+    query: { orderId: 9 },
+  });
   expect(proposalsAPI.update).not.toHaveBeenCalled();
 });

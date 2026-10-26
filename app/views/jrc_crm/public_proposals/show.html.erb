@@ -104,6 +104,12 @@
 
       <section class="section">
         <h2>Composição financeira</h2>
+        <% if @proposal.financial_version >= 3 %>
+          <% financials = @proposal.financial_summary %>
+          <p><%= financials[:recurring_months_count] %> mensalidades de <%= number_to_currency(BigDecimal(financials[:recurring_monthly_cents].to_s) / 100, unit: 'R$ ', separator: ',', delimiter: '.') %>.</p>
+          <p>Total previsto das mensalidades: <%= number_to_currency(BigDecimal(financials[:recurring_total_cents].to_s) / 100, unit: 'R$ ', separator: ',', delimiter: '.') %>.</p>
+          <p>O parcelamento dos valores únicos é independente das mensalidades.</p>
+        <% end %>
         <div class="cards">
           <div class="card"><div class="label">Implantação</div><div class="money"><%= number_to_currency(@proposal.implementation_cents.to_i / 100.0, unit: 'R$ ', separator: ',', delimiter: '.') %></div></div>
           <div class="card"><div class="label">Mensalidade</div><div class="money"><%= number_to_currency(@proposal.monthly_cents.to_i / 100.0, unit: 'R$ ', separator: ',', delimiter: '.') %></div></div>
