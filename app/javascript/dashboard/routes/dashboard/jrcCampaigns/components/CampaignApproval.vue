@@ -3,6 +3,7 @@ import { onBeforeUnmount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import JrcCampaignsAPI from 'dashboard/api/jrcCampaigns';
 import { useAlert } from 'dashboard/composables';
+import { formatCampaignTime } from '../scheduleHelpers';
 
 const props = defineProps({ campaign: { type: Object, required: true } });
 const emit = defineEmits(['close', 'approved']);
@@ -159,8 +160,24 @@ const approve = async () => {
             {{
               detail(
                 'WINDOW',
-                `${review.sending_window.days.join(', ')} · ${review.sending_window.start}–${review.sending_window.end}`
+                `${review.sending_window.days.join(', ')} · ${review.sending_window.start}–${review.sending_window.end} · ${review.schedule_timezone || review.sending_window.timezone || 'UTC'}`
               )
+            }}
+          </p>
+          <p v-if="review.next_send_at">
+            {{
+              t('JRC_CAMPAIGNS.WIZARD.NEXT_SEND_ESTIMATE', {
+                time: formatCampaignTime(
+                  review.next_send_at,
+                  review.schedule_timezone ||
+                    review.sending_window.timezone ||
+                    'UTC'
+                ),
+                timezone:
+                  review.schedule_timezone ||
+                  review.sending_window.timezone ||
+                  'UTC',
+              })
             }}
           </p>
           <p>

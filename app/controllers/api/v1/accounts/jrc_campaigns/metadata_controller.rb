@@ -3,6 +3,7 @@ class Api::V1::Accounts::JrcCampaigns::MetadataController < Api::V1::Accounts::J
     whatsapp = whatsapp_inboxes
     render json: {
       account_name: Current.account.name,
+      account_timezone: Time.find_zone(Current.account.reporting_timezone.presence)&.tzinfo&.name,
       contacts_count: Current.account.contacts.where.not(phone_number: [nil, '']).count,
       email_contacts_count: Current.account.contacts.where.not(email: [nil, '']).count,
       source_inboxes: source_inboxes,

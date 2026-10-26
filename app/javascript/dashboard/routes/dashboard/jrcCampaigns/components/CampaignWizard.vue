@@ -18,6 +18,13 @@ import {
 import { useI18n } from 'vue-i18n';
 import JrcCampaignsAPI from 'dashboard/api/jrcCampaigns';
 import { useAlert } from 'dashboard/composables';
+import {
+  defaultCampaignTimezone,
+  campaignWallTime,
+  campaignScheduledInstant,
+  campaignWindowEstimate,
+  formatCampaignTime,
+} from '../scheduleHelpers';
 
 const props = defineProps({
   campaign: { type: Object, default: null },
@@ -121,13 +128,52 @@ const form = reactive({
   rotation_mode: 'round_robin',
   delay_min_seconds: 5,
   delay_max_seconds: 20,
-  sending_window: { start: '08:00', end: '18:00', days: [1, 2, 3, 4, 5] },
+  sending_window: {
+    start: '08:00',
+    end: '18:00',
+    days: [1, 2, 3, 4, 5],
+    timezone: defaultCampaignTimezone(props.metadata.account_timezone),
+  },
   conversation_mode: 'reply_only',
   trigger_type: 'manual',
   scheduled_at: '',
   recurrence_config: { type: 'none', interval_days: 7 },
   follow_up_config: { on_reply_label_id: null, on_reply_stage_id: null },
   steps: [defaultMessage()],
+});
+
+const isUnapprovedDraft = campaign =>
+  campaign.status === 'draft' &&
+  !campaign.approval_valid &&
+  !campaign.approved_at &&
+  !campaign.approved_by_id;
+const hydratedSchedule = ref(null);
+const scheduledInstant = computed(() => {
+  if (form.trigger_type !== 'scheduled' || !form.scheduled_at) return null;
+  const original = hydratedSchedule.value;
+  if (
+    original &&
+    original.wall === form.scheduled_at &&
+    original.timezone === form.sending_window.timezone
+  ) {
+    return new Date(original.instant).toISOString();
+  }
+  return campaignScheduledInstant(
+    form.scheduled_at,
+    form.sending_window.timezone
+  );
+});
+const nextSendEstimate = computed(() => {
+  const scheduled = scheduledInstant.value
+    ? new Date(scheduledInstant.value).getTime()
+    : 0;
+  const base = new Date(
+    Math.max(Date.now(), scheduled) + Number(form.delay_min_seconds) * 1000
+  );
+  return formatCampaignTime(
+    campaignWindowEstimate(form.sending_window, base),
+    form.sending_window.timezone
+  );
 });
 
 const selectedPipeline = computed(() =>
@@ -887,6 +933,15 @@ const buildPayload = () => {
     if (!form.steps.some(item => Number(item.id) === Number(existing.id)))
       stepAttributes.push({ id: existing.id, _destroy: true });
   });
+  const sendingWindow = { ...form.sending_window };
+  // UTC is a presentation fallback for an approved legacy window, not a signed change.
+  if (
+    props.campaign &&
+    !props.campaign.sending_window?.timezone &&
+    !isUnapprovedDraft(props.campaign)
+  ) {
+    delete sendingWindow.timezone;
+  }
   return {
     name: form.name,
     delivery_channel: form.delivery_channel,
@@ -895,13 +950,10 @@ const buildPayload = () => {
     rotation_mode: form.rotation_mode,
     delay_min_seconds: Number(form.delay_min_seconds),
     delay_max_seconds: Number(form.delay_max_seconds),
-    sending_window: form.sending_window,
+    sending_window: sendingWindow,
     conversation_mode: form.conversation_mode,
     trigger_type: form.trigger_type,
-    scheduled_at:
-      form.trigger_type === 'scheduled' && form.scheduled_at
-        ? new Date(form.scheduled_at).toISOString()
-        : null,
+    scheduled_at: scheduledInstant.value,
     recurrence_config: form.recurrence_config,
     follow_up_config: form.follow_up_config,
     campaign_inboxes_attributes: inboxAttributes,
@@ -1223,10 +1275,17 @@ const hydrate = campaign => {
   form.rotation_mode = campaign.rotation_mode || 'round_robin';
   form.delay_min_seconds = campaign.delay_min_seconds ?? 5;
   form.delay_max_seconds = campaign.delay_max_seconds ?? 20;
-  form.sending_window = campaign.sending_window || {
+  const unapprovedDraft = isUnapprovedDraft(campaign);
+  form.sending_window = {
     start: '08:00',
     end: '18:00',
     days: [1, 2, 3, 4, 5],
+    ...campaign.sending_window,
+    timezone:
+      campaign.sending_window?.timezone ||
+      (unapprovedDraft
+        ? defaultCampaignTimezone(props.metadata.account_timezone)
+        : campaign.schedule_timezone || 'UTC'),
   };
   form.conversation_mode =
     form.delivery_channel === 'email' &&
@@ -1235,8 +1294,15 @@ const hydrate = campaign => {
       : campaign.conversation_mode || 'reply_only';
   form.trigger_type = campaign.trigger_type || 'manual';
   form.scheduled_at = campaign.scheduled_at
-    ? new Date(campaign.scheduled_at).toISOString().slice(0, 16)
+    ? campaignWallTime(campaign.scheduled_at, form.sending_window.timezone)
     : '';
+  hydratedSchedule.value = campaign.scheduled_at
+    ? {
+        instant: campaign.scheduled_at,
+        wall: form.scheduled_at,
+        timezone: form.sending_window.timezone,
+      }
+    : null;
   form.recurrence_config = {
     type: 'none',
     interval_days: 7,
@@ -1274,6 +1340,30 @@ const hydrate = campaign => {
 };
 
 hydrate(props.campaign);
+watch(
+  () => props.metadata.account_timezone,
+  timezone => {
+    if (
+      props.campaign &&
+      (props.campaign.sending_window?.timezone ||
+        !isUnapprovedDraft(props.campaign))
+    )
+      return;
+    const instant = scheduledInstant.value;
+    form.sending_window.timezone = defaultCampaignTimezone(timezone);
+    if (instant) {
+      form.scheduled_at = campaignWallTime(
+        instant,
+        form.sending_window.timezone
+      );
+      hydratedSchedule.value = {
+        instant,
+        wall: form.scheduled_at,
+        timezone: form.sending_window.timezone,
+      };
+    }
+  }
+);
 if (!props.campaign && props.initialSanitizedListId) {
   form.audience_type = 'sanitized_list';
   form.audience_config.sanitized_list_id = props.initialSanitizedListId;
@@ -2194,6 +2284,21 @@ watch(
                 <h4 class="text-sm font-semibold text-n-slate-12">
                   {{ $t('JRC_CAMPAIGNS.WIZARD.WINDOW') }}
                 </h4>
+                <p data-campaign-timezone class="mt-2 text-xs text-n-slate-10">
+                  {{
+                    $t('JRC_CAMPAIGNS.WIZARD.TIMEZONE', {
+                      timezone: form.sending_window.timezone,
+                    })
+                  }}
+                </p>
+                <p data-campaign-eta class="mt-2 text-xs text-n-slate-10">
+                  {{
+                    $t('JRC_CAMPAIGNS.WIZARD.NEXT_SEND_ESTIMATE', {
+                      time: nextSendEstimate,
+                      timezone: form.sending_window.timezone,
+                    })
+                  }}
+                </p>
                 <div class="mt-4 grid grid-cols-2 gap-4">
                   <label class="text-xs font-medium text-n-slate-10"
                     >{{ $t('JRC_CAMPAIGNS.WIZARD.WINDOW_START')
@@ -2961,7 +3066,11 @@ watch(
                         min: form.delay_min_seconds,
                         max: form.delay_max_seconds,
                       }),
-                      `${form.sending_window.start}–${form.sending_window.end} · ${selectedDaysLabel}`,
+                      `${form.sending_window.start}–${form.sending_window.end} · ${selectedDaysLabel} · ${form.sending_window.timezone}`,
+                      $t('JRC_CAMPAIGNS.WIZARD.NEXT_SEND_ESTIMATE', {
+                        time: nextSendEstimate,
+                        timezone: form.sending_window.timezone,
+                      }),
                     ],
                   },
                   {

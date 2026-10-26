@@ -9,12 +9,32 @@ class JrcCampaigns::CampaignSerializer
       steps: campaign.steps.map { |step| step_json(step) },
       approval_valid: JrcCampaigns::ApprovalService.new(campaign).locally_valid?,
       latest_execution: execution_json(campaign.latest_execution)
-    )
+    ).merge(schedule_json)
   end
 
   private
 
   attr_reader :campaign
+
+  def schedule_json
+    {
+      schedule_timezone: JrcCampaigns::ScheduleWindow.new(campaign).time_zone.tzinfo.name,
+      next_send_at: next_send_at&.iso8601
+    }
+  end
+
+  def next_send_at
+    return next_queued_send_at if campaign.running?
+    return unless campaign.draft? || campaign.scheduled?
+
+    scheduled_at = campaign.scheduled_at if campaign.trigger_type == 'scheduled'
+    base = [Time.current, scheduled_at].compact.max + campaign.delay_min_seconds.seconds
+    JrcCampaigns::ScheduleWindow.new(campaign).next_time(base)
+  end
+
+  def next_queued_send_at
+    campaign.latest_execution&.recipients&.where(status: 'queued')&.minimum(:scheduled_at)
+  end
 
   def scalar_fields
     [:id, :name, :status, :trigger_type, :scheduled_at, :audience_type, :audience_config, :message_body, :inbox_id,

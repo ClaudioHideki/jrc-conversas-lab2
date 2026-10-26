@@ -92,9 +92,11 @@ class JrcCampaigns::Campaign < ApplicationRecord
   validates :scheduled_at, presence: true, if: -> { trigger_type == 'scheduled' }
   validate :delay_range_is_valid
   validate :sending_window_is_valid
+  validate :sending_timezone_is_valid
   validate :recurrence_is_valid
   validate :legacy_inbox_belongs_to_account
 
+  before_validation :capture_sending_timezone, on: :create
   before_save :refresh_estimated_recipients, if: :audience_changed?
 
   def launch!
@@ -266,6 +268,22 @@ class JrcCampaigns::Campaign < ApplicationRecord
     end
 
     errors.add(:sending_window, 'deve terminar depois do horário inicial') if end_time <= start_time
+  end
+
+  def capture_sending_timezone
+    return if sending_window.to_h['timezone'].present?
+
+    zone = Time.find_zone(account&.reporting_timezone.presence) || Time.find_zone!('UTC')
+    self.sending_window = sending_window.to_h.merge('timezone' => zone.tzinfo.name)
+  end
+
+  def sending_timezone_is_valid
+    timezone = sending_window.to_h['timezone']
+    return if timezone.blank?
+
+    TZInfo::Timezone.get(timezone.to_s)
+  rescue TZInfo::InvalidTimezoneIdentifier
+    errors.add(:sending_window, 'possui fuso horário inválido')
   end
 
   def recurrence_is_valid

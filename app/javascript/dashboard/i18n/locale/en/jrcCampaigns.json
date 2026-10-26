@@ -178,6 +178,8 @@
       "WINDOW": "Janela de envio",
       "WINDOW_START": "Início",
       "WINDOW_END": "Fim",
+      "TIMEZONE": "Fuso horário: {timezone}. Os dias e horários desta janela usam este fuso.",
+      "NEXT_SEND_ESTIMATE": "Próximo início estimado: {time} ({timezone}). O envio respeita a janela configurada.",
       "DAYS": "Dias permitidos",
       "CONVERSATION_MODE": "Conversas após disparo",
       "REPLY_ONLY": "Criar/continuar somente quando o cliente responder",
