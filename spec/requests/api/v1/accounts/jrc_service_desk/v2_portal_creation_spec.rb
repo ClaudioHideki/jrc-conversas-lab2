@@ -126,7 +126,9 @@ RSpec.describe 'Service Desk portal creation with real configured authority', ty
   it 'accepts only real native customer uploads and protects their download with identity and scan checks' do
     service.update!(portal_enabled: true)
     file = fixture_file_upload(Rails.root.join('spec/fixtures/files/jrc_projects_task.txt'), 'text/plain')
-    post "#{base}/tickets", params: { website_token: widget.website_token, ticket: attributes.to_json, files: [file] }, headers: headers
+    expect do
+      post "#{base}/tickets", params: { website_token: widget.website_token, ticket: attributes.to_json, files: [file] }, headers: headers
+    end.to have_enqueued_job(JrcServiceDesk::MessageAttachmentScanJob).with(kind_of(Integer)).on_queue('low')
     expect(response).to have_http_status(:created)
     request = JrcServiceDesk::PortalRequest.where(account: sd_account).last
     attachment = request.message.attachments.first

@@ -1,3 +1,24 @@
+import { calendarIntervalsError } from './calendarIntervals';
+
+// Drafts may be incomplete, but a typed malformed period cannot be silently
+// saved or sent as a publishable calendar. Full publication checks stay below.
+export function validCalendarHours(value) {
+  const data = value?.conditions;
+  if (data == null) return true;
+  if (typeof data !== 'object' || Array.isArray(data)) return false;
+  return ['weekly', 'exceptions'].every(key => {
+    const entries = data[key];
+    return (
+      entries == null ||
+      (typeof entries === 'object' &&
+        !Array.isArray(entries) &&
+        Object.values(entries).every(
+          rows => calendarIntervalsError(rows) === null
+        ))
+    );
+  });
+}
+
 export function validCalendar(value) {
   try {
     if (!value || typeof value.timezone !== 'string' || !value.timezone.trim())
@@ -19,28 +40,6 @@ export function validCalendar(value) {
       typeof input === 'string' &&
       /^\d{4}-\d{2}-\d{2}$/.test(input) &&
       new Date(`${input}T00:00:00Z`).toISOString().slice(0, 10) === input;
-    const minute = input => {
-      if (
-        typeof input !== 'string' ||
-        !/^(?:[01]\d|2[0-3]):[0-5]\d$|^24:00$/.test(input)
-      )
-        return null;
-      const [hours, minutes] = input.split(':').map(Number);
-      return hours * 60 + minutes;
-    };
-    const intervals = rows => {
-      if (!Array.isArray(rows) || rows.length > 48) return false;
-      let previous = -1;
-      return rows.every(pair => {
-        if (!Array.isArray(pair) || pair.length !== 2) return false;
-        const first = minute(pair[0]);
-        const last = minute(pair[1]);
-        if (first == null || last == null || first >= last || first < previous)
-          return false;
-        previous = last;
-        return true;
-      });
-    };
     if (
       !Array.isArray(data.holidays) ||
       data.holidays.length > 10000 ||
@@ -56,12 +55,14 @@ export function validCalendar(value) {
       return false;
     if (
       !Object.entries(data.exceptions).every(
-        ([key, rows]) => date(key) && intervals(rows)
+        ([key, rows]) => date(key) && calendarIntervalsError(rows) === null
       )
     )
       return false;
     return (
-      Object.values(data.weekly).every(intervals) &&
+      Object.values(data.weekly).every(
+        rows => calendarIntervalsError(rows) === null
+      ) &&
       [...Object.values(data.weekly), ...Object.values(data.exceptions)].some(
         rows => rows.length > 0
       )

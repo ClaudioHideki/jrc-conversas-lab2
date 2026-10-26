@@ -19,6 +19,7 @@ class JrcServiceDesk::LifecycleTransitionService < JrcServiceDesk::BaseService
       prior = ticket.lifecycle_transitions.find_by(actor_membership_id: actor_membership.id, request_key: key)
       if prior
         raise Pundit::NotAuthorizedError unless JrcServiceDesk::LifecycleActionPolicy.new(context.to_h, ticket).action?(prior.action)
+        verify_allowed_role!(prior.lifecycle_policy_version.rules.rule(prior.rule_key))
         raise JrcServiceDesk::IdempotencyConflict, 'Transition key reused for different input' unless prior.fingerprint == fingerprint
 
         next prior
@@ -30,6 +31,7 @@ class JrcServiceDesk::LifecycleTransitionService < JrcServiceDesk::BaseService
 
       revision = JrcServiceDesk::ClosureRevisionBinding.new(ticket, version)
       rule = revision.rule(version.rules.rule(normalized.fetch('rule_key')))
+      verify_allowed_role!(rule)
       raise Pundit::NotAuthorizedError unless JrcServiceDesk::LifecycleActionPolicy.new(context.to_h, ticket).action?(rule.fetch('action'))
       unless JrcServiceDesk::LifecycleActionPolicy.new(context.to_h, ticket).requirements_allowed?(rule.fetch('requirements'))
         raise Pundit::NotAuthorizedError, 'Required lifecycle evidence is outside the permitted content scope'
@@ -73,6 +75,11 @@ class JrcServiceDesk::LifecycleTransitionService < JrcServiceDesk::BaseService
   end
 
   private
+
+  def verify_allowed_role!(rule)
+    roles = rule['allowed_account_roles']
+    raise Pundit::NotAuthorizedError if roles && !roles.include?(context.account_user.role)
+  end
 
   def transition_payload(normalized, previous, target, version, sla)
     normalized.except('expected_lock_version', 'expected_policy_version_id').merge(

@@ -14,6 +14,8 @@ Rails.application.routes.draw do
     omniauth_callbacks: 'devise_overrides/omniauth_callbacks'
   }, via: [:get, :post]
 
+  draw :jrc_requester_portal
+
   post 'resend_confirmation', to: 'auth/resend_confirmations#create'
 
   ## renders the frontend paths only if its not an api only server
@@ -126,6 +128,7 @@ Rails.application.routes.draw do
             # CP6-D01: structural authority is separate from ticket access.
             get 'structure/context', to: 'structure#context'
             get 'structure/members', to: 'structure#members'
+            get 'structure/assignees', to: 'structure#assignees'
             %w[operator_companies units unit_memberships].each do |structural_resource|
               scope "structure/#{structural_resource}", defaults: { resource: structural_resource } do
                 get '/', to: 'structure#index'
@@ -145,6 +148,10 @@ Rails.application.routes.draw do
               patch '/:id', to: 'configuration#update'
             end
             get 'automation_drafts', to: 'automation_drafts#show'
+            resources :automation_publications, only: [:index, :show, :create] do
+              post :preview, on: :collection
+              get :options, on: :collection
+            end
             put 'automation_drafts', to: 'automation_drafts#update'
             get 'queue_policy_versions', to: 'automation_drafts#queue_versions'
             get 'automation_insights/ola', to: 'automation_insights#ola'
@@ -951,6 +958,7 @@ Rails.application.routes.draw do
 
           resources :inboxes, only: [] do
             resource :assignment_policy, only: [:show, :create, :destroy], module: :inboxes
+            resource :assignment_diagnostics, only: [:show], module: :inboxes
           end
 
           namespace :twitter do
@@ -1095,6 +1103,7 @@ Rails.application.routes.draw do
         resource :config, only: [:create]
         resources :campaigns, only: [:index]
         resources :events, only: [:create]
+        get 'messages/:message_id/attachments/:attachment_id', to: 'messages#attachment'
         resources :messages, only: [:index, :create, :update]
         resources :conversations, only: [:index, :create] do
           collection do
@@ -1356,6 +1365,7 @@ Rails.application.routes.draw do
 
           resources :inboxes, only: [:index, :show, :create, :update, :destroy] do
             get :assignable_agents, on: :member
+            resource :assignment_diagnostics, only: [:show], module: :inboxes
             get :campaigns, on: :member
             get :agent_bot, on: :member
             post :set_agent_bot, on: :member

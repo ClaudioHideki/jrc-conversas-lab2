@@ -9,6 +9,7 @@ class JrcServiceDesk::RetryClockAlertService < JrcServiceDesk::BaseService
 
       row = JrcServiceDesk::ClockAlertDelivery.where(account_id: context.account.id, unit_id: unit.id).lock.find(JrcServiceDesk::Input.id(alert_id))
       authorize!(row.ticket, :update?)
+      authorize!(row.ticket, :view_sla?)
       raise JrcServiceDesk::IdempotencyConflict unless expected_attempts == row.attempts && %w[blocked failed].include?(row.state) && row.attempts < 3
       raise ArgumentError if JrcServiceDesk::ClockAlerts.blocker(row)
 

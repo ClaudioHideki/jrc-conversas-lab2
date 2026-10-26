@@ -111,4 +111,67 @@ RSpec.describe 'Durable internal OLA alerts and scoped metrics', type: :request 
     get "#{root}/automation_insights/ola", headers: headers, params: { unit_id: sd_foreign_unit.id, days: 90 }
     expect(response).to have_http_status(:not_found)
   end
+
+  context 'with explicit departmental supervision' do
+    let(:team) { create(:team, account: sd_account) }
+    let(:queue) { create(:jrc_sd_queue, unit: sd_unit, team: team) }
+    let(:ticket) { sd_ticket(queue: queue, team: team, assignee_membership: sd_membership) }
+
+    before { create(:team_member, team: team, user: sd_user) }
+
+    it 'blocks emission, mail rendering and OLA metrics when ticket visibility has no explicit SLA grant' do
+      rows = observe
+      sd_membership.update!(restricted_supervision: true, supervision_grants: [{ queue_id: queue.id, team_id: team.id,
+        permissions: %w[tickets_view tickets_edit] }])
+      expect(JrcServiceDesk::TicketPolicy.new(sd_context, ticket).show?).to be(true)
+      expect(JrcServiceDesk::OperationalContext.new(sd_context).capability?(:sla_view)).to be(true)
+      row = rows.find_by!(channel: 'in_app')
+      expect(JrcServiceDesk::ClockAlerts.blocker(row)).to eq('authority_revoked')
+      expect { JrcServiceDesk::ClockAlertJob.perform_now(row.id) }.not_to change(Notification, :count)
+      expect(row.reload).to have_attributes(state: 'blocked', reason: 'authority_revoked')
+      email = rows.find_by!(channel: 'email')
+      expect { JrcServiceDesk::ClockAlertMailer.with(account: sd_account).alert(email.id).message }.to raise_error(Pundit::NotAuthorizedError)
+
+      %w[ola clock_alerts].each do |kind|
+        get "#{root}/automation_insights/#{kind}", headers: headers, params: { unit_id: sd_unit.id, days: 90 }
+        expect(response).to have_http_status(:ok)
+        expect(response.parsed_body.fetch('total')).to eq(0)
+        expect(response.parsed_body.fetch('items')).to be_empty
+      end
+    end
+
+    it 'hides existing bell notifications and counts immediately after revoking only the SLA operation grant' do
+      sd_membership.update!(restricted_supervision: true, supervision_grants: [{ queue_id: queue.id, team_id: team.id,
+        permissions: %w[tickets_view tickets_edit sla_view] }])
+      row = observe.find_by!(channel: 'in_app')
+      JrcServiceDesk::ClockAlertJob.perform_now(row.id)
+      notification = row.reload.notification
+      expect(JrcServiceDesk::ClockAlerts.visible?(notification)).to be(true)
+      expect(NotificationFinder.new(sd_user, sd_account).notifications.where(id: notification.id)).to exist
+
+      sd_membership.update!(supervision_grants: [{ queue_id: queue.id, team_id: team.id, permissions: %w[tickets_view tickets_edit] }])
+      expect(JrcServiceDesk::TicketPolicy.new(sd_context, ticket).show?).to be(true)
+      expect(JrcServiceDesk::ClockAlerts.visible?(notification)).to be(false)
+      finder = NotificationFinder.new(sd_user, sd_account)
+      expect(finder.notifications.where(id: notification.id)).not_to exist
+      expect(finder.count).to eq(0)
+      expect(finder.unread_count).to eq(0)
+      put "/api/v1/accounts/#{sd_account.id}/notifications/#{notification.id}", headers: headers, as: :json,
+        params: { read_at: Time.current.iso8601 }
+      expect(response).to have_http_status(:not_found)
+    end
+
+    it 'rechecks a recipient SLA grant independently of the authorized execution actor' do
+      recipient = create(:account_user, account: sd_account, role: :agent)
+      recipient_membership = create(:jrc_sd_membership, unit: sd_unit, account_user: recipient, restricted_supervision: true,
+        supervision_grants: [{ queue_id: queue.id, team_id: team.id, permissions: %w[tickets_view sla_view] }])
+      attributes[:ola_escalation_policy]['thresholds'][0]['notification_member_ids'] = [recipient.id]
+      row = observe.find_by!(channel: 'in_app')
+      expect(JrcServiceDesk::ClockAlerts.blocker(row)).to be_nil
+      recipient_membership.update!(supervision_grants: [{ queue_id: queue.id, team_id: team.id, permissions: ['tickets_view'] }])
+      expect(JrcServiceDesk::ClockAlerts.blocker(row)).to eq('recipient_revoked')
+      expect { JrcServiceDesk::ClockAlertJob.perform_now(row.id) }.not_to change(Notification, :count)
+      expect(row.reload).to have_attributes(state: 'blocked', reason: 'recipient_revoked')
+    end
+  end
 end

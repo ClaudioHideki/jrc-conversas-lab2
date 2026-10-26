@@ -13,7 +13,7 @@ module ContactCenterAcwGuard
   private
 
   def contact_center_tabulation_required?
-    account.feature_enabled?('jrc_contact_center') && (inbox.whatsapp? || inbox.twilio_whatsapp?)
+    account&.feature_enabled?('jrc_contact_center') && (inbox&.whatsapp? || inbox&.twilio_whatsapp?)
   end
 
   def validate_contact_center_resolution
@@ -26,7 +26,7 @@ module ContactCenterAcwGuard
   end
 
   def validate_contact_center_assignment
-    return unless account.feature_enabled?('jrc_contact_center') && will_save_change_to_assignee_id?
+    return unless account&.feature_enabled?('jrc_contact_center') && will_save_change_to_assignee_id?
 
     pending = JrcContactCenter::Qualification.pending.where(account_id: account_id)
     if persisted? && pending.exists?(conversation_id: id)

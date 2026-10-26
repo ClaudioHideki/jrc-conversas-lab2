@@ -22,8 +22,10 @@ module JrcServiceDesk::ClockAlerts
     return false unless member
 
     ctx = context_for(notification.account, member)
-    JrcServiceDesk::TicketPolicy::Scope.new(ctx.to_h,
-                                            JrcServiceDesk::Ticket).resolve.exists?(id: notification.primary_actor_id) && ctx.capability?(:sla_view)
+    ticket = JrcServiceDesk::Ticket.find_by(account_id: notification.account_id, id: notification.primary_actor_id)
+    return false unless ticket
+
+    JrcServiceDesk::TicketPolicy.new(ctx.to_h, ticket).view_sla?
   end
 
   def blocker(row)
@@ -49,13 +51,14 @@ module JrcServiceDesk::ClockAlerts
 
     actor_member = event.actor_membership.account_user
     actor = context_for(row.account, actor_member)
-    return 'authority_revoked' unless JrcServiceDesk::TicketPolicy.new(actor.to_h, row.ticket).update? && actor.capability?(:sla_view)
+    actor_policy = JrcServiceDesk::TicketPolicy.new(actor.to_h, row.ticket)
+    return 'authority_revoked' unless actor_policy.update? && actor_policy.view_sla?
 
     member = AccountUser.find_by(account_id: row.account_id, id: row.recipient_account_user_id)
     return 'recipient_revoked' unless member
 
     recipient = context_for(row.account, member)
-    return 'recipient_revoked' unless JrcServiceDesk::TicketPolicy.new(recipient.to_h, row.ticket).show? && recipient.capability?(:sla_view)
+    return 'recipient_revoked' unless JrcServiceDesk::TicketPolicy.new(recipient.to_h, row.ticket).view_sla?
     return if row.channel == 'in_app'
     return 'smtp_unavailable' unless ENV['SMTP_ADDRESS'].present?
     return 'recipient_unconfirmed' unless member.user.confirmed_at

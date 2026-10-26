@@ -4,6 +4,14 @@
       "DOWNLOAD": "Download",
       "UPLOADING": "Enviando..."
     },
+    "PROTECTED_ATTACHMENT": {
+      "FILE": "Anexo",
+      "LOADING": "Carregando anexo...",
+      "SCAN_PENDING": "Aguardando verificação do arquivo",
+      "TEMPORARY_ERROR": "Não foi possível carregar o anexo. Tente novamente.",
+      "UNAVAILABLE": "Anexo indisponível",
+      "RETRY": "Tentar novamente"
+    },
     "FORM_BUBBLE": {
       "SUBMIT": "Enviar"
     },

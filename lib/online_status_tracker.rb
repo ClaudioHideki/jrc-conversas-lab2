@@ -3,18 +3,25 @@ class OnlineStatusTracker
   PRESENCE_DURATION = ENV.fetch('PRESENCE_DURATION', 20).to_i.seconds
   # Widget pings every 60s, so contacts need a longer presence window
   CONTACT_PRESENCE_DURATION = ENV.fetch('CONTACT_PRESENCE_DURATION', 90).to_i.seconds
+  ERROR_LOG_CACHE = ActiveSupport::Cache::MemoryStore.new(size: 64.kilobytes)
 
   # presence : sorted set with timestamp as the score & object id as value
 
   # obj_type: Contact | User
   def self.update_presence(account_id, obj_type, obj_id)
     ::Redis::Alfred.zadd(presence_key(account_id, obj_type), Time.now.to_i, obj_id)
+  rescue Redis::BaseError => e
+    presence_error(account_id, e)
+    false
   end
 
   def self.get_presence(account_id, obj_type, obj_id)
     connected_time = ::Redis::Alfred.zscore(presence_key(account_id, obj_type), obj_id)
     duration = obj_type == 'Contact' ? CONTACT_PRESENCE_DURATION : PRESENCE_DURATION
     connected_time && connected_time > (Time.zone.now - duration).to_i
+  rescue Redis::BaseError => e
+    presence_error(account_id, e)
+    false
   end
 
   def self.presence_key(account_id, type)
@@ -31,10 +38,16 @@ class OnlineStatusTracker
 
   def self.set_status(account_id, user_id, status)
     ::Redis::Alfred.hset(status_key(account_id), user_id, status)
+  rescue Redis::BaseError => e
+    presence_error(account_id, e)
+    false
   end
 
   def self.get_status(account_id, user_id)
     ::Redis::Alfred.hget(status_key(account_id), user_id)
+  rescue Redis::BaseError => e
+    presence_error(account_id, e)
+    nil
   end
 
   def self.status_key(account_id)
@@ -61,10 +74,45 @@ class OnlineStatusTracker
 
     user_availabilities = ::Redis::Alfred.hmget(status_key(account_id), user_ids)
     user_ids.map.with_index { |id, index| [id, (user_availabilities[index] || get_availability_from_db(account_id, id))] }.to_h
+  rescue Redis::BaseError => e
+    presence_error(account_id, e)
+    {}
   end
 
+  # Session presence is separate from configured availability and auto_offline.
+  def self.live_presence(account_id)
+    range_start = (Time.current - PRESENCE_DURATION).to_i
+    recent_ids = ::Redis::Alfred.zrangebyscore(presence_key(account_id, 'User'), "(#{range_start}", '+inf')
+    ids = AccountUser.where(account_id: account_id, user_id: recent_ids).pluck(:user_id)
+    { user_ids: ids, reason: nil }
+  rescue Redis::BaseError => e
+    presence_error(account_id, e)
+    { user_ids: [], reason: 'redis_presence_unavailable' }
+  end
+
+  # Automatic assignment requires both a live session and configured online status.
+  def self.effective_presence(account_id)
+    presence = live_presence(account_id)
+    return presence if presence[:reason] || presence[:user_ids].empty?
+
+    ids = AccountUser.online.where(account_id: account_id, user_id: presence[:user_ids]).pluck(:user_id)
+    { user_ids: ids, reason: nil }
+  end
+
+  def self.effective_available_users(account_id)
+    effective_presence(account_id)[:user_ids].map(&:to_s).index_with { 'online' }
+  end
+
+  def self.presence_error(account_id, error)
+    # No customer data, Redis URL, or exception message belongs in this event.
+    return unless ERROR_LOG_CACHE.write(account_id, true, unless_exist: true, expires_in: 1.minute)
+
+    Rails.logger.warn(event: 'redis_presence_unavailable', account_id: account_id, error_class: error.class.name)
+  end
+  private_class_method :presence_error
+
   def self.get_availability_from_db(account_id, user_id)
-    availability = Account.find(account_id).account_users.find_by(user_id: user_id).availability
+    availability = AccountUser.find_by(account_id: account_id, user_id: user_id)&.availability || 'offline'
     set_status(account_id, user_id, availability)
     availability
   end

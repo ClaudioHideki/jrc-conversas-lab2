@@ -16,6 +16,7 @@ class JrcServiceDesk::CatalogQuery
     @parameters = JrcServiceDesk::QueryParameters.new(parameters, catalog: true)
     @unit_id = @parameters['unit_id']
     raise ArgumentError, 'Team filter requires assignees' if @parameters['team_id'] && @resource != 'assignees'
+    raise ArgumentError, 'Queue filter requires assignees' if @parameters['queue_id'] && @resource != 'assignees'
     raise ArgumentError, 'Company filter requires requesters' if @parameters['company_id'] && @resource != 'requesters'
     @units = context.view_unit_scope
     if @parameters['operator_company_id']
@@ -27,6 +28,11 @@ class JrcServiceDesk::CatalogQuery
       @units = @units.where(id: unit_id)
     end
     raise ArgumentError, 'Unit required for native lookup' if NATIVE.include?(@resource) && unit_id.nil?
+    if @resource == 'assignees' && @parameters['queue_id']
+      @assignee_queue = JrcServiceDesk::Queue.where(account_id: context.account.id, unit_id: unit_id, active: true).find(@parameters['queue_id'])
+      Pundit.authorize(context.to_h, @assignee_queue, :show?)
+      raise ArgumentError, 'Queue/team mismatch' if @parameters['team_id'] && @assignee_queue.team_id != @parameters['team_id']
+    end
   end
 
   def collection
@@ -48,8 +54,9 @@ class JrcServiceDesk::CatalogQuery
     # No total includes contacts/teams/users denied by their own policies.
     if resource == 'assignees'
       records.select do |membership|
-        au = membership.account_user
-        JrcServiceDesk::OperationalContext.new(account: context.account, user: au.user, account_user: au).capability?(:tickets_view)
+        team_id = parameters['team_id'] || @assignee_queue&.team_id
+        candidate = JrcServiceDesk::Ticket.new(account: context.account, unit_id: unit_id, queue_id: parameters['queue_id'], team_id: team_id)
+        JrcServiceDesk::AssignmentEligibility.manual_domain?(membership, candidate)
       end
     elsif NATIVE.include?(resource) && resource != 'contracts'
       records.select { |record| Pundit.policy!(context.to_h, record).show? }
@@ -78,14 +85,29 @@ class JrcServiceDesk::CatalogQuery
       JrcServiceDesk::RequesterDirectory.new(context).scope(company_id: parameters['company_id'], query: parameters['q']).order(name: :asc, id: :asc)
     when 'teams'
       Pundit.authorize(context.to_h, Team, :index?)
-      search(Team.where(account_id: context.account.id), 'teams', 'name').order(name: :asc, id: :asc)
+      records = Team.where(account_id: context.account.id)
+      if context.supervision_access.restricted?(unit_id)
+        records = records.where(id: context.supervision_access.grants.map { |grant| grant[:team_id] })
+      end
+      search(records, 'teams', 'name').order(name: :asc, id: :asc)
     when 'assignees'
-      records = JrcServiceDesk::UnitMembership.operational.where(account_id: context.account.id, unit_id: unit_id, active: true)
+      records = JrcServiceDesk::UnitMembership.operational.where(account_id: context.account.id, unit_id: unit_id, active: true,
+                                                                manual_assignment_enabled: true)
         .joins(account_user: :user).includes(account_user: :user)
       if parameters['team_id']
         team = Team.where(account_id: context.account.id).find(parameters['team_id'])
         Pundit.authorize(context.to_h, team, :show?)
         records = records.where(users: { id: TeamMember.where(team_id: team.id).select(:user_id) })
+      end
+      if parameters['queue_id']
+        queue = JrcServiceDesk::Queue.where(account_id: context.account.id, unit_id: unit_id, active: true).find(parameters['queue_id'])
+        Pundit.authorize(context.to_h, queue, :show?)
+        raise ArgumentError, 'Queue/team mismatch' if parameters['team_id'] && queue.team_id != parameters['team_id']
+      end
+      if context.supervision_access.restricted?(unit_id)
+        grants = context.supervision_access.grants
+        grants = grants.select { |grant| grant[:queue_id] == parameters['queue_id'] } if parameters['queue_id']
+        records = records.where(users: { id: TeamMember.where(team_id: grants.map { |grant| grant[:team_id] }).select(:user_id) })
       end
       search(records, 'users', 'name').order('users.name ASC', 'jrc_service_desk_unit_memberships.id ASC')
     end

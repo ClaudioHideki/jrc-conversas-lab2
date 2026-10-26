@@ -1,6 +1,7 @@
 import { createConsumer } from '@rails/actioncable';
 
-const PRESENCE_INTERVAL = 20000;
+// Keep the heartbeat below the server's 20s presence window to allow jitter.
+const PRESENCE_INTERVAL = 10000;
 const RECONNECT_INTERVAL = 1000;
 
 class BaseActionCableConnector {

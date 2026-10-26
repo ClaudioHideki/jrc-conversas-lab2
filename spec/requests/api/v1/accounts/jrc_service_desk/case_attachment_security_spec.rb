@@ -89,6 +89,33 @@ RSpec.describe 'Service Desk case attachment security', type: :request do
     expect(response).to have_http_status(:conflict)
   end
 
+  it 'rejects a real Widget Case signed_id reattachment and preserves the official Case endpoint' do
+    scan_with("stream: OK\0")
+    blob = file.blob.reload
+    widget = create(:channel_widget, account: sd_account)
+    identity = create(:contact_inbox, contact: sd_contact, inbox: widget.inbox, hmac_verified: false)
+    conversation = create(:conversation, account: sd_account, contact: sd_contact, inbox: widget.inbox, contact_inbox: identity)
+    ticket = sd_ticket
+    create(:jrc_sd_conversation_link, ticket: ticket, conversation: conversation)
+    widget_headers = { 'X-Auth-Token' => Widget::TokenService.new(payload: { source_id: identity.source_id, inbox_id: widget.inbox.id }).generate_token }
+    blob_path = Rails.application.routes.url_helpers.rails_blob_path(file, only_path: true)
+
+    get blob_path
+    expect(response).to have_http_status(:not_found)
+    get blob_path, headers: headers
+    expect(response).to have_http_status(:not_found)
+
+    expect do
+      post '/api/v1/widget/messages', headers: widget_headers,
+                                     params: { website_token: widget.website_token, message: { content: 'Synthetic Case reattachment', attachments: [blob.signed_id] } }
+    end.not_to change(conversation.messages, :count)
+    expect(response).to have_http_status(:unprocessable_entity), response.body
+
+    download
+    expect(response).to have_http_status(:ok), response.body
+    expect(response.body).to eq('Synthetic safe test content')
+  end
+
   it 'blocks when the scanner is unconfigured and never treats a clean label alone as a scan proof' do
     file.blob.update!(metadata: { 'service_desk_scan_state' => 'clean' })
     download

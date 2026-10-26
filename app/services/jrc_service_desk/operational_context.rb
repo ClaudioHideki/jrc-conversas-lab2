@@ -91,6 +91,10 @@ class JrcServiceDesk::OperationalContext < JrcServiceDesk::AccessContext
     available? ? capability_set.effective : []
   end
 
+  def supervision_access
+    JrcServiceDesk::SupervisionAccess.new(self)
+  end
+
   private
 
   def capability_set

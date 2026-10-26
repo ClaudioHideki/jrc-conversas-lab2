@@ -7,7 +7,7 @@ RSpec.describe AutoAssignment::AssignmentService do
   let(:service) { described_class.new(inbox: inbox) }
   let(:agent) { create(:user, account: account, role: :agent, availability: :online) }
   let(:agent2) { create(:user, account: account, role: :agent, availability: :online) }
-  let(:conversation) { create(:conversation, inbox: inbox, assignee: nil) }
+  let(:conversation) { create(:conversation, account: account, inbox: inbox, assignee: nil) }
 
   before do
     # Enable assignment_v2 feature for the account (basic assignment features)
@@ -23,7 +23,7 @@ RSpec.describe AutoAssignment::AssignmentService do
       let(:rate_limiter) { instance_double(AutoAssignment::RateLimiter) }
 
       before do
-        allow(OnlineStatusTracker).to receive(:get_available_users).and_return({ agent.id.to_s => 'online' })
+        allow(OnlineStatusTracker).to receive(:effective_available_users).and_return({ agent.id.to_s => 'online' })
 
         # Mock RoundRobinSelector to return the agent
         round_robin_selector = instance_double(AutoAssignment::RoundRobinSelector)
@@ -38,7 +38,7 @@ RSpec.describe AutoAssignment::AssignmentService do
 
       it 'assigns conversations to available agents' do
         # Create conversation and ensure it's unassigned
-        conv = create(:conversation, inbox: inbox, status: 'open')
+        conv = create(:conversation, account: account, inbox: inbox, status: 'open')
         conv.update!(assignee_id: nil)
 
         assigned_count = service.perform_bulk_assignment(limit: 1)
@@ -48,7 +48,7 @@ RSpec.describe AutoAssignment::AssignmentService do
       end
 
       it 'returns 0 when no agents are online' do
-        allow(OnlineStatusTracker).to receive(:get_available_users).and_return({})
+        allow(OnlineStatusTracker).to receive(:effective_available_users).and_return({})
 
         assigned_count = service.perform_bulk_assignment(limit: 1)
 
@@ -58,10 +58,10 @@ RSpec.describe AutoAssignment::AssignmentService do
 
       it 'short-circuits without iterating conversations when no agents are online' do
         3.times do
-          conv = create(:conversation, inbox: inbox, status: 'open')
+          conv = create(:conversation, account: account, inbox: inbox, status: 'open')
           conv.update!(assignee_id: nil)
         end
-        allow(OnlineStatusTracker).to receive(:get_available_users).and_return({})
+        allow(OnlineStatusTracker).to receive(:effective_available_users).and_return({})
 
         expect(service).not_to receive(:perform_for_conversation)
 
@@ -71,7 +71,7 @@ RSpec.describe AutoAssignment::AssignmentService do
 
       it 'respects the limit parameter' do
         3.times do
-          conv = create(:conversation, inbox: inbox, status: 'open')
+          conv = create(:conversation, account: account, inbox: inbox, status: 'open')
           conv.update!(assignee_id: nil)
         end
 
@@ -84,7 +84,7 @@ RSpec.describe AutoAssignment::AssignmentService do
       it 'only assigns open conversations' do
         conversation # ensure it exists
         conversation.update!(assignee_id: nil)
-        resolved_conversation = create(:conversation, inbox: inbox, status: 'resolved')
+        resolved_conversation = create(:conversation, account: account, inbox: inbox, status: 'resolved')
         resolved_conversation.update!(assignee_id: nil)
 
         service.perform_bulk_assignment(limit: 10)
@@ -96,8 +96,8 @@ RSpec.describe AutoAssignment::AssignmentService do
       it 'does not reassign already assigned conversations' do
         conversation # ensure it exists
         conversation.update!(assignee_id: nil)
-        assigned_conversation = create(:conversation, inbox: inbox, assignee: agent)
-        unassigned_conversation = create(:conversation, inbox: inbox, status: 'open')
+        assigned_conversation = create(:conversation, account: account, inbox: inbox, assignee: agent)
+        unassigned_conversation = create(:conversation, account: account, inbox: inbox, status: 'open')
         unassigned_conversation.update!(assignee_id: nil)
 
         assigned_count = service.perform_bulk_assignment(limit: 10)
@@ -138,7 +138,7 @@ RSpec.describe AutoAssignment::AssignmentService do
       let(:rate_limiter) { instance_double(AutoAssignment::RateLimiter) }
 
       before do
-        allow(OnlineStatusTracker).to receive(:get_available_users).and_return({ agent.id.to_s => 'online' })
+        allow(OnlineStatusTracker).to receive(:effective_available_users).and_return({ agent.id.to_s => 'online' })
 
         # Mock RoundRobinSelector to return the agent
         round_robin_selector = instance_double(AutoAssignment::RoundRobinSelector)
@@ -153,17 +153,19 @@ RSpec.describe AutoAssignment::AssignmentService do
 
       context 'when priority is longest_waiting' do
         before do
-          allow(inbox).to receive(:auto_assignment_config).and_return({ 'conversation_priority' => 'longest_waiting' })
+          assignment_policy.update!(conversation_priority: :longest_waiting)
         end
 
         it 'assigns conversations with oldest last_activity_at first' do
           old_conversation = create(:conversation,
+                                    account: account,
                                     inbox: inbox,
                                     status: 'open',
                                     created_at: 2.hours.ago,
                                     last_activity_at: 2.hours.ago)
           old_conversation.update!(assignee_id: nil)
           new_conversation = create(:conversation,
+                                    account: account,
                                     inbox: inbox,
                                     status: 'open',
                                     created_at: 1.hour.ago,
@@ -179,9 +181,9 @@ RSpec.describe AutoAssignment::AssignmentService do
 
       context 'when priority is default' do
         it 'assigns conversations by created_at' do
-          old_conversation = create(:conversation, inbox: inbox, status: 'open', created_at: 2.hours.ago)
+          old_conversation = create(:conversation, account: account, inbox: inbox, status: 'open', created_at: 2.hours.ago)
           old_conversation.update!(assignee_id: nil)
-          new_conversation = create(:conversation, inbox: inbox, status: 'open', created_at: 1.hour.ago)
+          new_conversation = create(:conversation, account: account, inbox: inbox, status: 'open', created_at: 1.hour.ago)
           new_conversation.update!(assignee_id: nil)
 
           service.perform_bulk_assignment(limit: 1)
@@ -196,7 +198,7 @@ RSpec.describe AutoAssignment::AssignmentService do
       let(:rate_limiter) { instance_double(AutoAssignment::RateLimiter) }
 
       before do
-        allow(OnlineStatusTracker).to receive(:get_available_users).and_return({ agent.id.to_s => 'online' })
+        allow(OnlineStatusTracker).to receive(:effective_available_users).and_return({ agent.id.to_s => 'online' })
 
         round_robin_selector = instance_double(AutoAssignment::RoundRobinSelector)
         allow(AutoAssignment::RoundRobinSelector).to receive(:new).and_return(round_robin_selector)
@@ -209,8 +211,8 @@ RSpec.describe AutoAssignment::AssignmentService do
 
       it 'skips conversations inactive beyond the policy threshold' do
         assignment_policy.update!(exclude_older_than_hours: 24)
-        old_conversation = create(:conversation, inbox: inbox, assignee: nil, last_activity_at: 25.hours.ago)
-        recent_conversation = create(:conversation, inbox: inbox, assignee: nil, last_activity_at: 1.hour.ago)
+        old_conversation = create(:conversation, account: account, inbox: inbox, assignee: nil, last_activity_at: 25.hours.ago)
+        recent_conversation = create(:conversation, account: account, inbox: inbox, assignee: nil, last_activity_at: 1.hour.ago)
 
         assigned_count = service.perform_bulk_assignment(limit: 10)
 
@@ -221,7 +223,7 @@ RSpec.describe AutoAssignment::AssignmentService do
 
       it 'assigns reopened conversations created long ago but recently active' do
         assignment_policy.update!(exclude_older_than_hours: 24)
-        reopened_conversation = create(:conversation, inbox: inbox, assignee: nil,
+        reopened_conversation = create(:conversation, account: account, inbox: inbox, assignee: nil,
                                                       created_at: 30.days.ago, last_activity_at: 1.hour.ago)
 
         assigned_count = service.perform_bulk_assignment(limit: 10)
@@ -232,7 +234,7 @@ RSpec.describe AutoAssignment::AssignmentService do
 
       it 'assigns conversations regardless of age when threshold is nil' do
         assignment_policy.update!(exclude_older_than_hours: nil)
-        old_conversation = create(:conversation, inbox: inbox, assignee: nil, last_activity_at: 30.days.ago)
+        old_conversation = create(:conversation, account: account, inbox: inbox, assignee: nil, last_activity_at: 30.days.ago)
 
         assigned_count = service.perform_bulk_assignment(limit: 10)
 
@@ -246,15 +248,15 @@ RSpec.describe AutoAssignment::AssignmentService do
           inbox.reload
         end
 
-        it 'falls back to the default threshold and skips stale conversations' do
-          stale_conversation = create(:conversation, inbox: inbox, assignee: nil, last_activity_at: 8.days.ago)
-          recent_conversation = create(:conversation, inbox: inbox, assignee: nil, last_activity_at: 6.days.ago)
+        it 'leaves all conversations unassigned until an explicit policy is configured' do
+          stale_conversation = create(:conversation, account: account, inbox: inbox, assignee: nil, last_activity_at: 8.days.ago)
+          recent_conversation = create(:conversation, account: account, inbox: inbox, assignee: nil, last_activity_at: 6.days.ago)
 
           assigned_count = service.perform_bulk_assignment(limit: 10)
 
-          expect(assigned_count).to eq(1)
+          expect(assigned_count).to eq(0)
           expect(stale_conversation.reload.assignee).to be_nil
-          expect(recent_conversation.reload.assignee).to eq(agent)
+          expect(recent_conversation.reload.assignee).to be_nil
         end
       end
     end
@@ -262,7 +264,7 @@ RSpec.describe AutoAssignment::AssignmentService do
     context 'with fair distribution' do
       before do
         create(:inbox_member, inbox: inbox, user: agent2)
-        allow(OnlineStatusTracker).to receive(:get_available_users).and_return({
+        allow(OnlineStatusTracker).to receive(:effective_available_users).and_return({
                                                                                  agent.id.to_s => 'online',
                                                                                  agent2.id.to_s => 'online'
                                                                                })
@@ -293,7 +295,7 @@ RSpec.describe AutoAssignment::AssignmentService do
           allow(agent2_limiter).to receive(:within_limit?).and_return(true)
           allow(agent2_limiter).to receive(:track_assignment)
 
-          unassigned_conversation = create(:conversation, inbox: inbox, status: 'open')
+          unassigned_conversation = create(:conversation, account: account, inbox: inbox, status: 'open')
           unassigned_conversation.update!(assignee_id: nil)
 
           service.perform_bulk_assignment(limit: 1)
@@ -333,7 +335,7 @@ RSpec.describe AutoAssignment::AssignmentService do
           # Simulate time passing for rate limit window
           freeze_time do
             2.times do
-              conversation_new = create(:conversation, inbox: inbox, status: 'open')
+              conversation_new = create(:conversation, account: account, inbox: inbox, status: 'open')
               conversation_new.update!(assignee_id: nil)
               service.perform_bulk_assignment(limit: 1)
               expect(conversation_new.reload.assignee).not_to be_nil
@@ -342,7 +344,7 @@ RSpec.describe AutoAssignment::AssignmentService do
 
           # Move forward past the window
           travel_to(2.hours.from_now) do
-            new_conversation = create(:conversation, inbox: inbox, status: 'open')
+            new_conversation = create(:conversation, account: account, inbox: inbox, status: 'open')
             new_conversation.update!(assignee_id: nil)
             service.perform_bulk_assignment(limit: 1)
             expect(new_conversation.reload.assignee).not_to be_nil
@@ -353,7 +355,7 @@ RSpec.describe AutoAssignment::AssignmentService do
       context 'when fair distribution is disabled' do
         it 'assigns without rate limiting' do
           5.times do
-            conv = create(:conversation, inbox: inbox, status: 'open')
+            conv = create(:conversation, account: account, inbox: inbox, status: 'open')
             conv.update!(assignee_id: nil)
           end
 
@@ -375,7 +377,7 @@ RSpec.describe AutoAssignment::AssignmentService do
 
       context 'with round robin assignment' do
         it 'distributes conversations evenly among agents' do
-          conversations = Array.new(4) { create(:conversation, inbox: inbox, assignee: nil) }
+          conversations = Array.new(4) { create(:conversation, account: account, inbox: inbox, assignee: nil) }
 
           service.perform_bulk_assignment(limit: 4)
 
@@ -397,7 +399,7 @@ RSpec.describe AutoAssignment::AssignmentService do
         create(:team_member, team: team, user: team_member)
         create(:inbox_member, inbox: inbox, user: team_member)
 
-        allow(OnlineStatusTracker).to receive(:get_available_users).and_return({ team_member.id.to_s => 'online' })
+        allow(OnlineStatusTracker).to receive(:effective_available_users).and_return({ team_member.id.to_s => 'online' })
 
         allow(AutoAssignment::RateLimiter).to receive(:new).and_return(rate_limiter)
         allow(rate_limiter).to receive(:within_limit?).and_return(true)
@@ -409,7 +411,7 @@ RSpec.describe AutoAssignment::AssignmentService do
       end
 
       it 'assigns conversation with team to team member' do
-        conversation_with_team = create(:conversation, inbox: inbox, team: team, assignee: nil)
+        conversation_with_team = create(:conversation, account: account, inbox: inbox, team: team, assignee: nil)
 
         service.perform_bulk_assignment(limit: 1)
 
@@ -418,7 +420,7 @@ RSpec.describe AutoAssignment::AssignmentService do
 
       it 'skips assignment when team has allow_auto_assign false' do
         team.update!(allow_auto_assign: false)
-        conversation_with_team = create(:conversation, inbox: inbox, team: team, assignee: nil)
+        conversation_with_team = create(:conversation, account: account, inbox: inbox, team: team, assignee: nil)
 
         service.perform_bulk_assignment(limit: 1)
 
@@ -426,8 +428,8 @@ RSpec.describe AutoAssignment::AssignmentService do
       end
 
       it 'skips assignment when no team members are available' do
-        allow(OnlineStatusTracker).to receive(:get_available_users).and_return({})
-        conversation_with_team = create(:conversation, inbox: inbox, team: team, assignee: nil)
+        allow(OnlineStatusTracker).to receive(:effective_available_users).and_return({})
+        conversation_with_team = create(:conversation, account: account, inbox: inbox, team: team, assignee: nil)
 
         service.perform_bulk_assignment(limit: 1)
 

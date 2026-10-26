@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { validCalendar } from '../calendarRules';
+import { validCalendar, validCalendarHours } from '../calendarRules';
+import {
+  calendarIntervalsError,
+  formatCalendarIntervals,
+  parseCalendarIntervals,
+} from '../calendarIntervals';
 const calendar = () => ({
   timezone: 'America/Sao_Paulo',
   conditions: {
@@ -15,6 +20,101 @@ const calendar = () => ({
   },
 });
 describe('Explicit OLA/notification calendar input', () => {
+  it.each([
+    ['one period', '08:00-18:00', [['08:00', '18:00']]],
+    [
+      'semicolon',
+      '08:00-12:00;13:00-18:00',
+      [
+        ['08:00', '12:00'],
+        ['13:00', '18:00'],
+      ],
+    ],
+    [
+      'compatible comma',
+      '08:00-12:00,13:00-18:00',
+      [
+        ['08:00', '12:00'],
+        ['13:00', '18:00'],
+      ],
+    ],
+    [
+      'surrounding spaces',
+      ' 08:00 - 12:00 ; 13:00 - 18:00 ',
+      [
+        ['08:00', '12:00'],
+        ['13:00', '18:00'],
+      ],
+    ],
+    ['closed day', '   ', []],
+    ['native end-of-day boundary', '00:00-24:00', [['00:00', '24:00']]],
+  ])('parses %s into exact native two-item pairs', (_, input, rows) => {
+    expect(parseCalendarIntervals(input)).toEqual({
+      valid: true,
+      rows,
+      error: null,
+    });
+    expect(rows.every(pair => pair.length === 2)).toBe(true);
+    expect(formatCalendarIntervals(rows)).toBe(
+      input.trim() ? rows.map(pair => pair.join('-')).join(';') : ''
+    );
+  });
+  it.each([
+    ['non-padded time', '8:00-18:00', 'interval_time'],
+    ['invalid time', '08:60-18:00', 'interval_time'],
+    ['equal boundaries', '08:00-08:00', 'interval_order'],
+    ['reversed boundaries', '18:00-08:00', 'interval_order'],
+    ['overlap', '08:00-13:00;12:00-18:00', 'interval_overlap'],
+    ['unordered intervals', '13:00-18:00;08:00-12:00', 'interval_overlap'],
+    ['missing period', '08:00-12:00;;13:00-18:00', 'interval_format'],
+    ['extra boundary', '08:00-12:00-18:00', 'interval_format'],
+  ])(
+    'rejects %s without manufacturing a corrected native payload',
+    (_, input, error) => {
+      expect(parseCalendarIntervals(input)).toEqual({
+        valid: false,
+        rows: null,
+        error,
+      });
+    }
+  );
+  it('formats JSON canonically and retains malformed legacy text for explicit repair', () => {
+    const rows = [
+      ['08:00', '12:00'],
+      ['13:00', '18:00'],
+    ];
+    expect(formatCalendarIntervals(rows)).toBe('08:00-12:00;13:00-18:00');
+    const malformed = [['08:00', '12:00;13:00', '18:00']];
+    const original = JSON.stringify(malformed);
+    expect(calendarIntervalsError(malformed)).toBe('interval_format');
+    expect(formatCalendarIntervals(malformed)).toBe('08:00-12:00;13:00-18:00');
+    expect(JSON.stringify(malformed)).toBe(original);
+    expect(
+      parseCalendarIntervals(formatCalendarIntervals(malformed)).rows
+    ).toEqual(rows);
+  });
+  it('permits incomplete private drafts but rejects malformed typed periods', () => {
+    expect(validCalendarHours({ timezone: '', conditions: {} })).toBe(true);
+    const value = calendar();
+    value.conditions.weekly['1'] = '08:00-12:00;unfinished';
+    expect(validCalendarHours(value)).toBe(false);
+    expect(validCalendar(value)).toBe(false);
+  });
+  it('uses identical parsing and validation for exception dates and weekly periods', () => {
+    const value = calendar();
+    const parsed = parseCalendarIntervals('08:00-12:00;13:00-18:00');
+    value.conditions.weekly['1'] = parsed.rows;
+    value.conditions.exceptions = {
+      '2026-10-27': parsed.rows,
+      '2026-10-28': [],
+    };
+    expect(validCalendar(value)).toBe(true);
+    value.conditions.exceptions['2026-10-27'] = [
+      ['08:00', '12:00;13:00', '18:00'],
+    ];
+    expect(validCalendarHours(value)).toBe(false);
+    expect(validCalendar(value)).toBe(false);
+  });
   it('accepts explicit working hours, holidays and closed/open exception dates', () => {
     const value = calendar();
     value.conditions.holidays = ['2026-12-25'];

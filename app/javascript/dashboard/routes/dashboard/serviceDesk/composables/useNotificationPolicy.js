@@ -1,6 +1,9 @@
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { validCalendar } from '../automationStudio/calendarRules';
+import {
+  validCalendar,
+  validCalendarHours,
+} from '../automationStudio/calendarRules';
 import Drafts from 'dashboard/api/serviceDeskAutomationDrafts';
 import API from 'dashboard/api/serviceDeskCockpit';
 import { useServiceDesk } from './useServiceDesk';
@@ -400,6 +403,13 @@ export function useNotificationPolicy(props, emit = () => {}, options = {}) {
     }
   };
   const saveDraft = async () => {
+    if (
+      controls.value.window.enabled &&
+      !validCalendarHours(controls.value.window)
+    ) {
+      draftFeedback.value = 'draft_calendar_invalid';
+      return;
+    }
     try {
       const savedDraft = await Drafts.save(
         session.state.context.account_id,

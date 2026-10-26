@@ -8,7 +8,9 @@ RSpec.describe 'Closure revision HTTP concurrency', :sd_concurrency, type: :requ
   include JrcServiceDeskLifecycleFixtures
   around do |example|
     if ENV['JRC_SD_INTEGRATED_CONCURRENCY'] == '1' && Rails.env.test? && %w[jrc_sd_integrated_concurrency_20261023_test
-                                                                            jrc_sd_five_concurrency_20261024_test].include?(ActiveRecord::Base.connection.current_database)
+                                                                            jrc_sd_five_concurrency_20261024_test
+                                                                            jrc_sd_bc_portal_concurrency_20261025_test].include?(ActiveRecord::Base.connection.current_database) &&
+       ActiveRecord::Base.connection_db_config.adapter == 'postgresql'
       example.run
     else
       skip 'Requires the isolated committed synthetic concurrency database'

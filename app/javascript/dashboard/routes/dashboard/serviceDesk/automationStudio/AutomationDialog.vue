@@ -6,10 +6,16 @@ const props = defineProps({
   open: Boolean,
   busy: Boolean,
   dirty: Boolean,
+  validated: Boolean,
   title: { type: String, required: true },
   steps: { type: Array, required: true },
   step: { type: Number, default: 0 },
   maxStep: { type: Number, default: 0 },
+  placement: {
+    type: String,
+    default: 'center',
+    validator: value => ['center', 'right'].includes(value),
+  },
 });
 const emit = defineEmits(['close', 'update:step']);
 const { t } = useI18n();
@@ -22,6 +28,28 @@ function askClose() {
   if (props.busy) return;
   if (props.dirty) confirmDiscard.value = true;
   else emit('close');
+}
+function containFocus(event) {
+  if (!props.open || event.ctrlKey || event.metaKey || event.altKey) return;
+  const elements = [
+    ...dialog.value.querySelectorAll(
+      'a[href], button, input, select, textarea, [tabindex]'
+    ),
+  ].filter(
+    element =>
+      element.tabIndex >= 0 &&
+      !element.matches(':disabled') &&
+      element.getClientRects().length &&
+      !element.closest('[inert]')
+  );
+  if (!elements.length) return;
+  const index = elements.indexOf(document.activeElement);
+  let next = event.shiftKey ? elements.length - 1 : 0;
+  if (index >= 0)
+    next =
+      (index + (event.shiftKey ? -1 : 1) + elements.length) % elements.length;
+  event.preventDefault();
+  elements[next].focus();
 }
 watch(
   () => props.open,
@@ -53,8 +81,10 @@ onBeforeUnmount(() => {
     <dialog
       ref="dialog"
       :aria-label="title"
-      class="m-auto w-[calc(100%-1rem)] max-w-6xl max-h-[94dvh] overflow-hidden rounded-2xl border border-n-weak bg-n-solid-1 p-0 text-n-slate-12 shadow-2xl backdrop:bg-black/50"
+      class="w-[calc(100%-1rem)] max-w-6xl max-h-[94dvh] overflow-hidden rounded-2xl border border-n-weak bg-n-solid-1 p-0 text-n-slate-12 shadow-2xl backdrop:bg-black/50"
+      :class="placement === 'right' ? 'my-auto ml-auto mr-3' : 'm-auto'"
       @cancel.prevent="askClose"
+      @keydown.tab="containFocus"
     >
       <div
         v-if="open"
@@ -97,7 +127,12 @@ onBeforeUnmount(() => {
             @click="emit('update:step', index)"
           >
             <span class="shrink-0 rounded-full border border-current px-2 py-1">
-              {{ index + 1 }}
+              <span
+                v-if="validated"
+                class="i-lucide-check block size-3"
+                aria-hidden="true"
+              />
+              <template v-else>{{ index + 1 }}</template>
             </span>
             <span>{{ name }}</span>
           </button>

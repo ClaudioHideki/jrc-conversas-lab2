@@ -62,8 +62,12 @@ RSpec.describe JrcServiceDesk do
   end
 
   it 'rotates enabled round robin queues using persisted routing events' do
+    sd_account_user.update!(availability: :online)
     sd_membership.update!(availability: 'available', capacity: 5)
     other = create(:jrc_sd_membership, unit: sd_unit, availability: 'available', capacity: 5)
+    other.account_user.update!(availability: :online)
+    allow(OnlineStatusTracker).to receive(:effective_presence).with(sd_account.id)
+      .and_return(user_ids: [sd_user.id, other.account_user.user_id], reason: nil)
     queue = create(:jrc_sd_queue, unit: sd_unit, distribution_mode: 'round_robin')
     service = JrcServiceDesk::AutomaticRoutingService.new(user_context: sd_context)
     first = sd_ticket(queue: queue)
@@ -77,8 +81,12 @@ RSpec.describe JrcServiceDesk do
   end
 
   it 'uses real active workload for least load and excludes unavailable operators' do
+    sd_account_user.update!(availability: :online)
     sd_membership.update!(availability: 'available', capacity: 5)
     other = create(:jrc_sd_membership, unit: sd_unit, availability: 'available', capacity: 5)
+    other.account_user.update!(availability: :online)
+    allow(OnlineStatusTracker).to receive(:effective_presence).with(sd_account.id)
+      .and_return(user_ids: [sd_user.id, other.account_user.user_id], reason: nil)
     create(:jrc_sd_membership, unit: sd_unit, availability: 'unavailable', capacity: 5)
     sd_ticket(assignee_membership: sd_membership)
     queue = create(:jrc_sd_queue, unit: sd_unit, distribution_mode: 'least_load')

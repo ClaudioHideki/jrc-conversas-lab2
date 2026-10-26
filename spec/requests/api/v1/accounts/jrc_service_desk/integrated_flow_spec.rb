@@ -31,6 +31,10 @@ RSpec.describe 'Integrated Service Desk assignment, clocks and indicators', type
     sd_as_admin!
     member_a
     member_b
+    [agent_a, agent_b].each do |agent|
+      agent.update!(availability: :online, auto_assignment_enabled: true)
+      OnlineStatusTracker.update_presence(sd_account.id, 'User', agent.user_id)
+    end
     create(:team_member, team: team_a, user: agent_a.user)
     create(:team_member, team: team_b, user: agent_b.user)
     lc_publish(definition: lc_definition(tracked: true))

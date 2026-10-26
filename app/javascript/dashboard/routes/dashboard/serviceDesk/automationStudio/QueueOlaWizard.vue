@@ -6,7 +6,7 @@ import ClockAutomationFields from '../components/ClockAutomationFields.vue';
 import AutomationDialog from './AutomationDialog.vue';
 import OlaMonitoring from './OlaMonitoring.vue';
 import CalendarFields from './CalendarFields.vue';
-import { validCalendar } from './calendarRules';
+import { validCalendar, validCalendarHours } from './calendarRules';
 import Drafts from 'dashboard/api/serviceDeskAutomationDrafts';
 import { DISTRIBUTION_MODES, skillCodes } from '../helpers/v2Configuration';
 import { configurationAttributes } from '../helpers/configuration';
@@ -185,6 +185,14 @@ const versions = ref([]);
 const draftCode = () =>
   String(props.record.id || props.modelValue.code || 'new');
 async function saveLocal() {
+  if (
+    olaEnabled.value &&
+    props.modelValue.ola_time_basis === 'business' &&
+    !validCalendarHours(props.modelValue.ola_calendar)
+  ) {
+    localMessage.value = 'calendar.invalid';
+    return;
+  }
   try {
     const row = await Drafts.save(
       props.context.account_id,

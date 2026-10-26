@@ -36,6 +36,13 @@ class Webhooks::Trigger
   end
 
   def execute_delivery
+    if @webhook_type == :api_inbox_webhook && @payload[:event] == 'message_created' && message
+      JrcServiceDesk::OutboundAttachments.authorize_message!(message)
+      if message.outgoing? && !message.private? && JrcServiceDesk::OutboundAttachments.protected?(message)
+        message.update!(status: :failed, external_error: 'Protected Service Desk attachments require an authenticated media upload transport; API inbox URL delivery is unavailable')
+        return
+      end
+    end
     jrc_delivery&.validate!(url: @url, secret: @secret, delivery_id: @delivery_id)
     jrc_delivery&.prepare_campaign_intent!(@payload)
     jrc_delivery&.validate!(url: @url, secret: @secret, delivery_id: @delivery_id)

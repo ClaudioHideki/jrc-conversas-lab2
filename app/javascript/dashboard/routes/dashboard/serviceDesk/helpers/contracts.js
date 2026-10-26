@@ -116,6 +116,9 @@ export function decodeRecord(row, context, resource) {
       ...record,
       title: text(row.title),
       number: text(row.number),
+      labels: Array.isArray(row.labels)
+        ? row.labels.map(value => text(value))
+        : [],
       ...(Object.hasOwn(row, 'opened_at')
         ? { opened_at: stamp(row.opened_at) }
         : {}),
@@ -150,6 +153,9 @@ export function decodeRecord(row, context, resource) {
             ...named(row.requester),
             ...(Object.hasOwn(row.requester, 'phone_number')
               ? { phone_number: text(row.requester.phone_number) }
+              : {}),
+            ...(Object.hasOwn(row.requester, 'email')
+              ? { email: text(row.requester.email) }
               : {}),
           }
         : null,

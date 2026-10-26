@@ -9,7 +9,9 @@ RSpec.describe 'Integrated HTTP assignment with independent PostgreSQL transacti
 
   around do |example|
     if ENV['JRC_SD_INTEGRATED_CONCURRENCY'] == '1' && Rails.env.test? &&
-       ActiveRecord::Base.connection.current_database == 'jrc_sd_integrated_concurrency_20261023_test'
+       %w[jrc_sd_integrated_concurrency_20261023_test jrc_sd_bc_portal_concurrency_20261025_test].include?(
+         ActiveRecord::Base.connection.current_database
+       ) && ActiveRecord::Base.connection_db_config.adapter == 'postgresql'
       example.run
     else
       skip 'Requires the explicitly isolated, committed synthetic concurrency database'

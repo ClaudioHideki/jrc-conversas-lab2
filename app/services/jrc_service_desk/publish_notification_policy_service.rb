@@ -4,6 +4,31 @@ class JrcServiceDesk::PublishNotificationPolicyService < JrcServiceDesk::BaseSer
   FIELDS = %w[event_type channel enabled inbox_id template template_version confirmed expected_version ticket_type_id service_id display_name
               description settings channel_configurations expected_versions retired_channels].freeze
 
+  def validate_for_preview!(unit:, attributes:)
+    @context = fresh_context!
+    raise Pundit::NotAuthorizedError unless context.unit_allowed?(unit) && context.capability?(:notifications_manage)
+
+    values = JrcServiceDesk::Input.attributes(attributes, FIELDS)
+    validate_confirmation!(values)
+    validate_controls!(values, unit)
+    inbox = native_inbox(values)
+    fields = values.except('confirmed', 'expected_version', 'inbox_id')
+    %w[ticket_type_id service_id].each do |field|
+      next unless values[field]
+
+      model = field == 'service_id' ? JrcServiceDesk::Service : JrcServiceDesk::TicketType
+      model.where(account: context.account, unit: unit).find(JrcServiceDesk::Input.id(values[field]))
+    end
+    latest = JrcServiceDesk::NotificationPolicyVersion.where(account: context.account, unit: unit,
+      event_type: values['event_type'], channel: values['channel'], ticket_type_id: values['ticket_type_id'], service_id: values['service_id']).maximum(:version).to_i
+    actor = context.actor_for(unit)
+    candidate = JrcServiceDesk::NotificationPolicyVersion.new(fields.merge(account: context.account, unit: unit, inbox: inbox,
+      published_by_membership: actor, version: latest + 1, digest: JrcServiceDesk::CanonicalJson.digest(fields)))
+    raise ActiveRecord::RecordInvalid, candidate unless candidate.valid?
+
+    true
+  end
+
   def call(unit_id:, attributes:)
     values = JrcServiceDesk::Input.attributes(attributes, FIELDS)
     validate_confirmation!(values)

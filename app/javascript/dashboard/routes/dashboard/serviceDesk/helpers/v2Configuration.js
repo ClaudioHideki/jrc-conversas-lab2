@@ -41,7 +41,16 @@ const fields = {
   ],
 };
 export const configurationV2Fields = resource => fields[resource] || [];
-export const membershipV2Fields = ['availability', 'capacity', 'skills'];
+export const membershipV2Fields = [
+  'availability',
+  'capacity',
+  'skills',
+  'team_id',
+  'queue_id',
+  'manual_assignment_enabled',
+  'restricted_supervision',
+  'supervision_grants',
+];
 const check = value => {
   if (!value) throw new TypeError('Invalid operational setting');
 };
@@ -184,6 +193,32 @@ export function settingAttributes(data) {
           value === null ||
             (Number.isInteger(value) && value > 0 && value <= 1000)
         );
+      if (['manual_assignment_enabled', 'restricted_supervision'].includes(key))
+        check(typeof value === 'boolean');
+      if (key === 'supervision_grants') {
+        check(Array.isArray(value) && value.length <= 100);
+        value = value.map(row => {
+          check(
+            row &&
+              Object.keys(row).length === 3 &&
+              Array.isArray(row.permissions)
+          );
+          check(
+            row.permissions.includes('tickets_view') &&
+              row.permissions.every(
+                permission => typeof permission === 'string'
+              )
+          );
+          const queue = canonicalId(row.queue_id);
+          const team = canonicalId(row.team_id);
+          check(queue && team);
+          return {
+            queue_id: Number(queue),
+            team_id: Number(team),
+            permissions: [...row.permissions].sort(),
+          };
+        });
+      }
       if (key === 'ola_time_basis')
         check(value === null || ['business', 'calendar'].includes(value));
       if (key === 'description')

@@ -9,6 +9,8 @@ class Api::V1::Accounts::JrcServiceDesk::DashboardController < Api::V1::Accounts
   def report
     authorize :service_desk, :dashboard?, policy_class: ::JrcServiceDesk::ModulePolicy
     query = ::JrcServiceDesk::TicketQuery.new(user_context: pundit_user, parameters: query_values)
+    scope = query.context.supervision_access.scope(query.relation, permission: 'reports_view')
+    query = ::JrcServiceDesk::TicketQuery.new(user_context: pundit_user, parameters: query_values, scope: scope)
     render json: result_for(query.collection) { |record| presenter.ticket(record) }.merge(
       dashboard: ::JrcServiceDesk::DashboardService.new(user_context: pundit_user).call(parameters: query_values),
       generated_at: Time.current.iso8601(6), projection: 'authorized_service_desk_report_v2'

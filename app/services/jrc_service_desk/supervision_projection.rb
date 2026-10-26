@@ -7,7 +7,10 @@ class JrcServiceDesk::SupervisionProjection
   end
 
   def call
-    return nil unless @context.capability?(:dashboard_view) && @context.capability?(:tickets_view_all)
+    return nil unless @context.capability?(:dashboard_view) &&
+                      (@context.capability?(:tickets_view_all) || @context.supervision_access.any?('dashboard_view'))
+
+    @relation = @context.supervision_access.scope(@relation, permission: 'dashboard_view')
 
     { sla: sla, sla_coverage: coverage, by_agent: agent_loads, capacity: capacities, tasks: tasks, approvals: approvals,
       evolution: evolution, top_categories: top_categories, timezone: 'UTC',
@@ -21,7 +24,11 @@ class JrcServiceDesk::SupervisionProjection
   end
 
   def cycles
-    @cycles ||= JrcServiceDesk::SlaCycle.where(account_id: @context.account.id, ticket_id: ids).group(:ticket_id).maximum(:id).values
+    @cycles ||= JrcServiceDesk::SlaCycle.where(account_id: @context.account.id, ticket_id: sla_relation.select(:id)).group(:ticket_id).maximum(:id).values
+  end
+
+  def sla_relation
+    @context.supervision_access.scope(@relation, permission: 'sla_view')
   end
 
   def active(relation)
@@ -43,8 +50,10 @@ class JrcServiceDesk::SupervisionProjection
   end
 
   def calendar_required?
+    return false unless @context.capability?(:sla_view)
+
     # Group identical selectors; do not turn missing observations into a universal SLA requirement.
-    @relation.distinct.pluck(:unit_id, :service_id, :lifecycle_policy_version_id).any? do |unit_id, service_id, version_id|
+    sla_relation.distinct.pluck(:unit_id, :service_id, :lifecycle_policy_version_id).any? do |unit_id, service_id, version_id|
       ticket = JrcServiceDesk::Ticket.new(account_id: @context.account.id, unit_id: unit_id,
                                          service_id: service_id, lifecycle_policy_version_id: version_id)
       JrcServiceDesk::LifecycleSelector.new(ticket).applicable&.definition&.dig('sla', 'mode') == 'calendar_snapshot'
@@ -54,8 +63,8 @@ class JrcServiceDesk::SupervisionProjection
   def coverage
     return nil unless @context.capability?(:sla_view)
 
-    total = @relation.count
-    pending = JrcServiceDesk::LifecycleTransition.where(account_id: @context.account.id, ticket_id: ids)
+    total = sla_relation.count
+    pending = JrcServiceDesk::LifecycleTransition.where(account_id: @context.account.id, ticket_id: sla_relation.select(:id))
                 .where("payload->'sla'->>'calculation_pending' = 'true'").distinct.count(:ticket_id)
     completed = JrcServiceDesk::SlaClock.where(account_id: @context.account.id, sla_cycle_id: cycles, state: 'completed')
     { total_tickets: total, measured_tickets: cycles.length, unmeasured_tickets: total - cycles.length,
@@ -104,6 +113,11 @@ class JrcServiceDesk::SupervisionProjection
   def capacities
     units = @relation.reselect(:unit_id).distinct
     grants = JrcServiceDesk::UnitMembership.operational.where(account_id: @context.account.id, unit_id: units, active: true).includes(account_user: :user)
+    if @context.supervision_access.memberships.exists?
+      # Supervisors see only staffing represented in their authorized ticket domain.
+      restricted = grants.where(unit_id: @context.supervision_access.restricted_units, id: @relation.select(:assignee_membership_id))
+      grants = grants.where.not(unit_id: @context.supervision_access.restricted_units).or(restricted)
+    end
     scope = JrcServiceDesk::TicketPolicy::Scope.new(@context.to_h, JrcServiceDesk::Ticket).resolve.where(unit_id: units)
     loads = active(scope).group(:assignee_membership_id).count
     grants.order(:id).map { |row| capacity(row, loads.fetch(row.id, 0)) }

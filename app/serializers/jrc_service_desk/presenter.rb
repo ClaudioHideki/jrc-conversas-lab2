@@ -11,7 +11,7 @@ class JrcServiceDesk::Presenter
     'clock_violated' => %w[clock_id clock_kind policy_digest elapsed_seconds budget_seconds due_at observed_at],
     'approval_escalated' => %w[approval_id history_index],
     'resource_linked' => %w[resource_id resource_kind], 'resource_unlinked' => %w[resource_id resource_kind],
-    'resource_updated' => %w[resource_id resource_kind history_index],
+    'resource_updated' => %w[resource_id resource_kind history_index routing_no_candidate queue_id mode queue_policy_revision reason routing_fallback from_queue_id to_queue_id],
     'resource_archived' => %w[resource_id resource_kind history_index],
     'ticket_created' => %w[status_id priority_id queue_id assignee_membership_id],
     'ticket_updated' => %w[title description requester_id priority_id category_id ticket_type_id subcategory_id contract_id service_fields status_id company_id],
@@ -42,7 +42,7 @@ class JrcServiceDesk::Presenter
     requester = record.requester
     team = record.team
     common(record).merge(title: record.title, number: record.id.to_s, description: record.description, opened_at: stamp(record.opened_at),
-                         impact_code: record.impact_code, urgency_code: record.urgency_code,
+                         impact_code: record.impact_code, urgency_code: record.urgency_code, labels: record.label_list,
                          service: named(record.service), status: named(record.status), priority: named(record.priority),
                          category: named(record.category), ticket_type: named(record.ticket_type), subcategory: named(record.subcategory),
                          **catalogue_fields(record, policy),

@@ -26,7 +26,7 @@ class JrcServiceDesk::NotificationEligibility
     actor = @row.execution_membership
     actor.reload if actor.persisted?
     grant = actor.administrative_actor? ? @context.administrator? : actor.active?
-    grant && @context.unit_allowed?(@row.unit) && @context.capability?(:customer_publish)
+    grant && @context.unit_allowed?(@row.unit) && JrcServiceDesk::TicketPolicy.new(@context.to_h, @row.ticket).customer_publish?
   end
 
   def task_allowed?

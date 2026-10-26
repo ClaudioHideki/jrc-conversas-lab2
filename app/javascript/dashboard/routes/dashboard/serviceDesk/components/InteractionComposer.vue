@@ -89,6 +89,13 @@ const appearance = computed(
       public_without_notification: { color: 'teal', variant: 'outline' },
     })[audience.value]
 );
+const audienceTitle = computed(() => {
+  if (audience.value === 'internal')
+    return t('JRC_SERVICE_DESK.DETAIL_REVIEW.internal_response');
+  if (audience.value === 'customer')
+    return t('JRC_SERVICE_DESK.DETAIL_REVIEW.customer_response');
+  return values.value.visibility[audience.value];
+});
 const channelReason = channel =>
   channel.reason ||
   channel.destinations.find(destination => destination.reason)?.reason ||
@@ -101,18 +108,37 @@ watch(files, selected => {
 </script>
 
 <template>
-  <form class="grid gap-3 border-t border-n-weak pt-4" @submit.prevent="submit">
-    <p v-if="!options" role="status" class="text-sm">
+  <form
+    class="grid gap-3 border-t border-n-weak pt-4"
+    @submit.prevent="submit"
+  >
+    <p
+      v-if="!options"
+      role="status"
+      class="text-sm"
+    >
       {{ t('JRC_SERVICE_DESK.R2.unavailable') }}
     </p>
     <template v-else>
       <div
+        class="flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold"
+        :class="
+          ['internal', 'technical_team'].includes(audience)
+            ? 'border-n-amber-6 bg-n-amber-2 text-n-amber-11'
+            : 'border-n-blue-6 bg-n-blue-2 text-n-blue-11'
+        "
+        role="status"
+        data-testid="interaction-audience"
+      >
+        {{ audienceTitle }}
+      </div>
+      <div
         v-if="mode === 'conversation' && selectedDestination"
         class="flex flex-wrap items-center gap-2 rounded-lg bg-n-blue-2 p-3"
       >
-        <span class="text-xs break-all">{{
-          selectedDestination.recipient
-        }}</span>
+        <span class="text-xs break-all">
+          {{ selectedDestination.recipient }}
+        </span>
         <Button
           size="xs"
           type="button"
@@ -128,7 +154,10 @@ watch(files, selected => {
       >
         {{ t('JRC_SERVICE_DESK.REDESIGN_DETAIL.internal_help') }}
       </p>
-      <p v-else-if="mode === 'conversation'" class="text-sm text-n-slate-11">
+      <p
+        v-else-if="mode === 'conversation'"
+        class="text-sm text-n-slate-11"
+      >
         {{ t('JRC_SERVICE_DESK.REDESIGN_DETAIL.communication_help') }}
       </p>
       <label class="text-sm">
@@ -138,7 +167,11 @@ watch(files, selected => {
           :disabled="busy"
           class="w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
         >
-          <option v-for="value in allowedAudiences" :key="value" :value="value">
+          <option
+            v-for="value in allowedAudiences"
+            :key="value"
+            :value="value"
+          >
             {{ values.visibility[value] }}
           </option>
         </select>
@@ -173,19 +206,22 @@ watch(files, selected => {
       <p class="text-xs text-n-slate-11">
         {{ t('JRC_SERVICE_DESK.REDESIGN_DETAIL.file_limits') }}
       </p>
-      <ul v-if="files.length" class="grid gap-1">
+      <ul
+        v-if="files.length"
+        class="grid gap-1"
+      >
         <li
           v-for="(file, index) in files"
           :key="index"
           class="flex items-center justify-between gap-2 text-xs"
         >
-          <span class="break-all"
-            >{{ file.name }} ({{
+          <span class="break-all">
+            {{ file.name }} ({{
               t('JRC_SERVICE_DESK.REDESIGN_DETAIL.file_size_kb', {
                 size: Math.ceil(file.size / 1024),
               })
-            }})</span
-          >
+            }})
+          </span>
           <Button
             type="button"
             size="xs"
@@ -197,10 +233,17 @@ watch(files, selected => {
           />
         </li>
       </ul>
-      <p v-if="!filesValid" role="alert" class="text-sm text-n-ruby-11">
+      <p
+        v-if="!filesValid"
+        role="alert"
+        class="text-sm text-n-ruby-11"
+      >
         {{ t('JRC_SERVICE_DESK.REDESIGN_DETAIL.invalid_files') }}
       </p>
-      <div v-if="busy && uploadProgress !== null" class="grid gap-1">
+      <div
+        v-if="busy && uploadProgress !== null"
+        class="grid gap-1"
+      >
         <progress
           :value="uploadProgress"
           max="100"
@@ -215,7 +258,10 @@ watch(files, selected => {
           }}
         </p>
       </div>
-      <label v-if="previous" class="text-sm">
+      <label
+        v-if="previous"
+        class="text-sm"
+      >
         {{ t('JRC_SERVICE_DESK.COCKPIT.publication_reason') }}
         <input
           v-model="reason"
@@ -231,7 +277,10 @@ watch(files, selected => {
       >
         {{ t('JRC_SERVICE_DESK.R2.recipient') }} {{ options.recipient?.name }}
       </p>
-      <section v-if="audience === 'customer'" class="grid gap-2">
+      <section
+        v-if="audience === 'customer'"
+        class="grid gap-2"
+      >
         <div
           v-for="channel in options.channels"
           :key="channel.channel"
@@ -245,7 +294,10 @@ watch(files, selected => {
             />
             {{ values.channel[channel.channel] }}
           </label>
-          <p v-if="!channel.available" class="text-xs text-n-slate-11">
+          <p
+            v-if="!channel.available"
+            class="text-xs text-n-slate-11"
+          >
             {{ labels.reasons[channelReason(channel)] || labels.unavailable }}
           </p>
           <select
@@ -301,9 +353,9 @@ watch(files, selected => {
         >
           {{ delivery.recipient }} {{ values.channel[delivery.channel] }}
           {{ delivery.content }}
-          <span v-if="delivery.reason">{{
-            labels.reasons[delivery.reason] || labels.unavailable
-          }}</span>
+          <span v-if="delivery.reason">
+            {{ labels.reasons[delivery.reason] || labels.unavailable }}
+          </span>
         </p>
         <Button
           type="submit"
@@ -314,6 +366,12 @@ watch(files, selected => {
         />
       </section>
     </template>
-    <p v-if="feedback" role="status" class="text-sm">{{ labels[feedback] }}</p>
+    <p
+      v-if="feedback"
+      role="status"
+      class="text-sm"
+    >
+      {{ labels[feedback] }}
+    </p>
   </form>
 </template>

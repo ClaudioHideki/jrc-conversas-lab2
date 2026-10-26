@@ -1,4 +1,7 @@
 <script>
+import { computed } from 'vue';
+import { useMessageAttachments } from 'widget/composables/useMessageAttachments';
+import ProtectedAttachmentStatus from 'widget/components/ProtectedAttachmentStatus.vue';
 import UserMessageBubble from 'widget/components/UserMessageBubble.vue';
 import MessageReplyButton from 'widget/components/MessageReplyButton.vue';
 import ImageBubble from 'widget/components/ImageBubble.vue';
@@ -24,6 +27,7 @@ export default {
     FluentIcon,
     ReplyToChip,
     DragWrapper,
+    ProtectedAttachmentStatus,
   },
   mixins: [messageMixin],
   props: {
@@ -35,6 +39,9 @@ export default {
       type: Object,
       default: () => {},
     },
+  },
+  setup(props) {
+    return useMessageAttachments(computed(() => props.message));
   },
   data() {
     return {
@@ -133,31 +140,43 @@ export default {
               :style="{ backgroundColor: widgetColor }"
             >
               <div
-                v-for="attachment in message.attachments"
+                v-for="attachment in resolvedAttachments"
                 :key="attachment.id"
               >
-                <ImageBubble
-                  v-if="attachment.file_type === 'image' && !hasImageError"
-                  :url="attachment.data_url"
-                  :thumb="attachment.data_url"
-                  :readable-time="readableTime"
-                  @error="onImageLoadError"
+                <ProtectedAttachmentStatus
+                  v-if="
+                    attachment.service_desk_protected === true &&
+                    attachment.downloadState !== 'ready'
+                  "
+                  :filename="attachment.filename"
+                  :state="attachment.downloadState"
+                  @retry="retryAttachment(attachment.id)"
                 />
+                <template v-else>
+                  <ImageBubble
+                    v-if="attachment.file_type === 'image' && !hasImageError"
+                    :url="attachment.data_url"
+                    :thumb="attachment.data_url"
+                    :readable-time="readableTime"
+                    @error="onImageLoadError"
+                  />
 
-                <VideoBubble
-                  v-if="attachment.file_type === 'video' && !hasVideoError"
-                  :url="attachment.data_url"
-                  :readable-time="readableTime"
-                  @error="onVideoLoadError"
-                />
+                  <VideoBubble
+                    v-if="attachment.file_type === 'video' && !hasVideoError"
+                    :url="attachment.data_url"
+                    :readable-time="readableTime"
+                    @error="onVideoLoadError"
+                  />
 
-                <FileBubble
-                  v-else
-                  :url="attachment.data_url"
-                  :is-in-progress="isInProgress"
-                  :widget-color="widgetColor"
-                  is-user-bubble
-                />
+                  <FileBubble
+                    v-else
+                    :url="attachment.data_url"
+                    :filename="attachment.filename"
+                    :is-in-progress="isInProgress"
+                    :widget-color="widgetColor"
+                    is-user-bubble
+                  />
+                </template>
               </div>
             </div>
           </DragWrapper>

@@ -22,6 +22,8 @@ class RoomChannel < ApplicationCable::Channel
     data = { account_id: @current_account.id, users: ::OnlineStatusTracker.get_available_users(@current_account.id) }
     data[:contacts] = ::OnlineStatusTracker.get_available_contacts(@current_account.id) if @current_user.is_a? User
     ActionCable.server.broadcast(pubsub_token, { event: 'presence.update', data: data })
+  rescue Redis::BaseError => e
+    Rails.logger.warn(event: 'redis_presence_unavailable', account_id: @current_account.id, error_class: e.class.name)
   end
 
   def ensure_stream

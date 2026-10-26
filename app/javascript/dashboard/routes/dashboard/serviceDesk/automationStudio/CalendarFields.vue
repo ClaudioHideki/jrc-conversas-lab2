@@ -1,6 +1,11 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, getCurrentInstance, reactive, ref } from 'vue';
 import { validCalendar } from './calendarRules';
+import {
+  calendarIntervalsError,
+  formatCalendarIntervals,
+  parseCalendarIntervals,
+} from './calendarIntervals';
 import { useI18n } from 'vue-i18n';
 const props = defineProps({
   modelValue: { type: Object, required: true },
@@ -10,6 +15,8 @@ const emit = defineEmits(['update:modelValue']);
 const { t } = useI18n();
 const tr = key => t(`JRC_SERVICE_DESK.AUTOMATION_STUDIO.calendar.${key}`);
 const field = 'w-full rounded-lg border border-n-weak bg-n-solid-1 p-3 text-sm';
+const inputId = `sd-calendar-${getCurrentInstance().uid}`;
+const inputs = reactive({});
 const conditions = computed(
   () =>
     props.modelValue.conditions || {
@@ -27,16 +34,37 @@ function set(key, value) {
     conditions: { ...conditions.value, [key]: value },
   });
 }
-function dayValue(day) {
-  return (conditions.value.weekly[String(day)] || [])
-    .map(pair => pair.join('-'))
-    .join(',');
+function intervals(group, key) {
+  return conditions.value[group]?.[String(key)] ?? [];
 }
-function updateDay(day, value) {
-  const intervals = value.trim()
-    ? value.split(',').map(pair => pair.trim().split('-'))
-    : [];
-  set('weekly', { ...conditions.value.weekly, [String(day)]: intervals });
+function hoursValue(group, key) {
+  const rows = intervals(group, key);
+  const buffer = inputs[`${group}:${key}`];
+  return buffer?.signature === JSON.stringify(rows)
+    ? buffer.value
+    : formatCalendarIntervals(rows);
+}
+function hoursError(group, key) {
+  const error = calendarIntervalsError(intervals(group, key));
+  if (!error) return null;
+  return parseCalendarIntervals(hoursValue(group, key)).error || error;
+}
+function updateHours(group, key, value) {
+  const parsed = parseCalendarIntervals(value);
+  // Invalid text remains explicit in the private editing model. Publication
+  // gates reject it, so a previously valid value cannot be submitted silently.
+  const rows = parsed.valid ? parsed.rows : value;
+  inputs[`${group}:${key}`] = { value, signature: JSON.stringify(rows) };
+  set(group, { ...conditions.value[group], [String(key)]: rows });
+}
+function canonicalize(group, key) {
+  if (!hoursError(group, key)) delete inputs[`${group}:${key}`];
+}
+function repairable(group, key) {
+  return (
+    !!hoursError(group, key) &&
+    parseCalendarIntervals(hoursValue(group, key)).valid
+  );
 }
 const exceptionDate = ref('');
 function addException() {
@@ -50,12 +78,6 @@ function addException() {
     [exceptionDate.value]: [],
   });
   exceptionDate.value = '';
-}
-function updateException(date, input) {
-  const rows = input.trim()
-    ? input.split(',').map(pair => pair.trim().split('-'))
-    : [];
-  set('exceptions', { ...conditions.value.exceptions, [date]: rows });
 }
 function removeException(date) {
   const rows = { ...conditions.value.exceptions };
@@ -86,19 +108,44 @@ function removeException(date) {
         "
       />
     </label>
-    <label
+    <div
       v-for="day in [1, 2, 3, 4, 5, 6, 7]"
       :key="day"
       class="grid gap-1 text-sm"
     >
-      {{ tr(`day_${day}`) }}
+      <label :for="`${inputId}-day-${day}`">{{ tr(`day_${day}`) }}</label>
       <input
+        :id="`${inputId}-day-${day}`"
         :class="field"
-        :value="dayValue(day)"
+        :value="hoursValue('weekly', day)"
         :placeholder="tr('hours_example')"
-        @change="updateDay(day, $event.target.value)"
+        :aria-invalid="!!hoursError('weekly', day)"
+        :aria-describedby="
+          hoursError('weekly', day) ? `${inputId}-day-error-${day}` : undefined
+        "
+        @input="updateHours('weekly', day, $event.target.value)"
+        @blur="canonicalize('weekly', day)"
       />
-    </label>
+      <p
+        v-if="hoursError('weekly', day)"
+        :id="`${inputId}-day-error-${day}`"
+        role="alert"
+        class="text-xs text-n-amber-11"
+      >
+        {{ tr(hoursError('weekly', day)) }}
+      </p>
+      <button
+        v-if="repairable('weekly', day)"
+        type="button"
+        class="justify-self-start rounded-lg border border-n-blue-5 px-3 py-2 text-xs text-n-blue-11"
+        @click="
+          updateHours('weekly', day, hoursValue('weekly', day));
+          canonicalize('weekly', day);
+        "
+      >
+        {{ tr('repair_hours') }}
+      </button>
+    </div>
     <label class="grid gap-1 text-sm">
       {{ tr('holidays') }}
       <textarea
@@ -140,17 +187,24 @@ function removeException(date) {
         </button>
       </div>
       <div
-        v-for="(rows, date) in conditions.exceptions"
+        v-for="(_, date) in conditions.exceptions"
         :key="date"
         class="grid gap-2 sm:grid-cols-[8rem_minmax(0,1fr)_auto]"
       >
         <span class="py-3 text-sm">{{ date }}</span>
         <input
           :class="field"
-          :value="rows.map(pair => pair.join('-')).join(',')"
-          :aria-label="tr('exception_hours')"
+          :value="hoursValue('exceptions', date)"
+          :aria-label="`${tr('exception_hours')} ${date}`"
           :placeholder="tr('hours_example')"
-          @change="updateException(date, $event.target.value)"
+          :aria-invalid="!!hoursError('exceptions', date)"
+          :aria-describedby="
+            hoursError('exceptions', date)
+              ? `${inputId}-exception-error-${date}`
+              : undefined
+          "
+          @input="updateHours('exceptions', date, $event.target.value)"
+          @blur="canonicalize('exceptions', date)"
         />
         <button
           type="button"
@@ -159,6 +213,25 @@ function removeException(date) {
           @click="removeException(date)"
         >
           {{ tr('remove_exception') }}
+        </button>
+        <p
+          v-if="hoursError('exceptions', date)"
+          :id="`${inputId}-exception-error-${date}`"
+          role="alert"
+          class="text-xs text-n-amber-11 sm:col-span-3"
+        >
+          {{ tr(hoursError('exceptions', date)) }}
+        </p>
+        <button
+          v-if="repairable('exceptions', date)"
+          type="button"
+          class="justify-self-start rounded-lg border border-n-blue-5 px-3 py-2 text-xs text-n-blue-11 sm:col-span-3"
+          @click="
+            updateHours('exceptions', date, hoursValue('exceptions', date));
+            canonicalize('exceptions', date);
+          "
+        >
+          {{ tr('repair_hours') }}
         </button>
       </div>
     </section>

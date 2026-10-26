@@ -67,7 +67,9 @@ class Api::V1::Accounts::NotificationsController < Api::V1::Accounts::BaseContro
 
     if params[:primary_actor_type] == 'JrcServiceDesk::Ticket'
       ctx = JrcServiceDesk::OperationalContext.new(pundit_user)
-      @primary_actor = Pundit.policy_scope!(ctx.to_h, JrcServiceDesk::Ticket).find(params[:primary_actor_id])
+      raise ActiveRecord::RecordNotFound unless ctx.capability?(:sla_view)
+
+      @primary_actor = JrcServiceDesk::TicketPolicy::Scope.new(ctx.to_h, JrcServiceDesk::Ticket).resolve_for('sla_view').find(params[:primary_actor_id])
     elsif params[:primary_actor_type] == 'JrcRelationship::Action'
       @primary_actor = JrcRelationship::Context.new(Current.account_user).records(JrcRelationship::Action).find(params[:primary_actor_id])
     else

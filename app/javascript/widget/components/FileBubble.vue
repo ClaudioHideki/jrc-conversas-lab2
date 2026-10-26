@@ -11,6 +11,10 @@ export default {
       type: String,
       default: '',
     },
+    filename: {
+      type: String,
+      default: '',
+    },
     isInProgress: {
       type: Boolean,
       default: false,
@@ -28,7 +32,7 @@ export default {
     title() {
       return this.isInProgress
         ? this.$t('COMPONENTS.FILE_BUBBLE.UPLOADING')
-        : decodeURI(this.fileName);
+        : this.filename || decodeURI(this.fileName);
     },
     fileName() {
       return this.url.substring(this.url.lastIndexOf('/') + 1);
@@ -71,6 +75,7 @@ export default {
           target="_blank"
           :style="{ color: textColor }"
           :href="url"
+          :download="filename || undefined"
         >
           {{ $t('COMPONENTS.FILE_BUBBLE.DOWNLOAD') }}
         </a>

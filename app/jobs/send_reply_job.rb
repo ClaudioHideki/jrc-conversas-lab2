@@ -39,6 +39,7 @@ class SendReplyJob < ApplicationJob
   def deliver(message)
     return if message.additional_attributes.to_h['jrc_campaign_evolution'] == true
 
+    JrcServiceDesk::OutboundAttachments.authorize_message!(message)
     channel_name = message.conversation.inbox.channel.class.to_s
 
     return send_on_facebook_page(message) if channel_name == 'Channel::FacebookPage'
@@ -47,6 +48,8 @@ class SendReplyJob < ApplicationJob
     return unless service_class
 
     service_class.new(message: message).perform
+  rescue Pundit::NotAuthorizedError => e
+    message.update!(status: :failed, external_error: e.message)
   end
 
   private

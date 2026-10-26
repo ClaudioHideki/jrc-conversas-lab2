@@ -22,6 +22,10 @@ class JrcServiceDesk::TicketRecordPolicy < JrcServiceDesk::OperationalPolicy
     READ_CAPABILITIES.fetch(record.is_a?(Class) ? record.name : record.class.name, :unknown)
   end
 
+  def capability?(name)
+    super && (record.is_a?(Class) || parent_policy.scoped_permission?(name))
+  end
+
   def parent_policy
     JrcServiceDesk::TicketPolicy.new(user_context, record.ticket)
   end
@@ -31,7 +35,8 @@ class JrcServiceDesk::TicketRecordPolicy < JrcServiceDesk::OperationalPolicy
       name = scope.respond_to?(:klass) ? scope.klass.name : scope.name
       return scope.none unless operational_context.capability?(READ_CAPABILITIES.fetch(name, :unknown))
 
-      tickets = JrcServiceDesk::TicketPolicy::Scope.new(user_context, JrcServiceDesk::Ticket).resolve.select(:id)
+      tickets = JrcServiceDesk::TicketPolicy::Scope.new(user_context, JrcServiceDesk::Ticket)
+                                               .resolve_for(READ_CAPABILITIES.fetch(name, :unknown)).select(:id)
       unit_scope.where(ticket_id: tickets)
     end
   end

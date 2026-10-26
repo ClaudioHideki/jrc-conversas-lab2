@@ -46,7 +46,7 @@ RSpec.describe Enterprise::AutoAssignment::CapacityService, type: :service do
     create(:inbox_member, inbox: inbox, user: agent_at_capacity)
 
     # Mock online status
-    allow(OnlineStatusTracker).to receive(:get_available_users).and_return({
+    allow(OnlineStatusTracker).to receive(:effective_available_users).and_return({
                                                                              agent_with_capacity.id.to_s => 'online',
                                                                              agent_without_capacity.id.to_s => 'online',
                                                                              agent_at_capacity.id.to_s => 'online'
@@ -58,7 +58,7 @@ RSpec.describe Enterprise::AutoAssignment::CapacityService, type: :service do
 
     # Create existing assignments for agent_at_capacity (at limit)
     3.times do
-      create(:conversation, inbox: inbox, assignee: agent_at_capacity, status: :open)
+      create(:conversation, account: account, inbox: inbox, assignee: agent_at_capacity, status: :open)
     end
   end
 
@@ -84,6 +84,14 @@ RSpec.describe Enterprise::AutoAssignment::CapacityService, type: :service do
       expect(capacity_service.agent_has_capacity?(agent_without_capacity, inbox)).to be true
       expect(capacity_service.agent_has_capacity?(agent_at_capacity, inbox)).to be false
     end
+
+    it 'keeps capacity independent of automatic assignment exclusion and configured availability' do
+      agent_with_capacity.account_users.find_by!(account: account).update!(auto_assignment_enabled: false, availability: :offline)
+      inbox.update!(enable_auto_assignment: false)
+
+      expect(described_class.new.agent_has_capacity?(agent_with_capacity, inbox)).to be(true)
+      expect(described_class.new.agent_has_capacity?(agent_at_capacity, inbox)).to be(false)
+    end
   end
 
   describe 'exclusion policy (zero conversation limit)' do
@@ -101,7 +109,7 @@ RSpec.describe Enterprise::AutoAssignment::CapacityService, type: :service do
 
       create(:inbox_member, inbox: inbox, user: excluded_agent)
 
-      allow(OnlineStatusTracker).to receive(:get_available_users).and_return({
+      allow(OnlineStatusTracker).to receive(:effective_available_users).and_return({
                                                                                excluded_agent.id.to_s => 'online',
                                                                                agent_with_capacity.id.to_s => 'online',
                                                                                agent_without_capacity.id.to_s => 'online',
@@ -140,7 +148,7 @@ RSpec.describe Enterprise::AutoAssignment::CapacityService, type: :service do
 
     it 'assigns to agents with available capacity' do
       # Create conversation before assignment
-      conversation = create(:conversation, inbox: inbox, assignee: nil, status: :open)
+      conversation = create(:conversation, account: account, inbox: inbox, assignee: nil, status: :open)
 
       # Mock the selector to prefer agent_at_capacity (but should skip due to capacity)
       selector = instance_double(AutoAssignment::RoundRobinSelector)
@@ -157,10 +165,10 @@ RSpec.describe Enterprise::AutoAssignment::CapacityService, type: :service do
 
     it 'returns false when all agents are at capacity' do
       # Fill up remaining agents
-      3.times { create(:conversation, inbox: inbox, assignee: agent_with_capacity, status: :open) }
+      3.times { create(:conversation, account: account, inbox: inbox, assignee: agent_with_capacity, status: :open) }
 
       # agent_without_capacity has no limit, so should still be available
-      conversation2 = create(:conversation, inbox: inbox, assignee: nil, status: :open)
+      conversation2 = create(:conversation, account: account, inbox: inbox, assignee: nil, status: :open)
       assigned_count = service.perform_bulk_assignment(limit: 1)
       expect(assigned_count).to eq(1)
       expect(conversation2.reload.assignee).to eq(agent_without_capacity)

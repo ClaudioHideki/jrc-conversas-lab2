@@ -44,14 +44,16 @@ const details = computed(() =>
   props.compact
     ? Object.fromEntries(
         [
+          'status',
+          'priority',
+          'service',
+          'category',
           'requester',
           'unit',
           'queue',
           'team',
           'assignee',
-          'status',
-          'priority',
-          'updated_at',
+          'opened_at',
         ].map(key => [key, allDetails.value[key]])
       )
     : allDetails.value
@@ -59,18 +61,29 @@ const details = computed(() =>
 </script>
 
 <template>
-  <dl class="sd-detail-list">
-    <template v-for="(value, field) in details" :key="field">
-      <dt>
+  <dl
+    class="grid grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] gap-x-3 gap-y-3 text-sm"
+  >
+    <template
+      v-for="(value, field) in details"
+      :key="field"
+    >
+      <dt class="text-n-slate-11">
         {{ t(`JRC_SERVICE_DESK.FIELDS.${field}`) }}
       </dt>
-      <dd>
+      <dd class="min-w-0 break-words font-medium">
         {{ value || t('JRC_SERVICE_DESK.COMMON.no_value') }}
         <span
           v-if="field === 'requester' && ticket.requester?.phone_number"
           class="block text-xs text-n-slate-11"
         >
           {{ ticket.requester.phone_number }}
+        </span>
+        <span
+          v-if="field === 'requester' && ticket.requester?.email"
+          class="mt-1 block break-all text-xs text-n-blue-11"
+        >
+          {{ ticket.requester.email }}
         </span>
       </dd>
     </template>

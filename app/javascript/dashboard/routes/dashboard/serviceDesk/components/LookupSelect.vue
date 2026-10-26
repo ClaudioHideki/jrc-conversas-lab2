@@ -16,6 +16,7 @@ const props = defineProps({
   currentName: { type: String, default: '' },
   currentPhone: { type: String, default: '' },
   teamId: { type: String, default: '' },
+  queueId: { type: String, default: '' },
   valueKey: {
     type: String,
     default: 'id',
@@ -109,6 +110,9 @@ const load = () => {
     ...(props.resource === 'assignees' && props.teamId
       ? { team_id: props.teamId }
       : {}),
+    ...(props.resource === 'assignees' && props.queueId
+      ? { queue_id: props.queueId }
+      : {}),
   });
 };
 watch(
@@ -117,6 +121,7 @@ watch(
     () => props.unitId,
     () => props.resource,
     () => props.teamId,
+    () => props.queueId,
     () => props.companyId,
     () => props.refreshKey,
   ],

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_10_24_235901) do
+ActiveRecord::Schema[7.1].define(version: 2026_10_25_140000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -54,6 +54,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_24_235901) do
     t.bigint "agent_capacity_policy_id"
     t.boolean "crm_enabled", default: false, null: false
     t.boolean "jrc_projects_enabled", default: false, null: false
+    t.boolean "auto_assignment_enabled", default: true, null: false
     t.index ["account_id", "id"], name: "jrc_sd_ref_account_users", unique: true
     t.index ["account_id", "user_id"], name: "uniq_user_id_per_account_id", unique: true
     t.index ["account_id"], name: "index_account_users_on_account_id"
@@ -868,6 +869,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_24_235901) do
     t.text "cached_label_list"
     t.bigint "assignee_agent_bot_id"
     t.bigint "jrc_effect_control_revision", default: 0, null: false
+    t.datetime "auto_assignment_requested_at"
     t.index ["account_id", "display_id"], name: "index_conversations_on_account_id_and_display_id", unique: true
     t.index ["account_id", "id"], name: "index_conversations_on_id_and_account_id"
     t.index ["account_id", "id"], name: "jrc_sd_ref_conversations", unique: true
@@ -879,6 +881,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_24_235901) do
     t.index ["contact_inbox_id"], name: "index_conversations_on_contact_inbox_id"
     t.index ["first_reply_created_at"], name: "index_conversations_on_first_reply_created_at"
     t.index ["identifier", "account_id"], name: "index_conversations_on_identifier_and_account_id"
+    t.index ["inbox_id", "id"], name: "index_conversations_on_pending_auto_assignment", where: "((auto_assignment_requested_at IS NOT NULL) AND (assignee_id IS NULL) AND (status = 0))"
     t.index ["inbox_id"], name: "index_conversations_on_inbox_id"
     t.index ["priority"], name: "index_conversations_on_priority"
     t.index ["status", "account_id"], name: "index_conversations_on_status_and_account_id"
@@ -4631,6 +4634,26 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_24_235901) do
     t.index ["account_id", "unit_id", "account_user_id", "kind", "code"], name: "jrc_sd_draft_identity", unique: true
   end
 
+  create_table "jrc_service_desk_automation_publications", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "unit_id", null: false
+    t.bigint "published_by_membership_id", null: false
+    t.string "kind", null: false
+    t.string "code", null: false
+    t.string "name", null: false
+    t.text "description", default: "", null: false
+    t.bigint "service_id"
+    t.integer "version", null: false
+    t.boolean "enabled", default: false, null: false
+    t.jsonb "definition", null: false
+    t.jsonb "native_versions", null: false
+    t.string "digest", limit: 64, null: false
+    t.datetime "created_at", null: false
+    t.index ["account_id", "unit_id", "id"], name: "jrc_sd_automation_publication_scope", unique: true
+    t.index ["account_id", "unit_id", "kind", "code", "version"], name: "jrc_sd_automation_publication_version", unique: true
+    t.check_constraint "(kind::text = ANY (ARRAY['lifecycle'::character varying, 'operational'::character varying]::text[])) AND version > 0", name: "jrc_sd_automation_publication_kind"
+  end
+
   create_table "jrc_service_desk_case_links", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.bigint "unit_id", null: false
@@ -4978,6 +5001,27 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_24_235901) do
     t.index ["account_id", "code"], name: "jrc_sd_operator_code", unique: true
     t.index ["account_id", "id"], name: "jrc_sd_operator_ref", unique: true
     t.check_constraint "btrim(code::text) <> ''::text AND btrim(name::text) <> ''::text", name: "jrc_sd_operator_companies_names"
+  end
+
+  create_table "jrc_service_desk_portal_grants", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "user_id", null: false
+    t.bigint "company_id", null: false
+    t.bigint "contact_id", null: false
+    t.bigint "inbox_id", null: false
+    t.bigint "contact_inbox_id", null: false
+    t.bigint "granted_by_id", null: false
+    t.boolean "active", default: false, null: false
+    t.string "role", default: "requester", null: false
+    t.jsonb "visible_contact_ids", default: [], null: false
+    t.boolean "expose_sla", default: false, null: false
+    t.datetime "expires_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "account_id", "company_id", "contact_inbox_id"], name: "jrc_sd_pg_identity", unique: true
+    t.index ["user_id", "active"], name: "jrc_sd_pg_access"
+    t.check_constraint "jsonb_typeof(visible_contact_ids) = 'array'::text AND jsonb_array_length(visible_contact_ids) <= 100", name: "jrc_sd_pg_visible_contacts"
+    t.check_constraint "role::text = ANY (ARRAY['requester'::character varying, 'manager'::character varying, 'organization_admin'::character varying]::text[])", name: "jrc_sd_pg_role"
   end
 
   create_table "jrc_service_desk_portal_requests", force: :cascade do |t|
@@ -5413,11 +5457,17 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_24_235901) do
     t.integer "capacity"
     t.jsonb "skills", default: [], null: false
     t.boolean "administrative_actor", default: false, null: false
+    t.boolean "manual_assignment_enabled", default: true, null: false
+    t.bigint "team_id"
+    t.bigint "queue_id"
+    t.boolean "restricted_supervision", default: false, null: false
+    t.jsonb "supervision_grants", default: [], null: false
     t.index ["account_id", "account_user_id", "active", "unit_id"], name: "jrc_sd_membership_access"
     t.index ["account_id", "unit_id", "account_user_id", "administrative_actor"], name: "jrc_sd_membership_unique", unique: true
     t.index ["account_id", "unit_id", "id"], name: "jrc_sd_unit_memberships_scope_ref", unique: true
     t.check_constraint "NOT administrative_actor OR NOT active AND availability::text = 'unavailable'::text AND capacity IS NULL AND skills = '[]'::jsonb", name: "jrc_sd_membership_audit_only"
     t.check_constraint "capacity IS NULL OR capacity > 0", name: "jrc_sd_capacity_positive"
+    t.check_constraint "jsonb_typeof(supervision_grants) = 'array'::text", name: "jrc_sd_membership_supervision_array"
   end
 
   create_table "jrc_service_desk_units", force: :cascade do |t|
@@ -6595,6 +6645,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_24_235901) do
   add_foreign_key "jrc_service_desk_automation_drafts", "account_users", column: ["account_id", "account_user_id"], primary_key: ["account_id", "id"], name: "jrc_sd_draft_member"
   add_foreign_key "jrc_service_desk_automation_drafts", "accounts"
   add_foreign_key "jrc_service_desk_automation_drafts", "jrc_service_desk_units", column: ["account_id", "unit_id"], primary_key: ["account_id", "id"], name: "jrc_sd_draft_unit"
+  add_foreign_key "jrc_service_desk_automation_publications", "jrc_service_desk_services", column: ["account_id", "unit_id", "service_id"], primary_key: ["account_id", "unit_id", "id"], name: "jrc_sd_ap_service"
+  add_foreign_key "jrc_service_desk_automation_publications", "jrc_service_desk_unit_memberships", column: ["account_id", "unit_id", "published_by_membership_id"], primary_key: ["account_id", "unit_id", "id"], name: "jrc_sd_ap_publisher"
+  add_foreign_key "jrc_service_desk_automation_publications", "jrc_service_desk_units", column: ["account_id", "unit_id"], primary_key: ["account_id", "id"], name: "jrc_sd_ap_unit"
   add_foreign_key "jrc_service_desk_case_links", "jrc_service_desk_incidents", column: ["account_id", "unit_id", "incident_id"], primary_key: ["account_id", "unit_id", "id"], name: "jrc_sd_case_link_source_fk"
   add_foreign_key "jrc_service_desk_case_links", "jrc_service_desk_incidents", column: ["account_id", "unit_id", "related_incident_id"], primary_key: ["account_id", "unit_id", "id"], name: "jrc_sd_case_link_target_fk"
   add_foreign_key "jrc_service_desk_case_links", "jrc_service_desk_tickets", column: ["account_id", "unit_id", "ticket_id"], primary_key: ["account_id", "unit_id", "id"], name: "jrc_sd_case_link_ticket_fk"
@@ -6669,6 +6722,13 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_24_235901) do
   add_foreign_key "jrc_service_desk_operational_rule_versions", "jrc_service_desk_unit_memberships", column: ["account_id", "unit_id", "published_by_membership_id"], primary_key: ["account_id", "unit_id", "id"], name: "jrc_sd_rule_publisher_fk"
   add_foreign_key "jrc_service_desk_operational_rule_versions", "jrc_service_desk_units", column: ["account_id", "unit_id"], primary_key: ["account_id", "id"], name: "jrc_sd_rule_unit_fk"
   add_foreign_key "jrc_service_desk_operator_companies", "accounts", name: "jrc_sd_operator_companies_account_fk"
+  add_foreign_key "jrc_service_desk_portal_grants", "accounts"
+  add_foreign_key "jrc_service_desk_portal_grants", "companies", column: ["account_id", "company_id"], primary_key: ["account_id", "id"], name: "jrc_sd_pg_companies"
+  add_foreign_key "jrc_service_desk_portal_grants", "contact_inboxes", column: ["contact_id", "inbox_id", "contact_inbox_id"], primary_key: ["contact_id", "inbox_id", "id"], name: "jrc_sd_pg_native_identity"
+  add_foreign_key "jrc_service_desk_portal_grants", "contacts", column: ["account_id", "contact_id"], primary_key: ["account_id", "id"], name: "jrc_sd_pg_contacts"
+  add_foreign_key "jrc_service_desk_portal_grants", "inboxes", column: ["account_id", "inbox_id"], primary_key: ["account_id", "id"], name: "jrc_sd_pg_inboxes"
+  add_foreign_key "jrc_service_desk_portal_grants", "users"
+  add_foreign_key "jrc_service_desk_portal_grants", "users", column: "granted_by_id"
   add_foreign_key "jrc_service_desk_portal_requests", "contact_inboxes", column: ["contact_id", "inbox_id", "contact_inbox_id"], primary_key: ["contact_id", "inbox_id", "id"], name: "jrc_sd_portal_identity_fk"
   add_foreign_key "jrc_service_desk_portal_requests", "contacts", column: ["account_id", "contact_id"], primary_key: ["account_id", "id"], name: "jrc_sd_portal_contact_fk"
   add_foreign_key "jrc_service_desk_portal_requests", "inboxes", column: ["account_id", "inbox_id"], primary_key: ["account_id", "id"], name: "jrc_sd_portal_inbox_fk"
@@ -6764,7 +6824,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_24_235901) do
   add_foreign_key "jrc_service_desk_tickets", "teams", column: ["account_id", "team_id"], primary_key: ["account_id", "id"], name: "jrc_sd_ticket_team_fk"
   add_foreign_key "jrc_service_desk_unit_memberships", "account_users", column: ["account_id", "account_user_id"], primary_key: ["account_id", "id"], name: "jrc_sd_membership_account_user_fk"
   add_foreign_key "jrc_service_desk_unit_memberships", "accounts", name: "jrc_sd_unit_memberships_account_fk"
+  add_foreign_key "jrc_service_desk_unit_memberships", "jrc_service_desk_queues", column: ["account_id", "unit_id", "queue_id"], primary_key: ["account_id", "unit_id", "id"], name: "jrc_sd_membership_queue_fk"
   add_foreign_key "jrc_service_desk_unit_memberships", "jrc_service_desk_units", column: ["account_id", "unit_id"], primary_key: ["account_id", "id"], name: "jrc_sd_unit_memberships_unit_fk"
+  add_foreign_key "jrc_service_desk_unit_memberships", "teams", column: ["account_id", "team_id"], primary_key: ["account_id", "id"], name: "jrc_sd_membership_team_fk"
   add_foreign_key "jrc_service_desk_units", "accounts", name: "jrc_sd_units_account_fk"
   add_foreign_key "jrc_service_desk_units", "jrc_service_desk_operator_companies", column: ["account_id", "operator_company_id"], primary_key: ["account_id", "id"], name: "jrc_sd_unit_operator_fk"
   add_foreign_key "sales_activities", "accounts"
@@ -7525,6 +7587,14 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_24_235901) do
     ALTER TABLE "jrc_relationship_cadence_steps" ADD CONSTRAINT "rel_cadence_step_state" CHECK ((((state)::text = ANY ((ARRAY['pending'::character varying, 'applied'::character varying, 'canceled'::character varying])::text[])) AND ((ordinal >= 0) AND (ordinal <= 49)) AND (((state)::text = 'applied'::text) = (receipt IS NOT NULL))));
   JRC_SCHEMA_SQL_0bdc96bb434b
 
+  execute <<~'JRC_SCHEMA_SQL_6b3255b193bb'
+    ALTER TABLE "jrc_service_desk_automation_publications" DROP CONSTRAINT "jrc_sd_automation_publication_kind";
+  JRC_SCHEMA_SQL_6b3255b193bb
+
+  execute <<~'JRC_SCHEMA_SQL_4ce5b70a3ba8'
+    ALTER TABLE "jrc_service_desk_automation_publications" ADD CONSTRAINT "jrc_sd_automation_publication_kind" CHECK ((((kind)::text = ANY ((ARRAY['lifecycle'::character varying, 'operational'::character varying])::text[])) AND (version > 0)));
+  JRC_SCHEMA_SQL_4ce5b70a3ba8
+
   execute <<~'JRC_SCHEMA_SQL_3fa9232f87de'
     ALTER TABLE "jrc_service_desk_case_links" DROP CONSTRAINT "jrc_sd_case_link_one_target";
   JRC_SCHEMA_SQL_3fa9232f87de
@@ -7712,6 +7782,22 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_24_235901) do
   execute <<~'JRC_SCHEMA_SQL_5d9d84f109ef'
     ALTER TABLE "jrc_service_desk_operator_companies" ADD CONSTRAINT "jrc_sd_operator_companies_names" CHECK (((btrim((code)::text) <> ''::text) AND (btrim((name)::text) <> ''::text)));
   JRC_SCHEMA_SQL_5d9d84f109ef
+
+  execute <<~'JRC_SCHEMA_SQL_7f2d6d1f2b15'
+    ALTER TABLE "jrc_service_desk_portal_grants" DROP CONSTRAINT "jrc_sd_pg_role";
+  JRC_SCHEMA_SQL_7f2d6d1f2b15
+
+  execute <<~'JRC_SCHEMA_SQL_37200f101565'
+    ALTER TABLE "jrc_service_desk_portal_grants" ADD CONSTRAINT "jrc_sd_pg_role" CHECK (((role)::text = ANY ((ARRAY['requester'::character varying, 'manager'::character varying, 'organization_admin'::character varying])::text[])));
+  JRC_SCHEMA_SQL_37200f101565
+
+  execute <<~'JRC_SCHEMA_SQL_d1330ba4bb9b'
+    ALTER TABLE "jrc_service_desk_portal_grants" DROP CONSTRAINT "jrc_sd_pg_visible_contacts";
+  JRC_SCHEMA_SQL_d1330ba4bb9b
+
+  execute <<~'JRC_SCHEMA_SQL_725d783fd163'
+    ALTER TABLE "jrc_service_desk_portal_grants" ADD CONSTRAINT "jrc_sd_pg_visible_contacts" CHECK (((jsonb_typeof(visible_contact_ids) = 'array'::text) AND (jsonb_array_length(visible_contact_ids) <= 100)));
+  JRC_SCHEMA_SQL_725d783fd163
 
   execute <<~'JRC_SCHEMA_SQL_2f91ac6c7782'
     ALTER TABLE "jrc_service_desk_priorities" DROP CONSTRAINT "jrc_sd_priorities_names";
@@ -8001,6 +8087,14 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_24_235901) do
     ALTER TABLE "jrc_service_desk_unit_memberships" ADD CONSTRAINT "jrc_sd_membership_audit_only" CHECK (((NOT administrative_actor) OR ((NOT active) AND ((availability)::text = 'unavailable'::text) AND (capacity IS NULL) AND (skills = '[]'::jsonb))));
   JRC_SCHEMA_SQL_4c85c3281f41
 
+  execute <<~'JRC_SCHEMA_SQL_f98e6a9ffe40'
+    ALTER TABLE "jrc_service_desk_unit_memberships" DROP CONSTRAINT "jrc_sd_membership_supervision_array";
+  JRC_SCHEMA_SQL_f98e6a9ffe40
+
+  execute <<~'JRC_SCHEMA_SQL_33377c25d9c4'
+    ALTER TABLE "jrc_service_desk_unit_memberships" ADD CONSTRAINT "jrc_sd_membership_supervision_array" CHECK ((jsonb_typeof(supervision_grants) = 'array'::text));
+  JRC_SCHEMA_SQL_33377c25d9c4
+
   execute <<~'JRC_SCHEMA_SQL_9745c9fb6417'
     ALTER TABLE "jrc_service_desk_units" DROP CONSTRAINT "jrc_sd_units_names";
   JRC_SCHEMA_SQL_9745c9fb6417
@@ -8224,6 +8318,14 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_24_235901) do
   execute <<~'JRC_SCHEMA_SQL_511e472098e1'
     CREATE INDEX index_contacts_on_nonempty_fields ON public.contacts USING btree (account_id, email, phone_number, identifier) WHERE (((email)::text <> ''::text) OR ((phone_number)::text <> ''::text) OR ((identifier)::text <> ''::text));
   JRC_SCHEMA_SQL_511e472098e1
+
+  execute <<~'JRC_SCHEMA_SQL_1f517f379c03'
+    DROP INDEX "index_conversations_on_pending_auto_assignment";
+  JRC_SCHEMA_SQL_1f517f379c03
+
+  execute <<~'JRC_SCHEMA_SQL_f1a589f8a7f6'
+    CREATE INDEX index_conversations_on_pending_auto_assignment ON public.conversations USING btree (inbox_id, id) WHERE ((auto_assignment_requested_at IS NOT NULL) AND (assignee_id IS NULL) AND (status = 0));
+  JRC_SCHEMA_SQL_f1a589f8a7f6
 
   execute <<~'JRC_SCHEMA_SQL_34295cdc4791'
     DROP INDEX "index_email_templates_on_account_scope";

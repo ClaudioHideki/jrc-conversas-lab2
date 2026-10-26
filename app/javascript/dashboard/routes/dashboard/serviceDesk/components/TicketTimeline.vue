@@ -17,13 +17,19 @@ import {
   conversationGroups,
   filterConversations,
 } from '../helpers/conversationPresentation';
-import { visibleTimelineItems } from '../helpers/detailExperience';
+import {
+  visibleTimelineItems,
+  outgoingInteraction,
+} from '../helpers/detailExperience';
 import { newRequestKey } from '../helpers/drafts';
 
 const props = defineProps({
   ticket: { type: Object, required: true },
   revision: { type: Number, default: 0 },
   onlyFiles: Boolean,
+  compact: Boolean,
+  hideAttachments: Boolean,
+  statusOnly: Boolean,
   selectionLocked: Boolean,
   conversations: { type: Array, default: () => [] },
   view: { type: String, default: 'all' },
@@ -73,9 +79,16 @@ const currentRequest = (context, ticket, turn) =>
   session.state.status === 'ready' &&
   ticket.account_id === props.ticket.account_id &&
   ticket.id === props.ticket.id;
-const visibleItems = computed(() =>
-  visibleTimelineItems(items.value, effectiveView.value)
-);
+const visibleItems = computed(() => {
+  const rows = visibleTimelineItems(items.value, effectiveView.value);
+  return props.statusOnly
+    ? rows.filter(row =>
+        ['ticket_created', 'status_changed', 'lifecycle_transitioned'].includes(
+          row.event_type
+        )
+      )
+    : rows;
+});
 const conversationFilter = ref('all');
 const conversationSearch = ref('');
 const selectedConversation = ref('');
@@ -314,13 +327,13 @@ onBeforeUnmount(() => {
 <template>
   <section class="grid gap-3">
     <form
-      v-if="effectiveView === 'history'"
+      v-if="effectiveView === 'history' && !compact"
       class="grid gap-3 rounded-lg border border-n-weak bg-n-solid-2 p-3 sm:grid-cols-2"
       @submit.prevent="applyFilters"
     >
-      <label class="grid gap-1 text-xs"
-        >{{ t('JRC_SERVICE_DESK.REDESIGN_DETAIL.event_type')
-        }}<select
+      <label class="grid gap-1 text-xs">
+        {{ t('JRC_SERVICE_DESK.REDESIGN_DETAIL.event_type') }}
+        <select
           v-model="filters.event_type"
           class="rounded-lg border border-n-weak bg-n-solid-1 p-2"
         >
@@ -332,29 +345,31 @@ onBeforeUnmount(() => {
           >
             {{ item.label }}
           </option>
-        </select></label
-      >
+        </select>
+      </label>
       <LookupSelect
         v-model="filters.author_id"
         resource="assignees"
         :unit-id="ticket.unit_id"
         :label="t('JRC_SERVICE_DESK.REDESIGN_DETAIL.author')"
       />
-      <label class="grid gap-1 text-xs"
-        >{{ t('JRC_SERVICE_DESK.COMMON.date_from')
-        }}<input
+      <label class="grid gap-1 text-xs">
+        {{ t('JRC_SERVICE_DESK.COMMON.date_from') }}
+        <input
           v-model="filters.date_from"
           type="date"
           class="rounded-lg border border-n-weak bg-n-solid-1 p-2"
-      /></label>
-      <label class="grid gap-1 text-xs"
-        >{{ t('JRC_SERVICE_DESK.COMMON.date_to')
-        }}<input
+        />
+      </label>
+      <label class="grid gap-1 text-xs">
+        {{ t('JRC_SERVICE_DESK.COMMON.date_to') }}
+        <input
           v-model="filters.date_to"
           type="date"
           :min="filters.date_from"
           class="rounded-lg border border-n-weak bg-n-solid-1 p-2"
-      /></label>
+        />
+      </label>
       <div class="col-span-full flex gap-2">
         <Button
           type="submit"
@@ -366,7 +381,8 @@ onBeforeUnmount(() => {
               filters.date_from > filters.date_to)
           "
           :label="t('JRC_SERVICE_DESK.COMMON.apply')"
-        /><Button
+        />
+        <Button
           type="button"
           size="xs"
           color="slate"
@@ -437,23 +453,29 @@ onBeforeUnmount(() => {
             "
             @click="selectedConversation = group.key"
           >
-            <span class="block text-xs font-medium"
-              >{{ channelLabel(group.channel) }} / {{ groupTitle(group) }}</span
-            >
-            <span class="mt-1 block truncate text-xs text-n-slate-11">{{
-              group.latest?.body ||
-              group.latest?.content ||
-              group.latest?.title ||
-              labels.empty
-            }}</span>
+            <span class="block text-xs font-medium">
+              {{ channelLabel(group.channel) }} / {{ groupTitle(group) }}
+            </span>
+            <span class="mt-1 block truncate text-xs text-n-slate-11">
+              {{
+                group.latest?.body ||
+                group.latest?.content ||
+                group.latest?.title ||
+                labels.empty
+              }}
+            </span>
             <time
               class="mt-1 block text-xs text-n-slate-10"
               :datetime="group.latest?.created_at"
-              >{{ formatTimestamp(group.latest?.created_at, locale) }}</time
             >
+              {{ formatTimestamp(group.latest?.created_at, locale) }}
+            </time>
           </button>
         </div>
-        <p v-if="selectionLocked" class="mt-3 text-xs text-n-amber-11">
+        <p
+          v-if="selectionLocked"
+          class="mt-3 text-xs text-n-amber-11"
+        >
           {{ t('JRC_SERVICE_DESK.REFINEMENT.conversations.draft_lock') }}
         </p>
       </aside>
@@ -487,49 +509,60 @@ onBeforeUnmount(() => {
         <article
           v-for="row in displayedItems"
           :key="row.key"
-          class="grid gap-2 rounded-xl border border-n-weak p-4"
+          class="grid gap-2 rounded-xl border border-n-weak"
           :class="[
+            compact ? 'p-2' : 'p-4',
             effectiveView === 'notes'
               ? 'bg-n-amber-2'
-              : row.message_type === 'outgoing' || row.kind === 'delivery'
+              : outgoingInteraction(row)
                 ? 'bg-n-blue-2'
                 : 'bg-n-solid-1',
             isConversation
-              ? row.message_type === 'outgoing' || row.kind === 'delivery'
+              ? outgoingInteraction(row)
                 ? 'w-fit max-w-[92%] justify-self-end'
                 : 'w-fit max-w-[92%] justify-self-start'
               : '',
           ]"
         >
           <div
-            v-if="row.kind !== 'event'"
+            v-if="row.kind !== 'event' && !compact"
             class="flex flex-wrap items-start justify-between gap-2 text-xs text-n-slate-11"
           >
             <p>
-              <span class="font-semibold text-n-slate-12">{{
-                row.author?.name || t('JRC_SERVICE_DESK.COMMON.not_informed')
-              }}</span>
+              <span class="font-semibold text-n-slate-12">
+                {{
+                  row.author?.name || t('JRC_SERVICE_DESK.COMMON.not_informed')
+                }}
+              </span>
               · {{ labels.kinds[row.kind] }}
-              <span v-if="row.channel"
-                >· {{ values.channel[row.channel] }}</span
-              >
+              <span v-if="row.channel">
+                · {{ values.channel[row.channel] }}
+              </span>
             </p>
-            <time :datetime="row.created_at">{{
-              formatTimestamp(row.created_at, locale)
-            }}</time>
+            <time :datetime="row.created_at">
+              {{ formatTimestamp(row.created_at, locale) }}
+            </time>
           </div>
-          <p v-if="row.visibility" class="text-xs font-medium text-n-slate-11">
+          <p
+            v-if="row.visibility && !compact"
+            class="text-xs font-medium text-n-slate-11"
+          >
             {{ values.visibility[row.visibility] }}
           </p>
-          <p v-if="row.title" class="font-medium text-sm">{{ row.title }}</p>
           <p
-            v-if="row.body && !onlyFiles"
+            v-if="row.title && !compact"
+            class="font-medium text-sm"
+          >
+            {{ row.title }}
+          </p>
+          <p
+            v-if="row.body && !onlyFiles && !compact"
             class="whitespace-pre-wrap break-words text-sm"
           >
             {{ row.body }}
           </p>
           <p
-            v-if="row.comment && !onlyFiles"
+            v-if="row.comment && !onlyFiles && !compact"
             class="whitespace-pre-wrap text-sm"
           >
             {{ row.comment }}
@@ -539,16 +572,22 @@ onBeforeUnmount(() => {
             :event="row"
             :ticket="ticket"
           />
-          <p v-if="row.status && !onlyFiles" class="text-xs text-n-slate-11">
+          <p
+            v-if="row.status && !onlyFiles && !compact"
+            class="text-xs text-n-slate-11"
+          >
             {{ messageState(row) }}
           </p>
-          <template v-if="row.kind === 'delivery'">
+          <template v-if="row.kind === 'delivery' && !compact">
             <p class="text-sm">
               {{ values.channel[row.channel] }} ·
               {{ values.delivery[row.state] }} ·
               {{ row.recipient }}
             </p>
-            <p v-if="row.reason" class="text-xs text-n-amber-11">
+            <p
+              v-if="row.reason"
+              class="text-xs text-n-amber-11"
+            >
               {{ labels.reasons[row.reason] || labels.unavailable }}
             </p>
             <p class="whitespace-pre-wrap break-words text-sm">
@@ -584,61 +623,76 @@ onBeforeUnmount(() => {
               "
             />
           </template>
-          <div
-            v-for="attachment in [
-              ...(row.attachments || []),
-              ...(row.recordings || []),
-            ]"
-            :key="attachment.id"
-            class="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-n-solid-2 p-3"
-          >
-            <div class="min-w-0 flex-1">
-              <p class="break-all text-sm font-medium">
-                {{ attachment.filename }}
-              </p>
-              <p v-if="attachment.byte_size" class="text-xs text-n-slate-11">
-                {{ fileSize(attachment.byte_size) }} ·
-                {{ attachment.content_type }}
-              </p>
-            </div>
-            <div class="flex flex-wrap gap-1">
-              <Button
-                v-if="canPreview(attachment)"
-                size="xs"
-                color="slate"
-                variant="ghost"
-                :label="t('JRC_SERVICE_DESK.COMMON.preview')"
-                :disabled="attachment.scan_state !== 'clean'"
-                @click="download(row, attachment, true)"
-              />
-              <Button
-                size="xs"
-                color="slate"
-                variant="outline"
-                icon="i-lucide-download"
-                :label="t('JRC_SERVICE_DESK.REDESIGN_DETAIL.download')"
-                :disabled="attachment.scan_state !== 'clean'"
-                @click="download(row, attachment)"
-              />
-              <Button
-                v-if="row.kind === 'note' && attachment.permissions?.destroy"
-                size="xs"
-                color="ruby"
-                variant="ghost"
-                icon="i-lucide-trash-2"
-                :label="t('JRC_SERVICE_DESK.REDESIGN_DETAIL.delete')"
-                @click="openAction('file', row, attachment)"
-              />
-            </div>
-            <p
-              v-if="attachment.scan_state !== 'clean'"
-              class="w-full text-xs text-n-slate-11"
+          <template v-if="!hideAttachments">
+            <div
+              v-for="attachment in [
+                ...(row.attachments || []),
+                ...(row.recordings || []),
+              ]"
+              :key="attachment.id"
+              class="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-n-solid-2 p-3"
             >
-              {{ t('JRC_SERVICE_DESK.COCKPIT.scan_unavailable') }}
-            </p>
-          </div>
+              <div class="min-w-0 flex-1">
+                <p class="break-all text-sm font-medium">
+                  {{ attachment.filename }}
+                </p>
+                <p
+                  v-if="attachment.byte_size"
+                  class="text-xs text-n-slate-11"
+                >
+                  {{ fileSize(attachment.byte_size) }} ·
+                  {{ attachment.content_type }}
+                </p>
+              </div>
+              <div class="flex flex-wrap gap-1">
+                <Button
+                  v-if="canPreview(attachment)"
+                  size="xs"
+                  color="slate"
+                  variant="ghost"
+                  :label="t('JRC_SERVICE_DESK.COMMON.preview')"
+                  :disabled="attachment.scan_state !== 'clean'"
+                  @click="download(row, attachment, true)"
+                />
+                <Button
+                  size="xs"
+                  color="slate"
+                  variant="outline"
+                  icon="i-lucide-download"
+                  :label="t('JRC_SERVICE_DESK.REDESIGN_DETAIL.download')"
+                  :disabled="attachment.scan_state !== 'clean'"
+                  @click="download(row, attachment)"
+                />
+                <Button
+                  v-if="
+                    !compact &&
+                    row.kind === 'note' &&
+                    attachment.permissions?.destroy
+                  "
+                  size="xs"
+                  color="ruby"
+                  variant="ghost"
+                  icon="i-lucide-trash-2"
+                  :label="t('JRC_SERVICE_DESK.REDESIGN_DETAIL.delete')"
+                  @click="openAction('file', row, attachment)"
+                />
+              </div>
+              <p
+                v-if="attachment.scan_state !== 'clean'"
+                class="w-full text-xs text-n-slate-11"
+              >
+                {{ t('JRC_SERVICE_DESK.COCKPIT.scan_unavailable') }}
+              </p>
+            </div>
+          </template>
+          <p
+            v-else-if="row.attachments?.length || row.recordings?.length"
+            class="text-xs text-n-slate-11"
+          >
+            {{ t('JRC_SERVICE_DESK.DETAIL_REVIEW.files_in_panel') }}
+          </p>
           <div
-            v-if="row.kind === 'note' && !onlyFiles"
+            v-if="row.kind === 'note' && !onlyFiles && !compact"
             class="flex flex-wrap gap-2"
           >
             <Button
@@ -685,7 +739,11 @@ onBeforeUnmount(() => {
           :label="labels.more"
           @click="load(true)"
         />
-        <p v-if="feedback" role="status" class="text-sm">
+        <p
+          v-if="feedback"
+          role="status"
+          class="text-sm"
+        >
           {{ labels[feedback] }}
         </p>
         <slot
@@ -701,7 +759,10 @@ onBeforeUnmount(() => {
       :busy="actionBusy"
       @close="action = null"
     >
-      <form class="grid gap-4" @submit.prevent="confirmAction">
+      <form
+        class="grid gap-4"
+        @submit.prevent="confirmAction"
+      >
         <p class="text-sm">
           {{
             t(
@@ -721,9 +782,9 @@ onBeforeUnmount(() => {
           :disabled="actionBusy"
           class="rounded-lg border border-n-weak bg-n-solid-1 p-3"
         />
-        <label class="grid gap-2 text-sm"
-          >{{ t('JRC_SERVICE_DESK.REDESIGN_DETAIL.reason')
-          }}<textarea
+        <label class="grid gap-2 text-sm">
+          {{ t('JRC_SERVICE_DESK.REDESIGN_DETAIL.reason') }}
+          <textarea
             v-model="actionReason"
             required
             minlength="3"
@@ -733,7 +794,11 @@ onBeforeUnmount(() => {
             class="rounded-lg border border-n-weak bg-n-solid-1 p-3"
           />
         </label>
-        <p v-if="actionError" role="alert" class="text-sm text-n-ruby-11">
+        <p
+          v-if="actionError"
+          role="alert"
+          class="text-sm text-n-ruby-11"
+        >
           {{ actionError }}
         </p>
         <Button

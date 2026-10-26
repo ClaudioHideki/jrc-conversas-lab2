@@ -91,7 +91,8 @@ class Api::V1::Accounts::JrcServiceDesk::AutomationInsightsController < Api::V1:
 
     unit = ctx.unit_scope.find(::JrcServiceDesk::Input.id(values.fetch('unit_id')))
     authorize unit, :show?
-    tickets = policy_scope(::JrcServiceDesk::Ticket).where(account_id: ctx.account.id, unit_id: unit.id)
+    tickets = ::JrcServiceDesk::TicketPolicy::Scope.new(ctx.to_h, ::JrcServiceDesk::Ticket)
+      .resolve_for(required.include?(:sla_view) ? 'sla_view' : 'history_view').where(account_id: ctx.account.id, unit_id: unit.id)
     if values['assignee_account_user_id'].present?
       membership = ::JrcServiceDesk::UnitMembership.operational.where(account_id: ctx.account.id, unit_id: unit.id, active: true,
                                                                       account_user_id: ::JrcServiceDesk::Input.id(values['assignee_account_user_id'])).take!

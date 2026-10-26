@@ -53,7 +53,7 @@ class NotificationFinder
       ctx = JrcServiceDesk::OperationalContext.new(account: current_account, user: current_user, account_user: member)
       ids = if ctx.capability?(:sla_view)
               JrcServiceDesk::TicketPolicy::Scope.new(ctx.to_h,
-                                                      JrcServiceDesk::Ticket).resolve.select(:id)
+                                                      JrcServiceDesk::Ticket).resolve_for('sla_view').select(:id)
             else
               JrcServiceDesk::Ticket.none.select(:id)
             end

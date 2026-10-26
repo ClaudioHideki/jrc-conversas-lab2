@@ -142,6 +142,7 @@ onBeforeUnmount(() => {
           v-model="fields.assignee_account_user_id"
           resource="assignees"
           :team-id="fields.team_id"
+          :queue-id="fields.queue_id"
           :unit-id="ticket.unit_id"
           :label="t('JRC_SERVICE_DESK.FIELDS.assignee')"
           :current-name="
@@ -164,12 +165,12 @@ onBeforeUnmount(() => {
           v-model="fields.team_id"
           resource="teams"
           :unit-id="ticket.unit_id"
-          @update:model-value="fields.assignee_account_user_id = ''"
           :label="t('JRC_SERVICE_DESK.FIELDS.team')"
           :current-name="
             fields.team_id === ticket.team?.id ? ticket.team?.name || '' : ''
           "
           :disabled="busy"
+          @update:model-value="fields.assignee_account_user_id = ''"
         />
       </template>
       <Lookup

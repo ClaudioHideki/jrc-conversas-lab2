@@ -1,6 +1,17 @@
 require 'rails_helper'
 
 describe Labels::DestroyService do
+  it 'removes only old Service Desk taggings in the selected Account' do
+    owned_account = create(:account)
+    unit = create(:jrc_sd_unit, operator_company: create(:jrc_sd_operator_company, account: owned_account))
+    ticket = create(:jrc_sd_ticket, account: owned_account, unit: unit)
+    foreign = create(:jrc_sd_ticket)
+    [ticket, foreign].each { |row| row.update_labels(['synthetic-delete']) }
+    described_class.new(label_title: 'synthetic-delete', account_id: owned_account.id, label_deleted_at: 1.second.from_now).perform
+    expect(ticket.reload.label_list).to be_empty
+    expect(foreign.reload.label_list).to eq(['synthetic-delete'])
+  end
+
   let(:account) { create(:account) }
   let(:conversation) { create(:conversation, account: account) }
   let(:label) { create(:label, account: account) }

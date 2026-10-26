@@ -61,6 +61,9 @@ class Api::V1::Accounts::JrcServiceDesk::CommunicationController < Api::V1::Acco
     file = ::JrcServiceDesk::TimelineAttachment.new(ticket: strict_ticket, context: operational_context).call(
       kind: params[:kind], record_id: params[:record_id], attachment_id: params[:attachment_id]
     )
+    access = ::JrcServiceDesk::ProtectedBlobAccess.new(blob: file.blob, user: Current.user)
+    raise ActiveRecord::RecordNotFound unless access.allowed?
+
     send_data file.download, filename: file.filename.to_s, type: 'application/octet-stream', disposition: 'attachment'
   end
 

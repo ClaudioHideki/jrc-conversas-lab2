@@ -20,7 +20,7 @@ import SlaSnapshotEditor from '../components/SlaSnapshotEditor.vue';
 import TicketOperations from '../components/TicketOperations.vue';
 import TicketActivity from '../components/TicketActivity.vue';
 import CustomerContextPanel from '../components/CustomerContextPanel.vue';
-import TicketSummary from '../components/TicketSummary.vue';
+import TicketInformationPanel from '../components/TicketInformationPanel.vue';
 import TicketHeader from '../components/TicketHeader.vue';
 import { useServiceDesk } from '../composables/useServiceDesk';
 import { usePublicationConfirmation } from '../composables/usePublicationConfirmation';
@@ -381,267 +381,296 @@ const deleteTicket = async () => {
         @click="sidebarOpen = !sidebarOpen"
       />
     </div>
-    <TicketHeader v-if="ticket" :ticket="ticket">
-      <template #actions>
-        <Button
-          v-if="ticket.permissions.lifecycle_inspect"
-          data-testid="close-ticket-shortcut"
-          size="sm"
-          color="teal"
-          icon="i-lucide-circle-check"
-          :label="t('JRC_SERVICE_DESK.REFINEMENT.closure.title')"
-          @click="action = 'closure'"
-        />
-        <Button
-          v-if="ticket.permissions.view_conversations"
-          size="xs"
-          color="slate"
-          variant="outline"
-          icon="i-lucide-reply"
-          :label="t('JRC_SERVICE_DESK.REDESIGN_DETAIL.reply')"
-          @click="selectTab('conversation')"
-        />
-        <Button
-          v-if="ticket.permissions.lifecycle_inspect"
-          size="xs"
-          color="slate"
-          variant="outline"
-          icon="i-lucide-refresh-cw"
-          :label="t('JRC_SERVICE_DESK.REDESIGN_DETAIL.actions.status')"
-          @click="action = 'status'"
-        />
-        <Button
-          v-if="ticket.permissions.transfer"
-          size="xs"
-          color="slate"
-          variant="outline"
-          icon="i-lucide-user-round-cog"
-          :label="t('JRC_SERVICE_DESK.TICKET.transfer')"
-          @click="action = 'transfer'"
-        />
-        <Button
-          v-if="
-            ticket.permissions.tasks_manage && ticket.permissions.tasks_view
-          "
-          size="xs"
-          color="slate"
-          variant="outline"
-          icon="i-lucide-list-plus"
-          :label="t('JRC_SERVICE_DESK.REDESIGN_DETAIL.add_task')"
-          @click="addTask"
-        />
-        <details
-          v-if="ticket.permissions.update || ticket.permissions.destroy"
-          class="relative"
-        >
-          <summary
-            class="cursor-pointer rounded-lg border border-n-weak px-3 py-1.5 text-xs font-medium"
-          >
-            {{ t('JRC_SERVICE_DESK.REDESIGN_DETAIL.more_actions') }}
-          </summary>
-          <div
-            class="absolute right-0 z-20 mt-2 grid min-w-44 gap-1 rounded-xl border border-n-weak bg-n-solid-1 p-2 shadow-lg"
-          >
-            <Button
-              v-if="canAct(ticket, 'update')"
-              size="xs"
-              color="slate"
-              variant="ghost"
-              icon="i-lucide-pencil"
-              :label="t('JRC_SERVICE_DESK.SCREENS.edit')"
-              @click="go('edit')"
-            />
-            <Button
-              v-if="ticket.permissions.destroy"
-              size="xs"
-              color="ruby"
-              variant="ghost"
-              icon="i-lucide-trash-2"
-              :label="t('JRC_SERVICE_DESK.REDESIGN_DETAIL.delete_ticket')"
-              @click="
-                action = 'delete';
-                deletionReason = '';
-                deleteStatus = 'idle';
-                deleteMessage = '';
-              "
-            />
-          </div>
-        </details>
-      </template>
-    </TicketHeader>
-    <WriteFeedback v-if="editConfirmed" status="confirmed" />
-    <p v-if="confirmation" role="status" class="mb-4 text-sm">
-      {{ publicationLabels[confirmation.outcome] }}
-    </p>
     <div
-      v-if="confirmedSnapshot"
-      data-testid="snapshot-confirmed"
-      role="status"
-      class="mb-4 grid gap-1 break-words text-xs"
-    >
-      <p>
-        {{
-          t(
-            confirmedSnapshot.permissions.show
-              ? 'JRC_SERVICE_DESK.SNAPSHOT.feedback.confirmed'
-              : 'JRC_SERVICE_DESK.SNAPSHOT.feedback.recorded_restricted'
-          )
-        }}
-      </p>
-      <p>
-        {{
-          t('JRC_SERVICE_DESK.SNAPSHOT.receipt', {
-            id: confirmedSnapshot.id,
-            version: confirmedSnapshot.version,
-          })
-        }}
-      </p>
-      <p v-if="confirmedSnapshot.permissions.show">
-        {{ confirmedSnapshot.payload_digest }}
-      </p>
-    </div>
-    <nav
-      v-if="ticket"
-      class="mb-4 flex flex-wrap gap-1 border-b border-n-weak"
-      role="tablist"
-      :aria-label="t('JRC_SERVICE_DESK.SCREENS.detail')"
-      @keydown="navigateTabs"
-    >
-      <button
-        v-for="item in tabs"
-        :id="`sd-tab-${item.value}`"
-        :key="item.value"
-        :data-tab="item.value"
-        type="button"
-        role="tab"
-        :aria-selected="tab === item.value"
-        aria-controls="sd-ticket-content"
-        :tabindex="tab === item.value ? 0 : -1"
-        class="flex items-center gap-2 border-b-2 px-3 py-3 text-sm font-medium focus-visible:ring-2 focus-visible:ring-n-blue-9"
-        :class="
-          tab === item.value
-            ? 'border-n-blue-9 text-n-blue-11'
-            : 'border-transparent text-n-slate-11 hover:bg-n-solid-2'
-        "
-        @click="selectTab(item.value)"
-      >
-        <Icon :icon="tabTheme[item.value][1]" class="size-4" />{{ item.label }}
-      </button>
-    </nav>
-    <State
-      v-if="result.status !== 'ready' || !ticket"
-      :status="result.status"
-      retry
-      @retry="session.state.status === 'ready' ? load() : session.retry()"
-    />
-    <div
-      v-else
       class="grid items-start gap-4"
       :class="
-        sidebarOpen ? 'xl:grid-cols-[minmax(0,1fr)_18rem]' : 'grid-cols-1'
+        sidebarOpen && ticket
+          ? 'xl:grid-cols-[minmax(0,1fr)_20rem]'
+          : 'grid-cols-1'
       "
     >
-      <div
-        id="sd-ticket-content"
-        class="min-w-0"
-        role="tabpanel"
-        :aria-labelledby="`sd-tab-${tab}`"
-      >
-        <div v-if="tab === 'details'" class="grid gap-4">
-          <TicketDetailsPanel
-            :ticket="ticket"
-            @edit="go('edit', $event)"
-            @action="action = $event"
-          />
-          <Panel :title="t('JRC_SERVICE_DESK.TICKET.tabs.related')">
-            <OperationsLinks :ticket-id="ticket.id" :title="ticket.title" />
-            <TicketAssetLinks :ticket="ticket" />
-            <CustomerContextPanel
-              v-if="ticket.permissions.view_customer"
-              :ticket="ticket"
-            />
-          </Panel>
-        </div>
-        <Panel
-          v-else-if="['notes', 'tasks', 'files', 'conversation'].includes(tab)"
-          :title="t(`JRC_SERVICE_DESK.TICKET.tabs.${tab}`)"
-        >
-          <TicketCockpit
-            :key="`${ticket.id}:${tab}`"
-            :ticket="ticket"
-            :mode="tab === 'conversation' ? 'communication' : tab"
-            :create-task-on-open="createTaskOnOpen"
-            @task-editor-opened="createTaskOnOpen = false"
-            @updated="published"
-          />
-          <details
-            v-if="tab === 'conversation'"
-            class="mt-4 rounded-lg border border-n-weak p-3"
-          >
-            <summary class="cursor-pointer text-sm font-medium">
-              {{ t('JRC_SERVICE_DESK.EXPERIENCE.linked_conversations') }}
-            </summary>
-            <TicketActivity
-              :key="`${ticket.id}:conversations`"
-              :ticket="ticket"
-              kind="conversations"
-              @updated="refresh"
-            />
-          </details>
-        </Panel>
-        <LifecyclePanel
-          v-else-if="
-            ['solution', 'sla'].includes(tab) &&
-            ticket.permissions.lifecycle_inspect
-          "
-          :key="`${ticket.id}:${tab}`"
+      <main class="min-w-0">
+        <TicketHeader
+          v-if="ticket"
           :ticket="ticket"
-          :mode="tab"
-          @updated="refresh"
-          @snapshot-recorded="snapshotRecorded"
-        />
-        <Panel
-          v-else-if="tab === 'history'"
-          :title="t('JRC_SERVICE_DESK.TICKET.tabs.history')"
         >
-          <TicketTimeline :ticket="ticket" view="history" />
-        </Panel>
-        <Panel
-          v-else-if="tab === 'sla'"
-          :title="t('JRC_SERVICE_DESK.TICKET.tabs.sla')"
-        >
-          <TicketActivity :ticket="ticket" kind="sla" @updated="refresh" />
-          <SlaSnapshotEditor
-            v-if="ticket.permissions.record_sla_snapshot"
-            :ticket="ticket"
-            @snapshot-recorded="snapshotRecorded"
-          />
-        </Panel>
-      </div>
-      <aside v-if="sidebarOpen" class="min-w-0 xl:sticky xl:top-4">
-        <Panel :title="t('JRC_SERVICE_DESK.FORM.summary')">
-          <TicketSummary :ticket="ticket" compact />
-          <div class="mt-4 flex flex-wrap gap-2">
+          <template #actions>
             <Button
-              v-if="ticket.permissions.update"
+              v-if="ticket.permissions.lifecycle_inspect"
+              data-testid="close-ticket-shortcut"
+              size="sm"
+              color="teal"
+              icon="i-lucide-circle-check"
+              :label="t('JRC_SERVICE_DESK.REFINEMENT.closure.title')"
+              @click="action = 'closure'"
+            />
+            <Button
+              v-if="ticket.permissions.view_conversations"
               size="xs"
               color="slate"
               variant="outline"
-              icon="i-lucide-pencil"
-              :label="t('JRC_SERVICE_DESK.COMMON.edit')"
-              @click="go('edit')"
+              icon="i-lucide-reply"
+              :label="t('JRC_SERVICE_DESK.REDESIGN_DETAIL.reply')"
+              @click="selectTab('conversation')"
             />
             <Button
-              v-if="ticket.permissions.view_sla"
+              v-if="ticket.permissions.lifecycle_inspect"
               size="xs"
               color="slate"
-              variant="ghost"
-              :label="t('JRC_SERVICE_DESK.REDESIGN_DETAIL.view_sla')"
-              @click="selectTab('sla')"
+              variant="outline"
+              icon="i-lucide-refresh-cw"
+              :label="t('JRC_SERVICE_DESK.REDESIGN_DETAIL.actions.status')"
+              @click="action = 'status'"
             />
+            <Button
+              v-if="!ticket.assignee && ticket.permissions.assign"
+              data-testid="assign-ticket-shortcut"
+              size="xs"
+              variant="outline"
+              icon="i-lucide-user-round-plus"
+              :label="t('JRC_SERVICE_DESK.DETAIL_REVIEW.assign')"
+              @click="action = 'assign'"
+            />
+            <Button
+              v-if="ticket.permissions.transfer"
+              size="xs"
+              color="slate"
+              variant="outline"
+              icon="i-lucide-user-round-cog"
+              :label="t('JRC_SERVICE_DESK.TICKET.transfer')"
+              @click="action = 'transfer'"
+            />
+            <Button
+              v-if="
+                ticket.permissions.tasks_manage && ticket.permissions.tasks_view
+              "
+              size="xs"
+              color="slate"
+              variant="outline"
+              icon="i-lucide-list-plus"
+              :label="t('JRC_SERVICE_DESK.REDESIGN_DETAIL.add_task')"
+              @click="addTask"
+            />
+            <details
+              v-if="ticket.permissions.update || ticket.permissions.destroy"
+              class="relative"
+            >
+              <summary
+                class="cursor-pointer rounded-lg border border-n-weak px-3 py-1.5 text-xs font-medium"
+              >
+                {{ t('JRC_SERVICE_DESK.REDESIGN_DETAIL.more_actions') }}
+              </summary>
+              <div
+                class="absolute right-0 z-20 mt-2 grid min-w-44 gap-1 rounded-xl border border-n-weak bg-n-solid-1 p-2 shadow-lg"
+              >
+                <Button
+                  v-if="canAct(ticket, 'update')"
+                  size="xs"
+                  color="slate"
+                  variant="ghost"
+                  icon="i-lucide-pencil"
+                  :label="t('JRC_SERVICE_DESK.SCREENS.edit')"
+                  @click="go('edit')"
+                />
+                <Button
+                  v-if="ticket.permissions.destroy"
+                  size="xs"
+                  color="ruby"
+                  variant="ghost"
+                  icon="i-lucide-trash-2"
+                  :label="t('JRC_SERVICE_DESK.REDESIGN_DETAIL.delete_ticket')"
+                  @click="
+                    action = 'delete';
+                    deletionReason = '';
+                    deleteStatus = 'idle';
+                    deleteMessage = '';
+                  "
+                />
+              </div>
+            </details>
+          </template>
+        </TicketHeader>
+        <WriteFeedback
+          v-if="editConfirmed"
+          status="confirmed"
+        />
+        <p
+          v-if="confirmation"
+          role="status"
+          class="mb-4 text-sm"
+        >
+          {{ publicationLabels[confirmation.outcome] }}
+        </p>
+        <div
+          v-if="confirmedSnapshot"
+          data-testid="snapshot-confirmed"
+          role="status"
+          class="mb-4 grid gap-1 break-words text-xs"
+        >
+          <p>
+            {{
+              t(
+                confirmedSnapshot.permissions.show
+                  ? 'JRC_SERVICE_DESK.SNAPSHOT.feedback.confirmed'
+                  : 'JRC_SERVICE_DESK.SNAPSHOT.feedback.recorded_restricted'
+              )
+            }}
+          </p>
+          <p>
+            {{
+              t('JRC_SERVICE_DESK.SNAPSHOT.receipt', {
+                id: confirmedSnapshot.id,
+                version: confirmedSnapshot.version,
+              })
+            }}
+          </p>
+          <p v-if="confirmedSnapshot.permissions.show">
+            {{ confirmedSnapshot.payload_digest }}
+          </p>
+        </div>
+        <nav
+          v-if="ticket"
+          class="mb-4 flex flex-wrap gap-1 border-b border-n-weak"
+          role="tablist"
+          :aria-label="t('JRC_SERVICE_DESK.SCREENS.detail')"
+          @keydown="navigateTabs"
+        >
+          <button
+            v-for="item in tabs"
+            :id="`sd-tab-${item.value}`"
+            :key="item.value"
+            :data-tab="item.value"
+            type="button"
+            role="tab"
+            :aria-selected="tab === item.value"
+            aria-controls="sd-ticket-content"
+            :tabindex="tab === item.value ? 0 : -1"
+            class="flex items-center gap-2 border-b-2 px-3 py-3 text-sm font-medium focus-visible:ring-2 focus-visible:ring-n-blue-9"
+            :class="
+              tab === item.value
+                ? 'border-n-blue-9 text-n-blue-11'
+                : 'border-transparent text-n-slate-11 hover:bg-n-solid-2'
+            "
+            @click="selectTab(item.value)"
+          >
+            <Icon
+              :icon="tabTheme[item.value][1]"
+              class="size-4"
+            />
+            {{ item.label }}
+          </button>
+        </nav>
+        <State
+          v-if="result.status !== 'ready' || !ticket"
+          :status="result.status"
+          retry
+          @retry="session.state.status === 'ready' ? load() : session.retry()"
+        />
+        <div
+          v-else
+          id="sd-ticket-content"
+          class="min-w-0"
+          role="tabpanel"
+          :aria-labelledby="`sd-tab-${tab}`"
+        >
+          <div
+            v-if="tab === 'details'"
+            class="grid gap-4"
+          >
+            <TicketDetailsPanel
+              :ticket="ticket"
+              @edit="go('edit', $event)"
+              @action="action = $event"
+            />
+            <Panel :title="t('JRC_SERVICE_DESK.TICKET.tabs.related')">
+              <OperationsLinks
+                :ticket-id="ticket.id"
+                :title="ticket.title"
+              />
+              <TicketAssetLinks :ticket="ticket" />
+              <CustomerContextPanel
+                v-if="ticket.permissions.view_customer"
+                :ticket="ticket"
+              />
+            </Panel>
           </div>
-        </Panel>
-      </aside>
+          <Panel
+            v-else-if="
+              ['notes', 'tasks', 'files', 'conversation'].includes(tab)
+            "
+            :title="t(`JRC_SERVICE_DESK.TICKET.tabs.${tab}`)"
+          >
+            <TicketCockpit
+              :key="`${ticket.id}:${tab}`"
+              :ticket="ticket"
+              :mode="tab === 'conversation' ? 'communication' : tab"
+              :create-task-on-open="createTaskOnOpen"
+              :hide-attachments="
+                sidebarOpen && ticket.permissions.view_notes && tab !== 'files'
+              "
+              @task-editor-opened="createTaskOnOpen = false"
+              @updated="published"
+            />
+            <details
+              v-if="tab === 'conversation'"
+              class="mt-4 rounded-lg border border-n-weak p-3"
+            >
+              <summary class="cursor-pointer text-sm font-medium">
+                {{ t('JRC_SERVICE_DESK.EXPERIENCE.linked_conversations') }}
+              </summary>
+              <TicketActivity
+                :key="`${ticket.id}:conversations`"
+                :ticket="ticket"
+                kind="conversations"
+                @updated="refresh"
+              />
+            </details>
+          </Panel>
+          <LifecyclePanel
+            v-else-if="
+              ['solution', 'sla'].includes(tab) &&
+              ticket.permissions.lifecycle_inspect
+            "
+            :key="`${ticket.id}:${tab}`"
+            :ticket="ticket"
+            :mode="tab"
+            @updated="refresh"
+            @snapshot-recorded="snapshotRecorded"
+          />
+          <Panel
+            v-else-if="tab === 'history'"
+            :title="t('JRC_SERVICE_DESK.TICKET.tabs.history')"
+          >
+            <TicketTimeline
+              :ticket="ticket"
+              view="history"
+            />
+          </Panel>
+          <Panel
+            v-else-if="tab === 'sla'"
+            :title="t('JRC_SERVICE_DESK.TICKET.tabs.sla')"
+          >
+            <TicketActivity
+              :ticket="ticket"
+              kind="sla"
+              @updated="refresh"
+            />
+            <SlaSnapshotEditor
+              v-if="ticket.permissions.record_sla_snapshot"
+              :ticket="ticket"
+              @snapshot-recorded="snapshotRecorded"
+            />
+          </Panel>
+        </div>
+      </main>
+      <TicketInformationPanel
+        v-if="sidebarOpen && ticket && result.status === 'ready'"
+        :ticket="ticket"
+        :active-tab="tab"
+        @edit="go('edit')"
+        @assign="action = 'assign'"
+        @tab="selectTab"
+      />
     </div>
     <ServiceDeskDialog
       :open="!!action && !!ticket"
@@ -658,9 +687,9 @@ const deleteTicket = async () => {
         <p class="text-sm">
           {{ t('JRC_SERVICE_DESK.REDESIGN_DETAIL.delete_ticket_help') }}
         </p>
-        <label class="grid gap-2 text-sm"
-          >{{ t('JRC_SERVICE_DESK.REDESIGN_DETAIL.reason')
-          }}<textarea
+        <label class="grid gap-2 text-sm">
+          {{ t('JRC_SERVICE_DESK.REDESIGN_DETAIL.reason') }}
+          <textarea
             v-model="deletionReason"
             required
             minlength="3"
@@ -671,7 +700,11 @@ const deleteTicket = async () => {
           />
         </label>
         <WriteFeedback :status="deleteStatus" />
-        <p v-if="deleteMessage" role="alert" class="text-sm text-n-ruby-11">
+        <p
+          v-if="deleteMessage"
+          role="alert"
+          class="text-sm text-n-ruby-11"
+        >
           {{ deleteMessage }}
         </p>
         <Button
