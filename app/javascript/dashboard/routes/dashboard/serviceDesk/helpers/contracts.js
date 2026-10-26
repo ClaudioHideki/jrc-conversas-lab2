@@ -26,6 +26,12 @@ const permissions = value =>
     : {};
 const named = value =>
   object(value) ? { id: id(value.id), name: text(value.name) } : null;
+const ticketPhase = value => {
+  requireValue(
+    ['open', 'waiting', 'resolved', 'closed', 'cancelled'].includes(value)
+  );
+  return value;
+};
 const stamp = value => {
   if (value === null || value === undefined) return null;
   requireValue(typeof value === 'string' && Number.isFinite(Date.parse(value)));
@@ -131,6 +137,9 @@ export function decodeRecord(row, context, resource) {
         : {}),
       service: named(row.service),
       status: named(row.status),
+      ...(Object.hasOwn(row, 'status_phase')
+        ? { status_phase: ticketPhase(row.status_phase) }
+        : {}),
       priority: named(row.priority),
       category: named(row.category),
       ticket_type: named(row.ticket_type),

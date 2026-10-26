@@ -227,6 +227,7 @@ onBeforeUnmount(() => {
         :disabled="busy"
         :label="t('JRC_SERVICE_DESK.COMMON.save')"
       /><Button
+        type="button"
         variant="outline"
         :disabled="busy"
         :label="t('JRC_SERVICE_DESK.COMMON.cancel')"

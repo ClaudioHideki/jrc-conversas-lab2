@@ -43,7 +43,7 @@ class JrcServiceDesk::Presenter
     team = record.team
     common(record).merge(title: record.title, number: record.id.to_s, description: record.description, opened_at: stamp(record.opened_at),
                          impact_code: record.impact_code, urgency_code: record.urgency_code, labels: record.label_list,
-                         service: named(record.service), status: named(record.status), priority: named(record.priority),
+                         service: named(record.service), status: named(record.status), status_phase: record.status.phase, priority: named(record.priority),
                          category: named(record.category), ticket_type: named(record.ticket_type), subcategory: named(record.subcategory),
                          **catalogue_fields(record, policy),
                          requester: policy.view_customer? ? requester_details(requester) : nil,

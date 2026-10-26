@@ -396,8 +396,12 @@ const deleteTicket = async () => {
         >
           <template #actions>
             <Button
-              v-if="ticket.permissions.lifecycle_inspect"
+              v-if="
+                ticket.permissions.lifecycle_inspect &&
+                !['closed', 'cancelled'].includes(ticket.status_phase)
+              "
               data-testid="close-ticket-shortcut"
+              type="button"
               size="sm"
               color="teal"
               icon="i-lucide-circle-check"

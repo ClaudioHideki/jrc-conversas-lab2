@@ -226,7 +226,11 @@ onBeforeUnmount(() => {
 <template>
   <div data-testid="simple-closure" class="grid gap-4">
     <template v-if="state.status !== 'ready'">
-      <State :status="state.status" />
+      <State
+        :status="state.status"
+        :retry="state.status === 'error'"
+        @retry="lifecycle.load(currentTicket)"
+      />
       <Button
         v-if="state.status === 'denied'"
         type="button"
