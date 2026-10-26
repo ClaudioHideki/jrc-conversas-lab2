@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_10_26_160000) do
+ActiveRecord::Schema[7.1].define(version: 2026_10_26_161000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -2738,6 +2738,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_26_160000) do
     t.bigint "business_unit_id"
     t.bigint "company_id"
     t.bigint "contact_id"
+    t.integer "financial_version", default: 2, null: false
     t.index ["account_id", "proposal_number"], name: "idx_jrc_crm_proposals_account_number", unique: true
     t.index ["account_id"], name: "index_jrc_crm_proposals_on_account_id"
     t.index ["business_unit_id"], name: "index_jrc_crm_proposals_on_business_unit_id"

@@ -19,6 +19,7 @@ import CrmStatCard from '../../components/shared/CrmStatCard.vue';
 import ProposalRecipientDelivery from './ProposalRecipientDelivery.vue';
 import CommercialGratuityFields from './CommercialGratuityFields.vue';
 import { formatCrmDate } from '../../utils/dateTime';
+import { moneyCents, centsInput } from '../../utils/moneyCents';
 
 const store = useStore();
 const route = useRoute();
@@ -147,6 +148,8 @@ const withoutMonthlyFee = computed({
     proposalForm.has_monthly_fee = !value;
   },
 });
+const centsFromInput = moneyCents;
+const moneyInput = centsInput;
 const installmentPreview = computed(() => {
   const values = selectedProposal.value?.installment_plan_cents || [];
   if (!values.length) return '';
@@ -221,8 +224,6 @@ const proposalProgress = computed(() => {
 });
 
 const refresh = () => store.dispatch('jrcCrm/proposals/fetchProposals');
-const centsFromInput = value => Math.round(Number(value || 0) * 100);
-const moneyInput = cents => (Number(cents || 0) / 100).toFixed(2);
 const billingLabel = value =>
   ({
     one_time: 'Cobrança única',
@@ -1183,7 +1184,7 @@ onMounted(async () => {
               class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"
           /></label>
           <label class="block"
-            >Condição de pagamento<select
+            >Condição dos valores únicos<select
               v-model="proposalForm.payment_condition"
               class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"
             >
@@ -1196,7 +1197,7 @@ onMounted(async () => {
           >
           <template v-if="proposalForm.payment_condition !== 'cash'">
             <label class="block"
-              >Parcelas<input
+              >Parcelas dos valores únicos<input
                 v-model="proposalForm.installments_count"
                 type="number"
                 min="1"
@@ -1522,6 +1523,37 @@ onMounted(async () => {
             class="rounded-2xl border border-n-weak bg-n-solid-2 p-5 shadow-sm xl:col-start-1 xl:row-start-2"
             @submit.prevent="saveCommercialData"
           >
+            <section
+              v-if="
+                selectedProposal.financials?.financial_version >= 3 &&
+                selectedProposal.financials.recurring_months_count > 0
+              "
+              class="mb-4 rounded-xl bg-n-blue-2 p-4"
+              data-testid="proposal-fixed-recurrence"
+            >
+              <p class="font-semibold">
+                {{ selectedProposal.financials.recurring_months_count }}
+                mensalidades de R$
+                {{
+                  moneyInput(
+                    selectedProposal.financials.recurring_monthly_cents
+                  ).replace('.', ',')
+                }}
+              </p>
+              <p>
+                Total previsto das mensalidades: R$
+                {{
+                  moneyInput(
+                    selectedProposal.financials.recurring_total_cents
+                  ).replace('.', ',')
+                }}
+              </p>
+              <p class="text-sm">
+                As parcelas dos valores únicos são independentes. Mensalidades
+                não são divididas pela vigência. A quantidade do item representa
+                unidades ou licenças.
+              </p>
+            </section>
             <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h4 class="font-bold text-n-slate-12">
@@ -1683,7 +1715,11 @@ onMounted(async () => {
                     Incluir o frete no valor parcelável
                   </label>
                   <label class="text-sm font-medium text-n-slate-11">
-                    Condição de pagamento
+                    {{
+                      selectedProposal.financial_version >= 3
+                        ? 'Condição dos valores únicos'
+                        : 'Condição de pagamento'
+                    }}
                     <select
                       v-model="proposalForm.payment_condition"
                       class="mt-1 w-full rounded-lg border border-n-weak px-3 py-2"
@@ -1717,7 +1753,11 @@ onMounted(async () => {
                     v-if="proposalForm.payment_condition !== 'cash'"
                     class="text-sm font-medium text-n-slate-11"
                   >
-                    Quantidade de parcelas
+                    {{
+                      selectedProposal.financial_version >= 3
+                        ? 'Parcelas dos valores únicos'
+                        : 'Quantidade de parcelas'
+                    }}
                     <input
                       v-model.number="proposalForm.installments_count"
                       type="number"

@@ -45,7 +45,7 @@ module JrcCrm
           commercial_approval_status: 'not_required',
           financial_approval_status: 'not_required',
           technical_approval_status: 'not_required'
-        }.merge(@attributes).merge(JrcCrm::CorporateIssuer.attributes(@business_unit)).merge(down_payment_cents: 0))
+        }.merge(@attributes).merge(JrcCrm::CorporateIssuer.attributes(@business_unit)).merge(down_payment_cents: 0, financial_version: 3))
 
         create_items!(proposal)
 
