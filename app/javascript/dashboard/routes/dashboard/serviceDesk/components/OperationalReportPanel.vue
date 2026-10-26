@@ -259,6 +259,7 @@ function drilldown(dimension, value) {
           :disabled="busy || !scope.allowed.value"
           :label="t('JRC_SERVICE_DESK.COMPLETION.load')"
         /><Button
+          type="button"
           variant="outline"
           :disabled="busy || !scope.allowed.value"
           :label="t('JRC_SERVICE_DESK.COMPLETION.export')"

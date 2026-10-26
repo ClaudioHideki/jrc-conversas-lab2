@@ -132,6 +132,50 @@ afterEach(() => {
 });
 
 describe('verified publication confirmation in the ticket detail', () => {
+  it.each(['closed', 'cancelled'])(
+    'does not offer another closure for a ticket already in phase %s',
+    async phase => {
+      mocks.session.detail.record.permissions.lifecycle_inspect = true;
+      mocks.session.detail.record.status_phase = phase;
+      const wrapper = render();
+      await flushPromises();
+      expect(
+        wrapper.find('[data-testid="close-ticket-shortcut"]').exists()
+      ).toBe(false);
+      expect(
+        wrapper
+          .findAll('button')
+          .some(
+            button =>
+              button.text() ===
+              'JRC_SERVICE_DESK.REDESIGN_DETAIL.actions.status'
+          )
+      ).toBe(true);
+    }
+  );
+
+  it('opens the closure form without submitting any write and preserves the current ticket while it is busy', async () => {
+    mocks.session.detail.record.permissions.lifecycle_inspect = true;
+    mocks.session.detail.record.status_phase = 'open';
+    const closure = {
+      name: 'CloseTicketForm',
+      emits: ['busyChange', 'updated'],
+      template: '<div data-real-closure-slot />',
+    };
+    const wrapper = render({ CloseTicketForm: closure });
+    await flushPromises();
+    const button = wrapper.get('[data-testid="close-ticket-shortcut"]');
+    expect(button.attributes('type')).toBe('button');
+    await button.trigger('click');
+    expect(wrapper.find('[data-real-closure-slot]').exists()).toBe(true);
+    mocks.session.load.mockClear();
+    wrapper.findComponent(closure).vm.$emit('busyChange', true);
+    mocks.session.operations.state.revision += 1;
+    await flushPromises();
+    expect(mocks.session.load).not.toHaveBeenCalled();
+    expect(wrapper.find('[data-real-closure-slot]').exists()).toBe(true);
+  });
+
   it('keeps a transfer mounted until its confirmed result closes the dialog before refreshing', async () => {
     mocks.session.detail.record.permissions.transfer = true;
     const operation = {

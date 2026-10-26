@@ -341,6 +341,7 @@ const publish = async () => {
           @remove="rows.splice(index, 1)"
         />
         <Button
+          type="button"
           variant="outline"
           :disabled="busy || rows.length >= 100"
           :label="t('JRC_SERVICE_DESK.COMPLETION.add_rule')"
@@ -461,6 +462,7 @@ const publish = async () => {
           :label="t('JRC_SERVICE_DESK.COMPLETION.publish')"
         />
         <Button
+          type="button"
           variant="outline"
           :disabled="busy"
           :label="t('JRC_SERVICE_DESK.COMPLETION.load')"

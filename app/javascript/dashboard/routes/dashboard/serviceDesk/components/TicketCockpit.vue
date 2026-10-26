@@ -1194,6 +1194,7 @@ onBeforeUnmount(() => {
                 :label="t('JRC_SERVICE_DESK.R3.escalate_approval')"
               />
               <Button
+                type="button"
                 variant="outline"
                 :label="t('JRC_SERVICE_DESK.COMMON.cancel')"
                 @click="delete escalations[row.id]"
@@ -1305,6 +1306,7 @@ onBeforeUnmount(() => {
             />
             <template v-if="permissions.lifecycle_inspect">
               <Button
+                type="button"
                 size="xs"
                 variant="outline"
                 :label="t('JRC_SERVICE_DESK.R3.approval_waiting')"

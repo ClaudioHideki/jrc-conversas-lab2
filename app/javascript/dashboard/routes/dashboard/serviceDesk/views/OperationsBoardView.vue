@@ -192,6 +192,7 @@ const editIncident = row => {
       <Button type="submit" :label="t('JRC_SERVICE_DESK.COMMON.search')" />
       <Button
         v-if="incidentBoard && allowed && unitId"
+        type="button"
         variant="outline"
         :label="t('JRC_SERVICE_DESK.R3.create_resource')"
         @click="
