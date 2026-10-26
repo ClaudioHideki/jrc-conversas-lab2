@@ -9,6 +9,7 @@ import OpsModal from '../components/OpsModal.vue';
 import en from '../../jrcProjects/en.json';
 import pt_BR from 'dashboard/i18n/locale/pt_BR/jrcProjects.json';
 import { request, allPages } from '../api';
+import { commentDraft } from '../../jrcProjects/commentDrafts';
 
 vi.mock('../../jrcProjects/useProjects', () => ({
   useProjects: () => ({
@@ -327,6 +328,110 @@ describe('Edição, exclusão e idioma dos projetos', () => {
     expect(wrapper.text()).toContain('Forbidden synthetic write');
     expect(wrapper.emitted('changed')).toBeUndefined();
     wrapper.unmount();
+  });
+
+  it.each([
+    ['discards rich text and images before opening a subtask', true],
+    [
+      'keeps the task and its rich draft when subtask navigation is canceled',
+      false,
+    ],
+  ])('%s', async (_description, confirmed) => {
+    const scope = { accountId: 1, userId: 10, projectId: 7, taskId: 20 };
+    const imageKey = 'synthetic-image-draft-0001';
+    const draft = {
+      body: `Synthetic discarded text\n\n![discarded.png](comment-image:${imageKey})`,
+      requestKey: 'synthetic-comment-draft-0001',
+      images: [
+        [
+          imageKey,
+          new File(['synthetic print'], 'discarded.png', { type: 'image/png' }),
+        ],
+      ],
+    };
+    const subtask = { ...task, id: 21, title: 'Synthetic subtask' };
+    const selectedTask = ref(task);
+    request.mockImplementation((_account, path) =>
+      Promise.resolve({
+        data: path.endsWith('/21') ? subtask : { ...task, subtasks: [subtask] },
+      })
+    );
+    window.confirm.mockReturnValue(confirmed);
+    const originalCreateObjectURL = URL.createObjectURL;
+    const originalRevokeObjectURL = URL.revokeObjectURL;
+    URL.createObjectURL = vi.fn(() => 'blob:synthetic-draft-image');
+    URL.revokeObjectURL = vi.fn();
+    await commentDraft('put', scope, draft);
+    const wrapper = mount(
+      {
+        components: { TaskEditor },
+        setup: () => ({ project, selectedTask, tasks: [task, subtask] }),
+        template:
+          '<TaskEditor :key="selectedTask.id" :project="project" :task="selectedTask" :tasks="tasks" @open="selectedTask = $event" />',
+      },
+      { global: { stubs: { OpsModal: modalStub } } }
+    );
+    try {
+      await flushPromises();
+      const parentEditor = wrapper.findComponent(TaskEditor);
+      await wrapper
+        .findAll('button')
+        .find(button => button.text() === 'Comentários')
+        .trigger('click');
+      await vi.waitFor(() =>
+        expect(wrapper.find('[contenteditable="true"]').exists()).toBe(true)
+      );
+      expect(wrapper.find('[contenteditable="true"]').text()).toContain(
+        'Synthetic discarded text'
+      );
+      expect(wrapper.find('img[alt="discarded.png"]').exists()).toBe(true);
+      await wrapper
+        .findAll('button')
+        .find(button => button.text() === 'Detalhes')
+        .trigger('click');
+      await flushPromises();
+      expect((await commentDraft('get', scope)).images).toHaveLength(1);
+      await wrapper
+        .findAll('button')
+        .find(button => button.text().startsWith(subtask.title))
+        .trigger('click');
+      await flushPromises();
+      expect(window.confirm).toHaveBeenCalledOnce();
+      if (confirmed) {
+        await vi.waitFor(() =>
+          expect(parentEditor.emitted('open')).toEqual([[subtask]])
+        );
+        expect(wrapper.findComponent(TaskEditor).props('task').id).toBe(21);
+        expect(await commentDraft('get', scope)).toBeUndefined();
+        selectedTask.value = task;
+        await flushPromises();
+      } else {
+        expect(parentEditor.emitted('open')).toBeUndefined();
+        expect(wrapper.findComponent(TaskEditor).props('task').id).toBe(20);
+        expect((await commentDraft('get', scope)).body).toBe(draft.body);
+      }
+      await wrapper
+        .findAll('button')
+        .find(button => button.text() === 'Comentários')
+        .trigger('click');
+      await vi.waitFor(() =>
+        expect(wrapper.find('[contenteditable="true"]').exists()).toBe(true)
+      );
+      expect(
+        wrapper
+          .find('[contenteditable="true"]')
+          .text()
+          .includes('Synthetic discarded text')
+      ).toBe(!confirmed);
+      expect(wrapper.find('img[alt="discarded.png"]').exists()).toBe(
+        !confirmed
+      );
+    } finally {
+      wrapper.unmount();
+      await commentDraft('delete', scope);
+      URL.createObjectURL = originalCreateObjectURL;
+      URL.revokeObjectURL = originalRevokeObjectURL;
+    }
   });
 
   it('edits an existing time entry instead of adding another entry', async () => {

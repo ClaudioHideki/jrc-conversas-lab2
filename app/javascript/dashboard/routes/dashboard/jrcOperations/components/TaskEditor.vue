@@ -112,6 +112,23 @@ const taskTabs = computed(() => [
   ['hours', projectText('TASK_HOURS', 'Horas')],
   ['history', projectText('HISTORY', 'Histórico')],
 ]);
+async function discardCommentDrafts() {
+  await newCommentComposer.value?.discard();
+  await editingRichComposer.value?.discard();
+  if (
+    props.task &&
+    commentDraftAvailable.value &&
+    !newCommentComposer.value &&
+    !editingRichComposer.value
+  ) {
+    await persistCommentDraft('delete', commentScope.value);
+    if (editingComment.value)
+      await persistCommentDraft('delete', {
+        ...commentScope.value,
+        commentId: editingComment.value,
+      });
+  }
+}
 async function requestClose() {
   if (busy.value) return;
   if (!dirty.value) {
@@ -129,21 +146,7 @@ async function requestClose() {
   ) {
     busy.value = true;
     try {
-      await newCommentComposer.value?.discard();
-      await editingRichComposer.value?.discard();
-      if (
-        props.task &&
-        commentDraftAvailable.value &&
-        !newCommentComposer.value &&
-        !editingRichComposer.value
-      ) {
-        await persistCommentDraft('delete', commentScope.value);
-        if (editingComment.value)
-          await persistCommentDraft('delete', {
-            ...commentScope.value,
-            commentId: editingComment.value,
-          });
-      }
+      await discardCommentDrafts();
       emit('close');
     } catch (err) {
       error.value = errorMessage(err);
@@ -483,7 +486,8 @@ function taskEventLabel(eventAction) {
   ];
   return projectText(key, fallback);
 }
-function openSubtask(id) {
+async function openSubtask(id) {
+  if (busy.value) return;
   const task = props.tasks.find(row => row.id === id);
   if (
     task &&
@@ -494,8 +498,17 @@ function openSubtask(id) {
           'Descartar alterações não salvas e abrir a subtarefa?'
         )
       ))
-  )
-    emit('open', task);
+  ) {
+    busy.value = true;
+    try {
+      await discardCommentDrafts();
+      emit('open', task);
+    } catch (err) {
+      error.value = errorMessage(err);
+    } finally {
+      busy.value = false;
+    }
+  }
 }
 </script>
 
