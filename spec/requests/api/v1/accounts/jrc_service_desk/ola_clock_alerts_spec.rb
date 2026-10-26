@@ -15,7 +15,14 @@ RSpec.describe 'Durable internal OLA alerts and scoped metrics', type: :request 
                                                                      'notification_member_ids' => [sd_account_user.id], 'notification_channels' => %w[in_app email] }] } }
   end
 
-  before { sd_as_admin! }
+  before do
+    sd_as_admin!
+    allow(JrcServiceDesk::ClockAlertMailer).to receive(:delivery_method).and_return(:test)
+  end
+
+  # Mail delivery uses Rails' test adapter. Declare the configured SMTP state
+  # explicitly so preference/uncertain-result cases do not depend on local ENV.
+  around { |example| with_modified_env(SMTP_ADDRESS: 'smtp.example.test') { example.run } }
 
   def observe
     travel_to(Time.utc(2026, 10, 24, 10)) do
