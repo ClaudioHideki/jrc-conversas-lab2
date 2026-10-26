@@ -474,10 +474,12 @@ RSpec.describe 'Broker campaign transport', type: :request do
       expect(message.additional_attributes).not_to have_key('jrc_campaign_evolution')
       expect(account.messages.where("additional_attributes->>'jrc_campaign_id' = ?", campaign.id.to_s).count).to eq(1)
       expect(recipient.reload).to be_processing
+      accept_native_callback(message)
       receipt_url = "#{prefix}/connections/#{integration_id}/conversations/#{message.conversation.display_id}/campaign-messages/#{message.id}"
       receipt = { protocol: 'chatwoot-campaigns/v1', integrationId: integration_id, conversationId: message.conversation.display_id, messageId: message.id }
       stub_request(:get, receipt_url).to_return(headers: { 'Content-Type' => 'application/json' }, body: receipt.merge(status: 'queued').to_json)
       JrcCampaigns::BrokerStatusJob.perform_now('campaign', delivery.id)
+      expect(a_request(:get, receipt_url)).to have_been_made.once
       expect(delivery.reload.sent_at).to be_nil
       stub_request(:get, receipt_url).to_return(headers: { 'Content-Type' => 'application/json' }, body: receipt.merge(status: 'read').to_json)
       2.times { JrcCampaigns::BrokerStatusJob.perform_now('campaign', delivery.id) }
@@ -509,10 +511,12 @@ RSpec.describe 'Broker campaign transport', type: :request do
       service.perform
       delivery = recipient.deliveries.sole
       message = account.messages.find(delivery.metadata.fetch('message_id'))
+      accept_native_callback(message)
       url = "#{prefix}/connections/#{integration_id}/conversations/#{message.conversation.display_id}/campaign-messages/#{message.id}"
       stub_request(:get, url).to_return(headers: { 'Content-Type' => 'application/json' }, body: { protocol: 'chatwoot-campaigns/v1', integrationId: integration_id,
         conversationId: message.conversation.display_id, messageId: message.id, status: 'queued' }.to_json)
       JrcCampaigns::BrokerStatusJob.perform_now('campaign', delivery.id, 19)
+      expect(a_request(:get, url)).to have_been_made.once
       expect(delivery.reload).to be_unknown
       expect(campaign.reload).to be_paused
       service.perform
@@ -524,10 +528,12 @@ RSpec.describe 'Broker campaign transport', type: :request do
       service.perform
       delivery = recipient.deliveries.sole
       message = account.messages.find(delivery.metadata.fetch('message_id'))
+      accept_native_callback(message)
       url = "#{prefix}/connections/#{integration_id}/conversations/#{message.conversation.display_id}/campaign-messages/#{message.id}"
       stub_request(:get, url).to_return(headers: { 'Content-Type' => 'application/json' }, body: { protocol: 'chatwoot-campaigns/v1', integrationId: integration_id,
         conversationId: message.conversation.display_id + 1, messageId: message.id, status: 'read' }.to_json)
       JrcCampaigns::BrokerStatusJob.perform_now('campaign', delivery.id)
+      expect(a_request(:get, url)).to have_been_made.once
       expect(delivery.reload.sent_at).to be_nil
       expect(recipient.reload).to be_processing
     end
@@ -632,5 +638,20 @@ RSpec.describe 'Broker campaign transport', type: :request do
     end.to raise_error(ArgumentError, /mídia pública/)
     expect(account.messages.count).to eq(0)
     expect(JrcCampaigns::TestDelivery.where(account: account).count).to eq(0)
+  end
+
+  def accept_native_callback(message)
+    allow(Resolv).to receive(:getaddresses).and_call_original
+    allow(Resolv).to receive(:getaddresses).with('broker.example.test').and_return(['93.184.216.34'])
+    stub_request(:post, "#{prefix}/connections/#{integration_id}/campaign-intents").to_return(
+      status: 201, headers: { 'Content-Type' => 'application/json' }, body: {
+        protocol: 'chatwoot-campaigns/v1', intentId: SecureRandom.uuid, state: 'RESERVED',
+        expiresAt: 5.minutes.from_now.iso8601, replayed: false
+      }.to_json
+    )
+    callback = stub_request(:post, inbox.channel.webhook_url).to_return(status: 204)
+    WebhookJob.perform_now(inbox.channel.webhook_url, message.webhook_data.merge(event: 'message_created'), :api_inbox_webhook,
+                           secret: inbox.channel.secret, delivery_id: message.additional_attributes.fetch('jrc_campaign_webhook_delivery_id'))
+    expect(callback).to have_been_requested.once
   end
 end
