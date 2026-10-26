@@ -20,8 +20,8 @@ module JrcProjects
           task = scoped_tasks(project).find(params[:id])
           render json: { data: serialize(task).merge(
             checklist: task.checklist_items.where(account_id: Current.account.id).order(:position, :id),
-            comments: task.task_comments.where(account_id: Current.account.id).includes(:user).order(:created_at, :id)
-                          .last(100).as_json(include: { user: { only: %i[id name] } }),
+            comments: task.task_comments.where(account_id: Current.account.id).includes(:user, inline_images_attachments: :blob)
+                          .order(:created_at, :id).last(100).map { |comment| TaskCommentSerializer.new(comment).as_json },
             dependencies: task.incoming_dependencies.where(account_id: Current.account.id, predecessor_id: scoped_tasks(project).select(:id))
                               .as_json(only: %i[id predecessor_id kind]),
             subtasks: task.subtasks.where(account_id: Current.account.id, project_id: project.id).order(:position, :id)
