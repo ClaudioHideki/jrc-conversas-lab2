@@ -84,6 +84,9 @@ describe('audience input inside the campaign', () => {
       },
       global: { mocks: { $t: key => key } },
     });
+    wrapper.vm.stepIndex = 1;
+    await flushPromises();
+    await wrapper.get('input[type="checkbox"]').setValue(true);
     wrapper.vm.stepIndex = 2;
     await flushPromises();
     expect(wrapper.text()).not.toContain('JRC_CAMPAIGNS.WIZARD.COMPLIANCE');

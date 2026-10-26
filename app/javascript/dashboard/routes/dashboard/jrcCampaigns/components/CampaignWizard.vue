@@ -1387,21 +1387,9 @@ watch(
   availableSendingInboxes,
   inboxes => {
     const availableIds = new Set(inboxes.map(inbox => Number(inbox.id)));
-    const usableInboxes = inboxes.filter(
-      inbox => inboxHealth(inbox).state !== 'error'
-    );
     form.inboxLinks = form.inboxLinks.filter(item =>
       availableIds.has(Number(item.inbox_id))
     );
-    if (usableInboxes.length === 1 && !form.inboxLinks.length) {
-      form.inboxLinks.push({
-        id: null,
-        inbox_id: usableInboxes[0].id,
-        weight: 1,
-        position: 0,
-        enabled: true,
-      });
-    }
   },
   { immediate: true }
 );

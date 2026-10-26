@@ -234,6 +234,9 @@ describe('campaign wizard launch and required human review', () => {
     });
     await flushPromises();
     wrapper.vm.form.name = 'QA campaign';
+    wrapper.vm.stepIndex = 1;
+    await flushPromises();
+    await wrapper.get('input[type="checkbox"]').setValue(true);
     wrapper.vm.form.steps[0].kind = 'text';
     wrapper.vm.form.steps[0].body = 'Synthetic message';
     await wrapper.vm.save(true);

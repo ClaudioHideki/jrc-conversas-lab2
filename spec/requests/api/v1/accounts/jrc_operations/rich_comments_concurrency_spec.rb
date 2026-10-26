@@ -1,7 +1,7 @@
 require 'rails_helper'
 require 'timeout'
 
-RSpec.describe 'Concurrent rich comment publication', type: :request do
+RSpec.describe 'Concurrent rich comment publication', :project_comment_concurrency, type: :request do
   self.use_transactional_tests = false
   around do |example|
     if Rails.env.test? && ENV['JRC_PROJECT_COMMENT_CONCURRENCY'] == '1' &&

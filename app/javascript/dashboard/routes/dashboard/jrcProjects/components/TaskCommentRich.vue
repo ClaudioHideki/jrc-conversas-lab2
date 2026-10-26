@@ -146,7 +146,7 @@ function insertImages(files, position = null) {
   );
   if (!images.length) return;
   if (
-    staged.size + images.length > 10 ||
+    commentImageKeys(view.state.doc).length + images.length > 10 ||
     images.some(
       file =>
         !['image/png', 'image/jpeg', 'image/gif', 'image/webp'].includes(

@@ -14,6 +14,78 @@ RSpec.describe 'Rich project task comments', type: :request do
 
   before { account.enable_features!('jrc_projects') }
 
+  it 'acknowledges a repeated image edit without duplicate attachments or audit and preserves creation identity' do
+    post "#{base}/comments", params: { comment: { body: 'Original' } },
+         headers: headers.merge('Idempotency-Key' => 'synthetic-create-00000001')
+    record = JrcProjects::TaskComment.last
+    creation_identity = record.attributes.slice('request_key', 'request_digest')
+    2.times do
+      patch "#{base}/comments/#{record.id}", params: payload, headers: headers.merge('Idempotency-Key' => 'synthetic-edit-00000001')
+      expect(response).to have_http_status(:ok), response.body
+    end
+    expect(record.reload.inline_images.count).to eq(1)
+    expect(record.attributes.slice('request_key', 'request_digest')).to eq(creation_identity)
+    expect(JrcProjects::AuditEvent.where(account: account, action: 'projects.task.comment_updated').count).to eq(1)
+  end
+
+  it 'does not audit an unchanged text edit again' do
+    post "#{base}/comments", params: { comment: { body: 'Original' } }, headers: headers
+    record = JrcProjects::TaskComment.last
+    2.times do
+      patch "#{base}/comments/#{record.id}", params: { comment: { body: 'Updated', content_format: 'markdown' } }, headers: headers
+      expect(response).to have_http_status(:ok), response.body
+    end
+    expect(JrcProjects::AuditEvent.where(account: account, action: 'projects.task.comment_updated').count).to eq(1)
+  end
+
+  it 'counts retried existing image keys only once while retaining removed saved attachments' do
+    images = 10.times.to_h do |index|
+      ["synthetic-image-#{index.to_s.rjust(8, '0')}", fixture_file_upload(Rails.root.join('spec/assets/avatar.png'), 'image/png')]
+    end
+    rich_body = images.keys.map { |key| "![Print](comment-image:#{key})" }.join("\n\n")
+    post "#{base}/comments", params: { comment: { body: rich_body, content_format: 'markdown', images: images } }, headers: headers
+    expect(response).to have_http_status(:created), response.body
+    record = JrcProjects::TaskComment.last
+    attachment_ids = record.inline_images.attachments.pluck(:id)
+    patch "#{base}/comments/#{record.id}", params: { comment: { body: rich_body, content_format: 'markdown', images: images } }, headers: headers
+    expect(response).to have_http_status(:ok), response.body
+    expect(record.reload.inline_images.attachments.pluck(:id)).to eq(attachment_ids)
+    expect(JrcProjects::AuditEvent.where(account: account, action: 'projects.task.comment_updated')).to be_empty
+
+    patch "#{base}/comments/#{record.id}", params: { comment: { body: 'Images removed from text', content_format: 'markdown' } }, headers: headers
+    expect(response).to have_http_status(:ok), response.body
+    expect(record.reload.inline_images.attachments.pluck(:id)).to eq(attachment_ids)
+    replacement_key = 'synthetic-image-replacement1'
+    patch "#{base}/comments/#{record.id}", params: {
+      comment: { body: "![Replacement](comment-image:#{replacement_key})", content_format: 'markdown', images: { replacement_key => upload } }
+    }, headers: headers
+    expect(response).to have_http_status(:unprocessable_entity), response.body
+    expect(record.reload.inline_images.attachments.pluck(:id)).to eq(attachment_ids)
+    expect(record.body).to eq('Images removed from text')
+  end
+
+  it 'rejects an existing image key with different bytes, name or MIME and retains saved attachments' do
+    post "#{base}/comments", params: payload, headers: headers
+    record = JrcProjects::TaskComment.last
+    original = record.inline_images.attachments.sole
+    original_bytes = original.download
+    tampered_bytes = original_bytes.dup
+    tampered_bytes.setbyte(tampered_bytes.bytesize - 1, tampered_bytes.getbyte(-1) ^ 1)
+    changed_bytes = Rack::Test::UploadedFile.new(StringIO.new(tampered_bytes), 'image/png', false, original_filename: 'avatar.png')
+    changed_name = Rack::Test::UploadedFile.new(Rails.root.join('spec/assets/avatar.png'), 'image/png', false, original_filename: 'renamed.png')
+    changed_mime = fixture_file_upload(Rails.root.join('spec/assets/avatar.png'), 'image/jpeg')
+    [changed_bytes, changed_name, changed_mime].each do |changed_upload|
+      patch "#{base}/comments/#{record.id}", params: {
+        comment: { body: body + '\nChanged', content_format: 'markdown', images: { image_key => changed_upload } }
+      }, headers: headers
+      expect(response).to have_http_status(:unprocessable_entity), response.body
+      expect(record.reload.body).to eq(body)
+      expect(record.inline_images.attachments.pluck(:id)).to eq([original.id])
+      expect(original.download).to eq(original_bytes)
+    end
+    expect(JrcProjects::AuditEvent.where(account: account, action: 'projects.task.comment_updated')).to be_empty
+  end
+
   it 'persists ordered rich text and private images exclusively on the comment' do
     post "#{base}/comments", params: payload, headers: headers
     expect(response).to have_http_status(:created), response.body

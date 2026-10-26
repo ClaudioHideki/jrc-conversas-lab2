@@ -35,9 +35,10 @@ module JrcProjects::Api::V1
     def update
       change_comment! do |record, task|
         before = record.attributes.slice('id', 'body', 'user_id')
-        JrcProjects::CommentContent.new(record: record, parameters: params.require(:comment)).apply!
-        JrcProjects::AuditEvent.record!(account: Current.account, actor: Current.user, action: 'projects.task.comment_updated', auditable: task,
-                                       before_data: before, after_data: record.attributes.slice('id', 'body', 'user_id'), correlation_id: correlation_id)
+        if JrcProjects::CommentContent.new(record: record, parameters: params.require(:comment)).apply!
+          JrcProjects::AuditEvent.record!(account: Current.account, actor: Current.user, action: 'projects.task.comment_updated', auditable: task,
+                                         before_data: before, after_data: record.attributes.slice('id', 'body', 'user_id'), correlation_id: correlation_id)
+        end
         render json: { data: JrcProjects::TaskCommentSerializer.new(record).as_json }
       end
     end

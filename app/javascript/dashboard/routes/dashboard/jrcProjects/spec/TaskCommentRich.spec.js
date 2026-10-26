@@ -46,6 +46,7 @@ beforeEach(() => {
 });
 afterEach(() => {
   wrapper?.unmount();
+  vi.useRealTimers();
   vi.clearAllMocks();
 });
 const render = async props => {
@@ -63,6 +64,81 @@ const submit = () =>
     .find(button => button.text() === 'Registrar comentário');
 
 describe('real ProseMirror task comment composer', () => {
+  it('allows a replacement after removing staged images and retains removed files for undo', async () => {
+    await render();
+    const startedAt = Date.now();
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(startedAt + 1000);
+    wrapper.vm.insertImages(
+      Array.from(
+        { length: 10 },
+        (_, index) =>
+          new File([`print ${index}`], `print-${index}.png`, {
+            type: 'image/png',
+          })
+      )
+    );
+    await flushPromises();
+    const editor = wrapper.get('.ProseMirror[contenteditable="true"]');
+    vi.setSystemTime(startedAt + 2000);
+    await editor.trigger('keydown', { key: 'Backspace', code: 'Backspace' });
+    expect(wrapper.findAll('.ProseMirror img[src^="blob:"]')).toHaveLength(9);
+    vi.setSystemTime(startedAt + 3000);
+    wrapper.vm.insertImages([
+      new File(['replacement'], 'replacement.png', { type: 'image/png' }),
+    ]);
+    await flushPromises();
+    expect(wrapper.findAll('.ProseMirror img[src^="blob:"]')).toHaveLength(10);
+    await submit().trigger('click');
+    const names = wrapper
+      .emitted('submit')[0][0]
+      .images.map(image => image.file.name);
+    expect(names).toHaveLength(10);
+    expect(names).toContain('replacement.png');
+    expect(names).not.toContain('print-9.png');
+    // Each undo must consume the history produced by the preceding command.
+    /* eslint-disable no-await-in-loop */
+    for (
+      let attempt = 0;
+      attempt < 4 && !wrapper.find('img[alt="print-9.png"]').exists();
+      attempt += 1
+    ) {
+      await wrapper.get('[title="Undo last change"]').trigger('mousedown');
+      await flushPromises();
+    }
+    /* eslint-enable no-await-in-loop */
+    expect(wrapper.findAll('.ProseMirror img[src^="blob:"]')).toHaveLength(10);
+    await submit().trigger('click');
+    expect(
+      wrapper.emitted('submit')[1][0].images.map(image => image.file.name)
+    ).toContain('print-9.png');
+    expect(URL.revokeObjectURL).not.toHaveBeenCalled();
+    wrapper.unmount();
+    expect(URL.revokeObjectURL).toHaveBeenCalled();
+  });
+
+  it('counts persisted images toward the ten images in the current document', async () => {
+    const images = Array.from({ length: 10 }, (_, index) => ({
+      id: index + 10,
+      key: `synthetic-image-${String(index).padStart(8, '0')}`,
+    }));
+    await render({
+      comment: {
+        id: 8,
+        body: images
+          .map(image => `![Print](comment-image:${image.key})`)
+          .join('\n\n'),
+        inline_images: images,
+      },
+    });
+    wrapper.vm.insertImages([
+      new File(['extra'], 'extra.png', { type: 'image/png' }),
+    ]);
+    await flushPromises();
+    expect(wrapper.findAll('.ProseMirror img[src^="blob:"]')).toHaveLength(10);
+    expect(wrapper.find('[role="alert"]').exists()).toBe(true);
+  });
+
   it('inserts multiple binary prints at the cursor and submits them with a trailing editable paragraph', async () => {
     await render();
     const files = [

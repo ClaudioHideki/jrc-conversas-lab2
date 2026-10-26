@@ -54,6 +54,10 @@ jobs:
           console.log({ files: result.testResults.length, tests: result.numTotalTests, failed: result.numFailedTests, pending: result.numPendingTests });
           if (!result.success || result.numFailedTestSuites || result.numFailedTests || result.numPendingTests || result.testResults.length < 568) process.exit(1);
           NODE
+      - name: Build frontend nativo sem imagem Docker
+        env:
+          RAILS_ENV: production
+        run: pnpm exec vite build --outDir "$RUNNER_TEMP/jrc-consolidated-frontend"
       - name: Preservar fonte, snapshots e lockfiles
         if: always()
         run: git diff --exit-code
@@ -65,7 +69,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        suite: [standard, concurrent]
+        suite: [standard, concurrent, project-comments]
     services:
       postgres:
         image: pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a
@@ -83,15 +87,16 @@ jobs:
       POSTGRES_PORT: '5432'
       POSTGRES_USERNAME: postgres
       POSTGRES_PASSWORD: disposable-test-only
-      POSTGRES_DATABASE: jrc_sd_bc_portal_concurrency_20261025_test
+      POSTGRES_DATABASE: ${{ matrix.suite == 'project-comments' && 'jrc_four_fronts_concurrency_20261026_test' || 'jrc_sd_bc_portal_concurrency_20261025_test' }}
       REDIS_URL: redis://127.0.0.1:6379/15
       FRONTEND_URL: https://central.example.test
       SECRET_KEY_BASE: isolated-broker-customer-ci-not-a-production-secret
       BUNDLE_FROZEN: 'true'
       SCHEMA: /tmp/broker-customer-candidate-schema.rb
-      MINIMUM_EXAMPLES: ${{ matrix.suite == 'concurrent' && '11' || '1044' }}
+      MINIMUM_EXAMPLES: ${{ matrix.suite == 'project-comments' && '1' || matrix.suite == 'concurrent' && '11' || '1044' }}
       JRC_SD_CONCURRENCY: '1'
       JRC_SD_INTEGRATED_CONCURRENCY: '1'
+      JRC_PROJECT_COMMENT_CONCURRENCY: ${{ matrix.suite == 'project-comments' && '1' || '0' }}
       TEST_SUITE: ${{ matrix.suite }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
@@ -130,7 +135,11 @@ jobs:
           test "$POSTGRES_HOST" = 127.0.0.1
           test -z "${DATABASE_URL:-}"
           # Each job gets a fresh PostgreSQL service; use the existing approved concurrency profile.
-          test "$POSTGRES_DATABASE" = jrc_sd_bc_portal_concurrency_20261025_test
+          case "$TEST_SUITE" in
+            project-comments) test "$POSTGRES_DATABASE" = jrc_four_fronts_concurrency_20261026_test ;;
+            standard|concurrent) test "$POSTGRES_DATABASE" = jrc_sd_bc_portal_concurrency_20261025_test ;;
+            *) exit 1 ;;
+          esac
           test "$JRC_SD_CONCURRENCY" = 1
           test "$JRC_SD_INTEGRATED_CONCURRENCY" = 1
           SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
@@ -138,8 +147,9 @@ jobs:
       - name: Regressao Broker, clientes, campanhas e modulos integrados
         run: |
           case "$TEST_SUITE" in
-            standard) tags=(--tag '~sd_concurrency') ;;
+            standard) tags=(--tag '~sd_concurrency' --tag '~project_comment_concurrency') ;;
             concurrent) tags=(--tag sd_concurrency) ;;
+            project-comments) tags=(--tag project_comment_concurrency) ;;
             *) exit 1 ;;
           esac
           bundle exec rspec \
@@ -157,6 +167,10 @@ jobs:
             spec/requests/api/v1/accounts/jrc_operations \
             spec/requests/api/v1/accounts/jrc_service_desk \
             spec/services/jrc_service_desk \
+            spec/requests/api/v1/accounts/crm/recurring_proposals_spec.rb \
+            spec/services/jrc_crm/recurring_proposal_financials_spec.rb \
+            spec/services/jrc_crm/consolidated_financial_guards_spec.rb \
+            spec/models/jrc_crm/proposal_spec.rb \
             "${tags[@]}" --format progress --format json --out /tmp/broker-customer-rspec.json
           python3 - <<'PYTHON'
           import json, os
@@ -168,5 +182,32 @@ jobs:
           assert summary['example_count'] >= int(os.environ['MINIMUM_EXAMPLES'])
           PYTHON
       - name: Preservar fonte, schema e lockfiles
+        if: always()
+        run: git diff --exit-code
+
+  node-contracts:
+    if: github.ref == 'refs/heads/codex/jrc-campaign-direct-audience-20261022'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [nico-runtime, flows-sandbox, jrc-erp]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: services/${{ matrix.service }}/package-lock.json
+      - name: Instalar dependencias fixadas do servico
+        working-directory: services/${{ matrix.service }}
+        run: npm ci
+      - name: Validar contratos Node com fixtures sinteticas
+        working-directory: services/${{ matrix.service }}
+        run: npm test
+      - name: Preservar fonte e lockfiles
         if: always()
         run: git diff --exit-code
