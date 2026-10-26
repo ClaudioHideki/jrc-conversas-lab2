@@ -74,8 +74,11 @@ class JrcServiceDesk::SupervisionProjection
   end
 
   def agent_loads
-    active(@relation).group(:assignee_membership_id).count.map do |membership_id, count|
-      member = JrcServiceDesk::UnitMembership.find_by(account_id: @context.account.id, id: membership_id)
+    loads = active(@relation).group(:assignee_membership_id).count
+    members = JrcServiceDesk::UnitMembership.where(account_id: @context.account.id, id: loads.keys.compact)
+                                           .includes(account_user: :user).index_by(&:id)
+    loads.map do |membership_id, count|
+      member = members[membership_id]
       { id: membership_id&.to_s, account_user_id: member&.account_user_id&.to_s, unit_id: member&.unit_id&.to_s,
         name: member&.account_user&.user&.name, count: count }
     end

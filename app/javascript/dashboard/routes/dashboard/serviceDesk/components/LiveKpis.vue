@@ -13,13 +13,16 @@ const props = defineProps({
   supervision: { type: Object, default: null },
   breakdown: { type: Boolean, default: false },
   compact: { type: Boolean, default: false },
+  dashboardSource: { type: Object, default: null },
 });
-const emit = defineEmits(['status-filter', 'metric-filter']);
+const emit = defineEmits(['status-filter', 'metric-filter', 'retry']);
 const { t } = useI18n();
 const session = useServiceDesk();
 const key = `kpis:${getCurrentInstance().uid}`;
 const result = computed(
-  () => session.operations?.resource(key) || { status: 'idle', data: null }
+  () =>
+    props.dashboardSource ||
+    session.operations?.resource(key) || { status: 'idle', data: null }
 );
 const metrics = computed(() => {
   let names = ['total', 'active', 'open', 'waiting', 'resolved'];
@@ -49,6 +52,7 @@ const resolutionLabel = computed(() => {
       });
 });
 const load = () => {
+  if (props.dashboardSource !== null) return undefined;
   if (
     session.state.status === 'ready' &&
     session.state.context?.capabilities?.dashboard?.index === true
@@ -61,6 +65,7 @@ watch(
     () => props.query,
     () => session.state.status,
     () => session.operations?.state.revision,
+    () => props.dashboardSource,
   ],
   load,
   { immediate: true, deep: true }
@@ -123,7 +128,7 @@ onBeforeUnmount(() => session.operations?.cancel(key));
       :status="result.status"
       compact
       retry
-      @retry="load"
+      @retry="dashboardSource !== null ? emit('retry') : load()"
     />
     <p
       v-if="result.status === 'ready' && !compact"

@@ -11,7 +11,6 @@ import State from '../components/ServiceDeskState.vue';
 import TicketTable from '../components/TicketTable.vue';
 import OverviewOperations from '../components/OverviewOperations.vue';
 import { ticketListContext } from '../helpers/ticketNavigation';
-import { useSupervisionReport } from '../composables/useSupervisionReport.js';
 import { metricQuery } from '../helpers/screenExperience.js';
 import { useServiceDesk } from '../composables/useServiceDesk';
 import { serviceDeskRouteName } from '../routeDefinitions';
@@ -21,15 +20,28 @@ const route = useRoute();
 const session = useServiceDesk();
 const key = 'overview:recent';
 const recent = computed(() => session.resource(key));
-const {
-  result: supervision,
-  status: reportStatus,
-  load: reloadReport,
-} = useSupervisionReport(session, () => ({
-  ...route.query,
-  per_page: 5,
-  page: 1,
-}));
+const dashboardKey = 'overview:dashboard';
+const dashboard = computed(
+  () =>
+    session.operations?.resource(dashboardKey) || { status: 'idle', data: null }
+);
+const supervision = computed(() => dashboard.value.data?.supervision?.data);
+const reportStatus = computed(() =>
+  dashboard.value.status === 'ready'
+    ? dashboard.value.data.supervision.status
+    : dashboard.value.status
+);
+const reloadDashboard = () => {
+  if (
+    session.state.status === 'ready' &&
+    session.state.context?.capabilities?.dashboard?.index === true
+  )
+    return session.operations?.read(dashboardKey, 'dashboard', {
+      query: route.query,
+      includeSupervision: true,
+    });
+  return undefined;
+};
 const load = () =>
   session.load(key, 'tickets', {
     ...route.query,
@@ -43,10 +55,16 @@ watch(
     () => route.query,
     () => session.operations?.state.revision,
   ],
-  load,
+  () => {
+    load();
+    reloadDashboard();
+  },
   { immediate: true }
 );
-onBeforeUnmount(() => session.resetResource(key));
+onBeforeUnmount(() => {
+  session.resetResource(key);
+  session.operations?.cancel(dashboardKey);
+});
 const go = (name, ticketId, filters = {}) => {
   let query;
   if (['tickets', 'mine', 'sla'].includes(name)) {
@@ -111,8 +129,10 @@ const filterStatus = statusId =>
     />
     <LiveKpis
       reference-layout
-      :supervision="reportStatus === 'ready' ? supervision?.supervision : null"
+      :dashboard-source="dashboard"
+      :supervision="reportStatus === 'ready' ? supervision : null"
       :query="route.query"
+      @retry="reloadDashboard"
       @status-filter="filterStatus"
       @metric-filter="
         router.push({
@@ -128,7 +148,7 @@ const filterStatus = statusId =>
           <OverviewOperations
             v-if="reportStatus === 'ready'"
             section="charts"
-            :data="supervision.supervision"
+            :data="supervision"
             @navigate="go($event.name, null, $event.query || {})"
           />
           <State
@@ -136,7 +156,7 @@ const filterStatus = statusId =>
             :status="reportStatus"
             compact
             retry
-            @retry="reloadReport"
+            @retry="reloadDashboard"
           />
         </template>
         <Panel
@@ -169,7 +189,7 @@ const filterStatus = statusId =>
       <div class="grid content-start gap-4">
         <OverviewSignals
           kind="risk"
-          :data="reportStatus === 'ready' ? supervision?.supervision : null"
+          :data="reportStatus === 'ready' ? supervision : null"
           :can-view-sla="
             session.state.context?.effective_permissions?.includes(
               'jrc_service_desk_sla_view'
@@ -179,7 +199,7 @@ const filterStatus = statusId =>
         />
         <OverviewSignals
           kind="team"
-          :data="reportStatus === 'ready' ? supervision?.supervision : null"
+          :data="reportStatus === 'ready' ? supervision : null"
         />
         <OverviewSignals
           kind="activity"
@@ -194,7 +214,7 @@ const filterStatus = statusId =>
           <OverviewOperations
             v-if="reportStatus === 'ready'"
             section="summary"
-            :data="supervision.supervision"
+            :data="supervision"
             @navigate="go($event.name, null, $event.query || {})"
           />
         </details>

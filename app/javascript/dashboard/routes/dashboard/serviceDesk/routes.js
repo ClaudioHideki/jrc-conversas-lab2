@@ -107,7 +107,6 @@ export const routes = [
     path: frontendURL('accounts/:accountId/service-desk'),
     component: () => import('./ServiceDeskLayout.vue'),
     meta,
-    beforeEnter: guard,
     children: SERVICE_DESK_ROUTES.map(definition => ({
       path: definition.path,
       name: serviceDeskRouteName(definition.key),
