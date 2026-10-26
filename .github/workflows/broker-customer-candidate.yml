@@ -83,7 +83,7 @@ jobs:
       POSTGRES_PORT: '5432'
       POSTGRES_USERNAME: postgres
       POSTGRES_PASSWORD: disposable-test-only
-      POSTGRES_DATABASE: jrc_rel_sd_r345_concurrency_test
+      POSTGRES_DATABASE: jrc_sd_bc_portal_concurrency_20261025_test
       REDIS_URL: redis://127.0.0.1:6379/15
       FRONTEND_URL: https://central.example.test
       SECRET_KEY_BASE: isolated-broker-customer-ci-not-a-production-secret
@@ -91,6 +91,7 @@ jobs:
       SCHEMA: /tmp/broker-customer-candidate-schema.rb
       MINIMUM_EXAMPLES: ${{ matrix.suite == 'concurrent' && '11' || '1044' }}
       JRC_SD_CONCURRENCY: '1'
+      JRC_SD_INTEGRATED_CONCURRENCY: '1'
       TEST_SUITE: ${{ matrix.suite }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
@@ -129,8 +130,9 @@ jobs:
           test "$POSTGRES_HOST" = 127.0.0.1
           test -z "${DATABASE_URL:-}"
           # Each job gets a fresh PostgreSQL service; use the existing approved concurrency profile.
-          test "$POSTGRES_DATABASE" = jrc_rel_sd_r345_concurrency_test
+          test "$POSTGRES_DATABASE" = jrc_sd_bc_portal_concurrency_20261025_test
           test "$JRC_SD_CONCURRENCY" = 1
+          test "$JRC_SD_INTEGRATED_CONCURRENCY" = 1
           SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
           bundle exec rails db:migrate
       - name: Regressao Broker, clientes, campanhas e modulos integrados
