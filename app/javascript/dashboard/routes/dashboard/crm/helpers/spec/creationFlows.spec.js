@@ -65,7 +65,7 @@ beforeEach(() => {
   AgentsAPI.get.mockResolvedValue({ data: [] });
   pipelinesAPI.list.mockResolvedValue({ data: [{ id: 10, name: 'Vendas' }] });
   stagesAPI.list.mockResolvedValue({ data: [{ id: 11, name: 'Qualificação' }] });
-  productsAPI.list.mockResolvedValue({ data: [{ id: 12, name: 'JRC', unit_price_cents: 10_000 }] });
+  productsAPI.list.mockResolvedValue({ data: [{ id: 12, name: 'JRC', billing_model: 'one_time', unit_price_cents: 10_000 }] });
   dealsAPI.list.mockResolvedValue({ data: [] });
   dealsAPI.create.mockResolvedValue({ data: { id: 20 } });
   proposalsAPI.creationOptions.mockResolvedValue({ data: { business_units: [] } });
@@ -159,17 +159,39 @@ it('DRAFT-04 restores direct proposal identity, commercial conditions and discou
   await input(wrapper, 'Quantidade').setValue(2);
   await input(wrapper, 'Desconto do item').setValue(5);
   await button(wrapper, 'Adicionar item').trigger('click');
-  await input(wrapper, 'Condição de pagamento').setValue('installments');
-  await input(wrapper, 'Parcelas').setValue(4);
+  await input(wrapper, 'Condição dos valores únicos').setValue('installments');
+  await input(wrapper, 'Parcelas dos valores únicos').setValue(4);
   await input(wrapper, 'Observações').setValue('Condição acordada');
   await wrapper.get('button[aria-label="Fechar"]').trigger('click');
   const draft = readDraft(key('crm:new_proposal'));
-  expect(draft.items[0]).toMatchObject({ quantity: 2, discount_cents: 500 });
+  expect(draft).toMatchObject({
+    origin: 'customer',
+    company_id: 33,
+    contact_id: 44,
+    commercial: {
+      payment_condition: 'installments',
+      installments_count: 4,
+      term_months: 12,
+      commercial_notes: 'Condição acordada',
+    },
+  });
+  expect(draft.items).toEqual([
+    expect.objectContaining({
+      product_id: 12,
+      quantity: 2,
+      unit_price_cents: 10_000,
+      discount_cents: 500,
+    }),
+  ]);
   await button(wrapper, 'Nova proposta').trigger('click');
   await flushPromises();
   expect(wrapper.get('input[value="customer"]').element.checked).toBe(true);
   expect(input(wrapper, 'Título').element.value).toBe('Proposta recuperável');
-  expect(input(wrapper, 'Parcelas').element.value).toBe('4');
+  expect(input(wrapper, 'Condição dos valores únicos').element.value).toBe(
+    'installments'
+  );
+  expect(input(wrapper, 'Parcelas dos valores únicos').element.value).toBe('4');
+  expect(input(wrapper, 'Observações').element.value).toBe('Condição acordada');
   expect(wrapper.findComponent({ name: 'CompanyPicker' }).props('modelValue')).toBe(33);
   expect(wrapper.findComponent({ name: 'ContactPicker' }).props('modelValue')).toBe(44);
 });
