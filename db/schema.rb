@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_10_25_140000) do
+ActiveRecord::Schema[7.1].define(version: 2026_10_26_160000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -4058,6 +4058,10 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_25_140000) do
     t.text "body", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "content_format", default: "plain_text", null: false
+    t.string "request_key"
+    t.string "request_digest"
+    t.index ["account_id", "task_id", "user_id", "request_key"], name: "idx_project_comment_request", unique: true, where: "(request_key IS NOT NULL)"
     t.index ["account_id"], name: "index_jrc_projects_task_comments_on_account_id"
     t.index ["task_id"], name: "index_jrc_projects_task_comments_on_task_id"
     t.index ["user_id"], name: "index_jrc_projects_task_comments_on_user_id"
@@ -8302,6 +8306,14 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_25_140000) do
   execute <<~'JRC_SCHEMA_SQL_7381fc0a9ea2'
     CREATE UNIQUE INDEX idx_operator_boleto_delivery ON public.jrc_operator_operations USING btree (prepared_operation_id, conversation_id) WHERE ((kind)::text = 'send_boleto'::text);
   JRC_SCHEMA_SQL_7381fc0a9ea2
+
+  execute <<~'JRC_SCHEMA_SQL_510d3b461088'
+    DROP INDEX "idx_project_comment_request";
+  JRC_SCHEMA_SQL_510d3b461088
+
+  execute <<~'JRC_SCHEMA_SQL_0d7c8c4f864d'
+    CREATE UNIQUE INDEX idx_project_comment_request ON public.jrc_projects_task_comments USING btree (account_id, task_id, user_id, request_key) WHERE (request_key IS NOT NULL);
+  JRC_SCHEMA_SQL_0d7c8c4f864d
 
   execute <<~'JRC_SCHEMA_SQL_c107a3424afc'
     DROP INDEX "index_companies_on_account_and_domain";

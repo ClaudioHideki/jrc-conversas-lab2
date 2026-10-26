@@ -246,6 +246,89 @@ describe('Edição, exclusão e idioma dos projetos', () => {
     wrapper.unmount();
   });
 
+  it('keeps a rich comment draft until one successful POST acknowledgement despite duplicate submissions', async () => {
+    let finish;
+    request.mockImplementation((_account, path, options) =>
+      options?.method === 'post' && path.endsWith('/comments')
+        ? new Promise(resolve => {
+            finish = resolve;
+          })
+        : Promise.resolve({ data: task })
+    );
+    const rich = {
+      name: 'TaskCommentRich',
+      emits: ['submit', 'change'],
+      template: '<div data-comment-composer />',
+    };
+    const wrapper = mount(TaskEditor, {
+      props: { project, task },
+      global: { stubs: { OpsModal: modalStub, TaskCommentRich: rich } },
+    });
+    await flushPromises();
+    await wrapper
+      .findAll('button')
+      .find(item => item.text() === 'Comentários')
+      .trigger('click');
+    const composer = wrapper.findComponent(rich);
+    const onSaved = vi.fn().mockResolvedValue();
+    const payload = {
+      body: 'Synthetic rich draft',
+      requestKey: 'synthetic-comment-000001',
+      images: [],
+      onSaved,
+    };
+    composer.vm.$emit('change', payload.body);
+    composer.vm.$emit('submit', payload);
+    composer.vm.$emit('submit', payload);
+    await flushPromises();
+    expect(
+      request.mock.calls.filter(
+        ([, path, options]) =>
+          path.endsWith('/comments') && options?.method === 'post'
+      )
+    ).toHaveLength(1);
+    expect(onSaved).not.toHaveBeenCalled();
+    finish({ data: { id: 5 } });
+    await flushPromises();
+    expect(onSaved).toHaveBeenCalledTimes(1);
+    expect(wrapper.text()).toContain('Alterações salvas com sucesso.');
+    wrapper.unmount();
+  });
+
+  it('retains the rich draft after a refused request', async () => {
+    request.mockImplementation((_account, path, options) =>
+      options?.method === 'post' && path.endsWith('/comments')
+        ? Promise.reject(new Error('Forbidden synthetic write'))
+        : Promise.resolve({ data: task })
+    );
+    const rich = {
+      name: 'TaskCommentRich',
+      emits: ['submit'],
+      template: '<div data-comment-composer />',
+    };
+    const wrapper = mount(TaskEditor, {
+      props: { project, task },
+      global: { stubs: { OpsModal: modalStub, TaskCommentRich: rich } },
+    });
+    await flushPromises();
+    await wrapper
+      .findAll('button')
+      .find(item => item.text() === 'Comentários')
+      .trigger('click');
+    const onSaved = vi.fn();
+    wrapper.findComponent(rich).vm.$emit('submit', {
+      body: 'Draft to retain',
+      requestKey: 'synthetic-comment-000002',
+      images: [],
+      onSaved,
+    });
+    await flushPromises();
+    expect(onSaved).not.toHaveBeenCalled();
+    expect(wrapper.text()).toContain('Forbidden synthetic write');
+    expect(wrapper.emitted('changed')).toBeUndefined();
+    wrapper.unmount();
+  });
+
   it('edits an existing time entry instead of adding another entry', async () => {
     allPages.mockResolvedValue([
       {

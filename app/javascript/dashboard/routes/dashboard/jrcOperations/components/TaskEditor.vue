@@ -2,6 +2,9 @@
 import { ref, reactive, computed, onMounted } from 'vue';
 import OpsModal from './OpsModal.vue';
 import FilesBox from './FilesBox.vue';
+import TaskCommentRich from '../../jrcProjects/components/TaskCommentRich.vue';
+import { commentFormData } from '../../jrcProjects/commentDocument';
+import { commentDraft as persistCommentDraft } from '../../jrcProjects/commentDrafts';
 import { useProjects } from '../../jrcProjects/useProjects';
 import { projectTaskStatuses } from '../../jrcProjects/taskBoard';
 import {
@@ -28,6 +31,13 @@ const busy = ref(false);
 const error = ref('');
 const detail = ref(null);
 const comment = ref('');
+const commentPublished = ref(false);
+const newCommentComposer = ref(null);
+const editingRichComposer = ref(null);
+const commentDraftAvailable = ref(false);
+const registerRichEditor = editor => {
+  editingRichComposer.value = editor;
+};
 const checklistText = ref('');
 const editingComment = ref(null);
 const commentDraft = ref('');
@@ -39,6 +49,12 @@ const labelsText = ref((props.task?.labels || []).join(', '));
 const formVersion = ref(props.task?.lock_version);
 const projectBase = `projects/projects/${props.project.id}`;
 const base = `${projectBase}/tasks`;
+const commentScope = computed(() => ({
+  accountId: accountId.value,
+  userId: userId.value,
+  projectId: props.project.id,
+  taskId: props.task?.id,
+}));
 const openProject = computed(
   () => !['completed', 'canceled'].includes(props.project.status)
 );
@@ -96,8 +112,12 @@ const taskTabs = computed(() => [
   ['hours', projectText('TASK_HOURS', 'Horas')],
   ['history', projectText('HISTORY', 'Histórico')],
 ]);
-function requestClose() {
+async function requestClose() {
   if (busy.value) return;
+  if (!dirty.value) {
+    emit('close');
+    return;
+  }
   if (
     !dirty.value ||
     window.confirm(
@@ -106,8 +126,31 @@ function requestClose() {
         'Fechar e descartar as alterações ainda não salvas nesta tarefa?'
       )
     )
-  )
-    emit('close');
+  ) {
+    busy.value = true;
+    try {
+      await newCommentComposer.value?.discard();
+      await editingRichComposer.value?.discard();
+      if (
+        props.task &&
+        commentDraftAvailable.value &&
+        !newCommentComposer.value &&
+        !editingRichComposer.value
+      ) {
+        await persistCommentDraft('delete', commentScope.value);
+        if (editingComment.value)
+          await persistCommentDraft('delete', {
+            ...commentScope.value,
+            commentId: editingComment.value,
+          });
+      }
+      emit('close');
+    } catch (err) {
+      error.value = errorMessage(err);
+    } finally {
+      busy.value = false;
+    }
+  }
 }
 const timeForm = reactive({
   minutes: 60,
@@ -177,7 +220,7 @@ async function submit() {
   }
 }
 async function action(path, method, data) {
-  if (busy.value || !editable.value) return;
+  if (busy.value || !editable.value) return false;
   if (
     method === 'delete' &&
     !window.confirm(
@@ -187,7 +230,7 @@ async function action(path, method, data) {
       )
     )
   )
-    return;
+    return false;
   busy.value = true;
   error.value = '';
   try {
@@ -197,8 +240,10 @@ async function action(path, method, data) {
     });
     await load();
     emit('changed');
+    return true;
   } catch (err) {
     error.value = errorMessage(err);
+    return false;
   } finally {
     busy.value = false;
   }
@@ -238,27 +283,55 @@ function canEditComment(entry) {
 }
 async function saveComment() {
   if (!commentDraft.value.trim()) return;
-  await action(`comments/${editingComment.value}`, 'patch', {
+  const saved = await action(`comments/${editingComment.value}`, 'patch', {
     comment: { body: commentDraft.value },
   });
-  if (!error.value) editingComment.value = null;
+  if (saved) editingComment.value = null;
 }
 async function saveChecklist() {
   if (!checklistDraft.value.trim()) return;
-  await action(`checklist_items/${editingChecklist.value}`, 'patch', {
-    item: { text: checklistDraft.value },
-  });
-  if (!error.value) editingChecklist.value = null;
+  const saved = await action(
+    `checklist_items/${editingChecklist.value}`,
+    'patch',
+    {
+      item: { text: checklistDraft.value },
+    }
+  );
+  if (saved) editingChecklist.value = null;
 }
-async function addComment() {
-  await action('comments', 'post', { comment: { body: comment.value } });
-  if (!error.value) comment.value = '';
+async function saveRichComment(entry, payload) {
+  if (busy.value || !editable.value) return;
+  busy.value = true;
+  error.value = '';
+  commentPublished.value = false;
+  try {
+    await request(
+      accountId.value,
+      `${base}/${props.task.id}/comments${entry ? `/${entry.id}` : ''}`,
+      {
+        method: entry ? 'patch' : 'post',
+        data: commentFormData(payload),
+        key: payload.requestKey,
+      }
+    );
+    commentPublished.value = true;
+    // Clear the acknowledged draft before reload; a failed read must not cause a second POST.
+    await payload.onSaved();
+    editingComment.value = null;
+    comment.value = '';
+    await load();
+    emit('changed');
+  } catch (err) {
+    error.value = errorMessage(err);
+  } finally {
+    busy.value = false;
+  }
 }
 async function addChecklist() {
-  await action('checklist_items', 'post', {
+  const saved = await action('checklist_items', 'post', {
     item: { text: checklistText.value, completed: false },
   });
-  if (!error.value) checklistText.value = '';
+  if (saved) checklistText.value = '';
 }
 async function dependency(edge = null) {
   if (busy.value || !canDependencies.value) return;
@@ -789,6 +862,9 @@ function openSubtask(id) {
       </section>
       <section v-else-if="tab === 'comments'" class="flex flex-col gap-4">
         <h3>{{ projectText('INTERNAL_COMMENTS', 'Comentários internos') }}</h3>
+        <p v-if="commentPublished" role="status" class="text-n-teal-11">
+          {{ projectText('CONFIG_SAVED', 'Alterações salvas com sucesso.') }}
+        </p>
         <p
           v-if="!detail?.comments?.length"
           class="py-6 text-center text-n-slate-11"
@@ -806,8 +882,20 @@ function openSubtask(id) {
             }}</strong
             ><small>{{ formatDate(entry.created_at) }}</small>
           </div>
+          <TaskCommentRich
+            v-if="
+              editingComment === entry.id && entry.content_format === 'markdown'
+            "
+            :ref="registerRichEditor"
+            :scope="{ ...commentScope, commentId: entry.id }"
+            :comment="entry"
+            :disabled="busy"
+            @submit="saveRichComment(entry, $event)"
+            @cancel="editingComment = null"
+            @draft-state="commentDraftAvailable = $event"
+          />
           <form
-            v-if="editingComment === entry.id"
+            v-else-if="editingComment === entry.id"
             class="mt-3 flex flex-col gap-2"
             @submit.prevent="saveComment"
           >
@@ -838,7 +926,15 @@ function openSubtask(id) {
             </div>
           </form>
           <template v-else>
-            <p class="whitespace-pre-wrap break-words">{{ entry.body }}</p>
+            <TaskCommentRich
+              v-if="entry.content_format === 'markdown'"
+              :scope="commentScope"
+              :comment="entry"
+              readonly
+            />
+            <p v-else class="whitespace-pre-wrap break-words">
+              {{ entry.body }}
+            </p>
             <div
               v-if="canEditComment(entry)"
               class="mt-2 flex justify-end gap-2"
@@ -876,23 +972,15 @@ function openSubtask(id) {
             )
           }}
         </p>
-        <form
+        <TaskCommentRich
           v-if="editable"
-          class="flex flex-col gap-4"
-          @submit.prevent="addComment"
-        >
-          <label class="flex flex-col gap-1 min-w-0"
-            ><span>{{
-              projectText('INTERNAL_COMMENT', 'Comentário interno')
-            }}</span
-            ><textarea v-model="comment" required maxlength="20000" /></label
-          ><button
-            class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
-            :disabled="busy"
-          >
-            {{ projectText('ADD_COMMENT', 'Registrar comentário') }}
-          </button>
-        </form>
+          ref="newCommentComposer"
+          :scope="commentScope"
+          :disabled="busy"
+          @change="comment = $event"
+          @submit="saveRichComment(null, $event)"
+          @draft-state="commentDraftAvailable = $event"
+        />
       </section>
       <section v-else-if="tab === 'dependencies'" class="flex flex-col gap-4">
         <p class="text-sm text-n-slate-11">

@@ -18,7 +18,7 @@ export function errorMessage(error) {
 export async function request(
   accountId,
   path,
-  { method = 'get', data, params, key, responseType } = {}
+  { method = 'get', data, params, key, responseType, signal } = {}
 ) {
   if (!/^\d+$/.test(String(accountId))) throw new Error('Conta invalida.');
   const response = await window.axios({
@@ -27,6 +27,7 @@ export async function request(
     data,
     params,
     responseType,
+    ...(signal ? { signal } : {}),
     headers: key ? { 'Idempotency-Key': key } : {},
   });
   return response.data;

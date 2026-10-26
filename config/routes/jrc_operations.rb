@@ -21,7 +21,9 @@ scope '/api/v1/accounts/:account_id', defaults: { format: 'json' } do
       end
       resources :tasks do
         member { post :move }
-        resources :comments, only: %i[index create update destroy]
+        resources :comments, only: %i[index create update destroy] do
+          member { get 'images/:image_id', action: :image }
+        end
         resources :checklist_items, only: %i[create update destroy]
         resources :files, only: %i[index create destroy]
       end
