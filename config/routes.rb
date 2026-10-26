@@ -14,6 +14,8 @@ Rails.application.routes.draw do
     omniauth_callbacks: 'devise_overrides/omniauth_callbacks'
   }, via: [:get, :post]
 
+  draw :jrc_requester_portal
+
   post 'resend_confirmation', to: 'auth/resend_confirmations#create'
 
   ## renders the frontend paths only if its not an api only server
@@ -110,12 +112,23 @@ Rails.application.routes.draw do
           # JRC Service Desk CP4: all endpoints inherit the native Account authentication.
           namespace :jrc_service_desk do
             get 'knowledge', to: 'knowledge#index'
+            # Incidents/problems: contextual workspace over the existing native records.
+            get 'case_workspaces', to: 'case_workspaces#index'
+            post 'case_workspaces', to: 'case_workspaces#create'
+            get 'case_workspaces/:case_id', to: 'case_workspaces#show'
+            post 'case_workspaces/:case_id/commands', to: 'case_workspaces#command'
+            get 'case_workspaces/:case_id/related', to: 'case_workspaces#related'
+            get 'case_workspaces/:case_id/resources', to: 'case_workspaces#resources'
+            get 'case_workspaces/:case_id/resource_options', to: 'case_workspaces#resource_options'
+            get 'case_workspaces/:case_id/entries', to: 'case_workspaces#entries'
+            get 'case_workspaces/:case_id/entries/:entry_id/attachments/:attachment_id', to: 'case_workspaces#attachment'
             get 'board', to: 'cockpit#board'
             patch 'incidents/:incident_id', to: 'cockpit#update_incident'
             get 'reports', to: 'dashboard#report'
             # CP6-D01: structural authority is separate from ticket access.
             get 'structure/context', to: 'structure#context'
             get 'structure/members', to: 'structure#members'
+            get 'structure/assignees', to: 'structure#assignees'
             %w[operator_companies units unit_memberships].each do |structural_resource|
               scope "structure/#{structural_resource}", defaults: { resource: structural_resource } do
                 get '/', to: 'structure#index'
@@ -134,6 +147,26 @@ Rails.application.routes.draw do
               get '/:id', to: 'configuration#show'
               patch '/:id', to: 'configuration#update'
             end
+            get 'automation_drafts', to: 'automation_drafts#show'
+            resources :automation_publications, only: [:index, :show, :create] do
+              post :preview, on: :collection
+              get :options, on: :collection
+            end
+            put 'automation_drafts', to: 'automation_drafts#update'
+            get 'queue_policy_versions', to: 'automation_drafts#queue_versions'
+            get 'automation_insights/ola', to: 'automation_insights#ola'
+            get 'automation_insights/clock_alerts', to: 'automation_insights#clock_alerts'
+            post 'automation_insights/clock_alerts/retry', to: 'automation_insights#retry_clock_alert'
+            get 'automation_insights/notifications', to: 'automation_insights#notifications'
+            post 'closure_revisions/enqueue', to: 'closure_revisions#enqueue'
+            post 'closure_revisions/resume_async', to: 'closure_revisions#resume_async'
+            get 'closure_revisions/versions', to: 'closure_revisions#versions'
+            post 'closure_revisions/proposal', to: 'closure_revisions#proposal'
+            get 'closure_revisions', to: 'closure_revisions#index'
+            post 'closure_revisions/preview', to: 'closure_revisions#preview'
+            post 'closure_revisions', to: 'closure_revisions#create'
+            get 'closure_revisions/result', to: 'closure_revisions#result'
+            post 'closure_revisions/resume', to: 'closure_revisions#resume'
             resources :lifecycle_policies, only: [:index, :show, :create]
             resources :service_definitions, only: [:index, :show, :create]
             get 'ui_context', to: 'ui_context#show'
@@ -185,6 +218,9 @@ Rails.application.routes.draw do
             post 'notification_policies', to: 'cockpit#publish_notification_policy'
             get 'notification_policies', to: 'communication#notification_policies'
             get 'catalogue_form', to: 'catalogue_forms#show'
+            resources :requester_people, only: [:index, :show, :create] do
+              patch :link, on: :member
+            end
             %w[queues priorities categories ticket_types statuses units operator_companies assignees requesters teams
                contracts].each do |resource|
               get resource, to: 'lookups#index', defaults: { resource: resource }
@@ -539,6 +575,17 @@ Rails.application.routes.draw do
             end
           end
           namespace :relationship do
+            resources :survey_models, only: [:index, :show, :create, :update] do
+              collection { get :options }
+              member do
+                post :validate
+                post :publish
+                post :duplicate
+                post :deactivate
+                post :dispatch, action: :evaluate_dispatch
+                get :history
+              end
+            end
             get :metadata, to: 'dashboard#metadata'
             get :dashboard, to: 'dashboard#show'
             get :drilldown, to: 'dashboard#drilldown'
@@ -911,6 +958,7 @@ Rails.application.routes.draw do
 
           resources :inboxes, only: [] do
             resource :assignment_policy, only: [:show, :create, :destroy], module: :inboxes
+            resource :assignment_diagnostics, only: [:show], module: :inboxes
           end
 
           namespace :twitter do
@@ -1055,6 +1103,7 @@ Rails.application.routes.draw do
         resource :config, only: [:create]
         resources :campaigns, only: [:index]
         resources :events, only: [:create]
+        get 'messages/:message_id/attachments/:attachment_id', to: 'messages#attachment'
         resources :messages, only: [:index, :create, :update]
         resources :conversations, only: [:index, :create] do
           collection do
@@ -1316,6 +1365,7 @@ Rails.application.routes.draw do
 
           resources :inboxes, only: [:index, :show, :create, :update, :destroy] do
             get :assignable_agents, on: :member
+            resource :assignment_diagnostics, only: [:show], module: :inboxes
             get :campaigns, on: :member
             get :agent_bot, on: :member
             post :set_agent_bot, on: :member

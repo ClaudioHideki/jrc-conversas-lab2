@@ -10,7 +10,9 @@ class JrcRelationship::ReportMetrics
   private
 
   def records(model)
-    @context.records(model).where(assignment_id: @scope.select(:id))
+    source = model == JrcRelationship::Survey ? @context.records(model, survey_action: 'report') : @context.records(model)
+    rows = source.where(assignment_id: @scope.select(:id))
+    model == JrcRelationship::Survey ? JrcRelationship::SurveyModelAccess.visible_scope(@context, rows, action: 'report', share: 'share_relationship') : rows
   end
 
   def qbr_metrics
@@ -36,7 +38,7 @@ class JrcRelationship::ReportMetrics
   def satisfaction_metrics
     surveys = records(JrcRelationship::Survey).where(kind: 'nps', responded_at: @period)
     ces = records(JrcRelationship::Survey).where(kind: 'ces', responded_at: @period)
-    { ces: ces.average(:score)&.to_f,
+    { ces: ces.average(Arel.sql(JrcRelationship::SurveyScale.sql('ces', reverse: true)))&.to_f,
       nps_promoters: surveys.where('score >= 9').count, nps_detractors: surveys.where('score <= 6').count,
       nps_evolution: nps_evolution(surveys), csat_evolution: csat_evolution }
   end

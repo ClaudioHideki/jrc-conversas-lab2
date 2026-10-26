@@ -330,6 +330,7 @@ class Message < ApplicationRecord
     mark_pending_conversation_as_open_for_human_response
     set_conversation_activity
     dispatch_create_events
+    AutoAssignment::IncomingMessageRequest.new(message: self).perform
     send_reply
     execute_message_template_hooks
     update_contact_activity

@@ -3,6 +3,8 @@
 # Native unit grants and audit-only administrative actors; neither stores roles or capabilities.
 class JrcServiceDesk::UnitMembership < JrcServiceDesk::UnitRecord
   belongs_to :account_user, class_name: '::AccountUser', optional: false
+  belongs_to :team, class_name: '::Team', optional: true
+  belongs_to :queue, class_name: 'JrcServiceDesk::Queue', optional: true
 
   scope :operational, -> { where(administrative_actor: false) }
 
@@ -14,6 +16,9 @@ class JrcServiceDesk::UnitMembership < JrcServiceDesk::UnitRecord
   validates :availability, inclusion: { in: %w[available paused unavailable] }
   validates :capacity, numericality: { only_integer: true, greater_than: 0, less_than_or_equal_to: 1000 }, allow_nil: true
   validate :skills_are_explicit
+  validates :manual_assignment_enabled, :restricted_supervision, inclusion: { in: [true, false] }
+  validate :operational_domain_is_consistent
+  validate :supervision_is_explicit
 
   protected
 
@@ -37,5 +42,27 @@ class JrcServiceDesk::UnitMembership < JrcServiceDesk::UnitRecord
 
   def skills_are_explicit
     errors.add(:skills, 'must contain unique skill codes') unless JrcServiceDesk::SkillCodes.valid?(skills)
+  end
+
+  def operational_domain_is_consistent
+    validate_account_reference(:team)
+    validate_unit_reference(:queue)
+    errors.add(:team, 'must match the selected queue') if queue && queue.team_id != team_id
+    return unless administrative_actor? && (team_id || queue_id || restricted_supervision? || supervision_grants != [])
+
+    errors.add(:administrative_actor, 'cannot be configured as an operational member')
+  end
+
+  def supervision_is_explicit
+    normalized = JrcServiceDesk::SupervisionAccess.normalize(supervision_grants)
+    errors.add(:supervision_grants, 'require restricted supervision') if normalized.any? && !restricted_supervision?
+    normalized.each do |grant|
+      target = JrcServiceDesk::Queue.find_by(account_id: account_id, unit_id: unit_id, id: grant['queue_id'], active: true)
+      unless target&.team_id == grant['team_id'] && Team.exists?(account_id: account_id, id: grant['team_id'])
+        errors.add(:supervision_grants, 'require an active queue and its exact team in this unit')
+      end
+    end
+  rescue ArgumentError, KeyError
+    errors.add(:supervision_grants, 'require explicit queues, teams and supported permissions')
   end
 end

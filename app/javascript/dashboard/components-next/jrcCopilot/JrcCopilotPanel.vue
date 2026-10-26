@@ -8,6 +8,7 @@ import {
   watch,
 } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { surveyModelEditorOpen } from 'dashboard/routes/dashboard/serviceDesk/surveys/presentation';
 import { useI18n } from 'vue-i18n';
 import { useWindowSize } from '@vueuse/core';
 import { useMapGetter } from 'dashboard/composables/store';
@@ -608,6 +609,7 @@ onBeforeUnmount(() => {
 
 <template>
   <JrcCopilotQuickPanel
+    v-show="!surveyModelEditorOpen"
     v-if="!embedded && mode === 'quick'"
     v-model="input"
     :voice="voice"
@@ -634,6 +636,7 @@ onBeforeUnmount(() => {
     @options="openOptions"
   />
   <aside
+    v-show="!surveyModelEditorOpen"
     v-if="fullVisible"
     :id="embedded ? undefined : 'nico-operator-panel'"
     ref="panelRoot"

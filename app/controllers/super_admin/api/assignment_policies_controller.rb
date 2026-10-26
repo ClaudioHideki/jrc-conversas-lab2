@@ -16,12 +16,12 @@ class SuperAdmin::Api::AssignmentPoliciesController < SuperAdmin::Api::BaseContr
   end
 
   def update
-    @assignment_policy.update!(assignment_policy_params)
+    current_account.with_lock { @assignment_policy.update!(assignment_policy_params) }
     render 'api/v1/accounts/assignment_policies/update'
   end
 
   def destroy
-    @assignment_policy.destroy!
+    current_account.with_lock { @assignment_policy.destroy! }
     head :ok
   end
 

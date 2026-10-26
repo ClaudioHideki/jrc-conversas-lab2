@@ -74,8 +74,24 @@ export function decodeBoard(payload, context, kind, query) {
     const states = {
       tasks: ['open', 'in_progress', 'completed', 'cancelled'],
       approvals: ['pending', 'approved', 'rejected', 'returned'],
-      incidents: ['open', 'investigating', 'monitoring', 'resolved'],
-      problems: ['open', 'investigating', 'monitoring', 'resolved'],
+      incidents: [
+        'open',
+        'investigating',
+        'in_progress',
+        'waiting',
+        'monitoring',
+        'resolved',
+        'closed',
+      ],
+      problems: [
+        'open',
+        'investigating',
+        'in_progress',
+        'waiting',
+        'monitoring',
+        'resolved',
+        'closed',
+      ],
     }[kind];
     const relatedTicket = ['incidents', 'problems'].includes(kind)
       ? row.primary_ticket_id || row.ticket_ids[0]
@@ -155,6 +171,20 @@ export function decodeSupervision(value, context) {
         })();
   return {
     sla,
+    sla_coverage:
+      value.sla_coverage == null
+        ? null
+        : Object.fromEntries(
+            [
+              'total_tickets',
+              'measured_tickets',
+              'unmeasured_tickets',
+              'tickets_with_pending_result',
+              'completed_clocks',
+              'met_clocks',
+              'breached_clocks',
+            ].map(key => [key, count(value.sla_coverage[key])])
+          ),
     by_agent: rows('by_agent', row => ({
       id: row.id === null ? null : id(row.id),
       ...(row.account_user_id && row.unit_id

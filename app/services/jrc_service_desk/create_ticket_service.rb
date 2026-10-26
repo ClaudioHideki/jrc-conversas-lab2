@@ -44,6 +44,7 @@ class JrcServiceDesk::CreateTicketService < JrcServiceDesk::BaseService
 
       requester = Contact.where(account_id: context.account.id).find(JrcServiceDesk::Input.id(normalized['requester_id']))
       authorize!(requester, :show?)
+      JrcServiceDesk::RequesterDirectory.new(context).validate!(requester, company_id: normalized['company_id'])
       service, queue = catalogue_references(service_id, normalized, unit)
       ticket = JrcServiceDesk::Ticket.new(
         account: context.account, unit: unit, title: normalized['title'], description: normalized['description'], requester: requester,
@@ -59,8 +60,15 @@ class JrcServiceDesk::CreateTicketService < JrcServiceDesk::BaseService
       JrcServiceDesk::TicketCatalogue.new(ticket, context: context).bind!(normalized)
       intake = JrcServiceDesk::IntakeRuleApplication.new(ticket: ticket, context: context, supplied: values, conversation: intake_conversation)
       intake.apply!
+      if ticket.assignee_membership && normalized['assignee_account_user_id'].nil?
+        reason = JrcServiceDesk::AssignmentEligibility.new(membership: ticket.assignee_membership, ticket: ticket).reason
+        ticket.assignee_membership = nil if reason
+      end
+      verify_assignee_team!(ticket, manual: normalized['assignee_account_user_id'].present?)
+      raise Pundit::NotAuthorizedError unless context.supervision_access.allowed?(ticket, 'tickets_create')
       authorize!(ticket, :create?)
       ticket.save!
+      intake.record_actions!
       intake.record_sla!
       if ticket.lifecycle_policy_version
         version = ticket.lifecycle_policy_version

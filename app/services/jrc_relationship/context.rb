@@ -32,9 +32,9 @@ class JrcRelationship::Context
     record
   end
 
-  def records(model)
+  def records(model, survey_action: 'response')
     relation = model.where(account_id: account.id, assignment_id: assignments.select(:id))
-    relation = JrcRelationship::RecordVisibility.new(self).source_scope(model, relation)
+    relation = JrcRelationship::RecordVisibility.new(self).source_scope(model, relation, survey_action: survey_action)
     return relation.none if [JrcRelationship::Renewal, JrcRelationship::ExpansionSignal].include?(model) && !JrcOperations::Access.crm?(member)
 
     visibility = JrcCustomers::Visibility.new(account: account, user: user, account_user: member)
@@ -95,6 +95,7 @@ class JrcRelationship::Context
                                             account_user_id: member.id).order(:id).pluck(:id, :updated_at),
        JrcProjects::ProjectMember.where(account_id: account.id,
                                         user_id: user.id).order(:id).pluck(:id, :updated_at),
+       JrcRelationship::SurveyDefinition.where(account_id: account.id).where("jsonb_exists(settings, 'service_desk_model')").order(:id).pluck(:id, :version),
        InboxMember.where(inbox_id: account.inboxes.select(:id),
                          user_id: user.id).order(:id).pluck(:id, :updated_at)].join(':')
     )

@@ -132,6 +132,34 @@ afterEach(() => {
 });
 
 describe('verified publication confirmation in the ticket detail', () => {
+  it('keeps a transfer mounted until its confirmed result closes the dialog before refreshing', async () => {
+    mocks.session.detail.record.permissions.transfer = true;
+    const operation = {
+      name: 'TicketOperations',
+      emits: ['updated'],
+      template: '<div data-transfer-form />',
+    };
+    const wrapper = render({ TicketOperations: operation });
+    await flushPromises();
+    const transfer = wrapper
+      .findAll('button')
+      .find(button => button.text() === 'JRC_SERVICE_DESK.TICKET.transfer');
+    await transfer.trigger('click');
+    expect(wrapper.find('[data-transfer-form]').exists()).toBe(true);
+    mocks.session.load.mockClear().mockImplementation(() => {
+      mocks.session.detail.status = 'loading';
+      mocks.session.detail.record = null;
+    });
+    mocks.session.operations.state.revision += 1;
+    await flushPromises();
+    expect(mocks.session.load).not.toHaveBeenCalled();
+    expect(wrapper.find('[data-transfer-form]').exists()).toBe(true);
+    wrapper.findComponent(operation).vm.$emit('updated');
+    await flushPromises();
+    expect(wrapper.find('[role="dialog"]').exists()).toBe(false);
+    expect(mocks.session.load).toHaveBeenCalledTimes(1);
+  });
+
   it.each([true, false])(
     'shows the snapshot editor without requiring an unrelated lifecycle grant (%s)',
     async inspect => {

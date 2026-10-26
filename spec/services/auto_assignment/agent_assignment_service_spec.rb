@@ -16,8 +16,10 @@ RSpec.describe AutoAssignment::AgentAssignmentService do
   end
 
   before do
+    account.disable_features!('assignment_v2')
     inbox_members.each { |inbox_member| create(:account_user, account: account, user: inbox_member.user) }
-    allow(OnlineStatusTracker).to receive(:get_available_users).and_return(online_users)
+    allow(OnlineStatusTracker).to receive(:effective_available_users).and_return(online_users)
+    inbox.update!(enable_auto_assignment: true)
   end
 
   describe '#perform' do
@@ -25,6 +27,28 @@ RSpec.describe AutoAssignment::AgentAssignmentService do
       expect(conversation.reload.assignee).to be_nil
       described_class.new(conversation: conversation, allowed_agent_ids: inbox_members.map(&:user_id).map(&:to_s)).perform
       expect(conversation.reload.assignee).not_to be_nil
+    end
+
+    it 'locks a persisted copy without losing the caller creation event or trigger-generated display id' do
+      event_changes = conversation.previous_changes.deep_dup
+      display_id = conversation.display_id
+
+      described_class.new(conversation: conversation, allowed_agent_ids: inbox_members.map(&:user_id)).perform
+
+      expect(conversation.previous_changes).to eq(event_changes)
+      expect(conversation.display_id).to eq(display_id)
+      expect(conversation.assignee_id).to eq(inbox_members[3].user_id)
+      expect(conversation.will_save_change_to_assignee_id?).to be(false)
+      expect(Conversation.find(conversation.id).assignee_id).to eq(inbox_members[3].user_id)
+    end
+
+    it 'preserves a newer manual assignment when the caller has a stale unassigned instance' do
+      manual_agent = inbox_members[4].user
+      Conversation.find(conversation.id).update!(assignee: manual_agent)
+
+      described_class.new(conversation: conversation, allowed_agent_ids: inbox_members.map(&:user_id)).perform
+
+      expect(conversation.reload.assignee_id).to eq(manual_agent.id)
     end
   end
 

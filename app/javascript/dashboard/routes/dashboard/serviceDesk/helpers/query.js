@@ -9,6 +9,7 @@ const idFields = [
   'queue_id',
   'assignee_id',
   'team_id',
+  'company_id',
 ];
 const fields = new Set([
   'q',
@@ -27,6 +28,8 @@ const scalar = value => typeof value === 'string' || typeof value === 'number';
 export function normalizeQuery(query = {}, resource = null) {
   const result = { page: 1, per_page: 20 };
   Object.entries(query).forEach(([key, value]) => {
+    if (key === 'company_id' && resource !== 'requesters')
+      throw new QueryError('Company filter requires requesters');
     if (
       key === 'team_id' &&
       ![null, 'tickets', 'assignees', 'dashboard', 'reports'].includes(resource)

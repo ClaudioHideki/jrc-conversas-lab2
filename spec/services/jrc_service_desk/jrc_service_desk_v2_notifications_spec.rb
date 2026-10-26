@@ -186,6 +186,37 @@ RSpec.describe JrcServiceDesk do
     expect(row.reload.reason).to eq('authorization_revoked')
   end
 
+  it 'builds no native message when a queued customer publication loses its departmental publication grant' do
+    team = create(:team, account: sd_account)
+    queue = create(:jrc_sd_queue, unit: sd_unit, team: team)
+    ticket.update!(queue: queue, team: team)
+    policy
+    row = JrcServiceDesk::NotificationDelivery.find_by!(ticket_note_id: note.id)
+    expect(row.state).to eq('queued')
+    sd_membership.update!(restricted_supervision: true, supervision_grants: [{ queue_id: queue.id, team_id: team.id,
+      permissions: %w[tickets_view notes_view notes_add] }])
+    expect(JrcServiceDesk::TicketPolicy.new(sd_context, ticket).view_notes?).to be(true)
+    expect(JrcServiceDesk::OperationalContext.new(sd_context).capability?(:customer_publish)).to be(true)
+    expect { JrcServiceDesk::NotificationDeliveryJob.perform_now(row.id) }.not_to change(Message, :count)
+    expect(row.reload).to have_attributes(state: 'blocked', reason: 'authorization_revoked', message_id: nil)
+  end
+
+  it 'does not call the provider after revoking only the departmental customer publication grant' do
+    team = create(:team, account: sd_account)
+    queue = create(:jrc_sd_queue, unit: sd_unit, team: team)
+    ticket.update!(queue: queue, team: team)
+    row = queued_delivery
+    permissions = %w[tickets_view notes_view notes_add customer_publish]
+    sd_membership.update!(restricted_supervision: true,
+      supervision_grants: [{ queue_id: queue.id, team_id: team.id, permissions: permissions }])
+    expect(JrcServiceDesk::TicketPolicy.new(sd_context, ticket).customer_publish?).to be(true)
+    expect(JrcServiceDesk::NotificationEngine.blocker(row)).to be_nil
+    sd_membership.update!(supervision_grants: [{ queue_id: queue.id, team_id: team.id, permissions: permissions - ['customer_publish'] }])
+    expect(JrcServiceDesk::TicketPolicy.new(sd_context, ticket).view_notes?).to be(true)
+    expect { |block| JrcServiceDesk::NotificationExecution.new(row.message).perform(&block) }.not_to yield_control
+    expect(row.reload).to have_attributes(state: 'blocked', reason: 'authorization_revoked')
+  end
+
   it 'rechecks a revocation occurring between the claim and the provider boundary' do
     row = queued_delivery
     checks = 0

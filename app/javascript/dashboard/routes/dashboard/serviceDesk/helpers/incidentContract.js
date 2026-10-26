@@ -3,8 +3,11 @@ import { ContractError } from './contracts';
 export const incidentStates = [
   'open',
   'investigating',
+  'in_progress',
+  'waiting',
   'monitoring',
   'resolved',
+  'closed',
 ];
 const check = value => {
   if (!value) throw new ContractError();

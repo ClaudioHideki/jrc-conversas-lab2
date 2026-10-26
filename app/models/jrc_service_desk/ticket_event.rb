@@ -4,10 +4,10 @@ class JrcServiceDesk::TicketEvent < JrcServiceDesk::TicketRecord
   include JrcServiceDesk::AppendOnly
 
   TYPES = %w[ticket_deleted task_deleted note_withdrawn attachment_withdrawn resource_unlinked operational_rule_applied clock_threshold_reached clock_violated approval_escalated resource_linked resource_updated resource_archived
-             first_response_recorded ticket_auto_routed notification_delivery_updated notification_resend_requested interaction_republished
+             first_response_recorded first_response_observed ticket_auto_routed notification_delivery_updated notification_resend_requested interaction_republished
              task_created task_updated approval_requested approval_decided incident_linked incident_updated ticket_claimed ticket_created
              ticket_updated ticket_assigned ticket_transferred note_added conversation_linked sla_snapshot_recorded creation_context_recorded
-             lifecycle_policy_bound lifecycle_transitioned].freeze
+             closure_policy_revised lifecycle_policy_bound lifecycle_transitioned].freeze
 
   belongs_to :actor_membership, class_name: 'JrcServiceDesk::UnitMembership', optional: false
   validates :visibility, inclusion: { in: JrcServiceDesk::InteractionVisibility::VALUES }
@@ -17,17 +17,30 @@ class JrcServiceDesk::TicketEvent < JrcServiceDesk::TicketRecord
   validate :payload_is_safe_json
   before_create :capture_notification_fields
   after_create_commit :schedule_notification_event
+  after_create_commit :schedule_survey_response_event
 
   private
 
   def capture_notification_fields
     return unless JrcServiceDesk::NotificationEvent.active?(self)
 
-    self.data = data.merge('notification_fields' => JrcServiceDesk::NotificationSource.new(self).current_fields)
+    context = ticket.attributes.slice(*JrcServiceDesk::NotificationControls::CONDITION_FIELDS)
+                    .merge('assignee_account_user_id' => ticket.assignee_membership&.account_user_id)
+    self.data = data.merge('notification_context' => context,
+                           'notification_fields' => JrcServiceDesk::NotificationSource.new(self).current_fields)
   end
 
   def schedule_notification_event
     JrcServiceDesk::NotificationEventJob.perform_later(id) if JrcServiceDesk::NotificationEvent.active?(self)
+  end
+
+  def schedule_survey_response_event
+    return unless event_type == 'first_response_observed'
+    return unless JrcRelationship::SurveyEngine.enabled?(account)
+
+    JrcRelationship::SurveyResponseEventJob.perform_later(id)
+  rescue StandardError => e
+    Rails.logger.error("survey_response_enqueue_failed event=#{id} class=#{e.class.name}")
   end
 
   def actor_scope_is_consistent

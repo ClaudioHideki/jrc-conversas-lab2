@@ -143,6 +143,8 @@ class Whatsapp::Providers::WhatsappCloudService < Whatsapp::Providers::BaseServi
     normalize_opus_content_type(attachment)
     type = %w[image audio video].include?(attachment.file_type) ? attachment.file_type : 'document'
     type_content = build_attachment_content(type, attachment, message)
+    return unless type_content
+
     response = HTTParty.post(
       "#{phone_id_path('v24.0')}/messages",
       headers: api_headers,
@@ -183,11 +185,49 @@ class Whatsapp::Providers::WhatsappCloudService < Whatsapp::Providers::BaseServi
   end
 
   def build_attachment_content(type, attachment, message)
-    type_content = { 'link' => attachment.download_url }
+    protected_blob = attachment.file.attached? && JrcServiceDesk::ProtectedBlobAccess.new(blob: attachment.file.blob, user: nil).protected?
+    if protected_blob
+      media_id = upload_protected_media(attachment, message)
+      return unless media_id
+
+      type_content = { 'id' => media_id }
+    else
+      type_content = { 'link' => attachment.download_url }
+    end
     type_content['caption'] = message.outgoing_content unless %w[audio sticker].include?(type)
     type_content['filename'] = attachment.file.filename if type == 'document'
     type_content['voice'] = true if voice_message?(type, attachment)
     type_content
+  end
+
+  # Meta's native /media multipart contract keeps protected bytes out of bearer
+  # storage URLs. Ordinary attachments retain the existing link transport.
+  def upload_protected_media(attachment, message)
+    return protected_upload_failed(message) if message.private? || (!message.outgoing? && !message.template?)
+
+    JrcServiceDesk::OutboundAttachments.authorize_message!(message)
+    blob = attachment.file.blob
+    response = blob.open do |file|
+      connection = Faraday.new(request: { open_timeout: 10, timeout: 30 }) { |client| client.request :multipart }
+      connection.post("#{phone_id_path('v24.0')}/media", {
+                        messaging_product: 'whatsapp', type: blob.content_type,
+                        file: Faraday::Multipart::FilePart.new(file, blob.content_type, blob.filename.to_s)
+                      }) do |request|
+        request.headers['Authorization'] = api_headers.fetch('Authorization')
+      end
+    end
+    result = JSON.parse(response.body) if response.success?
+    media_id = result['id'] if result.is_a?(Hash)
+    return media_id if media_id.is_a?(String) && media_id.present?
+
+    protected_upload_failed(message)
+  rescue Pundit::NotAuthorizedError, Faraday::Error, JSON::ParserError, ActiveStorage::FileNotFoundError, ActiveStorage::IntegrityError
+    protected_upload_failed(message)
+  end
+
+  def protected_upload_failed(message)
+    message.update!(status: :failed, external_error: 'Protected Service Desk media upload failed or access was revoked; check the channel before retrying')
+    nil
   end
 
   def template_body_parameters(template_info)

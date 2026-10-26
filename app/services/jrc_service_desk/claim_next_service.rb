@@ -10,6 +10,7 @@ class JrcServiceDesk::ClaimNextService < JrcServiceDesk::BaseService
       raise Pundit::NotAuthorizedError, 'An operational unit grant is required to claim tickets' if actor_membership.administrative_actor?
 
       membership = actor_membership.reload
+      raise Pundit::NotAuthorizedError unless membership.manual_assignment_enabled?
       previous = authorized_replay(unit, membership, key)
       next previous if previous
 
@@ -64,6 +65,8 @@ class JrcServiceDesk::ClaimNextService < JrcServiceDesk::BaseService
   end
 
   def eligible?(ticket, membership)
+    return false unless JrcServiceDesk::AssignmentEligibility.manual_domain?(membership, ticket)
+
     queue = ticket.queue
     return false if queue && !queue.active?
     return false if ticket.team_id && !context.native_team_ids.exists?(id: ticket.team_id)

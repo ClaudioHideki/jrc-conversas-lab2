@@ -1,33 +1,48 @@
 <!doctype html>
 <html lang="pt-BR">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Pesquisa de relacionamento</title></head>
-<body>
-  <h1><%= @survey.definition_snapshot['name'].presence || 'Pesquisa de relacionamento' %></h1>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Pesquisa de satisfação | JRC Conversas</title>
+<%= stylesheet_link_tag '/brand-assets/jrc-survey-form.css' %>
+</head>
+<body class="jrc-survey-public">
+  <main class="survey-sheet"><header class="survey-brand"><span>JRC</span><div><strong>JRC Conversas</strong><small>Pesquisa de satisfação</small></div></header>
+  <section class="survey-heading"><p>SUA OPINIÃO IMPORTA</p><h1><%= @survey.definition_snapshot['name'].presence || 'Como foi seu atendimento?' %></h1>
+  <% description = @survey.definition_snapshot.dig('settings', 'service_desk_model', 'description') %>
+  <% if description.present? %><div><%= description %></div><% end %></section>
   <%= form_with url: request.path, local: true do %>
-    <% @survey.questions.each do |question| %>
-      <div data-survey-question="<%= question['key'] %>" data-required="<%= question['required'] %>" data-condition="<%= question['condition']&.to_json %>">
-        <label for="answer_<%= question['key'] %>"><%= question['text'] %></label>
+    <% @survey.questions.each_with_index do |question, index| %>
+      <fieldset class="survey-question" data-survey-question="<%= question['key'] %>" data-required="<%= question['required'] %>" data-condition="<%= question['condition']&.to_json %>">
+        <legend><span><%= index + 1 %></span> <%= question['text'] %> <% if question['required'] %><b aria-label="Obrigatória">*</b><% end %></legend>
         <% required = question['required'] && !question['condition'] %>
-        <% if question['type'] == 'scale' %>
+        <% if question['type'] == 'scale' && question['max'] - question['min'] <= 10 %>
+          <div class="survey-scale" role="radiogroup" aria-label="<%= question['text'] %>">
+          <% (question['min']..question['max']).each do |value| %>
+            <label><%= radio_button_tag "answers[#{question['key']}]", value, false, required: required, aria: { label: "#{value} de #{question['max']}" } %><span><%= value %><% if question['presentation'] == 'stars' %> ★<% end %></span></label>
+          <% end %></div><small>De <%= question['min'] %> a <%= question['max'] %></small>
+        <% elsif question['type'] == 'scale' %>
+          <label for="answer_<%= question['key'] %>">Nota entre <%= question['min'] %> e <%= question['max'] %></label>
           <%= number_field_tag "answers[#{question['key']}]", nil, id: "answer_#{question['key']}", min: question['min'], max: question['max'], required: required %>
-          <span><%= question['min'] %> – <%= question['max'] %></span>
         <% elsif question['type'] == 'choice' %>
-          <%= select_tag "answers[#{question['key']}]", options_for_select(question['options'].map { |option| [option['label'], option['value']] }), id: "answer_#{question['key']}", include_blank: true, required: required %>
+          <label for="answer_<%= question['key'] %>" class="survey-visually-hidden">Escolha uma opção</label>
+          <%= select_tag "answers[#{question['key']}]", options_for_select(question['options'].map { |option| [option['label'], option['value']] }), id: "answer_#{question['key']}", include_blank: 'Selecione', required: required %>
         <% else %>
-          <%= text_area_tag "answers[#{question['key']}]", nil, id: "answer_#{question['key']}", maxlength: 4000, required: required %>
+          <label for="answer_<%= question['key'] %>" class="survey-visually-hidden">Sua resposta</label>
+          <%= text_area_tag "answers[#{question['key']}]", nil, id: "answer_#{question['key']}", maxlength: 4000, required: required, rows: 3, placeholder: 'Escreva sua resposta...' %>
         <% end %>
-      </div>
+      </fieldset>
     <% end %>
-    <label for="comment">Comentário</label><%= text_area_tag :comment, nil, maxlength: 4000 %>
-    <%= submit_tag 'Enviar resposta' %>
-  <% end %>
+    <% unless @survey.questions.any? { |question| question['key'] == 'comment' } %><label for="comment">Comentário adicional (opcional)</label><%= text_area_tag :comment, nil, id: 'comment', maxlength: 4000, rows: 3 %><% end %>
+    <%= submit_tag 'Enviar resposta', class: 'survey-submit', data: { disable_with: 'Enviando...' } %>
+    <p class="survey-privacy">Sua resposta será associada ao atendimento e à versão desta pesquisa. Não informe senhas ou dados sensíveis.</p>
+  <% end %></main>
   <%= javascript_tag nonce: true do %>
     const updateSurveyConditions = () => {
-      document.querySelectorAll('[data-condition]').forEach(row => {
+      const rows = [...document.querySelectorAll('[data-survey-question]')];
+      rows.forEach(row => {
         if (!row.dataset.condition) return;
         const condition = JSON.parse(row.dataset.condition);
-        const previousField = document.getElementById(`answer_${condition.question}`);
-        const previous = previousField && !previousField.disabled ? previousField.value : '';
+        const prior = rows.find(item => item.dataset.surveyQuestion === condition.question);
+        const previousField = prior?.querySelector('input[type="radio"]:checked, input:not([type="radio"]), select, textarea');
+        const previous = previousField && !previousField.disabled && !prior.hidden ? previousField.value : '';
         const visible = previous !== '' && (condition.operator === 'eq' ? String(previous) === String(condition.value) :
           condition.operator === 'lte' ? Number(previous) <= Number(condition.value) : Number(previous) >= Number(condition.value));
         row.hidden = !visible;
@@ -35,6 +50,7 @@
       });
     };
     document.addEventListener('input', updateSurveyConditions);
+    document.addEventListener('change', updateSurveyConditions);
     updateSurveyConditions();
   <% end %>
 </body>

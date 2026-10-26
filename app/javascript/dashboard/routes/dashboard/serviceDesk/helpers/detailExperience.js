@@ -4,6 +4,14 @@ export const publicAudiences = Object.freeze([
   'public_without_notification',
 ]);
 
+export function outgoingInteraction(row) {
+  return (
+    row.message_type === 'outgoing' ||
+    row.kind === 'delivery' ||
+    (row.kind === 'note' && publicAudiences.includes(row.visibility))
+  );
+}
+
 export function audiencesForMode(audiences, mode = 'all') {
   return audiences.filter(value => {
     if (mode === 'internal') return privateAudiences.includes(value);

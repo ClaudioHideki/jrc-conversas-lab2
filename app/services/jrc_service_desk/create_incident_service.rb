@@ -2,23 +2,24 @@
 
 class JrcServiceDesk::CreateIncidentService < JrcServiceDesk::BaseService
   def call(unit_id:, attributes:, idempotency_key:)
-    values = JrcServiceDesk::Input.attributes(attributes, %w[title description severity impact ticket_ids resource_kind owner_account_user_id])
+    values = JrcServiceDesk::CaseInput.call(attributes, creating: true)
     ids = ticket_ids(values)
     key = JrcServiceDesk::Input.request_key(idempotency_key)
-    fingerprint = JrcServiceDesk::CanonicalJson.digest(values.merge('ticket_ids' => ids))
+    fingerprint = JrcServiceDesk::CanonicalJson.digest(JrcServiceDesk::RecordedChanges.call(values.merge('ticket_ids' => ids)))
     with_unit(unit_id) do |unit|
       raise Pundit::NotAuthorizedError unless context.capability?(:incidents_manage)
 
       tickets = authorized_tickets(unit, ids)
       existing = authorized_replay(unit, key, fingerprint)
       next existing if existing
-      raise ArgumentError, 'Ticket already belongs to an incident' if tickets.any?(&:incident_id)
 
       row = build_incident(unit, tickets, values)
       row.assign_attributes(idempotency_key: key, request_fingerprint: fingerprint)
       authorize!(row, :create?)
       row.save!
       link_tickets(tickets, row)
+      JrcServiceDesk::CaseJournal.append!(row: row, actor: actor_membership, event: 'created', key: key, fingerprint: fingerprint,
+                                          data: { 'title' => row.title, 'status' => row.status, 'ticket_ids' => ids.map(&:to_s) })
       row
     end
   end
@@ -27,7 +28,8 @@ class JrcServiceDesk::CreateIncidentService < JrcServiceDesk::BaseService
 
   def link_tickets(tickets, incident)
     tickets.each do |ticket|
-      ticket.update!(incident: incident)
+      ticket.update!(incident: incident) unless ticket.incident_id
+      incident.case_links.create!(account: context.account, unit: ticket.unit, ticket: ticket, created_by_membership: actor_membership)
       append_event!(ticket, 'incident_linked', 'incident_id' => incident.id, 'primary_ticket_id' => incident.primary_ticket_id)
     end
   end
@@ -62,7 +64,10 @@ class JrcServiceDesk::CreateIncidentService < JrcServiceDesk::BaseService
     JrcServiceDesk::Incident.new(
       account: context.account, unit: unit, created_by_membership: actor_membership, primary_ticket: tickets.first,
       title: values.fetch('title'), description: values['description'], impact: values['impact'],
-      severity: values.fetch('severity'), started_at: Time.current,
+      cause: values['cause'], workaround: values['workaround'], resolution: values['resolution'],
+      severity: values.fetch('severity'), started_at: values.fetch('started_at', Time.current),
+      service: reference(JrcServiceDesk::Service, values['service_id'], unit),
+      category: reference(JrcServiceDesk::Category, values['category_id'], unit), details: values.fetch('details', {}),
       resource_kind: values.fetch('resource_kind', 'incident'), owner_membership: assignee(values['owner_account_user_id'], unit)
     )
   end

@@ -4,10 +4,10 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import Button from 'dashboard/components-next/button/Button.vue';
 import State from '../components/ServiceDeskState.vue';
-import LifecyclePolicyEditor from '../components/LifecyclePolicyEditor.vue';
-import NotificationPolicyEditor from '../components/NotificationPolicyEditor.vue';
+import CoordinatedAutomationStudio from '../automationStudio/CoordinatedAutomationStudio.vue';
+import ClosureRevisionWorkbench from '../automationStudio/ClosureRevisionWorkbench.vue';
+import NotificationWorkbench from '../automationStudio/NotificationWorkbench.vue';
 import ConfigurationManager from '../components/ConfigurationManager.vue';
-import OperationalRulePanel from '../components/OperationalRulePanel.vue';
 import { useServiceDesk } from '../composables/useServiceDesk';
 const { t } = useI18n();
 const session = useServiceDesk();
@@ -35,6 +35,10 @@ const sections = computed(() => {
   return [
     {
       key: 'lifecycle',
+      allowed: capabilities.lifecycle_policies?.publish === true,
+    },
+    {
+      key: 'closure_revisions',
       allowed: capabilities.lifecycle_policies?.publish === true,
     },
     { key: 'ola', allowed: capabilities.configuration?.queues === true },
@@ -82,14 +86,25 @@ const active = computed(
         @click="select(row.key)"
       />
     </nav>
-    <LifecyclePolicyEditor
+    <CoordinatedAutomationStudio
       v-if="active === 'lifecycle'"
+      kind="lifecycle"
       :initial-unit-id="String(route?.query?.unit_id || '')"
       :initial-service-id="String(route?.query?.service_id || '')"
     />
-    <ConfigurationManager v-else-if="active === 'ola'" resource="queues" />
-    <NotificationPolicyEditor v-else-if="active === 'notifications'" />
-    <OperationalRulePanel v-else-if="active === 'operational'" />
+    <ClosureRevisionWorkbench v-else-if="active === 'closure_revisions'" />
+    <ConfigurationManager
+      v-else-if="active === 'ola'"
+      resource="queues"
+      ola-view
+    />
+    <NotificationWorkbench v-else-if="active === 'notifications'" />
+    <CoordinatedAutomationStudio
+      v-else-if="active === 'operational'"
+      kind="operational"
+      :initial-unit-id="String(route?.query?.unit_id || '')"
+      :initial-service-id="String(route?.query?.service_id || '')"
+    />
   </section>
   <State v-else-if="session.state.status === 'ready'" status="denied" />
 </template>

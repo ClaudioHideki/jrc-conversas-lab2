@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
+import { surveyModelEditorOpen } from 'dashboard/routes/dashboard/serviceDesk/surveys/presentation';
 import {
   useRoute,
   useRouter,
@@ -29,6 +30,11 @@ const router = useRouter();
 const quickActionEvents = useEventBus(quickActionTarget);
 const { actions, accountId, userId } = useQuickActionAccess();
 const { openQuick } = useJrcCopilot();
+const visibleActions = computed(() =>
+  actions.value.filter(
+    action => !surveyModelEditorOpen.value || action.command !== 'nico'
+  )
+);
 const expanded = ref(false);
 const toggle = ref(null);
 const contactDialog = ref(null);
@@ -65,6 +71,7 @@ const closePhone = () => {
   phoneTrigger.value?.focus({ preventScroll: true });
 };
 const openNico = () => {
+  if (surveyModelEditorOpen.value) return;
   expanded.value = false;
   openQuick();
 };
@@ -121,7 +128,7 @@ useEventBus(quickActionCommand).on(request => {
   >
     <ConversationQuickActions
       id="global-quick-actions-list"
-      :actions="actions"
+      :actions="visibleActions"
       :class="expanded ? 'grid lg:flex' : 'hidden lg:flex'"
       @select="activate"
     />
@@ -144,7 +151,11 @@ useEventBus(quickActionCommand).on(request => {
           aria-hidden="true"
         />
       </button>
-      <JrcCopilotLauncher docked :call-active="callActive" />
+      <JrcCopilotLauncher
+        v-show="!surveyModelEditorOpen"
+        docked
+        :call-active="callActive"
+      />
     </div>
     <CreateNewContactDialog
       v-if="canCreateContact"

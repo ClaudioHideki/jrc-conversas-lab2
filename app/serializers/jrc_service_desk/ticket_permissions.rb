@@ -33,6 +33,6 @@ class JrcServiceDesk::TicketPermissions
 
   def operational
     context = JrcServiceDesk::OperationalContext.new(@context)
-    CAPABILITIES.index_with { |key| context.capability?(key) }
+    CAPABILITIES.index_with { |key| context.capability?(key) && @policy.scoped_permission?(key) }
   end
 end

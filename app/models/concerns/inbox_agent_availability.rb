@@ -8,6 +8,7 @@ module InboxAgentAvailability
     inbox_members
       .joins(:user)
       .where(users: { id: online_agent_ids })
+      .where(user_id: account.account_users.online.where(auto_assignment_enabled: true).select(:user_id))
       .includes(:user)
   end
 
@@ -18,7 +19,7 @@ module InboxAgentAvailability
   private
 
   def fetch_online_agent_ids
-    OnlineStatusTracker.get_available_users(account_id)
+    OnlineStatusTracker.effective_available_users(account_id)
                        .select { |_key, value| value.eql?('online') }
                        .keys
                        .map(&:to_i)

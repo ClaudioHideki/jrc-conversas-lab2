@@ -13,7 +13,22 @@ class JrcHumanAssignment::Dispatch
         selected = select_agent
         next false unless selected
 
-        @conversation.update!(assignee_id: selected)
+        member = @account.account_users.find_by(user_id: selected)
+        next false unless member
+
+        assigned = member.with_lock do
+          @conversation.reload
+          @account.reload
+          rules = AutoAssignment::Eligibility.new(inbox: @conversation.inbox.reload, conversation: @conversation)
+          next false unless eligible? && rules.conversation_reason.nil? && rules.agent_reason(member).nil? && eligible_agent_ids.include?(selected)
+
+          policy = JrcHumanAssignment::Policy.for(@account)
+          next false if @account.conversations.open.where(assignee_id: selected).count >= policy[:max_open]
+
+          @conversation.update!(assignee_id: selected)
+          true
+        end
+        next false unless assigned
         settings = @account.custom_attributes.fetch('jrc_human_assignment')
         @account.update!(custom_attributes: @account.custom_attributes.merge(
           'jrc_human_assignment' => settings.merge('last_agent_id' => selected)
@@ -42,7 +57,7 @@ class JrcHumanAssignment::Dispatch
 
   def eligible?
     @account.active? && JrcHumanAssignment::Policy.enabled_for?(@account, @conversation.inbox_id) &&
-      awaiting_human? && eligible_destination?
+      @conversation.auto_assignment_requested_at.present? && awaiting_human? && eligible_destination?
   end
 
   def eligible_destination?
@@ -57,9 +72,9 @@ class JrcHumanAssignment::Dispatch
   end
 
   def eligible_agent_ids
-    available = OnlineStatusTracker.get_available_users(@account.id) || {}
+    available = OnlineStatusTracker.effective_available_users(@account.id)
     online_ids = available.select { |_id, state| state == 'online' }.keys.map(&:to_i)
-    @account.account_users.online.where(user_id: online_ids).pluck(:user_id) &
+    @account.account_users.online.where(auto_assignment_enabled: true, user_id: online_ids).pluck(:user_id) &
       @conversation.inbox.member_ids_with_assignment_capacity &
       @conversation.team.members.ids
   end

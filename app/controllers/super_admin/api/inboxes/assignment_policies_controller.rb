@@ -9,16 +9,18 @@ class SuperAdmin::Api::Inboxes::AssignmentPoliciesController < SuperAdmin::Api::
   end
 
   def create
-    remove_inbox_assignment_policy
-    @inbox_assignment_policy = @inbox.create_inbox_assignment_policy!(
-      assignment_policy: @assignment_policy
-    )
-    @assignment_policy = @inbox.assignment_policy
+    current_account.with_lock do
+      remove_inbox_assignment_policy
+      @inbox_assignment_policy = @inbox.create_inbox_assignment_policy!(
+        assignment_policy: @assignment_policy
+      )
+      @assignment_policy = @inbox.assignment_policy
+    end
     render 'api/v1/accounts/inboxes/assignment_policies/create'
   end
 
   def destroy
-    remove_inbox_assignment_policy
+    current_account.with_lock { remove_inbox_assignment_policy }
     head :ok
   end
 

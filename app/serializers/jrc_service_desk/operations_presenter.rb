@@ -55,7 +55,7 @@ class JrcServiceDesk::OperationsPresenter
 
   def incident_payload(row)
     Pundit.authorize(@context.to_h, row, :show?)
-    visible_tickets = Pundit.policy_scope!(@context.to_h, ::JrcServiceDesk::Ticket).where(incident_id: row.id)
+    visible_tickets = JrcServiceDesk::CaseAssociations.tickets(row, @context)
     incident_details(row).merge(
       primary_ticket_id: visible_tickets.exists?(id: row.primary_ticket_id) ? row.primary_ticket_id&.to_s : nil,
       ticket_ids: visible_tickets.pluck(:id).map(&:to_s)

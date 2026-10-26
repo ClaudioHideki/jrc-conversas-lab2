@@ -27,6 +27,18 @@ class JrcRelationship::SurveyEngine
   end
   private_class_method :closure_rule, :closure_candidate?
 
+  def self.evaluate_event(source:, cycle_key:, event:, rule_id: nil)
+    raise ArgumentError, 'Unsupported survey event' unless %w[closure first_agent_response manual].include?(event)
+    rules = JrcRelationship::SurveyRule.where(account_id: source.account_id).includes(:execution_member, :definition)
+    rules = rules.where(id: rule_id) if rule_id
+    candidate = rules.filter_map do |rule|
+      next unless closure_candidate?(rule, source) && JrcRelationship::SurveyModelRuntime.matches?(rule, source, event)
+      preview = new(source: source, cycle_key: cycle_key, member: rule.execution_member, event: event, rule_id: rule_id).preview
+      preview[:rule]
+    end.max_by { |rule| [rule.specificity, rule.priority, rule.version, rule.id] }
+    new(source: source, cycle_key: cycle_key, member: candidate&.execution_member, event: event, rule_id: rule_id).call
+  end
+
   def self.enabled?(account)
     account.active? && account.feature_enabled?('jrc_relationship') &&
       JrcRelationship::Configuration.find_by(account_id: account.id, scope_key: 'account')&.effective_rules&.fetch('survey_automation_enabled',
@@ -42,8 +54,10 @@ class JrcRelationship::SurveyEngine
                                                      comment: response.feedback_message, native_response_id: response.id)
   end
 
-  def initialize(source:, cycle_key:, member: nil, contract_id: nil, product_id: nil)
+  def initialize(source:, cycle_key:, member: nil, contract_id: nil, product_id: nil, event: 'closure', rule_id: nil)
     @source = source
+    @event = event
+    @requested_rule_id = rule_id
     @cycle_key = cycle_key.to_s
     @member = member
     @commercial_ids = { contract_id: contract_id, product_id: product_id }
@@ -88,14 +102,14 @@ class JrcRelationship::SurveyEngine
   end
 
   def eligibility_result(origin, rule, membership)
-    state, reason = origin_eligibility(origin) || rule_eligibility(rule, membership) || contact_eligibility(origin, rule) || %w[scheduled eligible]
+    state, reason = origin_eligibility(origin, rule) || rule_eligibility(rule, membership) || contact_eligibility(origin, rule) || channel_eligibility(origin, rule) || %w[scheduled eligible]
     { rule: rule, source: origin, state: state, reason: reason }
   end
 
   def matching_rule(origin)
     attributes = origin.attributes
     rows = JrcRelationship::SurveyRule.where(account_id: @account.id).includes(:definition).to_a
-    rows.select { |row| explicit_contact_center_rule?(row) && row.matchers.all? { |key, value| value.to_s == attributes[key].to_s } }
+    rows.select { |row| (!@requested_rule_id || row.id.to_s == @requested_rule_id.to_s) && JrcRelationship::SurveyModelRuntime.matches?(row, @source, @event) && explicit_contact_center_rule?(row) && row.matchers.all? { |key, value| value.to_s == attributes[key].to_s } }
         .max_by { |row| [row.specificity, row.priority, row.version, row.id] }
   end
 
@@ -103,8 +117,9 @@ class JrcRelationship::SurveyEngine
     !@source.is_a?(JrcContactCenter::CallSession) || rule.matchers['source_type'] == @source.class.name
   end
 
-  def origin_eligibility(origin)
-    return %w[skipped interaction_not_completed] unless origin.completed?
+  def origin_eligibility(origin, rule)
+    early = JrcRelationship::SurveyModelRuntime.configuration(rule) && %w[first_agent_response manual].include?(@event)
+    return %w[skipped interaction_not_completed] unless early || origin.completed?
     return %w[blocked contact_missing] unless origin.contact
 
     nil
@@ -113,9 +128,14 @@ class JrcRelationship::SurveyEngine
   def rule_eligibility(rule, membership)
     return %w[skipped rule_disabled] unless rule.active && rule.definition.status == 'active'
     return %w[blocked execution_member_mismatch] unless rule.execution_member_id == membership.id
-    return %w[skipped definition_not_available] unless rule.definition.available_at?(rule.effective_settings['delay_minutes'].minutes.from_now)
+    return %w[skipped definition_not_available] unless rule.definition.available_at?(JrcRelationship::SurveyModelRuntime.scheduled_at(rule))
 
     nil
+  end
+
+  def channel_eligibility(origin, rule)
+    return unless JrcRelationship::SurveyModelRuntime.configuration(rule)
+    %w[blocked channel_unavailable] unless JrcRelationship::SurveyModelRuntime.channel(rule, origin)
   end
 
   def contact_eligibility(origin, rule)
@@ -163,8 +183,15 @@ class JrcRelationship::SurveyEngine
   end
 
   def build_survey!(rule, origin)
-    scheduled_at = rule.effective_settings['delay_minutes'].minutes.from_now
+    scheduled_at = JrcRelationship::SurveyModelRuntime.scheduled_at(rule)
     attributes = origin_attributes(origin).merge(policy_attributes(rule))
+    if JrcRelationship::SurveyModelRuntime.configuration(rule)
+      choice = JrcRelationship::SurveyModelRuntime.channel(rule, origin)
+      raise ArgumentError, 'No authorized survey channel' unless choice
+      attributes[:rule_snapshot] = attributes[:rule_snapshot].deep_dup
+      attributes[:rule_snapshot]['settings'].merge!(choice)
+      attributes[:metadata]['survey_trigger'] = @event
+    end
     attributes[:metadata]['question'] = rule.definition.questions.first['text']
     attributes.merge!(token_digest: Digest::SHA256.hexdigest(SecureRandom.hex(32)), status: 'scheduled', scheduled_at: scheduled_at,
                       expires_at: scheduled_at + rule.effective_settings['expires_hours'].hours)

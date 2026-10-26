@@ -45,8 +45,24 @@ const boardStates = computed(
     ({
       tasks: ['open', 'in_progress', 'completed', 'cancelled'],
       approvals: ['pending', 'approved', 'rejected', 'returned'],
-      incidents: ['open', 'investigating', 'monitoring', 'resolved'],
-      problems: ['open', 'investigating', 'monitoring', 'resolved'],
+      incidents: [
+        'open',
+        'investigating',
+        'in_progress',
+        'waiting',
+        'monitoring',
+        'resolved',
+        'closed',
+      ],
+      problems: [
+        'open',
+        'investigating',
+        'in_progress',
+        'waiting',
+        'monitoring',
+        'resolved',
+        'closed',
+      ],
     })[props.screen] || []
 );
 stateFilter.value = boardStates.value.includes(route.query.status)

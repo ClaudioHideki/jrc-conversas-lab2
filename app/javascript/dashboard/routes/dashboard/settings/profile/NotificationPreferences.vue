@@ -213,6 +213,7 @@ export default {
             :class="`col-span-${type === 'push' ? 3 : 2}`"
           >
             <CheckBox
+              v-if="type === 'email' || !notification.emailOnly"
               :value="`${type}_${notification.value}`"
               :is-checked="
                 checkFlagStatus(type, notification.value, selectedPushFlags)
@@ -254,7 +255,9 @@ export default {
 
       <div class="flex flex-col gap-4">
         <div
-          v-for="(notification, index) in filteredNotificationTypes"
+          v-for="(notification, index) in filteredNotificationTypes.filter(
+            item => !item.emailOnly
+          )"
           :key="index"
           class="flex flex-row items-start gap-2"
         >

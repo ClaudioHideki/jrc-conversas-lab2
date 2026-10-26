@@ -17,6 +17,28 @@ export function createServiceDeskStructureClient(http) {
       .then(response => response.data);
   return Object.freeze({
     context: (account, signal) => get(`${base(account)}/context`, {}, signal),
+    assignees: (account, filters, signal) =>
+      get(`${base(account)}/assignees`, filters, signal),
+    member: (account, unit, accountUserId, signal) =>
+      get(
+        `${base(account)}/members`,
+        {
+          unit_id: structureId(unit),
+          account_user_id: structureId(accountUserId),
+        },
+        signal
+      ),
+    automatic(account, userId, enabled, signal) {
+      if (typeof enabled !== 'boolean')
+        throw new TypeError('Explicit boolean required');
+      return http
+        .patch(
+          `/api/v1/accounts/${structureId(account)}/agents/${structureId(userId)}`,
+          { agent: { auto_assignment_enabled: enabled } },
+          { signal, timeout: 20000 }
+        )
+        .then(response => response.data);
+    },
     members(account, unit, page = 1, q = '', signal = undefined) {
       if (
         !Number.isInteger(page) ||

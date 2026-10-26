@@ -74,6 +74,7 @@ export function createServiceDeskLifecycleClient(http) {
         'reason_code',
         'note',
         'solution',
+        'closing_reason',
         'evidence_note_ids',
         'fields',
       ]);

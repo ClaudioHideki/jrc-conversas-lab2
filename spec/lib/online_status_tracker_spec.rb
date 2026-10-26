@@ -54,4 +54,74 @@ describe OnlineStatusTracker do
       expect(Redis::Alfred.zscore(format(Redis::Alfred::ONLINE_PRESENCE_CONTACTS, account_id: account.id), offline_contact.id)).to be_nil
     end
   end
+
+  describe '.live_presence' do
+    it 'shows a connected paused or offline session without making it automatically assignable' do
+      user1.account_users.find_by!(account: account).update!(availability: :busy)
+      user2.account_users.find_by!(account: account).update!(availability: :offline)
+      user3.account_users.find_by!(account: account).update!(auto_offline: false)
+      described_class.update_presence(account.id, 'User', user1.id)
+      described_class.update_presence(account.id, 'User', user2.id)
+
+      expect(described_class.live_presence(account.id)[:user_ids]).to contain_exactly(user1.id, user2.id)
+      expect(described_class.effective_available_users(account.id)).to be_empty
+    end
+
+    it 'requires membership in the same account even if a heartbeat exists in its Redis key' do
+      foreign_user = create(:user, account: create(:account))
+      described_class.update_presence(account.id, 'User', foreign_user.id)
+      described_class.update_presence(account.id, 'User', user1.id)
+
+      expect(described_class.live_presence(account.id)[:user_ids]).to eq([user1.id])
+      travel described_class::PRESENCE_DURATION + 1.second do
+        expect(described_class.live_presence(account.id)[:user_ids]).to be_empty
+      end
+    end
+
+    it 'fails closed on Redis failure independently of configured availability' do
+      allow(Redis::Alfred).to receive(:zrangebyscore).and_raise(Redis::CannotConnectError)
+
+      expect(described_class.live_presence(account.id)).to eq(user_ids: [], reason: 'redis_presence_unavailable')
+    end
+  end
+
+  describe '.effective_presence' do
+    it 'requires recent presence and the account configured online status' do
+      described_class.update_presence(account.id, 'User', user1.id)
+      described_class.update_presence(account.id, 'User', user2.id)
+      user2.account_users.find_by!(account: account).update!(availability: :offline)
+      user3.account_users.find_by!(account: account).update!(auto_offline: false)
+
+      expect(described_class.effective_available_users(account.id)).to eq(user1.id.to_s => 'online')
+      expect(user3.account_users.find_by!(account: account).availability_status).to eq('online')
+    end
+
+    it 'expires a disconnected session and admits a fresh reconnect heartbeat' do
+      travel_to Time.current.change(usec: 0) do
+        described_class.update_presence(account.id, 'User', user1.id)
+        travel OnlineStatusTracker::PRESENCE_DURATION + 1.second
+        expect(described_class.effective_available_users(account.id)).to be_empty
+        described_class.update_presence(account.id, 'User', user1.id)
+        expect(described_class.effective_available_users(account.id)).to eq(user1.id.to_s => 'online')
+      end
+    end
+
+    it 'ignores the cached status and checks the correct account membership' do
+      foreign = create(:account)
+      create(:account_user, account: foreign, user: user1, availability: :offline)
+      described_class.update_presence(account.id, 'User', user1.id)
+      described_class.update_presence(foreign.id, 'User', user1.id)
+      described_class.set_status(foreign.id, user1.id, 'online')
+
+      expect(described_class.effective_available_users(account.id)).to eq(user1.id.to_s => 'online')
+      expect(described_class.effective_available_users(foreign.id)).to be_empty
+    end
+
+    it 'fails closed when Redis cannot read presence' do
+      allow(Redis::Alfred).to receive(:zrangebyscore).and_raise(Redis::CannotConnectError)
+
+      expect(described_class.effective_presence(account.id)).to eq(user_ids: [], reason: 'redis_presence_unavailable')
+      expect(described_class.effective_available_users(account.id)).to be_empty
+    end
+  end
 end

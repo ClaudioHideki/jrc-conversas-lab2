@@ -6,7 +6,7 @@ shared_examples_for 'auto_assignment_handler' do
   describe '#auto assignment' do
     let(:account) { create(:account) }
     let(:agent) { create(:user, email: 'agent1@example.com', account: account, auto_offline: false) }
-    let(:inbox) { create(:inbox, account: account) }
+    let(:inbox) { create(:inbox, account: account, enable_auto_assignment: true) }
     let(:conversation) do
       create(
         :conversation,
@@ -18,11 +18,13 @@ shared_examples_for 'auto_assignment_handler' do
     end
 
     before do
+      account.disable_features!('assignment_v2')
       create(:inbox_member, inbox: inbox, user: agent)
+      OnlineStatusTracker.update_presence(account.id, 'User', agent.id)
       allow(Redis::Alfred).to receive(:rpoplpush).and_return(agent.id)
     end
 
-    it 'runs round robin on after_save callbacks' do
+    it 'runs round robin after the new conversation commits' do
       expect(conversation.reload.assignee).to eq(agent)
     end
 
@@ -54,6 +56,7 @@ shared_examples_for 'auto_assignment_handler' do
       # round robin changes assignee in this case since agent doesn't have access to inbox
       agent2 = create(:user, email: 'agent2@example.com', account: account, auto_offline: false)
       create(:inbox_member, inbox: inbox, user: agent2)
+      OnlineStatusTracker.update_presence(account.id, 'User', agent2.id)
       allow(Redis::Alfred).to receive(:rpoplpush).and_return(agent2.id)
       conversation.status = 'open'
       conversation.save!

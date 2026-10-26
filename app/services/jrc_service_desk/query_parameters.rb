@@ -8,11 +8,11 @@ class JrcServiceDesk::QueryParameters
   attr_reader :values
 
   def initialize(input = {}, catalog: false)
-    @values = JrcServiceDesk::Input.attributes(input, catalog ? %w[q page per_page unit_id operator_company_id team_id sort] : KEYS)
+    @values = JrcServiceDesk::Input.attributes(input, catalog ? %w[q page per_page unit_id operator_company_id team_id queue_id company_id sort] : KEYS)
     @values = @values.reject { |_key, v| v.nil? || v == '' }
     @values.each do |key, value|
       raise ArgumentError, 'Scalar filters required' unless value.is_a?(String) || value.is_a?(Integer)
-      @values[key] = JrcServiceDesk::Input.id(value) if IDS.include?(key) || (catalog && key == 'team_id')
+      @values[key] = JrcServiceDesk::Input.id(value) if IDS.include?(key) || (catalog && %w[team_id company_id].include?(key))
     end
     @values['page'] = integer(@values.fetch('page', 1), 1_000_000)
     @values['per_page'] = integer(@values.fetch('per_page', 20), 100)

@@ -30,6 +30,7 @@ class JrcServiceDesk::MembershipDirectory
     role = nil unless role&.account_id == @account.id
     {
       id: member.id.to_s, user_id: member.user_id.to_s, name: member.user.name, role: member.role,
+      auto_assignment_enabled: member.auto_assignment_enabled?,
       custom_role: role && { id: role.id.to_s, name: role.name }, capabilities: context.effective_capabilities,
       membership: membership && JrcServiceDesk::StructureRecords.project('unit_memberships', membership)
     }

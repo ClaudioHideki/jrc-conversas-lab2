@@ -74,7 +74,9 @@ class JrcServiceDesk::PortalCreationService
       contact_inbox: @identity, inbox: @identity.inbox, execution_membership: service.portal_execution_membership,
       conversation: conversation, message: message, request_key: submission[:key], fingerprint: submission[:fingerprint],
       service_revision: JrcServiceDesk::ConfigurationResources.revision('services', service),
-      service_snapshot: JrcServiceDesk::ConfigurationResources.fields('services', service)
+      service_snapshot: JrcServiceDesk::ConfigurationResources.fields('services', service).merge(
+        'requester_snapshot' => @identity.contact.slice('name', 'email', 'phone_number', 'company_id')
+      )
     )
   end
 

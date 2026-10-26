@@ -65,7 +65,12 @@ class Api::V1::Accounts::NotificationsController < Api::V1::Accounts::BaseContro
     return unless params[:primary_actor_type]
     return unless Notification::PRIMARY_ACTORS.include?(params[:primary_actor_type])
 
-    if params[:primary_actor_type] == 'JrcRelationship::Action'
+    if params[:primary_actor_type] == 'JrcServiceDesk::Ticket'
+      ctx = JrcServiceDesk::OperationalContext.new(pundit_user)
+      raise ActiveRecord::RecordNotFound unless ctx.capability?(:sla_view)
+
+      @primary_actor = JrcServiceDesk::TicketPolicy::Scope.new(ctx.to_h, JrcServiceDesk::Ticket).resolve_for('sla_view').find(params[:primary_actor_id])
+    elsif params[:primary_actor_type] == 'JrcRelationship::Action'
       @primary_actor = JrcRelationship::Context.new(Current.account_user).records(JrcRelationship::Action).find(params[:primary_actor_id])
     else
       @primary_actor = params[:primary_actor_type].safe_constantize.find_by(id: params[:primary_actor_id])
@@ -74,6 +79,7 @@ class Api::V1::Accounts::NotificationsController < Api::V1::Accounts::BaseContro
 
   def fetch_notification
     @notification = current_user.notifications.where(account_id: Current.account.id).find(params[:id])
+    raise ActiveRecord::RecordNotFound if @notification.service_desk_clock? && !JrcServiceDesk::ClockAlerts.visible?(@notification)
     raise ActiveRecord::RecordNotFound if @notification.relationship_action? && !JrcRelationship::Notifications.visible?(@notification)
   end
 

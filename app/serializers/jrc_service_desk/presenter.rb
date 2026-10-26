@@ -3,6 +3,7 @@
 # Explicit projection; never ActiveRecord#as_json of a ticket/snapshot/blob.
 class JrcServiceDesk::Presenter
   EVENT_FIELDS = {
+    'closure_policy_revised' => %w[source_version_id target_version_id effects],
     'ticket_deleted' => %w[reason], 'task_deleted' => %w[task_id reason],
     'note_withdrawn' => %w[note_id replacement_note_id reason], 'attachment_withdrawn' => %w[note_id attachment_id filename reason],
     'operational_rule_applied' => %w[kind rule_version_id rule_key rule_digest snapshot_id],
@@ -10,7 +11,7 @@ class JrcServiceDesk::Presenter
     'clock_violated' => %w[clock_id clock_kind policy_digest elapsed_seconds budget_seconds due_at observed_at],
     'approval_escalated' => %w[approval_id history_index],
     'resource_linked' => %w[resource_id resource_kind], 'resource_unlinked' => %w[resource_id resource_kind],
-    'resource_updated' => %w[resource_id resource_kind history_index],
+    'resource_updated' => %w[resource_id resource_kind history_index routing_no_candidate queue_id mode queue_policy_revision reason routing_fallback from_queue_id to_queue_id],
     'resource_archived' => %w[resource_id resource_kind history_index],
     'ticket_created' => %w[status_id priority_id queue_id assignee_membership_id],
     'ticket_updated' => %w[title description requester_id priority_id category_id ticket_type_id subcategory_id contract_id service_fields status_id company_id],
@@ -24,10 +25,11 @@ class JrcServiceDesk::Presenter
     'notification_resend_requested' => %w[original_delivery_id delivery_id reason],
     'ticket_auto_routed' => %w[assignee_membership_id queue_id mode],
     'first_response_recorded' => %w[message_id conversation_id clock_id cycle_id achieved_at snapshot_id],
+    'first_response_observed' => %w[message_id conversation_id achieved_at],
     'conversation_linked' => %w[conversation_id link_id],
     'sla_snapshot_recorded' => %w[snapshot_id version], 'creation_context_recorded' => [],
     'lifecycle_policy_bound' => %w[policy_version_id version digest],
-    'lifecycle_transitioned' => %w[transition_id action from_status_id to_status_id policy_version_id policy_version cycle_id]
+    'lifecycle_transitioned' => %w[transition_id action from_status_id to_status_id policy_version_id policy_version cycle_id closing_reason]
   }.freeze
   def initialize(user_context:)
     @context = user_context
@@ -40,7 +42,7 @@ class JrcServiceDesk::Presenter
     requester = record.requester
     team = record.team
     common(record).merge(title: record.title, number: record.id.to_s, description: record.description, opened_at: stamp(record.opened_at),
-                         impact_code: record.impact_code, urgency_code: record.urgency_code,
+                         impact_code: record.impact_code, urgency_code: record.urgency_code, labels: record.label_list,
                          service: named(record.service), status: named(record.status), priority: named(record.priority),
                          category: named(record.category), ticket_type: named(record.ticket_type), subcategory: named(record.subcategory),
                          **catalogue_fields(record, policy),
@@ -71,7 +73,11 @@ class JrcServiceDesk::Presenter
 
       { id: record.id.to_s, account_id: record.account_id.to_s, unit_id: unit_id.to_s,
         name: record.name.to_s, permissions: { show: true } }.tap do |row|
-        row[:phone_number] = record.phone_number if resource == 'requesters'
+        if resource == 'requesters'
+          row[:phone_number] = record.phone_number
+          row[:email] = record.email
+          row[:company_id] = record.company_id&.to_s
+        end
       end
     else
       Pundit.authorize(@context, record, :show?)
@@ -207,9 +213,11 @@ class JrcServiceDesk::Presenter
       first = clocks.find { |clock| clock.kind == 'first_response' }
       resolution = clocks.find { |clock| clock.kind == 'resolution' }
       attendance = clocks.find { |clock| clock.kind == 'attendance' }
-      state = clocks.any? { |clock| clock.state == 'paused' } ? 'paused' : 'calculated'
+      projections = clocks.map { |clock| JrcServiceDesk::ClockProjection.new(clock).call }
+      states = projections.map { |clock| clock[:deadline_state] }
+      state = %w[overdue paused near_due on_time completed stopped].find { |value| states.include?(value) } || 'unavailable'
       return { state: state, first_response_due_at: stamp(first&.due_at), resolution_due_at: stamp(resolution&.due_at),
-               attendance_due_at: stamp(attendance&.due_at), clocks: clocks.map { |clock| JrcServiceDesk::ClockProjection.new(clock).call } }
+               attendance_due_at: stamp(attendance&.due_at), clocks: projections }
     end
     snapshot = ticket.latest_sla_snapshot
     return { state: 'unavailable', first_response_due_at: nil, resolution_due_at: nil } unless snapshot

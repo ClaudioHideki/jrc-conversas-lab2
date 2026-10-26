@@ -1,4 +1,5 @@
 <script setup>
+import QuickTicketForm from '../components/QuickTicketForm.vue';
 import TicketAssetLinks from '../components/TicketAssetLinks.vue';
 import OperationsLinks from '../../jrcOperations/components/OperationsLinks.vue';
 import ImpactUrgencySelect from '../components/ImpactUrgencySelect.vue';
@@ -27,6 +28,7 @@ import ScopeBar from '../components/ScopeBar.vue';
 import ServiceDefinitionSelect from '../components/ServiceDefinitionSelect.vue';
 import CatalogueAnswers from '../components/CatalogueAnswers.vue';
 import LookupSelect from '../components/LookupSelect.vue';
+import RequesterSelect from '../components/RequesterSelect.vue';
 import { useServiceDesk } from '../composables/useServiceDesk';
 import { canAct, canonicalId } from '../helpers/access';
 import Feedback from '../components/WriteFeedback.vue';
@@ -69,10 +71,17 @@ const mutation = computed(
   () => session.operations?.mutation(writeKey) || { status: 'idle' }
 );
 const hashingFiles = ref(false);
+const requesterBusy = ref(false);
 const busy = computed(
-  () => mutation.value.status === 'saving' || hashingFiles.value
+  () =>
+    mutation.value.status === 'saving' ||
+    hashingFiles.value ||
+    requesterBusy.value
 );
 const step = ref(0);
+const advanced = ref(false);
+const quickForm = ref(null);
+const quickSeed = ref(null);
 const operatorId = ref('');
 const blank = () => ({
   company_id: null,
@@ -143,6 +152,23 @@ const selectedNames = reactive({
   queue: null,
   team: null,
 });
+const openAdvanced = seed => {
+  Object.assign(draft, blank(), seed.draft);
+  selectedNames.requester = seed.requester;
+  operatorId.value =
+    session.state.context?.units.find(row => row.id === draft.unit_id)
+      ?.operator_company.id || '';
+  advanced.value = true;
+};
+const openQuick = () => {
+  quickSeed.value = {
+    draft: { ...draft, service_fields: { ...draft.service_fields } },
+    requester: selectedNames.requester,
+    account_id: session.state.context.account_id,
+    user_id: session.state.context.user_id,
+  };
+  advanced.value = false;
+};
 const applyCatalogue = value => {
   catalogue.value = value;
   if (!value || edit.value) return;
@@ -163,8 +189,7 @@ const applyCatalogue = value => {
           unit.value?.permissions.assign_ticket === true))
     ) {
       draft[`${field}_id`] = value.defaults[defaultKey];
-      if (field === 'priority')
-        selectedNames.priority = value.defaults.priority;
+      selectedNames[field] = value.defaults[field] || null;
     }
   });
 };
@@ -199,6 +224,20 @@ const catalogueAccess = computed(() => {
   );
 });
 const relationshipCustomer = ref(null);
+const relationshipSeed = computed(() =>
+  relationshipCustomer.value && session.state.context
+    ? {
+        draft: {
+          ...blank(),
+          company_id: relationshipCustomer.value.company_id,
+          requester_id: relationshipCustomer.value.id,
+        },
+        requester: relationshipCustomer.value,
+        account_id: session.state.context.account_id,
+        user_id: session.state.context.user_id,
+      }
+    : null
+);
 let relationshipEpoch = 0;
 const applyRelationshipCustomer = () => {
   if (edit.value || !relationshipCustomer.value || !hasCustomerMaster.value)
@@ -356,7 +395,11 @@ const cancel = () => {
       : ticketListReturn(route.query).query,
   });
 };
-defineExpose({ busy, cancel });
+defineExpose({
+  busy: computed(() => busy.value || quickForm.value?.busy === true),
+  cancel,
+  advanced,
+});
 
 const maySave = computed(
   () =>
@@ -478,7 +521,15 @@ const submit = async () => {
 </script>
 
 <template>
-  <section>
+  <QuickTicketForm
+    v-if="!edit && !advanced"
+    ref="quickForm"
+    :initial-draft="quickSeed || relationshipSeed"
+    @advanced="openAdvanced"
+    @cancel="cancel"
+    @open="openCreatedTicket"
+  />
+  <section v-else>
     <header class="sd-page-heading">
       <div>
         <h2 id="sd-ticket-form-title" class="sd-page-title">
@@ -488,6 +539,14 @@ const submit = async () => {
           {{ t('JRC_SERVICE_DESK.FORM.subtitle') }}
         </p>
       </div>
+      <Button
+        v-if="!edit"
+        variant="ghost"
+        color="slate"
+        :label="t('JRC_SERVICE_DESK.QUICK.quick_mode')"
+        :disabled="busy"
+        @click="openQuick"
+      />
       <Button
         color="slate"
         variant="ghost"
@@ -626,9 +685,9 @@ const submit = async () => {
                 :placeholder="t('JRC_SERVICE_DESK.NATIVE.company_from_contact')"
                 disabled
               />
-              <LookupSelect
+              <RequesterSelect
                 v-model="draft.requester_id"
-                resource="requesters"
+                :company-id="draft.company_id"
                 :label="t('JRC_SERVICE_DESK.FIELDS.requester')"
                 :unit-id="draft.unit_id"
                 :disabled="!mayEdit || busy"
@@ -637,6 +696,7 @@ const submit = async () => {
                 "
                 :current-phone="requesterPhone"
                 @selected="selectedNames.requester = $event"
+                @busy="requesterBusy = $event"
               />
               <div class="grid gap-4">
                 <Input

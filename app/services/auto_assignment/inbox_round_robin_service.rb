@@ -26,11 +26,15 @@ class AutoAssignment::InboxRoundRobinService
   # allowed member ids = [assignable online agents supplied by the assignment service]
   # the values of allowed member ids should be in string format
   def available_agent(allowed_agent_ids: [])
+    reset_queue unless validate_queue?
+    # Keep the queue's complete membership intact; exclusion is account-scoped.
+    allowed_agent_ids &= inbox.available_agents.pluck(:user_id).map(&:to_s)
+    return nil if allowed_agent_ids.empty?
+
     if inbox.account.feature_enabled?('jrc_contact_center')
       blocked = JrcContactCenter::Qualification.pending.where(account_id: inbox.account_id).joins(:account_user).pluck('account_users.user_id')
       allowed_agent_ids -= blocked.map(&:to_s)
     end
-    reset_queue unless validate_queue?
     user_id = get_member_from_allowed_agent_ids(allowed_agent_ids)
     inbox.inbox_members.find_by(user_id: user_id)&.user if user_id.present?
   end

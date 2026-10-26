@@ -75,9 +75,12 @@ RSpec.describe 'Conversation Assignment API', type: :request do
       end
 
       it 'assigns a team to the conversation' do
+        account.disable_features!('assignment_v2')
+        conversation.inbox.update!(enable_auto_assignment: true)
         team_member = create(:user, account: account, role: :agent, auto_offline: false)
         create(:inbox_member, inbox: conversation.inbox, user: team_member)
         create(:team_member, team: team, user: team_member)
+        OnlineStatusTracker.update_presence(account.id, 'User', team_member.id)
         params = { team_id: team.id }
 
         post api_v1_account_conversation_assignments_url(account_id: account.id, conversation_id: conversation.display_id),

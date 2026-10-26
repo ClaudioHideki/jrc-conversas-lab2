@@ -2,8 +2,8 @@
 
 # Field-level visibility is additional to the parent ticket/history authorization.
 module JrcServiceDesk::HistoryProjection
-  PROTECTED = %w[note solution fields evidence_note_ids].freeze
-  PROVENANCE = %w[reason_code from_phase to_phase policy_digest].freeze
+  PROTECTED = %w[note solution closing_reason fields evidence_note_ids].freeze
+  PROVENANCE = %w[reason_code from_phase to_phase policy_digest closure_revision].freeze
 
   def self.lifecycle(payload, notes:, sla:)
     allowed = PROVENANCE + (notes ? PROTECTED : []) + (sla ? ['sla'] : [])

@@ -3,8 +3,8 @@ class JrcRelationship::RecordVisibility
     @context = context
   end
 
-  def source_scope(model, relation)
-    model == JrcRelationship::Survey ? surveys(relation) : relation
+  def source_scope(model, relation, survey_action: 'response')
+    model == JrcRelationship::Survey ? surveys(relation, action: survey_action) : relation
   end
 
   def expansions(relation, visibility)
@@ -12,7 +12,7 @@ class JrcRelationship::RecordVisibility
     commercial_returns(rows, visibility)
   end
 
-  def surveys(relation)
+  def surveys(relation, action: 'response')
     native = JrcCustomers::Visibility.new(account: @context.account, user: @context.user, account_user: @context.member)
     shared = JrcRelationship::Survey.where(account_id: @context.account.id, assignment_id: nil).or(relation)
     sources = survey_sources(native)
@@ -20,7 +20,8 @@ class JrcRelationship::RecordVisibility
     rows = relation.where(source_type: nil).or(visible)
     contracts = native.crm(@context.account.jrc_crm_contracts)
     rows = rows.where(contract_id: nil).or(rows.where(contract_id: contracts.select(:id)))
-    native.crm? ? rows : rows.where(product_id: nil)
+    rows = native.crm? ? rows : rows.where(product_id: nil)
+    JrcRelationship::SurveyModelAccess.visible_scope(@context, rows, action: action)
   end
 
   def commercial_returns(relation, visibility)

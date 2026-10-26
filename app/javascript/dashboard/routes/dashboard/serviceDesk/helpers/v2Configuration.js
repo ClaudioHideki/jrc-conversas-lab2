@@ -17,6 +17,8 @@ const fields = {
     'ola_time_basis',
     'ola_pause_waiting',
     'ola_escalation_policy',
+    'ola_targets',
+    'ola_calendar',
   ],
   categories: ['parent_id', 'form_fields'],
   ticket_types: ['form_fields'],
@@ -39,7 +41,16 @@ const fields = {
   ],
 };
 export const configurationV2Fields = resource => fields[resource] || [];
-export const membershipV2Fields = ['availability', 'capacity', 'skills'];
+export const membershipV2Fields = [
+  'availability',
+  'capacity',
+  'skills',
+  'team_id',
+  'queue_id',
+  'manual_assignment_enabled',
+  'restricted_supervision',
+  'supervision_grants',
+];
 const check = value => {
   if (!value) throw new TypeError('Invalid operational setting');
 };
@@ -70,7 +81,15 @@ export function escalationPolicy(value) {
   const thresholds = value.thresholds.map(row => {
     check(
       row &&
-        Object.keys(row).length === 3 &&
+        Object.keys(row).every(key =>
+          [
+            'percent',
+            'queue_id',
+            'team_id',
+            'notification_member_ids',
+            'notification_channels',
+          ].includes(key)
+        ) &&
         ['percent', 'queue_id', 'team_id'].every(key => Object.hasOwn(row, key))
     );
     check(
@@ -83,7 +102,30 @@ export function escalationPolicy(value) {
         (row.team_id === null || team) &&
         (!team || queue)
     );
-    return { percent: row.percent, queue_id: queue, team_id: team };
+    const result = { percent: row.percent, queue_id: queue, team_id: team };
+    if (
+      Object.hasOwn(row, 'notification_member_ids') ||
+      Object.hasOwn(row, 'notification_channels')
+    ) {
+      result.notification_member_ids = canonicalIds(
+        row.notification_member_ids
+      );
+      check(
+        result.notification_member_ids.length > 0 &&
+          result.notification_member_ids.length <= 20
+      );
+      check(
+        Array.isArray(row.notification_channels) &&
+          row.notification_channels.length > 0 &&
+          new Set(row.notification_channels).size ===
+            row.notification_channels.length &&
+          row.notification_channels.every(channel =>
+            ['in_app', 'email'].includes(channel)
+          )
+      );
+      result.notification_channels = [...row.notification_channels];
+    }
+    return result;
   });
   check(new Set(thresholds.map(row => row.percent)).size === thresholds.length);
   const result = { enabled: value.enabled, thresholds };
@@ -135,6 +177,8 @@ export function settingAttributes(data) {
       if (key === 'form_fields') value = catalogueFields(value);
       if (['allowed_company_ids', 'allowed_contract_ids'].includes(key))
         value = canonicalIds(value);
+      if (['ola_targets', 'ola_calendar'].includes(key))
+        check(value && typeof value === 'object' && !Array.isArray(value));
       if (key === 'ola_escalation_policy') value = escalationPolicy(value);
       if (
         ['ola_pause_waiting', 'approval_required', 'portal_enabled'].includes(
@@ -149,6 +193,32 @@ export function settingAttributes(data) {
           value === null ||
             (Number.isInteger(value) && value > 0 && value <= 1000)
         );
+      if (['manual_assignment_enabled', 'restricted_supervision'].includes(key))
+        check(typeof value === 'boolean');
+      if (key === 'supervision_grants') {
+        check(Array.isArray(value) && value.length <= 100);
+        value = value.map(row => {
+          check(
+            row &&
+              Object.keys(row).length === 3 &&
+              Array.isArray(row.permissions)
+          );
+          check(
+            row.permissions.includes('tickets_view') &&
+              row.permissions.every(
+                permission => typeof permission === 'string'
+              )
+          );
+          const queue = canonicalId(row.queue_id);
+          const team = canonicalId(row.team_id);
+          check(queue && team);
+          return {
+            queue_id: Number(queue),
+            team_id: Number(team),
+            permissions: [...row.permissions].sort(),
+          };
+        });
+      }
       if (key === 'ola_time_basis')
         check(value === null || ['business', 'calendar'].includes(value));
       if (key === 'description')
@@ -204,6 +274,8 @@ export function operationalDefaults(resource) {
       ola_time_basis: null,
       ola_pause_waiting: false,
       ola_escalation_policy: {},
+      ola_targets: {},
+      ola_calendar: {},
     };
   if (resource === 'categories') return { parent_id: null, form_fields: [] };
   if (resource === 'ticket_types') return { form_fields: [] };

@@ -15,6 +15,11 @@ class JrcServiceDesk::TicketNote < JrcServiceDesk::TicketRecord
   validates :body, presence: true, length: { maximum: 50_000 }
   validates :visibility, inclusion: { in: JrcServiceDesk::InteractionVisibility::VALUES }
   validates :notification_state, inclusion: { in: %w[not_requested requested blocked_activation] }
+  before_create do
+    self.notification_context = ticket.attributes.slice(*JrcServiceDesk::NotificationControls::CONDITION_FIELDS)
+                                      .merge('fields' => JrcServiceDesk::NotificationSource.new(self).current_fields,
+                                             'assignee_account_user_id' => ticket.assignee_membership&.account_user_id)
+  end
   validate :publication_is_consistent
   validate :author_scope_is_consistent
 

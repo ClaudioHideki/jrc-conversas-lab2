@@ -144,7 +144,7 @@ onBeforeUnmount(() => {
           variant="ghost"
           size="sm"
           :disabled="result.status === 'loading'"
-          @click="load"
+          @click="session.operations.state.revision += 1"
         />
         <Button
           v-if="session.state.context?.capabilities?.reports?.index"

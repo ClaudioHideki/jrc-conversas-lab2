@@ -9,6 +9,7 @@ class JrcServiceDesk::LifecycleReadService
   def call(page: 1)
     Pundit.authorize(@context, @ticket, :inspect?, policy_class: JrcServiceDesk::LifecycleActionPolicy)
     version = JrcServiceDesk::LifecycleSelector.new(@ticket).applicable
+    revision = JrcServiceDesk::ClosureRevisionBinding.new(@ticket, version)
     dependency = nil
     if version && version.definition['sla']['mode'] == 'calendar_snapshot'
       cycle = @ticket.sla_cycles.order(number: :desc).first
@@ -20,8 +21,9 @@ class JrcServiceDesk::LifecycleReadService
       end
     end
     pause = @ticket.lifecycle_pauses.find_by(ended_at: nil)
-    options = if version && !dependency
-                version.definition['transitions'].select do |rule|
+    options = if version
+                version.definition['transitions'].map { |rule| revision.rule(rule) }.select do |rule|
+                  next false if dependency && (cycle || !revision.closure_rules.permits_unconfigured_closure?(rule['action']))
                   next false unless JrcServiceDesk::LifecycleActionPolicy.new(@context, @ticket).action?(rule['action'])
                   next false unless JrcServiceDesk::LifecycleActionPolicy.new(@context, @ticket).requirements_allowed?(rule['requirements'])
                   next false unless rule['from_status_ids'].include?(@ticket.status_id)
@@ -50,11 +52,16 @@ class JrcServiceDesk::LifecycleReadService
     history = @ticket.lifecycle_transitions.order(occurred_at: :desc, id: :desc)
     page = JrcServiceDesk::Input.id(page)
     cycle = @ticket.sla_cycles.order(number: :desc).first
+    closure = JrcServiceDesk::ClosureOptions.new(ticket: @ticket, context: @context, version: version, options: options, revision: revision)
     { contract_version: 1, account_id: @ticket.account_id.to_s, unit_id: @ticket.unit_id.to_s, ticket_id: @ticket.id.to_s,
       lock_version: @ticket.lock_version, service_id: @ticket.service_id&.to_s,
       policy: version && { id: version.id.to_s, version: version.version, digest: version.digest, pinned: @ticket.lifecycle_policy_version_id == version.id },
+      closure_revision: revision.projection,
       reopening: reopening_summary(version),
-      unavailable_reason: version ? dependency : 'no_applicable_policy', options: options,
+      unavailable_reason: version ? (options.empty? ? dependency : nil) : 'no_applicable_policy', options: options,
+      measurement: JrcServiceDesk::TicketPolicy.new(@context, @ticket).view_sla? ? JrcServiceDesk::ObservedServiceTimes.new(@ticket, version, cycle).call : nil,
+      closure_options: closure.call,
+      closure_unavailable_reason: version && options.any? ? closure.unavailable_reason : nil,
       pause: pause && { id: pause.id.to_s, reason_code: pause.reason_code, clocks: pause.clocks, started_at: pause.started_at.iso8601(6) },
       cycle: cycle && { id: cycle.id.to_s, number: cycle.number, snapshot_version: cycle.sla_snapshot.version,
         timezone: cycle.sla_snapshot.timezone, clocks: cycle.sla_clocks.order(:kind).map { |c| clock(c) } },

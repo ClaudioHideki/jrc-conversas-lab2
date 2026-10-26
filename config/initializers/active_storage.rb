@@ -13,13 +13,15 @@ Rails.application.config.active_storage.content_types_allowed_inline += %w[
 ]
 
 module ActiveStorageDirectUploadMetadataFilter
-  INTERNAL_METADATA_KEYS = %w[identified analyzed composed].freeze
+  INTERNAL_METADATA_KEYS = %w[identified analyzed composed service_desk_scanned_at].freeze
 
   private
 
   def blob_args
     super.tap do |args|
-      args[:metadata]&.except!(*INTERNAL_METADATA_KEYS, *INTERNAL_METADATA_KEYS.map(&:to_sym))
+      args[:metadata]&.delete_if do |key, _value|
+        INTERNAL_METADATA_KEYS.include?(key.to_s) || key.to_s.start_with?('service_desk_scan_')
+      end
     end
   end
 end

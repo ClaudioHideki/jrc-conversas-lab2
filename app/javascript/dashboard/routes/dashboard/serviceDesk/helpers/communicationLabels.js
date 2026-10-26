@@ -70,6 +70,18 @@ export function communicationLabels(t) {
       task_completed: t('JRC_SERVICE_DESK.R2.events.task_completed'),
     },
     reasons: {
+      conditions_not_matched: t(
+        'JRC_SERVICE_DESK.R2.reasons.conditions_not_matched'
+      ),
+      outside_window: t('JRC_SERVICE_DESK.R2.reasons.outside_window'),
+      outside_window_at_dispatch: t(
+        'JRC_SERVICE_DESK.R2.reasons.outside_window_at_dispatch'
+      ),
+      internal_copy_revoked: t(
+        'JRC_SERVICE_DESK.R2.reasons.internal_copy_revoked'
+      ),
+      recipient_denied: t('JRC_SERVICE_DESK.R2.reasons.recipient_denied'),
+      recipient_removed: t('JRC_SERVICE_DESK.R2.reasons.recipient_removed'),
       recipient_preference: t(
         'JRC_SERVICE_DESK.R2.reasons.recipient_preference'
       ),

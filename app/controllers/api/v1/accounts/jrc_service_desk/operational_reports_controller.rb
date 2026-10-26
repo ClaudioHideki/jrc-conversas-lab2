@@ -11,7 +11,7 @@ class Api::V1::Accounts::JrcServiceDesk::OperationalReportsController < Api::V1:
 
   def export
     authorize :module, :dashboard?, policy_class: ::JrcServiceDesk::ModulePolicy
-    query = ::JrcServiceDesk::OperationalReportQuery.new(user_context: pundit_user, parameters: query_values)
+    query = ::JrcServiceDesk::OperationalReportQuery.new(user_context: pundit_user, parameters: query_values, permission: 'reports_export')
     raise ArgumentError, 'Narrow the export to at most 10000 tickets' if query.relation.count > 10_000
 
     headers = %w[number title opened_at unit_id service_id category_id priority_id status origin_channel company_id]

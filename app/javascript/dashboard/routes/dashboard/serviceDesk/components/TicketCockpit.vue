@@ -24,6 +24,7 @@ const props = defineProps({
   ticket: { type: Object, required: true },
   mode: { type: String, default: 'all' },
   createTaskOnOpen: Boolean,
+  hideAttachments: Boolean,
 });
 const emit = defineEmits(['updated', 'taskEditorOpened']);
 const communicationDirty = ref(false);
@@ -551,7 +552,12 @@ onBeforeUnmount(() => {
       :label="t('JRC_SERVICE_DESK.SCREENS.knowledge')"
       @click="knowledge"
     />
-    <State v-if="status !== 'ready'" :status="status" retry @retry="load" />
+    <State
+      v-if="status !== 'ready'"
+      :status="status"
+      retry
+      @retry="load"
+    />
     <template v-else>
       <div
         v-if="data.incident && mode === 'all'"
@@ -561,12 +567,42 @@ onBeforeUnmount(() => {
         }}{{ data.incident.id }} {{ separator }} {{ data.incident.title }}
         {{ separator }} {{ data.incident.severity }}
       </div>
-      <div v-if="showInteractions" class="grid gap-3">
+      <div
+        v-if="
+          data.relatedIncidents?.length && ['all', 'history'].includes(mode)
+        "
+        class="flex flex-wrap gap-2 rounded-xl border border-n-weak p-3"
+      >
+        <button
+          v-for="item in data.relatedIncidents"
+          :key="item.id"
+          type="button"
+          class="rounded-lg bg-n-blue-2 px-3 py-2 text-xs text-n-blue-11"
+          @click="
+            router.push({
+              name: serviceDeskRouteName(
+                item.resource_kind === 'problem' ? 'problems' : 'incidents'
+              ),
+              params: { accountId: ticket.account_id },
+              query: { unit_id: ticket.unit_id, case_id: item.id },
+            })
+          "
+        >
+          {{ t(`JRC_SERVICE_DESK.CASES.${item.resource_kind}`) }} #{{
+            item.id
+          }}: {{ item.title }}
+        </button>
+      </div>
+      <div
+        v-if="showInteractions"
+        class="grid gap-3"
+      >
         <TicketTimeline
           :ticket="ticket"
           :revision="revision"
           :conversations="data.conversations"
           :selection-locked="communicationDirty || communicationBusy"
+          :hide-attachments="hideAttachments"
           :only-files="mode === 'files'"
           :view="
             mode === 'notes'
@@ -617,7 +653,10 @@ onBeforeUnmount(() => {
           @updated="refreshed"
         />
       </div>
-      <section v-if="showTasks && permissions.tasks_view" class="grid gap-3">
+      <section
+        v-if="showTasks && permissions.tasks_view"
+        class="grid gap-3"
+      >
         <div class="flex items-center justify-between gap-3">
           <p class="text-sm text-n-slate-11">
             {{
@@ -634,7 +673,10 @@ onBeforeUnmount(() => {
             @click="openTaskEditor()"
           />
         </div>
-        <p v-if="!data.tasks.length" class="text-sm text-n-slate-11">
+        <p
+          v-if="!data.tasks.length"
+          class="text-sm text-n-slate-11"
+        >
           {{ t('JRC_SERVICE_DESK.COMMON.no_records') }}
         </p>
         <article
@@ -706,27 +748,39 @@ onBeforeUnmount(() => {
           >
             {{ t('JRC_SERVICE_DESK.EXPERIENCE.overdue') }}
           </p>
-          <div v-if="row.checklist.length" class="flex items-center gap-3">
+          <div
+            v-if="row.checklist.length"
+            class="flex items-center gap-3"
+          >
             <progress
               class="min-w-0 flex-1"
               :value="row.checklist.filter(item => item.done).length"
               :max="row.checklist.length"
               :aria-label="t('JRC_SERVICE_DESK.EXPERIENCE.checklist_progress')"
-            /><span class="text-xs tabular-nums">{{
-              t('JRC_SERVICE_DESK.EXPERIENCE.checklist_count', {
-                done: row.checklist.filter(item => item.done).length,
-                total: row.checklist.length,
-              })
-            }}</span>
+            />
+            <span class="text-xs tabular-nums">
+              {{
+                t('JRC_SERVICE_DESK.EXPERIENCE.checklist_count', {
+                  done: row.checklist.filter(item => item.done).length,
+                  total: row.checklist.length,
+                })
+              }}
+            </span>
           </div>
-          <p v-if="row.parent_task_id" class="text-xs">
+          <p
+            v-if="row.parent_task_id"
+            class="text-xs"
+          >
             {{ t('JRC_SERVICE_DESK.R3.parent_task') }}:
             {{
               data.tasks.find(parent => parent.id === row.parent_task_id)
                 ?.title || numberPrefix + row.parent_task_id
             }}
           </p>
-          <p v-if="row.pending_children" class="text-xs">
+          <p
+            v-if="row.pending_children"
+            class="text-xs"
+          >
             {{
               t('JRC_SERVICE_DESK.R3.pending_subtasks', {
                 count: row.pending_children,
@@ -747,7 +801,8 @@ onBeforeUnmount(() => {
                 ['completed', 'cancelled'].includes(row.status)
               "
               @change="toggleItem(row, index, $event.target.checked)"
-            />{{ item.title }}
+            />
+            {{ item.title }}
           </label>
           <Button
             v-if="row.permissions.update && row.status === 'open'"
@@ -796,7 +851,11 @@ onBeforeUnmount(() => {
                 :disabled="busy || !!editingTask"
                 class="w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
               >
-                <option v-for="value in audiences" :key="value" :value="value">
+                <option
+                  v-for="value in audiences"
+                  :key="value"
+                  :value="value"
+                >
                   {{ labels.visibility[value] }}
                 </option>
               </select>
@@ -839,9 +898,9 @@ onBeforeUnmount(() => {
               :label="t('JRC_SERVICE_DESK.FIELDS.assignee')"
               :disabled="busy || terminalTask"
             />
-            <label
-              >{{ t('JRC_SERVICE_DESK.FIELDS.priority')
-              }}<select
+            <label>
+              {{ t('JRC_SERVICE_DESK.FIELDS.priority') }}
+              <select
                 v-model="taskPriority"
                 :disabled="busy || terminalTask"
                 class="block w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
@@ -853,16 +912,16 @@ onBeforeUnmount(() => {
                 >
                   {{ t(`JRC_SERVICE_DESK.R3.priority.${value}`) }}
                 </option>
-              </select></label
-            >
+              </select>
+            </label>
             <details class="rounded-lg border border-n-weak p-3">
               <summary class="cursor-pointer text-sm font-medium">
                 {{ t('JRC_SERVICE_DESK.REDESIGN_DETAIL.advanced_task') }}
               </summary>
               <div class="mt-3 grid gap-3">
-                <label
-                  >{{ t('JRC_SERVICE_DESK.R3.parent_task')
-                  }}<select
+                <label>
+                  {{ t('JRC_SERVICE_DESK.R3.parent_task') }}
+                  <select
                     v-model="parentTask"
                     :disabled="busy || !!editingTask"
                     class="block w-full rounded-lg border border-n-weak bg-n-solid-1 p-2"
@@ -880,8 +939,8 @@ onBeforeUnmount(() => {
                     >
                       {{ row.title }}
                     </option>
-                  </select></label
-                >
+                  </select>
+                </label>
                 <template
                   v-if="
                     !editingTask &&
@@ -889,13 +948,14 @@ onBeforeUnmount(() => {
                     permissions.lifecycle_inspect
                   "
                 >
-                  <label class="flex gap-2 text-sm"
-                    ><input
+                  <label class="flex gap-2 text-sm">
+                    <input
                       v-model="progressionEnabled"
                       type="checkbox"
                       @change="progressionEnabled && loadLifecycle()"
-                    />{{ t('JRC_SERVICE_DESK.R3.task_progression') }}</label
-                  >
+                    />
+                    {{ t('JRC_SERVICE_DESK.R3.task_progression') }}
+                  </label>
                   <template v-if="progressionEnabled">
                     <State
                       v-if="lifecycleStatus !== 'ready'"
@@ -903,7 +963,8 @@ onBeforeUnmount(() => {
                       compact
                       retry
                       @retry="loadLifecycle"
-                    /><input
+                    />
+                    <input
                       v-model="nextTaskTitle"
                       :aria-label="t('JRC_SERVICE_DESK.R3.next_task')"
                       :placeholder="t('JRC_SERVICE_DESK.R3.next_task')"
@@ -933,10 +994,18 @@ onBeforeUnmount(() => {
                 )
               "
             />
-            <p v-if="feedback" role="status" class="text-sm">
+            <p
+              v-if="feedback"
+              role="status"
+              class="text-sm"
+            >
               {{ labels.feedback[feedback] }}
             </p>
-            <p v-if="failureReason" role="alert" class="text-sm text-n-ruby-11">
+            <p
+              v-if="failureReason"
+              role="alert"
+              class="text-sm text-n-ruby-11"
+            >
               {{ failureReason }}
             </p>
           </form>
@@ -947,7 +1016,10 @@ onBeforeUnmount(() => {
           :busy="busy"
           @close="deletingTask = null"
         >
-          <form class="grid gap-4" @submit.prevent="removeTask">
+          <form
+            class="grid gap-4"
+            @submit.prevent="removeTask"
+          >
             <p class="text-sm">
               {{
                 t('JRC_SERVICE_DESK.REDESIGN_DETAIL.delete_task_help', {
@@ -955,9 +1027,9 @@ onBeforeUnmount(() => {
                 })
               }}
             </p>
-            <label class="grid gap-2 text-sm"
-              >{{ t('JRC_SERVICE_DESK.REDESIGN_DETAIL.reason')
-              }}<textarea
+            <label class="grid gap-2 text-sm">
+              {{ t('JRC_SERVICE_DESK.REDESIGN_DETAIL.reason') }}
+              <textarea
                 v-model="taskDeleteReason"
                 required
                 minlength="3"
@@ -967,10 +1039,18 @@ onBeforeUnmount(() => {
                 class="rounded-lg border border-n-weak bg-n-solid-1 p-3"
               />
             </label>
-            <p v-if="feedback" role="status" class="text-sm">
+            <p
+              v-if="feedback"
+              role="status"
+              class="text-sm"
+            >
               {{ labels.feedback[feedback] }}
             </p>
-            <p v-if="failureReason" role="alert" class="text-sm text-n-ruby-11">
+            <p
+              v-if="failureReason"
+              role="alert"
+              class="text-sm text-n-ruby-11"
+            >
               {{ failureReason }}
             </p>
             <Button
@@ -989,7 +1069,10 @@ onBeforeUnmount(() => {
         <h3 class="font-semibold">
           {{ t('JRC_SERVICE_DESK.COCKPIT.approvals') }}
         </h3>
-        <p v-if="!data.approvals.length" class="text-sm text-n-slate-11">
+        <p
+          v-if="!data.approvals.length"
+          class="text-sm text-n-slate-11"
+        >
           {{ t('JRC_SERVICE_DESK.COMMON.no_records') }}
         </p>
         <article
@@ -1008,7 +1091,10 @@ onBeforeUnmount(() => {
           >
             {{ t('JRC_SERVICE_DESK.EXPERIENCE.overdue') }}
           </p>
-          <p v-if="row.comment" class="text-sm whitespace-pre-wrap">
+          <p
+            v-if="row.comment"
+            class="text-sm whitespace-pre-wrap"
+          >
             {{ row.comment }}
           </p>
           <details v-if="row.history.length">
@@ -1106,7 +1192,8 @@ onBeforeUnmount(() => {
                   !escalations[row.id].reason.trim()
                 "
                 :label="t('JRC_SERVICE_DESK.R3.escalate_approval')"
-              /><Button
+              />
+              <Button
                 variant="outline"
                 :label="t('JRC_SERVICE_DESK.COMMON.cancel')"
                 @click="delete escalations[row.id]"
@@ -1141,7 +1228,10 @@ onBeforeUnmount(() => {
           <summary class="cursor-pointer text-sm font-medium">
             {{ t('JRC_SERVICE_DESK.COCKPIT.request_approval') }}
           </summary>
-          <form class="grid gap-3 mt-3" @submit.prevent="requestApproval">
+          <form
+            class="grid gap-3 mt-3"
+            @submit.prevent="requestApproval"
+          >
             <input
               v-model="approvalTitle"
               required
@@ -1237,8 +1327,9 @@ onBeforeUnmount(() => {
                     :value="row.key"
                   >
                     {{ row.to_status_name }}
-                  </option></select
-                ><select
+                  </option>
+                </select>
+                <select
                   v-if="selectedWaiting"
                   v-model="waitingReason"
                   required
@@ -1254,8 +1345,9 @@ onBeforeUnmount(() => {
                     :value="reason.code"
                   >
                     {{ reason.name }}
-                  </option></select
-                ><textarea
+                  </option>
+                </select>
+                <textarea
                   v-if="selectedWaiting?.requirements.note"
                   v-model="waitingNote"
                   required
@@ -1282,7 +1374,10 @@ onBeforeUnmount(() => {
           </form>
         </details>
       </section>
-      <section v-if="mode === 'all' && permissions.view_sla" class="grid gap-3">
+      <section
+        v-if="mode === 'all' && permissions.view_sla"
+        class="grid gap-3"
+      >
         <h3 class="font-semibold">{{ t('JRC_SERVICE_DESK.R3.ola_title') }}</h3>
         <article
           v-for="clock in data.ola"
@@ -1316,7 +1411,11 @@ onBeforeUnmount(() => {
           @click="evaluateClocks"
         />
       </section>
-      <p v-if="feedback" role="status" class="text-sm">
+      <p
+        v-if="feedback"
+        role="status"
+        class="text-sm"
+      >
         {{ labels.feedback[feedback] }}
       </p>
     </template>

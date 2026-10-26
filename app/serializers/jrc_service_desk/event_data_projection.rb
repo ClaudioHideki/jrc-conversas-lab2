@@ -9,7 +9,7 @@ class JrcServiceDesk::EventDataProjection
     'operational_rule_applied' => :sla_view,
     'note_added' => :notes_view, 'approval_requested' => :approvals_view, 'approval_decided' => :approvals_view,
     'incident_linked' => :incidents_manage, 'incident_updated' => :incidents_manage,
-    'sla_snapshot_recorded' => :sla_view, 'first_response_recorded' => :sla_view,
+    'sla_snapshot_recorded' => :sla_view, 'first_response_recorded' => :sla_view, 'first_response_observed' => :sla_view,
     'clock_threshold_reached' => :sla_view, 'clock_violated' => :sla_view, 'approval_escalated' => :approvals_view,
     'resource_linked' => :incidents_manage, 'resource_unlinked' => :incidents_manage,
     'resource_updated' => :incidents_manage, 'resource_archived' => :incidents_manage
@@ -64,7 +64,7 @@ class JrcServiceDesk::EventDataProjection
   end
 
   def conversation_allowed?(record, data)
-    return true unless %w[conversation_linked first_response_recorded].include?(record.event_type)
+    return true unless %w[conversation_linked first_response_recorded first_response_observed].include?(record.event_type)
     return false unless @context.capability?(:conversations_view)
 
     conversation = Conversation.find_by(account_id: @context.account.id, id: data['conversation_id'])
@@ -72,6 +72,9 @@ class JrcServiceDesk::EventDataProjection
   end
 
   def redact(record, data)
+    if data.key?('closing_reason') && !JrcServiceDesk::TicketPolicy.new(@context.to_h, record.ticket).view_notes?
+      data.delete('closing_reason')
+    end
     allowed = @context.capability?(:customers_view) && JrcCustomers::DirectoryPolicy.new(@context.to_h, :directory).access?
     data.delete('company_id') unless allowed
     %w[requester_id contract_id service_fields].each { |key| data.delete(key) } unless @context.capability?(:customers_view)

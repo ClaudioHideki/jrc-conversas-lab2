@@ -24,6 +24,25 @@ class Webhooks::Trigger
   end
 
   def execute
+    if @webhook_type == :api_inbox_webhook && @payload[:event] == 'message_created' &&
+       message && JrcRelationship::SurveyMessageExecution.applies?(message)
+      JrcRelationship::SurveyMessageExecution.new(message).perform { execute_delivery }
+    elsif @webhook_type == :api_inbox_webhook && @payload[:event] == 'message_created' &&
+          message && message.content_attributes['service_desk_delivery_id']
+      JrcServiceDesk::NotificationExecution.new(message).perform { execute_delivery }
+    else
+      execute_delivery
+    end
+  end
+
+  def execute_delivery
+    if @webhook_type == :api_inbox_webhook && @payload[:event] == 'message_created' && message
+      JrcServiceDesk::OutboundAttachments.authorize_message!(message)
+      if message.outgoing? && !message.private? && JrcServiceDesk::OutboundAttachments.protected?(message)
+        message.update!(status: :failed, external_error: 'Protected Service Desk attachments require an authenticated media upload transport; API inbox URL delivery is unavailable')
+        return
+      end
+    end
     prepare_jrc_delivery
     @jrc_delivery_phase = 'callback'
     jrc_delivery&.callback_started!
@@ -32,6 +51,8 @@ class Webhooks::Trigger
   rescue StandardError => e
     handle_delivery_error(e)
   end
+
+  private :execute_delivery
 
   def handle_failure(error)
     return jrc_delivery.handle_failure(error) if jrc_delivery

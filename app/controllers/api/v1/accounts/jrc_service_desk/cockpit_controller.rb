@@ -22,6 +22,8 @@ class Api::V1::Accounts::JrcServiceDesk::CockpitController < Api::V1::Accounts::
     raise ArgumentError unless query_values.empty?
 
     authorize strict_ticket, :show?
+    access = ::JrcServiceDesk::OperationalContext.new(pundit_user).supervision_access
+    raise Pundit::NotAuthorizedError unless access.allowed?(strict_ticket, 'reports_export')
     render json: base_payload.merge(ticket: presenter.ticket(strict_ticket), cockpit: cockpit_payload,
                                     generated_at: Time.current.iso8601(6), projection: 'authorized_service_desk_cockpit_v2')
   end
@@ -111,6 +113,9 @@ class Api::V1::Accounts::JrcServiceDesk::CockpitController < Api::V1::Accounts::
     if file.blob.metadata['service_desk_scan_state'] != 'clean'
       return render json: { code: 'attachment_scan_unavailable', error: 'O anexo aguarda a verificação de segurança.' }, status: :conflict
     end
+
+    access = ::JrcServiceDesk::ProtectedBlobAccess.new(blob: file.blob, user: Current.user)
+    raise ActiveRecord::RecordNotFound unless access.allowed?
 
     send_data file.download, filename: file.filename.to_s, type: 'application/octet-stream', disposition: 'attachment'
   end

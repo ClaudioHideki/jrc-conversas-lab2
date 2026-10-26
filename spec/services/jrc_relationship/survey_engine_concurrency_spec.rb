@@ -20,7 +20,10 @@ RSpec.describe JrcRelationship::SurveyEngine, :sd_concurrency do
 
   around do |example|
     database = ENV.fetch('POSTGRES_DATABASE', nil)
-    if ENV['JRC_SD_CONCURRENCY'] == '1' && Rails.env.test? && %w[jrc_rel_sd_candidate_test jrc_rel_sd_r2_concurrency_test jrc_rel_sd_r345_concurrency_test].include?(database)
+    if ENV['JRC_SD_CONCURRENCY'] == '1' && Rails.env.test? && %w[jrc_sd_five_concurrency_20261024_test jrc_rel_sd_candidate_test
+                                                                 jrc_rel_sd_r2_concurrency_test jrc_rel_sd_r345_concurrency_test
+                                                                 jrc_sd_bc_portal_concurrency_20261025_test].include?(database) &&
+       ActiveRecord::Base.connection.current_database == database && ActiveRecord::Base.connection_db_config.adapter == 'postgresql'
       example.run
     else
       skip 'Requires the explicit disposable candidate PostgreSQL database'

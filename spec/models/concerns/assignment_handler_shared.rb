@@ -17,6 +17,7 @@ shared_examples_for 'assignment_handler' do
         Current.user = agent
         create(:team_member, team: team, user: agent)
         create(:inbox_member, user: agent, inbox: conversation.inbox)
+        OnlineStatusTracker.update_presence(conversation.account_id, 'User', agent.id)
         conversation.inbox.reload
       end
 
@@ -40,6 +41,8 @@ shared_examples_for 'assignment_handler' do
       end
 
       it 'changes assignee to a team member if allow_auto_assign is enabled' do
+        conversation.account.disable_features!('assignment_v2')
+        conversation.inbox.update!(enable_auto_assignment: true)
         team.update!(allow_auto_assign: true)
 
         conversation.update(team: team)

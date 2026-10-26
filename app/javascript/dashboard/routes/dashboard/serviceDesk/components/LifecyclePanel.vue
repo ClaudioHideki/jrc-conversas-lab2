@@ -10,6 +10,7 @@ import LifecycleAPI from 'dashboard/api/serviceDeskLifecycle';
 import Panel from './ServiceDeskPanel.vue';
 import State from './ServiceDeskState.vue';
 import SlaSnapshotEditor from './SlaSnapshotEditor.vue';
+import ObservedTimesPanel from './ObservedTimesPanel.vue';
 import { useServiceDesk } from '../composables/useServiceDesk';
 import {
   createLifecycleSession,
@@ -265,6 +266,10 @@ onBeforeUnmount(() => {
         @retry="load"
       />
       <template v-else>
+        <ObservedTimesPanel
+          v-if="mode !== 'actions'"
+          :measurement="state.data.measurement"
+        />
         <p v-if="state.data.policy" class="text-xs text-n-slate-11">
           {{
             t('JRC_SERVICE_DESK.LIFECYCLE.version', {
@@ -553,6 +558,19 @@ onBeforeUnmount(() => {
               {{ t(`JRC_SERVICE_DESK.LIFECYCLE.clocks.${clock.kind}`) }}
             </p>
             <p>{{ t(`JRC_SERVICE_DESK.LIFECYCLE.states.${clock.state}`) }}</p>
+            <p
+              v-if="
+                clock.deadline_state && clock.deadline_state !== clock.state
+              "
+              class="text-sm font-medium"
+              :class="
+                clock.deadline_state === 'overdue'
+                  ? 'text-n-ruby-11'
+                  : 'text-n-slate-12'
+              "
+            >
+              {{ t(`JRC_SERVICE_DESK.OPS.SLA.${clock.deadline_state}`) }}
+            </p>
             <p class="text-xs text-n-slate-11">
               {{ t('JRC_SERVICE_DESK.FIELDS.due_at') }}:
               {{ formatTimestamp(clock.due_at, locale) }}
@@ -589,6 +607,10 @@ onBeforeUnmount(() => {
           <p v-if="item.note" class="whitespace-pre-wrap">{{ item.note }}</p>
           <p v-if="item.solution" class="whitespace-pre-wrap">
             {{ item.solution }}
+          </p>
+          <p v-if="item.closing_reason" class="whitespace-pre-wrap">
+            {{ t('JRC_SERVICE_DESK.SIMPLE_SLA.closing_reason') }}:
+            {{ item.closing_reason }}
           </p>
           <p v-if="item.reason_code">{{ item.reason_code }}</p>
           <p v-if="item.evidence_note_ids.length">

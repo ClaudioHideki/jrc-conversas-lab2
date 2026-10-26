@@ -22,7 +22,7 @@ class Api::V1::Accounts::JrcServiceDesk::CommunicationController < Api::V1::Acco
     authorize strict_ticket, :view_customer?
     values = body_values(%w[channels])
     channels = ::JrcServiceDesk::ContactNotificationPreferences.new(user_context: pundit_user)
-                                                              .call(ticket_id: strict_ticket.id, channels: values.fetch('channels'))
+                                                               .call(ticket_id: strict_ticket.id, channels: values.fetch('channels'))
     render json: base_payload.merge(applied: true, ticket_id: strict_ticket.id.to_s, channels: channels)
   end
 
@@ -61,6 +61,9 @@ class Api::V1::Accounts::JrcServiceDesk::CommunicationController < Api::V1::Acco
     file = ::JrcServiceDesk::TimelineAttachment.new(ticket: strict_ticket, context: operational_context).call(
       kind: params[:kind], record_id: params[:record_id], attachment_id: params[:attachment_id]
     )
+    access = ::JrcServiceDesk::ProtectedBlobAccess.new(blob: file.blob, user: Current.user)
+    raise ActiveRecord::RecordNotFound unless access.allowed?
+
     send_data file.download, filename: file.filename.to_s, type: 'application/octet-stream', disposition: 'attachment'
   end
 
@@ -107,7 +110,8 @@ class Api::V1::Accounts::JrcServiceDesk::CommunicationController < Api::V1::Acco
   end
 
   def policy_payload(row)
-    { id: row.id.to_s, event_type: row.event_type, channel: row.channel, enabled: row.enabled,
+    { id: row.id.to_s, code: row.code, event_type: row.event_type, channel: row.channel, enabled: row.enabled,
+      display_name: row.display_name, description: row.description, settings: row.settings,
       version: row.version, template: row.template, template_version: row.template_version, inbox_id: row.inbox_id&.to_s,
       ticket_type_id: row.ticket_type_id&.to_s, service_id: row.service_id&.to_s,
       execution_account_user_id: row.published_by_membership.account_user_id.to_s, created_at: row.created_at.iso8601(6), digest: row.digest }
@@ -119,7 +123,11 @@ class Api::V1::Accounts::JrcServiceDesk::CommunicationController < Api::V1::Acco
         next unless Pundit.policy!(context.to_h, inbox).show?
 
         channel = ::JrcServiceDesk::NotificationEngine.channel(inbox)
-        { id: inbox.id.to_s, name: inbox.name, channel: channel } if channel
+        if channel
+          row = { id: inbox.id.to_s, name: inbox.name, channel: channel }
+          row[:whatsapp_templates] = ::JrcServiceDesk::NotificationWhatsappTemplate.choices(inbox) if inbox.channel_type == 'Channel::Whatsapp'
+          row
+        end
       end
     end
   end

@@ -11,7 +11,13 @@ class JrcServiceDesk::TicketPolicy < JrcServiceDesk::OperationalPolicy
   end
 
   def create?
-    record.new_record? && record_unit_allowed? && capability?(:tickets_create)
+    return false unless record.new_record? && record_unit_allowed? && operational_context.capability?(:tickets_create)
+
+    access = operational_context.supervision_access
+    return true unless access.restricted?(record.unit_id)
+    return access.grants('tickets_create').any? { |grant| grant[:unit_id] == record.unit_id } unless record.queue_id || record.team_id
+
+    access.allowed?(record, 'tickets_create')
   end
 
   { update: :tickets_edit, assign: :tickets_assign, transfer: :tickets_transfer,
@@ -28,25 +34,46 @@ class JrcServiceDesk::TicketPolicy < JrcServiceDesk::OperationalPolicy
     show? && record_unit_allowed? && operational_context.administrator?
   end
 
+  def customer_publish?
+    add_note? && capability?(:customer_publish)
+  end
+
+  def scoped_permission?(permission)
+    operational_context.supervision_access.allowed?(record, permission)
+  end
+
   # LifecycleActionPolicy and the pinned policy authorize individual transitions.
   def transition?
     false
   end
 
+  protected
+
+  def capability?(name)
+    super && (record.is_a?(Class) || scoped_permission?(name))
+  end
+
   class Scope < JrcServiceDesk::OperationalPolicy::Scope
     def resolve
+      resolve_for('tickets_view')
+    end
+
+    def resolve_for(permission)
       context = operational_context
       return scope.none unless context.capability?(:tickets_view)
 
       records = JrcServiceDesk::RecordWithdrawal.excluding(scope.where(account_id: context.account.id, unit_id: context.unit_scope.select(:id)), :ticket)
-      return records if context.capability?(:tickets_view_all) # Always within the current Account and authorized view scope.
+      restricted = context.supervision_access.scope(records, permission: permission)
+      return restricted if context.capability?(:tickets_view_all)
 
       memberships = context.active_memberships.select(:id)
       permitted = records.where(created_by_membership_id: context.creator_memberships)
                          .or(records.where(assignee_membership_id: memberships))
                          .or(records.where(team_id: context.native_team_ids))
       permitted = permitted.or(approval_records(records, context, memberships)) if context.capability?(:approvals_view)
-      permitted
+      ordinary = permitted.where.not(unit_id: context.supervision_access.restricted_units)
+      supervised = restricted.where(unit_id: context.supervision_access.restricted_units)
+      ordinary.or(supervised)
     end
 
     private

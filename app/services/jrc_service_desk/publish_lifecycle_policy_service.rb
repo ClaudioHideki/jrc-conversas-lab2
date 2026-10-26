@@ -1,6 +1,19 @@
 # frozen_string_literal: true
 
 class JrcServiceDesk::PublishLifecyclePolicyService < JrcServiceDesk::BaseService
+  def validate_for_preview!(unit:, attributes:)
+    @context = fresh_context!
+    raise Pundit::NotAuthorizedError unless context.unit_allowed?(unit)
+
+    values = JrcServiceDesk::Input.attributes(attributes, %w[name service_id enabled expected_version definition])
+    policy = JrcServiceDesk::LifecyclePolicy.new(account: context.account, unit: unit, service_id: values['service_id'])
+    authorize!(policy, :publish?)
+    rules = JrcServiceDesk::LifecycleRules.new(values.fetch('definition'))
+    validate_statuses!(rules, unit)
+    validate_escalation_targets!(rules, unit)
+    true
+  end
+
   def call(unit_id:, attributes:)
     values = JrcServiceDesk::Input.attributes(attributes, %w[name service_id enabled expected_version definition])
     raise ArgumentError, 'Explicit enabled flag required' unless [true, false].include?(values['enabled'])
