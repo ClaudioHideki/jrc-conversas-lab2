@@ -108,7 +108,8 @@ class JrcCampaigns::BrokerMessageSender
                     allowed_content_types: step['kind'] == 'document' ? %w[application/pdf application/octet-stream text/plain] : []) do |file|
       source = { io: file.tempfile, filename: step['file_name'].presence || file.filename, content_type: file.content_type }
       normalized_file = JrcCampaigns::BrokerImageNormalizer.call(kind: step['kind'], file: source)
-      message.attachments.build(account: account, file_type: file_type, file: normalized_file)
+      # SafeFetch removes its tempfile before the outer transaction's after_commit upload.
+      message.attachments.build(account: account, file_type: file_type, file: JrcCampaigns::BrokerMediaUpload.call(normalized_file))
       message.save!
     end
   rescue SafeFetch::Error, Timeout::Error
