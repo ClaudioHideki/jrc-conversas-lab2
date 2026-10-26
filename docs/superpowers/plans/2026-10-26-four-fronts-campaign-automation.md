@@ -31,33 +31,35 @@
 
 - [x] Inspect remote, branch, HEAD, worktree, local changes and ancestry/equivalent patches.
 - [x] Verify source tip and sequence A/B/C/D; compare changed paths and review behavior.
-- [ ] Integrate `aaf70f416993d05a6cad522ca7879f9a43651a45`, `24064ed7fcf15d4c5c68e4b41d29572abd8e48f2`, `4ac43ca85cfb59170b8e81a25f59012958ec47df`, `2d07bc0f46ec786cbae9aad52da543c801eaf538` in order with provenance.
-- [ ] Reconcile schema version/columns/indexes with both additive migrations; never replace a newer schema.
-- [ ] Verify preservation of all destination-only paths and snapshots.
+- [x] Integrate `aaf70f416993d05a6cad522ca7879f9a43651a45`, `24064ed7fcf15d4c5c68e4b41d29572abd8e48f2`, `4ac43ca85cfb59170b8e81a25f59012958ec47df`, `2d07bc0f46ec786cbae9aad52da543c801eaf538` in order with provenance.
+- [x] Reconcile schema version/columns/indexes with both additive migrations; never replace a newer schema.
+- [x] Verify preservation of all destination-only paths and snapshots.
 
 ## Task 2: Automatic campaign backend recovery
 
 Owner: campaign recovery agent. Files: campaign dispatch/sender/reservation/status services and jobs, Broker context/client call sites, minimal webhook listener, focused service/job/request specs.
 
-- [ ] Reproduce interrupted claims, post-commit callback interruption and retained database leases with failing tests.
-- [ ] Add durable bounded watchdog and fenced claims without new schema unless review proves necessary.
-- [ ] Persist a stable callback identity atomically with canonical message correlation; retry only the normal safe callback using existing message and intent.
-- [ ] Release idle AR connections before Broker HTTP outside transactions; verify one-slot pool reentrant behavior.
-- [ ] Cover pause/cancel, approval change, tenant/inbox mismatch, blacklist, concurrent/stale workers, unknown/accepted/in-flight outcomes and callback idempotency.
+- [x] Reproduce interrupted claims, post-commit callback interruption and retained database leases with failing tests.
+- [x] Add durable bounded watchdog and fenced claims without new schema unless review proves necessary.
+- [x] Persist a stable callback identity atomically with canonical message correlation; retry only the normal safe callback using existing message and intent.
+- [x] Release idle AR connections before Broker HTTP outside transactions; verify one-slot pool reentrant behavior.
+- [x] Cover pause/cancel, approval change, tenant/inbox mismatch, blacklist, concurrent/stale workers, unknown/accepted/in-flight outcomes and callback idempotency.
+- [x] Preserve safe original-callback deferrals across prolonged sending-window waits and pauses; receipt polling must not turn a pre-provider deferral into UNKNOWN.
+- [x] Recheck a recipient's terminal status after preflight and intent HTTP, including a late previous-step failure.
 
 ## Task 3: Explicit sender and complete module workflow
 
 Owner: campaign UI agent. Files: CampaignWizard and campaign component/page specs.
 
-- [ ] RED/GREEN: no implicit sender; deselect then refresh; metadata reorder; removed sender without substitution.
-- [ ] Exercise pasted/manual and CSV recipients, native image upload plus personalized caption, explicit sender, review approval and launch through real components with synthetic API boundaries.
-- [ ] Preserve timezone, ETA, legacy approval payloads and canonical media asset IDs.
+- [x] RED/GREEN: no implicit sender; deselect then refresh; metadata reorder; removed sender without substitution.
+- [x] Exercise pasted/manual and CSV recipients, native image upload plus personalized caption, explicit sender, review approval and launch through real components with synthetic API boundaries.
+- [x] Preserve timezone, ETA, legacy approval payloads and canonical media asset IDs.
 
 ## Task 4: Integrated validation and candidate report
 
 - [ ] Exercise affected Vitest/RSpec/Node suites and frontend build without creating a Docker image.
-- [ ] Run rich-comment PostgreSQL concurrency with its explicit synthetic-database guard enabled; do not count a skipped suite as proof.
-- [ ] Test financial cents/version preservation, rich private uploads and permissions, navigation, Service Desk and both migrations in disposable databases.
-- [ ] Compare lint against the exact initial baseline; record inherited offenses separately.
+- [x] Run rich-comment PostgreSQL concurrency with its explicit synthetic-database guard enabled; do not count a skipped suite as proof.
+- [x] Test financial cents/version preservation, rich private uploads and permissions, navigation, Service Desk and both migrations in disposable databases.
+- [x] Compare lint against the exact initial baseline; record inherited offenses separately.
 - [ ] Independently review the complete diff and run broader regression gates.
 - [ ] Record destination/start/final commits, integrated provenance, conflicts/resolutions, changed files, tests, migrations and remaining limits. Present the candidate for review; await image-publication authorization.

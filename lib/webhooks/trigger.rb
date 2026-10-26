@@ -11,16 +11,17 @@ class Webhooks::Trigger
     end
   end
 
-  def initialize(url, payload, webhook_type, secret: nil, delivery_id: nil)
+  def initialize(url, payload, webhook_type, secret: nil, delivery_id: nil, campaign_recovery_token: nil)
     @url = url
     @payload = payload
     @webhook_type = webhook_type
     @secret = secret
     @delivery_id = delivery_id
+    @campaign_recovery_token = campaign_recovery_token
   end
 
-  def self.execute(url, payload, webhook_type, secret: nil, delivery_id: nil)
-    new(url, payload, webhook_type, secret: secret, delivery_id: delivery_id).execute
+  def self.execute(url, payload, webhook_type, secret: nil, delivery_id: nil, campaign_recovery_token: nil)
+    new(url, payload, webhook_type, secret: secret, delivery_id: delivery_id, campaign_recovery_token: campaign_recovery_token).execute
   end
 
   def execute
@@ -43,10 +44,15 @@ class Webhooks::Trigger
         return
       end
     end
-    prepare_jrc_delivery
+    return unless prepare_jrc_delivery
+
+    body = @payload.to_json
+    headers = request_headers(body)
+    timeout = webhook_timeout
     @jrc_delivery_phase = 'callback'
-    jrc_delivery&.callback_started!
-    perform_request
+    return unless start_jrc_callback
+
+    perform_request(body: body, headers: headers, timeout: timeout)
     jrc_delivery&.callback_accepted!
   rescue StandardError => e
     handle_delivery_error(e)
@@ -67,9 +73,18 @@ class Webhooks::Trigger
     @jrc_delivery_phase = 'validate'
     jrc_delivery&.validate!(url: @url, secret: @secret, delivery_id: @delivery_id)
     @jrc_delivery_phase = 'campaign_intent'
-    jrc_delivery&.prepare_campaign_intent!(@payload)
+    return false if jrc_delivery&.prepare_campaign_intent!(@payload) == false
     @jrc_delivery_phase = 'validate'
     jrc_delivery&.validate!(url: @url, secret: @secret, delivery_id: @delivery_id)
+    true
+  end
+
+  def start_jrc_callback
+    return true unless jrc_delivery
+    return jrc_delivery.callback_started! unless @campaign_recovery_token
+
+    JrcCampaigns::BrokerRecoveryService.callback_allowed?(@payload, token: @campaign_recovery_token, start: true,
+                                                                 callback: { url: @url, secret: @secret, delivery_id: @delivery_id })
   end
 
   def handle_delivery_error(error)
@@ -86,15 +101,19 @@ class Webhooks::Trigger
     @jrc_delivery = JrcBroker::WebhookDelivery.for(@payload, @webhook_type)
   end
 
-  def perform_request
-    body = @payload.to_json
+  def perform_request(body:, headers:, timeout:)
+    if jrc_delivery
+      pool = ActiveRecord::Base.connection_pool
+      connection = pool.active_connection?
+      pool.release_connection if connection && !connection.transaction_open?
+    end
     SafeFetch.fetch(
       @url,
       method: :post,
       body: body,
-      headers: request_headers(body),
-      open_timeout: webhook_timeout,
-      read_timeout: webhook_timeout,
+      headers: headers,
+      open_timeout: timeout,
+      read_timeout: timeout,
       validate_content_type: false
     ) { |_response| nil }
   end

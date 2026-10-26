@@ -13,7 +13,10 @@ RSpec.describe 'Broker campaign transport', type: :request do
     { protocol: 'chatwoot-campaigns/v1', integrationId: integration_id, instanceId: instance_id, inboxId: inbox.id,
       destinationRevision: 1, identityRevision: 2, ownerRevision: 0, numberSuffix: '0000', ready: true, reason: nil }
   end
-  let(:campaign) { JrcCampaigns::Campaign.create!(account: account, inbox: inbox, created_by: admin, name: 'Synthetic Broker campaign') }
+  let(:campaign) do
+    JrcCampaigns::Campaign.create!(account: account, inbox: inbox, created_by: admin, name: 'Synthetic Broker campaign',
+                                   sending_window: { days: [0, 1, 2, 3, 4, 5, 6], start: '00:00', end: '23:59', timezone: 'UTC' })
+  end
   let(:step) { campaign.steps.create!(kind: 'text', body: 'Synthetic message', position: 0) }
   let(:execution) { campaign.executions.create!(run_number: 1, status: 'running') }
   let(:recipient) { execution.recipients.create!(campaign: campaign, inbox: inbox, contact: contact, phone_number: contact.phone_number, destination: contact.phone_number) }

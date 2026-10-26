@@ -21,6 +21,7 @@ class JrcCampaigns::BrokerStatusJob < ApplicationJob
     return unless delivery&.metadata.to_h&.dig('broker_connector') && delivery.metadata['message_id']
 
     return if local_failure?(delivery)
+    return if JrcCampaigns::BrokerCallbackDeferral.hold?(delivery)
 
     campaign = delivery.recipient.campaign if type == 'campaign'
     connector = JrcCampaigns::BrokerConnector.for(delivery.inbox)

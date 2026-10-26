@@ -19,7 +19,7 @@ class JrcCampaigns::BrokerConversationResolver
     candidates = candidates_for(contact)
     identities = candidates.index_with { |candidate| local_identity!(candidate, contact) }
     # Only read requests run here, before the caller enters its local claim/message locks.
-    client = @connector.context(@user).client if candidates.any?
+    client = @connector.context(@user, release_connection: true).client if candidates.any?
     matches = candidates.select { |candidate| proven?(client, candidate, contact) }
     validate_fresh!(contact, identities)
     raise ArgumentError, 'Mais de uma conversa foi confirmada pelo Broker. Revise o histórico deste contato.' if matches.many?

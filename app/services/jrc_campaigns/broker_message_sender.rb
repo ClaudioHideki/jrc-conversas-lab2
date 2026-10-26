@@ -1,7 +1,9 @@
 class JrcCampaigns::BrokerMessageSender
+  class StaleClaim < StandardError; end
+
   KINDS = %w[text image document video audio].freeze
 
-  def self.call(delivery:, user:, phone_number:, step:, attributes:, conversation_status: 'pending', conversation: nil)
+  def self.call(delivery:, user:, phone_number:, step:, attributes:, conversation_status: 'pending', conversation: nil, dispatch_token: nil)
     inbox = delivery.inbox
     account = inbox.account
     raise ArgumentError, 'Tipo de mensagem não suportado pelo Broker.' unless KINDS.include?(step.fetch('kind'))
@@ -11,23 +13,60 @@ class JrcCampaigns::BrokerMessageSender
     # The record and its correlation are committed together, before message_created is dispatched.
     # Replaying a campaign job must never create a second outgoing message.
     delivery.with_lock do
+      next if dispatch_token && !validate_claim!(delivery, dispatch_token)
       return account.messages.find(delivery.metadata['message_id']) if delivery.metadata['message_id'].present?
 
       contact = canonical_contact!(delivery, inbox, phone_number)
       conversation = canonical_conversation!(delivery, inbox, contact, conversation_status, preferred: conversation)
       conversation.reload if conversation.display_id.nil?
       delivery.recipient.update!(contact: contact, conversation: conversation) if delivery.is_a?(JrcCampaigns::Delivery)
+      callback_id = SecureRandom.uuid
       message = conversation.messages.build(account: account, inbox: inbox, sender: user, message_type: 'outgoing', content: step['body'],
-                                            additional_attributes: attributes.merge('jrc_campaign_broker' => true))
+                                            additional_attributes: attributes.merge('jrc_campaign_broker' => true,
+                                                                                    'jrc_campaign_webhook_delivery_id' => callback_id))
       if step['kind'] != 'text'
         attach_media!(message, step, account)
       else
         message.save!
       end
-      delivery.update!(external_id: "broker:#{account.id}:#{inbox.id}:#{message.id}",
-                       metadata: delivery.metadata.to_h.merge('message_id' => message.id, 'conversation_id' => conversation.display_id))
+      correlate!(delivery, message, callback_id)
       message
     end
+  end
+
+  def self.correlate!(delivery, message, callback_id)
+    metadata = delivery.metadata.to_h.merge('message_id' => message.id, 'conversation_id' => message.conversation.display_id,
+                                             'webhook_delivery_id' => callback_id)
+    if delivery.is_a?(JrcCampaigns::Delivery)
+      metadata[JrcCampaigns::BrokerCallbackDeferral::KEY] = JrcCampaigns::BrokerCallbackDeferral.marker(
+        message_id: message.id, webhook_delivery_id: callback_id, reason: 'queued'
+      )
+    end
+    delivery.update!(external_id: "broker:#{message.account_id}:#{message.inbox_id}:#{message.id}", metadata: metadata)
+  end
+
+  def self.validate_claim!(delivery, token)
+    raise StaleClaim unless delivery.sending? && delivery.metadata['dispatch_token'] == token
+
+    recipient = delivery.recipient.reload
+    return false if stop_terminal_recipient!(delivery, recipient)
+    campaign = recipient.campaign.reload
+    connector = JrcCampaigns::BrokerConnector.for(delivery.inbox.reload)
+    allowed = campaign.running? && JrcCampaigns::ApprovalService.new(campaign).locally_valid? &&
+              connector && connector.public_configuration == delivery.metadata['broker_connector']
+    raise ArgumentError, 'A campanha ou o remetente mudou antes da criação da mensagem.' unless allowed
+
+    reason = JrcCampaigns::EligibilityPolicy.new(account: campaign.account, phone_number: recipient.phone_number,
+                                                contact: recipient.contact).rejection_reason
+    raise ArgumentError, reason if reason
+    true
+  end
+
+  def self.stop_terminal_recipient!(delivery, recipient)
+    return false unless recipient.status.in?(%w[failed canceled skipped])
+
+    delivery.update!(status: 'skipped') if delivery.metadata['message_id'].blank?
+    true
   end
 
   def self.canonical_contact!(delivery, inbox, phone_number)
@@ -115,6 +154,7 @@ class JrcCampaigns::BrokerMessageSender
   rescue SafeFetch::Error, Timeout::Error
     raise ArgumentError, 'Não foi possível obter uma mídia pública do tipo selecionado com até 10 MB.'
   end
-  private_class_method :canonical_contact!, :canonical_conversation!, :selected_conversation!, :pinned_conversation!,
+  private_class_method :correlate!, :validate_claim!, :stop_terminal_recipient!, :canonical_contact!, :canonical_conversation!,
+                       :selected_conversation!, :pinned_conversation!,
                        :campaign_recipient!, :valid_conversation?, :attach_media!
 end

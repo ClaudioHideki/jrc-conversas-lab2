@@ -5,16 +5,42 @@ class JrcCampaigns::BrokerIntentReservation
 
   def prepare!(payload)
     @message.reload
-    return unless campaign_message?(payload)
+    return true unless campaign_message?(payload)
 
     delivery, user, campaign_id = trusted_delivery!
     connector = current_connector!(delivery)
     validate_destination!(delivery)
+    return false if callback_deferred?(delivery)
+
+    transport = connector.ready!(user)
+    validate_approved_transport!(delivery, transport)
     unless @message.additional_attributes['jrc_campaign_intent_id']
-      intent_id = reserve!(connector, delivery, user, campaign_id)
+      intent_id = reserve!(connector, delivery, user, campaign_id, transport)
       persist!(intent_id, delivery)
     end
     payload[:additional_attributes] = @message.reload.additional_attributes
+    true
+  end
+
+  def start_callback!
+    delivery = trusted_delivery!.first
+    delivery.with_lock do
+      @message.with_lock do
+        delivery = trusted_delivery!.first
+        current_connector!(delivery)
+        validate_destination!(delivery)
+        next false if delivery.is_a?(JrcCampaigns::Delivery) && delivery.recipient.reload.status.in?(%w[failed canceled skipped])
+        next false if callback_deferred?(delivery)
+
+        validate_local_approval!(delivery)
+        deferred = JrcCampaigns::BrokerCallbackDeferral.pending?(delivery)
+        next false if deferred && !JrcCampaigns::BrokerCallbackDeferral.resume_polling(delivery)
+
+        yield
+        JrcCampaigns::BrokerCallbackDeferral.clear!(delivery)
+        true
+      end
+    end
   end
 
   private
@@ -32,15 +58,52 @@ class JrcCampaigns::BrokerIntentReservation
     connector
   end
 
-  def reserve!(connector, delivery, user, campaign_id)
+  def reserve!(connector, delivery, user, campaign_id, transport)
     # The native message and its correlation already committed. No DB lock spans HTTP.
-    transport = connector.ready!(user)
     body = { messageId: @message.id, conversationId: @message.conversation.display_id, campaignId: campaign_id,
              kind: message_kind, text: @message.content.to_s, destinationRevision: transport.fetch('destinationRevision'),
              identityRevision: transport.fetch('identityRevision'), ownerRevision: transport.fetch('ownerRevision') }
     type = delivery.is_a?(JrcCampaigns::TestDelivery) ? 'test' : 'campaign'
-    response = connector.context(user).client.campaign_intent(connector.binding.integration_id, body, key: "#{type}:#{delivery.id}")
+    response = connector.context(user, release_connection: true).client.campaign_intent(
+      connector.binding.integration_id, body, key: "#{type}:#{delivery.id}"
+    )
     validated_intent_id(response)
+  end
+
+  def callback_deferred?(delivery)
+    return false unless delivery.is_a?(JrcCampaigns::Delivery)
+    return true unless delivery.sending?
+
+    campaign = delivery.recipient.campaign.reload
+    if campaign.paused?
+      delivery.recipient.update!(metadata: delivery.recipient.metadata.to_h.merge('pending_step_id' => delivery.step_id))
+      JrcCampaigns::BrokerCallbackDeferral.mark!(delivery, message: @message, reason: 'paused')
+      return true
+    end
+    if delivery.step.only_if_no_reply? && delivery.recipient.replied_at.present?
+      JrcCampaigns::BrokerStatusJob.perform_later('campaign', delivery.id)
+      return true
+    end
+    target = JrcCampaigns::ScheduleWindow.new(campaign).next_time(Time.current)
+    return false unless target.future?
+
+    JrcCampaigns::BrokerCallbackDeferral.mark!(delivery, message: @message, reason: 'window', wait_until: target)
+    true
+  end
+
+  def validate_approved_transport!(delivery, transport)
+    return unless delivery.is_a?(JrcCampaigns::Delivery)
+
+    validate_local_approval!(delivery)
+    reviewed = delivery.recipient.campaign.review_snapshot.dig('configuration', 'broker_connectors').to_a
+                       .find { |row| row['inbox_id'] == @message.inbox_id }
+    reject! unless reviewed && reviewed['identity_revision'] == transport.fetch('identityRevision')
+  end
+
+  def validate_local_approval!(delivery)
+    return unless delivery.is_a?(JrcCampaigns::Delivery)
+
+    reject! unless JrcCampaigns::ApprovalService.new(delivery.recipient.campaign.reload).locally_valid?
   end
 
   def validated_intent_id(response)
@@ -81,8 +144,8 @@ class JrcCampaigns::BrokerIntentReservation
   def delivery_actor!(delivery, test)
     return [delivery.requested_by, "test:#{delivery.id}"] if test
 
-    campaign = delivery.recipient.campaign
-    reject! unless campaign.running?
+    campaign = delivery.recipient.campaign.reload
+    reject! unless campaign.running? || campaign.paused?
     [campaign.created_by, campaign.id.to_s]
   end
 

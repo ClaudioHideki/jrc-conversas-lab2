@@ -60,15 +60,15 @@ class JrcCampaigns::BrokerConnector
 
   def ready!(user)
     # Status refreshes the existing identity evidence; the scoped transport endpoint is read-only.
-    context(user).client.status(binding.integration_id)
-    data = transport(user)
+    context(user, release_connection: true).client.status(binding.integration_id)
+    data = transport(user, release_connection: true)
     raise ArgumentError, "Broker indisponível para campanhas: #{data['reason']}" unless data['ready'] == true
 
     data
   end
 
   def receipt(user, conversation_id, message_id)
-    data = context(user).client.campaign_receipt(binding.integration_id, conversation_id, message_id)
+    data = context(user, release_connection: true).client.campaign_receipt(binding.integration_id, conversation_id, message_id)
     valid = data['protocol'] == PROTOCOL && data.values_at('integrationId', 'conversationId', 'messageId') ==
       [binding.integration_id, conversation_id, message_id] && %w[queued sent delivered read failed blocked unknown].include?(data['status'])
     raise JrcBroker::Client::Error, 'JRC_BROKER_INVALID_RESPONSE' unless valid

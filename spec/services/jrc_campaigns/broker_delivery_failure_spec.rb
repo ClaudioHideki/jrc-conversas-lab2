@@ -69,6 +69,11 @@ RSpec.describe JrcCampaigns::BrokerDeliveryFailure do # rubocop:disable RSpec/Mu
     )
     JrcCampaigns::Consent.create!(account: account, recorded_by: admin, phone_number: contact.phone_number,
                                   evidence: 'Synthetic fixture authorization', purpose: 'whatsapp_campaigns', granted_at: Time.current)
+    step
+    campaign.update!(status: 'draft', sending_window: { days: [0, 1, 2, 3, 4, 5, 6], start: '00:00', end: '23:59', timezone: 'UTC' })
+    campaign.request_review!
+    campaign.approve!(admin, campaign.review_digest)
+    campaign.update!(status: 'running')
     message
     stub_request(:get, receipt_url).to_return(headers: { 'Content-Type' => 'application/json' }, body: {
       protocol: 'chatwoot-campaigns/v1', integrationId: integration_id, conversationId: message.conversation.display_id,

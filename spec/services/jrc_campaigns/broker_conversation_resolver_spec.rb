@@ -68,7 +68,8 @@ RSpec.describe 'Broker campaign canonical conversation selection', type: :reques
   end
 
   it 'creates the campaign message on the sole Broker-bound conversation instead of a more recent unmapped conversation' do
-    campaign = JrcCampaigns::Campaign.create!(account: account, inbox: inbox, created_by: admin, name: 'Synthetic canonical routing')
+    campaign = JrcCampaigns::Campaign.create!(account: account, inbox: inbox, created_by: admin, name: 'Synthetic canonical routing',
+                                              sending_window: { days: [0, 1, 2, 3, 4, 5, 6], start: '00:00', end: '23:59', timezone: 'UTC' })
     step = campaign.steps.create!(kind: 'text', body: 'Synthetic message', position: 0)
     campaign.request_review!
     campaign.approve!(admin, campaign.review_digest)

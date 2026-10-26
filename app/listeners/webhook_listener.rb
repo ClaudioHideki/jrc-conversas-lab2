@@ -127,8 +127,11 @@ class WebhookListener < BaseListener
     return if payload.dig(:additional_attributes, 'jrc_campaign_evolution') == true
     return if inbox.channel.webhook_url.blank?
 
+    callback_id = if payload[:event] == 'message_created' && payload.dig(:additional_attributes, 'jrc_campaign_broker') == true
+                    payload.dig(:additional_attributes, 'jrc_campaign_webhook_delivery_id')
+                  end
     WebhookJob.perform_later(inbox.channel.webhook_url, payload, :api_inbox_webhook,
-                             secret: inbox.channel.secret, delivery_id: SecureRandom.uuid)
+                             secret: inbox.channel.secret, delivery_id: callback_id.presence || SecureRandom.uuid)
   end
 
   def deliver_webhook_payloads(payload, inbox)

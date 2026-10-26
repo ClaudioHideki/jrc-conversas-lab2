@@ -43,6 +43,11 @@ class JrcBroker::WebhookDiagnostic
       (REJECTION_STATUSES.include?(proof['http_status']) || proof['error_class'] == 'JrcBroker::WebhookDelivery::ContextChanged')
   end
 
+  def self.pre_callback?(proof)
+    proof.empty? || (proof.values_at('in_flight', 'uncertain', 'accepted').none? &&
+                    proof['phase'].in?(%w[validate campaign_intent]) && proof['outcome'] != 'rejected')
+  end
+
   private
 
   def failure_result(error, phase, prior)

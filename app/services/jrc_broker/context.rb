@@ -7,7 +7,8 @@ class JrcBroker::Context
     @integration = JrcBrokerIntegration.find_by!(account_id: account.id)
     @configuration_snapshot = integration.attributes.slice('broker_origin', 'organization_id', 'destination_revision', 'encrypted_control_key').freeze
     token = JrcBroker::Configuration.credential_store.decrypt(account_id: account.id, ciphertext: integration.encrypted_control_key)
-    @client = JrcBroker::Client.new(origin: integration.broker_origin, token: token, actor_id: resolve_actor_id(actor_id))
+    @client = JrcBroker::Client.new(origin: integration.broker_origin, token: token, actor_id: resolve_actor_id(actor_id),
+                                  release_connection: release_connection)
     release_idle_connection if release_connection
     validate_remote_context!
   end

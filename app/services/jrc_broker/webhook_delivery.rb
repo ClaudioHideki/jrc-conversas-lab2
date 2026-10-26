@@ -52,7 +52,12 @@ class JrcBroker::WebhookDelivery
   end
 
   def callback_started!
+    if @message.additional_attributes.to_h['jrc_campaign_broker'] == true
+      return JrcCampaigns::BrokerIntentReservation.new(@message).start_callback! { diagnostic.callback_started! }
+    end
+
     diagnostic.callback_started!
+    true
   end
 
   def callback_accepted!

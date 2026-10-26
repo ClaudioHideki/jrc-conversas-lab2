@@ -14,12 +14,13 @@ class JrcBroker::Client
   UUID = /\A[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\z/i
   MAX_RESPONSE_BYTES = 2_100_000
 
-  def initialize(origin:, token:, actor_id:)
+  def initialize(origin:, token:, actor_id:, release_connection: false)
     @origin = JrcBroker::Configuration.allowed_origin!(origin)
     raise JrcBroker::Configuration::InvalidConfiguration unless token.is_a?(String) && token.bytesize.between?(1, 4096) && /\A[!-~]+\z/.match?(token)
 
     @token = token
     @actor_id = actor_id.to_s
+    @release_connection = release_connection
   end
 
   def inspect
@@ -129,6 +130,11 @@ class JrcBroker::Client
   end
 
   def request(method, path, body: nil, key: nil)
+    if @release_connection
+      pool = ActiveRecord::Base.connection_pool
+      connection = pool.active_connection?
+      pool.release_connection if connection && !connection.transaction_open?
+    end
     uri = URI.parse("#{@origin}#{PREFIX}#{path}")
     req = Net::HTTP.const_get(method.to_s.capitalize).new(uri.request_uri, request_headers(key))
     req.body = JSON.generate(body) unless body.nil?

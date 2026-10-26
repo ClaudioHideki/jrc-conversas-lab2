@@ -1,9 +1,10 @@
 class JrcCampaigns::DispatchStepService
-  def initialize(recipient:, step:)
+  def initialize(recipient:, step:, dispatch_token: nil)
     @recipient = recipient
     @step = step
     @campaign = recipient.campaign
     @inbox = recipient.inbox
+    @dispatch_token = dispatch_token
   end
 
   def perform
@@ -13,6 +14,7 @@ class JrcCampaigns::DispatchStepService
     @evolution_connector = JrcCampaigns::EvolutionConnector.for(inbox)
     @broker_connector = JrcCampaigns::BrokerConnector.for(inbox)
     delivery = recipient.deliveries.find_by(step: step)
+    return if @dispatch_token && (!delivery || stale_dispatch?(delivery))
     return reconcile_delivery(delivery) if delivery&.sent_at.present?
 
     campaign.reload
@@ -23,20 +25,24 @@ class JrcCampaigns::DispatchStepService
       return
     end
     return if recipient.status.in?(%w[failed canceled skipped])
-    if delivery && !delivery.queued?
+    if delivery && !delivery.queued? && !(@broker_connector && delivery.sending? && @dispatch_token)
       if delivery.status == 'sending' && delivery.metadata.to_h['broker_connector'] && delivery.metadata['message_id']
         JrcCampaigns::BrokerStatusJob.perform_later('campaign', delivery.id)
+        JrcCampaigns::BrokerRecoveryJob.perform_later(delivery.id, delivery.metadata['dispatch_token']) if @broker_connector
+      elsif delivery.sending? && @broker_connector
+        JrcCampaigns::BrokerRecoveryJob.perform_later(delivery.id, delivery.metadata['dispatch_token'])
       end
       return
     end
 
     recipient.update!(metadata: recipient.metadata.to_h.except('pending_step_id')) if recipient.metadata.to_h.key?('pending_step_id')
     if step.only_if_no_reply? && recipient.replied_at.present?
+      settle_replied_follow_up(delivery) if @broker_connector && delivery && delivery.metadata['message_id'].blank?
       JrcCampaigns::ExecutionCompletionService.new(recipient.execution).check!
       return
     end
 
-    delivery = claim_delivery
+    delivery = claim_delivery unless @dispatch_token
     return unless delivery
     return if defer_for_campaign_state(delivery)
 
@@ -52,6 +58,8 @@ class JrcCampaigns::DispatchStepService
     delivery.update!(external_id: @accepted_external_id, status: 'sent', sent_at: Time.current, error_message: nil)
     JrcCampaigns::EvolutionSafetyGate.new(@evolution_connector).complete! if @evolution_connector
     reconcile_delivery(delivery)
+  rescue JrcCampaigns::BrokerMessageSender::StaleClaim
+    nil
   rescue JrcCampaigns::EvolutionSafetyGate::Throttled => e
     delivery.update!(status: 'queued')
     recipient.update!(status: 'queued', metadata: recipient.metadata.to_h.merge('pending_step_id' => step.id))
@@ -76,10 +84,20 @@ class JrcCampaigns::DispatchStepService
       delivery = recipient.deliveries.find_or_initialize_by(step: step)
       next unless delivery.new_record? || delivery.queued?
 
-      delivery.update!(inbox: inbox, status: 'sending')
+      delivery.inbox = inbox
+      prepare_broker_claim(delivery) if @broker_connector
+      delivery.update!(status: 'sending')
       recipient.update!(status: 'processing', metadata: recipient.metadata.to_h.except('pending_step_id'))
       delivery
     end
+  end
+
+  def prepare_broker_claim(delivery)
+    delivery.save! if delivery.new_record?
+    @dispatch_token = SecureRandom.uuid
+    JrcCampaigns::BrokerRecoveryService.enqueue_watchdog(delivery.id, @dispatch_token)
+    delivery.metadata = delivery.metadata.to_h.merge('dispatch_token' => @dispatch_token,
+                                                     'broker_connector' => @broker_connector.public_configuration)
   end
 
   def sending_rejection
@@ -93,10 +111,14 @@ class JrcCampaigns::DispatchStepService
   end
 
   def defer_for_campaign_state(delivery)
+    return true if stale_dispatch?(delivery)
+
     campaign.reload
     return false if campaign.running?
 
-    recipient.with_lock do
+    delivery.with_lock do
+      return true if stale_dispatch?(delivery)
+
       if campaign.paused?
         delivery.update!(status: 'queued')
         recipient.update!(status: 'queued', metadata: recipient.metadata.to_h.merge('pending_step_id' => step.id))
@@ -114,8 +136,12 @@ class JrcCampaigns::DispatchStepService
   end
 
   def skip_delivery(delivery, reason)
-    delivery.update!(status: 'skipped', error_message: reason)
-    recipient.update!(status: 'skipped', error_message: reason, metadata: recipient.metadata.to_h.except('pending_step_id'))
+    delivery.with_lock do
+      return if stale_dispatch?(delivery)
+
+      delivery.update!(status: 'skipped', error_message: reason)
+      recipient.update!(status: 'skipped', error_message: reason, metadata: recipient.metadata.to_h.except('pending_step_id'))
+    end
     JrcCampaigns::ExecutionCompletionService.new(recipient.execution).check!
   end
 
@@ -183,24 +209,57 @@ class JrcCampaigns::DispatchStepService
   end
 
   def dispatch_broker(delivery)
+    return if defer_for_broker_window(delivery)
+
     @broker_connector.ready!(campaign.created_by)
     conversation = JrcCampaigns::BrokerConversationResolver.new(
       connector: @broker_connector, user: campaign.created_by, phone_number: recipient.phone_number,
       contact: recipient.contact, conversation: recipient.conversation
     ).call
     return if defer_for_campaign_state(delivery)
+    return if settle_replied_follow_up(delivery)
 
     rejection = sending_rejection
     return skip_delivery(delivery, rejection) if rejection
+    return if defer_for_broker_window(delivery)
 
-    delivery.update!(metadata: delivery.metadata.to_h.merge('broker_connector' => @broker_connector.public_configuration))
+    delivery.with_lock do
+      raise JrcCampaigns::BrokerMessageSender::StaleClaim if stale_dispatch?(delivery)
+
+      delivery.update!(metadata: delivery.metadata.to_h.merge('broker_connector' => @broker_connector.public_configuration))
+    end
     values = %w[kind body media_url file_name media_asset_id].index_with { |key| renderer.render(effective_value(key, step.public_send(key))) }
     JrcCampaigns::BrokerMessageSender.call(
       delivery: delivery, user: campaign.created_by, phone_number: recipient.phone_number, step: values, conversation: conversation,
+      dispatch_token: @dispatch_token,
       conversation_status: campaign.conversation_mode == 'open' ? 'open' : 'pending',
       attributes: { 'campaign_id' => campaign.id.to_s, 'jrc_campaign_id' => campaign.id, 'jrc_campaign_broker_delivery_id' => delivery.id,
                     'jrc_campaign_execution_id' => recipient.execution_id, 'jrc_campaign_step_id' => step.id }
     )
+  end
+
+  def defer_for_broker_window(delivery)
+    target = JrcCampaigns::ScheduleWindow.new(campaign.reload).next_time(Time.current)
+    return false unless target.future?
+
+    delivery.with_lock do
+      next if stale_dispatch?(delivery)
+
+      JrcCampaigns::BrokerRecoveryService.enqueue_watchdog(delivery.id, @dispatch_token, wait_until: target)
+    end
+    true
+  end
+
+  def settle_replied_follow_up(delivery)
+    return false unless step.only_if_no_reply? && recipient.reload.replied_at.present?
+
+    delivery.with_lock do
+      next if stale_dispatch?(delivery) || delivery.metadata['message_id'].present?
+
+      delivery.update!(status: 'skipped', error_message: 'Contato respondeu antes do envio da continuação.')
+    end
+    JrcCampaigns::ExecutionCompletionService.new(recipient.execution).check!
+    true
   end
 
   def dispatch_evolution(delivery)
@@ -395,6 +454,20 @@ class JrcCampaigns::DispatchStepService
   end
 
   def handle_failure(delivery, error)
+    if @broker_connector && delivery && @dispatch_token
+      delivery.with_lock do
+        next if stale_dispatch?(delivery) || campaign.reload.canceled?
+
+        if delivery.metadata['message_id']
+          # A committed native message is recovered through its original callback, never rebuilt.
+          delivery.update!(error_message: 'Mensagem criada; recuperação do callback pendente.')
+        else
+          fail_delivery(error)
+        end
+      end
+      return
+    end
+
     campaign.pause! if @evolution_connector && @accepted_external_id.blank? && campaign.reload.running?
     if @evolution_connector && @provider_attempted
       JrcCampaigns::EvolutionSafetyGate.new(@evolution_connector).halt!(error.message) if @accepted_external_id.blank?
@@ -434,5 +507,9 @@ class JrcCampaigns::DispatchStepService
       payload: { step_id: step.id, error: error.message }
     )
     JrcCampaigns::ExecutionCompletionService.new(recipient.execution).check!
+  end
+
+  def stale_dispatch?(delivery)
+    @broker_connector && @dispatch_token && delivery.reload.metadata['dispatch_token'] != @dispatch_token
   end
 end
