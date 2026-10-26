@@ -36,9 +36,13 @@ export function provideServiceDesk() {
     session,
     reactive(createOperationalState())
   );
+  let refreshGeneration = 0;
+  let pendingRefresh;
   watch(
     [accountId, userId, enabled],
     ([account, user, flag]) => {
+      refreshGeneration += 1;
+      pendingRefresh = null;
       operations.clear();
       session.start({ accountId: account, userId: user, enabled: flag });
       if (!flag && account && route.name?.startsWith('jrc_service_desk_')) {
@@ -48,6 +52,14 @@ export function provideServiceDesk() {
     { immediate: true, flush: 'sync' }
   );
   watch(
+    () => route.name,
+    () => {
+      refreshGeneration += 1;
+      pendingRefresh = null;
+    },
+    { flush: 'sync' }
+  );
+  watch(
     () => state.status,
     status => {
       if (status !== 'ready') operations.clear();
@@ -55,23 +67,38 @@ export function provideServiceDesk() {
     { flush: 'sync' }
   );
   let timer;
-  const revalidate = async () => {
-    if (document.visibilityState === 'hidden') return;
-    await session.revalidate();
-    const readScreens = [
-      'overview',
-      'tickets',
-      'mine',
-      'queues',
-      'assignees',
-      'sla',
-      'reports',
-    ];
-    if (
-      state.status === 'ready' &&
-      readScreens.some(name => route.name === serviceDeskRouteName(name))
-    )
-      operations.state.revision += 1;
+  const revalidate = () => {
+    if (document.visibilityState === 'hidden') return undefined;
+    if (pendingRefresh) return pendingRefresh;
+    const generation = refreshGeneration;
+    const context = state.context;
+    const screen = route.name;
+    // Returning to a tab can emit focus and visibilitychange together.
+    const task = (async () => {
+      await session.revalidate();
+      if (
+        generation !== refreshGeneration ||
+        state.context !== context ||
+        route.name !== screen ||
+        state.status !== 'ready'
+      )
+        return;
+      const readScreens = [
+        'overview',
+        'tickets',
+        'mine',
+        'queues',
+        'assignees',
+        'sla',
+        'reports',
+      ];
+      if (readScreens.some(name => screen === serviceDeskRouteName(name)))
+        operations.state.revision += 1;
+    })().finally(() => {
+      if (pendingRefresh === task) pendingRefresh = null;
+    });
+    pendingRefresh = task;
+    return task;
   };
   onMounted(() => {
     window.addEventListener('focus', revalidate);
@@ -79,6 +106,8 @@ export function provideServiceDesk() {
     timer = window.setInterval(revalidate, 60000);
   });
   onBeforeUnmount(() => {
+    refreshGeneration += 1;
+    pendingRefresh = null;
     window.clearInterval(timer);
     window.removeEventListener('focus', revalidate);
     document.removeEventListener('visibilitychange', revalidate);

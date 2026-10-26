@@ -10,6 +10,7 @@ import {
 } from './operationalContracts.js';
 import { normalizeQuery, queryWithinContext } from './query.js';
 import { errorStatus } from './session.js';
+import { decodeSupervision } from './v2Projection';
 const ACTION_PERMISSION = {
   update: 'update',
   assign: 'assign',
@@ -60,7 +61,11 @@ export function createOperationalSession(
     base.dispose();
     base.state.status = status;
   };
-  const read = async (key, kind, { ticket = null, query = {} } = {}) => {
+  const read = async (
+    key,
+    kind,
+    { ticket = null, query = {}, includeSupervision = false } = {}
+  ) => {
     cancel(key);
     state.reads[key] = { status: 'loading', data: null };
     const turn = epoch;
@@ -110,6 +115,20 @@ export function createOperationalSession(
         kind === 'dashboard'
           ? decodeDashboard(payload, context, normalized)
           : decodeRelated(payload, context, ticket, kind, normalized);
+      if (kind === 'dashboard' && includeSupervision) {
+        data.supervision = { status: 'denied', data: null };
+        if (context.capabilities?.reports?.index === true) {
+          try {
+            data.supervision = {
+              status: 'ready',
+              data: decodeSupervision(payload.dashboard.supervision, context),
+            };
+          } catch (error) {
+            // Optional report failures cannot invalidate independently valid KPIs.
+            data.supervision = { status: errorStatus(error), data: null };
+          }
+        }
+      }
       state.reads[key] = {
         status: kind === 'dashboard' || data.items.length ? 'ready' : 'empty',
         data,
