@@ -15,6 +15,44 @@ RSpec.describe 'Versioned monthly proposal requests', type: :request do
   end
   before { account.enable_features!('jrc_crm', 'jrc_customer_master') }
 
+  let(:legacy_proposal) do
+    proposal = JrcCrm::Proposal.create!(account: account, owner: admin, company: company, contact: contact,
+      title: 'Legacy approved monthly service', financial_version: 2, term_months: 36,
+      payment_condition: 'installments', installments_count: 36,
+      status: 'draft', approval_status: 'approved', commercial_approval_status: 'approved')
+    proposal.proposal_items.create!(product: product, name_snapshot: product.name, quantity: 1, unit_price_cents: 29_500, billing_model: 'monthly')
+    proposal
+  end
+
+  it 'recalculates an approved but unsent legacy proposal only when its owner explicitly saves unchanged terms' do
+    original = legacy_proposal.reload.attributes
+    get "#{base}/#{legacy_proposal.id}", headers: headers
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body['financial_version']).to eq(2)
+    expect(legacy_proposal.reload.attributes).to eq(original)
+
+    expect do
+      patch "#{base}/#{legacy_proposal.id}",
+            params: { proposal: { term_months: 36, installments_count: 36, payment_condition: 'installments' } },
+            headers: headers, as: :json
+    end.not_to change(Message, :count)
+    expect(response).to have_http_status(:ok), response.body
+    expect(legacy_proposal.reload).to have_attributes(financial_version: 3, monthly_cents: 29_500,
+                                                    status: 'draft', approval_status: 'not_required', sent_at: nil)
+    expect(response.parsed_body).to include('installment_plan_cents' => [], 'recurring_months_count' => 36,
+                                           'recurring_total_cents' => 1_062_000, 'contract_total_cents' => 1_062_000)
+  end
+
+  it 'preserves already sent legacy financial terms even when the authorized owner saves unchanged terms' do
+    legacy_proposal.update!(sent_at: Time.current, status: 'sent')
+    patch "#{base}/#{legacy_proposal.id}",
+          params: { proposal: { term_months: 36, installments_count: 36, payment_condition: 'installments' } },
+          headers: headers, as: :json
+    expect(response).to have_http_status(:ok), response.body
+    expect(legacy_proposal.reload).to have_attributes(financial_version: 2, status: 'sent')
+    expect(response.parsed_body['installment_plan_cents'].sum).to eq(29_500)
+  end
+
   it 'persists the correct terms and serves the same values in the API and real PDF' do
     post base, params: payload, headers: headers, as: :json
     expect(response).to have_http_status(:created), response.body
