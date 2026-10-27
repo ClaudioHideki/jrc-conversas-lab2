@@ -13,6 +13,7 @@ import ContactConversations from '../conversation/ContactConversations.vue';
 import ConversationParticipant from '../conversation/ConversationParticipant.vue';
 import Spinner from 'dashboard/components-next/spinner/Spinner.vue';
 import { CONVERSATION_TOOLS } from './conversationTools';
+import { WORKSPACE_APPEARANCE } from './inboxAppearance';
 
 const props = defineProps({
   accountId: { type: Number, required: true },
@@ -160,13 +161,14 @@ watch(
 <template>
   <section
     v-if="allowed"
-    class="min-h-0 flex-1 overflow-y-auto p-4"
+    class="min-h-0 flex-1 overflow-y-auto bg-n-slate-2 p-4"
     data-testid="inbox-conversation-tools"
   >
     <h3
-      class="mb-4 flex items-center gap-2 text-sm font-semibold text-n-slate-12"
+      class="mb-4 flex items-center gap-2 rounded-xl border p-4 text-sm font-semibold"
+      :class="WORKSPACE_APPEARANCE[tool].idle"
     >
-      <span :class="definition.icon" class="size-4 text-n-brand" />
+      <span :class="definition.icon" class="size-4" />
       {{ definition.label(t) }}
     </h3>
     <div v-if="loading" class="flex justify-center p-6"><Spinner /></div>
@@ -187,12 +189,16 @@ watch(
     <p v-else-if="needsContact && !contactId" class="text-sm text-n-slate-10">
       {{ t('JRC_CONTACT_CENTER.INBOX_360.NO_CUSTOMER') }}
     </p>
-    <component
-      :is="component"
+    <div
       v-else
-      :key="`${accountId}:${conversationId}:${tool}`"
-      v-bind="componentProps"
-    />
+      class="rounded-xl border border-n-weak bg-n-solid-1 p-4 shadow-sm"
+    >
+      <component
+        :is="component"
+        :key="`${accountId}:${conversationId}:${tool}`"
+        v-bind="componentProps"
+      />
+    </div>
   </section>
   <template v-else />
 </template>

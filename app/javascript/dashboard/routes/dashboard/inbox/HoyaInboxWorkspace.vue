@@ -35,6 +35,8 @@ import { useAttendanceClosing } from './useAttendanceClosing';
 import QualificationHistory from './QualificationHistory.vue';
 import InboxVoicePanel from './InboxVoicePanel.vue';
 import InboxConversationTools from './InboxConversationTools.vue';
+import InboxCustomerOverview from './InboxCustomerOverview.vue';
+import { CHANNEL_APPEARANCE, WORKSPACE_APPEARANCE } from './inboxAppearance';
 import {
   CONVERSATION_TOOLS,
   CONVERSATION_TOOL_KEYS,
@@ -279,6 +281,7 @@ const supportsClosing = computed(
 );
 const workspaceTabs = computed(() => [
   'CONVERSATION',
+  'OVERVIEW',
   'SCRIPT',
   'CUSTOMER_DATA',
   'ORDERS',
@@ -690,7 +693,7 @@ onBeforeUnmount(() => {
       <button
         type="button"
         :disabled="!canOperate"
-        class="flex h-8 shrink-0 items-center gap-2 rounded-md border border-n-weak px-2.5 text-xs font-medium text-n-slate-11 disabled:opacity-40"
+        class="flex h-8 shrink-0 items-center gap-2 rounded-md border border-n-amber-6 bg-n-amber-2 px-2.5 text-xs font-semibold text-n-amber-11 hover:bg-n-amber-3 disabled:opacity-40"
         @click="pauseDialog.open()"
       >
         <span class="i-lucide-pause size-3.5" />
@@ -721,7 +724,7 @@ onBeforeUnmount(() => {
       <button
         type="button"
         :disabled="!hasSelection"
-        class="flex h-8 min-w-28 max-w-56 flex-1 items-center gap-2 rounded-md border border-n-weak px-2.5 text-left text-xs font-medium text-n-slate-12 disabled:opacity-40"
+        class="flex h-8 min-w-28 max-w-56 flex-1 items-center gap-2 rounded-md border border-n-blue-6 bg-n-blue-2 px-2.5 text-left text-xs font-semibold text-n-blue-11 hover:bg-n-blue-3 disabled:opacity-40"
         @click="openQuick('QUALIFICATIONS')"
       >
         <span class="i-lucide-tag size-4 shrink-0 text-n-brand" />
@@ -735,7 +738,7 @@ onBeforeUnmount(() => {
       <button
         type="button"
         :disabled="!hasSelection"
-        class="flex h-8 shrink-0 items-center gap-2 rounded-md border border-n-weak px-2.5 text-xs font-medium text-n-slate-11 disabled:opacity-40"
+        class="flex h-8 shrink-0 items-center gap-2 rounded-md border border-n-violet-6 bg-n-violet-2 px-2.5 text-xs font-semibold text-n-violet-11 hover:bg-n-violet-3 disabled:opacity-40"
         :aria-label="t('JRC_CONTACT_CENTER.INBOX_360.REPLIES')"
         :title="t('JRC_CONTACT_CENTER.INBOX_360.REPLIES')"
         @click="openQuick('REPLIES')"
@@ -772,7 +775,7 @@ onBeforeUnmount(() => {
     </p>
     <div
       ref="layoutElement"
-      class="relative flex min-h-0 min-w-0 flex-1 gap-2 p-2"
+      class="relative flex min-h-0 min-w-0 flex-1 gap-3 bg-n-slate-2 p-3"
     >
       <aside
         :id="`attendance-list-${accountId}`"
@@ -784,7 +787,7 @@ onBeforeUnmount(() => {
         ]"
         data-testid="inbox-list"
       >
-        <header class="border-b border-n-weak p-3">
+        <header class="border-b border-n-blue-6 bg-n-blue-2 p-3">
           <div class="flex items-center justify-between gap-2">
             <h1 class="m-0 text-xs font-semibold leading-5 text-n-slate-12">
               {{
@@ -839,7 +842,7 @@ onBeforeUnmount(() => {
             </select>
           </div>
         </header>
-        <div class="min-h-0 flex-1 overflow-y-auto p-2">
+        <div class="min-h-0 flex-1 overflow-y-auto bg-n-slate-2 p-2.5">
           <InboxChannelGroups
             :calls="listCalls"
             :conversations="conversations"
@@ -917,7 +920,13 @@ onBeforeUnmount(() => {
         data-testid="interaction-workspace"
       >
         <header
-          class="flex min-h-12 shrink-0 flex-wrap items-center justify-between gap-3 bg-n-brand px-4 py-2 text-white"
+          class="flex min-h-12 shrink-0 flex-wrap items-center justify-between gap-3 px-4 py-2 text-white"
+          :class="
+            (
+              CHANNEL_APPEARANCE[voiceView ? 'voice' : channelKey] ||
+              CHANNEL_APPEARANCE.default
+            ).banner
+          "
         >
           <div
             class="flex min-w-0 basis-full items-center gap-2.5 sm:basis-auto"
@@ -992,7 +1001,9 @@ onBeforeUnmount(() => {
             <span class="i-lucide-contact-round size-4" />
           </button>
         </header>
-        <div class="flex min-w-0 shrink-0 border-b border-n-weak">
+        <div
+          class="flex min-w-0 shrink-0 border-b border-n-blue-6 bg-n-slate-2 p-1"
+        >
           <button
             type="button"
             class="grid w-7 shrink-0 place-items-center text-n-slate-10 hover:bg-n-blue-2"
@@ -1003,23 +1014,26 @@ onBeforeUnmount(() => {
           </button>
           <nav
             ref="workspaceTabsElement"
-            class="flex h-11 min-w-0 flex-1 overflow-x-auto"
+            class="flex min-h-12 min-w-0 flex-1 items-center gap-2 overflow-x-auto px-1 py-1"
             :aria-label="t('JRC_CONTACT_CENTER.INBOX_360.WORKSPACE_TABS')"
           >
             <button
               v-for="key in workspaceTabs"
               :key="key"
               type="button"
-              class="shrink-0 whitespace-nowrap border-b-2 px-2 py-2 text-[11px] font-medium transition disabled:cursor-not-allowed disabled:opacity-40"
+              class="flex shrink-0 items-center whitespace-nowrap rounded-lg border px-3 py-2 text-xs font-semibold transition focus-visible:ring-2 focus-visible:ring-n-brand disabled:cursor-not-allowed disabled:opacity-40"
               :class="
                 tab === key
-                  ? 'border-n-brand text-n-brand'
-                  : 'border-transparent text-n-slate-10 hover:text-n-slate-12'
+                  ? WORKSPACE_APPEARANCE[key].active
+                  : WORKSPACE_APPEARANCE[key].idle
               "
               :aria-pressed="tab === key"
               :aria-label="workspaceLabels[key]"
               :title="workspaceLabels[key]"
-              :disabled="CONVERSATION_TOOL_KEYS.has(key) && !nativeToolsReady"
+              :disabled="
+                (CONVERSATION_TOOL_KEYS.has(key) && !nativeToolsReady) ||
+                (key === 'OVERVIEW' && (!hasSelection || !contactId))
+              "
               :data-conversation-tool="
                 CONVERSATION_TOOL_KEYS.has(key) ? key : undefined
               "
@@ -1033,6 +1047,10 @@ onBeforeUnmount(() => {
                 {{ toolDefinitions[key].short(t) }}
               </template>
               <span v-else class="hidden 2xl:inline">
+                <span
+                  v-if="key === 'OVERVIEW'"
+                  class="i-lucide-layout-dashboard mr-1 inline-block size-4 align-middle"
+                />
                 {{ labels[key] }}
               </span>
               <span v-if="!toolDefinitions[key]" class="2xl:hidden">
@@ -1309,6 +1327,7 @@ onBeforeUnmount(() => {
           v-if="
             tab !== 'CONVERSATION' &&
             tab !== 'CLOSING' &&
+            tab !== 'OVERVIEW' &&
             !CONVERSATION_TOOL_KEYS.has(tab) &&
             !(isVoice && ['CASES', 'TASKS'].includes(tab))
           "
@@ -1319,6 +1338,17 @@ onBeforeUnmount(() => {
           :cases="cases"
           :script-reply="scriptReply"
           @replies="openQuick('REPLIES')"
+        />
+        <InboxCustomerOverview
+          v-if="tab === 'OVERVIEW' && ready && hasSelection && contactId"
+          :key="`${accountId}:${currentUserId}:${contactId}`"
+          :account-id="accountId"
+          :contact-id="contactId"
+          :contact="contact"
+          :enabled="features.master"
+          :crm="crm"
+          :crm-enabled="features.crm"
+          :conversation-id="currentConversationId"
         />
         <InboxConversationTools
           v-if="nativeToolsReady && CONVERSATION_TOOL_KEYS.has(tab)"

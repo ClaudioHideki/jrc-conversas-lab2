@@ -19,7 +19,10 @@ const router = useRouter();
 const session = provideServiceDesk();
 const { state, enabled, accountId, userId } = session;
 const groups = ['operation', 'governance', 'management'];
-const screenLabels = computed(() => tm('JRC_SERVICE_DESK.SCREENS'));
+const screenLabels = computed(() => ({
+  ...tm('JRC_SERVICE_DESK.SCREENS'),
+  policies: t('JRC_SERVICE_DESK.EXPERIENCE.manage_policies'),
+}));
 const primaryKeys = [
   'overview',
   'tickets',
@@ -70,7 +73,7 @@ const breadcrumbs = computed(() => {
       label: t('JRC_SERVICE_DESK.SCREENS.tickets'),
       route: to('tickets'),
     });
-  items.push({ label: t(`JRC_SERVICE_DESK.SCREENS.${activeScreen.value}`) });
+  items.push({ label: screenLabels.value[activeScreen.value] });
   return items;
 });
 const blocked = computed(() =>
@@ -150,7 +153,7 @@ const blocked = computed(() =>
                 "
               >
                 <Icon :icon="item.icon" class="size-4 shrink-0" />{{
-                  t(`JRC_SERVICE_DESK.SCREENS.${item.key}`)
+                  screenLabels[item.key]
                 }}
               </RouterLink>
             </div>

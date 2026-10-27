@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { callStateLabels } from './inboxPresentation';
 import { getInboxChannelKey, CHANNEL_TYPES } from 'dashboard/helper/inbox';
 import ConversationCard from 'dashboard/components/widgets/conversation/ConversationCard.vue';
+import { CHANNEL_APPEARANCE } from './inboxAppearance';
 
 const props = defineProps({
   calls: { type: Array, default: () => [] },
@@ -19,6 +20,7 @@ const props = defineProps({
 const emit = defineEmits(['selectCall', 'selectConversation']);
 const { t } = useI18n();
 const callLabels = computed(() => callStateLabels(t));
+const appearance = key => CHANNEL_APPEARANCE[key] || CHANNEL_APPEARANCE.default;
 const collapsed = ref([]);
 const callCustomer = call =>
   (props.currentCallId === call.id && props.selectedCustomerName) ||
@@ -89,16 +91,18 @@ const toggle = key => {
   <section
     v-for="group in groups"
     :key="group.key"
-    class="mb-3 overflow-hidden rounded-lg border border-n-weak"
+    class="mb-4 overflow-hidden rounded-xl border border-l-4 bg-n-solid-1 shadow-sm"
+    :class="appearance(group.key).border"
     :data-channel="group.key"
   >
     <button
       type="button"
-      class="flex w-full items-center gap-2 bg-n-alpha-2 px-3 py-2.5 text-left text-xs font-semibold text-n-slate-12"
+      class="flex w-full items-center gap-2 px-3 py-3 text-left text-xs font-bold focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-n-brand"
+      :class="appearance(group.key).heading"
       :aria-expanded="!collapsed.includes(group.key)"
       @click="toggle(group.key)"
     >
-      <span class="size-4 shrink-0" :class="[group.icon, group.iconClass]" />
+      <span class="size-5 shrink-0" :class="group.icon" />
       <span class="min-w-0 flex-1 truncate">
         {{
           t('JRC_CONTACT_CENTER.INBOX_360.LABEL_COUNT', {

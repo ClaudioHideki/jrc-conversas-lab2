@@ -1,5 +1,5 @@
 class Api::V1::Accounts::Customers::ContactsController < Api::V1::Accounts::Customers::BaseController
-  before_action :set_contact, only: [:show, :update, :duplicates, :timeline, :merge]
+  before_action :set_contact, only: [:show, :update, :duplicates, :overview, :timeline, :merge]
 
   def index
     scope = Current.account.contacts
@@ -12,6 +12,10 @@ class Api::V1::Accounts::Customers::ContactsController < Api::V1::Accounts::Cust
 
   def show
     render json: { payload: serializer.contact(@contact), contact_points: @contact.contact_points.where(account_id: Current.account.id).order(:id).as_json }
+  end
+
+  def overview
+    render json: context(contact: @contact).overview
   end
 
   def create

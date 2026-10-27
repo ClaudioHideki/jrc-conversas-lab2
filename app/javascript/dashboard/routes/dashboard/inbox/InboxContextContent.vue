@@ -38,7 +38,7 @@ const timeline = computed(() =>
 </script>
 
 <template>
-  <div class="min-h-0 flex-1 overflow-y-auto p-4">
+  <div class="min-h-0 flex-1 overflow-y-auto bg-n-slate-2 p-4">
     <template v-if="tab === 'SCRIPT'">
       <p
         v-if="scriptReply"

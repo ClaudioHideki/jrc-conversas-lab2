@@ -432,6 +432,7 @@ Rails.application.routes.draw do
             end
             resources :contacts, only: [:index, :show, :create, :update] do
               member do
+                get :overview
                 get :duplicates
                 get :timeline
                 post :merge

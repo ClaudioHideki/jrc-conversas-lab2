@@ -86,7 +86,7 @@ const details = computed(() =>
       class="overflow-hidden rounded-lg border border-n-weak bg-n-solid-1"
     >
       <header
-        class="flex items-center justify-between gap-2 border-b border-n-weak px-3 py-3"
+        class="flex items-center justify-between gap-2 border-b border-n-teal-6 bg-n-teal-2 px-3 py-3"
       >
         <h2 class="m-0 flex-1 text-sm font-semibold">
           {{ t('JRC_CONTACT_CENTER.INBOX_360.CUSTOMER') }}
@@ -200,18 +200,18 @@ const details = computed(() =>
           </div>
         </div>
         <nav
-          class="flex border-y border-n-weak"
+          class="flex gap-1 border-y border-n-blue-6 bg-n-blue-2 p-1"
           :aria-label="t('JRC_CONTACT_CENTER.INBOX_360.CUSTOMER')"
         >
           <button
             v-for="key in ['SUMMARY', 'CONTACTS', 'ADDRESS', 'FINANCE']"
             :key="key"
             type="button"
-            class="min-w-0 flex-1 border-b-2 px-1 py-2 text-[10px] font-medium"
+            class="min-w-0 flex-1 rounded-md border px-1 py-2 text-[10px] font-semibold"
             :class="
               tab === key
-                ? 'border-n-brand text-n-brand'
-                : 'border-transparent text-n-slate-10'
+                ? 'border-n-blue-9 bg-n-blue-9 text-white'
+                : 'border-n-blue-6 bg-n-solid-1 text-n-blue-11 hover:bg-n-blue-3'
             "
             :aria-pressed="tab === key"
             @click="tab = key"
@@ -261,8 +261,12 @@ const details = computed(() =>
         </div>
       </template>
     </section>
-    <section class="rounded-lg border border-n-weak bg-n-solid-1 p-3">
-      <header class="mb-3 flex items-center justify-between gap-2">
+    <section
+      class="rounded-xl border border-n-blue-6 bg-n-solid-1 p-3 shadow-sm"
+    >
+      <header
+        class="mb-3 flex items-center justify-between gap-2 rounded-lg bg-n-blue-2 p-2 text-n-blue-11"
+      >
         <h3 class="m-0 text-xs font-semibold">
           {{ t('JRC_CONTACT_CENTER.INBOX_360.RECENT_ORDERS') }}
         </h3>
@@ -303,8 +307,12 @@ const details = computed(() =>
         {{ t('JRC_CONTACT_CENTER.INBOX_360.ORDERS_EMPTY') }}
       </p>
     </section>
-    <section class="rounded-lg border border-n-weak bg-n-solid-1 p-3">
-      <header class="mb-3 flex items-center justify-between gap-2">
+    <section
+      class="rounded-xl border border-n-amber-6 bg-n-solid-1 p-3 shadow-sm"
+    >
+      <header
+        class="mb-3 flex items-center justify-between gap-2 rounded-lg bg-n-amber-2 p-2 text-n-amber-11"
+      >
         <h3 class="m-0 text-xs font-semibold">
           {{ t('JRC_CONTACT_CENTER.INBOX_360.OPEN_CASES') }}
         </h3>

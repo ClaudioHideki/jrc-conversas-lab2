@@ -25,6 +25,7 @@ const pages = {
   resources: () => import('./views/ResourcesView.vue'),
   reports: () => import('./views/ReportsView.vue'),
   sla: () => import('./views/SlaView.vue'),
+  policies: () => import('./views/LifecyclePoliciesView.vue'),
   planned: () => import('./views/PlannedView.vue'),
   settings: () => import('./views/SettingsView.vue'),
   automations: () => import('./views/AutomationsView.vue'),

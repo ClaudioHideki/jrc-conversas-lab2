@@ -312,9 +312,11 @@ describe('omnichannel inbox', () => {
 
   it('offers configured messaging and social channels alongside voice', async () => {
     store.state.conversationPayload = [
-      { id: 101, inbox_id: 11, meta: {} },
-      { id: 102, inbox_id: 12, meta: {} },
-      { id: 103, inbox_id: 13, meta: {} },
+      { id: 101, inbox_id: 11, meta: { assignee: { id: 5 } } },
+      { id: 102, inbox_id: 12, meta: { assignee: { id: 5 } } },
+      { id: 103, inbox_id: 13, meta: { assignee: { id: 5 } } },
+      { id: 104, inbox_id: 11, meta: { assignee: { id: 9 } } },
+      { id: 105, inbox_id: 11, meta: {} },
     ];
     const wrapper = mountInbox();
     await flushPromises();
@@ -481,10 +483,11 @@ describe('omnichannel inbox', () => {
       .get('nav[aria-label="JRC_CONTACT_CENTER.INBOX_360.WORKSPACE_TABS"]')
       .findAll('button');
     expect(
-      tabs.slice(0, 7).map(button => button.attributes('aria-label'))
+      tabs.slice(0, 8).map(button => button.attributes('aria-label'))
     ).toEqual(
       [
         'CONVERSATION',
+        'OVERVIEW',
         'SCRIPT',
         'CUSTOMER_DATA',
         'ORDERS',
@@ -494,7 +497,7 @@ describe('omnichannel inbox', () => {
       ].map(key => `JRC_CONTACT_CENTER.INBOX_360.${key}`)
     );
     expect(
-      tabs.slice(7).map(button => button.attributes('data-conversation-tool'))
+      tabs.slice(8).map(button => button.attributes('data-conversation-tool'))
     ).toEqual([
       'conversation_actions',
       'macros',
@@ -505,11 +508,11 @@ describe('omnichannel inbox', () => {
       'previous_conversation',
       'conversation_participants',
     ]);
-    tabs.slice(7).forEach(button => {
+    tabs.slice(8).forEach(button => {
       expect(button.attributes('disabled')).toBeDefined();
     });
-    await tabs[3].trigger('click');
-    expect(tabs[3].attributes('aria-pressed')).toBe('true');
+    await tabs[4].trigger('click');
+    expect(tabs[4].attributes('aria-pressed')).toBe('true');
     expect(wrapper.text()).toContain(
       'JRC_CONTACT_CENTER.INBOX_360.ORDERS_EMPTY'
     );
@@ -538,7 +541,9 @@ describe('omnichannel inbox', () => {
   });
 
   it('opens a messaging conversation without dropping the authorized account or filter', async () => {
-    store.state.conversationPayload = [{ id: 101, inbox_id: 11, meta: {} }];
+    store.state.conversationPayload = [
+      { id: 101, inbox_id: 11, meta: { assignee: { id: 5 } } },
+    ];
     const wrapper = mountInbox();
     await flushPromises();
     await wrapper.get('[data-testid="conversation"]').trigger('click');

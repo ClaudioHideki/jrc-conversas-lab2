@@ -16,6 +16,8 @@ export function screenAccessible(context, definition) {
     return false;
   }
   if (definition.key === 'overview') return canRead(context, 'dashboard');
+  if (definition.key === 'policies')
+    return context.capabilities?.lifecycle_policies?.publish === true;
   if (definition.key === 'new') return context.units.some(unit => unit.permissions.create_ticket === true);
   if (['detail', 'edit', 'tickets', 'mine'].includes(definition.key)) return canRead(context, 'tickets');
   return canRead(context, definition.resource || definition.key);

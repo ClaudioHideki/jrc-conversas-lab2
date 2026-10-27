@@ -16,6 +16,7 @@ import JrcContactCenterAPI from 'dashboard/api/jrcContactCenter';
 import HoyaInboxWorkspace from './HoyaInboxWorkspace.vue';
 import {
   ASSIGNEE_FILTERS,
+  matchesAssigneeFilter,
   canManageAssigneeFilters,
   assigneeFilterOptions as buildAssigneeFilterOptions,
   resolveAssigneeFilter as resolveAssigneeFilterValue,
@@ -164,10 +165,18 @@ const channelFilterOptions = computed(() => [
 ]);
 
 const conversations = computed(() => {
-  const items = allOpenConversations.value({
-    assigneeType: assigneeFilter.value,
-    status: wootConstants.STATUS_TYPE.OPEN,
-  });
+  const items = allOpenConversations
+    .value({
+      assigneeType: assigneeFilter.value,
+      status: wootConstants.STATUS_TYPE.OPEN,
+    })
+    .filter(conversation =>
+      matchesAssigneeFilter(
+        conversation,
+        assigneeFilter.value,
+        currentUser.value?.id
+      )
+    );
 
   if (channelFilter.value === 'all') return items;
   if (channelFilter.value === 'voice') return [];
