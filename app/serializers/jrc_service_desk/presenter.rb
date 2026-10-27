@@ -31,12 +31,13 @@ class JrcServiceDesk::Presenter
     'lifecycle_policy_bound' => %w[policy_version_id version digest],
     'lifecycle_transitioned' => %w[transition_id action from_status_id to_status_id policy_version_id policy_version cycle_id closing_reason]
   }.freeze
-  def initialize(user_context:)
+  def initialize(user_context:, read_only: false)
     @context = user_context
+    @read_projection = JrcServiceDesk::ReadProjection.new(user_context) if read_only
   end
 
   def ticket(record)
-    policy = Pundit.policy!(@context, record)
+    policy = @read_projection ? @read_projection.policy(record) : Pundit.policy!(@context, record)
     raise Pundit::NotAuthorizedError unless policy.show?
 
     requester = record.requester
@@ -52,7 +53,7 @@ class JrcServiceDesk::Presenter
                          team: native_named(team),
                          queue: named(record.queue), source: record.origin_channel, lock_version: record.lock_version,
                          sla: policy.view_sla? ? sla_summary(record) : nil,
-                         permissions: JrcServiceDesk::TicketPermissions.new(@context, record, policy).call)
+                         permissions: JrcServiceDesk::TicketPermissions.new(@context, record, policy, read_projection: @read_projection).call)
   end
 
   def catalog(record, resource:, unit_id: nil)
@@ -110,7 +111,7 @@ class JrcServiceDesk::Presenter
   def catalogue_fields(record, policy)
     return {} unless policy.view_customer?
 
-    context = JrcServiceDesk::OperationalContext.new(@context)
+    context = operational_context
     contract = JrcServiceDesk::CatalogueContracts.new(context).scope.find_by(id: record.contract_id) if record.contract_id
     result = { service_fields: record.service_fields, catalogue_form_fields: record.catalogue_snapshot.fetch('form_fields', []) }
     result[:contract] = contract && { id: contract.id.to_s, name: contract.contract_number } if contract || record.contract_id.nil?
@@ -167,7 +168,7 @@ class JrcServiceDesk::Presenter
   end
 
   def native_named(record)
-    context = JrcServiceDesk::OperationalContext.new(@context)
+    context = operational_context
     record && context.record_in_account?(record) && Pundit.policy!(context.to_h, record).show? ? named(record) : nil
   end
 
@@ -195,7 +196,7 @@ class JrcServiceDesk::Presenter
   def assignee(membership)
     return nil unless membership
 
-    context = JrcServiceDesk::OperationalContext.new(@context)
+    context = operational_context
     return nil unless context.record_in_account?(membership) && context.unit_scope.exists?(id: membership.unit_id)
     return nil unless membership.account_user.account_id == context.account.id
 
@@ -204,6 +205,10 @@ class JrcServiceDesk::Presenter
 
   def stamp(value)
     value&.iso8601(6)
+  end
+
+  def operational_context
+    @read_projection ? @read_projection.context : JrcServiceDesk::OperationalContext.new(@context)
   end
 
   def sla_summary(ticket)

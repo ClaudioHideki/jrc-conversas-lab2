@@ -19,7 +19,10 @@ class JrcServiceDesk::TicketQuery
   end
 
   def collection
-    { items: relation.order(SORTS.fetch(parameters['sort'] || 'updated_at_desc')).offset(parameters.offset).limit(parameters.per_page),
+    items = relation.order(SORTS.fetch(parameters['sort'] || 'updated_at_desc')).offset(parameters.offset).limit(parameters.per_page)
+                    .preload(:account, :unit, :requester, :team, :service, :status, :priority, :category, :ticket_type, :subcategory,
+                             :queue, :labels, assignee_membership: { account_user: :user })
+    { items: items,
       meta: { total: relation.count, page: parameters.page, per_page: parameters.per_page } }
   end
 

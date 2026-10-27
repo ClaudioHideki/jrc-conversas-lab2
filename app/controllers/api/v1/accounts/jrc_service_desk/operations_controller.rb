@@ -34,7 +34,7 @@ class Api::V1::Accounts::JrcServiceDesk::OperationsController < Api::V1::Account
   end
 
   def presenter
-    @presenter ||= ::JrcServiceDesk::Presenter.new(user_context: pundit_user)
+    @presenter ||= ::JrcServiceDesk::Presenter.new(user_context: pundit_user, read_only: request.get?)
   end
 
   def base_payload

@@ -2,7 +2,7 @@ name: Broker e Cadastro Mestre - regressao candidata
 
 on:
   push:
-    branches: [codex/jrc-campaign-direct-audience-20261022, codex/jrc-performance-refresh-20261026]
+    branches: [codex/jrc-campaign-direct-audience-20261022, codex/jrc-performance-refresh-20261026, codex/servicedesk-read-performance-20261027]
   workflow_dispatch:
 
 permissions:
@@ -22,7 +22,7 @@ defaults:
 
 jobs:
   full-vitest:
-    if: github.ref == 'refs/heads/codex/jrc-campaign-direct-audience-20261022' || github.ref == 'refs/heads/codex/jrc-performance-refresh-20261026'
+    if: github.ref == 'refs/heads/codex/jrc-campaign-direct-audience-20261022' || github.ref == 'refs/heads/codex/jrc-performance-refresh-20261026' || github.ref == 'refs/heads/codex/servicedesk-read-performance-20261027'
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
@@ -33,7 +33,7 @@ jobs:
       - name: Confirmar candidato e preservar a base instalada
         run: |
           case "$GITHUB_REF" in
-            refs/heads/codex/jrc-campaign-direct-audience-20261022|refs/heads/codex/jrc-performance-refresh-20261026) ;;
+            refs/heads/codex/jrc-campaign-direct-audience-20261022|refs/heads/codex/jrc-performance-refresh-20261026|refs/heads/codex/servicedesk-read-performance-20261027) ;;
             *) exit 1 ;;
           esac
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
@@ -62,7 +62,7 @@ jobs:
         run: git diff --exit-code
 
   frontend-build:
-    if: github.ref == 'refs/heads/codex/jrc-campaign-direct-audience-20261022' || github.ref == 'refs/heads/codex/jrc-performance-refresh-20261026'
+    if: github.ref == 'refs/heads/codex/jrc-campaign-direct-audience-20261022' || github.ref == 'refs/heads/codex/jrc-performance-refresh-20261026' || github.ref == 'refs/heads/codex/servicedesk-read-performance-20261027'
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     steps:
@@ -73,7 +73,7 @@ jobs:
       - name: Confirmar revisao e base consolidada
         run: |
           case "$GITHUB_REF" in
-            refs/heads/codex/jrc-campaign-direct-audience-20261022|refs/heads/codex/jrc-performance-refresh-20261026) ;;
+            refs/heads/codex/jrc-campaign-direct-audience-20261022|refs/heads/codex/jrc-performance-refresh-20261026|refs/heads/codex/servicedesk-read-performance-20261027) ;;
             *) exit 1 ;;
           esac
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
@@ -97,7 +97,7 @@ jobs:
         run: git diff --exit-code
 
   rails-postgres:
-    if: github.ref == 'refs/heads/codex/jrc-campaign-direct-audience-20261022' || github.ref == 'refs/heads/codex/jrc-performance-refresh-20261026'
+    if: github.ref == 'refs/heads/codex/jrc-campaign-direct-audience-20261022' || github.ref == 'refs/heads/codex/jrc-performance-refresh-20261026' || github.ref == 'refs/heads/codex/servicedesk-read-performance-20261027'
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     strategy:
@@ -140,7 +140,7 @@ jobs:
       - name: Confirmar candidato e preservar a base instalada
         run: |
           case "$GITHUB_REF" in
-            refs/heads/codex/jrc-campaign-direct-audience-20261022|refs/heads/codex/jrc-performance-refresh-20261026) ;;
+            refs/heads/codex/jrc-campaign-direct-audience-20261022|refs/heads/codex/jrc-performance-refresh-20261026|refs/heads/codex/servicedesk-read-performance-20261027) ;;
             *) exit 1 ;;
           esac
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
@@ -208,6 +208,8 @@ jobs:
             spec/requests/api/v1/accounts/jrc_operations \
             spec/requests/api/v1/accounts/jrc_service_desk \
             spec/services/jrc_service_desk \
+            spec/serializers/jrc_service_desk \
+            spec/policies/jrc_service_desk \
             spec/requests/api/v1/accounts/crm/recurring_proposals_spec.rb \
             spec/services/jrc_crm/recurring_proposal_financials_spec.rb \
             spec/services/jrc_crm/consolidated_financial_guards_spec.rb \
@@ -227,7 +229,7 @@ jobs:
         run: git diff --exit-code
 
   node-contracts:
-    if: github.ref == 'refs/heads/codex/jrc-campaign-direct-audience-20261022' || github.ref == 'refs/heads/codex/jrc-performance-refresh-20261026'
+    if: github.ref == 'refs/heads/codex/jrc-campaign-direct-audience-20261022' || github.ref == 'refs/heads/codex/jrc-performance-refresh-20261026' || github.ref == 'refs/heads/codex/servicedesk-read-performance-20261027'
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     strategy:
