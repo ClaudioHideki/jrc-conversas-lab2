@@ -31,7 +31,7 @@ const reportStatus = computed(() =>
     ? dashboard.value.data.supervision.status
     : dashboard.value.status
 );
-const reloadDashboard = () => {
+const reloadDashboard = ({ background = false } = {}) => {
   if (
     session.state.status === 'ready' &&
     session.state.context?.capabilities?.dashboard?.index === true
@@ -39,27 +39,38 @@ const reloadDashboard = () => {
     return session.operations?.read(dashboardKey, 'dashboard', {
       query: route.query,
       includeSupervision: true,
+      background,
     });
   return undefined;
 };
-const load = () =>
-  session.load(key, 'tickets', {
-    ...route.query,
-    page: 1,
-    per_page: 5,
-    sort: 'updated_at_desc',
-  });
+const load = ({ background = false } = {}) =>
+  session.load(
+    key,
+    'tickets',
+    {
+      ...route.query,
+      page: 1,
+      per_page: 5,
+      sort: 'updated_at_desc',
+    },
+    null,
+    { background }
+  );
 watch(
-  [
-    () => session.state.status,
-    () => route.query,
-    () => session.operations?.state.revision,
-  ],
+  [() => session.state.status, () => route.query],
   () => {
     load();
     reloadDashboard();
   },
   { immediate: true }
+);
+watch(
+  () => session.operations?.state.revision,
+  () => {
+    if (session.state.status !== 'ready') return;
+    load({ background: true });
+    reloadDashboard({ background: true });
+  }
 );
 onBeforeUnmount(() => {
   session.resetResource(key);

@@ -81,6 +81,102 @@ export function registerCp5Cases(test, assert) {
     let calls = 0; const access = createNavigationAccess({ context: () => { calls += 1; } });
     await access.refresh({ ...identity, enabled: false }); assert.equal(calls, 0); assert.equal(access.state.visible, false);
   });
+  test('sidebar keeps confirmed navigation throughout a same-identity recheck', async () => {
+    const wait = deferred();
+    let pending = false;
+    const access = createNavigationAccess({
+      context: () => (pending ? wait.promise : contextPayload()),
+    });
+    await access.refresh(identity);
+    const confirmed = access.state.context;
+    pending = true;
+    const task = access.refresh(identity);
+    assert.equal(access.state.visible, true);
+    assert.equal(access.state.route, 'jrc_service_desk_overview');
+    assert.equal(access.state.context, confirmed);
+    wait.resolve(contextPayload());
+    await task;
+    assert.equal(access.state.visible, true);
+  });
+  test('sidebar overlapping rechecks share only the active same-identity request', async () => {
+    const wait = deferred();
+    let calls = 0;
+    const access = createNavigationAccess({
+      context: () => {
+        calls += 1;
+        return calls === 1 ? wait.promise : contextPayload();
+      },
+    });
+    const first = access.refresh(identity);
+    const second = access.refresh({ ...identity, accountId: 1 });
+    assert.equal(calls, 1);
+    wait.resolve(contextPayload());
+    await Promise.all([first, second]);
+    await access.refresh(identity);
+    assert.equal(calls, 2);
+  });
+  [{ accountId: '2' }, { userId: '8' }, { enabled: false }].forEach(change => {
+    test(`sidebar clears confirmed navigation immediately on identity/feature change ${JSON.stringify(change)}`, async () => {
+      const wait = deferred();
+      let pending = false;
+      const signals = [];
+      const access = createNavigationAccess({
+        context: (accountId, signal) => {
+          signals.push(signal);
+          return pending ? wait.promise : contextPayload();
+        },
+      });
+      await access.refresh(identity);
+      pending = true;
+      const old = access.refresh(identity);
+      const next = access.refresh({ ...identity, ...change });
+      assert.equal(access.state.visible, false);
+      assert.equal(access.state.context, null);
+      assert.equal(signals[1].aborted, true);
+      wait.resolve(contextPayload());
+      await Promise.all([old, next]);
+      assert.equal(access.state.visible, false);
+      assert.equal(access.state.context, null);
+    });
+  });
+  [httpError(401), httpError(403), httpError(500), null].forEach(failure => {
+    test(`sidebar clears retained navigation after failed or invalid recheck ${failure?.response?.status || 'contract'}`, async () => {
+      const wait = deferred();
+      let pending = false;
+      const access = createNavigationAccess({
+        context: () => (pending ? wait.promise : contextPayload()),
+      });
+      await access.refresh(identity);
+      pending = true;
+      const task = access.refresh(identity);
+      if (failure) wait.reject(failure);
+      else wait.resolve({});
+      await task;
+      assert.equal(access.state.context, null);
+      assert.equal(access.state.visible, false);
+    });
+  });
+  test('sidebar disposal aborts a retained recheck and discards its late response', async () => {
+    const wait = deferred();
+    let pending = false;
+    let signal;
+    const access = createNavigationAccess({
+      context: (accountId, value) => {
+        signal = value;
+        return pending ? wait.promise : contextPayload();
+      },
+    });
+    await access.refresh(identity);
+    pending = true;
+    const task = access.refresh(identity);
+    access.dispose();
+    assert.equal(signal.aborted, true);
+    assert.equal(access.state.context, null);
+    wait.resolve(contextPayload());
+    await task;
+    assert.equal(access.state.status, 'idle');
+    assert.equal(access.state.visible, false);
+  });
   test('sidebar failure after prior success erases protected context', async () => {
     let failed = false; const access = createNavigationAccess({ context: async () => { if (failed) throw httpError(403); return contextPayload(); } });
     await access.refresh(identity); failed = true; await access.refresh(identity);

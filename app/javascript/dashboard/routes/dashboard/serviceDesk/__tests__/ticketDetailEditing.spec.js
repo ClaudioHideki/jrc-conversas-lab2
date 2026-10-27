@@ -170,6 +170,34 @@ const click = async label => {
 };
 
 describe('ticket details, preview and authorized editing', () => {
+  it('keeps the selected preview and list visible during a background revision refresh', async () => {
+    const response = deferred();
+    let calls = 0;
+    await render(
+      TicketListView,
+      'tickets',
+      ticket(),
+      {
+        list: async () => {
+          calls += 1;
+          return calls === 1 ? collection() : response.promise;
+        },
+      },
+      { dashboard: async () => ({}) }
+    );
+    await click('Preview row');
+    expect(wrapper.findComponent(TicketSummary).exists()).toBe(true);
+
+    holder.session.operations.state.revision += 1;
+    await flushPromises();
+    expect(wrapper.findComponent(TicketSummary).exists()).toBe(true);
+    expect(wrapper.text()).toContain('Open row');
+
+    response.resolve(collection());
+    await flushPromises();
+    expect(wrapper.findComponent(TicketSummary).exists()).toBe(true);
+  });
+
   it('opens the corresponding detail with the list context', async () => {
     const { router } = await render(TicketListView, 'tickets');
     await click('Open row');

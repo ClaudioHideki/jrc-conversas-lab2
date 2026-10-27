@@ -80,10 +80,17 @@ const load = () => {
   session.resetResource(previewKey);
   return session.load(key, 'tickets', query.value);
 };
+watch([query, () => session.state.status], load, { immediate: true });
 watch(
-  [query, () => session.state.status, () => session.operations?.state.revision],
-  load,
-  { immediate: true }
+  () => session.operations?.state.revision,
+  () => {
+    if (session.state.status !== 'ready' || filterError.value) return;
+    session.load(key, 'tickets', query.value, null, { background: true });
+    if (selection.value)
+      session.load(previewKey, 'tickets', {}, selection.value, {
+        background: true,
+      });
+  }
 );
 watch(
   () => result.value.status,

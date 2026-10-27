@@ -25,18 +25,21 @@ export function createServiceDeskSession(client, state = createSessionState()) {
   let identity = null;
   const controllers = new Map();
   const sequences = new Map();
+  const readScopes = new Map();
   const cancel = key => { controllers.get(key)?.abort(); controllers.delete(key); };
   const clear = status => {
     generation += 1;
     controllers.forEach(controller => controller.abort());
     controllers.clear();
     sequences.clear();
+    readScopes.clear();
     state.status = status;
     state.context = null;
     state.resources = {};
   };
   const resetResource = (key, status = 'idle') => {
     cancel(key);
+    readScopes.delete(key);
     sequences.set(key, (sequences.get(key) || 0) + 1);
     state.resources[key] = { ...createResourceState(), status };
   };
@@ -78,14 +81,27 @@ export function createServiceDeskSession(client, state = createSessionState()) {
         controllers.delete('context');
     }
   };
-  const load = async (key, resourceName, query = {}, ticketId = null) => {
-    resetResource(key);
+  const load = async (
+    key,
+    resourceName,
+    query = {},
+    ticketId = null,
+    { background = false } = {}
+  ) => {
+    const previous = resource(key);
+    const previousScope = readScopes.get(key);
+    cancel(key);
+    sequences.set(key, (sequences.get(key) || 0) + 1);
+    readScopes.delete(key);
     if (state.status !== 'ready' || !identity?.enabled) {
-      state.resources[key].status = state.status === 'ready' ? 'denied' : state.status;
+      state.resources[key] = {
+        ...createResourceState(),
+        status: state.status === 'ready' ? 'denied' : state.status,
+      };
       return;
     }
     if (!canRead(state.context, resourceName)) {
-      state.resources[key].status = 'denied';
+      state.resources[key] = { ...createResourceState(), status: 'denied' };
       return;
     }
     let request;
@@ -95,42 +111,77 @@ export function createServiceDeskSession(client, state = createSessionState()) {
         throw new QueryError('Unauthorized scope selector');
       if (ticketId !== null && !canonicalId(ticketId))
         throw new QueryError('Invalid ticket');
-    }
-    catch (error) {
-      state.resources[key].status = errorStatus(error);
+    } catch (error) {
+      state.resources[key] = {
+        ...createResourceState(),
+        status: errorStatus(error),
+      };
       return;
     }
     const epoch = generation;
     const seq = sequences.get(key);
     const controller = new AbortController();
     controllers.set(key, controller);
-    state.resources[key].status = 'loading';
+    const scope = JSON.stringify([
+      resourceName,
+      request,
+      canonicalId(ticketId),
+    ]);
+    const retain =
+      background &&
+      previousScope?.context === state.context &&
+      previousScope.query === scope &&
+      ['ready', 'empty'].includes(previous.status);
+    readScopes.set(key, { context: state.context, query: scope });
+    state.resources[key] = retain
+      ? { ...previous, refreshing: true }
+      : { ...createResourceState(), status: 'loading' };
     try {
-      const payload = ticketId !== null
-        ? await client.ticket(identity.accountId, canonicalId(ticketId), controller.signal)
-        : await client.list(identity.accountId, resourceName, request, controller.signal);
-      if (epoch !== generation || seq !== sequences.get(key))
-        return;
+      const payload =
+        ticketId !== null
+          ? await client.ticket(
+              identity.accountId,
+              canonicalId(ticketId),
+              controller.signal
+            )
+          : await client.list(
+              identity.accountId,
+              resourceName,
+              request,
+              controller.signal
+            );
+      if (epoch !== generation || seq !== sequences.get(key)) return;
       if (ticketId !== null) {
-        state.resources[key] = { ...createResourceState(), status: 'ready', record: decodeTicket(payload, state.context, canonicalId(ticketId)) };
+        state.resources[key] = {
+          ...createResourceState(),
+          status: 'ready',
+          record: decodeTicket(payload, state.context, canonicalId(ticketId)),
+        };
+      } else {
+        const decoded = decodeCollection(
+          payload,
+          state.context,
+          resourceName,
+          request
+        );
+        state.resources[key] = {
+          ...createResourceState(),
+          ...decoded,
+          status: decoded.items.length ? 'ready' : 'empty',
+        };
       }
-      else {
-        const decoded = decodeCollection(payload, state.context, resourceName, request);
-        state.resources[key] = { ...createResourceState(), ...decoded, status: decoded.items.length ? 'ready' : 'empty' };
-      }
-    }
-    catch (error) {
-      if (epoch !== generation || seq !== sequences.get(key))
-        return;
+    } catch (error) {
+      if (epoch !== generation || seq !== sequences.get(key)) return;
       const status = errorStatus(error, ticketId !== null);
       if (['denied', 'unauthenticated', 'invalid_contract'].includes(status))
         clear(status);
-      else
-        state.resources[key] = { ...createResourceState(), status };
-    }
-    finally {
-      if (epoch === generation && seq === sequences.get(key))
+      else state.resources[key] = { ...createResourceState(), status };
+    } finally {
+      if (epoch === generation && seq === sequences.get(key)) {
         controllers.delete(key);
+        if (state.resources[key]?.refreshing)
+          state.resources[key] = { ...state.resources[key], refreshing: false };
+      }
     }
   };
   const revalidate = async () => {

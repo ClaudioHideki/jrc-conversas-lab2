@@ -34,12 +34,14 @@ export function createOperationalSession(
   const controllers = new Map();
   const sequences = new Map();
   const intents = new Map();
+  const readScopes = new Map();
   const clear = () => {
     epoch += 1;
     controllers.forEach(c => c.abort());
     controllers.clear();
     sequences.clear();
     intents.clear();
+    readScopes.clear();
     state.reads = {};
     state.writes = {};
     state.notice = null;
@@ -64,10 +66,17 @@ export function createOperationalSession(
   const read = async (
     key,
     kind,
-    { ticket = null, query = {}, includeSupervision = false } = {}
+    {
+      ticket = null,
+      query = {},
+      includeSupervision = false,
+      background = false,
+    } = {}
   ) => {
+    const previous = state.reads[key];
+    const previousScope = readScopes.get(key);
     cancel(key);
-    state.reads[key] = { status: 'loading', data: null };
+    readScopes.delete(key);
     const turn = epoch;
     const seq = sequences.get(key);
     const controller = new AbortController();
@@ -95,6 +104,17 @@ export function createOperationalSession(
         state.reads[key] = { status: 'denied', data: null };
         return null;
       }
+      const scope = JSON.stringify([kind, normalized, includeSupervision]);
+      const retain =
+        background &&
+        previousScope?.context === context &&
+        previousScope.ticket === ticket &&
+        previousScope.query === scope &&
+        ['ready', 'empty'].includes(previous?.status);
+      readScopes.set(key, { context, ticket, query: scope });
+      state.reads[key] = retain
+        ? { ...previous, refreshing: true }
+        : { status: 'loading', data: null };
       const payload =
         kind === 'dashboard'
           ? await client.dashboard(
@@ -142,7 +162,11 @@ export function createOperationalSession(
       else state.reads[key] = { status, data: null };
       return null;
     } finally {
-      if (turn === epoch && seq === sequences.get(key)) controllers.delete(key);
+      if (turn === epoch && seq === sequences.get(key)) {
+        controllers.delete(key);
+        if (state.reads[key]?.refreshing)
+          state.reads[key] = { ...state.reads[key], refreshing: false };
+      }
     }
   };
   const write = async (key, action, payload, ticket = null) => {

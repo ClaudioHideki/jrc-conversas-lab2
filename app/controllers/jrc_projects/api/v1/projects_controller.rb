@@ -28,15 +28,17 @@ module JrcProjects
           completed_by_project = Task.where(account_id: Current.account.id, project_id: project_ids, status: 'completed').group(:project_id).count
           task_counts = project_ids.to_h { |project_id| [project_id, { total: total_by_project.fetch(project_id, 0), completed: completed_by_project.fetch(project_id, 0) }] }
           card_counts = ProjectSerializer.card_counts(account_id: Current.account.id, project_ids: project_ids)
+          read_projection = ReadProjection.new(account_user: Current.account_user, projects: records)
           data = records.map do |project|
             ProjectSerializer.one(project, account_user: Current.account_user,
-                                  task_counts: task_counts[project.id], card_counts: card_counts[project.id])
+                                  task_counts: task_counts[project.id], card_counts: card_counts[project.id], read_projection: read_projection)
           end
           render json: { data: data, meta: meta }
         end
         def show
           project = scoped_project
-          render json: { data: ProjectSerializer.one(project, account_user: Current.account_user, details: true) }
+          read_projection = ReadProjection.new(account_user: Current.account_user, projects: [project])
+          render json: { data: ProjectSerializer.one(project, account_user: Current.account_user, details: true, read_projection: read_projection) }
         end
         def create
           template = ProjectTemplate.where(account_id: Current.account.id, active: true).find(params[:template_id]) if params[:template_id].present?

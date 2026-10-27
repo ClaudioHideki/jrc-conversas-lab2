@@ -48,23 +48,62 @@ export function createIntegratedGuard(store, refreshAccount, refreshContext) {
   };
 }
 export function createNavigationAccess(client, state = { visible: false, route: null, context: null, status: 'idle' }) {
-  let epoch = 0; let controller;
-  const clear = status => { epoch += 1; controller?.abort(); state.visible = false; state.route = null; state.context = null; state.status = status; };
-  const refresh = async identity => {
-    clear('loading');
-    const accountId = canonicalId(identity.accountId), userId = canonicalId(identity.userId);
-    if (identity.enabled !== true || !accountId || !userId) { state.status = 'disabled'; return; }
-    const turn = epoch; controller = new AbortController();
-    try {
-      const payload = await client.context(accountId, controller.signal);
-      if (turn !== epoch) return;
-      const context = decodeContext(payload, { accountId, userId });
-      const landing = landingScreen(context);
-      if (!moduleAccessible(context) || !landing) { clear('denied'); return; }
-      state.context = context; state.route = serviceDeskRouteName(landing); state.visible = true; state.status = 'ready';
-    } catch (error) {
-      if (turn === epoch) clear(error?.response?.status === 403 ? 'denied' : 'unavailable');
+  let epoch = 0;
+  let controller;
+  let pending;
+  const clear = status => {
+    epoch += 1;
+    controller?.abort();
+    pending = null;
+    state.visible = false;
+    state.route = null;
+    state.context = null;
+    state.status = status;
+  };
+  const refresh = identity => {
+    const accountId = canonicalId(identity.accountId),
+      userId = canonicalId(identity.userId);
+    if (identity.enabled !== true || !accountId || !userId) {
+      clear('disabled');
+      return Promise.resolve();
     }
+    if (pending?.accountId === accountId && pending?.userId === userId)
+      return pending.promise;
+    const sameIdentity =
+      state.context?.account_id === accountId &&
+      state.context?.user_id === userId;
+    if (!sameIdentity) clear('loading');
+    else {
+      epoch += 1;
+      controller?.abort();
+    }
+    const turn = epoch;
+    controller = new AbortController();
+    // Reuse only this access instance's active read, never a settled authority result.
+    const request = { accountId, userId };
+    pending = request;
+    request.promise = (async () => {
+      try {
+        const payload = await client.context(accountId, controller.signal);
+        if (turn !== epoch) return;
+        const context = decodeContext(payload, { accountId, userId });
+        const landing = landingScreen(context);
+        if (!moduleAccessible(context) || !landing) {
+          clear('denied');
+          return;
+        }
+        state.context = context;
+        state.route = serviceDeskRouteName(landing);
+        state.visible = true;
+        state.status = 'ready';
+      } catch (error) {
+        if (turn === epoch)
+          clear(error?.response?.status === 403 ? 'denied' : 'unavailable');
+      } finally {
+        if (pending === request) pending = null;
+      }
+    })();
+    return request.promise;
   };
   return { state, refresh, clear, dispose: () => clear('idle') };
 }

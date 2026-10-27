@@ -51,24 +51,26 @@ const resolutionLabel = computed(() => {
         minutes: minutes % 60,
       });
 });
-const load = () => {
+const load = ({ background = false } = {}) => {
   if (props.dashboardSource !== null) return undefined;
   if (
     session.state.status === 'ready' &&
     session.state.context?.capabilities?.dashboard?.index === true
   )
-    return session.operations?.read(key, 'dashboard', { query: props.query });
+    return session.operations?.read(key, 'dashboard', {
+      query: props.query,
+      background,
+    });
   return undefined;
 };
 watch(
-  [
-    () => props.query,
-    () => session.state.status,
-    () => session.operations?.state.revision,
-    () => props.dashboardSource,
-  ],
-  load,
+  [() => props.query, () => session.state.status, () => props.dashboardSource],
+  () => load(),
   { immediate: true, deep: true }
+);
+watch(
+  () => session.operations?.state.revision,
+  () => load({ background: true })
 );
 onBeforeUnmount(() => session.operations?.cancel(key));
 </script>

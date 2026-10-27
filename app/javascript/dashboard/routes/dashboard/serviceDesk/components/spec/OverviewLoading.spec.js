@@ -186,6 +186,30 @@ afterEach(() => {
 });
 
 describe('Overview request sharing and independent loading', () => {
+  it('keeps rendered tickets and KPIs visible during a pending focus refresh', async () => {
+    render();
+    await flushPromises();
+    const rows = deferred();
+    const counts = deferred();
+    mocks.list.mockReturnValueOnce(rows.promise);
+    mocks.dashboard.mockReturnValueOnce(counts.promise);
+
+    window.dispatchEvent(new Event('focus'));
+    await flushPromises();
+    expect(wrapper.get('[data-testid="recent-tickets"]').text()).toContain(
+      'Recent Account 1'
+    );
+    expect(openCard().find('strong').text()).toBe('20');
+
+    rows.resolve(recentPayload('1', {}, 'Fresh visible ticket'));
+    counts.resolve(dashboardPayload('1', {}, 24));
+    await flushPromises();
+    expect(wrapper.get('[data-testid="recent-tickets"]').text()).toContain(
+      'Fresh visible ticket'
+    );
+    expect(openCard().find('strong').text()).toBe('24');
+  });
+
   it('uses one dashboard for KPIs and supervision and keeps recent tickets in a separate bounded request', async () => {
     render();
     await flushPromises();

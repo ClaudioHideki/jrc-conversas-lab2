@@ -56,6 +56,81 @@ RSpec.describe 'Global Service Desk company and people intake', type: :request d
     expect(response.parsed_body.dig('person', 'requester_eligible')).to be(true)
   end
 
+  it 'instantiates only the requested page as the searchable directory grows' do
+    auth_headers = headers
+    params = { unit_id: sd_unit.id, q: 'Picker pagination', per_page: 2 }
+    company_id = company.id
+    counts = [1, 9].map do |size|
+      (sd_account.contacts.count...size).each do |index|
+        create(:contact, account: sd_account, company_id: company_id, name: format('Picker pagination %02d', index))
+      end
+      instantiated = 0
+      subscriber = lambda do |*args|
+        event = ActiveSupport::Notifications::Event.new(*args)
+        instantiated += event.payload[:record_count] if event.payload[:class_name] == 'Contact'
+      end
+      ActiveSupport::Notifications.subscribed(subscriber, 'instantiation.active_record') do
+        get "#{base}/requester_people", params: params, headers: auth_headers
+      end
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body['meta']).to eq('total' => size, 'page' => 1, 'per_page' => 2)
+      expect(response.parsed_body['items'].size).to eq([size, 2].min)
+      instantiated
+    end
+    expect(counts).to eq([1, 2])
+  end
+
+  it 'batches company names for the selected page while preserving order and total' do
+    first = create(:contact, account: sd_account, company_id: company.id, name: 'Picker batch A')
+    second = create(:contact, account: sd_account, company_id: other_company.id, name: 'Picker batch B')
+    third = create(:contact, account: sd_account, company_id: company.id, name: 'Picker batch C')
+    fourth = create(:contact, account: sd_account, company_id: other_company.id, name: 'Picker batch D')
+    auth_headers = headers
+    params = { unit_id: sd_unit.id, q: 'Picker batch', per_page: 2, page: 2 }
+    company_queries = []
+    subscriber = lambda do |*args|
+      event = ActiveSupport::Notifications::Event.new(*args)
+      sql = event.payload[:sql]
+      company_queries << sql if sql.include?('SELECT "companies"."id", "companies"."name" FROM "companies"')
+    end
+    ActiveSupport::Notifications.subscribed(subscriber, 'sql.active_record') do
+      get "#{base}/requester_people", params: params, headers: auth_headers
+    end
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body['items'].map { |row| row.values_at('id', 'company_name') }).to eq(
+      [[third.id, company.name], [fourth.id, other_company.name]]
+    )
+    expect(response.parsed_body['items'].map { |row| row['id'] }).not_to include(first.id, second.id)
+    expect(response.parsed_body['meta']).to eq('total' => 4, 'page' => 2, 'per_page' => 2)
+    expect(company_queries.size).to eq(1)
+
+    get "#{base}/requester_people", params: params.merge(page: 3), headers: auth_headers
+    expect(response.parsed_body['items']).to eq([])
+    expect(response.parsed_body['meta']).to eq('total' => 4, 'page' => 3, 'per_page' => 2)
+  end
+
+  it 'preserves tenant and corporate coverage in page items and totals for an authorized custom role' do
+    permissions = %w[contact_manage jrc_service_desk_module_view jrc_service_desk_tickets_view jrc_service_desk_customers_view
+                     jrc_service_desk_lookups_view]
+    sd_account_user.update!(custom_role: create(:custom_role, account: sd_account, permissions: permissions))
+    linked
+    unlinked
+    restricted = sd_account.master_companies.create!(name: 'Restricted picker company', relationship_type: 'internal', person_kind: 'organization')
+    create(:contact, account: sd_account, company_id: restricted.id)
+    create(:contact, account: sd_foreign_account)
+    get "#{base}/requester_people", params: { unit_id: sd_unit.id, per_page: 1, page: 2 }, headers: headers
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body['items'].map { |row| row['id'] }).to eq([unlinked.id])
+    expect(response.parsed_body['meta']).to eq('total' => 2, 'page' => 2, 'per_page' => 1)
+    expect(response.parsed_body['items'].first['can_link']).to be(false)
+
+    get "#{base}/requester_people", params: { unit_id: sd_unit.id, company_id: restricted.id }, headers: headers
+    expect(response).to have_http_status(:not_found)
+    sd_account_user.custom_role.update!(permissions: permissions - ['contact_manage'])
+    get "#{base}/requester_people", params: { unit_id: sd_unit.id }, headers: headers
+    expect(response).to have_http_status(:forbidden)
+  end
+
   it 'searches a formatted secondary phone without returning all coworkers of the matched person' do
     linked
     colleague = create(:contact, account: sd_account, company_id: company.id, name: 'Colega sintético')

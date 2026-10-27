@@ -2,7 +2,7 @@ name: Broker e Cadastro Mestre - regressao candidata
 
 on:
   push:
-    branches: [codex/jrc-campaign-direct-audience-20261022]
+    branches: [codex/jrc-campaign-direct-audience-20261022, codex/jrc-performance-refresh-20261026]
   workflow_dispatch:
 
 permissions:
@@ -22,7 +22,7 @@ defaults:
 
 jobs:
   full-vitest:
-    if: github.ref == 'refs/heads/codex/jrc-campaign-direct-audience-20261022'
+    if: github.ref == 'refs/heads/codex/jrc-campaign-direct-audience-20261022' || github.ref == 'refs/heads/codex/jrc-performance-refresh-20261026'
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
@@ -32,7 +32,10 @@ jobs:
           persist-credentials: false
       - name: Confirmar candidato e preservar a base instalada
         run: |
-          test "$GITHUB_REF" = refs/heads/codex/jrc-campaign-direct-audience-20261022
+          case "$GITHUB_REF" in
+            refs/heads/codex/jrc-campaign-direct-audience-20261022|refs/heads/codex/jrc-performance-refresh-20261026) ;;
+            *) exit 1 ;;
+          esac
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           git merge-base --is-ancestor "$CANDIDATE_BASE_SHA" HEAD
           git diff --check "$CANDIDATE_BASE_SHA" HEAD
@@ -59,7 +62,7 @@ jobs:
         run: git diff --exit-code
 
   frontend-build:
-    if: github.ref == 'refs/heads/codex/jrc-campaign-direct-audience-20261022'
+    if: github.ref == 'refs/heads/codex/jrc-campaign-direct-audience-20261022' || github.ref == 'refs/heads/codex/jrc-performance-refresh-20261026'
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     steps:
@@ -69,7 +72,10 @@ jobs:
           persist-credentials: false
       - name: Confirmar revisao e base consolidada
         run: |
-          test "$GITHUB_REF" = refs/heads/codex/jrc-campaign-direct-audience-20261022
+          case "$GITHUB_REF" in
+            refs/heads/codex/jrc-campaign-direct-audience-20261022|refs/heads/codex/jrc-performance-refresh-20261026) ;;
+            *) exit 1 ;;
+          esac
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           git merge-base --is-ancestor "$CANDIDATE_BASE_SHA" HEAD
           git diff --check "$CANDIDATE_BASE_SHA" HEAD
@@ -91,7 +97,7 @@ jobs:
         run: git diff --exit-code
 
   rails-postgres:
-    if: github.ref == 'refs/heads/codex/jrc-campaign-direct-audience-20261022'
+    if: github.ref == 'refs/heads/codex/jrc-campaign-direct-audience-20261022' || github.ref == 'refs/heads/codex/jrc-performance-refresh-20261026'
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     strategy:
@@ -133,7 +139,10 @@ jobs:
           persist-credentials: false
       - name: Confirmar candidato e preservar a base instalada
         run: |
-          test "$GITHUB_REF" = refs/heads/codex/jrc-campaign-direct-audience-20261022
+          case "$GITHUB_REF" in
+            refs/heads/codex/jrc-campaign-direct-audience-20261022|refs/heads/codex/jrc-performance-refresh-20261026) ;;
+            *) exit 1 ;;
+          esac
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           git merge-base --is-ancestor "$CANDIDATE_BASE_SHA" HEAD
           git diff --check "$CANDIDATE_BASE_SHA" HEAD
@@ -183,6 +192,7 @@ jobs:
           bundle exec rspec \
             spec/services/jrc_broker \
             spec/services/jrc_customers \
+            spec/services/jrc_projects/read_projection_spec.rb \
             spec/requests/api/v1/accounts/jrc_broker_spec.rb \
             spec/requests/api/v1/accounts/jrc_broker_inbox_spec.rb \
             spec/requests/api/v1/accounts/jrc_broker_contract_spec.rb \
@@ -217,7 +227,7 @@ jobs:
         run: git diff --exit-code
 
   node-contracts:
-    if: github.ref == 'refs/heads/codex/jrc-campaign-direct-audience-20261022'
+    if: github.ref == 'refs/heads/codex/jrc-campaign-direct-audience-20261022' || github.ref == 'refs/heads/codex/jrc-performance-refresh-20261026'
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     strategy:

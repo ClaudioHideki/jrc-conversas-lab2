@@ -1,17 +1,25 @@
 module JrcProjects
   class ProjectSerializer
-    def self.one(project, account_user:, details: false, task_counts: nil, card_counts: nil)
+    def self.one(project, account_user:, details: false, task_counts: nil, card_counts: nil, read_projection: nil)
       data = project.as_json(only: %i[id key name description status visibility owner_id contact_id starts_on due_on completed_at acceptance_notes lock_version created_at updated_at])
-      if project.account.feature_enabled?('jrc_customer_master') &&
-         JrcCustomers::DirectoryPolicy.new(JrcOperations::Access.user_context(account_user), :directory).access?
+      directory_access = if read_projection
+                           read_projection.directory_access?(project)
+                         else
+                           project.account.feature_enabled?('jrc_customer_master') &&
+                             JrcCustomers::DirectoryPolicy.new(JrcOperations::Access.user_context(account_user), :directory).access?
+                         end
+      if directory_access
         data['company_id'] = project.company_id
-        company = JrcCustomers::Company.where(account_id: project.account_id).find_by(id: project.company_id)
-        data['company'] = company&.as_json(only: %i[id name])
+        data['company'] = if read_projection
+                            read_projection.company(project)
+                          else
+                            JrcCustomers::Company.where(account_id: project.account_id).find_by(id: project.company_id)&.as_json(only: %i[id name])
+                          end
       end
       data['priority'] = project.priority
       data['owner'] = project.owner.as_json(only: %i[id name])
       data['contact'] = project.contact&.as_json(only: %i[id name email])
-      data['capabilities'] = Authorization.capabilities(account_user, project)
+      data['capabilities'] = read_projection ? read_projection.capabilities(project) : Authorization.capabilities(account_user, project)
       counts = task_counts || { total: project.tasks.count, completed: project.tasks.where(status: 'completed').count }
       data['tasks_total'] = counts[:total]
       data['tasks_completed'] = counts[:completed]

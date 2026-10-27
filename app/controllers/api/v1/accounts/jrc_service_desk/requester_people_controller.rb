@@ -8,9 +8,8 @@ class Api::V1::Accounts::JrcServiceDesk::RequesterPeopleController < Api::V1::Ac
   def index
     prepare_directory!
     scope = ::JrcCustomers::ContactQuery.new(account: @context.account, scope: @directory.visible_contacts, query: @filters['q'], include_company: false).call
-    records = scope.order(:name, :id).select { |record| Pundit.policy!(@context.to_h, record).show? }
-    render json: base_payload.merge(items: records.slice(@filters.offset, @filters.per_page).to_a.map { |record| person(record) },
-                                    meta: { total: records.size, page: @filters.page, per_page: @filters.per_page }, can_create: may_create?,
+    render json: base_payload.merge(items: paginated_people(scope),
+                                    meta: { total: scope.count, page: @filters.page, per_page: @filters.per_page }, can_create: may_create?,
                                     company: @company && { id: @company.id, name: @company.name })
   end
 
@@ -64,11 +63,19 @@ class Api::V1::Accounts::JrcServiceDesk::RequesterPeopleController < Api::V1::Ac
     @company = @directory.company!(@filters['company_id']) if @filters['company_id']
   end
 
-  def person(record)
+  def paginated_people(scope)
+    # ContactPolicy#show? permits every contact (including its Enterprise overlay).
+    # Visibility is enforced by the directory relation; keep each returned person's authorization below.
+    records = scope.order(:name, :id).offset(@filters.offset).limit(@filters.per_page).to_a
+    rows = ::JrcCustomers::Serializer.new(account: @context.account).contacts(records)
+    records.zip(rows).map { |record, row| person(record, row) }
+  end
+
+  def person(record, row = nil)
     context = @context
     Pundit.authorize(context.to_h, record, :show?)
     reason = ::JrcCustomers::RequesterIdentity.reason(record)
-    row = ::JrcCustomers::Serializer.new(account: context.account).contact(record)
+    row ||= ::JrcCustomers::Serializer.new(account: context.account).contact(record)
     row.merge('requester_eligible' => reason.nil?, 'review_reason' => reason,
               'can_link' => reason.nil? && context.capability?(:tickets_create) &&
                 ::JrcCustomers::DirectoryPolicy.new(context.to_h, :directory).access? &&
