@@ -34,6 +34,12 @@ import { useInboxCustomer360 } from './useInboxCustomer360';
 import { useAttendanceClosing } from './useAttendanceClosing';
 import QualificationHistory from './QualificationHistory.vue';
 import InboxVoicePanel from './InboxVoicePanel.vue';
+import InboxConversationTools from './InboxConversationTools.vue';
+import {
+  CONVERSATION_TOOLS,
+  CONVERSATION_TOOL_KEYS,
+} from './conversationTools';
+import { useInboxListResize } from './useInboxListResize';
 
 const props = defineProps({
   accountId: { type: Number, required: true },
@@ -69,11 +75,29 @@ const labels = computed(() => inbox360Labels(t));
 const agentLabels = computed(() => agentStateLabels(t));
 const pauseLabels = computed(() => pauseReasonLabels(t));
 const selectedChat = useMapGetter('getSelectedChat');
+const currentUserId = useMapGetter('getCurrentUserID');
 const featureEnabled = useMapGetter('accounts/isFeatureEnabledonAccount');
 const sip = useSipWebphone();
 const tab = ref('CONVERSATION');
 const voiceSection = ref('journey');
 const listOpen = ref(false);
+const layoutElement = ref(null);
+const listElement = ref(null);
+const customerElement = ref(null);
+const workspaceTabsElement = ref(null);
+const listResize = useInboxListResize(
+  computed(() => props.accountId),
+  currentUserId,
+  layoutElement,
+  customerElement,
+  listElement
+);
+const {
+  width: listWidth,
+  widthClass: listWidthClass,
+  maxWidth: listMaxWidth,
+  dragging: listResizing,
+} = listResize;
 const phoneOpen = ref(false);
 const voicePanel = ref(null);
 const callDetails = ref(null);
@@ -142,6 +166,29 @@ const nativeConversationReady = computed(() =>
       selectedChat.value?.id === props.currentConversationId
   )
 );
+const nativeToolsReady = computed(
+  () =>
+    props.ready &&
+    !voiceView.value &&
+    nativeConversationReady.value &&
+    Number(selectedChat.value?.account_id) === props.accountId
+);
+const visibleConversationTools = computed(() =>
+  CONVERSATION_TOOLS.filter(
+    item =>
+      item.key !== 'macros' ||
+      featureEnabled.value(props.accountId, FEATURE_FLAGS.MACROS) === true
+  )
+);
+const toolDefinitions = Object.fromEntries(
+  CONVERSATION_TOOLS.map(item => [item.key, item])
+);
+const workspaceLabels = computed(() => ({
+  ...labels.value,
+  ...Object.fromEntries(
+    CONVERSATION_TOOLS.map(item => [item.key, item.label(t)])
+  ),
+}));
 const call = computed(() => callDetails.value?.call);
 const contactId = computed(() => {
   if (phoneOpen.value) return null;
@@ -238,8 +285,30 @@ const workspaceTabs = computed(() => [
   'CASES',
   'HISTORY',
   'TASKS',
+  ...visibleConversationTools.value.map(item => item.key),
   ...(supportsClosing.value ? ['CLOSING'] : []),
 ]);
+const selectWorkspaceTab = key => {
+  if (CONVERSATION_TOOL_KEYS.has(key) && !nativeToolsReady.value) return;
+  tab.value = key;
+  voiceSection.value = { CASES: 'case', TASKS: 'callback' }[key] || 'journey';
+};
+watch(
+  [nativeToolsReady, workspaceTabs],
+  () => {
+    if (
+      CONVERSATION_TOOL_KEYS.has(tab.value) &&
+      (!nativeToolsReady.value || !workspaceTabs.value.includes(tab.value))
+    )
+      tab.value = 'CONVERSATION';
+  },
+  { flush: 'sync' }
+);
+const scrollWorkspaceTabs = direction =>
+  workspaceTabsElement.value?.scrollBy?.({
+    left: direction * 280,
+    behavior: 'smooth',
+  });
 const channel = computed(() =>
   isVoice.value
     ? props.channels.find(item => item.key === 'voice')
@@ -701,12 +770,18 @@ onBeforeUnmount(() => {
     >
       {{ phoneError || t('JRC_CONTACT_CENTER.COMMON.ERROR') }}
     </p>
-    <div class="relative flex min-h-0 min-w-0 flex-1 gap-2 p-2">
+    <div
+      ref="layoutElement"
+      class="relative flex min-h-0 min-w-0 flex-1 gap-2 p-2"
+    >
       <aside
-        class="z-20 h-full min-h-0 shrink-0 flex-col overflow-hidden rounded-lg border border-n-weak bg-n-solid-1 xl:relative xl:inset-auto xl:z-auto xl:flex xl:w-56 2xl:w-60"
-        :class="
-          listOpen ? 'absolute inset-y-2 left-2 flex w-72 shadow-xl' : 'hidden'
-        "
+        :id="`attendance-list-${accountId}`"
+        ref="listElement"
+        class="z-20 h-full min-h-0 shrink-0 flex-col overflow-hidden rounded-lg border border-n-weak bg-n-solid-1 xl:relative xl:inset-auto xl:z-auto xl:flex"
+        :class="[
+          listWidthClass,
+          listOpen ? 'absolute inset-y-2 left-2 flex w-72 shadow-xl' : 'hidden',
+        ]"
         data-testid="inbox-list"
       >
         <header class="border-b border-n-weak p-3">
@@ -812,6 +887,31 @@ onBeforeUnmount(() => {
           </button>
         </div>
       </aside>
+      <div
+        role="separator"
+        tabindex="0"
+        aria-orientation="vertical"
+        :aria-controls="`attendance-list-${accountId}`"
+        :aria-label="t('JRC_CONTACT_CENTER.INBOX_360.RESIZE_LIST')"
+        :aria-valuemin="listResize.minWidth"
+        :aria-valuemax="listMaxWidth"
+        :aria-valuenow="listWidth"
+        :title="t('JRC_CONTACT_CENTER.INBOX_360.RESIZE_LIST_HINT')"
+        class="group hidden w-2 shrink-0 cursor-col-resize touch-none select-none items-center justify-center rounded-md outline-none hover:bg-n-blue-3 focus-visible:bg-n-blue-3 focus-visible:ring-2 focus-visible:ring-n-brand xl:flex"
+        :class="{ 'bg-n-blue-3': listResizing }"
+        data-testid="attendance-list-resizer"
+        @pointerdown="listResize.start"
+        @pointermove="listResize.move"
+        @pointerup="listResize.end"
+        @pointercancel="listResize.end"
+        @lostpointercapture="listResize.end"
+        @keydown="listResize.keydown"
+        @dblclick="listResize.reset"
+      >
+        <span
+          class="h-10 w-1 rounded-full bg-n-slate-5 group-hover:bg-n-brand group-focus-visible:bg-n-brand"
+        />
+      </div>
       <main
         class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-lg border border-n-weak bg-n-solid-1"
         data-testid="interaction-workspace"
@@ -892,47 +992,69 @@ onBeforeUnmount(() => {
             <span class="i-lucide-contact-round size-4" />
           </button>
         </header>
-        <nav
-          class="flex h-11 shrink-0 overflow-x-auto border-b border-n-weak px-2"
-          :aria-label="t('JRC_CONTACT_CENTER.INBOX_360.WORKSPACE_TABS')"
-        >
+        <div class="flex min-w-0 shrink-0 border-b border-n-weak">
           <button
-            v-for="key in workspaceTabs"
-            :key="key"
             type="button"
-            class="shrink-0 border-b-2 px-2 py-2 text-[11px] font-medium transition"
-            :class="
-              tab === key
-                ? 'border-n-brand text-n-brand'
-                : 'border-transparent text-n-slate-10 hover:text-n-slate-12'
-            "
-            :aria-pressed="tab === key"
-            :aria-label="labels[key]"
-            :title="labels[key]"
-            @click="
-              tab = key;
-              voiceSection =
-                key === 'CASES'
-                  ? 'case'
-                  : key === 'TASKS'
-                    ? 'callback'
-                    : 'journey';
-            "
+            class="grid w-7 shrink-0 place-items-center text-n-slate-10 hover:bg-n-blue-2"
+            :aria-label="t('JRC_CONTACT_CENTER.INBOX_360.PREVIOUS_TABS')"
+            @click="scrollWorkspaceTabs(-1)"
           >
-            <span class="hidden 2xl:inline">
-              {{ labels[key] }}
-            </span>
-            <span class="2xl:hidden">
-              {{
-                key === 'SCRIPT'
-                  ? t('JRC_CONTACT_CENTER.INBOX_360.SCRIPT_SHORT')
-                  : key === 'CUSTOMER_DATA'
-                    ? labels.CUSTOMER
-                    : labels[key]
-              }}
-            </span>
+            <span class="i-lucide-chevron-left size-4" />
           </button>
-        </nav>
+          <nav
+            ref="workspaceTabsElement"
+            class="flex h-11 min-w-0 flex-1 overflow-x-auto"
+            :aria-label="t('JRC_CONTACT_CENTER.INBOX_360.WORKSPACE_TABS')"
+          >
+            <button
+              v-for="key in workspaceTabs"
+              :key="key"
+              type="button"
+              class="shrink-0 whitespace-nowrap border-b-2 px-2 py-2 text-[11px] font-medium transition disabled:cursor-not-allowed disabled:opacity-40"
+              :class="
+                tab === key
+                  ? 'border-n-brand text-n-brand'
+                  : 'border-transparent text-n-slate-10 hover:text-n-slate-12'
+              "
+              :aria-pressed="tab === key"
+              :aria-label="workspaceLabels[key]"
+              :title="workspaceLabels[key]"
+              :disabled="CONVERSATION_TOOL_KEYS.has(key) && !nativeToolsReady"
+              :data-conversation-tool="
+                CONVERSATION_TOOL_KEYS.has(key) ? key : undefined
+              "
+              @click="selectWorkspaceTab(key)"
+            >
+              <template v-if="toolDefinitions[key]">
+                <span
+                  :class="toolDefinitions[key].icon"
+                  class="mr-1 inline-block size-3.5 align-middle"
+                />
+                {{ toolDefinitions[key].short(t) }}
+              </template>
+              <span v-else class="hidden 2xl:inline">
+                {{ labels[key] }}
+              </span>
+              <span v-if="!toolDefinitions[key]" class="2xl:hidden">
+                {{
+                  key === 'SCRIPT'
+                    ? t('JRC_CONTACT_CENTER.INBOX_360.SCRIPT_SHORT')
+                    : key === 'CUSTOMER_DATA'
+                      ? labels.CUSTOMER
+                      : labels[key]
+                }}
+              </span>
+            </button>
+          </nav>
+          <button
+            type="button"
+            class="grid w-7 shrink-0 place-items-center text-n-slate-10 hover:bg-n-blue-2"
+            :aria-label="t('JRC_CONTACT_CENTER.INBOX_360.NEXT_TABS')"
+            @click="scrollWorkspaceTabs(1)"
+          >
+            <span class="i-lucide-chevron-right size-4" />
+          </button>
+        </div>
         <div
           v-if="pendingIncoming"
           data-pending-incoming
@@ -1187,6 +1309,7 @@ onBeforeUnmount(() => {
           v-if="
             tab !== 'CONVERSATION' &&
             tab !== 'CLOSING' &&
+            !CONVERSATION_TOOL_KEYS.has(tab) &&
             !(isVoice && ['CASES', 'TASKS'].includes(tab))
           "
           :tab="tab"
@@ -1196,6 +1319,13 @@ onBeforeUnmount(() => {
           :cases="cases"
           :script-reply="scriptReply"
           @replies="openQuick('REPLIES')"
+        />
+        <InboxConversationTools
+          v-if="nativeToolsReady && CONVERSATION_TOOL_KEYS.has(tab)"
+          :key="`${accountId}:${currentUserId}:${currentConversationId}`"
+          :account-id="accountId"
+          :conversation-id="currentConversationId"
+          :tool="tab"
         />
         <footer
           v-if="isVoice && hasSelection"
@@ -1227,6 +1357,7 @@ onBeforeUnmount(() => {
         </footer>
       </main>
       <aside
+        ref="customerElement"
         class="hidden h-full min-h-0 w-60 shrink-0 overflow-y-auto xl:block 2xl:w-[280px]"
         data-testid="customer-column"
       >

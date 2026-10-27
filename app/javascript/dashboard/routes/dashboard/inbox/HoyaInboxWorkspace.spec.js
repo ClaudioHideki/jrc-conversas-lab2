@@ -6,6 +6,7 @@ import { useSipWebphone } from 'dashboard/routes/dashboard/webphone/useSipWebpho
 import CCAPI from 'dashboard/api/jrcContactCenter';
 import HoyaInboxWorkspace from './HoyaInboxWorkspace.vue';
 import { openEmbeddedSoftphone } from '../webphone/useEmbeddedSoftphone';
+import { CONVERSATION_TOOLS } from './conversationTools';
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({ t: key => key, locale: ref('pt_BR') }),
 }));
@@ -71,6 +72,22 @@ const store = createStore({
   getters: {
     getSelectedChat: () => ({}),
     'accounts/isFeatureEnabledonAccount': () => () => false,
+  },
+});
+
+const scopedConversation = ref({
+  id: 21,
+  account_id: 1,
+  inbox_id: 3,
+  status: 'open',
+  meta: { sender: {} },
+});
+const scopedUser = ref(9);
+const scopedStore = createStore({
+  getters: {
+    getSelectedChat: () => scopedConversation.value,
+    getCurrentUserID: () => scopedUser.value,
+    'accounts/isFeatureEnabledonAccount': () => (_, flag) => flag === 'macros',
   },
 });
 const global = {
@@ -158,6 +175,15 @@ describe('inbox native SIP action guards', () => {
     expect(header.text()).not.toContain('00:00:00');
   });
   beforeEach(() => {
+    localStorage.clear();
+    scopedUser.value = 9;
+    scopedConversation.value = {
+      id: 21,
+      account_id: 1,
+      inbox_id: 3,
+      status: 'open',
+      meta: { sender: {} },
+    };
     sip = {
       accountId: ref(1),
       callId: ref('native-7'),
@@ -196,6 +222,111 @@ describe('inbox native SIP action guards', () => {
     CCAPI.agentState.mockResolvedValue({
       data: { item: { state: 'available' } },
     });
+  });
+
+  it('places the native tools after Tasks and passes only the selected Account conversation to them', async () => {
+    const wrapper = mount(HoyaInboxWorkspace, {
+      props: {
+        ...props,
+        context: null,
+        currentCallId: null,
+        currentConversationId: 21,
+        conversations: [scopedConversation.value],
+      },
+      global: {
+        ...global,
+        plugins: [scopedStore],
+        stubs: { ...global.stubs, InboxConversationTools: true },
+      },
+    });
+    await flushPromises();
+    const buttons = wrapper.get('nav').findAll('button');
+    const taskIndex = buttons.findIndex(
+      button =>
+        button.attributes('aria-label') === 'JRC_CONTACT_CENTER.INBOX_360.TASKS'
+    );
+    expect(
+      buttons
+        .slice(taskIndex + 1)
+        .map(button => button.attributes('data-conversation-tool'))
+    ).toEqual(CONVERSATION_TOOLS.map(item => item.key));
+    await CONVERSATION_TOOLS.reduce(async (previous, tool) => {
+      await previous;
+      await wrapper
+        .get(`[data-conversation-tool="${tool.key}"]`)
+        .trigger('click');
+      expect(
+        wrapper.getComponent({ name: 'InboxConversationTools' }).props()
+      ).toMatchObject({ accountId: 1, conversationId: 21, tool: tool.key });
+    }, Promise.resolve());
+    expect(wrapper.findComponent({ name: 'RouterView' }).exists()).toBe(true);
+    expect(sip.initialize).not.toHaveBeenCalled();
+    await wrapper.setProps({ accountId: 2 });
+    await flushPromises();
+    expect(
+      wrapper.findComponent({ name: 'InboxConversationTools' }).exists()
+    ).toBe(false);
+    expect(
+      wrapper
+        .get('[data-conversation-tool="contact_notes"]')
+        .attributes('disabled')
+    ).toBeDefined();
+  });
+
+  it('keeps conversation tools unavailable for a voice call or an empty selection', async () => {
+    const wrapper = mount(HoyaInboxWorkspace, { props, global });
+    await flushPromises();
+    wrapper.findAll('[data-conversation-tool]').forEach(button => {
+      expect(button.attributes('disabled')).toBeDefined();
+    });
+    await wrapper.setProps({ currentCallId: null });
+    await flushPromises();
+    wrapper.findAll('[data-conversation-tool]').forEach(button => {
+      expect(button.attributes('disabled')).toBeDefined();
+    });
+  });
+
+  it('resizes with pointer and keyboard, clamps the width and isolates the saved preference by user', async () => {
+    const originalWidth = window.innerWidth;
+    window.innerWidth = 1920;
+    const wrapper = mount(HoyaInboxWorkspace, {
+      props: { ...props, context: null, currentCallId: null },
+      global: { ...global, plugins: [scopedStore] },
+    });
+    await flushPromises();
+    const separator = wrapper.get('[data-testid="attendance-list-resizer"]');
+    expect(separator.attributes('aria-valuenow')).toBe('240');
+    separator.element.dispatchEvent(
+      new MouseEvent('pointerdown', { bubbles: true, clientX: 300, button: 0 })
+    );
+    separator.element.dispatchEvent(
+      new MouseEvent('pointermove', { bubbles: true, clientX: 396 })
+    );
+    separator.element.dispatchEvent(
+      new MouseEvent('pointerup', { bubbles: true })
+    );
+    await flushPromises();
+    expect(separator.attributes('aria-valuenow')).toBe('336');
+    expect(localStorage.getItem('jrc:attendance-list-width:1:9')).toBe('336');
+    await separator.trigger('keydown', { key: 'End' });
+    expect(separator.attributes('aria-valuenow')).toBe('480');
+    await separator.trigger('keydown', { key: 'ArrowRight' });
+    expect(separator.attributes('aria-valuenow')).toBe('480');
+    await separator.trigger('keydown', { key: 'Home' });
+    expect(separator.attributes('aria-valuenow')).toBe('192');
+    await separator.trigger('keydown', { key: 'ArrowRight' });
+    expect(separator.attributes('aria-valuenow')).toBe('208');
+    scopedUser.value = 10;
+    await flushPromises();
+    expect(separator.attributes('aria-valuenow')).toBe('240');
+    scopedUser.value = 9;
+    await flushPromises();
+    expect(separator.attributes('aria-valuenow')).toBe('208');
+    await separator.trigger('dblclick');
+    expect(separator.attributes('aria-valuenow')).toBe('240');
+    expect(localStorage.getItem('jrc:attendance-list-width:1:9')).toBeNull();
+    wrapper.unmount();
+    window.innerWidth = originalWidth;
   });
   it('never initializes another phone and enables controls only for the matching native call', async () => {
     const wrapper = mount(HoyaInboxWorkspace, { props, global });

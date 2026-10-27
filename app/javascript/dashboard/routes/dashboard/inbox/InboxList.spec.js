@@ -458,7 +458,7 @@ describe('omnichannel inbox', () => {
     expect(wrapper.find('[data-testid="call-workspace"]').exists()).toBe(false);
   });
 
-  it('renders the three regions, collapsible channel groups and the seven contextual tabs', async () => {
+  it('preserves the contextual tabs and adds the eight scoped native tools after Tasks', async () => {
     const wrapper = mountInbox();
     await flushPromises();
     ['inbox-list', 'interaction-workspace', 'customer-column'].forEach(
@@ -480,7 +480,34 @@ describe('omnichannel inbox', () => {
     const tabs = wrapper
       .get('nav[aria-label="JRC_CONTACT_CENTER.INBOX_360.WORKSPACE_TABS"]')
       .findAll('button');
-    expect(tabs).toHaveLength(7);
+    expect(
+      tabs.slice(0, 7).map(button => button.attributes('aria-label'))
+    ).toEqual(
+      [
+        'CONVERSATION',
+        'SCRIPT',
+        'CUSTOMER_DATA',
+        'ORDERS',
+        'CASES',
+        'HISTORY',
+        'TASKS',
+      ].map(key => `JRC_CONTACT_CENTER.INBOX_360.${key}`)
+    );
+    expect(
+      tabs.slice(7).map(button => button.attributes('data-conversation-tool'))
+    ).toEqual([
+      'conversation_actions',
+      'macros',
+      'conversation_info',
+      'contact_attributes',
+      'contact_notes',
+      'shared_files',
+      'previous_conversation',
+      'conversation_participants',
+    ]);
+    tabs.slice(7).forEach(button => {
+      expect(button.attributes('disabled')).toBeDefined();
+    });
     await tabs[3].trigger('click');
     expect(tabs[3].attributes('aria-pressed')).toBe('true');
     expect(wrapper.text()).toContain(
