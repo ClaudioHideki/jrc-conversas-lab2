@@ -108,6 +108,7 @@ const resolveAssigneeFilter = value =>
 
 const conversationFilters = computed(() => ({
   assigneeType: assigneeFilter.value,
+  includeParticipating: true,
   status: wootConstants.STATUS_TYPE.OPEN,
   sortBy: wootConstants.SORT_BY_TYPE.LAST_ACTIVITY_AT_DESC,
   page: page.value,

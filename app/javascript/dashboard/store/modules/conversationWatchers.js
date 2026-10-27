@@ -87,9 +87,11 @@ export const actions = {
   },
 
   update: async (
-    { commit, dispatch, rootGetters, state: moduleState },
+    { commit, dispatch, rootGetters = {}, state: moduleState },
     { conversationId, userIds }
   ) => {
+    const accountId = rootGetters.getCurrentAccountId;
+    const userId = rootGetters.getCurrentUserID;
     commit(types.SET_CONVERSATION_PARTICIPANTS_UI_FLAG, {
       isUpdating: true,
     });
@@ -99,6 +101,11 @@ export const actions = {
         conversationId,
         userIds,
       });
+      if (
+        rootGetters.getCurrentAccountId !== accountId ||
+        rootGetters.getCurrentUserID !== userId
+      )
+        return;
       const shouldRefreshUnreadCounts = shouldRefreshConversationUnreadCounts(
         { rootGetters, state: moduleState },
         conversationId,
@@ -108,6 +115,14 @@ export const actions = {
         conversationId,
         data: response.data,
       });
+      commit(
+        types.UPDATE_CONVERSATION_PARTICIPANTS,
+        {
+          conversationId,
+          participantIds: response.data.map(participant => participant.id),
+        },
+        { root: true }
+      );
       if (shouldRefreshUnreadCounts) {
         refreshConversationUnreadCounts(dispatch);
       }

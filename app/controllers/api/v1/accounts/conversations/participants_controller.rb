@@ -13,7 +13,7 @@ class Api::V1::Accounts::Conversations::ParticipantsController < Api::V1::Accoun
     ActiveRecord::Base.transaction do
       @participants = participant_ids_to_add.map { |user_id| @conversation.conversation_participants.find_or_create_by!(user_id: user_id) }
     end
-    notify_unread_count_change if participant_ids_to_add.any?
+    notify_participants_changed if participant_ids_to_add.any?
   end
 
   def update
@@ -25,18 +25,18 @@ class Api::V1::Accounts::Conversations::ParticipantsController < Api::V1::Accoun
       participant_ids_to_add.each { |user_id| @conversation.conversation_participants.find_or_create_by!(user_id: user_id) }
       participant_ids_to_remove.each { |user_id| @conversation.conversation_participants.find_by(user_id: user_id)&.destroy }
     end
-    notify_unread_count_change if changed_participant_ids.any?
+    notify_participants_changed if changed_participant_ids.any?
     @participants = @conversation.conversation_participants.reload
     render action: 'show'
   end
 
   def destroy
-    participant_ids_to_remove = current_participant_ids & params[:user_ids]
+    participant_ids_to_remove = current_participant_ids & participant_ids
 
     ActiveRecord::Base.transaction do
-      params[:user_ids].map { |user_id| @conversation.conversation_participants.find_by(user_id: user_id)&.destroy }
+      participant_ids.each { |user_id| @conversation.conversation_participants.find_by(user_id: user_id)&.destroy }
     end
-    notify_unread_count_change if participant_ids_to_remove.any?
+    notify_participants_changed if participant_ids_to_remove.any?
     head :ok
   end
 
@@ -70,5 +70,11 @@ class Api::V1::Accounts::Conversations::ParticipantsController < Api::V1::Accoun
     return unless Current.account.feature_enabled?('unread_count_for_filters')
 
     Rails.configuration.dispatcher.dispatch(CONVERSATION_UNREAD_COUNT_CHANGED, Time.zone.now, conversation: @conversation)
+  end
+
+  def notify_participants_changed
+    @conversation.conversation_participants.reload
+    Rails.configuration.dispatcher.dispatch(CONVERSATION_PARTICIPANTS_CHANGED, Time.zone.now, conversation: @conversation)
+    notify_unread_count_change
   end
 end

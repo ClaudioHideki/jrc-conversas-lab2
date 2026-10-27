@@ -1565,7 +1565,16 @@
         "pending_activities": "Atividades pendentes",
         "campaigns_sent": "Envios de campanhas",
         "calls": "Chamadas registradas"
-      }
+      },
+      "ASSIGNMENT": {
+        "TITLE": "Atribuir",
+        "QUICK": "Ações rápidas",
+        "REMOVE_AGENT": "Remover responsável",
+        "REMOVE_TEAM": "Remover equipe",
+        "LOAD_ERROR": "Não foi possível carregar as opções de atribuição.",
+        "SEARCH": "Pesquisar atendente, agente de IA ou equipe"
+      },
+      "ACTION_ERROR": "Não foi possível concluir a ação. Tente novamente."
     },
     "ACW_OPERATION": {
       "HISTORY_OVERDUE": "Limite excedido",

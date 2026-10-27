@@ -8,9 +8,12 @@ export const matchesAssigneeFilter = (conversation, filter, currentUserId) => {
   const { assignee, assignee_type: assigneeType } = conversation.meta || {};
   if (filter === ASSIGNEE_FILTERS.ME) {
     return Boolean(
-      assignee &&
+      (assignee &&
         assigneeType !== 'AgentBot' &&
-        Number(assignee.id) === Number(currentUserId)
+        Number(assignee.id) === Number(currentUserId)) ||
+        conversation.meta?.participant_ids?.some(
+          id => Number(id) === Number(currentUserId)
+        )
     );
   }
   if (filter === ASSIGNEE_FILTERS.UNASSIGNED) return !assignee;

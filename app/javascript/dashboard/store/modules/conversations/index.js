@@ -167,14 +167,22 @@ export const mutations = {
     conversation.status = status;
   },
 
-  [types.MUTE_CONVERSATION](_state) {
-    const [chat] = getSelectedChatConversation(_state);
-    chat.muted = true;
+  [types.MUTE_CONVERSATION](_state, conversationId = _state.selectedChatId) {
+    const chat = getConversationById(_state)(conversationId);
+    if (chat) chat.muted = true;
   },
 
-  [types.UNMUTE_CONVERSATION](_state) {
-    const [chat] = getSelectedChatConversation(_state);
-    chat.muted = false;
+  [types.UNMUTE_CONVERSATION](_state, conversationId = _state.selectedChatId) {
+    const chat = getConversationById(_state)(conversationId);
+    if (chat) chat.muted = false;
+  },
+
+  [types.UPDATE_CONVERSATION_PARTICIPANTS](
+    _state,
+    { conversationId, participantIds }
+  ) {
+    const chat = getConversationById(_state)(conversationId);
+    if (chat) chat.meta.participant_ids = participantIds;
   },
 
   [types.ADD_CONVERSATION_ATTACHMENTS](_state, message) {

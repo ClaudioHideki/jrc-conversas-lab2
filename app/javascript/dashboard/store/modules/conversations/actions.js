@@ -253,22 +253,30 @@ const actions = {
   },
 
   assignAgent: async (
-    { dispatch },
+    { dispatch, rootGetters },
     { conversationId, agentId, assigneeType }
   ) => {
+    const accountId = rootGetters.getCurrentAccountId;
+    const userId = rootGetters.getCurrentUserID;
     try {
       const response = await ConversationApi.assignAgent({
         conversationId,
         agentId,
         assigneeType,
       });
-      dispatch('setCurrentChatAssignee', {
+      if (
+        rootGetters.getCurrentAccountId !== accountId ||
+        rootGetters.getCurrentUserID !== userId
+      )
+        return false;
+      await dispatch('setCurrentChatAssignee', {
         conversationId,
         assignee: response.data,
         assigneeType,
       });
+      return true;
     } catch (error) {
-      // Handle error
+      return false;
     }
   },
 
@@ -279,15 +287,26 @@ const actions = {
     commit(types.ASSIGN_AGENT, { conversationId, assignee, assigneeType });
   },
 
-  assignTeam: async ({ dispatch }, { conversationId, teamId }) => {
+  assignTeam: async ({ dispatch, rootGetters }, { conversationId, teamId }) => {
+    const accountId = rootGetters.getCurrentAccountId;
+    const userId = rootGetters.getCurrentUserID;
     try {
       const response = await ConversationApi.assignTeam({
         conversationId,
         teamId,
       });
-      dispatch('setCurrentChatTeam', { team: response.data, conversationId });
+      if (
+        rootGetters.getCurrentAccountId !== accountId ||
+        rootGetters.getCurrentUserID !== userId
+      )
+        return false;
+      await dispatch('setCurrentChatTeam', {
+        team: response.data,
+        conversationId,
+      });
+      return true;
     } catch (error) {
-      // Handle error
+      return false;
     }
   },
 
@@ -502,21 +521,37 @@ const actions = {
     commit(types.SET_ACTIVE_INBOX, inboxId);
   },
 
-  muteConversation: async ({ commit }, conversationId) => {
+  muteConversation: async ({ commit, rootGetters }, conversationId) => {
+    const accountId = rootGetters.getCurrentAccountId;
+    const userId = rootGetters.getCurrentUserID;
     try {
       await ConversationApi.mute(conversationId);
-      commit(types.MUTE_CONVERSATION);
+      if (
+        rootGetters.getCurrentAccountId !== accountId ||
+        rootGetters.getCurrentUserID !== userId
+      )
+        return false;
+      commit(types.MUTE_CONVERSATION, conversationId);
+      return true;
     } catch (error) {
-      //
+      return false;
     }
   },
 
-  unmuteConversation: async ({ commit }, conversationId) => {
+  unmuteConversation: async ({ commit, rootGetters }, conversationId) => {
+    const accountId = rootGetters.getCurrentAccountId;
+    const userId = rootGetters.getCurrentUserID;
     try {
       await ConversationApi.unmute(conversationId);
-      commit(types.UNMUTE_CONVERSATION);
+      if (
+        rootGetters.getCurrentAccountId !== accountId ||
+        rootGetters.getCurrentUserID !== userId
+      )
+        return false;
+      commit(types.UNMUTE_CONVERSATION, conversationId);
+      return true;
     } catch (error) {
-      //
+      return false;
     }
   },
 
