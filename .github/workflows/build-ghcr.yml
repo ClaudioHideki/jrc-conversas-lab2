@@ -1,275 +1,102 @@
-name: Candidato Cadastro Mestre - build e GHCR por SHA
-
+name: Precimech isolated contacts hotfix publication
 on:
   workflow_dispatch:
-    inputs:
-      publish:
-        description: Publicar a imagem aprovada no GHCR
-        type: boolean
-        default: false
-      source_sha:
-        description: SHA completo aprovado do codigo-fonte (40 caracteres)
-        type: string
-        required: true
-      base_sha:
-        description: SHA base da integracao para validar tambem commits de correcao (opcional)
-        type: string
-        required: false
-      component:
-        description: Construir somente o componente afetado (Cadastro Mestre usa app)
-        type: choice
-        options: [app, nico-runtime, flows-sandbox]
-        default: app
-        required: true
-
 permissions:
   contents: read
   packages: write
-
 jobs:
-  build-and-push:
+  publish-precimech:
     runs-on: ubuntu-24.04
-    timeout-minutes: 90
-    concurrency:
-      group: ghcr-jrc-conversas-${{ inputs.component }}
-      cancel-in-progress: false
+    timeout-minutes: 35
     env:
-      SOURCE_SHA: ${{ inputs.source_sha }}
-      BASE_SHA: ${{ inputs.base_sha }}
-      COMPONENT: ${{ inputs.component }}
-      IMAGE: ${{ inputs.component == 'app' && 'claudiohideki/jrc-conversas-lab2' || format('claudiohideki/jrc-conversas-nico-v12-2-7-comercial-integrado-{0}', inputs.component) }}
-      BUNDLE_FROZEN: 'true'
-      TZ: UTC
-
+      SOURCE_SHA: ca6b293e6902cb34ad2ae7f79d0a66f49501ca99
+      HOTFIX_WORKSPACE: ${{ github.workspace }}/hotfix
+      HOTFIX_VALIDATION: ${{ github.workspace }}/publish-tools/release/precimech
+    defaults:
+      run:
+        working-directory: hotfix
+        shell: bash
     steps:
-      - name: Validar SHA antes do checkout
-        run: '[[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]'
-
-      - name: Baixar a revisao exata
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.source_sha }}
+          path: publish-tools
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: ca6b293e6902cb34ad2ae7f79d0a66f49501ca99
+          path: hotfix
           fetch-depth: 0
           persist-credentials: false
-
-      - name: Confirmar identidade e alteracoes do componente
-        run: |
-          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
-          if [ -z "$BASE_SHA" ]; then BASE_SHA=$(git rev-parse "$SOURCE_SHA^"); fi
-          [[ "$BASE_SHA" =~ ^[0-9a-f]{40}$ ]]
-          git merge-base --is-ancestor "$BASE_SHA" "$SOURCE_SHA"
-          echo "BASE_SHA=$BASE_SHA" >> "$GITHUB_ENV"
-          git diff --check "$BASE_SHA" "$SOURCE_SHA"
-          case "$COMPONENT" in
-            app) paths=(app config db lib enterprise public Gemfile Gemfile.lock package.json pnpm-lock.yaml docker/Dockerfile docker/entrypoints) ;;
-            nico-runtime) paths=(services/nico-runtime docker/nico-runtime.Dockerfile) ;;
-            flows-sandbox) paths=(services/flows-sandbox) ;;
-            *) exit 1 ;;
-          esac
-          if git diff --quiet "$BASE_SHA" "$SOURCE_SHA" -- "${paths[@]}"; then
-            echo 'Componente nao afetado; nao gerar uma imagem/tag nova.' >&2
-            exit 1
-          fi
-
-      - name: Configurar Node declarado
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version-file: .nvmrc
-
-      - name: Configurar pnpm declarado
-        if: inputs.component == 'app'
-        uses: pnpm/action-setup@v4
+          node-version: 24.19.0
+      - uses: pnpm/action-setup@v4
         with:
+          version: 10.2.0
           run_install: false
-
-      - name: Instalar dependencias de sistema dos gates Ruby
-        if: inputs.component == 'app'
-        run: sudo apt-get update && sudo apt-get install -y libpq-dev libvips libvips-dev
-
-      - name: Configurar Ruby e Bundler declarados
-        if: inputs.component == 'app'
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.4.4'
-          bundler: 2.5.16
-          bundler-cache: true
-
-      - name: Instalar JavaScript sem alterar lockfile
-        if: inputs.component == 'app'
-        run: pnpm install --frozen-lockfile
-
-      - name: Sintaxe dos fontes alterados e timestamps de migrations
-        if: inputs.component == 'app'
-        run: |
-          git diff --name-only --diff-filter=ACMR "$BASE_SHA" "$SOURCE_SHA" -- '*.rb' | while IFS= read -r file; do ruby -c "$file"; done
-          node script/validate_changed_source.mjs "$BASE_SHA"
-
-      - name: Gates isolados do Cadastro Mestre e modulos preservados
-        if: inputs.component == 'app'
-        run: |
-          ruby test/jrc_customers/identity_pure_test.rb
-          ruby test/jrc_customers/company_link_decision_test.rb
-          bundle exec ruby -Itest -e 'Dir["test/jrc_relationship/*_test.rb", "test/jrc_operations/*_test.rb"].each { |file| require_relative file }'
-          node --test test/jrc_customers/*.test.mjs test/jrc_operations/*test.mjs test/jrc_consolidation/commercial_ui.test.mjs
-
-      - name: Vitest dos modulos afetados e SIP/WebRTC preservado
-        if: inputs.component == 'app'
-        run: >-
-          pnpm exec vitest run
-          app/javascript/dashboard/routes/dashboard/serviceDesk
-          app/javascript/dashboard/routes/dashboard/jrcOperations
-          app/javascript/dashboard/routes/dashboard/crm
-          app/javascript/dashboard/routes/dashboard/jrcCustomers
-          app/javascript/dashboard/routes/dashboard/webphone
-          app/javascript/dashboard/routes/dashboard/jrcRelationship
-          app/javascript/dashboard/components-next/sidebar/specs
-          app/javascript/dashboard/components-next/layout/specs
-          app/javascript/dashboard/components-next/NewConversation
-          app/javascript/dashboard/components-next/Conversation/ConversationHome/specs
-          app/javascript/dashboard/routes/dashboard/contacts/pages/spec
-          app/javascript/dashboard/routes/dashboard/videoConference
-          app/javascript/dashboard/helper/specs/inbox.spec.js
-          app/javascript/dashboard/helper/specs/videoConference.spec.js
-          --maxWorkers=2 --no-file-parallelism
-
-      - name: Lint direcionado do Cadastro Mestre e Pedido
-        if: inputs.component == 'app'
-        run: >-
-          pnpm exec eslint --ext .js,.vue
-          app/javascript/dashboard/routes/dashboard/jrcCustomers
-          app/javascript/dashboard/api/jrcCustomers.js
-          app/javascript/dashboard/api/crm/commercialCycle.js
-          app/javascript/dashboard/routes/dashboard/crm/helpers/commercialTerms.js
-          app/javascript/dashboard/routes/dashboard/crm/views/orders
-
-      - name: Lint dos fontes alterados de Relacionamento e badges
-        if: inputs.component == 'app'
-        run: |
-          mapfile -t files < <(git diff --name-only --diff-filter=ACMR "$BASE_SHA" "$SOURCE_SHA" -- app/javascript | grep -E '\.(js|vue)$' | grep -E '(/jrcRelationship/|/api/jrcRelationship.js$|/components-next/sidebar/)' | grep -v '/sidebar/Sidebar.vue$')
-          if [ "${#files[@]}" -gt 0 ]; then pnpm exec eslint "${files[@]}"; fi
-
-      - name: Gates NICO sem reconstruir a aplicacao
-        if: inputs.component == 'nico-runtime'
-        working-directory: services/nico-runtime
-        run: npm ci && npm test --if-present && npm run build
-
-      - name: Gates Flows sem reconstruir a aplicacao
-        if: inputs.component == 'flows-sandbox'
-        working-directory: services/flows-sandbox
-        run: npm ci --ignore-scripts && npm test
-
-      - name: Confirmar que os gates nao alteraram o codigo aprovado
+      - name: Assert isolated original base and exact scope
         run: |
           test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
-          git diff --exit-code
-          test -z "$(git ls-files --others --exclude-standard)"
-
-      - name: Configurar Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Construir somente a imagem selecionada (inclui build frontend)
-        uses: docker/build-push-action@v6
-        with:
-          context: ${{ inputs.component == 'flows-sandbox' && './services/flows-sandbox' || '.' }}
-          file: ${{ inputs.component == 'app' && './docker/Dockerfile' || inputs.component == 'nico-runtime' && './docker/nico-runtime.Dockerfile' || './services/flows-sandbox/Dockerfile' }}
-          platforms: linux/amd64
-          load: true
-          push: false
-          build-args: GIT_SHA=${{ inputs.source_sha }}
-          tags: ghcr.io/${{ env.IMAGE }}:sha-${{ inputs.source_sha }}
-          labels: |
-            org.opencontainers.image.revision=${{ inputs.source_sha }}
-            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
-          cache-from: type=gha,scope=${{ inputs.component }}
-          cache-to: type=gha,scope=${{ inputs.component }},mode=max
-          provenance: false
-
-      - name: Verificar SHA interno, label e plataforma antes de publicar
+          test "$(git rev-parse HEAD^)" = 4ce8241d35ce862e9d53e9a5dce4df9a1858432c
+          git diff --check HEAD^ HEAD
+          git diff --exit-code HEAD^ HEAD -- db Gemfile Gemfile.lock package.json pnpm-lock.yaml services enterprise
+      - name: Install locked frontend dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Contacts regression tests
         run: |
-          image="ghcr.io/$IMAGE:sha-$SOURCE_SHA"
-          test "$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' "$image")" = "$SOURCE_SHA"
-          test "$(docker image inspect --format '{{.Os}}/{{.Architecture}}' "$image")" = linux/amd64
-          revision_path=/app/.git_sha
-          if [ "$COMPONENT" = flows-sandbox ]; then revision_path=/srv/.git_sha; fi
-          test "$(docker run --rm --network none --entrypoint cat "$image" "$revision_path")" = "$SOURCE_SHA"
-
-      - name: Validar conteudo do produto, migrations e bibliotecas nativas
-        if: inputs.component == 'app'
+          pnpm exec vitest run app/javascript/dashboard/components-next/Contacts/ContactsForm/specs/ConfirmContactDeleteDialog.spec.js app/javascript/dashboard/routes/dashboard/contacts/pages/spec app/javascript/dashboard/store/modules/specs/contacts app/javascript/dashboard/api/specs/contacts.spec.js --maxWorkers=2 --no-file-parallelism | tee "$HOTFIX_VALIDATION/vitest-actions.log"
+      - name: Build production assets from exact hotfix source
+        run: node --max-old-space-size=4096 node_modules/vite/bin/vite.js build --mode production > "$HOTFIX_VALIDATION/frontend-actions.log" 2>&1
+      - name: Prepare curated context and build over original immutable runtime
         run: |
-          python3 - <<'PYTHON'
-          import hashlib, json, os, pathlib, subprocess
-          paths = subprocess.check_output(['git', 'diff', '--name-only', '--diff-filter=ACMR', os.environ['BASE_SHA'], os.environ['SOURCE_SHA']], text=True).splitlines()
-          paths = [p for p in paths if p.startswith(('app/', 'config/', 'db/', 'lib/', 'enterprise/', 'public/')) and '/spec/' not in p and '/specs/' not in p and not p.endswith(('.spec.js', '.spec.vue'))]
-          migrations = [
-              'db/migrate/20261004170000_complete_jrc_customer_master_company_profile.rb',
-              'db/migrate/20261004183000_strengthen_sales_order_origin_and_audit.rb',
-              'db/migrate/20261004234000_create_jrc_operations_routing_and_sla.rb',
-              'db/migrate/20261005180000_create_jrc_relationship.rb',
-              'db/migrate/20261005190000_allow_direct_customer_proposals.rb',
-              'db/migrate/20261005200000_extend_relationship_operations.rb',
-              'db/migrate/20261005210000_add_relationship_playbook_conditions.rb',
-              'db/migrate/20261005220000_extend_commercial_operational_configuration.rb',
-          ]
-          files = {p: hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest() for p in set(paths + migrations)}
-          pathlib.Path(os.environ['RUNNER_TEMP'], 'candidate-files.json').write_text(json.dumps(files))
-          PYTHON
-          docker run --rm -i --network none --read-only --entrypoint bundle --mount "type=bind,source=$RUNNER_TEMP/candidate-files.json,target=/candidate-files.json,readonly" "ghcr.io/$IMAGE:sha-$SOURCE_SHA" exec ruby - <<'RUBY'
-          require 'json'
-          require 'digest'
-          expected = JSON.parse(File.read('/candidate-files.json'))
-          expected.each do |path, sha|
-            raise "Candidate file missing or changed: #{path}" unless File.file?(path) && Digest::SHA256.file(path).hexdigest == sha
-          end
-          %w[verify-image.rb verify-and-save.ps1 finish-image-report.cjs].each do |helper|
-            raise "Local auxiliary entered image: #{helper}" unless Dir.glob("/app/**/#{helper}").empty?
-          end
-          require 'grpc'
-          require 'pg'
-          require 'nokogiri'
-          puts JSON.generate(verified_product_files: expected.size, migrations: 8, grpc: GRPC::VERSION, pg: PG::VERSION, nokogiri: Nokogiri::VERSION)
-          RUBY
-
-      - name: Autenticar no GHCR somente para publicacao autorizada
-        if: inputs.publish
-        uses: docker/login-action@v3
+          docker pull ghcr.io/claudiohideki/jrc-conversas-lab2@sha256:40d8073e0861b156f344c1f4fb882e8472c9560149ef5a353d27a5a4b23fb2d1
+          node "$HOTFIX_VALIDATION/package-hotfix.cjs"
+          image="ghcr.io/claudiohideki/jrc-conversas-lab2:precimech-contatos-sha-$SOURCE_SHA"
+          docker build --network=none --platform linux/amd64 --provenance=false -f "$HOTFIX_VALIDATION/build-context/docker/precimech-hotfix.Dockerfile" --build-arg "GIT_SHA=$SOURCE_SHA" -t "$image" "$HOTFIX_VALIDATION/build-context"
+          node "$HOTFIX_VALIDATION/verify-candidate.cjs"
+      - name: Create disposable local database and verify packaged application
+        run: |
+          docker network create precimech-hotfix-tests-20261028
+          docker run -d --name precimech-hotfix-db-20261028 --network precimech-hotfix-tests-20261028 -e POSTGRES_DB=precimech_hotfix_test -e POSTGRES_PASSWORD=precimech_local_test_only pgvector/pgvector:pg16
+          docker run -d --name precimech-hotfix-redis-20261028 --network precimech-hotfix-tests-20261028 redis:7-alpine
+          for attempt in $(seq 1 30); do
+            if docker exec precimech-hotfix-db-20261028 pg_isready -U postgres; then break; fi
+            sleep 2
+          done
+          cat > "$RUNNER_TEMP/precimech-test.env" <<'ENVFILE'
+          RAILS_ENV=production
+          SECRET_KEY_BASE=precimech_isolated_validation_key_20261028
+          POSTGRES_HOST=precimech-hotfix-db-20261028
+          POSTGRES_DATABASE=precimech_hotfix_test
+          POSTGRES_USERNAME=postgres
+          POSTGRES_PASSWORD=precimech_local_test_only
+          REDIS_URL=redis://precimech-hotfix-redis-20261028:6379/0
+          RAILS_LOG_TO_STDOUT=true
+          HOTFIX_EXPECTED=true
+          HOTFIX_STAGE=image
+          ENVFILE
+          image="ghcr.io/claudiohideki/jrc-conversas-lab2:precimech-contatos-sha-$SOURCE_SHA"
+          docker run --rm --network precimech-hotfix-tests-20261028 --env-file "$RUNNER_TEMP/precimech-test.env" --entrypoint bundle "$image" exec rails db:schema:load db:migrate > "$HOTFIX_VALIDATION/database-actions.log" 2>&1
+          docker run --rm --network precimech-hotfix-tests-20261028 --env-file "$RUNNER_TEMP/precimech-test.env" --mount "type=bind,source=$HOTFIX_VALIDATION,target=/validation" --entrypoint bundle "$image" exec rails runner /validation/backend-validation.rb > "$HOTFIX_VALIDATION/backend-actions.log" 2>&1
+      - uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Confirmar ausencia autenticada da tag imediatamente antes do push
-        if: inputs.publish
-        env:
-          GHCR_ACTOR: ${{ github.actor }}
-          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python3 script/ghcr_tag_absent.py "$IMAGE" "$SOURCE_SHA"
-
-      - name: Publicar exclusivamente a tag imutavel do SHA aprovado
-        if: inputs.publish
-        run: docker push "ghcr.io/$IMAGE:sha-$SOURCE_SHA"
-
-      - name: Verificar imagem publicada pelo digest e pela identidade interna
-        if: inputs.publish
+      - name: Publish only absent Precimech SHA tag and verify registry identity
         run: |
-          image="ghcr.io/$IMAGE:sha-$SOURCE_SHA"
-          digest=$(docker buildx imagetools inspect "$image" --format '{{.Manifest.Digest}}')
-          [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]
-          docker pull --platform linux/amd64 "ghcr.io/$IMAGE@$digest"
-          test "$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' "ghcr.io/$IMAGE@$digest")" = "$SOURCE_SHA"
-          test "$(docker image inspect --format '{{.Os}}/{{.Architecture}}' "ghcr.io/$IMAGE@$digest")" = linux/amd64
-          revision_path=/app/.git_sha
-          if [ "$COMPONENT" = flows-sandbox ]; then revision_path=/srv/.git_sha; fi
-          test "$(docker run --rm --network none --entrypoint cat "ghcr.io/$IMAGE@$digest" "$revision_path")" = "$SOURCE_SHA"
-          docker buildx imagetools inspect "ghcr.io/$IMAGE@$digest" --raw > "$RUNNER_TEMP/manifest.json"
-          compressed_bytes=$(python3 -c 'import json,sys; m=json.load(open(sys.argv[1])); print(sum(x["size"] for x in m["layers"]))' "$RUNNER_TEMP/manifest.json")
-          {
-            echo "Imagem: $image"
-            echo "Digest: $digest"
-            echo "IMAGE ID: $(docker image inspect --format '{{.Id}}' "ghcr.io/$IMAGE@$digest")"
-            echo "Tamanho local: $(docker image inspect --format '{{.Size}}' "ghcr.io/$IMAGE@$digest") bytes"
-            echo "SHA interno e label: $SOURCE_SHA"
-            echo 'Plataforma: linux/amd64'
-            echo "Camadas comprimidas: $compressed_bytes bytes (nao inclui config/manifest)"
-            echo "Criacao: $(docker image inspect --format '{{.Created}}' "ghcr.io/$IMAGE@$digest")"
-            echo "Verificacao UTC: $(date -u +%FT%TZ)"
-          } >> "$GITHUB_STEP_SUMMARY"
+          node "$HOTFIX_VALIDATION/publish-hotfix.cjs"
+          cat "$HOTFIX_VALIDATION/publication.json" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: precimech-hotfix-verification
+          path: |
+            publish-tools/release/precimech/*.json
+            publish-tools/release/precimech/*.log
+          retention-days: 14
+      - name: Remove disposable test resources
+        if: always()
+        run: |
+          docker rm -fv precimech-hotfix-db-20261028 precimech-hotfix-redis-20261028 || true
+          docker network rm precimech-hotfix-tests-20261028 || true
