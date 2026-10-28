@@ -386,6 +386,8 @@ en:
     survey:
       response: 'Please rate this conversation, %{link}'
   contacts:
+    delete:
+      referenced: 'This contact is linked to other records. Review its CRM, sales, project or service records before deleting it.'
     online:
       delete: '%{contact_name} is Online, please try again later'
   integration_apps:

@@ -70,8 +70,10 @@ export const mutations = {
   },
 
   [types.DELETE_CONTACT]: ($state, id) => {
-    const index = $state.sortOrder.findIndex(item => item === id);
-    $state.sortOrder.splice(index, 1);
+    const index = $state.sortOrder.findIndex(
+      item => Number(item) === Number(id)
+    );
+    if (index !== -1) $state.sortOrder.splice(index, 1);
     delete $state.records[id];
   },
 

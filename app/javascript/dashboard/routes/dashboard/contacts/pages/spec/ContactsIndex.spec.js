@@ -5,6 +5,9 @@ import { useRoute, useRouter } from 'vue-router';
 import ContactsIndex from '../ContactsIndex.vue';
 import ContactListHeaderWrapper from 'dashboard/components-next/Contacts/ContactsHeader/ContactListHeaderWrapper.vue';
 import ContactHeader from 'dashboard/components-next/Contacts/ContactsHeader/ContactHeader.vue';
+import ContactsBulkActionBar from '../../components/ContactsBulkActionBar.vue';
+import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
+import { useAlert } from 'dashboard/composables';
 
 vi.mock('vue-router', () => ({ useRoute: vi.fn(), useRouter: vi.fn() }));
 vi.mock('dashboard/composables', () => ({
@@ -67,6 +70,43 @@ describe('Relationship center pagination', () => {
     };
   });
   afterEach(() => wrapper?.unmount());
+
+  it('restores selection and deletes through the checked single-contact endpoint', async () => {
+    wrapper = page();
+    await flushPromises();
+    await wrapper.get('tbody input[type="checkbox"]').setValue(true);
+    expect(
+      wrapper.getComponent(ContactsBulkActionBar).props('selectedContactIds')
+    ).toEqual([42]);
+    wrapper.getComponent(Dialog).vm.$emit('confirm');
+    await flushPromises();
+    expect(store.dispatch).toHaveBeenCalledWith('contacts/delete', 42);
+    expect(wrapper.findComponent(ContactsBulkActionBar).exists()).toBe(false);
+  });
+
+  it('retains failed and unprocessed selection after a partial deletion', async () => {
+    store.getters['contacts/getContactsList'] = [
+      { id: 42, name: 'First' },
+      { id: 43, name: 'Linked' },
+      { id: 44, name: 'Last' },
+    ];
+    wrapper = page();
+    await flushPromises();
+    await wrapper.get('thead input[type="checkbox"]').setValue(true);
+    store.dispatch.mockImplementation(async (action, id) => {
+      if (action === 'contacts/delete' && id === 43)
+        throw new Error('Linked record');
+    });
+    wrapper.getComponent(Dialog).vm.$emit('confirm');
+    await flushPromises();
+    expect(store.dispatch).toHaveBeenCalledWith('contacts/delete', 42);
+    expect(store.dispatch).toHaveBeenCalledWith('contacts/delete', 43);
+    expect(store.dispatch).not.toHaveBeenCalledWith('contacts/delete', 44);
+    expect(
+      wrapper.getComponent(ContactsBulkActionBar).props('selectedContactIds')
+    ).toEqual([43, 44]);
+    expect(useAlert).toHaveBeenCalledWith('Linked record');
+  });
 
   it('uses count for regular pagination, even without has_more', async () => {
     wrapper = page();

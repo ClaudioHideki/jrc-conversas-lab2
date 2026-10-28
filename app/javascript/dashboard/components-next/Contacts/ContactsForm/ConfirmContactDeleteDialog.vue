@@ -21,22 +21,26 @@ const store = useStore();
 const route = useRoute();
 
 const dialogRef = ref(null);
+const isDeleting = ref(false);
 
-const deleteContact = async id => {
-  if (!id) return;
+const handleDialogConfirm = async () => {
+  const id = route.params.contactId || props.selectedContact?.id;
+  if (!id || isDeleting.value) return;
 
+  isDeleting.value = true;
   try {
     await store.dispatch('contacts/delete', id);
     useAlert(t('CONTACTS_LAYOUT.DETAILS.DELETE_DIALOG.API.SUCCESS_MESSAGE'));
+    dialogRef.value?.close();
+    emit('goToContactsList');
   } catch (error) {
-    useAlert(t('CONTACTS_LAYOUT.DETAILS.DELETE_DIALOG.API.ERROR_MESSAGE'));
+    useAlert(
+      error.message ||
+        t('CONTACTS_LAYOUT.DETAILS.DELETE_DIALOG.API.ERROR_MESSAGE')
+    );
+  } finally {
+    isDeleting.value = false;
   }
-};
-
-const handleDialogConfirm = async () => {
-  emit('goToContactsList');
-  await deleteContact(route.params.contactId || props.selectedContact.id);
-  dialogRef.value?.close();
 };
 
 defineExpose({ dialogRef });
@@ -49,6 +53,8 @@ defineExpose({ dialogRef });
     :title="t('CONTACTS_LAYOUT.DETAILS.DELETE_DIALOG.TITLE')"
     :description="t('CONTACTS_LAYOUT.DETAILS.DELETE_DIALOG.DESCRIPTION')"
     :confirm-button-label="t('CONTACTS_LAYOUT.DETAILS.DELETE_DIALOG.CONFIRM')"
+    :is-loading="isDeleting"
+    :disable-confirm-button="isDeleting"
     @confirm="handleDialogConfirm"
   />
 </template>

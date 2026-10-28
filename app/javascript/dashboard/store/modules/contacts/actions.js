@@ -211,11 +211,14 @@ export const actions = {
     commit(types.SET_CONTACT_UI_FLAG, { isDeleting: true });
     try {
       await ContactAPI.delete(id);
+      commit(types.DELETE_CONTACT, id);
       commit(types.SET_CONTACT_UI_FLAG, { isDeleting: false });
     } catch (error) {
       commit(types.SET_CONTACT_UI_FLAG, { isDeleting: false });
-      if (error.response?.data?.message) {
-        throw new Error(error.response.data.message);
+      const message =
+        error.response?.data?.message || error.response?.data?.error;
+      if (message) {
+        throw new Error(message);
       } else {
         throw new Error(error);
       }

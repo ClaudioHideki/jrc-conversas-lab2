@@ -44,7 +44,7 @@
 class Contact < ApplicationRecord
   include JrcCustomers::ContactMaster
   has_many :sales_opportunities, dependent: :restrict_with_error
-  has_many :jrc_crm_deal_contacts, class_name: 'JrcCrm::DealContact', dependent: :destroy_async
+  has_many :jrc_crm_deal_contacts, class_name: 'JrcCrm::DealContact', dependent: :destroy
   has_many :jrc_crm_deals, through: :jrc_crm_deal_contacts, source: :deal
   include Avatarable
   include AvailabilityStatusable

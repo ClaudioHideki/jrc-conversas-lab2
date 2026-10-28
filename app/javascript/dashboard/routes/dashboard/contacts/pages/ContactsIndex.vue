@@ -443,25 +443,33 @@ const removeLabels = async labels => {
 };
 
 const deleteContacts = async () => {
-  if (!selectedContactIds.value.length) {
+  if (!selectedContactIds.value.length || isBulkActionLoading.value) {
     return;
   }
 
   isBulkActionLoading.value = true;
   try {
-    await BulkActionsAPI.create({
-      type: 'Contact',
-      ids: selectedContactIds.value,
-      action_name: 'delete',
-    });
+    // Stop on the first failure and keep the remaining contacts selected.
+    // eslint-disable-next-line no-restricted-syntax
+    for (const id of [...selectedContactIds.value]) {
+      // Use the same presence, permission and dependency checks as single deletion.
+      // eslint-disable-next-line no-await-in-loop
+      await store.dispatch('contacts/delete', id);
+      selectedContactIds.value = selectedContactIds.value.filter(
+        selectedId => selectedId !== id
+      );
+    }
     useAlert(t('CONTACTS_BULK_ACTIONS.DELETE_SUCCESS'));
     clearSelection();
-    await fetchContactsBasedOnContext(pageNumber.value);
     bulkDeleteDialogRef.value?.close?.();
   } catch (error) {
-    useAlert(t('CONTACTS_BULK_ACTIONS.DELETE_FAILED'));
+    useAlert(error.message || t('CONTACTS_BULK_ACTIONS.DELETE_FAILED'));
   } finally {
     isBulkActionLoading.value = false;
+    crmSelectedContact.value = undefined;
+    await fetchContactsBasedOnContext(pageNumber.value, {
+      clearSelection: false,
+    });
   }
 };
 
@@ -628,12 +636,65 @@ onMounted(async () => {
         <div v-if="isFetchingList" class="flex h-60 items-center justify-center"><Spinner /></div>
         <div v-else-if="!hasContacts" class="p-10 text-center text-n-slate-11">{{ emptyStateMessage }}</div>
         <div v-else class="overflow-x-auto">
+          <ContactsBulkActionBar
+            v-if="selectedCount"
+            :visible-contact-ids="visibleContactIds"
+            :selected-contact-ids="selectedContactIds"
+            :is-loading="isBulkActionLoading"
+            @clear-selection="clearSelection"
+            @toggle-all="toggleSelectAll"
+            @assign-labels="assignLabels"
+            @remove-labels="removeLabels"
+            @delete-selected="openBulkDeleteDialog"
+          />
           <table class="w-full min-w-[900px] text-left text-sm">
             <thead class="bg-n-alpha-2 text-[11px] uppercase tracking-wide text-n-slate-11">
-              <tr><th class="px-4 py-3">Contato</th><th class="px-3 py-3">Empresa</th><th class="px-3 py-3">Canais</th><th class="px-3 py-3">Responsável</th><th class="px-3 py-3">Última interação</th><th class="px-3 py-3">Próxima ação</th><th class="px-3 py-3">{{ t('CRM.CONTACT_LEAD.AVAILABILITY') }}</th><th class="px-3 py-3">Ações</th></tr>
+              <tr>
+                <th class="px-4 py-3">
+                  <input
+                    type="checkbox"
+                    :aria-label="
+                      t('CONTACTS_BULK_ACTIONS.SELECT_ALL', {
+                        count: visibleContactIds.length,
+                      })
+                    "
+                    :checked="
+                      visibleContactIds.every(id =>
+                        selectedContactIds.includes(id)
+                      )
+                    "
+                    :disabled="isBulkActionLoading"
+                    @change="toggleSelectAll($event.target.checked)"
+                  />
+                </th>
+                <th class="px-4 py-3">Contato</th>
+                <th class="px-3 py-3">Empresa</th>
+                <th class="px-3 py-3">Canais</th>
+                <th class="px-3 py-3">Responsável</th>
+                <th class="px-3 py-3">Última interação</th>
+                <th class="px-3 py-3">Próxima ação</th>
+                <th class="px-3 py-3">
+                  {{ t('CRM.CONTACT_LEAD.AVAILABILITY') }}
+                </th>
+                <th class="px-3 py-3">Ações</th>
+              </tr>
             </thead>
             <tbody class="divide-y divide-n-weak">
               <tr v-for="contact in contacts" :key="contact.id" class="cursor-pointer transition hover:bg-blue-500/5" :class="selectedRelationshipContact?.id === contact.id ? 'bg-blue-500/5' : ''" @click="selectRelationshipContact(contact)">
+                <td class="px-4 py-3" @click.stop>
+                  <input
+                    type="checkbox"
+                    :aria-label="contact.name || String(contact.id)"
+                    :checked="selectedContactIds.includes(contact.id)"
+                    :disabled="isBulkActionLoading"
+                    @change="
+                      toggleContactSelection({
+                        id: contact.id,
+                        value: $event.target.checked,
+                      })
+                    "
+                  />
+                </td>
                 <td class="px-4 py-3"><div class="flex items-center gap-3"><span class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-n-teal-3 font-semibold text-n-teal-11">{{ contactInitials(contact) }}</span><div><p class="font-semibold text-n-slate-12">{{ contact.name || 'Sem nome' }}</p><p class="text-xs text-n-slate-11">{{ contactPhone(contact) }}</p></div></div></td>
                 <td class="px-3 py-3 text-n-slate-11">{{ contactCompany(contact) }}</td>
                 <td class="px-3 py-3"><div class="flex gap-1"><span class="flex size-8 items-center justify-center rounded-lg bg-n-teal-3 text-n-teal-11"><span class="i-ri-whatsapp-fill size-4" /></span><span class="flex size-8 items-center justify-center rounded-lg bg-n-blue-3 text-n-blue-11"><span class="i-lucide-phone size-4" /></span><span class="flex size-8 items-center justify-center rounded-lg bg-n-amber-3 text-n-amber-11"><span class="i-lucide-mail size-4" /></span></div></td>
@@ -708,5 +769,21 @@ onMounted(async () => {
         <div v-else class="flex h-full min-h-64 items-center justify-center text-center text-sm text-n-slate-11">Selecione um contato para ver os detalhes.</div>
       </aside>
     </div>
+    <Dialog
+      ref="bulkDeleteDialogRef"
+      type="alert"
+      :title="t('CONTACTS_BULK_ACTIONS.DELETE_DIALOG.TITLE')"
+      :description="
+        t('CONTACTS_BULK_ACTIONS.DELETE_DIALOG.DESCRIPTION', {
+          count: selectedCount,
+        })
+      "
+      :confirm-button-label="
+        t('CONTACTS_BULK_ACTIONS.DELETE_DIALOG.CONFIRM_MULTIPLE')
+      "
+      :is-loading="isBulkActionLoading"
+      :disable-confirm-button="isBulkActionLoading"
+      @confirm="deleteContacts"
+    />
   </div>
 </template>

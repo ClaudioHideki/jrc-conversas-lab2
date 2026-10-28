@@ -3,6 +3,16 @@ import Contacts from '../../contacts';
 const { mutations } = Contacts;
 
 describe('#mutations', () => {
+  it('handles route string IDs and repeated websocket deletion without removing another contact', () => {
+    const state = {
+      records: { 42: { id: 42 }, 43: { id: 43 } },
+      sortOrder: [42, 43],
+    };
+    mutations[types.DELETE_CONTACT](state, '42');
+    mutations[types.DELETE_CONTACT](state, 42);
+    expect(state.sortOrder).toEqual([43]);
+    expect(state.records).toEqual({ 43: { id: 43 } });
+  });
   describe('#SET_CONTACTS', () => {
     it('set contact records', () => {
       const state = { records: {} };

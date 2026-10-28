@@ -116,6 +116,9 @@ class Api::V1::Accounts::ContactsController < Api::V1::Accounts::BaseController
 
     @contact.destroy!
     head :ok
+  rescue ActiveRecord::RecordNotDestroyed, ActiveRecord::InvalidForeignKey, ActiveRecord::DeleteRestrictionError => e
+    log_handled_error(e)
+    render_error({ message: I18n.t('contacts.delete.referenced') }, :unprocessable_entity)
   end
 
   def avatar
