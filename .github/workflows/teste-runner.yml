@@ -1,10 +1,102 @@
-﻿name: Teste Runner
-
+name: Precimech isolated contacts hotfix publication
 on:
   workflow_dispatch:
-
+permissions:
+  contents: read
+  packages: write
 jobs:
-  teste:
-    runs-on: ubuntu-latest
+  publish-precimech:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      SOURCE_SHA: ca6b293e6902cb34ad2ae7f79d0a66f49501ca99
+      HOTFIX_WORKSPACE: ${{ github.workspace }}/hotfix
+      HOTFIX_VALIDATION: ${{ github.workspace }}/publish-tools/release/precimech
+    defaults:
+      run:
+        working-directory: hotfix
+        shell: bash
     steps:
-      - run: echo "Runner funcionando!"
+      - uses: actions/checkout@v4
+        with:
+          path: publish-tools
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: ca6b293e6902cb34ad2ae7f79d0a66f49501ca99
+          path: hotfix
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.19.0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.2.0
+          run_install: false
+      - name: Assert isolated original base and exact scope
+        run: |
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          test "$(git rev-parse HEAD^)" = 4ce8241d35ce862e9d53e9a5dce4df9a1858432c
+          git diff --check HEAD^ HEAD
+          git diff --exit-code HEAD^ HEAD -- db Gemfile Gemfile.lock package.json pnpm-lock.yaml services enterprise
+      - name: Install locked frontend dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Contacts regression tests
+        run: |
+          pnpm exec vitest run app/javascript/dashboard/components-next/Contacts/ContactsForm/specs/ConfirmContactDeleteDialog.spec.js app/javascript/dashboard/routes/dashboard/contacts/pages/spec app/javascript/dashboard/store/modules/specs/contacts app/javascript/dashboard/api/specs/contacts.spec.js --maxWorkers=2 --no-file-parallelism | tee "$HOTFIX_VALIDATION/vitest-actions.log"
+      - name: Build production assets from exact hotfix source
+        run: node --max-old-space-size=4096 node_modules/vite/bin/vite.js build --mode production > "$HOTFIX_VALIDATION/frontend-actions.log" 2>&1
+      - name: Prepare curated context and build over original immutable runtime
+        run: |
+          docker pull ghcr.io/claudiohideki/jrc-conversas-lab2@sha256:40d8073e0861b156f344c1f4fb882e8472c9560149ef5a353d27a5a4b23fb2d1
+          node "$HOTFIX_VALIDATION/package-hotfix.cjs"
+          image="ghcr.io/claudiohideki/jrc-conversas-lab2:precimech-contatos-sha-$SOURCE_SHA"
+          docker build --network=none --platform linux/amd64 --provenance=false -f "$HOTFIX_VALIDATION/build-context/docker/precimech-hotfix.Dockerfile" --build-arg "GIT_SHA=$SOURCE_SHA" -t "$image" "$HOTFIX_VALIDATION/build-context"
+          node "$HOTFIX_VALIDATION/verify-candidate.cjs"
+      - name: Create disposable local database and verify packaged application
+        run: |
+          docker network create precimech-hotfix-tests-20261028
+          docker run -d --name precimech-hotfix-db-20261028 --network precimech-hotfix-tests-20261028 -e POSTGRES_DB=precimech_hotfix_test -e POSTGRES_PASSWORD=precimech_local_test_only pgvector/pgvector:pg16
+          docker run -d --name precimech-hotfix-redis-20261028 --network precimech-hotfix-tests-20261028 redis:7-alpine
+          for attempt in $(seq 1 30); do
+            if docker exec precimech-hotfix-db-20261028 pg_isready -U postgres; then break; fi
+            sleep 2
+          done
+          cat > "$RUNNER_TEMP/precimech-test.env" <<'ENVFILE'
+          RAILS_ENV=production
+          SECRET_KEY_BASE=precimech_isolated_validation_key_20261028
+          POSTGRES_HOST=precimech-hotfix-db-20261028
+          POSTGRES_DATABASE=precimech_hotfix_test
+          POSTGRES_USERNAME=postgres
+          POSTGRES_PASSWORD=precimech_local_test_only
+          REDIS_URL=redis://precimech-hotfix-redis-20261028:6379/0
+          RAILS_LOG_TO_STDOUT=true
+          HOTFIX_EXPECTED=true
+          HOTFIX_STAGE=image
+          ENVFILE
+          image="ghcr.io/claudiohideki/jrc-conversas-lab2:precimech-contatos-sha-$SOURCE_SHA"
+          docker run --rm --network precimech-hotfix-tests-20261028 --env-file "$RUNNER_TEMP/precimech-test.env" --entrypoint bundle "$image" exec rails db:schema:load db:migrate > "$HOTFIX_VALIDATION/database-actions.log" 2>&1
+          docker run --rm --network precimech-hotfix-tests-20261028 --env-file "$RUNNER_TEMP/precimech-test.env" --mount "type=bind,source=$HOTFIX_VALIDATION,target=/validation" --entrypoint bundle "$image" exec rails runner /validation/backend-validation.rb > "$HOTFIX_VALIDATION/backend-actions.log" 2>&1
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish only absent Precimech SHA tag and verify registry identity
+        run: |
+          node "$HOTFIX_VALIDATION/publish-hotfix.cjs"
+          cat "$HOTFIX_VALIDATION/publication.json" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: precimech-hotfix-verification
+          path: |
+            publish-tools/release/precimech/*.json
+            publish-tools/release/precimech/*.log
+          retention-days: 14
+      - name: Remove disposable test resources
+        if: always()
+        run: |
+          docker rm -fv precimech-hotfix-db-20261028 precimech-hotfix-redis-20261028 || true
+          docker network rm precimech-hotfix-tests-20261028 || true
