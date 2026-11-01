@@ -1,6 +1,8 @@
 <script setup>
 import { computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import ModuleTabs from 'dashboard/components-next/navigation/ModuleTabs.vue';
+import { crmControlClasses } from '../../crmControlClasses';
 import BackofficeOverview from './BackofficeOverview.vue';
 import BackofficeWorklist from './BackofficeWorklist.vue';
 import BackofficeRequest360 from './BackofficeRequest360.vue';
@@ -10,25 +12,81 @@ import { useBackofficePresentation } from './useBackofficePresentation';
 const route = useRoute();
 const router = useRouter();
 const { text } = useBackofficePresentation();
-const primary = ['overview', 'mine', 'requests'];
+const primaryKeys = [
+  'overview',
+  'requests',
+  'docs',
+  'approvals',
+  'contracts',
+  'reports',
+];
 const groups = [
   {
     key: 'OPERATION',
-    sections: ['process', 'docs', 'contracts', 'implement', 'provision'],
+    tone: 'cyan',
+    icon: 'i-lucide-workflow',
+    sections: ['process', 'implement', 'provision', 'finance'],
   },
   {
     key: 'CONTROL',
-    sections: ['finance', 'issues', 'approvals', 'changes', 'sla', 'reports'],
+    tone: 'violet',
+    icon: 'i-lucide-settings',
+    sections: ['mine', 'issues', 'changes', 'sla'],
   },
 ];
-const sections = [...primary, ...groups.flatMap(group => group.sections)];
-const section = computed(() =>
-  sections.includes(
-    route.params.section === 'queues' ? 'requests' : route.params.section
-  )
-    ? route.params.section
-    : 'overview'
+const sections = [...primaryKeys, ...groups.flatMap(group => group.sections)];
+const tones = {
+  overview: 'blue',
+  requests: 'teal',
+  docs: 'amber',
+  approvals: 'violet',
+  contracts: 'cyan',
+  reports: 'rose',
+  mine: 'teal',
+  issues: 'rose',
+  changes: 'amber',
+  sla: 'violet',
+  process: 'blue',
+  implement: 'teal',
+  provision: 'violet',
+  finance: 'amber',
+};
+const icons = {
+  overview: 'i-lucide-layout-dashboard',
+  requests: 'i-lucide-inbox',
+  docs: 'i-lucide-files',
+  approvals: 'i-lucide-check-check',
+  contracts: 'i-lucide-file-signature',
+  reports: 'i-lucide-chart-column',
+  mine: 'i-lucide-list-checks',
+  issues: 'i-lucide-triangle-alert',
+  changes: 'i-lucide-git-compare',
+  sla: 'i-lucide-clock',
+  process: 'i-lucide-shopping-cart',
+  implement: 'i-lucide-list-checks',
+  provision: 'i-lucide-server',
+  finance: 'i-lucide-wallet',
+};
+const entry = key => ({
+  key,
+  label: text(`NAV.${key}`),
+  tone: tones[key],
+  icon: icons[key],
+  to: { name: 'crm_backoffice', params: { section: key } },
+});
+const primary = computed(() => primaryKeys.map(entry));
+const navigationGroups = computed(() =>
+  groups.map(group => ({
+    ...group,
+    label: text(group.key),
+    entries: group.sections.map(entry),
+  }))
 );
+const section = computed(() => {
+  const key =
+    route.params.section === 'queues' ? 'requests' : route.params.section;
+  return sections.includes(key) ? key : 'overview';
+});
 const tabBySection = {
   docs: 'documents',
   implement: 'checklist',
@@ -62,7 +120,10 @@ watch(
 </script>
 
 <template>
-  <div class="flex h-full min-w-0 flex-col bg-n-slate-2">
+  <div
+    class="flex h-full min-w-0 flex-col bg-n-slate-2 text-n-slate-12"
+    :class="crmControlClasses"
+  >
     <header class="shrink-0 border-b border-n-weak bg-n-solid-2 px-4 py-3">
       <div class="flex items-center justify-between gap-3">
         <div class="flex items-center gap-3">
@@ -79,59 +140,17 @@ watch(
           {{ text('NEW_REQUEST') }}
         </RouterLink>
       </div>
-      <nav
-        :aria-label="text('NAVIGATION')"
-        class="mt-3 flex flex-wrap gap-2"
-      >
-        <RouterLink
-          v-for="item in primary"
-          :key="item"
-          :to="{ name: 'crm_backoffice', params: { section: item } }"
-          class="rounded-lg border px-3 py-2 text-sm font-semibold"
-          :class="
-            !route.params.requestId &&
-            route.name !== 'crm_backoffice_new' &&
-            section === item
-              ? 'border-emerald-600 bg-emerald-600 text-white'
-              : 'border-n-weak text-n-slate-11 hover:bg-n-slate-3'
-          "
-          :aria-current="
-            !route.params.requestId && section === item ? 'page' : undefined
-          "
-        >
-          {{ text(`NAV.${item}`) }}
-        </RouterLink>
-        <details
-          v-for="group in groups"
-          :key="group.key"
-          class="relative"
-        >
-          <summary
-            class="cursor-pointer rounded-lg border px-3 py-2 text-sm font-semibold"
-            :class="
-              group.sections.includes(section)
-                ? 'border-emerald-400 bg-emerald-50 text-emerald-900'
-                : 'border-n-weak text-n-slate-11'
-            "
-          >
-            {{ text(group.key) }}
-          </summary>
-          <div
-            class="absolute left-0 top-full z-40 mt-1 w-60 rounded-xl border border-n-weak bg-n-solid-2 p-2 shadow-lg"
-          >
-            <RouterLink
-              v-for="item in group.sections"
-              :key="item"
-              :to="{ name: 'crm_backoffice', params: { section: item } }"
-              class="block rounded-lg px-3 py-2 text-sm hover:bg-n-slate-3"
-              :class="{ 'font-bold text-emerald-700': section === item }"
-              @click="$event.currentTarget.closest('details').open = false"
-            >
-              {{ text(`NAV.${item}`) }}
-            </RouterLink>
-          </div>
-        </details>
-      </nav>
+      <ModuleTabs
+        class="mt-3"
+        :label="text('NAVIGATION')"
+        :items="primary"
+        :groups="navigationGroups"
+        :active-key="
+          route.params.requestId || route.name === 'crm_backoffice_new'
+            ? 'requests'
+            : section
+        "
+      />
     </header>
     <main
       :key="route.fullPath"

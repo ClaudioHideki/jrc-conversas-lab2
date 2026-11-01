@@ -40,6 +40,14 @@ const row = {
   metadata: {},
   documents: [],
   history: [],
+  commercial: {
+    origin: 'direct_sale',
+    owner: { id: 2, name: 'Ana' },
+    items: [],
+    deal: null,
+    order_accessible: true,
+  },
+  workflow_stages: ['analysis', 'documentation', 'finance', 'completed'],
   stage_blockers: [],
   next_stage: 'finance',
 };
@@ -54,7 +62,15 @@ const payload = (data = [row], page = 1) => ({
       blocked: 1,
       stages: { documentation: 21 },
       queues: { 3: 21 },
+      statuses: { blocked: 21 },
+      kinds: [{ kind: 'fulfillment', total: 21, overdue: 1 }],
+      observed: {
+        first_action_seconds: null,
+        completion_seconds: null,
+        configured_sla: 0,
+      },
     },
+    dashboard: { mine: data, mine_total: 21 },
     options: { queues: [row.queue], owners: [row.owner], business_units: [] },
   },
 });

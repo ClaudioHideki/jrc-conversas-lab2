@@ -3,6 +3,9 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 import { backofficeAPI } from 'dashboard/api/crm/commercialCycle';
+import { moduleTabClasses } from 'dashboard/components-next/navigation/moduleTabClasses';
+import { stageTones, money } from './backofficeVisuals';
+import BackofficeRequestSummary from './BackofficeRequestSummary.vue';
 import BackofficeAssignment from './BackofficeAssignment.vue';
 import BackofficeActions from './BackofficeActions.vue';
 import BackofficeFinance from './BackofficeFinance.vue';
@@ -30,6 +33,16 @@ const tab = ref(
   tabs.includes(route.query.tab) ? route.query.tab : 'operations'
 );
 const historyPage = ref(1);
+const startIssue = ref(false);
+const tabTones = {
+  operations: 'blue',
+  context: 'cyan',
+  documents: 'amber',
+  checklist: 'teal',
+  issues: 'rose',
+  finance: 'violet',
+  history: 'blue',
+};
 let sequence = 0;
 const terminal = computed(() =>
   ['completed', 'canceled', 'rejected'].includes(record.value?.status)
@@ -154,7 +167,8 @@ onBeforeUnmount(() => {
           </div>
           <div class="flex flex-wrap gap-2">
             <span
-              class="rounded-lg bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-800"
+              class="rounded-lg border px-3 py-2 text-sm font-semibold"
+              :class="moduleTabClasses(stageTones[record.stage])"
             >
               {{ label(record.stage) }}
             </span>
@@ -162,45 +176,324 @@ onBeforeUnmount(() => {
               {{ label(record.status) }}
             </span>
             <span
-              class="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900"
+              class="rounded-lg border px-3 py-2 text-sm font-semibold"
+              :class="
+                moduleTabClasses(
+                  record.priority === 'critical' ? 'rose' : 'amber'
+                )
+              "
             >
               {{ label(record.priority) }}
             </span>
           </div>
         </div>
       </header>
-      <section
-        class="overflow-hidden rounded-2xl border border-n-weak bg-n-solid-2 shadow-sm"
-      >
-        <nav
-          :aria-label="text('DETAIL_NAV')"
-          class="flex flex-wrap gap-2 border-b border-n-weak bg-n-slate-2 p-3"
+      <div class="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_280px]">
+        <section
+          class="overflow-hidden rounded-2xl border border-n-weak bg-n-solid-2 shadow-sm"
         >
-          <button
-            v-for="item in tabs"
-            :id="`backoffice-tab-${item}`"
-            :key="item"
-            :aria-pressed="tab === item"
-            class="whitespace-nowrap rounded-lg px-4 py-2 text-sm font-semibold"
-            :class="
-              tab === item
-                ? 'bg-emerald-600 text-white'
-                : 'border border-n-weak bg-n-solid-2 text-n-slate-11'
-            "
-            @click="tab = item"
+          <nav
+            :aria-label="text('DETAIL_NAV')"
+            class="flex flex-wrap gap-2 border-b border-n-weak bg-n-slate-2 p-3"
           >
-            {{ text(`DETAIL_TABS.${item}`) }}
-          </button>
-        </nav>
-        <div
-          class="p-5"
-          :aria-labelledby="`backoffice-tab-${tab}`"
-        >
+            <button
+              v-for="item in tabs"
+              :id="`backoffice-tab-${item}`"
+              :key="item"
+              :aria-pressed="tab === item"
+              class="whitespace-nowrap rounded-lg border px-3 py-2 text-sm font-semibold"
+              :class="moduleTabClasses(tabTones[item], tab === item)"
+              @click="tab = item"
+            >
+              {{ text(`DETAIL_TABS.${item}`) }}
+            </button>
+          </nav>
           <div
-            v-if="tab === 'operations'"
-            class="rounded-2xl border border-amber-200 bg-n-solid-2 p-5 shadow-sm"
+            class="bg-n-slate-2 p-4"
+            :aria-labelledby="`backoffice-tab-${tab}`"
           >
-            <h3 class="font-bold">{{ text('NEXT_ACTION') }}</h3>
+            <BackofficeRequestSummary
+              v-if="tab === 'operations'"
+              :record="record"
+              @view="tab = $event"
+            />
+            <div
+              v-else-if="tab === 'context'"
+              class="space-y-5"
+            >
+              <div
+                class="mt-3 grid gap-2 text-sm sm:grid-cols-2 xl:grid-cols-4"
+              >
+                <div class="rounded-lg border border-n-weak p-2">
+                  <p class="text-xs text-n-slate-11">
+                    {{ text('QUEUE_OWNER') }}
+                  </p>
+                  <b class="mt-1 block">
+                    {{ record.queue?.name || text('NO_QUEUE') }}
+                  </b>
+                  <span>{{ record.owner.name }}</span>
+                </div>
+                <div class="rounded-lg border border-n-weak p-2">
+                  <p class="text-xs text-n-slate-11">{{ text('UNIT') }}</p>
+                  <b class="mt-1 block">
+                    {{ record.business_unit?.name || text('NO_UNIT') }}
+                  </b>
+                  <p class="mt-1 text-xs">{{ label(record.request_kind) }}</p>
+                </div>
+                <div class="rounded-lg border border-n-weak p-2">
+                  <p class="text-xs text-n-slate-11">{{ text('DEADLINE') }}</p>
+                  <b class="mt-1 block">{{ date(record.due_at) }}</b>
+                  <p class="mt-1 text-xs">
+                    {{ text('CREATED') }} {{ date(record.created_at) }}
+                  </p>
+                </div>
+                <div
+                  class="rounded-lg border border-n-weak p-2"
+                  :class="{
+                    'bg-red-50 text-red-800': record.sla.state === 'overdue',
+                  }"
+                >
+                  <p class="text-xs">{{ text('SLA') }}</p>
+                  <b class="mt-1 block">{{ slaLabel(record.sla) }}</b>
+                  <p
+                    v-if="record.sla.paused_at"
+                    class="mt-1 text-xs"
+                  >
+                    {{ text('PAUSED') }} {{ date(record.sla.paused_at) }}
+                  </p>
+                  <p
+                    v-else
+                    class="mt-1 text-xs"
+                  >
+                    {{ text('TOTAL_DEADLINE') }}
+                    {{ date(record.sla.total_due_at) }}
+                  </p>
+                </div>
+              </div>
+              <p
+                v-if="record.description"
+                class="whitespace-pre-wrap text-sm"
+              >
+                {{ record.description }}
+              </p>
+              <div class="grid gap-4 sm:grid-cols-2">
+                <article
+                  class="rounded-xl border border-blue-200 bg-blue-50 p-4 text-blue-900"
+                >
+                  <h3 class="font-bold">{{ text('COMMERCIAL_CONTEXT') }}</h3>
+                  <p class="mt-2 text-sm">
+                    {{ record.order.order_number }} {{ text('SEPARATOR') }}
+                    {{ label(record.order.status) }}
+                  </p>
+                  <p class="mt-1 text-sm">
+                    {{ text('REQUESTED_BY') }} {{ record.requested_by.name }}
+                  </p>
+                  <div class="mt-4 flex flex-wrap gap-3">
+                    <RouterLink
+                      v-if="record.commercial.order_accessible"
+                      :to="{
+                        name: 'crm_orders',
+                        query: { orderId: record.order.id },
+                      }"
+                      class="text-sm font-semibold underline"
+                    >
+                      {{ text('OPEN_ORDER') }}
+                    </RouterLink>
+                    <RouterLink
+                      v-if="
+                        record.contact &&
+                        (record.commercial.company_accessible ||
+                          record.commercial.contact_accessible)
+                      "
+                      :to="{
+                        name:
+                          record.company && record.commercial.company_accessible
+                            ? 'jrc_customer_company'
+                            : 'crm_customer_360',
+                        params:
+                          record.company && record.commercial.company_accessible
+                            ? { companyId: record.company.id }
+                            : { customerId: record.contact.id },
+                      }"
+                      class="text-sm font-semibold underline"
+                    >
+                      {{ text('OPEN_CLIENT') }}
+                    </RouterLink>
+                  </div>
+                </article>
+                <article
+                  class="rounded-xl border border-violet-200 bg-violet-50 p-4 text-violet-900"
+                >
+                  <h3 class="font-bold">{{ text('CONTRACT') }}</h3>
+                  <template v-if="record.contract">
+                    <p class="mt-2 text-sm">
+                      {{ record.contract.contract_number }}
+                      {{ text('SEPARATOR') }}
+                      {{ label(record.contract.signature_status) }}
+                    </p>
+                    <RouterLink
+                      v-if="record.commercial.contract_accessible"
+                      :to="{
+                        name: 'crm_contracts',
+                        query: { contractId: record.contract.id },
+                      }"
+                      class="mt-4 inline-block text-sm font-semibold underline"
+                    >
+                      {{ text('OPEN_CONTRACT') }}
+                    </RouterLink>
+                  </template>
+                  <p
+                    v-else
+                    class="mt-2 text-sm"
+                  >
+                    {{ text('NO_CONTRACT') }}
+                  </p>
+                </article>
+              </div>
+              <dl
+                class="grid gap-3 rounded-xl border border-n-weak p-4 text-sm sm:grid-cols-3"
+              >
+                <div>
+                  <dt class="text-xs text-n-slate-11">
+                    {{ text('FIRST_ACTION') }}
+                  </dt>
+                  <dd class="mt-1">
+                    {{
+                      record.sla.first_action_at
+                        ? date(record.sla.first_action_at)
+                        : text('NO_ACTION')
+                    }}
+                  </dd>
+                  <dd class="mt-1">
+                    {{ text('DEADLINE') }}{{ text('FIELD_SEPARATOR') }}
+                    {{ date(record.sla.first_action_due_at) }}
+                  </dd>
+                </div>
+                <div>
+                  <dt class="text-xs text-n-slate-11">
+                    {{ text('STAGE_DEADLINE') }}
+                  </dt>
+                  <dd class="mt-1">{{ date(record.sla.stage_due_at) }}</dd>
+                </div>
+                <div>
+                  <dt class="text-xs text-n-slate-11">
+                    {{ text('TOTAL_DEADLINE') }}
+                  </dt>
+                  <dd class="mt-1">{{ date(record.sla.total_due_at) }}</dd>
+                </div>
+              </dl>
+            </div>
+            <BackofficeActions
+              v-else-if="['documents', 'checklist', 'issues'].includes(tab)"
+              :key="tab"
+              :record="record"
+              :start-issue="startIssue"
+              :tab="tab"
+              :saving="saving"
+              @command="action"
+            />
+            <BackofficeFinance
+              v-else-if="tab === 'finance'"
+              :record="record"
+              :saving="saving"
+              @command="action"
+            />
+            <div
+              v-else
+              class="space-y-3"
+            >
+              <p class="text-xs text-n-slate-11">{{ text('HISTORY_NOTE') }}</p>
+              <article
+                v-for="event in record.history.slice(
+                  (historyPage - 1) * 5,
+                  historyPage * 5
+                )"
+                :key="event.id"
+                class="rounded-lg border border-n-weak border-l-4 border-l-emerald-400 px-3 py-2 text-sm"
+              >
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <b>{{ label(event.event_type) }}</b>
+                  <time class="text-xs text-n-slate-11">
+                    {{ date(event.created_at) }}
+                  </time>
+                </div>
+                <div
+                  v-if="event.to_value?.stage || event.to_value?.status"
+                  class="mt-1 flex flex-wrap gap-3 text-xs text-n-slate-11"
+                >
+                  <span v-if="event.to_value?.stage">
+                    {{ text('STAGE') }}{{ text('FIELD_SEPARATOR') }}
+                    {{ label(event.to_value.stage) }}
+                  </span>
+                  <span v-if="event.to_value?.status">
+                    {{ text('STATUS') }}{{ text('FIELD_SEPARATOR') }}
+                    {{ label(event.to_value.status) }}
+                  </span>
+                </div>
+              </article>
+              <p
+                v-if="!record.history.length"
+                class="py-5 text-sm text-n-slate-11"
+              >
+                {{ text('EMPTY_HISTORY') }}
+              </p>
+              <div
+                v-if="record.history.length > 5"
+                class="flex justify-end gap-3 text-sm"
+              >
+                <button
+                  :disabled="historyPage <= 1"
+                  @click="historyPage--"
+                >
+                  {{ text('PREVIOUS') }}
+                </button>
+                <span>
+                  {{ historyPage }} {{ text('PAGE_SEPARATOR') }}
+                  {{ Math.ceil(record.history.length / 5) }}
+                </span>
+                <button
+                  :disabled="historyPage * 5 >= record.history.length"
+                  @click="historyPage++"
+                >
+                  {{ text('NEXT') }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+        <aside class="min-w-0 xl:sticky xl:top-0">
+          <div
+            class="rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm"
+          >
+            <h3 class="flex items-center gap-2 font-bold">
+              <span
+                class="i-lucide-layers size-5 text-blue-600 dark:text-blue-300"
+              />
+              {{ text('REQUEST_SUMMARY.CENTRAL') }}
+            </h3>
+            <dl class="my-3 divide-y divide-n-weak text-xs">
+              <div
+                v-for="item in [
+                  {
+                    key: 'REQUEST_SUMMARY.PROTOCOL',
+                    value: record.request_number,
+                  },
+                  {
+                    key: 'REQUEST_SUMMARY.SALE_VALUE',
+                    value: money(record.order.total_cents),
+                  },
+                  { key: 'SLA', value: slaLabel(record.sla) },
+                  { key: 'PRIORITY', value: label(record.priority) },
+                  { key: 'REQUEST_SUMMARY.OWNER', value: record.owner.name },
+                ]"
+                :key="item.key"
+                class="flex justify-between gap-3 py-2"
+              >
+                <dt class="text-n-slate-11">{{ text(item.key) }}</dt>
+                <dd class="text-right font-semibold">{{ item.value }}</dd>
+              </div>
+            </dl>
+            <h4 class="text-sm font-bold">{{ text('NEXT_ACTION') }}</h4>
             <p class="mt-2 text-sm">
               {{ text('NEXT_STAGE') }}
               <b>{{ label(record.next_stage) }}</b>
@@ -270,11 +563,33 @@ onBeforeUnmount(() => {
                 {{ text('REOPEN') }}
               </button>
             </div>
-            <BackofficeAssignment
-              :record="record"
-              :saving="saving"
-              @command="action"
-            />
+            <button
+              v-if="!terminal && !orderApproval"
+              class="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold"
+              :class="moduleTabClasses('amber')"
+              @click="
+                startIssue = true;
+                tab = 'issues';
+              "
+            >
+              <span class="i-lucide-plus size-4" />
+              {{ text('REQUEST_SUMMARY.NEW_ISSUE') }}
+            </button>
+            <details
+              v-if="!terminal && !orderApproval"
+              class="mt-4 border-t border-n-weak pt-3"
+            >
+              <summary
+                class="cursor-pointer text-xs font-semibold text-n-slate-11"
+              >
+                {{ text('REQUEST_SUMMARY.MANAGE') }}
+              </summary>
+              <BackofficeAssignment
+                :record="record"
+                :saving="saving"
+                @command="action"
+              />
+            </details>
             <BackofficeActions
               v-if="
                 orderApproval ||
@@ -288,237 +603,8 @@ onBeforeUnmount(() => {
               @command="action"
             />
           </div>
-          <div
-            v-else-if="tab === 'context'"
-            class="space-y-5"
-          >
-            <div class="mt-3 grid gap-2 text-sm sm:grid-cols-2 xl:grid-cols-4">
-              <div class="rounded-lg border border-n-weak p-2">
-                <p class="text-xs text-n-slate-11">{{ text('QUEUE_OWNER') }}</p>
-                <b class="mt-1 block">
-                  {{ record.queue?.name || text('NO_QUEUE') }}
-                </b>
-                <span>{{ record.owner.name }}</span>
-              </div>
-              <div class="rounded-lg border border-n-weak p-2">
-                <p class="text-xs text-n-slate-11">{{ text('UNIT') }}</p>
-                <b class="mt-1 block">
-                  {{ record.business_unit?.name || text('NO_UNIT') }}
-                </b>
-                <p class="mt-1 text-xs">{{ label(record.request_kind) }}</p>
-              </div>
-              <div class="rounded-lg border border-n-weak p-2">
-                <p class="text-xs text-n-slate-11">{{ text('DEADLINE') }}</p>
-                <b class="mt-1 block">{{ date(record.due_at) }}</b>
-                <p class="mt-1 text-xs">
-                  {{ text('CREATED') }} {{ date(record.created_at) }}
-                </p>
-              </div>
-              <div
-                class="rounded-lg border border-n-weak p-2"
-                :class="{
-                  'bg-red-50 text-red-800': record.sla.state === 'overdue',
-                }"
-              >
-                <p class="text-xs">{{ text('SLA') }}</p>
-                <b class="mt-1 block">{{ slaLabel(record.sla) }}</b>
-                <p
-                  v-if="record.sla.paused_at"
-                  class="mt-1 text-xs"
-                >
-                  {{ text('PAUSED') }} {{ date(record.sla.paused_at) }}
-                </p>
-                <p
-                  v-else
-                  class="mt-1 text-xs"
-                >
-                  {{ text('TOTAL_DEADLINE') }}
-                  {{ date(record.sla.total_due_at) }}
-                </p>
-              </div>
-            </div>
-            <p
-              v-if="record.description"
-              class="whitespace-pre-wrap text-sm"
-            >
-              {{ record.description }}
-            </p>
-            <div class="grid gap-4 sm:grid-cols-2">
-              <article
-                class="rounded-xl border border-blue-200 bg-blue-50 p-4 text-blue-900"
-              >
-                <h3 class="font-bold">{{ text('COMMERCIAL_CONTEXT') }}</h3>
-                <p class="mt-2 text-sm">
-                  {{ record.order.order_number }} {{ text('SEPARATOR') }}
-                  {{ label(record.order.status) }}
-                </p>
-                <p class="mt-1 text-sm">
-                  {{ text('REQUESTED_BY') }} {{ record.requested_by.name }}
-                </p>
-                <div class="mt-4 flex flex-wrap gap-3">
-                  <RouterLink
-                    :to="{
-                      name: 'crm_orders',
-                      query: { orderId: record.order.id },
-                    }"
-                    class="text-sm font-semibold underline"
-                  >
-                    {{ text('OPEN_ORDER') }}
-                  </RouterLink>
-                  <RouterLink
-                    v-if="record.contact"
-                    :to="{
-                      name: record.company
-                        ? 'jrc_customer_company'
-                        : 'crm_customer_360',
-                      params: record.company
-                        ? { companyId: record.company.id }
-                        : { customerId: record.contact.id },
-                    }"
-                    class="text-sm font-semibold underline"
-                  >
-                    {{ text('OPEN_CLIENT') }}
-                  </RouterLink>
-                </div>
-              </article>
-              <article
-                class="rounded-xl border border-violet-200 bg-violet-50 p-4 text-violet-900"
-              >
-                <h3 class="font-bold">{{ text('CONTRACT') }}</h3>
-                <template v-if="record.contract">
-                  <p class="mt-2 text-sm">
-                    {{ record.contract.contract_number }}
-                    {{ text('SEPARATOR') }}
-                    {{ label(record.contract.signature_status) }}
-                  </p>
-                  <RouterLink
-                    :to="{
-                      name: 'crm_contracts',
-                      query: { contractId: record.contract.id },
-                    }"
-                    class="mt-4 inline-block text-sm font-semibold underline"
-                  >
-                    {{ text('OPEN_CONTRACT') }}
-                  </RouterLink>
-                </template>
-                <p
-                  v-else
-                  class="mt-2 text-sm"
-                >
-                  {{ text('NO_CONTRACT') }}
-                </p>
-              </article>
-            </div>
-            <dl
-              class="grid gap-3 rounded-xl border border-n-weak p-4 text-sm sm:grid-cols-3"
-            >
-              <div>
-                <dt class="text-xs text-n-slate-11">
-                  {{ text('FIRST_ACTION') }}
-                </dt>
-                <dd class="mt-1">
-                  {{
-                    record.sla.first_action_at
-                      ? date(record.sla.first_action_at)
-                      : text('NO_ACTION')
-                  }}
-                </dd>
-                <dd class="mt-1">
-                  {{ text('DEADLINE') }}{{ text('FIELD_SEPARATOR') }}
-                  {{ date(record.sla.first_action_due_at) }}
-                </dd>
-              </div>
-              <div>
-                <dt class="text-xs text-n-slate-11">
-                  {{ text('STAGE_DEADLINE') }}
-                </dt>
-                <dd class="mt-1">{{ date(record.sla.stage_due_at) }}</dd>
-              </div>
-              <div>
-                <dt class="text-xs text-n-slate-11">
-                  {{ text('TOTAL_DEADLINE') }}
-                </dt>
-                <dd class="mt-1">{{ date(record.sla.total_due_at) }}</dd>
-              </div>
-            </dl>
-          </div>
-          <BackofficeActions
-            v-else-if="['documents', 'checklist', 'issues'].includes(tab)"
-            :key="tab"
-            :record="record"
-            :tab="tab"
-            :saving="saving"
-            @command="action"
-          />
-          <BackofficeFinance
-            v-else-if="tab === 'finance'"
-            :record="record"
-            :saving="saving"
-            @command="action"
-          />
-          <div
-            v-else
-            class="space-y-3"
-          >
-            <p class="text-xs text-n-slate-11">{{ text('HISTORY_NOTE') }}</p>
-            <article
-              v-for="event in record.history.slice(
-                (historyPage - 1) * 5,
-                historyPage * 5
-              )"
-              :key="event.id"
-              class="rounded-lg border border-n-weak border-l-4 border-l-emerald-400 px-3 py-2 text-sm"
-            >
-              <div class="flex flex-wrap items-center justify-between gap-2">
-                <b>{{ label(event.event_type) }}</b>
-                <time class="text-xs text-n-slate-11">
-                  {{ date(event.created_at) }}
-                </time>
-              </div>
-              <div
-                v-if="event.to_value?.stage || event.to_value?.status"
-                class="mt-1 flex flex-wrap gap-3 text-xs text-n-slate-11"
-              >
-                <span v-if="event.to_value?.stage">
-                  {{ text('STAGE') }}{{ text('FIELD_SEPARATOR') }}
-                  {{ label(event.to_value.stage) }}
-                </span>
-                <span v-if="event.to_value?.status">
-                  {{ text('STATUS') }}{{ text('FIELD_SEPARATOR') }}
-                  {{ label(event.to_value.status) }}
-                </span>
-              </div>
-            </article>
-            <p
-              v-if="!record.history.length"
-              class="py-5 text-sm text-n-slate-11"
-            >
-              {{ text('EMPTY_HISTORY') }}
-            </p>
-            <div
-              v-if="record.history.length > 5"
-              class="flex justify-end gap-3 text-sm"
-            >
-              <button
-                :disabled="historyPage <= 1"
-                @click="historyPage--"
-              >
-                {{ text('PREVIOUS') }}
-              </button>
-              <span>
-                {{ historyPage }} {{ text('PAGE_SEPARATOR') }}
-                {{ Math.ceil(record.history.length / 5) }}
-              </span>
-              <button
-                :disabled="historyPage * 5 >= record.history.length"
-                @click="historyPage++"
-              >
-                {{ text('NEXT') }}
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
+        </aside>
+      </div>
     </template>
   </div>
 </template>

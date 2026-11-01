@@ -285,12 +285,30 @@ module Api::V1::Accounts::Crm
         data[:queue] = request.operations_queue && { id: request.operations_queue.id, name: request.operations_queue.name }
         data[:sla] = JrcOperations::SlaClock.new(request).snapshot
         data[:stage_blockers] = request.stage_blockers
+        data[:workflow_stages] = request.order_approval? ? ['approval'] : JrcCrm::BackofficeRequest::STAGES.select { |stage| request.stage_applicable?(stage) || stage == request.stage }
+        data[:commercial] = commercial_context(order)
+        data[:commercial][:contract_accessible] = request.contract && visible_to_current_user(crm_scope.jrc_crm_contracts).exists?(id: request.contract.id)
+        data[:commercial][:company_accessible] = company && JrcCustomers::DirectoryPolicy.new(pundit_user, :directory).access?
+        data[:commercial][:contact_accessible] = request.contact && policy(request.contact).show?
         data[:history] = crm_scope.jrc_crm_audit_events.for_resource('JrcCrm::BackofficeRequest', request.id).recent.limit(200).map do |event|
           { id: event.id, event_type: event.event_type, from_value: event.from_value, to_value: event.to_value,
             metadata: event.metadata, actor_id: event.actor_id, created_at: event.created_at }
         end
       end
       data
+    end
+
+    def commercial_context(order)
+      deal = order.deal
+      deal_visible = deal && visible_to_current_user(crm_scope.jrc_crm_deals).exists?(id: deal.id)
+      {
+        order_accessible: visible_to_current_user(crm_scope.jrc_crm_sales_orders).exists?(id: order.id),
+        origin: order.order_origin,
+        owner: { id: order.owner.id, name: order.owner.name },
+        deal: deal && (deal_visible ? { id: deal.id, title: deal.title, status: deal.status, won_at: deal.won_at,
+                                       accessible: true } : { accessible: false }),
+        items: order.order_items.order(:id).limit(10).map { |item| { id: item.id, name: item.name, quantity: item.quantity } }
+      }
     end
 
     def audit_snapshot(request)

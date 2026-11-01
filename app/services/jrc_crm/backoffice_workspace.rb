@@ -18,6 +18,7 @@ module JrcCrm
       @scope = params[:view] == 'mine' ? scope.where(owner_id: user.id) : scope
       @params = params
       @account = account
+      @user = user
       @companies = JrcCrm::CorporateCoverage.new(account: account, user: user).companies(account.master_companies)
     end
 
@@ -31,12 +32,20 @@ module JrcCrm
       rows = filtered.reorder(Arel.sql(SORTS.fetch(@params[:sort], SORTS['recent'])))
                      .offset((page - 1) * per_page).limit(per_page)
                      .includes(:contact, :owner, :business_unit, :operations_queue, :operations_sla_policy, :sales_order)
-      @company_names = @companies.where(id: rows.filter_map { |request| request.contact&.company_id }).pluck(:id, :name).to_h
-      {
+      mine_scope = filtered.where(owner_id: @user.id, status: BackofficeRequest::ACTIVE_STATUSES)
+      mine = []
+      if @params[:view] == 'overview'
+        mine = mine_scope.reorder(Arel.sql(SORTS['deadline'])).limit(5)
+          .includes(:contact, :owner, :business_unit, :operations_queue, :operations_sla_policy, :sales_order).to_a
+      end
+      @company_names = @companies.where(id: (rows.to_a + mine).filter_map { |request| request.contact&.company_id }).pluck(:id, :name).to_h
+      result = {
         data: rows.map { |request| serialize(request) },
         meta: { total: total, page: page, per_page: per_page, pages: pages },
         summary: summary(filtered), options: options
       }
+      result[:dashboard] = { mine: mine.map { |request| serialize(request) }, mine_total: mine_scope.count } if @params[:view] == 'overview'
+      result
     end
 
     private
@@ -95,14 +104,25 @@ module JrcCrm
         stages: active.group("#{TABLE}.stage").count,
         queues: active.group("#{TABLE}.operations_queue_id").count
       }
-      return result unless @params[:view] == 'reports'
+      return result unless %w[overview reports].include?(@params[:view])
 
       totals = scope.group(:request_kind).count
       late = overdue(scope).group(:request_kind).count
       result.merge(
+        statuses: scope.group("#{TABLE}.status").count,
+        observed: {
+          first_action_seconds: observed_average(scope, 'first_action_at'),
+          completion_seconds: observed_average(scope.where(status: 'completed'), 'completed_at'),
+          configured_sla: active.where.not(operations_sla_policy_id: nil).count
+        },
         average_open_hours: active.average(Arel.sql("EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - #{TABLE}.created_at)) / 3600"))&.round || 0,
         kinds: totals.map { |kind, count| { kind: kind, total: count, overdue: late.fetch(kind, 0) } }
       )
+    end
+
+    def observed_average(scope, field)
+      scope.where.not(field => nil).where("#{TABLE}.#{field} >= #{TABLE}.created_at")
+        .average(Arel.sql("EXTRACT(EPOCH FROM (#{TABLE}.#{field} - #{TABLE}.created_at))"))&.round
     end
 
     def options
@@ -120,7 +140,8 @@ module JrcCrm
         due_at: request.due_at, created_at: request.created_at, updated_at: request.updated_at,
         contact: request.contact && { id: request.contact.id, name: request.contact.name },
         company: company_for(request),
-        order: { id: request.sales_order.id, order_number: request.sales_order.order_number },
+        order: { id: request.sales_order.id, order_number: request.sales_order.order_number,
+                 total_cents: request.sales_order.total_cents, monthly_cents: request.sales_order.monthly_cents },
         owner: { id: request.owner.id, name: request.owner.name },
         business_unit: request.business_unit && { id: request.business_unit.id, name: request.business_unit.name },
         queue: request.operations_queue && { id: request.operations_queue.id, name: request.operations_queue.name },

@@ -6,6 +6,7 @@ const props = defineProps({
   record: { type: Object, required: true },
   tab: { type: String, required: true },
   saving: { type: Boolean, default: false },
+  startIssue: { type: Boolean, default: false },
 });
 const emit = defineEmits(['command']);
 const { text, label, date } = useBackofficePresentation();
@@ -329,6 +330,7 @@ const download = async row => {
     <template v-else-if="tab === 'issues'">
       <details
         v-if="!terminal"
+        :open="startIssue"
         class="rounded-xl border border-amber-200 p-3"
       >
         <summary class="cursor-pointer font-semibold">

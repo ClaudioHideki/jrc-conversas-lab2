@@ -1,20 +1,14 @@
 <script setup>
-import { computed, nextTick, onMounted, ref, watch } from 'vue';
+import { computed } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { useResizeObserver } from '@vueuse/core';
-import Button from 'dashboard/components-next/button/Button.vue';
-import Icon from 'dashboard/components-next/icon/Icon.vue';
+import ModuleTabs from 'dashboard/components-next/navigation/ModuleTabs.vue';
 import { crmControlClasses } from './crmControlClasses';
-
 const route = useRoute();
 const store = useStore();
 const { t } = useI18n();
-const tabList = ref(null);
-const canScrollBack = ref(false);
-const canScrollForward = ref(false);
-/* eslint-disable vue/no-bare-strings-in-template, @intlify/vue-i18n/no-raw-text, @intlify/vue-i18n/no-dynamic-keys */
+/* eslint-disable vue/no-bare-strings-in-template, @intlify/vue-i18n/no-raw-text */
 const navigation = [
   {
     name: 'crm_dashboard',
@@ -38,7 +32,7 @@ const navigation = [
     name: 'crm_deals',
     label: 'Negócios',
     icon: 'i-lucide-handshake',
-    tone: 'orange',
+    tone: 'amber',
   },
   {
     name: 'crm_funnel',
@@ -56,7 +50,7 @@ const navigation = [
     name: 'crm_activities',
     label: 'Atividades',
     icon: 'i-lucide-calendar-check-2',
-    tone: 'orange',
+    tone: 'amber',
   },
   {
     name: 'crm_calendar',
@@ -68,7 +62,7 @@ const navigation = [
     name: 'crm_products',
     label: 'Produtos',
     icon: 'i-lucide-package',
-    tone: 'green',
+    tone: 'teal',
   },
   {
     name: 'crm_proposals',
@@ -80,7 +74,7 @@ const navigation = [
     name: 'crm_orders',
     label: 'Pedidos',
     icon: 'i-lucide-shopping-cart',
-    tone: 'green',
+    tone: 'teal',
   },
   {
     name: 'crm_contracts',
@@ -93,7 +87,7 @@ const navigation = [
     name: 'crm_commissions',
     label: 'Comissões',
     icon: 'i-lucide-badge-dollar-sign',
-    tone: 'orange',
+    tone: 'amber',
   },
   {
     name: 'crm_management',
@@ -109,6 +103,13 @@ const navigation = [
   },
 ];
 
+const primaryKeys = [
+  'crm_dashboard',
+  'crm_indicators',
+  'crm_leads',
+  'crm_deals',
+  'crm_funnel',
+];
 const visibleNavigation = computed(() =>
   navigation.filter(
     item =>
@@ -116,62 +117,56 @@ const visibleNavigation = computed(() =>
       store.getters.getCurrentRole === 'administrator'
   )
 );
-
-const activeTabClass = item => {
-  if (route.name !== item.name)
-    return {
-      blue: 'border-n-blue-6 bg-n-blue-2 text-n-blue-11 hover:bg-n-blue-3',
-      cyan: 'border-n-teal-6 bg-n-teal-2 text-n-teal-11 hover:bg-n-teal-3',
-      violet: 'border-n-iris-6 bg-n-iris-2 text-n-iris-11 hover:bg-n-iris-3',
-      orange:
-        'border-n-amber-6 bg-n-amber-2 text-n-amber-11 hover:bg-n-amber-3',
-      green: 'border-n-teal-6 bg-n-teal-2 text-n-teal-11 hover:bg-n-teal-3',
-      rose: 'border-n-ruby-6 bg-n-ruby-2 text-n-ruby-11 hover:bg-n-ruby-3',
-    }[item.tone];
-  const tones = {
-    blue: 'bg-n-brand',
-    cyan: 'bg-cyan-700',
-    violet: 'bg-[#6d28d9]',
-    orange: 'bg-orange-700',
-    green: 'bg-emerald-700',
-    rose: 'bg-rose-700',
-  };
-  return `${tones[item.tone] || tones.blue} border-transparent text-white shadow-sm`;
-};
-
-const updateOverflow = () => {
-  const element = tabList.value;
-  if (!element) return;
-  const offset = Math.abs(element.scrollLeft);
-  canScrollBack.value = offset > 1;
-  canScrollForward.value =
-    element.scrollWidth - element.clientWidth - offset > 1;
-};
-const revealActiveTab = async () => {
-  await nextTick();
-  const element = tabList.value;
-  const activeTab = element?.querySelector('[aria-current="page"]');
-  if (activeTab) {
-    const listBounds = element.getBoundingClientRect();
-    const tabBounds = activeTab.getBoundingClientRect();
-    const left =
-      tabBounds.left < listBounds.left
-        ? tabBounds.left - listBounds.left
-        : Math.max(0, tabBounds.right - listBounds.right);
-    if (left) element.scrollBy({ left });
-  }
-  updateOverflow();
-};
-const scrollTabs = direction => {
-  const element = tabList.value;
-  const rtl = getComputedStyle(element).direction === 'rtl';
-  element.scrollBy({
-    left: direction * (rtl ? -1 : 1) * element.clientWidth * 0.75,
-  });
-};
-watch(() => route.name, revealActiveTab);
-useResizeObserver(tabList, revealActiveTab);
-onMounted(revealActiveTab);
+const entry = item => ({ ...item, key: item.name, to: { name: item.name } });
+const primary = computed(() =>
+  visibleNavigation.value
+    .filter(item => primaryKeys.includes(item.name))
+    .map(entry)
+);
+const groups = computed(() =>
+  [
+    {
+      key: 'commercial',
+      label: t('CRM.NAVIGATION.COMMERCIAL'),
+      icon: 'i-lucide-briefcase-business',
+      tone: 'teal',
+      keys: [
+        'crm_wallet',
+        'crm_products',
+        'crm_proposals',
+        'crm_orders',
+        'crm_contracts',
+      ],
+    },
+    {
+      key: 'planning',
+      label: t('CRM.NAVIGATION.PLANNING'),
+      icon: 'i-lucide-calendar-check',
+      tone: 'amber',
+      keys: ['crm_activities', 'crm_calendar', 'crm_goals', 'crm_commissions'],
+    },
+    {
+      key: 'management',
+      label: t('CRM.NAVIGATION.MANAGEMENT'),
+      icon: 'i-lucide-settings',
+      tone: 'violet',
+      keys: ['crm_management', 'crm_settings'],
+    },
+  ].map(group => ({
+    ...group,
+    entries: visibleNavigation.value
+      .filter(item => group.keys.includes(item.name))
+      .map(entry),
+  }))
+);
+const activeKey = computed(
+  () =>
+    ({
+      crm_order_new: 'crm_orders',
+      crm_contract_new: 'crm_contracts',
+      crm_contract_templates: 'crm_contracts',
+    })[route.name] || route.name
+);
 </script>
 
 <template>
@@ -213,55 +208,13 @@ onMounted(revealActiveTab);
           <i class="i-lucide-plus size-4" /> Novo lead
         </RouterLink>
       </div>
-      <nav
-        class="relative flex min-w-0 items-center gap-2 pb-3"
-        :aria-label="t('CRM.NAVIGATION.LABEL')"
-      >
-        <Button
-          v-show="canScrollBack || canScrollForward"
-          variant="outline"
-          color="slate"
-          icon="i-lucide-chevron-left"
-          class="shrink-0 rtl:rotate-180"
-          :disabled="!canScrollBack"
-          :aria-label="t('CRM.NAVIGATION.PREVIOUS')"
-          @click="scrollTabs(-1)"
-        />
-        <div
-          ref="tabList"
-          class="flex min-w-0 flex-1 gap-2 overflow-x-auto py-1"
-          @scroll="updateOverflow"
-        >
-          <RouterLink
-            v-for="item in visibleNavigation"
-            :key="item.name"
-            :to="{ name: item.name }"
-            :aria-current="route.name === item.name ? 'page' : undefined"
-            class="jrc-crm-tab flex shrink-0 items-center gap-2 whitespace-nowrap rounded-xl border px-3 py-2.5 text-sm font-medium transition focus-visible:ring-2 focus-visible:ring-n-blue-8"
-            :class="
-              activeTabClass(item) ||
-              'border-n-weak bg-n-solid-2 text-n-slate-11 hover:bg-n-alpha-2 hover:text-n-slate-12'
-            "
-          >
-            <span
-              class="grid size-6 place-content-center rounded-lg bg-n-alpha-1 text-current"
-            >
-              <Icon :icon="item.icon" class="size-4" />
-            </span>
-            {{ item.label }}
-          </RouterLink>
-        </div>
-        <Button
-          v-show="canScrollBack || canScrollForward"
-          variant="outline"
-          color="slate"
-          icon="i-lucide-chevron-right"
-          class="shrink-0 rtl:rotate-180"
-          :disabled="!canScrollForward"
-          :aria-label="t('CRM.NAVIGATION.NEXT')"
-          @click="scrollTabs(1)"
-        />
-      </nav>
+      <ModuleTabs
+        class="relative mb-3"
+        :label="t('CRM.NAVIGATION.LABEL')"
+        :items="primary"
+        :groups="groups"
+        :active-key="activeKey"
+      />
     </header>
     <main class="min-h-0 flex-1 overflow-auto">
       <RouterView :key="route.params.accountId" />

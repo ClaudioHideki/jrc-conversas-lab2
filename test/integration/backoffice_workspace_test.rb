@@ -200,4 +200,39 @@ class BackofficeWorkspaceIntegrationTest < Minitest::Test
     assert body['summary'].key?('average_open_hours')
   end
 
+  def test_dashboard_uses_authorized_totals_personal_queue_and_observed_times
+    now = Time.current.change(usec: 0)
+    @request.update_columns(created_at: now - 3600, first_action_at: now - 1800)
+    other = @account.jrc_crm_backoffice_requests.create!(sales_order: @order, contact: @contact, owner: @agent,
+      requested_by: @admin, request_kind: 'change', title: 'Agent operation')
+    @api.get "#{@url}/workspace", params: { view: 'overview', per_page: 1, user_id: @agent.id }, headers: @headers
+    body = @api.response.parsed_body
+    assert_equal 200, @api.response.status
+    assert_equal 2, body.dig('summary', 'total')
+    assert_equal 2, body.dig('summary', 'statuses').values.sum
+    assert_equal 2, body.dig('summary', 'kinds').sum { |item| item['total'] }
+    assert_equal [@request.id], body.dig('dashboard', 'mine').map { |item| item['id'] }
+    assert_equal 1, body.dig('dashboard', 'mine_total')
+    assert_equal 1800, body.dig('summary', 'observed', 'first_action_seconds')
+    assert_nil body.dig('summary', 'observed', 'completion_seconds')
+    @api.get "#{@url}/workspace", params: { view: 'overview', owner_id: @admin.id }, headers: @agent.create_new_auth_token
+    assert_equal 0, @api.response.parsed_body.dig('summary', 'total')
+    assert_empty @api.response.parsed_body.dig('dashboard', 'mine')
+    assert_equal other.owner_id, @agent.id
+  end
+
+  def test_detail_context_uses_native_workflow_and_does_not_grant_origin_module_access
+    @request.update_columns(owner_id: @agent.id)
+    @api.get "#{@url}/#{@request.id}", headers: @agent.create_new_auth_token
+    assert_equal 200, @api.response.status
+    body = @api.response.parsed_body
+    assert_equal false, body.dig('commercial', 'order_accessible')
+    assert_equal @admin.name, body.dig('commercial', 'owner', 'name')
+    assert_nil body.dig('commercial', 'deal')
+    assert_includes body['workflow_stages'], 'analysis'
+    refute_includes body['workflow_stages'], 'documentation'
+    @api.get "#{@url}/#{@request.id}", headers: @headers
+    assert_equal true, @api.response.parsed_body.dig('commercial', 'order_accessible')
+  end
+
 end

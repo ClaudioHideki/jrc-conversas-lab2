@@ -17,10 +17,16 @@ const props = defineProps({
 const route = useRoute();
 const { text, label, date, late, destination, deadline, slaLabel } =
   useBackofficePresentation();
+let initialStatus = 'active';
+if (statuses.includes(route.query.status)) initialStatus = route.query.status;
+if (route.query.status === 'all') initialStatus = '';
 const { filters, result, options, loading, error, load } =
   useBackofficeWorkspace(props.mine ? 'mine' : props.section, {
     stage: stages.includes(route.query.stage) ? route.query.stage : '',
     company_id: route.query.companyId || '',
+    status: initialStatus,
+    operations_queue_id: route.query.queueId || '',
+    overdue: route.query.overdue === 'true' ? 'true' : '',
   });
 const openRequest = id => ({
   ...destination(id),

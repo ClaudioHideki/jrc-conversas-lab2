@@ -67,3 +67,12 @@ it.each([
     expect(item(feature, permission).disabled).toBe(true);
   }
 );
+
+it('keeps CRM as a single module entry, with its internal destinations in horizontal tabs', () => {
+  const crm = objects.find(row => row.type === 'ObjectExpression' && row.properties.some(property => property.key.name === 'name' && property.value.value === 'CRM'));
+  const value = runInNewContext(`(${source.slice(crm.start, crm.end)})`, { t: key => key, accountScopedRoute: name => ({ name }), hasJrcCrm: { value: true }, hasCrmUserAccess: { value: true } });
+  expect(value.children).toBeUndefined();
+  expect(value.to.name).toBe('crm_dashboard');
+  expect(value.activeOn).toContain('crm_order_new');
+  expect(value.activeOn).toContain('crm_contract_new');
+});
