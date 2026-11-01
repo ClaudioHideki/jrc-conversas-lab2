@@ -220,7 +220,6 @@ const pay = () =>
                 type="number"
                 min="0.01"
                 step="0.01"
-                :max="invoice.balance_cents / 100"
                 required
                 class="mt-1 block rounded-lg border border-n-weak bg-n-solid-2 p-2"
               />
