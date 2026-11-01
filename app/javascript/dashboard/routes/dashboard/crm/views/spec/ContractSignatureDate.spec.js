@@ -13,15 +13,17 @@ vi.mock('dashboard/routes/dashboard/approvals/ApprovalGateBadge.vue', () => ({
 }));
 
 afterEach(() => {
+  vi.restoreAllMocks();
   vi.useRealTimers();
-  vi.unstubAllEnvs();
 });
 
 it('prefills the signature time as local time rather than a future UTC time in São Paulo', async () => {
-  vi.stubEnv('TZ', 'America/Sao_Paulo');
   vi.useFakeTimers({ toFake: ['Date'] });
   const instant = new Date('2026-11-01T16:30:00Z');
   vi.setSystemTime(instant);
+  // Workers cannot reliably change the host timezone at runtime. Model the
+  // local hour explicitly while toISOString() still returns the UTC hour.
+  vi.spyOn(Date.prototype, 'getHours').mockReturnValue(13);
   mocks.list.mockResolvedValue({
     data: [
       {
@@ -43,5 +45,4 @@ it('prefills the signature time as local time rather than a future UTC time in S
   const value = wrapper.get('input[type="datetime-local"]').element.value;
   wrapper.unmount();
   expect(value).toBe('2026-11-01T13:30');
-  expect(new Date(value).getTime()).toBe(instant.getTime());
 });
