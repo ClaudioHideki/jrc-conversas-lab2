@@ -7,6 +7,12 @@ on:
       - 'app/controllers/api/v1/accounts/crm/**'
       - 'app/services/jrc_crm/**'
       - 'app/models/jrc_crm/**'
+      - 'app/models/jrc_backoffice/**'
+      - 'app/services/jrc_backoffice/**'
+      - 'app/jobs/jrc_backoffice/**'
+      - 'db/migrate/*backoffice*'
+      - 'script/*backoffice_candidate*'
+      - 'docker/Dockerfile'
       - 'app/services/jrc_operations/**'
       - 'test/integration/backoffice*'
       - '.github/workflows/backoffice-flow.yml'
@@ -21,7 +27,7 @@ concurrency:
 jobs:
   commercial-flow:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 60
     services:
       postgres:
         image: pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a
@@ -50,7 +56,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Dependencias nativas
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libpq-dev libvips-dev
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libpq-dev libvips-dev imagemagick poppler-utils tesseract-ocr tesseract-ocr-por tesseract-ocr-eng redis-server
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.4.4'
@@ -58,7 +64,35 @@ jobs:
           bundler-cache: true
       - name: Preparar banco descartavel
         run: bundle exec rails db:schema:load
+      - name: Dependencias OCR e upgrade das duas migrations com dados legados
+        run: bundle exec rails runner script/validate_backoffice_candidate.rb
+      - name: Redis de concorrencia nativa
+        run: redis-server --bind 127.0.0.1 --port 6380 --daemonize yes --save '' --appendonly no
       - name: Acesso, filtros, paginacao e SLA
         run: bundle exec rails runner test/integration/backoffice_workspace_test.rb
       - name: Pedido ate conclusao do Backoffice
         run: bundle exec rails runner test/integration/backoffice_commercial_flow_test.rb
+      - name: Regressao nativa CRM, Central, Service Desk e permissoes
+        run: |
+          bundle exec rspec spec/services/jrc_crm spec/requests/api/v1/accounts/crm \
+            spec/services/jrc_approvals spec/requests/api/v1/accounts/jrc_approvals \
+            spec/models/jrc_service_desk spec/policies/jrc_service_desk spec/services/jrc_service_desk \
+            spec/requests/api/v1/accounts/jrc_service_desk --tag '~sd_concurrency' \
+            --format progress --format json --out /tmp/backoffice-candidate-core-rspec.json
+      - name: Regressao de Projetos, operacoes, NICO e contatos
+        run: |
+          bundle exec rspec spec/services/jrc_projects spec/services/jrc_operations \
+            spec/requests/api/v1/accounts/jrc_operations/project*_spec.rb \
+            spec/services/jrc_nico/runtime_client_spec.rb spec/services/jrc_nico/run_capacity_spec.rb \
+            spec/services/jrc_nico/helpdesk/policies_spec.rb \
+            spec/controllers/api/v1/accounts/contacts_controller_spec.rb \
+            --format progress --format json --out /tmp/backoffice-candidate-integrations-rspec.json
+      - name: Guardar resultados sem alterar os gates
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backoffice-candidate-native-results
+          path: /tmp/backoffice-candidate-*-rspec.json
+          if-no-files-found: ignore
+      - name: Confirmar fontes preservadas
+        run: git diff --exit-code
