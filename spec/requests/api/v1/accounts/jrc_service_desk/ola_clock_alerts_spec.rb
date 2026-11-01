@@ -22,7 +22,9 @@ RSpec.describe 'Durable internal OLA alerts and scoped metrics', type: :request 
 
   # Mail delivery uses Rails' test adapter. Declare the configured SMTP state
   # explicitly so preference/uncertain-result cases do not depend on local ENV.
-  around { |example| with_modified_env(SMTP_ADDRESS: 'smtp.example.test') { example.run } }
+  around do |example|
+    with_modified_env(SMTP_ADDRESS: 'smtp.example.test', FRONTEND_URL: 'https://jrc.example.test') { example.run }
+  end
 
   def observe
     travel_to(Time.utc(2026, 10, 24, 10)) do
@@ -66,7 +68,24 @@ RSpec.describe 'Durable internal OLA alerts and scoped metrics', type: :request 
     expect(response).to have_http_status(:ok), response.body
     JrcServiceDesk::ClockAlertJob.perform_now(row.id)
     expect(row.reload).to have_attributes(state: 'accepted', reason: 'smtp_accepted_not_delivery_confirmation', attempts: 1)
+    mail = ActionMailer::Base.deliveries.last
+    expect(mail.to).to eq([sd_user.email])
+    expect(mail.body.encoded).to include("https://jrc.example.test/app/accounts/#{sd_account.id}/service-desk/tickets/#{ticket.id}")
+    expect(row.accepted_at).to be_present
     expect(ticket.ticket_events.where(event_type: 'resource_updated').where("data->>'clock_alert_retry_id' = ?", row.id.to_s).count).to eq(1)
+  end
+
+  it 'records missing mail URL configuration as unknown without accepting or retrying delivery' do
+    row = observe.find_by!(channel: 'email')
+    NotificationSetting.find_or_create_by!(account: sd_account, user: sd_user).update!(email_service_desk_clock: true)
+    with_modified_env(FRONTEND_URL: nil) do
+      expect { 2.times { JrcServiceDesk::ClockAlertJob.perform_now(row.id) } }.not_to change(ActionMailer::Base.deliveries, :count)
+    end
+    expect(row.reload).to have_attributes(state: 'unknown', reason: 'provider_result_unknown', attempts: 1, accepted_at: nil)
+    post "#{root}/automation_insights/clock_alerts/retry", headers: headers, as: :json,
+      params: { unit_id: sd_unit.id, alert_id: row.id, expected_attempts: 1, reason: 'Configuration must be reconciled first' }
+    expect(response).to have_http_status(:conflict)
+    expect(row.reload.state).to eq('unknown')
   end
 
   it 'blocks a queued alert after the current queue policy is changed, preserving its historical threshold' do

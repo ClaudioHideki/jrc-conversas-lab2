@@ -43,7 +43,7 @@ A relação parte de `crm_scope.jrc_crm_backoffice_requests` e passa por `visibl
 
 `BackofficeRequest#stage_blockers` é a extração somente de leitura das dependências já verificadas por `advance!`. O avanço continua revalidando essas dependências, os gates comerciais e as assinaturas, sob os locks existentes. A prévia não é autorização para executar uma ação. Os componentes de aprovação existentes mostram os gates comerciais no detalhe.
 
-Não foram adicionados modelos de processo, migrations, dependências, integrações externas, execução automática do NICO ou solicitações sem pedido. A normalização de metadata e o construtor de processos permanecem para as próximas entregas.
+Na entrega inicial descrita nesta seção, não foram adicionados modelos de processo, migrations, dependências, integrações externas, execução automática do NICO ou solicitações sem pedido. A atualização candidata ao final deste documento registra o escopo posterior e suas pendências.
 
 ## Validação
 
@@ -72,3 +72,35 @@ Uma segunda rodada percorreu os componentes reais pelo navegador, em `America/Sa
 Essa rodada encontrou e corrigiu dois problemas: o formulário de assinatura preenchia UTC em um campo `datetime-local`, gerando uma data futura no fuso de São Paulo; e a mudança de área após avançar perdia a solicitação selecionada. A assinatura usa a hora local e a navegação preserva `requestId`. As validações de horário e dependências no servidor permanecem obrigatórias.
 
 A suíte ampliada também verifica download dos documentos persistidos, recusa de assinatura futura, pagamento com implantação pendente e o caminho com Projeto de Implantação: o pedido não pode ser concluído sem tarefas finalizadas e aceite do projeto. O workflow `.github/workflows/backoffice-flow.yml` repete os testes HTTP em banco descartável para pull requests e execução manual; ele não publica nem implanta a aplicação.
+
+## Versão candidata de homologação — atualização de 01/11/2026
+
+Esta seção complementa a entrega inicial descrita acima. O Backoffice continua parcial em relação ao Word; a candidata não representa a conclusão integral do projeto.
+
+A implementação aprovada em `a2db8b6d` acrescenta versões documentais imutáveis, decisões humanas com motivo e pré-análise local por Poppler/Tesseract. A pré-análise preserva evidências estruturadas e confiança medida, exige revisão humana e não aprova documentos automaticamente. A fila de processamento documental é `low`.
+
+As migrations necessárias são `20261101190000` (versões, análises e decisões documentais) e `20261101200000` (versão do fluxo). Registros existentes permanecem no fluxo 1; novos atendimentos de execução usam o fluxo 2: análise/documentação, aprovação quando exigida, contrato, implantação, provisionamento e financeiro. Contrato e assinatura continuam sujeitos aos serviços e políticas nativos. A imagem precisa de Poppler, Tesseract e idiomas `por`/`eng`.
+
+A correção dos gates preserva esse fluxo e fecha o intervalo de proteção financeira entre a aprovação registrada do pedido e a geração do contrato. A proteção anterior por proposta aceita ou contrato existente continua válida para registros legados. Os testes HTTP cobrem tentativas de alterar itens, desconto e frete efetivo, antes e depois do contrato e durante aprovação operacional pendente.
+
+Os dois testes antigos de navegação verificavam setas de rolagem removidas pelo layout aprovado. A regressão atual verifica destinos únicos, seleção após mudanças de rota, grupos, fechamento por seleção/Escape e revogação das opções administrativas. O componente real também foi exercitado em Chromium em 360, 768 e 1366 pixels, nos temas claro e escuro.
+
+Três expectativas globais `Message.count == 0` do Service Desk confundiam as operações internas com duas mensagens sintéticas de propostas criadas pelos testes PostgreSQL de concorrência da Central de Aprovações. O reproduzidor na base `ee9c1aa3f2957b5a58d4dfaf33f71fc398b56606` confirma a mesma condição. As regressões corrigidas exigem que a operação e seu replay não alterem o total global de mensagens, que a conta do chamado continue sem mensagens e que `SendReplyJob` não seja solicitado; os registros de concorrência são preservados. Notas internas e tarefas continuam verificados separadamente, incluindo unicidade e visibilidade.
+
+O teste SMTP não configurava `FRONTEND_URL`, obrigatória para renderizar o link do chamado. Isso também foi reproduzido na base. O fixture agora declara URL sintética e usa o adaptador de e-mail de teste. Preferência explícita, autorização do retry e estado desconhecido continuam obrigatórios; configuração ausente ou resultado incerto não são convertidos em aceite. Aceite SMTP continua distinto de entrega ao destinatário.
+
+### Limitações e pendências preservadas do Word
+
+- Portal do cliente e concessões de acesso; classificação/extração estruturada de outros tipos documentais e verificações de validade/legalidade.
+- Antimalware e políticas de retenção/criptografia implantadas; visualizador incorporado e pacote documental ZIP/resumo final.
+- Linha do tempo e lembretes completos da Central; revisões/diffs contratuais imutáveis e provedores externos de assinatura com seus callbacks.
+- BI e exportações avançadas por perfil; NICO contextual e passagem para CS.
+- Idempotência de todos os comandos além do upload e das unicidades nativas; respostas externas/equipes em pendências e abertura automática de pendência por rejeição documental.
+
+### Gates e publicação controlada
+
+`backoffice-flow.yml` valida as migrations em `backoffice_test`, dependências OCR, testes HTTP e comissões. O RSpec ampliado coleta o plano completo e o divide em duas execuções obrigatórias: regressão principal e concorrência do Service Desk, em bancos descartáveis separados. A execução concorrente usa um nome já aceito pelos guards nativos e ambos os opt-ins. Um validador compara os IDs executados com todo o plano e rejeita omissões, duplicidades, falhas ou exemplos pendentes. Essa separação preserva as evidências confirmadas por conexões independentes sem contaminar os demais testes do Service Desk. Projetos, operações, NICO e contatos têm uma etapa própria de regressão.
+
+`build-ghcr.yml` exige o mesmo SHA e uma execução bem-sucedida do gate nativo para publicar a candidata. O build testa frontend e identifica o SHA interno. O smoke inicia Rails e Sidekiq com a mesma imagem em rede, armazenamento e banco exclusivos, exige heartbeat e processamento OCR real na fila `low`. Somente depois pode publicar uma tag SHA ainda inexistente no GHCR. Nenhum desses fluxos implanta produção, executa migrations em produção ou substitui `latest`.
+
+Os resultados efetivos, URLs de execução, SHA final e eventual digest devem ser consultados no relatório da rodada e nos workflows. Uma tag planejada ou uma rota HTTP 200, isoladamente, não demonstram publicação nem aprovação do fluxo.

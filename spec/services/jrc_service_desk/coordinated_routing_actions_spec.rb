@@ -98,9 +98,15 @@ RSpec.describe 'Native coordinated routing actions' do
   it 'creates internal tasks, labels and notes through native commands exactly once' do
     label = create(:label, account: sd_account, title: 'synthetic-route')
     output.merge!('label_ids' => [label.id], 'task' => { 'title' => 'Synthetic first action', 'description' => 'Internal only' }, 'internal_note' => 'Synthetic internal instruction')
-    publisher.call(unit_id: sd_unit.id, kind: 'routing', definition: definition, enabled: true, expected_version: 0)
-    ticket = workflow.call(unit_id: sd_unit.id, attributes: sd_create_attributes, idempotency_key: 'actions-once')
-    replay = workflow.call(unit_id: sd_unit.id, attributes: sd_create_attributes, idempotency_key: 'actions-once')
+    expect(SendReplyJob).not_to receive(:perform_later)
+    ticket = replay = nil
+    # Other suites deliberately commit synthetic proposal messages on separate connections.
+    # Internal routing must create no Message in any account, including on replay.
+    expect do
+      publisher.call(unit_id: sd_unit.id, kind: 'routing', definition: definition, enabled: true, expected_version: 0)
+      ticket = workflow.call(unit_id: sd_unit.id, attributes: sd_create_attributes, idempotency_key: 'actions-once')
+      replay = workflow.call(unit_id: sd_unit.id, attributes: sd_create_attributes, idempotency_key: 'actions-once')
+    end.not_to change(Message, :count)
     expect(replay.id).to eq(ticket.id)
     expect(ticket.reload.label_list).to contain_exactly(label.title)
     expect(sd_contact.reload.label_list).to be_empty
@@ -108,7 +114,7 @@ RSpec.describe 'Native coordinated routing actions' do
     expect(ticket.ticket_tasks.first.visibility).to eq('internal')
     expect(ticket.ticket_notes.count).to eq(1)
     expect(ticket.ticket_notes.first.visibility).to eq('internal')
-    expect(Message.count).to eq(0)
+    expect(Message.where(account: sd_account)).to be_empty
     expect(JrcServiceDesk::NotificationDelivery.count).to eq(0)
   end
 

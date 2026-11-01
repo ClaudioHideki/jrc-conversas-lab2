@@ -12,6 +12,7 @@ on:
       - 'app/jobs/jrc_backoffice/**'
       - 'db/migrate/*backoffice*'
       - 'script/*backoffice_candidate*'
+      - 'script/validate_backoffice_rspec_coverage.rb'
       - 'docker/Dockerfile'
       - 'app/services/jrc_operations/**'
       - 'test/integration/backoffice*'
@@ -72,13 +73,42 @@ jobs:
         run: bundle exec rails runner test/integration/backoffice_workspace_test.rb
       - name: Pedido ate conclusao do Backoffice
         run: bundle exec rails runner test/integration/backoffice_commercial_flow_test.rb
-      - name: Regressao nativa CRM, Central, Service Desk e permissoes
+      - name: Regressao de comissoes
+        run: bundle exec ruby test/jrc_consolidation/commission_domain_test.rb
+      - name: Coletar plano completo dos exemplos nativos sem executar testes
         run: |
           bundle exec rspec spec/services/jrc_crm spec/requests/api/v1/accounts/crm \
             spec/services/jrc_approvals spec/requests/api/v1/accounts/jrc_approvals \
             spec/models/jrc_service_desk spec/policies/jrc_service_desk spec/services/jrc_service_desk \
-            spec/requests/api/v1/accounts/jrc_service_desk --tag '~sd_concurrency' \
+            spec/requests/api/v1/accounts/jrc_service_desk --dry-run --seed 20261101 --order defined \
+            --format json --out /tmp/backoffice-candidate-plan-rspec.json
+      - name: Regressao principal CRM, Central, Service Desk e permissoes
+        run: |
+          bundle exec rspec spec/services/jrc_crm spec/requests/api/v1/accounts/crm \
+            spec/services/jrc_approvals spec/requests/api/v1/accounts/jrc_approvals \
+            spec/models/jrc_service_desk spec/policies/jrc_service_desk spec/services/jrc_service_desk \
+            spec/requests/api/v1/accounts/jrc_service_desk --tag '~sd_concurrency' --seed 20261101 --order defined \
             --format progress --format json --out /tmp/backoffice-candidate-core-rspec.json
+      - name: Banco exclusivo para testes que confirmam dados em conexoes independentes
+        env:
+          POSTGRES_DATABASE: jrc_sd_bc_portal_concurrency_20261025_test
+        run: bundle exec rails db:create db:schema:load
+      - name: Regressao de concorrencia nativa do Service Desk
+        env:
+          POSTGRES_DATABASE: jrc_sd_bc_portal_concurrency_20261025_test
+          JRC_SD_CONCURRENCY: '1'
+          JRC_SD_INTEGRATED_CONCURRENCY: '1'
+        run: |
+          bundle exec rspec spec/services/jrc_crm spec/requests/api/v1/accounts/crm \
+            spec/services/jrc_approvals spec/requests/api/v1/accounts/jrc_approvals \
+            spec/models/jrc_service_desk spec/policies/jrc_service_desk spec/services/jrc_service_desk \
+            spec/requests/api/v1/accounts/jrc_service_desk --tag sd_concurrency --seed 20261101 --order defined \
+            --format progress --format json --out /tmp/backoffice-candidate-concurrency-rspec.json
+      - name: Exigir execucao de todo o plano, sem exemplos omitidos ou pendentes
+        run: |
+          bundle exec ruby script/validate_backoffice_rspec_coverage.rb \
+            /tmp/backoffice-candidate-plan-rspec.json /tmp/backoffice-candidate-core-rspec.json \
+            /tmp/backoffice-candidate-concurrency-rspec.json
       - name: Regressao de Projetos, operacoes, NICO e contatos
         run: |
           bundle exec rspec spec/services/jrc_projects spec/services/jrc_operations \
@@ -86,7 +116,8 @@ jobs:
             spec/services/jrc_nico/runtime_client_spec.rb spec/services/jrc_nico/run_capacity_spec.rb \
             spec/services/jrc_nico/helpdesk/policies_spec.rb \
             spec/controllers/api/v1/accounts/contacts_controller_spec.rb \
-            --format progress --format json --out /tmp/backoffice-candidate-integrations-rspec.json
+            --seed 20261101 --format progress --format json --out /tmp/backoffice-candidate-integrations-rspec.json
+          ruby -rjson -e 'abort "Pending examples are not an approved gate" unless JSON.parse(File.read(ARGV.fetch(0))).fetch("summary").fetch("pending_count").zero?' /tmp/backoffice-candidate-integrations-rspec.json
       - name: Guardar resultados sem alterar os gates
         if: always()
         uses: actions/upload-artifact@v4
