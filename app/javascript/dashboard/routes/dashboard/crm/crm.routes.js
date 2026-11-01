@@ -24,7 +24,8 @@ const ContractTemplates = () =>
 const GoalsView = () => import('./views/goals/GoalsView.vue');
 const CommissionsView = () => import('./views/commissions/CommissionsView.vue');
 const Customer360View = () => import('./views/customers/Customer360View.vue');
-const BackofficeView = () => import('./views/backoffice/BackofficeView.vue');
+const BackofficeLayout = () =>
+  import('./views/backoffice/BackofficeLayout.vue');
 const ManagementView = () => import('./views/management/ManagementView.vue');
 const CrmSettingsView = () => import('./views/settings/CrmSettingsView.vue');
 
@@ -153,9 +154,15 @@ export default {
           meta,
         },
         {
+          path: 'backoffice/requests/:requestId',
+          name: 'crm_backoffice_request',
+          component: BackofficeLayout,
+          meta,
+        },
+        {
           path: 'backoffice/:section?',
           name: 'crm_backoffice',
-          component: BackofficeView,
+          component: BackofficeLayout,
           meta,
         },
         {

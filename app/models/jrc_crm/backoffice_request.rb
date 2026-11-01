@@ -145,28 +145,8 @@ module JrcCrm
       Array((metadata || {})['issues']).reject { |issue| %w[resolved canceled].include?((issue['status'] || issue[:status]).to_s) }
     end
 
-    private
-
-    def prepare_operational_routing
-      return unless sales_order && account
-      routing = JrcOperations::BackofficeRouter.new(account: account, order: sales_order, request_kind: request_kind,
-        priority: priority, preferred_owner: owner).call
-      self.operations_queue ||= routing.queue
-      self.operations_sla_policy ||= routing.policy
-      self.owner = routing.owner
-      JrcOperations::SlaClock.new(self).start!
-    end
-
-    def sync_operational_status
-      from, to = saved_change_to_status
-      JrcOperations::SlaClock.new(self).status_changed!(from: from, to: to)
-    end
-
-    def sync_operational_stage
-      JrcOperations::SlaClock.new(self).stage_changed!
-    end
-
-    def validate_stage_dependencies!
+    # Read-only preview of the same dependencies enforced by advance!.
+    def stage_blockers
       errors = []
       data = (metadata || {}).with_indifferent_access
       snap = (sales_order.snapshot || {}).with_indifferent_access
@@ -221,10 +201,36 @@ module JrcCrm
         errors << 'Há faturamento/recebimento pendente.' unless sales_order.invoices.any?(&:paid?)
       end
 
-      if errors.any?
-        errors.each { |message| self.errors.add(:base, message) }
-        raise ActiveRecord::RecordInvalid.new(self)
-      end
+      errors
+    end
+
+    private
+
+    def prepare_operational_routing
+      return unless sales_order && account
+      routing = JrcOperations::BackofficeRouter.new(account: account, order: sales_order, request_kind: request_kind,
+        priority: priority, preferred_owner: owner).call
+      self.operations_queue ||= routing.queue
+      self.operations_sla_policy ||= routing.policy
+      self.owner = routing.owner
+      JrcOperations::SlaClock.new(self).start!
+    end
+
+    def sync_operational_status
+      from, to = saved_change_to_status
+      JrcOperations::SlaClock.new(self).status_changed!(from: from, to: to)
+    end
+
+    def sync_operational_stage
+      JrcOperations::SlaClock.new(self).stage_changed!
+    end
+
+    def validate_stage_dependencies!
+      blockers = stage_blockers
+      return if blockers.empty?
+
+      blockers.each { |message| errors.add(:base, message) }
+      raise ActiveRecord::RecordInvalid.new(self)
     end
 
     def bool(value)
