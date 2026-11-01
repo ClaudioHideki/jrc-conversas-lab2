@@ -80,6 +80,8 @@ export const backofficeAPI = make('backoffice_requests');
 backofficeAPI.decideOrder = (id, data) =>
   axios.post(`${backofficeAPI.url}/${id}/decide_order`, data);
 backofficeAPI.show = id => axios.get(`${backofficeAPI.url}/${id}`);
+backofficeAPI.workspace = params =>
+  axios.get(`${backofficeAPI.url}/workspace`, { params });
 backofficeAPI.summary = () => axios.get(`${backofficeAPI.url}/summary`);
 backofficeAPI.advance = id => axios.post(`${backofficeAPI.url}/${id}/advance`);
 backofficeAPI.uploadDocuments = (id, files) =>

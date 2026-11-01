@@ -1,0 +1,64 @@
+name: Backoffice - fluxo comercial e isolamento
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'app/controllers/api/v1/accounts/crm/**'
+      - 'app/services/jrc_crm/**'
+      - 'app/models/jrc_crm/**'
+      - 'app/services/jrc_operations/**'
+      - 'test/integration/backoffice*'
+      - '.github/workflows/backoffice-flow.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backoffice-flow-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  commercial-flow:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: disposable-test-only
+          POSTGRES_DB: backoffice_test
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 12
+      redis:
+        image: redis:7.4.0-alpine@sha256:c35af3bbcef51a62c8bae5a9a563c6f1b60d7ebaea4cb5a3ccbcc157580ae098
+        ports: ['6379:6379']
+    env:
+      RAILS_ENV: test
+      POSTGRES_HOST: 127.0.0.1
+      POSTGRES_USERNAME: postgres
+      POSTGRES_PASSWORD: disposable-test-only
+      POSTGRES_DATABASE: backoffice_test
+      REDIS_URL: redis://127.0.0.1:6379/15
+      SECRET_KEY_BASE: isolated-backoffice-ci-not-a-production-secret
+      BUNDLE_FROZEN: 'true'
+      LOG_LEVEL: error
+      TZ: UTC
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Dependencias nativas
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libpq-dev libvips-dev
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4.4'
+          bundler: 2.5.16
+          bundler-cache: true
+      - name: Preparar banco descartavel
+        run: bundle exec rails db:schema:load
+      - name: Acesso, filtros, paginacao e SLA
+        run: bundle exec rails runner test/integration/backoffice_workspace_test.rb
+      - name: Pedido ate conclusao do Backoffice
+        run: bundle exec rails runner test/integration/backoffice_commercial_flow_test.rb

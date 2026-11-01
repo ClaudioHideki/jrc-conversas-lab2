@@ -14,6 +14,8 @@ import {
 import { useAlert } from 'dashboard/composables';
 import { useI18n } from 'vue-i18n';
 import { useCommercialLabels } from '../../composables/useCommercialLabels';
+defineProps({ embedded: { type: Boolean, default: false } });
+
 const { t } = useI18n();
 const { statusLabel: commercialStatusLabel, issueTypeLabel } = useCommercialLabels();
 
@@ -64,7 +66,11 @@ const openContract = () => router.push({ name:'crm_contracts', query:{ contractI
 const continueRequest = async () => {
   if (!selected.value) return;
   const section = Object.entries(stageByTab).find(([,stages]) => stages.includes(selected.value.stage))?.[0] || 'requests';
-  await router.push({ name:'crm_backoffice', params:{ accountId:route.params.accountId, section } });
+  await router.push({
+    name: 'crm_backoffice',
+    params: { accountId: route.params.accountId, section },
+    query: { requestId: selected.value.id },
+  });
 };
 const summary = ref({});
 const agents = ref([]);
@@ -413,6 +419,21 @@ const money = value =>
 const formatDate = value =>
   value ? new Date(value).toLocaleString('pt-BR') : 'Sem prazo';
 
+const openRequest = async request => {
+  try {
+    const { data } = await backofficeAPI.show(request.id);
+    selected.value = data;
+    provisioningMode.value = data.metadata?.provisioning_completion_mode || 'manual';
+    provisioningExternalReference.value = data.metadata?.provisioning_external_reference || '';
+    provisioningConfirmed.value = false;
+  } catch (error) {
+    selected.value = null;
+    useAlert(
+      'Solicitação indisponível ou sem permissão de acesso.'
+    );
+  }
+};
+
 const load = async () => {
   loading.value = true;
   try {
@@ -435,8 +456,7 @@ const load = async () => {
         null;
     }
     if (selected.value) {
-      selected.value =
-        requests.value.find(item => item.id === selected.value.id) || null;
+      await openRequest({ id: selected.value.id });
     }
   } catch (error) {
     useAlert(
@@ -576,19 +596,6 @@ const registerPayment = async () => {
   }
 };
 
-
-const openRequest = async request => {
-  try {
-    const { data } = await backofficeAPI.show(request.id);
-    selected.value = data;
-    provisioningMode.value = data.metadata?.provisioning_completion_mode || 'manual';
-    provisioningExternalReference.value = data.metadata?.provisioning_external_reference || '';
-    provisioningConfirmed.value = false;
-  } catch (error) {
-    selected.value = request;
-    useAlert('Detalhes carregados parcialmente. Não foi possível obter o histórico completo.');
-  }
-};
 
 const uploadRequestDocuments = async () => {
   if (!selected.value || !documentFiles.value.length) {
@@ -749,11 +756,28 @@ watch(
     tab.value = validSections.includes(value) ? value : 'overview';
   }
 );
-onMounted(load);
+onMounted(async () => {
+  await load();
+  if (route.query.requestId) await openRequest({ id: route.query.requestId });
+});
+watch(
+  () => route.query.newRequest,
+  value => {
+    if (value !== '1') return;
+    showForm.value = true;
+    const query = { ...route.query };
+    delete query.newRequest;
+    router.replace({ query });
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
-  <div class="h-full overflow-auto bg-n-slate-2 p-4 sm:p-6">
+  <div
+    class="bg-n-slate-2"
+    :class="embedded ? '' : 'h-full overflow-auto p-4 sm:p-6'"
+  >
     <header class="flex flex-wrap items-center justify-between gap-3">
       <div>
         <p class="text-xs font-semibold text-emerald-700">CRM / Operações</p>
@@ -779,8 +803,14 @@ onMounted(load);
       </div>
     </header>
 
-    <div class="mt-4 grid gap-4 xl:grid-cols-[250px_minmax(0,1fr)]">
-      <aside class="h-fit rounded-2xl border border-slate-200 bg-n-solid-2 p-3 shadow-sm xl:sticky xl:top-3">
+    <div
+      class="mt-4 grid gap-4"
+      :class="{ 'xl:grid-cols-[250px_minmax(0,1fr)]': !embedded }"
+    >
+      <aside
+        v-if="!embedded"
+        class="h-fit rounded-2xl border border-slate-200 bg-n-solid-2 p-3 shadow-sm xl:sticky xl:top-3"
+      >
         <div class="mb-3 px-2">
           <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700">Áreas do Backoffice</p>
           <p class="mt-1 text-xs text-n-slate-11">Navegue pelas filas operacionais.</p>
@@ -1108,7 +1138,12 @@ onMounted(load);
       >
         <div class="flex justify-between">
           <h3 class="text-lg font-bold">Nova solicitação</h3>
-          <button type="button" title="Fechar" @click="showForm = false">
+          <button
+            type="button"
+            title="Fechar"
+            :aria-label="t('CRM.BACKOFFICE_WORKSPACE.CLOSE')"
+            @click="showForm = false"
+          >
             ×
           </button>
         </div>

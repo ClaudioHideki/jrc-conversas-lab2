@@ -748,6 +748,7 @@ Rails.application.routes.draw do
             end
             resources :backoffice_requests, only: [:index, :show, :create, :update] do
               get :summary, on: :collection
+              get :workspace, on: :collection
               member do
                 post :decide_order
                 post :advance

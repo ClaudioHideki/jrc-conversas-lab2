@@ -18,6 +18,11 @@ module Api::V1::Accounts::Crm
       render json: serialize(@request, include_history: true)
     end
 
+    def workspace
+      scope = visible_to_current_user(crm_scope.jrc_crm_backoffice_requests)
+      render json: JrcCrm::BackofficeWorkspace.new(scope: scope, user: Current.user, params: params).call
+    end
+
     def summary
       scope = visible_to_current_user(crm_scope.jrc_crm_backoffice_requests)
       active = scope.where(status: JrcCrm::BackofficeRequest::ACTIVE_STATUSES)
@@ -275,7 +280,10 @@ module Api::V1::Accounts::Crm
         business_unit: request.business_unit && { id: request.business_unit.id, name: request.business_unit.name }
       }
       if include_history
-        data[:history] = JrcCrm::AuditEvent.for_resource('JrcCrm::BackofficeRequest', request.id).recent.limit(200).map do |event|
+        data[:queue] = request.operations_queue && { id: request.operations_queue.id, name: request.operations_queue.name }
+        data[:sla] = JrcOperations::SlaClock.new(request).snapshot
+        data[:stage_blockers] = request.stage_blockers
+        data[:history] = crm_scope.jrc_crm_audit_events.for_resource('JrcCrm::BackofficeRequest', request.id).recent.limit(200).map do |event|
           { id: event.id, event_type: event.event_type, from_value: event.from_value, to_value: event.to_value,
             metadata: event.metadata, actor_id: event.actor_id, created_at: event.created_at }
         end
