@@ -5,6 +5,7 @@ module Api::V1::Accounts::Crm
     def index
       invoices = corporate_records(:jrc_crm_invoices).includes(:sales_order, :contract, :contact, :payments).order(created_at: :desc)
       invoices = invoices.joins(:sales_order).where(jrc_crm_sales_orders: { owner_id: Current.user.id }) unless crm_admin?
+      invoices = invoices.where(sales_order_id: params[:sales_order_id]) if params[:sales_order_id].present?
       render json: invoices.map { |invoice| serialize(invoice) }
     end
 

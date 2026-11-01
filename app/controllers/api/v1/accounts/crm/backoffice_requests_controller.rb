@@ -20,7 +20,7 @@ module Api::V1::Accounts::Crm
 
     def workspace
       scope = visible_to_current_user(crm_scope.jrc_crm_backoffice_requests)
-      render json: JrcCrm::BackofficeWorkspace.new(scope: scope, user: Current.user, params: params).call
+      render json: JrcCrm::BackofficeWorkspace.new(scope: scope, user: Current.user, params: params, account: crm_scope).call
     end
 
     def summary
@@ -280,6 +280,8 @@ module Api::V1::Accounts::Crm
         business_unit: request.business_unit && { id: request.business_unit.id, name: request.business_unit.name }
       }
       if include_history
+        company = corporate_records(:master_companies).find_by(id: request.contact&.company_id)
+        data[:company] = company && { id: company.id, name: company.name }
         data[:queue] = request.operations_queue && { id: request.operations_queue.id, name: request.operations_queue.name }
         data[:sla] = JrcOperations::SlaClock.new(request).snapshot
         data[:stage_blockers] = request.stage_blockers

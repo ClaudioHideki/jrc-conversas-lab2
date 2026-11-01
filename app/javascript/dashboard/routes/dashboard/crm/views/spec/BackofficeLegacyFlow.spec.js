@@ -1,70 +1,59 @@
 import { mount, flushPromises } from '@vue/test-utils';
-import BackofficeView from '../backoffice/BackofficeView.vue';
+import BackofficeLayout from '../backoffice/BackofficeLayout.vue';
 
-const mocks = vi.hoisted(() => ({
-  list: vi.fn(),
-  show: vi.fn(),
-  summary: vi.fn(),
-  advance: vi.fn(),
-  catalog: vi.fn(),
-  push: vi.fn(),
-}));
+const mocks = vi.hoisted(() => ({ replace: vi.fn(), route: null }));
 vi.mock('vue-router', () => ({
-  useRoute: () => ({
-    params: { accountId: '1', section: 'implement' },
-    query: { requestId: '7' },
-  }),
-  useRouter: () => ({ push: mocks.push, replace: vi.fn() }),
+  useRoute: () => mocks.route,
+  useRouter: () => ({ replace: mocks.replace }),
 }));
-vi.mock('vuex', () => ({
-  useStore: () => ({ getters: { getCurrentUser: { id: 1 } } }),
-}));
-vi.mock('dashboard/api/agents', () => ({ default: { get: mocks.catalog } }));
-vi.mock('dashboard/api/crm/commercialCycle', () => ({
-  backofficeAPI: mocks,
-  salesOrdersAPI: { list: mocks.catalog },
-  invoicesAPI: { list: mocks.catalog },
-  paymentsAPI: {},
-}));
-vi.mock('dashboard/composables', () => ({ useAlert: vi.fn() }));
-vi.mock('dashboard/routes/dashboard/approvals/ApprovalGateBadge.vue', () => ({
-  default: { template: '<div />' },
-}));
+const stubs = {
+  RouterLink: true,
+  BackofficeOverview: true,
+  BackofficeWorklist: true,
+  BackofficeRequest360: true,
+  BackofficeNewRequest: true,
+};
 
-it('keeps the selected request in the URL when advancing to another operational area', async () => {
-  const row = {
-    id: 7,
-    request_number: 'BKO-7',
-    stage: 'implementation',
-    status: 'in_progress',
-    priority: 'normal',
-    metadata: {
-      implementation_checklist: [{ label: 'Activation', done: true }],
-    },
-    order: { id: 1, order_number: 'PED-1', snapshot: {} },
-    owner: { id: 1, name: 'Operator' },
-  };
-  mocks.list.mockImplementation(async () => ({ data: [{ ...row }] }));
-  mocks.show.mockImplementation(async () => ({ data: { ...row } }));
-  mocks.catalog.mockResolvedValue({ data: [] });
-  mocks.summary.mockResolvedValue({ data: {} });
-  mocks.advance.mockImplementation(async () => {
-    row.stage = 'provisioning';
-    return { data: { ...row } };
-  });
-  const wrapper = mount(BackofficeView, {
-    global: { stubs: { RouterLink: true } },
-  });
-  await flushPromises();
-  const button = wrapper
-    .findAll('button')
-    .find(item => item.text() === 'Validar dependências e avançar');
-  await button.trigger('click');
-  await flushPromises();
-  expect(mocks.push).toHaveBeenLastCalledWith({
-    name: 'crm_backoffice',
-    params: { accountId: '1', section: 'provision' },
-    query: { requestId: 7 },
-  });
-  wrapper.unmount();
-});
+it.each([
+  [
+    'implement',
+    { requestId: '7' },
+    'crm_backoffice_request',
+    { accountId: '1', requestId: '7' },
+    { tab: 'checklist' },
+  ],
+  [
+    'docs',
+    { requestId: '8' },
+    'crm_backoffice_request',
+    { accountId: '1', requestId: '8' },
+    { tab: 'documents' },
+  ],
+  [
+    'process',
+    { newRequest: '1' },
+    'crm_backoffice_new',
+    { accountId: '1' },
+    undefined,
+  ],
+])(
+  'preserves saved links from %s and opens a dedicated page',
+  async (section, query, name, params, expectedQuery) => {
+    mocks.route = {
+      params: { accountId: '1', section },
+      query,
+      fullPath: `/legacy/${section}`,
+      name: 'crm_backoffice',
+    };
+    const wrapper = mount(BackofficeLayout, { global: { stubs } });
+    await flushPromises();
+    expect(mocks.replace).toHaveBeenCalledWith({
+      name,
+      params,
+      ...(expectedQuery ? { query: expectedQuery } : {}),
+    });
+    expect(wrapper.findAll('main')).toHaveLength(1);
+    expect(wrapper.find('aside').exists()).toBe(false);
+    wrapper.unmount();
+  }
+);

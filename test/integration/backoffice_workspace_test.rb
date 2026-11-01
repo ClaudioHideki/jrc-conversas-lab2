@@ -152,4 +152,52 @@ class BackofficeWorkspaceIntegrationTest < Minitest::Test
     @api.get "#{@url}/#{@request.id}", headers: @headers
     assert @api.response.parsed_body['history'].any? { |event| event['event_type'] == 'backoffice_stage_changed' }
   end
+  def test_customer_directory_company_filter_covers_linked_contacts_and_never_grants_access
+    @account.enable_features!('jrc_customer_master')
+    company = @account.master_companies.create!(name: 'Customer Corporation', trade_name: 'Known brand', relationship_type: 'customer')
+    @contact.update!(company_id: company.id)
+    second_contact = @account.contacts.create!(name: 'Another person at the customer', company_id: company.id)
+    second_order = @account.jrc_crm_sales_orders.create!(contact: second_contact, owner: @admin,
+      status: 'approved', source_type: 'manual', order_origin: 'direct_sale')
+    second = @account.jrc_crm_backoffice_requests.create!(sales_order: second_order, contact: second_contact,
+      owner: @admin, requested_by: @admin, request_kind: 'change', title: 'Second operation')
+    other = Account.create!(name: 'Foreign account')
+    foreign_company = other.master_companies.create!(name: 'Foreign customer', relationship_type: 'customer')
+    @api.get "#{@url}/workspace", params: { company_id: company.id, per_page: 1 }, headers: @headers
+    body = @api.response.parsed_body
+    assert_equal 200, @api.response.status
+    assert_equal 2, body.dig('meta', 'total')
+    assert_equal company.name, body['data'].first.dig('company', 'name')
+    refute body['data'].first['company'].key?('tax_id')
+    @api.get "#{@url}/workspace", params: { q: 'Known brand' }, headers: @headers
+    assert_equal [@request.id, second.id].sort, @api.response.parsed_body['data'].map { |row| row['id'] }.sort
+    @api.get "#{@url}/workspace", params: { company_id: foreign_company.id }, headers: @headers
+    assert_empty @api.response.parsed_body['data']
+    @api.get "#{@url}/workspace", params: { company_id: company.id }, headers: @agent.create_new_auth_token
+    assert_empty @api.response.parsed_body['data']
+    orders_url = "/api/v1/accounts/#{@account.id}/crm/sales_orders"
+    @api.get orders_url, params: { company_id: company.id }, headers: @headers
+    assert_equal [@order.id, second_order.id].sort, @api.response.parsed_body.map { |row| row['id'] }.sort
+    @api.get orders_url, params: { company_id: foreign_company.id }, headers: @headers
+    assert_empty @api.response.parsed_body
+    @api.get "#{@url}/#{@request.id}", headers: @headers
+    assert_equal company.id, @api.response.parsed_body.dig('company', 'id')
+  end
+
+  def test_specialized_areas_and_report_totals_use_the_authorized_scope_before_pagination
+    @request.update!(stage: 'documentation')
+    other = @account.jrc_crm_backoffice_requests.create!(sales_order: @order, contact: @contact, owner: @admin,
+      requested_by: @admin, request_kind: 'cancellation', title: 'Other stage', stage: 'implementation')
+    @api.get "#{@url}/workspace", params: { view: 'docs', per_page: 1 }, headers: @headers
+    assert_equal [@request.id], @api.response.parsed_body['data'].map { |row| row['id'] }
+    @api.get "#{@url}/workspace", params: { view: 'implement', per_page: 1 }, headers: @headers
+    assert_equal [other.id], @api.response.parsed_body['data'].map { |row| row['id'] }
+    @api.get "#{@url}/workspace", params: { view: 'reports', per_page: 1 }, headers: @headers
+    body = @api.response.parsed_body
+    assert_equal 2, body.dig('summary', 'total')
+    assert_equal 1, body['data'].size
+    assert_equal 2, body.dig('summary', 'kinds').sum { |kind| kind['total'] }
+    assert body['summary'].key?('average_open_hours')
+  end
+
 end

@@ -96,12 +96,6 @@ const navigation = [
     tone: 'orange',
   },
   {
-    name: 'crm_backoffice',
-    label: 'Backoffice',
-    icon: 'i-lucide-settings-2',
-    tone: 'green',
-  },
-  {
     name: 'crm_management',
     label: 'Gestão de Equipe',
     icon: 'i-lucide-users-round',

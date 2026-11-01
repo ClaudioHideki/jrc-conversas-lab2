@@ -1449,7 +1449,6 @@ const menuItems = computed(() => {
         'crm_contracts',
         'crm_goals',
         'crm_commissions',
-        'crm_backoffice',
         'crm_management',
         'crm_settings',
       ],
@@ -1468,7 +1467,6 @@ const menuItems = computed(() => {
         { name: 'CRM Contracts', label: 'Contratos', icon: 'i-lucide-file-check-2', to: accountScopedRoute('crm_contracts'), activeOn: ['crm_contracts'] },
         { name: 'CRM Goals', label: 'Metas', icon: 'i-lucide-target', to: accountScopedRoute('crm_goals'), activeOn: ['crm_goals'] },
         { name: 'CRM Commissions', label: 'Comissões', icon: 'i-lucide-badge-dollar-sign', to: accountScopedRoute('crm_commissions'), activeOn: ['crm_commissions'] },
-        { name: 'CRM Backoffice', label: 'Backoffice', icon: 'i-lucide-settings-2', to: accountScopedRoute('crm_backoffice'), activeOn: ['crm_backoffice'] },
         ...(store.getters.getCurrentRole === 'administrator'
           ? [
               {
@@ -1484,6 +1482,15 @@ const menuItems = computed(() => {
       ],
       disabled: !hasJrcCrm.value || !hasCrmUserAccess.value,
       newBadge: true,
+      ignoreFeatureFlag: true,
+    },
+    {
+      name: 'Backoffice',
+      label: t('CRM.BACKOFFICE_WORKSPACE.MODULE'),
+      icon: 'i-lucide-settings-2',
+      to: accountScopedRoute('crm_backoffice'),
+      activeOn: ['crm_backoffice', 'crm_backoffice_request', 'crm_backoffice_new'],
+      disabled: !hasJrcCrm.value || !hasCrmUserAccess.value,
       ignoreFeatureFlag: true,
     },
     !hasJrcCrm.value && hasSales.value
@@ -1577,6 +1584,7 @@ const menuSections = computed(() => {
     'JRC Flows',
     'Companies',
     'CRM',
+    'Backoffice',
     'Sales',
     'JRC Campaigns',
     'Reports',
@@ -1638,7 +1646,7 @@ const menuSections = computed(() => {
       {
         name: 'crm',
         label: t('JRC_CONTACT_CENTER.VISUAL.CRM'),
-        items: take(['CRM', 'Customers', 'Relationship']),
+        items: take(['CRM', 'Backoffice', 'Customers', 'Relationship']),
       },
       {
         name: 'operations',
@@ -1678,6 +1686,7 @@ const menuSections = computed(() => {
         'Contacts',
         'JRC Service Desk',
         'CRM',
+        'Backoffice',
         'Sales',
         'JRC Campaigns',
         'Reports',
