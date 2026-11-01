@@ -59,7 +59,13 @@ const payload = (data = [row], page = 1) => ({
   },
 });
 const options = {
-  global: { stubs: { RouterLink: { template: '<a><slot /></a>' } } },
+  global: {
+    stubs: {
+      BackofficeCustomerPicker: true,
+      BackofficeAssignment: true,
+      RouterLink: { template: '<a><slot /></a>' },
+    },
+  },
 };
 
 describe('Backoffice workspace', () => {

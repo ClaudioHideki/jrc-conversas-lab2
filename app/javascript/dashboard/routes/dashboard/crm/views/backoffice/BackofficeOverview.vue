@@ -1,13 +1,18 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useBackofficeWorkspace } from './useBackofficeWorkspace';
 import { stages, useBackofficePresentation } from './useBackofficePresentation';
 
+const props = defineProps({ report: { type: Boolean, default: false } });
 const { text, label, destination } = useBackofficePresentation();
-const { result, loading, error, load } = useBackofficeWorkspace('overview', {
-  status: '',
-  per_page: 5,
-});
+const { result, loading, error, load } = useBackofficeWorkspace(
+  props.report ? 'reports' : 'overview',
+  {
+    status: '',
+    per_page: 5,
+  }
+);
+const tab = ref('indicators');
 const metrics = [
   'active',
   'overdue',
@@ -33,7 +38,9 @@ const queueRows = computed(() =>
     :aria-busy="loading"
   >
     <div class="flex items-center justify-between gap-3">
-      <h2 class="text-xl font-bold">{{ text('NAV.overview') }}</h2>
+      <h2 class="text-xl font-bold">
+        {{ text(report ? 'NAV.reports' : 'NAV.overview') }}
+      </h2>
       <button
         class="rounded-lg border border-emerald-300 bg-n-solid-2 px-4 py-2 text-sm font-semibold text-emerald-700 disabled:opacity-50"
         :disabled="loading"
@@ -58,7 +65,35 @@ const queueRows = computed(() =>
       {{ text('LOAD_ERROR') }}
     </p>
     <template v-else-if="result">
-      <section class="grid gap-3 sm:grid-cols-2 2xl:grid-cols-3">
+      <nav
+        class="flex flex-wrap gap-2"
+        :aria-label="text('OVERVIEW_TABS_LABEL')"
+      >
+        <button
+          v-for="item in [
+            'indicators',
+            'stages',
+            'queues',
+            'recent',
+            ...(report ? ['types'] : []),
+          ]"
+          :key="item"
+          class="rounded-lg border px-4 py-2 text-sm font-semibold"
+          :class="
+            tab === item
+              ? 'border-emerald-600 bg-emerald-600 text-white'
+              : 'border-n-weak bg-n-solid-2'
+          "
+          :aria-pressed="tab === item"
+          @click="tab = item"
+        >
+          {{ text(`OVERVIEW_TABS.${item}`) }}
+        </button>
+      </nav>
+      <section
+        v-if="tab === 'indicators'"
+        class="grid gap-3 sm:grid-cols-3"
+      >
         <article
           v-for="metric in metrics"
           :key="metric"
@@ -77,8 +112,9 @@ const queueRows = computed(() =>
           </strong>
         </article>
       </section>
-      <section class="grid gap-5 2xl:grid-cols-[1.3fr_1fr]">
+      <section v-if="['stages', 'queues'].includes(tab)">
         <article
+          v-if="tab === 'stages'"
           class="rounded-2xl border border-n-weak bg-n-solid-2 p-5 shadow-sm"
         >
           <h3 class="font-bold">{{ text('STAGE_DISTRIBUTION') }}</h3>
@@ -102,6 +138,7 @@ const queueRows = computed(() =>
           </div>
         </article>
         <article
+          v-if="tab === 'queues'"
           class="rounded-2xl border border-n-weak bg-n-solid-2 p-5 shadow-sm"
         >
           <h3 class="font-bold">{{ text('QUEUE_DISTRIBUTION') }}</h3>
@@ -125,6 +162,33 @@ const queueRows = computed(() =>
         </article>
       </section>
       <section
+        v-if="tab === 'types'"
+        class="space-y-4"
+      >
+        <div class="rounded-xl border border-n-weak bg-n-solid-2 p-4 text-sm">
+          {{ text('AVERAGE_OPEN') }}
+          <b>{{ result.summary.average_open_hours }} {{ text('HOURS') }}</b>
+        </div>
+        <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <article
+            v-for="item in result.summary.kinds"
+            :key="item.kind"
+            class="rounded-xl border border-n-weak bg-n-solid-2 p-4"
+          >
+            <h3 class="font-semibold">{{ label(item.kind) }}</h3>
+            <p class="mt-3 text-2xl font-bold">
+              {{ Math.round(((item.total - item.overdue) / item.total) * 100)
+              }}{{ text('PERCENT') }}
+            </p>
+            <p class="mt-2 text-xs text-n-slate-11">
+              {{ item.overdue }} {{ text('METRICS.overdue') }}
+              {{ text('SEPARATOR') }} {{ item.total }} {{ text('RESULTS') }}
+            </p>
+          </article>
+        </div>
+      </section>
+      <section
+        v-if="tab === 'recent'"
         class="rounded-2xl border border-n-weak bg-n-solid-2 p-5 shadow-sm"
       >
         <h3 class="font-bold">{{ text('RECENT') }}</h3>

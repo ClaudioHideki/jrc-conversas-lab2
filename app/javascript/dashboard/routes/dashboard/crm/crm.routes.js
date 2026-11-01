@@ -52,6 +52,17 @@ const ensureCrmEnabled = async to => {
 
 export default {
   routes: [
+    ...[
+      ['requests/:requestId', 'crm_backoffice_request'],
+      ['new', 'crm_backoffice_new'],
+      [':section?', 'crm_backoffice'],
+    ].map(([path, name]) => ({
+      path: frontendURL(`accounts/:accountId/backoffice/${path}`),
+      name,
+      component: BackofficeLayout,
+      meta,
+      beforeEnter: ensureCrmEnabled,
+    })),
     {
       path: frontendURL('accounts/:accountId/crm'),
       component: CrmLayout,
@@ -155,15 +166,21 @@ export default {
         },
         {
           path: 'backoffice/requests/:requestId',
-          name: 'crm_backoffice_request',
-          component: BackofficeLayout,
-          meta,
+          redirect: to => ({
+            name: 'crm_backoffice_request',
+            params: to.params,
+            query: to.query,
+            hash: to.hash,
+          }),
         },
         {
           path: 'backoffice/:section?',
-          name: 'crm_backoffice',
-          component: BackofficeLayout,
-          meta,
+          redirect: to => ({
+            name: 'crm_backoffice',
+            params: to.params,
+            query: to.query,
+            hash: to.hash,
+          }),
         },
         {
           path: 'customers/:customerId',

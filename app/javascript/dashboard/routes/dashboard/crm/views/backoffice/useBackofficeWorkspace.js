@@ -13,6 +13,7 @@ export function useBackofficeWorkspace(view, initial = {}) {
     owner_id: '',
     operations_queue_id: '',
     business_unit_id: '',
+    company_id: '',
     overdue: '',
     sort: 'recent',
     page: 1,

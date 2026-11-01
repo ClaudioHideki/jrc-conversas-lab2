@@ -3,6 +3,9 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 import { backofficeAPI } from 'dashboard/api/crm/commercialCycle';
+import BackofficeAssignment from './BackofficeAssignment.vue';
+import BackofficeActions from './BackofficeActions.vue';
+import BackofficeFinance from './BackofficeFinance.vue';
 import ApprovalGateBadge from 'dashboard/routes/dashboard/approvals/ApprovalGateBadge.vue';
 import { useBackofficePresentation } from './useBackofficePresentation';
 
@@ -14,8 +17,19 @@ const loading = ref(false);
 const saving = ref(false);
 const error = ref('');
 const message = ref('');
-const tab = ref('context');
-const tabs = ['context', 'documents', 'checklist', 'issues', 'history'];
+const tabs = [
+  'operations',
+  'context',
+  'documents',
+  'checklist',
+  'issues',
+  'finance',
+  'history',
+];
+const tab = ref(
+  tabs.includes(route.query.tab) ? route.query.tab : 'operations'
+);
+const historyPage = ref(1);
 let sequence = 0;
 const terminal = computed(() =>
   ['completed', 'canceled', 'rejected'].includes(record.value?.status)
@@ -26,17 +40,6 @@ const orderApproval = computed(
     record.value?.request_kind === 'approval'
 );
 const admin = computed(() => store.getters.getCurrentRole === 'administrator');
-const checklist = computed(
-  () =>
-    record.value?.metadata?.implementation_checklist ||
-    record.value?.order.snapshot?.checklist ||
-    []
-);
-const manage = section => ({
-  name: 'crm_backoffice',
-  params: { section },
-  query: { requestId: record.value.id },
-});
 const load = async () => {
   sequence += 1;
   const request = sequence;
@@ -135,8 +138,18 @@ onBeforeUnmount(() => {
             </p>
             <h2 class="mt-2 text-xl font-bold">{{ record.title }}</h2>
             <p class="mt-2 text-sm text-n-slate-11">
-              {{ record.contact?.name || text('NO_CLIENT') }}
+              {{
+                record.company?.name ||
+                record.contact?.name ||
+                text('NO_CLIENT')
+              }}
               {{ text('SEPARATOR') }} {{ record.order.order_number }}
+            </p>
+            <p class="mt-2 text-xs text-n-slate-11">
+              {{ record.queue?.name || text('NO_QUEUE') }}
+              {{ text('SEPARATOR') }} {{ record.owner.name }}
+              {{ text('SEPARATOR') }}
+              {{ record.business_unit?.name || text('NO_UNIT') }}
             </p>
           </div>
           <div class="flex flex-wrap gap-2">
@@ -155,136 +168,13 @@ onBeforeUnmount(() => {
             </span>
           </div>
         </div>
-        <div class="mt-5 grid gap-3 text-sm sm:grid-cols-2 2xl:grid-cols-4">
-          <div class="rounded-xl border border-n-weak p-3">
-            <p class="text-xs text-n-slate-11">{{ text('QUEUE_OWNER') }}</p>
-            <b class="mt-1 block">
-              {{ record.queue?.name || text('NO_QUEUE') }}
-            </b>
-            <span>{{ record.owner.name }}</span>
-          </div>
-          <div class="rounded-xl border border-n-weak p-3">
-            <p class="text-xs text-n-slate-11">{{ text('UNIT') }}</p>
-            <b class="mt-1 block">
-              {{ record.business_unit?.name || text('NO_UNIT') }}
-            </b>
-            <p class="mt-1 text-xs">{{ label(record.request_kind) }}</p>
-          </div>
-          <div class="rounded-xl border border-n-weak p-3">
-            <p class="text-xs text-n-slate-11">{{ text('DEADLINE') }}</p>
-            <b class="mt-1 block">{{ date(record.due_at) }}</b>
-            <p class="mt-1 text-xs">
-              {{ text('CREATED') }} {{ date(record.created_at) }}
-            </p>
-          </div>
-          <div
-            class="rounded-xl border border-n-weak p-3"
-            :class="{
-              'bg-red-50 text-red-800': record.sla.state === 'overdue',
-            }"
-          >
-            <p class="text-xs">{{ text('SLA') }}</p>
-            <b class="mt-1 block">{{ slaLabel(record.sla) }}</b>
-            <p
-              v-if="record.sla.paused_at"
-              class="mt-1 text-xs"
-            >
-              {{ text('PAUSED') }} {{ date(record.sla.paused_at) }}
-            </p>
-            <p
-              v-else
-              class="mt-1 text-xs"
-            >
-              {{ text('TOTAL_DEADLINE') }} {{ date(record.sla.total_due_at) }}
-            </p>
-          </div>
-        </div>
       </header>
-      <section
-        class="rounded-2xl border border-amber-200 bg-n-solid-2 p-5 shadow-sm"
-      >
-        <h3 class="font-bold">{{ text('NEXT_ACTION') }}</h3>
-        <p class="mt-2 text-sm">
-          {{ text('NEXT_STAGE') }}
-          <b>{{ label(record.next_stage) }}</b>
-        </p>
-        <ul
-          v-if="record.stage_blockers.length && !terminal"
-          class="mt-3 list-inside list-disc space-y-2 rounded-xl bg-amber-50 p-4 text-sm text-amber-900"
-        >
-          <li
-            v-for="blocker in record.stage_blockers"
-            :key="blocker"
-          >
-            {{ blocker }}
-          </li>
-        </ul>
-        <p class="mt-3 text-xs text-n-slate-11">
-          {{ text('VALIDATION_NOTE') }}
-        </p>
-        <div class="mt-3 flex flex-wrap gap-2">
-          <ApprovalGateBadge
-            resource-key="backoffice.release"
-            :resource-id="record.id"
-          />
-          <ApprovalGateBadge
-            resource-key="crm.order_price"
-            :resource-id="record.order.id"
-          />
-        </div>
-        <div class="mt-4 flex flex-wrap gap-2">
-          <button
-            v-if="!terminal && !orderApproval"
-            class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
-            :disabled="saving || record.stage_blockers.length > 0"
-            @click="action(() => backofficeAPI.advance(record.id))"
-          >
-            {{ text('ADVANCE') }}
-          </button>
-          <button
-            v-if="!terminal && !orderApproval"
-            class="rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-900 disabled:opacity-40"
-            :disabled="saving"
-            @click="
-              action(() =>
-                backofficeAPI.update(record.id, {
-                  backoffice_request: {
-                    status:
-                      record.status === 'blocked' ? 'in_progress' : 'blocked',
-                  },
-                })
-              )
-            "
-          >
-            {{ text(record.status === 'blocked' ? 'RESUME' : 'BLOCK') }}
-          </button>
-          <button
-            v-if="terminal && admin && !orderApproval"
-            class="rounded-lg border border-emerald-300 px-4 py-2 text-sm text-emerald-700 disabled:opacity-40"
-            :disabled="saving"
-            @click="
-              action(() =>
-                backofficeAPI.reopen(record.id, { stage: 'analysis' })
-              )
-            "
-          >
-            {{ text('REOPEN') }}
-          </button>
-          <RouterLink
-            v-if="orderApproval"
-            :to="manage('approvals')"
-            class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white"
-          >
-            {{ text('REVIEW_APPROVAL') }}
-          </RouterLink>
-        </div>
-      </section>
       <section
         class="overflow-hidden rounded-2xl border border-n-weak bg-n-solid-2 shadow-sm"
       >
         <nav
           :aria-label="text('DETAIL_NAV')"
-          class="flex gap-2 overflow-x-auto border-b border-n-weak bg-n-slate-2 p-3"
+          class="flex flex-wrap gap-2 border-b border-n-weak bg-n-slate-2 p-3"
         >
           <button
             v-for="item in tabs"
@@ -307,9 +197,146 @@ onBeforeUnmount(() => {
           :aria-labelledby="`backoffice-tab-${tab}`"
         >
           <div
-            v-if="tab === 'context'"
+            v-if="tab === 'operations'"
+            class="rounded-2xl border border-amber-200 bg-n-solid-2 p-5 shadow-sm"
+          >
+            <h3 class="font-bold">{{ text('NEXT_ACTION') }}</h3>
+            <p class="mt-2 text-sm">
+              {{ text('NEXT_STAGE') }}
+              <b>{{ label(record.next_stage) }}</b>
+            </p>
+            <ul
+              v-if="record.stage_blockers.length && !terminal"
+              class="mt-3 list-inside list-disc space-y-2 rounded-xl bg-amber-50 p-4 text-sm text-amber-900"
+            >
+              <li
+                v-for="blocker in record.stage_blockers"
+                :key="blocker"
+              >
+                {{ blocker }}
+              </li>
+            </ul>
+            <p class="mt-3 text-xs text-n-slate-11">
+              {{ text('VALIDATION_NOTE') }}
+            </p>
+            <div class="mt-3 flex flex-wrap gap-2">
+              <ApprovalGateBadge
+                resource-key="backoffice.release"
+                :resource-id="record.id"
+              />
+              <ApprovalGateBadge
+                resource-key="crm.order_price"
+                :resource-id="record.order.id"
+              />
+            </div>
+            <div class="mt-4 flex flex-wrap gap-2">
+              <button
+                v-if="!terminal && !orderApproval"
+                class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
+                :disabled="saving || record.stage_blockers.length > 0"
+                @click="action(() => backofficeAPI.advance(record.id))"
+              >
+                {{ text('ADVANCE') }}
+              </button>
+              <button
+                v-if="!terminal && !orderApproval"
+                class="rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-900 disabled:opacity-40"
+                :disabled="saving"
+                @click="
+                  action(() =>
+                    backofficeAPI.update(record.id, {
+                      backoffice_request: {
+                        status:
+                          record.status === 'blocked'
+                            ? 'in_progress'
+                            : 'blocked',
+                      },
+                    })
+                  )
+                "
+              >
+                {{ text(record.status === 'blocked' ? 'RESUME' : 'BLOCK') }}
+              </button>
+              <button
+                v-if="terminal && admin && !orderApproval"
+                class="rounded-lg border border-emerald-300 px-4 py-2 text-sm text-emerald-700 disabled:opacity-40"
+                :disabled="saving"
+                @click="
+                  action(() =>
+                    backofficeAPI.reopen(record.id, { stage: 'analysis' })
+                  )
+                "
+              >
+                {{ text('REOPEN') }}
+              </button>
+            </div>
+            <BackofficeAssignment
+              :record="record"
+              :saving="saving"
+              @command="action"
+            />
+            <BackofficeActions
+              v-if="
+                orderApproval ||
+                record.stage === 'approval' ||
+                record.request_kind === 'approval'
+              "
+              :record="record"
+              tab="approval"
+              :saving="saving"
+              class="mt-4"
+              @command="action"
+            />
+          </div>
+          <div
+            v-else-if="tab === 'context'"
             class="space-y-5"
           >
+            <div class="mt-3 grid gap-2 text-sm sm:grid-cols-2 xl:grid-cols-4">
+              <div class="rounded-lg border border-n-weak p-2">
+                <p class="text-xs text-n-slate-11">{{ text('QUEUE_OWNER') }}</p>
+                <b class="mt-1 block">
+                  {{ record.queue?.name || text('NO_QUEUE') }}
+                </b>
+                <span>{{ record.owner.name }}</span>
+              </div>
+              <div class="rounded-lg border border-n-weak p-2">
+                <p class="text-xs text-n-slate-11">{{ text('UNIT') }}</p>
+                <b class="mt-1 block">
+                  {{ record.business_unit?.name || text('NO_UNIT') }}
+                </b>
+                <p class="mt-1 text-xs">{{ label(record.request_kind) }}</p>
+              </div>
+              <div class="rounded-lg border border-n-weak p-2">
+                <p class="text-xs text-n-slate-11">{{ text('DEADLINE') }}</p>
+                <b class="mt-1 block">{{ date(record.due_at) }}</b>
+                <p class="mt-1 text-xs">
+                  {{ text('CREATED') }} {{ date(record.created_at) }}
+                </p>
+              </div>
+              <div
+                class="rounded-lg border border-n-weak p-2"
+                :class="{
+                  'bg-red-50 text-red-800': record.sla.state === 'overdue',
+                }"
+              >
+                <p class="text-xs">{{ text('SLA') }}</p>
+                <b class="mt-1 block">{{ slaLabel(record.sla) }}</b>
+                <p
+                  v-if="record.sla.paused_at"
+                  class="mt-1 text-xs"
+                >
+                  {{ text('PAUSED') }} {{ date(record.sla.paused_at) }}
+                </p>
+                <p
+                  v-else
+                  class="mt-1 text-xs"
+                >
+                  {{ text('TOTAL_DEADLINE') }}
+                  {{ date(record.sla.total_due_at) }}
+                </p>
+              </div>
+            </div>
             <p
               v-if="record.description"
               class="whitespace-pre-wrap text-sm"
@@ -341,8 +368,12 @@ onBeforeUnmount(() => {
                   <RouterLink
                     v-if="record.contact"
                     :to="{
-                      name: 'crm_customer_360',
-                      params: { customerId: record.contact.id },
+                      name: record.company
+                        ? 'jrc_customer_company'
+                        : 'crm_customer_360',
+                      params: record.company
+                        ? { companyId: record.company.id }
+                        : { customerId: record.contact.id },
                     }"
                     class="text-sm font-semibold underline"
                   >
@@ -411,116 +442,30 @@ onBeforeUnmount(() => {
               </div>
             </dl>
           </div>
-          <div
-            v-else-if="tab === 'documents'"
-            class="space-y-3"
-          >
-            <RouterLink
-              :to="manage('docs')"
-              class="inline-block rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white"
-            >
-              {{ text('MANAGE_DOCUMENTS') }}
-            </RouterLink>
-            <div
-              v-for="document in record.metadata.document_checklist || []"
-              :key="document.key"
-              class="rounded-xl border border-n-weak p-4 text-sm"
-            >
-              <b>{{ document.label }}</b>
-              <p class="mt-1">
-                {{ label(document.status) }} {{ text('SEPARATOR') }}
-                {{ document.required ? text('REQUIRED') : text('OPTIONAL') }}
-              </p>
-            </div>
-            <div
-              v-for="document in record.documents"
-              :key="document.id"
-              class="flex flex-wrap justify-between gap-3 rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-900"
-            >
-              <b class="break-all">{{ document.filename }}</b>
-              <span>{{ label(document.status) }}</span>
-            </div>
-            <p
-              v-if="
-                !record.documents.length &&
-                !record.metadata.document_checklist?.length
-              "
-              class="py-5 text-sm text-n-slate-11"
-            >
-              {{ text('EMPTY_DOCUMENTS') }}
-            </p>
-          </div>
-          <div
-            v-else-if="tab === 'checklist'"
-            class="space-y-3"
-          >
-            <RouterLink
-              :to="
-                manage(
-                  record.stage === 'provisioning' ? 'provision' : 'implement'
-                )
-              "
-              class="inline-block rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white"
-            >
-              {{ text('MANAGE_EXECUTION') }}
-            </RouterLink>
-            <div
-              v-for="(item, index) in checklist"
-              :key="index"
-              class="flex items-center justify-between gap-3 rounded-xl border border-n-weak p-4 text-sm"
-            >
-              <span>{{ item.label || item.name || item.title }}</span>
-              <b>{{ item.done ? text('DONE') : text('PENDING') }}</b>
-            </div>
-            <p
-              v-if="!checklist.length"
-              class="py-5 text-sm text-n-slate-11"
-            >
-              {{ text('EMPTY_CHECKLIST') }}
-            </p>
-            <p
-              v-if="record.metadata.provisioning_completed_at"
-              class="rounded-xl bg-emerald-50 p-4 text-sm text-emerald-900"
-            >
-              {{ text('PROVISIONED') }}
-              {{ date(record.metadata.provisioning_completed_at) }}
-            </p>
-          </div>
-          <div
-            v-else-if="tab === 'issues'"
-            class="space-y-3"
-          >
-            <RouterLink
-              :to="manage('issues')"
-              class="inline-block rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white"
-            >
-              {{ text('MANAGE_ISSUES') }}
-            </RouterLink>
-            <article
-              v-for="issue in record.metadata.issues || []"
-              :key="issue.id"
-              class="rounded-xl border border-amber-200 p-4 text-sm"
-            >
-              <b>{{ issue.description }}</b>
-              <p class="mt-2">
-                {{ label(issue.status || 'open') }} {{ text('SEPARATOR') }}
-                {{ date(issue.due_at) }}
-              </p>
-            </article>
-            <p
-              v-if="!record.metadata.issues?.length"
-              class="py-5 text-sm text-n-slate-11"
-            >
-              {{ text('EMPTY_ISSUES') }}
-            </p>
-          </div>
+          <BackofficeActions
+            v-else-if="['documents', 'checklist', 'issues'].includes(tab)"
+            :key="tab"
+            :record="record"
+            :tab="tab"
+            :saving="saving"
+            @command="action"
+          />
+          <BackofficeFinance
+            v-else-if="tab === 'finance'"
+            :record="record"
+            :saving="saving"
+            @command="action"
+          />
           <div
             v-else
             class="space-y-3"
           >
             <p class="text-xs text-n-slate-11">{{ text('HISTORY_NOTE') }}</p>
             <article
-              v-for="event in record.history"
+              v-for="event in record.history.slice(
+                (historyPage - 1) * 10,
+                historyPage * 10
+              )"
               :key="event.id"
               class="rounded-xl border border-n-weak border-l-4 border-l-emerald-400 p-4 text-sm"
             >
@@ -549,6 +494,27 @@ onBeforeUnmount(() => {
             >
               {{ text('EMPTY_HISTORY') }}
             </p>
+            <div
+              v-if="record.history.length > 10"
+              class="flex justify-end gap-3 text-sm"
+            >
+              <button
+                :disabled="historyPage <= 1"
+                @click="historyPage--"
+              >
+                {{ text('PREVIOUS') }}
+              </button>
+              <span>
+                {{ historyPage }} {{ text('PAGE_SEPARATOR') }}
+                {{ Math.ceil(record.history.length / 10) }}
+              </span>
+              <button
+                :disabled="historyPage * 10 >= record.history.length"
+                @click="historyPage++"
+              >
+                {{ text('NEXT') }}
+              </button>
+            </div>
           </div>
         </div>
       </section>

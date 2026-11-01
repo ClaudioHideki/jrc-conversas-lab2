@@ -1,4 +1,5 @@
 <script setup>
+import BackofficeCustomerPicker from './BackofficeCustomerPicker.vue';
 import { useRoute } from 'vue-router';
 import { useBackofficeWorkspace } from './useBackofficeWorkspace';
 import {
@@ -9,14 +10,31 @@ import {
   useBackofficePresentation,
 } from './useBackofficePresentation';
 
-const props = defineProps({ mine: { type: Boolean, default: false } });
+const props = defineProps({
+  mine: { type: Boolean, default: false },
+  section: { type: String, default: 'requests' },
+});
 const route = useRoute();
 const { text, label, date, late, destination, deadline, slaLabel } =
   useBackofficePresentation();
 const { filters, result, options, loading, error, load } =
-  useBackofficeWorkspace(props.mine ? 'mine' : 'requests', {
+  useBackofficeWorkspace(props.mine ? 'mine' : props.section, {
     stage: stages.includes(route.query.stage) ? route.query.stage : '',
+    company_id: route.query.companyId || '',
   });
+const openRequest = id => ({
+  ...destination(id),
+  query: {
+    tab:
+      {
+        docs: 'documents',
+        implement: 'checklist',
+        provision: 'checklist',
+        issues: 'issues',
+        finance: 'finance',
+      }[props.section] || 'operations',
+  },
+});
 const optionGroups = ['operations_queue_id', 'owner_id', 'business_unit_id'];
 const optionSources = {
   operations_queue_id: 'queues',
@@ -33,7 +51,7 @@ const optionSources = {
     <div class="flex flex-wrap items-center justify-between gap-3">
       <div>
         <h2 class="text-xl font-bold">
-          {{ text(mine ? 'NAV.mine' : 'NAV.requests') }}
+          {{ text(`NAV.${section}`) }}
         </h2>
         <p class="mt-1 text-sm text-n-slate-11">
           {{ text(mine ? 'MINE_NOTE' : 'SCOPE_NOTE') }}
@@ -48,10 +66,10 @@ const optionSources = {
       </button>
     </div>
     <form
-      class="grid gap-3 rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm sm:grid-cols-2 2xl:grid-cols-4"
+      class="grid gap-3 rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm sm:grid-cols-2 xl:grid-cols-4"
       @submit.prevent="load(1)"
     >
-      <label class="text-xs font-semibold sm:col-span-2">
+      <label class="text-xs font-semibold">
         {{ text('SEARCH') }}
         <input
           v-model="filters.q"
@@ -79,95 +97,111 @@ const optionSources = {
           </option>
         </select>
       </label>
-      <label class="text-xs font-semibold">
-        {{ text('STAGE') }}
-        <select
-          v-model="filters.stage"
-          name="stage"
-          class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 p-2 text-sm"
-        >
-          <option value="">{{ text('ALL') }}</option>
-          <option
-            v-for="value in stages"
-            :key="value"
-            :value="value"
+      <BackofficeCustomerPicker
+        v-model="filters.company_id"
+        class="sm:col-span-2"
+      />
+
+      <div class="flex flex-wrap items-start gap-3 sm:col-span-2 xl:col-span-4">
+        <details class="min-w-0 flex-1">
+          <summary
+            class="cursor-pointer text-sm font-semibold text-emerald-700"
           >
-            {{ label(value) }}
-          </option>
-        </select>
-      </label>
-      <label class="text-xs font-semibold">
-        {{ text('PRIORITY') }}
-        <select
-          v-model="filters.priority"
-          name="priority"
-          class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 p-2 text-sm"
-        >
-          <option value="">{{ text('ALL') }}</option>
-          <option
-            v-for="value in priorities"
-            :key="value"
-            :value="value"
-          >
-            {{ label(value) }}
-          </option>
-        </select>
-      </label>
-      <label class="text-xs font-semibold">
-        {{ text('KIND') }}
-        <select
-          v-model="filters.kind"
-          name="kind"
-          class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 p-2 text-sm"
-        >
-          <option value="">{{ text('ALL') }}</option>
-          <option
-            v-for="value in kinds"
-            :key="value"
-            :value="value"
-          >
-            {{ label(value) }}
-          </option>
-        </select>
-      </label>
-      <label
-        v-for="key in optionGroups.filter(item => !mine || item !== 'owner_id')"
-        :key="key"
-        class="text-xs font-semibold"
-      >
-        {{ text(`FILTERS.${key}`) }}
-        <select
-          v-model="filters[key]"
-          :name="key"
-          class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 p-2 text-sm"
-        >
-          <option value="">{{ text('ALL') }}</option>
-          <option
-            v-for="option in options[optionSources[key]]"
-            :key="option.id"
-            :value="option.id"
-          >
-            {{ option.name }}
-          </option>
-        </select>
-      </label>
-      <label class="text-xs font-semibold">
-        {{ text('SORT') }}
-        <select
-          v-model="filters.sort"
-          name="sort"
-          class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 p-2 text-sm"
-        >
-          <option
-            v-for="value in ['recent', 'oldest', 'deadline', 'priority']"
-            :key="value"
-            :value="value"
-          >
-            {{ text(`SORTS.${value}`) }}
-          </option>
-        </select>
-      </label>
-      <div class="flex flex-wrap items-end gap-3 sm:col-span-2 2xl:col-span-4">
+            {{ text('ADVANCED_FILTERS') }}
+          </summary>
+          <div class="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <label class="text-xs font-semibold">
+              {{ text('STAGE') }}
+              <select
+                v-model="filters.stage"
+                name="stage"
+                class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 p-2 text-sm"
+              >
+                <option value="">{{ text('ALL') }}</option>
+                <option
+                  v-for="value in stages"
+                  :key="value"
+                  :value="value"
+                >
+                  {{ label(value) }}
+                </option>
+              </select>
+            </label>
+            <label class="text-xs font-semibold">
+              {{ text('PRIORITY') }}
+              <select
+                v-model="filters.priority"
+                name="priority"
+                class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 p-2 text-sm"
+              >
+                <option value="">{{ text('ALL') }}</option>
+                <option
+                  v-for="value in priorities"
+                  :key="value"
+                  :value="value"
+                >
+                  {{ label(value) }}
+                </option>
+              </select>
+            </label>
+            <label class="text-xs font-semibold">
+              {{ text('KIND') }}
+              <select
+                v-model="filters.kind"
+                name="kind"
+                class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 p-2 text-sm"
+              >
+                <option value="">{{ text('ALL') }}</option>
+                <option
+                  v-for="value in kinds"
+                  :key="value"
+                  :value="value"
+                >
+                  {{ label(value) }}
+                </option>
+              </select>
+            </label>
+            <label
+              v-for="key in optionGroups.filter(
+                item => !mine || item !== 'owner_id'
+              )"
+              :key="key"
+              class="text-xs font-semibold"
+            >
+              {{ text(`FILTERS.${key}`) }}
+              <select
+                v-model="filters[key]"
+                :name="key"
+                class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 p-2 text-sm"
+              >
+                <option value="">{{ text('ALL') }}</option>
+                <option
+                  v-for="option in options[optionSources[key]]"
+                  :key="option.id"
+                  :value="option.id"
+                >
+                  {{ option.name }}
+                </option>
+              </select>
+            </label>
+            <label class="text-xs font-semibold">
+              {{ text('SORT') }}
+              <select
+                v-model="filters.sort"
+                name="sort"
+                class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 p-2 text-sm"
+              >
+                <option
+                  v-for="value in ['recent', 'oldest', 'deadline', 'priority']"
+                  :key="value"
+                  :value="value"
+                >
+                  {{ text(`SORTS.${value}`) }}
+                </option>
+              </select>
+            </label>
+          </div>
+        </details>
         <label class="flex items-center gap-2 text-sm">
           <input
             v-model="filters.overdue"
@@ -205,10 +239,10 @@ const optionSources = {
         <article
           v-for="key in ['total', 'overdue', 'blocked']"
           :key="key"
-          class="rounded-xl border border-n-weak bg-n-solid-2 p-4"
+          class="flex items-center justify-between gap-3 rounded-xl border border-n-weak bg-n-solid-2 px-4 py-2"
         >
           <p class="text-xs text-n-slate-11">{{ text(`METRICS.${key}`) }}</p>
-          <b class="text-2xl">{{ result.summary[key] }}</b>
+          <b class="text-xl">{{ result.summary[key] }}</b>
         </article>
       </div>
       <section
@@ -221,7 +255,7 @@ const optionSources = {
           <RouterLink
             v-for="item in result.data"
             :key="item.id"
-            :to="destination(item.id)"
+            :to="openRequest(item.id)"
             class="rounded-xl border border-n-weak border-l-4 p-4 transition hover:border-emerald-400"
             :class="
               late(item)
@@ -239,7 +273,15 @@ const optionSources = {
             </div>
             <h3 class="mt-2 font-bold">{{ item.title }}</h3>
             <p class="mt-1 text-sm text-n-slate-11">
-              {{ item.contact?.name || text('NO_CLIENT') }}
+              {{
+                item.company?.name || item.contact?.name || text('NO_CLIENT')
+              }}
+              <span
+                v-if="item.company && item.contact"
+                class="block text-xs text-n-slate-11"
+              >
+                {{ item.contact.name }}
+              </span>
             </p>
             <dl class="mt-4 grid grid-cols-2 gap-3 text-sm">
               <div>
@@ -278,7 +320,7 @@ const optionSources = {
           v-else
           class="overflow-x-auto"
         >
-          <table class="w-full min-w-[960px] text-left text-sm">
+          <table class="w-full min-w-[800px] text-left text-sm">
             <thead class="bg-n-slate-3 text-xs text-n-slate-11">
               <tr>
                 <th
@@ -307,7 +349,7 @@ const optionSources = {
               >
                 <td class="max-w-[260px] p-3">
                   <RouterLink
-                    :to="destination(item.id)"
+                    :to="openRequest(item.id)"
                     class="font-semibold text-emerald-700 underline-offset-2 hover:underline"
                   >
                     {{ item.request_number }}
@@ -318,7 +360,17 @@ const optionSources = {
                   </p>
                 </td>
                 <td class="p-3">
-                  {{ item.contact?.name || text('NO_CLIENT') }}
+                  {{
+                    item.company?.name ||
+                    item.contact?.name ||
+                    text('NO_CLIENT')
+                  }}
+                  <span
+                    v-if="item.company && item.contact"
+                    class="block text-xs text-n-slate-11"
+                  >
+                    {{ item.contact.name }}
+                  </span>
                 </td>
                 <td class="p-3">{{ label(item.stage) }}</td>
                 <td class="p-3">

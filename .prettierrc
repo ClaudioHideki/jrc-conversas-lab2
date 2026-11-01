@@ -27,7 +27,7 @@
     {
       "files": [
         "app/javascript/dashboard/routes/dashboard/serviceDesk/automationStudio/**/*.vue",
-        "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/Backoffice{Layout,Overview,Worklist,Request360}.vue",
+        "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/Backoffice*.vue",
         "app/javascript/dashboard/routes/dashboard/serviceDesk/components/LifecycleVisualEditor.vue",
         "app/javascript/dashboard/routes/dashboard/serviceDesk/components/OperationalRulePanel.vue",
         "app/javascript/dashboard/routes/dashboard/serviceDesk/components/TicketSummary.vue",
