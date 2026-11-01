@@ -463,30 +463,31 @@ onBeforeUnmount(() => {
             <p class="text-xs text-n-slate-11">{{ text('HISTORY_NOTE') }}</p>
             <article
               v-for="event in record.history.slice(
-                (historyPage - 1) * 10,
-                historyPage * 10
+                (historyPage - 1) * 5,
+                historyPage * 5
               )"
               :key="event.id"
-              class="rounded-xl border border-n-weak border-l-4 border-l-emerald-400 p-4 text-sm"
+              class="rounded-lg border border-n-weak border-l-4 border-l-emerald-400 px-3 py-2 text-sm"
             >
-              <p class="text-xs text-n-slate-11">
-                {{ date(event.created_at) }}
-              </p>
-              <b class="mt-1 block">{{ label(event.event_type) }}</b>
-              <p
-                v-if="event.to_value?.stage"
-                class="mt-1"
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <b>{{ label(event.event_type) }}</b>
+                <time class="text-xs text-n-slate-11">
+                  {{ date(event.created_at) }}
+                </time>
+              </div>
+              <div
+                v-if="event.to_value?.stage || event.to_value?.status"
+                class="mt-1 flex flex-wrap gap-3 text-xs text-n-slate-11"
               >
-                {{ text('STAGE') }}{{ text('FIELD_SEPARATOR') }}
-                {{ label(event.to_value.stage) }}
-              </p>
-              <p
-                v-if="event.to_value?.status"
-                class="mt-1"
-              >
-                {{ text('STATUS') }}{{ text('FIELD_SEPARATOR') }}
-                {{ label(event.to_value.status) }}
-              </p>
+                <span v-if="event.to_value?.stage">
+                  {{ text('STAGE') }}{{ text('FIELD_SEPARATOR') }}
+                  {{ label(event.to_value.stage) }}
+                </span>
+                <span v-if="event.to_value?.status">
+                  {{ text('STATUS') }}{{ text('FIELD_SEPARATOR') }}
+                  {{ label(event.to_value.status) }}
+                </span>
+              </div>
             </article>
             <p
               v-if="!record.history.length"
@@ -495,7 +496,7 @@ onBeforeUnmount(() => {
               {{ text('EMPTY_HISTORY') }}
             </p>
             <div
-              v-if="record.history.length > 10"
+              v-if="record.history.length > 5"
               class="flex justify-end gap-3 text-sm"
             >
               <button
@@ -506,10 +507,10 @@ onBeforeUnmount(() => {
               </button>
               <span>
                 {{ historyPage }} {{ text('PAGE_SEPARATOR') }}
-                {{ Math.ceil(record.history.length / 10) }}
+                {{ Math.ceil(record.history.length / 5) }}
               </span>
               <button
-                :disabled="historyPage * 10 >= record.history.length"
+                :disabled="historyPage * 5 >= record.history.length"
                 @click="historyPage++"
               >
                 {{ text('NEXT') }}
