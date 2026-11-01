@@ -71,10 +71,10 @@ module Api::V1::Accounts::Crm
       attributes.delete('stage')
       incoming_metadata = (attributes.delete('metadata') || {}).except('document_statuses', 'provisioning_completed_at',
         'provisioning_completion_mode', 'provisioning_external_reference', 'provisioning_confirmed_by_id', 'approval_decision',
-        'document_checklist', 'contract_required', 'source', 'implementation_project_id')
+        'document_checklist', 'contract_required', 'source', 'implementation_project_id', 'issues')
       attributes[:metadata] = (@request.metadata || {}).deep_merge(incoming_metadata)
       if %w[approved rejected].include?(attributes['status']) && attributes['status'] != @request.status
-        unless crm_admin? && (@request.request_kind.in?(%w[approval change cancellation]) || @request.stage_applicable?('approval'))
+        unless @request.workflow_version == 1 && crm_admin? && (@request.request_kind.in?(%w[approval change cancellation]) || @request.stage_applicable?('approval'))
           return render json: { message: 'Aprovacao requer administrador e solicitacao elegivel.' }, status: :forbidden
         end
         attributes[:metadata]['approval_decision'] = { 'status' => attributes['status'], 'actor_id' => Current.user.id,
@@ -91,7 +91,6 @@ module Api::V1::Accounts::Crm
       end
       before = audit_snapshot(@request)
       JrcApprovals::CommercialGate.check!(resource: @request.sales_order, user: Current.user, key: 'crm.order_price')
-      JrcApprovals::CommercialGate.check!(resource: @request, user: Current.user, key: 'backoffice.release')
       JrcCrm::BackofficeDocumentChecklist.new(request: @request, actor: Current.user).sync! if @request.fulfillment?
       @request.advance!(actor: Current.user)
       audit!(@request, 'backoffice_stage_changed', before, audit_snapshot(@request))
@@ -119,6 +118,9 @@ module Api::V1::Accounts::Crm
     def document_status
       key = params[:document_key].to_s.presence || params[:attachment_id].to_s
       status = params[:status].to_s
+      if @request.document_versions.where(document_key: key).exists?
+        return render json: { message: 'Use a decisão da versão documental atual.' }, status: :unprocessable_entity
+      end
       automatic = Array(@request.metadata['document_checklist']).any? { |row| row['key'] == key && row['source'] != 'manual' }
       return render json: { message: 'Este requisito é verificado no módulo de origem.' }, status: :unprocessable_entity if automatic
       return render json: { message: 'Status inválido.' }, status: :unprocessable_entity unless status.in?(%w[pending received validating approved rejected expired])
@@ -138,7 +140,9 @@ module Api::V1::Accounts::Crm
         filename = attachment.filename.to_s.parameterize
         @request.required_documents.each do |required_name|
           normalized = required_name.to_s.parameterize
-          metadata['document_statuses'][required_name.to_s] = status if normalized.present? && filename.include?(normalized)
+          if normalized.present? && filename.include?(normalized) && !@request.document_versions.where(document_key: required_name).exists?
+            metadata['document_statuses'][required_name.to_s] = status
+          end
         end
       end
 
@@ -149,35 +153,27 @@ module Api::V1::Accounts::Crm
     end
 
     def add_issue
-      description = params[:description].to_s.strip
-      return render json: { message: 'Descreva a pendência.' }, status: :unprocessable_entity if description.blank?
-      metadata = (@request.metadata || {}).deep_dup
-      metadata['issues'] ||= []
-      issue = { 'id' => SecureRandom.uuid, 'description' => description, 'type' => params[:issue_type].presence || 'operational',
-                'status' => 'open', 'due_at' => params[:due_at], 'responsible_id' => params[:responsible_id],
-                'created_at' => Time.current.iso8601, 'created_by_id' => Current.user&.id }
-      metadata['issues'] << issue
-      @request.update!(metadata: metadata, status: 'blocked')
-      audit!(@request, 'backoffice_issue_created', {}, issue)
+      JrcBackoffice::Issues.new(request: @request, actor: Current.user).create!(params.permit(
+        :description, :issue_type, :blocking, :due_at, :responsible_id, :document_version_id
+      ))
       render json: serialize(@request.reload)
+    rescue ArgumentError => error
+      render json: { message: error.message }, status: :unprocessable_entity
     end
 
     def resolve_issue
-      issue_id = params[:issue_id].to_s
-      metadata = (@request.metadata || {}).deep_dup
-      issue = Array(metadata['issues']).find { |row| row['id'].to_s == issue_id }
-      return render json: { message: 'Pendência não encontrada.' }, status: :not_found unless issue
-      issue['status'] = 'resolved'
-      issue['resolved_at'] = Time.current.iso8601
-      issue['resolved_by_id'] = Current.user&.id
-      remaining = Array(metadata['issues']).reject { |row| %w[resolved canceled].include?(row['status'].to_s) }
-      next_status = remaining.empty? && @request.status == 'blocked' ? 'in_progress' : @request.status
-      @request.update!(metadata: metadata, status: next_status)
-      audit!(@request, 'backoffice_issue_resolved', {}, issue)
+      JrcBackoffice::Issues.new(request: @request, actor: Current.user).update!(id: params[:issue_id],
+        status: params[:status].presence || 'resolved', reason: params[:reason])
       render json: serialize(@request.reload)
+    rescue ArgumentError => error
+      render json: { message: error.message }, status: :unprocessable_entity
     end
 
     def confirm_provisioning
+      if @request.workflow_version == 2 && (@request.stage != 'provisioning' ||
+         (@request.stage_applicable?('contract') && @request.contract&.signature_status != 'signed'))
+        return render json: { message: 'Confirme o provisionamento na etapa própria, após a assinatura exigida.' }, status: :unprocessable_entity
+      end
       mode = params[:mode].to_s
       unless mode.in?(%w[manual external])
         return render json: { message: 'Modo de provisionamento inválido.' }, status: :unprocessable_entity
@@ -269,7 +265,7 @@ module Api::V1::Accounts::Crm
         id: request.id, request_number: request.request_number, request_kind: request.request_kind,
         stage: request.stage, next_stage: request.next_applicable_stage, status: request.status, priority: request.priority,
         title: request.title, description: request.description, due_at: request.due_at, completed_at: request.completed_at,
-        metadata: request.metadata, documents: documents_rows(request), created_at: request.created_at, updated_at: request.updated_at,
+        workflow_version: request.workflow_version, metadata: request.metadata, documents: documents_rows(request), created_at: request.created_at, updated_at: request.updated_at,
         order: { id: order.id, order_number: order.order_number, status: order.status, total_cents: order.total_cents,
                  monthly_cents: order.monthly_cents, items_count: order.order_items.size, snapshot: order.snapshot },
         contact: request.contact && { id: request.contact.id, name: request.contact.name, email: request.contact.email },
@@ -285,7 +281,7 @@ module Api::V1::Accounts::Crm
         data[:queue] = request.operations_queue && { id: request.operations_queue.id, name: request.operations_queue.name }
         data[:sla] = JrcOperations::SlaClock.new(request).snapshot
         data[:stage_blockers] = request.stage_blockers
-        data[:workflow_stages] = request.order_approval? ? ['approval'] : JrcCrm::BackofficeRequest::STAGES.select { |stage| request.stage_applicable?(stage) || stage == request.stage }
+        data[:workflow_stages] = request.order_approval? ? ['approval'] : request.workflow_stages.select { |stage| request.stage_applicable?(stage) || stage == request.stage }
         data[:commercial] = commercial_context(order)
         data[:commercial][:contract_accessible] = request.contract && visible_to_current_user(crm_scope.jrc_crm_contracts).exists?(id: request.contract.id)
         data[:commercial][:company_accessible] = company && JrcCustomers::DirectoryPolicy.new(pundit_user, :directory).access?

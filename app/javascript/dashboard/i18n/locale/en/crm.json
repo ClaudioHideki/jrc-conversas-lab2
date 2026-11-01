@@ -777,11 +777,18 @@
           "customer": "Cliente",
           "commercial": "Comercial",
           "technical": "Técnica",
-          "financial": "Financeira"
+          "financial": "Financeira",
+          "documentary": "Documental",
+          "registration": "Cadastral",
+          "legal": "Jurídica",
+          "seller": "Vendedor"
         },
         "INVOICES": "Faturas",
         "PAYMENTS": "Pagamentos",
-        "INVOICE": "Fatura"
+        "INVOICE": "Fatura",
+        "BLOCKING_ISSUE": "Bloqueia a etapa",
+        "NONBLOCKING": "Não bloqueia a etapa",
+        "ISSUE_RESPONSIBLE": "Responsável pela correção"
       },
       "AVERAGE_OPEN": "Tempo médio em aberto:",
       "HOURS": "horas",
@@ -868,6 +875,48 @@
         "BLOCKED_COUNT": "dependências pendentes",
         "PRIVATE_NOTE": "Acesso aos módulos de origem continua sujeito às permissões do usuário.",
         "NOTES": "Observações"
+      },
+      "DOCUMENTS": {
+        "TITLE": "Análise documental e versões",
+        "NOTE": "Cada substituição preserva o arquivo e as decisões anteriores. PDF, PNG ou JPEG de até 20 MB. A pré-análise auxilia a conferência e exige decisão humana.",
+        "REQUIREMENT": "Requisito documental",
+        "NEW_VERSION": "Arquivo da nova versão",
+        "UPLOAD": "Enviar nova versão",
+        "REASON": "Motivo da decisão e orientação de correção (obrigatório)",
+        "VERSION": "Versão",
+        "ANALYSIS": "Evidências da pré-análise",
+        "UNAVAILABLE": "Extração indisponível ou inconclusiva. Confira o arquivo e registre sua decisão.",
+        "OCR_CONFIDENCE": "Confiança média do OCR:",
+        "LIMIT": "Limite de páginas analisadas:",
+        "SUPERSEDED": "Versão substituída, preservada para auditoria. A decisão operacional pertence à versão atual.",
+        "DECISIONS": "Histórico de decisões",
+        "EMPTY": "Nenhum requisito manual configurado. Os requisitos automáticos e anexos existentes continuam disponíveis abaixo.",
+        "LEGACY": "Requisitos automáticos e anexos existentes",
+        "LOAD_ERROR": "Não foi possível carregar as versões documentais.",
+        "STATES": {
+          "processing": "Em processamento",
+          "review_required": "Revisão humana necessária",
+          "approved": "Aprovado pelo analista",
+          "rejected": "Rejeitado",
+          "expired": "Vencido"
+        },
+        "CHECKS": {
+          "readable_text": "Texto extraível suficiente",
+          "cnpj_checksum": "Dígitos verificadores do CNPJ",
+          "customer_identifier": "CNPJ comparado ao cadastro"
+        },
+        "RESULTS": {
+          "true": "Sim",
+          "false": "Não",
+          "not_found": "Não identificado",
+          "valid": "Válidos",
+          "invalid": "Inválidos",
+          "customer_unconfigured": "Cadastro sem CNPJ para comparação",
+          "matches": "Compatível",
+          "mismatch": "Divergente"
+        },
+        "CURRENT": "Versão atual",
+        "HISTORY": "Histórico de versões"
       }
     }
   }

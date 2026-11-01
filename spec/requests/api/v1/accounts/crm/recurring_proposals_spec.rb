@@ -113,7 +113,9 @@ RSpec.describe 'Versioned monthly proposal requests', type: :request do
          params: { decision: 'approved' }, headers: headers, as: :json
     expect(response).to have_http_status(:ok), response.body.first(600)
     expect(order.reload).to be_approved
-    contract = JrcCrm::OrderContractService.new(order: order, actor: admin).call
+    operational = order.backoffice_requests.find_by!(request_kind: 'fulfillment')
+    operational.advance!(actor: admin) while %w[analysis documentation].include?(operational.stage)
+    contract = operational.reload.contract
     expect(contract).to have_attributes(term_months: 36, monthly_cents: 29_500)
     expect(contract.financial_summary).to include('financial_version' => 3, 'recurring_total_cents' => 1_062_000)
     expect(contract.contract_template_id).to eq(template.id)

@@ -18,9 +18,13 @@ module JrcCrm
           if QUALIFYING_STATUSES.include?(@order.status)
             JrcApprovals::CommercialGate.check!(resource: @order, user: @actor, key: 'crm.order_price')
             JrcApprovals::CommercialGate.check_contracts!(order: @order, user: @actor) unless @order.status == 'approved'
+            sync_backoffice!
             contract = sync_contract!
-            implementation = {}
-            sync_backoffice!(contract: contract, implementation: implementation)
+            if contract
+              request = @order.backoffice_requests.find_by!(request_kind: 'fulfillment')
+              request.update!(contract: contract) unless request.contract_id == contract.id
+              JrcCrm::BackofficeDocumentChecklist.new(request: request, actor: @actor).sync!
+            end
             sync_commission!
           end
         end

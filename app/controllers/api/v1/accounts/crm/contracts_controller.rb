@@ -2,6 +2,8 @@ module Api::V1::Accounts::Crm
   class ContractsController < BaseController
     before_action :set_contract, only: %i[show update pdf history upload_documents download_document download_signed_document prepare_signature send_for_signature register_manual_signature renew addendum]
 
+    around_action :lock_backoffice_release, only: %i[prepare_signature send_for_signature register_manual_signature]
+
     def index
       rows = visible_to_current_user(crm_scope.jrc_crm_contracts)
              .includes(:contact, :owner, :sales_order, :deal, :contract_template, documents_attachments: :blob)
@@ -21,6 +23,7 @@ module Api::V1::Accounts::Crm
         unless JrcCrm::OrderWorkflowSyncService::QUALIFYING_STATUSES.include?(order.status)
           return render json: { message: 'Aprove o pedido no Backoffice antes de gerar o contrato.' }, status: :unprocessable_entity
         end
+        JrcBackoffice::ContractRelease.check!(order: order, actor: Current.user)
         attributes[:contract_template] ||= JrcCrm::ContractTemplateSelection.select(crm_scope.jrc_crm_contract_templates.where(active: true).to_a, JrcCrm::ContractTemplateSelection.context(order))
         if attributes[:contract_template].nil? && attributes['content_override'].blank?
           return render json: { message: 'Selecione um modelo ativo antes de gerar o contrato.' }, status: :unprocessable_entity
@@ -42,6 +45,9 @@ module Api::V1::Accounts::Crm
         attributes = normalized_contract_params
         if attributes.key?('lifecycle_metadata')
           attributes['lifecycle_metadata'] = (@contract.lifecycle_metadata || {}).deep_merge(attributes['lifecycle_metadata'])
+        end
+        if attributes['status'] == 'awaiting_signature' || attributes['signature_status'].in?(%w[prepared sent signed])
+          JrcBackoffice::ContractRelease.check!(order: @contract.sales_order, actor: Current.user)
         end
         @contract.update!(attributes)
         JrcApprovals::CommercialInvalidation.call(resource: @contract.reload, user: Current.user)
@@ -219,6 +225,13 @@ module Api::V1::Accounts::Crm
     end
 
     private
+
+    def lock_backoffice_release
+      @contract.sales_order.with_lock do
+        JrcBackoffice::ContractRelease.check!(order: @contract.sales_order, actor: Current.user)
+        yield
+      end
+    end
 
     def set_contract
       @contract = visible_to_current_user(crm_scope.jrc_crm_contracts).includes(

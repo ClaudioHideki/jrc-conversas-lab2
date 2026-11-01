@@ -3,8 +3,10 @@
 raise 'Use the Rails test environment and a disposable test database' unless Rails.env.test?
 
 require 'minitest/autorun'
+require 'active_support/testing/time_helpers'
 
 class BackofficeWorkspaceIntegrationTest < Minitest::Test
+  include ActiveSupport::Testing::TimeHelpers
   def setup
     ActiveRecord::Base.connection.begin_transaction(joinable: false)
     Current.reset
@@ -233,6 +235,183 @@ class BackofficeWorkspaceIntegrationTest < Minitest::Test
     refute_includes body['workflow_stages'], 'documentation'
     @api.get "#{@url}/#{@request.id}", headers: @headers
     assert_equal true, @api.response.parsed_body.dig('commercial', 'order_accessible')
+  end
+
+  def test_document_versions_preserve_history_decisions_and_current_requirement_status
+    @request.update!(metadata: @request.metadata.merge('required_documents' => ['identity']))
+    endpoint = "#{@url}/#{@request.id}/document_versions"
+    file = Rack::Test::UploadedFile.new(File.expand_path('../../spec/fixtures/files/sample.pdf', __dir__), 'application/pdf')
+    @api.post endpoint, params: { document_key: 'identity', file: file, idempotency_key: 'document-upload-0001' }, headers: @headers
+    assert_equal 201, @api.response.status, @api.response.body
+    first = @request.document_versions.first!
+    JrcBackoffice::DocumentPreanalysisJob.perform_now(first.id)
+    assert_equal 'review_required', first.reload.analysis.state
+    refute first.analysis.evidence.key?('text')
+    @api.post "#{endpoint}/#{first.id}/decision", params: { status: 'approved', reason: 'Verified against customer records' }, headers: @headers
+    assert_equal 200, @api.response.status, @api.response.body
+    assert_equal 'approved', @request.reload.metadata.dig('document_statuses', 'identity')
+    @api.post endpoint, params: { document_key: 'identity', file: file, idempotency_key: 'document-upload-0001' }, headers: @headers
+    assert_equal 201, @api.response.status
+    assert_equal 1, @request.document_versions.count
+    @api.post endpoint, params: { document_key: 'identity', file: file, idempotency_key: 'document-upload-0002' }, headers: @headers
+    assert_equal 201, @api.response.status, @api.response.body
+    assert_equal 2, @request.document_versions.count
+    assert_equal 'received', @request.reload.metadata.dig('document_statuses', 'identity')
+    assert_equal 'approved', first.reload.status
+    @api.post "#{endpoint}/#{first.id}/decision", params: { status: 'approved', reason: 'Old version cannot release' }, headers: @headers
+    assert_equal 422, @api.response.status
+    @api.post "#{@url}/#{@request.id}/document_status", params: { document_key: 'identity', status: 'approved' }, headers: @headers
+    assert_equal 422, @api.response.status
+    @api.get endpoint, headers: @headers
+    assert_equal [2, 1], @api.response.parsed_body['data'].map { |row| row['version'] }
+    @api.get "#{endpoint}/#{first.id}", headers: @headers
+    assert_equal 200, @api.response.status
+    assert_equal 'no-store', @api.response.headers['Cache-Control']
+    assert_raises(ActiveRecord::ReadOnlyRecord) { first.update!(sha256: 'changed') }
+  end
+
+  def test_document_versions_deny_untrusted_accounts_keys_formats_and_closed_requests
+    endpoint = "#{@url}/#{@request.id}/document_versions"
+    @request.update!(metadata: @request.metadata.merge('required_documents' => ['identity']))
+    @api.get endpoint, headers: @agent.create_new_auth_token
+    assert_equal 404, @api.response.status
+    @api.get endpoint
+    assert_equal 401, @api.response.status
+    file = Rack::Test::UploadedFile.new(File.expand_path('../../spec/fixtures/files/sample.pdf', __dir__), 'application/pdf')
+    @api.post endpoint, params: { document_key: 'unconfigured', file: file, idempotency_key: 'document-upload-0001' }, headers: @headers
+    assert_equal 422, @api.response.status
+    @request.update!(status: 'completed', completed_at: Time.current)
+    @api.post endpoint, params: { document_key: 'identity', file: file, idempotency_key: 'document-upload-0002' }, headers: @headers
+    assert_equal 422, @api.response.status
+    assert_empty @request.document_versions
+  end
+
+  def test_central_approval_blocks_formalization_after_documentary_analysis
+    company = @account.master_companies.create!(name: 'Approval issuer', relationship_type: 'internal')
+    unit = @account.jrc_crm_business_units.create!(name: 'Approval unit', code: 'APP', company_id: company.id)
+    [@admin, @agent].each do |user|
+      @account.jrc_crm_user_business_units.create!(user: user, scope: 'BUSINESS_UNIT', business_unit: unit,
+        company: company, structure_managed: true, active: true)
+    end
+    product = @account.jrc_crm_products.create!(name: 'Priced service', unit_price_cents: 100_000, minimum_price_cents: 100_000,
+      billing_model: 'one_time', sales_unit: 'unidade', requires_contract: true)
+    base = "/api/v1/accounts/#{@account.id}/crm"
+    @api.post "#{base}/sales_orders", params: { sales_order: { contact_id: @contact.id, business_unit_id: unit.id,
+      items: [{ product_id: product.id, name: product.name, quantity: 1, unit_cents: 100_000, one_time_cents: 100_000,
+        snapshot: { billing_model: 'one_time', unit_name: 'unidade' } }],
+      snapshot: { generate_contract: true } } }, headers: @headers, as: :json
+    assert_equal 201, @api.response.status, @api.response.body
+    order = @account.jrc_crm_sales_orders.find(@api.response.parsed_body['id'])
+    pending = order.backoffice_requests.find_by!(request_kind: 'approval')
+    JrcCrm::OrderApprovalService.new(order: order, actor: @admin).decide!(request: pending, decision: 'approved')
+    request = order.backoffice_requests.find_by!(request_kind: 'fulfillment')
+    assert_nil request.contract
+    @account.enable_features!('jrc_approvals')
+    @account.update!(custom_attributes: { 'jrc_approval_gates' => { 'backoffice.release' => 'enforcement' } })
+    role = CustomRole.create!(account: @account, name: 'Explicit approval reviewer', permissions: %w[jrc_approvals_decide jrc_crm])
+    reviewer = @account.account_users.find_by!(user: @agent)
+    reviewer.update!(custom_role: role)
+    definition = { 'schema_version' => 1, 'condition' => { 'const' => true },
+      'selection' => { 'mode' => 'exclusive', 'priority' => 10 }, 'execution' => 'sequential', 'completion' => 'all_steps',
+      'expires_in_seconds' => 3600, 'allow_self_approval' => false, 'delegation_allowed' => false, 'reopen_mode' => 'disabled',
+      'steps' => [{ 'code' => 'review', 'mode' => 'any', 'quorum' => 1,
+        'assignees' => [{ 'type' => 'account_user', 'id' => reviewer.id }], 'authority' => { 'const' => true },
+        'actions' => %w[approved rejected returned escalated], 'on_reject' => 'rejected' }] }
+    manager = JrcApprovals::Policies.new(account: @account, user: @admin)
+    policy = manager.create!(code: 'release', name: 'Backoffice release', module_key: 'backoffice', event_key: 'release',
+      issuer_company_id: company.id, business_unit_id: unit.id, definition: definition)
+    manager.validate!(policy_id: policy.id, expected_version: policy.lock_version)
+    manager.publish!(policy_id: policy.id, expected_version: policy.reload.lock_version)
+    endpoint = "#{@url}/#{request.id}"
+    @api.post "#{endpoint}/advance", headers: @headers
+    assert_equal 200, @api.response.status, @api.response.body
+    assert_equal 'documentation', request.reload.stage
+    @api.post "#{endpoint}/advance", headers: @headers
+    assert_equal 200, @api.response.status, @api.response.body
+    assert_equal 'approval', request.reload.stage
+    @api.post "#{endpoint}/advance", headers: @headers
+    assert_equal 409, @api.response.status, @api.response.body
+    assert_nil request.reload.contract
+    @api.post "#{base}/contracts", params: { contract: { sales_order_id: order.id, content_override: 'Draft' } }, headers: @headers, as: :json
+    assert_equal 409, @api.response.status
+    central = JrcApprovals::CommercialGate.new(account: @account, user: @admin)
+      .request!(key: 'backoffice.release', resource_id: request.id, idempotency_key: 'central-release-001').first
+    JrcApprovals::Decisions.new(account: @account, user: @agent).call(request_id: central.id, step_code: 'review',
+      decision: 'approved', reason: 'Approved after explicit review', expected_version: central.reload.lock_version,
+      idempotency_key: 'central-decision-001')
+    @api.post "#{endpoint}/advance", headers: @headers
+    assert_equal 200, @api.response.status, @api.response.body
+    assert_equal 'contract', request.reload.stage
+    assert request.contract
+    assert_equal 1, order.contracts.count
+    @api.post "#{endpoint}/advance", headers: @headers
+    assert_equal 422, @api.response.status
+    travel_to(central.expires_at + 1.second) do
+      @api.post "#{base}/contracts/#{request.contract_id}/prepare_signature", params: { mode: 'manual' }, headers: @headers
+      assert_equal 409, @api.response.status
+      refute_equal 'prepared', request.contract.reload.signature_status
+    end
+  end
+
+  def test_preanalysis_extracts_real_text_and_flags_customer_cnpj_mismatch_without_exposing_identifiers
+    company = @account.master_companies.create!(name: 'Document customer', tax_id: '11222333000181')
+    @contact.update!(company_id: company.id)
+    @request.update!(metadata: @request.metadata.merge('required_documents' => ['cnpj']))
+    layout = JrcCrm::CommercialPdf::Layout.new(title: 'Synthetic documentary test', number: 'TEST-1', logo: JrcCrm::DocumentBranding.logo)
+    layout.paragraph('Comprovante cadastral para conferencia humana. CNPJ: 04.252.011/0001-10')
+    Tempfile.create(['cnpj-mismatch', '.pdf']) do |file|
+      file.binmode
+      file.write(layout.render)
+      file.flush
+      upload = Rack::Test::UploadedFile.new(file.path, 'application/pdf')
+      version = JrcBackoffice::Documents.new(request: @request, actor: @admin).upload!(key: 'cnpj', file: upload,
+        idempotency_key: 'cnpj-analysis-upload-001')
+      result = JrcBackoffice::DocumentPreanalysis.new(version).call
+      assert_equal 'poppler', result.evidence['engine']
+      assert_equal true, result.evidence.dig('checks', 'readable_text')
+      assert_equal 'mismatch', result.evidence.dig('checks', 'customer_identifier')
+      assert_equal 'valid', result.evidence.dig('checks', 'cnpj_checksum')
+      refute_includes result.evidence.to_json, '04252011000110'
+      assert_equal 'review_required', result.state
+    end
+  end
+
+  def test_blocking_issue_preserves_origin_and_requires_scoped_responsible_and_deadline
+    @request.update_columns(workflow_version: 2, stage: 'analysis')
+    @api.post "#{@url}/#{@request.id}/issues", params: { description: 'Document correction', issue_type: 'documentary' }, headers: @headers
+    assert_equal 422, @api.response.status
+    @api.post "#{@url}/#{@request.id}/issues", params: { description: 'Document correction', issue_type: 'documentary',
+      due_at: 1.day.from_now.iso8601, responsible_id: @admin.id }, headers: @headers
+    assert_equal 200, @api.response.status, @api.response.body
+    issue = @request.reload.open_issues.last
+    assert_equal 'analysis', issue['origin_stage']
+    assert issue['blocking']
+    @api.post "#{@url}/#{@request.id}/advance", headers: @headers
+    assert_equal 422, @api.response.status
+    @api.post "#{@url}/#{@request.id}/resolve_issue", params: { issue_id: issue['id'] }, headers: @headers
+    assert_equal 200, @api.response.status
+    assert_equal 'analysis', @request.reload.stage
+    assert_equal 'in_progress', @request.status
+  end
+
+  def test_existing_workflow_keeps_its_original_stage_order
+    @request.update_columns(workflow_version: 1, stage: 'finance', metadata: { 'approval_required' => true, 'finance_required' => true })
+    assert_equal 'approval', @request.reload.next_applicable_stage
+    assert_equal JrcCrm::BackofficeRequest::STAGES, @request.workflow_stages
+    @request.update_columns(stage: 'approval')
+    assert @request.reload.stage_blockers.any? { |message| message.include?('administrador') }
+    @request.update_columns(metadata: @request.metadata.merge('approval_decision' => { 'status' => 'approved' }))
+    assert_equal 'completed', @request.reload.next_applicable_stage
+    assert_empty @request.stage_blockers
+  end
+
+  def test_local_ocr_reads_a_synthetic_image_and_returns_measured_confidence
+    path = File.expand_path('../fixtures/jrc_backoffice/cnpj_synthetic.png', __dir__)
+    result = JrcBackoffice::TextExtraction.call(path, 'image/png')
+    assert_equal 'tesseract', result[:engine]
+    assert_includes result[:text], '11.222.333/0001-81'
+    assert_operator result[:ocr_confidence], :>, 60
+    assert_equal 1, result[:page_limit]
   end
 
 end

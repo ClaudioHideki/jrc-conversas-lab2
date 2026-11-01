@@ -749,6 +749,10 @@ Rails.application.routes.draw do
             resources :backoffice_requests, only: [:index, :show, :create, :update] do
               get :summary, on: :collection
               get :workspace, on: :collection
+              get 'document_versions', to: 'backoffice_documents#index'
+              post 'document_versions', to: 'backoffice_documents#create'
+              get 'document_versions/:version_id', to: 'backoffice_documents#download'
+              post 'document_versions/:version_id/decision', to: 'backoffice_documents#decide'
               member do
                 post :decide_order
                 post :advance

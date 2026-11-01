@@ -61,7 +61,8 @@ class BackofficeCommercialFlowTest < Minitest::Test
     path = "backoffice_requests/#{request.id}"
     assert_equal 1, @account.jrc_crm_backoffice_requests.where(sales_order_id: order_id, request_kind: 'fulfillment').count
     assert_equal 'analysis', request.stage
-    assert request.contract.present?
+    assert_equal 2, request.workflow_version
+    assert_nil request.contract
     assert_equal 'documentation', call_api(:post, "#{path}/advance")['stage']
     call_api(:post, "#{path}/advance", {}, status: 422)
     call_api(:post, "#{path}/document_status", { document_key: 'identity', status: 'approved' }, status: 422)
@@ -70,8 +71,8 @@ class BackofficeCommercialFlowTest < Minitest::Test
     attachment_id = upload.fetch('documents').first.fetch('id')
     assert_equal File.binread(@pdf_path), call_api(:get, "#{path}/documents/#{attachment_id}")
     call_api(:post, "#{path}/document_status", { document_key: 'identity', attachment_id: attachment_id, status: 'approved' })
-    call_api(:post, "#{path}/advance", {}, status: 422)
-    contract_path = "contracts/#{request.contract_id}"
+    assert_equal 'contract', call_api(:post, "#{path}/advance")['stage']
+    contract_path = "contracts/#{request.reload.contract_id}"
     call_api(:post, "#{contract_path}/register_manual_signature", { signed_by_name: 'Synthetic signatory',
       signed_at: Time.current.iso8601 }, status: 422)
     call_api(:post, "#{contract_path}/register_manual_signature", { signed_by_name: 'Synthetic signatory',
@@ -91,12 +92,12 @@ class BackofficeCommercialFlowTest < Minitest::Test
     assert_equal 'finance', call_api(:post, "#{path}/advance")['stage']
     call_api(:post, "#{path}/advance", {}, status: 422)
     invoice = call_api(:post, 'invoices', { invoice: { sales_order_id: order_id, status: 'issued', due_on: 30.days.from_now.to_date } }, status: 201)
-    issue = call_api(:post, "#{path}/issues", { description: 'Confirm customer acceptance', issue_type: 'customer' })
+    issue = call_api(:post, "#{path}/issues", { description: 'Confirm customer acceptance', issue_type: 'customer', due_at: 1.day.from_now.iso8601 })
     issue_id = issue.fetch('metadata').fetch('issues').last.fetch('id')
     call_api(:post, 'payments', { payment: { invoice_id: invoice.fetch('id'), amount_cents: invoice.fetch('total_cents'),
       paid_at: Time.current.iso8601, method: 'pix', reconciliation_status: 'reconciled' } }, status: 201)
     assert JrcCrm::Invoice.find(invoice.fetch('id')).paid?
-    assert_equal 'issues', call_api(:get, path)['stage']
+    assert_equal 'finance', call_api(:get, path)['stage']
     call_api(:post, "#{path}/advance", {}, status: 422)
     call_api(:post, "#{path}/resolve_issue", { issue_id: issue_id })
     assert_equal 'completed', call_api(:post, "#{path}/advance")['status']

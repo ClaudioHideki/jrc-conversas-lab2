@@ -52,6 +52,7 @@ module JrcCrm
     self.table_name = 'jrc_crm_backoffice_requests'
 
     STAGES = %w[request analysis documentation contract implementation provisioning finance issues approval completed].freeze
+    WORKFLOW_V2 = %w[request analysis documentation approval contract implementation provisioning finance completed].freeze
     ACTIVE_STATUSES = %w[pending in_progress waiting_customer blocked].freeze
 
     belongs_to :account
@@ -63,6 +64,7 @@ module JrcCrm
     belongs_to :requested_by, class_name: 'User'
     belongs_to :operations_queue, class_name: 'JrcOperations::Queue', optional: true
     belongs_to :operations_sla_policy, class_name: 'JrcOperations::SlaPolicy', optional: true
+    has_many :document_versions, class_name: 'JrcBackoffice::DocumentVersion', dependent: :restrict_with_exception
     has_many_attached :documents
 
     enum request_kind: { fulfillment: 'fulfillment', approval: 'approval', change: 'change', cancellation: 'cancellation' }
@@ -76,6 +78,7 @@ module JrcCrm
     validates :sales_order_id, uniqueness: { scope: %i[account_id request_kind] }, if: :fulfillment?
     validate :associations_belong_to_account
     before_validation :assign_number, on: :create
+    before_validation :assign_workflow, on: :create
     before_validation :prepare_operational_routing, on: :create
     after_update :sync_operational_status, if: :saved_change_to_status?
     after_update :sync_operational_stage, if: :saved_change_to_stage?
@@ -84,12 +87,18 @@ module JrcCrm
       sales_order.with_lock do
         with_lock do
           JrcApprovals::CommercialGate.check!(resource: sales_order, user: actor, key: 'crm.order_price')
-          JrcApprovals::CommercialGate.check!(resource: self, user: actor, key: 'backoffice.release')
+          if workflow_version == 1 || !next_applicable_stage.in?(%w[analysis documentation approval])
+            JrcApprovals::CommercialGate.check!(resource: self, user: actor, key: 'backoffice.release')
+          end
           if %w[contract implementation provisioning finance issues approval].include?(stage)
             JrcApprovals::CommercialGate.check_contracts!(order: sales_order, user: actor)
           end
           validate_stage_dependencies!
           target = next_applicable_stage
+          if target == 'contract' && workflow_version == 2
+            generated = JrcCrm::OrderContractService.new(order: sales_order, actor: actor).call(releasing: true)
+            self.contract = generated if generated
+          end
           update!(stage: target, status: target == 'completed' ? 'completed' : 'in_progress',
                   completed_at: target == 'completed' ? Time.current : nil)
           JrcCrm::OrderWorkflowSyncService.new(order: sales_order, actor: actor, event: 'implementation_ready').call if target == 'implementation'
@@ -101,7 +110,15 @@ module JrcCrm
       self
     end
 
+    def workflow_stages
+      workflow_version == 2 ? WORKFLOW_V2 : STAGES
+    end
+
     def next_applicable_stage
+      if workflow_version == 2
+        position = WORKFLOW_V2.index(stage) || 0
+        return WORKFLOW_V2.drop(position + 1).find { |candidate| stage_applicable?(candidate) } || 'completed'
+      end
       candidates = case stage
                    when 'request' then %w[analysis]
                    when 'analysis' then %w[documentation contract implementation provisioning finance completed]
@@ -127,7 +144,10 @@ module JrcCrm
       when 'provisioning' then bool(data[:provisioning_required]) || bool(snap[:requires_provisioning])
       when 'finance' then bool(data.fetch(:finance_required, true)) || sales_order.invoices.exists?
       when 'issues' then open_issues.any?
-      when 'approval' then request_kind.in?(%w[approval change cancellation]) || bool(data[:approval_required])
+      when 'approval'
+        return true if workflow_version == 2 && JrcApprovals::CommercialGate.mode(account, 'backoffice.release') == 'enforcement'
+
+        request_kind.in?(%w[approval change cancellation]) || bool(data[:approval_required])
       else true
       end
     end
@@ -135,6 +155,10 @@ module JrcCrm
     def required_documents
       configured = Array((metadata || {})['document_checklist']).select { |row| row['required'] && row['blocking'] }.map { |row| row['key'] }
       (Array((metadata || {})['required_documents']) + configured).uniq
+    end
+
+    def precontract_documents
+      required_documents - %w[contract_generated contract_signed]
     end
 
     def order_approval?
@@ -164,7 +188,8 @@ module JrcCrm
 
       if stage == 'documentation'
         statuses = (data[:document_statuses] || {}).with_indifferent_access
-        pending = required_documents.reject { |name| statuses[name.to_s].to_s == 'approved' }
+        keys = workflow_version == 2 ? precontract_documents : required_documents
+        pending = keys.reject { |name| statuses[name.to_s].to_s == 'approved' }
         errors << "Documentos obrigatórios pendentes: #{pending.join(', ')}" if pending.any?
       end
 
@@ -193,7 +218,7 @@ module JrcCrm
         errors << 'Resolva as pendências abertas antes de concluir o fluxo.'
       end
 
-      if stage == 'approval' && stage_applicable?('approval')
+      if workflow_version == 1 && stage == 'approval' && stage_applicable?('approval')
         errors << 'A aprovacao explicita do administrador esta pendente.' unless data.dig(:approval_decision, :status) == 'approved'
       end
 
@@ -201,10 +226,21 @@ module JrcCrm
         errors << 'Há faturamento/recebimento pendente.' unless sales_order.invoices.any?(&:paid?)
       end
 
+      if workflow_version == 2 && stage == 'approval' && JrcApprovals::CommercialGate.mode(account, 'backoffice.release') != 'enforcement'
+        errors << 'Configure a política obrigatória na Central de Aprovações antes de liberar a solicitação.'
+      end
+
+      if workflow_version == 2 && open_issues.any? { |issue| issue.fetch('blocking', true) }
+        errors << 'Resolva as pendências bloqueantes da etapa antes de avançar.'
+      end
       errors
     end
 
     private
+
+    def assign_workflow
+      self.workflow_version = fulfillment? ? 2 : 1
+    end
 
     def prepare_operational_routing
       return unless sales_order && account

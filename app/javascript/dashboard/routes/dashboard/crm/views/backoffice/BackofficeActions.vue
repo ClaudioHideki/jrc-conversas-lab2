@@ -18,6 +18,8 @@ const issuePage = ref(1);
 const description = ref('');
 const issueType = ref('operational');
 const issueDue = ref('');
+const issueBlocking = ref(true);
+const issueResponsible = ref(props.record.owner.id);
 const mode = ref('manual');
 const reference = ref('');
 const confirmed = ref(false);
@@ -343,6 +345,8 @@ const download = async row => {
               backofficeAPI.addIssue(record.id, {
                 description: description.trim(),
                 issue_type: issueType,
+                blocking: issueBlocking,
+                responsible_id: issueResponsible,
                 due_at: issueDue ? new Date(issueDue).toISOString() : null,
               })
             )
@@ -357,6 +361,10 @@ const download = async row => {
               <option
                 v-for="type in [
                   'operational',
+                  'documentary',
+                  'registration',
+                  'legal',
+                  'seller',
                   'customer',
                   'commercial',
                   'technical',
@@ -373,9 +381,43 @@ const download = async row => {
             {{ text('DEADLINE') }}
             <input
               v-model="issueDue"
+              :required="record.workflow_version === 2 && issueBlocking"
               type="datetime-local"
               class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 p-2"
             />
+          </label>
+          <label class="flex items-center gap-2 text-sm">
+            <input
+              v-model="issueBlocking"
+              type="checkbox"
+            />
+            {{ text('FORM.BLOCKING_ISSUE') }}
+          </label>
+          <label class="text-sm">
+            {{ text('FORM.ISSUE_RESPONSIBLE') }}
+            <select
+              v-model="issueResponsible"
+              class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 p-2"
+            >
+              <option :value="record.owner.id">{{ record.owner.name }}</option>
+              <option
+                v-if="record.requested_by.id !== record.owner.id"
+                :value="record.requested_by.id"
+              >
+                {{ record.requested_by.name }}
+              </option>
+              <option
+                v-if="
+                  record.commercial?.owner &&
+                  ![record.owner.id, record.requested_by.id].includes(
+                    record.commercial.owner.id
+                  )
+                "
+                :value="record.commercial.owner.id"
+              >
+                {{ record.commercial.owner.name }}
+              </option>
+            </select>
           </label>
           <label class="text-sm sm:col-span-2">
             {{ text('FORM.DESCRIPTION') }}
@@ -403,6 +445,12 @@ const download = async row => {
           <b>{{ issue.description }}</b>
           <p class="mt-1 text-xs text-n-slate-11">
             {{ label(issue.status || 'open') }} {{ text('SEPARATOR') }}
+            {{
+              issue.blocking === false
+                ? text('FORM.NONBLOCKING')
+                : text('FORM.BLOCKING_ISSUE')
+            }}
+            {{ text('SEPARATOR') }}
             {{ date(issue.due_at) }}
           </p>
         </div>

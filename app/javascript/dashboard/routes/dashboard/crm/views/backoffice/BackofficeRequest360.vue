@@ -8,6 +8,7 @@ import { stageTones, money } from './backofficeVisuals';
 import BackofficeRequestSummary from './BackofficeRequestSummary.vue';
 import BackofficeAssignment from './BackofficeAssignment.vue';
 import BackofficeActions from './BackofficeActions.vue';
+import BackofficeDocumentVersions from './BackofficeDocumentVersions.vue';
 import BackofficeFinance from './BackofficeFinance.vue';
 import ApprovalGateBadge from 'dashboard/routes/dashboard/approvals/ApprovalGateBadge.vue';
 import { useBackofficePresentation } from './useBackofficePresentation';
@@ -67,6 +68,10 @@ const load = async () => {
   } finally {
     if (sequence === request) loading.value = false;
   }
+};
+const refreshDocuments = async () => {
+  const { data } = await backofficeAPI.show(route.params.requestId);
+  record.value = data;
 };
 const action = async command => {
   if (saving.value) return;
@@ -383,8 +388,29 @@ onBeforeUnmount(() => {
                 </div>
               </dl>
             </div>
+            <div
+              v-else-if="tab === 'documents'"
+              class="space-y-4"
+            >
+              <BackofficeDocumentVersions
+                :record="record"
+                @changed="refreshDocuments"
+              />
+              <details class="rounded-xl border border-n-weak bg-n-solid-2 p-4">
+                <summary class="cursor-pointer font-semibold">
+                  {{ text('DOCUMENTS.LEGACY') }}
+                </summary>
+                <BackofficeActions
+                  :record="record"
+                  tab="documents"
+                  :saving="saving"
+                  class="mt-4"
+                  @command="action"
+                />
+              </details>
+            </div>
             <BackofficeActions
-              v-else-if="['documents', 'checklist', 'issues'].includes(tab)"
+              v-else-if="['checklist', 'issues'].includes(tab)"
               :key="tab"
               :record="record"
               :start-issue="startIssue"
