@@ -19759,23 +19759,30 @@
             "JrcBackoffice::ContractRelease",
             "JrcBackoffice::SignatureRelease"
           ],
-          "implemented_change": "Geração de versão imutável, edição contextual, visualização e comparação implementadas. Seleção contextual de modelo e envio durável ainda não concluídos.",
+          "implemented_change": "Versões, PDF/diferenças e edição contextual preservados; seleção canônica individual/conjunta e roster imutável vinculados ao PDF, com interface validada. Modelo contextual, poderes e envio durável continuam pendentes.",
           "files": [
             "app/services/jrc_backoffice/contract_versions.rb",
-            "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeContractVersions.vue"
+            "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeContractVersions.vue",
+            "app/services/jrc_backoffice/signer_rosters.rb",
+            "app/services/jrc_backoffice/signer_roster_source.rb",
+            "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeContractSigners.vue"
           ],
           "status": "parcial",
           "tests_and_evidence": [
             "docs/jrc_backoffice/contract_versions_checkpoint_20261102.json",
             "spec/services/jrc_backoffice/contract_versions_spec.rb",
-            "spec/requests/api/v1/accounts/crm/backoffice_contract_versions_spec.rb"
+            "spec/requests/api/v1/accounts/crm/backoffice_contract_versions_spec.rb",
+            "docs/jrc_backoffice/canonical_signers_checkpoint_20261102.json",
+            "spec/services/jrc_backoffice/signer_rosters_spec.rb",
+            "spec/requests/api/v1/accounts/crm/backoffice_signers_spec.rb",
+            "spec/services/jrc_backoffice/signer_rosters_concurrency_spec.rb"
           ],
           "dependencies": [
-            "B2 — signatários e poderes",
+            "Poderes/representação pela Central",
             "B3 — intenção durável, consumidor e evidência",
             "Homologação DocuSign demo para efeitos externos"
           ],
-          "next_action": "Concluir seleção contextual do modelo, assinantes, poderes e B3 antes de habilitar envio.",
+          "next_action": "Concluir poderes e seleção contextual de modelo; então B3 antes de habilitar envio.",
           "fragment_kind": "requirement"
         },
         {

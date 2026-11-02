@@ -15,6 +15,14 @@ class JrcBackoffice::ContractVersions
                                          contract_id: @access.contracts.select(:id))
   end
 
+  def source_digest(contract_id)
+    request = @access.request(@request_id)
+    contract = @access.contract!(request)
+    raise Changed unless contract.id == contract_id
+
+    JrcBackoffice::ContractSnapshot.digest(contract, signer_roster: roster_for(request, contract))
+  end
+
   def create!(idempotency_key:, expected_source_digest:, change_reason:)
     @pending_blob = nil
     JrcApprovals::Ledger.key!(idempotency_key)
@@ -58,7 +66,8 @@ class JrcBackoffice::ContractVersions
     current = version.snapshot
     scope.find(version.id)
     before = {} if previous && !previous_visible?(previous)
-    JrcBackoffice::ContractSnapshot.differences(before, current)
+    JrcBackoffice::ContractSnapshot.differences(JrcBackoffice::ContractSnapshot.presentation(before),
+                                                JrcBackoffice::ContractSnapshot.presentation(current))
   end
 
   private
@@ -75,16 +84,38 @@ class JrcBackoffice::ContractVersions
     return previous if previous
 
     check_generation!(request, contract)
-    snapshot = JrcBackoffice::ContractSnapshot.capture(contract.reload)
-    digest = JrcApprovals::Ledger.digest(snapshot)
+    roster = roster_for(request, contract)
+    validate_roster!(request, contract, roster)
+    snapshot = JrcBackoffice::ContractSnapshot.capture(contract.reload, signer_roster: roster)
+    digest = JrcBackoffice::ContractSnapshot.digest_data(snapshot)
     raise Changed unless input[:source_digest] == digest
 
     number = JrcBackoffice::ContractVersion.where(account_id: contract.account_id, contract_id: contract.id).maximum(:number).to_i + 1
-    bytes = JrcCrm::ContractPdfService.new(contract, revision: number).call
-    raise Changed unless JrcBackoffice::ContractSnapshot.digest(contract.reload) == digest
+    bytes = render_version(contract, number, roster)
+    raise Changed unless JrcBackoffice::ContractSnapshot.digest(contract.reload, signer_roster: roster) == digest
 
+    validate_roster!(request, contract, roster)
     @access.writable!(request)
+    input[:signer_roster] = roster
     persist!(build_version(request, contract, number, snapshot, input), bytes)
+  end
+
+  def render_version(contract, number, roster)
+    options = { revision: number }
+    options[:signers] = roster.snapshot.fetch('signers') if roster
+    JrcCrm::ContractPdfService.new(contract, **options).call
+  end
+
+  def roster_for(request, contract)
+    JrcBackoffice::SignerRoster.where(account_id: @access.account.id, backoffice_request_id: request.id, contract_id: contract.id)
+                               .order(revision: :desc).first
+  end
+
+  def validate_roster!(request, contract, roster)
+    return unless roster
+
+    source = JrcBackoffice::SignerRosterSource.new(account: @access.account, actor: @access.actor, request: request, contract: contract)
+    source.assert_current!(roster)
   end
 
   def existing_version!(contract, input)
@@ -117,7 +148,8 @@ class JrcBackoffice::ContractVersions
     JrcBackoffice::ContractVersion.new(account: @access.account, backoffice_request: request, contract: contract,
                                        created_by: @access.actor, number: number, idempotency_key: input[:idempotency_key],
                                        source_digest: input[:source_digest], source_snapshot: JrcServiceDesk::CanonicalJson.dump(snapshot),
-                                       change_reason: input[:change_reason], change_paths: paths)
+                                       change_reason: input[:change_reason], change_paths: paths, signer_roster: input[:signer_roster],
+                                       source_format_version: input[:signer_roster] ? 2 : 1)
   end
 
   def persist!(record, bytes)

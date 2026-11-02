@@ -9,7 +9,7 @@ import BackofficeRequestSummary from './BackofficeRequestSummary.vue';
 import BackofficeAssignment from './BackofficeAssignment.vue';
 import BackofficeActions from './BackofficeActions.vue';
 import BackofficeDocumentVersions from './BackofficeDocumentVersions.vue';
-import BackofficeContractVersions from './BackofficeContractVersions.vue';
+import BackofficeContractPanel from './BackofficeContractPanel.vue';
 import BackofficeFinance from './BackofficeFinance.vue';
 import ApprovalGateBadge from 'dashboard/routes/dashboard/approvals/ApprovalGateBadge.vue';
 import { useBackofficePresentation } from './useBackofficePresentation';
@@ -435,7 +435,7 @@ onBeforeUnmount(() => {
                 />
               </details>
             </div>
-            <BackofficeContractVersions
+            <BackofficeContractPanel
               v-else-if="tab === 'contracts'"
               :record="record"
             />

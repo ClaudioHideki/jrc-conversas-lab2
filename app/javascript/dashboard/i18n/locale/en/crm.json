@@ -708,7 +708,8 @@
         "backoffice_issue_created": "Pendência registrada",
         "backoffice_issue_resolved": "Pendência resolvida",
         "backoffice_provisioning_confirmed": "Provisionamento confirmado",
-        "backoffice_reopened": "Solicitação reaberta"
+        "backoffice_reopened": "Solicitação reaberta",
+        "backoffice_signer_roster_created": "Proposta de assinantes preservada"
       },
       "NO_SLA": "Sem prazos de SLA configurados",
       "NO_ACTION": "Ainda não registrada",
@@ -1035,6 +1036,54 @@
         "EDIT_NOTE": "A edição altera somente a minuta e a vigência deste contrato. Valores e condições financeiras seguem o fluxo comercial autorizado.",
         "TEMPLATE": "Modelo atual:",
         "TEMPLATE_HELP": "Deixe a minuta vazia para usar o modelo atual. Se não houver modelo, informe o texto antes de gerar a versão."
+      },
+      "CONTRACT_SIGNERS": {
+        "NAVIGATION": "Contrato, versões e assinantes",
+        "TABS": {
+          "versions": "Versões e minuta",
+          "signers": "Assinantes"
+        },
+        "TITLE": "Assinantes do contrato",
+        "EDIT": "Selecionar assinantes",
+        "AUTHORITY_NOTE": "Selecionar contatos e cadastrar CPF não comprova poderes de representação. A validação de poderes e as aprovações exigidas são necessárias antes do envio.",
+        "PARTIES": {
+          "customer": "Cliente",
+          "issuer": "Emitente JRC"
+        },
+        "MODES": {
+          "single": "Individual — uma pessoa",
+          "joint": "Conjunta — todas as pessoas selecionadas"
+        },
+        "MODE": "Regra de assinatura desta parte",
+        "PARTY": "Parte do contrato",
+        "JOINT_HELP": "Selecione uma pessoa para assinatura individual ou de duas a dez para conjunta. Todas as pessoas selecionadas serão obrigatórias.",
+        "REQUIRED": "Assinatura obrigatória",
+        "REVISION": "Revisão dos assinantes",
+        "HISTORY": "Histórico dos assinantes",
+        "EMPTY": "Ainda não há proposta de assinantes preservada para este contrato.",
+        "READ_ONLY": "A seleção exige solicitação aberta, contrato ainda não enviado, acesso aos contatos e cobertura da empresa e unidade.",
+        "LOADING": "Carregando os assinantes autorizados…",
+        "SAVED": "Proposta de assinantes preservada. Gere uma nova versão para incluir essas pessoas no PDF; nenhum envio foi realizado.",
+        "CHANGED": "O contrato ou a proposta mudou. Atualize, confira os dados e selecione novamente antes de salvar.",
+        "DENIED": "Seu acesso aos assinantes foi negado. Os dados da tela foram limpos.",
+        "ERROR": "Não foi possível confirmar a proposta de assinantes. Confira o acesso e tente novamente.",
+        "CONTACTS": "Contatos cadastrados da empresa",
+        "CONTACTS_LOADING": "Buscando contatos autorizados…",
+        "CONTACTS_ERROR": "Não foi possível consultar os contatos desta parte. Tente novamente.",
+        "CONTACTS_EMPTY": "Nenhum contato desta empresa corresponde à pesquisa. Confira o cadastro e o vínculo no Cadastro Mestre.",
+        "SEARCH": "Pesquisar nome ou e-mail",
+        "SEARCH_ACTION": "Buscar",
+        "EMAIL_MISSING": "E-mail não cadastrado",
+        "CPF_MISSING": "CPF protegido não cadastrado",
+        "CONTACT_INCOMPLETE": "Confira nome, e-mail, CPF protegido e bloqueios no Cadastro Mestre antes de selecionar.",
+        "REGISTER_CPF": "Cadastrar CPF protegido",
+        "CHOOSE": "Selecionar",
+        "SELECTED": "Selecionado",
+        "REMOVE": "Remover da proposta",
+        "CLOSE": "Fechar",
+        "SAVE": "Preservar assinantes",
+        "VERSION_HELP": "A alteração preserva as revisões e os PDFs anteriores. Uma nova versão contratual incluirá o conjunto atual de assinantes.",
+        "INCOMPLETE": "Complete as duas partes conforme a regra individual ou conjunta antes de salvar."
       }
     },
     "CUSTOMER_SIGNING_IDENTITY": {

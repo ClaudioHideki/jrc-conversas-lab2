@@ -7,12 +7,14 @@ class JrcBackoffice::ContractVersion < ApplicationRecord
   belongs_to :contract, class_name: 'JrcCrm::Contract'
   belongs_to :created_by, class_name: 'User'
   belongs_to :pdf_blob, class_name: 'ActiveStorage::Blob'
+  belongs_to :signer_roster, class_name: 'JrcBackoffice::SignerRoster', optional: true
   validates :number, :source_format_version, numericality: { only_integer: true, greater_than: 0 }
   validates :number, uniqueness: { scope: :contract_id }
   validates :idempotency_key, presence: true, uniqueness: { scope: :contract_id }
   validates :source_digest, :pdf_sha256, format: { with: /\A[a-f0-9]{64}\z/ }
   validates :change_reason, presence: true, length: { maximum: 2000 }
   validate :consistent_origin
+  validate :consistent_signers
   before_update { raise ActiveRecord::ReadOnlyRecord, 'Contract versions are immutable' }
   before_destroy { raise ActiveRecord::ReadOnlyRecord, 'Contract versions are immutable' }
   after_rollback(on: :create) { self.class.clean_uncommitted_pdf(pdf_blob) }
@@ -26,11 +28,22 @@ class JrcBackoffice::ContractVersion < ApplicationRecord
   end
 
   def serializable_hash(_options = nil)
-    slice('id', 'contract_id', 'backoffice_request_id', 'number', 'source_format_version', 'source_digest',
+    slice('id', 'contract_id', 'backoffice_request_id', 'signer_roster_id', 'number', 'source_format_version', 'source_digest',
           'pdf_sha256', 'change_reason', 'change_paths', 'created_by_id', 'created_at')
   end
 
   private
+
+  def consistent_signers
+    return unless signer_roster || source_format_version == 2
+
+    valid = signer_roster && source_format_version == 2 && matching_signer_origin? && snapshot['signer_roster'] == signer_roster.version_snapshot
+    errors.add(:signer_roster, 'must match the exact version and signing proposal') unless valid
+  end
+
+  def matching_signer_origin?
+    [signer_roster.account_id, signer_roster.contract_id, signer_roster.backoffice_request_id] == [account_id, contract_id, backoffice_request_id]
+  end
 
   def consistent_origin
     errors.add(:contract, 'must match the account and request') unless matching_origin?

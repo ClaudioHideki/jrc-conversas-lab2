@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_11_02_060000) do
+ActiveRecord::Schema[7.1].define(version: 2026_11_02_070000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -1339,6 +1339,31 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_060000) do
     t.check_constraint "business_unit_id IS NULL OR issuer_company_id IS NOT NULL", name: "jrc_ap_requests_scope"
   end
 
+  create_table "jrc_backoffice_signer_rosters", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "contract_id", null: false
+    t.bigint "backoffice_request_id", null: false
+    t.bigint "created_by_id", null: false
+    t.integer "revision", null: false
+    t.string "customer_mode", null: false
+    t.string "issuer_mode", null: false
+    t.string "idempotency_key", null: false
+    t.string "source_digest", null: false
+    t.string "input_digest", null: false
+    t.string "change_reason", limit: 2000, null: false
+    t.text "source_snapshot", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "contract_id", "backoffice_request_id", "id"], name: "bo_signer_roster_origin", unique: true
+    t.index ["account_id"], name: "index_jrc_backoffice_signer_rosters_on_account_id"
+    t.index ["backoffice_request_id", "contract_id", "revision"], name: "bo_signer_roster_revision", unique: true
+    t.index ["backoffice_request_id", "idempotency_key"], name: "bo_signer_roster_intent", unique: true
+    t.index ["backoffice_request_id"], name: "index_jrc_backoffice_signer_rosters_on_backoffice_request_id"
+    t.index ["contract_id"], name: "index_jrc_backoffice_signer_rosters_on_contract_id"
+    t.index ["created_by_id"], name: "index_jrc_backoffice_signer_rosters_on_created_by_id"
+    t.check_constraint "revision > 0 AND (customer_mode::text = ANY (ARRAY['single'::character varying, 'joint'::character varying]::text[])) AND (issuer_mode::text = ANY (ARRAY['single'::character varying, 'joint'::character varying]::text[]))", name: "bo_signer_roster_modes"
+  end
+
   create_table "jrc_backoffice_contract_versions", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.bigint "backoffice_request_id", null: false
@@ -1355,6 +1380,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_060000) do
     t.jsonb "change_paths", default: [], null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "signer_roster_id"
     t.index ["account_id", "id"], name: "bo_contract_version_tenant", unique: true
     t.index ["account_id"], name: "index_jrc_backoffice_contract_versions_on_account_id"
     t.index ["backoffice_request_id"], name: "idx_on_backoffice_request_id_c299d77c81"
@@ -1364,6 +1390,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_060000) do
     t.index ["created_by_id"], name: "index_jrc_backoffice_contract_versions_on_created_by_id"
     t.index ["pdf_blob_id"], name: "index_jrc_backoffice_contract_versions_on_pdf_blob_id"
     t.check_constraint "number > 0 AND source_format_version > 0", name: "bo_contract_version_positive"
+    t.index ["signer_roster_id"], name: "index_jrc_backoffice_contract_versions_on_signer_roster_id"
   end
 
   create_table "jrc_backoffice_document_analyses", force: :cascade do |t|
@@ -9371,5 +9398,26 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_060000) do
   execute <<~'JRC_SCHEMA_SQL_1d29d7a0dc08'
     CREATE TRIGGER jrc_bo_document_version_pin BEFORE DELETE OR UPDATE ON jrc_backoffice_document_versions FOR EACH ROW EXECUTE FUNCTION jrc_bo_document_scan_pin();
   JRC_SCHEMA_SQL_1d29d7a0dc08
+
+  add_foreign_key "jrc_backoffice_contract_versions", "jrc_backoffice_signer_rosters", column: "signer_roster_id"
+  add_foreign_key "jrc_backoffice_contract_versions", "jrc_backoffice_signer_rosters", column: ["account_id", "contract_id", "backoffice_request_id", "signer_roster_id"], primary_key: ["account_id", "contract_id", "backoffice_request_id", "id"], name: "bo_version_signer_roster_origin"
+  add_foreign_key "jrc_backoffice_signer_rosters", "accounts"
+  add_foreign_key "jrc_backoffice_signer_rosters", "jrc_crm_backoffice_requests", column: "backoffice_request_id"
+  add_foreign_key "jrc_backoffice_signer_rosters", "jrc_crm_backoffice_requests", column: ["account_id", "backoffice_request_id"], primary_key: ["account_id", "id"], name: "bo_signer_roster_request_tenant"
+  add_foreign_key "jrc_backoffice_signer_rosters", "jrc_crm_contracts", column: "contract_id"
+  add_foreign_key "jrc_backoffice_signer_rosters", "jrc_crm_contracts", column: ["account_id", "contract_id"], primary_key: ["account_id", "id"], name: "bo_signer_roster_contract_tenant"
+  add_foreign_key "jrc_backoffice_signer_rosters", "users", column: "created_by_id"
+
+  execute <<~'JRC_SCHEMA_SQL_6a62fd96317d'
+    ALTER TABLE "jrc_backoffice_signer_rosters" DROP CONSTRAINT "bo_signer_roster_modes";
+  JRC_SCHEMA_SQL_6a62fd96317d
+
+  execute <<~'JRC_SCHEMA_SQL_b322cc4cff7a'
+    ALTER TABLE "jrc_backoffice_signer_rosters" ADD CONSTRAINT "bo_signer_roster_modes" CHECK (((revision > 0) AND ((customer_mode)::text = ANY ((ARRAY['single'::character varying, 'joint'::character varying])::text[])) AND ((issuer_mode)::text = ANY ((ARRAY['single'::character varying, 'joint'::character varying])::text[]))));
+  JRC_SCHEMA_SQL_b322cc4cff7a
+
+  execute <<~'JRC_SCHEMA_SQL_3ee03d5826c7'
+    CREATE TRIGGER jrc_signer_roster_pin BEFORE DELETE OR UPDATE ON jrc_backoffice_signer_rosters FOR EACH ROW EXECUTE FUNCTION jrc_contract_version_pin();
+  JRC_SCHEMA_SQL_3ee03d5826c7
 
 end

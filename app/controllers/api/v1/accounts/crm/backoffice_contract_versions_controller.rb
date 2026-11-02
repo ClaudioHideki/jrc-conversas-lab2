@@ -53,7 +53,7 @@ class Api::V1::Accounts::Crm::BackofficeContractVersionsController < Api::V1::Ac
   def contract_summary(contract)
     return unless contract
 
-    { id: contract.id, number: contract.contract_number, source_digest: JrcBackoffice::ContractSnapshot.digest(contract),
+    { id: contract.id, number: contract.contract_number, source_digest: service.source_digest(contract.id),
       signature_status: contract.signature_status }
   end
 

@@ -11,9 +11,10 @@ module JrcCrm
     SHIPPING = { 'included' => 'Incluso', 'separate' => 'Cobrado separadamente', 'not_applicable' => 'Sem frete' }.freeze
     RENEWALS = { 'automatic' => 'Automática', 'manual' => 'Manual', 'none' => 'Sem renovação' }.freeze
 
-    def initialize(kind:, record:, revision: nil)
+    def initialize(kind:, record:, revision: nil, signers: nil)
       @kind, @record = kind.to_sym, record
       @revision = revision
+      @signers = signers if @kind == :contract && @revision
       raise ArgumentError, 'Tipo de documento invalido.' unless TITLES.key?(@kind)
       @order = @kind == :contract ? value(record, :sales_order) : (@kind == :order ? record : nil)
       @snapshot = CommercialFinancials.symbolize(value(@order, :snapshot, {}))
@@ -218,7 +219,7 @@ module JrcCrm
         @layout.paragraph(entry[:notes])
         @layout.paragraph("Registrado em #{date(entry[:created_at])}", size: 9)
       end
-      @layout.signature_rows(customer_name, issuer)
+      @signers ? @layout.contract_signers(@signers) : @layout.signature_rows(customer_name, issuer)
     end
 
     def clauses
