@@ -1,7 +1,9 @@
 <script setup>
 import { reactive, ref, watch, onBeforeUnmount } from 'vue';
+import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcCustomers';
 import CompanyPicker from './CompanyPicker.vue';
+import SigningIdentityDialog from './SigningIdentityDialog.vue';
 import { useCustomerMaster } from '../useCustomerMaster';
 import {
   T,
@@ -16,8 +18,10 @@ const props = defineProps({
   contactId: { type: [Number, String], default: null },
 });
 const emit = defineEmits(['updated']);
-const { accountId, enabled, canAdmin, accountScopedRoute } =
+const { accountId, enabled, canAdmin, canAccess, accountScopedRoute } =
   useCustomerMaster();
+const { t } = useI18n();
+const showSigningIdentity = ref(false);
 const contact = ref(null);
 const points = ref([]);
 const duplicateItems = ref([]);
@@ -37,6 +41,7 @@ let generation = 0;
 const load = async () => {
   generation += 1;
   const version = generation;
+  showSigningIdentity.value = false;
   contact.value = null;
   error.value = '';
   checked.value = false;
@@ -148,6 +153,14 @@ onBeforeUnmount(() => {
       <span>{{ T.master }}</span
       ><span>{{ expanded ? '\u2212' : '+' }}</span>
     </button>
+    <button
+      v-if="contact && canAccess"
+      type="button"
+      class="mt-3 rounded-lg border border-n-teal-6 bg-n-teal-3 px-3 py-2 text-sm font-semibold text-n-teal-12"
+      @click="showSigningIdentity = true"
+    >
+      {{ t('CRM.CUSTOMER_SIGNING_IDENTITY.TITLE') }}
+    </button>
     <p
       v-if="error"
       class="mt-3 text-sm text-n-ruby-11"
@@ -162,8 +175,8 @@ onBeforeUnmount(() => {
     >
       {{ notice }}
     </p>
-    <template v-if="contact"
-      ><p class="mt-2 text-xs text-n-slate-10">
+    <template v-if="contact">
+      <p class="mt-2 text-xs text-n-slate-10">
         {{
           contact.registration_status === 'registered'
             ? T.registered
@@ -178,9 +191,10 @@ onBeforeUnmount(() => {
           })
         "
         class="mt-2 block text-sm font-medium text-n-brand"
-        >{{ contact.company_name || `#${contact.company_id}` }} /
-        {{ T.openCompany }}</RouterLink
       >
+        {{ contact.company_name || `#${contact.company_id}` }} /
+        {{ T.openCompany }}
+      </RouterLink>
       <p
         v-else
         class="mt-2 text-sm"
@@ -206,8 +220,9 @@ onBeforeUnmount(() => {
                 )
               "
               class="block text-xs text-n-brand"
-              >{{ T.newCompany }}</RouterLink
             >
+              {{ T.newCompany }}
+            </RouterLink>
             <label
               v-for="field in ['job_title', 'department']"
               :key="field"
@@ -317,8 +332,9 @@ onBeforeUnmount(() => {
           <RouterLink
             :to="accountScopedRoute('contacts_edit', { contactId: item.id })"
             class="font-semibold text-n-brand"
-            >{{ item.name }} #{{ item.id }}</RouterLink
           >
+            {{ item.name }} #{{ item.id }}
+          </RouterLink>
           <p>
             {{ item.company_name }} {{ item.phone_number }} {{ item.email }}
           </p>
@@ -334,5 +350,10 @@ onBeforeUnmount(() => {
         </article>
       </div>
     </template>
+    <SigningIdentityDialog
+      v-if="showSigningIdentity && enabled && canAccess"
+      :contact-id="contactId"
+      @close="showSigningIdentity = false"
+    />
   </section>
 </template>

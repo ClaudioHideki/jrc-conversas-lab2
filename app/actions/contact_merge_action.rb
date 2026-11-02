@@ -10,7 +10,7 @@ class ContactMergeAction
 
     ActiveRecord::Base.transaction do
       validate_contacts
-      if @account.feature_enabled?('jrc_customer_master')
+      if preserve_master_data?
         @account.lock! # Same account-first ordering used by project/link creation.
         @account.contacts.where(id: [@base_contact.id, @mergee_contact.id]).order(:id).lock.load
         @base_contact.reload
@@ -30,6 +30,11 @@ class ContactMergeAction
   end
 
   private
+
+  def preserve_master_data?
+    @account.feature_enabled?('jrc_customer_master') ||
+      JrcCustomers::SigningIdentity.where(account_id: @account.id, contact_id: [@base_contact.id, @mergee_contact.id]).exists?
+  end
 
   def validate_contacts
     return if belongs_to_account?(@base_contact) && belongs_to_account?(@mergee_contact)

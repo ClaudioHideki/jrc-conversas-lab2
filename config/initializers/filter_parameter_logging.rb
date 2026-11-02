@@ -21,3 +21,4 @@ Rails.application.config.filter_parameters += [:csv]
 # Backoffice documentary content and human review are never request-log payloads.
 Rails.application.config.filter_parameters += [:file, :files, :reason, :description, :extracted_fields]
 Rails.application.config.filter_parameters += [:next_step, :customer_feedback, :change_reason, :result]
+Rails.application.config.filter_parameters += [:personal_tax_identifier, :cpf, :lookup_digest]

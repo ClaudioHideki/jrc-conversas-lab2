@@ -49,6 +49,10 @@ module Api::V1::Accounts::Crm
         if attributes['status'] == 'awaiting_signature' || attributes['signature_status'].in?(%w[prepared sent signed])
           JrcBackoffice::ContractRelease.check!(order: @contract.sales_order, actor: Current.user)
         end
+        if attributes['status'].in?(%w[active expiring renewed]) && JrcBackoffice::SignatureRelease.operational_v2?(@contract) &&
+           !JrcBackoffice::SignatureRelease.verified?(@contract)
+          raise JrcApprovals::Error, 'SIGNATURE_EVIDENCE_REQUIRED'
+        end
         @contract.update!(attributes)
         JrcApprovals::CommercialInvalidation.call(resource: @contract.reload, user: Current.user)
         if %w[active expiring renewed].include?(@contract.status)
@@ -132,21 +136,14 @@ module Api::V1::Accounts::Crm
         return render json: { message: 'Este contrato não está configurado para assinatura por provedor.' }, status: :unprocessable_entity
       end
 
-      external_id = params[:external_id].to_s.presence
-      unless external_id
-        return render json: {
-          message: 'Integração externa não configurada/executada. Informe o identificador retornado pelo provedor somente após envio real.'
-        }, status: :unprocessable_entity
-      end
-
-      @contract.with_lock do
-        if @contract.signature_status == 'signed' || @contract.signature_mode != 'provider'
-          return render json: { message: 'O estado da assinatura foi alterado. Atualize a tela.' }, status: :unprocessable_entity
-        end
-        @contract.update!(signature_external_id: external_id, signature_status: 'sent', status: 'awaiting_signature')
-        audit!(@contract, 'contract_signature_sent', {}, { provider: @contract.signature_provider, external_id: external_id })
-      end
-      render json: serialize(@contract.reload)
+      # A manually typed ID is neither a provider acknowledgement nor proof
+      # of the PDF/version/recipients that were sent. Keep historical IDs,
+      # but do not manufacture a new delivery fact through this legacy route.
+      render json: {
+        code: 'VERSIONED_DELIVERY_REQUIRED',
+        message: 'O envio exige versão do contrato, assinantes e conexão vinculados. ' \
+                 'O fluxo integrado ainda não está disponível; nenhum envio foi confirmado.'
+      }, status: :unprocessable_entity
     end
 
     def register_manual_signature
@@ -164,12 +161,14 @@ module Api::V1::Accounts::Crm
                           .evaluate(key: 'contracts.company_signature', resource_id: @contract.id, lock: true)
                       end
         company_pending = gate_result && gate_result[:status] != 'ready'
+        operational_pending = JrcBackoffice::SignatureRelease.operational_v2?(@contract) && !JrcBackoffice::SignatureRelease.verified?(@contract)
         file = params[:signed_file]
         blob = ActiveStorage::Blob.create_and_upload!(io: file.tempfile, filename: file.original_filename,
           content_type: 'application/pdf', identify: false)
         @contract.signed_document.attach(blob)
         @contract.update!(signature_mode: 'manual', signature_provider: nil, signature_status: 'signed',
-          signed_by_name: signed_name, signed_at: signed_time, status: company_pending ? 'awaiting_signature' : 'active')
+          signed_by_name: signed_name, signed_at: signed_time,
+          status: company_pending || operational_pending ? 'awaiting_signature' : 'active')
         sync_order_after_signature!(@contract)
         audit!(@contract, 'contract_manual_signature_registered', {}, {
           signed_by_name: signed_name, signed_at: signed_time, recorded_at: Time.current,

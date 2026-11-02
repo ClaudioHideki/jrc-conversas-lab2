@@ -61,7 +61,7 @@
     {
       "requirement": "Módulo independente, abas horizontais, fluxo v2 com aprovações antes de contrato",
       "status": "parcial",
-      "existing": "Base 50f7f07d; não refazer. Regressão global ainda pendente."
+      "existing": "Base 50f7f07d preservada; regressões selecionadas passaram. Aceite integral das evoluções do Word continua parcial."
     },
     {
       "requirement": "Busca de toda a base autorizada e seleção Cliente→Pedido→Solicitação",
@@ -71,18 +71,18 @@
     },
     {
       "requirement": "Contrato dentro da solicitação, versões e snapshots de assinantes do Cadastro Mestre",
-      "status": "pendente",
-      "finding": "Contrato CRM e geração PDF existem; não há envelope versionado nem estrutura multiassinante de evidência."
+      "status": "parcial",
+      "finding": "CPF protegido no Contato canônico implementado e testado. PDF nativo existe; versões imutáveis, snapshots de vários assinantes e prova de poderes ainda pendentes."
     },
     {
       "requirement": "Envio, lembrete, cancelamento, eventos autenticados e documento final DocuSign",
       "status": "parcial",
-      "finding": "DocuSign confirmada. Configuração criptografada por conta, OAuth JWT/UserInfo, adaptador HTTP e caixa de entrada Connect autenticada/deduplicada implementados com testes simulados. Ainda não ligados ao contrato/versionamento; endpoint legado de registro manual de external_id permanece. Homologação externa depende de ambiente demo e HTTPS autorizado."
+      "finding": "Único conector DocuSign isolado por gateway; conta/ambiente/credenciais preservados por conexão. HTTPs simulados passaram. Recepção autentica e preserva eventos, sem concluir assinatura. O envio por ID digitado foi bloqueado; envio versionado e consumidor ainda pendentes. Demo externa precisa ser preparada."
     },
     {
       "requirement": "Bloqueios de aprovação, assinatura e proteção financeira",
       "status": "parcial",
-      "existing": "CommercialGate, ContractRelease e BackofficeRequest bloqueiam avanços; fortalecer validade da versão/evidências e cobrir assinatura parcial/versão substituída."
+      "existing": "CommercialGate e ContractRelease preservados. SignatureRelease acrescenta bloqueio v2 por evidência interna no avanço, pedido/projeto e ativação via API, sem estados DocuSign; assinatura manual do cliente permanece separada. Validação da versão e evidência reais ainda pendente."
     },
     {
       "requirement": "Requisitos tipados e snapshots por operação/produto/cliente",
@@ -107,7 +107,8 @@
         "Segredos criptografados por conta e revisão, sem retorno na API",
         "OAuth JWT com verificação de identidade e conta",
         "HMAC dos bytes originais, limite de corpo e deduplicação durável",
-        "Notificação recebida permanece received, sem marcar contrato ou assinatura"
+        "Notificação recebida permanece received, sem marcar contrato ou assinatura",
+        "Conexão técnica preservada por revisão; mudança do padrão não troca ambiente/conta dos eventos ou operações ligados à conexão anterior"
       ],
       "pending": [
         "Consumidor contratual ligado à versão corrente",
@@ -115,6 +116,18 @@
         "Homologação externa demo"
       ],
       "reference": "docs/jrc_backoffice/docusign_integration.md"
+    },
+    {
+      "requirement": "Separar domínio contratual do fornecedor e preservar a conexão de cada envio",
+      "status": "parcial",
+      "implemented": "Fronteira de operações, erros/estados comuns e conexão imutável testadas com único adaptador DocuSign.",
+      "pending": "Ledger durável com versão exata, assinantes e identificação externa; envio permanece bloqueado até concluir esse vínculo.",
+      "reference": "docs/jrc_backoffice/signature_provider_boundary.md"
+    },
+    {
+      "requirement": "Ambiente DocuSign demo e homologação externa",
+      "status": "dependência externa",
+      "finding": "Responsável confirmou necessidade de preparar demo. Roteiro disponível; conta, consentimento e HTTPS não criados nesta tarefa."
     }
   ],
   "customer_master": [
@@ -136,7 +149,7 @@
     {
       "requirement": "Pessoa/empresa, deduplicação e vínculo do assinante",
       "status": "parcial",
-      "existing": "Escritores e merge nativos devem ser reutilizados; não criar contatos paralelos."
+      "existing": "Contato canônico ganhou CPF protegido, CAS, deduplicação/merge, escopo e auditoria mascarada; 8 casos do diálogo e regressões backend passaram. Nenhuma prova de poderes ou estrutura paralela de pessoas foi criada."
     },
     {
       "requirement": "Segmentos/critérios/prévia, grupos econômicos separados de etiquetas, importações e contatos ativos",
@@ -252,7 +265,8 @@
         "status": "pendente",
         "note": "Motor existente inventariado; execução e evidências específicas do critério ainda necessárias."
       }
-    ]
+    ],
+    "validation_note_p1": "Regressões comerciais selecionadas passaram no gate P1; isso não conclui o aceite CA01–CA15 nem a UX pendente."
   },
   "execution_order": [
     "Checkpoint Relacionamento",
@@ -321,6 +335,15 @@
     },
     "backend_total_distinct_selected": 572,
     "scope_note": "572 exemplos distintos somam 465 do plano Relacionamento e 107 do gate Backoffice/DocuSign e regressões selecionadas. Não representam toda a suíte do repositório nem homologação externa.",
-    "rails_eager_load": "Zeitwerk: All is good!; log .codex/continuation-zeitwerk.log."
+    "rails_eager_load": "Zeitwerk: All is good!; log .codex/continuation-zeitwerk.log.",
+    "provenance": "Histórico anterior desta etapa, checkpoint pai e64e46c9; não representa reexecução no código P1 atual."
+  },
+  "p1_checkpoint_20261102": {
+    "report": "docs/jrc_backoffice/p1_signing_identity_provider_checkpoint_20261102.json",
+    "backend_examples": 408,
+    "frontend_tests": 164,
+    "failures": 0,
+    "external_homologation": false,
+    "scope": "Regressões selecionadas. Evidência detalhada e pendências no relatório; não somar aos gates anteriores como se fossem casos únicos reexecutados."
   }
 }

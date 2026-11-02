@@ -91,7 +91,10 @@ RSpec.describe 'Backoffice DocuSign configuration', type: :request do
     stub_request(:post, 'https://account-d.docusign.com/oauth/token')
       .to_return(status: 200, body: { access_token: 'synthetic-token-only', expires_in: 3600 }.to_json)
     stub_request(:get, 'https://account-d.docusign.com/oauth/userinfo').to_return do
-      account.account_users.find_by!(user_id: admin.id).update!(role: :agent)
+      member = account.account_users.find_by!(user_id: admin.id)
+      database = ActiveRecord::Base.connection
+      # Preserve the request cache while changing the actual database role.
+      database.raw_connection.exec("UPDATE account_users SET role=#{database.quote(AccountUser.roles.fetch('agent'))} WHERE id=#{member.id}")
       { status: 200, body: { sub: record.impersonated_user_id,
                              accounts: [{ account_id: record.external_account_id, base_uri: 'https://demo.docusign.net' }] }.to_json }
     end

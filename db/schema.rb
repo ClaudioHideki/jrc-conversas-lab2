@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_11_02_020000) do
+ActiveRecord::Schema[7.1].define(version: 2026_11_02_040000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -818,6 +818,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_020000) do
     t.index ["account_id", "email", "phone_number", "identifier"], name: "index_contacts_on_nonempty_fields", where: "(((email)::text <> ''::text) OR ((phone_number)::text <> ''::text) OR ((identifier)::text <> ''::text))"
     t.index ["account_id", "id"], name: "jrc_sd_ref_contacts", unique: true
     t.index ["account_id", "last_activity_at"], name: "index_contacts_on_account_id_and_last_activity_at", order: { last_activity_at: "DESC NULLS LAST" }
+    t.index ["account_id", "id"], name: "jrc_contact_signing_tenant_ref", unique: true
     t.index ["account_id"], name: "index_contacts_on_account_id"
     t.index ["account_id"], name: "index_resolved_contact_account_id", where: "(((email)::text <> ''::text) OR ((phone_number)::text <> ''::text) OR ((identifier)::text <> ''::text))"
     t.index ["blocked"], name: "index_contacts_on_blocked"
@@ -1376,6 +1377,32 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_020000) do
     t.check_constraint "version > 0", name: "backoffice_document_positive_version"
   end
 
+  create_table "jrc_backoffice_signature_connections", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "integration_id", null: false
+    t.bigint "created_by_id", null: false
+    t.string "public_id", null: false
+    t.string "provider", null: false
+    t.string "environment", null: false
+    t.string "integration_key", null: false
+    t.string "impersonated_user_id", null: false
+    t.string "external_account_id", null: false
+    t.text "encrypted_credentials", null: false
+    t.string "credentials_purpose", null: false
+    t.integer "revision", null: false
+    t.boolean "enabled", default: false, null: false
+    t.datetime "authorization_checked_at"
+    t.datetime "connect_checked_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "id"], name: "bo_signature_connection_tenant_ref", unique: true
+    t.index ["account_id"], name: "index_jrc_backoffice_signature_connections_on_account_id"
+    t.index ["created_by_id"], name: "index_jrc_backoffice_signature_connections_on_created_by_id"
+    t.index ["integration_id", "revision"], name: "bo_signature_connection_revision", unique: true
+    t.index ["integration_id"], name: "index_jrc_backoffice_signature_connections_on_integration_id"
+    t.index ["public_id"], name: "bo_signature_connection_public", unique: true
+  end
+
   create_table "jrc_backoffice_signature_integrations", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.bigint "created_by_id", null: false
@@ -1391,6 +1418,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_020000) do
     t.datetime "connect_checked_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "provider", default: "docusign", null: false
     t.index ["account_id", "id"], name: "bo_signature_tenant_ref", unique: true
     t.index ["account_id"], name: "bo_signature_account", unique: true
     t.index ["created_by_id"], name: "index_jrc_backoffice_signature_integrations_on_created_by_id"
@@ -1411,8 +1439,10 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_020000) do
     t.datetime "provider_generated_at", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "connection_id"
     t.index ["account_id", "envelope_id"], name: "bo_signature_notification_envelope"
     t.index ["account_id"], name: "index_jrc_backoffice_signature_notifications_on_account_id"
+    t.index ["connection_id"], name: "index_jrc_backoffice_signature_notifications_on_connection_id"
     t.index ["integration_id", "integration_revision", "body_sha256"], name: "bo_signature_notification_dedup", unique: true
     t.index ["integration_id"], name: "index_jrc_backoffice_signature_notifications_on_integration_id"
     t.check_constraint "state::text = ANY (ARRAY['received'::character varying, 'processed'::character varying, 'ignored'::character varying, 'failed'::character varying]::text[])", name: "bo_signature_notification_state"
@@ -3000,6 +3030,24 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_020000) do
     t.index ["business_unit_id"], name: "index_jrc_crm_user_business_units_on_business_unit_id"
     t.index ["user_id"], name: "index_jrc_crm_user_business_units_on_user_id"
     t.check_constraint "structure_managed = false OR scope::text = 'GROUP'::text AND company_id IS NULL AND business_unit_id IS NULL OR scope::text = 'COMPANY'::text AND company_id IS NOT NULL AND business_unit_id IS NULL OR scope::text = 'BUSINESS_UNIT'::text AND business_unit_id IS NOT NULL", name: "jrc_crm_user_scope_shape"
+  end
+
+  create_table "jrc_customer_signing_identities", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "contact_id", null: false
+    t.bigint "created_by_id", null: false
+    t.text "personal_tax_identifier", null: false
+    t.string "lookup_digest", null: false
+    t.integer "revision", default: 1, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "contact_id"], name: "jrc_signing_contact_once", unique: true
+    t.index ["account_id", "id"], name: "jrc_signing_identity_tenant_ref", unique: true
+    t.index ["account_id", "lookup_digest"], name: "jrc_signing_identifier_once", unique: true
+    t.index ["account_id"], name: "index_jrc_customer_signing_identities_on_account_id"
+    t.index ["contact_id"], name: "index_jrc_customer_signing_identities_on_contact_id"
+    t.index ["created_by_id"], name: "index_jrc_customer_signing_identities_on_created_by_id"
+    t.check_constraint "revision > 0", name: "jrc_signing_identity_revision"
   end
 
   create_table "jrc_customer_taxonomies", force: :cascade do |t|
@@ -9131,4 +9179,34 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_020000) do
   add_foreign_key "jrc_relationship_document_versions", "users", column: "uploaded_by_id"
   add_foreign_key "jrc_relationship_processing_runs", "accounts"
   add_foreign_key "jrc_relationship_processing_runs", "users", column: "viewer_id"
+  add_foreign_key "jrc_customer_signing_identities", "accounts"
+  add_foreign_key "jrc_customer_signing_identities", "contacts"
+  add_foreign_key "jrc_customer_signing_identities", "contacts", column: ["account_id", "contact_id"], primary_key: ["account_id", "id"], name: "jrc_signing_identity_contact_tenant"
+  add_foreign_key "jrc_customer_signing_identities", "users", column: "created_by_id"
+
+  execute <<~'JRC_SCHEMA_SQL_14edae927125'
+    CREATE OR REPLACE FUNCTION public.jrc_signature_connection_pin()
+     RETURNS trigger
+     LANGUAGE plpgsql
+    AS $function$
+    BEGIN
+      IF TG_OP = 'DELETE' OR (to_jsonb(NEW) - ARRAY['authorization_checked_at','connect_checked_at','updated_at'])
+        IS DISTINCT FROM (to_jsonb(OLD) - ARRAY['authorization_checked_at','connect_checked_at','updated_at']) THEN
+        RAISE EXCEPTION 'Signature connection snapshots are immutable';
+      END IF;
+      RETURN NEW;
+    END;
+    $function$
+  JRC_SCHEMA_SQL_14edae927125
+
+  execute <<~'JRC_SCHEMA_SQL_37a866c4a59d'
+    CREATE TRIGGER jrc_signature_connection_pin BEFORE DELETE OR UPDATE ON jrc_backoffice_signature_connections FOR EACH ROW EXECUTE FUNCTION jrc_signature_connection_pin();
+  JRC_SCHEMA_SQL_37a866c4a59d
+
+  add_foreign_key "jrc_backoffice_signature_connections", "accounts"
+  add_foreign_key "jrc_backoffice_signature_connections", "jrc_backoffice_signature_integrations", column: "integration_id"
+  add_foreign_key "jrc_backoffice_signature_connections", "jrc_backoffice_signature_integrations", column: ["account_id", "integration_id"], primary_key: ["account_id", "id"], name: "bo_signature_connection_tenant"
+  add_foreign_key "jrc_backoffice_signature_connections", "users", column: "created_by_id"
+  add_foreign_key "jrc_backoffice_signature_notifications", "jrc_backoffice_signature_connections", column: "connection_id"
+  add_foreign_key "jrc_backoffice_signature_notifications", "jrc_backoffice_signature_connections", column: ["account_id", "connection_id"], primary_key: ["account_id", "id"], name: "bo_signature_notification_connection_tenant"
 end

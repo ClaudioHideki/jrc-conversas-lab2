@@ -966,6 +966,41 @@
         "ERROR_PROVIDER_UNAVAILABLE": "A DocuSign não respondeu. A operação não foi confirmada.",
         "ERROR_PROVIDER_RESPONSE_INVALID": "A resposta da DocuSign não pôde ser validada. A operação não foi confirmada."
       }
+    },
+    "CUSTOMER_SIGNING_IDENTITY": {
+      "TITLE": "Dados para contrato",
+      "CPF": "CPF do contato",
+      "CPF_OPTIONAL": "CPF para contratos (opcional)",
+      "AUTHORITY_NOTE": "O CPF identifica a pessoa. Poderes para assinar dependem de documentos e das aprovações exigidas para o contrato.",
+      "UNLINKED": "Contato ainda sem empresa vinculada",
+      "HELP": "Este dado pertence ao Contato do Cadastro Mestre. Não cria outra pessoa e não confirma poderes de representação.",
+      "LOADING": "Consultando os dados protegidos…",
+      "SAVE": "Salvar CPF",
+      "CLOSE": "Fechar",
+      "REFRESH": "Atualizar",
+      "SAVED": "CPF salvo no Contato do Cadastro Mestre. Os poderes de assinatura ainda precisam ser validados.",
+      "DENIED": "Contato indisponível no seu acesso atual.",
+      "CHANGED": "Os dados foram alterados. Atualize antes de gravar novamente.",
+      "UNAVAILABLE": "Os dados protegidos não puderam ser abertos. Solicite revisão ao administrador.",
+      "INVALID": "Revise o CPF. Ele deve ser válido e não pode pertencer a outro contato da conta.",
+      "ERROR": "Não foi possível confirmar a operação. Atualize os dados e tente novamente."
+    },
+    "SIGNATURE_DELIVERY": {
+      "SEND": "Enviar para assinatura",
+      "PENDING": "O envio integrado ainda depende da versão do contrato, dos assinantes e das validações. Informar um ID externo não confirma um envio.",
+      "PROVIDER": "Provedor",
+      "NOT_CONFIGURED": "Ainda não vinculado ao contrato",
+      "HISTORICAL_ID": "Identificador externo histórico",
+      "STATUS": "Status da assinatura",
+      "STATES": {
+        "not_started": "Não iniciada",
+        "prepared": "Preparada, com validações pendentes",
+        "sent": "Registro histórico de envio",
+        "signed": "Assinatura do cliente registrada",
+        "canceled": "Cancelamento registrado",
+        "failed": "Falha registrada",
+        "unknown": "Aguardando validação"
+      }
     }
   }
 }

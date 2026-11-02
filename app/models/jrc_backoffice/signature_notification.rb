@@ -3,13 +3,19 @@ class JrcBackoffice::SignatureNotification < ApplicationRecord
   self.filter_attributes += [:encrypted_payload]
   belongs_to :account
   belongs_to :integration, class_name: 'JrcBackoffice::SignatureIntegration'
+  belongs_to :connection, class_name: 'JrcBackoffice::SignatureConnection', optional: true
   validates :body_sha256, format: { with: /\A[0-9a-f]{64}\z/ }
-  validates :envelope_id, format: { with: JrcBackoffice::SignatureIntegration::UUID }
+  validates :envelope_id, presence: true, length: { maximum: 255 }
   validates :encrypted_payload, :event_type, :provider_generated_at, presence: true
   validates :state, inclusion: { in: %w[received processed ignored failed] }
   validate { errors.add(:integration, 'must belong to account') unless integration&.account_id == account_id }
+  validate(on: :create) do
+    valid = connection && connection.account_id == account_id && connection.integration_id == integration_id &&
+            connection.revision == integration_revision
+    errors.add(:connection, 'must match the account and configuration revision') unless valid
+  end
   attr_readonly :account_id, :integration_id, :integration_revision, :body_sha256, :event_type, :envelope_id,
-                :encrypted_payload, :provider_generated_at
+                :encrypted_payload, :provider_generated_at, :connection_id
 
   def payload
     JrcBackoffice::SignatureSecrets.new.decrypt(account_id: account_id, purpose: secret_purpose, ciphertext: encrypted_payload)

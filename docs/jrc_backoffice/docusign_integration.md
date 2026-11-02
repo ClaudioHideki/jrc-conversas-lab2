@@ -13,12 +13,15 @@ Estado em 02/11/2026: **parcial**. Esta base ainda não substitui o fluxo contra
 - Recebimento durável e criptografado, deduplicado por integração/revisão/SHA-256. HTTP 202 significa apenas **notificação recebida**. O estado permanece `received`; o consumidor contratual ainda está pendente.
 - Eventos não alteram contratos, assinaturas, etapas ou liberações. Os webhooks existentes foram preservados.
 - Registro da auditoria com ator humano ou provedor, sem credenciais e sem payload contratual nos logs. O filtro integral do corpo do Connect é local a este controlador.
+- Fronteira interna `Signatures::Gateway`, seleção de conexão somente na admissão e configuração técnica preservada por revisão. Detalhes, testes e limites em [separação do provedor](signature_provider_boundary.md).
+- CPF protegido no Contato canônico, sem conferir poderes de representação. Cadastro, mesclagem, autorização e cache de permissões têm validação própria.
+- O endpoint legado não confirma mais envio a partir de um ID digitado. O envio operacional permanece bloqueado enquanto faltar o vínculo completo à versão e às evidências. Registros históricos e assinatura manual do cliente continuam separados da liberação operacional v2.
 
 ## Configuração e homologação ainda necessárias
 
 Não configurar esta implementação como uma integração contratual pronta em produção. Não houve deploy nem envio externo nesta etapa.
 
-1. Preparar ou confirmar o ambiente DocuSign Developer/demo, integração e usuário com consentimento para `signature impersonation`.
+1. Preparar o ambiente DocuSign Developer/demo, integração e usuário com consentimento para `signature impersonation`. O responsável confirmou em 02/11/2026 que esse ambiente ainda não existe. Consultar o [roteiro de preparação](docusign_demo_setup.md).
 2. Configurar a chave privada no campo próprio da aplicação, sem enviá-la pelo chat. As chaves de criptografia da aplicação precisam permanecer estáveis; sua rotação exige migração dos segredos armazenados.
 3. Disponibilizar o ambiente de homologação em HTTPS público, mediante autorização de implantação. `FRONTEND_URL` deve indicar essa origem. Em localhost HTTP, a interface não apresenta uma URL de callback como pronta.
 4. Configurar Connect em JSON SIM, com HMAC e apenas os eventos suportados. Não incluir PDFs no webhook: o corpo é limitado a 2 MiB, e os documentos finais deverão ser obtidos pela API autenticada.
@@ -32,7 +35,7 @@ Não configurar esta implementação como uma integração contratual pronta em 
 - Envelope e tentativa de envio persistidos antes do I/O, vinculados à versão e à revisão da integração.
 - Reconciliação de resultados incertos. O adaptador não repete automaticamente uma escrita que sofreu timeout. O `transactionId` do provedor tem janela limitada; não é uma garantia de idempotência permanente.
 - Consumidor autenticado de notificações, verificação dos destinatários, documento final e certificado, tratamento de assinatura parcial e proteção contra eventos de versões canceladas/substituídas.
-- Substituição do endpoint legado que aceita ID externo informado manualmente e grava `sent`. Esse comportamento legado ainda existe e não deve ser confundido com envio pela DocuSign.
+- Habilitar o envio operacional somente com versão, assinantes, aprovações e tentativa durável. A antiga confirmação por ID digitado já foi removida; não é um substituto para concluir esse fluxo.
 - Painel contratual dentro da solicitação, ações de assinatura e bloqueios de implantação/provisionamento vinculados à versão e às evidências válidas.
 - Integração completa com as políticas e decisões da Central de Aprovações.
 

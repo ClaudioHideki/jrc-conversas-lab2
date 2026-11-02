@@ -1,5 +1,5 @@
 class Api::V1::Accounts::Crm::SignatureIntegrationsController < Api::V1::Accounts::Crm::BaseController
-  rescue_from JrcBackoffice::Docusign::Error do |error|
+  rescue_from JrcBackoffice::Signatures::ProviderError do |error|
     render json: { code: error.code }, status: :unprocessable_entity
   end
   rescue_from JrcBackoffice::SignatureConfiguration::Changed do
@@ -39,7 +39,7 @@ class Api::V1::Accounts::Crm::SignatureIntegrationsController < Api::V1::Account
     origin = URI.parse(ENV.fetch('FRONTEND_URL', ''))
     return unless origin.scheme == 'https' && origin.host.present? && !origin.userinfo && !origin.query && !origin.fragment
 
-    origin.path = "/webhooks/docusign/#{record.public_id}"
+    origin.path = JrcBackoffice::Signatures::Gateway.new(connection: record.connection).callback_path
     origin.to_s
   rescue URI::InvalidURIError
     nil

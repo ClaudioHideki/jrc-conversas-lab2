@@ -1,6 +1,7 @@
 class JrcCustomers::IdentityResolver
-  def initialize(account:)
+  def initialize(account:, personal_tax_identifier: nil)
     @account = account
+    @personal_tax_identifier = personal_tax_identifier
   end
 
   # A shared telephone/email may belong to more than one person. Return all
@@ -19,6 +20,11 @@ class JrcCustomers::IdentityResolver
       scope = scope.or(point_contacts(JrcCustomers::Identity::PHONE_KINDS, normalized_phone))
     end
     scope = scope.or(point_contacts(['extension'], normalized_extension)) if normalized_extension
+    digest = JrcCustomers::SigningIdentity.digest_for(account_id: @account.id, value: @personal_tax_identifier)
+    if digest
+      ids = JrcCustomers::SigningIdentity.where(account_id: @account.id, lookup_digest: digest).select(:contact_id)
+      scope = scope.or(@account.contacts.where(id: ids))
+    end
     scope = scope.where.not(id: exclude_id) if exclude_id.present?
     scope.distinct.order(:id).limit(51)
   end

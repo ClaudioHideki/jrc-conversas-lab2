@@ -5,7 +5,7 @@ class JrcBackoffice::SignatureIntegration < ApplicationRecord
 
   belongs_to :account
   belongs_to :created_by, class_name: 'User'
-  attr_readonly :account_id, :public_id, :created_by_id
+  attr_readonly :account_id, :public_id, :created_by_id, :provider
   validates :account_id, :public_id, uniqueness: true
   validates :encrypted_credentials, presence: true
   validates :environment, inclusion: { in: %w[demo production] }
@@ -32,6 +32,10 @@ class JrcBackoffice::SignatureIntegration < ApplicationRecord
 
   def delivery_ready?
     authorization_current? && connect_checked_at.present?
+  end
+
+  def connection
+    JrcBackoffice::SignatureConnection.find_by!(account_id: account_id, integration_id: id, revision: revision)
   end
 
   def name

@@ -20,7 +20,8 @@ class Api::V1::Accounts::Customers::DirectoryController < Api::V1::Accounts::Cus
 
   def identity
     matches = JrcCustomers::IdentityResolver.new(account: Current.account).call(email: params[:email], phone: params[:phone],
-                                                                                 extension: params[:extension], country: params[:country]).to_a
+                                                                                 extension: params[:extension], country: params[:country])
+                                          .merge(JrcCustomers::ContactDirectory.new(account: Current.account, actor: Current.user).scope).to_a
     render json: { payload: serializer.contacts(matches.first(50)), match: matches.one? ? 'unique' : (matches.empty? ? 'none' : 'ambiguous'),
                    truncated: matches.size > 50, creates_customer: false }
   end

@@ -67,6 +67,20 @@ class CustomerAPI extends ApiClient {
     return axios.get(`${this.url}/contacts/${id}`);
   }
 
+  signingIdentity(accountId, contactId, options = {}) {
+    return axios.get(
+      `${this.urlForAccount(accountId)}/contacts/${contactId}/signing_identity`,
+      options
+    );
+  }
+
+  saveSigningIdentity(accountId, contactId, body) {
+    return axios.patch(
+      `${this.urlForAccount(accountId)}/contacts/${contactId}/signing_identity`,
+      body
+    );
+  }
+
   contactOverview(id) {
     return axios.get(`${this.url}/contacts/${id}/overview`);
   }

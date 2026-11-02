@@ -10,6 +10,8 @@ class JrcCustomers::MergePreserver
     return true unless [base.account_id, source.account_id].all? { |id| id == account.id }
     return true if [base.company_id, source.company_id].compact.uniq.size > 1
     return true if [base.identifier, source.identifier].compact_blank.uniq.size > 1
+    identifiers = JrcCustomers::SigningIdentity.where(account_id: account.id, contact_id: [base.id, source.id]).pluck(:lookup_digest)
+    return true if identifiers.compact.uniq.size > 1
 
     JrcNico::ErpBinding.where(account_id: account.id, contact_id: [base.id, source.id]).count > 1
   end
@@ -20,7 +22,7 @@ class JrcCustomers::MergePreserver
 
   def call
     if self.class.conflict?(account: @account, base: @base, source: @source)
-      raise Conflict, 'Conflicting company, external identifier or ERP bindings. Reconcile explicitly before merging.'
+      raise Conflict, 'Conflicting company, personal/external identifier or ERP bindings. Reconcile explicitly before merging.'
     end
     assert_reference_tenants!
     snapshot = @source.attributes.except('updated_at').merge('labels' => @source.label_list,
@@ -33,6 +35,7 @@ class JrcCustomers::MergePreserver
     move_deal_contacts
     move_recipients
     move_contact_points
+    move_signing_identity
     preserve_identity_points
     preserve_avatars
     preserve_labels
@@ -58,6 +61,20 @@ class JrcCustomers::MergePreserver
   end
 
   private
+
+  def move_signing_identity
+    source = JrcCustomers::SigningIdentity.find_by(account_id: @account.id, contact_id: @source.id)
+    return unless source
+
+    existing = JrcCustomers::SigningIdentity.find_by(account_id: @account.id, contact_id: @base.id)
+    if existing
+      source.destroy!
+    else
+      source.update!(contact_id: @base.id, revision: source.revision + 1)
+    end
+    JrcCustomers::Audit.record!(account: @account, actor: @actor, resource: @base, event_type: 'customer_contact_merged',
+                                metadata: { source_contact_id: @source.id, signing_identity_preserved: true })
+  end
 
   def assert_reference_tenants!
     connection = ActiveRecord::Base.connection

@@ -2,6 +2,7 @@ module JrcCustomers::ContactMaster
   extend ActiveSupport::Concern
   included do
     has_many_attached :merged_avatars
+    has_one :signing_identity, class_name: 'JrcCustomers::SigningIdentity', dependent: :destroy
     belongs_to :master_company, class_name: 'JrcCustomers::Company', foreign_key: :company_id, optional: true
     has_many :contact_points, class_name: 'JrcCustomers::ContactPoint', dependent: :destroy
     validate :master_company_belongs_to_account, if: -> { account&.feature_enabled?('jrc_customer_master') && (new_record? || will_save_change_to_company_id?) }

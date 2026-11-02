@@ -83,9 +83,21 @@ RSpec.describe 'DocuSign Connect inbox', type: :request do
     expect(JrcBackoffice::SignatureNotification.count).to eq(0)
   end
 
-  it 'rejects disabled configuration despite a matching old HMAC' do
-    integration.update!(enabled: false)
+  it 'preserves receipt on the original connection when the default is disabled for new sends' do
+    old = integration.connection
+    JrcBackoffice::SignatureConfiguration.new(account: account, actor: admin).save!(attributes: { enabled: false }, expected_revision: 1)
     post url, params: raw, headers: headers
+    expect(response).to have_http_status(:accepted)
+    expect(JrcBackoffice::SignatureNotification.last.connection_id).to eq(old.id)
+    expect(integration.reload.connect_checked_at).to be_nil
+    expect(integration.delivery_ready?).to be(false)
+  end
+
+  it 'rejects a connection that was disabled at creation despite a matching HMAC' do
+    integration
+    updated = JrcBackoffice::SignatureConfiguration.new(account: account, actor: admin)
+                                                 .save!(attributes: { enabled: false }, expected_revision: 1)
+    post "/webhooks/docusign/#{updated.connection.public_id}", params: raw, headers: headers
     expect(response).to have_http_status(:unauthorized)
     expect(JrcBackoffice::SignatureNotification.count).to eq(0)
   end
@@ -96,6 +108,20 @@ RSpec.describe 'DocuSign Connect inbox', type: :request do
     post url, params: raw, headers: headers
     expect(response).to have_http_status(:unauthorized)
     expect(JrcBackoffice::SignatureNotification.count).to eq(0)
+  end
+
+  it 'keeps a historical event bound to its original account, environment and secret after changing the default' do
+    old = integration.connection
+    updated = JrcBackoffice::SignatureConfiguration.new(account: account, actor: admin).save!(expected_revision: 1, attributes: {
+      environment: 'production', external_account_id: SecureRandom.uuid, connect_hmac_keys: ['rotated-synthetic-connect-key-123456789']
+    })
+    post url, params: raw, headers: headers
+    expect(response).to have_http_status(:accepted)
+    expect(JrcBackoffice::SignatureNotification.last.connection).to have_attributes(id: old.id, environment: 'demo',
+                                                                                  external_account_id: payload[:data][:accountId])
+    post "/webhooks/docusign/#{updated.connection.public_id}", params: raw, headers: headers
+    expect(response).to have_http_status(:unauthorized)
+    expect(updated.reload.connect_checked_at).to be_nil
   end
 
   it 'rejects invalid JSON with a matching signature' do
@@ -131,7 +157,7 @@ RSpec.describe 'DocuSign Connect inbox', type: :request do
     post url, params: raw, headers: headers
     record = JrcBackoffice::SignatureNotification.last
     record.account_id = create(:account).id
-    expect { record.payload }.to raise_error(JrcBackoffice::Docusign::Error, 'CREDENTIAL_UNAVAILABLE')
+    expect { record.payload }.to raise_error(JrcBackoffice::Signatures::ProviderError, 'CREDENTIAL_UNAVAILABLE')
   end
 
   it 'refuses an empty POST without changing connection state or persisting a notification' do

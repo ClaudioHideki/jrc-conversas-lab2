@@ -98,9 +98,8 @@ module JrcCrm
                       'approved' => %w[separating invoiced canceled], 'separating' => %w[invoiced canceled],
                       'invoiced' => %w[shipped canceled], 'shipped' => %w[completed canceled] }
       errors.add(:status, 'transição operacional inválida') unless transitions.fetch(attribute_in_database('status'), []).include?(status)
-      if %w[separating invoiced shipped completed].include?(status) && JrcCrm::OrderContractService.new(order: self).required? &&
-         !contracts.where(signature_status: 'signed').exists?
-        errors.add(:status, 'a assinatura do contrato ainda está pendente')
+      if %w[separating invoiced shipped completed].include?(status) && !JrcBackoffice::SignatureRelease.order_satisfied?(self)
+        errors.add(:status, JrcBackoffice::SignatureRelease::MESSAGE)
       end
       if status == 'invoiced' && !invoices.where(status: %w[issued sent paid overdue]).exists?
         errors.add(:status, 'exige faturamento efetivamente emitido')

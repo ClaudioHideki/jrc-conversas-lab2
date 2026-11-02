@@ -111,7 +111,7 @@ RSpec.describe JrcBackoffice::Docusign::Client do
     expect(integration.as_json.keys).not_to include('encrypted_credentials', 'private_key')
     copied = integration.dup
     copied.account = create(:account)
-    expect { copied.credentials }.to raise_error(JrcBackoffice::Docusign::Error, 'CREDENTIAL_UNAVAILABLE')
+    expect { copied.credentials }.to raise_error(JrcBackoffice::Signatures::ProviderError, 'CREDENTIAL_UNAVAILABLE')
   end
 
   it 'invalidates both provider checks after changing the integration identity' do

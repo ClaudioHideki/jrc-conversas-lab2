@@ -10,11 +10,11 @@ class JrcBackoffice::SignatureSecrets
 
   def decrypt(account_id:, purpose:, ciphertext:)
     value = @encryptor.decrypt_and_verify(ciphertext, purpose: context(account_id, purpose))
-    raise JrcBackoffice::Docusign::Error.new(code: 'CREDENTIAL_UNAVAILABLE') unless value.is_a?(Hash)
+    raise JrcBackoffice::Signatures::ProviderError.new(code: 'CREDENTIAL_UNAVAILABLE') unless value.is_a?(Hash)
 
     value
   rescue ActiveSupport::MessageEncryptor::InvalidMessage, ArgumentError
-    raise JrcBackoffice::Docusign::Error.new(code: 'CREDENTIAL_UNAVAILABLE')
+    raise JrcBackoffice::Signatures::ProviderError.new(code: 'CREDENTIAL_UNAVAILABLE')
   end
 
   def inspect

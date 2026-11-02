@@ -30,6 +30,7 @@ module JrcCrm
 
       key = idempotency_key
       existing = JrcProjects::Project.find_by(account_id: @account.id, idempotency_key: key)
+      return result(existing, JrcBackoffice::SignatureRelease::MESSAGE) unless JrcBackoffice::SignatureRelease.order_satisfied?(@order)
       return result(existing, nil) if existing
 
       membership = @account.account_users.find_by(user_id: @actor&.id)

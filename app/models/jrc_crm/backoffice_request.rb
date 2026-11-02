@@ -179,8 +179,8 @@ module JrcCrm
         errors << 'O pedido precisa estar aprovado antes de avançar o Backoffice.'
       end
       if fulfillment? && stage.in?(%w[implementation provisioning finance issues completed]) &&
-         stage_applicable?('contract') && contract&.signature_status != 'signed'
-        errors << 'A assinatura do contrato ainda está pendente.'
+         stage_applicable?('contract') && !JrcBackoffice::SignatureRelease.satisfied?(self)
+        errors << JrcBackoffice::SignatureRelease::MESSAGE
       end
       if stage.in?(%w[request analysis]) && !sales_order.status.in?(%w[approved separating invoiced shipped completed])
         errors << 'O pedido precisa estar aprovado antes de iniciar o fluxo operacional.'
@@ -199,7 +199,7 @@ module JrcCrm
       end
 
       if stage == 'contract' && stage_applicable?('contract')
-        errors << 'O contrato precisa estar assinado antes da implantação.' unless contract&.signature_status == 'signed'
+        errors << JrcBackoffice::SignatureRelease::MESSAGE unless JrcBackoffice::SignatureRelease.satisfied?(self)
       end
 
       if stage == 'implementation' && stage_applicable?('implementation')

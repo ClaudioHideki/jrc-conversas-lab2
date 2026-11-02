@@ -23,14 +23,27 @@ const empty = () => ({
   phone_number: '',
   job_title: '',
   department: '',
+  personal_tax_identifier: '',
 });
 const form = reactive(empty());
 const draft = useFormDraft(
   'crm:new_contact:' + (props.companyId || 'standalone'),
   {
     active,
-    snapshot: () => ({ ...form }),
-    restore: value => Object.assign(form, value),
+    snapshot: () => ({
+      name: form.name,
+      email: form.email,
+      phone_number: form.phone_number,
+      job_title: form.job_title,
+      department: form.department,
+    }),
+    restore: value => {
+      Object.keys(form)
+        .filter(key => key !== 'personal_tax_identifier')
+        .forEach(key => {
+          if (value[key] !== undefined) form[key] = value[key];
+        });
+    },
     reset: () => Object.assign(form, empty()),
   }
 );
@@ -131,6 +144,17 @@ const save = async () => {
             :class="inputClass"
         /></label>
         <template v-if="enabled">
+          <label class="block">
+            <span>{{ t('CRM.CUSTOMER_SIGNING_IDENTITY.CPF_OPTIONAL') }}</span>
+            <input
+              v-model="form.personal_tax_identifier"
+              name="personal_tax_identifier"
+              inputmode="numeric"
+              maxlength="14"
+              autocomplete="off"
+              :class="inputClass"
+            />
+          </label>
           <label class="block"
             >{{ t('CRM.CREATION.JOB_TITLE')
             }}<input

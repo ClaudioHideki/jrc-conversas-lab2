@@ -7,23 +7,25 @@ class JrcBackoffice::Docusign::ConnectInbox
               recipient-sent recipient-delivered recipient-completed recipient-declined].freeze
 
   def self.receive!(public_id:, raw_body:, signatures:)
-    integration = JrcBackoffice::SignatureIntegration.find_by(public_id: public_id)
-    raise Rejected unless integration
+    connection = JrcBackoffice::SignatureConnection.find_by(public_id: public_id, provider: 'docusign')
+    raise Rejected unless connection
 
-    integration.with_lock do
-      account = integration.account.reload
-      raise Rejected unless integration.enabled? && account.active? && account.feature_enabled?('jrc_crm')
+    connection.integration.with_lock do
+      connection.with_lock do
+        account = connection.account.reload
+        raise Rejected unless connection.enabled? && account.active? && account.feature_enabled?('jrc_crm')
 
-      keys = integration.credentials['connect_hmac_keys']
-      raise Rejected unless JrcBackoffice::Docusign::ConnectVerifier.valid?(raw_body: raw_body, signatures: signatures, keys: keys)
+        keys = connection.credentials['connect_hmac_keys']
+        raise Rejected unless JrcBackoffice::Docusign::ConnectVerifier.valid?(raw_body: raw_body, signatures: signatures, keys: keys)
 
-      data = JSON.parse(raw_body)
-      validate!(data, integration)
-      notification = persist!(integration, raw_body, data)
-      confirm_connection!(integration)
-      notification
+        data = JSON.parse(raw_body)
+        validate!(data, connection)
+        notification = persist!(connection, raw_body, data)
+        confirm_connection!(connection)
+        notification
+      end
     end
-  rescue JSON::ParserError, ArgumentError, JrcBackoffice::Docusign::Error
+  rescue JSON::ParserError, ArgumentError, JrcBackoffice::Signatures::ProviderError
     raise Rejected
   end
 
@@ -44,20 +46,25 @@ class JrcBackoffice::Docusign::ConnectInbox
   end
   private_class_method :validate_schema!
 
-  def self.confirm_connection!(integration)
-    return if integration.connect_checked_at
+  def self.confirm_connection!(connection)
+    return if connection.connect_checked_at
 
-    integration.update!(connect_checked_at: Time.current)
-    JrcCrm::AuditEvent.create!(account_id: integration.account_id, actor_type: 'Provider', event_type: 'signature_connect_checked',
+    connection.update!(connect_checked_at: Time.current)
+    integration = connection.integration
+    integration.with_lock do
+      integration.update!(connect_checked_at: connection.connect_checked_at) if integration.revision == connection.revision
+    end
+    JrcCrm::AuditEvent.create!(account_id: connection.account_id, actor_type: 'Provider', event_type: 'signature_connect_checked',
                                resource_type: integration.class.name, resource_id: integration.id,
-                               metadata: { provider: 'docusign', revision: integration.revision })
+                               metadata: { provider: connection.provider, revision: connection.revision, connection_id: connection.id })
   end
   private_class_method :confirm_connection!
 
-  def self.persist!(integration, raw_body, data)
-    JrcBackoffice::SignatureNotification.find_or_create_by!(integration_id: integration.id, integration_revision: integration.revision,
+  def self.persist!(connection, raw_body, data)
+    JrcBackoffice::SignatureNotification.find_or_create_by!(integration_id: connection.integration_id, integration_revision: connection.revision,
                                                             body_sha256: Digest::SHA256.hexdigest(raw_body)) do |record|
-      record.account_id = integration.account_id
+      record.account_id = connection.account_id
+      record.connection = connection
       record.event_type = data['event']
       record.envelope_id = data['data']['envelopeId']
       record.provider_generated_at = Time.iso8601(data['generatedDateTime'])

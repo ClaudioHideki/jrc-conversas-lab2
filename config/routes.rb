@@ -438,6 +438,7 @@ Rails.application.routes.draw do
                 post :merge
               end
               resources :contact_points, only: [:create, :update, :destroy]
+              resource :signing_identity, only: [:show, :update], controller: 'contact_signing_identities'
             end
           end
 
