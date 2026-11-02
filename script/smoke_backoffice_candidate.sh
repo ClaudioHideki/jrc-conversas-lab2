@@ -56,12 +56,14 @@ RAILS_ENV=test POSTGRES_HOST=127.0.0.1 POSTGRES_PORT="$port" POSTGRES_USERNAME=p
   POSTGRES_PASSWORD=disposable-candidate-only POSTGRES_DATABASE=backoffice_candidate_smoke_test \
   SECRET_KEY_BASE=isolated-candidate-smoke-not-production SCHEMA=db/schema.rb bundle exec rails db:schema:load
 
+# The native worker also runs auxiliary capsules and cron; a one-connection pool starves documentary jobs.
 runtime_env=(--network "$network" --label "$label" --mount "type=volume,source=$storage,target=/app/storage"
   -e RAILS_ENV=production -e POSTGRES_HOST="$postgres" -e POSTGRES_PORT=5432
   -e POSTGRES_USERNAME=postgres -e POSTGRES_PASSWORD=disposable-candidate-only
   -e POSTGRES_DATABASE=backoffice_candidate_smoke_test -e REDIS_URL="redis://$redis:6379/15"
   -e SECRET_KEY_BASE=isolated-candidate-smoke-not-production -e CANDIDATE_SHA="$SOURCE_SHA"
-  -e LOG_LEVEL=error -e RAILS_LOG_TO_STDOUT=true -e ACTIVE_STORAGE_SERVICE=local -e SIDEKIQ_CONCURRENCY=1)
+  -e LOG_LEVEL=error -e RAILS_LOG_TO_STDOUT=true -e ACTIVE_STORAGE_SERVICE=local
+  -e SIDEKIQ_CONCURRENCY=1 -e DB_POOL_SIZE=10)
 docker run -d --name "$rails" "${runtime_env[@]}" --entrypoint bundle \
   "$candidate" exec rails server -b 0.0.0.0 -p 3000
 docker run -d --name "$sidekiq" "${runtime_env[@]}" --entrypoint bundle \

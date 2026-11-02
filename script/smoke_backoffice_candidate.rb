@@ -14,7 +14,12 @@ end
 languages, _, status = Open3.capture3('tesseract', '--list-langs')
 raise 'Candidate OCR languages missing' unless status.success? && %w[por eng].all? { |lang| languages.lines.map(&:strip).include?(lang) }
 
-raise 'Sidekiq did not register with the isolated Redis' unless Sidekiq::ProcessSet.new.any? { |process| process['queues'].include?('low') }
+sidekiq_deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + 45
+until Sidekiq::ProcessSet.new.any? { |process| process['queues'].include?('low') }
+  raise 'Sidekiq did not register with the isolated Redis' if Process.clock_gettime(Process::CLOCK_MONOTONIC) > sidekiq_deadline
+
+  sleep 0.5
+end
 account = Account.create!(name: 'Isolated candidate smoke')
 account.enable_features!('jrc_crm')
 actor = User.create!(name: 'Synthetic candidate actor', email: "candidate-#{SecureRandom.uuid}@example.test",
