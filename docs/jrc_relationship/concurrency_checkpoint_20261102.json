@@ -1,0 +1,48 @@
+{
+  "date": "2026-11-02",
+  "parent_checkpoint": "bdf0d56915bcbdf5873cf525623f68b649d9f49e",
+  "changes": [
+    "Worker duplicado recusado pelo ownership não cancela a intenção compartilhada do worker admitido; fencing real mantém cancelamento.",
+    "Testes de concorrência respeitam retorno nil do bloqueio nativo e exigem conclusão real e exatamente um efeito.",
+    "Rollback de teste reverte primeiro as migrations mais recentes e reaplica as FKs de isolamento."
+  ],
+  "validation": {
+    "core": {
+      "artifact": ".codex/checkpoint-full-core.json",
+      "sha256": "18b15899d9a893a51a73777636b17cea400e7a49b86f50c73461e81ee3437821",
+      "summary": {
+        "duration": 1905.975744868,
+        "example_count": 427,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      }
+    },
+    "reviewed": {
+      "artifact": ".codex/current-full-reviewed.json",
+      "sha256": "0e4e4b2ac3da193aed97cb25b03f11c4b4079388e34e7290b41a586680f7c51d",
+      "summary": {
+        "duration": 15.066889932,
+        "example_count": 5,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      }
+    },
+    "service_desk_concurrency": {
+      "artifact": ".codex/current-full-sd-fixed.json",
+      "sha256": "4ccf61a32b14b1df0711dfc4794a537492435aac6cac69c1fc92015522cbdaee",
+      "summary": {
+        "duration": 400.16441614,
+        "example_count": 33,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      }
+    },
+    "coverage": "465 IDs conferidos contra o dry-run nativo, sem omissões, duplicações, falhas ou pending. Dry-run é apenas plano de coleta.",
+    "provenance": "427 casos centrais executados no snapshot imutável bdf0d569; 5 reviewed e 33 concorrentes no código atual. Os gates específicos de ownership também foram repetidos no backend final. Esta composição não é uma execução única de todo o repositório."
+  },
+  "earlier_failures": "Execução anterior de 31 casos teve 5 falhas. Duas expectativas incompatíveis com retorno nil e a disputa de cancelamento foram reproduzidas na base. Timeouts de locks ocorreram sob carga simultânea e não voltaram na execução serial final; logs preservados, limites não ampliados.",
+  "environment": "Bancos e Redis descartáveis. Nenhum deploy/push/imagem ou alteração de produção."
+}

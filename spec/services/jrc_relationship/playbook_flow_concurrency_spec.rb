@@ -56,8 +56,12 @@ RSpec.describe JrcRelationship::PlaybookFlow, :sd_concurrency do
   it 'serializes duplicate incoming retries without a second native effect' do
     run = wake_continuation(start_continuation)
     message = client_reply
-    outcomes = simultaneous { JrcFlows::Runner.new(JrcFlowRun.find(run.id)).perform(message: Message.find(message.id)).status }
-    expect(outcomes).to eq(%w[completed completed])
+    outcomes = simultaneous { JrcFlows::Runner.new(JrcFlowRun.find(run.id)).perform(message: Message.find(message.id))&.status }
+    # Native ownership may refuse a concurrent duplicate before the runner lock.
+    # At least one admitted call must complete; no duplicate may create an effect.
+    expect(outcomes.compact).not_to be_empty
+    expect(outcomes.compact).to all(eq('completed'))
+    expect(run.reload.status).to eq('completed')
     expect(flow_messages(run).length).to eq(1)
     expect(run.reload.last_message_id).to eq(message.id)
   end
@@ -115,6 +119,49 @@ RSpec.describe JrcRelationship::PlaybookFlow, :sd_concurrency do
       expect(outcomes.grep(Exception)).to be_empty
       expect(provider_attempts.size).to eq(1)
       expect(message.reload.content_attributes['jrc_flow_delivery']).to eq('channel_processed')
+    end
+
+    it 'does not cancel the admitted worker when a duplicate loses ownership admission before the claim' do
+      message = flow_messages(start_continuation).fetch(0)
+      entered = Queue.new
+      resume = Queue.new
+      attempts = Queue.new
+      winner = JrcFlows::Delivery.new(Message.find(message.id))
+      first = true
+      allow(winner).to receive(:with_managed_sources).and_wrap_original do |original, &block|
+        if first
+          first = false
+          entered << true
+          resume.pop
+        end
+        original.call(&block)
+      end
+      worker = Thread.new do
+        ActiveRecord::Base.connection_pool.with_connection { winner.perform { attempts << message.id } }
+      end
+      Timeout.timeout(10) { entered.pop }
+      JrcFlows::Delivery.new(Message.find(message.id)).perform { attempts << message.id }
+      expect(attempts.size).to eq(0)
+      expect(message.reload.content_attributes['jrc_flow_delivery']).to eq('queued')
+      resume << true
+      Timeout.timeout(20) { worker.join }
+      expect(attempts.size).to eq(1)
+      expect(message.reload.content_attributes['jrc_flow_delivery']).to eq('channel_processed')
+    ensure
+      resume << true if resume
+      worker&.kill if worker&.alive?
+      worker&.join
+    end
+
+    it 'still cancels queued delivery after the actual ownership scope is fenced' do
+      message = flow_messages(start_continuation).fetch(0)
+      scope = JrcFlows::NativeResponders.scope_for(inbox)
+      scope.update!(state: 'FENCED')
+      attempts = []
+      JrcFlows::Delivery.new(Message.find(message.id)).perform { attempts << message.id }
+      expect(attempts).to be_empty
+      expect(message.reload.content_attributes['jrc_flow_delivery']).to eq('cancelled')
+      expect(message.status).to eq('failed')
     end
   end
 end

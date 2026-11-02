@@ -68,9 +68,11 @@ RSpec.describe JrcRelationship::PlaybookFlowMutationJournal, :sd_concurrency do
       run = start_continuation
       version = run.wake_version
       outcomes = travel_to(run.wake_at, with_usec: true) do
-        race { JrcFlows::Runner.new(JrcFlowRun.find(run.id)).perform(wake_version: version).status }
+        race { JrcFlows::Runner.new(JrcFlowRun.find(run.id)).perform(wake_version: version)&.status }
       end
-      expect(outcomes).to eq(%w[completed completed])
+      expect(outcomes.compact).not_to be_empty
+      expect(outcomes.compact).to all(eq('completed'))
+      expect(run.reload.status).to eq('completed')
       expect(flow_messages(run).map(&:content)).to eq(['One native concurrent continuation'])
       expect(JrcCrm::Lead.where(conversation: conversation).count).to eq(1)
       expect(JrcCrm::Activity.where(conversation: conversation).count).to eq(1)

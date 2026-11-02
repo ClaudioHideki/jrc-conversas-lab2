@@ -92,8 +92,10 @@ module JrcFlows::OwnershipHooks
         JrcFlows::OwnershipEffects.refresh_message!(@message.id)
       end
     rescue JrcFlows::OwnershipGuard::Closed
-      # Known closure before provider I/O is not manufactured UNKNOWN.
-      if @message.reload.content_attributes.to_h['jrc_flow_delivery']=='queued'
+      # A duplicate worker can lose admission before the admitted worker claims
+      # the message. Only a change of owner may cancel that shared intention.
+      if !JrcFlows::OwnershipGuard.allowed_local?(@message.account_id, @conversation.inbox_id) &&
+         @message.reload.content_attributes.to_h['jrc_flow_delivery']=='queued'
         @message.update!(status: :failed, content_attributes: @message.content_attributes.to_h.merge('jrc_flow_delivery'=>'cancelled'))
         JrcFlows::OwnershipEffects.refresh_message!(@message.id)
       end
