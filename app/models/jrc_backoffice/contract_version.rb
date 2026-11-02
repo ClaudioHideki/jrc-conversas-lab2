@@ -18,21 +18,7 @@ class JrcBackoffice::ContractVersion < ApplicationRecord
   after_rollback(on: :create) { self.class.clean_uncommitted_pdf(pdf_blob) }
 
   def self.clean_uncommitted_pdf(blob)
-    return unless blob && blob.metadata['jrc_contract_generated'] == true
-    return if uncached { exists?(pdf_blob_id: blob.id) }
-    return if blob.attachments.exists?
-
-    if ActiveStorage::Blob.uncached { ActiveStorage::Blob.exists?(id: blob.id) }
-      blob.purge
-    else
-      # Rollback restores a blob's new-record flag; native purge then skips
-      # storage deletion. No persisted blob means the FK forbids a new owner.
-      blob.service.delete(blob.key)
-    end
-  rescue StandardError => e
-    # A failed existence check retains the PDF on uncertain database outcomes.
-    # Cleanup errors must never replace the original failed operation.
-    Rails.logger.warn("backoffice_contract_blob_cleanup_pending class=#{e.class.name}")
+    JrcBackoffice::PrivateBlob.clean_uncommitted(blob, marker: 'jrc_contract_generated')
   end
 
   def snapshot

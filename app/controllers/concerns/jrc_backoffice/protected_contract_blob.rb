@@ -6,7 +6,7 @@ module JrcBackoffice::ProtectedContractBlob
 
   def deny_backoffice_contract_blob
     blob = @blob || signed_contract_blob || disk_contract_blob
-    return unless blob && JrcBackoffice::ContractVersion.exists?(pdf_blob_id: blob.id)
+    return unless blob && JrcBackoffice::PrivateBlob.protected?(blob.id)
 
     response.headers['Cache-Control'] = 'no-store'
     head :not_found

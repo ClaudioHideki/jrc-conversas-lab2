@@ -1,5 +1,6 @@
 class JrcBackoffice::DocumentVersion < ApplicationRecord
   self.table_name = 'jrc_backoffice_document_versions'
+  attr_accessor :new_upload_blob
 
   belongs_to :account
   belongs_to :backoffice_request, class_name: 'JrcCrm::BackofficeRequest'
@@ -15,6 +16,9 @@ class JrcBackoffice::DocumentVersion < ApplicationRecord
   after_create_commit { JrcBackoffice::DocumentPreanalysisJob.perform_later(id) }
   before_update { raise ActiveRecord::ReadOnlyRecord, 'Document versions are immutable' }
   before_destroy { raise ActiveRecord::ReadOnlyRecord, 'Document versions are immutable' }
+  after_rollback(on: :create) do
+    JrcBackoffice::PrivateBlob.clean_uncommitted(new_upload_blob, marker: 'jrc_backoffice_document_upload')
+  end
 
   def status
     decisions.order(id: :desc).first&.status || analysis&.state || 'processing'

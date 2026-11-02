@@ -156,6 +156,10 @@ backofficeAPI.decideDocumentVersion = (id, versionId, data) =>
     `${backofficeAPI.url}/${id}/document_versions/${versionId}/decision`,
     data
   );
+backofficeAPI.recheckDocumentVersion = (id, versionId) =>
+  axios.post(
+    `${backofficeAPI.url}/${id}/document_versions/${versionId}/recheck`
+  );
 backofficeAPI.documentStatus = (id, data) =>
   axios.post(`${backofficeAPI.url}/${id}/document_status`, data);
 backofficeAPI.addIssue = (id, data) =>

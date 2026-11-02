@@ -352,5 +352,18 @@
     "new_image": false,
     "push": false,
     "deploy": false
+  },
+  "document_security_checkpoint_20261102": {
+    "report": "docs/jrc_backoffice/document_security_checkpoint_20261102.json",
+    "status": "parcial",
+    "backend": 534,
+    "frontend": 182,
+    "real_postgresql_concurrency": 3,
+    "legacy_lint_offenses": 44,
+    "real_antivirus_homologation": false,
+    "signature_flow_complete": false,
+    "push": false,
+    "new_image": false,
+    "deploy": false
   }
 }

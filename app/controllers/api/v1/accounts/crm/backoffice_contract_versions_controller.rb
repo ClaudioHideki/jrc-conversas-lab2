@@ -8,7 +8,7 @@ class Api::V1::Accounts::Crm::BackofficeContractVersionsController < Api::V1::Ac
   rescue_from ActiveStorage::IntegrityError, ActiveRecord::Encryption::Errors::Decryption do
     render json: { code: 'CONTRACT_DOCUMENT_UNAVAILABLE' }, status: :unprocessable_entity
   end
-  after_action { response.headers['Cache-Control'] = 'no-store' }
+  prepend_before_action { response.headers['Cache-Control'] = 'no-store' }
 
   def index
     request = access.request(params[:backoffice_request_id])

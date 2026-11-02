@@ -8,7 +8,15 @@ class JrcBackoffice::DocumentPreanalysis
   def call
     return @version.analysis if @version.analysis
 
-    extraction = @version.file.blob.open { |file| JrcBackoffice::TextExtraction.call(file.path, @version.file.content_type) }
+    # Parse exactly the verified bytes; do not reopen mutable storage between
+    # the checksum check and the parser.
+    bytes = JrcBackoffice::DocumentSafety.new(@version).bytes!
+    extraction = Tempfile.create(['jrc-backoffice-evidence', '.bin']) do |file|
+      file.binmode
+      file.write(bytes)
+      file.flush
+      JrcBackoffice::TextExtraction.call(file.path, @version.file.content_type)
+    end
     text = extraction.delete(:text)
     identifiers = text.scan(/(?:CNPJ)\s*[:\-]?\s*([A-Z0-9]{2}\.?[A-Z0-9]{3}\.?[A-Z0-9]{3}\/?[A-Z0-9]{4}-?\d{2})/i)
                       .flatten.map { |value| JrcCustomers::TaxIdentifier.normalize(value) }.uniq

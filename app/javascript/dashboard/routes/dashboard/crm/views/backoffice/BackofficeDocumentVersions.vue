@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { backofficeAPI } from 'dashboard/api/crm/commercialCycle';
 import { useBackofficePresentation } from './useBackofficePresentation';
 const props = defineProps({ record: { type: Object, required: true } });
@@ -15,6 +15,7 @@ const visibleVersions = computed(() =>
   )
 );
 const file = ref(null);
+const fileInput = ref(null);
 const reason = ref('');
 const busy = ref(false);
 const error = ref('');
@@ -22,6 +23,13 @@ const terminal = computed(() =>
   ['completed', 'canceled', 'rejected'].includes(props.record.status)
 );
 let sequence = 0;
+let active = true;
+let uploadIntent;
+const clearUpload = () => {
+  file.value = null;
+  uploadIntent = null;
+  if (fileInput.value) fileInput.value.value = '';
+};
 const load = async () => {
   sequence += 1;
   const current = sequence;
@@ -31,47 +39,78 @@ const load = async () => {
       document_key: selected.value,
       page: page.value,
     });
-    if (current !== sequence) return;
+    if (!active || current !== sequence) return false;
     result.value = data;
     selected.value = data.selected_key || '';
-  } catch {
-    if (current === sequence) error.value = text('DOCUMENTS.LOAD_ERROR');
+    return true;
+  } catch (failure) {
+    if (active && current === sequence) {
+      error.value = text('DOCUMENTS.LOAD_ERROR');
+      if ([401, 403, 404].includes(failure.response?.status)) {
+        result.value = null;
+        reason.value = '';
+        clearUpload();
+      }
+    }
+    return false;
   }
 };
 const run = async action => {
   if (busy.value) return;
+  const context = props.record.id;
+  const token = sequence;
   busy.value = true;
   error.value = '';
   try {
     await action();
-    await load();
-    emit('changed');
+    if (!active || context !== props.record.id || token !== sequence) return;
+    if (await load()) emit('changed');
   } catch (failure) {
+    if (!active || context !== props.record.id || token !== sequence) return;
+    if ([401, 403, 404].includes(failure.response?.status)) {
+      result.value = null;
+      reason.value = '';
+      clearUpload();
+    }
     error.value =
       failure.response?.data?.message ||
       failure.response?.data?.errors?.join(', ') ||
       text('ACTION_ERROR');
   } finally {
-    busy.value = false;
+    if (active && context === props.record.id) busy.value = false;
   }
 };
 const upload = () =>
   run(async () => {
-    await backofficeAPI.uploadDocumentVersion(
-      props.record.id,
-      selected.value,
-      file.value,
-      crypto.randomUUID()
+    const context = props.record.id;
+    const key = selected.value;
+    const source = file.value;
+    if (uploadIntent?.file !== source || uploadIntent?.documentKey !== key)
+      uploadIntent = {
+        file: source,
+        documentKey: key,
+        id: crypto.randomUUID(),
+      };
+    const { data } = await backofficeAPI.uploadDocumentVersion(
+      context,
+      key,
+      source,
+      uploadIntent.id
     );
-    file.value = null;
+    if (!active || context !== props.record.id) return;
+    if (!data?.id) throw new Error('Document upload was not confirmed');
+    clearUpload();
     page.value = 1;
   });
 const download = version =>
   run(async () => {
+    const context = props.record.id;
+    const token = sequence;
     const { data } = await backofficeAPI.downloadDocumentVersion(
       props.record.id,
       version.id
     );
+    if (!active || context !== props.record.id || token !== sequence) return;
     const url = URL.createObjectURL(data);
     const link = document.createElement('a');
     link.href = url;
@@ -90,16 +129,25 @@ watch(
   () => props.record.id,
   () => {
     selected.value = '';
+    reason.value = '';
+    clearUpload();
+    busy.value = false;
     page.value = 1;
     result.value = null;
     load();
   },
   { immediate: true }
 );
+onBeforeUnmount(() => {
+  active = false;
+  clearUpload();
+  sequence += 1;
+});
 const select = () => {
   view.value = 'current';
   page.value = 1;
   reason.value = '';
+  clearUpload();
   load();
 };
 </script>
@@ -175,6 +223,7 @@ const select = () => {
         <label class="min-w-0 flex-1 text-sm">
           {{ text('DOCUMENTS.NEW_VERSION') }}
           <input
+            ref="fileInput"
             type="file"
             accept=".pdf,.png,.jpg,.jpeg"
             class="mt-2 block w-full text-sm"
@@ -219,12 +268,35 @@ const select = () => {
           </div>
           <button
             class="rounded-lg border border-n-weak px-3 py-2"
-            :disabled="busy"
+            :disabled="busy || version.safety?.state !== 'clean'"
             @click="download(version)"
           >
             {{ text('FORM.DOWNLOAD') }}
           </button>
         </div>
+        <p
+          class="rounded-lg border p-3 text-xs"
+          :class="
+            version.safety?.state === 'clean'
+              ? 'border-n-teal-6 bg-n-teal-3 text-n-teal-12'
+              : 'border-n-amber-6 bg-n-amber-3 text-n-amber-12'
+          "
+        >
+          {{ text(`DOCUMENTS.SAFETY.${version.safety?.state || 'pending'}`) }}
+        </p>
+        <button
+          v-if="version.safety?.state !== 'clean' && !terminal"
+          type="button"
+          :disabled="busy"
+          class="rounded-lg border border-n-blue-6 bg-n-blue-3 px-3 py-2 text-n-blue-12 disabled:opacity-40"
+          @click="
+            run(() =>
+              backofficeAPI.recheckDocumentVersion(record.id, version.id)
+            )
+          "
+        >
+          {{ text('DOCUMENTS.RECHECK') }}
+        </button>
         <details
           v-if="version.analysis"
           :open="view === 'current'"
@@ -269,7 +341,8 @@ const select = () => {
           v-if="
             view === 'current' &&
             version.current &&
-            version.analysis &&
+            (version.analysis ||
+              (version.safety && version.safety.state !== 'pending')) &&
             !terminal
           "
           class="flex gap-2"
@@ -277,7 +350,12 @@ const select = () => {
           <button
             v-for="status in ['approved', 'rejected']"
             :key="status"
-            :disabled="busy || !reason.trim()"
+            :disabled="
+              busy ||
+              !reason.trim() ||
+              (status === 'approved' &&
+                (version.safety?.state !== 'clean' || !version.analysis))
+            "
             class="rounded-lg border border-n-strong px-3 py-2 font-semibold disabled:opacity-40"
             @click="decide(version, status)"
           >

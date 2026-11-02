@@ -125,8 +125,8 @@ class JrcBackoffice::ContractVersions
     raise ArgumentError, 'O gerador não retornou um PDF válido.' unless valid
 
     filename = "#{record.contract.contract_number}-v#{record.number}.pdf"
-    record.pdf_blob = ActiveStorage::Blob.create_and_upload!(io: StringIO.new(bytes), filename: filename, content_type: 'application/pdf',
-                                                             identify: false, metadata: { 'jrc_contract_generated' => true })
+    record.pdf_blob = JrcBackoffice::PrivateBlob.upload_owned(io: StringIO.new(bytes), filename: filename, content_type: 'application/pdf',
+                                                              marker: 'jrc_contract_generated')
     @pending_blob = record.pdf_blob
     @access.writable!(record.backoffice_request)
     record.pdf_sha256 = Digest::SHA256.hexdigest(bytes)
@@ -144,9 +144,16 @@ class JrcBackoffice::ContractVersions
     return row['status'] == 'approved' if row && row['source'] != 'manual'
 
     version = request.document_versions.where(document_key: key).order(version: :desc).first
-    return version.decisions.order(id: :desc).first&.status == 'approved' if version
+    return manual_document_ready?(request, version) if version
 
     request.workflow_version == 1 && request.metadata.dig('document_statuses', key) == 'approved'
+  end
+
+  def manual_document_ready?(request, version)
+    return false unless version.decisions.order(id: :desc).first&.status == 'approved'
+    return true if request.workflow_version == 1
+
+    JrcBackoffice::DocumentSafety.new(version).current&.clean?
   end
 
   def clean_uncommitted_blob

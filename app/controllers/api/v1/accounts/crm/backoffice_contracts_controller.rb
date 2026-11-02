@@ -1,6 +1,7 @@
 # Reuse native contract editing, price snapshots, approval invalidation and
 # audit. Only the entry scope changes to the assigned Backoffice request.
 class Api::V1::Accounts::Crm::BackofficeContractsController < Api::V1::Accounts::Crm::ContractsController
+  prepend_before_action { response.headers['Cache-Control'] = 'no-store' }
   EDITABLE_FIELDS = %w[contract_template_id content_override starts_on ends_on term_months renewal_type adjustment_index due_day
                        auto_renew renewal_notice_days renewal_term_months notes].freeze
   rescue_from ArgumentError do |error|

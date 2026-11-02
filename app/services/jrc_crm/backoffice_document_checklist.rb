@@ -13,7 +13,10 @@ module JrcCrm
     def sync!
       @request.with_lock do
         data = (@request.metadata || {}).deep_dup
-        configured = @order.order_items.includes(:product).flat_map do |item|
+        # Keep the manual requirements already applied to this request. An
+        # upload/review must not remove them when reconciling product evidence.
+        configured = Array(data['document_checklist']).select { |row| row['source'] == 'manual' }.map { |row| row.except('status', 'evidence') }
+        configured += @order.order_items.includes(:product).flat_map do |item|
           Array(item.product&.document_rules).map { |row| row.merge('product_id' => item.product_id) }
         end
         if OrderContractService.new(order: @order).required?
@@ -21,7 +24,7 @@ module JrcCrm
         end
         data['document_checklist'] = configured.uniq { |row| row['key'] }.map do |row|
           if row['source'] == 'manual'
-            version = @request.document_versions.where(document_key: row['key']).order(version: :desc).first
+            version = @request.document_versions.where(account_id: @request.account_id, document_key: row['key']).order(version: :desc).first
             row.merge('status' => version&.status || data.dig('document_statuses', row['key']) || 'pending')
           else
             evidence = source_evidence(row['source'])
@@ -35,7 +38,7 @@ module JrcCrm
         return @request if data == @request.metadata
         before = @request.metadata
         @request.update!(metadata: data)
-        AuditEvent.create!(account_id: @order.account_id, actor_type: 'User', actor_id: @actor&.id,
+        AuditEvent.create!(account_id: @order.account_id, actor_type: @actor ? 'User' : 'System', actor_id: @actor&.id,
           event_type: 'backoffice_updated', resource_type: 'JrcCrm::BackofficeRequest', resource_id: @request.id,
           from_value: { document_checklist: before['document_checklist'] },
           to_value: { document_checklist: data['document_checklist'] }, metadata: { source: 'native_document_reconciliation' })

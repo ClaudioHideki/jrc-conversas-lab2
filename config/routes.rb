@@ -768,6 +768,7 @@ Rails.application.routes.draw do
               post 'document_versions', to: 'backoffice_documents#create'
               get 'document_versions/:version_id', to: 'backoffice_documents#download'
               post 'document_versions/:version_id/decision', to: 'backoffice_documents#decide'
+              post 'document_versions/:version_id/recheck', to: 'backoffice_documents#recheck'
               member do
                 post :decide_order
                 post :advance

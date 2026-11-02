@@ -114,4 +114,50 @@ RSpec.describe JrcBackoffice::ContractVersions do
   ensure
     [writer, reader].compact.each { |thread| thread.kill if thread.alive? }
   end
+
+  it 'rejects an upload after an independently committed permission revocation and removes its file' do
+    role = create(:custom_role, account: account, permissions: ['contact_manage'])
+    uploaded = Queue.new
+    proceed = Queue.new
+    results = Queue.new
+    pids = Queue.new
+    allow(JrcBackoffice::PrivateBlob).to receive(:upload_owned).and_wrap_original do |method, **arguments|
+      blob = method.call(**arguments)
+      uploaded << blob
+      proceed.pop
+      blob
+    end
+    writer = Thread.new do
+      ApplicationRecord.connection_pool.with_connection do |connection|
+        pids << connection.select_value('SELECT pg_backend_pid()')
+        source = JrcCrm::BackofficeRequest.find(request.id)
+        file = fixture_file_upload(Rails.root.join('spec/fixtures/files/sample.pdf'), 'application/pdf')
+        record = JrcBackoffice::Documents.new(request: source, actor: User.find(actor.id))
+                                         .upload!(key: 'supporting', file: file, idempotency_key: SecureRandom.uuid)
+        results << [:created, record.id]
+      rescue StandardError => e
+        results << [:error, e.class.name]
+      end
+    end
+    revoker = nil
+    Timeout.timeout(30) do
+      blob = uploaded.pop
+      revoker = Thread.new do
+        ApplicationRecord.connection_pool.with_connection do |connection|
+          pids << connection.select_value('SELECT pg_backend_pid()')
+          AccountUser.find_by!(account_id: account.id, user_id: actor.id).update!(custom_role_id: role.id)
+        end
+      end
+      revoker.join
+      expect(Array.new(2) { pids.pop }.uniq.length).to eq(2)
+      proceed << true
+      writer.join
+      expect(results.pop).to eq([:error, 'Pundit::NotAuthorizedError'])
+      expect(AccountUser.find_by!(account_id: account.id, user_id: actor.id).custom_role_id).to eq(role.id)
+      expect(JrcBackoffice::DocumentVersion.where(backoffice_request_id: request.id)).to be_empty
+      expect(blob.service.exist?(blob.key)).to be(false)
+    end
+  ensure
+    [writer, revoker].compact.each { |thread| thread.kill if thread.alive? }
+  end
 end

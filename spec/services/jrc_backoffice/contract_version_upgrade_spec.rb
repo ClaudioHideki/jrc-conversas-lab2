@@ -1,5 +1,6 @@
 require 'rails_helper'
 require Rails.root.join('db/migrate/20261102050000_create_backoffice_contract_versions')
+require Rails.root.join('db/migrate/20261102060000_create_backoffice_document_scans')
 
 RSpec.describe JrcBackoffice::ContractVersion do
   let(:account) { create(:account) }
@@ -21,12 +22,17 @@ RSpec.describe JrcBackoffice::ContractVersion do
   it 'roundtrips an unused extension without changing native contracts, requests or customers' do
     original = [contract.reload.attributes, request.reload.attributes, contact.reload.attributes]
     counts = [Account.count, Contact.count, JrcCrm::Contract.count, JrcCrm::BackofficeRequest.count]
+    # The newer document fence references the version extension's tenant index.
+    # Roll back dependent extensions first, as the real migration stack does.
+    CreateBackofficeDocumentScans.new.migrate(:down)
     CreateBackofficeContractVersions.new.migrate(:down)
     CreateBackofficeContractVersions.new.migrate(:up)
+    CreateBackofficeDocumentScans.new.migrate(:up)
     expect([contract.reload.attributes, request.reload.attributes, contact.reload.attributes]).to eq(original)
     expect([Account.count, Contact.count, JrcCrm::Contract.count, JrcCrm::BackofficeRequest.count]).to eq(counts)
   ensure
     CreateBackofficeContractVersions.new.migrate(:up) unless ActiveRecord::Base.connection.table_exists?(:jrc_backoffice_contract_versions)
+    CreateBackofficeDocumentScans.new.migrate(:up) unless ActiveRecord::Base.connection.table_exists?(:jrc_backoffice_document_scans)
     ActiveRecord::Base.connection.schema_cache.clear!
     described_class.reset_column_information
   end

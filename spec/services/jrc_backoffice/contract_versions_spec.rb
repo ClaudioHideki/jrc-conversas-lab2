@@ -165,7 +165,7 @@ RSpec.describe JrcBackoffice::ContractVersions do
 
   it 'removes only its uncommitted PDF if persistence fails and preserves the original error' do
     uploaded = nil
-    allow(ActiveStorage::Blob).to receive(:create_and_upload!).and_wrap_original do |method, **attributes|
+    allow(JrcBackoffice::PrivateBlob).to receive(:upload_owned).and_wrap_original do |method, **attributes|
       uploaded = method.call(**attributes)
     end
     allow(JrcCrm::AuditEvent).to receive(:create!).and_wrap_original do |method, attributes|
@@ -183,6 +183,13 @@ RSpec.describe JrcBackoffice::ContractVersions do
     documents = JrcBackoffice::Documents.new(request: request, actor: actor)
     file = Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/files/sample.pdf'), 'application/pdf')
     first = documents.upload!(key: 'representation', file: file, idempotency_key: SecureRandom.uuid)
+    # Technical scanner reply is simulated; the protocol is covered by DocumentSafety.
+    scanner = instance_double(JrcServiceDesk::AttachmentScanner)
+    allow(JrcServiceDesk::AttachmentScanner).to receive(:new).and_return(scanner)
+    allow(scanner).to receive(:scan).with(first.file.blob, socket_path: anything).and_return(
+      'service_desk_scan_state' => 'clean', 'service_desk_scan_sha256' => first.sha256
+    )
+    JrcBackoffice::DocumentSafety.new(first).scan!
     first.create_analysis!(analyzer_version: 'synthetic-document-fixture/1', state: 'review_required', evidence: {})
     documents.decide!(version: first, status: 'approved', reason: 'TESTE SINTÉTICO — Documento conferido por pessoa autorizada')
     expect(version.number).to eq(1)

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_11_02_050000) do
+ActiveRecord::Schema[7.1].define(version: 2026_11_02_060000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -1387,6 +1387,26 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_050000) do
     t.index ["document_version_id", "id"], name: "idx_backoffice_decision_history"
   end
 
+  create_table "jrc_backoffice_document_scans", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "document_version_id", null: false
+    t.bigint "source_blob_id", null: false
+    t.integer "attempt", null: false
+    t.string "state", null: false
+    t.string "expected_sha256", null: false
+    t.string "scanner_adapter", null: false
+    t.string "observed_sha256"
+    t.string "failure_code"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_backoffice_document_scans_on_account_id"
+    t.index ["document_version_id", "attempt"], name: "bo_document_scan_attempt", unique: true
+    t.index ["document_version_id"], name: "index_jrc_backoffice_document_scans_on_document_version_id"
+    t.index ["source_blob_id"], name: "index_jrc_backoffice_document_scans_on_source_blob_id"
+    t.check_constraint "attempt > 0 AND (state::text = ANY (ARRAY['clean'::character varying, 'infected'::character varying, 'unavailable'::character varying, 'checksum_mismatch'::character varying]::text[]))", name: "bo_document_scan_state"
+    t.check_constraint "state::text <> 'clean'::text OR observed_sha256 IS NOT NULL AND observed_sha256::text = expected_sha256::text", name: "bo_document_scan_clean"
+  end
+
   create_table "jrc_backoffice_document_versions", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.bigint "backoffice_request_id", null: false
@@ -1397,6 +1417,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_050000) do
     t.string "sha256", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["account_id", "id"], name: "bo_document_version_tenant", unique: true
     t.index ["account_id"], name: "index_jrc_backoffice_document_versions_on_account_id"
     t.index ["backoffice_request_id", "document_key", "version"], name: "idx_backoffice_document_version", unique: true
     t.index ["backoffice_request_id", "idempotency_key"], name: "idx_backoffice_document_intent", unique: true
@@ -9269,4 +9290,86 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_050000) do
   execute <<~'JRC_SCHEMA_SQL_ced701519db3'
     CREATE TRIGGER jrc_contract_version_pin BEFORE DELETE OR UPDATE ON jrc_backoffice_contract_versions FOR EACH ROW EXECUTE FUNCTION jrc_contract_version_pin();
   JRC_SCHEMA_SQL_ced701519db3
+  add_foreign_key "jrc_backoffice_document_scans", "accounts"
+  add_foreign_key "jrc_backoffice_document_scans", "active_storage_blobs", column: "source_blob_id"
+  add_foreign_key "jrc_backoffice_document_scans", "jrc_backoffice_document_versions", column: "document_version_id"
+  add_foreign_key "jrc_backoffice_document_scans", "jrc_backoffice_document_versions", column: ["account_id", "document_version_id"], primary_key: ["account_id", "id"], name: "bo_document_scan_tenant"
+  add_foreign_key "jrc_backoffice_document_versions", "jrc_crm_backoffice_requests", column: ["account_id", "backoffice_request_id"], primary_key: ["account_id", "id"], name: "bo_document_request_tenant"
+
+  execute <<~'JRC_SCHEMA_SQL_1239956ec2c7'
+    ALTER TABLE "jrc_backoffice_document_scans" DROP CONSTRAINT "bo_document_scan_clean";
+  JRC_SCHEMA_SQL_1239956ec2c7
+
+  execute <<~'JRC_SCHEMA_SQL_6a75a5d5cc94'
+    ALTER TABLE "jrc_backoffice_document_scans" ADD CONSTRAINT "bo_document_scan_clean" CHECK ((((state)::text <> 'clean'::text) OR ((observed_sha256 IS NOT NULL) AND ((observed_sha256)::text = (expected_sha256)::text))));
+  JRC_SCHEMA_SQL_6a75a5d5cc94
+
+  execute <<~'JRC_SCHEMA_SQL_64b110cfa8f2'
+    ALTER TABLE "jrc_backoffice_document_scans" DROP CONSTRAINT "bo_document_scan_state";
+  JRC_SCHEMA_SQL_64b110cfa8f2
+
+  execute <<~'JRC_SCHEMA_SQL_e11cfebe60db'
+    ALTER TABLE "jrc_backoffice_document_scans" ADD CONSTRAINT "bo_document_scan_state" CHECK (((attempt > 0) AND ((state)::text = ANY ((ARRAY['clean'::character varying, 'infected'::character varying, 'unavailable'::character varying, 'checksum_mismatch'::character varying])::text[]))));
+  JRC_SCHEMA_SQL_e11cfebe60db
+
+  execute <<~'JRC_SCHEMA_SQL_b230812f3afd'
+    CREATE OR REPLACE FUNCTION public.jrc_bo_document_scan_pin()
+     RETURNS trigger
+     LANGUAGE plpgsql
+    AS $function$
+    BEGIN
+      IF TG_TABLE_NAME = 'jrc_backoffice_document_versions' AND TG_OP = 'UPDATE'
+        AND (to_jsonb(NEW) - 'updated_at') = (to_jsonb(OLD) - 'updated_at') THEN
+        RETURN NEW;
+      END IF;
+      RAISE EXCEPTION 'Document security observations are immutable';
+    END;
+    $function$
+  JRC_SCHEMA_SQL_b230812f3afd
+
+  execute <<~'JRC_SCHEMA_SQL_6cfd3ff9ee5c'
+    CREATE OR REPLACE FUNCTION public.jrc_bo_private_attachment()
+     RETURNS trigger
+     LANGUAGE plpgsql
+    AS $function$
+    BEGIN
+      IF TG_OP <> 'INSERT' AND OLD.record_type = 'JrcBackoffice::DocumentVersion' THEN
+        RAISE EXCEPTION 'Document version files are immutable';
+      END IF;
+      IF TG_OP = 'DELETE' THEN
+        RETURN OLD;
+      END IF;
+      IF EXISTS (SELECT 1 FROM jrc_backoffice_contract_versions WHERE pdf_blob_id = NEW.blob_id)
+        OR EXISTS (SELECT 1 FROM jrc_backoffice_document_scans WHERE source_blob_id = NEW.blob_id)
+        OR EXISTS (SELECT 1 FROM active_storage_attachments
+          WHERE blob_id = NEW.blob_id AND record_type = 'JrcBackoffice::DocumentVersion') THEN
+        RAISE EXCEPTION 'Private Backoffice files cannot be relinked';
+      END IF;
+      IF NEW.record_type = 'JrcBackoffice::DocumentVersion' THEN
+        PERFORM 1 FROM jrc_backoffice_document_versions WHERE id = NEW.record_id FOR NO KEY UPDATE;
+        IF NOT FOUND THEN
+          RAISE EXCEPTION 'Document version required';
+        END IF;
+        IF NEW.name <> 'file' OR EXISTS (SELECT 1 FROM active_storage_attachments
+          WHERE record_type = NEW.record_type AND record_id = NEW.record_id) THEN
+          RAISE EXCEPTION 'Document versions have one immutable file';
+        END IF;
+      END IF;
+      RETURN NEW;
+    END;
+    $function$
+  JRC_SCHEMA_SQL_6cfd3ff9ee5c
+
+  execute <<~'JRC_SCHEMA_SQL_b843a3e990c8'
+    CREATE TRIGGER jrc_bo_private_attachment BEFORE INSERT OR DELETE OR UPDATE ON active_storage_attachments FOR EACH ROW EXECUTE FUNCTION jrc_bo_private_attachment();
+  JRC_SCHEMA_SQL_b843a3e990c8
+
+  execute <<~'JRC_SCHEMA_SQL_33adea1f3970'
+    CREATE TRIGGER jrc_bo_document_scan_pin BEFORE DELETE OR UPDATE ON jrc_backoffice_document_scans FOR EACH ROW EXECUTE FUNCTION jrc_bo_document_scan_pin();
+  JRC_SCHEMA_SQL_33adea1f3970
+
+  execute <<~'JRC_SCHEMA_SQL_1d29d7a0dc08'
+    CREATE TRIGGER jrc_bo_document_version_pin BEFORE DELETE OR UPDATE ON jrc_backoffice_document_versions FOR EACH ROW EXECUTE FUNCTION jrc_bo_document_scan_pin();
+  JRC_SCHEMA_SQL_1d29d7a0dc08
+
 end
