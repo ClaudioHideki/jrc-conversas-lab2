@@ -362,6 +362,9 @@ Rails.application.routes.draw do
             get 'inboxes/:inbox_id/pair-operations/:operation_id', action: :pair_operation
             post 'inboxes/:inbox_id/disconnect', action: :disconnect
             post 'inboxes/:inbox_id/confirm_identity', action: :confirm_identity
+            get 'inboxes/:inbox_id/distribution', action: :connection_distribution
+            put 'inboxes/:inbox_id/distribution', action: :update_connection_distribution
+            get 'inboxes/:inbox_id/distribution-history', action: :connection_distribution_history
             get 'inboxes/:inbox_id/grants', action: :grants
             put 'inboxes/:inbox_id/grants', action: :update_grants
             put 'inboxes/:inbox_id/agents', action: :assign_agents
@@ -863,6 +866,7 @@ Rails.application.routes.draw do
               post :abandon
               get :error_logs
               get :skip_logs
+              get :reconciliation
             end
           end
           resources :csat_survey_responses, only: [:index] do

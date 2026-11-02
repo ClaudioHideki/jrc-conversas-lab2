@@ -144,3 +144,8 @@ jrc_flow_native_installation_renew_job:
   cron: '* * * * *'
   class: 'JrcFlows::NativeInstallationRenewJob'
   queue: scheduled_jobs
+
+jrc_broker_webhook_recovery_job:
+  cron: '* * * * *'
+  class: 'JrcBroker::WebhookRecoveryJob'
+  queue: scheduled_jobs

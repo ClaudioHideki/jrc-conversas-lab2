@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_11_01_200000) do
+ActiveRecord::Schema[7.1].define(version: 2026_11_02_110000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -1409,6 +1409,31 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_01_200000) do
     t.index ["account_id"], name: "index_jrc_broker_integrations_on_account_id", unique: true
     t.index ["broker_origin", "organization_id"], name: "jrc_broker_remote_org_unique", unique: true
     t.check_constraint "destination_revision > 0", name: "jrc_broker_revision_positive"
+  end
+
+  create_table "jrc_broker_webhook_obligations", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "message_id", null: false
+    t.bigint "inbox_id", null: false
+    t.bigint "binding_id", null: false
+    t.string "integration_id", null: false
+    t.string "instance_id", null: false
+    t.text "url", null: false
+    t.jsonb "payload", null: false
+    t.uuid "delivery_id", default: -> { "gen_random_uuid()" }, null: false
+    t.string "state", default: "pending", null: false
+    t.integer "attempts", default: 0, null: false
+    t.datetime "available_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.uuid "lease_token"
+    t.datetime "lease_until"
+    t.string "last_error_code"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_broker_webhook_obligations_on_account_id"
+    t.index ["delivery_id"], name: "index_jrc_broker_webhook_obligations_on_delivery_id", unique: true
+    t.index ["message_id"], name: "index_jrc_broker_webhook_obligations_on_message_id", unique: true
+    t.index ["state", "available_at"], name: "idx_jrc_broker_obligations_due"
+    t.check_constraint "(state::text = ANY (ARRAY['pending'::character varying, 'running'::character varying, 'delivered'::character varying, 'rejected'::character varying, 'failed'::character varying]::text[])) AND attempts >= 0", name: "jrc_broker_obligation_state"
   end
 
   create_table "jrc_campaign_blacklists", force: :cascade do |t|
@@ -3323,6 +3348,21 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_01_200000) do
     t.index ["account_id"], name: "index_jrc_flows_on_account_id"
     t.index ["connection_id"], name: "index_jrc_flows_on_connection_id"
     t.index ["created_by_id"], name: "index_jrc_flows_on_created_by_id"
+  end
+
+  create_table "jrc_human_assignment_policy_events", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "inbox_id"
+    t.bigint "user_id"
+    t.jsonb "previous_policy", default: {}, null: false
+    t.jsonb "next_policy", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "inbox_id", "id"], name: "idx_human_policy_history"
+    t.index ["account_id"], name: "index_jrc_human_assignment_policy_events_on_account_id"
+    t.index ["inbox_id"], name: "index_jrc_human_assignment_policy_events_on_inbox_id"
+    t.index ["user_id"], name: "index_jrc_human_assignment_policy_events_on_user_id"
+    t.check_constraint "inbox_id IS NOT NULL OR NOT (next_policy ->> 'scope'::text) IS DISTINCT FROM 'GLOBAL_ACCOUNT'::text", name: "jrc_human_policy_global_account_scope"
   end
 
   create_table "jrc_nico_broker_send_operations", force: :cascade do |t|
@@ -6198,6 +6238,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_01_200000) do
   add_foreign_key "jrc_broker_inbox_grants", "inbox_members", column: ["inbox_id", "user_id"], primary_key: ["inbox_id", "user_id"], on_delete: :cascade
   add_foreign_key "jrc_broker_inbox_grants", "jrc_broker_inbox_bindings", column: ["account_id", "inbox_id"], primary_key: ["account_id", "inbox_id"], on_delete: :cascade
   add_foreign_key "jrc_broker_integrations", "accounts", on_delete: :cascade
+  add_foreign_key "jrc_broker_webhook_obligations", "accounts", on_delete: :cascade
+  add_foreign_key "jrc_broker_webhook_obligations", "messages", on_delete: :cascade
   add_foreign_key "jrc_campaign_blacklists", "accounts"
   add_foreign_key "jrc_campaign_blacklists", "users", column: "created_by_id"
   add_foreign_key "jrc_campaign_consents", "accounts"
@@ -6458,6 +6500,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_01_200000) do
   add_foreign_key "jrc_flows", "accounts"
   add_foreign_key "jrc_flows", "jrc_flow_connections", column: "connection_id"
   add_foreign_key "jrc_flows", "users", column: "created_by_id", on_delete: :nullify
+  add_foreign_key "jrc_human_assignment_policy_events", "accounts", on_delete: :cascade
+  add_foreign_key "jrc_human_assignment_policy_events", "inboxes", on_delete: :cascade
+  add_foreign_key "jrc_human_assignment_policy_events", "users", on_delete: :nullify
   add_foreign_key "jrc_nico_broker_send_operations", "accounts", on_delete: :cascade
   add_foreign_key "jrc_nico_broker_send_operations", "conversations", on_delete: :cascade
   add_foreign_key "jrc_nico_broker_send_operations", "inboxes", on_delete: :cascade
@@ -7022,6 +7067,14 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_01_200000) do
     ALTER TABLE "jrc_approvals_requests" ADD CONSTRAINT "jrc_ap_requests_scope" CHECK (((business_unit_id IS NULL) OR (issuer_company_id IS NOT NULL)));
   JRC_SCHEMA_SQL_a15b3c0529f6
 
+  execute <<~'JRC_SCHEMA_SQL_89266eca31eb'
+    ALTER TABLE "jrc_backoffice_document_versions" DROP CONSTRAINT "backoffice_document_positive_version";
+  JRC_SCHEMA_SQL_89266eca31eb
+
+  execute <<~'JRC_SCHEMA_SQL_4e8f64428c52'
+    ALTER TABLE "jrc_backoffice_document_versions" ADD CONSTRAINT "backoffice_document_positive_version" CHECK ((version > 0));
+  JRC_SCHEMA_SQL_4e8f64428c52
+
   execute <<~'JRC_SCHEMA_SQL_1bd69d0a93ee'
     ALTER TABLE "jrc_broker_integrations" DROP CONSTRAINT "jrc_broker_revision_positive";
   JRC_SCHEMA_SQL_1bd69d0a93ee
@@ -7029,6 +7082,14 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_01_200000) do
   execute <<~'JRC_SCHEMA_SQL_a730acfcff45'
     ALTER TABLE "jrc_broker_integrations" ADD CONSTRAINT "jrc_broker_revision_positive" CHECK ((destination_revision > 0));
   JRC_SCHEMA_SQL_a730acfcff45
+
+  execute <<~'JRC_SCHEMA_SQL_40346926996a'
+    ALTER TABLE "jrc_broker_webhook_obligations" DROP CONSTRAINT "jrc_broker_obligation_state";
+  JRC_SCHEMA_SQL_40346926996a
+
+  execute <<~'JRC_SCHEMA_SQL_0674727866c4'
+    ALTER TABLE "jrc_broker_webhook_obligations" ADD CONSTRAINT "jrc_broker_obligation_state" CHECK ((((state)::text = ANY ((ARRAY['pending'::character varying, 'running'::character varying, 'delivered'::character varying, 'rejected'::character varying, 'failed'::character varying])::text[])) AND (attempts >= 0)));
+  JRC_SCHEMA_SQL_0674727866c4
 
   execute <<~'JRC_SCHEMA_SQL_7d8e7fc7adb6'
     ALTER TABLE "jrc_contact_center_agent_state_events" DROP CONSTRAINT "jrc_cc_agent_state";
@@ -7261,6 +7322,14 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_01_200000) do
   execute <<~'JRC_SCHEMA_SQL_d049c80f7eab'
     ALTER TABLE "jrc_contact_center_units" ADD CONSTRAINT "jrc_cc_units_status" CHECK (((status)::text = ANY ((ARRAY['active'::character varying, 'inactive'::character varying])::text[])));
   JRC_SCHEMA_SQL_d049c80f7eab
+
+  execute <<~'JRC_SCHEMA_SQL_e17fa63b3555'
+    ALTER TABLE "jrc_crm_backoffice_requests" DROP CONSTRAINT "backoffice_workflow_version";
+  JRC_SCHEMA_SQL_e17fa63b3555
+
+  execute <<~'JRC_SCHEMA_SQL_84e0ddebc6ba'
+    ALTER TABLE "jrc_crm_backoffice_requests" ADD CONSTRAINT "backoffice_workflow_version" CHECK ((workflow_version = ANY (ARRAY[1, 2])));
+  JRC_SCHEMA_SQL_84e0ddebc6ba
 
   execute <<~'JRC_SCHEMA_SQL_9f52f87a5903'
     ALTER TABLE "jrc_crm_team_scopes" DROP CONSTRAINT "jrc_crm_team_scope_shape";
@@ -9023,4 +9092,48 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_01_200000) do
     CREATE TRIGGER jrc_effect_message_control BEFORE INSERT ON messages FOR EACH ROW EXECUTE FUNCTION jrc_effect_message_control();
   JRC_SCHEMA_SQL_213d81448354
 
+
+  execute <<~'JRC_SCHEMA_SQL_ed2150e2fbd9'
+    ALTER TABLE "jrc_human_assignment_policy_events" DROP CONSTRAINT "jrc_human_policy_global_account_scope";
+  JRC_SCHEMA_SQL_ed2150e2fbd9
+
+  execute <<~'JRC_SCHEMA_SQL_b4f35ba8b80f'
+    ALTER TABLE "jrc_human_assignment_policy_events" ADD CONSTRAINT "jrc_human_policy_global_account_scope" CHECK (((inbox_id IS NOT NULL) OR (NOT ((next_policy ->> 'scope'::text) IS DISTINCT FROM 'GLOBAL_ACCOUNT'::text))));
+  JRC_SCHEMA_SQL_b4f35ba8b80f
+
+  execute <<~'JRC_SCHEMA_SQL_ae900f5e1338'
+    CREATE OR REPLACE FUNCTION public.jrc_human_policy_immutable_guard()
+     RETURNS trigger
+     LANGUAGE plpgsql
+     SET search_path TO 'pg_catalog', 'public'
+    AS $function$
+    BEGIN
+      -- Preserve only the parent-removal actions already defined by the original FKs.
+      IF TG_OP = 'DELETE' THEN
+        IF pg_trigger_depth() > 1 AND (
+          NOT EXISTS (SELECT 1 FROM public.accounts WHERE id = OLD.account_id) OR
+          (OLD.inbox_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM public.inboxes WHERE id = OLD.inbox_id))
+        ) THEN
+          RETURN OLD;
+        END IF;
+      ELSIF TG_OP = 'UPDATE' THEN
+        IF pg_trigger_depth() > 1 AND OLD.user_id IS NOT NULL AND NEW.user_id IS NULL AND
+          (to_jsonb(NEW) - 'user_id') IS NOT DISTINCT FROM (to_jsonb(OLD) - 'user_id') AND
+          NOT EXISTS (SELECT 1 FROM public.users WHERE id = OLD.user_id)
+        THEN
+          RETURN NEW;
+        END IF;
+      END IF;
+      RAISE EXCEPTION 'Human assignment policy history is append-only' USING ERRCODE = '23514';
+    END;
+    $function$
+  JRC_SCHEMA_SQL_ae900f5e1338
+
+  execute <<~'JRC_SCHEMA_SQL_e738d6ee27ad'
+    CREATE TRIGGER jrc_human_policy_immutable_rows BEFORE DELETE OR UPDATE ON jrc_human_assignment_policy_events FOR EACH ROW EXECUTE FUNCTION jrc_human_policy_immutable_guard();
+  JRC_SCHEMA_SQL_e738d6ee27ad
+
+  execute <<~'JRC_SCHEMA_SQL_0df134023ee3'
+    CREATE TRIGGER jrc_human_policy_immutable_truncate BEFORE TRUNCATE ON jrc_human_assignment_policy_events FOR EACH STATEMENT EXECUTE FUNCTION jrc_human_policy_immutable_guard();
+  JRC_SCHEMA_SQL_0df134023ee3
 end

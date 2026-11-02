@@ -37,6 +37,90 @@ afterEach(() => {
 });
 
 describe('native pairing lifecycle', () => {
+  it('publishes real health and confirms an explicit reconnection once without treating delivery as verified', async () => {
+    wrapper = mount(ConnectionPanel, { props: { accountId: 1, inboxId: 2 } });
+    await flushPromises();
+    expect(wrapper.emitted('health')).toEqual([
+      [{ accountId: 1, inboxId: 2, health }],
+    ]);
+    expect(wrapper.emitted('reconnected')).toBeUndefined();
+    await wrapper.get('[data-testid="pair"]').trigger('click');
+    await flushPromises();
+    api.status.mockResolvedValue({
+      ...health,
+      instanceStatus: 'CONNECTED',
+      identityStatus: 'CONFIRMATION_REQUIRED',
+      identityApproved: true,
+    });
+    await vi.advanceTimersByTimeAsync(3000);
+    expect(wrapper.emitted('reconnected')).toBeUndefined();
+    expect(wrapper.get('[data-testid="connection-health"]').text()).toContain(
+      'Administrator approval required'
+    );
+    const connected = {
+      ...health,
+      instanceStatus: 'CONNECTED',
+      identityStatus: 'CONFIRMED',
+      identityApproved: true,
+      allowedActions: ['status'],
+    };
+    api.status.mockResolvedValue(connected);
+    await vi.advanceTimersByTimeAsync(3000);
+    expect(wrapper.emitted('reconnected')).toEqual([
+      [{ accountId: 1, inboxId: 2, health: connected }],
+    ]);
+    expect(wrapper.emitted('health').at(-1)[0].health.transportStatus).toBe(
+      'UNVERIFIED'
+    );
+    await vi.advanceTimersByTimeAsync(3000);
+    expect(wrapper.emitted('reconnected')).toHaveLength(1);
+    expect(api.pair).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not announce reconnection on an already connected initial read or an inactive binding', async () => {
+    api.status.mockResolvedValue({
+      ...health,
+      instanceStatus: 'CONNECTED',
+      identityApproved: true,
+    });
+    wrapper = mount(ConnectionPanel, { props: { accountId: 1, inboxId: 2 } });
+    await flushPromises();
+    expect(wrapper.emitted('reconnected')).toBeUndefined();
+    api.status.mockResolvedValue({ ...health });
+    await wrapper.setProps({ inboxId: 3 });
+    await flushPromises();
+    await wrapper.get('[data-testid="pair"]').trigger('click');
+    api.status.mockResolvedValue({
+      ...health,
+      instanceStatus: 'CONNECTED',
+      identityApproved: true,
+      integrationStatus: 'DISABLED',
+    });
+    await flushPromises();
+    await vi.advanceTimersByTimeAsync(3000);
+    expect(wrapper.emitted('reconnected')).toBeUndefined();
+  });
+
+  it('keeps the existing poll alive when presentation changes and separates status from actions', async () => {
+    wrapper = mount(ConnectionPanel, {
+      props: { accountId: 1, inboxId: 2, presentation: 'overview' },
+    });
+    await flushPromises();
+    expect(wrapper.find('[data-testid="pair"]').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="connection-health"]').exists()).toBe(
+      true
+    );
+    const calls = api.status.mock.calls.length;
+    await wrapper.setProps({ presentation: 'configuration' });
+    expect(wrapper.find('[data-testid="pair"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="connection-health"]').exists()).toBe(
+      false
+    );
+    expect(api.status).toHaveBeenCalledTimes(calls);
+    await vi.advanceTimersByTimeAsync(3000);
+    expect(api.status).toHaveBeenCalledTimes(calls + 1);
+  });
+
   it('does not submit another pairing request after a response timeout without an operation ID', async () => {
     api.pair.mockRejectedValueOnce(new Error('timeout'));
     wrapper = mount(ConnectionPanel, { props: { accountId: 1, inboxId: 2 } });

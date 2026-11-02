@@ -416,6 +416,44 @@
     "CONVERSATION_WORKFLOW": "Conversation Workflow"
   },
   "DATA_IMPORTS": {
+    "RECONCILIATION": {
+      "TITLE": "Import reconciliation checks",
+      "DESCRIPTION": "Read-only checks of this account's stored import records. This query does not contact the source, import data or retry a delivery.",
+      "QUERY": "Check stored import records",
+      "LOADING": "Checking stored records…",
+      "FAILED": "Could not check this import. Try again.",
+      "ACCESS_DENIED": "You no longer have permission to check this import.",
+      "NOT_APPROVAL": "Recorded totals may be incomplete or outdated. These local checks do not approve migration, verify the current source or enable NICO.",
+      "GENERATED": "Query completed:",
+      "UTC": "UTC",
+      "SOURCE_TOTAL": "Recorded source total",
+      "UNKNOWN": "Unknown",
+      "VALID_LINKS": "Source records linked to this account",
+      "DIFFERENCE": "Source total minus valid links",
+      "MISSING": "Missing destination records",
+      "WRONG_ACCOUNT": "Destination records in another account",
+      "UNSUPPORTED": "Unsupported destination types",
+      "UNMAPPED": "Processed items without a source mapping",
+      "SKIPPED_MESSAGES": "Skipped message mappings",
+      "MEDIA_NOT_COVERED": "Attachment transfer, accessibility and file hashes are not verified by this importer.",
+      "MEDIA_REFERENCES": "Messages with stored file references:",
+      "LOGS": "Log entries — errors / failed / skipped:",
+      "INTEGRITY": "Import integrity checks",
+      "INTEGRITY_CHECKS": {
+        "foreign_account_mappings": "Mappings owned by another account",
+        "unexpected_provider_mappings": "Mappings with an unexpected source provider",
+        "unsupported_source_types": "Unsupported source record types",
+        "unselected_mapping_types": "Mappings outside the selected import scope",
+        "unselected_item_types": "Import items outside the selected import scope",
+        "unexpected_item_sources": "Items with an unexpected source provider",
+        "unsupported_item_types": "Unsupported import item types"
+      },
+      "STATUS": {
+        "incomplete": "Checks incomplete — review required",
+        "differences_found": "Differences found — review required",
+        "local_checks_passed": "Local checks passed — approval remains pending"
+      }
+    },
     "HEADER": "Data",
     "DESCRIPTION": "Bring your existing contacts and past conversations into this account from another support tool. Each import runs in the background, so you can keep working while it finishes, track its progress, and review anything that was skipped along the way.",
     "LOADING": "Fetching imports",

@@ -10,6 +10,14 @@ RSpec.describe 'Flow native host installed HTTP boundary', type: :request do
   let(:broker) { 'https://broker.example.test/v1/flow-delegations' }
   let(:callback) { SecureRandom.urlsafe_base64(32) }
   let(:token) { 't' * 43 }
+  let(:native_redis_context) do
+    redis_url = ENV.fetch('FLOW_TEST_REDIS_URL')
+    namespace = "jrc-flow-http-spec:#{Process.pid}:#{SecureRandom.uuid}"
+    pool = ConnectionPool.new(size: 2, timeout: 1) do
+      Redis::Namespace.new(namespace, redis: Redis.new(url: redis_url), deprecations: true)
+    end
+    { pool: pool, original: $alfred }
+  end
   let(:native_request) do
     { nonce: SecureRandom.uuid, externalActorId: admin.id.to_s, accountId: account.id, destinationRevision: 2, inboxIds: [inbox.id] }
   end
@@ -29,14 +37,25 @@ RSpec.describe 'Flow native host installed HTTP boundary', type: :request do
     account.enable_features!('jrc_flows')
     create(:inbox_member, inbox: inbox, user: admin)
     # The actual host adapter is exercised against the isolated Redis process.
-    @original_alfred = $alfred
-    $alfred = ConnectionPool.new(size: 2, timeout: 1) { Redis.new(url: ENV.fetch('FLOW_TEST_REDIS_URL')) }
-    $alfred.with(&:flushdb)
+    $alfred = native_redis_context.fetch(:pool)
   end
 
   after do
-    $alfred.shutdown(&:close)
-    $alfred = @original_alfred
+    native_redis_context.fetch(:pool).shutdown(&:close)
+    $alfred = native_redis_context.fetch(:original)
+  end
+
+  it 'isolates real Redis writes from a different example without resetting any database' do
+    raw = Redis.new(url: ENV.fetch('FLOW_TEST_REDIS_URL'))
+    key = "jrc-flow-isolation:#{SecureRandom.uuid}"
+    raw.set(key, 'outside-example', ex: 60)
+    Redis::Alfred.with { |connection| connection.set(key, 'inside-example', ex: 60) }
+    expect(raw.get(key)).to eq('outside-example')
+    expect(Redis::Alfred.with { |connection| connection.get(key) }).to eq('inside-example')
+  ensure
+    Redis::Alfred.with { |connection| connection.del(key) } if key
+    raw&.del(key) if key
+    raw&.close
   end
 
   def active_registration(callback_token: callback)
@@ -133,10 +152,10 @@ RSpec.describe 'Flow native host installed HTTP boundary', type: :request do
   it 'enforces tenant Inbox FKs and Account uniqueness on persisted Flow records' do
     record = active_registration
     # Build unrelated enterprise fixtures with the suite's standard cache;
-    # the isolated Redis5 pool remains the real HTTP/rate-limit target.
+    # the per-example Redis namespace remains the real HTTP/rate-limit target.
     isolated_alfred = $alfred
     begin
-      $alfred = @original_alfred
+      $alfred = native_redis_context.fetch(:original)
       foreign_inbox = create(:channel_api).inbox
     ensure
       $alfred = isolated_alfred

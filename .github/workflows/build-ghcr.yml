@@ -55,6 +55,10 @@ jobs:
       - name: Validar SHA antes do checkout
         run: '[[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]'
 
+      - name: Exigir gate nativo na candidata consolidada
+        if: github.ref_name == 'codex/release-integrada-specs-20261102' && inputs.component == 'app'
+        run: test "$BACKOFFICE_CANDIDATE" = true
+
       - name: Baixar a revisao exata
         uses: actions/checkout@v4
         with:
@@ -270,7 +274,10 @@ jobs:
           VALIDATION_RUN_ID: ${{ inputs.validation_run_id }}
           PUBLISH: ${{ inputs.publish }}
         run: |
-          test "$GITHUB_REF" = refs/heads/codex/crm-backoffice-servicedesk-visual-20261101
+          case "$GITHUB_REF_NAME" in
+            codex/crm-backoffice-servicedesk-visual-20261101|codex/release-integrada-specs-20261102) ;;
+            *) echo 'Branch candidata nao autorizada para este gate' >&2; exit 1 ;;
+          esac
           test "$COMPONENT" = app
           test "$GITHUB_SHA" = "$SOURCE_SHA"
           if [ "$PUBLISH" = true ]; then
@@ -284,7 +291,7 @@ jobs:
           with urllib.request.urlopen(request, timeout=30) as response:
               run = json.load(response)
           assert run['head_sha'] == os.environ['SOURCE_SHA'], 'Validation source SHA mismatch'
-          assert run['head_branch'] == 'codex/crm-backoffice-servicedesk-visual-20261101', 'Validation branch mismatch'
+          assert run['head_branch'] == os.environ['GITHUB_REF_NAME'], 'Validation branch mismatch'
           assert run['path'] == '.github/workflows/backoffice-flow.yml', 'Unexpected validation workflow'
           assert run['conclusion'] == 'success', 'Native validation has not passed'
           print('Native validation confirmed for the exact candidate SHA:', run['html_url'])

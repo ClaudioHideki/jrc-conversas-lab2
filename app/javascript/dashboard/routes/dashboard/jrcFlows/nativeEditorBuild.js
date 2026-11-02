@@ -1,2 +1,2 @@
 // Generated together with public/jrc-flow-editor from the committed Broker source.
-export const nativeEditorBuild = '42848bf68f9c07fdc6e102de37ccb4a845e463db';
+export const nativeEditorBuild = 'ea7dc741d0c63792a969dddeac2bd35b6cbdf514';

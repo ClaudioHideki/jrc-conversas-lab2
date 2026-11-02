@@ -126,6 +126,7 @@ class WebhookListener < BaseListener
     # Replaying their message_created event would send the message a second time.
     return if payload.dig(:additional_attributes, 'jrc_campaign_evolution') == true
     return if inbox.channel.webhook_url.blank?
+    return if payload[:event] == 'message_created' && JrcBrokerWebhookObligation.exists?(message_id: payload[:id], account_id: inbox.account_id)
 
     callback_id = if payload[:event] == 'message_created' && payload.dig(:additional_attributes, 'jrc_campaign_broker') == true
                     payload.dig(:additional_attributes, 'jrc_campaign_webhook_delivery_id')

@@ -13,7 +13,13 @@ import {
 const props = defineProps({
   accountId: { type: Number, required: true },
   inboxId: { type: Number, required: true },
+  presentation: {
+    type: String,
+    default: 'all',
+    validator: value => ['all', 'overview', 'configuration'].includes(value),
+  },
 });
+const emit = defineEmits(['health', 'healthError', 'reconnected']);
 const { t } = useI18n();
 const store = useStore();
 const health = ref(null);
@@ -29,6 +35,16 @@ const actions = computed(() =>
   visibleConnectionActions(health.value?.allowedActions)
 );
 const image = computed(() => pairingImage(action.value));
+const identityState = computed(() => {
+  if (
+    health.value?.identityApproved === true &&
+    health.value?.identityStatus === 'CONFIRMED'
+  )
+    return 'APPROVED';
+  return health.value?.identityStatus === 'CONFIRMATION_REQUIRED'
+    ? 'CONFIRMATION_REQUIRED'
+    : 'UNVERIFIED';
+});
 const progressMessage = computed(() => {
   if (pairingProgress.value === 'PENDING')
     return t('JRC_BROKER.PAIR_PROGRESS.PENDING');
@@ -53,6 +69,7 @@ let confirmationRevision;
 let pendingPair;
 let lastPairOperationId;
 let verifyRequested = false;
+let awaitingReconnection = false;
 
 const clearCode = () => {
   pendingPair = null;
@@ -104,6 +121,7 @@ const stop = () => {
   busy.value = false;
   confirm.value = '';
   approved.value = false;
+  awaitingReconnection = false;
 };
 const fail = failure => {
   const denied = [401, 403, 404].includes(failure?.response?.status);
@@ -116,6 +134,7 @@ const fail = failure => {
   if (denied) error.value = 'DENIED';
   else if (failure?.response?.status === 409) error.value = 'CONFLICT';
   else error.value = 'UNAVAILABLE';
+  emit('healthError', { accountId: props.accountId, inboxId: props.inboxId });
 };
 const poll = async () => {
   clearTimeout(timer);
@@ -137,6 +156,22 @@ const poll = async () => {
       approved.value = false;
     }
     health.value = result;
+    const update = {
+      accountId: props.accountId,
+      inboxId: props.inboxId,
+      health: result,
+    };
+    emit('health', update);
+    if (
+      awaitingReconnection &&
+      result.instanceStatus === 'CONNECTED' &&
+      result.integrationStatus === 'READY' &&
+      result.identityApproved === true &&
+      result.identityStatus === 'CONFIRMED'
+    ) {
+      awaitingReconnection = false;
+      emit('reconnected', update);
+    }
     failures = 0;
     error.value = '';
     if (
@@ -227,6 +262,8 @@ const mutate = async kind => {
     return;
   const current = generation;
   const checkedOperationId = lastPairOperationId;
+  if (kind === 'pair' && health.value?.instanceStatus !== 'CONNECTED')
+    awaitingReconnection = true;
   busy.value = true;
   error.value = '';
   expired.value = false;
@@ -296,120 +333,130 @@ onBeforeUnmount(() => {
 <template>
   <section
     class="flex flex-col gap-4 p-5 border border-n-weak rounded-xl bg-n-solid-1"
-    :aria-label="t('JRC_BROKER.TITLE')"
+    :aria-label="t('JRC_BROKER.DETAILS.PANEL_TITLE')"
   >
     <h3 class="text-lg font-semibold text-n-slate-12">
-      {{ t('JRC_BROKER.TITLE') }}
+      {{ t('JRC_BROKER.DETAILS.PANEL_TITLE') }}
     </h3>
     <p v-if="error" role="alert">{{ t(`JRC_BROKER.ERROR.${error}`) }}</p>
-    <dl v-if="health" class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+    <dl
+      v-if="health && presentation !== 'configuration'"
+      data-testid="connection-health"
+      class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm"
+    >
       <div>
-        <dt>{{ t('JRC_BROKER.CONFIGURATION') }}</dt>
-        <dd>{{ t(`JRC_BROKER.STATUS.${health.integrationStatus}`) }}</dd>
-      </div>
-      <div>
-        <dt>{{ t('JRC_BROKER.NUMBER') }}</dt>
+        <dt>{{ t('JRC_BROKER.DETAILS.SESSION') }}</dt>
         <dd>{{ t(`JRC_BROKER.STATUS.${health.instanceStatus}`) }}</dd>
       </div>
       <div>
-        <dt>{{ t('JRC_BROKER.TRANSPORT') }}</dt>
+        <dt>{{ t('JRC_BROKER.DETAILS.IDENTITY') }}</dt>
+        <dd>{{ t(`JRC_BROKER.DETAILS.IDENTITY_STATES.${identityState}`) }}</dd>
+      </div>
+      <div>
+        <dt>{{ t('JRC_BROKER.DETAILS.LINK') }}</dt>
+        <dd>{{ t(`JRC_BROKER.STATUS.${health.integrationStatus}`) }}</dd>
+      </div>
+      <div>
+        <dt>{{ t('JRC_BROKER.DETAILS.DELIVERY') }}</dt>
         <dd>{{ t(`JRC_BROKER.STATUS.${health.transportStatus}`) }}</dd>
       </div>
     </dl>
-    <p
-      v-if="health?.transportStatus !== 'OPERATIONAL'"
-      class="text-sm text-n-slate-11"
-    >
-      {{ t('JRC_BROKER.UNVERIFIED_HELP') }}
+    <p v-if="presentation !== 'configuration'" class="text-sm text-n-slate-11">
+      {{ t('JRC_BROKER.DETAILS.HEALTH_HELP') }}
     </p>
-    <img
-      v-if="image"
-      :src="image"
-      :alt="t('JRC_BROKER.QR_ALT')"
-      class="w-64 h-64 max-w-full self-center bg-white p-2"
-    />
-    <output
-      v-else-if="action?.type === 'PAIRING_CODE'"
-      class="text-2xl font-mono text-center"
-    >
-      <span>{{ action.code }}</span>
-    </output>
-    <p v-if="expired" role="status">{{ t('JRC_BROKER.EXPIRED') }}</p>
-    <p v-if="progressMessage" role="status">{{ progressMessage }}</p>
-    <div class="flex flex-wrap gap-3">
-      <Button
-        v-if="actions.includes('pair')"
-        data-testid="pair"
-        :disabled="
-          busy ||
-          pairingProgress === 'PENDING' ||
-          (pairingProgress === 'UNKNOWN' && !checkedUnknown)
-        "
-        :label="t('JRC_BROKER.PAIR')"
-        @click="mutate('pair')"
-      />
-      <Button
-        v-if="
-          pairingProgress === 'UNKNOWN' &&
-          lastPairOperationId &&
-          actions.includes('pair')
-        "
-        data-testid="verify-pair-operation"
-        :disabled="busy"
-        variant="outline"
-        :label="t('JRC_BROKER.PAIR_PROGRESS.VERIFY')"
-        @click="verifyPairOperation"
-      />
-      <Button
-        v-if="actions.includes('disconnect')"
-        :disabled="busy"
-        variant="outline"
-        :label="t('JRC_BROKER.DISCONNECT')"
-        @click="openConfirmation('disconnect')"
-      />
-      <Button
-        v-if="
-          actions.includes('manage') &&
-          health?.identityStatus === 'CONFIRMATION_REQUIRED'
-        "
-        :disabled="busy"
-        variant="outline"
-        :label="t('JRC_BROKER.CONFIRM_IDENTITY')"
-        @click="openConfirmation('confirmIdentity')"
-      />
-    </div>
-    <div
-      v-if="confirm"
-      class="p-4 border border-n-weak rounded-lg flex flex-col gap-3"
-    >
-      <p>
-        {{
-          confirm === 'disconnect'
-            ? t('JRC_BROKER.DISCONNECT_WARNING')
-            : t('JRC_BROKER.IDENTITY_WARNING', {
-                suffix: health?.observedNumberSuffix || '—',
-              })
-        }}
+    <template v-if="presentation !== 'overview'">
+      <p class="text-sm text-n-slate-11">
+        {{ t('JRC_BROKER.DETAILS.CONFIGURATION_HELP') }}
       </p>
-      <label class="flex gap-2 items-center">
-        <input v-model="approved" type="checkbox" />
-        <span>{{ t('JRC_BROKER.UNDERSTAND') }}</span>
-      </label>
-      <div class="flex gap-3">
+      <img
+        v-if="image"
+        :src="image"
+        :alt="t('JRC_BROKER.QR_ALT')"
+        class="w-64 h-64 max-w-full self-center bg-white p-2"
+      />
+      <output
+        v-else-if="action?.type === 'PAIRING_CODE'"
+        class="text-2xl font-mono text-center"
+      >
+        <span>{{ action.code }}</span>
+      </output>
+      <p v-if="expired" role="status">{{ t('JRC_BROKER.EXPIRED') }}</p>
+      <p v-if="progressMessage" role="status">{{ progressMessage }}</p>
+      <div class="flex flex-wrap gap-3">
         <Button
-          :disabled="busy || !approved"
-          :label="t('JRC_BROKER.CONFIRM')"
-          @click="mutate(confirm)"
+          v-if="actions.includes('pair')"
+          data-testid="pair"
+          :disabled="
+            busy ||
+            pairingProgress === 'PENDING' ||
+            (pairingProgress === 'UNKNOWN' && !checkedUnknown)
+          "
+          :label="t('JRC_BROKER.PAIR')"
+          @click="mutate('pair')"
         />
         <Button
-          variant="outline"
-          :label="t('JRC_BROKER.CANCEL')"
-          @click="
-            confirm = '';
-            approved = false;
+          v-if="
+            pairingProgress === 'UNKNOWN' &&
+            lastPairOperationId &&
+            actions.includes('pair')
           "
+          data-testid="verify-pair-operation"
+          :disabled="busy"
+          variant="outline"
+          :label="t('JRC_BROKER.PAIR_PROGRESS.VERIFY')"
+          @click="verifyPairOperation"
+        />
+        <Button
+          v-if="actions.includes('disconnect')"
+          :disabled="busy"
+          variant="outline"
+          :label="t('JRC_BROKER.DISCONNECT')"
+          @click="openConfirmation('disconnect')"
+        />
+        <Button
+          v-if="
+            actions.includes('manage') &&
+            health?.identityStatus === 'CONFIRMATION_REQUIRED'
+          "
+          :disabled="busy"
+          variant="outline"
+          :label="t('JRC_BROKER.CONFIRM_IDENTITY')"
+          @click="openConfirmation('confirmIdentity')"
         />
       </div>
-    </div>
+      <div
+        v-if="confirm"
+        class="p-4 border border-n-weak rounded-lg flex flex-col gap-3"
+      >
+        <p>
+          {{
+            confirm === 'disconnect'
+              ? t('JRC_BROKER.DISCONNECT_WARNING')
+              : t('JRC_BROKER.IDENTITY_WARNING', {
+                  suffix: health?.observedNumberSuffix || '—',
+                })
+          }}
+        </p>
+        <label class="flex gap-2 items-center">
+          <input v-model="approved" type="checkbox" />
+          <span>{{ t('JRC_BROKER.UNDERSTAND') }}</span>
+        </label>
+        <div class="flex gap-3">
+          <Button
+            :disabled="busy || !approved"
+            :label="t('JRC_BROKER.CONFIRM')"
+            @click="mutate(confirm)"
+          />
+          <Button
+            variant="outline"
+            :label="t('JRC_BROKER.CANCEL')"
+            @click="
+              confirm = '';
+              approved = false;
+            "
+          />
+        </div>
+      </div>
+    </template>
   </section>
 </template>
