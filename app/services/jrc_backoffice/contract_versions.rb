@@ -129,6 +129,7 @@ class JrcBackoffice::ContractVersions
   end
 
   def check_generation!(request, contract)
+    JrcBackoffice::Signatures::DeliveryGuard.check_editable!(contract)
     if contract.signature_status.in?(%w[sent signed])
       raise ArgumentError, 'Preserve o contrato enviado ou assinado; use o fluxo de revisão autorizado.'
     end

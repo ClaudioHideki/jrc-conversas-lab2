@@ -383,5 +383,11 @@
     "report": "docs/jrc_backoffice/signing_authority_checkpoint_20261102.json",
     "scope": "Proposta imutável, documentos/validade por pessoa, decisão e origem pela Central única, assinatura conjunta e bloqueio sem assinatura.",
     "not_completed": "Envio durável, consumidor, assinatura/evidências externas e conclusão global."
+  },
+  "signature_admission_increment": {
+    "status": "parcial",
+    "report": "docs/jrc_backoffice/signature_admission_checkpoint_20261102.json",
+    "implemented": "Serviço interno durável, isolamento/imutabilidade e travas validados.",
+    "pending": "Operação de envio, consumidor, evidências finais, UI e homologação externa."
   }
 }

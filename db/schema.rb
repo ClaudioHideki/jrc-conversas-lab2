@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_11_02_080000) do
+ActiveRecord::Schema[7.1].define(version: 2026_11_02_090000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -1389,6 +1389,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_080000) do
     t.index ["created_by_id"], name: "index_jrc_backoffice_authority_proposals_on_created_by_id"
     t.index ["signer_roster_id"], name: "index_jrc_backoffice_authority_proposals_on_signer_roster_id"
     t.check_constraint "revision > 0", name: "bo_authority_proposal_positive"
+    t.index ["account_id", "contract_id", "backoffice_request_id", "signer_roster_id", "contract_version_id", "id"], name: "bo_authority_exact_origin", unique: true
   end
 
   create_table "jrc_backoffice_contract_versions", force: :cascade do |t|
@@ -1504,6 +1505,56 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_080000) do
     t.index ["integration_id", "revision"], name: "bo_signature_connection_revision", unique: true
     t.index ["integration_id"], name: "index_jrc_backoffice_signature_connections_on_integration_id"
     t.index ["public_id"], name: "bo_signature_connection_public", unique: true
+  end
+
+  create_table "jrc_backoffice_signature_deliveries", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "contract_id", null: false
+    t.bigint "backoffice_request_id", null: false
+    t.bigint "contract_version_id", null: false
+    t.bigint "signer_roster_id", null: false
+    t.bigint "authority_proposal_id", null: false
+    t.bigint "connection_id", null: false
+    t.bigint "created_by_id", null: false
+    t.string "idempotency_key", null: false
+    t.string "input_digest", null: false
+    t.string "source_digest", null: false
+    t.string "transaction_id", null: false
+    t.text "source_snapshot", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "connection_id", "id"], name: "bo_delivery_tenant_connection", unique: true
+    t.index ["account_id", "created_by_id", "idempotency_key"], name: "bo_delivery_intent", unique: true
+    t.index ["account_id"], name: "index_jrc_backoffice_signature_deliveries_on_account_id"
+    t.index ["authority_proposal_id"], name: "idx_on_authority_proposal_id_e6fd1ab6c4"
+    t.index ["backoffice_request_id"], name: "idx_on_backoffice_request_id_455f0280d3"
+    t.index ["connection_id"], name: "index_jrc_backoffice_signature_deliveries_on_connection_id"
+    t.index ["contract_id"], name: "index_jrc_backoffice_signature_deliveries_on_contract_id"
+    t.index ["contract_version_id"], name: "bo_delivery_one_envelope_per_version", unique: true
+    t.index ["contract_version_id"], name: "idx_on_contract_version_id_606f57aeb3"
+    t.index ["created_by_id"], name: "index_jrc_backoffice_signature_deliveries_on_created_by_id"
+    t.index ["signer_roster_id"], name: "index_jrc_backoffice_signature_deliveries_on_signer_roster_id"
+    t.index ["transaction_id"], name: "bo_delivery_transaction", unique: true
+  end
+
+  create_table "jrc_backoffice_signature_delivery_events", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "delivery_id", null: false
+    t.bigint "connection_id", null: false
+    t.string "kind", null: false
+    t.string "event_key", null: false
+    t.string "external_id"
+    t.text "source_snapshot", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_backoffice_signature_delivery_events_on_account_id"
+    t.index ["connection_id", "external_id"], name: "bo_delivery_external_origin", unique: true, where: "(external_id IS NOT NULL)"
+    t.index ["delivery_id", "event_key"], name: "bo_delivery_event_intent", unique: true
+    t.index ["delivery_id"], name: "bo_delivery_dispatch_once", unique: true, where: "((kind)::text = 'dispatch_started'::text)"
+    t.index ["delivery_id"], name: "bo_delivery_one_external_binding", unique: true, where: "(external_id IS NOT NULL)"
+    t.index ["delivery_id"], name: "index_jrc_backoffice_signature_delivery_events_on_delivery_id"
+    t.check_constraint "(kind::text = 'send_confirmed'::text) = (external_id IS NOT NULL)", name: "bo_delivery_confirmed_requires_envelope"
+    t.check_constraint "kind::text = ANY (ARRAY['prepared'::character varying, 'dispatch_started'::character varying, 'send_confirmed'::character varying, 'send_uncertain'::character varying, 'send_rejected'::character varying, 'sender_blocked'::character varying, 'canceled_before_send'::character varying, 'completion_reported'::character varying, 'envelope_canceled'::character varying, 'envelope_declined'::character varying]::text[])", name: "bo_delivery_event_kind"
   end
 
   create_table "jrc_backoffice_signature_integrations", force: :cascade do |t|
@@ -9467,5 +9518,105 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_080000) do
   execute <<~'JRC_SCHEMA_SQL_428a8c7973b5'
     CREATE TRIGGER jrc_authority_proposal_pin BEFORE DELETE OR UPDATE ON jrc_backoffice_authority_proposals FOR EACH ROW EXECUTE FUNCTION jrc_contract_version_pin();
   JRC_SCHEMA_SQL_428a8c7973b5
+
+  add_foreign_key "jrc_backoffice_signature_deliveries", "accounts"
+  add_foreign_key "jrc_backoffice_signature_deliveries", "jrc_backoffice_authority_proposals", column: "authority_proposal_id"
+  add_foreign_key "jrc_backoffice_signature_deliveries", "jrc_backoffice_authority_proposals", column: ["account_id", "contract_id", "backoffice_request_id", "signer_roster_id", "contract_version_id", "authority_proposal_id"], primary_key: ["account_id", "contract_id", "backoffice_request_id", "signer_roster_id", "contract_version_id", "id"], name: "bo_delivery_exact_authority"
+  add_foreign_key "jrc_backoffice_signature_deliveries", "jrc_backoffice_contract_versions", column: "contract_version_id"
+  add_foreign_key "jrc_backoffice_signature_deliveries", "jrc_backoffice_signature_connections", column: "connection_id"
+  add_foreign_key "jrc_backoffice_signature_deliveries", "jrc_backoffice_signature_connections", column: ["account_id", "connection_id"], primary_key: ["account_id", "id"], name: "bo_delivery_tenant_connection_fk"
+  add_foreign_key "jrc_backoffice_signature_deliveries", "jrc_backoffice_signer_rosters", column: "signer_roster_id"
+  add_foreign_key "jrc_backoffice_signature_deliveries", "jrc_crm_backoffice_requests", column: "backoffice_request_id"
+  add_foreign_key "jrc_backoffice_signature_deliveries", "jrc_crm_contracts", column: "contract_id"
+  add_foreign_key "jrc_backoffice_signature_deliveries", "users", column: "created_by_id"
+  add_foreign_key "jrc_backoffice_signature_delivery_events", "accounts"
+  add_foreign_key "jrc_backoffice_signature_delivery_events", "jrc_backoffice_signature_deliveries", column: "delivery_id"
+  add_foreign_key "jrc_backoffice_signature_delivery_events", "jrc_backoffice_signature_deliveries", column: ["account_id", "connection_id", "delivery_id"], primary_key: ["account_id", "connection_id", "id"], name: "bo_delivery_event_exact_origin"
+
+  execute <<~'JRC_SCHEMA_SQL_98bb439c227c'
+    ALTER TABLE "jrc_backoffice_signature_delivery_events" DROP CONSTRAINT "bo_delivery_confirmed_requires_envelope";
+  JRC_SCHEMA_SQL_98bb439c227c
+
+  execute <<~'JRC_SCHEMA_SQL_5c8e4b7aa43e'
+    ALTER TABLE "jrc_backoffice_signature_delivery_events" ADD CONSTRAINT "bo_delivery_confirmed_requires_envelope" CHECK ((((kind)::text = 'send_confirmed'::text) = (external_id IS NOT NULL)));
+  JRC_SCHEMA_SQL_5c8e4b7aa43e
+
+  execute <<~'JRC_SCHEMA_SQL_ebaa74f22ff1'
+    ALTER TABLE "jrc_backoffice_signature_delivery_events" DROP CONSTRAINT "bo_delivery_event_kind";
+  JRC_SCHEMA_SQL_ebaa74f22ff1
+
+  execute <<~'JRC_SCHEMA_SQL_0a0388968a92'
+    ALTER TABLE "jrc_backoffice_signature_delivery_events" ADD CONSTRAINT "bo_delivery_event_kind" CHECK (((kind)::text = ANY ((ARRAY['prepared'::character varying, 'dispatch_started'::character varying, 'send_confirmed'::character varying, 'send_uncertain'::character varying, 'send_rejected'::character varying, 'sender_blocked'::character varying, 'canceled_before_send'::character varying, 'completion_reported'::character varying, 'envelope_canceled'::character varying, 'envelope_declined'::character varying])::text[])));
+  JRC_SCHEMA_SQL_0a0388968a92
+
+  execute <<~'JRC_SCHEMA_SQL_bdb7450aba4f'
+    DROP INDEX "bo_delivery_dispatch_once";
+  JRC_SCHEMA_SQL_bdb7450aba4f
+
+  execute <<~'JRC_SCHEMA_SQL_0add3aeb4c6d'
+    CREATE UNIQUE INDEX bo_delivery_dispatch_once ON public.jrc_backoffice_signature_delivery_events USING btree (delivery_id) WHERE ((kind)::text = 'dispatch_started'::text);
+  JRC_SCHEMA_SQL_0add3aeb4c6d
+
+  execute <<~'JRC_SCHEMA_SQL_4f45e344d034'
+    DROP INDEX "bo_delivery_external_origin";
+  JRC_SCHEMA_SQL_4f45e344d034
+
+  execute <<~'JRC_SCHEMA_SQL_b4f1023a518d'
+    CREATE UNIQUE INDEX bo_delivery_external_origin ON public.jrc_backoffice_signature_delivery_events USING btree (connection_id, external_id) WHERE (external_id IS NOT NULL);
+  JRC_SCHEMA_SQL_b4f1023a518d
+
+  execute <<~'JRC_SCHEMA_SQL_78ed3f6a9683'
+    DROP INDEX "bo_delivery_one_external_binding";
+  JRC_SCHEMA_SQL_78ed3f6a9683
+
+  execute <<~'JRC_SCHEMA_SQL_73fe145d0ef8'
+    CREATE UNIQUE INDEX bo_delivery_one_external_binding ON public.jrc_backoffice_signature_delivery_events USING btree (delivery_id) WHERE (external_id IS NOT NULL);
+  JRC_SCHEMA_SQL_73fe145d0ef8
+
+  execute <<~'JRC_SCHEMA_SQL_0765e8167801'
+    CREATE OR REPLACE FUNCTION public.jrc_contract_delivery_source_fence()
+     RETURNS trigger
+     LANGUAGE plpgsql
+    AS $function$
+    DECLARE
+      legal_columns text[] := ARRAY[
+        'account_id', 'contract_number', 'sales_order_id', 'contract_template_id', 'business_unit_id',
+        'contract_type', 'starts_on', 'ends_on', 'term_months', 'renewal_type', 'adjustment_index',
+        'monthly_cents', 'one_time_cents', 'payment_condition', 'due_day', 'auto_renew',
+        'renewal_notice_days', 'renewal_term_months', 'content_override', 'notes', 'contact_id', 'owner_id'
+      ];
+    BEGIN
+      IF ((SELECT jsonb_object_agg(key, value) FROM jsonb_each(to_jsonb(NEW)) WHERE key = ANY(legal_columns))
+          IS DISTINCT FROM
+          (SELECT jsonb_object_agg(key, value) FROM jsonb_each(to_jsonb(OLD)) WHERE key = ANY(legal_columns))
+          OR NEW.lifecycle_metadata->'financials' IS DISTINCT FROM OLD.lifecycle_metadata->'financials'
+          OR NEW.lifecycle_metadata->'addenda' IS DISTINCT FROM OLD.lifecycle_metadata->'addenda')
+         AND EXISTS (
+           SELECT 1 FROM jrc_backoffice_signature_deliveries d
+           WHERE d.account_id = OLD.account_id AND d.contract_id = OLD.id
+           AND NOT EXISTS (
+             SELECT 1 FROM jrc_backoffice_signature_delivery_events e
+             WHERE e.account_id = d.account_id AND e.delivery_id = d.id
+             AND e.kind IN ('send_rejected', 'sender_blocked', 'canceled_before_send', 'envelope_canceled', 'envelope_declined')
+           )
+         ) THEN
+        RAISE EXCEPTION 'signature_delivery_source_locked' USING ERRCODE = '23514';
+      END IF;
+      RETURN NEW;
+    END
+    $function$
+  JRC_SCHEMA_SQL_0765e8167801
+
+  execute <<~'JRC_SCHEMA_SQL_f9c3a75a4bf5'
+    CREATE TRIGGER jrc_signature_deliveries_pin BEFORE DELETE OR UPDATE ON jrc_backoffice_signature_deliveries FOR EACH ROW EXECUTE FUNCTION jrc_contract_version_pin();
+  JRC_SCHEMA_SQL_f9c3a75a4bf5
+
+  execute <<~'JRC_SCHEMA_SQL_1390707fe8c3'
+    CREATE TRIGGER jrc_signature_delivery_events_pin BEFORE DELETE OR UPDATE ON jrc_backoffice_signature_delivery_events FOR EACH ROW EXECUTE FUNCTION jrc_contract_version_pin();
+  JRC_SCHEMA_SQL_1390707fe8c3
+
+  execute <<~'JRC_SCHEMA_SQL_95a6607240d5'
+    CREATE TRIGGER jrc_contract_delivery_source_fence BEFORE UPDATE ON jrc_crm_contracts FOR EACH ROW EXECUTE FUNCTION jrc_contract_delivery_source_fence();
+  JRC_SCHEMA_SQL_95a6607240d5
 
 end

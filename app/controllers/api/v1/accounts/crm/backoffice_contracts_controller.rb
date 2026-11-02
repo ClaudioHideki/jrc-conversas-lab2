@@ -84,6 +84,7 @@ class Api::V1::Accounts::Crm::BackofficeContractsController < Api::V1::Accounts:
   end
 
   def editable!
+    JrcBackoffice::Signatures::DeliveryGuard.check_editable!(@contract)
     return unless @contract.signature_status.in?(%w[sent signed])
 
     raise ArgumentError, 'O contrato enviado ou assinado foi preservado. Use o fluxo de revisão autorizado.'

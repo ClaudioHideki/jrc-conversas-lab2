@@ -42,6 +42,7 @@ module JrcCrm
     EVENT_TYPES.concat(%w[backoffice_contract_version_created backoffice_contract_version_accessed])
     EVENT_TYPES.push('backoffice_signer_roster_created')
     EVENT_TYPES.concat(%w[backoffice_authority_proposed backoffice_authority_evidence_accessed])
+    EVENT_TYPES.concat(%w[signature_delivery_admitted signature_delivery_canceled])
     validates :event_type, inclusion: { in: EVENT_TYPES }
     
     scope :for_resource, ->(type, id) { where(resource_type: type, resource_id: id) }

@@ -206,6 +206,7 @@ module Api::V1::Accounts::Crm
     def update_contract!
       @contract.sales_order.with_lock do
         @contract.lock!
+        JrcBackoffice::Signatures::DeliveryGuard.check_editable!(@contract)
         before = audit_snapshot(@contract)
         attributes = normalized_contract_params
         if attributes.key?('lifecycle_metadata')

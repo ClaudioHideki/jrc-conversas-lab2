@@ -1,5 +1,6 @@
 require 'rails_helper'
 require Rails.root.join('db/migrate/20261102040000_pin_signature_provider_connections')
+require Rails.root.join('db/migrate/20261102090000_create_backoffice_signature_deliveries')
 
 RSpec.describe JrcBackoffice::SignatureConnection do
   it 'backfills the existing connection and known notification revision without changing native data or old ciphertext' do
@@ -21,8 +22,10 @@ RSpec.describe JrcBackoffice::SignatureConnection do
     ciphertext = integration.encrypted_credentials
     native = conversation.reload.attributes
     counts = [Account.count, Contact.count, Conversation.count, Message.count]
+    CreateBackofficeSignatureDeliveries.new.migrate(:down)
     PinSignatureProviderConnections.new.migrate(:down)
     PinSignatureProviderConnections.new.migrate(:up)
+    CreateBackofficeSignatureDeliveries.new.migrate(:up)
     [described_class, JrcBackoffice::SignatureIntegration, JrcBackoffice::SignatureNotification].each(&:reset_column_information)
     connection = integration.reload.connection
     expect(connection).to have_attributes(provider: 'docusign', public_id: integration.public_id)

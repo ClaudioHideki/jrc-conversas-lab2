@@ -59,7 +59,7 @@ class JrcBackoffice::AuthorityOverview
   def writable?(version)
     JrcBackoffice::AuthorityAccess.new(account: @account, actor: @actor).authoring_version!(@request_id, version.id)
     true
-  rescue Pundit::NotAuthorizedError, ActiveRecord::RecordNotFound, ArgumentError
+  rescue Pundit::NotAuthorizedError, ActiveRecord::RecordNotFound, ArgumentError, JrcBackoffice::Signatures::DeliveryError
     false
   end
 end

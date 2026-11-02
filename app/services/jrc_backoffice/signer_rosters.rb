@@ -63,6 +63,7 @@ class JrcBackoffice::SignerRosters
 
   def editable_context?(request, contract)
     return false unless @access.writable?(request) && !contract.signature_status.in?(%w[sent signed])
+    return false if JrcBackoffice::Signatures::DeliveryGuard.active(contract).exists?
 
     @directory.authorize!
     true
@@ -147,6 +148,7 @@ class JrcBackoffice::SignerRosters
   end
 
   def editable!(contract)
+    JrcBackoffice::Signatures::DeliveryGuard.check_editable!(contract)
     return unless contract.signature_status.in?(%w[sent signed])
 
     raise ArgumentError, 'Preserve os assinantes do contrato enviado ou assinado; use o fluxo autorizado de revisão.'

@@ -14,6 +14,7 @@ class JrcBackoffice::AuthorityAccess
   def authoring_version!(request_id, version_id)
     request = @backoffice.writable!(@backoffice.request(request_id))
     contract = @backoffice.contract!(request)
+    JrcBackoffice::Signatures::DeliveryGuard.check_editable!(contract)
     if contract.signature_status.in?(%w[sent signed])
       raise ArgumentError, 'Preserve o contrato enviado ou assinado; use o fluxo autorizado de revisão.'
     end

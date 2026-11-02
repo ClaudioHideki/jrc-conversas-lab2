@@ -37838,8 +37838,13 @@
         "line": 345,
         "section": "4.6 Contratos e assinantes",
         "text": "10. Registro durável da intenção de envio.",
-        "classification_pending": true,
-        "evidence": []
+        "classification_pending": false,
+        "evidence": [
+          "docs/jrc_backoffice/signature_admission_checkpoint_20261102.json"
+        ],
+        "status": "parcial",
+        "implemented_change": "Intenção imutável/cifrada e eventos duráveis testados no serviço, antes de I/O externo.",
+        "next_action": "Integrar à operação contextual de envio, worker e recuperação sem duplicação."
       },
       {
         "id": "latest-user:L0346",

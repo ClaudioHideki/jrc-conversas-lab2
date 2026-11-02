@@ -17,7 +17,7 @@ class Api::V1::Accounts::Crm::BackofficeContractVersionsController < Api::V1::Ac
     rows = service.scope.order(id: :desc)
     data = version_rows(rows, page, contract)
     payload = { data: data, meta: { page: page, per_page: 10, total: rows.count },
-                contract: contract_summary(contract), writable: access.writable?(request) }
+                contract: contract_summary(contract), writable: access.writable?(request) && !delivery_active?(contract) }
     access.request(params[:backoffice_request_id])
     render json: payload
   end
@@ -39,6 +39,10 @@ class Api::V1::Accounts::Crm::BackofficeContractVersionsController < Api::V1::Ac
   end
 
   private
+
+  def delivery_active?(contract)
+    contract && JrcBackoffice::Signatures::DeliveryGuard.active(contract).exists?
+  end
 
   def version_rows(scope, page, contract)
     selected = scope.includes(:created_by).offset((page - 1) * 10).limit(10).to_a
