@@ -6,7 +6,7 @@ class JrcRelationship::Workflow
              'renewals' => JrcRelationship::Renewal, 'expansion' => JrcRelationship::ExpansionSignal,
              'surveys' => JrcRelationship::Survey }.freeze
   FIELDS = {
-    'actions' => %w[reason status priority due_at result owner_id],
+    'actions' => %w[reason status priority due_at result owner_id next_step return_at customer_confirmation customer_feedback],
     'risks' => %w[kind severity reason status due_at outcome plan owner_id],
     'plans' => %w[title status target_on goals project_id contract_id product_id owner_id],
     'qbrs' => %w[title scheduled_at status agenda summary participants decisions owner_id meeting_url recording_url provider contact_id contract_id
@@ -34,6 +34,11 @@ class JrcRelationship::Workflow
       audit_fields = audit_fields_for(kind)
       before = record.attributes.slice(*audit_fields)
       record.assign_attributes(attrs.slice(*FIELDS.fetch(kind)))
+      if kind == 'actions' && record.will_save_change_to_customer_confirmation?
+        answered = %w[confirmed unresolved].include?(record.customer_confirmation)
+        record.customer_confirmed_by = answered ? @context.user : nil
+        record.customer_confirmed_at = answered ? Time.current : nil
+      end
       if kind == 'actions' && attrs.key?('priority') && record.will_save_change_to_priority?
         record.metadata = record.metadata.merge('manual_priority' => true)
       end
@@ -94,8 +99,9 @@ class JrcRelationship::Workflow
         JrcOperations::SlaClock.new(record).mark_first_action!
       end
       project_action!(record) if kind == 'actions'
-      if kind == 'actions' && record.activity
-        fields = { due_at: record.due_at }
+      if kind == 'actions' && record.activity && JrcOperations::Access.crm?(@context.member) &&
+         assignment.customer_context(@context.member).activities.exists?(id: record.activity_id)
+        fields = { due_at: record.return_at || record.due_at }
         fields[:user_id] = record.owner_id if record.owner_id
         fields.merge!(status: 'completed', completed_at: record.completed_at) if record.status == 'completed'
         fields[:status] = 'cancelled' if record.status == 'dismissed'
@@ -132,7 +138,8 @@ class JrcRelationship::Workflow
 
   def project_action!(action, kind: 'task')
     return action.activity if action.activity
-    return unless action.due_at && action.owner && JrcOperations::Access.crm?(@context.member)
+    scheduled_at = action.return_at || action.due_at
+    return unless scheduled_at && action.owner && JrcOperations::Access.crm?(@context.member)
 
     metadata = { relationship_assignment_id: action.assignment_id, relationship_action_id: action.id,
                  relationship_source_key: action.source_key }
@@ -140,7 +147,7 @@ class JrcRelationship::Workflow
     activity = JrcCrm::Activity.create!(account: @context.account, user: action.owner,
                                         company: action.assignment.company, contact: action.assignment.contact,
                                         business_unit: action.assignment.business_unit,
-                                        title: action.reason, activity_type: kind, due_at: action.due_at,
+                                        title: action.reason, activity_type: kind, due_at: scheduled_at,
                                         metadata: metadata)
     action.update!(activity: activity)
     @context.audit!(activity, after: { action_id: action.id, due_at: activity.due_at }, action: 'agenda_projected')
@@ -164,7 +171,7 @@ class JrcRelationship::Workflow
   end
 
   def audit_fields_for(kind)
-    fields = FIELDS.fetch(kind) + (kind == 'actions' ? %w[completed_at completed_by_id] : [])
+    fields = FIELDS.fetch(kind) + (kind == 'actions' ? %w[completed_at completed_by_id customer_confirmed_at customer_confirmed_by_id] : [])
     fields += %w[metadata] if %w[actions plans qbrs expansion renewals].include?(kind)
     fields += %w[financial_captured_at] if kind == 'risks'
     fields

@@ -2,6 +2,10 @@ class Api::V1::Accounts::Relationship::RecordsController < Api::V1::Accounts::Re
   def index
     model = JrcRelationship::Workflow::MODELS.fetch(params[:kind])
     scope = relationship_context.records(model).where(assignment_id: filtered_assignments.select(:id))
+    scope = scope.where(owner_id: Current.user.id) if model == JrcRelationship::Action && params[:mine].to_s == 'true'
+    if model == JrcRelationship::Action && params[:returns_overdue].to_s == 'true'
+      scope = scope.where(status: JrcRelationship::Action::ACTIVE_STATUSES).where('return_at < ?', Time.current)
+    end
     scope = survey_scope(model, scope)
     filters = JrcRelationship::RecordFilters.new(model, params, renewal_rules: model == JrcRelationship::Renewal ? renewal_rules : nil)
     scope = filters.identity_scope(scope)
@@ -24,6 +28,19 @@ class Api::V1::Accounts::Relationship::RecordsController < Api::V1::Accounts::Re
   end
 
   private :render_records
+
+  def show
+    model = JrcRelationship::Workflow::MODELS.fetch(params[:kind])
+    record = relationship_context.records(model).find(params[:id])
+    fields = JrcRelationship::Workflow::FIELDS.fetch(params[:kind])
+    events = JrcCrm::AuditEvent.where(account_id: Current.account.id, resource_type: model.name, resource_id: record.id)
+                              .order(created_at: :desc, id: :desc).limit(50)
+    history = events.map do |event|
+      { id: event.id, at: event.created_at, event: event.event_type, actor_id: event.actor_id,
+        before: event.from_value.slice(*fields), after: event.to_value.slice(*fields) }
+    end
+    render json: presenter.record(record).merge(history: history)
+  end
 
   def create
     save_record
@@ -184,6 +201,7 @@ class Api::V1::Accounts::Relationship::RecordsController < Api::V1::Accounts::Re
     params.require(:record).permit(
       :assignment_id, :request_id, :lock_version, :owner_id, :reason, :status, :priority, :due_at,
       :result, :kind, :severity, :outcome, :title, :target_on, :project_id, :scheduled_at, :agenda, :summary,
+      :next_step, :return_at, :customer_confirmation, :customer_feedback,
       :proposed_mrr_cents, :renewed_contract_id, :product_id, :contract_id, :source_contract_id, :source_product_id,
       :potential_cents, :evidence, :expansion_kind, :meeting_url, :recording_url, :provider, :contact_id,
       plan: [:cause, :hypothesis, :strategy, :actions, :concessions], goals: [], participants: [], decisions: []

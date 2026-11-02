@@ -68,8 +68,9 @@ class JrcRelationship::Presenter
       arr_cents: visibility.crm? ? contracts.sum(:monthly_cents) * 12 : nil,
       health_average: health.average(:score)&.to_f, bands: health.group(:band).count,
       health_coverage: { calculated: health.count, portfolio: scope.count },
-      at_risk: health.exists? ? risk_health.count : nil, churned: period ? closed_risks.where(status: 'churn').count : scope.where(status: 'churned').count,
-      mrr_at_risk_cents: visibility.crm? && health.exists? ? risk_health.sum("COALESCE((signals ->> 'mrr_cents')::bigint, 0)") : nil,
+      at_risk: health.where.not(score: nil).exists? ? risk_health.count : nil,
+      churned: period ? closed_risks.where(status: 'churn').count : scope.where(status: 'churned').count,
+      mrr_at_risk_cents: visibility.crm? && health.where.not(score: nil).exists? ? risk_health.sum("COALESCE((signals ->> 'mrr_cents')::bigint, 0)") : nil,
       retained: closed_risks.where(status: 'retained').count,
       retention_rate: closed_risks.where(status: %w[retained churn]).exists? ? 100.0 * closed_risks.where(status: 'retained').count / closed_risks.where(status: %w[retained churn]).count : nil,
       without_contact: health.exists? ? health.where("(signals ->> 'days_without_contact')::integer >= ?", @context.configuration.effective_rules['no_contact_days']).count : nil,
@@ -80,6 +81,11 @@ class JrcRelationship::Presenter
       actions_today: actions.where(sla_paused_at: nil, due_at: Time.current.all_day).count,
       overdue_actions: actions.where(sla_paused_at: nil).where('due_at < ?', Time.current).count,
       waiting_customer_actions: actions.where(status: 'waiting_customer').count,
+      overdue_returns: actions.where('return_at < ?', Time.current).count,
+      monitoring: { observed_customers: health.count, customers: scope.count, last_processed_at: health.maximum(:calculated_at),
+                    scored_customers: health.where.not(score: nil).count,
+                    stale_customers: health.where('calculated_at < ?', 15.minutes.ago).count,
+                    latest_attempt: JrcRelationship::ProcessingRun.latest_for(@context, scope)&.summary(scope) },
       waiting_finance_actions: actions.where(status: 'waiting_finance').count,
       priority_actions: priority_actions(actions),
       expansion_potential_cents: visibility.crm? ? JrcRelationship::ExpansionPipeline.open(expansion, deals).sum(:potential_cents) : nil,
@@ -107,8 +113,9 @@ class JrcRelationship::Presenter
 
   def priority_actions(actions)
     actions.includes(assignment: [:company, :contact]).order(priority: :desc, due_at: :asc, id: :asc).limit(10).map do |action|
-      { assignment_id: action.assignment_id, customer: action.assignment.label, reason: action.reason,
-        priority: action.priority, due_at: action.due_at, status: action.status, factors: action.factors }
+      { id: action.id, assignment_id: action.assignment_id, customer: action.assignment.label, reason: action.reason,
+        priority: action.priority, due_at: action.due_at, status: action.status, factors: action.factors,
+        next_step: action.next_step, return_at: action.return_at, customer_confirmation: action.customer_confirmation }
     end
   end
   private :shared_csat, :renewal_counts, :priority_actions

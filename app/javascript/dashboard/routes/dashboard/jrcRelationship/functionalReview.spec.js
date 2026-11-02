@@ -51,6 +51,7 @@ const customer = {
 };
 const stubLinks = {
   RouterLink: { template: '<a><slot /></a>', props: ['to'] },
+  Dialog: { template: '<div><slot /></div>', methods: { open: vi.fn() } },
 };
 beforeEach(() => {
   mocks.route = reactive({ params: { accountId: '1' }, query: {} });

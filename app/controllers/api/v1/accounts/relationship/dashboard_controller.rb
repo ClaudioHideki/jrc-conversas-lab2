@@ -74,7 +74,9 @@ class Api::V1::Accounts::Relationship::DashboardController < Api::V1::Accounts::
   private
 
   def metadata_access(ctx)
-    { can_manage: ctx.policy.manage?, can_team: ctx.policy.team?, can_configure: ctx.policy.configure?, can_export_history: ctx.policy.admin?,
+    { current_user: { id: Current.user.id, name: Current.user.name },
+      can_manage: ctx.policy.manage?, can_team: ctx.policy.team?, can_configure: ctx.policy.configure?, can_export_history: ctx.policy.admin?,
+      can_view_documents: ctx.policy.documents_view?, can_manage_documents: ctx.policy.documents_manage?,
       owners: metadata_owners(ctx),
       can_crm: JrcOperations::Access.crm?(ctx.member),
       can_configure_operations: ctx.policy.configure? && JrcOperations::Access.crm?(ctx.member) && ctx.member.administrator?,

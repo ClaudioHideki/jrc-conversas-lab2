@@ -1,9 +1,10 @@
 <script setup>
-import { computed, ref, reactive, watch, onBeforeUnmount } from 'vue';
+import { computed, ref, reactive, watch, onBeforeUnmount, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcRelationship';
+import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import MetricsPanel from './MetricsPanel.vue';
 import NicoSummaryPanel from './NicoSummaryPanel.vue';
 import PortfolioTable from './PortfolioTable.vue';
@@ -49,6 +50,13 @@ const loading = ref(false);
 const saving = ref(false);
 const error = ref('');
 const editing = ref(null);
+const recordDialog = ref(null);
+watch(editing, async value => {
+  if (value) {
+    await nextTick();
+    recordDialog.value?.open();
+  }
+});
 const selectedCustomer = ref(null);
 const selected = ref([]);
 const portfolioReviewProposal = ref(null);
@@ -1150,18 +1158,28 @@ const money = value => formatMoney(value, metadata.value?.formatting);
         >
           {{ t('RELATIONSHIP.NATIVE_CSAT_GUIDANCE') }}
         </p>
-        <RecordEditor
+        <Dialog
           v-if="editing"
-          :key="`${screen}:${editing.id || 'new'}`"
-          :kind="screen"
-          :record="editing"
-          :customers="customers"
-          :metadata="metadata"
-          :busy="saving"
-          :read-only="!metadata.can_manage"
-          @save="save"
+          ref="recordDialog"
+          width="5xl"
+          :title="t(editing.id ? 'RELATIONSHIP.EDIT' : 'RELATIONSHIP.NEW')"
+          :show-confirm-button="false"
+          :show-cancel-button="false"
+          :dismissible="!saving"
           @close="editing = null"
-        />
+        >
+          <RecordEditor
+            :key="`${screen}:${editing.id || 'new'}`"
+            :kind="screen"
+            :record="editing"
+            :customers="customers"
+            :metadata="metadata"
+            :busy="saving"
+            :read-only="!metadata.can_manage"
+            @save="save"
+            @close="editing = null"
+          />
+        </Dialog>
         <p
           v-if="surveyLink"
           class="rounded-lg border border-n-weak p-3 text-sm"
@@ -1174,13 +1192,29 @@ const money = value => formatMoney(value, metadata.value?.formatting);
             >{{ t('RELATIONSHIP.SURVEY_LINK') }}</a
           >
         </p>
-        <CustomerPanel
+        <aside
           v-if="selectedCustomer"
-          :assignment-id="selectedCustomer"
-          :metadata="metadata"
-          @changed="load"
-          @close="selectedCustomer = null"
-        />
+          class="fixed inset-y-0 right-0 z-40 w-full max-w-2xl overflow-y-auto border-l border-n-violet-6 bg-n-solid-1 p-4 shadow-xl"
+          :aria-label="t('RELATIONSHIP.V2.OPEN_360')"
+          @keydown.esc="selectedCustomer = null"
+        >
+          <RouterLink
+            :class="buttonClass"
+            :to="{
+              name: 'jrc_relationship_customers',
+              params: route.params,
+              query: { assignment_id: selectedCustomer },
+            }"
+          >
+            {{ t('RELATIONSHIP.V2.OPEN_360') }}
+          </RouterLink>
+          <CustomerPanel
+            :assignment-id="selectedCustomer"
+            :metadata="metadata"
+            @changed="load"
+            @close="selectedCustomer = null"
+          />
+        </aside>
         <SurveyPreparationPanel
           v-if="surveyPreparation"
           :survey="surveyPreparation"
@@ -1368,8 +1402,8 @@ const money = value => formatMoney(value, metadata.value?.formatting);
             ><label class="flex-1 text-sm"
               >{{ t('RELATIONSHIP.FIELDS.result')
               }}<input
-                data-testid="batch-result"
                 v-model="batch.result"
+                data-testid="batch-result"
                 :class="inputClass"
                 :required="batch.status === 'completed'" /></label
             ><label class="text-sm"

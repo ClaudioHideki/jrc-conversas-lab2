@@ -128,6 +128,27 @@ export default {
     }),
   records: (accountId, kind, params, options) =>
     axios.get(`${base(accountId)}/records/${kind}`, { ...options, params }),
+  record: (accountId, kind, id, options) =>
+    axios.get(`${base(accountId)}/records/${kind}/${Number(id)}`, options),
+  documents: (accountId, params, options) =>
+    axios.get(`${base(accountId)}/documents`, { ...options, params }),
+  document: (accountId, id, params, options) =>
+    axios.get(`${base(accountId)}/documents/${Number(id)}`, {
+      ...options,
+      params,
+    }),
+  uploadDocument: (accountId, form, id) =>
+    axios.post(
+      id
+        ? `${base(accountId)}/documents/${Number(id)}/version`
+        : `${base(accountId)}/documents`,
+      form
+    ),
+  downloadDocument: (accountId, id, versionId) =>
+    axios.get(
+      `${base(accountId)}/documents/${Number(id)}/versions/${Number(versionId)}/download`,
+      { responseType: 'blob' }
+    ),
   saveRecord: (accountId, kind, record, id) =>
     id
       ? axios.patch(`${base(accountId)}/records/${kind}/${Number(id)}`, {

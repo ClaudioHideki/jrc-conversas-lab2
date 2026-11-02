@@ -1,0 +1,252 @@
+{
+  "date": "2026-11-02",
+  "statuses": [
+    "implementado e testado",
+    "parcial",
+    "pendente",
+    "dependência externa"
+  ],
+  "documents": [
+    {
+      "document": "central-aprovacoes",
+      "source": "C:\\Users\\DEV03\\Downloads\\Especificacao_Central_Aprovacoes_JRC_Conversas_DEV.docx",
+      "sha256": "3456a7fa3ad15235d9e072aeb00bd4c0eef5ae08d52992463a6bf609ef94c917",
+      "text_read_in_full": true,
+      "figures_inspected": 12
+    },
+    {
+      "document": "cadastro-mestre",
+      "source": "C:\\Users\\DEV03\\Downloads\\JRC-CONVERSAS-CADASTRO-MESTRE-CLIENTES-ESPECIFICACAO-DEV-20261101 (1).docx",
+      "sha256": "2a9b7bb58b61856646c29d7681f97473c6a51973684167c62f57937239ac2fbf",
+      "text_read_in_full": true,
+      "figures_inspected": 28
+    },
+    {
+      "document": "backoffice",
+      "source": "C:\\Users\\DEV03\\Downloads\\JRC_Conversas_Backoffice_Projeto_DEV_20261101.docx",
+      "sha256": "ebd5cd1db7fa53cc7bf7e2fa6a801e498735eaef9d67040002a5a9ade4878284",
+      "text_read_in_full": true,
+      "figures_inspected": 10
+    },
+    {
+      "document": "backoffice-evolucao",
+      "source": "C:\\Users\\DEV03\\Downloads\\Projeto_Evolucao_Backoffice_JRC_Conversas_20261101.docx",
+      "sha256": "daae925b14eb1b0943f12e9a7cccae362ff143916a8d6e6bbd4fee2a3ebcb4ce",
+      "text_read_in_full": true,
+      "figures_inspected": 0
+    }
+  ],
+  "relationship_v2": {
+    "reference_sha256": "7ec0c32f0d33b509b47fc8c4c99c10aaa60cdc2ba52fec53100973180c685fee",
+    "text_read_in_full": true,
+    "figures_inspected": 22,
+    "status": "parcial",
+    "evidence": [
+      "Nove áreas principais, mantendo as rotas e operações legadas",
+      "Meu Painel e Minhas Ações com escopo por usuário/conta e respostas tardias descartadas",
+      "Caso contextual, conversa nativa autorizada, resultado, próximo passo, retorno, histórico e confirmação separada",
+      "Documentos versionados com permissão explícita, quarentena, auditoria e bloqueio das rotas genéricas de blob",
+      "Cobertura observada de saúde sem apresentar dado ausente como saudável e sem eco da própria agenda",
+      "Histórico real de processamento e cobertura pelo gestor para clientes sem responsável",
+      "Reutilização idempotente do recibo real de mensagem do playbook, mantendo guard, autoridade e ledger",
+      "Tokens nativos violetas locais ao Relacionamento e temas claro/escuro revistos"
+    ],
+    "remaining": [
+      "Completar Carteiras como agrupamento, equipe/capacidade, propostas de distribuição e integração autorizada à Central sem execução na aprovação",
+      "Histerese, frescor e demais evoluções de saúde/automação do Word",
+      "Finalizar filtros e solicitação de documentos conforme Word"
+    ]
+  },
+  "backoffice": [
+    {
+      "requirement": "Módulo independente, abas horizontais, fluxo v2 com aprovações antes de contrato",
+      "status": "parcial",
+      "existing": "Base 50f7f07d; não refazer. Regressão global ainda pendente."
+    },
+    {
+      "requirement": "Busca de toda a base autorizada e seleção Cliente→Pedido→Solicitação",
+      "status": "pendente",
+      "finding": "API Cadastro Mestre já busca no servidor; seletor não possui debounce e mistura erro/permissão/vazio. Pedidos são filtrados por vínculo contact.company_id, sem fluxo paginado de seleção próprio."
+    },
+    {
+      "requirement": "Contrato dentro da solicitação, versões e snapshots de assinantes do Cadastro Mestre",
+      "status": "pendente",
+      "finding": "Contrato CRM e geração PDF existem; não há envelope versionado nem estrutura multiassinante de evidência."
+    },
+    {
+      "requirement": "Envio, lembrete, cancelamento, eventos autenticados e documento final DocuSign",
+      "status": "dependência externa",
+      "finding": "Provedor confirmado: DocuSign. API atual apenas aceita external_id e registra sent; isso não é conector. Implementação necessária antes da configuração e homologação externas."
+    },
+    {
+      "requirement": "Bloqueios de aprovação, assinatura e proteção financeira",
+      "status": "parcial",
+      "existing": "CommercialGate, ContractRelease e BackofficeRequest bloqueiam avanços; fortalecer validade da versão/evidências e cobrir assinatura parcial/versão substituída."
+    },
+    {
+      "requirement": "Requisitos tipados e snapshots por operação/produto/cliente",
+      "status": "pendente",
+      "existing": "Checklist nativo reutilizável; ainda não equivale ao cadastro de todos os tipos de requisito solicitado."
+    },
+    {
+      "requirement": "Documentação com versões, decisão humana, OCR e histórico",
+      "status": "parcial",
+      "existing": "DocumentVersion/Documents/Preanalysis/TextExtraction existentes; OCR não comprova autenticidade ou poderes."
+    },
+    {
+      "requirement": "Pendências por causa, implantação/provisionamento/financeiro, relatórios",
+      "status": "parcial",
+      "existing": "Fluxos nativos e Issues existem; completar conforme matriz e validar causas/atores/escopo."
+    }
+  ],
+  "customer_master": [
+    {
+      "requirement": "Fonte única Company/Contact e operações nativas com escopo",
+      "status": "parcial",
+      "existing": "DirectoryQuery, CompanyWriter, ContactWriter, Customer360, CorporateCoverage; preservar os vínculos."
+    },
+    {
+      "requirement": "Detalhes em modal e abas dos módulos sem submenus duplicados",
+      "status": "parcial",
+      "existing": "Revisar tela atual contra figuras; abas adicionais ainda sem homologação nesta continuação."
+    },
+    {
+      "requirement": "Visão contextual Backoffice: solicitações, documentação, aprovações, contratos, pendências, histórico",
+      "status": "pendente",
+      "constraint": "Somente registros do cliente, com autorização do módulo de origem."
+    },
+    {
+      "requirement": "Pessoa/empresa, deduplicação e vínculo do assinante",
+      "status": "parcial",
+      "existing": "Escritores e merge nativos devem ser reutilizados; não criar contatos paralelos."
+    },
+    {
+      "requirement": "Segmentos/critérios/prévia, grupos econômicos separados de etiquetas, importações e contatos ativos",
+      "status": "parcial",
+      "constraint": "Não conceder acesso por segmento; preservar regras e engines existentes."
+    }
+  ],
+  "approval_central": {
+    "status": "parcial",
+    "existing": [
+      "Authorization/CorporateCoverage",
+      "Catalog e snapshots",
+      "Requests/Decisions com locks, idempotência, quorum e versões",
+      "Policies/Selection/Simulation",
+      "Delegations e auditoria",
+      "CommercialGate integrado ao CRM/Backoffice"
+    ],
+    "pending": [
+      "Cinco abas, inbox e resumo contextual, confirmações",
+      "Ajuste autorizado: salvar pendente ou salvar+aprovar atômico, sem remover trava financeira",
+      "Wizard de quatro etapas e alçadas sem campos técnicos",
+      "Integração de distribuição do Relacionamento separando decisão da execução",
+      "Notificações internas e homologação visual/contextual"
+    ],
+    "acceptance": [
+      {
+        "id": "CA-01",
+        "criterion": "Usuário com alçada visualiza apenas aprovações dentro de seu escopo ou delegadas a ele.",
+        "status": "pendente",
+        "note": "Motor existente inventariado; execução e evidências específicas do critério ainda necessárias."
+      },
+      {
+        "id": "CA-02",
+        "criterion": "Aprovador consegue abrir o pedido/registro de origem antes de decidir.",
+        "status": "pendente",
+        "note": "Motor existente inventariado; execução e evidências específicas do critério ainda necessárias."
+      },
+      {
+        "id": "CA-03",
+        "criterion": "Aprovação é concluída com confirmação e fica registrada no histórico.",
+        "status": "pendente",
+        "note": "Motor existente inventariado; execução e evidências específicas do critério ainda necessárias."
+      },
+      {
+        "id": "CA-04",
+        "criterion": "Rejeição exige motivo e devolve resultado ao solicitante/módulo de origem.",
+        "status": "pendente",
+        "note": "Motor existente inventariado; execução e evidências específicas do critério ainda necessárias."
+      },
+      {
+        "id": "CA-05",
+        "criterion": "Ajuste preserva valor original, registra novo valor e exige observação.",
+        "status": "pendente",
+        "note": "Motor existente inventariado; execução e evidências específicas do critério ainda necessárias."
+      },
+      {
+        "id": "CA-06",
+        "criterion": "Salvar e aprovar executa ajuste + decisão de forma atômica.",
+        "status": "pendente",
+        "note": "Motor existente inventariado; execução e evidências específicas do critério ainda necessárias."
+      },
+      {
+        "id": "CA-07",
+        "criterion": "Administrador cria regra em quatro passos sem código/evento técnico visível.",
+        "status": "pendente",
+        "note": "Motor existente inventariado; execução e evidências específicas do critério ainda necessárias."
+      },
+      {
+        "id": "CA-08",
+        "criterion": "Alçadas não podem ter sobreposição inválida.",
+        "status": "pendente",
+        "note": "Motor existente inventariado; execução e evidências específicas do critério ainda necessárias."
+      },
+      {
+        "id": "CA-09",
+        "criterion": "Simulador usa regras reais mas não cria solicitação nem altera registro.",
+        "status": "pendente",
+        "note": "Motor existente inventariado; execução e evidências específicas do critério ainda necessárias."
+      },
+      {
+        "id": "CA-10",
+        "criterion": "Delegação simples transfere aprovações do titular ao delegado durante período definido.",
+        "status": "pendente",
+        "note": "Motor existente inventariado; execução e evidências específicas do critério ainda necessárias."
+      },
+      {
+        "id": "CA-11",
+        "criterion": "Auditoria registra ator, data/hora, ação, regra/versão e alterações.",
+        "status": "pendente",
+        "note": "Motor existente inventariado; execução e evidências específicas do critério ainda necessárias."
+      },
+      {
+        "id": "CA-12",
+        "criterion": "Duas decisões simultâneas não podem finalizar a mesma solicitação duas vezes.",
+        "status": "pendente",
+        "note": "Motor existente inventariado; execução e evidências específicas do critério ainda necessárias."
+      },
+      {
+        "id": "CA-13",
+        "criterion": "Pausa/edição de regra não altera solicitações já abertas.",
+        "status": "pendente",
+        "note": "Motor existente inventariado; execução e evidências específicas do critério ainda necessárias."
+      },
+      {
+        "id": "CA-14",
+        "criterion": "Permissões e isolamento multiempresa são validados no backend.",
+        "status": "pendente",
+        "note": "Motor existente inventariado; execução e evidências específicas do critério ainda necessárias."
+      },
+      {
+        "id": "CA-15",
+        "criterion": "Interface funciona em desktop com os padrões visuais atuais do JRC Conversas.",
+        "status": "pendente",
+        "note": "Motor existente inventariado; execução e evidências específicas do critério ainda necessárias."
+      }
+    ]
+  },
+  "execution_order": [
+    "Checkpoint Relacionamento",
+    "Busca Cliente→Pedido→Solicitação",
+    "Backoffice P1 contrato/assinante/DocuSign e gates",
+    "Backoffice P2 requisitos/documentação/aprovações",
+    "Backoffice P3 e demais evoluções dos quatro documentos"
+  ],
+  "reference_caveats": [
+    "Imagens ilustrativas não são dados reais nem regras executáveis.",
+    "Exigência atual de navegação horizontal prevalece sobre submenus laterais das imagens.",
+    "Referências antigas de etapas não reordenam registros legados; manter workflow versionado.",
+    "Preservar quorum/paralelismo já existentes mesmo quando o Word trata como evolução futura."
+  ]
+}

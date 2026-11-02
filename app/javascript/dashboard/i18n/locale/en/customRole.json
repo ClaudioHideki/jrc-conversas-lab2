@@ -37,6 +37,8 @@
       "JRC_RELATIONSHIP_MANAGE": "Relacionamento: executar ações e registrar resultados",
       "JRC_RELATIONSHIP_TEAM": "Relacionamento: gerir equipe e concessões",
       "JRC_RELATIONSHIP_CONFIGURE": "Relacionamento: configurar regras e playbooks",
+      "JRC_RELATIONSHIP_DOCUMENTS_VIEW": "Relacionamento: consultar documentos autorizados",
+      "JRC_RELATIONSHIP_DOCUMENTS_MANAGE": "Relacionamento: enviar e versionar documentos autorizados",
       "JRC_CONTACT_CENTER_VIEW": "Contact Center: visualizar modulo e operacao autorizada",
       "JRC_CONTACT_CENTER_OPERATE": "Contact Center: atender e registrar ocorrencias/callbacks",
       "JRC_CONTACT_CENTER_SUPERVISE": "Contact Center: supervisionar filas, agentes e operacao",

@@ -68,7 +68,8 @@ class JrcRelationship::CustomerSignals
       detractor: ratings[:nps].where('score <= 6').exists?, critical_tickets: critical, sla_breached: overview[:sla_breached],
       unmanaged_satisfaction: ratings[:unmanaged],
       overdue_cents: overview[:capabilities][:crm] ? invoices.sum(:balance_cents) : nil,
-      delayed_projects: project_late + late_tasks, overdue_activities: customer.activities.overdue.count,
+      delayed_projects: project_late + late_tasks,
+      overdue_activities: customer.activities.overdue.where("NOT (COALESCE(jrc_crm_activities.metadata, '{}'::jsonb) ? 'relationship_action_id')").count,
       active_contract_ids: contracts.pluck(:id), capabilities: overview[:capabilities],
       _source_ids: source_ids(contracts: contracts, invoices: invoices, csat: ratings[:csat], nps: ratings[:nps], ces: ratings[:ces],
                               surveys: ratings[:surveys], plans: plans, sentiment: sentiment) }

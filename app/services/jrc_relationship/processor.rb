@@ -34,16 +34,23 @@ class JrcRelationship::Processor
   end
 
   def action!(kind, reason, data, rules, key: kind)
-    active = @assignment.actions.where(kind: kind, status: JrcRelationship::Action::ACTIVE_STATUSES)
+    health_family = %w[health health_drop].include?(kind)
+    active = @assignment.actions.where(kind: health_family ? %w[health health_drop] : kind, status: JrcRelationship::Action::ACTIVE_STATUSES)
+    key = 'health' if health_family
     keyed = %w[renewal post_ticket expansion].include?(kind)
     active = active.where(source_key: key) if keyed
     current = active.first
     manual = current&.metadata&.dig('manual_priority') == true ? current.priority : nil
-    priority = JrcRelationship::Priority.call(data: data, rules: rules, kind: kind, today: Date.current, manual_priority: manual)
+    related = health_family ? (Array(current&.metadata&.dig('related_signals')) + [kind]).uniq : []
+    priority_kind = related.include?('health_drop') ? 'health_drop' : kind
+    priority = JrcRelationship::Priority.call(data: data, rules: rules, kind: priority_kind, today: Date.current, manual_priority: manual)
     if current
-      if current.priority != priority[:score] || current.factors != priority[:factors].deep_stringify_keys
+      if current.priority != priority[:score] || current.factors != priority[:factors].deep_stringify_keys ||
+         (health_family && current.metadata['related_signals'] != related)
         before = current.attributes.slice('priority', 'factors')
-        current.update!(priority: priority[:score], factors: priority[:factors], metadata: current.metadata.merge('_source_ids' => data[:_source_ids]))
+        metadata = current.metadata.merge('_source_ids' => data[:_source_ids])
+        metadata['related_signals'] = related if health_family
+        current.update!(priority: priority[:score], factors: priority[:factors], metadata: metadata)
         @context.audit!(current, before: before, after: current.attributes.slice('priority', 'factors'), action: 'priority_updated')
       end
       return current
@@ -53,7 +60,8 @@ class JrcRelationship::Processor
     return record if record.persisted?
     record.assign_attributes(account: @context.account, owner: @assignment.owner, kind: kind, reason: reason,
                              priority: priority[:score], factors: priority[:factors],
-                             due_at: Time.current + rules['sla_hours'].hours, metadata: { _source_ids: data[:_source_ids] })
+                             due_at: Time.current + rules['sla_hours'].hours,
+                             metadata: { _source_ids: data[:_source_ids] }.merge(health_family ? { related_signals: related } : {}))
     JrcRelationship::OperationalRouting.new(@context).prepare!(record, signals: data)
     record.save!
     JrcRelationship::Workflow.new(@context).project_action!(record)

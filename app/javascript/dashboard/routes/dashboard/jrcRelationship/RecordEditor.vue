@@ -14,6 +14,7 @@ const props = defineProps({
 });
 const emit = defineEmits(['save', 'close']);
 const { t } = useI18n();
+const editorTab = ref('record');
 const form = reactive({
   assignment_id: props.record.assignment_id || '',
   request_id: crypto.randomUUID(),
@@ -104,6 +105,8 @@ const options = key => {
             value === props.record.status
         )
       : STATES[props.kind];
+  if (key === 'customer_confirmation')
+    return ['pending', 'confirmed', 'unresolved', 'not_applicable'];
   if (key === 'severity') return ['low', 'medium', 'high', 'critical'];
   if (key === 'kind' && props.kind === 'surveys') return ['nps', 'ces'];
   if (key === 'expansion_kind')
@@ -121,7 +124,7 @@ const fieldType = key => {
   if (key.endsWith('_url')) return 'url';
   return 'text';
 };
-['due_at', 'scheduled_at'].forEach(key => {
+['due_at', 'scheduled_at', 'return_at'].forEach(key => {
   if (form[key]) {
     const d = new Date(form[key]);
     form[key] = new Date(d.getTime() - d.getTimezoneOffset() * 60000)
@@ -176,7 +179,7 @@ const add = key => {
 const submit = () => {
   if (props.readOnly || props.busy) return;
   const payload = { ...form };
-  ['due_at', 'scheduled_at'].forEach(key => {
+  ['due_at', 'scheduled_at', 'return_at'].forEach(key => {
     if (payload[key]) payload[key] = new Date(payload[key]).toISOString();
   });
   [
@@ -211,6 +214,11 @@ const submit = () => {
   <form
     class="rounded-xl border border-n-weak bg-n-solid-2 p-5"
     @submit.prevent="submit"
+    @invalid.capture="
+      editorTab =
+        $event.target.closest('[data-editor-tab]')?.dataset.editorTab ||
+        editorTab
+    "
   >
     <div class="mb-4 flex items-center justify-between">
       <h3 class="font-semibold">
@@ -224,6 +232,30 @@ const submit = () => {
         {{ t('RELATIONSHIP.CLOSE') }}
       </button>
     </div>
+    <nav
+      class="mb-4 flex flex-wrap gap-2"
+      :aria-label="t('RELATIONSHIP.EDIT')"
+    >
+      <button
+        v-for="key in [
+          'record',
+          ...(['actions', 'plans', 'qbrs', 'expansion'].includes(kind)
+            ? ['context']
+            : []),
+          ...(['plans', 'qbrs', 'risks'].includes(kind) ? ['work'] : []),
+        ]"
+        :key="key"
+        type="button"
+        :class="[
+          buttonClass,
+          editorTab === key && 'border-n-violet-8 text-n-violet-11 ',
+        ]"
+        :aria-pressed="editorTab === key"
+        @click="editorTab = key"
+      >
+        {{ t(`RELATIONSHIP.V2.EDITOR.${key}`) }}
+      </button>
+    </nav>
     <fieldset :disabled="readOnly">
       <label class="mb-4 block text-sm"
         >{{ t('RELATIONSHIP.FIELDS.customer')
@@ -245,16 +277,22 @@ const submit = () => {
       >
       <SlaSummary
         v-if="kind === 'actions'"
+        v-show="editorTab === 'context'"
         :sla="record.sla"
         :metadata="metadata"
       />
       <WorkContextPanel
         v-if="['qbrs', 'plans', 'expansion'].includes(kind)"
+        v-show="editorTab === 'context'"
         :assignment-id="form.assignment_id"
         :initial-period="record.metadata || {}"
         @loaded="loadContext"
       />
-      <div class="grid gap-4 md:grid-cols-2">
+      <div
+        v-show="editorTab === 'record'"
+        data-editor-tab="record"
+        class="grid gap-4 md:grid-cols-2"
+      >
         <label
           v-if="kind === 'renewals' && form.status === 'won'"
           class="text-sm"
@@ -333,7 +371,13 @@ const submit = () => {
               :key="value"
               :value="value"
             >
-              {{ t(`RELATIONSHIP.STATES.${value}`) }}
+              {{
+                t(
+                  key === 'customer_confirmation'
+                    ? `RELATIONSHIP.V2.CONFIRMATION.${value}`
+                    : `RELATIONSHIP.STATES.${value}`
+                )
+              }}
             </option>
           </select>
           <template v-else-if="key === 'reason' && kind === 'risks'">
@@ -356,6 +400,8 @@ const submit = () => {
             v-else-if="
               [
                 'reason',
+                'next_step',
+                'customer_feedback',
                 'result',
                 'outcome',
                 'agenda',
@@ -386,6 +432,7 @@ const submit = () => {
       </div>
       <label
         v-if="kind === 'plans'"
+        v-show="editorTab === 'record'"
         class="mt-3 block text-sm"
         >{{ t('RELATIONSHIP.FIELDS.notes')
         }}<textarea
@@ -395,6 +442,8 @@ const submit = () => {
       </label>
       <div
         v-if="kind === 'risks'"
+        v-show="editorTab === 'work'"
+        data-editor-tab="work"
         class="mt-4 grid gap-3 md:grid-cols-2"
       >
         <label
@@ -417,7 +466,9 @@ const submit = () => {
       </div>
       <section
         v-for="collection in collections"
+        v-show="editorTab === 'work'"
         :key="collection"
+        data-editor-tab="work"
         class="mt-4"
       >
         <h4 class="mb-2 font-semibold">
@@ -498,6 +549,8 @@ const submit = () => {
       </p>
       <label
         v-if="kind === 'risks' && form.plan.concessions"
+        v-show="editorTab === 'work'"
+        data-editor-tab="work"
         class="mt-3 block text-sm"
       >
         {{ t('RELATIONSHIP.CONCESSION_APPROVAL') }}

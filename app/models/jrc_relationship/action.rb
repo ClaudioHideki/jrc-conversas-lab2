@@ -9,6 +9,19 @@ class JrcRelationship::Action < JrcRelationship::Record
   validate { errors.add(:operations_sla_policy, 'must use relationship scope') if operations_sla_policy && operations_sla_policy.scope_kind != 'relationship' }
   belongs_to :activity, class_name: 'JrcCrm::Activity', optional: true
   belongs_to :completed_by, class_name: 'User', optional: true
+  belongs_to :customer_confirmed_by, class_name: 'User', optional: true
+  validates :customer_confirmation, inclusion: { in: %w[pending confirmed unresolved not_applicable] }
+  validates :customer_feedback, :customer_confirmed_at, :customer_confirmed_by, presence: true,
+            if: -> { %w[confirmed unresolved].include?(customer_confirmation) }
+  validates :next_step, length: { maximum: 4000 }
+  validates :customer_feedback, length: { maximum: 8000 }
+  validates :next_step, presence: true, if: -> { return_at.present? }
+  validates :return_at, presence: true, if: -> { next_step.present? && ACTIVE_STATUSES.include?(status) }
+  validate do
+    if customer_confirmed_by_id && !AccountUser.exists?(account_id: account_id, user_id: customer_confirmed_by_id)
+      errors.add(:customer_confirmed_by, 'must belong to the account')
+    end
+  end
   validates :kind, :reason, :source_key, presence: true
   validates :status, inclusion: { in: ACTIVE_STATUSES + %w[completed dismissed] }
   validates :priority, numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 100 }

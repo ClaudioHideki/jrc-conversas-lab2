@@ -76,7 +76,9 @@
       "reports": "Relatórios",
       "settings": "Configurações",
       "survey_admin": "Survey Administration",
-      "handoffs": "Commercial → CS Handoff"
+      "handoffs": "Commercial → CS Handoff",
+      "customers": "Cliente 360º",
+      "actions_advanced": "Operações em lote e filtros"
     },
     "BANDS": {
       "healthy": "Saudável",
@@ -244,7 +246,11 @@
       "source_product_id": "Source product",
       "contact_id": "Recipient contact",
       "meeting_url": "Meeting link",
-      "recording_url": "Recording link"
+      "recording_url": "Recording link",
+      "next_step": "Próximo passo",
+      "return_at": "Data de retorno",
+      "customer_confirmation": "Confirmação do cliente",
+      "customer_feedback": "Retorno do cliente"
     },
     "METRICS": {
       "customers": "Clientes na carteira",
@@ -1139,6 +1145,139 @@
         "SYMBOL_BDA050": "—",
         "SYMBOL_3973E0": "-",
         "SYMBOL_E7AC07": ":"
+      }
+    },
+    "V2": {
+      "AREAS": {
+        "overview": "Dashboard",
+        "actions": "Central de Ações",
+        "portfolio": "Carteiras",
+        "customers": "Cliente 360º",
+        "health": "Saúde e Riscos",
+        "plans": "Planos de Acompanhamento",
+        "playbooks": "Automações NICO",
+        "reports": "Relatórios e BI",
+        "settings": "Configurações"
+      },
+      "PURPOSE": "Identificar, cuidar e acompanhar cada compromisso com o cliente.",
+      "CONTEXT_NAV": "Fluxos da área selecionada",
+      "MY_DASHBOARD": "Meu Painel",
+      "MY_ACTIONS": "Minhas Ações",
+      "ROUTINE": "Priorize → consulte a evidência → converse → registre o resultado → combine o retorno.",
+      "MINE": "Minha responsabilidade",
+      "AUTHORIZED_TEAM": "Equipe autorizada",
+      "RECORD_RESULT": "Registrar resultado e retorno",
+      "TABS": {
+        "result": "Resultado e confirmação",
+        "followup": "Próximo passo e retorno",
+        "context": "Contexto e evidências",
+        "history": "Histórico",
+        "relationship": "Relacionamento e canais",
+        "modules": "Módulos de origem",
+        "documents": "Documentos do cliente"
+      },
+      "TECHNICAL_NOT_CONFIRMATION": "Resolver um chamado técnico não confirma a recuperação da experiência. Registre a resposta do cliente ou mantenha a confirmação pendente.",
+      "CONFIRMATION": {
+        "pending": "Confirmação do cliente pendente",
+        "confirmed": "Cliente confirmou a solução",
+        "unresolved": "Cliente informou que continua pendente",
+        "not_applicable": "Confirmação não aplicável"
+      },
+      "CASE": "Caso de acompanhamento",
+      "OPEN_360": "Abrir Cliente 360º",
+      "NO_NEXT_STEP": "Próximo passo ainda não registrado",
+      "EVIDENCE": "Evidências e módulos de origem",
+      "CONVERSATIONS": "Conversar com o cliente",
+      "NO_CHANNEL": "Nenhuma conversa autorizada disponível. Consulte os canais no Cliente 360º.",
+      "OPEN_CONVERSATION": "Abrir conversa",
+      "NO_HISTORY": "Nenhum registro de alteração disponível.",
+      "SOURCES": {
+        "customer": "Contexto do cliente",
+        "ticket": "Consultar chamado",
+        "activity": "Atividade na agenda",
+        "invoice": "Documento financeiro",
+        "contract": "Contrato",
+        "survey": "Pesquisa",
+        "csat_survey_response": "Resposta CSAT",
+        "expansion": "Oportunidade comercial",
+        "project": "Projeto"
+      },
+      "CARDS": {
+        "customers": "Clientes sob responsabilidade",
+        "at_risk": "Clientes que precisam de atenção",
+        "actions_today": "Ações para hoje",
+        "overdue_returns": "Retornos vencidos",
+        "waiting_customer_actions": "Aguardando resposta"
+      },
+      "MONITORING": "Evidência do processamento de saúde",
+      "COVERAGE": "{observed} de {total} clientes com observação autorizada",
+      "LAST_PROCESSING": "Último processamento observado",
+      "STALE": "{count} observações com mais de 15 minutos",
+      "MONITORING_LIMIT": "A observação indica processamento realizado; não confirma disponibilidade contínua dos jobs ou das integrações. Dados ausentes permanecem indisponíveis.",
+      "PRIORITIES": "Quem precisa de atenção agora",
+      "SEE_ALL": "Ver todas as ações",
+      "EMPTY_ACTIONS": "Nenhuma ação encontrada neste escopo e filtros.",
+      "PAGINATION": "Paginação de registros",
+      "PREVIOUS": "Anterior",
+      "NEXT": "Próxima",
+      "PAGE": "Página {page} · {total} registros",
+      "BACK_TO_LIST": "Voltar aos clientes",
+      "ADVANCED_ACTIONS": "Criar ação, operações em lote e filtros completos",
+      "PRIORITY": {
+        "health": "Saúde observada",
+        "mrr": "Receita autorizada",
+        "renewal": "Proximidade da renovação",
+        "inactivity": "Tempo sem contato"
+      },
+      "WEIGHT": "Peso {value}",
+      "PORTFOLIO": {
+        "customers": "Clientes vinculados",
+        "team": "Equipe autorizada"
+      },
+      "EDITOR": {
+        "record": "Registro",
+        "context": "Contexto de origem",
+        "work": "Plano, itens e decisões"
+      },
+      "PROCESSING": {
+        "running": "Tentativa de processamento ainda sem conclusão",
+        "completed": "Processamento concluído",
+        "failed": "Processamento com falhas"
+      },
+      "PROCESSING_RESULT": "{processed} clientes processados; {failed} falhas no escopo",
+      "NICO_SUMMARY": "Consultar resumo e recomendações NICO",
+      "SCHEDULE_RETURN": "Agendar retorno",
+      "ESCALATE": "Acionar área responsável no Service Desk",
+      "DOCS": {
+        "HEADING": "Documentos do cliente",
+        "UPLOAD": "Enviar documento",
+        "NEW_VERSION": "Enviar nova versão",
+        "VERSIONS": "Versões preservadas",
+        "TITLE": "Nome do documento",
+        "CATEGORY": "Categoria",
+        "FILE": "Arquivo (até 10 MiB)",
+        "VALID_UNTIL": "Válido até",
+        "CHANGE_REASON": "Motivo e contexto da versão",
+        "QUARANTINE": "O arquivo fica em quarentena até uma verificação antivírus válida. Serviço indisponível ou arquivo infectado bloqueia o download. Versões anteriores são preservadas.",
+        "DOWNLOAD": "Baixar com autorização",
+        "EXPIRED": "Validade vencida",
+        "EMPTY": "Nenhum documento registrado neste cliente.",
+        "TABS": {
+          "file": "Arquivo e identificação",
+          "validity": "Validade e contexto"
+        },
+        "CATEGORIES": {
+          "registration": "Cadastro",
+          "contract": "Evidência contratual",
+          "evidence": "Evidência de acompanhamento",
+          "other": "Outro"
+        },
+        "SCAN": {
+          "pending": "Aguardando verificação",
+          "unavailable": "Antivírus indisponível — em quarentena",
+          "clean": "Verificação válida",
+          "infected": "Arquivo bloqueado pelo antivírus"
+        }
       }
     }
   }

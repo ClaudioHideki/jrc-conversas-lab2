@@ -1374,9 +1374,6 @@ const menuItems = computed(() => {
           name: 'Relationship', label: t('RELATIONSHIP.TITLE'), icon: 'i-lucide-heart-handshake',
           to: accountScopedRoute('jrc_relationship_overview'),
           activeOn: RELATIONSHIP_SCREENS.map(screen => `jrc_relationship_${screen}`),
-          children: RELATIONSHIP_SCREENS.map(screen => ({ name: `Relationship ${screen}`,
-            label: t(`RELATIONSHIP.SCREENS.${screen}`), icon: 'i-lucide-circle-small',
-            to: accountScopedRoute(`jrc_relationship_${screen}`), activeOn: [`jrc_relationship_${screen}`] })),
         }
       : null,
     {

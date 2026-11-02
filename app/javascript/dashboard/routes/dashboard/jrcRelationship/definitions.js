@@ -14,6 +14,8 @@ export const SCREENS = [
   'settings',
   'survey_admin',
   'handoffs',
+  'customers',
+  'actions_advanced',
 ];
 export const STATES = {
   surveys: ['awaiting', 'responded', 'expired'],
@@ -40,7 +42,18 @@ export const STATES = {
   expansion: ['suggested', 'approved', 'rejected', 'converted'],
 };
 export const FIELDS = {
-  actions: ['reason', 'status', 'priority', 'due_at', 'result', 'owner_id'],
+  actions: [
+    'reason',
+    'status',
+    'priority',
+    'due_at',
+    'result',
+    'owner_id',
+    'next_step',
+    'return_at',
+    'customer_confirmation',
+    'customer_feedback',
+  ],
   risks: [
     'reason',
     'kind',

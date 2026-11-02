@@ -591,6 +591,12 @@ Rails.application.routes.draw do
             get :dashboard, to: 'dashboard#show'
             get :drilldown, to: 'dashboard#drilldown'
             get :team, to: 'dashboard#team'
+            resources :documents, only: [:index, :show, :create] do
+              member do
+                post :version
+                get 'versions/:version_id/download', action: :download, as: :download
+              end
+            end
             resources :portfolio, only: [:index, :show, :create, :update] do
               member do
                 post :recalculate
@@ -603,6 +609,7 @@ Rails.application.routes.draw do
               end
             end
             get 'records/:kind', to: 'records#index'
+            get 'records/:kind/:id', to: 'records#show'
             post 'records/:kind', to: 'records#create'
             patch 'records/:kind/:id', to: 'records#update'
             post 'records/:kind/:id/opportunity', to: 'records#opportunity'

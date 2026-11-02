@@ -35,7 +35,12 @@ module JrcFlows::OwnershipHooks
                                         else
                                           type=='webhook' ? 'EXTERNAL' : 'DATABASE'
                                         end
-      JrcFlows::OwnershipEffects.perform(reference: JrcFlows::OwnershipHooks.reference("action:#{@run.id}:#{type}"), kind: kind) { super }
+      reference = JrcFlows::OwnershipHooks.reference("action:#{@run.id}:#{type}")
+      if kind == 'MESSAGE'
+        message = JrcRelationship::PlaybookFlowContinuation.replayed_message(@run, type, data)
+        return JrcFlows::OwnershipEffects.replay_message!(reference: reference, message: message) if message
+      end
+      JrcFlows::OwnershipEffects.perform(reference: reference, kind: kind) { super }
     end
   end
 

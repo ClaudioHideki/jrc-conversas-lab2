@@ -39,6 +39,8 @@ RSpec.describe JrcRelationship::RenewalOutcome do
                                      snapshot: { 'source_contract_id' => source_contract&.id }.compact)
     request = order.backoffice_requests.find_by!(request_kind: 'approval')
     JrcCrm::OrderApprovalService.new(order: order, actor: sd_user).decide!(request: request, decision: 'approved')
+    fulfillment = order.backoffice_requests.find_by!(request_kind: 'fulfillment')
+    fulfillment.advance!(actor: sd_user) while %w[request analysis documentation approval].include?(fulfillment.stage)
     order.reload
   end
 
@@ -114,6 +116,8 @@ RSpec.describe JrcRelationship::RenewalOutcome do
     sd_account.jrc_crm_contract_templates.create!(name: 'Renewal template', body: 'Native renewal contract', active: true)
     approval = order.backoffice_requests.find_by!(request_kind: 'approval')
     JrcCrm::OrderApprovalService.new(order: order, actor: sd_user).decide!(request: approval, decision: 'approved')
+    fulfillment = order.backoffice_requests.find_by!(request_kind: 'fulfillment')
+    fulfillment.advance!(actor: sd_user) while %w[request analysis documentation approval].include?(fulfillment.stage)
     order.reload.contracts.find_by!(source_contract_id: original.id)
   end
 

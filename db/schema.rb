@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_11_01_200000) do
+ActiveRecord::Schema[7.1].define(version: 2026_11_01_230000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -4197,8 +4197,15 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_01_200000) do
     t.datetime "sla_due_at"
     t.datetime "sla_paused_at"
     t.integer "sla_paused_seconds", default: 0, null: false
+    t.text "next_step"
+    t.datetime "return_at"
+    t.string "customer_confirmation", default: "pending", null: false
+    t.text "customer_feedback"
+    t.datetime "customer_confirmed_at"
+    t.bigint "customer_confirmed_by_id"
     t.index ["account_id", "assignment_id"], name: "actions_rel_scope"
     t.index ["account_id", "operations_queue_id", "status"], name: "rel_operational_queue"
+    t.index ["account_id", "owner_id", "return_at"], name: "rel_action_return_queue", where: "((status)::text = ANY ((ARRAY['open'::character varying, 'in_progress'::character varying, 'waiting_customer'::character varying, 'waiting_finance'::character varying])::text[]))"
     t.index ["account_id", "status", "due_at", "priority"], name: "rel_action_queue"
     t.index ["account_id"], name: "index_jrc_relationship_actions_on_account_id"
     t.index ["activity_id"], name: "index_jrc_relationship_actions_on_activity_id"
@@ -4207,6 +4214,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_01_200000) do
     t.index ["operations_queue_id"], name: "index_jrc_relationship_actions_on_operations_queue_id"
     t.index ["operations_sla_policy_id"], name: "index_jrc_relationship_actions_on_operations_sla_policy_id"
     t.index ["owner_id"], name: "index_jrc_relationship_actions_on_owner_id"
+    t.check_constraint "customer_confirmation::text = ANY (ARRAY['pending'::character varying, 'confirmed'::character varying, 'unresolved'::character varying, 'not_applicable'::character varying]::text[])", name: "rel_action_customer_confirmation"
   end
 
   create_table "jrc_relationship_assignments", force: :cascade do |t|
@@ -4327,6 +4335,34 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_01_200000) do
     t.index ["account_id"], name: "index_jrc_relationship_configurations_on_account_id"
   end
 
+  create_table "jrc_relationship_customer_documents", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "assignment_id", null: false
+    t.string "title", null: false
+    t.string "category", default: "other", null: false
+    t.string "status", default: "active", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "id"], name: "rel_document_tenant_ref", unique: true
+    t.index ["account_id"], name: "index_jrc_relationship_customer_documents_on_account_id"
+    t.index ["assignment_id"], name: "index_jrc_relationship_customer_documents_on_assignment_id"
+  end
+
+  create_table "jrc_relationship_document_versions", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "document_id", null: false
+    t.bigint "uploaded_by_id", null: false
+    t.integer "number", null: false
+    t.date "valid_until"
+    t.string "change_reason", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_relationship_document_versions_on_account_id"
+    t.index ["document_id", "number"], name: "rel_document_version_number", unique: true
+    t.index ["document_id"], name: "index_jrc_relationship_document_versions_on_document_id"
+    t.index ["uploaded_by_id"], name: "index_jrc_relationship_document_versions_on_uploaded_by_id"
+  end
+
   create_table "jrc_relationship_expansion_signals", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.bigint "assignment_id", null: false
@@ -4430,6 +4466,22 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_01_200000) do
     t.jsonb "conditions", default: [], null: false
     t.integer "version", default: 1, null: false
     t.index ["account_id"], name: "index_jrc_relationship_playbooks_on_account_id"
+  end
+
+  create_table "jrc_relationship_processing_runs", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "viewer_id", null: false
+    t.string "access_signature", null: false
+    t.string "state", default: "running", null: false
+    t.jsonb "requested_ids", default: [], null: false
+    t.jsonb "outcomes", default: {}, null: false
+    t.datetime "started_at", null: false
+    t.datetime "finished_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "viewer_id", "created_at"], name: "rel_processing_viewer_history"
+    t.index ["account_id"], name: "index_jrc_relationship_processing_runs_on_account_id"
+    t.index ["viewer_id"], name: "index_jrc_relationship_processing_runs_on_viewer_id"
   end
 
   create_table "jrc_relationship_qbrs", force: :cascade do |t|
@@ -9023,4 +9075,14 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_01_200000) do
     CREATE TRIGGER jrc_effect_message_control BEFORE INSERT ON messages FOR EACH ROW EXECUTE FUNCTION jrc_effect_message_control();
   JRC_SCHEMA_SQL_213d81448354
 
+  add_foreign_key "jrc_relationship_actions", "users", column: "customer_confirmed_by_id"
+  add_foreign_key "jrc_relationship_customer_documents", "accounts"
+  add_foreign_key "jrc_relationship_customer_documents", "jrc_relationship_assignments", column: "assignment_id"
+  add_foreign_key "jrc_relationship_customer_documents", "jrc_relationship_assignments", column: ["account_id", "assignment_id"], primary_key: ["account_id", "id"], name: "rel_document_assignment_tenant"
+  add_foreign_key "jrc_relationship_document_versions", "accounts"
+  add_foreign_key "jrc_relationship_document_versions", "jrc_relationship_customer_documents", column: "document_id"
+  add_foreign_key "jrc_relationship_document_versions", "jrc_relationship_customer_documents", column: ["account_id", "document_id"], primary_key: ["account_id", "id"], name: "rel_document_version_tenant"
+  add_foreign_key "jrc_relationship_document_versions", "users", column: "uploaded_by_id"
+  add_foreign_key "jrc_relationship_processing_runs", "accounts"
+  add_foreign_key "jrc_relationship_processing_runs", "users", column: "viewer_id"
 end
