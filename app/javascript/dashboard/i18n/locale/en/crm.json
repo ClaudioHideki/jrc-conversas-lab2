@@ -1035,7 +1035,14 @@
         "DRAFT_SAVED": "Minuta atualizada. Os PDFs anteriores foram preservados; gere uma nova versão para registrar as alterações.",
         "EDIT_NOTE": "A edição altera somente a minuta e a vigência deste contrato. Valores e condições financeiras seguem o fluxo comercial autorizado.",
         "TEMPLATE": "Modelo atual:",
-        "TEMPLATE_HELP": "Deixe a minuta vazia para usar o modelo atual. Se não houver modelo, informe o texto antes de gerar a versão."
+        "TEMPLATE_HELP": "Deixe a minuta vazia para usar o modelo atual. Se não houver modelo, informe o texto antes de gerar a versão.",
+        "SELECT_TEMPLATE": "Selecionar modelo contratual",
+        "TEMPLATES_HELP": "Modelos ativos que atendem aos critérios do pedido e da emitente. A seleção preserva a minuta digitada; use o texto do modelo se desejar substituí-la, depois salve.",
+        "TEMPLATE_SEARCH": "Pesquisar modelo pelo nome",
+        "TEMPLATES_ERROR": "Não foi possível consultar os modelos autorizados. Atualize e tente novamente.",
+        "TEMPLATES_EMPTY": "Nenhum modelo ativo atende aos critérios desta pesquisa e deste pedido.",
+        "USE_TEMPLATE_TEXT": "Usar texto do modelo selecionado",
+        "NO_TEMPLATE": "Usar somente minuta própria"
       },
       "CONTRACT_SIGNERS": {
         "NAVIGATION": "Contrato, versões e assinantes",

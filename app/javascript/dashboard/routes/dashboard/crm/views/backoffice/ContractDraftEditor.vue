@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import { backofficeContractVersionsAPI as api } from 'dashboard/api/crm/commercialCycle';
 import { useBackofficePresentation } from './useBackofficePresentation';
+import ContractTemplatePicker from './ContractTemplatePicker.vue';
 const props = defineProps({
   accountId: { type: [Number, String], required: true },
   requestId: { type: [Number, String], required: true },
@@ -14,7 +15,9 @@ const form = ref(null);
 const loading = ref(true);
 const saving = ref(false);
 const error = ref('');
-const template = ref('');
+const template = ref(null);
+const originalTemplateId = ref(null);
+const selectingTemplate = ref(false);
 const locked = ref(false);
 const sourceDigest = ref('');
 const stale = ref(false);
@@ -38,10 +41,13 @@ const save = async () => {
   saving.value = true;
   error.value = '';
   try {
+    const attributes = { ...form.value };
+    if ((template.value?.id || null) !== originalTemplateId.value)
+      attributes.contract_template_id = template.value?.id || null;
     const { data } = await api.updateDraft(
       props.accountId,
       props.requestId,
-      form.value,
+      attributes,
       sourceDigest.value,
       { signal: controller.signal }
     );
@@ -59,6 +65,7 @@ const load = async () => {
   loading.value = true;
   error.value = '';
   form.value = null;
+  selectingTemplate.value = false;
   stale.value = false;
   try {
     const { data } = await api.draft(props.accountId, props.requestId, {
@@ -67,8 +74,8 @@ const load = async () => {
     if (!active) return;
     locked.value = ['sent', 'signed'].includes(data.signature_status);
     sourceDigest.value = data.source_digest;
-    template.value =
-      data.template?.name || text('CONTRACT_VERSIONS.NOT_DEFINED');
+    template.value = data.template || null;
+    originalTemplateId.value = data.template?.id || null;
     form.value = {
       content_override: data.content_override || '',
       notes: data.notes || '',
@@ -85,6 +92,11 @@ onMounted(() => {
   dialog.value.open();
   load();
 });
+const selectTemplate = value => {
+  if (busy.value || locked.value || stale.value) return;
+  template.value = value;
+  selectingTemplate.value = false;
+};
 onBeforeUnmount(() => {
   active = false;
   controller.abort();
@@ -126,8 +138,45 @@ onBeforeUnmount(() => {
       </button>
       <template v-if="form">
         <p class="text-sm text-n-slate-11">
-          {{ text('CONTRACT_VERSIONS.TEMPLATE') }} {{ template }}
+          {{ text('CONTRACT_VERSIONS.TEMPLATE') }}
+          {{ template?.name || text('CONTRACT_VERSIONS.NOT_DEFINED') }}
         </p>
+        <div class="flex flex-wrap gap-2">
+          <button
+            type="button"
+            :disabled="busy || locked || stale"
+            class="rounded-lg border border-n-violet-6 bg-n-violet-3 px-3 py-2 text-sm text-n-violet-12 disabled:opacity-50"
+            @click="selectingTemplate = !selectingTemplate"
+          >
+            {{ text('CONTRACT_VERSIONS.SELECT_TEMPLATE') }}
+          </button>
+          <button
+            v-if="template"
+            type="button"
+            :disabled="busy || locked || stale"
+            class="rounded-lg border border-n-weak px-3 py-2 text-sm disabled:opacity-50"
+            @click="selectTemplate(null)"
+          >
+            {{ text('CONTRACT_VERSIONS.NO_TEMPLATE') }}
+          </button>
+          <button
+            v-if="template && form.content_override"
+            type="button"
+            :disabled="busy || locked || stale"
+            class="rounded-lg border border-n-blue-6 bg-n-blue-3 px-3 py-2 text-sm text-n-blue-12 disabled:opacity-50"
+            @click="form.content_override = ''"
+          >
+            {{ text('CONTRACT_VERSIONS.USE_TEMPLATE_TEXT') }}
+          </button>
+        </div>
+        <ContractTemplatePicker
+          v-if="selectingTemplate"
+          :account-id="accountId"
+          :request-id="requestId"
+          :disabled="busy || locked || stale"
+          @choose="selectTemplate"
+          @denied="failureText({ response: { status: 403 } })"
+        />
         <p v-if="locked" class="text-sm text-n-amber-12">
           {{ text('CONTRACT_VERSIONS.LOCKED') }}
         </p>

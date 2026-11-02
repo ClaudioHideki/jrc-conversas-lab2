@@ -1,0 +1,263 @@
+{
+  "date": "2026-11-02",
+  "phase": "B — seleção contextual do modelo contratual concluída neste incremento; poderes e B3 pendentes",
+  "global_state": "parcial; não é conclusão das quatro frentes nem homologação externa",
+  "branch": "codex/relacionamento-v2-20261101",
+  "base_commit": "6dfb72ca81848653590b45502bec02e69147119f",
+  "implemented": [
+    "Reutiliza a tabela e o motor nativo JrcCrm::ContractTemplateSelection; não cria um registro paralelo de modelos.",
+    "Seleção deriva pedido/emitente da solicitação autorizada, filtra modelos ativos/elegíveis e retorna10 por página sem corpo jurídico.",
+    "Busca no servidor com escape de ILIKE; empresa/unidade/conta fornecidas na query não concedem acesso.",
+    "Nova escolha é revalidada no servidor; modelo de outra conta/emitente, inativo ou fora dos critérios é recusado.",
+    "Atualização usa o editor nativo, CAS e locks da minuta/modelos; mantém locks financeiros, invalidação nativa de aprovações e histórico de PDFs.",
+    "Escolher modelo preserva texto digitado até a ação explícita Usar texto do modelo selecionado; minuta própria continua permitida.",
+    "Modelo atual inativo pode ser preservado ao editar outro campo; não se transforma em nova escolha nem se reescreve o legado.",
+    "Referência do modelo incluída na auditoria contextual sem registrar o texto jurídico; notas livres também filtradas nos parâmetros reais de log.",
+    "Interface salva/reabre a escolha e gera PDF privado com o novo modelo e o mesmo roster imutável de três signatários obrigatórios."
+  ],
+  "native_code_reused": [
+    "JrcCrm::ContractTemplate",
+    "JrcCrm::ContractTemplateSelection",
+    "JrcBackoffice::ContractAccess",
+    "JrcCrm::CorporateIssuer",
+    "Api::V1::Accounts::Crm::ContractsController",
+    "JrcApprovals::CommercialInvalidation",
+    "JrcBackoffice::ContractVersions",
+    "JrcCrm::ContractPdfService"
+  ],
+  "migrations": {
+    "new": [],
+    "current_schema": "20261102070000",
+    "production_applied": false
+  },
+  "validation": {
+    "backend_selected": {
+      "duration": 568.115815077,
+      "example_count": 570,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0,
+      "files": 60,
+      "artifact": {
+        "path": ".codex\\consolidation-template-backend-full.json",
+        "sha256": "51ae81416232ed2085ae29e686a0e2b6cd1f7dc84dbb4e49176736001319044a",
+        "bytes": 261178
+      },
+      "not_entire_repository": true
+    },
+    "targeted_roles_and_contracts": {
+      "duration": 101.122611978,
+      "example_count": 39,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0,
+      "artifact": {
+        "path": ".codex\\consolidation-template-backend-roles.json",
+        "sha256": "b0bb443d744ba6a05923e83ba2e106dead8f28c48160782e7f19de4e315c56f9",
+        "bytes": 18873
+      },
+      "includes": [
+        "analista atribuído sem administração de modelos",
+        "administrador com cobertura revogada",
+        "outra conta/emitente negada",
+        "mudança de regras e de texto depois da prévia",
+        "contrato enviado bloqueado",
+        "PDF histórico preservado",
+        "parâmetros jurídicos/notas filtrados"
+      ]
+    },
+    "frontend": {
+      "tests": 197,
+      "files": 34,
+      "failures": 0,
+      "pending": 0,
+      "artifact": {
+        "path": ".codex\\consolidation-template-frontend-full.json",
+        "sha256": "f1459db1136dd65772c470621822adc02102d6fe6512013ca59b8c9dd240250b",
+        "bytes": 77352
+      }
+    },
+    "ruby_lint": {
+      "overall_passed": false,
+      "inspected_files": 5,
+      "clean_files": 4,
+      "offenses": 1,
+      "remaining": "config/routes.rb:1 — CRLF preexistente; nenhuma infração nova de lógica/estilo nos quatro arquivos alterados inspecionados.",
+      "artifact": {
+        "path": ".codex\\consolidation-template-ruby-lf-final.json",
+        "sha256": "df1dd3546cd272df44d2c3748b0ea3c69d7d0c3b246d04a2fd6250748153ceda",
+        "bytes": 853
+      }
+    },
+    "frontend_lint": {
+      "files": 5,
+      "errors": 0,
+      "warnings": 0,
+      "artifact": {
+        "path": ".codex\\consolidation-template-frontend-lint-current.json",
+        "sha256": "5641b3056176e324db1654b5351527a3e6226a337ed2a3416a1a17b6fd4d0550",
+        "bytes": 4363
+      }
+    },
+    "frontend_build": {
+      "status": "passed",
+      "duration": "5m51s",
+      "artifact": {
+        "path": ".codex\\consolidation-template-production-build.log",
+        "sha256": "78ed60d083652d3492fc34654e0e23d50682a20aa77bb74ce451b66197f33660",
+        "bytes": 53566
+      },
+      "warnings": [
+        "chunks grandes",
+        "Browserslist antigo",
+        "brand JPEG resolvido em runtime",
+        "Webphone importado por caminhos estático/dinâmico"
+      ],
+      "docker_image_built": false
+    },
+    "rails_eager_load": {
+      "status": "passed",
+      "artifact": {
+        "path": ".codex\\consolidation-template-zeitwerk.log",
+        "sha256": "14a2b02856260727e7bff1d5d0eb5fe337b6912e5c29c905fecc7babe1d62b0c",
+        "bytes": 953
+      }
+    },
+    "source": {
+      "files": 11182,
+      "baseline": "6dfb72ca81848653590b45502bec02e69147119f",
+      "mismatches": [],
+      "snapshot": "/consolidation-templates-validated",
+      "sql_raw_hashes": true,
+      "manifest": {
+        "path": ".codex\\consolidation-template-source-manifest.json",
+        "sha256": "57d25cd96e5fc9107b62d4e0b7e646852bfe8bce1c33793aba93c6721347b87a",
+        "bytes": 1830369
+      },
+      "note": "Hashes textuais normalizam CRLF; os dois SQL críticos são verificados como bytes. Somente o initializer de filtros recebeu LF após a regressão, sem alteração de código/comportamento."
+    },
+    "browser": {
+      "status": "passed",
+      "synthetic_only": true,
+      "snapshot": "/consolidation-templates-validated",
+      "template_id": 1,
+      "contract_version_id": 11,
+      "signer_roster_id": 2,
+      "previous_version_id": 10,
+      "old_pdf_sha256": "779e52d82c7da35fdc202c95a2868916055f82b7fbc12409c6dcf7e550345e9a",
+      "pdf_sha256": "77ad0db0268fba7f565aa5ba5705e747989f8a31abb66898265a637b4ae05a3a",
+      "pdf_download": "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/contrato-modelo-contextual-v3-sintetico.pdf",
+      "typed_draft_preserved_until_explicit_choice": true,
+      "native_template_rules": true,
+      "server_pagination": true,
+      "search_beyond_first_page": true,
+      "saved_reopened": true,
+      "both_themes": true,
+      "mobile_width": 390,
+      "page_errors": [],
+      "ended_old_synthetic_session_via_native_picker": true,
+      "external_contracts_sent": 0,
+      "external_homologation": false,
+      "artifact": {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\modelo-contextual-resultado.json",
+        "sha256": "d1ded068bd1d7c2b168a8fdf3c01bf03d6a60addf951672b8dce0c089d24485b",
+        "bytes": 975
+      }
+    },
+    "actual_downloaded_pdf": {
+      "status": "passed",
+      "synthetic_only": true,
+      "contract_version_id": 11,
+      "signer_roster_id": 2,
+      "pdf_sha256": "77ad0db0268fba7f565aa5ba5705e747989f8a31abb66898265a637b4ae05a3a",
+      "parser": "real Poppler pdftotext",
+      "facts": {
+        "selected_template_pinned": true,
+        "selected_template_text_present": true,
+        "removed_override_absent": true,
+        "required_signers": 3,
+        "all_anchors_exactly_once": true,
+        "all_names_present": true,
+        "all_emails_present": true,
+        "protected_identifiers_present_only_in_authorized_private_pdf": true
+      },
+      "external_signature_or_powers_verified": false,
+      "artifact": {
+        "path": ".codex\\consolidation-template-pdf-proof.json",
+        "sha256": "48775b0b5bf5863c25851c21078dd5cc74d7ab52f5a30eec8933c0ad97913694",
+        "bytes": 614
+      }
+    },
+    "images_inspected": [
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\55-modelo-contextual-claro.png",
+        "sha256": "c3b67c44b036b60e5f1ea2018cdaeedf919772f91cf83775be9f8c581711e3e5",
+        "bytes": 426711
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\56-modelo-contextual-escuro.png",
+        "sha256": "32ded6f4a42a1e02a902d505c3e6a4eb9fb5c1e07ae9d8be0d030fa373968a51",
+        "bytes": 403645
+      },
+      {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\57-modelo-contextual-mobile.png",
+        "sha256": "d5c4f504038e52dfe3e65c0708cfda43c10c9c54f1ba1a401c1f8263cedbe15f",
+        "bytes": 48393
+      }
+    ]
+  },
+  "test_environment_correction": {
+    "problem": "Cada fonte Rails congelada usava Rails.root/tmp/storage no teste. O DB de UI mantinha referências históricas, mas o novo root não continha os arquivos antigos.",
+    "solution": "Copiados15 blobs privados sintéticos e autorizados, conferindo SHA imutável e checksum nativo, para uma pasta de teste persistente usada somente pelo Puma de UI.",
+    "proof": {
+      "path": ".codex\\consolidation-template-ui-storage.json",
+      "sha256": "4a9a88270b70f8afae6edf9e489b5972de5431c4d0c8788c7074e07a1fb0b323",
+      "bytes": 3668
+    },
+    "persistent_ui_root": "/tmp/jrc-rel-v2-ui-private-storage",
+    "originals_retained": true,
+    "db_metadata_changed": false,
+    "no_pdf_recreated": true,
+    "no_document_scan_or_authority_granted": true,
+    "rspec_storage_unchanged": true,
+    "production_storage_or_compose_changed": false,
+    "deployment_requirement": "Na homologação/produção, manter o armazenamento privado persistente entre releases e os processos que o utilizam; a configuração real continua pendente de homologação."
+  },
+  "failures_and_refinements_retained": [
+    ".codex/consolidation-template-browser-first.log — falha real ao ler o PDF antigo no novo root isolado; corrigida pela preservação verificada dos bytes, sem fabricar substituto.",
+    ".codex/consolidation-template-source-first-mismatch.json — duas verificações de função/escopo adicionadas durante o congelamento; somente o spec atualizado e todos11182 arquivos revalidados.",
+    "Infrações novas de complexidade/estilo simplificadas; teste de revogação usa validações nativas, sem pular checks."
+  ],
+  "still_pending": [
+    "Poderes/representação com evidências e aprovação formal pela única Central.",
+    "B3 — intenção durável, envio/reenvio/lembrete/cancelamento, consumidor Connect e conferência de todos os assinantes/PDF final/certificado.",
+    "DocuSign demo e ClamAV reais/configuração externa sem homologação; nenhuma assinatura externa declarada.",
+    "C/D/E/F/G e classificação integral da matriz literal continuam abertas."
+  ],
+  "next": "Poderes vinculados à versão/roster/evidências/validade pela Central; depois B3 e continuidade das outras frentes.",
+  "publication": {
+    "push": false,
+    "docker_build_or_publish": false,
+    "deploy": false,
+    "compose_changed": false,
+    "production_migrations": false,
+    "publication_worktree_untouched": true,
+    "publication_head": "50f7f07d802829dd44a67547fabad3aa77f3d196"
+  },
+  "files": [
+    "app/controllers/api/v1/accounts/crm/backoffice_contracts_controller.rb",
+    "app/javascript/dashboard/api/crm/commercialCycle.js",
+    "app/javascript/dashboard/i18n/locale/en/crm.json",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/ContractDraftEditor.vue",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/ContractTemplatePicker.vue",
+    "app/javascript/dashboard/routes/dashboard/crm/views/spec/ContractContextDialogs.spec.js",
+    "app/javascript/dashboard/routes/dashboard/crm/views/spec/ContractTemplatePicker.spec.js",
+    "app/services/jrc_backoffice/contract_templates.rb",
+    "config/initializers/filter_parameter_logging.rb",
+    "config/routes.rb",
+    "docs/jrc_backoffice/contextual_contract_templates_checkpoint_20261102.json",
+    "docs/jrc_consolidation/word_requirement_inventory_20261102.json",
+    "docs/jrc_relationship/continuation_matrix_20261102.json",
+    "spec/requests/api/v1/accounts/crm/backoffice_templates_spec.rb"
+  ]
+}

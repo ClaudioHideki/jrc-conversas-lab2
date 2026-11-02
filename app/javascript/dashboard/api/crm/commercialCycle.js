@@ -80,6 +80,11 @@ export const backofficeAPI = make('backoffice_requests');
 const contractVersionsUrl = (accountId, requestId) =>
   `${backofficeAPI.urlForAccount(accountId)}/${requestId}/contract_versions`;
 export const backofficeContractVersionsAPI = {
+  templates: (accountId, requestId, params, options = {}) =>
+    axios.get(
+      `${backofficeAPI.urlForAccount(accountId)}/${requestId}/contract/templates`,
+      { ...options, params }
+    ),
   draft: (accountId, requestId, options = {}) =>
     axios.get(
       `${backofficeAPI.urlForAccount(accountId)}/${requestId}/contract`,

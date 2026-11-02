@@ -8,6 +8,7 @@ const api = vi.hoisted(() => ({
   updateDraft: vi.fn(),
   download: vi.fn(),
   differences: vi.fn(),
+  templates: vi.fn(),
 }));
 vi.mock('dashboard/api/crm/commercialCycle', () => ({
   backofficeContractVersionsAPI: api,
@@ -47,6 +48,9 @@ afterAll(() => {
   URL.revokeObjectURL = originalRevoke;
 });
 beforeEach(() => {
+  api.templates.mockResolvedValue({
+    data: { data: [], meta: { page: 1, pages: 1, total: 0 } },
+  });
   api.draft.mockResolvedValue({ data: structuredClone(draft) });
   api.updateDraft.mockResolvedValue({ data: { id: 7 } });
   api.download.mockResolvedValue({
@@ -68,6 +72,89 @@ beforeEach(() => {
 });
 
 describe('Contextual contract draft editing', () => {
+  it('selects a native template without erasing a typed draft until the user explicitly chooses its text', async () => {
+    const wrapper = mount(Editor, {
+      props: editorProps,
+      global: {
+        stubs: { ...mountGlobals.stubs, ContractTemplatePicker: true },
+      },
+    });
+    await flushPromises();
+    await wrapper
+      .findAll('button')
+      .find(item => item.text() === 'Selecionar modelo contratual')
+      .trigger('click');
+    wrapper
+      .findComponent({ name: 'ContractTemplatePicker' })
+      .vm.$emit('choose', {
+        id: 82,
+        name: 'TESTE SINTÉTICO — Modelo escolhido',
+      });
+    await flushPromises();
+    expect(wrapper.get('textarea[name="contract_draft"]').element.value).toBe(
+      'Minuta autorizada'
+    );
+    expect(wrapper.text()).toContain('TESTE SINTÉTICO — Modelo escolhido');
+    await wrapper
+      .findAll('button')
+      .find(item => item.text() === 'Usar texto do modelo selecionado')
+      .trigger('click');
+    expect(wrapper.get('textarea[name="contract_draft"]').element.value).toBe(
+      ''
+    );
+    await wrapper.get('form').trigger('submit');
+    await flushPromises();
+    expect(api.updateDraft).toHaveBeenCalledWith(
+      '1',
+      9,
+      expect.objectContaining({
+        contract_template_id: 82,
+        content_override: '',
+      }),
+      'b'.repeat(64),
+      expect.objectContaining({ signal: expect.any(AbortSignal) })
+    );
+    wrapper.unmount();
+  });
+
+  it('clears the form when access to contextual models is withdrawn and supports explicit removal of the model', async () => {
+    api.draft.mockResolvedValueOnce({
+      data: {
+        ...structuredClone(draft),
+        template: { id: 81, name: 'Modelo sintético atual' },
+      },
+    });
+    const wrapper = mount(Editor, {
+      props: editorProps,
+      global: {
+        stubs: { ...mountGlobals.stubs, ContractTemplatePicker: true },
+      },
+    });
+    await flushPromises();
+    await wrapper
+      .findAll('button')
+      .find(item => item.text() === 'Usar somente minuta própria')
+      .trigger('click');
+    await wrapper.get('form').trigger('submit');
+    await flushPromises();
+    expect(api.updateDraft.mock.calls[0][2]).toEqual(
+      expect.objectContaining({
+        contract_template_id: null,
+        content_override: 'Minuta autorizada',
+      })
+    );
+    await wrapper
+      .findAll('button')
+      .find(item => item.text() === 'Selecionar modelo contratual')
+      .trigger('click');
+    wrapper
+      .findComponent({ name: 'ContractTemplatePicker' })
+      .vm.$emit('denied');
+    await flushPromises();
+    expect(wrapper.find('textarea').exists()).toBe(false);
+    expect(wrapper.emitted('denied')).toHaveLength(1);
+    wrapper.unmount();
+  });
   it('loads the native template and sends only editable fields with the original digest', async () => {
     const wrapper = mount(Editor, { props: editorProps, global: mountGlobals });
     await flushPromises();

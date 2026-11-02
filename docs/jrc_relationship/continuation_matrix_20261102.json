@@ -371,5 +371,11 @@
     "report": "docs/jrc_backoffice/canonical_signers_checkpoint_20261102.json",
     "implemented": "Seleção canônica, CPF protegido, assinatura conjunta, roster imutável, PDF privado vinculado e interface validada.",
     "pending": "Poderes/Central e envio durável/eventos/evidências; C/D/E/F/G permanecem abertas."
+  },
+  "contextual_template_checkpoint_20261102": {
+    "status": "parcial",
+    "report": "docs/jrc_backoffice/contextual_contract_templates_checkpoint_20261102.json",
+    "implemented": "Modelo ativo/elegível pelo pedido/emitente, busca/paginação, edição/CAS nativos, PDF exato com roster, temas e mobile validados.",
+    "pending": "Poderes e B3; demais frentes continuam parciais."
   }
 }

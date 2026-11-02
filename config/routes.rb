@@ -756,6 +756,7 @@ Rails.application.routes.draw do
             end
             resources :backoffice_requests, only: [:index, :show, :create, :update] do
               get 'contract', to: 'backoffice_contracts#show'
+              get 'contract/templates', to: 'backoffice_contracts#templates'
               patch 'contract', to: 'backoffice_contracts#update'
               get 'contract_versions', to: 'backoffice_contract_versions#index'
               get 'contract_signers', to: 'backoffice_signers#index'

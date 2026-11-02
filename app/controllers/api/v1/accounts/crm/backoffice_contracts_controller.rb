@@ -31,13 +31,17 @@ class Api::V1::Accounts::Crm::BackofficeContractsController < Api::V1::Accounts:
       @contract.sales_order.with_lock('FOR NO KEY UPDATE') do
         @contract.lock!('FOR NO KEY UPDATE')
         editable!
-        raise JrcBackoffice::ContractVersions::Changed unless params[:expected_source_digest] == JrcBackoffice::ContractSnapshot.digest(@contract)
+        check_preview!
 
         update_contract!
         context.writable!(operation)
       end
     end
     render json: serialize(@contract.reload)
+  end
+
+  def templates
+    render json: template_service.options(query: params[:q], page: params[:page])
   end
 
   private
@@ -57,6 +61,26 @@ class Api::V1::Accounts::Crm::BackofficeContractsController < Api::V1::Accounts:
     end
 
     data.permit(*EDITABLE_FIELDS)
+  end
+
+  def normalized_contract_params
+    attributes = super
+    selected = attributes[:contract_template]
+    attributes[:contract_template] = template_service.select!(selected.id) if selected && selected.id != @contract.contract_template_id
+    attributes
+  end
+
+  def template_service
+    JrcBackoffice::ContractTemplates.new(account: Current.account, actor: Current.user, request_id: params[:backoffice_request_id])
+  end
+
+  def audit_snapshot(contract)
+    super.merge(contract_template_id: contract.contract_template_id)
+  end
+
+  def check_preview!
+    crm_scope.jrc_crm_contract_templates.find(@contract.contract_template_id).lock!('FOR SHARE') if @contract.contract_template_id
+    raise JrcBackoffice::ContractVersions::Changed unless params[:expected_source_digest] == JrcBackoffice::ContractSnapshot.digest(@contract)
   end
 
   def editable!
