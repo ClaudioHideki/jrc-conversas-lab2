@@ -31,6 +31,28 @@ Broker0079 e requisito do core candidato; servidor observado ainda0078, ledger78
 
 ## Lacunas e proximo passo
 
-Exigir CI exata do candidato, schema estrutural consistente e imagem oficial antes de merge/release. Fechar teste HTTPS com Broker e Sidekiq reais (probe atual ainda porta sintetica), dois consumidores isolados, custodia integral e recuperacao da engine. Captura Evolution seguefalse/UNPROVEN; imagem API/web nao atualiza engine.
+Exigir CI exata do candidato, schema estrutural consistente e imagem oficial antes de merge/release. O teste adicional HTTPS com Broker e Sidekiq reais foi executado no incremento isolado descrito abaixo; revisar/publicar esse harness separadamente. Recuperacao da engine continua com gate proprio. Captura Evolution seguefalse/UNPROVEN; imagem API/web nao atualiza engine.
 
 WA permanece parcial em historico completo de conexoes, calendario/fallback e metricas; Flow continua por fases; Central multidominio/NICOgates/adapters e carga final nao estao encerrados. CCLX real, fontes externas e piloto50numeros/30dias aguardam contexto/autorizacao especificos. Capacidade900 nao medida. Publicar componentes independentes aprovados com limites explicitos; nao declarar100%.
+
+## Checkpoint isolado: custodia HTTPS real
+
+Branch local `codex/lab2-https-custody-20261102`, baseada no merge PR3 `daae59ecdbfd28008773a8adf9ec13f34ac8f486`. Nao altera app/db/workflow nem a release do core. O incremento contem somente fixture opt-in e documentacao; requer revisao e publicacao proprias.
+
+Gate observado `LAB2_TLS_BROKER_DURABLE_CUSTODY`, run `e4603a88-5311-42e9-b3d2-319cdeae8f5a`, launcher exit0. Dois consumidores LAB2 independentes em bancos novos, account/inbox/message reais1/1/1, Redis DB0/1. Rails7.1.5.2 + Sidekiq7.3.1 -> SafeFetch real -> TLS CA validada -> ingresso/servico/HMAC/migrations/RLS reais da imagem API EA. Cada org terminou com1observacao+1CHATWOOT_REPLY PENDING, cross-tenant0; A delivered/3, B delivered/2. Houve indisponibilidade real apos COMMIT do produtor, assinatura cruzada401, ACK retido apos COMMIT do receptor e SIGKILL137 do Sidekiq com recuperacao por lease. UUIDdelivery/bodyhash estaveis; o Broker deduplica pelas chaves reais de mensagem/destino, nao pelo header de delivery.
+
+O stack completo passou antes dos ajustes finais de estilo Ruby. Depois passaram unidade9/19assertions/0falhas/0skips, RuboCop6arquivos/0ofensas, parsers Ruby6/JS3/PowerShell1 e3checks criptograficos. O stack NAO foi repetido depois; nao afirmar que o SHA final deste incremento recebeu o gate completo. O revisor deve avaliar esse limite ou pedir novo run quando houver slot autorizado.
+
+Os seis containers da prova foram parados/exit0, sem portas publicadas, com volumes/DBs preservados e link de rede desconectado do Rails. CA privada/credenciais ficaram fora do Git; SSRF produtivo nao mudou. Sem worker fisico, numero/WhatsApp real, Chatwoot stock/CCLX, dois Chatwoots instalados, boot produtivo completo ou jornada bidirecional. Lease expirou controladamente, sem alegar decurso do TTL natural.
+
+Veja [operacao e falhas de preparacao preservadas](../../spec/homologation/broker_https_README.md) e [evidencia sanitizada](evidence/broker-https-custody-20261102.json). Nao publicar logs brutos, manifestos privados, caminhos temporarios privados ou chaves.
+
+## Checkpoint final da fixture HTTPS
+
+O P2 de cleanup foi corrigido no commit local `f1ffd1b9de2bc773ad8c1983f25f1dd352579bb5`, separado de283378b1. Confere exitcodes/inventario/ownership/estado parado/desanexo e falha fechado se nao puder provar cleanup; nunca mascara erro primario do stack. Resultado e mensagem positiva so sao publicados depois de cleanup verificado. RED3pass/8fail e REDnullinventory14pass/1fail; GREEN15/15contratos WindowsPowerShell sem Docker/Pester.
+
+A UMA rodada fria final autorizada passou: `bb759c3f-76e6-4f87-a9a8-d57d172276b3`, launcher exit0, fonte EXATA `f1ffd1b9de2bc773ad8c1983f25f1dd352579bb5`. Preflight Gitblobmatch13/13 e hashesLF; pos-run13/13hashes materializados Rails iguais. Inclui estilo Ruby final e cleanup corrigido. Cleanup Verified=true/Errors=[]/6Stopped=true/RailsDetached=true antes de criar result.json; inventario independente final6exited0/zeroportas. A delivered/3, B delivered/2;1observacao+1job PENDING por org/cross-tenant0. TLS3/3, assinatura cruzada401, ACK retido apos COMMIT, SIGKILL137, recovery e linhagem UUID/hash preservados.
+
+Checks finais no mesmo conteudo:9unit/19assertions/0falhas/0skips;15cleanupcontracts/0falhas; RuboCop6arquivos/0ofensas; parsersRuby6/JS3/PowerShell3. [Evidencia final sanitizada com revisao/hashes](evidence/broker-https-custody-final-20261102.json). Este checkpoint/README/evidencia sao incremento posterior SOMENTE documental, com bytes executaveis comparados e inalterados contra f1ffd1b9. Nao atribuir a execucao ao SHA documental nem o run original e460 a283. O limite post-style anterior foi fechado pela nova rodada, sem reescrever os registros antigos.
+
+Nada disso altera release/runtime/app/db/workflow. Sem worker fisico/numero/WhatsApp real, Chatwoot stock/CCLX ou boot completo produtivo. Seguem preservados DBs/volumes/failedruns, chaves privadas fora do Git/ZIP e SSRF produtivo inalterado. Sem push/PR ate revisao final do Ack.
