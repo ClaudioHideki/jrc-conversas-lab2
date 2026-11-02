@@ -27,6 +27,143 @@ beforeEach(() => {
 });
 afterEach(() => wrapper?.unmount());
 
+it.each([
+  [
+    'en',
+    'Included in the global selection',
+    'Not included in the global selection',
+    'Changed by System',
+  ],
+  [
+    'pt_BR',
+    'Incluída na seleção global',
+    'Não incluída na seleção global',
+    'Alteração pelo sistema',
+  ],
+])(
+  'renders a real GLOBAL audit with disabled inclusion changes and System actor in %s',
+  async (locale, included, excluded, actor) => {
+    api.distributionHistory.mockResolvedValue({
+      data: [
+        {
+          id: 1,
+          user_id: null,
+          previous_policy: {
+            scope: 'GLOBAL',
+            enabled: false,
+            included: true,
+            max_open: 3,
+          },
+          next_policy: {
+            scope: 'GLOBAL',
+            enabled: false,
+            included: false,
+            max_open: 3,
+          },
+        },
+      ],
+    });
+    wrapper = mountPolicy();
+    wrapper.vm.$i18n.locale = locale;
+    try {
+      await flushPromises();
+      await wrapper
+        .get('[data-testid="load-distribution-history"]')
+        .trigger('click');
+      await flushPromises();
+      const history = wrapper.get('[data-testid="distribution-history"]');
+      const snapshots = history.findAll('dd');
+      expect(snapshots[0].text()).toContain(included);
+      expect(snapshots[1].text()).toContain(excluded);
+      expect(snapshots[0].text()).not.toBe(snapshots[1].text());
+      expect(history.text()).toContain(actor);
+      expect(history.text()).not.toMatch(
+        /Mode unavailable|Tipo não disponível/
+      );
+      expect(api.saveConnectionDistribution).not.toHaveBeenCalled();
+    } finally {
+      wrapper.vm.$i18n.locale = 'en';
+    }
+  }
+);
+
+it.each(['en', 'pt_BR'])(
+  'renders GLOBAL_ACCOUNT inbox IDs and capacity changes in %s',
+  async locale => {
+    api.distributionHistory.mockResolvedValue({
+      data: [
+        {
+          id: 1,
+          user_id: 4,
+          previous_policy: {
+            scope: 'GLOBAL_ACCOUNT',
+            enabled: false,
+            inbox_ids: [7, 8],
+            max_open: 3,
+          },
+          next_policy: {
+            scope: 'GLOBAL_ACCOUNT',
+            enabled: true,
+            inbox_ids: [8, 9],
+            max_open: 6,
+          },
+        },
+      ],
+    });
+    wrapper = mountPolicy();
+    wrapper.vm.$i18n.locale = locale;
+    try {
+      await flushPromises();
+      await wrapper
+        .get('[data-testid="load-distribution-history"]')
+        .trigger('click');
+      await flushPromises();
+      const history = wrapper.get('[data-testid="distribution-history"]');
+      const snapshots = history.findAll('dd');
+      expect(snapshots[0].text()).toContain('7, 8');
+      expect(snapshots[0].text()).toContain('3');
+      expect(snapshots[1].text()).toContain('8, 9');
+      expect(snapshots[1].text()).toContain('6');
+      expect(history.text()).not.toMatch(
+        /Mode unavailable|Tipo não disponível/
+      );
+    } finally {
+      wrapper.vm.$i18n.locale = 'en';
+    }
+  }
+);
+
+it('shows only saved policy in overview and preserves an unsaved edit while switching presentations', async () => {
+  api.connectionDistribution.mockResolvedValue({
+    policy: { enabled: true, mode: 'direct', team_ids: [11], max_open: 6 },
+    teams,
+  });
+  wrapper = mountPolicy();
+  await flushPromises();
+  await wrapper.get('input[type="number"]').setValue(9);
+  await wrapper.setProps({ presentation: 'summary' });
+  expect(wrapper.find('form').exists()).toBe(false);
+  expect(
+    wrapper.get('[data-testid="distribution-saved-summary"]').text()
+  ).toContain('Reception');
+  expect(
+    wrapper.get('[data-testid="distribution-saved-summary"]').text()
+  ).toContain('6');
+  expect(
+    wrapper.find('[data-testid="load-distribution-history"]').exists()
+  ).toBe(false);
+  await wrapper.setProps({ presentation: 'history' });
+  expect(wrapper.find('form').exists()).toBe(false);
+  expect(
+    wrapper.get('[data-testid="load-distribution-history"]').exists()
+  ).toBe(true);
+  expect(api.distributionHistory).not.toHaveBeenCalled();
+  await wrapper.setProps({ presentation: 'policy' });
+  expect(wrapper.get('input[type="number"]').element.value).toBe('9');
+  expect(api.connectionDistribution).toHaveBeenCalledTimes(1);
+  expect(api.saveConnectionDistribution).not.toHaveBeenCalled();
+});
+
 it('starts disabled without choosing queues or mutating the connection', async () => {
   wrapper = mountPolicy();
   await flushPromises();

@@ -14,20 +14,39 @@ RSpec.describe 'P9 new native editor and installation HTTP cases', type: :reques
   let(:grant_token) { 'g' * 43 }
   let(:installation_callback) { 'i' * 43 }
   let(:registration_callback) { SecureRandom.urlsafe_base64(32) }
+  let(:native_redis_context) do
+    redis_url = ENV.fetch('FLOW_TEST_REDIS_URL')
+    namespace = "jrc-flow-http-spec:#{Process.pid}:#{SecureRandom.uuid}"
+    pool = ConnectionPool.new(size: 2, timeout: 1) do
+      Redis::Namespace.new(namespace, redis: Redis.new(url: redis_url), deprecations: true)
+    end
+    { pool: pool, original: $alfred }
+  end
 
   around { |example| with_modified_env(JRC_FLOWS_ENABLED: 'true', JRC_BROKER_ALLOWED_ORIGINS: 'https://broker.example.test', FRONTEND_URL: 'https://host.example.test') { example.run } }
 
   before do
     account.enable_features!('jrc_flows')
     create(:inbox_member, inbox: inbox, user: admin)
-    @original_alfred = $alfred
-    $alfred = ConnectionPool.new(size: 2, timeout: 1) { Redis.new(url: ENV.fetch('FLOW_TEST_REDIS_URL')) }
-    $alfred.with(&:flushdb)
+    $alfred = native_redis_context.fetch(:pool)
   end
 
   after do
-    $alfred.shutdown(&:close)
-    $alfred = @original_alfred
+    native_redis_context.fetch(:pool).shutdown(&:close)
+    $alfred = native_redis_context.fetch(:original)
+  end
+
+  it 'isolates real Redis writes from a different example without resetting any database' do
+    raw = Redis.new(url: ENV.fetch('FLOW_TEST_REDIS_URL'))
+    key = "jrc-flow-isolation:#{SecureRandom.uuid}"
+    raw.set(key, 'outside-example', ex: 60)
+    Redis::Alfred.with { |connection| connection.set(key, 'inside-example', ex: 60) }
+    expect(raw.get(key)).to eq('outside-example')
+    expect(Redis::Alfred.with { |connection| connection.get(key) }).to eq('inside-example')
+  ensure
+    Redis::Alfred.with { |connection| connection.del(key) } if key
+    raw&.del(key) if key
+    raw&.close
   end
 
   def registration

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_11_02_100000) do
+ActiveRecord::Schema[7.1].define(version: 2026_11_02_110000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -3352,7 +3352,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_100000) do
 
   create_table "jrc_human_assignment_policy_events", force: :cascade do |t|
     t.bigint "account_id", null: false
-    t.bigint "inbox_id", null: false
+    t.bigint "inbox_id"
     t.bigint "user_id"
     t.jsonb "previous_policy", default: {}, null: false
     t.jsonb "next_policy", default: {}, null: false
@@ -3362,6 +3362,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_100000) do
     t.index ["account_id"], name: "index_jrc_human_assignment_policy_events_on_account_id"
     t.index ["inbox_id"], name: "index_jrc_human_assignment_policy_events_on_inbox_id"
     t.index ["user_id"], name: "index_jrc_human_assignment_policy_events_on_user_id"
+    t.check_constraint "inbox_id IS NOT NULL OR NOT (next_policy ->> 'scope'::text) IS DISTINCT FROM 'GLOBAL_ACCOUNT'::text", name: "jrc_human_policy_global_account_scope"
   end
 
   create_table "jrc_nico_broker_send_operations", force: :cascade do |t|
@@ -9091,4 +9092,48 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_100000) do
     CREATE TRIGGER jrc_effect_message_control BEFORE INSERT ON messages FOR EACH ROW EXECUTE FUNCTION jrc_effect_message_control();
   JRC_SCHEMA_SQL_213d81448354
 
+
+  execute <<~'JRC_SCHEMA_SQL_ed2150e2fbd9'
+    ALTER TABLE "jrc_human_assignment_policy_events" DROP CONSTRAINT "jrc_human_policy_global_account_scope";
+  JRC_SCHEMA_SQL_ed2150e2fbd9
+
+  execute <<~'JRC_SCHEMA_SQL_b4f35ba8b80f'
+    ALTER TABLE "jrc_human_assignment_policy_events" ADD CONSTRAINT "jrc_human_policy_global_account_scope" CHECK (((inbox_id IS NOT NULL) OR (NOT ((next_policy ->> 'scope'::text) IS DISTINCT FROM 'GLOBAL_ACCOUNT'::text))));
+  JRC_SCHEMA_SQL_b4f35ba8b80f
+
+  execute <<~'JRC_SCHEMA_SQL_ae900f5e1338'
+    CREATE OR REPLACE FUNCTION public.jrc_human_policy_immutable_guard()
+     RETURNS trigger
+     LANGUAGE plpgsql
+     SET search_path TO 'pg_catalog', 'public'
+    AS $function$
+    BEGIN
+      -- Preserve only the parent-removal actions already defined by the original FKs.
+      IF TG_OP = 'DELETE' THEN
+        IF pg_trigger_depth() > 1 AND (
+          NOT EXISTS (SELECT 1 FROM public.accounts WHERE id = OLD.account_id) OR
+          (OLD.inbox_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM public.inboxes WHERE id = OLD.inbox_id))
+        ) THEN
+          RETURN OLD;
+        END IF;
+      ELSIF TG_OP = 'UPDATE' THEN
+        IF pg_trigger_depth() > 1 AND OLD.user_id IS NOT NULL AND NEW.user_id IS NULL AND
+          (to_jsonb(NEW) - 'user_id') IS NOT DISTINCT FROM (to_jsonb(OLD) - 'user_id') AND
+          NOT EXISTS (SELECT 1 FROM public.users WHERE id = OLD.user_id)
+        THEN
+          RETURN NEW;
+        END IF;
+      END IF;
+      RAISE EXCEPTION 'Human assignment policy history is append-only' USING ERRCODE = '23514';
+    END;
+    $function$
+  JRC_SCHEMA_SQL_ae900f5e1338
+
+  execute <<~'JRC_SCHEMA_SQL_e738d6ee27ad'
+    CREATE TRIGGER jrc_human_policy_immutable_rows BEFORE DELETE OR UPDATE ON jrc_human_assignment_policy_events FOR EACH ROW EXECUTE FUNCTION jrc_human_policy_immutable_guard();
+  JRC_SCHEMA_SQL_e738d6ee27ad
+
+  execute <<~'JRC_SCHEMA_SQL_0df134023ee3'
+    CREATE TRIGGER jrc_human_policy_immutable_truncate BEFORE TRUNCATE ON jrc_human_assignment_policy_events FOR EACH STATEMENT EXECUTE FUNCTION jrc_human_policy_immutable_guard();
+  JRC_SCHEMA_SQL_0df134023ee3
 end

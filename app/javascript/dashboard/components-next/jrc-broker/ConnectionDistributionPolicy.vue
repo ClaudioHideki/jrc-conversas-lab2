@@ -7,10 +7,16 @@ import Button from 'dashboard/components-next/button/Button.vue';
 const props = defineProps({
   accountId: { type: [Number, String], required: true },
   inboxId: { type: Number, required: true },
+  presentation: {
+    type: String,
+    default: 'all',
+    validator: value => ['all', 'summary', 'policy', 'history'].includes(value),
+  },
 });
 const { t } = useI18n();
 const enabled = ref(false);
 const hasPolicy = ref(false);
+const savedPolicy = ref(null);
 const mode = ref('round_robin');
 const maxOpen = ref(10);
 const teamIds = ref([]);
@@ -54,10 +60,36 @@ const modeLabel = value =>
 const policySummary = policy => {
   if (!policy || Object.keys(policy).length === 0)
     return t('JRC_BROKER.DISTRIBUTION.NO_POLICY');
+  const state = t(
+    `JRC_BROKER.DISTRIBUTION.${policy.enabled ? 'ACTIVE' : 'INACTIVE'}`
+  );
+  if (policy.scope === 'GLOBAL') {
+    return t('JRC_BROKER.DISTRIBUTION.GLOBAL_POLICY_SUMMARY', {
+      state,
+      selection: policy.included
+        ? t('JRC_BROKER.DISTRIBUTION.GLOBAL_INCLUDED')
+        : t('JRC_BROKER.DISTRIBUTION.GLOBAL_EXCLUDED'),
+      capacity: policy.max_open,
+    });
+  }
+  if (policy.scope === 'GLOBAL_ACCOUNT') {
+    const inboxes = Array.isArray(policy.inbox_ids)
+      ? policy.inbox_ids
+          .map(id =>
+            Number.isSafeInteger(id) && id > 0
+              ? id
+              : t('JRC_BROKER.DISTRIBUTION.INBOX_UNAVAILABLE')
+          )
+          .join(', ') || t('JRC_BROKER.DISTRIBUTION.NO_INBOX_SELECTION')
+      : t('JRC_BROKER.DISTRIBUTION.INBOX_UNAVAILABLE');
+    return t('JRC_BROKER.DISTRIBUTION.GLOBAL_ACCOUNT_POLICY_SUMMARY', {
+      state,
+      inboxes,
+      capacity: policy.max_open,
+    });
+  }
   return t('JRC_BROKER.DISTRIBUTION.POLICY_SUMMARY', {
-    state: t(
-      `JRC_BROKER.DISTRIBUTION.${policy.enabled ? 'ACTIVE' : 'INACTIVE'}`
-    ),
+    state,
     mode: modeLabel(policy.mode),
     teams:
       (policy.team_ids || []).map(teamName).join(', ') ||
@@ -66,6 +98,7 @@ const policySummary = policy => {
   });
 };
 const apply = policy => {
+  savedPolicy.value = policy;
   hasPolicy.value = policy !== null && policy !== undefined;
   enabled.value = policy?.enabled === true;
   mode.value = policy?.mode || 'round_robin';
@@ -195,7 +228,11 @@ onBeforeUnmount(clear);
       {{ t('JRC_BROKER.DISTRIBUTION.TITLE') }}
     </h3>
     <p class="text-sm text-n-slate-11">
-      {{ t('JRC_BROKER.DISTRIBUTION.HELP') }}
+      {{
+        presentation === 'history'
+          ? t('JRC_BROKER.DISTRIBUTION.HISTORY_HELP')
+          : t('JRC_BROKER.DISTRIBUTION.HELP')
+      }}
     </p>
     <p
       v-if="loaded && !hasPolicy"
@@ -207,13 +244,23 @@ onBeforeUnmount(clear);
     <p v-if="feedback" :role="feedback === 'SAVED' ? 'status' : 'alert'">
       {{ t(`JRC_BROKER.DISTRIBUTION.${feedback}`) }}
     </p>
+    <p
+      v-if="loaded && hasPolicy && presentation === 'summary'"
+      data-testid="distribution-saved-summary"
+      class="text-sm"
+    >
+      {{ policySummary(savedPolicy) }}
+    </p>
     <Button
       variant="outline"
       :disabled="busy"
       :label="t('JRC_BROKER.DISTRIBUTION.RELOAD')"
       @click="load"
     />
-    <form @submit.prevent="save">
+    <form
+      v-if="presentation === 'all' || presentation === 'policy'"
+      @submit.prevent="save"
+    >
       <fieldset :disabled="busy || !loaded" class="flex flex-col gap-4">
         <label class="flex items-center gap-2 text-sm">
           <input
@@ -329,6 +376,7 @@ onBeforeUnmount(clear);
       <time :datetime="effectiveFrom">{{ formatTime(effectiveFrom) }}</time>
     </p>
     <Button
+      v-if="presentation === 'all' || presentation === 'history'"
       data-testid="load-distribution-history"
       variant="outline"
       :disabled="!loaded || busy || historyBusy"
@@ -336,7 +384,9 @@ onBeforeUnmount(clear);
       @click="loadHistory"
     />
     <div
-      v-if="historyVisible"
+      v-if="
+        historyVisible && (presentation === 'all' || presentation === 'history')
+      "
       data-testid="distribution-history"
       class="flex flex-col gap-3"
     >
@@ -358,7 +408,13 @@ onBeforeUnmount(clear);
           :key="entry.id"
           class="rounded-lg border border-n-weak p-3 text-sm"
         >
-          <p>{{ t('JRC_BROKER.DISTRIBUTION.ACTOR', { id: entry.user_id }) }}</p>
+          <p>
+            {{
+              entry.user_id === null || entry.user_id === undefined
+                ? t('JRC_BROKER.DISTRIBUTION.ACTOR_SYSTEM')
+                : t('JRC_BROKER.DISTRIBUTION.ACTOR', { id: entry.user_id })
+            }}
+          </p>
           <time v-if="validTime(entry.created_at)" :datetime="entry.created_at">
             {{ formatTime(entry.created_at) }}
           </time>

@@ -45,8 +45,9 @@ const DialogStub = defineComponent({
 });
 
 let store;
-const mountPage = () =>
+const mountPage = (options = {}) =>
   mount(ConnectionsPage, {
+    ...options,
     global: {
       plugins: [store],
       stubs: { Dialog: DialogStub, RouterLink: true },
@@ -128,6 +129,131 @@ it('shows distribution settings only to an administrator, without enabling them'
   role.value = 'agent';
   await flushPromises();
   expect(wrapper.find('input[type="checkbox"]').exists()).toBe(false);
+});
+
+it('offers accessible detail tabs without remounting health polling or fetching history automatically', async () => {
+  role.value = 'administrator';
+  wrapper = mountPage({ attachTo: document.body });
+  await flushPromises();
+  await wrapper.get('[data-testid="manage-connection-7"]').trigger('click');
+  await flushPromises();
+  const tabs = wrapper.findAll('[role="tab"]');
+  expect(tabs.map(tab => tab.text())).toEqual([
+    'Overview',
+    'Distribution',
+    'Distribution history',
+    'Settings',
+  ]);
+  expect(tabs[0].attributes('aria-selected')).toBe('true');
+  expect(tabs[0].attributes('tabindex')).toBe('0');
+  const statusCalls = api.status.mock.calls.length;
+  await tabs[0].trigger('keydown', { key: 'ArrowRight' });
+  await flushPromises();
+  expect(tabs[1].attributes('aria-selected')).toBe('true');
+  expect(tabs[1].attributes('tabindex')).toBe('0');
+  expect(document.activeElement).toBe(tabs[1].element);
+  expect(wrapper.get('[role="tabpanel"]').attributes('aria-labelledby')).toBe(
+    tabs[1].attributes('id')
+  );
+  expect(api.status).toHaveBeenCalledTimes(statusCalls);
+  expect(api.connectionDistribution).toHaveBeenCalledTimes(1);
+  expect(wrapper.get('[role="tabpanel"] form').exists()).toBe(true);
+  expect(wrapper.find('[role="tabpanel"] form form').exists()).toBe(false);
+  await tabs[2].trigger('click');
+  expect(api.distributionHistory).not.toHaveBeenCalled();
+  await wrapper
+    .get('[data-testid="load-distribution-history"]')
+    .trigger('click');
+  await flushPromises();
+  expect(api.distributionHistory).toHaveBeenCalledWith(
+    7,
+    expect.any(AbortSignal)
+  );
+  expect(wrapper.text()).toContain(
+    'Connection and pairing events are not included'
+  );
+  role.value = 'agent';
+  await flushPromises();
+  expect(wrapper.findAll('[role="tab"]').map(tab => tab.text())).toEqual([
+    'Overview',
+    'Settings',
+  ]);
+  expect(wrapper.get('[role="tab"][aria-selected="true"]').text()).toBe(
+    'Overview'
+  );
+});
+
+it('updates the same card from real panel status and shows reconnection with saved distribution, not delivery success', async () => {
+  role.value = 'administrator';
+  api.connectionDistribution.mockResolvedValue({
+    policy: { enabled: true, mode: 'direct', team_ids: [11], max_open: 6 },
+    teams: [{ id: 11, name: 'Reception' }],
+  });
+  wrapper = mountPage();
+  await flushPromises();
+  const listRequests = api.inboxes.mock.calls.length;
+  await wrapper.get('[data-testid="reconnect-connection-7"]').trigger('click');
+  await flushPromises();
+  api.status.mockResolvedValue({
+    instanceStatus: 'CONNECTED',
+    integrationStatus: 'READY',
+    identityStatus: 'CONFIRMED',
+    identityApproved: true,
+    transportStatus: 'UNVERIFIED',
+    allowedActions: ['status'],
+  });
+  await wrapper.get('[data-testid="pair"]').trigger('click');
+  await flushPromises();
+  expect(wrapper.get('[data-testid="connection-card-7"]').text()).toContain(
+    'Connected'
+  );
+  expect(wrapper.find('[data-testid="reconnect-connection-7"]').exists()).toBe(
+    false
+  );
+  expect(
+    wrapper.get('[data-testid="reconnection-confirmation"]').text()
+  ).toContain('WhatsApp session reconnected');
+  expect(
+    wrapper.get('[data-testid="reconnection-confirmation"]').text()
+  ).toContain('does not confirm message delivery');
+  expect(
+    wrapper.get('[data-testid="distribution-saved-summary"]').text()
+  ).toContain('Reception');
+  expect(wrapper.get('[role="tab"][aria-selected="true"]').text()).toBe(
+    'Overview'
+  );
+  expect(api.pair).toHaveBeenCalledTimes(1);
+  expect(api.inboxes).toHaveBeenCalledTimes(listRequests);
+});
+
+it('presents the connection journey and detail tabs in Brazilian Portuguese', async () => {
+  role.value = 'administrator';
+  wrapper = mountPage();
+  wrapper.vm.$i18n.locale = 'pt_BR';
+  try {
+    await flushPromises();
+    expect(wrapper.get('h1').text()).toBe('Conexões WhatsApp');
+    expect(wrapper.get('[data-testid="new-whatsapp-number"]').text()).toContain(
+      'Conectar novo número'
+    );
+    await wrapper.get('[data-testid="manage-connection-7"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.findAll('[role="tab"]').map(tab => tab.text())).toEqual([
+      'Visão geral',
+      'Distribuição',
+      'Histórico de distribuição',
+      'Configurações',
+    ]);
+    expect(wrapper.get('[data-testid="connection-health"]').text()).toContain(
+      'Sessão do WhatsApp'
+    );
+    expect(wrapper.get('[data-testid="connection-health"]').text()).toContain(
+      'Identidade do número'
+    );
+    expect(wrapper.text()).not.toContain('JRC_BROKER.DETAILS.');
+  } finally {
+    wrapper.vm.$i18n.locale = 'en';
+  }
 });
 
 it('opens the existing new-number flow only on an explicit administrator action and refreshes after closing', async () => {

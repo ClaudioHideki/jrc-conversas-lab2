@@ -1,5 +1,28 @@
 {
   "JRC_BROKER": {
+    "DETAILS": {
+      "TABS_LABEL": "Connection details",
+      "TABS": {
+        "OVERVIEW": "Overview",
+        "DISTRIBUTION": "Distribution",
+        "HISTORY": "Distribution history",
+        "CONFIGURATION": "Settings"
+      },
+      "PANEL_TITLE": "Current connection state",
+      "SESSION": "WhatsApp session",
+      "IDENTITY": "Number identity",
+      "LINK": "Inbox link",
+      "DELIVERY": "Message delivery",
+      "IDENTITY_STATES": {
+        "APPROVED": "Approved number",
+        "CONFIRMATION_REQUIRED": "Administrator approval required",
+        "UNVERIFIED": "Approval not confirmed"
+      },
+      "HEALTH_HELP": "Session, number approval, inbox link and message delivery are separate checks. These states do not confirm message synchronization or a new message being delivered.",
+      "CONFIGURATION_HELP": "Actions below use this existing connection. Check its current state in Overview. No new inbox is created when reconnecting.",
+      "RECONNECTED": "WhatsApp session reconnected.",
+      "RECONNECTED_HELP": "The number is approved and the inbox link is ready. Existing configuration has been kept. This does not confirm message delivery or synchronization; check delivery separately below."
+    },
     "DISTRIBUTION": {
       "TITLE": "Distribution for this connection",
       "GLOBAL_FALLBACK": "No connection-specific rule has been saved. Existing account-wide distribution rules remain applicable. Save an explicitly disabled rule to disable automatic distribution for this connection.",
@@ -35,6 +58,13 @@
       "NO_POLICY": "No connection-specific rule",
       "NO_SELECTION": "No queues selected",
       "POLICY_SUMMARY": "{state}; {mode}; queues: {teams}; maximum open conversations: {capacity}",
+      "GLOBAL_POLICY_SUMMARY": "Account-wide rule for this connection: {state}; {selection}; maximum open conversations: {capacity}",
+      "GLOBAL_ACCOUNT_POLICY_SUMMARY": "Account-wide distribution: {state}; selected inbox IDs: {inboxes}; maximum open conversations: {capacity}",
+      "GLOBAL_INCLUDED": "Included in the global selection",
+      "GLOBAL_EXCLUDED": "Not included in the global selection",
+      "NO_INBOX_SELECTION": "No inboxes selected",
+      "INBOX_UNAVAILABLE": "Inbox unavailable",
+      "ACTOR_SYSTEM": "Changed by System",
       "HISTORY": "View distribution history",
       "HISTORY_HELP": "Last 50 changes to this connection's distribution. Connection and pairing events are not included.",
       "HISTORY_LOADING": "Loading distribution history…",

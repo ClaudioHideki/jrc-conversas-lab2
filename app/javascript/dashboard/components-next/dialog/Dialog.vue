@@ -137,6 +137,7 @@ onBeforeUnmount(() => dialogRef.value?.close());
   <TeleportWithDirection to="body">
     <dialog
       ref="dialogRef"
+      :aria-label="title || undefined"
       :data-popover-content="nestedPopover ? '' : undefined"
       class="w-full transition-all duration-300 ease-in-out shadow-xl rounded-xl"
       :class="[

@@ -19,6 +19,8 @@ const { isAdmin } = useAdmin();
 const inboxes = ref([]);
 const connections = ref({});
 const selectedId = ref(null);
+const activeTab = ref('overview');
+const reconnected = ref(false);
 const dialog = ref(null);
 const onboardingDialog = ref(null);
 const creatingNumber = ref(false);
@@ -36,6 +38,77 @@ const enabled = computed(
 const selectedInbox = computed(() =>
   inboxes.value.find(inbox => inbox.id === selectedId.value)
 );
+const detailTabs = computed(() =>
+  isAdmin.value
+    ? ['overview', 'distribution', 'history', 'configuration']
+    : ['overview', 'configuration']
+);
+const tabKeys = {
+  overview: 'OVERVIEW',
+  distribution: 'DISTRIBUTION',
+  history: 'HISTORY',
+  configuration: 'CONFIGURATION',
+};
+const distributionPresentation = computed(
+  () =>
+    ({ overview: 'summary', distribution: 'policy', history: 'history' })[
+      activeTab.value
+    ] || 'summary'
+);
+const tabId = tab =>
+  `connection-${accountId.value}-${selectedId.value}-tab-${tab}`;
+const panelId = computed(
+  () => `connection-${accountId.value}-${selectedId.value}-panel`
+);
+const selectTab = async (tab, focus = false) => {
+  if (!detailTabs.value.includes(tab)) return;
+  activeTab.value = tab;
+  if (focus) {
+    await nextTick();
+    document.getElementById(tabId(tab))?.focus();
+  }
+};
+const navigateTabs = (event, tab) => {
+  const index = detailTabs.value.indexOf(tab);
+  const last = detailTabs.value.length - 1;
+  let target;
+  if (event.key === 'ArrowRight') target = index === last ? 0 : index + 1;
+  else if (event.key === 'ArrowLeft') target = index === 0 ? last : index - 1;
+  else if (event.key === 'Home') target = 0;
+  else if (event.key === 'End') target = last;
+  else return;
+  event.preventDefault();
+  selectTab(detailTabs.value[target], true);
+};
+const currentUpdate = update =>
+  enabled.value &&
+  String(update.accountId) === String(accountId.value) &&
+  update.inboxId === selectedId.value;
+const receiveHealth = update => {
+  if (!currentUpdate(update)) return;
+  connections.value[update.inboxId] = update.health.allowedActions?.includes(
+    'status'
+  )
+    ? { health: update.health }
+    : { error: true };
+  if (
+    update.health.instanceStatus !== 'CONNECTED' ||
+    update.health.integrationStatus !== 'READY' ||
+    update.health.identityApproved !== true ||
+    update.health.identityStatus !== 'CONFIRMED'
+  )
+    reconnected.value = false;
+};
+const receiveHealthError = update => {
+  if (!currentUpdate(update)) return;
+  connections.value[update.inboxId] = { error: true };
+  reconnected.value = false;
+};
+const receiveReconnection = update => {
+  if (!currentUpdate(update)) return;
+  reconnected.value = true;
+  selectTab('overview', true);
+};
 const connectionStates = {
   CONNECTED: 'CONNECTED',
   CONNECTING: 'CONNECTING',
@@ -69,14 +142,17 @@ const checkedAt = id => {
 const formatTime = value => new Date(value).toLocaleString();
 const closeConnection = () => {
   selectedId.value = null;
+  reconnected.value = false;
 };
-const openConnection = async id => {
+const openConnection = async (id, reconnect = false) => {
   if (
     !enabled.value ||
     !connections.value[id]?.health?.allowedActions?.includes('status')
   )
     return;
   const current = generation;
+  activeTab.value = reconnect ? 'configuration' : 'overview';
+  reconnected.value = false;
   selectedId.value = id;
   await nextTick();
   if (current === generation && selectedId.value === id) dialog.value?.open();
@@ -162,6 +238,7 @@ const closeNewNumber = () => {
 };
 watch(isAdmin, allowed => {
   if (allowed) return;
+  if (!detailTabs.value.includes(activeTab.value)) selectTab('overview', true);
   creatingNumber.value = false;
   onboardingDialog.value?.close();
 });
@@ -281,7 +358,7 @@ onBeforeUnmount(() => {
                   :data-testid="`reconnect-connection-${inbox.id}`"
                   icon="i-lucide-refresh-cw"
                   :label="t('JRC_BROKER.CONNECTIONS.RECONNECT')"
-                  @click="openConnection(inbox.id)"
+                  @click="openConnection(inbox.id, true)"
                 />
                 <Button
                   :data-testid="`manage-connection-${inbox.id}`"
@@ -311,17 +388,68 @@ onBeforeUnmount(() => {
           overflow-y-auto
           @close="closeConnection"
         >
-          <ConnectionPanel
-            :key="`${accountId}:${selectedInbox.id}`"
-            :account-id="accountId"
-            :inbox-id="selectedInbox.id"
-          />
-          <ConnectionDistributionPolicy
-            v-if="isAdmin"
-            :key="`distribution:${accountId}:${selectedInbox.id}`"
-            :account-id="accountId"
-            :inbox-id="selectedInbox.id"
-          />
+          <div
+            role="tablist"
+            :aria-label="t('JRC_BROKER.DETAILS.TABS_LABEL')"
+            class="flex flex-wrap gap-2 mb-4"
+          >
+            <button
+              v-for="tab in detailTabs"
+              :id="tabId(tab)"
+              :key="tab"
+              type="button"
+              role="tab"
+              :aria-selected="activeTab === tab"
+              :aria-controls="panelId"
+              :tabindex="activeTab === tab ? 0 : -1"
+              class="rounded-lg border border-n-weak px-4 py-2 text-sm focus-visible:ring-2 focus-visible:ring-n-brand"
+              :class="
+                activeTab === tab
+                  ? 'bg-n-brand text-white'
+                  : 'bg-n-solid-1 text-n-slate-12'
+              "
+              @click="selectTab(tab)"
+              @keydown="navigateTabs($event, tab)"
+            >
+              {{ t(`JRC_BROKER.DETAILS.TABS.${tabKeys[tab]}`) }}
+            </button>
+          </div>
+          <div
+            :id="panelId"
+            role="tabpanel"
+            :aria-labelledby="tabId(activeTab)"
+            tabindex="0"
+          >
+            <p
+              v-if="reconnected && activeTab === 'overview'"
+              data-testid="reconnection-confirmation"
+              role="status"
+              class="mb-4 rounded-lg border border-n-weak p-4 text-sm"
+            >
+              {{ t('JRC_BROKER.DETAILS.RECONNECTED') }}
+              {{ t('JRC_BROKER.DETAILS.RECONNECTED_HELP') }}
+            </p>
+            <ConnectionPanel
+              v-show="activeTab === 'overview' || activeTab === 'configuration'"
+              :key="`${accountId}:${selectedInbox.id}`"
+              :account-id="accountId"
+              :inbox-id="selectedInbox.id"
+              :presentation="
+                activeTab === 'configuration' ? 'configuration' : 'overview'
+              "
+              @health="receiveHealth"
+              @health-error="receiveHealthError"
+              @reconnected="receiveReconnection"
+            />
+            <ConnectionDistributionPolicy
+              v-if="isAdmin"
+              v-show="activeTab !== 'configuration'"
+              :key="`distribution:${accountId}:${selectedInbox.id}`"
+              :account-id="accountId"
+              :inbox-id="selectedInbox.id"
+              :presentation="distributionPresentation"
+            />
+          </div>
         </Dialog>
       </template>
       <Dialog

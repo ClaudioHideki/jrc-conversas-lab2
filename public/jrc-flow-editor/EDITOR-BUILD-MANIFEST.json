@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "component": "jrc-native-flow-editor",
   "sourceRepository": "ClaudioHideki/BrokerJRCIA",
-  "sourceSha": "7c4903769f961a68bdf04583dce4c815d7a5709e",
+  "sourceSha": "ea7dc741d0c63792a969dddeac2bd35b6cbdf514",
   "sourceCommitted": true,
   "lockfileSha256": "697ccd1529eddb570515ecc6736ecdf45942a463cdfe88c28a635e13d9c0b8e2",
   "inputs": [
@@ -1041,7 +1041,7 @@
     {
       "path": "editor.js",
       "bytes": 928054,
-      "sha256": "edeb4cab12440c31e3f6cee9ce72c67bc5295020d7611b9adb714b879b1a2ef7"
+      "sha256": "b377670478105932e312e28e64beb7ff5760832339483e5723377ff3c681f3b6"
     },
     {
       "path": "editor.js.LEGAL.txt",

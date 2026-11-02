@@ -100,13 +100,64 @@ class JrcHumanAssignment::Policy
     account.with_lock do
       raise ArgumentError unless account.inboxes.where(id: inbox_ids).count == inbox_ids.size
 
-      current = account.custom_attributes['jrc_human_assignment'] || {}
-      account.update!(custom_attributes: account.custom_attributes.merge(
-        'jrc_human_assignment' => current.merge('enabled' => enabled, 'max_open' => max_open, 'inbox_ids' => inbox_ids)
-      ))
+      persist_global!(account, { enabled: enabled, max_open: max_open, inbox_ids: inbox_ids }, global_actor_id(account))
     end
     self.for(account).slice(:enabled, :max_open, :inbox_ids)
   end
+
+  def self.global_actor_id(account)
+    actor = Current.user
+    return unless actor
+
+    raise ArgumentError unless account.account_users.exists?(user_id: actor.id, role: :administrator)
+
+    actor.id
+  end
+  private_class_method :global_actor_id
+
+  def self.persist_global!(account, policy, actor_id)
+    before = global_snapshots(account, policy[:inbox_ids])
+    previous = account_global_snapshot(self.for(account))
+    following = account_global_snapshot(policy)
+    current = account.custom_attributes['jrc_human_assignment'] || {}
+    account.update!(custom_attributes: account.custom_attributes.merge('jrc_human_assignment' => current.merge(policy.stringify_keys)))
+    audit_global_changes!(account, before, actor_id)
+    return if previous == following
+
+    JrcHumanAssignmentPolicyEvent.create!(account_id: account.id, inbox_id: nil, user_id: actor_id,
+                                          previous_policy: previous, next_policy: following)
+  end
+  private_class_method :persist_global!
+
+  def self.account_global_snapshot(policy)
+    { 'scope' => 'GLOBAL_ACCOUNT', 'enabled' => policy[:enabled], 'max_open' => policy[:max_open], 'inbox_ids' => policy[:inbox_ids] }
+  end
+  private_class_method :account_global_snapshot
+
+  def self.global_snapshots(account, inbox_ids)
+    base = self.for(account)
+    ids = (base[:inbox_ids] + inbox_ids).uniq - connections(account).keys.map(&:to_i)
+    account.inboxes.where(id: ids).order(:id).pluck(:id).index_with { |id| global_snapshot(base, id) }
+  end
+  private_class_method :global_snapshots
+
+  def self.global_snapshot(policy, inbox_id)
+    included = policy[:inbox_ids].include?(inbox_id)
+    { 'scope' => 'GLOBAL', 'enabled' => policy[:enabled] && included, 'included' => included, 'max_open' => policy[:max_open] }
+  end
+  private_class_method :global_snapshot
+
+  def self.audit_global_changes!(account, before, actor_id)
+    policy = self.for(account)
+    before.each do |inbox_id, previous|
+      following = global_snapshot(policy, inbox_id)
+      next if previous == following
+
+      JrcHumanAssignmentPolicyEvent.create!(account_id: account.id, inbox_id: inbox_id, user_id: actor_id,
+                                            previous_policy: previous, next_policy: following)
+    end
+  end
+  private_class_method :audit_global_changes!
 
   def self.validate_limits!(enabled, max_open)
     raise ArgumentError unless [true, false].include?(enabled) && max_open.is_a?(Integer) && max_open.between?(1, 100)

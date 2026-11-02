@@ -155,6 +155,7 @@ jobs:
       POSTGRES_PASSWORD: disposable-test-only
       POSTGRES_DATABASE: jrc_durable_review_test
       REDIS_URL: redis://127.0.0.1:6379/15
+      FLOW_TEST_REDIS_URL: redis://127.0.0.1:6379/14
       SECRET_KEY_BASE: isolated-broker-ci-not-a-production-secret
       BUNDLE_FROZEN: 'true'
       JRC_SD_CONCURRENCY: '1'
@@ -183,6 +184,7 @@ jobs:
         run: |
           bundle exec rspec spec/services/jrc_broker spec/requests/api/v1/accounts/jrc_broker*_spec.rb \
             spec/models/jrc_broker_webhook_obligation_spec.rb spec/jobs/jrc_broker_webhook_job_spec.rb \
+            spec/models/jrc_human_assignment_policy_event_spec.rb \
             spec/services/jrc_campaigns/broker*_spec.rb spec/lib/webhooks/trigger_spec.rb \
             spec/services/jrc_human_assignment spec/requests/jrc_human_assignment_spec.rb \
             spec/requests/jrc_connection_distribution_spec.rb \
