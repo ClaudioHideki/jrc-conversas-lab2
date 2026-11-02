@@ -39,7 +39,7 @@ class JrcApprovals::Eligibility
 
   def commercial_capable?(member)
     keys = JrcApprovals::CommercialCatalog::EVENTS.keys + [JrcApprovals::CommercialCatalog::PRICE_FAMILY] +
-           JrcApprovals::GratuityCatalog::EVENTS.keys + [JrcApprovals::GratuityCatalog::FAMILY]
+           JrcApprovals::GratuityCatalog::EVENTS.keys + [JrcApprovals::GratuityCatalog::FAMILY, JrcBackoffice::AuthorityCatalog::KEY]
     return true unless keys.include?(@catalog_key)
 
     @account.feature_enabled?('jrc_crm') && member.permissions.include?('jrc_crm')

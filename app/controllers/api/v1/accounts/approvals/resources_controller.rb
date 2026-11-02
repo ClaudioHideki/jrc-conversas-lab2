@@ -4,7 +4,8 @@ class Api::V1::Accounts::Approvals::ResourcesController < Api::V1::Accounts::App
 
   def index
     key = params[:key].to_s
-    raise JrcApprovals::Error, 'ADAPTER_NOT_INSTALLED' unless JrcApprovals::CommercialCatalog::EVENTS.key?(key)
+    allowed = JrcApprovals::CommercialCatalog::EVENTS.key?(key) || key == JrcBackoffice::AuthorityCatalog::KEY
+    raise JrcApprovals::Error, 'ADAPTER_NOT_INSTALLED' unless allowed
 
     entry = JrcApprovals::Catalog.fetch(key)
     rows = entry.model.where(account_id: Current.account.id).order(:id).filter_map { |record| resource_payload(entry, record) }
@@ -20,6 +21,8 @@ class Api::V1::Accounts::Approvals::ResourcesController < Api::V1::Accounts::App
     return unless scope_allowed?(unit)
 
     { id: record.id, label: resource_label(record), issuer_company_id: unit.company_id, business_unit_id: unit.id }
+  rescue Pundit::NotAuthorizedError
+    nil
   end
 
   def scope_allowed?(unit)

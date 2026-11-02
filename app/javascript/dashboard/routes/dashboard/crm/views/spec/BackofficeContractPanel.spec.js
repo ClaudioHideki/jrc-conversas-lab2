@@ -14,6 +14,7 @@ const render = () =>
       stubs: {
         BackofficeContractVersions: true,
         BackofficeContractSigners: true,
+        BackofficeContractAuthority: true,
       },
     },
   });
@@ -24,6 +25,29 @@ beforeEach(() => {
   mocks.replace.mockImplementation(async ({ query }) => {
     mocks.route.query = query;
   });
+});
+
+it('preserves the representation subtab when the panel remounts', async () => {
+  const wrapper = render();
+  await wrapper
+    .findAll('button')
+    .find(button => button.text() === 'Representação e poderes')
+    .trigger('click');
+  await flushPromises();
+  expect(mocks.route.query).toMatchObject({
+    tab: 'contracts',
+    contractTab: 'authority',
+    status: 'in_progress',
+  });
+  expect(
+    wrapper.findComponent({ name: 'BackofficeContractAuthority' }).exists()
+  ).toBe(true);
+  wrapper.unmount();
+  const remounted = render();
+  expect(
+    remounted.findComponent({ name: 'BackofficeContractAuthority' }).exists()
+  ).toBe(true);
+  remounted.unmount();
 });
 
 it('preserves the signer subtab and surrounding query when the responsive layout remounts the panel', async () => {

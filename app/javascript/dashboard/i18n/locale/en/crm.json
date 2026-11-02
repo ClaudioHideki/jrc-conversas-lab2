@@ -1048,7 +1048,8 @@
         "NAVIGATION": "Contrato, versões e assinantes",
         "TABS": {
           "versions": "Versões e minuta",
-          "signers": "Assinantes"
+          "signers": "Assinantes",
+          "authority": "Representação e poderes"
         },
         "TITLE": "Assinantes do contrato",
         "EDIT": "Selecionar assinantes",
@@ -1091,6 +1092,83 @@
         "SAVE": "Preservar assinantes",
         "VERSION_HELP": "A alteração preserva as revisões e os PDFs anteriores. Uma nova versão contratual incluirá o conjunto atual de assinantes.",
         "INCOMPLETE": "Complete as duas partes conforme a regra individual ou conjunta antes de salvar."
+      },
+      "CONTRACT_AUTHORITY": {
+        "TITLE": "Representação e poderes",
+        "DESCRIPTION": "Evidências de cada pessoa, versão exata e decisão da Central de Aprovações.",
+        "PROPOSE": "Propor validação de poderes",
+        "CASE": "Comprovação de representação",
+        "REVISION": "Revisão",
+        "NOTE": "CPF, leitura automática e arquivo verificado não concedem poderes. A Central precisa avaliar os documentos e a representação de todas as pessoas obrigatórias. Essa decisão não envia nem assina o contrato.",
+        "REASON": "Motivo desta solicitação de aprovação",
+        "PERSON_REASON": "Justificativa e limites da representação desta pessoa",
+        "BASIS": "Base da representação",
+        "SELECT_BASIS": "Selecione a base para análise",
+        "BASES": {
+          "self": "Em nome próprio — pessoa física",
+          "legal_representative": "Representante legal",
+          "power_of_attorney": "Procuração"
+        },
+        "PARTIES": {
+          "customer": "Cliente",
+          "issuer_company": "Emitente JRC"
+        },
+        "PEOPLE": "Assinantes obrigatórios",
+        "VALID_FROM": "Válida a partir de",
+        "VALID_UNTIL": "Válida até",
+        "NO_EXPIRY": "Sem vencimento declarado",
+        "NO_EXPIRY_DECLARATION": "O instrumento apresentado não declara vencimento — sujeito à revisão humana",
+        "DOCUMENTS": "Documentos da própria solicitação",
+        "DOCUMENT_HELP": "Selecione versões atuais com verificação de segurança, pré-análise e aprovação documental humana. A adequação jurídica será decidida na Central.",
+        "DOCUMENT_TYPE": "Requisito documental",
+        "DOCUMENT_EMPTY": "Nenhum documento neste requisito. Configure os requisitos e envie os arquivos na aba Documentação.",
+        "DOCUMENT_ERROR": "Não foi possível consultar a documentação autorizada.",
+        "EVIDENCE": "Documento versionado",
+        "REMOVE_EVIDENCE": "Remover da proposta o documento",
+        "EXACT_PDF": "Baixar PDF da versão submetida",
+        "ORIGIN": "Pedido e proposta de origem",
+        "CREATED": "Proposta preservada em",
+        "APPROVAL": "Abrir aprovação",
+        "NATIVE_VALUE": "Valor contratual — confira a moeda no PDF",
+        "FINANCIAL_TERMS": "Condições de pagamento",
+        "STATES": {
+          "verified": "Poderes aprovados para este contexto",
+          "blocked": "Validação de poderes bloqueada ou pendente",
+          "unavailable": "Validação indisponível"
+        },
+        "REQUEST_STATES": {
+          "pending": "Pendente",
+          "approved": "Aprovada",
+          "rejected": "Rejeitada",
+          "returned": "Devolvida",
+          "escalated": "Escalada",
+          "canceled": "Cancelada",
+          "expired": "Expirada",
+          "stale": "Contexto alterado"
+        },
+        "FACTS": {
+          "version_current": "A versão contratual foi substituída.",
+          "roster_current": "O conjunto de assinantes foi substituído.",
+          "source_current": "A minuta ou suas condições foram alteradas.",
+          "parties_current": "Os dados ou vínculos das empresas mudaram.",
+          "people_current": "O cadastro, identidade ou vínculo de uma pessoa mudou.",
+          "party_identifiers_configured": "Complete CNPJ/CPF válido das partes no Cadastro Mestre.",
+          "proposal_current": "Há comprovação de poderes mais recente.",
+          "documents_current": "A documentação mudou ou ainda exige validação.",
+          "validity_current": "A representação não está vigente na data atual."
+        },
+        "HISTORY": "Histórico de comprovações",
+        "EMPTY": "Esta versão ainda não possui proposta de poderes.",
+        "LOCKED": "Para propor, gere uma versão com assinantes e mantenha a solicitação aberta, o contrato sem envio, a Central habilitada e as permissões de conta, empresa e unidade.",
+        "COMPLETE_ALL": "Preencha base, vigência, evidências e justificativa de todas as pessoas e o motivo da solicitação.",
+        "SUBMIT": "Preservar evidências e solicitar aprovação",
+        "SAVED": "Evidências preservadas e aprovação solicitada. Nenhum contrato foi enviado ou assinado.",
+        "POLICY_REQUIRED": "Configure e ative uma regra de aprovação para representação de assinantes nesta empresa/unidade.",
+        "CHANGED": "A versão, as evidências ou o contexto mudaram. Feche, atualize e confira antes de propor novamente.",
+        "LOADING": "Consultando a comprovação autorizada…",
+        "DENIED": "Acesso negado à comprovação. Os dados da tela foram limpos.",
+        "ERROR": "Não foi possível confirmar a comprovação. Atualize e confira as permissões.",
+        "EVIDENCE_ERROR": "A evidência não pôde ser liberada. Confira acesso, integridade e verificação de segurança."
       }
     },
     "CUSTOMER_SIGNING_IDENTITY": {

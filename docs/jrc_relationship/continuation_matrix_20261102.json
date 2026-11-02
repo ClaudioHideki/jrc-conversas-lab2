@@ -377,5 +377,11 @@
     "report": "docs/jrc_backoffice/contextual_contract_templates_checkpoint_20261102.json",
     "implemented": "Modelo ativo/elegível pelo pedido/emitente, busca/paginação, edição/CAS nativos, PDF exato com roster, temas e mobile validados.",
     "pending": "Poderes e B3; demais frentes continuam parciais."
+  },
+  "signing_authority_increment": {
+    "status": "implementado e testado no ambiente sintético",
+    "report": "docs/jrc_backoffice/signing_authority_checkpoint_20261102.json",
+    "scope": "Proposta imutável, documentos/validade por pessoa, decisão e origem pela Central única, assinatura conjunta e bloqueio sem assinatura.",
+    "not_completed": "Envio durável, consumidor, assinatura/evidências externas e conclusão global."
   }
 }

@@ -3,6 +3,7 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Button from 'dashboard/components-next/button/Button.vue';
 import { decisionChoices, scopeLabel } from './model';
+import AuthorityOrigin from './AuthorityOrigin.vue';
 const props = defineProps({
   request: { type: Object, required: true },
   context: { type: Object, default: null },
@@ -57,6 +58,11 @@ const choices = computed(() => decisionChoices(props.request));
         {{ step.code }} · {{ step.approved_count }}/{{ step.quorum }}
       </p>
     </div>
+    <AuthorityOrigin
+      v-if="request.origin?.kind === 'contract_authority'"
+      :key="request.id"
+      :request="request"
+    />
     <section class="space-y-3">
       <h3 class="font-semibold">{{ t('JRC_APPROVALS.decision') }}</h3>
       <p
@@ -67,8 +73,8 @@ const choices = computed(() => decisionChoices(props.request));
       </p>
       <template v-else>
         <label class="block text-sm"
-          >{{ t('JRC_APPROVALS.reason')
-          }}<textarea
+          ><span>{{ t('JRC_APPROVALS.reason') }}</span
+          ><textarea
             v-model="reason"
             required
             class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 p-3"

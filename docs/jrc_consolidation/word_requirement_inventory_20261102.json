@@ -20662,14 +20662,16 @@
           },
           "requirement_text": "Razão social, CNPJ, sócios, administradores, poderes de representação e alterações relevantes.",
           "is_heading": false,
-          "classification_pending": true,
+          "classification_pending": false,
           "existing_code_reused": [],
-          "implemented_change": null,
+          "implemented_change": "Evidências versionadas, fundamento/validade por pessoa e decisão jurídica pela Central. OCR não comprova automaticamente poderes/autenticidade.",
           "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "status": "parcial",
+          "tests_and_evidence": [
+            "docs/jrc_backoffice/signing_authority_checkpoint_20261102.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Tipos documentais e demais verificações específicas continuam na etapa E; integrar o caso aprovado ao envio B3."
         },
         {
           "id": "backoffice:P0248",
@@ -20710,14 +20712,16 @@
           },
           "requirement_text": "Outorgante, outorgado, poderes, validade e assinatura quando aplicável.",
           "is_heading": false,
-          "classification_pending": true,
+          "classification_pending": false,
           "existing_code_reused": [],
-          "implemented_change": null,
+          "implemented_change": "Evidências versionadas, fundamento/validade por pessoa e decisão jurídica pela Central. OCR não comprova automaticamente poderes/autenticidade.",
           "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "status": "parcial",
+          "tests_and_evidence": [
+            "docs/jrc_backoffice/signing_authority_checkpoint_20261102.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Tipos documentais e demais verificações específicas continuam na etapa E; integrar o caso aprovado ao envio B3."
         },
         {
           "id": "backoffice:P0250",
@@ -36854,8 +36858,13 @@
         "line": 160,
         "section": "3.2 Pessoas e contatos",
         "text": "O cadastro do CPF não significa comprovação de poderes para assinar contratos.",
-        "classification_pending": true,
-        "evidence": []
+        "classification_pending": false,
+        "evidence": [
+          "docs/jrc_backoffice/signing_authority_checkpoint_20261102.json"
+        ],
+        "status": "parcial",
+        "implemented_change": "Poderes por pessoa/versão/documentos, validade, assinatura conjunta e decisão nativa validados; dependência B3 para integrar ao envio e assinatura final.",
+        "next_action": "Aplicar o snapshot aprovado na admissão durável e verificar evidências finais de todos os assinantes."
       },
       {
         "id": "latest-user:L0162",
@@ -37654,8 +37663,13 @@
         "line": 314,
         "section": "4.4 Documentação",
         "text": "Não tratar OCR como verificação automática de autenticidade ou poderes de representação.",
-        "classification_pending": true,
-        "evidence": []
+        "classification_pending": false,
+        "evidence": [
+          "docs/jrc_backoffice/signing_authority_checkpoint_20261102.json"
+        ],
+        "status": "parcial",
+        "implemented_change": "Poderes por pessoa/versão/documentos, validade, assinatura conjunta e decisão nativa validados; dependência B3 para integrar ao envio e assinatura final.",
+        "next_action": "Aplicar o snapshot aprovado na admissão durável e verificar evidências finais de todos os assinantes."
       },
       {
         "id": "latest-user:L0316",
@@ -37798,16 +37812,26 @@
         "line": 343,
         "section": "4.6 Contratos e assinantes",
         "text": "8. Evidências de representação e poderes.",
-        "classification_pending": true,
-        "evidence": []
+        "classification_pending": false,
+        "evidence": [
+          "docs/jrc_backoffice/signing_authority_checkpoint_20261102.json"
+        ],
+        "status": "parcial",
+        "implemented_change": "Poderes por pessoa/versão/documentos, validade, assinatura conjunta e decisão nativa validados; dependência B3 para integrar ao envio e assinatura final.",
+        "next_action": "Aplicar o snapshot aprovado na admissão durável e verificar evidências finais de todos os assinantes."
       },
       {
         "id": "latest-user:L0344",
         "line": 344,
         "section": "4.6 Contratos e assinantes",
         "text": "9. Validação das regras de assinatura conjunta.",
-        "classification_pending": true,
-        "evidence": []
+        "classification_pending": false,
+        "evidence": [
+          "docs/jrc_backoffice/signing_authority_checkpoint_20261102.json"
+        ],
+        "status": "parcial",
+        "implemented_change": "Poderes por pessoa/versão/documentos, validade, assinatura conjunta e decisão nativa validados; dependência B3 para integrar ao envio e assinatura final.",
+        "next_action": "Aplicar o snapshot aprovado na admissão durável e verificar evidências finais de todos os assinantes."
       },
       {
         "id": "latest-user:L0345",
@@ -40279,7 +40303,9 @@
         "section": "Cenário completo 2 — Comercial e Backoffice",
         "text": "Testar bloqueios por documento ausente, aprovação pendente, assinatura ausente, versão substituída e falta de poderes.",
         "classification_pending": true,
-        "evidence": []
+        "evidence": [
+          "docs/jrc_backoffice/signing_authority_checkpoint_20261102.json"
+        ]
       },
       {
         "id": "latest-user:L0841",
@@ -40463,7 +40489,9 @@
         "section": "11. EXECUÇÃO CONTÍNUA E CHECKPOINTS",
         "text": "Contrato versionado, assinantes, poderes, envio durável, evidências, painel contratual e bloqueios.",
         "classification_pending": true,
-        "evidence": []
+        "evidence": [
+          "docs/jrc_backoffice/signing_authority_checkpoint_20261102.json"
+        ]
       },
       {
         "id": "latest-user:L0889",

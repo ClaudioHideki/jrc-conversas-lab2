@@ -24,11 +24,11 @@ class JrcApprovals::Decisions
         raise JrcApprovals::Error, 'VERSION_CONFLICT' unless existing.cycle == request.cycle
 
         principal!(request, step_code, actor, delegation_id, decision)
-        current!(request, replay: true)
+        current!(request, decision: decision, replay: true)
         next existing
       end
       JrcApprovals::Ledger.expected!(request, expected_version)
-      current!(request)
+      current!(request, decision: decision)
       step = request.policy_version.definition.fetch('steps').find { |item| item['code'] == step_code }
       raise JrcApprovals::Error, 'INVALID_STEP_ACTION' unless step && step['actions'].include?(decision)
       unless request.policy_version.definition['execution'] == 'parallel' || pending_steps(request).first == step_code
@@ -55,7 +55,7 @@ class JrcApprovals::Decisions
 
   private
 
-  def current!(request, replay: false)
+  def current!(request, decision:, replay: false)
     raise JrcApprovals::Error, 'REQUEST_EXPIRED' if request.expires_at <= Time.current
     raise JrcApprovals::Error, 'REQUEST_NOT_PENDING' unless request.state == 'pending' ||
       (replay && %w[approved rejected returned escalated].include?(request.state))
@@ -63,6 +63,12 @@ class JrcApprovals::Decisions
     snapshot = JrcApprovals::Catalog.snapshot(account: @account, user: @user,
       key: "#{request.module_key}.#{request.event_key}", resource_id: request.resource_id)
     raise JrcApprovals::Error, 'CONTEXT_STALE' unless snapshot == request.snapshot
+
+    if decision == 'approved'
+      JrcApprovals::Catalog.verify!(account: @account, user: @user,
+        key: "#{request.module_key}.#{request.event_key}", resource_id: request.resource_id)
+    end
+    raise JrcApprovals::Error, 'REQUEST_EXPIRED' if request.expires_at <= Time.current
   end
 
   def principal!(request, step_code, actor, delegation_id, decision)
