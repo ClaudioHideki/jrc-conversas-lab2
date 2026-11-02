@@ -142,6 +142,35 @@ RSpec.describe 'JRC Broker account control', type: :request do
     expect(response.body).not_to include('SUCCEEDED', 'NEVER-EXPOSE')
   end
 
+  [:admin, :agent].each do |role|
+    [:removed, :integration_replaced, :instance_replaced].each do |change|
+      it "does not release pairing progress to #{role} when the binding is #{change} during the Broker request" do
+        actor = public_send(role)
+        create(:inbox_member, inbox: inbox, user: actor)
+        JrcBrokerInboxGrant.create!(account: account, inbox: inbox, user: actor, can_pair: true)
+        operation_id = SecureRandom.uuid
+        stub_request(:get, "#{remote}/connections/#{connection_id}/pair-operations/#{operation_id}").to_return do
+          bindings = JrcBrokerInboxBinding.where(account: account, inbox: inbox)
+          case change
+          when :removed then bindings.delete_all
+          when :integration_replaced then bindings.update_all(integration_id: SecureRandom.uuid)
+          when :instance_replaced then bindings.update_all(instance_id: SecureRandom.uuid)
+          end
+          { status: 200, body: { operationId: operation_id, state: 'SUCCEEDED', reconciliationRequired: false,
+                                action: { type: 'PAIRING_CODE', code: 'NEVER-EXPOSE',
+                                          expiresAt: 30.seconds.from_now.iso8601 } }.to_json }
+        end
+
+        get "#{inbox_url}/pair-operations/#{operation_id}", headers: actor.create_new_auth_token
+
+        expect(response).to have_http_status(:forbidden)
+        expect(response.parsed_body).to eq('code' => 'JRC_BROKER_FORBIDDEN')
+        expect(response.headers['Cache-Control']).to eq('no-store')
+        expect(response.body).not_to include('SUCCEEDED', 'NEVER-EXPOSE')
+      end
+    end
+  end
+
   it 'does not expose admin actions to an inbox member or allow a first or changed identity' do
     create(:inbox_member, inbox: inbox, user: agent)
     JrcBrokerInboxGrant.create!(account: account, inbox: inbox, user: agent, can_pair: true)
