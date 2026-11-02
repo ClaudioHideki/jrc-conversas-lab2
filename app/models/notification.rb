@@ -44,7 +44,8 @@ class Notification < ApplicationRecord
     sla_missed_first_response: 6,
     sla_missed_next_response: 7,
     sla_missed_resolution: 8,
-    relationship_action: 9
+    relationship_action: 9,
+    service_desk_clock: 10
   }.freeze
 
   enum notification_type: NOTIFICATION_TYPES
@@ -54,7 +55,7 @@ class Notification < ApplicationRecord
   after_destroy_commit :dispatch_destroy_event
   after_update_commit :dispatch_update_event
 
-  PRIMARY_ACTORS = ['Conversation', 'JrcRelationship::Action'].freeze
+  PRIMARY_ACTORS = ['Conversation', 'JrcRelationship::Action', 'JrcServiceDesk::Ticket'].freeze
 
   def push_event_data
     # Secondary actor could be nil for cases like system assigning conversation
@@ -88,7 +89,9 @@ class Notification < ApplicationRecord
 
   # rubocop:disable Metrics/MethodLength
   def push_message_title
+    return I18n.t('notifications.notification_title.service_desk_clock') if service_desk_clock?
     return I18n.t('notifications.notification_title.relationship_action') if relationship_action?
+
     notification_title_map = {
       'conversation_creation' => 'notifications.notification_title.conversation_creation',
       'conversation_assignment' => 'notifications.notification_title.conversation_assignment',
@@ -115,7 +118,9 @@ class Notification < ApplicationRecord
   # rubocop:enable Metrics/MethodLength
 
   def push_message_body
+    return "OLA ##{primary_actor_id}: #{meta['percent']}%" if service_desk_clock?
     return primary_actor.reason if relationship_action?
+
     case notification_type
     when 'conversation_creation', 'sla_missed_first_response'
       message_body(conversation.messages.first)
@@ -156,8 +161,10 @@ class Notification < ApplicationRecord
   end
 
   def process_notification_delivery
+    return if service_desk_clock? # The durable clock execution owns its explicit channels.
     # CS alerts use the existing in-app feed; no conversation-specific delivery job.
     return if relationship_action?
+
     Notification::PushNotificationJob.perform_later(self) if user_subscribed_to_notification?('push')
 
     # Should we do something about the case where user subscribed to both push and email ?
@@ -203,6 +210,10 @@ class Notification < ApplicationRecord
   end
 
   def primary_actor_data
+    if service_desk_clock?
+      return { primary_actor: { id: primary_actor_id, account_id: account_id, unit_id: primary_actor.unit_id },
+               push_message_title: push_message_title, push_message_body: push_message_body }
+    end
     {
       primary_actor: primary_actor&.push_event_data,
       # TODO: Rename push_message_title to push_message_body

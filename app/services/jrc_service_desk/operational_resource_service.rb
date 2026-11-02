@@ -46,6 +46,17 @@ class JrcServiceDesk::OperationalResourceService < JrcServiceDesk::BaseService
     end
   end
 
+  def unlink(unit_id:, resource_id:, ticket_id:, expected_lock_version:)
+    with_resource(unit_id, resource_id, :update?) do |row, _unit|
+      verify_version!(row, expected_lock_version)
+      ticket = linked_ticket(row, JrcServiceDesk::Input.id(ticket_id))
+      row.resource_ticket_links.active.find_by!(ticket: ticket)
+      row.update!(history: row.history + [entry('ticket_unlinked', 'ticket_ids' => [ticket.id.to_s])])
+      append_event!(ticket, 'resource_unlinked', 'resource_id' => row.id, 'resource_kind' => row.resource_kind)
+      row
+    end
+  end
+
   private
 
   def existing_resource(unit, key, fingerprint)
@@ -118,12 +129,19 @@ class JrcServiceDesk::OperationalResourceService < JrcServiceDesk::BaseService
   end
 
   def link_ticket!(row, id)
+    ticket = linked_ticket(row, id)
+    return if row.resource_ticket_links.active.exists?(ticket: ticket)
+
+    unless row.resource_ticket_links.exists?(ticket: ticket)
+      row.resource_ticket_links.create!(account: context.account, unit: row.unit, ticket: ticket, linked_by_membership: actor_membership)
+    end
+    append_event!(ticket, 'resource_linked', 'resource_id' => row.id, 'resource_kind' => row.resource_kind)
+  end
+
+  def linked_ticket(row, id)
     ticket = JrcServiceDesk::TicketPolicy::Scope.new(context.to_h, JrcServiceDesk::Ticket).resolve.where(unit_id: row.unit_id).lock.find(id)
     authorize!(ticket, :update?)
-    return if row.resource_ticket_links.exists?(ticket: ticket)
-
-    row.resource_ticket_links.create!(account: context.account, unit: row.unit, ticket: ticket, linked_by_membership: actor_membership)
-    append_event!(ticket, 'resource_linked', 'resource_id' => row.id, 'resource_kind' => row.resource_kind)
+    ticket
   end
 
   def entry(action, values)
@@ -133,7 +151,7 @@ class JrcServiceDesk::OperationalResourceService < JrcServiceDesk::BaseService
 
   def record_ticket_history(row, type)
     visible = JrcServiceDesk::TicketPolicy::Scope.new(context.to_h, JrcServiceDesk::Ticket).resolve
-    visible.where(id: row.resource_ticket_links.select(:ticket_id)).find_each do |ticket|
+    visible.where(id: row.resource_ticket_links.active.select(:ticket_id)).find_each do |ticket|
       append_event!(ticket, type, 'resource_id' => row.id, 'resource_kind' => row.resource_kind, 'history_index' => row.history.size - 1)
     end
   end

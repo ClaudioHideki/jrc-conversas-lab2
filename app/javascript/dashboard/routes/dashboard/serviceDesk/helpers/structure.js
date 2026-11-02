@@ -33,6 +33,7 @@ export function structureContext(payload, identity) {
     user_id: structureId(payload.user_id),
     account_user_id: structureId(payload.account_user_id),
     available: true,
+    can_manage_auto_assignment: payload.can_manage_auto_assignment === true,
     capabilities,
   };
 }
@@ -63,12 +64,9 @@ export function structureAttributes(resource, attrs, creating) {
   requireValue(!creating || required.every(key => Object.hasOwn(attrs, key)));
   return Object.fromEntries(
     Object.entries(attrs).map(([key, value]) => {
-      if (key.endsWith('_id')) value = structureId(value);
-      else if (
-        resource === 'unit_memberships' &&
-        membershipV2Fields.includes(key)
-      )
+      if (resource === 'unit_memberships' && membershipV2Fields.includes(key))
         value = settingAttributes({ [key]: value })[key];
+      else if (key.endsWith('_id')) value = structureId(value);
       else if (key === 'active') requireValue(typeof value === 'boolean');
       else
         requireValue(
@@ -220,9 +218,10 @@ export function confirmStructure(ack, receiptPayload, fresh, ctx, intent) {
       : structureId(intent.recordId) === record.id && receipt.before !== null
   );
   Object.entries(intent.attributes).forEach(([field, value]) => {
-    const auditValue = field.endsWith('_id')
-      ? structureId(receipt.after?.[field])
-      : receipt.after?.[field];
+    const auditValue =
+      field.endsWith('_id') && receipt.after?.[field] !== null
+        ? structureId(receipt.after?.[field])
+        : receipt.after?.[field];
     requireValue(
       sameSetting(auditValue, value) && sameSetting(record[field], value)
     );

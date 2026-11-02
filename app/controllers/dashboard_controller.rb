@@ -1,6 +1,7 @@
 class DashboardController < ActionController::Base
   include SwitchLocale
   include PortalHomeData
+  include RequesterPortal::OperationalAccess
 
   GLOBAL_CONFIG_KEYS = %w[
     LOGO

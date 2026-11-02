@@ -56,7 +56,7 @@ class JrcRelationship::SurveyExecutionContext
   end
 
   def recipient_blocker
-    return 'interaction_not_completed' unless origin.completed?
+    return 'interaction_not_completed' unless JrcRelationship::SurveyModelRuntime.source_ready?(@survey, origin)
     return 'contact_missing' unless origin.contact
     return 'recipient_changed' unless origin.contact.id == @survey.contact_id
 

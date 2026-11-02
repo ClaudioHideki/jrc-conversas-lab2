@@ -55,6 +55,11 @@ class Messages::MessageBuilder
     return if @attachments.blank?
 
     @attachments.each do |uploaded_attachment|
+      if uploaded_attachment.is_a?(String)
+        blob = ActiveStorage::Blob.find_signed!(uploaded_attachment)
+        actor = @user.is_a?(User) ? @user : JrcServiceDesk::OutboundAttachments.execution_user(@account.id)
+        JrcServiceDesk::OutboundAttachments.authorize_blob!(blob, user: actor)
+      end
       attachment = @message.attachments.build(
         account_id: @message.account_id,
         file: uploaded_attachment

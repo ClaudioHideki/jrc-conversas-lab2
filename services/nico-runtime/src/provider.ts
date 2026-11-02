@@ -76,7 +76,14 @@ export async function structuredResponse<T>(options: {
       if (options.signal?.aborted) throw new NicoError('request_cancelled');
       if (deadline.aborted) throw new NicoError('provider_timeout');
       if (!(error instanceof NicoError)) throw new NicoError('provider_transport_error');
-      if (!options.retryInvalid || attempt !== 0 || !INVALID_OUTPUT.has(error.code)) throw error;
+      if (!options.retryInvalid || attempt !== 0 || !INVALID_OUTPUT.has(error.code)) {
+        // A later timeout/unmetered response must never turn an earlier partial receipt into complete accounting.
+        if (accounted && INVALID_OUTPUT.has(error.code)) {
+          throw new NicoError(error.code, { version: 1, complete: true, attempts: attempt + 1, model: options.body.model,
+            usage: { ...usage }, ...(usageEstimated ? { usage_estimated: true } : {}) });
+        }
+        throw error;
+      }
       if (!accounted) {
         // Invalid HTTP JSON cannot supply usage. Charge a marked conservative estimate,
         // matching the Rails reservation, instead of silently dropping the first call.

@@ -28,7 +28,10 @@ class JrcServiceDesk::ClockMonitoringBinding
     cycle = clock.sla_cycle
     version = cycle.lifecycle_policy_version
     current = JrcServiceDesk::LifecycleSelector.new(clock.ticket).applicable
-    valid = current&.id == version.id && version.lifecycle_policy.current_version_id == version.id &&
+    revision = JrcServiceDesk::ClosureRevisionBinding.new(clock.ticket, current)
+    publication_current = version.lifecycle_policy.current_version_id == version.id ||
+                          (revision.active? && revision.target.id == version.lifecycle_policy.current_version_id)
+    valid = current&.id == version.id && publication_current &&
             version.digest == version.expected_digest && clock.ticket.lifecycle_policy_version_id == version.id
     raise JrcServiceDesk::IdempotencyConflict, 'Historical SLA monitoring publication is not current' unless valid
 
@@ -39,7 +42,12 @@ class JrcServiceDesk::ClockMonitoringBinding
   def bind_ola!
     queue = clock.queue.reload
     current_policy = JrcServiceDesk::ClockEscalationPolicy.new(queue.ola_escalation_policy)
-    revision = JrcServiceDesk::OlaTracker.current_revision(queue, clock.sla_snapshot)
+    revision = if clock.queue_policy_version
+                 queue.current_policy_version&.digest
+               else
+                 JrcServiceDesk::OlaTracker.current_revision(queue,
+                                                             clock.sla_snapshot)
+               end
     valid = queue.active? && queue.id == clock.ticket.queue_id && queue.unit_id == clock.unit_id &&
             queue.account_id == clock.account_id && revision == clock.policy_revision &&
             current_policy.definition == clock.escalation_snapshot

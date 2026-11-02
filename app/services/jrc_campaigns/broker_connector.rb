@@ -1,6 +1,9 @@
 class JrcCampaigns::BrokerConnector
   PROTOCOL = 'chatwoot-campaigns/v1'.freeze
-  REASONS = %w[CAMPAIGN_BROKER_TRANSPORT_REQUIRED CAMPAIGN_EXECUTOR_EXTERNAL_REQUIRED CAMPAIGN_CALLBACK_NOT_READY CAMPAIGN_IDENTITY_NOT_READY].freeze
+  REASONS = %w[
+    CAMPAIGN_BROKER_TRANSPORT_REQUIRED CAMPAIGN_EXECUTOR_EXTERNAL_REQUIRED CAMPAIGN_CALLBACK_NOT_READY
+    CAMPAIGN_IDENTITY_NOT_READY CAMPAIGN_ATTENDANCE_POLICY_REQUIRES_CONFIGURATION
+  ].freeze
   attr_reader :inbox, :binding, :integration
 
   def self.for(inbox)
@@ -34,18 +37,19 @@ class JrcCampaigns::BrokerConnector
       'configuration_revision' => integration.updated_at.iso8601(6) }
   end
 
-  def context(user)
-    JrcBroker::Context.new(account: inbox.account, user: user)
+  def context(user, release_connection: false)
+    JrcBroker::Context.new(account: inbox.account, user: user, release_connection: release_connection)
   end
 
-  def transport(user)
+  def transport(user, release_connection: false)
     expected = "#{integration.broker_origin}/v1/integrations/chatwoot/#{binding.integration_id}/events"
     raise JrcBroker::Client::Error, 'JRC_BROKER_CALLBACK_MISMATCH' unless inbox.channel.webhook_url == expected
 
-    data = context(user).client.campaign_transport(binding.integration_id)
+    data = context(user, release_connection: release_connection).client.campaign_transport(binding.integration_id)
     valid = data['protocol'] == PROTOCOL && data.values_at('integrationId', 'inboxId', 'instanceId', 'destinationRevision') ==
       [binding.integration_id, inbox.id, binding.instance_id, integration.destination_revision]
     valid &&= [true, false].include?(data['ready']) && data['identityRevision'].is_a?(Integer) && data['identityRevision'] >= 0
+    valid &&= data['ownerRevision'].is_a?(Integer) && data['ownerRevision'] >= 0
     valid &&= data['numberSuffix'].nil? || /\A\d{4}\z/.match?(data['numberSuffix'].to_s)
     valid &&= data['ready'] ? data['reason'].nil? : REASONS.include?(data['reason'])
     valid &&= data['identityRevision'].positive? if data['ready'] == true && valid
@@ -56,15 +60,15 @@ class JrcCampaigns::BrokerConnector
 
   def ready!(user)
     # Status refreshes the existing identity evidence; the scoped transport endpoint is read-only.
-    context(user).client.status(binding.integration_id)
-    data = transport(user)
+    context(user, release_connection: true).client.status(binding.integration_id)
+    data = transport(user, release_connection: true)
     raise ArgumentError, "Broker indisponível para campanhas: #{data['reason']}" unless data['ready'] == true
 
     data
   end
 
   def receipt(user, conversation_id, message_id)
-    data = context(user).client.campaign_receipt(binding.integration_id, conversation_id, message_id)
+    data = context(user, release_connection: true).client.campaign_receipt(binding.integration_id, conversation_id, message_id)
     valid = data['protocol'] == PROTOCOL && data.values_at('integrationId', 'conversationId', 'messageId') ==
       [binding.integration_id, conversation_id, message_id] && %w[queued sent delivered read failed blocked unknown].include?(data['status'])
     raise JrcBroker::Client::Error, 'JRC_BROKER_INVALID_RESPONSE' unless valid

@@ -8,6 +8,7 @@ class JrcRelationship::SurveyMessageExecution
 
   def self.payload_digest(message)
     payload = recipient_payload(message).merge(message_payload(message), attachments: attachment_manifest(message))
+    payload[:broker_binding] = JrcBroker::OutboundChannel.configuration(message.inbox) if message.inbox.channel_type == 'Channel::Api'
     Digest::SHA256.hexdigest(JSON.generate(canonical(payload)))
   end
 
@@ -184,6 +185,11 @@ class JrcRelationship::SurveyMessageExecution
     return false unless allowed&.id == @message.conversation_id && ConversationPolicy.new(execution.context.to_h, allowed).show?
 
     sealed_link = @message.content_attributes['relationship_survey_link']
-    sealed_link.present? ? JrcRelationship::SurveyWhatsappTemplate.valid_message?(@survey, @message) : allowed.can_reply?
+    if sealed_link.present?
+      JrcRelationship::SurveyWhatsappTemplate.valid_message?(@survey,
+                                                             @message)
+    else
+      allowed.can_reply? && (allowed.inbox.channel_type != 'Channel::Api' || JrcBroker::OutboundChannel.available?(allowed.inbox))
+    end
   end
 end

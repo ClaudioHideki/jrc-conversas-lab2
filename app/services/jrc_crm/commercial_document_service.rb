@@ -141,7 +141,16 @@ module JrcCrm
         ['Meio de pagamento', f[:payment_method] || 'A definir'], ['Entrada', money(f[:down_payment_cents])],
         ['Frete fora das parcelas', money(f[:upfront_shipping_cents])], ['Saldo após entrada', money(f[:balance_cents])]
       ])
-      @layout.paragraph('A recorrencia futura e apresentada separadamente. Nos itens de cobranca mensal ou anual, o primeiro periodo compoe o total inicial. Valores anuais sao mostrados tambem pelo equivalente mensal.', size: 9, color: CommercialPdf::Layout::MUTED)
+      if f[:financial_version].to_i >= 3
+        @layout.key_values([
+          ['Mensalidades fixas', "#{f[:recurring_months_count]} mensalidades de #{money(f[:recurring_monthly_cents])}"],
+          ['Total previsto das mensalidades', money(f[:recurring_total_cents])],
+          ['Total previsto no prazo', money(f[:contract_total_cents])]
+        ])
+        @layout.paragraph('Mensalidades fixas nao sao divididas pelo prazo. As parcelas abaixo cobrem somente valores unicos, implantacao e frete. A primeira mensalidade consta no valor inicial e e contada uma unica vez no total previsto. Esta previsao nao projeta consumos variaveis ou renovacoes anuais, cujas condicoes permanecem nos itens.', size: 9, color: CommercialPdf::Layout::MUTED)
+      else
+        @layout.paragraph('A recorrencia futura e apresentada separadamente. Nos itens de cobranca mensal ou anual, o primeiro periodo compoe o total inicial. Valores anuais sao mostrados tambem pelo equivalente mensal.', size: 9, color: CommercialPdf::Layout::MUTED)
+      end
       if f[:payment_method].to_s == 'boleto'
         @layout.paragraph('Boleto identifica a condicao comercial. Este documento nao e um boleto bancario nem comprova sua emissao.', size: 9, color: CommercialPdf::Layout::MUTED)
       end
@@ -151,6 +160,7 @@ module JrcCrm
                 when 'cash' then 'Pagamento a vista'
                 when 'down_payment' then 'Entrada'
                 when 'shipping' then 'Frete separado'
+                when 'first_monthly' then 'Primeira mensalidade (fora do parcelamento)'
                 else "Parcela #{payment[:number]} de #{f[:installments_count]}"
                 end
         [label, date(payment[:date]), money(payment[:value])]
@@ -209,7 +219,10 @@ module JrcCrm
       if present?(value(template, :body))
         context = { 'cliente' => { 'nome' => customer_name }, 'contrato' => { 'numero' => value(@record, :contract_number) },
           'pedido' => { 'numero' => value(@order, :order_number) }, 'vigencia' => validity,
-          'valor_mensal' => money(@financials[:monthly_cents]), 'valor_total' => money(@financials[:total_cents]) }
+          'valor_mensal' => money(@financials[:monthly_cents]),
+          'valor_total' => money(@financials[:financial_version].to_i >= 3 ? @financials[:contract_total_cents] : @financials[:total_cents]),
+          'valor_inicial' => money(@financials[:total_cents]), 'total_recorrente' => money(@financials[:recurring_total_cents]),
+          'quantidade_mensalidades' => @financials[:recurring_months_count].to_s }
         return paragraphs(Liquid::Template.parse(template.body).render(context))
       end
       ["Este contrato formaliza a contratacao vinculada ao pedido #{value(@order, :order_number)}.",

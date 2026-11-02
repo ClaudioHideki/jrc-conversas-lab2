@@ -14,12 +14,13 @@ class JrcBroker::Client
   UUID = /\A[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\z/i
   MAX_RESPONSE_BYTES = 2_100_000
 
-  def initialize(origin:, token:, actor_id:)
+  def initialize(origin:, token:, actor_id:, release_connection: false)
     @origin = JrcBroker::Configuration.allowed_origin!(origin)
     raise JrcBroker::Configuration::InvalidConfiguration unless token.is_a?(String) && token.bytesize.between?(1, 4096) && /\A[!-~]+\z/.match?(token)
 
     @token = token
     @actor_id = actor_id.to_s
+    @release_connection = release_connection
   end
 
   def inspect
@@ -56,6 +57,10 @@ class JrcBroker::Client
 
   def campaign_transport(id)
     request(:get, connection_path(id, 'campaign-transport'))
+  end
+
+  def campaign_intent(id, body, key:)
+    request(:post, connection_path(id, 'campaign-intents'), body: body, key: key)
   end
 
   def campaign_receipt(id, conversation_id, message_id)
@@ -125,6 +130,11 @@ class JrcBroker::Client
   end
 
   def request(method, path, body: nil, key: nil)
+    if @release_connection
+      pool = ActiveRecord::Base.connection_pool
+      connection = pool.active_connection?
+      pool.release_connection if connection && !connection.transaction_open?
+    end
     uri = URI.parse("#{@origin}#{PREFIX}#{path}")
     req = Net::HTTP.const_get(method.to_s.capitalize).new(uri.request_uri, request_headers(key))
     req.body = JSON.generate(body) unless body.nil?
@@ -150,7 +160,7 @@ class JrcBroker::Client
     status = response.code.to_i
     code = { 400 => 'INVALID_REQUEST', 401 => 'FORBIDDEN', 403 => 'FORBIDDEN', 404 => 'NOT_FOUND', 409 => 'CONFLICT' }[status]
     raise Error.new("JRC_BROKER_#{code}", status: status == 401 ? 403 : status) if code
-    raise Error, 'JRC_BROKER_UNAVAILABLE' unless [200, 202].include?(status)
+    raise Error, 'JRC_BROKER_UNAVAILABLE' unless [200, 201, 202].include?(status)
 
     body = +''
     response.read_body do |chunk|

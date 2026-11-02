@@ -14,6 +14,35 @@
       "options": {
         "singleAttributePerLine": true
       }
+    },
+    {
+      "files": [
+        "app/javascript/dashboard/routes/dashboard/serviceDesk/surveys/**/*.vue"
+      ],
+      "options": {
+        "singleAttributePerLine": true,
+        "htmlWhitespaceSensitivity": "ignore"
+      }
+    },
+    {
+      "files": [
+        "app/javascript/dashboard/routes/dashboard/serviceDesk/automationStudio/**/*.vue",
+        "app/javascript/dashboard/routes/dashboard/serviceDesk/components/LifecycleVisualEditor.vue",
+        "app/javascript/dashboard/routes/dashboard/serviceDesk/components/OperationalRulePanel.vue",
+        "app/javascript/dashboard/routes/dashboard/serviceDesk/components/TicketSummary.vue",
+        "app/javascript/dashboard/routes/dashboard/serviceDesk/components/TicketCockpit.vue",
+        "app/javascript/dashboard/routes/dashboard/serviceDesk/components/TicketTimeline.vue",
+        "app/javascript/dashboard/routes/dashboard/serviceDesk/components/TicketInformationPanel.vue",
+        "app/javascript/dashboard/routes/dashboard/serviceDesk/components/InteractionComposer.vue",
+        "app/javascript/dashboard/routes/dashboard/serviceDesk/views/TicketDetailView.vue",
+        "app/javascript/dashboard/routes/dashboard/serviceDesk/caseWorkspace/**/*.vue",
+        "app/javascript/portal/requester/*.vue",
+        "app/javascript/dashboard/routes/dashboard/serviceDesk/components/AssigneesManager.vue"
+      ],
+      "options": {
+        "singleAttributePerLine": true,
+        "htmlWhitespaceSensitivity": "ignore"
+      }
     }
   ]
 }

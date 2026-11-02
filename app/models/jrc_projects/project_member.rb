@@ -12,8 +12,8 @@ module JrcProjects
     private
 
     def tenant_consistency
-      errors.add(:project, 'must belong to account') if project && project.account_id != account_id
-      errors.add(:user, 'must belong to account') if account && user && !account.users.exists?(user.id)
+      errors.add(:project, 'deve pertencer à conta') if project && project.account_id != account_id
+      errors.add(:user, 'deve pertencer à conta') if account && user && !account.users.exists?(user.id)
     end
   end
 end

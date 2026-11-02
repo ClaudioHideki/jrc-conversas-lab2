@@ -60,6 +60,13 @@ describe('#AssignmentPoliciesAPI', () => {
       );
     });
 
+    it('#getInboxDiagnostics', () => {
+      assignmentPolicies.getInboxDiagnostics(456);
+      expect(axiosMock.get).toHaveBeenCalledWith(
+        '/api/v1/accounts/1/inboxes/456/assignment_diagnostics'
+      );
+    });
+
     it('#removeInboxPolicy', () => {
       assignmentPolicies.removeInboxPolicy(456);
       expect(axiosMock.delete).toHaveBeenCalledWith(

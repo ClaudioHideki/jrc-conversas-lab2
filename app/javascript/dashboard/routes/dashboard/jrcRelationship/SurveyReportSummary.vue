@@ -36,6 +36,12 @@ const kinds = computed(() => ({
     class="space-y-3 rounded-xl border border-n-weak p-4"
     data-testid="survey-report-summary"
   >
+    <p
+      v-if="report.normalization"
+      class="text-xs text-n-slate-11"
+    >
+      {{ t('RELATIONSHIP.SURVEY_NORMALIZED_SCALES') }}
+    </p>
     <h3 class="font-semibold">
       {{ t('RELATIONSHIP.SURVEY_FILTERED_METRICS') }}
     </h3>

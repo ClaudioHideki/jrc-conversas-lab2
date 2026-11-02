@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useSipWebphone } from './useSipWebphone';
+import { hasEmbeddedSoftphone } from './useEmbeddedSoftphone';
 import { useJrcCopilot } from 'dashboard/components-next/jrcCopilot/useJrcCopilot';
 
 const { isFull: nicoOpen } = useJrcCopilot();
@@ -36,6 +37,7 @@ watch(
   { immediate: true }
 );
 const {
+  accountId,
   status,
   incoming,
   established,
@@ -49,9 +51,19 @@ const {
 
 const remoteAudio = ref(null);
 const ringtone = new Audio(RINGTONE_URL);
-const visible = computed(
-  () => incoming.value || (established.value && route.name !== 'ramal_index')
+const matchingAccount = computed(
+  () => Number(accountId.value) === Number(route.params?.accountId)
 );
+const visible = computed(
+  () =>
+    matchingAccount.value &&
+    !hasEmbeddedSoftphone(route.params?.accountId) &&
+    (incoming.value || (established.value && route.name !== 'ramal_index'))
+);
+const operate = action => {
+  if (matchingAccount.value) return action();
+  return undefined;
+};
 
 ringtone.loop = true;
 ringtone.volume = 1;
@@ -72,7 +84,7 @@ watch(
 );
 
 watch(
-  () => visible.value && incoming.value && route.name !== 'ramal_index',
+  () => matchingAccount.value && incoming.value && route.name !== 'ramal_index',
   shouldRing => {
     if (shouldRing) {
       ringtone.play().catch(() => {});
@@ -134,14 +146,14 @@ onBeforeUnmount(stopRingtone);
         <button
           type="button"
           class="min-h-11 rounded-xl border border-n-teal-7 bg-n-teal-3 px-4 font-semibold text-n-teal-11 shadow-sm hover:brightness-95"
-          @click="answer"
+          @click="operate(answer)"
         >
           {{ TEXT.answer }}
         </button>
         <button
           type="button"
           class="min-h-11 rounded-xl border border-n-ruby-7 bg-n-ruby-3 px-4 font-semibold text-n-ruby-11 shadow-sm hover:brightness-95"
-          @click="reject"
+          @click="operate(reject)"
         >
           {{ TEXT.reject }}
         </button>
@@ -150,11 +162,15 @@ onBeforeUnmount(stopRingtone);
         v-else
         type="button"
         class="mt-5 min-h-11 w-full rounded-xl bg-n-ruby-9 px-4 font-semibold text-white shadow-sm hover:brightness-110"
-        @click="hangup"
+        @click="operate(hangup)"
       >
         {{ TEXT.hangup }}
       </button>
-      <audio ref="remoteAudio" autoplay />
     </aside>
+    <audio
+      v-if="matchingAccount && route.name !== 'ramal_index'"
+      ref="remoteAudio"
+      autoplay
+    />
   </div>
 </template>

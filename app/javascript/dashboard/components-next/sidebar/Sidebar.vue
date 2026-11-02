@@ -1638,7 +1638,7 @@ const menuSections = computed(() => {
       {
         name: 'crm',
         label: t('JRC_CONTACT_CENTER.VISUAL.CRM'),
-        items: take(['CRM', 'Relationship']),
+        items: take(['CRM', 'Customers', 'Relationship']),
       },
       {
         name: 'operations',

@@ -31,13 +31,13 @@ class JrcRelationship::SurveyDefinition < ApplicationRecord
       errors.add(:questions, 'must contain unique bounded questions and valid backward conditions')
       return
     end
-    errors.add(:questions, 'the principal question must require the declared scale') unless schema.principal_scale?(kind)
+    errors.add(:questions, 'the principal question must require the declared scale') unless schema.principal_scale?(kind, configurable: settings.is_a?(Hash) && settings.key?('service_desk_model'))
   end
 
   def valid_settings
     errors.add(:settings, 'must be a bounded object') unless settings.is_a?(Hash) && (settings.keys - %w[low_threshold recovery_enabled
                                                                                                          recovery_sla_hours thank_you ces_direction
-                                                                                                         available_from available_until]).empty?
+                                                                                                         available_from available_until service_desk_model]).empty?
     return unless settings.is_a?(Hash)
 
     if settings.key?('recovery_enabled') && [true, false].exclude?(settings['recovery_enabled'])
@@ -48,6 +48,9 @@ class JrcRelationship::SurveyDefinition < ApplicationRecord
     validate_thank_you
     validate_direction
     validate_validity
+    if settings.key?('service_desk_model') && !JrcRelationship::SurveyModelContract.new(settings['service_desk_model']).valid?
+      errors.add(:settings, 'invalid service desk model contract')
+    end
   end
 
   def validate_thank_you

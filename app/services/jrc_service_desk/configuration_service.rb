@@ -15,11 +15,13 @@ class JrcServiceDesk::ConfigurationService < JrcServiceDesk::BaseService
       authorize!(candidate, :create?)
       existing = replay(resource, key, fingerprint)
       next existing if existing
+
       values['team_id'] = native_team(values['team_id'])&.id if values.key?('team_id')
       candidate.assign_attributes(values)
       save_catalogue!(candidate)
+      JrcServiceDesk::QueuePublication.call(candidate, publication_actor) if resource == 'queues'
       audit = auditor.write!(resource: resource, record: candidate, action: 'create', before: {},
-        after: JrcServiceDesk::ConfigurationResources.fields(resource, candidate), key: key, fingerprint: fingerprint)
+                             after: JrcServiceDesk::ConfigurationResources.fields(resource, candidate), key: key, fingerprint: fingerprint)
       Result.new(record: candidate, audit_id: audit.id)
     end
   end
@@ -32,7 +34,7 @@ class JrcServiceDesk::ConfigurationService < JrcServiceDesk::BaseService
     key = JrcServiceDesk::Input.request_key(idempotency_key)
     id = JrcServiceDesk::Input.id(record_id)
     fingerprint = JrcServiceDesk::CanonicalJson.digest('action' => 'update', 'resource' => resource, 'id' => id,
-      'attributes' => values, 'revision' => expected_revision)
+                                                       'attributes' => values, 'revision' => expected_revision)
     initial = fresh_context!
     candidate = Pundit.policy_scope!(initial.to_h, model).find(id)
     with_unit(candidate.unit_id, administrative: true) do |unit|
@@ -43,17 +45,23 @@ class JrcServiceDesk::ConfigurationService < JrcServiceDesk::BaseService
       unless JrcServiceDesk::ConfigurationResources.revision(resource, record) == expected_revision
         raise JrcServiceDesk::IdempotencyConflict, 'Configuration changed; reload'
       end
+
       before = JrcServiceDesk::ConfigurationResources.fields(resource, record)
       values['team_id'] = native_team(values['team_id'])&.id if values.key?('team_id')
       record.assign_attributes(values)
       save_catalogue!(record)
+      JrcServiceDesk::QueuePublication.call(record, publication_actor) if resource == 'queues'
       audit = auditor.write!(resource: resource, record: record, action: 'update', before: before,
-        after: JrcServiceDesk::ConfigurationResources.fields(resource, record), key: key, fingerprint: fingerprint)
+                             after: JrcServiceDesk::ConfigurationResources.fields(resource, record), key: key, fingerprint: fingerprint)
       Result.new(record: record, audit_id: audit.id)
     end
   end
 
   private
+
+  def publication_actor
+    actor_membership || context.actor_for(@acting_unit, lock: true).tap { |member| member.save! unless member.persisted? }
+  end
 
   def save_catalogue!(record)
     JrcServiceDesk::CatalogueAccess.new(record).validate_configuration!(context) if record.is_a?(JrcServiceDesk::Service)
@@ -67,10 +75,13 @@ class JrcServiceDesk::ConfigurationService < JrcServiceDesk::BaseService
   def replay(resource, key, fingerprint)
     prior = auditor.prior(key)
     return nil unless prior
+
     data = auditor.metadata(prior)
     raise JrcServiceDesk::IdempotencyConflict, 'Request key already used' unless data['fingerprint'] == fingerprint && data['resource'] == resource
+
     model = JrcServiceDesk::ConfigurationResources.model(resource)
     raise ActiveRecord::RecordNotFound unless prior.auditable_type == model.base_class.name
+
     record = Pundit.policy_scope!(context.to_h, model).where(unit_id: @acting_unit.id).find(prior.auditable_id)
     authorize!(record, :update?) # Replay must not restore a revoked management capability.
     Result.new(record: record, audit_id: prior.id)

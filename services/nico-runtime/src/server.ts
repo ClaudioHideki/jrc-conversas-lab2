@@ -31,6 +31,7 @@ const server = createServer(async (req, res) => {
   if (received.length !== expected.length || !timingSafeEqual(received, expected)) return reject(401, 'unauthorized');
   if (!['/v1/analyze', '/v1/operate', '/v1/transcribe', '/v1/sentiment'].includes(req.url || '') || req.method !== 'POST') return send(404, { error: 'not_found' });
   if (!req.headers['content-type']?.startsWith('application/json')) return send(415, { error: 'json_required' });
+  let input;
   try {
     let size = 0;
     const chunks: Buffer[] = [];
@@ -39,7 +40,6 @@ const server = createServer(async (req, res) => {
       if (size > (req.url === '/v1/transcribe' ? 5600000 : 262144)) return send(413, { error: 'body_too_large' });
       chunks.push(chunk);
     }
-    let input;
     let provider;
     try {
       const { provider: configuration, ...raw } = JSON.parse(Buffer.concat(chunks).toString('utf8'));
@@ -58,7 +58,7 @@ const server = createServer(async (req, res) => {
       : await engine.analyze(input as any, cancellation.signal, provider);
     send(200, { ...result, request_id: input.request_id, account_id: input.account_id });
   } catch (error) {
-    const failure = errorResponse(error, req.url || '');
+    const failure = errorResponse(error, req.url || '', input);
     console.error(JSON.stringify(failure.log));
     send(failure.status, failure.body);
   }

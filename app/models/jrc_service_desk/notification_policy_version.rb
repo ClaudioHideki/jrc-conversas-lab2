@@ -9,11 +9,22 @@ class JrcServiceDesk::NotificationPolicyVersion < JrcServiceDesk::UnitRecord
   validates :event_type, inclusion: { in: JrcServiceDesk::NotificationEvent::TYPES }
   validates :channel, inclusion: { in: %w[email whatsapp] }
   validates :version, numericality: { only_integer: true, greater_than: 0 },
-                       uniqueness: { scope: %i[account_id unit_id event_type channel ticket_type_id service_id] }
+                      uniqueness: { scope: %i[account_id unit_id event_type channel ticket_type_id service_id] }
   validates :template, presence: true, length: { maximum: 10_000 }
   validates :template_version, presence: true, length: { maximum: 80 }
   validates :digest, format: { with: /\A[a-f0-9]{64}\z/ }
+  validates :display_name, length: { maximum: 255 }, allow_nil: true
+  validates :description, length: { maximum: 4000 }, allow_nil: true
   validate :references_are_consistent
+  validate do
+    JrcServiceDesk::NotificationControls.new(settings)
+  rescue ArgumentError, KeyError, JrcServiceDesk::LifecycleDependencyError
+    errors.add(:settings, 'invalid notification controls')
+  end
+
+  def code
+    ['sdnotify', unit_id, event_type, channel, ticket_type_id || 'all', service_id || 'all'].join(':')
+  end
 
   private
 

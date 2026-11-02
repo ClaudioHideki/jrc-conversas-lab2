@@ -55,6 +55,8 @@ class JrcCustomers::Customer360
                                                       .select(:ticket_id).distinct.count
     end
     values[:projects_active] = projects.where(status: %w[planned active on_hold]).count if @visibility.projects?
+    values[:calls] = calls.count if calls
+    values[:campaigns_sent] = recipients.where.not(sent_at: nil).count if recipients
     last_conversation_at = Message.where(account_id: @account.id, conversation_id: conversations.select(:id), private: false)
                                   .where(message_type: [0, 1]).maximum(:created_at)
     interactions = [last_conversation_at, activities.maximum(:completed_at), calls&.maximum(:started_at),

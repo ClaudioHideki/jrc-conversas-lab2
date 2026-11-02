@@ -4,6 +4,7 @@ class Labels::DestroyService
   def perform
     conversation_labels_removed = remove_conversation_labels
     remove_contact_labels
+    remove_service_desk_labels
     invalidate_filtered_unread_count_conversations if conversation_labels_removed
   end
 
@@ -26,6 +27,13 @@ class Labels::DestroyService
   def remove_contact_labels
     contact_label_taggings.in_batches do |tagging_batch|
       ActsAsTaggableOn::Tagging.where(id: tagging_batch.select(:id)).delete_all
+    end
+  end
+
+  def remove_service_desk_labels
+    label_taggings_for(JrcServiceDesk::Ticket.polymorphic_name)
+      .where(taggable_id: JrcServiceDesk::Ticket.where(account_id: account.id).select(:id)).in_batches do |batch|
+      ActsAsTaggableOn::Tagging.where(id: batch.select(:id)).delete_all
     end
   end
 

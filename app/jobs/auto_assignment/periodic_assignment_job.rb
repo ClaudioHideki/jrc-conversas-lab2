@@ -9,6 +9,8 @@ class AutoAssignment::PeriodicAssignmentJob < ApplicationJob
         account.inboxes.joins(:assignment_policy).find_in_batches do |inboxes|
           inboxes.each do |inbox|
             next unless inbox.auto_assignment_v2_enabled?
+            next unless inbox.enable_auto_assignment? && inbox.assignment_policy.enabled?
+            next unless inbox.conversations.open.unassigned.where.not(auto_assignment_requested_at: nil).exists?
 
             AutoAssignment::AssignmentJob.enqueue_for_inbox(inbox.id)
           end

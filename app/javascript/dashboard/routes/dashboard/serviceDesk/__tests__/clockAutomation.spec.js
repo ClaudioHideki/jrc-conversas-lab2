@@ -72,7 +72,7 @@ const renderAutomations = () => {
           props: ['resource'],
           template: '<div data-ola-native :data-resource="resource" />',
         },
-        NotificationPolicyEditor: {
+        NotificationWorkbench: {
           template: '<div data-notification-native />',
         },
       },
@@ -169,16 +169,36 @@ describe('native clock controls and automation view', () => {
   });
   it('reuses the native policy, queue and notification editors only under affirmative backend grants', async () => {
     renderAutomations();
+    const openNativeEditor = async () => {
+      const section = wrapper.get('details');
+      section.element.open = true;
+      await section.trigger('toggle');
+      await flushPromises();
+    };
+    await openNativeEditor();
     expect(wrapper.find('[data-lifecycle-native]').exists()).toBe(true);
-    await wrapper.findAll('button')[1].trigger('click');
+    await wrapper
+      .findAll('button')
+      .find(
+        node => node.text() === 'JRC_SERVICE_DESK.CLOCK_AUTOMATION.sections.ola'
+      )
+      .trigger('click');
     expect(wrapper.get('[data-ola-native]').attributes('data-resource')).toBe(
       'queues'
     );
-    await wrapper.findAll('button')[2].trigger('click');
+    await wrapper
+      .findAll('button')
+      .find(
+        node =>
+          node.text() ===
+          'JRC_SERVICE_DESK.CLOCK_AUTOMATION.sections.notifications'
+      )
+      .trigger('click');
     expect(wrapper.find('[data-notification-native]').exists()).toBe(true);
     holder.session.state.context.capabilities.notifications.manage = false;
     await flushPromises();
     expect(wrapper.find('[data-notification-native]').exists()).toBe(false);
+    await openNativeEditor();
     expect(wrapper.find('[data-lifecycle-native]').exists()).toBe(true);
   });
   it('clears automation controls after current account authorization is revoked', async () => {

@@ -1,9 +1,8 @@
 <script setup>
-import { computed, onBeforeUnmount, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
-import Button from 'dashboard/components-next/button/Button.vue';
-import RelationshipAPI from 'dashboard/api/jrcRelationship';
+import { surveyClasses } from '../surveys/surveyClasses';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import SurveyModelsManager from '../surveys/SurveyModelsManager.vue';
 import ModulePage from '../../jrcRelationship/ModulePage.vue';
 import ScopeBar from '../components/ScopeBar.vue';
 import State from '../components/ServiceDeskState.vue';
@@ -11,10 +10,7 @@ import { useServiceDesk } from '../composables/useServiceDesk';
 import { canonicalId } from '../helpers/access';
 const { t } = useI18n();
 const session = useServiceDesk();
-const router = useRouter();
-const mayAdminister = ref(false);
-let adminRevision = 0;
-let adminController;
+const tab = ref('results');
 const unitId = ref('');
 const operatorId = ref('');
 const allowed = computed(
@@ -36,42 +32,12 @@ const identity = computed(
 watch(
   [() => session.state.context, () => session.state.status],
   () => {
+    tab.value = 'results';
     unitId.value = '';
     operatorId.value = '';
   },
   { flush: 'sync' }
 );
-watch(
-  [identity, allowed, () => session.state.context, () => session.state.status],
-  async () => {
-    adminRevision += 1;
-    const revision = adminRevision;
-    adminController?.abort();
-    mayAdminister.value = false;
-    if (!selected.value) return;
-    const context = session.state.context;
-    adminController = new AbortController();
-    try {
-      const response = await RelationshipAPI.metadata(context.account_id, {
-        signal: adminController.signal,
-      });
-      if (
-        revision !== adminRevision ||
-        context !== session.state.context ||
-        !selected.value
-      )
-        return;
-      mayAdminister.value = response.data?.can_administer_surveys === true;
-    } catch {
-      if (revision === adminRevision) mayAdminister.value = false;
-    }
-  },
-  { immediate: true, flush: 'sync' }
-);
-onBeforeUnmount(() => {
-  adminRevision += 1;
-  adminController?.abort();
-});
 </script>
 
 <template>
@@ -94,19 +60,44 @@ onBeforeUnmount(() => {
         })
       }}
     </p>
-    <Button
-      v-if="selected && mayAdminister"
-      variant="outline"
-      :label="t('JRC_SERVICE_DESK.EXPERIENCE.manage_surveys')"
-      @click="
-        router.push({
-          name: 'jrc_relationship_survey_admin',
-          params: { accountId: session.state.context.account_id },
-        })
+    <nav
+      v-if="selected"
+      :class="surveyClasses('sv-native-tabs')"
+      :aria-label="
+        $t('RELATIONSHIP.SURVEY_MODELS_V3.COPY.PESQUISAS_DE_SATISFACAO_ABE38A')
       "
+    >
+      <button
+        type="button"
+        :class="surveyClasses('sv-button')"
+        :aria-selected="tab === 'results'"
+        @click="tab = 'results'"
+      >
+        {{
+          $t(
+            'RELATIONSHIP.SURVEY_MODELS_V3.COPY.RESPOSTAS_E_INDICADORES_B03807'
+          )
+        }}
+      </button>
+      <button
+        type="button"
+        :class="surveyClasses('sv-button')"
+        :aria-selected="tab === 'models'"
+        @click="tab = 'models'"
+      >
+        {{
+          $t('RELATIONSHIP.SURVEY_MODELS_V3.COPY.MODELOS_DE_PESQUISA_7678A4')
+        }}
+      </button>
+    </nav>
+    <SurveyModelsManager
+      v-if="selected && tab === 'models'"
+      :key="identity"
+      :account-id="session.state.context.account_id"
+      :unit="selected"
     />
     <ModulePage
-      v-if="selected"
+      v-if="selected && tab === 'results'"
       :key="identity"
       screen="surveys"
       :fixed-survey-scope="{
@@ -116,7 +107,7 @@ onBeforeUnmount(() => {
       data-testid="native-surveys"
     />
     <State
-      v-else
+      v-if="!selected"
       :status="
         allowed
           ? 'idle'

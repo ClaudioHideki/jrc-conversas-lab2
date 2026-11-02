@@ -125,6 +125,11 @@ describe('Global Service Desk creation uses the authenticated Account', () => {
 
   it('keeps the existing form available and explains missing configuration without submitting or fabricating a status', async () => {
     const { wrapper } = await render('73', true, TicketFormView);
+    await wrapper
+      .findAll('button')
+      .find(row => row.text() === messages.JRC_SERVICE_DESK.QUICK.advanced)
+      .trigger('click');
+    await flushPromises();
     wrapper.findComponent(ScopeBar).vm.$emit('update:unitId', '10');
     await flushPromises();
     expect(wrapper.text()).toContain(

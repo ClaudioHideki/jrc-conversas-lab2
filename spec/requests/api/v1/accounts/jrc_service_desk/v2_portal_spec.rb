@@ -93,4 +93,24 @@ RSpec.describe 'Service Desk verified customer portal', type: :request do
     expect(response).to have_http_status(:not_found)
     expect(response.body).not_to include('Private evidence')
   end
+
+  it 'removes withdrawn public notes and logically deleted tickets from the verified portal' do
+    note = publish('Atualização retirada', 'public_without_notification')
+    JrcServiceDesk::WithdrawNoteService.new(user_context: sd_context).call(
+      ticket_id: ticket.id, note_id: note.id, reason: 'Publicação duplicada'
+    )
+    get path, params: { website_token: widget.website_token }, headers: headers
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body['notes']).to be_empty
+    expect(note.reload.body).to eq('Atualização retirada')
+    JrcServiceDesk::DeleteTicketService.new(user_context: sd_context).call(
+      ticket_id: ticket.id, expected_lock_version: ticket.reload.lock_version, reason: 'Chamado duplicado'
+    )
+    get path, params: { website_token: widget.website_token }, headers: headers
+    expect(response).to have_http_status(:not_found)
+    get '/api/v1/widget/service_desk/tickets', params: { website_token: widget.website_token }, headers: headers
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body['tickets']).to be_empty
+    expect(JrcServiceDesk::Ticket.exists?(ticket.id)).to be(true)
+  end
 end

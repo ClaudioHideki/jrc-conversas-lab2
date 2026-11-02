@@ -77,6 +77,7 @@ class JrcServiceDesk::BaseService
     return nil if value.nil?
 
     result = JrcServiceDesk::UnitMembership.operational.where(account_id: context.account.id, unit_id: unit.id, active: true,
+                                                   manual_assignment_enabled: true,
                                                    account_user_id: JrcServiceDesk::Input.id(value)).lock('FOR SHARE').take!
     account_user = AccountUser.where(id: result.account_user_id, account_id: context.account.id).lock('FOR SHARE').take!
     if account_user.respond_to?(:custom_role_id) && account_user.custom_role_id
@@ -93,6 +94,18 @@ class JrcServiceDesk::BaseService
     return if ticket.lock_version == JrcServiceDesk::Input.version(expected)
 
     raise ActiveRecord::StaleObjectError.new(ticket, 'update')
+  end
+
+  def verify_assignee_team!(ticket, manual: true)
+    return unless ticket.assignee_membership
+
+    unless JrcServiceDesk::AssignmentEligibility.manual_domain?(ticket.assignee_membership, ticket, manual: manual)
+      raise ActiveRecord::RecordNotFound, 'No authorized manual assignee in this domain'
+    end
+    return unless ticket.team_id
+
+    TeamMember.where(team_id: ticket.team_id, user_id: ticket.assignee_membership.account_user.user_id)
+              .lock('FOR SHARE').take!
   end
 
   def append_event!(ticket, type, data)

@@ -103,6 +103,10 @@ export function decodeDashboard(payload, context, request = {}) {
   };
 }
 const EVENT_KEYS = {
+  ticket_deleted: ['reason'],
+  task_deleted: ['task_id', 'reason'],
+  note_withdrawn: ['note_id', 'replacement_note_id', 'reason'],
+  attachment_withdrawn: ['note_id', 'attachment_id', 'filename', 'reason'],
   operational_rule_applied: [
     'kind',
     'rule_version_id',
@@ -132,7 +136,20 @@ const EVENT_KEYS = {
   ],
   approval_escalated: ['approval_id', 'history_index'],
   resource_linked: ['resource_id', 'resource_kind'],
-  resource_updated: ['resource_id', 'resource_kind', 'history_index'],
+  resource_unlinked: ['resource_id', 'resource_kind'],
+  resource_updated: [
+    'resource_id',
+    'resource_kind',
+    'history_index',
+    'routing_no_candidate',
+    'queue_id',
+    'mode',
+    'queue_policy_revision',
+    'reason',
+    'routing_fallback',
+    'from_queue_id',
+    'to_queue_id',
+  ],
   resource_archived: ['resource_id', 'resource_kind', 'history_index'],
   notification_resend_requested: [
     'original_delivery_id',
@@ -146,6 +163,11 @@ const EVENT_KEYS = {
     'assignee_membership_id',
   ],
   ticket_updated: [
+    'requester_id',
+    'ticket_type_id',
+    'subcategory_id',
+    'contract_id',
+    'service_fields',
     'title',
     'description',
     'priority_id',
@@ -179,10 +201,13 @@ const EVENT_KEYS = {
     'achieved_at',
     'snapshot_id',
   ],
+  first_response_observed: ['message_id', 'conversation_id', 'achieved_at'],
   sla_snapshot_recorded: ['snapshot_id', 'version'],
   creation_context_recorded: [],
+  closure_policy_revised: ['source_version_id', 'target_version_id', 'effects'],
   lifecycle_policy_bound: ['policy_version_id', 'version', 'digest'],
   lifecycle_transitioned: [
+    'closing_reason',
     'transition_id',
     'action',
     'from_status_id',
@@ -238,8 +263,8 @@ export function decodeRelated(payload, context, ticket, kind, request) {
         typeof row.calculation_pending === 'boolean' &&
           (row.met === null || typeof row.met === 'boolean')
       );
-      const due = maybeStamp(row.due_at),
-        achieved = maybeStamp(row.achieved_at);
+      const due = maybeStamp(row.due_at);
+      const achieved = maybeStamp(row.achieved_at);
       assert(row.calculation_pending === (due === null));
       assert((due !== null && achieved !== null) || row.met === null);
       return {

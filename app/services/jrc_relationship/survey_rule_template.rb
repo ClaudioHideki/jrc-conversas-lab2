@@ -31,6 +31,12 @@ class JrcRelationship::SurveyRuleTemplate
     return if config.nil?
 
     rule = survey.rule.reload
+    selected = rule.effective_settings.dig('service_desk_model', 'channels', 'whatsapp')
+    if selected
+      raise ArgumentError, 'Survey template configuration changed' unless selected['enabled'] && config == selected['whatsapp_template']
+      rule = rule.dup
+      rule.settings = rule.settings.merge('channel' => 'whatsapp', 'delivery_inbox_id' => selected['inbox_id'], 'whatsapp_template' => selected['whatsapp_template'])
+    end
     new(rule).validate!
     raise ArgumentError, 'Survey template configuration changed' unless config == rule.effective_settings['whatsapp_template']
     raise ArgumentError, 'Survey template inbox changed' unless config['inbox_id'].to_s == conversation.inbox_id.to_s

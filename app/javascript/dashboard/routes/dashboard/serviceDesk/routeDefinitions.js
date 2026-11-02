@@ -67,6 +67,13 @@ export const SERVICE_DESK_ROUTES = Object.freeze([
     group: 'governance',
   },
   {
+    key: 'policies',
+    path: 'policies',
+    page: 'policies',
+    icon: 'i-lucide-book-check',
+    group: 'governance',
+  },
+  {
     key: 'catalog',
     path: 'catalog',
     page: 'serviceCatalog',
@@ -98,14 +105,14 @@ export const SERVICE_DESK_ROUTES = Object.freeze([
   {
     key: 'incidents',
     path: 'incidents',
-    page: 'board',
+    page: 'cases',
     icon: 'i-lucide-siren',
     group: 'governance',
   },
   {
     key: 'problems',
     path: 'problems',
-    page: 'board',
+    page: 'cases',
     icon: 'i-lucide-circle-alert',
     group: 'governance',
   },

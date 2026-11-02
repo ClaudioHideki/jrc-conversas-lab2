@@ -40,6 +40,13 @@ class JrcRelationship::SurveyDispatchJob < ApplicationJob
     reason = execution.blocker
     reason = 'policy_disabled' if reason == 'automation_disabled'
     return survey.update!(status: 'blocked', failure_code: reason) if reason
+    window = survey.rule_snapshot.dig('settings', 'service_desk_model', 'rules', 'send_window')
+    next_at = JrcRelationship::SurveyModelRuntime.next_window([Time.current, survey.scheduled_at || Time.current].max, window)
+    if next_at > Time.current + 1.second
+      return survey.update!(status: 'expired') if next_at >= survey.expires_at
+      self.class.set(wait_until: next_at).perform_later(survey.id)
+      return
+    end
     return survey.update!(status: 'available') if survey.rule_snapshot.dig('settings', 'channel') == 'public_link'
 
     dispatch_message(survey, execution)

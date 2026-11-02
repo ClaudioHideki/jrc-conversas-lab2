@@ -50,6 +50,49 @@ RSpec.describe 'Service Desk R3 native resources and problems', type: :request d
     expect(JrcServiceDesk::NotificationDelivery.count).to eq(0)
   end
 
+  it 'filters current asset links and can unlink and relink while preserving each audit event and the original link' do
+    resource_post(asset)
+    id = response.parsed_body.dig('resource', 'id')
+    get "#{base}/resources", params: { ticket_id: ticket.id }, headers: headers
+    expect(response.parsed_body['items'].pluck('id')).to eq([id])
+
+    path = "#{base}/resources/#{id}/tickets/#{ticket.id}"
+    delete path, params: { unit_id: sd_unit.id, expected_lock_version: 0 }, headers: headers, as: :json
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.dig('resource', 'ticket_ids')).to eq([])
+    expect(response.parsed_body.dig('resource', 'lock_version')).to eq(1)
+    expect(JrcServiceDesk::ResourceTicketLink.count).to eq(1)
+    expect(ticket.reload.operational_resources).to be_empty
+    get "#{base}/resources", params: { ticket_id: ticket.id }, headers: headers
+    expect(response.parsed_body['items']).to be_empty
+
+    post "#{base}/resources/#{id}/tickets", params: { unit_id: sd_unit.id, ticket_ids: [ticket.id], expected_lock_version: 1 },
+                                           headers: headers, as: :json
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.dig('resource', 'ticket_ids')).to eq([ticket.id.to_s])
+    expect(JrcServiceDesk::ResourceTicketLink.count).to eq(1)
+    expect(ticket.reload.operational_resources.pluck(:id)).to eq([id.to_i])
+    expect(ticket.ticket_events.where(event_type: %w[resource_linked resource_unlinked]).order(:id).pluck(:event_type))
+      .to eq(%w[resource_linked resource_unlinked resource_linked])
+    expect(JrcServiceDesk::OperationalResource.find(id).history.pluck('action')).to eq(%w[created ticket_unlinked updated])
+  end
+
+  it 'rejects stale and inaccessible asset unlinks without changing the original relationship' do
+    resource_post(asset)
+    id = response.parsed_body.dig('resource', 'id')
+    delete "#{base}/resources/#{id}/tickets/#{ticket.id}", params: { unit_id: sd_unit.id, expected_lock_version: 8 },
+                                                         headers: headers, as: :json
+    expect(response).to have_http_status(:conflict)
+    foreign = create(:jrc_sd_ticket)
+    get "#{base}/resources", params: { ticket_id: foreign.id }, headers: headers
+    expect(response).to have_http_status(:not_found)
+    delete "#{base}/resources/#{id}/tickets/#{foreign.id}", params: { unit_id: sd_unit.id, expected_lock_version: 0 },
+                                                          headers: headers, as: :json
+    expect(response).to have_http_status(:not_found)
+    expect(JrcServiceDesk::ResourceTicketLink.active.count).to eq(1)
+    expect(ticket.ticket_events.where(event_type: 'resource_unlinked')).to be_empty
+  end
+
   it 'rejects a changed payload using the same key and a stale update without changing the native record' do
     resource_post(asset)
     expect(response).to have_http_status(:created)

@@ -28,6 +28,7 @@ const FloatingCallWidget = defineAsyncComponent(
 
 import GlobalQuickActions from 'dashboard/components-next/layout/GlobalQuickActions.vue';
 import JrcCopilotPanel from 'dashboard/components-next/jrcCopilot/JrcCopilotPanel.vue';
+import { surveyModelEditorOpen } from './serviceDesk/surveys/presentation';
 import { useJrcCopilot } from 'dashboard/components-next/jrcCopilot/useJrcCopilot';
 
 import MobileSidebarLauncher from 'dashboard/components-next/sidebar/MobileSidebarLauncher.vue';
@@ -69,7 +70,10 @@ export default {
       accountId,
       upgradePageRef,
       windowWidth,
-      nicoOpen: useJrcCopilot().isFull,
+      surveyModelEditorOpen,
+      nicoOpen: computed(
+        () => useJrcCopilot().isFull.value && !surveyModelEditorOpen.value
+      ),
       nicoCallActive: computed(
         () =>
           callsStore.hasActiveCall ||

@@ -32,7 +32,8 @@ class JrcServiceDesk::UiCapabilityProjection
       'lifecycle_policies' => { index: policy, publish: policy }, 'configuration' => configuration,
       'operational_rules' => JrcServiceDesk::OperationalRuleContract::KINDS
         .index_with { |kind| JrcServiceDesk::OperationalRuleAccess.allowed?(@context, kind) },
-      'operational_reports' => { index: @context.capability?(:dashboard_view) && @context.capability?(:tickets_view_all) } }
+      'operational_reports' => { index: @context.capability?(:dashboard_view) &&
+        (@context.capability?(:tickets_view_all) || @context.supervision_access.any?('reports_view')) } }
   end
 
   def configuration

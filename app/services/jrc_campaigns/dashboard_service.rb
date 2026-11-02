@@ -97,6 +97,7 @@ class JrcCampaigns::DashboardService
 
   def failure_category(message)
     value = message.to_s
+    return 'other' if value.include?('Vínculo do contato incompatível')
     return 'invalid_number' if value.match?(/invalid|inv[aá]lid|phone|telefone|number|n[uú]mero|wa_id/i)
     return 'opt_out' if value.match?(/opt.?out|blacklist|bloque|recus|unsubscribe/i)
     return 'temporary' if value.match?(/tempor|timeout|rate.?limit|thrott|indispon|unavailable/i)

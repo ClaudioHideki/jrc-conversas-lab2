@@ -28,6 +28,15 @@ class AssignmentPolicies extends ApiClient {
     return axios.get(this.inboxAssignmentPolicyUrl(inboxId));
   }
 
+  getInboxDiagnostics(inboxId) {
+    return axios.get(
+      this.inboxAssignmentPolicyUrl(inboxId).replace(
+        '/assignment_policy',
+        '/assignment_diagnostics'
+      )
+    );
+  }
+
   removeInboxPolicy(inboxId) {
     return axios.delete(this.inboxAssignmentPolicyUrl(inboxId));
   }

@@ -33,11 +33,13 @@ module JrcCrm
       conversation = @proposal.linked_conversation
       last_sent_event = @proposal.events.where(event_type: 'sent').order(created_at: :desc).includes(:user).first
       token = @proposal.public_token
+      financials = @proposal.financial_summary
 
       {
         id: @proposal.id,
         proposal_number: @proposal.proposal_number,
         version_number: @proposal.version_number,
+        financial_version: @proposal.financial_version,
         title: @proposal.title,
         status: @proposal.status,
         status_display: if @proposal.approval_status == 'approved' && @proposal.draft?
@@ -51,8 +53,8 @@ module JrcCrm
         solution_description: @proposal.solution_description,
         subtotal_cents: @proposal.subtotal_cents,
         discount_cents: @proposal.discount_cents,
-        item_discount_cents: @proposal.item_discount_cents,
-        total_discount_cents: @proposal.total_discount_cents,
+        item_discount_cents: financials[:item_discount_cents],
+        total_discount_cents: financials[:total_discount_cents],
         initial_items_cents: @proposal.initial_items_cents,
         total_cents: @proposal.total_cents,
         total_first_month_cents: @proposal.total_cents,
@@ -66,10 +68,12 @@ module JrcCrm
         down_payment_cents: @proposal.down_payment_cents,
         installments_count: @proposal.installments_count,
         recurring_monthly_cents: @proposal.has_monthly_fee? ? @proposal.monthly_cents : 0,
-        contract_total_cents: @proposal.contract_total_cents,
-        payable_base_cents: @proposal.payable_base_cents,
-        installment_plan_cents: @proposal.installment_plan_cents,
-        financials: @proposal.financial_summary.except(:items),
+        contract_total_cents: financials[:contract_total_cents],
+        recurring_total_cents: financials[:recurring_total_cents],
+        recurring_months_count: financials[:recurring_months_count],
+        payable_base_cents: financials[:payable_base_cents],
+        installment_plan_cents: financials[:installment_plan_cents],
+        financials: financials.except(:items),
         valid_until: @proposal.valid_until,
         valid_until_display: @proposal.valid_until&.strftime('%d/%m/%Y'),
         term_months: @proposal.term_months,

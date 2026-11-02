@@ -199,6 +199,8 @@ RSpec.describe JrcServiceDesk do
 
   it 'routes only enabled queues with eligible native operators and explicit capacity' do
     sd_membership.update!(availability: 'available', capacity: 3, skills: ['fiber'])
+    sd_account_user.update!(availability: :online, auto_assignment_enabled: true)
+    OnlineStatusTracker.update_presence(sd_account.id, 'User', sd_user.id)
     queue = create(:jrc_sd_queue, unit: sd_unit, distribution_mode: 'skill', required_skills: ['fiber'])
     row = JrcServiceDesk::CreateTicketWorkflowService.new(user_context: sd_context).call(
       unit_id: sd_unit.id, attributes: sd_create_attributes.merge(queue_id: queue.id), idempotency_key: 'auto-route'

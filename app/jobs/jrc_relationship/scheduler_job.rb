@@ -4,6 +4,8 @@ class JrcRelationship::SchedulerJob < ApplicationJob
   def perform
     Account.find_each do |account|
       next unless account.feature_enabled?('jrc_relationship')
+      JrcRelationship::SurveyEventRecovery.new(account).call
+
       members = account.account_users.includes(:user, :custom_role).index_by(&:user_id)
       JrcRelationship::Assignment.where(account: account).where.not(status: %w[churned inactive]).find_in_batches(batch_size: 200) do |batch|
         batch.group_by(&:owner_id).each do |owner_id, assignments|

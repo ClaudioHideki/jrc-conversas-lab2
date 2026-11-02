@@ -10,6 +10,25 @@ const base = account =>
 const options = signal => ({ signal, timeout: 30000 });
 
 export default {
+  linkTickets: (account, unit, row, tickets, signal) =>
+    axios
+      .post(
+        `${base(account)}/${id(row.id)}/tickets`,
+        {
+          unit_id: id(unit),
+          ticket_ids: tickets.map(id),
+          expected_lock_version: row.lock_version,
+        },
+        options(signal)
+      )
+      .then(result => result.data),
+  unlinkTicket: (account, unit, row, ticket, signal) =>
+    axios
+      .delete(`${base(account)}/${id(row.id)}/tickets/${id(ticket)}`, {
+        ...options(signal),
+        data: { unit_id: id(unit), expected_lock_version: row.lock_version },
+      })
+      .then(result => result.data),
   list: (account, query, signal) =>
     axios
       .get(base(account), { ...options(signal), params: query })

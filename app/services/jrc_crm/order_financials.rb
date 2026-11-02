@@ -5,7 +5,8 @@ module JrcCrm
                        payment_condition payment_method down_payment_cents installments_count].freeze
     TERM_FIELDS = %i[products_cents shipping_cents shipping_mode shipping_in_installments discount_cents
                      taxes_cents total_cents monthly_cents has_monthly_fee payment_condition payment_method
-                     down_payment_cents installments_count first_due_date installment_plan_cents].freeze
+                     down_payment_cents installments_count first_due_date installment_plan_cents financial_version
+                     term_months recurring_monthly_cents recurring_months_count recurring_total_cents contract_total_cents].freeze
 
     def self.attributes_for(result)
       result.select { |key, _| STORED_FIELDS.include?(key) }
@@ -14,7 +15,8 @@ module JrcCrm
     def self.snapshot_for(result, original = {})
       snapshot = CommercialFinancials.stringify(original.to_h)
       CommercialFinancials.stringify(snapshot.merge(
-        'financial_version' => CommercialFinancials::VERSION,
+        'financial_version' => result[:financial_version],
+        **(result[:financial_version] >= 3 ? { 'term_months' => result[:term_months] } : {}),
         'document_brand' => 'JRC Conversas',
         'shipping_mode' => result[:shipping_mode],
         'shipping_in_installments' => result[:shipping_in_installments],

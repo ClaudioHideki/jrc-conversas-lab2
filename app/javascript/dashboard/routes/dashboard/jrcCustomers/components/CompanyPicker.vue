@@ -17,30 +17,46 @@ const selected = ref(null);
 const results = ref([]);
 const error = ref('');
 const busy = ref(false);
+const page = ref(1);
+const total = ref(0);
 let timer;
 let generation = 0;
 let selectedGeneration = 0;
-const search = async () => {
+const load = async () => {
   if (props.disabled || !canAccess.value) return;
   generation += 1;
   const version = generation;
   busy.value = true;
   error.value = '';
   try {
-    const { data } = await API.companies({ q: query.value, per_page: 15 });
-    if (version === generation)
+    const { data } = await API.companies({
+      q: query.value,
+      per_page: 15,
+      page: page.value,
+    });
+    if (version === generation) {
       results.value = data.payload.filter(
         row => String(row.id) !== String(props.excludeId)
       );
+      total.value = data.meta.total;
+    }
   } catch (err) {
     if (version === generation) error.value = errorMessage(err);
   } finally {
     if (version === generation) busy.value = false;
   }
 };
+const search = () => {
+  if (page.value !== 1) page.value = 1;
+  else load();
+};
+watch(page, load);
 const choose = company => {
   if (props.disabled || !canAccess.value) return;
   selected.value = company;
+  generation += 1;
+  busy.value = false;
+  total.value = 0;
   results.value = [];
   query.value = '';
   emit('update:modelValue', company?.id || null);
@@ -49,6 +65,9 @@ const choose = company => {
 watch(query, () => {
   clearTimeout(timer);
   generation += 1;
+  results.value = [];
+  total.value = 0;
+  busy.value = false;
   if (query.value.trim().length >= 2) timer = setTimeout(search, 300);
   else results.value = [];
 });
@@ -64,6 +83,7 @@ watch(
     const version = selectedGeneration;
     selected.value = null;
     results.value = [];
+    total.value = 0;
     error.value = '';
     query.value = '';
     clearTimeout(timer);
@@ -152,6 +172,28 @@ onBeforeUnmount(() => {
         <span class="text-n-slate-10"
           >#{{ company.id }} {{ company.tax_id }}</span
         >
+      </button>
+    </div>
+    <div
+      v-if="total > 15"
+      class="mt-2 flex items-center justify-between gap-2 text-xs"
+    >
+      <button
+        type="button"
+        :class="buttonClass"
+        :disabled="busy || disabled || page <= 1"
+        @click="page--"
+      >
+        {{ T.previous }}
+      </button>
+      <span>{{ page }} / {{ Math.ceil(total / 15) }}</span>
+      <button
+        type="button"
+        :class="buttonClass"
+        :disabled="busy || disabled || page * 15 >= total"
+        @click="page++"
+      >
+        {{ T.next }}
       </button>
     </div>
   </div>

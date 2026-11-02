@@ -1091,6 +1091,7 @@ RSpec.describe Conversation do
     let(:conversation_start_time) { 5.hours.ago }
 
     before do
+      freeze_time
       create(:inbox_member, user: agent, inbox: inbox)
       # rubocop:disable Rails/SkipsModelValidations
       conversation.update_column(:waiting_since, nil)

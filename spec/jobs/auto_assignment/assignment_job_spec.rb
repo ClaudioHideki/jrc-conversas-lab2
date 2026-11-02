@@ -74,7 +74,7 @@ RSpec.describe AutoAssignment::AssignmentJob, type: :job do
           described_class.new.perform(inbox_id: inbox.id)
         end.to raise_error(StandardError, 'Something went wrong')
 
-        expect(Rails.logger).to have_received(:error).with("Bulk assignment failed for inbox #{inbox.id}: Something went wrong")
+        expect(Rails.logger).to have_received(:error).with(event: 'auto_assignment_error', inbox_id: inbox.id, error_class: 'StandardError')
       end
     end
   end

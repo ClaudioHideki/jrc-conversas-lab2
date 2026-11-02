@@ -35,7 +35,7 @@ class JrcRelationship::CustomerTimeline
   private
 
   def survey_scope
-    rows = @context.records(JrcRelationship::Survey)
+    rows = JrcRelationship::SurveyModelAccess.visible_scope(@context, @context.records(JrcRelationship::Survey), share: 'share_relationship')
     rows = rows.where(assignment_id: @assignment.id).or(rows.where(assignment_id: nil)) if @assignment
     visible = rows.where(contact_id: @customer.contacts.select(:id)).where.not(source_type: nil)
     @assignment ? visible.or(rows.where(source_type: nil, assignment_id: @assignment.id)) : visible
@@ -51,7 +51,10 @@ class JrcRelationship::CustomerTimeline
       visible = visible.or(rows.where(source_type: 'JrcRelationship::Qbr',
                                       source_id: @context.records(JrcRelationship::Qbr).where(assignment: @assignment).select(:id)))
     end
-    visible
+    managed_rules = JrcRelationship::SurveyRule.where(account: @context.account)
+      .where("jsonb_exists(settings, 'service_desk_model')").select(:id)
+    visible.where(rule_id: nil).or(visible.where.not(rule_id: managed_rules))
+      .or(visible.where(survey_id: survey_scope.select(:id)))
   end
 
   def handoffs

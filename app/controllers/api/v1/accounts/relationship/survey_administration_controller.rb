@@ -5,10 +5,11 @@ class Api::V1::Accounts::Relationship::SurveyAdministrationController < Api::V1:
 
   def index
     model = JrcRelationship::SurveyAdministration::MODELS.fetch(params[:kind])
-    render json: { payload: model.where(account: Current.account).order(:id).limit(500) }
+    render json: { payload: model.where(account: Current.account).where("NOT COALESCE(jsonb_exists(settings, 'service_desk_model'), false) OR settings->'service_desk_model' = 'null'::jsonb").order(:id).limit(500) }
   end
 
   def save
+    ensure_legacy_record! if params[:id]
     attrs = if params[:kind] == 'definitions'
               params.require(:record).permit(:name, :code, :kind, :status,
                                              questions: [:key, :text, :type, :required, :min, :max, { condition: [:question, :operator, :value],
@@ -23,15 +24,21 @@ class Api::V1::Accounts::Relationship::SurveyAdministrationController < Api::V1:
                                                         :max_attempts, :resend_minutes, :consent_required, :delivery_inbox_id,
                                                         { whatsapp_template: [:inbox_id, :content, :template_fingerprint, { template_params: {} }] }])
             end
+    if params[:kind] == 'rules' && attrs[:definition_id].present?
+      definition = JrcRelationship::SurveyDefinition.where(account: Current.account).find(attrs[:definition_id])
+      raise Pundit::NotAuthorizedError if definition.settings['service_desk_model'].present?
+    end
     row = administration.save(kind: params[:kind], id: params[:id], attributes: attrs.to_h, expected_version: params.dig(:record, :version))
     render json: row, status: params[:id] ? :ok : :created
   end
 
   def duplicate
+    ensure_legacy_record!
     render json: administration.duplicate(kind: params[:kind], id: params[:id], code: params[:code]), status: :created
   end
 
   def history
+    ensure_legacy_record!
     row = JrcRelationship::SurveyAdministration::MODELS.fetch(params[:kind]).where(account: Current.account).find(params[:id])
     render json: { payload: JrcRelationship::SurveyVersion.where(account: Current.account, entity_type: row.class.name,
                                                                  entity_id: row.id).order(version: :desc) }
@@ -94,6 +101,11 @@ class Api::V1::Accounts::Relationship::SurveyAdministrationController < Api::V1:
     scope.select { |row| JrcRelationship::ManualAttendance.eligible?(row) }.map do |row|
       { type: row.class.name, id: row.id, label: row.title }
     end
+  end
+
+  def ensure_legacy_record!
+    row = JrcRelationship::SurveyAdministration::MODELS.fetch(params[:kind]).where(account: Current.account).find(params[:id])
+    raise Pundit::NotAuthorizedError if row.settings['service_desk_model'].present?
   end
 
   def administration

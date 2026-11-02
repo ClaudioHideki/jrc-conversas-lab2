@@ -3,9 +3,9 @@ class JrcRelationship::SurveySummary
     raise ArgumentError, 'Unknown survey cohort option' unless (cohort_options.keys - %i[cohort_available cohort_period]).empty?
 
     @context = context
-    @scope = scope
+    @scope = JrcRelationship::SurveyModelAccess.visible_scope(context, scope, action: 'report', share: 'share_reports')
     @selected_period = selected_period
-    @cohort = cohort || scope
+    @cohort = JrcRelationship::SurveyModelAccess.visible_scope(context, cohort || scope, action: 'report', share: 'share_reports')
     @cohort_available = cohort_options.fetch(:cohort_available, true)
     @cohort_period = cohort_options.fetch(:cohort_period, {})
   end
@@ -19,8 +19,9 @@ class JrcRelationship::SurveySummary
 
   def scores(answered)
     { response_count: answered.count, nps: nps_score(answered), calculations: calculations(answered),
-      csat: answered.where(kind: 'csat').average(:score)&.to_f,
-      ces: answered.where(kind: 'ces').average(:score)&.to_f }
+      csat: answered.where(kind: 'csat').average(Arel.sql(JrcRelationship::SurveyScale.sql('csat')))&.to_f,
+      ces: answered.where(kind: 'ces').average(Arel.sql(JrcRelationship::SurveyScale.sql('ces', reverse: true)))&.to_f,
+      normalization: { csat: [1, 5], ces: [0, 10], basis: 'published_question_bounds' } }
   end
 
   def calculations(answered)
@@ -60,7 +61,7 @@ class JrcRelationship::SurveySummary
     day = "DATE(responded_at AT TIME ZONE 'UTC' AT TIME ZONE #{timezone})"
     answered = answered.where('responded_at >= ?', 90.days.ago) unless @selected_period
     answered.group(Arel.sql(day), :kind).order(Arel.sql(day), :kind)
-            .pluck(Arel.sql(day), :kind, Arel.sql('COUNT(*)'), Arel.sql('AVG(score)'),
+            .pluck(Arel.sql(day), :kind, Arel.sql('COUNT(*)'), Arel.sql("AVG(CASE WHEN kind = 'csat' THEN (#{JrcRelationship::SurveyScale.sql('csat')}) WHEN kind = 'ces' THEN (#{JrcRelationship::SurveyScale.sql('ces', reverse: true)}) ELSE score END)"),
                    Arel.sql('100.0 * SUM(CASE WHEN score >= 9 THEN 1 WHEN score <= 6 THEN -1 ELSE 0 END) / COUNT(*)'))
             .map do |date, kind, count, average, nps|
       { day: date, kind: kind, response_count: count, average_score: average&.to_f, nps: kind == 'nps' ? nps.to_f : nil }

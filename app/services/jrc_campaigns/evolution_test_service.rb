@@ -14,6 +14,8 @@ class JrcCampaigns::EvolutionTestService
     account.with_lock do
       existing = JrcCampaigns::TestDelivery.find_by(account: account, idempotency_key: idempotency_key)
       unless existing
+        unresolved = JrcCampaigns::TestDelivery.where(account: account, inbox: connector.inbox, phone_number: phone_number, status: %w[sending unknown])
+        raise ArgumentError, 'Teste anterior pendente ou desconhecido; reconcilie o resultado antes de reenviar.' if unresolved.exists?
         unless JrcCampaigns::Consent.active.exists?(account: account, phone_number: phone_number, purpose: 'whatsapp_campaigns')
           @authorization = JrcCampaigns::TestAuthorization.available.where(account: account, inbox: connector.inbox, phone_number: phone_number).lock.first
         end
@@ -81,6 +83,10 @@ class JrcCampaigns::EvolutionTestService
     raise ArgumentError, reason if reason
     raise ArgumentError, 'Template Meta exige uma caixa WhatsApp oficial.' if step['kind'] == 'template'
     raise ArgumentError, 'O número remetente não pode ser o destinatário do teste.' if phone_number.delete_prefix('+') == connector.sender_number
+
+    withdrawals = JrcCampaigns::TestAuthorization.where(account: account, inbox: connector.inbox, phone_number: phone_number).where.not(revoked_at: nil)
+    restored = @authorization || JrcCampaigns::Consent.active.exists?(account: account, phone_number: phone_number, purpose: 'whatsapp_campaigns')
+    raise ArgumentError, 'Autorização de teste revogada para este destinatário.' if withdrawals.exists? && !restored
 
     if @authorization
       @authorization.reload

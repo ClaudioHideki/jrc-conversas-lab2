@@ -42,6 +42,7 @@ class Attachment < ApplicationRecord
   belongs_to :message
   has_one_attached :file
   before_save :set_extension
+  after_create_commit :enqueue_service_desk_scan
   validate :acceptable_file
   validates :external_url, length: { maximum: Limits::URL_LENGTH_LIMIT }
   enum file_type: { :image => 0, :audio => 1, :video => 2, :file => 3, :location => 4, :fallback => 5, :share => 6, :story_mention => 7,
@@ -50,7 +51,14 @@ class Attachment < ApplicationRecord
   def push_event_data
     return unless file_type
 
-    base_data.merge(metadata_for_file_type)
+    data = base_data.merge(metadata_for_file_type)
+    data.merge!(service_desk_protected: true, filename: file.filename.to_s) if service_desk_protected?
+    data
+  end
+
+  def service_desk_protected?
+    file.attached? && account_id == message.account_id && message.conversation.account_id == account_id &&
+      JrcServiceDesk::TicketConversation.exists?(account_id: account_id, conversation_id: message.conversation_id)
   end
 
   # NOTE: the URl returned does a 301 redirect to the actual file
@@ -60,6 +68,10 @@ class Attachment < ApplicationRecord
 
   # NOTE: for External services use this methods since redirect doesn't work effectively in a lot of cases
   def download_url
+    if file.attached? && JrcServiceDesk::ProtectedBlobAccess.new(blob: file.blob, user: nil).protected?
+      raise Pundit::NotAuthorizedError, 'Protected Service Desk attachments require an authenticated media upload transport; signed storage URL delivery is unavailable'
+    end
+
     ActiveStorage::Current.url_options = Rails.application.routes.default_url_options if ActiveStorage::Current.url_options.blank?
     file.attached? ? file.blob.url : ''
   end
@@ -80,6 +92,23 @@ class Attachment < ApplicationRecord
   end
 
   private
+
+  def enqueue_service_desk_scan
+    return if @service_desk_scan_enqueued
+    return unless service_desk_protected?
+
+    blob = file.blob
+    return if JrcServiceDesk::AttachmentScanner.clean?(blob) || blob.metadata['service_desk_scan_state'] == 'infected'
+
+    # Native Message commit callbacks can commit this autosaved record again.
+    # Reserve before enqueueing so the same instance cannot schedule twice.
+    @service_desk_scan_enqueued = true
+    blob.update!(metadata: blob.metadata.merge('service_desk_scan_state' => 'unavailable'))
+    @service_desk_scan_enqueued = JrcServiceDesk::MessageAttachmentScanJob.perform_later(id).present?
+  rescue StandardError
+    @service_desk_scan_enqueued = false
+    raise
+  end
 
   def metadata_for_file_type
     case file_type.to_sym

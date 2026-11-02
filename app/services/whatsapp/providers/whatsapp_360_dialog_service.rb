@@ -72,6 +72,11 @@ class Whatsapp::Providers::Whatsapp360DialogService < Whatsapp::Providers::BaseS
   end
 
   def send_attachment_message(phone_number, message)
+    if JrcServiceDesk::OutboundAttachments.protected?(message)
+      message.update!(status: :failed, external_error: 'Protected Service Desk attachments require a supported media upload transport; legacy 360dialog URL delivery is unavailable')
+      return
+    end
+
     attachment = message.attachments.first
     type = %w[image audio video].include?(attachment.file_type) ? attachment.file_type : 'document'
     type_content = {

@@ -142,6 +142,27 @@ RSpec.describe JrcServiceDesk::EvaluateClocksService, type: :service do
     expect(ticket.ticket_events.where(event_type: 'clock_violated')).to be_empty
   end
 
+  [true, false].each do |enabled|
+    it "shows a preventive deadline only when its published threshold is enabled=#{enabled}, with no read side effects" do
+      definition['sla']['escalation_policy'] = {
+        'enabled' => enabled, 'thresholds' => [{ 'percent' => 75, 'queue_id' => nil, 'team_id' => nil }] }
+      lc_publish(definition: definition)
+      sd_as_admin!
+      JrcServiceDesk::RecordSlaSnapshotService.new(user_context: sd_context).call(ticket_id: ticket.id, attributes: snapshot_attributes)
+      lc_execute(ticket, 'pause', reason_code: 'customer')
+      lc_execute(ticket, 'resume')
+      travel 45.minutes
+      clock = ticket.sla_cycles.sole.sla_clocks.find_by!(kind: 'attendance')
+      before = clock.attributes
+      projection = nil
+      expect { projection = JrcServiceDesk::ClockProjection.new(clock).call }.not_to change(JrcServiceDesk::TicketEvent, :count)
+      expect(projection[:deadline_state]).to eq(enabled ? 'near_due' : 'on_time')
+      expect(projection[:breached]).to be(false)
+      expect(clock.reload.attributes).to eq(before)
+      expect(JrcServiceDesk::NotificationDelivery.count).to eq(0)
+    end
+  end
+
   it 'refuses monitoring after the original unit grant is revoked' do
     ticket
     sd_membership.update!(active: false)

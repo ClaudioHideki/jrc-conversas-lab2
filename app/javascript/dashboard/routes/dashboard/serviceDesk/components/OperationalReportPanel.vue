@@ -259,6 +259,7 @@ function drilldown(dimension, value) {
           :disabled="busy || !scope.allowed.value"
           :label="t('JRC_SERVICE_DESK.COMPLETION.load')"
         /><Button
+          type="button"
           variant="outline"
           :disabled="busy || !scope.allowed.value"
           :label="t('JRC_SERVICE_DESK.COMPLETION.export')"
@@ -356,6 +357,7 @@ function drilldown(dimension, value) {
           <thead>
             <tr>
               <th>{{ t('JRC_SERVICE_DESK.COMPLETION.clock') }}</th>
+              <th>{{ t('JRC_SERVICE_DESK.COMPLETION.observed') }}</th>
               <th>{{ t('JRC_SERVICE_DESK.COMPLETION.completed') }}</th>
               <th>{{ t('JRC_SERVICE_DESK.COMPLETION.mean_seconds') }}</th>
               <th>{{ t('JRC_SERVICE_DESK.COMPLETION.breached') }}</th>
@@ -367,6 +369,7 @@ function drilldown(dimension, value) {
               :key="kind"
             >
               <td>{{ t(`JRC_SERVICE_DESK.COMPLETION.clocks.${kind}`) }}</td>
+              <td>{{ row.observed }}</td>
               <td>{{ row.completed }}</td>
               <td>
                 {{
@@ -374,7 +377,13 @@ function drilldown(dimension, value) {
                   t('JRC_SERVICE_DESK.COMPLETION.not_available')
                 }}
               </td>
-              <td>{{ row.completed_breached }}</td>
+              <td>
+                {{
+                  row.completed > 0
+                    ? row.completed_breached
+                    : t('JRC_SERVICE_DESK.COMPLETION.not_available')
+                }}
+              </td>
             </tr>
           </tbody>
         </table>

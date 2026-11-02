@@ -9,7 +9,9 @@ class JrcBrokerWebhookObligation < ApplicationRecord
     channel = message.inbox.channel
     return unless binding && channel.is_a?(Channel::Api) && channel.webhook_url.present?
 
-    create!(account_id: message.account_id, message_id: message.id, inbox_id: message.inbox_id, binding_id: binding.id,
+    callback_id = message.additional_attributes['jrc_campaign_webhook_delivery_id'] if message.additional_attributes['jrc_campaign_broker'] == true
+    identity = callback_id.present? ? { delivery_id: callback_id } : {}
+    create!(**identity, account_id: message.account_id, message_id: message.id, inbox_id: message.inbox_id, binding_id: binding.id,
             integration_id: binding.integration_id, instance_id: binding.instance_id, url: channel.webhook_url,
             payload: message.webhook_data.merge(event: 'message_created'))
   end

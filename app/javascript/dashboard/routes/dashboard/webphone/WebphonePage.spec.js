@@ -26,7 +26,10 @@ vi.mock('vue-router', () => ({
   useRouter: () => ({ push: vi.fn() }),
 }));
 vi.mock('dashboard/api/contacts', () => ({
-  default: { get: vi.fn().mockResolvedValue({ data: { payload: [] } }) },
+  default: {
+    get: vi.fn().mockResolvedValue({ data: { payload: [] } }),
+    search: vi.fn(),
+  },
 }));
 vi.mock('./useSipWebphone', async () => {
   const { ref } = await import('vue');
@@ -265,5 +268,87 @@ describe('transfer form', () => {
     complete();
     await pending;
     expect(wrapper.emitted('dialing')).toEqual([[true], [false]]);
+  });
+  it('exposes only transfer and hold capabilities supported by the embedded provider', async () => {
+    await wrapper.setProps({
+      compact: true,
+      embedded: true,
+      capabilities: { transfer_blind: 'available' },
+      allowConference: false,
+    });
+    expect(
+      wrapper.findAll('button').some(button => button.text() === 'Espera')
+    ).toBe(false);
+    expect(wrapper.text()).not.toContain('Videoconferência');
+    await wrapper
+      .findAll('button')
+      .find(button => button.text() === 'Transferir')
+      .trigger('click');
+    expect(wrapper.text()).toContain('Transferência cega');
+    expect(wrapper.text()).not.toContain('Transferência assistida');
+    await wrapper.vm.selectTransferMode('supervised');
+    expect(wrapper.vm.transferMode).toBe('');
+  });
+  it('reports a sent transfer command without claiming provider completion', async () => {
+    wrapper.vm.selectTransferMode('immediate');
+    wrapper.vm.transferDestination = '1410';
+    mockState.transferCall.mockResolvedValue(true);
+    await wrapper.vm.submitTransfer();
+    await flushPromises();
+    expect(wrapper.text()).toContain('Comando de transferência enviado');
+    expect(wrapper.text()).not.toContain('Transferência concluída');
+  });
+  it('does not associate an ambiguous phone match with the first contact', async () => {
+    ContactAPI.search.mockResolvedValue({
+      data: {
+        payload: [
+          { id: 1, phone_number: '+5511999999999' },
+          { id: 2, phone_number: '+5511999999999' },
+        ],
+      },
+    });
+    await wrapper.vm.findContactByPhone('+5511999999999');
+    expect(wrapper.vm.currentContact).toBeNull();
+  });
+  it('prevents duplicate answer actions while the SIP operation is pending', async () => {
+    let resolve;
+    mockState.answer.mockImplementation(
+      () =>
+        new Promise(done => {
+          resolve = done;
+        })
+    );
+    const first = wrapper.vm.runPhoneAction(mockState.answer);
+    await wrapper.vm.runPhoneAction(mockState.answer);
+    expect(mockState.answer).toHaveBeenCalledOnce();
+    resolve();
+    await first;
+    expect(wrapper.vm.phoneActionPending).toBe(false);
+  });
+  it('prepares a contact destination without dialing or overwriting an active call', async () => {
+    wrapper.unmount();
+    wrapper = shallowMount(WebphonePage, {
+      props: { compact: true, embedded: true },
+    });
+    expect(wrapper.vm.prepareDestination('1410')).toBe(false);
+    expect(mockState.destination.value).toBe('');
+    mockState.hasCall.value = false;
+    expect(wrapper.vm.prepareDestination('1410')).toBe(true);
+    expect(mockState.destination.value).toBe('1410');
+    expect(mockState.call).not.toHaveBeenCalled();
+    await wrapper.setProps({ externalBusy: true });
+    expect(wrapper.vm.prepareDestination('1411')).toBe(false);
+    expect(mockState.destination.value).toBe('1410');
+  });
+  it('shows the actual incoming remote number in the embedded phone', async () => {
+    mockState.incoming.value = true;
+    mockState.remoteNumber.value = '1411';
+    await wrapper.setProps({ compact: true, embedded: true });
+    expect(wrapper.get('.jrc-caller-card').text()).toContain(
+      'Chamada recebida'
+    );
+    expect(wrapper.get('.jrc-caller-card').text()).toContain('1411');
+    mockState.incoming.value = false;
+    mockState.remoteNumber.value = '202';
   });
 });

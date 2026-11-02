@@ -12,6 +12,7 @@ import Panel from '../components/ServiceDeskPanel.vue';
 import State from '../components/ServiceDeskState.vue';
 import ScopeBar from '../components/ScopeBar.vue';
 import ConfigurationManager from '../components/ConfigurationManager.vue';
+import AssigneesManager from '../components/AssigneesManager.vue';
 import { useServiceDeskStructure } from 'dashboard/composables/useServiceDeskStructure';
 import { useServiceDesk } from '../composables/useServiceDesk';
 import { routeQuery } from '../helpers/query';
@@ -130,7 +131,18 @@ onBeforeUnmount(() => session.resetResource(key.value));
 </script>
 
 <template>
-  <ConfigurationManager v-if="mayManage" :resource="resource" :key="resource" />
+  <AssigneesManager
+    v-if="
+      resource === 'assignees' &&
+      structure.state.context?.capabilities?.unit_memberships
+    "
+    :context="structure.state.context"
+  />
+  <ConfigurationManager
+    v-else-if="mayManage"
+    :key="resource"
+    :resource="resource"
+  />
   <section v-else>
     <header class="sd-page-heading">
       <div>

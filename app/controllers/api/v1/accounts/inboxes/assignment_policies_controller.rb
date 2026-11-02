@@ -12,13 +12,15 @@ class Api::V1::Accounts::Inboxes::AssignmentPoliciesController < Api::V1::Accoun
     # There should be only one assignment policy for an inbox.
     # If there is a new request to add an assignment policy, we will
     # delete the old one and attach the new policy
-    remove_inbox_assignment_policy
-    @inbox_assignment_policy = @inbox.create_inbox_assignment_policy!(assignment_policy: @assignment_policy)
-    @assignment_policy = @inbox.assignment_policy
+    Current.account.with_lock do
+      remove_inbox_assignment_policy
+      @inbox_assignment_policy = @inbox.create_inbox_assignment_policy!(assignment_policy: @assignment_policy)
+      @assignment_policy = @inbox.assignment_policy
+    end
   end
 
   def destroy
-    remove_inbox_assignment_policy
+    Current.account.with_lock { remove_inbox_assignment_policy }
     head :ok
   end
 

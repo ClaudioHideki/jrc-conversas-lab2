@@ -7,8 +7,8 @@ defineProps({
 </script>
 
 <template>
-  <section class="sd-panel !rounded-2xl shadow-sm">
-    <header v-if="title" class="sd-panel-heading !bg-n-blue-2">
+  <section class="sd-panel !rounded-xl shadow-sm">
+    <header v-if="title" class="sd-panel-heading !bg-n-solid-1 !px-4 !py-3">
       <div class="flex items-center gap-2 min-w-0">
         <Icon
           v-if="icon"
@@ -21,7 +21,7 @@ defineProps({
       </div>
       <slot name="actions"><slot name="action" /></slot>
     </header>
-    <div class="sd-panel-body">
+    <div class="sd-panel-body !p-4">
       <slot />
     </div>
   </section>

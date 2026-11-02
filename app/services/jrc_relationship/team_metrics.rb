@@ -48,7 +48,7 @@ class JrcRelationship::TeamMetrics
       grouped(renewals.where(renewal_on: Date.current..(Date.current + days))).count.each { |owner, count| result[owner][:renewals][days] = count if result[owner] }
     end
     result.each_value { |metrics| metrics[:renewals_60] = metrics[:renewals].fetch(60, 0) if JrcOperations::Access.crm?(@context.member) }
-    surveys = @context.records(JrcRelationship::Survey).where(assignment_id: ids, kind: 'nps', responded_at: @period || (90.days.ago..Time.current))
+    surveys = JrcRelationship::SurveyModelAccess.visible_scope(@context, @context.records(JrcRelationship::Survey, survey_action: 'report').where(assignment_id: ids, kind: 'nps', responded_at: @period || (90.days.ago..Time.current)), action: 'report', share: 'share_relationship')
     all, promoters, detractors = grouped(surveys).count, grouped(surveys.where('score >= 9')).count, grouped(surveys.where('score <= 6')).count
     all.each { |owner, count| result[owner][:nps] = 100.0 * (promoters.fetch(owner, 0) - detractors.fetch(owner, 0)) / count if result[owner] }
     csat!(result)
@@ -120,9 +120,23 @@ class JrcRelationship::TeamMetrics
   def csat!(result)
     visibility = JrcCustomers::Visibility.new(account: @context.account, user: @context.user, account_user: @context.member)
     join = "INNER JOIN jrc_relationship_assignments ON jrc_relationship_assignments.account_id = csat_survey_responses.account_id AND (jrc_relationship_assignments.contact_id = contacts.id OR jrc_relationship_assignments.company_id = contacts.company_id)"
-    values = CsatSurveyResponse.where(account_id: @context.account.id, conversation_id: visibility.conversations.select(:id),
+    native = CsatSurveyResponse.where(account_id: @context.account.id, conversation_id: visibility.conversations.select(:id),
       created_at: @period || (90.days.ago..Time.current)).joins(:contact).joins(join).where(jrc_relationship_assignments: { id: @scope.select(:id) })
-      .group('jrc_relationship_assignments.owner_id').average(:rating)
+      .where.not(message_id: JrcRelationship::SurveyMetrics.managed_message_ids(@context))
+      .group('jrc_relationship_assignments.owner_id')
+    shared = JrcRelationship::SurveyModelAccess.visible_scope(@context,
+      @context.records(JrcRelationship::Survey, survey_action: 'report').where(assignment_id: @scope.select(:id),
+        kind: 'csat', responded_at: @period || (90.days.ago..Time.current)).where.not(score: nil),
+      action: 'report', share: 'share_relationship')
+    native_counts = native.count
+    native_sums = native.sum(:rating)
+    shared_counts = grouped(shared).count
+    shared_sums = grouped(shared).sum(Arel.sql(JrcRelationship::SurveyScale.sql('csat')))
+    values = (native_counts.keys | shared_counts.keys).to_h do |owner|
+      count = native_counts.fetch(owner, 0) + shared_counts.fetch(owner, 0)
+      sum = native_sums.fetch(owner, 0) + shared_sums.fetch(owner, 0)
+      [owner, count.positive? ? sum.to_f / count : nil]
+    end
     merge!(result, :csat, values, numeric: true)
   end
 

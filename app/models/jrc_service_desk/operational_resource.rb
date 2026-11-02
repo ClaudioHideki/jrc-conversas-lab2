@@ -9,7 +9,8 @@ class JrcServiceDesk::OperationalResource < JrcServiceDesk::UnitRecord
   belongs_to :company, class_name: 'JrcCustomers::Company', optional: true
   belongs_to :approval, class_name: 'JrcServiceDesk::TicketApproval', optional: true
   has_many :resource_ticket_links, class_name: 'JrcServiceDesk::ResourceTicketLink', dependent: :restrict_with_error
-  has_many :tickets, through: :resource_ticket_links, class_name: 'JrcServiceDesk::Ticket'
+  has_many :active_resource_ticket_links, -> { active }, class_name: 'JrcServiceDesk::ResourceTicketLink'
+  has_many :tickets, through: :active_resource_ticket_links, source: :ticket
   validates :name, presence: true, length: { maximum: 255 }
   validates :code, length: { maximum: 80 }, uniqueness: { scope: %i[account_id unit_id resource_kind] }, allow_nil: true
   validates :resource_kind, inclusion: { in: STATES.keys }

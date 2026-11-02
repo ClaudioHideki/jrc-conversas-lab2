@@ -50,6 +50,7 @@ module Api
             attributes = corporate_proposal_attributes
             validate_proposal_owner!(attributes[:owner_id]) if attributes[:owner_id].present?
             normalize_payment_attributes!(attributes)
+            attributes[:financial_version] = 3 if @proposal.draft? && @proposal.sent_at.nil?
             attributes.except!(:implementation_cents, :monthly_cents, :subtotal_cents, :total_cents) if @proposal.proposal_items.exists?
 
             if @proposal.update(attributes)
@@ -89,6 +90,7 @@ module Api
                 version_number: @proposal.version_number.to_i + 1,
                 owner_id: Current.user.id,
                 status: 'draft',
+                financial_version: 3,
                 approval_status: 'not_required',
                 commercial_approval_status: 'not_required',
                 financial_approval_status: 'not_required',

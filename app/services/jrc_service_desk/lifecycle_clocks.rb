@@ -2,9 +2,18 @@
 
 # Invoked only inside LifecycleTransitionService's authorized unit/ticket transaction.
 class JrcServiceDesk::LifecycleClocks
-  def initialize(ticket:, version:, actor:, now:)
+  def initialize(ticket:, version:, actor:, now:, closure_rules: nil)
     @ticket, @version, @actor, @now = ticket, version, actor, now
     @settings = version.definition.fetch('sla')
+    @closure_rules = closure_rules || version.rules
+  end
+
+  # Authorized intake has already selected and verified an explicit snapshot.
+  # Reads and legacy tickets never initialize a cycle implicitly.
+  def start!
+    raise JrcServiceDesk::LifecycleDependencyError unless @settings['mode'] == 'calendar_snapshot'
+
+    @ticket.sla_cycles.order(number: :desc).first || create_cycle!(@ticket.latest_sla_snapshot, @ticket.opened_at)
   end
 
   def run!(rule:, reason:, reopening:)
@@ -28,7 +37,18 @@ class JrcServiceDesk::LifecycleClocks
     if reopening && !cycle
       raise JrcServiceDesk::LifecycleDependencyError, 'Reopening requires the historical SLA cycle; no cycle was fabricated'
     end
-    cycle ||= create_cycle!(@ticket.latest_sla_snapshot, @ticket.opened_at)
+    unless cycle
+      pending_reason = JrcServiceDesk::SlaConfigurationState.reason(@ticket.latest_sla_snapshot, @version.rules.clock_kinds)
+      completed_without_cycle = @ticket.lifecycle_transitions.where(action: %w[resolve close]).exists?
+      pending_reason ||= 'result_unavailable' if completed_without_cycle
+      if pending_reason && @closure_rules.permits_unconfigured_closure?(rule['action'])
+        close_pause!(pause) if pause
+        return { 'mode' => 'calendar_snapshot', 'cycle_id' => nil, 'calculation_pending' => true,
+                 'pending_reason' => pending_reason, 'clocks' => [] }
+      end
+      raise JrcServiceDesk::LifecycleDependencyError, 'Historical completion has no measured cycle' if completed_without_cycle
+      cycle = create_cycle!(@ticket.latest_sla_snapshot, @ticket.opened_at)
+    end
     previous_cycle = nil
     if reopening && reopening['sla_cycle'] == 'new_cycle'
       # Preserve old clock state as historical; unfinished clocks stop at the boundary.

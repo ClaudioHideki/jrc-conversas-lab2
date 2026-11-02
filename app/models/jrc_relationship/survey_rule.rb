@@ -37,13 +37,15 @@ class JrcRelationship::SurveyRule < ApplicationRecord
       return
     end
     validate_matchers
-    unless settings.is_a?(Hash) && (settings.keys - DEFAULTS.keys).empty?
+    unless settings.is_a?(Hash) && (settings.keys - (DEFAULTS.keys + %w[service_desk_model])).empty?
       errors.add(:settings, 'unknown dispatch setting')
       return
     end
     validate_delivery_settings
     validate_timing_settings
     validate_template_settings
+    config = settings['service_desk_model']
+    errors.add(:settings, 'invalid service desk model contract') if config && !JrcRelationship::SurveyModelContract.new(config).valid?
   end
 
   def validate_template_settings

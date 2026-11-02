@@ -20,7 +20,8 @@ class JrcServiceDesk::OperationsPresenter
   def task_payload(row)
     Pundit.authorize(@context.to_h, row, :show?)
     ticket_identity(row).merge(task_details(row)).merge(task_progression(row)).merge(
-      permissions: { show: true, update: ::JrcServiceDesk::TicketTaskPolicy.new(@context.to_h, row).update? }
+      permissions: { show: true, update: ::JrcServiceDesk::TicketTaskPolicy.new(@context.to_h, row).update?,
+                     destroy: ::JrcServiceDesk::TicketTaskPolicy.new(@context.to_h, row).destroy? }
     )
   end
 
@@ -32,7 +33,7 @@ class JrcServiceDesk::OperationsPresenter
 
   def task_progression(row)
     { parent_task_id: row.parent_task_id&.to_s, completion_policy: row.completion_policy,
-      pending_children: row.subtasks.where.not(status: %w[completed cancelled]).count }
+      pending_children: JrcServiceDesk::RecordWithdrawal.excluding(row.subtasks, :task).where.not(status: %w[completed cancelled]).count }
   end
 
   def approval_payload(row)
@@ -54,7 +55,7 @@ class JrcServiceDesk::OperationsPresenter
 
   def incident_payload(row)
     Pundit.authorize(@context.to_h, row, :show?)
-    visible_tickets = Pundit.policy_scope!(@context.to_h, ::JrcServiceDesk::Ticket).where(incident_id: row.id)
+    visible_tickets = JrcServiceDesk::CaseAssociations.tickets(row, @context)
     incident_details(row).merge(
       primary_ticket_id: visible_tickets.exists?(id: row.primary_ticket_id) ? row.primary_ticket_id&.to_s : nil,
       ticket_ids: visible_tickets.pluck(:id).map(&:to_s)

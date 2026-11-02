@@ -29,7 +29,7 @@ class Api::V1::Accounts::JrcServiceDesk::OperationalRulesController < Api::V1::A
     unit = operational_context.unit_scope.find(::JrcServiceDesk::Input.id(values.fetch('unit_id')))
     authorize ::JrcServiceDesk::Ticket.new(account: Current.account, unit: unit), :create?
     rule = ::JrcServiceDesk::OperationalRuleVersion.current(account_id: Current.account.id, unit_id: unit.id, kind: 'priority_matrix')
-    rows = rule&.enabled? ? rule.definition.fetch('rules') : []
+    rows = rule&.enabled? ? rule.definition.fetch('rules').reject { |row| row['enabled'] == false } : []
     render json: base_payload.merge(unit_id: unit.id.to_s, impacts: rows.map { |row| row['match']['impact'] }.compact.uniq.sort,
                                     urgencies: rows.map { |row| row['match']['urgency'] }.compact.uniq.sort)
   end

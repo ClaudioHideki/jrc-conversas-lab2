@@ -245,6 +245,7 @@ async function remove(record) {
     await request(accountId.value, `${props.endpoint}/${record.id}`, {
       method: 'delete',
     });
+    if (rows.value.length === 1 && page.value > 1) page.value -= 1;
     await load();
     emit('changed');
   } catch (err) {
@@ -402,7 +403,9 @@ function navigatePage(delta) {
         :disabled="page <= 1 || loading"
         @click="navigatePage(-1)"
       >
-        Anterior</button><span>{{ page }} · {{ total }} registros</span><button
+        Anterior</button
+      ><span>{{ page }} · {{ total }} registros</span
+      ><button
         class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed"
         :disabled="page * 25 >= total || loading"
         @click="navigatePage(1)"
@@ -438,12 +441,16 @@ function navigatePage(delta) {
               v-else-if="field.type === 'schedule'"
               class="flex flex-col gap-1 min-w-0 col-span-full"
             >
-              <span>{{ field.label }}</span><small>Deixe vazio para folga. Separe os turnos por virgula:
-                09:00-12:00, 13:00-18:00.</small><label
+              <span>{{ field.label }}</span
+              ><small
+                >Deixe vazio para folga. Separe os turnos por virgula:
+                09:00-12:00, 13:00-18:00.</small
+              ><label
                 v-for="(day, index) in days"
                 :key="index"
                 class="flex flex-wrap items-center gap-3"
-                ><span class="w-20">{{ day }}</span><input
+                ><span class="w-20">{{ day }}</span
+                ><input
                   v-model="week[index]"
                   class="flex-1"
                   :aria-label="`Expediente de ${day}`"
@@ -455,7 +462,8 @@ function navigatePage(delta) {
               class="flex gap-2 items-center"
               ><input v-model="form[field.key]" type="checkbox" />{{
                 field.label
-              }}</label>
+              }}</label
+            >
             <label
               v-else
               class="flex flex-col gap-1 min-w-0"
@@ -469,7 +477,8 @@ function navigatePage(delta) {
                   'multiselect',
                 ].includes(field.type),
               }"
-              ><span>{{ field.label }}{{ field.required ? ' *' : '' }}</span><textarea
+              ><span>{{ field.label }}{{ field.required ? ' *' : '' }}</span
+              ><textarea
                 v-if="
                   [
                     'textarea',
@@ -492,7 +501,8 @@ function navigatePage(delta) {
                   :value="choice.value"
                 >
                   {{ choice.label }}
-                </option></select><select
+                </option></select
+              ><select
                 v-else-if="['select', 'option'].includes(field.type)"
                 v-model="form[field.key]"
                 :required="field.required"
@@ -505,7 +515,8 @@ function navigatePage(delta) {
                   :value="choice.value"
                 >
                   {{ choice.label }}
-                </option></select><input
+                </option></select
+              ><input
                 v-else
                 v-model="form[field.key]"
                 :type="field.type"
@@ -523,7 +534,8 @@ function navigatePage(delta) {
             :disabled="busy"
             @click="modal = false"
           >
-            Fechar</button><button
+            Fechar</button
+          ><button
             v-if="canEdit && !locked(editing)"
             class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed bg-n-blue-9 text-white"
             :disabled="busy"
@@ -537,7 +549,8 @@ function navigatePage(delta) {
         class="flex flex-col gap-4"
       >
         <h3>Decisao de aprovacao</h3>
-        <label class="flex flex-col gap-1 min-w-0"><span>Justificativa</span><textarea v-model="approvalReason" />
+        <label class="flex flex-col gap-1 min-w-0"
+          ><span>Justificativa</span><textarea v-model="approvalReason" />
         </label>
         <div class="flex flex-wrap items-center gap-3">
           <button
@@ -545,7 +558,8 @@ function navigatePage(delta) {
             :disabled="busy || !approvalReason.trim()"
             @click="approve('approved')"
           >
-            Aprovar</button><button
+            Aprovar</button
+          ><button
             class="rounded-md border border-n-weak px-3 py-2 text-sm disabled:bg-n-slate-3 disabled:text-n-slate-11 disabled:opacity-100 disabled:cursor-not-allowed danger"
             :disabled="busy || !approvalReason.trim()"
             @click="approve('rejected')"

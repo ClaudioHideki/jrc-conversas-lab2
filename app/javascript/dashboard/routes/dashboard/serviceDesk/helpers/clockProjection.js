@@ -19,7 +19,18 @@ export function decodeClockProjection(row) {
   return {
     id: canonicalId(row.id),
     kind: row.kind,
+    metric_kind: row.metric_kind || null,
     state: row.state,
+    deadline_state: [
+      'on_time',
+      'near_due',
+      'overdue',
+      'paused',
+      'completed',
+      'stopped',
+    ].includes(row.deadline_state)
+      ? row.deadline_state
+      : null,
     budget_seconds: row.budget_seconds,
     elapsed_seconds: row.elapsed_seconds,
     remaining_seconds: row.remaining_seconds,

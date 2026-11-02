@@ -5,6 +5,7 @@ class AutoAssignment::AssignmentService
     return 0 if JrcHumanAssignment::Policy.enabled_for?(inbox.account, inbox.id)
     return 0 unless inbox.auto_assignment_v2_enabled?
     return 0 unless inbox.enable_auto_assignment?
+    return 0 unless AutoAssignment::Eligibility.new(inbox: inbox).configuration_reason.nil?
 
     conversations = unassigned_conversations(limit).to_a
     return 0 if conversations.empty?
@@ -29,12 +30,12 @@ class AutoAssignment::AssignmentService
   end
 
   def assignable?(conversation)
-    conversation.status == 'open' &&
-      conversation.assignee_id.nil?
+    conversation.auto_assignment_requested_at.present? &&
+      AutoAssignment::Eligibility.new(inbox: inbox, conversation: conversation).conversation_reason.nil?
   end
 
   def unassigned_conversations(limit)
-    scope = inbox.conversations.unassigned.open
+    scope = inbox.conversations.unassigned.open.where.not(auto_assignment_requested_at: nil)
 
     # Skip stale backlog with no activity beyond the age threshold
     policy = inbox.assignment_policy
@@ -102,10 +103,6 @@ class AutoAssignment::AssignmentService
     return false unless claim_and_assign(conversation, agent)
 
     conversation.reload
-
-    rate_limiter = build_rate_limiter(agent)
-    rate_limiter.track_assignment(conversation)
-
     dispatch_assignment_event(conversation, agent)
     true
   end
@@ -113,9 +110,7 @@ class AutoAssignment::AssignmentService
   # Atomically claim the row so two bulk runs that overlap (the in-flight gate
   # is best-effort and can lapse on TTL) can't both assign the same conversation.
   def claim_and_assign(conversation, agent)
-    Current.executed_by = inbox.assignment_policy || inbox
-
-    inbox.account.with_lock do
+    inbox.account.with_lock(requires_new: true) do
       if inbox.account.feature_enabled?('jrc_contact_center') &&
          JrcContactCenter::Qualification.pending.where(account_id: inbox.account_id).joins(:account_user)
                                        .exists?(account_users: { user_id: agent.id })
@@ -127,9 +122,26 @@ class AutoAssignment::AssignmentService
                     .first
       next false unless locked
       next false if JrcHumanAssignment::Policy.enabled_for?(inbox.account.reload, inbox.id)
+      member = inbox.account.account_users.find_by(user_id: agent.id)
+      next false unless member
 
-      locked.update!(assignee: agent)
-      true
+      member.with_lock do
+        rules = AutoAssignment::Eligibility.new(inbox: inbox.reload, conversation: locked)
+        next false unless inbox.auto_assignment_v2_enabled?
+        next false unless rules.configuration_reason.nil? && assignable?(locked) && rules.agent_reason(member).nil?
+        rate_limiter = build_rate_limiter(agent)
+        next false unless rate_limiter.within_limit?
+        # Enterprise exclusions and capacity are evaluated again under the tenant
+        # lock so a competing inbox run cannot overbook the same agent.
+        next false unless unassigned_conversations(1).where(id: locked.id).exists?
+
+        Current.executed_by = inbox.assignment_policy
+        locked.update!(assignee: agent)
+        # Keep the reservation inside the account transaction. Redis failures
+        # must roll the assignment back before another worker checks the limit.
+        rate_limiter.track_assignment(locked)
+        true
+      end
     end
   ensure
     Current.executed_by = nil

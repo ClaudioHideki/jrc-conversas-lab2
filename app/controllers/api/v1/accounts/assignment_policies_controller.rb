@@ -13,11 +13,11 @@ class Api::V1::Accounts::AssignmentPoliciesController < Api::V1::Accounts::BaseC
   end
 
   def update
-    @assignment_policy.update!(assignment_policy_params)
+    Current.account.with_lock { @assignment_policy.update!(assignment_policy_params) }
   end
 
   def destroy
-    @assignment_policy.destroy!
+    Current.account.with_lock { @assignment_policy.destroy! }
     head :ok
   end
 

@@ -43,10 +43,11 @@ RSpec.describe 'Evolution campaign integration', type: :request do
       headers: { 'Content-Type' => 'application/json' },
       body: [{ name: 'demo', ownerJid: '551155550000@s.whatsapp.net', connectionStatus: 'open' }].to_json
     )
-    stub_request(:post, send_url).with(headers: { 'Apikey' => 'isolated-qa-key' }).to_return(
-      status: 201, headers: { 'Content-Type' => 'application/json' },
-      body: { key: { id: 'qa-provider-id', fromMe: true, remoteJid: '5511999999000@s.whatsapp.net' }, status: 'PENDING' }.to_json
-    )
+    stub_request(:post, send_url).with(headers: { 'Apikey' => 'isolated-qa-key' }).to_return do |request|
+      number = JSON.parse(request.body).fetch('number')
+      { status: 201, headers: { 'Content-Type' => 'application/json' },
+        body: { key: { id: 'qa-provider-id', fromMe: true, remoteJid: "#{number}@s.whatsapp.net" }, status: 'PENDING' }.to_json }
+    end
     JrcCampaigns::Consent.create!(account: account, recorded_by: admin, phone_number: contact.phone_number,
                                  evidence: 'QA only: campaign and individual test authorization', granted_at: Time.current, purpose: 'whatsapp_campaigns')
   end
@@ -217,13 +218,12 @@ RSpec.describe 'Evolution campaign integration', type: :request do
     expect(authorization.reload.consumed_at).to be_nil
   end
 
-  it 'does not let continuous consent for one phone authorize a different destination' do
+  it 'uses the explicitly requested destination without inventing consent for it' do
     expect do
-      JrcCampaigns::TestMessageService.new(**test_options.merge(phone_number: '+5511999999001')).perform
-    end.to raise_error(ArgumentError, /Consentimento/)
-    expect(a_request(:post, send_url)).not_to have_been_made
+      expect(JrcCampaigns::TestMessageService.new(**test_options.merge(phone_number: '+5511999999001')).perform[:status]).to eq('sent')
+    end.not_to change(JrcCampaigns::Consent, :count)
+    expect(a_request(:post, send_url)).to have_been_made.once
   end
-
   it 'stops later continuous tests after revocation' do
     JrcCampaigns::TestMessageService.new(**test_options).perform
     JrcCampaigns::Consent.find_by!(account: account, phone_number: contact.phone_number).update!(revoked_at: Time.current)
@@ -254,7 +254,7 @@ RSpec.describe 'Evolution campaign integration', type: :request do
       authorization
     end
 
-    it 'sends once without granting campaign eligibility or changing historical consent' do
+    it 'preserves optional single-test history and the operational interval without requiring another grant' do
       consent = JrcCampaigns::Consent.find_by!(account: account, phone_number: contact.phone_number)
       historical_attributes = consent.attributes
       first = JrcCampaigns::TestMessageService.new(**test_options).perform
@@ -263,9 +263,7 @@ RSpec.describe 'Evolution campaign integration', type: :request do
       expect(consent.reload.attributes).to eq(historical_attributes)
       expect(JrcCampaigns::AudienceResolver.new(campaign).entries.map(&:phone_number)).to include(contact.phone_number)
       expect(JrcCampaigns::TestMessageService.new(**test_options).perform[:test_delivery_id]).to eq(first[:test_delivery_id])
-      expect do
-        JrcCampaigns::TestMessageService.new(**test_options.merge(idempotency_key: SecureRandom.uuid)).perform
-      end.to raise_error(ArgumentError, /finalidade/)
+      expect(JrcCampaigns::TestMessageService.new(**test_options.merge(idempotency_key: SecureRandom.uuid)).perform[:status]).to eq('failed')
       expect(a_request(:post, send_url)).to have_been_made.once
     end
 
@@ -274,9 +272,8 @@ RSpec.describe 'Evolution campaign integration', type: :request do
       expect(JrcCampaigns::TestMessageService.new(**test_options).perform[:status]).to eq('unknown')
       expect(authorization.reload.consumed_at).to be_present
       expect(JrcCampaigns::TestMessageService.new(**test_options).perform[:status]).to eq('unknown')
-      expect do
-        JrcCampaigns::TestMessageService.new(**test_options.merge(idempotency_key: SecureRandom.uuid)).perform
-      end.to raise_error(ArgumentError, /finalidade/)
+      expect { JrcCampaigns::TestMessageService.new(**test_options.merge(idempotency_key: SecureRandom.uuid)).perform }
+        .to raise_error(ArgumentError, /pendente/)
       expect(a_request(:post, send_url)).to have_been_made.once
     end
 
@@ -284,9 +281,7 @@ RSpec.describe 'Evolution campaign integration', type: :request do
       stub_request(:post, send_url).to_return(status: 429)
       expect(JrcCampaigns::TestMessageService.new(**test_options).perform[:status]).to eq('failed')
       expect(authorization.reload.consumed_at).to be_present
-      expect do
-        JrcCampaigns::TestMessageService.new(**test_options.merge(idempotency_key: SecureRandom.uuid)).perform
-      end.to raise_error(ArgumentError)
+      expect(JrcCampaigns::TestMessageService.new(**test_options.merge(idempotency_key: SecureRandom.uuid)).perform[:status]).to eq('failed')
       expect(a_request(:post, send_url)).to have_been_made.once
     end
 
@@ -317,14 +312,11 @@ RSpec.describe 'Evolution campaign integration', type: :request do
       expect(authorization.reload.consumed_at).to be_nil
     end
 
-    it 'does not use a different destination authorization' do
-      expect do
-        JrcCampaigns::TestMessageService.new(**test_options.merge(phone_number: '+5511999999001')).perform
-      end.to raise_error(ArgumentError)
+    it 'uses a new explicitly requested destination without consuming another destinations authorization' do
+      expect(JrcCampaigns::TestMessageService.new(**test_options.merge(phone_number: '+5511999999001')).perform[:status]).to eq('sent')
       expect(authorization.reload.consumed_at).to be_nil
-      expect(a_request(:post, send_url)).not_to have_been_made
+      expect(a_request(:post, send_url)).to have_been_made.once
     end
-
     it 'does not reuse authorization for a changed sender' do
       with_modified_env('JRC_CAMPAIGNS_EVOLUTION_CONNECTORS' => [configuration.merge(sender_number: '551155550001')].to_json) do
         expect { JrcCampaigns::TestMessageService.new(**test_options).perform }.to raise_error(ArgumentError, /remetente/)
@@ -355,7 +347,10 @@ RSpec.describe 'Evolution campaign integration', type: :request do
 
   it 'does not invent campaign purpose for historical consent evidence' do
     JrcCampaigns::Consent.find_by!(account: account, phone_number: contact.phone_number).update!(purpose: nil)
-    expect { JrcCampaigns::TestMessageService.new(**test_options).perform }.to raise_error(ArgumentError, /finalidade/)
+    consent = JrcCampaigns::Consent.find_by!(account: account, phone_number: contact.phone_number)
+    original = consent.attributes
+    expect(JrcCampaigns::TestMessageService.new(**test_options).perform[:status]).to eq('sent')
+    expect(consent.reload.attributes).to eq(original)
     expect(JrcCampaigns::AudienceResolver.new(campaign).entries.map(&:phone_number)).to include(contact.phone_number)
   end
 

@@ -4,14 +4,32 @@ class JrcServiceDesk::TimelineSources
     @context = context
   end
 
-  def call
+  def call(view: 'all')
     sources = {
-      'note' => scope(JrcServiceDesk::TicketNote), 'event' => events,
+      'note' => scope(JrcServiceDesk::TicketNote), 'event' => events(history: view == 'history'),
       'task' => scope(JrcServiceDesk::TicketTask), 'approval' => scope(JrcServiceDesk::TicketApproval),
       'message' => @context.account.messages.where(conversation_id: conversation_ids), 'delivery' => deliveries
     }
     sources['call'] = calls if defined?(::Call)
-    sources
+    case view
+    when 'notes'
+      sources.slice('note', 'message').merge(
+        'note' => sources['note'].where(visibility: %w[internal technical_team]),
+        'message' => sources['message'].where(private: true)
+      )
+    when 'conversations'
+      sources.slice('note', 'message', 'delivery', 'call').merge(
+        'note' => sources['note'].where(visibility: JrcServiceDesk::InteractionVisibility::PUBLIC),
+        'message' => sources['message'].where(private: false)
+      )
+    when 'history' then sources.slice('event')
+    when 'files'
+      files = { 'note' => JrcServiceDesk::RecordWithdrawal.with_attachments(sources['note']),
+                'message' => sources['message'].joins(:attachments).distinct }
+      files['call'] = sources['call'].joins(:recording_attachment) if sources['call']
+      files
+    else sources
+    end
   end
 
   def conversation_ids
@@ -28,8 +46,9 @@ class JrcServiceDesk::TimelineSources
     Pundit.policy_scope!(@context.to_h, model).where(account_id: @ticket.account_id, unit_id: @ticket.unit_id, ticket_id: @ticket.id)
   end
 
-  def events
-    rows = delivery_events.where.not(event_type: %w[note_added interaction_republished task_created approval_requested])
+  def events(history: false)
+    rows = delivery_events
+    rows = rows.where.not(event_type: %w[note_added interaction_republished task_created approval_requested]) unless history
     rows = rows.where.not(event_type: 'task_updated') unless @context.capability?(:tasks_view)
     rows = rows.where.not(event_type: 'approval_decided') unless @context.capability?(:approvals_view)
     audits = %w[notification_delivery_updated notification_resend_requested]

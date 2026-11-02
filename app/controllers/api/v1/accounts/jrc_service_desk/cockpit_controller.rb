@@ -22,6 +22,8 @@ class Api::V1::Accounts::JrcServiceDesk::CockpitController < Api::V1::Accounts::
     raise ArgumentError unless query_values.empty?
 
     authorize strict_ticket, :show?
+    access = ::JrcServiceDesk::OperationalContext.new(pundit_user).supervision_access
+    raise Pundit::NotAuthorizedError unless access.allowed?(strict_ticket, 'reports_export')
     render json: base_payload.merge(ticket: presenter.ticket(strict_ticket), cockpit: cockpit_payload,
                                     generated_at: Time.current.iso8601(6), projection: 'authorized_service_desk_cockpit_v2')
   end
@@ -64,6 +66,15 @@ class Api::V1::Accounts::JrcServiceDesk::CockpitController < Api::V1::Accounts::
     acknowledged(strict_ticket, 'request_approval', result_id: row.id, status: :created)
   end
 
+  def destroy_task
+    authorize strict_ticket, :show?
+    values = body_values(%w[expected_lock_version reason])
+    row = ::JrcServiceDesk::DeleteTaskService.new(user_context: pundit_user).call(
+      ticket_id: strict_ticket.id, task_id: params[:record_id], reason: values.fetch('reason'),
+      expected_lock_version: values.fetch('expected_lock_version'))
+    acknowledged(strict_ticket, 'delete_task', result_id: row.id)
+  end
+
   def decide_approval
     authorize strict_ticket, :show?
     values = body_values(%w[decision expected_lock_version])
@@ -96,10 +107,15 @@ class Api::V1::Accounts::JrcServiceDesk::CockpitController < Api::V1::Accounts::
     authorize strict_ticket, :show?
     note = strict_ticket.ticket_notes.find(::JrcServiceDesk::Input.id(params[:record_id]))
     authorize note, :show?
-    file = note.files.find(::JrcServiceDesk::Input.id(params[:attachment_id]))
+    identifier = ::JrcServiceDesk::Input.id(params[:attachment_id])
+    file = ::JrcServiceDesk::RecordWithdrawal.attachments(note).find { |attachment| attachment.id == identifier }
+    raise ActiveRecord::RecordNotFound unless file
     if file.blob.metadata['service_desk_scan_state'] != 'clean'
-      return render json: { code: 'attachment_scan_unavailable', error: 'Attachment awaits a verified malware scan' }, status: :conflict
+      return render json: { code: 'attachment_scan_unavailable', error: 'O anexo aguarda a verificação de segurança.' }, status: :conflict
     end
+
+    access = ::JrcServiceDesk::ProtectedBlobAccess.new(blob: file.blob, user: Current.user)
+    raise ActiveRecord::RecordNotFound unless access.allowed?
 
     send_data file.download, filename: file.filename.to_s, type: 'application/octet-stream', disposition: 'attachment'
   end
@@ -157,7 +173,7 @@ class Api::V1::Accounts::JrcServiceDesk::CockpitController < Api::V1::Accounts::
   private
 
   def publication_preview_invalid
-    render json: { code: 'preview_invalid', error: 'Publication preview expired or changed; review the current preview' }, status: :conflict
+    render json: { code: 'preview_invalid', error: 'A prévia expirou ou foi alterada. Revise a prévia atual antes de confirmar.' }, status: :conflict
   end
 
   def operational_dependency_unavailable

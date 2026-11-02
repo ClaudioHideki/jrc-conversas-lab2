@@ -30,8 +30,8 @@ class AutoAssignment::AssignmentJob < ApplicationJob
     assigned_count = service.perform_bulk_assignment(limit: bulk_assignment_limit)
     Rails.logger.info "Assigned #{assigned_count} conversations for inbox #{inbox.id}"
   rescue StandardError => e
-    Rails.logger.error "Bulk assignment failed for inbox #{inbox_id}: #{e.message}"
-    raise e if Rails.env.test?
+    Rails.logger.error(event: 'auto_assignment_error', inbox_id: inbox_id, error_class: e.class.name)
+    raise
   ensure
     release_in_flight(inbox_id, token)
   end
@@ -46,6 +46,8 @@ class AutoAssignment::AssignmentJob < ApplicationJob
 
     key = format(::Redis::Alfred::AUTO_ASSIGNMENT_IN_FLIGHT_KEY, inbox_id: inbox_id)
     ::Redis::Alfred.delete_if_equals(key, token)
+  rescue Redis::BaseError => e
+    Rails.logger.warn(event: 'auto_assignment_gate_unavailable', inbox_id: inbox_id, error_class: e.class.name)
   end
 
   def bulk_assignment_limit

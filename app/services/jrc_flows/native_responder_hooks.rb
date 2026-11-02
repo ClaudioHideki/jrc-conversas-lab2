@@ -32,7 +32,7 @@ module JrcFlows::NativeResponderHooks
   end
 
   module MessageWebhooks
-    def perform(url, payload, webhook_type = :account_webhook, secret: nil, delivery_id: nil)
+    def perform(url, payload, webhook_type = :account_webhook, secret: nil, delivery_id: nil, **kwargs)
       body = payload.is_a?(Hash) ? payload.with_indifferent_access : {}
       message = if %w[message_created message_updated].include?(body['event'])
                   Message.find_by(id: body['id'], account_id: body.dig('account', 'id') || body['account_id'])

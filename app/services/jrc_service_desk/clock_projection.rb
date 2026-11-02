@@ -10,18 +10,35 @@ class JrcServiceDesk::ClockProjection
   def call
     elapsed = current_elapsed
     budget = @clock.budget_seconds
-    { id: @clock.id.to_s, kind: kind, state: @clock.state, budget_seconds: budget,
+    breached = elapsed > budget
+    { id: @clock.id.to_s, kind: kind, state: @clock.state, deadline_state: deadline_state(elapsed, budget, breached), budget_seconds: budget,
       elapsed_seconds: elapsed, remaining_seconds: [budget - elapsed, 0].max,
-      consumed_percent: elapsed * 100.0 / budget, breached: elapsed > budget,
+      consumed_percent: elapsed * 100.0 / budget, breached: breached,
       due_at: @clock.due_at.iso8601(6), observed_at: @now.iso8601(6),
       achieved_at: @clock.respond_to?(:achieved_at) ? @clock.achieved_at&.iso8601(6) : @clock.ended_at&.iso8601(6),
-      timezone: snapshot&.timezone, time_basis: @clock.respond_to?(:time_basis) ? @clock.time_basis : 'business' }
+      metric_kind: @clock.is_a?(JrcServiceDesk::OlaClock) ? @clock.kind : nil,
+      timezone: @clock.respond_to?(:calendar_snapshot) && @clock.calendar_snapshot.present? ? @clock.calendar_snapshot['timezone'] : snapshot&.timezone, time_basis: @clock.respond_to?(:time_basis) ? @clock.time_basis : 'business' }
   end
 
   private
 
+  def deadline_state(elapsed, budget, breached)
+    return @clock.state unless @clock.state == 'running'
+    return 'overdue' if breached
+
+    settings = if @clock.respond_to?(:sla_cycle)
+                 @clock.sla_cycle.lifecycle_policy_version.definition.dig('sla', 'escalation_policy') || {}
+               else
+                 @clock.escalation_snapshot
+               end
+    policy = JrcServiceDesk::ClockEscalationPolicy.new(settings)
+    return 'near_due' if policy.enabled? && policy.thresholds.any? { |row| row['percent'] < 100 && elapsed * 100.0 / budget >= row['percent'] }
+
+    'on_time'
+  end
+
   def kind
-    @clock.respond_to?(:kind) ? @clock.kind : 'ola'
+    @clock.is_a?(JrcServiceDesk::OlaClock) ? 'ola' : @clock.kind
   end
 
   def snapshot
@@ -33,7 +50,11 @@ class JrcServiceDesk::ClockProjection
     return elapsed unless @clock.state == 'running' && @now > @clock.anchor_at
     return elapsed + (@now - @clock.anchor_at) if @clock.respond_to?(:time_basis) && @clock.time_basis == 'calendar'
 
-    calendar = JrcServiceDesk::SnapshotCalendar.new(timezone: snapshot.timezone, conditions: snapshot.calendar_conditions)
+    calendar = if @clock.respond_to?(:calendar_snapshot) && @clock.calendar_snapshot.present?
+                 JrcServiceDesk::OlaMeasurements.calendar_for(@clock.calendar_snapshot)
+               else
+                 JrcServiceDesk::SnapshotCalendar.new(timezone: snapshot.timezone, conditions: snapshot.calendar_conditions)
+               end
     elapsed + calendar.elapsed(@clock.anchor_at, @now)
   end
 end

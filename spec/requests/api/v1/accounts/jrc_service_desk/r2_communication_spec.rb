@@ -169,6 +169,9 @@ RSpec.describe 'Service Desk R2 communication HTTP contracts', type: :request do
 
   it 'keeps Pundit policy caching distinct from the policy-list action across actual GET routes' do
     sd_as_admin!
+    email = create(:channel_email, account: sd_account)
+    create(:channel_email, account: sd_foreign_account)
+    create(:inbox, account: sd_account)
     get "#{base}/composer_options", headers: headers
     expect(response).to have_http_status(:ok)
     get "#{base}/timeline", headers: headers
@@ -178,9 +181,26 @@ RSpec.describe 'Service Desk R2 communication HTTP contracts', type: :request do
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.values_at('account_id', 'unit_id')).to eq([sd_account.id.to_s, sd_unit.id.to_s])
     expect(response.parsed_body['policies']).to eq([])
+    expect(response.parsed_body['inboxes']).to eq([{ 'id' => email.inbox.id.to_s, 'name' => email.inbox.name, 'channel' => 'email' }])
     sd_account_user.update!(role: 'agent')
     get path, params: { unit_id: sd_unit.id }, headers: headers
     expect(response).to have_http_status(:forbidden)
     expect(response.parsed_body).not_to have_key('policies')
+  end
+
+  it 'saves recipient preferences with controller authorization and denies ordinary agents without changing the contact' do
+    path = "#{base}/recipient_preferences"
+    patch path, params: { channels: ['email'] }, headers: headers, as: :json
+    expect(response).to have_http_status(:forbidden)
+    expect(sd_contact.reload.custom_attributes).not_to have_key(JrcServiceDesk::ContactNotificationPreferences::KEY)
+    sd_as_admin!
+    patch path, params: { channels: ['email'] }, headers: headers, as: :json
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.values_at('applied', 'channels')).to eq([true, ['email']])
+    get path, headers: headers
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body['channels']).to eq(['email'])
+    expect(sd_contact.reload.custom_attributes[JrcServiceDesk::ContactNotificationPreferences::KEY]).to eq(['email'])
+    expect(Audited::Audit.where(auditable: sd_contact, user: sd_user).last.audited_changes).to have_key(JrcServiceDesk::ContactNotificationPreferences::KEY)
   end
 end

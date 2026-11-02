@@ -83,6 +83,9 @@ export const isWhatsAppInbox = inbox => {
     return true;
   }
   if (channelType !== INBOX_TYPES.API) return false;
+  if (inbox?.jrc_broker_bound === true || inbox?.jrcBrokerBound === true) {
+    return true;
+  }
 
   const attributes =
     inbox?.additionalAttributes || inbox?.additional_attributes || {};

@@ -21,10 +21,12 @@ class JrcRelationship::SurveyReport
     @filters = filters.to_h.stringify_keys
   end
 
-  def scope
+  def scope(action: 'response')
     raise ArgumentError, 'Invalid survey period basis' unless %w[response cohort].include?(period_basis)
 
-    rows = @context.records(JrcRelationship::Survey)
+    rows = @context.records(JrcRelationship::Survey, survey_action: action)
+    share = native_service_desk_scope? ? nil : 'share_relationship'
+    rows = JrcRelationship::SurveyModelAccess.visible_scope(@context, rows, action: action, share: share)
     rows = identities(rows)
     rows = values(rows)
     rows = response_state(rows)
@@ -37,6 +39,7 @@ class JrcRelationship::SurveyReport
 
   def csv
     rows = period_basis == 'cohort' ? scope : scope.where.not(responded_at: nil)
+    rows = JrcRelationship::SurveyModelAccess.visible_scope(@context, rows, action: 'report', share: 'share_reports')
     rows = rows.includes(:assignment, :company, :contact).order(id: :asc)
     raise ArgumentError, 'Select a smaller response period (maximum 10000 responses)' if rows.limit(10_001).count > 10_000
 
@@ -46,10 +49,10 @@ class JrcRelationship::SurveyReport
     end
   end
 
-  def cohort_scope
+  def cohort_scope(action: 'report')
     filters = @filters.except('classification', 'treatment_status', 'record_status', 'score_min', 'score_max')
     filters = filters.except('from', 'to') if period_basis == 'response'
-    self.class.new(@context, filters.merge('period_basis' => 'cohort')).scope
+    self.class.new(@context, filters.merge('period_basis' => 'cohort')).scope(action: action)
   end
 
   def period_basis
@@ -66,6 +69,12 @@ class JrcRelationship::SurveyReport
   end
 
   private
+
+  def native_service_desk_scope?
+    return false unless @filters['source_type'] == 'JrcServiceDesk::Ticket' && @filters['unit_id'].present?
+    JrcRelationship::SurveyModelAccess.new(@context).unit!(positive_id(@filters['unit_id']))
+    true
+  end
 
   def identities(rows)
     IDENTITIES.each do |key|

@@ -787,7 +787,6 @@ watch(
 onMounted(async () => {
   await loadConfiguration();
   loadHistory();
-  loadWhatsappConversations();
 });
 </script>
 

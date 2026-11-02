@@ -5,6 +5,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useStore, useMapGetter } from 'dashboard/composables/store';
 import wootConstants from 'dashboard/constants/globals';
 import { FEATURE_FLAGS } from 'dashboard/featureFlags';
+import { hasPermissions } from 'dashboard/helper/permissionsHelper';
 import {
   CHANNEL_TYPES,
   getInboxChannelKey,
@@ -15,6 +16,7 @@ import JrcContactCenterAPI from 'dashboard/api/jrcContactCenter';
 import HoyaInboxWorkspace from './HoyaInboxWorkspace.vue';
 import {
   ASSIGNEE_FILTERS,
+  matchesAssigneeFilter,
   canManageAssigneeFilters,
   assigneeFilterOptions as buildAssigneeFilterOptions,
   resolveAssigneeFilter as resolveAssigneeFilterValue,
@@ -57,6 +59,19 @@ const currentAccount = computed(() =>
 const accountPermissions = computed(
   () => currentAccount.value?.permissions || []
 );
+// SIP already has its own authorized route and credential checks. Its central
+// presentation must not depend on enabling the external Contact Center API.
+const hasSoftphoneAccess = computed(
+  () =>
+    Boolean(currentAccount.value) &&
+    hasPermissions(
+      router.resolve({
+        name: 'ramal_index',
+        params: { accountId: accountId.value },
+      }).meta.permissions,
+      accountPermissions.value
+    )
+);
 
 const canManageAssignments = computed(() =>
   canManageAssigneeFilters({
@@ -93,6 +108,7 @@ const resolveAssigneeFilter = value =>
 
 const conversationFilters = computed(() => ({
   assigneeType: assigneeFilter.value,
+  includeParticipating: true,
   status: wootConstants.STATUS_TYPE.OPEN,
   sortBy: wootConstants.SORT_BY_TYPE.LAST_ACTIVITY_AT_DESC,
   page: page.value,
@@ -123,7 +139,7 @@ const channelFilterOptions = computed(() => [
     icon: 'i-lucide-inbox',
     iconClass: 'text-n-blue-10',
   },
-  ...(hasContactCenter.value
+  ...(hasContactCenter.value || hasSoftphoneAccess.value
     ? [
         {
           key: 'voice',
@@ -150,10 +166,18 @@ const channelFilterOptions = computed(() => [
 ]);
 
 const conversations = computed(() => {
-  const items = allOpenConversations.value({
-    assigneeType: assigneeFilter.value,
-    status: wootConstants.STATUS_TYPE.OPEN,
-  });
+  const items = allOpenConversations
+    .value({
+      assigneeType: assigneeFilter.value,
+      status: wootConstants.STATUS_TYPE.OPEN,
+    })
+    .filter(conversation =>
+      matchesAssigneeFilter(
+        conversation,
+        assigneeFilter.value,
+        currentUser.value?.id
+      )
+    );
 
   if (channelFilter.value === 'all') return items;
   if (channelFilter.value === 'voice') return [];
@@ -365,6 +389,7 @@ onBeforeUnmount(() => {
     :context="contactCenterContext"
     :loading="isCurrentListLoading"
     :ready="!isInitializing"
+    :softphone-access="hasSoftphoneAccess"
     :voice-error="voiceError"
     :conversation-error="channelFilter !== 'voice' && conversationError"
     :can-load-more="canLoadMore"

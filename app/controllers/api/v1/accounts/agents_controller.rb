@@ -24,7 +24,9 @@ class Api::V1::Accounts::AgentsController < Api::V1::Accounts::BaseController
 
   def update
     @agent.update!(agent_params.slice(:name).compact)
-    @agent.current_account_user.update!(agent_params.slice(*account_user_attributes).compact)
+    @agent.current_account_user.with_lock do
+      @agent.current_account_user.update!(agent_params.slice(*account_user_attributes).compact)
+    end
   end
 
   def destroy
@@ -56,11 +58,11 @@ class Api::V1::Accounts::AgentsController < Api::V1::Accounts::BaseController
   end
 
   def account_user_attributes
-    [:role, :availability, :auto_offline, :crm_enabled]
+    [:role, :availability, :auto_offline, :crm_enabled, :auto_assignment_enabled]
   end
 
   def allowed_agent_params
-    [:name, :email, :role, :availability, :auto_offline, :crm_enabled]
+    [:name, :email, :role, :availability, :auto_offline, :crm_enabled, :auto_assignment_enabled]
   end
 
   def agent_params

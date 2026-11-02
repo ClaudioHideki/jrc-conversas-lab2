@@ -8,14 +8,24 @@ import { createRouter, createMemoryHistory } from 'vue-router';
 import messages from 'dashboard/i18n/locale/pt_BR/jrcServiceDesk.json';
 import { decodeContext, decodeTicket } from '../helpers/contracts.js';
 import { contextPayload, identity, ticket, detail, deferred, httpError } from './fixtures.js';
-const holder = vi.hoisted(() => ({ session: null, context: vi.fn(), customer: vi.fn(), conversation: vi.fn() }));
+const holder = vi.hoisted(() => ({
+  session: null,
+  context: vi.fn(),
+  structure: vi.fn(),
+  customer: vi.fn(),
+  conversation: vi.fn(),
+}));
 vi.mock('../composables/useServiceDesk', () => ({ useServiceDesk: () => holder.session }));
 vi.mock('dashboard/api/serviceDesk', () => ({ default: { context: holder.context } }));
+vi.mock('dashboard/api/serviceDeskStructure', () => ({
+  default: { context: holder.structure },
+}));
 vi.mock('dashboard/api/serviceDeskNative', () => ({ default: { customer: holder.customer, conversation: holder.conversation } }));
 import CustomerContextPanel from '../components/CustomerContextPanel.vue';
 import TicketOperations from '../components/TicketOperations.vue';
 import AccessStateView from '../views/AccessStateView.vue';
 import { useServiceDeskNavigation } from 'dashboard/composables/useServiceDeskNavigation';
+import { useServiceDeskStructure } from 'dashboard/composables/useServiceDeskStructure';
 const Button = { props: ['label', 'disabled'], template: '<button :disabled="disabled">{{ label }}</button>' };
 const i18n = () => createI18n({ legacy: false, locale: 'pt_BR', messages: { pt_BR: messages } });
 let wrappers = [];
@@ -55,6 +65,110 @@ beforeEach(() => {
 });
 afterEach(() => { wrappers.forEach(w => w.unmount()); wrappers = []; vi.useRealTimers(); });
 describe('CP5 native Vue integration (execution requires project runtime)', () => {
+  it.each(['navigation', 'structure'])(
+    '%s keeps confirmed content and coalesces paired focus/visibility reads',
+    async kind => {
+      const payload =
+        kind === 'navigation'
+          ? contextPayload()
+          : {
+              contract_version: 1,
+              available: true,
+              account_id: '1',
+              user_id: '7',
+              account_user_id: '15',
+              capabilities: {
+                operator_companies: true,
+                units: true,
+                unit_memberships: true,
+              },
+            };
+      const transport =
+        kind === 'navigation' ? holder.context : holder.structure;
+      transport.mockReset();
+      transport.mockResolvedValue(payload);
+      const Harness = defineComponent({
+        setup() {
+          const access =
+            kind === 'navigation'
+              ? useServiceDeskNavigation(ref('1'), ref('7'), ref(true))
+              : useServiceDeskStructure(ref('1'), ref('7'), ref(true)).state;
+          return { access };
+        },
+        template: '<span v-if="access.visible">Confirmed link</span>',
+      });
+      const wrapper = render(Harness);
+      await flushPromises();
+      const wait = deferred();
+      transport.mockReturnValue(wait.promise);
+      window.dispatchEvent(new Event('focus'));
+      document.dispatchEvent(new Event('visibilitychange'));
+      await wrapper.vm.$nextTick();
+      expect(wrapper.text()).toContain('Confirmed link');
+      expect(transport).toHaveBeenCalledTimes(2);
+      wait.resolve(payload);
+      await flushPromises();
+      window.dispatchEvent(new Event('focus'));
+      await flushPromises();
+      expect(transport).toHaveBeenCalledTimes(3);
+    }
+  );
+  it.each(['navigation', 'structure'])(
+    '%s clears and aborts changed scope, feature and unmounted reads',
+    async kind => {
+      const payload =
+        kind === 'navigation'
+          ? contextPayload()
+          : {
+              contract_version: 1,
+              available: true,
+              account_id: '1',
+              user_id: '7',
+              account_user_id: '15',
+              capabilities: {
+                operator_companies: true,
+                units: true,
+                unit_memberships: true,
+              },
+            };
+      const transport =
+        kind === 'navigation' ? holder.context : holder.structure;
+      transport.mockReset();
+      transport.mockResolvedValue(payload);
+      const accountId = ref('1');
+      const enabled = ref(true);
+      const Harness = defineComponent({
+        setup() {
+          const access =
+            kind === 'navigation'
+              ? useServiceDeskNavigation(accountId, ref('7'), enabled)
+              : useServiceDeskStructure(accountId, ref('7'), enabled).state;
+          return { access };
+        },
+        template: '<span v-if="access.visible">Confirmed link</span>',
+      });
+      const wrapper = render(Harness);
+      await flushPromises();
+      const wait = deferred();
+      transport.mockReturnValue(wait.promise);
+      window.dispatchEvent(new Event('focus'));
+      const oldSignal = transport.mock.calls[1][1];
+      accountId.value = '2';
+      expect(wrapper.vm.access.context).toBeNull();
+      expect(oldSignal.aborted).toBe(true);
+      enabled.value = false;
+      accountId.value = '1';
+      enabled.value = true;
+      expect(transport).toHaveBeenCalledTimes(4);
+      const currentSignal = transport.mock.calls[3][1];
+      wrapper.unmount();
+      wrappers = wrappers.filter(item => item !== wrapper);
+      expect(currentSignal.aborted).toBe(true);
+      wait.resolve(payload);
+      await flushPromises();
+      expect(wrapper.vm.access.context).toBeNull();
+    }
+  );
   it('does not fetch native customer data without the backend capability', async () => {
     render(CustomerContextPanel, { ticket: record({ view_customer: false }) }); await flushPromises(); expect(holder.customer).not.toHaveBeenCalled();
   });

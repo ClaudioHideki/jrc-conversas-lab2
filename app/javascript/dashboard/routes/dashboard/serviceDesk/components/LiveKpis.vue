@@ -6,46 +6,71 @@ import KpiCard from './KpiCard.vue';
 import { metricTones, metricIcons } from '../helpers/visualTheme';
 import State from './ServiceDeskState.vue';
 import Button from 'dashboard/components-next/button/Button.vue';
+import { finiteDuration } from '../helpers/dashboardPresentation';
 const props = defineProps({
   query: { type: Object, default: () => ({}) },
+  referenceLayout: Boolean,
+  supervision: { type: Object, default: null },
   breakdown: { type: Boolean, default: false },
+  compact: { type: Boolean, default: false },
+  dashboardSource: { type: Object, default: null },
 });
-const emit = defineEmits(['status-filter', 'metric-filter']);
+const emit = defineEmits(['status-filter', 'metric-filter', 'retry']);
 const { t } = useI18n();
 const session = useServiceDesk();
 const key = `kpis:${getCurrentInstance().uid}`;
 const result = computed(
-  () => session.operations?.resource(key) || { status: 'idle', data: null }
+  () =>
+    props.dashboardSource ||
+    session.operations?.resource(key) || { status: 'idle', data: null }
 );
-const metrics = computed(() =>
-  ['total', 'active', 'open', 'waiting', 'resolved', 'closed', 'cancelled'].map(
-    name => {
-      let value = null;
-      if (result.value.status === 'ready') {
-        value = Object.hasOwn(result.value.data.phases, name)
-          ? result.value.data.phases[name]
-          : result.value.data[name];
-      }
-      return { name, value };
+const metrics = computed(() => {
+  let names = ['total', 'active', 'open', 'waiting', 'resolved'];
+  if (props.referenceLayout) names = ['active', 'open', 'waiting', 'resolved'];
+  if (props.compact) names = ['total', 'active', 'waiting', 'resolved'];
+  return names.map(name => {
+    let value = null;
+    if (result.value.status === 'ready') {
+      value = Object.hasOwn(result.value.data.phases, name)
+        ? result.value.data.phases[name]
+        : result.value.data[name];
     }
-  )
+    return { name, value };
+  });
+});
+const resolutionSeconds = computed(() =>
+  finiteDuration(props.supervision?.sla?.resolution_average_seconds)
 );
-const load = () => {
+const resolutionLabel = computed(() => {
+  if (resolutionSeconds.value === null) return '';
+  const minutes = Math.round(resolutionSeconds.value / 60);
+  return minutes < 60
+    ? t('JRC_SERVICE_DESK.REDESIGN_LIST.minutes', { count: minutes })
+    : t('JRC_SERVICE_DESK.REDESIGN_LIST.hours_minutes', {
+        hours: Math.floor(minutes / 60),
+        minutes: minutes % 60,
+      });
+});
+const load = ({ background = false } = {}) => {
+  if (props.dashboardSource !== null) return undefined;
   if (
     session.state.status === 'ready' &&
     session.state.context?.capabilities?.dashboard?.index === true
   )
-    return session.operations?.read(key, 'dashboard', { query: props.query });
+    return session.operations?.read(key, 'dashboard', {
+      query: props.query,
+      background,
+    });
   return undefined;
 };
 watch(
-  [
-    () => props.query,
-    () => session.state.status,
-    () => session.operations?.state.revision,
-  ],
-  load,
+  [() => props.query, () => session.state.status, () => props.dashboardSource],
+  () => load(),
   { immediate: true, deep: true }
+);
+watch(
+  () => session.operations?.state.revision,
+  () => load({ background: true })
 );
 onBeforeUnmount(() => session.operations?.cancel(key));
 </script>
@@ -55,10 +80,20 @@ onBeforeUnmount(() => session.operations?.cancel(key));
     v-if="session.state.context?.capabilities?.dashboard?.index === true"
     class="mb-4"
   >
-    <div class="grid grid-cols-2 gap-3 mb-4 md:grid-cols-3 2xl:grid-cols-4">
+    <div
+      class="mb-3 grid grid-cols-2 gap-3"
+      :class="
+        compact
+          ? 'lg:grid-cols-4'
+          : referenceLayout
+            ? 'lg:grid-cols-3 xl:grid-cols-6'
+            : 'xl:grid-cols-5'
+      "
+    >
       <KpiCard
         v-for="metric in metrics"
         :key="metric.name"
+        :compact="compact"
         :label="t(`JRC_SERVICE_DESK.OPS.KPI.${metric.name}`)"
         :value="metric.value"
         :tone="metricTones[metric.name]"
@@ -66,18 +101,47 @@ onBeforeUnmount(() => session.operations?.cancel(key));
         :interactive="result.status === 'ready'"
         @activate="emit('metric-filter', metric.name)"
       />
+      <KpiCard
+        v-if="referenceLayout"
+        :label="t('JRC_SERVICE_DESK.REFINEMENT.overview.resolution')"
+        :value="resolutionSeconds"
+        :display-value="resolutionLabel"
+        tone="iris"
+        icon="i-lucide-timer"
+        :hint="
+          t(
+            resolutionSeconds === null
+              ? 'JRC_SERVICE_DESK.REFINEMENT.overview.unmeasured'
+              : 'JRC_SERVICE_DESK.REFINEMENT.overview.measured_resolution'
+          )
+        "
+      />
+      <KpiCard
+        v-if="referenceLayout"
+        :label="t('JRC_SERVICE_DESK.REFINEMENT.overview.csat')"
+        :value="null"
+        tone="teal"
+        icon="i-lucide-smile"
+        :hint="t('JRC_SERVICE_DESK.REFINEMENT.overview.csat_unavailable')"
+      />
     </div>
     <State
       v-if="!['ready', 'idle'].includes(result.status)"
       :status="result.status"
       compact
       retry
-      @retry="load"
+      @retry="dashboardSource !== null ? emit('retry') : load()"
     />
-    <p v-if="result.status === 'ready'" class="text-xs text-n-slate-11">
+    <p
+      v-if="result.status === 'ready' && !compact"
+      class="text-xs text-n-slate-11"
+    >
       {{ t('JRC_SERVICE_DESK.OPS.kpi_rule') }}
     </p>
-    <div v-if="breakdown && result.status === 'ready'" class="grid gap-2 my-4">
+    <div
+      v-if="breakdown && result.status === 'ready'"
+      class="mb-4 grid gap-2 rounded-xl border border-n-weak bg-n-solid-1 p-3"
+    >
       <h3 class="text-sm font-semibold">
         {{ t('JRC_SERVICE_DESK.OVERVIEW.distribution') }}
       </h3>

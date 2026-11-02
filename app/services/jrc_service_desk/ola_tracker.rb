@@ -8,6 +8,9 @@ class JrcServiceDesk::OlaTracker
   end
 
   def self.sync!(ticket, now: Time.current)
+    independent = ticket.queue&.ola_targets.present? || ticket.ola_clocks.where.not(kind: 'queue_residence').where(state: %w[running paused]).exists?
+    return JrcServiceDesk::OlaMeasurements.sync!(ticket, now: now) if independent
+
     active = ticket.ola_clocks.lock.find_by(state: %w[running paused])
     if active
       update_current!(active, ticket, now)
@@ -64,7 +67,6 @@ class JrcServiceDesk::OlaTracker
   def self.calendar_for(snapshot)
     JrcServiceDesk::SnapshotCalendar.new(timezone: snapshot.timezone, conditions: snapshot.calendar_conditions)
   end
-  private_class_method :calendar_for
 
   def self.due_at(calendar, now, budget)
     calendar ? calendar.advance(now, budget) : now + budget

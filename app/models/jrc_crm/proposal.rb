@@ -114,6 +114,7 @@ module JrcCrm
     has_many :sales_orders, class_name: 'JrcCrm::SalesOrder', dependent: :restrict_with_error
 
     validates :title, presence: true
+    validates :financial_version, inclusion: { in: [2, 3] }
     validates :proposal_number, presence: true, uniqueness: { scope: :account_id }
     validates :public_token_digest, presence: true, uniqueness: true
     validates :implementation_cents, :monthly_cents, :discount_cents,
@@ -232,10 +233,12 @@ module JrcCrm
     end
 
     def item_discount_cents
+      return financial_summary[:item_discount_cents] if financial_version >= 3
       proposal_items.to_a.sum(&:applied_discount_cents)
     end
 
     def effective_general_discount_cents
+      return financial_summary[:discount_cents] if financial_version >= 3
       available_after_item_discounts = if proposal_items.any?
                                          initial_items_cents
                                        else
@@ -249,6 +252,7 @@ module JrcCrm
     end
 
     def initial_items_cents
+      return financial_summary[:products_cents] if financial_version >= 3
       proposal_items.to_a.sum(&:initial_total_cents)
     end
 
@@ -300,7 +304,7 @@ module JrcCrm
     end
 
     def contract_total_cents
-      financial_summary[:total_cents]
+      financial_summary[:contract_total_cents]
     end
 
     def payable_base_cents
@@ -312,14 +316,17 @@ module JrcCrm
     end
 
     def reset_approvals!
+      upgrade_financials = sent_at.nil? && financial_version < 3
       update_columns(
         status: 'draft',
         approval_status: 'not_required',
         commercial_approval_status: 'not_required',
         financial_approval_status: 'not_required',
         technical_approval_status: 'not_required',
+        financial_version: upgrade_financials ? 3 : financial_version,
         updated_at: Time.current
       )
+      recalculate_totals! if upgrade_financials
     end
 
     def record_customer_view!(origin: 'public_link', channel: 'web')

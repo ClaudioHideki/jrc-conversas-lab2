@@ -4,7 +4,7 @@
 class JrcServiceDesk::ConfigurationContract
   FIELDS = {
     'queues' => %w[name code active team_id distribution_mode required_skills ola_budget_seconds ola_time_basis ola_pause_waiting
-                   ola_escalation_policy],
+                   ola_escalation_policy ola_targets ola_calendar],
     'categories' => %w[name code active parent_id form_fields], 'ticket_types' => %w[name code active form_fields],
     'priorities' => %w[name code active position], 'statuses' => %w[name code active phase position initial],
     'services' => %w[name code active description form_fields default_priority_id default_queue_id approval_required portal_enabled
@@ -18,7 +18,7 @@ class JrcServiceDesk::ConfigurationContract
     'team_id' => :reference, 'default_priority_id' => :reference, 'default_queue_id' => :reference,
     'portal_inbox_id' => :reference, 'portal_execution_membership_id' => :reference, 'distribution_mode' => :choice,
     'required_skills' => :array, 'form_fields' => :array, 'ola_budget_seconds' => :budget, 'ola_time_basis' => :choice,
-    'description' => :description,
+    'description' => :description, 'ola_targets' => :object, 'ola_calendar' => :object,
     'parent_id' => :reference, 'default_category_id' => :reference, 'default_ticket_type_id' => :reference,
     'default_assignee_membership_id' => :reference, 'allowed_company_ids' => :ids, 'allowed_contract_ids' => :ids,
     'portal_history_days' => :budget, 'portal_access_until' => :timestamp, 'ola_escalation_policy' => :escalation_policy
@@ -120,10 +120,16 @@ class JrcServiceDesk::ConfigurationContract
     raise ArgumentError, 'Explicit ISO8601 date with timezone required'
   end
 
+  def self.object(_key, value)
+    raise ArgumentError unless value.is_a?(Hash) && value.to_json.bytesize <= 100_000
+
+    value
+  end
+
   def self.escalation_policy(_key, value)
     JrcServiceDesk::ClockEscalationPolicy.new(value).definition
   end
 
   private_class_method :required_fields, :text, :boolean, :choice, :position, :reference, :array, :budget,
-                       :description, :ids, :timestamp, :escalation_policy
+                       :description, :ids, :timestamp, :escalation_policy, :object
 end

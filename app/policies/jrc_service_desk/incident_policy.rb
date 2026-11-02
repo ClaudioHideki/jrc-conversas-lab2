@@ -12,6 +12,26 @@ class JrcServiceDesk::IncidentPolicy < JrcServiceDesk::OperationalPolicy
   alias create? show?
   alias update? show?
 
+  def work?
+    update? && capability?(:work_status_change)
+  end
+
+  def resolve?
+    update? && capability?(:resolve)
+  end
+
+  def close?
+    update? && capability?(:close)
+  end
+
+  def reopen?
+    update? && capability?(:reopen)
+  end
+
+  def comment?
+    show? && capability?(:notes_add)
+  end
+
   class Scope < JrcServiceDesk::OperationalPolicy::Scope
     def resolve
       operational_context.capability?(:incidents_manage) ? unit_scope : scope.none

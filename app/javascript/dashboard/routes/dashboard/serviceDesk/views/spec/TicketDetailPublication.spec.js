@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { reactive } from 'vue';
 import { flushPromises, mount } from '@vue/test-utils';
 import TicketDetailView from '../TicketDetailView.vue';
@@ -10,16 +10,18 @@ const mocks = vi.hoisted(() => ({
   route: null,
   recordSnapshot: vi.fn(),
   snapshot: vi.fn(),
+  push: vi.fn(),
+  replace: vi.fn(),
 }));
 vi.mock('vue-router', () => ({
   useRoute: () => mocks.route,
-  useRouter: () => ({ push: vi.fn() }),
+  useRouter: () => ({ push: mocks.push, replace: mocks.replace }),
 }));
 vi.mock('../../composables/useServiceDesk', () => ({
   useServiceDesk: () => mocks.session,
 }));
 vi.mock('vue-i18n', () => ({
-  useI18n: () => ({ t: key => key }),
+  useI18n: () => ({ t: key => key, tm: () => ({}), locale: { value: 'en' } }),
 }));
 vi.mock('dashboard/api/serviceDeskLifecycle', () => ({
   default: {
@@ -45,17 +47,22 @@ const publication = (outcome = 'saved') => ({
 });
 const cockpit = {
   name: 'TicketCockpit',
-  emits: ['updated'],
+  props: ['ticket', 'mode', 'createTaskOnOpen'],
+  emits: ['updated', 'taskEditorOpened'],
   template: '<div data-cockpit />',
 };
-const render = (stubs = {}) =>
-  mount(TicketDetailView, {
+const wrappers = [];
+const render = (stubs = {}) => {
+  const wrapper = mount(TicketDetailView, {
     global: {
       stubs: {
         TicketCockpit: cockpit,
         Panel: { template: '<section><slot /></section>' },
         State: { props: ['status'], template: '<div>{{ status }}</div>' },
-        TicketHeader: true,
+        TicketHeader: { template: '<header><slot name="actions" /></header>' },
+        TicketDetailsPanel: true,
+        TicketAssetLinks: true,
+        TicketTimeline: true,
         TicketSummary: true,
         TicketActivity: true,
         LifecyclePanel: true,
@@ -63,16 +70,39 @@ const render = (stubs = {}) =>
         TicketOperations: true,
         CustomerContextPanel: true,
         OperationsLinks: true,
-        Button: true,
-        TabBar: true,
+        ServiceDeskDialog: {
+          props: ['open'],
+          template: '<section v-if="open" role="dialog"><slot /></section>',
+        },
+        Button: {
+          props: ['label', 'disabled'],
+          template: '<button :disabled="disabled">{{ label }}</button>',
+        },
         ...stubs,
       },
     },
   });
+  wrappers.push(wrapper);
+  return wrapper;
+};
+const renderNotes = async () => {
+  const wrapper = render();
+  await flushPromises();
+  await wrapper.get('[data-tab="notes"]').trigger('click');
+  await flushPromises();
+  return wrapper;
+};
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mocks.route = reactive({ params: { accountId: '1', ticketId: '3' } });
+  mocks.route = reactive({
+    params: { accountId: '1', ticketId: '3' },
+    query: {},
+  });
+  mocks.push.mockResolvedValue(undefined);
+  mocks.replace.mockImplementation(async destination => {
+    if (destination.query) mocks.route.query = destination.query;
+  });
   mocks.session = {
     state: reactive({
       status: 'ready',
@@ -95,8 +125,85 @@ beforeEach(() => {
     retry: vi.fn(),
   };
 });
+afterEach(() => {
+  wrappers.splice(0).forEach(wrapper => {
+    if (!wrapper.vm.$.isUnmounted) wrapper.unmount();
+  });
+});
 
 describe('verified publication confirmation in the ticket detail', () => {
+  it.each(['closed', 'cancelled'])(
+    'does not offer another closure for a ticket already in phase %s',
+    async phase => {
+      mocks.session.detail.record.permissions.lifecycle_inspect = true;
+      mocks.session.detail.record.status_phase = phase;
+      const wrapper = render();
+      await flushPromises();
+      expect(
+        wrapper.find('[data-testid="close-ticket-shortcut"]').exists()
+      ).toBe(false);
+      expect(
+        wrapper
+          .findAll('button')
+          .some(
+            button =>
+              button.text() ===
+              'JRC_SERVICE_DESK.REDESIGN_DETAIL.actions.status'
+          )
+      ).toBe(true);
+    }
+  );
+
+  it('opens the closure form without submitting any write and preserves the current ticket while it is busy', async () => {
+    mocks.session.detail.record.permissions.lifecycle_inspect = true;
+    mocks.session.detail.record.status_phase = 'open';
+    const closure = {
+      name: 'CloseTicketForm',
+      emits: ['busyChange', 'updated'],
+      template: '<div data-real-closure-slot />',
+    };
+    const wrapper = render({ CloseTicketForm: closure });
+    await flushPromises();
+    const button = wrapper.get('[data-testid="close-ticket-shortcut"]');
+    expect(button.attributes('type')).toBe('button');
+    await button.trigger('click');
+    expect(wrapper.find('[data-real-closure-slot]').exists()).toBe(true);
+    mocks.session.load.mockClear();
+    wrapper.findComponent(closure).vm.$emit('busyChange', true);
+    mocks.session.operations.state.revision += 1;
+    await flushPromises();
+    expect(mocks.session.load).not.toHaveBeenCalled();
+    expect(wrapper.find('[data-real-closure-slot]').exists()).toBe(true);
+  });
+
+  it('keeps a transfer mounted until its confirmed result closes the dialog before refreshing', async () => {
+    mocks.session.detail.record.permissions.transfer = true;
+    const operation = {
+      name: 'TicketOperations',
+      emits: ['updated'],
+      template: '<div data-transfer-form />',
+    };
+    const wrapper = render({ TicketOperations: operation });
+    await flushPromises();
+    const transfer = wrapper
+      .findAll('button')
+      .find(button => button.text() === 'JRC_SERVICE_DESK.TICKET.transfer');
+    await transfer.trigger('click');
+    expect(wrapper.find('[data-transfer-form]').exists()).toBe(true);
+    mocks.session.load.mockClear().mockImplementation(() => {
+      mocks.session.detail.status = 'loading';
+      mocks.session.detail.record = null;
+    });
+    mocks.session.operations.state.revision += 1;
+    await flushPromises();
+    expect(mocks.session.load).not.toHaveBeenCalled();
+    expect(wrapper.find('[data-transfer-form]').exists()).toBe(true);
+    wrapper.findComponent(operation).vm.$emit('updated');
+    await flushPromises();
+    expect(wrapper.find('[role="dialog"]').exists()).toBe(false);
+    expect(mocks.session.load).toHaveBeenCalledTimes(1);
+  });
+
   it.each([true, false])(
     'shows the snapshot editor without requiring an unrelated lifecycle grant (%s)',
     async inspect => {
@@ -131,8 +238,7 @@ describe('verified publication confirmation in the ticket detail', () => {
   it.each(['saved', 'published_blocked'])(
     'keeps %s visible when the GET refresh unmounts the cockpit',
     async outcome => {
-      const wrapper = render();
-      await flushPromises();
+      const wrapper = await renderNotes();
       mocks.session.load.mockImplementationOnce(() => {
         mocks.session.detail.status = 'loading';
         mocks.session.detail.record = null;
@@ -147,6 +253,10 @@ describe('verified publication confirmation in the ticket detail', () => {
       mocks.session.detail.status = 'ready';
       await flushPromises();
       expect(wrapper.find('[data-cockpit]').exists()).toBe(true);
+      expect(
+        wrapper.get('[data-tab="notes"]').attributes('aria-selected')
+      ).toBe('true');
+      expect(mocks.route.query.tab).toBe('notes');
       expect(wrapper.get('[role="status"]').text()).toBe(
         `JRC_SERVICE_DESK.R2.${outcome}`
       );
@@ -156,8 +266,7 @@ describe('verified publication confirmation in the ticket detail', () => {
   it.each(['account', 'ticket', 'authorization'])(
     'clears the verified confirmation on %s change',
     async change => {
-      const wrapper = render();
-      await flushPromises();
+      const wrapper = await renderNotes();
       wrapper.findComponent(cockpit).vm.$emit('updated', publication());
       await flushPromises();
       expect(wrapper.find('[role="status"]').exists()).toBe(true);
@@ -170,8 +279,7 @@ describe('verified publication confirmation in the ticket detail', () => {
     }
   );
   it('clears confirmation when the refreshed ticket no longer allows notes', async () => {
-    const wrapper = render();
-    await flushPromises();
+    const wrapper = await renderNotes();
     wrapper.findComponent(cockpit).vm.$emit('updated', publication());
     await flushPromises();
     mocks.session.detail.record = {
@@ -183,8 +291,7 @@ describe('verified publication confirmation in the ticket detail', () => {
     wrapper.unmount();
   });
   it('does not turn unrelated writes or an acknowledgement for another scope into confirmation', async () => {
-    const wrapper = render();
-    await flushPromises();
+    const wrapper = await renderNotes();
     wrapper.findComponent(cockpit).vm.$emit('updated');
     await flushPromises();
     expect(wrapper.find('[role="status"]').exists()).toBe(false);
@@ -194,6 +301,80 @@ describe('verified publication confirmation in the ticket detail', () => {
     await flushPromises();
     expect(wrapper.find('[role="status"]').exists()).toBe(false);
     wrapper.unmount();
+  });
+
+  it('keeps the tasks tab after a successful non-publication write reloads the ticket', async () => {
+    const taskTicket = {
+      ...ticket(),
+      permissions: {
+        ...ticket().permissions,
+        tasks_view: true,
+        tasks_manage: true,
+      },
+    };
+    mocks.session.detail.record = taskTicket;
+    const wrapper = render();
+    await flushPromises();
+    await wrapper.get('[data-tab="tasks"]').trigger('click');
+    await flushPromises();
+    mocks.session.load.mockImplementationOnce(() => {
+      mocks.session.detail.status = 'loading';
+      mocks.session.detail.record = null;
+    });
+    wrapper.findComponent(cockpit).vm.$emit('updated');
+    await flushPromises();
+    expect(wrapper.find('[data-cockpit]').exists()).toBe(false);
+    mocks.session.detail.record = taskTicket;
+    mocks.session.detail.status = 'ready';
+    await flushPromises();
+    expect(wrapper.get('[data-tab="tasks"]').attributes('aria-selected')).toBe(
+      'true'
+    );
+    expect(wrapper.findComponent(cockpit).props('mode')).toBe('tasks');
+    expect(wrapper.find('[role="status"]').exists()).toBe(false);
+  });
+
+  it('consumes the add-task request so a ticket refresh does not reopen a blank task', async () => {
+    const taskTicket = {
+      ...ticket(),
+      permissions: {
+        ...ticket().permissions,
+        tasks_view: true,
+        tasks_manage: true,
+      },
+    };
+    mocks.session.detail.record = taskTicket;
+    const wrapper = render();
+    await flushPromises();
+    const addTask = wrapper
+      .findAll('button')
+      .find(
+        button => button.text() === 'JRC_SERVICE_DESK.REDESIGN_DETAIL.add_task'
+      );
+    expect(addTask).toBeDefined();
+    await addTask.trigger('click');
+    await flushPromises();
+    const tasks = wrapper.findComponent(cockpit);
+    expect(tasks.props('mode')).toBe('tasks');
+    expect(tasks.props('createTaskOnOpen')).toBe(true);
+    tasks.vm.$emit('taskEditorOpened');
+    await flushPromises();
+    expect(tasks.props('createTaskOnOpen')).toBe(false);
+    mocks.session.load.mockImplementationOnce(() => {
+      mocks.session.detail.status = 'loading';
+      mocks.session.detail.record = null;
+    });
+    tasks.vm.$emit('updated');
+    await flushPromises();
+    mocks.session.detail.record = taskTicket;
+    mocks.session.detail.status = 'ready';
+    await flushPromises();
+    expect(wrapper.findComponent(cockpit).props('createTaskOnOpen')).toBe(
+      false
+    );
+    expect(wrapper.get('[data-tab="tasks"]').attributes('aria-selected')).toBe(
+      'true'
+    );
   });
 });
 

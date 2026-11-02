@@ -12,7 +12,8 @@ RSpec.describe Inbox do
     let!(:inbox_member_4) { create(:inbox_member, inbox: inbox) }
 
     before do
-      create(:conversation, inbox: inbox, assignee: inbox_member_1.user)
+      inbox.account.disable_features!('assignment_v2')
+      create(:conversation, account: inbox.account, inbox: inbox, assignee: inbox_member_1.user)
       # to test conversations in other inboxes won't impact
       create_list(:conversation, 3, assignee: inbox_member_1.user)
       create_list(:conversation, 2, inbox: inbox, account: inbox.account, assignee: inbox_member_2.user)
@@ -49,7 +50,7 @@ RSpec.describe Inbox do
       create(:inbox_member, inbox: v2_inbox, user: agent1)
       create(:inbox_member, inbox: v2_inbox, user: agent2)
 
-      allow(OnlineStatusTracker).to receive(:get_available_users).and_return(
+      allow(OnlineStatusTracker).to receive(:effective_available_users).and_return(
         agent1.id.to_s => 'online',
         agent2.id.to_s => 'online'
       )
@@ -121,6 +122,7 @@ RSpec.describe Inbox do
 
     context 'when assignment_v2 is disabled (V1 path)' do
       before do
+        account.disable_features!('assignment_v2')
         v2_inbox.update(auto_assignment_config: { max_assignment_limit: 2 })
       end
 

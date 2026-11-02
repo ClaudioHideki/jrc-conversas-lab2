@@ -12,6 +12,7 @@ import NativeIncidentForm from '../components/NativeIncidentForm.vue';
 import IncidentBatchPanel from '../components/IncidentBatchPanel.vue';
 import { useServiceDesk } from '../composables/useServiceDesk';
 import { decodeBoard } from '../helpers/v2Projection';
+import { canonicalId } from '../helpers/access';
 import { errorStatus } from '../helpers/session';
 import { formatTimestamp } from '../helpers/presentation';
 import { dueState } from '../helpers/screenExperience.js';
@@ -23,12 +24,14 @@ const route = useRoute();
 const router = useRouter();
 const { t, locale } = useI18n();
 const labels = computed(() => v2Labels(t));
-const unitId = ref('');
-const operatorId = ref('');
+const unitId = ref(canonicalId(route.query.unit_id) || '');
+const operatorId = ref(canonicalId(route.query.operator_company_id) || '');
 const page = ref(1);
 const result = ref(null);
 const status = ref('idle');
-const search = ref('');
+const search = ref(
+  typeof route.query.query === 'string' ? route.query.query.slice(0, 200) : ''
+);
 const stateFilter = ref('');
 const formOpen = ref(false);
 const batchOpen = ref(false);
@@ -42,10 +45,29 @@ const boardStates = computed(
     ({
       tasks: ['open', 'in_progress', 'completed', 'cancelled'],
       approvals: ['pending', 'approved', 'rejected', 'returned'],
-      incidents: ['open', 'investigating', 'monitoring', 'resolved'],
-      problems: ['open', 'investigating', 'monitoring', 'resolved'],
+      incidents: [
+        'open',
+        'investigating',
+        'in_progress',
+        'waiting',
+        'monitoring',
+        'resolved',
+        'closed',
+      ],
+      problems: [
+        'open',
+        'investigating',
+        'in_progress',
+        'waiting',
+        'monitoring',
+        'resolved',
+        'closed',
+      ],
     })[props.screen] || []
 );
+stateFilter.value = boardStates.value.includes(route.query.status)
+  ? route.query.status
+  : '';
 let epoch = 0;
 let controller;
 const allowed = computed(
@@ -170,6 +192,7 @@ const editIncident = row => {
       <Button type="submit" :label="t('JRC_SERVICE_DESK.COMMON.search')" />
       <Button
         v-if="incidentBoard && allowed && unitId"
+        type="button"
         variant="outline"
         :label="t('JRC_SERVICE_DESK.R3.create_resource')"
         @click="

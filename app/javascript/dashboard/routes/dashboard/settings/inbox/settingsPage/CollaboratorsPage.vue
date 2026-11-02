@@ -29,6 +29,9 @@ const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
 const { isEnterprise } = useConfig();
+const diagnostics = ref(null);
+const diagnosticsLoading = ref(false);
+const diagnosticsFailed = ref(false);
 
 const selectedAgentIds = ref([]);
 const isAgentListUpdating = ref(false);
@@ -36,6 +39,7 @@ const enableAutoAssignment = ref(false);
 const maxAssignmentLimit = ref(null);
 const assignmentPolicy = ref(null);
 const isLoadingPolicy = ref(false);
+const isPolicyLoadFailed = ref(false);
 const isDeletingPolicy = ref(false);
 const showDeleteConfirmModal = ref(false);
 const availablePolicies = ref([]);
@@ -80,17 +84,11 @@ const isFeatureEnabled = feature => {
   );
 };
 
-const hasAdvancedAssignment = computed(() => {
-  return isFeatureEnabled('advanced_assignment');
-});
-
 const hasAssignmentV2 = computed(() => {
   return isFeatureEnabled('assignment_v2');
 });
 
-const showAdvancedAssignmentUI = computed(() => {
-  return hasAdvancedAssignment.value && hasAssignmentV2.value;
-});
+const showAssignmentPolicyUI = computed(() => hasAssignmentV2.value);
 
 const assignmentOrderLabel = computed(() => {
   if (!assignmentPolicy.value) return '';
@@ -144,6 +142,21 @@ const maxAssignmentLimitErrors = computed(() => {
   return '';
 });
 
+async function fetchDiagnostics() {
+  diagnosticsLoading.value = true;
+  diagnosticsFailed.value = false;
+  try {
+    const response = await assignmentPoliciesAPI.getInboxDiagnostics(
+      props.inbox.id
+    );
+    diagnostics.value = response.data;
+  } catch (error) {
+    diagnosticsFailed.value = true;
+  } finally {
+    diagnosticsLoading.value = false;
+  }
+}
+
 const fetchAttachedAgents = async () => {
   try {
     const response = await store.dispatch('inboxMembers/get', {
@@ -162,11 +175,12 @@ const fetchAssignmentPolicy = async () => {
   if (!props.inbox.id) return;
 
   isLoadingPolicy.value = true;
+  isPolicyLoadFailed.value = false;
   try {
     const response = await assignmentPoliciesAPI.getInboxPolicy(props.inbox.id);
     assignmentPolicy.value = response.data;
   } catch (error) {
-    // No policy attached, which is fine
+    isPolicyLoadFailed.value = error.response?.status !== 404;
     assignmentPolicy.value = null;
   } finally {
     isLoadingPolicy.value = false;
@@ -190,6 +204,7 @@ const linkPolicyToInbox = async policy => {
   try {
     await assignmentPoliciesAPI.setInboxPolicy(props.inbox.id, policy.id);
     assignmentPolicy.value = policy;
+    fetchDiagnostics();
     showPolicyDropdown.value = false;
     useAlert(t('INBOX_MGMT.ASSIGNMENT.LINK_SUCCESS'));
   } catch (error) {
@@ -257,6 +272,7 @@ const handleToggleAutoAssignment = async val => {
       enable_auto_assignment: val,
     };
     await store.dispatch('inboxes/updateInbox', payload);
+    if (hasAssignmentV2.value) fetchDiagnostics();
     useAlert(t('INBOX_MGMT.EDIT.API.SUCCESS_MESSAGE'));
   } catch (error) {
     useAlert(t('INBOX_MGMT.EDIT.API.ERROR_MESSAGE'));
@@ -297,7 +313,9 @@ const updateInbox = async () => {
 const navigateToCreatePolicy = () => {
   const accountId = route.params.accountId;
   router.push({
-    name: 'agent_assignment_policy_create',
+    name: route.path.startsWith('/super_admin/accounts')
+      ? 'super_admin_agent_assignment_policy_create'
+      : 'agent_assignment_policy_create',
     params: { accountId },
     query: { inboxId: props.inbox.id },
   });
@@ -307,16 +325,10 @@ const navigateToAssignmentPolicyEdit = () => {
   if (!assignmentPolicy.value?.id) return;
   const accountId = route.params.accountId;
   router.push({
-    name: 'agent_assignment_policy_edit',
+    name: route.path.startsWith('/super_admin/accounts')
+      ? 'super_admin_agent_assignment_policy_edit'
+      : 'agent_assignment_policy_edit',
     params: { accountId, id: assignmentPolicy.value.id },
-  });
-};
-
-const navigateToBilling = () => {
-  const accountId = route.params.accountId;
-  router.push({
-    name: 'billing_settings_index',
-    params: { accountId },
   });
 };
 
@@ -334,6 +346,7 @@ const deleteAssignmentPolicy = async () => {
   try {
     await assignmentPoliciesAPI.removeInboxPolicy(props.inbox.id);
     assignmentPolicy.value = null;
+    fetchDiagnostics();
     showDeleteConfirmModal.value = false;
     useAlert(t('INBOX_MGMT.ASSIGNMENT_POLICY.DELETE_SUCCESS'));
   } catch (error) {
@@ -343,14 +356,18 @@ const deleteAssignmentPolicy = async () => {
   }
 };
 
+const diagnosticReasonLabel = reason =>
+  t('INBOX_MGMT.ASSIGNMENT.REASONS.' + reason);
+
 const setDefaults = () => {
   enableAutoAssignment.value = props.inbox.enable_auto_assignment;
   maxAssignmentLimit.value =
     props.inbox.auto_assignment_config?.max_assignment_limit || null;
   fetchAttachedAgents();
-  if (showAdvancedAssignmentUI.value) {
+  if (showAssignmentPolicyUI.value) {
     fetchAssignmentPolicy();
     fetchAvailablePolicies();
+    fetchDiagnostics();
   }
 };
 
@@ -412,11 +429,45 @@ onMounted(() => {
           v-if="enableAutoAssignment && (isEnterprise || hasAssignmentV2)"
           #editor
         >
+          <div v-if="hasAssignmentV2" class="p-4 border-b border-n-weak">
+            <div class="flex items-center justify-between gap-3">
+              <p class="text-sm text-n-slate-12">
+                {{ $t('INBOX_MGMT.ASSIGNMENT.DIAGNOSTICS') }}
+              </p>
+              <NextButton
+                icon="i-lucide-refresh-cw"
+                :label="$t('INBOX_MGMT.ASSIGNMENT.REFRESH_DIAGNOSTICS')"
+                :is-loading="diagnosticsLoading"
+                ghost
+                sm
+                @click="fetchDiagnostics"
+              />
+            </div>
+            <p v-if="diagnosticsFailed" class="text-sm text-n-ruby-11">
+              {{ $t('INBOX_MGMT.ASSIGNMENT.DIAGNOSTICS_ERROR') }}
+            </p>
+            <template v-else-if="diagnostics">
+              <p class="text-sm text-n-slate-11" role="status">
+                {{ diagnosticReasonLabel(diagnostics.reason) }}
+              </p>
+              <ul class="mt-2 text-sm text-n-slate-11 space-y-1">
+                <li
+                  v-for="(count, reason) in diagnostics.agent_reasons"
+                  :key="reason"
+                >
+                  {{ diagnosticReasonLabel(reason) }}: {{ count }}
+                </li>
+              </ul>
+              <p class="mt-2 text-xs text-n-slate-11">
+                {{ $t('INBOX_MGMT.ASSIGNMENT.NEW_EVENTS_ONLY') }}
+              </p>
+            </template>
+          </div>
           <!-- assignment_v2 UI -->
           <template v-if="hasAssignmentV2">
             <!-- Policy Card - When policy is attached -->
             <div
-              v-if="showAdvancedAssignmentUI && assignmentPolicy"
+              v-if="showAssignmentPolicyUI && assignmentPolicy"
               class="ltr:pr-0 rtl:pl-0 ltr:pl-4 rtl:pr-4 py-4"
             >
               <div class="flex items-start gap-4">
@@ -482,8 +533,9 @@ onMounted(() => {
             <!-- Default Policy - When no custom policy attached but feature enabled -->
             <div
               v-else-if="
-                showAdvancedAssignmentUI &&
+                showAssignmentPolicyUI &&
                 !assignmentPolicy &&
+                !isPolicyLoadFailed &&
                 !isLoadingPolicy
               "
             >
@@ -496,12 +548,15 @@ onMounted(() => {
                     <i class="i-lucide-zap text-xl text-n-slate-11" />
                   </div>
                   <div class="flex-grow">
-                    <h4 class="text-heading-3 text-n-slate-12 mb-0.5">
-                      {{ $t('INBOX_MGMT.ASSIGNMENT.DEFAULT_POLICY_LINKED') }}
+                    <h4
+                      class="text-heading-3 text-n-ruby-11 mb-0.5"
+                      role="alert"
+                    >
+                      {{ $t('INBOX_MGMT.ASSIGNMENT.POLICY_MISSING_TITLE') }}
                     </h4>
                     <p class="text-body-main text-n-slate-11">
                       {{
-                        $t('INBOX_MGMT.ASSIGNMENT.DEFAULT_POLICY_DESCRIPTION')
+                        $t('INBOX_MGMT.ASSIGNMENT.POLICY_MISSING_DESCRIPTION')
                       }}
                     </p>
                   </div>
@@ -546,96 +601,14 @@ onMounted(() => {
                   />
                 </div>
               </div>
-
-              <!-- Default Rules Info -->
-              <div
-                class="px-4 py-4 border-t border-n-weak bg-n-slate-2 rounded-b-xl"
-              >
-                <div class="flex items-start gap-3">
-                  <Icon icon="i-lucide-info" class="mt-0.5 text-n-slate-11" />
-                  <div>
-                    <p class="text-body-main text-n-slate-11 mb-2">
-                      {{ $t('INBOX_MGMT.ASSIGNMENT.CURRENT_BEHAVIOR') }}
-                    </p>
-                    <ul class="space-y-1">
-                      <li class="flex items-center gap-2">
-                        <span
-                          class="w-1 h-1 rounded-full bg-n-slate-10 flex-shrink-0"
-                        />
-                        <span class="text-body-main text-n-slate-11">
-                          {{ $t('INBOX_MGMT.ASSIGNMENT.DEFAULT_RULE_1') }}
-                        </span>
-                      </li>
-                      <li class="flex items-center gap-2">
-                        <span
-                          class="w-1 h-1 rounded-full bg-n-slate-10 flex-shrink-0"
-                        />
-                        <span class="text-body-main text-n-slate-11">
-                          {{ $t('INBOX_MGMT.ASSIGNMENT.DEFAULT_RULE_2') }}
-                        </span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
             </div>
-
-            <!-- Default Rules Card - Feature not enabled (no advanced_assignment) -->
-            <div
-              v-else-if="!showAdvancedAssignmentUI"
-              class="ltr:pr-0 rtl:pl-0 ltr:pl-4 rtl:pr-4 py-4"
+            <p
+              v-else-if="isPolicyLoadFailed"
+              class="p-4 text-sm text-n-ruby-11"
+              role="alert"
             >
-              <div class="flex items-start gap-4">
-                <div
-                  class="flex-shrink-0 size-10 rounded-xl bg-n-slate-3 dark:bg-n-slate-4 flex items-center justify-center"
-                >
-                  <Icon icon="i-lucide-zap" class="text-xl text-n-slate-11" />
-                </div>
-                <div class="flex-grow">
-                  <h4 class="text-heading-3 text-n-slate-12 mb-0.5">
-                    {{ $t('INBOX_MGMT.ASSIGNMENT.DEFAULT_RULES_TITLE') }}
-                  </h4>
-                  <p class="text-body-main text-n-slate-11 mb-4">
-                    {{ $t('INBOX_MGMT.ASSIGNMENT.DEFAULT_RULES_DESCRIPTION') }}
-                  </p>
-
-                  <ul class="space-y-2 mb-6">
-                    <li class="flex items-center gap-2">
-                      <span
-                        class="w-1.5 h-1.5 rounded-full bg-n-slate-11 flex-shrink-0"
-                      />
-                      <span class="text-body-main text-n-slate-12">
-                        {{ $t('INBOX_MGMT.ASSIGNMENT.DEFAULT_RULE_1') }}
-                      </span>
-                    </li>
-                    <li class="flex items-center gap-2">
-                      <span
-                        class="w-1.5 h-1.5 rounded-full bg-n-slate-11 flex-shrink-0"
-                      />
-                      <span class="text-body-main text-n-slate-12">
-                        {{ $t('INBOX_MGMT.ASSIGNMENT.DEFAULT_RULE_2') }}
-                      </span>
-                    </li>
-                  </ul>
-
-                  <div class="w-full h-px bg-n-weak my-4" />
-
-                  <!-- Upgrade prompt when advanced_assignment is not enabled -->
-                  <div v-if="!hasAdvancedAssignment">
-                    <p class="text-body-main text-n-slate-11 mb-1">
-                      {{ $t('INBOX_MGMT.ASSIGNMENT.UPGRADE_PROMPT') }}
-                    </p>
-                    <NextButton
-                      :label="$t('INBOX_MGMT.ASSIGNMENT.UPGRADE_TO_BUSINESS')"
-                      icon="i-lucide-arrow-right"
-                      trailing-icon
-                      link
-                      @click="navigateToBilling"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
+              {{ $t('INBOX_MGMT.ASSIGNMENT.POLICY_LOAD_ERROR') }}
+            </p>
           </template>
 
           <!-- Old UI for non-assignment_v2 -->

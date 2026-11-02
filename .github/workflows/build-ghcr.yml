@@ -88,8 +88,8 @@ jobs:
         run: |
           set -euo pipefail
           # The hosted Azure mirror stalled this release before any product gate.
-          # Fall back to the official Ubuntu HTTPS archives on this disposable runner.
-          for source in /etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; do
+          # Keep APT signature/TLS verification and use the official HTTPS archives.
+          for source in /etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources /etc/apt/apt-mirrors*.txt; do
             if [ -f "$source" ]; then
               sudo sed -i -E \
                 -e 's|https?://azure[.]archive[.]ubuntu[.]com/ubuntu/?|https://archive.ubuntu.com/ubuntu/|g' \
@@ -135,6 +135,7 @@ jobs:
           app/javascript/dashboard/routes/dashboard/jrcOperations
           app/javascript/dashboard/routes/dashboard/crm
           app/javascript/dashboard/routes/dashboard/jrcCustomers
+          app/javascript/dashboard/routes/dashboard/jrcCampaigns/specs
           app/javascript/dashboard/routes/dashboard/webphone
           app/javascript/dashboard/routes/dashboard/jrcRelationship
           app/javascript/dashboard/components-next/sidebar/specs

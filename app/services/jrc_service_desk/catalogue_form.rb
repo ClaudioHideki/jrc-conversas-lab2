@@ -69,7 +69,10 @@ class JrcServiceDesk::CatalogueForm
 
   def defaults(service)
     member = service&.default_assignee_membership
-    allowed = member && @context.capability?(:tickets_assign)
+    candidate = service && JrcServiceDesk::Ticket.new(account: service.account, unit: service.unit,
+                                                      queue: service.default_queue, team_id: service.default_queue&.team_id)
+    allowed = member && @context.capability?(:tickets_assign) &&
+              JrcServiceDesk::AssignmentEligibility.new(membership: member, ticket: candidate).reason.nil?
     { priority_id: service&.default_priority_id&.to_s, queue_id: service&.default_queue_id&.to_s,
       assignee_account_user_id: allowed ? member.account_user_id.to_s : nil,
       priority: named(service&.default_priority), queue: named(service&.default_queue),

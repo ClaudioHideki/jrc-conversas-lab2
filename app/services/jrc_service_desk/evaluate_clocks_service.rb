@@ -72,11 +72,12 @@ class JrcServiceDesk::EvaluateClocksService < JrcServiceDesk::BaseService
     fields = observation.slice(:elapsed_seconds, :budget_seconds, :due_at, :breached).stringify_keys
     proof = { 'clock_id' => clock.id, 'clock_kind' => observation[:kind], 'percent' => threshold['percent'],
               'policy_digest' => digest, 'target_queue_id' => threshold['queue_id'] }
-    append_event!(ticket, 'clock_threshold_reached', proof.merge(fields))
+    event = append_event!(ticket, 'clock_threshold_reached', proof.merge(fields))
+    JrcServiceDesk::ClockAlerts.schedule(event, threshold) if clock.is_a?(JrcServiceDesk::OlaClock)
   end
 
   def already_recorded?(ticket, clock, threshold, digest)
-    proof = { clock_id: clock.id, clock_kind: clock.respond_to?(:kind) ? clock.kind : 'ola',
+    proof = { clock_id: clock.id, clock_kind: clock.is_a?(JrcServiceDesk::OlaClock) ? 'ola' : clock.kind,
               percent: threshold['percent'], policy_digest: digest }
     ticket.ticket_events.where(event_type: 'clock_threshold_reached').exists?(['data @> ?::jsonb', proof.to_json])
   end

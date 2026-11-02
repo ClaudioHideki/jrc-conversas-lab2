@@ -52,6 +52,6 @@ class Api::V1::Accounts::JrcServiceDesk::IncidentBatchesController < Api::V1::Ac
   end
 
   def invalid_preview
-    render json: { code: 'preview_invalid', error: 'Refresh and review the batch again' }, status: :conflict
+    render json: { code: 'preview_invalid', error: 'Atualize e revise o lote novamente.' }, status: :conflict
   end
 end

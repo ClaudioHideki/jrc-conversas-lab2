@@ -38,9 +38,9 @@ const props = defineProps({
     type: Number,
     default: null,
   },
-  crmEnabled: {
+  autoAssignmentEnabled: {
     type: Boolean,
-    default: false,
+    default: true,
   },
 });
 
@@ -53,6 +53,7 @@ const { t } = useI18n();
 
 const agentName = ref(props.name);
 const agentAvailability = ref(props.availability);
+const autoAssignmentEnabled = ref(props.autoAssignmentEnabled);
 const selectedRoleId = ref(props.customRoleId || props.type);
 const agentCredentials = ref({ email: props.email });
 
@@ -105,20 +106,24 @@ const selectedRole = computed(() =>
   )
 );
 
-const availabilityStatuses = computed(() => [
-  { label: 'Disponível', value: 'online' },
-  { label: 'Indisponível', value: 'offline' },
-  { label: 'Reunião', value: 'meeting' },
-  { label: 'Feedback', value: 'feedback' },
-  { label: 'Fim do turno', value: 'end_shift' },
-  { label: 'Treinamento', value: 'training' },
-  { label: 'Pausa banheiro', value: 'bathroom_break' },
-  { label: 'Pausa almoço', value: 'lunch_break' },
-  { label: 'Chamada Manual', value: 'manual_call' },
-].filter(status => AVAILABILITY_STATUS_KEYS.includes(status.value)).map(status => ({
-  ...status,
-  disabled: props.availability === status.value,
-})));
+const availabilityStatuses = computed(() =>
+  [
+    { label: 'Disponível', value: 'online' },
+    { label: 'Indisponível', value: 'offline' },
+    { label: 'Reunião', value: 'meeting' },
+    { label: 'Feedback', value: 'feedback' },
+    { label: 'Fim do turno', value: 'end_shift' },
+    { label: 'Treinamento', value: 'training' },
+    { label: 'Pausa banheiro', value: 'bathroom_break' },
+    { label: 'Pausa almoço', value: 'lunch_break' },
+    { label: 'Chamada Manual', value: 'manual_call' },
+  ]
+    .filter(status => AVAILABILITY_STATUS_KEYS.includes(status.value))
+    .map(status => ({
+      ...status,
+      disabled: props.availability === status.value,
+    }))
+);
 
 const editAgent = async () => {
   v$.value.$touch();
@@ -129,6 +134,7 @@ const editAgent = async () => {
       id: props.id,
       name: agentName.value,
       availability: agentAvailability.value,
+      auto_assignment_enabled: autoAssignmentEnabled.value,
     };
 
     if (selectedRole.value.name.startsWith('custom_')) {
@@ -205,6 +211,16 @@ const resetPassword = async () => {
             {{ $t('AGENT_MGMT.EDIT.FORM.AGENT_AVAILABILITY.ERROR') }}
           </span>
         </label>
+      </div>
+
+      <div class="w-full py-3">
+        <label class="flex items-center gap-2">
+          <input v-model="autoAssignmentEnabled" type="checkbox" />
+          {{ $t('AGENT_MGMT.EDIT.FORM.AUTO_ASSIGNMENT.LABEL') }}
+        </label>
+        <p class="text-sm text-n-slate-11">
+          {{ $t('AGENT_MGMT.EDIT.FORM.AUTO_ASSIGNMENT.HELP') }}
+        </p>
       </div>
 
       <div class="flex flex-row justify-start w-full gap-2 px-0 py-2">

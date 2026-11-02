@@ -31,6 +31,97 @@ describe('#Inbox Helpers', () => {
       ).toBe(true);
     });
 
+    it.each([
+      { channel_type: INBOX_TYPES.API, jrc_broker_bound: true },
+      {
+        channel_type: INBOX_TYPES.API,
+        jrc_broker_bound: true,
+        additional_attributes: {},
+      },
+      { channelType: INBOX_TYPES.API, jrcBrokerBound: true },
+      {
+        channelType: INBOX_TYPES.API,
+        jrcBrokerBound: true,
+        additionalAttributes: {},
+      },
+    ])(
+      'recognizes a Broker-bound Gestor inbox without name or provider hints: %j',
+      inbox => {
+        const gestor = { id: 13, name: 'Gestor', ...inbox };
+
+        expect(isWhatsAppInbox(gestor)).toBe(true);
+        expect(getInboxChannelKey(gestor)).toBe('whatsapp');
+      }
+    );
+
+    it.each([false, 'false', 'true', 0, 1, null, undefined])(
+      'requires a boolean true Broker binding for WhatsApp grouping: %j',
+      bound => {
+        [{ jrc_broker_bound: bound }, { jrcBrokerBound: bound }].forEach(
+          flags => {
+            const inbox = {
+              channel_type: INBOX_TYPES.API,
+              name: 'Gestor',
+              additional_attributes: {},
+              ...flags,
+            };
+
+            expect(isWhatsAppInbox(inbox)).toBe(false);
+            expect(getInboxChannelKey(inbox)).toBe('api');
+          }
+        );
+      }
+    );
+
+    it('does not treat editable attributes as a Broker binding', () => {
+      const inbox = {
+        channel_type: INBOX_TYPES.API,
+        name: 'Gestor',
+        additional_attributes: { jrc_broker_bound: true },
+      };
+
+      expect(isWhatsAppInbox(inbox)).toBe(false);
+      expect(getInboxChannelKey(inbox)).toBe('api');
+    });
+
+    it.each([
+      [INBOX_TYPES.EMAIL, 'email'],
+      [INBOX_TYPES.INSTAGRAM, 'instagram'],
+      [INBOX_TYPES.FB, 'facebook'],
+      [INBOX_TYPES.WEB, 'website'],
+      [INBOX_TYPES.TELEGRAM, 'telegram'],
+      [INBOX_TYPES.SMS, 'sms'],
+      [INBOX_TYPES.TWILIO, 'sms'],
+    ])(
+      'preserves the native %s channel with a Broker-shaped flag',
+      (channelType, expected) => {
+        const inbox = { channelType, name: 'Gestor', jrc_broker_bound: true };
+
+        expect(isWhatsAppInbox(inbox)).toBe(false);
+        expect(getInboxChannelKey(inbox)).toBe(expected);
+      }
+    );
+
+    it('recomputes the binding after switching Accounts with the same inbox ID', () => {
+      const views = [
+        { account_id: 1, jrc_broker_bound: true },
+        { account_id: 2 },
+        { accountId: 2, jrcBrokerBound: true },
+        { account_id: 1, jrc_broker_bound: false },
+      ];
+
+      expect(
+        views.map(view =>
+          getInboxChannelKey({
+            id: 13,
+            channel_type: INBOX_TYPES.API,
+            name: 'Gestor',
+            ...view,
+          })
+        )
+      ).toEqual(['whatsapp', 'api', 'whatsapp', 'api']);
+    });
+
     it('recognizes the existing API inbox by its WhatsApp name', () => {
       expect(
         isWhatsAppInbox({

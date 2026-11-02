@@ -37,12 +37,39 @@ class JrcServiceDesk::IntakeRuleApplication
 
     JrcServiceDesk::LifecycleClocks.verify_snapshot!(snapshot, clock_kinds: bound_policy.rules.clock_kinds)
     created = JrcServiceDesk::RecordSlaSnapshotService.new(user_context: @context.to_h).call(ticket_id: @ticket.id, attributes: attributes)
+    JrcServiceDesk::LifecycleClocks.new(ticket: @ticket, version: bound_policy,
+                                      actor: @ticket.created_by_membership, now: @ticket.opened_at).start!
     @ticket.ticket_events.create!(account: @ticket.account, unit: @ticket.unit,
                                   actor_membership: @ticket.created_by_membership, event_type: 'operational_rule_applied',
                                   data: { 'kind' => 'sla_selection', 'rule_version_id' => version.id, 'rule_key' => rule['key'],
                                           'rule_digest' => version.digest, 'snapshot_id' => created.id })
   rescue JrcServiceDesk::LifecycleDependencyError
     raise ArgumentError, 'Published intake SLA requires a compatible lifecycle and calendar'
+  end
+
+  def record_actions!
+    binding = @applied['routing']
+    return unless binding
+
+    version = JrcServiceDesk::OperationalRuleVersion.where(account_id: @ticket.account_id, unit_id: @ticket.unit_id).find(binding['version_id'])
+    raise JrcServiceDesk::IdempotencyConflict unless version.digest == binding['digest'] && version.digest == version.expected_digest
+
+    rule = version.definition.fetch('rules').find { |item| item['key'] == binding['key'] } || raise(JrcServiceDesk::IdempotencyConflict)
+    JrcServiceDesk::OperationalRuleReferences.new(context: @context, unit: @ticket.unit).validate_rule!(rule)
+    output = rule.fetch('output')
+    if output['label_ids']&.any?
+      titles = @ticket.account.labels.where(id: output['label_ids']).pluck(:title)
+      @ticket.update_labels((@ticket.label_list + titles).uniq)
+    end
+    key = "routing:#{@ticket.id}:#{version.id}:#{binding['key']}"
+    if output['task']
+      JrcServiceDesk::CreateTaskService.new(user_context: @context.to_h).call(ticket_id: @ticket.id,
+        attributes: output['task'].merge('visibility' => 'internal'), idempotency_key: "#{key}:task")
+    end
+    if output['internal_note']
+      JrcServiceDesk::AddNoteService.new(user_context: @context.to_h).call(ticket_id: @ticket.id,
+        attributes: { 'body' => output['internal_note'], 'visibility' => 'internal', 'notification_channels' => [] }, idempotency_key: "#{key}:note")
+    end
   end
 
   private
@@ -62,7 +89,9 @@ class JrcServiceDesk::IntakeRuleApplication
     { 'inbox_id' => @conversation&.inbox_id, 'channel_type' => @conversation&.inbox&.channel_type,
       'company_id' => @ticket.company_id || @ticket.requester.company_id, 'contract_id' => @ticket.contract_id,
       'category_id' => @ticket.category_id, 'service_id' => @ticket.service_id, 'priority_id' => @ticket.priority_id,
-      'ticket_type_id' => @ticket.ticket_type_id, 'impact' => @ticket.impact_code, 'urgency' => @ticket.urgency_code }
+      'ticket_type_id' => @ticket.ticket_type_id, 'impact' => @ticket.impact_code, 'urgency' => @ticket.urgency_code,
+      'assigned' => @ticket.assignee_membership_id.present?, 'label_id' => @ticket.account.labels.where(title: (@ticket.requester.label_list + Array(@conversation&.label_list)).uniq).pluck(:id),
+      'form_value' => @ticket.service_fields }
   end
 
   def selected(kind)
@@ -75,8 +104,7 @@ class JrcServiceDesk::IntakeRuleApplication
 
     # Revalidate references of the matching rule, not unrelated private rules.
     validator = JrcServiceDesk::OperationalRuleReferences.new(context: @context, unit: @ticket.unit)
-    validator.validate_facts!(rule.fetch('match'))
-    validator.validate_facts!(rule.fetch('output'))
+    validator.validate_rule!(rule)
     [version, rule]
   end
 
@@ -120,6 +148,18 @@ class JrcServiceDesk::IntakeRuleApplication
     end
 
     remember('routing', version, rule)
+    classification = rule['output']['classification']
+    return unless classification
+
+    models = { 'priority_id' => JrcServiceDesk::Priority, 'category_id' => JrcServiceDesk::Category, 'service_id' => JrcServiceDesk::Service }
+    models.each do |field, model|
+      next unless classification[field]
+      raise JrcServiceDesk::IdempotencyConflict, 'Explicit classification disagrees with published routing' if @supplied[field] && @supplied[field].to_i != classification[field]
+
+      @ticket.public_send("#{field}=", model.where(account_id: @ticket.account_id, unit_id: @ticket.unit_id, active: true).find(classification[field]).id)
+    end
+    JrcServiceDesk::TicketCatalogue.new(@ticket, context: @context).bind!(@supplied.merge(classification))
+    @ticket.lifecycle_policy_version = JrcServiceDesk::LifecycleSelector.new(@ticket).applicable
   end
 
   def remember(kind, version, rule)

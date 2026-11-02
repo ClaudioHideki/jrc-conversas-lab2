@@ -23,7 +23,7 @@ module JrcProjects
     end
 
     def task_belongs_to_project
-      errors.add(:task, 'must belong to project') if task && task.project_id != project_id
+      errors.add(:task, 'deve pertencer ao projeto') if task && task.project_id != project_id
     end
   end
 end

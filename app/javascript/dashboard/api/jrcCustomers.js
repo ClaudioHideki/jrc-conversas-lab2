@@ -61,6 +61,10 @@ class CustomerAPI extends ApiClient {
     return axios.get(`${this.url}/contacts/${id}`);
   }
 
+  contactOverview(id) {
+    return axios.get(`${this.url}/contacts/${id}/overview`);
+  }
+
   saveContact(contact, id = null, options = {}) {
     const body = { contact, ...options };
     return id

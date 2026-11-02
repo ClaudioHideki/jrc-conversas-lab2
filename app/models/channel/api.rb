@@ -30,12 +30,17 @@ class Channel::Api < ApplicationRecord
   include WebhookSecretable
   validate :ensure_valid_agent_reply_time_window
   validates :webhook_url, length: { maximum: Limits::URL_LENGTH_LIMIT }
+  after_update_commit :schedule_broker_registration, if: :saved_change_to_webhook_url?
 
   def name
     'API'
   end
 
   private
+
+  def schedule_broker_registration
+    JrcBroker::InboxSyncJob.enqueue_for(account)
+  end
 
   def ensure_valid_agent_reply_time_window
     return if additional_attributes['agent_reply_time_window'].blank?

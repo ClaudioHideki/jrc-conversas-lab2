@@ -135,11 +135,11 @@ class Api::V1::Accounts::Relationship::RecordsController < Api::V1::Accounts::Re
     survey.update!(attrs.merge(treated_at: attrs[:treatment_status] == 'treated' ? Time.current : nil))
   end
 
-  def survey_summary(model, scope)
+  def survey_summary(model, _scope)
     return unless model == JrcRelationship::Survey
 
     report = JrcRelationship::SurveyReport.new(relationship_context, survey_filters)
-    JrcRelationship::SurveySummary.new(relationship_context, scope, selected_period: params[:from].present?,
+    JrcRelationship::SurveySummary.new(relationship_context, report.scope(action: 'report'), selected_period: params[:from].present?,
       cohort: report.cohort_scope, cohort_available: report.cohort_available?, cohort_period: report.cohort_period).call
   end
 

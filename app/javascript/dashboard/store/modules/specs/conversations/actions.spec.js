@@ -84,16 +84,27 @@ describe('#actions', () => {
   });
   describe('#muteConversation', () => {
     it('sends correct actions if API is success', async () => {
-      axios.get.mockResolvedValue(null);
-      await actions.muteConversation({ commit }, 1);
-      expect(commit.mock.calls).toEqual([[types.MUTE_CONVERSATION]]);
+      axios.post.mockResolvedValue(null);
+      const saved = await actions.muteConversation(
+        {
+          commit,
+          rootGetters: { getCurrentAccountId: 1, getCurrentUserID: 1 },
+        },
+        1
+      );
+      expect(saved).toBe(true);
+      expect(commit.mock.calls).toEqual([[types.MUTE_CONVERSATION, 1]]);
     });
     it('sends correct actions if API is error', async () => {
-      axios.get.mockRejectedValue({ message: 'Incorrect header' });
-      await actions.getConversation({
-        commit,
-        rootGetters: { getCurrentAccountId: 1 },
-      });
+      axios.post.mockRejectedValue({ message: 'Incorrect header' });
+      const saved = await actions.muteConversation(
+        {
+          commit,
+          rootGetters: { getCurrentAccountId: 1, getCurrentUserID: 1 },
+        },
+        1
+      );
+      expect(saved).toBe(false);
       expect(commit.mock.calls).toEqual([]);
     });
   });
@@ -364,10 +375,11 @@ describe('#actions', () => {
       axios.post.mockResolvedValue({
         data: { id: 1, name: 'User' },
       });
-      await actions.assignAgent(
-        { dispatch },
+      const assigned = await actions.assignAgent(
+        { dispatch, rootGetters: { getCurrentAccountId: 1 } },
         { conversationId: 1, agentId: 1, assigneeType: 'AgentBot' }
       );
+      expect(assigned).toBe(true);
       expect(dispatch).toHaveBeenCalledWith('setCurrentChatAssignee', {
         conversationId: 1,
         assignee: { id: 1, name: 'User' },
@@ -419,7 +431,15 @@ describe('#actions', () => {
       axios.post.mockResolvedValue({
         data: { id: 1, name: 'Team' },
       });
-      await actions.assignTeam({ commit }, { conversationId: 1, teamId: 1 });
+      const assigned = await actions.assignTeam(
+        { dispatch, rootGetters: { getCurrentAccountId: 1 } },
+        { conversationId: 1, teamId: 1 }
+      );
+      expect(assigned).toBe(true);
+      expect(dispatch).toHaveBeenCalledWith('setCurrentChatTeam', {
+        team: { id: 1, name: 'Team' },
+        conversationId: 1,
+      });
       expect(commit).toHaveBeenCalledTimes(0);
       expect(commit.mock.calls).toEqual([]);
     });

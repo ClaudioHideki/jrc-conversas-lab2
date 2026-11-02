@@ -56,6 +56,7 @@ class JrcServiceDesk::TimelinePresenter
   end
 
   def attachment(file, identifier)
-    { id: identifier.to_s, filename: file.filename.to_s, scan_state: file.blob.metadata['service_desk_scan_state'] || 'unavailable' }
+    { id: identifier.to_s, filename: file.filename.to_s, byte_size: file.blob.byte_size, content_type: file.blob.content_type,
+      scan_state: file.blob.metadata['service_desk_scan_state'] || 'unavailable' }
   end
 end

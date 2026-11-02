@@ -349,6 +349,7 @@ onBeforeUnmount(() => {
         <Button type="submit" :label="t('JRC_SERVICE_DESK.COMMON.search')" />
         <Button
           v-if="allowed"
+          type="button"
           variant="outline"
           :label="t('JRC_SERVICE_DESK.R3.create_resource')"
           @click="begin(null)"
@@ -497,6 +498,7 @@ onBeforeUnmount(() => {
             :disabled="busy"
             :label="t('JRC_SERVICE_DESK.COMMON.save')"
           /><Button
+            type="button"
             variant="outline"
             :disabled="busy"
             :label="t('JRC_SERVICE_DESK.COMMON.cancel')"

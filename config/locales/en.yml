@@ -292,6 +292,7 @@ en:
       sla_missed_next_response: 'SLA target next response missed for conversation (#%{display_id})'
       sla_missed_resolution: 'SLA target resolution missed for conversation (#%{display_id})'
       relationship_action: 'Relationship action requires attention'
+      service_desk_clock: 'Internal Service Desk OLA alert'
     attachment: 'Attachment'
     no_content: 'No content'
   conversations:

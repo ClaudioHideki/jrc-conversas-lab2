@@ -253,6 +253,17 @@ function activityLabel(action) {
     'projects.task.updated': ['EVENT_TASK_UPDATED', 'Tarefa atualizada'],
     'projects.task.moved': ['EVENT_TASK_MOVED', 'Tarefa movimentada'],
     'projects.task.deleted': ['EVENT_TASK_DELETED', 'Tarefa removida'],
+    'projects.phase.created': ['EVENT_PHASE_CREATED', 'Fase criada'],
+    'projects.phase.updated': ['EVENT_PHASE_UPDATED', 'Fase atualizada'],
+    'projects.phase.deleted': ['EVENT_PHASE_DELETED', 'Fase excluída'],
+    'projects.task.comment_updated': [
+      'EVENT_COMMENT_UPDATED',
+      'Comentário editado',
+    ],
+    'projects.task.comment_deleted': [
+      'EVENT_COMMENT_DELETED',
+      'Comentário excluído',
+    ],
     'projects.task.comment_added': [
       'EVENT_COMMENT',
       'Comentário interno registrado',
@@ -283,6 +294,10 @@ function activityLabel(action) {
       'Arquivo removido',
     ],
     'projects.time_entry.created': ['EVENT_TIME_CREATED', 'Horas registradas'],
+    'projects.time_entry.deleted': [
+      'EVENT_TIME_DELETED',
+      'Apontamento excluído',
+    ],
     'projects.time_entry.updated': [
       'EVENT_TIME_UPDATED',
       'Apontamento revisado',

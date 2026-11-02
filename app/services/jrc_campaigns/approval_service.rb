@@ -1,24 +1,19 @@
 require 'digest'
 
 class JrcCampaigns::ApprovalService
-  CONFIGURATION_FIELDS = %w[delivery_channel name inbox_id trigger_type scheduled_at audience_type audience_config message_body rotation_mode delay_min_seconds
-                            delay_max_seconds sending_window conversation_mode recurrence_config follow_up_config].freeze
-
   def initialize(campaign)
     @campaign = campaign
   end
 
   def request_review!
+    prepared = configuration.prepare
     campaign.with_lock do
       reject!('A revisão exige campanha em rascunho ou agendada.') unless campaign.editable?
+      verify_configuration!(prepared)
       campaign.ensure_sender_compatibility!
       snapshot = {
-        'configuration' => configuration,
-        'recipients' => JrcCampaigns::AudienceResolver.new(campaign).entries.map do |entry|
-          { 'contact_id' => entry.contact&.id, 'name' => entry.name, 'phone_number' => entry.phone_number,
-            'email' => entry.email, 'destination' => entry.destination(campaign.delivery_channel),
-            'source' => entry.source, 'metadata' => entry.metadata }
-        end
+        'configuration' => prepared.configuration,
+        'recipients' => recipient_snapshot
       }
       campaign.update!(review_snapshot: snapshot, review_digest: digest(snapshot), approved_digest: nil, approved_by: nil,
                        approved_at: nil, approval_expires_at: nil)
@@ -26,11 +21,13 @@ class JrcCampaigns::ApprovalService
   end
 
   def approve!(user, expected_digest)
+    ensure_approver!(user)
+    prepared = configuration.prepare
     campaign.with_lock do
-      reject!('Somente administradores podem aprovar campanhas.') unless campaign.account.account_users.exists?(user_id: user.id,
-                                                                                                                role: :administrator)
+      verify_configuration!(prepared, actor: user)
+      ensure_approver!(user)
       reject!('A aprovação exige campanha em rascunho ou agendada.') unless campaign.editable?
-      unless expected_digest.present? && expected_digest == campaign.review_digest && current_review?
+      unless expected_digest.present? && expected_digest == campaign.review_digest && current_review?(prepared.configuration)
         reject!('A revisão está desatualizada. Revise novamente antes de aprovar.')
       end
 
@@ -39,38 +36,76 @@ class JrcCampaigns::ApprovalService
   end
 
   def valid?
-    campaign.approved_by_id.present? && campaign.approved_at.present? && campaign.approval_expires_at&.future? &&
-      campaign.approved_digest.present? && campaign.approved_digest == campaign.review_digest && current_review?
+    return false unless locally_valid?
+
+    prepared = configuration.prepare
+    configuration.matches?(prepared) && current_review?(prepared.configuration)
   end
 
-  def ensure_valid!
+  # Read-only presentation of the human approval; remote sender readiness is checked at execution.
+  def locally_valid?
+    approved? && current_review?(configuration.local_configuration, local: true)
+  end
+
+  def prepare_validation!
+    campaign.reload
     campaign.ensure_sender_compatibility!
-    reject!('A campanha exige aprovação humana válida. Revise e aprove novamente; a validade é de 48 horas.') unless valid?
+    reject_approval! unless locally_valid?
+    configuration.prepare
+  end
+
+  def ensure_valid!(prepared: nil)
+    prepared ||= prepare_validation!
+    campaign.with_lock do
+      verify_configuration!(prepared)
+      campaign.ensure_sender_compatibility!
+      reject_approval! unless approved? && current_review?(prepared.configuration)
+    end
   end
 
   private
 
   attr_reader :campaign
 
-  def current_review?
+  def recipient_snapshot
+    JrcCampaigns::AudienceResolver.new(campaign).entries.map do |entry|
+      { 'contact_id' => entry.contact&.id, 'name' => entry.name, 'phone_number' => entry.phone_number,
+        'email' => entry.email, 'destination' => entry.destination(campaign.delivery_channel),
+        'source' => entry.source, 'metadata' => entry.metadata }
+    end
+  end
+
+  def current_review?(expected, local: false)
     snapshot = campaign.review_snapshot
-    snapshot.present? && snapshot['configuration'] == configuration && digest(snapshot) == campaign.review_digest
+    return false unless snapshot.present? && digest(snapshot) == campaign.review_digest
+
+    actual = snapshot['configuration'].deep_dup
+    actual['broker_connectors']&.each { |connector| connector.delete('identity_revision') } if local
+    actual == expected
   end
 
   def configuration
-    result = campaign.as_json(only: CONFIGURATION_FIELDS).merge(
-      'steps' => campaign.steps.order(:position, :id).map { |step| step.as_json.except('created_at', 'updated_at') },
-      'inboxes' => campaign.campaign_inboxes.order(:position, :id).map { |link| link.as_json.except('created_at', 'updated_at') }
-    )
-    connectors = campaign.evolution_connectors
-    result['evolution_connectors'] = connectors.map(&:public_configuration) if connectors.any?
-    brokers = campaign.broker_connectors
-    if brokers.any?
-      result['broker_connectors'] = brokers.map do |connector|
-        connector.public_configuration.merge('identity_revision' => connector.transport(campaign.created_by).fetch('identityRevision'))
-      end
-    end
-    result
+    @configuration ||= JrcCampaigns::ReviewConfiguration.new(campaign)
+  end
+
+  def verify_configuration!(prepared, actor: nil)
+    configuration.lock_sources!(actor: actor)
+    reject!('A configuração mudou durante a consulta. Revise novamente antes de aprovar.') unless configuration.matches?(prepared)
+  end
+
+  def approved?
+    campaign.approved_by_id.present? && campaign.approved_at.present? && campaign.approval_expires_at&.future? &&
+      campaign.approved_digest.present? && campaign.approved_digest == campaign.review_digest
+  end
+
+  def ensure_approver!(user)
+    return if campaign.account.account_users.exists?(user_id: user.id, role: :administrator)
+
+    reject!('Somente administradores podem aprovar campanhas.')
+  end
+
+  def reject_approval!
+    reject!('A campanha exige aprovação humana válida. Revise e aprove novamente; a validade é de 48 horas.')
   end
 
   def digest(value)

@@ -48,11 +48,12 @@ class JrcCustomers::Visibility
   def tickets
     return JrcServiceDesk::Ticket.none unless service_desk?
 
-    JrcServiceDesk::TicketPolicy::Scope.new(service_desk_context.to_h, JrcServiceDesk::Ticket).resolve
+    JrcServiceDesk::TicketPolicy::Scope.new(service_desk_context.to_h, JrcServiceDesk::Ticket).resolve_for('customers_view')
   end
 
   def ticket_events(ticket_scope)
-    scope = JrcServiceDesk::TicketEvent.where(account_id: @account.id, ticket_id: ticket_scope.select(:id))
+    scope = JrcServiceDesk::TicketEventPolicy::Scope.new(service_desk_context.to_h, JrcServiceDesk::TicketEvent).resolve
+                                                .where(ticket_id: ticket_scope.select(:id))
     service_desk_context.capability?(:history_view) ? scope : scope.none
   end
 

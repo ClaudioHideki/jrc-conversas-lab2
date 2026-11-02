@@ -33,11 +33,13 @@ const mocks = vi.hoisted(() => ({
   session: null,
   services: vi.fn(),
   catalogueForm: vi.fn(),
+  validate: vi.fn(),
 }));
 vi.mock('../../composables/useServiceDesk', () => ({
   useServiceDesk: () => mocks.session,
 }));
 vi.mock('dashboard/api/serviceDeskLifecycle', () => ({ default: mocks }));
+vi.mock('dashboard/api/serviceDeskRequesters', () => ({ default: mocks }));
 vi.mock('dashboard/routes/dashboard/jrcCustomers/useCustomerMaster', () => ({
   useCustomerMaster: () => ({ canAccess: ref(true) }),
 }));
@@ -72,6 +74,16 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 async function render() {
+  mocks.validate.mockResolvedValue({
+    data: {
+      person: {
+        id: 33,
+        company_id: 80,
+        name: 'Chosen requesters',
+        requester_eligible: true,
+      },
+    },
+  });
   vi.stubGlobal('crypto', { randomUUID: () => 'r3-ticket-test-key' });
   const context = contextPayload({
     effective_permissions: ['jrc_service_desk_customers_view'],
@@ -138,6 +150,7 @@ async function render() {
             ...(resource === 'contracts'
               ? { company_id: '80', contact_id: '33' }
               : {}),
+            ...(resource === 'requesters' ? { company_id: '80' } : {}),
             ...(resource === 'categories'
               ? { parent_id: null, form_fields: [] }
               : {}),
@@ -221,6 +234,11 @@ async function render() {
       },
     },
   });
+  await wrapper
+    .findAll('button')
+    .find(row => row.text() === messages.JRC_SERVICE_DESK.QUICK.advanced)
+    .trigger('click');
+  await flushPromises();
   await wrapper.findAll('select')[1].setValue('10');
   await flushPromises();
   await wrapper
@@ -238,9 +256,21 @@ async function render() {
   await flushPromises();
   await wrapper
     .findComponent(ServiceDefinitionSelect)
-    .find('select')
-    .setValue('40');
+    .findAll('button')
+    .find(button => button.text().includes('Configured IT'))
+    .trigger('click');
   await flushPromises();
+  const advanceStep = async () => {
+    const next = wrapper
+      .findAll('button')
+      .find(button => button.text() === messages.JRC_SERVICE_DESK.COMMON.next);
+    expect(next.attributes('disabled')).toBeUndefined();
+    await next.trigger('click');
+    await flushPromises();
+  };
+  await advanceStep();
+  await advanceStep();
+  await advanceStep();
   return { create, router };
 }
 describe('R3 native ticket form uses configured defaults with explicit customer/contract authority', () => {
@@ -259,6 +289,13 @@ describe('R3 native ticket form uses configured defaults with explicit customer/
       ticket_type_id: '5',
     });
 
+    expect(
+      wrapper
+        .findAll('button')
+        .find(button => button.text() === messages.JRC_SERVICE_DESK.COMMON.next)
+        .attributes('disabled')
+    ).toBeDefined();
+
     await wrapper.find('form').trigger('submit');
     await flushPromises();
     expect(create).not.toHaveBeenCalled();
@@ -268,6 +305,10 @@ describe('R3 native ticket form uses configured defaults with explicit customer/
 
     wrapper.findComponent(CompanyPicker).vm.$emit('update:modelValue', '80');
     await flushPromises();
+    expect(mocks.validate).toHaveBeenCalledWith('33', {
+      unit_id: '10',
+      company_id: '80',
+    });
 
     await flushPromises();
     const contract = wrapper
@@ -280,7 +321,11 @@ describe('R3 native ticket form uses configured defaults with explicit customer/
       .find('input')
       .setValue('R3-device');
     await flushPromises();
-
+    await wrapper
+      .findAll('button')
+      .find(button => button.text() === messages.JRC_SERVICE_DESK.COMMON.next)
+      .trigger('click');
+    await flushPromises();
     await wrapper.find('form').trigger('submit');
     await flushPromises();
     expect(create).toHaveBeenCalledTimes(1);

@@ -12,6 +12,12 @@ class JrcServiceDesk::LifecycleRules
     definition['schema_version'] == 2 ? ATTENDANCE_CLOCKS : CLOCKS
   end
 
+  def permits_unconfigured_closure?(action)
+    %w[resolve close].include?(action) && definition.dig('sla', 'mode') == 'calendar_snapshot' &&
+      definition.dig('sla', 'obligation') == 'operational' &&
+      definition.dig('sla', 'missing_configuration') == 'allow_operational_closure'
+  end
+
   def initialize(definition)
     @definition = JrcServiceDesk::Input.attributes(definition, %w[schema_version transitions pause_reasons reopen sla])
     validate!
@@ -38,6 +44,15 @@ class JrcServiceDesk::LifecycleRules
 
   def validate_payload!(rule, payload, classified:)
     req = rule.fetch('requirements')
+    if payload.key?('closing_reason')
+      value = payload['closing_reason']
+      unless %w[resolve close].include?(rule['action']) && value.is_a?(String) && value.strip.present? && value.bytesize <= 4000
+        raise ArgumentError, 'A nonempty closing reason is required for closure'
+      end
+      if payload.dig('fields', 'closing_reason') && payload.dig('fields', 'closing_reason') != value
+        raise ArgumentError, 'Closing reason fields disagree'
+      end
+    end
     %w[note solution].each do |key|
       val = payload[key]
       raise ArgumentError, "Invalid #{key}" unless val.nil? || (val.is_a?(String) && val.bytesize <= 20_000)
@@ -55,7 +70,7 @@ class JrcServiceDesk::LifecycleRules
       next if val.nil?
       valid = case spec['type']
               when 'text' then val.is_a?(String) && val.bytesize <= 4000
-              when 'integer' then val.is_a?(Integer) && val.abs <= 2**53 - 1
+              when 'integer' then val.is_a?(Integer) && val.abs <= ((2**53) - 1)
               when 'boolean' then [true, false].include?(val)
               end
       raise ArgumentError, "Invalid field #{key}" unless valid
@@ -84,7 +99,17 @@ class JrcServiceDesk::LifecycleRules
     raise ArgumentError, 'Unsupported lifecycle format' unless [1, 2].include?(definition['schema_version'])
     exact(definition, %w[schema_version transitions pause_reasons reopen sla])
     sla_fields = definition['schema_version'] == 2 ? %w[mode initial_start escalation_policy] : %w[mode initial_start]
+    extended = definition['sla'].is_a?(Hash) && (definition['sla'].keys & %w[obligation missing_configuration]).any?
+    sla_fields += %w[obligation missing_configuration] if extended
     sla = exact(definition['sla'], sla_fields)
+    if extended
+      raise ArgumentError, 'Explicit SLA obligation required' unless %w[operational contractual].include?(sla['obligation'])
+      raise ArgumentError, 'Explicit missing SLA behavior required' unless %w[block allow_operational_closure].include?(sla['missing_configuration'])
+      raise ArgumentError, 'Contractual SLA requires calendar calculation' if sla['obligation'] == 'contractual' && sla['mode'] != 'calendar_snapshot'
+      if sla['missing_configuration'] == 'allow_operational_closure' && (sla['obligation'] != 'operational' || sla['mode'] != 'calendar_snapshot')
+        raise ArgumentError, 'Contractual SLA cannot waive required configuration'
+      end
+    end
     JrcServiceDesk::ClockEscalationPolicy.new(sla['escalation_policy']) if definition['schema_version'] == 2
     raise ArgumentError, 'Explicit SLA mode required' unless %w[not_applicable calendar_snapshot].include?(sla['mode']) && sla['initial_start'] == 'opened_at'
     rules = definition['transitions']
@@ -97,7 +122,13 @@ class JrcServiceDesk::LifecycleRules
   end
 
   def validate_rule(rule)
-    r = exact(rule, %w[key action from_status_ids to_status_id requirements clocks end_pause])
+    fields = %w[key action from_status_ids to_status_id requirements clocks end_pause]
+    fields += ['allowed_account_roles'] if rule.key?('allowed_account_roles')
+    r = exact(rule, fields)
+    if r.key?('allowed_account_roles')
+      roles = r['allowed_account_roles']
+      raise ArgumentError, 'Explicit restrictive native roles required' unless roles.is_a?(Array) && roles.any? && roles.uniq == roles && (roles - %w[agent administrator]).empty?
+    end
     token(r['key'])
     raise ArgumentError, 'Unknown action' unless ACTIONS.include?(r['action'])
     ids = r['from_status_ids']
@@ -119,7 +150,7 @@ class JrcServiceDesk::LifecycleRules
       value = spec['equals']
       valid = case spec['type']
               when 'text' then value.is_a?(String) && value.bytesize <= 4000
-              when 'integer' then value.is_a?(Integer) && value.abs <= 2**53 - 1
+              when 'integer' then value.is_a?(Integer) && value.abs <= ((2**53) - 1)
               when 'boolean' then [true, false].include?(value)
               end
       raise ArgumentError, 'Invalid equality requirement' unless valid && spec['required']
@@ -158,7 +189,7 @@ class JrcServiceDesk::LifecycleRules
     r = exact(definition['reopen'], %w[allowed window_seconds anchor_action expired sla_cycle inactive_time resume_clocks new_cycle_snapshot])
     bool(r['allowed'])
     return unless r['allowed']
-    raise ArgumentError, 'Explicit positive reopening window required' unless r['window_seconds'].is_a?(Integer) && r['window_seconds'].positive? && r['window_seconds'] <= 2**53 - 1
+    raise ArgumentError, 'Explicit positive reopening window required' unless r['window_seconds'].is_a?(Integer) && r['window_seconds'].positive? && r['window_seconds'] <= ((2**53) - 1)
     raise ArgumentError, 'Explicit reopening rule required' unless %w[resolve close cancel].include?(r['anchor_action']) && %w[deny require_new_ticket].include?(r['expired'])
     raise ArgumentError, 'Explicit SLA cycle choice required' unless %w[continue_cycle new_cycle].include?(r['sla_cycle'])
     raise ArgumentError, 'Explicit inactive time rule required' unless %w[count exclude].include?(r['inactive_time'])

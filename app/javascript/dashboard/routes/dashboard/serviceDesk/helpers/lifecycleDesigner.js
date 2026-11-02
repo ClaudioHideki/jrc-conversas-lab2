@@ -140,6 +140,21 @@ export function lifecycleDraftIssues(raw) {
     d.sla.initial_start !== 'opened_at'
   )
     issues.add('mode');
+  if (
+    Object.hasOwn(d.sla, 'obligation') ||
+    Object.hasOwn(d.sla, 'missing_configuration')
+  ) {
+    if (
+      !['operational', 'contractual'].includes(d.sla.obligation) ||
+      !['block', 'allow_operational_closure'].includes(
+        d.sla.missing_configuration
+      ) ||
+      (d.sla.missing_configuration === 'allow_operational_closure' &&
+        (d.sla.obligation !== 'operational' ||
+          d.sla.mode !== 'calendar_snapshot'))
+    )
+      issues.add('mode');
+  }
   if (!d.transitions.length || d.transitions.length > 100)
     issues.add('transitions');
   if (new Set(d.transitions.map(row => row?.key)).size !== d.transitions.length)

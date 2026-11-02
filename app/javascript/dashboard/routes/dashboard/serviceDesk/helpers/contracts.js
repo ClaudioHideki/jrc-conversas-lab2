@@ -26,6 +26,12 @@ const permissions = value =>
     : {};
 const named = value =>
   object(value) ? { id: id(value.id), name: text(value.name) } : null;
+const ticketPhase = value => {
+  requireValue(
+    ['open', 'waiting', 'resolved', 'closed', 'cancelled'].includes(value)
+  );
+  return value;
+};
 const stamp = value => {
   if (value === null || value === undefined) return null;
   requireValue(typeof value === 'string' && Number.isFinite(Date.parse(value)));
@@ -116,6 +122,9 @@ export function decodeRecord(row, context, resource) {
       ...record,
       title: text(row.title),
       number: text(row.number),
+      labels: Array.isArray(row.labels)
+        ? row.labels.map(value => text(value))
+        : [],
       ...(Object.hasOwn(row, 'opened_at')
         ? { opened_at: stamp(row.opened_at) }
         : {}),
@@ -128,6 +137,9 @@ export function decodeRecord(row, context, resource) {
         : {}),
       service: named(row.service),
       status: named(row.status),
+      ...(Object.hasOwn(row, 'status_phase')
+        ? { status_phase: ticketPhase(row.status_phase) }
+        : {}),
       priority: named(row.priority),
       category: named(row.category),
       ticket_type: named(row.ticket_type),
@@ -150,6 +162,9 @@ export function decodeRecord(row, context, resource) {
             ...named(row.requester),
             ...(Object.hasOwn(row.requester, 'phone_number')
               ? { phone_number: text(row.requester.phone_number) }
+              : {}),
+            ...(Object.hasOwn(row.requester, 'email')
+              ? { email: text(row.requester.email) }
               : {}),
           }
         : null,
@@ -200,7 +215,11 @@ export function decodeRecord(row, context, resource) {
         }
       : {}),
     ...(resource === 'requesters'
-      ? { phone_number: text(row.phone_number) }
+      ? {
+          phone_number: text(row.phone_number),
+          email: text(row.email),
+          company_id: row.company_id == null ? null : id(row.company_id),
+        }
       : {}),
     ...(resource === 'assignees' && row.membership_id
       ? { membership_id: id(row.membership_id) }

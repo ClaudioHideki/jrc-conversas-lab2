@@ -35,6 +35,7 @@ class JrcServiceDesk::ClockEscalationPolicy
     if definition.key?('automatic') && ![true, false].include?(definition['automatic'])
       raise ArgumentError, 'Explicit automatic monitoring switch required'
     end
+
     if definition.key?('execution_account_user_id') && !definition['execution_account_user_id'].nil?
       definition['execution_account_user_id'] = JrcServiceDesk::Input.id(definition['execution_account_user_id'])
     end
@@ -53,10 +54,18 @@ class JrcServiceDesk::ClockEscalationPolicy
   end
 
   def validate_threshold!(row)
-    values = JrcServiceDesk::Input.attributes(row, %w[percent queue_id team_id])
-    raise ArgumentError, 'Explicit threshold fields required' unless values.keys.sort == %w[percent queue_id team_id].sort
+    values = JrcServiceDesk::Input.attributes(row, %w[percent queue_id team_id notification_member_ids notification_channels])
+    raise ArgumentError, 'Explicit threshold fields required' unless (%w[percent queue_id team_id] - values.keys).empty?
     raise ArgumentError, 'Clock threshold must be between 1 and 100' unless values['percent'].is_a?(Integer) && values['percent'].between?(1, 100)
 
+    if values.key?('notification_member_ids') || values.key?('notification_channels')
+      ids = values.fetch('notification_member_ids')
+      channels = values.fetch('notification_channels')
+      raise ArgumentError unless ids.is_a?(Array) && ids.size.between?(1, 20) && ids.uniq == ids
+      raise ArgumentError unless channels.is_a?(Array) && channels.any? && channels.uniq == channels && (channels - %w[in_app email]).empty?
+
+      values['notification_member_ids'] = ids.map { |id| JrcServiceDesk::Input.id(id) }
+    end
     validate_targets!(values)
     values
   end

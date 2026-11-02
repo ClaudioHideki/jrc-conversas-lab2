@@ -17,6 +17,12 @@ class Labels::UpdateService
         contact.save!
       end
     end
+
+    JrcServiceDesk::Ticket.where(account_id: account_id).tagged_with(old_label_title).find_each do |ticket|
+      ticket.label_list.remove(old_label_title)
+      ticket.label_list.add(new_label_title)
+      ticket.save!
+    end
   end
 
   private

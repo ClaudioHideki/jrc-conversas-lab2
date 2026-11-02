@@ -419,8 +419,16 @@ const call = () => {
         version !== initializationVersion ||
         account !== activeAccountId.value ||
         data.contact_center_acw_pending
-      )
+      ) {
+        if (
+          version === initializationVersion &&
+          account === activeAccountId.value &&
+          data.contact_center_acw_pending
+        )
+          errorMessage.value =
+            'Conclua a qualificação pendente antes de iniciar ou atender outra ligação.';
         return false;
+      }
     }
     return client.call(normalizeSipDialNumber(destination.value));
   });
@@ -435,8 +443,16 @@ const answer = () =>
         version !== initializationVersion ||
         account !== activeAccountId.value ||
         data.contact_center_acw_pending
-      )
+      ) {
+        if (
+          version === initializationVersion &&
+          account === activeAccountId.value &&
+          data.contact_center_acw_pending
+        )
+          errorMessage.value =
+            'Conclua a qualificação pendente antes de iniciar ou atender outra ligação.';
         return false;
+      }
     }
     return client.answer();
   });

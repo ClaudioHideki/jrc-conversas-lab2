@@ -24,6 +24,9 @@ class JrcServiceDesk::AssignTicketService < JrcServiceDesk::BaseService
       ticket.assignee_membership = assignee(values['assignee_account_user_id'], ticket.unit) if values.key?('assignee_account_user_id')
       next ticket unless ticket.changed?
 
+      # Recheck the destination after queue/team changes; source authorization alone is insufficient.
+      raise Pundit::NotAuthorizedError unless context.supervision_access.allowed?(ticket, event_type == 'ticket_transferred' ? 'tickets_transfer' : 'tickets_assign')
+      verify_assignee_team!(ticket)
       persist_assignment!(ticket, event_type)
       ticket
     end

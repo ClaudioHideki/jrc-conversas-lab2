@@ -14,7 +14,7 @@ class JrcServiceDesk::CockpitProjection
       events: related(JrcServiceDesk::TicketEvent, 'events', @policy.view_history?),
       tasks: operations(JrcServiceDesk::TicketTask, 'tasks', @context.capability?(:tasks_view)),
       approvals: operations(JrcServiceDesk::TicketApproval, 'approvals', @context.capability?(:approvals_view)),
-      incident: incident, conversations: conversations, ola: ola,
+      incident: incident, related_incidents: related_incidents, conversations: conversations, ola: ola,
       audience_values: JrcServiceDesk::InteractionVisibility::VALUES, approvers: approvers }
   end
 
@@ -35,6 +35,12 @@ class JrcServiceDesk::CockpitProjection
   def incident
     record = @ticket.incident
     @operations.call('incidents', record) if record && JrcServiceDesk::IncidentPolicy.new(@context.to_h, record).show?
+  end
+
+  def related_incidents
+    return [] unless @context.capability?(:incidents_manage)
+
+    JrcServiceDesk::CaseAssociations.for_ticket(@ticket, @context).order(:id).map { |row| @operations.call('incidents', row) }
   end
 
   def ola

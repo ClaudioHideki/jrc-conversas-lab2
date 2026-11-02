@@ -52,6 +52,8 @@ class JrcServiceDesk::NotificationExecution
 
   def current_blocker
     reason = JrcServiceDesk::NotificationEngine.blocker(@row)
+    controls = JrcServiceDesk::NotificationControls.new(@row.notification_policy_version.settings)
+    reason ||= 'outside_window_at_dispatch' if controls.next_time > 1.second.from_now
     reason ||= 'incompatible_delivery_control' if CONTROLLERS.any? { |key| @message.content_attributes[key].present? }
     digest = self.class.payload_digest(@message, @row)
     reason ||= 'message_payload_changed' unless @row.payload_digest.present? && @row.payload_digest == digest
@@ -60,7 +62,7 @@ class JrcServiceDesk::NotificationExecution
 
   def reject(reason)
     @row.with_lock { @row.update!(state: 'blocked', reason: reason) }
-    @message.update!(status: :failed, external_error: 'Service Desk delivery blocked by current policy')
+    @message.update!(status: :failed, external_error: 'Envio do Service Desk bloqueado pela política vigente')
     false
   end
 

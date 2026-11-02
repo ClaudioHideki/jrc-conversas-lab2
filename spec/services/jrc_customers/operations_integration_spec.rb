@@ -36,7 +36,11 @@ RSpec.describe 'Customer master on official operations modules' do
     expect(ticket.created_by_membership_id).to eq(sd_membership.id)
   end
   it 'rejects a company different from the requester' do
-    expect { create_ticket(company_id: other_company.id) }.to raise_error(ActiveRecord::RecordInvalid)
+    expect do
+      expect { create_ticket(company_id: other_company.id) }.to raise_error(JrcServiceDesk::RequestValidationError) { |error|
+        expect(error.code).to eq('requester_company_mismatch')
+      }
+    end.not_to change(JrcServiceDesk::Ticket, :count)
   end
   it 'rejects a company in another tenant' do
     foreign = sd_foreign_account.master_companies.create!(name: 'Foreign')

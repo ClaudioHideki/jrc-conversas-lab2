@@ -2,6 +2,8 @@ class Webhooks::Trigger
   SUPPORTED_ERROR_HANDLE_EVENTS = %w[message_created message_updated].freeze
   RETRYABLE_AGENT_BOT_STATUSES = [429, 500].freeze
 
+  class DeliveryDeferred < StandardError; end
+
   class RetryableError < StandardError
     attr_reader :status
 
@@ -11,30 +13,63 @@ class Webhooks::Trigger
     end
   end
 
-  def initialize(url, payload, webhook_type, secret: nil, delivery_id: nil, strict: false)
+  def initialize(url, payload, webhook_type, secret: nil, delivery_id: nil, campaign_recovery_token: nil, strict: false)
     @url = url
     @payload = payload
     @webhook_type = webhook_type
     @secret = secret
     @delivery_id = delivery_id
+    @campaign_recovery_token = campaign_recovery_token
     @strict = strict
   end
 
-  def self.execute(url, payload, webhook_type, secret: nil, delivery_id: nil, strict: false)
-    new(url, payload, webhook_type, secret: secret, delivery_id: delivery_id, strict: strict).execute
+  def self.execute(url, payload, webhook_type, secret: nil, delivery_id: nil, campaign_recovery_token: nil, strict: false)
+    new(url, payload, webhook_type, secret: secret, delivery_id: delivery_id, campaign_recovery_token: campaign_recovery_token, strict: strict).execute
   end
 
   def execute
-    jrc_delivery&.validate!(url: @url, secret: @secret, delivery_id: @delivery_id)
-    perform_request
-  rescue StandardError => e
-    raise if @strict
-
-    raise RetryableError.new(status: http_status(e), message: e.message) if retryable_agent_bot_error?(e)
-    raise JrcBroker::WebhookDelivery::Unavailable if jrc_delivery&.retryable?(e)
-
-    handle_failure(e)
+    if @webhook_type == :api_inbox_webhook && @payload[:event] == 'message_created' &&
+       message && JrcRelationship::SurveyMessageExecution.applies?(message)
+      JrcRelationship::SurveyMessageExecution.new(message).perform { execute_delivery }
+    elsif @webhook_type == :api_inbox_webhook && @payload[:event] == 'message_created' &&
+          message && message.content_attributes['service_desk_delivery_id']
+      JrcServiceDesk::NotificationExecution.new(message).perform { execute_delivery }
+    else
+      execute_delivery
+    end
   end
+
+  def execute_delivery
+    if @webhook_type == :api_inbox_webhook && @payload[:event] == 'message_created' && message
+      JrcServiceDesk::OutboundAttachments.authorize_message!(message)
+      if message.outgoing? && !message.private? && JrcServiceDesk::OutboundAttachments.protected?(message)
+        message.update!(status: :failed, external_error: 'Protected Service Desk attachments require an authenticated media upload transport; API inbox URL delivery is unavailable')
+        return
+      end
+    end
+    unless prepare_jrc_delivery
+      raise DeliveryDeferred if @strict
+
+      return
+    end
+
+    body = @payload.to_json
+    headers = request_headers(body)
+    timeout = webhook_timeout
+    @jrc_delivery_phase = 'callback'
+    unless start_jrc_callback
+      raise DeliveryDeferred if @strict
+
+      return
+    end
+
+    perform_request(body: body, headers: headers, timeout: timeout)
+    jrc_delivery&.callback_accepted!
+  rescue StandardError => e
+    handle_delivery_error(e)
+  end
+
+  private :execute_delivery
 
   def handle_failure(error)
     return jrc_delivery.handle_failure(error) if jrc_delivery
@@ -45,21 +80,54 @@ class Webhooks::Trigger
 
   private
 
+  def prepare_jrc_delivery
+    @jrc_delivery_phase = 'validate'
+    jrc_delivery&.validate!(url: @url, secret: @secret, delivery_id: @delivery_id)
+    @jrc_delivery_phase = 'campaign_intent'
+    return false if jrc_delivery&.prepare_campaign_intent!(@payload) == false
+    @jrc_delivery_phase = 'validate'
+    jrc_delivery&.validate!(url: @url, secret: @secret, delivery_id: @delivery_id)
+    true
+  end
+
+  def start_jrc_callback
+    return true unless jrc_delivery
+    return jrc_delivery.callback_started! unless @campaign_recovery_token
+
+    JrcCampaigns::BrokerRecoveryService.callback_allowed?(@payload, token: @campaign_recovery_token, start: true,
+                                                                 callback: { url: @url, secret: @secret, delivery_id: @delivery_id })
+  end
+
+  def handle_delivery_error(error)
+    raise error if error.is_a?(DeliveryDeferred)
+
+    jrc_delivery&.record_failure(error, phase: @jrc_delivery_phase)
+    raise error if @strict
+    raise RetryableError.new(status: http_status(error), message: error.message) if retryable_agent_bot_error?(error)
+    raise JrcBroker::WebhookDelivery::Unavailable if jrc_delivery&.retryable?(error)
+
+    handle_failure(error)
+  end
+
   def jrc_delivery
     return @jrc_delivery if defined?(@jrc_delivery)
 
     @jrc_delivery = JrcBroker::WebhookDelivery.for(@payload, @webhook_type)
   end
 
-  def perform_request
-    body = @payload.to_json
+  def perform_request(body:, headers:, timeout:)
+    if jrc_delivery
+      pool = ActiveRecord::Base.connection_pool
+      connection = pool.active_connection?
+      pool.release_connection if connection && !connection.transaction_open?
+    end
     SafeFetch.fetch(
       @url,
       method: :post,
       body: body,
-      headers: request_headers(body),
-      open_timeout: webhook_timeout,
-      read_timeout: webhook_timeout,
+      headers: headers,
+      open_timeout: timeout,
+      read_timeout: timeout,
       validate_content_type: false
     ) { |_response| nil }
   end

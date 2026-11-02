@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class JrcServiceDesk::OlaClock < JrcServiceDesk::TicketRecord
+  belongs_to :queue_policy_version, class_name: 'JrcServiceDesk::QueuePolicyVersion', optional: true
+  validates :kind, inclusion: { in: %w[queue_residence first_response update resolution] }
   belongs_to :queue, class_name: 'JrcServiceDesk::Queue'
   belongs_to :sla_snapshot, class_name: 'JrcServiceDesk::SlaSnapshot', optional: true
   validates :state, inclusion: { in: %w[running paused completed stopped] }
@@ -14,15 +16,18 @@ class JrcServiceDesk::OlaClock < JrcServiceDesk::TicketRecord
   protected
 
   def ownership_columns
-    super + %i[queue_id sla_snapshot_id budget_seconds time_basis pause_waiting policy_revision started_at escalation_snapshot]
+    super + %i[queue_id sla_snapshot_id budget_seconds time_basis pause_waiting policy_revision started_at escalation_snapshot kind entry_key
+               queue_policy_version_id calendar_snapshot]
   end
 
   private
 
   def scoped_references
     validate_unit_reference(:queue)
+    validate_unit_reference(:queue_policy_version)
+    errors.add(:queue_policy_version, 'must match queue') if queue_policy_version && queue_policy_version.queue_id != queue_id
     validate_unit_reference(:sla_snapshot)
     errors.add(:sla_snapshot, 'must match ticket') if sla_snapshot && sla_snapshot.ticket_id != ticket_id
-    errors.add(:sla_snapshot, 'required for business time') if time_basis == 'business' && !sla_snapshot
+    errors.add(:sla_snapshot, 'required for business time') if time_basis == 'business' && !sla_snapshot && calendar_snapshot.blank?
   end
 end

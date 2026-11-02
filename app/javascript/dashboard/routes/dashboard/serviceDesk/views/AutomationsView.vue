@@ -1,15 +1,30 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import Button from 'dashboard/components-next/button/Button.vue';
-import LifecyclePolicyEditor from '../components/LifecyclePolicyEditor.vue';
-import NotificationPolicyEditor from '../components/NotificationPolicyEditor.vue';
+import State from '../components/ServiceDeskState.vue';
+import CoordinatedAutomationStudio from '../automationStudio/CoordinatedAutomationStudio.vue';
+import ClosureRevisionWorkbench from '../automationStudio/ClosureRevisionWorkbench.vue';
+import NotificationWorkbench from '../automationStudio/NotificationWorkbench.vue';
 import ConfigurationManager from '../components/ConfigurationManager.vue';
-import OperationalRulePanel from '../components/OperationalRulePanel.vue';
 import { useServiceDesk } from '../composables/useServiceDesk';
 const { t } = useI18n();
 const session = useServiceDesk();
-const selected = ref('lifecycle');
+const route = useRoute();
+const router = useRouter();
+const selected = ref(route?.query?.section || 'lifecycle');
+watch(
+  () => route?.query?.section,
+  value => {
+    if (typeof value === 'string') selected.value = value;
+  }
+);
+const select = key => {
+  selected.value = key;
+  if (route && router)
+    router.replace({ query: { ...route.query, section: key } });
+};
 const sections = computed(() => {
   if (
     session.state.status !== 'ready' ||
@@ -20,6 +35,10 @@ const sections = computed(() => {
   return [
     {
       key: 'lifecycle',
+      allowed: capabilities.lifecycle_policies?.publish === true,
+    },
+    {
+      key: 'closure_revisions',
       allowed: capabilities.lifecycle_policies?.publish === true,
     },
     { key: 'ola', allowed: capabilities.configuration?.queues === true },
@@ -55,7 +74,7 @@ const active = computed(
       </div>
     </header>
     <nav
-      class="flex flex-wrap gap-2"
+      class="grid gap-2 sm:grid-cols-2 xl:grid-cols-4"
       :aria-label="t('JRC_SERVICE_DESK.SCREENS.automations')"
     >
       <Button
@@ -64,12 +83,28 @@ const active = computed(
         size="sm"
         :variant="active === row.key ? 'solid' : 'outline'"
         :label="t(`JRC_SERVICE_DESK.CLOCK_AUTOMATION.sections.${row.key}`)"
-        @click="selected = row.key"
+        @click="select(row.key)"
       />
     </nav>
-    <LifecyclePolicyEditor v-if="active === 'lifecycle'" />
-    <ConfigurationManager v-else-if="active === 'ola'" resource="queues" />
-    <NotificationPolicyEditor v-else-if="active === 'notifications'" />
-    <OperationalRulePanel v-else-if="active === 'operational'" />
+    <CoordinatedAutomationStudio
+      v-if="active === 'lifecycle'"
+      kind="lifecycle"
+      :initial-unit-id="String(route?.query?.unit_id || '')"
+      :initial-service-id="String(route?.query?.service_id || '')"
+    />
+    <ClosureRevisionWorkbench v-else-if="active === 'closure_revisions'" />
+    <ConfigurationManager
+      v-else-if="active === 'ola'"
+      resource="queues"
+      ola-view
+    />
+    <NotificationWorkbench v-else-if="active === 'notifications'" />
+    <CoordinatedAutomationStudio
+      v-else-if="active === 'operational'"
+      kind="operational"
+      :initial-unit-id="String(route?.query?.unit_id || '')"
+      :initial-service-id="String(route?.query?.service_id || '')"
+    />
   </section>
+  <State v-else-if="session.state.status === 'ready'" status="denied" />
 </template>

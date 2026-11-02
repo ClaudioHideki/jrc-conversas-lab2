@@ -126,8 +126,18 @@ onBeforeUnmount(() => {
     <h4 class="text-sm font-medium">
       {{ t('JRC_SERVICE_DESK.R3.recipient_preferences') }}
     </h4>
+    <p v-if="ticket.requester?.name" class="m-0 text-sm font-medium">
+      {{ ticket.requester.name }}
+    </p>
     <p class="text-xs text-n-slate-11">
       {{ t('JRC_SERVICE_DESK.R3.preferences_help') }}
+    </p>
+    <p
+      v-if="ready && !channels.length"
+      role="status"
+      class="rounded-lg bg-n-amber-3 p-2 text-xs text-n-amber-11"
+    >
+      {{ t('JRC_SERVICE_DESK.REDESIGN_AUTOMATIONS.opt_out') }}
     </p>
     <label
       v-for="channel in ['email', 'whatsapp']"

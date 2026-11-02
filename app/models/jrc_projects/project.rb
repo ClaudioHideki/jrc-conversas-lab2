@@ -29,11 +29,20 @@ module JrcProjects
     end
     has_many :project_members, dependent: :destroy
     has_many :members, through: :project_members, source: :user
+    has_many :tasks
+    # Each root recursively destroys its subtasks once, before the board columns.
+    has_many :root_tasks, -> { where(parent_id: nil) }, class_name: 'JrcProjects::Task', dependent: :destroy
     has_many :boards, dependent: :destroy
     has_many :board_columns, through: :boards
-    has_many :tasks, dependent: :destroy
-    has_many :phases, dependent: :destroy
     has_many :milestones, dependent: :destroy
+    has_many :phases, dependent: :destroy
+    has_many :sprints, dependent: :destroy
+    has_many :risks, dependent: :destroy
+    has_many :issues, dependent: :destroy
+    has_many :decisions, dependent: :destroy
+    has_many :recurrences, dependent: :destroy
+    has_many :automation_rules, dependent: :destroy
+    has_many :custom_field_definitions, dependent: :destroy
     has_many :time_entries, dependent: :destroy
     has_one :budget, dependent: :destroy
     validates :key, :name, :status, :visibility, presence: true

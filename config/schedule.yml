@@ -1,4 +1,9 @@
 # https://github.com/ondrejbartas/sidekiq-cron
+jrc_broker_inbox_sync_job:
+  cron: '* * * * *'
+  class: 'JrcBroker::InboxSyncSchedulerJob'
+  queue: scheduled_jobs
+
 nico_queue_recovery_job:
   cron: '* * * * *'
   class: 'JrcNico::RecoveryJob'

@@ -5,7 +5,17 @@ import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import { useSipWebphone } from 'dashboard/routes/dashboard/webphone/useSipWebphone';
 import CCAPI from 'dashboard/api/jrcContactCenter';
 import HoyaInboxWorkspace from './HoyaInboxWorkspace.vue';
-vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }));
+import { openEmbeddedSoftphone } from '../webphone/useEmbeddedSoftphone';
+import { CONVERSATION_TOOLS } from './conversationTools';
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({ t: key => key, locale: ref('pt_BR') }),
+}));
+vi.mock('dashboard/stores/calls', () => ({
+  useCallsStore: () => ({ hasActiveCall: false, hasIncomingCall: false }),
+}));
+vi.mock('dashboard/composables/useWhatsappCallSession', () => ({
+  useWhatsappCallSession: () => ({ isInitiating: ref(false) }),
+}));
 vi.mock('vue-router', async importOriginal => ({
   ...(await importOriginal()),
   useRoute: () => ({ query: {} }),
@@ -43,6 +53,7 @@ const pendingResponse = {
 };
 const props = {
   accountId: 1,
+  softphoneAccess: true,
   currentCallId: 7,
   calls: [{ id: 7, ani: 'LOCAL-7', status: 'connected' }],
   inboxFor: () => ({}),
@@ -63,6 +74,22 @@ const store = createStore({
     'accounts/isFeatureEnabledonAccount': () => () => false,
   },
 });
+
+const scopedConversation = ref({
+  id: 21,
+  account_id: 1,
+  inbox_id: 3,
+  status: 'open',
+  meta: { sender: {} },
+});
+const scopedUser = ref(9);
+const scopedStore = createStore({
+  getters: {
+    getSelectedChat: () => scopedConversation.value,
+    getCurrentUserID: () => scopedUser.value,
+    'accounts/isFeatureEnabledonAccount': () => (_, flag) => flag === 'macros',
+  },
+});
 const global = {
   plugins: [store],
   stubs: {
@@ -73,7 +100,7 @@ const global = {
   },
 };
 describe('inbox native SIP action guards', () => {
-  it('does not load agent state or enable telephone actions without Contact Center context', async () => {
+  it('opens the authorized SIP session centrally without requesting Contact Center state', async () => {
     CCAPI.agentState.mockClear();
     const wrapper = mount(HoyaInboxWorkspace, {
       props: { ...props, context: null, currentCallId: null },
@@ -84,6 +111,33 @@ describe('inbox native SIP action guards', () => {
     expect(wrapper.find('[data-testid="hoya-inbox-workspace"]').exists()).toBe(
       true
     );
+    expect(openEmbeddedSoftphone(1)).toBe(true);
+    await flushPromises();
+    expect(wrapper.get('[data-central-voice]').isVisible()).toBe(true);
+    await wrapper.get('[data-voice-action="MUTE"]').trigger('click');
+    expect(sip.setMuted).toHaveBeenCalledWith(true);
+    expect(CCAPI.qualifications).not.toHaveBeenCalled();
+    expect(sip.initialize).not.toHaveBeenCalled();
+    expect(sip.connect).not.toHaveBeenCalled();
+  });
+  it('does not operate a selected native record when its Contact Center permission is denied', async () => {
+    const wrapper = mount(HoyaInboxWorkspace, {
+      props: {
+        ...props,
+        context: { ...props.context, capabilities: { operate: false } },
+      },
+      global,
+    });
+    await flushPromises();
+    wrapper.findComponent({ name: 'CallWorkspace' }).vm.$emit('loaded', {
+      call: { id: 7, external_session_id: 'native-7', status: 'connected' },
+      customer: { contacts: [] },
+    });
+    await flushPromises();
+    const mute = wrapper.get('[data-voice-action="MUTE"]');
+    expect(mute.attributes('disabled')).toBeDefined();
+    await mute.trigger('click');
+    expect(sip.setMuted).not.toHaveBeenCalled();
   });
   it('reports a conversation load failure and emits an explicit retry without operating SIP', async () => {
     const wrapper = mount(HoyaInboxWorkspace, {
@@ -114,13 +168,22 @@ describe('inbox native SIP action guards', () => {
     const header = wrapper
       .get('[data-testid="interaction-workspace"]')
       .get('header');
-    expect(header.text()).toContain('#99');
+    expect(header.text()).toContain('JRC_CONTACT_CENTER.INBOX.TITLE');
     expect(header.text()).not.toContain(
       'JRC_CONTACT_CENTER.INBOX_360.CALL_STATES.ringing'
     );
     expect(header.text()).not.toContain('00:00:00');
   });
   beforeEach(() => {
+    localStorage.clear();
+    scopedUser.value = 9;
+    scopedConversation.value = {
+      id: 21,
+      account_id: 1,
+      inbox_id: 3,
+      status: 'open',
+      meta: { sender: {} },
+    };
     sip = {
       accountId: ref(1),
       callId: ref('native-7'),
@@ -131,8 +194,18 @@ describe('inbox native SIP action guards', () => {
       muted: ref(false),
       holdPending: ref(false),
       errorMessage: ref(''),
+      credential: ref({ extension: '1410' }),
+      configured: ref(true),
+      registered: ref(true),
+      connecting: ref(false),
+      extensionEnabled: ref(true),
+      remoteNumber: ref('1410'),
+      duration: ref('03:27'),
+      destination: ref(''),
+      sessionState: ref('Established'),
       answer: vi.fn(),
       hangup: vi.fn(),
+      reject: vi.fn(),
       setMuted: vi.fn(),
       setHold: vi.fn(),
       initialize: vi.fn(),
@@ -150,12 +223,115 @@ describe('inbox native SIP action guards', () => {
       data: { item: { state: 'available' } },
     });
   });
+
+  it('places the native tools after Tasks and passes only the selected Account conversation to them', async () => {
+    const wrapper = mount(HoyaInboxWorkspace, {
+      props: {
+        ...props,
+        context: null,
+        currentCallId: null,
+        currentConversationId: 21,
+        conversations: [scopedConversation.value],
+      },
+      global: {
+        ...global,
+        plugins: [scopedStore],
+        stubs: { ...global.stubs, InboxConversationTools: true },
+      },
+    });
+    await flushPromises();
+    const buttons = wrapper.get('nav').findAll('button');
+    const taskIndex = buttons.findIndex(
+      button =>
+        button.attributes('aria-label') === 'JRC_CONTACT_CENTER.INBOX_360.TASKS'
+    );
+    expect(
+      buttons
+        .slice(taskIndex + 1)
+        .map(button => button.attributes('data-conversation-tool'))
+    ).toEqual(CONVERSATION_TOOLS.map(item => item.key));
+    await CONVERSATION_TOOLS.reduce(async (previous, tool) => {
+      await previous;
+      await wrapper
+        .get(`[data-conversation-tool="${tool.key}"]`)
+        .trigger('click');
+      expect(
+        wrapper.getComponent({ name: 'InboxConversationTools' }).props()
+      ).toMatchObject({ accountId: 1, conversationId: 21, tool: tool.key });
+    }, Promise.resolve());
+    expect(wrapper.findComponent({ name: 'RouterView' }).exists()).toBe(true);
+    expect(sip.initialize).not.toHaveBeenCalled();
+    await wrapper.setProps({ accountId: 2 });
+    await flushPromises();
+    expect(
+      wrapper.findComponent({ name: 'InboxConversationTools' }).exists()
+    ).toBe(false);
+    expect(
+      wrapper
+        .get('[data-conversation-tool="contact_notes"]')
+        .attributes('disabled')
+    ).toBeDefined();
+  });
+
+  it('keeps conversation tools unavailable for a voice call or an empty selection', async () => {
+    const wrapper = mount(HoyaInboxWorkspace, { props, global });
+    await flushPromises();
+    wrapper.findAll('[data-conversation-tool]').forEach(button => {
+      expect(button.attributes('disabled')).toBeDefined();
+    });
+    await wrapper.setProps({ currentCallId: null });
+    await flushPromises();
+    wrapper.findAll('[data-conversation-tool]').forEach(button => {
+      expect(button.attributes('disabled')).toBeDefined();
+    });
+  });
+
+  it('resizes with pointer and keyboard, clamps the width and isolates the saved preference by user', async () => {
+    const originalWidth = window.innerWidth;
+    window.innerWidth = 1920;
+    const wrapper = mount(HoyaInboxWorkspace, {
+      props: { ...props, context: null, currentCallId: null },
+      global: { ...global, plugins: [scopedStore] },
+    });
+    await flushPromises();
+    const separator = wrapper.get('[data-testid="attendance-list-resizer"]');
+    expect(separator.attributes('aria-valuenow')).toBe('240');
+    separator.element.dispatchEvent(
+      new MouseEvent('pointerdown', { bubbles: true, clientX: 300, button: 0 })
+    );
+    separator.element.dispatchEvent(
+      new MouseEvent('pointermove', { bubbles: true, clientX: 396 })
+    );
+    separator.element.dispatchEvent(
+      new MouseEvent('pointerup', { bubbles: true })
+    );
+    await flushPromises();
+    expect(separator.attributes('aria-valuenow')).toBe('336');
+    expect(localStorage.getItem('jrc:attendance-list-width:1:9')).toBe('336');
+    await separator.trigger('keydown', { key: 'End' });
+    expect(separator.attributes('aria-valuenow')).toBe('480');
+    await separator.trigger('keydown', { key: 'ArrowRight' });
+    expect(separator.attributes('aria-valuenow')).toBe('480');
+    await separator.trigger('keydown', { key: 'Home' });
+    expect(separator.attributes('aria-valuenow')).toBe('192');
+    await separator.trigger('keydown', { key: 'ArrowRight' });
+    expect(separator.attributes('aria-valuenow')).toBe('208');
+    scopedUser.value = 10;
+    await flushPromises();
+    expect(separator.attributes('aria-valuenow')).toBe('240');
+    scopedUser.value = 9;
+    await flushPromises();
+    expect(separator.attributes('aria-valuenow')).toBe('208');
+    await separator.trigger('dblclick');
+    expect(separator.attributes('aria-valuenow')).toBe('240');
+    expect(localStorage.getItem('jrc:attendance-list-width:1:9')).toBeNull();
+    wrapper.unmount();
+    window.innerWidth = originalWidth;
+  });
   it('never initializes another phone and enables controls only for the matching native call', async () => {
     const wrapper = mount(HoyaInboxWorkspace, { props, global });
     await flushPromises();
-    const mute = wrapper.get(
-      'button[aria-label="JRC_CONTACT_CENTER.INBOX_360.MUTE"]'
-    );
+    const mute = wrapper.get('button[data-voice-action="MUTE"]');
     expect(mute.attributes('disabled')).toBeDefined();
     const nativeWorkspace = wrapper.findComponent({ name: 'CallWorkspace' });
     nativeWorkspace.vm.$emit('loaded', {
@@ -178,9 +354,7 @@ describe('inbox native SIP action guards', () => {
       customer: { contacts: [] },
     });
     await flushPromises();
-    const mute = wrapper.get(
-      'button[aria-label="JRC_CONTACT_CENTER.INBOX_360.MUTE"]'
-    );
+    const mute = wrapper.get('button[data-voice-action="MUTE"]');
     expect(mute.attributes('disabled')).toBeDefined();
     sip.callId.value = 'native-8';
     sip.accountId.value = 2;
@@ -207,11 +381,9 @@ describe('inbox native SIP action guards', () => {
       customer: { contacts: [] },
     });
     await flushPromises();
-    ['ANSWER', 'HANGUP', 'MUTE', 'HOLD', 'TRANSFER'].forEach(key => {
+    ['MUTE', 'HOLD', 'TRANSFER'].forEach(key => {
       expect(
-        wrapper
-          .get(`button[aria-label="JRC_CONTACT_CENTER.INBOX_360.${key}"]`)
-          .attributes('disabled')
+        wrapper.get(`button[data-voice-action="${key}"]`).attributes('disabled')
       ).toBeDefined();
     });
     expect(sip.setHold).not.toHaveBeenCalled();
@@ -226,9 +398,7 @@ describe('inbox native SIP action guards', () => {
       customer: { contacts: [] },
     });
     await flushPromises();
-    await wrapper
-      .get('button[aria-label="JRC_CONTACT_CENTER.INBOX_360.HOLD"]')
-      .trigger('click');
+    await wrapper.get('button[data-voice-action="HOLD"]').trigger('click');
     await flushPromises();
     expect(wrapper.get('[role="alert"]').text()).toBe(
       'JRC_CONTACT_CENTER.COMMON.ERROR'
@@ -246,9 +416,7 @@ describe('inbox native SIP action guards', () => {
       customer: { contacts: [] },
     });
     await flushPromises();
-    await wrapper
-      .get('button[aria-label="JRC_CONTACT_CENTER.INBOX_360.HOLD"]')
-      .trigger('click');
+    await wrapper.get('button[data-voice-action="HOLD"]').trigger('click');
     await flushPromises();
     expect(wrapper.get('[role="alert"]').text()).toBe(
       'Native phone could not hold'
@@ -292,6 +460,20 @@ describe('inbox native SIP action guards', () => {
       customer: { contacts: [] },
     });
     await flushPromises();
+    expect(wrapper.find('progress').exists()).toBe(true);
+  });
+  it('preserves pending qualification when another incoming SIP call arrives and still permits rejection', async () => {
+    CCAPI.qualifications.mockResolvedValue(pendingResponse);
+    sip.incoming.value = true;
+    sip.callId.value = 'native-new';
+    const wrapper = mount(HoyaInboxWorkspace, { props, global });
+    await flushPromises();
+    expect(wrapper.find('progress').exists()).toBe(true);
+    const incoming = wrapper.get('[data-pending-incoming]');
+    expect(incoming.text()).toContain('SOFTPHONE.INBOX.QUALIFICATION_PENDING');
+    await incoming.get('button').trigger('click');
+    expect(sip.reject).toHaveBeenCalledOnce();
+    expect(sip.answer).not.toHaveBeenCalled();
     expect(wrapper.find('progress').exists()).toBe(true);
   });
   it('restores required tabulation when reopening an ended voice interaction', async () => {

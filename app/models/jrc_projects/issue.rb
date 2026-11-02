@@ -5,6 +5,6 @@ module JrcProjects
     belongs_to :project
     belongs_to :owner, class_name: 'User', optional: true
     validates :title, presence: true
-    validate { errors.add(:owner, 'must belong to account') if owner && !account.users.exists?(owner.id) }
+    validate { errors.add(:owner, 'deve pertencer à conta') if owner && !account.users.exists?(owner.id) }
   end
 end

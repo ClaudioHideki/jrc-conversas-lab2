@@ -63,9 +63,12 @@ class Api::V1::Widget::ServiceDeskController < Api::V1::Widget::BaseController
   def attachment
     ticket = portal_ticket
     note = portal_scope.notes(ticket).find(JrcServiceDesk::Input.id(params[:note_id]))
-    file = note.files.find(JrcServiceDesk::Input.id(params[:attachment_id]))
+    identifier = JrcServiceDesk::Input.id(params[:attachment_id])
+    file = JrcServiceDesk::RecordWithdrawal.attachments(note).find { |attachment| attachment.id == identifier }
+    raise ActiveRecord::RecordNotFound unless file
     return render json: { code: 'attachment_scan_unavailable' }, status: :conflict unless file.blob.metadata['service_desk_scan_state'] == 'clean'
 
+    authorize_portal_attachment!(file)
     send_data file.download, filename: file.filename.to_s, type: 'application/octet-stream', disposition: 'attachment'
   end
 
@@ -73,10 +76,16 @@ class Api::V1::Widget::ServiceDeskController < Api::V1::Widget::BaseController
     file = customer_attachment_file(portal_ticket)
     return render json: { code: 'attachment_scan_unavailable' }, status: :conflict unless file.blob.metadata['service_desk_scan_state'] == 'clean'
 
+    authorize_portal_attachment!(file)
     send_data file.download, filename: file.filename.to_s, type: 'application/octet-stream', disposition: 'attachment'
   end
 
   private
+
+  def authorize_portal_attachment!(file)
+    access = JrcServiceDesk::ProtectedBlobAccess.new(blob: file.blob, user: nil, portal_scope: portal_scope)
+    raise ActiveRecord::RecordNotFound unless access.allowed?
+  end
 
   def notes_payload(ticket)
     portal_scope.notes(ticket).order(:id).map { |row| portal_presenter.note(row) }

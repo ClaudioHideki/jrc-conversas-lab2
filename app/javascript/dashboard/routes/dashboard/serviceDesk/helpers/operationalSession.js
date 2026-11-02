@@ -10,6 +10,7 @@ import {
 } from './operationalContracts.js';
 import { normalizeQuery, queryWithinContext } from './query.js';
 import { errorStatus } from './session.js';
+import { decodeSupervision } from './v2Projection';
 const ACTION_PERMISSION = {
   update: 'update',
   assign: 'assign',
@@ -33,12 +34,14 @@ export function createOperationalSession(
   const controllers = new Map();
   const sequences = new Map();
   const intents = new Map();
+  const readScopes = new Map();
   const clear = () => {
     epoch += 1;
     controllers.forEach(c => c.abort());
     controllers.clear();
     sequences.clear();
     intents.clear();
+    readScopes.clear();
     state.reads = {};
     state.writes = {};
     state.notice = null;
@@ -60,16 +63,27 @@ export function createOperationalSession(
     base.dispose();
     base.state.status = status;
   };
-  const read = async (key, kind, { ticket = null, query = {} } = {}) => {
+  const read = async (
+    key,
+    kind,
+    {
+      ticket = null,
+      query = {},
+      includeSupervision = false,
+      background = false,
+    } = {}
+  ) => {
+    const previous = state.reads[key];
+    const previousScope = readScopes.get(key);
     cancel(key);
-    state.reads[key] = { status: 'loading', data: null };
-    const turn = epoch,
-      seq = sequences.get(key),
-      controller = new AbortController();
+    readScopes.delete(key);
+    const turn = epoch;
+    const seq = sequences.get(key);
+    const controller = new AbortController();
     controllers.set(key, controller);
     try {
-      const context = current(),
-        normalized = normalizeQuery(query);
+      const context = current();
+      const normalized = normalizeQuery(query);
       if (
         !queryWithinContext(normalized, context) ||
         !canRead(context, 'tickets')
@@ -90,6 +104,17 @@ export function createOperationalSession(
         state.reads[key] = { status: 'denied', data: null };
         return null;
       }
+      const scope = JSON.stringify([kind, normalized, includeSupervision]);
+      const retain =
+        background &&
+        previousScope?.context === context &&
+        previousScope.ticket === ticket &&
+        previousScope.query === scope &&
+        ['ready', 'empty'].includes(previous?.status);
+      readScopes.set(key, { context, ticket, query: scope });
+      state.reads[key] = retain
+        ? { ...previous, refreshing: true }
+        : { status: 'loading', data: null };
       const payload =
         kind === 'dashboard'
           ? await client.dashboard(
@@ -110,6 +135,20 @@ export function createOperationalSession(
         kind === 'dashboard'
           ? decodeDashboard(payload, context, normalized)
           : decodeRelated(payload, context, ticket, kind, normalized);
+      if (kind === 'dashboard' && includeSupervision) {
+        data.supervision = { status: 'denied', data: null };
+        if (context.capabilities?.reports?.index === true) {
+          try {
+            data.supervision = {
+              status: 'ready',
+              data: decodeSupervision(payload.dashboard.supervision, context),
+            };
+          } catch (error) {
+            // Optional report failures cannot invalidate independently valid KPIs.
+            data.supervision = { status: errorStatus(error), data: null };
+          }
+        }
+      }
       state.reads[key] = {
         status: kind === 'dashboard' || data.items.length ? 'ready' : 'empty',
         data,
@@ -123,15 +162,19 @@ export function createOperationalSession(
       else state.reads[key] = { status, data: null };
       return null;
     } finally {
-      if (turn === epoch && seq === sequences.get(key)) controllers.delete(key);
+      if (turn === epoch && seq === sequences.get(key)) {
+        controllers.delete(key);
+        if (state.reads[key]?.refreshing)
+          state.reads[key] = { ...state.reads[key], refreshing: false };
+      }
     }
   };
   const write = async (key, action, payload, ticket = null) => {
     if (state.writes[key]?.status === 'saving') return null;
     cancel(key);
-    const turn = epoch,
-      seq = sequences.get(key),
-      controller = new AbortController();
+    const turn = epoch;
+    const seq = sequences.get(key);
+    const controller = new AbortController();
     controllers.set(key, controller);
     state.notice = null;
     state.writes[key] = { status: 'saving', ticket: null };
@@ -196,13 +239,13 @@ export function createOperationalSession(
         payload,
         decodeTicket(result, context, ticketId)
       );
-      const relation =
-        action === 'add_note'
-          ? 'notes'
-          : action === 'link_conversation' ||
-              (action === 'create' && payload.conversation_id)
-            ? 'conversations'
-            : null;
+      let relation = null;
+      if (action === 'add_note') relation = 'notes';
+      else if (
+        action === 'link_conversation' ||
+        (action === 'create' && payload.conversation_id)
+      )
+        relation = 'conversations';
       if (relation) {
         const recordId = canonicalId(ack.result_id);
         if (!recordId) throw new ContractError();
@@ -282,14 +325,34 @@ export function createOperationalSession(
       else {
         state.writes[key] = {
           status:
-            status === 409
-              ? 'conflict'
-              : status === 422
-                ? 'invalid_input'
-                : error instanceof ContractError
-                  ? 'invalid_contract'
-                  : 'error',
+            { 409: 'conflict', 422: 'invalid_input' }[status] ||
+            (error instanceof ContractError ? 'invalid_contract' : 'error'),
           ticket: null,
+          ...([
+            'requester_company_mismatch',
+            'requester_is_company',
+            'validation_failed',
+          ].includes(error?.response?.data?.code)
+            ? {
+                reason: error.response.data.code,
+                fields: Array.isArray(error.response.data.fields)
+                  ? error.response.data.fields.filter(value =>
+                      [
+                        'requester_id',
+                        'company_id',
+                        'service_fields',
+                        'status',
+                        'priority',
+                        'title',
+                        'description',
+                      ].includes(value)
+                    )
+                  : [],
+              }
+            : {}),
+          ...(error?.response?.data?.code === 'linked_context_conflict'
+            ? { reason: 'linked_context_conflict' }
+            : {}),
         };
         if (status === 422) intents.delete(key); // Rejected request did not commit.
       }

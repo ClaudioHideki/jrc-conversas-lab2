@@ -57,9 +57,9 @@ class JrcServiceDesk::TicketCatalogue
     raise Pundit::NotAuthorizedError unless @context.capability?(:tickets_assign)
 
     member = service.default_assignee_membership
-    user_context = JrcServiceDesk::OperationalContext.new(account: service.account, user: member.account_user.user,
-                                                          account_user: member.account_user)
-    raise Pundit::NotAuthorizedError unless user_context.unit_allowed?(@ticket.unit) && user_context.capability?(:tickets_view)
+    member.lock!
+    member.account_user.lock!
+    return if JrcServiceDesk::AssignmentEligibility.new(membership: member, ticket: @ticket).reason
 
     @ticket.assignee_membership = member
   end

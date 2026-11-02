@@ -8,16 +8,19 @@ class JrcRelationship::SurveyQuestionSchema
   def valid?
     return false unless @questions.is_a?(Array) && @questions.size.between?(1, 20)
     return false unless @questions.all? { |question| valid_question?(question) }
-    return false unless @questions.pluck('key').uniq.size == @questions.size
+    return false unless @questions.map { |row| row['key'] }.uniq.size == @questions.size
 
     @questions.each_with_index.all? { |question, index| valid_condition?(question['condition'], index) }
   end
 
-  def principal_scale?(kind)
+  def principal_scale?(kind, configurable: false)
     return true if kind == 'custom'
 
     question = @questions.first
-    question['type'] == 'scale' && question['required'] == true && SCALES[kind] == [question['min'], question['max']]
+    required = question['type'] == 'scale' && question['required'] == true
+    return required && valid_scale?(question) if configurable && %w[csat ces].include?(kind)
+
+    required && SCALES[kind] == [question['min'], question['max']]
   end
 
   private
@@ -47,7 +50,7 @@ class JrcRelationship::SurveyQuestionSchema
     return false unless options.is_a?(Array) && options.size.between?(1, 30)
 
     valid = options.all? { |option| option.is_a?(Hash) && bounded_text?(option['value'], 60) && bounded_text?(option['label'], 120) }
-    valid && options.pluck('value').uniq.size == options.size
+    valid && options.map { |row| row['value'] }.uniq.size == options.size
   end
 
   def valid_condition?(condition, index)

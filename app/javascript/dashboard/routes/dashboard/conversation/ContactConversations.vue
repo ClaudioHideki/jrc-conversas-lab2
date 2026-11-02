@@ -16,6 +16,7 @@ import Spinner from 'dashboard/components-next/spinner/Spinner.vue';
 const props = defineProps({
   contactId: { type: [String, Number], required: true },
   conversationId: { type: [String, Number], required: true },
+  embedded: { type: Boolean, default: false },
 });
 
 const store = useStore();
@@ -49,7 +50,19 @@ const activeContextChat = ref(null);
 const showContextMenu = ref(false);
 const contextMenu = ref({ x: null, y: null });
 
+const embeddedLocation = conversationId => ({
+  name: 'inbox_view_conversation',
+  params: {
+    accountId: route.params.accountId,
+    type: 'conversation',
+    id: conversationId,
+  },
+  query: route.query,
+});
+
 const buildConversationUrl = conversationId => {
+  if (props.embedded)
+    return router.resolve(embeddedLocation(conversationId)).href;
   const {
     params: { accountId, inbox_id: inboxId, label, teamId },
     name,
@@ -94,7 +107,7 @@ const onCardClick = (conversation, e) => {
     return;
   }
 
-  router.push({ path });
+  router.push(props.embedded ? embeddedLocation(conversation.id) : { path });
 };
 
 const openContextMenu = (conversation, e) => {

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onUnmounted } from 'vue';
+import { computed, onUnmounted, ref, watch } from 'vue';
 import { useToggle } from '@vueuse/core';
 import { useStore } from 'vuex';
 import { useAlert } from 'dashboard/composables';
@@ -9,7 +9,8 @@ import EmailTranscriptModal from './EmailTranscriptModal.vue';
 import ResolveAction from '../../buttons/ResolveAction.vue';
 import ButtonV4 from 'dashboard/components-next/button/Button.vue';
 import DropdownMenu from 'dashboard/components-next/dropdown-menu/DropdownMenu.vue';
-import { useMapGetter } from 'dashboard/composables/store';
+import Popover from 'dashboard/components-next/popover/Popover.vue';
+import ConversationAssignmentMenu from './ConversationAssignmentMenu.vue';
 
 import {
   CMD_MUTE_CONVERSATION,
@@ -22,50 +23,31 @@ const store = useStore();
 const { t } = useI18n();
 
 const [showEmailActionsModal, toggleEmailModal] = useToggle(false);
-const [showActionsDropdown, toggleDropdown] = useToggle(false);
-const [showAssignDropdown, toggleAssignDropdown] = useToggle(false);
+const assignmentMenu = ref(null);
+const actionsPopover = ref(null);
+const isSavingAction = ref(false);
 
 const TEXT = Object.freeze({
   snooze: 'Adiar',
-  assign: 'Atribuir',
 });
 
 const currentChat = computed(() => store.getters.getSelectedChat);
-const assignableAgentsByInbox = useMapGetter(
-  'inboxAssignableAgents/getAssignableAgents'
-);
-const assignableAgents = computed(() =>
-  assignableAgentsByInbox.value(String(currentChat.value.inbox_id || ''))
-);
-const agentMenuItems = computed(() =>
-  assignableAgents.value.map(agent => ({
-    action: 'assign',
-    value: agent.id,
-    label: agent.name,
-    thumbnail: { name: agent.name, src: agent.thumbnail },
-  }))
-);
 
 const openSnoozeModal = () => {
   document.querySelector('ninja-keys')?.open({ parent: 'snooze_conversation' });
 };
 
-const openAssignDropdown = () => {
-  const willOpen = !showAssignDropdown.value;
-  toggleAssignDropdown();
-  toggleDropdown(false);
-  if (willOpen && currentChat.value.inbox_id) {
-    store.dispatch('inboxAssignableAgents/fetch', [currentChat.value.inbox_id]);
+watch(
+  () => [
+    currentChat.value.id,
+    store.getters.getCurrentAccountId,
+    store.getters.getCurrentUserID,
+  ],
+  () => {
+    actionsPopover.value?.hide();
+    toggleEmailModal(false);
   }
-};
-
-const assignAgent = async ({ value }) => {
-  await store.dispatch('assignAgent', {
-    conversationId: currentChat.value.id,
-    agentId: value,
-  });
-  toggleAssignDropdown(false);
-};
+);
 
 const actionMenuItems = computed(() => {
   const items = [];
@@ -76,6 +58,7 @@ const actionMenuItems = computed(() => {
       label: t('CONTACT_PANEL.MUTE_CONTACT'),
       action: 'mute',
       value: 'mute',
+      disabled: isSavingAction.value,
     });
   } else {
     items.push({
@@ -83,6 +66,7 @@ const actionMenuItems = computed(() => {
       label: t('CONTACT_PANEL.UNMUTE_CONTACT'),
       action: 'unmute',
       value: 'unmute',
+      disabled: isSavingAction.value,
     });
   }
 
@@ -96,30 +80,43 @@ const actionMenuItems = computed(() => {
   return items;
 });
 
-const handleActionClick = ({ action }) => {
-  toggleDropdown(false);
-
-  if (action === 'mute') {
-    store.dispatch('muteConversation', currentChat.value.id);
-    useAlert(t('CONTACT_PANEL.MUTED_SUCCESS'));
-  } else if (action === 'unmute') {
-    store.dispatch('unmuteConversation', currentChat.value.id);
-    useAlert(t('CONTACT_PANEL.UNMUTED_SUCCESS'));
-  } else if (action === 'send_transcript') {
-    toggleEmailModal();
+const handleActionClick = async ({ action }) => {
+  if (action === 'send_transcript') {
+    actionsPopover.value?.hide();
+    toggleEmailModal(true);
+    return;
+  }
+  if (isSavingAction.value || !currentChat.value.id) return;
+  const conversationId = currentChat.value.id;
+  const accountId = store.getters.getCurrentAccountId;
+  const userId = store.getters.getCurrentUserID;
+  isSavingAction.value = true;
+  try {
+    const saved = await store.dispatch(
+      action === 'mute' ? 'muteConversation' : 'unmuteConversation',
+      conversationId
+    );
+    if (
+      currentChat.value.id !== conversationId ||
+      store.getters.getCurrentAccountId !== accountId ||
+      store.getters.getCurrentUserID !== userId
+    )
+      return;
+    if (saved) actionsPopover.value?.hide();
+    const successMessage =
+      action === 'mute'
+        ? t('CONTACT_PANEL.MUTED_SUCCESS')
+        : t('CONTACT_PANEL.UNMUTED_SUCCESS');
+    useAlert(
+      saved ? successMessage : t('JRC_CONTACT_CENTER.INBOX_360.ACTION_ERROR')
+    );
+  } finally {
+    isSavingAction.value = false;
   }
 };
 
-// These functions are needed for the event listeners
-const mute = () => {
-  store.dispatch('muteConversation', currentChat.value.id);
-  useAlert(t('CONTACT_PANEL.MUTED_SUCCESS'));
-};
-
-const unmute = () => {
-  store.dispatch('unmuteConversation', currentChat.value.id);
-  useAlert(t('CONTACT_PANEL.UNMUTED_SUCCESS'));
-};
+const mute = () => handleActionClick({ action: 'mute' });
+const unmute = () => handleActionClick({ action: 'unmute' });
 
 emitter.on(CMD_MUTE_CONVERSATION, mute);
 emitter.on(CMD_UNMUTE_CONVERSATION, unmute);
@@ -148,49 +145,45 @@ onUnmounted(() => {
       color="amber"
       @click="openSnoozeModal"
     />
-    <div
-      v-on-clickaway="() => toggleAssignDropdown(false)"
-      class="relative flex items-center"
-    >
-      <ButtonV4
-        :label="TEXT.assign"
-        icon="i-lucide-user-round-check"
-        size="sm"
-        color="blue"
-        @click="openAssignDropdown"
-      />
-      <DropdownMenu
-        v-if="showAssignDropdown"
-        :menu-items="agentMenuItems"
-        class="top-full mt-1 ltr:right-0 rtl:left-0"
-        @action="assignAgent"
-      />
-    </div>
-    <div
-      v-on-clickaway="() => toggleDropdown(false)"
-      class="relative flex items-center group"
-    >
-      <ButtonV4
-        v-tooltip="$t('CONVERSATION.HEADER.MORE_ACTIONS')"
-        size="sm"
-        variant="ghost"
-        color="slate"
-        icon="i-lucide-more-vertical"
-        class="rounded-lg group-hover:bg-n-alpha-2"
-        @click="toggleDropdown()"
-      />
-      <DropdownMenu
-        v-if="showActionsDropdown"
-        :menu-items="actionMenuItems"
-        class="mt-1 ltr:right-0 rtl:left-0 top-full"
-        @action="handleActionClick"
-      />
-    </div>
-    <EmailTranscriptModal
-      v-if="showEmailActionsModal"
-      :show="showEmailActionsModal"
-      :current-chat="currentChat"
-      @cancel="toggleEmailModal"
+    <ConversationAssignmentMenu
+      ref="assignmentMenu"
+      @show="actionsPopover?.hide()"
     />
+    <Popover
+      ref="actionsPopover"
+      :modal-label="$t('CONVERSATION.HEADER.MORE_ACTIONS')"
+      @show="assignmentMenu?.hide()"
+    >
+      <template #default="{ isOpen }">
+        <ButtonV4
+          v-tooltip="$t('CONVERSATION.HEADER.MORE_ACTIONS')"
+          size="sm"
+          variant="ghost"
+          color="slate"
+          icon="i-lucide-more-vertical"
+          :aria-label="$t('CONVERSATION.HEADER.MORE_ACTIONS')"
+          :aria-expanded="isOpen"
+          aria-haspopup="menu"
+          data-testid="conversation-more-actions-trigger"
+          class="rounded-lg"
+        />
+      </template>
+      <template #content>
+        <DropdownMenu
+          data-testid="conversation-more-actions-menu"
+          :menu-items="actionMenuItems"
+          class="!static !shadow-none !outline-none min-w-56"
+          @action="handleActionClick"
+        />
+      </template>
+    </Popover>
+    <Teleport to="body">
+      <EmailTranscriptModal
+        v-if="showEmailActionsModal"
+        :show="showEmailActionsModal"
+        :current-chat="currentChat"
+        @cancel="toggleEmailModal(false)"
+      />
+    </Teleport>
   </div>
 </template>

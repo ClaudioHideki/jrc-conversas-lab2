@@ -9,8 +9,11 @@ module JrcProjects
           minutes = TimeEntry.where(account_id: Current.account.id, project_id: project.id, task_id: records.map(&:id))
                             .where.not(status: 'rejected').group(:task_id).sum(:minutes)
           counts = task_counts(records.map(&:id))
+          read_projection = ReadProjection.new(account_user: Current.account_user, projects: [project])
           render json: {
-            data: records.map { |task| serialize(task, worked_minutes: minutes.fetch(task.id, 0), counts: counts.fetch(task.id)) }, meta: meta
+            data: records.map do |task|
+              serialize(task, worked_minutes: minutes.fetch(task.id, 0), counts: counts.fetch(task.id), read_projection: read_projection)
+            end, meta: meta
           }
         end
 
@@ -18,10 +21,11 @@ module JrcProjects
           project = scoped_project
           authorize_capability!('projects.task.view', project: project)
           task = scoped_tasks(project).find(params[:id])
-          render json: { data: serialize(task).merge(
+          read_projection = ReadProjection.new(account_user: Current.account_user, projects: [project])
+          render json: { data: serialize(task, read_projection: read_projection).merge(
             checklist: task.checklist_items.where(account_id: Current.account.id).order(:position, :id),
-            comments: task.task_comments.where(account_id: Current.account.id).includes(:user).order(:created_at, :id)
-                          .last(100).as_json(include: { user: { only: %i[id name] } }),
+            comments: task.task_comments.where(account_id: Current.account.id).includes(:user, inline_images_attachments: :blob)
+                          .order(:created_at, :id).last(100).map { |comment| TaskCommentSerializer.new(comment).as_json },
             dependencies: task.incoming_dependencies.where(account_id: Current.account.id, predecessor_id: scoped_tasks(project).select(:id))
                               .as_json(only: %i[id predecessor_id kind]),
             subtasks: task.subtasks.where(account_id: Current.account.id, project_id: project.id).order(:position, :id)
@@ -75,6 +79,8 @@ module JrcProjects
           authorize_capability!('projects.task.delete', project: project, record: task)
           project.with_lock do
             ensure_project_editable!(project)
+            task.reload
+            assert_lock!(task, params[:lock_version]) if params.key?(:lock_version)
             before = task.attributes
             task.destroy!
             AuditEvent.record!(account: Current.account, actor: Current.user, action: 'projects.task.deleted', auditable: task,
@@ -121,7 +127,7 @@ module JrcProjects
           end
         end
 
-        def serialize(task, worked_minutes: nil, counts: nil)
+        def serialize(task, worked_minutes: nil, counts: nil, read_projection: nil)
           data = task.as_json(only: %i[id project_id parent_id title description status priority board_column_id assignee_id created_by_id
                                        position estimated_minutes starts_on due_on lock_version created_at updated_at],
                               include: { assignee: { only: %i[id name] } })
@@ -129,8 +135,13 @@ module JrcProjects
           data.merge!(counts || task_counts([task.id]).fetch(task.id))
           data['worked_minutes'] = worked_minutes || task.time_entries.where(account_id: Current.account.id, project_id: task.project_id)
                                                         .where.not(status: 'rejected').sum(:minutes)
-          data['can_update'] = Authorization.allowed?(account_user: Current.account_user, capability: 'projects.task.update', project: task.project, record: task)
-          data['can_move'] = Authorization.allowed?(account_user: Current.account_user, capability: 'projects.task.move', project: task.project, record: task)
+          if read_projection
+            data.merge!(read_projection.task_permissions(task))
+          else
+            data['can_update'] = Authorization.allowed?(account_user: Current.account_user, capability: 'projects.task.update', project: task.project, record: task)
+            data['can_move'] = Authorization.allowed?(account_user: Current.account_user, capability: 'projects.task.move', project: task.project, record: task)
+            data['can_delete'] = Authorization.allowed?(account_user: Current.account_user, capability: 'projects.task.delete', project: task.project, record: task)
+          end
           data
         end
       end

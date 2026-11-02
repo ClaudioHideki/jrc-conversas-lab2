@@ -4,6 +4,14 @@
       "DOWNLOAD": "Download",
       "UPLOADING": "Uploading..."
     },
+    "PROTECTED_ATTACHMENT": {
+      "FILE": "Attachment",
+      "LOADING": "Loading attachment...",
+      "SCAN_PENDING": "Waiting for file verification",
+      "TEMPORARY_ERROR": "Couldn't load the attachment. Try again.",
+      "UNAVAILABLE": "Attachment unavailable",
+      "RETRY": "Try again"
+    },
     "FORM_BUBBLE": {
       "SUBMIT": "Submit"
     },
@@ -252,6 +260,7 @@
       "copy": "Copy protocol",
       "copied": "Protocol copied",
       "public_only": "Only public updates and attachments authorized for your identity are shown."
-    }
+    },
+    "own_survey_response": "Your response"
   }
 }

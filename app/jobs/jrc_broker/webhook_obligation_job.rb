@@ -51,6 +51,12 @@ class JrcBroker::WebhookObligationJob < ApplicationJob
   end
 
   def record_failure(row, token, error)
+    if error.is_a?(Webhooks::Trigger::DeliveryDeferred)
+      settle(row, token, state: 'pending', attempts: row.attempts - 1, available_at: 1.minute.from_now,
+                         last_error_code: 'JRC_BROKER_DELIVERY_DEFERRED')
+      return
+    end
+
     retryable = JrcBroker::WebhookDelivery.new(row.message).retryable?(error)
     state = retryable && row.attempts < 8 ? 'pending' : 'failed'
     settle(row, token, failure: state == 'failed' ? error : nil,

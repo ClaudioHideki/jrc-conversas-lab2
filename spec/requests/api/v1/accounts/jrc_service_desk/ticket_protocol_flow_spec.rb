@@ -104,6 +104,8 @@ RSpec.describe 'Service Desk ticket protocol and assigned-agent readback', type:
 
   it 'auto-routes to a configured eligible agent and exposes the same ticket in My queue' do
     agent_membership.update!(availability: 'available', capacity: 10)
+    agent.update!(availability: :online, auto_assignment_enabled: true)
+    OnlineStatusTracker.update_presence(sd_account.id, 'User', agent.user_id)
     queue.update!(distribution_mode: 'round_robin')
     attributes = sd_create_attributes.merge(queue_id: queue.id)
     post "#{base}/tickets", params: { unit_id: sd_unit.id, ticket: attributes }, headers: headers, as: :json

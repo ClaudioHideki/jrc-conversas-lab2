@@ -1,5 +1,6 @@
 <script setup>
 import { useI18n } from 'vue-i18n';
+import SlaTargetEditor from './SlaTargetEditor.vue';
 import {
   snapshotTextFields,
   snapshotObjectFields,
@@ -21,6 +22,11 @@ const set = (field, value) =>
   >
     <legend>{{ t('JRC_SERVICE_DESK.COMPLETION.snapshot') }}</legend>
     <p class="text-sm">{{ t('JRC_SERVICE_DESK.COMPLETION.snapshot_help') }}</p>
+    <SlaTargetEditor
+      :model-value="modelValue"
+      :disabled="disabled"
+      @update:model-value="emit('update:modelValue', $event)"
+    />
     <div class="grid gap-3 md:grid-cols-2">
       <label
         v-for="field in snapshotTextFields"

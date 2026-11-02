@@ -2,6 +2,8 @@ json.id resource.id
 # could be nil for a deleted agent hence the safe operator before account id
 json.account_id Current.account&.id
 json.availability_status resource.availability_status
+json.availability resource.current_account_user&.availability
+json.auto_assignment_enabled resource.current_account_user&.auto_assignment_enabled?
 json.auto_offline resource.auto_offline
 json.confirmed resource.confirmed?
 json.email resource.email

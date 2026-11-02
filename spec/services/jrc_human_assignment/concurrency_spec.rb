@@ -13,11 +13,11 @@ RSpec.describe 'Human assignment across inboxes', :sd_concurrency do
       inbox = create(:inbox, account: account, enable_auto_assignment: false)
       agents.each { |agent| create(:inbox_member, inbox: inbox, user: agent) }
       conversation = create(:conversation, account: account, inbox: inbox, status: :open)
-      conversation.update_columns(team_id: team.id, assignee_id: nil)
+      conversation.update_columns(team_id: team.id, assignee_id: nil, auto_assignment_requested_at: Time.current)
       conversation.id
     end
     JrcHumanAssignment::Policy.update!(account, enabled: true, max_open: 1, inbox_ids: account.inboxes.ids)
-    allow(OnlineStatusTracker).to receive(:get_available_users).with(account.id)
+    allow(OnlineStatusTracker).to receive(:effective_available_users).with(account.id)
       .and_return(agents.to_h { |agent| [agent.id.to_s, 'online'] })
 
     results = concurrently(ids.map { |id| -> { JrcHumanAssignment::Dispatch.new(Conversation.find(id)).perform } })

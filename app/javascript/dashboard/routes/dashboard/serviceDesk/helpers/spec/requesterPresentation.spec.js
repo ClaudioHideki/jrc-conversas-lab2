@@ -83,7 +83,8 @@ describe('readable Service Desk projections', () => {
     expect(() => normalizeQuery({ team_id: '01' }, 'assignees')).toThrow();
     expect(() => normalizeQuery({ team_id: ['12'] }, 'assignees')).toThrow();
     expect(() => normalizeQuery({ team_id: '12' }, 'requesters')).toThrow();
-    expect(() => normalizeQuery({ team_id: '12' })).toThrow();
+    expect(normalizeQuery({ team_id: '12' }).team_id).toBe('12');
+    expect(normalizeQuery({ team_id: '12' }, 'tickets').team_id).toBe('12');
   });
 
   it('shows the authorized requester phone under the name and hides it after permission revocation', async () => {

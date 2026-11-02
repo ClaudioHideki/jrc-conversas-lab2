@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="<%= I18n.locale.to_s.tr('_', '-') %>">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <title>JRC Conversas · Portal</title>
+    <%= csrf_meta_tags %>
+    <%= vite_client_tag %>
+    <%= vite_javascript_tag 'requester_portal' %>
+  </head>
+  <body class="m-0 bg-slate-50 font-sans text-slate-800">
+    <div id="requester-portal" data-saml-enabled="<%= ChatwootApp.enterprise? && ChatwootHub.pricing_plan != 'community' && GlobalConfigService.load('ENABLE_SAML_SSO_LOGIN', 'true').to_s != 'false' %>"></div>
+  </body>
+</html>

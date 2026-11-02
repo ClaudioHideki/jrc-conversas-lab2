@@ -16,8 +16,9 @@ export function useTicketTimeline(props) {
     session.state.status === 'ready' &&
     session.state.context?.account_id === props.ticket.account_id;
   const load = async (append = false) => {
-    if (busy.value && append) return;
+    if (busy.value && append) return undefined;
     if (!append) {
+      status.value = 'loading';
       epoch += 1;
       controller?.abort();
       items.value = [];
@@ -26,7 +27,7 @@ export function useTicketTimeline(props) {
     if (!active()) {
       items.value = [];
       status.value = 'denied';
-      return;
+      return undefined;
     }
     const turn = epoch;
     const context = session.state.context;
@@ -37,23 +38,27 @@ export function useTicketTimeline(props) {
         context.account_id,
         props.ticket.id,
         append ? cursor.value : null,
-        controller.signal
+        controller.signal,
+        props.view || 'all',
+        props.filters || {}
       );
       if (turn !== epoch || context !== session.state.context || !active())
-        return;
+        return undefined;
       const page = decodeTimeline(response, context, props.ticket);
       const all = append ? [...items.value, ...page.items] : page.items;
       items.value = [...new Map(all.map(row => [row.key, row])).values()];
       cursor.value = page.cursor;
       status.value = items.value.length ? 'ready' : 'empty';
+      return items.value;
     } catch (error) {
-      if (turn !== epoch || context !== session.state.context) return;
+      if (turn !== epoch || context !== session.state.context) return undefined;
       items.value = [];
       cursor.value = null;
       status.value = errorStatus(error);
     } finally {
       if (turn === epoch) busy.value = false;
     }
+    return undefined;
   };
   watch(
     [
@@ -62,6 +67,8 @@ export function useTicketTimeline(props) {
       () => session.state.context,
       () => session.state.status,
       () => props.revision,
+      () => props.view,
+      () => JSON.stringify(props.filters || {}),
     ],
     () => load(),
     { immediate: true }

@@ -36,7 +36,8 @@ const load = async () => {
 const respond = async accepted => {
   if (responding.value) return;
   if (accepted && (!signerName.value.trim() || !signerDocument.value.trim())) {
-    notice.value = 'Informe o nome completo e o CPF ou documento do signatário.';
+    notice.value =
+      'Informe o nome completo e o CPF ou documento do signatário.';
     showAcceptanceForm.value = true;
     return;
   }
@@ -88,19 +89,24 @@ onMounted(load);
         <header class="bg-n-blue-11 p-8 text-white">
           <div class="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <p class="text-xs font-semibold uppercase tracking-[0.18em] text-white/75">
+              <p
+                class="text-xs font-semibold uppercase tracking-[0.18em] text-white/75"
+              >
                 {{ proposal.proposal_number || `PROP-${proposal.id}` }} · versão
                 {{ proposal.version_number || 1 }}
               </p>
               <h1 class="mt-2 text-3xl font-bold">{{ proposal.title }}</h1>
             </div>
-            <span class="rounded-full bg-white/15 px-3 py-1.5 text-sm font-semibold">
+            <span
+              class="rounded-full bg-white/15 px-3 py-1.5 text-sm font-semibold"
+            >
               {{ proposal.status_display || proposal.status }}
             </span>
           </div>
           <p class="mt-3 text-sm text-white/80">
-            Válida até {{ proposal.valid_until_display || 'data não definida' }} ·
-            vigência de {{ proposal.term_months || 0 }} meses
+            Válida até
+            {{ proposal.valid_until_display || 'data não definida' }} · vigência
+            de {{ proposal.term_months || 0 }} meses
           </p>
         </header>
         <div class="p-6 sm:p-8">
@@ -202,12 +208,36 @@ onMounted(load);
             </div>
           </section>
           <section
-            v-if="showAcceptanceForm && !['accepted', 'rejected', 'canceled'].includes(proposal.status)"
+            v-if="
+              proposal.financials?.financial_version >= 3 &&
+              proposal.financials.recurring_months_count > 0
+            "
+            class="mt-4 rounded-xl bg-n-blue-2 p-4"
+            data-testid="public-fixed-recurrence"
+          >
+            <p>
+              {{ proposal.financials.recurring_months_count }} mensalidades de
+              {{ formatBRL(proposal.financials.recurring_monthly_cents) }}
+            </p>
+            <p>
+              Total previsto das mensalidades:
+              {{ formatBRL(proposal.financials.recurring_total_cents) }}
+            </p>
+            <p>
+              O parcelamento dos valores únicos é independente das mensalidades.
+            </p>
+          </section>
+          <section
+            v-if="
+              showAcceptanceForm &&
+              !['accepted', 'rejected', 'canceled'].includes(proposal.status)
+            "
             class="mt-8 rounded-2xl border border-n-teal-6 bg-n-teal-2 p-5"
           >
             <h2 class="font-bold text-n-slate-12">Aceite digital</h2>
             <p class="mt-1 text-sm text-n-slate-10">
-              Confirme a identidade do signatário. A data, a hora e o IP serão registrados.
+              Confirme a identidade do signatário. A data, a hora e o IP serão
+              registrados.
             </p>
             <div class="mt-4 grid gap-4 sm:grid-cols-2">
               <label class="text-sm font-medium text-n-slate-11">
@@ -250,7 +280,9 @@ onMounted(load);
             ><button
               :disabled="responding"
               class="rounded-xl bg-n-teal-10 px-6 py-3 font-bold text-white hover:bg-n-teal-11 disabled:opacity-50"
-              @click="showAcceptanceForm ? respond(true) : (showAcceptanceForm = true)"
+              @click="
+                showAcceptanceForm ? respond(true) : (showAcceptanceForm = true)
+              "
             >
               Aceitar proposta
             </button>

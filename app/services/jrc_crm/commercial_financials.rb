@@ -3,8 +3,8 @@ require 'date'
 
 module JrcCrm
   # One source of truth for proposals, orders and the contractual snapshot.
-  # Money is integer cents. Recurring items include their FIRST billing period
-  # in the initial price, as in the protected BASE; MRR is reported separately.
+  # Money is integer cents. Version 2 retains published initial-period valuation.
+  # Version 3 separates fixed monthly fees from installments of one-time amounts.
   class CommercialFinancials
     VERSION = 2
     class InvalidTerms < ArgumentError; end
@@ -120,35 +120,53 @@ module JrcCrm
       total = products - discount + shipping + taxes
       monthly = monthly_enabled? ? items.sum { |item| item[:recurring_cents] } : 0
       monthly = self.class.money(@attributes[:monthly_cents]) if monthly_enabled? && items.empty?
+      fixed_monthly = items.sum do |item|
+        item.dig(:snapshot, :billing_model) == 'monthly' || item.dig(:snapshot, :manual_recurring_cents) ? item[:recurring_cents] : 0
+      end
+      fixed_monthly = monthly if items.empty?
+      initial_monthly = separate_recurrence? ? items.sum { |item| item.dig(:snapshot, :billing_model) == 'monthly' ? item[:recurring_cents] : 0 } : 0
+      recurring_months = separate_recurrence? && fixed_monthly.positive? ? positive_month_count : 0
+      recurring_total = fixed_monthly * recurring_months
       condition = setting(:payment_condition, 'cash').to_s
       raise InvalidTerms, 'Condicao de pagamento invalida.' unless PAYMENT_CONDITIONS.include?(condition)
       count = condition == 'cash' ? 1 : integer_count(@attributes[:installments_count] || 1)
       down = condition == 'down_payment_installments' ? self.class.money(@attributes[:down_payment_cents]) : 0
       upfront_shipping = shipping_in_installments ? 0 : shipping
-      payable = total - upfront_shipping
+      # Preserve initial totals used by existing reports/commissions. Only the
+      # financing base excludes the monthly period already present in them.
+      payable = [total - upfront_shipping - initial_monthly, 0].max
       raise InvalidTerms, 'A entrada nao pode exceder o saldo financiavel.' if down > payable
       balance = payable - down
       date_value = [@snapshot[:first_due_date], @attributes[:first_due_date]].find { |date| date && !date.to_s.empty? } || Date.today.iso8601
       first_due = date_value.is_a?(Date) ? date_value : Date.iso8601(date_value.to_s)
-      values = condition == 'cash' ? [] : self.class.allocate(balance, Array.new(count, 1))
+      values = condition == 'cash' || (separate_recurrence? && balance.zero?) ? [] : self.class.allocate(balance, Array.new(count, 1))
       installments = values.each_with_index.map do |value, index|
         { number: index + 1, date: (first_due >> index).iso8601, value: value, status: 'Pendente' }
       end
       payments = []
-      payments << { kind: 'cash', date: first_due.iso8601, value: balance } if condition == 'cash'
+      payments << { kind: 'cash', date: first_due.iso8601, value: balance } if condition == 'cash' && (!separate_recurrence? || balance.positive?)
       payments << { kind: 'down_payment', date: first_due.iso8601, value: down } if down.positive?
       payments << { kind: 'shipping', date: first_due.iso8601, value: upfront_shipping } if upfront_shipping.positive?
       payments.concat(installments.map { |row| row.merge(kind: 'installment') })
+      first_monthly_payment = total - payments.sum { |row| row[:value] }
+      payments << { kind: 'first_monthly', date: first_due.iso8601, value: first_monthly_payment } if separate_recurrence? && first_monthly_payment.positive?
       raise InvalidTerms, 'Plano financeiro nao conserva o total.' unless payments.sum { |row| row[:value] } == total
       {
-        financial_version: VERSION, items: items, subtotal_cents: products + item_discount,
+        financial_version: separate_recurrence? ? 3 : VERSION, items: items, subtotal_cents: products + item_discount,
         products_cents: products, item_discount_cents: item_discount, discount_cents: discount,
         total_discount_cents: item_discount + discount, shipping_cents: shipping,
         shipping_mode: shipping_mode, shipping_in_installments: shipping_in_installments,
-        taxes_cents: taxes, taxes_percent: BigDecimal((@snapshot[:taxes_percent] || 0).to_s).to_s('F'), total_cents: total, contract_total_cents: total,
+        taxes_cents: taxes, taxes_percent: BigDecimal((@snapshot[:taxes_percent] || 0).to_s).to_s('F'), total_cents: total,
+        contract_total_cents: total + recurring_total - initial_monthly,
+        term_months: separate_recurrence? ? positive_month_count : nil,
+        recurring_monthly_cents: separate_recurrence? ? fixed_monthly : monthly,
+        recurring_months_count: recurring_months, recurring_total_cents: recurring_total,
+        recurring_forecast_basis: 'fixed_monthly_only',
+        recurring_schedule: { count: recurring_months, amount_cents: fixed_monthly, first_due_date: first_due.iso8601, frequency: 'monthly', forecast_only: true },
         monthly_cents: monthly, has_monthly_fee: monthly_enabled?, payment_condition: condition,
         payment_method: @attributes[:payment_method], down_payment_cents: down,
         payable_base_cents: payable, balance_cents: balance, upfront_shipping_cents: upfront_shipping,
+        one_time_total_cents: [total - initial_monthly, 0].max, first_monthly_payment_cents: separate_recurrence? ? first_monthly_payment : 0,
         cash_payment_cents: condition == 'cash' ? balance : 0, installments_count: count,
         installment_plan_cents: values, installments: installments, payments: payments,
         first_due_date: first_due.iso8601
@@ -165,6 +183,18 @@ module JrcCrm
     end
 
     private
+
+    def separate_recurrence?
+      setting(:financial_version, VERSION).to_i >= 3
+    end
+
+    def positive_month_count
+      value = BigDecimal(setting(:term_months, 12).to_s)
+      raise InvalidTerms, 'Vigência deve conter uma quantidade positiva e inteira de meses.' unless value.finite? && value == value.round(0) && value >= 1
+      value.to_i
+    rescue ArgumentError
+      raise InvalidTerms, 'Vigência deve conter uma quantidade positiva e inteira de meses.'
+    end
 
     def monthly_enabled?
       self.class.boolean(setting(:has_monthly_fee, true))

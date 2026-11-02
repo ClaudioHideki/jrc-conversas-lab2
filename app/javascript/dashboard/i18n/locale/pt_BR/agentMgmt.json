@@ -82,7 +82,11 @@
           "PLACEHOLDER": "Por favor, selecione a disponibilidade do agente",
           "ERROR": "A disponibilidade é necessária"
         },
-        "SUBMIT": "Editar agente"
+        "SUBMIT": "Editar agente",
+        "AUTO_ASSIGNMENT": {
+          "LABEL": "Permitir atribuição automática",
+          "HELP": "Vale somente para esta conta. Atribuição manual autorizada, vínculos e conversas existentes são preservados."
+        }
       },
       "BUTTON_TEXT": "Alterar",
       "CANCEL_BUTTON_TEXT": "Cancelar",

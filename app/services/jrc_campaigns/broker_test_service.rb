@@ -14,18 +14,23 @@ class JrcCampaigns::BrokerTestService
     return result(existing, digest) if existing
 
     @connector.ready!(@user)
+    conversation = JrcCampaigns::BrokerConversationResolver.new(connector: @connector, user: @user, phone_number: @phone).call
     # Account lock only covers local claims. No provider call takes place under it.
     account.with_lock do
       @delivery = JrcCampaigns::TestDelivery.find_by(account: account, idempotency_key: @key)
       unless @delivery
+        unresolved = JrcCampaigns::TestDelivery.where(account: account, inbox: @connector.inbox, phone_number: @phone, status: %w[sending unknown])
+        raise ArgumentError, 'Teste anterior pendente ou desconhecido; reconcilie o resultado antes de reenviar.' if unresolved.exists?
         reason = JrcCampaigns::EligibilityPolicy.new(account: account, phone_number: @phone, purpose: 'whatsapp_campaigns').rejection_reason
         raise ArgumentError, reason if reason
 
         @delivery = JrcCampaigns::TestDelivery.create!(account: account, inbox: @connector.inbox, requested_by: @user, phone_number: @phone,
                                                        idempotency_key: @key, payload_digest: digest, status: 'sending',
                                                        metadata: { 'broker_connector' => @connector.public_configuration })
-        JrcCampaigns::BrokerMessageSender.call(delivery: @delivery, user: @user, phone_number: @phone, step: @step,
-                                              attributes: { 'campaign_id' => "test:#{@delivery.id}", 'jrc_campaign_test_delivery_id' => @delivery.id })
+        JrcCampaigns::BrokerMessageSender.call(
+          delivery: @delivery, user: @user, phone_number: @phone, step: @step, conversation: conversation,
+          attributes: { 'campaign_id' => "test:#{@delivery.id}", 'jrc_campaign_test_delivery_id' => @delivery.id }
+        )
       end
     end
     JrcCampaigns::BrokerStatusJob.set(wait: 10.seconds).perform_later('test', @delivery.id)

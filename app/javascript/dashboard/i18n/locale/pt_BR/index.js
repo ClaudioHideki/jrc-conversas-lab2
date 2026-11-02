@@ -54,7 +54,10 @@ import whatsappTemplates from './whatsappTemplates.json';
 import whatsappCalling from './whatsappCalling.json';
 import yearInReview from './yearInReview.json';
 
+import relationshipSurveyModels from './relationshipSurveyModels.json';
+
 export default {
+  ...relationshipSurveyModels,
   ...jrcOperator,
   ...jrcApprovals,
   ...jrcHome,

@@ -63,12 +63,12 @@ module JrcProjects
     end
 
     def parent_belongs_to_project
-      errors.add(:parent, 'must belong to project') if parent && parent.project_id != project_id
+      errors.add(:parent, 'deve pertencer ao projeto') if parent && parent.project_id != project_id
     end
 
     def board_and_assignee_belong_to_context
-      errors.add(:board_column, 'must belong to project') if board_column && board_column.board.project_id != project_id
-      errors.add(:assignee, 'must belong to account') if assignee && !account.users.exists?(assignee.id)
+      errors.add(:board_column, 'deve pertencer ao projeto') if board_column && board_column.board.project_id != project_id
+      errors.add(:assignee, 'deve pertencer à conta') if assignee && !account.users.exists?(assignee.id)
     end
   end
 end

@@ -4,12 +4,13 @@ import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import Button from 'dashboard/components-next/button/Button.vue';
 import LiveKpis from '../components/LiveKpis.vue';
+import OverviewSignals from '../components/OverviewSignals.vue';
 import TicketFilters from '../components/TicketFilters.vue';
 import Panel from '../components/ServiceDeskPanel.vue';
 import State from '../components/ServiceDeskState.vue';
 import TicketTable from '../components/TicketTable.vue';
-import SupervisorPanel from '../components/SupervisorPanel.vue';
-import { useSupervisionReport } from '../composables/useSupervisionReport.js';
+import OverviewOperations from '../components/OverviewOperations.vue';
+import { ticketListContext } from '../helpers/ticketNavigation';
 import { metricQuery } from '../helpers/screenExperience.js';
 import { useServiceDesk } from '../composables/useServiceDesk';
 import { serviceDeskRouteName } from '../routeDefinitions';
@@ -19,34 +20,88 @@ const route = useRoute();
 const session = useServiceDesk();
 const key = 'overview:recent';
 const recent = computed(() => session.resource(key));
-const {
-  result: supervision,
-  status: reportStatus,
-  load: reloadReport,
-} = useSupervisionReport(session, () => ({
-  ...route.query,
-  per_page: 5,
-  page: 1,
-}));
-const load = () => session.load(key, 'tickets', { ...route.query, page: 1, per_page: 5, sort: 'updated_at_desc' });
-watch([() => session.state.status, () => route.query, () => session.operations?.state.revision], load, { immediate: true });
-onBeforeUnmount(() => session.resetResource(key));
-const go = (name, ticketId) =>
-  router.push({
+const dashboardKey = 'overview:dashboard';
+const dashboard = computed(
+  () =>
+    session.operations?.resource(dashboardKey) || { status: 'idle', data: null }
+);
+const supervision = computed(() => dashboard.value.data?.supervision?.data);
+const reportStatus = computed(() =>
+  dashboard.value.status === 'ready'
+    ? dashboard.value.data.supervision.status
+    : dashboard.value.status
+);
+const reloadDashboard = ({ background = false } = {}) => {
+  if (
+    session.state.status === 'ready' &&
+    session.state.context?.capabilities?.dashboard?.index === true
+  )
+    return session.operations?.read(dashboardKey, 'dashboard', {
+      query: route.query,
+      includeSupervision: true,
+      background,
+    });
+  return undefined;
+};
+const load = ({ background = false } = {}) =>
+  session.load(
+    key,
+    'tickets',
+    {
+      ...route.query,
+      page: 1,
+      per_page: 5,
+      sort: 'updated_at_desc',
+    },
+    null,
+    { background }
+  );
+watch(
+  [() => session.state.status, () => route.query],
+  () => {
+    load();
+    reloadDashboard();
+  },
+  { immediate: true }
+);
+watch(
+  () => session.operations?.state.revision,
+  () => {
+    if (session.state.status !== 'ready') return;
+    load({ background: true });
+    reloadDashboard({ background: true });
+  }
+);
+onBeforeUnmount(() => {
+  session.resetResource(key);
+  session.operations?.cancel(dashboardKey);
+});
+const go = (name, ticketId, filters = {}) => {
+  let query;
+  if (['tickets', 'mine', 'sla'].includes(name)) {
+    query = {
+      ...route.query,
+      ...filters,
+      ...(name === 'mine' ? { mine: 'true', assignment: undefined } : {}),
+    };
+  } else if (['queues', 'tasks', 'approvals'].includes(name)) {
+    query = {
+      unit_id: route.query.unit_id,
+      operator_company_id: route.query.operator_company_id,
+      ...(filters.status ? { status: filters.status } : {}),
+    };
+  } else if (name === 'detail') {
+    query = ticketListContext('tickets', route.query);
+  }
+  return router.push({
     name: serviceDeskRouteName(name),
     params: {
       accountId: session.accountId.value,
       ...(ticketId ? { ticketId } : {}),
     },
-    ...(['tickets', 'mine', 'queues'].includes(name)
-      ? {
-          query: {
-            ...route.query,
-            ...(name === 'mine' ? { mine: 'true', assignment: undefined } : {}),
-          },
-        }
-      : {}),
+    ...(query ? { query } : {}),
   });
+};
 const filterStatus = statusId =>
   router.push({
     name: serviceDeskRouteName('tickets'),
@@ -54,29 +109,41 @@ const filterStatus = statusId =>
     query: { ...route.query, phase: undefined, status_id: statusId, page: '1' },
   });
 </script>
+
 <template>
   <section>
     <header class="sd-page-heading">
       <div>
         <h2 class="sd-page-title">
-          {{ t('JRC_SERVICE_DESK.SCREENS.overview') }}
+          {{ t('JRC_SERVICE_DESK.MODULE') }}
         </h2>
         <p class="sd-page-subtitle">
           {{ t('JRC_SERVICE_DESK.SUBTITLE') }}
         </p>
       </div>
       <Button
-        v-if="session.state.context?.units.some(unit => unit.permissions.create_ticket === true)"
+        v-if="
+          session.state.context?.units.some(
+            unit => unit.permissions.create_ticket === true
+          )
+        "
         :label="t('JRC_SERVICE_DESK.COMMON.open_structure')"
         icon="i-lucide-plus"
         size="sm"
         @click="go('new')"
       />
     </header>
-    <TicketFilters :query="route.query" @apply="router.push({ query: $event })" />
-    <LiveKpis
+    <TicketFilters
+      compact
       :query="route.query"
-      breakdown
+      @apply="router.push({ query: $event })"
+    />
+    <LiveKpis
+      reference-layout
+      :dashboard-source="dashboard"
+      :supervision="reportStatus === 'ready' ? supervision : null"
+      :query="route.query"
+      @retry="reloadDashboard"
       @status-filter="filterStatus"
       @metric-filter="
         router.push({
@@ -86,59 +153,97 @@ const filterStatus = statusId =>
         })
       "
     />
-    <div
-      v-if="session.state.context?.capabilities?.reports?.index"
-      class="mb-4"
-    >
-      <SupervisorPanel
-        v-if="reportStatus === 'ready'"
-        :data="supervision.supervision"
-      />
-      <State
-        v-else
-        :status="reportStatus"
-        compact
-        retry
-        @retry="reloadReport"
-      />
-    </div>
-    <div class="sd-two-columns">
-      <Panel :title="t('JRC_SERVICE_DESK.OVERVIEW.recent')" icon="i-lucide-ticket">
-        <template #actions>
-          <Button
-            size="xs"
-            variant="ghost"
-            :label="t('JRC_SERVICE_DESK.OVERVIEW.recent_link')"
-            @click="go('tickets')"
+    <div class="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_17rem]">
+      <div class="min-w-0">
+        <template v-if="session.state.context?.capabilities?.reports?.index">
+          <OverviewOperations
+            v-if="reportStatus === 'ready'"
+            section="charts"
+            :data="supervision"
+            @navigate="go($event.name, null, $event.query || {})"
+          />
+          <State
+            v-else
+            :status="reportStatus"
+            compact
+            retry
+            @retry="reloadDashboard"
           />
         </template>
-        <TicketTable
-          v-if="recent.status === 'ready'"
-          :items="recent.items"
+        <Panel
+          :title="t('JRC_SERVICE_DESK.OVERVIEW.recent')"
+          icon="i-lucide-ticket"
+        >
+          <template #actions>
+            <Button
+              size="xs"
+              variant="ghost"
+              :label="t('JRC_SERVICE_DESK.OVERVIEW.recent_link')"
+              @click="go('tickets')"
+            />
+          </template>
+          <TicketTable
+            v-if="recent.status === 'ready'"
+            compact
+            :items="recent.items"
+            @open="go('detail', $event)"
+            @preview="go('detail', $event)"
+          />
+          <State
+            v-else
+            :status="recent.status"
+            retry
+            @retry="session.state.status === 'ready' ? load() : session.retry()"
+          />
+        </Panel>
+      </div>
+      <div class="grid content-start gap-4">
+        <OverviewSignals
+          kind="risk"
+          :data="reportStatus === 'ready' ? supervision : null"
+          :can-view-sla="
+            session.state.context?.effective_permissions?.includes(
+              'jrc_service_desk_sla_view'
+            ) === true
+          "
+          @sla="go('sla')"
+        />
+        <OverviewSignals
+          kind="team"
+          :data="reportStatus === 'ready' ? supervision : null"
+        />
+        <OverviewSignals
+          kind="activity"
+          :tickets="recent.status === 'ready' ? recent.items : []"
+          :loading="recent.status === 'loading'"
           @open="go('detail', $event)"
-          @preview="go('detail', $event)"
         />
-        <State
-          v-else
-          :status="recent.status"
-          retry
-          @retry="session.state.status === 'ready' ? load() : session.retry()"
-        />
-      </Panel>
-      <div class="grid gap-4">
+        <details class="rounded-xl border border-n-weak bg-n-solid-1 p-3">
+          <summary class="cursor-pointer text-sm font-medium">
+            {{ t('JRC_SERVICE_DESK.REFINEMENT.overview.more') }}
+          </summary>
+          <OverviewOperations
+            v-if="reportStatus === 'ready'"
+            section="summary"
+            :data="supervision"
+            @navigate="go($event.name, null, $event.query || {})"
+          />
+        </details>
         <Panel :title="t('JRC_SERVICE_DESK.OVERVIEW.shortcuts')">
           <div class="grid gap-2">
-            <Button variant="outline" color="slate" :label="t('JRC_SERVICE_DESK.SCREENS.mine')" @click="go('mine')" />
-            <Button variant="outline" color="slate" :label="t('JRC_SERVICE_DESK.SCREENS.queues')" @click="go('queues')" />
+            <Button
+              variant="outline"
+              color="slate"
+              :label="t('JRC_SERVICE_DESK.SCREENS.mine')"
+              @click="go('mine')"
+            />
+            <Button
+              variant="outline"
+              color="slate"
+              :label="t('JRC_SERVICE_DESK.SCREENS.queues')"
+              @click="go('queues')"
+            />
           </div>
-        </Panel>
-        <Panel :title="t('JRC_SERVICE_DESK.OVERVIEW.copilot')">
-          <p class="text-sm text-n-slate-11">
-            {{ t('JRC_SERVICE_DESK.OVERVIEW.copilot_help') }}
-          </p>
-          <p class="text-xs text-n-slate-11 mt-2">
-            {{ t('JRC_SERVICE_DESK.EXPERIENCE.contextual_nico') }}
-          </p>
         </Panel>
       </div>
     </div>

@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
+require_relative 'operational_rule_conditions'
+
 # Finite intake/deadline configuration. This is not a script or Flow executor.
 # No business thresholds, precedence or priority levels are invented here.
 class JrcServiceDesk::OperationalRuleContract
   KINDS = %w[routing priority_matrix sla_selection approval_deadline recurrence].freeze
-  MATCH_FIELDS = %w[inbox_id channel_type company_id contract_id category_id service_id priority_id ticket_type_id impact urgency].freeze
+  MATCH_FIELDS = %w[inbox_id channel_type company_id contract_id category_id service_id priority_id ticket_type_id impact urgency label_id form_value].freeze
   APPROVAL_TARGETS = %w[approver_account_user_id approver_team_id approver_role approver_custom_role_id].freeze
   MAX_RULES = 100
   MAX_ID = (2**63) - 1
@@ -28,10 +30,12 @@ class JrcServiceDesk::OperationalRuleContract
     raise ArgumentError, 'One to 100 explicit rules required' unless rows.is_a?(Array) && rows.length.between?(1, MAX_RULES)
 
     rows.each do |row|
-      fields!(row, %w[key precedence match output])
+      fields!(row, %w[key precedence match output enabled conditions window valid_from valid_until exceptions], required: false)
+      raise ArgumentError, 'Missing rule fields' unless (%w[key precedence match output] - row.keys).empty?
       token!(row.fetch('key'))
       integer!(row.fetch('precedence'), 0, 1_000_000)
       predicates!(row.fetch('match'))
+      JrcServiceDesk::OperationalRuleConditions.validate!(row)
       output!(kind, row.fetch('output'))
       next unless kind == 'priority_matrix'
 
@@ -43,7 +47,14 @@ class JrcServiceDesk::OperationalRuleContract
   def self.predicates!(values)
     fields!(values, MATCH_FIELDS, required: false)
     values.each do |key, value|
-      if key.end_with?('_id')
+      if key == 'form_value'
+        fields!(value, %w[key value])
+        code = value['key']
+        raise ArgumentError unless code.is_a?(String) && code.match?(/\A[a-zA-Z0-9_.-]{1,80}\z/)
+        raise ArgumentError if credential_key?(code => nil)
+        valid = [true, false].include?(value['value']) || value['value'].is_a?(Integer) || (value['value'].is_a?(String) && value['value'].size.between?(1, 255))
+        raise ArgumentError unless valid
+      elsif key.end_with?('_id')
         integer!(value, 1, MAX_ID)
       elsif key == 'channel_type'
         raise ArgumentError, 'Native channel class required' unless value.is_a?(String) && value.match?(/\AChannel::[A-Za-z][A-Za-z0-9]{0,60}\z/)
@@ -55,7 +66,44 @@ class JrcServiceDesk::OperationalRuleContract
 
   def self.output!(kind, output)
     key = { 'routing' => 'queue_id', 'priority_matrix' => 'priority_id', 'sla_selection' => 'snapshot' }.fetch(kind)
-    fields!(output, [key])
+    allowed = kind == 'routing' ? [key, 'classification', 'task', 'internal_note', 'assignment', 'label_ids'] : [key]
+    fields!(output, allowed, required: false)
+    raise ArgumentError, 'Destination required' unless output.key?(key)
+    if kind == 'routing'
+      if output['assignment']
+        assignment = output['assignment']
+        fields!(assignment, %w[mode account_user_id fallback_queue_id], required: false)
+        raise ArgumentError unless %w[queue fixed hybrid].include?(assignment['mode'])
+        if %w[fixed hybrid].include?(assignment['mode'])
+          integer!(assignment['account_user_id'], 1, MAX_ID)
+        elsif assignment['account_user_id']
+          raise ArgumentError
+        end
+        if assignment['fallback_queue_id']
+          integer!(assignment['fallback_queue_id'], 1, MAX_ID)
+          raise ArgumentError, 'Fallback cannot route to itself' if assignment['fallback_queue_id'] == output['queue_id']
+        end
+      end
+      if output['label_ids']
+        ids = output['label_ids']
+        raise ArgumentError unless ids.is_a?(Array) && ids.uniq == ids && ids.size <= 20
+
+        ids.each { |id| integer!(id, 1, MAX_ID) }
+      end
+      if output['classification']
+        values = output['classification']
+        fields!(values, %w[priority_id category_id subcategory_id service_id ticket_type_id], required: false)
+        values.each_value { |value| integer!(value, 1, MAX_ID) }
+      end
+      if output['task']
+        fields!(output['task'], %w[title description], required: false)
+        raise ArgumentError unless output['task']['title'].is_a?(String) && output['task']['title'].strip.length.between?(1, 255)
+        raise ArgumentError if output['task'].key?('description') && (!output['task']['description'].is_a?(String) || output['task']['description'].length > 4000)
+      end
+      if output['internal_note']
+        raise ArgumentError unless output['internal_note'].is_a?(String) && output['internal_note'].strip.length.between?(1, 4000)
+      end
+    end
     if key == 'snapshot'
       snapshot!(output[key])
     else

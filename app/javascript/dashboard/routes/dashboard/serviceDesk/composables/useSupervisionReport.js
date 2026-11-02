@@ -8,12 +8,14 @@ export function useSupervisionReport(session, query, enabled = () => true) {
   const status = ref('idle');
   let epoch = 0;
   let controller;
-  async function load() {
+  let scope;
+  async function load({ background = false } = {}) {
     epoch += 1;
     const turn = epoch;
     controller?.abort();
-    result.value = null;
     if (!enabled()) {
+      result.value = null;
+      scope = null;
       status.value = 'idle';
       return;
     }
@@ -22,14 +24,27 @@ export function useSupervisionReport(session, query, enabled = () => true) {
       session.state.status !== 'ready' ||
       context?.capabilities?.reports?.index !== true
     ) {
+      result.value = null;
+      scope = null;
       status.value =
         session.state.status === 'ready' ? 'denied' : session.state.status;
       return;
     }
     controller = new AbortController();
-    status.value = 'loading';
     try {
       const filters = normalizeQuery(query());
+      const key = JSON.stringify(filters);
+      const retain =
+        background &&
+        scope?.context === context &&
+        scope.key === key &&
+        status.value === 'ready' &&
+        result.value !== null;
+      scope = { context, key };
+      if (!retain) {
+        result.value = null;
+        status.value = 'loading';
+      }
       const payload = await API.report(
         context.account_id,
         filters,
@@ -45,24 +60,26 @@ export function useSupervisionReport(session, query, enabled = () => true) {
       result.value = decodeReport(payload, context, filters);
       status.value = 'ready';
     } catch (error) {
-      if (turn === epoch && context === session.state.context)
+      if (turn === epoch && context === session.state.context) {
+        result.value = null;
+        scope = null;
         status.value = errorStatus(error);
+      }
     }
   }
   watch(
-    [
-      query,
-      enabled,
-      () => session.state.context,
-      () => session.state.status,
-      () => session.operations?.state.revision,
-    ],
-    load,
+    [query, enabled, () => session.state.context, () => session.state.status],
+    () => load(),
     { immediate: true, flush: 'sync' }
+  );
+  watch(
+    () => session.operations?.state.revision,
+    () => load({ background: true })
   );
   onBeforeUnmount(() => {
     epoch += 1;
     controller?.abort();
+    scope = null;
     result.value = null;
   });
   return { result, status, load };

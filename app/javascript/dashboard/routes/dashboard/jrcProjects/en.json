@@ -547,5 +547,22 @@
   "PLANNED_START": "Planned start",
   "ESTIMATE_MINUTES": "Estimate in minutes",
   "INITIAL_COLUMN": "Initial column",
-  "INTERNAL_COMMENT": "Internal comment"
+  "INTERNAL_COMMENT": "Internal comment",
+  "DELETE_PROJECT": "Delete project",
+  "DELETE_PROJECT_CONFIRM": "Delete this project and its internal items? This action is permanent. External links and logged hours prevent deletion.",
+  "DELETE_TASK": "Delete task",
+  "DELETE_TASK_CONFIRM": "Delete this task and its subtasks? Logged hours and links to other records prevent deletion.",
+  "DELETE_ITEM_CONFIRM": "Delete this item? This action is permanent and will be recorded in history.",
+  "CHECKLIST_ITEM_TEXT": "Item text",
+  "EDIT": "Edit",
+  "DELETE": "Delete",
+  "EDIT_TIME": "Edit time entry",
+  "TIME_UPDATED": "Time entry updated.",
+  "DELETE_TIME_CONFIRM": "Delete this time entry? The action will remain in the audit history.",
+  "EVENT_COMMENT_UPDATED": "Comment edited",
+  "EVENT_COMMENT_DELETED": "Comment deleted",
+  "EVENT_TIME_DELETED": "Time entry deleted",
+  "EVENT_PHASE_CREATED": "Phase created",
+  "EVENT_PHASE_UPDATED": "Phase updated",
+  "EVENT_PHASE_DELETED": "Phase deleted"
 }

@@ -85,6 +85,8 @@ class JrcRelationship::SurveySource
     scopes = JrcCustomers::Visibility.new(account: context.account, user: context.user, account_user: context.member).conversations
                                      .where(contact_id: contact&.id).joins(:inbox)
     types = channel == 'email' ? ['Channel::Email'] : ['Channel::Whatsapp', 'Channel::TwilioSms']
+    inbox = context.account.inboxes.find_by(id: inbox_id)
+    types << 'Channel::Api' if channel == 'whatsapp' && JrcBroker::OutboundChannel.available?(inbox)
     scopes.where(inbox_id: inbox_id, inboxes: { channel_type: types }).order(updated_at: :desc, id: :desc).first
   end
 

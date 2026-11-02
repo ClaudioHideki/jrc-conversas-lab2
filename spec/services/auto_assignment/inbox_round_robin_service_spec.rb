@@ -7,6 +7,13 @@ describe AutoAssignment::InboxRoundRobinService do
   let!(:inbox) { create(:inbox, account: account) }
   let!(:inbox_members) { create_list(:inbox_member, 5, inbox: inbox) }
 
+  before do
+    inbox_members.each do |member|
+      create(:account_user, account: account, user: member.user)
+      OnlineStatusTracker.update_presence(account.id, 'User', member.user_id)
+    end
+  end
+
   describe '#available_agent' do
     it 'returns nil if allowed_agent_ids is not passed or empty' do
       expect(described_class.new(inbox: inbox).available_agent).to be_nil

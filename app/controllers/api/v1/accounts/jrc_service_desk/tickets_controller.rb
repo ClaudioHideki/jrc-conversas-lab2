@@ -44,6 +44,39 @@ class Api::V1::Accounts::JrcServiceDesk::TicketsController < Api::V1::Accounts::
     acknowledged(ticket, 'assign')
   end
 
+  def destroy
+    authorize strict_ticket, :destroy?
+    values = body_values(%w[expected_lock_version reason])
+    ticket = ::JrcServiceDesk::DeleteTicketService.new(user_context: pundit_user).call(
+      ticket_id: strict_ticket.id, expected_lock_version: values.fetch('expected_lock_version'), reason: values.fetch('reason'))
+    acknowledged(ticket, 'delete')
+  end
+
+  def update_note
+    authorize strict_ticket, :show?
+    values = body_values(%w[note reason])
+    note = ::JrcServiceDesk::UpdateNoteService.new(user_context: pundit_user).call(
+      ticket_id: strict_ticket.id, note_id: params[:record_id], attributes: values.fetch('note'), reason: values.fetch('reason'),
+      idempotency_key: request.headers['Idempotency-Key'])
+    acknowledged(strict_ticket, 'update_note', result_id: note.id)
+  end
+
+  def destroy_note
+    authorize strict_ticket, :show?
+    values = body_values(%w[reason])
+    note = ::JrcServiceDesk::WithdrawNoteService.new(user_context: pundit_user).call(
+      ticket_id: strict_ticket.id, note_id: params[:record_id], reason: values.fetch('reason'))
+    acknowledged(strict_ticket, 'delete_note', result_id: note.id)
+  end
+
+  def destroy_attachment
+    authorize strict_ticket, :show?
+    values = body_values(%w[reason])
+    ::JrcServiceDesk::WithdrawNoteService.new(user_context: pundit_user).call(
+      ticket_id: strict_ticket.id, note_id: params[:record_id], attachment_id: params[:attachment_id], reason: values.fetch('reason'))
+    acknowledged(strict_ticket, 'delete_attachment', result_id: params[:attachment_id])
+  end
+
   def transfer
     authorize strict_ticket, :transfer?
     values = body_values(%w[assignment expected_lock_version])

@@ -116,6 +116,9 @@ class JrcRelationship::SurveyResponse
 
     return classify_nps(score) if @survey.kind == 'nps'
 
+    config = @survey.definition_snapshot.dig('settings', 'service_desk_model')
+    return 'unclassified' if config && @survey.definition_snapshot.dig('settings', 'low_threshold').nil?
+
     low_score?(score) ? 'low' : 'satisfied'
   end
 
@@ -133,6 +136,8 @@ class JrcRelationship::SurveyResponse
   end
 
   def recovery!
+    config = @survey.definition_snapshot.dig('settings', 'service_desk_model')
+    return if config && (config.dig('permissions', 'share_relationship') != true || @survey.definition&.settings&.dig('service_desk_model', 'permissions', 'share_relationship') != true)
     return unless @survey.assignment && @survey.definition_snapshot.dig('settings', 'recovery_enabled') == true
     return unless JrcRelationship::SurveyEngine.enabled?(@survey.account)
 

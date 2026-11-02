@@ -117,7 +117,10 @@ export function decodeCockpit(payload, context, ticket) {
         : 0,
       checklist,
       lock_version: row.lock_version,
-      permissions: { update: row.permissions.update === true },
+      permissions: {
+        update: row.permissions.update === true,
+        destroy: row.permissions.destroy === true,
+      },
     };
   });
   const approvals = list(data.approvals, row => {
@@ -171,6 +174,21 @@ export function decodeCockpit(payload, context, ticket) {
             severity: text(data.incident.severity),
           };
         })();
+  const relatedIncidents = list(data.related_incidents || [], row => {
+    assert(
+      object(row) &&
+        id(row.account_id) === context.account_id &&
+        id(row.unit_id) === ticket.unit_id &&
+        row.permissions?.show === true
+    );
+    assert(['incident', 'problem'].includes(row.resource_kind));
+    return {
+      id: id(row.id),
+      unit_id: ticket.unit_id,
+      title: text(row.title),
+      resource_kind: row.resource_kind,
+    };
+  });
   const approvers = list(data.approvers, row => ({
     id: id(row.id),
     name: text(row.name),
@@ -182,6 +200,7 @@ export function decodeCockpit(payload, context, ticket) {
     events,
     conversations,
     incident,
+    relatedIncidents,
     approvers,
     ola: Array.isArray(data.ola) ? data.ola.map(decodeClockProjection) : [],
   };

@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
+import { surveyModelEditorOpen } from 'dashboard/routes/dashboard/serviceDesk/surveys/presentation';
 import {
   useRoute,
   useRouter,
@@ -17,6 +18,10 @@ import ConversationQuickActions from 'dashboard/components-next/Conversation/Con
 import { useQuickActionAccess } from './useQuickActionAccess';
 import GlobalCallPanel from './GlobalCallPanel.vue';
 import GlobalCrmCreation from './GlobalCrmCreation.vue';
+import {
+  embeddedSoftphoneAccount,
+  openEmbeddedSoftphone,
+} from 'dashboard/routes/dashboard/webphone/useEmbeddedSoftphone';
 
 defineProps({ callActive: { type: Boolean, default: false } });
 const { t } = useI18n();
@@ -25,6 +30,11 @@ const router = useRouter();
 const quickActionEvents = useEventBus(quickActionTarget);
 const { actions, accountId, userId } = useQuickActionAccess();
 const { openQuick } = useJrcCopilot();
+const visibleActions = computed(() =>
+  actions.value.filter(
+    action => !surveyModelEditorOpen.value || action.command !== 'nico'
+  )
+);
 const expanded = ref(false);
 const toggle = ref(null);
 const contactDialog = ref(null);
@@ -61,6 +71,7 @@ const closePhone = () => {
   phoneTrigger.value?.focus({ preventScroll: true });
 };
 const openNico = () => {
+  if (surveyModelEditorOpen.value) return;
   expanded.value = false;
   openQuick();
 };
@@ -77,7 +88,7 @@ const activate = async key => {
   else if (action.command === 'nico') openNico();
   else if (action.command === 'call') {
     phoneTrigger.value = document.activeElement;
-    phoneOpen.value = true;
+    phoneOpen.value = !openEmbeddedSoftphone(accountId.value);
   } else if (['LEAD', 'DEAL'].includes(key)) {
     crmCreation.value = key;
   } else {
@@ -117,7 +128,7 @@ useEventBus(quickActionCommand).on(request => {
   >
     <ConversationQuickActions
       id="global-quick-actions-list"
-      :actions="actions"
+      :actions="visibleActions"
       :class="expanded ? 'grid lg:flex' : 'hidden lg:flex'"
       @select="activate"
     />
@@ -140,7 +151,11 @@ useEventBus(quickActionCommand).on(request => {
           aria-hidden="true"
         />
       </button>
-      <JrcCopilotLauncher docked :call-active="callActive" />
+      <JrcCopilotLauncher
+        v-show="!surveyModelEditorOpen"
+        docked
+        :call-active="callActive"
+      />
     </div>
     <CreateNewContactDialog
       v-if="canCreateContact"
@@ -155,7 +170,7 @@ useEventBus(quickActionCommand).on(request => {
       @close="crmCreation = null"
     />
     <GlobalCallPanel
-      v-if="phoneOpen && callAction"
+      v-if="phoneOpen && callAction && embeddedSoftphoneAccount !== accountId"
       :key="contactDialogKey"
       :allow-softphone="callAction.modes.softphone"
       :allow-conference="callAction.modes.conference"

@@ -66,6 +66,11 @@ describe('#actions', () => {
           types.SET_CONVERSATION_PARTICIPANTS,
           { conversationId: 2, data: [{ id: 2 }] },
         ],
+        [
+          types.UPDATE_CONVERSATION_PARTICIPANTS,
+          { conversationId: 2, participantIds: [2] },
+          { root: true },
+        ],
         [types.SET_CONVERSATION_PARTICIPANTS_UI_FLAG, { isUpdating: false }],
       ]);
     });

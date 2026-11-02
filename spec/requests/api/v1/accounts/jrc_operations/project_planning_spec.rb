@@ -167,25 +167,27 @@ RSpec.describe 'JRC Projects planning checkpoint 3C', type: :request do
   end
 
   it 'consolidates actual task, team, time and milestone totals without mixing projects' do
-    task.update!(due_on: Date.current - 1)
-    completed_column = project.board_columns.find_by!(status_key: 'completed')
-    project.tasks.create!(account: account, created_by: admin, board_column: completed_column, status: 'completed', title: 'Done', estimated_minutes: 60, due_on: Date.current - 1)
-    canceled_column = project.boards.first!.board_columns.create!(account: account, name: 'Canceled', status_key: 'canceled', position: 5)
-    project.tasks.create!(account: account, created_by: admin, board_column: canceled_column, status: 'canceled', title: 'Canceled', estimated_minutes: 30, due_on: Date.current - 1)
-    project.tasks.create!(account: account, created_by: admin, board_column: backlog, status: 'backlog', title: 'Subtask', parent: task, estimated_minutes: 45)
-    project.time_entries.create!(account: account, user: member, task: task, minutes: 90, worked_on: Date.current)
-    project.time_entries.create!(account: account, user: admin, minutes: 60, worked_on: Date.current, status: 'approved')
-    project.time_entries.create!(account: account, user: admin, minutes: 30, worked_on: Date.current, status: 'rejected')
-    milestone
-    project.milestones.create!(account: account, name: 'Complete milestone', status: 'completed', due_on: Date.current + 1)
-    project.milestones.create!(account: account, name: 'Undated')
-    other_project.milestones.create!(account: account, name: 'Other milestone', due_on: Date.current + 1)
-    get base, headers: headers
-    data = response.parsed_body.fetch('data')
-    expect(data).to include('tasks_total' => 4, 'tasks_completed' => 1, 'progress' => 25, 'contact' => nil)
-    expect(data.fetch('overview')).to include('overdue_tasks' => 1, 'team_size' => 2, 'estimated_minutes' => 255, 'worked_minutes' => 150, 'approved_minutes' => 60)
-    expect(data.dig('overview', 'upcoming_milestones').map { |row| row['id'] }).to eq([milestone.id])
-    expect(data.fetch('recent_activity').none? { |event| event['auditable_type'] == 'JrcProjects::Project' && event['auditable_id'] == other_project.id }).to be(true)
+    travel_to(Time.utc(2026, 10, 26, 15)) do
+      task.update!(due_on: Date.current - 1)
+      completed_column = project.board_columns.find_by!(status_key: 'completed')
+      project.tasks.create!(account: account, created_by: admin, board_column: completed_column, status: 'completed', title: 'Done', estimated_minutes: 60, due_on: Date.current - 1)
+      canceled_column = project.boards.first!.board_columns.create!(account: account, name: 'Canceled', status_key: 'canceled', position: 5)
+      project.tasks.create!(account: account, created_by: admin, board_column: canceled_column, status: 'canceled', title: 'Canceled', estimated_minutes: 30, due_on: Date.current - 1)
+      project.tasks.create!(account: account, created_by: admin, board_column: backlog, status: 'backlog', title: 'Subtask', parent: task, estimated_minutes: 45)
+      project.time_entries.create!(account: account, user: member, task: task, minutes: 90, worked_on: Date.current)
+      project.time_entries.create!(account: account, user: admin, minutes: 60, worked_on: Date.current, status: 'approved')
+      project.time_entries.create!(account: account, user: admin, minutes: 30, worked_on: Date.current, status: 'rejected')
+      milestone
+      project.milestones.create!(account: account, name: 'Complete milestone', status: 'completed', due_on: Date.current + 1)
+      project.milestones.create!(account: account, name: 'Undated')
+      other_project.milestones.create!(account: account, name: 'Other milestone', due_on: Date.current + 1)
+      get base, headers: headers
+      data = response.parsed_body.fetch('data')
+      expect(data).to include('tasks_total' => 4, 'tasks_completed' => 1, 'progress' => 25, 'contact' => nil)
+      expect(data.fetch('overview')).to include('overdue_tasks' => 1, 'team_size' => 2, 'estimated_minutes' => 255, 'worked_minutes' => 150, 'approved_minutes' => 60)
+      expect(data.dig('overview', 'upcoming_milestones').map { |row| row['id'] }).to eq([milestone.id])
+      expect(data.fetch('recent_activity').none? { |event| event['auditable_type'] == 'JrcProjects::Project' && event['auditable_id'] == other_project.id }).to be(true)
+    end
   end
 
   it 'does not expose financial amounts through project details, time entries or activity to an ordinary member' do

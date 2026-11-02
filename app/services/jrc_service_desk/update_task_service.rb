@@ -2,21 +2,25 @@
 
 class JrcServiceDesk::UpdateTaskService < JrcServiceDesk::BaseService
   def call(ticket_id:, task_id:, attributes:, expected_lock_version:)
-    values = JrcServiceDesk::Input.attributes(attributes, %w[status checklist due_at priority assignee_account_user_id])
+    values = JrcServiceDesk::Input.attributes(attributes, %w[title description status checklist due_at priority assignee_account_user_id])
     raise ArgumentError, 'Task fields required' if values.empty?
 
     with_ticket(ticket_id, :show?) do |ticket|
       row = ticket.ticket_tasks.lock.find(JrcServiceDesk::Input.id(task_id))
       authorize!(row, :update?)
       verify_version!(row, expected_lock_version)
-      raise ArgumentError, 'Completed/cancelled tasks are preserved; create a new task' if %w[completed cancelled].include?(row.status)
+      if %w[completed cancelled].include?(row.status) && (values.keys - %w[title description]).any?
+        raise ArgumentError, 'Tarefas concluídas ou canceladas permitem somente corrigir título e descrição'
+      end
 
       assign_task_changes(row, ticket, values)
       next row unless row.changed?
 
       row.save!
       record_update(ticket, row)
-      JrcServiceDesk::TaskProgression.new(context: context, ticket: ticket, task: row).call if row.status == 'completed'
+      if row.saved_change_to_status? && row.status == 'completed'
+        JrcServiceDesk::TaskProgression.new(context: context, ticket: ticket, task: row).call
+      end
       row
     end
   end
@@ -27,7 +31,7 @@ class JrcServiceDesk::UpdateTaskService < JrcServiceDesk::BaseService
     row.assign_attributes(values.except('assignee_account_user_id', 'due_at'))
     row.due_at = values['due_at'] && Time.iso8601(values['due_at']) if values.key?('due_at')
     row.assignee_membership = assignee(values['assignee_account_user_id'], ticket.unit) if values.key?('assignee_account_user_id')
-    row.completed_at = Time.current if row.status == 'completed'
+    row.completed_at = Time.current if row.will_save_change_to_status? && row.status == 'completed'
   end
 
   def record_update(ticket, row)

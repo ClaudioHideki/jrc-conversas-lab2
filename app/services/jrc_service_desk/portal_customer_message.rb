@@ -18,7 +18,7 @@ class JrcServiceDesk::PortalCustomerMessage
     JrcServiceDesk::NativeExecutionContext.with(account: conversation.account, contact: contact, inbox: conversation.inbox) do
       message = conversation.messages.new(account_id: conversation.account_id, inbox_id: conversation.inbox_id, sender: contact,
                                           content: attributes[:content], source_id: attributes[:source_id], message_type: :incoming, private: false,
-                                          content_attributes: attributes[:content_attributes])
+                                          content_attributes: attributes[:content_attributes].merge('service_desk_origin' => 'portal'))
       files.each do |uploaded|
         message.attachments.new(account_id: message.account_id, file: uploaded, file_type: file_type(uploaded.content_type))
       end

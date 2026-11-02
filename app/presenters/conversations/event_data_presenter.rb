@@ -44,6 +44,7 @@ class Conversations::EventDataPresenter < SimpleDelegator
       sender: contact.push_event_data,
       assignee: assigned_entity&.push_event_data,
       assignee_type: assignee_type,
+      participant_ids: conversation_participants.map(&:user_id),
       team: team&.push_event_data,
       hmac_verified: contact_inbox&.hmac_verified
     }

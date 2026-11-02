@@ -134,4 +134,34 @@ RSpec.describe 'Durable Broker message obligation', type: :model do
     expect(obligation.reload.state).to eq('failed')
     expect(message.reload.status).to eq('delivered')
   end
+  it 'keeps a campaign callback identity instead of allocating a second identity' do
+    callback_id = SecureRandom.uuid
+    message.additional_attributes = { 'jrc_campaign_broker' => true, 'jrc_campaign_webhook_delivery_id' => callback_id }
+    message.save!
+    expect(JrcBrokerWebhookObligation.find_by!(message_id: message.id).delivery_id).to eq(callback_id)
+  end
+
+  it 'does not acknowledge an obligation when campaign preparation defers the callback' do
+    message.save!
+    obligation = JrcBrokerWebhookObligation.find_by!(message_id: message.id)
+    reservation = instance_double(JrcCampaigns::BrokerIntentReservation, prepare!: false)
+    allow(JrcCampaigns::BrokerIntentReservation).to receive(:new).and_return(reservation)
+    expect(SafeFetch).not_to receive(:fetch)
+    JrcBroker::WebhookObligationJob.perform_now(obligation.id)
+    expect(obligation.reload.state).to eq('pending')
+    expect(obligation.attempts).to eq(0)
+    expect(message.reload.status).to eq('sent')
+  end
+
+  it 'does not acknowledge an obligation when the callback ownership gate declines sending' do
+    message.save!
+    obligation = JrcBrokerWebhookObligation.find_by!(message_id: message.id)
+    reservation = instance_double(JrcCampaigns::BrokerIntentReservation, prepare!: true, start_callback!: false)
+    allow(JrcCampaigns::BrokerIntentReservation).to receive(:new).and_return(reservation)
+    message.update_columns(additional_attributes: { 'jrc_campaign_broker' => true })
+    expect(SafeFetch).not_to receive(:fetch)
+    JrcBroker::WebhookObligationJob.perform_now(obligation.id)
+    expect(obligation.reload.state).to eq('pending')
+  end
+
 end

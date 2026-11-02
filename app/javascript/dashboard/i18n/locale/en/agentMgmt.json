@@ -82,7 +82,11 @@
           "PLACEHOLDER": "Please select an availability status",
           "ERROR": "Availability is required"
         },
-        "SUBMIT": "Edit Agent"
+        "SUBMIT": "Edit Agent",
+        "AUTO_ASSIGNMENT": {
+          "LABEL": "Allow automatic assignment",
+          "HELP": "Applies only to this account. Authorized manual assignment, memberships and existing conversations are preserved."
+        }
       },
       "BUTTON_TEXT": "Edit",
       "CANCEL_BUTTON_TEXT": "Cancel",

@@ -76,7 +76,8 @@ export default {
       this.$emit('cancel');
     },
     async onSubmit() {
-      this.isSubmitting = false;
+      if (this.isSubmitting) return;
+      this.isSubmitting = true;
       try {
         await this.$store.dispatch('sendEmailTranscript', {
           email: this.selectedEmailAddress,
@@ -178,7 +179,7 @@ export default {
           <NextButton
             type="submit"
             :label="$t('EMAIL_TRANSCRIPT.SUBMIT')"
-            :disabled="!isFormValid"
+            :disabled="!isFormValid || isSubmitting"
           />
         </div>
       </form>

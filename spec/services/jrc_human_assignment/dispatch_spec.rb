@@ -17,7 +17,7 @@ RSpec.describe JrcHumanAssignment::Dispatch do
       create(:inbox_member, inbox: inbox, user: member)
       create(:team_member, team: team, user: member)
     end
-    allow(OnlineStatusTracker).to receive(:get_available_users).with(account.id)
+    allow(OnlineStatusTracker).to receive(:effective_available_users).with(account.id)
       .and_return(agent.id.to_s => 'online', other_agent.id.to_s => 'online')
     conversation.update_columns(team_id: team.id, assignee_id: nil)
   end
@@ -41,11 +41,11 @@ RSpec.describe JrcHumanAssignment::Dispatch do
   end
 
   it 'keeps a human queue when agents are offline and resumes it when someone becomes available' do
-    allow(OnlineStatusTracker).to receive(:get_available_users).with(account.id).and_return({})
+    allow(OnlineStatusTracker).to receive(:effective_available_users).with(account.id).and_return({})
     expect(described_class.new(conversation).perform).to be(false)
     expect(conversation.reload.assignee_id).to be_nil
     expect(conversation.status).to eq('open')
-    allow(OnlineStatusTracker).to receive(:get_available_users).with(account.id).and_return(agent.id.to_s => 'online')
+    allow(OnlineStatusTracker).to receive(:effective_available_users).with(account.id).and_return(agent.id.to_s => 'online')
     JrcHumanAssignment::DispatchJob.perform_now(account.id)
     expect(conversation.reload.assignee_id).to eq(agent.id)
   end
@@ -76,6 +76,55 @@ RSpec.describe JrcHumanAssignment::Dispatch do
   it 'does not enable the policy for other accounts by default' do
     account.update!(custom_attributes: {})
     expect(described_class.new(conversation).perform).to be(false)
+  end
+
+  it 'excludes an individual administrator while preserving their manual assignment' do
+    account.account_users.find_by!(user: agent).update!(role: :administrator, auto_assignment_enabled: false)
+    expect(described_class.new(conversation).perform).to be(true)
+    expect(conversation.reload.assignee_id).to eq(other_agent.id)
+    conversation.update!(assignee: agent)
+    expect(conversation.reload.assignee_id).to eq(agent.id)
+  end
+
+  it 'rechecks individual exclusion after selection' do
+    service = described_class.new(conversation)
+    allow(service).to receive(:select_agent) do
+      account.account_users.find_by!(user: agent).update!(auto_assignment_enabled: false)
+      agent.id
+    end
+
+    expect(service.perform).to be(false)
+    expect(conversation.reload.assignee_id).to be_nil
+  end
+
+  it 'does not recover an unrequested historical conversation' do
+    conversation.update_columns(auto_assignment_requested_at: nil)
+
+    JrcHumanAssignment::RecoveryJob.perform_now
+    JrcHumanAssignment::DispatchJob.perform_now(account.id)
+    expect(conversation.reload.assignee_id).to be_nil
+  end
+
+  it 'rechecks the team permission after selecting an agent' do
+    service = described_class.new(conversation)
+    allow(service).to receive(:select_agent) do
+      team.update!(allow_auto_assign: false)
+      agent.id
+    end
+
+    expect(service.perform).to be(false)
+    expect(conversation.reload.assignee_id).to be_nil
+  end
+
+  it 'rechecks the human assignment policy after selecting an agent' do
+    service = described_class.new(conversation)
+    allow(service).to receive(:select_agent) do
+      JrcHumanAssignment::Policy.update!(account, enabled: false, max_open: 3, inbox_ids: [inbox.id, second_inbox.id])
+      agent.id
+    end
+
+    expect(service.perform).to be(false)
+    expect(conversation.reload.assignee_id).to be_nil
   end
 
   it 'skips an agent with pending contact-center tabulation without bypassing the assignment guard' do
@@ -133,6 +182,7 @@ RSpec.describe JrcHumanAssignment::Dispatch do
     account.enable_features!('assignment_v2')
     unrelated = create(:inbox, account: account, enable_auto_assignment: true)
     create(:inbox_member, inbox: unrelated, user: agent)
+    create(:inbox_assignment_policy, inbox: unrelated, assignment_policy: create(:assignment_policy, account: account))
     arrival = create(:conversation, account: account, inbox: unrelated, status: :open)
     expect(arrival.reload.assignee_id).to be_nil
     expect(AutoAssignment::AssignmentService.new(inbox: unrelated).perform_bulk_assignment).to eq(1)

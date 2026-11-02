@@ -16,7 +16,7 @@ RSpec.describe AutoAssignment::RateLimiter do
   let(:account) { create(:account) }
   let(:inbox) { create(:inbox, account: account) }
   let(:agent) { create(:user, account: account, role: :agent) }
-  let(:conversation) { create(:conversation, inbox: inbox) }
+  let(:conversation) { create(:conversation, account: account, inbox: inbox) }
   let(:rate_limiter) { described_class.new(inbox: inbox, agent: agent) }
 
   describe '#within_limit?' do
@@ -33,6 +33,7 @@ RSpec.describe AutoAssignment::RateLimiter do
     context 'when rate limiting is enabled' do
       let(:assignment_policy) do
         instance_double(AssignmentPolicy,
+                        account_id: account.id, enabled?: true,
                         fair_distribution_limit: 5,
                         fair_distribution_window: 3600)
       end
@@ -69,6 +70,7 @@ RSpec.describe AutoAssignment::RateLimiter do
     context 'when rate limiting is enabled' do
       let(:assignment_policy) do
         instance_double(AssignmentPolicy,
+                        account_id: account.id, enabled?: true,
                         fair_distribution_limit: 5,
                         fair_distribution_window: 3600)
       end
@@ -103,6 +105,7 @@ RSpec.describe AutoAssignment::RateLimiter do
     context 'when rate limiting is enabled' do
       let(:assignment_policy) do
         instance_double(AssignmentPolicy,
+                        account_id: account.id, enabled?: true,
                         fair_distribution_limit: 5,
                         fair_distribution_window: 3600)
       end
@@ -124,6 +127,7 @@ RSpec.describe AutoAssignment::RateLimiter do
     context 'with custom window' do
       let(:assignment_policy) do
         instance_double(AssignmentPolicy,
+                        account_id: account.id, enabled?: true,
                         fair_distribution_limit: 10,
                         fair_distribution_window: 7200)
       end
@@ -146,6 +150,7 @@ RSpec.describe AutoAssignment::RateLimiter do
     context 'without custom window' do
       let(:assignment_policy) do
         instance_double(AssignmentPolicy,
+                        account_id: account.id, enabled?: true,
                         fair_distribution_limit: 10,
                         fair_distribution_window: nil)
       end

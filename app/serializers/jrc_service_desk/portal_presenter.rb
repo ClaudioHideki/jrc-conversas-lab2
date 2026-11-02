@@ -19,7 +19,7 @@ class JrcServiceDesk::PortalPresenter
 
   def note(record)
     { id: record.id.to_s, body: record.body, visibility: record.visibility, created_at: record.created_at.iso8601(6),
-      attachments: record.files.map { |attachment| file(attachment) } }
+      attachments: JrcServiceDesk::RecordWithdrawal.attachments(record).map { |attachment| file(attachment) } }
   end
 
   def customer_message(record)

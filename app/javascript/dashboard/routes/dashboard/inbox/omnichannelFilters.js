@@ -4,6 +4,22 @@ export const ASSIGNEE_FILTERS = Object.freeze({
   ALL: 'all',
 });
 
+export const matchesAssigneeFilter = (conversation, filter, currentUserId) => {
+  const { assignee, assignee_type: assigneeType } = conversation.meta || {};
+  if (filter === ASSIGNEE_FILTERS.ME) {
+    return Boolean(
+      (assignee &&
+        assigneeType !== 'AgentBot' &&
+        Number(assignee.id) === Number(currentUserId)) ||
+        conversation.meta?.participant_ids?.some(
+          id => Number(id) === Number(currentUserId)
+        )
+    );
+  }
+  if (filter === ASSIGNEE_FILTERS.UNASSIGNED) return !assignee;
+  return filter === ASSIGNEE_FILTERS.ALL;
+};
+
 export const canManageAssigneeFilters = ({
   role,
   customRoleId,

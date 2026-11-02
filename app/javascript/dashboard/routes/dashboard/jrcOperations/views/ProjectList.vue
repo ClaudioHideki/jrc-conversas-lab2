@@ -21,6 +21,7 @@ import {
   dateInput,
 } from '../api';
 import CreateProject from '../components/CreateProject.vue';
+import DeleteProjectButton from '../../jrcProjects/components/DeleteProjectButton.vue';
 
 const { accountId, userId, status, canCreate, projectText } = useProjects();
 const router = useRouter();
@@ -150,6 +151,10 @@ function created(project) {
   router.push(
     routeTo('jrc_projects_detail', accountId.value, { projectId: project.id })
   );
+}
+async function deleted() {
+  if (rows.value.length === 1 && page.value > 1) page.value -= 1;
+  await Promise.all([load(), loadSummary()]);
 }
 async function exportProjects() {
   if (exporting.value) return;
@@ -543,16 +548,41 @@ async function exportProjects() {
             class="flex size-7 items-center justify-center rounded-full bg-n-blue-3 text-[10px] font-semibold text-n-blue-11"
             :title="project.owner?.name"
             >{{ initials(project.owner?.name) }}</span
-          ><RouterLink
-            class="rounded-lg border border-n-blue-5 bg-n-blue-2 px-3 py-1.5 text-xs font-semibold text-n-blue-11 hover:bg-n-blue-3"
-            :to="
-              routeTo('jrc_projects_detail', accountId, {
-                projectId: project.id,
-              })
-            "
           >
-            {{ projectText('OPEN_PROJECT', 'Abrir projeto') }}
-          </RouterLink>
+          <div class="ml-auto flex items-center gap-2">
+            <RouterLink
+              v-if="project.capabilities?.includes('projects.project.update')"
+              class="rounded-lg border border-n-weak p-2 text-n-blue-11 hover:bg-n-blue-2"
+              :to="{
+                ...routeTo('jrc_projects_detail', accountId, {
+                  projectId: project.id,
+                }),
+                query: { tab: 'settings' },
+              }"
+              :aria-label="projectText('EDIT_PROJECT', 'Editar projeto')"
+              :title="projectText('EDIT_PROJECT', 'Editar projeto')"
+              ><span
+                class="i-lucide-pencil block size-3.5 shrink-0"
+                aria-hidden="true"
+            /></RouterLink>
+            <DeleteProjectButton
+              :project="project"
+              compact
+              :disabled="loading"
+              @deleted="deleted"
+              @error="error = $event"
+            />
+            <RouterLink
+              class="rounded-lg border border-n-blue-5 bg-n-blue-2 px-3 py-1.5 text-xs font-semibold text-n-blue-11 hover:bg-n-blue-3"
+              :to="
+                routeTo('jrc_projects_detail', accountId, {
+                  projectId: project.id,
+                })
+              "
+            >
+              {{ projectText('OPEN_PROJECT', 'Abrir projeto') }}
+            </RouterLink>
+          </div>
         </div>
       </article>
     </div>

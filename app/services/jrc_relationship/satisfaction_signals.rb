@@ -7,13 +7,12 @@ class JrcRelationship::SatisfactionSignals
   end
 
   def call
-    surveys = @context.records(JrcRelationship::Survey).where(assignment: @assignment)
+    surveys = JrcRelationship::SurveyModelAccess.visible_scope(@context, @context.records(JrcRelationship::Survey, survey_action: 'report').where(assignment: @assignment), action: 'report', share: 'share_relationship')
     nps = surveys.where(kind: 'nps').where.not(responded_at: nil).where('responded_at >= ?', 90.days.ago)
     ces = surveys.where(kind: 'ces', responded_at: 90.days.ago..Time.current)
     csat = native_csat
-    { surveys: surveys, nps: nps, ces: ces, csat: csat, nps_score: nps.average(:score)&.to_f, ces_score: ces.average(:score)&.to_f,
-      ces_normalized: ces.average("CASE WHEN definition_snapshot -> 'settings' ->> 'ces_direction' = 'lower_is_better' " \
-                                 'THEN 100 - score * 10 ELSE score * 10 END')&.to_f,
+    { surveys: surveys, nps: nps, ces: ces, csat: csat, nps_score: nps.average(:score)&.to_f, ces_score: ces.average(Arel.sql(JrcRelationship::SurveyScale.sql('ces')))&.to_f,
+      ces_normalized: ces.average(Arel.sql("(#{JrcRelationship::SurveyScale.sql('ces', reverse: true)}) * 10"))&.to_f,
       csat_score: csat_score(surveys), unmanaged: unmanaged?(nps, ces, csat) }
   end
 

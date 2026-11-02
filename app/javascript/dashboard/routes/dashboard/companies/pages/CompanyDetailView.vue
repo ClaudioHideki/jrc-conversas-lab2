@@ -15,6 +15,7 @@ import CompanyNotesSidebar from 'dashboard/components-next/Companies/CompanyDeta
 import CompanyProfileCard from 'dashboard/components-next/Companies/CompanyDetail/CompanyProfileCard.vue';
 import ConfirmCompanyDeleteDialog from 'dashboard/components-next/Companies/CompanyDetail/ConfirmCompanyDeleteDialog.vue';
 import { useCompaniesStore } from 'dashboard/stores/companies';
+import { canReturnToAccountList } from 'dashboard/helper/listReturn';
 
 const route = useRoute();
 const router = useRouter();
@@ -92,7 +93,11 @@ const goToCompaniesIndex = () => {
 };
 
 const goToCompaniesList = () => {
-  if (window.history.state?.back) {
+  if (
+    canReturnToAccountList(router, route.params.accountId, [
+      'companies_dashboard_index',
+    ])
+  ) {
     router.back();
     return;
   }

@@ -23,6 +23,12 @@ export function v2Labels(t) {
       unknown: t('JRC_SERVICE_DESK.COCKPIT.delivery_state.unknown'),
     },
     event: {
+      closure_policy_revised: t(
+        'JRC_SERVICE_DESK.OPS.EVENTS.closure_policy_revised'
+      ),
+      first_response_observed: t(
+        'JRC_SERVICE_DESK.OPS.EVENTS.first_response_observed'
+      ),
       first_response_recorded: t(
         'JRC_SERVICE_DESK.OPS.EVENTS.first_response_recorded'
       ),

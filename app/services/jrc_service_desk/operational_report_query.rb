@@ -7,15 +7,15 @@ class JrcServiceDesk::OperationalReportQuery
   FIELDS = %w[unit_id service_id company_id inbox_id channel_type category_id priority_id from to page per_page].freeze
   attr_reader :context, :unit, :relation, :filters, :from, :to
 
-  def initialize(user_context:, parameters:)
+  def initialize(user_context:, parameters:, permission: 'reports_view')
     @context = JrcServiceDesk::OperationalContext.new(user_context)
-    unless context.capability?(:dashboard_view) && context.capability?(:tickets_view_all)
+    unless context.capability?(:dashboard_view) && (context.capability?(:tickets_view_all) || context.supervision_access.any?(permission))
       raise Pundit::NotAuthorizedError, 'Operational reports require supervisor capabilities'
     end
 
     @filters = JrcServiceDesk::Input.attributes(parameters, FIELDS)
     @unit = context.unit_scope.find(JrcServiceDesk::Input.id(filters.fetch('unit_id')))
-    @relation = JrcServiceDesk::TicketPolicy::Scope.new(context.to_h, JrcServiceDesk::Ticket).resolve.where(unit_id: unit.id)
+    @relation = JrcServiceDesk::TicketPolicy::Scope.new(context.to_h, JrcServiceDesk::Ticket).resolve_for(permission).where(unit_id: unit.id)
     @from = timestamp(filters['from'])
     @to = timestamp(filters['to'])
     raise ArgumentError, 'Invalid time range' if from && to && from >= to
@@ -39,8 +39,12 @@ class JrcServiceDesk::OperationalReportQuery
       JrcCustomers::Visibility.new(**context.to_h).conversations.where(account_id: context.account.id)
     end
     JrcServiceDesk::TicketConversation.where(account_id: context.account.id, unit_id: unit.id,
-                                             ticket_id: relation.select(:id), conversation_id: conversations.select(:id))
+                                             ticket_id: relation_for('conversations_view').select(:id), conversation_id: conversations.select(:id))
                                       .joins(conversation: :inbox)
+  end
+
+  def relation_for(permission)
+    context.supervision_access.scope(relation, permission: permission)
   end
 
   def customer_dimension?
@@ -70,7 +74,7 @@ class JrcServiceDesk::OperationalReportQuery
 
       id = JrcServiceDesk::Input.id(filters['company_id'])
       JrcCustomers::Company.where(account_id: context.account.id).find(id)
-      @relation = relation.where(company_id: id)
+      @relation = relation_for('customers_view').where(company_id: id)
     end
     apply_channel!
   end

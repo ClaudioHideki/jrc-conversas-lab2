@@ -6,15 +6,17 @@ module JrcServiceDesk::StructureContract
   CAPABILITIES = { 'operator_companies' => 'operator_companies_manage', 'units' => 'units_manage',
                    'unit_memberships' => 'unit_memberships_manage' }.freeze
   FIELDS = { 'operator_companies' => %w[code name active], 'units' => %w[code name active operator_company_id],
-             'unit_memberships' => %w[unit_id account_user_id active availability capacity skills] }.freeze
+             'unit_memberships' => %w[unit_id account_user_id active availability capacity skills team_id queue_id
+                                    manual_assignment_enabled restricted_supervision supervision_grants] }.freeze
 
   VALIDATORS = { 'name' => :text, 'code' => :text, 'active' => :boolean, 'availability' => :availability,
                  'capacity' => :capacity, 'skills' => :skills, 'unit_id' => :reference, 'account_user_id' => :reference,
-                 'operator_company_id' => :reference }.freeze
+                 'operator_company_id' => :reference, 'team_id' => :optional_reference, 'queue_id' => :optional_reference,
+                 'manual_assignment_enabled' => :boolean, 'restricted_supervision' => :boolean, 'supervision_grants' => :supervision }.freeze
 
   def self.attributes(resource, value, create:)
     allowed = FIELDS.fetch(resource.to_s)
-    allowed = resource == 'unit_memberships' ? %w[active availability capacity skills] : %w[name active] unless create
+    allowed = resource == 'unit_memberships' ? FIELDS.fetch(resource) - %w[unit_id account_user_id] : %w[name active] unless create
     data = JrcServiceDesk::Input.attributes(value, allowed)
     required = resource == 'unit_memberships' ? %w[unit_id account_user_id active] : allowed
     raise ArgumentError, 'Explicit fields required' if data.empty? || (create && (required - data.keys).any?)
@@ -78,5 +80,13 @@ module JrcServiceDesk::StructureContract
     JrcServiceDesk::Input.id(value)
   end
 
-  private_class_method :text, :boolean, :availability, :capacity, :skills, :reference
+  def self.optional_reference(key, value)
+    value.nil? ? nil : reference(key, value)
+  end
+
+  def self.supervision(_key, value)
+    JrcServiceDesk::SupervisionAccess.normalize(value)
+  end
+
+  private_class_method :text, :boolean, :availability, :capacity, :skills, :reference, :optional_reference, :supervision
 end

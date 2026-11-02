@@ -64,7 +64,8 @@ class JrcServiceDesk::CreateTicketWorkflowService < JrcServiceDesk::BaseService
   def same_creation_context?(ticket, marker, inputs)
     previous = marker&.data&.fetch('conversation_id', nil)
     files = marker&.data&.fetch('file_fingerprints', []) || []
-    previous == inputs[:conversation_id] && ticket.service_id == inputs[:service_id] && files == inputs[:file_fingerprints]
+    input_service_id = marker&.data&.key?('input_service_id') ? marker.data['input_service_id'] : ticket.service_id
+    previous == inputs[:conversation_id] && input_service_id == inputs[:service_id] && files == inputs[:file_fingerprints]
   end
 
   def create_ticket(unit, attributes, key, inputs)
@@ -80,11 +81,12 @@ class JrcServiceDesk::CreateTicketWorkflowService < JrcServiceDesk::BaseService
       JrcServiceDesk::LinkConversationService.new(user_context: context.to_h).call(ticket_id: ticket.id, conversation_id: conversation_id)
     end
     marker = { 'conversation_id' => conversation_id }
+    marker['input_service_id'] = inputs[:service_id] if ticket.service_id != inputs[:service_id]
     marker['file_fingerprints'] = inputs[:file_fingerprints] if inputs[:files].any?
     append_event!(ticket, 'creation_context_recorded', marker)
     attach_opening_files(ticket, inputs[:files], key) if inputs[:files].any?
     JrcServiceDesk::OlaTracker.sync!(ticket)
-    return unless ticket.queue && ticket.queue.distribution_mode != 'manual'
+    return unless ticket.queue
 
     JrcServiceDesk::AutomaticRoutingService.new(user_context: context.to_h).call(ticket_id: ticket.id)
   end

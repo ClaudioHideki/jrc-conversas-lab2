@@ -19,6 +19,7 @@ import Button from 'dashboard/components-next/button/Button.vue';
 import SalesOpportunityForm from 'dashboard/routes/dashboard/sales/SalesOpportunityForm.vue';
 import { FEATURE_FLAGS } from 'dashboard/featureFlags';
 import { useAccount } from 'dashboard/composables/useAccount';
+import { canReturnToAccountList } from 'dashboard/helper/listReturn';
 
 const store = useStore();
 const route = useRoute();
@@ -67,7 +68,14 @@ const activeTabIndex = computed(() => {
 });
 
 const goToContactsList = () => {
-  if (window.history.state?.back || window.history.length > 1) {
+  if (
+    canReturnToAccountList(router, route.params.accountId, [
+      'contacts_dashboard_index',
+      'contacts_dashboard_segments_index',
+      'contacts_dashboard_labels_index',
+      'contacts_dashboard_active',
+    ])
+  ) {
     router.back();
   } else {
     router.push(`/app/accounts/${route.params.accountId}/contacts?page=1`);

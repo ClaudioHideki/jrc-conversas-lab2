@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onBeforeUnmount } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useProjects } from '../../jrcProjects/useProjects';
 import {
@@ -23,6 +23,7 @@ import ProjectOverview from '../../jrcProjects/components/ProjectOverview.vue';
 import ProjectExecution from '../../jrcProjects/components/ProjectExecution.vue';
 import ProjectTeam from '../../jrcProjects/components/ProjectTeam.vue';
 import ProjectConfiguration from '../../jrcProjects/components/ProjectConfiguration.vue';
+import DeleteProjectButton from '../../jrcProjects/components/DeleteProjectButton.vue';
 import TaskEditor from '../components/TaskEditor.vue';
 import ProjectPlanning from '../components/ProjectPlanning.vue';
 import ProjectHours from '../components/ProjectHours.vue';
@@ -36,6 +37,7 @@ const projectId = computed(() => route.params.projectId);
 const project = ref(null);
 const tasks = ref([]);
 const loading = ref(false);
+const tasksLoading = ref(false);
 const error = ref('');
 const taskModal = ref(false);
 const selectedTask = ref(null);
@@ -125,31 +127,50 @@ function openQueryTask() {
 async function load({ throwOnError = false } = {}) {
   generation += 1;
   const current = generation;
+  let failed = false;
   if (!status.value?.projects_enabled || !projectId.value) {
     loading.value = false;
+    tasksLoading.value = false;
     return;
   }
   loading.value = true;
+  tasksLoading.value = true;
   tasksSynced.value = false;
   error.value = '';
   try {
-    const [record, list] = await Promise.all([
-      request(accountId.value, 'projects/projects/' + projectId.value),
+    const [, list] = await Promise.all([
+      request(accountId.value, 'projects/projects/' + projectId.value).then(
+        record => {
+          if (current !== generation || failed) return;
+          project.value = record.data;
+          loading.value = false;
+        }
+      ),
       allPages(
         accountId.value,
         'projects/projects/' + projectId.value + '/tasks'
       ),
     ]);
     if (current !== generation) return;
-    project.value = record.data;
     tasks.value = list;
     tasksSynced.value = true;
     openQueryTask();
   } catch (err) {
-    if (current === generation) error.value = errorMessage(err);
+    failed = true;
+    if (current !== generation) return;
+    project.value = null;
+    tasks.value = [];
+    tasksSynced.value = false;
+    taskModal.value = false;
+    selectedTask.value = null;
+    openedQueryTask = null;
+    error.value = errorMessage(err);
     if (throwOnError) throw err;
   } finally {
-    if (current === generation) loading.value = false;
+    if (current === generation) {
+      loading.value = false;
+      tasksLoading.value = false;
+    }
   }
 }
 const refresh = () => load({ throwOnError: true });
@@ -169,8 +190,11 @@ watch(
     openedQueryTask = null;
     load();
   },
-  { immediate: true }
+  { immediate: true, flush: 'sync' }
 );
+onBeforeUnmount(() => {
+  generation += 1;
+});
 function navigate(value) {
   router.push({ query: { ...route.query, tab: value } });
 }
@@ -297,7 +321,7 @@ async function exportTasks() {
             </p>
           </div>
           <div class="flex flex-col items-end gap-3">
-            <div class="flex gap-2">
+            <div class="flex flex-wrap justify-end gap-2">
               <button
                 v-if="can('project.update')"
                 class="flex items-center gap-2 rounded-lg border border-n-weak bg-n-solid-1 px-3 py-2 text-xs"
@@ -316,6 +340,12 @@ async function exportTasks() {
                   projectText('EXPORT_TASKS', 'Exportar tarefas')
                 }}
               </button>
+              <DeleteProjectButton
+                :project="project"
+                :disabled="loading"
+                @deleted="router.push(routeTo('jrc_projects_list', accountId))"
+                @error="error = $event"
+              />
             </div>
             <div class="w-64 max-w-full">
               <div class="mb-1.5 flex justify-between gap-3 text-xs">
@@ -371,8 +401,16 @@ async function exportTasks() {
         class="min-w-0"
         role="tabpanel"
         :aria-labelledby="'project-tab-' + tab"
-        :aria-busy="loading"
+        :aria-busy="loading || tasksLoading"
       >
+        <p v-if="tasksLoading" class="text-sm text-n-slate-11" role="status">
+          {{
+            projectText(
+              'TASK_STATE_UNAVAILABLE',
+              'Atualizando as tarefas. Aguarde antes de alterar o quadro.'
+            )
+          }}
+        </p>
         <KeepAlive>
           <ProjectOverview
             v-if="tab === 'overview'"
