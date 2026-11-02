@@ -4,7 +4,7 @@ class AutoAssignment::Diagnostics
   def perform
     rules = AutoAssignment::Eligibility.new(inbox: inbox, conversation: conversation)
     configuration_reason = rules.configuration_reason
-    human_policy = JrcHumanAssignment::Policy.for(inbox.account) if JrcHumanAssignment::Policy.enabled_for?(inbox.account, inbox.id)
+    human_policy = JrcHumanAssignment::Policy.effective(inbox.account, inbox.id) if JrcHumanAssignment::Policy.enabled_for?(inbox.account, inbox.id)
     presence = OnlineStatusTracker.effective_presence(inbox.account_id)
     counts = Hash.new(0)
     account_users = inbox.account.account_users.where(user_id: inbox.inbox_members.select(:user_id))

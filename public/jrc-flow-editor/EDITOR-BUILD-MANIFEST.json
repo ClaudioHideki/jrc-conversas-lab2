@@ -2,13 +2,13 @@
   "schemaVersion": 1,
   "component": "jrc-native-flow-editor",
   "sourceRepository": "ClaudioHideki/BrokerJRCIA",
-  "sourceSha": "42848bf68f9c07fdc6e102de37ccb4a845e463db",
+  "sourceSha": "7c4903769f961a68bdf04583dce4c815d7a5709e",
   "sourceCommitted": true,
-  "lockfileSha256": "d094a0da20f404512f64a6529490903524aecb95e883d81258b859544b3c0f86",
+  "lockfileSha256": "697ccd1529eddb570515ecc6736ecdf45942a463cdfe88c28a635e13d9c0b8e2",
   "inputs": [
     {
       "path": "apps/web/public/THIRD_PARTY_NOTICES.txt",
-      "sha256": "289db5060637c9fa381d89a21979bf1843257353341ec5b6189a5e9f871476c3",
+      "sha256": "15250d75013475d5cca3359dc027f4c069197725fff8f3c35ab9fad3fe2bf49d",
       "dependency": false
     },
     {
@@ -128,7 +128,7 @@
     },
     {
       "path": "apps/web/src/automations/node-editors/MenuEditor.tsx",
-      "sha256": "a36bd85e9d129c665431f6099b6ec935989f7e959a94006a3dacc2faee277549",
+      "sha256": "dfe5e18d2d49eff42e1b99f98ff4fcc775a63225d6320f5eb41098f34c3c4012",
       "dependency": false
     },
     {
@@ -158,7 +158,7 @@
     },
     {
       "path": "apps/web/src/flows/FlowCanvas.tsx",
-      "sha256": "ce0c16b071e1e7c52cec5ded27c6bfe55d459e6962c41a92d9a645a98834e4cb",
+      "sha256": "3fc42c3c2496b4b2761694405177b4b853fd1a7c347d2f0c00ae0e20f034cd00",
       "dependency": false
     },
     {
@@ -318,12 +318,12 @@
     },
     {
       "path": "node_modules/zod/v4/classic/external.js",
-      "sha256": "92a7244eb7306dd5035e3d2002a5f447cd6b4ec2f510adf08f11df090b0de610",
+      "sha256": "c6b584ae70ba4e7132b2cd78c23ea4ecedc9828abf999edee312372e1fb453d6",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/classic/from-json-schema.js",
-      "sha256": "e47add3abea25a4980f56df7c7e2fcb31a9fd8ae627c49fa07104e83f4697e91",
+      "sha256": "31dc999a26cb6928f5e99ea564d648567e85cf9aa47565198fb6186dbd6c070e",
       "dependency": true
     },
     {
@@ -343,37 +343,37 @@
     },
     {
       "path": "node_modules/zod/v4/classic/schemas.js",
-      "sha256": "5f05c8227d5ab4579552303f6f3204f8bc57e1341226007dc5fcc8479b055a8a",
+      "sha256": "2bf4a631a18f734a9a7ab7fc11bcf919214774d2235a312dcec0dd53d0324c32",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/core/api.js",
-      "sha256": "4c147782e1baaf518dc52e4041a898e718a171e03fdb5fd2b8dcbffa8545ea54",
+      "sha256": "03ae6016abc9585e3f3481d6b8d775a95ae4ee65badbde73ca1ed953ff14c0e7",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/core/checks.js",
-      "sha256": "92a4400fe5964b5bc6db6e9cb37470959d4594ad932e347ca691c59462deeca0",
+      "sha256": "bc42543274218aa7ef72192b3218d2a4a399e53df8de240a04d9ff275096f563",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/core/compile.js",
-      "sha256": "888783d09a521996f26f35de24c38460577ee094b433489e5119d0830d922bfc",
+      "sha256": "53fcf24821f50ecf42492ab7101abe8a50ead8286a53567d71648fe5ca346b99",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/core/core.js",
-      "sha256": "db75715d529e69c9dec49651c020aa8b67a9620e76024c8a46e917ed8b111ff4",
+      "sha256": "c7ce485c97263e42568d16b11bb4a90133221c7e807498a9273d70f41ba16ef6",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/core/doc.js",
-      "sha256": "8f49aae02f25258170291bb99ece6f58e50480db51ed2ef9f1e1621ebc54540d",
+      "sha256": "be4c1b1a1ad247cc70f360a572060edd7e0cea24252c3a319f33d247899c5643",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/core/errors.js",
-      "sha256": "2c02617e5e7bfebffa8176901a6ed4894d62d4942ed2ed2804c81239385c0bf9",
+      "sha256": "a0c95ef2f7085b5bc2931f7b566f524b26a0360c8df741e3f87f923745cf9792",
       "dependency": true
     },
     {
@@ -383,12 +383,12 @@
     },
     {
       "path": "node_modules/zod/v4/core/json-schema-generator.js",
-      "sha256": "c2e74b910ee71c0d07148442d8306c78860c13fa2d0a215ebd5c9166f6cb8a9e",
+      "sha256": "beaeab6faa654e99e443b8a9f5d8a4adc08cd8226f92a0cd32477a58ecfa1807",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/core/json-schema-processors.js",
-      "sha256": "de52da8e4c33d4c54b44c1515e702a3fac2663b4772d4a343b4891ac2d46af03",
+      "sha256": "b6d2aee72212c076b9cde38da6333591c76a24eb049a4ee4e7bd2b7825d8b817",
       "dependency": true
     },
     {
@@ -398,17 +398,17 @@
     },
     {
       "path": "node_modules/zod/v4/core/memoizer.js",
-      "sha256": "c0f46352b24c7457bd5b89df4d3847aced732d6d74a11f2d44502b8c035a7821",
+      "sha256": "18a3188c51229d9189a5408b0b7fbc3e121b55c2b4c3c406d79cb9b77e7ad964",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/core/parse.js",
-      "sha256": "cb65fa29960a4b0becfb3538d5afd5d5ff1fa4c52e8d53e531a9967b71905116",
+      "sha256": "fb05b91ec260f3f484f7c00a177b6126ceb8fd1b09dc90b1200afdffd4d98efd",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/core/regexes.js",
-      "sha256": "a401e10ad34078b4cfe8da337c21d2d8e20cc2c82b43406b95ae8523100d3c45",
+      "sha256": "24fc98f6fc9175e50ff29d28b040e3b4ac5650de19914d45ee27b853d367ecc6",
       "dependency": true
     },
     {
@@ -418,22 +418,22 @@
     },
     {
       "path": "node_modules/zod/v4/core/schemas.js",
-      "sha256": "d19d514ab02c347143f129e2212d63496f2dda4c6ba607cb939f7aa5eb4d8846",
+      "sha256": "0ee56e8afbae28eeb1060a162ad7e56f0675ee6fb83f0ae56bea2e088f6cdbc0",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/core/to-json-schema.js",
-      "sha256": "16cb6032d2810d664102af0dca07d50af7a6a808b5036e33415b38492fc00564",
+      "sha256": "85b883eb8f05e9f060c71a39fce7df9345b566af29d5bc9c8fa477fe616a051d",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/core/util.js",
-      "sha256": "e50c63d70e8b1abf2968936acf22c9e4e96e735f0af6d367785e0948e46553fa",
+      "sha256": "bb08133b11b478c8e715038fff26ebea204d7fd5443fba31fe138b142d202efb",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/core/versions.js",
-      "sha256": "0040e7f6554f6d3d1569388cde7dbd66c017ad1d3dfcfd731f9e810c429b4811",
+      "sha256": "28439030e50c35b90e1f88726297a346f5285e32e24da7ea4ce15618661d9ac1",
       "dependency": true
     },
     {
@@ -443,152 +443,152 @@
     },
     {
       "path": "node_modules/zod/v4/locales/ar.js",
-      "sha256": "954b1ecdf9beae18b24a078d888b741d498c4475527b63666cbde681636ce597",
+      "sha256": "eec4016c2b3063ae929617d90ec609e4c425e60c97a954d3a24de0f457b6ec97",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/az.js",
-      "sha256": "0f3c71cd60e4bb4c0506b0fc2ffdf615abc56dc351517b734953796e9daac5fd",
+      "sha256": "5bd03646b9d18b73e71356cd28937e4e6413b806bb23e14689cc88f6f65ff3a6",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/be.js",
-      "sha256": "08c0d312d33bb213b8c8a2688e4e32ac156b980c6786fe1435795fa457b1e735",
+      "sha256": "f969afea5d9800a71958a621658943b85a2576a2bfefdd5dea70afc4924d4af4",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/bg.js",
-      "sha256": "c9dc2ff4a430959c226a28ec71cceda54a4b9c83eb28ad9f27fa984ecc4bbaa0",
+      "sha256": "96741333a790320e05aef7286b5b709a4a7c48cfffc50fc5e6acff5b505275e9",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/bn.js",
-      "sha256": "c438a45fb8f142d0c715abdd5bde85f97fdcd7a4ecbb19baa22fa5544b931cf8",
+      "sha256": "6d8227b52a6864465b7c52a9ef7e09d261d904ec8a619932e15dd9f9f826e8dd",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/ca.js",
-      "sha256": "6525cce3d7a7a6486be11a603325ffb40a7a67b88ce2ad5605387f4762c4b4bc",
+      "sha256": "67f6f38b59a6e3ee81cc5155480465331dd9a142b2471a495503a81dafba0684",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/ckb.js",
-      "sha256": "858c8ff792ead63bc21433a9d5134cc1a12d6b43fe40a247ade2759f0f5217c3",
+      "sha256": "bdb9ef0cfda4009f8892585a1780fff863cd409931d6f89394c271042c131137",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/cs.js",
-      "sha256": "1d5d88fdfc2ddfcb9719f70f8b1367acc87cb7f7f541dfbaa380ee3477119422",
+      "sha256": "4ffa0e484ad1842a2c0e5c7f2dfe9160155ff5be4b95ab6e524d3a30a2210488",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/da.js",
-      "sha256": "0a16ebf92bc38487863c29be28d49cf015b00d40a72f4723b570e4bca07af306",
+      "sha256": "29addcd60e88422bed9ed78c6c864220a15c06b31fdb4ab7ad4f87be4098e6ae",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/de.js",
-      "sha256": "b75e66c589a7e664b6527cab5495851c87e9d69e754caa192460642280c164f9",
+      "sha256": "f344eb96ba18d9db907f3f9c95897ce2590ab0cde1553c023daffbb1cb5ef6f4",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/el.js",
-      "sha256": "1d6f7c0a139fc18d7741749cbbe0a385f5737af7563a4915c70deecd878f18ee",
+      "sha256": "fdea833aa0a8c381d26216db1521dd7fbc4dccb6d3aa50f9a585ffb975df91eb",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/en.js",
-      "sha256": "bf9bc721244e649eaf1f69c34c33c6a8ebd08c2e0f65cff8ad4ed0c9005977c3",
+      "sha256": "d5930e10d137b048b37823e168e4177947e1f696ada8419c71bb0d32da4333c0",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/eo.js",
-      "sha256": "43371beb2bb1cb02591167d95ea6de356ee2f7a6753b6d539ab1d5625676f361",
+      "sha256": "97797bd22319ecc3f2044da6c305f1114b851803697029ffce2b66644757da3a",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/es.js",
-      "sha256": "5610ea1773e87f333322946c0b6e9fcfd0fc0a3155eb773cc1e767aa0e9a6c88",
+      "sha256": "12e762b921b1e3fdb8e265d2b554de81ce9706ceb23a81527f48ae2dddf355db",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/fa.js",
-      "sha256": "c69ee6bdf38106800a979cb5383a4de3f3d45af7d66807ae4abd6fde877a9418",
+      "sha256": "60e7eeff4c000c85f8420168374344305d3c2110a5f91a2fb672b2a2381eeddf",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/fi.js",
-      "sha256": "703ba6e565c7ce2d442b8e8e0b0051e38171b07e17e249ff522e7125fbfce5a0",
+      "sha256": "1e72af4193e564cd37dce4a850dc18bc1bcd6ca280f29e9f5f8c6bbab6a2cad9",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/fr-CA.js",
-      "sha256": "daef8904651e0d426b54d5642b4e1b6a2e91e1db25bf11a470209550621fd04a",
+      "sha256": "a2ca0451ff943766bb6a88b392b25447462a1d3ed75c1adda5ddb0bc474bcd42",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/fr.js",
-      "sha256": "4ecf245f7f8f22a8af9ba710ebf1bbfd9c69dca2b69972d86e8ae6dba31c4552",
+      "sha256": "477345d6401d0e4f07794b1a2cff8b78953723f1fc8cfaeb6b660c19be47125a",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/gu.js",
-      "sha256": "7a72be7ef3e973003d0ea87d4a1f525e1273bff0504143977199bea8e7dd09c9",
+      "sha256": "b1921ac6b4158e6360a8da6099df8bbf2d7bce7c1cf381d5a5e47aa0c74874d2",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/he.js",
-      "sha256": "29455674b3c042f12719f76096b968363f614e5dc2454d1e2c7b480724dc8d95",
+      "sha256": "1cfff31fac19616d900d1f3febd9690ea87711e13b5be299326ebfd3f33aad4d",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/hi.js",
-      "sha256": "5cd963e4293c850c29e929f9905d982f1efebaca6560209ab03e14e9b4136e05",
+      "sha256": "c31e466c2a31dc10ba6a288e1aebf429a6e9566a26918d0240aae058693f6329",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/hr.js",
-      "sha256": "645d68ac923f8ebc21533e6b08bf349600eedb7751f9dd630691cb50d4150a5b",
+      "sha256": "ff2bebef0761f2d6095103d58484e3b95551bc51d56770db8f161b8e0e0ec941",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/hu.js",
-      "sha256": "3f3f0630d4d0444a41e59cdde46accc9c2ea495083066a9299cf0c40001aca90",
+      "sha256": "9816c21ee0b3be9d973f9e033e9587a608f2d35dd1b984d415b88e03242b0189",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/hy.js",
-      "sha256": "b9500a95d63ef1280673934af9ccffcc7a9c68e53e5cc4820a1cfb72893684f3",
+      "sha256": "daf6d0c590d9b061759598ba9f7f97041e2874c7a58da2c64b86f152840d68fa",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/id.js",
-      "sha256": "1ac54626137d02dfd3a7a24edf42a6f06f9f8a01fc920db8c4d18c9320729987",
+      "sha256": "e5c23bb0b6f696fa936bafd7969e64738504cf7a5be3ec04b24ae899d4912b58",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/index.js",
-      "sha256": "2d7e03f825285ae178748fe7186ad8e80bfb1a0eb55ef1e160b4e5f800d8f014",
+      "sha256": "7ea85250d1e7bd9459cda61f38c78757a410d561a5421bb3f08019bba79c9849",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/is.js",
-      "sha256": "d16df422e9bce5fa866dc66c89e11a854c78b875368250b2dc6d309bca2ee8c8",
+      "sha256": "1cce1285bbf55c8a76303fea0be0fb6d39fbd0ece833137ea23a22f406ac1ae1",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/it.js",
-      "sha256": "753d91ff007abf517212631a0012370a0b178a7fa787e026e7f5bffcf0f84053",
+      "sha256": "096b497df6c5fe7de4422482b7733e764e4b344e8d7f768a7289556687acdb82",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/ja.js",
-      "sha256": "e86ae224917fd95945de947b3af81c55f9ab250a69e53f3f7ad0635f3f7c0022",
+      "sha256": "2a6bbbd6dbd573687b22f35873a13cdf730c07423b4ab114e5a8b12d8777146d",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/ka.js",
-      "sha256": "031b439f4720482b427b953d60307cbd2fe2c89079b309c4df23f645d7b709cc",
+      "sha256": "baf3204123cf4246df654fd1948b6c8da6917e7a06e470aeeaf7c1eaa7003628",
       "dependency": true
     },
     {
@@ -598,122 +598,127 @@
     },
     {
       "path": "node_modules/zod/v4/locales/km.js",
-      "sha256": "02c05625e6ade1ff10935a4509555ee4d1f778ddc946ea7aaf016311cb5c3fd4",
+      "sha256": "e61079f14070dfa9c7b2047eb79f5bea6d4e845f192756d103c121bbd63ee18a",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/kn.js",
-      "sha256": "cd46ade57ca318fd6128884dbdc581a6fae77d349adc3965ee8e768cef67abb2",
+      "sha256": "884b1b68a1ca02fe9a774b8de9cbfa3486892eea36192699120f57b31f0a1f42",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/ko.js",
-      "sha256": "8f3a1013116b364df91d6d7fb4d73558277d6cc6b8c36b15771a1a1271cf00ad",
+      "sha256": "11fcef61a2f23e010bf0f569d71be0d49524afc97f3072cc03fdc6fe3ea2f14d",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/lt.js",
-      "sha256": "075f0d917ccca164aaf033e74f20323eac29ba6e6e5f9a7727b756e3ad396760",
+      "sha256": "d2e67a35a3c6e7241a9eb9c5851e4b5b651ac8b23278854862e6055829946c48",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/mk.js",
-      "sha256": "3867d845830499ef1fdb942705a7fd2b4925518cb848e0c44effd8fce66ecf10",
+      "sha256": "64ddd914c432ba5690d0686bff6603651ce886a891f84823d7dc766c9c980cd1",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/ms.js",
-      "sha256": "cf6c69c51fc57a63d571ef10b10b9fff5956f2ba9691eb9bf3a35e65a35e4e2e",
+      "sha256": "94faf0d306ffa2a4f95e57f3e53060d27220a639b9cb529f00d1d01b6270f045",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/ne.js",
-      "sha256": "5a503c5fb2cd676114fa54d3085758796f63b45d6a0c5a8ef25a8c579625f5a7",
+      "sha256": "6da69989b702ae15baa27b799b6b2b32fd011ba3980a190dd0eccfc9233083d6",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/nl.js",
-      "sha256": "dd4d6293dd962769503a77de077b2e0ecb4f35879e541a9c525e642ec1172d27",
+      "sha256": "296ced8be508c5f9e82b562049d2974882029bcd5b2ab4ade14401b33ec99909",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/nn.js",
-      "sha256": "de30d64d6c0affc8076c91b3eb15f5a59aa30bc8d705569336dc7878f50a0efc",
+      "sha256": "bae9756817629db30841eb54a27ed9b3c71c2a4208314d8d070be624bd2e9359",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/no.js",
-      "sha256": "909d5b032afc4593c80b33d40c365d7e92933e491d075feb3736471ba30ab432",
+      "sha256": "f358e5586940350ee25a05db184565d23eb1c66903e182ebec812172f31cb55a",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/ota.js",
-      "sha256": "7ac7db9c471408796059ae98182b89319d2d220b54e31eab7f6c5bc9da36e048",
+      "sha256": "66ed8c3ce00b2e9971ed5a17f002937405d8cdfeb399ebe012db9d2317f42146",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/pl.js",
-      "sha256": "7deb22313f5547c8a76240d155fbc3889366f10b78113c7343ff16a7726a98cc",
+      "sha256": "b7f82cf9f747785beeec05cd31d3d7493c52bd3647598924141568f148c07222",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/ps.js",
-      "sha256": "bff575c5ea157ba66f882763f047c742fe82b3d88ee58ffc8e2d0089a47b46c1",
+      "sha256": "1c15b81fcce0cdc59dbcca18df5c4ecf4e176fc3fb7668207b9ba54df43cce46",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/pt-BR.js",
-      "sha256": "6ed21969db4af569b0e7bddd86be996cc4e311f3b2f1279de84029f37988c463",
+      "sha256": "abc52db767b9dd938954776728ea7480cdcab569a5a17664f60e5a2c1d63e60b",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/pt.js",
-      "sha256": "6976fd2b1afa35abe404a04bd2a6780c474fdf3680dc430bea37873a86b0026f",
+      "sha256": "93a820f60d571607bf34b69198f5b24617475584c0b22c0f8d160fcdef096a46",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/ro.js",
-      "sha256": "a9d953e9295f181aad6b4a1b841a271071aa0ad49993c64c9096298f9ac27c7c",
+      "sha256": "54751d2866171c9c7ce1a72868dec09efa54d1b2b67401767594c5b360aca38a",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/ru.js",
-      "sha256": "69711d561391804b9ef55d8429b50a4ab0da960aeda8e26d44d9c12e858c7432",
+      "sha256": "40a019b53bd1684fd4b750db87021520dd5d710f714010c0a594e5bcf5787478",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/sk.js",
-      "sha256": "8368e3997cdb66290adade3353b246cf80f33836860ce23560dab5252ad18a3a",
+      "sha256": "ae7c49242e70149434c9051dd00209afbd517d98ba54c13692371a5340b616da",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/sl.js",
-      "sha256": "76af13e027fd69fc90c66337a9e25da67eecb1414a565407e7fdecd6db485e3a",
+      "sha256": "490ca48f8aae3aed660758b32856d49a9fc5c7e255dad220e75abaef8c35140b",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/sv.js",
-      "sha256": "dd4b5a0b37ebe65edf6bed4d0f3889eed08825b7561db424ac65f6be8da58588",
+      "sha256": "448f36996bb0d159489b34ad7d86df03e520a13e43b1c98ea2fb18d7ed4a3c95",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/ta.js",
-      "sha256": "70f11a941273beedbccfa0bd06e7699c46b2591895632b2b5cfd136e3134b09c",
+      "sha256": "8b6e1bc033fdaefb1acfc7edf88c9f53c3a50cc892066effdab306103e994d42",
+      "dependency": true
+    },
+    {
+      "path": "node_modules/zod/v4/locales/tg.js",
+      "sha256": "9a5c9a3b18b8ccded28d66033575b22d823df17a7afa8bb9a733f31fe071462f",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/th.js",
-      "sha256": "7c43bf69b788629e15e5f569cbb5db86c684d03f8a2143ecabe8fd9b56b67569",
+      "sha256": "913cc4962ddf5cb54ed694d04b7008493ef401d3333b26426b32f4890712574e",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/tk.js",
-      "sha256": "033b56bbedf63901978158b747636e45efa7f6b3599cba13d9675ebc1908a3cf",
+      "sha256": "445abfed18c5a9d79143b02c9cf9c171b41fb5dff8ffc2cb59b7aef7203e5a7f",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/tr.js",
-      "sha256": "dad0163bc78c77c600eeea79e22dad5c1826f351e56002ad7099e2212c9d7f3b",
+      "sha256": "bca07607a27f518f19877dd9c2235fada9c73eb56896f0f6e274781fab71d64e",
       "dependency": true
     },
     {
@@ -723,52 +728,52 @@
     },
     {
       "path": "node_modules/zod/v4/locales/uk.js",
-      "sha256": "91b29aabf7b30aa72cb4d67dd2de9d7a1eb33e027dc3603bf2fbbb63870b4a6e",
+      "sha256": "1e59ba41296aeb5b6142a6e5ed84712931e33e54ab0b9ae5d83faf436fc3d968",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/ur.js",
-      "sha256": "42de4029904c64a22a31fb1432ba53b423338f0ac1822d2a326f52e764de9da8",
+      "sha256": "d37ed2c93408e0a6b6e1cd290117a6f0e9d7b2c83509cd34b502e1dd94899c87",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/uz.js",
-      "sha256": "0428527e1ab1a35f68815786bcb5170c21087fac4a9cf4f1d0160a9abde18c3f",
+      "sha256": "2cbe07635b03064ffad0bfcc98d2d570f3264b9cd3e22bbd5c160cd0343f7872",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/vi.js",
-      "sha256": "9ece89e06392bdbd0b4f36d5b0c18468f0a8cd5755f5ddd0d44adff61072c7d4",
+      "sha256": "15939adaf263e0869c602d4b34c206178a235b8bec11c8207ccd3fa50de3a141",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/yo.js",
-      "sha256": "0194dd8af94d993ea43ce59bd5b27b8bb0b12a45a43203d669c0483ac25a723b",
+      "sha256": "88b33f6527c1a2faaf159568330cf727c448dc468eac72142a6fb24f8714ac1e",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/zh-CN.js",
-      "sha256": "149874e8079020bdd9fff6d1e7b411cea32745088479590a4b5d9eaa716b0941",
+      "sha256": "8fc02f2bd4d92f46b24b8d82da0ee95c962fc80c14dd7dd469500e14de08d320",
       "dependency": true
     },
     {
       "path": "node_modules/zod/v4/locales/zh-TW.js",
-      "sha256": "b9bbf30d36a4d6bbd32e1ada333baf45fff3ad5b0f13a2caf3ae580c041bb5d8",
+      "sha256": "01d9b119e318d8b9f1a8fa720d06424457429425a61d0730984b750e6a5edf7d",
       "dependency": true
     },
     {
       "path": "package-lock.json",
-      "sha256": "d094a0da20f404512f64a6529490903524aecb95e883d81258b859544b3c0f86",
+      "sha256": "697ccd1529eddb570515ecc6736ecdf45942a463cdfe88c28a635e13d9c0b8e2",
       "dependency": false
     },
     {
       "path": "package.json",
-      "sha256": "ac6cbc75c2664a4990f866119f80167465d7f378c96637ddb73ccbb236c30fcf",
+      "sha256": "6aa5949375d271bd32a1742b56d627fd11968d2bcec91b8e9c685f9d10ca9b72",
       "dependency": false
     },
     {
       "path": "packages/contracts/src/api-keys/schemas.ts",
-      "sha256": "daf7519ad0b871c87deb88bc509091a72a626f6deb5996f3031b2a60f1002128",
+      "sha256": "2d4e4e6529fe30aa2e7f56b4b718971be23f3645ab271429a4b644685c404ebe",
       "dependency": false
     },
     {
@@ -832,8 +837,13 @@
       "dependency": false
     },
     {
+      "path": "packages/contracts/src/automation-menu.ts",
+      "sha256": "c13e835c6f4f17aa4f1ee19b3392e548330078c44aded329d141b5ae589a1999",
+      "dependency": false
+    },
+    {
       "path": "packages/contracts/src/automation-node-definitions.ts",
-      "sha256": "6f2b2e6a089fd9f0b6f6b23770d3af5cbdde9af9b22bf1562b49a97c37810f18",
+      "sha256": "de87af4bb35caa5b6c906fa2521068dccda1f6858623b07f914dc0348afee2e0",
       "dependency": false
     },
     {
@@ -913,7 +923,7 @@
     },
     {
       "path": "packages/contracts/src/index.ts",
-      "sha256": "bffb17e799bdc07eda6395e963de389c4789dd2b95152c2b00ed12e6066d6d6e",
+      "sha256": "b4cca08686a0f036af6e52181991c76c8988155a1a51d8568ea5fd9f4bae1655",
       "dependency": false
     },
     {
@@ -943,7 +953,7 @@
     },
     {
       "path": "packages/contracts/src/integrations/schemas.ts",
-      "sha256": "d9ec3205ee3f22c3597ebd9acf083696f7b2353be32e6d5dda175708ff2cf7c6",
+      "sha256": "c67ef14486a73e841a2075e6945fd920671c72d82d80968d842b4d4fcec1e281",
       "dependency": false
     },
     {
@@ -952,8 +962,13 @@
       "dependency": false
     },
     {
+      "path": "packages/contracts/src/media-custody.ts",
+      "sha256": "8610d511322df744d453a370b0a056b3b1fd9133d0f2d4620d4e61f0d9f4b648",
+      "dependency": false
+    },
+    {
       "path": "packages/contracts/src/messaging/schemas.ts",
-      "sha256": "543c93b11d3e7256d8e623d7c73d17532ad01a966722145650b40187146b0d08",
+      "sha256": "c969280382ad07cc96c1a072157215c5766c26a60b5f70957a20681a50c8e51b",
       "dependency": false
     },
     {
@@ -968,7 +983,7 @@
     },
     {
       "path": "packages/contracts/src/problems.ts",
-      "sha256": "006e9e5851756b01c19b9b6ecf61b42309203bbbe42957aaa29d59e0df22117d",
+      "sha256": "b8c3dd0f2da957c97f43d5aededd540339c43348cca9e87e3c394031357a447d",
       "dependency": false
     },
     {
@@ -988,12 +1003,12 @@
     },
     {
       "path": "packages/ui/src/index.ts",
-      "sha256": "2d46ed635a9ca641adc78cf8435d2465fc359fb7147adedfbe95220624888177",
+      "sha256": "e4bd56b80ddb8c6ceaf36bb58ee92fd13178b8f79639570c5d4448883e730316",
       "dependency": false
     },
     {
       "path": "packages/ui/src/tokens.ts",
-      "sha256": "dbec3bac580a696d438f9427b79aceeeb1e9e036a793a30ed6a9f93799552808",
+      "sha256": "327cbb02396cf33c44a028ca49c7768d3a50ad19d60e9684eed9182d867338df",
       "dependency": false
     },
     {
@@ -1016,7 +1031,7 @@
     {
       "path": "THIRD_PARTY_NOTICES.txt",
       "bytes": 8663,
-      "sha256": "289db5060637c9fa381d89a21979bf1843257353341ec5b6189a5e9f871476c3"
+      "sha256": "15250d75013475d5cca3359dc027f4c069197725fff8f3c35ab9fad3fe2bf49d"
     },
     {
       "path": "editor.css",
@@ -1025,8 +1040,8 @@
     },
     {
       "path": "editor.js",
-      "bytes": 902736,
-      "sha256": "bfce628e20cae7354cb7797dd1bfefe76d1b323f526602aa275725b69767a6c1"
+      "bytes": 928054,
+      "sha256": "edeb4cab12440c31e3f6cee9ce72c67bc5295020d7611b9adb714b879b1a2ef7"
     },
     {
       "path": "editor.js.LEGAL.txt",

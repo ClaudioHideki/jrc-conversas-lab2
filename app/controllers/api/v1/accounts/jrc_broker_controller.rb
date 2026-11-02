@@ -29,7 +29,7 @@ class Api::V1::Accounts::JrcBrokerController < Api::V1::Accounts::BaseController
     inbox_ids = Current.account.inboxes.where(id: connections.pluck('inboxId'), channel_type: 'Channel::Api').pluck(:id)
     render json: { providers: data.fetch('providers').map { |value| value.slice('id', 'name') },
                    connections: connections.select { |value| inbox_ids.include?(value['inboxId']) }
-                                    .map { |value| value.slice('integrationId', 'inboxId', 'name') },
+                                           .map { |value| value.slice('integrationId', 'inboxId', 'name') },
                    instances: data.fetch('instances').map { |value| value.slice('id', 'name', 'status') },
                    agents: Current.account.users.select(:id, :name).map { |user| { id: user.id, name: user.name } } }
   end
@@ -41,9 +41,32 @@ class Api::V1::Accounts::JrcBrokerController < Api::V1::Accounts::BaseController
   def update_assignment_policy
     input = body!('enabled', 'max_open', 'inbox_ids')
     render json: JrcHumanAssignment::Policy.update!(Current.account, enabled: input['enabled'], max_open: input['max_open'],
-                                                                  inbox_ids: input['inbox_ids'])
+                                                                     inbox_ids: input['inbox_ids'])
   rescue ArgumentError
     render json: { code: 'JRC_BROKER_INVALID_ASSIGNMENT_POLICY' }, status: :unprocessable_entity
+  end
+
+  def connection_distribution
+    inbox = binding.inbox
+    render json: { policy: JrcHumanAssignment::Policy.connection_for(Current.account, inbox.id),
+                   teams: Current.account.teams.where(allow_auto_assign: true).order(:name).pluck(:id, :name).map do |id, name|
+                     { id: id, name: name }
+                   end }
+  end
+
+  def update_connection_distribution
+    input = body!('enabled', 'mode', 'team_ids', 'max_open')
+    result = JrcHumanAssignment::Policy.update_connection!(Current.account, inbox: binding.inbox, actor: Current.user,
+                                                                            **input.symbolize_keys)
+    render json: { policy: result }
+  rescue ArgumentError
+    render json: { code: 'JRC_BROKER_INVALID_ASSIGNMENT_POLICY' }, status: :unprocessable_entity
+  end
+
+  def connection_distribution_history
+    inbox = binding.inbox
+    events = JrcHumanAssignmentPolicyEvent.where(account_id: Current.account.id, inbox_id: inbox.id).order(id: :desc).limit(50)
+    render json: { data: events.map { |event| event.slice(:id, :user_id, :created_at, :previous_policy, :next_policy) } }
   end
 
   def onboardings

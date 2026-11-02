@@ -23,6 +23,10 @@ class DataImportsAPI extends ApiClient {
     return axios.get(`${this.url}/${id}`, { params });
   }
 
+  reconciliation(id) {
+    return axios.get(`${this.url}/${id}/reconciliation`);
+  }
+
   validateSource(payload) {
     return axios.post(`${this.url}/validate_source`, payload);
   }

@@ -28,4 +28,31 @@ RSpec.describe 'Human assignment across inboxes', :sd_concurrency do
     expect(account.conversations.where(assignee_id: nil).count).to eq(1)
     expect(account.conversations.distinct.count(:inbox_id)).to eq(3)
   end
+  it 'serializes per-connection policies while sharing the same account-wide agent workload' do
+    account = create(:account)
+    admin = create(:user, account: account, role: :administrator)
+    team = create(:team, account: account, allow_auto_assign: true)
+    agents = create_list(:user, 2, account: account, role: :agent)
+    agents.each { |agent| create(:team_member, team: team, user: agent) }
+    ids = Array.new(3) do
+      inbox = create(:inbox, account: account, enable_auto_assignment: false)
+      agents.each { |agent| create(:inbox_member, inbox: inbox, user: agent) }
+      JrcHumanAssignment::Policy.update_connection!(account, inbox: inbox, actor: admin, enabled: true,
+                                                     mode: 'priority', team_ids: [team.id], max_open: 1)
+      conversation = create(:conversation, account: account, inbox: inbox, status: :open)
+      conversation.update_columns(team_id: nil, assignee_id: nil, auto_assignment_requested_at: Time.current)
+      conversation.id
+    end
+    allow(OnlineStatusTracker).to receive(:effective_available_users).with(account.id)
+      .and_return(agents.to_h { |agent| [agent.id.to_s, 'online'] })
+
+    results = concurrently(ids.map { |id| -> { JrcHumanAssignment::Dispatch.new(Conversation.find(id)).perform } })
+
+    expect(results.count(true)).to eq(2)
+    expect(results.count(false)).to eq(1)
+    expect(account.conversations.where.not(assignee_id: nil).group(:assignee_id).count.values).to eq([1, 1])
+    expect(account.conversations.where(assignee_id: nil).count).to eq(1)
+    expect(account.conversations.distinct.count(:inbox_id)).to eq(3)
+  end
+
 end

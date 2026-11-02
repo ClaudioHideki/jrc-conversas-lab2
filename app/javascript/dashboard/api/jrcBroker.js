@@ -80,6 +80,12 @@ export const createJrcBrokerApi = accountId => {
         key,
         signal
       ),
+    connectionDistribution: (id, signal) =>
+      request('get', inboxPath(id, 'distribution'), undefined, undefined, signal),
+    saveConnectionDistribution: (id, data, signal) =>
+      request('put', inboxPath(id, 'distribution'), data, undefined, signal),
+    distributionHistory: (id, signal) =>
+      request('get', inboxPath(id, 'distribution-history'), undefined, undefined, signal),
     grants: (id, signal) =>
       request('get', inboxPath(id, 'grants'), undefined, undefined, signal),
     updateGrants: (id, userIds, signal) =>

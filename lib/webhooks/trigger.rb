@@ -3,6 +3,7 @@ class Webhooks::Trigger
   RETRYABLE_AGENT_BOT_STATUSES = [429, 500].freeze
 
   class DeliveryDeferred < StandardError; end
+  class DeliveryNotConfirmed < StandardError; end
 
   class RetryableError < StandardError
     attr_reader :status
@@ -24,15 +25,30 @@ class Webhooks::Trigger
   end
 
   def self.execute(url, payload, webhook_type, secret: nil, delivery_id: nil, campaign_recovery_token: nil, strict: false)
-    new(url, payload, webhook_type, secret: secret, delivery_id: delivery_id, campaign_recovery_token: campaign_recovery_token, strict: strict).execute
+    new(url, payload, webhook_type, secret: secret, delivery_id: delivery_id, campaign_recovery_token: campaign_recovery_token,
+                                    strict: strict).execute
   end
 
   def execute
-    if @webhook_type == :api_inbox_webhook && @payload[:event] == 'message_created' &&
-       message && JrcRelationship::SurveyMessageExecution.applies?(message)
+    @callback_completed = false
+    result = execute_wrapped_delivery
+    # Business wrappers may deliberately suppress an exception or decline I/O.
+    # A normal Ruby return is not a durable Broker acknowledgement.
+    raise DeliveryNotConfirmed if @strict && !@callback_completed
+
+    result
+  end
+
+  def api_message_created?
+    @webhook_type == :api_inbox_webhook && @payload[:event] == 'message_created' && message
+  end
+
+  def execute_wrapped_delivery
+    return execute_delivery unless api_message_created?
+
+    if JrcRelationship::SurveyMessageExecution.applies?(message)
       JrcRelationship::SurveyMessageExecution.new(message).perform { execute_delivery }
-    elsif @webhook_type == :api_inbox_webhook && @payload[:event] == 'message_created' &&
-          message && message.content_attributes['service_desk_delivery_id']
+    elsif message.content_attributes['service_desk_delivery_id']
       JrcServiceDesk::NotificationExecution.new(message).perform { execute_delivery }
     else
       execute_delivery
@@ -40,10 +56,12 @@ class Webhooks::Trigger
   end
 
   def execute_delivery
-    if @webhook_type == :api_inbox_webhook && @payload[:event] == 'message_created' && message
+    if api_message_created?
       JrcServiceDesk::OutboundAttachments.authorize_message!(message)
       if message.outgoing? && !message.private? && JrcServiceDesk::OutboundAttachments.protected?(message)
-        message.update!(status: :failed, external_error: 'Protected Service Desk attachments require an authenticated media upload transport; API inbox URL delivery is unavailable')
+        message.update!(status: :failed,
+                        external_error: 'Protected Service Desk attachments require an authenticated media upload transport; ' \
+                                        'API inbox URL delivery is unavailable')
         return
       end
     end
@@ -64,12 +82,14 @@ class Webhooks::Trigger
     end
 
     perform_request(body: body, headers: headers, timeout: timeout)
-    jrc_delivery&.callback_accepted!
+    accepted = jrc_delivery&.callback_accepted!
+    @callback_completed = true
+    accepted
   rescue StandardError => e
     handle_delivery_error(e)
   end
 
-  private :execute_delivery
+  private :execute_delivery, :execute_wrapped_delivery, :api_message_created?
 
   def handle_failure(error)
     return jrc_delivery.handle_failure(error) if jrc_delivery
@@ -85,6 +105,7 @@ class Webhooks::Trigger
     jrc_delivery&.validate!(url: @url, secret: @secret, delivery_id: @delivery_id)
     @jrc_delivery_phase = 'campaign_intent'
     return false if jrc_delivery&.prepare_campaign_intent!(@payload) == false
+
     @jrc_delivery_phase = 'validate'
     jrc_delivery&.validate!(url: @url, secret: @secret, delivery_id: @delivery_id)
     true
@@ -95,7 +116,7 @@ class Webhooks::Trigger
     return jrc_delivery.callback_started! unless @campaign_recovery_token
 
     JrcCampaigns::BrokerRecoveryService.callback_allowed?(@payload, token: @campaign_recovery_token, start: true,
-                                                                 callback: { url: @url, secret: @secret, delivery_id: @delivery_id })
+                                                                    callback: { url: @url, secret: @secret, delivery_id: @delivery_id })
   end
 
   def handle_delivery_error(error)
@@ -183,17 +204,11 @@ class Webhooks::Trigger
   end
 
   def message
-    return if message_id.blank?
+    return if @payload[:id].blank?
 
-    if defined?(@message)
-      @message
-    else
-      @message = Message.find_by(id: message_id)
-    end
-  end
+    return @message if defined?(@message)
 
-  def message_id
-    @payload[:id]
+    @message = Message.find_by(id: @payload[:id])
   end
 
   def webhook_timeout

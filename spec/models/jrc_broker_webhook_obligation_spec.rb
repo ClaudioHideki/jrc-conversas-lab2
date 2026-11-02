@@ -164,4 +164,54 @@ RSpec.describe 'Durable Broker message obligation', type: :model do
     expect(obligation.reload.state).to eq('pending')
   end
 
+  it 'captures the due time from the application clock at message commit' do
+    travel_to Time.utc(2026, 10, 26, 16, 59) do
+      message.save!
+      expect(JrcBrokerWebhookObligation.find_by!(message_id: message.id).available_at).to eq(Time.current)
+    end
+  end
+
+  it 'does not confirm protected attachment delivery when no HTTP callback was made' do
+    message.save!
+    obligation = JrcBrokerWebhookObligation.find_by!(message_id: message.id)
+    allow(JrcServiceDesk::OutboundAttachments).to receive(:protected?).and_return(true)
+    expect(SafeFetch).not_to receive(:fetch)
+    JrcBroker::WebhookObligationJob.perform_now(obligation.id)
+    expect(obligation.reload.state).not_to eq('delivered')
+    expect(message.reload).to be_failed
+  end
+
+  it 'does not confirm a Service Desk wrapper that declined to invoke the callback' do
+    message.content_attributes = { 'service_desk_delivery_id' => 0 }
+    message.save!
+    obligation = JrcBrokerWebhookObligation.find_by!(message_id: message.id)
+    expect(SafeFetch).not_to receive(:fetch)
+    JrcBroker::WebhookObligationJob.perform_now(obligation.id)
+    expect(obligation.reload.state).not_to eq('delivered')
+  end
+
+  it 'keeps a real survey wrapper timeout uncertain and never retries its external effect' do
+    message.save!
+    assignment = JrcRelationship::Assignment.create!(account: account, contact: message.conversation.contact, status: 'active')
+    survey = JrcRelationship::Survey.create!(account: account, assignment: assignment, kind: 'csat', token_digest: SecureRandom.hex(32),
+                                              expires_at: 1.day.from_now, status: 'queued', metadata: { 'sent_message_id' => message.id })
+    # Eligibility is isolated; wrapper perform/rescue and its UNKNOWN persistence remain real.
+    message.update!(content_attributes: { 'relationship_survey_id' => survey.id, 'relationship_survey_link' => 'https://example.test/synthetic' },
+                    additional_attributes: { 'template_params' => { 'name' => 'synthetic_template' } })
+    boundary = JrcRelationship::SurveyMessageExecution.new(message)
+    allow(boundary).to receive(:claim).and_return(true)
+    allow(boundary).to receive(:blocker).and_return(nil)
+    allow(JrcRelationship::SurveyMessageExecution).to receive(:new).and_return(boundary)
+    expect(SafeFetch).to receive(:fetch).once.and_raise(Errno::ECONNRESET)
+    obligation = JrcBrokerWebhookObligation.find_by!(message_id: message.id)
+    JrcBroker::WebhookObligationJob.perform_now(obligation.id)
+    expect(survey.reload.status).to eq('unknown')
+    expect(obligation.reload.state).to eq('failed')
+    expect(obligation.last_error_code).to eq('JRC_BROKER_DELIVERY_OUTCOME_UNCERTAIN')
+    travel 20.minutes do
+      JrcBroker::WebhookObligationJob.perform_now(obligation.id)
+    end
+    expect(survey.reload.status).to eq('unknown')
+  end
+
 end

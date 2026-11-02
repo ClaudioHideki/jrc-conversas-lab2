@@ -11,6 +11,10 @@ class DataImportPolicy < ApplicationPolicy
     @account_user.administrator?
   end
 
+  def reconciliation?
+    show?
+  end
+
   def validate_source?
     create?
   end

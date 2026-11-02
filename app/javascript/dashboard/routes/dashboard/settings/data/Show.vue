@@ -18,6 +18,7 @@ import ImportSummaryTiles from './components/ImportSummaryTiles.vue';
 import ImportProgress from './components/ImportProgress.vue';
 import ImportErrorsSection from './components/ImportErrorsSection.vue';
 import ImportSkipLogsSection from './components/ImportSkipLogsSection.vue';
+import ImportReconciliationPanel from './components/ImportReconciliationPanel.vue';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -230,6 +231,10 @@ onBeforeUnmount(() => {
     <template #body>
       <div v-if="dataImport" class="flex flex-col gap-3">
         <ImportSummaryTiles :data-import="dataImport" />
+        <ImportReconciliationPanel
+          :key="dataImport.id"
+          :data-import-id="dataImport.id"
+        />
 
         <ImportProgress
           v-if="dataImport.import_types?.length"

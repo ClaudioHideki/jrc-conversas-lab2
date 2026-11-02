@@ -4,7 +4,7 @@ class Api::V1::Accounts::DataImportsController < Api::V1::Accounts::BaseControll
   DATA_IMPORT_FEATURE = 'data_import'.freeze
 
   before_action :ensure_data_import_feature_enabled
-  before_action :set_data_import, only: [:show, :start, :retry_import, :abandon, :error_logs, :skip_logs]
+  before_action :set_data_import, only: [:show, :reconciliation, :start, :retry_import, :abandon, :error_logs, :skip_logs]
   before_action :check_authorization
 
   def index
@@ -16,6 +16,11 @@ class Api::V1::Accounts::DataImportsController < Api::V1::Accounts::BaseControll
 
   def show
     render_show
+  end
+
+  def reconciliation
+    response.headers['Cache-Control'] = 'no-store'
+    render json: DataImports::ReconciliationReport.new(data_import: @data_import).call
   end
 
   def validate_source

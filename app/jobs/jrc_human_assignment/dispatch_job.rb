@@ -8,8 +8,8 @@ class JrcHumanAssignment::DispatchJob < ApplicationJob
 
     batch = account.conversations.open.where(assignee_id: nil, assignee_agent_bot_id: nil)
                    .where.not(auto_assignment_requested_at: nil)
-                   .where(inbox_id: JrcHumanAssignment::Policy.for(account)[:inbox_ids])
-                   .where.not(team_id: nil).where('id > ?', after_id).reorder(id: :asc).limit(BATCH_SIZE).to_a
+                   .where(inbox_id: JrcHumanAssignment::Policy.enabled_inbox_ids(account))
+                   .where('id > ?', after_id).reorder(id: :asc).limit(BATCH_SIZE).to_a
     batch.each do |conversation|
       JrcHumanAssignment::Dispatch.new(conversation).perform
     end

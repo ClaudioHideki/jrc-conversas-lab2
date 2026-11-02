@@ -210,8 +210,18 @@ RSpec.describe 'Interrupted Broker campaign recovery' do # rubocop:disable RSpec
     expect(uuid).to match(JrcBroker::Client::UUID)
     expect(delivery.metadata['webhook_delivery_id']).to eq(uuid)
     WebhookListener.instance.message_created(Events::Base.new('message.created', Time.current, message: message))
-    callback = enqueued_jobs.find { |job| job[:job] == WebhookJob && job[:args][1]['event'] == 'message_created' }
-    expect(callback[:args].last['delivery_id']).to eq(uuid)
+    callback = enqueued_jobs.find { |job| job[:job] == JrcBroker::WebhookObligationJob && job[:args].first == JrcBrokerWebhookObligation.find_by!(message_id: message.id).id }
+    expect(JrcBrokerWebhookObligation.find(callback[:args].first).delivery_id).to eq(uuid)
+  end
+
+  it 'keeps durable obligations as the sole callback owner during safe campaign recovery' do
+    service.perform
+    delivery = recipient.deliveries.sole
+    obligation = JrcBrokerWebhookObligation.find_by!(message_id: account.messages.sole.id)
+    clear_enqueued_jobs
+    JrcCampaigns::BrokerRecoveryJob.perform_now(delivery.id, delivery.metadata.fetch('dispatch_token'))
+    expect(enqueued_jobs.any? { |job| job[:job] == JrcBroker::WebhookObligationJob && job[:args].first == obligation.id }).to be(true)
+    expect(enqueued_jobs.none? { |job| job[:job] == WebhookJob }).to be(true)
   end
 
   it 'keeps the committed message recoverable when its after-commit event cannot enqueue' do
@@ -257,7 +267,7 @@ RSpec.describe 'Interrupted Broker campaign recovery' do # rubocop:disable RSpec
     expect(delivery.reload.metadata.fetch('message_id')).to eq(message.id)
   end
 
-  it 'replays the same native message through WebhookJob after intent reservation was interrupted before local persistence' do
+  it 'recovers the same durable callback after its process lease expires following an interrupted intent reservation' do
     service.perform
     delivery = recipient.deliveries.sole
     message = account.messages.sole
@@ -270,7 +280,7 @@ RSpec.describe 'Interrupted Broker campaign recovery' do # rubocop:disable RSpec
       { status: 201, body: { protocol: 'chatwoot-campaigns/v1', intentId: intent_id, state: 'RESERVED', replayed: true }.to_json }
     end
     WebhookListener.instance.message_created(Events::Base.new('message.created', Time.current, message: message))
-    callback = enqueued_jobs.find { |job| job[:job] == WebhookJob && job[:args][1]['event'] == 'message_created' }
+    callback = enqueued_jobs.find { |job| job[:job] == JrcBroker::WebhookObligationJob && job[:args].first == JrcBrokerWebhookObligation.find_by!(message_id: message.id).id }
     expect { ActiveJob::Base.execute(callback) }.to raise_error(Interrupt)
     expect(message.reload.additional_attributes['jrc_campaign_intent_id']).to be_nil
     delivered = []
@@ -280,9 +290,9 @@ RSpec.describe 'Interrupted Broker campaign recovery' do # rubocop:disable RSpec
     end
     clear_enqueued_jobs
 
-    travel 3.minutes do
+    travel 6.minutes do
       JrcCampaigns::BrokerRecoveryJob.perform_now(delivery.id, delivery.metadata.fetch('dispatch_token'))
-      perform_enqueued_jobs(only: WebhookJob)
+      perform_enqueued_jobs(only: JrcBroker::WebhookObligationJob)
     end
 
     expect(account.messages.count).to eq(1)
@@ -340,7 +350,7 @@ RSpec.describe 'Interrupted Broker campaign recovery' do # rubocop:disable RSpec
     recovery = enqueued_jobs.find { |job| job[:job] == JrcCampaigns::BrokerRecoveryJob }
     expect(recovery).to be_present
     ActiveJob::Base.execute(recovery)
-    callback = enqueued_jobs.find { |job| job[:job] == WebhookJob }
+    callback = enqueued_jobs.find { |job| job[:job] == JrcBroker::WebhookObligationJob }
     expect(callback).to be_present
     sent = []
     stub_request(:post, inbox.channel.webhook_url).to_return do |request|
@@ -417,7 +427,7 @@ RSpec.describe 'Interrupted Broker campaign recovery' do # rubocop:disable RSpec
     travel 3.minutes do
       JrcCampaigns::BrokerRecoveryJob.perform_now(delivery.id, delivery.metadata.fetch('dispatch_token'))
     end
-    callback = enqueued_jobs.find { |job| job[:job] == WebhookJob }
+    callback = enqueued_jobs.find { |job| job[:job] == JrcBroker::WebhookObligationJob }
     expect(callback).to be_present
     delivery.reload.update!(status: 'unknown')
     request = stub_request(:post, inbox.channel.webhook_url).to_return(status: 204)
@@ -437,7 +447,7 @@ RSpec.describe 'Interrupted Broker campaign recovery' do # rubocop:disable RSpec
     travel 3.minutes do
       JrcCampaigns::BrokerRecoveryJob.perform_now(delivery.id, delivery.metadata.fetch('dispatch_token'))
     end
-    callback = enqueued_jobs.find { |job| job[:job] == WebhookJob }
+    callback = enqueued_jobs.find { |job| job[:job] == JrcBroker::WebhookObligationJob }
     expect(callback).to be_present
     JrcBroker::WebhookDiagnostic.new(message).callback_started!
     request = stub_request(:post, inbox.channel.webhook_url).to_return(status: 204)
@@ -451,11 +461,12 @@ RSpec.describe 'Interrupted Broker campaign recovery' do # rubocop:disable RSpec
   it 'drops a queued recovery callback when its signed source configuration changes' do
     service.perform
     delivery = recipient.deliveries.sole
+    message = account.messages.sole
     clear_enqueued_jobs
     travel 3.minutes do
       JrcCampaigns::BrokerRecoveryJob.perform_now(delivery.id, delivery.metadata.fetch('dispatch_token'))
     end
-    callback = enqueued_jobs.find { |job| job[:job] == WebhookJob }
+    callback = enqueued_jobs.find { |job| job[:job] == JrcBroker::WebhookObligationJob }
     expect(callback).to be_present
     JrcBrokerInboxBinding.find_by!(inbox: inbox).update!(instance_id: SecureRandom.uuid)
     request = stub_request(:post, inbox.channel.webhook_url).to_return(status: 204)
@@ -463,6 +474,7 @@ RSpec.describe 'Interrupted Broker campaign recovery' do # rubocop:disable RSpec
     ActiveJob::Base.execute(callback)
 
     expect(request).not_to have_been_requested
+    expect(JrcBrokerWebhookObligation.find_by!(message_id: message.id).state).to eq('rejected')
     expect(delivery.reload).to be_sending
     expect(account.messages.count).to eq(1)
   end
@@ -474,7 +486,7 @@ RSpec.describe 'Interrupted Broker campaign recovery' do # rubocop:disable RSpec
       message = account.messages.sole
       clear_enqueued_jobs
       JrcCampaigns::BrokerRecoveryJob.perform_now(delivery.id, delivery.metadata.fetch('dispatch_token'))
-      callback = enqueued_jobs.find { |job| job[:job] == WebhookJob }
+      callback = enqueued_jobs.find { |job| job[:job] == JrcBroker::WebhookObligationJob }
       expect(callback).to be_present
       prior = nil
       stub_request(:post, "#{prefix}/connections/#{integration_id}/campaign-intents").to_return do
@@ -667,7 +679,7 @@ RSpec.describe 'Interrupted Broker campaign recovery' do # rubocop:disable RSpec
       travel_to Time.utc(2026, 10, 26, 16, 59)
       service.perform
       WebhookListener.instance.message_created(Events::Base.new('message.created', Time.current, message: message))
-      callback = enqueued_jobs.find { |job| job[:job] == WebhookJob }
+      callback = enqueued_jobs.find { |job| job[:job] == JrcBroker::WebhookObligationJob }
       travel_to Time.utc(2026, 10, 26, 17, 2)
       ActiveJob::Base.execute(callback)
       stub_request(:get, receipt_url).to_return(status: 404)
@@ -689,7 +701,7 @@ RSpec.describe 'Interrupted Broker campaign recovery' do # rubocop:disable RSpec
       end
       travel_to Time.utc(2026, 10, 27, 16, 0)
       ActiveJob::Base.execute(watchdog)
-      callback = enqueued_jobs.find { |job| job[:job] == WebhookJob && job[:args].last['campaign_recovery_token'] }
+      callback = enqueued_jobs.find { |job| job[:job] == JrcBroker::WebhookObligationJob && job[:args].last.is_a?(Hash) && job[:args].last['campaign_recovery_token'] }
       ActiveJob::Base.execute(callback)
 
       expect(sent).to eq([[message.id, delivery.reload.metadata.fetch('webhook_delivery_id')]])
@@ -742,7 +754,7 @@ RSpec.describe 'Interrupted Broker campaign recovery' do # rubocop:disable RSpec
         clear_enqueued_jobs
         travel_to Time.utc(2026, 10, 27, 16, 0)
         ActiveJob::Base.execute(watchdog)
-        callback = enqueued_jobs.find { |job| job[:job] == WebhookJob && job[:args].last['campaign_recovery_token'] }
+        callback = enqueued_jobs.find { |job| job[:job] == JrcBroker::WebhookObligationJob && job[:args].last.is_a?(Hash) && job[:args].last['campaign_recovery_token'] }
         configured = JrcCampaigns::BrokerStatusJob.set(wait: 10.seconds)
         if failure == 'exception'
           allow(configured).to receive(:perform_later).and_raise(ActiveJob::EnqueueError, 'Synthetic queue unavailable')
@@ -786,7 +798,7 @@ RSpec.describe 'Interrupted Broker campaign recovery' do # rubocop:disable RSpec
         JrcCampaigns::BrokerRecoveryJob.perform_now(delivery.id, delivery.reload.metadata.fetch('dispatch_token'))
       end
     end
-    expect(enqueued_jobs.count { |job| job[:job] == WebhookJob && job[:args].last['campaign_recovery_token'].present? }).to eq(5)
+    expect(enqueued_jobs.count { |job| job[:job] == JrcBroker::WebhookObligationJob && job[:args].last.is_a?(Hash) && job[:args].last['campaign_recovery_token'].present? }).to eq(5)
     expect(account.messages.count).to eq(1)
     expect(delivery.reload).to be_sending
   end
@@ -840,7 +852,7 @@ RSpec.describe 'Interrupted Broker campaign recovery' do # rubocop:disable RSpec
     ActiveJob::Base.execute(dispatch)
     recovery = enqueued_jobs.find { |job| job[:job] == JrcCampaigns::BrokerRecoveryJob && !job[:at] }
     ActiveJob::Base.execute(recovery)
-    callback = enqueued_jobs.find { |job| job[:job] == WebhookJob && job[:args].last['campaign_recovery_token'] }
+    callback = enqueued_jobs.find { |job| job[:job] == JrcBroker::WebhookObligationJob && job[:args].last.is_a?(Hash) && job[:args].last['campaign_recovery_token'] }
     sent = []
     stub_request(:post, inbox.channel.webhook_url).to_return do |request|
       sent << [JSON.parse(request.body).fetch('id'), request.headers.fetch('X-Chatwoot-Delivery')]

@@ -2,7 +2,7 @@ class JrcBroker::WebhookObligationJob < ApplicationJob
   queue_as :medium
   self.log_arguments = false
 
-  def perform(id)
+  def perform(id, campaign_recovery_token: nil)
     row = JrcBrokerWebhookObligation.find_by(id: id)
     return unless row
 
@@ -10,7 +10,7 @@ class JrcBroker::WebhookObligationJob < ApplicationJob
     claimed = claim(row, token)
     return unless claimed
 
-    dispatch(row, token)
+    dispatch(row, token, campaign_recovery_token: campaign_recovery_token)
   rescue StandardError => e
     raise unless claimed
 
@@ -38,19 +38,26 @@ class JrcBroker::WebhookObligationJob < ApplicationJob
       (row.state == 'running' && row.lease_until && row.lease_until <= Time.current)
   end
 
-  def dispatch(row, token)
+  def dispatch(row, token, campaign_recovery_token:)
     unless row.current_binding?
       settle(row, token, state: 'rejected', last_error_code: 'JRC_BROKER_DELIVERY_CONTEXT_CHANGED',
-                         failure: JrcBroker::WebhookDelivery::ContextChanged.new)
+                         failure: campaign_recovery_token ? nil : JrcBroker::WebhookDelivery::ContextChanged.new)
       return
     end
 
     Webhooks::Trigger.execute(row.url, row.payload.deep_symbolize_keys, :api_inbox_webhook,
-                              secret: row.message.inbox.channel.secret, delivery_id: row.delivery_id, strict: true)
+                              secret: row.message.inbox.channel.secret, delivery_id: row.delivery_id, strict: true,
+                              campaign_recovery_token: campaign_recovery_token)
     settle(row, token, state: 'delivered', last_error_code: nil)
   end
 
   def record_failure(row, token, error)
+    if error.is_a?(Webhooks::Trigger::DeliveryNotConfirmed)
+      # Preserve business UNKNOWN/blocked state; never replay a swallowed provider failure.
+      settle(row, token, state: 'failed', last_error_code: 'JRC_BROKER_DELIVERY_OUTCOME_UNCERTAIN')
+      return
+    end
+
     if error.is_a?(Webhooks::Trigger::DeliveryDeferred)
       settle(row, token, state: 'pending', attempts: row.attempts - 1, available_at: 1.minute.from_now,
                          last_error_code: 'JRC_BROKER_DELIVERY_DEFERRED')

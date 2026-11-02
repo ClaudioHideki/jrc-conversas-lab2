@@ -30,6 +30,11 @@ class JrcCampaigns::BrokerRecoveryService
 
     message, token = action
     if message
+      obligation = JrcBrokerWebhookObligation.find_by(account_id: message.account_id, message_id: message.id)
+      if obligation
+        JrcBroker::WebhookObligationJob.perform_later(obligation.id, campaign_recovery_token: token)
+        return
+      end
       channel = delivery.inbox.channel
       WebhookJob.perform_later(channel.webhook_url, message.webhook_data.merge(event: 'message_created'), :api_inbox_webhook,
                                secret: channel.secret, delivery_id: delivery.metadata.fetch('webhook_delivery_id'), campaign_recovery_token: token)
