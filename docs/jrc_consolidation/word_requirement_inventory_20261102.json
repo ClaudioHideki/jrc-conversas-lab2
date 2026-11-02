@@ -37879,11 +37879,11 @@
         "text": "13. Recebimento e reconciliação dos eventos.",
         "classification_pending": false,
         "evidence": [
-          "docs/jrc_backoffice/signature_dispatch_notifications_checkpoint_20261102.json"
+          "docs/jrc_backoffice/signature_reconciliation_checkpoint_20261102.json"
         ],
         "status": "parcial",
-        "implemented_change": "Consumidor e jobs para recibos autenticados e vinculados, idempotência, eventos antigos e callback anterior ao vínculo testados.",
-        "next_action": "Concluir reconciliação do envio incerto, projeções operacionais, orçamento de consulta e verificação dos artefatos finais."
+        "implemented_change": "Consumidor autenticado prévio acrescido de recuperação durável da transação original incerta e vínculo tardio para callbacks.",
+        "next_action": "Completar demais reconciliações operacionais, evidência final e homologação externa."
       },
       {
         "id": "latest-user:L0349",

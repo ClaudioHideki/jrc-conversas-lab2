@@ -401,5 +401,11 @@
     "report": "docs/jrc_backoffice/signature_history_ui_checkpoint_20261102.json",
     "implemented": "API/UI de consulta do histórico com permissões, paginação,217 testes frontend,4API e navegador real.",
     "pending": "Ações operacionais, reconciliação e evidência final de assinatura; demais frentes."
+  },
+  "signature_reconciliation_increment": {
+    "status": "parcial",
+    "report": "docs/jrc_backoffice/signature_reconciliation_checkpoint_20261102.json",
+    "implemented": "Recuperação durável somente de leitura de resultado incerto, reserva/intervalo/janela, jobs e regressões selecionadas.",
+    "pending": "Demais ações, evidências/verificador/liberação e demais frentes."
   }
 }

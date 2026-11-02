@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_11_02_090000) do
+ActiveRecord::Schema[7.1].define(version: 2026_11_02_100000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -1554,7 +1554,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_090000) do
     t.index ["delivery_id"], name: "bo_delivery_one_external_binding", unique: true, where: "(external_id IS NOT NULL)"
     t.index ["delivery_id"], name: "index_jrc_backoffice_signature_delivery_events_on_delivery_id"
     t.check_constraint "(kind::text = 'send_confirmed'::text) = (external_id IS NOT NULL)", name: "bo_delivery_confirmed_requires_envelope"
-    t.check_constraint "kind::text = ANY (ARRAY['prepared'::character varying, 'dispatch_started'::character varying, 'send_confirmed'::character varying, 'send_uncertain'::character varying, 'send_rejected'::character varying, 'sender_blocked'::character varying, 'canceled_before_send'::character varying, 'completion_reported'::character varying, 'envelope_canceled'::character varying, 'envelope_declined'::character varying]::text[])", name: "bo_delivery_event_kind"
+    t.check_constraint "kind::text = ANY (ARRAY['prepared'::character varying, 'dispatch_started'::character varying, 'send_confirmed'::character varying, 'send_uncertain'::character varying, 'send_rejected'::character varying, 'sender_blocked'::character varying, 'canceled_before_send'::character varying, 'completion_reported'::character varying, 'envelope_canceled'::character varying, 'envelope_declined'::character varying, 'reconciliation_started'::character varying, 'reconciliation_finished'::character varying]::text[])", name: "bo_delivery_event_kind"
   end
 
   create_table "jrc_backoffice_signature_integrations", force: :cascade do |t|
@@ -9545,9 +9545,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_090000) do
     ALTER TABLE "jrc_backoffice_signature_delivery_events" DROP CONSTRAINT "bo_delivery_event_kind";
   JRC_SCHEMA_SQL_ebaa74f22ff1
 
-  execute <<~'JRC_SCHEMA_SQL_0a0388968a92'
-    ALTER TABLE "jrc_backoffice_signature_delivery_events" ADD CONSTRAINT "bo_delivery_event_kind" CHECK (((kind)::text = ANY ((ARRAY['prepared'::character varying, 'dispatch_started'::character varying, 'send_confirmed'::character varying, 'send_uncertain'::character varying, 'send_rejected'::character varying, 'sender_blocked'::character varying, 'canceled_before_send'::character varying, 'completion_reported'::character varying, 'envelope_canceled'::character varying, 'envelope_declined'::character varying])::text[])));
-  JRC_SCHEMA_SQL_0a0388968a92
+  execute <<~'JRC_SCHEMA_SQL_f81d88eae73e'
+    ALTER TABLE "jrc_backoffice_signature_delivery_events" ADD CONSTRAINT "bo_delivery_event_kind" CHECK (((kind)::text = ANY ((ARRAY['prepared'::character varying, 'dispatch_started'::character varying, 'send_confirmed'::character varying, 'send_uncertain'::character varying, 'send_rejected'::character varying, 'sender_blocked'::character varying, 'canceled_before_send'::character varying, 'completion_reported'::character varying, 'envelope_canceled'::character varying, 'envelope_declined'::character varying, 'reconciliation_started'::character varying, 'reconciliation_finished'::character varying])::text[])));
+  JRC_SCHEMA_SQL_f81d88eae73e
 
   execute <<~'JRC_SCHEMA_SQL_bdb7450aba4f'
     DROP INDEX "bo_delivery_dispatch_once";

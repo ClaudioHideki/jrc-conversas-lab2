@@ -6,10 +6,11 @@ class JrcBackoffice::SignatureDeliveryEvent < ApplicationRecord
              'send_rejected' => 'failed', 'sender_blocked' => 'blocked', 'canceled_before_send' => 'canceled',
              'completion_reported' => 'completion_reported', 'envelope_canceled' => 'canceled', 'envelope_declined' => 'declined' }.freeze
   TERMINAL = %w[send_rejected sender_blocked canceled_before_send envelope_canceled envelope_declined].freeze
+  OBSERVATIONS = %w[reconciliation_started reconciliation_finished].freeze
   belongs_to :account
   belongs_to :delivery, class_name: 'JrcBackoffice::SignatureDelivery', inverse_of: :events
   belongs_to :connection, class_name: 'JrcBackoffice::SignatureConnection'
-  validates :kind, inclusion: { in: STATES.keys }
+  validates :kind, inclusion: { in: STATES.keys + OBSERVATIONS }
   validates :event_key, presence: true, uniqueness: { scope: :delivery_id }
   validates :external_id, length: { maximum: 512 }, allow_nil: true
   validates :external_id, presence: true, if: -> { kind == 'send_confirmed' }

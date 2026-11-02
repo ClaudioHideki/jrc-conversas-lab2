@@ -20,6 +20,8 @@ const events = [
   'completion_reported',
   'envelope_canceled',
   'envelope_declined',
+  'reconciliation_started',
+  'reconciliation_finished',
 ];
 export const signatureStateKey = state =>
   states.includes(state) ? state : 'unknown';

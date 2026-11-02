@@ -28,7 +28,7 @@ class JrcBackoffice::SignatureDelivery < ApplicationRecord
   end
 
   def state
-    kind = events.order(id: :desc).pick(:kind)
+    kind = events.where(kind: JrcBackoffice::SignatureDeliveryEvent::STATES.keys).order(id: :desc).pick(:kind)
     kind ? JrcBackoffice::SignatureDeliveryEvent::STATES.fetch(kind) : 'prepared'
   end
 

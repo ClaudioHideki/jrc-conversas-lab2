@@ -7,7 +7,11 @@ class JrcBackoffice::Signatures::DispatchContext
   end
 
   def access!
-    request = @access.writable!(@access.request(@delivery.backoffice_request_id))
+    @access.writable!(read!)
+  end
+
+  def read!
+    request = @access.request(@delivery.backoffice_request_id)
     contract = @access.contract!(request)
     raise JrcBackoffice::Signatures::DeliveryError, 'CONTRACT_SOURCE_CHANGED' unless contract.id == @delivery.contract_id
 

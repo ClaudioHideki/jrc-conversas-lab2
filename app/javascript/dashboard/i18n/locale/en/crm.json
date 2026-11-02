@@ -1220,6 +1220,8 @@
           "completion_reported": "Conclusão informada pelo fornecedor",
           "envelope_canceled": "Cancelamento informado pelo fornecedor",
           "envelope_declined": "Assinatura recusada",
+          "reconciliation_started": "Consulta da transação iniciada",
+          "reconciliation_finished": "Consulta da transação registrada",
           "unknown": "Evento registrado"
         }
       }

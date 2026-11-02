@@ -51,7 +51,8 @@ class JrcBackoffice::Signatures::Notifications
     return true if delivery.state.in?(%w[canceled declined]) && delivery.state != fact[:state]
 
     prior = delivery.events.where(kind: KINDS.values).order(id: :desc).first
-    generated = prior&.snapshot&.fetch('provider_generated_at', nil)
+    facts = prior&.snapshot || {}
+    generated = facts['provider_generated_at'] || facts['observed_at']
     generated && Time.iso8601(generated) > fact.fetch(:generated_at)
   end
 
