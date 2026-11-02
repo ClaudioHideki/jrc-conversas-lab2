@@ -767,6 +767,8 @@ Rails.application.routes.draw do
               get 'contract_authorities/:proposal_id', to: 'backoffice_authorities#show'
               get 'contract_authorities/:proposal_id/pdf', to: 'backoffice_authorities#contract_pdf'
               get 'contract_authorities/:proposal_id/documents/:document_version_id', to: 'backoffice_authorities#document'
+              get 'contract_signatures', to: 'backoffice_signature_deliveries#index'
+              get 'contract_signatures/:delivery_id', to: 'backoffice_signature_deliveries#show'
               post 'contract_versions', to: 'backoffice_contract_versions#create'
               get 'contract_versions/:version_id/pdf', to: 'backoffice_contract_versions#download'
               get 'contract_versions/:version_id/differences', to: 'backoffice_contract_versions#differences'

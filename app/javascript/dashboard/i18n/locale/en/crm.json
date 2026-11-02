@@ -1049,7 +1049,8 @@
         "TABS": {
           "versions": "Versões e minuta",
           "signers": "Assinantes",
-          "authority": "Representação e poderes"
+          "authority": "Representação e poderes",
+          "signature": "Status da assinatura"
         },
         "TITLE": "Assinantes do contrato",
         "EDIT": "Selecionar assinantes",
@@ -1169,6 +1170,58 @@
         "DENIED": "Acesso negado à comprovação. Os dados da tela foram limpos.",
         "ERROR": "Não foi possível confirmar a comprovação. Atualize e confira as permissões.",
         "EVIDENCE_ERROR": "A evidência não pôde ser liberada. Confira acesso, integridade e verificação de segurança."
+      },
+      "CONTRACT_SIGNATURES": {
+        "TITLE": "Status da assinatura",
+        "DESCRIPTION": "Envios e eventos registrados para esta solicitação.",
+        "HISTORY": "Histórico do envio",
+        "HISTORY_DESCRIPTION": "Fatos registrados para este envio e sua versão contratual.",
+        "LOADING": "Carregando os registros de assinatura…",
+        "ERROR": "Não foi possível consultar o histórico. Tente novamente.",
+        "DENIED": "Seu acesso a este histórico não está mais disponível.",
+        "EMPTY": "Nenhum envio registrado para esta solicitação.",
+        "NO_EVENTS": "Nenhum evento disponível nesta página.",
+        "VERSION": "Versão contratual",
+        "PROVIDER": "Fornecedor",
+        "DOCUSIGN": "DocuSign",
+        "OTHER_PROVIDER": "Outro fornecedor",
+        "ENVIRONMENT": "Ambiente",
+        "DEMO": "Homologação",
+        "PRODUCTION": "Produção",
+        "CONNECTION_REVISION": "Revisão da conexão",
+        "LAST_EVENT": "Última atualização registrada",
+        "REFERENCE": "Identificação externa",
+        "NOT_CONFIRMED": "Ainda não confirmada",
+        "PAGES": "Páginas dos envios",
+        "EVENT_PAGES": "Páginas dos eventos",
+        "RELEASE_BLOCKED": "O contrato precisa estar assinado para liberar a implantação.",
+        "VERIFIED": "Assinatura com evidências validadas internamente. As demais aprovações e verificações operacionais continuam sendo exigidas.",
+        "EVIDENCE_NOTICE": "A conclusão informada pelo fornecedor precisa ter suas evidências validadas. O registro do envio, por si só, não comprova uma assinatura.",
+        "STATES": {
+          "prepared": "Solicitação de envio registrada",
+          "dispatching": "Confirmando o envio",
+          "sent": "Enviado para assinatura",
+          "uncertain": "Confirmação do envio pendente",
+          "failed": "Envio recusado",
+          "blocked": "Envio bloqueado",
+          "canceled": "Cancelado",
+          "completion_reported": "Conclusão informada; evidências precisam de validação",
+          "declined": "Assinatura recusada",
+          "unknown": "Estado ainda não identificado"
+        },
+        "EVENTS": {
+          "prepared": "Solicitação de envio registrada",
+          "dispatch_started": "Envio iniciado",
+          "send_confirmed": "Envio confirmado pelo fornecedor",
+          "send_uncertain": "Confirmação do envio pendente",
+          "send_rejected": "Envio recusado pelo fornecedor",
+          "sender_blocked": "Envio bloqueado pelas verificações internas",
+          "canceled_before_send": "Solicitação cancelada antes do envio",
+          "completion_reported": "Conclusão informada pelo fornecedor",
+          "envelope_canceled": "Cancelamento informado pelo fornecedor",
+          "envelope_declined": "Assinatura recusada",
+          "unknown": "Evento registrado"
+        }
       }
     },
     "CUSTOMER_SIGNING_IDENTITY": {

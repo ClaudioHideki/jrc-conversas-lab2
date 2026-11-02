@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import BackofficeContractVersions from './BackofficeContractVersions.vue';
 import BackofficeContractSigners from './BackofficeContractSigners.vue';
 import BackofficeContractAuthority from './BackofficeContractAuthority.vue';
+import BackofficeContractSignatures from './BackofficeContractSignatures.vue';
 import { useBackofficePresentation } from './useBackofficePresentation';
 
 defineProps({ record: { type: Object, required: true } });
@@ -11,7 +12,7 @@ const { text } = useBackofficePresentation();
 const route = useRoute();
 const router = useRouter();
 const tab = computed(() =>
-  ['signers', 'authority'].includes(route.query.contractTab)
+  ['signers', 'authority', 'signature'].includes(route.query.contractTab)
     ? route.query.contractTab
     : 'versions'
 );
@@ -28,7 +29,7 @@ const select = value =>
       :aria-label="text('CONTRACT_SIGNERS.NAVIGATION')"
     >
       <button
-        v-for="item in ['versions', 'signers', 'authority']"
+        v-for="item in ['versions', 'signers', 'authority', 'signature']"
         :key="item"
         type="button"
         :aria-current="tab === item ? 'page' : undefined"
@@ -52,6 +53,10 @@ const select = value =>
       :record="record"
     />
     <BackofficeContractAuthority
+      v-else-if="tab === 'authority'"
+      :record="record"
+    />
+    <BackofficeContractSignatures
       v-else
       :record="record"
     />

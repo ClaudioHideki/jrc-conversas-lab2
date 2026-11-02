@@ -37864,8 +37864,13 @@
         "line": 347,
         "section": "4.6 Contratos e assinantes",
         "text": "12. Consulta, reenvio, cancelamento e acompanhamento.",
-        "classification_pending": true,
-        "evidence": []
+        "classification_pending": false,
+        "evidence": [
+          "docs/jrc_backoffice/signature_history_ui_checkpoint_20261102.json"
+        ],
+        "status": "parcial",
+        "implemented_change": "Consulta do histórico persistido na solicitação, paginação, permissão histórica, tema/responsividade e popup validados.",
+        "next_action": "Concluir consulta remota controlada, reenvio/lembrete/cancelamento e o acompanhamento operacional completo."
       },
       {
         "id": "latest-user:L0348",

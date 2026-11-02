@@ -15,6 +15,7 @@ const render = () =>
         BackofficeContractVersions: true,
         BackofficeContractSigners: true,
         BackofficeContractAuthority: true,
+        BackofficeContractSignatures: true,
       },
     },
   });
@@ -25,6 +26,30 @@ beforeEach(() => {
   mocks.replace.mockImplementation(async ({ query }) => {
     mocks.route.query = query;
   });
+});
+
+it('restores signature status and preserves its page and surrounding filters', async () => {
+  mocks.route.query = {
+    tab: 'contracts',
+    contractTab: 'signature',
+    signaturePage: '2',
+    status: 'blocked',
+  };
+  const wrapper = render();
+  expect(
+    wrapper.findComponent({ name: 'BackofficeContractSignatures' }).exists()
+  ).toBe(true);
+  await wrapper
+    .findAll('button')
+    .find(button => button.text() === 'Versões e minuta')
+    .trigger('click');
+  await flushPromises();
+  expect(mocks.route.query).toMatchObject({
+    contractTab: 'versions',
+    signaturePage: '2',
+    status: 'blocked',
+  });
+  wrapper.unmount();
 });
 
 it('preserves the representation subtab when the panel remounts', async () => {
