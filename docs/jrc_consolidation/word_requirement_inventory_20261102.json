@@ -37851,8 +37851,13 @@
         "line": 346,
         "section": "4.6 Contratos e assinantes",
         "text": "11. Integração desse envio com a conexão selecionada.",
-        "classification_pending": true,
-        "evidence": []
+        "classification_pending": false,
+        "evidence": [
+          "docs/jrc_backoffice/signature_dispatch_notifications_checkpoint_20261102.json"
+        ],
+        "status": "parcial",
+        "implemented_change": "Dispatch interno preserva a conexão, ambiente, conta externa e versão exata, com claim commitado antes do POST simulado.",
+        "next_action": "Integrar reconciliação, operação contextual e evidências finais; homologar demo externo."
       },
       {
         "id": "latest-user:L0347",
@@ -37867,8 +37872,13 @@
         "line": 348,
         "section": "4.6 Contratos e assinantes",
         "text": "13. Recebimento e reconciliação dos eventos.",
-        "classification_pending": true,
-        "evidence": []
+        "classification_pending": false,
+        "evidence": [
+          "docs/jrc_backoffice/signature_dispatch_notifications_checkpoint_20261102.json"
+        ],
+        "status": "parcial",
+        "implemented_change": "Consumidor e jobs para recibos autenticados e vinculados, idempotência, eventos antigos e callback anterior ao vínculo testados.",
+        "next_action": "Concluir reconciliação do envio incerto, projeções operacionais, orçamento de consulta e verificação dos artefatos finais."
       },
       {
         "id": "latest-user:L0349",

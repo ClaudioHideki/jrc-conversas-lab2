@@ -1,0 +1,256 @@
+{
+  "date": "2026-11-02",
+  "branch": "codex/relacionamento-v2-20261101",
+  "base_commit": "27c97c84951a2ed0868c00c7b9ea9620f25424e8",
+  "phase": "B3 — dispatch e consumidor interno com recuperação de recibos validados; assinatura completa ainda parcial",
+  "global_state": "Todas as quatro frentes continuam parciais; este é um checkpoint técnico local.",
+  "implemented": [
+    "Dispatch recebe somente ID da intenção durável e carrega no servidor conta, ator, fonte e conexão preservadas.",
+    "Exige intenção já commitada e faz nova autorização, verificação dos poderes pela Central, validade original e bytes/checksum antes do POST.",
+    "Reserva única commitada antes de I/O; dois workers concorrentes não repetem POST. Timeout deixa o envio reservado/incerto.",
+    "Mudança do padrão não redireciona o envio. Recibo positivo é preservado mesmo se o remetente perder acesso durante a chamada.",
+    "Confirmação externa é persistida antes da projeção operacional; conflito com referência digitada não apaga o recibo nem permite reenviar para consertar uma tela.",
+    "Recuperação somente de leitura no conector consulta a transação preservada, verifica conta/envelope/transação e rejeita resultados ambíguos. Ausência não autoriza outro POST.",
+    "Conector traduz eventos do fornecedor. Consumidor exige vínculo exato de conta, conexão e envelope; não associa por e-mail ou suposição.",
+    "Recibo anterior ao vínculo permanece recebido. Job pós-commit e recuperação agendada retomam apenas recibos já vinculados, em lotes de até100.",
+    "Conclusão de destinatário não vira conclusão do envelope. Eventos antigos/terminais conflitantes não reabrem envio.",
+    "Conclusão informada permanece completion_reported; consumidor não marca contrato assinado nem libera implantação.",
+    "Jobs respeitam conta ativa/módulo, têm retry de locks, registram falha segura e recebem somente IDs, sem payload/credenciais em argumentos ou logs."
+  ],
+  "separation": {
+    "internal": [
+      "app/services/jrc_backoffice/signatures/dispatch.rb",
+      "app/services/jrc_backoffice/signatures/notifications.rb",
+      "app/services/jrc_backoffice/signatures/gateway.rb",
+      "app/jobs/jrc_backoffice/signature_notification_job.rb"
+    ],
+    "provider_only": [
+      "app/services/jrc_backoffice/docusign/client.rb",
+      "app/services/jrc_backoffice/docusign/adapter.rb",
+      "app/services/jrc_backoffice/docusign/recovery.rb",
+      "app/services/jrc_backoffice/docusign/notification.rb"
+    ],
+    "future_change": "Novo fornecedor exigirá conector/configuração e seus testes. Não exige refazer contratos, versões, pessoas, poderes, Central ou ledger; conexões históricas continuam imutáveis.",
+    "other_provider_implemented": false
+  },
+  "validation": {
+    "core": {
+      "examples": 58,
+      "passed": 58,
+      "failed": 0,
+      "artifact": {
+        "path": ".codex/signature-delivery-integrated-validated.json",
+        "sha256": "393e0c4c5ae4728bbb10149574dd50dba2e493591620f72858ed12b09573ed13"
+      },
+      "scope": "58 exemplos fora do arquivo legado de webhook passaram na execução combinada74/6; não se afirma que aquela execução passou integralmente.",
+      "cases": [
+        "./spec/services/jrc_backoffice/signatures/notifications_spec.rb[1:1]",
+        "./spec/services/jrc_backoffice/signatures/notifications_spec.rb[1:2]",
+        "./spec/services/jrc_backoffice/signatures/notifications_spec.rb[1:3]",
+        "./spec/services/jrc_backoffice/signatures/notifications_spec.rb[1:4]",
+        "./spec/jobs/jrc_backoffice/signature_notification_job_spec.rb[1:1]",
+        "./spec/jobs/jrc_backoffice/signature_notification_job_spec.rb[1:2]",
+        "./spec/configs/schedule_spec.rb[1:1]",
+        "./spec/services/jrc_backoffice/signatures/dispatch_spec.rb[1:1]",
+        "./spec/services/jrc_backoffice/signatures/dispatch_spec.rb[1:2]",
+        "./spec/services/jrc_backoffice/signatures/dispatch_spec.rb[1:3]",
+        "./spec/services/jrc_backoffice/signatures/dispatch_spec.rb[1:4]",
+        "./spec/services/jrc_backoffice/signatures/dispatch_spec.rb[1:5]",
+        "./spec/services/jrc_backoffice/signatures/dispatch_spec.rb[1:6]",
+        "./spec/services/jrc_backoffice/signatures/dispatch_spec.rb[1:7]",
+        "./spec/services/jrc_backoffice/signatures/dispatch_spec.rb[1:8]",
+        "./spec/services/jrc_backoffice/signatures/gateway_recovery_spec.rb[1:1]",
+        "./spec/services/jrc_backoffice/signatures/gateway_recovery_spec.rb[1:2]",
+        "./spec/services/jrc_backoffice/signatures/gateway_recovery_spec.rb[1:3]",
+        "./spec/services/jrc_backoffice/signatures/gateway_recovery_spec.rb[1:4]",
+        "./spec/services/jrc_backoffice/signatures/gateway_recovery_spec.rb[1:5]",
+        "./spec/services/jrc_backoffice/signatures/gateway_recovery_spec.rb[1:6]",
+        "./spec/services/jrc_backoffice/signatures/gateway_recovery_spec.rb[1:7]",
+        "./spec/services/jrc_backoffice/signatures/gateway_recovery_spec.rb[1:8]",
+        "./spec/services/jrc_backoffice/signatures/gateway_recovery_spec.rb[1:9]",
+        "./spec/services/jrc_backoffice/signatures/gateway_recovery_spec.rb[1:10]",
+        "./spec/services/jrc_backoffice/signatures/gateway_spec.rb[1:1]",
+        "./spec/services/jrc_backoffice/signatures/gateway_spec.rb[1:2]",
+        "./spec/services/jrc_backoffice/signatures/gateway_spec.rb[1:3]",
+        "./spec/services/jrc_backoffice/signatures/gateway_spec.rb[1:4]",
+        "./spec/services/jrc_backoffice/signatures/gateway_spec.rb[1:5]",
+        "./spec/services/jrc_backoffice/signatures/gateway_spec.rb[1:6]",
+        "./spec/services/jrc_backoffice/signatures/gateway_spec.rb[1:7]",
+        "./spec/services/jrc_backoffice/signatures/gateway_spec.rb[1:8]",
+        "./spec/services/jrc_backoffice/signatures/gateway_spec.rb[1:9]",
+        "./spec/services/jrc_backoffice/signatures/gateway_spec.rb[1:10]",
+        "./spec/services/jrc_backoffice/signatures/gateway_spec.rb[1:11]",
+        "./spec/services/jrc_backoffice/signatures/gateway_spec.rb[1:12]",
+        "./spec/services/jrc_backoffice/signatures/gateway_spec.rb[1:13]",
+        "./spec/services/jrc_backoffice/signatures/gateway_spec.rb[1:14]",
+        "./spec/services/jrc_backoffice/signatures/gateway_spec.rb[1:15]",
+        "./spec/services/jrc_backoffice/docusign/client_spec.rb[1:1]",
+        "./spec/services/jrc_backoffice/docusign/client_spec.rb[1:2]",
+        "./spec/services/jrc_backoffice/docusign/client_spec.rb[1:3]",
+        "./spec/services/jrc_backoffice/docusign/client_spec.rb[1:4]",
+        "./spec/services/jrc_backoffice/docusign/client_spec.rb[1:5]",
+        "./spec/services/jrc_backoffice/docusign/client_spec.rb[1:6]",
+        "./spec/services/jrc_backoffice/docusign/client_spec.rb[1:7]",
+        "./spec/services/jrc_backoffice/docusign/client_spec.rb[1:8]",
+        "./spec/services/jrc_backoffice/docusign/client_spec.rb[1:9]",
+        "./spec/services/jrc_backoffice/docusign/client_spec.rb[1:10]",
+        "./spec/services/jrc_backoffice/docusign/client_spec.rb[1:11]",
+        "./spec/services/jrc_backoffice/docusign/client_spec.rb[1:12]",
+        "./spec/services/jrc_backoffice/docusign/client_spec.rb[1:13]",
+        "./spec/services/jrc_backoffice/docusign/connect_verifier_spec.rb[1:1]",
+        "./spec/services/jrc_backoffice/docusign/connect_verifier_spec.rb[1:2]",
+        "./spec/services/jrc_backoffice/docusign/connect_verifier_spec.rb[1:3]",
+        "./spec/services/jrc_backoffice/docusign/connect_verifier_spec.rb[1:4]",
+        "./spec/services/jrc_backoffice/docusign/connect_verifier_spec.rb[1:5]"
+      ]
+    },
+    "webhook_isolated": {
+      "duration": 10.491970155,
+      "example_count": 17,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0,
+      "artifact": {
+        "path": ".codex/signature-webhook-isolated-validated.json",
+        "sha256": "be2db956aa3bc5d4b36ceedfac696e5afd604a5ff1f0b283381f94e11f26f02f"
+      },
+      "scope": "16 testes originais de webhook mais o teste de agendamento, em banco candidato lido como zero recibos antes da execução; nenhum dado apagado e nenhuma expectativa alterada.",
+      "webhook_cases": [
+        "./spec/requests/webhooks/docusign_spec.rb[1:1]",
+        "./spec/requests/webhooks/docusign_spec.rb[1:2]",
+        "./spec/requests/webhooks/docusign_spec.rb[1:3]",
+        "./spec/requests/webhooks/docusign_spec.rb[1:4]",
+        "./spec/requests/webhooks/docusign_spec.rb[1:5]",
+        "./spec/requests/webhooks/docusign_spec.rb[1:6]",
+        "./spec/requests/webhooks/docusign_spec.rb[1:7]",
+        "./spec/requests/webhooks/docusign_spec.rb[1:8]",
+        "./spec/requests/webhooks/docusign_spec.rb[1:9]",
+        "./spec/requests/webhooks/docusign_spec.rb[1:10]",
+        "./spec/requests/webhooks/docusign_spec.rb[1:11]",
+        "./spec/requests/webhooks/docusign_spec.rb[1:12]",
+        "./spec/requests/webhooks/docusign_spec.rb[1:13]",
+        "./spec/requests/webhooks/docusign_spec.rb[1:14]",
+        "./spec/requests/webhooks/docusign_spec.rb[1:15]",
+        "./spec/requests/webhooks/docusign_spec.rb[1:16]"
+      ]
+    },
+    "unique_cases_proven": 74,
+    "database_isolation": "Casos com commit real deixam evidências sintéticas em schema_admission_test. Webhooks antigos exigem zero recibos globais e rodam em candidate_test. Gates devem manter essa separação.",
+    "ruby": {
+      "offense_count": 0,
+      "target_file_count": 17,
+      "inspected_file_count": 17,
+      "artifact": {
+        "path": ".codex/signature-delivery-integrated-ruby.json",
+        "sha256": "d225502f93c3e3b57cfd1adfe547854089186f7367ef1ab2da9093a4cfd3aca5"
+      }
+    },
+    "source": {
+      "files": 11231,
+      "baseline": "701dad483ee61283b94375050f2952f5ffe2d7df",
+      "mismatches": [],
+      "snapshot": "/consolidation-signature-jobs-validated",
+      "sql_raw_hashes": true,
+      "manifest": {
+        "path": ".codex/signature-jobs-validated-source-manifest.json",
+        "sha256": "b156d7957c997ef2e533722f92a0bde5c1d0af8ed88b13cb003bff1a6563e24c"
+      },
+      "scope": "Fonte701 + admissão e estes18arquivos, antes da API/UI de histórico; os18 hashes atuais foram novamente comparados. SQL críticos byte a byte."
+    },
+    "frontend_in_checkpoint": false,
+    "browser_in_checkpoint": false,
+    "simulation": "HTTP DocuSign, OAuth e antivírus simulados; HMAC, cifras, transações PostgreSQL/segunda conexão, bloqueios e hashes reais. Não é homologação externa."
+  },
+  "failures_retained": [
+    {
+      "artifact": {
+        "path": ".codex/signature-dispatch-first.json",
+        "sha256": "5d79fb8682338dd7bbf95e06f3093007aab6a71e7121475008688b987d62dc1b"
+      },
+      "result": "6/0; depois acrescidos concorrência e corrupção de fonte, ambos aprovados."
+    },
+    {
+      "artifact": {
+        "path": ".codex/signature-events-backend.json",
+        "sha256": "d0560f212fa902932e19c77a5f234bcfee7cc9ff0785373e4d54b83fff507fbe"
+      },
+      "result": "71/4; quatro casos não chegaram ao consumidor porque let(:receive) ocultou o matcher RSpec. Renomeado para receipt_for sem relaxar produção."
+    },
+    {
+      "artifact": {
+        "path": ".codex/signature-notification-jobs-backend.json",
+        "sha256": "af9a25e83eafda71f17907d5bfa6c233f06324c2ac59b052190cc68ffb85b066"
+      },
+      "result": "19/1; CRLF em linhas vazias virou falsa duplicação no teste nativo. Convertido schedule.yml para LF, preservadas25chaves reais e o teste original."
+    },
+    {
+      "artifact": {
+        "path": ".codex/signature-delivery-integrated-validated.json",
+        "sha256": "393e0c4c5ae4728bbb10149574dd50dba2e493591620f72858ed12b09573ed13"
+      },
+      "result": "74/6; os58casos do núcleo passaram. Seis asserts globais de zero recibos conflitaram com dois recibos legítimos deixados pelos testes de commit real. Webhooks repetidos sem alterações em banco separado,17/0 incluindo agendamento."
+    }
+  ],
+  "remaining": [
+    "Não existe ainda job/API/interface de admissão e envio operacional habilitado; entrada Dispatch é interna.",
+    "Recuperação de envio incerto ainda é conector de leitura, não reconciliação operacional integrada com orçamento de polling.",
+    "Ações operacionais de consulta/remetimento/lembrete/cancelamento, obtenção de PDF final/certificado, validação de todos os assinantes e verificador interno permanecem pendentes.",
+    "Projeção nativa atual cobre confirmação de envio; consumidor mantém seus fatos próprios. Conciliação das demais projeções e conflitos ainda precisa ser concluída.",
+    "Painel/API de histórico estão em trabalho local separado e não integram este commit.",
+    "O agendamento foi registrado no código e testado, mas nenhum processo permanente de Sidekiq/scheduler foi iniciado neste ambiente.",
+    "DocuSign Developer/demo, consentimento, Connect HTTPS real, antivírus real e homologação externa continuam pendentes.",
+    "Matriz literal dos Words continua incompleta e as etapas C/D/E/F/G seguem abertas. Nenhuma satisfação, pagamento, provisionamento ou assinatura real foi inferida."
+  ],
+  "migrations_in_increment": [],
+  "files": [
+    "app/services/jrc_backoffice/docusign/client.rb",
+    "app/services/jrc_backoffice/docusign/adapter.rb",
+    "app/services/jrc_backoffice/docusign/recovery.rb",
+    "app/services/jrc_backoffice/docusign/notification.rb",
+    "app/services/jrc_backoffice/signatures/gateway.rb",
+    "app/services/jrc_backoffice/signatures/dispatch.rb",
+    "app/services/jrc_backoffice/signatures/dispatch_context.rb",
+    "app/services/jrc_backoffice/signatures/delivery_projection.rb",
+    "app/services/jrc_backoffice/signatures/notifications.rb",
+    "app/jobs/jrc_backoffice/signature_notification_job.rb",
+    "app/jobs/jrc_backoffice/signature_notification_recovery_job.rb",
+    "app/models/jrc_backoffice/signature_notification.rb",
+    "config/schedule.yml",
+    "spec/services/jrc_backoffice/signatures/gateway_recovery_spec.rb",
+    "spec/services/jrc_backoffice/signatures/dispatch_spec.rb",
+    "spec/services/jrc_backoffice/signatures/notifications_spec.rb",
+    "spec/support/jrc_signature_delivery_helpers.rb",
+    "spec/jobs/jrc_backoffice/signature_notification_job_spec.rb"
+  ],
+  "files_sha256": {
+    "app/services/jrc_backoffice/docusign/client.rb": "9708f6da61d15aa03d957554840e897e91b4add442de761896cedcc5c267422c",
+    "app/services/jrc_backoffice/docusign/adapter.rb": "4fae0702c04a831948553b818e5796b7f94140285b4ed2ca25429decd6db96ed",
+    "app/services/jrc_backoffice/docusign/recovery.rb": "73d11b8cc54ac8d290e6b4b104993e278caa6677ad0880cf33f1049039fcc1da",
+    "app/services/jrc_backoffice/docusign/notification.rb": "ee3502900b1a732cfebcfc46f6099c19ed187af3048067663f658eb6ef3cb9e8",
+    "app/services/jrc_backoffice/signatures/gateway.rb": "1f26b2d427260027a6b00643a82f007bb78a8b6cb06c2abc4a9e193fcc8d23ae",
+    "app/services/jrc_backoffice/signatures/dispatch.rb": "efbba456d7f37a42c6f0c90f2381c866cbffd3eedd3e62b260736c23bcf8c69c",
+    "app/services/jrc_backoffice/signatures/dispatch_context.rb": "c16a01b9fdb1d277b516c08618ade0e45e42de46132ef69fd269f6fc60cf6132",
+    "app/services/jrc_backoffice/signatures/delivery_projection.rb": "4f1559a12a19994ce731030006e83529ed80e8880a13c12b432cd468d280d5a0",
+    "app/services/jrc_backoffice/signatures/notifications.rb": "519df2f24ffd400a2e7060d7c51733c22e1d400fea315bbab4a75b8d163f711a",
+    "app/jobs/jrc_backoffice/signature_notification_job.rb": "d852a006e6cda6d5bfd9ca187f6603a228d79ec95d889f7cd278c544c8362e31",
+    "app/jobs/jrc_backoffice/signature_notification_recovery_job.rb": "c8e516a6c76712d3c5546086e402076a89942e7254cb3619bfb6b502899b3b94",
+    "app/models/jrc_backoffice/signature_notification.rb": "191cbdde67433bb76cb43ec58cf14b31e720a2ff615bcfc88668ade4da04089b",
+    "config/schedule.yml": "9811faf36ef4caad652684acff02af21d882bf1eb4d221a2c9453caf0ddb0b01",
+    "spec/services/jrc_backoffice/signatures/gateway_recovery_spec.rb": "76ffafff822afe9b76ed1b16aa50248b8af2e88dd25f9754fd90b48f1b207794",
+    "spec/services/jrc_backoffice/signatures/dispatch_spec.rb": "763f671557c8029fe2cde41180222bf72aa8347db7363135c534a1ece30e756d",
+    "spec/services/jrc_backoffice/signatures/notifications_spec.rb": "f4ac2bb116148e852843b44cf875ed0e89141fac6466190ccf3fc814a4e1ce7d",
+    "spec/support/jrc_signature_delivery_helpers.rb": "336989926ae34789e187c425c0ed88742a0f2a1838eecef5ffeb4b6dc95125c1",
+    "spec/jobs/jrc_backoffice/signature_notification_job_spec.rb": "8fedbc0a2223c383ed60196d3465d4e334d8bc268d0794d76b93d9838d1d0a47"
+  },
+  "publication": {
+    "push": false,
+    "docker_image_build": false,
+    "image_publish": false,
+    "deploy": false,
+    "compose_changed": false,
+    "production_migrations": false,
+    "protected_publication_head": "50f7f07d802829dd44a67547fabad3aa77f3d196",
+    "protected_worktree_clean": true
+  },
+  "next": "Validar API/UI de histórico com build e navegador; concluir reconciliação, ações, evidências finais e operação de envio; depois C/D/E/F/G."
+}

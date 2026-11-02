@@ -16,6 +16,7 @@ class JrcBackoffice::SignatureNotification < ApplicationRecord
   end
   attr_readonly :account_id, :integration_id, :integration_revision, :body_sha256, :event_type, :envelope_id,
                 :encrypted_payload, :provider_generated_at, :connection_id
+  after_create_commit { JrcBackoffice::SignatureNotificationJob.perform_later(id) }
 
   def payload
     JrcBackoffice::SignatureSecrets.new.decrypt(account_id: account_id, purpose: secret_purpose, ciphertext: encrypted_payload)

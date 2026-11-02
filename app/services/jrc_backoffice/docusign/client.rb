@@ -24,6 +24,10 @@ class JrcBackoffice::Docusign::Client
     api(:get, "envelopes/#{uuid!(id)}")
   end
 
+  def envelopes_for_transaction(transaction_id)
+    api(:get, "envelopes?transaction_ids=#{uuid!(transaction_id)}&count=2")
+  end
+
   def recipients(id)
     api(:get, "envelopes/#{uuid!(id)}/recipients")
   end

@@ -3,7 +3,7 @@ require 'base64'
 # Provider-specific authentication, fields and reported states stay here.
 # "Completion reported" must still pass version/recipient/PDF evidence checks.
 class JrcBackoffice::Docusign::Adapter
-  CAPABILITIES = %i[send status recipients resend remind cancel final_document certificate].freeze
+  CAPABILITIES = %i[send status recipients resend remind cancel final_document certificate recover_send].freeze
   STATES = { 'created' => 'pending', 'sent' => 'waiting', 'delivered' => 'waiting', 'completed' => 'completion_reported',
              'declined' => 'declined', 'voided' => 'canceled' }.freeze
 
@@ -53,6 +53,14 @@ class JrcBackoffice::Docusign::Adapter
       { id: signer['recipientId'], name: signer['name'], email: signer['email'], completed: signer['status'] == 'completed',
         signed_at: signer['signedDateTime'], provider_state: signer['status'] }
     end }
+  end
+
+  def recover_send(transaction_id:)
+    JrcBackoffice::Docusign::Recovery.new(client: @client).call(transaction_id: transaction_id)
+  end
+
+  def notification(receipt:)
+    JrcBackoffice::Docusign::Notification.call(connection: @connection, receipt: receipt)
   end
 
   def resend(external_id)

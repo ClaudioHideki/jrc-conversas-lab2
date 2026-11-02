@@ -389,5 +389,11 @@
     "report": "docs/jrc_backoffice/signature_admission_checkpoint_20261102.json",
     "implemented": "Serviço interno durável, isolamento/imutabilidade e travas validados.",
     "pending": "Operação de envio, consumidor, evidências finais, UI e homologação externa."
+  },
+  "signature_dispatch_increment": {
+    "status": "parcial",
+    "report": "docs/jrc_backoffice/signature_dispatch_notifications_checkpoint_20261102.json",
+    "implemented": "Dispatch interno sem POST duplicado, recuperação técnica de leitura e consumo autenticado com jobs.",
+    "pending": "Reconciliação operacional, ações, assinatura validada/evidências finais, UI de envio e homologação externa."
   }
 }
