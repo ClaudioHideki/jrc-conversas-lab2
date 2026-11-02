@@ -16,6 +16,7 @@ if (-not $IsWindows) { throw 'This orchestrator targets the authorized Windows D
 $BrokerRoot = (Resolve-Path -LiteralPath $BrokerRoot).Path
 $Lab2Root = (Resolve-Path -LiteralPath $Lab2Root).Path
 $scriptRoot = Join-Path $Lab2Root 'spec/homologation'
+. (Join-Path $scriptRoot 'broker_https_cleanup.ps1')
 $schemaPath = Join-Path $Lab2Root 'db/schema.rb'
 if ((Get-Content -LiteralPath $schemaPath -Raw) -notmatch 'define\(version: 2026_11_02_110000\)') { throw 'Reviewed host schema110000 is required.' }
 if ($scriptRoot.Contains(',') -or $BrokerRoot.Contains(',')) { throw 'Docker bind paths containing commas are not supported.' }
@@ -142,6 +143,18 @@ foreach ($relativePath in $criticalFiles) {
   $digest = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes($content))).ToLowerInvariant()
   if ($runtimeDigests[$relativePath] -ne $digest) { throw "Reviewed LAB2 source differs from materialized runtime: $relativePath. Coordinate an explicit source sync first." }
 }
+$harnessSourceRevision = (& git -C $Lab2Root rev-parse HEAD).Trim()
+if($LASTEXITCODE -ne 0){throw 'HARNESS_SOURCE_REVISION_UNVERIFIED'}
+$harnessHashes = @{}
+foreach($file in Get-ChildItem -LiteralPath $scriptRoot -Filter 'broker_https_*' -File){
+  $relativePath="spec/homologation/$($file.Name)"
+  $headBlob=(& git -C $Lab2Root rev-parse "HEAD:$relativePath" 2>$null)
+  if($LASTEXITCODE -ne 0){throw "HARNESS_SOURCE_NOT_COMMITTED:$relativePath"}
+  $workingBlob=(& git -C $Lab2Root hash-object "--path=$relativePath" $file.FullName)
+  if($LASTEXITCODE -ne 0 -or $headBlob -ne $workingBlob){throw "HARNESS_SOURCE_DIFFERS_FROM_COMMIT:$relativePath"}
+  $content=[IO.File]::ReadAllText($file.FullName).Replace("`r`n","`n")
+  $harnessHashes[$relativePath]=[Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes($content))).ToLowerInvariant()
+}
 
 $runId = [Guid]::NewGuid().ToString()
 $resourcePrefix = 'jrc-broker-https-' + $runId.Substring(0,8)
@@ -151,6 +164,7 @@ $privateDirectory = Join-Path ([IO.Path]::GetTempPath()) "broker_https_$runId"
 $evidenceDirectory = Join-Path $OutputRoot "broker-https-$runId"
 $null = New-Item -ItemType Directory -Path $privateDirectory,$evidenceDirectory
 Write-PublicLog 'lab2-runtime-source.json' ($runtimeDigests | ConvertTo-Json -Depth 4)
+Write-PublicLog 'harness-source.json' (@{revision=$harnessSourceRevision;committed_content_verified=$true;sha256_lf=$harnessHashes}|ConvertTo-Json -Depth 5)
 $privateAcl = Get-Acl -LiteralPath $privateDirectory
 $currentSid = [Security.Principal.WindowsIdentity]::GetCurrent().User
 $privateAcl.SetAccessRuleProtection($true,$false)
@@ -164,6 +178,8 @@ $credentialKey = [Convert]::ToBase64String([Security.Cryptography.RandomNumberGe
 $brokerPg = "$resourcePrefix-broker-pg"; $railsPg = "$resourcePrefix-rails-pg"
 $redisContainer = "$resourcePrefix-redis"; $seedContainer = "$resourcePrefix-seed"
 $apiContainer = "$resourcePrefix-api"; $proxyContainer = "$resourcePrefix-proxy"
+$primaryFailure = $null
+$cleanup = $null
 try {
 $null = Invoke-Docker @('network','create','--internal','--label',"jrc.task=$label",$resourcePrefix)
 $null = Invoke-Docker @('network','connect',$resourcePrefix,$RailsContainer)
@@ -249,25 +265,38 @@ Copy-FromRails 'worker_a_killed.json' (Join-Path $evidenceDirectory 'worker_a_ki
 Copy-FromRails 'foreign_signature.json' (Join-Path $evidenceDirectory 'foreign_signature.json')
 [IO.File]::Copy((Join-Path $privateDirectory 'wire.jsonl'),(Join-Path $evidenceDirectory 'wire.jsonl'))
 $result = @{ gate='LAB2_TLS_BROKER_DURABLE_CUSTODY'; broker_image=$BrokerImage; broker_source_sha=$sourceSha;
+  harness_source_revision=$harnessSourceRevision; harness_source_committed_content_verified=$true; harness_sha256_lf=$harnessHashes;
   docker_store_image_id=$imageInfo.Id; broker_platform_digest=$platformInfo.Descriptor.digest;
   broker_config_digest=$platformManifest.config.digest; image_identity_artifact_sha256=(Get-FileHash -LiteralPath $ImageIdentityPath -Algorithm SHA256).Hash;
   source_attribution='reviewed release evidence; OCI source label may be absent';
   independent_lab2_consumers=2; same_real_local_ids=$true; redis_databases=@(0,1); stock_chatwoot_cclx_homologated=$false;
   sigkill_exit_code=137;
-  physical_whatsapp_delivery='NOT_EXERCISED'; resource_prefix=$resourcePrefix; preserved_private_fixture_directory=$privateDirectory;
+  physical_whatsapp_delivery='NOT_EXERCISED'; resource_prefix=$resourcePrefix;
   no_public_ports=$true; safe_fetch_real=$true; production_ssrf_unchanged=$true; fixture_allow_private_network=$true }
+} catch {
+  $primaryFailure = $_
+} finally {
+  $cleanupRunner = {
+    param([string[]]$DockerArguments)
+    $PSNativeCommandUseErrorActionPreference = $false
+    $value = & docker @DockerArguments 2>&1
+    $nativeExit = $LASTEXITCODE
+    [pscustomobject]@{ExitCode=$nativeExit;Output=($value -join [Environment]::NewLine)}
+  }
+  try {
+    $cleanup = Invoke-BrokerHttpsCleanup -Runner $cleanupRunner -Containers @($apiContainer,$proxyContainer,$seedContainer,$brokerPg,$railsPg,$redisContainer) `
+      -Label $label -Network $resourcePrefix -RailsContainer $RailsContainer -Directory $containerDirectory -RunId $runId
+  } catch {
+    $cleanup = [pscustomobject]@{Verified=$false;Errors=@('CLEANUP_HELPER_FAILED');Containers=@();RailsDetached=$false}
+  }
+  try { Write-PublicLog 'cleanup-state.json' ($cleanup | ConvertTo-Json -Depth 5) }
+  catch {
+    $cleanup.Verified=$false
+    $cleanup.Errors=@($cleanup.Errors)+@('CLEANUP_EVIDENCE_WRITE_FAILED')
+  }
+}
+$cleanupSuccess = Complete-BrokerHttpsCleanup -Cleanup $cleanup -PrimaryFailure $primaryFailure
+$result.cleanup_verified = $true
 Write-PublicLog 'result.json' ($result | ConvertTo-Json -Depth 6)
 Write-Output ($result | ConvertTo-Json -Depth 6)
-} finally {
-  # Stop only processes/resources created for this nonce. Keep all containers/volumes and every DB for review.
-  $null = & docker exec $RailsContainer ruby -rjson -e 'File.write(File.join(ARGV.fetch(0),"stop_requested.json"),JSON.generate(run_id:ARGV.fetch(1)))' $containerDirectory $runId 2>$null
-  foreach ($ownedContainer in @($apiContainer,$proxyContainer,$seedContainer,$brokerPg,$railsPg,$redisContainer)) {
-    $actualLabel = & docker inspect --format '{{index .Config.Labels "jrc.task"}}' $ownedContainer 2>$null
-    if ($LASTEXITCODE -eq 0 -and ($actualLabel -join '') -eq $label) { $null = & docker stop --time 10 $ownedContainer 2>$null }
-  }
-  $actualNetworkLabel = & docker network inspect --format '{{index .Labels "jrc.task"}}' $resourcePrefix 2>$null
-  if ($LASTEXITCODE -eq 0 -and ($actualNetworkLabel -join '') -eq $label) {
-    $null = & docker network disconnect --force $resourcePrefix $RailsContainer 2>$null
-  }
-  Write-Output 'Only nonce-labelled fixture resources were stopped; containers, volumes, DBs and private fixture files remain. No deletion, backup or ZIP.'
-}
+Write-Output $cleanupSuccess
