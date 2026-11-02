@@ -11,22 +11,25 @@ class Webhooks::Trigger
     end
   end
 
-  def initialize(url, payload, webhook_type, secret: nil, delivery_id: nil)
+  def initialize(url, payload, webhook_type, secret: nil, delivery_id: nil, strict: false)
     @url = url
     @payload = payload
     @webhook_type = webhook_type
     @secret = secret
     @delivery_id = delivery_id
+    @strict = strict
   end
 
-  def self.execute(url, payload, webhook_type, secret: nil, delivery_id: nil)
-    new(url, payload, webhook_type, secret: secret, delivery_id: delivery_id).execute
+  def self.execute(url, payload, webhook_type, secret: nil, delivery_id: nil, strict: false)
+    new(url, payload, webhook_type, secret: secret, delivery_id: delivery_id, strict: strict).execute
   end
 
   def execute
     jrc_delivery&.validate!(url: @url, secret: @secret, delivery_id: @delivery_id)
     perform_request
   rescue StandardError => e
+    raise if @strict
+
     raise RetryableError.new(status: http_status(e), message: e.message) if retryable_agent_bot_error?(e)
     raise JrcBroker::WebhookDelivery::Unavailable if jrc_delivery&.retryable?(e)
 
