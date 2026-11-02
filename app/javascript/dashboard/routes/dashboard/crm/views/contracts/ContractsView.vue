@@ -2,6 +2,7 @@
 /* eslint-disable vue/no-bare-strings-in-template */
 import ApprovalGateBadge from 'dashboard/routes/dashboard/approvals/ApprovalGateBadge.vue';
 import { computed, onMounted, ref } from 'vue';
+import { format } from 'date-fns';
 import { useRoute, useRouter } from 'vue-router';
 import { contractsAPI } from 'dashboard/api/crm/commercialCycle';
 import { useAlert } from 'dashboard/composables';
@@ -22,7 +23,7 @@ const perPage = ref(10);
 const saving = ref(false);
 const signatureContract = ref(null);
 const signedByName = ref('');
-const signedAt = ref(new Date().toISOString().slice(0,16));
+const signedAt = ref(format(new Date(), "yyyy-MM-dd'T'HH:mm"));
 const signedFile = ref(null);
 const signatureProvider = ref('');
 const signatureExternalId = ref('');
@@ -245,7 +246,7 @@ const downloadPdf = async contract => {
 const openSignature = contract => {
   signatureContract.value = contract;
   signedByName.value = '';
-  signedAt.value = new Date().toISOString().slice(0,16);
+  signedAt.value = format(new Date(), "yyyy-MM-dd'T'HH:mm");
   signedFile.value = null;
   signatureProvider.value = contract.signature_provider || '';
   signatureExternalId.value = contract.signature_external_id || '';

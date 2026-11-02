@@ -7,7 +7,7 @@ module JrcCrm
       @actor = actor || order.owner
     end
 
-    def call
+    def call(releasing: false)
       return unless contract_required?
       return unless OrderWorkflowSyncService::QUALIFYING_STATUSES.include?(@order.status)
 
@@ -17,6 +17,12 @@ module JrcCrm
       @order.with_lock do
         existing = primary_contract
         next existing if existing
+
+        request = @order.backoffice_requests.find_by(request_kind: 'fulfillment')
+        if request&.workflow_version == 2 && !releasing && %w[request analysis documentation approval].include?(request.stage)
+          next nil
+        end
+        JrcBackoffice::ContractRelease.check!(order: @order, actor: @actor)
 
         proposal = @order.proposal
         starts_on = parse_date(snapshot[:activation_date]) || Date.current

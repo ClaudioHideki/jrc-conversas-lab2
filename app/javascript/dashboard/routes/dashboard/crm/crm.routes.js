@@ -24,7 +24,8 @@ const ContractTemplates = () =>
 const GoalsView = () => import('./views/goals/GoalsView.vue');
 const CommissionsView = () => import('./views/commissions/CommissionsView.vue');
 const Customer360View = () => import('./views/customers/Customer360View.vue');
-const BackofficeView = () => import('./views/backoffice/BackofficeView.vue');
+const BackofficeLayout = () =>
+  import('./views/backoffice/BackofficeLayout.vue');
 const ManagementView = () => import('./views/management/ManagementView.vue');
 const CrmSettingsView = () => import('./views/settings/CrmSettingsView.vue');
 
@@ -51,6 +52,17 @@ const ensureCrmEnabled = async to => {
 
 export default {
   routes: [
+    ...[
+      ['requests/:requestId', 'crm_backoffice_request'],
+      ['new', 'crm_backoffice_new'],
+      [':section?', 'crm_backoffice'],
+    ].map(([path, name]) => ({
+      path: frontendURL(`accounts/:accountId/backoffice/${path}`),
+      name,
+      component: BackofficeLayout,
+      meta,
+      beforeEnter: ensureCrmEnabled,
+    })),
     {
       path: frontendURL('accounts/:accountId/crm'),
       component: CrmLayout,
@@ -153,10 +165,22 @@ export default {
           meta,
         },
         {
+          path: 'backoffice/requests/:requestId',
+          redirect: to => ({
+            name: 'crm_backoffice_request',
+            params: to.params,
+            query: to.query,
+            hash: to.hash,
+          }),
+        },
+        {
           path: 'backoffice/:section?',
-          name: 'crm_backoffice',
-          component: BackofficeView,
-          meta,
+          redirect: to => ({
+            name: 'crm_backoffice',
+            params: to.params,
+            query: to.query,
+            hash: to.hash,
+          }),
         },
         {
           path: 'customers/:customerId',

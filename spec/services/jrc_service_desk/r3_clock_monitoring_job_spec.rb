@@ -190,15 +190,19 @@ RSpec.describe JrcServiceDesk::ClockMonitoringJob do
     end
 
     it 'monitors the real queue clock and persists one immutable breach proof without a customer delivery' do
-      clock = start_ola
-      travel 61.seconds
-      described_class.perform_now
-      described_class.perform_now
+      expect(SendReplyJob).not_to receive(:perform_later)
+      clock = nil
+      expect do
+        clock = start_ola
+        travel 61.seconds
+        described_class.perform_now
+        described_class.perform_now
+      end.not_to change(Message, :count)
       rows = monitoring_events.order(:event_type)
       expect(rows.pluck(:event_type)).to eq(%w[clock_threshold_reached clock_violated])
       expect(rows.all? { |row| row.actor_membership_id == sd_membership.id && row.data['clock_id'] == clock.id }).to be(true)
       expect(rows.all? { |row| row.data['clock_kind'] == 'ola' && row.data['policy_digest'] == clock.policy_revision }).to be(true)
-      expect(Message.count).to eq(0)
+      expect(Message.where(account: sd_account)).to be_empty
     end
 
     it 'stops a queued policy binding after its queue configuration is changed or disabled' do

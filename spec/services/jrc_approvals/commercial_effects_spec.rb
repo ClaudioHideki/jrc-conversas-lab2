@@ -138,6 +138,9 @@ RSpec.describe 'Protected native commercial effects', type: :model, approval_cor
     approval_vote(scope, approver, record)
     JrcCrm::OrderApprovalService.new(order: order, actor: author.user).decide!(request: legacy, decision: 'approved')
     fulfillment = order.backoffice_requests.find_by!(request_kind: 'fulfillment')
+    fulfillment.advance!(actor: author.user) while %w[request analysis documentation].include?(fulfillment.stage)
+    expect(fulfillment.stage).to eq('approval')
+    expect(fulfillment.contract).to be_nil
     original_stage = fulfillment.stage
     expect { fulfillment.advance!(actor: author.user) }.to raise_error(JrcApprovals::Error, 'APPROVAL_REQUIRED')
     expect(fulfillment.reload.stage).to eq(original_stage)

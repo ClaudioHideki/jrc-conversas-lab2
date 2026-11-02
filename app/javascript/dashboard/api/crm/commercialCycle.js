@@ -80,6 +80,8 @@ export const backofficeAPI = make('backoffice_requests');
 backofficeAPI.decideOrder = (id, data) =>
   axios.post(`${backofficeAPI.url}/${id}/decide_order`, data);
 backofficeAPI.show = id => axios.get(`${backofficeAPI.url}/${id}`);
+backofficeAPI.workspace = params =>
+  axios.get(`${backofficeAPI.url}/workspace`, { params });
 backofficeAPI.summary = () => axios.get(`${backofficeAPI.url}/summary`);
 backofficeAPI.advance = id => axios.post(`${backofficeAPI.url}/${id}/advance`);
 backofficeAPI.uploadDocuments = (id, files) =>
@@ -88,6 +90,24 @@ backofficeAPI.downloadDocument = (id, attachmentId) =>
   axios.get(`${backofficeAPI.url}/${id}/documents/${attachmentId}`, {
     responseType: 'blob',
   });
+backofficeAPI.documentVersions = (id, params) =>
+  axios.get(`${backofficeAPI.url}/${id}/document_versions`, { params });
+backofficeAPI.uploadDocumentVersion = (id, key, file, intent) => {
+  const data = new FormData();
+  data.append('document_key', key);
+  data.append('file', file);
+  data.append('idempotency_key', intent);
+  return axios.post(`${backofficeAPI.url}/${id}/document_versions`, data);
+};
+backofficeAPI.downloadDocumentVersion = (id, versionId) =>
+  axios.get(`${backofficeAPI.url}/${id}/document_versions/${versionId}`, {
+    responseType: 'blob',
+  });
+backofficeAPI.decideDocumentVersion = (id, versionId, data) =>
+  axios.post(
+    `${backofficeAPI.url}/${id}/document_versions/${versionId}/decision`,
+    data
+  );
 backofficeAPI.documentStatus = (id, data) =>
   axios.post(`${backofficeAPI.url}/${id}/document_status`, data);
 backofficeAPI.addIssue = (id, data) =>

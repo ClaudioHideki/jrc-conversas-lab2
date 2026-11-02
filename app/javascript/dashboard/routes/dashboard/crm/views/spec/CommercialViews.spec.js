@@ -6,7 +6,6 @@ import ContractWizard from '../contracts/ContractWizard.vue';
 import ContractTemplates from '../contracts/ContractTemplates.vue';
 import GoalsView from '../goals/GoalsView.vue';
 import CommissionsView from '../commissions/CommissionsView.vue';
-import BackofficeView from '../backoffice/BackofficeView.vue';
 
 const mocks = vi.hoisted(() => {
   const list = () => vi.fn().mockResolvedValue({ data: [] });
@@ -89,7 +88,6 @@ describe('Commercial screens on an Account without commercial records', () => {
     ['Modelos', ContractTemplates, () => mocks.templates.list],
     ['Metas', GoalsView, () => mocks.goals.dashboard],
     ['Comissões', CommissionsView, () => mocks.commissions.list],
-    ['Backoffice', BackofficeView, () => mocks.backoffice.list],
   ])('%s initializes and reads its API without creating data', async (_, component, read) => {
     const errors = [];
     const wrapper = mount(component, {

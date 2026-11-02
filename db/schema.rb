@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_10_26_161000) do
+ActiveRecord::Schema[7.1].define(version: 2026_11_01_200000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -1338,6 +1338,44 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_26_161000) do
     t.check_constraint "business_unit_id IS NULL OR issuer_company_id IS NOT NULL", name: "jrc_ap_requests_scope"
   end
 
+  create_table "jrc_backoffice_document_analyses", force: :cascade do |t|
+    t.bigint "document_version_id", null: false
+    t.string "analyzer_version", null: false
+    t.string "state", null: false
+    t.jsonb "evidence", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["document_version_id"], name: "idx_backoffice_analysis_version", unique: true
+  end
+
+  create_table "jrc_backoffice_document_decisions", force: :cascade do |t|
+    t.bigint "document_version_id", null: false
+    t.bigint "actor_id", null: false
+    t.string "status", null: false
+    t.text "reason", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["actor_id"], name: "index_jrc_backoffice_document_decisions_on_actor_id"
+    t.index ["document_version_id", "id"], name: "idx_backoffice_decision_history"
+  end
+
+  create_table "jrc_backoffice_document_versions", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "backoffice_request_id", null: false
+    t.bigint "uploaded_by_id", null: false
+    t.string "document_key", null: false
+    t.integer "version", null: false
+    t.string "idempotency_key", null: false
+    t.string "sha256", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_backoffice_document_versions_on_account_id"
+    t.index ["backoffice_request_id", "document_key", "version"], name: "idx_backoffice_document_version", unique: true
+    t.index ["backoffice_request_id", "idempotency_key"], name: "idx_backoffice_document_intent", unique: true
+    t.index ["uploaded_by_id"], name: "index_jrc_backoffice_document_versions_on_uploaded_by_id"
+    t.check_constraint "version > 0", name: "backoffice_document_positive_version"
+  end
+
   create_table "jrc_broker_inbox_bindings", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.bigint "inbox_id", null: false
@@ -2140,6 +2178,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_26_161000) do
     t.datetime "sla_due_at"
     t.datetime "sla_paused_at"
     t.integer "sla_paused_seconds", default: 0, null: false
+    t.integer "workflow_version", default: 1, null: false
     t.index ["account_id", "operations_queue_id", "status"], name: "idx_jrc_bko_queue_status"
     t.index ["account_id", "request_number"], name: "idx_jrc_crm_backoffice_number", unique: true
     t.index ["account_id", "sales_order_id", "request_kind"], name: "idx_jrc_crm_backoffice_order_kind", unique: true, where: "((request_kind)::text = 'fulfillment'::text)"
@@ -2155,6 +2194,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_26_161000) do
     t.index ["owner_id"], name: "index_jrc_crm_backoffice_requests_on_owner_id"
     t.index ["requested_by_id"], name: "index_jrc_crm_backoffice_requests_on_requested_by_id"
     t.index ["sales_order_id"], name: "index_jrc_crm_backoffice_requests_on_sales_order_id"
+    t.check_constraint "workflow_version = ANY (ARRAY[1, 2])", name: "backoffice_workflow_version"
   end
 
   create_table "jrc_crm_business_units", force: :cascade do |t|
@@ -6146,6 +6186,12 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_26_161000) do
   add_foreign_key "jrc_approvals_requests", "companies", column: ["account_id", "issuer_company_id"], primary_key: ["account_id", "id"], name: "jrc_ap_requests_company_fk"
   add_foreign_key "jrc_approvals_requests", "jrc_approvals_policy_versions", column: ["account_id", "policy_version_id"], primary_key: ["account_id", "id"], name: "jrc_ap_requests_policy_version_id_fk"
   add_foreign_key "jrc_approvals_requests", "jrc_crm_business_units", column: ["account_id", "issuer_company_id", "business_unit_id"], primary_key: ["account_id", "company_id", "id"], name: "jrc_ap_requests_unit_fk"
+  add_foreign_key "jrc_backoffice_document_analyses", "jrc_backoffice_document_versions", column: "document_version_id"
+  add_foreign_key "jrc_backoffice_document_decisions", "jrc_backoffice_document_versions", column: "document_version_id"
+  add_foreign_key "jrc_backoffice_document_decisions", "users", column: "actor_id"
+  add_foreign_key "jrc_backoffice_document_versions", "accounts"
+  add_foreign_key "jrc_backoffice_document_versions", "jrc_crm_backoffice_requests", column: "backoffice_request_id"
+  add_foreign_key "jrc_backoffice_document_versions", "users", column: "uploaded_by_id"
   add_foreign_key "jrc_broker_inbox_bindings", "inboxes", column: ["account_id", "inbox_id"], primary_key: ["account_id", "id"], on_delete: :cascade
   add_foreign_key "jrc_broker_inbox_bindings", "jrc_broker_integrations", column: "account_id", primary_key: "account_id", on_delete: :cascade
   add_foreign_key "jrc_broker_inbox_grants", "account_users", column: ["account_id", "user_id"], primary_key: ["account_id", "user_id"], on_delete: :cascade

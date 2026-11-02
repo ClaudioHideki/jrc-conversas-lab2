@@ -17,3 +17,6 @@ Rails.application.config.filter_parameters += [:encrypted_control_key, :control_
 Rails.application.config.filter_parameters += [:pabx_username, :api_username]
 
 Rails.application.config.filter_parameters += [:csv]
+
+# Backoffice documentary content and human review are never request-log payloads.
+Rails.application.config.filter_parameters += [:file, :files, :reason, :description, :extracted_fields]

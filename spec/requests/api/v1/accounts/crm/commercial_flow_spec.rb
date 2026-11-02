@@ -206,26 +206,104 @@ RSpec.describe 'CRM commercial flow integration', type: :request do
     expect(request.attributes.slice('stage', 'status')).to eq('stage' => 'completed', 'status' => 'completed')
   end
 
-  it 'rejects later financial changes after recorded approval creates a contractual snapshot' do
+  it 'locks approved financial terms throughout documentation and after deferred contract creation' do
+    product = create(:jrc_crm_product, account: account, requires_contract: true,
+      document_rules: [{ 'key' => 'identity', 'label' => 'Synthetic identity', 'source' => 'manual', 'required' => true, 'blocking' => true }])
     post orders_url, params: { sales_order: {
-      contact_id: contact.id, status: 'approved', items: [{
-        name: 'Synthetic contracted service', quantity: 1, unit_cents: 100_000,
+      contact_id: contact.id, status: 'pending', items: [{
+        product_id: product.id, name: 'Synthetic contracted service', quantity: 1, unit_cents: 100_000,
         one_time_cents: 100_000, recurring_cents: 2000
       }]
     } }, headers: headers, as: :json
     expect(response).to have_http_status(:created)
     order = approve_order(response.parsed_body.fetch('id'))
-    contract = order.contracts.sole
-    expect(contract).to be_draft
+    request = order.backoffice_requests.find_by!(request_kind: 'fulfillment')
+    path = "/api/v1/accounts/#{account.id}/crm/backoffice_requests/#{request.id}"
+    expect(request.workflow_version).to eq(2)
+    expect(request.stage).to eq('analysis')
+    expect(order.contracts).to be_empty
     before = order.financial_summary.deep_dup
-    contract_snapshot = contract.lifecycle_metadata.deep_dup
+    items_before = order.order_items.order(:id).map(&:attributes)
     patch "#{orders_url}/#{order.id}", params: { sales_order: { items: [{
       name: 'Synthetic attempted change', quantity: 1, unit_cents: 1, one_time_cents: 1
     }] } }, headers: headers, as: :json
     expect(response).to have_http_status(:unprocessable_entity)
     expect(response.body).to include('Condicoes aceitas/contratadas sao imutaveis')
     expect(order.reload.financial_summary).to eq(before)
+    expect(order.order_items.order(:id).map(&:attributes)).to eq(items_before)
+    expect(order.commissions.sole.base_cents).to eq(100_000)
+    expect(order.contracts).to be_empty
+
+    post "#{path}/advance", headers: headers, as: :json
+    expect(response).to have_http_status(:ok)
+    expect(request.reload.stage).to eq('documentation')
+    patch "#{orders_url}/#{order.id}", params: { sales_order: { discount_cents: 100 } }, headers: headers, as: :json
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(order.reload.financial_summary).to eq(before)
+    expect(order.contracts).to be_empty
+    post "#{path}/advance", headers: headers, as: :json
+    expect(response).to have_http_status(:unprocessable_entity)
+    file = Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/files/sample.pdf'), 'application/pdf')
+    post "#{path}/documents", params: { files: [file] }, headers: headers
+    expect(response).to have_http_status(:created)
+    attachment_id = response.parsed_body.fetch('documents').first.fetch('id')
+    post "#{path}/document_status", params: { document_key: 'identity', attachment_id: attachment_id, status: 'approved' },
+      headers: headers, as: :json
+    expect(response).to have_http_status(:ok)
+    post "#{path}/advance", headers: headers, as: :json
+    expect(response).to have_http_status(:ok)
+    expect(request.reload.stage).to eq('contract')
+    contract = order.contracts.sole
+    expect(contract).to be_draft
+    contract_snapshot = contract.lifecycle_metadata.deep_dup
+    patch "#{orders_url}/#{order.id}", params: { sales_order: { shipping_cents: 100, snapshot: { shipping_mode: 'separate' } } },
+      headers: headers, as: :json
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(order.reload.financial_summary).to eq(before)
     expect(contract.reload.lifecycle_metadata).to eq(contract_snapshot)
     expect(order.commissions.sole.base_cents).to eq(100_000)
+  end
+
+  it 'keeps approved terms locked while the operational release awaits its configured approval policy' do
+    post orders_url, params: { sales_order: { contact_id: contact.id, items: [
+      { name: 'Synthetic recurring service', quantity: 1, unit_cents: 100_000, one_time_cents: 100_000, recurring_cents: 2000 }
+    ] } }, headers: headers, as: :json
+    expect(response).to have_http_status(:created)
+    order = approve_order(response.parsed_body.fetch('id'))
+    request = order.backoffice_requests.find_by!(request_kind: 'fulfillment')
+    path = "/api/v1/accounts/#{account.id}/crm/backoffice_requests/#{request.id}"
+    patch path, params: { backoffice_request: { metadata: { approval_required: true } } }, headers: headers, as: :json
+    expect(response).to have_http_status(:ok)
+    post "#{path}/advance", headers: headers, as: :json
+    expect(response).to have_http_status(:ok)
+    expect(request.reload.stage).to eq('documentation')
+    post "#{path}/advance", headers: headers, as: :json
+    expect(response).to have_http_status(:ok)
+    expect(request.reload.stage).to eq('approval')
+    expect(order.contracts).to be_empty
+    before = order.financial_summary.deep_dup
+    patch "#{orders_url}/#{order.id}", params: { sales_order: { discount_cents: 100 } }, headers: headers, as: :json
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(order.reload.financial_summary).to eq(before)
+    post "#{path}/advance", headers: headers, as: :json
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(request.reload.stage).to eq('approval')
+    expect(order.contracts).to be_empty
+  end
+
+  it 'keeps legacy contractual terms locked without a recorded order approval' do
+    order = JrcCrm::SalesOrder.create!(account: account, owner: admin, contact: contact, status: 'approved', source_type: 'manual')
+    request = JrcCrm::BackofficeRequest.create!(account: account, sales_order: order, owner: admin,
+      requested_by: admin, request_kind: 'fulfillment', title: 'Synthetic legacy request', stage: 'analysis')
+    # Represent an existing row retained as version 1 by the upgrade migration.
+    request.update_column(:workflow_version, 1)
+    contract = JrcCrm::Contract.create!(account: account, owner: admin, contact: contact, sales_order: order)
+    expect(order.backoffice_requests.where(request_kind: 'approval')).to be_empty
+    expect(request.workflow_stages).to eq(JrcCrm::BackofficeRequest::STAGES)
+    before = order.financial_summary.deep_dup
+    patch "#{orders_url}/#{order.id}", params: { sales_order: { shipping_cents: 100 } }, headers: headers, as: :json
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(order.reload.financial_summary).to eq(before)
+    expect(order.contracts.reload).to contain_exactly(contract)
   end
 end

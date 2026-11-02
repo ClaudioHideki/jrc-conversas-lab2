@@ -13,7 +13,8 @@ RSpec.describe 'R3 catalogue and real opening attachments', type: :request do
 
   it 'persists uploaded bytes in one internal native note without sending a message' do
     values = { unit_id: sd_unit.id, ticket: sd_create_attributes.to_json, files: [file] }
-    post "#{base}/tickets", params: values, headers: headers
+    expect(SendReplyJob).not_to receive(:perform_later)
+    expect { post "#{base}/tickets", params: values, headers: headers }.not_to change(Message, :count)
     expect(response).to have_http_status(:created)
     id = response.parsed_body.fetch('ticket_id')
     ticket = JrcServiceDesk::Ticket.find(id)
@@ -21,7 +22,7 @@ RSpec.describe 'R3 catalogue and real opening attachments', type: :request do
     expect(note.visibility).to eq('internal')
     expect(Digest::SHA256.hexdigest(note.files.sole.download)).to eq(Digest::SHA256.file(Rails.root.join('spec/assets/sample.png')).hexdigest)
     expect(JrcServiceDesk::NotificationDelivery.count).to eq(0)
-    expect(Message.count).to eq(0)
+    expect(Message.where(account: sd_account)).to be_empty
   end
 
   it 'safely replays with the same ticket and note and reads back one attachment with the original byte size' do

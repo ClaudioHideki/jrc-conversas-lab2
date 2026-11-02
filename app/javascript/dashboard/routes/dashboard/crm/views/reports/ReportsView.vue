@@ -183,7 +183,7 @@ onMounted(async () => {
 <template>
   <div class="h-full overflow-y-auto bg-gradient-to-br from-n-blue-2 via-n-background to-n-violet-2 p-4 sm:p-6">
     <div class="mx-auto max-w-[1720px] space-y-5">
-      <header class="rounded-2xl border border-white/70 bg-white/85 p-5 shadow-sm backdrop-blur">
+      <header class="rounded-2xl border border-n-weak bg-n-solid-2 p-5 shadow-sm">
         <div class="flex flex-wrap items-start justify-between gap-4">
           <div>
             <div class="flex items-center gap-2">

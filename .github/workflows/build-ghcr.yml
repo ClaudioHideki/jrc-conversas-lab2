@@ -1,4 +1,4 @@
-name: Candidato Cadastro Mestre - build e GHCR por SHA
+name: JRC Conversas - build e GHCR candidato por SHA
 
 on:
   workflow_dispatch:
@@ -7,6 +7,14 @@ on:
         description: Publicar a imagem aprovada no GHCR
         type: boolean
         default: false
+      backoffice_candidate:
+        description: Validar a candidata Backoffice com Rails e Sidekiq isolados
+        type: boolean
+        default: false
+      validation_run_id:
+        description: Run bem-sucedido de backoffice-flow.yml no mesmo SHA (obrigatorio para publicar candidata Backoffice)
+        type: string
+        required: false
       source_sha:
         description: SHA completo aprovado do codigo-fonte (40 caracteres)
         type: string
@@ -23,6 +31,7 @@ on:
         required: true
 
 permissions:
+  actions: read
   contents: read
   packages: write
 
@@ -38,6 +47,7 @@ jobs:
       BASE_SHA: ${{ inputs.base_sha }}
       COMPONENT: ${{ inputs.component }}
       IMAGE: ${{ inputs.component == 'app' && 'claudiohideki/jrc-conversas-lab2' || format('claudiohideki/jrc-conversas-nico-v12-2-7-comercial-integrado-{0}', inputs.component) }}
+      BACKOFFICE_CANDIDATE: ${{ inputs.backoffice_candidate }}
       BUNDLE_FROZEN: 'true'
       TZ: UTC
 
@@ -100,6 +110,9 @@ jobs:
           apt_options=(-o Acquire::Retries=2 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20)
           sudo apt-get "${apt_options[@]}" -o APT::Update::Error-Mode=any update
           sudo apt-get "${apt_options[@]}" install -y --no-install-recommends libpq-dev libvips libvips-dev
+          if [ "$BACKOFFICE_CANDIDATE" = true ]; then
+            sudo apt-get "${apt_options[@]}" install -y --no-install-recommends imagemagick poppler-utils tesseract-ocr tesseract-ocr-por tesseract-ocr-eng
+          fi
 
       - name: Configurar Ruby e Bundler declarados
         if: inputs.component == 'app'
@@ -228,6 +241,9 @@ jobs:
               'db/migrate/20261005210000_add_relationship_playbook_conditions.rb',
               'db/migrate/20261005220000_extend_commercial_operational_configuration.rb',
           ]
+          if os.environ.get('BACKOFFICE_CANDIDATE') == 'true':
+              migrations += ['db/migrate/20261101190000_create_backoffice_document_versions.rb',
+                             'db/migrate/20261101200000_version_backoffice_fulfillment_flow.rb']
           files = {p: hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest() for p in set(paths + migrations)}
           pathlib.Path(os.environ['RUNNER_TEMP'], 'candidate-files.json').write_text(json.dumps(files))
           PYTHON
@@ -244,8 +260,48 @@ jobs:
           require 'grpc'
           require 'pg'
           require 'nokogiri'
-          puts JSON.generate(verified_product_files: expected.size, migrations: 8, grpc: GRPC::VERSION, pg: PG::VERSION, nokogiri: Nokogiri::VERSION)
+          puts JSON.generate(verified_product_files: expected.size, migrations: expected.keys.count { |path| path.start_with?('db/migrate/') }, grpc: GRPC::VERSION, pg: PG::VERSION, nokogiri: Nokogiri::VERSION)
           RUBY
+
+      - name: Confirmar a validacao nativa da candidata no mesmo SHA
+        if: inputs.backoffice_candidate
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VALIDATION_RUN_ID: ${{ inputs.validation_run_id }}
+          PUBLISH: ${{ inputs.publish }}
+        run: |
+          test "$GITHUB_REF" = refs/heads/codex/crm-backoffice-servicedesk-visual-20261101
+          test "$COMPONENT" = app
+          test "$GITHUB_SHA" = "$SOURCE_SHA"
+          if [ "$PUBLISH" = true ]; then
+            python3 - <<'PYTHON'
+          import json, os, urllib.request
+          run_id = os.environ['VALIDATION_RUN_ID']
+          assert run_id.isdecimal(), 'Native validation run ID required'
+          request = urllib.request.Request(
+              f"https://api.github.com/repos/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{run_id}",
+              headers={'Authorization': 'Bearer ' + os.environ['GH_TOKEN'], 'Accept': 'application/vnd.github+json'})
+          with urllib.request.urlopen(request, timeout=30) as response:
+              run = json.load(response)
+          assert run['head_sha'] == os.environ['SOURCE_SHA'], 'Validation source SHA mismatch'
+          assert run['head_branch'] == 'codex/crm-backoffice-servicedesk-visual-20261101', 'Validation branch mismatch'
+          assert run['path'] == '.github/workflows/backoffice-flow.yml', 'Unexpected validation workflow'
+          assert run['conclusion'] == 'success', 'Native validation has not passed'
+          print('Native validation confirmed for the exact candidate SHA:', run['html_url'])
+          PYTHON
+          fi
+
+      - name: Inicializar Rails e Sidekiq da mesma imagem e processar OCR real isolado
+        if: inputs.backoffice_candidate
+        run: bash script/smoke_backoffice_candidate.sh
+
+      - name: Guardar diagnosticos do runtime candidato
+        if: always() && inputs.backoffice_candidate
+        uses: actions/upload-artifact@v4
+        with:
+          name: backoffice-candidate-runtime-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/jrc-bo-candidate-*.log
+          if-no-files-found: ignore
 
       - name: Autenticar no GHCR somente para publicacao autorizada
         if: inputs.publish

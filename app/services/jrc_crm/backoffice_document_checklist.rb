@@ -21,7 +21,8 @@ module JrcCrm
         end
         data['document_checklist'] = configured.uniq { |row| row['key'] }.map do |row|
           if row['source'] == 'manual'
-            row.merge('status' => data.dig('document_statuses', row['key']) || 'pending')
+            version = @request.document_versions.where(document_key: row['key']).order(version: :desc).first
+            row.merge('status' => version&.status || data.dig('document_statuses', row['key']) || 'pending')
           else
             evidence = source_evidence(row['source'])
             row.merge('status' => evidence ? 'approved' : 'pending', 'evidence' => evidence)

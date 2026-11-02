@@ -158,7 +158,8 @@ module JrcCrm
     end
 
     def commercial_terms_locked?
-      proposal&.accepted? || contracts.exists?
+      proposal&.accepted? || contracts.exists? || backoffice_requests.where(account_id: account_id, request_kind: 'approval')
+        .where("metadata @> ?", { source: 'order_approval', approval_decision: { status: 'approved' } }.to_json).exists?
     end
 
     def assign_number

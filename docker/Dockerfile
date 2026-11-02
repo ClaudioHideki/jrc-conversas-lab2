@@ -139,6 +139,10 @@ RUN apk update && apk add --no-cache \
   tzdata \
   postgresql-client \
   imagemagick \
+  poppler-utils \
+  tesseract-ocr \
+  tesseract-ocr-data-por \
+  tesseract-ocr-data-eng \
   git \
   vips \
   && gem install bundler -v "$BUNDLER_VERSION"

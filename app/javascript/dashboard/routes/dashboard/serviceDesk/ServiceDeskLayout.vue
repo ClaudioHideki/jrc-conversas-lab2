@@ -1,8 +1,8 @@
 <script setup>
 import { computed } from 'vue';
-import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router';
+import { RouterView, useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import Icon from 'dashboard/components-next/icon/Icon.vue';
+import ModuleTabs from 'dashboard/components-next/navigation/ModuleTabs.vue';
 import Button from 'dashboard/components-next/button/Button.vue';
 import { provideServiceDesk } from './composables/useServiceDesk';
 import { SERVICE_DESK_ROUTES, serviceDeskRouteName } from './routeDefinitions';
@@ -57,6 +57,9 @@ const to = key => ({
   name: serviceDeskRouteName(key),
   params: { accountId: accountId.value },
 });
+const tabTones = { overview: 'blue', tickets: 'teal', mine: 'violet', sla: 'amber', assignees: 'cyan', reports: 'rose' };
+const navigationItems = computed(() => primaryEntries.value.map(item => ({ ...item, tone: tabTones[item.key], to: to(item.key) })));
+const navigationGroups = computed(() => groups.map(group => ({ key: group, label: groupLabels.value[group], icon: ({ operation: 'i-lucide-workflow', governance: 'i-lucide-shield-check', management: 'i-lucide-settings' })[group], tone: ({ operation: 'cyan', governance: 'violet', management: 'rose' })[group], entries: entries(group).map(item => ({ ...item, label: screenLabels.value[item.key], to: to(item.key) })) })));
 const screenAllowed = computed(() =>
   screenAccessible(
     state.context,
@@ -99,66 +102,14 @@ const blocked = computed(() =>
           :items="breadcrumbs"
           @click="item => item.route && router.push(item.route)"
         />
-        <nav
-          v-if="
-            state.status === 'ready' &&
-            !['detail', 'edit', 'new'].includes(activeScreen)
-          "
-          class="relative z-20 mb-4 flex flex-wrap items-center gap-1 rounded-xl border border-n-weak bg-n-solid-1 p-1.5"
-          :aria-label="t('JRC_SERVICE_DESK.REDESIGN_LIST.navigation')"
-        >
-          <RouterLink
-            v-for="item in primaryEntries"
-            :key="item.key"
-            :to="to(item.key)"
-            class="flex items-center gap-2 rounded-lg border-b-2 px-3 py-2.5 text-xs font-medium focus-visible:ring-2 focus-visible:ring-n-blue-9"
-            :class="
-              activeScreen === item.key
-                ? 'border-n-blue-9 bg-n-blue-3 text-n-blue-11'
-                : 'border-transparent text-n-slate-11 hover:bg-n-slate-2'
-            "
-            :aria-current="activeScreen === item.key ? 'page' : undefined"
-          >
-            <Icon :icon="item.icon" class="size-4 shrink-0" />
-            {{ item.label }}
-          </RouterLink>
-          <details
-            v-for="group in groups.filter(value => entries(value).length)"
-            :key="group"
-            class="static xl:relative"
-          >
-            <summary
-              class="cursor-pointer rounded-lg px-3 py-2.5 text-xs font-medium text-n-slate-11 focus-visible:ring-2 focus-visible:ring-n-blue-9"
-            >
-              {{ groupLabels[group] }}
-            </summary>
-            <div
-              class="absolute inset-x-0 top-full z-30 mt-1 grid max-h-80 gap-1 overflow-y-auto rounded-xl border border-n-weak bg-n-solid-1 p-2 shadow-lg xl:left-auto xl:right-0 xl:min-w-52"
-            >
-              <RouterLink
-                v-for="item in entries(group)"
-                :key="item.key"
-                :to="to(item.key)"
-                class="flex items-center gap-2 rounded-lg px-3 py-2 text-xs hover:bg-n-blue-2"
-                :class="
-                  activeScreen === item.key
-                    ? 'bg-n-blue-3 font-semibold text-n-blue-11'
-                    : 'text-n-slate-11'
-                "
-                :aria-current="activeScreen === item.key ? 'page' : undefined"
-                @click="
-                  $event.currentTarget
-                    .closest('details')
-                    .removeAttribute('open')
-                "
-              >
-                <Icon :icon="item.icon" class="size-4 shrink-0" />{{
-                  screenLabels[item.key]
-                }}
-              </RouterLink>
-            </div>
-          </details>
-        </nav>
+        <ModuleTabs
+          v-if="state.status === 'ready' && !['detail', 'edit', 'new'].includes(activeScreen)"
+          class="mb-4"
+          :label="t('JRC_SERVICE_DESK.REDESIGN_LIST.navigation')"
+          :items="navigationItems"
+          :groups="navigationGroups"
+          :active-key="activeScreen"
+        />
         <div
           v-if="state.status !== 'ready' && !blocked"
           class="sd-context-notice"

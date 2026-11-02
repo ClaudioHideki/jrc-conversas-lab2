@@ -154,8 +154,12 @@ RSpec.describe 'JRC CRM Nexora end-to-end commercial lifecycle' do
     approval = order.backoffice_requests.find_by!(request_kind: 'approval')
     JrcCrm::OrderApprovalService.new(order: order, actor: seller).decide!(request: approval, decision: 'approved')
 
+    expect(order.contracts.count).to eq(0)
+    operational = order.backoffice_requests.find_by!(request_kind: 'fulfillment')
+    operational.advance!(actor: seller) # analysis -> documentation
+    operational.advance!(actor: seller) # documentation -> contract, only after required approvals
+    contract = operational.reload.contract
     expect(order.contracts.count).to eq(1)
-    contract = order.contracts.first
     expect(contract.contact_id).to eq(contact.id)
     expect(contract.deal_id).to eq(deal.id)
     expect(contract.monthly_cents).to eq(order.monthly_cents)
@@ -175,9 +179,6 @@ RSpec.describe 'JRC CRM Nexora end-to-end commercial lifecycle' do
       signed_by_name: 'Marcelo Andrade', signed_at: Time.current
     )
     JrcCrm::BackofficeDocumentChecklist.new(request: backoffice, actor: seller).sync!
-    backoffice.advance! # analysis -> documentation
-    expect(backoffice.reload.stage).to eq('documentation')
-    backoffice.advance! # documentation -> contract
     expect(backoffice.reload.stage).to eq('contract')
     backoffice.advance! # contract -> implementation
     expect(backoffice.reload.stage).to eq('implementation')
