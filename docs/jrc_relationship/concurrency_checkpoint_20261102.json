@@ -43,6 +43,6 @@
     "coverage": "465 IDs conferidos contra o dry-run nativo, sem omissões, duplicações, falhas ou pending. Dry-run é apenas plano de coleta.",
     "provenance": "427 casos centrais executados no snapshot imutável bdf0d569; 5 reviewed e 33 concorrentes no código atual. Os gates específicos de ownership também foram repetidos no backend final. Esta composição não é uma execução única de todo o repositório."
   },
-  "earlier_failures": "Execução anterior de 31 casos teve 5 falhas. Duas expectativas incompatíveis com retorno nil e a disputa de cancelamento foram reproduzidas na base. Timeouts de locks ocorreram sob carga simultânea e não voltaram na execução serial final; logs preservados, limites não ampliados.",
+  "earlier_failures": "Execução anterior de 31 casos teve 5 falhas. A expectativa de retorno do runner e a disputa de cancelamento foram reproduzidas na base. Duas asserções foram ajustadas ao contrato nativo de retorno nil. Timeouts de locks ocorreram durante carga simultânea e não voltaram na execução serial final; logs preservados e limites não ampliados.",
   "environment": "Bancos e Redis descartáveis. Nenhum deploy/push/imagem ou alteração de produção."
 }

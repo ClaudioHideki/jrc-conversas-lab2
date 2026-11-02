@@ -755,6 +755,7 @@ Rails.application.routes.draw do
             end
             resources :backoffice_requests, only: [:index, :show, :create, :update] do
               get :summary, on: :collection
+              get :order_options, on: :collection
               get :workspace, on: :collection
               get 'document_versions', to: 'backoffice_documents#index'
               post 'document_versions', to: 'backoffice_documents#create'
@@ -771,6 +772,9 @@ Rails.application.routes.draw do
                 post :confirm_provisioning
                 post :reopen
               end
+            end
+            resource :signature_integration, only: [:show, :update] do
+              post :check
             end
             resources :operations_queues, only: [:index, :create, :update]
             resources :operations_sla_policies, only: [:index, :create, :update]
@@ -1299,6 +1303,7 @@ Rails.application.routes.draw do
   post 'webhooks/instagram', to: 'webhooks/instagram#events'
   post 'webhooks/tiktok', to: 'webhooks/tiktok#events'
   post 'webhooks/shopify', to: 'webhooks/shopify#events'
+  post 'webhooks/docusign/:integration_id', to: 'webhooks/docusign#events'
 
   namespace :twitter do
     resource :callback, only: [:show]

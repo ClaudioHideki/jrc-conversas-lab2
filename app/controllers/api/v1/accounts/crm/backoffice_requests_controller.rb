@@ -38,11 +38,33 @@ module Api::V1::Accounts::Crm
       }
     end
 
+    def order_options
+      company = intake_company!
+      kind = params.require(:kind).to_s
+      raise ActionController::BadRequest, 'Unsupported request kind' unless JrcCrm::BackofficeRequest.request_kinds.key?(kind)
+
+      orders = intake_orders(company, kind)
+      number = params.fetch(:page, 1).to_i.clamp(1, 10_000)
+      size = params.fetch(:per_page, 20).to_i.clamp(1, 50)
+      total = orders.count
+      rows = orders.includes(:contact).order(created_at: :desc, id: :desc).limit(size).offset((number - 1) * size)
+      render json: { payload: rows.map { |order| intake_order(order) }, meta: { page: number, per_page: size, total: total } }
+    end
+
     def create
       attributes = request_params.to_h
       attributes['stage'] = 'analysis'
       attributes['status'] = 'pending'
       order = visible_to_current_user(crm_scope.jrc_crm_sales_orders).find(attributes.delete('sales_order_id'))
+      if params[:company_id].present?
+        company = intake_company!
+        if order.contact&.company_id != company.id
+          return render json: { message: 'O pedido não pertence ao cliente selecionado.' }, status: :unprocessable_entity
+        end
+        unless intake_orders(company, attributes.fetch('request_kind', 'fulfillment')).exists?(id: order.id)
+          return render json: { message: 'O pedido não está mais elegível para este tipo de solicitação.' }, status: :unprocessable_entity
+        end
+      end
       contract_id = attributes.delete('contract_id')
       contract = contract_id.present? ? order.contracts.find(contract_id) : order.contracts.order(created_at: :desc).first
       owner_id = attributes.delete('owner_id')
@@ -227,6 +249,25 @@ module Api::V1::Accounts::Crm
     end
 
     private
+
+    def intake_company!
+      authorize :directory, :access?, policy_class: JrcCustomers::DirectoryPolicy
+      corporate_records(:master_companies).find(params.require(:company_id))
+    end
+
+    def intake_order(order)
+      { id: order.id, order_number: order.order_number, status: order.status,
+        contact: order.contact && { id: order.contact.id, name: order.contact.name } }
+    end
+
+    def intake_orders(company, kind)
+      orders = visible_to_current_user(crm_scope.jrc_crm_sales_orders)
+               .where(contact_id: crm_scope.contacts.where(company_id: company.id).select(:id))
+      return orders unless kind == 'fulfillment'
+
+      existing = crm_scope.jrc_crm_backoffice_requests.where(request_kind: 'fulfillment').select(:sales_order_id)
+      orders.where(status: JrcCrm::OrderWorkflowSyncService::QUALIFYING_STATUSES).where.not(id: existing)
+    end
 
     def lock_operational_change
       @request.sales_order.with_lock do

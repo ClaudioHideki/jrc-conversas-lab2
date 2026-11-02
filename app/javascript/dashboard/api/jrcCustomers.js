@@ -23,12 +23,18 @@ class CustomerAPI extends ApiClient {
       : axios.post(`${this.url}/taxonomies`, { taxonomy });
   }
 
-  companies(params = {}) {
-    return axios.get(`${this.url}/companies`, { params });
+  companies(params = {}, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const url =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
+    return axios.get(`${url}/companies`, { ...requestOptions, params });
   }
 
-  company(id) {
-    return axios.get(`${this.url}/companies/${id}`);
+  company(id, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const url =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
+    return axios.get(`${url}/companies/${id}`, requestOptions);
   }
 
   saveCompany(company, id = null) {

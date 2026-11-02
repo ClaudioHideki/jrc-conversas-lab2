@@ -7,6 +7,7 @@ import BackofficeOverview from './BackofficeOverview.vue';
 import BackofficeWorklist from './BackofficeWorklist.vue';
 import BackofficeRequest360 from './BackofficeRequest360.vue';
 import BackofficeNewRequest from './BackofficeNewRequest.vue';
+import SignatureSettings from './SignatureSettings.vue';
 import { useBackofficePresentation } from './useBackofficePresentation';
 
 const route = useRoute();
@@ -31,7 +32,7 @@ const groups = [
     key: 'CONTROL',
     tone: 'violet',
     icon: 'i-lucide-settings',
-    sections: ['mine', 'issues', 'changes', 'sla'],
+    sections: ['mine', 'issues', 'changes', 'sla', 'signature'],
   },
 ];
 const sections = [...primaryKeys, ...groups.flatMap(group => group.sections)];
@@ -50,6 +51,7 @@ const tones = {
   implement: 'teal',
   provision: 'violet',
   finance: 'amber',
+  signature: 'violet',
 };
 const icons = {
   overview: 'i-lucide-layout-dashboard',
@@ -66,6 +68,7 @@ const icons = {
   implement: 'i-lucide-list-checks',
   provision: 'i-lucide-server',
   finance: 'i-lucide-wallet',
+  signature: 'i-lucide-file-signature',
 };
 const entry = key => ({
   key,
@@ -158,6 +161,7 @@ watch(
     >
       <BackofficeRequest360 v-if="route.params.requestId" />
       <BackofficeNewRequest v-else-if="route.name === 'crm_backoffice_new'" />
+      <SignatureSettings v-else-if="section === 'signature'" />
       <BackofficeOverview
         v-else-if="['overview', 'reports'].includes(section)"
         :report="section === 'reports'"

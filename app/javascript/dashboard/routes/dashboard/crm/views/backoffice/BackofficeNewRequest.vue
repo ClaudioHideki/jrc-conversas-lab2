@@ -1,10 +1,8 @@
 <script setup>
 import { onBeforeUnmount, reactive, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import {
-  backofficeAPI,
-  salesOrdersAPI,
-} from 'dashboard/api/crm/commercialCycle';
+import { useStore } from 'vuex';
+import { backofficeAPI } from 'dashboard/api/crm/commercialCycle';
 import BackofficeCustomerPicker from './BackofficeCustomerPicker.vue';
 import {
   priorities,
@@ -13,12 +11,16 @@ import {
 } from './useBackofficePresentation';
 const route = useRoute();
 const router = useRouter();
+const store = useStore();
 const { text, label } = useBackofficePresentation();
 const companyId = ref('');
 const orders = ref([]);
 const loading = ref(false);
 const saving = ref(false);
 const error = ref('');
+const orderError = ref('');
+const orderPage = ref(1);
+const orderTotal = ref(0);
 const form = reactive({
   sales_order_id: '',
   request_kind: 'change',
@@ -28,50 +30,109 @@ const form = reactive({
   due_at: '',
 });
 let sequence = 0;
-watch(companyId, async value => {
+let identityVersion = 0;
+let controller;
+const loadOrders = async (page = 1) => {
+  controller?.abort();
+  controller = new AbortController();
+  const signal = controller.signal;
   sequence += 1;
   const request = sequence;
   form.sales_order_id = '';
   orders.value = [];
-  error.value = '';
+  orderError.value = '';
+  orderPage.value = page;
+  orderTotal.value = 0;
   loading.value = false;
-  if (!value) return;
+  if (!companyId.value) return;
   loading.value = true;
   try {
-    const { data } = await salesOrdersAPI.list({ company_id: value });
-    if (request === sequence) orders.value = data;
-  } catch {
-    if (request === sequence) error.value = text('FORM.ORDER_ERROR');
+    const { data } = await backofficeAPI.orderOptions(
+      route.params.accountId,
+      {
+        company_id: companyId.value,
+        kind: form.request_kind,
+        page,
+        per_page: 20,
+      },
+      { signal }
+    );
+    if (request === sequence && !signal.aborted) {
+      orders.value = data.payload;
+      orderTotal.value = data.meta.total;
+    }
+  } catch (failure) {
+    if (request === sequence && !signal.aborted) {
+      orderError.value = text(
+        [401, 403].includes(failure.response?.status)
+          ? 'FORM.ORDER_FORBIDDEN'
+          : 'FORM.ORDER_ERROR'
+      );
+    }
   } finally {
     if (request === sequence) loading.value = false;
   }
-});
+};
+watch([companyId, () => form.request_kind], () => loadOrders());
+watch(
+  [() => route.params.accountId, () => store.getters.getCurrentUserID],
+  () => {
+    identityVersion += 1;
+    sequence += 1;
+    controller?.abort();
+    companyId.value = '';
+    orders.value = [];
+    orderTotal.value = 0;
+    form.sales_order_id = '';
+    form.title = '';
+    form.description = '';
+    form.due_at = '';
+    error.value = '';
+    orderError.value = '';
+    saving.value = false;
+    loading.value = false;
+  }
+);
 onBeforeUnmount(() => {
+  identityVersion += 1;
   sequence += 1;
+  controller?.abort();
 });
 const save = async () => {
-  if (saving.value || !form.sales_order_id || !form.title.trim()) return;
+  if (
+    saving.value ||
+    loading.value ||
+    !companyId.value ||
+    !form.sales_order_id ||
+    !form.title.trim()
+  )
+    return;
+  const version = identityVersion;
+  const accountId = route.params.accountId;
   saving.value = true;
   error.value = '';
   try {
-    const { data } = await backofficeAPI.create({
+    const { data } = await backofficeAPI.createForAccount(accountId, {
+      company_id: companyId.value,
       backoffice_request: {
         ...form,
         due_at: form.due_at ? new Date(form.due_at).toISOString() : null,
       },
     });
+    if (version !== identityVersion) return;
     await router.push({
       name: 'crm_backoffice_request',
-      params: { accountId: route.params.accountId, requestId: data.id },
+      params: { accountId, requestId: data.id },
       query: { tab: 'operations' },
     });
   } catch (failure) {
+    if (version !== identityVersion) return;
     error.value =
       failure.response?.data?.errors?.join(', ') ||
       failure.response?.data?.message ||
       text('ACTION_ERROR');
   } finally {
-    saving.value = false;
+    if (version === identityVersion) saving.value = false;
   }
 };
 </script>
@@ -108,7 +169,7 @@ const save = async () => {
           v-model="form.sales_order_id"
           name="sales_order_id"
           required
-          :disabled="loading || !companyId"
+          :disabled="loading || !companyId || !!orderError"
           class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 p-2 text-sm"
         >
           <option value="">
@@ -125,10 +186,40 @@ const save = async () => {
           </option>
         </select>
         <span
-          v-if="companyId && !loading && !orders.length"
+          v-if="companyId && !loading && !orderError && !orders.length"
           class="mt-2 block text-xs text-n-slate-11"
         >
-          {{ text('FORM.NO_ORDERS') }}
+          {{ text('FORM.NO_ELIGIBLE_ORDERS') }}
+        </span>
+        <span
+          v-if="orderError"
+          role="alert"
+          class="mt-2 block text-xs text-n-ruby-11"
+        >
+          {{ orderError }}
+        </span>
+        <span
+          v-if="orderTotal > 20"
+          class="mt-2 flex justify-between gap-2 text-xs"
+        >
+          <button
+            type="button"
+            :disabled="loading || orderPage <= 1"
+            @click="loadOrders(orderPage - 1)"
+          >
+            {{ text('PREVIOUS') }}
+          </button>
+          <span>
+            {{ orderPage }} {{ text('PAGE_SEPARATOR') }}
+            {{ Math.ceil(orderTotal / 20) }}
+          </span>
+          <button
+            type="button"
+            :disabled="loading || orderPage * 20 >= orderTotal"
+            @click="loadOrders(orderPage + 1)"
+          >
+            {{ text('NEXT') }}
+          </button>
         </span>
       </label>
       <label class="text-sm font-semibold sm:col-span-2">
@@ -189,7 +280,13 @@ const save = async () => {
       </label>
       <div class="flex justify-end sm:col-span-2">
         <button
-          :disabled="saving || !form.sales_order_id || !form.title.trim()"
+          :disabled="
+            saving ||
+            loading ||
+            !companyId ||
+            !form.sales_order_id ||
+            !form.title.trim()
+          "
           class="rounded-lg bg-emerald-600 px-5 py-2 text-sm font-semibold text-white disabled:opacity-40"
         >
           {{ text('FORM.SAVE') }}

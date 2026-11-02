@@ -77,6 +77,22 @@ commissionProgramsAPI.simulate = data =>
   axios.post(`${commissionProgramsAPI.url}/simulate`, data);
 
 export const backofficeAPI = make('backoffice_requests');
+export const signatureIntegrationAPI = make('signature_integration');
+signatureIntegrationAPI.showForAccount = (accountId, options = {}) =>
+  axios.get(signatureIntegrationAPI.urlForAccount(accountId), options);
+signatureIntegrationAPI.saveForAccount = (accountId, data) =>
+  axios.patch(signatureIntegrationAPI.urlForAccount(accountId), data);
+signatureIntegrationAPI.checkForAccount = (accountId, revision) =>
+  axios.post(`${signatureIntegrationAPI.urlForAccount(accountId)}/check`, {
+    revision,
+  });
+backofficeAPI.orderOptions = (accountId, params, options = {}) =>
+  axios.get(`${backofficeAPI.urlForAccount(accountId)}/order_options`, {
+    ...options,
+    params,
+  });
+backofficeAPI.createForAccount = (accountId, data) =>
+  axios.post(backofficeAPI.urlForAccount(accountId), data);
 backofficeAPI.decideOrder = (id, data) =>
   axios.post(`${backofficeAPI.url}/${id}/decide_order`, data);
 backofficeAPI.show = id => axios.get(`${backofficeAPI.url}/${id}`);

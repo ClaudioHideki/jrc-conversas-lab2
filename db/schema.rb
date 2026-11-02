@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_11_01_230000) do
+ActiveRecord::Schema[7.1].define(version: 2026_11_02_020000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -1374,6 +1374,48 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_01_230000) do
     t.index ["backoffice_request_id", "idempotency_key"], name: "idx_backoffice_document_intent", unique: true
     t.index ["uploaded_by_id"], name: "index_jrc_backoffice_document_versions_on_uploaded_by_id"
     t.check_constraint "version > 0", name: "backoffice_document_positive_version"
+  end
+
+  create_table "jrc_backoffice_signature_integrations", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "created_by_id", null: false
+    t.string "public_id", null: false
+    t.string "environment", default: "demo", null: false
+    t.string "integration_key", null: false
+    t.string "impersonated_user_id", null: false
+    t.string "external_account_id", null: false
+    t.text "encrypted_credentials", null: false
+    t.integer "revision", default: 1, null: false
+    t.boolean "enabled", default: false, null: false
+    t.datetime "authorization_checked_at"
+    t.datetime "connect_checked_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "id"], name: "bo_signature_tenant_ref", unique: true
+    t.index ["account_id"], name: "bo_signature_account", unique: true
+    t.index ["created_by_id"], name: "index_jrc_backoffice_signature_integrations_on_created_by_id"
+    t.index ["public_id"], name: "bo_signature_public_ref", unique: true
+    t.check_constraint "environment::text = ANY (ARRAY['demo'::character varying, 'production'::character varying]::text[])", name: "bo_signature_environment"
+    t.check_constraint "revision > 0", name: "bo_signature_revision"
+  end
+
+  create_table "jrc_backoffice_signature_notifications", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "integration_id", null: false
+    t.integer "integration_revision", null: false
+    t.string "body_sha256", null: false
+    t.string "event_type", null: false
+    t.string "envelope_id", null: false
+    t.text "encrypted_payload", null: false
+    t.string "state", default: "received", null: false
+    t.datetime "provider_generated_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "envelope_id"], name: "bo_signature_notification_envelope"
+    t.index ["account_id"], name: "index_jrc_backoffice_signature_notifications_on_account_id"
+    t.index ["integration_id", "integration_revision", "body_sha256"], name: "bo_signature_notification_dedup", unique: true
+    t.index ["integration_id"], name: "index_jrc_backoffice_signature_notifications_on_integration_id"
+    t.check_constraint "state::text = ANY (ARRAY['received'::character varying, 'processed'::character varying, 'ignored'::character varying, 'failed'::character varying]::text[])", name: "bo_signature_notification_state"
   end
 
   create_table "jrc_broker_inbox_bindings", force: :cascade do |t|
@@ -6349,6 +6391,10 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_01_230000) do
   add_foreign_key "jrc_contact_center_routing_rules", "jrc_contact_center_units", column: ["account_id", "target_unit_id"], primary_key: ["account_id", "id"], name: "jrc_cc_routing_unit_fk"
   add_foreign_key "jrc_contact_center_units", "accounts"
   add_foreign_key "jrc_contact_center_units", "jrc_contact_center_units", column: ["account_id", "parent_unit_id"], primary_key: ["account_id", "id"], name: "jrc_cc_unit_parent_fk"
+  add_foreign_key "jrc_backoffice_signature_integrations", "accounts"
+  add_foreign_key "jrc_backoffice_signature_integrations", "users", column: "created_by_id"
+  add_foreign_key "jrc_backoffice_signature_notifications", "accounts"
+  add_foreign_key "jrc_backoffice_signature_notifications", "jrc_backoffice_signature_integrations", column: "integration_id"
   add_foreign_key "jrc_crm_activities", "accounts"
   add_foreign_key "jrc_crm_activities", "companies", column: ["account_id", "company_id"], primary_key: ["account_id", "id"], name: "jrc_master_jrc_crm_activities_company_fk", validate: false
   add_foreign_key "jrc_crm_activities", "contacts"

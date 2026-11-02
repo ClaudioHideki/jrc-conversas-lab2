@@ -65,8 +65,9 @@
     },
     {
       "requirement": "Busca de toda a base autorizada e seleção Cliente→Pedido→Solicitação",
-      "status": "pendente",
-      "finding": "API Cadastro Mestre já busca no servidor; seletor não possui debounce e mistura erro/permissão/vazio. Pedidos são filtrados por vínculo contact.company_id, sem fluxo paginado de seleção próprio."
+      "status": "implementado e testado",
+      "finding": "Busca paginada no servidor com debounce e invalidação de respostas por conta/usuário. Pedidos filtrados pela empresa canônica do contato, autorização de CRM e cobertura de operadora/unidade. Cliente sem pedido permanece selecionável. Criação de Alteração, recarga e abertura preservam cliente/pedido.",
+      "validation": "11 casos de intake no backend e 5 no frontend; demonstração no navegador com dados sintéticos e nenhuma mensagem ou contrato enviado."
     },
     {
       "requirement": "Contrato dentro da solicitação, versões e snapshots de assinantes do Cadastro Mestre",
@@ -75,8 +76,8 @@
     },
     {
       "requirement": "Envio, lembrete, cancelamento, eventos autenticados e documento final DocuSign",
-      "status": "dependência externa",
-      "finding": "Provedor confirmado: DocuSign. API atual apenas aceita external_id e registra sent; isso não é conector. Implementação necessária antes da configuração e homologação externas."
+      "status": "parcial",
+      "finding": "DocuSign confirmada. Configuração criptografada por conta, OAuth JWT/UserInfo, adaptador HTTP e caixa de entrada Connect autenticada/deduplicada implementados com testes simulados. Ainda não ligados ao contrato/versionamento; endpoint legado de registro manual de external_id permanece. Homologação externa depende de ambiente demo e HTTPS autorizado."
     },
     {
       "requirement": "Bloqueios de aprovação, assinatura e proteção financeira",
@@ -97,13 +98,30 @@
       "requirement": "Pendências por causa, implantação/provisionamento/financeiro, relatórios",
       "status": "parcial",
       "existing": "Fluxos nativos e Issues existem; completar conforme matriz e validar causas/atores/escopo."
+    },
+    {
+      "requirement": "Configuração DocuSign, autenticação e recebimento Connect",
+      "status": "parcial",
+      "implemented": [
+        "Configuração restrita a administrador ativo e cobertura de grupo",
+        "Segredos criptografados por conta e revisão, sem retorno na API",
+        "OAuth JWT com verificação de identidade e conta",
+        "HMAC dos bytes originais, limite de corpo e deduplicação durável",
+        "Notificação recebida permanece received, sem marcar contrato ou assinatura"
+      ],
+      "pending": [
+        "Consumidor contratual ligado à versão corrente",
+        "Envio real integrado ao contrato e snapshots de signatários",
+        "Homologação externa demo"
+      ],
+      "reference": "docs/jrc_backoffice/docusign_integration.md"
     }
   ],
   "customer_master": [
     {
       "requirement": "Fonte única Company/Contact e operações nativas com escopo",
       "status": "parcial",
-      "existing": "DirectoryQuery, CompanyWriter, ContactWriter, Customer360, CorporateCoverage; preservar os vínculos."
+      "existing": "DirectoryQuery, CompanyWriter, ContactsController com IdentityResolver/Audit, Customer360 e CorporateCoverage; preservar os vínculos."
     },
     {
       "requirement": "Detalhes em modal e abas dos módulos sem submenus duplicados",
@@ -248,5 +266,61 @@
     "Exigência atual de navegação horizontal prevalece sobre submenus laterais das imagens.",
     "Referências antigas de etapas não reordenam registros legados; manter workflow versionado.",
     "Preservar quorum/paralelismo já existentes mesmo quando o Word trata como evolução futura."
-  ]
+  ],
+  "validation_checkpoint_20261102": {
+    "frontend": {
+      "files": 129,
+      "tests": 1435,
+      "failures": 0,
+      "artifact": ".codex/continuation-frontend-regression.json"
+    },
+    "backend_new_and_native_regression": {
+      "artifact": ".codex/continuation-backend-verified.json",
+      "sha256": "d7c8afbaf5fa9df591882e879b544105c17c983b9d1a1f0628ed70973bc3768a",
+      "summary": {
+        "duration": 40.868609038,
+        "example_count": 107,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      }
+    },
+    "signature_migration_roundtrip": {
+      "examples": 1,
+      "failures": 0,
+      "included_in_backend_final": true,
+      "test": "spec/services/jrc_backoffice/signature_integration_upgrade_spec.rb"
+    },
+    "relationship_main": {
+      "examples": 427,
+      "failures": 0,
+      "source_commit": "bdf0d56915bcbdf5873cf525623f68b649d9f49e"
+    },
+    "relationship_reviewed": {
+      "examples": 5,
+      "failures": 0,
+      "note": "Rollback em ordem de dependência, mantendo a FK entre conta e documentos."
+    },
+    "relationship_concurrency": {
+      "examples": 33,
+      "failures": 0,
+      "artifact": ".codex/current-full-sd-fixed.json",
+      "coverage": "465 exemplos únicos no plano completo por partições",
+      "provenance": "427 casos centrais executados no snapshot imutável bdf0d569; 5 reviewed e 33 concorrentes no código atual. Os gates específicos de ownership também foram repetidos no backend final. Esta composição não é uma execução única de todo o repositório."
+    },
+    "build": "Frontend de produção compilado localmente com heap de 4096 MiB em 2m57s; sem imagem Docker/publicação.",
+    "browser": [
+      "Cliente→Pedido→Alteração: criação, recarga e reabertura com IDs corretos",
+      "Configuração DocuSign sintética desabilitada salva, segredos limpos, verificações permanecem pendentes, claro/escuro"
+    ],
+    "remaining": "Word integral permanece parcial. Contratos versionados/assinantes/evidências, requisitos tipados, Cadastro Mestre contextual, UX da Central e demais itens da matriz não foram declarados concluídos.",
+    "new_ruby_lint": {
+      "files": 20,
+      "offenses": 0,
+      "artifact": ".codex/continuation-ruby-lint-final.json"
+    },
+    "backend_total_distinct_selected": 572,
+    "scope_note": "572 exemplos distintos somam 465 do plano Relacionamento e 107 do gate Backoffice/DocuSign e regressões selecionadas. Não representam toda a suíte do repositório nem homologação externa.",
+    "rails_eager_load": "Zeitwerk: All is good!; log .codex/continuation-zeitwerk.log."
+  }
 }
