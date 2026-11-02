@@ -31,6 +31,18 @@ Broker0079 e requisito do core candidato; servidor observado ainda0078, ledger78
 
 ## Lacunas e proximo passo
 
-Exigir CI exata do candidato, schema estrutural consistente e imagem oficial antes de merge/release. Fechar teste HTTPS com Broker e Sidekiq reais (probe atual ainda porta sintetica), dois consumidores isolados, custodia integral e recuperacao da engine. Captura Evolution seguefalse/UNPROVEN; imagem API/web nao atualiza engine.
+Exigir CI exata do candidato, schema estrutural consistente e imagem oficial antes de merge/release. O teste adicional HTTPS com Broker e Sidekiq reais foi executado no incremento isolado descrito abaixo; revisar/publicar esse harness separadamente. Recuperacao da engine continua com gate proprio. Captura Evolution seguefalse/UNPROVEN; imagem API/web nao atualiza engine.
 
 WA permanece parcial em historico completo de conexoes, calendario/fallback e metricas; Flow continua por fases; Central multidominio/NICOgates/adapters e carga final nao estao encerrados. CCLX real, fontes externas e piloto50numeros/30dias aguardam contexto/autorizacao especificos. Capacidade900 nao medida. Publicar componentes independentes aprovados com limites explicitos; nao declarar100%.
+
+## Checkpoint isolado: custodia HTTPS real
+
+Branch local `codex/lab2-https-custody-20261102`, baseada no merge PR3 `daae59ecdbfd28008773a8adf9ec13f34ac8f486`. Nao altera app/db/workflow nem a release do core. O incremento contem somente fixture opt-in e documentacao; requer revisao e publicacao proprias.
+
+Gate observado `LAB2_TLS_BROKER_DURABLE_CUSTODY`, run `e4603a88-5311-42e9-b3d2-319cdeae8f5a`, launcher exit0. Dois consumidores LAB2 independentes em bancos novos, account/inbox/message reais1/1/1, Redis DB0/1. Rails7.1.5.2 + Sidekiq7.3.1 -> SafeFetch real -> TLS CA validada -> ingresso/servico/HMAC/migrations/RLS reais da imagem API EA. Cada org terminou com1observacao+1CHATWOOT_REPLY PENDING, cross-tenant0; A delivered/3, B delivered/2. Houve indisponibilidade real apos COMMIT do produtor, assinatura cruzada401, ACK retido apos COMMIT do receptor e SIGKILL137 do Sidekiq com recuperacao por lease. UUIDdelivery/bodyhash estaveis; o Broker deduplica pelas chaves reais de mensagem/destino, nao pelo header de delivery.
+
+O stack completo passou antes dos ajustes finais de estilo Ruby. Depois passaram unidade9/19assertions/0falhas/0skips, RuboCop6arquivos/0ofensas, parsers Ruby6/JS3/PowerShell1 e3checks criptograficos. O stack NAO foi repetido depois; nao afirmar que o SHA final deste incremento recebeu o gate completo. O revisor deve avaliar esse limite ou pedir novo run quando houver slot autorizado.
+
+Os seis containers da prova foram parados/exit0, sem portas publicadas, com volumes/DBs preservados e link de rede desconectado do Rails. CA privada/credenciais ficaram fora do Git; SSRF produtivo nao mudou. Sem worker fisico, numero/WhatsApp real, Chatwoot stock/CCLX, dois Chatwoots instalados, boot produtivo completo ou jornada bidirecional. Lease expirou controladamente, sem alegar decurso do TTL natural.
+
+Veja [operacao e falhas de preparacao preservadas](../../spec/homologation/broker_https_README.md) e [evidencia sanitizada](evidence/broker-https-custody-20261102.json). Nao publicar logs brutos, manifestos privados, caminhos temporarios privados ou chaves.

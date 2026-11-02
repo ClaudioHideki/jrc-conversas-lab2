@@ -1,6 +1,6 @@
 # Sidekiq real / obrigação Broker — laboratório somente
 
-Os scripts recusam ambiente diferente de Rails test e banco diferente de `jrc_durable_review_test`. São executáveis explícitos de homologação; não são jobs produtivos nem RSpec com adapter falso.
+Os scripts `broker_sidekiq_*` abaixo recusam ambiente diferente de Rails test e banco diferente de `jrc_durable_review_test`. São executáveis explícitos de homologação; não são jobs produtivos nem RSpec com adapter falso.
 
 Preparação: código LAB2 atual com migrations em PostgreSQL/pgvector descartável, Redis exclusivo e rede interna sem portas públicas. Não usar banco/Redis compartilhados. O laboratório desta rodada materializou apenas arquivos versionados num diretório vazio, sem .env privado.
 
@@ -17,3 +17,11 @@ O transporte SafeFetch é substituído somente no processo do probe por uma port
 Resultado observado: Rails7.1.5.2, Sidekiq7.3.1 e Redis reais; duas obrigações delivered; tentativas2/1; dois recibos, cada um ligado à sua conta. A primeira verificação expirou por query cache do observador; consulta SQL independente demonstrou os estados corretos e a verificação uncached passou sem reenviar. Logs RED/erro do observador e GREEN são preservados.
 
 Limites: duas contas na mesma instalação, não duas instalações Chatwoot independentes. Não valida perda de Redis, ACK do HTTP real, codecs/mídias, configuração do CCLX, capacidade ou sessão física. Não executa backup, dump ou restore.
+
+## Prova adicional com HTTPS e Broker reais
+
+O incremento separado [`broker_https_*`](broker_https_README.md) usa dois bancos Rails frios com IDs locais coincidentes, Redis DB0/1, TLS com CA validada e a rota real do Broker na imagem oficial fixada por digest. Não substitui o probe sintético acima nem modifica seu transporte.
+
+Run `e4603a88-5311-42e9-b3d2-319cdeae8f5a`: launcher exit0; TLS confiável aceito, CA/hostname inválidos rejeitados, assinatura cruzada401, indisponibilidade após COMMIT do produtor, ACK retido após COMMIT do receptor e Sidekiq SIGKILL137. Retomada real: A delivered/3, B delivered/2; uma observação e um job por organização, RLS cruzado0 e UUID/hash preservados. Lease expirada controladamente apenas na fixture. Jobs físicos permaneceram PENDING.
+
+[Evidência sanitizada](../../docs/release-integrada-jrc/evidence/broker-https-custody-20261102.json). O stack foi executado antes dos ajustes finais de estilo Ruby; unidade9/19, RuboCop6arquivos/0ofensas, sintaxe e certificados foram verificados depois. Isso não atribui o gate completo ao SHA deste commit. Não homologa WhatsApp físico, Chatwoot stock/CCLX ou boot completo de produção.

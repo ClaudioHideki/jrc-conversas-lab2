@@ -1,0 +1,110 @@
+{
+  "gate": "LAB2_TLS_BROKER_DURABLE_CUSTODY",
+  "run_id": "e4603a88-5311-42e9-b3d2-319cdeae8f5a",
+  "launcher_exit_code": 0,
+  "broker_image": "ghcr.io/claudiohideki/brokerjrcia-api@sha256:ae6229ed0d67cf2bd582291e4c6275dd641d57fbb75c88931fee14476cff6cd1",
+  "broker_source_revision_from_release_evidence": "ea7dc741d0c63792a969dddeac2bd35b6cbdf514",
+  "broker_platform_digest": "sha256:4282c003f694e53ab27f961b1489c61e911e3f75733461fdf98f50cafe958515",
+  "broker_config_digest": "sha256:20588c6fe707bc2620a8a02840a66beb78c6825e16ec46115f14e4e976570125",
+  "rails_version": "7.1.5.2",
+  "sidekiq_version": "7.3.1",
+  "independent_lab2_consumers": 2,
+  "local_ids": {
+    "account_id": 1,
+    "inbox_id": 1,
+    "message_id": 1
+  },
+  "redis_databases": [
+    0,
+    1
+  ],
+  "tls": {
+    "trusted_ca_accepted": true,
+    "wrong_ca_rejected_by_ssl": true,
+    "wrong_hostname_rejected_by_ssl": true,
+    "verify_peer": true,
+    "safe_fetch_replaced": false
+  },
+  "cross_signature": {
+    "status": 401,
+    "target_unchanged": true
+  },
+  "sigkill": {
+    "worker_exit_code": 137,
+    "receiver_committed_before_kill": true,
+    "ack_withheld": true,
+    "client_disconnected_before_ack": true,
+    "lease_expired_explicitly_by_fixture": true
+  },
+  "consumers": [
+    {
+      "key": "a",
+      "state": "delivered",
+      "attempts": 3,
+      "observations": 1,
+      "reply_jobs": 1,
+      "cross_tenant_observations": 0,
+      "job_states": [
+        "PENDING"
+      ],
+      "event_key": "message:1",
+      "job_dedupe_key": "reply:1:1:1:1",
+      "request_count": 3,
+      "delivery_uuid_preserved": true,
+      "body_sha256_preserved": true
+    },
+    {
+      "key": "b",
+      "state": "delivered",
+      "attempts": 2,
+      "observations": 1,
+      "reply_jobs": 1,
+      "cross_tenant_observations": 0,
+      "job_states": [
+        "PENDING"
+      ],
+      "event_key": "message:1",
+      "job_dedupe_key": "reply:1:1:1:1",
+      "request_count": 2,
+      "delivery_uuid_preserved": true,
+      "body_sha256_preserved": true
+    }
+  ],
+  "cleanup": {
+    "owned_containers_stopped": 6,
+    "owned_container_exit_codes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "published_ports": 0,
+    "rails_fixture_network_detached": true,
+    "databases_and_volumes_preserved": true
+  },
+  "final_source_verification": {
+    "pure_unit_tests": 9,
+    "pure_unit_assertions": 19,
+    "pure_unit_failures": 0,
+    "pure_unit_skips": 0,
+    "rubocop_files": 6,
+    "rubocop_offenses": 0,
+    "ruby_parser_files": 6,
+    "js_parser_files": 3,
+    "powershell_parser_files": 1,
+    "certificate_checks": 3,
+    "full_stack_before_final_ruby_style_changes": true,
+    "full_stack_repeated_after_style_changes": false,
+    "full_stack_gate_at_final_commit_sha": "NOT_CLAIMED"
+  },
+  "limits": {
+    "physical_whatsapp_delivery": "NOT_EXERCISED",
+    "physical_worker_started": false,
+    "stock_chatwoot_cclx_homologated": false,
+    "production_full_boot_tested": false,
+    "production_ssrf_changed": false,
+    "private_network_allowed_only_in_isolated_fixture": true
+  }
+}
