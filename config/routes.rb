@@ -755,6 +755,12 @@ Rails.application.routes.draw do
               post :simulate, on: :collection
             end
             resources :backoffice_requests, only: [:index, :show, :create, :update] do
+              get 'contract', to: 'backoffice_contracts#show'
+              patch 'contract', to: 'backoffice_contracts#update'
+              get 'contract_versions', to: 'backoffice_contract_versions#index'
+              post 'contract_versions', to: 'backoffice_contract_versions#create'
+              get 'contract_versions/:version_id/pdf', to: 'backoffice_contract_versions#download'
+              get 'contract_versions/:version_id/differences', to: 'backoffice_contract_versions#differences'
               get :summary, on: :collection
               get :order_options, on: :collection
               get :workspace, on: :collection

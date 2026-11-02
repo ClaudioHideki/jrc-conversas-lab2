@@ -9,6 +9,7 @@ import BackofficeRequestSummary from './BackofficeRequestSummary.vue';
 import BackofficeAssignment from './BackofficeAssignment.vue';
 import BackofficeActions from './BackofficeActions.vue';
 import BackofficeDocumentVersions from './BackofficeDocumentVersions.vue';
+import BackofficeContractVersions from './BackofficeContractVersions.vue';
 import BackofficeFinance from './BackofficeFinance.vue';
 import ApprovalGateBadge from 'dashboard/routes/dashboard/approvals/ApprovalGateBadge.vue';
 import { useBackofficePresentation } from './useBackofficePresentation';
@@ -25,6 +26,7 @@ const tabs = [
   'operations',
   'context',
   'documents',
+  'contracts',
   'checklist',
   'issues',
   'finance',
@@ -39,6 +41,7 @@ const tabTones = {
   operations: 'blue',
   context: 'cyan',
   documents: 'amber',
+  contracts: 'blue',
   checklist: 'teal',
   issues: 'rose',
   finance: 'violet',
@@ -54,10 +57,20 @@ const orderApproval = computed(
     record.value?.request_kind === 'approval'
 );
 const admin = computed(() => store.getters.getCurrentRole === 'administrator');
+const requestContext = computed(() =>
+  JSON.stringify([
+    route.params.accountId,
+    route.params.requestId,
+    store.getters.getCurrentUser?.id,
+    store.getters.getCurrentRole,
+    store.getters.getCurrentUser?.accounts,
+  ])
+);
 const load = async () => {
   sequence += 1;
   const request = sequence;
   loading.value = true;
+  saving.value = false;
   error.value = '';
   record.value = null;
   try {
@@ -70,19 +83,32 @@ const load = async () => {
   }
 };
 const refreshDocuments = async () => {
-  const { data } = await backofficeAPI.show(route.params.requestId);
-  record.value = data;
+  const current = sequence;
+  const context = requestContext.value;
+  try {
+    const { data } = await backofficeAPI.show(route.params.requestId);
+    if (current === sequence && context === requestContext.value)
+      record.value = data;
+  } catch (failure) {
+    if (current !== sequence || context !== requestContext.value) return;
+    error.value = text('DETAIL_ERROR');
+    if ([401, 403, 404].includes(failure.response?.status)) record.value = null;
+  }
 };
 const action = async command => {
   if (saving.value) return;
+  const context = requestContext.value;
   saving.value = true;
   error.value = '';
   message.value = '';
   try {
     await command();
+    if (context !== requestContext.value) return;
     await load();
+    if (context !== requestContext.value) return;
     message.value = text('ACTION_SUCCESS');
   } catch (failure) {
+    if (context !== requestContext.value) return;
     error.value =
       failure.response?.data?.errors?.join(', ') ||
       failure.response?.data?.message ||
@@ -90,10 +116,10 @@ const action = async command => {
         failure.response?.status === 409 ? 'APPROVAL_ERROR' : 'ACTION_ERROR'
       );
   } finally {
-    saving.value = false;
+    if (context === requestContext.value) saving.value = false;
   }
 };
-watch(() => [route.params.accountId, route.params.requestId], load, {
+watch(requestContext, load, {
   immediate: true,
 });
 onBeforeUnmount(() => {
@@ -409,6 +435,10 @@ onBeforeUnmount(() => {
                 />
               </details>
             </div>
+            <BackofficeContractVersions
+              v-else-if="tab === 'contracts'"
+              :record="record"
+            />
             <BackofficeActions
               v-else-if="['checklist', 'issues'].includes(tab)"
               :key="tab"

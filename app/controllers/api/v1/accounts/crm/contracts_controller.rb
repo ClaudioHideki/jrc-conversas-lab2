@@ -39,29 +39,7 @@ module Api::V1::Accounts::Crm
     end
 
     def update
-      @contract.sales_order.with_lock do
-        @contract.lock!
-        before = audit_snapshot(@contract)
-        attributes = normalized_contract_params
-        if attributes.key?('lifecycle_metadata')
-          attributes['lifecycle_metadata'] = (@contract.lifecycle_metadata || {}).deep_merge(attributes['lifecycle_metadata'])
-        end
-        if attributes['status'] == 'awaiting_signature' || attributes['signature_status'].in?(%w[prepared sent signed])
-          JrcBackoffice::ContractRelease.check!(order: @contract.sales_order, actor: Current.user)
-        end
-        if attributes['status'].in?(%w[active expiring renewed]) && JrcBackoffice::SignatureRelease.operational_v2?(@contract) &&
-           !JrcBackoffice::SignatureRelease.verified?(@contract)
-          raise JrcApprovals::Error, 'SIGNATURE_EVIDENCE_REQUIRED'
-        end
-        @contract.update!(attributes)
-        JrcApprovals::CommercialInvalidation.call(resource: @contract.reload, user: Current.user)
-        if %w[active expiring renewed].include?(@contract.status)
-          JrcApprovals::CommercialGate.check!(resource: @contract, user: Current.user, key: 'contracts.company_signature')
-        end
-        sync_signature_status_from_contract_status!(@contract)
-        sync_order_after_signature!(@contract)
-        audit!(@contract, 'contract_updated', before, audit_snapshot(@contract))
-      end
+      update_contract!
       render json: serialize(@contract.reload)
     end
 
@@ -224,6 +202,32 @@ module Api::V1::Accounts::Crm
     end
 
     private
+
+    def update_contract!
+      @contract.sales_order.with_lock do
+        @contract.lock!
+        before = audit_snapshot(@contract)
+        attributes = normalized_contract_params
+        if attributes.key?('lifecycle_metadata')
+          attributes['lifecycle_metadata'] = (@contract.lifecycle_metadata || {}).deep_merge(attributes['lifecycle_metadata'])
+        end
+        if attributes['status'] == 'awaiting_signature' || attributes['signature_status'].in?(%w[prepared sent signed])
+          JrcBackoffice::ContractRelease.check!(order: @contract.sales_order, actor: Current.user)
+        end
+        if attributes['status'].in?(%w[active expiring renewed]) && JrcBackoffice::SignatureRelease.operational_v2?(@contract) &&
+           !JrcBackoffice::SignatureRelease.verified?(@contract)
+          raise JrcApprovals::Error, 'SIGNATURE_EVIDENCE_REQUIRED'
+        end
+        @contract.update!(attributes)
+        JrcApprovals::CommercialInvalidation.call(resource: @contract.reload, user: Current.user)
+        if %w[active expiring renewed].include?(@contract.status)
+          JrcApprovals::CommercialGate.check!(resource: @contract, user: Current.user, key: 'contracts.company_signature')
+        end
+        sync_signature_status_from_contract_status!(@contract)
+        sync_order_after_signature!(@contract)
+        audit!(@contract, 'contract_updated', before, audit_snapshot(@contract))
+      end
+    end
 
     def lock_backoffice_release
       @contract.sales_order.with_lock do

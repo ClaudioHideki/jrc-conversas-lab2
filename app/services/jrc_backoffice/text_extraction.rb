@@ -14,7 +14,9 @@ class JrcBackoffice::TextExtraction
         output = File.join(directory, 'text.txt')
         return failure('invalid_pdf') unless run('pdftotext', '-f', '1', '-l', '5', '-enc', 'UTF-8', path, output)
 
-        text = File.read(output, 200_000, encoding: 'UTF-8').scrub
+        # A byte length makes File.read return BINARY even with encoding:.
+        # Poppler was explicitly asked for UTF-8; preserve that contract.
+        text = File.binread(output, 200_000).force_encoding(Encoding::UTF_8).scrub
         return { text: text, engine: 'poppler', page_limit: 5 } if text.strip.length >= 40
 
         image = File.join(directory, 'page')
@@ -44,6 +46,7 @@ class JrcBackoffice::TextExtraction
     output, _, status = Open3.capture3('timeout', '30', 'tesseract', path, 'stdout', '-l', 'por+eng', 'tsv')
     return failure('ocr_unavailable_or_failed') unless status.success?
 
+    output = output.force_encoding(Encoding::UTF_8).scrub
     words = output.lines.drop(1).filter_map do |line|
       values = line.chomp.split("\t", 12)
       next unless values.length == 12 && values[0] == '5' && values[11].present?

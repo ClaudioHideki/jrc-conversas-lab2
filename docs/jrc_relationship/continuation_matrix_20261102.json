@@ -72,7 +72,7 @@
     {
       "requirement": "Contrato dentro da solicitação, versões e snapshots de assinantes do Cadastro Mestre",
       "status": "parcial",
-      "finding": "CPF protegido no Contato canônico implementado e testado. PDF nativo existe; versões imutáveis, snapshots de vários assinantes e prova de poderes ainda pendentes."
+      "finding": "B1: versões imutáveis, fonte cifrada, PDF privado, checksum, histórico paginado, diferenças e edição contextual com CAS implementados. 492 regressões selecionadas backend, 2 concorrências reais PostgreSQL e 178 frontend passaram. Edição, gravação, recarga, diferenças, PDF/checksum e temas claro/escuro/móvel validados no Chrome com assets compilados. Assinantes/poderes/ledger/envio/evidência ainda pendentes; não é fluxo contratual completo."
     },
     {
       "requirement": "Envio, lembrete, cancelamento, eventos autenticados e documento final DocuSign",
@@ -345,5 +345,12 @@
     "failures": 0,
     "external_homologation": false,
     "scope": "Regressões selecionadas. Evidência detalhada e pendências no relatório; não somar aos gates anteriores como se fossem casos únicos reexecutados."
+  },
+  "contract_version_checkpoint_20261102": {
+    "report": "docs/jrc_backoffice/contract_versions_checkpoint_20261102.json",
+    "status": "parcial",
+    "new_image": false,
+    "push": false,
+    "deploy": false
   }
 }

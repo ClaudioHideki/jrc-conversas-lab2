@@ -77,6 +77,38 @@ commissionProgramsAPI.simulate = data =>
   axios.post(`${commissionProgramsAPI.url}/simulate`, data);
 
 export const backofficeAPI = make('backoffice_requests');
+const contractVersionsUrl = (accountId, requestId) =>
+  `${backofficeAPI.urlForAccount(accountId)}/${requestId}/contract_versions`;
+export const backofficeContractVersionsAPI = {
+  draft: (accountId, requestId, options = {}) =>
+    axios.get(
+      `${backofficeAPI.urlForAccount(accountId)}/${requestId}/contract`,
+      options
+    ),
+  updateDraft: (accountId, requestId, data, sourceDigest, options = {}) =>
+    axios.patch(
+      `${backofficeAPI.urlForAccount(accountId)}/${requestId}/contract`,
+      { contract: data, expected_source_digest: sourceDigest },
+      options
+    ),
+  list: (accountId, requestId, params, options = {}) =>
+    axios.get(contractVersionsUrl(accountId, requestId), {
+      ...options,
+      params,
+    }),
+  create: (accountId, requestId, data, options = {}) =>
+    axios.post(contractVersionsUrl(accountId, requestId), data, options),
+  download: (accountId, requestId, versionId, options = {}) =>
+    axios.get(`${contractVersionsUrl(accountId, requestId)}/${versionId}/pdf`, {
+      ...options,
+      responseType: 'blob',
+    }),
+  differences: (accountId, requestId, versionId, options = {}) =>
+    axios.get(
+      `${contractVersionsUrl(accountId, requestId)}/${versionId}/differences`,
+      options
+    ),
+};
 export const signatureIntegrationAPI = make('signature_integration');
 signatureIntegrationAPI.showForAccount = (accountId, options = {}) =>
   axios.get(signatureIntegrationAPI.urlForAccount(accountId), options);

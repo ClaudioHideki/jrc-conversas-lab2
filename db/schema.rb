@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_11_02_040000) do
+ActiveRecord::Schema[7.1].define(version: 2026_11_02_050000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -1339,6 +1339,33 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_040000) do
     t.check_constraint "business_unit_id IS NULL OR issuer_company_id IS NOT NULL", name: "jrc_ap_requests_scope"
   end
 
+  create_table "jrc_backoffice_contract_versions", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "backoffice_request_id", null: false
+    t.bigint "contract_id", null: false
+    t.bigint "created_by_id", null: false
+    t.bigint "pdf_blob_id", null: false
+    t.integer "number", null: false
+    t.integer "source_format_version", default: 1, null: false
+    t.string "idempotency_key", null: false
+    t.string "source_digest", null: false
+    t.string "pdf_sha256", null: false
+    t.text "source_snapshot", null: false
+    t.text "change_reason", null: false
+    t.jsonb "change_paths", default: [], null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "id"], name: "bo_contract_version_tenant", unique: true
+    t.index ["account_id"], name: "index_jrc_backoffice_contract_versions_on_account_id"
+    t.index ["backoffice_request_id"], name: "idx_on_backoffice_request_id_c299d77c81"
+    t.index ["contract_id", "idempotency_key"], name: "bo_contract_version_intent", unique: true
+    t.index ["contract_id", "number"], name: "bo_contract_version_number", unique: true
+    t.index ["contract_id"], name: "index_jrc_backoffice_contract_versions_on_contract_id"
+    t.index ["created_by_id"], name: "index_jrc_backoffice_contract_versions_on_created_by_id"
+    t.index ["pdf_blob_id"], name: "index_jrc_backoffice_contract_versions_on_pdf_blob_id"
+    t.check_constraint "number > 0 AND source_format_version > 0", name: "bo_contract_version_positive"
+  end
+
   create_table "jrc_backoffice_document_analyses", force: :cascade do |t|
     t.bigint "document_version_id", null: false
     t.string "analyzer_version", null: false
@@ -2267,6 +2294,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_040000) do
     t.index ["requested_by_id"], name: "index_jrc_crm_backoffice_requests_on_requested_by_id"
     t.index ["sales_order_id"], name: "index_jrc_crm_backoffice_requests_on_sales_order_id"
     t.check_constraint "workflow_version = ANY (ARRAY[1, 2])", name: "backoffice_workflow_version"
+    t.index ["account_id", "id"], name: "bo_contract_version_request_tenant", unique: true
   end
 
   create_table "jrc_crm_business_units", force: :cascade do |t|
@@ -2392,6 +2420,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_040000) do
     t.index ["owner_id"], name: "index_jrc_crm_contracts_on_owner_id"
     t.index ["sales_order_id"], name: "index_jrc_crm_contracts_on_sales_order_id"
     t.index ["source_contract_id"], name: "index_jrc_crm_contracts_on_source_contract_id"
+    t.index ["account_id", "id"], name: "bo_contract_version_contract_tenant", unique: true
   end
 
   create_table "jrc_crm_custom_attribute_definitions", force: :cascade do |t|
@@ -9209,4 +9238,35 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_040000) do
   add_foreign_key "jrc_backoffice_signature_connections", "users", column: "created_by_id"
   add_foreign_key "jrc_backoffice_signature_notifications", "jrc_backoffice_signature_connections", column: "connection_id"
   add_foreign_key "jrc_backoffice_signature_notifications", "jrc_backoffice_signature_connections", column: ["account_id", "connection_id"], primary_key: ["account_id", "id"], name: "bo_signature_notification_connection_tenant"
+
+  add_foreign_key "jrc_backoffice_contract_versions", "accounts"
+  add_foreign_key "jrc_backoffice_contract_versions", "active_storage_blobs", column: "pdf_blob_id"
+  add_foreign_key "jrc_backoffice_contract_versions", "jrc_crm_backoffice_requests", column: "backoffice_request_id"
+  add_foreign_key "jrc_backoffice_contract_versions", "jrc_crm_backoffice_requests", column: ["account_id", "backoffice_request_id"], primary_key: ["account_id", "id"], name: "bo_version_backoffice_request_tenant"
+  add_foreign_key "jrc_backoffice_contract_versions", "jrc_crm_contracts", column: "contract_id"
+  add_foreign_key "jrc_backoffice_contract_versions", "jrc_crm_contracts", column: ["account_id", "contract_id"], primary_key: ["account_id", "id"], name: "bo_version_contract_tenant"
+  add_foreign_key "jrc_backoffice_contract_versions", "users", column: "created_by_id"
+
+  execute <<~'JRC_SCHEMA_SQL_982754c39de7'
+    ALTER TABLE "jrc_backoffice_contract_versions" DROP CONSTRAINT "bo_contract_version_positive";
+  JRC_SCHEMA_SQL_982754c39de7
+
+  execute <<~'JRC_SCHEMA_SQL_e9913913177f'
+    ALTER TABLE "jrc_backoffice_contract_versions" ADD CONSTRAINT "bo_contract_version_positive" CHECK (((number > 0) AND (source_format_version > 0)));
+  JRC_SCHEMA_SQL_e9913913177f
+
+  execute <<~'JRC_SCHEMA_SQL_1321a9fb57fa'
+    CREATE OR REPLACE FUNCTION public.jrc_contract_version_pin()
+     RETURNS trigger
+     LANGUAGE plpgsql
+    AS $function$
+    BEGIN
+      RAISE EXCEPTION 'Contract versions are immutable';
+    END;
+    $function$
+  JRC_SCHEMA_SQL_1321a9fb57fa
+
+  execute <<~'JRC_SCHEMA_SQL_ced701519db3'
+    CREATE TRIGGER jrc_contract_version_pin BEFORE DELETE OR UPDATE ON jrc_backoffice_contract_versions FOR EACH ROW EXECUTE FUNCTION jrc_contract_version_pin();
+  JRC_SCHEMA_SQL_ced701519db3
 end
