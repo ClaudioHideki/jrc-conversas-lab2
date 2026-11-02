@@ -46,3 +46,13 @@ O stack completo passou antes dos ajustes finais de estilo Ruby. Depois passaram
 Os seis containers da prova foram parados/exit0, sem portas publicadas, com volumes/DBs preservados e link de rede desconectado do Rails. CA privada/credenciais ficaram fora do Git; SSRF produtivo nao mudou. Sem worker fisico, numero/WhatsApp real, Chatwoot stock/CCLX, dois Chatwoots instalados, boot produtivo completo ou jornada bidirecional. Lease expirou controladamente, sem alegar decurso do TTL natural.
 
 Veja [operacao e falhas de preparacao preservadas](../../spec/homologation/broker_https_README.md) e [evidencia sanitizada](evidence/broker-https-custody-20261102.json). Nao publicar logs brutos, manifestos privados, caminhos temporarios privados ou chaves.
+
+## Checkpoint final da fixture HTTPS
+
+O P2 de cleanup foi corrigido no commit local `f1ffd1b9de2bc773ad8c1983f25f1dd352579bb5`, separado de283378b1. Confere exitcodes/inventario/ownership/estado parado/desanexo e falha fechado se nao puder provar cleanup; nunca mascara erro primario do stack. Resultado e mensagem positiva so sao publicados depois de cleanup verificado. RED3pass/8fail e REDnullinventory14pass/1fail; GREEN15/15contratos WindowsPowerShell sem Docker/Pester.
+
+A UMA rodada fria final autorizada passou: `bb759c3f-76e6-4f87-a9a8-d57d172276b3`, launcher exit0, fonte EXATA `f1ffd1b9de2bc773ad8c1983f25f1dd352579bb5`. Preflight Gitblobmatch13/13 e hashesLF; pos-run13/13hashes materializados Rails iguais. Inclui estilo Ruby final e cleanup corrigido. Cleanup Verified=true/Errors=[]/6Stopped=true/RailsDetached=true antes de criar result.json; inventario independente final6exited0/zeroportas. A delivered/3, B delivered/2;1observacao+1job PENDING por org/cross-tenant0. TLS3/3, assinatura cruzada401, ACK retido apos COMMIT, SIGKILL137, recovery e linhagem UUID/hash preservados.
+
+Checks finais no mesmo conteudo:9unit/19assertions/0falhas/0skips;15cleanupcontracts/0falhas; RuboCop6arquivos/0ofensas; parsersRuby6/JS3/PowerShell3. [Evidencia final sanitizada com revisao/hashes](evidence/broker-https-custody-final-20261102.json). Este checkpoint/README/evidencia sao incremento posterior SOMENTE documental, com bytes executaveis comparados e inalterados contra f1ffd1b9. Nao atribuir a execucao ao SHA documental nem o run original e460 a283. O limite post-style anterior foi fechado pela nova rodada, sem reescrever os registros antigos.
+
+Nada disso altera release/runtime/app/db/workflow. Sem worker fisico/numero/WhatsApp real, Chatwoot stock/CCLX ou boot completo produtivo. Seguem preservados DBs/volumes/failedruns, chaves privadas fora do Git/ZIP e SSRF produtivo inalterado. Sem push/PR ate revisao final do Ack.
