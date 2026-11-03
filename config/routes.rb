@@ -435,6 +435,7 @@ Rails.application.routes.draw do
               member do
                 get :overview
                 get :records
+                get :company_history
                 get :duplicates
                 get :timeline
                 post :merge

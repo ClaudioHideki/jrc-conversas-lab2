@@ -42,4 +42,18 @@ RSpec.describe 'Native contact merge with master preservation' do
     source.update!(identifier: 'external-b')
     expect { merge }.to raise_error(JrcCustomers::MergePreserver::Conflict)
   end
+
+  it 'retains company role, job fields and the unique primary when the linked source is merged into an unlinked survivor' do
+    company = account.master_companies.create!(name: 'TESTE SINTÉTICO — Empresa da fusão')
+    source.update!(company_id: company.id)
+    source.update!(job_title: 'Diretora', department: 'Compras', company_role: 'purchasing', company_primary: true)
+    merge
+    expect(base.reload.attributes.slice('company_id', 'job_title', 'department', 'company_role', 'company_primary'))
+      .to eq('company_id' => company.id, 'job_title' => 'Diretora', 'department' => 'Compras',
+             'company_role' => 'purchasing', 'company_primary' => true)
+    expect(account.contacts.where(company_id: company.id, company_primary: true).pluck(:id)).to eq([base.id])
+    event = JrcCrm::AuditEvent.where(account: account, resource_id: base.id, event_type: 'customer_contact_merged').first
+    expect(event.metadata.dig('source_snapshot', 'company_primary')).to be(true)
+    expect(Contact.exists?(source.id)).to be(false)
+  end
 end

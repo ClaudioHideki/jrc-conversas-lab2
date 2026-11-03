@@ -37,8 +37,32 @@ const render = () =>
       },
     },
   });
+
 const button = (wrapper, name) =>
   wrapper.findAll('button').find(item => item.text() === name);
+
+it('confirms the primary change and saves the exact canonical person within the original account', async () => {
+  mocks.contacts.mockResolvedValue(
+    result([{ ...candidate, company_id: 7, company_contact_status: 'active' }])
+  );
+  const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
+  const wrapper = render();
+  await flushPromises();
+  await button(wrapper, 'Definir como principal').trigger('click');
+  expect(mocks.saveContact).not.toHaveBeenCalled();
+  confirm.mockReturnValue(true);
+  await button(wrapper, 'Definir como principal').trigger('click');
+  await flushPromises();
+  expect(mocks.saveContact).toHaveBeenCalledWith(
+    { company_id: 7, company_primary: true },
+    43,
+    { confirm_primary_change: true },
+    { accountId: 1 }
+  );
+  expect(wrapper.emitted('changed')).toHaveLength(1);
+  confirm.mockRestore();
+  wrapper.unmount();
+});
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.state = reactive({ account: 1, role: 'agent' });

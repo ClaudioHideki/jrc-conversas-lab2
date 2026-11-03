@@ -27,6 +27,9 @@ const record = (point = 'MOCK — PRIVATE_CONTACT_CHANNEL') => ({
       job_title: 'Analista',
       department: 'Atendimento',
       registration_status: 'registered',
+      company_role: null,
+      company_primary: false,
+      company_contact_status: 'active',
     },
     contact_points: [{ id: 1, kind: 'email', value: point }],
   },
@@ -59,7 +62,7 @@ it('uses the existing editor and pins the source account separately from reassig
   expect(mocks.saveContact).toHaveBeenCalledWith(
     expect.objectContaining({ job_title: 'MOCK — Novo cargo' }),
     42,
-    { confirm_reassignment: false },
+    { confirm_reassignment: false, confirm_primary_change: false },
     { accountId: 1 }
   );
   expect(mocks.contact).toHaveBeenLastCalledWith(
@@ -67,6 +70,71 @@ it('uses the existing editor and pins the source account separately from reassig
     expect.objectContaining({ accountId: 1, signal: expect.any(AbortSignal) })
   );
   expect(wrapper.emitted('updated')).toHaveLength(1);
+  wrapper.unmount();
+});
+
+it('saves a company role and primary only after explicit confirmation using the existing canonical update', async () => {
+  const linked = record();
+  linked.data.payload.company_id = 7;
+  mocks.contact.mockResolvedValue(linked);
+  const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true);
+  const wrapper = render();
+  await flushPromises();
+  await wrapper.find('form select').setValue('technical');
+  await wrapper.find('input[type="checkbox"]').setValue(true);
+  await wrapper.find('form').trigger('submit');
+  await flushPromises();
+  expect(confirm).toHaveBeenCalledOnce();
+  expect(mocks.saveContact).toHaveBeenCalledWith(
+    expect.objectContaining({
+      company_id: 7,
+      company_role: 'technical',
+      company_primary: true,
+    }),
+    42,
+    { confirm_reassignment: false, confirm_primary_change: true },
+    { accountId: 1 }
+  );
+  expect(wrapper.emitted('updated')).toHaveLength(1);
+  confirm.mockRestore();
+  wrapper.unmount();
+});
+
+it('clears the previous company context before a confirmed transfer and makes no write when confirmation is canceled', async () => {
+  const linked = record();
+  Object.assign(linked.data.payload, {
+    company_id: 7,
+    company_role: 'finance',
+    company_primary: true,
+  });
+  mocks.contact.mockResolvedValue(linked);
+  const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
+  const wrapper = render();
+  await flushPromises();
+  wrapper
+    .findComponent({ name: 'CompanyPicker' })
+    .vm.$emit('update:modelValue', 8);
+  await flushPromises();
+  expect(wrapper.find('form input').element.disabled).toBe(true);
+  expect(wrapper.find('input[type="checkbox"]').element.checked).toBe(false);
+  await wrapper.find('form').trigger('submit');
+  expect(mocks.saveContact).not.toHaveBeenCalled();
+  confirm.mockReturnValue(true);
+  await wrapper.find('form').trigger('submit');
+  await flushPromises();
+  expect(mocks.saveContact).toHaveBeenCalledWith(
+    expect.objectContaining({
+      company_id: 8,
+      job_title: '',
+      department: '',
+      company_role: '',
+      company_primary: false,
+    }),
+    42,
+    { confirm_reassignment: true, confirm_primary_change: false },
+    { accountId: 1 }
+  );
+  confirm.mockRestore();
   wrapper.unmount();
 });
 

@@ -39,6 +39,7 @@ const render = () =>
         MasterContactPanel: true,
         RecordsPanel: true,
         TimelinePanel: true,
+        CompanyContactHistoryPanel: true,
         CompanyDetailsDialog: true,
         ComposeConversation: true,
         VoiceCallButton: true,
@@ -52,6 +53,29 @@ beforeEach(() => {
     data: { payload: structuredClone(person) },
   });
   mocks.contactOverview.mockResolvedValue({ data: structuredClone(summary) });
+});
+
+it('keeps the six approved tabs and opens the canonical link history only after choosing its section', async () => {
+  const wrapper = render();
+  await flushPromises();
+  await wrapper
+    .findAll('button')
+    .find(item => item.text() === 'Histórico')
+    .trigger('click');
+  expect(
+    wrapper.findComponent({ name: 'CompanyContactHistoryPanel' }).exists()
+  ).toBe(false);
+  await wrapper
+    .findAll('button')
+    .find(item => item.text() === 'Histórico de vínculos')
+    .trigger('click');
+  expect(
+    wrapper
+      .findComponent({ name: 'CompanyContactHistoryPanel' })
+      .props('contactId')
+  ).toBe(42);
+  expect(wrapper.findComponent({ name: 'TimelinePanel' }).exists()).toBe(false);
+  wrapper.unmount();
 });
 
 it('opens six authorized tabs using the exact contact and mounts source panels only after selection', async () => {

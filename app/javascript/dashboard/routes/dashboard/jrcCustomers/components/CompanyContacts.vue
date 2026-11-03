@@ -1,13 +1,16 @@
 <script setup>
 import {
   defineAsyncComponent,
+  computed,
   reactive,
   ref,
   watch,
   onBeforeUnmount,
 } from 'vue';
+import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcCustomers';
 import MasterContactPanel from './MasterContactPanel.vue';
+import { companyContactRoleLabels } from './companyContactRoles';
 import { useCustomerMaster } from '../useCustomerMaster';
 import {
   T,
@@ -21,6 +24,8 @@ const props = defineProps({
   companyId: { type: [Number, String], required: true },
 });
 const emit = defineEmits(['changed', 'denied']);
+const { t } = useI18n();
+const roleLabels = computed(() => companyContactRoleLabels(t));
 const ContactDetailsDialog = defineAsyncComponent(
   () => import('./ContactDetailsDialog.vue')
 );
@@ -185,6 +190,25 @@ const detach = async item => {
     );
     if (!current(context)) return;
     await changed();
+  } catch (err) {
+    fail(err, context);
+  } finally {
+    if (current(context)) busy.value = false;
+  }
+};
+const makePrimary = async item => {
+  if (!window.confirm(t('CRM.COMPANY_CONTACT_CONTEXT.CONFIRM_PRIMARY'))) return;
+  const context = subjectKey();
+  busy.value = true;
+  error.value = '';
+  try {
+    await API.saveContact(
+      { company_id: Number(props.companyId), company_primary: true },
+      item.id,
+      { confirm_primary_change: true },
+      { accountId: accountId.value }
+    );
+    if (current(context)) await changed();
   } catch (err) {
     fail(err, context);
   } finally {
@@ -366,8 +390,37 @@ onBeforeUnmount(() => {
               {{ item.job_title }} / {{ item.department }}
             </p>
             <p class="text-sm">{{ item.email }} {{ item.phone_number }}</p>
+            <p class="mt-1 flex flex-wrap gap-2 text-xs">
+              <span
+                v-if="item.company_role"
+                class="rounded bg-n-blue-3 px-2 py-1 text-n-blue-12"
+              >
+                {{ roleLabels[item.company_role] }}
+              </span>
+              <span
+                v-if="item.company_primary"
+                class="rounded bg-n-teal-3 px-2 py-1 font-semibold text-n-teal-12"
+              >
+                {{ t('CRM.COMPANY_CONTACT_CONTEXT.PRIMARY') }}
+              </span>
+              <span
+                v-if="item.company_contact_status === 'inactive'"
+                class="rounded bg-n-amber-3 px-2 py-1 text-n-amber-12"
+              >
+                {{ t('CRM.COMPANY_CONTACT_CONTEXT.INACTIVE') }}
+              </span>
+            </p>
           </div>
           <div class="flex gap-2">
+            <button
+              v-if="!item.company_primary"
+              type="button"
+              :class="buttonClass"
+              :disabled="busy || item.company_contact_status === 'inactive'"
+              @click="makePrimary(item)"
+            >
+              {{ t('CRM.COMPANY_CONTACT_CONTEXT.MAKE_PRIMARY') }}
+            </button>
             <button
               type="button"
               :class="buttonClass"

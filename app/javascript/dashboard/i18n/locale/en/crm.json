@@ -1343,6 +1343,39 @@
       "ACTIVITIES": "Atividades",
       "HISTORY": "Histórico",
       "NEW_CONVERSATION": "Nova conversa"
+    },
+    "COMPANY_CONTACT_CONTEXT": {
+      "ROLE": "Papel na empresa",
+      "NO_ROLE": "Não informado",
+      "PRIMARY": "Contato principal",
+      "MAKE_PRIMARY": "Definir como principal",
+      "CONFIRM_PRIMARY": "Definir esta pessoa como principal? O contato principal atual desta empresa será substituído, preservando as pessoas e o histórico.",
+      "STATUS": "Status do vínculo",
+      "ACTIVE": "Ativo",
+      "INACTIVE": "Inativo",
+      "TRANSFER_HELP": "Salve a mudança de empresa antes de preencher o novo vínculo. Cargo, departamento, papel e indicação de principal da empresa anterior serão preservados no histórico e removidos do vínculo atual.",
+      "HISTORY": "Histórico de vínculos",
+      "TIMELINE": "Linha do tempo",
+      "FROM": "Antes",
+      "TO": "Depois",
+      "RESTRICTED": "Empresa fora do seu acesso atual",
+      "NO_COMPANY": "Sem empresa vinculada",
+      "NO_CONTEXT": "Sem vínculo registrado",
+      "PAGE": "{page} de {total}",
+      "CHANGED": "Vínculo atualizado",
+      "PRIMARY_CHANGED": "Contato principal alterado",
+      "ROLES": {
+        "decider": "Decisor",
+        "influencer": "Influenciador",
+        "purchasing": "Compras",
+        "finance": "Financeiro",
+        "technical": "Técnico",
+        "executive": "Executivo",
+        "requester": "Solicitante",
+        "administrative": "Administrativo",
+        "service_user": "Usuário do serviço",
+        "other": "Outro"
+      }
     }
   }
 }

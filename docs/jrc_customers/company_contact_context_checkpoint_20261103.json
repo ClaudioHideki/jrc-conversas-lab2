@@ -1,0 +1,172 @@
+{
+  "date": "2026-11-03",
+  "branch": "codex/relacionamento-v2-20261101",
+  "parent_commit": "d7f4a436b04dd9b67aede95b2327109a1058bb19",
+  "state": "Checkpoint C3 parcial antes de corrigir a preservação do primeiro vínculo. C→G integrais continuam parciais. Não é release.",
+  "implemented": [
+    "Papel, principal e status pertencem ao vínculo temporário company_id no Contact canônico. Sem tabela paralela de pessoas ou novos privilégios.",
+    "Troca do principal usa ContactDirectory, conta/contato bloqueados, cobertura corporativa, confirmação, transação e auditoria dos dois contatos. Índice único e check no PostgreSQL impedem dois principais e principal inativo/sem empresa.",
+    "Transferência/desvínculo preservam a pessoa e os snapshots auditados; fusão nativa preserva o contexto e transfere o principal ao sobrevivente sem duplicar identidade.",
+    "Histórico paginado projeta somente campos do vínculo e oculta o contexto de empresas fora do acesso atual; nomes/IDs fornecidos pelo cliente não concedem acesso.",
+    "Interface permite papel/status/principal no editor existente, ação de principal na lista da empresa e seção de vínculos dentro da aba Histórico do contato."
+  ],
+  "validation": {
+    "source": {
+      "files": 11287,
+      "baseline": "701dad483ee61283b94375050f2952f5ffe2d7df",
+      "mismatches": [],
+      "snapshot": "/consolidation-company-contact-context-validated",
+      "sql_raw_hashes": true
+    },
+    "backend": {
+      "duration": 57.806564159,
+      "example_count": 88,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    },
+    "frontend": {
+      "files": 14,
+      "tests": 82,
+      "failures": 0
+    },
+    "migration": {
+      "status": "passed",
+      "database": "jrc_rel_v2_candidate_test",
+      "migration": "20261103090000",
+      "up_down_up": true,
+      "prior_contacts_unchanged": 42,
+      "prior_audits_unchanged": 0,
+      "unique_primary_index": true,
+      "production_changed": false
+    },
+    "vite_assets": "2m46s; nenhuma imagem Docker",
+    "browser": {
+      "principal_result": "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/vinculo-principal-progresso.json",
+      "status": "Execução principal parcial: seis verificações reais passaram, depois falhou no seletor Próximo/Próxima. Contatos criados38/39; não repetir criação.",
+      "passed_checks": [
+        "cancelamento sem troca",
+        "substituição confirmada e persistida",
+        "transferência com limpeza do contexto",
+        "desvínculo sem apagar pessoa",
+        "histórico real",
+        "inativação impedindo principal"
+      ],
+      "mobile_resume": "vinculo-mobile-diagnostico.json: paginação2/2, botões dentro de390px e principal inativo desabilitado, sem alterações de negócio.",
+      "invalid_capture": "Imagem130 contém Carregando, não prova a aparência do editor; retomar leitura/captura estável sem repetir gravações.",
+      "valid_captures": [
+        "132-historico-vinculo-desktop-escuro.png",
+        "133-vinculo-inativo-mobile-escuro.png",
+        "134-pessoas-mobile-diagnostico.png"
+      ]
+    },
+    "integrity": {
+      "status": "passed",
+      "partial_checkpoint": true,
+      "synthetic_only": true,
+      "original_rows_unchanged": 158,
+      "model_sets": [
+        "Account",
+        "AccountUser",
+        "Contact",
+        "JrcCustomers::Company",
+        "JrcCrm::Contract",
+        "JrcCrm::SalesOrder",
+        "JrcBackoffice::ContractVersion",
+        "JrcBackoffice::SignatureDelivery",
+        "JrcBackoffice::SignatureDeliveryEvent"
+      ],
+      "native_contact_ids": [
+        38,
+        39
+      ],
+      "native_audit_events": {
+        "customer_contact_context_changed": 1,
+        "customer_contact_linked": 2,
+        "customer_contact_primary_changed": 4,
+        "customer_contact_updated": 2
+      },
+      "ordinary_agent_and_unit_scope_preserved": true,
+      "signature_deliveries": 0,
+      "verifier": null,
+      "production_changed": false,
+      "native_company_counter": {
+        "company_id": 40,
+        "before": 28,
+        "after": 29,
+        "net_new_members": 1,
+        "all_other_company_attributes_match_original_hash": true,
+        "code": "enterprise/app/models/enterprise/concerns/contact.rb:4"
+      },
+      "native_login_activity_exception": {
+        "row": "AccountUser#10",
+        "endpoint": "PUT /api/v1/profile/set_active_account",
+        "code": "app/controllers/api/v1/profiles_controller.rb:32",
+        "full_row_hash_unchanged": false,
+        "native_role_audits_since_baseline": 0,
+        "exact_permission_set_preserved": true,
+        "explanation": "Native login updates active_at and updated_at. Do not claim the complete membership row is unchanged."
+      }
+    },
+    "style": "Frontend10 arquivos:0 erros,32 avisos;30 herdados e2 novos no-alert por confirmação nativa seguindo o padrão existente. Ruby selecionado8 arquivos:35 ocorrências em arquivos existentes, novos arquivos limpos. Lint geral não está verde; nenhuma regra foi desativada."
+  },
+  "failed_attempts_preserved": [
+    "Backend inicial86/8: faltava registrar novos eventos no AuditEvent; corrigido no produto. Fixtures corrigidas para BusinessUnit.company_id e negativa HTTP401 conforme handler nativo;88/0 final.",
+    "Preparação da fixture chamou CompanyWriter com nil após migration local; correção usou objeto canônico e não reaplicou migration.73 registros do checkpoint anterior e gravações C2 preservados.",
+    "Verificação inicial tratava atividade do login e counter_cache da empresa como imutáveis. Relatório final distingue158 hashes completos, contador nativo+1 comprovado por reconstrução do hash e atividade de AccountUser10 sem auditoria de alteração de papéis/permissões.",
+    "Tentativa intermediária do verificador tinha erro de vírgula Ruby; sintaxe corrigida e runner de leitura validado. Logs anteriores mantidos."
+  ],
+  "blocking": [
+    "Primeiro vínculo de pessoa já existente e sem empresa atualmente limpa cargo/departamento no callback e no formulário. Corrigir e adicionar regressão antes de concluir C3.",
+    "Histórico mostra Ativo após Sem empresa vinculada; ocultar o status do vínculo ausente e validar o caso.",
+    "Completar retomada Chrome clara/escura em celular e capturas estáveis; não recriar38/39 nem reaplicar migration."
+  ],
+  "pending": [
+    "Cadastro Mestre integral: segmentos dinâmicos, grupos econômicos próprios, importação mapeada, contatos operacionais e integrações360º ainda parciais. Etapas D/E/F/G permanecem parciais.",
+    "Carregamento de schema novo completo ainda precisa de validação isolada; migration de upgrade/ida-volta já passou. Nunca substituir schema inteiro apagando os fences SQL.",
+    "Homologação DocuSign e assinatura genuína não realizadas; verifier nil e bloqueios existentes preservados."
+  ],
+  "migrations_added": [
+    "20261103090000"
+  ],
+  "dependencies_added": [],
+  "publication": {
+    "push": false,
+    "docker_image_build": false,
+    "publish": false,
+    "deploy": false,
+    "production_changed": false
+  },
+  "files": [
+    "app/controllers/api/v1/accounts/customers/contacts_controller.rb",
+    "app/javascript/dashboard/api/jrcCustomers.js",
+    "app/javascript/dashboard/i18n/locale/en/crm.json",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/CompanyContactHistoryPanel.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/CompanyContactHistoryPanel.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/CompanyContacts.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/CompanyContacts.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/Contact360Panel.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/Contact360Panel.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/MasterContactDetails.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/MasterContactDetails.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/companyContactRoles.js",
+    "app/models/concerns/jrc_customers/contact_master.rb",
+    "app/models/jrc_crm/audit_event.rb",
+    "app/services/jrc_customers/company_contact_history.rb",
+    "app/services/jrc_customers/company_contact_writer.rb",
+    "app/services/jrc_customers/merge_preserver.rb",
+    "app/services/jrc_customers/serializer.rb",
+    "config/routes.rb",
+    "db/migrate/20261103090000_add_company_contact_context_to_contacts.rb",
+    "db/schema.rb",
+    "spec/requests/api/v1/accounts/customers/company_contact_context_spec.rb",
+    "spec/services/jrc_customers/company_contact_writer_concurrency_spec.rb",
+    "spec/services/jrc_customers/company_contact_writer_spec.rb",
+    "spec/services/jrc_customers/merge_spec.rb"
+  ],
+  "artifact_sha256": {
+    ".codex/company-contact-context-validated-backend.json": "8477fff53898c59ac95831d3c900a8187e3b839913e4d62bc82cd414b5bcad4a",
+    ".codex/company-contact-context-frontend-final.json": "9249c59c7eb89ba9c97f8d6df2da616bcc3aed250663e9e51b5d046ddbd21456",
+    ".codex/company-contact-context-ui-integrity-native-activity.json": "7412676eda072ad9d41d73b5c7aa088e9816fe5abf426d08b66457ab02313f7b"
+  }
+}

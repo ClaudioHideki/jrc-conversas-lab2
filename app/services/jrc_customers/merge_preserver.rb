@@ -39,15 +39,11 @@ class JrcCustomers::MergePreserver
     preserve_identity_points
     preserve_avatars
     preserve_labels
+    preserve_company_context
     # Keep the old source ID in each existing audit's metadata before re-parenting its timeline.
     JrcCrm::AuditEvent.where(account_id: @account.id, resource_type: 'Contact', resource_id: @source.id).find_each do |event|
       event.update_columns(resource_id: @base.id, metadata: (event.metadata || {}).merge('original_contact_id' => @source.id))
     end
-    @base.assign_attributes(company_id: @base.company_id || @source.company_id,
-                            job_title: @base.job_title.presence || @source.job_title,
-                            department: @base.department.presence || @source.department,
-                            registration_status: [@base.registration_status, @source.registration_status].include?('registered') ? 'registered' : 'provisional')
-    @base.save! if @base.changed?
   end
 
   # Native merge methods use update (not update!). Refuse source deletion if a
@@ -61,6 +57,38 @@ class JrcCustomers::MergePreserver
   end
 
   private
+
+  def preserve_company_context
+    serializer = JrcCustomers::Serializer.new(account: @account)
+    before = serializer.contact(@base)
+    values = merged_company_context
+    clear_source_primary(serializer) if @source.company_primary?
+    # Save the link first: normal transfers clear the previous company's context.
+    # This merge then adopts the already-confirmed same-company source context.
+    @base.update!(company_id: @source.company_id) if @base.company_id.blank? && @source.company_id.present?
+    @base.assign_attributes(values)
+    @base.save! if @base.changed?
+    return unless before['company_primary'] != @base.company_primary?
+
+    JrcCustomers::Audit.record!(account: @account, actor: @actor, resource: @base, event_type: 'customer_contact_primary_changed',
+                                from_value: before, to_value: serializer.contact(@base))
+  end
+
+  def merged_company_context
+    primary = @base.company_primary? || @source.company_primary?
+    status = @base.company_id ? @base.company_contact_status : @source.company_contact_status
+    { job_title: @base.job_title.presence || @source.job_title, department: @base.department.presence || @source.department,
+      company_role: @base.company_role.presence || @source.company_role, company_primary: primary,
+      company_contact_status: primary ? 'active' : status,
+      registration_status: [@base.registration_status, @source.registration_status].include?('registered') ? 'registered' : 'provisional' }
+  end
+
+  def clear_source_primary(serializer)
+    before = serializer.contact(@source)
+    @source.update!(company_primary: false)
+    JrcCustomers::Audit.record!(account: @account, actor: @actor, resource: @source, event_type: 'customer_contact_primary_changed',
+                                from_value: before, to_value: serializer.contact(@source))
+  end
 
   def move_signing_identity
     source = JrcCustomers::SigningIdentity.find_by(account_id: @account.id, contact_id: @source.id)

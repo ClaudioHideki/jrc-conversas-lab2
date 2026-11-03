@@ -1,5 +1,5 @@
 class Api::V1::Accounts::Customers::ContactsController < Api::V1::Accounts::Customers::BaseController
-  before_action :set_contact, only: %i[show update duplicates overview timeline records merge]
+  before_action :set_contact, only: %i[show update duplicates overview timeline records company_history merge]
 
   def index
     scope = contact_directory.scope
@@ -20,6 +20,13 @@ class Api::V1::Accounts::Customers::ContactsController < Api::V1::Accounts::Cust
 
   def records
     render_module_records(context(contact: @contact))
+  end
+
+  def company_history
+    history = JrcCustomers::CompanyContactHistory.new(account: Current.account, actor: Current.user, contact: @contact)
+    rows, meta = page_scope(history.scope.order(created_at: :desc, id: :desc))
+    response.headers['Cache-Control'] = 'no-store'
+    render json: { payload: history.serialize(rows.to_a), meta: meta }
   end
 
   def create
@@ -49,18 +56,10 @@ class Api::V1::Accounts::Customers::ContactsController < Api::V1::Accounts::Cust
   end
 
   def update
-    contact_directory.with_locked_contact(@contact.id) do |contact|
-      @contact = contact
-      previous = serializer.contact(@contact)
-      values = contact_params
-      if values.key?(:company_id) && values[:company_id].to_s != @contact.company_id.to_s && @contact.company_id.present? && params[:confirm_reassignment] != true
-        raise JrcCustomers::MergePreserver::Conflict, 'Confirm reassignment; the current company and its historical context will change'
-      end
-      @contact.update!(values)
-      JrcCustomers::Audit.record!(account: Current.account, actor: Current.user, resource: @contact,
-                                  event_type: values.key?(:company_id) ? 'customer_contact_linked' : 'customer_contact_updated',
-                                  from_value: previous, to_value: serializer.contact(@contact))
-    end
+    writer = JrcCustomers::CompanyContactWriter.new(account: Current.account, actor: Current.user)
+    @contact = writer.update!(id: @contact.id, attributes: contact_params,
+                              confirm_reassignment: params[:confirm_reassignment] == true,
+                              confirm_primary_change: params[:confirm_primary_change] == true)
     render json: { payload: serializer.contact(@contact) }
   end
 
@@ -109,6 +108,7 @@ class Api::V1::Accounts::Customers::ContactsController < Api::V1::Accounts::Cust
   def contact_params
     fields = [:name, :email, :phone_number, :company_id, :job_title, :department, :registration_status]
     fields << :personal_tax_identifier if action_name == 'create'
+    fields += %i[company_role company_primary company_contact_status] if action_name == 'update'
     values = params.require(:contact).permit(*fields)
     company = Current.account.master_companies.find_by(id: values[:company_id])
     corporate_companies.find(company.id) if company

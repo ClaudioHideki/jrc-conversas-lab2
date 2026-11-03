@@ -510,5 +510,15 @@
     "blocking": [],
     "no_global_completion": true,
     "popup_increment_validated": true
+  },
+  "company_contact_context_checkpoint_20261103": {
+    "status": "parcial",
+    "report": "docs/jrc_customers/company_contact_context_checkpoint_20261103.json",
+    "blocking": [
+      "Primeiro vínculo de pessoa já existente e sem empresa atualmente limpa cargo/departamento no callback e no formulário. Corrigir e adicionar regressão antes de concluir C3.",
+      "Histórico mostra Ativo após Sem empresa vinculada; ocultar o status do vínculo ausente e validar o caso.",
+      "Completar retomada Chrome clara/escura em celular e capturas estáveis; não recriar38/39 nem reaplicar migration."
+    ],
+    "no_global_completion": true
   }
 }

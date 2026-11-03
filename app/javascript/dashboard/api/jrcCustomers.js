@@ -87,6 +87,16 @@ class CustomerAPI extends ApiClient {
     });
   }
 
+  contactCompanyHistory(id, params = {}, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const url =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
+    return axios.get(`${url}/contacts/${id}/company_history`, {
+      ...requestOptions,
+      params,
+    });
+  }
+
   timeline(id, params = {}, type = 'companies', options = {}) {
     const { accountId, ...requestOptions } = options;
     const url =

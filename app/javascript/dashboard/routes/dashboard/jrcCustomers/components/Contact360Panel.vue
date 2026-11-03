@@ -9,6 +9,7 @@ import {
 import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcCustomers';
 import ComposeConversation from 'dashboard/components-next/NewConversation/ComposeConversation.vue';
+import CompanyContactHistoryPanel from './CompanyContactHistoryPanel.vue';
 import VoiceCallButton from 'dashboard/components-next/Contacts/VoiceCallButton.vue';
 import Button from 'dashboard/components-next/button/Button.vue';
 import { usePolicy } from 'dashboard/composables/usePolicy';
@@ -33,6 +34,7 @@ const overview = ref(null);
 const busy = ref(false);
 const error = ref('');
 const tab = ref('overview');
+const historySection = ref('timeline');
 const commercialKind = ref('leads');
 const companyDialog = ref(false);
 const composer = ref(null);
@@ -280,12 +282,45 @@ onBeforeUnmount(() => {
           :kind="commercialKind"
         />
       </section>
-      <TimelinePanel
+      <section
         v-else-if="tab === 'history'"
-        :key="`${identity}:${contact.id}`"
-        :resource-id="contact.id"
-        resource-type="contacts"
-      />
+        class="space-y-4"
+      >
+        <nav
+          class="flex flex-wrap gap-2"
+          :aria-label="t('CRM.CONTACT_MASTER_360.HISTORY')"
+        >
+          <button
+            v-for="section in ['timeline', 'links']"
+            :key="section"
+            type="button"
+            class="rounded-lg border px-3 py-2 text-sm"
+            :class="
+              historySection === section
+                ? 'border-n-teal-8 bg-n-teal-3 text-n-teal-12'
+                : 'border-n-weak'
+            "
+            @click="historySection = section"
+          >
+            {{
+              section === 'timeline'
+                ? t('CRM.COMPANY_CONTACT_CONTEXT.TIMELINE')
+                : t('CRM.COMPANY_CONTACT_CONTEXT.HISTORY')
+            }}
+          </button>
+        </nav>
+        <TimelinePanel
+          v-if="historySection === 'timeline'"
+          :key="`${identity}:${contact.id}`"
+          :resource-id="contact.id"
+          resource-type="contacts"
+        />
+        <CompanyContactHistoryPanel
+          v-else
+          :key="`${identity}:${contact.id}`"
+          :contact-id="contact.id"
+        />
+      </section>
       <CompanyDetailsDialog
         v-if="companyDialog"
         :key="identity"

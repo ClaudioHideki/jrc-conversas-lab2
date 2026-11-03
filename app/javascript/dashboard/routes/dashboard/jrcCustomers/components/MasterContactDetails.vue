@@ -1,9 +1,13 @@
 <script setup>
-import { reactive, ref, watch, onBeforeUnmount } from 'vue';
+import { reactive, ref, computed, watch, onBeforeUnmount } from 'vue';
 import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcCustomers';
 import CompanyPicker from './CompanyPicker.vue';
 import SigningIdentityDialog from './SigningIdentityDialog.vue';
+import {
+  COMPANY_CONTACT_ROLES,
+  companyContactRoleLabels,
+} from './companyContactRoles';
 import { useCustomerMaster } from '../useCustomerMaster';
 import {
   T,
@@ -28,6 +32,7 @@ const {
   accountScopedRoute,
 } = useCustomerMaster();
 const { t } = useI18n();
+const roleLabels = computed(() => companyContactRoleLabels(t));
 const showSigningIdentity = ref(false);
 const contact = ref(null);
 const points = ref([]);
@@ -42,7 +47,33 @@ const form = reactive({
   job_title: '',
   department: '',
   registration_status: 'provisional',
+  company_role: '',
+  company_primary: false,
+  company_contact_status: 'active',
 });
+const companyChanged = computed(
+  () =>
+    contact.value &&
+    String(form.company_id || '') !== String(contact.value.company_id || '')
+);
+watch(
+  () => form.company_id,
+  () => {
+    if (!contact.value) return;
+    const context = companyChanged.value ? {} : contact.value;
+    form.job_title = context.job_title || '';
+    form.department = context.department || '';
+    form.company_role = context.company_role || '';
+    form.company_primary = context.company_primary || false;
+    form.company_contact_status = context.company_contact_status || 'active';
+  }
+);
+watch(
+  () => form.company_contact_status,
+  status => {
+    if (status === 'inactive') form.company_primary = false;
+  }
+);
 const point = reactive({ kind: 'phone', value: '', label: '' });
 let generation = 0;
 let controller;
@@ -99,6 +130,12 @@ const save = async () => {
     contact.value.company_id &&
     String(contact.value.company_id) !== String(form.company_id);
   if (changingCompany && !window.confirm(T.confirmReassignment)) return;
+  const primaryChange = form.company_primary && !contact.value.company_primary;
+  if (
+    primaryChange &&
+    !window.confirm(t('CRM.COMPANY_CONTACT_CONTEXT.CONFIRM_PRIMARY'))
+  )
+    return;
   busy.value = true;
   error.value = '';
   notice.value = '';
@@ -108,6 +145,7 @@ const save = async () => {
       props.contactId,
       {
         confirm_reassignment: Boolean(changingCompany),
+        confirm_primary_change: Boolean(primaryChange),
       },
       options
     );
@@ -295,9 +333,63 @@ onBeforeUnmount(() => {
               >{{ FIELD_LABELS[field]
               }}<input
                 v-model.trim="form[field]"
+                :disabled="companyChanged"
                 maxlength="255"
                 :class="inputClass"
             /></label>
+            <p
+              v-if="companyChanged"
+              class="text-sm text-n-amber-11"
+              role="status"
+            >
+              {{ t('CRM.COMPANY_CONTACT_CONTEXT.TRANSFER_HELP') }}
+            </p>
+            <label class="block text-sm">
+              {{ t('CRM.COMPANY_CONTACT_CONTEXT.ROLE') }}
+              <select
+                v-model="form.company_role"
+                :disabled="!form.company_id || companyChanged"
+                :class="inputClass"
+              >
+                <option value="">
+                  {{ t('CRM.COMPANY_CONTACT_CONTEXT.NO_ROLE') }}
+                </option>
+                <option
+                  v-for="role in COMPANY_CONTACT_ROLES"
+                  :key="role"
+                  :value="role"
+                >
+                  {{ roleLabels[role] }}
+                </option>
+              </select>
+            </label>
+            <label class="block text-sm">
+              {{ t('CRM.COMPANY_CONTACT_CONTEXT.STATUS') }}
+              <select
+                v-model="form.company_contact_status"
+                :disabled="!form.company_id || companyChanged"
+                :class="inputClass"
+              >
+                <option value="active">
+                  {{ t('CRM.COMPANY_CONTACT_CONTEXT.ACTIVE') }}
+                </option>
+                <option value="inactive">
+                  {{ t('CRM.COMPANY_CONTACT_CONTEXT.INACTIVE') }}
+                </option>
+              </select>
+            </label>
+            <label class="flex items-center gap-2 text-sm">
+              <input
+                v-model="form.company_primary"
+                type="checkbox"
+                :disabled="
+                  !form.company_id ||
+                  companyChanged ||
+                  form.company_contact_status !== 'active'
+                "
+              />
+              {{ t('CRM.COMPANY_CONTACT_CONTEXT.PRIMARY') }}
+            </label>
             <label class="block text-sm"
               >{{ T.kind
               }}<select

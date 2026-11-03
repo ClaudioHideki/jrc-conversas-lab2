@@ -2,7 +2,8 @@ class JrcCustomers::Serializer
   COMPANY_FIELDS = %w[id customer_code name person_kind trade_name tax_id state_registration municipal_registration segment size website domain
                       email phone_number source economic_group parent_company_id owner_id relationship_type relationship_tags tags active description
                       created_by_id updated_by_id last_activity_at created_at updated_at].freeze
-  CONTACT_FIELDS = %w[id name email phone_number identifier company_id job_title department registration_status contact_type blocked created_at updated_at].freeze
+  CONTACT_FIELDS = %w[id name email phone_number identifier company_id job_title department company_role company_primary company_contact_status
+                      registration_status contact_type blocked created_at updated_at].freeze
 
   def initialize(account:)
     @account = account

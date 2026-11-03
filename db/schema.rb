@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_11_02_100000) do
+ActiveRecord::Schema[7.1].define(version: 2026_11_03_090000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -811,9 +811,13 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_100000) do
     t.string "job_title"
     t.string "department"
     t.string "registration_status", default: "provisional", null: false
+    t.string "company_role", limit: 40
+    t.boolean "company_primary", default: false, null: false
+    t.string "company_contact_status", limit: 20, default: "active", null: false
     t.index "account_id, lower(TRIM(BOTH FROM email))", name: "jrc_master_contact_normalized_email"
     t.index "account_id, regexp_replace((phone_number)::text, '[^0-9]'::text, ''::text, 'g'::text)", name: "jrc_master_contact_normalized_phone"
     t.index "lower((email)::text), account_id", name: "index_contacts_on_lower_email_account_id"
+    t.index ["account_id", "company_id"], name: "contacts_one_primary_per_company", unique: true, where: "company_primary"
     t.index ["account_id", "contact_type"], name: "index_contacts_on_account_id_and_contact_type"
     t.index ["account_id", "email", "phone_number", "identifier"], name: "index_contacts_on_nonempty_fields", where: "(((email)::text <> ''::text) OR ((phone_number)::text <> ''::text) OR ((identifier)::text <> ''::text))"
     t.index ["account_id", "id"], name: "jrc_sd_ref_contacts", unique: true
@@ -827,6 +831,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_100000) do
     t.index ["identifier", "account_id"], name: "uniq_identifier_per_account_contact", unique: true
     t.index ["name", "email", "phone_number", "identifier"], name: "index_contacts_on_name_email_phone_number_identifier", opclass: :gin_trgm_ops, using: :gin
     t.index ["phone_number", "account_id"], name: "index_contacts_on_phone_number_and_account_id"
+    t.check_constraint "NOT company_primary OR company_id IS NOT NULL AND company_contact_status::text = 'active'::text", name: "contacts_company_primary_requires_active_link"
     t.check_constraint "registration_status::text = ANY (ARRAY['provisional'::character varying::text, 'registered'::character varying::text])", name: "jrc_master_registration_status", validate: false
   end
 
