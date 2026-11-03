@@ -8,6 +8,7 @@ class Api::V1::Accounts::JrcCampaigns::CampaignsController < Api::V1::Accounts::
   before_action :set_campaign, only: [:show, :update, :destroy, :launch, :pause, :resume, :cancel, :duplicate, :report, :export, :preview, :request_review, :approve]
 
   def request_review
+    JrcCustomers::CampaignSegment.new(@campaign).authorize_viewer!(Current.user)
     @campaign.request_review!
     render json: serialize(@campaign).merge(review_snapshot: @campaign.review_snapshot)
   rescue ActiveRecord::RecordInvalid => e
@@ -15,6 +16,7 @@ class Api::V1::Accounts::JrcCampaigns::CampaignsController < Api::V1::Accounts::
   end
 
   def approve
+    JrcCustomers::CampaignSegment.new(@campaign).authorize_viewer!(Current.user)
     @campaign.approve!(Current.user, params[:digest])
     render json: serialize(@campaign)
   rescue ActiveRecord::RecordInvalid => e
@@ -37,6 +39,7 @@ class Api::V1::Accounts::JrcCampaigns::CampaignsController < Api::V1::Accounts::
 
   def audience_preview
     campaign = scope.new(audience_preview_params)
+    campaign.created_by = Current.user
     render json: audience_preview_json(campaign, recipient_preview_params)
   end
 
@@ -74,6 +77,9 @@ class Api::V1::Accounts::JrcCampaigns::CampaignsController < Api::V1::Accounts::
   def update
     return render_not_editable unless @campaign.editable?
 
+    proposed = @campaign.dup
+    proposed.assign_attributes(campaign_params.slice(:audience_type, :audience_config).to_h)
+    JrcCustomers::CampaignSegment.new(proposed).authorize_viewer!(Current.user)
     if @campaign.update(campaign_params)
       reschedule_pending_launch if @campaign.scheduled? && @campaign.saved_change_to_scheduled_at?
       render json: serialize(@campaign.reload)
@@ -209,6 +215,7 @@ class Api::V1::Accounts::JrcCampaigns::CampaignsController < Api::V1::Accounts::
   end
 
   def audience_preview_json(campaign, recipient_options = {})
+    JrcCustomers::CampaignSegment.new(campaign).authorize_viewer!(Current.user)
     preview = JrcCampaigns::AudienceResolver.new(campaign).preview
     response = preview.except(:entries, :selectable_entries).merge(
       sample: preview[:entries].first(20).map do |entry|

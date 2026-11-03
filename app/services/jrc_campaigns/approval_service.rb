@@ -45,6 +45,10 @@ class JrcCampaigns::ApprovalService
   # Read-only presentation of the human approval; remote sender readiness is checked at execution.
   def locally_valid?
     approved? && current_review?(configuration.local_configuration, local: true)
+  rescue Pundit::NotAuthorizedError, ActiveRecord::RecordNotFound, ActionController::BadRequest, JrcCustomers::CampaignFilter::InvalidFilter
+    raise unless JrcCustomers::CampaignSegment.new(campaign).selected?
+
+    false
   end
 
   def prepare_validation!
@@ -81,7 +85,10 @@ class JrcCampaigns::ApprovalService
 
     actual = snapshot['configuration'].deep_dup
     actual['broker_connectors']&.each { |connector| connector.delete('identity_revision') } if local
-    actual == expected
+    return false unless actual == expected
+
+    segment = JrcCustomers::CampaignSegment.new(campaign)
+    !segment.selected? || segment.reviewed_contacts_visible?(snapshot.fetch('recipients'))
   end
 
   def configuration

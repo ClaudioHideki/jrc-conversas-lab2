@@ -124,6 +124,8 @@ class JrcCampaigns::AudienceResolver
   end
 
   def resolved_entries
+    segment = JrcCustomers::CampaignSegment.new(campaign)
+    segment.apply(account.contacts) if segment.selected? && campaign.audience_type == 'sanitized_list'
     case campaign.audience_type
     when 'label' then contact_entries(label_contacts, 'label')
     when 'inbox' then contact_entries(inbox_contacts, 'inbox')
@@ -135,6 +137,7 @@ class JrcCampaigns::AudienceResolver
 
   def contact_entries(scope, source)
     scope = JrcCustomers::CampaignFilter.apply(scope: scope, account: account, filters: campaign.audience_config['customer_filters'] || {})
+    scope = JrcCustomers::CampaignSegment.new(campaign).apply(scope)
     scope.distinct.find_each.map do |contact|
       Entry.new(
         contact: contact,

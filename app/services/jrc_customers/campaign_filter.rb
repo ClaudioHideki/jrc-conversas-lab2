@@ -1,5 +1,5 @@
 class JrcCustomers::CampaignFilter
-  FIELDS = %w[company_id segment relationship_type department].freeze
+  FIELDS = %w[company_id segment relationship_type department customer_segment_id].freeze
   class InvalidFilter < StandardError; end
 
   def self.apply(scope:, account:, filters:)
@@ -17,7 +17,7 @@ class JrcCustomers::CampaignFilter
       companies = companies.where(relationship_type: values[:relationship_type])
     end
     filtered = scope.where(account_id: account.id)
-    filtered = filtered.where(company_id: companies.select(:id)) if values.except(:department).values.any?(&:present?)
+    filtered = filtered.where(company_id: companies.select(:id)) if values.slice(:company_id, :segment, :relationship_type).values.any?(&:present?)
     filtered = filtered.where(department: values[:department]) if values[:department].present?
     filtered
   end
