@@ -12,7 +12,7 @@ class JrcCustomers::ImportFile
   DELIMITERS = [',', ';', "\t"].freeze
   MAX_HEADERS = 100
 
-  attr_reader :headers, :delimiter, :sha256
+  attr_reader :headers, :delimiter, :sha256, :kind
 
   def initialize(content:, kind:, delimiter: nil)
     @kind = kind
