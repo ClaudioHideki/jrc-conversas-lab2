@@ -19033,14 +19033,37 @@
           },
           "requirement_text": "Modelo, versão, status da assinatura e documentos finais.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
-          "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "classification_pending": false,
+          "existing_code_reused": [
+            "JrcBackoffice::ContractAccess",
+            "JrcBackoffice::AuthorityAccess",
+            "JrcCustomers::DirectoryPolicy",
+            "JrcBackoffice::SignatureRelease"
+          ],
+          "implemented_change": "Versão, modelo e status persistido no contexto contratual; documentos finais não disponíveis nesta etapa.",
+          "files": [
+            "app/services/jrc_backoffice/signatures/delivery_projection.rb",
+            "app/services/jrc_backoffice/signatures/notifications.rb",
+            "app/services/jrc_backoffice/signatures/reconciliation.rb",
+            "app/jobs/jrc_backoffice/signature_notification_job.rb",
+            "app/controllers/api/v1/accounts/crm/backoffice_contract_versions_controller.rb",
+            "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeContractVersions.vue"
+          ],
+          "status": "parcial",
+          "tests_and_evidence": [
+            "docs/jrc_backoffice/signature_projection_checkpoint_20261102.json",
+            ".codex/signature-projection-authorized-backend.json",
+            ".codex/signature-projection-permissions-frontend-regression.json",
+            "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\assinatura-permissao-negada-resultado.json",
+            "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\assinatura-callback-versao-resultado.json",
+            "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\assinatura-celular-revalidado-resultado.json",
+            "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\assinatura-downloads-revalidados-resultado.json"
+          ],
+          "dependencies": [
+            "Ações operacionais/evidências finais ainda incompletas",
+            "DocuSign demo não configurada; somente HTTP/HMAC sintéticos"
+          ],
+          "next_action": "Obter e conferir documentos finais antes de aceitar uma assinatura válida."
         },
         {
           "id": "backoffice:P0162",
@@ -19754,40 +19777,35 @@
           "is_heading": false,
           "classification_pending": false,
           "existing_code_reused": [
-            "JrcCrm::ContractPdfService",
-            "JrcCrm::CommercialDocumentService",
-            "JrcBackoffice::ContractRelease",
+            "JrcBackoffice::ContractAccess",
+            "JrcBackoffice::AuthorityAccess",
+            "JrcCustomers::DirectoryPolicy",
             "JrcBackoffice::SignatureRelease"
           ],
-          "implemented_change": "Seleção contextual de modelo ativo/elegível, minuta própria, edição/CAS, versões imutáveis, PDF/diferenças e signatários individuais/conjuntos vinculados estão implementados e validados. Poderes e envio durável continuam pendentes.",
+          "implemented_change": "Geração/edição/nova versão preservadas e validadas pelo agente, com aviso de permissão nativa de contatos e bloqueio no servidor.",
           "files": [
-            "app/services/jrc_backoffice/contract_versions.rb",
-            "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeContractVersions.vue",
-            "app/services/jrc_backoffice/signer_rosters.rb",
-            "app/services/jrc_backoffice/signer_roster_source.rb",
-            "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeContractSigners.vue",
-            "app/services/jrc_backoffice/contract_templates.rb",
-            "app/controllers/api/v1/accounts/crm/backoffice_contracts_controller.rb",
-            "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/ContractTemplatePicker.vue"
+            "app/services/jrc_backoffice/signatures/delivery_projection.rb",
+            "app/services/jrc_backoffice/signatures/notifications.rb",
+            "app/services/jrc_backoffice/signatures/reconciliation.rb",
+            "app/jobs/jrc_backoffice/signature_notification_job.rb",
+            "app/controllers/api/v1/accounts/crm/backoffice_contract_versions_controller.rb",
+            "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeContractVersions.vue"
           ],
           "status": "parcial",
           "tests_and_evidence": [
-            "docs/jrc_backoffice/contract_versions_checkpoint_20261102.json",
-            "spec/services/jrc_backoffice/contract_versions_spec.rb",
-            "spec/requests/api/v1/accounts/crm/backoffice_contract_versions_spec.rb",
-            "docs/jrc_backoffice/canonical_signers_checkpoint_20261102.json",
-            "spec/services/jrc_backoffice/signer_rosters_spec.rb",
-            "spec/requests/api/v1/accounts/crm/backoffice_signers_spec.rb",
-            "spec/services/jrc_backoffice/signer_rosters_concurrency_spec.rb",
-            "docs/jrc_backoffice/contextual_contract_templates_checkpoint_20261102.json",
-            "spec/requests/api/v1/accounts/crm/backoffice_templates_spec.rb"
+            "docs/jrc_backoffice/signature_projection_checkpoint_20261102.json",
+            ".codex/signature-projection-authorized-backend.json",
+            ".codex/signature-projection-permissions-frontend-regression.json",
+            "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\assinatura-permissao-negada-resultado.json",
+            "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\assinatura-callback-versao-resultado.json",
+            "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\assinatura-celular-revalidado-resultado.json",
+            "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\assinatura-downloads-revalidados-resultado.json"
           ],
           "dependencies": [
-            "Poderes/representação pela Central",
-            "B3 — intenção durável, consumidor e evidência",
-            "Homologação DocuSign demo para efeitos externos"
+            "Ações operacionais/evidências finais ainda incompletas",
+            "DocuSign demo não configurada; somente HTTP/HMAC sintéticos"
           ],
-          "next_action": "Concluir poderes/representação e B3 antes de habilitar envio.",
+          "next_action": "Concluir a admissão e o envio pela tela sem ID manual nem confirmação otimista.",
           "fragment_kind": "requirement"
         },
         {
@@ -19835,28 +19853,35 @@
           "is_heading": false,
           "classification_pending": false,
           "existing_code_reused": [
-            "JrcCrm::ContractPdfService",
-            "JrcCrm::CommercialDocumentService",
-            "JrcBackoffice::ContractRelease",
+            "JrcBackoffice::ContractAccess",
+            "JrcBackoffice::AuthorityAccess",
+            "JrcCustomers::DirectoryPolicy",
             "JrcBackoffice::SignatureRelease"
           ],
-          "implemented_change": "Há conector técnico com estados traduzidos. Não há ledger/versionamento de envios nem consumidor que habilite acompanhamento operacional seguro.",
+          "implemented_change": "Histórico de envios e status persistidos por versão/conexão, com cancelamento/recusa projetados e replay sem duplicação. Não é consulta externa nem status individual completo dos signatários.",
           "files": [
-            "app/services/jrc_backoffice/contract_versions.rb",
+            "app/services/jrc_backoffice/signatures/delivery_projection.rb",
+            "app/services/jrc_backoffice/signatures/notifications.rb",
+            "app/services/jrc_backoffice/signatures/reconciliation.rb",
+            "app/jobs/jrc_backoffice/signature_notification_job.rb",
+            "app/controllers/api/v1/accounts/crm/backoffice_contract_versions_controller.rb",
             "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeContractVersions.vue"
           ],
-          "status": "pendente",
+          "status": "parcial",
           "tests_and_evidence": [
-            "docs/jrc_backoffice/contract_versions_checkpoint_20261102.json",
-            "spec/services/jrc_backoffice/contract_versions_spec.rb",
-            "spec/requests/api/v1/accounts/crm/backoffice_contract_versions_spec.rb"
+            "docs/jrc_backoffice/signature_projection_checkpoint_20261102.json",
+            ".codex/signature-projection-authorized-backend.json",
+            ".codex/signature-projection-permissions-frontend-regression.json",
+            "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\assinatura-permissao-negada-resultado.json",
+            "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\assinatura-callback-versao-resultado.json",
+            "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\assinatura-celular-revalidado-resultado.json",
+            "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\assinatura-downloads-revalidados-resultado.json"
           ],
           "dependencies": [
-            "B2 — signatários e poderes",
-            "B3 — intenção durável, consumidor e evidência",
-            "Homologação DocuSign demo para efeitos externos"
+            "Ações operacionais/evidências finais ainda incompletas",
+            "DocuSign demo não configurada; somente HTTP/HMAC sintéticos"
           ],
-          "next_action": "Implementar B2/B3 e homologar externamente DocuSign; não considerar completed suficiente.",
+          "next_action": "Concluir consulta ao fornecedor, destinatários e reenvio/lembrete autorizados, mantendo conexão e ambiente originais.",
           "fragment_kind": "requirement"
         },
         {
@@ -19872,28 +19897,35 @@
           "is_heading": false,
           "classification_pending": false,
           "existing_code_reused": [
-            "JrcCrm::ContractPdfService",
-            "JrcCrm::CommercialDocumentService",
-            "JrcBackoffice::ContractRelease",
+            "JrcBackoffice::ContractAccess",
+            "JrcBackoffice::AuthorityAccess",
+            "JrcCustomers::DirectoryPolicy",
             "JrcBackoffice::SignatureRelease"
           ],
-          "implemented_change": "SignatureRelease bloqueia os fluxos v2 enquanto faltar evidência interna. A prova positiva da cadeia versão/assinantes/PDF/certificado continua pendente.",
+          "implemented_change": "Bloqueio de implantação preservado e exibido no navegador após cancelamento/revisão; completion_reported não vira signed ou liberação.",
           "files": [
-            "app/services/jrc_backoffice/contract_versions.rb",
+            "app/services/jrc_backoffice/signatures/delivery_projection.rb",
+            "app/services/jrc_backoffice/signatures/notifications.rb",
+            "app/services/jrc_backoffice/signatures/reconciliation.rb",
+            "app/jobs/jrc_backoffice/signature_notification_job.rb",
+            "app/controllers/api/v1/accounts/crm/backoffice_contract_versions_controller.rb",
             "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeContractVersions.vue"
           ],
           "status": "parcial",
           "tests_and_evidence": [
-            "docs/jrc_backoffice/contract_versions_checkpoint_20261102.json",
-            "spec/services/jrc_backoffice/contract_versions_spec.rb",
-            "spec/requests/api/v1/accounts/crm/backoffice_contract_versions_spec.rb"
+            "docs/jrc_backoffice/signature_projection_checkpoint_20261102.json",
+            ".codex/signature-projection-authorized-backend.json",
+            ".codex/signature-projection-permissions-frontend-regression.json",
+            "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\assinatura-permissao-negada-resultado.json",
+            "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\assinatura-callback-versao-resultado.json",
+            "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\assinatura-celular-revalidado-resultado.json",
+            "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\assinatura-downloads-revalidados-resultado.json"
           ],
           "dependencies": [
-            "B2 — signatários e poderes",
-            "B3 — intenção durável, consumidor e evidência",
-            "Homologação DocuSign demo para efeitos externos"
+            "Ações operacionais/evidências finais ainda incompletas",
+            "DocuSign demo não configurada; somente HTTP/HMAC sintéticos"
           ],
-          "next_action": "Concluir o verificador interno e testar evidências completas, antigas, substituídas e todos os signatários obrigatórios.",
+          "next_action": "Implementar e validar o caminho positivo de evidência interna completa e a homologação externa.",
           "fragment_kind": "requirement"
         },
         {
@@ -22513,14 +22545,37 @@
           },
           "requirement_text": "Assinatura deve ser vinculada ao contrato e refletida no Backoffice.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
-          "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "classification_pending": false,
+          "existing_code_reused": [
+            "JrcBackoffice::ContractAccess",
+            "JrcBackoffice::AuthorityAccess",
+            "JrcCustomers::DirectoryPolicy",
+            "JrcBackoffice::SignatureRelease"
+          ],
+          "implemented_change": "Intenção/envio imutáveis vinculam versão e conexão; callback e reconciliação refletem fatos no contrato sem apagar a versão anterior.",
+          "files": [
+            "app/services/jrc_backoffice/signatures/delivery_projection.rb",
+            "app/services/jrc_backoffice/signatures/notifications.rb",
+            "app/services/jrc_backoffice/signatures/reconciliation.rb",
+            "app/jobs/jrc_backoffice/signature_notification_job.rb",
+            "app/controllers/api/v1/accounts/crm/backoffice_contract_versions_controller.rb",
+            "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeContractVersions.vue"
+          ],
+          "status": "parcial",
+          "tests_and_evidence": [
+            "docs/jrc_backoffice/signature_projection_checkpoint_20261102.json",
+            ".codex/signature-projection-authorized-backend.json",
+            ".codex/signature-projection-permissions-frontend-regression.json",
+            "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\assinatura-permissao-negada-resultado.json",
+            "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\assinatura-callback-versao-resultado.json",
+            "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\assinatura-celular-revalidado-resultado.json",
+            "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\assinatura-downloads-revalidados-resultado.json"
+          ],
+          "dependencies": [
+            "Ações operacionais/evidências finais ainda incompletas",
+            "DocuSign demo não configurada; somente HTTP/HMAC sintéticos"
+          ],
+          "next_action": "Concluir evidência válida, todos os assinantes e ações operacionais pela tela; não considerar completed como assinatura validada."
         },
         {
           "id": "backoffice:P0327",
@@ -41002,5 +41057,18 @@
         "evidence": []
       }
     ]
+  },
+  "signature_projection_increment": {
+    "report": "docs/jrc_backoffice/signature_projection_checkpoint_20261102.json",
+    "updated_fragment_ids": [
+      "backoffice:P0161",
+      "backoffice:P0203",
+      "backoffice:P0205",
+      "backoffice:P0206",
+      "backoffice:P0326"
+    ],
+    "global_completion": false,
+    "fragments_preserved": 1546,
+    "other_classification_pending": 1531
   }
 }

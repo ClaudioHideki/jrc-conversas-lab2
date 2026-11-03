@@ -2,13 +2,16 @@
 # contract signed, attach unverified files or release implementation.
 class JrcBackoffice::Signatures::Notifications
   KINDS = { 'completion_reported' => 'completion_reported', 'canceled' => 'envelope_canceled', 'declined' => 'envelope_declined' }.freeze
+  attr_reader :delivery
 
   def initialize(receipt_id:)
     @receipt = JrcBackoffice::SignatureNotification.find(receipt_id)
   end
 
   def call
-    return :finished if @receipt.state.in?(%w[processed ignored])
+    @delivery = nil
+    @receipt.reload
+    return :finished if @receipt.state == 'ignored'
 
     connection = @receipt.connection
     raise JrcBackoffice::Signatures::DeliveryError, 'NOTIFICATION_CONNECTION_REQUIRED' unless connection
@@ -16,10 +19,10 @@ class JrcBackoffice::Signatures::Notifications
     fact = JrcBackoffice::Signatures::Gateway.new(connection: connection).notification(receipt: @receipt)
     return finish!('ignored') unless fact[:state]
 
-    delivery = binding(fact.fetch(:external_id))
-    return :unbound unless delivery
+    @delivery = binding(fact.fetch(:external_id))
+    return :unbound unless @delivery
 
-    delivery.with_lock('FOR NO KEY UPDATE') { consume!(delivery, fact) }
+    @delivery.with_lock('FOR NO KEY UPDATE') { consume!(@delivery, fact) }
   end
 
   private

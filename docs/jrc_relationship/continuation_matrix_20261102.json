@@ -72,12 +72,12 @@
     {
       "requirement": "Contrato dentro da solicitação, versões e snapshots de assinantes do Cadastro Mestre",
       "status": "parcial",
-      "finding": "B1: versões imutáveis, fonte cifrada, PDF privado, checksum, histórico paginado, diferenças e edição contextual com CAS implementados. 492 regressões selecionadas backend, 2 concorrências reais PostgreSQL e 178 frontend passaram. Edição, gravação, recarga, diferenças, PDF/checksum e temas claro/escuro/móvel validados no Chrome com assets compilados. Assinantes/poderes/ledger/envio/evidência ainda pendentes; não é fluxo contratual completo."
+      "finding": "Versões/PDF/hash e edição contextual, assinantes canônicos, proposta de poderes pela Central, admissão/despacho duráveis, histórico e callbacks implementados em incrementos testados. Agente autorizado gera/reabre nova versão após cancelamento e preserva PDFs. Ações completas pela tela e evidências finais continuam pendentes."
     },
     {
       "requirement": "Envio, lembrete, cancelamento, eventos autenticados e documento final DocuSign",
       "status": "parcial",
-      "finding": "Único conector DocuSign isolado por gateway; conta/ambiente/credenciais preservados por conexão. HTTPs simulados passaram. Recepção autentica e preserva eventos, sem concluir assinatura. O envio por ID digitado foi bloqueado; envio versionado e consumidor ainda pendentes. Demo externa precisa ser preparada."
+      "finding": "Conector único isolado; intenção e despacho preservam conexão/versão. Consumidor e reconciliação registram fatos autenticados sem marcar signed. Status persistido e revisão após cancelamento validados no navegador. Consulta externa e ações de reenvio/lembrete/cancelamento pela tela, evidências finais e demo permanecem pendentes."
     },
     {
       "requirement": "Bloqueios de aprovação, assinatura e proteção financeira",
@@ -107,12 +107,12 @@
         "Segredos criptografados por conta e revisão, sem retorno na API",
         "OAuth JWT com verificação de identidade e conta",
         "HMAC dos bytes originais, limite de corpo e deduplicação durável",
-        "Notificação recebida permanece received, sem marcar contrato ou assinatura",
-        "Conexão técnica preservada por revisão; mudança do padrão não troca ambiente/conta dos eventos ou operações ligados à conexão anterior"
+        "Conexão técnica preservada por revisão; mudança do padrão não troca ambiente/conta dos eventos ou operações ligados à conexão anterior",
+        "Notificações autenticadas são consumidas por conexão/envio exatos; estado de negócio projetado com locks, sem inferir assinatura válida."
       ],
       "pending": [
-        "Consumidor contratual ligado à versão corrente",
-        "Envio real integrado ao contrato e snapshots de signatários",
+        "Ações operacionais completas pela tela",
+        "Obtenção e validação das evidências finais e liberação segura",
         "Homologação externa demo"
       ],
       "reference": "docs/jrc_backoffice/docusign_integration.md"
@@ -121,7 +121,7 @@
       "requirement": "Separar domínio contratual do fornecedor e preservar a conexão de cada envio",
       "status": "parcial",
       "implemented": "Fronteira de operações, erros/estados comuns e conexão imutável testadas com único adaptador DocuSign.",
-      "pending": "Ledger durável com versão exata, assinantes e identificação externa; envio permanece bloqueado até concluir esse vínculo.",
+      "pending": "Concluir ações operacionais, evidências finais, verificador interno e homologação externa. Ledger com versão/assinantes/conexão e consumidor já implementados; não equivalem a assinatura válida.",
       "reference": "docs/jrc_backoffice/signature_provider_boundary.md"
     },
     {
@@ -407,5 +407,20 @@
     "report": "docs/jrc_backoffice/signature_reconciliation_checkpoint_20261102.json",
     "implemented": "Recuperação durável somente de leitura de resultado incerto, reserva/intervalo/janela, jobs e regressões selecionadas.",
     "pending": "Demais ações, evidências/verificador/liberação e demais frentes."
+  },
+  "signature_projection_increment": {
+    "status": "parcial",
+    "report": "docs/jrc_backoffice/signature_projection_checkpoint_20261102.json",
+    "base_commit": "ca44ef6d34eae5ab4d38864e539c920288f6c88f",
+    "backend_selected": {
+      "examples": 52,
+      "failures": 0
+    },
+    "frontend_selected": {
+      "tests": 219,
+      "failures": 0
+    },
+    "browser": "Agente, permissão negada/permitida, callback sintético, revisão2, reabertura, dois downloads/hash, conta estrangeira e celular validados; nenhuma assinatura real.",
+    "next": "Concluir B3 — ações operacionais/evidências/verificador; depois C/D/E/F/G. Quatro frentes permanecem parciais."
   }
 }

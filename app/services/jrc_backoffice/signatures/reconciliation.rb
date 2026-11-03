@@ -15,6 +15,11 @@ class JrcBackoffice::Signatures::Reconciliation
   def call
     raise JrcBackoffice::Signatures::DeliveryError, 'RECONCILIATION_REQUIRES_COMMITTED_INTENT' if ApplicationRecord.connection.transaction_open?
 
+    if @delivery.external_id
+      @context.read!
+      return JrcBackoffice::Signatures::DeliveryProjection.call(@delivery)
+    end
+
     claim = claim!
     return @delivery unless claim
 

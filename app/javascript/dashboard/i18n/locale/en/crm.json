@@ -997,6 +997,7 @@
         "EMPTY": "Nenhuma versão contratual preservada. Gere a primeira após concluir as dependências.",
         "LOCKED": "A geração exige contrato vinculado e solicitação aberta. Contratos enviados ou assinados precisam do fluxo de revisão autorizado.",
         "SIGNATURE_NOTE": "Gerar uma versão preserva a minuta e o PDF. Isso não envia o contrato nem comprova assinatura ou liberação operacional.",
+        "DIRECTORY_REQUIRED": "Seu perfil precisa de acesso ao cadastro de contatos para validar os assinantes e gerar uma nova versão. Solicite a configuração desse acesso ao administrador.",
         "IMMUTABLE_NOTE": "O PDF, as condições e o histórico desta revisão serão preservados. Alterações posteriores exigem uma nova versão.",
         "CREATED": "Versão contratual criada e preservada. Nenhum envio para assinatura foi realizado.",
         "DENIED": "Você não tem mais acesso a estas versões. Os dados da tela foram limpos.",

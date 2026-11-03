@@ -31,13 +31,16 @@ export function useContractVersions(props) {
   );
   const accountId = computed(() => route.params.accountId);
   const busy = computed(() => loading.value || saving.value);
-  const canGenerate = computed(
+  const canEditDraft = computed(
     () =>
       result.value?.writable &&
       result.value?.contract &&
       !['sent', 'signed'].includes(result.value.contract.signature_status) &&
       !stale.value &&
       !busy.value
+  );
+  const canGenerate = computed(
+    () => canEditDraft.value && result.value?.signer_directory_access !== false
   );
   const canSave = computed(
     () => canGenerate.value && reason.value.trim().length > 0
@@ -181,6 +184,7 @@ export function useContractVersions(props) {
     busy,
     error,
     notice,
+    canEditDraft,
     canGenerate,
     canSave,
     page,

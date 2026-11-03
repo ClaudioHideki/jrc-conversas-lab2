@@ -69,6 +69,45 @@ const render = () =>
   });
 
 describe('Backoffice contract version workflow', () => {
+  it('explains directory access before generation without blocking otherwise permitted draft editing', async () => {
+    mocks.api.list.mockResolvedValue({
+      data: { ...structuredClone(payload), signer_directory_access: false },
+    });
+    const wrapper = render();
+    await flushPromises();
+    expect(wrapper.text()).toContain('acesso ao cadastro de contatos');
+    expect(
+      wrapper
+        .findAll('button')
+        .find(button => button.text() === 'Gerar nova versão')
+        .attributes('disabled')
+    ).toBeDefined();
+    expect(
+      wrapper
+        .findAll('button')
+        .find(button => button.text() === 'Editar minuta')
+        .attributes('disabled')
+    ).toBeUndefined();
+    expect(mocks.api.create).not.toHaveBeenCalled();
+    wrapper.unmount();
+  });
+
+  it('enables generation only after the server confirms the configured directory access', async () => {
+    mocks.api.list.mockResolvedValue({
+      data: { ...structuredClone(payload), signer_directory_access: true },
+    });
+    const wrapper = render();
+    await flushPromises();
+    expect(wrapper.text()).not.toContain('acesso ao cadastro de contatos');
+    expect(
+      wrapper
+        .findAll('button')
+        .find(button => button.text() === 'Gerar nova versão')
+        .attributes('disabled')
+    ).toBeUndefined();
+    wrapper.unmount();
+  });
+
   it('requires a reason and confirms creation only after the real API acknowledgement', async () => {
     const wrapper = render();
     await flushPromises();

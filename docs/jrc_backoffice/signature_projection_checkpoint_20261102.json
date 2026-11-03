@@ -1,0 +1,241 @@
+{
+  "date": "2026-11-02",
+  "branch": "codex/relacionamento-v2-20261101",
+  "base_commit": "ca44ef6d34eae5ab4d38864e539c920288f6c88f",
+  "phase": "B3 — projeção de fatos autenticados e revisão contratual pelo agente; quatro frentes ainda parciais",
+  "implemented": [
+    "O consumidor e o job projetam os fatos de cancelamento/recusa no contrato nativo. completion_reported continua sent; não produz signed, evidência válida ou liberação operacional.",
+    "Retry de recibo já processado revalida conta e conexão e repara a projeção sem duplicar o fato. Conflito preserva o recibo e o histórico, em vez de trocar uma referência desconhecida.",
+    "Nova versão e nova admissão podem suceder um cancelamento/recusa confirmados. A projeção histórica não reverte a referência do envio posterior, que conserva sua própria versão e conexão.",
+    "A projeção lê o estado após obter os locks do contrato e do envio. Um worker atrasado de enviado não restaura sent depois de um cancelamento já projetado.",
+    "A reconciliação com envelope já recuperado revalida o remetente, a conta, o proprietário e a cobertura selada antes de reparar a projeção, sem outro GET ou POST ao fornecedor.",
+    "Quando há assinantes vinculados, a API informa a permissão nativa do cadastro de contatos e a tela explica sua ausência antes de habilitar nova versão. A política DirectoryPolicy e a validação no POST permanecem obrigatórias.",
+    "Edição da minuta continua disponível quando permitida pelas regras existentes. O acesso a contatos não é convertido em permissão de administrador nem de outra unidade.",
+    "Roteiros existentes atualizados para remover afirmações antigas de ausência de versões/envio durável/consumidor; ações pela tela, evidências finais e demo continuam explicitamente pendentes."
+  ],
+  "validation": {
+    "backend": {
+      "duration": 3040.85902129,
+      "example_count": 52,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0,
+      "files": 9,
+      "artifact": {
+        "path": ".codex\\signature-projection-authorized-backend.json",
+        "sha256": "fea3ed91dedc27a03b6083d23e15312fec7c325a1f4a0b0c155be426e1f65ac5"
+      },
+      "database": "jrc_four_domains_schema_admission_test",
+      "scope": "52 casos selecionados de API de versões/permissões, projeção e concorrência, jobs, reconciliação, notificações, despacho e histórico; não é a suíte completa."
+    },
+    "frontend": {
+      "files": 36,
+      "tests": 219,
+      "passed": 219,
+      "failed": 0,
+      "artifact": {
+        "path": ".codex\\signature-projection-permissions-frontend-regression.json",
+        "sha256": "d84f194421f443d50c03619ababa9d376933bc2f842153852a7d4354e17a1daa"
+      },
+      "eslint_files": 11,
+      "eslint_errors": 0,
+      "eslint_warnings": 0,
+      "eslint": {
+        "path": ".codex\\signature-projection-permissions-frontend-lint-final.json",
+        "sha256": "6c88387683047b77e6807aa8d99838030c3a46d96ed2f369e6e7594ac98158ae"
+      }
+    },
+    "ruby": {
+      "offense_count": 0,
+      "target_file_count": 11,
+      "inspected_file_count": 11,
+      "artifact": {
+        "path": ".codex\\signature-projection-authorized-ruby.json",
+        "sha256": "d5d800f42202afa246086ae2a29a12d31e69a38302c98cf2887625fab4efb0ca"
+      }
+    },
+    "source": {
+      "files": 11248,
+      "mismatches": 0,
+      "raw_sql_hashes_checked": true,
+      "snapshot": "/consolidation-signature-projection-authorized",
+      "artifact": {
+        "path": ".codex\\signature-projection-authorized-source-verified.json",
+        "sha256": "76626123fd89fa6994a2bc910bb56e26450b0a7c87432e39d72f30af97ba5fb9"
+      }
+    },
+    "asset_build": {
+      "status": "passed",
+      "duration": "5m20s",
+      "artifact": {
+        "path": ".codex\\signature-projection-permissions-production-assets.log",
+        "sha256": "1bb2ac952236c181ab30c65c094843b50cc34ae7f45ebad9d9623bc11aff6f73"
+      },
+      "docker_image_build": false,
+      "warnings": "Chunks grandes, Browserslist antigo e referência de marca resolvida em runtime; source map ausente de dependência durante os testes. Não houve instalação de dependências."
+    },
+    "rails_loading": {
+      "status": "passed",
+      "artifact": {
+        "path": ".codex\\signature-projection-authorized-zeitwerk.log",
+        "sha256": "2b389f76b03eb1a85aeba0f75f01e13456f3c176d9030a4f1760ea24d59418ac"
+      }
+    },
+    "browser": {
+      "status": "passed",
+      "artifacts": [
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\assinatura-permissao-negada-resultado.json",
+          "sha256": "32b8afea7a0d73a9b91d76d4729da7b205064e13b6add0da8fa1a167e6c20ee3"
+        },
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\assinatura-callback-versao-resultado.json",
+          "sha256": "f7f82f1a327b0a72a1ec28f5f46d1bec4700c3ef89e012acc60cd323ab39815f"
+        },
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\assinatura-celular-revalidado-resultado.json",
+          "sha256": "432314d255ed660fa4fb01f2039989d61a93ce305230f9aa0d2ebd92ef06bc3c"
+        },
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\assinatura-downloads-revalidados-resultado.json",
+          "sha256": "23355f05a2ef1c4933824235220af67f8a24eb5f650a02fa062d741fc9e7ce4c"
+        }
+      ],
+      "source": "/consolidation-signature-projection-permissions",
+      "frontend_equivalence": {
+        "path": ".codex\\signature-projection-authorized-frontend-equivalence.json",
+        "sha256": "036c5467532b29bbdcbbd1b52a1a1a1c95184f570f3697916cb43fdc00f7c621"
+      },
+      "final_source_delta": {
+        "path": ".codex\\signature-projection-authorized-source-delta.json",
+        "sha256": "7c79394b6fa3158839ab104547994f89c100baeb7384517bf10da1f0d59cdc02"
+      },
+      "source_note": "Única mudança posterior de runtime é a revalidação em Reconciliation, coberta no gate final. Controllers, jobs e componentes exercitados pelo navegador permaneceram idênticos.",
+      "facts": [
+        "Agente sem permissão vê o motivo e não gera versão; editar minuta permanece permitido.",
+        "Perfil sintético ganhou somente contact_manage, mantendo agente e cobertura BUSINESS_UNIT.",
+        "Primeira tentativa confirmou cancelamento HMAC; fluxo retomado reprocessou callback sintético com estado já cancelado, sem alegar novo cancelamento externo.",
+        "HMAC adulterado401, callback202 e outra conta401. Versão2 criada201, reaberta e ambas preservadas.",
+        "Dois downloads reais pelos botões; bytes do PDF original e hashes das duas versões conferidos. Download pela outra conta401.",
+        "Temas claro/escuro e celular390x844 inspecionados; sem erros de runtime ou transbordamento do documento."
+      ],
+      "screenshots": [
+        "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\74-permissao-contatos-claro.png",
+        "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\75-permissao-contatos-escuro.png",
+        "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\76-callback-reprocessado-claro.png",
+        "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\77-callback-reprocessado-escuro.png",
+        "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\78-versao-apos-cancelamento.png",
+        "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\79-versoes-reabertas-claro.png",
+        "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\81-callback-cancelamento-celular-validado.png"
+      ],
+      "mobile_initial_attempt": {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\80-callback-cancelamento-celular.png",
+        "result": "captura preservada de recarga transitória;81 aguarda dados reais."
+      },
+      "synthetic_only": true,
+      "real_contracts_sent": 0,
+      "real_signatures": 0,
+      "external_homologation": false
+    },
+    "fixture_limitations": "OAuth/Connect e verificações de scanner foram simulados nas fixtures. Não houve conta demo real, consentimento externo, execução de antivírus real ou assinatura juridicamente homologada neste incremento.",
+    "race_regression": {
+      "old_source_expected_failure": {
+        "path": ".codex\\signature-projection-race-old.json",
+        "sha256": "0e2a374441fb738bb1fcf4ac0a429af736669211c40dab1ba1ba925d70455f07"
+      },
+      "fixed_source_pass": {
+        "path": ".codex\\signature-projection-race-fixed.json",
+        "sha256": "d3ecf6598b328da3e3624a6f0553e224e25132fbb04dcf7fdd4d9c4620ef20b7"
+      },
+      "final_suite_includes_same_real_postgresql_case": true
+    },
+    "preserved_attempts": [
+      {
+        "artifact": {
+          "path": ".codex\\signature-projection-jobs-backend.json",
+          "sha256": "08490131b0186326dda0219eb0730edcb5e53384ad0aeef3ea09f729642a2235"
+        },
+        "examples": 38,
+        "failures": 1,
+        "cause": "Fixture positiva de agente sem contact_manage foi recusada pela política nativa. Permissão correta e negativas API/UI acrescentadas; DirectoryPolicy não foi relaxada."
+      },
+      {
+        "artifact": {
+          "path": ".codex\\signature-projection-browser.log",
+          "sha256": "303000363185a295d81144d5c907b28802ded44f7fd2daa680e405f4b94203c7"
+        },
+        "result": "Cancelamento HMAC e projeção passaram; geração retornou401, revelando a falta de aviso de permissão. Histórico não foi reiniciado."
+      },
+      {
+        "artifact": {
+          "path": ".codex\\signature-projection-permissions-backend.json",
+          "sha256": "8d70d24c30c70065208b1c3d298fb540c4ce3144dcf7abb17e48dffb20d648c2"
+        },
+        "examples": 2,
+        "failures": 0,
+        "process_exit": 1,
+        "result": "Interrompido graciosamente para acrescentar revalidação de acesso no retry. Não é um gate integral aprovado."
+      },
+      {
+        "artifact": {
+          "path": ".codex\\signature-projection-permissions-frontend-sandbox-attempt.log",
+          "sha256": "9d6c2a6d8e5ee9bdffd51504802fa7117953288095b71abdf070ed649c99adda"
+        },
+        "result": "EPERM ao iniciar esbuild no sandbox; execução autorizada posterior passou."
+      },
+      {
+        "artifact": {
+          "path": ".codex\\signature-projection-permissions-production-assets-sandbox-attempt.log",
+          "sha256": "2d9f9f1648d6802edf8b436f8336c21687cad5c758539343ef38f9e998bb72a1"
+        },
+        "result": "EPERM ao iniciar esbuild no sandbox; build autorizado posterior passou."
+      }
+    ],
+    "fixture_isolation": "O teste de prévia obsoleta agora exige o conjunto global de IDs idêntico antes/depois, preservando revisões legítimas commitadas por outros exemplos; não limpa o banco nem reduz a recusa exigida."
+  },
+  "files": [
+    "app/controllers/api/v1/accounts/crm/backoffice_contract_versions_controller.rb",
+    "app/javascript/dashboard/i18n/locale/en/crm.json",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeContractVersions.vue",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/useContractVersions.js",
+    "app/javascript/dashboard/routes/dashboard/crm/views/spec/BackofficeContractVersions.spec.js",
+    "app/jobs/jrc_backoffice/signature_notification_job.rb",
+    "app/services/jrc_backoffice/signatures/delivery_projection.rb",
+    "app/services/jrc_backoffice/signatures/notifications.rb",
+    "app/services/jrc_backoffice/signatures/reconciliation.rb",
+    "docs/jrc_backoffice/docusign_demo_setup.md",
+    "docs/jrc_backoffice/docusign_integration.md",
+    "docs/jrc_backoffice/signature_projection_checkpoint_20261102.json",
+    "docs/jrc_backoffice/signature_provider_boundary.md",
+    "docs/jrc_consolidation/word_requirement_inventory_20261102.json",
+    "docs/jrc_relationship/continuation_matrix_20261102.json",
+    "spec/jobs/jrc_backoffice/signature_notification_job_spec.rb",
+    "spec/requests/api/v1/accounts/crm/backoffice_contract_versions_spec.rb",
+    "spec/requests/api/v1/accounts/crm/backoffice_version_directory_access_spec.rb",
+    "spec/services/jrc_backoffice/signatures/delivery_projection_concurrency_spec.rb",
+    "spec/services/jrc_backoffice/signatures/delivery_projection_spec.rb",
+    "spec/services/jrc_backoffice/signatures/reconciliation_spec.rb"
+  ],
+  "migrations": {
+    "new_files": [],
+    "local_schema": "20261102100000",
+    "ui_database": "jrc_signature_projection_ui_test",
+    "production_migrations": false
+  },
+  "remaining": [
+    "Ações operacionais pela tela: admissão/envio, consulta ao fornecedor, reenvio/lembrete, cancelamento e evidências.",
+    "Obtenção protegida e conferência do PDF final/certificado, todos os assinantes obrigatórios e registro de assinatura válida; verificador padrão continua sem aceitar assinatura.",
+    "Conta DocuSign Developer/demo, consentimento real, Connect público e homologação externa com evidências reais.",
+    "Conclusão das etapas C/D/E/F/G e classificação dos demais requisitos dos quatro Words; não há declaração de conclusão global."
+  ],
+  "publication": {
+    "push": false,
+    "docker_image_build": false,
+    "docker_image_publish": false,
+    "deploy": false,
+    "compose_changed": false,
+    "protected_worktree_commit": "50f7f07d802829dd44a67547fabad3aa77f3d196",
+    "protected_worktree_clean": true,
+    "existing_images_unchanged": true
+  }
+}

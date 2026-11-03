@@ -27,6 +27,7 @@ RSpec.describe 'Backoffice immutable contract version API', type: :request do
   it 'generates and reloads the exact revision through the scoped API' do
     get url, headers: headers
     expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('signer_directory_access')).to be(true)
     digest = response.parsed_body.dig('contract', 'source_digest')
     post url, headers: headers, params: { idempotency_key: SecureRandom.uuid, expected_source_digest: digest,
                                           change_reason: 'Revisão de teste', account_id: 999, created_by_id: 999 }, as: :json
@@ -62,12 +63,13 @@ RSpec.describe 'Backoffice immutable contract version API', type: :request do
   it 'rejects a stale preview without showing a successful generation' do
     get url, headers: headers
     digest = response.parsed_body.dig('contract', 'source_digest')
+    preserved_ids = JrcBackoffice::ContractVersion.order(:id).pluck(:id)
     contract.update!(content_override: 'TESTE SINTÉTICO — Mudou antes de salvar.')
     post url, headers: headers, params: { idempotency_key: SecureRandom.uuid, expected_source_digest: digest, change_reason: 'Prévia antiga' },
               as: :json
     expect(response).to have_http_status(:conflict)
     expect(response.parsed_body['code']).to eq('CONTRACT_SOURCE_CHANGED')
-    expect(JrcBackoffice::ContractVersion.count).to eq(0)
+    expect(JrcBackoffice::ContractVersion.order(:id).pluck(:id)).to eq(preserved_ids)
   end
 
   it 'bounds the history on the server and does not expose encrypted source columns' do

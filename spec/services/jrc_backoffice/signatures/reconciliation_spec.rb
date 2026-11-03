@@ -206,4 +206,39 @@ RSpec.describe JrcBackoffice::Signatures::Reconciliation, :approval_core, :autho
     expect(described_class.candidates.pluck(:id)).not_to include(delivery.id)
     expect(delivery.reload.state).to eq('sent')
   end
+
+  it 'repairs a recovered acknowledgement on retry without another lookup or POST when native projection first conflicts' do
+    delivery.events.create!(account: delivery.account, connection: connection, kind: 'dispatch_started', event_key: 'synthetic-lost-ack',
+                            source_snapshot: '{}')
+    conflict = SecureRandom.uuid
+    domain[:contract].update!(signature_external_id: conflict)
+    travel 17.minutes
+    expect do
+      described_class.new(delivery_id: delivery.id).call
+    end.to raise_error(JrcBackoffice::Signatures::DeliveryError, 'DELIVERY_PROJECTION_CONFLICT')
+    expect([delivery.reload.state, delivery.external_id, domain[:contract].reload.signature_external_id]).to eq(['sent', external_id, conflict])
+    expect do
+      described_class.new(delivery_id: delivery.id).call
+    end.to raise_error(JrcBackoffice::Signatures::DeliveryError, 'DELIVERY_PROJECTION_CONFLICT')
+    # Test-only correction of an untracked/conflicting pointer.
+    domain[:contract].update!(signature_external_id: external_id)
+    expect(described_class.new(delivery_id: delivery.id).call.state).to eq('sent')
+    expect(domain[:contract].reload.signature_status).to eq('sent')
+    expect(WebMock).to have_requested(:get, lookup).once
+    expect(WebMock).not_to have_requested(:post, "#{root}/envelopes")
+  end
+
+  it 'rechecks the original sender coverage before repairing an already bound acknowledgement without another provider call' do
+    delivery.events.create!(account: delivery.account, connection: connection, kind: 'send_confirmed', event_key: 'synthetic-bound-ack',
+                            external_id: external_id, source_snapshot: '{}')
+    original_facts = delivery.events.order(:id).pluck(:id)
+    domain[:account].jrc_crm_user_business_units.where(user: domain[:actor]).each { |grant| grant.update!(active: false) }
+    expect do
+      described_class.new(delivery_id: delivery.id).call
+    end.to raise_error(ActiveRecord::RecordNotFound)
+    expect(delivery.events.order(:id).pluck(:id)).to eq(original_facts)
+    expect([delivery.reload.state, domain[:contract].reload.signature_status]).to eq(%w[sent not_started])
+    expect(WebMock).not_to have_requested(:get, lookup)
+    expect(WebMock).not_to have_requested(:post, "#{root}/envelopes")
+  end
 end

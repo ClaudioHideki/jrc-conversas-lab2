@@ -32,11 +32,11 @@ Em **Backoffice → Controle e gestão → Assinatura DocuSign**, um administrad
 
 A conexão exige duas verificações diferentes: a ação **Verificar autorização** precisa concluir JWT/UserInfo; um evento real e autenticado da conta demo precisa chegar ao Connect. Para esse primeiro evento pode ser necessário um envelope sintético criado diretamente no ambiente demo, pois o JRC não permite envio antes da verificação do Connect. Preparar o cenário com um destinatário da equipe; este roteiro não autoriza dispará-lo automaticamente.
 
-O receptor confirma a persistência antes de responder. O objetivo operacional da DocuSign é receber a resposta em até cinco segundos, conforme sua [documentação de implementação](https://developers.docusign.com/platform/webhooks/connect/implement/). A confirmação HTTP e a indicação de Connect verificado **não significam contrato assinado**. Nesta base, os eventos permanecem na caixa de entrada, sem consumidor que conclua a assinatura.
+O receptor confirma a persistência antes de responder. O objetivo operacional da DocuSign é receber a resposta em até cinco segundos, conforme sua [documentação de implementação](https://developers.docusign.com/platform/webhooks/connect/implement/). A confirmação HTTP e a indicação de Connect verificado **não significam contrato assinado**. O consumidor já registra fatos autenticados na intenção de envio correspondente à conexão original; `completed` é apenas conclusão informada. A obtenção e a conferência das evidências finais continuam pendentes. Os testes locais não demonstram o prazo de resposta no ambiente público de homologação.
 
 ## Critérios para declarar homologação externa
 
-Somente depois de implementar e validar o vínculo contrato → versão → envelope → destinatários → evidências:
+Para homologar externamente o vínculo contrato → versão → envelope → destinatários → evidências, todos os critérios abaixo precisam de evidência real. A existência dos modelos, serviços e testes locais não substitui essa execução:
 
 | Cenário | Evidência exigida |
 | --- | --- |
@@ -56,7 +56,10 @@ Registrar data, ambiente, SHA do código, cenários e resultados sem segredos, C
 - Conta demo e integração externas: **não criadas nesta tarefa**.
 - Configuração e adaptador locais: implementados e testados com dados sintéticos; sem credenciais reais.
 - CPF do assinante: extensão protegida do Contato canônico, sem conferir poderes de representação.
-- Versões contratuais, vários assinantes, prova de poderes e consumidor das notificações: **pendentes**.
+- Versões contratuais imutáveis, PDF/hash, seleção de vários assinantes canônicos, proposta de poderes pela Central e intenção durável de envio: implementados em incrementos locais, com regressões selecionadas. O CPF cadastrado e a aprovação registrada não substituem a conferência da evidência de representação.
+- Despacho, consumo autenticado de eventos e recuperação de envio incerto: implementados e testados com HTTP/HMAC sintéticos; a recuperação preserva a conexão original e não repete automaticamente o envio. Consultar os checkpoints de [despacho](signature_dispatch_notifications_checkpoint_20261102.json) e [reconciliação](signature_reconciliation_checkpoint_20261102.json).
+- Ações operacionais de consulta ao fornecedor, reenvio/lembrete/cancelamento pela tela, obtenção do PDF final/certificado e verificação interna da assinatura: **ainda não concluídas**. O histórico local de status não realiza uma consulta externa.
+- Liberação operacional: continua bloqueada sem assinatura validada internamente; conclusão informada pelo fornecedor não libera a implantação.
 - Implantação pública e primeiro envio de homologação: **não executados**.
 
 Nenhuma alteração de Compose, publicação de imagem ou acesso a produção é necessária para revisar este roteiro e continuar a implementação local.

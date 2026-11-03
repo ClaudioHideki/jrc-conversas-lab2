@@ -1,6 +1,6 @@
 # Fronteira entre o fluxo JRC e o provedor de assinatura
 
-Complemento de 02/11/2026: manter DocuSign como único conector instalado, sem transformar o Backoffice em uma plataforma de fornecedores. A separação técnica abaixo está implementada. **O envio contratual ponta a ponta permanece parcial**: ainda faltam versões, snapshots de vários assinantes, validação de poderes e o registro durável do envio ligado a essa versão. A rota operacional de envio não confirma entregas enquanto essas dependências não estiverem prontas.
+Complemento de 02/11/2026: manter DocuSign como único conector instalado, sem transformar o Backoffice em uma plataforma de fornecedores. A separação técnica abaixo está implementada. Os incrementos posteriores acrescentaram versões imutáveis, snapshots de vários assinantes, propostas de poderes com aprovação nativa e registro durável de intenção/despacho. **O fluxo contratual ponta a ponta permanece parcial**: faltam ações operacionais pela tela, obtenção e conferência das evidências finais e homologação externa. Nenhum teste simulado comprova poderes jurídicos ou uma assinatura real. A interface não habilita um envio incompleto nem usa um ID digitado como confirmação.
 
 ## Responsabilidades implementadas
 
@@ -24,7 +24,7 @@ O adaptador recebe operações comuns e traduz para a eSignature API. Não receb
 
 Para o único conector instalado, as capacidades são envio, consulta, destinatários, reenvio/lembrete, cancelamento, documento final e certificado. O lembrete imediato usa a mesma operação real de reenvio suportada pelo cliente DocuSign; não existe um agendador de lembretes implementado nesta etapa.
 
-Reenvio e cancelamento retornam a aceitação da requisição pelo endpoint autenticado. Esse retorno não muda um estado de negócio do JRC; a confirmação contratual deverá ser reconciliada pela consulta/evento correspondente no consumidor ainda pendente.
+No conector, reenvio e cancelamento retornam a aceitação da requisição pelo endpoint autenticado. Esse retorno não muda um estado de negócio do JRC. O consumidor de eventos já preserva conclusão informada, recusa e cancelamento autenticados; as ações operacionais correspondentes pela tela continuam pendentes.
 
 O estado DocuSign `completed` é traduzido para **`completion_reported`**, não para `signed`. O domínio ainda precisará conferir versão, destinatários obrigatórios, PDF final e certificado antes de registrar uma assinatura válida. Estados desconhecidos retornam `unknown`; não são tratados como sucesso.
 
@@ -50,17 +50,19 @@ As telas CRM de contratos reutilizam `SignatureDeliveryNotice.vue`: o texto oper
 
 `JrcBackoffice::SignatureRelease` mantém a liberação v2 no domínio interno. Um registro de assinatura do cliente pode ser preservado enquanto a ativação e a liberação continuam pendentes. A marcação histórica `signed` não substitui a verificação de evidências; o mesmo bloqueio alcança avanço do Backoffice, status operacional do pedido e criação do projeto. Projetos históricos não são apagados por esse bloqueio. O evento de assinatura não avança automaticamente as etapas v2; o comportamento legado v1 permanece separado.
 
-## Vínculo que ainda falta antes de habilitar novos envios
+## Vínculo durável implementado e liberação ainda pendente
 
-O próximo incremento deve criar o envio interno durável com referências obrigatórias à conta, contrato, versão imutável, SHA do PDF, snapshots dos assinantes, provedor, conexão preservada, ambiente e identificação externa retornada. A intenção deve existir antes do I/O; estados de fila, resultado incerto e confirmação de envio precisam ser distintos.
+`Signatures::Admissions`, `DeliverySnapshot`, `Dispatch` e seu job preservam referências obrigatórias à conta, contrato, versão imutável, SHA do PDF, snapshots dos assinantes, poderes aprovados, provedor, conexão e ambiente. A intenção e a reserva do despacho precisam estar commitadas antes do I/O. Fila, resultado incerto e confirmação de envio são estados distintos; uma tentativa incerta não é reenviada automaticamente. A identificação externa só é vinculada após confirmação, inclusive na recuperação por transação original.
 
-A seleção do padrão ocorre **somente na criação desse envio**. Depois disso, todas as ações e eventos usam a conexão gravada. O consumidor só pode liberar a versão atual após validar evidências reais, sem reativar versão cancelada/substituída nem completar a solicitação inteira. Esse vínculo e esse consumidor ainda não estão implementados e não são comprovados apenas pelos testes do gateway.
+A seleção do padrão ocorre **somente na criação desse envio**. Depois disso, despacho, recuperação e eventos usam a conexão gravada. `Notifications` e seu job consomem os fatos autenticados sem transformar `completion_reported` em assinatura válida. O histórico operacional é somente de leitura. A obtenção e a verificação de evidências reais de todos os assinantes obrigatórios ainda precisam ser concluídas antes de liberar a versão atual, sem reativar versão cancelada/substituída nem completar a solicitação inteira. O verificador interno padrão continua recusando a liberação.
 
-Os serviços chamadores deverão manter as políticas nativas, a cobertura de operadora/unidade e a revalidação do ator antes de cada operação. O gateway não recebe `account_id` ou `user_id` do navegador como autorização e não substitui essas políticas.
+Os serviços chamadores usam `ContractAccess`, `AuthorityAccess` e `DispatchContext` para manter as políticas nativas, a cobertura de operadora/unidade e a revalidação do ator antes de cada operação. O gateway não recebe `account_id` ou `user_id` do navegador como autorização e não substitui essas políticas. Futuras ações operacionais precisam manter essas mesmas verificações.
 
 Uma futura troca exigirá implementar outro adaptador com suas capacidades reais e adequar a configuração do fornecedor. Os contratos, aprovações, pendências e bloqueios do Backoffice continuarão consumindo a fronteira comum. Não há outro fornecedor implementado ou selecionável como integração funcional nesta entrega.
 
 ## Evidências automatizadas
+
+Os checkpoints de [admissão](signature_admission_checkpoint_20261102.json), [despacho e notificações](signature_dispatch_notifications_checkpoint_20261102.json), [histórico](signature_history_ui_checkpoint_20261102.json) e [reconciliação](signature_reconciliation_checkpoint_20261102.json) registram os incrementos posteriores e os lotes efetivamente executados. Os testes do gateway abaixo continuam demonstrando a fronteira do conector; a durabilidade é validada pelos serviços/jobs adicionais, inclusive com commits e concorrência reais no PostgreSQL descartável.
 
 - `spec/services/jrc_backoffice/signatures/gateway_spec.rb`: envio traduzido, status sem falso `signed`, falha incerta sem repetição, cancelamento/certificado, conta revogada, seleção de novas admissões, ambiente histórico e troca do padrão para um identificador não instalado sem redirecionar o envio antigo. O teste entre admissão e submissão conserva a conexão selecionada enquanto o padrão muda; simula o intervalo de uma fila, mas não implementa nem comprova um job durável de envio. O identificador não instalado é apenas uma prova de recusa, não um segundo conector.
 - `spec/requests/webhooks/docusign_spec.rb`: HMAC, isolamento de contas, repetição, conexão desabilitada na criação, revisão histórica após mudança do padrão e impossibilidade de verificar a nova conexão com o evento antigo.

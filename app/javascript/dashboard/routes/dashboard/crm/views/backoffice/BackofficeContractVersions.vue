@@ -18,6 +18,7 @@ const {
   busy,
   error,
   notice,
+  canEditDraft,
   canGenerate,
   canSave,
   page,
@@ -72,7 +73,7 @@ watch(identity, () => {
         <button
           type="button"
           class="rounded-lg border border-n-blue-6 bg-n-solid-2 px-3 py-2 text-sm text-n-blue-12 disabled:opacity-50"
-          :disabled="!canGenerate"
+          :disabled="!canEditDraft"
           @click="editing = true"
         >
           {{ text('CONTRACT_VERSIONS.EDIT_DRAFT') }}
@@ -123,7 +124,14 @@ watch(identity, () => {
     </p>
     <template v-if="result">
       <p
-        v-if="!canGenerate && !busy"
+        v-if="result.signer_directory_access === false"
+        role="status"
+        class="rounded-lg border border-n-amber-6 bg-n-amber-3 p-3 text-sm text-n-amber-12"
+      >
+        {{ text('CONTRACT_VERSIONS.DIRECTORY_REQUIRED') }}
+      </p>
+      <p
+        v-if="!canEditDraft && !busy"
         class="text-sm text-n-slate-11"
       >
         {{ text('CONTRACT_VERSIONS.LOCKED') }}

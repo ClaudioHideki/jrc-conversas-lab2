@@ -17,7 +17,7 @@ class Api::V1::Accounts::Crm::BackofficeContractVersionsController < Api::V1::Ac
     rows = service.scope.order(id: :desc)
     data = version_rows(rows, page, contract)
     payload = { data: data, meta: { page: page, per_page: 10, total: rows.count },
-                contract: contract_summary(contract), writable: access.writable?(request) && !delivery_active?(contract) }
+                contract: contract_summary(contract) }.merge(generation_permissions(request, contract))
     access.request(params[:backoffice_request_id])
     render json: payload
   end
@@ -40,8 +40,22 @@ class Api::V1::Accounts::Crm::BackofficeContractVersionsController < Api::V1::Ac
 
   private
 
+  def generation_permissions(request, contract)
+    { writable: access.writable?(request) && !delivery_active?(contract), signer_directory_access: signer_directory_access?(request, contract) }
+  end
+
   def delivery_active?(contract)
     contract && JrcBackoffice::Signatures::DeliveryGuard.active(contract).exists?
+  end
+
+  def signer_directory_access?(request, contract)
+    return true unless contract && JrcBackoffice::SignerRoster.exists?(account_id: Current.account.id,
+                                                                       backoffice_request_id: request.id, contract_id: contract.id)
+
+    JrcCustomers::ContactDirectory.new(account: Current.account, actor: Current.user).authorize!
+    true
+  rescue Pundit::NotAuthorizedError
+    false
   end
 
   def version_rows(scope, page, contract)
