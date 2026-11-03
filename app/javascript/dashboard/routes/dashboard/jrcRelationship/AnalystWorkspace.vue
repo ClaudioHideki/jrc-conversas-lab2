@@ -31,6 +31,7 @@ const container = ref(null);
 const nicoDialog = ref(null);
 const isDashboard = computed(() => props.screen === 'overview');
 const scope = computed(() => ({
+  customer_segment_id: route.query.customer_segment_id || undefined,
   q: route.query.q || '',
   record_status: route.query.record_status || '',
   mine: route.query.mine !== 'false',
@@ -72,7 +73,10 @@ const load = async () => {
     if (isDashboard.value) {
       const result = await API.dashboard(
         accountId,
-        { mode: scope.value.mine ? 'mine' : undefined },
+        {
+          mode: scope.value.mine ? 'mine' : undefined,
+          customer_segment_id: scope.value.customer_segment_id,
+        },
         options
       );
       if (version === generation) {
@@ -227,7 +231,11 @@ const cards = computed(() => [
           :to="{
             name: `jrc_relationship_${card.to}`,
             params: route.params,
-            query: { mine: String(scope.mine), ...card.query },
+            query: {
+              mine: String(scope.mine),
+              customer_segment_id: scope.customer_segment_id,
+              ...card.query,
+            },
           }"
           class="rounded-xl border p-4 transition hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-n-violet-8"
           :class="card.tone"
@@ -318,7 +326,10 @@ const cards = computed(() => [
             router.push({
               name: 'jrc_relationship_customers',
               params: route.params,
-              query: { assignment_id: $event },
+              query: {
+                assignment_id: $event,
+                customer_segment_id: scope.customer_segment_id,
+              },
             })
           "
         />
@@ -389,7 +400,10 @@ const cards = computed(() => [
             :to="{
               name: 'jrc_relationship_actions',
               params: route.params,
-              query: { mine: String(scope.mine) },
+              query: {
+                mine: String(scope.mine),
+                customer_segment_id: scope.customer_segment_id,
+              },
             }"
           >
             {{ t('RELATIONSHIP.V2.SEE_ALL') }}

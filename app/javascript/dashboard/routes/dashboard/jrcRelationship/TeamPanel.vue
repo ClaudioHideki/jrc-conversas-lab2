@@ -37,6 +37,7 @@ const filters = reactive({
 });
 let activeController;
 const query = () => ({
+  customer_segment_id: route.query.customer_segment_id || undefined,
   ...Object.fromEntries(
     Object.entries(filters).filter(([, value]) => value !== '')
   ),
@@ -100,6 +101,7 @@ watch(
     () => props.startDate,
     () => props.endDate,
     () => props.search,
+    () => route.query.customer_segment_id,
   ],
   async (_, __, cleanup) => {
     const controller = new AbortController();

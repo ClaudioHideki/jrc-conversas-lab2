@@ -46,10 +46,18 @@ const load = async () => {
   busy.value = true;
   try {
     const result = await Promise.all([
-      API.handoffs(route.params.accountId, { signal: controller.signal }),
+      API.handoffs(route.params.accountId, {
+        signal: controller.signal,
+        params: {
+          customer_segment_id: route.query.customer_segment_id || undefined,
+        },
+      }),
       API.portfolio(
         route.params.accountId,
-        { per_page: 50 },
+        {
+          per_page: 50,
+          customer_segment_id: route.query.customer_segment_id || undefined,
+        },
         { signal: controller.signal }
       ),
     ]);
@@ -122,6 +130,7 @@ watch(
     () => route.params.accountId,
     () => store.getters.getCurrentUserID,
     () => props.allowed,
+    () => route.query.customer_segment_id,
   ],
   load,
   { immediate: true }

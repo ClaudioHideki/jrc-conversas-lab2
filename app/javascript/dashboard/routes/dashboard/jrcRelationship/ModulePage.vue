@@ -146,6 +146,7 @@ const stageOptions = computed(
     )?.stages || []
 );
 const scope = () => ({
+  customer_segment_id: route.query.customer_segment_id || undefined,
   ...Object.fromEntries(
     Object.entries(filters).filter(
       ([, value]) => value !== '' && value !== false
@@ -200,7 +201,11 @@ const load = async () => {
         : API.records(accountId, props.screen, scope(), options),
       API.portfolio(
         accountId,
-        { per_page: 50, assignment_id: route.query.assignment_id || undefined },
+        {
+          per_page: 50,
+          assignment_id: route.query.assignment_id || undefined,
+          customer_segment_id: route.query.customer_segment_id || undefined,
+        },
         options
       ),
     ]);
@@ -531,6 +536,7 @@ watch(
     () => route.query.renewal_days,
     () => route.query.mode,
     () => route.query.segment_id,
+    () => route.query.customer_segment_id,
     () => route.query.product_id,
     () => route.query.business_unit_id,
     () => route.query.complexity,

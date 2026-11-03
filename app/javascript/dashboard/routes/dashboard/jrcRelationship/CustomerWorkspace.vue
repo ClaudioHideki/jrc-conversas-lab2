@@ -25,6 +25,7 @@ watch(
     () => store.getters.getCurrentUserID,
     () => route.query.q,
     () => route.query.page,
+    () => route.query.customer_segment_id,
   ],
   async (_, __, cleanup) => {
     const controller = new AbortController();
@@ -40,7 +41,11 @@ watch(
         API.metadata(accountId, options),
         API.portfolio(
           accountId,
-          { q: route.query.q, page: route.query.page || 1 },
+          {
+            q: route.query.q,
+            page: route.query.page || 1,
+            customer_segment_id: route.query.customer_segment_id || undefined,
+          },
           options
         ),
       ]);

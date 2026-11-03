@@ -5,6 +5,7 @@ import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcRelationship';
 import ModuleTabs from 'dashboard/components-next/navigation/ModuleTabs.vue';
+import ModuleSegmentFilter from '../jrcCustomers/components/ModuleSegmentFilter.vue';
 import { areaForScreen, visibleAreas } from './navigation';
 import { relationshipTabClasses } from './tabClasses';
 import { message } from './definitions';
@@ -17,12 +18,19 @@ const screen = computed(() =>
   String(route.name).replace('jrc_relationship_', '')
 );
 const area = computed(() => areaForScreen(screen.value));
+const supportsSegment = key =>
+  !['settings', 'playbooks', 'survey_admin'].includes(key);
 const link = key => ({
   name: `jrc_relationship_${key}`,
   params: { accountId: route.params.accountId },
-  query: route.query.assignment_id
-    ? { assignment_id: route.query.assignment_id }
-    : {},
+  query: {
+    ...(route.query.assignment_id
+      ? { assignment_id: route.query.assignment_id }
+      : {}),
+    ...(supportsSegment(key) && route.query.customer_segment_id
+      ? { customer_segment_id: route.query.customer_segment_id }
+      : {}),
+  },
 });
 const items = computed(() =>
   visibleAreas(metadata.value).map(item => ({
@@ -107,6 +115,10 @@ watch(
         :active-key="screen"
       />
     </header>
+    <ModuleSegmentFilter
+      v-if="metadata && supportsSegment(screen)"
+      module-key="relationship"
+    />
     <RouterView
       :key="`${route.params.accountId}:${store.getters.getCurrentUserID}:${route.name}`"
     />
