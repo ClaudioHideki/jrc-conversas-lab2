@@ -1,0 +1,54 @@
+{
+  "date": "2026-11-03",
+  "baseline": "5aa2e7fe86959e29f184a4c41ca296ad87120c5e",
+  "status": "Backend defect corrected and automated gates passed; real Chrome edit pending",
+  "defect": "CampaignSerializer omitted delivery_channel and steps.subject; email drafts reopened as WhatsApp with no email subject",
+  "change": "Add the two scalar fields to existing authorized serialization; no authorization, sender or execution changes",
+  "red": {
+    "report": ".codex/campaign-email-roundtrip-red.json",
+    "examples": 1,
+    "failures": 1
+  },
+  "fixed_regression": {
+    "report": ".codex/campaign-email-roundtrip-fixed.json",
+    "examples": 73,
+    "failures": 0
+  },
+  "focused_final": {
+    "report": ".codex/campaign-email-roundtrip-final.json",
+    "examples": 3,
+    "failures": 0
+  },
+  "rubocop": {
+    "stdin_current_exact_files": true,
+    "offenses": 0,
+    "prior_failed_style_reports_preserved": true
+  },
+  "fresh_frontend_build": ".codex/segment-consumers-5aa2e7fe-build.json",
+  "frontend_changes_since_build": false,
+  "real_chrome_passed": [
+    "segmentos-relacionamento-c7-navegacao-5aa2e7fe-20261103.json",
+    "segmentos-relacionamento-c7-integracao-5aa2e7fe-20261103.json",
+    "segmentos-campanhas-c7-previa-nativa-5aa2e7fe-20261103.json"
+  ],
+  "campaign_real_ui": {
+    "draft_created_id": 1,
+    "persisted": true,
+    "edit_failed_before_fix": true,
+    "executions_or_sends": 0
+  },
+  "pending": [
+    "Actual Chrome edit/reload with corrected backend",
+    "Final consumer integrity and Word Stage C audit",
+    "TRR undefined; D/E/F/G not complete"
+  ],
+  "restrictions": {
+    "push": false,
+    "deploy": false,
+    "production": false,
+    "external_operations": 0,
+    "migrations": false,
+    "deletion": false
+  },
+  "local_hooks": "Missing .husky/_/husky.sh; manual gates executed and command-local core.hooksPath=.codex/git-hooks for checkpoint"
+}
