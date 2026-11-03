@@ -1,0 +1,134 @@
+{
+  "date": "2026-11-03",
+  "stage": "C4c — Grupos econômicos e preservação de contexto",
+  "status": "incremento validado; Cadastro Mestre e escopo integral C/D/E/F/G permanecem parciais",
+  "branch": "codex/relacionamento-v2-20261101",
+  "base_commit": "4c6c7382db529f021078ead67cdf861e76a7898e",
+  "preserved_checkpoints": [
+    "72b9d7a1a96250a991d96d9a51d1bf3265d89bfe",
+    "4c6c7382db529f021078ead67cdf861e76a7898e"
+  ],
+  "implementation": "Consultar economic_groups_partial_checkpoint_20261103.json para cadastro, migration, compatibilidade dos nomes, permissões e escopo. Este relatório conclui os gates pendentes daquele incremento, sem apagar a evidência parcial.",
+  "context_fix": {
+    "file": "app/javascript/dashboard/routes/dashboard/jrcCustomers/useCustomerMaster.js",
+    "problem": "O refresh nativo de preferências após resize retorna active_at atualizado. A identidade tratava esse campo como mudança de acesso e descartava popup/rascunho.",
+    "red_browser": ".codex/economic-groups-native-activity-settled-diagnostic.json (popup1→0; somente active_at mudou)",
+    "red_unit": ".codex/customer-context-identity-red.json (6 casos,1 falha; preservado)",
+    "change": "Excluir somente active_at, availability, availability_status e auto_offline da identidade. Manter conta/usuário/papel e todos os outros campos de membership, inclusive permissões, status e novos escopos. Servidor continua autorizando cada chamada.",
+    "dependencies": "Nenhuma nova. A primeira tentativa com import lodash não disponível falhou; substituída por Object.entries/fromEntries, preservando logs e o resultado anterior.",
+    "files": [
+      "app/javascript/dashboard/routes/dashboard/jrcCustomers/useCustomerMaster.js",
+      "app/javascript/dashboard/routes/dashboard/jrcCustomers/useCustomerMaster.spec.js"
+    ]
+  },
+  "backend": {
+    "examples": 199,
+    "failures": 0,
+    "report": ".codex/economic-groups-regression.json",
+    "single_green_run": true,
+    "reused_for_frontend_only_fix": ".codex/customer-context-identity-backend-reuse.json (5380 arquivos não frontend idênticos)"
+  },
+  "frontend": {
+    "cases": 145,
+    "failures": 0,
+    "failed_suites": 0,
+    "single_green_run": true,
+    "report": ".codex/customer-context-identity-final-frontend.json",
+    "simulated_services": "Testes de componentes não são homologação externa. O fluxo no Chrome abaixo usa API e persistência reais no banco sintético.",
+    "earlier_attempt": ".codex/customer-context-identity-frontend.json:117 casos aprovados,3 suites não carregadas por import indisponível; não declarado sucesso. A execução final substitui a evidência do código."
+  },
+  "style": {
+    "shared_files": 2,
+    "errors": 0,
+    "warnings": 0,
+    "report": ".codex/customer-context-identity-native-style.json",
+    "prior_group_ruby": "8 arquivos,0 infrações; .codex/economic-groups-final-ruby-style.json",
+    "prior_group_frontend": "0 erros,2 avisos; sem alegação de limpeza global"
+  },
+  "build": {
+    "type": "Somente assets Vite locais; sem Docker build",
+    "duration": "3m35",
+    "log": ".codex/customer-context-identity-native-production-assets.log",
+    "prefix": "consolidation-customer-context-identity-native-vite",
+    "warnings": "Chunks grandes, Browserslist e sourcemap de dependência já existentes; não alterados para contornar gates."
+  },
+  "chrome": {
+    "status": "passed",
+    "continuation": "grupos-economicos-c4c-retomada-chrome.json",
+    "checks": 10,
+    "original": "grupos-economicos-c4c-chrome.json (5 etapas persistidas antes de falhar no resize; não repetir criações)",
+    "group": 127,
+    "unused_group": 128,
+    "unused_deleted": true,
+    "coverage": [
+      "Segunda página de empresas e Empresa 360º real, popup filho/Escape preservando o grupo",
+      "Criação/vínculo/principal; transferência com confirmação; descrição e recarga",
+      "DELETE422 real por dependências, principal limpa explicitamente e desvinculação com cancelar/confirmar",
+      "Rascunho preservado no resize com atualização nativa de atividade; nenhum write de negócio nesse teste",
+      "Mobile390×844 claro/escuro, popup sem overflow horizontal",
+      "Grupo vazio criado/excluído204 com cancelamento anterior",
+      "Navegação nativa por etiqueta e configuração protegida para agente"
+    ],
+    "javascript_errors": 0,
+    "rejected_unexpected_requests": 0,
+    "theme_qa": "grupos-economicos-c4c-temas-estaveis.json:5 capturas após duas empresas carregadas e animações finitas concluídas,0 escritas de negócio",
+    "stable_images": [
+      "200-grupos-desktop-claro-estavel.png",
+      "201-grupos-mobile-claro-carregado.png",
+      "202-grupos-mobile-escuro-carregado.png",
+      "203-grupos-mobile-escuro-resumo.png",
+      "204-grupos-desktop-claro-final.png"
+    ],
+    "capture_caveat": "190/195/197 podem mostrar resposta em processamento/carregamento/transição. Não são a revisão visual final; imagens200–204 substituem a evidência visual, sem apagar as antigas."
+  },
+  "integrity": {
+    "status": "passed",
+    "source": "/consolidation-customer-context-identity-native",
+    "protected_old_rows": 18,
+    "fixture_company_contexts_checked": 26,
+    "group": 127,
+    "principal": 75,
+    "members": [
+      74,
+      75
+    ],
+    "audits": {
+      "customer_economic_group_created": 1,
+      "customer_economic_group_linked": 4,
+      "customer_economic_group_updated": 4
+    },
+    "verifier": null,
+    "external_operations": 0,
+    "production_changed": false,
+    "chrome": "10 checks passed in continuation; stable theme QA reported separately",
+    "unused_group": 128,
+    "unused_deleted": true,
+    "unused_audits": {
+      "customer_economic_group_created": 1,
+      "customer_economic_group_deleted": 1
+    },
+    "native_labels": 2,
+    "canonical_people": 26
+  },
+  "integrity_test_correction": "Primeira comparação de etiquetas usou order(:id), que preserva o default_scope por título e produziu ordem diferente. Mantida a falha; correção usa reorder(:id) e confere IDs E títulos exatos, sem enfraquecer o teste.",
+  "source": {
+    "snapshot": "/consolidation-customer-context-identity-native",
+    "files": 11321,
+    "mismatches": 0,
+    "raw_sql_preserved": true,
+    "report": ".codex/customer-context-identity-native-source-verified.json"
+  },
+  "pending": [
+    "C5: central única Empresas/Contatos/ambos, mapeamento, tratamento de existentes, prévia completa, resultado/erros e histórico. Reaproveitar importador validado e regras nativas.",
+    "Visão operacional de Contatos ativos, não uma duplicação do cadastro.",
+    "Filtros nos demais módulos e métricas financeiras/TRR continuam parciais; definição TRR aguarda resposta.",
+    "Demais requisitos integrais das etapas C,D,E,F,G e homologação externa DocuSign ainda pendentes/parciais."
+  ],
+  "safety": {
+    "database": "jrc_customer_groups_test",
+    "earlier_databases_storage_worktrees_preserved": true,
+    "signature_verifier": null,
+    "external_operations": 0,
+    "push_image_build_publish_deploy_or_production_migrations": false
+  }
+}

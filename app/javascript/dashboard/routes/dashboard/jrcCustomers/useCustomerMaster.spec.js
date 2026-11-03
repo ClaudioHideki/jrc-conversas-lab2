@@ -91,4 +91,40 @@ describe('Cadastro Mestre account and feature boundaries', () => {
     expect(wrapper.vm.enabled).toBe(false);
     expect(wrapper.vm.canAccess).toBe(false);
   });
+
+  it('preserves the current form context when profile preferences refresh activity and availability metadata', () => {
+    const previous = wrapper.vm.identity;
+    store.state.user = {
+      ...store.state.user,
+      ui_settings: { conversation_display_type: 'expanded' },
+      accounts: [
+        {
+          ...store.state.user.accounts[0],
+          active_at: '2026-11-03T10:00:00Z',
+          availability: 'online',
+          availability_status: 'online',
+          auto_offline: true,
+        },
+      ],
+    };
+    expect(wrapper.vm.identity).toBe(previous);
+  });
+
+  it('still invalidates the context for membership, permissions, status and newly introduced scope fields', () => {
+    const original = { ...store.state.user.accounts[0] };
+    const previous = wrapper.vm.identity;
+    [
+      { role: 'agent' },
+      { custom_role_id: 7 },
+      { permissions: ['contact_manage'] },
+      { status: 'suspended' },
+      { corporate_scope_revision: 2 },
+    ].forEach(change => {
+      store.state.user.accounts = [{ ...original, ...change }];
+      expect(wrapper.vm.identity).not.toBe(previous);
+    });
+    store.state.user.accounts = [];
+    expect(wrapper.vm.identity).not.toBe(previous);
+    expect(wrapper.vm.canAccess).toBe(false);
+  });
 });

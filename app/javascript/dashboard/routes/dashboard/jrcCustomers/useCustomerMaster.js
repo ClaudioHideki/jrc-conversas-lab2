@@ -2,19 +2,37 @@ import { computed } from 'vue';
 import { useAccount } from 'dashboard/composables/useAccount';
 import { useMapGetter } from 'dashboard/composables/store';
 import { FEATURE_FLAGS } from 'dashboard/featureFlags';
+const presenceFields = [
+  'active_at',
+  'availability',
+  'availability_status',
+  'auto_offline',
+];
 export function useCustomerMaster() {
   const { accountId, accountScopedRoute, currentAccount } = useAccount();
   const feature = useMapGetter('accounts/isFeatureEnabledonAccount');
   const role = useMapGetter('getCurrentRole');
   const user = useMapGetter('getCurrentUser');
-  const identity = computed(() =>
-    JSON.stringify([
+  const identity = computed(() => {
+    const membership = user.value?.accounts?.find(
+      item => Number(item.id) === accountId.value
+    );
+    // Activity/presence refreshes must not discard a form. All other membership
+    // fields, including future access scopes, still invalidate its context.
+    const access = membership
+      ? Object.fromEntries(
+          Object.entries(membership).filter(
+            ([key]) => !presenceFields.includes(key)
+          )
+        )
+      : null;
+    return JSON.stringify([
       accountId.value,
       user.value?.id,
       role.value,
-      user.value?.accounts?.find(item => Number(item.id) === accountId.value),
-    ])
-  );
+      access,
+    ]);
+  });
   const enabled = computed(() =>
     Boolean(feature.value(accountId.value, FEATURE_FLAGS.JRC_CUSTOMER_MASTER))
   );

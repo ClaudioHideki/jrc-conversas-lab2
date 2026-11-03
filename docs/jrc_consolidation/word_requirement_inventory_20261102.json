@@ -6149,14 +6149,28 @@
           },
           "requirement_text": "Relaciona empresas que pertencem ao mesmo conglomerado/estrutura econômica. É dado corporativo.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "CompanyWriter",
+            "CorporateCoverage",
+            "Audit",
+            "Label/LabelsController e rotas nativas",
+            "CompanyDetailsDialog"
+          ],
+          "implemented_change": "Grupos corporativos separados das etiquetas, membros e principal opcionais com escopo/auditoria; seis fragmentos específicos validados, sem conclusão integral do Cadastro Mestre.",
+          "files": [
+            "app/models/jrc_customers/economic_group.rb",
+            "app/services/jrc_customers/economic_group_writer.rb",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/TaxonomyPage.vue"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/economic_groups_checkpoint_20261103.json",
+            "199/0 backend;145/0 frontend final",
+            "Chrome:grupo127 preservado,128 excluído; temas200–204 estáveis"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Preservar o incremento validado; continuar C5 e demais requisitos do inventário."
         },
         {
           "id": "cadastro-mestre:P0266",
@@ -6197,14 +6211,28 @@
           },
           "requirement_text": "Classificações operacionais de pessoas, ex.: VIP, Renovação, Implantação. Não alteram a estrutura societária/econômica.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "CompanyWriter",
+            "CorporateCoverage",
+            "Audit",
+            "Label/LabelsController e rotas nativas",
+            "CompanyDetailsDialog"
+          ],
+          "implemented_change": "Grupos corporativos separados das etiquetas, membros e principal opcionais com escopo/auditoria; seis fragmentos específicos validados, sem conclusão integral do Cadastro Mestre.",
+          "files": [
+            "app/models/jrc_customers/economic_group.rb",
+            "app/services/jrc_customers/economic_group_writer.rb",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/TaxonomyPage.vue"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/economic_groups_checkpoint_20261103.json",
+            "199/0 backend;145/0 frontend final",
+            "Chrome:grupo127 preservado,128 excluído; temas200–204 estáveis"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Preservar o incremento validado; continuar C5 e demais requisitos do inventário."
         },
         {
           "id": "cadastro-mestre:P0269",
@@ -6217,14 +6245,28 @@
           },
           "requirement_text": "A tela deve ter duas abas ou áreas claras: “Grupos econômicos” e “Etiquetas e grupos dos contatos”. Nunca usar o mesmo registro para as duas finalidades.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "CompanyWriter",
+            "CorporateCoverage",
+            "Audit",
+            "Label/LabelsController e rotas nativas",
+            "CompanyDetailsDialog"
+          ],
+          "implemented_change": "Grupos corporativos separados das etiquetas, membros e principal opcionais com escopo/auditoria; seis fragmentos específicos validados, sem conclusão integral do Cadastro Mestre.",
+          "files": [
+            "app/models/jrc_customers/economic_group.rb",
+            "app/services/jrc_customers/economic_group_writer.rb",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/TaxonomyPage.vue"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/economic_groups_checkpoint_20261103.json",
+            "199/0 backend;145/0 frontend final",
+            "Chrome:grupo127 preservado,128 excluído; temas200–204 estáveis"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Preservar o incremento validado; continuar C5 e demais requisitos do inventário."
         },
         {
           "id": "cadastro-mestre:P0271",
@@ -7627,14 +7669,28 @@
           },
           "requirement_text": "Grupo econômico com empresas membros e empresa principal opcional.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "CompanyWriter",
+            "CorporateCoverage",
+            "Audit",
+            "Label/LabelsController e rotas nativas",
+            "CompanyDetailsDialog"
+          ],
+          "implemented_change": "Grupos corporativos separados das etiquetas, membros e principal opcionais com escopo/auditoria; seis fragmentos específicos validados, sem conclusão integral do Cadastro Mestre.",
+          "files": [
+            "app/models/jrc_customers/economic_group.rb",
+            "app/services/jrc_customers/economic_group_writer.rb",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/TaxonomyPage.vue"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/economic_groups_checkpoint_20261103.json",
+            "199/0 backend;145/0 frontend final",
+            "Chrome:grupo127 preservado,128 excluído; temas200–204 estáveis"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Preservar o incremento validado; continuar C5 e demais requisitos do inventário."
         },
         {
           "id": "cadastro-mestre:P0338",
@@ -8240,14 +8296,28 @@
           },
           "requirement_text": "Grupo econômico separado de etiqueta/grupo de contato.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "CompanyWriter",
+            "CorporateCoverage",
+            "Audit",
+            "Label/LabelsController e rotas nativas",
+            "CompanyDetailsDialog"
+          ],
+          "implemented_change": "Grupos corporativos separados das etiquetas, membros e principal opcionais com escopo/auditoria; seis fragmentos específicos validados, sem conclusão integral do Cadastro Mestre.",
+          "files": [
+            "app/models/jrc_customers/economic_group.rb",
+            "app/services/jrc_customers/economic_group_writer.rb",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/TaxonomyPage.vue"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/economic_groups_checkpoint_20261103.json",
+            "199/0 backend;145/0 frontend final",
+            "Chrome:grupo127 preservado,128 excluído; temas200–204 estáveis"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Preservar o incremento validado; continuar C5 e demais requisitos do inventário."
         },
         {
           "id": "cadastro-mestre:P0366",
@@ -8260,14 +8330,28 @@
           },
           "requirement_text": "Vínculo de empresa com grupo econômico auditável.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "CompanyWriter",
+            "CorporateCoverage",
+            "Audit",
+            "Label/LabelsController e rotas nativas",
+            "CompanyDetailsDialog"
+          ],
+          "implemented_change": "Grupos corporativos separados das etiquetas, membros e principal opcionais com escopo/auditoria; seis fragmentos específicos validados, sem conclusão integral do Cadastro Mestre.",
+          "files": [
+            "app/models/jrc_customers/economic_group.rb",
+            "app/services/jrc_customers/economic_group_writer.rb",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/TaxonomyPage.vue"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/economic_groups_checkpoint_20261103.json",
+            "199/0 backend;145/0 frontend final",
+            "Chrome:grupo127 preservado,128 excluído; temas200–204 estáveis"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Preservar o incremento validado; continuar C5 e demais requisitos do inventário."
         },
         {
           "id": "cadastro-mestre:P0367",

@@ -158,8 +158,8 @@
       "requirement": "Segmentos/critérios/prévia, grupos econômicos separados de etiquetas, importações e contatos ativos",
       "status": "parcial",
       "constraint": "Não conceder acesso por segmento; preservar regras e engines existentes.",
-      "existing": "C4a/C4b validaram definições, critérios corporativos, prévia, escolhas manuais, CRUD auditado, separação entre classificação estática e definição dinâmica, proteção de classificações em uso e filtro visível com busca/paginação/URL no diretório. Grupos econômicos, métricas/TRR, demais módulos, importações mapeadas e contatos ativos continuam parciais.",
-      "report": "docs/jrc_customers/segment_filter_checkpoint_20261103.json"
+      "existing": "C4a/C4b/C4c validaram definições/prévia/escolhas, classificação estática x dinâmica, filtro visível, grupos econômicos com membros/principal/auditoria separados das etiquetas nativas e preservação de popup/rascunho em refresh de atividade. Chrome desktop/celular claro/escuro e integridade passaram. Métricas/TRR, demais módulos, central de importações e Contatos ativos permanecem parciais.",
+      "report": "docs/jrc_customers/economic_groups_checkpoint_20261103.json"
     }
   ],
   "approval_central": {
@@ -528,5 +528,12 @@
   "customer_segment_filter_checkpoint_20261103": {
     "status": "parcial",
     "report": "docs/jrc_customers/segment_filter_checkpoint_20261103.json"
+  },
+  "economic_groups_checkpoint_20261103": {
+    "status": "incremento validado; escopo integral parcial",
+    "report": "docs/jrc_customers/economic_groups_checkpoint_20261103.json",
+    "backend": "199/0; fonte não frontend idêntica no ajuste",
+    "frontend": "145/0 final",
+    "chrome": "10 verificações com grupo127 preservado/128 excluído;5 capturas estáveis"
   }
 }
