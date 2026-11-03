@@ -41,6 +41,6 @@ export const routes = [
     path: frontendURL('accounts/:accountId/customers/imports'),
     name: 'jrc_customer_imports',
     component: scoped(ImportsPage),
-    meta: { ...meta, permissions: ['administrator'] },
+    meta: { ...meta, permissions: ['administrator', 'contact_manage'] },
   },
 ];

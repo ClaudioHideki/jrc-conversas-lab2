@@ -338,5 +338,80 @@ class CustomerAPI extends ApiClient {
       body
     );
   }
+
+  importUrl(options = {}) {
+    const url =
+      options.accountId === undefined
+        ? this.url
+        : this.urlForAccount(options.accountId);
+    return `${url}/import_runs`;
+  }
+
+  importMetadata(options = {}) {
+    const { accountId, ...request } = options;
+    return axios.get(`${this.importUrl({ accountId })}/metadata`, request);
+  }
+
+  importTemplate(kind, options = {}) {
+    const { accountId, ...request } = options;
+    return axios.get(`${this.importUrl({ accountId })}/template`, {
+      ...request,
+      params: { kind },
+      responseType: 'blob',
+    });
+  }
+
+  importRuns(params = {}, options = {}) {
+    const { accountId, ...request } = options;
+    return axios.get(this.importUrl({ accountId }), { ...request, params });
+  }
+
+  importRun(id, options = {}) {
+    const { accountId, ...request } = options;
+    return axios.get(`${this.importUrl({ accountId })}/${id}`, request);
+  }
+
+  uploadImport(file, kind, delimiter, options = {}) {
+    const { accountId, ...request } = options;
+    const body = new FormData();
+    body.append('file', file);
+    body.append('kind', kind);
+    if (delimiter) body.append('delimiter', delimiter);
+    return axios.post(this.importUrl({ accountId }), body, request);
+  }
+
+  previewImport(id, values, options = {}) {
+    const { accountId, ...request } = options;
+    return axios.post(
+      `${this.importUrl({ accountId })}/${id}/preview`,
+      values,
+      request
+    );
+  }
+
+  applyImport(id, token, options = {}) {
+    const { accountId, ...request } = options;
+    return axios.post(
+      `${this.importUrl({ accountId })}/${id}/apply`,
+      { token, confirm: true },
+      request
+    );
+  }
+
+  importRecords(id, view, params = {}, options = {}) {
+    const { accountId, ...request } = options;
+    return axios.get(`${this.importUrl({ accountId })}/${id}/${view}`, {
+      ...request,
+      params,
+    });
+  }
+
+  importErrorsFile(id, options = {}) {
+    const { accountId, ...request } = options;
+    return axios.get(`${this.importUrl({ accountId })}/${id}/errors.csv`, {
+      ...request,
+      responseType: 'blob',
+    });
+  }
 }
 export default new CustomerAPI();

@@ -338,7 +338,27 @@ describe('Relationship center pagination', () => {
     expect(store.dispatch).toHaveBeenCalledWith('contacts/clearContactFilters');
   });
 
+  it('opens the reviewed import central in the current account when Customer Master is enabled', async () => {
+    route.params.accountId = '2';
+    wrapper = page({ ContactListHeaderWrapper: false });
+    await flushPromises();
+    wrapper
+      .findComponent(ContactListHeaderWrapper)
+      .findComponent(ContactHeader)
+      .vm.$emit('import');
+    await flushPromises();
+    expect(useRouter().push).toHaveBeenCalledWith({
+      name: 'jrc_customer_imports',
+      params: { accountId: 2 },
+      query: { kind: 'contacts' },
+    });
+    expect(
+      store.dispatch.mock.calls.some(([action]) => action === 'contacts/import')
+    ).toBe(false);
+  });
+
   it('opens native create/import dialogs and dispatches their payloads through the existing store', async () => {
+    store.getters['accounts/isFeatureEnabledonAccount'] = () => false;
     const openCreate = vi.fn();
     const openImport = vi.fn();
     const createSuccess = vi.fn();

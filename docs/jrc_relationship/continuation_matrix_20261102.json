@@ -158,8 +158,8 @@
       "requirement": "Segmentos/critérios/prévia, grupos econômicos separados de etiquetas, importações e contatos ativos",
       "status": "parcial",
       "constraint": "Não conceder acesso por segmento; preservar regras e engines existentes.",
-      "existing": "C4a/C4b/C4c validaram definições/prévia/escolhas, classificação estática x dinâmica, filtro visível, grupos econômicos com membros/principal/auditoria separados das etiquetas nativas e preservação de popup/rascunho em refresh de atividade. Chrome desktop/celular claro/escuro e integridade passaram. Métricas/TRR, demais módulos, central de importações e Contatos ativos permanecem parciais.",
-      "report": "docs/jrc_customers/economic_groups_checkpoint_20261103.json"
+      "existing": "C4a/b/c preservados. C5 Central única de Importações concluída com arquivo/mapeamento/prévia/confirmação/resultado/histórico privado, popups canônicos, persistência e permissões validadas no Chrome desktop/celular. Contatos ativos operacionais, critérios financeiros/TRR e filtros nos demais módulos ainda parciais.",
+      "report": "docs/jrc_customers/import_central_checkpoint_20261103.json"
     }
   ],
   "approval_central": {

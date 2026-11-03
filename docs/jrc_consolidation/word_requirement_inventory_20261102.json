@@ -6811,14 +6811,29 @@
           },
           "requirement_text": "Substituir importações fragmentadas por uma central única para Empresas, Contatos ou ambos. Toda importação deve ter validação, prévia, resultado e histórico.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "DataImport/DataImportItem/DataImportError",
+            "ImportPlan/Review/Execution",
+            "CompanyWriter/CompanyContactWriter/IdentityResolver",
+            "ContactDirectory/CorporateCoverage",
+            "Popups canônicos Company/Contact"
+          ],
+          "implemented_change": "Central C5 com fluxo integral de revisão, confirmação e resultado privado, preservando as regras nativas; validada em banco sintético e Chrome, sem conclusão dos demais requisitos do Cadastro Mestre.",
+          "files": [
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/ImportsPage.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/useCustomerImports.js",
+            "app/controllers/api/v1/accounts/customers/import_runs_controller.rb",
+            "app/services/jrc_customers/import_execution.rb"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/import_central_checkpoint_20261103.json",
+            "188/0 backend;155/0 frontend;10/0 pós-apresentação;14 arquivos ESLint0/0",
+            "Chrome real e integridade102 registros/29 arquivos preservados"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Preservar o incremento; continuar Contatos ativos e demais requisitos C/D/E/F/G."
         },
         {
           "id": "cadastro-mestre:P0300",
@@ -6871,14 +6886,29 @@
           },
           "requirement_text": "Arquivo: upload CSV UTF-8, download de modelo e seleção do tipo de importação.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "DataImport/DataImportItem/DataImportError",
+            "ImportPlan/Review/Execution",
+            "CompanyWriter/CompanyContactWriter/IdentityResolver",
+            "ContactDirectory/CorporateCoverage",
+            "Popups canônicos Company/Contact"
+          ],
+          "implemented_change": "Central C5 com fluxo integral de revisão, confirmação e resultado privado, preservando as regras nativas; validada em banco sintético e Chrome, sem conclusão dos demais requisitos do Cadastro Mestre.",
+          "files": [
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/ImportsPage.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/useCustomerImports.js",
+            "app/controllers/api/v1/accounts/customers/import_runs_controller.rb",
+            "app/services/jrc_customers/import_execution.rb"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/import_central_checkpoint_20261103.json",
+            "188/0 backend;155/0 frontend;10/0 pós-apresentação;14 arquivos ESLint0/0",
+            "Chrome real e integridade102 registros/29 arquivos preservados"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Preservar o incremento; continuar Contatos ativos e demais requisitos C/D/E/F/G."
         },
         {
           "id": "cadastro-mestre:P0303",
@@ -6891,14 +6921,29 @@
           },
           "requirement_text": "Configuração: mapear colunas do arquivo para os campos do JRC e definir tratamento de registros existentes.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "DataImport/DataImportItem/DataImportError",
+            "ImportPlan/Review/Execution",
+            "CompanyWriter/CompanyContactWriter/IdentityResolver",
+            "ContactDirectory/CorporateCoverage",
+            "Popups canônicos Company/Contact"
+          ],
+          "implemented_change": "Central C5 com fluxo integral de revisão, confirmação e resultado privado, preservando as regras nativas; validada em banco sintético e Chrome, sem conclusão dos demais requisitos do Cadastro Mestre.",
+          "files": [
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/ImportsPage.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/useCustomerImports.js",
+            "app/controllers/api/v1/accounts/customers/import_runs_controller.rb",
+            "app/services/jrc_customers/import_execution.rb"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/import_central_checkpoint_20261103.json",
+            "188/0 backend;155/0 frontend;10/0 pós-apresentação;14 arquivos ESLint0/0",
+            "Chrome real e integridade102 registros/29 arquivos preservados"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Preservar o incremento; continuar Contatos ativos e demais requisitos C/D/E/F/G."
         },
         {
           "id": "cadastro-mestre:P0304",
@@ -6913,31 +6958,27 @@
           "is_heading": false,
           "classification_pending": false,
           "existing_code_reused": [
-            "JrcCrm::CorporateCoverage",
-            "JrcCustomers::CompanyWriter",
-            "JrcCustomers::CompanyImport",
-            "Api::V1::Accounts::Customers::BaseController",
-            "JrcCustomers::DirectoryPolicy"
+            "DataImport/DataImportItem/DataImportError",
+            "ImportPlan/Review/Execution",
+            "CompanyWriter/CompanyContactWriter/IdentityResolver",
+            "ContactDirectory/CorporateCoverage",
+            "Popups canônicos Company/Contact"
           ],
-          "implemented_change": "Prévia de empresas e gravação reutilizam a cobertura nativa; alvo interno fora da abrangência não é retornado nem aplicado. Token não concede acesso após revogação. Escopo específico validado por API e navegador; não equivale à central completa de importação.",
+          "implemented_change": "Central C5 com fluxo integral de revisão, confirmação e resultado privado, preservando as regras nativas; validada em banco sintético e Chrome, sem conclusão dos demais requisitos do Cadastro Mestre.",
           "files": [
-            "app/services/jrc_crm/corporate_coverage.rb",
-            "app/services/jrc_customers/company_writer.rb",
-            "app/services/jrc_customers/company_import.rb"
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/ImportsPage.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/useCustomerImports.js",
+            "app/controllers/api/v1/accounts/customers/import_runs_controller.rb",
+            "app/services/jrc_customers/import_execution.rb"
           ],
-          "status": "parcial",
+          "status": "concluído",
           "tests_and_evidence": [
-            "docs/jrc_customers/company_corporate_scope_checkpoint_20261102.json",
-            ".codex/customer-company-scope-backend.json",
-            ".codex/customer-company-scope-nexora-baseline.json",
-            "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/importacao-cobertura-resultado.json",
-            ".codex/company-scope-ui-integrity.json"
+            "docs/jrc_customers/import_central_checkpoint_20261103.json",
+            "188/0 backend;155/0 frontend;10/0 pós-apresentação;14 arquivos ESLint0/0",
+            "Chrome real e integridade102 registros/29 arquivos preservados"
           ],
-          "dependencies": [
-            "Central de importação/mapeamento/lote e histórico ainda incompletos",
-            "Gate global Nexora e lint legado continuam abertos"
-          ],
-          "next_action": "Completar os demais critérios de prévia e processamento para empresas/contatos, preservando as regras nativas e a cobertura por chamada."
+          "dependencies": [],
+          "next_action": "Preservar o incremento; continuar Contatos ativos e demais requisitos C/D/E/F/G."
         },
         {
           "id": "cadastro-mestre:P0305",
@@ -6950,14 +6991,29 @@
           },
           "requirement_text": "Importar: confirmar execução e processar com relatório final auditável.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "DataImport/DataImportItem/DataImportError",
+            "ImportPlan/Review/Execution",
+            "CompanyWriter/CompanyContactWriter/IdentityResolver",
+            "ContactDirectory/CorporateCoverage",
+            "Popups canônicos Company/Contact"
+          ],
+          "implemented_change": "Central C5 com fluxo integral de revisão, confirmação e resultado privado, preservando as regras nativas; validada em banco sintético e Chrome, sem conclusão dos demais requisitos do Cadastro Mestre.",
+          "files": [
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/ImportsPage.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/useCustomerImports.js",
+            "app/controllers/api/v1/accounts/customers/import_runs_controller.rb",
+            "app/services/jrc_customers/import_execution.rb"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/import_central_checkpoint_20261103.json",
+            "188/0 backend;155/0 frontend;10/0 pós-apresentação;14 arquivos ESLint0/0",
+            "Chrome real e integridade102 registros/29 arquivos preservados"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Preservar o incremento; continuar Contatos ativos e demais requisitos C/D/E/F/G."
         },
         {
           "id": "cadastro-mestre:P0306",
@@ -6990,14 +7046,29 @@
           },
           "requirement_text": "Empresa: identificar atualização preferencialmente por ID interno ou CNPJ/CPF normalizado; nome isolado não deve provocar mescla automática.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "DataImport/DataImportItem/DataImportError",
+            "ImportPlan/Review/Execution",
+            "CompanyWriter/CompanyContactWriter/IdentityResolver",
+            "ContactDirectory/CorporateCoverage",
+            "Popups canônicos Company/Contact"
+          ],
+          "implemented_change": "Central C5 com fluxo integral de revisão, confirmação e resultado privado, preservando as regras nativas; validada em banco sintético e Chrome, sem conclusão dos demais requisitos do Cadastro Mestre.",
+          "files": [
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/ImportsPage.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/useCustomerImports.js",
+            "app/controllers/api/v1/accounts/customers/import_runs_controller.rb",
+            "app/services/jrc_customers/import_execution.rb"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/import_central_checkpoint_20261103.json",
+            "188/0 backend;155/0 frontend;10/0 pós-apresentação;14 arquivos ESLint0/0",
+            "Chrome real e integridade102 registros/29 arquivos preservados"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Preservar o incremento; continuar Contatos ativos e demais requisitos C/D/E/F/G."
         },
         {
           "id": "cadastro-mestre:P0308",
@@ -7010,14 +7081,29 @@
           },
           "requirement_text": "Contato: usar identificadores disponíveis e alertar possíveis duplicidades por e-mail/telefone; não mesclar silenciosamente.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "DataImport/DataImportItem/DataImportError",
+            "ImportPlan/Review/Execution",
+            "CompanyWriter/CompanyContactWriter/IdentityResolver",
+            "ContactDirectory/CorporateCoverage",
+            "Popups canônicos Company/Contact"
+          ],
+          "implemented_change": "Central C5 com fluxo integral de revisão, confirmação e resultado privado, preservando as regras nativas; validada em banco sintético e Chrome, sem conclusão dos demais requisitos do Cadastro Mestre.",
+          "files": [
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/ImportsPage.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/useCustomerImports.js",
+            "app/controllers/api/v1/accounts/customers/import_runs_controller.rb",
+            "app/services/jrc_customers/import_execution.rb"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/import_central_checkpoint_20261103.json",
+            "188/0 backend;155/0 frontend;10/0 pós-apresentação;14 arquivos ESLint0/0",
+            "Chrome real e integridade102 registros/29 arquivos preservados"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Preservar o incremento; continuar Contatos ativos e demais requisitos C/D/E/F/G."
         },
         {
           "id": "cadastro-mestre:P0309",
@@ -7030,14 +7116,29 @@
           },
           "requirement_text": "Exibir erro por linha/campo e permitir baixar relatório de erros.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "DataImport/DataImportItem/DataImportError",
+            "ImportPlan/Review/Execution",
+            "CompanyWriter/CompanyContactWriter/IdentityResolver",
+            "ContactDirectory/CorporateCoverage",
+            "Popups canônicos Company/Contact"
+          ],
+          "implemented_change": "Central C5 com fluxo integral de revisão, confirmação e resultado privado, preservando as regras nativas; validada em banco sintético e Chrome, sem conclusão dos demais requisitos do Cadastro Mestre.",
+          "files": [
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/ImportsPage.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/useCustomerImports.js",
+            "app/controllers/api/v1/accounts/customers/import_runs_controller.rb",
+            "app/services/jrc_customers/import_execution.rb"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/import_central_checkpoint_20261103.json",
+            "188/0 backend;155/0 frontend;10/0 pós-apresentação;14 arquivos ESLint0/0",
+            "Chrome real e integridade102 registros/29 arquivos preservados"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Preservar o incremento; continuar Contatos ativos e demais requisitos C/D/E/F/G."
         },
         {
           "id": "cadastro-mestre:P0310",
@@ -7050,14 +7151,29 @@
           },
           "requirement_text": "Nenhuma importação deve apagar registros por omissão de linha.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "DataImport/DataImportItem/DataImportError",
+            "ImportPlan/Review/Execution",
+            "CompanyWriter/CompanyContactWriter/IdentityResolver",
+            "ContactDirectory/CorporateCoverage",
+            "Popups canônicos Company/Contact"
+          ],
+          "implemented_change": "Central C5 com fluxo integral de revisão, confirmação e resultado privado, preservando as regras nativas; validada em banco sintético e Chrome, sem conclusão dos demais requisitos do Cadastro Mestre.",
+          "files": [
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/ImportsPage.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/useCustomerImports.js",
+            "app/controllers/api/v1/accounts/customers/import_runs_controller.rb",
+            "app/services/jrc_customers/import_execution.rb"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/import_central_checkpoint_20261103.json",
+            "188/0 backend;155/0 frontend;10/0 pós-apresentação;14 arquivos ESLint0/0",
+            "Chrome real e integridade102 registros/29 arquivos preservados"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Preservar o incremento; continuar Contatos ativos e demais requisitos C/D/E/F/G."
         },
         {
           "id": "cadastro-mestre:P0311",
@@ -7072,31 +7188,27 @@
           "is_heading": false,
           "classification_pending": false,
           "existing_code_reused": [
-            "JrcCrm::CorporateCoverage",
-            "JrcCustomers::CompanyWriter",
-            "JrcCustomers::CompanyImport",
-            "Api::V1::Accounts::Customers::BaseController",
-            "JrcCustomers::DirectoryPolicy"
+            "DataImport/DataImportItem/DataImportError",
+            "ImportPlan/Review/Execution",
+            "CompanyWriter/CompanyContactWriter/IdentityResolver",
+            "ContactDirectory/CorporateCoverage",
+            "Popups canônicos Company/Contact"
           ],
-          "implemented_change": "Prévia de empresas e gravação reutilizam a cobertura nativa; alvo interno fora da abrangência não é retornado nem aplicado. Token não concede acesso após revogação. Escopo específico validado por API e navegador; não equivale à central completa de importação.",
+          "implemented_change": "Central C5 com fluxo integral de revisão, confirmação e resultado privado, preservando as regras nativas; validada em banco sintético e Chrome, sem conclusão dos demais requisitos do Cadastro Mestre.",
           "files": [
-            "app/services/jrc_crm/corporate_coverage.rb",
-            "app/services/jrc_customers/company_writer.rb",
-            "app/services/jrc_customers/company_import.rb"
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/ImportsPage.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/useCustomerImports.js",
+            "app/controllers/api/v1/accounts/customers/import_runs_controller.rb",
+            "app/services/jrc_customers/import_execution.rb"
           ],
-          "status": "parcial",
+          "status": "concluído",
           "tests_and_evidence": [
-            "docs/jrc_customers/company_corporate_scope_checkpoint_20261102.json",
-            ".codex/customer-company-scope-backend.json",
-            ".codex/customer-company-scope-nexora-baseline.json",
-            "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/importacao-cobertura-resultado.json",
-            ".codex/company-scope-ui-integrity.json"
+            "docs/jrc_customers/import_central_checkpoint_20261103.json",
+            "188/0 backend;155/0 frontend;10/0 pós-apresentação;14 arquivos ESLint0/0",
+            "Chrome real e integridade102 registros/29 arquivos preservados"
           ],
-          "dependencies": [
-            "Central de importação/mapeamento/lote e histórico ainda incompletos",
-            "Gate global Nexora e lint legado continuam abertos"
-          ],
-          "next_action": "Completar os demais critérios de prévia e processamento para empresas/contatos, preservando as regras nativas e a cobertura por chamada."
+          "dependencies": [],
+          "next_action": "Preservar o incremento; continuar Contatos ativos e demais requisitos C/D/E/F/G."
         },
         {
           "id": "cadastro-mestre:P0312",
@@ -7109,14 +7221,29 @@
           },
           "requirement_text": "Manter histórico com arquivo, tipo, usuário, data/hora, totais, resultado e erros.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "DataImport/DataImportItem/DataImportError",
+            "ImportPlan/Review/Execution",
+            "CompanyWriter/CompanyContactWriter/IdentityResolver",
+            "ContactDirectory/CorporateCoverage",
+            "Popups canônicos Company/Contact"
+          ],
+          "implemented_change": "Central C5 com fluxo integral de revisão, confirmação e resultado privado, preservando as regras nativas; validada em banco sintético e Chrome, sem conclusão dos demais requisitos do Cadastro Mestre.",
+          "files": [
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/ImportsPage.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/useCustomerImports.js",
+            "app/controllers/api/v1/accounts/customers/import_runs_controller.rb",
+            "app/services/jrc_customers/import_execution.rb"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/import_central_checkpoint_20261103.json",
+            "188/0 backend;155/0 frontend;10/0 pós-apresentação;14 arquivos ESLint0/0",
+            "Chrome real e integridade102 registros/29 arquivos preservados"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Preservar o incremento; continuar Contatos ativos e demais requisitos C/D/E/F/G."
         },
         {
           "id": "cadastro-mestre:P0313",
