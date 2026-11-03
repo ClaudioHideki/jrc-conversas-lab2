@@ -139,12 +139,15 @@
     {
       "requirement": "Detalhes em modal e abas dos módulos sem submenus duplicados",
       "status": "parcial",
-      "existing": "Revisar tela atual contra figuras; abas adicionais ainda sem homologação nesta continuação."
+      "existing": "Empresas agora usam popup canônico com criação/edição em abas, contexto da lista, mapa/histórico próprios e provas reais Chrome. Contatos e segmentos ainda pendentes.",
+      "report": "docs/jrc_customers/company_context_checkpoint_20261102.json"
     },
     {
       "requirement": "Visão contextual Backoffice: solicitações, documentação, aprovações, contratos, pendências, histórico",
-      "status": "pendente",
-      "constraint": "Somente registros do cliente, com autorização do módulo de origem."
+      "status": "parcial",
+      "constraint": "Somente registros do cliente, com autorização do módulo de origem.",
+      "existing": "Visões de solicitações nativas por empresa, etapas e histórico seguro com links de origem. Backend/API/temas/celular validados; não equivale à Central documental integral.",
+      "report": "docs/jrc_customers/company_context_checkpoint_20261102.json"
     },
     {
       "requirement": "Pessoa/empresa, deduplicação e vínculo do assinante",
@@ -485,6 +488,20 @@
     },
     "browser": "Agente sem GROUP, prévia claro/escuro, confirmação 202, reabertura, cancelamento 200, versão reutilizada bloqueada, conta estrangeira 401, celular, PDF/conexão e 17 registros anteriores preservados; nenhuma assinatura externa.",
     "remaining": "PDF final/certificado/verificador, consulta direta/reenvio/lembrete/cancelamento após despacho e demo pendentes; SignatureEvidence.verifier nil. C/D/E/F/G completos continuam a executar.",
+    "publication": false
+  },
+  "company_context_increment": {
+    "status": "incremento C1 local validado; C e B→G parciais",
+    "report": "docs/jrc_customers/company_context_checkpoint_20261102.json",
+    "backend": {
+      "examples": 63,
+      "failures": 0
+    },
+    "frontend": {
+      "tests": 36,
+      "failures": 0
+    },
+    "original_rows_preserved": 27,
     "publication": false
   }
 }

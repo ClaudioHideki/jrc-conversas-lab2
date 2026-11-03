@@ -9,10 +9,14 @@ class JrcBackoffice::ContractAccess
   end
 
   def request(id)
+    requests.find(id)
+  end
+
+  def requests
     member = membership!
     rows = account.jrc_crm_backoffice_requests
     rows = rows.where(owner_id: actor.id) unless member.administrator?
-    JrcCrm::OrganizationalVisibility.new(account: account, user: actor, relation: rows).call.find(id)
+    JrcCrm::OrganizationalVisibility.new(account: account, user: actor, relation: rows).call
   end
 
   def membership!

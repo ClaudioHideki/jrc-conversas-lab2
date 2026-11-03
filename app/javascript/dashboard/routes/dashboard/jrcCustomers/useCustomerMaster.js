@@ -7,6 +7,14 @@ export function useCustomerMaster() {
   const feature = useMapGetter('accounts/isFeatureEnabledonAccount');
   const role = useMapGetter('getCurrentRole');
   const user = useMapGetter('getCurrentUser');
+  const identity = computed(() =>
+    JSON.stringify([
+      accountId.value,
+      user.value?.id,
+      role.value,
+      user.value?.accounts?.find(item => Number(item.id) === accountId.value),
+    ])
+  );
   const enabled = computed(() =>
     Boolean(feature.value(accountId.value, FEATURE_FLAGS.JRC_CUSTOMER_MASTER))
   );
@@ -38,5 +46,13 @@ export function useCustomerMaster() {
       return parsed.toLocaleString('pt-BR');
     }
   };
-  return { accountId, enabled, canAccess, canAdmin, accountScopedRoute, date };
+  return {
+    accountId,
+    identity,
+    enabled,
+    canAccess,
+    canAdmin,
+    accountScopedRoute,
+    date,
+  };
 }

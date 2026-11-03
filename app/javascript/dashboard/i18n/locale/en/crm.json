@@ -1285,6 +1285,53 @@
         "failed": "Falha registrada",
         "unknown": "Aguardando validação"
       }
+    },
+    "CUSTOMER_MASTER_360": {
+      "COMPANY_DETAILS": "Empresa 360º",
+      "OPEN_FULL_PAGE": "Abrir em tela completa",
+      "BACKOFFICE_TITLE": "Backoffice",
+      "BACKOFFICE_DESCRIPTION": "Solicitações e etapas desta empresa. Abra a solicitação para consultar documentos, aprovações e ações operacionais.",
+      "VIEWS": {
+        "requests": "Solicitações",
+        "documents": "Documentação",
+        "approvals": "Aprovações",
+        "contracts": "Contratos",
+        "issues": "Pendências",
+        "history": "Histórico"
+      },
+      "COUNTS": {
+        "total": "Solicitações",
+        "active": "Em operação",
+        "overdue": "Prazo vencido",
+        "completed": "Concluídas"
+      },
+      "SEARCH": "Número, título, pedido ou responsável",
+      "SEARCH_BUTTON": "Pesquisar",
+      "LOADING": "Carregando dados do Backoffice…",
+      "DENIED": "Seu acesso ao Backoffice desta empresa não está disponível.",
+      "LOAD_ERROR": "Não foi possível carregar o Backoffice. Tente atualizar.",
+      "EMPTY": "Nenhum registro autorizado nesta visão.",
+      "OPEN_REQUEST": "Abrir solicitação",
+      "PAGINATION": "Páginas do Backoffice desta empresa",
+      "PREVIOUS": "Anterior",
+      "NEXT": "Próxima",
+      "REFRESH": "Atualizar",
+      "EVENT_CREATED": "Solicitação criada",
+      "EVENT_UPDATED": "Solicitação atualizada",
+      "EVENT_STAGE": "Etapa alterada",
+      "EVENT_DOCUMENT": "Documento enviado",
+      "EVENT_DOCUMENT_DECISION": "Decisão documental registrada",
+      "EVENT_ISSUE": "Pendência aberta",
+      "EVENT_ISSUE_RESOLVED": "Pendência resolvida",
+      "EVENT_REOPENED": "Solicitação reaberta",
+      "EVENT_RECORDED": "Evento registrado",
+      "EDITOR_SECTIONS": "Seções do cadastro da empresa",
+      "EDITOR_IDENTITY": "Identificação",
+      "EDITOR_COMMUNICATION": "Contatos e canais",
+      "EDITOR_CLASSIFICATION": "Classificação",
+      "EDITOR_STRUCTURE": "Estrutura e observações",
+      "RELATIONSHIP_MAP": "Mapa de relacionamento",
+      "UNSPECIFIED": "Não informado"
     }
   }
 }

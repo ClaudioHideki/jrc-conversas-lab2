@@ -48,6 +48,13 @@ class Api::V1::Accounts::Customers::CompaniesController < Api::V1::Accounts::Cus
     render json: context(company: @company).relationship_map
   end
 
+  def backoffice
+    response.headers['Cache-Control'] = 'no-store'
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    query = JrcCustomers::BackofficeContext.new(account: Current.account, actor: Current.user, company: @company)
+    render json: query.call(params: params.permit(:view, :page, :per_page, :q, :status))
+  end
+
   def timeline
     value = JrcCustomers::Timeline.new(context: context(company: @company), account: Current.account, user: Current.user)
     render json: value.call(cursor: params[:cursor], limit: params.fetch(:per_page, 30))

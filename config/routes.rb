@@ -425,6 +425,7 @@ Rails.application.routes.draw do
               member do
                 get :overview
                 get :relationships
+                get :backoffice
                 get :timeline
                 get :records
               end

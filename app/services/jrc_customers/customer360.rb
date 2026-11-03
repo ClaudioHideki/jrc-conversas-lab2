@@ -29,7 +29,8 @@ class JrcCustomers::Customer360
     values = {
       contacts: contacts.count, conversations_open: conversations.where(status: :open).count,
       capabilities: { conversations: true, crm: @visibility.crm?, calls: !calls.nil?, campaigns: !recipients.nil?,
-                      service_desk: @visibility.service_desk?, projects: @visibility.projects?, contracts: @visibility.crm?, central_sip_cdr: false, relationship: !@relationship_assignment.nil? },
+                      service_desk: @visibility.service_desk?, projects: @visibility.projects?, contracts: @visibility.crm?,
+                      backoffice: @visibility.crm?, central_sip_cdr: false, relationship: !@relationship_assignment.nil? },
       relationship: @relationship_assignment && { id: @relationship_assignment.id, status: @relationship_assignment.status },
       visibility: 'Counts and items are restricted to the signed-in user. Missing modules are not counted as zero.'
     }
@@ -61,9 +62,7 @@ class JrcCustomers::Customer360
                                   .where(message_type: [0, 1]).maximum(:created_at)
     interactions = [last_conversation_at, activities.maximum(:completed_at), calls&.maximum(:started_at),
                     ticket_events.maximum(:created_at), project_events.maximum(:created_at)]
-    values[:last_conversation_at] = last_conversation_at&.iso8601
-    values[:last_interaction_at] = interactions.compact.max&.iso8601
-    values
+    values.merge(last_conversation_at: last_conversation_at&.iso8601, last_interaction_at: interactions.compact.max&.iso8601)
   end
 
   def sources

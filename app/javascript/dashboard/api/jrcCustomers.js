@@ -5,8 +5,11 @@ class CustomerAPI extends ApiClient {
     super('customers', { accountScoped: true });
   }
 
-  metadata() {
-    return axios.get(`${this.url}/metadata`);
+  metadata(options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const url =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
+    return axios.get(`${url}/metadata`, requestOptions);
   }
 
   identity(params) {
@@ -43,8 +46,21 @@ class CustomerAPI extends ApiClient {
       : axios.post(`${this.url}/companies`, { company });
   }
 
-  overview(id) {
-    return axios.get(`${this.url}/companies/${id}/overview`);
+  overview(id, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const url =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
+    return axios.get(`${url}/companies/${id}/overview`, requestOptions);
+  }
+
+  backoffice(id, params = {}, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const url =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
+    return axios.get(`${url}/companies/${id}/backoffice`, {
+      ...requestOptions,
+      params,
+    });
   }
 
   relationships(id) {
