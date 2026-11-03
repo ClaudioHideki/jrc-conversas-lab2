@@ -1,4 +1,5 @@
 <script setup>
+import { useCustomerSegmentFilter } from '../../helpers/useCustomerSegmentFilter';
 /* eslint-disable vue/no-bare-strings-in-template */
 import ApprovalGateBadge from 'dashboard/routes/dashboard/approvals/ApprovalGateBadge.vue';
 import { computed, onMounted, ref, watch } from 'vue';
@@ -299,20 +300,34 @@ const open = async row => {
     detailLoading.value = false;
   }
 };
+const { segmentParams, watchSegment } = useCustomerSegmentFilter();
+let listGeneration = 0;
 const load = async () => {
+  listGeneration += 1;
+  const token = listGeneration;
+  rows.value = [];
   loading.value = true;
   try {
-    const response = await salesOrdersAPI.list();
+    const response = await salesOrdersAPI.list(segmentParams());
+    if (token !== listGeneration) return;
     rows.value = response.data || [];
     const q = route.query.orderId;
     if (q) {
       const row = rows.value.find(x => String(x.id) === String(q));
       if (row) await open(row);
     }
+  } catch {
+    if (token === listGeneration)
+      useAlert('Não foi possível carregar os pedidos.');
   } finally {
-    loading.value = false;
+    if (token === listGeneration) loading.value = false;
   }
 };
+watchSegment(() => {
+  page.value = 1;
+  selectedIds.value = [];
+  return load();
+});
 const close = () => {
   selected.value = null;
   const q = { ...route.query };

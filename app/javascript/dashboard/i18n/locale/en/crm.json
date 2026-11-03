@@ -1406,6 +1406,13 @@
       "VALUE": "Valor",
       "EQUAL": "É igual a",
       "NOT_EQUAL": "É diferente de",
+      "GREATER_THAN": "É maior que",
+      "AT_LEAST": "É maior ou igual a",
+      "LESS_THAN": "É menor que",
+      "AT_MOST": "É menor ou igual a",
+      "PERIOD_START": "Início do período",
+      "PERIOD_END": "Fim do período",
+      "FINANCIAL_HELP": "Considera somente pedidos e contratos que você pode consultar no CRM. Faturamento em reais: soma dos pedidos faturados, em entrega ou ativos, pela data da venda (ou fechamento/criação), no fuso da conta. Contratos: quantidade nos estados ativo e próximo do vencimento. TRR ainda não disponível.",
       "ADD_RULE": "Adicionar critério",
       "REMOVE_RULE": "Remover critério",
       "CRITERIA_HELP": "Selecione os valores do cadastro. Cidade e UF usam correspondência exata. Máximo de 20 critérios; todos os resultados respeitam o seu acesso.",
@@ -1434,7 +1441,9 @@
         "city": "Cidade",
         "state": "UF",
         "size": "Porte",
-        "source": "Origem"
+        "source": "Origem",
+        "invoiced_revenue": "Faturamento de pedidos no período (R$)",
+        "active_contract_count": "Quantidade de contratos ativos"
       },
       "MODULES": {
         "crm": "CRM",
@@ -1446,6 +1455,8 @@
       },
       "SYSTEM": "Sistema",
       "FILTER_LABEL": "Filtrar por segmento",
+      "MODULE_FILTER_HELP": "A seleção é aplicada à lista atual e fica no endereço para recarregar ou voltar. Somente segmentos ativos publicados neste módulo estão disponíveis. As permissões do módulo continuam valendo.",
+      "UNAVAILABLE_MODULE_FILTER": "Este segmento está inativo ou não está publicado neste módulo. Limpe o filtro ou escolha outro segmento.",
       "SEARCH_FILTER": "Pesquisar segmento",
       "CLEAR_FILTER": "Limpar filtro de segmento",
       "COMPANY_CLASSIFICATION": "Classificação da empresa",

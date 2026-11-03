@@ -5728,7 +5728,7 @@
             "JrcCustomers::Audit",
             "CustomFilter pessoal nativo"
           ],
-          "implemented_change": "Definição, wizard, prévia, escolhas manuais, CRUD auditado e escopo validados no incremento C4a; requisitos financeiros, distinção de seletores e filtros de todos os módulos permanecem parciais conforme o relatório.",
+          "implemented_change": "Definição, wizard, prévia, escolhas manuais, CRUD auditado e escopo validados no incremento C4a; requisitos financeiros, distinção de seletores e filtros de todos os módulos permanecem parciais conforme o relatório. | C7: faturamento de pedidos por período e contagem de contratos, com filtros CRM e gates automatizados. Build/Chrome pendentes por espaço. TRR e consumo nos demais módulos continuam pendentes.",
           "files": [
             "app/models/jrc_customers/taxonomy.rb",
             "app/models/jrc_customers/segment_override.rb",
@@ -5744,10 +5744,11 @@
           ],
           "status": "parcial",
           "tests_and_evidence": [
-            "docs/jrc_customers/segment_definition_checkpoint_20261103.json"
+            "docs/jrc_customers/segment_definition_checkpoint_20261103.json",
+            "docs/jrc_customers/financial_segments_crm_checkpoint_20261103.json"
           ],
           "dependencies": [],
-          "next_action": "Manter a validação do incremento e conferir os requisitos associados ainda parciais no relatório C4a."
+          "next_action": "Retomar build e Chrome após liberar espaço; concluir consumo nos demais módulos e manter TRR pendente de definição."
         },
         {
           "id": "cadastro-mestre:P0251",
@@ -5932,7 +5933,7 @@
             "JrcCustomers::Audit",
             "CustomFilter pessoal nativo"
           ],
-          "implemented_change": "Classificação estática separada de filtro dinâmico e filtro visível com paginação/URL no diretório de empresas, sem conceder permissões. Os demais módulos continuam pendentes.",
+          "implemented_change": "Classificação estática separada de filtro dinâmico e filtro visível com paginação/URL no diretório de empresas, sem conceder permissões. Os demais módulos continuam pendentes. | C7: faturamento de pedidos por período e contagem de contratos, com filtros CRM e gates automatizados. Build/Chrome pendentes por espaço. TRR e consumo nos demais módulos continuam pendentes.",
           "files": [
             "app/models/jrc_customers/taxonomy.rb",
             "app/models/jrc_customers/segment_override.rb",
@@ -5949,10 +5950,11 @@
           "status": "parcial",
           "tests_and_evidence": [
             "docs/jrc_customers/segment_definition_checkpoint_20261103.json",
-            "docs/jrc_customers/segment_filter_checkpoint_20261103.json"
+            "docs/jrc_customers/segment_filter_checkpoint_20261103.json",
+            "docs/jrc_customers/financial_segments_crm_checkpoint_20261103.json"
           ],
           "dependencies": [],
-          "next_action": "Manter a validação do incremento e conferir os requisitos associados ainda parciais no relatório C4a."
+          "next_action": "Retomar build e Chrome após liberar espaço; concluir consumo nos demais módulos e manter TRR pendente de definição."
         },
         {
           "id": "cadastro-mestre:P0257",

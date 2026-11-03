@@ -8,6 +8,7 @@ module Api::V1::Accounts::Crm
       rows = visible_to_current_user(crm_scope.jrc_crm_contracts)
              .includes(:contact, :owner, :sales_order, :deal, :contract_template, documents_attachments: :blob)
              .order(created_at: :desc)
+      rows = customer_segment_scope(rows)
       render json: rows.map { |contract| serialize(contract) }
     end
 

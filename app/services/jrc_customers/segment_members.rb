@@ -35,7 +35,7 @@ class JrcCustomers::SegmentMembers
     selected = if @taxonomy.selection_mode == 'classification'
                  scope.where(segment: @taxonomy.name)
                else
-                 JrcCustomers::SegmentCriteria.new(account: @account, scope: scope).call(@taxonomy.criteria)
+                 JrcCustomers::SegmentCriteria.new(account: @account, scope: scope, actor: @actor).call(@taxonomy.criteria)
                end
     apply_overrides(scope, selected, :company_id)
   end

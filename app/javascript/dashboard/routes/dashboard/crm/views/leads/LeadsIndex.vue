@@ -1,4 +1,5 @@
 <script setup>
+import { useCustomerSegmentFilter } from '../../helpers/useCustomerSegmentFilter';
 import { useQuickActionTarget } from 'dashboard/components-next/layout/useQuickActionTarget';
 /* eslint-disable vue/no-bare-strings-in-template, @intlify/vue-i18n/no-raw-text */
 import { computed, onMounted, reactive, ref } from 'vue';
@@ -84,7 +85,10 @@ const kanbanColumns = computed(() =>
 const selectedLead = computed(() =>
   leads.value.find(item => String(item.id) === String(route.query.leadId))
 );
-const load = () => store.dispatch('jrcCrm/leads/fetchLeads', filters);
+const { segmentParams, watchSegment } = useCustomerSegmentFilter();
+const load = () =>
+  store.dispatch('jrcCrm/leads/fetchLeads', segmentParams(filters));
+watchSegment(load);
 
 const openDetails = lead =>
   router.replace({ query: { ...route.query, leadId: lead.id } });

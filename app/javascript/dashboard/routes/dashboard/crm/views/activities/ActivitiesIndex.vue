@@ -1,4 +1,5 @@
 <script setup>
+import { useCustomerSegmentFilter } from '../../helpers/useCustomerSegmentFilter';
 import { useFormDraft } from '../../helpers/useFormDraft';
 import { useQuickActionTarget } from 'dashboard/components-next/layout/useQuickActionTarget';
 /* eslint-disable vue/no-bare-strings-in-template, @intlify/vue-i18n/no-raw-text */
@@ -125,7 +126,10 @@ const activityStats = computed(() => [
   },
 ]);
 
-const load = () => store.dispatch('jrcCrm/activities/fetchActivities');
+const { segmentParams, watchSegment } = useCustomerSegmentFilter();
+const load = () =>
+  store.dispatch('jrcCrm/activities/fetchActivities', segmentParams());
+watchSegment(load);
 
 const complete = async id => {
   try {

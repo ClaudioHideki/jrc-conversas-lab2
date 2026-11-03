@@ -7,6 +7,7 @@ import { T, inputClass, buttonClass, errorMessage } from '../copy';
 
 const props = defineProps({
   modelValue: { type: [Number, String], default: null },
+  moduleKey: { type: String, default: '' },
 });
 const emit = defineEmits(['update:modelValue']);
 const { t } = useI18n();
@@ -42,6 +43,7 @@ const load = async () => {
         q: query.value,
         page: page.value,
         per_page: 10,
+        ...(props.moduleKey ? { module_key: props.moduleKey } : {}),
       },
       { accountId: accountId.value, signal: controller.signal }
     );
@@ -82,7 +84,7 @@ watch(query, () => {
 });
 watch(page, load);
 watch(
-  [identity, () => props.modelValue],
+  [identity, () => props.modelValue, () => props.moduleKey],
   async () => {
     generation += 1;
     selectionGeneration += 1;
@@ -106,7 +108,16 @@ watch(
         accountId: accountId.value,
         signal: selectionController.signal,
       });
-      if (token === selectionGeneration) selected.value = result.data.payload;
+      if (token !== selectionGeneration) return;
+      const record = result.data.payload;
+      if (
+        props.moduleKey &&
+        (!record.active || !record.modules?.includes(props.moduleKey))
+      ) {
+        error.value = t('CRM.CORPORATE_SEGMENTS.UNAVAILABLE_MODULE_FILTER');
+        return;
+      }
+      selected.value = record;
     } catch (failure) {
       if (token === selectionGeneration) error.value = errorMessage(failure);
     } finally {

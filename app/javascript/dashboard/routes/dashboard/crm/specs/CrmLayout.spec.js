@@ -41,6 +41,7 @@ describe('CRM module navigation', () => {
             template: '<a :href="to.name" @click.prevent><slot /></a>',
           },
           RouterView: true,
+          ModuleSegmentFilter: true,
         },
       },
     });

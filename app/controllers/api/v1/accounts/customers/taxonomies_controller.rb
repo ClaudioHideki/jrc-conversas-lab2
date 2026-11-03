@@ -80,8 +80,8 @@ class Api::V1::Accounts::Customers::TaxonomiesController < Api::V1::Accounts::Cu
   private
 
   def catalog_scope
-    filters = params.permit(:kind, :active, :q)
-    scope = JrcCustomers::Taxonomy.where(account_id: Current.account.id)
+    filters = params.permit(:kind, :active, :q, :module_key)
+    scope = published_catalog(JrcCustomers::Taxonomy.where(account_id: Current.account.id))
     scope = scope.where(kind: filters[:kind]) if filters[:kind].present?
     scope = scope.where(active: ActiveModel::Type::Boolean.new.cast(filters[:active])) if filters[:active].present?
     return scope if filters[:q].blank?
@@ -90,13 +90,21 @@ class Api::V1::Accounts::Customers::TaxonomiesController < Api::V1::Accounts::Cu
     scope.where('name ILIKE ?', "%#{term}%")
   end
 
+  def published_catalog(scope)
+    return scope if params[:module_key].blank?
+
+    raise ActionController::BadRequest, 'Invalid segment module' unless JrcCustomers::Taxonomy::MODULES.include?(params[:module_key])
+
+    scope.where('? = ANY(modules)', params[:module_key])
+  end
+
   def set_taxonomy
     @taxonomy = JrcCustomers::Taxonomy.where(account_id: Current.account.id).find(params[:id])
   end
 
   def taxonomy_params
     params.require(:taxonomy).permit(:kind, :name, :active, :position, :description, :selection_mode,
-                                     modules: [], criteria: [:match, { rules: %i[field operator value] }])
+                                     modules: [], criteria: [:match, { rules: %i[field operator value period_start period_end] }])
   end
 
   def serialize(record)

@@ -1,0 +1,126 @@
+{
+  "date": "2026-11-03",
+  "branch": "codex/relacionamento-v2-20261101",
+  "base_commit": "d28eebd8c171242c05ba6fa1d4a7b011a08db183",
+  "stage": "C7 — critérios financeiros e filtros de segmentos no CRM",
+  "status": "parcial: checkpoint local com gates automatizados aprovados; build e Chrome bloqueados por espaço",
+  "preserved": {
+    "C5": "a1fef6240222f37513be20f498efcfe6315418c0",
+    "C6": "d28eebd8c171242c05ba6fa1d4a7b011a08db183",
+    "protected_publication_head": "50f7f07d802829dd44a67547fabad3aa77f3d196",
+    "canonical_contacts_and_online_presence": "sem novo cadastro e sem alterações na lista de presença; C7 não modificou dados do banco UI"
+  },
+  "business_definition": {
+    "user_confirmed": "Pedidos faturados em um período",
+    "field": "invoiced_revenue",
+    "amount": "Soma de total_cents dos pedidos autorizados; valor do critério informado em reais, sem ponto flutuante",
+    "statuses": "JrcCrm::GoalProgressService::ORDER_STATUSES[invoiced_orders]: invoiced, shipped, completed",
+    "period": "Datas inicial/final ISO inclusivas no fuso reporting_timezone da conta. Mesma precedência nativa: sold_at, closed_at, created_at. Não é data de recebimento nem uma data fiscal inexistente.",
+    "contracts": "active_contract_count conta os estados nativos active/expiring; não calcula TRR",
+    "TRR": "Indefinida; não implementada nem substituída por MRR."
+  },
+  "implemented_increment": [
+    "DSL numérica com comparação, datas explícitas e validação de valores, preservando critérios antigos E/OU e escolhas manuais.",
+    "Prévia, persistência da definição e avaliação dinâmica reutilizam SegmentMembers, Directory e Visibility.crm/OrganizationalVisibility. Ausência de acesso CRM nega a avaliação financeira, inclusive comparação com zero/negação.",
+    "Filtro opcional customer_segment_id nas listas nativas de leads, negócios, atividades, propostas, pedidos e contratos. Publicação exige segmento ativo configurado para CRM.",
+    "Listas preservam o contrato de resposta em array; chamadas sem segmento preservam a consulta nativa. Show, update e selection_options não recebem uma nova regra de acesso.",
+    "Propostas legadas sem contato/empresa direta podem usar negócio com vínculo canônico, somente quando o negócio também passa pelo escopo nativo. Vínculos ambíguos não são inferidos por nome.",
+    "Interface usa picker existente, catálogo paginado por módulo, query na URL e recarga após navegação. Limpar filtro continua possível após perder permissão de diretório, sem buscar o catálogo protegido.",
+    "Listas CRM limpam linhas antigas e ignoram respostas de consultas anteriores. Removido log do payload completo na listagem de negócios."
+  ],
+  "security": [
+    "Account e actor vêm do contexto autenticado; parâmetros não concedem identidade nem cobertura.",
+    "Filtros somente intersectam relações já autorizadas; validação de tenant, publicação, diretório, proprietário e cobertura nativa.",
+    "Nenhuma alteração nos fluxos de assinatura, SignatureEvidence.verifier, webhooks, NICO, telefonia ou WhatsApp."
+  ],
+  "backend": {
+    "report": ".codex/customer-segment-financial-checked-backend.json",
+    "summary": {
+      "duration": 38.830454001,
+      "example_count": 55,
+      "failure_count": 0,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0
+    },
+    "scope": "8 arquivos: critérios financeiros, filtro de módulo, segmentos existentes, API de segmentos e regressões nativas de leads/atividades/negócios/propostas. Dados sintéticos no banco candidato local, sem resemear o banco UI.",
+    "final_spec_alignment": ".codex/customer-segment-financial-final-spec-equivalence.json"
+  },
+  "frontend": {
+    "report": ".codex/customer-segment-financial-checked-frontend.json",
+    "passed": 76,
+    "failed": 0,
+    "files": 11,
+    "simulation_boundary": "Testes Vue usam mocks dos serviços. Não substituem compilação nem Chrome com backend real.",
+    "final_modified_case": {
+      "report": ".codex/customer-segment-filter-removable-frontend.json",
+      "passed": 1,
+      "failed": 0,
+      "reason": "Após a rodada de 76, revalidado somente o componente alterado para remover filtro após revogação de acesso."
+    }
+  },
+  "ruby_style": {
+    "main_report": ".codex/customer-segment-financial-checked-style.json",
+    "main_result": "7 arquivos limpos e 2 diagnósticos de alinhamento em 1 spec; corrigidos depois.",
+    "final_spec_report": ".codex/customer-segment-financial-final-spec-style.json",
+    "final_result": "8 arquivos sem infrações por composição dos 7 inalterados e rechecagem do spec. Tokens executáveis do spec idênticos aos testados."
+  },
+  "eslint": {
+    "report": ".codex/customer-segment-financial-final-eslint-comparison.json",
+    "files": 22,
+    "new_errors": 0,
+    "legacy_errors_before": 233,
+    "legacy_errors_after": 233,
+    "note": "Não é gate global limpo. Seis telas mantêm os 233 erros e avisos preexistentes; sem diagnósticos acrescentados. Picker mantém 2 avisos no template que não foi alterado."
+  },
+  "source_proof": ".codex/customer-segment-financial-final-source-proof.json",
+  "source_verification": {
+    "admitted_snapshot": "/consolidation-customer-segment-financial-checked",
+    "matched_files": 11382,
+    "final_differences": [
+      "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/ModuleSegmentFilter.spec.js",
+      "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/ModuleSegmentFilter.vue",
+      "spec/requests/api/v1/accounts/customers/module_segment_filter_spec.rb"
+    ],
+    "backend_spec_tokens_unchanged": true,
+    "final_permission_removal_component_retested": true
+  },
+  "disk_blocker": {
+    "checked_at": "2026-11-03T15:36:58.935476+00:00",
+    "status": "blocked_insufficient_disk",
+    "free_c_bytes": 795017216,
+    "minimum_start_bytes": 1500000000,
+    "recommended_free_bytes": 3000000000,
+    "additional_bytes_to_minimum": 704982784,
+    "disk_guard_stop_bytes": 750000000,
+    "new_vite_build_started": false,
+    "c7_chrome_desktop_mobile_started": false,
+    "existing_c6_ui_preserved": true,
+    "docker_image_build_publish_deploy": false,
+    "production_changed": false
+  },
+  "disk_preservation": [
+    ".codex/customer-segments-c7-ntfs-preservation.json: 147 relatórios/logs/overlays, SHA-256 antes/depois.",
+    ".codex/customer-segments-c7-cache-ntfs-preservation.json: 468 arquivos de caches identificados, SHA-256 antes/depois. Nenhuma exclusão."
+  ],
+  "hooks": "Husky/_/husky.sh ausente, como no checkpoint anterior. Gates manuais registrados. Hook nativo não executado; eventual override apenas no comando do checkpoint local, sem configuração global.",
+  "dependencies_and_migrations": "Nenhuma dependência instalada, alteração de schema ou migration adicionada/executada.",
+  "remaining": [
+    "Liberar espaço no C: (mínimo de início 1,5 GB, recomendado 3 GB), compilar com guard de 750 MB e então validar C7 em Chrome desktop/mobile com aplicação/banco reais.",
+    "Validar criação/edição de critérios, prévia, persistência, remoção de filtro, histórico de URL, paginação do picker, permissões e integração nas seis listas; não repetir escritas C5/C6 já realizadas.",
+    "Conectar e validar filtros publicados nos outros módulos: Backoffice, Service Desk, Projetos, Relacionamento e Campanhas. Ainda não implementados neste incremento.",
+    "TRR depende de definição de negócio. Não inventar fórmula.",
+    "Concluir pendências reais da Etapa C antes de D → E → F → G. Essas etapas permanecem parciais; homologação externa DocuSign demo ainda pendente."
+  ],
+  "publication": {
+    "push": false,
+    "image_build": false,
+    "GHCR": false,
+    "deploy": false,
+    "production_migrations": false
+  },
+  "earlier_failed_runs_retained": [
+    ".codex/customer-segment-modules-core-backend.json: operador JSONB inadequado para array PostgreSQL, corrigido.",
+    ".codex/customer-segment-financial-core-backend.json: preparação de contrato ativo sem assinatura, corrigida com documento manual sintético.",
+    ".codex/customer-segment-financial-ui-backend.json: factory de funil em outra conta, corrigida sem relaxar validação."
+  ]
+}

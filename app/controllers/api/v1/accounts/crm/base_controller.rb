@@ -48,6 +48,14 @@ module Api
             JrcCrm::OrganizationalVisibility.new(account: crm_scope, user: Current.user, relation: legacy_visible).call
           end
 
+          def customer_segment_scope(relation)
+            filter = JrcCustomers::ModuleSegmentFilter.new(account: crm_scope, actor: Current.user,
+                                                           module_key: 'crm', segment_id: params[:customer_segment_id])
+            columns = relation.klass.column_names
+            filter.call(relation, company_column: columns.include?('company_id') ? :company_id : nil,
+                                  contact_column: columns.include?('contact_id') ? :contact_id : nil)
+          end
+
           def ensure_crm_admin!
             raise Pundit::NotAuthorizedError unless crm_admin?
           end

@@ -4,6 +4,7 @@ import { proposalsAPI } from '../../../api/crm';
 export default {
   namespaced: true,
   state: {
+    listRequestId: 0,
     proposals: [],
     filters: {},
     isLoading: false,
@@ -16,6 +17,9 @@ export default {
     error: state => state.error,
   },
   mutations: {
+    SET_LIST_REQUEST_ID(state, value) {
+      state.listRequestId = value;
+    },
     SET_PROPOSALS(state, payload) {
       state.proposals = payload;
     },
@@ -27,13 +31,18 @@ export default {
     },
   },
   actions: {
-    async fetchProposals({ commit }, params) {
+    async fetchProposals({ commit, state }, params) {
+      const requestId = state.listRequestId + 1;
+      commit('SET_LIST_REQUEST_ID', requestId);
+      commit('SET_PROPOSALS', []);
       commit('SET_LOADING', true);
       commit('SET_ERROR', null);
       try {
         const response = await proposalsAPI.list(params);
+        if (requestId !== state.listRequestId) return;
         commit('SET_PROPOSALS', response.data);
       } catch (error) {
+        if (requestId !== state.listRequestId) return;
         console.error(error);
         commit(
           'SET_ERROR',
@@ -41,7 +50,7 @@ export default {
             'Não foi possível carregar as propostas.'
         );
       } finally {
-        commit('SET_LOADING', false);
+        if (requestId === state.listRequestId) commit('SET_LOADING', false);
       }
     },
   },

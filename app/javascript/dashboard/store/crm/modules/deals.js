@@ -6,6 +6,7 @@ export default {
   namespaced: true,
 
   state: {
+    listRequestId: 0,
     deals: [],
     currentDeal: null,
     filters: {},
@@ -42,6 +43,9 @@ export default {
   },
 
   mutations: {
+    SET_LIST_REQUEST_ID(state, value) {
+      state.listRequestId = value;
+    },
     SET_DEALS(state, payload) {
       state.deals = Array.isArray(payload) ? payload : [];
     },
@@ -122,22 +126,22 @@ export default {
   },
 
   actions: {
-    async fetchDeals({ commit }, params = {}) {
+    async fetchDeals({ commit, state }, params = {}) {
+      const requestId = state.listRequestId + 1;
+      commit('SET_LIST_REQUEST_ID', requestId);
+      commit('SET_DEALS', []);
       commit('SET_LOADING', true);
       commit('SET_ERROR', null);
 
       try {
         const response = await dealsAPI.list(params);
+        if (requestId !== state.listRequestId) return;
 
         const payload = response.data?.payload || response.data;
 
-        console.log(
-          'JRC CRM DEALS API COMPLETO:',
-          JSON.stringify(payload, null, 2)
-        );
-
         commit('SET_DEALS', payload);
       } catch (error) {
+        if (requestId !== state.listRequestId) return;
         console.error('Erro ao carregar negócios:', error);
 
         commit(
@@ -146,7 +150,7 @@ export default {
             'Não foi possível carregar os negócios.'
         );
       } finally {
-        commit('SET_LOADING', false);
+        if (requestId === state.listRequestId) commit('SET_LOADING', false);
       }
     },
 

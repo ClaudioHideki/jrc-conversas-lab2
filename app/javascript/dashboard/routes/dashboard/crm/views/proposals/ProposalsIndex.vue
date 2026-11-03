@@ -1,4 +1,5 @@
 <script setup>
+import { useCustomerSegmentFilter } from '../../helpers/useCustomerSegmentFilter';
 /* eslint-disable vue/no-bare-strings-in-template, @intlify/vue-i18n/no-raw-text */
 import ApprovalGateBadge from 'dashboard/routes/dashboard/approvals/ApprovalGateBadge.vue';
 import { computed, onMounted, reactive, ref } from 'vue';
@@ -223,7 +224,10 @@ const proposalProgress = computed(() => {
   ];
 });
 
-const refresh = () => store.dispatch('jrcCrm/proposals/fetchProposals');
+const { segmentParams, watchSegment } = useCustomerSegmentFilter();
+const refresh = () =>
+  store.dispatch('jrcCrm/proposals/fetchProposals', segmentParams());
+watchSegment(refresh);
 const billingLabel = value =>
   ({
     one_time: 'Cobrança única',

@@ -4,6 +4,7 @@ import { leadsAPI } from '../../../api/crm';
 export default {
   namespaced: true,
   state: {
+    listRequestId: 0,
     leads: [],
     currentLead: null,
     filters: {},
@@ -16,6 +17,9 @@ export default {
     isLoading: state => state.isLoading,
   },
   mutations: {
+    SET_LIST_REQUEST_ID(state, value) {
+      state.listRequestId = value;
+    },
     SET_LEADS(state, payload) {
       state.leads = payload;
     },
@@ -30,15 +34,20 @@ export default {
     },
   },
   actions: {
-    async fetchLeads({ commit }, params) {
+    async fetchLeads({ commit, state }, params) {
+      const requestId = state.listRequestId + 1;
+      commit('SET_LIST_REQUEST_ID', requestId);
+      commit('SET_LEADS', []);
       commit('SET_LOADING', true);
       try {
         const response = await leadsAPI.list(params);
+        if (requestId !== state.listRequestId) return;
         commit('SET_LEADS', response.data);
       } catch (error) {
+        if (requestId !== state.listRequestId) return;
         console.error(error);
       } finally {
-        commit('SET_LOADING', false);
+        if (requestId === state.listRequestId) commit('SET_LOADING', false);
       }
     },
     async fetchLead({ commit }, id) {

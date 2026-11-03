@@ -10,6 +10,7 @@ module Api
               crm_scope.jrc_crm_activities,
               owner_column: :user_id
             )
+            activities = customer_segment_scope(activities)
 
             activities = activities.where(user_id: params[:user_id]) if params[:user_id].present?
             activities = activities.where(deal_id: params[:deal_id]) if params[:deal_id].present?

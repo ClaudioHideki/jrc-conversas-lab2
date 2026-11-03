@@ -9,6 +9,10 @@ export const segmentFields = t => ({
   state: t('CRM.CORPORATE_SEGMENTS.FIELDS.state'),
   size: t('CRM.CORPORATE_SEGMENTS.FIELDS.size'),
   source: t('CRM.CORPORATE_SEGMENTS.FIELDS.source'),
+  invoiced_revenue: t('CRM.CORPORATE_SEGMENTS.FIELDS.invoiced_revenue'),
+  active_contract_count: t(
+    'CRM.CORPORATE_SEGMENTS.FIELDS.active_contract_count'
+  ),
 });
 export const segmentModules = t => ({
   crm: t('CRM.CORPORATE_SEGMENTS.MODULES.crm'),

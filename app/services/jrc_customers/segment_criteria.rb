@@ -1,7 +1,8 @@
 # Corporate criteria are distinct from personal Contact CustomFilters. Reuse the
 # canonical company directory predicates, then intersect with the caller's scope.
 class JrcCustomers::SegmentCriteria
-  FIELDS = %w[relationship_type person_kind segment owner_id economic_group active city size source state].freeze
+  FIELDS = (%w[relationship_type person_kind segment owner_id economic_group active city size source state] +
+            JrcCustomers::FinancialSegmentCriteria::FIELDS).freeze
   OPERATORS = %w[equal_to not_equal_to].freeze
 
   def self.error(value, mode:)
@@ -28,7 +29,9 @@ class JrcCustomers::SegmentCriteria
   end
 
   def self.rule_error(rule)
-    return 'contains an invalid rule' unless rule.is_a?(Hash) && (rule.keys - %w[field operator value]).empty?
+    return 'contains an invalid rule' unless rule.is_a?(Hash) && (rule.keys - %w[field operator value period_start period_end]).empty?
+    return JrcCustomers::FinancialSegmentCriteria.error(rule) if JrcCustomers::FinancialSegmentCriteria::FIELDS.include?(rule['field'])
+    return 'periods are only supported for invoiced revenue' if rule.keys.intersect?(%w[period_start period_end])
     return 'contains an unsupported field or operator' unless FIELDS.include?(rule['field']) && OPERATORS.include?(rule['operator'])
 
     value_error(rule)
@@ -47,13 +50,18 @@ class JrcCustomers::SegmentCriteria
     value.is_a?(String) && value.present? && value.length <= 200
   end
 
-  def initialize(account:, scope:)
+  def initialize(account:, scope:, actor: nil)
     @account = account
     @scope = scope
+    @actor = actor
   end
 
   def call(criteria)
     parts = criteria.fetch('rules').map do |rule|
+      if JrcCustomers::FinancialSegmentCriteria::FIELDS.include?(rule['field'])
+        next JrcCustomers::FinancialSegmentCriteria.new(account: @account, actor: @actor, scope: @scope).call(rule)
+      end
+
       matched = matches(rule)
       rule['operator'] == 'not_equal_to' ? @scope.where.not(id: matched.reselect(:id)) : @scope.where(id: matched.reselect(:id))
     end

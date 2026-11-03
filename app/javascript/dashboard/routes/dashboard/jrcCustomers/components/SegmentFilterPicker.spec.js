@@ -128,3 +128,17 @@ it('clears old search choices and ignores a late response after the viewer chang
   expect(wrapper.text()).not.toContain('Resultado anterior proibido');
   wrapper.unmount();
 });
+
+it('requests the module catalog and rejects an inactive or unpublished URL-selected definition', async () => {
+  const wrapper = render({ modelValue: 7, moduleKey: 'crm' });
+  await flushPromises();
+  expect(wrapper.text()).not.toContain(item.name);
+  expect(wrapper.get('[role="alert"]').text()).toContain('não está publicado');
+  await wrapper.find('input').trigger('focus');
+  await flushPromises();
+  expect(mocks.taxonomies).toHaveBeenLastCalledWith(
+    expect.objectContaining({ module_key: 'crm', active: true, per_page: 10 }),
+    expect.objectContaining({ accountId: 1 })
+  );
+  wrapper.unmount();
+});

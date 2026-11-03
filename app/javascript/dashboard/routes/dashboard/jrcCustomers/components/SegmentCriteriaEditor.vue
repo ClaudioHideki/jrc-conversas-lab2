@@ -20,6 +20,20 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue']);
 const { t } = useI18n();
 const fields = computed(() => segmentFields(t));
+const isFinancial = field =>
+  ['invoiced_revenue', 'active_contract_count'].includes(field);
+const operators = field => ({
+  equal_to: t('CRM.CORPORATE_SEGMENTS.EQUAL'),
+  not_equal_to: t('CRM.CORPORATE_SEGMENTS.NOT_EQUAL'),
+  ...(isFinancial(field)
+    ? {
+        greater_than: t('CRM.CORPORATE_SEGMENTS.GREATER_THAN'),
+        at_least: t('CRM.CORPORATE_SEGMENTS.AT_LEAST'),
+        less_than: t('CRM.CORPORATE_SEGMENTS.LESS_THAN'),
+        at_most: t('CRM.CORPORATE_SEGMENTS.AT_MOST'),
+      }
+    : {}),
+});
 const valueOptions = field =>
   ({
     relationship_type: RELATIONSHIPS,
@@ -52,9 +66,14 @@ const setField = (index, field) =>
     props.modelValue.rules.map((rule, i) =>
       i === index
         ? {
-            ...rule,
             field,
-            value: Object.keys(valueOptions(field) || {})[0] || '',
+            operator: 'equal_to',
+            value: isFinancial(field)
+              ? '0'
+              : Object.keys(valueOptions(field) || {})[0] || '',
+            ...(field === 'invoiced_revenue'
+              ? { period_start: '', period_end: '' }
+              : {}),
           }
         : rule
     )
@@ -115,11 +134,12 @@ const remove = index =>
           :class="inputClass"
           @change="setRule(index, 'operator', $event.target.value)"
         >
-          <option value="equal_to">
-            {{ t('CRM.CORPORATE_SEGMENTS.EQUAL') }}
-          </option>
-          <option value="not_equal_to">
-            {{ t('CRM.CORPORATE_SEGMENTS.NOT_EQUAL') }}
+          <option
+            v-for="(label, key) in operators(rule.field)"
+            :key="key"
+            :value="key"
+          >
+            {{ label }}
           </option>
         </select>
       </label>
@@ -150,6 +170,9 @@ const remove = index =>
         </select>
         <input
           v-else
+          :type="isFinancial(rule.field) ? 'number' : 'text'"
+          :min="isFinancial(rule.field) ? '0' : undefined"
+          :step="rule.field === 'invoiced_revenue' ? '0.01' : '1'"
           :value="rule.value"
           :class="inputClass"
           maxlength="200"
@@ -157,6 +180,36 @@ const remove = index =>
           @input="setRule(index, 'value', $event.target.value)"
         />
       </label>
+      <template v-if="rule.field === 'invoiced_revenue'">
+        <label class="text-xs">
+          {{ t('CRM.CORPORATE_SEGMENTS.PERIOD_START') }}
+          <input
+            type="date"
+            :value="rule.period_start"
+            :class="inputClass"
+            :max="rule.period_end || undefined"
+            required
+            @input="setRule(index, 'period_start', $event.target.value)"
+          />
+        </label>
+        <label class="text-xs">
+          {{ t('CRM.CORPORATE_SEGMENTS.PERIOD_END') }}
+          <input
+            type="date"
+            :value="rule.period_end"
+            :class="inputClass"
+            :min="rule.period_start || undefined"
+            required
+            @input="setRule(index, 'period_end', $event.target.value)"
+          />
+        </label>
+      </template>
+      <p
+        v-if="isFinancial(rule.field)"
+        class="text-xs text-n-slate-11 sm:col-span-4"
+      >
+        {{ t('CRM.CORPORATE_SEGMENTS.FINANCIAL_HELP') }}
+      </p>
       <button
         type="button"
         :class="buttonClass"

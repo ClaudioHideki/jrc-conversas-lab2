@@ -1,4 +1,5 @@
 <script setup>
+import { useCustomerSegmentFilter } from '../../helpers/useCustomerSegmentFilter';
 import { useQuickActionTarget } from 'dashboard/components-next/layout/useQuickActionTarget';
 import OperationsLinks from '../../../jrcOperations/components/OperationsLinks.vue';
 import { crmControlClasses } from '../../crmControlClasses';
@@ -30,6 +31,13 @@ const { t } = useI18n();
 const store = useStore();
 const route = useRoute();
 const router = useRouter();
+const { segmentParams, watchSegment } = useCustomerSegmentFilter();
+const loadDeals = () =>
+  store.dispatch('jrcCrm/deals/fetchDeals', segmentParams());
+watchSegment(() => {
+  if (!props.creationOnly) return loadDeals();
+  return undefined;
+});
 const showForm = ref(props.creationOnly);
 watch(showForm, visible => {
   if (props.creationOnly && !visible) emit('close');
@@ -206,7 +214,7 @@ const saveDetails = async () => {
       value_cents: centsFromInput(detailsForm.value),
       },
     });
-    await store.dispatch('jrcCrm/deals/fetchDeals');
+    await loadDeals();
     await loadDetails();
     editingDetails.value = false;
     useAlert('Negócio atualizado com sucesso.');
@@ -230,7 +238,7 @@ const addDetailsProduct = async () => {
       discount_cents: centsFromInput(detailsProductForm.discount),
     }});
     detailsProductForm.product_id = ''; detailsProductForm.quantity = 1; detailsProductForm.unit_price = ''; detailsProductForm.discount = '';
-    await store.dispatch('jrcCrm/deals/fetchDeals');
+    await loadDeals();
     await loadDetails();
   } catch (requestError) {
     useAlert(requestError.response?.data?.errors?.join(', ') || 'Não foi possível adicionar o produto.');
@@ -245,7 +253,7 @@ const updateDetailsProduct = async item => {
       unit_price_cents: Number(item.unit_price_cents || 0),
         discount_cents: Number(item.discount_cents || 0),
     }});
-    await store.dispatch('jrcCrm/deals/fetchDeals');
+    await loadDeals();
     await loadDetails();
   } catch { useAlert('Não foi possível atualizar o produto.'); }
 };
@@ -254,7 +262,7 @@ const removeDetailsProduct = async item => {
   if (!selectedDeal.value) return;
   try {
     await dealsAPI.deleteProduct(selectedDeal.value.id, item.id);
-    await store.dispatch('jrcCrm/deals/fetchDeals');
+    await loadDeals();
     await loadDetails();
   } catch { useAlert('Não foi possível remover o produto.'); }
 };
@@ -286,7 +294,7 @@ const save = async () => {
     }} : {}) });
     if (!dealDraft.complete(savingDraftKey)) return;
     showForm.value = false;
-    await Promise.all([store.dispatch('jrcCrm/deals/fetchDeals'), store.dispatch('jrcCrm/activities/fetchActivities')]);
+    await Promise.all([loadDeals(), store.dispatch('jrcCrm/activities/fetchActivities')]);
     useAlert('Negócio criado com sucesso.');
   } catch (requestError) {
     useAlert(requestError.response?.data?.errors?.join(', ') || 'Não foi possível criar o negócio.');
@@ -319,7 +327,7 @@ onBeforeUnmount(() => { detailGeneration += 1; });
 watch(() => form.pipeline_id, loadStages);
 onMounted(async () => {
   const [pipelinesResponse] = await Promise.all([
-    pipelinesAPI.list(), loadContacts(), loadProducts(), ...(props.creationOnly ? [] : [AgentsAPI.get().then(({ data }) => { agents.value = data || []; }), store.dispatch('jrcCrm/deals/fetchDeals')]),
+    pipelinesAPI.list(), loadContacts(), loadProducts(), ...(props.creationOnly ? [] : [AgentsAPI.get().then(({ data }) => { agents.value = data || []; }), loadDeals()]),
   ]);
   pipelines.value = pipelinesResponse.data;
   form.pipeline_id = pipelines.value[0]?.id || '';

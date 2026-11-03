@@ -1,4 +1,5 @@
 <script setup>
+import { useCustomerSegmentFilter } from '../../helpers/useCustomerSegmentFilter';
 /* eslint-disable vue/no-bare-strings-in-template */
 import ApprovalGateBadge from 'dashboard/routes/dashboard/approvals/ApprovalGateBadge.vue';
 import { computed, onMounted, ref } from 'vue';
@@ -186,16 +187,29 @@ const openManage = async contract => {
   }
 };
 
+const { segmentParams, watchSegment } = useCustomerSegmentFilter();
+let listGeneration = 0;
 const load = async () => {
+  listGeneration += 1;
+  const token = listGeneration;
+  rows.value = [];
   loading.value = true;
 
   try {
-    const response = await contractsAPI.list();
+    const response = await contractsAPI.list(segmentParams());
+    if (token !== listGeneration) return;
     rows.value = response.data || [];
+  } catch {
+    if (token === listGeneration)
+      useAlert('Não foi possível carregar os contratos.');
   } finally {
-    loading.value = false;
+    if (token === listGeneration) loading.value = false;
   }
 };
+watchSegment(() => {
+  page.value = 1;
+  return load();
+});
 
 onMounted(async () => {
   await load();
