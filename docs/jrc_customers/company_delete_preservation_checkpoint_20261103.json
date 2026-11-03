@@ -1,0 +1,88 @@
+{
+  "date": "2026-11-03",
+  "stage": "C3/C4 — Compatibilidade da exclusão nativa de empresa",
+  "status": "incremento corrigido e testado; escopo integral C/D/E/F/G permanece parcial",
+  "base_commit": "36776e7bcdafd2f82dbbba63e70c0ad1f2e427c6",
+  "branch": "codex/relacionamento-v2-20261101",
+  "problem": [
+    "Exclusão de empresa com contato principal violava o check do vínculo ativo.",
+    "Uma FK de unidade podia impedir excluir a empresa depois de seus contatos terem sido desvinculados, sem rollback."
+  ],
+  "changes": [
+    "A operação compartilha a ordem de bloqueio conta→empresa→contatos e executa todas as etapas na mesma transação.",
+    "Somente campos do vínculo corporativo e additional_attributes.company_name são limpos; pessoas e demais atributos permanecem.",
+    "Cada desvinculação registra auditoria nativa de sistema dentro da transação. Não dispara callbacks de contato, automações ou webhooks.",
+    "Vínculos legados entre contas impedem a operação; a interface do job e as permissões do controller nativo foram preservadas."
+  ],
+  "files": [
+    "enterprise/app/jobs/companies/delete_job.rb",
+    "spec/enterprise/jobs/companies/delete_job_master_context_spec.rb"
+  ],
+  "validation": {
+    "red": {
+      "examples": 2,
+      "genuine_failures": 2,
+      "report": ".codex/company-delete-red.json"
+    },
+    "green": {
+      "examples": 62,
+      "failures": 0,
+      "pending": 0,
+      "report": ".codex/company-delete-final.json",
+      "scope": [
+        "job nativo",
+        "transação sem outer transaction de teste",
+        "FK real de unidade",
+        "rollback por falha de auditoria",
+        "ausência de contact.updated",
+        "repetição de job removido",
+        "controller/modelo Enterprise",
+        "escrita e API de contexto de contato"
+      ]
+    },
+    "style": {
+      "files": 2,
+      "offenses": 0,
+      "log": ".codex/company-delete-final-style.log"
+    },
+    "intermediate_failures": [
+      "company-delete-atomic: referência de constante do evento no teste, corrigida.",
+      "company-delete-verified: limpeza da própria conta sintética bloqueada por sua nova auditoria, corrigida apenas no teardown."
+    ],
+    "preservation": {
+      "status": "passed",
+      "protected_business_rows": 32,
+      "protected_memberships": 2,
+      "native_login_timestamp_changes_allowed_only": [
+        "active_at",
+        "updated_at"
+      ],
+      "existing_segment_id": 55,
+      "deleted_unused_segment_id": 56,
+      "manual_choices": 3,
+      "company_count": 12,
+      "contact_count": 13,
+      "audit_event_count": 7,
+      "schema": "20261103100000",
+      "foreign_keys": 4,
+      "signature_verifier": null,
+      "external_operations": 0,
+      "source": "/consolidation-company-delete-final",
+      "production_changed": false,
+      "classification_mode_preserved": true
+    },
+    "source": {
+      "snapshot": "/consolidation-company-delete-final",
+      "files": 11308,
+      "mismatches": 0,
+      "report": ".codex/company-delete-final-source-verified.json"
+    },
+    "frontend": "Nenhum arquivo de frontend alterado neste incremento; sem nova alegação de aceite no Chrome para este job. Fluxo visual completo será revisto nos gates integrados."
+  },
+  "no_migrations": true,
+  "no_push_build_publish_or_deploy": true,
+  "next": [
+    "Grupos econômicos distintos de etiquetas nativas, membros e principal opcional sem alterar matriz/filial ou cobertura corporativa.",
+    "Continuar escopo integral C→D→E→F→G e validação no Chrome."
+  ]
+}
