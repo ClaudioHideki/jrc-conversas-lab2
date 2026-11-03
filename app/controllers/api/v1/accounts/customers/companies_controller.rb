@@ -6,6 +6,11 @@ class Api::V1::Accounts::Customers::CompaniesController < Api::V1::Accounts::Cus
                                              filters: params.permit(:q, :relationship_type,
                                                                     :person_kind, :segment, :owner_id,
                                                                     :city, :active, :parent_company_id, :economic_group)).call
+    if params[:taxonomy_id].present?
+      taxonomy = JrcCustomers::Taxonomy.active.where(account_id: Current.account.id).find(params[:taxonomy_id])
+      members = JrcCustomers::SegmentMembers.new(account: Current.account, actor: Current.user, taxonomy: taxonomy)
+      scope = scope.where(id: members.companies.reselect(:id))
+    end
     records, meta = page_scope(corporate_companies(scope))
     render json: { payload: serializer.companies(records.to_a), meta: meta }
   end

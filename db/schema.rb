@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_11_03_090000) do
+ActiveRecord::Schema[7.1].define(version: 2026_11_03_100000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -3211,6 +3211,24 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_03_090000) do
     t.check_constraint "revision > 0", name: "jrc_signing_identity_revision"
   end
 
+  create_table "jrc_customer_segment_overrides", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "taxonomy_id", null: false
+    t.bigint "company_id"
+    t.integer "contact_id"
+    t.string "mode", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_customer_segment_overrides_on_account_id"
+    t.index ["company_id"], name: "index_jrc_customer_segment_overrides_on_company_id"
+    t.index ["contact_id"], name: "index_jrc_customer_segment_overrides_on_contact_id"
+    t.index ["taxonomy_id", "company_id"], name: "customer_segment_company_override", unique: true, where: "(company_id IS NOT NULL)"
+    t.index ["taxonomy_id", "contact_id"], name: "customer_segment_contact_override", unique: true, where: "(contact_id IS NOT NULL)"
+    t.index ["taxonomy_id"], name: "index_jrc_customer_segment_overrides_on_taxonomy_id"
+    t.check_constraint "(company_id IS NULL) <> (contact_id IS NULL)", name: "customer_segment_override_subject"
+    t.check_constraint "mode::text = ANY (ARRAY['include'::character varying, 'exclude'::character varying]::text[])", name: "customer_segment_override_mode"
+  end
+
   create_table "jrc_customer_taxonomies", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.string "kind", null: false
@@ -3219,9 +3237,14 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_03_090000) do
     t.integer "position", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "description"
+    t.string "selection_mode", default: "classification", null: false
+    t.jsonb "criteria", default: {"match" => "all", "rules" => []}, null: false
+    t.string "modules", default: [], null: false, array: true
     t.index "account_id, kind, lower((name)::text)", name: "idx_jrc_customer_taxonomies_unique", unique: true
     t.index ["account_id", "kind", "active", "position"], name: "idx_jrc_customer_taxonomies_directory"
     t.check_constraint "kind::text = 'segment'::text", name: "jrc_customer_taxonomy_kind"
+    t.check_constraint "selection_mode::text = ANY (ARRAY['classification'::character varying, 'dynamic'::character varying]::text[])", name: "customer_segment_selection_mode"
   end
 
   create_table "jrc_flow_connections", force: :cascade do |t|
@@ -6737,6 +6760,10 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_03_090000) do
   add_foreign_key "jrc_crm_user_business_units", "teams"
   add_foreign_key "jrc_crm_user_business_units", "teams", column: ["account_id", "team_id"], primary_key: ["account_id", "id"], name: "jrc_crm_user_scope_team_account_fk", validate: false
   add_foreign_key "jrc_crm_user_business_units", "users"
+  add_foreign_key "jrc_customer_segment_overrides", "accounts", on_delete: :cascade
+  add_foreign_key "jrc_customer_segment_overrides", "companies", on_delete: :cascade
+  add_foreign_key "jrc_customer_segment_overrides", "contacts", on_delete: :cascade
+  add_foreign_key "jrc_customer_segment_overrides", "jrc_customer_taxonomies", column: "taxonomy_id", on_delete: :cascade
   add_foreign_key "jrc_customer_taxonomies", "accounts", on_delete: :cascade
   add_foreign_key "jrc_flow_connections", "accounts"
   add_foreign_key "jrc_flow_effect_receipts", "accounts", on_delete: :cascade

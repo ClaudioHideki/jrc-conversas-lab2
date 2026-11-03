@@ -5,6 +5,7 @@ import { FEATURE_FLAGS } from '../../../featureFlags';
 import CompaniesPage from './CompaniesPage.vue';
 import CompanyPage from './CompanyPage.vue';
 import TaxonomyPage from './TaxonomyPage.vue';
+import SegmentDirectory from './SegmentDirectory.vue';
 import ImportsPage from './ImportsPage.vue';
 const scoped = page => ({ render: () => h(CustomerPageBoundary, { page }) });
 const meta = {
@@ -27,7 +28,7 @@ export const routes = [
   {
     path: frontendURL('accounts/:accountId/customers/segments'),
     name: 'jrc_customer_segments',
-    component: scoped(TaxonomyPage),
+    component: scoped(SegmentDirectory),
     meta,
   },
   {

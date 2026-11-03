@@ -6,8 +6,11 @@ class CustomViewsAPI extends ApiClient {
     super('custom_filters', { accountScoped: true });
   }
 
-  getCustomViewsByFilterType(type) {
-    return axios.get(`${this.url}?filter_type=${type}`);
+  getCustomViewsByFilterType(type, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const url =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
+    return axios.get(`${url}?filter_type=${type}`, requestOptions);
   }
 
   deleteCustomViews(id, type) {

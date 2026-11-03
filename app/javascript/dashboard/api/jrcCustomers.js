@@ -16,14 +16,74 @@ class CustomerAPI extends ApiClient {
     return axios.get(`${this.url}/identity`, { params });
   }
 
-  taxonomies(params = {}) {
-    return axios.get(`${this.url}/taxonomies`, { params });
+  taxonomyUrl(options = {}) {
+    return `${options.accountId === undefined ? this.url : this.urlForAccount(options.accountId)}/taxonomies`;
   }
 
-  saveTaxonomy(taxonomy, id = null) {
+  taxonomies(params = {}, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    return axios.get(this.taxonomyUrl({ accountId }), {
+      ...requestOptions,
+      params,
+    });
+  }
+
+  taxonomy(id, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    return axios.get(
+      `${this.taxonomyUrl({ accountId })}/${id}`,
+      requestOptions
+    );
+  }
+
+  saveTaxonomy(taxonomy, id = null, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const url = this.taxonomyUrl({ accountId });
     return id
-      ? axios.patch(`${this.url}/taxonomies/${id}`, { taxonomy })
-      : axios.post(`${this.url}/taxonomies`, { taxonomy });
+      ? axios.patch(`${url}/${id}`, { taxonomy }, requestOptions)
+      : axios.post(url, { taxonomy }, requestOptions);
+  }
+
+  segmentPreview(taxonomy, params = {}, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    return axios.post(
+      `${this.taxonomyUrl({ accountId })}/preview`,
+      { taxonomy, ...params },
+      requestOptions
+    );
+  }
+
+  segmentRecords(id, view, params = {}, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    return axios.get(`${this.taxonomyUrl({ accountId })}/${id}/${view}`, {
+      ...requestOptions,
+      params,
+    });
+  }
+
+  segmentOverride(id, choice, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    return axios.post(
+      `${this.taxonomyUrl({ accountId })}/${id}/set_override`,
+      choice,
+      requestOptions
+    );
+  }
+
+  removeSegmentOverride(id, choiceId, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    return axios.delete(
+      `${this.taxonomyUrl({ accountId })}/${id}/overrides/${choiceId}`,
+      requestOptions
+    );
+  }
+
+  deleteTaxonomy(id, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    return axios.delete(`${this.taxonomyUrl({ accountId })}/${id}`, {
+      ...requestOptions,
+      data: { confirm: true },
+    });
   }
 
   companies(params = {}, options = {}) {

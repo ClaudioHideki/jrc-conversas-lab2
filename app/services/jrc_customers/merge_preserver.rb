@@ -12,6 +12,9 @@ class JrcCustomers::MergePreserver
     return true if [base.identifier, source.identifier].compact_blank.uniq.size > 1
     identifiers = JrcCustomers::SigningIdentity.where(account_id: account.id, contact_id: [base.id, source.id]).pluck(:lookup_digest)
     return true if identifiers.compact.uniq.size > 1
+    base_choices = JrcCustomers::SegmentOverride.where(account_id: account.id, contact_id: base.id).pluck(:taxonomy_id, :mode).to_h
+    source_choices = JrcCustomers::SegmentOverride.where(account_id: account.id, contact_id: source.id).pluck(:taxonomy_id, :mode).to_h
+    return true if source_choices.any? { |id, mode| base_choices.key?(id) && base_choices[id] != mode }
 
     JrcNico::ErpBinding.where(account_id: account.id, contact_id: [base.id, source.id]).count > 1
   end
@@ -22,7 +25,7 @@ class JrcCustomers::MergePreserver
 
   def call
     if self.class.conflict?(account: @account, base: @base, source: @source)
-      raise Conflict, 'Conflicting company, personal/external identifier or ERP bindings. Reconcile explicitly before merging.'
+      raise Conflict, 'Conflicting company, identifier, ERP binding or segment choice. Reconcile explicitly before merging.'
     end
     assert_reference_tenants!
     snapshot = @source.attributes.except('updated_at').merge('labels' => @source.label_list,
@@ -36,6 +39,7 @@ class JrcCustomers::MergePreserver
     move_recipients
     move_contact_points
     move_signing_identity
+    move_segment_choices
     preserve_identity_points
     preserve_avatars
     preserve_labels
@@ -57,6 +61,18 @@ class JrcCustomers::MergePreserver
   end
 
   private
+
+  def move_segment_choices
+    JrcCustomers::SegmentOverride.where(account_id: @account.id, contact_id: @source.id).find_each do |choice|
+      if JrcCustomers::SegmentOverride.exists?(account_id: @account.id, taxonomy_id: choice.taxonomy_id, contact_id: @base.id)
+        choice.destroy!
+      else
+        choice.update!(contact_id: @base.id)
+      end
+      JrcCustomers::Audit.record!(account: @account, actor: @actor, resource: choice.taxonomy,
+                                  event_type: 'customer_segment_override_changed', metadata: { source_contact_id: @source.id })
+    end
+  end
 
   def preserve_company_context
     serializer = JrcCustomers::Serializer.new(account: @account)
@@ -105,6 +121,9 @@ class JrcCustomers::MergePreserver
   end
 
   def assert_reference_tenants!
+    if JrcCustomers::SegmentOverride.where(contact_id: @source.id).where.not(account_id: @account.id).exists?
+      raise Conflict, 'Existing cross-account segment choice; repair before merge'
+    end
     connection = ActiveRecord::Base.connection
     ACCOUNT_TABLES.each do |table|
       invalid = connection.select_value("SELECT 1 FROM #{table} WHERE contact_id = #{@source.id.to_i} AND account_id <> #{@account.id.to_i} LIMIT 1")

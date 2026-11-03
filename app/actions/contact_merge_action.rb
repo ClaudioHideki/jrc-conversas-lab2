@@ -33,6 +33,7 @@ class ContactMergeAction
 
   def preserve_master_data?
     @account.feature_enabled?('jrc_customer_master') ||
+      JrcCustomers::SegmentOverride.where(account_id: @account.id, contact_id: [@base_contact.id, @mergee_contact.id]).exists? ||
       JrcCustomers::SigningIdentity.where(account_id: @account.id, contact_id: [@base_contact.id, @mergee_contact.id]).exists?
   end
 

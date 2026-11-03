@@ -13,6 +13,7 @@ const fields = [
   'active',
   'economic_group',
   'parent_company_id',
+  'taxonomy_id',
 ];
 const scalar = value =>
   String(Array.isArray(value) ? value[0] || '' : value || '');

@@ -5015,14 +5015,34 @@
           },
           "requirement_text": "Segmento é uma classificação parametrizável que pode ser reutilizada no cadastro de empresas e em filtros/ações de módulos. Não confundir segmento com grupo econômico.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "JrcCustomers::DirectoryQuery",
+            "JrcCrm::CorporateCoverage",
+            "JrcCustomers::ContactDirectory",
+            "JrcCustomers::Audit",
+            "CustomFilter pessoal nativo"
+          ],
+          "implemented_change": "Definição, wizard, prévia, escolhas manuais, CRUD auditado e escopo validados no incremento C4a; requisitos financeiros, distinção de seletores e filtros de todos os módulos permanecem parciais conforme o relatório.",
+          "files": [
+            "app/models/jrc_customers/taxonomy.rb",
+            "app/models/jrc_customers/segment_override.rb",
+            "app/services/jrc_customers/segment_criteria.rb",
+            "app/services/jrc_customers/segment_members.rb",
+            "app/services/jrc_customers/taxonomy_writer.rb",
+            "app/controllers/api/v1/accounts/customers/taxonomies_controller.rb",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/SegmentDirectory.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentDialog.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentResults.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentHistory.vue",
+            "db/migrate/20261103100000_add_customer_segment_definitions.rb"
+          ],
+          "status": "parcial",
+          "tests_and_evidence": [
+            "docs/jrc_customers/segment_definition_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Manter a validação do incremento e conferir os requisitos associados ainda parciais no relatório C4a."
         },
         {
           "id": "cadastro-mestre:P0222",
@@ -5095,14 +5115,34 @@
           },
           "requirement_text": "Ao clicar em um segmento, abrir popup central. Abas recomendadas: Resumo, Empresas, Contatos, Critérios, Módulos e Histórico.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "JrcCustomers::DirectoryQuery",
+            "JrcCrm::CorporateCoverage",
+            "JrcCustomers::ContactDirectory",
+            "JrcCustomers::Audit",
+            "CustomFilter pessoal nativo"
+          ],
+          "implemented_change": "Definição, wizard, prévia, escolhas manuais, CRUD auditado e escopo validados no incremento C4a; requisitos financeiros, distinção de seletores e filtros de todos os módulos permanecem parciais conforme o relatório.",
+          "files": [
+            "app/models/jrc_customers/taxonomy.rb",
+            "app/models/jrc_customers/segment_override.rb",
+            "app/services/jrc_customers/segment_criteria.rb",
+            "app/services/jrc_customers/segment_members.rb",
+            "app/services/jrc_customers/taxonomy_writer.rb",
+            "app/controllers/api/v1/accounts/customers/taxonomies_controller.rb",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/SegmentDirectory.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentDialog.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentResults.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentHistory.vue",
+            "db/migrate/20261103100000_add_customer_segment_definitions.rb"
+          ],
+          "status": "parcial",
+          "tests_and_evidence": [
+            "docs/jrc_customers/segment_definition_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Manter a validação do incremento e conferir os requisitos associados ainda parciais no relatório C4a."
         },
         {
           "id": "cadastro-mestre:P0228",
@@ -5155,14 +5195,34 @@
           },
           "requirement_text": "Dados gerais: nome, descrição, status e onde será utilizado.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "JrcCustomers::DirectoryQuery",
+            "JrcCrm::CorporateCoverage",
+            "JrcCustomers::ContactDirectory",
+            "JrcCustomers::Audit",
+            "CustomFilter pessoal nativo"
+          ],
+          "implemented_change": "Definição, wizard, prévia, escolhas manuais, CRUD auditado e escopo validados no incremento C4a; requisitos financeiros, distinção de seletores e filtros de todos os módulos permanecem parciais conforme o relatório.",
+          "files": [
+            "app/models/jrc_customers/taxonomy.rb",
+            "app/models/jrc_customers/segment_override.rb",
+            "app/services/jrc_customers/segment_criteria.rb",
+            "app/services/jrc_customers/segment_members.rb",
+            "app/services/jrc_customers/taxonomy_writer.rb",
+            "app/controllers/api/v1/accounts/customers/taxonomies_controller.rb",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/SegmentDirectory.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentDialog.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentResults.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentHistory.vue",
+            "db/migrate/20261103100000_add_customer_segment_definitions.rb"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/segment_definition_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Manter a validação do incremento e conferir os requisitos associados ainda parciais no relatório C4a."
         },
         {
           "id": "cadastro-mestre:P0231",
@@ -5175,14 +5235,34 @@
           },
           "requirement_text": "Critérios: regras de inclusão e operador E/OU, com prévia em tempo real.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "JrcCustomers::DirectoryQuery",
+            "JrcCrm::CorporateCoverage",
+            "JrcCustomers::ContactDirectory",
+            "JrcCustomers::Audit",
+            "CustomFilter pessoal nativo"
+          ],
+          "implemented_change": "Definição, wizard, prévia, escolhas manuais, CRUD auditado e escopo validados no incremento C4a; requisitos financeiros, distinção de seletores e filtros de todos os módulos permanecem parciais conforme o relatório.",
+          "files": [
+            "app/models/jrc_customers/taxonomy.rb",
+            "app/models/jrc_customers/segment_override.rb",
+            "app/services/jrc_customers/segment_criteria.rb",
+            "app/services/jrc_customers/segment_members.rb",
+            "app/services/jrc_customers/taxonomy_writer.rb",
+            "app/controllers/api/v1/accounts/customers/taxonomies_controller.rb",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/SegmentDirectory.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentDialog.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentResults.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentHistory.vue",
+            "db/migrate/20261103100000_add_customer_segment_definitions.rb"
+          ],
+          "status": "parcial",
+          "tests_and_evidence": [
+            "docs/jrc_customers/segment_definition_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Manter a validação do incremento e conferir os requisitos associados ainda parciais no relatório C4a."
         },
         {
           "id": "cadastro-mestre:P0232",
@@ -5195,14 +5275,34 @@
           },
           "requirement_text": "Empresas e contatos: revisar resultados automáticos e inclusões/exclusões manuais.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "JrcCustomers::DirectoryQuery",
+            "JrcCrm::CorporateCoverage",
+            "JrcCustomers::ContactDirectory",
+            "JrcCustomers::Audit",
+            "CustomFilter pessoal nativo"
+          ],
+          "implemented_change": "Definição, wizard, prévia, escolhas manuais, CRUD auditado e escopo validados no incremento C4a; requisitos financeiros, distinção de seletores e filtros de todos os módulos permanecem parciais conforme o relatório.",
+          "files": [
+            "app/models/jrc_customers/taxonomy.rb",
+            "app/models/jrc_customers/segment_override.rb",
+            "app/services/jrc_customers/segment_criteria.rb",
+            "app/services/jrc_customers/segment_members.rb",
+            "app/services/jrc_customers/taxonomy_writer.rb",
+            "app/controllers/api/v1/accounts/customers/taxonomies_controller.rb",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/SegmentDirectory.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentDialog.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentResults.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentHistory.vue",
+            "db/migrate/20261103100000_add_customer_segment_definitions.rb"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/segment_definition_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Manter a validação do incremento e conferir os requisitos associados ainda parciais no relatório C4a."
         },
         {
           "id": "cadastro-mestre:P0233",
@@ -5215,14 +5315,34 @@
           },
           "requirement_text": "Revisão: confirmar dados antes de criar.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "JrcCustomers::DirectoryQuery",
+            "JrcCrm::CorporateCoverage",
+            "JrcCustomers::ContactDirectory",
+            "JrcCustomers::Audit",
+            "CustomFilter pessoal nativo"
+          ],
+          "implemented_change": "Definição, wizard, prévia, escolhas manuais, CRUD auditado e escopo validados no incremento C4a; requisitos financeiros, distinção de seletores e filtros de todos os módulos permanecem parciais conforme o relatório.",
+          "files": [
+            "app/models/jrc_customers/taxonomy.rb",
+            "app/models/jrc_customers/segment_override.rb",
+            "app/services/jrc_customers/segment_criteria.rb",
+            "app/services/jrc_customers/segment_members.rb",
+            "app/services/jrc_customers/taxonomy_writer.rb",
+            "app/controllers/api/v1/accounts/customers/taxonomies_controller.rb",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/SegmentDirectory.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentDialog.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentResults.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentHistory.vue",
+            "db/migrate/20261103100000_add_customer_segment_definitions.rb"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/segment_definition_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Manter a validação do incremento e conferir os requisitos associados ainda parciais no relatório C4a."
         },
         {
           "id": "cadastro-mestre:P0235",
@@ -5235,14 +5355,34 @@
           },
           "requirement_text": "Etapa 1 - Dados gerais.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "JrcCustomers::DirectoryQuery",
+            "JrcCrm::CorporateCoverage",
+            "JrcCustomers::ContactDirectory",
+            "JrcCustomers::Audit",
+            "CustomFilter pessoal nativo"
+          ],
+          "implemented_change": "Definição, wizard, prévia, escolhas manuais, CRUD auditado e escopo validados no incremento C4a; requisitos financeiros, distinção de seletores e filtros de todos os módulos permanecem parciais conforme o relatório.",
+          "files": [
+            "app/models/jrc_customers/taxonomy.rb",
+            "app/models/jrc_customers/segment_override.rb",
+            "app/services/jrc_customers/segment_criteria.rb",
+            "app/services/jrc_customers/segment_members.rb",
+            "app/services/jrc_customers/taxonomy_writer.rb",
+            "app/controllers/api/v1/accounts/customers/taxonomies_controller.rb",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/SegmentDirectory.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentDialog.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentResults.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentHistory.vue",
+            "db/migrate/20261103100000_add_customer_segment_definitions.rb"
+          ],
+          "status": "parcial",
+          "tests_and_evidence": [
+            "docs/jrc_customers/segment_definition_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Manter a validação do incremento e conferir os requisitos associados ainda parciais no relatório C4a."
         },
         {
           "id": "cadastro-mestre:P0237",
@@ -5255,14 +5395,34 @@
           },
           "requirement_text": "Etapa 2 - Critérios.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "JrcCustomers::DirectoryQuery",
+            "JrcCrm::CorporateCoverage",
+            "JrcCustomers::ContactDirectory",
+            "JrcCustomers::Audit",
+            "CustomFilter pessoal nativo"
+          ],
+          "implemented_change": "Definição, wizard, prévia, escolhas manuais, CRUD auditado e escopo validados no incremento C4a; requisitos financeiros, distinção de seletores e filtros de todos os módulos permanecem parciais conforme o relatório.",
+          "files": [
+            "app/models/jrc_customers/taxonomy.rb",
+            "app/models/jrc_customers/segment_override.rb",
+            "app/services/jrc_customers/segment_criteria.rb",
+            "app/services/jrc_customers/segment_members.rb",
+            "app/services/jrc_customers/taxonomy_writer.rb",
+            "app/controllers/api/v1/accounts/customers/taxonomies_controller.rb",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/SegmentDirectory.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentDialog.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentResults.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentHistory.vue",
+            "db/migrate/20261103100000_add_customer_segment_definitions.rb"
+          ],
+          "status": "parcial",
+          "tests_and_evidence": [
+            "docs/jrc_customers/segment_definition_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Manter a validação do incremento e conferir os requisitos associados ainda parciais no relatório C4a."
         },
         {
           "id": "cadastro-mestre:P0239",
@@ -5275,14 +5435,34 @@
           },
           "requirement_text": "Etapa 3 - Empresas.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "JrcCustomers::DirectoryQuery",
+            "JrcCrm::CorporateCoverage",
+            "JrcCustomers::ContactDirectory",
+            "JrcCustomers::Audit",
+            "CustomFilter pessoal nativo"
+          ],
+          "implemented_change": "Definição, wizard, prévia, escolhas manuais, CRUD auditado e escopo validados no incremento C4a; requisitos financeiros, distinção de seletores e filtros de todos os módulos permanecem parciais conforme o relatório.",
+          "files": [
+            "app/models/jrc_customers/taxonomy.rb",
+            "app/models/jrc_customers/segment_override.rb",
+            "app/services/jrc_customers/segment_criteria.rb",
+            "app/services/jrc_customers/segment_members.rb",
+            "app/services/jrc_customers/taxonomy_writer.rb",
+            "app/controllers/api/v1/accounts/customers/taxonomies_controller.rb",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/SegmentDirectory.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentDialog.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentResults.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentHistory.vue",
+            "db/migrate/20261103100000_add_customer_segment_definitions.rb"
+          ],
+          "status": "parcial",
+          "tests_and_evidence": [
+            "docs/jrc_customers/segment_definition_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Manter a validação do incremento e conferir os requisitos associados ainda parciais no relatório C4a."
         },
         {
           "id": "cadastro-mestre:P0241",
@@ -5295,14 +5475,34 @@
           },
           "requirement_text": "Etapa 3 - Contatos.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "JrcCustomers::DirectoryQuery",
+            "JrcCrm::CorporateCoverage",
+            "JrcCustomers::ContactDirectory",
+            "JrcCustomers::Audit",
+            "CustomFilter pessoal nativo"
+          ],
+          "implemented_change": "Definição, wizard, prévia, escolhas manuais, CRUD auditado e escopo validados no incremento C4a; requisitos financeiros, distinção de seletores e filtros de todos os módulos permanecem parciais conforme o relatório.",
+          "files": [
+            "app/models/jrc_customers/taxonomy.rb",
+            "app/models/jrc_customers/segment_override.rb",
+            "app/services/jrc_customers/segment_criteria.rb",
+            "app/services/jrc_customers/segment_members.rb",
+            "app/services/jrc_customers/taxonomy_writer.rb",
+            "app/controllers/api/v1/accounts/customers/taxonomies_controller.rb",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/SegmentDirectory.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentDialog.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentResults.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentHistory.vue",
+            "db/migrate/20261103100000_add_customer_segment_definitions.rb"
+          ],
+          "status": "parcial",
+          "tests_and_evidence": [
+            "docs/jrc_customers/segment_definition_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Manter a validação do incremento e conferir os requisitos associados ainda parciais no relatório C4a."
         },
         {
           "id": "cadastro-mestre:P0243",
@@ -5315,14 +5515,34 @@
           },
           "requirement_text": "Etapa 4 - Revisão.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "JrcCustomers::DirectoryQuery",
+            "JrcCrm::CorporateCoverage",
+            "JrcCustomers::ContactDirectory",
+            "JrcCustomers::Audit",
+            "CustomFilter pessoal nativo"
+          ],
+          "implemented_change": "Definição, wizard, prévia, escolhas manuais, CRUD auditado e escopo validados no incremento C4a; requisitos financeiros, distinção de seletores e filtros de todos os módulos permanecem parciais conforme o relatório.",
+          "files": [
+            "app/models/jrc_customers/taxonomy.rb",
+            "app/models/jrc_customers/segment_override.rb",
+            "app/services/jrc_customers/segment_criteria.rb",
+            "app/services/jrc_customers/segment_members.rb",
+            "app/services/jrc_customers/taxonomy_writer.rb",
+            "app/controllers/api/v1/accounts/customers/taxonomies_controller.rb",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/SegmentDirectory.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentDialog.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentResults.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentHistory.vue",
+            "db/migrate/20261103100000_add_customer_segment_definitions.rb"
+          ],
+          "status": "parcial",
+          "tests_and_evidence": [
+            "docs/jrc_customers/segment_definition_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Manter a validação do incremento e conferir os requisitos associados ainda parciais no relatório C4a."
         },
         {
           "id": "cadastro-mestre:P0244",
@@ -5431,14 +5651,34 @@
           },
           "requirement_text": "Suportar E (todos) e OU (qualquer) de forma explícita.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "JrcCustomers::DirectoryQuery",
+            "JrcCrm::CorporateCoverage",
+            "JrcCustomers::ContactDirectory",
+            "JrcCustomers::Audit",
+            "CustomFilter pessoal nativo"
+          ],
+          "implemented_change": "Definição, wizard, prévia, escolhas manuais, CRUD auditado e escopo validados no incremento C4a; requisitos financeiros, distinção de seletores e filtros de todos os módulos permanecem parciais conforme o relatório.",
+          "files": [
+            "app/models/jrc_customers/taxonomy.rb",
+            "app/models/jrc_customers/segment_override.rb",
+            "app/services/jrc_customers/segment_criteria.rb",
+            "app/services/jrc_customers/segment_members.rb",
+            "app/services/jrc_customers/taxonomy_writer.rb",
+            "app/controllers/api/v1/accounts/customers/taxonomies_controller.rb",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/SegmentDirectory.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentDialog.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentResults.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentHistory.vue",
+            "db/migrate/20261103100000_add_customer_segment_definitions.rb"
+          ],
+          "status": "parcial",
+          "tests_and_evidence": [
+            "docs/jrc_customers/segment_definition_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Manter a validação do incremento e conferir os requisitos associados ainda parciais no relatório C4a."
         },
         {
           "id": "cadastro-mestre:P0249",
@@ -5479,14 +5719,34 @@
           },
           "requirement_text": "Campos parametrizados: faturamento, contratos, TRR, segmento, região, status e outros dados autorizados.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "JrcCustomers::DirectoryQuery",
+            "JrcCrm::CorporateCoverage",
+            "JrcCustomers::ContactDirectory",
+            "JrcCustomers::Audit",
+            "CustomFilter pessoal nativo"
+          ],
+          "implemented_change": "Definição, wizard, prévia, escolhas manuais, CRUD auditado e escopo validados no incremento C4a; requisitos financeiros, distinção de seletores e filtros de todos os módulos permanecem parciais conforme o relatório.",
+          "files": [
+            "app/models/jrc_customers/taxonomy.rb",
+            "app/models/jrc_customers/segment_override.rb",
+            "app/services/jrc_customers/segment_criteria.rb",
+            "app/services/jrc_customers/segment_members.rb",
+            "app/services/jrc_customers/taxonomy_writer.rb",
+            "app/controllers/api/v1/accounts/customers/taxonomies_controller.rb",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/SegmentDirectory.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentDialog.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentResults.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentHistory.vue",
+            "db/migrate/20261103100000_add_customer_segment_definitions.rb"
+          ],
+          "status": "parcial",
+          "tests_and_evidence": [
+            "docs/jrc_customers/segment_definition_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Manter a validação do incremento e conferir os requisitos associados ainda parciais no relatório C4a."
         },
         {
           "id": "cadastro-mestre:P0251",
@@ -5527,14 +5787,34 @@
           },
           "requirement_text": "Mostrar quantidade estimada de empresas e contatos antes de salvar.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "JrcCustomers::DirectoryQuery",
+            "JrcCrm::CorporateCoverage",
+            "JrcCustomers::ContactDirectory",
+            "JrcCustomers::Audit",
+            "CustomFilter pessoal nativo"
+          ],
+          "implemented_change": "Definição, wizard, prévia, escolhas manuais, CRUD auditado e escopo validados no incremento C4a; requisitos financeiros, distinção de seletores e filtros de todos os módulos permanecem parciais conforme o relatório.",
+          "files": [
+            "app/models/jrc_customers/taxonomy.rb",
+            "app/models/jrc_customers/segment_override.rb",
+            "app/services/jrc_customers/segment_criteria.rb",
+            "app/services/jrc_customers/segment_members.rb",
+            "app/services/jrc_customers/taxonomy_writer.rb",
+            "app/controllers/api/v1/accounts/customers/taxonomies_controller.rb",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/SegmentDirectory.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentDialog.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentResults.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentHistory.vue",
+            "db/migrate/20261103100000_add_customer_segment_definitions.rb"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/segment_definition_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Manter a validação do incremento e conferir os requisitos associados ainda parciais no relatório C4a."
         },
         {
           "id": "cadastro-mestre:P0253",
@@ -5575,14 +5855,34 @@
           },
           "requirement_text": "Se o segmento for baseado em critérios, reprocessar quando dados-base mudarem, preservando inclusões/exclusões manuais conforme regra definida.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "JrcCustomers::DirectoryQuery",
+            "JrcCrm::CorporateCoverage",
+            "JrcCustomers::ContactDirectory",
+            "JrcCustomers::Audit",
+            "CustomFilter pessoal nativo"
+          ],
+          "implemented_change": "Definição, wizard, prévia, escolhas manuais, CRUD auditado e escopo validados no incremento C4a; requisitos financeiros, distinção de seletores e filtros de todos os módulos permanecem parciais conforme o relatório.",
+          "files": [
+            "app/models/jrc_customers/taxonomy.rb",
+            "app/models/jrc_customers/segment_override.rb",
+            "app/services/jrc_customers/segment_criteria.rb",
+            "app/services/jrc_customers/segment_members.rb",
+            "app/services/jrc_customers/taxonomy_writer.rb",
+            "app/controllers/api/v1/accounts/customers/taxonomies_controller.rb",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/SegmentDirectory.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentDialog.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentResults.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentHistory.vue",
+            "db/migrate/20261103100000_add_customer_segment_definitions.rb"
+          ],
+          "status": "parcial",
+          "tests_and_evidence": [
+            "docs/jrc_customers/segment_definition_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Manter a validação do incremento e conferir os requisitos associados ainda parciais no relatório C4a."
         },
         {
           "id": "cadastro-mestre:P0255",
@@ -5623,14 +5923,34 @@
           },
           "requirement_text": "A indicação de uso deve habilitar filtros/escopo; não deve conceder permissões de usuário.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "JrcCustomers::DirectoryQuery",
+            "JrcCrm::CorporateCoverage",
+            "JrcCustomers::ContactDirectory",
+            "JrcCustomers::Audit",
+            "CustomFilter pessoal nativo"
+          ],
+          "implemented_change": "Definição, wizard, prévia, escolhas manuais, CRUD auditado e escopo validados no incremento C4a; requisitos financeiros, distinção de seletores e filtros de todos os módulos permanecem parciais conforme o relatório.",
+          "files": [
+            "app/models/jrc_customers/taxonomy.rb",
+            "app/models/jrc_customers/segment_override.rb",
+            "app/services/jrc_customers/segment_criteria.rb",
+            "app/services/jrc_customers/segment_members.rb",
+            "app/services/jrc_customers/taxonomy_writer.rb",
+            "app/controllers/api/v1/accounts/customers/taxonomies_controller.rb",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/SegmentDirectory.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentDialog.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentResults.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentHistory.vue",
+            "db/migrate/20261103100000_add_customer_segment_definitions.rb"
+          ],
+          "status": "parcial",
+          "tests_and_evidence": [
+            "docs/jrc_customers/segment_definition_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Manter a validação do incremento e conferir os requisitos associados ainda parciais no relatório C4a."
         },
         {
           "id": "cadastro-mestre:P0257",
@@ -5671,14 +5991,34 @@
           },
           "requirement_text": "Bloquear exclusão se houver dependências críticas ou exigir confirmação e estratégia de desvinculação.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "JrcCustomers::DirectoryQuery",
+            "JrcCrm::CorporateCoverage",
+            "JrcCustomers::ContactDirectory",
+            "JrcCustomers::Audit",
+            "CustomFilter pessoal nativo"
+          ],
+          "implemented_change": "Definição, wizard, prévia, escolhas manuais, CRUD auditado e escopo validados no incremento C4a; requisitos financeiros, distinção de seletores e filtros de todos os módulos permanecem parciais conforme o relatório.",
+          "files": [
+            "app/models/jrc_customers/taxonomy.rb",
+            "app/models/jrc_customers/segment_override.rb",
+            "app/services/jrc_customers/segment_criteria.rb",
+            "app/services/jrc_customers/segment_members.rb",
+            "app/services/jrc_customers/taxonomy_writer.rb",
+            "app/controllers/api/v1/accounts/customers/taxonomies_controller.rb",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/SegmentDirectory.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentDialog.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentResults.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentHistory.vue",
+            "db/migrate/20261103100000_add_customer_segment_definitions.rb"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/segment_definition_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Manter a validação do incremento e conferir os requisitos associados ainda parciais no relatório C4a."
         },
         {
           "id": "cadastro-mestre:P0260",
@@ -41638,5 +41978,9 @@
     ],
     "fragments_preserved": 1546,
     "global_completion": false
+  },
+  "customer_segment_definition_increment": {
+    "status": "parcial",
+    "report": "docs/jrc_customers/segment_definition_checkpoint_20261103.json"
   }
 }

@@ -3,6 +3,11 @@ class Api::V1::Accounts::Customers::ContactsController < Api::V1::Accounts::Cust
 
   def index
     scope = contact_directory.scope
+    if params[:taxonomy_id].present?
+      taxonomy = JrcCustomers::Taxonomy.active.where(account_id: Current.account.id).find(params[:taxonomy_id])
+      members = JrcCustomers::SegmentMembers.new(account: Current.account, actor: Current.user, taxonomy: taxonomy)
+      scope = scope.where(id: members.contacts.reselect(:id))
+    end
     scope = scope.where(company_id: corporate_companies.find(params[:company_id]).id) if params[:company_id].present?
     scope = scope.where(company_id: nil) if params[:unlinked] == 'true'
     scope = JrcCustomers::ContactQuery.new(account: Current.account, scope: scope, query: params[:q]).call

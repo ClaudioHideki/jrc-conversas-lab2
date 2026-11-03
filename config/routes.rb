@@ -417,7 +417,16 @@ Rails.application.routes.draw do
           namespace :customers do
             get :metadata, to: 'directory#metadata'
             get :identity, to: 'directory#identity'
-            resources :taxonomies, only: [:index, :create, :update]
+            resources :taxonomies, only: [:index, :show, :create, :update, :destroy] do
+              post :preview, on: :collection
+              member do
+                get :members
+                get :overrides
+                get :history
+                post :set_override
+                delete 'overrides/:override_id', action: :remove_override
+              end
+            end
             post 'imports/preview', to: 'imports#preview'
             post 'imports/apply', to: 'imports#apply'
             resources :companies, only: [:index, :show, :create, :update] do
