@@ -847,14 +847,24 @@
           },
           "requirement_text": "Telas de detalhe devem abrir em popup/modal, preservando o contexto da lista.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "Contact/Company canônicos, Customer360, ContactDirectory/CorporateCoverage e políticas dos módulos fonte",
+            "ComposeConversation/Popover/Dialog nativos; nenhuma escrita externa"
+          ],
+          "implemented_change": "Empresas/contatos abrem popups preservando contexto; seis abas autorizadas do contato, fontes paginadas e origem exata; compositor interativo no top layer e captura escura real no celular.",
+          "files": [
+            "app/javascript/dashboard/components-next/NewConversation/ComposeConversation.vue",
+            "app/javascript/dashboard/components-next/popover/Popover.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/Contact360Panel.vue"
+          ],
+          "status": "parcial",
+          "tests_and_evidence": [
+            "docs/jrc_customers/contact_composer_checkpoint_20261103.json",
+            "docs/jrc_customers/contact_context_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Concluir critérios restantes do fragmento e as demais entidades; não tratar o incremento de popup como conclusão integral."
         },
         {
           "id": "cadastro-mestre:P0021",
@@ -1051,14 +1061,24 @@
           },
           "requirement_text": "Central, popup de contato, empresa/vínculos, atendimento, CRM, atividades e histórico.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "Contact/Company canônicos, Customer360, ContactDirectory/CorporateCoverage e políticas dos módulos fonte",
+            "ComposeConversation/Popover/Dialog nativos; nenhuma escrita externa"
+          ],
+          "implemented_change": "Empresas/contatos abrem popups preservando contexto; seis abas autorizadas do contato, fontes paginadas e origem exata; compositor interativo no top layer e captura escura real no celular.",
+          "files": [
+            "app/javascript/dashboard/components-next/NewConversation/ComposeConversation.vue",
+            "app/javascript/dashboard/components-next/popover/Popover.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/Contact360Panel.vue"
+          ],
+          "status": "parcial",
+          "tests_and_evidence": [
+            "docs/jrc_customers/contact_composer_checkpoint_20261103.json",
+            "docs/jrc_customers/contact_context_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Concluir critérios restantes do fragmento e as demais entidades; não tratar o incremento de popup como conclusão integral."
         },
         {
           "id": "cadastro-mestre:P0030",
@@ -1619,14 +1639,24 @@
           },
           "requirement_text": "Métricas e registros exibidos nas abas devem respeitar permissões e visibilidade do usuário autenticado.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "Contact/Company canônicos, Customer360, ContactDirectory/CorporateCoverage e políticas dos módulos fonte",
+            "ComposeConversation/Popover/Dialog nativos; nenhuma escrita externa"
+          ],
+          "implemented_change": "Empresas/contatos abrem popups preservando contexto; seis abas autorizadas do contato, fontes paginadas e origem exata; compositor interativo no top layer e captura escura real no celular.",
+          "files": [
+            "app/javascript/dashboard/components-next/NewConversation/ComposeConversation.vue",
+            "app/javascript/dashboard/components-next/popover/Popover.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/Contact360Panel.vue"
+          ],
+          "status": "parcial",
+          "tests_and_evidence": [
+            "docs/jrc_customers/contact_composer_checkpoint_20261103.json",
+            "docs/jrc_customers/contact_context_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Concluir critérios restantes do fragmento e as demais entidades; não tratar o incremento de popup como conclusão integral."
         },
         {
           "id": "cadastro-mestre:P0055",
@@ -1821,45 +1851,22 @@
           "is_heading": false,
           "classification_pending": false,
           "existing_code_reused": [
-            "JrcCustomers::CompanyWriter",
-            "JrcCustomers::Customer360",
-            "JrcBackoffice::ContractAccess",
-            "JrcCrm::BackofficeWorkspace",
-            "JrcCrm::CorporateCoverage"
+            "Contact/Company canônicos, Customer360, ContactDirectory/CorporateCoverage e políticas dos módulos fonte",
+            "ComposeConversation/Popover/Dialog nativos; nenhuma escrita externa"
           ],
-          "implemented_change": "Empresas abrem/criam/editam em popup canônico, com abas, estado de lista preservado e Backoffice de origem autorizado. Visão geral não duplica mapa/histórico. Demais entidades e critérios integrais do Cadastro Mestre continuam parciais.",
+          "implemented_change": "Empresas/contatos abrem popups preservando contexto; seis abas autorizadas do contato, fontes paginadas e origem exata; compositor interativo no top layer e captura escura real no celular.",
           "files": [
-            "app/controllers/api/v1/accounts/customers/companies_controller.rb",
-            "app/javascript/dashboard/api/jrcCustomers.js",
-            "app/javascript/dashboard/i18n/locale/en/crm.json",
-            "app/javascript/dashboard/routes/dashboard/jrcCustomers/CompaniesPage.vue",
-            "app/javascript/dashboard/routes/dashboard/jrcCustomers/CompanyPage.spec.js",
-            "app/javascript/dashboard/routes/dashboard/jrcCustomers/CompanyPage.vue",
-            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/BackofficeContextPanel.spec.js",
-            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/BackofficeContextPanel.vue",
-            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/CompanyDetailsDialog.vue",
-            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/CompanyEditor.spec.js",
-            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/CompanyEditor.vue",
-            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/CompanyEditorDialog.vue",
-            "app/javascript/dashboard/routes/dashboard/jrcCustomers/useCompanyDirectory.js",
-            "app/javascript/dashboard/routes/dashboard/jrcCustomers/useCompanyDirectory.spec.js",
-            "app/javascript/dashboard/routes/dashboard/jrcCustomers/useCustomerMaster.js",
-            "app/services/jrc_backoffice/contract_access.rb",
-            "app/services/jrc_customers/backoffice_context.rb",
-            "app/services/jrc_customers/customer360.rb",
-            "config/routes.rb",
-            "spec/requests/api/v1/accounts/customers/company_backoffice_context_spec.rb",
-            "spec/services/jrc_customers/backoffice_context_spec.rb"
+            "app/javascript/dashboard/components-next/NewConversation/ComposeConversation.vue",
+            "app/javascript/dashboard/components-next/popover/Popover.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/Contact360Panel.vue"
           ],
           "status": "parcial",
           "tests_and_evidence": [
-            "docs/jrc_customers/company_context_checkpoint_20261102.json",
-            ".codex/master-company-context-validated-backend.json",
-            ".codex/master-company-mobile-frontend-tests.json",
-            "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\cadastro-popup-celular-corrigido-resultado.json"
+            "docs/jrc_customers/contact_composer_checkpoint_20261103.json",
+            "docs/jrc_customers/contact_context_checkpoint_20261103.json"
           ],
           "dependencies": [],
-          "next_action": "Concluir critérios restantes de C (contatos, segmentos, grupos, importações e contatos ativos), sem repetir este incremento; depois D→G.",
+          "next_action": "Concluir critérios restantes do fragmento e as demais entidades; não tratar o incremento de popup como conclusão integral.",
           "fragment_kind": "requirement"
         },
         {
@@ -1875,45 +1882,22 @@
           "is_heading": false,
           "classification_pending": false,
           "existing_code_reused": [
-            "JrcCustomers::CompanyWriter",
-            "JrcCustomers::Customer360",
-            "JrcBackoffice::ContractAccess",
-            "JrcCrm::BackofficeWorkspace",
-            "JrcCrm::CorporateCoverage"
+            "Contact/Company canônicos, Customer360, ContactDirectory/CorporateCoverage e políticas dos módulos fonte",
+            "ComposeConversation/Popover/Dialog nativos; nenhuma escrita externa"
           ],
-          "implemented_change": "Empresas abrem/criam/editam em popup canônico, com abas, estado de lista preservado e Backoffice de origem autorizado. Visão geral não duplica mapa/histórico. Demais entidades e critérios integrais do Cadastro Mestre continuam parciais.",
+          "implemented_change": "Empresas/contatos abrem popups preservando contexto; seis abas autorizadas do contato, fontes paginadas e origem exata; compositor interativo no top layer e captura escura real no celular.",
           "files": [
-            "app/controllers/api/v1/accounts/customers/companies_controller.rb",
-            "app/javascript/dashboard/api/jrcCustomers.js",
-            "app/javascript/dashboard/i18n/locale/en/crm.json",
-            "app/javascript/dashboard/routes/dashboard/jrcCustomers/CompaniesPage.vue",
-            "app/javascript/dashboard/routes/dashboard/jrcCustomers/CompanyPage.spec.js",
-            "app/javascript/dashboard/routes/dashboard/jrcCustomers/CompanyPage.vue",
-            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/BackofficeContextPanel.spec.js",
-            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/BackofficeContextPanel.vue",
-            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/CompanyDetailsDialog.vue",
-            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/CompanyEditor.spec.js",
-            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/CompanyEditor.vue",
-            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/CompanyEditorDialog.vue",
-            "app/javascript/dashboard/routes/dashboard/jrcCustomers/useCompanyDirectory.js",
-            "app/javascript/dashboard/routes/dashboard/jrcCustomers/useCompanyDirectory.spec.js",
-            "app/javascript/dashboard/routes/dashboard/jrcCustomers/useCustomerMaster.js",
-            "app/services/jrc_backoffice/contract_access.rb",
-            "app/services/jrc_customers/backoffice_context.rb",
-            "app/services/jrc_customers/customer360.rb",
-            "config/routes.rb",
-            "spec/requests/api/v1/accounts/customers/company_backoffice_context_spec.rb",
-            "spec/services/jrc_customers/backoffice_context_spec.rb"
+            "app/javascript/dashboard/components-next/NewConversation/ComposeConversation.vue",
+            "app/javascript/dashboard/components-next/popover/Popover.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/Contact360Panel.vue"
           ],
           "status": "parcial",
           "tests_and_evidence": [
-            "docs/jrc_customers/company_context_checkpoint_20261102.json",
-            ".codex/master-company-context-validated-backend.json",
-            ".codex/master-company-mobile-frontend-tests.json",
-            "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\cadastro-popup-celular-corrigido-resultado.json"
+            "docs/jrc_customers/contact_composer_checkpoint_20261103.json",
+            "docs/jrc_customers/contact_context_checkpoint_20261103.json"
           ],
           "dependencies": [],
-          "next_action": "Concluir critérios restantes de C (contatos, segmentos, grupos, importações e contatos ativos), sem repetir este incremento; depois D→G.",
+          "next_action": "Concluir critérios restantes do fragmento e as demais entidades; não tratar o incremento de popup como conclusão integral.",
           "fragment_kind": "requirement"
         },
         {
@@ -4229,14 +4213,24 @@
           },
           "requirement_text": "Link para abrir popup da empresa.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "Contact/Company canônicos, Customer360, ContactDirectory/CorporateCoverage e políticas dos módulos fonte",
+            "ComposeConversation/Popover/Dialog nativos; nenhuma escrita externa"
+          ],
+          "implemented_change": "Empresas/contatos abrem popups preservando contexto; seis abas autorizadas do contato, fontes paginadas e origem exata; compositor interativo no top layer e captura escura real no celular.",
+          "files": [
+            "app/javascript/dashboard/components-next/NewConversation/ComposeConversation.vue",
+            "app/javascript/dashboard/components-next/popover/Popover.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/Contact360Panel.vue"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/contact_composer_checkpoint_20261103.json",
+            "docs/jrc_customers/contact_context_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Preservar a evidência e executar G integrado."
         },
         {
           "id": "cadastro-mestre:P0181",
@@ -4373,14 +4367,24 @@
           },
           "requirement_text": "Abrir popup do contato.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "Contact/Company canônicos, Customer360, ContactDirectory/CorporateCoverage e políticas dos módulos fonte",
+            "ComposeConversation/Popover/Dialog nativos; nenhuma escrita externa"
+          ],
+          "implemented_change": "Empresas/contatos abrem popups preservando contexto; seis abas autorizadas do contato, fontes paginadas e origem exata; compositor interativo no top layer e captura escura real no celular.",
+          "files": [
+            "app/javascript/dashboard/components-next/NewConversation/ComposeConversation.vue",
+            "app/javascript/dashboard/components-next/popover/Popover.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/Contact360Panel.vue"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/contact_composer_checkpoint_20261103.json",
+            "docs/jrc_customers/contact_context_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Preservar a evidência e executar G integrado."
         },
         {
           "id": "cadastro-mestre:P0189",
@@ -4433,14 +4437,24 @@
           },
           "requirement_text": "Abas aprovadas: Visão Geral, Empresa e Vínculos, Atendimento, CRM, Atividades e Histórico. O popup deve preservar o contexto da lista.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "Contact/Company canônicos, Customer360, ContactDirectory/CorporateCoverage e políticas dos módulos fonte",
+            "ComposeConversation/Popover/Dialog nativos; nenhuma escrita externa"
+          ],
+          "implemented_change": "Empresas/contatos abrem popups preservando contexto; seis abas autorizadas do contato, fontes paginadas e origem exata; compositor interativo no top layer e captura escura real no celular.",
+          "files": [
+            "app/javascript/dashboard/components-next/NewConversation/ComposeConversation.vue",
+            "app/javascript/dashboard/components-next/popover/Popover.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/Contact360Panel.vue"
+          ],
+          "status": "parcial",
+          "tests_and_evidence": [
+            "docs/jrc_customers/contact_composer_checkpoint_20261103.json",
+            "docs/jrc_customers/contact_context_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Concluir critérios restantes do fragmento e as demais entidades; não tratar o incremento de popup como conclusão integral."
         },
         {
           "id": "cadastro-mestre:P0193",
@@ -7351,14 +7365,24 @@
           },
           "requirement_text": "Paginação, busca e filtros devem ocorrer no servidor para bases grandes.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "Contact/Company canônicos, Customer360, ContactDirectory/CorporateCoverage e políticas dos módulos fonte",
+            "ComposeConversation/Popover/Dialog nativos; nenhuma escrita externa"
+          ],
+          "implemented_change": "Empresas/contatos abrem popups preservando contexto; seis abas autorizadas do contato, fontes paginadas e origem exata; compositor interativo no top layer e captura escura real no celular.",
+          "files": [
+            "app/javascript/dashboard/components-next/NewConversation/ComposeConversation.vue",
+            "app/javascript/dashboard/components-next/popover/Popover.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/Contact360Panel.vue"
+          ],
+          "status": "parcial",
+          "tests_and_evidence": [
+            "docs/jrc_customers/contact_composer_checkpoint_20261103.json",
+            "docs/jrc_customers/contact_context_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Concluir critérios restantes do fragmento e as demais entidades; não tratar o incremento de popup como conclusão integral."
         },
         {
           "id": "cadastro-mestre:P0347",
@@ -7585,14 +7609,24 @@
           },
           "requirement_text": "Clique abre popup com 6 abas aprovadas.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "Contact/Company canônicos, Customer360, ContactDirectory/CorporateCoverage e políticas dos módulos fonte",
+            "ComposeConversation/Popover/Dialog nativos; nenhuma escrita externa"
+          ],
+          "implemented_change": "Empresas/contatos abrem popups preservando contexto; seis abas autorizadas do contato, fontes paginadas e origem exata; compositor interativo no top layer e captura escura real no celular.",
+          "files": [
+            "app/javascript/dashboard/components-next/NewConversation/ComposeConversation.vue",
+            "app/javascript/dashboard/components-next/popover/Popover.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/Contact360Panel.vue"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/contact_composer_checkpoint_20261103.json",
+            "docs/jrc_customers/contact_context_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Preservar a evidência e executar G integrado."
         },
         {
           "id": "cadastro-mestre:P0357",
@@ -8025,14 +8059,24 @@
           },
           "requirement_text": "Refatorar Contatos para popup mestre e conexões com Empresa/CRM/Atendimento/Service Desk.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "Contact/Company canônicos, Customer360, ContactDirectory/CorporateCoverage e políticas dos módulos fonte",
+            "ComposeConversation/Popover/Dialog nativos; nenhuma escrita externa"
+          ],
+          "implemented_change": "Empresas/contatos abrem popups preservando contexto; seis abas autorizadas do contato, fontes paginadas e origem exata; compositor interativo no top layer e captura escura real no celular.",
+          "files": [
+            "app/javascript/dashboard/components-next/NewConversation/ComposeConversation.vue",
+            "app/javascript/dashboard/components-next/popover/Popover.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/Contact360Panel.vue"
+          ],
+          "status": "parcial",
+          "tests_and_evidence": [
+            "docs/jrc_customers/contact_composer_checkpoint_20261103.json",
+            "docs/jrc_customers/contact_context_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Concluir critérios restantes do fragmento e as demais entidades; não tratar o incremento de popup como conclusão integral."
         },
         {
           "id": "cadastro-mestre:P0379",
@@ -8401,14 +8445,24 @@
           },
           "requirement_text": "Abrir popup e visualizar dados sem criar registros novos.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "Contact/Company canônicos, Customer360, ContactDirectory/CorporateCoverage e políticas dos módulos fonte",
+            "ComposeConversation/Popover/Dialog nativos; nenhuma escrita externa"
+          ],
+          "implemented_change": "Empresas/contatos abrem popups preservando contexto; seis abas autorizadas do contato, fontes paginadas e origem exata; compositor interativo no top layer e captura escura real no celular.",
+          "files": [
+            "app/javascript/dashboard/components-next/NewConversation/ComposeConversation.vue",
+            "app/javascript/dashboard/components-next/popover/Popover.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/Contact360Panel.vue"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/contact_composer_checkpoint_20261103.json",
+            "docs/jrc_customers/contact_context_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Preservar a evidência e executar G integrado."
         },
         {
           "id": "cadastro-mestre:P0397",

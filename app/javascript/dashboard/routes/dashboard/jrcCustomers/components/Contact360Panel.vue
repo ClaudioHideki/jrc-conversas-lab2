@@ -164,6 +164,7 @@ onBeforeUnmount(() => {
           <ComposeConversation
             ref="composer"
             :contact-id="String(contact.id)"
+            native-dialog
           >
             <template #trigger>
               <Button

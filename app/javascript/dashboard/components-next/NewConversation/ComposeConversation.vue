@@ -37,6 +37,7 @@ const props = defineProps({
   inboxFilter: { type: Function, default: null },
   isSubmitting: { type: Boolean, default: false },
   disabled: { type: Boolean, default: false },
+  nativeDialog: { type: Boolean, default: false },
   contactId: {
     type: String,
     default: null,
@@ -309,6 +310,7 @@ onMounted(() => resetContacts());
     :show-content-border="false"
     :close-on-scroll="false"
     modal
+    :native-dialog="nativeDialog"
     modal-class="max-w-7xl"
     :modal-label="t('JRC_HOME.COMPOSE.TITLE')"
     @show="onPopoverShow"
