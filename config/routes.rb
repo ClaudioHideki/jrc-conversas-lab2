@@ -436,6 +436,18 @@ Rails.application.routes.draw do
             end
             post 'imports/preview', to: 'imports#preview'
             post 'imports/apply', to: 'imports#apply'
+            resources :import_runs, only: [:index, :show, :create] do
+              collection do
+                get :metadata
+                get :template
+              end
+              member do
+                post :preview
+                post :apply
+                get :rows
+                get :errors
+              end
+            end
             resources :companies, only: [:index, :show, :create, :update] do
               get :duplicates, on: :collection
               member do

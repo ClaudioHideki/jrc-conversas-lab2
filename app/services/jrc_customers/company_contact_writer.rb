@@ -1,7 +1,8 @@
 # The temporary single-company link stays on Contact. Reuse its native lock,
 # coverage, validation and audit; switching a primary never changes the person.
 class JrcCustomers::CompanyContactWriter
-  FIELDS = %i[name email phone_number company_id job_title department registration_status company_role company_primary company_contact_status].freeze
+  FIELDS = %i[name email phone_number company_id job_title department registration_status company_role company_primary company_contact_status
+              identifier custom_attributes additional_attributes label_list].freeze
 
   def initialize(account:, actor:)
     @account = account
@@ -10,23 +11,47 @@ class JrcCustomers::CompanyContactWriter
     @serializer = JrcCustomers::Serializer.new(account: account)
   end
 
-  def update!(id:, attributes:, confirm_reassignment: false, confirm_primary_change: false)
+  def update!(id:, attributes:, confirm_reassignment: false, confirm_primary_change: false, imported: false)
+    JrcCustomers::ImportAccess.new(account: @account, actor: @actor).authorize!(kind: 'contacts') if imported
     @directory.with_locked_contact(id) do |contact|
-      previous = @serializer.contact(contact)
+      target = imported ? contact.becomes(JrcCustomers::ImportContact) : contact
+      result = update_contact!(target, attributes, confirm_reassignment, confirm_primary_change)
+      imported ? result.becomes(Contact) : result
+    end
+  end
+
+  def create_imported!(attributes:, confirm_primary_change: false)
+    @account.with_lock do
+      JrcCustomers::ImportAccess.new(account: @account, actor: @actor).authorize!(kind: 'contacts')
+      contact = JrcCustomers::ImportContact.new(account: @account, registration_status: 'registered')
       values = attributes.to_h.symbolize_keys.slice(*FIELDS)
-      transferring = values.key?(:company_id) && values[:company_id].to_s != contact.company_id.to_s
-      authorize_transfer!(contact, values, transferring, confirm_reassignment)
+      authorize_transfer!(contact, values, false, false)
       contact.assign_attributes(values)
       raise ActiveRecord::RecordInvalid, contact unless contact.valid?
 
       replace_primary!(contact, confirm_primary_change) if contact.company_primary?
       contact.save!
-      audit!(contact, event_type(contact, previous, values, transferring), previous)
-      contact
+      native_contact = contact.becomes(Contact)
+      audit!(native_contact, 'customer_contact_updated', {})
+      native_contact
     end
   end
 
   private
+
+  def update_contact!(contact, attributes, confirm_reassignment, confirm_primary_change)
+    previous = @serializer.contact(contact)
+    values = attributes.to_h.symbolize_keys.slice(*FIELDS)
+    transferring = values.key?(:company_id) && values[:company_id].to_s != contact.company_id.to_s
+    authorize_transfer!(contact, values, transferring, confirm_reassignment)
+    contact.assign_attributes(values)
+    raise ActiveRecord::RecordInvalid, contact unless contact.valid?
+
+    replace_primary!(contact, confirm_primary_change) if contact.company_primary?
+    contact.save!
+    audit!(contact, event_type(contact, previous, values, transferring), previous)
+    contact
+  end
 
   def authorize_transfer!(contact, values, transferring, confirmed)
     if transferring && contact.company_id.present? && !confirmed
@@ -60,7 +85,7 @@ class JrcCustomers::CompanyContactWriter
   end
 
   def audit!(contact, event, previous)
-    JrcCustomers::Audit.record!(account: @account, actor: @actor, resource: contact, event_type: event,
+    JrcCustomers::Audit.record!(account: @account, actor: @actor, resource: contact.becomes(Contact), event_type: event,
                                 from_value: previous, to_value: @serializer.contact(contact))
   end
 end

@@ -36,7 +36,7 @@ class JrcCustomers::ImportCompanyPlan
 
     append!(source.fetch(:line), validated, attrs)
   rescue JrcCustomers::CompanyImport::InvalidImport, ActiveRecord::RecordNotFound, ArgumentError => e
-    @errors << { line: source.fetch(:line), entity: 'company', field: 'company', code: 'INVALID_COMPANY', message: e.message }
+    @errors << exception_error(e, source.fetch(:line))
   end
 
   def reviewed_attributes(record, attrs)
@@ -89,9 +89,29 @@ class JrcCustomers::ImportCompanyPlan
     end
     result = JrcCustomers::CompanyImport.new(account: @account, actor: @actor, content: content).preview
     result.fetch(:errors).each do |error|
-      @errors << { line: line, entity: 'company', field: 'company', code: 'INVALID_COMPANY', message: error.fetch(:error) }
+      @errors << { line: line, entity: 'company', field: error[:field] || 'company', code: error.fetch(:code), message: safe_message(error) }
     end
     result.fetch(:rows).first
+  end
+
+  def unavailable_error(line)
+    { line: line, entity: 'company', field: 'id', code: 'UNAVAILABLE_RECORD', message: 'Company unavailable in the current account or scope' }
+  end
+
+  def exception_error(error, line)
+    return unavailable_error(line) if error.is_a?(ActiveRecord::RecordNotFound)
+    if error.is_a?(JrcCustomers::CompanyImport::InvalidImport)
+      return { line: line, entity: 'company', field: error.field || 'company', code: error.code, message: error.message }
+    end
+
+    { line: line, entity: 'company', field: 'id', code: 'INVALID_REFERENCE', message: 'Review the mapped internal ID' }
+  end
+
+  def safe_message(error)
+    return 'Review the mapped internal ID' if error[:code] == 'INVALID_REFERENCE'
+    return 'Company unavailable in the current account or scope' if error[:code] == 'UNAVAILABLE_RECORD'
+
+    error.fetch(:error)
   end
 
   def append!(line, validated, source_attrs)

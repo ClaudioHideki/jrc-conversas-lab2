@@ -4,11 +4,21 @@ require 'digest'
 # Companies use the master table. Contact CSV imports keep Chatwoot's existing job.
 # Preview is read-only; apply requires the exact file and signed, actor/account-bound preview.
 class JrcCustomers::CompanyImport
-  class InvalidImport < StandardError; end
+  class InvalidImport < StandardError
+    attr_reader :field, :code
+
+    def initialize(message = nil, field: nil, code: 'INVALID_COMPANY')
+      super(message)
+      @field = field
+      @code = code
+    end
+  end
   FIELDS = %w[id name person_kind trade_name tax_id state_registration municipal_registration segment size website domain email
               phone_number source economic_group parent_company_id owner_id relationship_type active description].freeze
   MAX_BYTES = 1_048_576
   MAX_ROWS = 500
+  REFERENCE_FIELDS = %w[parent_company_id owner_id].freeze
+  BOOLEAN_VALUES = %w[true false].freeze
 
   def initialize(account:, actor:, content:)
     @account = account
@@ -82,26 +92,26 @@ class JrcCustomers::CompanyImport
       attrs = row.to_h.transform_keys { |key| key.to_s.strip }.transform_values { |value| value.to_s.strip.presence }
       id = attrs.delete('id')
       tax = JrcCustomers::TaxIdentifier.normalize(attrs['tax_id'])
-      company = id.present? ? @account.master_companies.find(Integer(id, 10)) : nil
+      company = id.present? ? @account.master_companies.find(integer_reference(id, 'id')) : nil
       by_tax = tax.present? ? @account.master_companies.find_by(tax_id: tax) : nil
-      raise InvalidImport, 'ID and CPF/CNPJ point to different companies' if company && by_tax && company.id != by_tax.id
+      invalid!('ID and CPF/CNPJ point to different companies', field: 'id') if company && by_tax && company.id != by_tax.id
 
       company ||= by_tax
       if company.nil? && @account.master_companies.where('lower(name) = ?', attrs['name'].to_s.downcase).exists?
-        raise InvalidImport, 'Matching name is not an identity: supply the existing id or review the company name'
+        invalid!('Matching name is not an identity: supply the existing id or review the company name', field: 'name')
       end
-      raise InvalidImport, 'Same company appears more than once in CSV' if company && seen_ids.include?(company.id)
-      raise InvalidImport, 'Repeated CPF/CNPJ in CSV' if tax && seen_tax.include?(tax)
+      invalid!('Same company appears more than once in CSV', field: 'id') if company && seen_ids.include?(company.id)
+      invalid!('Repeated CPF/CNPJ in CSV', field: 'tax_id') if tax && seen_tax.include?(tax)
 
       domain = attrs['domain']&.downcase
-      raise InvalidImport, 'Repeated domain in CSV' if domain && seen_domains.include?(domain)
+      invalid!('Repeated domain in CSV', field: 'domain') if domain && seen_domains.include?(domain)
 
       seen_ids << company.id if company
       seen_tax << tax if tax
       seen_domains << domain if domain
-      %w[parent_company_id owner_id].each { |key| attrs[key] = Integer(attrs[key], 10) if attrs[key].present? }
+      REFERENCE_FIELDS.each { |key| attrs[key] = integer_reference(attrs[key], key) if attrs[key].present? }
       if attrs.key?('active')
-        raise InvalidImport, 'active must be true or false' unless %w[true false].include?(attrs['active'])
+        invalid!('active must be true or false', field: 'active') unless BOOLEAN_VALUES.include?(attrs['active'])
 
         attrs['active'] = attrs['active'] == 'true'
       end
@@ -110,15 +120,38 @@ class JrcCustomers::CompanyImport
       original_stamp = company.persisted? ? company.updated_at.iso8601(6) : nil
       company.assign_attributes(attrs)
       @coverage.authorize_company_write!(company)
-      raise InvalidImport, company.errors.full_messages.join('; ') unless company.valid?
+      validate_company!(company)
 
       result[:rows] << { line: index + 2, action: company.persisted? ? 'update' : 'create', company_id: company.id,
                          updated_at: original_stamp, attributes: attrs }
     rescue InvalidImport, ActiveRecord::RecordNotFound, ArgumentError => e
-      result[:errors] << { line: index + 2, error: e.message }
+      result[:errors] << row_error(e, index + 2)
     end
     result
   rescue CSV::MalformedCSVError => e
     raise InvalidImport, e.message
+  end
+
+  def validate_company!(company)
+    return if company.valid?
+
+    invalid!(company.errors.full_messages.join('; '), field: company.errors.attribute_names.first.to_s)
+  end
+
+  def integer_reference(value, field)
+    Integer(value, 10)
+  rescue ArgumentError => e
+    invalid!(e.message, field: field, code: 'INVALID_REFERENCE')
+  end
+
+  def invalid!(message, field:, code: 'INVALID_COMPANY')
+    raise InvalidImport.new(message, field: field, code: code)
+  end
+
+  def row_error(error, line)
+    code = error.is_a?(ActiveRecord::RecordNotFound) ? 'UNAVAILABLE_RECORD' : 'INVALID_REFERENCE'
+    return { line: line, error: error.message, field: nil, code: code } unless error.is_a?(InvalidImport)
+
+    { line: line, error: error.message, field: error.field, code: error.code }
   end
 end

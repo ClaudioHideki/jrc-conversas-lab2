@@ -28,9 +28,15 @@ class JrcCustomers::ImportFile
   end
 
   def fields
+    self.class.fields_for(@kind)
+  end
+
+  def self.fields_for(kind)
+    raise InvalidFile, 'Unsupported import type' unless KINDS.include?(kind)
+
     result = []
-    result += JrcCustomers::CompanyImport::FIELDS.map { |field| "company.#{field}" } unless @kind == 'contacts'
-    result += CONTACT_FIELDS.map { |field| "contact.#{field}" } unless @kind == 'companies'
+    result += JrcCustomers::CompanyImport::FIELDS.map { |field| "company.#{field}" } unless kind == 'contacts'
+    result += CONTACT_FIELDS.map { |field| "contact.#{field}" } unless kind == 'companies'
     result
   end
 

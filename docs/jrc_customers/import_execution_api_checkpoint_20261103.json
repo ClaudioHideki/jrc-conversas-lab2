@@ -1,0 +1,73 @@
+{
+  "stage": "C5 reviewed CSV execution and HTTP API checkpoint; full UI still pending",
+  "base_commit": "a24bbb79b178185b992543a39d5cc9212eed9604",
+  "branch": "codex/relacionamento-v2-20261101",
+  "confirmed": [
+    "Native CompanyWriter, CompanyContactWriter and SigningIdentityWriter used in one transaction",
+    "15-minute signed preview bound to actor/account/run/private original/config/revision/digest; fresh authorization and plan under locks",
+    "Completed acknowledgment is idempotent; source bytes and run outcome preserved",
+    "Native contact callbacks preserved on update; bulk creates avoid creation/IP/avatar effects and Enterprise email-domain guessing",
+    "Owner/account scoped history, current record visibility on result links, page size capped at 50",
+    "Explicit boolean confirmation; no deletion by omission; no source data in error CSV; formula-safe output",
+    "Native company-only import endpoints preserved; HTTP strong parameter boundary unchanged"
+  ],
+  "tests": [
+    {
+      "report": ".codex/customer-import-execution-checked-backend.json",
+      "examples": 148,
+      "failures": 0,
+      "pending": 0,
+      "snapshot": "/consolidation-customer-import-execution-checked"
+    },
+    {
+      "report": ".codex/customer-import-api-checked-backend.json",
+      "examples": 22,
+      "failures": 0,
+      "pending": 0,
+      "snapshot": "/consolidation-customer-import-api-checked"
+    },
+    {
+      "report": ".codex/customer-import-domain-recovered.json",
+      "examples": 84,
+      "failures": 0,
+      "pending": 0,
+      "scope": "Previous record-plan source domain regression, not reclassified as current full execution suite"
+    }
+  ],
+  "style": [
+    {
+      "report": ".codex/customer-import-execution-style-review.json",
+      "files": 14,
+      "new_offenses": 0,
+      "caveat": "Preexisting shared CompanyImport metrics are unchanged or improved; no cops disabled."
+    },
+    {
+      "report": ".codex/customer-import-api-style-review.json",
+      "files": 5,
+      "new_offenses": 0
+    }
+  ],
+  "failed_rounds_preserved": [
+    ".codex/customer-import-execution-backend.json: 148/4, corrected persisted identity revision and Events::Types test constants",
+    ".codex/customer-import-api-backend.json: 21/1, native access denial is 401, corrected expectation without weakening gate"
+  ],
+  "remaining": [
+    "Full horizontal wizard/history UI, actual Chrome desktop/mobile themes/persistence",
+    "Configured native contact custom fields and city/company_name capability",
+    "Feature-gated native import entry and queued legacy bypass protection after replacement is complete",
+    "C5 Word clauses remain partial until UI and final regression; C operational contacts/module filters and D/E/F/G remain",
+    "TRR undefined; DocuSign external demo not homologated"
+  ],
+  "safety": {
+    "signature_verifier": "nil; signed contract guard unchanged",
+    "published": false,
+    "pushed": false,
+    "production_changes": false,
+    "external_provider_calls": false
+  },
+  "local_git_hook": {
+    "normal_commit_attempt": "Blocked before checks because .husky/_/husky.sh is absent in this worktree",
+    "manual_validation": "Native RuboCop executed in installed Ruby container on exact current files (14+5 file reviews, zero new offenses), RSpec 148/0 and22/0 retained; staged files contain no JS/Vue",
+    "checkpoint_method": "Use existing local checkpoint workflow: per-command core.hooksPath=.codex/git-hooks. No global config or checks disabled, no success attributed to the unavailable hook."
+  }
+}

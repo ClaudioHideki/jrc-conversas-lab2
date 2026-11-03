@@ -45,6 +45,7 @@ class JrcCustomers::ImportContactPlan
     attributes.validate!
     line = source.fetch(:line)
     revision = contact.updated_at&.iso8601(6)
+    identity_revision = persisted_identity_revision(contact)
     values = attributes.values.except('id')
     assign_company!(contact, values, company)
     contact.assign_attributes(values)
@@ -55,7 +56,7 @@ class JrcCustomers::ImportContactPlan
     @rows << { line: line, entity: 'contact', action: contact.persisted? ? 'update' : 'create', record_id: contact.id,
                revision: revision, attributes: values.keys.index_with { |field| contact.public_send(field) },
                personal_identifier: attributes.personal_identifier, labels: attributes.labels,
-               identity_revision: contact.signing_identity&.revision || 0, company_line: company ? line : nil,
+               identity_revision: identity_revision, company_line: company ? line : nil,
                warnings: contact.persisted? ? ['EXISTING_CONTACT'] : [] }
   end
 
@@ -85,6 +86,11 @@ class JrcCustomers::ImportContactPlan
     return if identity.valid?
 
     raise JrcCustomers::ImportIssue.new('Review the personal fiscal identifier and its existing owner', field: 'personal_tax_identifier')
+  end
+
+  def persisted_identity_revision(contact)
+    identity = contact.signing_identity
+    identity&.persisted? ? identity.revision : 0
   end
 
   def confirm_reassignment!(contact)

@@ -86,6 +86,7 @@ RSpec.describe JrcCustomers::ImportPlan do
     csv.replace("name,email,personal_tax_identifier\nPerson,person@example.test,11144477735\n")
     expect(plan.errors).to be_empty
     expect(plan.rows.first[:personal_identifier]).to eq('11144477735')
+    expect(plan.rows.first[:identity_revision]).to eq(0)
     expect(plan.public_rows.to_json).not_to include('11144477735', 'signing_authority')
     expect(JrcCustomers::SigningIdentity.where(account: account)).to be_empty
   end
