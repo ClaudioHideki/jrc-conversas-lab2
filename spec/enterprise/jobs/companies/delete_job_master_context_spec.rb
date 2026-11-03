@@ -6,7 +6,8 @@ RSpec.describe 'Native company deletion with preserved master contact context', 
   let(:owned_account) { create(:account, name: '[TESTE SINTÉTICO] Remoção de empresa — transação') }
   let(:owned_database) do
     cfg = ActiveRecord::Base.connection_db_config
-    Rails.env.test? && cfg.host == 'jrc-rel-v2-pg-20261101' && %w[jrc_customer_segments_test jrc_rel_v2_candidate_test].include?(cfg.database)
+    databases = %w[jrc_customer_segments_test jrc_rel_v2_candidate_test jrc_customer_groups_test]
+    Rails.env.test? && cfg.host == 'jrc-rel-v2-pg-20261101' && databases.include?(cfg.database)
   end
 
   before do

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_11_03_100000) do
+ActiveRecord::Schema[7.1].define(version: 2026_11_03_110000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -3209,6 +3209,17 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_03_100000) do
     t.index ["contact_id"], name: "index_jrc_customer_signing_identities_on_contact_id"
     t.index ["created_by_id"], name: "index_jrc_customer_signing_identities_on_created_by_id"
     t.check_constraint "revision > 0", name: "jrc_signing_identity_revision"
+  end
+
+  create_table "jrc_customer_economic_groups", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.text "name", null: false
+    t.text "description"
+    t.bigint "principal_company_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index "account_id, md5(name)", name: "customer_economic_group_name", unique: true
+    t.index ["account_id"], name: "index_jrc_customer_economic_groups_on_account_id"
   end
 
   create_table "jrc_customer_segment_overrides", force: :cascade do |t|
@@ -6760,6 +6771,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_03_100000) do
   add_foreign_key "jrc_crm_user_business_units", "teams"
   add_foreign_key "jrc_crm_user_business_units", "teams", column: ["account_id", "team_id"], primary_key: ["account_id", "id"], name: "jrc_crm_user_scope_team_account_fk", validate: false
   add_foreign_key "jrc_crm_user_business_units", "users"
+  add_foreign_key "jrc_customer_economic_groups", "accounts", on_delete: :cascade
+  add_foreign_key "jrc_customer_economic_groups", "companies", column: ["account_id", "principal_company_id"], primary_key: ["account_id", "id"], name: "customer_economic_group_principal_account"
   add_foreign_key "jrc_customer_segment_overrides", "accounts", on_delete: :cascade
   add_foreign_key "jrc_customer_segment_overrides", "companies", on_delete: :cascade
   add_foreign_key "jrc_customer_segment_overrides", "contacts", on_delete: :cascade

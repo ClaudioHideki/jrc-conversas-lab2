@@ -1,0 +1,115 @@
+{
+  "date": "2026-11-03",
+  "stage": "C4c — Grupos econômicos e etiquetas nativas",
+  "status": "checkpoint parcial verificável; continuar a validação móvel e demais frentes C/D/E/F/G",
+  "base_commit": "72b9d7a1a96250a991d96d9a51d1bf3265d89bfe",
+  "branch": "codex/relacionamento-v2-20261101",
+  "changes": [
+    "Cadastro próprio de grupo econômico, descrição e empresa principal opcional. A participação continua usando o campo existente companies.economic_group; não duplica nem altera identidades, importações, filtros salvos ou matriz/filial.",
+    "Migration aditiva 20261103110000 preserva textos exatos por conta; índice por conta/md5 evita truncar nomes legados longos. FK composta impede principal de outra conta.",
+    "Diretório, empresas e histórico paginados, pesquisa literal, no-store e autenticação/permissões revalidadas no servidor. Catálogo e metadata não expõem grupos ocupados somente por operadoras inacessíveis.",
+    "Agentes com acesso existente ao cadastro podem vincular empresas visíveis; configurações do grupo exigem administrador e cobertura de todos os membros. IDs do cliente não concedem acesso.",
+    "Vínculo reaproveita CompanyWriter, revisão, cobertura e auditoria nativa. Transferência exige confirmação. Principal deve ser membro; remover/trocar sua participação exige limpar a principal antes.",
+    "Grupos com empresas/principal/critérios não podem ser excluídos ou renomeados de forma destrutiva. Falha de auditoria reverte o vínculo.",
+    "Duas abas horizontais separam estrutura corporativa e etiquetas de contatos. Etiquetas mantêm API, regras, rotas e configuração nativas. API de etiquetas ganhou método explícito por conta sem alterar get(cache).",
+    "Popups com resumo, empresas e histórico; seleção de empresa existente e abertura do Empresa 360º reaproveitado. Nenhuma simulação de dados ou ações externas."
+  ],
+  "migration": {
+    "status": "passed",
+    "source_companies_unchanged": 8,
+    "accounts": 2,
+    "distinct_groups": 8,
+    "exact_whitespace_case_and_unicode_preserved": true,
+    "production_changed": false,
+    "migration": "20261103110000",
+    "verifier": null,
+    "source": "/consolidation-economic-groups-core"
+  },
+  "backend": {
+    "report": ".codex/economic-groups-regression.json",
+    "examples": 199,
+    "failures": 0,
+    "pending": 0,
+    "single_green_run": true,
+    "note": "Inclui grupos, cadastro, CSV, segmentos/classificações, fusão, escopos corporativos, contexto de contatos e job/controller/modelo Enterprise. Não equivale ao gate G completo."
+  },
+  "frontend": {
+    "report": ".codex/economic-groups-final-frontend.json",
+    "cases": 16,
+    "failures": 0,
+    "note": "Testes de componentes com serviços simulados; separados do fluxo real no Chrome."
+  },
+  "style": {
+    "ruby_files": 8,
+    "ruby_offenses": 0,
+    "report": ".codex/economic-groups-final-ruby-style.json",
+    "frontend_errors": 0,
+    "frontend_warnings": 2,
+    "global_clean_claim": false
+  },
+  "assets": {
+    "build": "Vite local, 2m55; nenhuma imagem Docker construída",
+    "log": ".codex/economic-groups-production-assets.log",
+    "source_hashes_identical": ".codex/economic-groups-assets-reuse.json",
+    "existing_warnings": [
+      "chunks grandes",
+      "Browserslist antigo",
+      "source map de dependência ausente nos testes; não impede os 16 casos aprovados"
+    ]
+  },
+  "chrome": {
+    "report": "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\grupos-economicos-c4c-chrome.json",
+    "status": "parcial; cinco verificações concluídas com persistência real antes da etapa móvel",
+    "created_group": 127,
+    "companies": [
+      74,
+      75
+    ],
+    "principal": 75,
+    "expected_delete_denial": 422,
+    "failure": "Ao mudar a largura para celular, o popup foi desmontado durante a atualização de preferências/contexto. Diagnosticar antes de alterar código compartilhado; não repetir criação.",
+    "first_attempt": "Seletor do teste usou título incorreto Detalhes da empresa; título existente é Empresa 360º. Zero escritas nessa tentativa; relatório preservado.",
+    "images": "190 captura durante retorno da gravação; obter revisão visual estável ao concluir o fluxo. Não usá-la como prova final de botões habilitados."
+  },
+  "preservation": {
+    "status": "passed",
+    "source": "/consolidation-economic-groups-validated",
+    "protected_old_rows": 18,
+    "fixture_company_contexts_checked": 26,
+    "group": 127,
+    "principal": 75,
+    "members": [
+      74,
+      75
+    ],
+    "audits": {
+      "customer_economic_group_created": 1,
+      "customer_economic_group_linked": 4,
+      "customer_economic_group_updated": 4
+    },
+    "verifier": null,
+    "external_operations": 0,
+    "production_changed": false,
+    "chrome": "partial; existing desktop writes persisted; mobile continuation still pending"
+  },
+  "source": {
+    "snapshot": "/consolidation-economic-groups-validated",
+    "files": 11321,
+    "mismatches": 0,
+    "raw_sql_preserved": true,
+    "report": ".codex/economic-groups-validated-source-verified.json"
+  },
+  "pending": [
+    "Diagnosticar comportamento de sessão/preferências no redimensionamento; validar mobile claro/escuro no Chrome.",
+    "Concluir exclusão/cancelamento de grupo sem dependências, navegação de etiquetas e restrições de configuração do agente na UI.",
+    "A integração completa dos filtros em outros módulos, critérios financeiros/TRR, demais requisitos do Cadastro Mestre e etapas D/E/F/G permanecem pendentes/parciais. TRR aguarda definição.",
+    "A estrutura é o vínculo único já existente em companies.economic_group; não implementa múltiplos grupos por empresa nem altera a cobertura GROUP de operadoras."
+  ],
+  "safety": {
+    "new_disposable_database": "jrc_customer_groups_test",
+    "old_databases_and_private_storage_preserved": true,
+    "signature_verifier": null,
+    "no_external_operations": true,
+    "no_push_image_build_publish_deploy_or_production_migrations": true
+  }
+}

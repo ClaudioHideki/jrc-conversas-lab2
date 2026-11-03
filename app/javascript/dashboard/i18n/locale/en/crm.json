@@ -1450,6 +1450,35 @@
       "CLEAR_FILTER": "Limpar filtro de segmento",
       "COMPANY_CLASSIFICATION": "Classificação da empresa",
       "APPLY_FILTER_HELP": "Escolha ou limpe o segmento e use Buscar para aplicar, sem alterar o cadastro das empresas."
+    },
+    "ECONOMIC_GROUPS": {
+      "HELP": "Grupos econômicos organizam empresas do mesmo conglomerado. Etiquetas organizam contatos e mantêm seu cadastro próprio.",
+      "CORPORATE_TAB": "Grupos econômicos",
+      "CONTACT_TAB": "Etiquetas e grupos dos contatos",
+      "NEW": "Novo grupo econômico",
+      "OPEN": "Abrir grupo",
+      "VISIBLE_MEMBERS": "{count} empresas no seu escopo",
+      "PRINCIPAL": "Empresa principal",
+      "NAME": "Nome do grupo econômico",
+      "DESCRIPTION": "Descrição",
+      "NAME_HELP": "Nomes em uso são preservados para manter os vínculos, importações e critérios salvos.",
+      "NO_PRINCIPAL": "Principal não definida ou indisponível no seu escopo",
+      "PRINCIPAL_HELP": "Opcional. Na aba Empresas, vincule a empresa e escolha Definir como principal. Essa escolha não altera a matriz/filial nem as permissões.",
+      "CLEAR_PRINCIPAL": "Remover principal",
+      "SET_PRINCIPAL": "Definir como principal",
+      "READ_ONLY": "A configuração exige administração e acesso a todas as empresas do grupo. Os dados exibidos respeitam seu escopo.",
+      "ADD_COMPANY": "Vincular empresa existente",
+      "TRANSFER": "Confirmo a transferência do grupo {name}. A empresa e sua hierarquia serão preservadas.",
+      "LINK": "Vincular ao grupo",
+      "UNLINK": "Desvincular empresa",
+      "UNLINK_HELP": "Desvincular {name} deste grupo? A empresa, seus contatos e seu histórico serão mantidos.",
+      "DELETE": "Excluir grupo",
+      "DELETE_HELP": "Excluir este cadastro? Empresas, principal e critérios salvos precisam ser desvinculados antes. A auditoria será preservada.",
+      "LABEL_HELP": "As etiquetas nativas classificam contatos, como VIP, renovação ou implantação. Elas não mudam a estrutura das empresas.",
+      "MANAGE_LABELS": "Gerenciar etiquetas nativas",
+      "CREATED": "Grupo criado",
+      "UPDATED": "Grupo atualizado",
+      "MEMBERSHIP_CHANGED": "Vínculo de empresa atualizado"
     }
   }
 }

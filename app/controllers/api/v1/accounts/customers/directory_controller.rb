@@ -15,7 +15,7 @@ class Api::V1::Accounts::Customers::DirectoryController < Api::V1::Accounts::Cus
       can_administer: Current.account_user.administrator?,
       external_tax_lookup: { configured: JrcCustomers::TaxLookup.configured?, required: false },
       segments: configured_segments,
-      economic_groups: Current.account.master_companies.where.not(economic_group: [nil, '']).distinct.order(:economic_group).limit(200).pluck(:economic_group)
+      economic_groups: corporate_companies.where.not(economic_group: [nil, '']).distinct.order(:economic_group).limit(200).pluck(:economic_group)
     }
   end
 

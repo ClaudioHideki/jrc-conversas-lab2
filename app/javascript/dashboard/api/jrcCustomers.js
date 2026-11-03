@@ -16,6 +16,67 @@ class CustomerAPI extends ApiClient {
     return axios.get(`${this.url}/identity`, { params });
   }
 
+  economicGroupUrl(options = {}) {
+    const url =
+      options.accountId === undefined
+        ? this.url
+        : this.urlForAccount(options.accountId);
+    return `${url}/economic_groups`;
+  }
+
+  economicGroups(params = {}, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    return axios.get(this.economicGroupUrl({ accountId }), {
+      ...requestOptions,
+      params,
+    });
+  }
+
+  economicGroup(id, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    return axios.get(
+      `${this.economicGroupUrl({ accountId })}/${id}`,
+      requestOptions
+    );
+  }
+
+  saveEconomicGroup(economicGroup, id = null, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const url = this.economicGroupUrl({ accountId });
+    return id
+      ? axios.patch(
+          `${url}/${id}`,
+          { economic_group: economicGroup },
+          requestOptions
+        )
+      : axios.post(url, { economic_group: economicGroup }, requestOptions);
+  }
+
+  economicGroupRecords(id, view, params = {}, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    return axios.get(`${this.economicGroupUrl({ accountId })}/${id}/${view}`, {
+      ...requestOptions,
+      params,
+    });
+  }
+
+  assignEconomicGroup(id, values, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    return axios.post(
+      `${this.economicGroupUrl({ accountId })}/${id}/assign`,
+      values,
+      requestOptions
+    );
+  }
+
+  deleteEconomicGroup(id, revision, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    return axios.delete(`${this.economicGroupUrl({ accountId })}/${id}`, {
+      ...requestOptions,
+      data: { confirm: true, revision },
+    });
+  }
+
   taxonomyUrl(options = {}) {
     return `${options.accountId === undefined ? this.url : this.urlForAccount(options.accountId)}/taxonomies`;
   }

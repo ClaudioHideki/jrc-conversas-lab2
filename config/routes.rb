@@ -417,6 +417,13 @@ Rails.application.routes.draw do
           namespace :customers do
             get :metadata, to: 'directory#metadata'
             get :identity, to: 'directory#identity'
+            resources :economic_groups, only: [:index, :show, :create, :update, :destroy] do
+              member do
+                get :members
+                get :history
+                post :assign
+              end
+            end
             resources :taxonomies, only: [:index, :show, :create, :update, :destroy] do
               post :preview, on: :collection
               member do

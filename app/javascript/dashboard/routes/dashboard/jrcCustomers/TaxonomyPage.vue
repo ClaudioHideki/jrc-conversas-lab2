@@ -1,129 +1,129 @@
 <script setup>
-import { ref, computed, watch, onBeforeUnmount } from 'vue';
-import { useRoute } from 'vue-router';
-import { useStore, useMapGetter } from 'dashboard/composables/store';
+import { ref, watch, onBeforeUnmount } from 'vue';
+import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcCustomers';
+import LabelsAPI from 'dashboard/api/labels';
+import EconomicGroupDialog from './components/EconomicGroupDialog.vue';
 import { useCustomerMaster } from './useCustomerMaster';
-import { T, errorMessage, inputClass, primaryClass, buttonClass } from './copy';
+import { T, inputClass, primaryClass, buttonClass, errorMessage } from './copy';
 
-const route = useRoute();
-const store = useStore();
-const { accountId, accountScopedRoute } = useCustomerMaster();
-const groups = computed(() => route.name === 'jrc_customer_groups');
-const metadata = ref({
-  segments: [],
-  economic_groups: [],
-  can_administer: false,
-});
-const taxonomyRecords = ref([]);
-const newSegmentName = ref('');
+const { t } = useI18n();
+const { accountId, identity, canAdmin, accountScopedRoute } =
+  useCustomerMaster();
+const tab = ref('corporate');
+const query = ref('');
+const page = ref(1);
+const rows = ref([]);
+const labels = ref([]);
+const meta = ref({ total: 0, per_page: 25 });
 const error = ref('');
 const busy = ref(false);
-const saving = ref(false);
-const segments = useMapGetter('customViews/getContactCustomViews');
-const labels = useMapGetter('labels/getLabels');
-const values = computed(() =>
-  groups.value
-    ? metadata.value.economic_groups || []
-    : metadata.value.segments || []
-);
-const native = computed(() =>
-  groups.value ? labels.value || [] : segments.value || []
-);
+const selection = ref(null);
+const creating = ref(false);
 let generation = 0;
-
+let controller;
 const load = async () => {
   generation += 1;
-  const version = generation;
-  metadata.value = { segments: [], economic_groups: [], can_administer: false };
-  taxonomyRecords.value = [];
+  const token = generation;
+  controller?.abort();
+  controller = new AbortController();
+  rows.value = [];
+  labels.value = [];
   error.value = '';
   busy.value = true;
   try {
-    const requests = [
-      API.metadata(),
-      store.dispatch('labels/get'),
-      store.dispatch('customViews/get', 'contact'),
-    ];
-    if (!groups.value) requests.push(API.taxonomies({ kind: 'segment' }));
-    const responses = await Promise.all(requests);
-    if (version === generation) {
-      metadata.value = responses[0].data;
-      taxonomyRecords.value = responses[3]?.data?.payload || [];
+    const options = { accountId: accountId.value, signal: controller.signal };
+    if (tab.value === 'corporate') {
+      const { data } = await API.economicGroups(
+        { q: query.value, page: page.value },
+        options
+      );
+      if (token !== generation) return;
+      rows.value = data.payload;
+      meta.value = data.meta;
+    } else {
+      const { data } = await LabelsAPI.getForAccount(accountId.value, {
+        signal: controller.signal,
+      });
+      if (token !== generation) return;
+      labels.value = data.payload || [];
     }
-  } catch (err) {
-    if (version === generation) error.value = errorMessage(err);
+  } catch (failure) {
+    if (token === generation) error.value = errorMessage(failure);
   } finally {
-    if (version === generation) busy.value = false;
+    if (token === generation) busy.value = false;
   }
 };
-
-watch([accountId, groups], load, { immediate: true });
+const search = () => {
+  if (page.value !== 1) page.value = 1;
+  else load();
+};
+watch(
+  [identity, tab],
+  () => {
+    creating.value = false;
+    selection.value = null;
+    query.value = '';
+    if (page.value !== 1) page.value = 1;
+    else load();
+  },
+  { immediate: true }
+);
+watch(page, load);
 onBeforeUnmount(() => {
   generation += 1;
+  controller?.abort();
 });
-
-const addSegment = async () => {
-  const name = newSegmentName.value.trim();
-  if (!name) return;
-  saving.value = true;
-  error.value = '';
-  try {
-    await API.saveTaxonomy({
-      kind: 'segment',
-      name,
-      active: true,
-      position: taxonomyRecords.value.length,
-    });
-    newSegmentName.value = '';
-    await load();
-  } catch (err) {
-    error.value = errorMessage(err);
-  } finally {
-    saving.value = false;
-  }
-};
-
-const toggleTaxonomy = async item => {
-  saving.value = true;
-  error.value = '';
-  try {
-    await API.saveTaxonomy({ active: !item.active }, item.id);
-    await load();
-  } catch (err) {
-    error.value = errorMessage(err);
-  } finally {
-    saving.value = false;
-  }
-};
-
-const nativeRoute = item =>
-  groups.value
-    ? accountScopedRoute(
-        'contacts_dashboard_labels_index',
-        { label: item.title },
-        { page: 1 }
-      )
-    : accountScopedRoute(
-        'contacts_dashboard_segments_index',
-        { segmentId: item.id },
-        { page: 1 }
-      );
 </script>
 
 <template>
-  <main class="h-full w-full overflow-auto bg-n-solid-1 p-6 text-n-slate-12">
-    <p class="text-sm text-n-brand">{{ T.customers }}</p>
-    <h1 class="my-3 text-2xl font-bold">
-      {{ groups ? T.groups : T.segments }}
-    </h1>
-    <p class="mb-6 text-sm text-n-slate-10">
-      {{ groups ? T.taxonomiesHelp : T.taxonomyAdminHelp }}
-    </p>
+  <main
+    class="h-full w-full overflow-auto bg-n-solid-1 p-5 text-n-slate-12 md:p-8"
+  >
+    <header class="mb-5 flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <p class="text-sm text-n-brand">{{ T.customers }}</p>
+        <h1 class="my-2 text-2xl font-bold">{{ T.groups }}</h1>
+        <p class="text-sm text-n-slate-10">
+          {{ t('CRM.ECONOMIC_GROUPS.HELP') }}
+        </p>
+      </div>
+      <button
+        v-if="canAdmin && tab === 'corporate'"
+        type="button"
+        :class="primaryClass"
+        @click="creating = true"
+      >
+        {{ t('CRM.ECONOMIC_GROUPS.NEW') }}
+      </button>
+    </header>
+    <nav
+      class="mb-5 flex flex-wrap gap-2"
+      :aria-label="T.groups"
+    >
+      <button
+        type="button"
+        class="rounded-lg border border-n-teal-7 bg-n-teal-3 px-4 py-3 font-medium text-n-teal-12"
+        :class="tab === 'corporate' ? 'ring-2 ring-n-teal-8' : ''"
+        :aria-pressed="tab === 'corporate'"
+        @click="tab = 'corporate'"
+      >
+        {{ t('CRM.ECONOMIC_GROUPS.CORPORATE_TAB') }}
+      </button>
+      <button
+        type="button"
+        class="rounded-lg border border-n-violet-7 bg-n-violet-3 px-4 py-3 font-medium text-n-violet-12"
+        :class="tab === 'contacts' ? 'ring-2 ring-n-violet-8' : ''"
+        :aria-pressed="tab === 'contacts'"
+        @click="tab = 'contacts'"
+      >
+        {{ t('CRM.ECONOMIC_GROUPS.CONTACT_TAB') }}
+      </button>
+    </nav>
     <p
       v-if="error"
-      class="mb-4 text-n-ruby-11"
       role="alert"
+      class="mb-4 text-n-ruby-11"
     >
       {{ error }}
     </p>
@@ -133,98 +133,127 @@ const nativeRoute = item =>
     >
       {{ T.loading }}
     </p>
-
-    <form
-      v-if="!groups && metadata.can_administer"
-      class="mb-5 flex max-w-2xl flex-wrap items-end gap-3 rounded-xl border border-n-weak bg-n-solid-2 p-4"
-      @submit.prevent="addSegment"
+    <section
+      v-if="tab === 'corporate'"
+      class="space-y-4"
     >
-      <label class="min-w-72 flex-1 text-sm">
-        {{ T.segmentName }}
-        <input
-          v-model.trim="newSegmentName"
-          :class="inputClass"
-          maxlength="120"
-        />
-      </label>
-      <button
-        type="submit"
-        :class="primaryClass"
-        :disabled="saving || !newSegmentName.trim()"
+      <form
+        class="flex flex-wrap items-end gap-3 rounded-xl border border-n-weak bg-n-solid-2 p-4"
+        @submit.prevent="search"
       >
-        {{ T.addSegment }}
-      </button>
-    </form>
-
-    <div class="grid gap-5 md:grid-cols-2">
-      <section class="rounded-xl border border-n-weak bg-n-solid-2 p-5">
-        <h2 class="mb-4 font-semibold">
-          {{ groups ? T.economicGroups : T.companySegments }}
-        </h2>
-        <div
-          v-if="!groups && taxonomyRecords.length"
-          class="mb-5 space-y-2"
+        <label class="min-w-0 flex-1">
+          <span>{{ T.search }}</span>
+          <input
+            v-model.trim="query"
+            maxlength="200"
+            :class="inputClass"
+        /></label>
+        <button
+          type="submit"
+          :class="buttonClass"
+          :disabled="busy"
         >
-          <div
-            v-for="item in taxonomyRecords"
-            :key="item.id"
-            class="flex items-center justify-between gap-3 rounded-lg border border-n-weak p-3"
+          {{ T.search }}
+        </button>
+      </form>
+      <article
+        v-for="row in rows"
+        :key="row.id"
+        class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-n-teal-6 bg-n-solid-2 p-4"
+      >
+        <div class="min-w-0 flex-1">
+          <button
+            type="button"
+            class="break-words text-left font-semibold text-n-teal-11"
+            @click="selection = row.id"
           >
-            <span :class="item.active ? '' : 'line-through text-n-slate-9'">{{
-              item.name
-            }}</span>
-            <button
-              v-if="metadata.can_administer"
-              type="button"
-              :class="buttonClass"
-              :disabled="saving"
-              @click="toggleTaxonomy(item)"
-            >
-              {{ item.active ? T.active : T.inactive }}
-            </button>
-          </div>
+            {{ row.name }}
+          </button>
+          <p class="text-sm text-n-slate-10">
+            {{
+              t('CRM.ECONOMIC_GROUPS.VISIBLE_MEMBERS', {
+                count: row.member_count,
+              })
+            }}
+          </p>
+          <p
+            v-if="row.principal_company"
+            class="text-sm"
+          >
+            {{ t('CRM.ECONOMIC_GROUPS.PRINCIPAL') }}:
+            {{ row.principal_company.name }}
+          </p>
         </div>
-        <RouterLink
-          v-for="value in values"
-          :key="value"
-          :to="
-            accountScopedRoute(
-              'jrc_customer_companies',
-              {},
-              { [groups ? 'economic_group' : 'segment']: value }
-            )
-          "
-          class="block border-b border-n-weak py-3 text-n-brand"
+        <button
+          type="button"
+          :class="buttonClass"
+          @click="selection = row.id"
         >
-          {{ value }}
-        </RouterLink>
-        <p
-          v-if="!values.length"
-          class="text-n-slate-10"
+          {{ t('CRM.ECONOMIC_GROUPS.OPEN') }}
+        </button>
+      </article>
+      <p v-if="!busy && !rows.length">{{ T.noResults }}</p>
+      <div class="flex items-center gap-3">
+        <button
+          type="button"
+          :class="buttonClass"
+          :disabled="busy || page <= 1"
+          @click="page -= 1"
         >
-          {{ T.noResults }}
-        </p>
-      </section>
-
-      <section class="rounded-xl border border-n-weak bg-n-solid-2 p-5">
-        <h2 class="mb-4 font-semibold">
-          {{ groups ? T.nativeGroups : T.nativeSegments }}
-        </h2>
-        <RouterLink
-          v-for="item in native"
-          :key="item.id"
-          :to="nativeRoute(item)"
-          class="block border-b border-n-weak py-3 text-n-brand"
+          {{ T.previous }}
+        </button>
+        <span>{{
+          `${page} / ${Math.max(1, Math.ceil(meta.total / meta.per_page))}`
+        }}</span>
+        <button
+          type="button"
+          :class="buttonClass"
+          :disabled="busy || page * meta.per_page >= meta.total"
+          @click="page += 1"
         >
-          {{ item.title || item.name }}
-        </RouterLink>
-        <p
-          v-if="!native.length"
-          class="text-n-slate-10"
-        >
-          {{ T.noResults }}
-        </p>
-      </section>
-    </div>
+          {{ T.next }}
+        </button>
+      </div>
+    </section>
+    <section
+      v-else
+      class="space-y-3 rounded-xl border border-n-violet-6 bg-n-solid-2 p-5"
+    >
+      <p class="text-sm text-n-slate-10">
+        {{ t('CRM.ECONOMIC_GROUPS.LABEL_HELP') }}
+      </p>
+      <RouterLink
+        v-if="canAdmin"
+        :to="accountScopedRoute('labels_list')"
+        :class="buttonClass"
+      >
+        {{ t('CRM.ECONOMIC_GROUPS.MANAGE_LABELS') }}
+      </RouterLink>
+      <RouterLink
+        v-for="label in labels"
+        :key="label.id"
+        :to="
+          accountScopedRoute(
+            'contacts_dashboard_labels_index',
+            { label: label.title },
+            { page: 1 }
+          )
+        "
+        class="block rounded-lg border border-n-weak p-3 text-n-violet-11"
+      >
+        {{ label.title }}
+      </RouterLink>
+      <p v-if="!busy && !labels.length">{{ T.noResults }}</p>
+    </section>
+    <EconomicGroupDialog
+      v-if="creating || selection"
+      :key="`${identity}:${selection || 'new'}`"
+      :group-id="selection"
+      @saved="load"
+      @close="
+        creating = false;
+        selection = null;
+      "
+    />
   </main>
 </template>
