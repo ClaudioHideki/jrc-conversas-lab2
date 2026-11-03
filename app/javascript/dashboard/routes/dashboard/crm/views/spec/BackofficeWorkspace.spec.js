@@ -79,7 +79,11 @@ const options = {
     stubs: {
       BackofficeCustomerPicker: true,
       BackofficeAssignment: true,
-      RouterLink: { template: '<a><slot /></a>' },
+      RouterLink: {
+        name: 'RouterLink',
+        props: ['to'],
+        template: '<a><slot /></a>',
+      },
     },
   },
 };
@@ -163,6 +167,43 @@ describe('Backoffice workspace', () => {
     wrapper.unmount();
   });
 
+  it('reloads a published segment, paginates inside it and removes it without stale results', async () => {
+    mocks.route.query.customer_segment_id = '12';
+    const wrapper = mount(BackofficeWorklist, options);
+    await flushPromises();
+    expect(mocks.workspace).toHaveBeenLastCalledWith(
+      expect.objectContaining({ customer_segment_id: '12', page: 1 })
+    );
+    await wrapper
+      .findAll('button')
+      .find(button => button.text() === 'Próxima')
+      .trigger('click');
+    await flushPromises();
+    expect(mocks.workspace).toHaveBeenLastCalledWith(
+      expect.objectContaining({ customer_segment_id: '12', page: 2 })
+    );
+    let resolve;
+    mocks.workspace.mockImplementationOnce(
+      () =>
+        new Promise(done => {
+          resolve = done;
+        })
+    );
+    mocks.route.query.customer_segment_id = '13';
+    await flushPromises();
+    expect(wrapper.text()).not.toContain('Cliente autorizado');
+    delete mocks.route.query.customer_segment_id;
+    await flushPromises();
+    expect(mocks.workspace).toHaveBeenLastCalledWith(
+      expect.objectContaining({ customer_segment_id: undefined, page: 1 })
+    );
+    resolve(payload([{ ...row, title: 'Resposta de segmento antigo' }]));
+    await flushPromises();
+    expect(wrapper.text()).not.toContain('Resposta de segmento antigo');
+    expect(wrapper.text()).toContain('Cliente autorizado');
+    wrapper.unmount();
+  });
+
   it('uses aggregate totals rather than the five displayed overview rows', async () => {
     const wrapper = mount(BackofficeOverview, options);
     await flushPromises();
@@ -171,6 +212,41 @@ describe('Backoffice workspace', () => {
     );
     expect(wrapper.text()).toContain('21');
     wrapper.unmount();
+  });
+
+  it('preserves the selected segment in dashboard drilldowns, request links and the native return link', async () => {
+    mocks.route.query.customer_segment_id = '12';
+    const overview = mount(BackofficeOverview, options);
+    await flushPromises();
+    const destinations = overview
+      .findAllComponents({ name: 'RouterLink' })
+      .map(link => link.props('to'))
+      .filter(to =>
+        ['crm_backoffice', 'crm_backoffice_request'].includes(to.name)
+      );
+    expect(destinations.length).toBeGreaterThan(0);
+    expect(
+      destinations.every(to => to.query?.customer_segment_id === '12')
+    ).toBe(true);
+    overview.unmount();
+    const list = mount(BackofficeWorklist, options);
+    await flushPromises();
+    expect(
+      list.findComponent({ name: 'RouterLink' }).props('to')
+    ).toMatchObject({
+      name: 'crm_backoffice_request',
+      query: { customer_segment_id: '12' },
+    });
+    list.unmount();
+    const detail = mount(BackofficeRequest360, options);
+    await flushPromises();
+    expect(
+      detail.findComponent({ name: 'RouterLink' }).props('to')
+    ).toMatchObject({
+      name: 'crm_backoffice',
+      query: { customer_segment_id: '12' },
+    });
+    detail.unmount();
   });
 
   it('discards a response from the previous Account and clears denied data', async () => {

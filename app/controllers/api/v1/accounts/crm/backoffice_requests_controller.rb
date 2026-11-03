@@ -5,7 +5,7 @@ module Api::V1::Accounts::Crm
     around_action :lock_operational_change, only: %i[update advance document_status add_issue resolve_issue confirm_provisioning reopen]
 
     def index
-      scope = visible_to_current_user(crm_scope.jrc_crm_backoffice_requests)
+      scope = customer_segment_scope(visible_to_current_user(crm_scope.jrc_crm_backoffice_requests), module_key: 'backoffice')
               .includes(:sales_order, :contract, :contact, :owner, :requested_by, :business_unit, documents_attachments: :blob)
               .order(created_at: :desc)
       scope = scope.where(request_kind: params[:kind]) if params[:kind].present?
@@ -19,12 +19,12 @@ module Api::V1::Accounts::Crm
     end
 
     def workspace
-      scope = visible_to_current_user(crm_scope.jrc_crm_backoffice_requests)
+      scope = customer_segment_scope(visible_to_current_user(crm_scope.jrc_crm_backoffice_requests), module_key: 'backoffice')
       render json: JrcCrm::BackofficeWorkspace.new(scope: scope, user: Current.user, params: params, account: crm_scope).call
     end
 
     def summary
-      scope = visible_to_current_user(crm_scope.jrc_crm_backoffice_requests)
+      scope = customer_segment_scope(visible_to_current_user(crm_scope.jrc_crm_backoffice_requests), module_key: 'backoffice')
       active = scope.where(status: JrcCrm::BackofficeRequest::ACTIVE_STATUSES)
       render json: {
         total: scope.count, pending: active.where(stage: %w[request analysis]).count,

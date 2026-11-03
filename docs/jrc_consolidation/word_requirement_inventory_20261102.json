@@ -5933,7 +5933,7 @@
             "JrcCustomers::Audit",
             "CustomFilter pessoal nativo"
           ],
-          "implemented_change": "Classificação estática separada de filtro dinâmico e filtro visível com paginação/URL no diretório de empresas, sem conceder permissões. Os demais módulos continuam pendentes. | C7: faturamento de pedidos por período e contagem de contratos, com filtros CRM e gates automatizados. Build C7 Vite aprovado e homologação real Chrome concluída por continuações documentadas em financial_segments_crm_checkpoint_20261103.json. Etapa C continua parcial: outros módulos e TRR pendentes. TRR e consumo nos demais módulos continuam pendentes.",
+          "implemented_change": "Classificação estática separada de filtro dinâmico e filtro visível com paginação/URL no diretório de empresas, sem conceder permissões. Os demais módulos continuam pendentes. | C7: faturamento de pedidos por período e contagem de contratos, com filtros CRM e gates automatizados. Build C7 Vite aprovado e homologação real Chrome concluída por continuações documentadas em financial_segments_crm_checkpoint_20261103.json. Etapa C continua parcial: outros módulos e TRR pendentes. TRR e consumo nos demais módulos continuam pendentes. | Incremento seguinte Backoffice: código/gates backend42/0, Vue11/0 e ESLint6files0/0; compilação e Chrome pendentes. Outros quatro módulos ainda não consomem filtro publicado.",
           "files": [
             "app/models/jrc_customers/taxonomy.rb",
             "app/models/jrc_customers/segment_override.rb",
@@ -42359,5 +42359,10 @@
     "C_stage_complete": false,
     "other_module_consumers_complete": false,
     "TRR": "undefined"
+  },
+  "backoffice_customer_segment_increment": {
+    "report": "docs/jrc_customers/backoffice_segment_integration_checkpoint_20261103.json",
+    "stage_C_complete": false,
+    "status": "partial; build/real Chrome pending; four further consumers pending"
   }
 }

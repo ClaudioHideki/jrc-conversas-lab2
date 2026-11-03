@@ -2,6 +2,7 @@
 import { computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import ModuleTabs from 'dashboard/components-next/navigation/ModuleTabs.vue';
+import ModuleSegmentFilter from 'dashboard/routes/dashboard/jrcCustomers/components/ModuleSegmentFilter.vue';
 import { crmControlClasses } from '../../crmControlClasses';
 import BackofficeOverview from './BackofficeOverview.vue';
 import BackofficeWorklist from './BackofficeWorklist.vue';
@@ -75,7 +76,11 @@ const entry = key => ({
   label: text(`NAV.${key}`),
   tone: tones[key],
   icon: icons[key],
-  to: { name: 'crm_backoffice', params: { section: key } },
+  to: {
+    name: 'crm_backoffice',
+    params: { section: key },
+    query: { customer_segment_id: route.query.customer_segment_id },
+  },
 });
 const primary = computed(() => primaryKeys.map(entry));
 const navigationGroups = computed(() =>
@@ -159,6 +164,14 @@ watch(
       :key="route.fullPath"
       class="min-h-0 flex-1 overflow-auto p-4"
     >
+      <ModuleSegmentFilter
+        v-if="
+          !route.params.requestId &&
+          route.name !== 'crm_backoffice_new' &&
+          section !== 'signature'
+        "
+        module-key="backoffice"
+      />
       <BackofficeRequest360 v-if="route.params.requestId" />
       <BackofficeNewRequest v-else-if="route.name === 'crm_backoffice_new'" />
       <SignatureSettings v-else-if="section === 'signature'" />

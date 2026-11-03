@@ -1,0 +1,197 @@
+{
+  "date": "2026-11-03",
+  "branch": "codex/relacionamento-v2-20261101",
+  "base_checkpoint": "9f4b33ac3166e29599e454aa897763628c5da362",
+  "stage": "C7 — consumo de segmentos no Backoffice",
+  "status": "PARCIAL: código e gates automatizados aprovados; nova compilação e Chrome bloqueados pelo espaço mínimo. Não conclui a Etapa C.",
+  "implemented": [
+    "Reutiliza ModuleSegmentFilter e helper de CRM com module_key interno constante backoffice. As seis listas CRM mantêm o padrão crm; parâmetros do cliente não selecionam o módulo de autorização.",
+    "Index, workspace e summary intersectam o escopo nativo de proprietário/OrganizationalVisibility antes de totais e paginação. Filtros de status, etapa, cliente, unidade, fila e Minha Operação permanecem.",
+    "Interface reaproveita ModuleSegmentFilter somente em listas/indicadores, sem aplicar filtro de leitura a show/update, assinatura ou criação.",
+    "Query mantém o segmento ao navegar entre abas, indicadores, solicitação e retorno. Limpar/trocar segmento reinicia a página; respostas antigas não repovoam a lista."
+  ],
+  "tests": {
+    "backend": {
+      "report": ".codex/customer-segment-backoffice-final-shared-backend.json",
+      "summary": {
+        "duration": 24.930837783,
+        "example_count": 42,
+        "failure_count": 0,
+        "pending_count": 0,
+        "errors_outside_of_examples_count": 0
+      },
+      "files": 4,
+      "database": "jrc_rel_v2_candidate_test",
+      "scope": "10 cenários novos + regressões do intake Backoffice, filtros HTTP CRM e serviço de filtro publicado; includes autorização por proprietário/unidade/conta e diretório",
+      "migrations_executed": false,
+      "source": "/consolidation-customer-segment-backoffice-final",
+      "source_equivalence": ".codex/customer-segment-backoffice-final-backend-source-equivalence.json",
+      "current_ruby_files_compared": 4461
+    },
+    "frontend": {
+      "report": ".codex/customer-segment-backoffice-navigation-final-frontend.json",
+      "passed": 11,
+      "failed": 0,
+      "method": "Vue com mocks; não é homologação Chrome",
+      "scope": "Área Backoffice, aprovação/bloqueios existentes, paginação, troca/remoção de segmento, contas e respostas obsoletas; links de indicadores/lista/detalhes/volta"
+    },
+    "eslint": {
+      "report": ".codex/customer-segment-backoffice-final-eslint.json",
+      "files": 6,
+      "errors": 0,
+      "warnings": 0
+    },
+    "rubocop": {
+      "new_spec_offenses": 0,
+      "base_controller_existing_offenses_before_after": [
+        1,
+        1
+      ],
+      "backoffice_existing_offenses_before_after": [
+        74,
+        74
+      ],
+      "global_clean": false,
+      "changed_existing_metric": "Método index já excedia ABC: 26.78/26 → 27.75/26 com a chamada do filtro. O relatório de comparação exata marca falha por essa mudança; não é gate global limpo. Nenhum cop desabilitado.",
+      "report": ".codex/customer-segment-backoffice-final-style-comparison.json"
+    },
+    "build": "Não iniciado: preflight abaixo de 1,5 GB. Os 585 assets e a UI5371 são exclusivamente C7/9bb8d2ec e NÃO incluem este incremento.",
+    "chrome": "Pendente para o incremento Backoffice; não reutilizar a homologação financeira/CRM como se cobrisse esta mudança."
+  },
+  "preservation": {
+    "C5": "a1fef6240222f37513be20f498efcfe6315418c0",
+    "C6": "d28eebd8c171242c05ba6fa1d4a7b011a08db183",
+    "C7": "9bb8d2ecef4dc5d61f719dca7a721710aaadb494",
+    "C7_core_real_validation": "9f4b33ac3166e29599e454aa897763628c5da362",
+    "original_C6_source_hash_verified": 11375,
+    "new_backend_snapshot_app_config_db_lib_spec_enterprise_files": 11295,
+    "snapshot_preparation": ".codex/customer-segment-backoffice-final-source-preservation.json",
+    "deleted_files": false,
+    "cleanup_suspended": true,
+    "source_snapshots_and_existing_UI_preserved": true,
+    "outbound_external_operations": 0,
+    "production_changes": false,
+    "push_deploy_GHCR": false
+  },
+  "disk": {
+    "status": "blocked_insufficient_disk",
+    "free_c_bytes": 1041408000,
+    "minimum_start_bytes": 1500000000,
+    "recommended_free_bytes": 3000000000,
+    "additional_bytes_to_minimum": 458592000,
+    "disk_guard_stop_bytes": 750000000,
+    "guard_self_test": {
+      "status": "passed",
+      "method": "simulated disk samples and process handle; no real process stopped",
+      "cases": [
+        {
+          "sample_free_bytes": 749999999,
+          "termination_requested": true
+        },
+        {
+          "sample_free_bytes": 750000000,
+          "termination_requested": true
+        },
+        {
+          "sample_free_bytes": 750000001,
+          "termination_requested": false
+        }
+      ]
+    },
+    "new_build_started": false,
+    "browser_cleanup_suspended": true,
+    "deleted_files": false,
+    "production_changed": false
+  },
+  "word_audit": {
+    "scope": "Conferência de versões dos quatro documentos e pendências específicas de Segmentos. NÃO é auditoria final da Etapa C.",
+    "documents": [
+      {
+        "id": "cadastro-mestre",
+        "source": "C:\\Users\\DEV03\\Downloads\\JRC-CONVERSAS-CADASTRO-MESTRE-CLIENTES-ESPECIFICACAO-DEV-20261101 (1).docx",
+        "sha256": "2a9b7bb58b61856646c29d7681f97473c6a51973684167c62f57937239ac2fbf",
+        "current_hash_matches": true
+      },
+      {
+        "id": "relacionamento",
+        "source": "C:\\Users\\DEV03\\Downloads\\JRC_Conversas_Relacionamento_V2_Projeto_Completo_Dev_Com_Imagens_20261101.docx",
+        "sha256": "7ec0c32f0d33b509b47fc8c4c99c10aaa60cdc2ba52fec53100973180c685fee",
+        "current_hash_matches": true
+      },
+      {
+        "id": "backoffice",
+        "source": "C:\\Users\\DEV03\\Downloads\\JRC_Conversas_Backoffice_Projeto_DEV_20261101.docx",
+        "sha256": "ebd5cd1db7fa53cc7bf7e2fa6a801e498735eaef9d67040002a5a9ade4878284",
+        "current_hash_matches": true
+      },
+      {
+        "id": "central-aprovacoes",
+        "source": "C:\\Users\\DEV03\\Downloads\\Especificacao_Central_Aprovacoes_JRC_Conversas_DEV.docx",
+        "sha256": "3456a7fa3ad15235d9e072aeb00bd4c0eef5ae08d52992463a6bf609ef94c917",
+        "current_hash_matches": true
+      }
+    ],
+    "partial_requirements": [
+      "cadastro-mestre:P0250",
+      "cadastro-mestre:P0256"
+    ],
+    "TRR": "Definição de negócio ainda ausente. Nenhuma fórmula implementada ou inferida.",
+    "real_financial_semantics": "Pedidos faturados no período: invoiced/shipped/completed e precedência nativa sold_at/closed_at/created_at. Não é recebimento nem data fiscal inventada."
+  },
+  "remaining_module_read_only_analysis": [
+    {
+      "module": "service_desk",
+      "status": "não implementado neste incremento",
+      "existing": [
+        "app/services/jrc_service_desk/ticket_query.rb:11",
+        "app/services/jrc_service_desk/query_parameters.rb:5",
+        "app/policies/jrc_service_desk/ticket_policy.rb:58",
+        "app/javascript/dashboard/routes/dashboard/serviceDesk/helpers/query.js",
+        "app/javascript/dashboard/routes/dashboard/serviceDesk/components/TicketFilters.vue"
+      ],
+      "required": "Adicionar seletor na whitelist e formulário nativos; intersectar TicketPolicy e escopo customers_view por unidade/supervisão. Preservar IDs canônicos de requester/company, KPIs, filtros salvos e navegação. Não usar empresa como autorização."
+    },
+    {
+      "module": "projects",
+      "status": "não implementado neste incremento",
+      "existing": [
+        "app/controllers/jrc_projects/api/v1/projects_controller.rb:5",
+        "app/services/jrc_operations/access.rb",
+        "app/services/jrc_projects/read_projection.rb"
+      ],
+      "required": "Filtrar apenas a relação JrcOperations::Access.projects já autorizada, antes da paginação/projeção. Preservar membership/visibilidade e capabilities; usar company_id/contact_id canônicos."
+    },
+    {
+      "module": "relationship",
+      "status": "não implementado neste incremento",
+      "existing": [
+        "app/controllers/api/v1/accounts/relationship/base_controller.rb:38",
+        "app/services/jrc_relationship/context.rb"
+      ],
+      "required": "Intersectar filtered_assignments e seus consumidores (carteira/KPIs/relatórios/registros); preservar context/access_signature/snapshots. customer_segment_id deve coexistir com segment_id legado, sem substituí-lo."
+    },
+    {
+      "module": "campaigns",
+      "status": "não implementado neste incremento",
+      "existing": [
+        "app/services/jrc_customers/campaign_filter.rb:2",
+        "app/services/jrc_campaigns/audience_resolver.rb:136",
+        "app/models/jrc_campaigns/campaign.rb:307",
+        "app/services/jrc_campaigns/approval_service.rb:70"
+      ],
+      "required": "Separar classificação segment do filtro publicado; garantir identidade fresca no preview e também no callback de estimativa/aprovação/jobs, atualmente sem actor explícito. Não usar Current.user como identidade implícita de job; rever created_by/ator autorizado e negar identidade ausente quando houver filtro publicado. Preservar consentimento, blacklist, bloqueio, normalização, exclusões manuais, digest e aprovação; nenhum envio real autorizado."
+    }
+  ],
+  "next": [
+    "Recuperar margem de disco sem exclusão automática: mínimo 1,5 GB, preferir 3 GB; confirmar novamente antes de compilar.",
+    "Preparar build protegido do novo commit, prefixo exclusivo, sem reutilizar assets C7 antigos; proteger em 750 MB.",
+    "Homologar o incremento Backoffice em Chrome/DB reais desktop/mobile, incluindo publicação para Backoffice, todos os indicadores/listas, paginação, navegação, permissões e escopos.",
+    "Continuar os quatro consumidores restantes com testes proporcionais e depois auditoria final C.",
+    "Somente após C validada avançar D → E → F → G; manter pendências DocuSign demo/homologação externa e demais requisitos dos relatórios, sem tratá-los como concluídos."
+  ],
+  "failed_attempts_preserved": [
+    "Primeira rodada backend30: um pedido sintético sem unidade não passava no escopo nativo. Preparação corrigida; rodada30/0 e final42/0. Nenhuma permissão relaxada.",
+    "Primeiro teste extra de navegação Vue não nomeava seu stub RouterLink; corrigido no harness. Final11/0.",
+    "RuboCop inicial mostrou alinhamento/line-endings e limite de expectativas no teste novo; corrigidos sem supressão. Comparação do controller continua com métricas legadas descritas."
+  ]
+}

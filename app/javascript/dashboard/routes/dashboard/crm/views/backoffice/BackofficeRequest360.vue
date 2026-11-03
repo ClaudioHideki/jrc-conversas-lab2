@@ -134,7 +134,11 @@ onBeforeUnmount(() => {
   >
     <div class="flex items-center justify-between gap-3">
       <RouterLink
-        :to="{ name: 'crm_backoffice', params: { section: 'requests' } }"
+        :to="{
+          name: 'crm_backoffice',
+          params: { section: 'requests' },
+          query: { customer_segment_id: route.query.customer_segment_id },
+        }"
         class="text-sm font-semibold text-emerald-700"
       >
         {{ text('BACK_TO_QUEUE') }}
