@@ -417,6 +417,7 @@ Rails.application.routes.draw do
           namespace :customers do
             get :metadata, to: 'directory#metadata'
             get :identity, to: 'directory#identity'
+            resources :operational_contacts, only: [:index]
             resources :economic_groups, only: [:index, :show, :create, :update, :destroy] do
               member do
                 get :members

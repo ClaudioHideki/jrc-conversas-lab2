@@ -1,0 +1,62 @@
+{
+  "date": "2026-11-03",
+  "stage": "C6 — consulta operacional; interface e Chrome ainda pendentes",
+  "status": "parcial",
+  "branch": "codex/relacionamento-v2-20261101",
+  "preserved_c5": "a1fef6240222f37513be20f498efcfe6315418c0",
+  "confirmed": [
+    "Consulta somente de leitura sobre Contact canônico, sem novo cadastro ou migration e sem alterar ContactsController#active/presença online",
+    "Conversa/atendimento aberto, atividade/próxima ação válida e interação recente em janela configurável de1a365dias; estados e datas vêm somente de fontes autorizadas",
+    "ContactDirectory/CorporateCoverage, Visibility/PermissionFilterService Enterprise, CRM ownership/OrganizationalVisibility e Ticket/EventPolicy nativos restringem itens e totais",
+    "Notas privadas, corpo de mensagens, transcrições, tokens, metadados e dados fiscais não entram na projeção; timestamps globais de cadastro não ativam contatos",
+    "Paginação servidor até50, pesquisa literal, status/origem e segmento; conta/usuário/unidade fornecidos pelo chamador não concedem acesso",
+    "Projeções SQL usam relações autorizadas nativas, agregação e amostra por contato/tipo; nenhum carregamento irrestrito de históricos para montar a página"
+  ],
+  "backend": {
+    "examples": 32,
+    "failures": 0,
+    "pending": 0,
+    "source": "/consolidation-customer-operational-scoped",
+    "database": "jrc_rel_v2_candidate_test",
+    "report": ".codex/customer-operational-scoped-backend.json",
+    "coverage": "C6 serviços/API, Customer360 e políticas Service Desk, incluindo inbox invisível, custom-role participante, CRM restrito, chamadas do agente, unidade revogada e conta estrangeira",
+    "current_service_spec": "/tmp/customer-operational-current-service_spec.rb copiado do arquivo atual; única diferença frente ao snapshot é nome-canário exclusivo do chamado da unidade oculta, evitando colidir com o título padrão da factory",
+    "earlier_failure": ".codex/customer-operational-core-backend.json:13casos/3falhas. Dois testes criavam mensagem incoming que reabre conversa por regra nativa; preparação corrigida com nota outgoing/fechamento real posterior. Terceiro usava associação company inexistente em BusinessUnit; corrigida para company_id. Nenhuma regra nativa enfraquecida."
+  },
+  "style": {
+    "initial": ".codex/customer-operational-core-ruby-style.json:8infrações corrigidas sem desativar cops",
+    "scoped": ".codex/customer-operational-scoped-style.json:5arquivos,1infração de indentação no controller",
+    "current_controller": ".codex/customer-operational-final-controller-style.json:0infrações usando bytes atuais via stdin; controller passou a guardar query e renderizar call diretamente, sem mudança no contrato HTTP",
+    "frontend": ".codex/customer-operational-frontend-final-eslint.json:6arquivos,0erros/0avisos"
+  },
+  "frontend_partial": {
+    "files": "OperationalContactsPage/useOperationalContacts/OperationalContactActions e rota/sidebar local ainda não commitados neste incremento backend",
+    "tests": ".codex/customer-operational-core-frontend.json:5casos/0falhas, APIs/diálogos simulados; não comprovam persistência externa nem validação no Chrome",
+    "build_original": "Build com heap4GiB interrompido pelo travamento/falta de espaço; sem saída completa, sem declaração de sucesso",
+    "build_guarded": ".codex/customer-operational-guarded-build.json:falhou exit134 por heap insuficiente de2GiB, disco permaneceu acima de1,53GB; log e relatório preservados",
+    "chrome": "ainda não executado para C6"
+  },
+  "recovery": {
+    "old_pid_21636": "não existia na retomada; nenhum processo alheio encerrado",
+    "docker": "reabertura normal do DockerDesktop instalado; somente3containers locais existentes reativados, sem shutdownWSL/reset/reinstalação/remoção de volumes",
+    "generated_preservation": [
+      ".codex/customer-operational-lossless-compression.json:2builds antigos compactados, todos arquivos SHA-256 verificados antes da substituição por ZIP; cerca113MB liberados; build C5 final preservado",
+      ".codex/customer-operational-overlay-compression-20261103.json:TAR gerado compactado com roundtrip SHA-256; cerca56MB liberados; nenhum byte de fonte ou backup perdido"
+    ],
+    "protected_worktree": "crm-backoffice-servicedesk-visual-20261101 limpo no50f7f07d802829dd44a67547fabad3aa77f3d196"
+  },
+  "remaining": [
+    "Build atual completo com margem de disco/memória e guard automático; nenhum sucesso presumido",
+    "Validar Chrome desktop/celular claro/escuro, filtros, paginação, popups, persistência e navegação CRM/ServiceDesk",
+    "Fixture C6 preparada em .codex/seed-customer-operational-ui_spec.rb mas ainda não executada; nunca repetir se já persistida",
+    "Conferência final Word de C e critérios financeiros/segmentos; TRR permanece sem definição",
+    "D/E/F/G e homologação externa DocuSign ainda parciais"
+  ],
+  "safety": {
+    "new_migrations": false,
+    "signature_verifier": null,
+    "push_image_build_publish_deploy_or_production_changes": false,
+    "external_operations": 0
+  },
+  "hooks": "BootstrapHusky ausente no worktree; gates manuais executados e checkpoint local usa core.hooksPath apenas no comando; hook nativo não declarado executado."
+}
