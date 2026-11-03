@@ -25,6 +25,8 @@ As novas execuções de CI do SHA do ajuste devem ser consultadas separadamente.
 
 O primeiro run do novo gate também comprovou que o job de integração usava checkout raso e não possuía a base Git histórica exigida pelo gerador. O checkout desse job foi ajustado para `fetch-depth: 0`; a regressão do gate exige essa configuração. A validação não gera manifestos durante a CI e continua recusando base ausente ou hashes divergentes.
 
+No SHA b857d277, Flow/QR e o job Broker/distribuição ficaram aprovados. NICO executou 235 exemplos com zero falhas, mas o RuboCop final apontou uma única indentação em `app/services/jrc_customers/visibility.rb`. A chamada encadeada foi alinhada, sem alterar sua lógica; o resultado de lint e a comparação da AST Ruby são registrados separadamente. As execuções de CI de cada novo SHA continuam distintas.
+
 ## Limites preservados
 
 Branches históricas e específicas de outros ambientes, incluindo Precimech, não foram sobrepostas à candidata atual. PRs com base em branches antigas podem permanecer abertas mesmo quando seus commits já são ancestrais da main. Nenhuma pendência funcional previamente documentada de engine, custódia, capacidade ou integração externa foi declarada concluída por esta promoção.

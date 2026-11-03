@@ -53,7 +53,7 @@ class JrcCustomers::Visibility
 
   def ticket_events(ticket_scope)
     scope = JrcServiceDesk::TicketEventPolicy::Scope.new(service_desk_context.to_h, JrcServiceDesk::TicketEvent).resolve
-                                                .where(ticket_id: ticket_scope.select(:id))
+                                                    .where(ticket_id: ticket_scope.select(:id))
     service_desk_context.capability?(:history_view) ? scope : scope.none
   end
 
