@@ -5728,7 +5728,7 @@
             "JrcCustomers::Audit",
             "CustomFilter pessoal nativo"
           ],
-          "implemented_change": "Definição, wizard, prévia, escolhas manuais, CRUD auditado e escopo validados no incremento C4a; requisitos financeiros, distinção de seletores e filtros de todos os módulos permanecem parciais conforme o relatório. | C7: faturamento de pedidos por período e contagem de contratos, com filtros CRM e gates automatizados. Build/Chrome pendentes por espaço. TRR e consumo nos demais módulos continuam pendentes.",
+          "implemented_change": "Definição, wizard, prévia, escolhas manuais, CRUD auditado e escopo validados no incremento C4a; requisitos financeiros, distinção de seletores e filtros de todos os módulos permanecem parciais conforme o relatório. | C7: faturamento de pedidos por período e contagem de contratos, com filtros CRM e gates automatizados. Build C7 Vite aprovado e homologação real Chrome concluída por continuações documentadas em financial_segments_crm_checkpoint_20261103.json. Etapa C continua parcial: outros módulos e TRR pendentes. TRR e consumo nos demais módulos continuam pendentes.",
           "files": [
             "app/models/jrc_customers/taxonomy.rb",
             "app/models/jrc_customers/segment_override.rb",
@@ -5933,7 +5933,7 @@
             "JrcCustomers::Audit",
             "CustomFilter pessoal nativo"
           ],
-          "implemented_change": "Classificação estática separada de filtro dinâmico e filtro visível com paginação/URL no diretório de empresas, sem conceder permissões. Os demais módulos continuam pendentes. | C7: faturamento de pedidos por período e contagem de contratos, com filtros CRM e gates automatizados. Build/Chrome pendentes por espaço. TRR e consumo nos demais módulos continuam pendentes.",
+          "implemented_change": "Classificação estática separada de filtro dinâmico e filtro visível com paginação/URL no diretório de empresas, sem conceder permissões. Os demais módulos continuam pendentes. | C7: faturamento de pedidos por período e contagem de contratos, com filtros CRM e gates automatizados. Build C7 Vite aprovado e homologação real Chrome concluída por continuações documentadas em financial_segments_crm_checkpoint_20261103.json. Etapa C continua parcial: outros módulos e TRR pendentes. TRR e consumo nos demais módulos continuam pendentes.",
           "files": [
             "app/models/jrc_customers/taxonomy.rb",
             "app/models/jrc_customers/segment_override.rb",
@@ -42351,5 +42351,13 @@
   "customer_segment_filter_increment": {
     "status": "parcial",
     "report": "docs/jrc_customers/segment_filter_checkpoint_20261103.json"
+  },
+  "customer_segment_financial_crm_validation": {
+    "date": "2026-11-03",
+    "source_commit": "9bb8d2ecef4dc5d61f719dca7a721710aaadb494",
+    "report": "docs/jrc_customers/financial_segments_crm_checkpoint_20261103.json",
+    "C_stage_complete": false,
+    "other_module_consumers_complete": false,
+    "TRR": "undefined"
   }
 }
