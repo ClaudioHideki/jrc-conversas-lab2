@@ -3,7 +3,7 @@
   "branch": "codex/relacionamento-v2-20261101",
   "base_checkpoint": "9f4b33ac3166e29599e454aa897763628c5da362",
   "stage": "C7 — consumo de segmentos no Backoffice",
-  "status": "PARCIAL: código e gates automatizados aprovados; nova compilação e Chrome bloqueados pelo espaço mínimo. Não conclui a Etapa C.",
+  "status": "Consumo de Segmentos no Backoffice homologado localmente em Chrome/DB reais após correção de navegação. A Etapa C permanece parcial por quatro outros consumidores, auditoria final e TRR indefinida.",
   "implemented": [
     "Reutiliza ModuleSegmentFilter e helper de CRM com module_key interno constante backoffice. As seis listas CRM mantêm o padrão crm; parâmetros do cliente não selecionam o módulo de autorização.",
     "Index, workspace e summary intersectam o escopo nativo de proprietário/OrganizationalVisibility antes de totais e paginação. Filtros de status, etapa, cliente, unidade, fila e Minha Operação permanecem.",
@@ -55,8 +55,82 @@
       "changed_existing_metric": "Método index já excedia ABC: 26.78/26 → 27.75/26 com a chamada do filtro. O relatório de comparação exata marca falha por essa mudança; não é gate global limpo. Nenhum cop desabilitado.",
       "report": ".codex/customer-segment-backoffice-final-style-comparison.json"
     },
-    "build": "Não iniciado: preflight abaixo de 1,5 GB. Os 585 assets e a UI5371 são exclusivamente C7/9bb8d2ec e NÃO incluem este incremento.",
-    "chrome": "Pendente para o incremento Backoffice; não reutilizar a homologação financeira/CRM como se cobrisse esta mudança."
+    "build": {
+      "status": "passed",
+      "final_report": ".codex/backoffice-role-28aa8023-build.json",
+      "assets_report": ".codex/backoffice-role-28aa8023-assets-verified.json",
+      "asset_files": 587,
+      "manifest_entries": 372,
+      "asset_bytes": 78240361,
+      "guard_stop_bytes": 750000000,
+      "minimum_free": 2589745152,
+      "first_3390725e_build_also_passed": ".codex/customer-segment-backoffice-build-3390725e.json",
+      "final_assets_used_in_Chrome": "consolidation-backoffice-role-28aa8023-vite",
+      "served_asset_proof": ".codex/backoffice-role-28aa8023-served-assets.json",
+      "no_old_assets_as_final_evidence": true
+    },
+    "chrome": {
+      "status": "passed_by_documented_continuations",
+      "method": "Chrome instalado/headless, Rails/PostgreSQL reais; dados sintéticos; desktop1520x1050 e viewportmobile390x844, não telefone físico",
+      "reports": [
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\segmentos-backoffice-c7-criacao-3390725e-20261103.json",
+          "status": "passed",
+          "checks": {
+            "financial_preview_uses_real_billing_scope": true,
+            "created_and_persisted_via_Chrome": true
+          },
+          "javascript_errors": 0,
+          "unexpected_writes": 0
+        },
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\segmentos-backoffice-c7-fluxos-28aa8023-20261103.json",
+          "status": "passed",
+          "checks": {
+            "published_catalog_picker_and_filtered_totals": true,
+            "server_pagination_and_detail_return_keep_scope": true,
+            "overview_stage_totals_drilldown_and_tabs_match": true,
+            "mobile_detail_and_return_operated": true,
+            "mobile_pagination_and_clear_filter_operated": true,
+            "native_dark_desktop_mobile": true
+          },
+          "javascript_errors": 0,
+          "unexpected_writes": 0
+        },
+        {
+          "path": "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\segmentos-backoffice-c7-permissoes-retomada-28aa8023-20261103.json",
+          "status": "passed",
+          "checks": {
+            "agent_positive_native_control_and_financial_scope": true,
+            "directory_denial_and_native_UI_clear_recovery": true,
+            "other_account_positive_control_and_cross_account_denial": true,
+            "publication_and_account_are_rechecked": true
+          },
+          "javascript_errors": 0,
+          "unexpected_writes": 0
+        }
+      ],
+      "creation_once": "segment95 criado via UI em3390725e; reutilizado nos testes finais28aa8023, sem recriação",
+      "functional_scope": [
+        "Catálogo publicado Backoffice paginado; filtro e critérios financeiros persistidos",
+        "Listas, totais, etapas, dashboard/MinhaOperação e drilldown coerentes",
+        "Paginação nativa23registros em20+3, exclusão de outros clientes, remoção de filtro26registros",
+        "Navegação entre abas/lista/detalhe/retorno preservando query, também operada no viewportmobile",
+        "Temas claro e escuro nativo body.dark, capturas desktop/mobile inspecionadas",
+        "Controle positivo de agente na lista própria; filtro financeiro respeita escopo CRM do ator",
+        "Papel CRM sem diretório: lista própria permitida, filtro negado401, remoção pela UI mobile recupera a lista",
+        "Outra conta controle positivo próprio, negação cruzada401/404; segmentos inativo/não publicado/CRM/estrangeiro negados"
+      ],
+      "unit_scope_boundary": "Cobertura de operadora/unidade comprovada nos testes backend42/0. Não foram alteradas as unidades da conta C7 nem inventada homologação Chrome de unidade.",
+      "external_operations": 0
+    },
+    "additional_routing_fix": {
+      "commit": "28aa80232666704a40085d4d51481ecb17060a37",
+      "report": "docs/jrc_customers/crm_only_landing_checkpoint_20261103.json",
+      "frontend": "33/0",
+      "eslint": "2files0errors0warnings",
+      "native_Chrome_CRM_only_login": "passed; original loop reproduced before fix and absent in final validation"
+    }
   },
   "preservation": {
     "C5": "a1fef6240222f37513be20f498efcfe6315418c0",
@@ -71,37 +145,20 @@
     "source_snapshots_and_existing_UI_preserved": true,
     "outbound_external_operations": 0,
     "production_changes": false,
-    "push_deploy_GHCR": false
+    "push_deploy_GHCR": false,
+    "post_Chrome_rows_verified": 281,
+    "post_Chrome_report": ".codex/backoffice-c7-final-integrity.json",
+    "private_files_verified": 30,
+    "private_report": ".codex/backoffice-c7-private-preservation.json",
+    "C7_original_segment82_unchanged": true,
+    "existing_approval20_unchanged": true
   },
   "disk": {
-    "status": "blocked_insufficient_disk",
-    "free_c_bytes": 1041408000,
-    "minimum_start_bytes": 1500000000,
-    "recommended_free_bytes": 3000000000,
-    "additional_bytes_to_minimum": 458592000,
-    "disk_guard_stop_bytes": 750000000,
-    "guard_self_test": {
-      "status": "passed",
-      "method": "simulated disk samples and process handle; no real process stopped",
-      "cases": [
-        {
-          "sample_free_bytes": 749999999,
-          "termination_requested": true
-        },
-        {
-          "sample_free_bytes": 750000000,
-          "termination_requested": true
-        },
-        {
-          "sample_free_bytes": 750000001,
-          "termination_requested": false
-        }
-      ]
-    },
-    "new_build_started": false,
-    "browser_cleanup_suspended": true,
-    "deleted_files": false,
-    "production_changed": false
+    "free_c_bytes": 2961313792,
+    "minimum_new_build_start_bytes": 1500000000,
+    "guard_stop_bytes": 750000000,
+    "cleanup_executed": false,
+    "check_again_before_any_new_build": true
   },
   "word_audit": {
     "scope": "Conferência de versões dos quatro documentos e pendências específicas de Segmentos. NÃO é auditoria final da Etapa C.",
@@ -183,15 +240,48 @@
     }
   ],
   "next": [
-    "Recuperar margem de disco sem exclusão automática: mínimo 1,5 GB, preferir 3 GB; confirmar novamente antes de compilar.",
-    "Preparar build protegido do novo commit, prefixo exclusivo, sem reutilizar assets C7 antigos; proteger em 750 MB.",
-    "Homologar o incremento Backoffice em Chrome/DB reais desktop/mobile, incluindo publicação para Backoffice, todos os indicadores/listas, paginação, navegação, permissões e escopos.",
-    "Continuar os quatro consumidores restantes com testes proporcionais e depois auditoria final C.",
-    "Somente após C validada avançar D → E → F → G; manter pendências DocuSign demo/homologação externa e demais requisitos dos relatórios, sem tratá-los como concluídos."
+    "Continuar as quatro integrações restantes com escopos nativos, testes e nova validação Chrome dos respectivos incrementos.",
+    "Compilar novos incrementos somente após medir disco>=1,5GB, guarda750MB e ausência de outro build; preferir3GB.",
+    "Concluir auditoria Etapa C contra Word sem inventar TRR; somente então avançar D/E/F/G."
   ],
   "failed_attempts_preserved": [
     "Primeira rodada backend30: um pedido sintético sem unidade não passava no escopo nativo. Preparação corrigida; rodada30/0 e final42/0. Nenhuma permissão relaxada.",
     "Primeiro teste extra de navegação Vue não nomeava seu stub RouterLink; corrigido no harness. Final11/0.",
-    "RuboCop inicial mostrou alinhamento/line-endings e limite de expectativas no teste novo; corrigidos sem supressão. Comparação do controller continua com métricas legadas descritas."
-  ]
+    "RuboCop inicial mostrou alinhamento/line-endings e limite de expectativas no teste novo; corrigidos sem supressão. Comparação do controller continua com métricas legadas descritas.",
+    "Chrome3390725e: papel custom_role sóCRM entrou no fallback sem rota permitida. Corrigido no produto e homologado na versão28aa8023.",
+    "Primeira captura do erro ficou aguardando; revisão automática rejeitou encerramento. Usuário autorizou somente Chrome do teste;8860 e filhos3480/19216 verificados e encerrados. Node3752 terminou normalmente depois; outros processos preservados.",
+    "Chrome28aa8023: seletor genérico de alertas ambíguo (2mensagens esperadas). Ajustado apenas no harness; continuação passou sem repetir criação ou o controle de agente aprovado.",
+    "Verificação inicial procurou a regra no bundle v3app; ela pertence ao chunk dashboard. Verificação corrigida conferiu exatamente permissions:[jrc_crm],path:crm/dashboard no chunk final; nenhum asset antigo usado."
+  ],
+  "validated_source_commit": "28aa80232666704a40085d4d51481ecb17060a37",
+  "previous_disk_blocker": {
+    "status": "blocked_insufficient_disk",
+    "free_c_bytes": 1041408000,
+    "minimum_start_bytes": 1500000000,
+    "recommended_free_bytes": 3000000000,
+    "additional_bytes_to_minimum": 458592000,
+    "disk_guard_stop_bytes": 750000000,
+    "guard_self_test": {
+      "status": "passed",
+      "method": "simulated disk samples and process handle; no real process stopped",
+      "cases": [
+        {
+          "sample_free_bytes": 749999999,
+          "termination_requested": true
+        },
+        {
+          "sample_free_bytes": 750000000,
+          "termination_requested": true
+        },
+        {
+          "sample_free_bytes": 750000001,
+          "termination_requested": false
+        }
+      ]
+    },
+    "new_build_started": false,
+    "browser_cleanup_suspended": true,
+    "deleted_files": false,
+    "production_changed": false
+  }
 }
