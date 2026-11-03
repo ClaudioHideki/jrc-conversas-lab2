@@ -55,6 +55,9 @@ port=$(docker inspect --format '{{(index (index .NetworkSettings.Ports "5432/tcp
 RAILS_ENV=test POSTGRES_HOST=127.0.0.1 POSTGRES_PORT="$port" POSTGRES_USERNAME=postgres \
   POSTGRES_PASSWORD=disposable-candidate-only POSTGRES_DATABASE=backoffice_candidate_smoke_test \
   SECRET_KEY_BASE=isolated-candidate-smoke-not-production SCHEMA=db/schema.rb bundle exec rails db:schema:load
+RAILS_ENV=test POSTGRES_HOST=127.0.0.1 POSTGRES_PORT="$port" POSTGRES_USERNAME=postgres \
+  POSTGRES_PASSWORD=disposable-candidate-only POSTGRES_DATABASE=backoffice_candidate_smoke_test \
+  SECRET_KEY_BASE=isolated-candidate-smoke-not-production bundle exec rails runner script/prepare_lab2_candidate_database.rb
 
 # The native worker also runs auxiliary capsules and cron; a one-connection pool starves documentary jobs.
 runtime_env=(--network "$network" --label "$label" --mount "type=volume,source=$storage,target=/app/storage"

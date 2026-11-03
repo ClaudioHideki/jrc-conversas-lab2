@@ -5,8 +5,8 @@ class JrcFlows::NativeEditor
     @handle_id = handle_id
   end
 
-  def call!(operation:, id: nil, cursor: nil, body: nil, idempotency_key: nil, target_id: nil, resource_id: nil)
-    op = JrcFlows::NativeEditorOperation.resolve!(operation, id: id, cursor: cursor, target_id: target_id, resource_id: resource_id)
+  def call!(operation:, id: nil, cursor: nil, body: nil, idempotency_key: nil, target_id: nil, resource_id: nil, query: nil)
+    op = JrcFlows::NativeEditorOperation.resolve!(operation, id: id, cursor: cursor, target_id: target_id, resource_id: resource_id, query: query)
     handle, registration = authorize!(op.scope)
     token = JrcFlows::NativeCredentialStore.for_application.decrypt(
       account_id: @account_id, record_id: handle.id, revision: handle.credential_revision,
@@ -14,6 +14,14 @@ class JrcFlows::NativeEditor
     )
     result = JrcFlows::NativeClient.new(origin: registration.broker_origin, credential: token)
                                    .editor(op, body: body, idempotency_key: idempotency_key)
+    if %w[executions execution].include?(operation)
+      scope = result.is_a?(Hash) && result['scope']
+      valid = scope.is_a?(Hash) && scope.keys.sort == %w[accountId capabilityVersion inboxIds organizationId revision rootAutomationId] &&
+              scope['capabilityVersion'] == 1 && scope['organizationId'] == registration.organization_id &&
+              scope['rootAutomationId'] == id && scope['accountId'] == @account_id && scope['revision'].is_a?(Integer) && scope['revision'].positive? &&
+              scope['inboxIds'].is_a?(Array) && scope['inboxIds'].any? && (scope['inboxIds'] - handle.inbox_ids).empty?
+      fail!('FLOW_BROKER_INVALID_RESPONSE', 502) unless valid
+    end
     current_handle, current_registration = authorize!(op.scope)
     fail!('FLOW_CONTEXT_CHANGED', 409) unless current_handle.id == handle.id && current_registration.id == registration.id &&
                                               current_registration.revision == registration.revision &&

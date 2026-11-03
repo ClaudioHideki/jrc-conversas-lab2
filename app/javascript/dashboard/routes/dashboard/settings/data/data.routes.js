@@ -3,6 +3,7 @@ import { frontendURL } from '../../../../helper/URLHelper';
 import SettingsWrapper from '../SettingsWrapper.vue';
 import Index from './Index.vue';
 import Show from './Show.vue';
+import MigrationPage from './MigrationPage.vue';
 
 export default {
   routes: [
@@ -14,6 +15,15 @@ export default {
           path: '',
           name: 'settings_data_imports',
           component: Index,
+          meta: {
+            featureFlag: FEATURE_FLAGS.DATA_IMPORT,
+            permissions: ['administrator'],
+          },
+        },
+        {
+          path: 'migration-center',
+          name: 'settings_migration_center',
+          component: MigrationPage,
           meta: {
             featureFlag: FEATURE_FLAGS.DATA_IMPORT,
             permissions: ['administrator'],

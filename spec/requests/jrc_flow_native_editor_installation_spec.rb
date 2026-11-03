@@ -199,4 +199,49 @@ RSpec.describe 'P9 new native editor and installation HTTP cases', type: :reques
     expect(handle.reload.encrypted_session_bearer).to be_nil
     expect(registration.reload.state).to eq('REVOKED')
   end
+  it 'requires the explicit history scope and a current inbox-bound administrator on each inspection' do
+    path = editor_path + '/executions'
+    query = { from: '2030-01-01T00:00:00.000Z', to: '2030-01-02T00:00:00.000Z' }
+    get path, params: query, headers: admin.create_new_auth_token
+    expect(response).to have_http_status(:forbidden)
+    handle.update!(scopes: handle.scopes + ['flow:executions:read'])
+    payload = { scope: { capabilityVersion: 1, organizationId: organization, rootAutomationId: root,
+                         accountId: account.id, inboxIds: [inbox.id], revision: 1 }, data: [] }
+    remote = stub_request(:get, "https://broker.example.test/v1/delegated-flows/#{root}/executions").with(query: query)
+             .to_return(status: 200, body: payload.to_json)
+    get path, params: query, headers: admin.create_new_auth_token
+    expect(response).to have_http_status(:ok)
+    expect(response.body).not_to include(session_token)
+    expect(remote).to have_been_requested.once
+    AccountUser.find_by!(account: account, user: admin).update!(role: :agent)
+    get path, params: query, headers: admin.create_new_auth_token
+    expect(response).to have_http_status(:forbidden)
+    expect(remote).to have_been_requested.once
+  end
+
+  it 'rejects an execution response after inbox revocation during the broker read' do
+    path = editor_path + '/executions/' + SecureRandom.uuid
+    handle.update!(scopes: handle.scopes + ['flow:executions:read'])
+    stub_request(:get, /https:\/\/broker.example.test\/v1\/delegated-flows\/.+\/executions\/.+/).to_return do
+      InboxMember.where(inbox: inbox, user: admin).delete_all
+      { status: 200, body: { scope: { capabilityVersion: 1, organizationId: organization, rootAutomationId: root,
+                                     accountId: account.id, inboxIds: [inbox.id], revision: 1 }, data: {} }.to_json }
+    end
+    get path, headers: admin.create_new_auth_token
+    expect(response).to have_http_status(:forbidden)
+  end
+
+  it 'rejects a foreign account or root in the execution response instead of forwarding it' do
+    path = editor_path + '/executions'
+    handle.update!(scopes: handle.scopes + ['flow:executions:read'])
+    query = { from: '2030-01-01T00:00:00.000Z', to: '2030-01-02T00:00:00.000Z' }
+    stub_request(:get, "https://broker.example.test/v1/delegated-flows/#{root}/executions").with(query: query).to_return(
+      status: 200, body: { scope: { capabilityVersion: 1, organizationId: organization, rootAutomationId: SecureRandom.uuid,
+                                   accountId: account.id, inboxIds: [inbox.id], revision: 1 }, data: ['FOREIGN_CANARY'] }.to_json
+    )
+    get path, params: query, headers: admin.create_new_auth_token
+    expect(response).to have_http_status(:bad_gateway)
+    expect(response.body).not_to include('FOREIGN_CANARY')
+  end
+
 end

@@ -2,7 +2,7 @@ class JrcBroker::Response
   OPERATION_FIELDS = %w[operationId state stage instanceId integrationId inboxId lastError].freeze
   HEALTH_FIELDS = %w[integrationId inboxId instanceId integrationStatus instanceStatus transportStatus checkedAt lastError
                      callbackVerifiedAt lastSuccessfulInboundAt lastSuccessfulOutboundAt identityStatus identityApproved
-                     identityRevision observedNumberSuffix allowedActions].freeze
+                     identityRevision observedNumberSuffix allowedActions phoneNumber connectedAt lastSyncAt].freeze
   INSTANCE_FIELDS = %w[id organizationId providerAccountId name provider status createdAt updatedAt].freeze
 
   def self.operation(value)

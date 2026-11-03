@@ -1,19 +1,21 @@
 # frozen_string_literal: true
 
-# Only native Service Desk blobs require this additional check. Ordinary Chatwoot
-# attachments retain their native behavior. A signed blob URL is not SD authority.
+# Native Service Desk and imported project blobs retain their source authority.
+# Ordinary Chatwoot attachments keep their native behavior; signed IDs grant no rights.
 class JrcServiceDesk::ProtectedBlobAccess
-  def initialize(blob:, user:, grant_id: nil, widget_contact_inbox: nil, widget_conversations: nil, portal_scope: nil)
+  def initialize(blob:, user:, grant_id: nil, widget_contact_inbox: nil, widget_conversations: nil, portal_scope: nil, account_id: nil)
     @blob, @user, @grant_id = blob, user, grant_id
     @widget_contact_inbox, @widget_conversations = widget_contact_inbox, widget_conversations
     @portal_scope = portal_scope
+    @imported_access = JrcMigrations::ProtectedBlobAccess.new(blob: blob, user: user, grant_id: grant_id, account_id: account_id)
   end
 
   def protected?
-    protected_records.any?
+    @imported_access.protected? || protected_records.any?
   end
 
   def allowed?
+    return false if @imported_access.protected? && !@imported_access.allowed?
     return false unless @blob.metadata['service_desk_scan_state'] == 'clean'
     return protected_records.all? { |record| widget_allowed?(record) } if @widget_contact_inbox
     # Only an already verified, server-built PortalScope may enter this branch.

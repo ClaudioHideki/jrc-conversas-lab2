@@ -20,8 +20,9 @@ class JrcNico::Helpdesk::EvidenceAccess
     id = @evidence['clock_id']
     return unless id
 
-    JrcServiceDesk::SlaClock.where(account_id: @context.account.id, ticket_id: @ticket.id).find(id)
+    clock = JrcServiceDesk::SlaClock.where(account_id: @context.account.id, ticket_id: @ticket.id).find(id)
     Pundit.authorize(@context.native.to_h, @ticket, :view_sla?)
+    JrcNico::SlaEvidence.new(@context.account).clock!(clock)
   end
 
   def authorize_survey!

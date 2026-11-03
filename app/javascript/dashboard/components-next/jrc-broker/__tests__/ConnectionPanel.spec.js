@@ -37,6 +37,39 @@ afterEach(() => {
 });
 
 describe('native pairing lifecycle', () => {
+  it('renames the existing connection only after an explicit authorized save', async () => {
+    api.status.mockResolvedValue({
+      ...health,
+      allowedActions: ['status', 'manage'],
+    });
+    api.renameConnection = vi
+      .fn()
+      .mockResolvedValue({ id: 2, name: 'Commercial' });
+    wrapper = mount(ConnectionPanel, {
+      props: {
+        accountId: 1,
+        inboxId: 2,
+        connectionName: 'Reception',
+        presentation: 'configuration',
+      },
+    });
+    await flushPromises();
+    await wrapper
+      .get('[data-testid="connection-name-input"]')
+      .setValue('Commercial');
+    expect(api.renameConnection).not.toHaveBeenCalled();
+    await wrapper.get('[data-testid="connection-name-form"]').trigger('submit');
+    await flushPromises();
+    expect(api.renameConnection).toHaveBeenCalledWith(
+      2,
+      'Commercial',
+      expect.any(AbortSignal)
+    );
+    expect(wrapper.emitted('renamed')).toEqual([
+      [{ accountId: 1, inboxId: 2, name: 'Commercial' }],
+    ]);
+  });
+
   it('publishes real health and confirms an explicit reconnection once without treating delivery as verified', async () => {
     wrapper = mount(ConnectionPanel, { props: { accountId: 1, inboxId: 2 } });
     await flushPromises();

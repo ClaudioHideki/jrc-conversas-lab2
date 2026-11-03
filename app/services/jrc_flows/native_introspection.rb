@@ -5,7 +5,7 @@ class JrcFlows::NativeIntrospection
   class Denied < StandardError; end
 
   REQUEST_KEYS = %w[nonce externalActorId accountId destinationRevision inboxIds].freeze
-  SCOPES = %w[flow:read flow:edit flow:publish flow:bind].freeze
+  SCOPES = %w[flow:read flow:edit flow:publish flow:bind flow:executions:read].freeze
   MAX_SAFE_INTEGER = 9_007_199_254_740_991
   UUID = Regexp.new(
     '\A(?:[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}|' \

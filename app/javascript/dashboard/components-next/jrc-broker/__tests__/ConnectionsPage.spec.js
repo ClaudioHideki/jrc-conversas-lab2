@@ -78,6 +78,9 @@ beforeEach(() => {
       .mockResolvedValue({ policy: null, teams: [] }),
     saveConnectionDistribution: vi.fn(),
     distributionHistory: vi.fn().mockResolvedValue({ data: [] }),
+    connectionHistory: vi
+      .fn()
+      .mockResolvedValue({ data: [], next_cursor: null }),
     resources: vi.fn().mockResolvedValue({
       providers: [],
       instances: [
@@ -120,6 +123,31 @@ beforeEach(() => {
   createJrcBrokerApi.mockReturnValue(api);
 });
 
+it('shows provider phone and source timestamps without treating health checks as synchronization', async () => {
+  api.status.mockResolvedValue({
+    integrationStatus: 'READY',
+    instanceStatus: 'CONNECTED',
+    allowedActions: ['status'],
+    phoneNumber: '+5521988882000',
+    connectedAt: '2026-11-02T11:45:00Z',
+    lastSyncAt: '2026-11-02T11:50:00Z',
+    checkedAt: '2026-11-02T12:00:00Z',
+    observedNumberSuffix: '2000',
+  });
+  wrapper = mountPage();
+  await flushPromises();
+  const card = wrapper.get('[data-testid="connection-card-7"]');
+  expect(card.text()).toContain('+5521988882000');
+  expect(
+    card
+      .get('[data-testid="connection-connected-at"] time')
+      .attributes('datetime')
+  ).toBe('2026-11-02T11:45:00Z');
+  expect(
+    card.get('[data-testid="connection-last-sync"] time').attributes('datetime')
+  ).toBe('2026-11-02T11:50:00Z');
+});
+
 it('shows distribution settings only to an administrator, without enabling them', async () => {
   role.value = 'administrator';
   wrapper = mountPage();
@@ -141,7 +169,7 @@ it('offers accessible detail tabs without remounting health polling or fetching 
   expect(tabs.map(tab => tab.text())).toEqual([
     'Overview',
     'Distribution',
-    'Distribution history',
+    'Connection history',
     'Settings',
   ]);
   expect(tabs[0].attributes('aria-selected')).toBe('true');
@@ -170,16 +198,17 @@ it('offers accessible detail tabs without remounting health polling or fetching 
     expect.any(AbortSignal)
   );
   expect(wrapper.text()).toContain(
-    'Connection and pairing events are not included'
+    'Distribution changes, including the previous and saved rules'
   );
   role.value = 'agent';
   await flushPromises();
   expect(wrapper.findAll('[role="tab"]').map(tab => tab.text())).toEqual([
     'Overview',
+    'Connection history',
     'Settings',
   ]);
   expect(wrapper.get('[role="tab"][aria-selected="true"]').text()).toBe(
-    'Overview'
+    'Connection history'
   );
 });
 
@@ -241,7 +270,7 @@ it('presents the connection journey and detail tabs in Brazilian Portuguese', as
     expect(wrapper.findAll('[role="tab"]').map(tab => tab.text())).toEqual([
       'Visão geral',
       'Distribuição',
-      'Histórico de distribuição',
+      'Histórico de conexões',
       'Configurações',
     ]);
     expect(wrapper.get('[data-testid="connection-health"]').text()).toContain(

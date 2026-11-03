@@ -4,7 +4,7 @@ class Api::V1::Accounts::JrcBrokerController < Api::V1::Accounts::BaseController
   before_action :no_store
   before_action :verify_control_csrf!
   before_action :reject_query!
-  before_action :authorize_management!, except: [:status, :pair, :pair_operation, :disconnect, :confirm_identity]
+  before_action :authorize_management!, except: [:status, :pair, :pair_operation, :disconnect, :confirm_identity, :connection_history]
   rescue_from JrcBroker::Client::Error, with: :broker_error
   rescue_from JrcBroker::Configuration::InvalidConfiguration, JrcBroker::CredentialStore::InvalidCredential, with: :configuration_error
 
@@ -49,13 +49,15 @@ class Api::V1::Accounts::JrcBrokerController < Api::V1::Accounts::BaseController
   def connection_distribution
     inbox = binding.inbox
     render json: { policy: JrcHumanAssignment::Policy.connection_for(Current.account, inbox.id),
+                   calendar: { enabled: inbox.working_hours_enabled?, timezone: inbox.timezone, weekly_schedule: inbox.weekly_schedule },
                    teams: Current.account.teams.where(allow_auto_assign: true).order(:name).pluck(:id, :name).map do |id, name|
                      { id: id, name: name }
                    end }
   end
 
   def update_connection_distribution
-    input = body!('enabled', 'mode', 'team_ids', 'max_open')
+    input = body!('enabled', 'mode', 'team_ids', 'max_open', 'respect_availability', 'capacity_enabled', 'waiting_enabled',
+                  'schedule', 'fallback', 'fallback_team_id')
     result = JrcHumanAssignment::Policy.update_connection!(Current.account, inbox: binding.inbox, actor: Current.user,
                                                                             **input.symbolize_keys)
     render json: { policy: result }
@@ -65,8 +67,46 @@ class Api::V1::Accounts::JrcBrokerController < Api::V1::Accounts::BaseController
 
   def connection_distribution_history
     inbox = binding.inbox
-    events = JrcHumanAssignmentPolicyEvent.where(account_id: Current.account.id, inbox_id: inbox.id).order(id: :desc).limit(50)
-    render json: { data: events.map { |event| event.slice(:id, :user_id, :created_at, :previous_policy, :next_policy) } }
+    events = JrcHumanAssignmentPolicyEvent.where(account_id: Current.account.id, inbox_id: inbox.id).order(id: :desc)
+    events = events.where('id < ?', params[:before].to_i) if params[:before].present?
+    page = events.limit(51).to_a
+    render json: { data: page.first(50).map { |event| event.slice(:id, :user_id, :created_at, :previous_policy, :next_policy) },
+                   next_cursor: page.size > 50 ? page[49].id : nil }
+  end
+
+  def update_connection_configuration
+    name = body!('name')['name']
+    unless name.is_a?(String) && name.strip.length.between?(1, 255)
+      raise JrcBroker::Client::Error.new('JRC_BROKER_INVALID_REQUEST', status: 400)
+    end
+
+    inbox = binding.inbox
+    inbox.with_lock do
+      authorize_management!
+      previous = inbox.name
+      if previous != name.strip
+        inbox.update!(name: name.strip)
+        JrcBrokerConnectionEvent.create!(account: Current.account, inbox: inbox, user: Current.user, event_type: 'CONFIGURATION_CHANGED',
+                                        occurred_at: Time.current, metadata: { previous_name: previous, next_name: inbox.name })
+      end
+    end
+    render json: { id: inbox.id, name: inbox.name }
+  end
+
+  def connection_history
+    policy = JrcBrokerPolicy.new(pundit_user, binding)
+    raise JrcBroker::Client::Error.new('JRC_BROKER_FORBIDDEN', status: 403) unless policy.status?
+
+    events = JrcBrokerConnectionEvent.where(account_id: Current.account.id, inbox_id: binding.inbox_id).order(id: :desc)
+    events = events.where('id < ?', params[:before].to_i) if params[:before].present?
+    events = events.where(event_type: params[:event_type]) if params[:event_type].present?
+    page = events.limit(51).to_a
+    payload = page.first(50).map do |event|
+      entry = event.slice(:id, :user_id, :event_type, :status_before, :status_after, :occurred_at, :correlation_id, :metadata)
+      entry['metadata'] = entry['metadata'].slice('result', 'reason') unless policy.manage?
+      entry
+    end
+    render json: { data: payload, next_cursor: page.size > 50 ? page[49].id : nil }
   end
 
   def onboardings
@@ -127,7 +167,7 @@ class Api::V1::Accounts::JrcBrokerController < Api::V1::Accounts::BaseController
 
   def update_grants
     input = body!('userIds')
-    render json: { data: JrcBroker::Grants.update!(account: Current.account, inbox: binding.inbox, user_ids: input['userIds']) }
+    render json: { data: JrcBroker::Grants.update!(account: Current.account, inbox: binding.inbox, user_ids: input['userIds'], actor: Current.user) }
   end
 
   def assign_agents
@@ -142,7 +182,8 @@ class Api::V1::Accounts::JrcBrokerController < Api::V1::Accounts::BaseController
   end
 
   def control
-    JrcBroker::Control.new(account: Current.account, user: Current.user, account_user: Current.account_user, binding: binding)
+    JrcBroker::Control.new(account: Current.account, user: Current.user, account_user: Current.account_user, binding: binding,
+                          source_ip: request.remote_ip)
   end
 
   def broker
@@ -181,6 +222,13 @@ class Api::V1::Accounts::JrcBrokerController < Api::V1::Accounts::BaseController
   end
 
   def reject_query!
+    if %w[connection_history connection_distribution_history].include?(action_name)
+      allowed = action_name == 'connection_history' ? %w[before event_type] : ['before']
+      valid = (request.query_parameters.keys - allowed).empty? &&
+              (params[:before].nil? || /\A[1-9]\d{0,18}\z/.match?(params[:before].to_s)) &&
+              (params[:event_type].blank? || JrcBrokerConnectionEvent::TYPES.include?(params[:event_type]))
+      return if valid
+    end
     raise JrcBroker::Client::Error.new('JRC_BROKER_INVALID_REQUEST', status: 400) if request.query_parameters.present?
   end
 

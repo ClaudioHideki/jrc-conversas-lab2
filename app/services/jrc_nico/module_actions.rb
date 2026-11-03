@@ -48,7 +48,10 @@ class JrcNico::ModuleActions
 
     @access.crm_scope(JrcCrm::Deal).find(args['deal_id']) if args['deal_id']
     @access.crm_scope(JrcCrm::Proposal).find(args['proposal_id']) if args['proposal_id']
-    @access.account.jrc_campaigns.find(args['campaign_id']) if args['campaign_id']
+    if args['campaign_id']
+      campaign = @access.account.jrc_campaigns.find(args['campaign_id'])
+      JrcNico::MigrationVisibility.campaign!(campaign, account: @access.account)
+    end
     products = @access.account.jrc_crm_products
     products = products.where(active: true) unless name == 'update_product'
     products.find(args['product_id']) if args['product_id']

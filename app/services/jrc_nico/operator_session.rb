@@ -136,6 +136,7 @@ class JrcNico::OperatorSession
         raise ArgumentError, 'O telefone do contato mudou. Prepare a ligação novamente para revisar o destinatário.'
       end
 
+      JrcNico::NativeBrowserCommand.claim!(command, access)
       command.update!(status: 'executing')
     end
     command
@@ -147,6 +148,7 @@ class JrcNico::OperatorSession
         raise Busy unless command.status == 'executing' && command.result['browser_action']
         raise ArgumentError, 'Estado inválido.' unless %w[succeeded failed unknown].include?(status)
 
+        JrcNico::NativeBrowserCommand.authorize_browser_result!(command, status)
         command.update!(status: status, result: command.result.merge('browser_status' => status, 'browser_detail' => detail.to_s.first(500)),
                         reply: detail.to_s.first(500))
         session.append('assistant', "#{command.reply} (estado informado pela aba do operador)")
@@ -213,7 +215,7 @@ class JrcNico::OperatorSession
         when 'JrcCampaigns::Campaign'
           raise Pundit::NotAuthorizedError unless access.campaigns?
 
-          access.account.jrc_campaigns.find(id)
+          JrcNico::MigrationVisibility.campaign!(access.account.jrc_campaigns.find(id), account: access.account)
         when 'JrcNico::KnowledgeDocument' then JrcNico::KnowledgeDocument.where(account: access.account).approved.find(id)
         else
           JrcNico::DomainAccess.authorize_resource!(access, type, id) if JrcNico::DomainAccess::RESOURCE_TYPES.include?(type)

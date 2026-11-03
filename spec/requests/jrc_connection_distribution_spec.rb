@@ -67,4 +67,16 @@ RSpec.describe 'Broker inbox distribution API', type: :request do
     get "#{url}?token=synthetic-not-a-credential", headers: admin.create_new_auth_token
     expect(response).to have_http_status(:bad_request)
   end
+
+  it 'paginates all distribution changes with a stable inbox-scoped cursor' do
+    51.times { JrcHumanAssignmentPolicyEvent.create!(account: account, inbox: inbox, user: admin, previous_policy: {}, next_policy: input) }
+    get url.sub('/distribution', '/distribution-history'), headers: admin.create_new_auth_token
+    first = response.parsed_body
+    expect(first['data'].size).to eq(50)
+    expect(first['next_cursor']).to be_present
+    get url.sub('/distribution', '/distribution-history'), headers: admin.create_new_auth_token, params: { before: first['next_cursor'] }
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body['data'].size).to eq(1)
+    expect(response.parsed_body['data'].first['id']).not_to be_in(first['data'].pluck('id'))
+  end
 end

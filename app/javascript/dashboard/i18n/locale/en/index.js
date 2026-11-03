@@ -1,3 +1,4 @@
+import jrcMigrations from './jrcMigrations.json';
 import jrcOperator from './jrcOperator.json';
 import jrcApprovals from './jrcApprovals.json';
 import jrcContactCenter from './jrcContactCenter.json';
@@ -60,6 +61,7 @@ import jrcNicoHelpdesk from './jrcNicoHelpdesk.json';
 import jrcCustomerRelations from './jrcCustomerRelations.json';
 
 export default {
+  ...jrcMigrations,
   ...jrcOperator,
   ...relationship,
   ...jrcHome,

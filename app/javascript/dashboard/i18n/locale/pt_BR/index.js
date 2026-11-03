@@ -1,3 +1,4 @@
+import jrcMigrations from './jrcMigrations.json';
 import jrcOperator from './jrcOperator.json';
 import jrcApprovals from './jrcApprovals.json';
 import jrcHome from './jrcHome.json';
@@ -57,6 +58,7 @@ import yearInReview from './yearInReview.json';
 import relationshipSurveyModels from './relationshipSurveyModels.json';
 
 export default {
+  ...jrcMigrations,
   ...relationshipSurveyModels,
   ...jrcOperator,
   ...jrcApprovals,

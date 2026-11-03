@@ -7,7 +7,7 @@ class JrcRelationship::SurveyResponseEventJob < ApplicationJob
 
   def perform(event_id)
     event = JrcServiceDesk::TicketEvent.find_by(id: event_id, event_type: 'first_response_observed')
-    return unless event
+    return unless event && JrcRelationship::SurveyEventSource.operational?(event)
     ticket = event.ticket
     reopening = ticket.lifecycle_transitions.where(action: 'reopen').order(:id).last
     return if reopening && reopening.occurred_at > event.created_at

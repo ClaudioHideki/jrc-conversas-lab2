@@ -27,6 +27,106 @@ beforeEach(() => {
 });
 afterEach(() => wrapper?.unmount());
 
+it('keeps older distribution audit pages available after loading the first fifty changes', async () => {
+  api.distributionHistory
+    .mockResolvedValueOnce({
+      data: [{ id: 51, previous_policy: {}, next_policy: {} }],
+      next_cursor: 51,
+    })
+    .mockResolvedValueOnce({
+      data: [{ id: 1, previous_policy: {}, next_policy: {} }],
+      next_cursor: null,
+    });
+  wrapper = mountPolicy();
+  await flushPromises();
+  await wrapper
+    .get('[data-testid="load-distribution-history"]')
+    .trigger('click');
+  await flushPromises();
+  await wrapper
+    .get('[data-testid="distribution-history-more"]')
+    .trigger('click');
+  await flushPromises();
+  expect(api.distributionHistory).toHaveBeenLastCalledWith(
+    7,
+    expect.any(AbortSignal),
+    51
+  );
+  expect(
+    wrapper.get('[data-testid="distribution-history"]').findAll('li')
+  ).toHaveLength(2);
+});
+
+it('saves calendar, availability, waiting and fallback choices with the connection policy', async () => {
+  api.connectionDistribution.mockResolvedValue({
+    policy: null,
+    teams,
+    calendar: {
+      enabled: true,
+      timezone: 'America/Sao_Paulo',
+      weekly_schedule: [],
+    },
+  });
+  wrapper = mountPolicy();
+  await flushPromises();
+  await wrapper.get('[data-testid="distribution-enabled"]').setValue(true);
+  await wrapper.get('[data-team-id="11"]').setValue(true);
+  await wrapper.get('[data-testid="distribution-schedule"]').setValue('inbox');
+  await wrapper
+    .get('[data-testid="distribution-availability"]')
+    .setValue(false);
+  await wrapper
+    .get('[data-testid="distribution-capacity-enabled"]')
+    .setValue(false);
+  await wrapper
+    .get('[data-testid="distribution-fallback"]')
+    .setValue('default_team');
+  await wrapper
+    .get('[data-testid="distribution-fallback-team"]')
+    .setValue('22');
+  await wrapper.get('form').trigger('submit');
+  await flushPromises();
+  expect(api.saveConnectionDistribution).toHaveBeenCalledWith(
+    7,
+    expect.objectContaining({
+      schedule: 'inbox',
+      respect_availability: false,
+      capacity_enabled: false,
+      waiting_enabled: true,
+      fallback: 'default_team',
+      fallback_team_id: 22,
+    }),
+    expect.any(AbortSignal)
+  );
+  expect(wrapper.text()).toContain('America/Sao_Paulo');
+});
+
+it('requires a fallback team and does not offer a disabled calendar', async () => {
+  wrapper = mountPolicy();
+  await flushPromises();
+  expect(
+    wrapper
+      .get('[data-testid="distribution-schedule"] option[value="inbox"]')
+      .attributes('disabled')
+  ).toBeDefined();
+  await wrapper.get('[data-testid="distribution-enabled"]').setValue(true);
+  await wrapper.get('[data-team-id="11"]').setValue(true);
+  await wrapper
+    .get('[data-testid="distribution-fallback"]')
+    .setValue('default_team');
+  await wrapper.get('form').trigger('submit');
+  expect(api.saveConnectionDistribution).not.toHaveBeenCalled();
+});
+
+it('explains that an offline connection can save rules while waiting for reconnection', async () => {
+  wrapper = mountPolicy();
+  await wrapper.setProps({ connected: false });
+  await flushPromises();
+  expect(
+    wrapper.get('[data-testid="distribution-awaiting-connection"]').text()
+  ).toContain('reconnection');
+});
+
 it.each([
   [
     'en',
@@ -196,6 +296,12 @@ it('saves explicit authorized queues and capacity for this existing connection',
       mode: 'round_robin',
       team_ids: [11, 22],
       max_open: 6,
+      respect_availability: true,
+      capacity_enabled: true,
+      waiting_enabled: true,
+      schedule: 'always',
+      fallback: 'waiting',
+      fallback_team_id: null,
     },
     expect.any(AbortSignal)
   );
@@ -225,6 +331,12 @@ it('keeps the selected priority order when accessible move controls are used', a
       mode: 'priority',
       team_ids: [22, 11],
       max_open: 10,
+      respect_availability: true,
+      capacity_enabled: true,
+      waiting_enabled: true,
+      schedule: 'always',
+      fallback: 'waiting',
+      fallback_team_id: null,
     },
     expect.any(AbortSignal)
   );
@@ -250,6 +362,12 @@ it('requires exactly one queue for direct distribution and does not silently dro
       mode: 'direct',
       team_ids: [11],
       max_open: 10,
+      respect_availability: true,
+      capacity_enabled: true,
+      waiting_enabled: true,
+      schedule: 'always',
+      fallback: 'waiting',
+      fallback_team_id: null,
     },
     expect.any(AbortSignal)
   );
@@ -284,6 +402,12 @@ it('requires an explicit queue to enable distribution but can save an explicitly
       mode: 'round_robin',
       team_ids: [],
       max_open: 10,
+      respect_availability: true,
+      capacity_enabled: true,
+      waiting_enabled: true,
+      schedule: 'always',
+      fallback: 'waiting',
+      fallback_team_id: null,
     },
     expect.any(AbortSignal)
   );

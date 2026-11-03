@@ -5,7 +5,7 @@
       "TABS": {
         "OVERVIEW": "Visão geral",
         "DISTRIBUTION": "Distribuição",
-        "HISTORY": "Histórico de distribuição",
+        "HISTORY": "Histórico de conexões",
         "CONFIGURATION": "Configurações"
       },
       "PANEL_TITLE": "Estado atual da conexão",
@@ -46,12 +46,17 @@
         "DISABLED": "Desativado",
         "ERROR": "Precisa de atenção",
         "UNKNOWN": "Estado não confirmado"
-      }
+      },
+      "MY_CONNECTIONS": "Minhas conexões",
+      "CONNECTED_AT": "Conectado em",
+      "LAST_SYNC": "Última mensagem recebida sincronizada em",
+      "SAVE_NAME": "Salvar nome da conexão",
+      "ADVANCED_DISTRIBUTION": "Distribuição avançada da conta"
     },
     "DISTRIBUTION": {
       "TITLE": "Distribuição desta conexão",
       "GLOBAL_FALLBACK": "Nenhuma regra específica foi salva para esta conexão. As regras gerais de distribuição da conta continuam aplicáveis. Salve uma regra explicitamente desativada para desativar a distribuição automática desta conexão.",
-      "HELP": "Configure filas sem reconectar o WhatsApp. As alterações valem para novas conversas; conversas já atribuídas mantêm o responsável e o canal de resposta. A atribuição automática respeita agentes elegíveis online e a carga de atendimento da conta.",
+      "HELP": "Configure filas sem reconectar o WhatsApp. Alterações valem para novos encaminhamentos; atendimentos atribuídos mantêm responsável e canal. Disponibilidade, capacidade e destino alternativo seguem as opções salvas.",
       "RELOAD": "Recarregar distribuição salva",
       "ENABLED": "Ativar distribuição desta conexão",
       "MODE": "Tipo de distribuição",
@@ -91,13 +96,28 @@
       "INBOX_UNAVAILABLE": "Caixa indisponível",
       "ACTOR_SYSTEM": "Alteração pelo sistema",
       "HISTORY": "Consultar histórico de distribuição",
-      "HISTORY_HELP": "Últimas 50 alterações da distribuição desta conexão. Eventos de conexão e pareamento não estão incluídos.",
+      "HISTORY_HELP": "Alterações de distribuição, incluindo as regras anteriores e salvas. Carregue eventos anteriores para continuar a auditoria.",
       "HISTORY_LOADING": "Carregando histórico de distribuição…",
       "HISTORY_ERROR": "Não foi possível carregar o histórico de distribuição. Tente novamente.",
       "HISTORY_EMPTY": "Nenhuma alteração de distribuição registrada.",
       "ACTOR": "Alterado pelo usuário {id} da conta",
       "PREVIOUS": "Regra anterior",
-      "NEXT": "Regra salva"
+      "NEXT": "Regra salva",
+      "RULES": "Regras e horários",
+      "AVAILABILITY": "Respeitar disponibilidade do agente",
+      "CAPACITY_ENABLED": "Aplicar o limite de capacidade desta conexão",
+      "WAITING": "Manter atendimentos aguardando",
+      "SCHEDULE": "Horário de atendimento",
+      "ALWAYS": "Todos os dias e horários",
+      "INBOX_CALENDAR": "Usar calendário desta conexão",
+      "TIMEZONE": "Fuso horário",
+      "EDIT_CALENDAR": "Editar calendário desta conexão",
+      "FALLBACK": "Fora do horário ou sem agente elegível",
+      "DEFAULT_TEAM": "Encaminhar para a fila padrão",
+      "UNASSIGNED": "Deixar sem atribuição",
+      "NO_CAPACITY_LIMIT": "Sem limite nesta conexão",
+      "IGNORE_AVAILABILITY": "Presença online não obrigatória",
+      "AWAITING_CONNECTION": "Você pode salvar as regras. A distribuição de novos atendimentos aguarda a reconexão."
     },
     "ASSIGNMENT": {
       "TITLE": "Distribuição do atendimento humano",
@@ -190,6 +210,31 @@
     "LOADING_CONNECTIONS": "Carregando suas caixas de WhatsApp…",
     "NO_CONNECTIONS": "Nenhuma caixa de WhatsApp JRC está disponível para você nesta conta. Peça ao administrador para vincular a caixa e liberar seu acesso.",
     "SELECT_INBOX": "Caixa de entrada do WhatsApp",
-    "AGENT_CONNECTIONS_HELP": "A reconexão está disponível para membros autorizados da caixa. O administrador aprova a primeira conexão e qualquer troca do número da empresa."
+    "AGENT_CONNECTIONS_HELP": "A reconexão está disponível para membros autorizados da caixa. O administrador aprova a primeira conexão e qualquer troca do número da empresa.",
+    "HISTORY": {
+      "TITLE": "Histórico de conexões",
+      "HELP": "Solicitações registradas e mudanças de sessão observadas. Eventos anteriores à ativação deste histórico não são reconstruídos.",
+      "FILTER": "Tipo de evento",
+      "ALL": "Todos os eventos",
+      "EMPTY": "Nenhum evento registrado.",
+      "MORE": "Carregar eventos anteriores",
+      "REFERENCE": "Referência: {id}",
+      "EVENTS": {
+        "CONNECT_REQUESTED": "Conexão solicitada",
+        "RECONNECT_REQUESTED": "Reconexão solicitada",
+        "CONNECTED": "Conectado",
+        "RECONNECTED": "Reconectado",
+        "DISCONNECT_REQUESTED": "Desconexão solicitada",
+        "DISCONNECTED": "Desconectado",
+        "QR_EXPIRED": "Código de conexão expirou",
+        "NUMBER_MISMATCH": "Número divergente bloqueado",
+        "IDENTITY_CONFIRMED": "Número comercial aprovado",
+        "SESSION_FAILED": "Falha da sessão",
+        "DISTRIBUTION_FALLBACK": "Destino alternativo aplicado",
+        "CONFIGURATION_CHANGED": "Configuração alterada",
+        "PERMISSIONS_CHANGED": "Permissões de pareamento alteradas"
+      },
+      "TRANSITION": "De {before} para {after}"
+    }
   }
 }

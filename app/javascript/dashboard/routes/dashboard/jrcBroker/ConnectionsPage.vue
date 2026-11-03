@@ -8,6 +8,7 @@ import { createJrcBrokerApi } from 'dashboard/api/jrcBroker';
 import Button from 'dashboard/components-next/button/Button.vue';
 import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import ConnectionPanel from 'dashboard/components-next/jrc-broker/ConnectionPanel.vue';
+import ConnectionHistory from 'dashboard/components-next/jrc-broker/ConnectionHistory.vue';
 import HumanAssignmentPolicy from 'dashboard/components-next/jrc-broker/HumanAssignmentPolicy.vue';
 import ConnectionDistributionPolicy from 'dashboard/components-next/jrc-broker/ConnectionDistributionPolicy.vue';
 import OnboardingFlow from 'dashboard/components-next/jrc-broker/OnboardingFlow.vue';
@@ -20,6 +21,8 @@ const inboxes = ref([]);
 const connections = ref({});
 const selectedId = ref(null);
 const activeTab = ref('overview');
+const pageTab = ref('overview');
+const pageHistoryId = ref(null);
 const reconnected = ref(false);
 const dialog = ref(null);
 const onboardingDialog = ref(null);
@@ -41,7 +44,7 @@ const selectedInbox = computed(() =>
 const detailTabs = computed(() =>
   isAdmin.value
     ? ['overview', 'distribution', 'history', 'configuration']
-    : ['overview', 'configuration']
+    : ['overview', 'history', 'configuration']
 );
 const tabKeys = {
   overview: 'OVERVIEW',
@@ -109,6 +112,11 @@ const receiveReconnection = update => {
   reconnected.value = true;
   selectTab('overview', true);
 };
+const receiveRename = update => {
+  if (!currentUpdate(update)) return;
+  const inbox = inboxes.value.find(item => item.id === update.inboxId);
+  if (inbox) inbox.name = update.name;
+};
 const connectionStates = {
   CONNECTED: 'CONNECTED',
   CONNECTING: 'CONNECTING',
@@ -132,6 +140,18 @@ const canReconnect = id =>
 const numberSuffix = id => {
   const suffix = connections.value[id]?.health?.observedNumberSuffix;
   return typeof suffix === 'string' && /^\d{2,6}$/.test(suffix) ? suffix : null;
+};
+const phoneNumber = id => {
+  const value = connections.value[id]?.health?.phoneNumber;
+  return typeof value === 'string' && /^\+[1-9]\d{6,14}$/.test(value)
+    ? value
+    : null;
+};
+const sourceTime = (id, field) => {
+  const value = connections.value[id]?.health?.[field];
+  return typeof value === 'string' && Number.isFinite(Date.parse(value))
+    ? value
+    : null;
 };
 const checkedAt = id => {
   const value = connections.value[id]?.health?.checkedAt;
@@ -166,6 +186,8 @@ const clear = () => {
   inboxes.value = [];
   connections.value = {};
   selectedId.value = null;
+  pageHistoryId.value = null;
+  pageTab.value = 'overview';
   loading.value = false;
   error.value = '';
 };
@@ -287,6 +309,31 @@ onBeforeUnmount(() => {
           />
         </div>
       </header>
+      <nav
+        v-if="enabled"
+        :aria-label="t('JRC_BROKER.CONNECTIONS.TITLE')"
+        class="flex flex-wrap gap-2"
+      >
+        <Button
+          variant="outline"
+          :aria-pressed="pageTab === 'overview'"
+          :label="t('JRC_BROKER.CONNECTIONS.MY_CONNECTIONS')"
+          @click="pageTab = 'overview'"
+        />
+        <Button
+          v-if="isAdmin"
+          variant="outline"
+          :aria-pressed="pageTab === 'distribution'"
+          :label="t('JRC_BROKER.DETAILS.TABS.DISTRIBUTION')"
+          @click="pageTab = 'distribution'"
+        />
+        <Button
+          variant="outline"
+          :aria-pressed="pageTab === 'history'"
+          :label="t('JRC_BROKER.HISTORY.TITLE')"
+          @click="pageTab = 'history'"
+        />
+      </nav>
       <p v-if="!enabled" role="status">{{ t('JRC_BROKER.DISABLED') }}</p>
       <p v-else-if="loading && !inboxes.length" role="status">
         {{ t('JRC_BROKER.LOADING_CONNECTIONS') }}
@@ -301,7 +348,28 @@ onBeforeUnmount(() => {
         <p class="text-sm text-n-slate-11">
           {{ t('JRC_BROKER.AGENT_CONNECTIONS_HELP') }}
         </p>
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <template v-if="pageTab === 'history'">
+          <label class="flex flex-col gap-2 text-sm">
+            {{ t('JRC_BROKER.CONNECTION') }}
+            <select v-model="pageHistoryId">
+              <option :value="null">{{ t('JRC_BROKER.SELECT_INBOX') }}</option>
+              <option
+                v-for="inbox in inboxes"
+                :key="inbox.id"
+                :value="inbox.id"
+              >
+                {{ inbox.name }}
+              </option>
+            </select>
+          </label>
+          <ConnectionHistory
+            v-if="pageHistoryId"
+            :key="`${accountId}:${pageHistoryId}:${isAdmin}`"
+            :account-id="accountId"
+            :inbox-id="pageHistoryId"
+          />
+        </template>
+        <div v-else class="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <article
             v-for="inbox in inboxes"
             :key="inbox.id"
@@ -337,7 +405,10 @@ onBeforeUnmount(() => {
                   )
                 }}
               </span>
-              <p class="text-sm text-n-slate-11">
+              <p v-if="phoneNumber(inbox.id)" class="text-sm text-n-slate-11">
+                {{ phoneNumber(inbox.id) }}
+              </p>
+              <p v-else class="text-sm text-n-slate-11">
                 {{
                   numberSuffix(inbox.id)
                     ? t('JRC_BROKER.CONNECTIONS.NUMBER_SUFFIX', {
@@ -346,6 +417,37 @@ onBeforeUnmount(() => {
                     : t('JRC_BROKER.CONNECTIONS.NUMBER_UNAVAILABLE')
                 }}
               </p>
+              <p
+                v-if="sourceTime(inbox.id, 'connectedAt')"
+                data-testid="connection-connected-at"
+                class="text-sm text-n-slate-11"
+              >
+                {{ t('JRC_BROKER.CONNECTIONS.CONNECTED_AT') }}
+                <time :datetime="sourceTime(inbox.id, 'connectedAt')">{{
+                  formatTime(sourceTime(inbox.id, 'connectedAt'))
+                }}</time>
+              </p>
+              <p
+                v-if="sourceTime(inbox.id, 'lastSyncAt')"
+                data-testid="connection-last-sync"
+                class="text-sm text-n-slate-11"
+              >
+                {{ t('JRC_BROKER.CONNECTIONS.LAST_SYNC') }}
+                <time :datetime="sourceTime(inbox.id, 'lastSyncAt')">{{
+                  formatTime(sourceTime(inbox.id, 'lastSyncAt'))
+                }}</time>
+              </p>
+              <ConnectionDistributionPolicy
+                v-if="pageTab === 'distribution' && isAdmin"
+                :account-id="accountId"
+                :inbox-id="inbox.id"
+                :connected="
+                  connectionState(inbox.id) === 'UNKNOWN'
+                    ? null
+                    : connectionState(inbox.id) === 'CONNECTED'
+                "
+                presentation="summary"
+              />
               <p v-if="checkedAt(inbox.id)" class="text-sm text-n-slate-11">
                 {{ t('JRC_BROKER.CONNECTIONS.CHECKED_AT') }}
                 <time :datetime="checkedAt(inbox.id)">
@@ -434,12 +536,14 @@ onBeforeUnmount(() => {
               :key="`${accountId}:${selectedInbox.id}`"
               :account-id="accountId"
               :inbox-id="selectedInbox.id"
+              :connection-name="selectedInbox.name"
               :presentation="
                 activeTab === 'configuration' ? 'configuration' : 'overview'
               "
               @health="receiveHealth"
               @health-error="receiveHealthError"
               @reconnected="receiveReconnection"
+              @renamed="receiveRename"
             />
             <ConnectionDistributionPolicy
               v-if="isAdmin"
@@ -448,6 +552,17 @@ onBeforeUnmount(() => {
               :account-id="accountId"
               :inbox-id="selectedInbox.id"
               :presentation="distributionPresentation"
+              :connected="
+                connectionState(selectedInbox.id) === 'UNKNOWN'
+                  ? null
+                  : connectionState(selectedInbox.id) === 'CONNECTED'
+              "
+            />
+            <ConnectionHistory
+              v-if="activeTab === 'history'"
+              :key="`history:${accountId}:${selectedInbox.id}:${isAdmin}`"
+              :account-id="accountId"
+              :inbox-id="selectedInbox.id"
             />
           </div>
         </Dialog>
@@ -465,11 +580,15 @@ onBeforeUnmount(() => {
       >
         <OnboardingFlow :key="accountId" :account-id="accountId" />
       </Dialog>
-      <HumanAssignmentPolicy
+      <details
         v-if="enabled && isAdmin"
-        :key="accountId"
-        :account-id="accountId"
-      />
+        class="rounded-lg border border-n-weak p-4"
+      >
+        <summary class="cursor-pointer text-sm">
+          {{ t('JRC_BROKER.CONNECTIONS.ADVANCED_DISTRIBUTION') }}
+        </summary>
+        <HumanAssignmentPolicy :key="accountId" :account-id="accountId" />
+      </details>
     </div>
   </main>
 </template>

@@ -84,7 +84,10 @@ RSpec.describe JrcNico::Helpdesk::Kpis do
     prepare_shared_survey(channel: 'email')
     decision = JrcRelationship::SurveyEngine.new(source: ticket.reload, cycle_key: 'unrelated-prior-cycle', member: sd_account_user).call
     expect(decision.state).to eq('scheduled')
-    JrcRelationship::SurveyDispatchJob.perform_now(decision.survey_id)
+    with_modified_env(FRONTEND_URL: 'https://surveys.disposable-mail.invalid') do
+      JrcRelationship::SurveyDispatchJob.perform_now(decision.survey_id)
+    end
+    expect(decision.survey.reload).to have_attributes(status: 'queued', failure_code: nil)
     message = Message.find(decision.survey.reload.metadata.fetch('sent_message_id'))
     JrcRelationship::SurveyMessageExecution.new(message).perform { message.update!(source_id: 'synthetic-kpi-provider-receipt') }
     expect(decision.survey.reload.status).to eq('sent')
@@ -97,6 +100,7 @@ RSpec.describe JrcNico::Helpdesk::Kpis do
     lc_execute(ticket, 'resolve')
     lc_execute(ticket, 'close')
     cycle = "service-desk:ticket:#{ticket.id}:cycle:initial"
+    JrcRelationship::SurveyClosureJob.perform_now(ticket.class.name, ticket.id, cycle)
     decision = JrcRelationship::SurveyDispatchDecision.find_by!(account: sd_account, source_type: ticket.class.name,
                                                                 source_id: ticket.id, cycle_key: cycle)
     expect(decision.state).to eq('scheduled')

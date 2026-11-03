@@ -5,7 +5,7 @@
       "TABS": {
         "OVERVIEW": "Overview",
         "DISTRIBUTION": "Distribution",
-        "HISTORY": "Distribution history",
+        "HISTORY": "Connection history",
         "CONFIGURATION": "Settings"
       },
       "PANEL_TITLE": "Current connection state",
@@ -26,7 +26,7 @@
     "DISTRIBUTION": {
       "TITLE": "Distribution for this connection",
       "GLOBAL_FALLBACK": "No connection-specific rule has been saved. Existing account-wide distribution rules remain applicable. Save an explicitly disabled rule to disable automatic distribution for this connection.",
-      "HELP": "Configure queues without reconnecting WhatsApp. Changes apply to new conversations; existing assigned conversations keep their owner and reply channel. Automatic assignment respects eligible online agents and account workload.",
+      "HELP": "Configure queues without reconnecting WhatsApp. Changes apply to new requests; assigned conversations keep their owner and reply channel. Availability, capacity and fallback follow the saved options.",
       "RELOAD": "Reload saved distribution",
       "ENABLED": "Enable distribution for this connection",
       "MODE": "Distribution mode",
@@ -66,13 +66,28 @@
       "INBOX_UNAVAILABLE": "Inbox unavailable",
       "ACTOR_SYSTEM": "Changed by System",
       "HISTORY": "View distribution history",
-      "HISTORY_HELP": "Last 50 changes to this connection's distribution. Connection and pairing events are not included.",
+      "HISTORY_HELP": "Distribution changes, including the previous and saved rules. Load older events to continue the audit.",
       "HISTORY_LOADING": "Loading distribution history…",
       "HISTORY_ERROR": "Distribution history could not be loaded. Try again.",
       "HISTORY_EMPTY": "No distribution changes recorded.",
       "ACTOR": "Changed by account user {id}",
       "PREVIOUS": "Previous rule",
-      "NEXT": "Saved rule"
+      "NEXT": "Saved rule",
+      "RULES": "Rules and working hours",
+      "AVAILABILITY": "Respect agent availability",
+      "CAPACITY_ENABLED": "Apply the connection capacity limit",
+      "WAITING": "Keep conversations waiting",
+      "SCHEDULE": "Working hours",
+      "ALWAYS": "Every day, all hours",
+      "INBOX_CALENDAR": "Use this connection calendar",
+      "TIMEZONE": "Time zone",
+      "EDIT_CALENDAR": "Edit this connection calendar",
+      "FALLBACK": "Outside hours or no eligible agent",
+      "DEFAULT_TEAM": "Send to the default queue",
+      "UNASSIGNED": "Leave unassigned",
+      "NO_CAPACITY_LIMIT": "No connection limit",
+      "IGNORE_AVAILABILITY": "Agent presence is not required",
+      "AWAITING_CONNECTION": "You can save these rules. Incoming distribution is waiting for reconnection."
     },
     "CONNECTIONS": {
       "TITLE": "WhatsApp connections",
@@ -97,7 +112,12 @@
         "DISABLED": "Disabled",
         "ERROR": "Needs attention",
         "UNKNOWN": "State not confirmed"
-      }
+      },
+      "MY_CONNECTIONS": "My connections",
+      "CONNECTED_AT": "Connected at",
+      "LAST_SYNC": "Last inbound message synchronized at",
+      "SAVE_NAME": "Save connection name",
+      "ADVANCED_DISTRIBUTION": "Advanced account distribution"
     },
     "ASSIGNMENT": {
       "TITLE": "Human service distribution",
@@ -207,6 +227,31 @@
       "ASSIGN_AGENTS": "Assign agents",
       "VERIFY": "Check configuration",
       "DONE": "Setup complete"
+    },
+    "HISTORY": {
+      "TITLE": "Connection history",
+      "HELP": "Recorded requests and observed session changes. Events before this history was enabled are not reconstructed.",
+      "FILTER": "Event type",
+      "ALL": "All events",
+      "EMPTY": "No recorded events.",
+      "MORE": "Load older events",
+      "REFERENCE": "Reference: {id}",
+      "EVENTS": {
+        "CONNECT_REQUESTED": "Connection requested",
+        "RECONNECT_REQUESTED": "Reconnection requested",
+        "CONNECTED": "Connected",
+        "RECONNECTED": "Reconnected",
+        "DISCONNECT_REQUESTED": "Disconnection requested",
+        "DISCONNECTED": "Disconnected",
+        "QR_EXPIRED": "Connection code expired",
+        "NUMBER_MISMATCH": "Different number blocked",
+        "IDENTITY_CONFIRMED": "Business number approved",
+        "SESSION_FAILED": "Session failure",
+        "DISTRIBUTION_FALLBACK": "Distribution fallback applied",
+        "CONFIGURATION_CHANGED": "Connection settings changed",
+        "PERMISSIONS_CHANGED": "Pairing permissions changed"
+      },
+      "TRANSITION": "From {before} to {after}"
     }
   }
 }

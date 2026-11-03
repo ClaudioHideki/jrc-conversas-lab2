@@ -1,3 +1,4 @@
+require 'time'
 require 'uri'
 module JrcFlows; end
 
@@ -21,6 +22,8 @@ class JrcFlows::NativeEditorOperation
     'validate' => [:post, '/validate', 'flow:edit', false, false, true],
     'simulate' => [:post, '/simulate', 'flow:edit', true, true, true],
     'publish' => [:post, '/publish', 'flow:publish', false, true, true],
+    'executions' => [:get, '/executions', 'flow:executions:read', false, true, true],
+    'execution' => [:get, '', 'flow:executions:read', false, true, true],
     'versions' => [:get, '/versions-page', 'flow:read', false, true, true],
     'targets' => [:get, '/targets', 'flow:read', false, false, false],
     'bind' => [:post, '/bindings', 'flow:bind', false, false, true],
@@ -42,19 +45,21 @@ class JrcFlows::NativeEditorOperation
   }.freeze
   PAGINATED = %w[list versions http_catalog subflow_catalog ai_catalog resource_channels action_catalog].freeze
   TARGET_PATHS = {
+    'execution' => '/executions/%s',
     'handoff_catalog' => '/integrations/%s/attendance-catalog', 'local_handoff_catalog' => '/channels/%s/local-attendance-catalog',
     'action_catalog' => '/channels/%s/action-catalog', 'save_action_resource' => '/channels/%s/action-resources',
     'media_catalog' => '/channels/%s/media', 'revoke_media' => '/channels/%s/media'
   }.freeze
 
-  def self.resolve!(operation, id: nil, cursor: nil, target_id: nil, resource_id: nil)
+  def self.resolve!(operation, id: nil, cursor: nil, target_id: nil, resource_id: nil, query: nil)
     spec = TABLE[operation]
     raise Invalid unless spec
 
     verb, suffix, scope, graph_request, graph_response, needs_id = spec
     raise Invalid if needs_id ? !uuid?(id) : !id.nil?
 
-    path = operation_path(operation, id, suffix) + target_path(operation, target_id, resource_id) + pagination(operation, cursor)
+    path = operation_path(operation, id, suffix) + target_path(operation, target_id, resource_id) +
+           pagination(operation, cursor) + execution_query(operation, query)
     Operation.new(method: verb, path: path, scope: scope,
                   request_limit: graph_request ? GRAPH_LIMIT : CONTROL_LIMIT,
                   response_limit: graph_response ? GRAPH_LIMIT : CONTROL_LIMIT)
@@ -84,6 +89,26 @@ class JrcFlows::NativeEditorOperation
     return '' unless PAGINATED.include?(operation)
 
     '?pageSize=1' + (cursor ? "&cursor=#{cursor}" : '')
+  end
+
+  EXECUTION_FILTERS = %w[from to status channelId search nodeId cursor pageSize].freeze
+  def self.execution_query(operation, query)
+    raise Invalid if operation != 'executions' && query
+    return '' unless operation == 'executions'
+
+    raise Invalid unless query.is_a?(Hash) && (query.keys - EXECUTION_FILTERS).empty? && query.values.all? { |value| value.is_a?(String) }
+    raise Invalid unless %w[from to].all? { |key| query[key]&.match?(/\A\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z\z/) }
+    from, to = Time.iso8601(query.fetch('from')), Time.iso8601(query.fetch('to'))
+    raise Invalid unless to > from && to - from <= 31 * 86_400
+    raise Invalid if query['status'] && !%w[QUEUED RUNNING WAITING HANDOFF COMPLETED FAILED CANCELED UNKNOWN].include?(query['status'])
+    raise Invalid if %w[channelId search].any? { |key| query[key] && !uuid?(query[key]) }
+    raise Invalid if query['nodeId'] && !query['nodeId'].length.between?(1, 100)
+    raise Invalid if query['cursor'] && !/\A[A-Za-z0-9_-]{1,2048}\z/.match?(query['cursor'])
+    raise Invalid if query['pageSize'] && !/\A(?:[1-9]|[1-9][0-9]|100)\z/.match?(query['pageSize'])
+
+    '?' + URI.encode_www_form(query.sort)
+  rescue ArgumentError
+    raise Invalid
   end
 
   def self.graph_request?(method, path)

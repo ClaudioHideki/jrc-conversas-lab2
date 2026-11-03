@@ -27,8 +27,9 @@ class JrcNico::Helpdesk::KpiClosureEvidence
     cycle = close.payload.dig('sla', 'cycle_id')
     return unless cycle
 
-    JrcServiceDesk::SlaClock.where(account: @context.account, ticket_id: close.ticket_id, sla_cycle_id: cycle, kind: 'resolution', state: 'completed')
-                            .where('achieved_at <= ?', close.occurred_at).first
+    clock = JrcServiceDesk::SlaClock.where(account: @context.account, ticket_id: close.ticket_id, sla_cycle_id: cycle, kind: 'resolution', state: 'completed')
+                                  .where('achieved_at <= ?', close.occurred_at).first
+    clock if clock && JrcNico::SlaEvidence.new(@context.account).clock_visible?(clock)
   end
 
   def observation(cohort, values)

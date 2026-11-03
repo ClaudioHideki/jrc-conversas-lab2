@@ -61,6 +61,7 @@ class JrcNico::Helpdesk::Facts
     cycle = @ticket.sla_cycles.order(number: :desc).first
     clock = cycle&.sla_clocks&.find_by(kind: 'resolution')
     return unless clock
+    return unless JrcNico::SlaEvidence.new(@context.account).clock_visible?(clock)
 
     calendar = JrcServiceDesk::LifecycleClocks.verify_snapshot!(cycle.sla_snapshot)
     elapsed = clock.elapsed_seconds.to_f

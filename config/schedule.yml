@@ -149,3 +149,9 @@ jrc_broker_webhook_recovery_job:
   cron: '* * * * *'
   class: 'JrcBroker::WebhookRecoveryJob'
   queue: scheduled_jobs
+
+# No arbitrary storage paths: only uncommitted, server-owned migration reservations.
+jrc_migration_media_recovery_job:
+  cron: '*/5 * * * *'
+  class: 'JrcMigrations::MediaRecoveryJob'
+  queue: scheduled_jobs

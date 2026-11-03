@@ -6,6 +6,7 @@ on:
     branches:
       - codex/crm-backoffice-servicedesk-visual-20261101
       - codex/release-integrada-specs-20261102
+      - codex/lab2-integral-20261102
   pull_request:
     paths:
       - 'app/controllers/api/v1/accounts/crm/**'
@@ -68,7 +69,9 @@ jobs:
           bundler: 2.5.16
           bundler-cache: true
       - name: Preparar banco descartavel
-        run: bundle exec rails db:schema:load
+        run: |
+          bundle exec rails db:schema:load
+          bundle exec rails runner script/prepare_lab2_candidate_database.rb
       - name: Dependencias OCR e upgrade das duas migrations com dados legados
         run: bundle exec rails runner script/validate_backoffice_candidate.rb
       - name: Redis de concorrencia nativa
@@ -96,7 +99,9 @@ jobs:
       - name: Banco exclusivo para testes que confirmam dados em conexoes independentes
         env:
           POSTGRES_DATABASE: jrc_sd_bc_portal_concurrency_20261025_test
-        run: bundle exec rails db:create db:schema:load
+        run: |
+          bundle exec rails db:create db:schema:load
+          bundle exec rails runner script/prepare_lab2_candidate_database.rb
       - name: Regressao de concorrencia nativa do Service Desk
         env:
           POSTGRES_DATABASE: jrc_sd_bc_portal_concurrency_20261025_test
@@ -178,26 +183,52 @@ jobs:
           node-version-file: .nvmrc
       - name: pnpm e lockfile imutavel
         run: corepack enable && pnpm install --frozen-lockfile
+      - name: Contratos dos gates e migrations da release
+        run: node --test script/lab2_release_gates.test.mjs script/validate_migration_timestamps.test.mjs
       - name: Preparar banco descartavel sem fontes externas
-        run: bundle exec rails db:prepare
+        run: |
+          bundle exec rails db:schema:load
+          bundle exec rails runner script/prepare_lab2_candidate_database.rb
       - name: Regressao de contratos e integridade
         run: |
           bundle exec rspec spec/services/jrc_broker spec/requests/api/v1/accounts/jrc_broker*_spec.rb \
             spec/models/jrc_broker_webhook_obligation_spec.rb spec/jobs/jrc_broker_webhook_job_spec.rb \
             spec/models/jrc_human_assignment_policy_event_spec.rb \
+            spec/models/jrc_broker_connection_event_spec.rb spec/requests/jrc_connection_history_spec.rb \
             spec/services/jrc_campaigns/broker*_spec.rb spec/lib/webhooks/trigger_spec.rb \
             spec/services/jrc_human_assignment spec/requests/jrc_human_assignment_spec.rb \
             spec/requests/jrc_connection_distribution_spec.rb \
             spec/services/data_imports spec/requests/api/v1/accounts/data_import*_spec.rb \
+            spec/services/jrc_migrations spec/requests/jrc_migration*_spec.rb \
+            spec/services/jrc_nico/migration*_spec.rb spec/requests/jrc_nico_migration_browser_boundary_spec.rb \
+            spec/services/jrc_nico/native_browser_command_concurrency_spec.rb spec/requests/jrc_nico_native*concurrency_spec.rb \
             spec/services/jrc_flows spec/services/jrc_flow_effects spec/requests/jrc_flow*_spec.rb \
             --format progress --format json --out /tmp/broker-candidate-rspec.json
           ruby -rjson -e 'abort "Pending examples are not an approved gate" unless JSON.parse(File.read(ARGV.fetch(0))).fetch("summary").fetch("pending_count").zero?' /tmp/broker-candidate-rspec.json
+      - name: Importador com S3 MinIO fisico isolado
+        env:
+          JRC_IMPORT_MINIO_ENDPOINT: http://127.0.0.1:19000
+        run: |
+          set -euo pipefail
+          docker run -d --name lab2-import-minio --memory 256m -p 127.0.0.1:19000:9000 \
+            -e MINIO_ROOT_USER=disposable-import -e MINIO_ROOT_PASSWORD=disposable-import-only \
+            minio/minio@sha256:8ba4ed4d0eafe0458071c2ebe12301eaccd32b10d5299765db2b00ef2f1b382b server /data
+          trap 'docker rm -f -v lab2-import-minio' EXIT
+          for attempt in {1..30}; do
+            if curl --fail --silent "$JRC_IMPORT_MINIO_ENDPOINT/minio/health/ready"; then break; fi
+            sleep 1
+          done
+          curl --fail --silent "$JRC_IMPORT_MINIO_ENDPOINT/minio/health/ready"
+          bundle exec rspec spec/homologation/import_minio_check.rb \
+            --format progress --format json --out /tmp/broker-import-minio-rspec.json
       - name: Regressao frontend e editor compartilhado
         run: |
           pnpm exec vitest run app/javascript/dashboard/components-next/jrc-broker \
             app/javascript/dashboard/routes/dashboard/jrcBroker \
             app/javascript/dashboard/routes/dashboard/jrcFlows \
             app/javascript/dashboard/routes/dashboard/settings/data \
+            app/javascript/dashboard/components-next/jrcCopilot/specs/nicoModuleActions.spec.js \
+            app/javascript/dashboard/components-next/jrcCopilot/specs/nicoNativeCommand.spec.js \
             --maxWorkers=2 --no-file-parallelism
       - name: Sidekiq real e perda de ACK apos recibo persistido
         shell: bash
@@ -221,6 +252,7 @@ jobs:
           name: broker-import-candidate-results
           path: |
             /tmp/broker-candidate-rspec.json
+            /tmp/broker-import-minio-rspec.json
             /tmp/broker-first-worker.log
             /tmp/broker-second-worker.log
           if-no-files-found: ignore

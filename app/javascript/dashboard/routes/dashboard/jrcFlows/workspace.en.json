@@ -44,7 +44,9 @@
       "FLOW_HOST_FENCE_REQUIRED": "Host executor guards must be installed before activation.",
       "FLOW_BROKER_UNAVAILABLE": "The Broker did not respond. A pending revocation can be retried safely.",
       "DEFAULT": "The operation could not be completed. Check the connection and this account's authorization."
-    }
+    },
+    "INCLUDE_EXECUTION_HISTORY": "Consultar histórico de execuções nesta sessão",
+    "EXECUTION_HISTORY_PERMISSION": "Requer permissão de histórico na credencial do Broker. A consulta mostra metadados das caixas selecionadas e não permite reexecutar conversas."
   },
   "CONNECTIONS": "Conexões WhatsApp",
   "DISABLED": "Flows não está habilitado para esta conta.",

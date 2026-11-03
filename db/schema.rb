@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_11_02_110000) do
+ActiveRecord::Schema[7.1].define(version: 2026_11_02_202000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -1376,6 +1376,25 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_110000) do
     t.check_constraint "version > 0", name: "backoffice_document_positive_version"
   end
 
+  create_table "jrc_broker_connection_events", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "inbox_id", null: false
+    t.bigint "user_id"
+    t.string "event_type", null: false
+    t.string "event_key"
+    t.string "status_before"
+    t.string "status_after"
+    t.string "correlation_id"
+    t.datetime "occurred_at", null: false
+    t.jsonb "metadata", default: {}, null: false
+    t.datetime "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.index ["account_id", "inbox_id", "event_key"], name: "jrc_connection_events_dedupe", unique: true
+    t.index ["account_id", "inbox_id", "id"], name: "jrc_connection_events_history"
+    t.index ["account_id"], name: "index_jrc_broker_connection_events_on_account_id"
+    t.index ["inbox_id"], name: "index_jrc_broker_connection_events_on_inbox_id"
+    t.index ["user_id"], name: "index_jrc_broker_connection_events_on_user_id"
+  end
+
   create_table "jrc_broker_inbox_bindings", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.bigint "inbox_id", null: false
@@ -1383,6 +1402,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_110000) do
     t.uuid "instance_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.jsonb "connection_state", default: {}, null: false
     t.index ["account_id", "inbox_id"], name: "jrc_broker_binding_tenant_unique", unique: true
     t.index ["account_id", "integration_id"], name: "jrc_broker_connection_unique", unique: true
     t.index ["inbox_id"], name: "index_jrc_broker_inbox_bindings_on_inbox_id", unique: true
@@ -3183,7 +3203,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_110000) do
     t.index ["nonce"], name: "index_jrc_flow_native_session_handles_on_nonce", unique: true
     t.index ["public_id"], name: "index_jrc_flow_native_session_handles_on_public_id", unique: true
     t.index ["user_id"], name: "index_jrc_flow_native_session_handles_on_user_id"
-    t.check_constraint "registration_revision > 0 AND jsonb_typeof(inbox_ids) = 'array'::text AND jsonb_array_length(inbox_ids) <= 100 AND jsonb_typeof(scopes) = 'array'::text AND scopes <@ '[\"flow:read\", \"flow:edit\", \"flow:publish\", \"flow:bind\"]'::jsonb", name: "jrc_flow_handle_scope_bound"
+    t.check_constraint "registration_revision > 0 AND jsonb_typeof(inbox_ids) = 'array'::text AND jsonb_array_length(inbox_ids) <= 100 AND jsonb_typeof(scopes) = 'array'::text AND scopes <@ '[\"flow:read\", \"flow:edit\", \"flow:publish\", \"flow:bind\", \"flow:executions:read\"]'::jsonb", name: "jrc_flow_handle_scope_bound"
   end
 
   create_table "jrc_flow_ownership_effects", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -3363,6 +3383,84 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_110000) do
     t.index ["inbox_id"], name: "index_jrc_human_assignment_policy_events_on_inbox_id"
     t.index ["user_id"], name: "index_jrc_human_assignment_policy_events_on_user_id"
     t.check_constraint "inbox_id IS NOT NULL OR NOT (next_policy ->> 'scope'::text) IS DISTINCT FROM 'GLOBAL_ACCOUNT'::text", name: "jrc_human_policy_global_account_scope"
+  end
+
+  create_table "jrc_migration_batches", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "created_by_id", null: false
+    t.bigint "accepted_by_id"
+    t.string "source", null: false
+    t.string "domain", null: false
+    t.string "status", default: "staged", null: false
+    t.integer "version", default: 1, null: false
+    t.jsonb "field_mapping", default: {}, null: false
+    t.string "source_digest", null: false
+    t.string "file_name"
+    t.jsonb "summary", default: {}, null: false
+    t.jsonb "reconciliation", default: {}, null: false
+    t.datetime "executed_at"
+    t.datetime "accepted_at"
+    t.text "acceptance_note"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["accepted_by_id"], name: "index_jrc_migration_batches_on_accepted_by_id"
+    t.index ["account_id", "id"], name: "index_jrc_migration_batches_on_account_id_and_id", unique: true
+    t.index ["account_id"], name: "index_jrc_migration_batches_on_account_id"
+    t.index ["created_by_id"], name: "index_jrc_migration_batches_on_created_by_id"
+  end
+
+  create_table "jrc_migration_items", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "batch_id", null: false
+    t.string "legacy_id", null: false
+    t.jsonb "raw_data", null: false
+    t.jsonb "normalized_data", default: {}, null: false
+    t.string "source_digest", null: false
+    t.string "decision"
+    t.string "status", default: "staged", null: false
+    t.string "error_code"
+    t.jsonb "validation_errors", default: [], null: false
+    t.bigint "target_id"
+    t.string "target_digest"
+    t.jsonb "before_data", default: {}, null: false
+    t.datetime "migrated_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_migration_items_on_account_id"
+    t.index ["batch_id", "legacy_id"], name: "index_jrc_migration_items_on_batch_id_and_legacy_id", unique: true
+  end
+
+  create_table "jrc_migration_mappings", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "batch_id", null: false
+    t.string "source", null: false
+    t.string "domain", null: false
+    t.string "legacy_id", null: false
+    t.bigint "target_id", null: false
+    t.string "source_digest", null: false
+    t.string "target_digest", null: false
+    t.datetime "source_updated_at", null: false
+    t.datetime "accepted_at"
+    t.bigint "accepted_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["accepted_by_id"], name: "index_jrc_migration_mappings_on_accepted_by_id"
+    t.index ["account_id", "domain", "target_id"], name: "jrc_migration_target"
+    t.index ["account_id", "source", "domain", "legacy_id"], name: "jrc_migration_source_identity", unique: true
+    t.index ["account_id"], name: "index_jrc_migration_mappings_on_account_id"
+  end
+
+  create_table "jrc_migration_events", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "batch_id", null: false
+    t.bigint "user_id"
+    t.string "action", null: false
+    t.jsonb "metadata", default: {}, null: false
+    t.datetime "occurred_at", null: false
+    t.datetime "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.index ["account_id", "batch_id", "id"], name: "jrc_migration_event_history"
+    t.index ["account_id"], name: "index_jrc_migration_events_on_account_id"
+    t.index ["user_id"], name: "index_jrc_migration_events_on_user_id"
   end
 
   create_table "jrc_nico_broker_send_operations", force: :cascade do |t|
@@ -6232,6 +6330,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_110000) do
   add_foreign_key "jrc_backoffice_document_versions", "accounts"
   add_foreign_key "jrc_backoffice_document_versions", "jrc_crm_backoffice_requests", column: "backoffice_request_id"
   add_foreign_key "jrc_backoffice_document_versions", "users", column: "uploaded_by_id"
+  add_foreign_key "jrc_broker_connection_events", "accounts", on_delete: :cascade
+  add_foreign_key "jrc_broker_connection_events", "inboxes", on_delete: :cascade
+  add_foreign_key "jrc_broker_connection_events", "users", on_delete: :nullify
   add_foreign_key "jrc_broker_inbox_bindings", "inboxes", column: ["account_id", "inbox_id"], primary_key: ["account_id", "id"], on_delete: :cascade
   add_foreign_key "jrc_broker_inbox_bindings", "jrc_broker_integrations", column: "account_id", primary_key: "account_id", on_delete: :cascade
   add_foreign_key "jrc_broker_inbox_grants", "account_users", column: ["account_id", "user_id"], primary_key: ["account_id", "user_id"], on_delete: :cascade
@@ -6503,6 +6604,17 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_110000) do
   add_foreign_key "jrc_human_assignment_policy_events", "accounts", on_delete: :cascade
   add_foreign_key "jrc_human_assignment_policy_events", "inboxes", on_delete: :cascade
   add_foreign_key "jrc_human_assignment_policy_events", "users", on_delete: :nullify
+  add_foreign_key "jrc_migration_batches", "accounts"
+  add_foreign_key "jrc_migration_batches", "users", column: "accepted_by_id"
+  add_foreign_key "jrc_migration_batches", "users", column: "created_by_id"
+  add_foreign_key "jrc_migration_items", "accounts"
+  add_foreign_key "jrc_migration_items", "jrc_migration_batches", column: ["account_id", "batch_id"], primary_key: ["account_id", "id"]
+  add_foreign_key "jrc_migration_mappings", "accounts"
+  add_foreign_key "jrc_migration_mappings", "jrc_migration_batches", column: ["account_id", "batch_id"], primary_key: ["account_id", "id"]
+  add_foreign_key "jrc_migration_mappings", "users", column: "accepted_by_id"
+  add_foreign_key "jrc_migration_events", "accounts", on_delete: :cascade
+  add_foreign_key "jrc_migration_events", "jrc_migration_batches", column: ["account_id", "batch_id"], primary_key: ["account_id", "id"], on_delete: :cascade
+  add_foreign_key "jrc_migration_events", "users", on_delete: :nullify
   add_foreign_key "jrc_nico_broker_send_operations", "accounts", on_delete: :cascade
   add_foreign_key "jrc_nico_broker_send_operations", "conversations", on_delete: :cascade
   add_foreign_key "jrc_nico_broker_send_operations", "inboxes", on_delete: :cascade
@@ -7471,9 +7583,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_110000) do
     ALTER TABLE "jrc_flow_native_session_handles" DROP CONSTRAINT "jrc_flow_handle_scope_bound";
   JRC_SCHEMA_SQL_0af1897fac12
 
-  execute <<~'JRC_SCHEMA_SQL_719494dd098e'
-    ALTER TABLE "jrc_flow_native_session_handles" ADD CONSTRAINT "jrc_flow_handle_scope_bound" CHECK (((registration_revision > 0) AND (jsonb_typeof(inbox_ids) = 'array'::text) AND (jsonb_array_length(inbox_ids) <= 100) AND (jsonb_typeof(scopes) = 'array'::text) AND (scopes <@ '["flow:read", "flow:edit", "flow:publish", "flow:bind"]'::jsonb)));
-  JRC_SCHEMA_SQL_719494dd098e
+  execute <<~'JRC_SCHEMA_SQL_4abd6f2a5359'
+    ALTER TABLE "jrc_flow_native_session_handles" ADD CONSTRAINT "jrc_flow_handle_scope_bound" CHECK (((registration_revision > 0) AND (jsonb_typeof(inbox_ids) = 'array'::text) AND (jsonb_array_length(inbox_ids) <= 100) AND (jsonb_typeof(scopes) = 'array'::text) AND (scopes <@ '["flow:read", "flow:edit", "flow:publish", "flow:bind", "flow:executions:read"]'::jsonb)));
+  JRC_SCHEMA_SQL_4abd6f2a5359
 
   execute <<~'JRC_SCHEMA_SQL_3c8fa9168141'
     ALTER TABLE "jrc_flow_ownership_effects" DROP CONSTRAINT "jrc_ownership_effect_valid";
@@ -9136,4 +9248,45 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_110000) do
   execute <<~'JRC_SCHEMA_SQL_0df134023ee3'
     CREATE TRIGGER jrc_human_policy_immutable_truncate BEFORE TRUNCATE ON jrc_human_assignment_policy_events FOR EACH STATEMENT EXECUTE FUNCTION jrc_human_policy_immutable_guard();
   JRC_SCHEMA_SQL_0df134023ee3
+  execute <<~'JRC_SCHEMA_SQL_9a7c1bf6b1f5'
+    CREATE OR REPLACE FUNCTION public.jrc_connection_event_immutable_guard()
+     RETURNS trigger
+     LANGUAGE plpgsql
+     SET search_path TO 'pg_catalog', 'public'
+    AS $function$
+    BEGIN
+      IF TG_OP = 'DELETE' AND pg_trigger_depth() > 1 AND (
+        NOT EXISTS (SELECT 1 FROM public.accounts WHERE id = OLD.account_id) OR
+        NOT EXISTS (SELECT 1 FROM public.inboxes WHERE id = OLD.inbox_id)
+      ) THEN RETURN OLD;
+      ELSIF TG_OP = 'UPDATE' AND pg_trigger_depth() > 1 AND OLD.user_id IS NOT NULL AND NEW.user_id IS NULL AND
+        (to_jsonb(NEW) - 'user_id') IS NOT DISTINCT FROM (to_jsonb(OLD) - 'user_id') AND
+        NOT EXISTS (SELECT 1 FROM public.users WHERE id = OLD.user_id)
+      THEN RETURN NEW;
+      END IF;
+      RAISE EXCEPTION 'Connection history is append-only' USING ERRCODE = '23514';
+    END;
+    $function$
+  JRC_SCHEMA_SQL_9a7c1bf6b1f5
+  execute <<~'JRC_SCHEMA_SQL_2ce7f4f547fa'
+    CREATE TRIGGER jrc_connection_event_immutable_rows BEFORE DELETE OR UPDATE ON jrc_broker_connection_events FOR EACH ROW EXECUTE FUNCTION jrc_connection_event_immutable_guard();
+  JRC_SCHEMA_SQL_2ce7f4f547fa
+  execute <<~'JRC_SCHEMA_SQL_aeac535f8e23'
+    CREATE TRIGGER jrc_connection_event_immutable_truncate BEFORE TRUNCATE ON jrc_broker_connection_events FOR EACH STATEMENT EXECUTE FUNCTION jrc_connection_event_immutable_guard();
+  JRC_SCHEMA_SQL_aeac535f8e23
+  execute <<~'JRC_SCHEMA_SQL_6635904880b1'
+    CREATE OR REPLACE FUNCTION public.jrc_migration_event_guard()
+     RETURNS trigger
+     LANGUAGE plpgsql
+     SET search_path TO 'pg_catalog', 'public'
+    AS $function$ BEGIN IF TG_OP = 'DELETE' AND pg_trigger_depth() > 1 AND ( NOT EXISTS (SELECT 1 FROM public.accounts WHERE id = OLD.account_id) OR NOT EXISTS (SELECT 1 FROM public.jrc_migration_batches WHERE id = OLD.batch_id) ) THEN RETURN OLD; ELSIF TG_OP = 'UPDATE' AND pg_trigger_depth() > 1 AND OLD.user_id IS NOT NULL AND NEW.user_id IS NULL AND (to_jsonb(NEW) - 'user_id') IS NOT DISTINCT FROM (to_jsonb(OLD) - 'user_id') AND NOT EXISTS (SELECT 1 FROM public.users WHERE id = OLD.user_id) THEN RETURN NEW; END IF; RAISE EXCEPTION 'Migration history is append-only' USING ERRCODE = '23514'; END; $function$
+  JRC_SCHEMA_SQL_6635904880b1
+
+  execute <<~'JRC_SCHEMA_SQL_9da8f3a6aa81'
+    CREATE TRIGGER jrc_migration_event_rows BEFORE DELETE OR UPDATE ON jrc_migration_events FOR EACH ROW EXECUTE FUNCTION jrc_migration_event_guard();
+  JRC_SCHEMA_SQL_9da8f3a6aa81
+
+  execute <<~'JRC_SCHEMA_SQL_b780ed2b2bc1'
+    CREATE TRIGGER jrc_migration_event_truncate BEFORE TRUNCATE ON jrc_migration_events FOR EACH STATEMENT EXECUTE FUNCTION jrc_migration_event_guard();
+  JRC_SCHEMA_SQL_b780ed2b2bc1
 end

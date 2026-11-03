@@ -3,8 +3,8 @@
 # Recheck the existing native author at creation and at the provider boundary.
 # Possession of a signed_id never supplies rights to another SD blob owner.
 class JrcServiceDesk::OutboundAttachments
-  def self.authorize_blob!(blob, user:)
-    access = JrcServiceDesk::ProtectedBlobAccess.new(blob: blob, user: user)
+  def self.authorize_blob!(blob, user:, account_id: nil)
+    access = JrcServiceDesk::ProtectedBlobAccess.new(blob: blob, user: user, account_id: account_id)
     return unless access.protected?
     return if access.allowed?
 
@@ -17,7 +17,7 @@ class JrcServiceDesk::OutboundAttachments
     user = message.sender if message.sender.is_a?(User)
     user ||= execution_user(message.account_id)
     message.attachments.each do |attachment|
-      authorize_blob!(attachment.file.blob, user: user) if attachment.file.attached?
+      authorize_blob!(attachment.file.blob, user: user, account_id: message.account_id) if attachment.file.attached?
     end
   end
 

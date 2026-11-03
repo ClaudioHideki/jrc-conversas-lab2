@@ -81,11 +81,43 @@ export const createJrcBrokerApi = accountId => {
         signal
       ),
     connectionDistribution: (id, signal) =>
-      request('get', inboxPath(id, 'distribution'), undefined, undefined, signal),
+      request(
+        'get',
+        inboxPath(id, 'distribution'),
+        undefined,
+        undefined,
+        signal
+      ),
     saveConnectionDistribution: (id, data, signal) =>
       request('put', inboxPath(id, 'distribution'), data, undefined, signal),
-    distributionHistory: (id, signal) =>
-      request('get', inboxPath(id, 'distribution-history'), undefined, undefined, signal),
+    distributionHistory: (id, signal, before) =>
+      request(
+        'get',
+        `${inboxPath(id, 'distribution-history')}${before ? `?before=${encodeURIComponent(before)}` : ''}`,
+        undefined,
+        undefined,
+        signal
+      ),
+    renameConnection: (id, name, signal) =>
+      request(
+        'patch',
+        inboxPath(id, 'configuration'),
+        { name },
+        undefined,
+        signal
+      ),
+    connectionHistory: (id, filters, signal) => {
+      const query = new URLSearchParams();
+      if (filters.before) query.set('before', filters.before);
+      if (filters.event_type) query.set('event_type', filters.event_type);
+      return request(
+        'get',
+        `${inboxPath(id, 'history')}?${query}`,
+        undefined,
+        undefined,
+        signal
+      );
+    },
     grants: (id, signal) =>
       request('get', inboxPath(id, 'grants'), undefined, undefined, signal),
     updateGrants: (id, userIds, signal) =>

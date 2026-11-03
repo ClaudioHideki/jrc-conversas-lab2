@@ -28,7 +28,8 @@ class JrcNico::ConversationRadar
   private
 
   def active_scope
-    scope = Conversations::PermissionFilterService.new(@access.account.conversations, @access.user, @access.account).perform
+    relation = JrcNico::MigrationVisibility.scope(@access.account.conversations, account: @access.account)
+    scope = Conversations::PermissionFilterService.new(relation, @access.user, @access.account).perform
     if @arguments['inbox_id']
       inbox = @access.account.inboxes.find_by(id: @arguments['inbox_id'])
       raise Pundit::NotAuthorizedError unless inbox && @access.inbox_visible?(inbox)

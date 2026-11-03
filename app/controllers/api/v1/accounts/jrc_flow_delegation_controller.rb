@@ -36,8 +36,9 @@ class Api::V1::Accounts::JrcFlowDelegationController < Api::V1::Accounts::BaseCo
 
   def editor
     render json: JrcFlows::NativeEditor.new(**identity, handle_id: params[:session_id]).call!(
-      operation: params[:editor_operation], id: params[:id], cursor: request.query_parameters['cursor'],
+      operation: params[:editor_operation], id: params[:id], cursor: params[:editor_operation] == 'executions' ? nil : request.query_parameters['cursor'],
       target_id: params[:target_id], resource_id: params[:resource_id],
+      query: params[:editor_operation] == 'executions' ? request.query_parameters : nil,
       body: request.get? ? nil : request.request_parameters,
       idempotency_key: params[:editor_operation] == 'create' ? request.headers['Idempotency-Key'] : nil
     )
@@ -89,7 +90,11 @@ class Api::V1::Accounts::JrcFlowDelegationController < Api::V1::Accounts::BaseCo
     response.headers['Cache-Control'] = 'no-store'
     response.headers['Pragma'] = 'no-cache'
     paginated = params[:action] == 'editor' && JrcFlows::NativeEditorOperation::PAGINATED.include?(params[:editor_operation])
-    allowed_query = paginated ? %w[cursor] : []
+    allowed_query = if params[:action] == 'editor' && params[:editor_operation] == 'executions'
+                      JrcFlows::NativeEditorOperation::EXECUTION_FILTERS
+                    else
+                      paginated ? %w[cursor] : []
+                    end
     raise JrcFlows::NativeClient::Error.new('FLOW_INVALID_REQUEST', status: 400) unless (request.query_parameters.keys - allowed_query).empty?
 
     if request.headers['X-Organization-Id'] || request.headers['X-JRC-Organization-Id'] || request.headers['X-JRC-API-Key']

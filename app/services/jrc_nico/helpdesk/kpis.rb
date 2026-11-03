@@ -110,7 +110,8 @@ class JrcNico::Helpdesk::Kpis
 
     clocks = JrcServiceDesk::SlaClock.where(account: @context.account, ticket_id: @ids, kind: 'resolution', due_at: @from...@until)
                                      .where('due_at <= ?', [@until, Time.current].min)
-                                     .where("state = 'running' OR (state = 'completed' AND achieved_at > due_at)").to_a
+                                     .where("state = 'running' OR (state = 'completed' AND achieved_at > due_at)")
+    clocks = JrcNico::SlaEvidence.new(@context.account).clocks(clocks).to_a
     matched = clocks.count { |clock| prealert_delivered?(clock) }
     metric('K4', numerator: matched, denominator: clocks.size,
                  extra: { 'clock_ids' => clocks.map(&:id), 'queued_is_delivery' => false })

@@ -7,6 +7,7 @@ import Button from 'dashboard/components-next/button/Button.vue';
 const props = defineProps({
   accountId: { type: [Number, String], required: true },
   inboxId: { type: Number, required: true },
+  connected: { type: Boolean, default: null },
   presentation: {
     type: String,
     default: 'all',
@@ -19,6 +20,13 @@ const hasPolicy = ref(false);
 const savedPolicy = ref(null);
 const mode = ref('round_robin');
 const maxOpen = ref(10);
+const respectAvailability = ref(true);
+const capacityEnabled = ref(true);
+const waitingEnabled = ref(true);
+const schedule = ref('always');
+const fallback = ref('waiting');
+const fallbackTeamId = ref(null);
+const calendar = ref(null);
 const teamIds = ref([]);
 const teams = ref([]);
 const effectiveFrom = ref(null);
@@ -29,6 +37,7 @@ const history = ref([]);
 const historyVisible = ref(false);
 const historyBusy = ref(false);
 const historyError = ref(false);
+const historyCursor = ref(null);
 let controller;
 let generation = 0;
 let api;
@@ -41,7 +50,11 @@ const valid = computed(
     maxOpen.value <= 100 &&
     (!enabled.value || teamIds.value.length > 0) &&
     (mode.value !== 'direct' || teamIds.value.length === 1) &&
-    teamIds.value.every(id => teams.value.some(team => team.id === id))
+    teamIds.value.every(id => teams.value.some(team => team.id === id)) &&
+    (schedule.value !== 'inbox' || calendar.value?.enabled === true) &&
+    (fallback.value !== 'waiting' || waitingEnabled.value) &&
+    (fallback.value !== 'default_team' ||
+      teams.value.some(team => team.id === fallbackTeamId.value))
 );
 const teamName = id =>
   teams.value.find(team => team.id === id)?.name ||
@@ -88,14 +101,35 @@ const policySummary = policy => {
       capacity: policy.max_open,
     });
   }
-  return t('JRC_BROKER.DISTRIBUTION.POLICY_SUMMARY', {
+  const distribution = t('JRC_BROKER.DISTRIBUTION.POLICY_SUMMARY', {
     state,
     mode: modeLabel(policy.mode),
     teams:
       (policy.team_ids || []).map(teamName).join(', ') ||
       t('JRC_BROKER.DISTRIBUTION.NO_SELECTION'),
-    capacity: policy.max_open,
+    capacity:
+      policy.capacity_enabled === false
+        ? t('JRC_BROKER.DISTRIBUTION.NO_CAPACITY_LIMIT')
+        : policy.max_open,
   });
+  const fallbackLabel = {
+    waiting: t('JRC_BROKER.DISTRIBUTION.WAITING'),
+    default_team: t('JRC_BROKER.DISTRIBUTION.DEFAULT_TEAM'),
+    unassigned: t('JRC_BROKER.DISTRIBUTION.UNASSIGNED'),
+  }[policy.fallback || 'waiting'];
+  const rules = [
+    policy.schedule === 'inbox'
+      ? t('JRC_BROKER.DISTRIBUTION.INBOX_CALENDAR')
+      : t('JRC_BROKER.DISTRIBUTION.ALWAYS'),
+    policy.respect_availability === false
+      ? t('JRC_BROKER.DISTRIBUTION.IGNORE_AVAILABILITY')
+      : t('JRC_BROKER.DISTRIBUTION.AVAILABILITY'),
+    fallbackLabel,
+    policy.fallback_team_id ? teamName(policy.fallback_team_id) : '',
+  ]
+    .filter(Boolean)
+    .join('; ');
+  return `${distribution}; ${rules}`;
 };
 const apply = policy => {
   savedPolicy.value = policy;
@@ -103,6 +137,12 @@ const apply = policy => {
   enabled.value = policy?.enabled === true;
   mode.value = policy?.mode || 'round_robin';
   maxOpen.value = policy?.max_open ?? 10;
+  respectAvailability.value = policy?.respect_availability !== false;
+  capacityEnabled.value = policy?.capacity_enabled !== false;
+  waitingEnabled.value = policy?.waiting_enabled !== false;
+  schedule.value = policy?.schedule || 'always';
+  fallback.value = policy?.fallback || 'waiting';
+  fallbackTeamId.value = policy?.fallback_team_id ?? null;
   teamIds.value = [...(policy?.team_ids || [])];
   effectiveFrom.value = validTime(policy?.effective_from)
     ? policy.effective_from
@@ -115,7 +155,9 @@ const clear = () => {
   busy.value = false;
   feedback.value = '';
   teams.value = [];
+  calendar.value = null;
   history.value = [];
+  historyCursor.value = null;
   historyVisible.value = false;
   historyBusy.value = false;
   historyError.value = false;
@@ -142,6 +184,7 @@ const load = async () => {
     );
     if (current !== generation) return;
     teams.value = result.teams;
+    calendar.value = result.calendar;
     apply(result.policy);
     loaded.value = true;
   } catch (error) {
@@ -163,6 +206,13 @@ const save = async () => {
         mode: mode.value,
         team_ids: [...teamIds.value],
         max_open: maxOpen.value,
+        respect_availability: respectAvailability.value,
+        capacity_enabled: capacityEnabled.value,
+        waiting_enabled: waitingEnabled.value,
+        schedule: schedule.value,
+        fallback: fallback.value,
+        fallback_team_id:
+          fallback.value === 'default_team' ? fallbackTeamId.value : null,
       },
       controller.signal
     );
@@ -189,20 +239,24 @@ const moveTeam = (index, offset) => {
   [ordered[index], ordered[target]] = [ordered[target], ordered[index]];
   teamIds.value = ordered;
 };
-const loadHistory = async () => {
+const loadHistory = async (more = false) => {
   if (!loaded.value || busy.value || historyBusy.value) return;
   const current = generation;
   historyVisible.value = true;
   historyBusy.value = true;
   historyError.value = false;
-  history.value = [];
+  if (!more) history.value = [];
   try {
-    const result = await api.distributionHistory(
-      props.inboxId,
-      controller.signal
-    );
+    const result = more
+      ? await api.distributionHistory(
+          props.inboxId,
+          controller.signal,
+          historyCursor.value
+        )
+      : await api.distributionHistory(props.inboxId, controller.signal);
     if (current !== generation) return;
-    history.value = result.data;
+    history.value = [...history.value, ...result.data];
+    historyCursor.value = result.next_cursor;
   } catch (error) {
     if (current !== generation) return;
     if ([401, 403, 404].includes(error?.response?.status))
@@ -233,6 +287,13 @@ onBeforeUnmount(clear);
           ? t('JRC_BROKER.DISTRIBUTION.HISTORY_HELP')
           : t('JRC_BROKER.DISTRIBUTION.HELP')
       }}
+    </p>
+    <p
+      v-if="connected === false"
+      data-testid="distribution-awaiting-connection"
+      class="text-sm text-n-amber-11"
+    >
+      {{ t('JRC_BROKER.DISTRIBUTION.AWAITING_CONNECTION') }}
     </p>
     <p
       v-if="loaded && !hasPolicy"
@@ -361,6 +422,86 @@ onBeforeUnmount(clear);
             required
           />
         </label>
+        <fieldset
+          class="flex flex-col gap-3 rounded-lg border border-n-weak p-4"
+        >
+          <legend>{{ t('JRC_BROKER.DISTRIBUTION.RULES') }}</legend>
+          <label class="flex items-center gap-2 text-sm">
+            <input
+              v-model="respectAvailability"
+              data-testid="distribution-availability"
+              type="checkbox"
+            />
+            {{ t('JRC_BROKER.DISTRIBUTION.AVAILABILITY') }}
+          </label>
+          <label class="flex items-center gap-2 text-sm">
+            <input
+              v-model="capacityEnabled"
+              data-testid="distribution-capacity-enabled"
+              type="checkbox"
+            />
+            {{ t('JRC_BROKER.DISTRIBUTION.CAPACITY_ENABLED') }}
+          </label>
+          <label class="flex items-center gap-2 text-sm">
+            <input
+              v-model="waitingEnabled"
+              data-testid="distribution-waiting"
+              type="checkbox"
+            />
+            {{ t('JRC_BROKER.DISTRIBUTION.WAITING') }}
+          </label>
+          <label class="flex flex-col gap-2 text-sm">
+            {{ t('JRC_BROKER.DISTRIBUTION.SCHEDULE') }}
+            <select v-model="schedule" data-testid="distribution-schedule">
+              <option value="always">
+                {{ t('JRC_BROKER.DISTRIBUTION.ALWAYS') }}
+              </option>
+              <option value="inbox" :disabled="!calendar?.enabled">
+                {{ t('JRC_BROKER.DISTRIBUTION.INBOX_CALENDAR') }}
+              </option>
+            </select>
+          </label>
+          <p v-if="calendar?.timezone" class="text-sm">
+            {{ t('JRC_BROKER.DISTRIBUTION.TIMEZONE') }} {{ calendar.timezone }}
+          </p>
+          <a
+            :href="`/app/accounts/${accountId}/settings/inboxes/${inboxId}/business-hours`"
+            class="text-sm text-n-blue-11 underline"
+          >
+            {{ t('JRC_BROKER.DISTRIBUTION.EDIT_CALENDAR') }}
+          </a>
+          <label class="flex flex-col gap-2 text-sm">
+            {{ t('JRC_BROKER.DISTRIBUTION.FALLBACK') }}
+            <select v-model="fallback" data-testid="distribution-fallback">
+              <option value="waiting" :disabled="!waitingEnabled">
+                {{ t('JRC_BROKER.DISTRIBUTION.WAITING') }}
+              </option>
+              <option value="default_team">
+                {{ t('JRC_BROKER.DISTRIBUTION.DEFAULT_TEAM') }}
+              </option>
+              <option value="unassigned">
+                {{ t('JRC_BROKER.DISTRIBUTION.UNASSIGNED') }}
+              </option>
+            </select>
+          </label>
+          <label
+            v-if="fallback === 'default_team'"
+            class="flex flex-col gap-2 text-sm"
+          >
+            {{ t('JRC_BROKER.DISTRIBUTION.DEFAULT_TEAM') }}
+            <select
+              v-model="fallbackTeamId"
+              data-testid="distribution-fallback-team"
+            >
+              <option :value="null">
+                {{ t('JRC_BROKER.DISTRIBUTION.NO_SELECTION') }}
+              </option>
+              <option v-for="team in teams" :key="team.id" :value="team.id">
+                {{ team.name }}
+              </option>
+            </select>
+          </label>
+        </fieldset>
         <p v-if="!valid" class="text-sm">
           {{ t('JRC_BROKER.DISTRIBUTION.VALIDATION') }}
         </p>
@@ -381,7 +522,7 @@ onBeforeUnmount(clear);
       variant="outline"
       :disabled="!loaded || busy || historyBusy"
       :label="t('JRC_BROKER.DISTRIBUTION.HISTORY')"
-      @click="loadHistory"
+      @click="loadHistory()"
     />
     <div
       v-if="
@@ -434,6 +575,14 @@ onBeforeUnmount(clear);
           </dl>
         </li>
       </ol>
+      <Button
+        v-if="historyCursor"
+        data-testid="distribution-history-more"
+        variant="outline"
+        :disabled="historyBusy"
+        :label="t('JRC_BROKER.HISTORY.MORE')"
+        @click="loadHistory(true)"
+      />
     </div>
   </section>
 </template>

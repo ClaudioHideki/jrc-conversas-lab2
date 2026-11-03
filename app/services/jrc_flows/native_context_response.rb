@@ -3,7 +3,7 @@ require 'time'
 class JrcFlows::NativeContextResponse
   class Invalid < StandardError; end
   UUID = /\A[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\z/i
-  SCOPES = %w[flow:read flow:edit flow:publish flow:bind].freeze
+  SCOPES = %w[flow:read flow:edit flow:publish flow:bind flow:executions:read].freeze
 
   def self.parse!(raw, account_id:, origin:)
     invalid = -> { raise Invalid, 'FLOW_BROKER_CONTEXT_INVALID' }

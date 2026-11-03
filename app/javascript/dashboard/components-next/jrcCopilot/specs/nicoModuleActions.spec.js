@@ -44,6 +44,7 @@ describe('NICO authenticated module actions', () => {
   it('preserves version zero and explicit removal in the native task edit', async () => {
     await runNicoModuleAction(7, {
       operation: 'update_project_task',
+      native_execution: { command_id: 19, contract: 'nico-native-v1' },
       parameters: {
         project_id: 12,
         task_id: 42,
@@ -61,6 +62,12 @@ describe('NICO authenticated module actions', () => {
           title: 'Revised',
           assignee_id: null,
           parent_id: null,
+        },
+      },
+      {
+        headers: {
+          'X-JRC-Nico-Command-Id': '19',
+          'X-JRC-Nico-Contract': 'nico-native-v1',
         },
       }
     );

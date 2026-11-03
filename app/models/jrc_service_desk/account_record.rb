@@ -34,6 +34,10 @@ class JrcServiceDesk::AccountRecord < JrcServiceDesk::Base
   end
 
   def validate_active_reference(name)
+    # Imported history keeps the original actor/status without reactivating grants.
+    # Account/unit/existence validation and immutable ownership remain mandatory.
+    return if Array(validation_context).include?(:historical_migration)
+
     reflection = self.class.reflect_on_association(name)
     return unless new_record? || will_save_change_to_attribute?(reflection.foreign_key)
 

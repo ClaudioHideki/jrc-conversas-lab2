@@ -23,7 +23,7 @@ class JrcRelationship::SurveyEventRecovery
 
   def recover_events(trigger, policies)
     units = policies.map { |rule| rule.matchers['unit_id'] }.compact
-    events = JrcServiceDesk::TicketEvent.where(account: @account, unit_id: units)
+    events = JrcRelationship::SurveyEventSource.operational(JrcServiceDesk::TicketEvent.where(account: @account, unit_id: units))
     events = if trigger == 'closed'
                events.where(event_type: 'lifecycle_transitioned').where("data->>'action' = 'close'")
              else
@@ -44,6 +44,8 @@ class JrcRelationship::SurveyEventRecovery
   end
 
   def recover_event(event, trigger, policies)
+    return unless JrcRelationship::SurveyEventSource.operational?(event)
+
     ticket = JrcServiceDesk::Ticket.find_by(account: @account, id: event.ticket_id)
     return unless ticket
 

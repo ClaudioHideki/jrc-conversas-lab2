@@ -17,12 +17,14 @@ class JrcHumanAssignment::Dispatch
     return false unless ready_for_dispatch?
     return false if request_predates_policy?
 
-    route_team!
     policy = JrcHumanAssignment::Policy.connection_for(@account, @conversation.inbox_id)
-    return true if policy && policy['mode'] == 'direct' && eligible_destination?
-    return false unless eligible?
+    return apply_fallback!(policy, 'outside_hours') if policy && policy['schedule'] == 'inbox' && @conversation.inbox.out_of_office?
 
-    assign_selected_agent
+    route_team!
+    return true if policy && policy['mode'] == 'direct' && eligible_destination?
+    return apply_fallback!(policy, 'no_eligible_agent') unless eligible?
+
+    assign_selected_agent || apply_fallback!(policy, 'no_eligible_agent')
   end
 
   def ready_for_dispatch?
@@ -59,12 +61,14 @@ class JrcHumanAssignment::Dispatch
 
   def member_assignable?(member, selected)
     rules = AutoAssignment::Eligibility.new(inbox: @conversation.inbox.reload, conversation: @conversation)
-    eligible? && rules.conversation_reason.nil? && rules.agent_reason(member).nil? &&
+    respect = JrcHumanAssignment::Policy.effective(@account, @conversation.inbox_id)[:respect_availability] != false
+    eligible? && rules.conversation_reason.nil? && rules.agent_reason(member, respect_availability: respect).nil? &&
       eligible_agent_ids.include?(selected) && below_capacity?(selected)
   end
 
   def below_capacity?(selected)
     policy = JrcHumanAssignment::Policy.effective(@account, @conversation.inbox_id)
+    return true if policy[:capacity_enabled] == false
     @account.conversations.open.where(assignee_id: selected).count < policy[:max_open]
   end
 
@@ -89,9 +93,9 @@ class JrcHumanAssignment::Dispatch
   def select_team_with_capacity(policy, teams, ordered)
     ids = available_agent_ids
     loads = agent_loads(ids)
-    ids = ids.select { |id| loads.fetch(id, 0) < policy['max_open'] }
+    ids = ids.select { |id| loads.fetch(id, 0) < policy['max_open'] } unless policy['capacity_enabled'] == false
     eligible_teams = TeamMember.where(team_id: teams.keys, user_id: ids).distinct.pluck(:team_id)
-    ordered.find { |team| eligible_teams.include?(team.id) } || ordered.first
+    ordered.find { |team| eligible_teams.include?(team.id) }
   end
 
   def agent_loads(ids)
@@ -102,7 +106,7 @@ class JrcHumanAssignment::Dispatch
     policy = JrcHumanAssignment::Policy.effective(@account, @conversation.inbox_id)
     ids = eligible_agent_ids
     loads = agent_loads(ids)
-    ids = ids.select { |id| loads.fetch(id, 0) < policy[:max_open] }
+    ids = ids.select { |id| loads.fetch(id, 0) < policy[:max_open] } unless policy[:capacity_enabled] == false
     minimum = ids.map { |id| loads.fetch(id, 0) }.min
     candidates = ids.select { |id| loads.fetch(id, 0) == minimum }.sort
     candidates.find { |id| id > policy[:last_agent_id] } || candidates.first
@@ -128,8 +132,11 @@ class JrcHumanAssignment::Dispatch
   def available_agent_ids
     available = OnlineStatusTracker.effective_available_users(@account.id)
     online_ids = available.select { |_id, state| state == 'online' }.keys.map(&:to_i)
-    ids = @account.account_users.online.where(auto_assignment_enabled: true, user_id: online_ids).pluck(:user_id) &
-          @conversation.inbox.member_ids_with_assignment_capacity
+    members = @account.account_users.where(auto_assignment_enabled: true)
+    unless JrcHumanAssignment::Policy.effective(@account, @conversation.inbox_id)[:respect_availability] == false
+      members = members.online.where(user_id: online_ids)
+    end
+    ids = members.pluck(:user_id) & @conversation.inbox.member_ids_with_assignment_capacity
     if @account.feature_enabled?('jrc_contact_center')
       pending = JrcContactCenter::Qualification.pending.where(account_id: @account.id).joins(:account_user).pluck('account_users.user_id')
       ids -= pending
@@ -139,5 +146,25 @@ class JrcHumanAssignment::Dispatch
 
   def eligible_agent_ids
     available_agent_ids & @conversation.team.members.ids
+  end
+
+  def apply_fallback!(policy, reason)
+    return false unless policy
+
+    fallback = policy.fetch('fallback', 'waiting')
+    team = if fallback == 'default_team'
+             @account.teams.find_by(id: policy['fallback_team_id'], allow_auto_assign: true)
+           elsif fallback == 'waiting'
+             @conversation.team || @account.teams.where(id: policy['team_ids'], allow_auto_assign: true).find_by(id: policy['team_ids'].first)
+           end
+    signature = { 'reason' => reason, 'fallback' => fallback, 'team_id' => team&.id, 'effective_from' => policy['effective_from'],
+                  'requested_at' => @conversation.auto_assignment_requested_at.iso8601(6) }
+    return false if @conversation.custom_attributes['jrc_assignment_fallback'] == signature
+
+    @conversation.update!(team: team, auto_assignment_requested_at: fallback == 'waiting' ? @conversation.auto_assignment_requested_at : nil,
+                          custom_attributes: @conversation.custom_attributes.merge('jrc_assignment_fallback' => signature))
+    JrcBrokerConnectionEvent.create!(account: @account, inbox: @conversation.inbox, event_type: 'DISTRIBUTION_FALLBACK',
+                                    occurred_at: Time.current, metadata: signature.merge('conversation_id' => @conversation.id))
+    false
   end
 end

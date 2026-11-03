@@ -33,7 +33,7 @@ class JrcNico::Helpdesk::Context
 
   def tickets
     units = JrcServiceDesk::UnitMembership.operational.where(account_id: account.id, account_user_id: member.id, active: true).select(:unit_id)
-    JrcOperations::Access.tickets(member).where(unit_id: units)
+    JrcNico::MigrationVisibility.scope(JrcOperations::Access.tickets(member), account: account).where(unit_id: units)
   end
 
   def policy(id)
@@ -82,7 +82,7 @@ class JrcNico::Helpdesk::Context
 
   def validate_pilot_scope!(definition)
     assert_ids!(native.view_unit_scope, definition.fetch('unit_ids'))
-    assert_ids!(JrcCustomers::Company.where(account: account), definition.fetch('company_ids'))
+    assert_ids!(JrcNico::MigrationVisibility.companies(account), definition.fetch('company_ids'))
     assert_ids!(account.account_users, definition.fetch('operator_ids'))
 
     critical = definition.dig('rules', 'R12', 'critical_company_ids')

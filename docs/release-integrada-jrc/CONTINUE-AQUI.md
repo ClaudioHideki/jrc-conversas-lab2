@@ -1,3 +1,9 @@
+# Checkpoint ativo — 03/11/2026
+
+Atualização de escopo neste dia: o usuário autorizou publicar a candidata LAB2 consolidada e atualizar o Grupo JRC. Leia `CANDIDATA-CONSOLIDADA-20261103.md` e o plano de release de03/11. Brokerd1d0f2e já publicado/implantado; não repetir seu deploy. LAB2 permanece em validação antes da promoção; banco frio e MinIO4/4 passaram, UI134/134. Registrar CI/imagem/deploy como níveis separados.
+
+Branch atual codex/lab2-integral-20261102; preservar WIP e base20e56104. Leia MIDIA-HARDENING-20261103.md e MIG-INTEGRAL-LAB2-20261102.md. As instruções de release abaixo são históricas, não autorização para deploy agora. Editor do Broker ef5c5ae instalado; serviços de mídia65/65 e NICO60/60. Faltam MinIO do importador, schema frio, CI/build completos e revisão integral.
+
 # Candidata integrada - 02/11/2026
 
 Branch: `codex/release-integrada-specs-20261102`, PR3. Publicar pela branch efetiva `codex/crm-backoffice-servicedesk-visual-20261101`, observada novamente em50f7f07d802829dd44a67547fabad3aa77f3d196. Default antiga128243d nao e a release. Preservados merges19d28b72/57efc6e1, outbox89d87ccb e ajuste APT preexistenteab8f672b. O pedido vigente autoriza merge/imagens/Dokploy apos gates; backup/dump/restore, mensagens reais, pairing, replayUNKNOWN e carga historica indiscriminada continuam excluidos.

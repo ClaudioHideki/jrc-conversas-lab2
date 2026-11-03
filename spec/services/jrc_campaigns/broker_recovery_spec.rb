@@ -40,10 +40,15 @@ RSpec.describe 'Interrupted Broker campaign recovery' do # rubocop:disable RSpec
                  ActiveRecord::Base.connection_db_config.database.end_with?('_test')
     raise 'Disposable PostgreSQL test database required' unless disposable
 
+    # The default fixture window ends at 23:59:00. Wall-clock runs during its
+    # excluded final minute must not turn unrelated recovery assertions into
+    # scheduling failures. Individual boundary examples still travel explicitly.
+    travel_to Time.utc(2026, 11, 2, 12, 0)
     DatabaseCleaner.clean_with(:deletion)
     with_modified_env('JRC_BROKER_ENABLED' => 'true', 'JRC_BROKER_ALLOWED_ORIGINS' => origin, 'FRONTEND_URL' => 'https://central.example.test',
                       'JRC_BROKER_CREDENTIAL_KEY' => Base64.strict_encode64('s' * 32)) { example.run }
   ensure
+    travel_back
     clear_enqueued_jobs
     uploaded_keys.each { |key| ActiveStorage::Blob.service.delete(key) } if disposable
     DatabaseCleaner.clean_with(:deletion) if disposable

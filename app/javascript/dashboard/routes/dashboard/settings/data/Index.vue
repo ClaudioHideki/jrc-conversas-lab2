@@ -203,6 +203,12 @@ onBeforeUnmount(() => {
           </span>
         </template>
         <template v-if="activeTab === 'import'" #actions>
+          <RouterLink
+            :to="{ name: 'settings_migration_center', params: { accountId } }"
+            class="text-sm text-n-blue-11 underline"
+          >
+            {{ $t('JRC_MIGRATIONS.TITLE') }}
+          </RouterLink>
           <span
             v-if="hasActiveImport"
             class="hidden items-center gap-1.5 text-body-main text-n-slate-11 sm:inline-flex"

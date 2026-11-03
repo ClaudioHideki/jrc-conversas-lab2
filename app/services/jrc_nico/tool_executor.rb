@@ -12,6 +12,7 @@ class JrcNico::ToolExecutor
     JrcNico::Helpdesk::ExecutionGuard.authorize!(@access, @command)
     JrcNico::ToolCatalog.new(@access).validate!(name, arguments)
     raise Pundit::NotAuthorizedError if internal_tool?(name) && (@customer_notice || @command&.source_notice_id)
+    JrcNico::MigrationVisibility.arguments!(arguments, account: @account)
 
     return JrcNico::DomainActions.new(@access, command: @command).call(name, arguments) if JrcNico::DomainToolCatalog::TOOLS.key?(name)
     return JrcNico::HelpdeskToolActions.new(@access, command: @command).call(name, arguments) if JrcNico::HelpdeskToolCatalog::TOOLS.key?(name)
@@ -31,21 +32,21 @@ class JrcNico::ToolExecutor
 
   def search_contacts
     query = "%#{ActiveRecord::Base.sanitize_sql_like(@args.fetch('query'))}%"
-    scope = @account.contacts
+    scope = @access.contacts
     scope = scope.where(id: @customer_conversation.contact_id) if @customer_conversation
     scope.where('name ILIKE :q OR email ILIKE :q OR phone_number ILIKE :q', q: query).limit(20)
          .select { |c| @access.policy(c).show? }.map { |c| contact_snapshot(c) }
   end
 
   def list_contacts
-    scope = @account.contacts
+    scope = @access.contacts
     scope = scope.where(id: @customer_conversation.contact_id) if @customer_conversation
     scope.order(id: :desc).limit(20)
          .select { |c| @access.policy(c).show? }.map { |c| contact_snapshot(c) }
   end
 
   def count_contacts
-    scope = @account.contacts
+    scope = @access.contacts
     scope = scope.where(id: @customer_conversation.contact_id) if @customer_conversation
     { count: scope.find_each.count { |c| @access.policy(c).show? } }
   end
@@ -315,7 +316,9 @@ class JrcNico::ToolExecutor
   end
 
   def list_campaigns
-    @account.jrc_campaigns.order(updated_at: :desc).limit(20).map { |c| c.slice(:id, :name, :status, :review_digest, :review_snapshot, :approved_at) }
+    @account.jrc_campaigns.order(updated_at: :desc).limit(20)
+      .select { |campaign| JrcNico::MigrationVisibility.campaign_visible?(campaign, account: @account) }
+      .map { |campaign| campaign.slice(:id, :name, :status, :review_digest, :review_snapshot, :approved_at) }
   end
 
   def create_campaign
@@ -330,12 +333,14 @@ class JrcNico::ToolExecutor
     campaign = @account.jrc_campaigns.find(@args.fetch('campaign_id'))
     actions = { 'request_review' => :request_review!, 'launch' => :launch!, 'pause' => :pause!, 'resume' => :resume!, 'cancel' => :cancel! }
     method = actions.fetch(@args.fetch('action')) { raise ArgumentError, 'Ação de campanha não permitida.' }
+    JrcNico::MigrationVisibility.campaign!(campaign, account: @account) if %w[request_review launch resume].include?(@args['action'])
     campaign.public_send(method)
     record_result(campaign.reload, 'Estado da campanha atualizado', 'jrc_campaigns_index')
   end
 
   def campaign_report
-    JrcCampaigns::ReportService.new(@account.jrc_campaigns.find(@args.fetch('campaign_id')), page: 1, per_page: 20).as_json
+    campaign = JrcNico::MigrationVisibility.campaign!(@account.jrc_campaigns.find(@args.fetch('campaign_id')), account: @account)
+    JrcCampaigns::ReportService.new(campaign, page: 1, per_page: 20).as_json
   end
 
   def operational_report

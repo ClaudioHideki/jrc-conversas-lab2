@@ -83,6 +83,8 @@ Rails.application.routes.draw do
           post ':id/channels/:target_id/action-resources', action: :editor, defaults: { editor_operation: 'save_action_resource' }
           get ':id/channels/:target_id/media', action: :editor, defaults: { editor_operation: 'media_catalog' }
           post ':id/channels/:target_id/media/:resource_id/revoke', action: :editor, defaults: { editor_operation: 'revoke_media' }
+          get ':id/executions', action: :editor, defaults: { editor_operation: 'executions' }
+          get ':id/executions/:target_id', action: :editor, defaults: { editor_operation: 'execution' }
           get ':id', action: :editor, defaults: { editor_operation: 'get' }
           put ':id', action: :editor, defaults: { editor_operation: 'save' }
           get ':id/scope', action: :editor, defaults: { editor_operation: 'scope' }
@@ -365,6 +367,8 @@ Rails.application.routes.draw do
             get 'inboxes/:inbox_id/distribution', action: :connection_distribution
             put 'inboxes/:inbox_id/distribution', action: :update_connection_distribution
             get 'inboxes/:inbox_id/distribution-history', action: :connection_distribution_history
+            get 'inboxes/:inbox_id/history', action: :connection_history
+            patch 'inboxes/:inbox_id/configuration', action: :update_connection_configuration
             get 'inboxes/:inbox_id/grants', action: :grants
             put 'inboxes/:inbox_id/grants', action: :update_grants
             put 'inboxes/:inbox_id/agents', action: :assign_agents
@@ -856,6 +860,18 @@ Rails.application.routes.draw do
             get :usage, to: 'usage#index'
           end
 
+          resources :jrc_migration_batches, only: [:index, :show, :create] do
+            member do
+              post :preview
+              post :execute
+              get :reconciliation
+              post :accept
+              get :errors
+              get :events
+              post 'items/:item_id/scan', action: :scan
+              post 'items/:item_id/recover_media', action: :recover_media
+            end
+          end
           resources :data_imports, only: [:index, :show, :create] do
             collection do
               post :validate_source

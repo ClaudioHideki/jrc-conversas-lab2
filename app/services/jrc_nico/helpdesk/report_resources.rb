@@ -25,7 +25,8 @@ class JrcNico::Helpdesk::ReportResources
     ids = Array(evidence['clock_ids']) + Array(evidence['observations']).flat_map { |row| Array(row['samples']).pluck('clock_id').compact }
     ids.uniq.map do |id|
       clock = JrcServiceDesk::SlaClock.where(account: @context.account).find(id)
-      ['JrcNico::ServiceTicketSla', clock.ticket_id]
+      snapshot = JrcNico::SlaEvidence.new(@context.account).clock!(clock)
+      [JrcNico::SlaEvidence::SNAPSHOT_RESOURCE, snapshot.id]
     end
   end
 end

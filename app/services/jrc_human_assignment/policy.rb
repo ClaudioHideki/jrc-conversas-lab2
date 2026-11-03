@@ -1,4 +1,6 @@
 class JrcHumanAssignment::Policy
+  CONNECTION_DEFAULTS = { respect_availability: true, capacity_enabled: true, waiting_enabled: true,
+                          schedule: 'always', fallback: 'waiting', fallback_team_id: nil }.freeze
   def self.for(account)
     value = account.custom_attributes['jrc_human_assignment'] || {}
     { enabled: value['enabled'] == true, max_open: value.fetch('max_open', 10), inbox_ids: value.fetch('inbox_ids', []),
@@ -37,20 +39,31 @@ class JrcHumanAssignment::Policy
   end
 
   def self.update_connection!(account, inbox:, actor:, **options)
+    options = CONNECTION_DEFAULTS.merge(options)
     validate_connection_options!(options)
     account.with_lock do
-      validate_connection_access!(account, inbox, actor, options[:team_ids])
+      ids = (options[:team_ids] + [options[:fallback_team_id]].compact).uniq
+      validate_connection_access!(account, inbox, actor, ids)
+      raise ArgumentError if options[:schedule] == 'inbox' && !inbox.reload.working_hours_enabled?
       value = options.stringify_keys.merge('effective_from' => Time.current.iso8601(6))
       persist_connection!(account, inbox, actor, value)
     end
   end
 
   def self.validate_connection_options!(options)
-    raise ArgumentError unless options.keys.sort == %i[enabled max_open mode team_ids]
+    raise ArgumentError unless options.keys.sort == (%i[enabled max_open mode team_ids] + CONNECTION_DEFAULTS.keys).sort
 
     validate_limits!(options[:enabled], options[:max_open])
     validate_inbox_ids!(options[:team_ids])
     validate_connection_mode!(options[:mode], options[:enabled], options[:team_ids])
+    raise ArgumentError unless %i[respect_availability capacity_enabled waiting_enabled].all? { |key| [true, false].include?(options[key]) }
+    raise ArgumentError unless %w[always inbox].include?(options[:schedule]) && %w[waiting default_team unassigned].include?(options[:fallback])
+    raise ArgumentError if options[:fallback] == 'waiting' && !options[:waiting_enabled]
+    if options[:fallback] == 'default_team'
+      raise ArgumentError unless options[:fallback_team_id].is_a?(Integer) && options[:fallback_team_id].positive?
+    elsif options[:fallback_team_id]
+      raise ArgumentError
+    end
   end
   private_class_method :validate_connection_options!
 

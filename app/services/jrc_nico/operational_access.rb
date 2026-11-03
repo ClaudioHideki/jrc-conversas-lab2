@@ -38,19 +38,20 @@ class JrcNico::OperationalAccess
   def crm_scope(relation, owner: :owner_id)
     raise Pundit::NotAuthorizedError unless crm?
 
-    scoped = relation.where(account_id: account.id)
+    scoped = JrcNico::MigrationVisibility.scope(relation, account: account)
     membership.administrator? ? scoped : scoped.where(owner => user.id)
   end
 
   def conversation(id)
     record = account.conversations.find_by!(display_id: id)
+    contact(record.contact_id)
     raise Pundit::NotAuthorizedError unless policy(record).show?
 
     record
   end
 
   def contact(id, action = :show?)
-    record = account.contacts.find(id)
+    record = contacts.find(id)
     raise Pundit::NotAuthorizedError unless policy(record).public_send(action)
 
     record
@@ -58,6 +59,10 @@ class JrcNico::OperationalAccess
 
   def conversations
     # Match the authoritative per-resource policy, including Enterprise custom roles.
-    account.conversations.order(updated_at: :desc).limit(200).select { |record| policy(record).show? }
+    account.conversations.where(contact_id: contacts.select(:id)).order(updated_at: :desc).limit(200).select { |record| policy(record).show? }
+  end
+
+  def contacts
+    JrcMigrations::Visibility.scope(account.contacts, account: account, domain: 'contacts')
   end
 end

@@ -37,7 +37,7 @@ class JrcServiceDesk::Ticket < JrcServiceDesk::UnitRecord
   has_many :ticket_conversations, class_name: 'JrcServiceDesk::TicketConversation', dependent: :restrict_with_error
 
   validates :title, presence: true, length: { maximum: 255 }
-  validates :description, presence: true, on: :create
+  validates :description, presence: true, on: [:create, :historical_migration]
   validates :origin_channel, presence: true, length: { maximum: 80 }
   validates :opened_at, presence: true
   validates :idempotency_key, presence: true, length: { maximum: 120 },

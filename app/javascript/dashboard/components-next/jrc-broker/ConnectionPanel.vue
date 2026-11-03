@@ -13,13 +13,14 @@ import {
 const props = defineProps({
   accountId: { type: Number, required: true },
   inboxId: { type: Number, required: true },
+  connectionName: { type: String, default: '' },
   presentation: {
     type: String,
     default: 'all',
     validator: value => ['all', 'overview', 'configuration'].includes(value),
   },
 });
-const emit = defineEmits(['health', 'healthError', 'reconnected']);
+const emit = defineEmits(['health', 'healthError', 'reconnected', 'renamed']);
 const { t } = useI18n();
 const store = useStore();
 const health = ref(null);
@@ -31,6 +32,7 @@ const pairingProgress = ref('');
 const checkedUnknown = ref(false);
 const confirm = ref('');
 const approved = ref(false);
+const name = ref(props.connectionName);
 const actions = computed(() =>
   visibleConnectionActions(health.value?.allowedActions)
 );
@@ -299,6 +301,40 @@ const mutate = async kind => {
     if (current === generation) busy.value = false;
   }
 };
+const rename = async () => {
+  if (
+    stopped ||
+    busy.value ||
+    !actions.value.includes('manage') ||
+    !name.value.trim()
+  )
+    return;
+  const current = generation;
+  busy.value = true;
+  try {
+    const result = await api.renameConnection(
+      props.inboxId,
+      name.value.trim(),
+      controller.signal
+    );
+    if (current === generation)
+      emit('renamed', {
+        accountId: props.accountId,
+        inboxId: props.inboxId,
+        name: result.name,
+      });
+  } catch (failure) {
+    if (current === generation) fail(failure);
+  } finally {
+    if (current === generation) busy.value = false;
+  }
+};
+watch(
+  () => props.connectionName,
+  value => {
+    name.value = value;
+  }
+);
 const restart = () => {
   stop();
   stopped = false;
@@ -365,6 +401,29 @@ onBeforeUnmount(() => {
       {{ t('JRC_BROKER.DETAILS.HEALTH_HELP') }}
     </p>
     <template v-if="presentation !== 'overview'">
+      <form
+        v-if="actions.includes('manage')"
+        data-testid="connection-name-form"
+        class="flex flex-col gap-3"
+        @submit.prevent="rename"
+      >
+        <label class="flex flex-col gap-2 text-sm">
+          {{ t('JRC_BROKER.INSTANCE_NAME') }}
+          <input
+            v-model="name"
+            data-testid="connection-name-input"
+            type="text"
+            maxlength="255"
+            required
+            :disabled="busy"
+          />
+        </label>
+        <Button
+          type="submit"
+          :disabled="busy || !name.trim()"
+          :label="t('JRC_BROKER.CONNECTIONS.SAVE_NAME')"
+        />
+      </form>
       <p class="text-sm text-n-slate-11">
         {{ t('JRC_BROKER.DETAILS.CONFIGURATION_HELP') }}
       </p>

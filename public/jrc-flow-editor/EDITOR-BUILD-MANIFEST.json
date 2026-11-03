@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "component": "jrc-native-flow-editor",
   "sourceRepository": "ClaudioHideki/BrokerJRCIA",
-  "sourceSha": "ea7dc741d0c63792a969dddeac2bd35b6cbdf514",
+  "sourceSha": "ef5c5aea41b28a04b2f4e81cddca425145671ef4",
   "sourceCommitted": true,
-  "lockfileSha256": "697ccd1529eddb570515ecc6736ecdf45942a463cdfe88c28a635e13d9c0b8e2",
+  "lockfileSha256": "dafcbad0115860b04c4b17525222e9d405964759458a0bda05bf7d53d8fc5829",
   "inputs": [
     {
       "path": "apps/web/public/THIRD_PARTY_NOTICES.txt",
@@ -47,6 +47,16 @@
       "dependency": false
     },
     {
+      "path": "apps/web/src/automations/ExecutionExplorer.tsx",
+      "sha256": "f9197c11da8a4ba390f00f77a6dac501bdefbb8fe3646365759705e92bcfa20b",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/automations/ExecutionPlayground.tsx",
+      "sha256": "d93642bc05f883ef2919b0f6bfd0ebc6f52b20fd4daf50f37e683b3795b1e847",
+      "dependency": false
+    },
+    {
       "path": "apps/web/src/automations/HttpSimulationControl.tsx",
       "sha256": "26b451db44b2746bbfcceec57d58da6c8df92d4450527a2a811a02ec181f1b74",
       "dependency": false
@@ -62,8 +72,18 @@
       "dependency": false
     },
     {
+      "path": "apps/web/src/automations/MediaSimulationControl.tsx",
+      "sha256": "d6d09fd3bfb8b69eb7a7366893fb5b157ba71d4f4a8b5b8d718f1e5b3ae1bad7",
+      "dependency": false
+    },
+    {
       "path": "apps/web/src/automations/SimulationWaitControl.tsx",
-      "sha256": "0e032fc4e3ab2bc5ab406ae3f856c32e4b6319548800c0b25003f9864feb1728",
+      "sha256": "8f69261bf0a729f8fefd5c2e096bff940657e6fa1cf958342c12d1006500857e",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/automations/VersionComparison.tsx",
+      "sha256": "480905f4aae55afb7cdf03c63042b570606306c8cbb91a32168831f8d7e696b3",
       "dependency": false
     },
     {
@@ -74,6 +94,11 @@
     {
       "path": "apps/web/src/automations/conversation-api.ts",
       "sha256": "6f3def640ce338cc664e03be30a5da10c300996975f99d1b1caa5f31038bef09",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/automations/graph-diff.ts",
+      "sha256": "fa3df88a023128d1351afebff176af2ff6f87f65b471c2328f3cedcb5145ef9b",
       "dependency": false
     },
     {
@@ -102,6 +127,11 @@
       "dependency": false
     },
     {
+      "path": "apps/web/src/automations/node-editors/EntryEditor.tsx",
+      "sha256": "70b6eed0a0a789b026e3085a2e0969704ccf1ca7da2c4c846d67ebfcc963b6d1",
+      "dependency": false
+    },
+    {
       "path": "apps/web/src/automations/node-editors/HandoffEditor.tsx",
       "sha256": "7e8bb46ddf9b54dd2339dea24255b0bc16b63db1d90e3e0684e8606bdbfea95e",
       "dependency": false
@@ -113,7 +143,7 @@
     },
     {
       "path": "apps/web/src/automations/node-editors/InputEditor.tsx",
-      "sha256": "f0ef0a9d22e14ccda7b713b900ec58946c314927246bfb5ee07f934e2d3fcdcb",
+      "sha256": "5a4c5caf4d51d52027083a4b9facfa2d70cf69be0d0727114c6eb4cbe9c09c20",
       "dependency": false
     },
     {
@@ -148,7 +178,7 @@
     },
     {
       "path": "apps/web/src/automations/studio.css",
-      "sha256": "ffef123f553d02c344b00f25112a07b57dde80686e623c9c8e31c0cdbed3536f",
+      "sha256": "51b8735f4e9af201f451fa8859b5ae97b8dad9d59d2e26be53122bd21b25e756",
       "dependency": false
     },
     {
@@ -158,7 +188,7 @@
     },
     {
       "path": "apps/web/src/flows/FlowCanvas.tsx",
-      "sha256": "3fc42c3c2496b4b2761694405177b4b853fd1a7c347d2f0c00ae0e20f034cd00",
+      "sha256": "504fc6320e8d96e504f9ecd25f95c4a6fd6954ade042fa86e4e9184c6de8ce93",
       "dependency": false
     },
     {
@@ -172,8 +202,13 @@
       "dependency": false
     },
     {
+      "path": "apps/web/src/native-flow/Executions.tsx",
+      "sha256": "1daa85470988e3f1a8e3365515d333f2f99b32439db0130e3a6e6b52c93e6c3c",
+      "dependency": false
+    },
+    {
       "path": "apps/web/src/native-flow/entry.tsx",
-      "sha256": "d46e79cecf619cd26be1ccdb7dd27d06ec4b1e29c181bdd0ed152fc87ee5c567",
+      "sha256": "5add0ae77509d4b5e5932ae28bb4754d0a01777b8167c3bb51932cddcafc2e13",
       "dependency": false
     },
     {
@@ -183,12 +218,12 @@
     },
     {
       "path": "apps/web/src/native-flow/transport.ts",
-      "sha256": "e268f53d7500d27dc2f1e95a8750199cab8b038a736b56a8cdcb3c693d727e27",
+      "sha256": "9fbab12664cf70cf042b237f0251f2d4f6eeca8353d94edc44ec241b065ba3d3",
       "dependency": false
     },
     {
       "path": "apps/web/src/native-flow/workspace.tsx",
-      "sha256": "94a9e6f095a00f7fd086bd9b4481b2b125a2f112485b37ad9fce6e764aa571d7",
+      "sha256": "9fdcdfe1a5ad47283100bac8779ec81beec1f6bcd0b471a2e7e4a8afa055f223",
       "dependency": false
     },
     {
@@ -198,7 +233,12 @@
     },
     {
       "path": "apps/web/src/pages/AutomationStudio.tsx",
-      "sha256": "94e2fc0899e71d98f9d158978b0a36220115de17d835441b345fb1f5210f89a8",
+      "sha256": "5761343fb57b03a8561d6361ecb531fb2a48182fed4dd226eb3ca7b29f54e42d",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/pages/AutomationVersions.tsx",
+      "sha256": "b96e9ccf442b074ce17849a199eb95b8dc88c8ca7c6cb697295cdf81dca93d6b",
       "dependency": false
     },
     {
@@ -763,12 +803,12 @@
     },
     {
       "path": "package-lock.json",
-      "sha256": "697ccd1529eddb570515ecc6736ecdf45942a463cdfe88c28a635e13d9c0b8e2",
+      "sha256": "dafcbad0115860b04c4b17525222e9d405964759458a0bda05bf7d53d8fc5829",
       "dependency": false
     },
     {
       "path": "package.json",
-      "sha256": "6aa5949375d271bd32a1742b56d627fd11968d2bcec91b8e9c685f9d10ca9b72",
+      "sha256": "b45114e366cba28f9e99781f1ba917acb152755e4db4f5898d28dc4b32af8ee0",
       "dependency": false
     },
     {
@@ -822,6 +862,11 @@
       "dependency": false
     },
     {
+      "path": "packages/contracts/src/automation-entry.ts",
+      "sha256": "b68898b71aaee102360ed4f68ad23be3194f5ac8c1890251c92623729095c8e1",
+      "dependency": false
+    },
+    {
       "path": "packages/contracts/src/automation-handoff-v1.ts",
       "sha256": "e16f4c81bdda0582de0b23f6b531441ffff97c6a8bf615312368c2ef92a82e11",
       "dependency": false
@@ -833,7 +878,12 @@
     },
     {
       "path": "packages/contracts/src/automation-input.ts",
-      "sha256": "7860b5c5ec9df23cc555ba21d9ee8f716b468f2411b6693f9f9c9e6c53cad03d",
+      "sha256": "88844e154e82d3d8360cda23180cae64e798d907b0c824546fa9f62fbe349dfb",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/automation-inspection.ts",
+      "sha256": "658ac282d77f1bcff9ccc7b46bc28366b6d4250b9f5a3373b94729a62781328d",
       "dependency": false
     },
     {
@@ -843,12 +893,17 @@
     },
     {
       "path": "packages/contracts/src/automation-node-definitions.ts",
-      "sha256": "de87af4bb35caa5b6c906fa2521068dccda1f6858623b07f914dc0348afee2e0",
+      "sha256": "a61b684a508eaef9dac5ac3581e128def464058880cda9102dacc7b914f2fc91",
       "dependency": false
     },
     {
       "path": "packages/contracts/src/automation-schedule.ts",
       "sha256": "e07b4b9ea9003ee9891e6f041548a15884ec57dcfde5a927f48a5c076dfb6c42",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/automation-simulation.ts",
+      "sha256": "7a21073d6bd51cf1ec6bccb05cc68a22082abea6f369f3d2bb3c09a792706b26",
       "dependency": false
     },
     {
@@ -898,17 +953,22 @@
     },
     {
       "path": "packages/contracts/src/flow-delegation-constants.ts",
-      "sha256": "7c55c879805ff334ad85a1addf8ff6385d5555e64024d5410ad5ab0be24724a5",
+      "sha256": "f1a4e4eed07403835b31c808a9dd4f996d839e7f79ab11b0d4a680cb02061291",
       "dependency": false
     },
     {
       "path": "packages/contracts/src/flow-delegation.ts",
-      "sha256": "1dacc983281940c506ba26099e3f21c023fbdaf36c12cb70e0c39ff3dd0231cb",
+      "sha256": "d56d744965bd862a049b27ef25ecb8ad70ef8bb3ccc987b381f9026276242ef8",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/flow-executions.ts",
+      "sha256": "eaa2e435ac8f8c1bae3ac899fd1a61641549cda0ef8d3e9fd48d9a08be6b0c2c",
       "dependency": false
     },
     {
       "path": "packages/contracts/src/flows.ts",
-      "sha256": "b603a110fac4062c4d7dbc9af01b1d912db98f19e6a4c09be1b750ced77aaa82",
+      "sha256": "fc11c16cf42b394ec80f8712bee61e30d3cc5f6269aaccc27af7242294578bd7",
       "dependency": false
     },
     {
@@ -923,7 +983,7 @@
     },
     {
       "path": "packages/contracts/src/index.ts",
-      "sha256": "b4cca08686a0f036af6e52181991c76c8988155a1a51d8568ea5fd9f4bae1655",
+      "sha256": "720c002eab2af01fe4abf375ba71a3ddec3f071c7652f5291f4e031e2c3572fa",
       "dependency": false
     },
     {
@@ -933,7 +993,7 @@
     },
     {
       "path": "packages/contracts/src/integrations/control.ts",
-      "sha256": "55e6ed693b45138b4e4025120876314b58723354adfac56ed333276aec5b2938",
+      "sha256": "ac42ce8d9e2c3c9688328b029e5712eae580edcae29da09b391fe7fe527a624c",
       "dependency": false
     },
     {
@@ -953,7 +1013,7 @@
     },
     {
       "path": "packages/contracts/src/integrations/schemas.ts",
-      "sha256": "c67ef14486a73e841a2075e6945fd920671c72d82d80968d842b4d4fcec1e281",
+      "sha256": "cf8ce912d6f66f783a98f514be0aa9669aae4896d3c6026b2889e995d964176d",
       "dependency": false
     },
     {
@@ -1035,18 +1095,18 @@
     },
     {
       "path": "editor.css",
-      "bytes": 26865,
-      "sha256": "c65a52b9b1caeab057e7bf88bded09fa08e83868373438602a9ce4cead5e8ee4"
+      "bytes": 29555,
+      "sha256": "71fa57194fdee277348c5a6b7abaf2024fb2a072a8083e2a5cc80f3e94ad85f6"
     },
     {
       "path": "editor.js",
-      "bytes": 928054,
-      "sha256": "b377670478105932e312e28e64beb7ff5760832339483e5723377ff3c681f3b6"
+      "bytes": 959464,
+      "sha256": "0a1cb29ff7917376517aeace01bdae672ea5ac88d1e87863307d02e8f35c44a4"
     },
     {
       "path": "editor.js.LEGAL.txt",
       "bytes": 1863,
-      "sha256": "7066aa717376ca1236a5d6112725fd01632e36f10e77f904f024624b6fcfbbf3"
+      "sha256": "a4bb6bdca26057d85644e8b9a27f8d3526f0cb6b9b45b02808eaf4d4184b5b5b"
     }
   ],
   "inspection": {

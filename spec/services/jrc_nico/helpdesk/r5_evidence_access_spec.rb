@@ -75,6 +75,7 @@ RSpec.describe JrcNico::Helpdesk::Context do
     lc_execute(ticket, 'resolve')
     lc_execute(ticket, 'close')
     cycle = "service-desk:ticket:#{ticket.id}:cycle:initial"
+    JrcRelationship::SurveyClosureJob.perform_now(ticket.class.name, ticket.id, cycle)
     JrcRelationship::SurveyDispatchDecision.find_by!(account: sd_account, source_type: ticket.class.name,
                                                      source_id: ticket.id, cycle_key: cycle)
   end

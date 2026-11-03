@@ -23,6 +23,7 @@ const selected = ref([]);
 const configuration = ref(null);
 const registration = ref(null);
 const session = ref(null);
+const includeExecutionHistory = ref(false);
 const origin = ref('');
 const credential = ref('');
 const challenge = ref('');
@@ -95,6 +96,7 @@ async function load() {
   inboxes.value = [];
   selected.value = [];
   session.value = null;
+  includeExecutionHistory.value = false;
   registration.value = null;
   configuration.value = null;
   api = createJrcFlowNativeApi(accountId.value);
@@ -146,6 +148,9 @@ async function openSession() {
     const scopes = administrator.value
       ? ['flow:read', 'flow:edit', 'flow:publish', 'flow:bind']
       : ['flow:read'];
+    if (administrator.value && includeExecutionHistory.value) {
+      scopes.push('flow:executions:read');
+    }
     const result = await api.session(selected.value, scopes, abort.signal);
     if (current !== generation) return;
     session.value = result;
@@ -349,6 +354,11 @@ onBeforeUnmount(() => {
     </section>
     <section class="flex flex-col items-start gap-2">
       <h2 class="font-semibold">{{ t('NATIVE.SESSION') }}</h2>
+      <label v-if="administrator && !session" class="flex items-center gap-2">
+        <input v-model="includeExecutionHistory" data-test="execution-history-scope" type="checkbox" :disabled="busy" />
+        {{ t('NATIVE.INCLUDE_EXECUTION_HISTORY') }}
+      </label>
+      <p v-if="administrator && !session" class="text-sm text-n-slate-11">{{ t('NATIVE.EXECUTION_HISTORY_PERMISSION') }}</p>
       <p v-if="session">
         {{ t('NATIVE.SESSION_VALID_UNTIL', { expiresAt: session.expiresAt }) }}
       </p>

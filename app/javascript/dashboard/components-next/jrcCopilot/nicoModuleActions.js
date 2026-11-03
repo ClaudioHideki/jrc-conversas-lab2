@@ -21,6 +21,15 @@ export const runNicoModuleAction = async (
       });
       break;
     case 'update_project_task': {
+      const context = action.native_execution;
+      if (
+        context?.contract !== 'nico-native-v1' ||
+        !/^[1-9][0-9]{0,18}$/.test(String(context?.command_id))
+      ) {
+        throw new Error(
+          'O comando precisa de uma autorização atual. Prepare a ação novamente.'
+        );
+      }
       const task = without(
         'project_id',
         'task_id',
@@ -29,9 +38,16 @@ export const runNicoModuleAction = async (
       );
       if (args.clear_assignee) task.assignee_id = null;
       if (args.clear_parent) task.parent_id = null;
-      response = await axios.patch(`${projectTasks}/${Number(args.task_id)}`, {
-        task,
-      });
+      response = await axios.patch(
+        `${projectTasks}/${Number(args.task_id)}`,
+        { task },
+        {
+          headers: {
+            'X-JRC-Nico-Command-Id': String(context.command_id),
+            'X-JRC-Nico-Contract': context.contract,
+          },
+        }
+      );
       break;
     }
     case 'create_product':

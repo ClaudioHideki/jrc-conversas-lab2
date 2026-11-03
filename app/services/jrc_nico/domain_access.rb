@@ -10,6 +10,7 @@ class JrcNico::DomainAccess
                       JrcNico::ServiceDeskContext JrcNico::ServiceDeskLookup JrcNico::ServiceDeskRequesters
                       JrcNico::ServiceDeskAssignee JrcNico::ServiceDeskAssignable JrcNico::ServiceDeskTeams JrcNico::ServiceDeskUnit
                       JrcNico::ServiceTicketLifecycle JrcNico::ServiceTicketSla JrcNico::ServiceTicketCustomer
+                      JrcNico::OperationalSlaSnapshot JrcNico::OperationalSlaMilestone
                       JrcNico::ServiceTicketNotes JrcNico::ServiceTicketConversations JrcNico::ProjectTasks Team
                       JrcServiceDesk::Unit JrcServiceDesk::OperatorCompany JrcServiceDesk::Queue
                       JrcServiceDesk::Priority JrcServiceDesk::Category JrcServiceDesk::TicketStatus
@@ -41,14 +42,14 @@ class JrcNico::DomainAccess
   def project(id, capability: 'projects.project.view')
     record = JrcOperations::Access.projects(@access.membership).find(id)
     authorize_project!(record, capability)
-    record
+    JrcNico::MigrationVisibility.authorize!(record, account: @access.account)
   end
 
   def task(project_id, id, capability: 'projects.task.view')
     project = project(project_id)
     record = project.tasks.where(account_id: @access.account.id).find(id)
     authorize_project!(project, capability, record)
-    record
+    JrcNico::MigrationVisibility.authorize!(record, account: @access.account)
   end
 
   def authorize_project!(project, capability, record = nil)
@@ -58,15 +59,15 @@ class JrcNico::DomainAccess
   end
 
   def ticket(id)
-    JrcOperations::Access.ticket!(@access.membership, id)
+    JrcNico::MigrationVisibility.authorize!(JrcOperations::Access.ticket!(@access.membership, id), account: @access.account)
   end
 
   def self.authorize_resource!(access, type, id)
     domain = new(access)
     reader = JrcNico::ProtectedResourceReader.new(access, domain)
-    return reader.authorize!(type, id) if reader.supported?(type)
+    return JrcNico::MigrationVisibility.authorize!(reader.authorize!(type, id), account: access.account) if reader.supported?(type)
 
-    case type
+    record = case type
     when 'Contact' then access.contact(id)
     when 'JrcNico::KnowledgeDocument'
       JrcNico::KnowledgeDocument.where(account: access.account).approved.find(id)
@@ -116,11 +117,18 @@ class JrcNico::DomainAccess
       ticket = domain.ticket(id)
       Pundit.authorize(domain.context, ticket, :inspect?, policy_class: JrcServiceDesk::LifecycleActionPolicy)
       ticket
+    when 'JrcNico::OperationalSlaSnapshot', 'JrcNico::OperationalSlaMilestone'
+      model = type == 'JrcNico::OperationalSlaSnapshot' ? JrcServiceDesk::SlaSnapshot : JrcServiceDesk::SlaMilestone
+      source = model.where(account: access.account).find(id)
+      ticket = domain.ticket(source.ticket_id)
+      Pundit.authorize(domain.context, ticket, :view_sla?)
+      source
     when 'JrcNico::ServiceTicketSla', 'JrcNico::ServiceTicketCustomer', 'JrcNico::ServiceTicketNotes', 'JrcNico::ServiceTicketConversations'
       ticket = domain.ticket(id)
       action = { 'JrcNico::ServiceTicketSla' => :view_sla?, 'JrcNico::ServiceTicketCustomer' => :view_customer?,
                  'JrcNico::ServiceTicketNotes' => :view_notes?, 'JrcNico::ServiceTicketConversations' => :view_conversations? }.fetch(type)
       Pundit.authorize(domain.context, ticket, action)
+      JrcNico::SlaEvidence.new(access.account).legacy_ticket!(ticket) if type == 'JrcNico::ServiceTicketSla'
       ticket
     when 'JrcServiceDesk::Unit', 'JrcServiceDesk::OperatorCompany', 'JrcServiceDesk::Queue',
          'JrcServiceDesk::Priority', 'JrcServiceDesk::Category', 'JrcServiceDesk::TicketStatus'
@@ -155,5 +163,6 @@ class JrcNico::DomainAccess
       model.where(account_id: access.account.id).find(id)
     else raise Pundit::NotAuthorizedError
     end
+    JrcNico::MigrationVisibility.authorize!(record, account: access.account)
   end
 end

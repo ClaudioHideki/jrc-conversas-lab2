@@ -35,6 +35,39 @@ RSpec.describe 'JRC Broker account control', type: :request do
     stub_request(:get, "#{remote}/connections/#{connection_id}/status").to_return(status: 200, body: health.to_json)
   end
 
+  it 'audits reconnection, expiry and identity mismatch once without retaining the pairing code' do
+    headers = admin.create_new_auth_token.merge('Idempotency-Key' => 'synthetic-audit-intent')
+    operation_id = SecureRandom.uuid
+    stub_request(:post, "#{remote}/connections/#{connection_id}/pair").to_return(status: 200, body: {
+      operationId: operation_id, instance: { id: instance_id },
+      action: { type: 'PAIRING_CODE', code: 'NEVER-RETAIN', expiresAt: 1.minute.from_now.iso8601 }
+    }.to_json)
+    post "#{inbox_url}/pair", headers: headers, params: {}, as: :json
+    expect(response).to have_http_status(:ok)
+    expect(JrcBrokerConnectionEvent.where(account: account).pluck(:event_type)).to include('RECONNECT_REQUESTED')
+    travel 2.minutes do
+      2.times { get "#{inbox_url}/status", headers: headers }
+    end
+    expect(JrcBrokerConnectionEvent.where(account: account, event_type: 'QR_EXPIRED').count).to eq(1)
+    stub_request(:get, "#{remote}/connections/#{connection_id}/status")
+      .to_return(status: 200, body: health.merge(identityStatus: 'CONFIRMATION_REQUIRED').to_json)
+    2.times { get "#{inbox_url}/status", headers: headers }
+    expect(JrcBrokerConnectionEvent.where(account: account, event_type: 'NUMBER_MISMATCH').count).to eq(1)
+    expect(JrcBrokerConnectionEvent.where(account: account).to_json).not_to include('NEVER-RETAIN', 'synthetic-control')
+  end
+
+  it 'records a confirmed connection transition once with the attempt actor and real provider timestamps only' do
+    headers = admin.create_new_auth_token
+    get "#{inbox_url}/status", headers: headers
+    stub_request(:get, "#{remote}/connections/#{connection_id}/status").to_return(status: 200, body: health.merge(
+      instanceStatus: 'CONNECTED', identityStatus: 'CONFIRMED', phoneNumber: '+5521988882000',
+      connectedAt: '2026-11-02T11:45:00Z', lastSyncAt: nil
+    ).to_json)
+    2.times { get "#{inbox_url}/status", headers: headers }
+    expect(response.parsed_body).to include('phoneNumber' => '+5521988882000', 'connectedAt' => '2026-11-02T11:45:00Z', 'lastSyncAt' => nil)
+    expect(JrcBrokerConnectionEvent.where(account: account, event_type: 'CONNECTED').count).to eq(1)
+  end
+
   it 'adopts an existing API inbox idempotently without creating another inbox' do
     JrcBrokerInboxBinding.where(account: account).delete_all
     headers = admin.create_new_auth_token
@@ -316,5 +349,35 @@ RSpec.describe 'JRC Broker account control', type: :request do
     post "#{prefix}/inboxes/#{second.id}/pair", headers: headers, params: {}, as: :json
     expect(response).to have_http_status(:forbidden)
     expect(a_request(:post, "#{remote}/connections/#{second_connection}/pair")).not_to have_been_made
+  end
+
+  it 'records a disconnect failure without changing the persisted distribution' do
+    headers = admin.create_new_auth_token.merge('Idempotency-Key' => 'synthetic-disconnect-failure')
+    stub_request(:post, "#{remote}/connections/#{connection_id}/disconnect").to_return(status: 503, body: { code: 'ENGINE_UNAVAILABLE' }.to_json)
+    post "#{inbox_url}/disconnect", headers: headers, params: {}, as: :json
+    expect(response).to have_http_status(:bad_gateway)
+    expect(JrcBrokerConnectionEvent.where(account: account).pluck(:event_type)).to include('DISCONNECT_REQUESTED', 'SESSION_FAILED')
+  end
+
+  it 'audits explicit pairing permission changes atomically with before and after' do
+    create(:inbox_member, inbox: inbox, user: agent)
+    put "#{inbox_url}/grants", headers: admin.create_new_auth_token, params: { userIds: [agent.id] }, as: :json
+    expect(response).to have_http_status(:ok)
+    event = JrcBrokerConnectionEvent.where(account: account, event_type: 'PERMISSIONS_CHANGED').last!
+    expect(event.user_id).to eq(admin.id)
+    expect(event.metadata).to include('previous_user_ids' => [], 'next_user_ids' => [agent.id])
+  end
+
+  it 'audits observed session failure codes without retaining untrusted provider error text' do
+    headers = admin.create_new_auth_token
+    stub_request(:get, "#{remote}/connections/#{connection_id}/status")
+      .to_return(status: 200, body: health.merge(instanceStatus: 'ERROR', lastError: 'ENGINE_RECONNECT_FAILED').to_json)
+    2.times { get "#{inbox_url}/status", headers: headers }
+    expect(JrcBrokerConnectionEvent.where(account: account, event_type: 'SESSION_FAILED').last!.metadata['error_code']).to eq('ENGINE_RECONNECT_FAILED')
+    stub_request(:get, "#{remote}/connections/#{connection_id}/status")
+      .to_return(status: 200, body: health.merge(instanceStatus: 'ERROR', lastError: 'secret=NEVER-RETAIN-ERROR').to_json)
+    2.times { get "#{inbox_url}/status", headers: headers }
+    expect(JrcBrokerConnectionEvent.where(account: account, event_type: 'SESSION_FAILED').count).to eq(2)
+    expect(JrcBrokerInboxBinding.find_by!(inbox: inbox).connection_state.to_json).not_to include('NEVER-RETAIN-ERROR')
   end
 end
