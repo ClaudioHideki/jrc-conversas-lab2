@@ -35,6 +35,9 @@ test('native validation includes migration media and NICO permission regressions
 });
 
 test('the consolidated release rejects stale Flow ownership manifests before Rails validation', () => {
+  const integrationJob = native.split('  broker-and-import-integration:')[1];
+  const checkout = integrationJob.slice(integrationJob.indexOf('uses: actions/checkout@'), integrationJob.indexOf('- name: Dependencias nativas'));
+  assert.match(checkout, /fetch-depth: 0/, 'the manifest verifier needs its exact historical Git base');
   const manifestGate = native.indexOf('node script/jrc_native_module_manifest.mjs');
   const railsGate = native.indexOf('name: Regressao de contratos e integridade');
   assert.ok(manifestGate >= 0, 'the release must verify the frozen module manifest');
