@@ -12,6 +12,16 @@ class CustomerAPI extends ApiClient {
     return axios.get(`${url}/metadata`, requestOptions);
   }
 
+  operationalContacts(params = {}, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const url =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
+    return axios.get(`${url}/operational_contacts`, {
+      ...requestOptions,
+      params,
+    });
+  }
+
   identity(params) {
     return axios.get(`${this.url}/identity`, { params });
   }

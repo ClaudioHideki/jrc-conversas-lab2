@@ -158,8 +158,8 @@
       "requirement": "Segmentos/critérios/prévia, grupos econômicos separados de etiquetas, importações e contatos ativos",
       "status": "parcial",
       "constraint": "Não conceder acesso por segmento; preservar regras e engines existentes.",
-      "existing": "C4a/b/c preservados. C5 Central única de Importações concluída com arquivo/mapeamento/prévia/confirmação/resultado/histórico privado, popups canônicos, persistência e permissões validadas no Chrome desktop/celular. Contatos ativos operacionais, critérios financeiros/TRR e filtros nos demais módulos ainda parciais.",
-      "report": "docs/jrc_customers/import_central_checkpoint_20261103.json"
+      "existing": "C4a/b/c e C5 preservados. C6 Contatos ativos validou consulta nativa, janela/filtros/paginação, popups, persistência e origens CRM/ServiceDesk no Chrome desktop/celular claro/escuro; presença online preservada. Critérios financeiros/TRR, filtros dos demais módulos e demais requisitos integrais continuam parciais.",
+      "report": "docs/jrc_customers/operational_contacts_checkpoint_20261103.json"
     }
   ],
   "approval_central": {

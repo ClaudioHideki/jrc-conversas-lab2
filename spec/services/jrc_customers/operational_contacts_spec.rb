@@ -120,6 +120,17 @@ RSpec.describe JrcCustomers::OperationalContacts do
     expect { query.call }.to raise_error(Pundit::NotAuthorizedError)
   end
 
+  it 'does not expand a person match to every contact of their company while still supporting direct company searches' do
+    company = account.master_companies.create!(name: 'Distinct company', tax_id: '11222333000181')
+    contact.update!(company_id: company.id)
+    colleague = create(:contact, account: account, company_id: company.id, name: 'Different colleague')
+    [contact, colleague].each { |person| create(:conversation, account: account, contact: person, status: :open) }
+    expect(query.call(params: { q: contact.name })[:payload].pluck('id')).to eq([contact.id])
+    expect(query.call(params: { q: company.name })[:payload].pluck('id')).to contain_exactly(contact.id, colleague.id)
+    expect(query.call(params: { q: company.tax_id })[:payload].pluck('id')).to contain_exactly(contact.id, colleague.id)
+    expect(query.call(params: { q: '%' })[:payload]).to be_empty
+  end
+
   it 'projects only native calls handled by the agent in visible conversations and never includes transcripts or recording metadata' do
     account.account_users.find_by!(user: actor).update!(role: :agent)
     inbox = create(:channel_api, account: account).inbox

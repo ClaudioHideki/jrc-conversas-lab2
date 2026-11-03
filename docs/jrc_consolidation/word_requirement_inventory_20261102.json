@@ -6323,14 +6323,29 @@
           },
           "requirement_text": "Correção conceitual — Contatos ativos não deve ser uma segunda lista do Cadastro Mestre. Deve ser uma visão operacional dos contatos em movimento.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "Contact/ContactDirectory/CorporateCoverage",
+            "Visibility/Conversations::PermissionFilterService",
+            "CRM activity/follow-up and Ticket/EventPolicy",
+            "Company/ContactDetailsDialog",
+            "ComposeConversation/VoiceCallButton/AgendaRecord"
+          ],
+          "implemented_change": "C6 operacional com escopos nativos, filtros/janela/paginação, popups e origens. Persistência real e Chrome desktop/celular validados; nenhuma operação externa executada.",
+          "files": [
+            "app/services/jrc_customers/operational_contacts.rb",
+            "app/services/jrc_customers/operational_sources.rb",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/OperationalContactsPage.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/useOperationalContacts.js"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/operational_contacts_checkpoint_20261103.json",
+            "33/0 backend;5/0 frontend;Ruby5arquivos0infrações;ESLint6arquivos0/0",
+            "Chrome por retomadas:edição855,conversa73resolvida,atividade1concluída,chamado2,paginação e temas estáveis;integridade144linhas anteriores+C5/C4"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Preservar C6 e incluir na integraçãoG; continuar demais critérios deC eD/E/F. Comunicação externa real não homologada."
         },
         {
           "id": "cadastro-mestre:P0275",
@@ -6363,14 +6378,29 @@
           },
           "requirement_text": "Conversa ou atendimento aberto no momento.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "Contact/ContactDirectory/CorporateCoverage",
+            "Visibility/Conversations::PermissionFilterService",
+            "CRM activity/follow-up and Ticket/EventPolicy",
+            "Company/ContactDetailsDialog",
+            "ComposeConversation/VoiceCallButton/AgendaRecord"
+          ],
+          "implemented_change": "C6 operacional com escopos nativos, filtros/janela/paginação, popups e origens. Persistência real e Chrome desktop/celular validados; nenhuma operação externa executada.",
+          "files": [
+            "app/services/jrc_customers/operational_contacts.rb",
+            "app/services/jrc_customers/operational_sources.rb",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/OperationalContactsPage.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/useOperationalContacts.js"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/operational_contacts_checkpoint_20261103.json",
+            "33/0 backend;5/0 frontend;Ruby5arquivos0infrações;ESLint6arquivos0/0",
+            "Chrome por retomadas:edição855,conversa73resolvida,atividade1concluída,chamado2,paginação e temas estáveis;integridade144linhas anteriores+C5/C4"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Preservar C6 e incluir na integraçãoG; continuar demais critérios deC eD/E/F. Comunicação externa real não homologada."
         },
         {
           "id": "cadastro-mestre:P0277",
@@ -6383,14 +6413,29 @@
           },
           "requirement_text": "Atividade pendente/próxima ação válida.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "Contact/ContactDirectory/CorporateCoverage",
+            "Visibility/Conversations::PermissionFilterService",
+            "CRM activity/follow-up and Ticket/EventPolicy",
+            "Company/ContactDetailsDialog",
+            "ComposeConversation/VoiceCallButton/AgendaRecord"
+          ],
+          "implemented_change": "C6 operacional com escopos nativos, filtros/janela/paginação, popups e origens. Persistência real e Chrome desktop/celular validados; nenhuma operação externa executada.",
+          "files": [
+            "app/services/jrc_customers/operational_contacts.rb",
+            "app/services/jrc_customers/operational_sources.rb",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/OperationalContactsPage.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/useOperationalContacts.js"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/operational_contacts_checkpoint_20261103.json",
+            "33/0 backend;5/0 frontend;Ruby5arquivos0infrações;ESLint6arquivos0/0",
+            "Chrome por retomadas:edição855,conversa73resolvida,atividade1concluída,chamado2,paginação e temas estáveis;integridade144linhas anteriores+C5/C4"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Preservar C6 e incluir na integraçãoG; continuar demais critérios deC eD/E/F. Comunicação externa real não homologada."
         },
         {
           "id": "cadastro-mestre:P0278",
@@ -6403,14 +6448,29 @@
           },
           "requirement_text": "Interação recente dentro de janela configurável.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "Contact/ContactDirectory/CorporateCoverage",
+            "Visibility/Conversations::PermissionFilterService",
+            "CRM activity/follow-up and Ticket/EventPolicy",
+            "Company/ContactDetailsDialog",
+            "ComposeConversation/VoiceCallButton/AgendaRecord"
+          ],
+          "implemented_change": "C6 operacional com escopos nativos, filtros/janela/paginação, popups e origens. Persistência real e Chrome desktop/celular validados; nenhuma operação externa executada.",
+          "files": [
+            "app/services/jrc_customers/operational_contacts.rb",
+            "app/services/jrc_customers/operational_sources.rb",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/OperationalContactsPage.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/useOperationalContacts.js"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/operational_contacts_checkpoint_20261103.json",
+            "33/0 backend;5/0 frontend;Ruby5arquivos0infrações;ESLint6arquivos0/0",
+            "Chrome por retomadas:edição855,conversa73resolvida,atividade1concluída,chamado2,paginação e temas estáveis;integridade144linhas anteriores+C5/C4"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Preservar C6 e incluir na integraçãoG; continuar demais critérios deC eD/E/F. Comunicação externa real não homologada."
         },
         {
           "id": "cadastro-mestre:P0279",
@@ -6539,14 +6599,29 @@
           },
           "requirement_text": "Identificação imediata e link para popup mestre.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "Contact/ContactDirectory/CorporateCoverage",
+            "Visibility/Conversations::PermissionFilterService",
+            "CRM activity/follow-up and Ticket/EventPolicy",
+            "Company/ContactDetailsDialog",
+            "ComposeConversation/VoiceCallButton/AgendaRecord"
+          ],
+          "implemented_change": "C6 operacional com escopos nativos, filtros/janela/paginação, popups e origens. Persistência real e Chrome desktop/celular validados; nenhuma operação externa executada.",
+          "files": [
+            "app/services/jrc_customers/operational_contacts.rb",
+            "app/services/jrc_customers/operational_sources.rb",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/OperationalContactsPage.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/useOperationalContacts.js"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/operational_contacts_checkpoint_20261103.json",
+            "33/0 backend;5/0 frontend;Ruby5arquivos0infrações;ESLint6arquivos0/0",
+            "Chrome por retomadas:edição855,conversa73resolvida,atividade1concluída,chamado2,paginação e temas estáveis;integridade144linhas anteriores+C5/C4"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Preservar C6 e incluir na integraçãoG; continuar demais critérios deC eD/E/F. Comunicação externa real não homologada."
         },
         {
           "id": "cadastro-mestre:P0285",
@@ -6587,14 +6662,29 @@
           },
           "requirement_text": "WhatsApp, telefone, e-mail ou canal em uso.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "Contact/ContactDirectory/CorporateCoverage",
+            "Visibility/Conversations::PermissionFilterService",
+            "CRM activity/follow-up and Ticket/EventPolicy",
+            "Company/ContactDetailsDialog",
+            "ComposeConversation/VoiceCallButton/AgendaRecord"
+          ],
+          "implemented_change": "C6 operacional com escopos nativos, filtros/janela/paginação, popups e origens. Persistência real e Chrome desktop/celular validados; nenhuma operação externa executada.",
+          "files": [
+            "app/services/jrc_customers/operational_contacts.rb",
+            "app/services/jrc_customers/operational_sources.rb",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/OperationalContactsPage.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/useOperationalContacts.js"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/operational_contacts_checkpoint_20261103.json",
+            "33/0 backend;5/0 frontend;Ruby5arquivos0infrações;ESLint6arquivos0/0",
+            "Chrome por retomadas:edição855,conversa73resolvida,atividade1concluída,chamado2,paginação e temas estáveis;integridade144linhas anteriores+C5/C4"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Preservar C6 e incluir na integraçãoG; continuar demais critérios deC eD/E/F. Comunicação externa real não homologada."
         },
         {
           "id": "cadastro-mestre:P0287",
@@ -6635,14 +6725,29 @@
           },
           "requirement_text": "Atendimento/conversa atual, última interação, próxima ação e responsável.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "Contact/ContactDirectory/CorporateCoverage",
+            "Visibility/Conversations::PermissionFilterService",
+            "CRM activity/follow-up and Ticket/EventPolicy",
+            "Company/ContactDetailsDialog",
+            "ComposeConversation/VoiceCallButton/AgendaRecord"
+          ],
+          "implemented_change": "C6 operacional com escopos nativos, filtros/janela/paginação, popups e origens. Persistência real e Chrome desktop/celular validados; nenhuma operação externa executada.",
+          "files": [
+            "app/services/jrc_customers/operational_contacts.rb",
+            "app/services/jrc_customers/operational_sources.rb",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/OperationalContactsPage.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/useOperationalContacts.js"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/operational_contacts_checkpoint_20261103.json",
+            "33/0 backend;5/0 frontend;Ruby5arquivos0infrações;ESLint6arquivos0/0",
+            "Chrome por retomadas:edição855,conversa73resolvida,atividade1concluída,chamado2,paginação e temas estáveis;integridade144linhas anteriores+C5/C4"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Preservar C6 e incluir na integraçãoG; continuar demais critérios deC eD/E/F. Comunicação externa real não homologada."
         },
         {
           "id": "cadastro-mestre:P0289",
@@ -6683,14 +6788,29 @@
           },
           "requirement_text": "Em atendimento, aguardando, ativo, sem interação, etc.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "Contact/ContactDirectory/CorporateCoverage",
+            "Visibility/Conversations::PermissionFilterService",
+            "CRM activity/follow-up and Ticket/EventPolicy",
+            "Company/ContactDetailsDialog",
+            "ComposeConversation/VoiceCallButton/AgendaRecord"
+          ],
+          "implemented_change": "C6 operacional com escopos nativos, filtros/janela/paginação, popups e origens. Persistência real e Chrome desktop/celular validados; nenhuma operação externa executada.",
+          "files": [
+            "app/services/jrc_customers/operational_contacts.rb",
+            "app/services/jrc_customers/operational_sources.rb",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/OperationalContactsPage.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/useOperationalContacts.js"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/operational_contacts_checkpoint_20261103.json",
+            "33/0 backend;5/0 frontend;Ruby5arquivos0infrações;ESLint6arquivos0/0",
+            "Chrome por retomadas:edição855,conversa73resolvida,atividade1concluída,chamado2,paginação e temas estáveis;integridade144linhas anteriores+C5/C4"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Preservar C6 e incluir na integraçãoG; continuar demais critérios deC eD/E/F. Comunicação externa real não homologada."
         },
         {
           "id": "cadastro-mestre:P0291",
@@ -6731,14 +6851,29 @@
           },
           "requirement_text": "Abrir conversa/atendimento, enviar mensagem, ligar, e-mail, abrir CRM/Service Desk conforme vínculo.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "Contact/ContactDirectory/CorporateCoverage",
+            "Visibility/Conversations::PermissionFilterService",
+            "CRM activity/follow-up and Ticket/EventPolicy",
+            "Company/ContactDetailsDialog",
+            "ComposeConversation/VoiceCallButton/AgendaRecord"
+          ],
+          "implemented_change": "C6 operacional com escopos nativos, filtros/janela/paginação, popups e origens. Persistência real e Chrome desktop/celular validados; nenhuma operação externa executada.",
+          "files": [
+            "app/services/jrc_customers/operational_contacts.rb",
+            "app/services/jrc_customers/operational_sources.rb",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/OperationalContactsPage.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/useOperationalContacts.js"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/operational_contacts_checkpoint_20261103.json",
+            "33/0 backend;5/0 frontend;Ruby5arquivos0infrações;ESLint6arquivos0/0",
+            "Chrome por retomadas:edição855,conversa73resolvida,atividade1concluída,chamado2,paginação e temas estáveis;integridade144linhas anteriores+C5/C4"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Preservar C6 e incluir na integraçãoG; continuar demais critérios deC eD/E/F. Comunicação externa real não homologada."
         },
         {
           "id": "cadastro-mestre:P0295",
@@ -8511,14 +8646,29 @@
           },
           "requirement_text": "Critério operacional claro e diferente da lista geral.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "Contact/ContactDirectory/CorporateCoverage",
+            "Visibility/Conversations::PermissionFilterService",
+            "CRM activity/follow-up and Ticket/EventPolicy",
+            "Company/ContactDetailsDialog",
+            "ComposeConversation/VoiceCallButton/AgendaRecord"
+          ],
+          "implemented_change": "C6 operacional com escopos nativos, filtros/janela/paginação, popups e origens. Persistência real e Chrome desktop/celular validados; nenhuma operação externa executada.",
+          "files": [
+            "app/services/jrc_customers/operational_contacts.rb",
+            "app/services/jrc_customers/operational_sources.rb",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/OperationalContactsPage.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/useOperationalContacts.js"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/operational_contacts_checkpoint_20261103.json",
+            "33/0 backend;5/0 frontend;Ruby5arquivos0infrações;ESLint6arquivos0/0",
+            "Chrome por retomadas:edição855,conversa73resolvida,atividade1concluída,chamado2,paginação e temas estáveis;integridade144linhas anteriores+C5/C4"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Preservar C6 e incluir na integraçãoG; continuar demais critérios deC eD/E/F. Comunicação externa real não homologada."
         },
         {
           "id": "cadastro-mestre:P0369",

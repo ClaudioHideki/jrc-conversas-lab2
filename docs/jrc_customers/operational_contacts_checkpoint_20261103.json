@@ -1,0 +1,260 @@
+{
+  "date": "2026-11-03",
+  "stage": "C6 — Contatos ativos operacionais",
+  "status": "Incremento funcional validado; Cadastro Mestre e escopo integral C/D/E/F/G continuam parciais",
+  "branch": "codex/relacionamento-v2-20261101",
+  "base_commit": "d36648898ef4d4b8d135b5f6364c7958dd407ebd",
+  "preserved_c5": "a1fef6240222f37513be20f498efcfe6315418c0",
+  "backend_increment": "docs/jrc_customers/operational_contacts_backend_checkpoint_20261103.json",
+  "confirmed": [
+    "Visão operacional sobre o Contact canônico; não cria cadastro paralelo, campo online ou migration. Endpoint/página antigos de presença online preservados",
+    "Conversa/atendimento aberto, atividade/follow-up válido do CRM e interação recente de fontes autorizadas; janela de1a365dias, padrão30, mantida na URL",
+    "Pesquisa, situação, origem e segmento, paginação real do servidor até50; itens e totais usam os mesmos escopos nativos",
+    "Popups canônicos de contato e empresa, compositor nativo, botão de telefonia condicionado à configuração nativa e link e-mail; origens de conversa/CRM/ServiceDesk funcionam",
+    "Permissões de inbox/participação/custom-role, conta, operadora/unidade, CRM e ServiceDesk reavaliadas no servidor. Parâmetros de identidade não concedem acesso",
+    "Notas privadas, presença online e timestamps globais do cadastro não ativam contatos. Conteúdo de mensagens, transcrições, metadados sensíveis e credenciais não entram na projeção"
+  ],
+  "search_correction": {
+    "discovered_in_chrome": "ContactQuery também encontra empresa através de seus contatos. Isso expandia a busca por uma pessoa para todos os contatos da empresa.",
+    "change": "C6 usa a busca canônica de pessoa sem expansão indireta e combina somente campos diretos da empresa. ContactQuery/DirectoryQuery e módulos estáveis não foram alterados.",
+    "regression": "Pessoa retorna apenas seu ID; nome/CNPJ direto da empresa preserva os contatos correspondentes; curingas tratados literalmente."
+  },
+  "backend": {
+    "examples": 33,
+    "failures": 0,
+    "pending": 0,
+    "single_final_green_run": true,
+    "evidence": {
+      "path": ".codex/customer-operational-search-checked-backend.json",
+      "sha256": "c4a9747fdd0e6cb264b6afa46e9deb48a3662e7e34f87fe724e9422b90cb97ac"
+    },
+    "scope": "C6 serviços/API, Customer360 e políticas ServiceDesk; isolamento, acesso negado/revogado, inbox/participação, chamadas, pendências, privacidade, paginação e busca"
+  },
+  "frontend": {
+    "examples": 5,
+    "failures": 0,
+    "evidence": {
+      "path": ".codex/customer-operational-core-frontend.json",
+      "sha256": "93ba164b247e640da049f89a6c5e59a5d10bee797b94db9204780dbb54a658ae"
+    },
+    "scope": "Serviços e diálogos simulados nos testes unitários; persistência comprovada separadamente no Chrome. Código frontend não mudou depois do build.",
+    "lint": {
+      "files": 6,
+      "errors": 0,
+      "warnings": 0,
+      "evidence": {
+        "path": ".codex/customer-operational-frontend-final-eslint.json",
+        "sha256": "6517a834c1749cfc79c1114b1b3eae633c54240dee460ad19b315ffd4c097fcd"
+      }
+    },
+    "shared_sidebar_lint": {
+      "base_errors": 37,
+      "current_errors": 37,
+      "base_warnings": 0,
+      "current_warnings": 0,
+      "new_violations": 0,
+      "comparison": "rule/severity/message multiset; unchanged existing findings preserved, no fix or cop disable",
+      "evidence": {
+        "path": ".codex/customer-operational-sidebar-lint-comparison.json",
+        "sha256": "6da87f247c1709e6c7245a7669d4f725c7a1b473193b89accb499e0c68bf33e7"
+      }
+    }
+  },
+  "ruby_style": {
+    "files": 5,
+    "offenses": 0,
+    "evidence": {
+      "path": ".codex/customer-operational-search-checked-style.json",
+      "sha256": "fd8a1fec3b1e80bea82d21d82c8b1459a2f5b9b99c6afc89a696086078ae4f0d"
+    },
+    "transport_correction": "Git archive produziu CRLF em3novosarquivos. Fonte anterior mantida; novo snapshot recebe os5arquivos atuais LF por overlay após desvincular os destinos. Nenhum cop desativado."
+  },
+  "build": {
+    "type": "Somente Vite local, sem imagemDocker",
+    "report": {
+      "path": ".codex/customer-operational-native-limit-build.json",
+      "sha256": "12fc16a72700ffe09738bc4d77038b023514d29cba7ad2d8a69b1357860d25db"
+    },
+    "log": {
+      "path": ".codex/customer-operational-native-limit-production-assets.log",
+      "sha256": "f5b83e3a40444aba09088a40f41950d8c93b14bb97c6631c4aed0a21560904be"
+    },
+    "vite_duration": "3m12s",
+    "compiled_files": 583,
+    "heap_mib": 4096,
+    "minimum_free_bytes": 1444220928,
+    "earlier_failures": "Tentativas limitadas a2e3GiB falharam exit134 por heap; relatórios guardados. Mesmo limite4GiB já aprovado naC5 concluiu com guarda de disco750MB.",
+    "warnings": "Chunks grandes, Browserslist, background e import estático/dinâmico preexistentes, sem supressão ou novas dependências",
+    "reuse": "Correção posterior foi apenas Ruby; assets não precisaram de nova compilação. Todos583hashes conferidos no runtime."
+  },
+  "chrome": {
+    "browser": "Chrome real headless; desktop1520x1050 e viewport celular390x844, banco local sintético com APIs reais",
+    "final_report": {
+      "path": "../validacao-relacionamento-v2-20261101/contatos-ativos-c6-chrome-origens-final.json",
+      "sha256": "0e5294b2d3e02b5f2f1c4b124ad7325a567325ca07ab91f8196599acd90b5103"
+    },
+    "checks": {
+      "server_pagination_and_no_presence_activation": true,
+      "native_conversation_resolution_persisted": true,
+      "native_filters_and_configurable_recent_window": true,
+      "master_contact_edit_company_popup_and_reload": true,
+      "native_message_composer_no_external_send": true,
+      "desktop_mobile_themes_and_persisted_popup": true,
+      "crm_origin_completion_and_operational_refresh": true,
+      "service_desk_origin_and_return_navigation": true,
+      "mobile_actual_next_previous_and_stable_theme_captures": true,
+      "legacy_online_presence_endpoint_preserved": true,
+      "restricted_role_does_not_leak_operational_records": true
+    },
+    "resume_chain": [
+      "contatos-ativos-c6-chrome-fluxos-nativos.json",
+      "contatos-ativos-c6-chrome-ui-retomada.json",
+      "contatos-ativos-c6-chrome-origens-final.json"
+    ],
+    "no_replay": "Fechamento e edição anteriores preservados e reconfirmados, não repetidos. Última retomada executou apenas conclusão CRM e verificações restantes.",
+    "native_writes": [
+      "POST conversations/27/toggle_status:conversa73resolvida",
+      "PATCH customers/contacts/855:cargo persistido",
+      "POST crm/activities/1/complete:conclusão persistida"
+    ],
+    "integration": "Chamado2 abriu na tela nativa e voltou sem escrita; papel restrito retornou0itens mesmo com parâmetros forjados; endpoint antigo contacts/active continuou disponível",
+    "themes": "Capturas010–013 após animações finitas, inspecionadas; captura003 ocorreu durante transição do sidebar e não é evidência visual final",
+    "actual_outbound_limits": "Compositor aberto com caixa autorizada, rascunho e descarte. Nenhum envio, chamada telefônica ou operação externa real foi efetuado; telefonia real depende da configuração nativa e será tratada emG.",
+    "earlier_failures": "Seletores Pesquisar/Resolver não correspondiam a Buscar/Resolve; headings duplicados nativos exigiram escopo; display_id da fixture estava em cache nulo e foi resolvido pela projeção autenticada. Relatórios mantidos como falhas; não foram mascarados."
+  },
+  "integrity": {
+    "status": "passed",
+    "source": "/consolidation-customer-operational-search-checked",
+    "protected_previous_rows": 144,
+    "account": 1397,
+    "canonical_contact_ids": [
+      855,
+      856,
+      857,
+      858,
+      859,
+      860,
+      861,
+      862,
+      863,
+      864,
+      865,
+      866,
+      867,
+      868,
+      869,
+      870,
+      871,
+      872,
+      873,
+      874,
+      875,
+      876,
+      877,
+      878,
+      879,
+      880,
+      881,
+      882,
+      883,
+      884
+    ],
+    "company_id": 921,
+    "native_contact_edit": 855,
+    "native_resolved_conversation": 73,
+    "native_completed_activity": 1,
+    "ticket_id": 2,
+    "ticket_navigation_did_not_write": true,
+    "operational_total": 29,
+    "restricted_actor_total": 0,
+    "verifier": null,
+    "external_operations": 0,
+    "production_changed": false
+  },
+  "c5_preservation": {
+    "status": "passed",
+    "source": "/consolidation-customer-operational-search-checked",
+    "protected_previous_rows": 102,
+    "native_company_ids": [
+      917,
+      919
+    ],
+    "native_contact_ids": [
+      851,
+      852,
+      853,
+      854
+    ],
+    "original_contact_id_preserved": 851,
+    "private_source_files_verified": 29,
+    "encrypted_fiscal_identity_verified": true,
+    "labels_json_roles_primary_and_counters_preserved": true,
+    "no_signature_authority_granted": true,
+    "verifier": null,
+    "external_operations": 0,
+    "production_changed": false
+  },
+  "c4_preservation": {
+    "status": "passed",
+    "source": "/consolidation-customer-operational-search-checked",
+    "protected_old_rows": 18,
+    "fixture_company_contexts_checked": 26,
+    "group": 127,
+    "principal": 75,
+    "members": [
+      74,
+      75
+    ],
+    "audits": {
+      "customer_economic_group_created": 1,
+      "customer_economic_group_linked": 4,
+      "customer_economic_group_updated": 4
+    },
+    "verifier": null,
+    "external_operations": 0,
+    "production_changed": false,
+    "chrome": "10 checks passed in continuation; stable theme QA reported separately",
+    "unused_group": 128,
+    "unused_deleted": true,
+    "unused_audits": {
+      "customer_economic_group_created": 1,
+      "customer_economic_group_deleted": 1
+    },
+    "native_labels": 2,
+    "canonical_people": 26
+  },
+  "synthetic_fixture": {
+    "account": 1397,
+    "company": 921,
+    "contacts": 30,
+    "operational": 29,
+    "source": ".codex/customer-operational-ui.json",
+    "seed": ".codex/customer-operational-ui-seed-checked.json1/0",
+    "initial_seed_failure": "Leitura channel.inbox em cache retornou nil; transação integral revertida. Consulta fresca ao Inbox corrigida eWebhooknil. Fixture criada uma vez; não repetir.",
+    "database_generated_ids": "display_id gerado pelo banco não estava atualizado no objeto de criação. Chrome usou o valor real da consulta autenticada, sem adivinhar ou alterar a fixture."
+  },
+  "source": {
+    "path": ".codex/customer-operational-search-checked-source-verified.json",
+    "sha256": "1bd58ec9d0b5487bc0ea52761e179ee36265cbf34ae7c0fc947eb77677652966"
+  },
+  "disk_preservation": [
+    ".codex/customer-operational-lossless-compression.json",
+    ".codex/customer-operational-overlay-compression-20261103.json",
+    ".codex/customer-operational-final-assets-preservation.json",
+    ".codex/customer-operational-search-checked-preservation.json"
+  ],
+  "source_preservation": "Novos snapshots compartilham arquivos imutáveis por hardlink; destinos do novo overlay desvinculados antes da escrita e árvore anterior integralmente reverificada. Assets/private storage/bancos anteriores preservados.",
+  "remaining": [
+    "C: com cerca1GB livre; manter guarda e orçamento de cópia, sem limpezas amplas",
+    "C: critérios financeiros e filtros nos demais módulos ainda parciais; TRR continua sem definição e não foi inventado",
+    "Nenhum novo marcador manual de acompanhamento criado sem regra explícita; status cadastral/portfolio não foram reinterpretados como presença operacional",
+    "Conferir demais fragmentos do Word e continuarD/E/F/G; homologação externaDocuSign e telefonia não declaradas concluídas"
+  ],
+  "publication": {
+    "push": false,
+    "docker_image_build_publish": false,
+    "deploy_or_production_migrations": false,
+    "external_operations": 0
+  },
+  "hooks": "BootstrapHusky ausente no worktree; gates manuais registrados. Commit usa core.hooksPath apenas no comando, sem alegar execução do hook nativo."
+}

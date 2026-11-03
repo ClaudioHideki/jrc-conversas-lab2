@@ -1624,6 +1624,38 @@
       "FILE_CONTEXT": "{filename} · {kind}",
       "ERROR_DETAIL": "{field}: {message}",
       "REFERENCE_ROW": "Empresa identificada no registro {line}"
+    },
+    "OPERATIONAL_CONTACTS": {
+      "TITLE": "Contatos ativos",
+      "HELP": "Visão operacional de conversas e atendimentos abertos, próximas ações e interações recentes. Registros e totais respeitam suas permissões e cobertura atuais.",
+      "REFRESH": "Atualizar",
+      "SEARCH": "Contato, empresa, e-mail ou telefone",
+      "STATUS": "Status operacional",
+      "SOURCE": "Origem do movimento",
+      "DAYS": "Janela de interação recente (dias)",
+      "APPLY": "Aplicar filtros",
+      "TOTAL": "{total} contatos em movimento · janela de {days} dias",
+      "EMPTY": "Nenhum contato em movimento no escopo e filtros atuais.",
+      "CONTEXT": "Contexto e canal",
+      "NO_CONTEXT": "Sem atendimento atual",
+      "NO_CHANNEL": "Canal não informado",
+      "NO_OWNER": "Sem responsável atribuído",
+      "NO_INTERACTION": "Sem interação registrada nas fontes autorizadas",
+      "EMAIL": "E-mail",
+      "PAGINATION": "Paginação de contatos ativos",
+      "PAGE": "Página {page}",
+      "STATES": {
+        "in_service": "Em atendimento",
+        "waiting": "Aguardando",
+        "active": "Ativo"
+      },
+      "KINDS": {
+        "conversation": "Conversa",
+        "activity": "Atividade CRM",
+        "follow_up": "Próxima ação CRM",
+        "ticket": "Chamado Service Desk",
+        "call": "Ligação"
+      }
     }
   }
 }

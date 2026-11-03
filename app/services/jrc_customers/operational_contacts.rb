@@ -53,7 +53,7 @@ class JrcCustomers::OperationalContacts
   end
 
   def filter(relation, signals, filters)
-    relation = JrcCustomers::ContactQuery.new(account: @account, scope: relation, query: filters[:q]).call
+    relation = search(relation, filters[:q])
     relation = relation.where(movement: { operational_status: filters[:status] }) if filters[:status].present?
     if filters[:kind].present?
       quoted = ActiveRecord::Base.connection.quote(filters[:kind])
@@ -64,6 +64,22 @@ class JrcCustomers::OperationalContacts
     taxonomy = JrcCustomers::Taxonomy.active.where(account_id: @account.id).find(filters[:taxonomy_id])
     ids = JrcCustomers::SegmentMembers.new(account: @account, actor: @actor, taxonomy: taxonomy).contacts.reselect(:id)
     relation.where(id: ids)
+  end
+
+  def search(relation, value)
+    term = value.to_s.strip.first(200)
+    return relation if term.blank?
+
+    contacts = JrcCustomers::ContactQuery.new(account: @account, scope: relation, query: term, include_company: false).call
+    pattern = "%#{ActiveRecord::Base.sanitize_sql_like(term)}%"
+    # DirectoryQuery also finds companies through their people. Here that would
+    # expand a match on one person to every operational contact at that company.
+    companies = @account.master_companies.where(
+      'name ILIKE :q OR trade_name ILIKE :q OR customer_code ILIKE :q OR tax_id ILIKE :q OR ' \
+      'email ILIKE :q OR phone_number ILIKE :q OR domain ILIKE :q',
+      q: pattern
+    )
+    contacts.or(relation.where(company_id: companies.select(:id)))
   end
 
   def serialize(records, signals)

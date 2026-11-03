@@ -1306,6 +1306,7 @@ const menuItems = computed(() => {
             'jrc_customer_segments',
             'jrc_customer_groups',
             'jrc_customer_imports',
+            'jrc_customer_operational_contacts',
             'contacts_dashboard_index',
             'contacts_dashboard_active',
             'contacts_edit',
@@ -1359,7 +1360,7 @@ const menuItems = computed(() => {
               name: 'Customer Active Contacts',
               label: 'Contatos ativos',
               icon: 'i-lucide-activity',
-              to: accountScopedRoute('contacts_dashboard_active'),
+              to: accountScopedRoute('jrc_customer_operational_contacts'),
             },
           ],
         }
