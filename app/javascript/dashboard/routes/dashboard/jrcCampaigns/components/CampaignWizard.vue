@@ -40,6 +40,19 @@ const emit = defineEmits([
 ]);
 const { t } = useI18n();
 const { enabled: hasCustomerMaster } = useCustomerMaster();
+const previewCardClasses = [
+  'border-[#93c5fd] border-t-4 border-t-[#2563eb] bg-[#eff6ff] dark:border-n-blue-6 dark:border-t-n-blue-9 dark:bg-n-blue-2',
+  'border-[#86efac] border-t-4 border-t-[#16a34a] bg-[#ecfdf5] dark:border-n-teal-6 dark:border-t-n-teal-9 dark:bg-n-teal-2',
+  'border-[#fdba74] border-t-4 border-t-[#f97316] bg-[#fff7ed] dark:border-n-amber-6 dark:border-t-n-amber-9 dark:bg-n-amber-2',
+  'border-[#fda4af] border-t-4 border-t-[#e11d48] bg-[#fff1f2] dark:border-n-ruby-6 dark:border-t-n-ruby-9 dark:bg-n-ruby-2',
+  'border-[#c4b5fd] border-t-4 border-t-[#7c3aed] bg-[#f5f3ff] dark:border-n-violet-6 dark:border-t-n-violet-9 dark:bg-n-violet-2',
+  'border-[#f9a8d4] border-t-4 border-t-[#ec4899] bg-[#fdf2f8] dark:border-n-iris-6 dark:border-t-n-iris-9 dark:bg-n-iris-2',
+];
+const reviewCardClasses = [
+  previewCardClasses[0],
+  previewCardClasses[1],
+  previewCardClasses[4],
+];
 const stepIndex = ref(0);
 const saving = ref(false);
 const audienceInputMode = ref(null);
@@ -1563,7 +1576,9 @@ watch(
                 class="mt-1.5 w-full rounded-xl border border-n-weak bg-n-background px-3 py-2.5"
                 :placeholder="$t('JRC_CAMPAIGNS.WIZARD.NAME_PLACEHOLDER')"
             /></label>
-            <div class="campaign-channel-panel rounded-2xl border p-5">
+            <div
+              class="campaign-channel-panel rounded-2xl border border-[#93c5fd] bg-[#eff6ff] p-5 dark:border-n-blue-6 dark:bg-n-blue-2"
+            >
               <h4 class="text-sm font-semibold text-n-slate-12">
                 {{ $t('JRC_CAMPAIGNS.WIZARD.DELIVERY_CHANNEL') }}
               </h4>
@@ -1605,7 +1620,9 @@ watch(
                 </button>
               </div>
             </div>
-            <div class="campaign-source-panel rounded-2xl border p-5">
+            <div
+              class="campaign-source-panel rounded-2xl border border-[#c4b5fd] bg-[#f5f3ff] p-5 dark:border-n-violet-6 dark:bg-n-violet-2"
+            >
               <h4 class="text-sm font-semibold text-n-slate-12">
                 {{ $t('JRC_CAMPAIGNS.WIZARD.SOURCE') }}
               </h4>
@@ -1819,7 +1836,9 @@ watch(
                 v-model="form.audience_config.customer_filters"
               />
             </div>
-            <div class="campaign-preview-panel rounded-2xl border p-5">
+            <div
+              class="campaign-preview-panel rounded-2xl border border-[#67e8f9] bg-[#ecfeff] p-5 dark:border-n-teal-6 dark:bg-n-teal-2"
+            >
               <div class="flex items-center justify-between gap-3">
                 <div>
                   <h4 class="text-sm font-semibold text-n-slate-12">
@@ -1881,7 +1900,10 @@ watch(
                   ]"
                   :key="item.key"
                   class="campaign-preview-card rounded-xl border p-4"
-                  :class="`campaign-preview-card-${index + 1}`"
+                  :class="[
+                    `campaign-preview-card-${index + 1}`,
+                    previewCardClasses[index],
+                  ]"
                 >
                   <p class="text-xs text-n-slate-10">{{ item.label }}</p>
                   <p class="mt-2 text-xl font-semibold" :class="item.className">
@@ -3077,7 +3099,10 @@ watch(
                 ]"
                 :key="card.title"
                 class="campaign-review-card rounded-2xl border p-5"
-                :class="`campaign-review-card-${index + 1}`"
+                :class="[
+                  `campaign-review-card-${index + 1}`,
+                  reviewCardClasses[index],
+                ]"
               >
                 <div class="flex items-center gap-2">
                   <span
@@ -3236,7 +3261,7 @@ watch(
         <aside class="lg:col-span-3">
           <div class="space-y-4 lg:sticky lg:top-0">
             <article
-              class="campaign-summary-panel rounded-2xl border p-5 shadow-sm"
+              class="campaign-summary-panel rounded-2xl border border-[#fdba74] border-t-4 border-t-[#f97316] bg-[#fff7ed] p-5 shadow-sm dark:border-n-amber-6 dark:border-t-n-amber-9 dark:bg-n-amber-2"
             >
               <p
                 class="text-xs font-semibold uppercase tracking-wide text-n-slate-10"
@@ -3379,68 +3404,3 @@ watch(
     </footer>
   </div>
 </template>
-
-<style scoped>
-.campaign-channel-panel {
-  background: #eff6ff !important;
-  border-color: #93c5fd !important;
-}
-.campaign-source-panel {
-  background: #f5f3ff !important;
-  border-color: #c4b5fd !important;
-}
-.campaign-preview-panel {
-  background: #ecfeff !important;
-  border-color: #67e8f9 !important;
-}
-.campaign-preview-card-1 {
-  background: #eff6ff !important;
-  border-color: #93c5fd !important;
-  border-top: 4px solid #2563eb !important;
-}
-.campaign-preview-card-2 {
-  background: #ecfdf5 !important;
-  border-color: #86efac !important;
-  border-top: 4px solid #16a34a !important;
-}
-.campaign-preview-card-3 {
-  background: #fff7ed !important;
-  border-color: #fdba74 !important;
-  border-top: 4px solid #f97316 !important;
-}
-.campaign-preview-card-4 {
-  background: #fff1f2 !important;
-  border-color: #fda4af !important;
-  border-top: 4px solid #e11d48 !important;
-}
-.campaign-preview-card-5 {
-  background: #f5f3ff !important;
-  border-color: #c4b5fd !important;
-  border-top: 4px solid #7c3aed !important;
-}
-.campaign-preview-card-6 {
-  background: #fdf2f8 !important;
-  border-color: #f9a8d4 !important;
-  border-top: 4px solid #ec4899 !important;
-}
-.campaign-review-card-1 {
-  background: #eff6ff !important;
-  border-color: #93c5fd !important;
-  border-top: 4px solid #2563eb !important;
-}
-.campaign-review-card-2 {
-  background: #ecfdf5 !important;
-  border-color: #86efac !important;
-  border-top: 4px solid #16a34a !important;
-}
-.campaign-review-card-3 {
-  background: #f5f3ff !important;
-  border-color: #c4b5fd !important;
-  border-top: 4px solid #7c3aed !important;
-}
-.campaign-summary-panel {
-  background: #fff7ed !important;
-  border-color: #fdba74 !important;
-  border-top: 4px solid #f97316 !important;
-}
-</style>

@@ -1,4 +1,4 @@
-import { shallowMount, flushPromises } from '@vue/test-utils';
+import { shallowMount, flushPromises, RouterLinkStub } from '@vue/test-utils';
 import { reactive } from 'vue';
 import AnalystWorkspace from './AnalystWorkspace.vue';
 import ModulePage from './ModulePage.vue';
@@ -6,10 +6,13 @@ import CustomerWorkspace from './CustomerWorkspace.vue';
 import TeamPanel from './TeamPanel.vue';
 import HandoffPanel from './HandoffPanel.vue';
 import RelationshipLayout from './RelationshipLayout.vue';
+import PortfolioTable from './PortfolioTable.vue';
+import MetricsPanel from './MetricsPanel.vue';
 
 const mocks = vi.hoisted(() => ({
   route: null,
   store: null,
+  push: vi.fn(),
   api: {
     metadata: vi.fn(),
     dashboard: vi.fn(),
@@ -21,7 +24,7 @@ const mocks = vi.hoisted(() => ({
 }));
 vi.mock('vue-router', () => ({
   useRoute: () => mocks.route,
-  useRouter: () => ({ replace: vi.fn(), push: vi.fn() }),
+  useRouter: () => ({ replace: vi.fn(), push: mocks.push }),
 }));
 vi.mock('vuex', async original => ({
   ...(await original()),
@@ -31,7 +34,7 @@ vi.mock('dashboard/api/jrcRelationship', () => ({ default: mocks.api }));
 const mount = (component, props = {}) =>
   shallowMount(component, {
     props,
-    global: { stubs: { RouterLink: { template: '<a><slot /></a>' } } },
+    global: { stubs: { RouterLink: RouterLinkStub } },
   });
 beforeEach(() => {
   mocks.route = reactive({
@@ -169,4 +172,53 @@ it('uses the same cohort for team indicators and handoff/customer choices', asyn
   );
   team.unmount();
   handoffs.unmount();
+});
+
+it('keeps the selected segment when opening native 360 and quick-create record navigation', async () => {
+  const row = { id: 42, name: 'Selected customer', settings: {}, signals: {} };
+  mocks.api.portfolio.mockResolvedValue({
+    data: { payload: [row], meta: { page: 1, total: 1, per_page: 25 } },
+  });
+  const wrapper = mount(ModulePage, { screen: 'portfolio' });
+  await flushPromises();
+  wrapper.findComponent(PortfolioTable).vm.$emit('open', row.id);
+  await flushPromises();
+  const link = wrapper
+    .findAllComponents(RouterLinkStub)
+    .find(item => item.props('to').name === 'jrc_relationship_customers');
+  expect(link.props('to').query).toEqual({
+    assignment_id: row.id,
+    customer_segment_id: '12',
+  });
+  wrapper
+    .findComponent(PortfolioTable)
+    .vm.$emit('quick', { kind: 'risks', assignmentId: row.id });
+  expect(mocks.push).toHaveBeenCalledWith(
+    expect.objectContaining({
+      name: 'jrc_relationship_risks',
+      query: { assignment_id: row.id, create: '1', customer_segment_id: '12' },
+    })
+  );
+  wrapper.unmount();
+});
+
+it('keeps the published cohort on overdue and waiting-finance metric links', async () => {
+  const wrapper = mount(ModulePage, { screen: 'portfolio' });
+  await flushPromises();
+  wrapper.findComponent(MetricsPanel).vm.$emit('filter', 'overdue_actions');
+  expect(mocks.push).toHaveBeenLastCalledWith(
+    expect.objectContaining({
+      name: 'jrc_relationship_actions',
+      query: { overdue: 'true', customer_segment_id: '12' },
+    })
+  );
+  wrapper
+    .findComponent(MetricsPanel)
+    .vm.$emit('filter', 'waiting_finance_actions');
+  expect(mocks.push).toHaveBeenLastCalledWith(
+    expect.objectContaining({
+      query: { status: 'waiting_finance', customer_segment_id: '12' },
+    })
+  );
+  wrapper.unmount();
 });

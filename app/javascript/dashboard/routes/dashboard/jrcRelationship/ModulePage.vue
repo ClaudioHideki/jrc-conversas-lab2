@@ -157,6 +157,11 @@ const scope = () => ({
   page: pagination.value.page,
   ...normalizeFixedSurveyScope(props.fixedSurveyScope, props.screen),
 });
+const customerSegmentQuery = computed(() =>
+  route.query.customer_segment_id
+    ? { customer_segment_id: route.query.customer_segment_id }
+    : {}
+);
 let generation = 0;
 let controller;
 const load = async () => {
@@ -382,7 +387,11 @@ const quick = ({ kind, assignmentId }) =>
   router.push({
     name: `jrc_relationship_${kind}`,
     params: { accountId: route.params.accountId },
-    query: { assignment_id: assignmentId, create: '1' },
+    query: {
+      ...customerSegmentQuery.value,
+      assignment_id: assignmentId,
+      create: '1',
+    },
   });
 const metricFilter = key => {
   if (typeof key === 'object' && key.renewal_days) {
@@ -401,13 +410,15 @@ const metricFilter = key => {
     router.push({
       name: 'jrc_relationship_actions',
       params: { accountId: route.params.accountId },
-      query:
-        key === 'overdue_actions'
+      query: {
+        ...customerSegmentQuery.value,
+        ...(key === 'overdue_actions'
           ? { overdue: 'true' }
           : {
               from: new Date().toLocaleDateString('en-CA'),
               to: new Date().toLocaleDateString('en-CA'),
-            },
+            }),
+      },
     });
     return;
   } else if (
@@ -417,6 +428,7 @@ const metricFilter = key => {
       name: 'jrc_relationship_actions',
       params: { accountId: route.params.accountId },
       query: {
+        ...customerSegmentQuery.value,
         status:
           key === 'waiting_finance_actions'
             ? 'waiting_finance'
@@ -1209,7 +1221,10 @@ const money = value => formatMoney(value, metadata.value?.formatting);
             :to="{
               name: 'jrc_relationship_customers',
               params: route.params,
-              query: { assignment_id: selectedCustomer },
+              query: {
+                ...customerSegmentQuery,
+                assignment_id: selectedCustomer,
+              },
             }"
           >
             {{ t('RELATIONSHIP.V2.OPEN_360') }}
