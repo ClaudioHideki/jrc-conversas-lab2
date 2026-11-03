@@ -8,14 +8,15 @@ class JrcCustomers::ImportFile
 
   KINDS = %w[companies contacts both].freeze
   CONTACT_FIELDS = %w[id identifier name email phone_number company_id job_title department registration_status
-                      company_role company_primary company_contact_status personal_tax_identifier labels].freeze
+                      company_role company_primary company_contact_status personal_tax_identifier labels city company_name].freeze
   DELIMITERS = [',', ';', "\t"].freeze
   MAX_HEADERS = 100
 
   attr_reader :headers, :delimiter, :sha256, :kind
 
-  def initialize(content:, kind:, delimiter: nil)
+  def initialize(content:, kind:, delimiter: nil, custom_fields: [])
     @kind = kind
+    @custom_fields = custom_fields
     raise InvalidFile, 'Unsupported import type' unless KINDS.include?(kind)
 
     @content = validated_content(content)
@@ -28,16 +29,18 @@ class JrcCustomers::ImportFile
   end
 
   def fields
-    self.class.fields_for(@kind)
+    self.class.fields_for(@kind, custom_fields: @custom_fields)
   end
 
-  def self.fields_for(kind)
+  def self.fields_for(kind, custom_fields: [])
     raise InvalidFile, 'Unsupported import type' unless KINDS.include?(kind)
 
     result = []
     result += JrcCustomers::CompanyImport::FIELDS.map { |field| "company.#{field}" } unless kind == 'contacts'
-    result += CONTACT_FIELDS.map { |field| "contact.#{field}" } unless kind == 'companies'
-    result
+    return result if kind == 'companies'
+
+    contact_fields = CONTACT_FIELDS + custom_fields.map { |key| "custom_attributes.#{key}" }
+    result + contact_fields.map { |field| "contact.#{field}" }
   end
 
   def metadata

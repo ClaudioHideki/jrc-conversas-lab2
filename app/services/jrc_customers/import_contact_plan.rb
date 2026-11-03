@@ -48,6 +48,7 @@ class JrcCustomers::ImportContactPlan
     identity_revision = persisted_identity_revision(contact)
     values = attributes.values.except('id')
     assign_company!(contact, values, company)
+    JrcCustomers::ImportContactFields.new(account: @account).merge!(contact, values)
     contact.assign_attributes(values)
     validate_contact!(contact, attributes)
     confirm_reassignment!(contact)
@@ -72,6 +73,9 @@ class JrcCustomers::ImportContactPlan
       visible = JrcCrm::CorporateCoverage.new(account: @account, user: @actor).companies(@account.master_companies)
       visible.find(values['company_id'])
     end
+  rescue ActiveRecord::RecordNotFound
+    raise JrcCustomers::ImportIssue.new('Company unavailable in the current account and access scope',
+                                        field: 'company_id', code: 'UNAVAILABLE_COMPANY')
   end
 
   def validate_contact!(contact, attributes)

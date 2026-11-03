@@ -1,0 +1,61 @@
+{
+  "stage": "C5 configured contact fields and reviewed native entry; backend increment only, full UI validation pending",
+  "branch": "codex/relacionamento-v2-20261101",
+  "base_commit": "d53f817fa4db88580c43e714b18135f85349c6cd",
+  "confirmed": [
+    "Configured account-owned native contact attributes are mapped with current types, allowed lists and bounded regex validation; city/company_name remain native JSON fields",
+    "Existing JSON keys and labels survive partial imports; linked canonical company name overrides informational CSV name; no name-based company association",
+    "Fresh upload and repeated preview use the current account-owned field catalog, not user-provided model/tenant attributes",
+    "Feature-enabled contact import UI targets the reviewed central; server extension requires review and preserves native import method exactly for other accounts and missing file validation",
+    "Previously queued unowned legacy contacts CSV jobs cannot bypass current actor/scope review; their source is retained, status explicitly failed with REVIEW_REQUIRED, requiring reupload",
+    "Unavailable foreign/scoped company reference reports company_id with UNAVAILABLE_COMPANY; no hidden company name disclosed"
+  ],
+  "native_import_method_sha256": "a40a599eff9327e8ba83f8d62dcae7fffd7d213a57032d88f6026fb608a35041",
+  "tests": [
+    {
+      "report": ".codex/customer-import-wizard-field-errors-backend.json",
+      "examples": 188,
+      "failures": 0,
+      "pending": 0,
+      "database": "jrc_rel_v2_candidate_test",
+      "source": "/consolidation-customer-import-wizard-field-errors"
+    },
+    {
+      "report": ".codex/customer-import-wizard-final-frontend.json",
+      "examples": 155,
+      "failures": 0,
+      "scope": "Full current functional frontend regression; later presentation-only table widths and reference row label need targeted/current Chrome checks"
+    }
+  ],
+  "ruby_style": [
+    {
+      "report": ".codex/customer-import-wizard-final-style-review.json",
+      "files": 12,
+      "new_offenses": 0
+    },
+    {
+      "report": ".codex/customer-import-wizard-field-errors-style-review.json",
+      "files": 2,
+      "new_offenses": 0
+    }
+  ],
+  "local_ui_evidence": {
+    "initial_report": "importacoes-c5-chrome-phase1.json: actual run444 created company919/contacts852,853; preview had no writes; cancel had no apply",
+    "resume_report": "importacoes-c5-chrome-phase1-resume-checked.json: native contact852 job_title edit persisted, company popup, reload/history/search/page2/same-run resume passed; final color assertion failed because it counted disabled gray steps. Failure report retained, final theme validation pending.",
+    "fixture": ".codex/customer-import-ui.json account1394 only, 22privatependinghistorydrafts, seed1/0 preserved all captured earlier rows",
+    "private_files": ".codex/customer-import-ui-private-copy.json verifies all22source checksums in separate private UI store,0databasewrites"
+  },
+  "remaining": [
+    "Final Chrome standalone contact update, current source/themes/inner table scrolling, errors CSV and role/account isolation",
+    "C5 complete Word clauses remain partial until current UI and integrity checkpoints",
+    "Native central currently supports UTF8 CSV,1MiB/500rows; no large async importer introduced",
+    "TRR definition, operational contacts and module segment filters remain; D/E/F/G continue",
+    "DocuSign external demo not homologated; verifier nil and signed deployment guard unchanged"
+  ],
+  "publication": {
+    "push": false,
+    "image_build_or_publish": false,
+    "deploy_or_production_changes": false,
+    "external_provider_calls": false
+  }
+}

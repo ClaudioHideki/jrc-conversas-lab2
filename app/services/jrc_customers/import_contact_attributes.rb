@@ -10,6 +10,7 @@ class JrcCustomers::ImportContactAttributes
   end
 
   def validate!
+    JrcCustomers::ImportContactFields.new(account: @account).apply!(@values)
     @values['company_id'] = positive_id(@values['company_id'], 'company_id') if @values['company_id']
     if @values.key?('company_primary')
       raw = @values['company_primary']

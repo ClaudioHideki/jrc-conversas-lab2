@@ -20,6 +20,17 @@ RSpec.describe JrcCustomers::ImportPlan do
     expect([account.contacts.count, account.master_companies.count, JrcCrm::AuditEvent.count, enqueued_jobs.size]).to eq(before)
   end
 
+  it 'identifies the company field when a row tries to link a company from another account without disclosing it' do
+    foreign = create(:company, name: 'Private foreign company')
+    before = foreign.reload.attributes
+    csv.replace("name,email,company_id\nPerson,person@example.test,#{foreign.id}\n")
+    expect(plan.errors).to include(hash_including(line: 2, field: 'company_id', code: 'UNAVAILABLE_COMPANY'))
+    expect(plan.errors.to_json).not_to include(foreign.name)
+    expect(plan.rows).to be_empty
+    expect(account.contacts.count).to eq(0)
+    expect(foreign.reload.attributes).to eq(before)
+  end
+
   it 'matches the native normalized identities and warns about the reviewed update without saving during preview' do
     contact = create(:contact, account: account, email: 'person@example.test', name: 'Original')
     before = contact.reload.attributes

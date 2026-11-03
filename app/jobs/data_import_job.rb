@@ -10,6 +10,13 @@ class DataImportJob < ApplicationJob
   CONTACT_TAGGABLE_TYPE = 'Contact'.freeze
 
   def perform(data_import)
+    return if data_import.customer_master_import?
+
+    if data_import.legacy_contacts_csv_import? && data_import.account.feature_enabled?('jrc_customer_master')
+      data_import.update!(status: :failed, processing_errors: 'REVIEW_REQUIRED: Reenvie o arquivo pela Central de Importações para revisão.')
+      return
+    end
+
     @data_import = data_import
     @contact_manager = DataImport::ContactManager.new(@data_import.account)
     begin

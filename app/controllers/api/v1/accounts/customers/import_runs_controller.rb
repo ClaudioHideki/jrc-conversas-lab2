@@ -6,7 +6,7 @@ class Api::V1::Accounts::Customers::ImportRunsController < Api::V1::Accounts::Cu
 
   def metadata
     kinds = access.available_kinds
-    render json: { available_kinds: kinds, fields: kinds.index_with { |kind| JrcCustomers::ImportFile.fields_for(kind) },
+    render json: { available_kinds: kinds, fields: kinds.index_with { |kind| runs.fields_for(kind) },
                    max_bytes: JrcCustomers::CompanyImport::MAX_BYTES, max_rows: JrcCustomers::CompanyImport::MAX_ROWS,
                    delimiters: JrcCustomers::ImportFile::DELIMITERS }
   end

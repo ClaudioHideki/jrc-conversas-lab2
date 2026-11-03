@@ -19,7 +19,7 @@ class JrcCustomers::ImportRuns
 
   def create!(content:, kind:, filename:, delimiter: nil)
     @access.authorize!(kind: kind)
-    parsed = JrcCustomers::ImportFile.new(content: content, kind: kind, delimiter: delimiter)
+    parsed = JrcCustomers::ImportFile.new(content: content, kind: kind, delimiter: delimiter, custom_fields: custom_fields)
     blob = nil
     @account.with_lock do
       @access.authorize!(kind: kind)
@@ -37,10 +37,19 @@ class JrcCustomers::ImportRuns
   def file(run)
     run = find(run.id)
     JrcCustomers::ImportFile.new(content: JrcCustomers::ImportBlob.read!(run: run), kind: run.source_metadata.fetch('kind'),
-                                 delimiter: run.source_metadata.fetch('delimiter'))
+                                 delimiter: run.source_metadata.fetch('delimiter'), custom_fields: custom_fields)
+  end
+
+  def fields_for(kind)
+    @access.authorize!(kind: kind)
+    JrcCustomers::ImportFile.fields_for(kind, custom_fields: custom_fields)
   end
 
   private
+
+  def custom_fields
+    JrcCustomers::ImportContactFields.new(account: @account).keys
+  end
 
   def create_record!(parsed, kind, filename)
     DataImport.create!(account: @account, initiated_by: @actor, data_type: 'customer_master', source_provider: 'customer_master_csv',
