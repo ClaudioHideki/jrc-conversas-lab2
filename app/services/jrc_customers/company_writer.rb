@@ -4,6 +4,7 @@ class JrcCustomers::CompanyWriter
   def initialize(account:, actor:)
     @account = account
     @actor = actor
+    @coverage = JrcCrm::CorporateCoverage.new(account: account, user: actor)
   end
 
   def save!(company:, attributes:, expected_revision: nil)
@@ -26,6 +27,7 @@ class JrcCustomers::CompanyWriter
       audited_keys = attributes.keys.map(&:to_s)
       previous = company.attributes.slice(*audited_keys)
       company.assign_attributes(attributes)
+      @coverage.authorize_company_write!(company)
       company.save!
       assign_customer_code!(company)
 

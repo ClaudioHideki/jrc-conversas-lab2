@@ -1,0 +1,190 @@
+{
+  "date": "2026-11-02",
+  "phase": "C — correção de cobertura corporativa do Cadastro Mestre, por dependência de segurança; módulo completo ainda parcial",
+  "isolated_branch": "codex/customer-master-import-scope-20261102",
+  "base_commit": "ca44ef6d34eae5ab4d38864e539c920288f6c88f",
+  "validated_together_with_B3_commit": "bde3237078e4653a22269be7b81e261edb46f217",
+  "global_gate_green": false,
+  "publication_ready": false,
+  "confirmed_problem": {
+    "finding": "Administrador limitado à unidadeA alterava por CSV uma empresa internaB ocultada pela cobertura nativa.",
+    "red_reproduction": {
+      "path": ".codex\\company-import-coverage-reproduction-v2.json",
+      "sha256": "5a3af88ec1bb9adf925c61d41bc4024533850fe5e6399a49018c9eaacc0ad8e7"
+    },
+    "observation": {
+      "path": ".codex\\company-import-coverage-reproduction-v2-observed.json",
+      "sha256": "52379eabc4641283d522ddd14962212b9cbb19a77d03b019c09321538705d758"
+    },
+    "rollback_integrity": {
+      "path": ".codex\\company-import-coverage-reproduction-v2-data-proof.json",
+      "sha256": "183046a4e1091708e8a4bfd6673d62db7a3dd63f7d020927726d4a157c8f4e41"
+    },
+    "first_attempt": {
+      "artifact": {
+        "path": ".codex\\company-import-coverage-reproduction.json",
+        "sha256": "6d831f6521f2ecf471f030c3a52a9a5b35d4b047fd57d1c76c5fd33c0f8b02dc"
+      },
+      "cause": "Fixture usava company em vez do campo real company_id. Não foi tratada como prova do defeito; v2 confirmou a alteração indevida."
+    }
+  },
+  "implemented": [
+    "CorporateCoverage concentra a conferência de escrita: empresa persistida precisa estar visível e a proposta de empresa interna/matriz precisa estar na abrangência atual.",
+    "CompanyWriter usa essa regra antes de salvar; a prévia CSV também usa a mesma regra antes de retornar linha, identidade, revisão ou token de aplicação.",
+    "Prévia não concede autorização. A aplicação recalcula o plano e a gravação revalida cobertura; perda de abrangência entre as chamadas impede a alteração.",
+    "Permissões funcionais nativas continuam nos controllers/serviços chamadores. Papel de administrador não concede cobertura de grupo; o arquivo não cria abrangências.",
+    "Criação/promoção de clientes externos, alteração da própria empresa interna, operação autorizada de grupo e bootstrap legado sem estrutura configurada foram preservados nos testes.",
+    "Nenhum cadastro paralelo, endpoint, model de negócio, dependência, migration ou alteração de frontend foi acrescentado."
+  ],
+  "files": [
+    "app/services/jrc_crm/corporate_coverage.rb",
+    "app/services/jrc_customers/company_import.rb",
+    "app/services/jrc_customers/company_writer.rb",
+    "spec/requests/api/v1/accounts/customers/company_import_coverage_spec.rb",
+    "spec/services/jrc_customers/company_import_corporate_scope_spec.rb",
+    "docs/jrc_customers/company_corporate_scope_checkpoint_20261102.json"
+  ],
+  "validation": {
+    "backend": {
+      "duration": 84.547298742,
+      "example_count": 91,
+      "failure_count": 1,
+      "pending_count": 0,
+      "errors_outside_of_examples_count": 0,
+      "passed": 90,
+      "files": 8,
+      "new_cases": 15,
+      "new_cases_passed": 15,
+      "artifact": {
+        "path": ".codex\\customer-company-scope-backend.json",
+        "sha256": "810cbc98bdaceca9fdb3419caa4f71ec2c55b5af1010bf8e46d7ee74cc20e0a2"
+      },
+      "scope": "15 novos casos e regressões selecionadas de Cadastro Mestre, Bemtevi, empresas/estrutura/cobertura corporativa e ciclo comercial. O lote terminou vermelho:90/91."
+    },
+    "remaining_failure": {
+      "case": "JRC CRM Nexora end-to-end commercial lifecycle preserves one company/contact from lead through won sale, order, contract, backoffice and implementation project",
+      "class": "ActiveRecord::RecordInvalid",
+      "message": "Validation failed: O contrato precisa estar assinado para liberar a implantação.",
+      "baseline_artifact": {
+        "path": ".codex\\customer-company-scope-nexora-baseline.json",
+        "sha256": "d2471966ff05af097f97ba7088481697210645973dcde1976c22fa22e5eeaa57"
+      },
+      "baseline_result": "1caso/1falha idêntica sem a correção de cobertura.",
+      "finding": "O cenário Nexora anexa um PDF manual, marca signed e tenta avançar um fluxo v2 sem verificação interna de evidências. O bloqueio continua ativo. O teste original e suas asserções foram preservados; nenhum verificador permissivo foi instalado para fazê-lo passar.",
+      "next": "Concluir a cadeia real de evidências/verificação B3 e validar o caminho positivo pelo fluxo correspondente; não declarar essa integração concluída."
+    },
+    "lint": {
+      "baseline_exit": 1,
+      "current_full_lint_exit": 1,
+      "baseline_summary": {
+        "offense_count": 34,
+        "target_file_count": 3,
+        "inspected_file_count": 3
+      },
+      "current_summary": {
+        "offense_count": 16,
+        "target_file_count": 5,
+        "inspected_file_count": 5
+      },
+      "new_offense_types_or_locations": [],
+      "note": "Full lint is NOT reported green when legacy metrics/validation-skip warnings remain. No cop disabled or config changed.",
+      "artifact": {
+        "path": ".codex\\customer-company-scope-lint-comparison.json",
+        "sha256": "0a939b848815cb6d33a55b5e077fc5e81ac9ea94009415201c59fde20ed5e54a"
+      },
+      "baseline_artifact": {
+        "path": ".codex\\customer-company-scope-baseline-lint.json",
+        "sha256": "d348f3296a47915780729d372b7027b91a24448c735756fe2e5c4908b94762dc"
+      },
+      "current_artifact": {
+        "path": ".codex\\customer-company-scope-current-lint.json",
+        "sha256": "885274c48516c9d1dd69de460039a75499a09908fef29ba253691be66df4e7f0"
+      },
+      "finding": "Lint completo permanece vermelho com16 ocorrências preexistentes de métricas/estilo/atualização de código. Nenhuma regra foi desabilitada e não há novos tipos/locais de infração. Não equivale a lint integral aprovado."
+    },
+    "source": {
+      "files": 11250,
+      "mismatches": 0,
+      "snapshot": "/consolidation-customer-company-scope-validated",
+      "artifact": {
+        "path": ".codex\\customer-company-scope-source-verified.json",
+        "sha256": "2f1fd4fabee7f68ee7e6be70c71f8de8498426f708306a80cd42e9a71df508a5"
+      },
+      "composition": "Base701 + snapshot B3authorized + exatamente5arquivos deste incremento. Código combinado validado sem misturar antecipadamente as worktrees."
+    },
+    "rails_loading": {
+      "status": "passed",
+      "artifact": {
+        "path": ".codex\\customer-company-scope-zeitwerk.log",
+        "sha256": "504e65c0a0faa9fa4de785661cc19416e2e02048be4766559ca86aa2df904f9a"
+      }
+    },
+    "frontend": "Sem alteração de JS/Vue/CSS. Assets anteriores reutilizados no navegador; o build e219casos do checkpoint B3 permanecem identificados em seu relatório, sem nova contagem de testes.",
+    "browser": {
+      "status": "passed",
+      "artifact": {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\importacao-cobertura-resultado.json",
+        "sha256": "5337815fd022f3a561af3dd360f2b8a5b27d0ed0459022d422f2908da9f46986"
+      },
+      "settled_capture_artifact": {
+        "path": "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\importacao-cobertura-captura-revalidada-resultado.json",
+        "sha256": "32d38b645caccf1168674b3762c7608982bd75a3ec7f8ae9a49f306b39be31d1"
+      },
+      "facts": [
+        "Administrador sintético limitado: GET da operadoraB404, prévia sem token/linhas e sem botão de aplicar.",
+        "Mesmo ator importou um cliente externo permitido; resposta confirmou1 e o cadastro canônico foi relido pela API.",
+        "Claro e escuro inspecionados; nenhum erro de runtime. Nenhum envio real ou alteração de produção."
+      ],
+      "screenshots": [
+        "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\85-importacao-cobertura-negada-claro-validado.png",
+        "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\86-importacao-cobertura-negada-escuro-validado.png",
+        "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\84-importacao-cliente-autorizado-escuro.png"
+      ],
+      "initial_captures_preserved": [
+        "82-importacao-cobertura-negada-claro.png",
+        "83-importacao-cobertura-negada-escuro.png"
+      ],
+      "integrity": {
+        "artifact": {
+          "path": ".codex\\company-scope-ui-integrity.json",
+          "sha256": "925e3fc52c92185274567c9ee7ca3690e6433d4eb107595e70c690a2c9003b4e"
+        },
+        "status": "passed",
+        "synthetic_only": true,
+        "original_rows_unchanged": 11,
+        "original_model_sets": [
+          "JrcCustomers::Company",
+          "JrcCrm::Contract",
+          "JrcBackoffice::ContractVersion",
+          "JrcBackoffice::SignatureDelivery",
+          "JrcBackoffice::SignatureDeliveryEvent",
+          "JrcBackoffice::SignatureNotification"
+        ],
+        "hidden_issuer_unchanged": true,
+        "original_agent_role_preserved": true,
+        "new_administrator_group_scope": false,
+        "new_external_company_count": 1,
+        "new_external_company_id": 4,
+        "production_changed": false
+      },
+      "synthetic_only": true,
+      "fixture_note": "Criados apenas ator limitado, operadora oculta e um novo cliente de teste. Registros originais de empresa/contrato/versão/envio/evento/recibo e o papel do agente anterior foram preservados."
+    }
+  },
+  "still_pending": [
+    "Central completa de importação com mapeamento, processamento durável, resultado/histórico e demais critérios do Word.",
+    "Demais funcionalidades do Cadastro Mestre, Central, Backoffice e Relacionamento e classificação restante da matriz literal.",
+    "Falha Nexora por assinatura interna pendente e16 ocorrências de lint legado; gates globais não aprovados.",
+    "Ações contratuais/evidências finais/verificador e DocuSign demo externa continuam pendentes."
+  ],
+  "operations": {
+    "push": false,
+    "docker_image_build": false,
+    "docker_publish": false,
+    "deploy": false,
+    "compose_changed": false,
+    "production_data_changed": false,
+    "migrations_added": [],
+    "dependencies_added": []
+  }
+}
