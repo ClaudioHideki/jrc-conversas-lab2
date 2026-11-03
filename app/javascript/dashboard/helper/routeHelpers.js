@@ -28,6 +28,7 @@ export const defaultRedirectPage = (to, permissions) => {
     { permissions: [CONTACT_PERMISSIONS], path: 'contacts' },
     { permissions: [REPORTS_PERMISSIONS], path: 'reports/overview' },
     { permissions: [PORTAL_PERMISSIONS], path: 'portals' },
+    { permissions: ['jrc_crm'], path: 'crm/dashboard' },
     {
       permissions: ['jrc_approvals_policy_manage'],
       path: 'approvals/policies',

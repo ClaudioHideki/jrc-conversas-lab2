@@ -49,6 +49,36 @@ describe('#defaultRedirectPage', () => {
     expect(defaultRedirectPage(to, permissions)).toBe('accounts/2/dashboard');
   });
 
+  it('lands a CRM-only custom role in CRM instead of looping through an unauthorized conversation dashboard', () => {
+    expect(defaultRedirectPage(to, ['custom_role', 'jrc_crm'])).toBe(
+      'accounts/2/crm/dashboard'
+    );
+    expect(
+      validateLoggedInRoutes(
+        { ...to, meta: { permissions: ['agent', 'administrator'] } },
+        {
+          accounts: [
+            {
+              id: 2,
+              role: 'agent',
+              status: 'active',
+              permissions: ['custom_role', 'jrc_crm'],
+            },
+          ],
+        }
+      )
+    ).toBe('accounts/2/crm/dashboard');
+  });
+
+  it('keeps native conversation and contact landing precedence when a user also has CRM permission', () => {
+    expect(defaultRedirectPage(to, ['agent', 'jrc_crm'])).toBe(
+      'accounts/2/dashboard'
+    );
+    expect(
+      defaultRedirectPage(to, ['custom_role', 'contact_manage', 'jrc_crm'])
+    ).toBe('accounts/2/contacts');
+  });
+
   it('should return dashboard route for users with administrator role', () => {
     const permissions = ['administrator'];
     expect(defaultRedirectPage(to, permissions)).toBe('accounts/2/dashboard');
