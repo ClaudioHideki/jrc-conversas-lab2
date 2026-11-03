@@ -444,5 +444,47 @@
       "Lint completo mantém 16 ocorrências preexistentes; nenhum novo tipo/local ou regra desabilitada."
     ],
     "next": "Concluir cadeia de evidências/verificador B3 e demais funcionalidades de importação/mapeamento/histórico do Cadastro Mestre."
+  },
+  "signature_submission_increment": {
+    "status": "incremento local validado; Etapa B e quatro frentes parciais",
+    "report": "docs/jrc_backoffice/signature_submission_checkpoint_20261102.json",
+    "implemented": "Prévia, confirmação de intenção, job/recovery e cancelamento apenas antes do despacho dentro da solicitação. Serviços Admissions/Dispatch/ContractAccess/AuthorityStatus/ContractRelease existentes preservados.",
+    "backend": {
+      "status": "passed selected checks",
+      "unique_examples": 35,
+      "latest_result_per_example_failures": 0,
+      "single_green_suite": false,
+      "batches": [
+        {
+          "artifact": ".codex/signature-submission-validated-backend.json",
+          "examples": 35,
+          "failures": 1
+        },
+        {
+          "artifact": ".codex/signature-submission-http-commit-tests.json",
+          "examples": 2,
+          "failures": 0
+        }
+      ],
+      "source_delta": {
+        "changed_files": [
+          "spec/requests/api/v1/accounts/crm/backoffice_signature_submission_commit_spec.rb"
+        ],
+        "production_code_unchanged": true,
+        "all_frontend_files_unchanged": true,
+        "previous_source": "/consolidation-signature-submission-validated",
+        "current_source": "/consolidation-signature-submission-http",
+        "reason": "Correct public HTTP500 expectation under native show_exceptions=true; preserve committed-row/retry/no-external-request assertions."
+      },
+      "reason": "Native show_exceptions=true renders HTTP500. Corrected request spec asserts500 and preserves exact committed row, one intent/event, actor/account/connection and retry/no-provider assertions. No production behavior or original regression expectation was weakened."
+    },
+    "frontend": {
+      "files": 37,
+      "tests": 233,
+      "failures": 0
+    },
+    "browser": "Agente sem GROUP, prévia claro/escuro, confirmação 202, reabertura, cancelamento 200, versão reutilizada bloqueada, conta estrangeira 401, celular, PDF/conexão e 17 registros anteriores preservados; nenhuma assinatura externa.",
+    "remaining": "PDF final/certificado/verificador, consulta direta/reenvio/lembrete/cancelamento após despacho e demo pendentes; SignatureEvidence.verifier nil. C/D/E/F/G completos continuam a executar.",
+    "publication": false
   }
 }

@@ -108,6 +108,11 @@ jrc_backoffice_signature_reconciliation_recovery_job:
   class: 'JrcBackoffice::SignatureReconciliationRecoveryJob'
   queue: scheduled_jobs
 
+jrc_backoffice_signature_dispatch_recovery_job:
+  cron: '*/5 * * * *'
+  class: 'JrcBackoffice::SignatureDispatchRecoveryJob'
+  queue: scheduled_jobs
+
 jrc_operations_sla_monitor_job:
   cron: '*/5 * * * *'
   class: 'JrcOperations::SlaMonitorJob'

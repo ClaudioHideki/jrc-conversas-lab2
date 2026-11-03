@@ -50,7 +50,9 @@ const DialogStub = defineComponent({
 const render = () =>
   mount(Panel, {
     props: { record: { id: 9, contract: { id: 4 } } },
-    global: { stubs: { SignatureDeliveryDetails: true } },
+    global: {
+      stubs: { SignatureDeliveryDetails: true, SignatureIntentDialog: true },
+    },
   });
 const button = (wrapper, label) =>
   wrapper.findAll('button').find(row => row.text() === label);
@@ -182,6 +184,54 @@ it('offers a real refresh after a network error without retaining stale success'
   await flushPromises();
   expect(wrapper.find('[role="alert"]').exists()).toBe(false);
   expect(wrapper.text()).toContain('SYNTHETIC-ENVELOPE');
+  wrapper.unmount();
+});
+
+it('closes an open send confirmation when a history refresh denies access', async () => {
+  const wrapper = render();
+  await flushPromises();
+  await button(wrapper, 'Enviar para assinatura').trigger('click');
+  expect(
+    wrapper.findComponent({ name: 'SignatureIntentDialog' }).exists()
+  ).toBe(true);
+  mocks.api.list.mockRejectedValueOnce({ response: { status: 403 } });
+  await button(wrapper, 'Atualizar').trigger('click');
+  await flushPromises();
+  expect(
+    wrapper.findComponent({ name: 'SignatureIntentDialog' }).exists()
+  ).toBe(false);
+  expect(
+    button(wrapper, 'Enviar para assinatura').attributes('disabled')
+  ).toBeDefined();
+  expect(wrapper.text()).not.toContain('SYNTHETIC-ENVELOPE');
+  wrapper.unmount();
+});
+
+it('offers local cancellation only before dispatch and reloads persisted state without changing filters', async () => {
+  mocks.api.list.mockResolvedValue({
+    data: {
+      ...structuredClone(overview),
+      data: [{ ...overview.data[0], state: 'prepared' }],
+    },
+  });
+  const wrapper = render();
+  await flushPromises();
+  await button(wrapper, 'Cancelar antes do envio').trigger('click');
+  const dialog = wrapper.findComponent({ name: 'SignatureIntentDialog' });
+  expect(dialog.props('delivery').id).toBe(8);
+  mocks.api.list.mockResolvedValue({
+    data: {
+      ...structuredClone(overview),
+      data: [{ ...overview.data[0], state: 'canceled' }],
+    },
+  });
+  dialog.vm.$emit('registered', 'canceled');
+  await flushPromises();
+  expect(wrapper.text()).toContain(
+    'Intenção cancelada antes do envio. Nenhum cancelamento externo foi solicitado.'
+  );
+  expect(button(wrapper, 'Cancelar antes do envio')).toBeUndefined();
+  expect(mocks.route.query.status).toBe('blocked');
   wrapper.unmount();
 });
 

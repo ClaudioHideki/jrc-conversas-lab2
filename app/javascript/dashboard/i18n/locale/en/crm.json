@@ -1224,6 +1224,30 @@
           "reconciliation_started": "Consulta da transação iniciada",
           "reconciliation_finished": "Consulta da transação registrada",
           "unknown": "Evento registrado"
+        },
+        "SEND": "Enviar para assinatura",
+        "SEND_NOTICE": "Confira a versão e a validação de poderes na solicitação. O registro do envio não comprova entrega nem assinatura. A implantação continua sujeita à validação interna das evidências.",
+        "CONFIRM_SEND": "Conferi a versão, os assinantes e a aprovação de poderes. Solicito o envio desta versão para assinatura.",
+        "PREPARING": "Conferindo versão, poderes, aprovações e conexão…",
+        "PDF_HASH": "SHA-256 do PDF original",
+        "REGISTERED": "Solicitação de envio registrada. Aguarde a confirmação do processamento no histórico; o contrato ainda não foi validado como assinado.",
+        "CANCEL_PREPARED": "Cancelar antes do envio",
+        "CANCEL_PREPARED_NOTICE": "Esta ação cancela somente uma intenção ainda não despachada. Se o processamento já começou, o cancelamento será recusado e os bloqueios serão preservados.",
+        "CONFIRM_CANCEL": "Confirmo o cancelamento desta intenção antes do envio.",
+        "CANCELED_PREPARED": "Intenção cancelada antes do envio. Nenhum cancelamento externo foi solicitado.",
+        "ACTION_ERROR": "Não foi possível confirmar o processamento. Tente novamente para consultar ou reutilizar a mesma intenção, sem criar outro envio.",
+        "ACTION_ERRORS": {
+          "REQUEST_NOT_EDITABLE": "Reabra a solicitação operacional antes de solicitar o envio.",
+          "CONTRACT_VERSION_REQUIRED": "Gere uma versão contratual com os assinantes antes de solicitar o envio.",
+          "DELIVERY_IN_PROGRESS": "Já existe uma intenção em processamento. Consulte o histórico antes de solicitar outro envio.",
+          "CONTRACT_SOURCE_CHANGED": "A versão ou o contexto contratual mudou. Atualize e revise o contrato e os poderes.",
+          "AUTHORITY_APPROVAL_REQUIRED": "Valide os poderes de todos os assinantes na Central de Aprovações antes do envio.",
+          "CONNECTION_NOT_READY": "A conexão de assinatura precisa de configuração, autorização e validação do recebimento de eventos.",
+          "CONNECTION_CHANGED": "A conexão mudou desde a prévia. Atualize e confira novamente antes de confirmar.",
+          "DELIVERY_ALREADY_DISPATCHED": "O processamento já começou. Esta intenção não pode mais ser cancelada localmente.",
+          "DELIVERY_INTENT_CHANGED": "Os dados desta intenção mudaram. Consulte o histórico e atualize a prévia.",
+          "BLOCKED": "O envio está bloqueado pelas regras atuais. Revise os documentos, poderes e aprovações na solicitação.",
+          "DELIVERY_VERSION_ALREADY_REGISTERED": "Esta versão já tem uma intenção registrada. Preserve o histórico e gere uma nova versão antes de outro envio."
         }
       }
     },

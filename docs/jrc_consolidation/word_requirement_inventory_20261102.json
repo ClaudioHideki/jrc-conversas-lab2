@@ -19818,16 +19818,25 @@
             "JrcBackoffice::ContractAccess",
             "JrcBackoffice::AuthorityAccess",
             "JrcCustomers::DirectoryPolicy",
-            "JrcBackoffice::SignatureRelease"
+            "JrcBackoffice::SignatureRelease",
+            "JrcBackoffice::Signatures::Admissions",
+            "JrcBackoffice::Signatures::Dispatch",
+            "JrcBackoffice::AuthorityStatus",
+            "JrcBackoffice::ContractRelease"
           ],
-          "implemented_change": "Geração/edição/nova versão preservadas e validadas pelo agente, com aviso de permissão nativa de contatos e bloqueio no servidor.",
+          "implemented_change": "Fluxo de envio no contexto usa versão/poderes/conexão exatos, intenção durável, confirmação, worker/recovery e histórico persistido. Cancelamento local somente antes do despacho; não equivale a assinatura comprovada nem ao conjunto de ações externas.",
           "files": [
             "app/services/jrc_backoffice/signatures/delivery_projection.rb",
             "app/services/jrc_backoffice/signatures/notifications.rb",
             "app/services/jrc_backoffice/signatures/reconciliation.rb",
             "app/jobs/jrc_backoffice/signature_notification_job.rb",
             "app/controllers/api/v1/accounts/crm/backoffice_contract_versions_controller.rb",
-            "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeContractVersions.vue"
+            "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeContractVersions.vue",
+            "app/services/jrc_backoffice/signatures/preparation.rb",
+            "app/controllers/api/v1/accounts/crm/backoffice_signature_deliveries_controller.rb",
+            "app/jobs/jrc_backoffice/signature_dispatch_job.rb",
+            "app/jobs/jrc_backoffice/signature_dispatch_recovery_job.rb",
+            "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/SignatureIntentDialog.vue"
           ],
           "status": "parcial",
           "tests_and_evidence": [
@@ -19837,13 +19846,20 @@
             "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\assinatura-permissao-negada-resultado.json",
             "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\assinatura-callback-versao-resultado.json",
             "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\assinatura-celular-revalidado-resultado.json",
-            "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\assinatura-downloads-revalidados-resultado.json"
+            "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\assinatura-downloads-revalidados-resultado.json",
+            "docs/jrc_backoffice/signature_submission_checkpoint_20261102.json",
+            ".codex/signature-submission-verified-composition.json",
+            ".codex/signature-submission-validated-frontend-regression.json",
+            "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/REVISAO-ASSINATURA-INTENCAO.html"
           ],
           "dependencies": [
             "Ações operacionais/evidências finais ainda incompletas",
-            "DocuSign demo não configurada; somente HTTP/HMAC sintéticos"
+            "DocuSign demo não configurada; somente HTTP/HMAC sintéticos",
+            "Verificação final e evidências ainda pendentes",
+            "Ações diretas ao fornecedor e status individual dos assinantes ainda pendentes",
+            "DocuSign Developer/demo ainda sem homologação externa"
           ],
-          "next_action": "Concluir a admissão e o envio pela tela sem ID manual nem confirmação otimista.",
+          "next_action": "Concluir os critérios contratuais restantes e a homologação externa, mantendo implantação bloqueada até assinatura verificada. Prosseguir nas demais frentes independentes conforme autorização B→G.",
           "fragment_kind": "requirement"
         },
         {
@@ -19894,16 +19910,25 @@
             "JrcBackoffice::ContractAccess",
             "JrcBackoffice::AuthorityAccess",
             "JrcCustomers::DirectoryPolicy",
-            "JrcBackoffice::SignatureRelease"
+            "JrcBackoffice::SignatureRelease",
+            "JrcBackoffice::Signatures::Admissions",
+            "JrcBackoffice::Signatures::Dispatch",
+            "JrcBackoffice::AuthorityStatus",
+            "JrcBackoffice::ContractRelease"
           ],
-          "implemented_change": "Histórico de envios e status persistidos por versão/conexão, com cancelamento/recusa projetados e replay sem duplicação. Não é consulta externa nem status individual completo dos signatários.",
+          "implemented_change": "Fluxo de envio no contexto usa versão/poderes/conexão exatos, intenção durável, confirmação, worker/recovery e histórico persistido. Cancelamento local somente antes do despacho; não equivale a assinatura comprovada nem ao conjunto de ações externas.",
           "files": [
             "app/services/jrc_backoffice/signatures/delivery_projection.rb",
             "app/services/jrc_backoffice/signatures/notifications.rb",
             "app/services/jrc_backoffice/signatures/reconciliation.rb",
             "app/jobs/jrc_backoffice/signature_notification_job.rb",
             "app/controllers/api/v1/accounts/crm/backoffice_contract_versions_controller.rb",
-            "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeContractVersions.vue"
+            "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeContractVersions.vue",
+            "app/services/jrc_backoffice/signatures/preparation.rb",
+            "app/controllers/api/v1/accounts/crm/backoffice_signature_deliveries_controller.rb",
+            "app/jobs/jrc_backoffice/signature_dispatch_job.rb",
+            "app/jobs/jrc_backoffice/signature_dispatch_recovery_job.rb",
+            "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/SignatureIntentDialog.vue"
           ],
           "status": "parcial",
           "tests_and_evidence": [
@@ -19913,13 +19938,20 @@
             "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\assinatura-permissao-negada-resultado.json",
             "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\assinatura-callback-versao-resultado.json",
             "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\assinatura-celular-revalidado-resultado.json",
-            "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\assinatura-downloads-revalidados-resultado.json"
+            "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\assinatura-downloads-revalidados-resultado.json",
+            "docs/jrc_backoffice/signature_submission_checkpoint_20261102.json",
+            ".codex/signature-submission-verified-composition.json",
+            ".codex/signature-submission-validated-frontend-regression.json",
+            "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/REVISAO-ASSINATURA-INTENCAO.html"
           ],
           "dependencies": [
             "Ações operacionais/evidências finais ainda incompletas",
-            "DocuSign demo não configurada; somente HTTP/HMAC sintéticos"
+            "DocuSign demo não configurada; somente HTTP/HMAC sintéticos",
+            "Verificação final e evidências ainda pendentes",
+            "Ações diretas ao fornecedor e status individual dos assinantes ainda pendentes",
+            "DocuSign Developer/demo ainda sem homologação externa"
           ],
-          "next_action": "Concluir consulta ao fornecedor, destinatários e reenvio/lembrete autorizados, mantendo conexão e ambiente originais.",
+          "next_action": "Concluir os critérios contratuais restantes e a homologação externa, mantendo implantação bloqueada até assinatura verificada. Prosseguir nas demais frentes independentes conforme autorização B→G.",
           "fragment_kind": "requirement"
         },
         {
@@ -41118,5 +41150,20 @@
       "cadastro-mestre:P0311"
     ],
     "global_completion": false
+  },
+  "signature_submission_increment": {
+    "report": "docs/jrc_backoffice/signature_submission_checkpoint_20261102.json",
+    "updated_fragment_ids": [
+      "backoffice:P0203",
+      "backoffice:P0205"
+    ],
+    "fragments_preserved": 1546,
+    "classification_pending_after": 1529,
+    "global_completion": false
+  },
+  "approved_continuity_complement": {
+    "source": "C:/Users/DEV03/.codex/attachments/4fe8d380-8c9a-4852-972f-36d23024f21f/Texto colado.txt",
+    "sha256": "ce09a98f94d73b4745361ce7dcda3c5a14a42c9a4ca75f72cac12ff16744c7b7",
+    "directive": "Executar B→G integralmente, com checkpoints locais e continuidade automática, sem push/imagem/deploy/produção e sem declarar conclusão sem evidência."
   }
 }

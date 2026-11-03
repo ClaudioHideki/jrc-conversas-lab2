@@ -13,6 +13,7 @@ export function useSignatureHistory(props) {
   const selection = ref(null);
   const loading = ref(false);
   const error = ref('');
+  const accessDenied = ref(false);
   let generation = 0;
   let controller;
   const accountId = computed(() => route.params.accountId);
@@ -34,6 +35,7 @@ export function useSignatureHistory(props) {
     result.value = null;
     selection.value = null;
     loading.value = false;
+    accessDenied.value = true;
     error.value = text('CONTRACT_SIGNATURES.DENIED');
   };
   const load = async () => {
@@ -45,6 +47,7 @@ export function useSignatureHistory(props) {
     selection.value = null;
     error.value = '';
     loading.value = true;
+    accessDenied.value = false;
     try {
       const { data } = await api.list(
         accountId.value,
@@ -84,6 +87,7 @@ export function useSignatureHistory(props) {
     selection,
     loading,
     error,
+    accessDenied,
     load,
     changePage,
     deny,

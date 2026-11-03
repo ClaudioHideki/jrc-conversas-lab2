@@ -1,8 +1,10 @@
 <script setup>
+import { ref, watch } from 'vue';
 import { useBackofficePresentation } from './useBackofficePresentation';
 import { useSignatureHistory } from './useSignatureHistory';
 import { signatureStateKey, signatureTone } from './signaturePresentation';
 import SignatureDeliveryDetails from './SignatureDeliveryDetails.vue';
+import SignatureIntentDialog from './SignatureIntentDialog.vue';
 
 const props = defineProps({ record: { type: Object, required: true } });
 const { text, date } = useBackofficePresentation();
@@ -12,11 +14,32 @@ const {
   result,
   selection,
   loading,
+  accessDenied,
   error,
   load,
   changePage,
   deny,
 } = useSignatureHistory(props);
+const intent = ref(null);
+const notice = ref('');
+watch(identity, () => {
+  intent.value = null;
+  notice.value = '';
+});
+watch(accessDenied, denied => {
+  if (!denied) return;
+  intent.value = null;
+  notice.value = '';
+});
+const registered = async state => {
+  intent.value = null;
+  notice.value = text(
+    state === 'canceled'
+      ? 'CONTRACT_SIGNATURES.CANCELED_PREPARED'
+      : 'CONTRACT_SIGNATURES.REGISTERED'
+  );
+  await load();
+};
 </script>
 
 <template>
@@ -35,14 +58,24 @@ const {
           {{ text('CONTRACT_SIGNATURES.DESCRIPTION') }}
         </p>
       </div>
-      <button
-        type="button"
-        :disabled="loading"
-        class="rounded-lg border border-n-blue-6 bg-n-solid-2 px-3 py-2 text-sm text-n-blue-12 disabled:opacity-50"
-        @click="load"
-      >
-        {{ text('REFRESH') }}
-      </button>
+      <div class="flex flex-wrap gap-2">
+        <button
+          type="button"
+          :disabled="loading || accessDenied"
+          class="rounded-lg bg-n-blue-9 px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
+          @click="intent = { delivery: null }"
+        >
+          {{ text('CONTRACT_SIGNATURES.SEND') }}
+        </button>
+        <button
+          type="button"
+          :disabled="loading"
+          class="rounded-lg border border-n-blue-6 bg-n-solid-2 px-3 py-2 text-sm text-n-blue-12 disabled:opacity-50"
+          @click="load"
+        >
+          {{ text('REFRESH') }}
+        </button>
+      </div>
     </header>
     <p
       v-if="loading"
@@ -57,6 +90,13 @@ const {
       class="rounded-lg bg-n-ruby-3 p-3 text-sm text-n-ruby-12"
     >
       {{ error }}
+    </p>
+    <p
+      v-if="notice && !error"
+      role="status"
+      class="rounded-lg border border-n-blue-6 bg-n-blue-3 p-3 text-sm text-n-blue-12"
+    >
+      {{ notice }}
     </p>
     <template v-if="result">
       <p
@@ -163,6 +203,14 @@ const {
         >
           {{ text('CONTRACT_SIGNATURES.HISTORY') }}
         </button>
+        <button
+          v-if="delivery.state === 'prepared'"
+          type="button"
+          class="ml-2 rounded-lg border border-n-ruby-6 bg-n-ruby-3 px-3 py-2 text-sm text-n-ruby-12"
+          @click="intent = { delivery }"
+        >
+          {{ text('CONTRACT_SIGNATURES.CANCEL_PREPARED') }}
+        </button>
       </article>
       <nav
         class="flex justify-between gap-2"
@@ -195,5 +243,18 @@ const {
         @denied="deny"
       />
     </template>
+    <SignatureIntentDialog
+      v-if="intent"
+      :key="identity"
+      :account-id="accountId"
+      :request-id="record.id"
+      :delivery="intent.delivery"
+      @close="intent = null"
+      @registered="registered"
+      @denied="
+        intent = null;
+        deny();
+      "
+    />
   </section>
 </template>
