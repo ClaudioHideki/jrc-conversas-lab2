@@ -1,7 +1,8 @@
 class Api::V1::Accounts::Customers::DirectoryController < Api::V1::Accounts::Customers::BaseController
   def metadata
     users = Current.account.users.order(:name).limit(500).pluck(:id, :name).map { |id, name| { id: id, name: name } }
-    configured_segments = JrcCustomers::Taxonomy.where(account_id: Current.account.id, kind: 'segment', active: true).ordered.limit(200).pluck(:name)
+    configured_segments = JrcCustomers::Taxonomy.classifications.active.where(account_id: Current.account.id, kind: 'segment')
+                                               .ordered.limit(200).pluck(:name)
 
     render json: {
       relationships: JrcCustomers::CompanyRules::RELATIONSHIPS,

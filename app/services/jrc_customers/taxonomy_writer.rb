@@ -12,10 +12,7 @@ class JrcCustomers::TaxonomyWriter
       created = taxonomy.new_record?
       old_name = taxonomy.name
       taxonomy.assign_attributes(attributes.to_h.stringify_keys.slice(*FIELDS))
-      if !created && old_name != taxonomy.name && @account.master_companies.exists?(segment: old_name)
-        taxonomy.errors.add(:name, 'cannot rename a classification assigned to companies; preserve their existing classification')
-        raise ActiveRecord::RecordInvalid, taxonomy
-      end
+      preserve_assigned_classification!(taxonomy, old_name) unless created
       taxonomy.save!
       audit!(taxonomy, created ? 'customer_segment_created' : 'customer_segment_updated')
       taxonomy
@@ -61,6 +58,19 @@ class JrcCustomers::TaxonomyWriter
   end
 
   private
+
+  def preserve_assigned_classification!(taxonomy, old_name)
+    return unless @account.master_companies.exists?(segment: old_name)
+
+    taxonomy.errors.clear
+    if old_name != taxonomy.name
+      taxonomy.errors.add(:name, 'cannot rename a classification assigned to companies; preserve their existing classification')
+    end
+    if taxonomy.selection_mode_in_database == 'classification' && taxonomy.selection_mode != 'classification'
+      taxonomy.errors.add(:selection_mode, 'is assigned to companies; create a separate dynamic segment to preserve their classification')
+    end
+    raise ActiveRecord::RecordInvalid, taxonomy if taxonomy.errors.any?
+  end
 
   def prepare_change!(taxonomy, expected_revision)
     authorize!

@@ -1444,7 +1444,12 @@
         "relationship": "Relacionamento",
         "campaigns": "Campanhas"
       },
-      "SYSTEM": "Sistema"
+      "SYSTEM": "Sistema",
+      "FILTER_LABEL": "Filtrar por segmento",
+      "SEARCH_FILTER": "Pesquisar segmento",
+      "CLEAR_FILTER": "Limpar filtro de segmento",
+      "COMPANY_CLASSIFICATION": "Classificação da empresa",
+      "APPLY_FILTER_HELP": "Escolha ou limpe o segmento e use Buscar para aplicar, sem alterar o cadastro das empresas."
     }
   }
 }

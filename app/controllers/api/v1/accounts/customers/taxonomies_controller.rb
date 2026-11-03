@@ -4,9 +4,7 @@ class Api::V1::Accounts::Customers::TaxonomiesController < Api::V1::Accounts::Cu
   before_action :private_response
 
   def index
-    scope = JrcCustomers::Taxonomy.where(account_id: Current.account.id)
-    scope = scope.where(kind: params[:kind]) if params[:kind].present?
-    records, meta = page_scope(scope.ordered)
+    records, meta = page_scope(catalog_scope.ordered)
     render json: { payload: records.map { |record| serialize(record) }, meta: meta,
                    fields: JrcCustomers::SegmentCriteria::FIELDS, modules: JrcCustomers::Taxonomy::MODULES }
   end
@@ -80,6 +78,17 @@ class Api::V1::Accounts::Customers::TaxonomiesController < Api::V1::Accounts::Cu
   end
 
   private
+
+  def catalog_scope
+    filters = params.permit(:kind, :active, :q)
+    scope = JrcCustomers::Taxonomy.where(account_id: Current.account.id)
+    scope = scope.where(kind: filters[:kind]) if filters[:kind].present?
+    scope = scope.where(active: ActiveModel::Type::Boolean.new.cast(filters[:active])) if filters[:active].present?
+    return scope if filters[:q].blank?
+
+    term = ActiveRecord::Base.sanitize_sql_like(filters[:q].to_s.strip.first(200))
+    scope.where('name ILIKE ?', "%#{term}%")
+  end
 
   def set_taxonomy
     @taxonomy = JrcCustomers::Taxonomy.where(account_id: Current.account.id).find(params[:id])

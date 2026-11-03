@@ -17,6 +17,7 @@ class JrcCustomers::Taxonomy < ApplicationRecord
 
   scope :ordered, -> { order(:position, :name, :id) }
   scope :active, -> { where(active: true) }
+  scope :classifications, -> { where(selection_mode: 'classification') }
 
   private
 

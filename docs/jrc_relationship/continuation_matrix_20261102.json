@@ -158,8 +158,8 @@
       "requirement": "Segmentos/critérios/prévia, grupos econômicos separados de etiquetas, importações e contatos ativos",
       "status": "parcial",
       "constraint": "Não conceder acesso por segmento; preservar regras e engines existentes.",
-      "existing": "Incremento C4a validou definições, critérios corporativos E/OU, prévia, escolhas manuais e CRUD auditado com Chrome, escopos e preservação. Filtros de todos os módulos, separação dos seletores, métricas/TRR, grupos econômicos, importações e contatos ativos continuam parciais.",
-      "report": "docs/jrc_customers/segment_definition_checkpoint_20261103.json"
+      "existing": "C4a/C4b validaram definições, critérios corporativos, prévia, escolhas manuais, CRUD auditado, separação entre classificação estática e definição dinâmica, proteção de classificações em uso e filtro visível com busca/paginação/URL no diretório. Grupos econômicos, métricas/TRR, demais módulos, importações mapeadas e contatos ativos continuam parciais.",
+      "report": "docs/jrc_customers/segment_filter_checkpoint_20261103.json"
     }
   ],
   "approval_central": {
@@ -524,5 +524,9 @@
     "status": "parcial",
     "report": "docs/jrc_customers/segment_definition_checkpoint_20261103.json",
     "execution_order_preserved": "C →D →E →F →G; sem publicação"
+  },
+  "customer_segment_filter_checkpoint_20261103": {
+    "status": "parcial",
+    "report": "docs/jrc_customers/segment_filter_checkpoint_20261103.json"
   }
 }

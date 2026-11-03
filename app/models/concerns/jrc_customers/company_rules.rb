@@ -74,7 +74,7 @@ module JrcCustomers::CompanyRules
     end
     return unless will_save_change_to_segment? && segment.present? && JrcCustomers::Taxonomy.table_exists?
 
-    configured = JrcCustomers::Taxonomy.where(account_id: account_id, kind: 'segment', active: true).exists?(name: segment)
+    configured = JrcCustomers::Taxonomy.classifications.active.where(account_id: account_id, kind: 'segment').exists?(name: segment)
     errors.add(:segment, 'must use an active configured segment') unless configured
   end
 

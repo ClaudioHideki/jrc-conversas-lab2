@@ -1,6 +1,8 @@
 <script setup>
+import { useI18n } from 'vue-i18n';
 import CompanyEditorDialog from './components/CompanyEditorDialog.vue';
 import CompanyDetailsDialog from './components/CompanyDetailsDialog.vue';
+import SegmentFilterPicker from './components/SegmentFilterPicker.vue';
 import { useCompanyDirectory } from './useCompanyDirectory';
 import {
   T,
@@ -10,6 +12,7 @@ import {
   buttonClass,
   primaryClass,
 } from './copy';
+const { t } = useI18n();
 
 const {
   identity,
@@ -105,12 +108,20 @@ const {
         :key="field"
         class="text-xs"
       >
-        {{ FIELD_LABELS[field] }}
+        {{
+          field === 'segment'
+            ? t('CRM.CORPORATE_SEGMENTS.COMPANY_CLASSIFICATION')
+            : FIELD_LABELS[field]
+        }}
         <input
           v-model.trim="filters[field]"
           :class="inputClass"
         />
       </label>
+      <div class="min-w-0 text-xs">
+        <p>{{ t('CRM.CORPORATE_SEGMENTS.FILTER_LABEL') }}</p>
+        <SegmentFilterPicker v-model="filters.taxonomy_id" />
+      </div>
       <div class="flex items-end gap-2">
         <select
           v-model="filters.active"

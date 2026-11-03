@@ -1,0 +1,147 @@
+{
+  "date": "2026-11-03",
+  "stage": "C4b — Classificações estáticas e filtro visível",
+  "status": "incremento validado; Cadastro Mestre e C/D/E/F/G continuam parciais",
+  "base_commit": "ed9a90db13a64853c99f53898f7335632651c529",
+  "branch": "codex/relacionamento-v2-20261101",
+  "changes": [
+    "O editor de empresas e a validação canônica aceitam como classificação somente definições estáticas ativas. Definições dinâmicas permanecem disponíveis como filtros.",
+    "Classificações atribuídas a empresas não podem trocar de modo silenciosamente. Conversão explícita de definição sem uso continua permitida; erros anteriores não impedem uma edição válida posterior.",
+    "O diretório mostra o segmento selecionado pela URL e oferece busca com paginação no servidor, seleção, limpeza e aplicação pelo formulário existente. Filtros e página são preservados na navegação dos popups.",
+    "O catálogo aceita apenas filtros escalares previstos, limita resultados e trata caracteres de busca como texto literal. Conta/usuário e escopo continuam definidos pelo servidor."
+  ],
+  "files": [
+    "app/models/jrc_customers/taxonomy.rb",
+    "app/models/concerns/jrc_customers/company_rules.rb",
+    "app/services/jrc_customers/taxonomy_writer.rb",
+    "app/controllers/api/v1/accounts/customers/directory_controller.rb",
+    "app/controllers/api/v1/accounts/customers/taxonomies_controller.rb",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/CompaniesPage.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentFilterPicker.vue"
+  ],
+  "backend": {
+    "unique_examples": 133,
+    "passed": 133,
+    "failed": 0,
+    "pending": 0,
+    "single_green_run": false,
+    "runs": [
+      "85/0",
+      "47/0 em arquivos distintos",
+      "15/0 final, 14 repetidos e 1 adicional"
+    ],
+    "reports": [
+      ".codex/customer-segment-filter-backend.json",
+      ".codex/customer-segment-filter-company-regression.json",
+      ".codex/customer-segment-filter-final-backend.json",
+      ".codex/customer-segment-filter-latest-backend.json"
+    ],
+    "coverage": [
+      "cadastro canônico",
+      "CSV e escopo corporativo da importação",
+      "modelo Enterprise",
+      "contas e operadora/unidade",
+      "definições, prévia eCRUD de segmentos",
+      "classificação em uso e edição posterior",
+      "fusão de contatos",
+      "busca literal, paginação e parâmetros não escalares"
+    ]
+  },
+  "frontend": {
+    "cases": 15,
+    "passed": 15,
+    "failed": 0,
+    "report": ".codex/customer-segment-filter-frontend.json",
+    "coverage": [
+      "resolução de seleção por ID fora da página inicial",
+      "busca ativa e paginação",
+      "rejeição de respostas antigas após mudança de conta/identidade",
+      "limpeza de filtro indisponível",
+      "restauração de URL, filtros e página",
+      "editor e critérios existentes"
+    ]
+  },
+  "style": {
+    "new_or_extended_ruby_files": 4,
+    "ruby_offenses": 0,
+    "frontend_files": 4,
+    "frontend_errors": 0,
+    "frontend_warnings": 2,
+    "global_clean_claim": false,
+    "reports": [
+      ".codex/customer-segment-filter-final-style.json",
+      ".codex/customer-segment-filter-style.json"
+    ]
+  },
+  "chrome": {
+    "result": "passed",
+    "source": "/consolidation-customer-segment-filter-final",
+    "reports": [
+      "segmento-filtro-visivel-chrome.json (passed após corrigir a espera do teste por option anexado, sem alterar o select)",
+      "segmento-filtro-estatico-dinamico-final.json (passed, sem escritas de negócio)"
+    ],
+    "verified": [
+      "filtro dinâmico 12, classificação estática 1, sem filtro 14 empresas reais do banco sintético",
+      "limpar/reselecionar/aplicar/restaurar URL e recarregar",
+      "abrir/fechar popup canônico preservando o filtro",
+      "editor mostra somente classificação estática",
+      "tentativa de converter classificação 54 em uso retorna 422 e preserva dados",
+      "tema claro e escuro no celular"
+    ],
+    "expected_denial": "PATCH classificação 54→dynamic:422",
+    "javascript_errors_final": 0,
+    "unexpected_writes": 0,
+    "artifact_directory": "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101",
+    "screenshots": [
+      "180-diretorio-filtro-dinamico-desktop.png",
+      "181-classificacao-em-uso-preservada.png",
+      "182-filtro-segmento-mobile-claro.png",
+      "183-filtro-segmento-mobile-escuro.png",
+      "185-filtro-estatico-dinamico-final-claro.png"
+    ]
+  },
+  "integrity": {
+    "status": "passed",
+    "protected_business_rows": 32,
+    "protected_memberships": 2,
+    "native_login_timestamp_changes_allowed_only": [
+      "active_at",
+      "updated_at"
+    ],
+    "existing_segment_id": 55,
+    "deleted_unused_segment_id": 56,
+    "manual_choices": 3,
+    "company_count": 12,
+    "contact_count": 13,
+    "audit_event_count": 7,
+    "schema": "20261103100000",
+    "foreign_keys": 4,
+    "signature_verifier": null,
+    "external_operations": 0,
+    "source": "/consolidation-customer-segment-filter-final",
+    "production_changed": false,
+    "classification_mode_preserved": true
+  },
+  "assets": {
+    "build": "passed, 2m54s",
+    "reuse": "5935 arquivos de frontend com hashes idênticos entre os snapshots; não houve nova compilação após a extração da consulta Ruby.",
+    "proof": ".codex/customer-segment-filter-assets-reuse.json",
+    "kind": "Somente assets Vite. Sem imagem Docker, publicação ou deploy."
+  },
+  "source": {
+    "snapshot": "/consolidation-customer-segment-filter-final",
+    "files_verified": 11307,
+    "mismatches": 0,
+    "native_sql_raw_hashes_preserved": true,
+    "proof": ".codex/customer-segment-filter-final-source-verified.json"
+  },
+  "pending": [
+    "Grupos econômicos corporativos com membros e empresa principal opcional, separados de etiquetas.",
+    "Critérios financeiros/contratos, definição de TRR aguardando resposta e conexão dos filtros aos demais módulos. A indicação Módulos ainda não habilita todos os filtros.",
+    "Demais itens integrais de C, depois D/E/F/G.",
+    "Homologação externa DocuSign e prova independente de assinatura continuam pendentes; verifier permanece nil."
+  ],
+  "production_changed": false,
+  "migrations_added": false,
+  "next_action": "Avançar para grupos econômicos preservando os valores legados, as empresas canônicas, etiquetas e integrações."
+}

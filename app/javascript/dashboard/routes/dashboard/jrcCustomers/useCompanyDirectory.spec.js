@@ -7,6 +7,8 @@ const mocks = vi.hoisted(() => ({
   state: null,
   companies: vi.fn(),
   metadata: vi.fn(),
+  taxonomy: vi.fn(),
+  taxonomies: vi.fn(),
 }));
 vi.mock('dashboard/api/jrcCustomers', () => ({ default: mocks }));
 vi.mock('./useCustomerMaster', () => ({
@@ -67,6 +69,42 @@ beforeEach(() => {
   mocks.metadata.mockResolvedValue({
     data: { owners: [{ id: 7, name: 'MOCK — Responsável' }] },
   });
+  mocks.taxonomy.mockResolvedValue({
+    data: { payload: { id: 7, name: 'MOCK — Segmento da URL' } },
+  });
+  mocks.taxonomies.mockResolvedValue({
+    data: { payload: [], meta: { total: 0, per_page: 10 } },
+  });
+});
+
+it('displays the selected URL segment and clears it through the existing search form without losing other filters', async () => {
+  const wrapper = await render({
+    page: '2',
+    q: 'Alpha',
+    taxonomy_id: '7',
+    source: 'review',
+  });
+  await flushPromises();
+  expect(wrapper.text()).toContain('MOCK — Segmento da URL');
+  expect(mocks.companies).toHaveBeenLastCalledWith(
+    expect.objectContaining({ page: 2, taxonomy_id: '7' }),
+    expect.any(Object)
+  );
+  await button(wrapper, 'Limpar filtro de segmento').trigger('click');
+  expect(router.currentRoute.value.query.taxonomy_id).toBe('7');
+  await wrapper.find('form').trigger('submit');
+  await flushPromises();
+  expect(router.currentRoute.value.query).toMatchObject({
+    page: '1',
+    q: 'Alpha',
+    source: 'review',
+  });
+  expect(router.currentRoute.value.query.taxonomy_id).toBeUndefined();
+  expect(mocks.companies).toHaveBeenLastCalledWith(
+    expect.objectContaining({ taxonomy_id: '', q: 'Alpha', page: 1 }),
+    expect.any(Object)
+  );
+  wrapper.unmount();
 });
 
 it('opens and closes the canonical company popup without losing URL filters or the server page', async () => {
