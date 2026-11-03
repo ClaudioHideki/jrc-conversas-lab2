@@ -1,0 +1,105 @@
+{
+  "date": "2026-11-03",
+  "status": "AUDITORIA ATUALIZADA — ETAPA C NÃO CONCLUÍDA",
+  "source": "C:\\Users\\DEV03\\Downloads\\JRC-CONVERSAS-CADASTRO-MESTRE-CLIENTES-ESPECIFICACAO-DEV-20261101 (1).docx",
+  "source_sha256_verified": "2a9b7bb58b61856646c29d7681f97473c6a51973684167c62f57937239ac2fbf",
+  "entire_word_xml_read": true,
+  "word_xml_text_characters": 21227,
+  "inventory_fragments": 373,
+  "preservation": "Inventário histórico e evidências anteriores preservados; rótulo pendente antigo não é prova de ausência. Somente células especificamente verificadas foram atualizadas.",
+  "validated_increments": [
+    "C5 importações",
+    "C6 contatos ativos",
+    "C7 financeiro nas seis listas CRM",
+    "Filtros de Segmentos nos cinco consumidores adicionais e escopos nativos",
+    "Correções reais de navegação Cliente 360, contraste e contrato de API de campanhas"
+  ],
+  "evidence": [
+    "docs/jrc_customers/backoffice_segment_integration_checkpoint_20261103.json",
+    "docs/jrc_customers/service_desk_segment_integration_checkpoint_20261103.json",
+    "docs/jrc_customers/project_segment_integration_checkpoint_20261103.json",
+    "docs/jrc_customers/relationship_segment_integration_checkpoint_20261103.json",
+    "docs/jrc_customers/campaign_segment_integration_checkpoint_20261103.json",
+    "docs/jrc_customers/campaign_email_roundtrip_checkpoint_20261103.json"
+  ],
+  "confirmed_remaining": [
+    {
+      "requirement": "cadastro-mestre:P0163",
+      "status": "parcial",
+      "finding": "O popup Empresa não tem aba Documentos. Existe Central documental do Relacionamento com versões, validade, auditoria e scan, mas ela exige assignment_id autorizado e não está conectada ao popup mestre. Não criar cadastro documental paralelo nem contornar CustomerDocuments.scope.",
+      "files": [
+        "app/javascript/dashboard/routes/dashboard/jrcCustomers/CompanyPage.vue",
+        "app/services/jrc_customers/customer360.rb",
+        "app/services/jrc_relationship/customer_documents.rb",
+        "app/controllers/api/v1/accounts/relationship/documents_controller.rb",
+        "app/javascript/dashboard/routes/dashboard/jrcRelationship/DocumentsPanel.vue"
+      ]
+    },
+    {
+      "requirement": "cadastro-mestre:P0155",
+      "status": "parcial",
+      "finding": "Listagem e abertura de chamados existentes usam a origem nativa. Falta ação Novo chamado no popup Empresa com company/contact pré-preenchidos; RecordsPanel só contém links para detalhes existentes.",
+      "files": [
+        "app/javascript/dashboard/routes/dashboard/jrcCustomers/CompanyPage.vue",
+        "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/RecordsPanel.vue"
+      ]
+    },
+    {
+      "requirement": "cadastro-mestre:P0151",
+      "status": "parcial",
+      "finding": "Customer360 consulta conversas autorizadas e últimas interações, mas não apresenta toda a análise de período/canais/satisfação/SLA de Atendimento pedida neste fragmento. SLA de chamados não equivale a SLA de conversas.",
+      "files": [
+        "app/javascript/dashboard/routes/dashboard/jrcCustomers/CompanyPage.vue",
+        "app/services/jrc_customers/customer360.rb"
+      ]
+    },
+    {
+      "requirement": "cadastro-mestre:P0136",
+      "status": "parcial",
+      "finding": "Contagem de contratos ativos e MRR existem. Próxima renovação e ações contratuais derivadas precisam de fechamento específico na visão da Empresa.",
+      "files": [
+        "app/javascript/dashboard/routes/dashboard/jrcCustomers/CompanyPage.vue",
+        "app/services/jrc_customers/customer360.rb"
+      ]
+    },
+    {
+      "requirement": "cadastro-mestre:P0250",
+      "status": "parcial",
+      "finding": "Faturamento por pedidos faturados no período, contratos ativos, campos corporativos e E/OU implementados. TRR não definido; não há fórmula substituta.",
+      "files": [
+        "app/services/jrc_customers/financial_segment_criteria.rb",
+        "app/services/jrc_customers/segment_criteria.rb"
+      ]
+    },
+    {
+      "requirement": "cadastro-mestre:P0414",
+      "status": "parcial",
+      "finding": "Paginação e limites em consultas nativas foram testados. Homologação de escala em grande base representativa não demonstrada pelos fixtures sintéticos; não inferir escala a partir de 54 contatos.",
+      "files": [
+        "app/services/jrc_customers/module_segment_filter.rb"
+      ]
+    }
+  ],
+  "blocking_frontend_validation": {
+    "minimum_build_free_bytes": 1500000000,
+    "preferred_free_bytes": 3000000000,
+    "stop_bytes": 750000000,
+    "mobile_fix_not_built": true,
+    "old_assets_not_proof_of_fix": true
+  },
+  "next_sequence": [
+    "Compilar a correção mobile e medir todos os passos em claro/escuro, desktop/390px",
+    "Fechar documentos e ações de origem do popup Empresa com autorização nativa",
+    "Fechar métricas e ações contratuais que faltam no Word",
+    "Reavaliar os demais fragmentos e registrar evidências antes de declarar Etapa C integral",
+    "D → E → F → G sem publicações; TRR e homologações externas continuam explicitamente pendentes"
+  ],
+  "external_homologation_not_claimed": [
+    "DocuSign demo",
+    "PABX",
+    "WhatsApp",
+    "SMS",
+    "SMTP"
+  ],
+  "production_changed": false
+}

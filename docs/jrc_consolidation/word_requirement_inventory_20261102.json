@@ -3514,14 +3514,18 @@
           },
           "requirement_text": "Quantidade de contratos, ativos, valor mensal total e próxima renovação.",
           "is_heading": false,
-          "classification_pending": true,
+          "classification_pending": false,
           "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
+          "implemented_change": "Contagem de contratos ativos e MRR existem. Próxima renovação e ações contratuais derivadas precisam de fechamento específico na visão da Empresa.",
+          "files": [
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/CompanyPage.vue",
+            "app/services/jrc_customers/customer360.rb"
+          ],
+          "status": "parcial",
           "tests_and_evidence": [],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Fechar a lacuna com os serviços e permissões nativos; compilar e homologar qualquer alteração de frontend quando o disco permitir.",
+          "fragment_kind": "requirement"
         },
         {
           "id": "cadastro-mestre:P0137",
@@ -3778,14 +3782,18 @@
           },
           "requirement_text": "Visão consolidada das conversas/atendimentos do cliente, com período, canais, volume, satisfação, SLA e últimos atendimentos. A abertura/gestão completa continua no módulo Atendimento.",
           "is_heading": false,
-          "classification_pending": true,
+          "classification_pending": false,
           "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
+          "implemented_change": "Customer360 consulta conversas autorizadas e últimas interações, mas não apresenta toda a análise de período/canais/satisfação/SLA de Atendimento pedida neste fragmento. SLA de chamados não equivale a SLA de conversas.",
+          "files": [
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/CompanyPage.vue",
+            "app/services/jrc_customers/customer360.rb"
+          ],
+          "status": "parcial",
           "tests_and_evidence": [],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Fechar a lacuna com os serviços e permissões nativos; compilar e homologar qualquer alteração de frontend quando o disco permitir.",
+          "fragment_kind": "requirement"
         },
         {
           "id": "cadastro-mestre:P0153",
@@ -3838,14 +3846,18 @@
           },
           "requirement_text": "Consolidar os chamados de Service Desk associados à empresa. O botão “Novo chamado” deve abrir o fluxo real do Service Desk já com empresa/contato pré-preenchidos.",
           "is_heading": false,
-          "classification_pending": true,
+          "classification_pending": false,
           "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
+          "implemented_change": "Listagem e abertura de chamados existentes usam a origem nativa. Falta ação Novo chamado no popup Empresa com company/contact pré-preenchidos; RecordsPanel só contém links para detalhes existentes.",
+          "files": [
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/CompanyPage.vue",
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/RecordsPanel.vue"
+          ],
+          "status": "parcial",
           "tests_and_evidence": [],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Fechar a lacuna com os serviços e permissões nativos; compilar e homologar qualquer alteração de frontend quando o disco permitir.",
+          "fragment_kind": "requirement"
         },
         {
           "id": "cadastro-mestre:P0157",
@@ -3958,14 +3970,21 @@
           },
           "requirement_text": "Central documental do cliente, com categorias, validade, versão, status, responsável e pendências. Deve suportar documentos obrigatórios configuráveis e metadados como quem assina contrato quando aplicável.",
           "is_heading": false,
-          "classification_pending": true,
+          "classification_pending": false,
           "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
+          "implemented_change": "O popup Empresa não tem aba Documentos. Existe Central documental do Relacionamento com versões, validade, auditoria e scan, mas ela exige assignment_id autorizado e não está conectada ao popup mestre. Não criar cadastro documental paralelo nem contornar CustomerDocuments.scope.",
+          "files": [
+            "app/javascript/dashboard/routes/dashboard/jrcCustomers/CompanyPage.vue",
+            "app/services/jrc_customers/customer360.rb",
+            "app/services/jrc_relationship/customer_documents.rb",
+            "app/controllers/api/v1/accounts/relationship/documents_controller.rb",
+            "app/javascript/dashboard/routes/dashboard/jrcRelationship/DocumentsPanel.vue"
+          ],
+          "status": "parcial",
           "tests_and_evidence": [],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Fechar a lacuna com os serviços e permissões nativos; compilar e homologar qualquer alteração de frontend quando o disco permitir.",
+          "fragment_kind": "requirement"
         },
         {
           "id": "cadastro-mestre:P0165",
@@ -5728,19 +5747,10 @@
             "JrcCustomers::Audit",
             "CustomFilter pessoal nativo"
           ],
-          "implemented_change": "Definição, wizard, prévia, escolhas manuais, CRUD auditado e escopo validados no incremento C4a; requisitos financeiros, distinção de seletores e filtros de todos os módulos permanecem parciais conforme o relatório. | C7: faturamento de pedidos por período e contagem de contratos, com filtros CRM e gates automatizados. Build C7 Vite aprovado e homologação real Chrome concluída por continuações documentadas em financial_segments_crm_checkpoint_20261103.json. Etapa C continua parcial: outros módulos e TRR pendentes. TRR e consumo nos demais módulos continuam pendentes.",
+          "implemented_change": "Faturamento por pedidos faturados no período, contratos ativos, campos corporativos e E/OU implementados. TRR não definido; não há fórmula substituta.",
           "files": [
-            "app/models/jrc_customers/taxonomy.rb",
-            "app/models/jrc_customers/segment_override.rb",
-            "app/services/jrc_customers/segment_criteria.rb",
-            "app/services/jrc_customers/segment_members.rb",
-            "app/services/jrc_customers/taxonomy_writer.rb",
-            "app/controllers/api/v1/accounts/customers/taxonomies_controller.rb",
-            "app/javascript/dashboard/routes/dashboard/jrcCustomers/SegmentDirectory.vue",
-            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentDialog.vue",
-            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentResults.vue",
-            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentHistory.vue",
-            "db/migrate/20261103100000_add_customer_segment_definitions.rb"
+            "app/services/jrc_customers/financial_segment_criteria.rb",
+            "app/services/jrc_customers/segment_criteria.rb"
           ],
           "status": "parcial",
           "tests_and_evidence": [
@@ -5748,7 +5758,8 @@
             "docs/jrc_customers/financial_segments_crm_checkpoint_20261103.json"
           ],
           "dependencies": [],
-          "next_action": "Retomar build e Chrome após liberar espaço; concluir consumo nos demais módulos e manter TRR pendente de definição."
+          "next_action": "Fechar a lacuna com os serviços e permissões nativos; compilar e homologar qualquer alteração de frontend quando o disco permitir.",
+          "fragment_kind": "requirement"
         },
         {
           "id": "cadastro-mestre:P0251",
@@ -5933,28 +5944,23 @@
             "JrcCustomers::Audit",
             "CustomFilter pessoal nativo"
           ],
-          "implemented_change": "Classificação estática separada de filtro dinâmico e filtro visível com paginação/URL no diretório de empresas, sem conceder permissões. Os demais módulos continuam pendentes. | C7: faturamento de pedidos por período e contagem de contratos, com filtros CRM e gates automatizados. Build C7 Vite aprovado e homologação real Chrome concluída por continuações documentadas em financial_segments_crm_checkpoint_20261103.json. Etapa C continua parcial: outros módulos e TRR pendentes. TRR e consumo nos demais módulos continuam pendentes. | Incremento seguinte Backoffice: código/gates backend42/0, Vue11/0 e ESLint6files0/0; compilação e Chrome pendentes. Outros quatro módulos ainda não consomem filtro publicado. | Homologação Backoffice concluída em28aa8023: nova compilação e Chrome/DB reais desktop/mobile, permissões/isolamento e281registros/30arquivos preservados. Consumo dos outros quatro módulos e auditoria C ainda pendentes.",
+          "implemented_change": "Publicação por módulo limita o catálogo e as consultas autorizadas de CRM, Backoffice, Service Desk, Projetos, Relacionamento e Campanhas. Nunca concede permissões nem usa IDs de identidade enviados pelo cliente.",
           "files": [
-            "app/models/jrc_customers/taxonomy.rb",
-            "app/models/jrc_customers/segment_override.rb",
-            "app/services/jrc_customers/segment_criteria.rb",
-            "app/services/jrc_customers/segment_members.rb",
-            "app/services/jrc_customers/taxonomy_writer.rb",
-            "app/controllers/api/v1/accounts/customers/taxonomies_controller.rb",
-            "app/javascript/dashboard/routes/dashboard/jrcCustomers/SegmentDirectory.vue",
-            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentDialog.vue",
-            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentResults.vue",
-            "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/SegmentHistory.vue",
-            "db/migrate/20261103100000_add_customer_segment_definitions.rb"
+            "app/services/jrc_customers/module_segment_filter.rb",
+            "app/services/jrc_customers/campaign_segment.rb"
           ],
-          "status": "parcial",
+          "status": "concluído",
           "tests_and_evidence": [
-            "docs/jrc_customers/segment_definition_checkpoint_20261103.json",
-            "docs/jrc_customers/segment_filter_checkpoint_20261103.json",
-            "docs/jrc_customers/financial_segments_crm_checkpoint_20261103.json"
+            "docs/jrc_customers/backoffice_segment_integration_checkpoint_20261103.json",
+            "docs/jrc_customers/service_desk_segment_integration_checkpoint_20261103.json",
+            "docs/jrc_customers/project_segment_integration_checkpoint_20261103.json",
+            "docs/jrc_customers/relationship_segment_integration_checkpoint_20261103.json",
+            "docs/jrc_customers/campaign_segment_integration_checkpoint_20261103.json",
+            "docs/jrc_customers/segment_consumer_chrome_corrections_checkpoint_20261103.json"
           ],
           "dependencies": [],
-          "next_action": "Retomar build e Chrome após liberar espaço; concluir consumo nos demais módulos e manter TRR pendente de definição."
+          "next_action": "Preservar escopos nativos. Pendência visual de Campanhas e os demais requisitos da Etapa C são registrados separadamente.",
+          "fragment_kind": "requirement"
         },
         {
           "id": "cadastro-mestre:P0257",
@@ -8520,14 +8526,25 @@
           },
           "requirement_text": "Uso por módulo não altera permissão do usuário.",
           "is_heading": false,
-          "classification_pending": true,
+          "classification_pending": false,
           "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "implemented_change": "Publicação por módulo limita o catálogo e as consultas autorizadas de CRM, Backoffice, Service Desk, Projetos, Relacionamento e Campanhas. Nunca concede permissões nem usa IDs de identidade enviados pelo cliente.",
+          "files": [
+            "app/services/jrc_customers/module_segment_filter.rb",
+            "app/services/jrc_customers/campaign_segment.rb"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/backoffice_segment_integration_checkpoint_20261103.json",
+            "docs/jrc_customers/service_desk_segment_integration_checkpoint_20261103.json",
+            "docs/jrc_customers/project_segment_integration_checkpoint_20261103.json",
+            "docs/jrc_customers/relationship_segment_integration_checkpoint_20261103.json",
+            "docs/jrc_customers/campaign_segment_integration_checkpoint_20261103.json",
+            "docs/jrc_customers/segment_consumer_chrome_corrections_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Preservar escopos nativos. Pendência visual de Campanhas e os demais requisitos da Etapa C são registrados separadamente.",
+          "fragment_kind": "requirement"
         },
         {
           "id": "cadastro-mestre:P0364",
@@ -9724,14 +9741,17 @@
           },
           "requirement_text": "Listas e popups respondem com paginação/queries adequadas em base real.",
           "is_heading": false,
-          "classification_pending": true,
+          "classification_pending": false,
           "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
+          "implemented_change": "Paginação e limites em consultas nativas foram testados. Homologação de escala em grande base representativa não demonstrada pelos fixtures sintéticos; não inferir escala a partir de 54 contatos.",
+          "files": [
+            "app/services/jrc_customers/module_segment_filter.rb"
+          ],
+          "status": "parcial",
           "tests_and_evidence": [],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Fechar a lacuna com os serviços e permissões nativos; compilar e homologar qualquer alteração de frontend quando o disco permitir.",
+          "fragment_kind": "requirement"
         },
         {
           "id": "cadastro-mestre:P0416",
@@ -42365,5 +42385,71 @@
     "stage_C_complete": false,
     "status": "Backoffice locally homologated; four other module consumers and final C audit pending",
     "validated_source_commit": "28aa80232666704a40085d4d51481ecb17060a37"
+  },
+  "customer_segment_consumers_chrome_increment": {
+    "date": "2026-11-03",
+    "compiled_source": "5aa2e7fe86959e29f184a4c41ca296ad87120c5e",
+    "backend_contract_fix": "df89ae22ccfb3927dd2ccc68f64fe38900cf1062",
+    "stage_C_complete": false,
+    "module_filter_security_validated": true,
+    "pending_visual": "Campaign wizard mobile horizontal overflow reproduced: 390px viewport, 538px scroll width. Source-only grid correction awaits a fresh guarded build and Chrome.",
+    "remaining_findings": [
+      {
+        "requirement": "cadastro-mestre:P0163",
+        "status": "parcial",
+        "finding": "O popup Empresa não tem aba Documentos. Existe Central documental do Relacionamento com versões, validade, auditoria e scan, mas ela exige assignment_id autorizado e não está conectada ao popup mestre. Não criar cadastro documental paralelo nem contornar CustomerDocuments.scope.",
+        "files": [
+          "app/javascript/dashboard/routes/dashboard/jrcCustomers/CompanyPage.vue",
+          "app/services/jrc_customers/customer360.rb",
+          "app/services/jrc_relationship/customer_documents.rb",
+          "app/controllers/api/v1/accounts/relationship/documents_controller.rb",
+          "app/javascript/dashboard/routes/dashboard/jrcRelationship/DocumentsPanel.vue"
+        ]
+      },
+      {
+        "requirement": "cadastro-mestre:P0155",
+        "status": "parcial",
+        "finding": "Listagem e abertura de chamados existentes usam a origem nativa. Falta ação Novo chamado no popup Empresa com company/contact pré-preenchidos; RecordsPanel só contém links para detalhes existentes.",
+        "files": [
+          "app/javascript/dashboard/routes/dashboard/jrcCustomers/CompanyPage.vue",
+          "app/javascript/dashboard/routes/dashboard/jrcCustomers/components/RecordsPanel.vue"
+        ]
+      },
+      {
+        "requirement": "cadastro-mestre:P0151",
+        "status": "parcial",
+        "finding": "Customer360 consulta conversas autorizadas e últimas interações, mas não apresenta toda a análise de período/canais/satisfação/SLA de Atendimento pedida neste fragmento. SLA de chamados não equivale a SLA de conversas.",
+        "files": [
+          "app/javascript/dashboard/routes/dashboard/jrcCustomers/CompanyPage.vue",
+          "app/services/jrc_customers/customer360.rb"
+        ]
+      },
+      {
+        "requirement": "cadastro-mestre:P0136",
+        "status": "parcial",
+        "finding": "Contagem de contratos ativos e MRR existem. Próxima renovação e ações contratuais derivadas precisam de fechamento específico na visão da Empresa.",
+        "files": [
+          "app/javascript/dashboard/routes/dashboard/jrcCustomers/CompanyPage.vue",
+          "app/services/jrc_customers/customer360.rb"
+        ]
+      },
+      {
+        "requirement": "cadastro-mestre:P0250",
+        "status": "parcial",
+        "finding": "Faturamento por pedidos faturados no período, contratos ativos, campos corporativos e E/OU implementados. TRR não definido; não há fórmula substituta.",
+        "files": [
+          "app/services/jrc_customers/financial_segment_criteria.rb",
+          "app/services/jrc_customers/segment_criteria.rb"
+        ]
+      },
+      {
+        "requirement": "cadastro-mestre:P0414",
+        "status": "parcial",
+        "finding": "Paginação e limites em consultas nativas foram testados. Homologação de escala em grande base representativa não demonstrada pelos fixtures sintéticos; não inferir escala a partir de 54 contatos.",
+        "files": [
+          "app/services/jrc_customers/module_segment_filter.rb"
+        ]
+      }
+    ]
   }
 }

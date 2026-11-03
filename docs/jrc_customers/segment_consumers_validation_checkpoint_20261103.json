@@ -1,0 +1,125 @@
+{
+  "date": "2026-11-03",
+  "status": "C7 PARCIAL — integrações funcionais e segurança validadas; correção mobile aguarda build e Chrome; Etapa C permanece aberta",
+  "branch": "codex/relacionamento-v2-20261101",
+  "validated_frontend_commit": "5aa2e7fe86959e29f184a4c41ca296ad87120c5e",
+  "validated_backend_commit": "df89ae22ccfb3927dd2ccc68f64fe38900cf1062",
+  "fresh_build": {
+    "report": ".codex/segment-consumers-5aa2e7fe-build.json",
+    "exit": 0,
+    "elapsed_seconds": 172.89,
+    "minimum_free_bytes": 1840160768,
+    "stop_bytes": 750000000,
+    "generated_assets": 586,
+    "manifest_entries": 372,
+    "old_assets_not_proof_of_new_responsive_fix": true
+  },
+  "ui_runtime": ".codex/segment-email-roundtrip-runtime.json",
+  "actual_chrome_passed": {
+    "segmentos-relacionamento-c7-navegacao-5aa2e7fe-20261103.json": [
+      "native_filtered_portfolio",
+      "native_filtered_pagination",
+      "native_360_keeps_segment"
+    ],
+    "segmentos-relacionamento-c7-integracao-5aa2e7fe-20261103.json": [
+      "financial_portfolio_one_authorized_customer",
+      "native_customer_360_source_module_and_return",
+      "filtered_real_dashboard",
+      "filtered_native_actions",
+      "mobile_navigation_and_clear_restore_native_portfolio"
+    ],
+    "segmentos-campanhas-c7-previa-nativa-5aa2e7fe-20261103.json": [
+      "native_segment_preview_and_recipient_pagination",
+      "financial_membership_uses_real_invoiced_period",
+      "clear_restores_native_audience",
+      "preview_has_no_business_writes"
+    ],
+    "segmentos-campanhas-c7-edicao-email-df89ae22-20261103.json": [
+      "email_channel_subject_restored_from_real_persisted_draft",
+      "native_mobile_edit_segment_and_reload_persistence",
+      "only_existing_own_draft_edited"
+    ],
+    "segmentos-modulos-c7-smoke-contrato-df89ae22-20261103.json": [
+      "fresh_service_desk_authorized_native_filter",
+      "fresh_projects_authorized_native_filter",
+      "real_light_theme_desktop_mobile"
+    ]
+  },
+  "actual_browser": "Installed Chrome, real local Rails/PostgreSQL, synthetic data; 1520x1050 and responsive 390x844, not a physical device",
+  "backend_regression": {
+    "examples": 73,
+    "failures": 0,
+    "report": ".codex/campaign-email-roundtrip-fixed.json",
+    "focused_final_examples": 3,
+    "focused_report": ".codex/campaign-email-roundtrip-final.json",
+    "focused_is_restructured_regression_not_3_additional_cases": true
+  },
+  "final_mobile_source_regression": {
+    "report": ".codex/campaign-mobile-layout-owned-config-regression.json",
+    "vue_tests": 20,
+    "failures": 0,
+    "real_browser_geometry_after_fix": false,
+    "lint_errors": 0,
+    "existing_warnings": 121
+  },
+  "failed_runs_preserved": {
+    "email_create_then_edit": "segmentos-campanhas-c7-rascunho-5aa2e7fe-20261103.json — create passed, edit revealed actual missing API fields",
+    "smoke_test_adapter": "segmentos-modulos-c7-smoke-final-df89ae22-20261103.json — harness used payload instead of native items; corrected in separate report",
+    "vitest_default_cache": ".codex/campaign-mobile-layout-regression.json — zero tests executed due cached dependency path in another worktree; 20 passed with existing owned config",
+    "mobile_actual": "campanha-c7-geometria-mobile-df89ae22-20261103.json — reproduced actual 538px content in 390px viewport; not a passed layout gate"
+  },
+  "mobile_fix": {
+    "file": "app/javascript/dashboard/routes/dashboard/jrcCampaigns/components/CampaignWizard.vue",
+    "changes": "Explicit single minmax(0,1fr) grid column and min-w-0 on the two main children; preserve all fields, sender rules and light/dark palette",
+    "status": "Source correction and Vue regression only; fresh guarded build + actual Chrome all steps pending"
+  },
+  "integrity": {
+    "reports": [
+      ".codex/segment-consumers-final-integrity.json",
+      ".codex/segment-consumers-final-private-preservation.json",
+      ".codex/segment-consumers-final-git-preservation.json"
+    ],
+    "protected_row_sets": [
+      317,
+      476
+    ],
+    "row_sets_overlap": true,
+    "private_files_per_store": 30,
+    "stores": 4,
+    "protected_checkpoint_ancestors": 12,
+    "campaigns_created": 1,
+    "campaigns_status": "draft",
+    "campaign_executions": 0,
+    "campaign_recipients": 0,
+    "campaign_consents": 0,
+    "signature_deliveries": 0,
+    "signature_verifier": null
+  },
+  "word_audit": "docs/jrc_customers/stage_c_word_audit_20261103.json",
+  "remaining": [
+    "Fresh build and installed Chrome for mobile Campaign grid fix",
+    "Company Documents central with native permissions/versioning/required-document configuration",
+    "Create native Service Desk ticket with Company/Contact context from master popup",
+    "Complete source-based attendance metrics and contract renewal/actions",
+    "Remaining Word evidence and representative scale validation",
+    "TRR business definition; no substitute formula",
+    "D/E/F/G not concluded; external DocuSign demo not homologated"
+  ],
+  "disk": {
+    "free_at_checkpoint_bytes": 1409265664,
+    "minimum_new_build_bytes": 1500000000,
+    "preferred_bytes": 3000000000,
+    "blocked_new_build": true,
+    "cleanup_or_deletion": false,
+    "other_processes_stopped": false
+  },
+  "restrictions": {
+    "push": false,
+    "image_build_publish": false,
+    "deploy": false,
+    "production_changed": false,
+    "migrations": false,
+    "external_operations": 0
+  },
+  "local_commit_hook": "Missing .husky/_/husky.sh; manual gates executed; command-local core.hooksPath=.codex/git-hooks only"
+}

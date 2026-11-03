@@ -1522,9 +1522,9 @@ watch(
 
     <main class="flex-1 overflow-y-auto">
       <div
-        class="mx-auto grid w-full max-w-[1540px] gap-5 p-5 lg:grid-cols-12 lg:p-8"
+        class="mx-auto grid w-full max-w-[1540px] grid-cols-1 gap-5 p-5 lg:grid-cols-12 lg:p-8"
       >
-        <section class="lg:col-span-9">
+        <section class="min-w-0 lg:col-span-9">
           <div
             v-if="latestTest"
             class="mb-4 rounded-lg border border-n-weak p-3 text-sm"
@@ -3258,7 +3258,7 @@ watch(
           </div>
         </section>
 
-        <aside class="lg:col-span-3">
+        <aside class="min-w-0 lg:col-span-3">
           <div class="space-y-4 lg:sticky lg:top-0">
             <article
               class="campaign-summary-panel rounded-2xl border border-[#fdba74] border-t-4 border-t-[#f97316] bg-[#fff7ed] p-5 shadow-sm dark:border-n-amber-6 dark:border-t-n-amber-9 dark:bg-n-amber-2"
