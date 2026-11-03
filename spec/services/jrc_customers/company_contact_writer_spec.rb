@@ -9,6 +9,13 @@ RSpec.describe JrcCustomers::CompanyContactWriter do
 
   before { account.enable_features!('jrc_customer_master') }
 
+  it 'preserves existing job fields on the first company link' do
+    unlinked = create(:contact, account: account, job_title: 'TESTE SINTÉTICO — Cargo anterior', department: 'Operação')
+    writer.update!(id: unlinked.id, attributes: { company_id: company.id })
+    expect(unlinked.reload.attributes.slice('company_id', 'job_title', 'department'))
+      .to eq('company_id' => company.id, 'job_title' => 'TESTE SINTÉTICO — Cargo anterior', 'department' => 'Operação')
+  end
+
   it 'saves the role and primary on the existing person with audit and ignores caller ownership attributes' do
     writer.update!(id: contact.id, attributes: { company_role: 'finance', company_primary: true, account_id: 0, user_id: 0 })
     expect(contact.reload.attributes.slice('account_id', 'company_id', 'company_role', 'company_primary'))

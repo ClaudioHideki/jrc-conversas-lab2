@@ -1354,6 +1354,7 @@
       "ACTIVE": "Ativo",
       "INACTIVE": "Inativo",
       "TRANSFER_HELP": "Salve a mudança de empresa antes de preencher o novo vínculo. Cargo, departamento, papel e indicação de principal da empresa anterior serão preservados no histórico e removidos do vínculo atual.",
+      "FIRST_LINK_HELP": "Salve o vínculo para definir papel, status e contato principal da empresa. Cargo e departamento já informados serão preservados.",
       "HISTORY": "Histórico de vínculos",
       "TIMELINE": "Linha do tempo",
       "FROM": "Antes",

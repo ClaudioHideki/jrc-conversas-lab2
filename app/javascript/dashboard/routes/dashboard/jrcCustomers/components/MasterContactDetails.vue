@@ -59,7 +59,7 @@ const companyChanged = computed(
 watch(
   () => form.company_id,
   () => {
-    if (!contact.value) return;
+    if (!contact.value?.company_id) return;
     const context = companyChanged.value ? {} : contact.value;
     form.job_title = context.job_title || '';
     form.department = context.department || '';
@@ -342,9 +342,16 @@ onBeforeUnmount(() => {
               class="text-sm text-n-amber-11"
               role="status"
             >
-              {{ t('CRM.COMPANY_CONTACT_CONTEXT.TRANSFER_HELP') }}
+              {{
+                contact.company_id
+                  ? t('CRM.COMPANY_CONTACT_CONTEXT.TRANSFER_HELP')
+                  : t('CRM.COMPANY_CONTACT_CONTEXT.FIRST_LINK_HELP')
+              }}
             </p>
-            <label class="block text-sm">
+            <label
+              v-if="form.company_id"
+              class="block text-sm"
+            >
               {{ t('CRM.COMPANY_CONTACT_CONTEXT.ROLE') }}
               <select
                 v-model="form.company_role"
@@ -363,7 +370,10 @@ onBeforeUnmount(() => {
                 </option>
               </select>
             </label>
-            <label class="block text-sm">
+            <label
+              v-if="form.company_id"
+              class="block text-sm"
+            >
               {{ t('CRM.COMPANY_CONTACT_CONTEXT.STATUS') }}
               <select
                 v-model="form.company_contact_status"
@@ -378,7 +388,10 @@ onBeforeUnmount(() => {
                 </option>
               </select>
             </label>
-            <label class="flex items-center gap-2 text-sm">
+            <label
+              v-if="form.company_id"
+              class="flex items-center gap-2 text-sm"
+            >
               <input
                 v-model="form.company_primary"
                 type="checkbox"

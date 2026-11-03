@@ -135,7 +135,7 @@ onBeforeUnmount(() => {
             >
               {{ t('CRM.COMPANY_CONTACT_CONTEXT.PRIMARY') }}
             </p>
-            <p v-if="row[side].company_contact_status">
+            <p v-if="row[side].company_id && row[side].company_contact_status">
               {{
                 row[side].company_contact_status === 'inactive'
                   ? t('CRM.COMPANY_CONTACT_CONTEXT.INACTIVE')

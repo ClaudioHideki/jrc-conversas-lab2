@@ -52,6 +52,32 @@ beforeEach(() => {
   mocks.saveContact.mockResolvedValue({ data: {} });
 });
 
+it('keeps the personal job draft when selecting the first company for an unlinked person', async () => {
+  const wrapper = render();
+  await flushPromises();
+  await wrapper.find('form input').setValue('MOCK — Cargo preservado');
+  wrapper
+    .findComponent({ name: 'CompanyPicker' })
+    .vm.$emit('update:modelValue', 7);
+  await flushPromises();
+  expect(wrapper.find('form input').element.value).toBe(
+    'MOCK — Cargo preservado'
+  );
+  await wrapper.find('form').trigger('submit');
+  await flushPromises();
+  expect(mocks.saveContact).toHaveBeenCalledWith(
+    expect.objectContaining({
+      company_id: 7,
+      job_title: 'MOCK — Cargo preservado',
+      department: 'Atendimento',
+    }),
+    42,
+    { confirm_reassignment: false, confirm_primary_change: false },
+    { accountId: 1 }
+  );
+  wrapper.unmount();
+});
+
 it('uses the existing editor and pins the source account separately from reassignment confirmation', async () => {
   const wrapper = render();
   await flushPromises();

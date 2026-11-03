@@ -11,8 +11,7 @@ module JrcCustomers::ContactMaster
     validate :master_company_belongs_to_account, if: -> { account&.feature_enabled?('jrc_customer_master') && (new_record? || will_save_change_to_company_id?) }
     validates :registration_status, inclusion: { in: %w[provisional registered] }, if: -> { has_attribute?(:registration_status) }
     before_save :sync_master_company_name, if: -> { will_save_change_to_company_id? && account.feature_enabled?('jrc_customer_master') }
-    before_validation :reset_company_contact_context,
-                      if: -> { persisted? && will_save_change_to_company_id? && account.feature_enabled?('jrc_customer_master') }
+    before_validation :reset_company_contact_context, if: :changing_existing_company?
     before_validation :normalize_company_role
     validates :company_role, inclusion: { in: COMPANY_ROLES }, allow_nil: true
     validates :company_contact_status, inclusion: { in: %w[active inactive] }
@@ -20,6 +19,10 @@ module JrcCustomers::ContactMaster
   end
 
   private
+
+  def changing_existing_company?
+    persisted? && company_id_in_database.present? && will_save_change_to_company_id? && account.feature_enabled?('jrc_customer_master')
+  end
 
   def normalize_company_role
     self.company_role = company_role.to_s.strip.presence

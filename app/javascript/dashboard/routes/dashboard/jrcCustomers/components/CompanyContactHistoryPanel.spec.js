@@ -37,6 +37,25 @@ beforeEach(() => {
   );
 });
 
+it('does not describe the person as an active company link after unlinking', async () => {
+  const data = response('MOCK — Empresa permitida');
+  data.data.payload[0].from = {
+    company_id: 7,
+    company_name: 'MOCK — Empresa permitida',
+    company_contact_status: 'active',
+  };
+  data.data.payload[0].to = {
+    company_id: null,
+    company_contact_status: 'active',
+  };
+  mocks.contactCompanyHistory.mockResolvedValue(data);
+  const wrapper = render();
+  await flushPromises();
+  expect(wrapper.text()).toContain('Sem empresa vinculada');
+  expect(wrapper.text().match(/Ativo/g)).toHaveLength(1);
+  wrapper.unmount();
+});
+
 it('uses server paging and the canonical contact while displaying only the safe link context', async () => {
   const wrapper = render();
   await flushPromises();

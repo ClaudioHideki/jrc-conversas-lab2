@@ -807,14 +807,25 @@
           },
           "requirement_text": "Uma empresa pode ter várias pessoas vinculadas, com cargo, área, papel e indicação de contato principal.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "Contact/Company/ContactDirectory/CorporateCoverage e fusão/auditoria nativas",
+            "MasterContactDetails e CompanyContacts existentes; sem novos privilégios"
+          ],
+          "implemented_change": "Papel/status/principal único por empresa, troca confirmada e auditada, primeiro vínculo sem perda de cargo/departamento e transferência/desvínculo preservando a pessoa e o histórico. Usado company_id temporário conforme Word.",
+          "files": [
+            "app/services/jrc_customers/company_contact_writer.rb",
+            "app/services/jrc_customers/company_contact_history.rb",
+            "app/models/concerns/jrc_customers/contact_master.rb",
+            "db/migrate/20261103090000_add_company_contact_context_to_contacts.rb"
+          ],
+          "status": "parcial",
+          "tests_and_evidence": [
+            "docs/jrc_customers/company_contact_preservation_checkpoint_20261103.json",
+            "docs/jrc_customers/company_contact_context_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Concluir os demais critérios do fragmento e integrações previstas; não equiparar vínculo temporário à evolução N:N completa."
         },
         {
           "id": "cadastro-mestre:P0019",
@@ -2641,14 +2652,25 @@
           },
           "requirement_text": "Deve listar as pessoas vinculadas à empresa e permitir cadastrar, vincular, editar o vínculo, indicar contato principal e desvincular.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "Contact/Company/ContactDirectory/CorporateCoverage e fusão/auditoria nativas",
+            "MasterContactDetails e CompanyContacts existentes; sem novos privilégios"
+          ],
+          "implemented_change": "Papel/status/principal único por empresa, troca confirmada e auditada, primeiro vínculo sem perda de cargo/departamento e transferência/desvínculo preservando a pessoa e o histórico. Usado company_id temporário conforme Word.",
+          "files": [
+            "app/services/jrc_customers/company_contact_writer.rb",
+            "app/services/jrc_customers/company_contact_history.rb",
+            "app/models/concerns/jrc_customers/contact_master.rb",
+            "db/migrate/20261103090000_add_company_contact_context_to_contacts.rb"
+          ],
+          "status": "parcial",
+          "tests_and_evidence": [
+            "docs/jrc_customers/company_contact_preservation_checkpoint_20261103.json",
+            "docs/jrc_customers/company_contact_context_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Concluir os demais critérios do fragmento e integrações previstas; não equiparar vínculo temporário à evolução N:N completa."
         },
         {
           "id": "cadastro-mestre:P0098",
@@ -2833,14 +2855,25 @@
           },
           "requirement_text": "Decisor, Influenciador, Compras, Financeiro, Técnico, Executivo, Solicitante, Administrativo, Usuário do serviço, Outro.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "Contact/Company/ContactDirectory/CorporateCoverage e fusão/auditoria nativas",
+            "MasterContactDetails e CompanyContacts existentes; sem novos privilégios"
+          ],
+          "implemented_change": "Papel/status/principal único por empresa, troca confirmada e auditada, primeiro vínculo sem perda de cargo/departamento e transferência/desvínculo preservando a pessoa e o histórico. Usado company_id temporário conforme Word.",
+          "files": [
+            "app/services/jrc_customers/company_contact_writer.rb",
+            "app/services/jrc_customers/company_contact_history.rb",
+            "app/models/concerns/jrc_customers/contact_master.rb",
+            "db/migrate/20261103090000_add_company_contact_context_to_contacts.rb"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/company_contact_preservation_checkpoint_20261103.json",
+            "docs/jrc_customers/company_contact_context_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Preservar a evidência e incluir na validação integrada G."
         },
         {
           "id": "cadastro-mestre:P0106",
@@ -2929,14 +2962,25 @@
           },
           "requirement_text": "No máximo um contato principal por empresa, salvo regra futura explicitamente diferente.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "Contact/Company/ContactDirectory/CorporateCoverage e fusão/auditoria nativas",
+            "MasterContactDetails e CompanyContacts existentes; sem novos privilégios"
+          ],
+          "implemented_change": "Papel/status/principal único por empresa, troca confirmada e auditada, primeiro vínculo sem perda de cargo/departamento e transferência/desvínculo preservando a pessoa e o histórico. Usado company_id temporário conforme Word.",
+          "files": [
+            "app/services/jrc_customers/company_contact_writer.rb",
+            "app/services/jrc_customers/company_contact_history.rb",
+            "app/models/concerns/jrc_customers/contact_master.rb",
+            "db/migrate/20261103090000_add_company_contact_context_to_contacts.rb"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/company_contact_preservation_checkpoint_20261103.json",
+            "docs/jrc_customers/company_contact_context_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Preservar a evidência e incluir na validação integrada G."
         },
         {
           "id": "cadastro-mestre:P0110",
@@ -2977,14 +3021,25 @@
           },
           "requirement_text": "Ativo/Inativo no vínculo.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "Contact/Company/ContactDirectory/CorporateCoverage e fusão/auditoria nativas",
+            "MasterContactDetails e CompanyContacts existentes; sem novos privilégios"
+          ],
+          "implemented_change": "Papel/status/principal único por empresa, troca confirmada e auditada, primeiro vínculo sem perda de cargo/departamento e transferência/desvínculo preservando a pessoa e o histórico. Usado company_id temporário conforme Word.",
+          "files": [
+            "app/services/jrc_customers/company_contact_writer.rb",
+            "app/services/jrc_customers/company_contact_history.rb",
+            "app/models/concerns/jrc_customers/contact_master.rb",
+            "db/migrate/20261103090000_add_company_contact_context_to_contacts.rb"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/company_contact_preservation_checkpoint_20261103.json",
+            "docs/jrc_customers/company_contact_context_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Preservar a evidência e incluir na validação integrada G."
         },
         {
           "id": "cadastro-mestre:P0112",
@@ -3213,14 +3268,25 @@
           },
           "requirement_text": "Cargo, departamento, papel e indicação de contato principal pertencem ao contexto do vínculo com a empresa.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "Contact/Company/ContactDirectory/CorporateCoverage e fusão/auditoria nativas",
+            "MasterContactDetails e CompanyContacts existentes; sem novos privilégios"
+          ],
+          "implemented_change": "Papel/status/principal único por empresa, troca confirmada e auditada, primeiro vínculo sem perda de cargo/departamento e transferência/desvínculo preservando a pessoa e o histórico. Usado company_id temporário conforme Word.",
+          "files": [
+            "app/services/jrc_customers/company_contact_writer.rb",
+            "app/services/jrc_customers/company_contact_history.rb",
+            "app/models/concerns/jrc_customers/contact_master.rb",
+            "db/migrate/20261103090000_add_company_contact_context_to_contacts.rb"
+          ],
+          "status": "parcial",
+          "tests_and_evidence": [
+            "docs/jrc_customers/company_contact_preservation_checkpoint_20261103.json",
+            "docs/jrc_customers/company_contact_context_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Concluir os demais critérios do fragmento e integrações previstas; não equiparar vínculo temporário à evolução N:N completa."
         },
         {
           "id": "cadastro-mestre:P0127",
@@ -3253,14 +3319,25 @@
           },
           "requirement_text": "Se company_id continuar sendo o modelo temporário, impedir vínculo simultâneo em duas empresas e exibir aviso de transferência. Planejar migração futura para vínculo N:N.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "Contact/Company/ContactDirectory/CorporateCoverage e fusão/auditoria nativas",
+            "MasterContactDetails e CompanyContacts existentes; sem novos privilégios"
+          ],
+          "implemented_change": "Papel/status/principal único por empresa, troca confirmada e auditada, primeiro vínculo sem perda de cargo/departamento e transferência/desvínculo preservando a pessoa e o histórico. Usado company_id temporário conforme Word.",
+          "files": [
+            "app/services/jrc_customers/company_contact_writer.rb",
+            "app/services/jrc_customers/company_contact_history.rb",
+            "app/models/concerns/jrc_customers/contact_master.rb",
+            "db/migrate/20261103090000_add_company_contact_context_to_contacts.rb"
+          ],
+          "status": "parcial",
+          "tests_and_evidence": [
+            "docs/jrc_customers/company_contact_preservation_checkpoint_20261103.json",
+            "docs/jrc_customers/company_contact_context_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Concluir os demais critérios do fragmento e integrações previstas; não equiparar vínculo temporário à evolução N:N completa."
         },
         {
           "id": "cadastro-mestre:P0129",
@@ -4627,14 +4704,25 @@
           },
           "requirement_text": "Exibir empresa atual, papel, tipo de contato, responsável da conta e histórico de vínculos. Se a pessoa não tiver empresa, destacar “Contato sem empresa vinculada” e oferecer “Vincular empresa”.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "Contact/Company/ContactDirectory/CorporateCoverage e fusão/auditoria nativas",
+            "MasterContactDetails e CompanyContacts existentes; sem novos privilégios"
+          ],
+          "implemented_change": "Papel/status/principal único por empresa, troca confirmada e auditada, primeiro vínculo sem perda de cargo/departamento e transferência/desvínculo preservando a pessoa e o histórico. Usado company_id temporário conforme Word.",
+          "files": [
+            "app/services/jrc_customers/company_contact_writer.rb",
+            "app/services/jrc_customers/company_contact_history.rb",
+            "app/models/concerns/jrc_customers/contact_master.rb",
+            "db/migrate/20261103090000_add_company_contact_context_to_contacts.rb"
+          ],
+          "status": "parcial",
+          "tests_and_evidence": [
+            "docs/jrc_customers/company_contact_preservation_checkpoint_20261103.json",
+            "docs/jrc_customers/company_contact_context_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Concluir os demais critérios do fragmento e integrações previstas; não equiparar vínculo temporário à evolução N:N completa."
         },
         {
           "id": "cadastro-mestre:P0203",
@@ -7529,14 +7617,25 @@
           },
           "requirement_text": "Pessoas podem ser cadastradas, vinculadas, marcadas como principal e desvinculadas sem duplicar pessoa.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "Contact/Company/ContactDirectory/CorporateCoverage e fusão/auditoria nativas",
+            "MasterContactDetails e CompanyContacts existentes; sem novos privilégios"
+          ],
+          "implemented_change": "Papel/status/principal único por empresa, troca confirmada e auditada, primeiro vínculo sem perda de cargo/departamento e transferência/desvínculo preservando a pessoa e o histórico. Usado company_id temporário conforme Word.",
+          "files": [
+            "app/services/jrc_customers/company_contact_writer.rb",
+            "app/services/jrc_customers/company_contact_history.rb",
+            "app/models/concerns/jrc_customers/contact_master.rb",
+            "db/migrate/20261103090000_add_company_contact_context_to_contacts.rb"
+          ],
+          "status": "parcial",
+          "tests_and_evidence": [
+            "docs/jrc_customers/company_contact_preservation_checkpoint_20261103.json",
+            "docs/jrc_customers/company_contact_context_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Concluir os demais critérios do fragmento e integrações previstas; não equiparar vínculo temporário à evolução N:N completa."
         },
         {
           "id": "cadastro-mestre:P0353",
@@ -8039,14 +8138,25 @@
           },
           "requirement_text": "Implementar Pessoas na Empresa e regras de vínculo/contato principal.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "Contact/Company/ContactDirectory/CorporateCoverage e fusão/auditoria nativas",
+            "MasterContactDetails e CompanyContacts existentes; sem novos privilégios"
+          ],
+          "implemented_change": "Papel/status/principal único por empresa, troca confirmada e auditada, primeiro vínculo sem perda de cargo/departamento e transferência/desvínculo preservando a pessoa e o histórico. Usado company_id temporário conforme Word.",
+          "files": [
+            "app/services/jrc_customers/company_contact_writer.rb",
+            "app/services/jrc_customers/company_contact_history.rb",
+            "app/models/concerns/jrc_customers/contact_master.rb",
+            "db/migrate/20261103090000_add_company_contact_context_to_contacts.rb"
+          ],
+          "status": "parcial",
+          "tests_and_evidence": [
+            "docs/jrc_customers/company_contact_preservation_checkpoint_20261103.json",
+            "docs/jrc_customers/company_contact_context_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Concluir os demais critérios do fragmento e integrações previstas; não equiparar vínculo temporário à evolução N:N completa."
         },
         {
           "id": "cadastro-mestre:P0378",
@@ -8503,14 +8613,25 @@
           },
           "requirement_text": "Vincular à empresa e preservar histórico.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "Contact/Company/ContactDirectory/CorporateCoverage e fusão/auditoria nativas",
+            "MasterContactDetails e CompanyContacts existentes; sem novos privilégios"
+          ],
+          "implemented_change": "Papel/status/principal único por empresa, troca confirmada e auditada, primeiro vínculo sem perda de cargo/departamento e transferência/desvínculo preservando a pessoa e o histórico. Usado company_id temporário conforme Word.",
+          "files": [
+            "app/services/jrc_customers/company_contact_writer.rb",
+            "app/services/jrc_customers/company_contact_history.rb",
+            "app/models/concerns/jrc_customers/contact_master.rb",
+            "db/migrate/20261103090000_add_company_contact_context_to_contacts.rb"
+          ],
+          "status": "parcial",
+          "tests_and_evidence": [
+            "docs/jrc_customers/company_contact_preservation_checkpoint_20261103.json",
+            "docs/jrc_customers/company_contact_context_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Concluir os demais critérios do fragmento e integrações previstas; não equiparar vínculo temporário à evolução N:N completa."
         },
         {
           "id": "cadastro-mestre:P0399",
@@ -8551,14 +8672,25 @@
           },
           "requirement_text": "Trocar principal com consistência e auditoria.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
+          "classification_pending": false,
+          "existing_code_reused": [
+            "Contact/Company/ContactDirectory/CorporateCoverage e fusão/auditoria nativas",
+            "MasterContactDetails e CompanyContacts existentes; sem novos privilégios"
+          ],
+          "implemented_change": "Papel/status/principal único por empresa, troca confirmada e auditada, primeiro vínculo sem perda de cargo/departamento e transferência/desvínculo preservando a pessoa e o histórico. Usado company_id temporário conforme Word.",
+          "files": [
+            "app/services/jrc_customers/company_contact_writer.rb",
+            "app/services/jrc_customers/company_contact_history.rb",
+            "app/models/concerns/jrc_customers/contact_master.rb",
+            "db/migrate/20261103090000_add_company_contact_context_to_contacts.rb"
+          ],
+          "status": "concluído",
+          "tests_and_evidence": [
+            "docs/jrc_customers/company_contact_preservation_checkpoint_20261103.json",
+            "docs/jrc_customers/company_contact_context_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "next_action": "Preservar a evidência e incluir na validação integrada G."
         },
         {
           "id": "cadastro-mestre:P0401",
