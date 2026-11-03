@@ -16,17 +16,24 @@ import {
 } from '../copy';
 const props = defineProps({
   contactId: { type: [Number, String], default: null },
+  expandedByDefault: { type: Boolean, default: false },
 });
-const emit = defineEmits(['updated']);
-const { accountId, enabled, canAdmin, canAccess, accountScopedRoute } =
-  useCustomerMaster();
+const emit = defineEmits(['updated', 'denied']);
+const {
+  accountId,
+  identity,
+  enabled,
+  canAdmin,
+  canAccess,
+  accountScopedRoute,
+} = useCustomerMaster();
 const { t } = useI18n();
 const showSigningIdentity = ref(false);
 const contact = ref(null);
 const points = ref([]);
 const duplicateItems = ref([]);
 const checked = ref(false);
-const expanded = ref(false);
+const expanded = ref(props.expandedByDefault);
 const error = ref('');
 const notice = ref('');
 const busy = ref(false);
@@ -38,28 +45,56 @@ const form = reactive({
 });
 const point = reactive({ kind: 'phone', value: '', label: '' });
 let generation = 0;
+let controller;
+let active = true;
+const subjectKey = () => `${identity.value}:${props.contactId}`;
+const current = context => active && context === subjectKey();
+const fail = (failure, context) => {
+  if (!current(context)) return;
+  if ([401, 403, 404].includes(failure.response?.status)) {
+    contact.value = null;
+    points.value = [];
+    duplicateItems.value = [];
+    showSigningIdentity.value = false;
+    notice.value = '';
+    emit('denied');
+  }
+  error.value = errorMessage(failure);
+};
 const load = async () => {
   generation += 1;
   const version = generation;
+  const context = subjectKey();
+  controller?.abort();
+  controller = new AbortController();
+  points.value = [];
+  notice.value = '';
   showSigningIdentity.value = false;
   contact.value = null;
   error.value = '';
   checked.value = false;
   duplicateItems.value = [];
-  if (!enabled.value || !props.contactId) return;
+  if (!enabled.value || !canAccess.value || !props.contactId) return false;
   try {
-    const { data } = await API.contact(props.contactId);
-    if (version !== generation) return;
+    const { data } = await API.contact(props.contactId, {
+      accountId: accountId.value,
+      signal: controller.signal,
+    });
+    if (version !== generation) return false;
     contact.value = data.payload;
     points.value = data.contact_points;
     Object.keys(form).forEach(key => {
       form[key] = data.payload[key];
     });
+    return true;
   } catch (err) {
-    if (version === generation) error.value = errorMessage(err);
+    if (version === generation) fail(err, context);
+    return false;
   }
 };
 const save = async () => {
+  const context = subjectKey();
+  const options = { accountId: accountId.value };
   const changingCompany =
     contact.value.company_id &&
     String(contact.value.company_id) !== String(form.company_id);
@@ -68,73 +103,103 @@ const save = async () => {
   error.value = '';
   notice.value = '';
   try {
-    await API.saveContact({ ...form }, props.contactId, {
-      confirm_reassignment: Boolean(changingCompany),
-    });
-    await load();
+    await API.saveContact(
+      { ...form },
+      props.contactId,
+      {
+        confirm_reassignment: Boolean(changingCompany),
+      },
+      options
+    );
+    if (!current(context)) return;
+    if (!(await load()) || !current(context)) return;
     emit('updated');
     notice.value = T.saved;
   } catch (err) {
-    error.value = errorMessage(err);
+    fail(err, context);
   } finally {
-    busy.value = false;
+    if (current(context)) busy.value = false;
   }
 };
 const addPoint = async () => {
+  const context = subjectKey();
+  const options = { accountId: accountId.value };
   busy.value = true;
   error.value = '';
   try {
-    await API.savePoint(props.contactId, { ...point });
+    await API.savePoint(props.contactId, { ...point }, null, options);
+    if (!current(context)) return;
     point.value = '';
     point.label = '';
     await load();
   } catch (err) {
-    error.value = errorMessage(err);
+    fail(err, context);
   } finally {
-    busy.value = false;
+    if (current(context)) busy.value = false;
   }
 };
 const removePoint = async item => {
+  const context = subjectKey();
+  const options = { accountId: accountId.value };
   if (!window.confirm(T.confirmRemove)) return;
   busy.value = true;
   try {
-    await API.removePoint(props.contactId, item.id);
+    await API.removePoint(props.contactId, item.id, options);
+    if (!current(context)) return;
     await load();
   } catch (err) {
-    error.value = errorMessage(err);
+    fail(err, context);
   } finally {
-    busy.value = false;
+    if (current(context)) busy.value = false;
   }
 };
 const duplicates = async () => {
+  const context = subjectKey();
+  const options = { accountId: accountId.value };
   busy.value = true;
   error.value = '';
   try {
-    const { data } = await API.duplicates(props.contactId);
+    const { data } = await API.duplicates(props.contactId, options);
+    if (!current(context)) return;
     duplicateItems.value = data.payload;
     checked.value = true;
   } catch (err) {
-    error.value = errorMessage(err);
+    fail(err, context);
   } finally {
-    busy.value = false;
+    if (current(context)) busy.value = false;
   }
 };
 const merge = async item => {
+  const context = subjectKey();
+  const options = { accountId: accountId.value };
   if (!window.confirm(T.confirmMerge)) return;
   busy.value = true;
   error.value = '';
   try {
-    await API.merge(props.contactId, item.id);
-    await load();
+    await API.merge(props.contactId, item.id, options);
+    if (!current(context)) return;
+    if (!(await load()) || !current(context)) return;
     emit('updated');
   } catch (err) {
-    error.value = errorMessage(err);
+    fail(err, context);
   } finally {
-    busy.value = false;
+    if (current(context)) busy.value = false;
   }
 };
-watch([accountId, enabled, () => props.contactId], load, { immediate: true });
+watch(
+  [identity, enabled, canAccess, () => props.contactId],
+  () => {
+    busy.value = false;
+    load();
+  },
+  { immediate: true }
+);
 onBeforeUnmount(() => {
+  active = false;
+  controller?.abort();
+  points.value = [];
+  duplicateItems.value = [];
+  contact.value = null;
   generation += 1;
 });
 </script>

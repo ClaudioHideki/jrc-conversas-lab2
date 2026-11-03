@@ -503,5 +503,14 @@
     },
     "original_rows_preserved": 27,
     "publication": false
+  },
+  "contact_context_checkpoint_20261103": {
+    "status": "parcial",
+    "report": "docs/jrc_customers/contact_context_checkpoint_20261103.json",
+    "blocking": [
+      "Compositor nativo usa Popover teleportado ao body e fica atrás do dialog do contato. Corrigir incrementalmente com modo opcional de dialog nativo e validar uso real.",
+      "Refazer captura mobile escura com tema explicitamente aplicado; não repetir criação/edição já persistidas."
+    ],
+    "no_global_completion": true
   }
 }

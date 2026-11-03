@@ -1,5 +1,5 @@
 class Api::V1::Accounts::Customers::ContactsController < Api::V1::Accounts::Customers::BaseController
-  before_action :set_contact, only: [:show, :update, :duplicates, :overview, :timeline, :merge]
+  before_action :set_contact, only: %i[show update duplicates overview timeline records merge]
 
   def index
     scope = contact_directory.scope
@@ -16,6 +16,10 @@ class Api::V1::Accounts::Customers::ContactsController < Api::V1::Accounts::Cust
 
   def overview
     render json: context(contact: @contact).overview
+  end
+
+  def records
+    render_module_records(context(contact: @contact))
   end
 
   def create

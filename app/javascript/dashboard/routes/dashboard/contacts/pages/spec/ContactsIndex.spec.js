@@ -453,4 +453,55 @@ describe('Relationship center pagination', () => {
       true
     );
   });
+
+  it('opens company and contact dialogs without changing the list route, filters or page', async () => {
+    route.query = { page: '2', directory_view: 'people', search: 'Cliente' };
+    store.getters['contacts/getContactsList'] = [
+      { id: 42, name: 'Cliente', companyId: 77, companyName: 'MOCK — Empresa' },
+    ];
+    wrapper = page();
+    await flushPromises();
+    await button('MOCK — Empresa').trigger('click');
+    expect(
+      wrapper.getComponent({ name: 'CompanyDetailsDialog' }).props('companyId')
+    ).toBe(77);
+    expect(
+      wrapper.findComponent({ name: 'ContactDetailsDialog' }).exists()
+    ).toBe(false);
+    wrapper.getComponent({ name: 'CompanyDetailsDialog' }).vm.$emit('close');
+    await flushPromises();
+    await wrapper.get('tbody tr').trigger('click');
+    expect(
+      wrapper.getComponent({ name: 'ContactDetailsDialog' }).props('contactId')
+    ).toBe(42);
+    wrapper.getComponent({ name: 'ContactDetailsDialog' }).vm.$emit('close');
+    await flushPromises();
+    expect(
+      wrapper.findComponent({ name: 'ContactDetailsDialog' }).exists()
+    ).toBe(false);
+    expect(route.query).toEqual({
+      page: '2',
+      directory_view: 'people',
+      search: 'Cliente',
+    });
+    expect(useRouter().push).not.toHaveBeenCalled();
+  });
+
+  it('preserves the legacy full profile route when Customer Master is unavailable', async () => {
+    store.getters['accounts/isFeatureEnabledonAccount'] = (
+      _accountId,
+      feature
+    ) => feature !== 'jrc_customer_master';
+    wrapper = page();
+    await flushPromises();
+    await button('Ver perfil completo').trigger('click');
+    expect(
+      wrapper.findComponent({ name: 'ContactDetailsDialog' }).exists()
+    ).toBe(false);
+    expect(useRouter().push).toHaveBeenCalledWith({
+      name: 'contacts_edit',
+      params: { accountId: '1', contactId: 42 },
+      query: route.query,
+    });
+  });
 });

@@ -43,6 +43,7 @@ const error = ref('');
 const busy = ref(false);
 let generation = 0;
 let controller;
+let overviewController;
 
 const availableTabs = computed(() => {
   const base = [
@@ -216,6 +217,40 @@ const saved = async record => {
   if ((await load()) && context === identity.value) emit('updated', record);
 };
 
+const directoryDenied = () => {
+  generation += 1;
+  controller?.abort();
+  overviewController?.abort();
+  company.value = null;
+  overview.value = null;
+  busy.value = false;
+  error.value = t('CRM.CUSTOMER_MASTER_360.DIRECTORY_DENIED');
+  emit('denied');
+};
+
+const refreshOverview = async () => {
+  const version = generation;
+  const context = identity.value;
+  overviewController?.abort();
+  overviewController = new AbortController();
+  try {
+    const { data } = await API.overview(companyId.value, {
+      accountId: accountId.value,
+      signal: overviewController.signal,
+    });
+    if (version === generation && context === identity.value)
+      overview.value = data;
+  } catch (failure) {
+    if (version !== generation || context !== identity.value) return;
+    error.value = errorMessage(failure);
+    if ([401, 403, 404].includes(failure.response?.status)) {
+      company.value = null;
+      overview.value = null;
+      emit('denied');
+    }
+  }
+};
+
 watch(
   [identity, companyId],
   () => {
@@ -238,6 +273,7 @@ watch([availableTabs, busy], () => {
 onBeforeUnmount(() => {
   generation += 1;
   controller?.abort();
+  overviewController?.abort();
   company.value = null;
   overview.value = null;
 });
@@ -562,7 +598,8 @@ onBeforeUnmount(() => {
         <CompanyContacts
           v-else-if="tab === 'contacts'"
           :company-id="company.id"
-          @changed="load"
+          @changed="refreshOverview"
+          @denied="directoryDenied"
         />
         <TimelinePanel
           v-else-if="tab === 'timeline'"

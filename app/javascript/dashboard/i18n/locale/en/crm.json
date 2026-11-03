@@ -1331,7 +1331,18 @@
       "EDITOR_CLASSIFICATION": "Classificação",
       "EDITOR_STRUCTURE": "Estrutura e observações",
       "RELATIONSHIP_MAP": "Mapa de relacionamento",
-      "UNSPECIFIED": "Não informado"
+      "UNSPECIFIED": "Não informado",
+      "DIRECTORY_DENIED": "Seu acesso ao cadastro desta empresa não está disponível."
+    },
+    "CONTACT_MASTER_360": {
+      "TITLE": "Contato 360º",
+      "OVERVIEW": "Visão Geral",
+      "COMPANY": "Empresa e Vínculos",
+      "CONVERSATIONS": "Atendimento",
+      "CRM": "CRM",
+      "ACTIVITIES": "Atividades",
+      "HISTORY": "Histórico",
+      "NEW_CONVERSATION": "Nova conversa"
     }
   }
 }

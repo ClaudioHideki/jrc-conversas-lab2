@@ -61,23 +61,7 @@ class Api::V1::Accounts::Customers::CompaniesController < Api::V1::Accounts::Cus
   end
 
   def records
-    relation = context(company: @company).sources[params[:kind].to_s]
-    raise ActionController::BadRequest, 'Unsupported or unavailable module' unless relation
-
-    records, meta = page_scope(relation.order(created_at: :desc, id: :desc))
-    # Explicit safe fields: never return tokens, transcripts, private messages, configuration or audit snapshots.
-    fields = %w[id display_id title name status created_at updated_at contact_id company_id deal_id lead_id
-                requester_id unit_id status_id priority_id project_id key due_on starts_on contract_number order_number
-                due_at completed_at direction duration_seconds provider started_at campaign_id sent_at value_cents total_cents proposal_number]
-    payload = records.map do |record|
-      row = record.attributes.slice(*fields)
-      if record.is_a?(JrcServiceDesk::Ticket)
-        row['status'] = record.status.name
-        row['phase'] = record.status.phase
-      end
-      row
-    end
-    render json: { payload: payload, meta: meta }
+    render_module_records(context(company: @company))
   end
 
   private

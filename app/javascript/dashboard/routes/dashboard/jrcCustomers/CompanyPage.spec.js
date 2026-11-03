@@ -161,3 +161,47 @@ it('clears company details and edit state after a current permission denial', as
   expect(wrapper.find('[role="alert"]').exists()).toBe(true);
   wrapper.unmount();
 });
+
+it('refreshes real overview counts after a contact change while preserving the people view instance', async () => {
+  const wrapper = await render();
+  await flushPromises();
+  await wrapper
+    .findAll('button')
+    .find(item => item.text() === 'Cadastro')
+    .trigger('click');
+  await wrapper
+    .findAll('button')
+    .find(item => item.text() === 'Contatos')
+    .trigger('click');
+  const people = wrapper.findComponent({ name: 'CompanyContacts' });
+  const instance = people.vm;
+  mocks.overview.mockResolvedValue({
+    data: { ...structuredClone(summary), contacts: 3 },
+  });
+  people.vm.$emit('changed');
+  await flushPromises();
+  expect(mocks.company).toHaveBeenCalledTimes(1);
+  expect(mocks.overview).toHaveBeenCalledTimes(2);
+  expect(wrapper.findComponent({ name: 'CompanyContacts' }).vm).toBe(instance);
+  expect(wrapper.text()).toContain(company.name);
+  wrapper.unmount();
+});
+
+it('clears the company header if its people directory denies the current request', async () => {
+  const wrapper = await render();
+  await flushPromises();
+  await wrapper
+    .findAll('button')
+    .find(item => item.text() === 'Cadastro')
+    .trigger('click');
+  await wrapper
+    .findAll('button')
+    .find(item => item.text() === 'Contatos')
+    .trigger('click');
+  wrapper.findComponent({ name: 'CompanyContacts' }).vm.$emit('denied');
+  await flushPromises();
+  expect(wrapper.text()).not.toContain(company.name);
+  expect(wrapper.emitted('denied')).toHaveLength(1);
+  expect(wrapper.find('[role="alert"]').exists()).toBe(true);
+  wrapper.unmount();
+});

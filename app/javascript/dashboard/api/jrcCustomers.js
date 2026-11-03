@@ -67,20 +67,48 @@ class CustomerAPI extends ApiClient {
     return axios.get(`${this.url}/companies/${id}/relationships`);
   }
 
-  records(id, params) {
-    return axios.get(`${this.url}/companies/${id}/records`, { params });
+  records(id, params, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const url =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
+    return axios.get(`${url}/companies/${id}/records`, {
+      ...requestOptions,
+      params,
+    });
   }
 
-  timeline(id, params = {}, type = 'companies') {
-    return axios.get(`${this.url}/${type}/${id}/timeline`, { params });
+  contactRecords(id, params, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const url =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
+    return axios.get(`${url}/contacts/${id}/records`, {
+      ...requestOptions,
+      params,
+    });
   }
 
-  contacts(params = {}) {
-    return axios.get(`${this.url}/contacts`, { params });
+  timeline(id, params = {}, type = 'companies', options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const url =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
+    return axios.get(`${url}/${type}/${id}/timeline`, {
+      ...requestOptions,
+      params,
+    });
   }
 
-  contact(id) {
-    return axios.get(`${this.url}/contacts/${id}`);
+  contacts(params = {}, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const url =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
+    return axios.get(`${url}/contacts`, { ...requestOptions, params });
+  }
+
+  contact(id, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const url =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
+    return axios.get(`${url}/contacts/${id}`, requestOptions);
   }
 
   signingIdentity(accountId, contactId, options = {}) {
@@ -97,38 +125,65 @@ class CustomerAPI extends ApiClient {
     );
   }
 
-  contactOverview(id) {
-    return axios.get(`${this.url}/contacts/${id}/overview`);
+  contactOverview(id, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const url =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
+    return axios.get(`${url}/contacts/${id}/overview`, requestOptions);
   }
 
-  saveContact(contact, id = null, options = {}) {
+  saveContact(contact, id = null, options = {}, request = {}) {
     const body = { contact, ...options };
+    const { accountId, ...requestOptions } = request;
+    const url =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
     return id
-      ? axios.patch(`${this.url}/contacts/${id}`, body)
-      : axios.post(`${this.url}/contacts`, body);
+      ? axios.patch(`${url}/contacts/${id}`, body, requestOptions)
+      : axios.post(`${url}/contacts`, body, requestOptions);
   }
 
-  duplicates(id) {
-    return axios.get(`${this.url}/contacts/${id}/duplicates`);
+  duplicates(id, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const url =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
+    return axios.get(`${url}/contacts/${id}/duplicates`, requestOptions);
   }
 
-  merge(id, sourceContactId) {
-    return axios.post(`${this.url}/contacts/${id}/merge`, {
-      source_contact_id: sourceContactId,
-      confirm: true,
-    });
+  merge(id, sourceContactId, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const url =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
+    return axios.post(
+      `${url}/contacts/${id}/merge`,
+      {
+        source_contact_id: sourceContactId,
+        confirm: true,
+      },
+      requestOptions
+    );
   }
 
-  savePoint(contactId, contactPoint, id = null) {
-    const url = `${this.url}/contacts/${contactId}/contact_points`;
+  savePoint(contactId, contactPoint, id = null, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const base =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
+    const url = `${base}/contacts/${contactId}/contact_points`;
     return id
-      ? axios.patch(`${url}/${id}`, { contact_point: contactPoint })
-      : axios.post(url, { contact_point: contactPoint });
+      ? axios.patch(
+          `${url}/${id}`,
+          { contact_point: contactPoint },
+          requestOptions
+        )
+      : axios.post(url, { contact_point: contactPoint }, requestOptions);
   }
 
-  removePoint(contactId, id) {
+  removePoint(contactId, id, options = {}) {
+    const { accountId, ...requestOptions } = options;
+    const url =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
     return axios.delete(
-      `${this.url}/contacts/${contactId}/contact_points/${id}`
+      `${url}/contacts/${contactId}/contact_points/${id}`,
+      requestOptions
     );
   }
 

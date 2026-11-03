@@ -434,6 +434,7 @@ Rails.application.routes.draw do
             resources :contacts, only: [:index, :show, :create, :update] do
               member do
                 get :overview
+                get :records
                 get :duplicates
                 get :timeline
                 post :merge
