@@ -27,6 +27,7 @@ Preservados todos os fontes e implementações locais preexistentes: conexões, 
 
 ## Rodadas intermediárias que não aprovam release
 
+- CI183b58e:818exemplos de contratos/integridade aprovados; a etapa MinIO não iniciou porque a imagem antiga em cache local não é mais obtida no Docker Hub. Corrigida somente a fixture CI para binário oficial2025-09-07 com SHA256 verificado antes de executar, sem alterar storage produtivo. Novo SHA deve repetir todos os gates; o resultado antigo não aprova o novo.
 -233exemplos,0falhas,9pending: banco frio inicialmente fora da whitelist de concorrência. Não contar como aprovação dos casos ignorados.
 -239exemplos,12falhas: banco antigo de laboratório tinha ledger110000 mas coluna inbox_id indevidamenteNOT NULL; não representa a criação fria nem prova defeito produtivo. Banco antigo preservado para investigação.
 - O teste de crash agora avança o relógio de teste até vencer a janela de5minutos da seleção periódica. Não se removeu a janela produtiva para fazer a assertion passar.

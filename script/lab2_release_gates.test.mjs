@@ -25,3 +25,10 @@ test('native validation includes migration media and NICO permission regressions
   assert.match(native, /spec\/services\/jrc_nico\/migration\*_spec.rb/);
   assert.match(native, /JRC_IMPORT_MINIO_ENDPOINT/);
 });
+
+test('the MinIO fixture is retrievable from its official release and verified before execution', () => {
+  assert.equal(native.includes('minio/minio@sha256:'), false);
+  assert.equal(native.includes('https://github.com/minio/minio/releases/download/RELEASE.2025-09-07T16-13-09Z/'), true);
+  assert.equal(native.includes('7c5bd8512c6e966455b1d198209358b2d191c77a83ab377c4073281065fb855f'), true);
+  assert.equal(native.includes('sha256sum --check'), true);
+});

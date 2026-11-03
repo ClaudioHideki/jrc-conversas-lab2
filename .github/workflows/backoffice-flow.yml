@@ -210,15 +210,23 @@ jobs:
           JRC_IMPORT_MINIO_ENDPOINT: http://127.0.0.1:19000
         run: |
           set -euo pipefail
-          docker run -d --name lab2-import-minio --memory 256m -p 127.0.0.1:19000:9000 \
-            -e MINIO_ROOT_USER=disposable-import -e MINIO_ROOT_PASSWORD=disposable-import-only \
-            minio/minio@sha256:8ba4ed4d0eafe0458071c2ebe12301eaccd32b10d5299765db2b00ef2f1b382b server /data
-          trap 'docker rm -f -v lab2-import-minio' EXIT
-          for attempt in {1..30}; do
-            if curl --fail --silent "$JRC_IMPORT_MINIO_ENDPOINT/minio/health/ready"; then break; fi
+          fixture=$(mktemp -d "$RUNNER_TEMP/lab2-import-minio.XXXXXX")
+          curl --fail --location --proto '=https' --tlsv1.2 --connect-timeout 10 --max-time 120 --retry 2 \
+            'https://github.com/minio/minio/releases/download/RELEASE.2025-09-07T16-13-09Z/minio.linux-amd64.RELEASE.2025-09-07T16-13-09Z' \
+            --output "$fixture/minio"
+          printf '%s  %s\n' 7c5bd8512c6e966455b1d198209358b2d191c77a83ab377c4073281065fb855f "$fixture/minio" | sha256sum --check
+          chmod 700 "$fixture/minio"
+          "$fixture/minio" --version | grep -F 'RELEASE.2025-09-07T16-13-09Z'
+          MINIO_ROOT_USER=disposable-import MINIO_ROOT_PASSWORD=disposable-import-only MINIO_BROWSER=off \
+            "$fixture/minio" server --address 127.0.0.1:19000 --console-address 127.0.0.1:0 "$fixture/data" \
+            > /tmp/broker-import-minio.log 2>&1 &
+          fixture_pid=$!
+          trap 'kill -TERM "$fixture_pid" 2>/dev/null || true; wait "$fixture_pid" 2>/dev/null || true' EXIT
+          for attempt in {1..60}; do
+            if curl --fail --silent "$JRC_IMPORT_MINIO_ENDPOINT/minio/health/cluster"; then break; fi
             sleep 1
           done
-          curl --fail --silent "$JRC_IMPORT_MINIO_ENDPOINT/minio/health/ready"
+          curl --fail --silent "$JRC_IMPORT_MINIO_ENDPOINT/minio/health/cluster"
           bundle exec rspec spec/homologation/import_minio_check.rb \
             --format progress --format json --out /tmp/broker-import-minio-rspec.json
       - name: Regressao frontend e editor compartilhado
@@ -253,6 +261,7 @@ jobs:
           path: |
             /tmp/broker-candidate-rspec.json
             /tmp/broker-import-minio-rspec.json
+            /tmp/broker-import-minio.log
             /tmp/broker-first-worker.log
             /tmp/broker-second-worker.log
           if-no-files-found: ignore
