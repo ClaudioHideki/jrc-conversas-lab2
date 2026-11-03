@@ -6187,14 +6187,33 @@
           },
           "requirement_text": "Prévia: mostrar válidos, novos, atualizações, duplicidades, erros e registros ignorados.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
-          "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "classification_pending": false,
+          "existing_code_reused": [
+            "JrcCrm::CorporateCoverage",
+            "JrcCustomers::CompanyWriter",
+            "JrcCustomers::CompanyImport",
+            "Api::V1::Accounts::Customers::BaseController",
+            "JrcCustomers::DirectoryPolicy"
+          ],
+          "implemented_change": "Prévia de empresas e gravação reutilizam a cobertura nativa; alvo interno fora da abrangência não é retornado nem aplicado. Token não concede acesso após revogação. Escopo específico validado por API e navegador; não equivale à central completa de importação.",
+          "files": [
+            "app/services/jrc_crm/corporate_coverage.rb",
+            "app/services/jrc_customers/company_writer.rb",
+            "app/services/jrc_customers/company_import.rb"
+          ],
+          "status": "parcial",
+          "tests_and_evidence": [
+            "docs/jrc_customers/company_corporate_scope_checkpoint_20261102.json",
+            ".codex/customer-company-scope-backend.json",
+            ".codex/customer-company-scope-nexora-baseline.json",
+            "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/importacao-cobertura-resultado.json",
+            ".codex/company-scope-ui-integrity.json"
+          ],
+          "dependencies": [
+            "Central de importação/mapeamento/lote e histórico ainda incompletos",
+            "Gate global Nexora e lint legado continuam abertos"
+          ],
+          "next_action": "Completar os demais critérios de prévia e processamento para empresas/contatos, preservando as regras nativas e a cobertura por chamada."
         },
         {
           "id": "cadastro-mestre:P0305",
@@ -6327,14 +6346,33 @@
           },
           "requirement_text": "Processamento deve respeitar tenant/account e permissões.",
           "is_heading": false,
-          "classification_pending": true,
-          "existing_code_reused": [],
-          "implemented_change": null,
-          "files": [],
-          "status": "pendente",
-          "tests_and_evidence": [],
-          "dependencies": [],
-          "next_action": "Classificar este fragmento como contexto ou requisito e conferir código/evidência existente; não inferir ausência nem implementar duplicação."
+          "classification_pending": false,
+          "existing_code_reused": [
+            "JrcCrm::CorporateCoverage",
+            "JrcCustomers::CompanyWriter",
+            "JrcCustomers::CompanyImport",
+            "Api::V1::Accounts::Customers::BaseController",
+            "JrcCustomers::DirectoryPolicy"
+          ],
+          "implemented_change": "Prévia de empresas e gravação reutilizam a cobertura nativa; alvo interno fora da abrangência não é retornado nem aplicado. Token não concede acesso após revogação. Escopo específico validado por API e navegador; não equivale à central completa de importação.",
+          "files": [
+            "app/services/jrc_crm/corporate_coverage.rb",
+            "app/services/jrc_customers/company_writer.rb",
+            "app/services/jrc_customers/company_import.rb"
+          ],
+          "status": "parcial",
+          "tests_and_evidence": [
+            "docs/jrc_customers/company_corporate_scope_checkpoint_20261102.json",
+            ".codex/customer-company-scope-backend.json",
+            ".codex/customer-company-scope-nexora-baseline.json",
+            "C:/Users/DEV03/Documents/Jrc/validacao-relacionamento-v2-20261101/importacao-cobertura-resultado.json",
+            ".codex/company-scope-ui-integrity.json"
+          ],
+          "dependencies": [
+            "Central de importação/mapeamento/lote e histórico ainda incompletos",
+            "Gate global Nexora e lint legado continuam abertos"
+          ],
+          "next_action": "Completar os demais critérios de prévia e processamento para empresas/contatos, preservando as regras nativas e a cobertura por chamada."
         },
         {
           "id": "cadastro-mestre:P0312",
@@ -41070,5 +41108,15 @@
     "global_completion": false,
     "fragments_preserved": 1546,
     "other_classification_pending": 1531
+  },
+  "customer_company_scope_increment": {
+    "report": "docs/jrc_customers/company_corporate_scope_checkpoint_20261102.json",
+    "commit": "8a893582e7967f3674f0756d3c4374a0640f40a7",
+    "fragments_preserved": 1546,
+    "updated_fragment_ids": [
+      "cadastro-mestre:P0304",
+      "cadastro-mestre:P0311"
+    ],
+    "global_completion": false
   }
 }

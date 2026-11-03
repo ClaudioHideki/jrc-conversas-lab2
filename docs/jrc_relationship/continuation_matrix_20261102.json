@@ -422,5 +422,27 @@
     },
     "browser": "Agente, permissão negada/permitida, callback sintético, revisão2, reabertura, dois downloads/hash, conta estrangeira e celular validados; nenhuma assinatura real.",
     "next": "Concluir B3 — ações operacionais/evidências/verificador; depois C/D/E/F/G. Quatro frentes permanecem parciais."
+  },
+  "customer_company_scope_increment": {
+    "status": "correção específica implementada e validada; Cadastro Mestre completo permanece parcial",
+    "commit": "8a893582e7967f3674f0756d3c4374a0640f40a7",
+    "isolated_commit": "df1b6e2f38412a4e366c740da548323d6c31ca6b",
+    "report": "docs/jrc_customers/company_corporate_scope_checkpoint_20261102.json",
+    "implemented": "CSV e CompanyWriter aplicam a cobertura nativa à empresa persistida e aos vínculos propostos. Administrador sem grupo não alcança outra operadora interna. Permissões do módulo permanecem nos chamadores.",
+    "validation": {
+      "new_tests": 15,
+      "new_tests_passed": 15,
+      "selected_backend": 91,
+      "passed": 90,
+      "failed": 1,
+      "browser": "Recusa da operadora oculta e importação de cliente externo validadas em claro/escuro; 11 registros originais e agente preservados.",
+      "source": "11250 arquivos iguais ao snapshot combinado após cherry-pick"
+    },
+    "full_gate_green": false,
+    "remaining_failures": [
+      "Nexora falha identicamente na base sem a correção: assinatura interna v2 ainda não verificada; teste original preservado.",
+      "Lint completo mantém 16 ocorrências preexistentes; nenhum novo tipo/local ou regra desabilitada."
+    ],
+    "next": "Concluir cadeia de evidências/verificador B3 e demais funcionalidades de importação/mapeamento/histórico do Cadastro Mestre."
   }
 }
