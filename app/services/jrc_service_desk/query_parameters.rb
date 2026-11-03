@@ -2,7 +2,7 @@
 
 # Whitelist shared by list and KPI queries. Values are selectors, never grants.
 class JrcServiceDesk::QueryParameters
-  IDS = %w[unit_id operator_company_id status_id priority_id category_id queue_id assignee_id team_id].freeze
+  IDS = %w[unit_id operator_company_id status_id priority_id category_id queue_id assignee_id team_id customer_segment_id].freeze
   KEYS = (IDS + %w[q page per_page mine source sort phase assignment created_from created_to]).freeze
   SORTS = %w[updated_at_desc created_at_desc created_at_asc].freeze
   attr_reader :values

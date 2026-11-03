@@ -79,6 +79,21 @@ describe('#defaultRedirectPage', () => {
     ).toBe('accounts/2/contacts');
   });
 
+  it.each([
+    ['jrc_service_desk_module_view', 'service-desk'],
+    ['jrc_projects_project_view', 'projetos'],
+  ])(
+    'lands a custom role with only %s in its native module',
+    (permission, path) => {
+      expect(defaultRedirectPage(to, ['custom_role', permission])).toBe(
+        `accounts/2/${path}`
+      );
+      expect(defaultRedirectPage(to, ['contact_manage', permission])).toBe(
+        'accounts/2/contacts'
+      );
+    }
+  );
+
   it('should return dashboard route for users with administrator role', () => {
     const permissions = ['administrator'];
     expect(defaultRedirectPage(to, permissions)).toBe('accounts/2/dashboard');

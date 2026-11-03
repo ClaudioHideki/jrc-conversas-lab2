@@ -4,6 +4,8 @@ import { useI18n } from 'vue-i18n';
 import Input from 'dashboard/components-next/input/Input.vue';
 import Select from 'dashboard/components-next/select/Select.vue';
 import Button from 'dashboard/components-next/button/Button.vue';
+import SegmentFilterPicker from 'dashboard/routes/dashboard/jrcCustomers/components/SegmentFilterPicker.vue';
+import { useCustomerMaster } from 'dashboard/routes/dashboard/jrcCustomers/useCustomerMaster';
 import ScopeBar from './ScopeBar.vue';
 import LookupSelect from './LookupSelect.vue';
 import { useServiceDesk } from '../composables/useServiceDesk';
@@ -16,6 +18,14 @@ const props = defineProps({
 const emit = defineEmits(['apply']);
 const { t } = useI18n();
 const session = useServiceDesk();
+const { canAccess } = useCustomerMaster();
+const canSegment = computed(
+  () =>
+    canAccess.value &&
+    session.state.context?.effective_permissions?.includes(
+      'jrc_service_desk_customers_view'
+    )
+);
 const draft = reactive({
   q: '',
   unit_id: '',
@@ -32,6 +42,7 @@ const draft = reactive({
   assignment: '',
   created_from: '',
   created_to: '',
+  customer_segment_id: '',
 });
 const expanded = ref(false);
 const savingFilter = ref(false);
@@ -110,6 +121,10 @@ const clear = () => {
     draft[key] = key === 'sort' ? 'updated_at_desc' : '';
   });
   selectedFilter.value = '';
+  apply();
+};
+const clearSegment = () => {
+  draft.customer_segment_id = '';
   apply();
 };
 const saveFilter = () => {
@@ -227,6 +242,29 @@ const removeSaved = () => {
         >{{ t('JRC_SERVICE_DESK.EXPERIENCE.unassigned_visible') }}</span
       >
     </div>
+    <section
+      v-if="canSegment || draft.customer_segment_id"
+      class="rounded-xl border border-n-violet-6 bg-n-violet-2 p-3"
+      :aria-label="t('CRM.CORPORATE_SEGMENTS.FILTER_LABEL')"
+    >
+      <h3 class="mb-2 text-sm font-semibold">
+        {{ t('CRM.CORPORATE_SEGMENTS.FILTER_LABEL') }}
+      </h3>
+      <SegmentFilterPicker
+        v-if="canSegment"
+        v-model="draft.customer_segment_id"
+        module-key="service_desk"
+      />
+      <Button
+        v-else
+        type="button"
+        variant="outline"
+        color="slate"
+        :label="t('CRM.CORPORATE_SEGMENTS.CLEAR_FILTER')"
+        size="sm"
+        @click="clearSegment"
+      />
+    </section>
     <template v-if="expanded">
       <ScopeBar
         v-model:operator-id="draft.operator_company_id"

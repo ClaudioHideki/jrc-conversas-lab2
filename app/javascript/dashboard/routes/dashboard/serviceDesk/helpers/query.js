@@ -10,6 +10,7 @@ const idFields = [
   'assignee_id',
   'team_id',
   'company_id',
+  'customer_segment_id',
 ];
 const fields = new Set([
   'q',
@@ -38,6 +39,11 @@ export function normalizeQuery(query = {}, resource = null) {
     if (!fields.has(key) && !(resource === 'assignees' && key === 'team_id'))
       throw new QueryError('Unknown filter');
     if (value === '' || value === undefined || value === null) return;
+    if (
+      key === 'customer_segment_id' &&
+      ![null, 'tickets', 'dashboard', 'reports'].includes(resource)
+    )
+      throw new QueryError('Customer segments require a ticket query');
     if (!scalar(value)) throw new QueryError('Invalid filter');
     if (idFields.includes(key) || key === 'team_id') {
       const parsed = canonicalId(value);

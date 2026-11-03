@@ -1460,7 +1460,7 @@
       "SEARCH_FILTER": "Pesquisar segmento",
       "CLEAR_FILTER": "Limpar filtro de segmento",
       "COMPANY_CLASSIFICATION": "Classificação da empresa",
-      "APPLY_FILTER_HELP": "Escolha ou limpe o segmento e use Buscar para aplicar, sem alterar o cadastro das empresas."
+      "APPLY_FILTER_HELP": "Selecione um segmento ou limpe a seleção, sem alterar o cadastro das empresas."
     },
     "ECONOMIC_GROUPS": {
       "HELP": "Grupos econômicos organizam empresas do mesmo conglomerado. Etiquetas organizam contatos e mantêm seu cadastro próprio.",
