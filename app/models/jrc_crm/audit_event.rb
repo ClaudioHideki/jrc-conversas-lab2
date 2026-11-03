@@ -46,6 +46,7 @@ module JrcCrm
     EVENT_TYPES.concat(%w[customer_contact_primary_changed customer_contact_context_changed])
     EVENT_TYPES.concat(%w[customer_segment_created customer_segment_updated customer_segment_deleted customer_segment_override_changed])
     EVENT_TYPES.concat(%w[customer_economic_group_created customer_economic_group_updated customer_economic_group_deleted customer_economic_group_linked])
+    EVENT_TYPES.concat(%w[customer_import_uploaded customer_import_previewed])
     validates :event_type, inclusion: { in: EVENT_TYPES }
     
     scope :for_resource, ->(type, id) { where(resource_type: type, resource_id: id) }

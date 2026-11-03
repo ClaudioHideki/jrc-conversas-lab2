@@ -1,0 +1,29 @@
+{
+  "stage": "C5c — private source and scoped import history foundation",
+  "status": "Internal services validated; no new Central API/interface or record execution yet. C→G remain in progress.",
+  "base": "49a364d9",
+  "snapshot": "/consolidation-customer-import-runs-final",
+  "source": { "files": 11332, "mismatches": 0, "raw_sql_preserved": true },
+  "confirmed": [
+    "Native DataImport storage/history reused with explicit customer_master/customer_master_csv classification; no new table or dependency.",
+    "Native CSV callback and Intercom import types preserved; uploaded drafts do not enqueue either engine.",
+    "History requires the initiating actor, current account, active membership/feature and current import permission. Contact-only grants cannot access company runs.",
+    "Source checksum checked before reading; private storage required; original attachment cannot be replaced, deleted or relinked.",
+    "Generic signed blob, proxy and disk URLs deny the private source. Native Intercom policy/scope exclude these runs.",
+    "Source row values are absent from history metadata/stats/cursor; cleanup after transaction/audit failure does not log content."
+  ],
+  "validation": {
+    "core_and_legacy": { "examples": 96, "failures": 0, "pending": 0, "report": ".codex/customer-import-runs-final-backend.json" },
+    "existing_private_http": { "examples": 25, "failures": 0, "pending": 0, "report": ".codex/customer-import-private-http-regression.json" },
+    "style": { "files": 9, "offenses": 0, "report": ".codex/customer-import-runs-final-style.json" },
+    "additional_domain_suite": "Not yet validated. Initial run on groups DB was refused by 47 explicit candidate-only guards (59 examples, 12 passed). No guards changed. Candidate retry stopped before examples because its additive economic-groups migration is pending.",
+    "failed_runs_preserved": ["customer-import-runs-backend", "customer-import-runs-checked-backend", "customer-import-private-regression", "customer-import-private-candidate-regression"],
+    "browser": "No new UI in this internal increment; prior Chrome checkpoints preserved."
+  },
+  "next": [
+    "Bring only the owned candidate test schema forward with before/after preservation hashes, then complete domain regression.",
+    "Readonly scoped record plan, mapping/options, reviewed confirmation, atomic application and per-line results.",
+    "Complete Central interface, history, templates, error report and Chrome flows; keep legacy import routes intact."
+  ],
+  "external": "No push, image build/publication, deployment, production migrations or external signatures."
+}

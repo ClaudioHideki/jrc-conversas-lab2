@@ -4,7 +4,7 @@ class DataImportPolicy < ApplicationPolicy
   end
 
   def show?
-    @account_user.administrator? && record.account_id == account.id
+    @account_user.administrator? && record.account_id == account.id && record.data_type != 'customer_master'
   end
 
   def create?
@@ -37,7 +37,7 @@ class DataImportPolicy < ApplicationPolicy
 
   class Scope < Scope
     def resolve
-      return scope.where(account_id: account.id) if account_user.administrator?
+      return scope.where(account_id: account.id).where.not(data_type: 'customer_master') if account_user.administrator?
 
       scope.none
     end
