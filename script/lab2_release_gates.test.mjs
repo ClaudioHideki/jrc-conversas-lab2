@@ -13,6 +13,14 @@ test('the integral candidate triggers native validation and cannot bypass its im
   assert.match(build, /codex\/lab2-integral-20261102\) ;;/);
 });
 
+test('main retains the native regression and exact-SHA image release gates after promotion', () => {
+  assert.match(native.split('pull_request:')[0], /^\s+- main\s*$/m);
+  assert.match(build, /github\.ref_name == 'main'/);
+  assert.match(build, /main\|codex\/crm-backoffice-servicedesk-visual-20261101/);
+  assert.match(build, /run\['head_sha'\] == os\.environ\['SOURCE_SHA'\]/);
+  assert.match(build, /run\['head_branch'\] == os\.environ\['GITHUB_REF_NAME'\]/);
+});
+
 test('every schema-loaded validation database applies SQL guards without dumping source', () => {
   assert.doesNotMatch(native, /rails db:prepare/);
   assert.equal((native.match(/rails runner script\/prepare_lab2_candidate_database.rb/g) || []).length, 3);
@@ -24,6 +32,14 @@ test('native validation includes migration media and NICO permission regressions
   assert.match(native, /spec\/requests\/jrc_migration\*_spec.rb/);
   assert.match(native, /spec\/services\/jrc_nico\/migration\*_spec.rb/);
   assert.match(native, /JRC_IMPORT_MINIO_ENDPOINT/);
+});
+
+test('the consolidated release rejects stale Flow ownership manifests before Rails validation', () => {
+  const manifestGate = native.indexOf('node script/jrc_native_module_manifest.mjs');
+  const railsGate = native.indexOf('name: Regressao de contratos e integridade');
+  assert.ok(manifestGate >= 0, 'the release must verify the frozen module manifest');
+  assert.ok(manifestGate < railsGate, 'verify source hashes before exercising the candidate');
+  assert.doesNotMatch(native, /jrc_native_module_manifest\.mjs\s+--write/);
 });
 
 test('the MinIO fixture is retrievable from its official release and verified before execution', () => {

@@ -33,8 +33,8 @@
     {
       "path": "app/controllers/api/v1/accounts/jrc_flow_delegation_controller.rb",
       "baseSha256": null,
-      "sha256": "cc1976ee7a3d8ff76fc22475bb30acc7b7c319c630a29aad42d1ea3b900cd6b4",
-      "bytes": 5005
+      "sha256": "f4f26ef5e3f7d29a3a8d6b2c53fff3c3bda99105a215ab63f4a2d25b8f303935",
+      "bytes": 5364
     },
     {
       "path": "app/controllers/api/v1/accounts/jrc_flow_effects_controller.rb",
@@ -87,8 +87,8 @@
     {
       "path": "app/javascript/dashboard/components-next/jrcCopilot/JrcCopilotPanel.vue",
       "baseSha256": "c8e6559825c8adaebdea8fd4556747ef074332ef75aa89e737b574f5f4560b19",
-      "sha256": "d0bfd2e352cf3f87efceaafff4958baeda08bcc2446fdfcefdea86a38d8eb5fd",
-      "bytes": 39521
+      "sha256": "0bae3f47c0354a85f01eed98af43b56b712920ab89a2ef238171fa1872da5d28",
+      "bytes": 39698
     },
     {
       "path": "app/javascript/dashboard/components-next/jrcCopilot/JrcCopilotQuickPanel.vue",
@@ -153,8 +153,8 @@
     {
       "path": "app/javascript/dashboard/components-next/sidebar/Sidebar.vue",
       "baseSha256": "4eb35689e3727861a17007c90d86e85cdfae3955409b6150261010e992406358",
-      "sha256": "7f5973a75831138fdf3b2e10d8a7d5af7e79751972d666dd358bbe1b891f4020",
-      "bytes": 64601
+      "sha256": "397374c5823a32d7280623f97d7c9b7af0c4ac3e109c67f81a0cc97fb64fc092",
+      "bytes": 62224
     },
     {
       "path": "app/javascript/dashboard/i18n/locale/en/jrcNico.json",
@@ -165,8 +165,8 @@
     {
       "path": "app/javascript/dashboard/i18n/locale/en/relationship.json",
       "baseSha256": "ef6d35ee197367f4838da764aa653f40818e83091e0b702674c937b16ff070f3",
-      "sha256": "65c56463c6e769fede51d211e26a366df71c92c9012ca6035e8e081943a0af16",
-      "bytes": 45159
+      "sha256": "770adb2df9a44c667a0159f4db00fd5a37fb56bf2daa778d01b37ccd1f938ddd",
+      "bytes": 59164
     },
     {
       "path": "app/javascript/dashboard/routes/dashboard/jrcFlows/FlowsWorkspace.vue",
@@ -177,14 +177,14 @@
     {
       "path": "app/javascript/dashboard/routes/dashboard/jrcFlows/nativeEditorBuild.js",
       "baseSha256": null,
-      "sha256": "26750904b97d51d5de2148d94b4d8e3952363b74a14015c8a07bea386354dbd3",
+      "sha256": "30cf599990831042cf448e92f965bb854953ccb4a15da8ed83508073cb8d7ad8",
       "bytes": 161
     },
     {
       "path": "app/javascript/dashboard/routes/dashboard/jrcFlows/NativeFlowModule.vue",
       "baseSha256": null,
-      "sha256": "1a2ffa7a96d1db9786e55b09c6979b6bf8463df470607d46254e433bec6db9c7",
-      "bytes": 11663
+      "sha256": "9b8ca75aab68d8f1970fd17c0aee23b008eb0a63f9d56cf0e8ceef9f864aed4c",
+      "bytes": 12253
     },
     {
       "path": "app/javascript/dashboard/routes/dashboard/jrcFlows/routes.js",
@@ -195,8 +195,8 @@
     {
       "path": "app/javascript/dashboard/routes/dashboard/jrcFlows/workspace.en.json",
       "baseSha256": "67cdb885064de5741f8818f426367e55ca6a5b0a9ec33505894c043dba24335a",
-      "sha256": "d77dbf01555a8e7e8b9ad800104d27aeeaa08334d308d2ccd4f6375147c6adc0",
-      "bytes": 3855
+      "sha256": "4fab972326dccdfce3535148470851aee77d24693a8c52e687dd372fe091a454",
+      "bytes": 4126
     },
     {
       "path": "app/javascript/dashboard/routes/dashboard/jrcRelationship/ModulePage.vue",
@@ -309,14 +309,14 @@
     {
       "path": "app/jobs/send_reply_job.rb",
       "baseSha256": "439ead02ef0873d96f511a3dd6ff1f1c8e23d02fd1d53654abc26af666982884",
-      "sha256": "da6b4251a8d78ab8357078f30c8764dc7cc7c88866b537d3d9643a0864e86521",
-      "bytes": 3494
+      "sha256": "c682f2308749f3239fa635d8cb4e8b29f5eee9ceadc9cfe546b979feb6fa1ed9",
+      "bytes": 3956
     },
     {
       "path": "app/jobs/webhook_job.rb",
       "baseSha256": "db0f84a588b2183e095fd85d1496300e28a04f301ea72f482e6c393949abe044",
-      "sha256": "db0f84a588b2183e095fd85d1496300e28a04f301ea72f482e6c393949abe044",
-      "bytes": 718
+      "sha256": "39d05e8b95c45b069eaf4e7e171d2cb0f9a0d5e80e896285953341d3c93d5da5",
+      "bytes": 1168
     },
     {
       "path": "app/listeners/agent_bot_listener.rb",
@@ -519,8 +519,8 @@
     {
       "path": "app/services/jrc_flows/native_context_response.rb",
       "baseSha256": null,
-      "sha256": "3e1a72a89b150c9ea51481446ce1b0f5c47554a2f97d2a386d1953e04ecb555f",
-      "bytes": 2399
+      "sha256": "6eb1ac032df4b3fadee467de7387c4e1bb6e2365a17c9a8ab6d29d8ec4963356",
+      "bytes": 2420
     },
     {
       "path": "app/services/jrc_flows/native_credential_store.rb",
@@ -531,14 +531,14 @@
     {
       "path": "app/services/jrc_flows/native_editor_operation.rb",
       "baseSha256": null,
-      "sha256": "d80690a7ee3895935f8378228cbc6d7df30b5e5b7208cca5922e0a7a8ad29efd",
-      "bytes": 5094
+      "sha256": "54f04b36e78404828e49d27178d8fa33153d4a288d871cd97fd1cb8c90b6d4ee",
+      "bytes": 6602
     },
     {
       "path": "app/services/jrc_flows/native_editor.rb",
       "baseSha256": null,
-      "sha256": "7df7ff43345b13605f518162c9211bc84ecb6001f524386b9f5e6e975cdc053d",
-      "bytes": 5545
+      "sha256": "faf404b500d898b269e0da2b7cbaf365fa9e5a897fd2b491d100a92df9cd1bb6",
+      "bytes": 6265
     },
     {
       "path": "app/services/jrc_flows/native_host_authority.rb",
@@ -561,8 +561,8 @@
     {
       "path": "app/services/jrc_flows/native_introspection.rb",
       "baseSha256": null,
-      "sha256": "6e5f8609c273b131b99d69722ae2e1373f6d0ca14d8e018f0a73acbf651b6c41",
-      "bytes": 4303
+      "sha256": "bbe84593fae354bf36ae789f7daad5b2c0587b34b05b93835cca83871cb2ab33",
+      "bytes": 4324
     },
     {
       "path": "app/services/jrc_flows/native_ownership_broker_proof.rb",
@@ -597,8 +597,8 @@
     {
       "path": "app/services/jrc_flows/native_responder_hooks.rb",
       "baseSha256": null,
-      "sha256": "81e350752ce28a7fccca4621e82baf99886cdeae1be518db4511d69d4c65dcf3",
-      "bytes": 4918
+      "sha256": "cf8ac5bc6db23588ce21e4194558f0e134869bd7457b7dc22d58e2120f080909",
+      "bytes": 4928
     },
     {
       "path": "app/services/jrc_flows/native_responders.rb",
@@ -765,7 +765,7 @@
     {
       "path": "config/jrc_flow_ownership_guards.json",
       "baseSha256": null,
-      "sha256": "2197d3f521557bc1c7bda59c989180f3ed10165348534a1bfcc3a2bb2b459cff",
+      "sha256": "5df40d368e9d750968e9d56e31d53793e2c1c7b71a6076407ccc8e39be6432ad",
       "bytes": 11350
     },
     {
@@ -777,14 +777,14 @@
     {
       "path": "config/routes.rb",
       "baseSha256": "a00b0f9b8f9735ec0673eed1719ac5b5df16f8b19e24bbd20cb7bd2cfee38596",
-      "sha256": "9c1c6ee23c4eec7e98dd5f21b18c865f51b835771571d37ea3b15e12a1e38f01",
-      "bytes": 63506
+      "sha256": "776d0dbb702147376aa31fb1eb922fe1408d8813ca8576be3be3edbde377593c",
+      "bytes": 68617
     },
     {
       "path": "config/schedule.yml",
       "baseSha256": "be8bbc19451f6acb9d15919a08b6cc860bc8dbb4bc0630f1a4a58a9ef8ad751d",
-      "sha256": "5cbb87b34c7b7c287f505ebf662853ce46c7bf22055c83bf5f8abff0a75f600a",
-      "bytes": 3965
+      "sha256": "c2c8a73ea51de696026280705e805461b65c02b11725945be0290301bdfde241",
+      "bytes": 4409
     },
     {
       "path": "db/functions/20261015160000_native_responder_config_fence.sql",
@@ -903,31 +903,31 @@
     {
       "path": "public/jrc-flow-editor/EDITOR-BUILD-MANIFEST.json",
       "baseSha256": null,
-      "sha256": "44f89bdafc88c3ef1ba8b9e3011c0b0cfe70ae941438c71890865cb21779b4fe",
-      "bytes": 37039
+      "sha256": "aa973612430faf545c2d2469dae375fb4ce635530631a0337f2dfa8c2291b89e",
+      "bytes": 39805
     },
     {
       "path": "public/jrc-flow-editor/editor.css",
       "baseSha256": null,
-      "sha256": "c65a52b9b1caeab057e7bf88bded09fa08e83868373438602a9ce4cead5e8ee4",
-      "bytes": 26865
+      "sha256": "71fa57194fdee277348c5a6b7abaf2024fb2a072a8083e2a5cc80f3e94ad85f6",
+      "bytes": 29555
     },
     {
       "path": "public/jrc-flow-editor/editor.js",
       "baseSha256": null,
-      "sha256": "bfce628e20cae7354cb7797dd1bfefe76d1b323f526602aa275725b69767a6c1",
-      "bytes": 902736
+      "sha256": "0a1cb29ff7917376517aeace01bdae672ea5ac88d1e87863307d02e8f35c44a4",
+      "bytes": 959464
     },
     {
       "path": "public/jrc-flow-editor/editor.js.LEGAL.txt",
       "baseSha256": null,
-      "sha256": "7066aa717376ca1236a5d6112725fd01632e36f10e77f904f024624b6fcfbbf3",
+      "sha256": "a4bb6bdca26057d85644e8b9a27f8d3526f0cb6b9b45b02808eaf4d4184b5b5b",
       "bytes": 1863
     },
     {
       "path": "public/jrc-flow-editor/THIRD_PARTY_NOTICES.txt",
       "baseSha256": null,
-      "sha256": "289db5060637c9fa381d89a21979bf1843257353341ec5b6189a5e9f871476c3",
+      "sha256": "15250d75013475d5cca3359dc027f4c069197725fff8f3c35ab9fad3fe2bf49d",
       "bytes": 8663
     },
     {
@@ -963,8 +963,8 @@
     {
       "path": "spec/jobs/send_reply_job_nico_composition_spec.rb",
       "baseSha256": null,
-      "sha256": "ac9dd18d3b448a372248bc173507ab6a4abf69e210a3defb349a36850706d41d",
-      "bytes": 6024
+      "sha256": "4a356f2eaa7e3f04e1619eae43a9e59ecb387aa089d963de535d9468491e08ba",
+      "bytes": 6582
     },
     {
       "path": "spec/requests/api/v1/accounts/relationship/reviewed_batches_spec.rb",
@@ -987,14 +987,14 @@
     {
       "path": "spec/requests/jrc_flow_native_boundary_spec.rb",
       "baseSha256": null,
-      "sha256": "db6406b1dd8a285f3f27b1a3338c1c18c4ffecf63666541040fdf2f0904aea4d",
-      "bytes": 9123
+      "sha256": "795cc0e5d27b315bcb98602f5d16e61125527b3d02ab62660b1051dd356f237c",
+      "bytes": 10031
     },
     {
       "path": "spec/requests/jrc_flow_native_editor_installation_spec.rb",
       "baseSha256": null,
-      "sha256": "ec4b770eea4ea9b69afdb103882651d8365b93b63dc993748f5b443504ba0834",
-      "bytes": 9303
+      "sha256": "b4009d1e223f2df807c911717bb63e91dc8cea8fce80add90ec4e9e398e4eb1f",
+      "bytes": 13031
     },
     {
       "path": "spec/requests/jrc_flow_native_ownership_spec.rb",
@@ -1059,8 +1059,8 @@
     {
       "path": "spec/services/jrc_nico/broker_send_commit_gate_spec.rb",
       "baseSha256": null,
-      "sha256": "0a27a6cba7799ad752d8287f62f121132af21e9aba17e42104f09e541de82b53",
-      "bytes": 18316
+      "sha256": "c60e8be350b7148705dc424adde69f86e919587b7d0e4199177564f816e1c1c0",
+      "bytes": 18544
     },
     {
       "path": "spec/services/jrc_relationship/playbook_flow_webhook_delivery_spec.rb",
@@ -1095,8 +1095,8 @@
     {
       "path": "spec/support/jrc_service_desk_concurrency.rb",
       "baseSha256": "20e912cab5dac9c2a1dec52c8a40df87b9895c201302033e0b59f6200c9c5084",
-      "sha256": "de7f93a493fa3388b55ea9bf3d1d4677d3c4fd2b2b258b1e9a456bd869296351",
-      "bytes": 1817
+      "sha256": "32c648b626a025b636a6f75ace6477458bb2ef4e24e99e3dd9a84df590d68f85",
+      "bytes": 2111
     }
   ]
 }

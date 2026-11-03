@@ -4,6 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
+      - main
       - codex/crm-backoffice-servicedesk-visual-20261101
       - codex/release-integrada-specs-20261102
       - codex/lab2-integral-20261102
@@ -184,7 +185,9 @@ jobs:
       - name: pnpm e lockfile imutavel
         run: corepack enable && pnpm install --frozen-lockfile
       - name: Contratos dos gates e migrations da release
-        run: node --test script/lab2_release_gates.test.mjs script/validate_migration_timestamps.test.mjs
+        run: |
+          node --test script/lab2_release_gates.test.mjs script/validate_migration_timestamps.test.mjs deploy/jrc/module-manifest.test.mjs
+          node script/jrc_native_module_manifest.mjs
       - name: Preparar banco descartavel sem fontes externas
         run: |
           bundle exec rails db:schema:load

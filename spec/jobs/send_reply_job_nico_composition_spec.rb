@@ -35,7 +35,11 @@ RSpec.describe SendReplyJob do
     begin
       # The complete application-table set is explicit; no cascading expansion or
       # sequence reset is required to remove these disposable fixtures.
-      connection.execute("TRUNCATE #{tables.map { |name| connection.quote_table_name(name) }.join(', ')}")
+      # The surrounding opt-in guard restricts this to an exclusive disposable DB.
+      # Rails restores every trigger before the example exercises SQL protections.
+      connection.disable_referential_integrity do
+        connection.execute("TRUNCATE #{tables.map { |name| connection.quote_table_name(name) }.join(', ')}")
+      end
     rescue ActiveRecord::LockWaitTimeout
       activity = connection.select_all('SELECT pid,state,wait_event_type FROM pg_stat_activity WHERE datname=current_database()')
       raise "Fixture cleanup was blocked; disposable DB sessions: #{activity.to_a.inspect}"
@@ -43,6 +47,13 @@ RSpec.describe SendReplyJob do
       connection.execute("SET lock_timeout=#{connection.quote(previous_timeout)}")
     end
     connection.clear_query_cache
+  end
+
+  it 'keeps connection history append-only after committed fixture cleanup' do
+    connection = ActiveRecord::Base.connection
+    expect do
+      connection.transaction(requires_new: true) { connection.execute('TRUNCATE jrc_broker_connection_events') }
+    end.to raise_error(ActiveRecord::StatementInvalid, /append-only/)
   end
 
   it 'does not send a queued bot reply after a public human message' do

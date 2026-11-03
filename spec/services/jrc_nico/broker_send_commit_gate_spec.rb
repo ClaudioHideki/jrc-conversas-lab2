@@ -50,7 +50,11 @@ RSpec.describe JrcNico::BrokerSendCommitGate do
     begin
       # The complete application-table set is explicit. Keep monotonic IDs and
       # avoid resetting hundreds of unrelated sequences for every example.
-      connection.execute("TRUNCATE #{tables.map { |name| connection.quote_table_name(name) }.join(', ')}")
+      # The surrounding opt-in guard restricts this to an exclusive disposable DB.
+      # Rails restores every trigger before the example exercises SQL protections.
+      connection.disable_referential_integrity do
+        connection.execute("TRUNCATE #{tables.map { |name| connection.quote_table_name(name) }.join(', ')}")
+      end
     rescue ActiveRecord::LockWaitTimeout
       activity = connection.select_all('SELECT pid,state,wait_event_type FROM pg_stat_activity WHERE datname=current_database()')
       raise "Fixture cleanup was blocked; disposable DB sessions: #{activity.to_a.inspect}"
