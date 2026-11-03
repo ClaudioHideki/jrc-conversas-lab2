@@ -1,5 +1,7 @@
 # Checkpoint ativo — 03/11/2026
 
+PUBLICAÇÃO CONCLUÍDA: leia `PUBLICACAO-GRUPO-JRC-20261103.md`. Fonte executáveledd6f1a2570676a64d0e9086652c8e1da476c7ac; CInativa41645392552eimagem41645896885SUCCESS. Digestdabbbfcad2a97c659fb90c269b3e96a7f7c619fe70d8d56800486023c9ce4a76 implantado no Grupo JRC. Railsbc16920b5640eSidekiq50b51ecfc39b no mesmo SHA, heartbeat ativo,7migrations aplicadas/0pendentes, HTTPShealth200. O registro documental posterior não é outra candidata executável. Não repetir o deploy sem necessidade; não confundir este release com homologação real de campanha, IA paga, CCLX ou capacidade.
+
 Atualização de escopo neste dia: o usuário autorizou publicar a candidata LAB2 consolidada e atualizar o Grupo JRC. Leia `CANDIDATA-CONSOLIDADA-20261103.md` e o plano de release de03/11. Brokerd1d0f2e já publicado/implantado; não repetir seu deploy. LAB2 permanece em validação antes da promoção; banco frio e MinIO4/4 passaram, UI134/134. Registrar CI/imagem/deploy como níveis separados.
 
 Branch atual codex/lab2-integral-20261102; preservar WIP e base20e56104. Leia MIDIA-HARDENING-20261103.md e MIG-INTEGRAL-LAB2-20261102.md. As instruções de release abaixo são históricas, não autorização para deploy agora. Editor do Broker ef5c5ae instalado; serviços de mídia65/65 e NICO60/60. Faltam MinIO do importador, schema frio, CI/build completos e revisão integral.

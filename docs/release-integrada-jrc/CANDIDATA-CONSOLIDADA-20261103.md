@@ -1,5 +1,7 @@
 # Candidata consolidada Grupo JRC — 03/11/2026
 
+Situação final: candidata aprovada e implantada; fonte executáveledd6f1a2, digestdabbbfcad2a97c659fb90c269b3e96a7f7c619fe70d8d56800486023c9ce4a76. Leia `PUBLICACAO-GRUPO-JRC-20261103.md` para os resultados finais. As pendências de gates abaixo descrevem a preparação histórica deste incremento.
+
 Pedido vigente autoriza publicação da imagem e atualização do Grupo JRC após validação. Branch preservada: `codex/lab2-integral-20261102`, base `20e56104ec0f748b53da58edb1b639369fad0a1e`. Produção consultada no terminal Rails: `daae59ecdbfd28008773a8adf9ec13f34ac8f486`.
 
 ## Reconciliação
