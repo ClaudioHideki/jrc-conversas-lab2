@@ -206,6 +206,32 @@ it('lets an administrator edit local distribution while remote connection status
   expect(api.pair).not.toHaveBeenCalled();
 });
 
+it('shows queue and rule summary cards with actions that open the corresponding editor tab', async () => {
+  role.value = 'administrator';
+  api.connectionDistribution.mockResolvedValue({
+    policy: { enabled: true, mode: 'direct', team_ids: [11], max_open: 6 },
+    teams: [{ id: 11, name: 'Reception' }],
+  });
+  wrapper = mountPage();
+  await flushPromises();
+  await wrapper.get('[data-testid="manage-connection-7"]').trigger('click');
+  await flushPromises();
+  expect(
+    wrapper.get('[data-testid="distribution-queue-card"]').text()
+  ).toContain('Reception');
+  await wrapper.get('[data-testid="edit-connection-rules"]').trigger('click');
+  expect(wrapper.get('[role="tab"][aria-selected="true"]').text()).toBe(
+    'Rules and schedules'
+  );
+  await wrapper.findAll('[role="tab"]')[0].trigger('click');
+  await wrapper
+    .get('[data-testid="edit-connection-distribution"]')
+    .trigger('click');
+  expect(wrapper.get('[role="tab"][aria-selected="true"]').text()).toBe(
+    'Distribution'
+  );
+});
+
 it('offers accessible detail tabs without remounting health polling or fetching history automatically', async () => {
   role.value = 'administrator';
   wrapper = mountPage({ attachTo: document.body });

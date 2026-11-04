@@ -9,7 +9,12 @@ export default defineConfig({
   expect: { timeout: 30000 },
   reporter: 'line',
   outputDir: '../../.codex/whatsapp-word-e2e',
-  use: { baseURL: 'http://127.0.0.1:5214', headless: true },
+  use: {
+    baseURL: 'http://127.0.0.1:5214',
+    headless: true,
+    locale: 'pt-BR',
+    timezoneId: 'America/Sao_Paulo',
+  },
   webServer: {
     command:
       'pnpm exec vite --config tests/playwright/fixtures/whatsapp-word/vite.config.mjs',

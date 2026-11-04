@@ -27,6 +27,10 @@ test('administra conexoes e distribuicao sem iniciar pareamento ao abrir', async
     dialog.getByRole('tab', { name: 'Distribuição', exact: true })
   ).toHaveAttribute('aria-selected', 'true');
   await dialog.locator('input[type="radio"][value="priority"]').check();
+  await page.screenshot({
+    path: testInfo.outputPath('distribuicao-antes-salvar.png'),
+    fullPage: true,
+  });
   await dialog
     .getByRole('button', { name: 'Salvar distribuição', exact: false })
     .click();

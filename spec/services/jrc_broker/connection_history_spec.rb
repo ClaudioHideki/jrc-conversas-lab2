@@ -14,6 +14,11 @@ RSpec.describe JrcBroker::ConnectionHistory do
       'identityStatus' => 'CONFIRMED', 'identityRevision' => 2, 'checkedAt' => '2026-11-04T12:00:02Z' }
   end
 
+  before do
+    JrcBrokerIntegration.create!(account: account, broker_origin: 'https://broker.example.test', organization_id: SecureRandom.uuid,
+                                destination_revision: 1, encrypted_control_key: 'synthetic-not-used')
+  end
+
   it 'ignores an older status response without rolling back health or inventing a disconnect event' do
     history.observe!(health)
 

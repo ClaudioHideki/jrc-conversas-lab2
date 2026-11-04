@@ -70,7 +70,8 @@ RSpec.describe 'Broker connection summary', type: :request do
 
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body['policy']).to include('enabled' => true, 'mode' => 'priority', 'max_open' => 3)
-    expect(response.parsed_body['teams']).to eq([{ 'id' => first.id, 'name' => 'Zulu' }, { 'id' => second.id, 'name' => 'Alpha' }])
+    expect(response.parsed_body['teams']).to eq([{ 'id' => first.id, 'name' => first.reload.name },
+                                              { 'id' => second.id, 'name' => second.reload.name }])
   end
 
   it 'hides report metrics and queue configuration from an authorized operator without reporting permission' do

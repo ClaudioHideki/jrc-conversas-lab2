@@ -15,7 +15,7 @@ import ConnectionDistributionTable from 'dashboard/components-next/jrc-broker/Co
 import ConnectionInsights from 'dashboard/components-next/jrc-broker/ConnectionInsights.vue';
 import OnboardingFlow from 'dashboard/components-next/jrc-broker/OnboardingFlow.vue';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const { accountId, currentAccount } = useAccount();
 const store = useStore();
 const { isAdmin } = useAdmin();
@@ -193,7 +193,8 @@ const checkedAt = id => {
     ? value
     : null;
 };
-const formatTime = value => new Date(value).toLocaleString();
+const formatTime = value =>
+  new Date(value).toLocaleString(locale.value.replace('_', '-'));
 const closeConnection = () => {
   reconnectMode.value = false;
   selectedId.value = null;
@@ -464,7 +465,7 @@ onBeforeUnmount(() => {
                 <div class="min-w-0 flex-1 basis-40">
                   <h2
                     :id="`connection-name-${inbox.id}`"
-                    class="text-lg font-semibold text-n-slate-12 break-words"
+                    class="text-base font-semibold text-n-slate-12 break-words"
                   >
                     {{ inbox.name }}
                   </h2>
@@ -487,7 +488,7 @@ onBeforeUnmount(() => {
                 </p>
                 <template v-else>
                   <span
-                    class="self-start rounded-full px-3 py-1 text-sm font-medium bg-n-alpha-2"
+                    class="self-center rounded-full px-3 py-1 text-xs font-medium bg-n-alpha-2"
                     :class="{
                       'text-n-teal-11':
                         connectionState(inbox.id) === 'CONNECTED',
@@ -520,7 +521,7 @@ onBeforeUnmount(() => {
                   <p
                     v-if="sourceTime(inbox.id, 'lastSyncAt')"
                     data-testid="connection-last-sync"
-                    class="text-sm text-n-slate-11"
+                    class="max-w-44 text-xs text-n-slate-11"
                   >
                     {{ t('JRC_BROKER.CONNECTIONS.LAST_SYNC') }}
                     <time :datetime="sourceTime(inbox.id, 'lastSyncAt')">{{
@@ -538,7 +539,7 @@ onBeforeUnmount(() => {
                     "
                     presentation="summary"
                   />
-                  <p v-if="checkedAt(inbox.id)" class="text-sm text-n-slate-11">
+                  <p v-if="checkedAt(inbox.id)" class="sr-only">
                     {{ t('JRC_BROKER.CONNECTIONS.CHECKED_AT') }}
                     <time :datetime="checkedAt(inbox.id)">
                       {{ formatTime(checkedAt(inbox.id)) }}
@@ -733,36 +734,44 @@ onBeforeUnmount(() => {
               {{ t('JRC_BROKER.DETAILS.RECONNECTED') }}
               {{ t('JRC_BROKER.DETAILS.RECONNECTED_HELP') }}
             </p>
-            <ConnectionInsights
-              v-if="activeTab === 'overview' && !reconnectMode"
-              :key="`insights:${accountId}:${selectedInbox.id}`"
-              :account-id="accountId"
-              :inbox-id="selectedInbox.id"
-            />
             <div
               v-if="activeTab === 'overview' && phoneNumber(selectedInbox.id)"
               class="mb-5 rounded-xl bg-n-alpha-1 p-5 text-lg font-semibold"
             >
               {{ phoneNumber(selectedInbox.id) }}
             </div>
-            <ConnectionPanel
+            <details
               v-show="activeTab === 'overview' || activeTab === 'configuration'"
-              :key="`${accountId}:${selectedInbox.id}`"
-              :account-id="accountId"
-              :inbox-id="selectedInbox.id"
-              :connection-name="selectedInbox.name"
-              :presentation="
-                reconnectMode
-                  ? 'pairing'
-                  : activeTab === 'configuration'
-                    ? 'configuration'
-                    : 'overview'
-              "
-              @health="receiveHealth"
-              @health-error="receiveHealthError"
-              @reconnected="receiveReconnection"
-              @renamed="receiveRename"
-            />
+              :open="activeTab === 'configuration' || reconnectMode"
+              class="mb-5"
+            >
+              <summary
+                v-show="activeTab === 'overview'"
+                class="cursor-pointer rounded-lg border border-n-weak px-4 py-3 text-sm text-n-slate-11"
+              >
+                {{ t('JRC_BROKER.DETAILS.PANEL_TITLE') }}
+              </summary>
+              <ConnectionPanel
+                v-show="
+                  activeTab === 'overview' || activeTab === 'configuration'
+                "
+                :key="`${accountId}:${selectedInbox.id}`"
+                :account-id="accountId"
+                :inbox-id="selectedInbox.id"
+                :connection-name="selectedInbox.name"
+                :presentation="
+                  reconnectMode
+                    ? 'pairing'
+                    : activeTab === 'configuration'
+                      ? 'configuration'
+                      : 'overview'
+                "
+                @health="receiveHealth"
+                @health-error="receiveHealthError"
+                @reconnected="receiveReconnection"
+                @renamed="receiveRename"
+              />
+            </details>
             <ConnectionDistributionPolicy
               v-if="isAdmin"
               v-show="activeTab !== 'configuration'"
@@ -771,11 +780,18 @@ onBeforeUnmount(() => {
               :inbox-id="selectedInbox.id"
               :presentation="distributionPresentation"
               @saved="receiveDistribution"
+              @edit="selectTab"
               :connected="
                 connectionState(selectedInbox.id) === 'UNKNOWN'
                   ? null
                   : connectionState(selectedInbox.id) === 'CONNECTED'
               "
+            />
+            <ConnectionInsights
+              v-if="activeTab === 'overview' && !reconnectMode"
+              :key="`insights:${accountId}:${selectedInbox.id}`"
+              :account-id="accountId"
+              :inbox-id="selectedInbox.id"
             />
             <ConnectionHistory
               v-if="activeTab === 'history'"
