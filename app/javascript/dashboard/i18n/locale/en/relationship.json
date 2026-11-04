@@ -1294,7 +1294,22 @@
         "RESPONSIBLE_SEARCH": "Pesquisar usuários elegíveis",
         "SEARCH": "Pesquisar",
         "METADATA_REASON": "Motivo da alteração (registrado na auditoria)",
-        "OPTIONS_FAILED": "Não foi possível validar os usuários elegíveis. Feche e atualize o documento antes de tentar novamente."
+        "OPTIONS_FAILED": "Não foi possível validar os usuários elegíveis. Feche e atualize o documento antes de tentar novamente.",
+        "REQUIRED_HEADING": "Documentos obrigatórios",
+        "CATALOG_HELP": "Catálogo do escopo selecionado, salvo com a versão desta configuração. Códigos identificam exigências; alterar ou remover códigos não religa arquivos antigos nem altera seu histórico. Não concede aprovação ou poder de assinatura.",
+        "REQUIREMENT_CODE": "Código estável (letras minúsculas, números, _ ou -)",
+        "NO_REQUIREMENTS": "Nenhum documento obrigatório configurado neste escopo. Isso não comprova conformidade.",
+        "REQUIREMENT_LINK": "Exigência documental vinculada",
+        "NO_REQUIREMENT_LINK": "Sem vínculo a uma exigência",
+        "PREVIOUS_REQUIREMENT": "Vínculo anterior fora do catálogo atual",
+        "FILE_NOT_APPROVAL": "A disponibilidade do arquivo depende de validade e verificação nativa. Não representa aprovação jurídica, poderes de representação ou liberação de assinatura.",
+        "REQUIREMENT_STATES": {
+          "missing": "Documento faltante",
+          "category_mismatch": "Categoria diferente da exigência atual",
+          "expired": "Versão atual vencida",
+          "quarantined": "Arquivo pendente ou em quarentena",
+          "file_available": "Arquivo disponível; aprovação não inferida"
+        }
       }
     }
   }

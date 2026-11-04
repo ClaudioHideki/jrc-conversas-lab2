@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_11_04_120000) do
+ActiveRecord::Schema[7.1].define(version: 2026_11_04_130000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -4630,6 +4630,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_04_120000) do
     t.datetime "updated_at", null: false
     t.bigint "responsible_id"
     t.integer "lock_version", default: 0, null: false
+    t.string "requirement_key", limit: 60
+    t.index ["account_id", "assignment_id", "requirement_key"], name: "rel_doc_active_requirement", unique: true, where: "(((status)::text = 'active'::text) AND (requirement_key IS NOT NULL))"
     t.index ["account_id", "id"], name: "rel_document_tenant_ref", unique: true
     t.index ["account_id"], name: "index_jrc_relationship_customer_documents_on_account_id"
     t.index ["assignment_id"], name: "index_jrc_relationship_customer_documents_on_assignment_id"

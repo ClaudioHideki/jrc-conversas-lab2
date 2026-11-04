@@ -1,11 +1,13 @@
 <script setup>
-import { onMounted, reactive, ref } from 'vue';
+import { onMounted, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import DocumentRequirementField from './DocumentRequirementField.vue';
 import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import { buttonClass, inputClass } from './definitions';
 const props = defineProps({
   document: { type: Object, default: null },
   busy: Boolean,
+  requirements: { type: Array, default: () => [] },
   error: { type: String, default: '' },
 });
 const emit = defineEmits(['close', 'save']);
@@ -13,12 +15,19 @@ const { t } = useI18n();
 const dialog = ref(null);
 const tab = ref('file');
 const form = reactive({
+  requirement_key: props.document?.requirement_key || '',
   title: props.document?.title || '',
   category: props.document?.category || 'registration',
   valid_until: '',
   change_reason: '',
 });
 const file = ref(null);
+watch(
+  () => form.category,
+  () => {
+    if (!props.document) form.requirement_key = '';
+  }
+);
 onMounted(() => dialog.value.open());
 </script>
 
@@ -99,7 +108,15 @@ onMounted(() => dialog.value.open());
               {{ t(`RELATIONSHIP.V2.DOCS.CATEGORIES.${category}`) }}
             </option>
           </select></label
-        ><label class="block text-sm"
+        >
+        <DocumentRequirementField
+          v-if="!document"
+          v-model="form.requirement_key"
+          :entries="requirements"
+          :category="form.category"
+          :disabled="busy"
+        />
+        <label class="block text-sm"
           >{{ t('RELATIONSHIP.V2.DOCS.FILE')
           }}<input
             type="file"

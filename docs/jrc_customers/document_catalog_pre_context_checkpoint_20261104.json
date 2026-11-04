@@ -1,0 +1,38 @@
+{
+  "status": "WIP protected checkpoint before shared configuration correction; not complete",
+  "base": "4631b79e0b2e39d7c99b8fc7f80fdda0bc845274",
+  "feature": "B2 mandatory document catalog in native versioned configuration",
+  "current_gates": {
+    "backend_regression": {
+      "examples": 36,
+      "failures": 0,
+      "evidence": ".codex/doc-catalog-20261104/backend-reviewed.json"
+    },
+    "additional_context_gate": {
+      "examples": 19,
+      "failures": 1,
+      "evidence": ".codex/doc-catalog-20261104/backend-context-initial.json",
+      "failure": "A general account configuration hides a specific company configuration in Context.configuration"
+    },
+    "vue": {
+      "examples": 15,
+      "failures": 0,
+      "evidence": ".codex/doc-catalog-20261104/vue-final.json"
+    }
+  },
+  "shared_change_planned": "Fix company/unit fallback precedence only when no product/segment configuration is selected; verify native health/workflow/configuration tests before accepting",
+  "database": {
+    "migration": "20261104130000",
+    "only": "jrc_rel_v2_candidate_test",
+    "original_ui_database_changed": false,
+    "old_document_links_default": null
+  },
+  "quarantine": "Availability is based on native evidence and expiry; never legal approval; test scanner attestation is simulated",
+  "ui_build": "Still 4d4a6de3 at 5379, not this increment",
+  "disk_current": 10151018496,
+  "complete": false,
+  "chrome": "pending manual; no policy circumvention",
+  "push": false,
+  "deploy": false,
+  "production": false
+}

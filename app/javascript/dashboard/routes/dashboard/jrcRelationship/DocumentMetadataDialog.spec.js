@@ -20,6 +20,7 @@ const record = {
   id: 6,
   revision: 2,
   status: 'active',
+  category: 'registration',
   responsible: { id: 7, name: 'Previous responsible' },
 };
 const render = () =>
@@ -59,6 +60,7 @@ it('loads native eligible options and sends explicit responsibility, status, rea
   await wrapper.get('textarea').setValue('Explicit responsibility review');
   await wrapper.get('form').trigger('submit');
   expect(wrapper.emitted('save')[0][0]).toEqual({
+    requirement_key: '',
     responsible_id: 8,
     status: 'archived',
     revision: 2,

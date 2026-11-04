@@ -19,9 +19,10 @@ class JrcRelationship::DocumentMetadata
       authorize_current!(document)
       validate_revision!(document, attributes.fetch('revision'))
 
-      before = document.attributes.slice('responsible_id', 'status')
+      before = document.attributes.slice('responsible_id', 'status', 'requirement_key')
       assign_responsible!(document, attributes['responsible_id']) if attributes.key?('responsible_id')
       document.status = attributes['status'] if attributes.key?('status')
+      assign_requirement!(document, attributes['requirement_key']) if attributes.key?('requirement_key')
       document.save!
       audit_change!(document, before, reason)
     end
@@ -48,12 +49,16 @@ class JrcRelationship::DocumentMetadata
   end
 
   def audit_change!(document, before, reason)
-    changes = document.attributes.slice('responsible_id', 'status').merge('reason' => reason)
+    changes = document.attributes.slice('responsible_id', 'status', 'requirement_key').merge('reason' => reason)
     @context.audit!(document, before: before, after: changes, action: 'document_metadata_updated')
   end
 
   def authorize!
     raise Pundit::NotAuthorizedError unless @context.policy.documents_manage?
+  end
+
+  def assign_requirement!(document, key)
+    document.requirement_key = JrcRelationship::DocumentRequirements.new(@context).validate_link!(document, key)
   end
 
   def assign_responsible!(document, id)

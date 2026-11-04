@@ -16,6 +16,7 @@ class JrcRelationship::CustomerDocuments
 
   def upload!(assignment_id:, attributes:, upload:, document_id: nil)
     raise Pundit::NotAuthorizedError unless @context.policy.documents_manage?
+
     type = validate_upload!(upload)
     assignment = @context.assignment(assignment_id)
     document = document_id ? scope.find(document_id) : JrcRelationship::CustomerDocument.new(account: @context.account, assignment: assignment)
@@ -26,7 +27,7 @@ class JrcRelationship::CustomerDocuments
       document.lock! if document.persisted?
       raise ArgumentError, 'Archived document cannot receive a version' if document.status == 'archived'
 
-      document.assign_attributes(attributes.slice('title', 'category')) unless document_id
+      assign_new_document!(document, attributes) unless document_id
       document.save!
       version = create_version!(document, attributes, upload, type)
     end
@@ -48,6 +49,11 @@ class JrcRelationship::CustomerDocuments
 
   private
 
+  def assign_new_document!(document, attributes)
+    document.assign_attributes(attributes.slice('title', 'category'))
+    document.requirement_key = JrcRelationship::DocumentRequirements.new(@context).validate_link!(document, attributes['requirement_key'])
+  end
+
   def validate_upload!(upload)
     raise ArgumentError, 'Send a file of at most 10 MiB' unless upload.respond_to?(:tempfile) && upload.size.between?(1, MAX_BYTES)
 
@@ -55,15 +61,18 @@ class JrcRelationship::CustomerDocuments
     unless CONTENT_TYPES.include?(type) && EXTENSIONS.include?(File.extname(upload.original_filename.to_s).downcase)
       raise ArgumentError, 'Unsupported document type or extension'
     end
+
     type
   end
 
   def create_version!(document, attributes, upload, type)
-    version = document.versions.create!(account: @context.account, uploaded_by: @context.user, number: document.versions.maximum(:number).to_i + 1,
+    version = document.versions.create!(account: @context.account, uploaded_by: @context.user,
+                                        number: document.versions.maximum(:number).to_i + 1,
                                         valid_until: attributes['valid_until'].presence, change_reason: attributes.fetch('change_reason'))
     upload.tempfile.rewind
     version.file.attach(io: upload.tempfile, filename: upload.original_filename, content_type: type, identify: false)
-    @context.audit!(document, after: { version: version.number, version_id: version.id, valid_until: version.valid_until }, action: 'document_uploaded')
+    @context.audit!(document, after: { version: version.number, version_id: version.id, valid_until: version.valid_until },
+                              action: 'document_uploaded')
     version
   end
 end

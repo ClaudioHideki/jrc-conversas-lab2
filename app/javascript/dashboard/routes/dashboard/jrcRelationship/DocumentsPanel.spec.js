@@ -128,3 +128,35 @@ it('persists metadata through the authenticated API and reloads the native read 
   ).toBe(false);
   wrapper.unmount();
 });
+
+it('shows the native scoped catalog and clears it when access is revoked', async () => {
+  mocks.documents.mockResolvedValue({
+    data: {
+      payload: [record],
+      meta: { total: 1, per_page: 20 },
+      requirements: {
+        scope_key: 'account',
+        configuration_version: 2,
+        entries: [
+          {
+            code: 'proof',
+            title: 'Required proof',
+            category: 'registration',
+            state: 'missing',
+          },
+        ],
+      },
+    },
+  });
+  const wrapper = render();
+  await flushPromises();
+  expect(wrapper.text()).toContain('Required proof');
+  mocks.documents.mockRejectedValue({ response: { status: 403 } });
+  await wrapper
+    .findAll('button')
+    .find(button => button.text() === 'RELATIONSHIP.REFRESH')
+    .trigger('click');
+  await flushPromises();
+  expect(wrapper.text()).not.toContain('Required proof');
+  wrapper.unmount();
+});

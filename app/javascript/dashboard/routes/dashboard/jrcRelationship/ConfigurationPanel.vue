@@ -10,6 +10,7 @@ import {
   message,
   date as formatDate,
 } from './definitions';
+import RequiredDocumentsForm from './RequiredDocumentsForm.vue';
 import OperationsSettingsPanel from './OperationsSettingsPanel.vue';
 import PlaybookExecutionPanel from './PlaybookExecutionPanel.vue';
 import PlaybookDesignPreview from './PlaybookDesignPreview.vue';
@@ -32,7 +33,7 @@ const invalidFlowPolicy = ref(false);
 const ordinaryRules = computed(() =>
   Object.fromEntries(
     Object.entries(config.value?.rules || {}).filter(
-      ([key]) => key !== 'playbook_flow_policy'
+      ([key]) => !['playbook_flow_policy', 'required_documents'].includes(key)
     )
   )
 );
@@ -295,6 +296,10 @@ const date = value => formatDate(value, props.metadata?.formatting);
           />
         </label>
       </div>
+      <RequiredDocumentsForm
+        v-model="config.rules.required_documents"
+        :disabled="busy"
+      />
       <PlaybookFlowPolicyForm
         v-if="config.rules.playbook_flow_policy"
         v-model="config.rules.playbook_flow_policy"

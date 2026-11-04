@@ -31,13 +31,14 @@ class JrcRelationship::Configuration < ApplicationRecord
                     'adoption_metric' => 'adoption', 'recurring_ticket_count' => 3, 'growth_threshold_percent' => 20, 'ces_threshold' => 6,
                     'survey_question_nps' => 'De 0 a 10, quanto você recomendaria nossa empresa?',
                     'survey_question_ces' => 'De 0 a 10, quanto foi fácil alcançar seu objetivo?',
+                    'required_documents' => [],
                     'risk_reasons' => ['Baixa adoção', 'Insatisfação', 'Suporte recorrente', 'Financeiro', 'Renovação',
                                        'Cancelamento solicitado'] }.freeze
 
   BOOLEAN_VALUES = [true, false].freeze
   NON_NUMERIC_RULES = %w[auto_handoff survey_automation_enabled missing_factor_policy critical_priority_codes qbr_agenda_template adoption_metric
                          risk_reasons survey_question_nps survey_question_ces renewal_window_days eligibility_mode handoff_acceptance_required
-                         playbook_flow_effects_enabled playbook_flow_policy].freeze
+                         playbook_flow_effects_enabled playbook_flow_policy required_documents].freeze
 
   def effective_weights
     DEFAULT_WEIGHTS.merge(weights)
@@ -46,6 +47,7 @@ class JrcRelationship::Configuration < ApplicationRecord
   def effective_rules
     values = DEFAULT_RULES.merge(rules)
     values['playbook_flow_policy'] = values['playbook_flow_policy'].deep_dup
+    values['required_documents'] = values['required_documents'].deep_dup
     values
   end
 
@@ -63,7 +65,14 @@ class JrcRelationship::Configuration < ApplicationRecord
     validate_flow_policy
     validate_renewal_windows
     validate_rule_lists
+    validate_document_requirements
     validate_scope
+  end
+
+  def validate_document_requirements
+    JrcRelationship::DocumentRequirements.validate!(effective_rules['required_documents'])
+  rescue ArgumentError => e
+    errors.add(:rules, e.message)
   end
 
   def validate_weights

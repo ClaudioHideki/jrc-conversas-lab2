@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcRelationship';
+import DocumentRequirementsPanel from './DocumentRequirementsPanel.vue';
 import DocumentUploadDialog from './DocumentUploadDialog.vue';
 import DocumentMetadataDialog from './DocumentMetadataDialog.vue';
 import { buttonClass, date as formatDate, message } from './definitions';
@@ -17,6 +18,7 @@ const { t } = useI18n();
 const rows = ref([]);
 const page = ref(1);
 const meta = ref(null);
+const requirements = ref(null);
 const editing = ref(false);
 const metadataDocument = ref(null);
 const current = ref(null);
@@ -25,6 +27,7 @@ const busy = ref(false);
 const error = ref('');
 const clearDeniedData = err => {
   if (![403, 404].includes(err.response?.status)) return;
+  requirements.value = null;
   rows.value = [];
   details.value = null;
   current.value = null;
@@ -39,6 +42,7 @@ const load = async () => {
   controller?.abort();
   controller = new AbortController();
   error.value = '';
+  requirements.value = null;
   rows.value = [];
   details.value = null;
   busy.value = true;
@@ -51,6 +55,7 @@ const load = async () => {
     if (version === generation) {
       rows.value = result.data.payload;
       meta.value = result.data.meta;
+      requirements.value = result.data.requirements || null;
     }
   } catch (err) {
     if (version === generation && err.code !== 'ERR_CANCELED')
@@ -88,9 +93,13 @@ const upload = async fields => {
   const form = new FormData();
   form.append('assignment_id', props.assignmentId);
   form.append('file', fields.file);
-  ['title', 'category', 'valid_until', 'change_reason'].forEach(key =>
-    form.append(`document[${key}]`, fields[key])
-  );
+  [
+    'title',
+    'category',
+    'valid_until',
+    'change_reason',
+    'requirement_key',
+  ].forEach(key => form.append(`document[${key}]`, fields[key]));
   try {
     await API.uploadDocument(accountId, form, current.value?.id);
     if (version === generation) {
@@ -219,6 +228,11 @@ const date = value => formatDate(value, props.metadata.formatting);
     >
       {{ t('RELATIONSHIP.LOADING') }}
     </p>
+    <DocumentRequirementsPanel
+      v-if="requirements"
+      :requirements="requirements"
+      @open-document="id => versions({ id })"
+    />
     <article
       v-for="document in rows"
       :key="document.id"
@@ -419,6 +433,7 @@ const date = value => formatDate(value, props.metadata.formatting);
       v-if="metadataDocument && metadata.can_manage_documents"
       :key="`${generation}:${metadataDocument.id}`"
       :document="metadataDocument"
+      :requirements="requirements?.entries || []"
       :busy="busy"
       :error="error"
       @close="metadataDocument = null"
@@ -427,6 +442,7 @@ const date = value => formatDate(value, props.metadata.formatting);
     <DocumentUploadDialog
       v-if="editing"
       :document="current"
+      :requirements="requirements?.entries || []"
       :busy="busy"
       :error="error"
       @close="editing = false"

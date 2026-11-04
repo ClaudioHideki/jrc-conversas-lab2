@@ -10,11 +10,13 @@ import {
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcRelationship';
+import DocumentRequirementField from './DocumentRequirementField.vue';
 import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import { buttonClass, inputClass, message } from './definitions';
 const props = defineProps({
   document: { type: Object, required: true },
   busy: Boolean,
+  requirements: { type: Array, default: () => [] },
   error: { type: String, default: '' },
 });
 const emit = defineEmits(['close', 'save']);
@@ -29,6 +31,7 @@ const loading = ref(false);
 const optionsReady = ref(false);
 const loadError = ref('');
 const form = reactive({
+  requirement_key: props.document?.requirement_key || '',
   responsible_id: props.document.responsible?.id || '',
   status: props.document.status,
   revision: props.document.revision,
@@ -198,6 +201,12 @@ onBeforeUnmount(() => {
           </option>
         </select></label
       >
+      <DocumentRequirementField
+        v-model="form.requirement_key"
+        :entries="requirements"
+        :category="document.category"
+        :disabled="busy || loading || !optionsReady"
+      />
       <label class="grid gap-1 text-sm"
         >{{ t('RELATIONSHIP.V2.DOCS.METADATA_REASON')
         }}<textarea

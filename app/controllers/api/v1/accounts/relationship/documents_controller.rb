@@ -6,7 +6,8 @@ class Api::V1::Accounts::Relationship::DocumentsController < Api::V1::Accounts::
   def index
     scope = service.scope.where(assignment_id: relationship_context.assignment(params.require(:assignment_id)).id)
     records, meta = page(scope.includes(:responsible, assignment: :owner).order(updated_at: :desc, id: :desc))
-    render json: { payload: records.map { |record| present(record, include_versions: false) }, meta: meta }
+    render json: { payload: records.map { |record| present(record, include_versions: false) }, meta: meta,
+                   requirements: JrcRelationship::DocumentRequirements.new(relationship_context).call(assignment_id: params[:assignment_id]) }
   end
 
   def show
@@ -23,7 +24,7 @@ class Api::V1::Accounts::Relationship::DocumentsController < Api::V1::Accounts::
       raise ArgumentError, 'Responsible must be one user identifier'
     end
 
-    values = input.permit(:responsible_id, :status, :revision, :reason).to_h
+    values = input.permit(:responsible_id, :status, :revision, :reason, :requirement_key).to_h
     document = JrcRelationship::DocumentMetadata.new(relationship_context).update!(document_id: params[:id], attributes: values)
     render json: present(document, include_versions: true)
   end
@@ -54,7 +55,7 @@ class Api::V1::Accounts::Relationship::DocumentsController < Api::V1::Accounts::
   end
 
   def upload
-    attrs = params.require(:document).permit(:title, :category, :valid_until, :change_reason).to_h
+    attrs = params.require(:document).permit(:title, :category, :valid_until, :change_reason, :requirement_key).to_h
     document = service.upload!(assignment_id: params.require(:assignment_id), attributes: attrs,
                                upload: params.require(:file), document_id: params[:id])
     render json: present(document, include_versions: true), status: :created
@@ -73,7 +74,8 @@ class Api::V1::Accounts::Relationship::DocumentsController < Api::V1::Accounts::
   def document_metadata(document)
     owner = document.assignment.owner
     responsible = document.responsible
-    { revision: document.lock_version, responsible: responsible && { id: responsible.id, name: responsible.name },
+    { revision: document.lock_version, requirement_key: document.requirement_key,
+      responsible: responsible && { id: responsible.id, name: responsible.name },
       portfolio_owner: owner && { id: owner.id, name: owner.name } }
   end
 
