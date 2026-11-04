@@ -14,9 +14,15 @@ const checkViewport = async (page, testInfo, stage) => {
         .map(element => ({
           tag: element.tagName,
           class: element.className,
+          overflow: getComputedStyle(element).overflow,
+          position: getComputedStyle(element).position,
+          parent: element.parentElement?.className,
           rect: element.getBoundingClientRect().toJSON(),
         }))
-        .filter(element => element.rect.width > width + 1),
+        .filter(
+          element =>
+            element.rect.width > width + 1 || element.rect.right > width + 1
+        ),
     };
   });
   await writeFile(
