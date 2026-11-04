@@ -686,7 +686,7 @@ onBeforeUnmount(() => {
           :use-form="false"
           :cancel-button-label="t('JRC_BROKER.CLOSE')"
           width="5xl"
-          overflow-y-auto
+          contained
           @close="closeConnection"
         >
           <div

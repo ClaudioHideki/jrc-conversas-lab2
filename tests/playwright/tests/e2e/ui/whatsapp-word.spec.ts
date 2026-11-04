@@ -46,6 +46,7 @@ test('administra conexoes e distribuicao sem iniciar pareamento ao abrir', async
     dialog.getByRole('tab', { name: 'Distribuição', exact: true })
   ).toHaveAttribute('aria-selected', 'true');
   await dialog.locator('input[type="radio"][value="priority"]').check();
+  await expect(dialog).toHaveClass(/max-h-/);
   await page.screenshot({
     path: testInfo.outputPath('distribuicao-antes-salvar.png'),
     fullPage: true,
@@ -61,9 +62,30 @@ test('administra conexoes e distribuicao sem iniciar pareamento ao abrir', async
     expect(save).not.toBeNull();
     expect(save!.y).toBeGreaterThanOrEqual(rules!.y + rules!.height - 1);
   }
-  await dialog
-    .getByRole('button', { name: 'Salvar distribuição', exact: false })
-    .click();
+  const saveButton = dialog.getByTestId('distribution-policy-save');
+  await saveButton.scrollIntoViewIfNeeded();
+  await testInfo.attach('save-hit-target.json', {
+    contentType: 'application/json',
+    body: JSON.stringify(
+      await saveButton.evaluate(element => {
+        const rect = element.getBoundingClientRect();
+        const hit = document.elementFromPoint(
+          rect.x + rect.width / 2,
+          rect.y + rect.height / 2
+        );
+        return {
+          rect: rect.toJSON(),
+          hit: hit?.outerHTML,
+          viewport: {
+            width: innerWidth,
+            height: innerHeight,
+            visualOffsetTop: visualViewport?.offsetTop,
+          },
+        };
+      })
+    ),
+  });
+  await saveButton.click();
   await expect(
     dialog.getByText('Distribuição salva.', { exact: false })
   ).toBeVisible();
