@@ -245,7 +245,10 @@ onBeforeUnmount(() => {
             <dd>{{ overview.next_activity?.title || T.noNextActivity }}</dd>
           </div>
         </dl>
-        <ContractRenewalCard v-if="overview.capabilities.contracts" :value="overview.contract_renewal" />
+        <ContractRenewalCard
+          v-if="overview.capabilities.contracts"
+          :value="overview.contract_renewal"
+        />
         <p class="text-xs text-n-slate-10">{{ T.permissionsHelp }}</p>
       </section>
       <MasterContactPanel

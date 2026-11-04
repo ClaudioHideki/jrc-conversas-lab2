@@ -495,7 +495,10 @@ onBeforeUnmount(() => {
             </article>
           </div>
 
-          <ContractRenewalCard v-if="overview.capabilities.contracts" :value="overview.contract_renewal" />
+          <ContractRenewalCard
+            v-if="overview.capabilities.contracts"
+            :value="overview.contract_renewal"
+          />
           <p class="mt-5 text-sm text-n-slate-10">{{ T.permissionsHelp }}</p>
         </template>
 
