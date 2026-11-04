@@ -41,6 +41,11 @@ jobs:
       - name: Dependencias do navegador sintetico
         run: |
           pnpm -C tests/playwright install --frozen-lockfile
+          for source in /etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources /etc/apt/apt-mirrors*.txt; do
+            if [ -f "$source" ]; then
+              sudo sed -i -E -e 's|https?://azure[.]archive[.]ubuntu[.]com/ubuntu/?|https://archive.ubuntu.com/ubuntu/|g' -e 's#http://(archive|security)[.]ubuntu[.]com/ubuntu/?#https://\1.ubuntu.com/ubuntu/#g' "$source"
+            fi
+          done
           pnpm -C tests/playwright exec playwright install --with-deps chromium
       - name: Jornadas reais de componentes com respostas sinteticas
         run: pnpm -C tests/playwright exec playwright test --config whatsapp-word.config.ts
@@ -85,7 +90,15 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           persist-credentials: false
-      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libpq-dev libvips libvips-dev
+      - name: Dependencias Rails por mirrors HTTPS
+        run: |
+          for source in /etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources /etc/apt/apt-mirrors*.txt; do
+            if [ -f "$source" ]; then
+              sudo sed -i -E -e 's|https?://azure[.]archive[.]ubuntu[.]com/ubuntu/?|https://archive.ubuntu.com/ubuntu/|g' -e 's#http://(archive|security)[.]ubuntu[.]com/ubuntu/?#https://\1.ubuntu.com/ubuntu/#g' "$source"
+            fi
+          done
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libpq-dev libvips libvips-dev
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.4.4'
