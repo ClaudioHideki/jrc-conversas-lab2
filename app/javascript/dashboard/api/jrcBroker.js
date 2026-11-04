@@ -80,6 +80,8 @@ export const createJrcBrokerApi = accountId => {
         key,
         signal
       ),
+    connectionSummary: (id, signal) =>
+      request('get', inboxPath(id, 'summary'), undefined, undefined, signal),
     connectionDistribution: (id, signal) =>
       request(
         'get',

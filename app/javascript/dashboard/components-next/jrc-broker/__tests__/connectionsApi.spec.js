@@ -2,6 +2,20 @@ import { createJrcBrokerApi } from 'dashboard/api/jrcBroker';
 
 afterEach(() => vi.unstubAllGlobals());
 
+it('reads connection metrics on the captured account and encodes the inbox path', async () => {
+  const request = vi.fn().mockResolvedValue({ data: { metrics: null } });
+  vi.stubGlobal('axios', request);
+  const signal = new AbortController().signal;
+  await createJrcBrokerApi(7).connectionSummary('12/other', signal);
+  expect(request).toHaveBeenCalledWith({
+    method: 'get',
+    url: '/api/v1/accounts/7/jrc_broker/inboxes/12%2Fother/summary',
+    data: undefined,
+    signal,
+    headers: {},
+  });
+});
+
 it('loads inboxes from the authenticated Rails origin and retains the captured account', async () => {
   const request = vi.fn().mockResolvedValue({ data: { payload: [] } });
   vi.stubGlobal('axios', request);

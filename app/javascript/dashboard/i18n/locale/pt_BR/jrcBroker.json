@@ -6,7 +6,8 @@
         "OVERVIEW": "Visão geral",
         "DISTRIBUTION": "Distribuição",
         "HISTORY": "Histórico de conexões",
-        "CONFIGURATION": "Configurações"
+        "CONFIGURATION": "Configurações",
+        "RULES": "Regras e horários"
       },
       "PANEL_TITLE": "Estado atual da conexão",
       "SESSION": "Sessão do WhatsApp",
@@ -235,6 +236,41 @@
         "PERMISSIONS_CHANGED": "Permissões de pareamento alteradas"
       },
       "TRANSITION": "De {before} para {after}"
+    },
+    "WORKSPACE": {
+      "ACTIONS": "Ações de {name}",
+      "CONFIGURE_DISTRIBUTION": "Configurar distribuição",
+      "HOW_TITLE": "Como funciona a conexão e distribuição",
+      "HOW_HELP": "Conecte seu WhatsApp e escolha como as novas conversas chegam aos times certos.",
+      "STEPS": {
+        "CONNECT": "Conecte um número com segurança pelo QR Code.",
+        "QUEUES": "Selecione as filas que receberão as novas conversas.",
+        "RULES": "Defina disponibilidade, capacidade e horários de atendimento."
+      },
+      "HELP": "Ajuda sobre conexão e distribuição",
+      "NUMBER": "Número / conexão",
+      "QUEUES": "Filas",
+      "MODE": "Modo",
+      "STATE": "Status",
+      "UNCONFIGURED": "Padrão da conta",
+      "NEW_DISTRIBUTION": "Nova distribuição",
+      "RULES_TAB": "Regras e horários",
+      "METRICS_TITLE": "Últimos 30 dias",
+      "CONVERSATIONS": "Conversas",
+      "FIRST_RESPONSE": "Tempo médio de primeira resposta",
+      "RESOLUTION": "Tempo médio de resolução",
+      "ELIGIBLE_AGENTS": "Agentes elegíveis agora",
+      "NO_DATA": "Sem dados",
+      "METRICS_HELP": "Calculado a partir das conversas e dos eventos persistidos. O tempo de resolução inclui espera; não equivale ao tempo de trabalho ativo.",
+      "METRICS_RESTRICTED": "As métricas estão disponíveis para usuários com acesso aos relatórios.",
+      "PAIR_TITLE": "Reconectar o mesmo número de WhatsApp",
+      "PAIR_HELP": "No celular de origem, abra WhatsApp → Aparelhos conectados → Conectar um aparelho e escaneie o código.",
+      "PAIR_STEP_1": "Use o mesmo número da empresa já vinculado a esta caixa.",
+      "PAIR_STEP_2": "Mantenha o celular conectado à internet.",
+      "PAIR_STEP_3": "Aguarde a confirmação de conexão. Suas filas e regras são preservadas.",
+      "EXPIRES_IN": "O código expira em {seconds}s",
+      "CONNECTED_SUCCESS": "Conexão confirmada. Suas filas e regras foram mantidas.",
+      "SELECT_CONNECTION": "Escolha uma conexão para configurar sua distribuição."
     }
   }
 }

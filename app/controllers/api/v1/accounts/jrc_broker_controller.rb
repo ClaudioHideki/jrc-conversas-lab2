@@ -4,7 +4,8 @@ class Api::V1::Accounts::JrcBrokerController < Api::V1::Accounts::BaseController
   before_action :no_store
   before_action :verify_control_csrf!
   before_action :reject_query!
-  before_action :authorize_management!, except: [:status, :pair, :pair_operation, :disconnect, :confirm_identity, :connection_history]
+  before_action :authorize_management!, except: [:status, :pair, :pair_operation, :disconnect, :confirm_identity,
+                                                 :connection_history, :connection_summary]
   rescue_from JrcBroker::Client::Error, with: :broker_error
   rescue_from JrcBroker::Configuration::InvalidConfiguration, JrcBroker::CredentialStore::InvalidCredential, with: :configuration_error
 
@@ -53,6 +54,14 @@ class Api::V1::Accounts::JrcBrokerController < Api::V1::Accounts::BaseController
                    teams: Current.account.teams.where(allow_auto_assign: true).order(:name).pluck(:id, :name).map do |id, name|
                      { id: id, name: name }
                    end }
+  end
+
+  def connection_summary
+    policy = JrcBrokerPolicy.new(pundit_user, binding)
+    raise JrcBroker::Client::Error.new('JRC_BROKER_FORBIDDEN', status: 403) unless policy.status?
+
+    render json: JrcBroker::ConnectionSummary.new(binding: binding, manage: policy.manage?,
+                                                 reports: ReportPolicy.new(pundit_user, :report).view?).perform
   end
 
   def update_connection_distribution

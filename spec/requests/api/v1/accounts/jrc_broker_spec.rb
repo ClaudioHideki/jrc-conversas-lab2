@@ -68,6 +68,20 @@ RSpec.describe 'JRC Broker account control', type: :request do
     expect(JrcBrokerConnectionEvent.where(account: account, event_type: 'CONNECTED').count).to eq(1)
   end
 
+  it 'returns a typed invalid-response error for a malformed observed timestamp and preserves cached health' do
+    headers = admin.create_new_auth_token
+    get "#{inbox_url}/status", headers: headers
+    previous = JrcBrokerInboxBinding.find_by!(inbox: inbox).connection_state.deep_dup
+    stub_request(:get, "#{remote}/connections/#{connection_id}/status")
+      .to_return(status: 200, body: health.merge(checkedAt: { invalid: 'timestamp' }).to_json)
+
+    get "#{inbox_url}/status", headers: headers
+
+    expect(response).to have_http_status(:bad_gateway)
+    expect(response.parsed_body).to eq('code' => 'JRC_BROKER_INVALID_RESPONSE')
+    expect(JrcBrokerInboxBinding.find_by!(inbox: inbox).connection_state).to eq(previous)
+  end
+
   it 'adopts an existing API inbox idempotently without creating another inbox' do
     JrcBrokerInboxBinding.where(account: account).delete_all
     headers = admin.create_new_auth_token

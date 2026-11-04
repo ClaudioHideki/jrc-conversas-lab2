@@ -1,0 +1,119 @@
+name: Conexoes WhatsApp - candidata Word
+
+on:
+  push:
+    branches: [codex/whatsapp-connections-word-20261104]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: whatsapp-connections-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  interface:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - run: pnpm install --frozen-lockfile
+      - name: Regressao dos componentes reais
+        run: pnpm exec vitest run app/javascript/dashboard/components-next/jrc-broker --maxWorkers=2 --minWorkers=1 --reporter=default --reporter=json --outputFile=/tmp/whatsapp-connections-vitest.json
+      - name: Lint do incremento
+        run: |
+          pnpm exec eslint app/javascript/dashboard/routes/dashboard/jrcBroker/ConnectionsPage.vue \
+            app/javascript/dashboard/components-next/jrc-broker/{ConnectionDistributionTable,ConnectionInsights,ConnectionPanel,ConnectionDistributionPolicy}.vue \
+            app/javascript/dashboard/api/jrcBroker.js
+      - name: Build frontend completo
+        env:
+          RAILS_ENV: production
+        run: pnpm exec vite build --outDir "$RUNNER_TEMP/whatsapp-connections-frontend"
+      - name: Dependencias do navegador sintetico
+        run: |
+          pnpm -C tests/playwright install --frozen-lockfile
+          pnpm -C tests/playwright exec playwright install --with-deps chromium
+      - name: Jornadas reais de componentes com respostas sinteticas
+        run: pnpm -C tests/playwright exec playwright test --config whatsapp-word.config.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: whatsapp-connections-interface
+          path: |
+            .codex/whatsapp-word-e2e/
+            /tmp/whatsapp-connections-vitest.json
+          if-no-files-found: ignore
+      - run: git diff --exit-code && git diff --check
+
+  rails:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: disposable-test-only
+        ports: ['5432:5432']
+        options: --health-cmd "pg_isready -U postgres -d postgres" --health-interval 5s --health-timeout 5s --health-retries 12
+      redis:
+        image: redis:7.4.0-alpine@sha256:c35af3bbcef51a62c8bae5a9a563c6f1b60d7ebaea4cb5a3ccbcc157580ae098
+        ports: ['6379:6379']
+    env:
+      RAILS_ENV: test
+      POSTGRES_HOST: 127.0.0.1
+      POSTGRES_PORT: '5432'
+      POSTGRES_USERNAME: postgres
+      POSTGRES_PASSWORD: disposable-test-only
+      POSTGRES_DATABASE: whatsapp_connections_candidate_test
+      REDIS_URL: redis://127.0.0.1:6379/15
+      FRONTEND_URL: https://host.example.test
+      SECRET_KEY_BASE: isolated-whatsapp-connections-ci-not-a-production-secret
+      BUNDLE_FROZEN: 'true'
+      SCHEMA: /tmp/whatsapp-connections-schema.rb
+      TZ: UTC
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libpq-dev libvips libvips-dev
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4.4'
+          bundler: 2.5.16
+          bundler-cache: true
+      - name: Schema e migrations somente no banco descartavel
+        run: |
+          test "$RAILS_ENV" = test
+          test "$POSTGRES_DATABASE" = whatsapp_connections_candidate_test
+          SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
+          bundle exec rails db:migrate
+      - name: Contratos, permissoes e distribuicao
+        run: |
+          bundle exec rspec spec/requests/jrc_connection_summary_spec.rb \
+            spec/enterprise/requests/jrc_connection_summary_spec.rb \
+            spec/requests/jrc_connection_history_spec.rb \
+            spec/requests/jrc_connection_distribution_spec.rb \
+            spec/requests/api/v1/accounts/jrc_broker_spec.rb \
+            spec/requests/api/v1/accounts/jrc_broker_inbox_spec.rb \
+            spec/services/jrc_broker \
+            spec/services/jrc_human_assignment \
+            --format progress --format json --out /tmp/whatsapp-connections-rspec.json
+          ruby -rjson -e 's=JSON.parse(File.read("/tmp/whatsapp-connections-rspec.json")).fetch("summary"); puts s; abort "failed or pending" unless s.fetch("failure_count").zero? && s.fetch("pending_count").zero?'
+      - name: Preservar fonte e schema versionado
+        run: git diff --exit-code && git diff --check
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: whatsapp-connections-rails
+          path: /tmp/whatsapp-connections-rspec.json
+          if-no-files-found: ignore

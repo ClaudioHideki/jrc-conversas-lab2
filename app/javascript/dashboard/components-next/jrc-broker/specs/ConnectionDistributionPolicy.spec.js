@@ -314,7 +314,7 @@ it('keeps the selected priority order when accessible move controls are used', a
   await wrapper.get('[data-testid="distribution-enabled"]').setValue(true);
   await wrapper.get('[data-team-id="11"]').setValue(true);
   await wrapper.get('[data-team-id="22"]').setValue(true);
-  await wrapper.get('select').setValue('priority');
+  await wrapper.get('input[type="radio"][value="priority"]').setValue(true);
   await wrapper.get('button[aria-label="Move Support up"]').trigger('click');
   expect(
     wrapper.findAll('[data-selected-team]').map(row => row.text())
@@ -348,7 +348,7 @@ it('requires exactly one queue for direct distribution and does not silently dro
   await wrapper.get('[data-testid="distribution-enabled"]').setValue(true);
   await wrapper.get('[data-team-id="11"]').setValue(true);
   await wrapper.get('[data-team-id="22"]').setValue(true);
-  await wrapper.get('select').setValue('direct');
+  await wrapper.get('input[type="radio"][value="direct"]').setValue(true);
   await wrapper.get('form').trigger('submit');
   expect(api.saveConnectionDistribution).not.toHaveBeenCalled();
   expect(wrapper.get('[data-team-id="22"]').element.checked).toBe(true);

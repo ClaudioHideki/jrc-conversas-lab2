@@ -25,7 +25,7 @@ class JrcBroker::Control
     @history.request!('pair', key: key, state: state)
     result = JrcBroker::Response.mutation(context.client.pair(@binding.integration_id, key: key), @binding)
     authorize!(:pair) # Do not release a QR to an operator revoked during the remote request.
-    @history.result!(result)
+    @history.result!(result, key: key)
     result
   rescue JrcBroker::Client::Error => error
     @history.failed!(error, key: key) if state

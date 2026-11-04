@@ -11,6 +11,8 @@ import ConnectionPanel from 'dashboard/components-next/jrc-broker/ConnectionPane
 import ConnectionHistory from 'dashboard/components-next/jrc-broker/ConnectionHistory.vue';
 import HumanAssignmentPolicy from 'dashboard/components-next/jrc-broker/HumanAssignmentPolicy.vue';
 import ConnectionDistributionPolicy from 'dashboard/components-next/jrc-broker/ConnectionDistributionPolicy.vue';
+import ConnectionDistributionTable from 'dashboard/components-next/jrc-broker/ConnectionDistributionTable.vue';
+import ConnectionInsights from 'dashboard/components-next/jrc-broker/ConnectionInsights.vue';
 import OnboardingFlow from 'dashboard/components-next/jrc-broker/OnboardingFlow.vue';
 
 const { t } = useI18n();
@@ -22,8 +24,31 @@ const connections = ref({});
 const selectedId = ref(null);
 const activeTab = ref('overview');
 const pageTab = ref('overview');
+const pageTabs = computed(() => [
+  {
+    id: 'overview',
+    label: 'JRC_BROKER.CONNECTIONS.MY_CONNECTIONS',
+    icon: 'i-lucide-smartphone',
+  },
+  ...(isAdmin.value
+    ? [
+        {
+          id: 'distribution',
+          label: 'JRC_BROKER.DETAILS.TABS.DISTRIBUTION',
+          icon: 'i-lucide-git-branch',
+        },
+      ]
+    : []),
+  {
+    id: 'history',
+    label: 'JRC_BROKER.HISTORY.TITLE',
+    icon: 'i-lucide-history',
+  },
+]);
 const pageHistoryId = ref(null);
 const reconnected = ref(false);
+const reconnectMode = ref(false);
+const distributionRevision = ref(0);
 const dialog = ref(null);
 const onboardingDialog = ref(null);
 const creatingNumber = ref(false);
@@ -43,20 +68,24 @@ const selectedInbox = computed(() =>
 );
 const detailTabs = computed(() =>
   isAdmin.value
-    ? ['overview', 'distribution', 'history', 'configuration']
+    ? ['overview', 'distribution', 'rules', 'history', 'configuration']
     : ['overview', 'history', 'configuration']
 );
 const tabKeys = {
   overview: 'OVERVIEW',
   distribution: 'DISTRIBUTION',
+  rules: 'RULES',
   history: 'HISTORY',
   configuration: 'CONFIGURATION',
 };
 const distributionPresentation = computed(
   () =>
-    ({ overview: 'summary', distribution: 'policy', history: 'history' })[
-      activeTab.value
-    ] || 'summary'
+    ({
+      overview: 'summary',
+      distribution: 'policy',
+      rules: 'rules',
+      history: 'history',
+    })[activeTab.value] || 'summary'
 );
 const tabId = tab =>
   `connection-${accountId.value}-${selectedId.value}-tab-${tab}`;
@@ -110,12 +139,17 @@ const receiveHealthError = update => {
 const receiveReconnection = update => {
   if (!currentUpdate(update)) return;
   reconnected.value = true;
+  reconnectMode.value = false;
   selectTab('overview', true);
 };
 const receiveRename = update => {
   if (!currentUpdate(update)) return;
   const inbox = inboxes.value.find(item => item.id === update.inboxId);
   if (inbox) inbox.name = update.name;
+};
+const receiveDistribution = update => {
+  if (!currentUpdate(update) || !isAdmin.value) return;
+  distributionRevision.value += 1;
 };
 const connectionStates = {
   CONNECTED: 'CONNECTED',
@@ -161,21 +195,43 @@ const checkedAt = id => {
 };
 const formatTime = value => new Date(value).toLocaleString();
 const closeConnection = () => {
+  reconnectMode.value = false;
   selectedId.value = null;
   reconnected.value = false;
 };
-const openConnection = async (id, reconnect = false) => {
+const openConnection = async (
+  id,
+  reconnect = false,
+  localDistribution = false
+) => {
+  const canEditLocally =
+    localDistribution &&
+    isAdmin.value &&
+    inboxes.value.some(
+      inbox => inbox.id === id && inbox.jrc_broker_bound === true
+    );
   if (
     !enabled.value ||
-    !connections.value[id]?.health?.allowedActions?.includes('status')
+    (!canEditLocally &&
+      !connections.value[id]?.health?.allowedActions?.includes('status'))
   )
     return;
   const current = generation;
   activeTab.value = reconnect ? 'configuration' : 'overview';
+  reconnectMode.value = reconnect;
   reconnected.value = false;
   selectedId.value = id;
   await nextTick();
   if (current === generation && selectedId.value === id) dialog.value?.open();
+};
+const configureDistribution = async id => {
+  if (!isAdmin.value) return;
+  await openConnection(id, false, true);
+  selectTab('distribution');
+};
+const viewConnectionTab = async (id, tab) => {
+  await openConnection(id);
+  selectTab(tab);
 };
 const clear = () => {
   generation += 1;
@@ -279,10 +335,16 @@ onBeforeUnmount(() => {
 
 <template>
   <main class="flex-1 overflow-y-auto bg-n-background p-6">
-    <div class="mx-auto flex w-full max-w-4xl flex-col gap-5">
+    <div class="mx-auto flex w-full max-w-7xl flex-col gap-5">
       <header class="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-semibold text-n-slate-12">
+          <h1
+            class="flex items-center gap-3 text-2xl font-semibold text-n-slate-12"
+          >
+            <span
+              aria-hidden="true"
+              class="i-lucide-message-circle text-n-teal-11 size-8"
+            />
             {{ t('JRC_BROKER.CONNECTIONS.TITLE') }}
           </h1>
           <p class="mt-2 text-sm text-n-slate-11">
@@ -312,27 +374,25 @@ onBeforeUnmount(() => {
       <nav
         v-if="enabled"
         :aria-label="t('JRC_BROKER.CONNECTIONS.TITLE')"
-        class="flex flex-wrap gap-2"
+        class="flex flex-wrap gap-3 border-b border-n-weak"
       >
-        <Button
-          variant="outline"
-          :aria-pressed="pageTab === 'overview'"
-          :label="t('JRC_BROKER.CONNECTIONS.MY_CONNECTIONS')"
-          @click="pageTab = 'overview'"
-        />
-        <Button
-          v-if="isAdmin"
-          variant="outline"
-          :aria-pressed="pageTab === 'distribution'"
-          :label="t('JRC_BROKER.DETAILS.TABS.DISTRIBUTION')"
-          @click="pageTab = 'distribution'"
-        />
-        <Button
-          variant="outline"
-          :aria-pressed="pageTab === 'history'"
-          :label="t('JRC_BROKER.HISTORY.TITLE')"
-          @click="pageTab = 'history'"
-        />
+        <button
+          v-for="tab in pageTabs"
+          :key="tab.id"
+          type="button"
+          :aria-pressed="pageTab === tab.id"
+          class="flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium focus-visible:ring-2 focus-visible:ring-n-brand"
+          :class="
+            pageTab === tab.id
+              ? 'border-n-brand text-n-blue-11'
+              : 'border-transparent text-n-slate-11 hover:text-n-slate-12'
+          "
+          @click="pageTab = tab.id"
+        >
+          <span :class="tab.icon" class="size-4" aria-hidden="true" />{{
+            t(tab.label)
+          }}<span v-if="tab.id === 'overview'">({{ inboxes.length }})</span>
+        </button>
       </nav>
       <p v-if="!enabled" role="status">{{ t('JRC_BROKER.DISABLED') }}</p>
       <p v-else-if="loading && !inboxes.length" role="status">
@@ -369,108 +429,246 @@ onBeforeUnmount(() => {
             :inbox-id="pageHistoryId"
           />
         </template>
-        <div v-else class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <article
-            v-for="inbox in inboxes"
-            :key="inbox.id"
-            :data-testid="`connection-card-${inbox.id}`"
-            :aria-labelledby="`connection-name-${inbox.id}`"
-            class="min-w-0 rounded-xl border border-n-weak bg-n-solid-1 p-5 flex flex-col gap-4"
-          >
-            <h2
-              :id="`connection-name-${inbox.id}`"
-              class="text-lg font-semibold text-n-slate-12 break-words"
+        <div
+          v-else
+          class="grid min-w-0 grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_300px]"
+        >
+          <div class="min-w-0 space-y-6">
+            <section
+              v-if="pageTab === 'overview'"
+              data-testid="connections-list"
+              class="rounded-xl border border-n-weak bg-n-solid-1 shadow-sm"
             >
-              {{ inbox.name }}
-            </h2>
-            <p v-if="!connections[inbox.id]" role="status">
-              {{ t('JRC_BROKER.CONNECTIONS.CHECKING') }}
-            </p>
-            <p v-else-if="connections[inbox.id].error" role="alert">
-              {{ t('JRC_BROKER.CONNECTIONS.UNAVAILABLE') }}
-            </p>
-            <template v-else>
-              <span
-                class="self-start rounded-full px-3 py-1 text-sm font-medium bg-n-alpha-2"
-                :class="{
-                  'text-n-teal-11': connectionState(inbox.id) === 'CONNECTED',
-                  'text-n-amber-11':
-                    connectionState(inbox.id) === 'DISCONNECTED',
-                  'text-n-ruby-11': connectionState(inbox.id) === 'ERROR',
-                }"
+              <div
+                class="flex items-center justify-between gap-3 border-b border-n-weak px-5 py-4"
               >
-                {{
-                  t(
-                    `JRC_BROKER.CONNECTIONS.STATES.${connectionState(inbox.id)}`
-                  )
-                }}
-              </span>
-              <p v-if="phoneNumber(inbox.id)" class="text-sm text-n-slate-11">
-                {{ phoneNumber(inbox.id) }}
-              </p>
-              <p v-else class="text-sm text-n-slate-11">
-                {{
-                  numberSuffix(inbox.id)
-                    ? t('JRC_BROKER.CONNECTIONS.NUMBER_SUFFIX', {
-                        suffix: numberSuffix(inbox.id),
-                      })
-                    : t('JRC_BROKER.CONNECTIONS.NUMBER_UNAVAILABLE')
-                }}
-              </p>
-              <p
-                v-if="sourceTime(inbox.id, 'connectedAt')"
-                data-testid="connection-connected-at"
-                class="text-sm text-n-slate-11"
-              >
-                {{ t('JRC_BROKER.CONNECTIONS.CONNECTED_AT') }}
-                <time :datetime="sourceTime(inbox.id, 'connectedAt')">{{
-                  formatTime(sourceTime(inbox.id, 'connectedAt'))
-                }}</time>
-              </p>
-              <p
-                v-if="sourceTime(inbox.id, 'lastSyncAt')"
-                data-testid="connection-last-sync"
-                class="text-sm text-n-slate-11"
-              >
-                {{ t('JRC_BROKER.CONNECTIONS.LAST_SYNC') }}
-                <time :datetime="sourceTime(inbox.id, 'lastSyncAt')">{{
-                  formatTime(sourceTime(inbox.id, 'lastSyncAt'))
-                }}</time>
-              </p>
-              <ConnectionDistributionPolicy
-                v-if="pageTab === 'distribution' && isAdmin"
-                :account-id="accountId"
-                :inbox-id="inbox.id"
-                :connected="
-                  connectionState(inbox.id) === 'UNKNOWN'
-                    ? null
-                    : connectionState(inbox.id) === 'CONNECTED'
-                "
-                presentation="summary"
-              />
-              <p v-if="checkedAt(inbox.id)" class="text-sm text-n-slate-11">
-                {{ t('JRC_BROKER.CONNECTIONS.CHECKED_AT') }}
-                <time :datetime="checkedAt(inbox.id)">
-                  {{ formatTime(checkedAt(inbox.id)) }}
-                </time>
-              </p>
-              <div class="flex flex-wrap gap-2 mt-auto">
-                <Button
-                  v-if="canReconnect(inbox.id)"
-                  :data-testid="`reconnect-connection-${inbox.id}`"
-                  icon="i-lucide-refresh-cw"
-                  :label="t('JRC_BROKER.CONNECTIONS.RECONNECT')"
-                  @click="openConnection(inbox.id, true)"
-                />
-                <Button
-                  :data-testid="`manage-connection-${inbox.id}`"
-                  variant="outline"
-                  :label="t('JRC_BROKER.CONNECTIONS.MANAGE')"
-                  @click="openConnection(inbox.id)"
-                />
+                <h2 class="text-base font-semibold">
+                  {{ t('JRC_BROKER.CONNECTIONS.MY_CONNECTIONS') }}
+                </h2>
+                <span
+                  class="rounded-full bg-n-alpha-2 px-2 py-1 text-xs text-n-slate-11"
+                  >{{ inboxes.length }}</span
+                >
               </div>
-            </template>
-          </article>
+              <article
+                v-for="inbox in inboxes"
+                :key="inbox.id"
+                :data-testid="`connection-card-${inbox.id}`"
+                :aria-labelledby="`connection-name-${inbox.id}`"
+                class="min-w-0 flex flex-wrap items-center gap-4 border-b border-n-weak p-5 last:border-b-0"
+              >
+                <span
+                  aria-hidden="true"
+                  class="i-lucide-message-circle size-7 shrink-0 text-n-teal-11"
+                />
+                <div class="min-w-0 flex-1 basis-40">
+                  <h2
+                    :id="`connection-name-${inbox.id}`"
+                    class="text-lg font-semibold text-n-slate-12 break-words"
+                  >
+                    {{ inbox.name }}
+                  </h2>
+                  <p class="mt-1 text-sm text-n-slate-11">
+                    {{
+                      phoneNumber(inbox.id) ||
+                      (numberSuffix(inbox.id)
+                        ? t('JRC_BROKER.CONNECTIONS.NUMBER_SUFFIX', {
+                            suffix: numberSuffix(inbox.id),
+                          })
+                        : t('JRC_BROKER.CONNECTIONS.NUMBER_UNAVAILABLE'))
+                    }}
+                  </p>
+                </div>
+                <p v-if="!connections[inbox.id]" role="status">
+                  {{ t('JRC_BROKER.CONNECTIONS.CHECKING') }}
+                </p>
+                <p v-else-if="connections[inbox.id].error" role="alert">
+                  {{ t('JRC_BROKER.CONNECTIONS.UNAVAILABLE') }}
+                </p>
+                <template v-else>
+                  <span
+                    class="self-start rounded-full px-3 py-1 text-sm font-medium bg-n-alpha-2"
+                    :class="{
+                      'text-n-teal-11':
+                        connectionState(inbox.id) === 'CONNECTED',
+                      'text-n-amber-11':
+                        connectionState(inbox.id) === 'DISCONNECTED',
+                      'text-n-ruby-11': connectionState(inbox.id) === 'ERROR',
+                      'text-n-blue-11':
+                        connectionState(inbox.id) === 'CONNECTING',
+                      'text-n-slate-11': ['UNKNOWN', 'DISABLED'].includes(
+                        connectionState(inbox.id)
+                      ),
+                    }"
+                  >
+                    {{
+                      t(
+                        `JRC_BROKER.CONNECTIONS.STATES.${connectionState(inbox.id)}`
+                      )
+                    }}
+                  </span>
+                  <p
+                    v-if="sourceTime(inbox.id, 'connectedAt')"
+                    data-testid="connection-connected-at"
+                    class="min-w-32 text-xs text-n-slate-11"
+                  >
+                    {{ t('JRC_BROKER.CONNECTIONS.CONNECTED_AT') }}
+                    <time :datetime="sourceTime(inbox.id, 'connectedAt')">{{
+                      formatTime(sourceTime(inbox.id, 'connectedAt'))
+                    }}</time>
+                  </p>
+                  <p
+                    v-if="sourceTime(inbox.id, 'lastSyncAt')"
+                    data-testid="connection-last-sync"
+                    class="text-sm text-n-slate-11"
+                  >
+                    {{ t('JRC_BROKER.CONNECTIONS.LAST_SYNC') }}
+                    <time :datetime="sourceTime(inbox.id, 'lastSyncAt')">{{
+                      formatTime(sourceTime(inbox.id, 'lastSyncAt'))
+                    }}</time>
+                  </p>
+                  <ConnectionDistributionPolicy
+                    v-if="pageTab === 'distribution' && isAdmin"
+                    :account-id="accountId"
+                    :inbox-id="inbox.id"
+                    :connected="
+                      connectionState(inbox.id) === 'UNKNOWN'
+                        ? null
+                        : connectionState(inbox.id) === 'CONNECTED'
+                    "
+                    presentation="summary"
+                  />
+                  <p v-if="checkedAt(inbox.id)" class="text-sm text-n-slate-11">
+                    {{ t('JRC_BROKER.CONNECTIONS.CHECKED_AT') }}
+                    <time :datetime="checkedAt(inbox.id)">
+                      {{ formatTime(checkedAt(inbox.id)) }}
+                    </time>
+                  </p>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <Button
+                      v-if="canReconnect(inbox.id)"
+                      :data-testid="`reconnect-connection-${inbox.id}`"
+                      icon="i-lucide-refresh-cw"
+                      :label="t('JRC_BROKER.CONNECTIONS.RECONNECT')"
+                      @click="openConnection(inbox.id, true)"
+                    />
+                    <Button
+                      :data-testid="`manage-connection-${inbox.id}`"
+                      variant="outline"
+                      :label="t('JRC_BROKER.CONNECTIONS.MANAGE')"
+                      @click="openConnection(inbox.id)"
+                    />
+                    <details
+                      class="relative"
+                      @keydown.esc="$event.currentTarget.open = false"
+                    >
+                      <summary
+                        :aria-label="
+                          t('JRC_BROKER.WORKSPACE.ACTIONS', {
+                            name: inbox.name,
+                          })
+                        "
+                        class="flex size-9 cursor-pointer list-none items-center justify-center rounded-lg text-n-slate-11 hover:bg-n-alpha-2 focus-visible:ring-2 focus-visible:ring-n-brand"
+                      >
+                        <span
+                          class="i-lucide-ellipsis size-5"
+                          aria-hidden="true"
+                        />
+                      </summary>
+                      <div
+                        class="absolute right-0 z-20 min-w-48 rounded-xl border border-n-weak bg-n-solid-1 p-2 shadow-lg"
+                      >
+                        <button
+                          type="button"
+                          class="w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-n-alpha-2"
+                          @click="openConnection(inbox.id)"
+                        >
+                          {{ t('JRC_BROKER.CONNECTIONS.MANAGE') }}
+                        </button>
+                        <button
+                          v-if="isAdmin"
+                          type="button"
+                          class="w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-n-alpha-2"
+                          @click="configureDistribution(inbox.id)"
+                        >
+                          {{ t('JRC_BROKER.WORKSPACE.CONFIGURE_DISTRIBUTION') }}
+                        </button>
+                        <button
+                          v-if="
+                            connections[inbox.id]?.health?.allowedActions?.some(
+                              action =>
+                                ['manage', 'pair', 'disconnect'].includes(
+                                  action
+                                )
+                            )
+                          "
+                          type="button"
+                          class="w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-n-alpha-2"
+                          @click="viewConnectionTab(inbox.id, 'configuration')"
+                        >
+                          {{ t('JRC_BROKER.DETAILS.TABS.CONFIGURATION') }}
+                        </button>
+                        <button
+                          type="button"
+                          class="w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-n-alpha-2"
+                          @click="viewConnectionTab(inbox.id, 'history')"
+                        >
+                          {{ t('JRC_BROKER.HISTORY.TITLE') }}
+                        </button>
+                      </div>
+                    </details>
+                  </div>
+                </template>
+              </article>
+            </section>
+            <ConnectionDistributionTable
+              v-if="isAdmin"
+              :key="`${distributionRevision}:${accountId}:${inboxes.map(i => i.id).join(',')}`"
+              :account-id="accountId"
+              :inboxes="inboxes"
+              @configure="configureDistribution"
+            />
+          </div>
+          <aside
+            data-testid="connections-help"
+            class="rounded-xl border border-n-weak bg-n-solid-1 p-6 shadow-sm"
+          >
+            <div
+              aria-hidden="true"
+              class="mb-5 flex justify-center rounded-xl bg-n-alpha-2 p-7 text-n-brand"
+            >
+              <span class="i-lucide-smartphone size-16" /><span
+                class="i-lucide-git-branch size-12 self-end"
+              />
+            </div>
+            <h2 class="text-lg font-semibold">
+              {{ t('JRC_BROKER.WORKSPACE.HOW_TITLE') }}
+            </h2>
+            <p class="mt-3 text-sm leading-6 text-n-slate-11">
+              {{ t('JRC_BROKER.WORKSPACE.HOW_HELP') }}
+            </p>
+            <ol class="mt-5 space-y-4 text-sm text-n-slate-11">
+              <li
+                v-for="step in ['CONNECT', 'QUEUES', 'RULES']"
+                :key="step"
+                class="flex gap-3"
+              >
+                <span
+                  aria-hidden="true"
+                  class="i-lucide-circle-check mt-0.5 size-4 shrink-0 text-n-teal-11"
+                />{{ t(`JRC_BROKER.WORKSPACE.STEPS.${step}`) }}
+              </li>
+            </ol>
+            <details class="mt-6 border-t border-n-weak pt-4">
+              <summary class="cursor-pointer text-sm text-n-blue-11">
+                {{ t('JRC_BROKER.WORKSPACE.HELP') }}
+              </summary>
+              <p class="mt-3 text-sm leading-6 text-n-slate-11">
+                {{ t('JRC_BROKER.AGENT_CONNECTIONS_HELP') }}
+                {{ t('JRC_BROKER.DISTRIBUTION.HELP') }}
+              </p>
+            </details>
+          </aside>
         </div>
         <p class="text-xs text-n-slate-11">
           {{ t('JRC_BROKER.CONNECTIONS.SNAPSHOT_HELP') }}
@@ -486,14 +684,15 @@ onBeforeUnmount(() => {
           :show-confirm-button="false"
           :use-form="false"
           :cancel-button-label="t('JRC_BROKER.CLOSE')"
-          width="xl"
+          width="5xl"
           overflow-y-auto
           @close="closeConnection"
         >
           <div
+            v-if="!reconnectMode"
             role="tablist"
             :aria-label="t('JRC_BROKER.DETAILS.TABS_LABEL')"
-            class="flex flex-wrap gap-2 mb-4"
+            class="mb-5 flex flex-wrap gap-1 border-b border-n-weak"
           >
             <button
               v-for="tab in detailTabs"
@@ -504,11 +703,11 @@ onBeforeUnmount(() => {
               :aria-selected="activeTab === tab"
               :aria-controls="panelId"
               :tabindex="activeTab === tab ? 0 : -1"
-              class="rounded-lg border border-n-weak px-4 py-2 text-sm focus-visible:ring-2 focus-visible:ring-n-brand"
+              class="border-b-2 px-4 py-3 text-sm focus-visible:ring-2 focus-visible:ring-n-brand"
               :class="
                 activeTab === tab
-                  ? 'bg-n-brand text-white'
-                  : 'bg-n-solid-1 text-n-slate-12'
+                  ? 'border-n-brand text-n-blue-11'
+                  : 'border-transparent text-n-slate-11 hover:text-n-slate-12'
               "
               @click="selectTab(tab)"
               @keydown="navigateTabs($event, tab)"
@@ -518,8 +717,11 @@ onBeforeUnmount(() => {
           </div>
           <div
             :id="panelId"
-            role="tabpanel"
-            :aria-labelledby="tabId(activeTab)"
+            :role="reconnectMode ? 'region' : 'tabpanel'"
+            :aria-labelledby="reconnectMode ? undefined : tabId(activeTab)"
+            :aria-label="
+              reconnectMode ? t('JRC_BROKER.WORKSPACE.PAIR_TITLE') : undefined
+            "
             tabindex="0"
           >
             <p
@@ -531,6 +733,18 @@ onBeforeUnmount(() => {
               {{ t('JRC_BROKER.DETAILS.RECONNECTED') }}
               {{ t('JRC_BROKER.DETAILS.RECONNECTED_HELP') }}
             </p>
+            <ConnectionInsights
+              v-if="activeTab === 'overview' && !reconnectMode"
+              :key="`insights:${accountId}:${selectedInbox.id}`"
+              :account-id="accountId"
+              :inbox-id="selectedInbox.id"
+            />
+            <div
+              v-if="activeTab === 'overview' && phoneNumber(selectedInbox.id)"
+              class="mb-5 rounded-xl bg-n-alpha-1 p-5 text-lg font-semibold"
+            >
+              {{ phoneNumber(selectedInbox.id) }}
+            </div>
             <ConnectionPanel
               v-show="activeTab === 'overview' || activeTab === 'configuration'"
               :key="`${accountId}:${selectedInbox.id}`"
@@ -538,7 +752,11 @@ onBeforeUnmount(() => {
               :inbox-id="selectedInbox.id"
               :connection-name="selectedInbox.name"
               :presentation="
-                activeTab === 'configuration' ? 'configuration' : 'overview'
+                reconnectMode
+                  ? 'pairing'
+                  : activeTab === 'configuration'
+                    ? 'configuration'
+                    : 'overview'
               "
               @health="receiveHealth"
               @health-error="receiveHealthError"
@@ -552,6 +770,7 @@ onBeforeUnmount(() => {
               :account-id="accountId"
               :inbox-id="selectedInbox.id"
               :presentation="distributionPresentation"
+              @saved="receiveDistribution"
               :connected="
                 connectionState(selectedInbox.id) === 'UNKNOWN'
                   ? null

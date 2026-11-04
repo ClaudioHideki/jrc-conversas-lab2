@@ -18,11 +18,11 @@ class JrcBroker::ConnectionHistory
     end
   end
 
-  def result!(result)
+  def result!(result, key: nil)
     @binding.with_lock do
       context = @binding.connection_state
       attempt = context['attempt']
-      next unless attempt
+      next unless attempt && matching_attempt?(attempt, result, key)
 
       attempt = attempt.merge('operation_id' => result['operationId'], 'expires_at' => result.dig('action', 'expiresAt'))
       @binding.update!(connection_state: context.merge('attempt' => attempt))
@@ -34,8 +34,12 @@ class JrcBroker::ConnectionHistory
     @binding.with_lock do
       context = @binding.connection_state
       previous = context.fetch('health', {})
+      next if older_observation?(previous, health)
+
       attempt = context.fetch('attempt', {})
-      observed = health.slice('instanceStatus', 'integrationStatus', 'identityApproved', 'identityStatus', 'identityRevision', 'lastError')
+      observed = health.slice('instanceStatus', 'integrationStatus', 'identityApproved', 'identityStatus',
+                              'identityRevision', 'lastError', 'checkedAt')
+      observed['checkedAt'] = previous['checkedAt'] if health['checkedAt'].nil? && observation_time(previous['checkedAt'])
       transition = transition_type(previous, health, attempt)
       record_transition!(transition, previous, health, attempt) if transition
       record_identity_change!(previous, health, attempt)
@@ -59,7 +63,28 @@ class JrcBroker::ConnectionHistory
 
   private
 
+  def matching_attempt?(attempt, result, key)
+    return attempt['key'] == key unless key.nil?
+
+    result['operationId'].present? && attempt['operation_id'] == result['operationId']
+  end
+
+  def older_observation?(previous, health)
+    previous_time = observation_time(previous['checkedAt'])
+    current_time = observation_time(health['checkedAt'])
+    previous_time && current_time && current_time < previous_time
+  end
+
+  def observation_time(value)
+    Time.iso8601(value) if value.is_a?(String)
+  rescue ArgumentError
+    nil
+  end
+
   def safe_health(health)
+    unless health['checkedAt'].nil? || observation_time(health['checkedAt'])
+      raise JrcBroker::Client::Error, 'JRC_BROKER_INVALID_RESPONSE'
+    end
     error = health['lastError']
     error = 'SESSION_FAILED' if error.present? && !/\A[A-Z][A-Z0-9_]{0,127}\z/.match?(error.to_s)
     health.merge('lastError' => error)

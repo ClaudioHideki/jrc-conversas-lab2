@@ -17,7 +17,8 @@ const props = defineProps({
   presentation: {
     type: String,
     default: 'all',
-    validator: value => ['all', 'overview', 'configuration'].includes(value),
+    validator: value =>
+      ['all', 'overview', 'configuration', 'pairing'].includes(value),
   },
 });
 const emit = defineEmits(['health', 'healthError', 'reconnected', 'renamed']);
@@ -28,6 +29,16 @@ const action = ref(null);
 const error = ref('');
 const busy = ref(false);
 const expired = ref(false);
+const clock = ref(Date.now());
+const remainingSeconds = computed(() =>
+  action.value
+    ? Math.max(
+        0,
+        Math.ceil((Date.parse(action.value.expiresAt) - clock.value) / 1000)
+      )
+    : 0
+);
+let countdownTimer;
 const pairingProgress = ref('');
 const checkedUnknown = ref(false);
 const confirm = ref('');
@@ -78,6 +89,7 @@ const clearCode = () => {
   lastPairOperationId = null;
   checkedUnknown.value = false;
   clearTimeout(expiryTimer);
+  clearInterval(countdownTimer);
   action.value = null;
 };
 
@@ -86,7 +98,12 @@ const acceptPair = result => {
   if (isPairingActionUsable(result.action, Date.now())) {
     pendingPair = null;
     pairingProgress.value = '';
+    clearInterval(countdownTimer);
     action.value = result.action;
+    clock.value = Date.now();
+    countdownTimer = setInterval(() => {
+      clock.value = Date.now();
+    }, 1000);
     expiryTimer = setTimeout(
       () => {
         clearCode();
@@ -132,6 +149,7 @@ const fail = failure => {
   } else {
     clearTimeout(expiryTimer);
     action.value = null;
+    clearInterval(countdownTimer);
   }
   if (denied) error.value = 'DENIED';
   else if (failure?.response?.status === 409) error.value = 'CONFLICT';
@@ -372,11 +390,36 @@ onBeforeUnmount(() => {
     :aria-label="t('JRC_BROKER.DETAILS.PANEL_TITLE')"
   >
     <h3 class="text-lg font-semibold text-n-slate-12">
-      {{ t('JRC_BROKER.DETAILS.PANEL_TITLE') }}
+      {{
+        t(
+          presentation === 'pairing'
+            ? 'JRC_BROKER.WORKSPACE.PAIR_TITLE'
+            : 'JRC_BROKER.DETAILS.PANEL_TITLE'
+        )
+      }}
     </h3>
+    <div
+      v-if="presentation === 'pairing'"
+      data-testid="pairing-instructions"
+      class="rounded-xl border border-n-weak bg-n-alpha-1 p-5"
+    >
+      <p class="text-sm leading-6 text-n-slate-11">
+        {{ t('JRC_BROKER.WORKSPACE.PAIR_HELP') }}
+      </p>
+      <ol class="mt-4 grid gap-4 text-sm lg:grid-cols-3">
+        <li v-for="step in [1, 2, 3]" :key="step" class="flex gap-3">
+          <span
+            class="flex size-6 shrink-0 items-center justify-center rounded-full bg-n-brand text-xs text-white"
+            >{{ step }}</span
+          >{{ t(`JRC_BROKER.WORKSPACE.PAIR_STEP_${step}`) }}
+        </li>
+      </ol>
+    </div>
     <p v-if="error" role="alert">{{ t(`JRC_BROKER.ERROR.${error}`) }}</p>
     <dl
-      v-if="health && presentation !== 'configuration'"
+      v-if="
+        health && presentation !== 'configuration' && presentation !== 'pairing'
+      "
       data-testid="connection-health"
       class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm"
     >
@@ -402,7 +445,7 @@ onBeforeUnmount(() => {
     </p>
     <template v-if="presentation !== 'overview'">
       <form
-        v-if="actions.includes('manage')"
+        v-if="presentation !== 'pairing' && actions.includes('manage')"
         data-testid="connection-name-form"
         class="flex flex-col gap-3"
         @submit.prevent="rename"
@@ -439,6 +482,17 @@ onBeforeUnmount(() => {
       >
         <span>{{ action.code }}</span>
       </output>
+      <p
+        v-if="action"
+        data-testid="pairing-countdown"
+        role="status"
+        aria-live="off"
+        class="text-center text-sm text-n-slate-11"
+      >
+        {{
+          t('JRC_BROKER.WORKSPACE.EXPIRES_IN', { seconds: remainingSeconds })
+        }}
+      </p>
       <p v-if="expired" role="status">{{ t('JRC_BROKER.EXPIRED') }}</p>
       <p v-if="progressMessage" role="status">{{ progressMessage }}</p>
       <div class="flex flex-wrap gap-3">

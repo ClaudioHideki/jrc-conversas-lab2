@@ -6,7 +6,8 @@
         "OVERVIEW": "Overview",
         "DISTRIBUTION": "Distribution",
         "HISTORY": "Connection history",
-        "CONFIGURATION": "Settings"
+        "CONFIGURATION": "Settings",
+        "RULES": "Rules and schedules"
       },
       "PANEL_TITLE": "Current connection state",
       "SESSION": "WhatsApp session",
@@ -252,6 +253,41 @@
         "PERMISSIONS_CHANGED": "Pairing permissions changed"
       },
       "TRANSITION": "From {before} to {after}"
+    },
+    "WORKSPACE": {
+      "ACTIONS": "Actions for {name}",
+      "CONFIGURE_DISTRIBUTION": "Configure distribution",
+      "HOW_TITLE": "How connections and distribution work",
+      "HOW_HELP": "Connect your WhatsApp and choose how new conversations reach the right teams.",
+      "STEPS": {
+        "CONNECT": "Connect a number securely using its QR code.",
+        "QUEUES": "Select the teams that will receive new conversations.",
+        "RULES": "Set availability, capacity and service hours."
+      },
+      "HELP": "Connection and distribution help",
+      "NUMBER": "Number / connection",
+      "QUEUES": "Queues",
+      "MODE": "Mode",
+      "STATE": "Status",
+      "UNCONFIGURED": "Account default",
+      "NEW_DISTRIBUTION": "New distribution",
+      "RULES_TAB": "Rules and schedules",
+      "METRICS_TITLE": "Last 30 days",
+      "CONVERSATIONS": "Conversations",
+      "FIRST_RESPONSE": "Average first response",
+      "RESOLUTION": "Average resolution time",
+      "ELIGIBLE_AGENTS": "Eligible agents now",
+      "NO_DATA": "No data",
+      "METRICS_HELP": "Measured from persisted conversation and reporting events. Resolution time includes waiting; it is not active handling time.",
+      "METRICS_RESTRICTED": "Metrics are available to users with reporting access.",
+      "PAIR_TITLE": "Reconnect the same WhatsApp number",
+      "PAIR_HELP": "On the original phone, open WhatsApp → Linked devices → Link a device and scan the code.",
+      "PAIR_STEP_1": "Use the same business number already linked to this inbox.",
+      "PAIR_STEP_2": "Keep your phone connected to the internet.",
+      "PAIR_STEP_3": "Wait for the connection confirmation. Your queues and rules are preserved.",
+      "EXPIRES_IN": "Code expires in {seconds}s",
+      "CONNECTED_SUCCESS": "Connection confirmed. Your queues and rules were preserved.",
+      "SELECT_CONNECTION": "Choose a connection to configure its distribution."
     }
   }
 }

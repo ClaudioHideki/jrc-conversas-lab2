@@ -11,9 +11,11 @@ const props = defineProps({
   presentation: {
     type: String,
     default: 'all',
-    validator: value => ['all', 'summary', 'policy', 'history'].includes(value),
+    validator: value =>
+      ['all', 'summary', 'policy', 'rules', 'history'].includes(value),
   },
 });
+const emit = defineEmits(['saved']);
 const { t } = useI18n();
 const enabled = ref(false);
 const hasPolicy = ref(false);
@@ -219,6 +221,7 @@ const save = async () => {
     if (current !== generation) return;
     apply(result.policy);
     feedback.value = 'SAVED';
+    emit('saved', { accountId: props.accountId, inboxId: props.inboxId });
     history.value = [];
     historyVisible.value = false;
   } catch (error) {
@@ -318,112 +321,147 @@ onBeforeUnmount(clear);
       :label="t('JRC_BROKER.DISTRIBUTION.RELOAD')"
       @click="load"
     />
+    <p
+      v-if="presentation === 'rules' && loaded"
+      class="text-sm text-n-slate-11"
+    >
+      {{ policySummary(savedPolicy) }}
+    </p>
     <form
-      v-if="presentation === 'all' || presentation === 'policy'"
+      v-if="
+        presentation === 'all' ||
+        presentation === 'policy' ||
+        presentation === 'rules'
+      "
       @submit.prevent="save"
     >
-      <fieldset :disabled="busy || !loaded" class="flex flex-col gap-4">
-        <label class="flex items-center gap-2 text-sm">
-          <input
-            v-model="enabled"
-            data-testid="distribution-enabled"
-            type="checkbox"
-          />
-          {{ t('JRC_BROKER.DISTRIBUTION.ENABLED') }}
-        </label>
-        <label class="flex flex-col gap-2 text-sm">
-          {{ t('JRC_BROKER.DISTRIBUTION.MODE') }}
-          <select v-model="mode">
-            <option value="round_robin">{{ modeLabel('round_robin') }}</option>
-            <option value="priority">{{ modeLabel('priority') }}</option>
-            <option value="direct">{{ modeLabel('direct') }}</option>
-          </select>
-        </label>
-        <p v-if="mode === 'direct'" class="text-sm text-n-slate-11">
-          {{ t('JRC_BROKER.DISTRIBUTION.DIRECT_HELP') }}
-        </p>
-        <p v-if="mode === 'priority'" class="text-sm text-n-slate-11">
-          {{ t('JRC_BROKER.DISTRIBUTION.PRIORITY_HELP') }}
-        </p>
-        <div class="flex flex-col gap-2">
-          <p class="text-sm font-medium">
-            {{ t('JRC_BROKER.DISTRIBUTION.QUEUES') }}
-          </p>
-          <label
-            v-for="team in teams"
-            :key="team.id"
-            class="flex items-center gap-2 text-sm"
-          >
+      <fieldset
+        :disabled="busy || !loaded"
+        class="grid items-start gap-6"
+        :class="presentation === 'rules' ? 'grid-cols-1' : 'lg:grid-cols-2'"
+      >
+        <div v-show="presentation !== 'rules'" class="flex flex-col gap-4">
+          <label class="flex items-center gap-2 text-sm">
             <input
+              v-model="enabled"
+              data-testid="distribution-enabled"
               type="checkbox"
-              :data-team-id="team.id"
-              :checked="teamIds.includes(team.id)"
-              @change="toggleTeam(team.id, $event.target.checked)"
             />
-            {{ team.name }}
+            {{ t('JRC_BROKER.DISTRIBUTION.ENABLED') }}
           </label>
-          <p v-if="!teams.length" class="text-sm">
-            {{ t('JRC_BROKER.DISTRIBUTION.NO_TEAMS') }}
+          <fieldset class="flex flex-col gap-3">
+            <legend class="mb-3 text-sm font-medium">
+              {{ t('JRC_BROKER.DISTRIBUTION.MODE') }}
+            </legend>
+            <label
+              v-for="option in ['round_robin', 'priority', 'direct']"
+              :key="option"
+              class="flex cursor-pointer items-center gap-3 rounded-xl border p-4 text-sm"
+              :class="
+                mode === option
+                  ? 'border-n-brand bg-n-alpha-1'
+                  : 'border-n-weak'
+              "
+            >
+              <input
+                v-model="mode"
+                type="radio"
+                name="connection-distribution-mode"
+                :value="option"
+              />{{ modeLabel(option) }}
+            </label>
+          </fieldset>
+          <p v-if="mode === 'direct'" class="text-sm text-n-slate-11">
+            {{ t('JRC_BROKER.DISTRIBUTION.DIRECT_HELP') }}
           </p>
-        </div>
-        <ol v-if="teamIds.length" class="flex flex-col gap-2 list-decimal pl-5">
-          <li
-            v-for="(id, index) in teamIds"
-            :key="id"
-            :data-selected-team="id"
-            class="text-sm"
+          <p v-if="mode === 'priority'" class="text-sm text-n-slate-11">
+            {{ t('JRC_BROKER.DISTRIBUTION.PRIORITY_HELP') }}
+          </p>
+          <div class="flex flex-col gap-2">
+            <p class="text-sm font-medium">
+              {{ t('JRC_BROKER.DISTRIBUTION.QUEUES') }}
+            </p>
+            <label
+              v-for="team in teams"
+              :key="team.id"
+              class="flex items-center gap-2 text-sm"
+            >
+              <input
+                type="checkbox"
+                :data-team-id="team.id"
+                :checked="teamIds.includes(team.id)"
+                @change="toggleTeam(team.id, $event.target.checked)"
+              />
+              {{ team.name }}
+            </label>
+            <p v-if="!teams.length" class="text-sm">
+              {{ t('JRC_BROKER.DISTRIBUTION.NO_TEAMS') }}
+            </p>
+          </div>
+          <ol
+            v-if="teamIds.length"
+            class="flex flex-col gap-2 list-decimal pl-5"
           >
-            <span>{{ teamName(id) }}</span>
-            <div class="mt-2 flex flex-wrap gap-2">
-              <Button
-                v-if="mode === 'priority'"
-                type="button"
-                variant="outline"
-                icon="i-lucide-arrow-up"
-                :disabled="index === 0"
-                :aria-label="
-                  t('JRC_BROKER.DISTRIBUTION.MOVE_UP', { name: teamName(id) })
-                "
-                @click="moveTeam(index, -1)"
-              />
-              <Button
-                v-if="mode === 'priority'"
-                type="button"
-                variant="outline"
-                icon="i-lucide-arrow-down"
-                :disabled="index === teamIds.length - 1"
-                :aria-label="
-                  t('JRC_BROKER.DISTRIBUTION.MOVE_DOWN', { name: teamName(id) })
-                "
-                @click="moveTeam(index, 1)"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                :label="t('JRC_BROKER.DISTRIBUTION.REMOVE')"
-                :aria-label="
-                  t('JRC_BROKER.DISTRIBUTION.REMOVE_TEAM', {
-                    name: teamName(id),
-                  })
-                "
-                @click="toggleTeam(id, false)"
-              />
-            </div>
-          </li>
-        </ol>
-        <label class="flex flex-col gap-2 text-sm">
-          {{ t('JRC_BROKER.DISTRIBUTION.CAPACITY') }}
-          <input
-            v-model.number="maxOpen"
-            type="number"
-            min="1"
-            max="100"
-            step="1"
-            required
-          />
-        </label>
+            <li
+              v-for="(id, index) in teamIds"
+              :key="id"
+              :data-selected-team="id"
+              class="text-sm"
+            >
+              <span>{{ teamName(id) }}</span>
+              <div class="mt-2 flex flex-wrap gap-2">
+                <Button
+                  v-if="mode === 'priority'"
+                  type="button"
+                  variant="outline"
+                  icon="i-lucide-arrow-up"
+                  :disabled="index === 0"
+                  :aria-label="
+                    t('JRC_BROKER.DISTRIBUTION.MOVE_UP', { name: teamName(id) })
+                  "
+                  @click="moveTeam(index, -1)"
+                />
+                <Button
+                  v-if="mode === 'priority'"
+                  type="button"
+                  variant="outline"
+                  icon="i-lucide-arrow-down"
+                  :disabled="index === teamIds.length - 1"
+                  :aria-label="
+                    t('JRC_BROKER.DISTRIBUTION.MOVE_DOWN', {
+                      name: teamName(id),
+                    })
+                  "
+                  @click="moveTeam(index, 1)"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  :label="t('JRC_BROKER.DISTRIBUTION.REMOVE')"
+                  :aria-label="
+                    t('JRC_BROKER.DISTRIBUTION.REMOVE_TEAM', {
+                      name: teamName(id),
+                    })
+                  "
+                  @click="toggleTeam(id, false)"
+                />
+              </div>
+            </li>
+          </ol>
+          <label class="flex flex-col gap-2 text-sm">
+            {{ t('JRC_BROKER.DISTRIBUTION.CAPACITY') }}
+            <input
+              v-model.number="maxOpen"
+              type="number"
+              min="1"
+              max="100"
+              step="1"
+              required
+            />
+          </label>
+        </div>
         <fieldset
-          class="flex flex-col gap-3 rounded-lg border border-n-weak p-4"
+          class="flex flex-col gap-4 rounded-xl border border-n-weak bg-n-alpha-1 p-5"
         >
           <legend>{{ t('JRC_BROKER.DISTRIBUTION.RULES') }}</legend>
           <label class="flex items-center gap-2 text-sm">
@@ -502,11 +540,13 @@ onBeforeUnmount(clear);
             </select>
           </label>
         </fieldset>
-        <p v-if="!valid" class="text-sm">
+        <p v-if="!valid" class="text-sm lg:col-span-2">
           {{ t('JRC_BROKER.DISTRIBUTION.VALIDATION') }}
         </p>
         <Button
           type="submit"
+          class="justify-self-start"
+          :class="presentation === 'rules' ? '' : 'lg:col-span-2'"
           :disabled="!valid"
           :label="t('JRC_BROKER.DISTRIBUTION.SAVE')"
         />

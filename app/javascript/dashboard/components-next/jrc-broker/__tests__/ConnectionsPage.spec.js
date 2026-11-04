@@ -70,6 +70,7 @@ beforeEach(() => {
     mutations: { LOGOUT: () => {} },
   });
   api = {
+    connectionSummary: vi.fn().mockResolvedValue({ metrics: null }),
     assignmentPolicy: vi
       .fn()
       .mockResolvedValue({ enabled: false, max_open: 10, inbox_ids: [] }),
@@ -159,6 +160,52 @@ it('shows distribution settings only to an administrator, without enabling them'
   expect(wrapper.find('input[type="checkbox"]').exists()).toBe(false);
 });
 
+it('uses the Word connection list and distribution table without pairing on page load', async () => {
+  role.value = 'administrator';
+  wrapper = mountPage();
+  await flushPromises();
+  expect(wrapper.get('[data-testid="connections-list"]').exists()).toBe(true);
+  expect(wrapper.get('[data-testid="distribution-table"]').exists()).toBe(true);
+  expect(wrapper.get('[data-testid="connections-help"]').text()).toContain(
+    'How'
+  );
+  expect(api.pair).not.toHaveBeenCalled();
+  await wrapper
+    .get('[data-testid="configure-distribution-7"]')
+    .trigger('click');
+  await flushPromises();
+  expect(wrapper.get('[role="tab"][aria-selected="true"]').text()).toBe(
+    'Distribution'
+  );
+  expect(wrapper.get('[role="dialog"] form').exists()).toBe(true);
+});
+
+it('lets an administrator edit local distribution while remote connection status is unavailable', async () => {
+  role.value = 'administrator';
+  api.status.mockRejectedValue({ response: { status: 503 } });
+  api.saveConnectionDistribution.mockResolvedValue({
+    policy: { enabled: false, mode: 'round_robin', team_ids: [], max_open: 10 },
+  });
+  wrapper = mountPage();
+  await flushPromises();
+  await wrapper
+    .get('[data-testid="configure-distribution-7"]')
+    .trigger('click');
+  await flushPromises();
+  expect(wrapper.get('[role="dialog"]').exists()).toBe(true);
+  expect(wrapper.get('[role="tab"][aria-selected="true"]').text()).toBe(
+    'Distribution'
+  );
+  await wrapper.get('[role="dialog"] form').trigger('submit');
+  await flushPromises();
+  expect(api.saveConnectionDistribution).toHaveBeenCalledWith(
+    7,
+    expect.objectContaining({ enabled: false }),
+    expect.any(AbortSignal)
+  );
+  expect(api.pair).not.toHaveBeenCalled();
+});
+
 it('offers accessible detail tabs without remounting health polling or fetching history automatically', async () => {
   role.value = 'administrator';
   wrapper = mountPage({ attachTo: document.body });
@@ -169,6 +216,7 @@ it('offers accessible detail tabs without remounting health polling or fetching 
   expect(tabs.map(tab => tab.text())).toEqual([
     'Overview',
     'Distribution',
+    'Rules and schedules',
     'Connection history',
     'Settings',
   ]);
@@ -184,10 +232,10 @@ it('offers accessible detail tabs without remounting health polling or fetching 
     tabs[1].attributes('id')
   );
   expect(api.status).toHaveBeenCalledTimes(statusCalls);
-  expect(api.connectionDistribution).toHaveBeenCalledTimes(1);
+  expect(api.connectionDistribution).toHaveBeenCalledTimes(3);
   expect(wrapper.get('[role="tabpanel"] form').exists()).toBe(true);
   expect(wrapper.find('[role="tabpanel"] form form').exists()).toBe(false);
-  await tabs[2].trigger('click');
+  await tabs[3].trigger('click');
   expect(api.distributionHistory).not.toHaveBeenCalled();
   await wrapper
     .get('[data-testid="load-distribution-history"]')
@@ -270,6 +318,7 @@ it('presents the connection journey and detail tabs in Brazilian Portuguese', as
     expect(wrapper.findAll('[role="tab"]').map(tab => tab.text())).toEqual([
       'Visão geral',
       'Distribuição',
+      'Regras e horários',
       'Histórico de conexões',
       'Configurações',
     ]);

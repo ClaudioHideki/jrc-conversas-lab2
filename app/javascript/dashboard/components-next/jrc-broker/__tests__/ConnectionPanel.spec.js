@@ -37,6 +37,32 @@ afterEach(() => {
 });
 
 describe('native pairing lifecycle', () => {
+  it('shows reconnect instructions and a real expiry countdown without requesting a code on open', async () => {
+    wrapper = mount(ConnectionPanel, {
+      props: { accountId: 1, inboxId: 2, presentation: 'pairing' },
+    });
+    await flushPromises();
+    expect(
+      wrapper.get('[data-testid="pairing-instructions"]').text()
+    ).toContain('same business number');
+    expect(api.pair).not.toHaveBeenCalled();
+    await wrapper.get('[data-testid="pair"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.get('[data-testid="pairing-countdown"]').text()).toContain(
+      '10s'
+    );
+    await vi.advanceTimersByTimeAsync(4000);
+    expect(wrapper.get('[data-testid="pairing-countdown"]').text()).toContain(
+      '6s'
+    );
+    await vi.advanceTimersByTimeAsync(6000);
+    expect(wrapper.find('[data-testid="pairing-countdown"]').exists()).toBe(
+      false
+    );
+    expect(wrapper.find('output').exists()).toBe(false);
+    expect(api.pair).toHaveBeenCalledTimes(1);
+  });
+
   it('renames the existing connection only after an explicit authorized save', async () => {
     api.status.mockResolvedValue({
       ...health,
