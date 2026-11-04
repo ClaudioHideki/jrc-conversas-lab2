@@ -1,6 +1,30 @@
 import { test, expect } from '@playwright/test';
+import { writeFile } from 'node:fs/promises';
 
 const path = '/tests/playwright/fixtures/whatsapp-word/index.html';
+
+const checkViewport = async (page, testInfo, stage) => {
+  const geometry = await page.evaluate(() => {
+    const width = document.documentElement.clientWidth;
+    return {
+      width,
+      scrollWidth: document.documentElement.scrollWidth,
+      visualWidth: visualViewport?.width,
+      oversized: [...document.querySelectorAll('body *')]
+        .map(element => ({
+          tag: element.tagName,
+          class: element.className,
+          rect: element.getBoundingClientRect().toJSON(),
+        }))
+        .filter(element => element.rect.width > width + 1),
+    };
+  });
+  await writeFile(
+    testInfo.outputPath(`${stage}-viewport.json`),
+    JSON.stringify(geometry, null, 2)
+  );
+  expect(geometry.scrollWidth).toBeLessThanOrEqual(geometry.width + 1);
+};
 
 test('apresenta QR sintetico e prazo real sem usar sessao WhatsApp', async ({
   page,
@@ -35,6 +59,7 @@ test('administra conexoes e distribuicao sem iniciar pareamento ao abrir', async
     'Desconectado'
   );
   await expect(page.getByTestId('fixture-pair-requests')).toHaveText('0');
+  await checkViewport(page, testInfo, 'connections');
   await page.screenshot({
     path: testInfo.outputPath('conexoes.png'),
     fullPage: true,
@@ -46,6 +71,7 @@ test('administra conexoes e distribuicao sem iniciar pareamento ao abrir', async
     dialog.getByRole('tab', { name: 'Distribuição', exact: true })
   ).toHaveAttribute('aria-selected', 'true');
   await dialog.locator('input[type="radio"][value="priority"]').check();
+  await checkViewport(page, testInfo, 'distribution');
   await expect(dialog).toHaveClass(/max-h-/);
   await page.screenshot({
     path: testInfo.outputPath('distribuicao-antes-salvar.png'),
