@@ -49,14 +49,15 @@
         "cadastro-mestre:P0163",
         "relacionamento:P0011"
       ],
-      "classification": "Implementado com divergências",
+      "classification": "Implementado com pendências de compilação/homologação e integração documental",
       "code_checkpoint": "1f714280",
       "evidence": "company_documents_metadata_checkpoint_20261103.json",
       "acceptance": "Autoria e situação da versão atual e histórico paginado; leitor sem upload; perda de permissão limpa dados; quarentena bloqueia download; claro/escuro e 390px. Metadados novos aguardam build/Chrome.",
       "remaining": [
-        "Catálogo mestre de documentos obrigatórios configuráveis",
         "Representação/assinantes e bloqueios devem reutilizar autoridade/aprovações do Backoffice; não expor pelo cadastro sem permissão",
-        "Scanner real/arquivo limpo não homologado; manter quarentena"
+        "Scanner real/arquivo limpo não homologado; manter quarentena",
+        "Compilar e homologar os incrementos documentais novos quando houver permissão para novo build; servidor5379 continua no produto4d4a6de3",
+        "Apresentação protegida do histórico de alterações de metadados; auditoria já persiste no motor nativo"
       ],
       "deferred": "Empresas sem carteira continuam bloqueadas por decisão explícita do usuário; proposta não implementada.",
       "documentary_responsible_increment": {
@@ -64,6 +65,13 @@
         "evidence": "document_responsibility_checkpoint_20261104.json",
         "backend": 17,
         "vue": 7
+      },
+      "catalog_increment": {
+        "classification": "Implementado; catálogo por escopo e permissões testados; não compilado/homologado no Chrome",
+        "evidence": "document_catalog_checkpoint_20261104.json",
+        "vue_examples": 15,
+        "company_catalog_and_native_configuration_precedence_tested": true,
+        "legacy_documents_not_auto_linked": true
       }
     },
     {
@@ -101,7 +109,7 @@
         "cadastro-mestre:P0414"
       ],
       "classification": "Pendente",
-      "remaining": "Fixtures, índices e EXPLAIN anteriores não demonstram escala representativa. Planejar banco/dados sintéticos e disco dedicado; não executar carga nesta máquina limitada."
+      "remaining": "Paginação/limites e consultas nativas foram testados em fixtures. Base representativa e homologação de listas/popups com volume realista continuam pendentes; não inferir escala destes testes. Queda de espaço observada nesta sessão ainda sem causa confirmada; nenhuma carga de escala executada."
     },
     {
       "id": "TRR",
@@ -114,7 +122,8 @@
     {
       "id": "DEF",
       "classification": "Pertencente às próximas etapas D, E ou F",
-      "remaining": "Motores completos e integrações não são declarados concluídos pela existência de classes ou por testes locais de C."
+      "remaining": "Motores completos e integrações não são declarados concluídos pela existência de classes ou por testes locais de C.",
+      "test_infrastructure_increment": "Pré-requisito HTTPS sintético nos testes de Flow, mantendo OwnershipGuard ativo; 3 Playbooks + 30 continuações aprovados. Não implica conclusão funcional de F."
     }
   ],
   "restrictions": [
@@ -124,6 +133,6 @@
     "Sem ampliação documental sem carteira",
     "Sem declarar etapa concluída apenas por testes automatizados"
   ],
-  "next": "Homologação consolidada B1-B4, resolução das divergências documentais e escala, mantendo TRR explicitamente dependente. D/E/F somente planejamento neste bloco.",
+  "next": "Homologação manual B1-B4 do build existente e fechamento incremental de histórico documental, representação/autoridade e escala. Novos incrementos não foram compilados por orientação do usuário.",
   "manual_homologation": "manual_b1_b4_20261104.html"
 }

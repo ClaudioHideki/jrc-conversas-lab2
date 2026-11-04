@@ -108,8 +108,8 @@ class JrcRelationship::Context
     return product_config if product_config
 
     segment = assignment&.settings&.dig('segment_id')
-    key = segment ? "segment:#{segment}" : 'account'
-    choices = [configurations[key], customer_configuration(assignment, configurations), configurations['account']]
+    segment_config = configurations["segment:#{segment}"] if segment
+    choices = [segment_config, customer_configuration(assignment, configurations), configurations['account']]
     choices.compact.first ||
       JrcRelationship::Configuration.new(account: account, scope_key: 'account')
   end

@@ -45,7 +45,10 @@ RSpec.shared_context 'with a published relationship Flow' do
   end
 
   around do |example|
-    with_modified_env(JRC_FLOWS_ENABLED: 'true', JRC_FLOWS_EXTERNAL_BETA: 'false') { example.run }
+    # OwnershipGuard validates the origin even when all external effects are disabled.
+    with_modified_env(FRONTEND_URL: 'https://jrc-flow-test.example', JRC_FLOWS_ENABLED: 'true', JRC_FLOWS_EXTERNAL_BETA: 'false') do
+      example.run
+    end
   end
 
   before do
