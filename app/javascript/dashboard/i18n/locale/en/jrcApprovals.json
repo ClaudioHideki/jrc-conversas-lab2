@@ -75,7 +75,7 @@
     "validate": "Validate",
     "publish": "Publish version",
     "retire": "Retire policy",
-    "saveFirst": "Save changes before validating or publishing.",
+    "saveFirst": "Save changes before validating, publishing or duplicating.",
     "confirmPublication": "Confirm policy operation",
     "confirm": "Confirm",
     "cancel": "Cancel",
@@ -264,6 +264,8 @@
       "yes": "Yes",
       "no": "No"
     },
-    "invalidDelegation": "This delegation is not valid. Select different eligible users and a valid period without circular delegations."
+    "invalidDelegation": "This delegation is not valid. Select different eligible users and a valid period without circular delegations.",
+    "duplicate": "Duplicate rule",
+    "copyName": "Copy of {name}"
   }
 }

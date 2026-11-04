@@ -138,5 +138,9 @@
     "Internal notifications require separate inventory of actual producers/consumers; not declared implemented merely because audit events exist."
   ],
   "next": "Inventory adjustment, numeric tiers, global own delegation and native notification gaps; continue independent E/F/G code review and targeted regressions.",
-  "tables_revisited_in_full": 20
+  "tables_revisited_in_full": 20,
+  "rule_list_increment": {
+    "status": "Native saved-rule duplication implemented and tested, no original mutation; visual acceptance pending",
+    "evidence": "approval_duplication_checkpoint_20261104.json"
+  }
 }

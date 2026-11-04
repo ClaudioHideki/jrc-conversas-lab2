@@ -144,6 +144,10 @@ it('preserves all advanced controls, historical step codes, native definition an
   await flushPromises();
   expect(wrapper.text()).not.toContain('PRIVATE_INTERNAL_RULE_CODE');
   await wrapper.find('input').setValue('Renamed rule');
+  expect(
+    wrapper.findAll('button').find(button => button.text() === 'Duplicate rule')
+      .element.disabled
+  ).toBe(true);
   await wrapper.findAll('[role="tab"]')[2].trigger('click');
   expect(wrapper.findAll('details')).toHaveLength(2);
   expect(
@@ -213,4 +217,42 @@ it('summarizes typed conditions in readable language without mutating the struct
     'All of (Discount (%) is greater than 10; Always requires approval)'
   );
   expect(JSON.stringify(node)).toBe(before);
+});
+
+it('duplicates a rule as a detached new draft without its record identity, version or publication state', async () => {
+  const source = {
+    ...policy(),
+    state: 'published',
+    enabled: true,
+    current_version_id: 81,
+    current_version: 3,
+  };
+  const before = JSON.stringify(source);
+  const wrapper = mount(
+    PolicyEditor,
+    options({ context, templatePolicy: source })
+  );
+  await flushPromises();
+  expect(wrapper.find('input').element.value).toBe('Copy of Existing rule');
+  await click(wrapper, 'Save draft');
+  const body = wrapper.emitted('save')[0][0];
+  expect(body).toEqual({
+    name: 'Copy of Existing rule',
+    module_key: 'crm',
+    event_key: 'proposal_send',
+    issuer_company_id: 4,
+    business_unit_id: 6,
+    definition: source.draft_definition,
+  });
+  expect(body).not.toHaveProperty('id');
+  expect(body).not.toHaveProperty('code');
+  expect(body).not.toHaveProperty('state');
+  expect(body).not.toHaveProperty('current_version_id');
+  expect(
+    wrapper
+      .findAll('button')
+      .some(button => button.text() === 'Publish version')
+  ).toBe(false);
+  expect(JSON.stringify(source)).toBe(before);
+  wrapper.unmount();
 });

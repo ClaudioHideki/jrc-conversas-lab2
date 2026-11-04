@@ -797,7 +797,10 @@ describe('E4 components using bounded real DTO contracts', () => {
         )
       )
     );
-    const wrapper = mount(DelegationView, options({ props: { context, rows: [] } }));
+    const wrapper = mount(
+      DelegationView,
+      options({ props: { context, rows: [] } })
+    );
     await flushPromises();
     await wrapper.findAll('select')[0].setValue('301');
     await flushPromises();
@@ -810,6 +813,90 @@ describe('E4 components using bounded real DTO contracts', () => {
     await selectors[2].setValue('44');
     expect(selectors[3].element.value).toBe('');
     expect(wrapper.emitted('create')).toBeUndefined();
+    wrapper.unmount();
+  });
+  it('reads the authorized source when duplicating and persists only a separate new draft', async () => {
+    const router = createRouter({ history: createMemoryHistory(), routes });
+    await router.push({
+      name: 'jrc_approvals',
+      params: { accountId: 17, screen: 'policies', id: policy.id },
+    });
+    axios.get.mockImplementation(url => {
+      let data = { account_users: [] };
+      if (url.endsWith('/context')) data = context;
+      else if (url.includes('/policies/')) data = policy;
+      else if (url.endsWith('/catalogs')) data = catalog;
+      return Promise.resolve(response(data));
+    });
+    axios.post.mockResolvedValue(
+      response({ ...policy, id: 302, name: 'Copy of Synthetic policy' })
+    );
+    const wrapper = mount(ApprovalsPage, {
+      global: { plugins: [i18n(), router], stubs: { Button: buttonStub } },
+    });
+    await flushPromises();
+    await wrapper
+      .findAll('button')
+      .find(button => button.text() === 'Duplicate rule')
+      .trigger('click');
+    await flushPromises();
+    expect(router.currentRoute.value.params.id).toBe('new');
+    expect(router.currentRoute.value.query.copy).toBe('301');
+    expect(axios.get).toHaveBeenCalledWith(
+      '/api/v1/accounts/17/approvals/policies/301',
+      { params: {} }
+    );
+    expect(axios.post).not.toHaveBeenCalled();
+    const editor = wrapper.getComponent(PolicyEditor);
+    expect(editor.props('policy')).toBeNull();
+    expect(editor.props('templatePolicy').id).toBe(301);
+    await editor
+      .findAll('button')
+      .find(button => button.text() === 'Save draft')
+      .trigger('click');
+    await flushPromises();
+    expect(axios.post).toHaveBeenCalledWith(
+      '/api/v1/accounts/17/approvals/policies',
+      {
+        policy: {
+          name: 'Copy of Synthetic policy',
+          module_key: 'crm',
+          event_key: 'proposal_send',
+          issuer_company_id: 101,
+          business_unit_id: 202,
+          definition,
+        },
+      }
+    );
+    expect(axios.patch).not.toHaveBeenCalled();
+    expect(router.currentRoute.value.params.id).toBe('302');
+    wrapper.unmount();
+  });
+  it('does not reuse a denied source as a new rule template', async () => {
+    const router = createRouter({ history: createMemoryHistory(), routes });
+    await router.push({
+      name: 'jrc_approvals',
+      params: { accountId: 17, screen: 'policies', id: 'new' },
+      query: { copy: '301' },
+    });
+    axios.get.mockImplementation(url => {
+      if (url.endsWith('/context')) return Promise.resolve(response(context));
+      return Promise.reject(
+        Object.assign(new Error('Synthetic denied source'), {
+          response: { status: 403, data: { error: 'FORBIDDEN' } },
+        })
+      );
+    });
+    const wrapper = mount(ApprovalsPage, {
+      global: { plugins: [i18n(), router], stubs: { Button: buttonStub } },
+    });
+    await flushPromises();
+    expect(
+      wrapper.getComponent(PolicyEditor).props('templatePolicy')
+    ).toBeNull();
+    expect(wrapper.text()).not.toContain('Synthetic policy');
+    expect(wrapper.find('[role="alert"]').exists()).toBe(true);
+    expect(axios.post).not.toHaveBeenCalled();
     wrapper.unmount();
   });
   it('loads a Central list with endpoint filters and total headers', async () => {

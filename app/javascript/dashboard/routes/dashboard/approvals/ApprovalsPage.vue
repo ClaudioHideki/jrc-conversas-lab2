@@ -21,6 +21,7 @@ const router = useRouter();
 const { t } = useI18n();
 const { state, reset, run, loadContext, list } = useApprovals();
 const record = ref(null);
+const templatePolicy = ref(null);
 const versions = ref(null);
 const catalogs = ref([]);
 const simulation = ref(null);
@@ -69,6 +70,7 @@ const navigate = (target, targetId, query = {}) =>
   });
 const load = async () => {
   record.value = null;
+  templatePolicy.value = null;
   versions.value = null;
   simulation.value = null;
   state.rows = [];
@@ -86,6 +88,19 @@ const load = async () => {
     if (id.value && id.value !== 'new') {
       const result = await run(api => api.get(`policies/${id.value}`));
       if (result) record.value = result.data;
+    } else if (id.value === 'new' && route.query.copy !== undefined) {
+      const source = route.query.copy;
+      if (
+        typeof source !== 'string' ||
+        !/^[1-9]\d*$/.test(source) ||
+        !Number.isSafeInteger(Number(source))
+      ) {
+        state.error = { status: 422, code: 'INVALID_INPUT' };
+        return;
+      }
+      const result = await run(api => api.get(`policies/${source}`));
+      if (!result) return;
+      templatePolicy.value = result.data;
     } else if (!id.value) await list('policies', params);
   } else if (screen.value === 'inbox') {
     if (id.value) {
@@ -349,11 +364,13 @@ const errorText = computed(() =>
           v-if="screen === 'policies' && (id === 'new' || record)"
           :key="`${state.accountId}:${id}`"
           :policy="record"
+          :template-policy="templatePolicy"
           :context="state.context"
           :busy="state.loading"
           @save="savePolicy"
           @operation="operate"
           @versions="loadVersions(1)"
+          @duplicate="navigate('policies', 'new', { copy: String(record.id) })"
         />
         <section
           v-if="versions"

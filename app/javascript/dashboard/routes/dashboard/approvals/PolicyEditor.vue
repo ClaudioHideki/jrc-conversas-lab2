@@ -15,10 +15,11 @@ import {
 } from './model';
 const props = defineProps({
   policy: { type: Object, default: null },
+  templatePolicy: { type: Object, default: null },
   context: { type: Object, required: true },
   busy: Boolean,
 });
-const emit = defineEmits(['save', 'operation', 'versions']);
+const emit = defineEmits(['save', 'operation', 'versions', 'duplicate']);
 const { t } = useI18n();
 const draft = ref({});
 const tab = ref('general');
@@ -111,24 +112,35 @@ const dirty = computed(
 );
 let generation = 0;
 watch(
-  () => props.policy,
-  policy => {
-    draft.value = policy
-      ? copy(policy)
-      : {
-          name: '',
-          module_key: '',
-          event_key: '',
-          issuer_company_id: null,
-          business_unit_id: null,
-          draft_definition: emptyDefinition(),
-        };
+  () => [props.policy, props.templatePolicy],
+  ([policy, templatePolicy]) => {
+    if (policy) draft.value = copy(policy);
+    else if (templatePolicy) {
+      draft.value = {
+        name: t('JRC_APPROVALS.copyName', { name: templatePolicy.name }),
+        module_key: templatePolicy.module_key,
+        event_key: templatePolicy.event_key,
+        issuer_company_id: templatePolicy.issuer_company_id,
+        business_unit_id: templatePolicy.business_unit_id,
+        draft_definition: copy(templatePolicy.draft_definition),
+      };
+    } else {
+      draft.value = {
+        name: '',
+        module_key: '',
+        event_key: '',
+        issuer_company_id: null,
+        business_unit_id: null,
+        draft_definition: emptyDefinition(),
+      };
+    }
     const index = scopes.value.findIndex(
       row =>
         row.issuer_company_id === draft.value.issuer_company_id &&
         row.business_unit_id === draft.value.business_unit_id
     );
-    scopeIndex.value = policy && index >= 0 ? String(index) : '';
+    scopeIndex.value =
+      (policy || templatePolicy) && index >= 0 ? String(index) : '';
   },
   { immediate: true }
 );
@@ -204,6 +216,13 @@ const confirm = () => {
           {{ scopeLabel(context, draft) || t('JRC_APPROVALS.groupScope') }}
         </p>
       </div>
+      <Button
+        v-if="policy"
+        :label="t('JRC_APPROVALS.duplicate')"
+        variant="faded"
+        :disabled="busy || dirty"
+        @click="emit('duplicate')"
+      />
       <Button
         v-if="policy"
         :label="t('JRC_APPROVALS.versions')"
