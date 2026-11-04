@@ -97,9 +97,14 @@ class JrcRelationship::Processor
       action = action!('health_drop', 'Queda do Health Score acima do limite configurado', data, rules)
       JrcRelationship::Playbooks.new(@context).run!(@assignment, 'health', source_key: action.id)
     end
-    if score && score < rules['risk_threshold']
-      action = action!('health', 'Health Score abaixo do limite configurado', data, rules)
-      risk!('health', 'Health Score abaixo do limite configurado', score < rules['critical_threshold'] ? 'critical' : 'high', data)
+    if score && data.dig(:health, :band).in?(%w[risk critical])
+      reason = if data.dig(:health, :hysteresis, :retained)
+                 'Faixa de risco mantida até confirmar a margem de recuperação'
+               else
+                 'Health Score abaixo do limite configurado'
+               end
+      action = action!('health', reason, data, rules)
+      risk!('health', reason, data.dig(:health, :band) == 'critical' ? 'critical' : 'high', data)
       JrcRelationship::Playbooks.new(@context).run!(@assignment, 'health', source_key: action.id)
     end
     if data[:days_without_contact] >= rules['no_contact_days']

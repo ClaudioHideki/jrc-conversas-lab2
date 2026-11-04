@@ -266,9 +266,15 @@ const date = value => formatDate(value, props.metadata?.formatting);
           ><input
             v-else-if="typeof config.rules[key] === 'number'"
             v-model.number="config.rules[key]"
+            :data-testid="`relationship-rule-${key}`"
             type="number"
             step="0.1"
-            min="0.01"
+            :min="key === 'health_hysteresis_points' ? 0 : 0.01"
+            :max="
+              key === 'health_hysteresis_points'
+                ? 100 - config.rules.healthy_threshold
+                : undefined
+            "
             :class="inputClass"
           /><input
             v-else-if="key === 'renewal_window_days'"

@@ -1,5 +1,6 @@
 {
   "RELATIONSHIP": {
+    "HEALTH_STABILITY": "Band retained until the {points}-point recovery margin is reached. Measured band: {band}.",
     "REVIEWED_BATCH": {
       "TITLE": "Lote revisado",
       "DESCRIPTION": "Confira os clientes e a operação antes de confirmar. Cada item terá seu próprio resultado. Cancelar preserva o que já foi aplicado. Este lote não autoriza mensagens nem um Flow de atendimento.",
@@ -389,6 +390,7 @@
       "critical_action_priority": "Prioridade mínima para saúde crítica",
       "ticket_action_priority": "Prioridade mínima para chamado crítico",
       "detractor_action_priority": "Prioridade mínima para detrator",
+      "health_hysteresis_points": "Health recovery margin (points; 0 preserves current behavior)",
       "health_drop_points": "Queda mínima do Health Score (pontos)",
       "health_drop_action_priority": "Prioridade mínima para queda de saúde",
       "detractor_sla_hours": "Primeira ação para detrator (horas)",

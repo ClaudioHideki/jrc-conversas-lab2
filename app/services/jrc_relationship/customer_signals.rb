@@ -57,6 +57,9 @@ class JrcRelationship::CustomerSignals
       [id, JrcRelationship::HealthScore.call(observations: product_observations, weights: config.effective_weights, rules: config.effective_rules)
                                        .merge(config_scope_key: config.scope_key, config_version: config.version)]
     end
+    manifest = source_ids(contracts: contracts, invoices: invoices, csat: ratings[:csat], nps: ratings[:nps], ces: ratings[:ces],
+                          surveys: ratings[:surveys], plans: plans, sentiment: sentiment)
+    health, history_sources = JrcRelationship::HealthHysteresis.new(context: context, assignment: assignment).call(health)
     { segment_id: assignment.settings['segment_id'], product_id: assignment.settings['product_id'], business_unit_id: assignment.business_unit_id,
       health: health, product_health: product_health, products: products.map { |id, name| { id: id, name: name } },
       portfolio_status: assignment.status,
@@ -71,11 +74,14 @@ class JrcRelationship::CustomerSignals
       delayed_projects: project_late + late_tasks,
       overdue_activities: customer.activities.overdue.where("NOT (COALESCE(jrc_crm_activities.metadata, '{}'::jsonb) ? 'relationship_action_id')").count,
       active_contract_ids: contracts.pluck(:id), capabilities: overview[:capabilities],
-      _source_ids: source_ids(contracts: contracts, invoices: invoices, csat: ratings[:csat], nps: ratings[:nps], ces: ratings[:ces],
-                              surveys: ratings[:surveys], plans: plans, sentiment: sentiment) }
+      _source_ids: merge_health_sources(history_sources, manifest) }
   end
 
   private
+
+  def merge_health_sources(history, current)
+    SOURCE_MANIFEST.to_h { |key| [key, (Array(current[key]) + Array(history[key.to_s])).uniq] }
+  end
 
   def sentiment_observation
     rows = Message.where(account_id: context.account.id, conversation_id: customer.conversations.select(:id),

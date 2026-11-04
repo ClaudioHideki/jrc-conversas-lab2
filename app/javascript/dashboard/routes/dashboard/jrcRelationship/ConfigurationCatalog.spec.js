@@ -68,3 +68,40 @@ it('saves the documentary catalog in the native scoped/versioned configuration a
   expect(wrapper.findComponent(RequiredDocumentsForm).exists()).toBe(false);
   wrapper.unmount();
 });
+
+it('persists a recovery margin through the existing versioned configuration form and permits zero', async () => {
+  const state = {
+    scope_key: 'account',
+    version: 7,
+    weights: { adoption: 100 },
+    rules: {
+      required_documents: [],
+      healthy_threshold: 80,
+      health_hysteresis_points: 0,
+    },
+    history: [],
+  };
+  mocks.configuration.mockResolvedValue({ data: state });
+  mocks.saveConfiguration.mockResolvedValue({ data: {} });
+  const wrapper = mount(Configuration, {
+    props: { allowed: true },
+    global: { stubs: { PlaybookFlowPolicyForm: true } },
+  });
+  await flushPromises();
+  const input = wrapper.get(
+    '[data-testid="relationship-rule-health_hysteresis_points"]'
+  );
+  expect(input.attributes('min')).toBe('0');
+  expect(input.attributes('max')).toBe('20');
+  await input.setValue('5');
+  await wrapper.get('form').trigger('submit');
+  await flushPromises();
+  expect(mocks.saveConfiguration).toHaveBeenCalledWith(
+    '1400',
+    expect.objectContaining({
+      version: 7,
+      rules: expect.objectContaining({ health_hysteresis_points: 5 }),
+    })
+  );
+  wrapper.unmount();
+});

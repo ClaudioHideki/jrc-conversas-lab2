@@ -22,7 +22,7 @@ class JrcRelationship::Configuration < ApplicationRecord
                     'ticket_penalty' => 30, 'sla_penalty' => 20, 'overdue_finance_score' => 20,
                     'project_penalty' => 30, 'task_penalty' => 10, 'csat_threshold' => 3,
                     'critical_action_priority' => 90, 'ticket_action_priority' => 85, 'detractor_action_priority' => 80,
-                    'health_drop_points' => 20, 'health_drop_action_priority' => 70,
+                    'health_hysteresis_points' => 0, 'health_drop_points' => 20, 'health_drop_action_priority' => 70,
                     'auto_handoff' => true, 'missing_factor_policy' => 'renormalize', 'survey_automation_enabled' => false,
                     'renewal_window_days' => [15, 30, 60, 90, 120],
                     'eligibility_mode' => 'legacy_order', 'handoff_acceptance_required' => false, 'playbook_flow_effects_enabled' => false,
@@ -38,7 +38,7 @@ class JrcRelationship::Configuration < ApplicationRecord
   BOOLEAN_VALUES = [true, false].freeze
   NON_NUMERIC_RULES = %w[auto_handoff survey_automation_enabled missing_factor_policy critical_priority_codes qbr_agenda_template adoption_metric
                          risk_reasons survey_question_nps survey_question_ces renewal_window_days eligibility_mode handoff_acceptance_required
-                         playbook_flow_effects_enabled playbook_flow_policy required_documents].freeze
+                         playbook_flow_effects_enabled playbook_flow_policy required_documents health_hysteresis_points].freeze
 
   def effective_weights
     DEFAULT_WEIGHTS.merge(weights)
@@ -61,6 +61,7 @@ class JrcRelationship::Configuration < ApplicationRecord
     end
     validate_numeric_rules
     validate_risk_bands
+    validate_health_hysteresis
     validate_rule_choices
     validate_flow_policy
     validate_renewal_windows
@@ -109,6 +110,13 @@ class JrcRelationship::Configuration < ApplicationRecord
     risk = effective_rules['risk_threshold'].to_f
     healthy = effective_rules['healthy_threshold'].to_f
     errors.add(:rules, 'risk bands must be ordered') unless critical < risk && risk < healthy && healthy <= 100
+  end
+
+  def validate_health_hysteresis
+    value = effective_rules['health_hysteresis_points']
+    ceiling = 100 - effective_rules['healthy_threshold'].to_f
+    valid = value.is_a?(Numeric) && value.finite? && value.between?(0, ceiling)
+    errors.add(:rules, 'health hysteresis must be nonnegative and allow recovery at score 100') unless valid
   end
 
   def validate_rule_choices

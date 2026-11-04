@@ -3,6 +3,7 @@ import { computed, ref, watch, onBeforeUnmount } from 'vue';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
+import HealthStabilityNote from './HealthStabilityNote.vue';
 import API from 'dashboard/api/jrcRelationship';
 import ComposeConversation from 'dashboard/components-next/NewConversation/ComposeConversation.vue';
 import VoiceCallButton from 'dashboard/components-next/Contacts/VoiceCallButton.vue';
@@ -189,7 +190,8 @@ const money = value => formatMoney(value, props.metadata?.formatting);
           record.signals.health.score ?? '—'
         }}</strong
         ><span>{{ t(`RELATIONSHIP.BANDS.${record.signals.health.band}`) }}</span
-        ><span>{{ money(record.signals.mrr_cents) }}</span
+        ><HealthStabilityNote :health="record.signals.health" />
+        <span>{{ money(record.signals.mrr_cents) }}</span
         ><span>{{ date(record.calculated_at) }}</span>
         <button
           v-if="metadata.can_manage"

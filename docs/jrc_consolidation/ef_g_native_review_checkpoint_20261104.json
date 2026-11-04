@@ -205,7 +205,7 @@
         "app/models/jrc_relationship/configuration.rb"
       ],
       "confirmed": "Permission-aware jobs, authorized manager fallback for unassigned clients, per-item revocation checks, bounded error records, correlated health-cause dedup and data coverage exist. Missing data are not blindly zeroed.",
-      "remaining": "Word hysteresis, configurable source freshness/cooldown and complete absence/coverage behavior still need implementation/acceptance; source presence is not scale evidence."
+      "remaining": "Customer-wide hysteresis implemented in linked increment; per-product history, configurable source freshness/trend windows/cooldown and complete operational/scale acceptance remain open."
     },
     {
       "id": "F03",
@@ -290,5 +290,12 @@
   "stage_D_complete": false,
   "stage_E_complete": false,
   "stage_F_complete": false,
-  "stage_G_complete": false
+  "stage_G_complete": false,
+  "increments": [
+    {
+      "stage": "F",
+      "evidence": "relationship_health_hysteresis_checkpoint_20261104.json",
+      "status": "Implemented customer-wide configurable band recovery with native automated evidence; remaining product/trend/freshness/cooldown and real UI gaps retained"
+    }
+  ]
 }
