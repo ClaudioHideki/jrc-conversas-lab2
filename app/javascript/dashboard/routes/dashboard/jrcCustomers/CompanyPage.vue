@@ -3,6 +3,7 @@ import { computed, ref, watch, onBeforeUnmount } from 'vue';
 import { useRoute } from 'vue-router';
 import API from 'dashboard/api/jrcCustomers';
 import RelationshipPanel from '../jrcRelationship/Customer360Relationship.vue';
+import DocumentsPanel from '../jrcRelationship/DocumentsPanel.vue';
 import { useI18n } from 'vue-i18n';
 import CompanyEditorDialog from './components/CompanyEditorDialog.vue';
 import BackofficeContextPanel from './components/BackofficeContextPanel.vue';
@@ -55,6 +56,7 @@ const availableTabs = computed(() => {
     'timeline',
     'conversations',
   ];
+  if (overview.value?.document_context) base.push('documents');
   if (overview.value?.capabilities?.crm)
     base.push('leads', 'deals', 'proposals', 'activities');
   if (overview.value?.capabilities?.service_desk) base.push('tickets');
@@ -82,7 +84,7 @@ const groupTones = {
 const navigationGroups = computed(() => {
   const definitions = [
     ['overview', ['overview', 'map']],
-    ['registration', ['general', 'addresses', 'contacts']],
+    ['registration', ['general', 'addresses', 'contacts', 'documents']],
     [
       'relationshipArea',
       ['relationship', 'timeline', 'conversations', 'calls', 'campaigns'],
@@ -436,9 +438,11 @@ onBeforeUnmount(() => {
           {{
             key === 'map'
               ? t('CRM.CUSTOMER_MASTER_360.RELATIONSHIP_MAP')
-              : key === 'relationship'
-                ? t('RELATIONSHIP.TITLE')
-                : T[key]
+              : key === 'documents'
+                ? t('CRM.CUSTOMER_MASTER_360.COMPANY_DOCUMENTS')
+                : key === 'relationship'
+                  ? t('RELATIONSHIP.TITLE')
+                  : T[key]
           }}
         </button>
       </nav>
@@ -581,6 +585,12 @@ onBeforeUnmount(() => {
           </div>
         </template>
 
+        <DocumentsPanel
+          v-else-if="tab === 'documents' && overview.document_context"
+          :key="`${accountId}:${company.id}:${overview.document_context.assignment_id}`"
+          :assignment-id="overview.document_context.assignment_id"
+          :metadata="overview.document_context"
+        />
         <BackofficeContextPanel
           v-else-if="tab === 'backoffice'"
           :company-id="company.id"

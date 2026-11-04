@@ -31,6 +31,7 @@ class JrcCustomers::Customer360
       capabilities: { conversations: true, crm: @visibility.crm?, calls: !calls.nil?, campaigns: !recipients.nil?,
                       service_desk: @visibility.service_desk?, projects: @visibility.projects?, contracts: @visibility.crm?,
                       backoffice: @visibility.crm?, central_sip_cdr: false, relationship: !@relationship_assignment.nil? },
+      document_context: JrcCustomers::CompanyDocumentsContext.new(member: @account_user, company: @company).call(@relationship_assignment),
       relationship: @relationship_assignment && { id: @relationship_assignment.id, status: @relationship_assignment.status },
       visibility: 'Counts and items are restricted to the signed-in user. Missing modules are not counted as zero.'
     }

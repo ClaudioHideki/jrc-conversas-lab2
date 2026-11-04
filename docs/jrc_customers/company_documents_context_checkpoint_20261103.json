@@ -1,0 +1,59 @@
+{
+  "date": "2026-11-03",
+  "status": "INCREMENTO PARCIAL — backend e Vue aprovados; build e Chrome pendentes",
+  "baseline": "0c3dff76cf7d7821eb3917239abad5e1399e7ff9",
+  "word_requirement": "cadastro-mestre:P0163",
+  "implementation": [
+    "Popup Empresa ganha aba Documentos quando existe carteira nativa autorizada e permissão documental.",
+    "Customer360 expõe somente o contexto documental autorizado; serviço CompanyDocumentsContext revalida a carteira com Context.assignment e ModulePolicy.documents_view.",
+    "Reutiliza DocumentsPanel, DocumentsController e CustomerDocuments: upload, versões, categorias, validade, auditoria, antimalware e download protegido mantidos nos módulos proprietários.",
+    "Sem migração, novo repositório documental, criação automática de carteira ou alteração de permissões."
+  ],
+  "files": [
+    "app/services/jrc_customers/company_documents_context.rb",
+    "app/services/jrc_customers/customer360.rb",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/CompanyPage.vue",
+    "app/javascript/dashboard/i18n/locale/en/crm.json",
+    "spec/services/jrc_customers/company_documents_context_spec.rb",
+    "app/javascript/dashboard/routes/dashboard/jrcCustomers/CompanyPage.spec.js"
+  ],
+  "automated": {
+    "backend": ".codex/company-documents-reviewed-backend.json",
+    "backend_examples": 21,
+    "backend_failures": 0,
+    "vue": ".codex/company-documents-reviewed-frontend.json",
+    "vue_cases": 9,
+    "vue_failures": 0,
+    "vue_with_mocks_not_real_chrome": true,
+    "new_service_and_spec_rubocop_offenses": 0,
+    "shared_customer360_existing_offenses_before_after": [
+      18,
+      18
+    ],
+    "shared_customer360_global_lint_clean": false,
+    "shared_overview_existing_metrics_increased_by_projection": true,
+    "eslint_errors": 0,
+    "eslint_warnings": 0
+  },
+  "source_snapshot": ".codex/customer-company-documents-reviewed-source-verified.json",
+  "remaining": [
+    "Novo build protegido e Chrome com upload/versão, temas/celular e negação real de acesso",
+    "Empresas sem carteira nativa autorizada não ganham carteira nem documento duplicado; suporte integral desse cenário permanece pendente.",
+    "Catálogo documental obrigatório configurável e representação/assinantes continuam nos fluxos nativos de Backoffice/Aprovações; ainda não há central unificada integral no popup Empresa.",
+    "Criação contextual de chamados, indicadores de atendimento, renovação e ações contratuais, escala e auditoria restante da Etapa C.",
+    "TRR depende de definição; D/E/F não concluídas."
+  ],
+  "free_at_checkpoint_bytes": 1788407808,
+  "minimum_build_bytes": 1610612736,
+  "preferred_build_bytes": 3221225472,
+  "stop_bytes": 750000000,
+  "restrictions": {
+    "push": false,
+    "deploy": false,
+    "images": false,
+    "production": false,
+    "deletion": false,
+    "external_operations": 0
+  },
+  "hooks": "Missing husky launcher; manual gates performed; command-local core.hooksPath=.codex/git-hooks only"
+}

@@ -57,6 +57,7 @@ const render = async () => {
         CompanyContacts: true,
         CompanyAddresses: true,
         RecordsPanel: true,
+        DocumentsPanel: true,
         RelationshipPanel: true,
       },
     },
@@ -203,5 +204,86 @@ it('clears the company header if its people directory denies the current request
   expect(wrapper.text()).not.toContain(company.name);
   expect(wrapper.emitted('denied')).toHaveLength(1);
   expect(wrapper.find('[role="alert"]').exists()).toBe(true);
+  wrapper.unmount();
+});
+
+it('opens the existing document panel lazily with the authorized assignment and native view-only capability', async () => {
+  const documentContext = {
+    assignment_id: 77,
+    can_manage_documents: false,
+    formatting: { locale: 'pt-BR' },
+  };
+  mocks.overview.mockResolvedValue({
+    data: {
+      ...structuredClone(summary),
+      capabilities: {},
+      document_context: documentContext,
+    },
+  });
+  const wrapper = await render();
+  await flushPromises();
+  expect(wrapper.findComponent({ name: 'DocumentsPanel' }).exists()).toBe(
+    false
+  );
+  await wrapper
+    .findAll('button')
+    .find(item => item.text() === 'Cadastro')
+    .trigger('click');
+  await wrapper
+    .findAll('button')
+    .find(item => item.text() === 'Documentos')
+    .trigger('click');
+  expect(
+    wrapper.findComponent({ name: 'DocumentsPanel' }).props()
+  ).toMatchObject({
+    assignmentId: 77,
+    metadata: documentContext,
+  });
+  wrapper.unmount();
+});
+
+it('keeps documents unavailable when the server does not grant the native document capability', async () => {
+  const wrapper = await render();
+  await flushPromises();
+  await wrapper
+    .findAll('button')
+    .find(item => item.text() === 'Cadastro')
+    .trigger('click');
+  expect(
+    wrapper.findAll('button').some(item => item.text() === 'Documentos')
+  ).toBe(false);
+  expect(wrapper.findComponent({ name: 'DocumentsPanel' }).exists()).toBe(
+    false
+  );
+  wrapper.unmount();
+});
+
+it('unmounts the document context when the current company access is denied', async () => {
+  mocks.overview.mockResolvedValue({
+    data: {
+      ...structuredClone(summary),
+      capabilities: {},
+      document_context: { assignment_id: 77, can_manage_documents: true },
+    },
+  });
+  const wrapper = await render();
+  await flushPromises();
+  await wrapper
+    .findAll('button')
+    .find(item => item.text() === 'Cadastro')
+    .trigger('click');
+  await wrapper
+    .findAll('button')
+    .find(item => item.text() === 'Documentos')
+    .trigger('click');
+  mocks.company.mockRejectedValue({
+    response: { status: 403, data: { error: 'MOCK — denied' } },
+  });
+  mocks.state.viewer = 'revoked';
+  await flushPromises();
+  expect(wrapper.findComponent({ name: 'DocumentsPanel' }).exists()).toBe(
+    false
+  );
+  expect(wrapper.text()).not.toContain(company.name);
   wrapper.unmount();
 });

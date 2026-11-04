@@ -1287,6 +1287,7 @@
       }
     },
     "CUSTOMER_MASTER_360": {
+      "COMPANY_DOCUMENTS": "Documentos",
       "COMPANY_DETAILS": "Empresa 360º",
       "OPEN_FULL_PAGE": "Abrir em tela completa",
       "BACKOFFICE_TITLE": "Backoffice",
