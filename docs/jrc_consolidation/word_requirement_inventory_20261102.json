@@ -42392,7 +42392,7 @@
     "backend_contract_fix": "df89ae22ccfb3927dd2ccc68f64fe38900cf1062",
     "stage_C_complete": false,
     "module_filter_security_validated": true,
-    "pending_visual": "Campaign wizard mobile horizontal overflow reproduced: 390px viewport, 538px scroll width. Source-only grid correction awaits a fresh guarded build and Chrome.",
+    "pending_visual": null,
     "remaining_findings": [
       {
         "requirement": "cadastro-mestre:P0163",
@@ -42450,6 +42450,7 @@
           "app/services/jrc_customers/module_segment_filter.rb"
         ]
       }
-    ]
+    ],
+    "campaign_mobile_validated": "docs/jrc_customers/campaign_mobile_validated_checkpoint_20261103.json"
   }
 }

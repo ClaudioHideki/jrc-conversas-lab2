@@ -1,0 +1,100 @@
+{
+  "date": "2026-11-03",
+  "status": "BLOCO A VALIDADO LOCALMENTE; ETAPA C ABERTA",
+  "compiled_source": "95f1137fef913dc61b06afc51d600ac1de7b4799",
+  "product_change_in_this_block": false,
+  "new_test": "spec/requests/api/v1/accounts/customers/campaign_segment_review_edit_spec.rb",
+  "build": {
+    "report": ".codex/segment-consumers-95f1137f-build.json",
+    "exit": 0,
+    "seconds": 245.94,
+    "start_bytes": 1866682368,
+    "minimum_free_bytes": 1780666368,
+    "final_bytes": 1781125120,
+    "minimum_start_bytes": 1610612736,
+    "preferred_bytes": 3221225472,
+    "stop_bytes": 750000000,
+    "artifacts": 586,
+    "hash_verified": true,
+    "simultaneous_vite_builds": false
+  },
+  "chrome": {
+    "report": "C:\\Users\\DEV03\\Documents\\Jrc\\validacao-relacionamento-v2-20261101\\campanhas-c7-mobile-validado-95f1137f-20261103.json",
+    "status": "passed",
+    "actual_application": "http://127.0.0.1:5377",
+    "database": "jrc_customer_groups_test",
+    "fixture": "synthetic; same canonical data, existing draft 1",
+    "checks": {
+      "sixteen_real_theme_viewport_step_geometries_without_horizontal_overflow": true,
+      "native_sender_and_email_fields_preserved_in_all_steps": true,
+      "financial_preview_and_native_draft_reload_persistence": true
+    },
+    "geometry_cases": 16,
+    "viewports": [
+      "1520x1050",
+      "390x844 responsive viewport, not physical phone"
+    ],
+    "themes": [
+      "Claro",
+      "Escuro"
+    ],
+    "mobile_main_width_and_scroll_width": [
+      390,
+      390
+    ],
+    "existing_draft_saved": 1,
+    "final_segment_id": 98,
+    "external_operations": 0
+  },
+  "native_approval": {
+    "regression": ".codex/campaign-mobile-95f1137f-approval-regression.json",
+    "examples": 17,
+    "failures": 0,
+    "focused_final": ".codex/campaign-mobile-95f1137f-final-review-api.json",
+    "focused_final_examples": 1,
+    "counts_overlap": true,
+    "tests_are_local_not_external_homologation": true,
+    "sender_not_called": true,
+    "new_spec_rubocop": ".codex/campaign-mobile-95f1137f-review-spec-final-style.json",
+    "rubocop_offenses": 0
+  },
+  "preservation": {
+    "report": ".codex/campaign-mobile-95f1137f-final-integrity.json",
+    "protected_baseline_row_sets": [
+      317,
+      476
+    ],
+    "overlapping_sets": true,
+    "campaign_executions": 0,
+    "campaign_recipients": 0,
+    "campaign_consents": 0,
+    "signature_verifier": null,
+    "signature_deliveries": 0
+  },
+  "auth_fixture": {
+    "initial_login_409": "Native session limit; no bypass, no session revoked, no limit modified",
+    "dedicated_actor_fixture": ".codex/campaign-mobile-95f1137f-ui.json",
+    "existing_actors_and_tokens_unchanged": true,
+    "fixture_test": ".codex/campaign-mobile-session-95f1137f-fixture.json"
+  },
+  "failed_reports_preserved": [
+    "campanhas-c7-mobile-todos-passos-95f1137f-20261103.json: native session limit, no business writes",
+    "campanhas-c7-mobile-sessao-nativa-95f1137f-20261103.json: eight light geometry checks passed; harness attempted theme menu with mobile sidebar hidden; resumed dark only",
+    "initial docker top args lacked PID; preflight stopped before a build was launched"
+  ],
+  "free_at_checkpoint_bytes": 1906933760,
+  "word_pending": [
+    "Company Documents central/context with versioning/native permissions",
+    "Native ticket creation from company/contact",
+    "Attendance source metrics",
+    "Contract renewal and actions",
+    "Representative scale validation",
+    "TRR undefined; D/E/F next stages not complete"
+  ],
+  "push": false,
+  "deploy": false,
+  "images": false,
+  "production": false,
+  "deletion": false,
+  "hooks": "Manual gates; missing husky launcher; command-local core.hooksPath=.codex/git-hooks only"
+}

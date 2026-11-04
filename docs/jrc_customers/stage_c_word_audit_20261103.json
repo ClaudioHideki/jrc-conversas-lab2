@@ -81,14 +81,14 @@
     }
   ],
   "blocking_frontend_validation": {
-    "minimum_build_free_bytes": 1500000000,
-    "preferred_free_bytes": 3000000000,
+    "minimum_build_free_bytes": 1610612736,
+    "preferred_free_bytes": 3221225472,
     "stop_bytes": 750000000,
-    "mobile_fix_not_built": true,
-    "old_assets_not_proof_of_fix": true
+    "mobile_fix_not_built": false,
+    "old_assets_not_proof_of_fix": true,
+    "mobile_fix_chrome_validated": true
   },
   "next_sequence": [
-    "Compilar a correção mobile e medir todos os passos em claro/escuro, desktop/390px",
     "Fechar documentos e ações de origem do popup Empresa com autorização nativa",
     "Fechar métricas e ações contratuais que faltam no Word",
     "Reavaliar os demais fragmentos e registrar evidências antes de declarar Etapa C integral",
@@ -101,5 +101,6 @@
     "SMS",
     "SMTP"
   ],
-  "production_changed": false
+  "production_changed": false,
+  "campaign_mobile_closure": "docs/jrc_customers/campaign_mobile_validated_checkpoint_20261103.json"
 }
