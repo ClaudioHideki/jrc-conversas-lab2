@@ -1,5 +1,5 @@
 class JrcApprovals::Authorization
-  PERMISSIONS = %w[policy_manage request_create decide view_audit].map { |name| "jrc_approvals_#{name}" }.freeze
+  PERMISSIONS = %w[policy_manage request_create decide view_audit adjust].map { |name| "jrc_approvals_#{name}" }.freeze
 
   def self.scope!(account, company_id, unit_id)
     raise JrcApprovals::Error, 'INVALID_SCOPE' if unit_id && !company_id
@@ -28,7 +28,7 @@ class JrcApprovals::Authorization
     self.class.scope!(@account, company_id, unit_id)
     permission = "jrc_approvals_#{action}"
     explicit = member.permissions.include?(permission)
-    native_management = member.administrator? && member.custom_role_id.nil? && action != 'decide'
+    native_management = member.administrator? && member.custom_role_id.nil? && %w[policy_manage request_create view_audit].include?(action)
     raise Pundit::NotAuthorizedError unless (explicit || native_management) && covered?(company_id, unit_id)
 
     member

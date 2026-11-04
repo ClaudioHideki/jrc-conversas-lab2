@@ -6,6 +6,7 @@ import { decisionChoices, scopeLabel } from './model';
 import ApprovalOriginLink from './ApprovalOriginLink.vue';
 import ApprovalDecisionDialog from './ApprovalDecisionDialog.vue';
 import AuthorityOrigin from './AuthorityOrigin.vue';
+import AdjustmentDialog from './AdjustmentDialog.vue';
 const props = defineProps({
   request: { type: Object, required: true },
   context: { type: Object, default: null },
@@ -14,11 +15,12 @@ const props = defineProps({
   error: { type: String, default: '' },
   errorState: { type: Object, default: null },
 });
-const emit = defineEmits(['decide', 'audit']);
+const emit = defineEmits(['decide', 'adjust', 'audit']);
 const { t } = useI18n();
 const reason = ref('');
 const choices = computed(() => decisionChoices(props.request));
 const selectedChoice = ref(null);
+const adjusting = ref(false);
 const authoritySection = ref(null);
 const showAuthority = async () => {
   selectedChoice.value = null;
@@ -60,6 +62,7 @@ watch(
     ]),
   () => {
     selectedChoice.value = null;
+    adjusting.value = false;
   }
 );
 const confirm = payload => {
@@ -158,6 +161,20 @@ const confirm = payload => {
         </div>
       </template>
     </section>
+    <Button
+      v-if="request.adjustment && request.state === 'pending'"
+      :label="t('JRC_APPROVALS.adjustment.title')"
+      :disabled="busy"
+      @click="adjusting = true"
+    />
+    <AdjustmentDialog
+      v-if="adjusting && request.adjustment"
+      :request="request"
+      :busy="busy"
+      :error="error"
+      @close="adjusting = false"
+      @confirm="emit('adjust', $event)"
+    />
     <ApprovalDecisionDialog
       v-if="selectedChoice"
       :request="request"

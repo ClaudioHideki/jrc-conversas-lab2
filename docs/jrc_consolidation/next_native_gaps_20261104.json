@@ -33,7 +33,8 @@
       "Treat decide as unrestricted CRM edit",
       "Silently copy requester identity into Current.user",
       "Overwrite immutable snapshot/decision history or bypass financial/authority verification"
-    ]
+    ],
+    "partial_implementation": "docs/jrc_consolidation/approval_adjustment_checkpoint_20261104.json"
   },
   "D8_global_delegation": {
     "finding": "Existing grants require policy_manage and bind exact policy-version/step; new D4 prevents future scoped cycles. A global own grant is not represented by this model.",

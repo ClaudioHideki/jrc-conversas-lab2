@@ -125,6 +125,15 @@ export const auditPresentation = event => ({
   state: event.data?.state,
   version: event.data?.expected_version,
   cycle: event.data?.cycle,
+  ...(event.event_type === 'request_adjusted'
+    ? {
+        adjustment: {
+          before: event.data?.before?.discount_cents,
+          after: event.data?.after?.discount_cents,
+          currency: event.data?.currency,
+        },
+      }
+    : {}),
 });
 
 export const describeCondition = node => {

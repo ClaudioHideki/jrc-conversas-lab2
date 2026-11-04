@@ -8,6 +8,7 @@ import RequestDetail from './RequestDetail.vue';
 import SimulatorView from './SimulatorView.vue';
 import DelegationView from './DelegationView.vue';
 import ResourcePicker from './ResourcePicker.vue';
+import { minorAmountText } from './tierPresentation';
 import { useApprovals } from './useApprovals';
 import {
   capability,
@@ -40,6 +41,7 @@ const filters = ref({
 });
 const decisionIntent = intent();
 const requestIntent = intent();
+const adjustmentIntent = intent();
 const screen = computed(() => route.params.screen || 'inbox');
 const id = computed(() => route.params.id);
 const can = action => capability(state.context, action);
@@ -219,6 +221,28 @@ const simulate = async body => {
   const result = await run(api => api.post('requests/simulate', body));
   if (result) simulation.value = result.data;
 };
+const adjust = async body => {
+  const result = await run(api =>
+    api.post(`requests/${id.value}/adjust`, {
+      adjustment: adjustmentIntent(
+        body,
+        `${state.accountId}:adjust:${id.value}`
+      ),
+    })
+  );
+  if (result) {
+    await navigate('inbox', result.data.request?.id);
+    await load();
+    notice.value = t('JRC_APPROVALS.adjustment.saved');
+  } else if (state.error?.status === 409) {
+    const error = state.error;
+    await load();
+    state.error = error;
+  } else if ([401, 403, 404].includes(state.error?.status)) {
+    record.value = null;
+    state.rows = [];
+  }
+};
 const grant = async delegation => {
   const result = await run(api => api.post('delegations', { delegation }));
   if (result) {
@@ -265,6 +289,13 @@ const errorText = computed(() => {
         'TIER_OVERLAP',
         'TIER_GAP',
         'TIER_NOT_APPLICABLE',
+        'INVALID_ADJUSTMENT_FIELDS',
+        'SOURCE_LOCKED',
+        'NO_ADJUSTMENT_CHANGE',
+        'ADJUSTMENT_OUTSIDE_POLICY',
+        'ADJUSTMENT_NOT_SUPPORTED',
+        'INVALID_COMMERCIAL_TERMS',
+        'STEP_NOT_CURRENT',
       ].includes(state.error.code)
     )
       return t(`JRC_APPROVALS.domainErrors.${state.error.code}`);
@@ -446,6 +477,7 @@ const errorText = computed(() => {
             )
           "
           @decide="decide"
+          @adjust="adjust"
           @audit="navigate('history', record.id)"
         />
         <SimulatorView
@@ -481,6 +513,19 @@ const errorText = computed(() => {
               {{ t('JRC_APPROVALS.actor') }} #{{ event.actor }} · {{ event.at }}
             </p>
             <p v-if="event.state">{{ event.state }}</p>
+            <p
+              v-if="event.adjustment"
+              class="break-words rounded-lg bg-n-teal-3 p-3 text-n-teal-11"
+            >
+              {{ t('JRC_APPROVALS.adjustment.summary') }}:
+              {{
+                t('JRC_APPROVALS.adjustment.values', {
+                  before: minorAmountText(event.adjustment.before),
+                  after: minorAmountText(event.adjustment.after),
+                  currency: event.adjustment.currency || '',
+                })
+              }}
+            </p>
             <p
               v-if="event.reason"
               class="whitespace-pre-wrap"

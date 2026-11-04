@@ -54,16 +54,10 @@ module Api
             attributes[:financial_version] = 3 if @proposal.draft? && @proposal.sent_at.nil?
             attributes.except!(:implementation_cents, :monthly_cents, :subtotal_cents, :total_cents) if @proposal.proposal_items.exists?
 
-            if @proposal.update(attributes)
-              commercial_changes = @proposal.saved_changes.keys - %w[updated_at]
-              @proposal.reset_approvals! if commercial_changes.any?
-              @proposal.recalculate_totals!
-              JrcApprovals::CommercialInvalidation.call(resource: @proposal.reload, user: Current.user)
-              audit_event!('updated', 'Proposta atualizada no CRM')
-              render json: serialize(@proposal.reload)
-            else
-              render json: { errors: @proposal.errors.full_messages }, status: :unprocessable_entity
-            end
+            JrcCrm::ProposalMutation.call!(proposal: @proposal, actor: Current.user, attributes: attributes)
+            render json: serialize(@proposal)
+          rescue ActiveRecord::RecordInvalid => e
+            render json: { errors: e.record.errors.full_messages }, status: :unprocessable_entity
           end
 
           def destroy

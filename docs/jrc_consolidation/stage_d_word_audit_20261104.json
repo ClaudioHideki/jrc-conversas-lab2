@@ -45,17 +45,19 @@
     },
     {
       "criterion": "CA-05",
-      "status": "Pending generic allowed-field adjustment UI; inspect/reuse native commercial exception engines before any new model",
+      "status": "Native proposal general discount adjustment, immutable revision and atomic decision implemented;54 backend and116 Vue passed. Other fields/types, notification delivery and fresh UI acceptance remain pending.",
       "evidence": [
         "app/controllers/api/v1/accounts/approvals/requests_controller.rb",
-        "app/javascript/dashboard/routes/dashboard/approvals/RequestDetail.vue"
+        "app/javascript/dashboard/routes/dashboard/approvals/RequestDetail.vue",
+        "docs/jrc_consolidation/approval_adjustment_checkpoint_20261104.json"
       ]
     },
     {
       "criterion": "CA-06",
-      "status": "Pending atomic adjustment plus approval integration; existing decision transaction must remain authoritative",
+      "status": "Native proposal general discount adjustment, immutable revision and atomic decision implemented;54 backend and116 Vue passed. Other fields/types, notification delivery and fresh UI acceptance remain pending.",
       "evidence": [
-        "app/services/jrc_approvals/decisions.rb"
+        "app/services/jrc_approvals/decisions.rb",
+        "docs/jrc_consolidation/approval_adjustment_checkpoint_20261104.json"
       ]
     },
     {

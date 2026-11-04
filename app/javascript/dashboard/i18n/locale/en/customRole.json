@@ -121,7 +121,12 @@
       "JRC_SERVICE_DESK_APPROVALS_REQUEST": "Request approvals",
       "JRC_SERVICE_DESK_APPROVALS_DECIDE": "Decide assigned approvals",
       "JRC_SERVICE_DESK_INCIDENTS_MANAGE": "Manage Service Desk incidents",
-      "JRC_SERVICE_DESK_TICKETS_CLAIM": "Claim next eligible ticket"
+      "JRC_SERVICE_DESK_TICKETS_CLAIM": "Claim next eligible ticket",
+      "JRC_APPROVALS_POLICY_MANAGE": "Manage approval rules and scoped delegations",
+      "JRC_APPROVALS_REQUEST_CREATE": "Request approval within native scope",
+      "JRC_APPROVALS_DECIDE": "Decide assigned approval stages",
+      "JRC_APPROVALS_VIEW_AUDIT": "View approval audit within native scope",
+      "JRC_APPROVALS_ADJUST": "Adjust installed approval fields (also requires native module edit access)"
     },
     "FORM": {
       "NAME": {

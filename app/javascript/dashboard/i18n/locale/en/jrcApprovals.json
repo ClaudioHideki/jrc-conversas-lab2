@@ -302,11 +302,30 @@
       "POLICY_REQUIRED": "No active approval rule matches this context.",
       "POLICY_SELECTION_CONFLICT": "The applicable rules conflict. Review their selection settings.",
       "INSUFFICIENT_APPROVERS": "There are not enough currently eligible approvers for this rule.",
-      "AUTHORITY_NOT_APPLICABLE": "The configured authority conditions do not match this source."
+      "AUTHORITY_NOT_APPLICABLE": "The configured authority conditions do not match this source.",
+      "INVALID_ADJUSTMENT_FIELDS": "Only the installed general discount can be adjusted. Enter a nonnegative amount with at most two decimal places.",
+      "SOURCE_LOCKED": "This proposal is locked. Create a new version through its native CRM screen.",
+      "NO_ADJUSTMENT_CHANGE": "Enter a discount different from the current value.",
+      "ADJUSTMENT_OUTSIDE_POLICY": "The adjusted value no longer matches this rule. The source was not changed.",
+      "ADJUSTMENT_NOT_SUPPORTED": "Adjustment is not installed for this type of approval.",
+      "INVALID_COMMERCIAL_TERMS": "Review the commercial conditions in the source proposal. The adjustment was not saved.",
+      "STEP_NOT_CURRENT": "The adjusted value requires a different approval authority. The adjustment and decision were rolled back."
     },
     "simulationStates": {
       "pending": "Approval required",
       "blocked": "Blocked"
+    },
+    "adjustment": {
+      "title": "Adjust permitted fields",
+      "notice": "Only the installed proposal discount can be edited here. A new audited request preserves the original requester, policy version and deadline. Saving and approving rechecks the current authority; an ineligible decision rolls back the whole adjustment.",
+      "original": "Original general discount",
+      "discount": "Adjusted general discount",
+      "action": "After saving",
+      "save": "Save adjustment and keep pending",
+      "approve": "Save adjustment and approve",
+      "saved": "Adjustment saved. The new value follows its recalculated approval authority.",
+      "summary": "General discount adjustment",
+      "values": "{before} → {after} {currency}"
     }
   }
 }
