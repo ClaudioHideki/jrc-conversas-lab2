@@ -1,5 +1,18 @@
 {
   "RELATIONSHIP": {
+    "PRODUCT_HISTORY": {
+      "TITLE": "Product health history",
+      "LOADING": "Loading authorized product observations…",
+      "ERROR": "Product history is unavailable. Check your current permissions and source access.",
+      "EMPTY": "No authorized preserved observations for this product.",
+      "NOTE": "Measurements preserved in the customer history. Compare the observation date and calculation version; a missing score is unavailable.",
+      "MEASUREMENT": "{score} · {band}",
+      "FACTOR_VALUE": "{factor}: {score} · {evidence}",
+      "PAGE": "Page {page} · {total} observations",
+      "FACTORS": "Factors and evidence for this observation",
+      "PREVIOUS": "Previous",
+      "NEXT": "Next"
+    },
     "HEALTH_STABILITY": "Band retained until the {points}-point recovery margin is reached. Measured band: {band}.",
     "REVIEWED_BATCH": {
       "TITLE": "Lote revisado",

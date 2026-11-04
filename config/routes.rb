@@ -641,6 +641,7 @@ Rails.application.routes.draw do
                 get :recommendations
                 get :channels
                 get :work_context
+                get :product_health_history
                 post :native_csat
                 post :manual_attendance
               end

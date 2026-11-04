@@ -31,6 +31,11 @@ export default {
     axios.get(`${base(accountId)}/portfolio`, { ...options, params }),
   customer: (accountId, id, options) =>
     axios.get(`${base(accountId)}/portfolio/${Number(id)}`, options),
+  productHealthHistory: (accountId, id, params, options) =>
+    axios.get(
+      `${base(accountId)}/portfolio/${Number(id)}/product_health_history`,
+      { ...options, params }
+    ),
   saveAssignment: (accountId, assignment, id) =>
     id
       ? axios.patch(`${base(accountId)}/portfolio/${Number(id)}`, {

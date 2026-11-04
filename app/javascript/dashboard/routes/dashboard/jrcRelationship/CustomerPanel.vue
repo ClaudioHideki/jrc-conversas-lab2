@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import HealthStabilityNote from './HealthStabilityNote.vue';
+import ProductHealthHistory from './ProductHealthHistory.vue';
 import API from 'dashboard/api/jrcRelationship';
 import ComposeConversation from 'dashboard/components-next/NewConversation/ComposeConversation.vue';
 import VoiceCallButton from 'dashboard/components-next/Contacts/VoiceCallButton.vue';
@@ -298,6 +299,7 @@ const money = value => formatMoney(value, props.metadata?.formatting);
             {{ factor.normalized ?? t('RELATIONSHIP.UNAVAILABLE') }} ·
             {{ factor.evidence }}
           </p>
+          <ProductHealthHistory :assignment-id="record.id" :product-id="product.id" :formatting="metadata.formatting" />
         </div>
       </details>
       <details class="my-4">

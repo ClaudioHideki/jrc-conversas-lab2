@@ -87,6 +87,14 @@ class Api::V1::Accounts::Relationship::PortfolioController < Api::V1::Accounts::
     render json: presenter.recommendations(relationship_context.assignment(params[:id]))
   end
 
+  def product_health_history
+    response.headers['Cache-Control'] = 'no-store'
+    render json: JrcRelationship::ProductHealthHistory.new(relationship_context).call(
+      assignment_id: params[:id], product_id: params.require(:product_id),
+      page: params.fetch(:page, 1), per_page: params.fetch(:per_page, 10)
+    )
+  end
+
   def work_context
     record = relationship_context.assignment(params[:id])
     render json: JrcRelationship::WorkContext.new(context: relationship_context, assignment: record, period: report_period).call.except(:_source_ids)
