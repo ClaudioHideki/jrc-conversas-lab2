@@ -85,10 +85,12 @@
     },
     {
       "criterion": "CA-10",
-      "status": "Partial: current delegations are policy-version/step-scoped and policy_manage-authorized; global own delegation MVP remains a real gap",
+      "status": "Existing scoped grants hardened against self/cycles/concurrency, with native UI errors; 56 backend and 63 distinct Vue cases covered. Global own delegation remains unimplemented; no policy_manage grant relaxed.",
       "evidence": [
         "app/services/jrc_approvals/delegations.rb",
-        "app/javascript/dashboard/routes/dashboard/approvals/DelegationView.vue"
+        "app/javascript/dashboard/routes/dashboard/approvals/DelegationView.vue",
+        "app/services/jrc_approvals/delegation_topology.rb",
+        "docs/jrc_consolidation/approval_delegation_checkpoint_20261104.json"
       ]
     },
     {
@@ -135,5 +137,6 @@
     "Current advanced parallel/quorum/condition capabilities are preserved even where Word marks them future.",
     "Internal notifications require separate inventory of actual producers/consumers; not declared implemented merely because audit events exist."
   ],
-  "next": "Inventory adjustment, numeric tiers, global own delegation and native notification gaps; continue independent E/F/G code review and targeted regressions."
+  "next": "Inventory adjustment, numeric tiers, global own delegation and native notification gaps; continue independent E/F/G code review and targeted regressions.",
+  "tables_revisited_in_full": 20
 }

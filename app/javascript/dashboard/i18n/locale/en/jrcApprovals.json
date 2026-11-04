@@ -263,6 +263,7 @@
       "never": "Never matches",
       "yes": "Yes",
       "no": "No"
-    }
+    },
+    "invalidDelegation": "This delegation is not valid. Select different eligible users and a valid period without circular delegations."
   }
 }

@@ -241,7 +241,9 @@ const auditRows = computed(() => state.rows.map(auditPresentation));
 const pageTo = page =>
   navigate(screen.value, id.value, { ...route.query, page });
 const errorText = computed(() =>
-  t(`JRC_APPROVALS.error${state.error?.status || 'Network'}`)
+  state.error?.status === 422 && state.error.code === 'INVALID_DELEGATION'
+    ? t('JRC_APPROVALS.invalidDelegation')
+    : t(`JRC_APPROVALS.error${state.error?.status || 'Network'}`)
 );
 </script>
 

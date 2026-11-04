@@ -749,6 +749,69 @@ describe('E4 components using bounded real DTO contracts', () => {
     expect(wrapper.find('[role="alert"]').exists()).toBe(true);
     wrapper.unmount();
   });
+  it('shows the server delegation validation as an actionable error without retrying or displaying success', async () => {
+    const router = createRouter({ history: createMemoryHistory(), routes });
+    await router.push({
+      name: 'jrc_approvals',
+      params: { accountId: 17, screen: 'delegations' },
+    });
+    axios.get.mockImplementation(url =>
+      Promise.resolve(response(url.endsWith('/context') ? context : []))
+    );
+    axios.post.mockRejectedValue({
+      response: { status: 422, data: { error: 'INVALID_DELEGATION' } },
+    });
+    const wrapper = mount(ApprovalsPage, {
+      global: { plugins: [i18n(), router], stubs: { Button: buttonStub } },
+    });
+    await flushPromises();
+    wrapper
+      .getComponent(DelegationView)
+      .vm.$emit('create', { policy_version_id: 401 });
+    await flushPromises();
+    expect(wrapper.get('[role="alert"]').text()).toContain(
+      'Select different eligible users and a valid period without circular delegations.'
+    );
+    expect(axios.post).toHaveBeenCalledTimes(1);
+    expect(wrapper.text()).not.toContain('Saved and reloaded');
+    wrapper.unmount();
+  });
+  it('prevents selecting the principal as their own delegate while preserving native identities and clearing a conflicting selection', async () => {
+    const published = {
+      ...policy,
+      enabled: true,
+      current_version_id: 401,
+      published_definition: { ...definition, delegation_allowed: true },
+    };
+    axios.get.mockImplementation(url =>
+      Promise.resolve(
+        response(
+          url.endsWith('/policies')
+            ? [published]
+            : {
+                account_users: [
+                  { id: 43, name: 'Principal A' },
+                  { id: 44, name: 'Principal B' },
+                ],
+              }
+        )
+      )
+    );
+    const wrapper = mount(DelegationView, options({ props: { context, rows: [] } }));
+    await flushPromises();
+    await wrapper.findAll('select')[0].setValue('301');
+    await flushPromises();
+    const selectors = wrapper.findAll('select');
+    await selectors[1].setValue('review');
+    expect(selectors[1].get('option[value="review"]').text()).toBe('Step 1');
+    await selectors[2].setValue('43');
+    expect(selectors[3].get('option[value="43"]').element.disabled).toBe(true);
+    await selectors[3].setValue('44');
+    await selectors[2].setValue('44');
+    expect(selectors[3].element.value).toBe('');
+    expect(wrapper.emitted('create')).toBeUndefined();
+    wrapper.unmount();
+  });
   it('loads a Central list with endpoint filters and total headers', async () => {
     const router = createRouter({ history: createMemoryHistory(), routes });
     await router.push({

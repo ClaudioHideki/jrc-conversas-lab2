@@ -57,4 +57,25 @@ RSpec.describe 'Approval core independent PostgreSQL connections', type: :model,
     expect(request.state).to eq('pending')
     expect(JrcApprovals::AuditEvent.where(request_id: request.id, event_type: 'decision_recorded').count).to eq(1)
   end
+
+  it 'serializes reciprocal delegation grants so only one overlapping direction is committed' do
+    scope = approval_scope
+    author = approval_actor(scope)
+    a = approval_actor(scope)
+    b = approval_actor(scope)
+    policy = approval_publish(scope, author, approval_definition([a, b]).merge('delegation_allowed' => true))
+    starts_at = Time.current
+    ends_at = 1.hour.from_now
+    results = simultaneous do |index|
+      principal, delegate = index.zero? ? [a, b] : [b, a]
+      JrcApprovals::Delegations.new(account: scope[:account], user: author.user).create!(
+        policy_version_id: policy.current_version_id, step_code: 'review', principal_id: principal.id, delegate_id: delegate.id,
+        actions: ['approved'], reason: 'Synthetic concurrent coverage', starts_at: starts_at, ends_at: ends_at
+      ).id
+    end
+    expect(results.count { |result| result.first == :ok }).to eq(1)
+    expect(results.find { |result| result.first == :error }).to eq([:error, 'JrcApprovals::Error', 'INVALID_DELEGATION'])
+    expect(JrcApprovals::Delegation.where(account_id: scope[:account].id).count).to eq(1)
+    expect(JrcApprovals::AuditEvent.where(account_id: scope[:account].id, event_type: 'delegation_granted').count).to eq(1)
+  end
 end

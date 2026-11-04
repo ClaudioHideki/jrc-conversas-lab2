@@ -1,0 +1,134 @@
+{
+  "date": "2026-11-04",
+  "stage": "D4 scoped delegation hardening",
+  "parent_checkpoint": "0114e16a725e72d78ef92bc1fa383e2566c1e822",
+  "existing": "Database CHECK already forbids principal_id = delegate_id and invalid periods. Native policy_manage, eligibility, account FKs, immutable policy version and step binding remain authoritative.",
+  "changes": [
+    "Returns bounded INVALID_DELEGATION for self-grants before database failure.",
+    "Rejects new reciprocal or transitive cycles only when all edges share a nonempty period in the same account/policy-version/step. Merely adjacent periods, revoked grants and independent policy versions are not conflated.",
+    "Serializes grant creation with native transaction-scoped advisory lock. Existing grants/histories are not rewritten.",
+    "UI prevents self-selection, clears conflicting delegate selection, labels native step/action values readably, and presents the server validation error without automatic retry."
+  ],
+  "files": [
+    "app/services/jrc_approvals/delegation_topology.rb",
+    "app/services/jrc_approvals/delegations.rb",
+    "app/javascript/dashboard/routes/dashboard/approvals/DelegationView.vue",
+    "app/javascript/dashboard/routes/dashboard/approvals/ApprovalsPage.vue",
+    "spec/services/jrc_approvals/delegations_topology_spec.rb",
+    "spec/services/jrc_approvals/concurrency_spec.rb"
+  ],
+  "tests": {
+    "backend_core_plus_topology": {
+      "artifact": "/tmp/topology-refined-20261104.json",
+      "examples": 53,
+      "failures": 0
+    },
+    "final_topology": {
+      "artifact": "/tmp/topology-final-20261104.json",
+      "examples": 7,
+      "failures": 0
+    },
+    "final_independent_postgresql_connections": {
+      "artifact": "/tmp/topology-concurrency-final-20261104.json",
+      "examples": 3,
+      "failures": 0,
+      "reciprocal_case": "Exactly one grant and one grant audit persisted"
+    },
+    "distinct_backend_cases": 56,
+    "vue": {
+      "primary": ".codex\\d-approvals-20261104\\vue-topology-ui.json",
+      "primary_passed": 62,
+      "primary_failed": 1,
+      "failure": "New test omitted required rows prop; fixture corrected, product not relaxed",
+      "corrected": ".codex\\d-approvals-20261104\\vue-topology-ui-corrected.json",
+      "corrected_executed": 2,
+      "corrected_skipped": 61,
+      "corrected_failures": 0,
+      "exit_code": 0,
+      "no_unhandled_errors": true,
+      "distinct_covered": 63
+    },
+    "lint": {
+      "eslint_errors": 0,
+      "eslint_warnings": 51,
+      "topology_and_new_spec_offenses": 0,
+      "delegations_service": "ABC offense removed; four inherited offenses remain, no new metrics/layout offenses",
+      "concurrency_spec": "15 inherited offenses unchanged; added example has no new offenses"
+    }
+  },
+  "disk": {
+    "final_topology": {
+      "start": 16593424384,
+      "minimum": 16578514944,
+      "mandatory_stop": 750000000,
+      "conservative_stop": 2000000000,
+      "no_build": true,
+      "database": "jrc_rel_v2_candidate_test",
+      "exact_source_overlays": {
+        "sources": [
+          {
+            "path": "app/services/jrc_approvals/delegation_topology.rb",
+            "constant": null,
+            "method": "JrcApprovals::DelegationTopology.method(:check!)"
+          },
+          {
+            "path": "app/services/jrc_approvals/delegations.rb",
+            "constant": "JrcApprovals::Delegations",
+            "method": "JrcApprovals::Delegations.instance_method(:create!)"
+          }
+        ],
+        "spec": "spec/services/jrc_approvals/delegations_topology_spec.rb"
+      },
+      "original_runtime_files_changed": false,
+      "exit_code": 0,
+      "end": 16577052672,
+      "status": "passed"
+    },
+    "concurrency": {
+      "start": 16577048576,
+      "minimum": 16566509568,
+      "mandatory_stop": 750000000,
+      "conservative_stop": 2000000000,
+      "no_build": true,
+      "database": "jrc_rel_v2_candidate_test",
+      "exact_source_overlays": {
+        "sources": [
+          {
+            "path": "app/services/jrc_approvals/delegation_topology.rb",
+            "constant": null,
+            "method": "JrcApprovals::DelegationTopology.method(:check!)"
+          },
+          {
+            "path": "app/services/jrc_approvals/delegations.rb",
+            "constant": "JrcApprovals::Delegations",
+            "method": "JrcApprovals::Delegations.instance_method(:create!)"
+          }
+        ],
+        "spec": "spec/services/jrc_approvals/concurrency_spec.rb"
+      },
+      "original_runtime_files_changed": false,
+      "exit_code": 0,
+      "end": 16565395456,
+      "status": "passed"
+    },
+    "ui": {
+      "status": "passed",
+      "free_start": 16593522688,
+      "minimum_free": 16568193024,
+      "mandatory_stop_bytes": 750000000,
+      "conservative_stop_bytes": 2000000000,
+      "no_build": true,
+      "owned_process_id": 21860,
+      "exit_code": 0,
+      "free_end": 16589688832
+    },
+    "current": 16590532608
+  },
+  "remaining": [
+    "Global own temporary delegation per Word is not implemented; this change hardens existing scoped grants only",
+    "Historical preexisting active graph cycles are not retroactively rewritten or revoked",
+    "Fresh compilation and actual browser validation pending; UI remains 4d4a6de3",
+    "D remains open; no generic adjust/atomic adjust+approve, dedicated tiers or native notification delivery completed by this change"
+  ],
+  "no_cleanup_build_push_publish_deploy_external_operation": true
+}
