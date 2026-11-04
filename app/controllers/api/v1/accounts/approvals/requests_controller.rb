@@ -8,8 +8,10 @@ class Api::V1::Accounts::Approvals::RequestsController < Api::V1::Accounts::Appr
 
   def show
     record = readable_request
-    decisions = record.decisions.order(:id).map do |decision|
-      decision.attributes.slice('id', 'step_code', 'decision', 'reason', 'cycle', 'created_at').merge('actor_name' => decision.actor.user.name)
+    decisions = record.decisions.includes(actor: :user, principal: :user).order(:id).map do |decision|
+      values = decision.attributes.slice('id', 'step_code', 'decision', 'reason', 'cycle', 'created_at')
+      values.merge('actor_name' => decision.actor.user.name,
+                   'delegated_from_name' => decision.delegation_id && decision.principal.user.name)
     end
     render json: request_payload(record).merge(decisions: decisions, allowed_decisions: JrcApprovals::DecisionOptions.call(
       account: Current.account, user: Current.user, record: record

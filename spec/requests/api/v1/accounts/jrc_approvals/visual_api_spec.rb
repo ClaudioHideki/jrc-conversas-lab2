@@ -108,6 +108,29 @@ RSpec.describe 'E4 bounded visual administration', :approval_core, :commercial_a
     expect(response.parsed_body).to eq([])
   end
 
+  it 'projects the authorized delegation principal and records both names without exposing personal data' do
+    published = approval_publish(scope, author, approval_definition([approver]).merge('delegation_allowed' => true))
+    record = approval_request(scope, author)
+    delegate = approval_actor(scope, permissions: %w[jrc_approvals_decide])
+    grant = JrcApprovals::Delegations.new(account: scope[:account], user: author.user).create!(
+      policy_version_id: published.current_version_id, step_code: 'review', principal_id: approver.id, delegate_id: delegate.id,
+      actions: ['approved'], reason: 'SYNTHETIC delegated review', starts_at: 1.minute.ago, ends_at: 1.hour.from_now
+    )
+    get "#{url}/requests/#{record.id}", headers: delegate.user.create_new_auth_token
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body['allowed_decisions'].first['choices'].first).to include(
+      'delegation_id' => grant.id, 'principal_name' => approver.user.name, 'actions' => ['approved']
+    )
+    expect(response.body).not_to include(approver.user.email)
+    decision = { step_code: 'review', decision: 'approved', reason: 'SYNTHETIC confirmed delegated decision',
+                 expected_version: record.lock_version, delegation_id: grant.id, idempotency_key: SecureRandom.uuid }
+    post "#{url}/requests/#{record.id}/decide", headers: delegate.user.create_new_auth_token, as: :json, params: { decision: decision }
+    expect(response).to have_http_status(:ok)
+    expect(record.reload.state).to eq('approved')
+    get "#{url}/requests/#{record.id}", headers: headers
+    expect(response.parsed_body['decisions'].first).to include('actor_name' => delegate.user.name, 'delegated_from_name' => approver.user.name)
+  end
+
   it 'returns validated eligible counts and immutable published version authors' do
     proposal
     values = { code: 'visual', name: 'Synthetic UI policy', module_key: 'crm', event_key: 'proposal_send',

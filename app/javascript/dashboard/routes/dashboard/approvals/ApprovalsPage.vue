@@ -195,6 +195,9 @@ const decide = async decision => {
     await load();
     state.error = error;
     notice.value = t('JRC_APPROVALS.concurrent');
+  } else if ([401, 403, 404].includes(state.error?.status)) {
+    record.value = null;
+    state.rows = [];
   }
 };
 const simulate = async body => {
@@ -400,6 +403,8 @@ const errorText = computed(() =>
           v-if="screen === 'inbox' && record"
           :key="record.id"
           :request="record"
+          :error="state.error ? errorText : ''"
+          :error-state="state.error"
           :context="state.context"
           :busy="state.loading"
           :audit-allowed="

@@ -1,19 +1,67 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Button from 'dashboard/components-next/button/Button.vue';
 import { decisionChoices, scopeLabel } from './model';
+import ApprovalDecisionDialog from './ApprovalDecisionDialog.vue';
 import AuthorityOrigin from './AuthorityOrigin.vue';
 const props = defineProps({
   request: { type: Object, required: true },
   context: { type: Object, default: null },
   busy: Boolean,
   auditAllowed: Boolean,
+  error: { type: String, default: '' },
+  errorState: { type: Object, default: null },
 });
 const emit = defineEmits(['decide', 'audit']);
 const { t } = useI18n();
 const reason = ref('');
 const choices = computed(() => decisionChoices(props.request));
+const selectedChoice = ref(null);
+const choose = choice => {
+  if (!props.busy && reason.value.trim()) selectedChoice.value = choice;
+};
+const label = (choice, index) => {
+  const action = t(`JRC_APPROVALS.decisionLabels.${choice.decision}`);
+  const step =
+    Math.max(
+      0,
+      (props.request.stages || []).findIndex(
+        row => row.code === choice.step_code
+      )
+    ) + 1;
+  let delegation = '';
+  if (choice.delegation_id) {
+    delegation = choice.principal_name
+      ? t('JRC_APPROVALS.onBehalfOf', { name: choice.principal_name })
+      : t('JRC_APPROVALS.delegatedOption', { number: index + 1 });
+  }
+  return [action, t('JRC_APPROVALS.stepNumber', { number: step }), delegation]
+    .filter(Boolean)
+    .join(' · ');
+};
+watch(
+  () =>
+    JSON.stringify([
+      props.context?.account_id,
+      props.context?.member_id,
+      props.request.id,
+      props.request.lock_version,
+      props.request.state,
+      props.request.allowed_decisions,
+    ]),
+  () => {
+    selectedChoice.value = null;
+  }
+);
+const confirm = payload => {
+  if (
+    !props.busy &&
+    selectedChoice.value &&
+    props.request.lock_version === payload.expected_version
+  )
+    emit('decide', payload);
+};
 </script>
 
 <template>
@@ -85,19 +133,25 @@ const choices = computed(() => decisionChoices(props.request));
           <Button
             v-for="(choice, index) in choices"
             :key="index"
-            :label="`${choice.step_code}: ${choice.decision}${choice.delegation_id ? ` (#${choice.delegation_id})` : ''}`"
+            :label="label(choice, index)"
             :disabled="busy || !reason.trim()"
-            @click="
-              emit('decide', {
-                ...choice,
-                reason: reason.trim(),
-                expected_version: request.lock_version,
-              })
-            "
+            @click="choose(choice)"
           />
         </div>
       </template>
     </section>
+    <ApprovalDecisionDialog
+      v-if="selectedChoice"
+      :request="request"
+      :choice="selectedChoice"
+      :context="context"
+      :reason="reason"
+      :busy="busy"
+      :error="error"
+      :error-state="errorState"
+      @close="selectedChoice = null"
+      @confirm="confirm"
+    />
     <section class="space-y-3">
       <h3 class="font-semibold">{{ t('JRC_APPROVALS.decisions') }}</h3>
       <p
@@ -112,8 +166,15 @@ const choices = computed(() => decisionChoices(props.request));
         class="rounded-xl border border-n-weak p-3 text-sm"
       >
         <p>
-          {{ decision.step_code }} · {{ decision.decision }} ·
+          {{ t(`JRC_APPROVALS.decisionLabels.${decision.decision}`) }} ·
           {{ decision.actor_name }}
+        </p>
+        <p v-if="decision.delegated_from_name">
+          {{
+            t('JRC_APPROVALS.onBehalfOf', {
+              name: decision.delegated_from_name,
+            })
+          }}
         </p>
         <p class="my-2 whitespace-pre-wrap">{{ decision.reason }}</p>
         <p class="text-xs text-n-slate-11">

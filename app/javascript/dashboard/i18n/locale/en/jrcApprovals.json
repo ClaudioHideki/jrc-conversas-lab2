@@ -182,6 +182,18 @@
     "groupScope": "Account-wide scope",
     "status_GRATUITY_POLICY_REQUIRED": "Gratuity blocked: configure and enable enforcement after validation",
     "status_GRATUITY_VALUE_PENDING": "Gratuity impact pending an official reference",
-    "status_GRATUITY_AUTHORITIES_PENDING": "Principals and formal authorization pending"
+    "status_GRATUITY_AUTHORITIES_PENDING": "Principals and formal authorization pending",
+    "confirmDecision": "Confirm decision",
+    "confirmDecisionNotice": "Confirm this decision for the selected request. The server rechecks your permission, delegation, current source and version.",
+    "decisionLabels": {
+      "approved": "Approve",
+      "rejected": "Reject",
+      "returned": "Return for correction",
+      "escalated": "Escalate"
+    },
+    "onBehalfOf": "On behalf of {name}",
+    "delegatedDecision": "Delegated decision",
+    "delegatedOption": "Delegated option {number}",
+    "stepNumber": "Step {number}"
   }
 }

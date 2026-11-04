@@ -136,10 +136,24 @@ const buttonStub = {
   props: ['label', 'disabled'],
   template: '<button :disabled="disabled">{{ label }}</button>',
 };
+const decisionDialogStub = {
+  props: [
+    'confirmButtonLabel',
+    'disableConfirmButton',
+    'isLoading',
+    'dismissible',
+  ],
+  emits: ['confirm', 'close'],
+  setup(_, { expose, emit }) {
+    expose({ open: vi.fn(), close: () => emit('close') });
+  },
+  template:
+    '<section role="dialog"><slot /><button data-confirm :disabled="disableConfirmButton || isLoading" @click="$emit(\'confirm\')">{{ confirmButtonLabel }}</button><button data-cancel :disabled="!dismissible" @click="$emit(\'close\')">Cancel</button></section>',
+};
 const options = extra => ({
   global: {
     plugins: [i18n()],
-    stubs: { Button: buttonStub, RouterLink: true },
+    stubs: { Button: buttonStub, RouterLink: true, Dialog: decisionDialogStub },
   },
   ...extra,
 });
@@ -368,12 +382,15 @@ describe('E4 components using bounded real DTO contracts', () => {
   it('renders only allowed decision buttons, requires a reason and emits expected version/delegation', async () => {
     const wrapper = mount(RequestDetail, options({ props: { request } }));
     expect(wrapper.findAll('button').map(b => b.text())).toEqual([
-      'review: approved',
-      'review: returned',
+      'Approve · Step 1',
+      'Return for correction · Step 1',
     ]);
     expect(wrapper.find('button').attributes('disabled')).toBeDefined();
     await wrapper.find('textarea').setValue('Reviewed synthetic evidence');
     await wrapper.find('button').trigger('click');
+    await flushPromises();
+    expect(wrapper.emitted('decide')).toBeUndefined();
+    await wrapper.get('[data-confirm]').trigger('click');
     expect(wrapper.emitted('decide')[0][0]).toEqual({
       step_code: 'review',
       decision: 'approved',
@@ -421,7 +438,9 @@ describe('E4 components using bounded real DTO contracts', () => {
         },
       })
     );
-    expect(wrapper.find('button').text()).toBe('review: approved (#99)');
+    expect(wrapper.find('button').text()).toBe(
+      'Approve · Step 1 · Delegated option 1'
+    );
     expect(wrapper.text()).not.toContain('History / Audit');
   });
   it('edits a detached draft without mutating the response and keeps identity immutable', async () => {
@@ -682,6 +701,40 @@ describe('E4 components using bounded real DTO contracts', () => {
     await flushPromises();
     expect(axios.get).not.toHaveBeenCalled();
     expect(wrapper.text()).toBe('');
+  });
+  it('clears protected request detail when the native decision API denies current access', async () => {
+    const router = createRouter({ history: createMemoryHistory(), routes });
+    await router.push({
+      name: 'jrc_approvals',
+      params: { accountId: 17, screen: 'inbox', id: request.id },
+    });
+    axios.get.mockImplementation(url => {
+      if (url.endsWith('/context')) return Promise.resolve(response(context));
+      if (url.endsWith(`/requests/${request.id}`))
+        return Promise.resolve(response(request));
+      return Promise.resolve(response([]));
+    });
+    axios.post.mockRejectedValue({
+      response: { status: 403, data: { error: 'FORBIDDEN' } },
+    });
+    const wrapper = mount(ApprovalsPage, {
+      global: {
+        plugins: [i18n(), router],
+        stubs: { Button: buttonStub, Dialog: decisionDialogStub },
+      },
+    });
+    await flushPromises();
+    expect(wrapper.findComponent(RequestDetail).exists()).toBe(true);
+    wrapper.getComponent(RequestDetail).vm.$emit('decide', {
+      step_code: 'review',
+      decision: 'approved',
+      reason: 'Explicit review',
+      expected_version: 0,
+    });
+    await flushPromises();
+    expect(wrapper.findComponent(RequestDetail).exists()).toBe(false);
+    expect(wrapper.find('[role="alert"]').exists()).toBe(true);
+    wrapper.unmount();
   });
   it('loads a Central list with endpoint filters and total headers', async () => {
     const router = createRouter({ history: createMemoryHistory(), routes });

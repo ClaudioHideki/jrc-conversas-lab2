@@ -1,0 +1,66 @@
+{
+  "status": "D1 implemented and targeted gates validated; not built or visually homologated",
+  "base": "b2c7eb4e9a51ab9143e9ef238e4999a3c40e86a5",
+  "branch": "codex/relacionamento-v2-20261101",
+  "changes": [
+    "Explicit native Dialog confirmation before any decision API event",
+    "Pinned request/version, reason, original native delegation and step payload; no principal-name or account-scope grants from client fields",
+    "Double-click protection and deliberate retry after fast rejected response",
+    "Prepared confirmation invalidates on request/state/version/allowed-choice/context changes",
+    "Denial from decision API clears protected request detail; error is visible in popup while applicable",
+    "Native eligible delegated choices and recorded votes expose principal name, not email/identifier or raw audit data",
+    "Friendly decision labels replace technical codes and delegation IDs on action buttons"
+  ],
+  "tests": {
+    "backend": {
+      "examples": 10,
+      "failures": 0,
+      "report": ".codex/d-approvals-20261104/decision-native-initial.json"
+    },
+    "canonical_delegated_api": {
+      "examples": 1,
+      "failures": 0,
+      "report": ".codex/d-approvals-20261104/decision-native-canonical.json",
+      "real_path": "Current server-authenticated request read -> delegated decision HTTP POST -> native persisted state/vote -> actor/principal names"
+    },
+    "vue": {
+      "examples": 68,
+      "failures": 0,
+      "report": ".codex/d-approvals-20261104/vue-initial.json"
+    },
+    "additional_denial": {
+      "passed": 1,
+      "report": ".codex/d-approvals-20261104/vue-denied.json"
+    },
+    "limits": "Vue APIs mocked; complementary runs are not one single 69-test run or Chrome evidence"
+  },
+  "lint": {
+    "eslint_errors": 0,
+    "new_ruby_helpers_controller_test_offenses": 0,
+    "legacy_DecisionOptions_call_metrics": 4,
+    "abc_before": 85.23,
+    "abc_after": 66.79,
+    "new_checks_disabled": false
+  },
+  "word_audit": "docs/jrc_consolidation/stage_d_word_audit_20261104.json",
+  "disk": {
+    "start": 4198404096,
+    "minimum": 4155437056,
+    "current": 16606408704,
+    "stop_before": 2000000000,
+    "cleanup": false,
+    "increase_cause": "Free space increased externally; pagefile and VHDX logical lengths unchanged at read-only recheck. No attribution made."
+  },
+  "runtime": {
+    "url": "http://127.0.0.1:5379",
+    "compiled_product": "4d4a6de3",
+    "changed": false
+  },
+  "no_migration": true,
+  "no_new_build": true,
+  "no_production": true,
+  "no_push": true,
+  "no_ghcr": true,
+  "stage_D_complete": false,
+  "next": "D2 native origin navigation; preserve C visual and scale gates as open."
+}
