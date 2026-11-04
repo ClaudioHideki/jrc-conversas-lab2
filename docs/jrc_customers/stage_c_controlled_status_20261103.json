@@ -69,5 +69,9 @@
   "push": false,
   "deploy": false,
   "production": false,
-  "images": false
+  "images": false,
+  "B1_native_ticket_increment": {
+    "status": "implemented_awaiting_build_chrome",
+    "evidence": "master_ticket_context_checkpoint_20261103.json"
+  }
 }

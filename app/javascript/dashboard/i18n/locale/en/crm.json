@@ -1288,6 +1288,11 @@
     },
     "CUSTOMER_MASTER_360": {
       "COMPANY_DOCUMENTS": "Documentos",
+      "NEW_TICKET": "Novo chamado",
+      "TICKET_CONTEXT_READY": "Contexto validado para a unidade selecionada. Confira os dados antes de criar o chamado.",
+      "TICKET_CONTEXT_UNIT": "Selecione uma unidade para verificar a empresa e o solicitante no Service Desk.",
+      "TICKET_CONTEXT_LOADING": "Verificando empresa e solicitante…",
+      "TICKET_CONTEXT_DENIED": "Não foi possível validar este contexto. Selecione uma empresa e um solicitante autorizados no formulário.",
       "COMPANY_DETAILS": "Empresa 360º",
       "OPEN_FULL_PAGE": "Abrir em tela completa",
       "BACKOFFICE_TITLE": "Backoffice",

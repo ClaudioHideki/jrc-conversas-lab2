@@ -36,6 +36,7 @@ const render = () =>
     props: { contactId: 42 },
     global: {
       stubs: {
+        MasterTicketAction: true,
         MasterContactPanel: true,
         RecordsPanel: true,
         TimelinePanel: true,

@@ -50,6 +50,7 @@ const render = async () => {
     global: {
       plugins: [router],
       stubs: {
+        MasterTicketAction: true,
         CompanyEditorDialog: true,
         BackofficeContextPanel: true,
         RelationshipMapPanel: true,

@@ -13,6 +13,11 @@ import { T } from 'dashboard/routes/dashboard/jrcCustomers/copy';
 import CompanyPicker from 'dashboard/routes/dashboard/jrcCustomers/components/CompanyPicker.vue';
 import { useCustomerMaster } from 'dashboard/routes/dashboard/jrcCustomers/useCustomerMaster';
 import RelationshipAPI from 'dashboard/api/jrcRelationship';
+import ServiceDeskAPI from 'dashboard/api/serviceDesk';
+import {
+  applyMasterCustomer,
+  resolveMasterCustomer,
+} from '../helpers/masterCustomer';
 const props = defineProps({ screen: { type: String, default: 'new' } });
 const { canAccess: mayUseMasterDirectory } = useCustomerMaster();
 import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue';
@@ -72,11 +77,13 @@ const mutation = computed(
 );
 const hashingFiles = ref(false);
 const requesterBusy = ref(false);
+const masterLoading = ref(false);
 const busy = computed(
   () =>
     mutation.value.status === 'saving' ||
     hashingFiles.value ||
-    requesterBusy.value
+    requesterBusy.value ||
+    masterLoading.value
 );
 const step = ref(0);
 const advanced = ref(false);
@@ -169,6 +176,83 @@ const openQuick = () => {
   };
   advanced.value = false;
 };
+const masterCustomer = ref(null);
+const masterError = ref(false);
+const quickUnit = ref('');
+const hasMasterSource = computed(
+  () =>
+    !edit.value &&
+    (route.query.master_company_id !== undefined ||
+      route.query.master_contact_id !== undefined)
+);
+const sourceUnit = computed(() =>
+  advanced.value ? draft.unit_id : quickUnit.value
+);
+let masterController;
+watch(
+  [
+    () => session.accountId.value,
+    () => session.userId.value,
+    () => session.state.context,
+    () => session.state.status,
+    hasCustomerMaster,
+    hasMasterSource,
+    () => route.query.master_company_id,
+    () => route.query.master_contact_id,
+    sourceUnit,
+  ],
+  async (_, __, cleanup) => {
+    masterController?.abort();
+    masterCustomer.value = null;
+    masterLoading.value = false;
+    masterError.value = false;
+    if (
+      !hasMasterSource.value ||
+      !hasCustomerMaster.value ||
+      session.state.status !== 'ready'
+    )
+      return;
+    const selectedUnit = session.state.context?.units.find(
+      row => row.id === sourceUnit.value
+    );
+    if (!selectedUnit?.permissions.create_ticket) return;
+    const request = new AbortController();
+    masterController = request;
+    cleanup(() => request.abort());
+    masterLoading.value = true;
+    try {
+      const value = await resolveMasterCustomer(
+        ServiceDeskAPI,
+        {
+          accountId: session.accountId.value,
+          userId: session.userId.value,
+          unitId: selectedUnit.id,
+        },
+        {
+          companyId: route.query.master_company_id,
+          contactId: route.query.master_contact_id,
+        },
+        request.signal
+      );
+      if (!request.signal.aborted) masterCustomer.value = value;
+    } catch {
+      if (!request.signal.aborted) masterError.value = true;
+    } finally {
+      if (!request.signal.aborted) masterLoading.value = false;
+    }
+  },
+  { immediate: true }
+);
+watch(masterCustomer, (value, previous) => {
+  const appliedContext = applyMasterCustomer(draft, previous, value, {
+    accountId: session.accountId.value,
+    userId: session.userId.value,
+    allowed:
+      !edit.value && advanced.value && hasCustomerMaster.value && mayEdit.value,
+  });
+  if (appliedContext.applied) selectedNames.requester = value.requester;
+  else if (appliedContext.clearRequester) selectedNames.requester = null;
+});
 const applyCatalogue = value => {
   catalogue.value = value;
   if (!value || edit.value) return;
@@ -374,6 +458,7 @@ watch(record, value => {
 onBeforeUnmount(() => {
   creationReceipt.value = null;
   relationshipEpoch += 1;
+  masterController?.abort();
   relationshipCustomer.value = null;
   Object.assign(draft, blank());
   files.value = [];
@@ -521,10 +606,25 @@ const submit = async () => {
 </script>
 
 <template>
+  <p
+    v-if="hasMasterSource"
+    role="status"
+    class="mb-3 rounded-lg border border-n-blue-6 bg-n-blue-2 p-3 text-sm text-n-slate-12"
+  >
+    {{
+      t(
+        `CRM.CUSTOMER_MASTER_360.${masterError ? 'TICKET_CONTEXT_DENIED' : masterLoading ? 'TICKET_CONTEXT_LOADING' : masterCustomer ? 'TICKET_CONTEXT_READY' : 'TICKET_CONTEXT_UNIT'}`
+      )
+    }}
+  </p>
   <QuickTicketForm
     v-if="!edit && !advanced"
     ref="quickForm"
+    :customer-context="masterCustomer"
+    :customer-context-source="hasMasterSource"
+    :context-loading="masterLoading"
     :initial-draft="quickSeed || relationshipSeed"
+    @unit-change="quickUnit = $event"
     @advanced="openAdvanced"
     @cancel="cancel"
     @open="openCreatedTicket"

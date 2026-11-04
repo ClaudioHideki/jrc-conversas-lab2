@@ -16,6 +16,7 @@ import { usePolicy } from 'dashboard/composables/usePolicy';
 import { useCustomerMaster } from '../useCustomerMaster';
 import MasterContactPanel from './MasterContactPanel.vue';
 import RecordsPanel from './RecordsPanel.vue';
+import MasterTicketAction from './MasterTicketAction.vue';
 import TimelinePanel from './TimelinePanel.vue';
 import { T, errorMessage } from '../copy';
 
@@ -176,6 +177,11 @@ onBeforeUnmount(() => {
               />
             </template>
           </ComposeConversation>
+          <MasterTicketAction
+            v-if="overview?.capabilities?.service_desk"
+            :company-id="contact.company_id"
+            :contact-id="contact.id"
+          />
           <VoiceCallButton
             :contact-id="contact.id"
             :phone="contact.phone_number || ''"

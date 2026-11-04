@@ -9,6 +9,7 @@ import CompanyEditorDialog from './components/CompanyEditorDialog.vue';
 import BackofficeContextPanel from './components/BackofficeContextPanel.vue';
 import CompanyAddresses from './components/CompanyAddresses.vue';
 import CompanyContacts from './components/CompanyContacts.vue';
+import MasterTicketAction from './components/MasterTicketAction.vue';
 import TimelinePanel from './components/TimelinePanel.vue';
 import RecordsPanel from './components/RecordsPanel.vue';
 import RelationshipMapPanel from './components/RelationshipMapPanel.vue';
@@ -447,6 +448,11 @@ onBeforeUnmount(() => {
         </button>
       </nav>
 
+      <MasterTicketAction
+        v-if="overview.capabilities.service_desk"
+        :company-id="company.id"
+        class="mb-4"
+      />
       <section class="rounded-xl border border-n-weak bg-n-solid-2 p-5">
         <template v-if="tab === 'overview'">
           <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
