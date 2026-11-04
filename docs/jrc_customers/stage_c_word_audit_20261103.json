@@ -1,6 +1,6 @@
 {
   "date": "2026-11-03",
-  "status": "AUDITORIA ATUALIZADA — ETAPA C NÃO CONCLUÍDA",
+  "status": "AUDITORIA ATUALIZADA — CAMPANHAS VALIDADO, DOCUMENTOS COM DIVERGÊNCIAS; ETAPA C ABERTA",
   "source": "C:\\Users\\DEV03\\Downloads\\JRC-CONVERSAS-CADASTRO-MESTRE-CLIENTES-ESPECIFICACAO-DEV-20261101 (1).docx",
   "source_sha256_verified": "2a9b7bb58b61856646c29d7681f97473c6a51973684167c62f57937239ac2fbf",
   "entire_word_xml_read": true,
@@ -26,14 +26,16 @@
     {
       "requirement": "cadastro-mestre:P0163",
       "status": "parcial",
-      "finding": "O popup Empresa não tem aba Documentos. Existe Central documental do Relacionamento com versões, validade, auditoria e scan, mas ela exige assignment_id autorizado e não está conectada ao popup mestre. Não criar cadastro documental paralelo nem contornar CustomerDocuments.scope.",
+      "finding": "Carteira nativa autorizada exigida; falta cenário sem carteira e integração integral de requisitos documentais/representação. Arquivos novos permanecem em quarentena até verificação real.",
       "files": [
         "app/javascript/dashboard/routes/dashboard/jrcCustomers/CompanyPage.vue",
         "app/services/jrc_customers/customer360.rb",
         "app/services/jrc_relationship/customer_documents.rb",
         "app/controllers/api/v1/accounts/relationship/documents_controller.rb",
-        "app/javascript/dashboard/routes/dashboard/jrcRelationship/DocumentsPanel.vue"
-      ]
+        "app/javascript/dashboard/routes/dashboard/jrcRelationship/DocumentsPanel.vue",
+        "app/services/jrc_customers/company_documents_context.rb"
+      ],
+      "validated_increment": "Popup Empresa → Cadastro → Documentos reutiliza a central nativa, versões, permissões e quarentena; Chrome desktop/390px em claro/escuro aprovados."
     },
     {
       "requirement": "cadastro-mestre:P0155",
@@ -102,5 +104,7 @@
     "SMTP"
   ],
   "production_changed": false,
-  "campaign_mobile_closure": "docs/jrc_customers/campaign_mobile_validated_checkpoint_20261103.json"
+  "campaign_mobile_closure": "docs/jrc_customers/campaign_mobile_validated_checkpoint_20261103.json",
+  "controlled_status": "docs/jrc_customers/stage_c_controlled_status_20261103.json",
+  "company_documents_increment": "docs/jrc_customers/company_documents_context_checkpoint_20261103.json"
 }

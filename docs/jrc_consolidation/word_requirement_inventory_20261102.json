@@ -3972,18 +3972,21 @@
           "is_heading": false,
           "classification_pending": false,
           "existing_code_reused": [],
-          "implemented_change": "O popup Empresa não tem aba Documentos. Existe Central documental do Relacionamento com versões, validade, auditoria e scan, mas ela exige assignment_id autorizado e não está conectada ao popup mestre. Não criar cadastro documental paralelo nem contornar CustomerDocuments.scope.",
+          "implemented_change": "Aba Documentos do popup Empresa abre o workspace documental nativo autorizado, com upload, versões, validade, histórico e quarentena validados. Sem carteira nativa e catálogo unificado de obrigatoriedade/representação permanecem divergências; não criar cadastro paralelo.",
           "files": [
             "app/javascript/dashboard/routes/dashboard/jrcCustomers/CompanyPage.vue",
             "app/services/jrc_customers/customer360.rb",
             "app/services/jrc_relationship/customer_documents.rb",
             "app/controllers/api/v1/accounts/relationship/documents_controller.rb",
-            "app/javascript/dashboard/routes/dashboard/jrcRelationship/DocumentsPanel.vue"
+            "app/javascript/dashboard/routes/dashboard/jrcRelationship/DocumentsPanel.vue",
+            "app/services/jrc_customers/company_documents_context.rb"
           ],
           "status": "parcial",
-          "tests_and_evidence": [],
+          "tests_and_evidence": [
+            "docs/jrc_customers/company_documents_context_checkpoint_20261103.json"
+          ],
           "dependencies": [],
-          "next_action": "Fechar a lacuna com os serviços e permissões nativos; compilar e homologar qualquer alteração de frontend quando o disco permitir.",
+          "next_action": "Carteira nativa autorizada exigida; falta cenário sem carteira e integração integral de requisitos documentais/representação. Arquivos novos permanecem em quarentena até verificação real.",
           "fragment_kind": "requirement"
         },
         {
@@ -42452,5 +42455,6 @@
       }
     ],
     "campaign_mobile_validated": "docs/jrc_customers/campaign_mobile_validated_checkpoint_20261103.json"
-  }
+  },
+  "controlled_stage_c_status": "docs/jrc_customers/stage_c_controlled_status_20261103.json"
 }

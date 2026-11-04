@@ -1,6 +1,6 @@
 {
   "date": "2026-11-03",
-  "status": "INCREMENTO PARCIAL — backend e Vue aprovados; build e Chrome pendentes",
+  "status": "INCREMENTO VALIDADO LOCALMENTE COM DIVERGÊNCIAS DO WORD — ETAPA C ABERTA",
   "baseline": "0c3dff76cf7d7821eb3917239abad5e1399e7ff9",
   "word_requirement": "cadastro-mestre:P0163",
   "implementation": [
@@ -37,7 +37,6 @@
   },
   "source_snapshot": ".codex/customer-company-documents-reviewed-source-verified.json",
   "remaining": [
-    "Novo build protegido e Chrome com upload/versão, temas/celular e negação real de acesso",
     "Empresas sem carteira nativa autorizada não ganham carteira nem documento duplicado; suporte integral desse cenário permanece pendente.",
     "Catálogo documental obrigatório configurável e representação/assinantes continuam nos fluxos nativos de Backoffice/Aprovações; ainda não há central unificada integral no popup Empresa.",
     "Criação contextual de chamados, indicadores de atendimento, renovação e ações contratuais, escala e auditoria restante da Etapa C.",
@@ -55,5 +54,138 @@
     "deletion": false,
     "external_operations": 0
   },
-  "hooks": "Missing husky launcher; manual gates performed; command-local core.hooksPath=.codex/git-hooks only"
+  "hooks": "Missing husky launcher; manual gates performed; command-local core.hooksPath=.codex/git-hooks only",
+  "validated_source": "d3ad0f4f3a37833f49f4b5e041ea5684439658fa",
+  "build": {
+    "report": ".codex/company-documents-d3ad0f4f-build.json",
+    "fresh_assets_verified": 586,
+    "start_bytes": 1714835456,
+    "minimum_free_bytes": 1502199808,
+    "final_bytes": 1506402304,
+    "minimum_start_bytes": 1610612736,
+    "stop_bytes": 750000000,
+    "seconds": 235.84,
+    "one_build_at_a_time": true
+  },
+  "chrome": {
+    "functional": "empresa-documentos-c8-final-d3ad0f4f-20261103.json",
+    "visual": "empresa-documentos-c8-temas-d3ad0f4f-20261103.json",
+    "functional_checks": {
+      "native_popup_upload_and_quarantine_persisted": true,
+      "native_version_history_contains_both_real_changes": true,
+      "native_view_only_role_can_read_versions_and_server_denies_upload": true,
+      "no_automatic_assignment_or_parallel_document_registry": true,
+      "foreign_account_document_and_company_denied": true
+    },
+    "actual_source": "http://127.0.0.1:5378",
+    "actual_database": "jrc_customer_groups_test",
+    "data": {
+      "type": "synthetic local fixture; canonical records",
+      "company_id": 953,
+      "assignment_id": 36,
+      "document_id": 6
+    },
+    "rendered_cases": [
+      {
+        "theme": "Claro",
+        "viewport": 1520,
+        "width": 924,
+        "scroll_width": 924,
+        "body_dark": false,
+        "background": "rgb(255, 255, 255)",
+        "heading": "rgb(28, 32, 36)"
+      },
+      {
+        "theme": "Claro",
+        "viewport": 390,
+        "width": 290,
+        "scroll_width": 290,
+        "body_dark": false,
+        "background": "rgb(255, 255, 255)",
+        "heading": "rgb(28, 32, 36)"
+      },
+      {
+        "theme": "Escuro",
+        "viewport": 1520,
+        "width": 924,
+        "scroll_width": 924,
+        "body_dark": true,
+        "background": "rgb(29, 30, 36)",
+        "heading": "rgb(237, 238, 240)"
+      },
+      {
+        "theme": "Escuro",
+        "viewport": 390,
+        "width": 290,
+        "scroll_width": 290,
+        "body_dark": true,
+        "background": "rgb(29, 30, 36)",
+        "heading": "rgb(237, 238, 240)"
+      }
+    ],
+    "physical_phone_tested": false,
+    "viewport_mobile": "390x844",
+    "new_business_uploads": 2,
+    "versions": [
+      1,
+      2
+    ],
+    "quarantine_respected": true,
+    "real_clean_antivirus_scan_homologated": false,
+    "real_uploads_not_repeated_on_harness_resume": true,
+    "scoped_write_denial_status": 403,
+    "foreign_account_requests": [
+      {
+        "path": "/api/v1/accounts/1400/relationship/documents/6/versions/7/download",
+        "status": 409
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/accounts/1400/relationship/documents",
+        "status": 403
+      },
+      {
+        "path": "/api/v1/accounts/1400/customers/companies/953",
+        "status": 401
+      },
+      {
+        "path": "/api/v1/accounts/1400/relationship/documents/6",
+        "status": 403
+      },
+      {
+        "path": "/api/v1/accounts/1401/relationship/documents/6",
+        "status": 404
+      }
+    ],
+    "no_javascript_errors": true
+  },
+  "integrity": {
+    "business": ".codex/company-documents-final-integrity.json",
+    "existing_rows": 483,
+    "private": ".codex/company-documents-final-private-integrity.json",
+    "original_files_each": 30,
+    "stores": 6,
+    "new_files_only_in_new_storage": 2,
+    "no_automatic_portfolio": true,
+    "no_denied_write_record": true,
+    "campaign_executions": 0,
+    "campaign_recipients": 0,
+    "signature_deliveries": 0,
+    "signature_verifier": null
+  },
+  "failed_runs_retained": [
+    "company-documents-frontend.json: seven cases passed, two new cases expected Documentos while reused Backoffice translation was Documentação; corrected specific Company label.",
+    "Initial Ruby projector added metrics offenses; final separate service has zero offenses; shared Customer360 remains at 18 existing offenses.",
+    "empresa-documentos-c8-real: response body lost on navigation; no document written.",
+    "empresa-documentos-c8-contrato: native dialog has no accessible name; no document written.",
+    "empresa-documentos-c8-popup: document6 created successfully; upload-dialog locator rebound to company dialog while waiting for hidden.",
+    "empresa-documentos-c8-validacao: second version persisted; history assertion expected exact reason without its rendered date.",
+    "Final functional report geometry theme label alone is not theme evidence; separate explicit-body-theme report contains the four authoritative visual gates."
+  ],
+  "scale_validation": {
+    "live_indexes_and_native_explain": ".codex/company-documents-final-integrity.json",
+    "representative_load_test": false,
+    "large_dataset_not_created_under_disk_pressure": true
+  },
+  "free_final_bytes": 1109659648
 }
