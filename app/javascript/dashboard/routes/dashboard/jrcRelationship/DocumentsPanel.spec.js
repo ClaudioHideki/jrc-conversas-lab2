@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   store: null,
   documents: vi.fn(),
   document: vi.fn(),
+  updateDocumentMetadata: vi.fn(),
 }));
 vi.mock('vue-router', () => ({ useRoute: () => mocks.route }));
 vi.mock('vuex', () => ({ useStore: () => mocks.store }));
@@ -41,7 +42,9 @@ const render = () =>
         formatting: { locale: 'pt-BR' },
       },
     },
-    global: { stubs: { DocumentUploadDialog: true } },
+    global: {
+      stubs: { DocumentUploadDialog: true, DocumentMetadataDialog: true },
+    },
   });
 beforeEach(() => {
   mocks.route = reactive({ params: { accountId: '1' } });
@@ -95,5 +98,33 @@ it('opens preserved version history with authors and validity and clears it on d
   await flushPromises();
   expect(wrapper.text()).not.toContain('Synthetic document');
   expect(wrapper.text()).not.toContain('Synthetic author');
+  wrapper.unmount();
+});
+
+it('persists metadata through the authenticated API and reloads the native read model', async () => {
+  const wrapper = render();
+  await wrapper.setProps({
+    metadata: { can_manage_documents: true, formatting: { locale: 'pt-BR' } },
+  });
+  await flushPromises();
+  mocks.updateDocumentMetadata.mockResolvedValue({ data: {} });
+  await wrapper
+    .findAll('button')
+    .find(row => row.text() === 'RELATIONSHIP.V2.DOCS.METADATA')
+    .trigger('click');
+  const dialog = wrapper.findComponent({ name: 'DocumentMetadataDialog' });
+  const fields = {
+    responsible_id: 8,
+    revision: 0,
+    status: 'active',
+    reason: 'Reviewed documentary ownership',
+  };
+  dialog.vm.$emit('save', fields);
+  await flushPromises();
+  expect(mocks.updateDocumentMetadata).toHaveBeenCalledWith('1', 1, fields);
+  expect(mocks.documents.mock.calls.length).toBeGreaterThan(1);
+  expect(
+    wrapper.findComponent({ name: 'DocumentMetadataDialog' }).exists()
+  ).toBe(false);
   wrapper.unmount();
 });

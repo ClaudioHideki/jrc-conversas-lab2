@@ -137,6 +137,17 @@ export default {
       ...options,
       params,
     }),
+  documentResponsibles: (accountId, id, params, options) =>
+    axios.get(`${base(accountId)}/documents/${Number(id)}/responsibles`, {
+      ...options,
+      params,
+    }),
+  updateDocumentMetadata: (accountId, id, document, options) =>
+    axios.patch(
+      `${base(accountId)}/documents/${Number(id)}`,
+      { document },
+      options
+    ),
   uploadDocument: (accountId, form, id) =>
     axios.post(
       id

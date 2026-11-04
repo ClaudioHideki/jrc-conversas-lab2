@@ -1286,7 +1286,15 @@
           "archived": "Arquivado"
         },
         "UNASSIGNED": "Sem responsável de carteira",
-        "UNAVAILABLE": "Não disponível"
+        "UNAVAILABLE": "Não disponível",
+        "METADATA": "Responsável e situação",
+        "RESPONSIBLE": "Responsável documental",
+        "NO_DOCUMENT_RESPONSIBLE": "Sem responsável documental informado",
+        "RESPONSIBILITY_HELP": "Responsabilidade documental não altera o autor das versões, o responsável da carteira, os poderes de assinatura ou as permissões de acesso. A verificação antivírus continua obrigatória.",
+        "RESPONSIBLE_SEARCH": "Pesquisar usuários elegíveis",
+        "SEARCH": "Pesquisar",
+        "METADATA_REASON": "Motivo da alteração (registrado na auditoria)",
+        "OPTIONS_FAILED": "Não foi possível validar os usuários elegíveis. Feche e atualize o documento antes de tentar novamente."
       }
     }
   }

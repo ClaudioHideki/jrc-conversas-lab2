@@ -5,7 +5,7 @@ class Api::V1::Accounts::Relationship::DocumentsController < Api::V1::Accounts::
 
   def index
     scope = service.scope.where(assignment_id: relationship_context.assignment(params.require(:assignment_id)).id)
-    records, meta = page(scope.includes(assignment: :owner).order(updated_at: :desc, id: :desc))
+    records, meta = page(scope.includes(:responsible, assignment: :owner).order(updated_at: :desc, id: :desc))
     render json: { payload: records.map { |record| present(record, include_versions: false) }, meta: meta }
   end
 
@@ -15,6 +15,25 @@ class Api::V1::Accounts::Relationship::DocumentsController < Api::V1::Accounts::
 
   def create
     upload
+  end
+
+  def update
+    input = params.require(:document)
+    if input.key?(:responsible_id) && [String, Integer, NilClass].none? { |type| input[:responsible_id].is_a?(type) }
+      raise ArgumentError, 'Responsible must be one user identifier'
+    end
+
+    values = input.permit(:responsible_id, :status, :revision, :reason).to_h
+    document = JrcRelationship::DocumentMetadata.new(relationship_context).update!(document_id: params[:id], attributes: values)
+    render json: present(document, include_versions: true)
+  end
+
+  def responsibles
+    scope = JrcRelationship::DocumentMetadata.new(relationship_context).responsibles(document_id: params[:id])
+    query = params[:q].to_s.strip.first(100)
+    scope = scope.where('users.name ILIKE ?', "%#{ActiveRecord::Base.sanitize_sql_like(query)}%") if query.present?
+    records, meta = page(scope.order(:name, :id))
+    render json: { payload: records.map { |user| { id: user.id, name: user.name, eligible: user.active_for_authentication? } }, meta: meta }
   end
 
   def version
@@ -44,12 +63,18 @@ class Api::V1::Accounts::Relationship::DocumentsController < Api::V1::Accounts::
   def present(document, include_versions:)
     versions = document.versions.includes(:uploaded_by, file_attachment: :blob).order(number: :desc)
     data = { id: document.id, assignment_id: document.assignment_id, title: document.title, category: document.category, status: document.status }
-    owner = document.assignment.owner
-    data[:portfolio_owner] = owner && { id: owner.id, name: owner.name }
+    data.merge!(document_metadata(document))
     selected, meta = include_versions ? page(versions) : [versions.limit(1), nil]
     data[:versions_meta] = meta if include_versions
     data[:versions] = selected.map { |version| present_version(version) }
     data
+  end
+
+  def document_metadata(document)
+    owner = document.assignment.owner
+    responsible = document.responsible
+    { revision: document.lock_version, responsible: responsible && { id: responsible.id, name: responsible.name },
+      portfolio_owner: owner && { id: owner.id, name: owner.name } }
   end
 
   def present_version(version)

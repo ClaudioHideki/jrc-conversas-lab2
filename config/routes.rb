@@ -626,8 +626,9 @@ Rails.application.routes.draw do
             get :dashboard, to: 'dashboard#show'
             get :drilldown, to: 'dashboard#drilldown'
             get :team, to: 'dashboard#team'
-            resources :documents, only: [:index, :show, :create] do
+            resources :documents, only: [:index, :show, :create, :update] do
               member do
+                get :responsibles
                 post :version
                 get 'versions/:version_id/download', action: :download, as: :download
               end

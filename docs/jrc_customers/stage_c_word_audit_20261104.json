@@ -37,10 +37,11 @@
         "cadastro-mestre:P0155",
         "cadastro-mestre:P0205"
       ],
-      "classification": "Implementado, aguardando build/Chrome",
+      "classification": "Implementado e compilado; homologação funcional Chrome pendente",
       "code_checkpoint": "e82e48d6",
       "evidence": "master_ticket_context_checkpoint_20261103.json",
-      "acceptance": "Novo chamado por Empresa e Contato; unidade autorizada; prefill nativo validado no backend; criar/reabrir detalhe; conta/unidade/solicitante negados; troca de usuário/conta sem resposta antiga. Sem unidades/vínculos automáticos."
+      "acceptance": "Novo chamado por Empresa e Contato; unidade autorizada; prefill nativo validado no backend; criar/reabrir detalhe; conta/unidade/solicitante negados; troca de usuário/conta sem resposta antiga. Sem unidades/vínculos automáticos.",
+      "runtime_build_evidence": "b1_b4_build_runtime_checkpoint_20261104.json"
     },
     {
       "id": "B2",
@@ -53,39 +54,46 @@
       "evidence": "company_documents_metadata_checkpoint_20261103.json",
       "acceptance": "Autoria e situação da versão atual e histórico paginado; leitor sem upload; perda de permissão limpa dados; quarentena bloqueia download; claro/escuro e 390px. Metadados novos aguardam build/Chrome.",
       "remaining": [
-        "Responsável documental próprio distinto de autor e responsável pela carteira",
         "Catálogo mestre de documentos obrigatórios configuráveis",
         "Representação/assinantes e bloqueios devem reutilizar autoridade/aprovações do Backoffice; não expor pelo cadastro sem permissão",
         "Scanner real/arquivo limpo não homologado; manter quarentena"
       ],
-      "deferred": "Empresas sem carteira continuam bloqueadas por decisão explícita do usuário; proposta não implementada."
+      "deferred": "Empresas sem carteira continuam bloqueadas por decisão explícita do usuário; proposta não implementada.",
+      "documentary_responsible_increment": {
+        "classification": "Implementado e testes automatizados aprovados; compilação/homologação pendentes",
+        "evidence": "document_responsibility_checkpoint_20261104.json",
+        "backend": 17,
+        "vue": 7
+      }
     },
     {
       "id": "B3",
       "word": [
         "cadastro-mestre:P0151"
       ],
-      "classification": "Implementado, aguardando build/Chrome",
+      "classification": "Implementado e compilado; homologação funcional Chrome pendente",
       "code_checkpoint": "b6929f0d",
       "evidence": "attendance_metrics_checkpoint_20261103.json",
       "acceptance": "Período inclusivo no fuso da conta; canais, limpar filtro, fontes reais e indisponibilidade explícita; CSAT compartilhado com grants report/share_reports; SLA de conversas separado de relógios do Service Desk; notas privadas excluídas; lista/paginação existentes preservadas.",
       "remaining": [
         "Escala representativa e custo das projeções de relógios dependentes de calendário ainda não homologados"
-      ]
+      ],
+      "runtime_build_evidence": "b1_b4_build_runtime_checkpoint_20261104.json"
     },
     {
       "id": "B4",
       "word": [
         "cadastro-mestre:P0136"
       ],
-      "classification": "Implementado, aguardando build/Chrome",
+      "classification": "Implementado e compilado; homologação funcional Chrome pendente",
       "code_checkpoint": "4d4a6de3f934d4f7f1475e1f939aedaaf2513def",
       "evidence": "contract_renewal_validated_checkpoint_20261104.json",
       "acceptance": "Datas de vigência/aviso sem mudança pelo fuso do navegador; próximos/vencidos/sem data; abrir contrato correto no CRM; administrador/proprietário ainda respeitam operadora/unidade; nenhuma renovação ou assinatura automática.",
       "automated": {
         "backend": 23,
         "vue": 15
-      }
+      },
+      "runtime_build_evidence": "b1_b4_build_runtime_checkpoint_20261104.json"
     },
     {
       "id": "C-escala",
@@ -116,5 +124,6 @@
     "Sem ampliação documental sem carteira",
     "Sem declarar etapa concluída apenas por testes automatizados"
   ],
-  "next": "Homologação consolidada B1-B4, resolução das divergências documentais e escala, mantendo TRR explicitamente dependente. D/E/F somente planejamento neste bloco."
+  "next": "Homologação consolidada B1-B4, resolução das divergências documentais e escala, mantendo TRR explicitamente dependente. D/E/F somente planejamento neste bloco.",
+  "manual_homologation": "manual_b1_b4_20261104.html"
 }

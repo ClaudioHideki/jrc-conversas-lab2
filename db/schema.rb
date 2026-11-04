@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_11_03_110000) do
+ActiveRecord::Schema[7.1].define(version: 2026_11_04_120000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -4628,9 +4628,12 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_03_110000) do
     t.string "status", default: "active", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "responsible_id"
+    t.integer "lock_version", default: 0, null: false
     t.index ["account_id", "id"], name: "rel_document_tenant_ref", unique: true
     t.index ["account_id"], name: "index_jrc_relationship_customer_documents_on_account_id"
     t.index ["assignment_id"], name: "index_jrc_relationship_customer_documents_on_assignment_id"
+    t.index ["responsible_id"], name: "index_jrc_relationship_customer_documents_on_responsible_id"
   end
 
   create_table "jrc_relationship_document_versions", force: :cascade do |t|
@@ -9374,6 +9377,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_03_110000) do
   add_foreign_key "jrc_relationship_customer_documents", "accounts"
   add_foreign_key "jrc_relationship_customer_documents", "jrc_relationship_assignments", column: "assignment_id"
   add_foreign_key "jrc_relationship_customer_documents", "jrc_relationship_assignments", column: ["account_id", "assignment_id"], primary_key: ["account_id", "id"], name: "rel_document_assignment_tenant"
+  add_foreign_key "jrc_relationship_customer_documents", "users", column: "responsible_id"
   add_foreign_key "jrc_relationship_document_versions", "accounts"
   add_foreign_key "jrc_relationship_document_versions", "jrc_relationship_customer_documents", column: "document_id"
   add_foreign_key "jrc_relationship_document_versions", "jrc_relationship_customer_documents", column: ["account_id", "document_id"], primary_key: ["account_id", "id"], name: "rel_document_version_tenant"

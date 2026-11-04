@@ -5,6 +5,7 @@ import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcRelationship';
 import DocumentUploadDialog from './DocumentUploadDialog.vue';
+import DocumentMetadataDialog from './DocumentMetadataDialog.vue';
 import { buttonClass, date as formatDate, message } from './definitions';
 const props = defineProps({
   assignmentId: { type: [Number, String], required: true },
@@ -17,6 +18,7 @@ const rows = ref([]);
 const page = ref(1);
 const meta = ref(null);
 const editing = ref(false);
+const metadataDocument = ref(null);
 const current = ref(null);
 const details = ref(null);
 const busy = ref(false);
@@ -27,6 +29,7 @@ const clearDeniedData = err => {
   details.value = null;
   current.value = null;
   editing.value = false;
+  metadataDocument.value = null;
 };
 let generation = 0;
 let controller;
@@ -66,6 +69,7 @@ watch(
   ],
   () => {
     editing.value = false;
+    metadataDocument.value = null;
     current.value = null;
     details.value = null;
     load();
@@ -141,6 +145,31 @@ const download = async (document, version) => {
     }
   }
 };
+const saveMetadata = async fields => {
+  const version = generation;
+  const document = metadataDocument.value;
+  if (!document || !props.metadata.can_manage_documents || busy.value) return;
+  busy.value = true;
+  error.value = '';
+  try {
+    await API.updateDocumentMetadata(
+      route.params.accountId,
+      document.id,
+      fields
+    );
+    if (version === generation) {
+      metadataDocument.value = null;
+      await load();
+    }
+  } catch (err) {
+    if (version === generation) {
+      error.value = message(err);
+      clearDeniedData(err);
+    }
+  } finally {
+    if (version === generation) busy.value = false;
+  }
+};
 const date = value => formatDate(value, props.metadata.formatting);
 </script>
 
@@ -212,8 +241,24 @@ const date = value => formatDate(value, props.metadata.formatting);
               t('RELATIONSHIP.V2.DOCS.UNASSIGNED')
             }}
           </p>
+          <p class="text-sm text-n-slate-11">
+            {{ t('RELATIONSHIP.V2.DOCS.RESPONSIBLE') }}:
+            {{
+              document.responsible?.name ||
+              t('RELATIONSHIP.V2.DOCS.NO_DOCUMENT_RESPONSIBLE')
+            }}
+          </p>
         </div>
-        <div class="flex gap-2">
+        <div class="flex flex-wrap gap-2">
+          <button
+            v-if="metadata.can_manage_documents"
+            type="button"
+            :class="buttonClass"
+            :disabled="busy"
+            @click="metadataDocument = document"
+          >
+            {{ t('RELATIONSHIP.V2.DOCS.METADATA') }}
+          </button>
           <button
             type="button"
             :class="buttonClass"
@@ -370,6 +415,15 @@ const date = value => formatDate(value, props.metadata.formatting);
         </button>
       </nav>
     </section>
+    <DocumentMetadataDialog
+      v-if="metadataDocument && metadata.can_manage_documents"
+      :key="`${generation}:${metadataDocument.id}`"
+      :document="metadataDocument"
+      :busy="busy"
+      :error="error"
+      @close="metadataDocument = null"
+      @save="saveMetadata"
+    />
     <DocumentUploadDialog
       v-if="editing"
       :document="current"
