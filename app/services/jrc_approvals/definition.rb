@@ -6,6 +6,19 @@ class JrcApprovals::Definition
 
   def self.validate!(definition, entry)
     data = JrcServiceDesk::CanonicalJson.normalize(definition)
+    if data.is_a?(Hash) && data['schema_version'] == 2
+      JrcServiceDesk::CanonicalJson.dump(data)
+      validate_base!(data.except('tiers').merge('schema_version' => 1), entry)
+      JrcApprovals::TierRanges.new(data, entry).validate!
+      data
+    else
+      validate_base!(data, entry)
+    end
+  rescue ArgumentError, NoMethodError, KeyError, TypeError
+    invalid!
+  end
+
+  def self.validate_base!(data, entry)
     JrcServiceDesk::CanonicalJson.dump(data)
     invalid! unless data.is_a?(Hash) && data.keys.sort == KEYS.sort && data['schema_version'] == 1
     invalid! unless %w[sequential parallel].include?(data['execution']) && data['completion'] == 'all_steps'
@@ -40,6 +53,8 @@ class JrcApprovals::Definition
   rescue ArgumentError, NoMethodError, KeyError, TypeError
     invalid!
   end
+
+  private_class_method :validate_base!
 
   def self.invalid!
     raise JrcApprovals::Error, 'INVALID_DEFINITION'

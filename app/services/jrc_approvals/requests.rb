@@ -107,12 +107,6 @@ class JrcApprovals::Requests
   end
 
   def plan!(version, snapshot, actor)
-    conditions = JrcApprovals::Conditions.new(JrcApprovals::Catalog.fetch("#{version.policy.module_key}.#{version.policy.event_key}").fields)
-    unless version.definition['steps'].all? { |step| conditions.match?(step['authority'], snapshot.fetch('values')) }
-      raise JrcApprovals::Error, 'AUTHORITY_NOT_APPLICABLE'
-    end
-    JrcApprovals::Eligibility.new(account: @account, company_id: snapshot['issuer_company_id'], unit_id: snapshot['business_unit_id'],
-      catalog_key: "#{version.policy.module_key}.#{version.policy.event_key}")
-      .plan!(version.definition, requester_id: actor.id)
+    JrcApprovals::ApprovalPlan.new(account: @account).call(version: version, snapshot: snapshot, requester_id: actor.id)
   end
 end

@@ -11,7 +11,7 @@ const props = defineProps({
   busy: Boolean,
 });
 const emit = defineEmits(['simulate']);
-const { t } = useI18n();
+const { t, te } = useI18n();
 const key = ref('');
 const mode = ref('resource');
 const resource = ref('');
@@ -61,7 +61,9 @@ const simulate = () => {
             v-for="row in catalogs"
             :key="row.key"
           >
-            {{ row.key }}
+            {{
+              t(`JRC_APPROVALS.catalogEvents.${row.key.replaceAll('.', '_')}`)
+            }}
           </option>
         </select></label
       ><label class="text-sm"
@@ -103,7 +105,7 @@ const simulate = () => {
           :key="field"
           v-model="values[field]"
           :type="type"
-          :label="field"
+          :label="t(`JRC_APPROVALS.catalogFields.${field}`)"
         />
       </div> </template
     ><Button
@@ -117,12 +119,18 @@ const simulate = () => {
       v-if="result"
       class="space-y-3 rounded-xl border border-n-weak p-4"
     >
-      <h3 class="font-semibold">{{ result.predicted_state }}</h3>
+      <h3 class="font-semibold">
+        {{ t(`JRC_APPROVALS.simulationStates.${result.predicted_state}`) }}
+      </h3>
       <p
         v-if="result.conflict"
         role="alert"
       >
-        {{ result.conflict }}
+        {{
+          te(`JRC_APPROVALS.domainErrors.${result.conflict}`)
+            ? t(`JRC_APPROVALS.domainErrors.${result.conflict}`)
+            : t('JRC_APPROVALS.loadError')
+        }}
       </p>
       <article
         v-for="version in result.versions"
@@ -130,14 +138,15 @@ const simulate = () => {
         class="space-y-2 rounded-lg bg-n-alpha-2 p-3"
       >
         <p>
-          {{ t('JRC_APPROVALS.version') }} #{{ version.id }} ·
-          {{ version.priority }} · {{ version.selection_mode }}
+          {{ version.policy_name || t('JRC_APPROVALS.request') }}
         </p>
         <p
-          v-for="step in version.plan"
+          v-for="(step, index) in version.plan"
           :key="step.code"
         >
-          {{ step.code }} · {{ t('JRC_APPROVALS.quorum') }} {{ step.quorum }} ·
+          {{ t('JRC_APPROVALS.stepNumber', { number: index + 1 }) }} ·
+          {{ (step.principal_names || []).join(', ') }} ·
+          {{ t('JRC_APPROVALS.quorum') }} {{ step.quorum }} ·
           {{ t('JRC_APPROVALS.eligible') }} {{ step.principal_ids.length }}
         </p>
       </article>

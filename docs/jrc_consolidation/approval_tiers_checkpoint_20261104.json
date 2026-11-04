@@ -1,0 +1,72 @@
+{
+  "date": "2026-11-04",
+  "parent": "0f768a98aef6078c84b7196c520c40b5985844f7",
+  "status": "D6 implemented with automated native API/database and component evidence; no build or real browser acceptance",
+  "schema": {
+    "v1": "Original validation/semantics and immutable historical snapshots retained",
+    "v2": "Exact typed alternative step ranges; one planner for simulation and actual requests; no overlap, explicit inclusion, complete or explicit partial coverage; unmatched values fail closed",
+    "precision": "Finite integer/money bounds restricted to exact JSON/UI integer range +/-9007199254740991; actual source values not restricted, decimals exact Rational",
+    "gratuity": "Both existing prescribed commercial and financial steps required in every tier"
+  },
+  "tests": [
+    {
+      "run": "d6-tiers-refined",
+      "backend": 96,
+      "failures": 0
+    },
+    {
+      "run": "d6-tiers-final",
+      "backend": 28,
+      "failures": 0
+    },
+    {
+      "run": "d6-api-final",
+      "backend": 3,
+      "failures": 0
+    },
+    {
+      "run": "d6-bound-final",
+      "backend": 23,
+      "failures": 0
+    },
+    {
+      "run": "d6-tiers-ui-final",
+      "vue": 104,
+      "failures": 0,
+      "scope": "Full approval suite before final monetary presentation"
+    },
+    {
+      "run": "d6-money-corrected",
+      "vue": 10,
+      "failures": 0,
+      "scope": "Final changed monetary editor tests"
+    }
+  ],
+  "test_failures_fixed": [
+    "An isolated TierBound test fired change twice; setValue already emits change. Removed duplicate trigger; precision and raw-invalid-value behavior verified. No success inferred from failing run."
+  ],
+  "lint": "New Ruby files/specs/controller clean in canonical path checks; preserved v1 Definition and Simulation retain inherited offenses. ESLint zero errors; existing style warnings documented in local artifacts. git diff --check passed.",
+  "visual_reference": {
+    "document": "Especificacao_Central_Aprovacoes_JRC_Conversas_DEV.docx",
+    "images_inspected": [
+      "word/media/image7.png",
+      "word/media/image8.png"
+    ],
+    "implemented": "Four-step native wizard, responsive value rows and approver names, add/remove ranges, adjacent configuration/review summary",
+    "differences": "Additional explicit boundary/domain/coverage controls and collapsible native quorum/authority settings; summary is configuration only, real results remain in native simulator",
+    "not_validated": "New assets not built or served. No Chrome desktop/mobile/light/dark conformance claimed."
+  },
+  "disk": {
+    "initial": 16596615168,
+    "observed_minimum": 8409000000,
+    "final": 15845597184,
+    "note": "Unexplained external fluctuation, recovered without cleanup by this agent; pagefile/VHDX read-only diagnosis inconclusive. Guards never triggered."
+  },
+  "preserved": [
+    "server5379 frozen source/assets4d4a6de3",
+    "v1 published versions and request plans",
+    "native eligibility/account/issuer/unit/self-approval/quorum",
+    "no migration/dependency/build/push/deploy/cleanup/external action"
+  ],
+  "next": "D7 allowlisted domain adjustment with native edit authorization, immutable linked requests and atomic native decision; D8/D9 and E/F/G remain open"
+}

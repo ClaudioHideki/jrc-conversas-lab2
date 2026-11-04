@@ -266,6 +266,47 @@
     },
     "invalidDelegation": "This delegation is not valid. Select different eligible users and a valid period without circular delegations.",
     "duplicate": "Duplicate rule",
-    "copyName": "Copy of {name}"
+    "copyName": "Copy of {name}",
+    "tiers": {
+      "enabled": "Choose approvers by value ranges",
+      "field": "Value or percentage from the native source",
+      "coverage": "Range coverage",
+      "complete": "Complete declared domain",
+      "partial": "Allow explicit uncovered ranges",
+      "domainMin": "Domain minimum",
+      "domainMax": "Domain maximum",
+      "domainHelp": "Finite domain endpoints are included. Complete coverage requires every value in this domain to belong to exactly one range.",
+      "from": "From",
+      "to": "To",
+      "unbounded": "No limit",
+      "includeBoundary": "Include this boundary value",
+      "selectStages": "Approval stages for this range",
+      "stageDefinitions": "Approvers and stage settings",
+      "rangeNumber": "Range {number}",
+      "add": "Add authority range",
+      "summary": "Configured authority ranges",
+      "howItWorks": "The native approval engine chooses the range for the actual source value. Define the responsible users, roles or native teams in the stages below.",
+      "serverValidation": "Configuration summary only. Save, validate and use the native simulator to confirm eligibility. An uncovered value is blocked.",
+      "moneyLabels": {
+        "total_cents": "Total value",
+        "gratuity_total_cents": "Commercial gratuity value",
+        "below_minimum_total_cents": "Below-minimum price value"
+      },
+      "sourceCurrency": "Values use the source currency and are not converted. Restrict currency in the rule conditions when needed. Enter decimals such as 1000.00 or 1000,00 without thousands separators."
+    },
+    "domainErrors": {
+      "INVALID_TIER_DEFINITION": "Review the field, currency, domain, range boundaries and selected stages.",
+      "TIER_OVERLAP": "Ranges overlap. Each value must belong to at most one authority range.",
+      "TIER_GAP": "Complete coverage contains a gap or an uncovered endpoint. Review the range boundaries.",
+      "TIER_NOT_APPLICABLE": "The source value has no configured authority range. Approval is blocked.",
+      "POLICY_REQUIRED": "No active approval rule matches this context.",
+      "POLICY_SELECTION_CONFLICT": "The applicable rules conflict. Review their selection settings.",
+      "INSUFFICIENT_APPROVERS": "There are not enough currently eligible approvers for this rule.",
+      "AUTHORITY_NOT_APPLICABLE": "The configured authority conditions do not match this source."
+    },
+    "simulationStates": {
+      "pending": "Approval required",
+      "blocked": "Blocked"
+    }
   }
 }

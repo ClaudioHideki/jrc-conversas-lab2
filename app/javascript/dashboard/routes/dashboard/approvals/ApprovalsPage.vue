@@ -255,11 +255,22 @@ const createRequest = async () => {
 const auditRows = computed(() => state.rows.map(auditPresentation));
 const pageTo = page =>
   navigate(screen.value, id.value, { ...route.query, page });
-const errorText = computed(() =>
-  state.error?.status === 422 && state.error.code === 'INVALID_DELEGATION'
-    ? t('JRC_APPROVALS.invalidDelegation')
-    : t(`JRC_APPROVALS.error${state.error?.status || 'Network'}`)
-);
+const errorText = computed(() => {
+  if (state.error?.status === 422) {
+    if (state.error.code === 'INVALID_DELEGATION')
+      return t('JRC_APPROVALS.invalidDelegation');
+    if (
+      [
+        'INVALID_TIER_DEFINITION',
+        'TIER_OVERLAP',
+        'TIER_GAP',
+        'TIER_NOT_APPLICABLE',
+      ].includes(state.error.code)
+    )
+      return t(`JRC_APPROVALS.domainErrors.${state.error.code}`);
+  }
+  return t(`JRC_APPROVALS.error${state.error?.status || 'Network'}`);
+});
 </script>
 
 <template>

@@ -60,27 +60,30 @@
     },
     {
       "criterion": "CA-07",
-      "status": "Four guided steps, hidden generated identities, readable installed catalog labels implemented and tested; native advanced controls preserved. Dedicated numeric tier authoring and full visual acceptance still pending.",
+      "status": "D6 versioned numeric tiers, shared native planner and wizard implemented/tested; fresh build and actual visual acceptance remain pending",
       "evidence": [
         "app/javascript/dashboard/routes/dashboard/approvals/PolicyEditor.vue",
         "docs/jrc_consolidation/approval_wizard_checkpoint_20261104.json",
-        "app/javascript/dashboard/routes/dashboard/approvals/conditionSummary.js"
+        "app/javascript/dashboard/routes/dashboard/approvals/conditionSummary.js",
+        "docs/jrc_consolidation/approval_tiers_checkpoint_20261104.json"
       ]
     },
     {
       "criterion": "CA-08",
-      "status": "Existing priority-overlap/definition validation is not proof of dedicated numeric tier overlap/gap validation",
+      "status": "D6 versioned numeric tiers, shared native planner and wizard implemented/tested; fresh build and actual visual acceptance remain pending",
       "evidence": [
         "app/services/jrc_approvals/selection.rb",
-        "app/services/jrc_approvals/definition.rb"
+        "app/services/jrc_approvals/definition.rb",
+        "docs/jrc_consolidation/approval_tiers_checkpoint_20261104.json"
       ]
     },
     {
       "criterion": "CA-09",
-      "status": "Native simulator and typed UI exist; no full acceptance inferred from source presence",
+      "status": "D6 versioned numeric tiers, shared native planner and wizard implemented/tested; fresh build and actual visual acceptance remain pending",
       "evidence": [
         "app/services/jrc_approvals/simulation.rb",
-        "app/javascript/dashboard/routes/dashboard/approvals/SimulatorView.vue"
+        "app/javascript/dashboard/routes/dashboard/approvals/SimulatorView.vue",
+        "docs/jrc_consolidation/approval_tiers_checkpoint_20261104.json"
       ]
     },
     {

@@ -16,13 +16,14 @@
       "app/services/jrc_approvals/eligibility.rb",
       "app/services/jrc_approvals/gratuity_authorities.rb"
     ],
-    "next": "Design an explicitly versioned native definition/plan extension, preserve v1 semantics and snapshot validity; use native exact typed Conditions comparisons. Keep commercial gratuity fixed-authority/formal-absence requirements. Inventory actual catalog field availability before offering percentage/value fields.",
+    "next": "Build/actual UI acceptance pending explicit build authorization; implementation and automated evidence supersede earlier design plan",
     "required_tests": [
       "v1 unchanged; old immutable requests/versions usable",
       "Intervals at exact open/closed boundaries; decimal precision/currency; overlap/gap policy; unbounded/empty/duplicate malformed ranges",
       "Simulator and request creation select the same native tier/roster; unmatched range cannot default to approval",
       "Publishing/version changes and concurrent decisions preserve request binding; revoked eligibility/foreign scope denied"
-    ]
+    ],
+    "implemented_checkpoint": "docs/jrc_consolidation/approval_tiers_checkpoint_20261104.json"
   },
   "D7_adjustment": {
     "finding": "Catalog adapters are authorized read/capture/verify only. Native requests pin readonly snapshot/stage_plan; source changes make contexts stale. There is no installed generic write adapter/adjust permission.",

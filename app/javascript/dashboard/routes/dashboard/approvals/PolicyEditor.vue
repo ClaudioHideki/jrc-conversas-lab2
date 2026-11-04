@@ -5,6 +5,8 @@ import Button from 'dashboard/components-next/button/Button.vue';
 import { approvalClient } from 'dashboard/api/approvals';
 import ConditionEditor from './ConditionEditor.vue';
 import StepEditor from './StepEditor.vue';
+import TierEditor from './TierEditor.vue';
+import TierSummary from './TierSummary.vue';
 import { conditionSummary } from './conditionSummary';
 import {
   copy,
@@ -70,12 +72,40 @@ const fields = computed(
   () => catalogs.value.find(row => row.key === key.value)?.fields || {}
 );
 const definition = computed(() => draft.value.draft_definition);
+const tierDraft = ref(null);
+const tierMode = enabled => {
+  if (enabled) {
+    definition.value.schema_version = 2;
+    definition.value.tiers = tierDraft.value || {
+      field: '',
+      currency: null,
+      min: null,
+      max: null,
+      coverage: 'complete',
+      rows: [],
+    };
+  } else {
+    tierDraft.value = copy(definition.value.tiers);
+    delete definition.value.tiers;
+    definition.value.schema_version = 1;
+  }
+};
 const addStep = () => {
   if (definition.value.steps.length < 16)
     definition.value.steps.push({
       ...emptyStep(),
       code: `step_${crypto.randomUUID().replaceAll('-', '')}`,
     });
+};
+const removeStep = index => {
+  const code = definition.value.steps[index].code;
+  definition.value.steps.splice(index, 1);
+  const ranges = definition.value.tiers || tierDraft.value;
+  if (ranges)
+    ranges.rows = ranges.rows.map(row => ({
+      ...row,
+      step_codes: row.step_codes.filter(value => value !== code),
+    }));
 };
 const gratuityDraft = () => {
   const authorities = options.value.gratuity_authorities || {};
@@ -114,6 +144,7 @@ let generation = 0;
 watch(
   () => [props.policy, props.templatePolicy],
   ([policy, templatePolicy]) => {
+    tierDraft.value = null;
     if (policy) draft.value = copy(policy);
     else if (templatePolicy) {
       draft.value = {
@@ -345,11 +376,45 @@ const confirm = () => {
       v-if="tab === 'steps'"
       class="space-y-4"
     >
-      <div
-        v-for="(step, index) in definition.steps"
-        :key="index"
-        class="space-y-2"
+      <label
+        class="flex items-center gap-2 rounded-lg border border-n-blue-6 bg-n-blue-2 p-3 text-sm font-medium"
       >
+        <input
+          type="checkbox"
+          :checked="definition.schema_version === 2"
+          @change="tierMode($event.target.checked)"
+        />
+        {{ t('JRC_APPROVALS.tiers.enabled') }}
+      </label>
+      <TierEditor
+        v-if="definition.schema_version === 2"
+        v-model="definition.tiers"
+        :fields="fields"
+        :steps="definition.steps"
+        :options="options"
+      />
+      <h3 class="font-semibold">
+        {{ t('JRC_APPROVALS.tiers.stageDefinitions') }}
+      </h3>
+
+      <component
+        :is="definition.schema_version === 2 ? 'details' : 'div'"
+        v-for="(step, index) in definition.steps"
+        :key="step.code"
+        class="space-y-2"
+        :class="
+          definition.schema_version === 2
+            ? 'rounded-lg border border-n-weak p-3'
+            : ''
+        "
+      >
+        <summary
+          v-if="definition.schema_version === 2"
+          class="cursor-pointer font-semibold"
+        >
+          {{ t('JRC_APPROVALS.stepNumber', { number: index + 1 }) }} ·
+          {{ t('JRC_APPROVALS.tiers.stageDefinitions') }}
+        </summary>
         <StepEditor
           v-model="definition.steps[index]"
           :fields="fields"
@@ -357,11 +422,11 @@ const confirm = () => {
           :number="index + 1"
         /><button
           class="text-sm text-n-ruby-11"
-          @click="definition.steps.splice(index, 1)"
+          @click="removeStep(index)"
         >
           {{ t('JRC_APPROVALS.remove') }}
         </button>
-      </div>
+      </component>
       <Button
         :disabled="definition.steps.length >= 16"
         :label="t('JRC_APPROVALS.addStep')"
@@ -482,6 +547,12 @@ const confirm = () => {
           })
         }}
       </p>
+      <TierSummary
+        v-if="definition.schema_version === 2"
+        :tiers="definition.tiers"
+        :steps="definition.steps"
+        :options="options"
+      />
       <ul class="space-y-2">
         <li
           v-for="(step, index) in definition.steps"

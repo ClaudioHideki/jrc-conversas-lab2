@@ -90,5 +90,11 @@ class Api::V1::Accounts::Approvals::RequestsController < Api::V1::Accounts::Appr
     version = JrcApprovals::PolicyVersion.where(account_id: Current.account.id).find(item[:id])
     item[:priority] = version.definition['selection']['priority']
     item[:selection_mode] = version.definition['selection']['mode']
+    item[:policy_name] = version.policy.name
+    item[:plan].each { |step| step['principal_names'] = simulated_principal_names(step.fetch('principal_ids')) }
+  end
+
+  def simulated_principal_names(ids)
+    Current.account.account_users.joins(:user).where(id: ids).order('account_users.id').pluck('users.name')
   end
 end
