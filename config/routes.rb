@@ -791,6 +791,7 @@ Rails.application.routes.draw do
               post :simulate, on: :collection
             end
             resources :backoffice_requests, only: [:index, :show, :create, :update] do
+              get 'completion_report', to: 'backoffice_completion_reports#show'
               get 'contract', to: 'backoffice_contracts#show'
               get 'contract/templates', to: 'backoffice_contracts#templates'
               patch 'contract', to: 'backoffice_contracts#update'

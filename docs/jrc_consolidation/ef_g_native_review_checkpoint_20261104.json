@@ -175,9 +175,10 @@
       "files": [
         "app/models/jrc_crm/backoffice_request.rb",
         "app/services/jrc_backoffice/issues.rb",
-        "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeOverview.vue"
+        "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeOverview.vue",
+        "app/services/jrc_backoffice/completion_report.rb"
       ],
-      "remaining": "Need explicit full-flow acceptance for configured go-live blocks, integrations, SLA metrics/export scope, final documentary package and relationship handoff. No dedicated final package/export operation located in the reviewed Backoffice paths; confirm entire native domain before designing one. Do not replace native systems or invent delivered external resources."
+      "remaining": "Current operational CSV report implemented in linked increment. Final signed-document package, independent detailed Central approval report, full go-live/handoff, SLA duration/scale and actual UI acceptance remain pending; no delivered external resources invented."
     }
   ],
   "stage_F": [
@@ -296,6 +297,11 @@
       "stage": "F",
       "evidence": "relationship_health_hysteresis_checkpoint_20261104.json",
       "status": "Implemented customer-wide configurable band recovery with native automated evidence; remaining product/trend/freshness/cooldown and real UI gaps retained"
+    },
+    {
+      "stage": "E",
+      "evidence": "backoffice_completion_report_checkpoint_20261104.json",
+      "status": "Scoped current completion CSV and real UI download implemented/tested; package/export of signed files and full conclusion/handoff still pending"
     }
   ]
 }

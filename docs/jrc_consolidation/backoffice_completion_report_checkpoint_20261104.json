@@ -1,0 +1,115 @@
+{
+  "date": "2026-11-04",
+  "parent_checkpoint": "ab2a9412f39a96951256d41112cd9c84bf35e606",
+  "stage_E_complete": false,
+  "status": "Current operational completion CSV implemented; full final dossier/package and complete Word acceptance remain partial",
+  "word": {
+    "source": "C:/Users/DEV03/Downloads/JRC_Conversas_Backoffice_Projeto_DEV_20261101.docx",
+    "paragraphs": [
+      217,
+      218,
+      219,
+      220,
+      221
+    ],
+    "image_inspected": ".codex/referencias-continuacao-20261102/backoffice/image9.png",
+    "coverage": "Generate order report action; request/order/contract metadata, operational dates, native SLA and latest document-version identifiers/review/scan status",
+    "visual_difference": "Download button added to the existing completed-request 360 header, preserving its horizontal tabs and current layout. Does not replace the entire reference conclusion dashboard or reproduce illustrative green delivery/approval badges."
+  },
+  "implementation": {
+    "route": "GET /api/v1/accounts/:account_id/crm/backoffice_requests/:backoffice_request_id/completion_report",
+    "authorization": "Native Crm::BaseController and ContractAccess request/contract scopes; account, owner and native CorporateCoverage/OrganizationalVisibility rechecked after generation",
+    "completed_only": "Requires actual completed status, completed stage and completion timestamp; cannot export active/canceled or merely labeled-complete requests",
+    "consistency": "Native order then request FOR SHARE locks; contract read lock; no source writes. New bounded access audit only after final authorization",
+    "CSV": "Native OperationalCsv escaping reused; UTF-8 BOM; cents are explicitly labeled, no invented currency or SLA duration",
+    "documents": "Current immutable version metadata only, at most100 document keys. No private file bytes, encrypted source snapshots, tokens, filenames, signer personal data, unrestricted audit reasons or provider credentials exported",
+    "delivery": "Browser blob download with duplicate-click guard, URL release, real error state and late-response discard after account/request change or unmount",
+    "dependencies": "No new dependency or migration. Native CRM audit allowlist extended for the new access event."
+  },
+  "files": [
+    "app/services/jrc_backoffice/completion_report.rb",
+    "app/controllers/api/v1/accounts/crm/backoffice_completion_reports_controller.rb",
+    "app/models/jrc_crm/audit_event.rb",
+    "config/routes.rb",
+    "app/javascript/dashboard/api/crm/commercialCycle.js",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeCompletionReport.vue",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeRequest360.vue",
+    "app/javascript/dashboard/i18n/locale/en/crm.json",
+    "spec/requests/api/v1/accounts/crm/backoffice_completion_report_spec.rb",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeCompletionReport.spec.js"
+  ],
+  "validation": {
+    "backend_30_case_run": {
+      "start": 13255925760,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/crm/backoffice_completion_report_spec.rb": "03b40f536270005e69dde7b5bde7488597ebeec919e375ce53015c44d7fdbd34",
+        "spec/requests/api/v1/accounts/crm/backoffice_intake_spec.rb": "9f5a01b4e905323bd21bebdd3af101bd7a6e53823e10a8eb4fbae4a5f4b64726",
+        "spec/services/jrc_backoffice/signature_release_spec.rb": "3af87f5030050305d1ab9f025eaaf017a3582bf3254bf719ac2c4f08714ce432",
+        "spec/requests/api/v1/accounts/crm/corporate_company_scope_spec.rb": "7e28cc324b349e3960600c32f7948a10fb64268fb4bc316e25a9557844319612"
+      },
+      "minimum": 13254934528,
+      "exit_code": 0,
+      "end": 13254877184
+    },
+    "combined_post_lint_38_case_run": {
+      "start": 13213634560,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/crm/backoffice_completion_report_spec.rb": "cfe2517e1da5dba9c433124854f9e5141e3ef528097394e1c3728705f6f3fb8c",
+        "spec/services/jrc_relationship/health_hysteresis_spec.rb": "624c666965f3588368ad1c6ffe7833ff01ba9ee06acaa28b4d83cc1a673d5e20",
+        "spec/services/jrc_relationship/monitoring_runs_spec.rb": "3c7152fbaff056037c2879f5f49df277ca98a5106a8aacdaf1ae2a04aef44082",
+        "spec/services/jrc_approvals/notifications_spec.rb": "8a79bbd79184fd461fa9b8a5facf86f8492d277e50b85f146a9b7705f0d79196",
+        "spec/requests/api/v1/accounts/jrc_approvals/notifications_spec.rb": "524459a9887df3954052dfdf413d05a9344bd3b01e3d4ad1cf5950023bd1af9b"
+      },
+      "minimum": 13194268672,
+      "exit_code": 0,
+      "end": 13213859840
+    },
+    "final_legacy_and_health_17_case_run": {
+      "start": 13212315648,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/crm/backoffice_completion_report_spec.rb": "264ec6400f579e2211b497fecca844fb1b8f007e5999e1f8453cf1128106ffb3",
+        "spec/services/jrc_relationship/health_hysteresis_spec.rb": "624c666965f3588368ad1c6ffe7833ff01ba9ee06acaa28b4d83cc1a673d5e20",
+        "spec/services/jrc_relationship/health_coverage_spec.rb": "2e69a283b127f208e9f3675d025143e759757dbc77614a701cba0adf76d1d886"
+      },
+      "minimum": 13212098560,
+      "exit_code": 0,
+      "end": 13212090368
+    },
+    "Vue": "5 report interaction cases passed in the37-case integrated Vue run",
+    "lint": "New Ruby files RuboCop0;5 related JS/Vue files ESLint0",
+    "native_data": "Synthetic Rails/PostgreSQL with actual models, authorization and private storage metadata; no provider/production operations",
+    "failure_fixed": "Initial report returned422 because its access event was missing from the native audit allowlist. Corrected the allowlist and verified actual persisted access audit. Foreign-account denial is native401 for this CRM endpoint."
+  },
+  "remaining": [
+    "Actual full final file/package export, including exact signed contract bytes and verified release evidence",
+    "Detailed Central approval report must reuse independent approval visibility; no approval snapshot leaked through CRM access",
+    "Full provisioning/go-live/handoff operational acceptance and final immutable dossier remain open",
+    "Actual compiled desktop/mobile light/dark acceptance pending explicit build authorization"
+  ],
+  "runtime": {
+    "login_http": 200,
+    "entry_http": 200,
+    "entry_url": "/consolidation-customer-b1-b4-4d4a6de3-vite/assets/v3app-Dc7pKck9.js",
+    "entry_sha256": "ae6897f4131fe8b6d08767ed31bbff7f780cca17cb5e9da960b8d2e4bcfbca52",
+    "same_preserved_asset": true,
+    "served_commit": "4d4a6de3f934d4f7f1475e1f939aedaaf2513def",
+    "new_code_served": false,
+    "not_browser_homologation": true,
+    "no_new_server_or_build": true,
+    "free_bytes": 13213630464
+  },
+  "disk_end": 12944396288,
+  "no_stage_completion_claim": true
+}

@@ -77,6 +77,14 @@ commissionProgramsAPI.simulate = data =>
   axios.post(`${commissionProgramsAPI.url}/simulate`, data);
 
 export const backofficeAPI = make('backoffice_requests');
+backofficeAPI.completionReport = (accountId, requestId, options = {}) =>
+  axios.get(
+    `${backofficeAPI.urlForAccount(accountId)}/${requestId}/completion_report`,
+    {
+      ...options,
+      responseType: 'blob',
+    }
+  );
 const contractVersionsUrl = (accountId, requestId) =>
   `${backofficeAPI.urlForAccount(accountId)}/${requestId}/contract_versions`;
 export const backofficeContractVersionsAPI = {

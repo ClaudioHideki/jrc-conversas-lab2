@@ -535,6 +535,9 @@
       }
     },
     "BACKOFFICE_WORKSPACE": {
+      "COMPLETION_REPORT": "Download completion report (CSV)",
+      "COMPLETION_REPORT_LOADING": "Preparing report…",
+      "COMPLETION_REPORT_ERROR": "The report is unavailable. Refresh the request and check your access.",
       "EYEBROW": "Backoffice",
       "TITLE": "Central de Operações",
       "SUBTITLE": "Solicitações, etapas e prazos conectados ao fluxo comercial.",
@@ -709,6 +712,7 @@
         "backoffice_issue_resolved": "Pendência resolvida",
         "backoffice_provisioning_confirmed": "Provisionamento confirmado",
         "backoffice_reopened": "Solicitação reaberta",
+        "backoffice_completion_report_accessed": "Completion report accessed",
         "backoffice_signer_roster_created": "Proposta de assinantes preservada"
       },
       "NO_SLA": "Sem prazos de SLA configurados",

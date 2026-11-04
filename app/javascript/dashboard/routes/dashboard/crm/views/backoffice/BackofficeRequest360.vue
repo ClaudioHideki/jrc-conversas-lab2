@@ -11,6 +11,7 @@ import BackofficeActions from './BackofficeActions.vue';
 import BackofficeDocumentVersions from './BackofficeDocumentVersions.vue';
 import BackofficeContractPanel from './BackofficeContractPanel.vue';
 import BackofficeFinance from './BackofficeFinance.vue';
+import BackofficeCompletionReport from './BackofficeCompletionReport.vue';
 import ApprovalGateBadge from 'dashboard/routes/dashboard/approvals/ApprovalGateBadge.vue';
 import { useBackofficePresentation } from './useBackofficePresentation';
 
@@ -201,6 +202,7 @@ onBeforeUnmount(() => {
             </p>
           </div>
           <div class="flex flex-wrap gap-2">
+            <BackofficeCompletionReport :record="record" />
             <span
               class="rounded-lg border px-3 py-2 text-sm font-semibold"
               :class="moduleTabClasses(stageTones[record.stage])"
