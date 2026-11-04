@@ -77,6 +77,15 @@ commissionProgramsAPI.simulate = data =>
   axios.post(`${commissionProgramsAPI.url}/simulate`, data);
 
 export const backofficeAPI = make('backoffice_requests');
+backofficeAPI.completionPackage = (accountId, requestId) =>
+  axios.get(
+    `${backofficeAPI.urlForAccount(accountId)}/${requestId}/completion_package`
+  );
+backofficeAPI.downloadCompletionPackage = (accountId, requestId) =>
+  axios.get(
+    `${backofficeAPI.urlForAccount(accountId)}/${requestId}/completion_package/download`,
+    { responseType: 'blob' }
+  );
 backofficeAPI.completionReport = (accountId, requestId, options = {}) =>
   axios.get(
     `${backofficeAPI.urlForAccount(accountId)}/${requestId}/completion_report`,

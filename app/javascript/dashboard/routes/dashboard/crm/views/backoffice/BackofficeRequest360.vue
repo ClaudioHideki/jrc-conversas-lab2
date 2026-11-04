@@ -12,6 +12,7 @@ import BackofficeDocumentVersions from './BackofficeDocumentVersions.vue';
 import BackofficeContractPanel from './BackofficeContractPanel.vue';
 import BackofficeFinance from './BackofficeFinance.vue';
 import BackofficeCompletionReport from './BackofficeCompletionReport.vue';
+import BackofficeCompletionPackage from './BackofficeCompletionPackage.vue';
 import ApprovalGateBadge from 'dashboard/routes/dashboard/approvals/ApprovalGateBadge.vue';
 import { useBackofficePresentation } from './useBackofficePresentation';
 
@@ -31,6 +32,7 @@ const tabs = [
   'checklist',
   'issues',
   'finance',
+  'completion',
   'history',
 ];
 const tab = ref(
@@ -46,6 +48,7 @@ const tabTones = {
   checklist: 'teal',
   issues: 'rose',
   finance: 'violet',
+  completion: 'teal',
   history: 'blue',
 };
 let sequence = 0;
@@ -460,6 +463,12 @@ onBeforeUnmount(() => {
               :saving="saving"
               @command="action"
             />
+            <div v-else-if="tab === 'completion'" class="min-w-0 space-y-3">
+              <BackofficeCompletionPackage :record="record" />
+              <p v-if="record.status !== 'completed'" class="text-sm text-n-slate-11">
+                {{ text('COMPLETION_PACKAGE_NOT_COMPLETED') }}
+              </p>
+            </div>
             <div
               v-else
               class="space-y-3"
