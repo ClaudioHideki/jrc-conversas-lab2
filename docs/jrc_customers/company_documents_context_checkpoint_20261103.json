@@ -38,6 +38,7 @@
   "source_snapshot": ".codex/customer-company-documents-reviewed-source-verified.json",
   "remaining": [
     "Empresas sem carteira nativa autorizada não ganham carteira nem documento duplicado; suporte integral desse cenário permanece pendente.",
+    "Exibir de forma completa responsável/autor e estado documental no popup; o painel nativo já guarda uploaded_by_id e mostra a verificação/validade, mas isso não conclui todos os campos solicitados no Word.",
     "Catálogo documental obrigatório configurável e representação/assinantes continuam nos fluxos nativos de Backoffice/Aprovações; ainda não há central unificada integral no popup Empresa.",
     "Criação contextual de chamados, indicadores de atendimento, renovação e ações contratuais, escala e auditoria restante da Etapa C.",
     "TRR depende de definição; D/E/F não concluídas."

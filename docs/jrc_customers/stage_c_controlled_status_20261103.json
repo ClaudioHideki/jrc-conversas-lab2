@@ -12,7 +12,7 @@
       "requirement": "cadastro-mestre:P0163 / Documentos da Empresa",
       "classification": "Implementado com divergências",
       "evidence": "docs/jrc_customers/company_documents_context_checkpoint_20261103.json",
-      "remaining": "Carteira nativa autorizada exigida; falta cenário sem carteira e integração integral de requisitos documentais/representação. Arquivos novos permanecem em quarentena até verificação real."
+      "remaining": "Carteira nativa autorizada exigida; falta cenário sem carteira e integração integral de requisitos documentais/representação. Arquivos novos permanecem em quarentena até verificação real. Exibir de forma completa responsável/autor e estado documental no popup; o painel nativo já guarda uploaded_by_id e mostra a verificação/validade, mas isso não conclui todos os campos solicitados no Word."
     },
     {
       "requirement": "cadastro-mestre:P0155 / Novo chamado contextual",

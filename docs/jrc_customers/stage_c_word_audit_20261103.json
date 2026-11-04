@@ -26,7 +26,7 @@
     {
       "requirement": "cadastro-mestre:P0163",
       "status": "parcial",
-      "finding": "Carteira nativa autorizada exigida; falta cenário sem carteira e integração integral de requisitos documentais/representação. Arquivos novos permanecem em quarentena até verificação real.",
+      "finding": "Carteira nativa autorizada exigida; falta cenário sem carteira e integração integral de requisitos documentais/representação. Arquivos novos permanecem em quarentena até verificação real. Exibir de forma completa responsável/autor e estado documental no popup; o painel nativo já guarda uploaded_by_id e mostra a verificação/validade, mas isso não conclui todos os campos solicitados no Word.",
       "files": [
         "app/javascript/dashboard/routes/dashboard/jrcCustomers/CompanyPage.vue",
         "app/services/jrc_customers/customer360.rb",
