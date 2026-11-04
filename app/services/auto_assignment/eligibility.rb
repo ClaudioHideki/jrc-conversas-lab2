@@ -44,7 +44,8 @@ class AutoAssignment::Eligibility
        JrcContactCenter::Qualification.pending.where(account_id: inbox.account_id, account_user_id: account_user.id).exists?
       return 'qualification_pending'
     end
-    return 'capacity_reached' unless inbox.member_ids_with_assignment_capacity.include?(account_user.user_id)
+    capacity_ids = inbox.member_ids_with_assignment_capacity(respect_availability: respect_availability)
+    return 'capacity_reached' unless capacity_ids.include?(account_user.user_id)
 
     nil
   end

@@ -116,12 +116,15 @@ jobs:
         run: |
           bundle exec rspec spec/requests/jrc_connection_summary_spec.rb \
             spec/enterprise/requests/jrc_connection_summary_spec.rb \
+            spec/enterprise/services/jrc_human_assignment/availability_spec.rb \
+            spec/enterprise/models/inbox_spec.rb \
             spec/requests/jrc_connection_history_spec.rb \
             spec/requests/jrc_connection_distribution_spec.rb \
             spec/requests/api/v1/accounts/jrc_broker_spec.rb \
             spec/requests/api/v1/accounts/jrc_broker_inbox_spec.rb \
             spec/services/jrc_broker \
             spec/services/jrc_human_assignment \
+            spec/services/auto_assignment \
             --format progress --format json --out /tmp/whatsapp-connections-rspec.json
           ruby -rjson -e 's=JSON.parse(File.read("/tmp/whatsapp-connections-rspec.json")).fetch("summary"); puts s; abort "failed or pending" unless s.fetch("failure_count").zero? && s.fetch("pending_count").zero?'
       - name: Preservar fonte e schema versionado

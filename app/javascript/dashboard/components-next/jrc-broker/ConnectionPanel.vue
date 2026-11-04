@@ -387,9 +387,10 @@ onBeforeUnmount(() => {
 <template>
   <section
     class="flex flex-col gap-4 p-5 border border-n-weak rounded-xl bg-n-solid-1"
+    :class="presentation === 'pairing' ? 'md:grid md:grid-cols-2' : ''"
     :aria-label="t('JRC_BROKER.DETAILS.PANEL_TITLE')"
   >
-    <h3 class="text-lg font-semibold text-n-slate-12">
+    <h3 class="text-lg font-semibold text-n-slate-12 md:col-span-2">
       {{
         t(
           presentation === 'pairing'
@@ -401,12 +402,12 @@ onBeforeUnmount(() => {
     <div
       v-if="presentation === 'pairing'"
       data-testid="pairing-instructions"
-      class="rounded-xl border border-n-weak bg-n-alpha-1 p-5"
+      class="rounded-xl border border-n-weak bg-n-alpha-1 p-5 md:col-start-2 md:row-start-2 md:row-span-4"
     >
       <p class="text-sm leading-6 text-n-slate-11">
         {{ t('JRC_BROKER.WORKSPACE.PAIR_HELP') }}
       </p>
-      <ol class="mt-4 grid gap-4 text-sm lg:grid-cols-3">
+      <ol class="mt-4 flex flex-col gap-4 text-sm">
         <li v-for="step in [1, 2, 3]" :key="step" class="flex gap-3">
           <span
             class="flex size-6 shrink-0 items-center justify-center rounded-full bg-n-brand text-xs text-white"
@@ -440,7 +441,10 @@ onBeforeUnmount(() => {
         <dd>{{ t(`JRC_BROKER.STATUS.${health.transportStatus}`) }}</dd>
       </div>
     </dl>
-    <p v-if="presentation !== 'configuration'" class="text-sm text-n-slate-11">
+    <p
+      v-if="presentation !== 'configuration' && presentation !== 'pairing'"
+      class="text-sm text-n-slate-11"
+    >
       {{ t('JRC_BROKER.DETAILS.HEALTH_HELP') }}
     </p>
     <template v-if="presentation !== 'overview'">
@@ -467,18 +471,18 @@ onBeforeUnmount(() => {
           :label="t('JRC_BROKER.CONNECTIONS.SAVE_NAME')"
         />
       </form>
-      <p class="text-sm text-n-slate-11">
+      <p v-if="presentation !== 'pairing'" class="text-sm text-n-slate-11">
         {{ t('JRC_BROKER.DETAILS.CONFIGURATION_HELP') }}
       </p>
       <img
         v-if="image"
         :src="image"
         :alt="t('JRC_BROKER.QR_ALT')"
-        class="w-64 h-64 max-w-full self-center bg-white p-2"
+        class="w-64 h-64 max-w-full self-center bg-white p-2 md:col-start-1 md:row-start-2"
       />
       <output
         v-else-if="action?.type === 'PAIRING_CODE'"
-        class="text-2xl font-mono text-center"
+        class="text-2xl font-mono text-center md:col-start-1 md:row-start-2"
       >
         <span>{{ action.code }}</span>
       </output>
@@ -495,7 +499,7 @@ onBeforeUnmount(() => {
       </p>
       <p v-if="expired" role="status">{{ t('JRC_BROKER.EXPIRED') }}</p>
       <p v-if="progressMessage" role="status">{{ progressMessage }}</p>
-      <div class="flex flex-wrap gap-3">
+      <div class="flex flex-wrap gap-3 md:col-span-2">
         <Button
           v-if="actions.includes('pair')"
           data-testid="pair"

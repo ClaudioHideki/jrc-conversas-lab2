@@ -1,11 +1,19 @@
 module Enterprise::Inbox
-  def member_ids_with_assignment_capacity
-    return super unless enable_auto_assignment?
-    return filter_by_capacity(available_agents).map(&:user_id) if auto_assignment_v2_enabled?
+  def member_ids_with_assignment_capacity(respect_availability: true)
+    unless enable_auto_assignment?
+      return super(respect_availability: respect_availability) if respect_availability
+
+      return filter_by_capacity(inbox_members).map(&:user_id)
+    end
+    if auto_assignment_v2_enabled?
+      agents = respect_availability ? available_agents : inbox_members
+      return filter_by_capacity(agents).map(&:user_id)
+    end
 
     max_assignment_limit = auto_assignment_config['max_assignment_limit']
     overloaded_agent_ids = max_assignment_limit.present? ? get_agent_ids_over_assignment_limit(max_assignment_limit) : []
-    super - overloaded_agent_ids
+    ids = respect_availability ? super(respect_availability: respect_availability) : filter_by_capacity(inbox_members).map(&:user_id)
+    ids - overloaded_agent_ids
   end
 
   def active_bot?

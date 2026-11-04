@@ -133,10 +133,10 @@ class JrcHumanAssignment::Dispatch
     available = OnlineStatusTracker.effective_available_users(@account.id)
     online_ids = available.select { |_id, state| state == 'online' }.keys.map(&:to_i)
     members = @account.account_users.where(auto_assignment_enabled: true)
-    unless JrcHumanAssignment::Policy.effective(@account, @conversation.inbox_id)[:respect_availability] == false
-      members = members.online.where(user_id: online_ids)
-    end
-    ids = members.pluck(:user_id) & @conversation.inbox.member_ids_with_assignment_capacity
+    respect = JrcHumanAssignment::Policy.effective(@account, @conversation.inbox_id)[:respect_availability] != false
+    members = members.online.where(user_id: online_ids) if respect
+    capacity_ids = @conversation.inbox.member_ids_with_assignment_capacity(respect_availability: respect)
+    ids = members.pluck(:user_id) & capacity_ids
     if @account.feature_enabled?('jrc_contact_center')
       pending = JrcContactCenter::Qualification.pending.where(account_id: @account.id).joins(:account_user).pluck('account_users.user_id')
       ids -= pending

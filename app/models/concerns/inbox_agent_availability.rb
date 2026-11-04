@@ -12,7 +12,7 @@ module InboxAgentAvailability
       .includes(:user)
   end
 
-  def member_ids_with_assignment_capacity
+  def member_ids_with_assignment_capacity(respect_availability: true)
     member_ids
   end
 

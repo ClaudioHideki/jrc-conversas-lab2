@@ -27,6 +27,36 @@ beforeEach(() => {
 });
 afterEach(() => wrapper?.unmount());
 
+it.each(['unassigned', 'default_team'])(
+  'shows the actual configured fallback %s rather than claiming waiting is the outcome',
+  async fallback => {
+    api.connectionDistribution.mockResolvedValue({
+      policy: {
+        enabled: true,
+        mode: 'direct',
+        team_ids: [11],
+        max_open: 5,
+        waiting_enabled: true,
+        fallback,
+        fallback_team_id: fallback === 'default_team' ? 22 : null,
+      },
+      teams,
+    });
+    wrapper = mount(ConnectionDistributionPolicy, {
+      props: { accountId: 1, inboxId: 7, presentation: 'summary' },
+    });
+    await flushPromises();
+    const card = wrapper.findAll('section').at(-1);
+    expect(card.text()).toContain(
+      fallback === 'unassigned'
+        ? 'Leave unassigned'
+        : 'Send to the default queue'
+    );
+    if (fallback === 'default_team') expect(card.text()).toContain('Support');
+    expect(card.text()).not.toContain('Keep conversations waiting');
+  }
+);
+
 it('keeps older distribution audit pages available after loading the first fifty changes', async () => {
   api.distributionHistory
     .mockResolvedValueOnce({

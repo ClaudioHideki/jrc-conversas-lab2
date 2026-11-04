@@ -401,8 +401,20 @@ onBeforeUnmount(clear);
                 )
               }}
             </li>
-            <li v-if="savedPolicy.waiting_enabled !== false">
-              {{ t('JRC_BROKER.DISTRIBUTION.WAITING') }}
+            <li>
+              {{ t('JRC_BROKER.DISTRIBUTION.FALLBACK') }}:
+              {{
+                t(
+                  savedPolicy.fallback === 'unassigned'
+                    ? 'JRC_BROKER.DISTRIBUTION.UNASSIGNED'
+                    : savedPolicy.fallback === 'default_team'
+                      ? 'JRC_BROKER.DISTRIBUTION.DEFAULT_TEAM'
+                      : 'JRC_BROKER.DISTRIBUTION.WAITING'
+                )
+              }}
+              <span v-if="savedPolicy.fallback === 'default_team'">
+                — {{ teamName(savedPolicy.fallback_team_id) }}</span
+              >
             </li>
           </ul>
         </template>

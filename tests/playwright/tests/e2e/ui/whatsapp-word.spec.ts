@@ -2,6 +2,25 @@ import { test, expect } from '@playwright/test';
 
 const path = '/tests/playwright/fixtures/whatsapp-word/index.html';
 
+test('apresenta QR sintetico e prazo real sem usar sessao WhatsApp', async ({
+  page,
+}, testInfo) => {
+  await page.goto(`${path}?role=agent&pairing=qr`);
+  await page.getByTestId('reconnect-connection-702').click();
+  await expect(page.getByRole('dialog').locator('img')).toHaveCount(0);
+  await page.getByTestId('pair').click();
+  await expect(page.getByRole('dialog').locator('img')).toBeVisible();
+  await expect(page.getByRole('dialog').locator('img')).toHaveAttribute(
+    'src',
+    /^data:image\/png;base64,/
+  );
+  await expect(page.getByTestId('pairing-countdown')).toBeVisible();
+  await page.screenshot({
+    path: testInfo.outputPath('qrcode.png'),
+    fullPage: true,
+  });
+});
+
 test('administra conexoes e distribuicao sem iniciar pareamento ao abrir', async ({
   page,
 }, testInfo) => {

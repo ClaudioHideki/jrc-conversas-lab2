@@ -3,6 +3,7 @@ import { createApp, h, ref } from 'vue';
 import { createStore } from 'vuex';
 import { createRouter, createMemoryHistory } from 'vue-router';
 import { createI18n } from 'vue-i18n';
+import QRCode from 'qrcode';
 import ConnectionsPage from 'dashboard/routes/dashboard/jrcBroker/ConnectionsPage.vue';
 import en from 'dashboard/i18n/locale/en/jrcBroker.json';
 import pt from 'dashboard/i18n/locale/pt_BR/jrcBroker.json';
@@ -87,6 +88,18 @@ window.axios = async ({ method, url, data }) => {
     };
   if (url.endsWith('/pair')) {
     pairingRequests.value += 1;
+    if (new URLSearchParams(location.search).get('pairing') === 'qr') {
+      return {
+        data: {
+          action: {
+            type: 'QR_CODE',
+            encoding: 'DATA_URL',
+            value: await QRCode.toDataURL('JRC-DEMO-NOT-A-WHATSAPP-SESSION'),
+            expiresAt: new Date(Date.now() + 30000).toISOString(),
+          },
+        },
+      };
+    }
     return {
       data: {
         action: {

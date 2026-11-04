@@ -204,7 +204,7 @@ class Inbox < ApplicationRecord
     end
   end
 
-  def member_ids_with_assignment_capacity
+  def member_ids_with_assignment_capacity(respect_availability: true)
     members.ids
   end
 
