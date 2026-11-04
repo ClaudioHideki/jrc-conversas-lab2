@@ -5,7 +5,7 @@ class JrcApprovals::Decisions
     @authorization = JrcApprovals::Authorization.new(account: account, user: user)
   end
 
-  def call(request_id:, step_code:, decision:, reason:, expected_version:, idempotency_key:, delegation_id: nil)
+  def call(request_id:, step_code:, decision:, reason:, expected_version:, idempotency_key:, delegation_id: nil, own_delegation_id: nil)
     JrcApprovals::Ledger.key!(idempotency_key)
     raise JrcApprovals::Error, 'REASON_REQUIRED' unless reason.is_a?(String) && reason.strip.present? && reason.bytesize <= 4096
     raise JrcApprovals::Error, 'INVALID_DECISION' unless JrcApprovals::Definition::ACTIONS.include?(decision)
@@ -17,6 +17,13 @@ class JrcApprovals::Decisions
       actor = @authorization.authorize!('decide', company_id: request.issuer_company_id, unit_id: request.business_unit_id)
       payload = { request_id: request.id, step_code: step_code, decision: decision, reason: reason.strip,
                   expected_version: expected_version, delegation_id: delegation_id }
+      if own_delegation_id
+        raise JrcApprovals::Error, 'INVALID_DELEGATION' if delegation_id
+
+        payload[:own_delegation_id] = own_delegation_id
+        delegation_id = JrcApprovals::OwnDelegationBindings.new(account: @account, user: @user, record: request)
+          .materialize!(id: own_delegation_id, step_code: step_code, decision: decision).id
+      end
       digest = JrcApprovals::Ledger.digest(payload)
       existing = JrcApprovals::Decision.find_by(account_id: @account.id, actor_id: actor.id, idempotency_key: idempotency_key)
       if existing
@@ -98,6 +105,8 @@ class JrcApprovals::Decisions
     end
 
     validate_gratuity_delegation!(request, delegation)
+    step = definition.fetch('steps').find { |row| row['code'] == step_code }
+    JrcApprovals::OwnDelegationBindings.new(account: @account, user: actor.user, record: request).verify_scoped!(delegation, step, decision)
     delegation
   end
 

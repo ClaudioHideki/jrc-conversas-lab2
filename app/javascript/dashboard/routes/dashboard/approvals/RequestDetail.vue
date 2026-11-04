@@ -41,7 +41,7 @@ const label = (choice, index) => {
       )
     ) + 1;
   let delegation = '';
-  if (choice.delegation_id) {
+  if (choice.delegation_id || choice.own_delegation_id) {
     delegation = choice.principal_name
       ? t('JRC_APPROVALS.onBehalfOf', { name: choice.principal_name })
       : t('JRC_APPROVALS.delegatedOption', { number: index + 1 });
@@ -187,12 +187,13 @@ const confirm = payload => {
       @close="selectedChoice = null"
       @confirm="confirm"
     >
-      <template #origin
-        ><ApprovalOriginLink
+      <template #origin>
+        <ApprovalOriginLink
           :request="request"
           :account-id="context?.account_id"
           @authority="showAuthority"
-      /></template>
+        />
+      </template>
     </ApprovalDecisionDialog>
     <section class="space-y-3">
       <h3 class="font-semibold">{{ t('JRC_APPROVALS.decisions') }}</h3>

@@ -64,7 +64,13 @@ const confirm = () => {
     reason: reason.value.trim(),
     expected_version: expectedVersion,
     ...(choice
-      ? { step_code: choice.step_code, delegation_id: choice.delegation_id }
+      ? {
+          step_code: choice.step_code,
+          delegation_id: choice.delegation_id,
+          ...(choice.own_delegation_id
+            ? { own_delegation_id: choice.own_delegation_id }
+            : {}),
+        }
       : {}),
   });
 };

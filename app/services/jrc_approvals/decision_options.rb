@@ -27,6 +27,8 @@ class JrcApprovals::DecisionOptions
       options << { delegation_id: nil, actions: step['actions'] } if principals.include?(actor.id)
       if definition['delegation_allowed'] && (definition['allow_self_approval'] || record.requester_id != actor.id)
         options.concat(delegated_choices(account: account, record: record, actor: actor, step: step, principals: principals))
+        options.concat(JrcApprovals::OwnDelegationBindings.choices(account: account, user: user, record: record,
+          step: step, principals: principals))
       end
       { step_code: step['code'], choices: options } if options.any?
     end
@@ -39,6 +41,7 @@ class JrcApprovals::DecisionOptions
                                           delegate_id: actor.id, principal_id: principals, step_code: step['code'], revoked_at: nil)
                                    .where('starts_at <= ? AND ends_at > ?', Time.current, Time.current).includes(principal: :user)
     rows.filter_map do |delegation|
+      next if JrcApprovals::OwnDelegationBindings.own_id(delegation)
       next if record.decisions.exists?(cycle: record.cycle, step_code: step['code'], principal_id: delegation.principal_id)
 
       { delegation_id: delegation.id, principal_name: delegation.principal.user.name, actions: step['actions'] & delegation.actions }

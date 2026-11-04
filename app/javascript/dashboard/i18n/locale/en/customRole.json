@@ -126,7 +126,8 @@
       "JRC_APPROVALS_REQUEST_CREATE": "Request approval within native scope",
       "JRC_APPROVALS_DECIDE": "Decide assigned approval stages",
       "JRC_APPROVALS_VIEW_AUDIT": "View approval audit within native scope",
-      "JRC_APPROVALS_ADJUST": "Adjust installed approval fields (also requires native module edit access)"
+      "JRC_APPROVALS_ADJUST": "Adjust installed approval fields (also requires native module edit access)",
+      "JRC_APPROVALS_DELEGATE": "Create and revoke own approval delegations (also requires decision permission)"
     },
     "FORM": {
       "NAME": {

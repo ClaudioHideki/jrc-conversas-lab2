@@ -326,6 +326,21 @@
       "saved": "Adjustment saved. The new value follows its recalculated approval authority.",
       "summary": "General discount adjustment",
       "values": "{before} → {after} {currency}"
+    },
+    "own-delegations": "My delegations",
+    "ownDelegations": "My delegations",
+    "ownDelegation": {
+      "help": "Delegate only your own approval authority for a defined period and authorized scope. Both people must remain eligible at each use; a rule must permit delegation. No access to edit origin records is granted. Gratuities still require the existing formal-absence delegation for the exact rule version.",
+      "recipient": "Temporary delegate",
+      "create": "Create my delegation",
+      "revoke": "Revoke my delegation",
+      "active": "Active",
+      "scheduled": "Scheduled",
+      "expired": "Expired",
+      "parties": "{principal} → {recipient}",
+      "reason": "Reason (optional)",
+      "period": "Validity period",
+      "removed": "Removed member"
     }
   }
 }

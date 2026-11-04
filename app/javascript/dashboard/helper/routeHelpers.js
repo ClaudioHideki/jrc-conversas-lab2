@@ -40,6 +40,10 @@ export const defaultRedirectPage = (to, permissions) => {
       path: 'approvals/inbox',
     },
     { permissions: ['jrc_approvals_view_audit'], path: 'approvals/history' },
+    {
+      permissions: ['jrc_approvals_delegate'],
+      path: 'approvals/own-delegations',
+    },
   ];
 
   const route = permissionRoutes.find(({ permissions: routePermissions }) =>

@@ -35,6 +35,9 @@ const confirm = () => {
     step_code: props.choice.step_code,
     decision,
     delegation_id: props.choice.delegation_id,
+    ...(props.choice.own_delegation_id
+      ? { own_delegation_id: props.choice.own_delegation_id }
+      : {}),
     reason: props.reason.trim(),
     expected_version: expectedVersion,
   });
@@ -68,7 +71,7 @@ onMounted(() => dialog.value.open());
       </p>
       <p class="break-words text-sm">{{ request.policy_name }}</p>
       <p
-        v-if="choice.delegation_id"
+        v-if="choice.delegation_id || choice.own_delegation_id"
         class="text-sm"
       >
         {{

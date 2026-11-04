@@ -45,7 +45,7 @@ class JrcApprovals::Adjustments
 
     JrcCrm::ProposalMutation.call!(proposal: resource, actor: @user, attributes: intent.changes)
     revised = revise!(original, resource, actor, intent.digest(original.id))
-    approve!(revised, intent.reason, intent.digest(original.id), intent.step_code, intent.delegation_id) if intent.mode == 'approve'
+    approve!(revised, intent, intent.digest(original.id)) if intent.mode == 'approve'
     audit!(original, revised, actor, before, intent)
     revised
   end
@@ -91,11 +91,12 @@ class JrcApprovals::Adjustments
                                           snapshot: snapshot, request_key: "adjust:#{digest}")
   end
 
-  def approve!(record, reason, digest, step, delegation)
-    JrcApprovals::Decisions.new(account: @account, user: @user).call(request_id: record.id, step_code: step,
-                                                                     decision: 'approved', reason: reason.strip,
+  def approve!(record, intent, digest)
+    JrcApprovals::Decisions.new(account: @account, user: @user).call(request_id: record.id, step_code: intent.step_code,
+                                                                     decision: 'approved', reason: intent.reason,
                                                                      expected_version: record.lock_version,
-                                                                     idempotency_key: "adjust:#{digest}", delegation_id: delegation)
+                                                                     idempotency_key: "adjust:#{digest}", delegation_id: intent.delegation_id,
+                                                                     own_delegation_id: intent.own_delegation_id)
     record.reload
   end
 

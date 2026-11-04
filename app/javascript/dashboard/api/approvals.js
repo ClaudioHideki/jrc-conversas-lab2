@@ -9,5 +9,6 @@ export const approvalClient = accountId => {
     post: (path, body) => axios.post(`${base}/${path}`, body),
     patch: (path, body) => axios.patch(`${base}/${path}`, body),
     revoke: id => axios.delete(`${base}/delegations/${id}`),
+    revokeOwn: id => axios.delete(`${base}/own_delegations/${id}`),
   };
 };

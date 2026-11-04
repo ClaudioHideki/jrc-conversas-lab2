@@ -15,6 +15,9 @@ namespace :api, defaults: { format: 'json' } do
           member { post :decide; post :adjust; post :transition; get :audit }
         end
         resources :delegations, only: %i[index create destroy]
+        resources :own_delegations, only: %i[index create destroy] do
+          collection { get :recipients }
+        end
       end
     end
   end

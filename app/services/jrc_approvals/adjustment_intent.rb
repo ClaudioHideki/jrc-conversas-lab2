@@ -1,20 +1,22 @@
 class JrcApprovals::AdjustmentIntent
   REQUIRED = %i[changes mode reason expected_version idempotency_key].freeze
-  OPTIONAL = %i[step_code delegation_id].freeze
-  attr_reader :changes, :mode, :reason, :expected_version, :idempotency_key, :step_code, :delegation_id
+  OPTIONAL = %i[step_code delegation_id own_delegation_id].freeze
+  attr_reader :changes, :mode, :reason, :expected_version, :idempotency_key, :step_code, :delegation_id, :own_delegation_id
 
   def initialize(input)
     raise JrcApprovals::Error, 'INVALID_INPUT' unless (REQUIRED - input.keys).empty? && (input.keys - REQUIRED - OPTIONAL).empty?
 
     @changes, @mode, @reason, @expected_version, @idempotency_key = input.values_at(*REQUIRED)
-    @step_code, @delegation_id = input.values_at(*OPTIONAL)
+    @step_code, @delegation_id, @own_delegation_id = input.values_at(*OPTIONAL)
     validate!
     @reason = reason.strip
   end
 
   def digest(request_id)
-    JrcApprovals::Ledger.digest(request_id: request_id, changes: changes, mode: mode, reason: reason,
-                                expected_version: expected_version, step_code: step_code, delegation_id: delegation_id)
+    payload = { request_id: request_id, changes: changes, mode: mode, reason: reason,
+                expected_version: expected_version, step_code: step_code, delegation_id: delegation_id }
+    payload[:own_delegation_id] = own_delegation_id if own_delegation_id
+    JrcApprovals::Ledger.digest(payload)
   end
 
   private

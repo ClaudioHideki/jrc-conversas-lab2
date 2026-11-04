@@ -11,6 +11,7 @@ class JrcApprovals::Delegations
     absence_authorization = formal_absence[:absence_authorization]
     JrcApprovals::Delegation.transaction do
       version, grantor = delegation_context(policy_version_id)
+      JrcApprovals::Ledger.lock!(@account.id, 'own-delegation-topology')
       step = version.definition['steps'].find { |item| item['code'] == step_code }
       validate_terms!(version, step, actions, reason, [starts_at, ends_at])
       JrcApprovals::Ledger.lock!(@account.id, "delegations:#{version.id}:#{step_code}")
@@ -52,6 +53,7 @@ class JrcApprovals::Delegations
       relation: JrcApprovals::Delegation.where(account_id: @account.id, policy_version_id: version.id, step_code: step['code'], revoked_at: nil),
       principal_id: principal.id, delegate_id: delegate.id, period: period
     )
+    JrcApprovals::OwnDelegations.check_scoped_topology!(@account, principal.id, delegate.id, period)
   end
   private :delegation_parties!, :check_topology!
 
@@ -94,6 +96,7 @@ class JrcApprovals::Delegations
       company_id, unit_id = grant.policy_version.publication.values_at('issuer_company_id', 'business_unit_id')
       actor = JrcApprovals::Authorization.new(account: @account, user: @user)
         .authorize!('policy_manage', company_id: company_id, unit_id: unit_id)
+      raise JrcApprovals::Error, 'INVALID_DELEGATION' if JrcApprovals::OwnDelegationBindings.own_id(grant)
       next grant if grant.revoked_at
 
       grant.update!(revoked_at: Time.current)

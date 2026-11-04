@@ -5,11 +5,12 @@ export const APPROVAL_PAGES = [
   'simulate',
   'delegations',
   'history',
+  'own-delegations',
 ];
 export const routes = [
   {
     path: frontendURL(
-      'accounts/:accountId/approvals/:screen(policies|inbox|simulate|delegations|history)/:id?'
+      'accounts/:accountId/approvals/:screen(policies|inbox|simulate|delegations|history|own-delegations)/:id?'
     ),
     name: 'jrc_approvals',
     component: () => import('./ApprovalsPage.vue'),

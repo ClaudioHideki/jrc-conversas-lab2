@@ -2,6 +2,7 @@ class Api::V1::Accounts::Approvals::DelegationsController < Api::V1::Accounts::A
   def index
     rows = JrcApprovals::Delegation.where(account_id: Current.account.id).includes(:policy_version, :principal, :delegate)
                                    .order(:id).filter_map do |record|
+      next if JrcApprovals::OwnDelegationBindings.own_id(record)
       company_id, unit_id = record.policy_version.publication.values_at('issuer_company_id', 'business_unit_id')
       authorization.authorize!('policy_manage', company_id: company_id, unit_id: unit_id)
       record.attributes.slice('id', 'policy_version_id', 'step_code', 'principal_id', 'delegate_id', 'actions',

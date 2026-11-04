@@ -37,7 +37,8 @@ class Api::V1::Accounts::Approvals::RequestsController < Api::V1::Accounts::Appr
   end
 
   def decide
-    values = params.require(:decision).permit(:step_code, :decision, :reason, :expected_version, :idempotency_key, :delegation_id).to_h.symbolize_keys
+    values = params.require(:decision).permit(:step_code, :decision, :reason, :expected_version, :idempotency_key,
+      :delegation_id, :own_delegation_id).to_h.symbolize_keys
     record = service(JrcApprovals::Decisions).call(request_id: params[:id], **values)
     render json: record.attributes.slice('id', 'request_id', 'actor_id', 'principal_id', 'step_code', 'decision', 'reason', 'cycle', 'created_at')
   end
@@ -54,7 +55,7 @@ class Api::V1::Accounts::Approvals::RequestsController < Api::V1::Accounts::Appr
     changes = input.require(:changes)
     raise JrcApprovals::Error, 'INVALID_ADJUSTMENT_FIELDS' unless (changes.keys - JrcApprovals::Adjustments::FIELDS).empty?
 
-    values = input.permit(:mode, :reason, :expected_version, :idempotency_key, :step_code, :delegation_id).to_h.symbolize_keys
+    values = input.permit(:mode, :reason, :expected_version, :idempotency_key, :step_code, :delegation_id, :own_delegation_id).to_h.symbolize_keys
     record = service(JrcApprovals::Adjustments).call(request_id: params[:id], changes: changes.permit(:discount_cents).to_h, **values)
     readable = JrcApprovals::RequestVisibility.authorize!(account: Current.account, user: Current.user, record: record)
     render json: { saved: true, request: readable && request_payload(record) }

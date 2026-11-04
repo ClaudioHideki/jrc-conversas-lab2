@@ -136,6 +136,20 @@ RSpec.describe 'Corporate commercial gratuity', :approval_core, :commercial_appr
     expect(JrcApprovals::Request.where(account: scope[:account]).count).to eq(0)
   end
 
+  it 'does not replace the required formal absence authorization with a global own grant' do
+    jose.custom_role.update!(permissions: jose.custom_role.permissions + ['jrc_approvals_delegate'])
+    own = JrcApprovals::OwnDelegations.new(account: scope[:account], user: jose.user).create!(delegate_id: thiago.id,
+      issuer_company_id: scope[:company].id, business_unit_id: scope[:unit].id, actions: ['approved'],
+      reason: 'Synthetic global grant without formal absence', starts_at: 1.minute.ago, ends_at: 1.hour.from_now,
+      idempotency_key: 'global-does-not-replace-absence')
+    policy
+    record = commercial_request(scope, author, proposal).first
+    expect { approval_vote(scope, thiago, record, step_code: 'gratuidade_comercial', own_delegation_id: own.id) }
+      .to raise_error(JrcApprovals::Error, 'INVALID_DELEGATION')
+    expect(record.decisions).to be_empty
+    expect(JrcApprovals::Delegation.where(account: scope[:account])).to be_empty
+  end
+
   it 'keeps returned distinct from approved and requires a rejection reason' do
     policy
     record = commercial_request(scope, author, proposal).first

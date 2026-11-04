@@ -1,0 +1,73 @@
+{
+  "date": "2026-11-04",
+  "parent": "b5dbb7e346523887cda5ca282ca0a290668eae9c",
+  "status": "D8 native own global delegation implemented and automatically tested; no new build or actual UI acceptance",
+  "implementation": [
+    "Append-only native AuditEvent grants/revocations; actor derives principal, no client principal/account grants",
+    "Explicit delegate plus native decide and scope checks for own creation; authorized native policy manager can cancel within scope",
+    "Current policy delegation allowance, captured principal, native eligibility, actions, dates and native company/unit/account coverage intersect on every use",
+    "Lazy native scoped binding only within actual decision transaction; old snapshots and scoped grants unchanged",
+    "Revocation/expiry invalidate even materialized local id; duplicate votes, requester self-approval and transitive redelegation blocked",
+    "All prospective global/mixed cycles serialized by account lock; global topology conservatively rejects overlapping account-wide cycles",
+    "Optional MVP reason preserved as absent, projected native binding records the real source grant reference and absence of a reason",
+    "Native API, scoped recipient pagination, role controls, decision confirmation, pending inbox and responsive own-grant screen connected"
+  ],
+  "storage": "Native immutable AuditEvent ledger plus existing Delegation/Decision references; no migration, dependency or parallel approval engine",
+  "scope_limits": [
+    "Applies only installed Central approval catalog adapters and policies that explicitly allow delegation",
+    "Gratuity formal-absence authorization and designated substitutes remain mandatory; global grant does not replace them",
+    "No editing of grant history; cancel/recreate. No direct origin-edit access from delegation",
+    "D9 internal notification delivery remains pending"
+  ],
+  "tests": [
+    {
+      "run": "d8-word-aligned",
+      "backend": 110,
+      "failures": 0,
+      "scope": "v1 core, real PostgreSQL concurrency including mixed scoped/global cycles, native gratuity/formal absence and atomic proposal adjustment"
+    },
+    {
+      "run": "d8-final-access",
+      "backend": 21,
+      "failures": 0,
+      "scope": "Final service/API, explicit timezone offsets, Word manager/optional reason, same-account foreign unit and duplicate principal quorum checks"
+    },
+    {
+      "run": "d8-own-ui",
+      "vue": 121,
+      "failures": 0,
+      "scope": "Full approval regression before final Word optional-reason/row presentation"
+    },
+    {
+      "run": "d8-word-ui",
+      "vue": 5,
+      "failures": 0,
+      "scope": "Final changed component/optional reason/global decision propagation/account-switch checks"
+    }
+  ],
+  "invalid_evidence": {
+    "run": "d8-own-final",
+    "reason": "A formatting script accidentally copied the service spec over the uncommitted HTTP spec. Recovered exact HTTP test from preserved independent copy. Its114 successes are excluded as API evidence. d8-own-verified106 and final Word110/21 used corrected distinct inputs. No application source, data or prior checkpoint lost.",
+    "prevention": "Local runner now rejects duplicate spec paths/content before execution and records distinct spec SHA256 values."
+  },
+  "visual": {
+    "Word": "Especificacao_Central_Aprovacoes_JRC_Conversas_DEV.docx",
+    "image_inspected": "word/media/image11.png",
+    "paragraphs": "230\u2013250 reviewed, including optional MVP reason and authorized administrator cancellation",
+    "layout": "Horizontal native tab; desktop aligned grant/scope/recipient/period/status/action rows with responsive stacked mobile rows; native themed tokens; scoped form and pagination",
+    "differences": "Uses native inline responsive creation form; immutable grants use cancellation and a new creation rather than an edit pencil. Actual Chrome light/dark/390px acceptance is pending."
+  },
+  "disk": {
+    "start": 14072623104,
+    "minimum_observed": 3856183296,
+    "end": 14164717568,
+    "note": "Unexplained fluctuation/recovery, no cleanup performed. Disk guards did not trigger."
+  },
+  "preserved": [
+    "All prior C/D checkpoints",
+    "server5379 frozen4d4a6de3",
+    "UI and other databases",
+    "No build/push/GHCR/deploy/cleanup/external operations"
+  ],
+  "next": "D9 durable native internal notifications with reauthorization at feed/read/count/serialization/broadcast, followed by actual E/F gaps and G regressions"
+}

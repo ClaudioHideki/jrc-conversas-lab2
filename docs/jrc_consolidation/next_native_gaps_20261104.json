@@ -44,7 +44,8 @@
       "own revocation/expiry, inactive user, foreign unit/tenant",
       "future policy version and old in-flight request semantics",
       "no two effective principal votes, no actor/requester self-approval bypass"
-    ]
+    ],
+    "implementation_checkpoint": "docs/jrc_consolidation/approval_own_delegation_checkpoint_20261104.json"
   },
   "D9_internal_notifications": {
     "finding": "Ledger/AuditEvent persist audit only; Request and AuditEvent have no notification producer hooks, and reviewed native notification/feed paths have no JrcApprovals handling. Audits are not user notification delivery.",

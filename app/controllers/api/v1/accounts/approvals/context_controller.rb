@@ -1,5 +1,5 @@
 class Api::V1::Accounts::Approvals::ContextController < Api::V1::Accounts::Approvals::BaseController
-  CAPABILITIES = %w[policy_manage request_create decide view_audit adjust].freeze
+  CAPABILITIES = %w[policy_manage request_create decide view_audit adjust delegate].freeze
 
   def show
     member = authorization.member!

@@ -90,12 +90,13 @@
     },
     {
       "criterion": "CA-10",
-      "status": "Existing scoped grants hardened against self/cycles/concurrency, with native UI errors; 56 backend and 63 distinct Vue cases covered. Global own delegation remains unimplemented; no policy_manage grant relaxed.",
+      "status": "D8 own global grant lifecycle and native resolver implemented;110 backend plus final21 service/API cases and121 Vue plus final5 component cases passed. Formal gratuity absence preserved; fresh build/real visual acceptance and D9 delivery remain pending.",
       "evidence": [
         "app/services/jrc_approvals/delegations.rb",
         "app/javascript/dashboard/routes/dashboard/approvals/DelegationView.vue",
         "app/services/jrc_approvals/delegation_topology.rb",
-        "docs/jrc_consolidation/approval_delegation_checkpoint_20261104.json"
+        "docs/jrc_consolidation/approval_delegation_checkpoint_20261104.json",
+        "docs/jrc_consolidation/approval_own_delegation_checkpoint_20261104.json"
       ]
     },
     {

@@ -101,6 +101,9 @@ export const decisionChoices = dto =>
         step_code: step.step_code,
         decision: action,
         delegation_id: choice.delegation_id,
+        ...(choice.own_delegation_id
+          ? { own_delegation_id: choice.own_delegation_id }
+          : {}),
         ...(choice.principal_name
           ? { principal_name: choice.principal_name }
           : {}),

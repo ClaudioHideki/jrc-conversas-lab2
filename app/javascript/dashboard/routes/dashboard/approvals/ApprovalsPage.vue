@@ -7,6 +7,7 @@ import PolicyEditor from './PolicyEditor.vue';
 import RequestDetail from './RequestDetail.vue';
 import SimulatorView from './SimulatorView.vue';
 import DelegationView from './DelegationView.vue';
+import OwnDelegationView from './OwnDelegationView.vue';
 import ResourcePicker from './ResourcePicker.vue';
 import { minorAmountText } from './tierPresentation';
 import { useApprovals } from './useApprovals';
@@ -42,6 +43,7 @@ const filters = ref({
 const decisionIntent = intent();
 const requestIntent = intent();
 const adjustmentIntent = intent();
+const ownDelegationIntent = intent();
 const screen = computed(() => route.params.screen || 'inbox');
 const id = computed(() => route.params.id);
 const can = action => capability(state.context, action);
@@ -50,6 +52,8 @@ const allowed = computed(() => {
   if (['policies', 'simulate', 'delegations'].includes(screen.value))
     return can('policy_manage');
   if (screen.value === 'history') return can('view_audit');
+  if (screen.value === 'own-delegations')
+    return can('delegate') || can('decide') || can('policy_manage');
   return ['request_create', 'decide', 'view_audit'].some(can);
 });
 const tabs = computed(() =>
@@ -61,6 +65,10 @@ const tabs = computed(() =>
     },
     { key: 'simulate', show: can('policy_manage') },
     { key: 'delegations', show: can('policy_manage') },
+    {
+      key: 'own-delegations',
+      show: can('delegate') || can('decide') || can('policy_manage'),
+    },
     { key: 'history', show: can('view_audit') },
   ].filter(tab => tab.show)
 );
@@ -122,6 +130,8 @@ const load = async () => {
     if (id.value) await list(`requests/${id.value}/audit`, params);
     else await list('requests', params);
   } else if (screen.value === 'delegations') await list('delegations', params);
+  else if (screen.value === 'own-delegations')
+    await list('own_delegations', params);
   if (['simulate', 'policies'].includes(screen.value) && can('policy_manage')) {
     const scope = state.context.scopes.find(row =>
       row.capabilities.includes('policy_manage')
@@ -252,6 +262,27 @@ const grant = async delegation => {
 };
 const revoke = async grantId => {
   const result = await run(api => api.revoke(grantId));
+  if (result) {
+    await load();
+    notice.value = t('JRC_APPROVALS.revoked');
+  }
+};
+const grantOwn = async delegation => {
+  const result = await run(api =>
+    api.post('own_delegations', {
+      delegation: ownDelegationIntent(
+        delegation,
+        `${state.accountId}:own-delegation`
+      ),
+    })
+  );
+  if (result) {
+    await load();
+    notice.value = t('JRC_APPROVALS.saved');
+  }
+};
+const revokeOwn = async grantId => {
+  const result = await run(api => api.revokeOwn(grantId));
   if (result) {
     await load();
     notice.value = t('JRC_APPROVALS.revoked');
@@ -495,6 +526,14 @@ const errorText = computed(() => {
           :busy="state.loading"
           @create="grant"
           @revoke="revoke"
+        />
+        <OwnDelegationView
+          v-if="screen === 'own-delegations'"
+          :context="state.context"
+          :rows="state.rows"
+          :busy="state.loading"
+          @create="grantOwn"
+          @revoke="revokeOwn"
         />
         <section
           v-if="screen === 'history' && id"
