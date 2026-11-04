@@ -76,6 +76,13 @@ class Api::V1::Accounts::Approvals::RequestsController < Api::V1::Accounts::Appr
     render json: paginated(rows)
   end
 
+  def report
+    bytes = service(JrcApprovals::RequestReport).call(params[:id])
+    response.headers['Cache-Control'] = 'no-store'
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    send_data bytes, filename: "approval-#{params[:id].to_i}-report.json", type: 'application/json', disposition: 'attachment'
+  end
+
   private
 
   def visible_row(record)

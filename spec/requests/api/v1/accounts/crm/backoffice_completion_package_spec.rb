@@ -44,7 +44,8 @@ RSpec.describe 'Native Backoffice documentary package', type: :request do
     expect(entries.except('manifest.json').transform_values { |bytes| Digest::SHA256.hexdigest(bytes) })
       .to eq("documents/#{first.id}/v1.pdf" => first.sha256, "documents/#{second.id}/v2.pdf" => second.sha256)
     manifest = JSON.parse(entries.fetch('manifest.json'))
-    expect(manifest).to include('coverage' => 'available', 'request_id' => operation.id, 'responsible_id' => actor.id)
+    expect(manifest).to include('coverage' => 'available', 'request_id' => operation.id, 'responsible_id' => actor.id,
+                                'completed_at' => operation.reload.completed_at.as_json)
     expect(manifest['files'].last).to include('id' => second.id, 'version' => 2, 'actor_id' => actor.id, 'review_status' => 'approved',
                                               'decisions' => [a_hash_including('actor_id' => actor.id, 'status' => 'approved')])
     expect(entries.fetch('manifest.json')).not_to include('source_snapshot', 'Synthetic private reviewer rationale', 'token', 'service_name')
@@ -152,6 +153,22 @@ RSpec.describe 'Native Backoffice documentary package', type: :request do
     operation.advance!(actor: actor)
     allow(row.file.blob.service).to receive(:download).and_return('tampered synthetic bytes')
     expect { service.download }.to raise_error(ActiveStorage::IntegrityError)
+    get "#{url}/download", headers: headers
+    expect(response).to have_http_status(:conflict)
+    expect(response.parsed_body['code']).to eq('PACKAGE_FILE_INTEGRITY')
+    expect(JrcCrm::AuditEvent.where(account: account, event_type: 'backoffice_completion_package_accessed')).to be_empty
+  end
+
+  it 'reports unavailable stored bytes without returning an empty replacement file or a success audit' do
+    row = version
+    JrcBackoffice::DocumentScan.create!(account: account, document_version: row, source_blob: row.file.blob, attempt: 1,
+                                        state: 'clean', expected_sha256: row.sha256, observed_sha256: row.sha256,
+                                        scanner_adapter: 'clamav-instream-v1')
+    operation.advance!(actor: actor)
+    allow(row.file.blob.service).to receive(:download).and_raise(ActiveStorage::FileNotFoundError)
+    get "#{url}/download", headers: headers
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response.parsed_body['code']).to eq('PACKAGE_FILE_UNAVAILABLE')
     expect(JrcCrm::AuditEvent.where(account: account, event_type: 'backoffice_completion_package_accessed')).to be_empty
   end
 

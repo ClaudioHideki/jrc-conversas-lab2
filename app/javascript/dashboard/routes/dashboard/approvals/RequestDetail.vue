@@ -7,6 +7,7 @@ import ApprovalOriginLink from './ApprovalOriginLink.vue';
 import ApprovalDecisionDialog from './ApprovalDecisionDialog.vue';
 import AuthorityOrigin from './AuthorityOrigin.vue';
 import AdjustmentDialog from './AdjustmentDialog.vue';
+import ApprovalRequestReport from './ApprovalRequestReport.vue';
 const props = defineProps({
   request: { type: Object, required: true },
   context: { type: Object, default: null },
@@ -232,5 +233,6 @@ const confirm = payload => {
       variant="faded"
       @click="emit('audit')"
     />
+    <ApprovalRequestReport v-if="auditAllowed && context" :request="request" :context="context" />
   </section>
 </template>

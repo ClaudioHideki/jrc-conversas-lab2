@@ -6,6 +6,8 @@ export const approvalClient = accountId => {
   const base = `/api/v1/accounts/${Number(accountId)}/approvals`;
   return {
     get: (path, params = {}) => axios.get(`${base}/${path}`, { params }),
+    report: id =>
+      axios.get(`${base}/requests/${id}/report`, { responseType: 'blob' }),
     post: (path, body) => axios.post(`${base}/${path}`, body),
     patch: (path, body) => axios.patch(`${base}/${path}`, body),
     revoke: id => axios.delete(`${base}/delegations/${id}`),

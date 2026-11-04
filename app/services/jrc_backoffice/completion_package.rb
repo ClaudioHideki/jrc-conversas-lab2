@@ -86,7 +86,7 @@ class JrcBackoffice::CompletionPackage
         # Revalidate all current scopes, references, security decisions and completion after I/O.
         raise Changed unless manifest == captured
 
-        data = JSON.pretty_generate(captured)
+        data = JSON.pretty_generate(captured.as_json)
         archive.add_file_simple('manifest.json', 0o600, data.bytesize) { |file| file.write(data) }
       end
     end
