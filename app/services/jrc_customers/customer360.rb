@@ -47,6 +47,7 @@ class JrcCustomers::Customer360
         pending_activities: activities.pending.count,
         contracts_active: active_contracts.count,
         contracts_mrr_cents: active_contracts.sum(:monthly_cents),
+        contract_renewal: contract_renewal(active_contracts),
         next_activity: next_activity && { id: next_activity.id, title: next_activity.title, due_at: next_activity.due_at&.iso8601 }
       )
     end
@@ -108,6 +109,16 @@ class JrcCustomers::Customer360
   end
 
   private
+
+  def contract_renewal(active_contracts)
+    today = Time.current.in_time_zone(Time.find_zone(@account.reporting_timezone) || Time.zone).to_date
+    upcoming = active_contracts.where('ends_on >= ?', today).order(:ends_on, :id).first
+    notice_on = upcoming && upcoming.ends_on - upcoming.renewal_notice_days
+    { next: upcoming && { id: upcoming.id, contract_number: upcoming.contract_number, ends_on: upcoming.ends_on.iso8601,
+                          renewal_notice_days: upcoming.renewal_notice_days, notice_on: notice_on.iso8601,
+                          within_notice_window: today >= notice_on },
+      overdue: active_contracts.where('ends_on < ?', today).count, undated: active_contracts.where(ends_on: nil).count }
+  end
 
   def append_module_timeline_sources(sources)
     sources['ticket_event'] = [ticket_events, :created_at] if @visibility.service_desk?

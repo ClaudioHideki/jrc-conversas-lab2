@@ -9,6 +9,7 @@ import CompanyEditorDialog from './components/CompanyEditorDialog.vue';
 import BackofficeContextPanel from './components/BackofficeContextPanel.vue';
 import CompanyAddresses from './components/CompanyAddresses.vue';
 import CompanyContacts from './components/CompanyContacts.vue';
+import ContractRenewalCard from './components/ContractRenewalCard.vue';
 import AttendancePanel from './components/AttendancePanel.vue';
 import MasterTicketAction from './components/MasterTicketAction.vue';
 import TimelinePanel from './components/TimelinePanel.vue';
@@ -494,6 +495,7 @@ onBeforeUnmount(() => {
             </article>
           </div>
 
+          <ContractRenewalCard v-if="overview.capabilities.contracts" :value="overview.contract_renewal" />
           <p class="mt-5 text-sm text-n-slate-10">{{ T.permissionsHelp }}</p>
         </template>
 

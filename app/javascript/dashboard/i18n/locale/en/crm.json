@@ -1712,6 +1712,19 @@
         "TwilioSms": "SMS",
         "Other": "Outro canal"
       }
+    },
+    "CONTRACT_RENEWAL": {
+      "HEADING": "Próxima renovação contratual",
+      "UNAVAILABLE": "Contexto contratual não disponível.",
+      "CONTRACT": "Contrato",
+      "ENDS_ON": "Vigência até",
+      "NOTICE_ON": "Início do aviso de renovação",
+      "OPEN_CONTRACT": "Ver contrato e ações no CRM",
+      "NO_UPCOMING": "Sem contrato ativo com vigência futura definida no seu escopo.",
+      "IN_NOTICE_WINDOW": "Contrato dentro da janela de aviso para avaliação.",
+      "OVERDUE": "{count} contrato(s) ativo(s) com vigência vencida. Verifique a lista de contratos.",
+      "UNDATED": "{count} contrato(s) ativo(s) sem data de término definida.",
+      "HELP": "Considera somente contratos ativos ou a vencer autorizados no CRM. Esta consulta não renova, aprova nem envia contratos para assinatura."
     }
   }
 }

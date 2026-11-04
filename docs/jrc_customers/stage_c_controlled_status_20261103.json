@@ -73,5 +73,17 @@
   "B1_native_ticket_increment": {
     "status": "implemented_awaiting_build_chrome",
     "evidence": "master_ticket_context_checkpoint_20261103.json"
-  }
+  },
+  "low_disk_20261103": {
+    "initial_free": 1233350656,
+    "current_free": 754130944,
+    "tests_suspended": true,
+    "builds_started": false,
+    "cleanup": false,
+    "next": "Recover space without automatic deletion; validate B4, combined build and Chrome"
+  },
+  "B1": "e82e48d6 implemented awaiting build/Chrome",
+  "B2": "1f714280 metadata tested; Word divergences remain; no-portfolio expansion deferred",
+  "B3": "b6929f0d native backend and Vue tested; awaiting build/Chrome and scale",
+  "B4": "Work in progress; code/tests prepared but NOT RUN"
 }

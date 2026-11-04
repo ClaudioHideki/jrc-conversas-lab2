@@ -15,6 +15,7 @@ import Button from 'dashboard/components-next/button/Button.vue';
 import { usePolicy } from 'dashboard/composables/usePolicy';
 import { useCustomerMaster } from '../useCustomerMaster';
 import MasterContactPanel from './MasterContactPanel.vue';
+import ContractRenewalCard from './ContractRenewalCard.vue';
 import AttendancePanel from './AttendancePanel.vue';
 import RecordsPanel from './RecordsPanel.vue';
 import MasterTicketAction from './MasterTicketAction.vue';
@@ -244,6 +245,7 @@ onBeforeUnmount(() => {
             <dd>{{ overview.next_activity?.title || T.noNextActivity }}</dd>
           </div>
         </dl>
+        <ContractRenewalCard v-if="overview.capabilities.contracts" :value="overview.contract_renewal" />
         <p class="text-xs text-n-slate-10">{{ T.permissionsHelp }}</p>
       </section>
       <MasterContactPanel
