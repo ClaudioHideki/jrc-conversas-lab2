@@ -382,7 +382,7 @@ onBeforeUnmount(() => {
           :key="tab.id"
           type="button"
           :aria-pressed="pageTab === tab.id"
-          class="flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium focus-visible:ring-2 focus-visible:ring-n-brand"
+          class="flex items-center gap-2 border-solid border-b-2 px-4 py-3 text-sm font-medium focus-visible:ring-2 focus-visible:ring-n-brand"
           :class="
             pageTab === tab.id
               ? 'border-n-brand text-n-blue-11'
@@ -704,7 +704,7 @@ onBeforeUnmount(() => {
               :aria-selected="activeTab === tab"
               :aria-controls="panelId"
               :tabindex="activeTab === tab ? 0 : -1"
-              class="border-b-2 px-4 py-3 text-sm focus-visible:ring-2 focus-visible:ring-n-brand"
+              class="border-solid border-b-2 px-4 py-3 text-sm focus-visible:ring-2 focus-visible:ring-n-brand"
               :class="
                 activeTab === tab
                   ? 'border-n-brand text-n-blue-11'

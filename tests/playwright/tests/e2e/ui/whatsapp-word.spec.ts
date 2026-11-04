@@ -58,6 +58,14 @@ test('administra conexoes e distribuicao sem iniciar pareamento ao abrir', async
   page.on('pageerror', error => errors.push(error.message));
   await page.goto(path);
   await expect(page.getByTestId('connections-list')).toBeVisible();
+  await expect(page.locator('nav button[aria-pressed="true"]')).toHaveCSS(
+    'border-bottom-style',
+    'solid'
+  );
+  await expect(page.locator('nav button[aria-pressed="true"]')).toHaveCSS(
+    'border-bottom-width',
+    '2px'
+  );
   await expect(page.getByTestId('connection-card-701')).toContainText(
     'Conectado'
   );
@@ -131,6 +139,12 @@ test('administra conexoes e distribuicao sem iniciar pareamento ao abrir', async
   await expect(dialog.getByTestId('distribution-schedule')).toBeVisible();
   await expect(dialog.getByTestId('distribution-availability')).toBeChecked();
   await dialog.getByRole('tab', { name: 'Visão geral', exact: true }).click();
+  await expect(
+    dialog.getByRole('tab', { name: 'Visão geral', exact: true })
+  ).toHaveAttribute('aria-selected', 'true');
+  await expect(
+    dialog.getByRole('tab', { name: 'Visão geral', exact: true })
+  ).toHaveCSS('border-bottom-style', 'solid');
   await expect(dialog.getByTestId('connection-insights')).toContainText('12');
   await expect(dialog.getByTestId('connection-insights')).toContainText(
     'Sem dados'

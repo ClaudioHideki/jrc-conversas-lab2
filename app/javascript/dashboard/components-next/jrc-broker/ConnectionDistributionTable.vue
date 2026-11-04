@@ -103,7 +103,7 @@ onBeforeUnmount(stop);
             <th class="px-4 py-3">{{ t('JRC_BROKER.WORKSPACE.QUEUES') }}</th>
             <th class="px-4 py-3">{{ t('JRC_BROKER.WORKSPACE.MODE') }}</th>
             <th class="px-4 py-3">{{ t('JRC_BROKER.WORKSPACE.STATE') }}</th>
-            <th class="px-4 py-3">
+            <th class="relative px-4 py-3">
               <span class="sr-only">{{
                 t('JRC_BROKER.WORKSPACE.CONFIGURE_DISTRIBUTION')
               }}</span>
