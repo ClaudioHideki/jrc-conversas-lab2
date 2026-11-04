@@ -141,12 +141,16 @@
   "divergences_preserved": [
     "Word says optional approval observation; native service/model require bounded reason for all decisions. This stronger existing constraint was preserved and remains an explicit divergence.",
     "Current advanced parallel/quorum/condition capabilities are preserved even where Word marks them future.",
-    "Internal notifications require separate inventory of actual producers/consumers; not declared implemented merely because audit events exist."
+    "D9 is internal feed only, with bounded generic text; no email/browser-push delivery or live worker acceptance claimed."
   ],
-  "next": "Inventory adjustment, numeric tiers, global own delegation and native notification gaps; continue independent E/F/G code review and targeted regressions.",
+  "next": "Complete E/F native gaps and G scope regression; D remains open for full Word/actual UI acceptance.",
   "tables_revisited_in_full": 20,
   "rule_list_increment": {
     "status": "Native saved-rule duplication implemented and tested, no original mutation; visual acceptance pending",
     "evidence": "approval_duplication_checkpoint_20261104.json"
+  },
+  "internal_notifications_increment": {
+    "status": "Implemented with 91,119,44 backend regression runs and 71/12 frontend runs; overlaps not summed; new build/real UI pending",
+    "evidence": "approval_notifications_checkpoint_20261104.json"
   }
 }

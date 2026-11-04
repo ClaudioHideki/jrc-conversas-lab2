@@ -4,6 +4,7 @@ import { useTrack } from 'dashboard/composables';
 import TableFooter from 'dashboard/components/widgets/TableFooter.vue';
 
 import NotificationTable from './NotificationTable.vue';
+import { approvalNotificationRoute } from '../approvalNotificationRoute';
 
 import { ACCOUNT_EVENTS } from '../../../../helper/AnalyticsHelper/events';
 export default {
@@ -28,6 +29,18 @@ export default {
       this.$store.dispatch('notifications/get', { page });
     },
     openConversation(notification) {
+      if (notification.notification_type === 'approval_event') {
+        const target = approvalNotificationRoute(notification, this.accountId);
+        if (!target) return;
+        this.$store.dispatch('notifications/read', {
+          id: notification.id,
+          primaryActorId: notification.primary_actor_id,
+          primaryActorType: notification.primary_actor_type,
+          unreadCount: this.meta.unreadCount,
+        });
+        this.$router.push(target);
+        return;
+      }
       if (notification.notification_type === 'service_desk_clock') {
         this.$store.dispatch('notifications/read', {
           id: notification.id,

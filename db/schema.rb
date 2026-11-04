@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_11_04_130000) do
+ActiveRecord::Schema[7.1].define(version: 2026_11_04_170000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -1276,6 +1276,17 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_04_130000) do
     t.datetime "updated_at", null: false
     t.index ["account_id", "id"], name: "jrc_ap_delegations_ref", unique: true
     t.check_constraint "ends_at > starts_at AND principal_id <> delegate_id", name: "jrc_ap_delegation_window"
+  end
+
+  create_table "jrc_approvals_notification_outboxes", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "source_event_id", null: false
+    t.datetime "completed_at"
+    t.integer "lock_version", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "source_event_id"], name: "jrc_ap_notice_source_once", unique: true
+    t.index ["id"], name: "jrc_ap_notice_pending", where: "(completed_at IS NULL)"
   end
 
   create_table "jrc_approvals_policies", force: :cascade do |t|
@@ -6515,6 +6526,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_04_130000) do
   add_foreign_key "jrc_approvals_delegations", "account_users", column: ["account_id", "principal_id"], primary_key: ["account_id", "id"], name: "jrc_ap_delegations_principal_id_fk"
   add_foreign_key "jrc_approvals_delegations", "accounts"
   add_foreign_key "jrc_approvals_delegations", "jrc_approvals_policy_versions", column: ["account_id", "policy_version_id"], primary_key: ["account_id", "id"], name: "jrc_ap_delegations_policy_version_id_fk"
+  add_foreign_key "jrc_approvals_notification_outboxes", "accounts"
+  add_foreign_key "jrc_approvals_notification_outboxes", "jrc_approvals_audit_events", column: ["account_id", "source_event_id"], primary_key: ["account_id", "id"], name: "jrc_ap_notice_source_fk"
   add_foreign_key "jrc_approvals_policies", "account_users", column: ["account_id", "author_id"], primary_key: ["account_id", "id"], name: "jrc_ap_policies_author_id_fk"
   add_foreign_key "jrc_approvals_policies", "accounts"
   add_foreign_key "jrc_approvals_policies", "companies", column: ["account_id", "issuer_company_id"], primary_key: ["account_id", "id"], name: "jrc_ap_policies_company_fk"
@@ -9669,5 +9682,25 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_04_130000) do
   execute <<~'JRC_SCHEMA_SQL_95a6607240d5'
     CREATE TRIGGER jrc_contract_delivery_source_fence BEFORE UPDATE ON jrc_crm_contracts FOR EACH ROW EXECUTE FUNCTION jrc_contract_delivery_source_fence();
   JRC_SCHEMA_SQL_95a6607240d5
+
+  execute <<~'JRC_SCHEMA_SQL_fd1b6956e257'
+    CREATE OR REPLACE FUNCTION public.jrc_ap_notice_source_guard()
+     RETURNS trigger
+     LANGUAGE plpgsql
+    AS $function$
+    BEGIN
+      IF ROW(NEW.account_id, NEW.source_event_id, NEW.created_at) IS DISTINCT FROM
+         ROW(OLD.account_id, OLD.source_event_id, OLD.created_at) OR
+         (OLD.completed_at IS NOT NULL AND NEW.completed_at IS DISTINCT FROM OLD.completed_at) THEN
+        RAISE EXCEPTION 'Approval notification source and completion are immutable';
+      END IF;
+      RETURN NEW;
+    END; $function$
+  JRC_SCHEMA_SQL_fd1b6956e257
+
+  execute <<~'JRC_SCHEMA_SQL_7c8aa86d3a47'
+    CREATE TRIGGER jrc_ap_notice_source_guard BEFORE UPDATE ON jrc_approvals_notification_outboxes FOR EACH ROW EXECUTE FUNCTION jrc_ap_notice_source_guard();
+  JRC_SCHEMA_SQL_7c8aa86d3a47
+
 
 end

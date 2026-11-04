@@ -42,6 +42,20 @@ RSpec.describe 'Approval core independent PostgreSQL connections', type: :model,
     expect(JrcApprovals::AuditEvent.where(account_id: scope[:account].id, event_type: 'request_created').count).to eq(1)
   end
 
+  it 'projects the same committed source concurrently without duplicate feed rows or completion events' do
+    scope = approval_scope
+    author = approval_actor(scope)
+    approver = approval_actor(scope)
+    approval_publish(scope, author, approval_definition([approver]))
+    record = approval_request(scope, author)
+    event = JrcApprovals::AuditEvent.find_by!(request_id: record.id, event_type: 'request_created')
+    results = simultaneous { JrcApprovals::NotificationProjection.new(event.id).call }
+    expect(results.map(&:first)).to eq(%i[ok ok])
+    expect(Notification.where(account: scope[:account], primary_actor: record, user: approver.user).count).to eq(1)
+    expect(JrcApprovals::NotificationOutbox.find_by!(source_event: event).completed_at).to be_present
+    expect(JrcApprovals::AuditEvent.where(account: scope[:account], correlation_key: "approval_notification:#{event.id}:complete").count).to eq(1)
+  end
+
   it 'serializes competing decisions and refuses the stale expected version' do
     scope = approval_scope
     author, a, b = approval_actor(scope), approval_actor(scope), approval_actor(scope)

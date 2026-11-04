@@ -62,6 +62,7 @@ class NotificationFinder
       clocks = clocks.none
     end
     @notifications = @notifications.where.not(notification_type: 'service_desk_clock').or(clocks)
+    @notifications = JrcApprovals::Notifications.restrict(@notifications)
   end
 
   def filter_snoozed_notifications

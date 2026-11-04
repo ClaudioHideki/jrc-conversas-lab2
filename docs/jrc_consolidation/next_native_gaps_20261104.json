@@ -55,10 +55,11 @@
       "app/listeners/action_cable_listener.rb",
       "app/services/jrc_relationship/notifications.rb"
     ],
-    "next": "Implement a durable native in-app projection/delivery that cannot turn committed decisions into false API failures or leak after revocation. Reauthorize recipient and exact request at read/count/serialization/broadcast. Keep financial snapshots, PII, tokens and private evidence out of notification metadata. Do not enable email/browser push or real external channels without separate scope.",
+    "next": "Operational worker and real fresh-build Chrome acceptance pending; local implementation and automated evidence in linked checkpoint.",
     "shared_impact": [
       "Existing conversation/relationship/SLA notifications, unread counts, list pagination, serialization, ActionCable, jobs and frontend route handling require regression before changes"
-    ]
+    ],
+    "implementation_checkpoint": "docs/jrc_consolidation/approval_notifications_checkpoint_20261104.json"
   },
   "E_F_followup": "Use ef_g_native_review_checkpoint_20261104.json; preserve existing implementations, implement actual gaps incrementally rather than restarting modules. External DocuSign demo and Chrome visual QA remain distinct prerequisites.",
   "business_dependencies": {
