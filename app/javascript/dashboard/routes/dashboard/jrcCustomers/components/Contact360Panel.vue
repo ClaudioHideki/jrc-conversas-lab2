@@ -15,6 +15,7 @@ import Button from 'dashboard/components-next/button/Button.vue';
 import { usePolicy } from 'dashboard/composables/usePolicy';
 import { useCustomerMaster } from '../useCustomerMaster';
 import MasterContactPanel from './MasterContactPanel.vue';
+import AttendancePanel from './AttendancePanel.vue';
 import RecordsPanel from './RecordsPanel.vue';
 import MasterTicketAction from './MasterTicketAction.vue';
 import TimelinePanel from './TimelinePanel.vue';
@@ -253,8 +254,19 @@ onBeforeUnmount(() => {
         @updated="updated"
         @denied="emit('denied')"
       />
+      <section v-else-if="tab === 'conversations'">
+        <AttendancePanel
+          :key="`${identity}:${contact.id}:attendance`"
+          :contact-id="contact.id"
+        />
+        <RecordsPanel
+          :key="`${identity}:${contact.id}:${tab}`"
+          :contact-id="contact.id"
+          :kind="tab"
+        />
+      </section>
       <RecordsPanel
-        v-else-if="tab === 'conversations' || tab === 'activities'"
+        v-else-if="tab === 'activities'"
         :key="`${identity}:${contact.id}:${tab}`"
         :contact-id="contact.id"
         :kind="tab"

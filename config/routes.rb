@@ -453,6 +453,7 @@ Rails.application.routes.draw do
               get :duplicates, on: :collection
               member do
                 get :overview
+                get :attendance
                 get :relationships
                 get :backoffice
                 get :timeline
@@ -463,6 +464,7 @@ Rails.application.routes.draw do
             resources :contacts, only: [:index, :show, :create, :update] do
               member do
                 get :overview
+                get :attendance
                 get :records
                 get :company_history
                 get :duplicates

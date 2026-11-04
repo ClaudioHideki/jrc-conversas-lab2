@@ -157,6 +157,18 @@ class CustomerAPI extends ApiClient {
     });
   }
 
+  attendance(subject, id, params = {}, options = {}) {
+    if (!['companies', 'contacts'].includes(subject))
+      throw new TypeError('Invalid customer subject');
+    const { accountId, ...requestOptions } = options;
+    const url =
+      accountId === undefined ? this.url : this.urlForAccount(accountId);
+    return axios.get(`${url}/${subject}/${id}/attendance`, {
+      ...requestOptions,
+      params,
+    });
+  }
+
   companies(params = {}, options = {}) {
     const { accountId, ...requestOptions } = options;
     const url =

@@ -9,6 +9,7 @@ import CompanyEditorDialog from './components/CompanyEditorDialog.vue';
 import BackofficeContextPanel from './components/BackofficeContextPanel.vue';
 import CompanyAddresses from './components/CompanyAddresses.vue';
 import CompanyContacts from './components/CompanyContacts.vue';
+import AttendancePanel from './components/AttendancePanel.vue';
 import MasterTicketAction from './components/MasterTicketAction.vue';
 import TimelinePanel from './components/TimelinePanel.vue';
 import RecordsPanel from './components/RecordsPanel.vue';
@@ -621,6 +622,17 @@ onBeforeUnmount(() => {
           v-else-if="tab === 'timeline'"
           :resource-id="company.id"
         />
+        <section v-else-if="tab === 'conversations'">
+          <AttendancePanel
+            :key="`${identity}:${company.id}:attendance`"
+            :company-id="company.id"
+          />
+          <RecordsPanel
+            :key="`${accountId}:${company.id}:${tab}`"
+            :company-id="company.id"
+            :kind="tab"
+          />
+        </section>
         <RecordsPanel
           v-else
           :key="`${accountId}:${company.id}:${tab}`"

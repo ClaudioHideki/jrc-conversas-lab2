@@ -190,5 +190,48 @@
     },
     "chrome": "Pending future combined protected build; no old-assets evidence",
     "production": false
+  },
+  "B3_attendance_increment": {
+    "block": "B3",
+    "status": "implemented_awaiting_build_chrome",
+    "word": "P0151",
+    "tests": {
+      "native_backend": 9,
+      "backend_failures": 0,
+      "vue_including_360_regression": 17,
+      "vue_failures": 0,
+      "eslint_errors": 0,
+      "eslint_warnings": 16,
+      "new_service_rubocop_offenses": 0,
+      "legacy_controller_offenses": "Baseline comparison retained; only new method formatting adjusted. Full repository lint not clean."
+    },
+    "delivered": [
+      "Lazy read-only Company/Contact attendance panel, native conversation lists/pagination preserved",
+      "Account timezone, inclusive from/to dates, default last 30 days, maximum 366 days",
+      "Channel filtering of visible conversations; private notes/activity/presence excluded from message counts",
+      "Real CSAT count/positive percentage, null without answers and unavailable without native metrics policy",
+      "Shared survey report/model/share_reports grants intersect source/unit visibility; managed adapter rows excluded to prevent duplication or restoration",
+      "Separate administrator-only native applied conversation SLA and native calendar-aware running ticket clock breaches; no synthetic compliance rate",
+      "Native TicketPolicy scope for customers_view intersected with sla_view and supervision/unit grants"
+    ],
+    "measurements": "Conversation counts by creation date, current status, channel; public messages by message date. CSAT by reply date. SLA applications/clocks by their own creation date. Ticket SLA independent of conversation channel filter.",
+    "evidence": [
+      ".codex/lowdisk-stage-c-20261103/b3-final-reviewed-backend-resource.json",
+      ".codex/lowdisk-stage-c-20261103/b3-vue.json",
+      ".codex/lowdisk-stage-c-20261103/b3-lint-final-resource.json",
+      ".codex/lowdisk-stage-c-20261103/b3-ruby-lint-final.json"
+    ],
+    "disk": {
+      "start": 1258799104,
+      "minimum_observed": 1092923392,
+      "end": 990224384
+    },
+    "pending": [
+      "Fresh combined protected build",
+      "Real Chrome desktop/mobile with period/channel clearing and permission changes",
+      "Representative scale validation; native clock evaluation is calendar-aware, not a fabricated SQL count"
+    ],
+    "chrome_claimed": false,
+    "production_changed": false
   }
 }

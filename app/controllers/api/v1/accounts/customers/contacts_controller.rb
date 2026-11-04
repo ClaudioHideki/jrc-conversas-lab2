@@ -1,5 +1,5 @@
 class Api::V1::Accounts::Customers::ContactsController < Api::V1::Accounts::Customers::BaseController
-  before_action :set_contact, only: %i[show update duplicates overview timeline records company_history merge]
+  before_action :set_contact, only: %i[show update duplicates overview attendance timeline records company_history merge]
 
   def index
     scope = contact_directory.scope
@@ -21,6 +21,14 @@ class Api::V1::Accounts::Customers::ContactsController < Api::V1::Accounts::Cust
 
   def overview
     render json: context(contact: @contact).overview
+  end
+
+  def attendance
+    response.headers['Cache-Control'] = 'no-store'
+    metrics = JrcCustomers::AttendanceMetrics.new(
+      account: Current.account, user: Current.user, member: Current.account_user, customer: context(contact: @contact)
+    )
+    render json: metrics.call(params.permit(:from, :to, :channel).to_h.symbolize_keys)
   end
 
   def records

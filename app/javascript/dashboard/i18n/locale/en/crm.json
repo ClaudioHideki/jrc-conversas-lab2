@@ -1673,6 +1673,45 @@
         "ticket": "Chamado Service Desk",
         "call": "Ligação"
       }
+    },
+    "CUSTOMER_ATTENDANCE": {
+      "HEADING": "Indicadores de atendimento",
+      "FROM": "Data inicial",
+      "TO": "Data final",
+      "CHANNEL": "Canal das conversas",
+      "ALL_CHANNELS": "Todos os canais",
+      "APPLY": "Aplicar período",
+      "RESET": "Limpar filtros",
+      "LOADING": "Consultando fontes autorizadas…",
+      "PERIOD_HELP": "Até 366 dias. Conversas criadas e mensagens públicas no período. Fuso:",
+      "CREATED": "Conversas criadas no período",
+      "INCOMING": "Mensagens recebidas",
+      "OUTGOING": "Respostas públicas",
+      "CSAT": "CSAT das conversas",
+      "RESPONSES": "Respostas válidas",
+      "SATISFIED": "Satisfeitos (4 e 5)",
+      "NO_DATA": "Sem respostas",
+      "UNAVAILABLE": "Indisponível para suas permissões ou sem fonte habilitada.",
+      "CONVERSATION_SLA": "SLA de conversas",
+      "APPLIED": "Aplicações no período",
+      "RECORDED_MISS": "Com violação registrada",
+      "TICKET_SLA": "SLA de chamados",
+      "CLOCKS": "Relógios criados no período",
+      "RUNNING_BREACHES": "Em execução com prazo violado agora",
+      "SLA_HELP": "SLA de conversas usa registros nativos. SLA de chamados considera os calendários nativos, é separado e não é filtrado pelo canal das conversas. Ausência de relógio ou resposta não comprova cumprimento de SLA.",
+      "CHANNELS": {
+        "Whatsapp": "WhatsApp",
+        "Email": "E-mail",
+        "WebWidget": "Chat do site",
+        "Api": "API",
+        "FacebookPage": "Facebook",
+        "Instagram": "Instagram",
+        "Telegram": "Telegram",
+        "Line": "LINE",
+        "Sms": "SMS",
+        "TwilioSms": "SMS",
+        "Other": "Outro canal"
+      }
     }
   }
 }

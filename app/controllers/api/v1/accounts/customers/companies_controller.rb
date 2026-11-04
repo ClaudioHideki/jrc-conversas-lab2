@@ -65,6 +65,14 @@ class Api::V1::Accounts::Customers::CompaniesController < Api::V1::Accounts::Cus
     render json: value.call(cursor: params[:cursor], limit: params.fetch(:per_page, 30))
   end
 
+  def attendance
+    response.headers['Cache-Control'] = 'no-store'
+    metrics = JrcCustomers::AttendanceMetrics.new(
+      account: Current.account, user: Current.user, member: Current.account_user, customer: context(company: @company)
+    )
+    render json: metrics.call(params.permit(:from, :to, :channel).to_h.symbolize_keys)
+  end
+
   def records
     render_module_records(context(company: @company))
   end
