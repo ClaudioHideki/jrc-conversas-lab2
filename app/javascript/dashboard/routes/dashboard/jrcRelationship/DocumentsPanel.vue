@@ -201,6 +201,17 @@ const date = value => formatDate(value, props.metadata.formatting);
           <p class="text-sm text-n-slate-11">
             {{ t(`RELATIONSHIP.V2.DOCS.CATEGORIES.${document.category}`) }}
           </p>
+          <p class="text-sm text-n-slate-11">
+            {{ t('RELATIONSHIP.V2.DOCS.STATUS') }}:
+            {{ t(`RELATIONSHIP.V2.DOCS.STATUSES.${document.status}`) }}
+          </p>
+          <p class="text-sm text-n-slate-11">
+            {{ t('RELATIONSHIP.V2.DOCS.PORTFOLIO_OWNER') }}:
+            {{
+              document.portfolio_owner?.name ||
+              t('RELATIONSHIP.V2.DOCS.UNASSIGNED')
+            }}
+          </p>
         </div>
         <div class="flex gap-2">
           <button
@@ -230,6 +241,12 @@ const date = value => formatDate(value, props.metadata.formatting);
         <span
           >{{ t('RELATIONSHIP.VERSION', { version: version.number }) }} ·
           {{ version.filename }}</span
+        ><span
+          >{{ t('RELATIONSHIP.V2.DOCS.UPLOADED_BY') }}:
+          {{
+            version.uploaded_by?.name || t('RELATIONSHIP.V2.DOCS.UNAVAILABLE')
+          }}
+          · {{ date(version.uploaded_at) }}</span
         ><span
           class="rounded-md border px-2 py-1"
           :class="
@@ -304,6 +321,21 @@ const date = value => formatDate(value, props.metadata.formatting);
           {{ version.filename }}</strong
         >
         <p>{{ version.change_reason }} · {{ date(version.uploaded_at) }}</p>
+        <p>
+          {{ t('RELATIONSHIP.V2.DOCS.UPLOADED_BY') }}:
+          {{
+            version.uploaded_by?.name || t('RELATIONSHIP.V2.DOCS.UNAVAILABLE')
+          }}
+        </p>
+        <p>
+          {{ t('RELATIONSHIP.V2.DOCS.VALID_UNTIL') }}:
+          {{ date(version.valid_until) }}
+          <span
+            v-if="version.expired"
+            class="text-n-ruby-11"
+            >{{ t('RELATIONSHIP.V2.DOCS.EXPIRED') }}</span
+          >
+        </p>
         <p>{{ t(`RELATIONSHIP.V2.DOCS.SCAN.${version.scan_state}`) }}</p>
         <button
           type="button"

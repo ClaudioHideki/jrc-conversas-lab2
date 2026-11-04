@@ -1277,7 +1277,16 @@
           "unavailable": "Antivírus indisponível — em quarentena",
           "clean": "Verificação válida",
           "infected": "Arquivo bloqueado pelo antivírus"
-        }
+        },
+        "UPLOADED_BY": "Enviado por",
+        "PORTFOLIO_OWNER": "Responsável pela carteira",
+        "STATUS": "Situação documental",
+        "STATUSES": {
+          "active": "Ativo",
+          "archived": "Arquivado"
+        },
+        "UNASSIGNED": "Sem responsável de carteira",
+        "UNAVAILABLE": "Não disponível"
       }
     }
   }

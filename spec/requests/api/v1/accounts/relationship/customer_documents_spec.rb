@@ -16,7 +16,10 @@ RSpec.describe 'Protected Relationship customer documents', type: :request do
     expect(response).to have_http_status(:created)
     document_id = response.parsed_body.fetch('id')
     first = response.parsed_body.fetch('versions').first
-    expect(first).to include('number' => 1, 'download_available' => false)
+    expect(first).to include('number' => 1, 'download_available' => false,
+                             'uploaded_by' => { 'id' => manager.id, 'name' => manager.name })
+    expect(response.parsed_body).to include('status' => 'active', 'portfolio_owner' => { 'id' => analyst.id, 'name' => analyst.name })
+    expect(first['uploaded_by'].keys).to match_array(%w[id name])
     expect(first.keys).not_to include('url', 'signed_id', 'key')
     get "#{url}/#{document_id}/versions/#{first['id']}/download", headers: headers
     expect(response).to have_http_status(:conflict)

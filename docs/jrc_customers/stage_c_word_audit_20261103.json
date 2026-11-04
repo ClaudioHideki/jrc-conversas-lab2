@@ -152,5 +152,43 @@
     "disk_current": 1269280768,
     "production": false,
     "cleanup": false
+  },
+  "B2_metadata_increment": {
+    "block": "B2",
+    "status": "implemented_with_divergences_awaiting_build_chrome",
+    "base": "e82e48d6",
+    "native_reuse": "CustomerDocuments, Context.assignments, DocumentVersion, scanner/storage/audit unchanged",
+    "delivered": [
+      "Uploader name/id in latest version and paginated history, without email or tokens",
+      "Active/archived document state distinct from scan state",
+      "Portfolio owner correctly labeled separately from author",
+      "Historical validity/expiration alongside version reason"
+    ],
+    "tests": {
+      "native_requests": 6,
+      "native_failures": 0,
+      "vue": 2,
+      "vue_failures": 0,
+      "initial_vue_failure": "Assertion matched UPLOADED_BY label as if it were UPLOAD button; corrected to exact button equality and rerun passed"
+    },
+    "runtime_testing": "Exact source controller overlay loaded only in isolated RSpec process; SHA and method source location checked. Original source snapshots and existing servers unchanged.",
+    "evidence": [
+      ".codex/lowdisk-stage-c-20261103/b2-documents-backend-resource.json",
+      ".codex/lowdisk-stage-c-20261103/b2-final.json",
+      ".codex/lowdisk-stage-c-20261103/b2-lint-verified-resource.json"
+    ],
+    "no_portfolio": "User explicitly chose to keep blocked and evaluate later. Proposal not implemented. No portfolio/link created.",
+    "word_gaps": [
+      "Dedicated documentary responsible distinct from portfolio owner",
+      "Configurable mandatory-document checklist",
+      "Signer context integration belongs with approval/backoffice workflows D/E"
+    ],
+    "disk": {
+      "start": 1269145600,
+      "minimum_observed": 1197117440,
+      "end": 1233973248
+    },
+    "chrome": "Pending future combined protected build; no old-assets evidence",
+    "production": false
   }
 }
