@@ -2,7 +2,7 @@
 import { useCustomerSegmentFilter } from '../../helpers/useCustomerSegmentFilter';
 /* eslint-disable vue/no-bare-strings-in-template */
 import ApprovalGateBadge from 'dashboard/routes/dashboard/approvals/ApprovalGateBadge.vue';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { salesOrdersAPI } from 'dashboard/api/crm/commercialCycle';
 import { useAlert } from 'dashboard/composables';
@@ -286,18 +286,32 @@ const upcoming = computed(() =>
 );
 
 const detailLoading = ref(false);
+let detailGeneration = 0;
+let requestedOrderId = null;
+const clearOrderDetail = () => {
+  detailGeneration += 1;
+  requestedOrderId = null;
+  selected.value = null;
+  detailLoading.value = false;
+};
 const open = async row => {
-  editingItems.value = false;
-  selected.value = row;
+  clearOrderDetail();
+  const token = detailGeneration;
+  const accountId = route.params.accountId;
+  requestedOrderId = String(row.id);
   detailLoading.value = true;
   router.replace({ query: { ...route.query, orderId: row.id } });
   try {
     const { data } = await salesOrdersAPI.show(row.id);
-    if (String(selected.value?.id) === String(row.id)) selected.value = data;
+    if (token === detailGeneration && route.params.accountId === accountId)
+      selected.value = data;
   } catch (e) {
-    useAlert('Não foi possível carregar o detalhe do pedido.');
+    if (token === detailGeneration) {
+      clearOrderDetail();
+      useAlert('Não foi possível carregar o detalhe do pedido.');
+    }
   } finally {
-    detailLoading.value = false;
+    if (token === detailGeneration) detailLoading.value = false;
   }
 };
 const { segmentParams, watchSegment } = useCustomerSegmentFilter();
@@ -312,10 +326,12 @@ const load = async () => {
     if (token !== listGeneration) return;
     rows.value = response.data || [];
     const q = route.query.orderId;
-    if (q) {
-      const row = rows.value.find(x => String(x.id) === String(q));
-      if (row) await open(row);
-    }
+    if (
+      typeof q === 'string' &&
+      /^[1-9]\d*$/.test(q) &&
+      Number.isSafeInteger(Number(q))
+    )
+      await open({ id: q });
   } catch {
     if (token === listGeneration)
       useAlert('Não foi possível carregar os pedidos.');
@@ -329,7 +345,7 @@ watchSegment(() => {
   return load();
 });
 const close = () => {
-  selected.value = null;
+  clearOrderDetail();
   const q = { ...route.query };
   delete q.orderId;
   router.replace({ query: q });
@@ -469,6 +485,27 @@ const togglePage = () => {
     ];
 };
 onMounted(load);
+watch(
+  () => route.query.orderId,
+  value => {
+    if (String(value) === requestedOrderId) return;
+    if (
+      typeof value === 'string' &&
+      /^[1-9]\d*$/.test(value) &&
+      Number.isSafeInteger(Number(value))
+    )
+      open({ id: value });
+    else clearOrderDetail();
+  }
+);
+watch(
+  () => route.params.accountId,
+  () => {
+    clearOrderDetail();
+    return load();
+  }
+);
+onBeforeUnmount(clearOrderDetail);
 </script>
 
 <template>

@@ -18,11 +18,14 @@
     },
     {
       "criterion": "CA-02",
-      "status": "Partial: native sealed contract-authority view exists; generic CRM/source navigation still needs closure",
+      "status": "Installed commercial origin routes and sealed legal view implemented; 92 distinct Vue scenarios covered through main plus corrected confirmation rerun; fresh build and real browser pending",
       "evidence": [
         "app/serializers/jrc_approvals/request_serializer.rb",
         "app/javascript/dashboard/routes/dashboard/approvals/AuthorityOrigin.vue",
-        "app/javascript/dashboard/routes/dashboard/approvals/RequestDetail.vue"
+        "app/javascript/dashboard/routes/dashboard/approvals/RequestDetail.vue",
+        "app/javascript/dashboard/routes/dashboard/approvals/originRoute.js",
+        "app/javascript/dashboard/routes/dashboard/approvals/ApprovalOriginLink.vue",
+        "docs/jrc_consolidation/approval_origin_checkpoint_20261104.json"
       ]
     },
     {
@@ -130,5 +133,5 @@
     "Current advanced parallel/quorum/condition capabilities are preserved even where Word marks them future.",
     "Internal notifications require separate inventory of actual producers/consumers; not declared implemented merely because audit events exist."
   ],
-  "next": "Complete verified native source navigation, then guided policy configuration and scoped adjustment/delegation gaps without recreating engines."
+  "next": "Four-step guided policy configuration, then scoped adjustment/delegation and notification inventory without recreating engines."
 }

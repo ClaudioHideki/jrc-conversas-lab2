@@ -194,6 +194,9 @@
     "onBehalfOf": "On behalf of {name}",
     "delegatedDecision": "Delegated decision",
     "delegatedOption": "Delegated option {number}",
-    "stepNumber": "Step {number}"
+    "stepNumber": "Step {number}",
+    "viewOrigin": "View original record",
+    "viewAuthorityOrigin": "View authorized authority case",
+    "originUnavailable": "This approval type has no native source navigation available. No access is granted by this notice."
   }
 }

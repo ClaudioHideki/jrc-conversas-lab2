@@ -1,0 +1,66 @@
+{
+  "date": "2026-11-04",
+  "stage": "D2 native origin navigation",
+  "status": "implemented and automated tests passed with complementary corrected confirmation rerun; compilation and real browser pending",
+  "parent_checkpoint": "65fe7d9b6f5cf9af87aafad8beecb6b746036215",
+  "changes": [
+    "Closed native-route allowlist for five installed commercial resource types; current explicit account, bounded positive IDs; ignores caller-supplied origin URLs. Links grant no source permissions.",
+    "Source available in review and explicit confirmation popup. Sealed legal authority stays in Central without generic Backoffice browsing.",
+    "Contracts and orders open exact native detail through existing APIs even when the record is absent from the currently filtered list. Denied, partial, late and previous-account results cannot replace current detail. List segment filters remain intact."
+  ],
+  "tests": {
+    "vue_primary": {
+      "artifact": ".codex\\d-approvals-20261104\\vue-origin-final.json",
+      "passed": 91,
+      "failed": 1,
+      "failure": "New popup fixture omitted native context.scopes; product authorization not changed"
+    },
+    "vue_corrected_confirmation": {
+      "artifact": ".codex\\d-approvals-20261104\\vue-origin-confirm-corrected.json",
+      "passed": 6,
+      "failed": 0
+    },
+    "distinct_tests": 92,
+    "eslint": {
+      "errors": 0,
+      "warnings": 351,
+      "artifact": ".codex\\d-approvals-20261104\\eslint-origin-final.json"
+    },
+    "no_backend_change": true,
+    "build": false,
+    "chrome": false
+  },
+  "disk": {
+    "status": "failed",
+    "free_start": 16531922944,
+    "minimum_free": 16498225152,
+    "mandatory_stop_bytes": 750000000,
+    "conservative_stop_bytes": 2000000000,
+    "no_build": true,
+    "owned_process_id": 1400,
+    "exit_code": 1,
+    "free_end": 16540717056,
+    "corrected_run": {
+      "status": "passed",
+      "free_start": 16540577792,
+      "minimum_free": 16498143232,
+      "mandatory_stop_bytes": 750000000,
+      "conservative_stop_bytes": 2000000000,
+      "no_build": true,
+      "owned_process_id": 19740,
+      "exit_code": 0,
+      "free_end": 16538099712
+    }
+  },
+  "preserved": [
+    "UI 5379/source 4d4a6de3 and its DB/assets untouched",
+    "All source authorization remains native; no role grants or migrations",
+    "No cleanup, push, deploy, external operations or publication"
+  ],
+  "remaining": [
+    "No inferred support for future uninstalled adapters",
+    "Source APIs may deny independent approvers native CRM browsing; this is intentional and no permission is relaxed",
+    "Fresh compilation and manual desktop/mobile QA still pending",
+    "D/C not complete"
+  ]
+}

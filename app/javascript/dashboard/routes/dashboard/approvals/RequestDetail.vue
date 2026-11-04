@@ -1,8 +1,9 @@
 <script setup>
-import { computed, ref, watch } from 'vue';
+import { computed, ref, watch, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Button from 'dashboard/components-next/button/Button.vue';
 import { decisionChoices, scopeLabel } from './model';
+import ApprovalOriginLink from './ApprovalOriginLink.vue';
 import ApprovalDecisionDialog from './ApprovalDecisionDialog.vue';
 import AuthorityOrigin from './AuthorityOrigin.vue';
 const props = defineProps({
@@ -18,6 +19,13 @@ const { t } = useI18n();
 const reason = ref('');
 const choices = computed(() => decisionChoices(props.request));
 const selectedChoice = ref(null);
+const authoritySection = ref(null);
+const showAuthority = async () => {
+  selectedChoice.value = null;
+  await nextTick();
+  authoritySection.value?.scrollIntoView({ block: 'start' });
+  authoritySection.value?.focus({ preventScroll: true });
+};
 const choose = choice => {
   if (!props.busy && reason.value.trim()) selectedChoice.value = choice;
 };
@@ -106,11 +114,21 @@ const confirm = payload => {
         {{ step.code }} · {{ step.approved_count }}/{{ step.quorum }}
       </p>
     </div>
-    <AuthorityOrigin
-      v-if="request.origin?.kind === 'contract_authority'"
-      :key="request.id"
+    <ApprovalOriginLink
       :request="request"
+      :account-id="context?.account_id"
+      @authority="showAuthority"
     />
+    <section
+      v-if="request.origin?.kind === 'contract_authority'"
+      ref="authoritySection"
+      tabindex="-1"
+    >
+      <AuthorityOrigin
+        :key="request.id"
+        :request="request"
+      />
+    </section>
     <section class="space-y-3">
       <h3 class="font-semibold">{{ t('JRC_APPROVALS.decision') }}</h3>
       <p
@@ -151,7 +169,14 @@ const confirm = payload => {
       :error-state="errorState"
       @close="selectedChoice = null"
       @confirm="confirm"
-    />
+    >
+      <template #origin
+        ><ApprovalOriginLink
+          :request="request"
+          :account-id="context?.account_id"
+          @authority="showAuthority"
+      /></template>
+    </ApprovalDecisionDialog>
     <section class="space-y-3">
       <h3 class="font-semibold">{{ t('JRC_APPROVALS.decisions') }}</h3>
       <p

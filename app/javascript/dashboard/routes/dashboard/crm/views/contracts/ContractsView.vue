@@ -2,7 +2,7 @@
 import { useCustomerSegmentFilter } from '../../helpers/useCustomerSegmentFilter';
 /* eslint-disable vue/no-bare-strings-in-template */
 import ApprovalGateBadge from 'dashboard/routes/dashboard/approvals/ApprovalGateBadge.vue';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue';
 import { format } from 'date-fns';
 import { useRoute, useRouter } from 'vue-router';
 import { contractsAPI } from 'dashboard/api/crm/commercialCycle';
@@ -151,21 +151,41 @@ const pagedContracts = computed(() => {
   return filtered.value.slice(start, start + perPage.value);
 });
 
-const refreshManagedContract = async id => {
+let detailGeneration = 0;
+const clearManagedContract = () => {
+  detailGeneration += 1;
+  manageContract.value = null;
+  contractFiles.value = [];
+  contractHistory.value = [];
+  detailLoading.value = false;
+};
+const refreshManagedContract = async (id, stillCurrent = null) => {
+  const accountId = route.params.accountId;
   const [{ data: detail }, { data: history }] = await Promise.all([
     contractsAPI.show(id),
     contractsAPI.history(id),
   ]);
+  if (route.params.accountId !== accountId || (stillCurrent && !stillCurrent()))
+    return false;
   manageContract.value = detail;
   contractFiles.value = detail.documents || [];
   contractHistory.value = history || [];
+  return true;
 };
 
 const openManage = async contract => {
+  clearManagedContract();
+  const token = detailGeneration;
   detailLoading.value = true;
   manageTab.value = 'summary';
   try {
-    await refreshManagedContract(contract.id);
+    if (
+      !(await refreshManagedContract(
+        contract.id,
+        () => token === detailGeneration
+      ))
+    )
+      return;
     const baseDate = manageContract.value?.ends_on
       ? new Date(`${manageContract.value.ends_on}T12:00:00`)
       : new Date();
@@ -178,12 +198,14 @@ const openManage = async contract => {
           12
       ) || 12;
   } catch (error) {
+    if (token !== detailGeneration) return;
+    clearManagedContract();
     useAlert(
       error.response?.data?.message ||
         'Não foi possível carregar os detalhes do contrato.'
     );
   } finally {
-    detailLoading.value = false;
+    if (token === detailGeneration) detailLoading.value = false;
   }
 };
 
@@ -211,13 +233,35 @@ watchSegment(() => {
   return load();
 });
 
+const openRequestedContract = async () => {
+  const value = route.query.contractId;
+  if (
+    typeof value === 'string' &&
+    /^[1-9]\d*$/.test(value) &&
+    Number.isSafeInteger(Number(value))
+  )
+    await openManage({ id: value });
+};
 onMounted(async () => {
   await load();
-  const requested = rows.value.find(
-    contract => String(contract.id) === String(route.query.contractId)
-  );
-  if (requested) await openManage(requested);
+  await openRequestedContract();
 });
+watch(
+  () => route.query.contractId,
+  () => {
+    clearManagedContract();
+    return openRequestedContract();
+  }
+);
+watch(
+  () => route.params.accountId,
+  async () => {
+    clearManagedContract();
+    await load();
+    await openRequestedContract();
+  }
+);
+onBeforeUnmount(clearManagedContract);
 
 const badge = value =>
   ({
@@ -1099,7 +1143,7 @@ const updateStatus = async (contract, nextStatus) => {
         :class="crmControlClasses"
         v-if="manageContract"
         class="fixed inset-0 z-[95] flex justify-end bg-black/40"
-        @click.self="manageContract = null"
+        @click.self="clearManagedContract"
       >
         <section
           class="h-full w-full max-w-4xl overflow-y-auto bg-n-slate-2 shadow-2xl"
@@ -1127,7 +1171,7 @@ const updateStatus = async (contract, nextStatus) => {
               </div>
               <button
                 class="grid size-9 place-content-center rounded-lg border text-xl"
-                @click="manageContract = null"
+                @click="clearManagedContract"
               >
                 ×
               </button>

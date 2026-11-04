@@ -4,6 +4,7 @@ import { expect, it, vi } from 'vitest';
 import locale from 'dashboard/i18n/locale/en/jrcApprovals.json';
 import Component from '../ApprovalDecisionDialog.vue';
 import RequestDetail from '../RequestDetail.vue';
+import Origin from '../ApprovalOriginLink.vue';
 const Dialog = {
   props: ['disableConfirmButton', 'dismissible', 'isLoading'],
   emits: ['confirm', 'close'],
@@ -129,6 +130,36 @@ it('invalidates a prepared confirmation when the request version, state or allow
   await wrapper.setProps({ request: { ...record, lock_version: 5 } });
   await flushPromises();
   expect(wrapper.findComponent(Component).exists()).toBe(false);
+  expect(wrapper.emitted('decide')).toBeUndefined();
+  wrapper.unmount();
+});
+
+it('keeps the exact native source available in the review and its confirmation popup', async () => {
+  const config = options({
+    request: { ...record, resource_type: 'JrcCrm::Contract', resource_id: 99 },
+    context: { account_id: 17, scopes: [] },
+  });
+  config.global.stubs.RouterLink = {
+    name: 'RouterLink',
+    props: ['to'],
+    template: '<a><slot /></a>',
+  };
+  const wrapper = mount(RequestDetail, config);
+  await wrapper.get('textarea').setValue('Reviewed native source');
+  await wrapper
+    .findAll('button')
+    .find(button => button.text().startsWith('Approve'))
+    .trigger('click');
+  await flushPromises();
+  expect(wrapper.findAllComponents(Origin)).toHaveLength(2);
+  const popup = wrapper.getComponent(Component);
+  expect(
+    popup.getComponent(Origin).getComponent({ name: 'RouterLink' }).props('to')
+  ).toEqual({
+    name: 'crm_contracts',
+    params: { accountId: '17' },
+    query: { contractId: '99' },
+  });
   expect(wrapper.emitted('decide')).toBeUndefined();
   wrapper.unmount();
 });
