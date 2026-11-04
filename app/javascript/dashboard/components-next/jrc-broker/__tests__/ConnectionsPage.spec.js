@@ -124,6 +124,68 @@ beforeEach(() => {
   createJrcBrokerApi.mockReturnValue(api);
 });
 
+it('searches only authorized connection names without case or accents and clears empty results', async () => {
+  api.inboxes.mockResolvedValue([
+    { id: 7, name: 'Suporte técnico', jrc_broker_bound: true },
+    { id: 8, name: 'Comercial', jrc_broker_bound: true },
+    { id: 9, name: 'Técnico sem acesso', jrc_broker_bound: true },
+  ]);
+  api.status.mockImplementation(id =>
+    id === 9
+      ? Promise.reject(
+          Object.assign(new Error('Denied'), { response: { status: 403 } })
+        )
+      : Promise.resolve({ allowedActions: ['status'] })
+  );
+  wrapper = mountPage();
+  await flushPromises();
+  await wrapper.get('[data-testid="connection-search"]').setValue('TECNICO');
+  expect(wrapper.find('[data-testid="connection-card-7"]').exists()).toBe(true);
+  expect(wrapper.find('[data-testid="connection-card-8"]').exists()).toBe(
+    false
+  );
+  expect(wrapper.text()).not.toContain('Técnico sem acesso');
+  expect(
+    wrapper.get('[data-testid="connection-search-results"]').text()
+  ).toContain('1 of 2');
+  await wrapper.get('[data-testid="connection-search"]').setValue('not a name');
+  expect(wrapper.get('[data-testid="connection-search-empty"]').exists()).toBe(
+    true
+  );
+  await wrapper.get('[data-testid="clear-connection-search"]').trigger('click');
+  expect(wrapper.findAll('[data-testid^="connection-card-"]')).toHaveLength(2);
+  expect(api.inboxes).toHaveBeenCalledTimes(1);
+  expect(api.pair).not.toHaveBeenCalled();
+  expect(api.create).not.toHaveBeenCalled();
+});
+
+it('keeps a selected authorized dialog open when a name filter hides its list card', async () => {
+  wrapper = mountPage();
+  await flushPromises();
+  await wrapper.get('[data-testid="manage-connection-7"]').trigger('click');
+  await flushPromises();
+  await wrapper.get('[data-testid="connection-search"]').setValue('Sales');
+  expect(wrapper.find('[data-testid="connection-card-7"]').exists()).toBe(
+    false
+  );
+  expect(wrapper.get('[role="dialog"]').attributes('aria-label')).toContain(
+    'Support'
+  );
+});
+
+it('clears the connection name search when switching accounts', async () => {
+  wrapper = mountPage();
+  await flushPromises();
+  await wrapper.get('[data-testid="connection-search"]').setValue('Support');
+  accountId.value = 2;
+  await flushPromises();
+  expect(wrapper.get('[data-testid="connection-search"]').element.value).toBe(
+    ''
+  );
+  expect(wrapper.findAll('[data-testid^="connection-card-"]')).toHaveLength(2);
+  expect(api.create).not.toHaveBeenCalled();
+});
+
 it('shows provider phone and source timestamps without treating health checks as synchronization', async () => {
   api.status.mockResolvedValue({
     integrationStatus: 'READY',
@@ -418,10 +480,16 @@ it('keeps the existing flow single intent after an uncertain explicit submission
   await wrapper.get('[data-testid="new-whatsapp-number"]').trigger('click');
   await flushPromises();
   const form = wrapper.get('[role="dialog"] form');
-  await form.get('input').setValue('Synthetic new number');
+  await form.get('[data-testid="setup-type-create"]').setValue();
+  await form.get('[data-testid="onboarding-next"]').trigger('click');
   await form
-    .findAll('select')[1]
-    .setValue('11111111-1111-4111-8111-111111111111');
+    .get('[data-testid="onboarding-name"]')
+    .setValue('Synthetic new number');
+  await form
+    .get('[data-testid="instance-11111111-1111-4111-8111-111111111111"]')
+    .setValue();
+  await form.get('[data-testid="onboarding-next"]').trigger('click');
+  await form.get('[data-testid="onboarding-next"]').trigger('click');
   await form.trigger('submit');
   await form.trigger('submit');
   expect(api.create).toHaveBeenCalledTimes(1);

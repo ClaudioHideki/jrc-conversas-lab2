@@ -32,6 +32,119 @@ const checkViewport = async (page, testInfo, stage) => {
   expect(geometry.scrollWidth).toBeLessThanOrEqual(geometry.width + 1);
 };
 
+test('busca conexoes autorizadas por nome sem acentos e limpa resultados vazios', async ({
+  page,
+}, testInfo) => {
+  await page.goto(path);
+  await page.getByTestId('connection-search').fill('TECNICO');
+  await expect(page.getByTestId('connection-card-701')).toBeVisible();
+  await expect(page.getByTestId('connection-card-702')).toHaveCount(0);
+  await expect(page.getByTestId('connection-search-results')).toContainText(
+    '1 de 2'
+  );
+  await page.getByTestId('connection-search').fill('sem correspondencia');
+  await expect(page.getByTestId('connection-search-empty')).toBeVisible();
+  await page.getByTestId('clear-connection-search').click();
+  await expect(page.getByTestId('connection-card-702')).toBeVisible();
+  await expect(page.getByTestId('fixture-create-requests')).toHaveText('0');
+  await expect(page.getByTestId('fixture-adopt-requests')).toHaveText('0');
+  await expect(page.getByTestId('fixture-pair-requests')).toHaveText('0');
+  await checkViewport(page, testInfo, 'name-search');
+  await page.screenshot({
+    path: testInfo.outputPath('busca-conexoes.png'),
+    fullPage: true,
+  });
+});
+
+test('cria caixa em quatro etapas com busca e revisao antes da unica confirmacao', async ({
+  page,
+}, testInfo) => {
+  await page.goto(path);
+  await page.getByTestId('new-whatsapp-number').click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByTestId('onboarding-step-1')).toBeVisible();
+  await expect(dialog.getByTestId('onboarding-name')).toHaveCount(0);
+  await page.screenshot({
+    path: testInfo.outputPath('cadastro-1-tipo.png'),
+    fullPage: true,
+  });
+  await dialog.getByTestId('setup-type-create').check();
+  await dialog.getByTestId('onboarding-next').click();
+  await dialog.getByTestId('onboarding-name').fill('Caixa de testes');
+  await dialog.getByTestId('onboarding-instance-search').fill('CONEXAO 1');
+  await dialog.getByTestId('instance-demo-instance-1').check();
+  await expect(dialog.getByTestId('onboarding-agent-search')).toHaveCount(0);
+  await checkViewport(page, testInfo, 'wizard-inbox');
+  await page.screenshot({
+    path: testInfo.outputPath('cadastro-2-caixa.png'),
+    fullPage: true,
+  });
+  await dialog.getByTestId('onboarding-next').click();
+  await dialog.getByTestId('onboarding-agent-search').fill('AGATA');
+  await dialog.getByTestId('agent-1').check();
+  await dialog.getByTestId('onboarding-agent-search').fill('Agente 30');
+  await expect(dialog.getByTestId('agent-1')).toHaveCount(0);
+  await checkViewport(page, testInfo, 'wizard-agents');
+  await page.screenshot({
+    path: testInfo.outputPath('cadastro-3-agentes.png'),
+    fullPage: true,
+  });
+  await dialog.getByTestId('onboarding-next').click();
+  await expect(dialog.getByTestId('onboarding-review')).toContainText(
+    'Ágata Demo'
+  );
+  await expect(dialog.getByTestId('onboarding-review')).toContainText(
+    'Caixa de testes'
+  );
+  await expect(page.getByTestId('fixture-create-requests')).toHaveText('0');
+  await expect(page.getByTestId('fixture-adopt-requests')).toHaveText('0');
+  await dialog.getByTestId('onboarding-back').click();
+  await dialog.getByTestId('onboarding-back').click();
+  await expect(dialog.getByTestId('onboarding-name')).toHaveValue(
+    'Caixa de testes'
+  );
+  await expect(dialog.getByTestId('instance-demo-instance-1')).toBeChecked();
+  await dialog.getByTestId('onboarding-next').click();
+  await dialog.getByTestId('onboarding-next').click();
+  await checkViewport(page, testInfo, 'wizard-review');
+  await page.screenshot({
+    path: testInfo.outputPath('cadastro-4-revisao.png'),
+    fullPage: true,
+  });
+  await dialog.getByTestId('create').click();
+  await expect(page.getByTestId('fixture-create-requests')).toHaveText('1');
+  await expect(page.getByTestId('fixture-pair-requests')).toHaveText('0');
+});
+
+test('vincula uma caixa existente com busca e confirmacao sem repetir o cadastro', async ({
+  page,
+}, testInfo) => {
+  await page.goto(path);
+  await page.getByTestId('new-whatsapp-number').click();
+  const dialog = page.getByRole('dialog');
+  await dialog.getByTestId('setup-type-adopt').check();
+  await dialog.getByTestId('onboarding-next').click();
+  await dialog.getByTestId('onboarding-inbox-search').fill('TECNICO');
+  await dialog.getByTestId('adopt-demo-integration-1').check();
+  await expect(dialog.getByTestId('onboarding-name')).toHaveCount(0);
+  await dialog.getByTestId('onboarding-next').click();
+  await expect(dialog.getByTestId('onboarding-agent-search')).toHaveCount(0);
+  await dialog.getByTestId('onboarding-next').click();
+  await expect(dialog.getByTestId('onboarding-review')).toContainText(
+    'Suporte técnico'
+  );
+  await expect(page.getByTestId('fixture-adopt-requests')).toHaveText('0');
+  await checkViewport(page, testInfo, 'adopt-review');
+  await page.screenshot({
+    path: testInfo.outputPath('vincular-revisao.png'),
+    fullPage: true,
+  });
+  await dialog.getByTestId('create').click();
+  await expect(page.getByTestId('fixture-adopt-requests')).toHaveText('1');
+  await expect(page.getByTestId('fixture-create-requests')).toHaveText('0');
+  await expect(page.getByTestId('fixture-pair-requests')).toHaveText('0');
+});
+
 test('apresenta QR sintetico e prazo real sem usar sessao WhatsApp', async ({
   page,
 }, testInfo) => {

@@ -1,5 +1,45 @@
 {
   "JRC_BROKER": {
+    "SEARCH": {
+      "CONNECTIONS": "Buscar conexões pelo nome",
+      "INBOXES": "Buscar caixas existentes pelo nome",
+      "INSTANCES": "Buscar conexões disponíveis pelo nome",
+      "AGENTS": "Buscar agentes pelo nome",
+      "RESULTS": "{count} de {total}",
+      "CLEAR": "Limpar busca",
+      "EMPTY": "Nenhum nome corresponde à busca."
+    },
+    "ONBOARDING": {
+      "PROGRESS": "Progresso do cadastro",
+      "STEP": "Etapa {step} de {total}",
+      "STEPS": {
+        "TYPE": "Tipo",
+        "INBOX": "Caixa",
+        "AGENTS": "Agentes",
+        "REVIEW": "Revisão"
+      },
+      "TITLES": {
+        "TYPE": "Como deseja conectar?",
+        "INBOX": "Escolha a caixa e a conexão",
+        "AGENTS": "Escolha os agentes da caixa",
+        "REVIEW": "Revise antes de confirmar"
+      },
+      "CREATE": "Criar uma nova caixa",
+      "CREATE_HELP": "Escolha a conexão WhatsApp e os agentes em etapas.",
+      "ADOPT": "Vincular uma caixa existente",
+      "NO_INBOXES": "Nenhuma caixa existente está disponível para vínculo nesta conta.",
+      "KEEP_AGENTS": "Os agentes, conversas e configurações existentes serão mantidos. Você poderá gerenciar a caixa após vinculá-la.",
+      "AGENT_RESULTS": "{count} de {total}; selecionados: {selected}",
+      "KEEP_TITLE": "Manter a configuração existente",
+      "RECENT_OPERATIONS": "Operações recentes ({count})",
+      "NO_AGENTS": "Nenhum agente selecionado",
+      "SELECT_PROVIDER": "Selecione o serviço de conexão",
+      "REVIEW_HELP": "Confira os dados abaixo. O cadastro só começa ao confirmar. O pareamento exige uma ação explícita separada.",
+      "BACK": "Voltar",
+      "NEXT": "Avançar",
+      "CONFIRM": "Confirmar cadastro",
+      "LOADING": "Carregando opções autorizadas para o cadastro…"
+    },
     "DETAILS": {
       "TABS_LABEL": "Detalhes da conexão",
       "TABS": {

@@ -10,7 +10,11 @@ import pt from 'dashboard/i18n/locale/pt_BR/jrcBroker.json';
 import '../../../../app/javascript/dashboard/assets/scss/app.scss';
 
 const inboxes = [
-  { id: 701, name: 'Atendimento — demonstração', jrc_broker_bound: true },
+  {
+    id: 701,
+    name: 'Atendimento técnico — demonstração',
+    jrc_broker_bound: true,
+  },
   { id: 702, name: 'Comercial — demonstração', jrc_broker_bound: true },
 ];
 const teams = [
@@ -36,13 +40,64 @@ const policies = new Map([
 ]);
 const now = () => new Date().toISOString();
 const pairingRequests = ref(0);
-const isAgent = new URLSearchParams(location.search).get('role') === 'agent';
+const creationRequests = ref(0);
+const adoptionRequests = ref(0);
+const setupResources = {
+  providers: [{ id: 'demo-provider-1', name: 'Serviço de demonstração' }],
+  instances: Array.from({ length: 6 }, (_, index) => ({
+    id: `demo-instance-${index + 1}`,
+    name: `Conexão ${index + 1} — demonstração`,
+  })),
+  connections: Array.from({ length: 6 }, (_, index) => ({
+    integrationId: `demo-integration-${index + 1}`,
+    inboxId: 703 + index,
+    name: index === 0 ? 'Suporte técnico' : `Caixa de testes ${index + 1}`,
+  })),
+  agents: Array.from({ length: 30 }, (_, index) => ({
+    id: index + 1,
+    name:
+      index === 0
+        ? 'Ágata Demo'
+        : `Agente ${String(index + 1).padStart(2, '0')} Demo`,
+  })),
+};
+const completedSetup = {
+  operationId: 'demo-onboarding-operation',
+  state: 'SUCCEEDED',
+  stage: 'DONE',
+  inboxId: 709,
+};
+const isAgent =
+  new URLSearchParams(window.location.search).get('role') === 'agent';
 window.chatwootConfig = { jrcBrokerEnabled: true };
 window.axios = async ({ method, url, data }) => {
   if (!url.startsWith('/api/v1/accounts/9001/'))
     throw new Error('Fixture refused another account');
   const id = Number(url.match(/inboxes\/(\d+)/)?.[1]);
   if (url.endsWith('/inboxes')) return { data: { payload: inboxes } };
+  if (url.endsWith('/resources')) return { data: setupResources };
+  if (url.endsWith('/onboarding')) {
+    if (method !== 'post') return { data: { data: [] } };
+    creationRequests.value += 1;
+    if (!inboxes.some(inbox => inbox.id === 709))
+      inboxes.push({ id: 709, name: data.name, jrc_broker_bound: true });
+    return { data: completedSetup };
+  }
+  if (url.includes('/onboarding/')) return { data: completedSetup };
+  if (url.endsWith('/adopt')) {
+    adoptionRequests.value += 1;
+    const selected = setupResources.connections.find(
+      connection => connection.integrationId === data.integrationId
+    );
+    if (!selected) throw new Error('Fixture refused unknown integration');
+    if (!inboxes.some(inbox => inbox.id === selected.inboxId))
+      inboxes.push({
+        id: selected.inboxId,
+        name: selected.name,
+        jrc_broker_bound: true,
+      });
+    return { data: { inboxId: selected.inboxId } };
+  }
   if (url.endsWith('/assignment_policy'))
     return { data: { enabled: false, max_open: 10, inbox_ids: [] } };
   if (url.endsWith('/status'))
@@ -88,7 +143,7 @@ window.axios = async ({ method, url, data }) => {
     };
   if (url.endsWith('/pair')) {
     pairingRequests.value += 1;
-    if (new URLSearchParams(location.search).get('pairing') === 'qr') {
+    if (new URLSearchParams(window.location.search).get('pairing') === 'qr') {
       return {
         data: {
           action: {
@@ -151,6 +206,18 @@ const app = createApp({
             'output',
             { 'data-testid': 'fixture-pair-requests' },
             String(pairingRequests.value)
+          ),
+          ' · Cadastros simulados: ',
+          h(
+            'output',
+            { 'data-testid': 'fixture-create-requests' },
+            String(creationRequests.value)
+          ),
+          ' · Vínculos simulados: ',
+          h(
+            'output',
+            { 'data-testid': 'fixture-adopt-requests' },
+            String(adoptionRequests.value)
           ),
         ]
       ),

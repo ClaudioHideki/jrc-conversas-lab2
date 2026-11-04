@@ -20,6 +20,18 @@ const { accountId, currentAccount } = useAccount();
 const store = useStore();
 const { isAdmin } = useAdmin();
 const inboxes = ref([]);
+const search = ref('');
+const normalizeName = value =>
+  value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+const filteredInboxes = computed(() =>
+  inboxes.value.filter(inbox =>
+    normalizeName(inbox.name).includes(normalizeName(search.value))
+  )
+);
 const connections = ref({});
 const selectedId = ref(null);
 const activeTab = ref('overview');
@@ -241,6 +253,7 @@ const clear = () => {
   onboardingDialog.value?.close();
   dialog.value?.close();
   inboxes.value = [];
+  search.value = '';
   connections.value = {};
   selectedId.value = null;
   pageHistoryId.value = null;
@@ -406,6 +419,45 @@ onBeforeUnmount(() => {
         {{ t('JRC_BROKER.NO_CONNECTIONS') }}
       </p>
       <template v-else>
+        <div class="flex flex-wrap items-end gap-3">
+          <label class="flex min-w-0 flex-1 flex-col gap-2 text-sm">
+            {{ t('JRC_BROKER.SEARCH.CONNECTIONS') }}
+            <input
+              v-model="search"
+              data-testid="connection-search"
+              type="search"
+              class="w-full"
+            />
+          </label>
+          <button
+            v-if="search"
+            data-testid="clear-connection-search"
+            type="button"
+            class="rounded-lg px-3 py-2 text-sm text-n-blue-11 hover:bg-n-alpha-2"
+            @click="search = ''"
+          >
+            {{ t('JRC_BROKER.SEARCH.CLEAR') }}
+          </button>
+          <span
+            data-testid="connection-search-results"
+            aria-live="polite"
+            class="py-2 text-xs text-n-slate-11"
+            >{{
+              t('JRC_BROKER.SEARCH.RESULTS', {
+                count: filteredInboxes.length,
+                total: inboxes.length,
+              })
+            }}</span
+          >
+        </div>
+        <p
+          v-if="!filteredInboxes.length"
+          data-testid="connection-search-empty"
+          role="status"
+          class="text-sm text-n-slate-11"
+        >
+          {{ t('JRC_BROKER.SEARCH.EMPTY') }}
+        </p>
         <p class="text-sm text-n-slate-11">
           {{ t('JRC_BROKER.AGENT_CONNECTIONS_HELP') }}
         </p>
@@ -415,7 +467,7 @@ onBeforeUnmount(() => {
             <select v-model="pageHistoryId">
               <option :value="null">{{ t('JRC_BROKER.SELECT_INBOX') }}</option>
               <option
-                v-for="inbox in inboxes"
+                v-for="inbox in filteredInboxes"
                 :key="inbox.id"
                 :value="inbox.id"
               >
@@ -448,11 +500,11 @@ onBeforeUnmount(() => {
                 </h2>
                 <span
                   class="rounded-full bg-n-alpha-2 px-2 py-1 text-xs text-n-slate-11"
-                  >{{ inboxes.length }}</span
+                  >{{ filteredInboxes.length }}</span
                 >
               </div>
               <article
-                v-for="inbox in inboxes"
+                v-for="inbox in filteredInboxes"
                 :key="inbox.id"
                 :data-testid="`connection-card-${inbox.id}`"
                 :aria-labelledby="`connection-name-${inbox.id}`"
@@ -623,10 +675,10 @@ onBeforeUnmount(() => {
               </article>
             </section>
             <ConnectionDistributionTable
-              v-if="isAdmin"
+              v-if="isAdmin && filteredInboxes.length"
               :key="`${distributionRevision}:${accountId}:${inboxes.map(i => i.id).join(',')}`"
               :account-id="accountId"
-              :inboxes="inboxes"
+              :inboxes="filteredInboxes"
               @configure="configureDistribution"
             />
           </div>
@@ -810,7 +862,7 @@ onBeforeUnmount(() => {
         :use-form="false"
         :cancel-button-label="t('JRC_BROKER.CLOSE')"
         width="xl"
-        overflow-y-auto
+        contained
         @close="closeNewNumber"
       >
         <OnboardingFlow :key="accountId" :account-id="accountId" />

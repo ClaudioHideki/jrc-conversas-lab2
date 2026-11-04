@@ -1,5 +1,45 @@
 {
   "JRC_BROKER": {
+    "SEARCH": {
+      "CONNECTIONS": "Search connections by name",
+      "INBOXES": "Search existing inboxes by name",
+      "INSTANCES": "Search available connections by name",
+      "AGENTS": "Search agents by name",
+      "RESULTS": "{count} of {total}",
+      "CLEAR": "Clear search",
+      "EMPTY": "No names match your search."
+    },
+    "ONBOARDING": {
+      "PROGRESS": "Setup progress",
+      "STEP": "Step {step} of {total}",
+      "STEPS": {
+        "TYPE": "Type",
+        "INBOX": "Inbox",
+        "AGENTS": "Agents",
+        "REVIEW": "Review"
+      },
+      "TITLES": {
+        "TYPE": "What would you like to do?",
+        "INBOX": "Choose your inbox and connection",
+        "AGENTS": "Choose inbox agents",
+        "REVIEW": "Review before confirming"
+      },
+      "CREATE": "Create a new inbox",
+      "CREATE_HELP": "Choose a WhatsApp connection and agents one step at a time.",
+      "ADOPT": "Link an existing inbox",
+      "NO_INBOXES": "No existing inbox is available to link in this account.",
+      "KEEP_AGENTS": "Existing agents, conversations and settings will be kept. You can manage the inbox after linking it.",
+      "AGENT_RESULTS": "{count} of {total}; selected: {selected}",
+      "KEEP_TITLE": "Keep existing settings",
+      "RECENT_OPERATIONS": "Recent setup operations ({count})",
+      "NO_AGENTS": "No agents selected",
+      "SELECT_PROVIDER": "Select a connection service",
+      "REVIEW_HELP": "Check the details below. Setup starts only when you confirm. Pairing requires a separate explicit action.",
+      "BACK": "Back",
+      "NEXT": "Next",
+      "CONFIRM": "Confirm setup",
+      "LOADING": "Loading authorized setup options…"
+    },
     "DETAILS": {
       "TABS_LABEL": "Connection details",
       "TABS": {
