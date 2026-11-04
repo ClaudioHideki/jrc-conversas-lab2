@@ -109,6 +109,26 @@ describe('Product health history from native snapshots', () => {
     expect(wrapper.text()).toContain('Indisponível');
     wrapper.unmount();
   });
+  it('shows the existing stability explanation for a preserved product observation', async () => {
+    const row = {
+      ...fixture.payload[0],
+      health: {
+        ...fixture.payload[0].health,
+        raw_band: 'risk',
+        hysteresis: { points: 5, retained: true },
+      },
+    };
+    mocks.api.mockResolvedValue({ data: { ...fixture, payload: [row] } });
+    const wrapper = mount(History, {
+      props: { assignmentId: 2, productId: 6 },
+    });
+    await wrapper.get('button').trigger('click');
+    await flushPromises();
+    expect(
+      wrapper.get('[data-testid="health-stability-note"]').text()
+    ).toContain('5');
+    wrapper.unmount();
+  });
   it.each([
     'account',
     'product',

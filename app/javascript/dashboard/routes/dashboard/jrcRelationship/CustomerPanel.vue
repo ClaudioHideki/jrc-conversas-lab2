@@ -299,7 +299,14 @@ const money = value => formatMoney(value, props.metadata?.formatting);
             {{ factor.normalized ?? t('RELATIONSHIP.UNAVAILABLE') }} ·
             {{ factor.evidence }}
           </p>
-          <ProductHealthHistory :assignment-id="record.id" :product-id="product.id" :formatting="metadata.formatting" />
+          <HealthStabilityNote
+            :health="record.signals.product_health?.[product.id]"
+          />
+          <ProductHealthHistory
+            :assignment-id="record.id"
+            :product-id="product.id"
+            :formatting="metadata.formatting"
+          />
         </div>
       </details>
       <details class="my-4">

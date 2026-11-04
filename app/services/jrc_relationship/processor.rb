@@ -13,7 +13,9 @@ class JrcRelationship::Processor
       configuration = @context.configuration(@assignment)
       # Keep lineage in stored evidence without treating each refresh as a new observation.
       fingerprint_data = data.deep_dup
-      fingerprint_data.dig(:health, :hysteresis)&.delete(:previous_snapshot_id)
+      [fingerprint_data[:health], *fingerprint_data.fetch(:product_health, {}).values].each do |health|
+        health&.dig(:hysteresis)&.except!(:previous_snapshot_id, :previous_band)
+      end
       fingerprint = Digest::SHA256.hexdigest([Date.current, configuration.scope_key, configuration.version, configuration.effective_weights,
                                               configuration.effective_rules, @context.access_signature, fingerprint_data.to_json].join(':'))
       previous = JrcRelationship::HealthSnapshot.where(assignment: @assignment, viewer: @context.user,

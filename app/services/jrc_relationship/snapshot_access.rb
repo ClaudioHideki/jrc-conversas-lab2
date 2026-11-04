@@ -10,8 +10,21 @@ class JrcRelationship::SnapshotAccess
       sql = native_scope.reselect(native_scope.klass.arel_table[:id]).reorder(nil).to_sql
       relation = relation.where("NOT EXISTS (SELECT 1 FROM jsonb_array_elements_text(COALESCE(#{evidence} #> '{_source_ids,#{key}}', '[]'::jsonb)) AS source_id(value) WHERE source_id.value::bigint NOT IN (#{sql}))")
     end
-    require_manifest ? relation : relation.or(original.where("NOT (#{evidence} ? '_source_ids')"))
+    relation = relation.or(original.where("NOT (#{evidence} ? '_source_ids')")) unless require_manifest
+    column == 'signals' ? capability_scope(context, relation, evidence) : relation
   end
+
+  # Empty source lists do not prove continued module access. A previously
+  # available factor must not survive revocation just because it counted zero.
+  def self.capability_scope(context, relation, evidence)
+    visibility = JrcCustomers::Visibility.new(account: context.account, user: context.user, account_user: context.member)
+    available = { 'crm' => visibility.crm?, 'service_desk' => visibility.service_desk?, 'projects' => visibility.projects? }
+    available.each do |key, allowed|
+      relation = relation.where("#{evidence} #>> ARRAY['capabilities', ?] IS DISTINCT FROM 'true'", key) unless allowed
+    end
+    relation
+  end
+  private_class_method :capability_scope
 
   def self.sources(context)
     visibility = JrcCustomers::Visibility.new(account: context.account, user: context.user, account_user: context.member)

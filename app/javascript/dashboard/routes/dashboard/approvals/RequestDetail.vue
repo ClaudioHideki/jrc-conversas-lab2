@@ -233,6 +233,10 @@ const confirm = payload => {
       variant="faded"
       @click="emit('audit')"
     />
-    <ApprovalRequestReport v-if="auditAllowed && context" :request="request" :context="context" />
+    <ApprovalRequestReport
+      v-if="auditAllowed && context"
+      :request="request"
+      :context="context"
+    />
   </section>
 </template>

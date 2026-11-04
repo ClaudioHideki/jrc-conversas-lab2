@@ -94,5 +94,18 @@ RSpec.describe JrcRelationship::HealthHysteresis do
       2.times { JrcRelationship::Processor.new(context: JrcRelationship::Context.new(member), assignment: assignment).call }
       expect(JrcRelationship::HealthSnapshot.where(assignment: assignment).count).to eq(count)
     end
+
+    it 'does not duplicate a recovered customer observation when only the previous band and snapshot lineage change' do
+      weights = JrcRelationship::Configuration::DEFAULT_WEIGHTS.transform_values { 0 }.merge('relationship' => 100)
+      configuration.update!(weights: weights, rules: { health_hysteresis_points: 5, no_contact_days: 100 })
+      assignment.update!(created_at: 61.days.ago)
+      JrcRelationship::Processor.new(context: JrcRelationship::Context.new(member), assignment: assignment).call
+      assignment.update!(created_at: 35.days.ago)
+      recovered = JrcRelationship::Processor.new(context: JrcRelationship::Context.new(member), assignment: assignment).call
+      expect(recovered[:health]).to include(score: 65, raw_band: 'attention', band: 'attention')
+      count = JrcRelationship::HealthSnapshot.where(assignment: assignment).count
+      2.times { JrcRelationship::Processor.new(context: JrcRelationship::Context.new(member), assignment: assignment).call }
+      expect(JrcRelationship::HealthSnapshot.where(assignment: assignment).count).to eq(count)
+    end
   end
 end

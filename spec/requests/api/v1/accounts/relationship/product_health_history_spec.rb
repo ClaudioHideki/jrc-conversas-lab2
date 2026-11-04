@@ -29,6 +29,7 @@ RSpec.describe 'Authorized native product health history', type: :request do
     before = JrcRelationship::HealthSnapshot.where(account: account).count
     get url, headers: headers, params: { product_id: product.id }
     expect(response).to have_http_status(:ok), response.body
+    expect(response.headers['Cache-Control']).to include('no-store')
     expect(response.parsed_body).to include('product_id' => product.id, 'meta' => { 'page' => 1, 'per_page' => 10, 'total' => 2 })
     expect(response.parsed_body['payload']).to include(a_hash_including('id' => latest.id,
                                                                         'health' => health.deep_stringify_keys,
@@ -142,5 +143,56 @@ RSpec.describe 'Authorized native product health history', type: :request do
     end
     get url, headers: headers, params: { product_id: product.id }
     expect(response.parsed_body).to include('payload' => [], 'meta' => a_hash_including('total' => 0))
+  end
+
+  it 'excludes evidence from a private project even within the same account' do
+    account.enable_features!('jrc_projects')
+    member.update!(jrc_projects_enabled: true)
+    own_project = JrcProjects::Project.create!(account: account, owner: user, key: 'OWNEDHISTORY',
+                                               name: 'Synthetic authorized project', status: 'active', visibility: 'private')
+    expect(JrcRelationship::SnapshotAccess.sources(context).fetch('projects')).to exist(id: own_project.id)
+    project = JrcProjects::Project.create!(account: account, owner: create(:user, account: account), key: 'PRIVATEHISTORY',
+                                           name: 'Synthetic private project', status: 'active', visibility: 'private')
+    JrcRelationship::HealthSnapshot.create!(**attributes,
+                                             signals: attributes[:signals].merge('_source_ids' => { 'projects' => [project.id] }))
+    get url, headers: headers, params: { product_id: product.id }
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body).to include('payload' => [], 'meta' => a_hash_including('total' => 0))
+    expect(response.body).not_to include(project.name)
+  end
+
+  it 'does not reuse a formerly enabled module observation after revocation even when it had no source rows' do
+    account.enable_features!('jrc_projects')
+    member.update!(jrc_projects_enabled: true)
+    JrcRelationship::HealthSnapshot.create!(**attributes, signals: attributes[:signals].merge('capabilities' => { 'projects' => true }))
+    get url, headers: headers, params: { product_id: product.id }
+    expect(response.parsed_body['payload'].size).to eq(1)
+    member.update!(jrc_projects_enabled: false)
+    get url, headers: headers, params: { product_id: product.id }
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body).to include('payload' => [], 'meta' => a_hash_including('total' => 0))
+  end
+
+  it 'keeps a six-month daily-observation sample paginated without creating or updating snapshots' do
+    order = account.jrc_crm_sales_orders.create!(owner: user, contact: assignment.contact, status: 'approved')
+    contract = account.jrc_crm_contracts.create!(sales_order: order, owner: user, contact: assignment.contact)
+    200.times do |index|
+      JrcRelationship::HealthSnapshot.create!(**attributes, calculated_at: index.days.ago, fingerprint: SecureRandom.hex(16),
+                                                            signals: attributes[:signals].merge('_source_ids' => { 'contracts' => [contract.id] }))
+    end
+    request_headers = headers
+    queries = 0
+    subscriber = proc { |*, data| queries += 1 unless data[:name] == 'SCHEMA' }
+    started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    ActiveSupport::Notifications.subscribed(subscriber, 'sql.active_record') do
+      get url, headers: request_headers, params: { product_id: product.id, page: 13, per_page: 10 }
+    end
+    elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - started
+    RSpec.configuration.reporter.message("product_history_sample observations=200 returned=#{response.parsed_body['payload'].size} " \
+                                         "seconds=#{elapsed.round(3)} sql_queries=#{queries}")
+    expect(response).to have_http_status(:ok), response.body
+    expect(response.parsed_body['payload'].size).to eq(10)
+    expect(response.parsed_body['meta']).to eq('page' => 13, 'per_page' => 10, 'total' => 200)
+    expect(JrcRelationship::HealthSnapshot.where(account: account).count).to eq(200)
   end
 end

@@ -463,9 +463,15 @@ onBeforeUnmount(() => {
               :saving="saving"
               @command="action"
             />
-            <div v-else-if="tab === 'completion'" class="min-w-0 space-y-3">
+            <div
+              v-else-if="tab === 'completion'"
+              class="min-w-0 space-y-3"
+            >
               <BackofficeCompletionPackage :record="record" />
-              <p v-if="record.status !== 'completed'" class="text-sm text-n-slate-11">
+              <p
+                v-if="record.status !== 'completed'"
+                class="text-sm text-n-slate-11"
+              >
                 {{ text('COMPLETION_PACKAGE_NOT_COMPLETED') }}
               </p>
             </div>
