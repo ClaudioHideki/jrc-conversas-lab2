@@ -56,8 +56,7 @@
       "remaining": [
         "Representação/assinantes e bloqueios devem reutilizar autoridade/aprovações do Backoffice; não expor pelo cadastro sem permissão",
         "Scanner real/arquivo limpo não homologado; manter quarentena",
-        "Compilar e homologar os incrementos documentais novos quando houver permissão para novo build; servidor5379 continua no produto4d4a6de3",
-        "Apresentação protegida do histórico de alterações de metadados; auditoria já persiste no motor nativo"
+        "Compilar e homologar os incrementos documentais novos quando houver permissão para novo build; servidor5379 continua no produto4d4a6de3"
       ],
       "deferred": "Empresas sem carteira continuam bloqueadas por decisão explícita do usuário; proposta não implementada.",
       "documentary_responsible_increment": {
@@ -72,7 +71,16 @@
         "vue_examples": 15,
         "company_catalog_and_native_configuration_precedence_tested": true,
         "legacy_documents_not_auto_linked": true
-      }
+      },
+      "protected_history_increment": {
+        "evidence": "document_history_checkpoint_20261104.json",
+        "backend": 7,
+        "native_document_regression": 6,
+        "vue": 9,
+        "compiled": false,
+        "chrome": false
+      },
+      "authority_review": "document_authority_boundary_review_20261104.json"
     },
     {
       "id": "B3",
@@ -109,7 +117,8 @@
         "cadastro-mestre:P0414"
       ],
       "classification": "Pendente",
-      "remaining": "Paginação/limites e consultas nativas foram testados em fixtures. Base representativa e homologação de listas/popups com volume realista continuam pendentes; não inferir escala destes testes. Queda de espaço observada nesta sessão ainda sem causa confirmada; nenhuma carga de escala executada."
+      "remaining": "Paginação/limites e consultas nativas foram testados em fixtures. Base representativa e homologação de listas/popups com volume realista continuam pendentes; não inferir escala destes testes. Queda de espaço observada nesta sessão ainda sem causa confirmada; nenhuma carga de escala executada.",
+      "preparation": "stage_c_representative_scale_plan_20261104.json"
     },
     {
       "id": "TRR",
@@ -133,6 +142,6 @@
     "Sem ampliação documental sem carteira",
     "Sem declarar etapa concluída apenas por testes automatizados"
   ],
-  "next": "Homologação manual B1-B4 do build existente e fechamento incremental de histórico documental, representação/autoridade e escala. Novos incrementos não foram compilados por orientação do usuário.",
+  "next": "D: close verified independent Central gaps, then E/F/G. C visual/scale/TRR remain explicitly open; no build, UI server change or external effects.",
   "manual_homologation": "manual_b1_b4_20261104.html"
 }

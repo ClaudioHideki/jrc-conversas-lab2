@@ -1,0 +1,83 @@
+{
+  "status": "Protected documentary history implemented and automated gates passed; not built or Chrome-homologated",
+  "base": "7bb836ae71e156f8862c18c957c34298688d6a42",
+  "branch": "codex/relacionamento-v2-20261101",
+  "feature": [
+    "Read-only native document history with metadata/version filters and bounded pagination",
+    "Before/after responsibility, status, explicit requirement link, actor, reason and immutable file-version reason",
+    "Current document account/assignment/module/issuer/unit access; history grants no new rights",
+    "Whitelist projection excludes raw audit JSON, identifiers from foreign users, secrets, bearer URLs, IP addresses and file bytes",
+    "Response Cache-Control no-store; revocation clears protected UI; late responses and closed requests cannot repopulate rows",
+    "Native Dialog with return to existing versions; no replacement log or parallel document/person registry"
+  ],
+  "tests": {
+    "backend_canonical": {
+      "examples": 7,
+      "failures": 0,
+      "report": ".codex/doc-history-20261104/history-canonical.json"
+    },
+    "document_regression": {
+      "examples": 13,
+      "failures": 0,
+      "report": ".codex/doc-history-20261104/history-corrected.json"
+    },
+    "initial_failure_preserved": {
+      "examples": 13,
+      "failures": 5,
+      "cause": "New fixture omitted its explicit registration category, so native requirement-category validation rejected it; fixed fixture, no loosened validation"
+    },
+    "vue": {
+      "examples": 9,
+      "failures": 0,
+      "report": ".codex/doc-history-20261104/vue-initial.json",
+      "scope": "Mocked API tests; not Chrome"
+    },
+    "lint": {
+      "ruby_changed_files": "Zero offenses",
+      "eslint_errors": 0,
+      "eslint_warnings": 43,
+      "checks_disabled": false
+    }
+  },
+  "related_review": "document_authority_boundary_review_20261104.json",
+  "scale_preparation": "stage_c_representative_scale_plan_20261104.json",
+  "disk": {
+    "initial": 4211511296,
+    "minimum": 4123926528,
+    "current": 4204326912,
+    "conservative_test_stop": 2000000000,
+    "mandatory_stop": 750000000,
+    "cleanup": false
+  },
+  "disk_diagnosis_read_only": {
+    "candidate_database_bytes": 103717911,
+    "wal_directory_bytes": 100663296,
+    "wal_generated_bytes_at_snapshot": 12858067,
+    "container_tmp_kib": 3014664,
+    "own_test_tmp_kib": 63452,
+    "pagefile_logical_bytes": 15679950848,
+    "docker_vhdx_logical_bytes": 78829846528,
+    "conclusion": "No historical size baseline or allocated-size comparison; cause of prior 5.5-GiB free-space drop remains unconfirmed. No process attribution or cleanup."
+  },
+  "runtime": {
+    "url": "http://127.0.0.1:5379",
+    "compiled_product": "4d4a6de3",
+    "new_increment_served": false,
+    "new_server": false,
+    "build_repeated": false,
+    "ui_database_modified": false
+  },
+  "stage_C_complete": false,
+  "remaining": [
+    "New increment compilation and real desktop/mobile themes validation",
+    "Representative scale",
+    "Remaining authority/representative UI acceptance in E",
+    "TRR business definition"
+  ],
+  "next": "Start D code-based gap closure; C visual/scale gates stay open and do not block independent development",
+  "production": false,
+  "push": false,
+  "ghcr": false,
+  "deploy": false,
+  "migration": false
+}

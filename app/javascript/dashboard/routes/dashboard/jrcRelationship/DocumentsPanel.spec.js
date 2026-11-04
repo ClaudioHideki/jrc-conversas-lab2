@@ -43,7 +43,11 @@ const render = () =>
       },
     },
     global: {
-      stubs: { DocumentUploadDialog: true, DocumentMetadataDialog: true },
+      stubs: {
+        DocumentUploadDialog: true,
+        DocumentMetadataDialog: true,
+        DocumentHistoryDialog: true,
+      },
     },
   });
 beforeEach(() => {
@@ -158,5 +162,23 @@ it('shows the native scoped catalog and clears it when access is revoked', async
     .trigger('click');
   await flushPromises();
   expect(wrapper.text()).not.toContain('Required proof');
+  wrapper.unmount();
+});
+
+it('opens the protected native history and clears the document context on denied history access', async () => {
+  const wrapper = render();
+  await flushPromises();
+  await wrapper
+    .findAll('button')
+    .find(button => button.text() === 'RELATIONSHIP.V2.DOCS.HISTORY')
+    .trigger('click');
+  const dialog = wrapper.findComponent({ name: 'DocumentHistoryDialog' });
+  expect(dialog.props('document').id).toBe(record.id);
+  dialog.vm.$emit('denied', { response: { status: 404 } });
+  await flushPromises();
+  expect(
+    wrapper.findComponent({ name: 'DocumentHistoryDialog' }).exists()
+  ).toBe(false);
+  expect(wrapper.text()).not.toContain('Synthetic document');
   wrapper.unmount();
 });

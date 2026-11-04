@@ -137,6 +137,11 @@ export default {
       ...options,
       params,
     }),
+  documentHistory: (accountId, id, params, options) =>
+    axios.get(`${base(accountId)}/documents/${Number(id)}/history`, {
+      ...options,
+      params,
+    }),
   documentResponsibles: (accountId, id, params, options) =>
     axios.get(`${base(accountId)}/documents/${Number(id)}/responsibles`, {
       ...options,

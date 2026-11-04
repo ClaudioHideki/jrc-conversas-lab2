@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcRelationship';
+import DocumentHistoryDialog from './DocumentHistoryDialog.vue';
 import DocumentRequirementsPanel from './DocumentRequirementsPanel.vue';
 import DocumentUploadDialog from './DocumentUploadDialog.vue';
 import DocumentMetadataDialog from './DocumentMetadataDialog.vue';
@@ -21,6 +22,7 @@ const meta = ref(null);
 const requirements = ref(null);
 const editing = ref(false);
 const metadataDocument = ref(null);
+const historyDocument = ref(null);
 const current = ref(null);
 const details = ref(null);
 const busy = ref(false);
@@ -33,6 +35,7 @@ const clearDeniedData = err => {
   current.value = null;
   editing.value = false;
   metadataDocument.value = null;
+  historyDocument.value = null;
 };
 let generation = 0;
 let controller;
@@ -75,6 +78,7 @@ watch(
   () => {
     editing.value = false;
     metadataDocument.value = null;
+    historyDocument.value = null;
     current.value = null;
     details.value = null;
     load();
@@ -265,6 +269,14 @@ const date = value => formatDate(value, props.metadata.formatting);
         </div>
         <div class="flex flex-wrap gap-2">
           <button
+            type="button"
+            :class="buttonClass"
+            :disabled="busy"
+            @click="historyDocument = document"
+          >
+            {{ t('RELATIONSHIP.V2.DOCS.HISTORY') }}
+          </button>
+          <button
             v-if="metadata.can_manage_documents"
             type="button"
             :class="buttonClass"
@@ -429,6 +441,19 @@ const date = value => formatDate(value, props.metadata.formatting);
         </button>
       </nav>
     </section>
+    <DocumentHistoryDialog
+      v-if="historyDocument"
+      :document="historyDocument"
+      :formatting="metadata.formatting"
+      @close="historyDocument = null"
+      @denied="clearDeniedData"
+      @versions="
+        record => {
+          historyDocument = null;
+          versions(record);
+        }
+      "
+    />
     <DocumentMetadataDialog
       v-if="metadataDocument && metadata.can_manage_documents"
       :key="`${generation}:${metadataDocument.id}`"

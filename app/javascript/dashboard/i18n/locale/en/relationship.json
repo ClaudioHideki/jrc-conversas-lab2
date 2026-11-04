@@ -1309,6 +1309,23 @@
           "expired": "Versão atual vencida",
           "quarantined": "Arquivo pendente ou em quarentena",
           "file_available": "Arquivo disponível; aprovação não inferida"
+        },
+        "HISTORY": "Histórico de alterações",
+        "HISTORY_FILTER": "Filtrar alterações documentais",
+        "HISTORY_FAILED": "Não foi possível carregar o histórico documental.",
+        "HISTORY_EMPTY": "Nenhuma alteração documental disponível neste filtro.",
+        "HISTORY_FILTERS": {
+          "all": "Todas as alterações",
+          "metadata": "Responsável e metadados",
+          "version": "Versões de arquivo"
+        },
+        "HISTORY_ACTIONS": {
+          "document_metadata_updated": "Metadados alterados",
+          "document_uploaded": "Versão de arquivo registrada"
+        },
+        "HISTORY_SIDES": {
+          "before": "Antes",
+          "after": "Depois"
         }
       }
     }

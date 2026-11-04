@@ -37,6 +37,13 @@ class Api::V1::Accounts::Relationship::DocumentsController < Api::V1::Accounts::
     render json: { payload: records.map { |user| { id: user.id, name: user.name, eligible: user.active_for_authentication? } }, meta: meta }
   end
 
+  def history
+    history = JrcRelationship::DocumentHistory.new(relationship_context)
+    records, meta = page(history.scope(document_id: params[:id], kind: params[:kind].presence).order(created_at: :desc, id: :desc))
+    response.headers['Cache-Control'] = 'no-store'
+    render json: { payload: history.present(records), meta: meta }
+  end
+
   def version
     upload
   end

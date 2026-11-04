@@ -629,6 +629,7 @@ Rails.application.routes.draw do
             resources :documents, only: [:index, :show, :create, :update] do
               member do
                 get :responsibles
+                get :history
                 post :version
                 get 'versions/:version_id/download', action: :download, as: :download
               end
