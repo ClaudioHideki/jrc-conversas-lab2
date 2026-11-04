@@ -1,0 +1,120 @@
+{
+  "date": "2026-11-04",
+  "base": "4d4a6de3f934d4f7f1475e1f939aedaaf2513def",
+  "stage_C_complete": false,
+  "sources": [
+    {
+      "id": "cadastro-mestre",
+      "path": "C:\\Users\\DEV03\\Downloads\\JRC-CONVERSAS-CADASTRO-MESTRE-CLIENTES-ESPECIFICACAO-DEV-20261101 (1).docx",
+      "sha256": "2a9b7bb58b61856646c29d7681f97473c6a51973684167c62f57937239ac2fbf",
+      "matches_inventory": true
+    },
+    {
+      "id": "relacionamento",
+      "path": "C:\\Users\\DEV03\\Downloads\\JRC_Conversas_Relacionamento_V2_Projeto_Completo_Dev_Com_Imagens_20261101.docx",
+      "sha256": "7ec0c32f0d33b509b47fc8c4c99c10aaa60cdc2ba52fec53100973180c685fee",
+      "matches_inventory": true
+    },
+    {
+      "id": "backoffice",
+      "path": "C:\\Users\\DEV03\\Downloads\\JRC_Conversas_Backoffice_Projeto_DEV_20261101.docx",
+      "sha256": "ebd5cd1db7fa53cc7bf7e2fa6a801e498735eaef9d67040002a5a9ade4878284",
+      "matches_inventory": true
+    },
+    {
+      "id": "central-aprovacoes",
+      "path": "C:\\Users\\DEV03\\Downloads\\Especificacao_Central_Aprovacoes_JRC_Conversas_DEV.docx",
+      "sha256": "3456a7fa3ad15235d9e072aeb00bd4c0eef5ae08d52992463a6bf609ef94c917",
+      "matches_inventory": true
+    }
+  ],
+  "source_interpretation": "Word é referência funcional; inventário original contém classificações pendentes genéricas, não prova ausência de implementação. Checkpoints e evidências específicos prevalecem.",
+  "historical_audit": "docs/jrc_customers/stage_c_word_audit_20261103.json",
+  "items": [
+    {
+      "id": "B1",
+      "word": [
+        "cadastro-mestre:P0155",
+        "cadastro-mestre:P0205"
+      ],
+      "classification": "Implementado, aguardando build/Chrome",
+      "code_checkpoint": "e82e48d6",
+      "evidence": "master_ticket_context_checkpoint_20261103.json",
+      "acceptance": "Novo chamado por Empresa e Contato; unidade autorizada; prefill nativo validado no backend; criar/reabrir detalhe; conta/unidade/solicitante negados; troca de usuário/conta sem resposta antiga. Sem unidades/vínculos automáticos."
+    },
+    {
+      "id": "B2",
+      "word": [
+        "cadastro-mestre:P0163",
+        "relacionamento:P0011"
+      ],
+      "classification": "Implementado com divergências",
+      "code_checkpoint": "1f714280",
+      "evidence": "company_documents_metadata_checkpoint_20261103.json",
+      "acceptance": "Autoria e situação da versão atual e histórico paginado; leitor sem upload; perda de permissão limpa dados; quarentena bloqueia download; claro/escuro e 390px. Metadados novos aguardam build/Chrome.",
+      "remaining": [
+        "Responsável documental próprio distinto de autor e responsável pela carteira",
+        "Catálogo mestre de documentos obrigatórios configuráveis",
+        "Representação/assinantes e bloqueios devem reutilizar autoridade/aprovações do Backoffice; não expor pelo cadastro sem permissão",
+        "Scanner real/arquivo limpo não homologado; manter quarentena"
+      ],
+      "deferred": "Empresas sem carteira continuam bloqueadas por decisão explícita do usuário; proposta não implementada."
+    },
+    {
+      "id": "B3",
+      "word": [
+        "cadastro-mestre:P0151"
+      ],
+      "classification": "Implementado, aguardando build/Chrome",
+      "code_checkpoint": "b6929f0d",
+      "evidence": "attendance_metrics_checkpoint_20261103.json",
+      "acceptance": "Período inclusivo no fuso da conta; canais, limpar filtro, fontes reais e indisponibilidade explícita; CSAT compartilhado com grants report/share_reports; SLA de conversas separado de relógios do Service Desk; notas privadas excluídas; lista/paginação existentes preservadas.",
+      "remaining": [
+        "Escala representativa e custo das projeções de relógios dependentes de calendário ainda não homologados"
+      ]
+    },
+    {
+      "id": "B4",
+      "word": [
+        "cadastro-mestre:P0136"
+      ],
+      "classification": "Implementado, aguardando build/Chrome",
+      "code_checkpoint": "4d4a6de3f934d4f7f1475e1f939aedaaf2513def",
+      "evidence": "contract_renewal_validated_checkpoint_20261104.json",
+      "acceptance": "Datas de vigência/aviso sem mudança pelo fuso do navegador; próximos/vencidos/sem data; abrir contrato correto no CRM; administrador/proprietário ainda respeitam operadora/unidade; nenhuma renovação ou assinatura automática.",
+      "automated": {
+        "backend": 23,
+        "vue": 15
+      }
+    },
+    {
+      "id": "C-escala",
+      "word": [
+        "cadastro-mestre:P0414"
+      ],
+      "classification": "Pendente",
+      "remaining": "Fixtures, índices e EXPLAIN anteriores não demonstram escala representativa. Planejar banco/dados sintéticos e disco dedicado; não executar carga nesta máquina limitada."
+    },
+    {
+      "id": "TRR",
+      "word": [
+        "cadastro-mestre:P0250"
+      ],
+      "classification": "Dependente de definição de negócio",
+      "remaining": "Não há fórmula/unidade/origem aprovadas. Pedidos faturados no período continuam sendo a base financeira autorizada."
+    },
+    {
+      "id": "DEF",
+      "classification": "Pertencente às próximas etapas D, E ou F",
+      "remaining": "Motores completos e integrações não são declarados concluídos pela existência de classes ou por testes locais de C."
+    }
+  ],
+  "restrictions": [
+    "Sem limpeza automática",
+    "Sem push/deploy/GHCR/produção",
+    "Sem operações externas reais",
+    "Sem ampliação documental sem carteira",
+    "Sem declarar etapa concluída apenas por testes automatizados"
+  ],
+  "next": "Homologação consolidada B1-B4, resolução das divergências documentais e escala, mantendo TRR explicitamente dependente. D/E/F somente planejamento neste bloco."
+}

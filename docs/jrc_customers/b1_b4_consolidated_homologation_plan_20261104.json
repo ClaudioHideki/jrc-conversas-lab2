@@ -1,0 +1,78 @@
+{
+  "date": "2026-11-04",
+  "status": "Preparado, não executado",
+  "product_commit": "4d4a6de3f934d4f7f1475e1f939aedaaf2513def",
+  "single_build": true,
+  "driver": ".codex/build-customer-b1-b4-4d4a6de3.py",
+  "prefix": "consolidation-customer-b1-b4-4d4a6de3-vite",
+  "disk": {
+    "minimum_start_bytes": 1610612736,
+    "preferred_start_bytes": 3221225472,
+    "mandatory_stop_bytes": 750000000,
+    "current_free_bytes": 1750347776,
+    "note": "Espaço atual supera o mínimo por margem pequena. Não confundir mínimo com os 3 GiB preferenciais. Revalidar imediatamente antes do build."
+  },
+  "admission": [
+    "Git limpo na branch esperada e descendente do produto validado; mudanças posteriores somente documentais",
+    "Nenhum outro Vite build no Windows ou em contêiner; se inspeção de processos falhar, não presumir ausência",
+    "Autoteste de guarda com amostras simuladas, não um encerramento real de build",
+    "Prefixo/log/relatório exclusivos; recusar sobrescrita de outputs existentes",
+    "Nenhum build Docker, pull, install ou atualização de dependências"
+  ],
+  "runtime": [
+    "Criar snapshot local exclusivo a partir das fontes preservadas, aplicar somente o delta exato de produto e verificar SHA; nunca substituir snapshots homologados",
+    "Copiar/verificar o armazenamento privado necessário, preservando originais; monitorar espaço também nessa preparação",
+    "Rails no banco local jrc_customer_groups_test e Redis6; TestAdapter, mailer test, sem Sidekiq/entregas externas; verificar tudo no boot",
+    "Portas novas propostas 5379/3007, usar apenas se livres e bind localhost; não parar processos para obter portas",
+    "Assets do prefixo novo e manifesto vinculados ao SHA do produto; antiga UI D3 não representa B1-B4"
+  ],
+  "fixtures_preserved": [
+    "C5/C6/C7 e segmento financeiro98",
+    "Rascunho de Campanha1: não reenviar, recriar ou lançar",
+    "Empresa953/carteira36/documento6/versões1e2: não reenviar ou recriar",
+    "Empresa954 sem carteira permanece sem carteira",
+    "Atores existentes e limites nativos de sessão; não revogar sessões para facilitar testes"
+  ],
+  "browser_matrix": {
+    "desktop_width": 1520,
+    "mobile_width": 390,
+    "themes": [
+      "claro",
+      "escuro"
+    ],
+    "tests": [
+      {
+        "block": "B1",
+        "criteria": "Novo chamado por Empresa e Contato; unidade autorizada; prefill nativo validado no backend; criar/reabrir detalhe; conta/unidade/solicitante negados; troca de usuário/conta sem resposta antiga. Sem unidades/vínculos automáticos."
+      },
+      {
+        "block": "B2",
+        "criteria": "Autoria e situação da versão atual e histórico paginado; leitor sem upload; perda de permissão limpa dados; quarentena bloqueia download; claro/escuro e 390px. Metadados novos aguardam build/Chrome."
+      },
+      {
+        "block": "B3",
+        "criteria": "Período inclusivo no fuso da conta; canais, limpar filtro, fontes reais e indisponibilidade explícita; CSAT compartilhado com grants report/share_reports; SLA de conversas separado de relógios do Service Desk; notas privadas excluídas; lista/paginação existentes preservadas."
+      },
+      {
+        "block": "B4",
+        "criteria": "Datas de vigência/aviso sem mudança pelo fuso do navegador; próximos/vencidos/sem data; abrir contrato correto no CRM; administrador/proprietário ainda respeitam operadora/unidade; nenhuma renovação ou assinatura automática."
+      }
+    ],
+    "persistence": "Leitura após gravação e navegação pelo fluxo nativo, não somente tela/HTTP200 ou mocks",
+    "security": [
+      "conta estrangeira",
+      "operadora/unidade sem cobertura",
+      "papel sem permissão",
+      "revogação durante requisição",
+      "cliente/solicitante incompatível"
+    ],
+    "no_external": "Sem campanha, chamada, SMS, assinatura externa ou provedor NICO real"
+  },
+  "evidence": [
+    "Capturas por tela/tema/viewport, sem dados privados",
+    "Console/rede sem tokens, hashes de assets, IDs sintéticos/idempotência dos writes",
+    "Resultado por caso com passou/falhou/bloqueado; não completar C com casos pendentes"
+  ],
+  "driver_sha256": "5b11147092ebfc80e074849c60c0c2b34fbcd3a182e37f32a9f96364609e37ee",
+  "driver_scope": "Local setup in .codex; hash recorded here. Pins product commit; subsequent Git changes must be docs-only; actual build not executed."
+}
