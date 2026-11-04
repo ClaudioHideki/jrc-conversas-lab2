@@ -14,11 +14,13 @@
 
 A regressão da página/lista/cinco abas falhou antes da alteração. O novo teste de edição offline também falhou antes da correção e passou depois.
 
-- Suíte de componentes Broker: 96 testes, zero falhas e pendências.
-- Página após revisão e novo teste offline: 27 testes, zero falhas e pendências. Os demais componentes não foram alterados pela correção offline.
+- Suíte de componentes Broker: 100 testes, zero falhas e pendências. Inclui edição offline e duas regressões do resumo de fallback.
+- Página após contenção da rolagem do modal: 28 testes, zero falhas e pendências. Uma primeira execução local estourou o prazo de 5 segundos em um caso; repetição com um worker e prazo de 15 segundos passou integralmente, sem alterar o teste.
 - ESLint dos componentes/cliente API: zero erros; avisos de chaves de tradução dinâmicas devem ser distinguidos de erro de lint.
 - Build local completo foi interrompido para reduzir concorrência de recursos. Não representa build aprovado; a CI desta candidata executa o build completo.
-- Testes Rails completos ainda precisam da CI com PostgreSQL/Redis e schema/migrations atualizados. O runner local existente parou com 25 migrations pendentes antes de executar exemplos, após carregamento de gems anormalmente lento.
+- Rails nativo com PostgreSQL/Redis: 261 exemplos, zero falhas e pendências no SHA `ccd9fe70`, run [41882583138](https://github.com/ClaudioHideki/jrc-conversas-lab2/actions/runs/41882583138). Inclui contratos, concorrência e overlay Enterprise; não equivale à suíte de todo o produto. O runner local antigo parou com 25 migrations pendentes antes de executar exemplos.
+- Build completo, lint e 100 testes Vue passaram nessa mesma CI. O E2E executou seis cenários: cinco passaram e o Save mobile revelou interceptação após rolagem, apesar da geometria correta do botão. O modal agora usa a contenção nativa do componente Dialog; o E2E mantém clique normal, captura o alvo real e precisa passar no SHA final. Não usar esta CI anterior para aprovar o código posterior.
+- A regra de disponibilidade chega à checagem final Enterprise, preservando capacidade, opt-out, conta, caixa e time. Nove casos específicos e as regressões existentes passaram na suíte Rails acima.
 - A suíte isolada do histórico executa a classe real com binding em memória; não substitui os testes Rails/PostgreSQL.
 - A conferência visual pelo controle do navegador foi interrompida por impossibilidade de confirmar a URL. O laboratório e E2E em CI usam componentes reais, respostas sintéticas e nenhum telefone/credencial real.
 
