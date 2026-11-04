@@ -90,6 +90,9 @@ RSpec.describe JrcRelationship::HealthHysteresis do
       expect(assignment.actions.where(kind: 'health').count).to eq(1)
       expect(JrcRelationship::RiskCase.where(assignment: assignment, kind: 'health').first!.severity).to eq('critical')
       expect(previous.reload.attributes).to eq(captured)
+      count = JrcRelationship::HealthSnapshot.where(assignment: assignment).count
+      2.times { JrcRelationship::Processor.new(context: JrcRelationship::Context.new(member), assignment: assignment).call }
+      expect(JrcRelationship::HealthSnapshot.where(assignment: assignment).count).to eq(count)
     end
   end
 end

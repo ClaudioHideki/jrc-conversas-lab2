@@ -80,6 +80,8 @@ class JrcRelationship::CustomerSignals
   private
 
   def merge_health_sources(history, current)
+    return current if history.empty?
+
     SOURCE_MANIFEST.to_h { |key| [key, (Array(current[key]) + Array(history[key.to_s])).uniq] }
   end
 

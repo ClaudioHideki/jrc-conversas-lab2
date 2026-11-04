@@ -1,6 +1,6 @@
 {
   "date": "2026-11-04",
-  "status": "Next implementation plan based on actual native code; none of the following gaps declared implemented",
+  "status": "Updated incremental source/local automated evidence: D6-D9, E completion report and F health hysteresis implemented; no full C/D/E/F/G closure or fresh-build visual acceptance claimed.",
   "source_checkpoint": "e8b3e4d54a2939990fcaa1da0083a04794cf9442",
   "do_not_restart": [
     "C5/C6/C7 and current company document catalog/responsibility/history",
@@ -8,7 +8,6 @@
     "Existing Backoffice, signatures boundary and relationship reviewed batches/Flow"
   ],
   "D6_numeric_tiers": {
-    "finding": "Requests.plan! requires all step.authority conditions to match. Mutually exclusive tier conditions in v1 cannot represent alternative approvers; a UI-only tier table would be false functionality. Definition validates exact v1 keys; snapshots/versions are immutable.",
     "files": [
       "app/services/jrc_approvals/definition.rb",
       "app/services/jrc_approvals/requests.rb",
@@ -23,10 +22,11 @@
       "Simulator and request creation select the same native tier/roster; unmatched range cannot default to approval",
       "Publishing/version changes and concurrent decisions preserve request binding; revoked eligibility/foreign scope denied"
     ],
-    "implemented_checkpoint": "docs/jrc_consolidation/approval_tiers_checkpoint_20261104.json"
+    "implemented_checkpoint": "docs/jrc_consolidation/approval_tiers_checkpoint_20261104.json",
+    "finding_at_source_checkpoint": "Requests.plan! requires all step.authority conditions to match. Mutually exclusive tier conditions in v1 cannot represent alternative approvers; a UI-only tier table would be false functionality. Definition validates exact v1 keys; snapshots/versions are immutable.",
+    "current_status": "Native v2 tiers implemented/tested; v1 preserved"
   },
   "D7_adjustment": {
-    "finding": "Catalog adapters are authorized read/capture/verify only. Native requests pin readonly snapshot/stage_plan; source changes make contexts stale. There is no installed generic write adapter/adjust permission.",
     "next": "Reuse allowlisted native domain mutations with an explicit adjustment capability, original snapshot and immutable revision/audit link. Atomic adjust+approve must use one domain transaction, preserve actual adjustor and original requester provenance, re-evaluate native pricing/gates and never impersonate another actor or overwrite old snapshots.",
     "forbidden": [
       "Arbitrary model.update from approval payload",
@@ -34,10 +34,11 @@
       "Silently copy requester identity into Current.user",
       "Overwrite immutable snapshot/decision history or bypass financial/authority verification"
     ],
-    "partial_implementation": "docs/jrc_consolidation/approval_adjustment_checkpoint_20261104.json"
+    "partial_implementation": "docs/jrc_consolidation/approval_adjustment_checkpoint_20261104.json",
+    "finding_at_source_checkpoint": "Catalog adapters are authorized read/capture/verify only. Native requests pin readonly snapshot/stage_plan; source changes make contexts stale. There is no installed generic write adapter/adjust permission.",
+    "current_status": "Native proposal discount adjustment implemented; other source mutations remain partial"
   },
   "D8_global_delegation": {
-    "finding": "Existing grants require policy_manage and bind exact policy-version/step; new D4 prevents future scoped cycles. A global own grant is not represented by this model.",
     "next": "Add explicit native own-delegation authorization/storage semantics and resolve an intersection with each request current account/company/unit/eligible principals/actions/window. Retain local history and gratuity formal absence. No blanket role grant or policy-version rewrite.",
     "required_tests": [
       "self/cycles/windows including concurrent grants",
@@ -45,10 +46,11 @@
       "future policy version and old in-flight request semantics",
       "no two effective principal votes, no actor/requester self-approval bypass"
     ],
-    "implementation_checkpoint": "docs/jrc_consolidation/approval_own_delegation_checkpoint_20261104.json"
+    "implementation_checkpoint": "docs/jrc_consolidation/approval_own_delegation_checkpoint_20261104.json",
+    "finding_at_source_checkpoint": "Existing grants require policy_manage and bind exact policy-version/step; new D4 prevents future scoped cycles. A global own grant is not represented by this model.",
+    "current_status": "Own temporary global grants implemented/tested; exact current native intersection required"
   },
   "D9_internal_notifications": {
-    "finding": "Ledger/AuditEvent persist audit only; Request and AuditEvent have no notification producer hooks, and reviewed native notification/feed paths have no JrcApprovals handling. Audits are not user notification delivery.",
     "reuse": [
       "app/models/notification.rb",
       "app/finders/notification_finder.rb",
@@ -59,7 +61,9 @@
     "shared_impact": [
       "Existing conversation/relationship/SLA notifications, unread counts, list pagination, serialization, ActionCable, jobs and frontend route handling require regression before changes"
     ],
-    "implementation_checkpoint": "docs/jrc_consolidation/approval_notifications_checkpoint_20261104.json"
+    "implementation_checkpoint": "docs/jrc_consolidation/approval_notifications_checkpoint_20261104.json",
+    "finding_at_source_checkpoint": "Ledger/AuditEvent persist audit only; Request and AuditEvent have no notification producer hooks, and reviewed native notification/feed paths have no JrcApprovals handling. Audits are not user notification delivery.",
+    "current_status": "Durable native internal feed implemented/tested; operational workers and real browser acceptance pending"
   },
   "E_F_followup": "Use ef_g_native_review_checkpoint_20261104.json; preserve existing implementations, implement actual gaps incrementally rather than restarting modules. External DocuSign demo and Chrome visual QA remain distinct prerequisites.",
   "business_dependencies": {
@@ -102,5 +106,6 @@
     "No builds or new UI instances under current instruction",
     "No push/GHCR/deploy/production changes",
     "No external real operations or interruption of other agents"
-  ]
+  ],
+  "latest_incremental_report": "docs/jrc_consolidation/implementation_progress_20261104.json"
 }

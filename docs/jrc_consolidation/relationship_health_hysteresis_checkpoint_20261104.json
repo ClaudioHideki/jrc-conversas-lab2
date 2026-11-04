@@ -106,5 +106,9 @@
     "no_push": true,
     "no_cleanup": true,
     "server5379_unchanged": true
+  },
+  "deduplication_followup": {
+    "evidence": "implementation_progress_20261104.json",
+    "status": "Lineage excluded from measurement fingerprint; original zero-margin manifest preserved; final native repeat-refresh count assertion passed."
   }
 }

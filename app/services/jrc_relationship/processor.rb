@@ -11,8 +11,11 @@ class JrcRelationship::Processor
       data = JrcRelationship::CustomerSignals.new(assignment: @assignment, context: @context).call
       reconcile_commercial! if @context.policy.manage?
       configuration = @context.configuration(@assignment)
+      # Keep lineage in stored evidence without treating each refresh as a new observation.
+      fingerprint_data = data.deep_dup
+      fingerprint_data.dig(:health, :hysteresis)&.delete(:previous_snapshot_id)
       fingerprint = Digest::SHA256.hexdigest([Date.current, configuration.scope_key, configuration.version, configuration.effective_weights,
-                                              configuration.effective_rules, @context.access_signature, data.to_json].join(':'))
+                                              configuration.effective_rules, @context.access_signature, fingerprint_data.to_json].join(':'))
       previous = JrcRelationship::HealthSnapshot.where(assignment: @assignment, viewer: @context.user,
                                                        config_scope_key: configuration.scope_key, config_version: configuration.version,
                                                        access_signature: @context.access_signature)
