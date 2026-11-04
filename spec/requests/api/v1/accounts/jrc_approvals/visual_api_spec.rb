@@ -147,6 +147,39 @@ RSpec.describe 'E4 bounded visual administration', :approval_core, :commercial_a
     expect(response.parsed_body.first['publisher_name']).to eq(author.user.name)
   end
 
+  it 'generates distinct internal policy codes when the guided editor omits them, without publishing or changing explicit codes' do
+    values = { name: 'SYNTHETIC guided policy', module_key: 'crm', event_key: 'proposal_send',
+               issuer_company_id: scope[:company].id, business_unit_id: scope[:unit].id, definition: approval_definition([approver]) }
+    codes = Array.new(2) do
+      post "#{url}/policies", params: { policy: values }, headers: headers, as: :json
+      expect(response).to have_http_status(:created)
+      body = response.parsed_body
+      expect(body).to include('state' => 'draft', 'enabled' => false, 'current_version_id' => nil)
+      expect(body['code']).to match(/\Apolicy_[a-f0-9]{24}\z/)
+      expect(JrcApprovals::Policy.find(body['id']).account_id).to eq(scope[:account].id)
+      body['code']
+    end
+    expect(codes.uniq.size).to eq(2)
+    post "#{url}/policies", params: { policy: values.merge(code: 'existing_api_code') }, headers: headers, as: :json
+    expect(response).to have_http_status(:created)
+    expect(response.parsed_body['code']).to eq('existing_api_code')
+  end
+
+  it 'does not turn automatic policy identity into a manage grant or accept a foreign organizational scope' do
+    values = { name: 'SYNTHETIC denied', module_key: 'crm', event_key: 'proposal_send',
+               issuer_company_id: scope[:company].id, business_unit_id: scope[:unit].id, definition: approval_definition([approver]) }
+    expect do
+      post "#{url}/policies", params: { policy: values }, headers: approver.user.create_new_auth_token, as: :json
+    end.not_to change(JrcApprovals::Policy, :count)
+    expect(response).to have_http_status(:unauthorized)
+    other = approval_scope
+    expect do
+      post "#{url}/policies", params: { policy: values.merge(issuer_company_id: other[:company].id, business_unit_id: other[:unit].id) },
+                              headers: headers, as: :json
+    end.not_to change(JrcApprovals::Policy, :count)
+    expect(response).to have_http_status(:not_found)
+  end
+
   it 'enriches simulator presentation without executing any effect' do
     commercial_policy(scope, author, [approver])
     proposal

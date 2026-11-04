@@ -7,6 +7,7 @@ const props = defineProps({
   modelValue: { type: Object, required: true },
   fields: { type: Object, required: true },
   options: { type: Object, required: true },
+  number: { type: Number, default: 1 },
 });
 const emit = defineEmits(['update:modelValue']);
 const { t } = useI18n();
@@ -36,16 +37,11 @@ const toggle = action =>
 
 <template>
   <fieldset class="space-y-4 rounded-xl border border-n-weak bg-n-solid-2 p-4">
-    <legend class="px-1 font-semibold">{{ t('JRC_APPROVALS.step') }}</legend>
+    <legend class="px-1 font-semibold">
+      {{ t('JRC_APPROVALS.stepNumber', { number }) }}
+    </legend>
     <div class="grid gap-3 sm:grid-cols-3">
       <label class="text-sm"
-        >{{ t('JRC_APPROVALS.code')
-        }}<input
-          :value="modelValue.code"
-          class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 p-2"
-          pattern="[a-z][a-z0-9_]{0,63}"
-          @input="patch({ code: $event.target.value })" /></label
-      ><label class="text-sm"
         >{{ t('JRC_APPROVALS.mode')
         }}<select
           :value="modelValue.mode"
@@ -139,7 +135,7 @@ const toggle = action =>
           :disabled="action === 'approved'"
           @change="toggle(action)"
         />
-        {{ action }}</label
+        {{ t(`JRC_APPROVALS.decisionLabels.${action}`) }}</label
       >
     </fieldset>
     <label class="block text-sm"

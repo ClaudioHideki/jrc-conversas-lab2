@@ -1,0 +1,92 @@
+{
+  "date": "2026-11-04",
+  "stage": "D3 guided policy editor",
+  "parent_checkpoint": "4d007f3fc04781a0d9fee66940814f932ae13efc",
+  "changes": [
+    "Four keyboard-accessible guided steps with back/next; native condition, steps, selection, parallel/quorum, expiry, delegation and self-approval controls preserved. Advanced fields remain available in expandable sections.",
+    "New rule internal code generated on the server after native policy_manage authorization when omitted. Existing explicit API codes and immutable policy identity remain supported. Step IDs are generated once on insertion and hidden; historical IDs are preserved.",
+    "Readable labels for the currently installed event/field/operator catalogs and condition summary; native typed keys and values remain unchanged. No JSON editor or arbitrary expression execution.",
+    "Existing review/validate/publish confirmation and immutable published history preserved; no rollout or permission activation."
+  ],
+  "tests": {
+    "vue": {
+      "artifact": ".codex\\d-approvals-20261104\\vue-wizard-native-final.json",
+      "tests": 98,
+      "failures": 0,
+      "exit_code": 0,
+      "unhandled_errors": 0
+    },
+    "backend": {
+      "artifact": "/tmp/wizard-api-canonical-20261104.json",
+      "examples": 12,
+      "failures": 0,
+      "database": "jrc_rel_v2_candidate_test",
+      "exact_source_overlay": ".codex\\d-approvals-20261104\\wizard-overlay.json",
+      "resource": ".codex\\d-approvals-20261104\\wizard-api-canonical-backend-resource.json"
+    },
+    "eslint": {
+      "errors": 0,
+      "warnings": 68
+    },
+    "rubocop": {
+      "controller": 0,
+      "new_api_spec": 0,
+      "policies_service": "12 inherited offenses unchanged versus HEAD baseline; no cops disabled",
+      "baseline": ".codex\\d-approvals-20261104\\wizard-policies-baseline-lint.json",
+      "current": ".codex\\d-approvals-20261104\\wizard-policies-current-lint.json"
+    }
+  },
+  "failed_runs_preserved": [
+    "Initial Vue assertions were green but process failed on unhandled RouterLink errors: the page fixture router omitted the native proposal route. Added that test route and asserted the actual generated source href; final 98/0 has exit zero and no unhandled errors.",
+    "Initial backend 11/12: runner copied spec to a filename lacking jrc_approvals, so existing support did not register synthetic.review. Runner path corrected, no product adapter or authorization changed; final native 12/0."
+  ],
+  "limits": [
+    "Numeric tier rows with overlap/gap validation still pending; four-step presentation is not proof of tier implementation",
+    "Generic allowed adjustment and atomic adjustment+approval remain pending",
+    "Global temporary own delegation and native approval notification delivery remain pending inventory/implementation",
+    "New build and real desktop/mobile light/dark QA pending; UI 5379 still frozen source/assets 4d4a6de3",
+    "D and C remain open"
+  ],
+  "disk": {
+    "frontend": {
+      "status": "passed",
+      "free_start": 16539795456,
+      "minimum_free": 16287662080,
+      "mandatory_stop_bytes": 750000000,
+      "conservative_stop_bytes": 2000000000,
+      "no_build": true,
+      "owned_process_id": 1252,
+      "exit_code": 0,
+      "free_end": 16264736768
+    },
+    "backend": {
+      "start": 16528146432,
+      "minimum": 16508141568,
+      "mandatory_stop": 750000000,
+      "conservative_stop": 2000000000,
+      "no_build": true,
+      "database": "jrc_rel_v2_candidate_test",
+      "exact_source_overlays": {
+        "sources": [
+          {
+            "path": "app/services/jrc_approvals/policies.rb",
+            "constant": "JrcApprovals::Policies",
+            "method": "JrcApprovals::Policies.instance_method(:create!)"
+          },
+          {
+            "path": "app/controllers/api/v1/accounts/approvals/policies_controller.rb",
+            "constant": "Api::V1::Accounts::Approvals::PoliciesController",
+            "method": "Api::V1::Accounts::Approvals::PoliciesController.instance_method(:create)"
+          }
+        ],
+        "spec": "spec/requests/api/v1/accounts/jrc_approvals/visual_api_spec.rb"
+      },
+      "original_runtime_files_changed": false,
+      "exit_code": 0,
+      "end": 16527929344,
+      "status": "passed"
+    },
+    "free_at_checkpoint_preparation": 16528281600
+  },
+  "no_cleanup_build_deploy_push_external_operation": true
+}

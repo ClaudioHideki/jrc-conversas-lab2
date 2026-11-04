@@ -703,7 +703,17 @@ describe('E4 components using bounded real DTO contracts', () => {
     expect(wrapper.text()).toBe('');
   });
   it('clears protected request detail when the native decision API denies current access', async () => {
-    const router = createRouter({ history: createMemoryHistory(), routes });
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        ...routes,
+        {
+          name: 'crm_proposals',
+          path: '/app/accounts/:accountId/crm/proposals',
+          component: { template: '<div />' },
+        },
+      ],
+    });
     await router.push({
       name: 'jrc_approvals',
       params: { accountId: 17, screen: 'inbox', id: request.id },
@@ -725,6 +735,9 @@ describe('E4 components using bounded real DTO contracts', () => {
     });
     await flushPromises();
     expect(wrapper.findComponent(RequestDetail).exists()).toBe(true);
+    expect(wrapper.find('a[target="_blank"]').attributes('href')).toBe(
+      '/app/accounts/17/crm/proposals?proposalId=601'
+    );
     wrapper.getComponent(RequestDetail).vm.$emit('decide', {
       step_code: 'review',
       decision: 'approved',

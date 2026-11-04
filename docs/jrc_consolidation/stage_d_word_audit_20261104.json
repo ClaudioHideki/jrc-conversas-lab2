@@ -18,7 +18,7 @@
     },
     {
       "criterion": "CA-02",
-      "status": "Installed commercial origin routes and sealed legal view implemented; 92 distinct Vue scenarios covered through main plus corrected confirmation rerun; fresh build and real browser pending",
+      "status": "Installed commercial origin routes and sealed legal view implemented; consolidated 98 Vue scenarios exit zero and no unhandled errors; fresh compilation and real browser pending",
       "evidence": [
         "app/serializers/jrc_approvals/request_serializer.rb",
         "app/javascript/dashboard/routes/dashboard/approvals/AuthorityOrigin.vue",
@@ -60,9 +60,11 @@
     },
     {
       "criterion": "CA-07",
-      "status": "Partial: current editor has six tabs and visible draft code; Word requires four guided steps and no internal code",
+      "status": "Four guided steps, hidden generated identities, readable installed catalog labels implemented and tested; native advanced controls preserved. Dedicated numeric tier authoring and full visual acceptance still pending.",
       "evidence": [
-        "app/javascript/dashboard/routes/dashboard/approvals/PolicyEditor.vue"
+        "app/javascript/dashboard/routes/dashboard/approvals/PolicyEditor.vue",
+        "docs/jrc_consolidation/approval_wizard_checkpoint_20261104.json",
+        "app/javascript/dashboard/routes/dashboard/approvals/conditionSummary.js"
       ]
     },
     {
@@ -133,5 +135,5 @@
     "Current advanced parallel/quorum/condition capabilities are preserved even where Word marks them future.",
     "Internal notifications require separate inventory of actual producers/consumers; not declared implemented merely because audit events exist."
   ],
-  "next": "Four-step guided policy configuration, then scoped adjustment/delegation and notification inventory without recreating engines."
+  "next": "Inventory adjustment, numeric tiers, global own delegation and native notification gaps; continue independent E/F/G code review and targeted regressions."
 }
