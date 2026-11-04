@@ -50,6 +50,17 @@ test('administra conexoes e distribuicao sem iniciar pareamento ao abrir', async
     path: testInfo.outputPath('distribuicao-antes-salvar.png'),
     fullPage: true,
   });
+  if (testInfo.project.name === 'mobile') {
+    const rules = await dialog
+      .getByTestId('distribution-rules-fields')
+      .boundingBox();
+    const save = await dialog
+      .getByTestId('distribution-policy-save')
+      .boundingBox();
+    expect(rules).not.toBeNull();
+    expect(save).not.toBeNull();
+    expect(save!.y).toBeGreaterThanOrEqual(rules!.y + rules!.height - 1);
+  }
   await dialog
     .getByRole('button', { name: 'Salvar distribuição', exact: false })
     .click();

@@ -14,6 +14,7 @@ export default defineConfig({
     headless: true,
     locale: 'pt-BR',
     timezoneId: 'America/Sao_Paulo',
+    screenshot: 'only-on-failure',
   },
   webServer: {
     command:

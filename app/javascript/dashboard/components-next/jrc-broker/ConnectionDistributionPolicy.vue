@@ -453,7 +453,7 @@ onBeforeUnmount(clear);
     >
       <fieldset :disabled="busy || !loaded" class="min-w-0">
         <div
-          class="grid items-start gap-6"
+          class="grid grid-cols-1 items-start gap-6"
           :class="presentation === 'rules' ? 'grid-cols-1' : 'lg:grid-cols-2'"
         >
           <div v-show="presentation !== 'rules'" class="flex flex-col gap-4">
@@ -578,10 +578,14 @@ onBeforeUnmount(clear);
               />
             </label>
           </div>
-          <fieldset
+          <section
+            data-testid="distribution-rules-fields"
+            :aria-label="t('JRC_BROKER.DISTRIBUTION.RULES')"
             class="flex min-w-0 flex-col gap-4 rounded-xl border border-n-weak bg-n-alpha-1 p-5"
           >
-            <legend>{{ t('JRC_BROKER.DISTRIBUTION.RULES') }}</legend>
+            <h4 class="text-sm font-semibold">
+              {{ t('JRC_BROKER.DISTRIBUTION.RULES') }}
+            </h4>
             <label class="flex items-center gap-2 text-sm">
               <input
                 v-model="respectAvailability"
@@ -658,11 +662,12 @@ onBeforeUnmount(clear);
                 </option>
               </select>
             </label>
-          </fieldset>
+          </section>
           <p v-if="!valid" class="text-sm lg:col-span-2">
             {{ t('JRC_BROKER.DISTRIBUTION.VALIDATION') }}
           </p>
           <Button
+            data-testid="distribution-policy-save"
             type="submit"
             class="justify-self-start"
             :class="presentation === 'rules' ? '' : 'lg:col-span-2'"
