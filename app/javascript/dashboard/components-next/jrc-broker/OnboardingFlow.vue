@@ -334,7 +334,7 @@ onBeforeUnmount(() => {
             v-for="(key, index) in stepKeys"
             :key="key"
             :aria-current="step === index + 1 ? 'step' : undefined"
-            class="min-w-0 rounded-lg px-2 py-3 text-center text-xs"
+            class="min-w-0 list-none rounded-lg px-2 py-3 text-center text-xs"
             :class="
               step === index + 1
                 ? 'bg-n-blue-3 text-n-blue-11'
