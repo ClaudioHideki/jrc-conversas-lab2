@@ -1,0 +1,294 @@
+{
+  "date": "2026-11-04",
+  "code_checkpoint": "e8b3e4d54a2939990fcaa1da0083a04794cf9442",
+  "status": "E/F source review and G selected native regression; none of these stages declared complete",
+  "documents": [
+    {
+      "stage": "E",
+      "path": "C:\\Users\\DEV03\\Downloads\\JRC_Conversas_Backoffice_Projeto_DEV_20261101.docx",
+      "sha256": "ebd5cd1db7fa53cc7bf7e2fa6a801e498735eaef9d67040002a5a9ade4878284",
+      "body_paragraphs_read": 201,
+      "tables_read": 27,
+      "new_visual_QA": false,
+      "images": "References previously inventoried; not used as implementation evidence"
+    },
+    {
+      "stage": "F",
+      "path": "C:\\Users\\DEV03\\Downloads\\JRC_Conversas_Relacionamento_V2_Projeto_Completo_Dev_Com_Imagens_20261101.docx",
+      "sha256": "7ec0c32f0d33b509b47fc8c4c99c10aaa60cdc2ba52fec53100973180c685fee",
+      "body_paragraphs_read": 223,
+      "tables_read": 6,
+      "new_visual_QA": false,
+      "images": "References previously inventoried; not used as implementation evidence"
+    }
+  ],
+  "source_verification": {
+    "files": 270,
+    "differences_after_CRLF_LF_normalization": 0,
+    "artifact": ".codex\\d-approvals-20261104\\ef-source-normalized.json",
+    "raw_digest_probe": "Raw CRLF/LF differences were checked and preserved separately; no runtime source modification was needed"
+  },
+  "test_environment": {
+    "database": "jrc_rel_v2_candidate_test",
+    "test_source": "/consolidation-document-responsibility-tests-20261104",
+    "current_approval_overlays": ".codex\\d-approvals-20261104\\ef-g-overlay.json",
+    "UI_database_untouched": "jrc_customer_groups_test",
+    "external_HTTP": "Simulated with WebMock; no external operations or workers started"
+  },
+  "regression": {
+    "examples": 60,
+    "failures": 0,
+    "errors_outside_examples": 0,
+    "suites": {
+      "./spec/services/jrc_backoffice/authority_proposals_spec.rb": {
+        "examples": 20,
+        "failures": 0
+      },
+      "./spec/services/jrc_backoffice/signature_release_spec.rb": {
+        "examples": 3,
+        "failures": 0
+      },
+      "./spec/services/jrc_backoffice/signatures/gateway_spec.rb": {
+        "examples": 15,
+        "failures": 0
+      },
+      "./spec/services/jrc_relationship/monitoring_runs_spec.rb": {
+        "examples": 6,
+        "failures": 0
+      },
+      "./spec/services/jrc_relationship/reviewed_portfolio_batch_spec.rb": {
+        "examples": 14,
+        "failures": 0
+      },
+      "./spec/services/jrc_relationship/health_coverage_spec.rb": {
+        "examples": 2,
+        "failures": 0
+      }
+    },
+    "artifact": ".codex\\d-approvals-20261104\\ef-g-native-result.json",
+    "resources": {
+      "start": 16599396352,
+      "minimum": 16572080128,
+      "mandatory_stop": 750000000,
+      "conservative_stop": 2000000000,
+      "no_build": true,
+      "database": "jrc_rel_v2_candidate_test",
+      "exact_source_overlays": {
+        "sources": [
+          {
+            "path": "app/services/jrc_approvals/policies.rb",
+            "constant": "JrcApprovals::Policies",
+            "method": "JrcApprovals::Policies.instance_method(:create!)"
+          },
+          {
+            "path": "app/controllers/api/v1/accounts/approvals/policies_controller.rb",
+            "constant": "Api::V1::Accounts::Approvals::PoliciesController",
+            "method": "Api::V1::Accounts::Approvals::PoliciesController.instance_method(:create)"
+          },
+          {
+            "path": "app/services/jrc_approvals/delegation_topology.rb",
+            "constant": null,
+            "method": "JrcApprovals::DelegationTopology.method(:check!)"
+          },
+          {
+            "path": "app/services/jrc_approvals/delegations.rb",
+            "constant": "JrcApprovals::Delegations",
+            "method": "JrcApprovals::Delegations.instance_method(:create!)"
+          }
+        ]
+      },
+      "original_runtime_files_changed": false,
+      "exit_code": 0,
+      "end": 16593567744,
+      "status": "passed"
+    },
+    "interpretation": "Native Rails/PostgreSQL synthetic fixtures. Gateway tests use simulated DocuSign responses, not demo homologation. These selected tests are not full UI or cross-module end-to-end acceptance."
+  },
+  "stage_E": [
+    {
+      "id": "E01",
+      "requirement": "Independent navigation and legacy compatibility",
+      "classification": "Existing code and previous checkpoints; fresh UI acceptance pending",
+      "files": [
+        "app/javascript/dashboard/routes/dashboard/crm/crm.routes.js",
+        "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeLayout.vue"
+      ],
+      "note": "Current user instruction for horizontal tabs takes precedence over the older Word sidebar submenu suggestion."
+    },
+    {
+      "id": "E02",
+      "requirement": "Native request/order/CRM context and workflow",
+      "classification": "Existing native implementation; full acceptance remains partial",
+      "files": [
+        "app/models/jrc_crm/backoffice_request.rb",
+        "app/controllers/api/v1/accounts/crm/backoffice_requests_controller.rb",
+        "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeRequest360.vue"
+      ],
+      "confirmed": "Legacy STAGES preserved; WORKFLOW_V2 puts approval before contract. Uses native CommercialGate, transaction locks, BackofficeRouter and SlaClock. Exact contract/order origin navigation corrected in D2.",
+      "remaining": "Do not infer all transition/SLA/idempotency cases from the selected signature-release tests."
+    },
+    {
+      "id": "E03",
+      "requirement": "Versioned documents, preanalysis, reviews and protected storage",
+      "classification": "Implemented foundations with explicit functional divergences",
+      "files": [
+        "app/services/jrc_backoffice/documents.rb",
+        "app/services/jrc_backoffice/document_preanalysis.rb",
+        "app/services/jrc_backoffice/document_safety.rb",
+        "app/services/jrc_crm/backoffice_document_checklist.rb"
+      ],
+      "confirmed": "Private bytes/scan verification, immutable versions, current-version-only decisions, configured document requirements and request audit exist.",
+      "remaining": "Preanalysis is text/readability and customer CNPJ checks only; always review_required. It is not broad RG/CNH/legal authority validation or automatic legal approval. Real scanner/OCR acceptance and restricted customer portal remain unaccepted."
+    },
+    {
+      "id": "E04",
+      "requirement": "Approval and signing authority gates",
+      "classification": "Native integration present; selected 20 authority + 3 release cases passed",
+      "files": [
+        "app/services/jrc_approvals/commercial_gate.rb",
+        "app/services/jrc_backoffice/authority_proposals.rb",
+        "app/services/jrc_backoffice/authority_access.rb",
+        "app/services/jrc_backoffice/signature_release.rb"
+      ],
+      "confirmed": "Identity/document availability does not grant authority. Exact contract version, roster, evidence, native decision and signature release remain necessary.",
+      "remaining": "No claim of complete approval reminder/escalation or automatic full operational progression from these tests."
+    },
+    {
+      "id": "E05",
+      "requirement": "Contract versions and provider separation",
+      "classification": "Existing implementation; 15 simulated gateway cases passed, external demo pending",
+      "files": [
+        "app/services/jrc_backoffice/contract_versions.rb",
+        "app/services/jrc_backoffice/signatures/gateway.rb",
+        "app/services/jrc_backoffice/signatures/admissions.rb",
+        "app/services/jrc_backoffice/signatures/dispatch.rb",
+        "app/services/jrc_backoffice/signatures/reconciliation.rb",
+        "app/services/jrc_backoffice/signatures/notifications.rb"
+      ],
+      "confirmed": "Only DocuSign installed. Connection/provider/environment/external account are pinned; replacing default affects new sends only. Provider reports do not independently prove internal signed-release evidence.",
+      "remaining": "DocuSign Developer/demo, consent, HTTPS Connect, real signature/evidence and scanner still require external homologation; none performed."
+    },
+    {
+      "id": "E06",
+      "requirement": "Implementation, provisioning, finance, completion package and reports",
+      "classification": "Existing stage/checklist/UI/report foundations; comprehensive acceptance pending",
+      "files": [
+        "app/models/jrc_crm/backoffice_request.rb",
+        "app/services/jrc_backoffice/issues.rb",
+        "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeOverview.vue"
+      ],
+      "remaining": "Need explicit full-flow acceptance for configured go-live blocks, integrations, SLA metrics/export scope, final documentary package and relationship handoff. No dedicated final package/export operation located in the reviewed Backoffice paths; confirm entire native domain before designing one. Do not replace native systems or invent delivered external resources."
+    }
+  ],
+  "stage_F": [
+    {
+      "id": "F01",
+      "requirement": "Nine areas and scoped operations",
+      "classification": "Existing implementation; new real UI QA pending",
+      "files": [
+        "app/javascript/dashboard/routes/dashboard/jrcRelationship/navigation.js",
+        "app/javascript/dashboard/routes/dashboard/jrcRelationship/RelationshipLayout.vue",
+        "app/services/jrc_relationship/context.rb",
+        "app/services/jrc_relationship/record_visibility.rb"
+      ],
+      "confirmed": "Nine navigation areas reuse native clients/modules and effective permissions. No new customer registry created."
+    },
+    {
+      "id": "F02",
+      "requirement": "Monitoring, real health coverage and exception cases",
+      "classification": "Existing implementation, 6 monitoring + 2 health coverage cases passed",
+      "files": [
+        "app/jobs/jrc_relationship/scheduler_job.rb",
+        "app/jobs/jrc_relationship/refresh_job.rb",
+        "app/services/jrc_relationship/processor.rb",
+        "app/services/jrc_relationship/health_score.rb",
+        "app/models/jrc_relationship/configuration.rb"
+      ],
+      "confirmed": "Permission-aware jobs, authorized manager fallback for unassigned clients, per-item revocation checks, bounded error records, correlated health-cause dedup and data coverage exist. Missing data are not blindly zeroed.",
+      "remaining": "Word hysteresis, configurable source freshness/cooldown and complete absence/coverage behavior still need implementation/acceptance; source presence is not scale evidence."
+    },
+    {
+      "id": "F03",
+      "requirement": "Portfolio grouping, capacity and Central-approved distribution",
+      "classification": "Partial; 14 reviewed native batch cases passed, Central distribution integration absent from reviewed code",
+      "files": [
+        "app/services/jrc_relationship/reviewed_portfolio_batch.rb",
+        "app/services/jrc_relationship/batch_review_plan.rb",
+        "app/services/jrc_relationship/portfolio_batch.rb"
+      ],
+      "confirmed": "Actor-scoped, versioned/digested preview, review, per-item execution/receipts and native access validation exist.",
+      "remaining": "ReviewedPortfolioBatch.approve is native review, not a Central approval decision. No JrcApprovals references found in reviewed relationship services/models/jobs/controllers. Need full grouping/team/capacity simulation, a native Central adapter, separation of approval from execution, safe analyst removal and measured scale. No fixed 400/600/1000 license limit assumed."
+    },
+    {
+      "id": "F04",
+      "requirement": "Documents and canonical representatives",
+      "classification": "C increments implemented/tested, new compilation/UI pending",
+      "files": [
+        "app/services/jrc_relationship/customer_documents.rb",
+        "app/services/jrc_relationship/document_history.rb",
+        "app/services/jrc_backoffice/signer_roster_source.rb"
+      ],
+      "confirmed": "Shared native versioned private storage, explicit document permissions, current metadata/history and canonical contacts retained.",
+      "remaining": "Companies without authorized portfolios remain blocked by explicit user decision. No powers inferred from uploaded document or CPF. Authorized document-update communication and real scanner acceptance remain open."
+    },
+    {
+      "id": "F05",
+      "requirement": "NICO, plans, QBR, surveys, renewals and expansions",
+      "classification": "Existing native integrations; full Word automation acceptance partial",
+      "files": [
+        "app/javascript/dashboard/routes/dashboard/jrcRelationship/NicoSummaryPanel.vue",
+        "app/services/jrc_relationship/playbook_flow_policy.rb",
+        "app/services/jrc_relationship/playbook_flow_approval.rb",
+        "app/services/jrc_relationship/reviewed_cadence.rb"
+      ],
+      "confirmed": "Copilot prompt panel is a suggestion interface, not proof of complete autonomous monitoring/execution. Native survey/CRM/contract lineage is reused.",
+      "remaining": "Full configurable governed automation, capacity, hysteresis, precision/latency/BI and external channel pilot remain open. No real WhatsApp/SMS/PABX/campaign/signature/NICO operations performed."
+    }
+  ],
+  "stage_G": {
+    "classification": "Selected integration regression passed; final stage open",
+    "remaining": [
+      "New compiled source and assets matching current code when authorized; preserve existing 5379 until controlled replacement is permitted",
+      "Actual desktop/mobile light/dark B1-B4 and new C/D interaction acceptance; Chrome URL policy block not bypassed",
+      "Representative-scale acceptance against justified local data and actual query/job measurements",
+      "Full native scope/roles/origins test matrix, DocuSign demo and external channel acceptance separately",
+      "No new claim that all CRM/Service Desk/Projects/NICO/PABX/WhatsApp/SMS flows were retested in this selected block"
+    ]
+  },
+  "runtime_preservation": {
+    "login_http": 200,
+    "entry_http": 200,
+    "entry_url_path": "/consolidation-customer-b1-b4-4d4a6de3-vite/assets/v3app-Dc7pKck9.js",
+    "entry_sha256": "ae6897f4131fe8b6d08767ed31bbff7f780cca17cb5e9da960b8d2e4bcfbca52",
+    "served_source_commit": "4d4a6de3f934d4f7f1475e1f939aedaaf2513def",
+    "new_changes_served": false,
+    "new_build_or_instance": false,
+    "browser_automation": false,
+    "functional_browser_qa": false,
+    "containers": [
+      {
+        "name": "jrc-rel-v2-run-20261101",
+        "running": true
+      },
+      {
+        "name": "jrc-rel-v2-pg-20261101",
+        "running": true
+      },
+      {
+        "name": "jrc-rel-v2-redis-20261101",
+        "running": true
+      },
+      {
+        "name": "jrc-customer-b1-b4-proxy-4d4a6de3",
+        "running": true
+      }
+    ],
+    "free_bytes": 16588136448,
+    "earlier_probe": "Treating the URL asset path as a Rails filesystem path returned ENOENT; corrected to the observed HTTP asset URL. No runtime files changed."
+  },
+  "stage_C_complete": false,
+  "stage_D_complete": false,
+  "stage_E_complete": false,
+  "stage_F_complete": false,
+  "stage_G_complete": false
+}

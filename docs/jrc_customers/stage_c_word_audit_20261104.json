@@ -132,7 +132,16 @@
       "id": "DEF",
       "classification": "Pertencente às próximas etapas D, E ou F",
       "remaining": "Motores completos e integrações não são declarados concluídos pela existência de classes ou por testes locais de C.",
-      "test_infrastructure_increment": "Pré-requisito HTTPS sintético nos testes de Flow, mantendo OwnershipGuard ativo; 3 Playbooks + 30 continuações aprovados. Não implica conclusão funcional de F."
+      "test_infrastructure_increment": "Pré-requisito HTTPS sintético nos testes de Flow, mantendo OwnershipGuard ativo; 3 Playbooks + 30 continuações aprovados. Não implica conclusão funcional de F.",
+      "independent_progress_20261104": {
+        "D": "D1-D5 implemented and automated tests passed; stage remains open",
+        "E_F_G": "60 selected native regression cases passed; full Word audit/visual/demo/scale pending",
+        "reports": [
+          "../jrc_consolidation/stage_d_word_audit_20261104.json",
+          "../jrc_consolidation/ef_g_native_review_checkpoint_20261104.json",
+          "../jrc_consolidation/next_native_gaps_20261104.json"
+        ]
+      }
     }
   ],
   "restrictions": [

@@ -1,0 +1,102 @@
+{
+  "date": "2026-11-04",
+  "status": "Next implementation plan based on actual native code; none of the following gaps declared implemented",
+  "source_checkpoint": "e8b3e4d54a2939990fcaa1da0083a04794cf9442",
+  "do_not_restart": [
+    "C5/C6/C7 and current company document catalog/responsibility/history",
+    "D1 confirmation, D2 origins, D3 four-step editor, D4 scoped delegation guard, D5 saved-rule duplication",
+    "Existing Backoffice, signatures boundary and relationship reviewed batches/Flow"
+  ],
+  "D6_numeric_tiers": {
+    "finding": "Requests.plan! requires all step.authority conditions to match. Mutually exclusive tier conditions in v1 cannot represent alternative approvers; a UI-only tier table would be false functionality. Definition validates exact v1 keys; snapshots/versions are immutable.",
+    "files": [
+      "app/services/jrc_approvals/definition.rb",
+      "app/services/jrc_approvals/requests.rb",
+      "app/services/jrc_approvals/selection.rb",
+      "app/services/jrc_approvals/eligibility.rb",
+      "app/services/jrc_approvals/gratuity_authorities.rb"
+    ],
+    "next": "Design an explicitly versioned native definition/plan extension, preserve v1 semantics and snapshot validity; use native exact typed Conditions comparisons. Keep commercial gratuity fixed-authority/formal-absence requirements. Inventory actual catalog field availability before offering percentage/value fields.",
+    "required_tests": [
+      "v1 unchanged; old immutable requests/versions usable",
+      "Intervals at exact open/closed boundaries; decimal precision/currency; overlap/gap policy; unbounded/empty/duplicate malformed ranges",
+      "Simulator and request creation select the same native tier/roster; unmatched range cannot default to approval",
+      "Publishing/version changes and concurrent decisions preserve request binding; revoked eligibility/foreign scope denied"
+    ]
+  },
+  "D7_adjustment": {
+    "finding": "Catalog adapters are authorized read/capture/verify only. Native requests pin readonly snapshot/stage_plan; source changes make contexts stale. There is no installed generic write adapter/adjust permission.",
+    "next": "Reuse allowlisted native domain mutations with an explicit adjustment capability, original snapshot and immutable revision/audit link. Atomic adjust+approve must use one domain transaction, preserve actual adjustor and original requester provenance, re-evaluate native pricing/gates and never impersonate another actor or overwrite old snapshots.",
+    "forbidden": [
+      "Arbitrary model.update from approval payload",
+      "Treat decide as unrestricted CRM edit",
+      "Silently copy requester identity into Current.user",
+      "Overwrite immutable snapshot/decision history or bypass financial/authority verification"
+    ]
+  },
+  "D8_global_delegation": {
+    "finding": "Existing grants require policy_manage and bind exact policy-version/step; new D4 prevents future scoped cycles. A global own grant is not represented by this model.",
+    "next": "Add explicit native own-delegation authorization/storage semantics and resolve an intersection with each request current account/company/unit/eligible principals/actions/window. Retain local history and gratuity formal absence. No blanket role grant or policy-version rewrite.",
+    "required_tests": [
+      "self/cycles/windows including concurrent grants",
+      "own revocation/expiry, inactive user, foreign unit/tenant",
+      "future policy version and old in-flight request semantics",
+      "no two effective principal votes, no actor/requester self-approval bypass"
+    ]
+  },
+  "D9_internal_notifications": {
+    "finding": "Ledger/AuditEvent persist audit only; Request and AuditEvent have no notification producer hooks, and reviewed native notification/feed paths have no JrcApprovals handling. Audits are not user notification delivery.",
+    "reuse": [
+      "app/models/notification.rb",
+      "app/finders/notification_finder.rb",
+      "app/listeners/action_cable_listener.rb",
+      "app/services/jrc_relationship/notifications.rb"
+    ],
+    "next": "Implement a durable native in-app projection/delivery that cannot turn committed decisions into false API failures or leak after revocation. Reauthorize recipient and exact request at read/count/serialization/broadcast. Keep financial snapshots, PII, tokens and private evidence out of notification metadata. Do not enable email/browser push or real external channels without separate scope.",
+    "shared_impact": [
+      "Existing conversation/relationship/SLA notifications, unread counts, list pagination, serialization, ActionCable, jobs and frontend route handling require regression before changes"
+    ]
+  },
+  "E_F_followup": "Use ef_g_native_review_checkpoint_20261104.json; preserve existing implementations, implement actual gaps incrementally rather than restarting modules. External DocuSign demo and Chrome visual QA remain distinct prerequisites.",
+  "business_dependencies": {
+    "TRR": "Still undefined; do not invent a formula. Approved financial segmentation remains invoiced orders in a period.",
+    "documents_without_portfolio": "Expansion explicitly deferred; keep blocked."
+  },
+  "preserved_runtime": {
+    "login_http": 200,
+    "entry_http": 200,
+    "entry_url_path": "/consolidation-customer-b1-b4-4d4a6de3-vite/assets/v3app-Dc7pKck9.js",
+    "entry_sha256": "ae6897f4131fe8b6d08767ed31bbff7f780cca17cb5e9da960b8d2e4bcfbca52",
+    "served_source_commit": "4d4a6de3f934d4f7f1475e1f939aedaaf2513def",
+    "new_changes_served": false,
+    "new_build_or_instance": false,
+    "browser_automation": false,
+    "functional_browser_qa": false,
+    "containers": [
+      {
+        "name": "jrc-rel-v2-run-20261101",
+        "running": true
+      },
+      {
+        "name": "jrc-rel-v2-pg-20261101",
+        "running": true
+      },
+      {
+        "name": "jrc-rel-v2-redis-20261101",
+        "running": true
+      },
+      {
+        "name": "jrc-customer-b1-b4-proxy-4d4a6de3",
+        "running": true
+      }
+    ],
+    "free_bytes": 16588136448,
+    "earlier_probe": "Treating the URL asset path as a Rails filesystem path returned ENOENT; corrected to the observed HTTP asset URL. No runtime files changed."
+  },
+  "restrictions": [
+    "No cleanup/delete",
+    "No builds or new UI instances under current instruction",
+    "No push/GHCR/deploy/production changes",
+    "No external real operations or interruption of other agents"
+  ]
+}
