@@ -1,0 +1,73 @@
+{
+  "date": "2026-11-05",
+  "branch": "codex/relacionamento-v2-20261101",
+  "parent_head": "9ed8056024af431fdef678f809a87388c00e606e",
+  "status": "Directed native CS signature/source regression validated. C-G remain open.",
+  "changes": [
+    "Relationship eligibility reuses JrcBackoffice::SignatureRelease.order_satisfied? rather than trusting only a signed status. The native v1 rule stays unchanged; v2 needs current exact-version verified evidence.",
+    "Backoffice completion preview, direct native order handoff preparation/acceptance and automatic handoff use the same eligibility. No acceptance, onboarding or source stage is executed automatically.",
+    "Completed implementation handoffs resolve their commercial source using the existing canonical resolver, then authorize that order within the current customer native scope and recheck eligibility. Standalone implementations retain the existing path.",
+    "A declared CRM implementation order key that resolves outside the account or to no current order is denied; it is not reclassified as a standalone implementation.",
+    "Pending handoff decisions remain unchanged after denied signatures, reopened sources, customer/account mismatches or permission failures; reasoned rejection remains available through the native path."
+  ],
+  "source_files": [
+    "app/controllers/api/v1/accounts/relationship/handoffs_controller.rb",
+    "app/services/jrc_relationship/eligibility.rb",
+    "app/services/jrc_relationship/handoff.rb",
+    "spec/requests/api/v1/accounts/crm/backoffice_completion_handoff_spec.rb",
+    "spec/requests/api/v1/accounts/relationship/handoff_project_acceptance_spec.rb"
+  ],
+  "tests_non_additive": [
+    {
+      "label": "recovery-cs-signature-gate",
+      "examples": 16,
+      "failures": 0,
+      "purpose": "12Backoffice-to-CS cases including v1/v2 signature behavior and4native project regressions"
+    },
+    {
+      "label": "recovery-cs-project-origin",
+      "examples": 6,
+      "failures": 0,
+      "purpose": "Project source/signature/customer isolation and4overlapping regressions"
+    },
+    {
+      "label": "recovery-cs-origin-foreign-order",
+      "status": "passed",
+      "purpose": "Foreign-account order key cannot masquerade as a standalone native project",
+      "examples": 1,
+      "failures": 0
+    }
+  ],
+  "static_gates": {
+    "specification_files": "Directed RuboCop0offenses after format correction",
+    "native_handoff_call": "Four pre-existing metrics retained in byte-identical call method; verified against parent HEAD. Other changed controller/spec code has0offenses.",
+    "diff_check": "passed"
+  },
+  "validation_limits": [
+    "These tests use native persisted synthetic records and authenticated local HTTP. They are not new-build Chrome acceptance.",
+    "No claim of final sealed dossier, full E3/C-G closure or external provider/scanner acceptance.",
+    "No frontend build, server5379 change, container restart, cleanup, push, GHCR, deploy or real provider operation."
+  ],
+  "remaining": [
+    "Final immutable sealed documentary dossier, including historical source scopes, actual files/version references and current-security revalidation.",
+    "Integrated acceptance/concurrency/representative-scale validation of completed dossier and CS.",
+    "Remaining F1 project-owner authority receipts, active cadence handling and safe final analyst withdrawal; configured weighted/hour semantics.",
+    "Remaining F2,C,D,G requirements and Word/image conformance.",
+    "TRR business definition and deferred company documents without portfolio remain unchanged."
+  ],
+  "disk": {
+    "start_this_cs_block_bytes": 7084654592,
+    "minimum_observed_bytes": 5945503744,
+    "current_bytes": 5965496320,
+    "host_observations_not_exclusive_process_attribution": true,
+    "final_bytes": 6175789056
+  },
+  "next": "Continue final sealed-dossier implementation and remaining authorized C-G work; preserve both documentary checkpoints and do not treat pending browser/external acceptance as done.",
+  "source_sha256": {
+    "app/controllers/api/v1/accounts/relationship/handoffs_controller.rb": "7398a48822bbb405b0eba6cac0cabbe876133e45b94dcf078cb97d7a55562eb4",
+    "app/services/jrc_relationship/eligibility.rb": "f2852feb03d5f14c35083cd7f0e4105af070980e0ff6ebc9de4f37180300ab46",
+    "app/services/jrc_relationship/handoff.rb": "076ade73750916d8829907de0e535837f138b13727654ea9358159d6d00acb17",
+    "spec/requests/api/v1/accounts/crm/backoffice_completion_handoff_spec.rb": "d4528ffa0dd83fbd2317a8a19a06073578b21b449b8ae403a6064e6f9e4a2337",
+    "spec/requests/api/v1/accounts/relationship/handoff_project_acceptance_spec.rb": "75ed1d47eb8bf0e742c438f33fba24d7aa118f58adaecbfe69972c46e1256634"
+  }
+}

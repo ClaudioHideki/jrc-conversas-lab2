@@ -72,6 +72,12 @@ class Api::V1::Accounts::Relationship::HandoffsController < Api::V1::Accounts::R
       validate_order_eligibility!(source, assignment)
     elsif source.status != 'completed'
       raise ArgumentError, 'Implementation is not completed'
+    else
+      order = JrcRelationship::Handoff.origin_order(source)
+      return unless order
+
+      current = assignment.customer_context(relationship_context.member).orders.find(order.id)
+      validate_order_eligibility!(current, assignment)
     end
   end
 

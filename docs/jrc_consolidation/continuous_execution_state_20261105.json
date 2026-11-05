@@ -44,6 +44,11 @@
       "recovery-evidence-final-callback:23/0",
       "recovery-evidence-crm-final:2/0(overlap)",
       "recovery-evidence-ui-final:6/0;existinghistory11/0"
+    ],
+    "latest_cs_gates": [
+      "recovery-cs-signature-gate:16/0",
+      "recovery-cs-project-origin:6/0(overlap)",
+      "recovery-cs-origin-foreign-order:1/0"
     ]
   },
   "provider_validation_sources": [
@@ -57,12 +62,12 @@
     "No real participant removal or provider request; tests use synthetic records and WebMock, with external network disabled."
   ],
   "restrictions": "No build/recompile, no5379 change/restart, no four-container restart/reconfiguration, no cleanup/delete of existing data, no push/GHCR/deploy/production/client change, no real provider operations. Additive migrations allowed only in owned synthetic test database.",
-  "disk_last_observed_bytes": 7094657024,
+  "disk_last_observed_bytes": 6175789056,
   "TRR": "Undefined; do not invent",
   "company_documents_without_portfolio": "Explicitly deferred",
-  "last_validated_head": "9c9b007ae98b1dbf4cbe6ac384b4bfdb6124b4fb",
-  "new_validated_code_checkpoint": "Commit containing docs/jrc_consolidation/documentary_acceptance_checkpoint_20261105.json; resolve with git log -1 --format=%H -- that path.",
-  "current_status": "E1 documentary acceptance and exact-version export evidence validated. Current-source visual QA and full C-G closure not claimed.",
+  "last_validated_head": "9ed8056024af431fdef678f809a87388c00e606e",
+  "new_validated_code_checkpoint": "Resolve latest local CS code checkpoint with git log -1 --format=%H -- docs/jrc_consolidation/cs_signature_origin_checkpoint_20261105.json",
+  "current_status": "Documentary evidence/acceptance/API/UI source validated; native CS order/project origin and signature gates validated. Final immutable sealed dossier, remaining C-G implementation and fresh-build visual acceptance remain open.",
   "next_actions": [
     "Implement final immutable sealed completion dossier with native historical scope, files/version references, current security revalidation and no new document registry. Current completion export is not sealed.",
     "Validate native E3 completion/CS revalidation against accepted exact-version evidence and dossier; no automatic stage or CS acceptance.",

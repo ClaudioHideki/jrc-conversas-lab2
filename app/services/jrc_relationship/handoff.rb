@@ -1,4 +1,15 @@
 class JrcRelationship::Handoff
+  # Reuse the canonical implementation origin. Interactive callers must still
+  # authorize the returned order through the customer's native source scope.
+  def self.origin_order(record)
+    order = source_order(record)
+    if !order && record.is_a?(JrcProjects::Project) && record.idempotency_key.to_s.match?(/\Acrm-order-implementation-\d+\z/)
+      raise ActiveRecord::RecordNotFound
+    end
+
+    order
+  end
+
   def self.call(record, actor: nil)
     account = record.account
     return unless account.feature_enabled?('jrc_relationship') && account.feature_enabled?('jrc_customer_master')

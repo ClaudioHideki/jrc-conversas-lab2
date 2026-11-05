@@ -85,6 +85,36 @@ RSpec.describe 'Backoffice completion to native CS handoff', type: :request do
     expect(JrcRelationship::Assignment.count).to eq(before)
   end
 
+  it 'requires current native v2 signature evidence while preserving legacy v1 manual signature eligibility' do
+    assignment
+    operation.advance!(actor: actor)
+    # A synthetic post-completion source change must not become a legal receipt.
+    contract = account.jrc_crm_contracts.create!(sales_order: order, contact: contact, owner: actor)
+    contract.signed_document.attach(io: StringIO.new('%PDF-1.4 synthetic legacy signed file'),
+                                    filename: 'synthetic-legacy.pdf', content_type: 'application/pdf')
+    contract.update!(signature_status: 'signed', signed_at: Time.current, signed_by_name: 'Synthetic legacy signer')
+    operation.update!(contract: contract, workflow_version: 2)
+    get url, headers: headers
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body).to include('available' => false, 'code' => 'HANDOFF_DEPENDENCY_PENDING')
+    operation.update!(workflow_version: 1)
+    get url, headers: headers
+    expect(response.parsed_body).to include('available' => true, 'assignment_id' => assignment.id)
+  end
+
+  it 'refuses CS acceptance after a prepared order gains a v2 signature dependency without version-bound evidence' do
+    operation.advance!(actor: actor)
+    handoff = JrcRelationship::HandoffCase.create!(account: account, assignment: assignment, source_type: order.class.name, source_id: order.id)
+    contract = account.jrc_crm_contracts.create!(sales_order: order, contact: contact, owner: actor)
+    operation.update!(contract: contract, workflow_version: 2)
+    before = handoff.attributes.deep_dup
+    checklist = %w[contract products contacts objectives promises pending_items].index_with(true)
+    post "#{base}/handoffs/#{handoff.id}/decide", headers: headers, as: :json,
+                                                  params: { status: 'accepted', reason: 'Synthetic changed legal dependency', checklist: checklist }
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(handoff.reload.attributes).to eq(before)
+  end
+
   it 'requires an operationally completed request and current native Relationship team permission' do
     assignment
     get url, headers: headers

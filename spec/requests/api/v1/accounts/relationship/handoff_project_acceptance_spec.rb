@@ -41,12 +41,51 @@ RSpec.describe 'Native CS handoff from project completion', type: :request do
     expect(handoff.reload).to have_attributes(status: 'rejected', reason: 'Implementation incomplete')
   end
 
+  it 'refuses completed implementations whose linked v2 order still lacks current signature evidence' do
+    account.enable_features!('jrc_crm')
+    order = account.jrc_crm_sales_orders.create!(owner: actor, contact: contact, status: 'approved')
+    contract = account.jrc_crm_contracts.create!(sales_order: order, contact: contact, owner: actor)
+    account.jrc_crm_backoffice_requests.create!(sales_order: order, contract: contract, contact: contact, owner: actor, requested_by: actor,
+                                                request_kind: 'fulfillment', stage: 'contract', title: 'Synthetic linked implementation',
+                                                metadata: { implementation_project_id: project.id.to_s, finance_required: false })
+    handoff
+    before = handoff.attributes.deep_dup
+    post url, headers: headers, as: :json, params: { status: 'accepted', reason: 'Incomplete legal source', checklist: checklist }
+    expect(response).to have_http_status(:unprocessable_entity), response.body
+    expect(handoff.reload.attributes).to eq(before)
+  end
+
+  it 'does not use a linked order for a different customer as the commercial origin of the completed project' do
+    account.enable_features!('jrc_crm')
+    other_contact = create(:contact, account: account)
+    order = account.jrc_crm_sales_orders.create!(owner: actor, contact: other_contact, status: 'approved')
+    account.jrc_crm_backoffice_requests.create!(sales_order: order, contact: other_contact, owner: actor, requested_by: actor,
+                                                request_kind: 'fulfillment', title: 'Synthetic wrong customer link',
+                                                metadata: { implementation_project_id: project.id.to_s })
+    handoff
+    before = handoff.attributes.deep_dup
+    post url, headers: headers, as: :json, params: { status: 'accepted', reason: 'Forged customer origin', checklist: checklist }
+    expect(response).to have_http_status(:not_found)
+    expect(handoff.reload.attributes).to eq(before)
+  end
+
   it 'does not accept or disclose a legacy case referencing a foreign project' do
     other = create(:account)
     foreign = JrcProjects::Project.create!(account: other, owner: create(:user, account: other), key: 'CS_FOREIGN', name: 'Foreign synthetic source')
     handoff.update!(source_id: foreign.id)
     before = handoff.attributes.deep_dup
     post url, headers: headers, as: :json, params: { status: 'accepted', reason: 'Forged source', checklist: checklist }
+    expect(response).to have_http_status(:not_found)
+    expect(handoff.reload.attributes).to eq(before)
+  end
+
+  it 'denies a declared native order origin from another account instead of treating it as a standalone project' do
+    other = create(:account)
+    foreign = other.jrc_crm_sales_orders.create!(owner: create(:user, account: other), status: 'approved')
+    project.update!(idempotency_key: "crm-order-implementation-#{foreign.id}")
+    handoff
+    before = handoff.attributes.deep_dup
+    post url, headers: headers, as: :json, params: { status: 'accepted', reason: 'Forged native order reference', checklist: checklist }
     expect(response).to have_http_status(:not_found)
     expect(handoff.reload.attributes).to eq(before)
   end
