@@ -19,7 +19,7 @@ RSpec.describe JrcBroker::RoutingContext do
 
   before do
     allow(JrcBroker::Configuration).to receive(:enabled?).and_return(true)
-    allow(JrcBroker::Context).to receive(:new).with(account: account, user: agent).and_return(double(client: client))
+    allow(JrcBroker::Context).to receive(:new).with(account: account, user: agent, release_connection: true).and_return(double(client: client))
     allow(client).to receive(:routing_context).with([binding.integration_id]).and_return(payload)
   end
 

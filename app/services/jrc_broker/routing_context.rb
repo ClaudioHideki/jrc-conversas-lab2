@@ -20,7 +20,7 @@ class JrcBroker::RoutingContext
     return {} unless tuples.all? { |_, tuple| tuple['account_id'] == @account.id }
 
     started_at = Time.current
-    client = JrcBroker::Context.new(account: @account, user: @user).client
+    client = JrcBroker::Context.new(account: @account, user: @user, release_connection: true).client
     raw = client.routing_context(@bindings.map(&:integration_id).uniq.sort)
     return {} unless valid_response?(raw, integration, started_at)
     return {} unless integration.reload.attributes.slice(*snapshot.keys) == snapshot
