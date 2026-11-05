@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcRelationship';
+import WithdrawalReadinessDialog from './WithdrawalReadinessDialog.vue';
 import MetricsPanel from './MetricsPanel.vue';
 import MetricDrilldownPanel from './MetricDrilldownPanel.vue';
 import {
@@ -29,6 +30,8 @@ const error = ref('');
 const busy = ref(false);
 const metadata = ref(null);
 const localRefresh = ref(0);
+const withdrawalUser = ref('');
+const withdrawalAnalyst = ref(null);
 const filters = reactive({
   segment_id: '',
   product_id: '',
@@ -96,6 +99,11 @@ watch(
   [
     () => route.params.accountId,
     () => store.getters.getCurrentUserID,
+    () =>
+      JSON.stringify([
+        store.getters.getCurrentRole,
+        store.getters.getCurrentUser?.accounts,
+      ]),
     () => props.refresh,
     () => localRefresh.value,
     () => props.startDate,
@@ -108,6 +116,8 @@ watch(
     activeController = controller;
     cleanup(() => controller.abort());
     rows.value = [];
+    withdrawalAnalyst.value = null;
+    withdrawalUser.value = '';
     metadata.value = null;
     metrics.value = null;
     drilldown.value = null;
@@ -215,6 +225,37 @@ const money = value => formatMoney(value, metadata.value?.formatting);
         inspectMetric({ metric: drilldown.metric, day: drilldown.day }, $event)
       "
     />
+    <form
+      data-testid="withdrawal-entry"
+      class="mb-3 flex flex-wrap gap-2"
+      @submit.prevent="withdrawalAnalyst = Number(withdrawalUser)"
+    >
+      <label class="min-w-0 text-sm">
+        {{ t('RELATIONSHIP.WITHDRAWAL.ANALYST') }}
+        <select
+          v-model="withdrawalUser"
+          data-testid="withdrawal-analyst"
+          required
+          :class="inputClass"
+        >
+          <option value="">{{ t('RELATIONSHIP.SELECT') }}</option>
+          <option
+            v-for="owner in metadata?.owners || []"
+            :key="owner[0]"
+            :value="owner[0]"
+          >
+            {{ owner[1] }}
+          </option>
+        </select>
+      </label>
+      <button
+        type="submit"
+        :class="buttonClass"
+        :disabled="!withdrawalUser || busy"
+      >
+        {{ t('RELATIONSHIP.WITHDRAWAL.REVIEW') }}
+      </button>
+    </form>
     <div
       v-if="rows.length"
       class="overflow-x-auto rounded-xl border border-n-weak"
@@ -260,4 +301,9 @@ const money = value => formatMoney(value, metadata.value?.formatting);
       {{ t('RELATIONSHIP.EMPTY') }}
     </p>
   </section>
+  <WithdrawalReadinessDialog
+    v-if="withdrawalAnalyst"
+    :analyst-id="withdrawalAnalyst"
+    @close="withdrawalAnalyst = null"
+  />
 </template>

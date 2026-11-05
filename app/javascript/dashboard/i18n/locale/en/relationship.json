@@ -1481,6 +1481,30 @@
           "after": "Depois"
         }
       }
+    },
+    "WITHDRAWAL": {
+      "TITLE": "Analyst withdrawal readiness",
+      "NOTE": "Current scoped pending responsibilities must have effective destinations before final withdrawal. This consultation never removes a member or changes historical executors.",
+      "ANALYST": "Analyst",
+      "REVIEW": "Review withdrawal dependencies",
+      "UNAVAILABLE": "Current permissions do not allow a complete review. Hidden workload is not zero workload.",
+      "pending_responsibilities": "Pending responsibilities still require native reviewed handover.",
+      "ready_for_final_review": "No pending ownership found in this verified snapshot. A separate final withdrawal review is still required.",
+      "FINAL_REVIEW": "Final removal remains unavailable until the governed execution validates all destination receipts, projects and active cadences.",
+      "KINDS": {
+        "allocations": "Customer allocations",
+        "actions": "CS actions",
+        "plans": "Success plans",
+        "qbrs": "Meetings and QBRs",
+        "risks": "Risk cases",
+        "renewals": "Renewals",
+        "expansion": "Expansion signals",
+        "activities": "CRM tasks and commitments",
+        "cadences": "Active cadences bound to this executor",
+        "project_tasks": "Native project tasks",
+        "service_tickets": "Service Desk tickets",
+        "projects": "Native project ownership"
+      }
     }
   }
 }

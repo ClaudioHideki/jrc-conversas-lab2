@@ -18,6 +18,11 @@ class Api::V1::Accounts::Relationship::DashboardController < Api::V1::Accounts::
     render json: { payload: users.map { |user| { user: { id: user.id, name: user.name }, metrics: metrics.fetch(user.id) } } }
   end
 
+  def withdrawal_readiness
+    response.headers['Cache-Control'] = 'no-store'
+    render json: JrcRelationship::WithdrawalReadiness.new(relationship_context).call(params[:analyst_id])
+  end
+
   def metadata
     ctx = relationship_context
     render json: metadata_access(ctx).merge(metadata_surveys(ctx), metadata_operations(ctx), metadata_workflows(ctx))

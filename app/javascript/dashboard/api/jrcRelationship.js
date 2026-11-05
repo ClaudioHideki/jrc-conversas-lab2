@@ -27,6 +27,11 @@ export default {
     axios.get(`${base(accountId)}/drilldown`, { ...options, params }),
   team: (accountId, params, options) =>
     axios.get(`${base(accountId)}/team`, { ...options, params }),
+  withdrawalReadiness: (accountId, analystId, options) =>
+    axios.get(
+      `${base(accountId)}/team/${Number(analystId)}/withdrawal_readiness`,
+      options
+    ),
   portfolio: (accountId, params, options) =>
     axios.get(`${base(accountId)}/portfolio`, { ...options, params }),
   customer: (accountId, id, options) =>

@@ -13,6 +13,12 @@ class JrcRelationship::NativeResponsibilities
     kind == 'project_tasks' ? @visibility.project_tasks(@visibility.projects) : @visibility.tickets
   end
 
+  def pending_scope(kind)
+    raise ArgumentError, 'Unsupported native responsibility' unless KINDS.include?(kind)
+
+    pending(kind)
+  end
+
   def snapshot(entries, owner_id:, lock:)
     references = plan_references(entries)
     KINDS.flat_map do |kind|
