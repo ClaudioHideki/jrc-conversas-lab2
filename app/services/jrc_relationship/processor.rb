@@ -78,13 +78,19 @@ class JrcRelationship::Processor
                              metadata: { _source_ids: data[:_source_ids], automatic: true, automatic_cause_digest: cause_digest }
                                .merge(health_family ? { related_signals: related } : {}))
     JrcRelationship::OperationalRouting.new(@context).prepare!(record, signals: data)
-    record.save!
-    JrcRelationship::Workflow.new(@context).project_action!(record)
-    @context.audit!(record, after: record.attributes.slice('kind', 'priority', 'due_at'), action: 'action_created')
-    record
+    persist_automatic_action!(record)
   end
 
   private
+
+  def persist_automatic_action!(record)
+    JrcRelationship::AutomaticActionBudget.new(context: @context, assignment: @assignment).call do
+      record.save!
+      JrcRelationship::Workflow.new(@context).project_action!(record)
+      @context.audit!(record, after: record.attributes.slice('kind', 'priority', 'due_at'), action: 'action_created')
+      record
+    end
+  end
 
   def record_health_trend!(data, configuration)
     result = JrcRelationship::HealthTrend.new(context: @context, assignment: @assignment, configuration: configuration).call(data.fetch(:health))

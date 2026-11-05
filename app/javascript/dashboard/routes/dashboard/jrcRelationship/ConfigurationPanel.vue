@@ -42,6 +42,8 @@ const ordinaryRules = computed(() =>
           'required_documents',
           'portfolio_capacity_limits',
         ].includes(key) &&
+        (key !== 'automatic_action_daily_limit' ||
+          scopeKey.value === 'account') &&
         (!distributionOnly.value ||
           [
             'portfolio_transfer_approval_required',
@@ -307,9 +309,11 @@ const date = value => formatDate(value, props.metadata?.formatting);
             :data-testid="`relationship-rule-${key}`"
             type="number"
             :step="
-              ['satisfaction_window_days', 'health_trend_window_days'].includes(
-                key
-              )
+              [
+                'satisfaction_window_days',
+                'health_trend_window_days',
+                'automatic_action_daily_limit',
+              ].includes(key)
                 ? 1
                 : 0.1
             "
@@ -317,6 +321,7 @@ const date = value => formatDate(value, props.metadata?.formatting);
               [
                 'health_hysteresis_points',
                 'automatic_action_cooldown_hours',
+                'automatic_action_daily_limit',
               ].includes(key)
                 ? 0
                 : [

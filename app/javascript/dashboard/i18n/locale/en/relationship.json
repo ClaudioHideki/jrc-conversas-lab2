@@ -425,7 +425,8 @@
       "portfolio_review_validity_minutes": "Portfolio review validity (minutes)",
       "satisfaction_window_days": "Satisfaction evidence window (days)",
       "health_trend_window_days": "Health trend window (days)",
-      "automatic_action_cooldown_hours": "Monitoring alert repeat cooldown (hours; 0 disables)"
+      "automatic_action_cooldown_hours": "Monitoring alert repeat cooldown (hours; 0 disables)",
+      "automatic_action_daily_limit": "Account-wide daily ceiling for monitoring actions (0 disables; uses the account time zone)"
     },
     "ACCOUNT_SCOPE": "Toda a conta",
     "CONFIG_SCOPE": "Configuração por conta, segmento ou produto",

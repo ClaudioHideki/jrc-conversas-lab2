@@ -24,6 +24,7 @@ const configuration = {
     portfolio_review_validity_minutes: 15,
     healthy_threshold: 80,
     automatic_action_cooldown_hours: 0,
+    automatic_action_daily_limit: 0,
     required_documents: [],
   },
 };
@@ -111,5 +112,32 @@ it('allows zero and persists typed cooldown hours through the existing permissio
       rules: expect.objectContaining({ automatic_action_cooldown_hours: 72 }),
     })
   );
+  wrapper.unmount();
+});
+
+it('edits the global daily monitoring ceiling as an integer only in account settings', async () => {
+  const wrapper = mountPanel();
+  await flushPromises();
+  const input = wrapper.get(
+    '[data-testid="relationship-rule-automatic_action_daily_limit"]'
+  );
+  expect(input.attributes('min')).toBe('0');
+  expect(input.attributes('step')).toBe('1');
+  await input.setValue('8');
+  await wrapper.get('form').trigger('submit');
+  await flushPromises();
+  expect(api.saveConfiguration).toHaveBeenCalledWith(
+    '12',
+    expect.objectContaining({
+      rules: expect.objectContaining({ automatic_action_daily_limit: 8 }),
+    })
+  );
+  await wrapper.findAll('select')[0].setValue('team:22');
+  await flushPromises();
+  expect(
+    wrapper
+      .find('[data-testid="relationship-rule-automatic_action_daily_limit"]')
+      .exists()
+  ).toBe(false);
   wrapper.unmount();
 });

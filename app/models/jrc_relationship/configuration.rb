@@ -26,7 +26,7 @@ class JrcRelationship::Configuration < ApplicationRecord
                     'health_hysteresis_points' => 0, 'health_drop_points' => 20, 'health_drop_action_priority' => 70,
                     'portfolio_transfer_approval_required' => false, 'portfolio_review_validity_minutes' => 15,
                     'portfolio_capacity_limits' => [], 'satisfaction_window_days' => 90, 'health_trend_window_days' => 30,
-                    'automatic_action_cooldown_hours' => 0,
+                    'automatic_action_cooldown_hours' => 0, 'automatic_action_daily_limit' => 0,
                     'auto_handoff' => true, 'missing_factor_policy' => 'renormalize', 'survey_automation_enabled' => false,
                     'renewal_window_days' => [15, 30, 60, 90, 120],
                     'eligibility_mode' => 'legacy_order', 'handoff_acceptance_required' => false, 'playbook_flow_effects_enabled' => false,
@@ -43,7 +43,8 @@ class JrcRelationship::Configuration < ApplicationRecord
   NON_NUMERIC_RULES = %w[auto_handoff survey_automation_enabled missing_factor_policy critical_priority_codes qbr_agenda_template adoption_metric
                          risk_reasons survey_question_nps survey_question_ces renewal_window_days eligibility_mode handoff_acceptance_required
                          playbook_flow_effects_enabled playbook_flow_policy required_documents health_hysteresis_points
-                         portfolio_transfer_approval_required portfolio_capacity_limits automatic_action_cooldown_hours].freeze
+                         portfolio_transfer_approval_required portfolio_capacity_limits automatic_action_cooldown_hours
+                         automatic_action_daily_limit].freeze
 
   def effective_weights
     DEFAULT_WEIGHTS.merge(weights)
@@ -75,7 +76,14 @@ class JrcRelationship::Configuration < ApplicationRecord
     validate_document_requirements
     validate_capacity_limits
     validate_temporal_policy
+    validate_automatic_action_budget
     validate_scope
+  end
+
+  def validate_automatic_action_budget
+    limit = effective_rules['automatic_action_daily_limit']
+    valid = limit.is_a?(Integer) && limit.between?(0, 9_007_199_254_740_991) && (scope_key == 'account' || limit.zero?)
+    errors.add(:rules, 'automatic action daily limit must be a nonnegative whole number configured only at account scope; 0 disables it') unless valid
   end
 
   def validate_capacity_limits
