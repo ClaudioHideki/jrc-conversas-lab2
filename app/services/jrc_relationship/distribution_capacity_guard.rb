@@ -26,7 +26,8 @@ class JrcRelationship::DistributionCapacityGuard
     return true if active_status_changed?
 
     @record.will_save_change_to_settings? &&
-      @record.settings.slice('segment_id', 'product_id') != @record.settings_in_database.slice('segment_id', 'product_id')
+      @record.settings.slice('segment_id', 'product_id', 'capacity_workload') !=
+        @record.settings_in_database.slice('segment_id', 'product_id', 'capacity_workload')
   end
 
   def active_status_changed?
@@ -39,6 +40,11 @@ class JrcRelationship::DistributionCapacityGuard
 
     JrcRelationship::DistributionCapacityPolicy.validate!(@record.account, limits)
     pool = relation.where(owner_id: @record.owner_id, status: LOAD_STATUSES)
+    entry = limits.find { |row| row.fetch('user_id') == @record.owner_id }
+    if entry && entry.fetch('unit', 'customers') != 'customers'
+      validate_workload(pool, entry)
+      return
+    end
     return if @record.persisted? && pool.exists?(id: @record.id)
 
     validate_admission(pool, limits)
@@ -57,5 +63,31 @@ class JrcRelationship::DistributionCapacityGuard
     member = @record.account.account_users.find_by(user_id: @record.owner_id)
     member&.user&.active_for_authentication? &&
       JrcRelationship::ModulePolicy.new({ account: @record.account, account_user: member, user: member.user }, @record.account).access?
+  end
+
+  def validate_workload(pool, entry)
+    return @record.errors.add(:owner, :portfolio_capacity_unavailable) unless available_member?
+
+    unit = entry.fetch('unit')
+    return @record.errors.add(:owner, :portfolio_capacity_unavailable) unless weighted_available?(pool, entry)
+
+    incoming = JrcRelationship::CapacityWorkload.value(@record.settings, unit)
+    current = JrcRelationship::CapacityWorkload.sum(pool.where.not(id: @record.id), unit)
+    limit = JrcRelationship::DistributionCapacityPolicy.effective(entry)
+    return if current + incoming <= limit
+
+    return if reduces_workload?(pool, unit, incoming)
+
+    @record.errors.add(:owner, :portfolio_capacity_exceeded)
+  rescue JrcRelationship::CapacityWorkload::Unavailable => e
+    @record.errors.add(:owner, e.message)
+  end
+
+  def weighted_available?(pool, entry)
+    pool.exists?(id: @record.id) || (entry.fetch('availability').positive? && entry.fetch('dedication').positive?)
+  end
+
+  def reduces_workload?(pool, unit, incoming)
+    @record.persisted? && pool.exists?(id: @record.id) && incoming <= JrcRelationship::CapacityWorkload.value(@record.settings_in_database, unit)
   end
 end

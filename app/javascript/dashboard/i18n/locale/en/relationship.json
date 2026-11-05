@@ -625,7 +625,25 @@
       "BLOCKERS": {
         "capacity_missing": "No limit is configured for this analyst in this scope.",
         "capacity_scope_denied": "Your permissions do not allow verification of the full destination workload. Counts are hidden.",
-        "capacity_exceeded": "This transfer exceeds the destination capacity."
+        "capacity_exceeded": "This transfer exceeds the destination capacity.",
+        "capacity_workload_missing": "Explicit workload inputs are missing or invalid; this is not spare capacity."
+      },
+      "UNIT": "Capacity unit",
+      "UNITS": {
+        "customers": "Customers",
+        "points": "Weighted points",
+        "hours": "Supplied equivalent hours"
+      },
+      "WORKLOAD": {
+        "TITLE": "Customer workload inputs",
+        "NOTE": "Points = base × complexity × risk × journey + activity effort. Supply all factors explicitly. Hours are supplied equivalent hours; no implicit financial or calendar conversion is applied.",
+        "base": "Base points",
+        "complexity_factor": "Complexity factor",
+        "risk_factor": "Risk factor",
+        "journey_factor": "Journey factor",
+        "activity_effort": "Activity effort in points",
+        "hours": "Equivalent hours",
+        "SAVE": "Save workload inputs"
       }
     },
     "DISTRIBUTION": {

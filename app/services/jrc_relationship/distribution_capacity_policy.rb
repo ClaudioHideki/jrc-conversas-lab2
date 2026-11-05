@@ -16,7 +16,8 @@ class JrcRelationship::DistributionCapacityPolicy
   end
 
   def self.valid_entry?(entry)
-    return false unless entry.is_a?(Hash) && entry.keys.sort == FIELDS.sort
+    return false unless valid_fields?(entry)
+    return false unless JrcRelationship::CapacityWorkload::UNITS.include?(entry.fetch('unit', 'customers'))
 
     valid_identity?(entry) && %w[availability dedication].all? do |key|
       value = entry[key]
@@ -24,12 +25,19 @@ class JrcRelationship::DistributionCapacityPolicy
     end
   end
 
+  def self.valid_fields?(entry)
+    entry.is_a?(Hash) && (entry.keys.sort == FIELDS.sort || entry.keys.sort == (FIELDS + ['unit']).sort)
+  end
+
   def self.valid_identity?(entry)
-    entry['user_id'].is_a?(Integer) && entry['user_id'].positive? &&
-      entry['maximum'].is_a?(Integer) && entry['maximum'].between?(0, 9_007_199_254_740_991)
+    maximum = entry['maximum']
+    valid = JrcRelationship::CapacityWorkload.numeric?(maximum)
+    valid &&= maximum.is_a?(Integer) if entry.fetch('unit', 'customers') == 'customers'
+    entry['user_id'].is_a?(Integer) && entry['user_id'].positive? && valid
   end
 
   def self.effective(entry)
-    (entry.fetch('maximum').to_d * entry.fetch('availability').to_d * entry.fetch('dedication').to_d).floor
+    value = entry.fetch('maximum').to_d * entry.fetch('availability').to_d * entry.fetch('dedication').to_d
+    entry.fetch('unit', 'customers') == 'customers' ? value.floor : value
   end
 end

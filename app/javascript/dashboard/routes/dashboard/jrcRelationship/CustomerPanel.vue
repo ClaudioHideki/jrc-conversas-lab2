@@ -7,6 +7,7 @@ import HealthStabilityNote from './HealthStabilityNote.vue';
 import HealthEvidenceSummary from './HealthEvidenceSummary.vue';
 import ProductHealthHistory from './ProductHealthHistory.vue';
 import API from 'dashboard/api/jrcRelationship';
+import CapacityWorkloadForm from './CapacityWorkloadForm.vue';
 import ComposeConversation from 'dashboard/components-next/NewConversation/ComposeConversation.vue';
 import VoiceCallButton from 'dashboard/components-next/Contacts/VoiceCallButton.vue';
 import SurveyDeliveryPanel from './SurveyDeliveryPanel.vue';
@@ -36,6 +37,7 @@ const activityTitle = ref('');
 const dueAt = ref('');
 const recommendation = ref(null);
 const ownerId = ref('');
+const capacityWorkload = ref({});
 const sendCsat = ref(false);
 const contact = computed(() =>
   channels.value?.contacts.find(
@@ -57,6 +59,9 @@ const load = async () => {
     ]);
     if (version !== generation) return;
     record.value = summary.data;
+    capacityWorkload.value = structuredClone(
+      record.value.settings?.capacity_workload || {}
+    );
     channels.value = communication.data;
     ownerId.value = record.value.owner?.id || '';
     contactId.value = channels.value.contacts[0]?.id || '';
@@ -89,6 +94,14 @@ const assign = () =>
     API.saveAssignment(
       route.params.accountId,
       { owner_id: ownerId.value || null },
+      props.assignmentId
+    )
+  );
+const saveWorkload = () =>
+  execute(() =>
+    API.saveAssignment(
+      route.params.accountId,
+      { settings: { capacity_workload: capacityWorkload.value } },
       props.assignmentId
     )
   );
@@ -400,6 +413,23 @@ const money = value => formatMoney(value, props.metadata?.formatting);
           :disabled="busy"
         >
           {{ t('RELATIONSHIP.ASSIGN') }}
+        </button>
+      </form>
+      <form
+        v-if="metadata.can_team && metadata.can_manage"
+        class="my-4 space-y-3"
+        @submit.prevent="saveWorkload"
+      >
+        <CapacityWorkloadForm
+          v-model="capacityWorkload"
+          :disabled="busy"
+        />
+        <button
+          type="submit"
+          :class="buttonClass"
+          :disabled="busy"
+        >
+          {{ t('RELATIONSHIP.CAPACITY.WORKLOAD.SAVE') }}
         </button>
       </form>
       <div

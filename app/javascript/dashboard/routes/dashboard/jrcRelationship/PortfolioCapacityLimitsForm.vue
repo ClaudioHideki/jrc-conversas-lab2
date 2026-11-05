@@ -16,10 +16,14 @@ const valid = computed(() => {
     new Set(ids).size === ids.length &&
     props.modelValue.every(
       row =>
+        ['customers', 'points', 'hours'].includes(row.unit || 'customers') &&
         Number.isSafeInteger(row.user_id) &&
         row.user_id > 0 &&
-        Number.isSafeInteger(row.maximum) &&
+        ((row.unit || 'customers') === 'customers'
+          ? Number.isSafeInteger(row.maximum)
+          : Number.isFinite(row.maximum)) &&
         row.maximum >= 0 &&
+        row.maximum <= Number.MAX_SAFE_INTEGER &&
         ['availability', 'dedication'].every(
           key => Number.isFinite(row[key]) && row[key] >= 0 && row[key] <= 1
         )
@@ -97,13 +101,29 @@ const remove = index => {
           </option>
         </select>
       </label>
+      <label class="text-sm">
+        {{ t('RELATIONSHIP.CAPACITY.UNIT') }}
+        <select
+          :value="row.unit || 'customers'"
+          :class="inputClass"
+          @change="change(index, 'unit', $event.target.value)"
+        >
+          <option
+            v-for="unit in ['customers', 'points', 'hours']"
+            :key="unit"
+            :value="unit"
+          >
+            {{ t(`RELATIONSHIP.CAPACITY.UNITS.${unit}`) }}
+          </option>
+        </select>
+      </label>
       <label class="text-sm"
         >{{ t('RELATIONSHIP.CAPACITY.MAXIMUM') }}
         <input
           :value="row.maximum"
           type="number"
           min="0"
-          step="1"
+          :step="(row.unit || 'customers') === 'customers' ? '1' : 'any'"
           required
           :class="inputClass"
           @input="

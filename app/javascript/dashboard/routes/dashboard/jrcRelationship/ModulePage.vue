@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcRelationship';
+import CapacityWorkloadForm from './CapacityWorkloadForm.vue';
 import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import MetricsPanel from './MetricsPanel.vue';
 import NicoSummaryPanel from './NicoSummaryPanel.vue';
@@ -1100,6 +1101,10 @@ const money = value => formatMoney(value, metadata.value?.formatting);
               v-model="assignment.settings.complexity"
               :class="inputClass"
           /></label>
+          <CapacityWorkloadForm
+            v-model="assignment.settings.capacity_workload"
+            :disabled="saving"
+          />
           <label class="mt-3 block text-sm"
             >{{ t('RELATIONSHIP.ELIGIBILITY_EXCEPTION_REASON')
             }}<textarea

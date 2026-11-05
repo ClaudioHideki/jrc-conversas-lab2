@@ -5,11 +5,11 @@
   "branch": "codex/relacionamento-v2-20261101",
   "last_validated_checkpoint": "53d0b022556a5bfb31210631c2e3a16acb26b7d7",
   "completed_current_work": "Native version-bound evidence/CS gates plus real immutable sealed dossier; see sealed_dossier_checkpoint_20261105.json. Full stages not closed.",
-  "active_work": "Dossier source/local tests validated; next F1 safe withdrawal and remaining responsibilities, then capacity modes and F2/C/D/G.",
+  "active_work": "F1 withdrawal readiness/native responsibility dependencies; weighted/hour capacity validated.",
   "exact_next_actions": [
-    "Continue native safe analyst withdrawal and project/cadence responsibility dependencies without changing historical executors.",
-    "Add explicit points/hours capacity with native admission/review/concurrency gates; no invented business weights or hours conversion.",
-    "Continue F2 and C/D/G functional and Word gaps; keep build/browser/external acceptance honestly pending."
+    "Finish safe analyst withdrawal via native scope/readiness and immutable reviewed responsibility receipts, including project owner/cadence dependencies.",
+    "Continue F2 and C/D/G functional and Word/scale gaps without reducing requirements.",
+    "Preserve no-build/current-server restriction; do not claim fresh visual or external acceptance."
   ],
   "test_environment": {
     "source_manifest": ".codex/d9-notifications-20261104/snapshot.json",
@@ -47,16 +47,17 @@
     "No real participant removal or provider request; tests use synthetic records and WebMock, with external network disabled."
   ],
   "restrictions": "No build/recompile, no5379 change/restart, no four-container restart/reconfiguration, no cleanup/delete of existing data, no push/GHCR/deploy/production/client change, no real provider operations. Additive migrations allowed only in owned synthetic test database.",
-  "disk_last_observed_bytes": 6687875072,
+  "disk_last_observed_bytes": 7398367232,
   "TRR": "Undefined; do not invent",
   "company_documents_without_portfolio": "Explicitly deferred",
-  "last_validated_head": "9ed8056024af431fdef678f809a87388c00e606e",
+  "last_validated_head": "8acdb7716f8102448d928c8945492d1e205a2ab7",
   "new_validated_code_checkpoint": "Resolve latest local CS code checkpoint with git log -1 --format=%H -- docs/jrc_consolidation/cs_signature_origin_checkpoint_20261105.json",
-  "current_status": "Sealed dossier source and directed local tests validated; continuing F1, not C-G closure.",
+  "current_status": "Explicit weighted/hour capacity source and directed tests validated; continuing F1 readiness, not full C-G closure.",
   "next_actions": [
-    "Continue native safe analyst withdrawal and project/cadence responsibility dependencies without changing historical executors.",
-    "Add explicit points/hours capacity with native admission/review/concurrency gates; no invented business weights or hours conversion.",
-    "Continue F2 and C/D/G functional and Word gaps; keep build/browser/external acceptance honestly pending."
+    "Finish safe analyst withdrawal via native scope/readiness and immutable reviewed responsibility receipts, including project owner/cadence dependencies.",
+    "Continue F2 and C/D/G functional and Word/scale gaps without reducing requirements.",
+    "Preserve no-build/current-server restriction; do not claim fresh visual or external acceptance."
   ],
-  "latest_dossier_report": "docs/jrc_consolidation/sealed_dossier_checkpoint_20261105.json"
+  "latest_dossier_report": "docs/jrc_consolidation/sealed_dossier_checkpoint_20261105.json",
+  "capacity_report": "docs/jrc_consolidation/weighted_capacity_checkpoint_20261105.json"
 }

@@ -62,7 +62,7 @@ class JrcRelationship::DistributionCapacity
   def fact(config, limits, inputs, records, applied_ids)
     JrcRelationship::DistributionCapacityPolicy.validate!(@context.account, limits)
     entry = limits.find { |row| row['user_id'] == inputs['owner_id'] }
-    result = { 'scope_key' => config.scope_key, 'configuration_version' => config.version, 'user_id' => inputs['owner_id'], 'unit' => 'customers' }
+    result = capacity_identity(config, inputs['owner_id'], entry)
     return result.merge('blocker' => 'capacity_missing') unless entry
 
     pool = @sources.relation(config).where(status: JrcRelationship::DistributionCapacityGuard::LOAD_STATUSES)
@@ -70,16 +70,34 @@ class JrcRelationship::DistributionCapacity
     visible = target.where(id: @context.assignments.select(:id))
     return result.merge('blocker' => 'capacity_scope_denied') unless target.count == visible.count
 
-    counts = counts(pool, target, inputs, records, applied_ids)
+    sources = { records: records, applied_ids: applied_ids }
+    counts = capacity_counts(pool, target, inputs, sources, result['unit'])
     capacity_result(result, entry, counts)
+  rescue JrcRelationship::CapacityWorkload::Unavailable
+    result.merge('blocker' => 'capacity_workload_missing')
   end
 
   def capacity_result(result, entry, counts)
     limit = JrcRelationship::DistributionCapacityPolicy.effective(entry)
-    exceeded = counts.fetch('incoming').positive? && counts.fetch('projected') > limit
+    limit = limit.to_f if entry.fetch('unit', 'customers') != 'customers'
+    incoming = counts.fetch('incoming_customers', counts.fetch('incoming'))
+    unavailable = entry.fetch('availability').zero? || entry.fetch('dedication').zero?
+    exceeded = incoming.positive? && (unavailable || counts.fetch('projected') > limit)
     result.merge(entry.except('user_id')).merge(counts).merge('effective_capacity' => limit,
                                                               'available_after' => limit - counts.fetch('projected'),
                                                               'blocker' => exceeded ? 'capacity_exceeded' : nil)
+  end
+
+  def capacity_identity(config, user_id, entry)
+    { 'scope_key' => config.scope_key, 'configuration_version' => config.version, 'user_id' => user_id,
+      'unit' => entry ? entry.fetch('unit', 'customers') : 'customers' }
+  end
+
+  def capacity_counts(pool, target, inputs, sources, unit)
+    return counts(pool, target, inputs, sources.fetch(:records), sources.fetch(:applied_ids)) if unit == 'customers'
+
+    original = sources.fetch(:records).select { |row| sources.fetch(:applied_ids).include?(row.id) }.map(&:id)
+    JrcRelationship::WeightedCapacity.facts(pool: pool, target: target, inputs: inputs, applied_ids: original, unit: unit)
   end
 
   def counts(pool, target, inputs, records, applied_ids)

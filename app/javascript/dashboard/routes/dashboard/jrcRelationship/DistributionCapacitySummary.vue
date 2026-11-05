@@ -19,6 +19,9 @@ const { t } = useI18n();
       <p class="font-medium">
         {{ t(`RELATIONSHIP.CAPACITY.SCOPES.${row.scope_key.split(':')[0]}`) }}
       </p>
+      <p class="text-sm">
+        {{ t(`RELATIONSHIP.CAPACITY.UNITS.${row.unit || 'customers'}`) }}
+      </p>
       <p
         v-if="row.blocker"
         role="alert"

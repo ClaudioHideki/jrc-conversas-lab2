@@ -26,7 +26,7 @@ class Api::V1::Accounts::Relationship::PortfolioController < Api::V1::Accounts::
     raise Pundit::NotAuthorizedError unless relationship_context.policy.team?
 
     attrs = params.require(:assignment).permit(:company_id, :contact_id, :owner_id, :team_id, :business_unit_id,
-                                               settings: [:segment_id, :product_id, :complexity])
+      settings: [:segment_id, :product_id, :complexity, { capacity_workload: [:hours, { points: JrcRelationship::CapacityWorkload::FACTORS }] }])
     if attrs[:contact_id].present?
       contact = JrcOperations::Access.contact!(relationship_context.member, attrs[:contact_id])
       if contact.company_id
@@ -43,7 +43,8 @@ class Api::V1::Accounts::Relationship::PortfolioController < Api::V1::Accounts::
 
   def update
     record = relationship_context.assignment(params[:id], write: true)
-    attrs = params.require(:assignment).permit(:owner_id, :team_id, :status, settings: [:segment_id, :product_id, :complexity])
+    attrs = params.require(:assignment).permit(:owner_id, :team_id, :status,
+      settings: [:segment_id, :product_id, :complexity, { capacity_workload: [:hours, { points: JrcRelationship::CapacityWorkload::FACTORS }] }])
     raise Pundit::NotAuthorizedError unless relationship_context.policy.team?
 
     relationship_context.assignable_users.find(attrs[:owner_id]) if attrs[:owner_id].present?
@@ -157,6 +158,7 @@ class Api::V1::Accounts::Relationship::PortfolioController < Api::V1::Accounts::
     JrcRelationship::Assignment.transaction do
       JrcRelationship::DistributionApproval.lock_configuration!(Current.account.id)
       record.with_lock do
+        attrs[:settings] = record.settings.merge(attrs[:settings].to_h) if attrs.key?(:settings)
         JrcRelationship::DistributionScopeGuard.check!(relationship_context, record, attrs)
         if attrs.key?(:owner_id) && attrs[:owner_id].to_s != record.owner_id.to_s
           JrcRelationship::DistributionApproval.direct_allowed!(relationship_context, [record])
