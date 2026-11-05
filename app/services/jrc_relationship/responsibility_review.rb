@@ -28,7 +28,11 @@ class JrcRelationship::ResponsibilityReview
     return unless review.inputs['transfer_responsibilities']
 
     review.snapshot.fetch('responsibilities').map do |row|
-      view_row(review, row)
+      shown = view_row(review, row)
+      next shown if shown.fetch('state') == 'unavailable'
+
+      customer = review.snapshot.fetch('rows').find { |source| source.fetch('assignment_id') == row.fetch('assignment_id') }
+      shown.merge('label' => customer.fetch('label'))
     end
   end
 

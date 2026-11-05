@@ -12,12 +12,21 @@ it('paginates the actual frozen responsibilities and resets after a proposal cha
   const wrapper = mount(ResponsibilityComparison, {
     props: {
       ownerName: 'Reviewed analyst',
-      rows: [{ assignment_id: 4, entries, blockers: [], state: 'ready' }],
+      rows: [
+        {
+          assignment_id: 4,
+          label: 'Frozen synthetic customer',
+          entries,
+          blockers: [],
+          state: 'ready',
+        },
+      ],
     },
   });
   expect(wrapper.findAll('article')).toHaveLength(10);
   expect(wrapper.text()).toContain('Original analyst');
   expect(wrapper.text()).toContain('Reviewed analyst');
+  expect(wrapper.text()).toContain('Frozen synthetic customer');
   expect(wrapper.findAll('button')[0].element.disabled).toBe(true);
   await wrapper.findAll('button')[1].trigger('click');
   expect(wrapper.findAll('article')).toHaveLength(2);

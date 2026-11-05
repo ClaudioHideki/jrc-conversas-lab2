@@ -137,6 +137,15 @@ RSpec.describe JrcRelationship::ResponsibilityTransfer do
     reader = JrcRelationship::Context.new(foreign.account_users.find_by!(user: user))
     data = JrcRelationship::ResponsibilityReview.new(reader).for_view(JrcRelationship::BatchReview.find(preview.fetch('id')))
     expect(data.first).to include('state' => 'unavailable', 'entries' => [])
-    expect(data.to_json).not_to include(action.reason)
+    expect(data.to_json).not_to include(action.reason, assignment.label)
+  end
+
+  it 'uses the reviewed customer name on every responsibility comparison without rewriting its source snapshot' do
+    action
+    preview = service.preview(inputs)
+    original_label = assignment.label
+    assignment.contact.update!(name: 'Customer renamed after proposal')
+    projection = service.get(preview.fetch('id'))
+    expect(projection.fetch('responsibilities').first.fetch('label')).to eq(original_label)
   end
 end

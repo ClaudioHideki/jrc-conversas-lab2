@@ -8,7 +8,11 @@ const props = defineProps({
 });
 const { t } = useI18n();
 const page = ref(1);
-const entries = computed(() => props.rows.flatMap(row => row.entries));
+const entries = computed(() =>
+  props.rows.flatMap(row =>
+    row.entries.map(entry => ({ ...entry, customerLabel: row.label }))
+  )
+);
 const pages = computed(() => Math.max(1, Math.ceil(entries.value.length / 10)));
 const visible = computed(() =>
   entries.value.slice((page.value - 1) * 10, page.value * 10)
@@ -52,13 +56,23 @@ watch(
       class="grid min-w-0 gap-2 rounded-lg bg-n-alpha-2 p-3 text-sm sm:grid-cols-3"
     >
       <p class="break-words">
+        <span
+          v-if="row.customerLabel"
+          class="block"
+          >{{ t('RELATIONSHIP.FIELDS.customer') }}:
+          {{ row.customerLabel }}</span
+        >
         <strong>{{
           t(`RELATIONSHIP.RESPONSIBILITIES.KINDS.${row.kind}`)
         }}</strong
         ><span class="block">{{ row.label }}</span>
       </p>
-      <p>{{ row.from_owner_name || t('RELATIONSHIP.UNASSIGNED') }}</p>
-      <p>
+      <p class="break-words">
+        {{ t('RELATIONSHIP.DISTRIBUTION.FROM') }}:
+        {{ row.from_owner_name || t('RELATIONSHIP.UNASSIGNED') }}
+      </p>
+      <p class="break-words">
+        {{ t('RELATIONSHIP.DISTRIBUTION.TO') }}:
         {{
           ownerName || t('RELATIONSHIP.RESPONSIBILITIES.REVIEWED_DESTINATION')
         }}
