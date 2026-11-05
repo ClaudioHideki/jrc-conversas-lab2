@@ -73,13 +73,14 @@ const actions = {
         !ownsRequest() ||
         listFilterKey(state.conversationFilters) !== filterKey
       )
-        return;
+        return null;
       buildConversationList(
         { commit, dispatch },
         params,
         data,
         params.assigneeType
       );
+      return data;
     } catch {
       if (ownsRequest()) commit(types.SET_LIST_ERROR_STATUS);
     } finally {
@@ -88,6 +89,7 @@ const actions = {
         activeListRequests.delete(state);
       }
     }
+    return null;
   },
 
   fetchFilteredConversations: async (

@@ -12,11 +12,13 @@ class Api::V1::Accounts::ConversationsController < Api::V1::Accounts::BaseContro
     result = conversation_finder.perform
     @conversations = result[:conversations]
     @conversations_count = result[:count]
+    @shared_scope = result[:shared_scope]
   end
 
   def meta
     result = conversation_finder.perform_meta_only
     @conversations_count = result[:count]
+    @shared_scope = result[:shared_scope]
   end
 
   def search

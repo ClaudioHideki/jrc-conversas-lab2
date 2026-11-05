@@ -37,7 +37,11 @@ class MessageFinder
   end
 
   def messages_before(before_id)
-    messages.reorder('created_at desc').where('id < ?', before_id).limit(20).reverse
+    anchor = @conversation.messages.select(:id, :created_at).find_by(id: before_id)
+    return [] unless anchor
+
+    messages.where('(messages.created_at, messages.id) < (?, ?)', anchor.created_at, anchor.id)
+            .reorder(created_at: :desc, id: :desc).limit(20).reverse
   end
 
   def messages_between(after_id, before_id)
@@ -45,7 +49,7 @@ class MessageFinder
   end
 
   def messages_latest
-    messages.reorder('created_at desc').limit(20).reverse
+    messages.reorder(created_at: :desc, id: :desc).limit(20).reverse
   end
 end
 

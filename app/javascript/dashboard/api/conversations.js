@@ -17,6 +17,18 @@ class ConversationApi extends ApiClient {
   getUnreadCounts() {
     return axios.get(`${this.url}/unread_counts`);
   }
+
+  sharedContext(accountId) {
+    return axios.get(
+      `${this.apiVersion}/accounts/${accountId}/conversations/meta`,
+      {
+        params: {
+          assignee_type: 'mine_or_shared',
+          include_participating: true,
+        },
+      }
+    );
+  }
 }
 
 export default new ConversationApi();

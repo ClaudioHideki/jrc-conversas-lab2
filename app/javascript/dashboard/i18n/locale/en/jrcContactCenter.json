@@ -1372,6 +1372,7 @@
       "LOAD_MORE": "Carregar mais atendimentos",
       "CALL_WORKSPACE": "Atendimento de voz",
       "ASSIGNEE": {
+        "MINE_OR_SHARED": "Minhas e compartilhadas",
         "ME": "Minhas",
         "UNASSIGNED": "Não atribuídas",
         "ALL": "Todas"

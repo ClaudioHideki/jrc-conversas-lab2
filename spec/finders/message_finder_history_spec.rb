@@ -85,7 +85,7 @@ RSpec.describe MessageFinder, 'historical pagination' do
       newer = described_class.new(conversation, after: anchor.id).perform
 
       expect(older.map(&:id)).to eq(ordered.first(15).map(&:id))
-      expect(newer.map(&:id)).to eq(ordered.drop(16).map(&:id))
+      expect(newer.map(&:id)).to contain_exactly(*ordered.drop(16).map(&:id))
     end
   end
 

@@ -9,19 +9,41 @@ import {
 
 describe('omnichannel inbox assignee filters', () => {
   it('offers an additive shared filter only with a server capability', () => {
-    expect(assigneeFilterOptions(false, true).map(option => option.key)).toEqual([
-      'mine_or_shared', 'me',
-    ]);
-    expect(resolveAssigneeFilter(undefined, false, true)).toBe('mine_or_shared');
+    expect(
+      assigneeFilterOptions(false, true).map(option => option.key)
+    ).toEqual(['mine_or_shared', 'me']);
+    expect(resolveAssigneeFilter(undefined, false, true)).toBe(
+      'mine_or_shared'
+    );
     expect(resolveAssigneeFilter('mine_or_shared', false, false)).toBe('me');
   });
 
   it('matches shared inboxes including another assignee, while preserving own work and rejecting bots', () => {
-    const shared = { inbox_id: 8, meta: { assignee: { id: 99 }, assignee_type: 'User' } };
+    const shared = {
+      inbox_id: 8,
+      meta: { assignee: { id: 99 }, assignee_type: 'User' },
+    };
     expect(matchesAssigneeFilter(shared, 'mine_or_shared', 42, [8])).toBe(true);
     expect(matchesAssigneeFilter(shared, 'mine_or_shared', 42, [])).toBe(false);
-    expect(matchesAssigneeFilter({ ...shared, meta: { assignee: { id: 42 } } }, 'mine_or_shared', 42, [])).toBe(true);
-    expect(matchesAssigneeFilter({ ...shared, meta: { assignee: { id: 99 }, assignee_type: 'AgentBot' } }, 'mine_or_shared', 42, [8])).toBe(false);
+    expect(
+      matchesAssigneeFilter(
+        { ...shared, meta: { assignee: { id: 42 } } },
+        'mine_or_shared',
+        42,
+        []
+      )
+    ).toBe(true);
+    expect(
+      matchesAssigneeFilter(
+        {
+          ...shared,
+          meta: { assignee: { id: 99 }, assignee_type: 'AgentBot' },
+        },
+        'mine_or_shared',
+        42,
+        [8]
+      )
+    ).toBe(false);
     expect(matchesAssigneeFilter(shared, 'me', 42, [8])).toBe(false);
   });
   it.each([

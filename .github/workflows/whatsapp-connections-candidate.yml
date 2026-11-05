@@ -39,7 +39,11 @@ jobs:
         run: |
           pnpm exec eslint app/javascript/dashboard/routes/dashboard/jrcBroker/ConnectionsPage.vue \
             app/javascript/dashboard/components-next/jrc-broker/{ConnectionDistributionTable,ConnectionInsights,ConnectionPanel,ConnectionDistributionPolicy}.vue \
-            app/javascript/dashboard/api/jrcBroker.js
+            app/javascript/dashboard/api/jrcBroker.js \
+            app/javascript/dashboard/api/conversations.js \
+            app/javascript/dashboard/routes/dashboard/inbox/{InboxList.vue,InboxList.spec.js,omnichannelFilters.js,omnichannelFilters.spec.js} \
+            app/javascript/dashboard/store/modules/conversationPage.js \
+            app/javascript/dashboard/store/modules/conversations/actions.js
       - name: Dependencias do navegador sintetico
         run: |
           pnpm -C tests/playwright install --frozen-lockfile
@@ -124,6 +128,10 @@ jobs:
             spec/finders/message_finder_history_spec.rb \
             spec/finders/conversation_finder_spec.rb \
             spec/finders/conversation_finder_shared_spec.rb \
+            spec/services/conversations/shared_inbox_routing_spec.rb \
+            spec/services/jrc_broker/routing_context_spec.rb \
+            spec/enterprise/finders/conversation_finder_shared_spec.rb \
+            spec/requests/api/v1/accounts/conversations_shared_spec.rb \
             spec/requests/jrc_connection_summary_spec.rb \
             spec/enterprise/requests/jrc_connection_summary_spec.rb \
             spec/enterprise/services/jrc_human_assignment/availability_spec.rb \

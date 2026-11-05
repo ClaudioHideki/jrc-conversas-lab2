@@ -43,6 +43,8 @@ class ConversationFinder
 
     mine_count, unassigned_count, all_count = set_count_for_all_conversations
     assigned_count = all_count - unassigned_count
+    shared = @assignee_type == 'mine_or_shared' ? shared_inbox_scope : nil
+    shared_count = shared&.perform&.count
 
     filter_by_assignee_type
 
@@ -52,9 +54,11 @@ class ConversationFinder
         mine_count: mine_count,
         assigned_count: assigned_count,
         unassigned_count: unassigned_count,
-        all_count: all_count
-      }
-    }
+        all_count: all_count,
+        mine_or_shared_count: shared_count
+      }.compact,
+      shared_scope: shared&.metadata
+    }.compact
   end
 
   def perform_meta_only
@@ -62,15 +66,18 @@ class ConversationFinder
 
     mine_count, unassigned_count, all_count, = set_count_for_all_conversations
     assigned_count = all_count - unassigned_count
+    shared = @assignee_type == 'mine_or_shared' ? shared_inbox_scope : nil
 
     {
       count: {
         mine_count: mine_count,
         assigned_count: assigned_count,
         unassigned_count: unassigned_count,
-        all_count: all_count
-      }
-    }
+        all_count: all_count,
+        mine_or_shared_count: shared&.perform&.count
+      }.compact,
+      shared_scope: shared&.metadata
+    }.compact
   end
 
   private
@@ -128,6 +135,8 @@ class ConversationFinder
     case @assignee_type
     when 'me'
       @conversations = mine_conversations
+    when 'mine_or_shared'
+      @conversations = shared_inbox_scope.perform
     when 'unassigned'
       @conversations = @conversations.unassigned
     when 'assigned'
@@ -207,6 +216,11 @@ class ConversationFinder
 
     participant_conversation_ids = ConversationParticipant.where(account_id: current_account.id, user_id: current_user.id).select(:conversation_id)
     assigned.or(@conversations.where(id: participant_conversation_ids))
+  end
+
+  def shared_inbox_scope
+    @shared_inbox_scope ||= Conversations::SharedInboxScope.new(conversations: @conversations, account: current_account,
+                                                               user: current_user, include_participating: include_participating?)
   end
 
   def legacy_count_for_all_conversations

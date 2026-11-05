@@ -1,11 +1,24 @@
 export const ASSIGNEE_FILTERS = Object.freeze({
   ME: 'me',
+  MINE_OR_SHARED: 'mine_or_shared',
   UNASSIGNED: 'unassigned',
   ALL: 'all',
 });
 
-export const matchesAssigneeFilter = (conversation, filter, currentUserId) => {
+export const matchesAssigneeFilter = (
+  conversation,
+  filter,
+  currentUserId,
+  sharedInboxIds = []
+) => {
   const { assignee, assignee_type: assigneeType } = conversation.meta || {};
+  if (filter === ASSIGNEE_FILTERS.MINE_OR_SHARED) {
+    return (
+      matchesAssigneeFilter(conversation, ASSIGNEE_FILTERS.ME, currentUserId) ||
+      (assigneeType !== 'AgentBot' &&
+        sharedInboxIds.some(id => Number(id) === Number(conversation.inbox_id)))
+    );
+  }
   if (filter === ASSIGNEE_FILTERS.ME) {
     return Boolean(
       (assignee &&
@@ -34,7 +47,19 @@ export const canManageAssigneeFilters = ({
     ].includes(permission)
   );
 
-export const assigneeFilterOptions = canManageAssignments => [
+export const assigneeFilterOptions = (
+  canManageAssignments,
+  canShare = false
+) => [
+  ...(canShare
+    ? [
+        {
+          key: ASSIGNEE_FILTERS.MINE_OR_SHARED,
+          labelKey: 'JRC_CONTACT_CENTER.INBOX.ASSIGNEE.MINE_OR_SHARED',
+          icon: 'i-lucide-users-round',
+        },
+      ]
+    : []),
   {
     key: ASSIGNEE_FILTERS.ME,
     labelKey: 'JRC_CONTACT_CENTER.INBOX.ASSIGNEE.ME',
@@ -56,8 +81,14 @@ export const assigneeFilterOptions = canManageAssignments => [
     : []),
 ];
 
-export const resolveAssigneeFilter = (value, canManageAssignments) => {
-  const options = assigneeFilterOptions(canManageAssignments);
+export const resolveAssigneeFilter = (
+  value,
+  canManageAssignments,
+  canShare = false
+) => {
+  const options = assigneeFilterOptions(canManageAssignments, canShare);
+  if (!value && canShare && !canManageAssignments)
+    return ASSIGNEE_FILTERS.MINE_OR_SHARED;
   return options.some(option => option.key === value)
     ? value
     : ASSIGNEE_FILTERS.ME;

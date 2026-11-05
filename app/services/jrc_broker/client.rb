@@ -35,6 +35,13 @@ class JrcBroker::Client
     request(:get, '/resources')
   end
 
+  def routing_context(ids)
+    raise Error.new('JRC_BROKER_INVALID_REQUEST', status: 400) unless ids.is_a?(Array) && ids.size.between?(1, 100) && ids.uniq.size == ids.size
+
+    values = ids.map { |id| identifier!(id) }.join(',')
+    request(:get, "/routing-context?integrationIds=#{values}")
+  end
+
   def operations
     request(:get, '/onboarding')
   end
