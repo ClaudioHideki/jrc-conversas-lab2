@@ -422,7 +422,9 @@
       "handoff_acceptance_required": "Require formal handoff acceptance before onboarding",
       "playbook_flow_effects_enabled": "Enable reviewed native Flow effects (OFF by default)",
       "portfolio_transfer_approval_required": "Require formal Central approval for portfolio transfers",
-      "portfolio_review_validity_minutes": "Portfolio review validity (minutes)"
+      "portfolio_review_validity_minutes": "Portfolio review validity (minutes)",
+      "satisfaction_window_days": "Satisfaction evidence window (days)",
+      "health_trend_window_days": "Health trend window (days)"
     },
     "ACCOUNT_SCOPE": "Toda a conta",
     "CONFIG_SCOPE": "Configuração por conta, segmento ou produto",
@@ -528,6 +530,26 @@
     "APPLY_PLAYBOOK": "Aplicar playbook",
     "EXPORT": "Exportar carteira",
     "PORTFOLIO_BATCH": "Operar {count} clientes selecionados",
+    "HEALTH_EVIDENCE": {
+      "SATISFACTION": "Satisfaction source evidence",
+      "TREND": "Observed health trend",
+      "WINDOW": "Calculation window: {days} days",
+      "REFRESH_REQUIRED": "The displayed score is historical. Recalculate to apply the current evidence window.",
+      "ANSWERED": "Latest contributing answer: {date}",
+      "BASELINE": "Actual baseline observation: {date}",
+      "CHANGE": "Change: {delta} points",
+      "STATES": {
+        "current": "Evidence within the configured window",
+        "stale": "Evidence outside the configured window is unavailable as an observed score",
+        "missing": "No authorized answer available",
+        "unavailable": "Current score unavailable",
+        "insufficient": "No comparable authorized observation in the window",
+        "requires_refresh": "Evidence window changed; recalculation required",
+        "improved": "Improved",
+        "declined": "Declined",
+        "stable": "Stable"
+      }
+    },
     "CAPACITY": {
       "TITLE": "Customer allocation capacity",
       "POLICY_NOTICE": "Limits use customer counts. Effective capacity is the configured maximum × availability × dedication, rounded down. An empty policy adds no capacity limit. With limits configured, unlisted analysts cannot receive new allocations in this scope.",

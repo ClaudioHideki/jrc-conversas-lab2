@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import HealthStabilityNote from './HealthStabilityNote.vue';
+import HealthEvidenceSummary from './HealthEvidenceSummary.vue';
 import ProductHealthHistory from './ProductHealthHistory.vue';
 import API from 'dashboard/api/jrcRelationship';
 import ComposeConversation from 'dashboard/components-next/NewConversation/ComposeConversation.vue';
@@ -117,6 +118,11 @@ watch(
     () => route.params.accountId,
     () => props.assignmentId,
     () => store.getters.getCurrentUserID,
+    () =>
+      JSON.stringify([
+        store.getters.getCurrentRole,
+        store.getters.getCurrentUser?.accounts,
+      ]),
   ],
   () => {
     activityTitle.value = '';
@@ -185,6 +191,10 @@ const money = value => formatMoney(value, props.metadata?.formatting);
         :assignment-id="assignmentId"
         :enabled="metadata.can_nico"
         :metadata="metadata"
+      />
+      <HealthEvidenceSummary
+        :signals="record.signals"
+        :formatting="metadata.formatting"
       />
       <div class="flex flex-wrap gap-3">
         <strong class="text-2xl">{{

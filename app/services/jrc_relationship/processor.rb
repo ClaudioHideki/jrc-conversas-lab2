@@ -11,8 +11,10 @@ class JrcRelationship::Processor
       data = JrcRelationship::CustomerSignals.new(assignment: @assignment, context: @context).call
       reconcile_commercial! if @context.policy.manage?
       configuration = @context.configuration(@assignment)
+      record_health_trend!(data, configuration)
       # Keep lineage in stored evidence without treating each refresh as a new observation.
       fingerprint_data = data.deep_dup
+      fingerprint_data.except!(:health_trend)
       [fingerprint_data[:health], *fingerprint_data.fetch(:product_health, {}).values].each do |health|
         health&.dig(:hysteresis)&.except!(:previous_snapshot_id, :previous_band)
       end
@@ -75,6 +77,14 @@ class JrcRelationship::Processor
   end
 
   private
+
+  def record_health_trend!(data, configuration)
+    result = JrcRelationship::HealthTrend.new(context: @context, assignment: @assignment, configuration: configuration).call(data.fetch(:health))
+    data[:health_trend] = result.fetch(:trend)
+    result.fetch(:source_ids).each do |key, ids|
+      data[:_source_ids][key.to_sym] = (Array(data[:_source_ids][key.to_sym]) + ids).uniq
+    end
+  end
 
   def record_health_change!(data, previous)
     return unless previous&.score && data.dig(:health, :score)

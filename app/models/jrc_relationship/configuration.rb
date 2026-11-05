@@ -25,7 +25,7 @@ class JrcRelationship::Configuration < ApplicationRecord
                     'critical_action_priority' => 90, 'ticket_action_priority' => 85, 'detractor_action_priority' => 80,
                     'health_hysteresis_points' => 0, 'health_drop_points' => 20, 'health_drop_action_priority' => 70,
                     'portfolio_transfer_approval_required' => false, 'portfolio_review_validity_minutes' => 15,
-                    'portfolio_capacity_limits' => [],
+                    'portfolio_capacity_limits' => [], 'satisfaction_window_days' => 90, 'health_trend_window_days' => 30,
                     'auto_handoff' => true, 'missing_factor_policy' => 'renormalize', 'survey_automation_enabled' => false,
                     'renewal_window_days' => [15, 30, 60, 90, 120],
                     'eligibility_mode' => 'legacy_order', 'handoff_acceptance_required' => false, 'playbook_flow_effects_enabled' => false,
@@ -73,6 +73,7 @@ class JrcRelationship::Configuration < ApplicationRecord
     validate_rule_lists
     validate_document_requirements
     validate_capacity_limits
+    validate_temporal_windows
     validate_scope
   end
 
@@ -80,6 +81,13 @@ class JrcRelationship::Configuration < ApplicationRecord
     JrcRelationship::DistributionCapacityPolicy.validate!(account, effective_rules['portfolio_capacity_limits'])
   rescue ArgumentError => e
     errors.add(:rules, e.message)
+  end
+
+  def validate_temporal_windows
+    %w[satisfaction_window_days health_trend_window_days].each do |key|
+      value = effective_rules.fetch(key)
+      errors.add(:rules, "#{key} must be a whole number from1 to3650 days") unless value.is_a?(Integer) && value.between?(1, 3650)
+    end
   end
 
   def validate_document_requirements

@@ -300,12 +300,32 @@ const date = value => formatDate(value, props.metadata?.formatting);
             v-model.number="config.rules[key]"
             :data-testid="`relationship-rule-${key}`"
             type="number"
-            step="0.1"
-            :min="key === 'health_hysteresis_points' ? 0 : 0.01"
+            :step="
+              ['satisfaction_window_days', 'health_trend_window_days'].includes(
+                key
+              )
+                ? 1
+                : 0.1
+            "
+            :min="
+              key === 'health_hysteresis_points'
+                ? 0
+                : [
+                      'satisfaction_window_days',
+                      'health_trend_window_days',
+                    ].includes(key)
+                  ? 1
+                  : 0.01
+            "
             :max="
               key === 'health_hysteresis_points'
                 ? 100 - config.rules.healthy_threshold
-                : undefined
+                : [
+                      'satisfaction_window_days',
+                      'health_trend_window_days',
+                    ].includes(key)
+                  ? 3650
+                  : undefined
             "
             :class="inputClass"
           /><input

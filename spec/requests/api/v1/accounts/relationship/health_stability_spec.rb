@@ -33,6 +33,21 @@ RSpec.describe 'Versioned relationship health stability configuration', type: :r
     expect(JrcRelationship::Configuration.where(account: account)).to be_empty
   end
 
+  it 'round-trips whole-day evidence/trend windows with immutable native configuration history' do
+    get url, headers: headers, as: :json
+    original = response.parsed_body.slice('scope_key', 'version', 'weights', 'rules')
+    change = original.merge('rules' => original['rules'].merge('satisfaction_window_days' => 14, 'health_trend_window_days' => 7))
+    patch url, headers: headers, as: :json, params: change
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body['rules']).to include('satisfaction_window_days' => 14, 'health_trend_window_days' => 7)
+    expect(response.parsed_body['history'].map { |row| row.dig('rules', 'satisfaction_window_days') }).to eq([14, 90])
+    invalid = response.parsed_body.slice('scope_key', 'version', 'weights', 'rules')
+    invalid['rules']['satisfaction_window_days'] = 0.5
+    patch url, headers: headers, as: :json, params: invalid
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(JrcRelationship::Configuration.find_by!(account: account).effective_rules['satisfaction_window_days']).to eq(14)
+  end
+
   it 'denies ordinary analysts and foreign accounts through the existing configuration permission' do
     analyst = create(:user, account: account, role: :agent)
     get url, headers: analyst.create_new_auth_token, as: :json

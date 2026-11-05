@@ -38,7 +38,7 @@ class JrcRelationship::HealthScore
     contribution = value[:normalized].clamp(0, 100) * weight / denominator if denominator.positive? && !value[:normalized].nil?
     { factor: key, raw: value[:raw], normalized: value[:normalized], weight: weight,
       contribution: contribution&.round(4), evidence: value[:evidence], available: !value[:normalized].nil? && !value[:imputed],
-      imputed: value[:imputed] == true }
+      imputed: value[:imputed] == true }.merge(value.slice(:measurement))
   end
 
   def self.score_for(factors, denominator, blocked)

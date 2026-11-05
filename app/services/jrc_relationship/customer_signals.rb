@@ -27,6 +27,7 @@ class JrcRelationship::CustomerSignals
                                                       relation: invoices).call
     end
     ratings = JrcRelationship::SatisfactionSignals.new(context, assignment, customer, rules).call
+    @satisfaction_windows = { rules.fetch('satisfaction_window_days') => ratings }
     tickets = customer.tickets.joins(:status).where(jrc_service_desk_ticket_statuses: { phase: %w[open waiting] })
     critical = tickets.joins(:priority).where(jrc_service_desk_priorities: { code: rules['critical_priority_codes'] }).count
     project_late = customer.projects.where(status: %w[planned active on_hold]).where('due_on < ?', Date.current).count
@@ -52,9 +53,13 @@ class JrcRelationship::CustomerSignals
     health = JrcRelationship::HealthScore.call(observations: observations, weights: context.configuration(assignment).effective_weights, rules: rules)
     product_history_sources = []
     product_health = products.to_h do |id, _name|
-      product_observations = observations.merge('adoption' => JrcRelationship::AdoptionMetric.call(goals: goals, metric: rules['adoption_metric'],
-                                                                                                   product_id: id))
       config = JrcRelationship::Configuration.find_by(account: context.account, scope_key: "product:#{id}") || context.configuration(assignment)
+      product_ratings = @satisfaction_windows[config.effective_rules.fetch('satisfaction_window_days')] ||=
+        JrcRelationship::SatisfactionSignals.new(context, assignment, customer, config.effective_rules).call
+      product_observations = observations.merge('adoption' => JrcRelationship::AdoptionMetric.call(goals: goals,
+        metric: rules['adoption_metric'], product_id: id),
+        'satisfaction' => satisfaction_observation(product_ratings))
+      product_history_sources << product_ratings.fetch(:source_ids)
       measured = JrcRelationship::HealthScore.call(observations: product_observations, weights: config.effective_weights, rules: config.effective_rules)
                                             .merge(config_scope_key: config.scope_key, config_version: config.version)
       stable, sources = JrcRelationship::ProductHealthHysteresis.new(context: context, assignment: assignment, product_id: id,
@@ -63,7 +68,8 @@ class JrcRelationship::CustomerSignals
       [id, stable]
     end
     manifest = source_ids(contracts: contracts, invoices: invoices, csat: ratings[:csat], nps: ratings[:nps], ces: ratings[:ces],
-                          surveys: ratings[:surveys], plans: plans, sentiment: sentiment)
+                          surveys: ratings[:surveys], window_days: ratings[:window_days], plans: plans, sentiment: sentiment)
+    manifest = merge_health_sources(ratings.fetch(:source_ids), manifest)
     health, history_sources = JrcRelationship::HealthHysteresis.new(context: context, assignment: assignment).call(health)
     manifest = product_history_sources.reduce(manifest) { |current, sources| merge_health_sources(sources, current) }
     { segment_id: assignment.settings['segment_id'], product_id: assignment.settings['product_id'], business_unit_id: assignment.business_unit_id,
@@ -114,7 +120,8 @@ class JrcRelationship::CustomerSignals
   def satisfaction_observation(ratings)
     raw = { nps: ratings[:nps_score], csat: ratings[:csat_score], ces: ratings[:ces_score] }
     observation(raw, normalized_satisfaction(raw, ratings[:ces_normalized]),
-                'Relational NPS/CES (0-10; published CES direction) and native conversation CSAT (1-5), last 90 days')
+                "Authorized relational NPS/CES and native/shared CSAT, last #{ratings.fetch(:window_days)} days")
+      .merge(measurement: ratings.fetch(:evidence))
   end
 
   def normalized_satisfaction(raw, ces_normalized)
@@ -131,7 +138,8 @@ class JrcRelationship::CustomerSignals
   def source_ids_for(key, data)
     case key
     when :surveys
-      data[:nps].pluck(:id) + data[:ces].pluck(:id) + data[:surveys].where(kind: 'csat', responded_at: 90.days.ago..Time.current).pluck(:id)
+      csat = data[:surveys].where(kind: 'csat', responded_at: data.fetch(:window_days).days.ago..Time.current).pluck(:id)
+      data[:nps].pluck(:id) + data[:ces].pluck(:id) + csat
     when :messages then recent_message_ids + data[:sentiment][:source_ids]
     when :calls then customer.calls&.pluck(:id) || []
     else (data[key] || customer.public_send(key)).pluck(:id)

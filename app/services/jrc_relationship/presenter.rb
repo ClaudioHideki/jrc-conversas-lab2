@@ -6,6 +6,7 @@ class JrcRelationship::Presenter
   def assignment(record, signals: nil)
     snapshot = snapshots[record.id]
     signals ||= snapshot&.signals&.deep_symbolize_keys || { health: { score: nil, band: 'unavailable', factors: [] } }
+    signals = JrcRelationship::SatisfactionEvidenceProjection.annotate(signals: signals, configuration: @context.configuration(record))
     next_action = next_actions[record.id]
     { id: record.id, name: record.label, company_id: record.company_id, contact_id: record.contact_id,
       business_unit_id: record.business_unit_id, business_unit: record.business_unit&.name,

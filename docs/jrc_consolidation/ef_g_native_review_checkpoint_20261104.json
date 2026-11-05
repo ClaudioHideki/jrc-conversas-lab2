@@ -343,5 +343,17 @@
       "Company documents without portfolio remain explicitly blocked",
       "DocuSign demo and real external provider/channel acceptance require separately authorized environment and operations"
     ]
+  },
+  "F1b_F2a_actual_update_20261105": {
+    "capacity_checkpoint": "3db1094b28d38ff0753d6bb029c0ddb4a214097d",
+    "capacity_report": "portfolio_capacity_checkpoint_20261105.json",
+    "health_report": "health_windows_checkpoint_20261105.json",
+    "classification": "Implemented and locally automated tested; current-build browser acceptance pending; F2 and C-G remain open",
+    "remaining": [
+      "F1 weighted/hour modes, complete safe analyst removal/all responsibility destinations and approved scope transfer.",
+      "E version-bound provider signed artifacts/certificate and sealed immutable dossier; current export remains truthful about absence.",
+      "Remaining C/D gaps and G real current-build browser acceptance.",
+      "TRR undefined; company documents without portfolio deferred; DocuSign demo/external acceptance not performed."
+    ]
   }
 }
