@@ -3,6 +3,7 @@
 require_relative 'boot'
 
 require 'rails/all'
+require 'tzinfo'
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
@@ -37,6 +38,14 @@ module Chatwoot
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 7.0
+    # Deployment timezone controls Time.current; Active Record keeps its UTC default.
+    config.time_zone = ENV.fetch('APP_TIME_ZONE', 'UTC')
+    begin
+      TZInfo::Timezone.get(config.time_zone)
+    rescue TZInfo::InvalidTimezoneIdentifier
+      raise ArgumentError, 'APP_TIME_ZONE must be a valid IANA timezone (for example America/Sao_Paulo)'
+    end
+
     config.rails_i18n.enabled_modules = [:pluralization]
 
     config.eager_load_paths << Rails.root.join('lib')

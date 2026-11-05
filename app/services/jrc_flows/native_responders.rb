@@ -38,7 +38,11 @@ class JrcFlows::NativeResponders
     valid = (bot_id.nil? && callback.nil?) || (bot_id.is_a?(Integer) && bot_id.positive? && callback.is_a?(String) && callback.present?)
     raise JrcFlows::NativeOwnership::Denied unless valid
 
-    link = AgentBotInbox.find_by(inbox_id: inbox.id, status: AgentBotInbox.statuses.fetch('active'))
+    links = AgentBotInbox.where(inbox_id: inbox.id)
+    # A native null pair requires no legacy association, including inactive ones.
+    raise JrcFlows::NativeOwnership::Denied if bot_id.nil? && links.exists?
+
+    link = links.find_by(status: AgentBotInbox.statuses.fetch('active'))
     bot = link&.agent_bot
     raise JrcFlows::NativeOwnership::Denied unless bot&.id == bot_id && bot&.outgoing_url == callback
 

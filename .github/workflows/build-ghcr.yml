@@ -46,7 +46,6 @@ jobs:
       SOURCE_SHA: ${{ inputs.source_sha }}
       BASE_SHA: ${{ inputs.base_sha }}
       COMPONENT: ${{ inputs.component }}
-      IMAGE: ${{ inputs.component == 'app' && 'claudiohideki/jrc-conversas-lab2' || format('claudiohideki/jrc-conversas-nico-v12-2-7-comercial-integrado-{0}', inputs.component) }}
       BACKOFFICE_CANDIDATE: ${{ inputs.backoffice_candidate }}
       BUNDLE_FROZEN: 'true'
       TZ: UTC
@@ -55,8 +54,18 @@ jobs:
       - name: Validar SHA antes do checkout
         run: '[[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]'
 
+      - name: Publicar somente no namespace deste repositorio
+        run: |
+          repository_image=${GITHUB_REPOSITORY,,}
+          case "$COMPONENT" in
+            app) image="$repository_image" ;;
+            nico-runtime|flows-sandbox) image="$repository_image-$COMPONENT" ;;
+            *) exit 1 ;;
+          esac
+          echo "IMAGE=$image" >> "$GITHUB_ENV"
+
       - name: Exigir gate nativo na candidata consolidada
-        if: (github.ref_name == 'main' || github.ref_name == 'codex/release-integrada-specs-20261102' || github.ref_name == 'codex/lab2-integral-20261102') && inputs.component == 'app'
+        if: (github.ref_name == 'main' || github.ref_name == 'codex/release-integrada-specs-20261102' || github.ref_name == 'codex/lab2-integral-20261102' || startsWith(github.ref_name, 'codex/ura-padrao-lab2-')) && inputs.component == 'app'
         run: test "$BACKOFFICE_CANDIDATE" = true
 
       - name: Baixar a revisao exata
@@ -275,7 +284,7 @@ jobs:
           PUBLISH: ${{ inputs.publish }}
         run: |
           case "$GITHUB_REF_NAME" in
-            main|codex/crm-backoffice-servicedesk-visual-20261101|codex/release-integrada-specs-20261102|codex/lab2-integral-20261102) ;;
+            main|codex/crm-backoffice-servicedesk-visual-20261101|codex/release-integrada-specs-20261102|codex/lab2-integral-20261102|codex/ura-padrao-lab2-*) ;;
             *) echo 'Branch candidata nao autorizada para este gate' >&2; exit 1 ;;
           esac
           test "$COMPONENT" = app

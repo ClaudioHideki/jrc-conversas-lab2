@@ -7,6 +7,14 @@ describe MessageTemplates::Template::CsatSurvey do
   let(:service) { described_class.new(conversation: conversation) }
 
   describe '#perform' do
+    it 'creates only one survey when the same conversation is processed twice' do
+      conversation.custom_attributes = { 'synthetic_pending' => 'retained' }
+      2.times { service.perform }
+
+      expect(conversation.messages.where(content_type: :input_csat).count).to eq(1)
+      expect(conversation.custom_attributes).to eq('synthetic_pending' => 'retained')
+    end
+
     context 'when no survey rules are configured' do
       it 'creates a CSAT survey message' do
         inbox.update(csat_config: {})

@@ -14,7 +14,7 @@ class JrcBroker::WebhookDelivery
   def self.for(payload, webhook_type)
     return unless webhook_type == :api_inbox_webhook && payload[:event] == 'message_created'
 
-    message = Message.find_by(id: payload[:id], message_type: :outgoing, private: false)
+    message = find_deliverable_message(payload[:id])
     attributes = payload[:additional_attributes].to_h
     marked_message = message && message.additional_attributes.to_h['jrc_campaign_broker'] == true
     campaign = attributes['jrc_campaign_broker'] == true || marked_message
@@ -23,6 +23,12 @@ class JrcBroker::WebhookDelivery
 
     new(message)
   end
+
+  def self.find_deliverable_message(id)
+    message = Message.find_by(id: id)
+    message if message && JrcBrokerWebhookObligation.deliverable_message?(message)
+  end
+  private_class_method :find_deliverable_message
 
   def initialize(message)
     @message = message

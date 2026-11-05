@@ -286,11 +286,11 @@
   column: feature_flags_ext_1
 - name: jrc_flows
   display_name: JRC Flows
-  enabled: false
+  enabled: true
   column: feature_flags_ext_1
 - name: jrc_broker
   display_name: JRC Broker
-  enabled: false
+  enabled: true
   column: feature_flags_ext_1
 
 - name: jrc_projects

@@ -23,7 +23,12 @@ class JrcBrokerWebhookObligation < ApplicationRecord
   private_class_method :campaign_identity
 
   def self.eligible?(message)
-    message.outgoing? && !message.private? && message.webhook_sendable? && message.additional_attributes['jrc_campaign_evolution'] != true
+    deliverable_message?(message) && message.webhook_sendable? && message.additional_attributes['jrc_campaign_evolution'] != true
+  end
+
+  def self.deliverable_message?(message)
+    native_csat = message.template? && message.input_csat? && message.sender_type.nil? && message.sender_id.nil?
+    (message.outgoing? || native_csat) && !message.private?
   end
 
   def current_binding?

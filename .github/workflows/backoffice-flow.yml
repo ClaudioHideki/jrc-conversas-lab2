@@ -8,6 +8,7 @@ on:
       - codex/crm-backoffice-servicedesk-visual-20261101
       - codex/release-integrada-specs-20261102
       - codex/lab2-integral-20261102
+      - 'codex/ura-padrao-lab2-*'
   pull_request:
     paths:
       - 'app/controllers/api/v1/accounts/crm/**'
@@ -196,8 +197,14 @@ jobs:
       - name: Regressao de contratos e integridade
         run: |
           bundle exec rspec spec/services/jrc_broker spec/requests/api/v1/accounts/jrc_broker*_spec.rb \
+            spec/config/application_time_zone_spec.rb spec/models/jrc_native_module_defaults_spec.rb \
+            spec/services/message_templates/template/csat_survey_spec.rb \
+            spec/services/csat_survey_service_native_spec.rb spec/services/csat_survey_service_concurrency_spec.rb \
+            spec/controllers/public/api/v1/csat_survey_controller_spec.rb \
             spec/models/jrc_broker_webhook_obligation_spec.rb spec/jobs/jrc_broker_webhook_job_spec.rb \
             spec/models/jrc_human_assignment_policy_event_spec.rb \
+            spec/requests/jrc_connection_summary_spec.rb spec/enterprise/requests/jrc_connection_summary_spec.rb \
+            spec/enterprise/services/jrc_human_assignment/availability_spec.rb spec/enterprise/models/inbox_spec.rb \
             spec/models/jrc_broker_connection_event_spec.rb spec/requests/jrc_connection_history_spec.rb \
             spec/services/jrc_campaigns/broker*_spec.rb spec/lib/webhooks/trigger_spec.rb \
             spec/services/jrc_human_assignment spec/requests/jrc_human_assignment_spec.rb \

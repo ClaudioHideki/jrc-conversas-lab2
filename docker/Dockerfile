@@ -108,8 +108,8 @@ FROM mirror.gcr.io/library/ruby:3.4.4-alpine3.21@sha256:bf74912af8989a3ca3f35312
 
 ARG GIT_SHA
 LABEL org.opencontainers.image.revision=$GIT_SHA \
-      org.opencontainers.image.title="JRC Conversas - candidato Cadastro Mestre" \
-      org.opencontainers.image.description="Cadastro Mestre integrado; jrc_customer_master desligada por padrao"
+      org.opencontainers.image.title="JRC Conversas Grupo JRC" \
+      org.opencontainers.image.description="Imagem padrao LAB2 com Broker e Flow nativo configuraveis por empresa"
 
 ARG NODE_VERSION="24.13.0"
 ARG PNPM_VERSION="10.2.0"

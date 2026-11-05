@@ -7,10 +7,22 @@ const native = readFileSync(new URL('../.github/workflows/backoffice-flow.yml', 
 const build = readFileSync(new URL('../.github/workflows/build-ghcr.yml', import.meta.url), 'utf8');
 const smoke = readFileSync(new URL('./smoke_backoffice_candidate.sh', import.meta.url), 'utf8');
 
+test('the standard URA candidate keeps validation mandatory and publishes only its own repository packages', () => {
+  assert.match(native.split('pull_request:')[0], /codex\/ura-padrao-lab2-\*/);
+  assert.match(build, /startsWith\(github.ref_name, 'codex\/ura-padrao-lab2-'\)/);
+  assert.match(build, /codex\/ura-padrao-lab2-\*/);
+  assert.doesNotMatch(build, /claudiohideki\/jrc-conversas-nico-v12-2-7-comercial-integrado/);
+  assert.match(build, /repository_image=\$\{GITHUB_REPOSITORY,,\}/);
+  for (const path of ['spec/models/jrc_native_module_defaults_spec.rb', 'spec/config/application_time_zone_spec.rb',
+    'spec/services/message_templates/template/csat_survey_spec.rb', 'spec/services/csat_survey_service_concurrency_spec.rb']) {
+    assert.ok(native.includes(path), `the native gate must run ${path}`);
+  }
+});
+
 test('the integral candidate triggers native validation and cannot bypass its image gate', () => {
   assert.match(native.split('pull_request:')[0], new RegExp(branch));
   assert.match(build, /github\.ref_name == 'codex\/lab2-integral-20261102'/);
-  assert.match(build, /codex\/lab2-integral-20261102\) ;;/);
+  assert.match(build, /codex\/lab2-integral-20261102(?:\||\) ;;)/);
 });
 
 test('main retains the native regression and exact-SHA image release gates after promotion', () => {

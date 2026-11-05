@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "component": "jrc-native-flow-editor",
   "sourceRepository": "ClaudioHideki/BrokerJRCIA",
-  "sourceSha": "ef5c5aea41b28a04b2f4e81cddca425145671ef4",
+  "sourceSha": "2d30a5a544aa0eae12c208867e4912c369626787",
   "sourceCommitted": true,
   "lockfileSha256": "dafcbad0115860b04c4b17525222e9d405964759458a0bda05bf7d53d8fc5829",
   "inputs": [
@@ -158,7 +158,7 @@
     },
     {
       "path": "apps/web/src/automations/node-editors/MenuEditor.tsx",
-      "sha256": "dfe5e18d2d49eff42e1b99f98ff4fcc775a63225d6320f5eb41098f34c3c4012",
+      "sha256": "f1d2dc666d7697793edf5ddc7d9a29b51e322ab964357b44c2f51eb2c83b6c9e",
       "dependency": false
     },
     {
@@ -178,7 +178,7 @@
     },
     {
       "path": "apps/web/src/automations/studio.css",
-      "sha256": "51b8735f4e9af201f451fa8859b5ae97b8dad9d59d2e26be53122bd21b25e756",
+      "sha256": "5a86a6130cba4e08a4df8c99f1b18112919d4b2be4df29eec2304ae59282c7aa",
       "dependency": false
     },
     {
@@ -203,7 +203,7 @@
     },
     {
       "path": "apps/web/src/native-flow/Executions.tsx",
-      "sha256": "1daa85470988e3f1a8e3365515d333f2f99b32439db0130e3a6e6b52c93e6c3c",
+      "sha256": "277bce4a015239d330f1410dfdf85635b8c9aafb4907aa4ee5c296653a9b91b7",
       "dependency": false
     },
     {
@@ -223,7 +223,7 @@
     },
     {
       "path": "apps/web/src/native-flow/workspace.tsx",
-      "sha256": "9fdcdfe1a5ad47283100bac8779ec81beec1f6bcd0b471a2e7e4a8afa055f223",
+      "sha256": "6ed3ff8269ad97af72a50ec17889e33709bbbaad6e51816d221f0fa8fa93881c",
       "dependency": false
     },
     {
@@ -233,7 +233,7 @@
     },
     {
       "path": "apps/web/src/pages/AutomationStudio.tsx",
-      "sha256": "5761343fb57b03a8561d6361ecb531fb2a48182fed4dd226eb3ca7b29f54e42d",
+      "sha256": "1d770495393a14e79f34247ab5ae9bc5faa6944e6432318fcdefdf72d6cbce59",
       "dependency": false
     },
     {
@@ -243,7 +243,7 @@
     },
     {
       "path": "apps/web/src/pages/NewAutomation.tsx",
-      "sha256": "9a3ca892c9f6b4fbb7d644c1a690db3bc067e337883978d50eca74326a2e1008",
+      "sha256": "9385ad62452027b3b6a001aa0c3306ea049329cd20538445abeb65e22b5c722b",
       "dependency": false
     },
     {
@@ -888,7 +888,7 @@
     },
     {
       "path": "packages/contracts/src/automation-menu.ts",
-      "sha256": "c13e835c6f4f17aa4f1ee19b3392e548330078c44aded329d141b5ae589a1999",
+      "sha256": "957fc9d250938f3dc96f5d288e25c31505387b30f84aef461365ff3149ffd29e",
       "dependency": false
     },
     {
@@ -918,7 +918,7 @@
     },
     {
       "path": "packages/contracts/src/automations-v1.ts",
-      "sha256": "58fda4015f724664a8c1e8c632b9740b910636ce98686a6727aa9dfbd4eafa51",
+      "sha256": "fbb9fc77bab5a0d84114da662f99212fe9a8895b3be42add0e2db3c388869655",
       "dependency": false
     },
     {
@@ -963,7 +963,7 @@
     },
     {
       "path": "packages/contracts/src/flow-executions.ts",
-      "sha256": "eaa2e435ac8f8c1bae3ac899fd1a61641549cda0ef8d3e9fd48d9a08be6b0c2c",
+      "sha256": "a1dd3615876861240407cb24c10f7cc323f1c566613cff165b17aabfefbbf51d",
       "dependency": false
     },
     {
@@ -978,12 +978,12 @@
     },
     {
       "path": "packages/contracts/src/history-import.ts",
-      "sha256": "9e22b69f71afe0cb2c56ac1295fa35f8cb8530e2d440d4cccf31663777666538",
+      "sha256": "a68bfb72e2dba5488c3da8b6d747f1aa013fda06dbaaf0042539d9d04ddc5905",
       "dependency": false
     },
     {
       "path": "packages/contracts/src/index.ts",
-      "sha256": "720c002eab2af01fe4abf375ba71a3ddec3f071c7652f5291f4e031e2c3572fa",
+      "sha256": "1de2ef263e73d128756177216792eee52c9900a351524ddbd9cfbc65d83a5154",
       "dependency": false
     },
     {
@@ -1032,6 +1032,11 @@
       "dependency": false
     },
     {
+      "path": "packages/contracts/src/oia-visual-reconstruction.ts",
+      "sha256": "006e799558e62e729470101316c82e080fe657cba087f6d40cd7d0a07b1cd672",
+      "dependency": false
+    },
+    {
       "path": "packages/contracts/src/operator-reception.ts",
       "sha256": "57038ee73a4271c5b2599a7a39a0654eaae2246b99742a0b552d7adad6d015e5",
       "dependency": false
@@ -1073,7 +1078,7 @@
     },
     {
       "path": "scripts/build-native-flow-editor.mjs",
-      "sha256": "2de3f1f2c167d57cf203738d3bf204443da1be340d26171bcd45ffcdd85a52d2",
+      "sha256": "643e94f06cc3aafa2f7973bcf78bc667dd8ec42f4ba4f152e38022ae0d5ed866",
       "dependency": false
     },
     {
@@ -1100,8 +1105,8 @@
     },
     {
       "path": "editor.js",
-      "bytes": 959464,
-      "sha256": "0a1cb29ff7917376517aeace01bdae672ea5ac88d1e87863307d02e8f35c44a4"
+      "bytes": 966510,
+      "sha256": "310416a69f9f344faebbe059312eb4cf2814955ae2fcb4e1acf26aa8f12e584b"
     },
     {
       "path": "editor.js.LEGAL.txt",

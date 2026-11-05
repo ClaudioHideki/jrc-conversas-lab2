@@ -186,6 +186,12 @@ RSpec.describe JrcFlows::NativeResponders, :sd_concurrency, type: :request do
     expect { described_class.verify_pair!(inbox, nil, nil) }.to raise_error(JrcFlows::NativeOwnership::Denied)
   end
 
+  it 'rejects even an inactive legacy association under the explicit native null pair' do
+    bot = create(:agent_bot, account: account)
+    AgentBotInbox.create!(account: account, inbox: inbox, agent_bot: bot, status: :inactive)
+    expect { described_class.verify_pair!(inbox, nil, nil) }.to raise_error(JrcFlows::NativeOwnership::Denied)
+  end
+
   it 'dispatches the canonical event outside a transaction and refuses stale epoch metadata' do
     bot, scope, epoch = canonical_bot
     Timeout.timeout(5) do

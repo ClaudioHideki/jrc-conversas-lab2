@@ -3,6 +3,9 @@ class MessageTemplates::Template::CsatSurvey
 
   def perform
     ActiveRecord::Base.transaction do
+      Conversation.lock.find(conversation.id)
+      next if conversation.messages.exists?(content_type: :input_csat)
+
       conversation.messages.create!(csat_survey_message_params)
     end
   end
