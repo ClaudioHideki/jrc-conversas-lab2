@@ -18,7 +18,7 @@ class JrcBackoffice::Signatures::Gateway
 
   delegate :capabilities, :callback_path, to: :@adapter
 
-  %i[authenticate! status recipients resend remind cancel document recover_send notification].each do |operation|
+  %i[authenticate! status recipients resend remind cancel document recover_send notification evidence].each do |operation|
     define_method(operation) do |*arguments, **keywords|
       ensure_account!
       @adapter.public_send(operation, *arguments, **keywords)

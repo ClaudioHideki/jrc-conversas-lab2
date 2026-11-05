@@ -45,6 +45,8 @@ module JrcCrm
     EVENT_TYPES.push('backoffice_signer_roster_created')
     EVENT_TYPES.concat(%w[backoffice_authority_proposed backoffice_authority_evidence_accessed])
     EVENT_TYPES.concat(%w[signature_delivery_admitted signature_delivery_canceled])
+    EVENT_TYPES.concat(%w[backoffice_signature_artifact_uploaded backoffice_signature_evidence_captured])
+    EVENT_TYPES.push('backoffice_signature_evidence_accepted')
     EVENT_TYPES.concat(%w[customer_contact_primary_changed customer_contact_context_changed])
     EVENT_TYPES.concat(%w[customer_segment_created customer_segment_updated customer_segment_deleted customer_segment_override_changed])
     EVENT_TYPES.concat(%w[customer_economic_group_created customer_economic_group_updated customer_economic_group_deleted customer_economic_group_linked])

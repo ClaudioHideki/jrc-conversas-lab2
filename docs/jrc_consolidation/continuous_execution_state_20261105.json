@@ -1,0 +1,54 @@
+{
+  "status": "Execution ongoing; not a final report and not C-G closure",
+  "user_request": "499267ac-546d-4853-b4cf-7f03a2ea0629",
+  "initial_head": "be54d0f7b4ce8d4e2a077cf2bdd8c2a4d5c88f5e",
+  "branch": "codex/relacionamento-v2-20261101",
+  "last_validated_checkpoint": "3b31577e8115a6fb5c2d9cc7e2297d3d755e9b9b",
+  "completed_current_work": "Native pending task/ticket responsibility transfer; 57 backend regression,23Vue,9 directed locking and10 reader/concurrency reruns passed with overlaps. Original executor eligibility is separate from origin reader rights.",
+  "active_work": "E1 provider evidence capture and version-bound immutable persistence. Ten initial domain/connector observation tests passed; they are synthetic provider replies and not DocuSign homologation.",
+  "uncommitted_E1_files": [
+    "app/services/jrc_backoffice/docusign/client.rb",
+    "app/services/jrc_backoffice/docusign/adapter.rb",
+    "app/services/jrc_backoffice/docusign/evidence.rb",
+    "app/services/jrc_backoffice/signatures/gateway.rb",
+    "app/services/jrc_backoffice/signatures/evidence_observation.rb",
+    "app/services/jrc_backoffice/signatures/artifacts.rb",
+    "app/services/jrc_backoffice/documents.rb",
+    "app/models/jrc_backoffice/signature_artifact_bundle.rb",
+    "db/migrate/20261105120000_create_backoffice_signature_artifact_bundles.rb",
+    "spec/services/jrc_backoffice/docusign/evidence_spec.rb",
+    "spec/services/jrc_backoffice/signatures/evidence_observation_spec.rb"
+  ],
+  "exact_next_actions": [
+    "Inspect continuous-evidence-lint01; preserve uncommitted files and finish static gates without disabling tests/cops.",
+    "Use backend.py --verify-only to sync owned isolated test source, then verify exact Rails.env/test database jrc_rel_v2_candidate_test on jrc-rel-v2-pg-20261101 and exactly one pending migration20261105120000. Apply only that additive migration there; never production/application databases, never dump host schema.",
+    "Write and run committed synthetic artifact capture tests: permissions, exact version, private immutable versions, duplicate/replay/conflict, security-pending state and rollback.",
+    "Implement trusted current-version evidence/security verification, explicit native signature release, authenticated API/UI and final immutable dossier; validate E3 afterwards.",
+    "Return to remaining F1 safe scoped withdrawal/cadence/project owner authority-receipt handling, alternative capacity inputs; then remaining F2/C/D/G items. Continue after checkpoints; no final until no authorized implementable tasks remain."
+  ],
+  "test_environment": {
+    "source_manifest": ".codex/d9-notifications-20261104/snapshot.json",
+    "source_root": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+    "database": "jrc_rel_v2_candidate_test",
+    "no_application_schema_migrations_executed": true,
+    "E1_migration_at_time_of_note": "20261105120000 applied exclusively in jrc_rel_v2_candidate_test with exact environment/host/pending-version guards; exit0, no host schema dump, no real environment migration. Log:continuous-evidence-isolated-migration.log.",
+    "backend_helper": ".codex/d9-notifications-20261104/backend.py",
+    "frontend_helper": ".codex/d-approvals-20261104/frontend.py",
+    "native_reports": ["continuous-native-final", "continuous-native-locks", "continuous-native-reader"],
+    "E1_initial_test": "continuous-evidence01:10examples,0failures"
+  },
+  "provider_validation_sources": [
+    "https://developers.docusign.com/docs/esign-rest-api/reference/envelopes/envelopedocuments/",
+    "https://developers.docusign.com/docs/esign-rest-api/v2/reference/envelopes/envelopedocuments/get/"
+  ],
+  "security_notes": [
+    "Signed PDF hash is byte-integrity evidence, not a claim that signed/unsigned PDFs are byte-identical or that cryptographic PDF signatures were independently validated.",
+    "Envelope/provider/account/environment/exact version and required signers must stay pinned; new provider default must affect only new sends.",
+    "Native DocumentVersion/DocumentSafety/private blob protections will be reused for received files. Do not promote unscanned bytes, a manual upload, or completion_reported into a completed signed dossier.",
+    "No real participant removal or provider request; tests use synthetic records and WebMock, with external network disabled."
+  ],
+  "restrictions": "No build/recompile, no5379 change/restart, no four-container restart/reconfiguration, no cleanup/delete of existing data, no push/GHCR/deploy/production/client change, no real provider operations. Additive migrations allowed only in owned synthetic test database.",
+  "disk_last_observed_bytes": 9615912960,
+  "TRR": "Undefined; do not invent",
+  "company_documents_without_portfolio": "Explicitly deferred"
+}

@@ -1,0 +1,48 @@
+{
+  "date": "2026-11-05",
+  "branch": "codex/relacionamento-v2-20261101",
+  "parent_head": "3b31577e8115a6fb5c2d9cc7e2297d3d755e9b9b",
+  "status": "Validated documentary receipt checkpoint; E1 and C-G remain open, autonomous execution continues",
+  "diagnosis_after_interruption": {
+    "last_command": "continuous-artifacts02",
+    "result": "Already completed:5examples,0failures,exit0,3m1.7s",
+    "container_test_process": "No test process remained; docker top showed only the preserved tail and Rails ruby process.",
+    "synthetic_database": "No connections in pg_stat_activity at first diagnosis, hence no blocked sessions or locks to recover.",
+    "recovery_action": "None required. No process terminated, session canceled or container restarted.",
+    "preserved_files": "All25distinct files confirmed:11committed by3b31577e plus14pending files. Subsequent authorized development adds files; none of the25were discarded.",
+    "current_followup": "During the next test, observed ClientRead with no blocking PID. Idle-in-transaction ClientRead is a client wait, not evidence of a PostgreSQL lock deadlock."
+  },
+  "implementation": [
+    "Pinned provider evidence observation validates the admitted envelope, exact current contract version, source PDF hash, required signer identities/positions, signed timestamps and frozen authority validity periods.",
+    "DocuSign boundary confirms one uploaded contract document and unchanged status/recipient/document facts around retrieval of final PDF and separate certificate.",
+    "Native private DocumentVersion/DocumentSafety protections reused. Provider files remain unavailable for trusted release until security admission; manual uploads and completion_reported alone do not sign a contract.",
+    "Immutable encrypted artifact bundle binds delivery/version/connection/provider/environment/external account and both exact file versions/hashes, with server HMAC and native audit.",
+    "Native transactional account/order/request/contract locks revalidate authorization and source after provider I/O. Concurrent captures yield one bundle and two document versions; replay does not repeat provider reads.",
+    "Only additive migration20261105120000 was applied, solely in jrc_rel_v2_candidate_test with exact environment/host/pending-version guards. No host schema dump or real-environment migration."
+  ],
+  "tests_not_additive": [
+    { "label": "continuous-evidence01", "backend": 10, "failures": 0, "purpose": "Initial observation and connector validation" },
+    { "label": "continuous-artifacts02", "backend": 5, "failures": 0, "purpose": "Committed immutable capture, duplicate/replay, unit revocation, tenant isolation and two-connection capture race" },
+    { "label": "recovery-evidence-final", "backend": 35, "failures": 0, "duration": "6m8s", "purpose": "Final observation, connector, native HTTP client and completion-package regression; overlaps the10initial examples" }
+  ],
+  "static_gates": "recovery-evidence-lint:0offenses across targeted new Ruby files/specs/migration; git diff --check passed. No whole-repository clean-lint claim.",
+  "failure_corrected": "New artifact/capture event types were initially absent from the native AuditEvent allowlist. They were explicitly registered; validation remains enabled. Initial5example capture run had3failures; corrected run passed all5.",
+  "security_limits": [
+    "Provider replies/PDFs and scanner observations in tests are synthetic; no real signature, DocuSign demo or external scanner acceptance claimed.",
+    "Hashes establish byte integrity. No claim of byte-equivalence between unsigned/signed PDF or independent cryptographic validation of PDF signatures.",
+    "Current artifact capture does not activate a contract, advance Backoffice or accept CS handoff. Explicit post-security acceptance/API/UI and immutable final dossier remain subsequent work."
+  ],
+  "preservation": {
+    "four_container_started_at_unchanged": true,
+    "no5379_change": true,
+    "no_build_cleanup_push_ghcr_deploy_or_real_provider_operation": true,
+    "diagnostic_free_bytes": 8483467264,
+    "capture_test_minimum_free_bytes": 8467783680,
+    "subsequent_observed_free_bytes": 8267808768
+  },
+  "official_provider_references": [
+    "https://developers.docusign.com/docs/esign-rest-api/reference/envelopes/envelopedocuments/",
+    "https://developers.docusign.com/docs/esign-rest-api/v2/reference/envelopes/envelopedocuments/get/"
+  ],
+  "exact_next_action": "Collect recovery-evidence-acceptance results and complete the explicit acceptance/API/UI flow; then implement immutable completion dossier, revalidate E3 and return to remaining F1/F2/C/D/G work without ending after this checkpoint."
+}

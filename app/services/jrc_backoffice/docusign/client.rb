@@ -32,6 +32,10 @@ class JrcBackoffice::Docusign::Client
     api(:get, "envelopes/#{uuid!(id)}/recipients")
   end
 
+  def documents(id)
+    api(:get, "envelopes/#{uuid!(id)}/documents")
+  end
+
   def resend(id)
     raise JrcBackoffice::Docusign::Error.new(code: 'CONNECTION_NOT_READY') unless @integration.delivery_ready?
 

@@ -1,6 +1,9 @@
+require 'stringio'
+
 class JrcBackoffice::Documents
   MAX_BYTES = 20.megabytes
   CONTENT_TYPES = { '.pdf' => 'application/pdf', '.png' => 'image/png', '.jpg' => 'image/jpeg', '.jpeg' => 'image/jpeg' }.freeze
+  SignatureFile = Struct.new(:tempfile, :original_filename)
 
   def initialize(request:, actor:)
     @request = request
@@ -32,6 +35,22 @@ class JrcBackoffice::Documents
     @pending_blob = nil
   end
 
+  # System artifacts are not editable checklist requirements. They retain the
+  # native immutable version, private blob, scan job and rollback protections.
+  def receive_signature_file!(delivery:, kind:, artifact:)
+    @pending_blob = nil
+    input = signature_file_input!(delivery, kind, artifact)
+    @request.with_lock do
+      writable!
+      replay_version!(input[:key], input[:digest], input[:idempotency]) || persist_signature_file!(delivery, kind, input)
+    end
+  rescue StandardError
+    JrcBackoffice::PrivateBlob.clean_uncommitted(@pending_blob, marker: 'jrc_backoffice_document_upload')
+    raise
+  ensure
+    @pending_blob = nil
+  end
+
   def reflect_analysis!(version)
     @request.with_lock do
       latest = versions.where(document_key: version.document_key).order(version: :desc).first
@@ -54,6 +73,29 @@ class JrcBackoffice::Documents
   end
 
   private
+
+  def signature_file_input!(delivery, kind, artifact)
+    raise ArgumentError, 'Unsupported signature artifact' unless %i[signed_document certificate].include?(kind)
+    raise Pundit::NotAuthorizedError unless delivery.account_id == @request.account_id && delivery.backoffice_request_id == @request.id
+
+    bytes = artifact.fetch(:bytes)
+    digest = Digest::SHA256.hexdigest(bytes)
+    raise ActiveStorage::IntegrityError unless bytes.b.start_with?('%PDF-') && bytes.bytesize <= MAX_BYTES && digest == artifact.fetch(:sha256)
+
+    key = "signature_delivery_#{delivery.id}_#{kind}"
+    { key: key, digest: digest, idempotency: Digest::SHA256.hexdigest("#{key}:#{digest}"),
+      file: SignatureFile.new(StringIO.new(bytes), "#{kind}.pdf") }
+  end
+
+  def persist_signature_file!(delivery, kind, input)
+    key = input.fetch(:key)
+    record = versions.new(account: @request.account, uploaded_by: @actor, document_key: key,
+      version: versions.where(document_key: key).maximum(:version).to_i + 1, sha256: input.fetch(:digest), idempotency_key: input.fetch(:idempotency))
+    attach_upload!(record, input.fetch(:file), 'application/pdf')
+    record.save!
+    audit!('backoffice_signature_artifact_uploaded', version_id: record.id, delivery_id: delivery.id, kind: kind, sha256: input.fetch(:digest))
+    record
+  end
 
   def validate_upload!(key, idempotency_key)
     raise ArgumentError, 'Selecione um requisito documental configurado.' unless requirements.any? { |row| row['key'] == key }

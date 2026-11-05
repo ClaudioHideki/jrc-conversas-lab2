@@ -55,6 +55,10 @@ class JrcBackoffice::Docusign::Adapter
     end }
   end
 
+  def evidence(external_id)
+    JrcBackoffice::Docusign::Evidence.new(adapter: self, client: @client).call(external_id)
+  end
+
   def recover_send(transaction_id:)
     JrcBackoffice::Docusign::Recovery.new(client: @client).call(transaction_id: transaction_id)
   end
