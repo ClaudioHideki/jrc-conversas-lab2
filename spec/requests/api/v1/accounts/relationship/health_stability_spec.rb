@@ -57,4 +57,20 @@ RSpec.describe 'Versioned relationship health stability configuration', type: :r
     expect(response).to have_http_status(:forbidden)
     expect(JrcRelationship::Configuration.where(account: foreign)).to be_empty
   end
+
+  it 'persists the opt-in repeat cooldown through the native API and retains the zero default and history' do
+    get url, headers: headers, as: :json
+    payload = response.parsed_body.slice('scope_key', 'version', 'weights', 'rules')
+    expect(payload['rules']['automatic_action_cooldown_hours']).to eq(0)
+    payload['rules']['automatic_action_cooldown_hours'] = 72
+    patch url, headers: headers, as: :json, params: payload
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.dig('rules', 'automatic_action_cooldown_hours')).to eq(72)
+    expect(response.parsed_body['history'].map { |row| row.dig('rules', 'automatic_action_cooldown_hours') }).to eq([72, 0])
+    invalid = response.parsed_body.slice('scope_key', 'version', 'weights', 'rules')
+    invalid['rules']['automatic_action_cooldown_hours'] = -1
+    patch url, headers: headers, as: :json, params: invalid
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(JrcRelationship::Configuration.find_by!(account: account).effective_rules['automatic_action_cooldown_hours']).to eq(72)
+  end
 end

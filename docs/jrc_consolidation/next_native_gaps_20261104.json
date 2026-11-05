@@ -159,5 +159,68 @@
       "Remaining C/D gaps and G real current-build browser acceptance.",
       "TRR undefined; company documents without portfolio deferred; DocuSign demo/external acceptance not performed."
     ]
+  },
+  "F2b_round_update_20261105": {
+    "date": "2026-11-05",
+    "cooldown_report": "docs/jrc_consolidation/automatic_action_cooldown_checkpoint_20261105.json",
+    "classification": [
+      {
+        "requirement": "F1 native Central approval and customer-count capacity",
+        "state": "Concluído e testado",
+        "visual": "implementado mas não homologado visualmente",
+        "reports": [
+          "portfolio_distribution_central_checkpoint_20261105.json",
+          "portfolio_capacity_checkpoint_20261105.json"
+        ]
+      },
+      {
+        "requirement": "F1 complete distribution/removal and weighted/hour capacity",
+        "state": "parcial",
+        "remaining": "Complete responsibility destination validation/transfer, safe analyst removal, approved scope transfer and alternative capacity modes."
+      },
+      {
+        "requirement": "F2 satisfaction source windows, customer trend and local NICO read freshness",
+        "state": "Concluído e testado",
+        "visual": "implementado mas não homologado visualmente",
+        "report": "health_windows_checkpoint_20261105.json"
+      },
+      {
+        "requirement": "F2 monitoring-alert cooldown",
+        "state": "Concluído e testado",
+        "visual": "implementado mas não homologado visualmente",
+        "report": "automatic_action_cooldown_checkpoint_20261105.json"
+      },
+      {
+        "requirement": "F2 complete freshness/priority/anti-noise policy",
+        "state": "parcial",
+        "remaining": "Other dimensions, broader trend/priority rules, aggregation, global task ceilings and representative scale."
+      },
+      {
+        "requirement": "E1/E3 provider signed artifacts bound to exact contract version and sealed final dossier",
+        "state": "pendente",
+        "remaining": "Current package remains a truthful current export, not a signed-artifact/sealed-dossier completion."
+      },
+      {
+        "requirement": "C/D functional/documentary closure",
+        "state": "parcial",
+        "remaining": "Existing per-Word audit gaps preserved; no closure claimed."
+      },
+      {
+        "requirement": "G current-source browser/visual acceptance",
+        "state": "bloqueado",
+        "reason": "Explicit no-build/no-frontend-recompile/no-server5379-change instruction. Old assets cannot validate new code."
+      },
+      {
+        "requirement": "DocuSign external demo acceptance",
+        "state": "bloqueado",
+        "reason": "Demo preparation and separately authorized real provider operations are still required."
+      },
+      {
+        "requirement": "TRR and company documents without portfolio",
+        "state": "bloqueado",
+        "reason": "TRR has no approved formula; portfolio-free documents were explicitly deferred by the user."
+      }
+    ],
+    "next_recommended": "Finish F1 responsibility destinations/safe removal and remaining capacity modes; then E exact version-bound signed artifacts/certificate and sealed dossier, without provider operations or environment changes."
   }
 }

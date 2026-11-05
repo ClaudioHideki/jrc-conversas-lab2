@@ -424,7 +424,8 @@
       "portfolio_transfer_approval_required": "Require formal Central approval for portfolio transfers",
       "portfolio_review_validity_minutes": "Portfolio review validity (minutes)",
       "satisfaction_window_days": "Satisfaction evidence window (days)",
-      "health_trend_window_days": "Health trend window (days)"
+      "health_trend_window_days": "Health trend window (days)",
+      "automatic_action_cooldown_hours": "Monitoring alert repeat cooldown (hours; 0 disables)"
     },
     "ACCOUNT_SCOPE": "Toda a conta",
     "CONFIG_SCOPE": "Configuração por conta, segmento ou produto",
@@ -530,6 +531,7 @@
     "APPLY_PLAYBOOK": "Aplicar playbook",
     "EXPORT": "Exportar carteira",
     "PORTFOLIO_BATCH": "Operar {count} clientes selecionados",
+    "AUTOMATIC_ACTION_NOTICE": "For monitoring alerts, cooldown delays repeated tasks only when a previously closed cause has exactly the same source evidence and health measurement. Active tasks keep updating and risks remain visible. Changed evidence is evaluated normally. Existing daily deduplication is preserved. Survey rules and separately started playbooks retain their own policies.",
     "HEALTH_EVIDENCE": {
       "SATISFACTION": "Satisfaction source evidence",
       "TREND": "Observed health trend",

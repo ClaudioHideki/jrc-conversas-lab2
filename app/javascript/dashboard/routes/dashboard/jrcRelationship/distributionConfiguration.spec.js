@@ -23,6 +23,7 @@ const configuration = {
     portfolio_transfer_approval_required: false,
     portfolio_review_validity_minutes: 15,
     healthy_threshold: 80,
+    automatic_action_cooldown_hours: 0,
     required_documents: [],
   },
 };
@@ -85,5 +86,30 @@ it('offers native team settings without presenting health controls that do not r
     wrapper.find('[data-testid="relationship-rule-healthy_threshold"]').exists()
   ).toBe(false);
   expect(wrapper.find('fieldset').exists()).toBe(true);
+  expect(
+    wrapper
+      .find('[data-testid="relationship-rule-automatic_action_cooldown_hours"]')
+      .exists()
+  ).toBe(false);
+  wrapper.unmount();
+});
+
+it('allows zero and persists typed cooldown hours through the existing permission-bound settings form', async () => {
+  const wrapper = mountPanel();
+  await flushPromises();
+  const input = wrapper.get(
+    '[data-testid="relationship-rule-automatic_action_cooldown_hours"]'
+  );
+  expect(input.attributes('min')).toBe('0');
+  expect(input.attributes('max')).toBe('8760');
+  await input.setValue('72');
+  await wrapper.get('form').trigger('submit');
+  await flushPromises();
+  expect(api.saveConfiguration).toHaveBeenCalledWith(
+    '12',
+    expect.objectContaining({
+      rules: expect.objectContaining({ automatic_action_cooldown_hours: 72 }),
+    })
+  );
   wrapper.unmount();
 });

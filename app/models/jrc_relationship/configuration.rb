@@ -26,6 +26,7 @@ class JrcRelationship::Configuration < ApplicationRecord
                     'health_hysteresis_points' => 0, 'health_drop_points' => 20, 'health_drop_action_priority' => 70,
                     'portfolio_transfer_approval_required' => false, 'portfolio_review_validity_minutes' => 15,
                     'portfolio_capacity_limits' => [], 'satisfaction_window_days' => 90, 'health_trend_window_days' => 30,
+                    'automatic_action_cooldown_hours' => 0,
                     'auto_handoff' => true, 'missing_factor_policy' => 'renormalize', 'survey_automation_enabled' => false,
                     'renewal_window_days' => [15, 30, 60, 90, 120],
                     'eligibility_mode' => 'legacy_order', 'handoff_acceptance_required' => false, 'playbook_flow_effects_enabled' => false,
@@ -42,7 +43,7 @@ class JrcRelationship::Configuration < ApplicationRecord
   NON_NUMERIC_RULES = %w[auto_handoff survey_automation_enabled missing_factor_policy critical_priority_codes qbr_agenda_template adoption_metric
                          risk_reasons survey_question_nps survey_question_ces renewal_window_days eligibility_mode handoff_acceptance_required
                          playbook_flow_effects_enabled playbook_flow_policy required_documents health_hysteresis_points
-                         portfolio_transfer_approval_required portfolio_capacity_limits].freeze
+                         portfolio_transfer_approval_required portfolio_capacity_limits automatic_action_cooldown_hours].freeze
 
   def effective_weights
     DEFAULT_WEIGHTS.merge(weights)
@@ -73,7 +74,7 @@ class JrcRelationship::Configuration < ApplicationRecord
     validate_rule_lists
     validate_document_requirements
     validate_capacity_limits
-    validate_temporal_windows
+    validate_temporal_policy
     validate_scope
   end
 
@@ -83,11 +84,8 @@ class JrcRelationship::Configuration < ApplicationRecord
     errors.add(:rules, e.message)
   end
 
-  def validate_temporal_windows
-    %w[satisfaction_window_days health_trend_window_days].each do |key|
-      value = effective_rules.fetch(key)
-      errors.add(:rules, "#{key} must be a whole number from1 to3650 days") unless value.is_a?(Integer) && value.between?(1, 3650)
-    end
+  def validate_temporal_policy
+    JrcRelationship::HealthTemporalPolicy.validation_errors(effective_rules).each { |message| errors.add(:rules, message) }
   end
 
   def validate_document_requirements

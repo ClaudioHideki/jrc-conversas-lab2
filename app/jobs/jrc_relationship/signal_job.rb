@@ -86,7 +86,7 @@ class JrcRelationship::SignalJob < ApplicationJob
     assignment.with_lock do
       action = processor.action!('post_ticket', "Follow-up após chamado crítico #{record.id}", data,
                                  context.configuration(assignment).effective_rules, key: "post-ticket:#{record.id}")
-      JrcRelationship::Playbooks.new(context).run!(assignment, 'ticket', source_key: action.id)
+      JrcRelationship::Playbooks.new(context).run!(assignment, 'ticket', source_key: action.id) if action
     end
   end
 end

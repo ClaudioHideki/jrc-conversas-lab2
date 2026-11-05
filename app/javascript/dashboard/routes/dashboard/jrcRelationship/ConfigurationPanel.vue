@@ -261,6 +261,12 @@ const date = value => formatDate(value, props.metadata?.formatting);
         /></label>
       </div>
       <h3 class="mb-3 mt-5 font-semibold">{{ t('RELATIONSHIP.RULES') }}</h3>
+      <p
+        v-if="!distributionOnly"
+        class="mb-3 text-sm"
+      >
+        {{ t('RELATIONSHIP.AUTOMATIC_ACTION_NOTICE') }}
+      </p>
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <label
           v-for="(_, key) in ordinaryRules"
@@ -308,7 +314,10 @@ const date = value => formatDate(value, props.metadata?.formatting);
                 : 0.1
             "
             :min="
-              key === 'health_hysteresis_points'
+              [
+                'health_hysteresis_points',
+                'automatic_action_cooldown_hours',
+              ].includes(key)
                 ? 0
                 : [
                       'satisfaction_window_days',
@@ -325,7 +334,9 @@ const date = value => formatDate(value, props.metadata?.formatting);
                       'health_trend_window_days',
                     ].includes(key)
                   ? 3650
-                  : undefined
+                  : key === 'automatic_action_cooldown_hours'
+                    ? 8760
+                    : undefined
             "
             :class="inputClass"
           /><input
