@@ -281,6 +281,15 @@ test('persiste exclusividade supervisao e escala individual com intervalo', asyn
   await dialog
     .getByTestId('distribution-visibility')
     .selectOption('assigned_only');
+  await expect(
+    dialog.getByRole('combobox', {
+      name: 'Visibilidade das conversas nesta caixa',
+      exact: true,
+    })
+  ).toBeVisible();
+  await expect(
+    dialog.getByText('Supervisores da caixa', { exact: true })
+  ).toBeVisible();
   await dialog.locator('[data-supervisor-id="1"]').check();
   await dialog.locator('[data-agent-limit-id="2"]').fill('5');
   await dialog.getByTestId('distribution-policy-save').click();
@@ -291,6 +300,15 @@ test('persiste exclusividade supervisao e escala individual com intervalo', asyn
     .getByRole('tab', { name: 'Regras e horários', exact: true })
     .click();
   await dialog.getByTestId('schedule-agent').selectOption('2');
+  await expect(
+    dialog.getByRole('group', {
+      name: 'Escalas semanais individuais',
+      exact: true,
+    })
+  ).toBeVisible();
+  await expect(dialog.getByTestId('schedule-enabled')).toHaveAccessibleName(
+    'Usar uma escala individual para este agente'
+  );
   await dialog.getByTestId('schedule-enabled').check();
   await dialog.locator('[data-add-period-day="1"]').click();
   await dialog.locator('[data-period-end="1-0"]').fill('12:00');

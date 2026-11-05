@@ -27,6 +27,49 @@ beforeEach(() => {
 });
 afterEach(() => wrapper?.unmount());
 
+it('renders exclusive distribution and individual shifts in Brazilian Portuguese without English fallback', async () => {
+  api.connectionDistribution.mockResolvedValue({
+    policy: {
+      enabled: true,
+      mode: 'round_robin',
+      visibility: 'assigned_only',
+      supervisor_ids: [7],
+      team_ids: [11],
+      max_open: 10,
+    },
+    teams,
+    agents: [{ id: 7, name: 'Lucas' }],
+    calendar: { enabled: true, timezone: 'America/Sao_Paulo' },
+  });
+  wrapper = mountPolicy();
+  wrapper.vm.$i18n.locale = 'pt_BR';
+  try {
+    await flushPromises();
+    expect(wrapper.text()).toContain('Visibilidade das conversas nesta caixa');
+    expect(wrapper.text()).toContain('Supervisores da caixa');
+    expect(wrapper.text()).toContain('Escalas semanais individuais');
+    expect(wrapper.text()).toContain(
+      'Os horários usam o fuso America/Sao_Paulo'
+    );
+    expect(wrapper.text()).toContain(
+      'Usar uma escala individual para este agente'
+    );
+    expect(wrapper.text()).not.toMatch(
+      /Individual weekly shifts|Inbox supervisors|Manual pauses/
+    );
+    await wrapper.get('[data-testid="schedule-enabled"]').setValue(true);
+    await wrapper.get('[data-add-period-day="1"]').trigger('click');
+    expect(
+      wrapper.get('[data-period-start="1-0"]').attributes('aria-label')
+    ).toBe('segunda-feira, período 1, início');
+    expect(
+      wrapper.get('[data-period-end="1-0"]').attributes('aria-label')
+    ).toBe('segunda-feira, período 1, término');
+  } finally {
+    wrapper.vm.$i18n.locale = 'en';
+  }
+});
+
 it('configures exclusive visibility with a supervisor and an individual agent capacity', async () => {
   api.connectionDistribution.mockResolvedValue({
     policy: {

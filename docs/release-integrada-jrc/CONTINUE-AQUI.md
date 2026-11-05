@@ -1,4 +1,12 @@
-# Publicação autorizada — Grupo JRC — 05/11/2026
+# Correção PT-BR — 05/11/2026
+
+O usuário solicitou explicitamente que a tela fique integralmente em português do Brasil; essa instrução autoriza a tradução PT-BR apesar da orientação padrão de AGENTS.md sobre catálogos en/Crowdin. Base executável implantada d77ae401. Reprodução: novo teste real do formulário apresentou o texto em inglês e falhou antes da correção (35 testes antigos passaram). Foram preenchidas as 45 traduções ausentes de jrcBroker, incluindo escalas, acessibilidade, supervisores, capacidade, permissões e configuração. Cobertura do catálogo:317/317chaves, sem divergências de parâmetros. GREENlocal:117testes/15arquivos, lint0erros, Prettier/diff aprovados. A jornada Playwright exige nomes acessíveis em português em desktop/mobile. API, banco, credenciais, fuso e regras das caixas não foram alterados. Publicar/implantar somente após os gates desse novo SHA; a publicação anterior abaixo é histórica.
+
+# Publicação verificada — Grupo JRC — 05/11/2026
+
+Imagem executável `d77ae401f46d9c654232c547932ce5712244c47d` publicada no run42084127988 e implantada no Grupo JRC pelo digest `sha256:f2c2d83eeb9720a2ad718789b661e53ff0b14b26080987aa12ae22cc5ba4492b`. CI nativa42082206709 e WhatsApp42082206657 aprovadas nesse SHA. Rails e451fb21f007 e Sidekiq21c5bce2947a executam o mesmo SHA, conferido em ambos os containers. Init64de86c3c7e4 exit0, migrations pendentes0, PostgreSQL/Redis saudáveis, heartbeat e cron de recuperação ativos, HTTPShealth200. Compose125linhas preservado com somente a troca do digest, sem ENV. Regras de caixas preservadas; nenhuma escala, supervisor, fuso, campanha ou pareamento foi configurado na produção. Editor novo conferido em produção; inbox1 está em UTC e herda a regra anterior. Relatório e ZIP de evidências ficam em `output/release-distribuicao-20261105` na raiz do workspace principal. Este parágrafo é checkpoint documental local posterior ao SHA executável; não corresponde a outra imagem, merge ou implantação.
+
+# Preparação da publicação — Grupo JRC — 05/11/2026
 
 O usuário autorizou gerar a imagem e implantar no Grupo JRC. A inspeção do Dokploy e de `/app/.git_sha` confirmou fonte `200b4f1ddd7459ec924e314cfe34cb93f11c5d5e` e imagem `ghcr.io/claudiohideki/jrc-conversas-lab2@sha256:6b6e364af77dfbd7267afbdd5dc4b9a3ff1783208352da76e502931101dbb942`. Essa fonte e a main `a92f9bf8dd4a0b8828530f6c5d52d367449fe24b` estão preservadas na candidata. Sem migrations novas desde a imagem instalada. Não alterar ENV, engine Broker, sessões, campanhas ou regras reais das caixas nesta publicação.
 
