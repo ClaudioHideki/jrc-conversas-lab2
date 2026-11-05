@@ -10,15 +10,29 @@ class JrcRelationship::ResponsibilityBlockers
     plans = @context.records(JrcRelationship::SuccessPlan).where(id: entries.select { |row| row['kind'] == 'plans' }.pluck('id'))
     result = reference_blockers(plans, plan_references(plans), activities)
     result << 'active_cadence_requires_native_review' if active_cadence?(assignment)
-    unless activities.all? { |row| row.metadata['relationship_assignment_id'].to_s == assignment.id.to_s }
-      result << 'activity_origin_requires_native_review'
-    end
+    result << 'activity_origin_requires_native_review' unless exclusive_activity_origins?(assignment, entries, activities)
     result << 'shared_activity_requires_native_review' if shared_activities?(assignment, activities)
     native = JrcRelationship::NativeResponsibilities.new(@context, executor_id: @executor_id)
     (result + native.blockers(assignment, entries)).uniq
   end
 
   private
+
+  def exclusive_activity_origins?(assignment, entries, activities)
+    plan_ids = JrcRelationship::PortfolioResponsibilities.new(@context).plan_activity_ids(entries)
+    native_ids = native_plan_activity_ids(assignment, activities)
+    activities.all? do |activity|
+      direct = activity.metadata.to_h['relationship_assignment_id']
+      next direct.to_s == assignment.id.to_s if direct.present?
+
+      plan_ids.include?(activity.id) && native_ids.include?(activity.id)
+    end
+  end
+
+  def native_plan_activity_ids(assignment, activities)
+    referenced = activities.select { |activity| activity.metadata.to_h['relationship_assignment_id'].blank? }.map(&:id)
+    referenced.empty? ? [] : assignment.customer_context(@context.member).activities.where(id: referenced).pluck(:id)
+  end
 
   def active_cadence?(assignment)
     JrcRelationship::CadenceEnrollment.exists?(account_id: @context.account.id, assignment_id: assignment.id, state: 'active')

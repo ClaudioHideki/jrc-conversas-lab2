@@ -51,7 +51,22 @@ class JrcRelationship::PortfolioResponsibilities
     @context.records(TYPES.fetch(kind).first)
   end
 
+  def plan_activity_ids(entries)
+    ids = plan_activity_references(entries).filter_map { |row| row['activity_id'] }.map { |id| Integer(id.to_s, 10) }.uniq
+    raise ArgumentError, 'Plan activities must belong to this account' unless @context.account.jrc_crm_activities.where(id: ids).count == ids.length
+
+    ids
+  end
+
   private
+
+  def plan_activity_references(entries)
+    plans = @context.records(JrcRelationship::SuccessPlan).where(id: entries.select { |row| row['kind'] == 'plans' }.pluck('id'))
+    references = plans.flat_map { |plan| plan.goals + Array(plan.metadata['milestones']) }
+    raise ArgumentError, 'Pending plan activities require native review' unless references.length <= MAX_RECORDS && references.all?(Hash)
+
+    references
+  end
 
   def entry(kind, record, owner_id)
     from = kind == 'activities' ? record.user_id : record.owner_id
@@ -79,10 +94,11 @@ class JrcRelationship::PortfolioResponsibilities
   end
 
   def activity_ids(entries)
-    %w[actions qbrs].flat_map do |kind|
+    ids = %w[actions qbrs].flat_map do |kind|
       ids = entries.select { |row| row['kind'] == kind }.pluck('id')
       TYPES.fetch(kind).first.where(account_id: @context.account.id, id: ids).pluck(:activity_id).compact
     end
+    (ids + plan_activity_ids(entries)).uniq
   end
 
   def visibility

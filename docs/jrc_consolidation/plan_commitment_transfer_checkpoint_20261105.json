@@ -1,0 +1,50 @@
+{
+  "date": "2026-11-05",
+  "parent_head": "865ccbac77d0875dee6fec708e3c147fe6ab8c4d",
+  "status": "Exclusive native plan CRM commitments now participate in the existing reviewed atomic responsibility transfer; F1 withdrawal remains partial.",
+  "files": [
+    "app/services/jrc_relationship/portfolio_responsibilities.rb",
+    "app/services/jrc_relationship/responsibility_blockers.rb",
+    "spec/services/jrc_relationship/responsibility_transfer_plan_activity_spec.rb"
+  ],
+  "implementation": [
+    "Pending goals/milestones activity references join the existing authorized bounded review inventory, destination receipt and native CRM owner transfer.",
+    "Exclusive native customer context is checked; direct origin to another allocation, shared active plans, missing/foreign records and denied scopes retain fail-closed behavior.",
+    "Closed commitments and immutable reviewed snapshots retain their original provenance; source changes invalidate approval.",
+    "No new endpoint or parallel write path: existing review/approve/advance interface handles these entries."
+  ],
+  "tests_non_additive": [
+    {
+      "label": "plan-native-transfer01",
+      "examples": 15,
+      "failures": 5,
+      "reason": "New nullable native metadata path failed; one foreign fixture lacked required owner."
+    },
+    {
+      "label": "plan-native-transfer02",
+      "examples": 5,
+      "failures": 1,
+      "reason": "Foreign fixture lacked required user; remaining four passed."
+    },
+    {
+      "label": "plan-native-transfer-final",
+      "examples": 15,
+      "failures": 1,
+      "reason": "All ten existing regressions and four new cases passed. Existing source policy denied the foreign plan earlier with Pundit, instead of the later ArgumentError expected by the new test."
+    },
+    {
+      "label": "plan-native-transfer-isolation",
+      "examples": 1,
+      "failures": 0,
+      "reason": "Foreign and missing references both denied by unchanged native source authorization; no policy relaxed."
+    }
+  ],
+  "static_gates": "plan-native-clean:0 RuboCop offenses for all three source/spec files. git diff --check clean.",
+  "remaining": [
+    "Reviewed native project-owner authority transitions and active cadence successor handover.",
+    "Final governed analyst withdrawal and membership receipts; global roles/teams are not CS-only and must not be silently removed.",
+    "Fresh Chrome acceptance remains pending no-build restriction."
+  ],
+  "disk_final_bytes": 7412166656,
+  "restrictions": "No build,cleanup,push,GHCR,deploy,5379 change,container restart or external operation."
+}
