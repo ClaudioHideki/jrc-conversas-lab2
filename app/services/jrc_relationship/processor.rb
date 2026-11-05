@@ -175,7 +175,9 @@ class JrcRelationship::Processor
   def risk!(kind, reason, severity, data)
     active = JrcRelationship::RiskCase.where(assignment: @assignment, kind: kind, status: %w[detected analyzing planned negotiating]).first
     if active
-      if active.severity != severity
+      # A weaker automatic observation cannot dismiss an already critical case.
+      # An authorized operator can still reclassify it through the native editor.
+      if active.severity != severity && active.severity != 'critical'
         before = { severity: active.severity }
         active.update!(severity: severity, metadata: active.metadata.merge('_source_ids' => data[:_source_ids]))
         @context.audit!(active, before: before, after: { severity: severity }, action: 'risk_reclassified')

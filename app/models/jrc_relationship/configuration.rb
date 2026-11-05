@@ -18,7 +18,7 @@ class JrcRelationship::Configuration < ApplicationRecord
                       'satisfaction' => 10, 'contract' => 10, 'projects' => 5, 'engagement' => 5, 'sentiment' => 0 }.freeze
   DEFAULT_RULES = { 'no_contact_days' => 30, 'renewal_days' => 120, 'risk_threshold' => 60, 'critical_threshold' => 40,
                     'survey_frequency_days' => 90, 'sla_hours' => 24, 'detractor_sla_hours' => 4, 'healthy_threshold' => 80, 'priority_health' => 0.4,
-                    'priority_mrr' => 0.2, 'priority_renewal' => 0.2, 'priority_inactivity' => 0.2,
+                    'priority_mrr' => 0.2, 'priority_renewal' => 0.2, 'priority_inactivity' => 0.2, 'priority_trend' => 0, 'priority_sla' => 0,
                     'mrr_priority_ceiling_cents' => 1_000_000, 'critical_priority_codes' => %w[P1 critical urgent],
                     'ticket_penalty' => 30, 'sla_penalty' => 20, 'overdue_finance_score' => 20,
                     'project_penalty' => 30, 'task_penalty' => 10, 'csat_threshold' => 3,
@@ -44,7 +44,7 @@ class JrcRelationship::Configuration < ApplicationRecord
                          risk_reasons survey_question_nps survey_question_ces renewal_window_days eligibility_mode handoff_acceptance_required
                          playbook_flow_effects_enabled playbook_flow_policy required_documents health_hysteresis_points
                          portfolio_transfer_approval_required portfolio_capacity_limits automatic_action_cooldown_hours
-                         automatic_action_daily_limit].freeze
+                         automatic_action_daily_limit priority_trend priority_sla].freeze
 
   def effective_weights
     DEFAULT_WEIGHTS.merge(weights)
@@ -77,7 +77,12 @@ class JrcRelationship::Configuration < ApplicationRecord
     validate_capacity_limits
     validate_temporal_policy
     validate_automatic_action_budget
+    validate_priority_signals
     validate_scope
+  end
+
+  def validate_priority_signals
+    JrcRelationship::PrioritySignals.validation_errors(effective_rules).each { |message| errors.add(:rules, message) }
   end
 
   def validate_automatic_action_budget

@@ -391,6 +391,8 @@
       "priority_mrr": "Peso por MRR",
       "priority_renewal": "Peso por renovação",
       "priority_inactivity": "Peso por inatividade",
+      "priority_trend": "Peso por queda observada de saúde (0 desativa)",
+      "priority_sla": "Peso por evidência de SLA vencido (0 desativa)",
       "mrr_priority_ceiling_cents": "Teto MRR para prioridade (centavos)",
       "critical_priority_codes": "Códigos de prioridade crítica",
       "ticket_penalty": "Redução por chamado crítico",
@@ -1505,6 +1507,7 @@
         "service_tickets": "Service Desk tickets",
         "projects": "Native project ownership"
       }
-    }
+    },
+    "PRIORITY_SIGNAL_NOTICE": "Os pesos opcionais de tendência e SLA começam desativados. Tendência usa a queda observada em pontos de saúde; SLA usa a existência de vencimentos autorizados. Dados ausentes não são tratados como zero. A revisão manual de prioridade permanece preservada."
   }
 }

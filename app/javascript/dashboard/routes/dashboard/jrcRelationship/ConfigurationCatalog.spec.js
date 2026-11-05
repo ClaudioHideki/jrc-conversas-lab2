@@ -24,6 +24,50 @@ vi.mock('./PlaybookExecutionPanel.vue', () => ({
 vi.mock('./PlaybookDesignPreview.vue', () => ({
   default: { template: '<div />' },
 }));
+it('saves fractional trend and SLA weights in the native versioned editor, allowing zero without replacing other rules', async () => {
+  mocks.saveConfiguration.mockClear();
+  const state = {
+    scope_key: 'account',
+    version: 9,
+    weights: { adoption: 100 },
+    rules: { required_documents: [], priority_trend: 0, priority_sla: 0 },
+    history: [],
+  };
+  mocks.configuration.mockResolvedValue({ data: state });
+  mocks.saveConfiguration.mockResolvedValue({ data: {} });
+  const wrapper = mount(Configuration, {
+    props: { allowed: true },
+    global: { stubs: { PlaybookFlowPolicyForm: true } },
+  });
+  await flushPromises();
+  const trend = wrapper.get('[data-testid="relationship-rule-priority_trend"]');
+  const sla = wrapper.get('[data-testid="relationship-rule-priority_sla"]');
+  expect([trend.attributes('min'), sla.attributes('min')]).toEqual(['0', '0']);
+  expect([trend.attributes('step'), sla.attributes('step')]).toEqual([
+    'any',
+    'any',
+  ]);
+  await trend.setValue('0.25');
+  await sla.setValue('0.5');
+  await wrapper.get('form').trigger('submit');
+  await flushPromises();
+  expect(mocks.saveConfiguration).toHaveBeenCalledWith(
+    '1400',
+    expect.objectContaining({
+      scope_key: 'account',
+      version: 9,
+      rules: {
+        required_documents: [],
+        priority_trend: 0.25,
+        priority_sla: 0.5,
+      },
+    })
+  );
+  await wrapper.setProps({ allowed: false });
+  await flushPromises();
+  expect(wrapper.find('form').exists()).toBe(false);
+  wrapper.unmount();
+});
 it('saves the documentary catalog in the native scoped/versioned configuration and reloads persisted state', async () => {
   const entry = {
     code: 'proof',

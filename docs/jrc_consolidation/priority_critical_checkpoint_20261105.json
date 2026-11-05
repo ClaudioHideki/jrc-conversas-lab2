@@ -1,0 +1,78 @@
+{
+  "date": "2026-11-05",
+  "parent_head": "d4b60420171937b40b11a496d3e2a8d79ae65dee",
+  "status": "F2 opt-in native trend/SLA priority inputs and critical-risk preservation implemented and locally tested. F2 remains open.",
+  "files": [
+    "app/services/jrc_relationship/priority_signals.rb",
+    "spec/requests/api/v1/accounts/relationship/priority_configuration_spec.rb",
+    "spec/services/jrc_relationship/priority_signals_spec.rb",
+    "spec/services/jrc_relationship/processor_critical_preservation_spec.rb",
+    "app/javascript/dashboard/i18n/locale/en/relationship.json",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ConfigurationCatalog.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ConfigurationPanel.vue",
+    "app/models/jrc_relationship/configuration.rb",
+    "app/services/jrc_relationship/priority.rb",
+    "app/services/jrc_relationship/processor.rb"
+  ],
+  "implementation": [
+    "Optional priority_trend and priority_sla weights default to zero; legacy and old saved rules preserve their prior factor/score calculation.",
+    "Trend uses the actual authorized HealthSnapshot score drop in points, retaining the source snapshot identity. SLA uses authorized current breached-ticket evidence as binary urgency; missing inputs remain unavailable, not zero.",
+    "Native versioned configuration and editor support zero/fractional weights with persistence, history, stale-write guard and native permissions.",
+    "A weaker automatic risk observation no longer downgrades an existing critical risk. Explicit authorized human reclassification remains available with its native audit.",
+    "Manual priority behavior is preserved as already approved; urgency evidence remains visible without overwriting the explicit choice."
+  ],
+  "tests_non_additive": [
+    {
+      "label": "priority-critical01",
+      "examples": 10,
+      "failures": 0
+    },
+    {
+      "label": "priority-native-regression",
+      "examples": 21,
+      "failures": 0,
+      "scope": "Automatic budget, native health change, explicit manager priority and versioned configuration regressions."
+    },
+    {
+      "label": "priority-ui01",
+      "tests": 3,
+      "failures": 0,
+      "scope": "Existing documentary/recovery forms plus new fractional signal-weight editing case; Vue mocks, not Chrome."
+    }
+  ],
+  "static_gates": {
+    "new_ruby_files": 4,
+    "offenses": 0,
+    "shared_ruby_delta": "priority-static-delta.json:0 new cop counts; inherited11 Priority/22 Processor offenses remain visible; Configuration0",
+    "eslint": "0 errors,35 pre-existing warnings in ConfigurationPanel; new spec0 warnings"
+  },
+  "word_reference": {
+    "file": ".codex/relacionamento-v2-referencia/word-completo.txt",
+    "paragraphs": [
+      "67-71 priority and configurable trend/SLA inputs",
+      "83 evidenced health and absence policy"
+    ],
+    "partial": [
+      "General freshness across dimensions, executive aggregation and universal automatic-engine budget/retry governance remain open.",
+      "Full P0-P3/native retention financial-risk prioritization not claimed complete."
+    ]
+  },
+  "disk": {
+    "start": 7409012736,
+    "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+    "database": "jrc_rel_v2_candidate_test",
+    "no_build": true,
+    "no_server": true,
+    "spec_sha256": {
+      "spec/services/jrc_relationship/automatic_action_budget_spec.rb": "d7a76c225bd110a95418614cfe2c412d1ae1ae8c648469280aa57ed2ce7a52bc",
+      "spec/services/jrc_relationship/health_change_spec.rb": "a954e9d5d419a2c3b079941ee1cb2db5618067347ab183117a9450cf1385645c",
+      "spec/services/jrc_relationship/complementary_review_spec.rb": "6fe4f0c9c600c37d469f650b5e017a64f9649afc31ef0e868218a8e1da24a12f",
+      "spec/requests/api/v1/accounts/relationship/health_stability_spec.rb": "4baf8daa330ffd1d6ca13ba1b66234d4c5c004a18cc7bd312e6447cafb3f2d4e"
+    },
+    "minimum": 7389147136,
+    "exit_code": 0,
+    "end": 7408803840
+  },
+  "next": "F1 automatic operational routing must respect configured analyst availability without altering explicit native manual assignments.",
+  "restrictions": "No build,cleanup,push,GHCR,deploy,5379 change,container restart or external operation."
+}

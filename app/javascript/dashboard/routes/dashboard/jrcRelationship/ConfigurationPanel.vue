@@ -269,6 +269,12 @@ const date = value => formatDate(value, props.metadata?.formatting);
       >
         {{ t('RELATIONSHIP.AUTOMATIC_ACTION_NOTICE') }}
       </p>
+      <p
+        v-if="!distributionOnly"
+        class="mb-3 text-sm"
+      >
+        {{ t('RELATIONSHIP.PRIORITY_SIGNAL_NOTICE') }}
+      </p>
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <label
           v-for="(_, key) in ordinaryRules"
@@ -309,19 +315,23 @@ const date = value => formatDate(value, props.metadata?.formatting);
             :data-testid="`relationship-rule-${key}`"
             type="number"
             :step="
-              [
-                'satisfaction_window_days',
-                'health_trend_window_days',
-                'automatic_action_daily_limit',
-              ].includes(key)
-                ? 1
-                : 0.1
+              ['priority_trend', 'priority_sla'].includes(key)
+                ? 'any'
+                : [
+                      'satisfaction_window_days',
+                      'health_trend_window_days',
+                      'automatic_action_daily_limit',
+                    ].includes(key)
+                  ? 1
+                  : 0.1
             "
             :min="
               [
                 'health_hysteresis_points',
                 'automatic_action_cooldown_hours',
                 'automatic_action_daily_limit',
+                'priority_trend',
+                'priority_sla',
               ].includes(key)
                 ? 0
                 : [
