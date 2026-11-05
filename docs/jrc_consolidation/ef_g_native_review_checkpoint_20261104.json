@@ -303,5 +303,45 @@
       "evidence": "backoffice_completion_report_checkpoint_20261104.json",
       "status": "Scoped current completion CSV and real UI download implemented/tested; package/export of signed files and full conclusion/handoff still pending"
     }
-  ]
+  ],
+  "continuation_20261105": {
+    "date": "2026-11-05",
+    "source_head": "8576c78678d5a7310099db701cf5134b55159fa2",
+    "checkpoints": [
+      {
+        "commit": "7c9edef70edd9d4f3f8c1b18bc138d5fa10c83f4",
+        "stage": "E3",
+        "evidence": "backoffice_cs_handoff_checkpoint_20261105.json",
+        "result": "Exact scoped native completion-to-CS link, explicit prepare/accept,10 native backend and23 initial Vue cases passed;16 changed-component Vue cases rechecked."
+      },
+      {
+        "commit": "82c796618781c135b5bba4f611ace09e72ad1f2d",
+        "stage": "E2",
+        "evidence": "backoffice_approval_mirror_checkpoint_20261105.json",
+        "result": "Native Central history mirror, actual pagination and read-only reused detail;4 backend and17 Vue cases passed."
+      },
+      {
+        "commit": "8576c78678d5a7310099db701cf5134b55159fa2",
+        "stage": "F/G",
+        "evidence": "handoff_project_revalidation_checkpoint_20261105.json",
+        "result": "Reopened native project cannot be accepted; source account lock and current source-scope revalidation.13 of14 first combined cases passed; last fixture corrected and passed alone.10 order cases were repeated only because the common decision path changed."
+      }
+    ],
+    "all_stages_remain_open": true,
+    "authoritative_restrictions": [
+      "No build, push, GHCR, deploy, cleanup, external real operations, production change or server5379 modification",
+      "Old .codex/resume-current-jrc.json build/next-step suggestions are historical and do not override the latest user instruction"
+    ],
+    "next_safe_work": [
+      "F1: native Central-approved portfolio distribution/capacity and safe analyst removal; preserve existing reviewed batch semantics/history and reuse source/version/capability checks. Manual reviewed-batch confirmation is still not Central approval.",
+      "F2: configurable freshness/trend/cooldown with native evidence and old behavior preserved; do not imply current hysteresis/history implement all these requirements.",
+      "E1/E3: version-bound signed artifacts/certificate, immutable final dossier and complete provisioning/CS closure acceptance. Current package truthfully marks unavailable signed artifacts.",
+      "G: current compiled desktop/mobile light/dark acceptance remains blocked by the explicit no-build/no-server-change instruction; frozen5379 assets cannot be evidence for new components."
+    ],
+    "business_dependencies": [
+      "TRR has no approved formula",
+      "Company documents without portfolio remain explicitly blocked",
+      "DocuSign demo and real external provider/channel acceptance require separately authorized environment and operations"
+    ]
+  }
 }

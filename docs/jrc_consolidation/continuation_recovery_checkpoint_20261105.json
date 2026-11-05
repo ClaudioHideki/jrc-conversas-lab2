@@ -1,0 +1,124 @@
+{
+  "date": "2026-11-05",
+  "requested_base": "e1c6261c8fc30a97d329b23b5c00982cc7f93206",
+  "branch": "codex/relacionamento-v2-20261101",
+  "source_head": "8576c78678d5a7310099db701cf5134b55159fa2",
+  "recovery": "Exact expected HEAD and clean worktree on recovery; no unrecorded post-crash work was overwritten. Required old ancestors checked; connectivity fsck exited0.",
+  "checkpoints": [
+    {
+      "commit": "7c9edef70edd9d4f3f8c1b18bc138d5fa10c83f4",
+      "stage": "E3",
+      "evidence": "backoffice_cs_handoff_checkpoint_20261105.json",
+      "result": "Exact scoped native completion-to-CS link, explicit prepare/accept,10 native backend and23 initial Vue cases passed;16 changed-component Vue cases rechecked."
+    },
+    {
+      "commit": "82c796618781c135b5bba4f611ace09e72ad1f2d",
+      "stage": "E2",
+      "evidence": "backoffice_approval_mirror_checkpoint_20261105.json",
+      "result": "Native Central history mirror, actual pagination and read-only reused detail;4 backend and17 Vue cases passed."
+    },
+    {
+      "commit": "8576c78678d5a7310099db701cf5134b55159fa2",
+      "stage": "F/G",
+      "evidence": "handoff_project_revalidation_checkpoint_20261105.json",
+      "result": "Reopened native project cannot be accepted; source account lock and current source-scope revalidation.13 of14 first combined cases passed; last fixture corrected and passed alone.10 order cases were repeated only because the common decision path changed."
+    }
+  ],
+  "Word_classification": {
+    "implemented_automated_only": [
+      "E: native exact completion-to-CS navigation and explicit handoff persistence/acceptance",
+      "E: linked request/order/contract Central history mirror with independent native visibility and scoped report access",
+      "F/G: native reopened-project denial, completed-project acceptance, foreign-source denial and immutable decisions"
+    ],
+    "implemented_with_divergences": [
+      "Final package includes actual safe preserved files and honest omissions, not version-bound signed artifacts or a sealed final immutable dossier",
+      "Mirror shows native stages/version/history; full captured rule/tier/audit is the native separately authorized JSON report",
+      "Central pagination is real but existing native index materializes visible history before slicing: production scale unvalidated"
+    ],
+    "pending": [
+      "F1: native Central-approved portfolio distribution/capacity and safe analyst removal; preserve existing reviewed batch semantics/history and reuse source/version/capability checks. Manual reviewed-batch confirmation is still not Central approval.",
+      "F2: configurable freshness/trend/cooldown with native evidence and old behavior preserved; do not imply current hysteresis/history implement all these requirements.",
+      "E1/E3: version-bound signed artifacts/certificate, immutable final dossier and complete provisioning/CS closure acceptance. Current package truthfully marks unavailable signed artifacts.",
+      "G: current compiled desktop/mobile light/dark acceptance remains blocked by the explicit no-build/no-server-change instruction; frozen5379 assets cannot be evidence for new components."
+    ],
+    "business_dependencies": [
+      "TRR has no approved formula",
+      "Company documents without portfolio remain explicitly blocked",
+      "DocuSign demo and real external provider/channel acceptance require separately authorized environment and operations"
+    ],
+    "next_stages_not_complete": [
+      "C",
+      "D",
+      "E",
+      "F",
+      "G"
+    ]
+  },
+  "regressions": {
+    "prior109": "Not repeated",
+    "backend": "18 distinct scenarios covered across directed runs;10 order cases necessarily rerun after common controller change. Recorded fixture failures corrected without weakening validation.",
+    "frontend": "40 distinct selected Vue cases:23 initial E3/CRM-segment cases and17 mirror/decision cases;16 changed E3 component cases repeated after lint corrections. Mocks are not Chrome acceptance.",
+    "failures": "See each checkpoint; no failing run removed or represented as success.",
+    "lint": "New Ruby files0; final shared HandoffsController RuboCop0 after LF normalization; changed JS/Vue ESLint0 errors. Existing dynamic-i18n and framework/fixture warnings retained in logs."
+  },
+  "runtime": {
+    "date": "2026-11-05",
+    "purpose": "read-only preservation evidence, not current-source browser acceptance",
+    "no_runtime_changes": true,
+    "free_bytes": 12536918016,
+    "login": {
+      "http": 200,
+      "sha256": "62fdeec11d63846d9fca4f4cb9401c1677e9c525f25e449d0b52b22537056166",
+      "bytes": 8330,
+      "path": "/app/login"
+    },
+    "entry": {
+      "http": 200,
+      "sha256": "ae6897f4131fe8b6d08767ed31bbff7f780cca17cb5e9da960b8d2e4bcfbca52",
+      "bytes": 274583,
+      "path": "/consolidation-customer-b1-b4-4d4a6de3-vite/assets/v3app-Dc7pKck9.js"
+    },
+    "entry_matches_preserved_build": true,
+    "containers": [
+      {
+        "name": "jrc-rel-v2-run-20261101",
+        "running": true,
+        "started_at": "2026-11-04T11:34:25.650429595Z"
+      },
+      {
+        "name": "jrc-rel-v2-pg-20261101",
+        "running": true,
+        "started_at": "2026-11-04T11:34:28.691130017Z"
+      },
+      {
+        "name": "jrc-rel-v2-redis-20261101",
+        "running": true,
+        "started_at": "2026-11-04T11:34:29.041643269Z"
+      },
+      {
+        "name": "jrc-customer-b1-b4-proxy-4d4a6de3",
+        "running": true,
+        "started_at": "2026-11-04T12:04:25.285490323Z"
+      }
+    ]
+  },
+  "disk": {
+    "initial_free_bytes": 13007831040,
+    "minimum_observed_in_owned_test_monitors_bytes": 11967451136,
+    "final_free_bytes": 12532809728,
+    "builds": 0,
+    "cleanups": 0,
+    "safety_stop_bytes": 750000000
+  },
+  "restrictions_preserved": [
+    "No build, push, GHCR, deploy, cleanup, external real operations, production change or server5379 modification",
+    "Old .codex/resume-current-jrc.json build/next-step suggestions are historical and do not override the latest user instruction"
+  ],
+  "next_safe_work": [
+    "F1: native Central-approved portfolio distribution/capacity and safe analyst removal; preserve existing reviewed batch semantics/history and reuse source/version/capability checks. Manual reviewed-batch confirmation is still not Central approval.",
+    "F2: configurable freshness/trend/cooldown with native evidence and old behavior preserved; do not imply current hysteresis/history implement all these requirements.",
+    "E1/E3: version-bound signed artifacts/certificate, immutable final dossier and complete provisioning/CS closure acceptance. Current package truthfully marks unavailable signed artifacts.",
+    "G: current compiled desktop/mobile light/dark acceptance remains blocked by the explicit no-build/no-server-change instruction; frozen5379 assets cannot be evidence for new components."
+  ],
+  "stage_completion_claim": false
+}
