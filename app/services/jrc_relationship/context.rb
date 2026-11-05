@@ -130,6 +130,7 @@ class JrcRelationship::Context
     case kind
     when 'company' then assignments.find_by!(company_id: id)
     when 'unit' then assignments.find_by!(business_unit_id: id)
+    when 'team' then account.teams.joins(:team_members).where(team_members: { user_id: user.id }).find(id)
     when 'segment', 'product'
       raise Pundit::NotAuthorizedError unless assignments.exists?(['settings ->> ? = ?', "#{kind}_id", id])
     else raise Pundit::NotAuthorizedError

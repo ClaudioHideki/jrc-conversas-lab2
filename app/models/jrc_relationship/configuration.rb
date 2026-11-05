@@ -10,7 +10,7 @@ class JrcRelationship::Configuration < ApplicationRecord
       row.actor = actor
     end
   end
-  validates :scope_key, uniqueness: { scope: :account_id }, format: { with: /\A(account|segment:\d+|product:\d+|company:\d+|unit:\d+)\z/ }
+  validates :scope_key, uniqueness: { scope: :account_id }, format: { with: /\A(account|segment:\d+|product:\d+|company:\d+|unit:\d+|team:\d+)\z/ }
   validates :version, numericality: { only_integer: true, greater_than: 0 }
   validate :valid_config
   before_save { JrcRelationship::DistributionApproval.lock_configuration!(account_id) }
@@ -25,6 +25,7 @@ class JrcRelationship::Configuration < ApplicationRecord
                     'critical_action_priority' => 90, 'ticket_action_priority' => 85, 'detractor_action_priority' => 80,
                     'health_hysteresis_points' => 0, 'health_drop_points' => 20, 'health_drop_action_priority' => 70,
                     'portfolio_transfer_approval_required' => false, 'portfolio_review_validity_minutes' => 15,
+                    'portfolio_capacity_limits' => [],
                     'auto_handoff' => true, 'missing_factor_policy' => 'renormalize', 'survey_automation_enabled' => false,
                     'renewal_window_days' => [15, 30, 60, 90, 120],
                     'eligibility_mode' => 'legacy_order', 'handoff_acceptance_required' => false, 'playbook_flow_effects_enabled' => false,
@@ -41,7 +42,7 @@ class JrcRelationship::Configuration < ApplicationRecord
   NON_NUMERIC_RULES = %w[auto_handoff survey_automation_enabled missing_factor_policy critical_priority_codes qbr_agenda_template adoption_metric
                          risk_reasons survey_question_nps survey_question_ces renewal_window_days eligibility_mode handoff_acceptance_required
                          playbook_flow_effects_enabled playbook_flow_policy required_documents health_hysteresis_points
-                         portfolio_transfer_approval_required].freeze
+                         portfolio_transfer_approval_required portfolio_capacity_limits].freeze
 
   def effective_weights
     DEFAULT_WEIGHTS.merge(weights)
@@ -51,6 +52,7 @@ class JrcRelationship::Configuration < ApplicationRecord
     values = DEFAULT_RULES.merge(rules)
     values['playbook_flow_policy'] = values['playbook_flow_policy'].deep_dup
     values['required_documents'] = values['required_documents'].deep_dup
+    values['portfolio_capacity_limits'] = values['portfolio_capacity_limits'].deep_dup
     values
   end
 
@@ -70,7 +72,14 @@ class JrcRelationship::Configuration < ApplicationRecord
     validate_renewal_windows
     validate_rule_lists
     validate_document_requirements
+    validate_capacity_limits
     validate_scope
+  end
+
+  def validate_capacity_limits
+    JrcRelationship::DistributionCapacityPolicy.validate!(account, effective_rules['portfolio_capacity_limits'])
+  rescue ArgumentError => e
+    errors.add(:rules, e.message)
   end
 
   def validate_document_requirements
@@ -166,7 +175,7 @@ class JrcRelationship::Configuration < ApplicationRecord
   def validate_scope
     kind, id = scope_key.to_s.split(':')
     target = { 'segment' => JrcCustomers::Taxonomy, 'product' => JrcCrm::Product, 'company' => JrcCustomers::Company,
-               'unit' => JrcCrm::BusinessUnit }[kind]
+               'unit' => JrcCrm::BusinessUnit, 'team' => Team }[kind]
     scope = target&.where(account_id: account_id, id: id)
     scope = scope.where(kind: 'segment') if kind == 'segment' && scope
     errors.add(:scope_key, 'scope must belong to this account and kind') if scope && !scope.exists?

@@ -1,0 +1,168 @@
+{
+  "date": "2026-11-05",
+  "stage": "F1b, cross-stage D/G regression",
+  "parent_checkpoint": "50bd7759442d63d2360f8997660a9845383d3e72",
+  "classification": "Implemented and locally automated tested; no new-build browser acceptance; F1 and C-G remain open",
+  "implemented": [
+    "Native account/unit/customer/team/segment/product constraints accumulate; specific false values do not disable mandatory parent approval.",
+    "Configured customer-count capacity = floor(maximum × availability × dedication); zero availability blocks new admissions; no invented 400-customer limit.",
+    "Reviewed before/incoming/final counts, stable own receipts and source fingerprint; changed workload requires a new review.",
+    "Account advisory lock plus model-level admission guard protects individual, reviewed and native entry points; two independent PostgreSQL allocations cannot consume one remaining slot.",
+    "Partial destination visibility blocks confirmation and redacts historical counts; no invisible workload is presented as zero.",
+    "Native handoff retains the existing canonical customer unassigned on capacity-only refusal, idempotently; unrelated validation errors are not swallowed.",
+    "Read-only authorized approvers can inspect/decide without portfolio management; only the original review actor may request its source through the native generic request API.",
+    "Changing mandatory approval requires native Central policy_manage scope; removing a governed classification is blocked pending an authorized scope-transfer flow.",
+    "Functional typed capacity form, native team configuration/version history, reviewed summary and authorization-change clearing; health configuration precedence unchanged."
+  ],
+  "files": [
+    "app/controllers/api/v1/accounts/relationship/configuration_controller.rb",
+    "app/controllers/api/v1/accounts/relationship/dashboard_controller.rb",
+    "app/controllers/api/v1/accounts/relationship/distribution_approval_origins_controller.rb",
+    "app/controllers/api/v1/accounts/relationship/portfolio_controller.rb",
+    "app/javascript/dashboard/i18n/locale/en/relationship.json",
+    "app/javascript/dashboard/routes/dashboard/approvals/DistributionApprovalOrigin.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ConfigurationPanel.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/DistributionCapacitySummary.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ModulePage.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/PortfolioCapacityLimitsForm.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ReviewedPortfolioBatchPanel.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/distributionConfiguration.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/portfolioCapacity.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/reviewedPortfolioBatch.spec.js",
+    "app/models/jrc_relationship/assignment.rb",
+    "app/models/jrc_relationship/configuration.rb",
+    "app/services/jrc_approvals/catalog.rb",
+    "app/services/jrc_approvals/requests.rb",
+    "app/services/jrc_relationship/batch_review_authority.rb",
+    "app/services/jrc_relationship/context.rb",
+    "app/services/jrc_relationship/distribution_approval_catalog.rb",
+    "app/services/jrc_relationship/distribution_capacity.rb",
+    "app/services/jrc_relationship/distribution_capacity_guard.rb",
+    "app/services/jrc_relationship/distribution_capacity_policy.rb",
+    "app/services/jrc_relationship/distribution_configuration_governance.rb",
+    "app/services/jrc_relationship/distribution_configurations.rb",
+    "app/services/jrc_relationship/distribution_policy_binding.rb",
+    "app/services/jrc_relationship/distribution_preview.rb",
+    "app/services/jrc_relationship/distribution_scope_guard.rb",
+    "app/services/jrc_relationship/handoff.rb",
+    "app/services/jrc_relationship/handoff_allocation.rb",
+    "app/services/jrc_relationship/reviewed_portfolio_batch.rb",
+    "config/locales/en.yml",
+    "spec/requests/api/v1/accounts/jrc_approvals/portfolio_distribution_spec.rb",
+    "spec/services/jrc_relationship/distribution_capacity_concurrency_spec.rb",
+    "spec/services/jrc_relationship/distribution_capacity_spec.rb"
+  ],
+  "sha256": {
+    "app/controllers/api/v1/accounts/relationship/configuration_controller.rb": "cf9e3bfe6c2b7b32cb476f83609acff87e96f43d5c42f3fa4f16396e309307f8",
+    "app/controllers/api/v1/accounts/relationship/dashboard_controller.rb": "5837bb22cbe082d5aacf7df9b0c6ec3de8c869ab730a6e9ddb68dcebd51a1f3a",
+    "app/controllers/api/v1/accounts/relationship/distribution_approval_origins_controller.rb": "dac15844187283dfec7c604802923ddeba8ffa37ab5e397a31273d584d998a57",
+    "app/controllers/api/v1/accounts/relationship/portfolio_controller.rb": "a90f55cbc31750babcede5b7576dd048d0179f27fc666e5a386f468278786424",
+    "app/javascript/dashboard/i18n/locale/en/relationship.json": "7fc88a57539834e839acfc18c1434220cb9668bdf836ad2155d84e3907f36936",
+    "app/javascript/dashboard/routes/dashboard/approvals/DistributionApprovalOrigin.vue": "177b50362efeac5f8a6d5d8ce3a0ea561429e6cfcd94913f3277bf4f86fb29e8",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ConfigurationPanel.vue": "28fcdc5e1171b7b09d361331c79c540fc9fd2c3149fae778474cc175ca5ab284",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/DistributionCapacitySummary.vue": "fee65957ea306f22be8f43b06a57c92904d8c4013e3432f71995c7da73054ac6",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ModulePage.vue": "cdf9ba7844e0581445a105d346aacd1b9b16298c91b6f044093936cc2fab1d82",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/PortfolioCapacityLimitsForm.vue": "fbaab0850e85eb278f9bc7d703b9faf33c93a7adf2e7a28a4798a492baf27a33",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ReviewedPortfolioBatchPanel.vue": "5fd016adeddafb5cda6390ae2247c28d817e21108c1cc0f273ce6fc860fcdc89",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/distributionConfiguration.spec.js": "aa39278200ad58122c1d7dbf2876675489306bdf218cf67424a2c894f22387ff",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/portfolioCapacity.spec.js": "58508b185c6ff2d394fd0cfb96975270c9afd4a426e388c76406d2a129f80d70",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/reviewedPortfolioBatch.spec.js": "e658b736475a0d5fb95496b2e4da14900a4d51a32c7be7581b68cd6f8648c579",
+    "app/models/jrc_relationship/assignment.rb": "cef81d7dc067187a4e96b835fcfb777577a343768203cc57cc5d7ea9d4a0c2e6",
+    "app/models/jrc_relationship/configuration.rb": "1f13560a2f5bf738ab49617960f2e87291d74702c02bb5a569cf9814a0799211",
+    "app/services/jrc_approvals/catalog.rb": "b01f8e3d7b4481e9bb1b7b9a6318eff52790d27e3be62ceee046d8af38af652d",
+    "app/services/jrc_approvals/requests.rb": "c1e327a4dc0a6d66b328fc3ffc174c786b875f9a961c2c75a3eedd0ab3ec9b70",
+    "app/services/jrc_relationship/batch_review_authority.rb": "e9b73860eb10f8e42ec5be79b94f4bd59c39e321e5e8fd0d2ae07d41902eb753",
+    "app/services/jrc_relationship/context.rb": "20945332a8d3b7e66b4e348bfa8ff3b1109530288c5c2bf1af49c2b717194327",
+    "app/services/jrc_relationship/distribution_approval_catalog.rb": "0283b4d154982a3b31254867a9becd02af645c87ef4db948262af11f1de89fea",
+    "app/services/jrc_relationship/distribution_capacity.rb": "481b116441969c3e46a852ad59a333fc5e3ae40f36a70aa223e2cb0a8befdefe",
+    "app/services/jrc_relationship/distribution_capacity_guard.rb": "5680c64da16d41a62fbb48ca9b32c318f9165f1d0fdd903727f3b3445b383adf",
+    "app/services/jrc_relationship/distribution_capacity_policy.rb": "d617651693f7ee3624203a590e6fc182dbe5b82befeda617f245a7d02c4f0f8f",
+    "app/services/jrc_relationship/distribution_configuration_governance.rb": "4b099892afd7c37c27fec207b2ec784b1859d3f3248e5ed1449a7f8f46bbf3e3",
+    "app/services/jrc_relationship/distribution_configurations.rb": "b370212ad2743c2c677bfdb64bb43c64a6f7ba9f89a1c65fbfef467b6280eb21",
+    "app/services/jrc_relationship/distribution_policy_binding.rb": "45470111d0427f2af60603800855b48b16ffc4841e020d673449f603e6ec2f35",
+    "app/services/jrc_relationship/distribution_preview.rb": "655bb30e7b8ca4bdbc8584cb785186a43e06ccab9ac1681129a943425ca8f619",
+    "app/services/jrc_relationship/distribution_scope_guard.rb": "edd11329b42ce41704f0b2d92bfb7804b0b9d77e2a9f03e3ce962af97336037e",
+    "app/services/jrc_relationship/handoff.rb": "861b7998ce88a3336d4354af3c4916b6da69d4e710fcf8354ae29c88189265f5",
+    "app/services/jrc_relationship/handoff_allocation.rb": "2edb1ca0b4f422deaa5d65bd91b7d425bcd43771b07f0328019fbcbcef0a8ce1",
+    "app/services/jrc_relationship/reviewed_portfolio_batch.rb": "46e3ecf4b1d4c36eff7daa44b3056b926571a9c1bd31bc8e5f5e2b21583ad0b5",
+    "config/locales/en.yml": "bfb1749ea59d0a22c21d673691c50fafb70dce66c6c52f2a637402339c32390a",
+    "spec/requests/api/v1/accounts/jrc_approvals/portfolio_distribution_spec.rb": "f7ee3050d72b56aadc1a137a849a0a4c23e1104fd025b5b59b168bb52823cd92",
+    "spec/services/jrc_relationship/distribution_capacity_concurrency_spec.rb": "f42a39a97b9e618df1e8f7d7a69736b2b76eb78edda1400b854b1c26c9a138bb",
+    "spec/services/jrc_relationship/distribution_capacity_spec.rb": "72803f4fbc25d54ad1e4fe8281b4591bace6788cfea69f70338b8f26c427e7b7"
+  },
+  "validation": {
+    "backend": {
+      "run": "f1capacity06",
+      "examples": 54,
+      "failures": 0,
+      "isolated_database": "jrc_rel_v2_candidate_test",
+      "includes": "13 capacity cases, 1 independent-connection race, 23 native Central distribution, 3 settings compatibility, 14 reviewed-batch regression"
+    },
+    "vue": [
+      {
+        "run": "f1capacityui03",
+        "tests": 20,
+        "failures": 0
+      },
+      {
+        "run": "f1capacityui04",
+        "tests": 2,
+        "failures": 0
+      }
+    ],
+    "rubocop_new_and_touched_boundary_files": {
+      "run": "f1capacitylint05",
+      "files": 13,
+      "offenses": 0
+    },
+    "shared_static_debt": "f1capacitylint04 records pre-existing complexity/style debt in native Assignment, Catalog, Requests, Handoff and dashboard; no claim of a repository-wide clean RuboCop gate. Newly introduced show/approve complexity and formatting errors corrected.",
+    "eslint": {
+      "run": "f1capacityeslint02",
+      "files": 9,
+      "errors": 0,
+      "warnings": 167
+    },
+    "provenance": ".codex/d9-notifications-20261104/f1capacity-source-equivalence.json: all25 changed Ruby ASTs match the final isolated tested source after formatting.",
+    "failed_attempts_preserved": [
+      "f1capacity02 missing policy fixture; native POLICY_REQUIRED correctly blocked",
+      "f1capacity03 fixture lacked configure permission",
+      "f1capacity04 initial assignment created after an explicit target-only limit; fixture order fixed, missing English error translation fixed",
+      "f1capacity05 foreign native team intentionally hidden as404; assertion corrected",
+      "f1capacityui01 sandbox EPERM before test startup; normal scoped execution passed",
+      "f1capacityeslint01 one missing block separator; corrected"
+    ]
+  },
+  "preservation": {
+    "runtime_evidence": ".codex/d9-notifications-20261104/f1capacity-runtime-preservation.json",
+    "unchanged_container_starts": 4,
+    "frozen5379_asset_unchanged": true,
+    "no_build": true,
+    "no_server_or_container_restart": true,
+    "no_migration_or_dependency_change": true,
+    "no_push_external_operations_or_cleanup": true
+  },
+  "disk_bytes": {
+    "block_start": 9596264448,
+    "observed_test_minimum": 9582235648,
+    "final": 9862311936,
+    "mandatory_stop": 750000000
+  },
+  "word_conformance": {
+    "validated": "F1 hard scoped customer capacity, readable reviewed comparison, native Central decision separation, stable history and concurrency. Source Word hash/references preserved in parent report.",
+    "partial": [
+      "Customer-count mode only; weighted load/points/equivalent hours, simulation alternatives and complete policy workload matrix remain open.",
+      "Safe analyst removal and all plan/QBR/task/responsibility destinations are NOT complete; no global TeamMember deletion or permission change is implemented.",
+      "Removing governed team/segment/product scope is blocked rather than silently bypassed; complete approved scope transfer remains pending.",
+      "No current desktop/mobile/light/dark Chrome acceptance under explicit no-build/no-server-change instruction."
+    ]
+  },
+  "next": [
+    "F2 configurable source evidence windows and trends using native snapshots, retaining hysteresis/product history and permission lineage.",
+    "F1 full safe removal/responsibility destinations; E exact signed artifacts and sealed dossier; genuine C/D gaps and proportional G remain open."
+  ],
+  "business_dependencies": [
+    "TRR undefined",
+    "Company documents without portfolio explicitly deferred",
+    "DocuSign demo/external signature acceptance not authorized or claimed"
+  ]
+}

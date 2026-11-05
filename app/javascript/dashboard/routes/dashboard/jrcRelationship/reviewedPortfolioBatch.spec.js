@@ -65,6 +65,25 @@ beforeEach(() => {
 afterEach(() => {
   wrapper?.unmount();
 });
+it('blocks over-capacity execution and clears captured workload after an authorization change', async () => {
+  api.previewPortfolioBatch.mockResolvedValueOnce({
+    data: {
+      ...review,
+      capacity: [{ scope_key: 'account', blocker: 'capacity_exceeded' }],
+    },
+  });
+  wrapper = mount(ReviewedPortfolioBatchPanel, {
+    props: { accountId: '12', proposal, authorizationKey: 'initial' },
+  });
+  await flushPromises();
+  expect(wrapper.get('[data-test="review-approve"]').element.disabled).toBe(
+    true
+  );
+  await wrapper.get('[data-test="review-approve"]').trigger('click');
+  expect(api.approvePortfolioBatch).not.toHaveBeenCalled();
+  await wrapper.setProps({ authorizationKey: 'revoked' });
+  expect(wrapper.find('[data-test="review-approve"]').exists()).toBe(false);
+});
 it('prepares only a preview and requires explicit confirmation bound to its account and digest', async () => {
   wrapper = mount(ReviewedPortfolioBatchPanel, {
     props: { accountId: '12', proposal },

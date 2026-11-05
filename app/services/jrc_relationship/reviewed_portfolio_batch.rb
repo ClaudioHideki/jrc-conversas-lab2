@@ -34,8 +34,7 @@ class JrcRelationship::ReviewedPortfolioBatch
       raise ArgumentError, 'Review is not available' unless review.state == 'previewed'
       raise ArgumentError, 'Review expired' if review.expires_at <= Time.current
 
-      JrcRelationship::BatchReviewPlan.new(context).validate!(review)
-      approval_ids = JrcRelationship::DistributionApproval.new(context).check!(review)
+      approval_ids = authorize_execution!(review, context)
       review.update!(state: 'running', revision: review.revision + 1)
       context.audit!(review, after: { digest: review.digest, approval_request_ids: approval_ids }, action: 'reviewed_batch_execution_confirmed')
       project(review, context)
@@ -69,6 +68,12 @@ class JrcRelationship::ReviewedPortfolioBatch
   end
 
   private
+
+  def authorize_execution!(review, context)
+    JrcRelationship::BatchReviewPlan.new(context).validate!(review)
+    JrcRelationship::DistributionCapacity.new(context).verify!(review)
+    JrcRelationship::DistributionApproval.new(context).check!(review)
+  end
 
   def persist_review(inputs, snapshot, plan)
     review = reviews.create!(inputs: inputs, snapshot: snapshot, digest: plan.digest([inputs, snapshot]),
@@ -121,6 +126,7 @@ class JrcRelationship::ReviewedPortfolioBatch
     assignment = context.assignment(item.assignment_id, write: true)
     assignment.lock!
     JrcRelationship::BatchReviewPlan.new(context).validate!(review, assignment: assignment)
+    JrcRelationship::DistributionCapacity.new(context).verify!(review)
     JrcRelationship::DistributionApproval.new(context).check!(review)
     receipt = apply_reviewed_item(review, item, assignment, context)
     current = JrcRelationship::Context.new(context.member.reload)
@@ -169,6 +175,7 @@ class JrcRelationship::ReviewedPortfolioBatch
     { 'id' => review.id, 'state' => review.state, 'revision' => review.revision, 'digest' => review.digest,
       'expires_at' => review.expires_at.iso8601(6), 'inputs' => review.inputs,
       'summary' => review.snapshot['summary'], 'distribution' => review.snapshot['distribution'],
+      'capacity' => JrcRelationship::DistributionCapacity.new(context).for_view(review),
       'approval' => JrcRelationship::DistributionApproval.new(context).projection(review),
       'items' => reviewed_items(review) }
   end

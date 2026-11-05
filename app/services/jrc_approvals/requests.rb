@@ -1,6 +1,7 @@
 class JrcApprovals::Requests
   def initialize(account:, user:)
-    @account, @user = account, user
+    @account = account
+    @user = user
     @authorization = JrcApprovals::Authorization.new(account: account, user: user)
   end
 
@@ -101,7 +102,7 @@ class JrcApprovals::Requests
 
   def capture(key, resource_id)
     @authorization.member!
-    snapshot = JrcApprovals::Catalog.snapshot(account: @account, user: @user, key: key, resource_id: resource_id)
+    snapshot = JrcApprovals::Catalog.snapshot(account: @account, user: @user, key: key, resource_id: resource_id, purpose: :request)
     actor = @authorization.authorize!('request_create', company_id: snapshot['issuer_company_id'], unit_id: snapshot['business_unit_id'])
     [snapshot, actor]
   end

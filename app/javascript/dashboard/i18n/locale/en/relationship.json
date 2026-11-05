@@ -528,7 +528,42 @@
     "APPLY_PLAYBOOK": "Aplicar playbook",
     "EXPORT": "Exportar carteira",
     "PORTFOLIO_BATCH": "Operar {count} clientes selecionados",
+    "CAPACITY": {
+      "TITLE": "Customer allocation capacity",
+      "POLICY_NOTICE": "Limits use customer counts. Effective capacity is the configured maximum × availability × dedication, rounded down. An empty policy adds no capacity limit. With limits configured, unlisted analysts cannot receive new allocations in this scope.",
+      "ANALYST": "Analyst",
+      "PRESERVED_ANALYST": "Previously configured analyst (not in current options)",
+      "MAXIMUM": "Maximum customers",
+      "AVAILABILITY": "Availability (%)",
+      "DEDICATION": "Dedication (%)",
+      "ADD": "Add analyst limit",
+      "REMOVE": "Remove limit",
+      "INVALID": "Select distinct analysts and enter a whole customer limit and percentages from 0 to 100.",
+      "REVIEW_TITLE": "Reviewed destination capacity",
+      "REVIEW_NOTICE": "Captured before and after counts are revalidated at execution. Changes require a new simulation.",
+      "SCOPES": {
+        "account": "Account",
+        "unit": "Operational unit",
+        "company": "Customer company",
+        "team": "Portfolio team",
+        "segment": "Customer segment",
+        "product": "Product"
+      },
+      "FACTS": {
+        "current": "Before simulation",
+        "incoming": "Incoming customers",
+        "projected": "After transfer",
+        "effective_capacity": "Effective capacity",
+        "available_after": "Available after transfer"
+      },
+      "BLOCKERS": {
+        "capacity_missing": "No limit is configured for this analyst in this scope.",
+        "capacity_scope_denied": "Your permissions do not allow verification of the full destination workload. Counts are hidden.",
+        "capacity_exceeded": "This transfer exceeds the destination capacity."
+      }
+    },
     "DISTRIBUTION": {
+      "PORTFOLIO_TEAM": "Portfolio team",
       "JUSTIFICATION": "Transfer justification",
       "CENTRAL_NOTICE": "Manual review is not formal approval. Request a decision in the native Approval Center, then explicitly confirm execution.",
       "REQUEST_APPROVAL": "Request formal approval",

@@ -77,7 +77,7 @@ class Api::V1::Accounts::Relationship::DashboardController < Api::V1::Accounts::
     { current_user: { id: Current.user.id, name: Current.user.name },
       can_manage: ctx.policy.manage?, can_team: ctx.policy.team?, can_configure: ctx.policy.configure?, can_export_history: ctx.policy.admin?,
       can_view_documents: ctx.policy.documents_view?, can_manage_documents: ctx.policy.documents_manage?,
-      owners: metadata_owners(ctx),
+      owners: metadata_owners(ctx), configuration_teams: metadata_configuration_teams(ctx),
       can_crm: JrcOperations::Access.crm?(ctx.member),
       can_configure_operations: ctx.policy.configure? && JrcOperations::Access.crm?(ctx.member) && ctx.member.administrator?,
       can_nico: Current.account.active? && Current.account.custom_attributes['nico_enabled'] == true,
@@ -86,6 +86,13 @@ class Api::V1::Accounts::Relationship::DashboardController < Api::V1::Accounts::
 
   def metadata_owners(ctx)
     ctx.policy.team? ? ctx.assignable_users.order(:name).limit(500).pluck(:id, :name) : [[Current.user.id, Current.user.name]]
+  end
+
+  def metadata_configuration_teams(ctx)
+    return [] unless ctx.policy.configure?
+
+    rows = ctx.policy.admin? ? Current.account.teams : Current.account.teams.joins(:team_members).where(team_members: { user_id: Current.user.id })
+    rows.order(:name).limit(500).pluck(:id, :name)
   end
 
   def metadata_surveys(ctx)

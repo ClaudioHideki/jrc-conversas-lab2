@@ -12,12 +12,10 @@ class JrcRelationship::Handoff
 
     rules = JrcRelationship::Configuration.find_by(account: account, scope_key: 'account')&.effective_rules ||
             JrcRelationship::Configuration::DEFAULT_RULES
-    assignment = JrcRelationship::Assignment.create_or_find_by!(identity.merge(account: account)) do |row|
-      row.owner_id = order.owner_id
-      row.business_unit_id = order.business_unit_id
-      row.team_id = order.deal&.team_id
-      row.status = rules['handoff_acceptance_required'] ? 'onboarding' : 'active'
-    end
+    assignment = JrcRelationship::HandoffAllocation.call(account: account, identity: identity,
+                                                         attributes: { owner_id: order.owner_id, business_unit_id: order.business_unit_id,
+                                                                       team_id: order.deal&.team_id,
+                                                                       status: rules['handoff_acceptance_required'] ? 'onboarding' : 'active' })
     assignment.with_lock do
       next unless acceptance_ready?(assignment, order, rules)
 

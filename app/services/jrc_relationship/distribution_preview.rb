@@ -12,7 +12,8 @@ class JrcRelationship::DistributionPreview
     raise ArgumentError, 'A justification is required for formal distribution approval' if binding['required'] && @inputs['justification'].blank?
 
     minutes = @records.map { |row| @context.configuration(row).effective_rules.fetch('portfolio_review_validity_minutes') }.min
-    { 'distribution_approval' => binding, 'validity_minutes' => minutes, 'distribution' => comparison }
+    { 'distribution_approval' => binding, 'validity_minutes' => minutes, 'distribution' => comparison,
+      'capacity' => JrcRelationship::DistributionCapacity.new(@context).preview(@inputs, @records) }
   end
 
   private

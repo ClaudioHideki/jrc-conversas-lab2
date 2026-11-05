@@ -132,6 +132,9 @@ en:
       search:
         query_missing: Specify search string with parameter q
     messages:
+      portfolio_capacity_exceeded: exceeds the configured portfolio capacity
+      portfolio_capacity_unconfigured: requires a configured capacity for this portfolio
+      portfolio_capacity_unavailable: is not available for this portfolio
       search:
         time_range_limit_exceeded: 'Search is limited to the last %{days} days'
     categories:

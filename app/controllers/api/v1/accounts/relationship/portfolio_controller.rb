@@ -157,6 +157,7 @@ class Api::V1::Accounts::Relationship::PortfolioController < Api::V1::Accounts::
     JrcRelationship::Assignment.transaction do
       JrcRelationship::DistributionApproval.lock_configuration!(Current.account.id)
       record.with_lock do
+        JrcRelationship::DistributionScopeGuard.check!(relationship_context, record, attrs)
         if attrs.key?(:owner_id) && attrs[:owner_id].to_s != record.owner_id.to_s
           JrcRelationship::DistributionApproval.direct_allowed!(relationship_context, [record])
         end

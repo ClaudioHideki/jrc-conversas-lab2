@@ -15,6 +15,7 @@ import OperationsSettingsPanel from './OperationsSettingsPanel.vue';
 import PlaybookExecutionPanel from './PlaybookExecutionPanel.vue';
 import PlaybookDesignPreview from './PlaybookDesignPreview.vue';
 import PlaybookFlowPolicyForm from './PlaybookFlowPolicyForm.vue';
+import PortfolioCapacityLimitsForm from './PortfolioCapacityLimitsForm.vue';
 const props = defineProps({
   screen: { type: String, default: 'settings' },
   allowed: Boolean,
@@ -30,15 +31,31 @@ const error = ref('');
 const busy = ref(false);
 const scopeKey = ref('account');
 const invalidFlowPolicy = ref(false);
+const invalidCapacity = ref(false);
+const distributionOnly = computed(() => scopeKey.value.startsWith('team:'));
 const ordinaryRules = computed(() =>
   Object.fromEntries(
     Object.entries(config.value?.rules || {}).filter(
-      ([key]) => !['playbook_flow_policy', 'required_documents'].includes(key)
+      ([key]) =>
+        ![
+          'playbook_flow_policy',
+          'required_documents',
+          'portfolio_capacity_limits',
+        ].includes(key) &&
+        (!distributionOnly.value ||
+          [
+            'portfolio_transfer_approval_required',
+            'portfolio_review_validity_minutes',
+          ].includes(key))
     )
   )
 );
 const scopeOptions = computed(() => [
   ['account', t('RELATIONSHIP.ACCOUNT_SCOPE')],
+  ...(props.metadata.configuration_teams || []).map(row => [
+    `team:${row[0]}`,
+    `${t('RELATIONSHIP.DISTRIBUTION.PORTFOLIO_TEAM')}: ${row[1]}`,
+  ]),
   ...(props.metadata.segments || []).map(row => [
     `segment:${row[0]}`,
     `${t('RELATIONSHIP.FIELDS.segment_id')}: ${row[1]}`,
@@ -66,6 +83,7 @@ const load = async () => {
   error.value = '';
   busy.value = false;
   invalidFlowPolicy.value = false;
+  invalidCapacity.value = false;
   if (!props.allowed) return;
   busy.value = true;
   try {
@@ -85,7 +103,13 @@ const load = async () => {
   }
 };
 const save = async () => {
-  if (busy.value || !props.allowed || invalidFlowPolicy.value) return;
+  if (
+    busy.value ||
+    !props.allowed ||
+    invalidFlowPolicy.value ||
+    invalidCapacity.value
+  )
+    return;
   const version = generation;
   const accountId = route.params.accountId;
   busy.value = true;
@@ -213,8 +237,16 @@ const date = value => formatDate(value, props.metadata?.formatting);
       <p class="mb-4 text-sm">
         {{ t('RELATIONSHIP.VERSION', { version: config.version }) }}
       </p>
-      <h3 class="mb-3 font-semibold">{{ t('RELATIONSHIP.WEIGHTS') }}</h3>
-      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <h3
+        v-if="!distributionOnly"
+        class="mb-3 font-semibold"
+      >
+        {{ t('RELATIONSHIP.WEIGHTS') }}
+      </h3>
+      <div
+        v-if="!distributionOnly"
+        class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+      >
         <label
           v-for="(_, key) in config.weights"
           :key="key"
@@ -302,12 +334,19 @@ const date = value => formatDate(value, props.metadata?.formatting);
           />
         </label>
       </div>
+      <PortfolioCapacityLimitsForm
+        v-model="config.rules.portfolio_capacity_limits"
+        :owners="metadata.owners || []"
+        :disabled="busy"
+        @validity="invalidCapacity = !$event"
+      />
       <RequiredDocumentsForm
+        v-if="!distributionOnly"
         v-model="config.rules.required_documents"
         :disabled="busy"
       />
       <PlaybookFlowPolicyForm
-        v-if="config.rules.playbook_flow_policy"
+        v-if="!distributionOnly && config.rules.playbook_flow_policy"
         v-model="config.rules.playbook_flow_policy"
         :disabled="busy"
         @validity="invalidFlowPolicy = !$event"
@@ -316,7 +355,7 @@ const date = value => formatDate(value, props.metadata?.formatting);
         type="submit"
         :class="buttonClass"
         class="mt-5"
-        :disabled="busy || invalidFlowPolicy"
+        :disabled="busy || invalidFlowPolicy || invalidCapacity"
       >
         {{ t('RELATIONSHIP.SAVE') }}
       </button>

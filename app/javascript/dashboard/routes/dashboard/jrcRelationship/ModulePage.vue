@@ -1399,6 +1399,12 @@ const money = value => formatMoney(value, metadata.value?.formatting);
           :key="`${route.params.accountId}:${store.getters.getCurrentUserID}`"
           :account-id="route.params.accountId"
           :actor-id="store.getters.getCurrentUserID"
+          :authorization-key="
+            JSON.stringify([
+              store.getters.getCurrentRole,
+              store.getters.getCurrentUser?.accounts,
+            ])
+          "
           :proposal="portfolioReviewProposal"
           @updated="load"
         />

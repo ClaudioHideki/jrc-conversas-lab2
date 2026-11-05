@@ -13,15 +13,17 @@ class Api::V1::Accounts::Relationship::ConfigurationController < Api::V1::Accoun
   end
 
   def update
-    record = Current.account.with_lock do
-      @relationship_context = JrcRelationship::Context.new(Current.account_user)
-      raise Pundit::NotAuthorizedError unless relationship_context.policy.configure?
+    record = JrcRelationship::DistributionConfigurationGovernance.synchronize(Current.account.id) do
+      Current.account.with_lock do
+        @relationship_context = JrcRelationship::Context.new(Current.account_user)
+        raise Pundit::NotAuthorizedError unless relationship_context.policy.configure?
 
-      scope = params.fetch(:scope_key, 'account')
-      relationship_context.authorize_configuration_scope!(scope)
-      row = JrcRelationship::Configuration.find_or_initialize_by(account: Current.account, scope_key: scope)
-      update_configuration!(row)
-      row
+        scope = params.fetch(:scope_key, 'account')
+        relationship_context.authorize_configuration_scope!(scope)
+        row = JrcRelationship::Configuration.find_or_initialize_by(account: Current.account, scope_key: scope)
+        update_configuration!(row)
+        row
+      end
     end
     render json: configuration_payload(record)
   end
@@ -135,17 +137,11 @@ class Api::V1::Accounts::Relationship::ConfigurationController < Api::V1::Accoun
     raise ActiveRecord::StaleObjectError.new(record, 'update') unless expected == record.version
 
     previous = configuration_version(record)
+    JrcRelationship::DistributionConfigurationGovernance.authorize!(account: Current.account, user: Current.user,
+                                                                    configuration: record, rules: params.require(:rules))
     record.assign_attributes(weights: params.require(:weights).to_unsafe_h, rules: params.require(:rules).to_unsafe_h, version: expected + 1)
     record.save!
-    record.capture_version!(previous, actor: Current.user)
-    current = configuration_version(record)
-    record.capture_version!(current, actor: Current.user)
-    audit_configuration!(record, previous, current)
-  end
-
-  def audit_configuration!(record, previous, current)
-    JrcCustomers::Audit.record!(account: Current.account, actor: Current.user, resource: record, event_type: 'relationship_updated',
-                                from_value: previous, to_value: current, metadata: { action: 'configuration_versioned', scope_key: record.scope_key })
+    JrcRelationship::DistributionConfigurationGovernance.record_versions!(record, actor: Current.user, previous: previous)
   end
 
   def configuration_version(record)
@@ -181,7 +177,7 @@ class Api::V1::Accounts::Relationship::ConfigurationController < Api::V1::Accoun
     return unless step.key?(:message_id)
 
     JrcRelationship::PlaybookFlowInput.find!(account: Current.account, conversation: conversation,
-                                            contact_id: conversation.contact_id, message_id: step[:message_id])
+                                             contact_id: conversation.contact_id, message_id: step[:message_id])
   end
 
   def validate_flow_pin!(flow, step)

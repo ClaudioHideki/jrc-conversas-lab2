@@ -5,6 +5,7 @@ import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcRelationship';
 import DistributionComparison from '../jrcRelationship/DistributionComparison.vue';
+import DistributionCapacitySummary from '../jrcRelationship/DistributionCapacitySummary.vue';
 const props = defineProps({ request: { type: Object, required: true } });
 const route = useRoute();
 const store = useStore();
@@ -65,6 +66,7 @@ onBeforeUnmount(() => {
         {{ data.justification }}
       </p>
       <DistributionComparison :rows="data.distribution" />
+      <DistributionCapacitySummary :rows="data.capacity || []" />
     </template>
   </section>
 </template>

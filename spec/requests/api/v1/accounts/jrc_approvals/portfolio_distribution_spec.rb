@@ -180,6 +180,64 @@ RSpec.describe 'Native Central portfolio distribution', :approval_core, :commerc
     expect(target.reload.state).to eq('pending')
   end
 
+  it 'allows a visible read-only approver to decide without granting portfolio execution or source creation' do
+    target = approval
+    reviewer.custom_role.update!(permissions: JrcApprovals::Authorization::PERMISSIONS + %w[contact_manage jrc_crm jrc_relationship_view
+                                                                                            jrc_relationship_team])
+    get "#{base}/distribution_approval_origins/#{review.id}", headers: reviewer.user.create_new_auth_token
+    expect(response).to have_http_status(:ok)
+    expect do
+      JrcApprovals::Catalog.snapshot(key: JrcRelationship::DistributionApproval::KEY, account: scope[:account], resource_id: review.id,
+                                     user: reviewer.user, purpose: :request)
+    end.to raise_error(Pundit::NotAuthorizedError)
+    approval_vote(scope, reviewer, target)
+    expect(target.reload.state).to eq('approved')
+    expect do
+      JrcRelationship::ReviewedPortfolioBatch.new(JrcRelationship::Context.new(reviewer)).approve(review.id, digest: review.digest)
+    end.to raise_error(Pundit::NotAuthorizedError)
+    expect(first.reload.owner_id).to eq(author.user_id)
+  end
+
+  it 'accumulates mandatory parent requirements despite a more specific false override' do
+    policy
+    JrcRelationship::Configuration.create!(account: scope[:account], scope_key: "team:#{team.id}",
+                                           rules: { portfolio_transfer_approval_required: false })
+    expect(preview.fetch('approval')).to include(required: true)
+    expect { service.approve(review.id, digest: review.digest) }.to raise_error(ArgumentError, /Formal Central approval/)
+  end
+
+  it 'persists versioned native team capacity without changing health resolution or accepting a foreign team' do
+    author.custom_role.update!(permissions: permissions + ['jrc_relationship_configure'])
+    first
+    get "#{base}/configuration", headers: author.user.create_new_auth_token, params: { scope_key: "team:#{team.id}" }
+    expect(response).to have_http_status(:ok)
+    payload = response.parsed_body.slice('scope_key', 'version', 'weights', 'rules')
+    payload['rules']['portfolio_capacity_limits'] = [{ user_id: destination.user_id, maximum: 12, availability: 0.5, dedication: 1 }]
+    patch "#{base}/configuration", headers: author.user.create_new_auth_token, params: payload, as: :json
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.dig('rules', 'portfolio_capacity_limits').first).to include('maximum' => 12)
+    expect(response.parsed_body.fetch('history').size).to eq(2)
+    expect(JrcRelationship::Context.new(author).configuration(first).scope_key).to eq("unit:#{scope[:unit].id}")
+    foreign = create(:team, account: create(:account))
+    patch "#{base}/configuration", headers: author.user.create_new_auth_token,
+                                   params: payload.merge('scope_key' => "team:#{foreign.id}"), as: :json
+    expect(response).to have_http_status(:not_found)
+    expect(JrcRelationship::Configuration.where(account: scope[:account], scope_key: "team:#{foreign.id}")).not_to exist
+  end
+
+  it 'requires native Central policy management before disabling mandatory transfer approval' do
+    reviewer.custom_role.update!(permissions: %w[contact_manage jrc_crm jrc_relationship_view jrc_relationship_team jrc_relationship_configure])
+    first
+    get "#{base}/configuration", headers: reviewer.user.create_new_auth_token, params: { scope_key: "unit:#{scope[:unit].id}" }
+    expect(response).to have_http_status(:ok)
+    payload = response.parsed_body.slice('scope_key', 'version', 'weights', 'rules')
+    payload['rules']['portfolio_transfer_approval_required'] = false
+    patch "#{base}/configuration", headers: reviewer.user.create_new_auth_token, params: payload, as: :json
+    expect(response).to have_http_status(:forbidden)
+    expect(JrcRelationship::Configuration.find_by!(account: scope[:account], scope_key: payload['scope_key']).effective_rules)
+      .to include('portfolio_transfer_approval_required' => true)
+  end
+
   it 'does not fall back to manual confirmation when the required Approval Center is disabled' do
     scope[:account].disable_features!('jrc_approvals')
     expect(preview.fetch('approval')).to include(required: true, state: 'unavailable')

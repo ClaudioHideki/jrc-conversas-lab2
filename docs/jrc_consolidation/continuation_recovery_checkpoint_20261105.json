@@ -125,5 +125,11 @@
     "evidence": "portfolio_distribution_central_checkpoint_20261105.json",
     "status": "Formal integration tested; fullF1, capacity, responsibilities and visual homologation remain open",
     "next": "F1b capacity and safe analyst removal"
+  },
+  "F1b_native_capacity_20261105": {
+    "report": "docs/jrc_consolidation/portfolio_capacity_checkpoint_20261105.json",
+    "backend": 54,
+    "vue": 22,
+    "classification": "Implemented and locally automated tested; no new-build browser acceptance; F1 and C-G remain open"
   }
 }

@@ -1,16 +1,17 @@
 class JrcRelationship::BatchReviewAuthority
   LOCK = 'FOR SHARE NOWAIT'.freeze
 
-  def initialize(account_id:, actor_id:)
+  def initialize(account_id:, actor_id:, write: true)
     @account_id = account_id
     @actor_id = actor_id
+    @write = write
   end
 
   def call
     ActiveRecord::Base.uncached do
       JrcRelationship::DistributionApproval.lock_configuration!(@account_id)
       context = JrcRelationship::Context.new(lock_member)
-      raise Pundit::NotAuthorizedError unless context.policy.manage?
+      raise Pundit::NotAuthorizedError unless @write ? context.policy.manage? : context.policy.access?
 
       yield context
     end

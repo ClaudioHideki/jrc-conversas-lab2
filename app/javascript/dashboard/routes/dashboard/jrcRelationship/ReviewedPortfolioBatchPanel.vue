@@ -5,10 +5,12 @@ import API from 'dashboard/api/jrcRelationship';
 import { buttonClass, message } from './definitions';
 import ReviewedCadencePanel from './ReviewedCadencePanel.vue';
 import DistributionComparison from './DistributionComparison.vue';
+import DistributionCapacitySummary from './DistributionCapacitySummary.vue';
 import { intent } from 'dashboard/routes/dashboard/approvals/model';
 const props = defineProps({
   accountId: { type: [String, Number], required: true },
   actorId: { type: [String, Number], default: null },
+  authorizationKey: { type: String, default: '' },
   proposal: { type: Object, default: null },
 });
 const emit = defineEmits(['updated']);
@@ -193,7 +195,10 @@ watch(
   },
   { immediate: true, deep: true }
 );
-watch([() => props.accountId, () => props.actorId], reset);
+watch(
+  [() => props.accountId, () => props.actorId, () => props.authorizationKey],
+  reset
+);
 onMounted(() => {
   if (!props.proposal) refresh();
 });
@@ -287,6 +292,7 @@ onBeforeUnmount(reset);
         v-if="review.distribution"
         :rows="review.distribution"
       />
+      <DistributionCapacitySummary :rows="review.capacity || []" />
       <section
         v-if="review.approval?.required"
         class="my-3 space-y-3 rounded-xl border border-n-violet-6 bg-n-violet-2 p-3"
@@ -316,7 +322,9 @@ onBeforeUnmount(reset);
           type="button"
           data-test="review-request-approval"
           :class="buttonClass"
-          :disabled="busy || uncertain"
+          :disabled="
+            busy || uncertain || review.capacity?.some(row => row.blocker)
+          "
           @click="mutate('requestApproval')"
         >
           {{ t('RELATIONSHIP.DISTRIBUTION.REQUEST_APPROVAL') }}
@@ -364,6 +372,7 @@ onBeforeUnmount(reset);
           :disabled="
             busy ||
             uncertain ||
+            review.capacity?.some(row => row.blocker) ||
             (review.approval?.required &&
               (review.approval.state !== 'approved' || !executionConfirmed))
           "

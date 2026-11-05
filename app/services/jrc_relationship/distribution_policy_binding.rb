@@ -5,10 +5,12 @@ class JrcRelationship::DistributionPolicyBinding
   end
 
   def call(records, owner_id: nil)
-    configurations = records.map do |row|
-      config = @context.configuration(row)
-      { 'assignment_id' => row.id, 'scope_key' => config.scope_key, 'version' => config.version,
-        'required' => config.effective_rules.fetch('portfolio_transfer_approval_required') }
+    sources = JrcRelationship::DistributionConfigurations.new(@context.account)
+    configurations = records.flat_map do |row|
+      sources.for(row).map do |config|
+        { 'assignment_id' => row.id, 'scope_key' => config.scope_key, 'version' => config.version,
+          'required' => config.effective_rules.fetch('portfolio_transfer_approval_required') }
+      end
     end
     corporate_scope(records).merge('required' => configurations.any? { |row| row.fetch('required') },
                                    'configurations' => configurations,

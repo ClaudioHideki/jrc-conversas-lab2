@@ -12,6 +12,7 @@ class JrcRelationship::DistributionApprovalCatalog
     JrcApprovals::Catalog.instance_variable_get(:@mutex).synchronize { entries.delete(key) }
     JrcApprovals::Catalog.register(key: key, version: 1, model: model, fields: FIELDS,
                                    authorize: ->(actor, review) { authorized?(review, actor) },
+                                   request_authorize: ->(actor, review) { review.actor_id == actor.id },
                                    capture: ->(review, actor) { capture(review, actor) },
                                    verify: ->(review, actor) { verify_source!(review, actor) })
   end
@@ -19,7 +20,7 @@ class JrcRelationship::DistributionApprovalCatalog
   def self.context(review, actor)
     member = review.account.account_users.find_by!(user_id: actor&.id)
     context = JrcRelationship::Context.new(member)
-    raise Pundit::NotAuthorizedError unless context.policy.manage? && context.policy.team? && review.inputs['operation'] == 'assign'
+    raise Pundit::NotAuthorizedError unless review.inputs['operation'] == 'assign'
 
     ids = review.inputs.fetch('ids')
     raise Pundit::NotAuthorizedError unless context.assignments.where(id: ids).count == ids.size
@@ -71,6 +72,9 @@ class JrcRelationship::DistributionApprovalCatalog
     data = capture(review, actor)
     raise ArgumentError, 'Distribution origin changed or expired' unless data.fetch(:values).fetch(:evidence_state) == 'current'
 
+    executor = context(review, review.actor)
+    JrcRelationship::DistributionCapacity.new(executor).verify!(review)
+    JrcRelationship::DistributionCapacity.new(context(review, actor)).verify!(review) if actor.id != review.actor_id
     true
   end
 end
