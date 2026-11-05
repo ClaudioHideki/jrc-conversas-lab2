@@ -60,6 +60,57 @@ beforeEach(() => {
   mocks.api.channels.mockResolvedValue({ data: { channel_conversations: [] } });
 });
 describe('Relationship V2 analyst workflow', () => {
+  it('shows real pending routing without pretending a critical case has an owner and keeps native follow-up available', async () => {
+    mocks.api.record.mockResolvedValue({
+      data: {
+        id: 5,
+        assignment_id: 19,
+        owner_id: null,
+        status: 'open',
+        priority: 95,
+        customer_confirmation: 'not_applicable',
+        metadata: { routing_waiting_reason: 'no_authorized_available_analyst' },
+        factors: {
+          trend: { normalized: 25, weight: 0.25 },
+          sla: { normalized: 100, weight: 0.5 },
+        },
+      },
+    });
+    const wrapper = shallowMount(ActionCasePanel, {
+      props: { actionId: 5, metadata },
+    });
+    await flushPromises();
+    expect(
+      wrapper.get('[data-testid="routing-waiting"]').attributes('role')
+    ).toBe('status');
+    expect(
+      wrapper.get('[data-testid="priority-factor-trend"]').text()
+    ).toContain('25');
+    expect(wrapper.get('[data-testid="priority-factor-sla"]').text()).toContain(
+      '100'
+    );
+    expect(wrapper.find('[data-testid="record-follow-up"]').exists()).toBe(
+      true
+    );
+    mocks.api.record.mockResolvedValue({
+      data: {
+        id: 6,
+        assignment_id: 19,
+        owner_id: 7,
+        owner_name: 'Synthetic assigned analyst',
+        status: 'open',
+        customer_confirmation: 'not_applicable',
+        metadata: { routing_waiting_reason: 'no_authorized_available_analyst' },
+      },
+    });
+    await wrapper.setProps({ actionId: 6 });
+    await flushPromises();
+    expect(wrapper.find('[data-testid="routing-waiting"]').exists()).toBe(
+      false
+    );
+    expect(wrapper.text()).toContain('Synthetic assigned analyst');
+    wrapper.unmount();
+  });
   it('keeps exactly nine primary areas and preserves every legacy screen inside one area', () => {
     expect(AREAS).toHaveLength(9);
     SCREENS.forEach(screen =>

@@ -71,6 +71,10 @@ class JrcRelationship::DistributionApproval
     JrcApprovals::Ledger.lock!(account_id, 'relationship_configuration')
   end
 
+  def self.try_lock_configuration!(account_id)
+    JrcApprovals::Ledger.try_lock!(account_id, 'relationship_configuration')
+  end
+
   private
 
   def approved_request_ids(review, snapshot)

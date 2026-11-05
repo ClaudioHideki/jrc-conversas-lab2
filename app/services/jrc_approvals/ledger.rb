@@ -11,6 +11,11 @@ class JrcApprovals::Ledger
     ApplicationRecord.connection.execute("SELECT pg_advisory_xact_lock(#{number})")
   end
 
+  def self.try_lock!(account_id, key)
+    number = Digest::SHA256.hexdigest("jrc_approvals:#{account_id}:#{key}")[0, 16].to_i(16) - (1 << 63)
+    ApplicationRecord.connection.select_value("SELECT pg_try_advisory_xact_lock(#{number})")
+  end
+
   def self.audit!(account:, actor:, event:, key:, data:, **references)
     JrcApprovals::AuditEvent.create!(references.merge(account: account, actor: actor, event_type: event,
                                                       correlation_key: key, data: JrcServiceDesk::CanonicalJson.normalize(data)))

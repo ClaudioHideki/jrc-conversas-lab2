@@ -156,12 +156,24 @@ const save = async fields => {
             {{ record.priority }}</span
           >
         </div>
+        <p
+          v-if="
+            !record.owner_id &&
+            record.metadata?.routing_waiting_reason ===
+              'no_authorized_available_analyst'
+          "
+          data-testid="routing-waiting"
+          role="status"
+          class="rounded-lg border border-n-amber-6 bg-n-amber-3 p-3 text-sm text-n-amber-11"
+        >
+          {{ t('RELATIONSHIP.V2.ROUTING_WAITING') }}
+        </p>
         <dl class="grid grid-cols-2 gap-3 text-sm">
           <div>
             <dt class="text-n-slate-11">
               {{ t('RELATIONSHIP.FIELDS.owner_id') }}
             </dt>
-            <dd>{{ record.owner_name || t('RELATIONSHIP.UNAVAILABLE') }}</dd>
+            <dd>{{ record.owner_name || t('RELATIONSHIP.UNASSIGNED') }}</dd>
           </div>
           <div>
             <dt class="text-n-slate-11">
@@ -297,6 +309,7 @@ const save = async fields => {
             <p
               v-for="factor in priorityFactors"
               :key="factor.key"
+              :data-testid="`priority-factor-${factor.key}`"
               class="mt-2 text-sm"
             >
               {{ t(`RELATIONSHIP.V2.PRIORITY.${factor.key}`) }}:

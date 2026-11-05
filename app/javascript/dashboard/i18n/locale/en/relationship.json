@@ -1382,8 +1382,11 @@
         "health": "Saúde observada",
         "mrr": "Receita autorizada",
         "renewal": "Proximidade da renovação",
-        "inactivity": "Tempo sem contato"
+        "inactivity": "Tempo sem contato",
+        "trend": "Queda observada da saúde (pontos)",
+        "sla": "Evidência autorizada de SLA vencido"
       },
+      "ROUTING_WAITING": "Aguardando analista disponível e autorizado. A ação permanece nesta fila, com evidências, prioridade e SLA preservados. A gestão pode revisar o responsável pelo fluxo nativo.",
       "WEIGHT": "Peso {value}",
       "PORTFOLIO": {
         "customers": "Clientes vinculados",

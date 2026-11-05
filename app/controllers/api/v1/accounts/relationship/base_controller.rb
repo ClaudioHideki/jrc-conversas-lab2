@@ -7,7 +7,7 @@ class Api::V1::Accounts::Relationship::BaseController < Api::V1::Accounts::BaseC
   rescue_from ArgumentError, KeyError do |error|
     render json: { errors: [error.message] }, status: :unprocessable_entity
   end
-  rescue_from ActiveRecord::StaleObjectError, ActiveRecord::RecordNotUnique do |_error|
+  rescue_from ActiveRecord::StaleObjectError, ActiveRecord::RecordNotUnique, ActiveRecord::LockWaitTimeout, ActiveRecord::Deadlocked do |_error|
     render json: { errors: ['Record changed. Refresh before retrying.'] }, status: :conflict
   end
 
