@@ -11,8 +11,9 @@ class JrcRelationship::PortfolioResponsibilities
   }.freeze
   MAX_RECORDS = 1000
 
-  def initialize(context)
+  def initialize(context, executor_id: context.user.id)
     @context = context
+    @executor_id = executor_id
   end
 
   def snapshot(assignment, owner_id:, lock: false)
@@ -22,8 +23,9 @@ class JrcRelationship::PortfolioResponsibilities
       bounded(source, :owner, lock).map { |record| entry(kind, record, owner_id) }
     end
     activities = activity_rows(assignment, rows, lock)
+    rows += JrcRelationship::NativeResponsibilities.new(@context, executor_id: @executor_id).snapshot(rows, owner_id: owner_id, lock: lock)
     { 'assignment_id' => assignment.id, 'entries' => rows + activities.map { |row| entry('activities', row, owner_id) },
-      'blockers' => JrcRelationship::ResponsibilityBlockers.new(@context).call(assignment, rows, activities) }
+      'blockers' => JrcRelationship::ResponsibilityBlockers.new(@context, executor_id: @executor_id).call(assignment, rows, activities) }
   end
 
   def authorized!(source, visible)
@@ -33,13 +35,20 @@ class JrcRelationship::PortfolioResponsibilities
   def visible_snapshot?(snapshot)
     snapshot.fetch('entries').group_by { |row| row.fetch('kind') }.all? do |kind, rows|
       ids = rows.pluck('id')
-      relation = kind == 'activities' ? activity_scope : @context.records(TYPES.fetch(kind).first)
+      relation = visible_scope(kind)
       relation.where(id: ids).count == ids.size
     end
   end
 
   def activity_scope
     visibility.crm(@context.account.jrc_crm_activities, owner: :user_id)
+  end
+
+  def visible_scope(kind)
+    return activity_scope if kind == 'activities'
+    return JrcRelationship::NativeResponsibilities.new(@context).scope(kind) if JrcRelationship::NativeResponsibilities::KINDS.include?(kind)
+
+    @context.records(TYPES.fetch(kind).first)
   end
 
   private

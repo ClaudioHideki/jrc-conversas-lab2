@@ -548,7 +548,9 @@
         "risks": "Open risks",
         "renewals": "Renewals",
         "expansion": "Expansion opportunities",
-        "activities": "Pending agenda activities"
+        "activities": "Pending agenda activities",
+        "project_tasks": "Project tasks",
+        "service_tickets": "Service Desk tickets"
       },
       "STATES": {
         "ready": "Reviewed; execution will revalidate destinations",
@@ -565,6 +567,10 @@
         "activity_origin_requires_native_review": "An activity does not have an exclusive portfolio origin. Review its destination in the source module.",
         "service_ticket_requires_native_transfer": "An open Service Desk responsibility requires native assignment review first.",
         "shared_activity_requires_native_review": "An activity is also linked to another customer. Review the shared responsibility in the source module.",
+        "native_customer_context_mismatch": "A linked task or ticket belongs to another customer. Correct the source reference before transfer.",
+        "shared_native_responsibility_requires_review": "A native task or ticket is shared by different customer plans and requires source review.",
+        "native_project_requires_reopen": "Reopen the source project before transferring its pending tasks.",
+        "native_actor_membership_required": "The executor needs an existing native Service Desk unit membership. This operation will not create one.",
         "responsibility_scope_denied": "Your current permissions do not allow access to these responsibility details."
       }
     },

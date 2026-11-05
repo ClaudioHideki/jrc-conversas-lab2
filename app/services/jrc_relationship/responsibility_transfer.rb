@@ -23,7 +23,9 @@ class JrcRelationship::ResponsibilityTransfer
   private
 
   def transfer_entry!(row, assignment, owner)
-    if row['kind'] == 'activities'
+    if JrcRelationship::NativeResponsibilities::KINDS.include?(row['kind'])
+      JrcRelationship::NativeResponsibilities.new(@context).transfer!(row, owner, correlation_id: "relationship-review:#{@review.id}")
+    elsif row['kind'] == 'activities'
       activity = JrcRelationship::PortfolioResponsibilities.new(@context).activity_scope.lock.find(row.fetch('id'))
       activity.update!(user: owner)
       @context.audit!(activity, before: { user_id: row['from_owner_id'] }, after: { user_id: owner.id }, action: 'responsibility_transferred')
@@ -46,6 +48,11 @@ class JrcRelationship::ResponsibilityTransfer
 
   def owned_scope(target, inventory, kind, owner)
     return inventory.activity_scope.where(user_id: owner.id) if kind == 'activities'
+
+    if JrcRelationship::NativeResponsibilities::KINDS.include?(kind)
+      return JrcRelationship::NativeResponsibilities.new(target).owned_scope(kind,
+                                                                             owner)
+    end
 
     target.records(JrcRelationship::PortfolioResponsibilities::TYPES.fetch(kind).first).where(owner_id: owner.id)
   end

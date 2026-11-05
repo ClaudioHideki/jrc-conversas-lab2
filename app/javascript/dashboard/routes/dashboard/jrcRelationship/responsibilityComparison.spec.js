@@ -68,3 +68,43 @@ it.each(['blocked', 'stale', 'unavailable', 'failed', 'canceled'])(
     wrapper.unmount();
   }
 );
+
+it('shows native task and ticket responsibilities with the reviewed customer and destination', () => {
+  const wrapper = mount(ResponsibilityComparison, {
+    props: {
+      ownerName: 'Authorized destination',
+      rows: [
+        {
+          assignment_id: 4,
+          label: 'Reviewed customer',
+          state: 'ready',
+          blockers: [],
+          entries: [
+            {
+              kind: 'project_tasks',
+              id: 1,
+              label: 'Native project task',
+              from_owner_name: 'Source analyst',
+            },
+            {
+              kind: 'service_tickets',
+              id: 2,
+              label: 'Native service ticket',
+              from_owner_name: 'Source analyst',
+            },
+          ],
+        },
+      ],
+    },
+  });
+  const rows = wrapper.findAll('article');
+  expect(rows).toHaveLength(2);
+  expect(rows[0].text()).toContain('Native project task');
+  expect(rows[1].text()).toContain('Native service ticket');
+  rows.forEach(row => {
+    expect(row.text()).toContain('Reviewed customer');
+    expect(row.text()).toContain('Source analyst');
+    expect(row.text()).toContain('Authorized destination');
+  });
+  wrapper.unmount();
+});
