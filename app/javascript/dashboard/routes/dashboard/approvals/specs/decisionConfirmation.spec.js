@@ -163,3 +163,51 @@ it('keeps the exact native source available in the review and its confirmation p
   expect(wrapper.emitted('decide')).toBeUndefined();
   wrapper.unmount();
 });
+
+it('renders native stages and decisions without decision or adjustment controls in a read-only mirror', () => {
+  const wrapper = mount(
+    RequestDetail,
+    options({
+      request: {
+        ...record,
+        adjustment: { discount_cents: 1 },
+        decisions: [
+          {
+            id: 1,
+            decision: 'approved',
+            actor_name: 'Synthetic reviewer',
+            reason: 'Reviewed',
+            cycle: 1,
+          },
+        ],
+      },
+      readOnly: true,
+    })
+  );
+  expect(wrapper.text()).toContain('Synthetic reviewer');
+  expect(wrapper.find('textarea').exists()).toBe(false);
+  expect(wrapper.findComponent(Component).exists()).toBe(false);
+  expect(
+    wrapper
+      .findAll('button')
+      .some(button => button.text().startsWith('Approve'))
+  ).toBe(false);
+  expect(wrapper.emitted('decide')).toBeUndefined();
+  expect(wrapper.emitted('adjust')).toBeUndefined();
+  wrapper.unmount();
+});
+
+it('closes a pending native decision when the same detail switches to read-only', async () => {
+  const wrapper = mount(RequestDetail, options({ request: record }));
+  await wrapper.get('textarea').setValue('Reviewed');
+  await wrapper
+    .findAll('button')
+    .find(button => button.text().startsWith('Approve'))
+    .trigger('click');
+  expect(wrapper.findComponent(Component).exists()).toBe(true);
+  await wrapper.setProps({ readOnly: true });
+  expect(wrapper.findComponent(Component).exists()).toBe(false);
+  expect(wrapper.find('textarea').exists()).toBe(false);
+  expect(wrapper.emitted('decide')).toBeUndefined();
+  wrapper.unmount();
+});

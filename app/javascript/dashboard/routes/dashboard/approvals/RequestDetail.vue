@@ -13,6 +13,7 @@ const props = defineProps({
   context: { type: Object, default: null },
   busy: Boolean,
   auditAllowed: Boolean,
+  readOnly: Boolean,
   error: { type: String, default: '' },
   errorState: { type: Object, default: null },
 });
@@ -30,7 +31,8 @@ const showAuthority = async () => {
   authoritySection.value?.focus({ preventScroll: true });
 };
 const choose = choice => {
-  if (!props.busy && reason.value.trim()) selectedChoice.value = choice;
+  if (!props.readOnly && !props.busy && reason.value.trim())
+    selectedChoice.value = choice;
 };
 const label = (choice, index) => {
   const action = t(`JRC_APPROVALS.decisionLabels.${choice.decision}`);
@@ -60,6 +62,7 @@ watch(
       props.request.lock_version,
       props.request.state,
       props.request.allowed_decisions,
+      props.readOnly,
     ]),
   () => {
     selectedChoice.value = null;
@@ -68,6 +71,7 @@ watch(
 );
 const confirm = payload => {
   if (
+    !props.readOnly &&
     !props.busy &&
     selectedChoice.value &&
     props.request.lock_version === payload.expected_version
@@ -133,7 +137,10 @@ const confirm = payload => {
         :request="request"
       />
     </section>
-    <section class="space-y-3">
+    <section
+      v-if="!readOnly"
+      class="space-y-3"
+    >
       <h3 class="font-semibold">{{ t('JRC_APPROVALS.decision') }}</h3>
       <p
         v-if="!choices.length"
@@ -163,13 +170,13 @@ const confirm = payload => {
       </template>
     </section>
     <Button
-      v-if="request.adjustment && request.state === 'pending'"
+      v-if="!readOnly && request.adjustment && request.state === 'pending'"
       :label="t('JRC_APPROVALS.adjustment.title')"
       :disabled="busy"
       @click="adjusting = true"
     />
     <AdjustmentDialog
-      v-if="adjusting && request.adjustment"
+      v-if="!readOnly && adjusting && request.adjustment"
       :request="request"
       :busy="busy"
       :error="error"
@@ -177,7 +184,7 @@ const confirm = payload => {
       @confirm="emit('adjust', $event)"
     />
     <ApprovalDecisionDialog
-      v-if="selectedChoice"
+      v-if="!readOnly && selectedChoice"
       :request="request"
       :choice="selectedChoice"
       :context="context"
@@ -228,7 +235,7 @@ const confirm = payload => {
       </article>
     </section>
     <Button
-      v-if="auditAllowed"
+      v-if="auditAllowed && !readOnly"
       :label="t('JRC_APPROVALS.history')"
       variant="faded"
       @click="emit('audit')"

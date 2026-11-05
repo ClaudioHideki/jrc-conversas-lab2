@@ -662,7 +662,8 @@
         "history": "Histórico",
         "operations": "Visão geral",
         "finance": "Financeiro",
-        "contracts": "Contrato"
+        "contracts": "Contrato",
+        "approvals": "Approvals"
       },
       "COMMERCIAL_CONTEXT": "Origem comercial",
       "REQUESTED_BY": "Solicitante:",
@@ -1277,6 +1278,20 @@
           "BLOCKED": "O envio está bloqueado pelas regras atuais. Revise os documentos, poderes e aprovações na solicitação.",
           "DELIVERY_VERSION_ALREADY_REGISTERED": "Esta versão já tem uma intenção registrada. Preserve o histórico e gere uma nova versão antes de outro envio."
         }
+      },
+      "APPROVAL_MIRROR": {
+        "TITLE": "Approval history",
+        "NOTICE": "Read-only view of the native Approval Center. Decisions and adjustments are performed in the Center, with current permissions.",
+        "DISABLED": "The Approval Center is not enabled for this account.",
+        "REQUEST": "Operational request",
+        "ORDER": "Origin order",
+        "CONTRACT": "Linked contract",
+        "EMPTY": "No approvals visible for this origin.",
+        "PAGES": "Approval pages",
+        "PAGE": "Page",
+        "PREVIOUS": "Previous",
+        "NEXT": "Next",
+        "OPEN_CENTRAL": "Open in Approval Center"
       }
     },
     "CUSTOMER_SIGNING_IDENTITY": {

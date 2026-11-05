@@ -14,6 +14,7 @@ import BackofficeFinance from './BackofficeFinance.vue';
 import BackofficeCompletionReport from './BackofficeCompletionReport.vue';
 import BackofficeCompletionPackage from './BackofficeCompletionPackage.vue';
 import BackofficeCompletionHandoff from './BackofficeCompletionHandoff.vue';
+import BackofficeApprovalMirror from './BackofficeApprovalMirror.vue';
 import ApprovalGateBadge from 'dashboard/routes/dashboard/approvals/ApprovalGateBadge.vue';
 import { useBackofficePresentation } from './useBackofficePresentation';
 
@@ -29,6 +30,7 @@ const tabs = [
   'operations',
   'context',
   'documents',
+  'approvals',
   'contracts',
   'checklist',
   'issues',
@@ -45,6 +47,7 @@ const tabTones = {
   operations: 'blue',
   context: 'cyan',
   documents: 'amber',
+  approvals: 'violet',
   contracts: 'blue',
   checklist: 'teal',
   issues: 'rose',
@@ -445,6 +448,10 @@ onBeforeUnmount(() => {
                 />
               </details>
             </div>
+            <BackofficeApprovalMirror
+              v-else-if="tab === 'approvals'"
+              :record="record"
+            />
             <BackofficeContractPanel
               v-else-if="tab === 'contracts'"
               :record="record"
