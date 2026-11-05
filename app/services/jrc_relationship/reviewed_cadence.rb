@@ -135,11 +135,10 @@ class JrcRelationship::ReviewedCadence
   def project(record)
     { 'id' => record.id, 'state' => record.state, 'revision' => record.revision, 'stop_reason' => record.stop_reason,
       'assignment_id' => record.assignment_id, 'conversation_id' => record.conversation_id,
-      'retry_at' => JrcRelationship::CadenceActionBudget.retry_at(record),
       'book_name' => record.snapshot.dig('book', 'name'), 'book_version' => record.snapshot.dig('book', 'version'),
       'steps' => record.steps.order(:ordinal).map do |step|
         { 'ordinal' => step.ordinal, 'title' => step.definition.fetch('title'), 'due_at' => step.due_at.iso8601(6),
           'state' => step.state, 'receipt' => step.receipt }
-      end }
+      end }.merge(JrcRelationship::CadenceActionBudget.deferral(record))
   end
 end

@@ -108,7 +108,7 @@ class JrcRelationship::Playbooks
 
   def native_step!(assignment, step, key, execution_context)
     if NATIVE_ACTIVITIES.include?(step['kind'])
-      activity_step!(assignment, step, key, execution_context[:start])
+      activity_step!(assignment, step, key, execution_context[:start], automatic: execution_context.fetch(:automatic, false))
     elsif WORKFLOW_STEPS.include?(step['kind'])
       workflow_step!(assignment, step, key, execution_context[:start])
     else
@@ -116,12 +116,12 @@ class JrcRelationship::Playbooks
     end
   end
 
-  def activity_step!(assignment, step, key, start)
+  def activity_step!(assignment, step, key, start, automatic: false)
     return unless JrcOperations::Access.crm?(@context.member)
 
     JrcRelationship::Workflow.new(@context).activity!(assignment: assignment, title: step['title'],
                                                       due_at: start + step['after_days'].to_i.days,
-                                                      kind: step['kind'] == 'meeting' ? 'meeting' : 'task', request_id: key)
+                                                      kind: step['kind'] == 'meeting' ? 'meeting' : 'task', request_id: key, automatic: automatic)
   end
 
   def action_step!(assignment, step, key, execution_context)

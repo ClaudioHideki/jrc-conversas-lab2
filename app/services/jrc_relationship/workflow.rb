@@ -1,6 +1,8 @@
 require 'digest'
 
 class JrcRelationship::Workflow
+  class AutomaticWorkUnavailable < StandardError; end
+
   MODELS = { 'actions' => JrcRelationship::Action, 'risks' => JrcRelationship::RiskCase,
              'plans' => JrcRelationship::SuccessPlan, 'qbrs' => JrcRelationship::Qbr,
              'renewals' => JrcRelationship::Renewal, 'expansion' => JrcRelationship::ExpansionSignal,
@@ -133,7 +135,7 @@ class JrcRelationship::Workflow
     end
   end
 
-  def activity!(assignment:, title:, due_at:, request_id:, kind: 'task', owner_id: nil)
+  def activity!(assignment:, title:, due_at:, request_id:, kind: 'task', owner_id: nil, automatic: false)
     raise Pundit::NotAuthorizedError unless JrcOperations::Access.crm?(@context.member)
     raise ArgumentError, 'Invalid activity type' unless %w[task meeting note follow_up call whatsapp email].include?(kind)
 
@@ -142,14 +144,22 @@ class JrcRelationship::Workflow
     return action.activity if action.persisted?
 
     action.assign_attributes(account: @context.account, owner: assignment.owner, kind: 'manual', reason: title, due_at: due_at)
-    action.owner = @context.assignable_users.find(owner_id) if owner_id
-    JrcRelationship::OperationalRouting.new(@context).prepare!(action, preserve_owner: owner_id.present?)
-    action.owner ||= @context.user
+    prepare_activity_owner!(action, owner_id, automatic)
     action.save!
     activity = project_action!(action, kind: kind)
     @context.audit!(activity, after: { title: title, due_at: due_at }, action: 'activity_created')
     activity
   end
+
+  def prepare_activity_owner!(action, owner_id, automatic)
+    action.metadata = action.metadata.merge('automatic' => true) if automatic
+    action.owner = @context.assignable_users.find(owner_id) if owner_id
+    JrcRelationship::OperationalRouting.new(@context).prepare!(action, preserve_owner: owner_id.present?)
+    raise AutomaticWorkUnavailable, 'Automatic work requires an available authorized owner' if automatic && !action.owner
+
+    action.owner ||= @context.user
+  end
+  private :prepare_activity_owner!
 
   def project_action!(action, kind: 'task')
     return action.activity if action.activity

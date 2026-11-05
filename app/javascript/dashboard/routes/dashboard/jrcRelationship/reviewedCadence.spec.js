@@ -103,6 +103,35 @@ it('clears the frozen book and deferral details after native access is denied', 
   );
   expect(api.advanceCadence).not.toHaveBeenCalled();
 });
+it('distinguishes an availability deferral from an exhausted daily budget without advancing the pending Agenda step', async () => {
+  api.cadence.mockResolvedValue({
+    data: {
+      id: 18,
+      revision: 1,
+      state: 'active',
+      book_name: 'Synthetic native Agenda cadence',
+      retry_at: '2026-11-06T03:05:00.000000Z',
+      retry_reason: 'native_assignment_unavailable',
+      steps: [
+        {
+          ordinal: 0,
+          title: 'Pending meeting',
+          state: 'pending',
+          receipt: null,
+        },
+      ],
+    },
+  });
+  wrapper = mount(ReviewedCadencePanel, {
+    props: { accountId: '7', cadenceId: 18 },
+  });
+  await flushPromises();
+  expect(
+    wrapper.get('[data-testid="cadence-budget-deferred"]').text()
+  ).toContain('2026-11-06T03:05:00.000000Z');
+  expect(wrapper.text()).toContain('Pending meeting');
+  expect(api.advanceCadence).not.toHaveBeenCalled();
+});
 it('discards an old company response and aborts its request', async () => {
   let resolve;
   api.cadence.mockImplementationOnce(

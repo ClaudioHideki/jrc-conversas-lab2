@@ -112,7 +112,10 @@ onBeforeUnmount(() => {
         class="rounded-lg bg-n-amber-3 p-3 text-sm text-n-amber-11"
       >
         {{
-          t('RELATIONSHIP.CADENCE.BUDGET_DEFERRED', { date: record.retry_at })
+          t(
+            `RELATIONSHIP.CADENCE.DEFERRED.${record.retry_reason || 'account_daily_budget'}`,
+            { date: record.retry_at }
+          )
         }}
       </p>
       <p v-if="record.stop_reason">
