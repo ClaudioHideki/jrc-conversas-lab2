@@ -4,6 +4,9 @@ json.channel_id resource.channel_id
 json.name resource.name
 json.channel_type resource.channel_type
 json.jrc_broker_bound resource.jrc_broker_bound?
+if resource.jrc_broker_bound?
+  json.conversation_origin JrcBroker::OriginSnapshot.project(resource.jrc_broker_inbox_binding)
+end
 json.greeting_enabled resource.greeting_enabled
 json.greeting_message resource.greeting_message
 json.working_hours_enabled resource.working_hours_enabled

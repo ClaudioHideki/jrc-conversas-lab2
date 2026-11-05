@@ -32,12 +32,14 @@ class JrcBroker::ConnectionHistory
   def observe!(health)
     health = safe_health(health)
     @binding.with_lock do
+      JrcBroker::Response.health(health, @binding) # Binding may have changed while the HTTP request was in flight.
       context = @binding.connection_state
       previous = context.fetch('health', {})
+      previous = {} unless JrcBroker::OriginSnapshot.matching_scope?(@binding, previous)
       next if older_observation?(previous, health)
 
       attempt = context.fetch('attempt', {})
-      observed = health.slice('instanceStatus', 'integrationStatus', 'identityApproved', 'identityStatus',
+      observed = health.slice('integrationId', 'instanceId', 'inboxId', 'instanceStatus', 'integrationStatus', 'identityApproved', 'identityStatus',
                               'identityRevision', 'lastError', 'checkedAt')
       observed['checkedAt'] = previous['checkedAt'] if health['checkedAt'].nil? && observation_time(previous['checkedAt'])
       transition = transition_type(previous, health, attempt)
@@ -45,7 +47,9 @@ class JrcBroker::ConnectionHistory
       record_identity_change!(previous, health, attempt)
       record_expiry!(attempt) unless %w[CONNECTED RECONNECTED].include?(transition)
       context = context.except('attempt') if %w[CONNECTED RECONNECTED DISCONNECTED].include?(transition)
-      @binding.update!(connection_state: context.merge('health' => observed)) unless context['health'] == observed
+      origin = JrcBroker::OriginSnapshot.capture(@binding, health, previous: context['origin'])
+      updated = context.merge('health' => observed, 'origin' => origin)
+      @binding.update!(connection_state: updated) unless @binding.connection_state == updated
     end
   end
 
@@ -70,6 +74,10 @@ class JrcBroker::ConnectionHistory
   end
 
   def older_observation?(previous, health)
+    previous_revision = previous['identityRevision']
+    current_revision = health['identityRevision']
+    return true if previous_revision.is_a?(Integer) && current_revision.is_a?(Integer) && current_revision < previous_revision
+
     previous_time = observation_time(previous['checkedAt'])
     current_time = observation_time(health['checkedAt'])
     previous_time && current_time && current_time < previous_time

@@ -32,6 +32,11 @@ jobs:
           pnpm exec vitest run app/javascript/dashboard/components-next/jrc-broker
           app/javascript/dashboard/routes/dashboard/inbox/omnichannelFilters.spec.js
           app/javascript/dashboard/routes/dashboard/inbox/InboxList.spec.js
+          app/javascript/dashboard/routes/dashboard/inbox/HoyaInboxWorkspace.spec.js
+          app/javascript/dashboard/routes/dashboard/inbox/InboxChannelGroups.spec.js
+          app/javascript/dashboard/routes/dashboard/inbox/InboxOriginLabel.spec.js
+          app/javascript/dashboard/helper/specs/inboxOrigin.spec.js
+          app/javascript/dashboard/components/widgets/conversation/specs/ConversationCard.spec.js
           app/javascript/dashboard/routes/dashboard/inbox/specs/InboxList.spec.js
           app/javascript/dashboard/store/modules/specs/conversationPage/mutations.spec.js
           --maxWorkers=2 --minWorkers=1 --reporter=default --reporter=json
@@ -46,6 +51,9 @@ jobs:
             app/javascript/dashboard/store/modules/conversationPage.js \
             app/javascript/dashboard/store/modules/specs/conversationPage/mutations.spec.js \
             app/javascript/dashboard/routes/dashboard/inbox/HoyaInboxWorkspace.vue \
+            app/javascript/dashboard/routes/dashboard/inbox/{InboxChannelGroups.vue,InboxChannelGroups.spec.js,InboxOriginLabel.vue,InboxOriginLabel.spec.js} \
+            app/javascript/dashboard/helper/{inboxOrigin.js,specs/inboxOrigin.spec.js} \
+            app/javascript/dashboard/components/widgets/conversation/{ConversationCard.vue,specs/ConversationCard.spec.js} \
             app/javascript/dashboard/store/modules/conversations/actions.js
       - name: Dependencias do navegador sintetico
         run: |
@@ -127,6 +135,7 @@ jobs:
           bundle exec rails db:migrate
       - name: Contratos, permissoes e distribuicao
         run: |
+          bundle exec ruby test/standalone/jrc_broker_origin_snapshot_test.rb
           bundle exec rspec spec/finders/message_finder_spec.rb \
             spec/finders/message_finder_history_spec.rb \
             spec/finders/conversation_finder_spec.rb \

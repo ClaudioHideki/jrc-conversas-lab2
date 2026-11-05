@@ -23,6 +23,7 @@ import ConversationSidebar from 'dashboard/components/widgets/conversation/Conve
 import CallWorkspace from 'dashboard/routes/dashboard/jrcContactCenter/views/CallWorkspace.vue';
 import AgentStatePanel from 'dashboard/routes/dashboard/jrcContactCenter/views/AgentStatePanel.vue';
 import InboxChannelGroups from './InboxChannelGroups.vue';
+import InboxOriginLabel from './InboxOriginLabel.vue';
 import InboxCustomerPanel from './InboxCustomerPanel.vue';
 import InboxContextContent from './InboxContextContent.vue';
 import InboxQuickActions from './InboxQuickActions.vue';
@@ -178,6 +179,9 @@ const conversation = computed(
     (selectedChat.value?.id === props.currentConversationId
       ? selectedChat.value
       : null)
+);
+const originInbox = computed(() =>
+  conversation.value ? props.inboxFor(conversation.value) : null
 );
 const nativeConversationReady = computed(() =>
   Boolean(
@@ -1206,8 +1210,14 @@ onBeforeUnmount(() => {
         <div
           v-else
           v-show="!voiceView && tab === 'CONVERSATION'"
-          class="flex min-h-0 flex-1"
+          class="flex min-h-0 flex-1 flex-col"
         >
+          <InboxOriginLabel
+            v-if="ready && originInbox"
+            :inbox="originInbox"
+            :now="now"
+            class="shrink-0 border-b border-n-weak bg-n-slate-2 px-4 py-2 text-n-slate-12"
+          />
           <RouterView
             v-if="ready"
             :key="`${accountId}-${currentConversationId}`"
@@ -1216,6 +1226,13 @@ onBeforeUnmount(() => {
           <div v-else class="grid flex-1 place-items-center">
             <Spinner />
           </div>
+          <InboxOriginLabel
+            v-if="ready && originInbox"
+            :inbox="originInbox"
+            :now="now"
+            reply
+            class="shrink-0 border-t border-n-weak bg-n-slate-2 px-4 py-2 text-n-slate-12"
+          />
         </div>
         <div
           v-if="supportsClosing && tab === 'CLOSING'"

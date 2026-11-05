@@ -12,6 +12,10 @@ import UnreadBadge from 'dashboard/components-next/Conversation/ConversationCard
 import SLACardLabel from './components/SLACardLabel.vue';
 import VoiceCallStatus from './VoiceCallStatus.vue';
 import Checkbox from 'dashboard/components-next/checkbox/Checkbox.vue';
+import {
+  conversationMessageTimestamp,
+  messageClock,
+} from 'dashboard/helper/inboxOrigin';
 
 const props = defineProps({
   chat: { type: Object, required: true },
@@ -25,6 +29,7 @@ const props = defineProps({
   hideThumbnail: { type: Boolean, default: false },
   compact: { type: Boolean, default: false },
   operational: { type: Boolean, default: false },
+  now: { type: Number, default: () => Date.now() },
 });
 
 const emit = defineEmits([
@@ -38,7 +43,14 @@ const hovered = ref(false);
 
 const unreadCount = computed(() => props.chat.unread_count);
 const hasUnread = computed(() => unreadCount.value > 0);
-const lastMessageInChat = computed(() => getLastMessage(props.chat));
+const lastMessageInChat = computed(() =>
+  getLastMessage({ ...props.chat, messages: props.chat.messages || [] })
+);
+const lastMessageTimestamp = computed(() =>
+  conversationMessageTimestamp(props.chat)
+);
+const operationalClock = yesterday =>
+  messageClock(lastMessageTimestamp.value, props.now, undefined, yesterday);
 
 const voiceCallData = computed(() => {
   const last = lastMessageInChat.value;
@@ -242,10 +254,25 @@ watch(
           v-if="operational && showAssignee && assignee.name"
           class="min-w-0 flex-1 truncate text-[10px] text-n-slate-10"
         >
-          {{ assignee.name }}
+          {{
+            $t('JRC_CONTACT_CENTER.INBOX_360.ATTENDING_AGENT', {
+              name: assignee.name,
+            })
+          }}
         </span>
         <span class="ml-auto font-normal leading-4 text-xxs">
+          <time
+            v-if="operational && lastMessageTimestamp"
+            :datetime="new Date(lastMessageTimestamp * 1000).toISOString()"
+            :title="new Date(lastMessageTimestamp * 1000).toLocaleString()"
+            >{{
+              operationalClock(
+                $t('JRC_CONTACT_CENTER.INBOX_360.MESSAGE_YESTERDAY')
+              )
+            }}</time
+          >
           <TimeAgo
+            v-else-if="!operational"
             :last-activity-timestamp="chat.timestamp"
             :created-at-timestamp="chat.created_at"
             :conversation-id="chat.id"

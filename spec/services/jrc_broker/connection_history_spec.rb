@@ -10,8 +10,28 @@ RSpec.describe JrcBroker::ConnectionHistory do
   end
   let(:history) { described_class.new(binding, user: admin) }
   let(:health) do
-    { 'instanceStatus' => 'CONNECTED', 'integrationStatus' => 'READY', 'identityApproved' => true,
+    { 'integrationId' => binding.integration_id, 'instanceId' => binding.instance_id, 'inboxId' => inbox.id,
+      'instanceStatus' => 'CONNECTED', 'integrationStatus' => 'READY', 'identityApproved' => true,
       'identityStatus' => 'CONFIRMED', 'identityRevision' => 2, 'checkedAt' => '2026-11-04T12:00:02Z' }
+  end
+
+  it 'stores a safe origin snapshot and projects the business number independently of the contact' do
+    history.observe!(health.merge('phoneNumber' => '+15550000001', 'credential' => 'not-public'))
+    expect(JrcBroker::OriginSnapshot.project(binding.reload, now: Time.iso8601(health['checkedAt']))).to include('own_number' => '+15550000001', 'number_status' => 'VERIFIED')
+    expect(binding.connection_state['origin']).not_to have_key('credential')
+  end
+
+  it 'revalidates the binding inside the locked write instead of storing a delayed response for a previous integration' do
+    delayed = health.merge('phoneNumber' => '+15550000001')
+    binding.update!(integration_id: SecureRandom.uuid)
+    expect { history.observe!(delayed) }.to raise_error { |error| expect(error.message).to eq('JRC_BROKER_INVALID_RESPONSE') }
+    expect(binding.reload.connection_state).not_to have_key('origin')
+  end
+
+  it 'does not roll identity back when a more recent response contains a smaller identity revision' do
+    history.observe!(health.merge('phoneNumber' => '+15550000001'))
+    history.observe!(health.merge('phoneNumber' => '+15550000002', 'identityRevision' => 1, 'checkedAt' => '2026-11-04T12:00:03Z'))
+    expect(JrcBroker::OriginSnapshot.project(binding.reload, now: Time.iso8601(health['checkedAt']))).to include('own_number' => '+15550000001')
   end
 
   before do

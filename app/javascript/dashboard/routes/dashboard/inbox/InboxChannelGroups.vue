@@ -5,6 +5,10 @@ import { callStateLabels } from './inboxPresentation';
 import { getInboxChannelKey, CHANNEL_TYPES } from 'dashboard/helper/inbox';
 import ConversationCard from 'dashboard/components/widgets/conversation/ConversationCard.vue';
 import { CHANNEL_APPEARANCE } from './inboxAppearance';
+import {
+  conversationMessageTimestamp,
+  inboxOrigin,
+} from 'dashboard/helper/inboxOrigin';
 
 const props = defineProps({
   calls: { type: Array, default: () => [] },
@@ -51,40 +55,66 @@ const social = [
 const visibleCalls = computed(() =>
   ['all', 'voice'].includes(props.channelFilter) ? props.calls : []
 );
-const groups = computed(() =>
-  props.channels
-    .filter(
-      channel =>
-        channel.key !== 'all' &&
-        (channel.key === 'voice' ||
-          props.channelFilter === 'all' ||
-          props.channelFilter === channel.key)
-    )
-    .map(channel => ({
-      ...channel,
-      items:
-        channel.key === 'voice'
-          ? visibleCalls.value
-          : props.conversations.filter(conversation => {
-              const key = getInboxChannelKey(props.inboxFor(conversation));
-              return channel.key === 'social'
-                ? social.includes(key)
-                : key === channel.key;
-            }),
-    }))
-    .sort((a, b) => {
-      const order = ['voice', 'whatsapp', 'email', 'social'];
-      return (
-        (order.indexOf(a.key) < 0 ? 9 : order.indexOf(a.key)) -
-        (order.indexOf(b.key) < 0 ? 9 : order.indexOf(b.key))
-      );
-    })
-);
+const groups = computed(() => {
+  const inboxes = new Map();
+  props.conversations.forEach(conversation => {
+    const inbox = props.inboxFor(conversation) || {};
+    const channelKey = getInboxChannelKey(inbox);
+    const filterKey = social.includes(channelKey) ? 'social' : channelKey;
+    if (props.channelFilter !== 'all' && props.channelFilter !== filterKey)
+      return;
+    const id = conversation.inbox_id;
+    if (!inboxes.has(id)) {
+      const channel = props.channels.find(item => item.key === filterKey);
+      inboxes.set(id, {
+        key: `inbox-${id}`,
+        inboxId: id,
+        channelKey,
+        label:
+          inbox.name ||
+          t('JRC_CONTACT_CENTER.INBOX_360.SOURCE_INBOX_ID', { id }),
+        icon: channel?.icon || 'i-lucide-inbox',
+        inbox,
+        items: [],
+      });
+    }
+    inboxes.get(id).items.push(conversation);
+  });
+  const result = [...inboxes.values()];
+  result.forEach(group => {
+    group.unreadCount = group.items.reduce(
+      (total, item) => total + (item.unread_count || 0),
+      0
+    );
+    group.items.sort(
+      (a, b) =>
+        (conversationMessageTimestamp(b) || 0) -
+          (conversationMessageTimestamp(a) || 0) || a.id - b.id
+    );
+  });
+  result.sort(
+    (a, b) => a.label.localeCompare(b.label) || a.inboxId - b.inboxId
+  );
+  const voice = props.channels.find(item => item.key === 'voice');
+  if (
+    visibleCalls.value.length ||
+    (voice && ['all', 'voice'].includes(props.channelFilter))
+  ) {
+    result.unshift({
+      ...voice,
+      key: 'voice',
+      channelKey: 'voice',
+      items: visibleCalls.value,
+    });
+  }
+  return result;
+});
 const toggle = key => {
   collapsed.value = collapsed.value.includes(key)
     ? collapsed.value.filter(item => item !== key)
     : [...collapsed.value, key];
 };
+const originFor = group => inboxOrigin(group.inbox, props.now);
 </script>
 
 <template>
@@ -92,22 +122,42 @@ const toggle = key => {
     v-for="group in groups"
     :key="group.key"
     class="mb-4 overflow-hidden rounded-xl border border-l-4 bg-n-solid-1 shadow-sm"
-    :class="appearance(group.key).border"
-    :data-channel="group.key"
+    :class="appearance(group.channelKey).border"
+    :data-channel="group.channelKey"
+    :data-inbox-id="group.inboxId"
   >
     <button
       type="button"
       class="flex w-full items-center gap-2 px-3 py-3 text-left text-xs font-bold focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-n-brand"
-      :class="appearance(group.key).heading"
+      :class="appearance(group.channelKey).heading"
       :aria-expanded="!collapsed.includes(group.key)"
       @click="toggle(group.key)"
     >
       <span class="size-5 shrink-0" :class="group.icon" />
-      <span class="min-w-0 flex-1 truncate">
-        {{
-          t('JRC_CONTACT_CENTER.INBOX_360.LABEL_COUNT', {
+      <span class="min-w-0 flex-1">
+        <span class="block truncate">{{
+          t('JRC_CONTACT_CENTER.INBOX_360.INBOX_LOADED_COUNT', {
             label: group.label,
             count: group.items.length,
+          })
+        }}</span>
+        <span
+          v-if="group.channelKey === 'whatsapp'"
+          class="mt-1 block truncate text-[11px] font-normal"
+        >
+          {{
+            originFor(group).ownNumber ||
+            t('JRC_CONTACT_CENTER.INBOX_360.NUMBER_UNCONFIRMED')
+          }}
+        </span>
+      </span>
+      <span
+        v-if="group.unreadCount > 0"
+        class="shrink-0 rounded-full bg-n-solid-1 px-2 py-1 text-[10px]"
+      >
+        {{
+          t('JRC_CONTACT_CENTER.INBOX_360.UNREAD_COUNT', {
+            count: group.unreadCount,
           })
         }}
       </span>
@@ -176,6 +226,7 @@ const toggle = key => {
         compact
         operational
         show-assignee
+        :now="now"
         @click="emit('selectConversation', conversation)"
       />
       <p
