@@ -3,7 +3,9 @@ class ActionCableListener < BaseListener
 
   def notification_created(event)
     item = event.data[:notification]
+    return unless item.visible_to_user?
     return if item.relationship_action? && !JrcRelationship::Notifications.visible?(item)
+
     notification, account, unread_count, count = extract_notification_and_account(event)
     tokens = [event.data[:notification].user.pubsub_token]
     broadcast(account, tokens, NOTIFICATION_CREATED, { notification: notification.push_event_data, unread_count: unread_count, count: count })
@@ -11,7 +13,9 @@ class ActionCableListener < BaseListener
 
   def notification_updated(event)
     item = event.data[:notification]
+    return unless item.visible_to_user?
     return if item.relationship_action? && !JrcRelationship::Notifications.visible?(item)
+
     notification, account, unread_count, count = extract_notification_and_account(event)
     tokens = [event.data[:notification].user.pubsub_token]
     broadcast(account, tokens, NOTIFICATION_UPDATED, { notification: notification.push_event_data, unread_count: unread_count, count: count })
@@ -45,7 +49,7 @@ class ActionCableListener < BaseListener
   def message_created(event)
     message, account = extract_message_and_account(event)
     conversation = message.conversation
-    tokens = user_tokens(account, conversation.inbox.members) + contact_tokens(conversation.contact_inbox, message)
+    tokens = Conversations::EventVisibility.tokens(conversation) + contact_tokens(conversation.contact_inbox, message)
 
     broadcast(account, tokens, MESSAGE_CREATED, message.push_event_data)
   end
@@ -53,7 +57,7 @@ class ActionCableListener < BaseListener
   def message_updated(event)
     message, account = extract_message_and_account(event)
     conversation = message.conversation
-    tokens = user_tokens(account, conversation.inbox.members) + contact_tokens(conversation.contact_inbox, message)
+    tokens = Conversations::EventVisibility.tokens(conversation) + contact_tokens(conversation.contact_inbox, message)
 
     broadcast(account, tokens, MESSAGE_UPDATED, message.push_event_data.merge(previous_changes: event.data[:previous_changes]))
   end
@@ -61,35 +65,35 @@ class ActionCableListener < BaseListener
   def first_reply_created(event)
     message, account = extract_message_and_account(event)
     conversation = message.conversation
-    tokens = user_tokens(account, conversation.inbox.members)
+    tokens = Conversations::EventVisibility.tokens(conversation)
 
     broadcast(account, tokens, FIRST_REPLY_CREATED, message.push_event_data)
   end
 
   def conversation_created(event)
     conversation, account = extract_conversation_and_account(event)
-    tokens = user_tokens(account, conversation.inbox.members) + contact_inbox_tokens(conversation.contact_inbox)
+    tokens = Conversations::EventVisibility.tokens(conversation) + contact_inbox_tokens(conversation.contact_inbox)
 
     broadcast(account, tokens, CONVERSATION_CREATED, conversation.push_event_data)
   end
 
   def conversation_read(event)
     conversation, account = extract_conversation_and_account(event)
-    tokens = user_tokens(account, conversation.inbox.members)
+    tokens = Conversations::EventVisibility.tokens(conversation)
 
     broadcast(account, tokens, CONVERSATION_READ, conversation.push_event_data)
   end
 
   def conversation_status_changed(event)
     conversation, account = extract_conversation_and_account(event)
-    tokens = user_tokens(account, conversation.inbox.members) + contact_inbox_tokens(conversation.contact_inbox)
+    tokens = Conversations::EventVisibility.tokens(conversation) + contact_inbox_tokens(conversation.contact_inbox)
 
     broadcast(account, tokens, CONVERSATION_STATUS_CHANGED, conversation.push_event_data)
   end
 
   def conversation_updated(event)
     conversation, account = extract_conversation_and_account(event)
-    tokens = user_tokens(account, conversation.inbox.members) + contact_inbox_tokens(conversation.contact_inbox)
+    tokens = Conversations::EventVisibility.tokens(conversation) + contact_inbox_tokens(conversation.contact_inbox)
 
     broadcast(account, tokens, CONVERSATION_UPDATED, conversation.push_event_data)
   end
@@ -105,7 +109,7 @@ class ActionCableListener < BaseListener
 
   def conversation_participants_changed(event)
     conversation, account = extract_conversation_and_account(event)
-    tokens = user_tokens(account, conversation.inbox.members)
+    tokens = Conversations::EventVisibility.tokens(conversation)
 
     broadcast(account, tokens, CONVERSATION_PARTICIPANTS_CHANGED, conversation.push_event_data)
   end
@@ -144,21 +148,26 @@ class ActionCableListener < BaseListener
 
   def assignee_changed(event)
     conversation, account = extract_conversation_and_account(event)
-    tokens = user_tokens(account, conversation.inbox.members)
+    if JrcHumanAssignment::Policy.connection_for(account, conversation.inbox_id)&.fetch('visibility', nil) == 'assigned_only'
+      old_id = event.data[:changed_attributes]&.dig('assignee_id', 0)
+      revoked = User.where(id: old_id).pluck(:pubsub_token)
+      broadcast(account, revoked.uniq, 'conversation.access_revoked', { id: conversation.display_id })
+    end
+    tokens = Conversations::EventVisibility.tokens(conversation)
 
     broadcast(account, tokens, ASSIGNEE_CHANGED, conversation.push_event_data)
   end
 
   def team_changed(event)
     conversation, account = extract_conversation_and_account(event)
-    tokens = user_tokens(account, conversation.inbox.members)
+    tokens = Conversations::EventVisibility.tokens(conversation)
 
     broadcast(account, tokens, TEAM_CHANGED, conversation.push_event_data)
   end
 
   def conversation_contact_changed(event)
     conversation, account = extract_conversation_and_account(event)
-    tokens = user_tokens(account, conversation.inbox.members)
+    tokens = Conversations::EventVisibility.tokens(conversation)
 
     broadcast(account, tokens, CONVERSATION_CONTACT_CHANGED, conversation.push_event_data)
   end
@@ -189,6 +198,7 @@ class ActionCableListener < BaseListener
   def conversation_mentioned(event)
     conversation, account = extract_conversation_and_account(event)
     user = event.data[:user]
+    return unless Conversations::InboxVisibility.new(account: account, user: user).visible?(conversation)
 
     broadcast(account, [user.pubsub_token], CONVERSATION_MENTIONED, conversation.push_event_data)
   end
@@ -199,14 +209,14 @@ class ActionCableListener < BaseListener
     "account_#{account.id}"
   end
 
-  def typing_event_listener_tokens(account, conversation, user)
+  def typing_event_listener_tokens(_account, conversation, user)
     current_user_token = if user.is_a?(Contact)
                            conversation.contact_inbox.pubsub_token
                          elsif user.respond_to?(:pubsub_token)
                            user.pubsub_token
                          end
 
-    tokens = user_tokens(account, conversation.inbox.members) + [conversation.contact_inbox.pubsub_token]
+    tokens = Conversations::EventVisibility.tokens(conversation) + [conversation.contact_inbox.pubsub_token]
     current_user_token.present? ? tokens - [current_user_token] : tokens
   end
 

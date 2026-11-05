@@ -9,13 +9,16 @@ class Conversations::SharedInboxScope
 
   def metadata
     @metadata ||= begin
-      ids = member_inbox_ids
+      ids = member_inbox_ids - Conversations::InboxVisibility.new(account: @account, user: @user).exclusive_inbox_ids
       enabled = allowed? && ids.any?
       shared = enabled ? Conversations::SharedInboxRouting.new(account: @account, user: @user, inbox_ids: ids).perform : []
       # The remote snapshot must not retain access revoked while HTTP was in flight.
       ApplicationRecord.uncached do
         enabled &&= allowed?
-        { enabled: enabled, inbox_ids: enabled ? (shared & member_inbox_ids).sort : [] }
+        result = { enabled: enabled, inbox_ids: enabled ? (shared & member_inbox_ids).sort : [] }
+        supervised = Conversations::InboxVisibility.new(account: @account, user: @user).supervised_inbox_ids
+        result[:supervised_inbox_ids] = supervised if supervised.any?
+        result
       end
     end
   end

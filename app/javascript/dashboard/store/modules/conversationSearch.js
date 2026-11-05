@@ -38,7 +38,9 @@ export const getters = {
 };
 
 export const actions = {
-  async get({ commit }, { q }) {
+  async get({ commit, state, rootGetters }, { q }) {
+    const revision = state?.accessVersion || 0;
+    const accountId = rootGetters?.getCurrentAccountId;
     commit(types.SEARCH_CONVERSATIONS_SET, []);
     if (!q) {
       return;
@@ -48,6 +50,11 @@ export const actions = {
       const {
         data: { payload },
       } = await SearchAPI.get({ q });
+      if (
+        revision !== (state?.accessVersion || 0) ||
+        accountId !== rootGetters?.getCurrentAccountId
+      )
+        return;
       commit(types.SEARCH_CONVERSATIONS_SET, payload);
     } catch (error) {
       // Ignore error
@@ -94,11 +101,18 @@ export const actions = {
       commit(types.CONTACT_SEARCH_SET_UI_FLAG, { isFetching: false });
     }
   },
-  async conversationSearch({ commit }, payload) {
+  async conversationSearch({ commit, state, rootGetters }, payload) {
+    const revision = state?.accessVersion || 0;
+    const accountId = rootGetters?.getCurrentAccountId;
     const { page = 1, ...searchParams } = payload;
     commit(types.CONVERSATION_SEARCH_SET_UI_FLAG, { isFetching: true });
     try {
       const { data } = await SearchAPI.conversations({ ...searchParams, page });
+      if (
+        revision !== (state?.accessVersion || 0) ||
+        accountId !== rootGetters?.getCurrentAccountId
+      )
+        return;
       commit(types.CONVERSATION_SEARCH_SET, data.payload.conversations);
     } catch (error) {
       // Ignore error
@@ -106,11 +120,18 @@ export const actions = {
       commit(types.CONVERSATION_SEARCH_SET_UI_FLAG, { isFetching: false });
     }
   },
-  async messageSearch({ commit }, payload) {
+  async messageSearch({ commit, state, rootGetters }, payload) {
+    const revision = state?.accessVersion || 0;
+    const accountId = rootGetters?.getCurrentAccountId;
     const { page = 1, ...searchParams } = payload;
     commit(types.MESSAGE_SEARCH_SET_UI_FLAG, { isFetching: true });
     try {
       const { data } = await SearchAPI.messages({ ...searchParams, page });
+      if (
+        revision !== (state?.accessVersion || 0) ||
+        accountId !== rootGetters?.getCurrentAccountId
+      )
+        return;
       commit(types.MESSAGE_SEARCH_SET, data.payload.messages);
     } catch (error) {
       // Ignore error
@@ -170,6 +191,8 @@ export const mutations = {
     state.uiFlags.article = { ...state.uiFlags.article, ...uiFlags };
   },
   [types.CLEAR_SEARCH_RESULTS](state) {
+    state.accessVersion = (state.accessVersion || 0) + 1;
+    state.records = [];
     state.contactRecords = [];
     state.conversationRecords = [];
     state.messageRecords = [];

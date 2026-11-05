@@ -8,6 +8,7 @@ export const mutations = {
     };
   },
   [types.CLEAR_NOTIFICATIONS]: $state => {
+    $state.accessVersion = ($state.accessVersion || 0) + 1;
     $state.records = {};
     $state.uiFlags.isAllNotificationsLoaded = false;
   },
@@ -27,7 +28,8 @@ export const mutations = {
     data.forEach(notification => {
       // Native actors of different domains may have the same numeric ID.
       const existingNotification = Object.values($state.records).find(
-        record => record.primary_actor_id === notification.primary_actor_id &&
+        record =>
+          record.primary_actor_id === notification.primary_actor_id &&
           record.primary_actor_type === notification.primary_actor_type
       );
       // This is to handle the case where the same notification is received multiple times

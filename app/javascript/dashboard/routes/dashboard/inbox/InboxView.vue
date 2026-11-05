@@ -67,6 +67,7 @@ const fetchConversationById = async () => {
 };
 
 watch(conversationId, fetchConversationById, { immediate: true });
+watch(() => store.state?.conversations?.accessVersion, fetchConversationById);
 onBeforeUnmount(() => {
   generation += 1;
 });

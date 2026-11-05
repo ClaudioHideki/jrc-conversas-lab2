@@ -41,6 +41,7 @@ class Api::V1::Accounts::ConversationsController < Api::V1::Accounts::BaseContro
   def create
     ActiveRecord::Base.transaction do
       @conversation = ConversationBuilder.new(params: params, contact_inbox: @contact_inbox).perform
+      authorize @conversation, :show? if exclusive_inbox?
       Messages::MessageBuilder.new(Current.user, @conversation, params[:message]).perform if params[:message].present?
     end
   end
@@ -182,9 +183,15 @@ class Api::V1::Accounts::ConversationsController < Api::V1::Accounts::BaseContro
   end
 
   def handle_human_open
+    return if exclusive_inbox? && JrcHumanAssignment::Policy.enabled_for?(Current.account, @conversation.inbox_id)
+
     @conversation.assignee_agent_bot = nil
     @conversation.assignee = Current.user if Current.user.agent?
     @conversation.save!
+  end
+
+  def exclusive_inbox?
+    JrcHumanAssignment::Policy.connection_for(Current.account, @conversation.inbox_id)&.fetch('visibility', nil) == 'assigned_only'
   end
 
   def conversation

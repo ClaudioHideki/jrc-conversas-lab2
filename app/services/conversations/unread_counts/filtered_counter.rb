@@ -72,7 +72,24 @@ class Conversations::UnreadCounts::FilteredCounter
   end
 
   def snapshot_or_build(scope:, state:, lock_key:, claim_refresh:, &)
+    if scope != :folder_index && unsafe_visibility_snapshot?(state)
+      state = Conversations::UnreadCounts::FilteredCountStore::SnapshotResult.new(status: :missing, payload: nil)
+    end
     snapshot_resolver.resolve(scope: scope, state: state, lock_key: lock_key, claim_refresh: claim_refresh, &)
+  end
+
+  def visibility_policy
+    policies = JrcHumanAssignment::Policy.connections(account).select { |_id, policy| policy['visibility'] == 'assigned_only' }
+    return if policies.empty?
+
+    policies.transform_values { |policy| policy.slice('visibility', 'supervisor_ids') }.to_json
+  end
+
+  def unsafe_visibility_snapshot?(state)
+    return false if state.payload.blank?
+
+    state.payload.dig(:meta, :visibility_policy) != visibility_policy ||
+      (state.stale? && Conversations::InboxVisibility.new(account: account, user: user).exclusive_inbox_ids.any?)
   end
 
   def filter_build_available? = @inline_filter_builds.to_i < Conversations::UnreadCounts::MAX_INLINE_FILTER_BUILDS
@@ -91,7 +108,8 @@ class Conversations::UnreadCounts::FilteredCounter
       counts: built_in_counts_from_database,
       account_version: versions.fetch(:account_version),
       built_in_filter_version: versions.fetch(:built_in_filter_version),
-      built_at: now
+      built_at: now,
+      meta: { visibility_policy: visibility_policy }
     }
   end
 
@@ -161,7 +179,8 @@ class Conversations::UnreadCounts::FilteredCounter
       account_version: versions.fetch(:account_version),
       filter_version: versions.fetch(:filter_version),
       owner_built_in_filter_version: versions.fetch(:owner_built_in_filter_version),
-      built_at: now
+      built_at: now,
+      meta: { visibility_policy: visibility_policy }
     )
   end
 

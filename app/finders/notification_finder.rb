@@ -38,6 +38,10 @@ class NotificationFinder
 
   def find_all_notifications
     @notifications = current_user.notifications.where(account_id: @current_account.id)
+    visible = Conversations::InboxVisibility.new(account: current_account, user: current_user).restrict(current_account.conversations).select(:id)
+    @notifications = @notifications.where.not(primary_actor_type: 'Conversation').or(
+      @notifications.where(primary_actor_type: 'Conversation', primary_actor_id: visible)
+    )
     relationship = @notifications.where(notification_type: 'relationship_action')
     member = @current_account.account_users.find_by(user_id: current_user.id)
     policy = member && JrcRelationship::ModulePolicy.new({ account: @current_account, user: current_user, account_user: member }, @current_account)

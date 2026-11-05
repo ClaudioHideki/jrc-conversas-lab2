@@ -8,6 +8,8 @@ class ConversationPolicy < ApplicationPolicy
   end
 
   def show?
+    return false unless agent_bot? || Conversations::InboxVisibility.new(account: account, user: user).visible?(record)
+
     administrator? || agent_bot? || agent_can_view_conversation?
   end
 

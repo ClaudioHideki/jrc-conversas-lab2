@@ -8,12 +8,14 @@ class Conversations::PermissionFilterService
   end
 
   def perform
-    return conversations if user_role == 'administrator'
-
-    accessible_conversations
+    restrict_inbox_visibility(user_role == 'administrator' ? conversations : accessible_conversations)
   end
 
   private
+
+  def restrict_inbox_visibility(scope)
+    Conversations::InboxVisibility.new(account: account, user: user).restrict(scope)
+  end
 
   def accessible_conversations
     conversations.where(inbox: user.inboxes.where(account_id: account.id))

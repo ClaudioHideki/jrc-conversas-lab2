@@ -13,6 +13,17 @@ RSpec.describe AgentNotifications::ConversationNotificationsMailer do
     allow(class_instance).to receive(:smtp_config_set_or_development?).and_return(true)
   end
 
+  it 'does not deliver queued conversation content after the agent lost ownership' do
+    inbox = conversation.inbox
+    create(:inbox_member, inbox: inbox, user: agent)
+    account.update!(custom_attributes: { 'jrc_human_assignment' => { 'connections' => {
+                      inbox.id.to_s => { 'visibility' => 'assigned_only', 'supervisor_ids' => [] }
+                    } } })
+    delivery = described_class.with(account: account).conversation_assignment(conversation, agent, nil)
+    conversation.update!(assignee: nil)
+    expect { delivery.deliver_now }.not_to change(ActionMailer::Base.deliveries, :count)
+  end
+
   describe 'conversation_creation' do
     let(:mail) { described_class.with(account: account).conversation_creation(conversation, agent, nil).deliver_now }
 

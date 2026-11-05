@@ -2,7 +2,9 @@ import types from '../../mutation-types';
 import NotificationsAPI from '../../../api/notifications';
 
 export const actions = {
-  get: async ({ commit }, { page = 1 } = {}) => {
+  get: async ({ commit, state, rootGetters }, { page = 1 } = {}) => {
+    const revision = state?.accessVersion || 0;
+    const accountId = rootGetters?.getCurrentAccountId;
     commit(types.SET_NOTIFICATIONS_UI_FLAG, { isFetching: true });
     try {
       const {
@@ -10,6 +12,11 @@ export const actions = {
           data: { payload, meta },
         },
       } = await NotificationsAPI.get({ page });
+      if (
+        revision !== (state?.accessVersion || 0) ||
+        accountId !== rootGetters?.getCurrentAccountId
+      )
+        return;
       commit(types.CLEAR_NOTIFICATIONS);
       commit(types.SET_NOTIFICATIONS, payload);
       commit(types.SET_NOTIFICATIONS_META, meta);
@@ -18,7 +25,12 @@ export const actions = {
       commit(types.SET_NOTIFICATIONS_UI_FLAG, { isFetching: false });
     }
   },
-  index: async ({ commit }, { page = 1, status, type, sortOrder } = {}) => {
+  index: async (
+    { commit, state, rootGetters },
+    { page = 1, status, type, sortOrder } = {}
+  ) => {
+    const revision = state?.accessVersion || 0;
+    const accountId = rootGetters?.getCurrentAccountId;
     commit(types.SET_NOTIFICATIONS_UI_FLAG, { isFetching: true });
     try {
       const {
@@ -31,6 +43,11 @@ export const actions = {
         type,
         sortOrder,
       });
+      if (
+        revision !== (state?.accessVersion || 0) ||
+        accountId !== rootGetters?.getCurrentAccountId
+      )
+        return;
       commit(types.SET_NOTIFICATIONS, payload);
       commit(types.SET_NOTIFICATIONS_META, meta);
       commit(types.SET_NOTIFICATIONS_UI_FLAG, { isFetching: false });

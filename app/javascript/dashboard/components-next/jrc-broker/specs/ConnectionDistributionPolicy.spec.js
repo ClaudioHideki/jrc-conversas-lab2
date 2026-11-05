@@ -27,6 +27,45 @@ beforeEach(() => {
 });
 afterEach(() => wrapper?.unmount());
 
+it('configures exclusive visibility with a supervisor and an individual agent capacity', async () => {
+  api.connectionDistribution.mockResolvedValue({
+    policy: {
+      enabled: true,
+      mode: 'round_robin',
+      team_ids: [11],
+      max_open: 10,
+    },
+    teams,
+    agents: [
+      { id: 7, name: 'Supervisor' },
+      { id: 8, name: 'Atendente' },
+    ],
+  });
+  wrapper = mount(ConnectionDistributionPolicy, {
+    props: { accountId: 1, inboxId: 7, presentation: 'policy' },
+  });
+  await flushPromises();
+  expect(wrapper.find('[data-testid="distribution-visibility"]').exists()).toBe(
+    true
+  );
+  await wrapper
+    .get('[data-testid="distribution-visibility"]')
+    .setValue('assigned_only');
+  await wrapper.get('[data-supervisor-id="7"]').setValue(true);
+  await wrapper.get('[data-agent-limit-id="8"]').setValue(5);
+  await wrapper.get('form').trigger('submit');
+  await flushPromises();
+  expect(api.saveConnectionDistribution).toHaveBeenCalledWith(
+    7,
+    expect.objectContaining({
+      visibility: 'assigned_only',
+      supervisor_ids: [7],
+      agent_limits: { 8: 5 },
+    }),
+    expect.any(AbortSignal)
+  );
+});
+
 it.each(['unassigned', 'default_team'])(
   'shows the actual configured fallback %s rather than claiming waiting is the outcome',
   async fallback => {
@@ -326,6 +365,9 @@ it('saves explicit authorized queues and capacity for this existing connection',
       mode: 'round_robin',
       team_ids: [11, 22],
       max_open: 6,
+      visibility: 'shared',
+      supervisor_ids: [],
+      agent_limits: {},
       respect_availability: true,
       capacity_enabled: true,
       waiting_enabled: true,
@@ -361,6 +403,9 @@ it('keeps the selected priority order when accessible move controls are used', a
       mode: 'priority',
       team_ids: [22, 11],
       max_open: 10,
+      visibility: 'shared',
+      supervisor_ids: [],
+      agent_limits: {},
       respect_availability: true,
       capacity_enabled: true,
       waiting_enabled: true,
@@ -392,6 +437,9 @@ it('requires exactly one queue for direct distribution and does not silently dro
       mode: 'direct',
       team_ids: [11],
       max_open: 10,
+      visibility: 'shared',
+      supervisor_ids: [],
+      agent_limits: {},
       respect_availability: true,
       capacity_enabled: true,
       waiting_enabled: true,
@@ -432,6 +480,9 @@ it('requires an explicit queue to enable distribution but can save an explicitly
       mode: 'round_robin',
       team_ids: [],
       max_open: 10,
+      visibility: 'shared',
+      supervisor_ids: [],
+      agent_limits: {},
       respect_availability: true,
       capacity_enabled: true,
       waiting_enabled: true,

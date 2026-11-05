@@ -44,6 +44,16 @@ const routerMock = {
   },
 };
 
+it('invalidates cached conversation authorization before fetching after a reconnect', async () => {
+  const service = new ReconnectService(storeMock, routerMock);
+  storeMock.dispatch.mockClear();
+  vi.spyOn(service, 'handleRouteSpecificFetch').mockResolvedValue();
+  vi.spyOn(service, 'revalidateCaches').mockResolvedValue();
+  await service.onReconnect();
+  expect(storeMock.dispatch).toHaveBeenCalledWith('revokeConversationAccess');
+  vi.restoreAllMocks();
+});
+
 describe('ReconnectService', () => {
   let reconnectService;
 
@@ -130,12 +140,12 @@ describe('ReconnectService', () => {
   });
 
   describe('fetchConversations', () => {
-    it('should update the filters with disconnected time and the threshold', async () => {
+    it('reloads a full first page after clearing cached authorization', async () => {
       reconnectService.getSecondsSinceDisconnect = vi.fn().mockReturnValue(100);
       await reconnectService.fetchConversations();
       expect(storeMock.dispatch).toHaveBeenCalledWith('updateChatListFilters', {
-        page: null,
-        updatedWithin: 115,
+        page: 1,
+        updatedWithin: null,
       });
     });
 
@@ -143,8 +153,8 @@ describe('ReconnectService', () => {
       reconnectService.getSecondsSinceDisconnect = vi.fn().mockReturnValue(100);
       await reconnectService.fetchConversations();
       expect(storeMock.dispatch).toHaveBeenCalledWith('updateChatListFilters', {
-        page: null,
-        updatedWithin: 115,
+        page: 1,
+        updatedWithin: null,
       });
       expect(storeMock.dispatch).toHaveBeenCalledWith('fetchAllConversations');
     });
@@ -153,6 +163,7 @@ describe('ReconnectService', () => {
       reconnectService.getSecondsSinceDisconnect = vi.fn().mockReturnValue(100);
       await reconnectService.fetchConversations();
       expect(storeMock.dispatch).toHaveBeenCalledWith('updateChatListFilters', {
+        page: 1,
         updatedWithin: null,
       });
     });
@@ -223,6 +234,15 @@ describe('ReconnectService', () => {
   });
 
   describe('fetchConversationMessagesOnReconnect', () => {
+    it('restores the selected conversation only from a newly authorized response', async () => {
+      routerMock.currentRoute.value.params.conversation_id = 1;
+      storeMock.dispatch.mockResolvedValueOnce({ id: 1, messages: [] });
+      await reconnectService.fetchConversationMessagesOnReconnect();
+      expect(storeMock.dispatch).toHaveBeenCalledWith('getConversation', 1);
+      expect(storeMock.dispatch).toHaveBeenCalledWith('setActiveChat', {
+        data: { id: 1, messages: [] },
+      });
+    });
     it('should dispatch syncActiveConversationMessages if conversationId exists', async () => {
       routerMock.currentRoute.value.params.conversation_id = 1;
       await reconnectService.fetchConversationMessagesOnReconnect();

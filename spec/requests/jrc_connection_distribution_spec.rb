@@ -41,6 +41,23 @@ RSpec.describe 'Broker inbox distribution API', type: :request do
     expect(JrcHumanAssignmentPolicyEvent.where(account_id: account.id)).to be_empty
   end
 
+  it 'round trips central visibility and individual capacity without exposing credentials or calling the Broker' do
+    create(:inbox_member, inbox: inbox, user: agent)
+    expect(JrcBroker::Client).not_to receive(:new)
+    policy = input.merge(visibility: 'assigned_only', supervisor_ids: [agent.id], agent_limits: { agent.id.to_s => 2 })
+    put url, headers: admin.create_new_auth_token, params: policy, as: :json
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body['policy']).to include('visibility' => 'assigned_only', 'supervisor_ids' => [agent.id],
+                                                      'agent_limits' => { agent.id.to_s => 2 })
+    get url, headers: admin.create_new_auth_token
+    expect(response.parsed_body['agents']).to include(include('id' => agent.id, 'name' => agent.name, 'active' => 0))
+    expect(response.body).not_to include('synthetic-not-used')
+    # An older client may omit the additive settings; it must not downgrade privacy.
+    put url, headers: admin.create_new_auth_token, params: input, as: :json
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body['policy']['visibility']).to eq('assigned_only')
+  end
+
   it 'rejects a foreign inbox even for a shared administrator' do
     foreign = create(:account)
     create(:account_user, account: foreign, user: admin, role: :administrator)

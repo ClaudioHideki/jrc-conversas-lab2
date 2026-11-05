@@ -10,6 +10,7 @@ module AutoAssignmentHandler
   private
 
   def record_auto_assignment_request
+    prepare_exclusive_reopening
     if assignee_id.present? || !open?
       self.auto_assignment_requested_at = nil
       return
@@ -19,6 +20,17 @@ module AutoAssignmentHandler
     self.auto_assignment_requested_at = Time.current if
       (JrcHumanAssignment::Policy.enabled_for?(account, inbox_id) || inbox.auto_assignment_v2_enabled?) &&
       AutoAssignment::Eligibility.new(inbox: inbox).configuration_reason.nil?
+  end
+
+  def prepare_exclusive_reopening
+    return unless persisted? && will_save_change_to_status? && status_in_database == 'resolved' && open? && assignee_id.present?
+    return unless JrcHumanAssignment::Policy.enabled_for?(account, inbox_id) &&
+                  JrcHumanAssignment::Policy.connection_for(account, inbox_id)&.fetch('visibility', nil) == 'assigned_only'
+    return if assignee_agent_bot_id.present? || custom_attributes['nico_control'] == 'active' ||
+              JrcFlowRun.live.exists?(account_id: account_id, conversation_id: id)
+
+    self.custom_attributes = custom_attributes.merge('jrc_preferred_agent_id' => assignee_id)
+    self.assignee_id = nil
   end
 
   def run_auto_assignment

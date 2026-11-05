@@ -48,12 +48,7 @@ class Api::V1::Accounts::JrcBrokerController < Api::V1::Accounts::BaseController
   end
 
   def connection_distribution
-    inbox = binding.inbox
-    render json: { policy: JrcHumanAssignment::Policy.connection_for(Current.account, inbox.id),
-                   calendar: { enabled: inbox.working_hours_enabled?, timezone: inbox.timezone, weekly_schedule: inbox.weekly_schedule },
-                   teams: Current.account.teams.where(allow_auto_assign: true).order(:name).pluck(:id, :name).map do |id, name|
-                     { id: id, name: name }
-                   end }
+    render json: JrcHumanAssignment::ConnectionSnapshot.new(account: Current.account, inbox: binding.inbox).perform
   end
 
   def connection_summary
@@ -61,12 +56,12 @@ class Api::V1::Accounts::JrcBrokerController < Api::V1::Accounts::BaseController
     raise JrcBroker::Client::Error.new('JRC_BROKER_FORBIDDEN', status: 403) unless policy.status?
 
     render json: JrcBroker::ConnectionSummary.new(binding: binding, manage: policy.manage?,
-                                                 reports: ReportPolicy.new(pundit_user, :report).view?).perform
+                                                  reports: ReportPolicy.new(pundit_user, :report).view?).perform
   end
 
   def update_connection_distribution
     input = body!('enabled', 'mode', 'team_ids', 'max_open', 'respect_availability', 'capacity_enabled', 'waiting_enabled',
-                  'schedule', 'fallback', 'fallback_team_id')
+                  'schedule', 'fallback', 'fallback_team_id', 'visibility', 'supervisor_ids', 'agent_limits')
     result = JrcHumanAssignment::Policy.update_connection!(Current.account, inbox: binding.inbox, actor: Current.user,
                                                                             **input.symbolize_keys)
     render json: { policy: result }
@@ -85,9 +80,7 @@ class Api::V1::Accounts::JrcBrokerController < Api::V1::Accounts::BaseController
 
   def update_connection_configuration
     name = body!('name')['name']
-    unless name.is_a?(String) && name.strip.length.between?(1, 255)
-      raise JrcBroker::Client::Error.new('JRC_BROKER_INVALID_REQUEST', status: 400)
-    end
+    raise JrcBroker::Client::Error.new('JRC_BROKER_INVALID_REQUEST', status: 400) unless name.is_a?(String) && name.strip.length.between?(1, 255)
 
     inbox = binding.inbox
     inbox.with_lock do
@@ -96,7 +89,7 @@ class Api::V1::Accounts::JrcBrokerController < Api::V1::Accounts::BaseController
       if previous != name.strip
         inbox.update!(name: name.strip)
         JrcBrokerConnectionEvent.create!(account: Current.account, inbox: inbox, user: Current.user, event_type: 'CONFIGURATION_CHANGED',
-                                        occurred_at: Time.current, metadata: { previous_name: previous, next_name: inbox.name })
+                                         occurred_at: Time.current, metadata: { previous_name: previous, next_name: inbox.name })
       end
     end
     render json: { id: inbox.id, name: inbox.name }
@@ -192,7 +185,7 @@ class Api::V1::Accounts::JrcBrokerController < Api::V1::Accounts::BaseController
 
   def control
     JrcBroker::Control.new(account: Current.account, user: Current.user, account_user: Current.account_user, binding: binding,
-                          source_ip: request.remote_ip)
+                           source_ip: request.remote_ip)
   end
 
   def broker

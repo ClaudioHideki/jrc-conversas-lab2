@@ -58,15 +58,21 @@ class JrcFlows::Actions
   end
 
   def assign(data)
-    if data['team_id'].present?
-      @conversation.update!(team: @account.teams.find(data['team_id']))
-    end
+    @conversation.update!(team: @account.teams.find(data['team_id'])) if data['team_id'].present?
     if data['agent_id'].present?
       user = @account.users.find(data['agent_id'])
       allowed = @conversation.inbox.members.exists?(user.id) || @account.administrators.exists?(user.id)
       raise 'O atendente não participa desta caixa.' unless allowed
 
-      Conversations::AssignmentService.new(conversation: @conversation, assignee_id: user.id).perform
+      policy = JrcHumanAssignment::Policy.connection_for(@account, @conversation.inbox_id)
+      if policy&.fetch('visibility', nil) == 'assigned_only' && policy['enabled']
+        # A bot preference is not a manual override of presence or capacity.
+        @conversation.update!(assignee_id: nil, assignee_agent_bot_id: nil,
+                              auto_assignment_requested_at: @conversation.auto_assignment_requested_at || Time.current,
+                              custom_attributes: @conversation.custom_attributes.merge('jrc_preferred_agent_id' => user.id))
+      else
+        Conversations::AssignmentService.new(conversation: @conversation, assignee_id: user.id).perform
+      end
     end
     @conversation.update!(status: 'open')
   end
@@ -123,9 +129,7 @@ class JrcFlows::Actions
 
   def create_activity(data)
     user = @account.users.find(data.fetch('user_id'))
-    reference = if JrcRelationship::PlaybookFlowContinuation.managed?(@run)
-                  JrcRelationship::PlaybookFlowRunContext.new(@run).authorize!.reference
-                end
+    reference = (JrcRelationship::PlaybookFlowRunContext.new(@run).authorize!.reference if JrcRelationship::PlaybookFlowContinuation.managed?(@run))
     selected_lead = lead
     activity = JrcCrm::Activity.create!(
       account: @account, user: user, lead: selected_lead, contact: @conversation.contact, conversation: @conversation,
@@ -138,9 +142,9 @@ class JrcFlows::Actions
     return unless reference
 
     JrcCrm::AuditLoggerService.new(account: @account, event_type: 'activity_created', actor: reference.context.user,
-                                  resource: activity, from_value: nil, to_value: activity.status,
-                                  metadata: { source: 'relationship_playbook_flow', run_id: @run.id, node_id: @run.node_id,
-                                              business_unit_id: reference.assignment.business_unit_id }).call
+                                   resource: activity, from_value: nil, to_value: activity.status,
+                                   metadata: { source: 'relationship_playbook_flow', run_id: @run.id, node_id: @run.node_id,
+                                               business_unit_id: reference.assignment.business_unit_id }).call
   end
 
   def webhook(data)

@@ -1,6 +1,7 @@
 class JrcHumanAssignment::Policy
   CONNECTION_DEFAULTS = { respect_availability: true, capacity_enabled: true, waiting_enabled: true,
-                          schedule: 'always', fallback: 'waiting', fallback_team_id: nil }.freeze
+                          schedule: 'always', fallback: 'waiting', fallback_team_id: nil,
+                          visibility: 'shared', supervisor_ids: [], agent_limits: {} }.freeze
   def self.for(account)
     value = account.custom_attributes['jrc_human_assignment'] || {}
     { enabled: value['enabled'] == true, max_open: value.fetch('max_open', 10), inbox_ids: value.fetch('inbox_ids', []),
@@ -39,13 +40,16 @@ class JrcHumanAssignment::Policy
   end
 
   def self.update_connection!(account, inbox:, actor:, **options)
-    options = CONNECTION_DEFAULTS.merge(options)
-    validate_connection_options!(options)
     account.with_lock do
+      previous = connection_for(account, inbox.id)
+      options = JrcHumanAssignment::ConnectionOptions.merge(previous, options)
+      validate_connection_options!(options)
       ids = (options[:team_ids] + [options[:fallback_team_id]].compact).uniq
       validate_connection_access!(account, inbox, actor, ids)
+      JrcHumanAssignment::ConnectionOptions.validate_members!(account, inbox, options)
       raise ArgumentError if options[:schedule] == 'inbox' && !inbox.reload.working_hours_enabled?
-      value = options.stringify_keys.merge('effective_from' => Time.current.iso8601(6))
+
+      value = JrcHumanAssignment::ConnectionOptions.snapshot(options, previous: previous, enabled: enabled_for?(account, inbox.id))
       persist_connection!(account, inbox, actor, value)
     end
   end
@@ -58,7 +62,10 @@ class JrcHumanAssignment::Policy
     validate_connection_mode!(options[:mode], options[:enabled], options[:team_ids])
     raise ArgumentError unless %i[respect_availability capacity_enabled waiting_enabled].all? { |key| [true, false].include?(options[key]) }
     raise ArgumentError unless %w[always inbox].include?(options[:schedule]) && %w[waiting default_team unassigned].include?(options[:fallback])
+
+    JrcHumanAssignment::ConnectionOptions.validate!(options)
     raise ArgumentError if options[:fallback] == 'waiting' && !options[:waiting_enabled]
+
     if options[:fallback] == 'default_team'
       raise ArgumentError unless options[:fallback_team_id].is_a?(Integer) && options[:fallback_team_id].positive?
     elsif options[:fallback_team_id]
@@ -178,8 +185,7 @@ class JrcHumanAssignment::Policy
   private_class_method :validate_limits!
 
   def self.validate_inbox_ids!(inbox_ids)
-    raise ArgumentError unless inbox_ids.is_a?(Array) && inbox_ids.size <= 1000
-    raise ArgumentError unless inbox_ids.all? { |id| id.is_a?(Integer) && id.positive? } && inbox_ids.uniq == inbox_ids
+    JrcHumanAssignment::ConnectionOptions.validate_ids!(inbox_ids)
   end
   private_class_method :validate_inbox_ids!
 end

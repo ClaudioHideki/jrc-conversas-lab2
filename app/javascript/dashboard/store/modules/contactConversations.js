@@ -84,7 +84,15 @@ export const getters = {
 };
 
 export const actions = {
-  create: async ({ commit }, { params, isFromWhatsApp }) => {
+  clear({ commit }) {
+    commit(types.default.EMPTY_ALL_CONVERSATION);
+  },
+  create: async (
+    { commit, state: moduleState, rootGetters },
+    { params, isFromWhatsApp }
+  ) => {
+    const revision = moduleState?.accessVersion || 0;
+    const accountId = rootGetters?.getCurrentAccountId;
     commit(types.default.SET_CONTACT_CONVERSATIONS_UI_FLAG, {
       isCreating: true,
     });
@@ -98,6 +106,11 @@ export const actions = {
       });
 
       const { data } = await ConversationApi.create(payload);
+      if (
+        revision !== (moduleState?.accessVersion || 0) ||
+        accountId !== rootGetters?.getCurrentAccountId
+      )
+        return null;
       commit(types.default.ADD_CONTACT_CONVERSATION, {
         id: contactId,
         data,
@@ -112,12 +125,19 @@ export const actions = {
       });
     }
   },
-  get: async ({ commit }, contactId) => {
+  get: async ({ commit, state: moduleState, rootGetters }, contactId) => {
+    const revision = moduleState?.accessVersion || 0;
+    const accountId = rootGetters?.getCurrentAccountId;
     commit(types.default.SET_CONTACT_CONVERSATIONS_UI_FLAG, {
       isFetching: true,
     });
     try {
       const response = await ContactAPI.getConversations(contactId);
+      if (
+        revision !== (moduleState?.accessVersion || 0) ||
+        accountId !== rootGetters?.getCurrentAccountId
+      )
+        return;
       commit(types.default.SET_CONTACT_CONVERSATIONS, {
         id: contactId,
         data: response.data.payload,
@@ -134,6 +154,10 @@ export const actions = {
 };
 
 export const mutations = {
+  [types.default.EMPTY_ALL_CONVERSATION]($state) {
+    $state.records = {};
+    $state.accessVersion = ($state.accessVersion || 0) + 1;
+  },
   [types.default.SET_CONTACT_CONVERSATIONS_UI_FLAG]($state, data) {
     $state.uiFlags = {
       ...$state.uiFlags,

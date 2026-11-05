@@ -65,6 +65,13 @@
       "RECONNECTED_HELP": "The number is approved and the inbox link is ready. Existing configuration has been kept. This does not confirm message delivery or synchronization; check delivery separately below."
     },
     "DISTRIBUTION": {
+      "VISIBILITY": "Conversation visibility in this inbox",
+      "SHARED": "Shared with authorized inbox members",
+      "ASSIGNED_ONLY": "Agents see only their assigned conversations",
+      "SUPERVISORS": "Inbox supervisors",
+      "EXCLUSIVE_HELP": "Only supervisors and authorized administrators see the waiting queue. Availability, capacity and waiting are required in this mode.",
+      "INDIVIDUAL_LIMITS": "Individual capacity for this inbox (blank uses the default)",
+      "AGENT_LIMIT": "Capacity for {name}",
       "TITLE": "Distribution for this connection",
       "GLOBAL_FALLBACK": "No connection-specific rule has been saved. Existing account-wide distribution rules remain applicable. Save an explicitly disabled rule to disable automatic distribution for this connection.",
       "HELP": "Configure queues without reconnecting WhatsApp. Changes apply to new requests; assigned conversations keep their owner and reply channel. Availability, capacity and fallback follow the saved options.",
@@ -289,6 +296,7 @@
         "IDENTITY_CONFIRMED": "Business number approved",
         "SESSION_FAILED": "Session failure",
         "DISTRIBUTION_FALLBACK": "Distribution fallback applied",
+        "DISTRIBUTION_ASSIGNED": "Conversation assigned to an eligible agent",
         "CONFIGURATION_CHANGED": "Connection settings changed",
         "PERMISSIONS_CHANGED": "Pairing permissions changed"
       },

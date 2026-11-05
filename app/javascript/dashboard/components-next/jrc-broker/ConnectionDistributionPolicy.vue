@@ -31,6 +31,23 @@ const fallbackTeamId = ref(null);
 const calendar = ref(null);
 const teamIds = ref([]);
 const teams = ref([]);
+const agents = ref([]);
+const visibility = ref('shared');
+const supervisorIds = ref([]);
+const agentLimits = ref({});
+const exclusive = computed(() => visibility.value === 'assigned_only');
+watch(exclusive, value => {
+  if (!value) return;
+  respectAvailability.value = true;
+  capacityEnabled.value = true;
+  waitingEnabled.value = true;
+  fallback.value = 'waiting';
+  if (mode.value === 'direct') mode.value = 'round_robin';
+});
+const setAgentLimit = (id, value) => {
+  if (value === '') delete agentLimits.value[id];
+  else agentLimits.value[id] = Number(value);
+};
 const effectiveFrom = ref(null);
 const loaded = ref(false);
 const busy = ref(false);
@@ -52,6 +69,9 @@ const valid = computed(
     maxOpen.value <= 100 &&
     (!enabled.value || teamIds.value.length > 0) &&
     (mode.value !== 'direct' || teamIds.value.length === 1) &&
+    Object.values(agentLimits.value).every(
+      limit => Number.isInteger(limit) && limit >= 1 && limit <= 100
+    ) &&
     teamIds.value.every(id => teams.value.some(team => team.id === id)) &&
     (schedule.value !== 'inbox' || calendar.value?.enabled === true) &&
     (fallback.value !== 'waiting' || waitingEnabled.value) &&
@@ -137,6 +157,9 @@ const policySummary = policy => {
 const apply = policy => {
   savedPolicy.value = policy;
   hasPolicy.value = policy !== null && policy !== undefined;
+  visibility.value = policy?.visibility || 'shared';
+  supervisorIds.value = [...(policy?.supervisor_ids || [])];
+  agentLimits.value = { ...(policy?.agent_limits || {}) };
   enabled.value = policy?.enabled === true;
   mode.value = policy?.mode || 'round_robin';
   maxOpen.value = policy?.max_open ?? 10;
@@ -158,6 +181,7 @@ const clear = () => {
   busy.value = false;
   feedback.value = '';
   teams.value = [];
+  agents.value = [];
   calendar.value = null;
   history.value = [];
   historyCursor.value = null;
@@ -187,6 +211,7 @@ const load = async () => {
     );
     if (current !== generation) return;
     teams.value = result.teams;
+    agents.value = result.agents || [];
     calendar.value = result.calendar;
     apply(result.policy);
     loaded.value = true;
@@ -209,6 +234,9 @@ const save = async () => {
         mode: mode.value,
         team_ids: [...teamIds.value],
         max_open: maxOpen.value,
+        visibility: visibility.value,
+        supervisor_ids: [...supervisorIds.value],
+        agent_limits: { ...agentLimits.value },
         respect_availability: respectAvailability.value,
         capacity_enabled: capacityEnabled.value,
         waiting_enabled: waitingEnabled.value,
@@ -457,6 +485,74 @@ onBeforeUnmount(clear);
           :class="presentation === 'rules' ? 'grid-cols-1' : 'lg:grid-cols-2'"
         >
           <div v-show="presentation !== 'rules'" class="flex flex-col gap-4">
+            <label class="flex flex-col gap-2 text-sm">
+              {{ t('JRC_BROKER.DISTRIBUTION.VISIBILITY') }}
+              <select
+                v-model="visibility"
+                data-testid="distribution-visibility"
+              >
+                <option value="shared">
+                  {{ t('JRC_BROKER.DISTRIBUTION.SHARED') }}
+                </option>
+                <option value="assigned_only">
+                  {{ t('JRC_BROKER.DISTRIBUTION.ASSIGNED_ONLY') }}
+                </option>
+              </select>
+            </label>
+            <fieldset v-if="exclusive" class="flex flex-col gap-2">
+              <legend>{{ t('JRC_BROKER.DISTRIBUTION.SUPERVISORS') }}</legend>
+              <p class="text-sm text-n-slate-11">
+                {{ t('JRC_BROKER.DISTRIBUTION.EXCLUSIVE_HELP') }}
+              </p>
+              <label
+                v-for="agent in agents.filter(
+                  item => item.can_supervise !== false
+                )"
+                :key="agent.id"
+                class="flex items-center gap-2 text-sm"
+              >
+                <input
+                  v-model="supervisorIds"
+                  type="checkbox"
+                  :value="agent.id"
+                  :data-supervisor-id="agent.id"
+                />
+                {{ agent.name }}
+              </label>
+            </fieldset>
+            <fieldset v-if="exclusive" class="flex flex-col gap-2">
+              <legend>
+                {{ t('JRC_BROKER.DISTRIBUTION.INDIVIDUAL_LIMITS') }}
+              </legend>
+              <label
+                v-for="agent in agents"
+                :key="agent.id"
+                class="flex items-center justify-between gap-2 text-sm"
+              >
+                <span
+                  >{{ agent.name }}
+                  <span v-if="agent.active !== undefined"
+                    >({{ agent.active }} /
+                    {{ agentLimits[agent.id] || maxOpen }})</span
+                  ></span
+                >
+                <input
+                  type="number"
+                  min="1"
+                  max="100"
+                  step="1"
+                  :value="agentLimits[agent.id] ?? ''"
+                  :placeholder="String(maxOpen)"
+                  :data-agent-limit-id="agent.id"
+                  :aria-label="
+                    t('JRC_BROKER.DISTRIBUTION.AGENT_LIMIT', {
+                      name: agent.name,
+                    })
+                  "
+                  @input="setAgentLimit(agent.id, $event.target.value)"
+                />
+              </label>
+            </fieldset>
             <label class="flex items-center gap-2 text-sm">
               <input
                 v-model="enabled"
@@ -484,6 +580,7 @@ onBeforeUnmount(clear);
                   type="radio"
                   name="connection-distribution-mode"
                   :value="option"
+                  :disabled="exclusive && option === 'direct'"
                 />{{ modeLabel(option) }}
               </label>
             </fieldset>
@@ -590,6 +687,7 @@ onBeforeUnmount(clear);
               <input
                 v-model="respectAvailability"
                 data-testid="distribution-availability"
+                :disabled="exclusive"
                 type="checkbox"
               />
               {{ t('JRC_BROKER.DISTRIBUTION.AVAILABILITY') }}
@@ -598,6 +696,7 @@ onBeforeUnmount(clear);
               <input
                 v-model="capacityEnabled"
                 data-testid="distribution-capacity-enabled"
+                :disabled="exclusive"
                 type="checkbox"
               />
               {{ t('JRC_BROKER.DISTRIBUTION.CAPACITY_ENABLED') }}
@@ -606,6 +705,7 @@ onBeforeUnmount(clear);
               <input
                 v-model="waitingEnabled"
                 data-testid="distribution-waiting"
+                :disabled="exclusive"
                 type="checkbox"
               />
               {{ t('JRC_BROKER.DISTRIBUTION.WAITING') }}
@@ -633,7 +733,11 @@ onBeforeUnmount(clear);
             </a>
             <label class="flex flex-col gap-2 text-sm">
               {{ t('JRC_BROKER.DISTRIBUTION.FALLBACK') }}
-              <select v-model="fallback" data-testid="distribution-fallback">
+              <select
+                v-model="fallback"
+                data-testid="distribution-fallback"
+                :disabled="exclusive"
+              >
                 <option value="waiting" :disabled="!waitingEnabled">
                   {{ t('JRC_BROKER.DISTRIBUTION.WAITING') }}
                 </option>

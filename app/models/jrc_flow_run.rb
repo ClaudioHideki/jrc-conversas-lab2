@@ -48,10 +48,20 @@ class JrcFlowRun < ApplicationRecord
   validates :event_key, presence: true, uniqueness: { scope: :flow_id }
   validates :status, inclusion: { in: %w[running waiting delayed completed paused failed] }
   scope :live, -> { where(status: %w[running waiting delayed]) }
+  after_update_commit :resume_human_distribution, if: :saved_change_to_status?
 
   def snapshot
     as_json(only: %i[id status node_id trace error steps created_at finished_at wake_at]).merge(
       conversation_id: conversation.display_id, contact_name: conversation.contact.name
     )
+  end
+
+  private
+
+  def resume_human_distribution
+    return unless status == 'completed' && JrcHumanAssignment::Policy.enabled_for?(account, conversation.inbox_id)
+    return unless conversation.open? && conversation.assignee_id.nil? && conversation.auto_assignment_requested_at
+
+    JrcHumanAssignment::DispatchJob.perform_later(account_id)
   end
 end

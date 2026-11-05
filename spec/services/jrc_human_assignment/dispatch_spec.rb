@@ -18,7 +18,7 @@ RSpec.describe JrcHumanAssignment::Dispatch do
       create(:team_member, team: team, user: member)
     end
     allow(OnlineStatusTracker).to receive(:effective_available_users).with(account.id)
-      .and_return(agent.id.to_s => 'online', other_agent.id.to_s => 'online')
+                                                                     .and_return(agent.id.to_s => 'online', other_agent.id.to_s => 'online')
     conversation.update_columns(team_id: team.id, assignee_id: nil)
   end
 
@@ -150,7 +150,7 @@ RSpec.describe JrcHumanAssignment::Dispatch do
     conversation.update_columns(custom_attributes: {})
     flow = JrcFlow.create!(account: account, name: 'Synthetic assignment boundary',
                            graph: { 'nodes' => [{ 'id' => 'start', 'type' => 'start', 'label' => 'Start',
-                                                 'position' => { 'x' => 0, 'y' => 0 }, 'data' => {} }], 'edges' => [] },
+                                                  'position' => { 'x' => 0, 'y' => 0 }, 'data' => {} }], 'edges' => [] },
                            settings: { 'inbox_ids' => [], 'days' => [] })
     run = flow.runs.create!(account: account, conversation: conversation, event_key: SecureRandom.uuid,
                             graph: flow.graph, settings: {}, status: 'waiting')
@@ -199,7 +199,7 @@ RSpec.describe JrcHumanAssignment::Dispatch do
     waiting = create(:conversation, account: account, inbox: inbox, status: :open)
     waiting.update_columns(team_id: team.id, assignee_id: nil)
     expect { JrcHumanAssignment::DispatchJob.perform_now(account.id) }
-      .to have_enqueued_job(JrcHumanAssignment::DispatchJob).with(account.id, blocked.id)
+      .to have_enqueued_job(JrcHumanAssignment::DispatchJob).with(account.id, blocked.id, blocked.auto_assignment_requested_at.iso8601(6))
     JrcHumanAssignment::DispatchJob.perform_now(account.id, blocked.id)
     expect(waiting.reload.assignee_id).to be_present
     expect(conversation.reload.assignee_id).to be_nil

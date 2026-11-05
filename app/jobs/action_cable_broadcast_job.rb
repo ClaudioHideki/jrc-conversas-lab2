@@ -13,11 +13,25 @@ class ActionCableBroadcastJob < ApplicationJob
   def perform(members, event_name, data)
     return if members.blank?
 
+    data = data.deep_symbolize_keys
+    account = Account.find(data[:account_id])
+    reference = Conversations::EventVisibility.reference(event_name, data)
+    conversation = account.conversations.find_by(reference) if reference
+    return if reference && conversation.nil?
+
+    members = authorized_members(members, event_name, account, conversation)
     broadcast_data = prepare_broadcast_data(event_name, data)
     broadcast_to_members(members, event_name, broadcast_data)
   end
 
   private
+
+  def authorized_members(members, event_name, account, conversation)
+    return members unless conversation
+
+    allowed = Conversations::EventVisibility.filter_tokens(account: account, conversation: conversation, tokens: members)
+    event_name == 'conversation.access_revoked' ? members - allowed : allowed
+  end
 
   # Ensures that only the latest available data is sent to prevent UI issues
   # caused by out-of-order events during high-traffic periods. This prevents

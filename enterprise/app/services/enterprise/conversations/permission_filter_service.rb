@@ -1,6 +1,6 @@
 module Enterprise::Conversations::PermissionFilterService
   def perform
-    return filter_by_permissions(permissions) if user_has_custom_role?
+    return restrict_inbox_visibility(filter_by_permissions(permissions)) if user_has_custom_role?
 
     super
   end

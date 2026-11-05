@@ -34,16 +34,20 @@ class JrcHumanAssignment::Dispatch
 
   def request_predates_policy?
     policy = JrcHumanAssignment::Policy.connection_for(@account, @conversation.inbox_id)
-    policy && policy['effective_from'] && @conversation.auto_assignment_requested_at < Time.iso8601(policy['effective_from'])
+    since = policy && (policy['requests_since'] || policy['effective_from'])
+    since && @conversation.auto_assignment_requested_at < Time.iso8601(since)
   end
 
   def assign_selected_agent
     selected = select_agent
     return false unless selected
 
+    preferred = @conversation.custom_attributes['jrc_preferred_agent_id'] == selected
+    requested_at = @conversation.auto_assignment_requested_at.iso8601(6)
     member = @account.account_users.find_by(user_id: selected)
     return false unless member && assign_member!(member, selected)
 
+    record_decision!(selected, preferred, requested_at)
     JrcHumanAssignment::Policy.record_cursor!(@account, @conversation.inbox_id, agent_id: selected, team_id: @conversation.team_id)
     true
   end
@@ -54,7 +58,7 @@ class JrcHumanAssignment::Dispatch
       @account.reload
       next false unless member_assignable?(member, selected)
 
-      @conversation.update!(assignee_id: selected)
+      @conversation.update!(assignee_id: selected, custom_attributes: @conversation.custom_attributes.except('jrc_preferred_agent_id'))
       true
     end
   end
@@ -67,9 +71,19 @@ class JrcHumanAssignment::Dispatch
   end
 
   def below_capacity?(selected)
-    policy = JrcHumanAssignment::Policy.effective(@account, @conversation.inbox_id)
-    return true if policy[:capacity_enabled] == false
-    @account.conversations.open.where(assignee_id: selected).count < policy[:max_open]
+    workload.available([selected]).include?(selected)
+  end
+
+  def record_decision!(selected, preferred, requested_at)
+    return unless JrcHumanAssignment::Policy.effective(@account, @conversation.inbox_id)[:visibility] == 'assigned_only'
+
+    count = workload.loads([selected]).fetch(selected, 0)
+    JrcBrokerConnectionEvent.create!(account: @account, inbox: @conversation.inbox, user_id: selected,
+                                     event_type: 'DISTRIBUTION_ASSIGNED', occurred_at: Time.current,
+                                     metadata: { conversation_id: @conversation.id, agent_id: selected, team_id: @conversation.team_id,
+                                                 active_count: count, capacity_limit: workload.limit(selected),
+                                                 reason: preferred ? 'eligible_preferred_agent' : 'lowest_occupancy_round_robin',
+                                                 requested_at: requested_at })
   end
 
   def route_team!
@@ -78,7 +92,7 @@ class JrcHumanAssignment::Dispatch
 
     teams = @account.teams.where(id: policy['team_ids'], allow_auto_assign: true).index_by(&:id)
     ordered = ordered_teams(policy, teams)
-    selected = policy['mode'] == 'direct' ? ordered.first : select_team_with_capacity(policy, teams, ordered)
+    selected = policy['mode'] == 'direct' ? ordered.first : select_team_with_capacity(teams, ordered)
     @conversation.update!(team: selected) if selected
   end
 
@@ -90,26 +104,23 @@ class JrcHumanAssignment::Dispatch
     cursor ? ordered.rotate(cursor + 1) : ordered
   end
 
-  def select_team_with_capacity(policy, teams, ordered)
-    ids = available_agent_ids
-    loads = agent_loads(ids)
-    ids = ids.select { |id| loads.fetch(id, 0) < policy['max_open'] } unless policy['capacity_enabled'] == false
+  def select_team_with_capacity(teams, ordered)
+    ids = workload.available(available_agent_ids)
     eligible_teams = TeamMember.where(team_id: teams.keys, user_id: ids).distinct.pluck(:team_id)
     ordered.find { |team| eligible_teams.include?(team.id) }
   end
 
-  def agent_loads(ids)
-    @account.conversations.open.where(assignee_id: ids).group(:assignee_id).count
+  def workload
+    JrcHumanAssignment::Workload.new(account: @account, inbox_id: @conversation.inbox_id,
+                                     policy: JrcHumanAssignment::Policy.effective(@account, @conversation.inbox_id))
   end
 
   def select_agent
-    policy = JrcHumanAssignment::Policy.effective(@account, @conversation.inbox_id)
-    ids = eligible_agent_ids
-    loads = agent_loads(ids)
-    ids = ids.select { |id| loads.fetch(id, 0) < policy[:max_open] } unless policy[:capacity_enabled] == false
-    minimum = ids.map { |id| loads.fetch(id, 0) }.min
-    candidates = ids.select { |id| loads.fetch(id, 0) == minimum }.sort
-    candidates.find { |id| id > policy[:last_agent_id] } || candidates.first
+    candidates = workload.available(eligible_agent_ids)
+    previous = @conversation.custom_attributes['jrc_preferred_agent_id']
+    return previous if previous && candidates.include?(previous)
+
+    workload.select(candidates)
   end
 
   def eligible?
@@ -164,7 +175,7 @@ class JrcHumanAssignment::Dispatch
     @conversation.update!(team: team, auto_assignment_requested_at: fallback == 'waiting' ? @conversation.auto_assignment_requested_at : nil,
                           custom_attributes: @conversation.custom_attributes.merge('jrc_assignment_fallback' => signature))
     JrcBrokerConnectionEvent.create!(account: @account, inbox: @conversation.inbox, event_type: 'DISTRIBUTION_FALLBACK',
-                                    occurred_at: Time.current, metadata: signature.merge('conversation_id' => @conversation.id))
+                                     occurred_at: Time.current, metadata: signature.merge('conversation_id' => @conversation.id))
     false
   end
 end

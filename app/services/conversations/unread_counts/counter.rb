@@ -103,18 +103,20 @@ class Conversations::UnreadCounts::Counter
   end
 
   def inbox_keys_for_mode(inbox_id)
-    case permission_mode
+    case permission_mode_for(inbox_id)
     when :base
       [store.inbox_key(account.id, inbox_id)]
     when :unassigned_and_mine
       [store.inbox_unassigned_key(account.id, inbox_id), store.inbox_assignee_key(account.id, inbox_id, user.id)]
     when :mine
       [store.inbox_assignee_key(account.id, inbox_id, user.id)]
+    else
+      []
     end
   end
 
   def label_inbox_keys_for_mode(label_id, inbox_id)
-    case permission_mode
+    case permission_mode_for(inbox_id)
     when :base
       [store.label_inbox_key(account.id, label_id, inbox_id)]
     when :unassigned_and_mine
@@ -124,11 +126,13 @@ class Conversations::UnreadCounts::Counter
       ]
     when :mine
       [store.label_inbox_assignee_key(account.id, label_id, inbox_id, user.id)]
+    else
+      []
     end
   end
 
   def team_inbox_keys_for_mode(team_id, inbox_id)
-    case permission_mode
+    case permission_mode_for(inbox_id)
     when :base
       [store.team_inbox_key(account.id, team_id, inbox_id)]
     when :unassigned_and_mine
@@ -138,6 +142,8 @@ class Conversations::UnreadCounts::Counter
       ]
     when :mine
       [store.team_inbox_assignee_key(account.id, team_id, inbox_id, user.id)]
+    else
+      []
     end
   end
 
@@ -151,7 +157,17 @@ class Conversations::UnreadCounts::Counter
   end
 
   def assignment_mode?
-    %i[unassigned_and_mine mine].include?(permission_mode)
+    %i[unassigned_and_mine mine].include?(permission_mode) || visible_inbox_ids.any? { |id| permission_mode_for(id) == :mine }
+  end
+
+  def permission_mode_for(inbox_id)
+    visibility = @inbox_visibility ||= Conversations::InboxVisibility.new(account: account, user: user)
+    return permission_mode unless visibility.exclusive_inbox_ids.include?(inbox_id)
+    return permission_mode if (account_user&.administrator? && account_user.custom_role_id.nil?) ||
+                              visibility.supervised_inbox_ids.include?(inbox_id)
+    return :none unless visibility.member_of?(inbox_id)
+
+    permission_mode == :none ? :none : :mine
   end
 
   def permission_mode

@@ -9,7 +9,14 @@ class OnlineStatusTracker
 
   # obj_type: Contact | User
   def self.update_presence(account_id, obj_type, obj_id)
+    returning = obj_type == 'User' && !get_presence(account_id, obj_type, obj_id)
     ::Redis::Alfred.zadd(presence_key(account_id, obj_type), Time.now.to_i, obj_id)
+    if returning
+      member = AccountUser.find_by(account_id: account_id, user_id: obj_id)
+      if member&.online? && member.auto_assignment_enabled? && JrcHumanAssignment::Policy.enabled?(member.account)
+        JrcHumanAssignment::DispatchJob.perform_later(account_id)
+      end
+    end
   rescue Redis::BaseError => e
     presence_error(account_id, e)
     false

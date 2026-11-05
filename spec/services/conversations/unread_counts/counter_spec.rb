@@ -20,6 +20,23 @@ RSpec.describe Conversations::UnreadCounts::Counter do
     store.clear_account!(account.id)
   end
 
+  it 'does not include colleagues or the waiting queue in the central agents unread counts' do
+    visible_inbox.update!(enable_auto_assignment: false)
+    peer = create(:user, account: account, role: :agent)
+    create(:inbox_member, inbox: visible_inbox, user: peer)
+    account.update!(custom_attributes: { 'jrc_human_assignment' => { 'connections' => {
+                      visible_inbox.id.to_s => { 'visibility' => 'assigned_only', 'supervisor_ids' => [] }
+                    } } })
+    [agent, peer, nil].each do |owner|
+      create_unread_conversation(account: account, inbox: visible_inbox, assignee: owner, labels: [label.title], team: visible_team)
+    end
+    counts = described_class.new(account: account, user: agent).perform
+    expect(counts[:all_count]).to eq(1)
+    expect(counts[:inboxes]).to eq(visible_inbox.id.to_s => 1)
+    expect(counts[:labels]).to eq(label.id.to_s => 1)
+    expect(counts[:teams]).to eq(visible_team.id.to_s => 1)
+  end
+
   it 'builds the base cache on demand' do
     create_unread_conversation(account: account, inbox: visible_inbox, labels: [label.title], team: visible_team)
 

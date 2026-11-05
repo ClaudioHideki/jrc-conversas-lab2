@@ -29,7 +29,7 @@ class AutoAssignment::IncomingMessageRequest
         inbox = conversation.inbox.reload
         next unless AutoAssignment::Eligibility.new(inbox: inbox).configuration_reason.nil?
 
-        conversation.update!(auto_assignment_requested_at: Time.current)
+        conversation.update!(auto_assignment_requested_at: Time.current) if conversation.auto_assignment_requested_at.nil?
         if JrcHumanAssignment::Policy.enabled_for?(inbox.account, inbox.id)
           :human
         else

@@ -1,4 +1,5 @@
 class AgentNotifications::ConversationNotificationsMailer < ApplicationMailer
+  after_action :verify_current_conversation_access
   def conversation_creation(conversation, agent, _user)
     return unless smtp_config_set_or_development?
 
@@ -56,6 +57,18 @@ class AgentNotifications::ConversationNotificationsMailer < ApplicationMailer
   end
 
   private
+
+  def verify_current_conversation_access
+    return unless @conversation && @agent
+
+    conversation = Conversation.find_by(id: @conversation.id)
+    account = conversation && Account.find(conversation.account_id)
+    return if conversation && JrcHumanAssignment::Policy.connection_for(account, conversation.inbox_id)&.fetch('visibility', nil) != 'assigned_only'
+
+    member = account&.account_users&.find_by(user_id: @agent.id)
+    allowed = member && ConversationPolicy.new({ account: account, user: @agent, account_user: member }, conversation).show?
+    mail.perform_deliveries = false unless allowed
+  end
 
   def liquid_droppables
     super.merge({

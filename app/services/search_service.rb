@@ -41,9 +41,10 @@ class SearchService
                                               'conversations.last_activity_at')
     end
 
-    @conversations = conversations_query.order('conversations.created_at DESC')
-                                        .page(params[:page])
-                                        .per(15)
+    @conversations = Conversations::PermissionFilterService.new(conversations_query, current_user, current_account).perform
+                                                           .order('conversations.created_at DESC')
+                                                           .page(params[:page])
+                                                           .per(15)
   end
 
   def filter_messages
@@ -64,7 +65,8 @@ class SearchService
   end
 
   def should_run_advanced_search?
-    ChatwootApp.advanced_search_allowed? && current_account.feature_enabled?('advanced_search')
+    Conversations::InboxVisibility.new(account: current_account, user: current_user).exclusive_inbox_ids.empty? &&
+      ChatwootApp.advanced_search_allowed? && current_account.feature_enabled?('advanced_search')
   end
 
   def advanced_search; end
@@ -107,7 +109,13 @@ class SearchService
   def message_base_query
     query = current_account.messages.where('created_at >= ?', 3.months.ago)
     query = query.where(inbox_id: accessable_inbox_ids) unless should_skip_inbox_filtering?
-    query
+    return query if Conversations::InboxVisibility.new(account: current_account, user: current_user).exclusive_inbox_ids.empty?
+
+    query.where(conversation_id: visible_conversations.select(:id))
+  end
+
+  def visible_conversations
+    Conversations::PermissionFilterService.new(current_account.conversations, current_user, current_account).perform
   end
 
   def apply_message_filters(query)

@@ -55,6 +55,8 @@ class ActionCableConnector extends BaseActionCableConnector {
       'notification.updated': this.onNotificationUpdated,
       'conversation.read': this.onConversationRead,
       'conversation.updated': this.onConversationUpdated,
+      'conversation.access_revoked': this.onConversationAccessRevoked,
+      'conversation.access_reset': this.onConversationAccessRevoked,
       'conversation.participants_changed':
         this.onConversationParticipantsChanged,
       'conversation.unread_count_changed':
@@ -148,6 +150,12 @@ class ActionCableConnector extends BaseActionCableConnector {
 
   onConversationUpdated = data => {
     this.app.$store.dispatch('updateConversation', data);
+    this.fetchConversationStats();
+  };
+
+  onConversationAccessRevoked = data => {
+    this.app.$store.dispatch('revokeConversationAccess', data.id);
+    if (!data.id) emitter.emit(BUS_EVENTS.WEBSOCKET_RECONNECT);
     this.fetchConversationStats();
   };
 

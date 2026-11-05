@@ -57,6 +57,12 @@ class Notification < ApplicationRecord
 
   PRIMARY_ACTORS = ['Conversation', 'JrcRelationship::Action', 'JrcServiceDesk::Ticket'].freeze
 
+  def visible_to_user?
+    return true unless primary_actor_type == 'Conversation'
+
+    primary_actor && Conversations::InboxVisibility.new(account: account, user: user).visible?(primary_actor)
+  end
+
   def push_event_data
     # Secondary actor could be nil for cases like system assigning conversation
     payload = {
@@ -161,6 +167,7 @@ class Notification < ApplicationRecord
   end
 
   def process_notification_delivery
+    return unless visible_to_user?
     return if service_desk_clock? # The durable clock execution owns its explicit channels.
     # CS alerts use the existing in-app feed; no conversation-specific delivery job.
     return if relationship_action?

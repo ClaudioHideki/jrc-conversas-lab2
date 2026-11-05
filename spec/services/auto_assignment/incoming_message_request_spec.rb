@@ -19,6 +19,17 @@ RSpec.describe AutoAssignment::IncomingMessageRequest do
     OnlineStatusTracker.update_presence(account.id, 'User', agent.id)
   end
 
+  it 'preserves the first queue timestamp when a waiting client sends another message' do
+    tenant = create(:account)
+    box = create(:inbox, account: tenant, enable_auto_assignment: false)
+    tenant.update!(custom_attributes: { 'jrc_human_assignment' => { 'enabled' => true, 'max_open' => 10, 'inbox_ids' => [box.id] } })
+    waiting = create(:conversation, account: tenant, inbox: box, assignee: nil)
+    first_request = 2.hours.ago.change(usec: 0)
+    waiting.update!(auto_assignment_requested_at: first_request)
+    create(:message, account: tenant, inbox: box, conversation: waiting, message_type: :incoming)
+    expect(waiting.reload.auto_assignment_requested_at).to eq(first_request)
+  end
+
   it 'requests only the historical conversation receiving a new public incoming message' do
     untouched
     create(:message, account: account, inbox: inbox, conversation: historical, sender: historical.contact, message_type: :incoming)
@@ -129,7 +140,7 @@ RSpec.describe AutoAssignment::IncomingMessageRequest do
   it 'retains the live-flow boundary when a historical conversation receives an incoming message' do
     flow = JrcFlow.create!(account: account, name: 'Synthetic inbound boundary',
                            graph: { 'nodes' => [{ 'id' => 'start', 'type' => 'start', 'label' => 'Start',
-                                                 'position' => { 'x' => 0, 'y' => 0 }, 'data' => {} }], 'edges' => [] },
+                                                  'position' => { 'x' => 0, 'y' => 0 }, 'data' => {} }], 'edges' => [] },
                            settings: { 'inbox_ids' => [], 'days' => [] })
     flow.runs.create!(account: account, conversation: historical, event_key: SecureRandom.uuid,
                       graph: flow.graph, settings: {}, status: 'waiting')

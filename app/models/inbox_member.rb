@@ -25,8 +25,15 @@ class InboxMember < ApplicationRecord
   after_create :add_agent_to_round_robin
   after_destroy :remove_agent_from_round_robin
   after_commit :invalidate_filtered_unread_count_visibility, on: [:create, :destroy]
+  after_destroy_commit :revoke_exclusive_inbox_cache
 
   private
+
+  def revoke_exclusive_inbox_cache
+    return unless inbox && JrcHumanAssignment::Policy.connection_for(inbox.account, inbox_id)&.fetch('visibility', nil) == 'assigned_only'
+
+    ActionCableBroadcastJob.perform_later([user.pubsub_token], 'conversation.access_reset', { account_id: inbox.account_id })
+  end
 
   def add_agent_to_round_robin
     ::AutoAssignment::InboxRoundRobinService.new(inbox: inbox).add_agent_to_queue(user_id)

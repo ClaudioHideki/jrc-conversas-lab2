@@ -37,6 +37,7 @@ const statusFilter = ref(resolveStatus(route.query.status));
 const channelFilter = ref(route.query.channel || 'all');
 const assigneeFilter = ref(ASSIGNEE_FILTERS.ME);
 const sharedScope = ref({ enabled: false, inbox_ids: [] });
+const supervisedInboxIds = ref([]);
 const voiceCalls = ref([]);
 const voiceLoading = ref(false);
 const contactCenterContext = ref(null);
@@ -86,12 +87,14 @@ const hasSoftphoneAccess = computed(
     )
 );
 
-const canManageAssignments = computed(() =>
-  canManageAssigneeFilters({
-    role: store.getters.getCurrentRole,
-    customRoleId: store.getters.getCurrentCustomRoleId,
-    permissions: accountPermissions.value,
-  })
+const canManageAssignments = computed(
+  () =>
+    supervisedInboxIds.value.length > 0 ||
+    canManageAssigneeFilters({
+      role: store.getters.getCurrentRole,
+      customRoleId: store.getters.getCurrentCustomRoleId,
+      permissions: accountPermissions.value,
+    })
 );
 
 const hasContactCenter = computed(
@@ -142,6 +145,11 @@ const conversationFilters = computed(() => ({
 }));
 
 const acceptSharedScope = scope => {
+  supervisedInboxIds.value = Array.isArray(scope?.supervised_inbox_ids)
+    ? scope.supervised_inbox_ids.filter(
+        id => Number.isSafeInteger(id) && id > 0
+      )
+    : [];
   const valid =
     scope?.enabled === true &&
     Array.isArray(scope.inbox_ids) &&

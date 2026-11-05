@@ -1,8 +1,10 @@
 class JrcBrokerConnectionEvent < ApplicationRecord
   TYPES = %w[CONNECT_REQUESTED RECONNECT_REQUESTED CONNECTED RECONNECTED DISCONNECT_REQUESTED DISCONNECTED
-             QR_EXPIRED NUMBER_MISMATCH IDENTITY_CONFIRMED SESSION_FAILED DISTRIBUTION_FALLBACK CONFIGURATION_CHANGED PERMISSIONS_CHANGED].freeze
+             QR_EXPIRED NUMBER_MISMATCH IDENTITY_CONFIRMED SESSION_FAILED DISTRIBUTION_FALLBACK DISTRIBUTION_ASSIGNED
+             CONFIGURATION_CHANGED PERMISSIONS_CHANGED].freeze
   SAFE_METADATA = %w[result reason fallback team_id effective_from conversation_id error_code source_ip operation_id
-                     expected_number observed_number previous_name next_name requested_at previous_user_ids next_user_ids].freeze
+                     expected_number observed_number previous_name next_name requested_at previous_user_ids next_user_ids
+                     agent_id active_count capacity_limit].freeze
   belongs_to :account
   belongs_to :inbox
   belongs_to :user, optional: true

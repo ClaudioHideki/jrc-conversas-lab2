@@ -33,13 +33,15 @@ class AccountUser < ApplicationRecord
   belongs_to :inviter, class_name: 'User', optional: true
 
   enum role: { agent: 0, administrator: 1 }
-  enum availability: { online: 0, offline: 1, busy: 2, meeting: 3, feedback: 4, end_shift: 5, training: 6, bathroom_break: 7, lunch_break: 8, manual_call: 9 }
+  enum availability: { online: 0, offline: 1, busy: 2, meeting: 3, feedback: 4, end_shift: 5, training: 6, bathroom_break: 7, lunch_break: 8,
+                       manual_call: 9 }
 
   accepts_nested_attributes_for :account
 
   after_create_commit :notify_creation, :create_notification_setting
   after_destroy :notify_deletion, :remove_user_from_account
   after_save :update_presence_in_redis, if: :saved_change_to_availability?
+  after_update_commit :resume_human_distribution, if: :saved_change_to_availability?
   after_update :audit_auto_assignment_change, if: :saved_change_to_auto_assignment_enabled?
   after_commit :invalidate_filtered_unread_count_visibility, on: [:create, :destroy]
   after_update_commit :invalidate_filtered_unread_count_visibility_update, if: :filtered_unread_count_visibility_changed?
@@ -75,10 +77,16 @@ class AccountUser < ApplicationRecord
 
   private
 
+  def resume_human_distribution
+    return unless online? && auto_assignment_enabled? && JrcHumanAssignment::Policy.enabled?(account)
+
+    JrcHumanAssignment::DispatchJob.perform_later(account_id)
+  end
+
   def audit_auto_assignment_change
     Audited::Audit.create!(auditable: self, associated: account, user: Current.user, action: 'update',
-                          audited_changes: { 'auto_assignment_enabled' => saved_change_to_auto_assignment_enabled },
-                          comment: 'auto_assignment_configuration_v1')
+                           audited_changes: { 'auto_assignment_enabled' => saved_change_to_auto_assignment_enabled },
+                           comment: 'auto_assignment_configuration_v1')
   end
 
   def notify_creation
