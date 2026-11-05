@@ -7,6 +7,7 @@ import SignatureDeliveryDetails from './SignatureDeliveryDetails.vue';
 import SignatureIntentDialog from './SignatureIntentDialog.vue';
 
 const props = defineProps({ record: { type: Object, required: true } });
+const emit = defineEmits(['updated']);
 const { text, date } = useBackofficePresentation();
 const {
   accountId,
@@ -39,6 +40,10 @@ const registered = async state => {
       : 'CONTRACT_SIGNATURES.REGISTERED'
   );
   await load();
+};
+const accepted = async () => {
+  await load();
+  emit('updated');
 };
 </script>
 
@@ -241,6 +246,7 @@ const registered = async state => {
         :delivery-id="selection"
         @close="selection = null"
         @denied="deny"
+        @updated="accepted"
       />
     </template>
     <SignatureIntentDialog

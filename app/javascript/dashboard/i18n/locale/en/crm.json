@@ -1292,6 +1292,26 @@
         "PREVIOUS": "Previous",
         "NEXT": "Next",
         "OPEN_CENTRAL": "Open in Approval Center"
+      },
+      "SIGNATURE_EVIDENCE": {
+        "TITLE": "Signature evidence",
+        "DESCRIPTION": "Files belong to the exact contract version and original provider connection. Acceptance does not activate the contract or advance Backoffice.",
+        "REFRESH": "Refresh status",
+        "LOADING": "Checking evidence…",
+        "ERROR": "Evidence is unavailable or access changed. Refresh to check again.",
+        "NOT_RECEIVED": "No signature files received",
+        "PENDING": "Files awaiting security verification",
+        "VERIFIED": "Evidence verified; explicit acceptance is required",
+        "INVALID": "Evidence cannot authorize this contract",
+        "SOURCE_CHANGED": "Contract data changed after this version was sent",
+        "ACCEPTED": "Signature accepted for this contract version",
+        "CAPTURE": "Retrieve signed files",
+        "CONFIRM": "I reviewed the signed PDF and certificate for this exact contract version.",
+        "ACCEPT": "Accept signature",
+        "FILES": {
+          "signed_document": "Signed contract PDF",
+          "certificate": "Completion certificate"
+        }
       }
     },
     "CUSTOMER_SIGNING_IDENTITY": {

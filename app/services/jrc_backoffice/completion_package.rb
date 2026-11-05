@@ -23,10 +23,11 @@ class JrcBackoffice::CompletionPackage
     contract = @request.contract_id && @access.contract!(@request)
     contracts = contract_entries
     files = document_entries + contracts
-    missing = missing_entries(contract, contracts)
+    signature = JrcBackoffice::CompletionSignature.new(account: @access.account, actor: @access.actor, request_id: @request_id).call(contract)
+    missing = missing_entries(contract, contracts, signature)
     result = request_manifest.merge(files: files, missing: missing, coverage: coverage(files, missing),
                                     contract_id: contract&.id,
-                                    signature: contract && { status: contract.signature_status, artifact_available: false })
+                                    signature: signature)
     @access.request(@request_id)
     @access.contract!(@request) if contract
     result
@@ -55,11 +56,11 @@ class JrcBackoffice::CompletionPackage
       signature_history: signature_history, history: history }
   end
 
-  def missing_entries(contract, contracts)
+  def missing_entries(contract, contracts, signature)
     missing = missing_requirements + legacy_entries(@request)
     return missing unless contract
 
-    missing << { kind: 'signed_contract', reason: 'VERSION_BOUND_SIGNED_ARTIFACT_UNAVAILABLE' }
+    missing << { kind: 'signed_contract', reason: 'VERSION_BOUND_SIGNED_ARTIFACT_UNAVAILABLE' } unless signature[:artifact_available]
     missing << { kind: 'contract_version', reason: 'PRESERVED_CONTRACT_VERSION_UNAVAILABLE' } if contracts.empty?
     missing + legacy_entries(contract)
   end

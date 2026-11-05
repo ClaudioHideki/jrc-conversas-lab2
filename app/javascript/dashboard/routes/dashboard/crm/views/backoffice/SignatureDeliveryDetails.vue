@@ -2,6 +2,7 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import api from 'dashboard/api/crm/backofficeSignatures';
 import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
+import SignatureEvidencePanel from './SignatureEvidencePanel.vue';
 import { useBackofficePresentation } from './useBackofficePresentation';
 import { signatureEventKey } from './signaturePresentation';
 
@@ -10,7 +11,7 @@ const props = defineProps({
   requestId: { type: [Number, String], required: true },
   deliveryId: { type: Number, required: true },
 });
-const emit = defineEmits(['close', 'denied']);
+const emit = defineEmits(['close', 'denied', 'updated']);
 const { text, date } = useBackofficePresentation();
 const dialog = ref(null);
 const result = ref(null);
@@ -75,6 +76,13 @@ onBeforeUnmount(() => {
       {{ error }}
     </p>
     <section v-if="result" class="space-y-3" :aria-busy="loading">
+      <SignatureEvidencePanel
+        :account-id="accountId"
+        :request-id="requestId"
+        :delivery-id="deliveryId"
+        @denied="emit('denied')"
+        @updated="emit('updated')"
+      />
       <p class="text-sm text-n-slate-11">
         {{ text('CONTRACT_SIGNATURES.VERSION') }}
         {{ result.delivery.version_number }}

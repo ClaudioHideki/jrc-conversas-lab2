@@ -31,11 +31,20 @@
     "source_root": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
     "database": "jrc_rel_v2_candidate_test",
     "no_application_schema_migrations_executed": true,
-    "E1_migration_at_time_of_note": "20261105120000 applied exclusively in jrc_rel_v2_candidate_test with exact environment/host/pending-version guards; exit0, no host schema dump, no real environment migration. Log:continuous-evidence-isolated-migration.log.",
+    "E1_migration_at_time_of_note": "20261105120000,20261105121000,20261105122000 applied only to owned candidate testDB; exact environment/host/pending guards;no host schema dump.",
     "backend_helper": ".codex/d9-notifications-20261104/backend.py",
     "frontend_helper": ".codex/d-approvals-20261104/frontend.py",
-    "native_reports": ["continuous-native-final", "continuous-native-locks", "continuous-native-reader"],
-    "E1_initial_test": "continuous-evidence01:10examples,0failures"
+    "native_reports": [
+      "continuous-native-final",
+      "continuous-native-locks",
+      "continuous-native-reader"
+    ],
+    "E1_initial_test": "continuous-evidence01:10examples,0failures",
+    "latest_directed_gates": [
+      "recovery-evidence-final-callback:23/0",
+      "recovery-evidence-crm-final:2/0(overlap)",
+      "recovery-evidence-ui-final:6/0;existinghistory11/0"
+    ]
   },
   "provider_validation_sources": [
     "https://developers.docusign.com/docs/esign-rest-api/reference/envelopes/envelopedocuments/",
@@ -48,7 +57,16 @@
     "No real participant removal or provider request; tests use synthetic records and WebMock, with external network disabled."
   ],
   "restrictions": "No build/recompile, no5379 change/restart, no four-container restart/reconfiguration, no cleanup/delete of existing data, no push/GHCR/deploy/production/client change, no real provider operations. Additive migrations allowed only in owned synthetic test database.",
-  "disk_last_observed_bytes": 9615912960,
+  "disk_last_observed_bytes": 7094657024,
   "TRR": "Undefined; do not invent",
-  "company_documents_without_portfolio": "Explicitly deferred"
+  "company_documents_without_portfolio": "Explicitly deferred",
+  "last_validated_head": "9c9b007ae98b1dbf4cbe6ac384b4bfdb6124b4fb",
+  "new_validated_code_checkpoint": "Commit containing docs/jrc_consolidation/documentary_acceptance_checkpoint_20261105.json; resolve with git log -1 --format=%H -- that path.",
+  "current_status": "E1 documentary acceptance and exact-version export evidence validated. Current-source visual QA and full C-G closure not claimed.",
+  "next_actions": [
+    "Implement final immutable sealed completion dossier with native historical scope, files/version references, current security revalidation and no new document registry. Current completion export is not sealed.",
+    "Validate native E3 completion/CS revalidation against accepted exact-version evidence and dossier; no automatic stage or CS acceptance.",
+    "Return to F1 native project owner authority receipt, active cadence and safe final analyst withdrawal; preserve original executors/snapshots and explicit capacity business inputs.",
+    "Continue remaining F2,C,D,G functional/Word gaps. Do not repeat109old tests without new technical risk. No build/new-source Chrome acceptance until authorized."
+  ]
 }

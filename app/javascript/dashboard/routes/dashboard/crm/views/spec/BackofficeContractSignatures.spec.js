@@ -273,7 +273,7 @@ it('requires an explicit boolean verified fact rather than a truthy provider fie
 it('pages actual event history and keeps unknown or private payload fields out of the popup', async () => {
   const wrapper = mount(Details, {
     props: { accountId: '1', requestId: 9, deliveryId: 8 },
-    global: { stubs: { Dialog: DialogStub } },
+    global: { stubs: { Dialog: DialogStub, SignatureEvidencePanel: true } },
   });
   await flushPromises();
   expect(wrapper.text()).toContain('Conclusão informada pelo fornecedor');
@@ -308,7 +308,7 @@ it('propagates a denied direct history URL instead of rendering a cached event',
   mocks.api.show.mockRejectedValue({ response: { status: 404 } });
   const wrapper = mount(Details, {
     props: { accountId: '1', requestId: 9, deliveryId: 8 },
-    global: { stubs: { Dialog: DialogStub } },
+    global: { stubs: { Dialog: DialogStub, SignatureEvidencePanel: true } },
   });
   await flushPromises();
   expect(wrapper.emitted('denied')).toHaveLength(1);

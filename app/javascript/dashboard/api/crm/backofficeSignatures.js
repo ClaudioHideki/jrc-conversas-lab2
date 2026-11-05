@@ -25,4 +25,23 @@ export default {
       ...options,
       params: { page },
     }),
+  evidence: (accountId, requestId, deliveryId, options = {}) =>
+    axios.get(`${url(accountId, requestId)}/${deliveryId}/evidence`, options),
+  captureEvidence: (accountId, requestId, deliveryId, options = {}) =>
+    axios.post(
+      `${url(accountId, requestId)}/${deliveryId}/capture_evidence`,
+      {},
+      options
+    ),
+  acceptEvidence: (accountId, requestId, deliveryId, digest, options = {}) =>
+    axios.post(
+      `${url(accountId, requestId)}/${deliveryId}/accept_evidence`,
+      { signature_evidence: { expected_source_digest: digest } },
+      options
+    ),
+  downloadEvidence: (accountId, requestId, deliveryId, kind, options = {}) =>
+    axios.get(
+      `${url(accountId, requestId)}/${deliveryId}/evidence/${kind}/download`,
+      { ...options, responseType: 'blob' }
+    ),
 };

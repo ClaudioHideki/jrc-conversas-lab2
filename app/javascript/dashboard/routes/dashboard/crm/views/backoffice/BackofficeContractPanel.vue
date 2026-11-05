@@ -8,6 +8,7 @@ import BackofficeContractSignatures from './BackofficeContractSignatures.vue';
 import { useBackofficePresentation } from './useBackofficePresentation';
 
 defineProps({ record: { type: Object, required: true } });
+const emit = defineEmits(['updated']);
 const { text } = useBackofficePresentation();
 const route = useRoute();
 const router = useRouter();
@@ -59,6 +60,7 @@ const select = value =>
     <BackofficeContractSignatures
       v-else
       :record="record"
+      @updated="emit('updated')"
     />
   </section>
 </template>

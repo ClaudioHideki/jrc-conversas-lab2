@@ -1,0 +1,179 @@
+{
+  "date": "2026-11-05",
+  "branch": "codex/relacionamento-v2-20261101",
+  "parent_head": "9c9b007ae98b1dbf4cbe6ac384b4bfdb6124b4fb",
+  "status": "Documentary acceptance/API/UI source and directed regressions validated; C-G remain open; local checkpoint ready.",
+  "preservation": {
+    "original_checkpoint": "3b31577e8115a6fb5c2d9cc7e2297d3d755e9b9b",
+    "original_distinct_files": 25,
+    "preserved_in_git_ancestry": true,
+    "capture_checkpoint": "9c9b007ae98b1dbf4cbe6ac384b4bfdb6124b4fb",
+    "discard_reset_or_revert": false
+  },
+  "diagnosis": {
+    "last_execution": "continuous-artifacts02 had already completed:5examples,0failures,exit0",
+    "initial_pg_sessions": 0,
+    "observed_wait": "ClientRead/idle in transaction, no blocking PID",
+    "recovery": "No process termination, cancellation, container restart or5379 change required"
+  },
+  "implementation": [
+    "Explicit account/user/unit/case-scoped evidence summary, capture, acceptance and PDF download routes. GET never calls a provider.",
+    "Current exact-version source and signer roster, pinned original provider connection, recipient receipt and both native document security observations control acceptance.",
+    "Encrypted HMAC-bound immutable acceptance preserves exact contract, bundle and blob. SQL trigger validates account/contract/file links and prevents receipt/file changes or deletion; all other private relinks remain blocked.",
+    "ActiveStorage unchanged association saves are allowed, real attachment mutations remain rejected by Ruby and PostgreSQL.",
+    "Acceptance is idempotent, audited and transactional; it registers a signature without activating the contract, advancing Backoffice or accepting CS.",
+    "Responsive themed evidence panel requires explicit review confirmation and handles pending/quarantine, scoped downloads, revoked access, stale identity responses and status refresh. Parent request state reloads after acceptance.",
+    "Native completion export identifies accepted exact-version files through current authorization; legacy documents remain unchanged. This is not the final sealed dossier.",
+    "CRM signed-file download reuses the private evidence authorization/security boundary; legacy unprotected files retain native scoped access."
+  ],
+  "source_files": [
+    "app/controllers/api/v1/accounts/crm/backoffice_signature_deliveries_controller.rb",
+    "app/controllers/api/v1/accounts/crm/contracts_controller.rb",
+    "app/javascript/dashboard/api/crm/backofficeSignatures.js",
+    "app/javascript/dashboard/i18n/locale/en/crm.json",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeContractPanel.vue",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeContractSignatures.vue",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeRequest360.vue",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/SignatureDeliveryDetails.vue",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/SignatureEvidencePanel.vue",
+    "app/javascript/dashboard/routes/dashboard/crm/views/spec/BackofficeContractSignatures.spec.js",
+    "app/javascript/dashboard/routes/dashboard/crm/views/spec/SignatureEvidencePanel.spec.js",
+    "app/models/concerns/jrc_backoffice/protected_contract_attachment.rb",
+    "app/models/jrc_backoffice/signature_acceptance.rb",
+    "app/services/jrc_approvals/signature_evidence.rb",
+    "app/services/jrc_backoffice/completion_package.rb",
+    "app/services/jrc_backoffice/completion_signature.rb",
+    "app/services/jrc_backoffice/signatures/evidence_acceptance.rb",
+    "app/services/jrc_backoffice/signatures/evidence_operations.rb",
+    "app/services/jrc_backoffice/signatures/evidence_state.rb",
+    "config/routes.rb",
+    "db/functions/20261105122000_backoffice_signature_acceptance.sql",
+    "db/migrate/20261105121000_create_backoffice_signature_acceptances.rb",
+    "db/migrate/20261105122000_pin_backoffice_signature_acceptance_files.rb",
+    "spec/requests/api/v1/accounts/crm/backoffice_signature_evidence_spec.rb",
+    "spec/services/jrc_backoffice/signatures/evidence_acceptance_spec.rb"
+  ],
+  "tests_non_additive": [
+    {
+      "label": "continuous-artifacts02",
+      "examples": 5,
+      "failures": 0,
+      "purpose": "Previously finished capture/concurrency test recovered without rerunning it"
+    },
+    {
+      "label": "recovery-evidence-final",
+      "examples": 35,
+      "failures": 0,
+      "purpose": "Provider observation/client and legacy completion package regression"
+    },
+    {
+      "label": "recovery-evidence-final-callback",
+      "examples": 23,
+      "failures": 0,
+      "purpose": "Atomic acceptance/SQL protections, authenticated evidence HTTP,12package regressions and9private-document regressions"
+    },
+    {
+      "label": "recovery-evidence-ui",
+      "examples": 17,
+      "passed": 16,
+      "failed": 1,
+      "purpose": "11existing history cases passed; JSDOM lacks native URL.createObjectURL"
+    },
+    {
+      "label": "recovery-evidence-ui-final",
+      "examples": 6,
+      "failures": 0,
+      "purpose": "New evidence panel with explicit native-browser URL API simulation; no real Chrome acceptance"
+    },
+    {
+      "label": "recovery-evidence-crm-final",
+      "status": "passed",
+      "purpose": "Pinned provider default rotation; new CRM download, quarantine and unit revocation",
+      "examples": 2,
+      "failures": 0
+    }
+  ],
+  "failed_runs_retained": {
+    "recovery-evidence-acceptance-reference": "6examples,2failures: SQL private-link guard required an exact immutable reference, not a generic bypass",
+    "recovery-evidence-acceptance-http-final": "0examples; malformed combined literal filter; not counted as success",
+    "recovery-evidence-acceptance-http-final2": "5examples,3failures: unchanged ActiveStorage association autosave was rejected as a mutation; corrected callback, then23-example regression passed"
+  },
+  "static_gates": {
+    "new_ruby_files": "Final corrected/new completion lint reports have0offenses; previously clean files retained",
+    "crm_legacy_controller": "Final changed-line delta0;71historical baseline offenses preserved without broad rewriting.",
+    "frontend": "Directed ESLint final reports exit0; no build",
+    "diff_check": "passed"
+  },
+  "migrations": {
+    "versions": [
+      20261105120000,
+      20261105121000,
+      20261105122000
+    ],
+    "database": "jrc_rel_v2_candidate_test",
+    "host": "jrc-rel-v2-pg-20261101",
+    "environment": "test",
+    "exact_pending_version_guards": true,
+    "host_schema_dumped": false,
+    "production_or_application_database_changed": false
+  },
+  "validation_limits": [
+    "Provider HTTP/PDF and AV observations are synthetic. No DocuSign demo/scanner external homologation is claimed.",
+    "Hashes/HMAC prove byte/source binding; they do not independently validate embedded PDF cryptographic signatures.",
+    "No frontend build or5379 assets changed; new-source desktop/mobile Chrome acceptance remains pending authorization.",
+    "No whole C,D,E,F,G completion is claimed."
+  ],
+  "remaining": [
+    "E1 final immutable sealed dossier and full version-bound E3 CS closure/regression.",
+    "F1 native project owner authority receipts, active cadence handling, safe final analyst withdrawal, explicit configurable weighted/hour business inputs.",
+    "F2 remaining freshness/priority/aggregation/global-action coverage and representative scale.",
+    "C/D outstanding Word/image conformance and current-source browser acceptance.",
+    "TRR business definition remains absent. Company documents without portfolio remain explicitly deferred.",
+    "DocuSign demo/environment credentials and real external acceptance remain pending, with no real provider operations authorized."
+  ],
+  "environment": {
+    "no_build": true,
+    "no_cleanup": true,
+    "no_push_ghcr_deploy": true,
+    "no_production_or_client_change": true,
+    "no_container_restart": true,
+    "server5379_preserved": true,
+    "containers_started_at_unchanged": true,
+    "server5379": "127.0.0.1:5379,PID6464;not modified",
+    "test_end_pg_blockers": 0
+  },
+  "disk": {
+    "initial_bytes": 8483467264,
+    "minimum_observed_test_bytes": 7159726080,
+    "final_bytes": 7094657024,
+    "minimum_observed_bytes": 7094657024
+  },
+  "continuation": "After verified local checkpoint, continue authorized E/F/C/D/G gaps; do not repeat old109tests or treat mocks as Chrome acceptance.",
+  "source_sha256": {
+    "app/controllers/api/v1/accounts/crm/backoffice_signature_deliveries_controller.rb": "3ee60e1dca0f12765a366567e5469dffaeae7df7b552073ae8141fe449876d4a",
+    "app/controllers/api/v1/accounts/crm/contracts_controller.rb": "adb2b86d9f0d0598e48edcae854514bafba6479e143c6e41ad02bd221b8de8a8",
+    "app/javascript/dashboard/api/crm/backofficeSignatures.js": "c3b08f96297e84bf341e8d7019724ed5f284f57c8a15f8aac2ec314f56160082",
+    "app/javascript/dashboard/i18n/locale/en/crm.json": "4e543de54114b4fa0a82f4487712c0510f576dc0f70a3fd951587a19acf30298",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeContractPanel.vue": "d7a36ecfdd1fbc53f780e7309841cbe311ddb7684f128b5bcb045c2fab2525dd",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeContractSignatures.vue": "796e5971a524343891136c7424489196eb69a30b41a023726f1d3988ff0356de",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeRequest360.vue": "042e6c6cd1e36dd934835752d7f2c6d51710bf82b4bc3eabf9604d9e90f042d2",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/SignatureDeliveryDetails.vue": "d8e0da99fb298158a87208f999913498eac8a417cf1ecf1ec6a050b1e1a12522",
+    "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/SignatureEvidencePanel.vue": "9267e7dee872c3fa5bca6369a35b6df6024ddbcf23b4a6d8bb1ab2ff255a27d7",
+    "app/javascript/dashboard/routes/dashboard/crm/views/spec/BackofficeContractSignatures.spec.js": "40bc0ed6f4797bda712e99e1420cb7456ff4d00811b0fdde5078b6fff5984f0f",
+    "app/javascript/dashboard/routes/dashboard/crm/views/spec/SignatureEvidencePanel.spec.js": "1c8890a24ba220eb0a60fdceb97a66f985d11d5d3bc27ee21dbc4c5e0e5a2906",
+    "app/models/concerns/jrc_backoffice/protected_contract_attachment.rb": "e1cd622f7172d51ea58e57d0087aff7b50b72e77b7050cc571b9a0e02dea5372",
+    "app/models/jrc_backoffice/signature_acceptance.rb": "95909cd3ad28fa967a15fa98f1624a50238e1566edd9996b5fbb0e07fb93918f",
+    "app/services/jrc_approvals/signature_evidence.rb": "6e63d5c8f97aa5b0d7a82de7085a9ea36393e75075d7202c6383f24d826318c2",
+    "app/services/jrc_backoffice/completion_package.rb": "f24c684e40694c2c41adcb4cbd7736c21605404fd9f8e55464ee2b1aecc64298",
+    "app/services/jrc_backoffice/completion_signature.rb": "93c6edfb9c9221c6bfabbd20336f62960a84b20bf4b33f4399d3052fb46ebf44",
+    "app/services/jrc_backoffice/signatures/evidence_acceptance.rb": "e18360a48a3e0751ee912e849a59ae4316cdd78452b3caa3b942ac43ca56231f",
+    "app/services/jrc_backoffice/signatures/evidence_operations.rb": "99603cece4d8396509efcf93aee352cc73ddde7932a1cee66ac8ff3b00ae2326",
+    "app/services/jrc_backoffice/signatures/evidence_state.rb": "ad154e82446831c84daf6678407f5c29bddc4e4d71bfc01cc190cd71f2805b67",
+    "config/routes.rb": "9a8ae91da34c3ff8f56ce1e2edf3912ed895ef06fdf3a2dcd947d9d460f5f657",
+    "db/functions/20261105122000_backoffice_signature_acceptance.sql": "0df7db83c57c71f975a467cf6bf157b129631cf75e402d649e0c0fb2d31ea17c",
+    "db/migrate/20261105121000_create_backoffice_signature_acceptances.rb": "02f6b9e8625add7b8d23bdede2d04a5a7479c41097db4577384d5f8dc625fa55",
+    "db/migrate/20261105122000_pin_backoffice_signature_acceptance_files.rb": "c2499c94392636ba89e2edcb276a7df6b3adb6ea2f523105a2723d339a9d5c01",
+    "spec/requests/api/v1/accounts/crm/backoffice_signature_evidence_spec.rb": "1f78af662af72af3770a0d6c4bb6506ee25a8affbac9e70b04d8e33f6f2c607d",
+    "spec/services/jrc_backoffice/signatures/evidence_acceptance_spec.rb": "b798dada4e517151180f9f1883a96694bb106e967d8653a2a9514215eb7ee9b8"
+  }
+}

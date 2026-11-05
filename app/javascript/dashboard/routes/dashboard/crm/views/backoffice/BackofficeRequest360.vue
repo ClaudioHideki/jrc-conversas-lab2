@@ -455,6 +455,7 @@ onBeforeUnmount(() => {
             <BackofficeContractPanel
               v-else-if="tab === 'contracts'"
               :record="record"
+              @updated="load"
             />
             <BackofficeActions
               v-else-if="['checklist', 'issues'].includes(tab)"

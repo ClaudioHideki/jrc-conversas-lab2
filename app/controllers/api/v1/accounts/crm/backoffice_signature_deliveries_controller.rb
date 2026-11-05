@@ -9,6 +9,12 @@ class Api::V1::Accounts::Crm::BackofficeSignatureDeliveriesController < Api::V1:
   rescue_from JrcBackoffice::Signatures::ProviderError do |exception|
     render json: { code: exception.code }, status: :conflict
   end
+  rescue_from JrcBackoffice::DocumentSafety::NotClean do
+    render json: { code: 'SIGNATURE_ARTIFACT_SECURITY_PENDING' }, status: :conflict
+  end
+  rescue_from ActiveStorage::IntegrityError do
+    render json: { code: 'SIGNATURE_ARTIFACT_INTEGRITY_INVALID' }, status: :conflict
+  end
 
   def index
     render json: history.call(page: params[:page])
@@ -36,7 +42,33 @@ class Api::V1::Accounts::Crm::BackofficeSignatureDeliveriesController < Api::V1:
     render json: record.serializable_hash
   end
 
+  def evidence
+    render json: evidence_operations.summary(params[:delivery_id])
+  end
+
+  def capture_evidence
+    JrcBackoffice::Signatures::Artifacts.new(account: Current.account, actor: Current.user, request_id: params[:backoffice_request_id])
+                                        .capture!(delivery_id: params[:delivery_id])
+    render json: evidence_operations.summary(params[:delivery_id]), status: :accepted
+  end
+
+  def accept_evidence
+    digest = params.require(:signature_evidence).permit(:expected_source_digest).fetch(:expected_source_digest)
+    JrcBackoffice::Signatures::EvidenceAcceptance.new(account: Current.account, actor: Current.user, request_id: params[:backoffice_request_id])
+                                                 .call(delivery_id: params[:delivery_id], expected_source_digest: digest)
+    render json: evidence_operations.summary(params[:delivery_id])
+  end
+
+  def evidence_document
+    bundle, bytes = evidence_operations.download(delivery_id: params[:delivery_id], kind: params[:kind])
+    send_data bytes, filename: "contract-v#{bundle.contract_version.number}-#{params[:kind]}.pdf", type: 'application/pdf', disposition: 'attachment'
+  end
+
   private
+
+  def evidence_operations
+    JrcBackoffice::Signatures::EvidenceOperations.new(account: Current.account, actor: Current.user, request_id: params[:backoffice_request_id])
+  end
 
   def admissions
     JrcBackoffice::Signatures::Admissions.new(account: Current.account, actor: Current.user, request_id: params[:backoffice_request_id])
