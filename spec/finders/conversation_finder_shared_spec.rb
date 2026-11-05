@@ -17,6 +17,9 @@ describe ConversationFinder do
 
   it 'shares unassigned and other assignments only in member inboxes without automation' do
     mine = create(:conversation, account: account, inbox: routed_inbox, assignee: agent)
+    # Bot inbox creation starts pending; model the completed handoff before querying open work.
+    mine.update!(status: 'open')
+    expect(mine.reload).to have_attributes(assignee_id: agent.id, assignee_agent_bot_id: nil, status: 'open')
     shared = create(:conversation, account: account, inbox: inbox, assignee: other_agent)
     unassigned = create(:conversation, account: account, inbox: inbox)
     create(:conversation, account: account, inbox: routed_inbox, assignee: other_agent)
