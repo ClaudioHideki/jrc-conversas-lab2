@@ -29,7 +29,10 @@ class Api::V1::Accounts::Relationship::PortfolioController < Api::V1::Accounts::
                                                settings: [:segment_id, :product_id, :complexity])
     if attrs[:contact_id].present?
       contact = JrcOperations::Access.contact!(relationship_context.member, attrs[:contact_id])
-      attrs[:company_id], attrs[:contact_id] = contact.company_id, nil if contact.company_id
+      if contact.company_id
+        attrs[:company_id] = contact.company_id
+        attrs[:contact_id] = nil
+      end
     end
     relationship_context.assignable_users.find(attrs[:owner_id]) if attrs[:owner_id].present?
     record = JrcRelationship::Assignment.new(attrs.merge(account: Current.account))
@@ -44,7 +47,7 @@ class Api::V1::Accounts::Relationship::PortfolioController < Api::V1::Accounts::
     raise Pundit::NotAuthorizedError unless relationship_context.policy.team?
 
     relationship_context.assignable_users.find(attrs[:owner_id]) if attrs[:owner_id].present?
-    record.with_lock do
+    with_assignment_update(record, attrs) do
       before = record.attributes.slice(*attrs.keys)
       record.update!(attrs)
       if attrs.key?(:owner_id)
@@ -99,7 +102,7 @@ class Api::V1::Accounts::Relationship::PortfolioController < Api::V1::Accounts::
     record = relationship_context.assignment(params[:id])
     source = { type: params[:source_type], id: params[:source_id] } if params[:source_type].present? || params[:source_id].present?
     render json: JrcRelationship::WorkContext.new(context: relationship_context, assignment: record, period: report_period,
-                                                   source: source).call.except(:_source_ids)
+                                                  source: source).call.except(:_source_ids)
   end
 
   def batch
@@ -149,6 +152,18 @@ class Api::V1::Accounts::Relationship::PortfolioController < Api::V1::Accounts::
   end
 
   private
+
+  def with_assignment_update(record, attrs)
+    JrcRelationship::Assignment.transaction do
+      JrcRelationship::DistributionApproval.lock_configuration!(Current.account.id)
+      record.with_lock do
+        if attrs.key?(:owner_id) && attrs[:owner_id].to_s != record.owner_id.to_s
+          JrcRelationship::DistributionApproval.direct_allowed!(relationship_context, [record])
+        end
+        yield
+      end
+    end
+  end
 
   def initialize_assignment!(record)
     record.status = 'onboarding' if relationship_context.configuration.effective_rules['handoff_acceptance_required']

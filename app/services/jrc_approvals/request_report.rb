@@ -7,7 +7,8 @@ class JrcApprovals::RequestReport
   MAX_ROWS = 1000
   AUDIT_FIELDS = %w[state decision reason principal_id step_code cycle fingerprint original_request_id revised_request_id mode currency].freeze
   ADJUSTMENT_FIELDS = %w[before after].freeze
-  SUMMARY_FIELDS = %w[total_cents currency item_count price_status signature_evidence evidence_state signer_count joint_signature value_basis].freeze
+  SUMMARY_FIELDS = %w[total_cents currency item_count price_status signature_evidence evidence_state signer_count joint_signature value_basis
+                      context_digest policy_context_digest customer_count target_user_id justification].freeze
 
   def initialize(account:, user:)
     @account = account

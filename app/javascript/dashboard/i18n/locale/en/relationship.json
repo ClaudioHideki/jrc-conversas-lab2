@@ -420,7 +420,9 @@
       "renewal_window_days": "Renewal window limits in days",
       "eligibility_mode": "Portfolio eligibility policy",
       "handoff_acceptance_required": "Require formal handoff acceptance before onboarding",
-      "playbook_flow_effects_enabled": "Enable reviewed native Flow effects (OFF by default)"
+      "playbook_flow_effects_enabled": "Enable reviewed native Flow effects (OFF by default)",
+      "portfolio_transfer_approval_required": "Require formal Central approval for portfolio transfers",
+      "portfolio_review_validity_minutes": "Portfolio review validity (minutes)"
     },
     "ACCOUNT_SCOPE": "Toda a conta",
     "CONFIG_SCOPE": "Configuração por conta, segmento ou produto",
@@ -526,7 +528,23 @@
     "APPLY_PLAYBOOK": "Aplicar playbook",
     "EXPORT": "Exportar carteira",
     "PORTFOLIO_BATCH": "Operar {count} clientes selecionados",
-    "DISTRIBUTION": "Distribuição do Health Score",
+    "DISTRIBUTION": {
+      "JUSTIFICATION": "Transfer justification",
+      "CENTRAL_NOTICE": "Manual review is not formal approval. Request a decision in the native Approval Center, then explicitly confirm execution.",
+      "REQUEST_APPROVAL": "Request formal approval",
+      "CONFIRM_EXECUTION": "I reviewed the approved proposal and confirm execution of these transfers.",
+      "COMPARISON": "Reviewed transfer comparison",
+      "FROM": "Current analyst",
+      "TO": "Destination analyst",
+      "STATES": {
+        "required": "Formal approval required",
+        "approved": "Approved in the Central; awaiting execution",
+        "stale": "Proposal or permissions changed; create a new review",
+        "executed": "Execution finished; approval history preserved",
+        "unavailable": "Approval Center unavailable for this account; execution blocked"
+      },
+      "EXECUTE": "Execute approved transfer"
+    },
     "HEALTH_TREND": "Evolução diária do Health Score",
     "ADJUSTMENT": "Reajuste: {percent}%",
     "COMMERCIAL_TRACE": "Propostas: {proposals} · Pedidos: {orders}",

@@ -655,10 +655,12 @@ Rails.application.routes.draw do
             resources :reviewed_batches, only: [:create, :show] do
               member do
                 post :approve
+                post :request_approval
                 post :advance
                 post :cancel
               end
             end
+            resources :distribution_approval_origins, only: [:show]
             resources :cadences, only: [:show] do
               member do
                 post :advance

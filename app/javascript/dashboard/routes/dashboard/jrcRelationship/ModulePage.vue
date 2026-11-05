@@ -107,6 +107,7 @@ const filters = reactive({
 });
 const portfolioOperation = reactive({
   operation: 'activity',
+  justification: '',
   conversation_id: '',
   starts_at: '',
   owner_id: '',
@@ -322,6 +323,11 @@ const completeBatch = () =>
 const updatePortfolioBatch = () => {
   portfolioReviewProposal.value = {
     ...portfolioOperation,
+    justification:
+      portfolioOperation.operation === 'assign' &&
+      portfolioOperation.justification.trim()
+        ? portfolioOperation.justification.trim()
+        : undefined,
     ids: [...selected.value],
     request_id: crypto.randomUUID(),
     due_at: portfolioOperation.due_at
@@ -1308,6 +1314,14 @@ const money = value => formatMoney(value, metadata.value?.formatting);
                 </option>
               </select></label
             >
+            <label v-if="portfolioOperation.operation === 'assign'">
+              {{ t('RELATIONSHIP.DISTRIBUTION.JUSTIFICATION') }}
+              <textarea
+                v-model="portfolioOperation.justification"
+                maxlength="4096"
+                :class="inputClass"
+              />
+            </label>
             <template v-if="portfolioOperation.operation === 'activity'">
               <label
                 >{{ t('RELATIONSHIP.FIELDS.title')

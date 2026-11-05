@@ -14,6 +14,9 @@ const target = computed(() =>
 const authority = computed(
   () => props.request.origin?.kind === 'contract_authority'
 );
+const distribution = computed(
+  () => props.request.origin?.kind === 'portfolio_distribution'
+);
 </script>
 
 <template>
@@ -26,12 +29,18 @@ const authority = computed(
     >{{ t('JRC_APPROVALS.viewOrigin') }}</RouterLink
   >
   <button
-    v-else-if="authority"
+    v-else-if="authority || distribution"
     type="button"
     class="rounded-lg border border-n-blue-6 bg-n-blue-3 px-3 py-2 text-sm font-semibold text-n-blue-12"
     @click="emit('authority')"
   >
-    {{ t('JRC_APPROVALS.viewAuthorityOrigin') }}
+    {{
+      t(
+        distribution
+          ? 'JRC_APPROVALS.viewDistributionOrigin'
+          : 'JRC_APPROVALS.viewAuthorityOrigin'
+      )
+    }}
   </button>
   <p
     v-else

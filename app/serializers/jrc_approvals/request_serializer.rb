@@ -17,6 +17,11 @@ class JrcApprovals::RequestSerializer
   private
 
   def origin
+    if @record.resource_type == 'JrcRelationship::BatchReview' &&
+       @record.module_key == 'relationship' && @record.event_key == 'portfolio_distribution'
+      return { 'origin' => { kind: 'portfolio_distribution', review_id: @record.resource_id } }
+    end
+
     legal_case = @record.resource_type == 'JrcBackoffice::AuthorityProposal' && @record.module_key == 'contracts' &&
                  @record.event_key == 'signer_authority'
     return {} unless legal_case

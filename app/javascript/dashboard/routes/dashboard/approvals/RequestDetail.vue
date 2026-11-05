@@ -8,6 +8,7 @@ import ApprovalDecisionDialog from './ApprovalDecisionDialog.vue';
 import AuthorityOrigin from './AuthorityOrigin.vue';
 import AdjustmentDialog from './AdjustmentDialog.vue';
 import ApprovalRequestReport from './ApprovalRequestReport.vue';
+import DistributionApprovalOrigin from './DistributionApprovalOrigin.vue';
 const props = defineProps({
   request: { type: Object, required: true },
   context: { type: Object, default: null },
@@ -122,6 +123,13 @@ const confirm = payload => {
         {{ step.code }} · {{ step.approved_count }}/{{ step.quorum }}
       </p>
     </div>
+    <section
+      v-if="request.origin?.kind === 'portfolio_distribution'"
+      ref="authoritySection"
+      tabindex="-1"
+    >
+      <DistributionApprovalOrigin :request="request" />
+    </section>
     <ApprovalOriginLink
       :request="request"
       :account-id="context?.account_id"

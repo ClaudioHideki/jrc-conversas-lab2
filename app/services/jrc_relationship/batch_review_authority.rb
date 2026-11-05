@@ -8,6 +8,7 @@ class JrcRelationship::BatchReviewAuthority
 
   def call
     ActiveRecord::Base.uncached do
+      JrcRelationship::DistributionApproval.lock_configuration!(@account_id)
       context = JrcRelationship::Context.new(lock_member)
       raise Pundit::NotAuthorizedError unless context.policy.manage?
 

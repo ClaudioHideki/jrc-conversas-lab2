@@ -1,0 +1,302 @@
+{
+  "date": "2026-11-05",
+  "branch": "codex/relacionamento-v2-20261101",
+  "source_checkpoint": "3d8a6c9253b9f1f94d841465a6025eb01040dd21",
+  "scope": "F1a: formal native Central approval for reviewed portfolio transfers; F1 as a whole remains partial",
+  "recovery": {
+    "expected_HEAD_confirmed": true,
+    "clean_on_start": true,
+    "git_connectivity_fsck_passed": true,
+    "initial_free_bytes": 12357664768,
+    "other_Codex_and_gopure_containers_preserved": true
+  },
+  "Word_sources": {
+    "relationship_sha256": "7ec0c32f0d33b509b47fc8c4c99c10aaa60cdc2ba52fec53100973180c685fee",
+    "central_sha256": "3456a7fa3ad15235d9e072aeb00bd4c0eef5ae08d52992463a6bf609ef94c917",
+    "relationship_original_media_verified": 22,
+    "figures_reviewed_this_block": [
+      8,
+      13,
+      16
+    ],
+    "conflict_resolution": "Written three-phase separation and configurable capacity prevail over image8 four-step example and illustrative400. Source popup/confirmation and original decision history preserved; no visual acceptance inferred from reference figures."
+  },
+  "implementation": [
+    "Native read-only Catalog adapter for existing immutable BatchReview; no second approval engine, customer registry, migration or dependency.",
+    "Versioned opt-in portfolio_transfer_approval_required and portfolio_review_validity_minutes default15 preserve legacy manual reviews. Required formal approval cannot fall back to manual confirmation when the Central is unavailable.",
+    "Snapshot/justification and native company/unit scope are derived on server, with current executor/destination permissions and immutable before/after comparison. Multi-unit scopes require the derived native company/group authorization, not a client issuer_id grant.",
+    "Creation/voting/expiry/cumulative selection/fingerprint/quorum/self-approval/history remain native Requests/Decisions/Selection/RequestVerification. Old requests stay bound to their captured version; execution requires currently selected policy versions, as other native domain gates do.",
+    "Confirmation, each native item and direct individual/bulk ownership paths revalidate authority/configuration/origin; cached Context cannot bypass a newly required rule. Existing SQL immutability and receipt/job/state machinery preserved.",
+    "Shared per-account configuration advisory lock and native membership/source locks protect execution; no independent-connection concurrency/SLO claim yet.",
+    "UI separates review, Central request and explicit execution confirmation; displays current pending requests, discards late/foreign-user responses, recovers uncertain operations by server read, and renews request intent after changed policy/history without duplicating retries.",
+    "Central popup opens authorized reviewed source without voting. Detailed native JSON report includes captured transfer facts and identifiers; no tokens or full private source documents added."
+  ],
+  "files": [
+    "app/controllers/api/v1/accounts/relationship/distribution_approval_origins_controller.rb",
+    "app/javascript/dashboard/routes/dashboard/approvals/DistributionApprovalOrigin.vue",
+    "app/javascript/dashboard/routes/dashboard/approvals/specs/distributionOrigin.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/DistributionComparison.vue",
+    "app/services/jrc_relationship/distribution_approval.rb",
+    "app/services/jrc_relationship/distribution_approval_catalog.rb",
+    "app/services/jrc_relationship/distribution_policy_binding.rb",
+    "app/services/jrc_relationship/distribution_preview.rb",
+    "spec/requests/api/v1/accounts/jrc_approvals/portfolio_distribution_spec.rb",
+    "app/controllers/api/v1/accounts/approvals/catalogs_controller.rb",
+    "app/controllers/api/v1/accounts/approvals/resources_controller.rb",
+    "app/controllers/api/v1/accounts/relationship/portfolio_controller.rb",
+    "app/controllers/api/v1/accounts/relationship/reviewed_batches_controller.rb",
+    "app/javascript/dashboard/api/jrcRelationship.js",
+    "app/javascript/dashboard/i18n/locale/en/jrcApprovals.json",
+    "app/javascript/dashboard/i18n/locale/en/relationship.json",
+    "app/javascript/dashboard/routes/dashboard/approvals/ApprovalOriginLink.vue",
+    "app/javascript/dashboard/routes/dashboard/approvals/RequestDetail.vue",
+    "app/javascript/dashboard/routes/dashboard/approvals/specs/decisionConfirmation.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ModulePage.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ReviewedPortfolioBatchPanel.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/reviewedPortfolioBatch.spec.js",
+    "app/models/jrc_relationship/configuration.rb",
+    "app/serializers/jrc_approvals/request_serializer.rb",
+    "app/services/jrc_approvals/request_report.rb",
+    "app/services/jrc_relationship/batch_review_authority.rb",
+    "app/services/jrc_relationship/batch_review_plan.rb",
+    "app/services/jrc_relationship/portfolio_batch.rb",
+    "app/services/jrc_relationship/reviewed_portfolio_batch.rb",
+    "config/initializers/jrc_commercial_approvals.rb",
+    "config/routes.rb"
+  ],
+  "tests": {
+    "backend_final": "f1central07:33 examples0 failures =19 distribution scenarios+14 existing reviewed-batch cases. f1central02 additionally passed11 native report scenarios (39 total in that earlier run).",
+    "Vue_final": "f1centralui05:38 passed across batch panel, source guard, decision popup and legacy origin routing; f1centralui03 also verified the nine panel cases after error presentation changes.",
+    "Ruby": "f1centrallint04/05 new files and changed services0; f1centrallint06/07 remaining shared files: only5 pre-existing PortfolioController complexity offenses remain, reduced from8; f1-controller-baseline.json confirms introduced=[]. No rule disabled.",
+    "JS": "f1centraleslint05:ten changed JS/Vue files0 errors; existing i18n/framework/Browserslist warnings retained, no dependency update.",
+    "source_equivalence": "f1-final-source-equivalence.json:host/test-copy Ruby hashes match (no mismatched files).",
+    "previous109": "Not automatically repeated; selected legacy batch/report/origin/popup tests rerun because their components changed.",
+    "failed_runs_preserved": [
+      "f1central01:2 expectations corrected: invalidate entire proposal before first mutation, and native foreign-account403.",
+      "f1centralui01:retry correctly blocked while uncertain; test now explicitly refreshes before retry.",
+      "f1central03:expiry test captured a stale in-memory pending request; reload before freeze fixed preparation, no approval behavior relaxed.",
+      "f1centralui04:23 assertions passed but one jsdom scrollIntoView rejection; run was not counted as success. Browser scroll stub added to the test and invocation asserted; final run has no unhandled errors.",
+      "New complexity/style findings corrected by isolating new domain binding/preview/locking responsibilities; no broad module rewrite."
+    ],
+    "resources": {
+      ".codex/d9-notifications-20261104/f1central01-resource.json": {
+        "start": 12501667840,
+        "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+        "database": "jrc_rel_v2_candidate_test",
+        "no_build": true,
+        "no_server": true,
+        "spec_sha256": {
+          "spec/requests/api/v1/accounts/jrc_approvals/portfolio_distribution_spec.rb": "8388955814a6bb8d6ea01b78d75e409ca612bde6b86a4c2200eacf9124b25267",
+          "spec/services/jrc_relationship/reviewed_portfolio_batch_spec.rb": "ea899c17aacc8afd1f1c8f9511c389b2269ba21a903ffb0fced7e8a5ed86cc40"
+        },
+        "minimum": 12486340608,
+        "exit_code": 1,
+        "end": 12499365888
+      },
+      ".codex/d9-notifications-20261104/f1central02-resource.json": {
+        "start": 12502171648,
+        "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+        "database": "jrc_rel_v2_candidate_test",
+        "no_build": true,
+        "no_server": true,
+        "spec_sha256": {
+          "spec/requests/api/v1/accounts/jrc_approvals/portfolio_distribution_spec.rb": "9c7628edef59f85ce0bbeb252749434eb4e8cbd7154dfc59b661102acb9f5f50",
+          "spec/services/jrc_relationship/reviewed_portfolio_batch_spec.rb": "ea899c17aacc8afd1f1c8f9511c389b2269ba21a903ffb0fced7e8a5ed86cc40",
+          "spec/requests/api/v1/accounts/jrc_approvals/request_report_spec.rb": "10b883bcaeda47277e1b2a230d4290fb5763a379f8569d26955c85e6126ffc4e"
+        },
+        "minimum": 12487004160,
+        "exit_code": 0,
+        "end": 12507746304
+      },
+      ".codex/d9-notifications-20261104/f1central03-resource.json": {
+        "start": 12498231296,
+        "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+        "database": "jrc_rel_v2_candidate_test",
+        "no_build": true,
+        "no_server": true,
+        "spec_sha256": {
+          "spec/requests/api/v1/accounts/jrc_approvals/portfolio_distribution_spec.rb": "01efb47a76f7de50fc39800aef914ec7512dc72b1f5397178cb1b87a150df285"
+        },
+        "minimum": 12476313600,
+        "exit_code": 1,
+        "end": 12497797120
+      },
+      ".codex/d9-notifications-20261104/f1central04-resource.json": {
+        "start": 12287692800,
+        "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+        "database": "jrc_rel_v2_candidate_test",
+        "no_build": true,
+        "no_server": true,
+        "spec_sha256": {
+          "spec/requests/api/v1/accounts/jrc_approvals/portfolio_distribution_spec.rb": "1c2255cb92219f04d46ea25203458880f62343e27993b83b3c71531efd666c7b",
+          "spec/services/jrc_relationship/reviewed_portfolio_batch_spec.rb": "ea899c17aacc8afd1f1c8f9511c389b2269ba21a903ffb0fced7e8a5ed86cc40"
+        },
+        "minimum": 12266528768,
+        "exit_code": 0,
+        "end": 12286439424
+      },
+      ".codex/d9-notifications-20261104/f1central05-resource.json": {
+        "start": 12270764032,
+        "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+        "database": "jrc_rel_v2_candidate_test",
+        "no_build": true,
+        "no_server": true,
+        "spec_sha256": {
+          "spec/requests/api/v1/accounts/jrc_approvals/portfolio_distribution_spec.rb": "48dee567f4f25974f98813101a3b83a53fb8b0c18beb33dc394f49e21449d295",
+          "spec/services/jrc_relationship/reviewed_portfolio_batch_spec.rb": "ea899c17aacc8afd1f1c8f9511c389b2269ba21a903ffb0fced7e8a5ed86cc40"
+        },
+        "minimum": 12245581824,
+        "exit_code": 0,
+        "end": 12276883456
+      },
+      ".codex/d9-notifications-20261104/f1central06-resource.json": {
+        "start": 12262182912,
+        "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+        "database": "jrc_rel_v2_candidate_test",
+        "no_build": true,
+        "no_server": true,
+        "spec_sha256": {},
+        "minimum": 12247367680,
+        "exit_code": 0,
+        "end": 12258922496
+      },
+      ".codex/d9-notifications-20261104/f1central07-resource.json": {
+        "start": 4159483904,
+        "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+        "database": "jrc_rel_v2_candidate_test",
+        "no_build": true,
+        "no_server": true,
+        "spec_sha256": {
+          "spec/requests/api/v1/accounts/jrc_approvals/portfolio_distribution_spec.rb": "53cdaf88b40d7f176293e1bf6b3450fbdcfbba71513a02ae87c0632ee35d4b19",
+          "spec/services/jrc_relationship/reviewed_portfolio_batch_spec.rb": "ea899c17aacc8afd1f1c8f9511c389b2269ba21a903ffb0fced7e8a5ed86cc40"
+        },
+        "minimum": 4131545088,
+        "exit_code": 0,
+        "end": 4161724416
+      },
+      ".codex/d-approvals-20261104/f1centralui01-resource.json": {
+        "status": "failed",
+        "free_start": 12500520960,
+        "minimum_free": 12480729088,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 7980,
+        "exit_code": 1,
+        "free_end": 12517007360
+      },
+      ".codex/d-approvals-20261104/f1centralui02-resource.json": {
+        "status": "passed",
+        "free_start": 12510834688,
+        "minimum_free": 12483710976,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 25936,
+        "exit_code": 0,
+        "free_end": 12508516352
+      },
+      ".codex/d-approvals-20261104/f1centralui03-resource.json": {
+        "status": "passed",
+        "free_start": 12490551296,
+        "minimum_free": 12478664704,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 24768,
+        "exit_code": 0,
+        "free_end": 12499632128
+      },
+      ".codex/d-approvals-20261104/f1centralui04-resource.json": {
+        "status": "failed",
+        "free_start": 12286529536,
+        "minimum_free": 12263026688,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 23104,
+        "exit_code": 1,
+        "free_end": 12284887040
+      },
+      ".codex/d-approvals-20261104/f1centralui05-resource.json": {
+        "status": "passed",
+        "free_start": 12280348672,
+        "minimum_free": 12245688320,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 25104,
+        "exit_code": 0,
+        "free_end": 12276887552
+      }
+    }
+  },
+  "requirements": {
+    "formal_core": "Concluído e testado localmente",
+    "UI": "Implementado mas não homologado visualmente",
+    "capacity_redistribution_and_safe_analyst_removal": "Pendente: proceed immediately with actual native counts/capacity and complete pending responsibility destinations; do not treat existing action-owner transfer as full removal.",
+    "concurrency_full_scope_scale": "Parcial: transaction/locks and selected scope revocation tested; independent connection races and full tenant/company/unit/private portfolio scale matrix still pending.",
+    "F2_monitoring": "Pendente: freshness/trends/cooldown/governed NICO beyond existing hysteresis/history",
+    "E1_E3_final_dossier": "Parcial: actual version-bound signed artifacts/certificates/sealed closure remain open; no fabricated provider evidence.",
+    "C_D_full_Word_acceptance": "Parcial; prior checkpoints preserved",
+    "G_current_build_Chrome": "Bloqueado pela restrição explícita de build/server5379; old assets are not acceptance evidence."
+  },
+  "business_dependencies": [
+    "TRR undefined; no invented formula",
+    "Company documents without portfolio explicitly deferred",
+    "DocuSign demo/external channels not authorized or homologated"
+  ],
+  "runtime_preservation": {
+    "date": "2026-11-05",
+    "classification": "Read-only preservation check; not new-source UI homologation",
+    "containers": [
+      {
+        "name": "jrc-rel-v2-run-20261101",
+        "running": true,
+        "started_at": "2026-11-04T11:34:25.650429595Z"
+      },
+      {
+        "name": "jrc-rel-v2-pg-20261101",
+        "running": true,
+        "started_at": "2026-11-04T11:34:28.691130017Z"
+      },
+      {
+        "name": "jrc-rel-v2-redis-20261101",
+        "running": true,
+        "started_at": "2026-11-04T11:34:29.041643269Z"
+      },
+      {
+        "name": "jrc-customer-b1-b4-proxy-4d4a6de3",
+        "running": true,
+        "started_at": "2026-11-04T12:04:25.285490323Z"
+      }
+    ],
+    "login": {
+      "http": 200,
+      "sha256": "62fdeec11d63846d9fca4f4cb9401c1677e9c525f25e449d0b52b22537056166"
+    },
+    "entry": {
+      "http": 200,
+      "sha256": "ae6897f4131fe8b6d08767ed31bbff7f780cca17cb5e9da960b8d2e4bcfbca52"
+    },
+    "entry_unchanged": true,
+    "free_bytes": 9328844800
+  },
+  "disk": {
+    "initial_free_bytes": 12357664768,
+    "minimum_owned_monitor_free_bytes": 4131545088,
+    "final_free_bytes": 9328418816,
+    "mandatory_stop_bytes": 750000000,
+    "conservative_stop_bytes": 2000000000,
+    "no_build_or_cleanup": true,
+    "observed_oscillation": "f1central07 started4.159GB and minimum4.132GB; later read recovered above9GB. No owned build or cleanup; do not infer cause."
+  },
+  "no_schema_dependency_compose_changes": true,
+  "restrictions_preserved": [
+    "No build/frontend recompile, new server or change to5379",
+    "No container restart/recreation/configuration change; only authorized isolated test source/database used",
+    "No push, GHCR, deploy, production/client changes, cleanup or external real operations"
+  ],
+  "all_stages_C_D_E_F_G_complete": false,
+  "next_action": "F1b: native configurable capacity/current/projected workload, pending responsibility destinations and safe analyst removal; continue without intermediate approval."
+}

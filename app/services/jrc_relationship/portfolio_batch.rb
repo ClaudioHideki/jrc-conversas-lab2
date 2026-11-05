@@ -1,7 +1,8 @@
 class JrcRelationship::PortfolioBatch
-  def initialize(context, params)
+  def initialize(context, params, review: nil)
     @context = context
     @params = params
+    @review = review
   end
 
   def call
@@ -12,8 +13,9 @@ class JrcRelationship::PortfolioBatch
     raise ArgumentError, 'Unsupported portfolio operation' unless %w[assign activity playbook].include?(operation)
     raise Pundit::NotAuthorizedError if operation == 'assign' && !@context.policy.team?
 
-    options = operation_options(operation, rows.count)
     JrcRelationship::Assignment.transaction do
+      authorize_transfer!(rows) if operation == 'assign'
+      options = operation_options(operation, rows.count)
       rows.each do |record|
         @context.assignment(record.id, write: true)
         record.with_lock { apply!(record, operation, options) }
@@ -23,6 +25,25 @@ class JrcRelationship::PortfolioBatch
   end
 
   private
+
+  def authorize_transfer!(rows)
+    JrcRelationship::DistributionApproval.lock_configuration!(@context.account.id)
+    if @review
+      assert_review_identity!(rows)
+      JrcRelationship::DistributionApproval.new(@context).check!(@review)
+    else
+      JrcRelationship::DistributionApproval.direct_allowed!(@context, rows)
+    end
+  end
+
+  def assert_review_identity!(rows)
+    expected = { 'account_id' => @context.account.id, 'actor_id' => @context.user.id, 'state' => 'running' }
+    owner_id = @params[:owner_id].present? ? Integer(@params[:owner_id]) : nil
+    inputs = { 'operation' => 'assign', 'owner_id' => owner_id }
+    valid = @review.attributes.slice(*expected.keys) == expected && @review.inputs.slice(*inputs.keys) == inputs &&
+            (rows.pluck(:id) - @review.inputs.fetch('ids')).empty?
+    raise ArgumentError, 'Reviewed transfer identity mismatch' unless valid
+  end
 
   def selected_assignments
     ids = @params.require(:ids)

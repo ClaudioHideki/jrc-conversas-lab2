@@ -3,7 +3,8 @@ class Api::V1::Accounts::Approvals::CatalogsController < Api::V1::Accounts::Appr
     authorization.authorize!('policy_manage', company_id: params[:issuer_company_id].presence&.to_i,
                                               unit_id: params[:business_unit_id].presence&.to_i)
     keys = JrcApprovals::CommercialCatalog::EVENTS.keys + JrcApprovals::GratuityCatalog::EVENTS.keys + [
-      JrcApprovals::CommercialCatalog::PRICE_FAMILY, JrcApprovals::GratuityCatalog::FAMILY, JrcBackoffice::AuthorityCatalog::KEY
+      JrcApprovals::CommercialCatalog::PRICE_FAMILY, JrcApprovals::GratuityCatalog::FAMILY, JrcBackoffice::AuthorityCatalog::KEY,
+      JrcRelationship::DistributionApproval::KEY
     ]
     rows = keys.map do |key|
       entry = JrcApprovals::Catalog.fetch(key)

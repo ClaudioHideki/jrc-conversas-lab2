@@ -13,6 +13,7 @@ class JrcRelationship::Configuration < ApplicationRecord
   validates :scope_key, uniqueness: { scope: :account_id }, format: { with: /\A(account|segment:\d+|product:\d+|company:\d+|unit:\d+)\z/ }
   validates :version, numericality: { only_integer: true, greater_than: 0 }
   validate :valid_config
+  before_save { JrcRelationship::DistributionApproval.lock_configuration!(account_id) }
   DEFAULT_WEIGHTS = { 'adoption' => 25, 'relationship' => 15, 'service_desk' => 15, 'finance' => 15,
                       'satisfaction' => 10, 'contract' => 10, 'projects' => 5, 'engagement' => 5, 'sentiment' => 0 }.freeze
   DEFAULT_RULES = { 'no_contact_days' => 30, 'renewal_days' => 120, 'risk_threshold' => 60, 'critical_threshold' => 40,
@@ -23,6 +24,7 @@ class JrcRelationship::Configuration < ApplicationRecord
                     'project_penalty' => 30, 'task_penalty' => 10, 'csat_threshold' => 3,
                     'critical_action_priority' => 90, 'ticket_action_priority' => 85, 'detractor_action_priority' => 80,
                     'health_hysteresis_points' => 0, 'health_drop_points' => 20, 'health_drop_action_priority' => 70,
+                    'portfolio_transfer_approval_required' => false, 'portfolio_review_validity_minutes' => 15,
                     'auto_handoff' => true, 'missing_factor_policy' => 'renormalize', 'survey_automation_enabled' => false,
                     'renewal_window_days' => [15, 30, 60, 90, 120],
                     'eligibility_mode' => 'legacy_order', 'handoff_acceptance_required' => false, 'playbook_flow_effects_enabled' => false,
@@ -38,7 +40,8 @@ class JrcRelationship::Configuration < ApplicationRecord
   BOOLEAN_VALUES = [true, false].freeze
   NON_NUMERIC_RULES = %w[auto_handoff survey_automation_enabled missing_factor_policy critical_priority_codes qbr_agenda_template adoption_metric
                          risk_reasons survey_question_nps survey_question_ces renewal_window_days eligibility_mode handoff_acceptance_required
-                         playbook_flow_effects_enabled playbook_flow_policy required_documents health_hysteresis_points].freeze
+                         playbook_flow_effects_enabled playbook_flow_policy required_documents health_hysteresis_points
+                         portfolio_transfer_approval_required].freeze
 
   def effective_weights
     DEFAULT_WEIGHTS.merge(weights)
@@ -120,7 +123,8 @@ class JrcRelationship::Configuration < ApplicationRecord
   end
 
   def validate_rule_choices
-    %w[auto_handoff survey_automation_enabled handoff_acceptance_required playbook_flow_effects_enabled].each do |key|
+    %w[auto_handoff survey_automation_enabled handoff_acceptance_required playbook_flow_effects_enabled
+       portfolio_transfer_approval_required].each do |key|
       errors.add(:rules, "#{key} must be boolean") unless BOOLEAN_VALUES.include?(effective_rules[key])
     end
     errors.add(:rules, 'invalid eligibility mode') unless %w[legacy_order active_contract_product].include?(effective_rules['eligibility_mode'])

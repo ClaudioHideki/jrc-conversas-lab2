@@ -1,13 +1,17 @@
 class Api::V1::Accounts::Relationship::ReviewedBatchesController < Api::V1::Accounts::Relationship::BaseController
   wrap_parameters false
   before_action :no_store
+  rescue_from JrcApprovals::Error do |error|
+    render json: { errors: [error.code] }, status: :unprocessable_entity
+  end
 
   def show
     render json: service.get(params[:id])
   end
 
   def create
-    render json: service.preview(body!('ids', 'operation', 'owner_id', 'playbook_id', 'title', 'due_at', 'request_id', 'conversation_id', 'starts_at'))
+    render json: service.preview(body!('ids', 'operation', 'owner_id', 'playbook_id', 'title', 'due_at', 'request_id', 'conversation_id', 'starts_at',
+                                       'justification'))
   end
 
   def approve
@@ -20,6 +24,11 @@ class Api::V1::Accounts::Relationship::ReviewedBatchesController < Api::V1::Acco
   def advance
     body!
     render json: service.advance(params[:id])
+  end
+
+  def request_approval
+    input = body!('digest', 'idempotency_key')
+    render json: service.request_approval(params[:id], digest: input.fetch('digest'), idempotency_key: input.fetch('idempotency_key'))
   end
 
   def cancel

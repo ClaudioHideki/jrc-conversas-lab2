@@ -92,6 +92,17 @@ export default {
       { digest },
       options
     ),
+  requestPortfolioBatchApproval: (accountId, id, fields, options) =>
+    axios.post(
+      `${base(accountId)}/reviewed_batches/${Number(id)}/request_approval`,
+      fields,
+      options
+    ),
+  distributionApprovalOrigin: (accountId, id, options) =>
+    axios.get(
+      `${base(accountId)}/distribution_approval_origins/${Number(id)}`,
+      options
+    ),
   advancePortfolioBatch: (accountId, id, options) =>
     axios.post(
       `${base(accountId)}/reviewed_batches/${Number(id)}/advance`,

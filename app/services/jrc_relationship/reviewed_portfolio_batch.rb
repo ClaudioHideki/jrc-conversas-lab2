@@ -17,11 +17,7 @@ class JrcRelationship::ReviewedPortfolioBatch
         next project(previous, context)
       end
       snapshot = plan.snapshot(inputs, lock: true)
-      review = reviews.create!(inputs: inputs, snapshot: snapshot, digest: plan.digest([inputs, snapshot]),
-                               request_id: inputs.fetch('request_id'), expires_at: 15.minutes.from_now)
-      snapshot.fetch('rows').each_with_index do |row, ordinal|
-        review.items.create!(account_id: @account_id, assignment_id: row.fetch('assignment_id'), ordinal: ordinal)
-      end
+      review = persist_review(inputs, snapshot, plan)
       project(review, context)
     end
   end
@@ -39,7 +35,9 @@ class JrcRelationship::ReviewedPortfolioBatch
       raise ArgumentError, 'Review expired' if review.expires_at <= Time.current
 
       JrcRelationship::BatchReviewPlan.new(context).validate!(review)
+      approval_ids = JrcRelationship::DistributionApproval.new(context).check!(review)
       review.update!(state: 'running', revision: review.revision + 1)
+      context.audit!(review, after: { digest: review.digest, approval_request_ids: approval_ids }, action: 'reviewed_batch_execution_confirmed')
       project(review, context)
     end
   end
@@ -55,6 +53,14 @@ class JrcRelationship::ReviewedPortfolioBatch
     end
   end
 
+  def request_approval(id, digest:, idempotency_key:)
+    transaction do |context|
+      review = reviews.find(id)
+      JrcRelationship::DistributionApproval.new(context).request!(review, digest: digest, idempotency_key: idempotency_key)
+      project(review, context)
+    end
+  end
+
   def advance(id, limit: 5)
     raise ArgumentError, 'Invalid batch budget' unless limit.is_a?(Integer) && limit.between?(1, 10)
 
@@ -63,6 +69,15 @@ class JrcRelationship::ReviewedPortfolioBatch
   end
 
   private
+
+  def persist_review(inputs, snapshot, plan)
+    review = reviews.create!(inputs: inputs, snapshot: snapshot, digest: plan.digest([inputs, snapshot]),
+                             request_id: inputs.fetch('request_id'), expires_at: snapshot.fetch('validity_minutes', 15).minutes.from_now)
+    snapshot.fetch('rows').each_with_index do |row, ordinal|
+      review.items.create!(account_id: @account_id, assignment_id: row.fetch('assignment_id'), ordinal: ordinal)
+    end
+    review
+  end
 
   def lock_request(request_id)
     key = "reviewed-batch:#{@account_id}:#{@actor_id}:#{request_id}"
@@ -106,6 +121,7 @@ class JrcRelationship::ReviewedPortfolioBatch
     assignment = context.assignment(item.assignment_id, write: true)
     assignment.lock!
     JrcRelationship::BatchReviewPlan.new(context).validate!(review, assignment: assignment)
+    JrcRelationship::DistributionApproval.new(context).check!(review)
     receipt = apply_reviewed_item(review, item, assignment, context)
     current = JrcRelationship::Context.new(context.member.reload)
     raise Pundit::NotAuthorizedError unless current.policy.manage? && current.access_signature == review.snapshot.fetch('access_signature')
@@ -144,7 +160,7 @@ class JrcRelationship::ReviewedPortfolioBatch
 
   def apply_native(review, item, context)
     inputs = review.inputs.merge('ids' => [item.assignment_id], 'request_id' => "reviewed:#{review.id}:#{item.id}")
-    count = JrcRelationship::PortfolioBatch.new(context, ActionController::Parameters.new(inputs)).call
+    count = JrcRelationship::PortfolioBatch.new(context, ActionController::Parameters.new(inputs), review: review).call
     raise ArgumentError, 'Native item result mismatch' unless count == 1
   end
 
@@ -152,11 +168,16 @@ class JrcRelationship::ReviewedPortfolioBatch
     review.inputs.fetch('ids').each { |id| context.assignment(id) }
     { 'id' => review.id, 'state' => review.state, 'revision' => review.revision, 'digest' => review.digest,
       'expires_at' => review.expires_at.iso8601(6), 'inputs' => review.inputs,
-      'summary' => review.snapshot['summary'],
-      'items' => review.items.order(:ordinal).map do |item|
-        row = review.snapshot.fetch('rows').fetch(item.ordinal)
-        { 'assignment_id' => item.assignment_id, 'label' => row.fetch('label'), 'state' => item.state,
-          'receipt' => item.receipt, 'error_code' => item.error_code }
-      end }
+      'summary' => review.snapshot['summary'], 'distribution' => review.snapshot['distribution'],
+      'approval' => JrcRelationship::DistributionApproval.new(context).projection(review),
+      'items' => reviewed_items(review) }
+  end
+
+  def reviewed_items(review)
+    review.items.order(:ordinal).map do |item|
+      row = review.snapshot.fetch('rows').fetch(item.ordinal)
+      { 'assignment_id' => item.assignment_id, 'label' => row.fetch('label'), 'state' => item.state,
+        'receipt' => item.receipt, 'error_code' => item.error_code }
+    end
   end
 end

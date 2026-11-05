@@ -344,6 +344,7 @@
       "reason": "Reason (optional)",
       "period": "Validity period",
       "removed": "Removed member"
-    }
+    },
+    "viewDistributionOrigin": "View reviewed transfers"
   }
 }

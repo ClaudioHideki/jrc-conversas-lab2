@@ -211,3 +211,32 @@ it('closes a pending native decision when the same detail switches to read-only'
   expect(wrapper.emitted('decide')).toBeUndefined();
   wrapper.unmount();
 });
+
+it('opens the scoped reviewed transfer source from the decision popup without casting a vote', async () => {
+  const config = options({
+    request: {
+      ...record,
+      origin: { kind: 'portfolio_distribution', review_id: 33 },
+    },
+  });
+  config.global.stubs.DistributionApprovalOrigin = {
+    template: '<p>Scoped synthetic transfer source</p>',
+  };
+  const wrapper = mount(RequestDetail, config);
+  const source = wrapper.get('section[tabindex="-1"]').element;
+  source.scrollIntoView = vi.fn(); // jsdom does not implement browser scrolling.
+  await wrapper.get('textarea').setValue('Review transfer source');
+  await wrapper
+    .findAll('button')
+    .find(button => button.text().startsWith('Approve'))
+    .trigger('click');
+  await flushPromises();
+  const popup = wrapper.getComponent(Component);
+  await popup.getComponent(Origin).get('button').trigger('click');
+  await flushPromises();
+  expect(wrapper.findComponent(Component).exists()).toBe(false);
+  expect(wrapper.text()).toContain('Scoped synthetic transfer source');
+  expect(source.scrollIntoView).toHaveBeenCalledWith({ block: 'start' });
+  expect(wrapper.emitted('decide')).toBeUndefined();
+  wrapper.unmount();
+});

@@ -1,9 +1,11 @@
 <script setup>
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcRelationship';
-import { buttonClass } from './definitions';
+import { buttonClass, message } from './definitions';
 import ReviewedCadencePanel from './ReviewedCadencePanel.vue';
+import DistributionComparison from './DistributionComparison.vue';
+import { intent } from 'dashboard/routes/dashboard/approvals/model';
 const props = defineProps({
   accountId: { type: [String, Number], required: true },
   actorId: { type: [String, Number], default: null },
@@ -16,6 +18,17 @@ const error = ref('');
 const busy = ref(false);
 const reading = ref(false);
 const uncertain = ref(false);
+const executionConfirmed = ref(false);
+const approvalIntent = intent();
+const hasPendingApproval = computed(() =>
+  (review.value?.approval?.requests || []).some(
+    request =>
+      ['pending', 'escalated'].includes(request.state) &&
+      (review.value.approval.policy_version_ids || []).includes(
+        request.policy_version_id
+      )
+  )
+);
 let epoch = 0;
 let controller = new AbortController();
 let timer;
@@ -32,11 +45,17 @@ const reset = () => {
   busy.value = false;
   reading.value = false;
   uncertain.value = false;
+  executionConfirmed.value = false;
 };
 const remember = value => {
   if (review.value?.id === value.id && review.value.revision > value.revision)
     return;
   const previous = review.value;
+  if (
+    JSON.stringify([previous?.id, previous?.digest, previous?.approval]) !==
+    JSON.stringify([value.id, value.digest, value.approval])
+  )
+    executionConfirmed.value = false;
   review.value = value;
   try {
     sessionStorage.setItem(storageKey(), String(value.id));
@@ -77,14 +96,21 @@ async function refresh() {
       uncertain.value = false;
       error.value = '';
     }
-  } catch {
-    if (version === epoch) error.value = t('RELATIONSHIP.REVIEWED_BATCH.ERROR');
+  } catch (failure) {
+    if (version === epoch)
+      error.value = message(failure) || t('RELATIONSHIP.REVIEWED_BATCH.ERROR');
   } finally {
     if (version === epoch) reading.value = false;
   }
 }
 async function mutate(action) {
   if (busy.value || !review.value) return;
+  if (
+    action === 'approve' &&
+    review.value.approval?.required &&
+    (review.value.approval.state !== 'approved' || !executionConfirmed.value)
+  )
+    return;
   epoch += 1;
   const version = epoch;
   const accountId = props.accountId;
@@ -96,7 +122,22 @@ async function mutate(action) {
   try {
     const options = { signal: controller.signal };
     let response;
-    if (action === 'approve')
+    if (action === 'requestApproval')
+      response = await API.requestPortfolioBatchApproval(
+        accountId,
+        current.id,
+        approvalIntent(
+          { digest: current.digest },
+          JSON.stringify([
+            accountId,
+            current.id,
+            current.approval?.policy_version_ids,
+            current.approval?.requests,
+          ])
+        ),
+        options
+      );
+    else if (action === 'approve')
       response = await API.approvePortfolioBatch(
         accountId,
         current.id,
@@ -117,9 +158,9 @@ async function mutate(action) {
       uncertain.value = false;
       error.value = '';
     }
-  } catch {
+  } catch (failure) {
     if (version === epoch) {
-      error.value = t('RELATIONSHIP.REVIEWED_BATCH.ERROR');
+      error.value = message(failure) || t('RELATIONSHIP.REVIEWED_BATCH.ERROR');
       uncertain.value = true;
     }
   } finally {
@@ -142,9 +183,10 @@ watch(
         signal: controller.signal,
       });
       if (version === epoch) remember(data);
-    } catch {
+    } catch (failure) {
       if (version === epoch)
-        error.value = t('RELATIONSHIP.REVIEWED_BATCH.ERROR');
+        error.value =
+          message(failure) || t('RELATIONSHIP.REVIEWED_BATCH.ERROR');
     } finally {
       if (version === epoch) busy.value = false;
     }
@@ -241,6 +283,58 @@ onBeforeUnmount(reset);
           </li>
         </ul>
       </div>
+      <DistributionComparison
+        v-if="review.distribution"
+        :rows="review.distribution"
+      />
+      <section
+        v-if="review.approval?.required"
+        class="my-3 space-y-3 rounded-xl border border-n-violet-6 bg-n-violet-2 p-3"
+      >
+        <p class="text-sm">
+          {{ t('RELATIONSHIP.DISTRIBUTION.CENTRAL_NOTICE') }}
+        </p>
+        <p class="font-semibold">
+          {{ t(`RELATIONSHIP.DISTRIBUTION.STATES.${review.approval.state}`) }}
+        </p>
+        <RouterLink
+          v-for="request in review.approval.requests"
+          :key="request.id"
+          :to="{
+            name: 'jrc_approvals',
+            params: { accountId, screen: 'inbox', id: request.id },
+          }"
+          class="block text-sm text-n-blue-11 underline"
+          >#{{ request.id }} · {{ request.state }}</RouterLink
+        >
+        <button
+          v-if="
+            review.state === 'previewed' &&
+            review.approval.state === 'required' &&
+            !hasPendingApproval
+          "
+          type="button"
+          data-test="review-request-approval"
+          :class="buttonClass"
+          :disabled="busy || uncertain"
+          @click="mutate('requestApproval')"
+        >
+          {{ t('RELATIONSHIP.DISTRIBUTION.REQUEST_APPROVAL') }}
+        </button>
+        <label
+          v-if="
+            review.state === 'previewed' && review.approval.state === 'approved'
+          "
+          class="flex items-start gap-2 text-sm"
+        >
+          <input
+            v-model="executionConfirmed"
+            type="checkbox"
+            data-test="review-execution-confirmation"
+          />
+          {{ t('RELATIONSHIP.DISTRIBUTION.CONFIRM_EXECUTION') }}
+        </label>
+      </section>
       <ul class="my-3 space-y-2">
         <li
           v-for="item in review.items"
@@ -267,10 +361,21 @@ onBeforeUnmount(reset);
           type="button"
           data-test="review-approve"
           :class="buttonClass"
-          :disabled="busy || uncertain"
+          :disabled="
+            busy ||
+            uncertain ||
+            (review.approval?.required &&
+              (review.approval.state !== 'approved' || !executionConfirmed))
+          "
           @click="mutate('approve')"
         >
-          {{ t('RELATIONSHIP.REVIEWED_BATCH.APPROVE') }}
+          {{
+            t(
+              review.approval?.required
+                ? 'RELATIONSHIP.DISTRIBUTION.EXECUTE'
+                : 'RELATIONSHIP.REVIEWED_BATCH.APPROVE'
+            )
+          }}
         </button>
         <button
           v-if="review.state === 'running'"

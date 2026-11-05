@@ -24,6 +24,10 @@ class JrcRelationship::BatchReviewPlan
     book = book_snapshot(inputs, lock: lock)
     result = { 'version' => 1, 'access_signature' => @context.access_signature, 'book' => book, 'summary' => operation_summary(inputs, book),
                'rows' => records.map { |record| row_snapshot(record) } }
+    if inputs['operation'] == 'assign'
+      result.merge!(JrcRelationship::DistributionPreview.new(context: @context, inputs: inputs, records: records,
+                                                             summary: result['summary']).call)
+    end
     add_cadence_snapshot(result, inputs, book, lock) if inputs['operation'] == 'cadence'
     result
   end
@@ -110,7 +114,14 @@ class JrcRelationship::BatchReviewPlan
   def assign_options(input)
     raise Pundit::NotAuthorizedError unless @context.policy.team?
 
-    { 'owner_id' => input['owner_id'].present? ? @context.assignable_users.find(input['owner_id']).id : nil }
+    result = { 'owner_id' => input['owner_id'].present? ? @context.assignable_users.find(input['owner_id']).id : nil }
+    if input.key?('justification')
+      reason = input['justification']
+      raise ArgumentError, 'Invalid distribution justification' unless reason.is_a?(String) && reason.strip.bytesize.between?(1, 4096)
+
+      result['justification'] = reason.strip
+    end
+    result
   end
 
   def book_snapshot(inputs, lock: false)
