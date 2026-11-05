@@ -25,7 +25,12 @@ class JrcBackoffice::PrivateBlob
   end
 
   def self.protected?(id)
-    contract?(id) || document?(id)
+    contract?(id) || document?(id) || dossier?(id)
+  end
+
+  def self.dossier?(id)
+    JrcBackoffice::CompletionDossier.exists?(archive_blob_id: id) ||
+      ActiveStorage::Blob.where(id: id).where("metadata::jsonb ->> 'jrc_backoffice_dossier_archive' = 'true'").exists?
   end
 
   def self.clean_uncommitted(blob, marker:)
@@ -46,7 +51,10 @@ class JrcBackoffice::PrivateBlob
   end
 
   def self.uncached_reference?(id)
-    ApplicationRecord.uncached { protected?(id) || ActiveStorage::Attachment.exists?(blob_id: id) }
+    ApplicationRecord.uncached do
+      contract?(id) || document?(id) || JrcBackoffice::CompletionDossier.exists?(archive_blob_id: id) ||
+        ActiveStorage::Attachment.exists?(blob_id: id)
+    end
   end
   private_class_method :uncached_reference?
 end

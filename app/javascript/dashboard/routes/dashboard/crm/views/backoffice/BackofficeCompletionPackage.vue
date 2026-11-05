@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { backofficeAPI } from 'dashboard/api/crm/commercialCycle';
+import BackofficeCompletionDossier from './BackofficeCompletionDossier.vue';
 import { useBackofficePresentation } from './useBackofficePresentation';
 
 const props = defineProps({ record: { type: Object, required: true } });
@@ -169,4 +170,5 @@ const preview = () => {
       </template>
     </div>
   </section>
+  <BackofficeCompletionDossier :record="record" />
 </template>

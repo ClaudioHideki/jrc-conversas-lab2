@@ -18,6 +18,9 @@ vi.mock('dashboard/api/crm/commercialCycle', () => ({
   },
 }));
 vi.mock('vue-router', () => ({ useRoute: () => mocks.route }));
+vi.mock('./BackofficeCompletionDossier.vue', () => ({
+  default: { template: '<span />' },
+}));
 const fixture = {
   coverage: 'incomplete',
   missing: [

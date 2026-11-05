@@ -1312,6 +1312,22 @@
           "signed_document": "Signed contract PDF",
           "certificate": "Completion certificate"
         }
+      },
+      "COMPLETION_DOSSIER": {
+        "TITLE": "Sealed completion dossier",
+        "NOTE": "A preserved revision contains the exact verified files and manifest at sealing. It does not activate contracts or accept CS. New revisions preserve previous seals.",
+        "ERROR": "The dossier changed, is unavailable, or access was revoked. Refresh before continuing.",
+        "LOADING": "Checking dossier…",
+        "EMPTY": "No sealed revision yet. Incomplete or unsafe evidence cannot be sealed.",
+        "VERSION": "Revision",
+        "CURRENT": "Matches the current completion context",
+        "HISTORICAL": "Historical sealed revision",
+        "DOWNLOAD": "Download sealed archive",
+        "BLOCKED": "Download blocked by current document security checks",
+        "CONFIRM": "I reviewed the current documentary coverage and want to seal this exact revision.",
+        "SEAL": "Seal completion dossier",
+        "PAGES": "Sealed revision pages",
+        "OF": "of"
       }
     },
     "CUSTOMER_SIGNING_IDENTITY": {

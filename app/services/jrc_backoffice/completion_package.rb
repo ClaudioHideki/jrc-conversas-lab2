@@ -34,6 +34,13 @@ class JrcBackoffice::CompletionPackage
   end
 
   def download
+    export do |captured, bytes|
+      audit!(captured, Digest::SHA256.hexdigest(bytes))
+      bytes
+    end
+  end
+
+  def export
     record = @access.request(@request_id)
     record.sales_order.with_lock('FOR SHARE') do
       record.with_lock('FOR SHARE') do
@@ -42,8 +49,7 @@ class JrcBackoffice::CompletionPackage
         raise JrcBackoffice::CompletionReport::TooLarge if available.sum { |row| row[:byte_size] } > MAX_BYTES
 
         bytes = build_archive(captured, available)
-        audit!(captured, Digest::SHA256.hexdigest(bytes))
-        bytes
+        block_given? ? yield(captured, bytes) : [captured, bytes]
       end
     end
   end
@@ -142,7 +148,8 @@ class JrcBackoffice::CompletionPackage
 
   def history
     rows = JrcCrm::AuditEvent.where(account_id: @access.account.id, resource_type: @request.class.name, resource_id: @request.id)
-                             .where.not(event_type: %w[backoffice_completion_package_accessed backoffice_completion_report_accessed])
+                             .where.not(event_type: %w[backoffice_completion_package_accessed backoffice_completion_report_accessed
+                                                      backoffice_completion_dossier_sealed backoffice_completion_dossier_accessed])
     limited(rows.order(:id)).map { |row| row.slice('id', 'event_type', 'actor_type', 'actor_id', 'created_at') }
   end
 

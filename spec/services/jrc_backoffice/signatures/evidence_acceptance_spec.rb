@@ -93,6 +93,22 @@ RSpec.describe JrcBackoffice::Signatures::EvidenceAcceptance, :approval_core, :a
     expect(domain[:contract].reload.signature_status).not_to eq('signed')
   end
 
+  it 'seals the final accepted PDF and certificate through native completion without replacing their exact contract version' do
+    scan_bundle
+    service.call(delivery_id: delivery.id, expected_source_digest: bundle.source_digest)
+    operation = domain[:operation]
+    operation.update!(metadata: operation.metadata.merge('finance_required' => false))
+    4.times { operation.reload.advance!(actor: domain[:actor]) unless operation.reload.completed? }
+    expect(operation.reload).to be_completed
+    dossiers = JrcBackoffice::CompletionDossiers.new(account: domain[:account], actor: domain[:actor], request_id: operation.id)
+    candidate = dossiers.show
+    expect(candidate.fetch(:can_seal)).to be(true)
+    row = dossiers.seal!(expected_manifest_digest: candidate.fetch(:candidate_digest))
+    expect(row.snapshot.dig('manifest', 'signature')).to include('artifact_available' => true, 'contract_version_id' => bundle.contract_version_id)
+    expect(row.snapshot.dig('manifest', 'files').pluck('id')).to include(bundle.signed_document_id, bundle.certificate_document_id)
+    expect(Digest::SHA256.hexdigest(dossiers.download(row.id).last)).to eq(row.archive_sha256)
+  end
+
   it 'retains the immutable historical receipt but refuses it for changed current legal source data' do
     scan_bundle
     original = bundle.snapshot.deep_dup
