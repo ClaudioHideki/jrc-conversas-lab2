@@ -61,7 +61,7 @@ class Api::V1::Accounts::JrcBrokerController < Api::V1::Accounts::BaseController
 
   def update_connection_distribution
     input = body!('enabled', 'mode', 'team_ids', 'max_open', 'respect_availability', 'capacity_enabled', 'waiting_enabled',
-                  'schedule', 'fallback', 'fallback_team_id', 'visibility', 'supervisor_ids', 'agent_limits')
+                  'schedule', 'fallback', 'fallback_team_id', 'visibility', 'supervisor_ids', 'agent_limits', 'agent_schedules')
     result = JrcHumanAssignment::Policy.update_connection!(Current.account, inbox: binding.inbox, actor: Current.user,
                                                                             **input.symbolize_keys)
     render json: { policy: result }

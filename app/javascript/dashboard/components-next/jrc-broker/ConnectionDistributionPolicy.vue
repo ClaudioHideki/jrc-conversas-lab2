@@ -3,6 +3,8 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { createJrcBrokerApi } from 'dashboard/api/jrcBroker';
 import Button from 'dashboard/components-next/button/Button.vue';
+import AgentScheduleEditor from './AgentScheduleEditor.vue';
+import { validAgentSchedules } from './agentSchedules';
 
 const props = defineProps({
   accountId: { type: [Number, String], required: true },
@@ -35,6 +37,13 @@ const agents = ref([]);
 const visibility = ref('shared');
 const supervisorIds = ref([]);
 const agentLimits = ref({});
+const agentSchedules = ref({});
+const removeObsoleteAgent = id => {
+  delete agentLimits.value[id];
+  supervisorIds.value = supervisorIds.value.filter(
+    value => String(value) !== id
+  );
+};
 const exclusive = computed(() => visibility.value === 'assigned_only');
 watch(exclusive, value => {
   if (!value) return;
@@ -72,6 +81,7 @@ const valid = computed(
     Object.values(agentLimits.value).every(
       limit => Number.isInteger(limit) && limit >= 1 && limit <= 100
     ) &&
+    validAgentSchedules(agentSchedules.value) &&
     teamIds.value.every(id => teams.value.some(team => team.id === id)) &&
     (schedule.value !== 'inbox' || calendar.value?.enabled === true) &&
     (fallback.value !== 'waiting' || waitingEnabled.value) &&
@@ -160,6 +170,9 @@ const apply = policy => {
   visibility.value = policy?.visibility || 'shared';
   supervisorIds.value = [...(policy?.supervisor_ids || [])];
   agentLimits.value = { ...(policy?.agent_limits || {}) };
+  agentSchedules.value = JSON.parse(
+    JSON.stringify(policy?.agent_schedules || {})
+  );
   enabled.value = policy?.enabled === true;
   mode.value = policy?.mode || 'round_robin';
   maxOpen.value = policy?.max_open ?? 10;
@@ -237,6 +250,7 @@ const save = async () => {
         visibility: visibility.value,
         supervisor_ids: [...supervisorIds.value],
         agent_limits: { ...agentLimits.value },
+        agent_schedules: JSON.parse(JSON.stringify(agentSchedules.value)),
         respect_availability: respectAvailability.value,
         capacity_enabled: capacityEnabled.value,
         waiting_enabled: waitingEnabled.value,
@@ -766,6 +780,12 @@ onBeforeUnmount(clear);
                 </option>
               </select>
             </label>
+            <AgentScheduleEditor
+              v-model="agentSchedules"
+              :agents="agents"
+              :timezone="calendar?.timezone || ''"
+              @remove-obsolete-agent="removeObsoleteAgent"
+            />
           </section>
           <p v-if="!valid" class="text-sm lg:col-span-2">
             {{ t('JRC_BROKER.DISTRIBUTION.VALIDATION') }}

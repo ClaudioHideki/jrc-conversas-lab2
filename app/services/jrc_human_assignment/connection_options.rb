@@ -1,6 +1,6 @@
 class JrcHumanAssignment::ConnectionOptions
   def self.merge(previous, options)
-    retained = (previous || {}).slice('visibility', 'supervisor_ids', 'agent_limits').symbolize_keys
+    retained = (previous || {}).slice('visibility', 'supervisor_ids', 'agent_limits', 'agent_schedules').symbolize_keys
     JrcHumanAssignment::Policy::CONNECTION_DEFAULTS.merge(retained).merge(options)
   end
 
@@ -16,6 +16,8 @@ class JrcHumanAssignment::ConnectionOptions
     validate_ids!(options[:supervisor_ids])
     limits = options[:agent_limits]
     raise ArgumentError unless limits.is_a?(Hash) && limits.size <= 1000 && limits.all? { |id, limit| valid_limit?(id, limit) }
+
+    JrcHumanAssignment::AgentSchedule.validate!(options[:agent_schedules])
     return unless options[:visibility] == 'assigned_only'
 
     raise ArgumentError unless options.values_at(:respect_availability, :capacity_enabled, :waiting_enabled).all? &&
@@ -33,7 +35,7 @@ class JrcHumanAssignment::ConnectionOptions
   private_class_method :valid_limit?
 
   def self.validate_members!(account, inbox, options)
-    ids = (options[:supervisor_ids] + options[:agent_limits].keys.map(&:to_i)).uniq
+    ids = (options[:supervisor_ids] + options[:agent_limits].keys.map(&:to_i) + options[:agent_schedules].keys.map(&:to_i)).uniq
     members = account.account_users.where(user_id: inbox.members.where(id: ids).select(:id))
     raise ArgumentError unless members.count == ids.size
 

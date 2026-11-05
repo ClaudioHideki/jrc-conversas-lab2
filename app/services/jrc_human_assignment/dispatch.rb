@@ -18,7 +18,7 @@ class JrcHumanAssignment::Dispatch
     return false if request_predates_policy?
 
     policy = JrcHumanAssignment::Policy.connection_for(@account, @conversation.inbox_id)
-    return apply_fallback!(policy, 'outside_hours') if policy && policy['schedule'] == 'inbox' && @conversation.inbox.out_of_office?
+    return apply_fallback!(policy, 'outside_hours') if inbox_closed?
 
     route_team!
     return true if policy && policy['mode'] == 'direct' && eligible_destination?
@@ -65,6 +65,8 @@ class JrcHumanAssignment::Dispatch
 
   def member_assignable?(member, selected)
     rules = AutoAssignment::Eligibility.new(inbox: @conversation.inbox.reload, conversation: @conversation)
+    return false if inbox_closed? || !agent_in_shift?(selected)
+
     respect = JrcHumanAssignment::Policy.effective(@account, @conversation.inbox_id)[:respect_availability] != false
     eligible? && rules.conversation_reason.nil? && rules.agent_reason(member, respect_availability: respect).nil? &&
       eligible_agent_ids.include?(selected) && below_capacity?(selected)
@@ -72,6 +74,16 @@ class JrcHumanAssignment::Dispatch
 
   def below_capacity?(selected)
     workload.available([selected]).include?(selected)
+  end
+
+  def inbox_closed?
+    policy = JrcHumanAssignment::Policy.connection_for(@account, @conversation.inbox_id)
+    policy && policy['schedule'] == 'inbox' && (!@conversation.inbox.working_hours_enabled? || @conversation.inbox.out_of_office?)
+  end
+
+  def agent_in_shift?(id)
+    days = JrcHumanAssignment::Policy.effective(@account, @conversation.inbox_id).fetch(:agent_schedules, {})[id.to_s]
+    JrcHumanAssignment::AgentSchedule.new(days).open?(time: Time.current, timezone: @conversation.inbox.timezone)
   end
 
   def record_decision!(selected, preferred, requested_at)
@@ -152,7 +164,7 @@ class JrcHumanAssignment::Dispatch
       pending = JrcContactCenter::Qualification.pending.where(account_id: @account.id).joins(:account_user).pluck('account_users.user_id')
       ids -= pending
     end
-    ids
+    ids.select { |id| agent_in_shift?(id) }
   end
 
   def eligible_agent_ids

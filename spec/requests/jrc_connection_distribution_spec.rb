@@ -58,6 +58,16 @@ RSpec.describe 'Broker inbox distribution API', type: :request do
     expect(response.parsed_body['policy']['visibility']).to eq('assigned_only')
   end
 
+  it 'saves and reads individual weekly shifts without contacting the Broker' do
+    create(:inbox_member, inbox: inbox, user: agent)
+    week = (0..6).to_h { |day| [day.to_s, []] }.merge('1' => [{ 'start' => '09:00', 'end' => '18:00' }])
+    expect(JrcBroker::Client).not_to receive(:new)
+    put url, headers: admin.create_new_auth_token, params: input.merge(agent_schedules: { agent.id.to_s => week }), as: :json
+    expect(response).to have_http_status(:ok)
+    get url, headers: admin.create_new_auth_token
+    expect(response.parsed_body.dig('policy', 'agent_schedules', agent.id.to_s)).to eq(week)
+  end
+
   it 'rejects a foreign inbox even for a shared administrator' do
     foreign = create(:account)
     create(:account_user, account: foreign, user: admin, role: :administrator)

@@ -66,6 +66,148 @@ it('configures exclusive visibility with a supervisor and an individual agent ca
   );
 });
 
+it('edits a split individual shift, saves it and can restore inherited inbox hours', async () => {
+  api.connectionDistribution.mockResolvedValue({
+    policy: {
+      enabled: true,
+      mode: 'round_robin',
+      team_ids: [11],
+      max_open: 10,
+    },
+    teams,
+    agents: [{ id: 8, name: 'Lucas' }],
+    calendar: { enabled: true, timezone: 'America/Sao_Paulo' },
+  });
+  wrapper = mount(ConnectionDistributionPolicy, {
+    props: { accountId: 1, inboxId: 7, presentation: 'rules' },
+  });
+  await flushPromises();
+  await wrapper.get('[data-testid="schedule-enabled"]').setValue(true);
+  await wrapper.get('[data-add-period-day="1"]').trigger('click');
+  await wrapper.get('[data-period-end="1-0"]').setValue('12:00');
+  await wrapper.get('[data-add-period-day="1"]').trigger('click');
+  await wrapper.get('[data-period-start="1-1"]').setValue('13:00');
+  await wrapper.get('[data-period-end="1-1"]').setValue('17:00');
+  await wrapper.get('form').trigger('submit');
+  await flushPromises();
+  expect(api.saveConnectionDistribution).toHaveBeenLastCalledWith(
+    7,
+    expect.objectContaining({
+      agent_schedules: {
+        8: expect.objectContaining({
+          1: [
+            { start: '09:00', end: '12:00' },
+            { start: '13:00', end: '17:00' },
+          ],
+        }),
+      },
+    }),
+    expect.any(AbortSignal)
+  );
+  await wrapper.get('[data-testid="schedule-enabled"]').setValue(false);
+  await wrapper.get('form').trigger('submit');
+  await flushPromises();
+  expect(api.saveConnectionDistribution).toHaveBeenLastCalledWith(
+    7,
+    expect.objectContaining({ agent_schedules: {} }),
+    expect.any(AbortSignal)
+  );
+});
+
+it('prevents submitting overlapping weekly shifts', async () => {
+  api.connectionDistribution.mockResolvedValue({
+    policy: {
+      enabled: true,
+      mode: 'round_robin',
+      team_ids: [11],
+      max_open: 10,
+    },
+    teams,
+    agents: [{ id: 8, name: 'Lucas' }],
+  });
+  wrapper = mount(ConnectionDistributionPolicy, {
+    props: { accountId: 1, inboxId: 7, presentation: 'rules' },
+  });
+  await flushPromises();
+  await wrapper.get('[data-testid="schedule-enabled"]').setValue(true);
+  await wrapper.get('[data-add-period-day="1"]').trigger('click');
+  await wrapper.get('[data-add-period-day="1"]').trigger('click');
+  await wrapper.get('form').trigger('submit');
+  await flushPromises();
+  expect(api.saveConnectionDistribution).not.toHaveBeenCalled();
+});
+
+it.each([{ agents: [] }, { agents: [{ id: 8, name: 'Lucas' }] }])(
+  'allows explicit removal of obsolete schedules after inbox membership changes',
+  async ({ agents }) => {
+    api.connectionDistribution.mockResolvedValue({
+      policy: {
+        enabled: true,
+        mode: 'round_robin',
+        team_ids: [11],
+        max_open: 10,
+        supervisor_ids: [99],
+        agent_limits: { 99: 2 },
+        agent_schedules: {
+          99: Object.fromEntries(
+            Array.from({ length: 7 }, (_, day) => [String(day), []])
+          ),
+        },
+      },
+      teams,
+      agents,
+    });
+    wrapper = mount(ConnectionDistributionPolicy, {
+      props: { accountId: 1, inboxId: 7, presentation: 'rules' },
+    });
+    await flushPromises();
+    await wrapper.get('[data-remove-schedule-id="99"]').trigger('click');
+    await wrapper.get('form').trigger('submit');
+    await flushPromises();
+    expect(api.saveConnectionDistribution).toHaveBeenCalledWith(
+      7,
+      expect.objectContaining({
+        agent_schedules: {},
+        agent_limits: {},
+        supervisor_ids: [],
+      }),
+      expect.any(AbortSignal)
+    );
+  }
+);
+
+it('normalizes a full midnight-to-midnight shift even when its end is edited first', async () => {
+  api.connectionDistribution.mockResolvedValue({
+    policy: {
+      enabled: true,
+      mode: 'round_robin',
+      team_ids: [11],
+      max_open: 10,
+    },
+    teams,
+    agents: [{ id: 8, name: 'Lucas' }],
+  });
+  wrapper = mount(ConnectionDistributionPolicy, {
+    props: { accountId: 1, inboxId: 7, presentation: 'rules' },
+  });
+  await flushPromises();
+  await wrapper.get('[data-testid="schedule-enabled"]').setValue(true);
+  await wrapper.get('[data-add-period-day="1"]').trigger('click');
+  await wrapper.get('[data-period-end="1-0"]').setValue('00:00');
+  await wrapper.get('[data-period-start="1-0"]').setValue('00:00');
+  await wrapper.get('form').trigger('submit');
+  await flushPromises();
+  expect(api.saveConnectionDistribution).toHaveBeenCalledWith(
+    7,
+    expect.objectContaining({
+      agent_schedules: {
+        8: expect.objectContaining({ 1: [{ start: '00:00', end: '24:00' }] }),
+      },
+    }),
+    expect.any(AbortSignal)
+  );
+});
+
 it.each(['unassigned', 'default_team'])(
   'shows the actual configured fallback %s rather than claiming waiting is the outcome',
   async fallback => {
@@ -368,6 +510,7 @@ it('saves explicit authorized queues and capacity for this existing connection',
       visibility: 'shared',
       supervisor_ids: [],
       agent_limits: {},
+      agent_schedules: {},
       respect_availability: true,
       capacity_enabled: true,
       waiting_enabled: true,
@@ -406,6 +549,7 @@ it('keeps the selected priority order when accessible move controls are used', a
       visibility: 'shared',
       supervisor_ids: [],
       agent_limits: {},
+      agent_schedules: {},
       respect_availability: true,
       capacity_enabled: true,
       waiting_enabled: true,
@@ -440,6 +584,7 @@ it('requires exactly one queue for direct distribution and does not silently dro
       visibility: 'shared',
       supervisor_ids: [],
       agent_limits: {},
+      agent_schedules: {},
       respect_availability: true,
       capacity_enabled: true,
       waiting_enabled: true,
@@ -483,6 +628,7 @@ it('requires an explicit queue to enable distribution but can save an explicitly
       visibility: 'shared',
       supervisor_ids: [],
       agent_limits: {},
+      agent_schedules: {},
       respect_availability: true,
       capacity_enabled: true,
       waiting_enabled: true,

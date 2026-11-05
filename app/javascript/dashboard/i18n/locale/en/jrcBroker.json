@@ -135,7 +135,29 @@
       "UNASSIGNED": "Leave unassigned",
       "NO_CAPACITY_LIMIT": "No connection limit",
       "IGNORE_AVAILABILITY": "Agent presence is not required",
-      "AWAITING_CONNECTION": "You can save these rules. Incoming distribution is waiting for reconnection."
+      "AWAITING_CONNECTION": "You can save these rules. Incoming distribution is waiting for reconnection.",
+      "SHIFTS": {
+        "TITLE": "Individual weekly shifts",
+        "HELP": "Configure one agent at a time for this inbox. Times use {timezone} and must also respect the inbox calendar when enabled.",
+        "NO_AGENTS": "Add agents to this inbox before configuring shifts.",
+        "AGENT": "Agent",
+        "ENABLED": "Use an individual shift for this agent",
+        "INHERITED": "This agent inherits the configured inbox working hours. Manual pauses and capacity limits still apply.",
+        "PERIOD_HELP": "Add working periods around lunch. Days without a period start have no shift of their own. An end before the start finishes on the next day. Midnight as the end of a period starting at midnight means a full day.",
+        "OFF": "No period starts on this day. Overnight periods from the previous day may still apply.",
+        "START": "Start",
+        "END": "End",
+        "START_LABEL": "{day}, period {period}, start",
+        "END_LABEL": "{day}, period {period}, end",
+        "NEXT_DAY": "Ends on the next day",
+        "REMOVE": "Remove",
+        "REMOVE_LABEL": "Remove {day} period {period}",
+        "ADD": "Add period",
+        "ADD_LABEL": "Add a working period on {day}",
+        "INVALID": "Use valid, non-overlapping working periods. Each day allows up to four periods.",
+        "OBSOLETE": "Saved distribution settings for former inbox member {id}. Remove this shift and any obsolete capacity or supervisor settings before saving.",
+        "REMOVE_SCHEDULE": "Remove former member settings"
+      }
     },
     "CONNECTIONS": {
       "TITLE": "WhatsApp connections",

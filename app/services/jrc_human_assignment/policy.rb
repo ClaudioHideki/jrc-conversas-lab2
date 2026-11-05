@@ -1,7 +1,7 @@
 class JrcHumanAssignment::Policy
   CONNECTION_DEFAULTS = { respect_availability: true, capacity_enabled: true, waiting_enabled: true,
                           schedule: 'always', fallback: 'waiting', fallback_team_id: nil,
-                          visibility: 'shared', supervisor_ids: [], agent_limits: {} }.freeze
+                          visibility: 'shared', supervisor_ids: [], agent_limits: {}, agent_schedules: {} }.freeze
   def self.for(account)
     value = account.custom_attributes['jrc_human_assignment'] || {}
     { enabled: value['enabled'] == true, max_open: value.fetch('max_open', 10), inbox_ids: value.fetch('inbox_ids', []),
