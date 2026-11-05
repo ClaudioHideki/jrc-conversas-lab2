@@ -1,6 +1,7 @@
 class Api::V1::Accounts::Relationship::HandoffsController < Api::V1::Accounts::Relationship::BaseController
   def index
     rows = JrcRelationship::HandoffCase.where(account: Current.account, assignment_id: filtered_assignments.select(:id)).includes(:assignment)
+    rows = rows.where(id: params[:handoff_id]) if params[:handoff_id].present?
     render json: { payload: rows.order(id: :desc).limit(100).map { |row| row.as_json.merge(customer_name: row.assignment.label) } }
   end
 

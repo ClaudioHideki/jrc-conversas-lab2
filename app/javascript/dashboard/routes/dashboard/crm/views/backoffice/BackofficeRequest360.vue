@@ -13,6 +13,7 @@ import BackofficeContractPanel from './BackofficeContractPanel.vue';
 import BackofficeFinance from './BackofficeFinance.vue';
 import BackofficeCompletionReport from './BackofficeCompletionReport.vue';
 import BackofficeCompletionPackage from './BackofficeCompletionPackage.vue';
+import BackofficeCompletionHandoff from './BackofficeCompletionHandoff.vue';
 import ApprovalGateBadge from 'dashboard/routes/dashboard/approvals/ApprovalGateBadge.vue';
 import { useBackofficePresentation } from './useBackofficePresentation';
 
@@ -468,6 +469,10 @@ onBeforeUnmount(() => {
               class="min-w-0 space-y-3"
             >
               <BackofficeCompletionPackage :record="record" />
+              <BackofficeCompletionHandoff
+                v-if="record.status === 'completed'"
+                :record="record"
+              />
               <p
                 v-if="record.status !== 'completed'"
                 class="text-sm text-n-slate-11"

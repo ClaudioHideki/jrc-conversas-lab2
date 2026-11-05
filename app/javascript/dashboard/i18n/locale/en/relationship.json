@@ -803,6 +803,7 @@
       }
     },
     "HANDOFF": {
+      "LINK_UNAVAILABLE": "This linked portfolio or origin is unavailable in your current scope. No handoff was prepared.",
       "GUIDANCE": "Review authorized commercial and implementation records before accepting the transfer to Customer Success.",
       "ORIGIN": "Completed order or implementation",
       "PREPARE": "Prepare handoff",

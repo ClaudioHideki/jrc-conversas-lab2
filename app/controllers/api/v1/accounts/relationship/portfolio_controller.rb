@@ -97,7 +97,9 @@ class Api::V1::Accounts::Relationship::PortfolioController < Api::V1::Accounts::
 
   def work_context
     record = relationship_context.assignment(params[:id])
-    render json: JrcRelationship::WorkContext.new(context: relationship_context, assignment: record, period: report_period).call.except(:_source_ids)
+    source = { type: params[:source_type], id: params[:source_id] } if params[:source_type].present? || params[:source_id].present?
+    render json: JrcRelationship::WorkContext.new(context: relationship_context, assignment: record, period: report_period,
+                                                   source: source).call.except(:_source_ids)
   end
 
   def batch

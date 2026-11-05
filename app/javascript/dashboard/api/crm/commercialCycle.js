@@ -77,6 +77,10 @@ commissionProgramsAPI.simulate = data =>
   axios.post(`${commissionProgramsAPI.url}/simulate`, data);
 
 export const backofficeAPI = make('backoffice_requests');
+backofficeAPI.completionHandoff = (accountId, requestId) =>
+  axios.get(
+    `${backofficeAPI.urlForAccount(accountId)}/${requestId}/completion_handoff`
+  );
 backofficeAPI.completionPackage = (accountId, requestId) =>
   axios.get(
     `${backofficeAPI.urlForAccount(accountId)}/${requestId}/completion_package`
