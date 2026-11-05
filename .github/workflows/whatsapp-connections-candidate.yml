@@ -2,7 +2,7 @@ name: Conexoes WhatsApp - candidata Word
 
 on:
   push:
-    branches: [codex/whatsapp-connections-word-20261104]
+    branches: [codex/whatsapp-connections-word-20261104, codex/shared-inbox-history-20261104]
   workflow_dispatch:
 
 permissions:
@@ -28,7 +28,13 @@ jobs:
           run_install: false
       - run: pnpm install --frozen-lockfile
       - name: Regressao dos componentes reais
-        run: pnpm exec vitest run app/javascript/dashboard/components-next/jrc-broker --maxWorkers=2 --minWorkers=1 --reporter=default --reporter=json --outputFile=/tmp/whatsapp-connections-vitest.json
+        run: >-
+          pnpm exec vitest run app/javascript/dashboard/components-next/jrc-broker
+          app/javascript/dashboard/routes/dashboard/inbox/omnichannelFilters.spec.js
+          app/javascript/dashboard/routes/dashboard/inbox/InboxList.spec.js
+          app/javascript/dashboard/routes/dashboard/inbox/specs/InboxList.spec.js
+          --maxWorkers=2 --minWorkers=1 --reporter=default --reporter=json
+          --outputFile=/tmp/whatsapp-connections-vitest.json
       - name: Lint do incremento
         run: |
           pnpm exec eslint app/javascript/dashboard/routes/dashboard/jrcBroker/ConnectionsPage.vue \
@@ -114,7 +120,11 @@ jobs:
           bundle exec rails db:migrate
       - name: Contratos, permissoes e distribuicao
         run: |
-          bundle exec rspec spec/requests/jrc_connection_summary_spec.rb \
+          bundle exec rspec spec/finders/message_finder_spec.rb \
+            spec/finders/message_finder_history_spec.rb \
+            spec/finders/conversation_finder_spec.rb \
+            spec/finders/conversation_finder_shared_spec.rb \
+            spec/requests/jrc_connection_summary_spec.rb \
             spec/enterprise/requests/jrc_connection_summary_spec.rb \
             spec/enterprise/services/jrc_human_assignment/availability_spec.rb \
             spec/enterprise/models/inbox_spec.rb \

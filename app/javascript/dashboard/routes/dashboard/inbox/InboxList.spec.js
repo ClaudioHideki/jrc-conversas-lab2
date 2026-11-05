@@ -5,6 +5,7 @@ import { createPinia } from 'pinia';
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import { INBOX_TYPES } from 'dashboard/helper/inbox';
 import JrcContactCenterAPI from 'dashboard/api/jrcContactCenter';
+import ConversationAPI from 'dashboard/api/conversations';
 import InboxList from './InboxList.vue';
 import { routes as webphoneRoutes } from '../webphone/routes';
 import { openEmbeddedSoftphone } from '../webphone/useEmbeddedSoftphone';
@@ -21,6 +22,9 @@ vi.mock('vue-router', async importOriginal => ({
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }));
 vi.mock('dashboard/api/jrcContactCenter', () => ({
   default: { calls: vi.fn(), context: vi.fn(), agentState: vi.fn() },
+}));
+vi.mock('dashboard/api/conversations', () => ({
+  default: { sharedContext: vi.fn().mockResolvedValue({ data: { meta: { shared_scope: { enabled: false, inbox_ids: [] } } } }) },
 }));
 enableAutoUnmount(afterEach);
 
@@ -63,6 +67,18 @@ const mountInbox = () =>
   });
 
 describe('omnichannel inbox', () => {
+  it('defaults an authorized ordinary member to own and shared conversations without changing their assignments', async () => {
+    ConversationAPI.sharedContext.mockResolvedValueOnce({ data: { meta: { shared_scope: { enabled: true, inbox_ids: [11] } } } });
+    store.state.conversationPayload = [
+      { id: 1, inbox_id: 11, meta: { assignee: { id: 99 }, assignee_type: 'User' } },
+      { id: 2, inbox_id: 12, meta: { assignee: { id: 99 }, assignee_type: 'User' } },
+    ];
+    const wrapper = mountInbox();
+    await flushPromises();
+    expect(store.state.filters.assigneeType).toBe('mine_or_shared');
+    expect(wrapper.text()).toContain('JRC_CONTACT_CENTER.INBOX.ASSIGNEE.MINE_OR_SHARED');
+    expect(wrapper.findAll('[data-testid="conversation"]').map(row => row.text())).toEqual(['1']);
+  });
   it('keeps Voice and the central dialer for an authorized SIP extension when Contact Center is off', async () => {
     store.state.feature = false;
     const wrapper = mountInbox();
