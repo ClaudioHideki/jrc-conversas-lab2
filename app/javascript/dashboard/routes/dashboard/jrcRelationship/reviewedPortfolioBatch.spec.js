@@ -34,6 +34,32 @@ const review = {
   ],
 };
 let wrapper;
+it.each(['blocked', 'stale', 'unavailable', 'failed'])(
+  'prevents confirmation and approval requests for %s responsibilities',
+  async state => {
+    api.previewPortfolioBatch.mockResolvedValueOnce({
+      data: {
+        ...review,
+        responsibilities: [
+          { assignment_id: 19, entries: [], blockers: [], state },
+        ],
+        approval: { required: true, state: 'required', requests: [] },
+      },
+    });
+    wrapper = mount(ReviewedPortfolioBatchPanel, {
+      props: { accountId: '12', proposal },
+    });
+    await flushPromises();
+    expect(
+      wrapper.get('[data-test="review-request-approval"]').element.disabled
+    ).toBe(true);
+    expect(wrapper.get('[data-test="review-approve"]').element.disabled).toBe(
+      true
+    );
+    expect(api.requestPortfolioBatchApproval).not.toHaveBeenCalled();
+    expect(api.approvePortfolioBatch).not.toHaveBeenCalled();
+  }
+);
 beforeEach(() => {
   vi.clearAllMocks();
   sessionStorage.clear();

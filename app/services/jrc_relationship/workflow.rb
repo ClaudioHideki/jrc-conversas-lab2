@@ -20,6 +20,21 @@ class JrcRelationship::Workflow
     @context = context
   end
 
+  # Narrow internal operation for a reviewed portfolio handoff. It does not
+  # widen the public editor fields or replay commercial/status transitions.
+  def transfer_owner!(kind:, id:, assignment:, owner:)
+    raise Pundit::NotAuthorizedError unless @context.policy.manage? && @context.policy.team?
+
+    model = JrcRelationship::PortfolioResponsibilities::TYPES.fetch(kind).first
+    statuses = JrcRelationship::PortfolioResponsibilities::TYPES.fetch(kind).last
+    record = @context.records(model).where(assignment_id: assignment.id, status: statuses).lock.find(id)
+    @context.assignable_users.find(owner.id)
+    before = { owner_id: record.owner_id }
+    record.update!(owner: owner)
+    @context.audit!(record, before: before, after: { owner_id: owner.id }, action: 'responsibility_transferred')
+    record
+  end
+
   def save(kind:, attributes:, id: nil)
     model = MODELS.fetch(kind)
     attrs = attributes.to_h.stringify_keys

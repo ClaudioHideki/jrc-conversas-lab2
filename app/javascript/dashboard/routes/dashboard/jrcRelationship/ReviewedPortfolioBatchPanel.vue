@@ -6,6 +6,7 @@ import { buttonClass, message } from './definitions';
 import ReviewedCadencePanel from './ReviewedCadencePanel.vue';
 import DistributionComparison from './DistributionComparison.vue';
 import DistributionCapacitySummary from './DistributionCapacitySummary.vue';
+import ResponsibilityComparison from './ResponsibilityComparison.vue';
 import { intent } from 'dashboard/routes/dashboard/approvals/model';
 const props = defineProps({
   accountId: { type: [String, Number], required: true },
@@ -22,6 +23,11 @@ const reading = ref(false);
 const uncertain = ref(false);
 const executionConfirmed = ref(false);
 const approvalIntent = intent();
+const responsibilitiesBlocked = computed(() =>
+  (review.value?.responsibilities || []).some(
+    row => !['ready', 'executed'].includes(row.state)
+  )
+);
 const hasPendingApproval = computed(() =>
   (review.value?.approval?.requests || []).some(
     request =>
@@ -293,6 +299,10 @@ onBeforeUnmount(reset);
         :rows="review.distribution"
       />
       <DistributionCapacitySummary :rows="review.capacity || []" />
+      <ResponsibilityComparison
+        :rows="review.responsibilities || []"
+        :owner-name="review.summary?.owner_name || ''"
+      />
       <section
         v-if="review.approval?.required"
         class="my-3 space-y-3 rounded-xl border border-n-violet-6 bg-n-violet-2 p-3"
@@ -323,7 +333,10 @@ onBeforeUnmount(reset);
           data-test="review-request-approval"
           :class="buttonClass"
           :disabled="
-            busy || uncertain || review.capacity?.some(row => row.blocker)
+            busy ||
+            uncertain ||
+            responsibilitiesBlocked ||
+            review.capacity?.some(row => row.blocker)
           "
           @click="mutate('requestApproval')"
         >
@@ -372,6 +385,7 @@ onBeforeUnmount(reset);
           :disabled="
             busy ||
             uncertain ||
+            responsibilitiesBlocked ||
             review.capacity?.some(row => row.blocker) ||
             (review.approval?.required &&
               (review.approval.state !== 'approved' || !executionConfirmed))

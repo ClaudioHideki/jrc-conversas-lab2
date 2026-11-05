@@ -27,6 +27,7 @@ class JrcRelationship::BatchReviewPlan
     if inputs['operation'] == 'assign'
       result.merge!(JrcRelationship::DistributionPreview.new(context: @context, inputs: inputs, records: records,
                                                              summary: result['summary']).call)
+      add_responsibility_snapshot(result, inputs, records, lock)
     end
     add_cadence_snapshot(result, inputs, book, lock) if inputs['operation'] == 'cadence'
     result
@@ -45,6 +46,7 @@ class JrcRelationship::BatchReviewPlan
     raise ArgumentError, 'Reviewed playbook changed' unless review.snapshot['book'] == book_snapshot(review.inputs, lock: true)
 
     validate_cadence!(review)
+    JrcRelationship::ResponsibilityReview.new(@context).verify!(review, assignment: assignment)
 
     records = assignment ? [assignment] : reviewed_assignments(review)
     records.each { |record| validate_row!(review, record) }
@@ -115,6 +117,7 @@ class JrcRelationship::BatchReviewPlan
     raise Pundit::NotAuthorizedError unless @context.policy.team?
 
     result = { 'owner_id' => input['owner_id'].present? ? @context.assignable_users.find(input['owner_id']).id : nil }
+    result.merge!(responsibility_options(input))
     if input.key?('justification')
       reason = input['justification']
       raise ArgumentError, 'Invalid distribution justification' unless reason.is_a?(String) && reason.strip.bytesize.between?(1, 4096)
@@ -122,6 +125,20 @@ class JrcRelationship::BatchReviewPlan
       result['justification'] = reason.strip
     end
     result
+  end
+
+  def responsibility_options(input)
+    return {} unless input.key?('transfer_responsibilities')
+
+    raise ArgumentError, 'Invalid responsibility transfer option' unless [true, false].include?(input['transfer_responsibilities'])
+
+    input['transfer_responsibilities'] ? { 'transfer_responsibilities' => true } : {}
+  end
+
+  def add_responsibility_snapshot(result, inputs, records, lock)
+    return unless inputs['transfer_responsibilities']
+
+    result['responsibilities'] = JrcRelationship::ResponsibilityReview.new(@context).snapshot(inputs, records, lock: lock)
   end
 
   def book_snapshot(inputs, lock: false)

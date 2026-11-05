@@ -108,6 +108,7 @@ const filters = reactive({
 const portfolioOperation = reactive({
   operation: 'activity',
   justification: '',
+  transfer_responsibilities: false,
   conversation_id: '',
   starts_at: '',
   owner_id: '',
@@ -323,6 +324,11 @@ const completeBatch = () =>
 const updatePortfolioBatch = () => {
   portfolioReviewProposal.value = {
     ...portfolioOperation,
+    transfer_responsibilities:
+      portfolioOperation.operation === 'assign' &&
+      portfolioOperation.transfer_responsibilities
+        ? true
+        : undefined,
     justification:
       portfolioOperation.operation === 'assign' &&
       portfolioOperation.justification.trim()
@@ -608,6 +614,7 @@ watch(
     });
     Object.assign(portfolioOperation, {
       operation: 'assign',
+      transfer_responsibilities: false,
       conversation_id: '',
       starts_at: '',
       owner_id: '',
@@ -1314,6 +1321,17 @@ const money = value => formatMoney(value, metadata.value?.formatting);
                 </option>
               </select></label
             >
+            <label
+              v-if="
+                metadata.can_team && portfolioOperation.operation === 'assign'
+              "
+            >
+              <input
+                v-model="portfolioOperation.transfer_responsibilities"
+                type="checkbox"
+              />
+              {{ t('RELATIONSHIP.RESPONSIBILITIES.INCLUDE') }}
+            </label>
             <label v-if="portfolioOperation.operation === 'assign'">
               {{ t('RELATIONSHIP.DISTRIBUTION.JUSTIFICATION') }}
               <textarea

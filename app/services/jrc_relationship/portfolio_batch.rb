@@ -28,6 +28,8 @@ class JrcRelationship::PortfolioBatch
 
   def authorize_transfer!(rows)
     JrcRelationship::DistributionApproval.lock_configuration!(@context.account.id)
+    raise ArgumentError, 'Complete responsibility transfer requires a reviewed proposal' if @params[:transfer_responsibilities] && !@review
+
     if @review
       assert_review_identity!(rows)
       JrcRelationship::DistributionApproval.new(@context).check!(@review)
@@ -80,6 +82,10 @@ class JrcRelationship::PortfolioBatch
   end
 
   def assign!(record, owner)
+    if @review&.inputs&.fetch('transfer_responsibilities', false)
+      return JrcRelationship::ResponsibilityTransfer.new(@context, @review).call(record, owner)
+    end
+
     before = { owner_id: record.owner_id }
     record.update!(owner: owner)
     record.actions.where(status: JrcRelationship::Action::ACTIVE_STATUSES).find_each do |action|

@@ -56,6 +56,39 @@ RSpec.describe 'Native Central portfolio distribution', :approval_core, :commerc
                                                    'justification' => 'Synthetic approved workload transfer')
   end
 
+  context 'with complete pending responsibilities' do
+    let(:preview) do
+      service.preview('ids' => [first.id], 'operation' => 'assign', 'owner_id' => destination.user_id,
+                      'transfer_responsibilities' => true, 'justification' => 'Synthetic complete transfer', 'request_id' => SecureRandom.uuid)
+    end
+    before do
+      JrcRelationship::Action.create!(account: scope[:account], assignment: first, owner: author.user, kind: 'manual',
+                                      reason: 'Synthetic reviewed responsibility', source_key: 'complete-responsibility')
+    end
+
+    it 'lets a native read-only reviewer approve without transferring or receiving management powers' do
+      pending_action = first.actions.sole
+      reviewer.custom_role.update!(permissions: permissions - %w[jrc_relationship_manage jrc_relationship_configure])
+      decision = approval
+      approval_vote(scope, reviewer, decision)
+      expect(JrcRelationship::Context.new(reviewer).policy.manage?).to be(false)
+      expect([first.reload.owner_id, pending_action.reload.owner_id]).to all(eq(author.user_id))
+      service.approve(review.id, digest: review.digest)
+      expect(service.advance(review.id).fetch('state')).to eq('completed')
+      expect([first.reload.owner_id, pending_action.reload.owner_id]).to all(eq(destination.user_id))
+    end
+
+    it 'invalidates a formal approval when a pending child changes, without editing the frozen proposal' do
+      pending_action = first.actions.sole
+      decision = approval
+      frozen = review.snapshot.deep_dup
+      pending_action.update!(reason: 'Changed after request')
+      expect { approval_vote(scope, reviewer, decision) }.to raise_error(JrcApprovals::Error, 'CONTEXT_STALE')
+      expect(review.reload.snapshot).to eq(frozen)
+      expect(pending_action.reload.owner_id).to eq(author.user_id)
+    end
+  end
+
   it 'does not treat manual confirmation as a formal approval' do
     policy
     expect { service.approve(review.id, digest: review.digest) }.to raise_error(ArgumentError, /Formal Central approval/)

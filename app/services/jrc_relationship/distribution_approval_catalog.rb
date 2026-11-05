@@ -56,6 +56,8 @@ class JrcRelationship::DistributionApprovalCatalog
   def self.current_source?(review, context)
     return false unless review.state.in?(%w[previewed running]) && review.expires_at > Time.current
 
+    JrcRelationship::ResponsibilityReview.new(context).verify!(review, lock: false)
+
     pending = review.items.where(state: 'pending').pluck(:assignment_id)
     plan = JrcRelationship::BatchReviewPlan.new(context)
     # Read only: approval must not acquire or mutate the executor's batch/assignment locks.
@@ -66,6 +68,8 @@ class JrcRelationship::DistributionApprovalCatalog
       captured = review.snapshot.fetch('rows').find { |item| item.fetch('assignment_id') == row.id }
       captured == plan.row_snapshot(row)
     end
+  rescue ArgumentError, Pundit::NotAuthorizedError, ActiveRecord::RecordNotFound
+    false
   end
 
   def self.verify_source!(review, actor)
@@ -73,6 +77,8 @@ class JrcRelationship::DistributionApprovalCatalog
     raise ArgumentError, 'Distribution origin changed or expired' unless data.fetch(:values).fetch(:evidence_state) == 'current'
 
     executor = context(review, review.actor)
+    JrcRelationship::ResponsibilityReview.new(executor).verify!(review, lock: false)
+    JrcRelationship::ResponsibilityReview.new(context(review, actor)).verify!(review, lock: false) if actor.id != review.actor_id
     JrcRelationship::DistributionCapacity.new(executor).verify!(review)
     JrcRelationship::DistributionCapacity.new(context(review, actor)).verify!(review) if actor.id != review.actor_id
     true

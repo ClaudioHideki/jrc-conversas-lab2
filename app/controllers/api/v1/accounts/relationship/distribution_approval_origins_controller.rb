@@ -17,6 +17,7 @@ class Api::V1::Accounts::Relationship::DistributionApprovalOriginsController < A
   def present(review, context)
     { id: review.id, digest: review.digest, expires_at: review.expires_at, state: review.state,
       justification: review.inputs['justification'], distribution: review.snapshot['distribution'] || [],
-      capacity: JrcRelationship::DistributionCapacity.new(context).for_view(review) }
+      capacity: JrcRelationship::DistributionCapacity.new(context).for_view(review),
+      responsibilities: JrcRelationship::ResponsibilityReview.new(context).for_view(review) }
   end
 end

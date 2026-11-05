@@ -176,6 +176,7 @@ class JrcRelationship::ReviewedPortfolioBatch
       'expires_at' => review.expires_at.iso8601(6), 'inputs' => review.inputs,
       'summary' => review.snapshot['summary'], 'distribution' => review.snapshot['distribution'],
       'capacity' => JrcRelationship::DistributionCapacity.new(context).for_view(review),
+      'responsibilities' => JrcRelationship::ResponsibilityReview.new(context).for_view(review),
       'approval' => JrcRelationship::DistributionApproval.new(context).projection(review),
       'items' => reviewed_items(review) }
   end

@@ -532,6 +532,41 @@
     "EXPORT": "Exportar carteira",
     "PORTFOLIO_BATCH": "Operar {count} clientes selecionados",
     "AUTOMATIC_ACTION_NOTICE": "For monitoring alerts, cooldown delays repeated tasks only when a previously closed cause has exactly the same source evidence and health measurement. Active tasks keep updating and risks remain visible. Changed evidence is evaluated normally. Existing daily deduplication is preserved. Survey rules and separately started playbooks retain their own policies.",
+    "RESPONSIBILITIES": {
+      "TITLE": "Reviewed responsibility destinations",
+      "INCLUDE": "Transfer pending CS responsibilities and their linked agenda activities",
+      "NOTICE": "Customer allocation and the listed responsibilities move together for each customer. The source and destination permissions are revalidated during execution. A denied destination preserves the original allocation. Historical records stay with their original author.",
+      "REVIEWED_DESTINATION": "Reviewed destination analyst",
+      "PREVIOUS": "Previous",
+      "NEXT": "Next",
+      "PAGE": "Page {page} of {pages}",
+      "KINDS": {
+        "actions": "Open actions",
+        "plans": "Success plans",
+        "qbrs": "Scheduled meetings and QBR",
+        "risks": "Open risks",
+        "renewals": "Renewals",
+        "expansion": "Expansion opportunities",
+        "activities": "Pending agenda activities"
+      },
+      "STATES": {
+        "ready": "Reviewed; execution will revalidate destinations",
+        "blocked": "Pending native-source review",
+        "stale": "Responsibilities changed; create a new simulation",
+        "unavailable": "Responsibility details are outside your current scope",
+        "executed": "Transferred; history preserved",
+        "failed": "Transfer failed; original allocation preserved",
+        "canceled": "Canceled without transferring these responsibilities"
+      },
+      "BLOCKERS": {
+        "active_cadence_requires_native_review": "An active cadence requires its own native review before the customer can be completely transferred.",
+        "project_responsibility_requires_native_transfer": "Linked project responsibilities require native project transfer and review first.",
+        "activity_origin_requires_native_review": "An activity does not have an exclusive portfolio origin. Review its destination in the source module.",
+        "service_ticket_requires_native_transfer": "An open Service Desk responsibility requires native assignment review first.",
+        "shared_activity_requires_native_review": "An activity is also linked to another customer. Review the shared responsibility in the source module.",
+        "responsibility_scope_denied": "Your current permissions do not allow access to these responsibility details."
+      }
+    },
     "HEALTH_EVIDENCE": {
       "SATISFACTION": "Satisfaction source evidence",
       "TREND": "Observed health trend",
