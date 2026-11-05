@@ -46,8 +46,8 @@
 - [x] Copy the targeted regression cases from the validated R2 tree, run them against unchanged LAB2 and record expected failures. 61 examples, 13 expected failures, no pending.
 - [x] Apply only the corresponding runtime deltas. Preserve all unrelated LAB2 code.
 - [x] Run targeted specs including CSAT concurrency and current native ownership/callback tests; require zero failures. 61 examples, zero failures and pending.
-- [ ] Run the newer LAB2 availability and connection request regressions.
-- [ ] Review `git diff --check` and commit the bounded port.
+- [x] Run the newer LAB2 availability and connection request regressions. 40 examples, zero failures and pending after scoping audit assertions to their inbox.
+- [x] Review `git diff --check` and commit the bounded port.
 
 ### Task 2: Ship generic availability and verifiable module artifacts
 
@@ -59,16 +59,16 @@
 - Regenerate: `config/jrc_flow_ownership_guards.json`, `deploy/jrc/MODULE-COMPOSITION-MANIFEST.json`
 - Update: `deploy/jrc/module-composition-input.json`
 - Create: `deploy/jrc/native-ura.env.example`; use the existing module composition manifest for capability provenance rather than duplicating that inventory.
-- Create: `.github/workflows/native-ura-candidate.yml`
+- Extend: existing `.github/workflows/backoffice-flow.yml` and `.github/workflows/build-ghcr.yml`; preserve their exact-SHA proof relationship instead of creating a duplicate publisher.
 - Test: existing `deploy/jrc/module-manifest.test.mjs`, `script/lab2_release_gates.test.mjs` and native configuration/policy specs.
 
 **Interfaces:** New accounts can see Broker/Flows capabilities; their integration and binding tables remain empty. Per-deployment false flags and explicit account opt-outs remain authoritative. The public Broker origin is a deployment setting; no credentials are image defaults. The common editor remains pinned to Broker source `2d30a5a544aa0eae12c208867e4912c369626787`.
 
-- [ ] Add a failing model example: a newly created account has Broker/Flows available with no integrations, native registrations or bindings.
-- [ ] Add a regression example: an explicit account opt-out persists across reload/save; retain existing account isolation and credential-negative cases.
-- [ ] Enable new-account capability defaults and supply image/deployment availability defaults, preserving explicit overrides and required encryption/origin setup.
-- [ ] Port the frozen editor and regenerate manifests from this actual LAB2 source.
-- [ ] Add a generic candidate workflow with native backend/UI/MinIO gates and a final production-image smoke. Use repository-derived immutable GHCR tags; preserve existing workflows.
+- [x] Add a failing model example: a newly created account has Broker/Flows available with no integrations, native registrations or bindings.
+- [x] Add a regression example: an explicit account opt-out persists across reload/save; retain existing account isolation and credential-negative cases.
+- [x] Enable new-account capability defaults and supply image/deployment availability defaults, preserving explicit overrides and required encryption/origin setup.
+- [x] Port the frozen editor and regenerate manifests from this actual LAB2 source.
+- [x] Extend the generic candidate workflow with native backend/UI/MinIO gates and a final production-image smoke. Use repository-derived immutable GHCR tags; preserve existing workflows.
 - [ ] Run manifest/node checks, targeted Rails tests and UI/availability regressions. Commit only after checks pass.
 
 ### Task 3: Publish standard candidate and install in authorized LAB
