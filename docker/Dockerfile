@@ -1,6 +1,6 @@
 # pre-build stage
 FROM mirror.gcr.io/library/node:24.13.0-alpine@sha256:26eb49fbfdf03bf69f728b73178fa6f9e7c2cef88b06561b65497f5ae8e50a3d AS node
-FROM mirror.gcr.io/library/ruby:3.4.4-alpine3.21@sha256:bf74912af8989a3ca3f353123b5db2424cd77af809cc500c2e0d93aec602c77f AS pre-builder
+FROM docker.io/library/ruby:3.4.4-alpine3.21@sha256:bf74912af8989a3ca3f353123b5db2424cd77af809cc500c2e0d93aec602c77f AS pre-builder
 
 ARG NODE_VERSION="24.13.0"
 ARG PNPM_VERSION="10.2.0"
@@ -104,12 +104,12 @@ RUN rm -rf /gems/ruby/3.4.0/cache/*.gem \
   && rm .gitignore
 
 # final build stage
-FROM mirror.gcr.io/library/ruby:3.4.4-alpine3.21@sha256:bf74912af8989a3ca3f353123b5db2424cd77af809cc500c2e0d93aec602c77f
+FROM docker.io/library/ruby:3.4.4-alpine3.21@sha256:bf74912af8989a3ca3f353123b5db2424cd77af809cc500c2e0d93aec602c77f
 
 ARG GIT_SHA
 LABEL org.opencontainers.image.revision=$GIT_SHA \
-      org.opencontainers.image.title="JRC Conversas - candidato Cadastro Mestre" \
-      org.opencontainers.image.description="Cadastro Mestre integrado; jrc_customer_master desligada por padrao"
+      org.opencontainers.image.title="JRC Conversas Grupo JRC" \
+      org.opencontainers.image.description="Imagem padrao LAB2 com Broker e Flow nativo configuraveis por empresa"
 
 ARG NODE_VERSION="24.13.0"
 ARG PNPM_VERSION="10.2.0"

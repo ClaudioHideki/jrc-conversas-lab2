@@ -17,7 +17,7 @@ RSpec.describe JrcBroker::RoutingContext do
   around do |example|
     database = ActiveRecord::Base.connection_db_config.database
     disposable = Rails.env.test? && ENV['JRC_SD_CONCURRENCY'] == '1' &&
-                 ENV['POSTGRES_DATABASE'] == 'jrc_sd_bc_portal_concurrency_20261025_test' &&
+                 %w[jrc_sd_bc_portal_concurrency_20261025_test jrc_durable_review_test].include?(ENV['POSTGRES_DATABASE']) &&
                  database == ENV['POSTGRES_DATABASE'] && ActiveRecord::Base.connection.adapter_name == 'PostgreSQL'
     raise 'Explicitly named disposable PostgreSQL CI database required' unless disposable
 

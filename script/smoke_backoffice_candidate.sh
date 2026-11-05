@@ -66,11 +66,13 @@ runtime_env=(--network "$network" --label "$label" --mount "type=volume,source=$
   -e POSTGRES_DATABASE=backoffice_candidate_smoke_test -e REDIS_URL="redis://$redis:6379/15"
   -e SECRET_KEY_BASE=isolated-candidate-smoke-not-production -e CANDIDATE_SHA="$SOURCE_SHA"
   -e LOG_LEVEL=error -e RAILS_LOG_TO_STDOUT=true -e ACTIVE_STORAGE_SERVICE=local
-  -e SIDEKIQ_CONCURRENCY=1 -e DB_POOL_SIZE=10)
+  -e SIDEKIQ_CONCURRENCY=1 -e DB_POOL_SIZE=10
+  -e APP_TIME_ZONE=America/Sao_Paulo -e TZ=UTC
+  -e URA_HML_TIMEZONE_REDIS_URL="redis://$redis:6379/15")
 docker run -d --name "$rails" "${runtime_env[@]}" --entrypoint bundle \
   "$candidate" exec rails server -b 0.0.0.0 -p 3000
 docker run -d --name "$sidekiq" "${runtime_env[@]}" --entrypoint bundle \
-  "$candidate" exec sidekiq -C config/sidekiq.yml -q low
+  "$candidate" exec sidekiq -C config/sidekiq.yml -r ./script/ura_hml_timezone.rb -q low -q ura_hml_timezone_probe
 test "$(docker inspect --format '{{.Image}}' "$rails")" = "$(docker inspect --format '{{.Image}}' "$sidekiq")"
 ready=false
 for attempt in {1..45}; do
@@ -85,6 +87,7 @@ for attempt in {1..45}; do
   sleep 1
 done
 test "$ready" = true
+docker exec "$rails" bundle exec rails runner script/ura_hml_timezone_check.rb
 docker run --rm "${runtime_env[@]}" \
   --mount "type=bind,source=$PWD/script/smoke_backoffice_candidate.rb,target=/candidate-smoke.rb,readonly" \
   --mount "type=bind,source=$PWD/test/fixtures/jrc_backoffice/cnpj_synthetic.png,target=/candidate-fixture.png,readonly" \

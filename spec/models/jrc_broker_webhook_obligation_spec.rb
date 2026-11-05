@@ -10,6 +10,62 @@ RSpec.describe 'Durable Broker message obligation', type: :model do
   end
   let(:message) { build(:message, account: account, inbox: inbox, message_type: :outgoing) }
 
+  it 'captures one durable native CSAT obligation and suppresses the duplicate listener delivery' do
+    inbox.update!(csat_survey_enabled: true, csat_config: { 'message' => 'Synthetic CSAT' })
+    conversation = create(:conversation, account: account, inbox: inbox, status: :resolved)
+    with_modified_env(FRONTEND_URL: 'https://hml.example.test') do
+      2.times { CsatSurveyService.new(conversation: conversation).perform }
+    end
+    survey = conversation.messages.find_by!(content_type: :input_csat)
+    obligation = JrcBrokerWebhookObligation.find_by(message_id: survey.id)
+    expect(obligation).to be_present
+    expect(JrcBrokerWebhookObligation.where(message_id: survey.id).count).to eq(1)
+    expect(obligation.payload).to include(
+      'event' => 'message_created', 'id' => survey.id, 'message_type' => 'template', 'content_type' => 'input_csat',
+      'private' => false, 'sender' => nil,
+      'content' => "Synthetic CSAT https://hml.example.test/survey/responses/#{conversation.uuid}"
+    )
+    expect(obligation.payload.dig('account', 'id')).to eq(account.id)
+    expect(obligation.payload.dig('inbox', 'id')).to eq(inbox.id)
+    expect(obligation.payload.dig('conversation', 'id')).to eq(conversation.display_id)
+    event = Events::Base.new('message.created', Time.current, message: survey)
+    expect { WebhookListener.instance.message_created(event) }.not_to have_enqueued_job(WebhookJob)
+  end
+
+  it 'does not capture other templates, bot-authored CSAT templates or private CSAT notes' do
+    bot = create(:agent_bot, account: account)
+    conversation = create(:conversation, account: account, inbox: inbox)
+    excluded = [
+      Message.create!(account: account, inbox: inbox, conversation: conversation, message_type: :template, content_type: :text),
+      Message.create!(account: account, inbox: inbox, conversation: conversation,
+                      message_type: :template, content_type: :input_csat, sender: bot),
+      Message.create!(account: account, inbox: inbox, conversation: conversation,
+                      message_type: :template, content_type: :input_csat, private: true)
+    ]
+
+    expect(JrcBrokerWebhookObligation.where(message_id: excluded.map(&:id))).to be_empty
+  end
+
+  it 'retries native CSAT after a lost ACK with the same delivery identity' do
+    survey = MessageTemplates::Template::CsatSurvey.new(conversation: message.conversation).perform
+    obligation = JrcBrokerWebhookObligation.find_by(message_id: survey.id)
+    expect(obligation).to be_present
+    identities = []
+    allow(SafeFetch).to receive(:fetch) do |_url, **options|
+      identities << options.fetch(:headers).fetch('X-Chatwoot-Delivery')
+      raise Errno::ECONNRESET if identities.one?
+    end
+
+    JrcBroker::WebhookObligationJob.perform_now(obligation.id)
+    expect(obligation.reload.state).to eq('pending')
+    travel 20.minutes do
+      2.times { JrcBroker::WebhookObligationJob.perform_now(obligation.id) }
+    end
+    expect(obligation.reload.state).to eq('delivered')
+    expect(identities).to eq([obligation.delivery_id, obligation.delivery_id])
+    expect(survey.reload).to be_template
+  end
+
   it 'keeps the message and its obligation when dispatch after COMMIT fails' do
     allow(message).to receive(:dispatch_create_events).and_raise('synthetic process boundary')
     expect { message.save! }.to raise_error('synthetic process boundary')
@@ -134,6 +190,7 @@ RSpec.describe 'Durable Broker message obligation', type: :model do
     expect(obligation.reload.state).to eq('failed')
     expect(message.reload.status).to eq('delivered')
   end
+
   it 'keeps a campaign callback identity instead of allocating a second identity' do
     callback_id = SecureRandom.uuid
     message.additional_attributes = { 'jrc_campaign_broker' => true, 'jrc_campaign_webhook_delivery_id' => callback_id }
@@ -193,8 +250,10 @@ RSpec.describe 'Durable Broker message obligation', type: :model do
   it 'keeps a real survey wrapper timeout uncertain and never retries its external effect' do
     message.save!
     assignment = JrcRelationship::Assignment.create!(account: account, contact: message.conversation.contact, status: 'active')
-    survey = JrcRelationship::Survey.create!(account: account, assignment: assignment, kind: 'csat', token_digest: SecureRandom.hex(32),
-                                              expires_at: 1.day.from_now, status: 'queued', metadata: { 'sent_message_id' => message.id })
+    survey = JrcRelationship::Survey.create!(
+      account: account, assignment: assignment, kind: 'csat', token_digest: SecureRandom.hex(32),
+      expires_at: 1.day.from_now, status: 'queued', metadata: { 'sent_message_id' => message.id }
+    )
     # Eligibility is isolated; wrapper perform/rescue and its UNKNOWN persistence remain real.
     message.update!(content_attributes: { 'relationship_survey_id' => survey.id, 'relationship_survey_link' => 'https://example.test/synthetic' },
                     additional_attributes: { 'template_params' => { 'name' => 'synthetic_template' } })
@@ -213,5 +272,4 @@ RSpec.describe 'Durable Broker message obligation', type: :model do
     end
     expect(survey.reload.status).to eq('unknown')
   end
-
 end
