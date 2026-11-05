@@ -76,6 +76,36 @@ it('saves exact permitted cents with a mandatory reason, pinned version and no i
   expect(wrapper.text()).not.toContain('private_review');
   wrapper.unmount();
 });
+it('blocks amounts above the real native discount base, then accepts a corrected amount without emitting a false save', async () => {
+  const wrapper = mount(
+    Component,
+    options({
+      request: {
+        ...record,
+        adjustment: { ...record.adjustment, maximum_discount_cents: 800 },
+      },
+    })
+  );
+  await wrapper.find('input').setValue('9.00');
+  await wrapper
+    .find('textarea')
+    .setValue('Synthetic explicit corrected amount');
+  expect(wrapper.find('[data-testid="adjustment-over-maximum"]').exists()).toBe(
+    true
+  );
+  expect(wrapper.get('[data-confirm]').attributes('disabled')).toBeDefined();
+  await wrapper.get('[data-confirm]').trigger('click');
+  expect(wrapper.emitted('confirm')).toBeUndefined();
+  await wrapper.find('input').setValue('1.00');
+  expect(wrapper.find('[data-testid="adjustment-over-maximum"]').exists()).toBe(
+    false
+  );
+  await wrapper.get('[data-confirm]').trigger('click');
+  expect(wrapper.emitted('confirm')[0][0].changes).toEqual({
+    discount_cents: 100,
+  });
+  wrapper.unmount();
+});
 it('only sends a current native approval choice for atomic save and approve', async () => {
   const wrapper = mount(Component, options({ request: record }));
   await wrapper.find('input').setValue('2.00');

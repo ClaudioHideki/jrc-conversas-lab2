@@ -24,6 +24,9 @@ const expectedVersion = props.request.lock_version;
 const choices = computed(() =>
   decisionChoices(props.request).filter(row => row.decision === 'approved')
 );
+const maximumDiscount = computed(
+  () => props.request.adjustment.maximum_discount_cents ?? null
+);
 const parsed = computed(() => {
   try {
     return moneyCents(amount.value.replace(',', '.'));
@@ -39,6 +42,7 @@ const ready = computed(
     reason.value.length <= 4096 &&
     parsed.value !== null &&
     parsed.value >= 0 &&
+    (maximumDiscount.value === null || parsed.value <= maximumDiscount.value) &&
     parsed.value !== props.request.adjustment.values.discount_cents &&
     props.request.id === requestId &&
     props.request.lock_version === expectedVersion &&
@@ -112,6 +116,17 @@ onMounted(() => dialog.value.open());
             {{ request.adjustment.currency }}
           </p>
           <p
+            v-if="maximumDiscount !== null"
+            class="text-sm"
+          >
+            {{
+              t('JRC_APPROVALS.adjustment.maximum', {
+                value: minorAmountText(maximumDiscount),
+                currency: request.adjustment.currency,
+              })
+            }}
+          </p>
+          <p
             v-if="parsed !== null && parsed >= 0"
             class="break-words rounded-lg bg-n-teal-3 p-3 text-sm text-n-teal-11"
           >
@@ -139,6 +154,14 @@ onMounted(() => dialog.value.open());
               class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 p-3"
             />
           </label>
+          <p
+            v-if="maximumDiscount !== null && parsed > maximumDiscount"
+            data-testid="adjustment-over-maximum"
+            role="alert"
+            class="text-sm text-n-ruby-11"
+          >
+            {{ t('JRC_APPROVALS.adjustment.overMaximum') }}
+          </p>
           <p
             v-if="parsed === null"
             role="alert"

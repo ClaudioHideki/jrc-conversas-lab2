@@ -1,0 +1,69 @@
+{
+  "date": "2026-11-05",
+  "parent_head": "fd57f91b818e13206fcadcfa2f3d710d72015a27",
+  "status": "D native monetary adjustment now rejects a receipt different from the effective applied discount; D/C-G remain open.",
+  "implementation": [
+    "Existing native ProposalMutation and its authorization, recalculation, invalidation and immutable RequestRevision paths remain unchanged.",
+    "After native mutation, the adjustment transaction checks actual financial_summary discount against requested cents. Native capping now causes INVALID_COMMERCIAL_TERMS and rolls back source, invalidations, revisions and audits.",
+    "Authorized options expose the native products_cents discount base; the popup displays the base and blocks excessive input, while the server remains authoritative.",
+    "Valid retry after a rejected HTTP request persists normally; original snapshots and commercial terms are retained."
+  ],
+  "files": [
+    "app/javascript/dashboard/i18n/locale/en/jrcApprovals.json",
+    "app/javascript/dashboard/routes/dashboard/approvals/AdjustmentDialog.vue",
+    "app/javascript/dashboard/routes/dashboard/approvals/specs/adjustments.spec.js",
+    "app/services/jrc_approvals/adjustments.rb",
+    "spec/requests/api/v1/accounts/jrc_approvals/adjustments_spec.rb"
+  ],
+  "tests_non_additive": [
+    {
+      "label": "adjustment-effective-repro",
+      "examples": 0,
+      "note": "Text filter selected no cases; not validation."
+    },
+    {
+      "label": "adjustment-effective-repro-cases",
+      "examples": 3,
+      "failures": 3,
+      "note": "One genuine failure: excessive discount silently accepted. Two exploratory fixtures wrongly assumed Proposal had the shared calculator snapshot/percentage field; actual model has no such field. Hypothesis discarded; no percentage field or operational branch added."
+    },
+    {
+      "label": "adjustment-effective-final",
+      "examples": 13,
+      "failures": 0
+    },
+    {
+      "label": "adjustment-effective-options",
+      "examples": 1,
+      "failures": 0,
+      "note": "Overlapping directed case also validates native800-cent UI base."
+    },
+    {
+      "label": "adjustment-effective-ui",
+      "tests": 10,
+      "failures": 0
+    }
+  ],
+  "static_gates": {
+    "ruby_offenses": 0,
+    "eslint": [
+      {
+        "file": "AdjustmentDialog.vue",
+        "errors": 0,
+        "warnings": 7
+      },
+      {
+        "file": "adjustments.spec.js",
+        "errors": 0,
+        "warnings": 2
+      }
+    ]
+  },
+  "limitations": [
+    "Only installed proposal general-cent discount adjustment is supported; no invented percentage field or arbitrary domain mutation.",
+    "Other domain adapters and fresh-build Chrome acceptance remain pending."
+  ],
+  "disk_final_bytes": 7411101696,
+  "next": "F2 read-only draft health-configuration simulation using native source scopes and calculators, preserving native precedence and writing no actions/snapshots/configurations.",
+  "restrictions": "No build,cleanup,push,GHCR,deploy,5379 change,container restart or external operation."
+}

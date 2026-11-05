@@ -14,8 +14,9 @@ class JrcApprovals::Adjustments
     authorize!(record, resource)
     return unless current_choices(record).any? && !resource.locked_for_editing?
 
-    { values: resource.attributes.slice(*FIELDS), currency: record.snapshot.dig('values', 'currency') }
-  rescue Pundit::NotAuthorizedError, ActiveRecord::RecordNotFound, JrcApprovals::Error
+    { values: resource.attributes.slice(*FIELDS), currency: record.snapshot.dig('values', 'currency'),
+      maximum_discount_cents: resource.financial_summary.fetch(:products_cents) }
+  rescue Pundit::NotAuthorizedError, ActiveRecord::RecordNotFound, JrcApprovals::Error, JrcCrm::CommercialFinancials::InvalidTerms
     nil
   end
 
@@ -44,6 +45,10 @@ class JrcApprovals::Adjustments
     raise JrcApprovals::Error, 'NO_ADJUSTMENT_CHANGE' if before == intent.changes
 
     JrcCrm::ProposalMutation.call!(proposal: resource, actor: @user, attributes: intent.changes)
+    unless resource.financial_summary.fetch(:discount_cents) == intent.changes.fetch('discount_cents')
+      raise JrcApprovals::Error, 'INVALID_COMMERCIAL_TERMS'
+    end
+
     revised = revise!(original, resource, actor, intent.digest(original.id))
     approve!(revised, intent, intent.digest(original.id)) if intent.mode == 'approve'
     audit!(original, revised, actor, before, intent)
@@ -61,8 +66,8 @@ class JrcApprovals::Adjustments
     JrcApprovals::Ledger.audit!(account: @account, actor: actor, event: 'request_adjusted',
                                 key: "adjustment:#{actor.id}:#{intent.idempotency_key}",
                                 data: { input_digest: intent.digest(original.id), original_request_id: original.id, revised_request_id: revised.id,
-              before: before, after: intent.changes, reason: intent.reason, mode: intent.mode,
-              currency: original.snapshot.dig('values', 'currency') },
+                                        before: before, after: intent.changes, reason: intent.reason, mode: intent.mode,
+                                        currency: original.snapshot.dig('values', 'currency') },
                                 request_id: original.id, policy_version_id: original.policy_version_id)
   end
 

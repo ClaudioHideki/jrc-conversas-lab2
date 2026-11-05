@@ -3,9 +3,9 @@
   "user_request": "499267ac-546d-4853-b4cf-7f03a2ea0629",
   "initial_head": "be54d0f7b4ce8d4e2a077cf2bdd8c2a4d5c88f5e",
   "branch": "codex/relacionamento-v2-20261101",
-  "last_validated_checkpoint": "d623600dc6ae5b8d9f60d7f81a44d079f47f7360",
+  "last_validated_checkpoint": "fd57f91b818e13206fcadcfa2f3d710d72015a27",
   "completed_current_work": "Native version-bound evidence/CS gates plus real immutable sealed dossier; see sealed_dossier_checkpoint_20261105.json. Full stages not closed.",
-  "active_work": "D: prevent monetary adjustment from being ignored by an existing percentage-based proposal valuation, using native mutation and immutable revision paths.",
+  "active_work": "F2 read-only draft health-configuration simulation using native source scopes and calculators, preserving native precedence and writing no actions/snapshots/configurations.",
   "exact_next_actions": [
     "Finish safe analyst withdrawal via native scope/readiness and immutable reviewed responsibility receipts, including project owner/cadence dependencies.",
     "Continue F2 and C/D/G functional and Word/scale gaps without reducing requirements.",
@@ -47,10 +47,10 @@
     "No real participant removal or provider request; tests use synthetic records and WebMock, with external network disabled."
   ],
   "restrictions": "No build/recompile, no5379 change/restart, no four-container restart/reconfiguration, no cleanup/delete of existing data, no push/GHCR/deploy/production/client change, no real provider operations. Additive migrations allowed only in owned synthetic test database.",
-  "disk_last_observed_bytes": 7401492480,
+  "disk_last_observed_bytes": 7411097600,
   "TRR": "Undefined; do not invent",
   "company_documents_without_portfolio": "Explicitly deferred",
-  "last_validated_head": "d623600dc6ae5b8d9f60d7f81a44d079f47f7360",
+  "last_validated_head": "fd57f91b818e13206fcadcfa2f3d710d72015a27",
   "new_validated_code_checkpoint": "Resolve latest local CS code checkpoint with git log -1 --format=%H -- docs/jrc_consolidation/cs_signature_origin_checkpoint_20261105.json",
   "current_status": "Explicit weighted/hour capacity source and directed tests validated; continuing F1 readiness, not full C-G closure.",
   "next_actions": [
@@ -64,5 +64,6 @@
   "scale_report": "docs/jrc_consolidation/withdrawal_scale_checkpoint_20261105.json",
   "plan_commitment_report": "docs/jrc_consolidation/plan_commitment_transfer_checkpoint_20261105.json",
   "priority_critical_report": "docs/jrc_consolidation/priority_critical_checkpoint_20261105.json",
-  "routing_availability_report": "docs/jrc_consolidation/routing_availability_checkpoint_20261105.json"
+  "routing_availability_report": "docs/jrc_consolidation/routing_availability_checkpoint_20261105.json",
+  "adjustment_effective_report": "docs/jrc_consolidation/adjustment_effective_value_checkpoint_20261105.json"
 }

@@ -328,7 +328,9 @@
       "approve": "Save adjustment and approve",
       "saved": "Adjustment saved. The new value follows its recalculated approval authority.",
       "summary": "General discount adjustment",
-      "values": "{before} → {after} {currency}"
+      "values": "{before} → {after} {currency}",
+      "maximum": "Native discount base: {value} {currency}. The saved amount must match the discount actually applied.",
+      "overMaximum": "The discount exceeds the native base. Review the amount; no adjustment was saved."
     },
     "own-delegations": "My delegations",
     "ownDelegations": "My delegations",

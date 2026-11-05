@@ -61,6 +61,44 @@ RSpec.describe 'Atomic native proposal adjustments', :approval_core, :commercial
     expect(JrcApprovals::RequestVerification.approved?(revised, revised.policy_version, revised.snapshot)).to be(true)
   end
 
+  it 'persists the exact applied amount without changing native commercial terms or old approval snapshots' do
+    proposal.update!(commercial_notes: 'Synthetic retained native term')
+    terms = proposal.attributes.slice('commercial_notes', 'term_months', 'renewal_type')
+    original = record.attributes.slice('snapshot', 'stage_plan', 'fingerprint', 'requester_id', 'policy_version_id')
+    expect(service.options(record)).to include(maximum_discount_cents: 800)
+    revised = service.call(**values)
+    expect(proposal.reload.financial_summary).to include(discount_cents: 100, total_cents: 700)
+    expect(proposal.attributes.slice(*terms.keys)).to eq(terms)
+    expect(record.reload.attributes.slice(*original.keys)).to eq(original)
+    expect(revised.snapshot.dig('values', 'total_cents')).to eq(700)
+    audit = JrcApprovals::AuditEvent.find_by!(request_id: record.id, event_type: 'request_adjusted')
+    expect(audit.data.fetch('before')).to eq('discount_cents' => 300)
+  end
+
+  it 'rejects a requested amount that native valuation would cap, without saving a false adjustment receipt' do
+    input = values.merge(changes: { 'discount_cents' => 900 })
+    before = [proposal.reload.attributes, record.reload.attributes, JrcApprovals::Request.count, JrcApprovals::AuditEvent.count,
+              proposal.events.count]
+    expect { service.call(**input) }.to raise_error(JrcApprovals::Error, 'INVALID_COMMERCIAL_TERMS')
+    expect([proposal.reload.attributes, record.reload.attributes, JrcApprovals::Request.count,
+            JrcApprovals::AuditEvent.count, proposal.events.count]).to eq(before)
+  end
+
+  it 'reports native valuation mismatch as an HTTP error and permits a valid retry without a false success receipt' do
+    payload = values.except(:request_id).merge(changes: { discount_cents: 900 })
+    before = [proposal.reload.attributes, record.reload.attributes]
+    post "/api/v1/accounts/#{scope[:account].id}/approvals/requests/#{record.id}/adjust",
+         params: { adjustment: payload }, headers: manager.user.create_new_auth_token, as: :json
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response.parsed_body).to eq('error' => 'INVALID_COMMERCIAL_TERMS')
+    expect([proposal.reload.attributes, record.reload.attributes]).to eq(before)
+    post "/api/v1/accounts/#{scope[:account].id}/approvals/requests/#{record.id}/adjust",
+         params: { adjustment: payload.merge(changes: { discount_cents: 100 }) }, headers: manager.user.create_new_auth_token, as: :json
+    expect(response).to have_http_status(:ok), response.body
+    expect(response.parsed_body.fetch('saved')).to be(true)
+    expect(proposal.reload.financial_summary.fetch(:discount_cents)).to eq(100)
+  end
+
   it 'rolls back the source, invalidations, revisions, audit and votes when the new tier needs another principal' do
     initial = values.merge(mode: 'approve', step_code: 'review', changes: { 'discount_cents' => 0 })
     before = [proposal.reload.attributes, record.reload.attributes, JrcApprovals::Request.count,
