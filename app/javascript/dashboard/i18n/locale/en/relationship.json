@@ -69,7 +69,8 @@
         "AUTHORITY_REVOKED": "O operador perdeu a autorização.",
         "CONDITIONS_CHANGED": "O cliente não atende mais às condições do playbook.",
         "CUSTOMER_CHANGED": "O cadastro ou o responsável pelo cliente mudou; revise antes de inscrever novamente."
-      }
+      },
+      "BUDGET_DEFERRED": "A última tentativa foi adiada pelo orçamento diário até {date}. O passo continua pendente, sem recibo de execução. Mudanças de acesso, cliente ou resposta continuam sendo verificadas antes de executar."
     },
     "TITLE": "Relacionamento",
     "SUBTITLE": "Customer Success, saúde, renovação e retenção",
@@ -428,7 +429,7 @@
       "satisfaction_window_days": "Satisfaction evidence window (days)",
       "health_trend_window_days": "Health trend window (days)",
       "automatic_action_cooldown_hours": "Monitoring alert repeat cooldown (hours; 0 disables)",
-      "automatic_action_daily_limit": "Account-wide daily ceiling for monitoring actions (0 disables; uses the account time zone)"
+      "automatic_action_daily_limit": "Daily ceiling for monitoring and reviewed cadence Action steps (0 disables; account time zone)"
     },
     "ACCOUNT_SCOPE": "Toda a conta",
     "CONFIG_SCOPE": "Configuração por conta, segmento ou produto",
@@ -534,7 +535,7 @@
     "APPLY_PLAYBOOK": "Aplicar playbook",
     "EXPORT": "Exportar carteira",
     "PORTFOLIO_BATCH": "Operar {count} clientes selecionados",
-    "AUTOMATIC_ACTION_NOTICE": "For monitoring alerts, cooldown delays repeated tasks only when a previously closed cause has exactly the same source evidence and health measurement. Active tasks keep updating and risks remain visible. Changed evidence is evaluated normally. Existing daily deduplication is preserved. Survey rules and separately started playbooks retain their own policies.",
+    "AUTOMATIC_ACTION_NOTICE": "For monitoring alerts, cooldown delays repeated tasks only when a previously closed cause has exactly the same source evidence and health measurement. Active tasks keep updating and risks remain visible. Changed evidence is evaluated normally. Existing daily deduplication is preserved. Survey rules and separately started playbooks retain their own policies. Steps labeled Action in reviewed cadences share the daily ceiling and stay pending when exhausted. Meetings, Agenda activities, risk cases and success plans retain their separate workflows.",
     "RESPONSIBILITIES": {
       "TITLE": "Reviewed responsibility destinations",
       "INCLUDE": "Transfer pending CS responsibilities and their linked agenda activities",

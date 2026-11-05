@@ -48,8 +48,12 @@ async function request(action = 'read') {
     uncertain.value = false;
     clearInterval(timer);
     if (data.state === 'active') timer = setInterval(() => request(), 2000);
-  } catch {
+  } catch (failure) {
     if (version === epoch) {
+      if ([403, 404].includes(failure.response?.status)) {
+        record.value = null;
+        clearInterval(timer);
+      }
       error.value = true;
       uncertain.value = action !== 'read' || uncertain.value;
     }
@@ -101,6 +105,16 @@ onBeforeUnmount(() => {
         }}
       </p>
       <p>{{ t(`RELATIONSHIP.CADENCE.STATES.${record.state}`) }}</p>
+      <p
+        v-if="record.retry_at"
+        data-testid="cadence-budget-deferred"
+        role="status"
+        class="rounded-lg bg-n-amber-3 p-3 text-sm text-n-amber-11"
+      >
+        {{
+          t('RELATIONSHIP.CADENCE.BUDGET_DEFERRED', { date: record.retry_at })
+        }}
+      </p>
       <p v-if="record.stop_reason">
         {{ t(`RELATIONSHIP.CADENCE.REASONS.${record.stop_reason}`) }}
       </p>
@@ -142,6 +156,7 @@ onBeforeUnmount(() => {
       type="button"
       :class="buttonClass"
       :disabled="busy"
+      data-test="cadence-refresh"
       @click="request()"
     >
       {{ t('RELATIONSHIP.CADENCE.REFRESH') }}

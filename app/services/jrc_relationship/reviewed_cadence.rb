@@ -115,10 +115,14 @@ class JrcRelationship::ReviewedCadence
     step = record.steps.where(state: 'pending').order(:due_at, :ordinal).lock.first
     return unless step && step.due_at <= Time.current
 
-    receipt = JrcRelationship::Playbooks.new(context).apply_scheduled_step!(
-      assignment: context.assignment(record.assignment_id, write: true), step: step.definition,
-      key: "cadence:#{record.id}:#{step.ordinal}", starts_at: record.starts_at
-    )
+    receipt = JrcRelationship::CadenceActionBudget.new(context, record, step).call do
+      JrcRelationship::Playbooks.new(context).apply_scheduled_step!(
+        assignment: context.assignment(record.assignment_id, write: true), step: step.definition,
+        key: "cadence:#{record.id}:#{step.ordinal}", starts_at: record.starts_at
+      )
+    end
+    return unless receipt
+
     step.update!(state: 'applied', receipt: receipt)
     record.update!(state: record.steps.exists?(state: 'pending') ? 'active' : 'completed', revision: record.revision + 1)
   end
@@ -131,6 +135,7 @@ class JrcRelationship::ReviewedCadence
   def project(record)
     { 'id' => record.id, 'state' => record.state, 'revision' => record.revision, 'stop_reason' => record.stop_reason,
       'assignment_id' => record.assignment_id, 'conversation_id' => record.conversation_id,
+      'retry_at' => JrcRelationship::CadenceActionBudget.retry_at(record),
       'book_name' => record.snapshot.dig('book', 'name'), 'book_version' => record.snapshot.dig('book', 'version'),
       'steps' => record.steps.order(:ordinal).map do |step|
         { 'ordinal' => step.ordinal, 'title' => step.definition.fetch('title'), 'due_at' => step.due_at.iso8601(6),

@@ -1,12 +1,15 @@
-# An optional account-wide daily ceiling for monitoring-created CS actions.
+# An optional account-wide ceiling for monitoring and governed cadence actions.
 # Existing actions and risk evidence remain visible and continue to be updated.
 class JrcRelationship::AutomaticActionBudget
+  attr_reader :next_allowed_at
+
   def initialize(context:, assignment:)
     @context = context
     @assignment = assignment
   end
 
   def call
+    @next_allowed_at = nil
     @context = JrcRelationship::Context.new(@context.member)
     raise Pundit::NotAuthorizedError unless @context.user.active_for_authentication?
 
@@ -18,6 +21,7 @@ class JrcRelationship::AutomaticActionBudget
 
       day = account_day
       if automatic_actions.where(created_at: day...day.advance(days: 1)).limit(limit).count >= limit
+        @next_allowed_at = day.advance(days: 1)
         audit_suppression!(configuration, day)
         next nil
       end

@@ -23,7 +23,7 @@ class JrcRelationship::Playbooks
       raise ArgumentError, 'Cadence requires a finite native step; public Flow needs separate approval'
     end
 
-    native_step!(assignment, step, key, { trigger: 'cadence', start: starts_at })
+    native_step!(assignment, step, key, { trigger: 'cadence', start: starts_at, automatic: true })
     record = native_result(assignment, step, key)
     raise Pundit::NotAuthorizedError unless record
 
@@ -130,6 +130,7 @@ class JrcRelationship::Playbooks
 
     record.assign_attributes(account: @context.account, owner: assignment.owner, reason: step['title'], kind: execution_context[:trigger],
                              due_at: execution_context[:start] + step['after_days'].to_i.days)
+    record.metadata = record.metadata.merge('automatic' => true) if execution_context[:automatic]
     JrcRelationship::OperationalRouting.new(@context).prepare!(record)
     record.save!
     JrcRelationship::Workflow.new(@context).project_action!(record)

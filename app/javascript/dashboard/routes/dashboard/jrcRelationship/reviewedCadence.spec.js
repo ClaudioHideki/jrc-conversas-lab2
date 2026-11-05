@@ -12,6 +12,36 @@ afterEach(() => {
   wrapper?.unmount();
   vi.clearAllMocks();
 });
+it('displays persisted budget deferral as pending and does not advance automatically or invent a receipt', async () => {
+  const record = {
+    id: 18,
+    revision: 2,
+    state: 'active',
+    book_name: 'Native budget-governed book',
+    book_version: 1,
+    retry_at: '2026-11-06T03:00:00.000000Z',
+    steps: [
+      {
+        ordinal: 1,
+        title: 'Pending native work',
+        state: 'pending',
+        receipt: null,
+      },
+    ],
+  };
+  api.cadence.mockResolvedValue({ data: record });
+  wrapper = mount(ReviewedCadencePanel, {
+    props: { accountId: '7', cadenceId: 18 },
+  });
+  await flushPromises();
+  expect(
+    wrapper.get('[data-testid="cadence-budget-deferred"]').attributes('role')
+  ).toBe('status');
+  expect(wrapper.text()).toContain('2026-11-06T03:00:00.000000Z');
+  expect(wrapper.text()).toContain('Pending native work');
+  expect(api.advanceCadence).not.toHaveBeenCalled();
+  expect(api.cancelCadence).not.toHaveBeenCalled();
+});
 it('only reads the approved enrollment until explicit advance or cancellation', async () => {
   const record = {
     id: 18,
@@ -47,6 +77,31 @@ it('only reads the approved enrollment until explicit advance or cancellation', 
   await flushPromises();
   expect(api.cancelCadence).toHaveBeenCalledWith('7', 18, expect.any(Object));
   expect(wrapper.find('[data-test="cadence-cancel"]').exists()).toBe(false);
+});
+it('clears the frozen book and deferral details after native access is denied', async () => {
+  api.cadence.mockResolvedValueOnce({
+    data: {
+      id: 18,
+      revision: 2,
+      state: 'active',
+      book_name: 'Synthetic restricted book',
+      retry_at: '2026-11-06T03:00:00Z',
+      steps: [],
+    },
+  });
+  wrapper = mount(ReviewedCadencePanel, {
+    props: { accountId: '7', cadenceId: 18 },
+  });
+  await flushPromises();
+  expect(wrapper.text()).toContain('Synthetic restricted book');
+  api.cadence.mockRejectedValueOnce({ response: { status: 403 } });
+  await wrapper.get('[data-test="cadence-refresh"]').trigger('click');
+  await flushPromises();
+  expect(wrapper.text()).not.toContain('Synthetic restricted book');
+  expect(wrapper.find('[data-testid="cadence-budget-deferred"]').exists()).toBe(
+    false
+  );
+  expect(api.advanceCadence).not.toHaveBeenCalled();
 });
 it('discards an old company response and aborts its request', async () => {
   let resolve;
