@@ -5,6 +5,12 @@ RSpec.describe RelocateJrcBrokerFeatureFlag, type: :model do
   let(:migration) { described_class.new }
 
   it 'preserves every combination of prior flags and round-trips the Broker entitlement' do
+    # Other examples may commit current-schema accounts. Model a historical
+    # database with an unoccupied destination bit inside this test transaction.
+    # Keep the migration's collision guard intact for real upgrades.
+    Account.where('(feature_flags_ext_1 & 1024) <> 0')
+           .update_all('feature_flags_ext_1 = feature_flags_ext_1 & ~1024::bigint')
+
     # All lower bits, Flows, and a high unrelated bit, with Broker both on and off.
     accounts = (0...1024).map do |flags|
       account = create(:account)
@@ -41,11 +47,11 @@ RSpec.describe RelocateJrcBrokerFeatureFlag, type: :model do
     expect(account.reload.feature_flags_ext_1).to eq(2047)
   end
 
-  it 'keeps the consolidated feature positions and disabled defaults' do
+  it 'keeps the consolidated feature positions and standard module availability defaults' do
     flags = Featurable::FEATURES_BY_COLUMN.fetch('feature_flags_ext_1')
     expect(flags.slice(9, 10, 11)).to eq(9 => :feature_jrc_service_desk, 10 => :feature_jrc_flows, 11 => :feature_jrc_broker)
-    %w[jrc_service_desk jrc_broker jrc_flows].each do |name|
-      expect(Featurable::FEATURE_LIST.find { |flag| flag['name'] == name }.fetch('enabled')).to be(false)
+    { 'jrc_service_desk' => false, 'jrc_broker' => true, 'jrc_flows' => true }.each do |name, enabled|
+      expect(Featurable::FEATURE_LIST.find { |flag| flag['name'] == name }.fetch('enabled')).to be(enabled)
     end
   end
 end

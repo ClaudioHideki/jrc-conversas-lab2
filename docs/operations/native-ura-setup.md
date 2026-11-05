@@ -21,6 +21,8 @@ GoPure e outras instalações de clientes não fazem parte desta atualização. 
 5. Executar a preparação de banco prevista pelo Compose e confirmar Rails e Sidekiq saudáveis. `APP_TIME_ZONE` aceita identificadores IANA e mantém o armazenamento de datas em UTC; `TZ=UTC` mantém o relógio do sistema em UTC.
 6. Disponibilizar os recursos `jrc_broker` e `jrc_flows` na conta pelo superadministrador, respeitando os opt-outs existentes. Novas instalações recebem esses módulos como disponíveis; isso não cria vínculos, credenciais, bots ou canais automaticamente. A habilitação global e a habilitação da conta são verificadas separadamente.
 
+Na atualização de uma instalação existente, a migração de campanhas de e-mail pode constar com a versão antiga `20260904150000`. O mesmo DDL passou a usar `20261021090000` na base padrão. O atualizador reconhece o histórico antigo somente após conferir colunas, defaults, nulabilidade, seis índices válidos/prontos e a chave estrangeira validada. Nesse caso, o Rails registra a nova versão sem reescrever registros nem repetir o preenchimento de destinos. Uma estrutura incompatível interrompe o preparo com `JRC_CAMPAIGNS_LEGACY_SCHEMA_MISMATCH`; investigar a divergência em vez de apagar colunas ou editar `schema_migrations` manualmente.
+
 ## Configurar a empresa no Broker
 
 1. Selecionar a empresa correta e confirmar seu direito de uso do Flow no plano administrativo. Uma empresa com Flow habilitado não habilita as outras empresas do serviço compartilhado.
@@ -88,6 +90,7 @@ Registrar testes locais, CI, inspeção da API, inspeção visual e confirmaçã
 | Convite CSAT ausente | Condição/etiqueta da pesquisa, encerramento, mensagem template/input_csat e obrigação de entrega do Broker. |
 | Editor não abre | Flags globais e da conta, origem permitida, credencial Flow, registro, autorização de instalação e validade/revisões. |
 | Horário incorreto | APP_TIME_ZONE IANA no Rails e Sidekiq, regra do expediente do Flow e armazenamento UTC. |
+| Coluna de campanhas já existe no preparo | Conferir a revisão da imagem e o histórico da migração de e-mail renomeada. A release atual verifica o legado antes de registrar a nova versão; não remover a coluna nem os dados. |
 | Tela com marca de outra empresa | Repositório/digest implantado e configurações de marca da instalação; não corrigir isso alterando o repositório de outro cliente. |
 
 Para rollback, usar o digest anterior registrado e o procedimento da release. Uma troca de imagem não desfaz migrations nem restaura credenciais. Desativar somente o vínculo de automação afetado quando necessário; preservar o transporte e o atendimento humano.

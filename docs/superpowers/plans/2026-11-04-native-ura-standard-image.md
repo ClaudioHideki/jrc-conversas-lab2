@@ -82,6 +82,7 @@
 - [ ] Push the isolated candidate branch and run all candidate gates before publishing.
 - [ ] Verify GHCR provenance/source, platform and digest. Keep prior HML image ref recorded.
 - [ ] Replace only the authorized LAB application image; preserve DB, Redis, keys and bindings. Run required database preparation and verify Rails/Sidekiq/source SHA.
+- [ ] Complete upgrade compatibility for the campaign email migration renamed from 20260904150000 to 20261021090000. Accept the legacy history only after full structural verification; preserve data and fail closed on mismatch. Include its isolated-schema tests and the historical feature-bit tests in the required candidate gate.
 - [ ] Verify Grupo JRC/LAB branding and current connections screens, then repeat the OIA sample checks supported by the authorized contact.
 - [ ] Complete or precisely identify remaining scoped native-editor registration inputs. Never reuse the QR/control key as Flow authority.
 - [ ] Document the exact UI/operator procedure, real findings and remaining physical checks.

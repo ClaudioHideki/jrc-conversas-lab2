@@ -4,7 +4,7 @@
   "provenanceSourceSha": "e7dba8149be63708dc1b9e38ab9479ec7cca2ffe",
   "encoding": "Git text payloads with LF line endings",
   "installedProof": false,
-  "compositionCount": 201,
+  "compositionCount": 204,
   "editorStatus": {
     "sourceRepository": "ClaudioHideki/BrokerJRCIA",
     "sourceSha": "2d30a5a544aa0eae12c208867e4912c369626787",
@@ -22,8 +22,8 @@
     {
       "path": ".github/workflows/backoffice-flow.yml",
       "baseSha256": null,
-      "sha256": "139aeeff6b8a3e77a203e21b0fd2a7ae0d21c9eef276ea3ccc9a0a9d11263e48",
-      "bytes": 14889
+      "sha256": "887640f879bb8f8791f41d8c7fa74aa771e82133071918f7318d5ca29e290c3f",
+      "bytes": 15040
     },
     {
       "path": ".github/workflows/build-ghcr.yml",
@@ -890,6 +890,12 @@
       "bytes": 1333
     },
     {
+      "path": "db/migrate/20261021090000_add_email_channel_to_jrc_campaigns.rb",
+      "baseSha256": null,
+      "sha256": "c991dd66368ee11024ca11c336c1dd984c3d94dfd0e5927c6dc4970985714d76",
+      "bytes": 6020
+    },
+    {
       "path": "deploy/jrc/compose.ownership-observer.yml",
       "baseSha256": null,
       "sha256": "5f81cc6b0ee373acc8fbbdc51df3aba2e1f758d3b98078f6bbafcbd2156f6b0c",
@@ -910,8 +916,8 @@
     {
       "path": "deploy/jrc/module-composition-input.json",
       "baseSha256": null,
-      "sha256": "15407fde652030ac80019c357130f029ed153595c9d038a396ea749c6862acee",
-      "bytes": 18254
+      "sha256": "00e4aa197ed4740daad320e5ed1fed7944f2f738ce62fa3025f8c608d182f9ea",
+      "bytes": 18462
     },
     {
       "path": "deploy/jrc/module-manifest.test.mjs",
@@ -952,8 +958,8 @@
     {
       "path": "docs/operations/native-ura-setup.md",
       "baseSha256": null,
-      "sha256": "289fb88101a7f648e8ef8957f30b10557775bb2c235948033609cc16f4928497",
-      "bytes": 12132
+      "sha256": "5b76102c710acd392524b65b8224420ae4555a563c50823cb7759a9b8d847a07",
+      "bytes": 13022
     },
     {
       "path": "public/jrc-flow-editor/EDITOR-BUILD-MANIFEST.json",
@@ -1000,8 +1006,8 @@
     {
       "path": "script/lab2_release_gates.test.mjs",
       "baseSha256": null,
-      "sha256": "13faa3c6c4136a931ee0342ad387cd352e553c3c544fc52495ced1fbeaa8bcb3",
-      "bytes": 4095
+      "sha256": "6883765d111d400de586d44d3c62b47ac8fb7c9793b830e2bc04c57b789acc03",
+      "bytes": 4228
     },
     {
       "path": "script/smoke_backoffice_candidate.sh",
@@ -1056,6 +1062,18 @@
       "baseSha256": null,
       "sha256": "4a356f2eaa7e3f04e1619eae43a9e59ecb387aa089d963de535d9468491e08ba",
       "bytes": 6582
+    },
+    {
+      "path": "spec/migrations/add_email_channel_to_jrc_campaigns_legacy_spec.rb",
+      "baseSha256": null,
+      "sha256": "e901c1744bc204b655ceb428d7c25a7ff6fdd7071f32926e75eadc01dc66c8e4",
+      "bytes": 6990
+    },
+    {
+      "path": "spec/migrations/relocate_jrc_broker_feature_flag_spec.rb",
+      "baseSha256": "07446b6c68d59eed2863547e7e6413248684b23a3e5c75246ac34ec5ca4373e9",
+      "sha256": "627ae2db5f21629df93f490618da2f4dca057b9c7a22cb340c39de94973f2188",
+      "bytes": 2738
     },
     {
       "path": "spec/models/jrc_broker_webhook_obligation_spec.rb",

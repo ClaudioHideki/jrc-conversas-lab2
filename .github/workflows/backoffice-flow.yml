@@ -198,6 +198,8 @@ jobs:
         run: |
           bundle exec rspec spec/services/jrc_broker spec/requests/api/v1/accounts/jrc_broker*_spec.rb \
             spec/config/application_time_zone_spec.rb spec/models/jrc_native_module_defaults_spec.rb \
+            spec/migrations/relocate_jrc_broker_feature_flag_spec.rb \
+            spec/migrations/add_email_channel_to_jrc_campaigns_legacy_spec.rb \
             spec/services/message_templates/template/csat_survey_spec.rb \
             spec/services/csat_survey_service_native_spec.rb spec/services/csat_survey_service_concurrency_spec.rb \
             spec/controllers/public/api/v1/csat_survey_controller_spec.rb \

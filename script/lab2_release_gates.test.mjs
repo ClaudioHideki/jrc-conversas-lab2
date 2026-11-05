@@ -14,7 +14,8 @@ test('the standard URA candidate keeps validation mandatory and publishes only i
   assert.doesNotMatch(build, /claudiohideki\/jrc-conversas-nico-v12-2-7-comercial-integrado/);
   assert.match(build, /repository_image=\$\{GITHUB_REPOSITORY,,\}/);
   for (const path of ['spec/models/jrc_native_module_defaults_spec.rb', 'spec/config/application_time_zone_spec.rb',
-    'spec/services/message_templates/template/csat_survey_spec.rb', 'spec/services/csat_survey_service_concurrency_spec.rb']) {
+    'spec/services/message_templates/template/csat_survey_spec.rb', 'spec/services/csat_survey_service_concurrency_spec.rb',
+    'spec/migrations/relocate_jrc_broker_feature_flag_spec.rb', 'spec/migrations/add_email_channel_to_jrc_campaigns_legacy_spec.rb']) {
     assert.ok(native.includes(path), `the native gate must run ${path}`);
   }
 });
