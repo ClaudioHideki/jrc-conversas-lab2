@@ -29,6 +29,11 @@ const store = useStore();
 const { t } = useI18n();
 
 const page = ref(1);
+const resolveStatus = value =>
+  ['open', 'pending', 'all'].includes(value)
+    ? value
+    : wootConstants.STATUS_TYPE.OPEN;
+const statusFilter = ref(resolveStatus(route.query.status));
 const channelFilter = ref(route.query.channel || 'all');
 const assigneeFilter = ref(ASSIGNEE_FILTERS.ME);
 const sharedScope = ref({ enabled: false, inbox_ids: [] });
@@ -50,7 +55,7 @@ const accountId = computed(() => Number(route.params.accountId));
 const currentUser = useMapGetter('getCurrentUser');
 const inboxes = useMapGetter('inboxes/getAllInboxes');
 const inboxById = useMapGetter('inboxes/getInboxById');
-const allOpenConversations = useMapGetter('getAllStatusChats');
+const allStatusConversations = useMapGetter('getAllStatusChats');
 const isLoading = useMapGetter('getChatListLoadingStatus');
 const conversationError = useMapGetter('getChatListErrorStatus');
 const hasEndReached = useMapGetter('conversationPage/getHasEndReached');
@@ -122,10 +127,16 @@ const resolveAssigneeFilter = value =>
     sharedScope.value.enabled
   );
 
+const statusFilterOptions = computed(() => [
+  { key: 'open', label: t('JRC_CONTACT_CENTER.INBOX.STATUSES.OPEN') },
+  { key: 'pending', label: t('JRC_CONTACT_CENTER.INBOX.STATUSES.PENDING') },
+  { key: 'all', label: t('JRC_CONTACT_CENTER.INBOX.STATUSES.ALL') },
+]);
+
 const conversationFilters = computed(() => ({
   assigneeType: assigneeFilter.value,
   includeParticipating: true,
-  status: wootConstants.STATUS_TYPE.OPEN,
+  status: statusFilter.value,
   sortBy: wootConstants.SORT_BY_TYPE.LAST_ACTIVITY_AT_DESC,
   page: page.value,
 }));
@@ -194,10 +205,10 @@ const channelFilterOptions = computed(() => [
 ]);
 
 const conversations = computed(() => {
-  const items = allOpenConversations
+  const items = allStatusConversations
     .value({
       assigneeType: assigneeFilter.value,
-      status: wootConstants.STATUS_TYPE.OPEN,
+      status: statusFilter.value,
     })
     .filter(conversation =>
       inboxes.value.some(
@@ -370,6 +381,16 @@ const setAssigneeFilter = async key => {
   });
 };
 
+const setStatusFilter = async key => {
+  const resolved = resolveStatus(key);
+  if (resolved === statusFilter.value) return;
+  statusFilter.value = resolved;
+  await replaceInboxRoute({
+    ...route.query,
+    status: resolved === wootConstants.STATUS_TYPE.OPEN ? undefined : resolved,
+  });
+};
+
 const openConversation = conversation => {
   if (currentConversationId.value === conversation.id) return;
   router.push({
@@ -418,8 +439,8 @@ watch(
   [
     () => JSON.stringify(inboxes.value),
     () =>
-      allOpenConversations
-        .value({ status: wootConstants.STATUS_TYPE.OPEN })
+      allStatusConversations
+        .value({ status: statusFilter.value })
         .map(conversation =>
           [
             conversation.id,
@@ -446,6 +467,7 @@ watch(
   [
     accountId,
     () => route.query.assignee,
+    () => route.query.status,
     canManageAssignments,
     () => store.getters.getCurrentCustomRoleId,
     () => accountPermissions.value.join(','),
@@ -459,6 +481,10 @@ watch(
     isInitializing.value = true;
     voiceGeneration += 1;
     page.value = 1;
+    statusFilter.value = resolveStatus(route.query.status);
+    // Invalidate the previous request key and end marker before awaiting routing metadata.
+    store.dispatch('updateChatListFilters', conversationFilters.value);
+    store.dispatch('conversationPage/reset');
     voiceCalls.value = [];
     contactCenterContext.value = null;
     voiceError.value = false;
@@ -515,6 +541,8 @@ onBeforeUnmount(() => {
     :channels="channelFilterOptions"
     :assignees="assigneeFilterOptions"
     :assignee-filter="assigneeFilter"
+    :statuses="statusFilterOptions"
+    :status-filter="statusFilter"
     :channel-filter="channelFilter"
     :current-call-id="currentCallId"
     :current-conversation-id="currentConversationId"
@@ -530,6 +558,7 @@ onBeforeUnmount(() => {
     @select-conversation="openConversation"
     @channel-change="setChannelFilter"
     @assignee-change="setAssigneeFilter"
+    @status-change="setStatusFilter"
     @load-more="loadMore"
     @refresh="fetchVoiceCalls"
     @retry-conversations="fetchConversations({ reset: true })"

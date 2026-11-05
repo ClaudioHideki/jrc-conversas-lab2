@@ -50,6 +50,8 @@ const props = defineProps({
   channels: { type: Array, default: () => [] },
   assignees: { type: Array, default: () => [] },
   assigneeFilter: { type: String, default: 'me' },
+  statuses: { type: Array, default: () => [] },
+  statusFilter: { type: String, default: 'open' },
   channelFilter: { type: String, default: 'all' },
   currentCallId: { type: Number, default: null },
   currentConversationId: { type: Number, default: null },
@@ -67,6 +69,7 @@ const emit = defineEmits([
   'selectConversation',
   'channelChange',
   'assigneeChange',
+  'statusChange',
   'loadMore',
   'refresh',
   'retryConversations',
@@ -149,6 +152,21 @@ const listCalls = computed(() => {
     ...props.calls,
   ];
 });
+const listTitle = computed(() => {
+  if (props.channelFilter === 'voice')
+    return t('JRC_CONTACT_CENTER.INBOX.CALLS_LOADED');
+  const titles = {
+    open: t('JRC_CONTACT_CENTER.INBOX.STATUS_TITLES.OPEN'),
+    pending: t('JRC_CONTACT_CENTER.INBOX.STATUS_TITLES.PENDING'),
+    all: t('JRC_CONTACT_CENTER.INBOX.STATUS_TITLES.ALL'),
+  };
+  return titles[props.statusFilter] || titles.open;
+});
+const listCount = computed(() =>
+  props.channelFilter === 'voice'
+    ? listCalls.value.length
+    : props.conversations.length
+);
 const hasSelection = computed(
   () =>
     !phoneOpen.value &&
@@ -792,12 +810,8 @@ onBeforeUnmount(() => {
             <h1 class="m-0 text-xs font-semibold leading-5 text-n-slate-12">
               {{
                 t('JRC_CONTACT_CENTER.INBOX_360.LABEL_COUNT', {
-                  label: labels.ACTIVE_INTERACTIONS,
-                  count:
-                    conversations.length +
-                    (['all', 'voice'].includes(channelFilter)
-                      ? listCalls.length
-                      : 0),
+                  label: listTitle,
+                  count: listCount,
                 })
               }}
             </h1>
@@ -811,6 +825,16 @@ onBeforeUnmount(() => {
               <span class="i-lucide-x size-4" />
             </button>
           </div>
+          <p
+            v-if="channelFilter === 'all' && listCalls.length"
+            class="m-0 mt-1 text-[11px] text-n-slate-10"
+          >
+            {{
+              t('JRC_CONTACT_CENTER.INBOX.VOICE_LOADED_COUNT', {
+                count: listCalls.length,
+              })
+            }}
+          </p>
           <div class="mt-2 flex gap-1.5">
             <select
               :value="assigneeFilter"
@@ -841,6 +865,22 @@ onBeforeUnmount(() => {
               </option>
             </select>
           </div>
+          <select
+            v-if="channelFilter !== 'voice'"
+            :value="statusFilter"
+            :aria-label="t('JRC_CONTACT_CENTER.INBOX.STATUS_FILTER_LABEL')"
+            class="mt-1.5 h-8 w-full min-w-0 rounded-md border border-n-weak bg-n-solid-1 px-1.5 !py-0 text-[11px] text-n-slate-11"
+            data-testid="conversation-status-filter"
+            @change="emit('statusChange', $event.target.value)"
+          >
+            <option
+              v-for="option in statuses"
+              :key="option.key"
+              :value="option.key"
+            >
+              {{ option.label }}
+            </option>
+          </select>
         </header>
         <div class="min-h-0 flex-1 overflow-y-auto bg-n-slate-2 p-2.5">
           <InboxChannelGroups
@@ -1079,11 +1119,11 @@ onBeforeUnmount(() => {
           class="flex shrink-0 flex-wrap items-center gap-3 border-b border-n-weak bg-n-amber-2 p-3 text-xs text-n-amber-11"
           role="status"
         >
-          <span class="min-w-0 flex-1"
-            >{{ t('SOFTPHONE.CENTRAL.STATES.incoming') }} ·
+          <span class="min-w-0 flex-1">
+            {{ t('SOFTPHONE.CENTRAL.STATES.incoming') }} ·
             {{ sip.remoteNumber.value }}.
-            {{ t('SOFTPHONE.INBOX.QUALIFICATION_PENDING') }}</span
-          >
+            {{ t('SOFTPHONE.INBOX.QUALIFICATION_PENDING') }}
+          </span>
           <button
             type="button"
             class="rounded-md bg-n-ruby-9 px-4 py-2 font-semibold text-white"

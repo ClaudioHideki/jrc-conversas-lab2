@@ -1368,6 +1368,19 @@
       "SEARCH": "Buscar conversas ou contatos...",
       "ASSIGNEE_FILTER_LABEL": "Filtrar atendimentos por responsável",
       "CHANNEL_FILTER_LABEL": "Filtrar atendimentos por canal",
+      "STATUS_FILTER_LABEL": "Status das conversas",
+      "STATUSES": {
+        "OPEN": "Em andamento",
+        "PENDING": "Pendentes",
+        "ALL": "Todas e histórico"
+      },
+      "STATUS_TITLES": {
+        "OPEN": "Conversas em andamento carregadas",
+        "PENDING": "Conversas pendentes carregadas",
+        "ALL": "Conversas e histórico carregados"
+      },
+      "CALLS_LOADED": "Chamadas carregadas",
+      "VOICE_LOADED_COUNT": "Chamadas carregadas: {count}",
       "EMPTY": "Nenhum atendimento aberto neste canal.",
       "LOAD_MORE": "Carregar mais atendimentos",
       "CALL_WORKSPACE": "Atendimento de voz",

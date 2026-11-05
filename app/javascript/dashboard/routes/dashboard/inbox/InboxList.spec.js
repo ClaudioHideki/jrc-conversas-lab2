@@ -19,7 +19,14 @@ vi.mock('vue-router', async importOriginal => ({
   useRoute: () => mocks.route,
   useRouter: () => mocks.router,
 }));
-vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }));
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: (key, params) =>
+      key === 'JRC_CONTACT_CENTER.INBOX_360.LABEL_COUNT' && params
+        ? `${params.label} (${params.count})`
+        : key,
+  }),
+}));
 vi.mock('dashboard/api/jrcContactCenter', () => ({
   default: { calls: vi.fn(), context: vi.fn(), agentState: vi.fn() },
 }));
@@ -71,6 +78,173 @@ const mountInbox = () =>
   });
 
 describe('omnichannel inbox', () => {
+  it('loads authorized pending conversations from a status deep link', async () => {
+    mocks.route.query.status = 'pending';
+    store.state.conversationPayload = [
+      {
+        id: 101,
+        inbox_id: 11,
+        status: 'pending',
+        meta: { assignee: { id: 5 } },
+      },
+      { id: 102, inbox_id: 11, status: 'open', meta: { assignee: { id: 5 } } },
+      {
+        id: 103,
+        inbox_id: 11,
+        status: 'resolved',
+        meta: { assignee: { id: 5 } },
+      },
+    ];
+    const wrapper = mountInbox();
+    await flushPromises();
+    expect(store.state.filters.status).toBe('pending');
+    expect(
+      wrapper.findAll('[data-testid="conversation"]').map(row => row.text())
+    ).toEqual(['101']);
+    expect(
+      wrapper.get('[data-testid="conversation-status-filter"]').element.value
+    ).toBe('pending');
+  });
+
+  it('includes resolved history for all statuses and labels the loaded count without calling it active work', async () => {
+    mocks.route.query.status = 'all';
+    store.state.conversationPayload = [
+      {
+        id: 101,
+        inbox_id: 11,
+        status: 'pending',
+        meta: { assignee: { id: 5 } },
+      },
+      { id: 102, inbox_id: 11, status: 'open', meta: { assignee: { id: 5 } } },
+      {
+        id: 103,
+        inbox_id: 11,
+        status: 'resolved',
+        meta: { assignee: { id: 5 } },
+      },
+    ];
+    const wrapper = mountInbox();
+    await flushPromises();
+    expect(store.state.filters.status).toBe('all');
+    expect(
+      wrapper.findAll('[data-testid="conversation"]').map(row => row.text())
+    ).toEqual(['101', '102', '103']);
+    expect(wrapper.get('[data-testid="inbox-list"] h1').text()).toContain(
+      'STATUS_TITLES.ALL (3)'
+    );
+    expect(wrapper.get('[data-testid="inbox-list"] h1').text()).not.toContain(
+      'ACTIVE_INTERACTIONS'
+    );
+  });
+
+  it.each([undefined, 'invalid', ['all', 'pending']].map(value => [value]))(
+    'preserves open as the default for an absent or invalid status %j',
+    async status => {
+      mocks.route.query.status = status;
+      const wrapper = mountInbox();
+      await flushPromises();
+      expect(store.state.filters.status).toBe('open');
+      expect(
+        wrapper.get('[data-testid="conversation-status-filter"]').element.value
+      ).toBe('open');
+    }
+  );
+
+  it('updates status in the URL and restores the default through browser navigation', async () => {
+    const wrapper = mountInbox();
+    await flushPromises();
+    await wrapper
+      .get('[data-testid="conversation-status-filter"]')
+      .setValue('pending');
+    await flushPromises();
+    expect(mocks.route.query.status).toBe('pending');
+    expect(store.state.filters.status).toBe('pending');
+    mocks.route.query.status = 'all';
+    await flushPromises();
+    expect(store.state.filters.status).toBe('all');
+    delete mocks.route.query.status;
+    await flushPromises();
+    expect(store.state.filters.status).toBe('open');
+  });
+
+  it('invalidates the old status and exhausted page before awaiting fresh sharing metadata', async () => {
+    const wrapper = mountInbox();
+    await flushPromises();
+    store.state.ended = true;
+    let resolveScope;
+    ConversationAPI.sharedContext.mockImplementationOnce(
+      () =>
+        new Promise(resolve => {
+          resolveScope = resolve;
+        })
+    );
+    mocks.route.query.status = 'pending';
+    await flushPromises();
+    expect(store.state.filters.status).toBe('pending');
+    expect(store.state.ended).toBe(false);
+    resolveScope({
+      data: { meta: { shared_scope: { enabled: false, inbox_ids: [] } } },
+    });
+    await flushPromises();
+    expect(
+      wrapper.get('[data-testid="conversation-status-filter"]').element.value
+    ).toBe('pending');
+  });
+
+  it('keeps realtime rows within the selected pending status', async () => {
+    mocks.route.query.status = 'pending';
+    store.state.conversationPayload = [
+      {
+        id: 101,
+        inbox_id: 11,
+        status: 'pending',
+        meta: { assignee: { id: 5 } },
+      },
+    ];
+    const wrapper = mountInbox();
+    await flushPromises();
+    expect(
+      wrapper.findAll('[data-testid="conversation"]').map(row => row.text())
+    ).toEqual(['101']);
+    store.state.conversations.push({
+      id: 102,
+      inbox_id: 11,
+      status: 'open',
+      meta: { assignee: { id: 5 } },
+    });
+    await flushPromises();
+    expect(
+      wrapper.findAll('[data-testid="conversation"]').map(row => row.text())
+    ).toEqual(['101']);
+    store.state.conversations[0].status = 'resolved';
+    await flushPromises();
+    expect(wrapper.findAll('[data-testid="conversation"]')).toHaveLength(0);
+  });
+
+  it('does not broaden assignment permissions when requesting all statuses', async () => {
+    mocks.route.query.status = 'all';
+    mocks.route.query.assignee = 'all';
+    store.state.conversationPayload = [
+      {
+        id: 101,
+        inbox_id: 11,
+        status: 'resolved',
+        meta: { assignee: { id: 5 } },
+      },
+      {
+        id: 102,
+        inbox_id: 11,
+        status: 'resolved',
+        meta: { assignee: { id: 99 } },
+      },
+    ];
+    const wrapper = mountInbox();
+    await flushPromises();
+    expect(store.state.filters.assigneeType).toBe('me');
+    expect(
+      wrapper.findAll('[data-testid="conversation"]').map(row => row.text())
+    ).toEqual(['101']);
+  });
   it('defaults an authorized ordinary member to own and shared conversations without changing their assignments', async () => {
     ConversationAPI.sharedContext.mockResolvedValueOnce({
       data: { meta: { shared_scope: { enabled: true, inbox_ids: [11] } } },
@@ -259,6 +433,9 @@ describe('omnichannel inbox', () => {
     expect(JrcContactCenterAPI.agentState).not.toHaveBeenCalled();
   });
   beforeEach(() => {
+    ConversationAPI.sharedContext.mockReset().mockResolvedValue({
+      data: { meta: { shared_scope: { enabled: false, inbox_ids: [] } } },
+    });
     mocks.sip = Object.fromEntries(
       Object.entries({
         accountId: 1,
@@ -351,13 +528,22 @@ describe('omnichannel inbox', () => {
         'inboxes/getInboxById': state => id =>
           state.inboxes.find(inbox => inbox.id === id),
         'accounts/isFeatureEnabledonAccount': state => () => state.feature,
-        getAllStatusChats: state => () => state.conversations,
+        getAllStatusChats: state => filters =>
+          state.conversations.filter(
+            conversation =>
+              !conversation.status ||
+              !filters.status ||
+              filters.status === 'all' ||
+              filters.status === conversation.status
+          ),
         getChatListLoadingStatus: () => false,
         getChatListErrorStatus: state => state.conversationError,
       },
       actions: {
         'inboxes/get': vi.fn(),
-        'conversationPage/reset': vi.fn(),
+        'conversationPage/reset': ({ state }) => {
+          state.ended = false;
+        },
         clearSelectedState: vi.fn(),
         emptyAllConversations: ({ state }) => {
           state.conversations = [];

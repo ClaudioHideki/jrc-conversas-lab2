@@ -33,6 +33,7 @@ jobs:
           app/javascript/dashboard/routes/dashboard/inbox/omnichannelFilters.spec.js
           app/javascript/dashboard/routes/dashboard/inbox/InboxList.spec.js
           app/javascript/dashboard/routes/dashboard/inbox/specs/InboxList.spec.js
+          app/javascript/dashboard/store/modules/specs/conversationPage/mutations.spec.js
           --maxWorkers=2 --minWorkers=1 --reporter=default --reporter=json
           --outputFile=/tmp/whatsapp-connections-vitest.json
       - name: Lint do incremento
@@ -43,6 +44,8 @@ jobs:
             app/javascript/dashboard/api/conversations.js \
             app/javascript/dashboard/routes/dashboard/inbox/{InboxList.vue,InboxList.spec.js,omnichannelFilters.js,omnichannelFilters.spec.js} \
             app/javascript/dashboard/store/modules/conversationPage.js \
+            app/javascript/dashboard/store/modules/specs/conversationPage/mutations.spec.js \
+            app/javascript/dashboard/routes/dashboard/inbox/HoyaInboxWorkspace.vue \
             app/javascript/dashboard/store/modules/conversations/actions.js
       - name: Dependencias do navegador sintetico
         run: |
