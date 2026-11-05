@@ -123,7 +123,13 @@ window.axios = async ({ method, url, data }) => {
       data: {
         policy: policies.get(id) || null,
         teams,
-        calendar: { enabled: false, timezone: 'America/Sao_Paulo' },
+        agents: setupResources.agents.slice(0, 3).map(agent => ({
+          ...agent,
+          active: 0,
+          availability: 'online',
+          can_supervise: true,
+        })),
+        calendar: { enabled: true, timezone: 'America/Sao_Paulo' },
       },
     };
   }

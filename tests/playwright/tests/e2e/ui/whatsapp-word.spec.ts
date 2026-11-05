@@ -270,6 +270,69 @@ test('administra conexoes e distribuicao sem iniciar pareamento ao abrir', async
   expect(errors).toEqual([]);
 });
 
+test('persiste exclusividade supervisao e escala individual com intervalo', async ({
+  page,
+}, testInfo) => {
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto(path);
+  await page.getByTestId('configure-distribution-701').click();
+  const dialog = page.getByRole('dialog');
+  await dialog
+    .getByTestId('distribution-visibility')
+    .selectOption('assigned_only');
+  await dialog.locator('[data-supervisor-id="1"]').check();
+  await dialog.locator('[data-agent-limit-id="2"]').fill('5');
+  await dialog.getByTestId('distribution-policy-save').click();
+  await expect(
+    dialog.getByText('Distribuição salva.', { exact: false })
+  ).toBeVisible();
+  await dialog
+    .getByRole('tab', { name: 'Regras e horários', exact: true })
+    .click();
+  await dialog.getByTestId('schedule-agent').selectOption('2');
+  await dialog.getByTestId('schedule-enabled').check();
+  await dialog.locator('[data-add-period-day="1"]').click();
+  await dialog.locator('[data-period-end="1-0"]').fill('12:00');
+  await dialog.locator('[data-add-period-day="1"]').click();
+  await dialog.locator('[data-period-start="1-1"]').fill('13:00');
+  await dialog.getByTestId('distribution-policy-save').click();
+  await expect(
+    dialog.getByText('Distribuição salva.', { exact: false })
+  ).toBeVisible();
+  await dialog.getByRole('button', { name: 'Fechar', exact: true }).click();
+  await page.getByTestId('configure-distribution-701').click();
+  await expect(dialog.getByTestId('distribution-visibility')).toHaveValue(
+    'assigned_only'
+  );
+  await expect(dialog.locator('[data-supervisor-id="1"]')).toBeChecked();
+  await expect(dialog.locator('[data-agent-limit-id="2"]')).toHaveValue('5');
+  await dialog
+    .getByRole('tab', { name: 'Regras e horários', exact: true })
+    .click();
+  await dialog.getByTestId('schedule-agent').selectOption('2');
+  await expect(dialog.getByTestId('schedule-enabled')).toBeChecked();
+  await expect(dialog.locator('[data-period-start="1-0"]')).toHaveValue(
+    '09:00'
+  );
+  await expect(dialog.locator('[data-period-end="1-0"]')).toHaveValue('12:00');
+  await expect(dialog.locator('[data-period-start="1-1"]')).toHaveValue(
+    '13:00'
+  );
+  await expect(dialog.locator('[data-period-end="1-1"]')).toHaveValue('17:00');
+  await checkViewport(page, testInfo, 'individual-shifts');
+  await page.screenshot({
+    path: testInfo.outputPath('escalas-individuais.png'),
+    fullPage: true,
+  });
+  for (const counter of ['pair', 'create', 'adopt']) {
+    await expect(page.getByTestId(`fixture-${counter}-requests`)).toHaveText(
+      '0'
+    );
+  }
+  expect(errors).toEqual([]);
+});
+
 test('reconecta somente por acao explicita e limita a jornada do agente', async ({
   page,
 }, testInfo) => {

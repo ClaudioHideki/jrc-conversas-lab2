@@ -39,12 +39,20 @@ jobs:
           app/javascript/dashboard/components/widgets/conversation/specs/ConversationCard.spec.js
           app/javascript/dashboard/routes/dashboard/inbox/specs/InboxList.spec.js
           app/javascript/dashboard/store/modules/specs/conversationPage/mutations.spec.js
+          app/javascript/dashboard/helper/specs/actionCable.spec.js
+          app/javascript/dashboard/helper/specs/ReconnectService.spec.js
+          app/javascript/dashboard/store/modules/conversations/specs
+          app/javascript/dashboard/store/modules/specs/notifications
+          app/javascript/dashboard/store/modules/specs/contactConversations
+          app/javascript/dashboard/store/modules/specs/conversationMetadata
+          app/javascript/dashboard/store/modules/specs/conversationSearch
           --maxWorkers=2 --minWorkers=1 --reporter=default --reporter=json
           --outputFile=/tmp/whatsapp-connections-vitest.json
       - name: Lint do incremento
         run: |
           pnpm exec eslint app/javascript/dashboard/routes/dashboard/jrcBroker/ConnectionsPage.vue \
-            app/javascript/dashboard/components-next/jrc-broker/{ConnectionDistributionTable,ConnectionInsights,ConnectionPanel,ConnectionDistributionPolicy}.vue \
+            app/javascript/dashboard/components-next/jrc-broker/{ConnectionDistributionTable,ConnectionInsights,ConnectionPanel,ConnectionDistributionPolicy,AgentScheduleEditor}.vue \
+            app/javascript/dashboard/components-next/jrc-broker/agentSchedules.js \
             app/javascript/dashboard/api/jrcBroker.js \
             app/javascript/dashboard/api/conversations.js \
             app/javascript/dashboard/routes/dashboard/inbox/{InboxList.vue,InboxList.spec.js,omnichannelFilters.js,omnichannelFilters.spec.js} \
@@ -155,6 +163,23 @@ jobs:
             spec/services/jrc_broker \
             spec/services/jrc_human_assignment \
             spec/services/auto_assignment \
+            spec/services/conversations/inbox_visibility_exclusive_spec.rb \
+            spec/services/conversations/permission_filter_service_spec.rb \
+            spec/services/conversations/unread_counts/counter_spec.rb \
+            spec/services/conversations/unread_counts/filtered_counter_spec.rb \
+            spec/enterprise/services/enterprise/conversations/permission_filter_service_spec.rb \
+            spec/enterprise/services/conversations/unread_counts/counter_spec.rb \
+            spec/policies/conversation_policy_spec.rb \
+            spec/enterprise/policies/conversation_policy_spec.rb \
+            spec/listeners/action_cable_listener_spec.rb \
+            spec/services/search_service_spec.rb \
+            spec/finders/notification_finder_spec.rb \
+            spec/requests/exclusive_inbox_conversations_spec.rb \
+            spec/mailers/agent_notifications/conversation_notifications_mailer_spec.rb \
+            spec/jobs/jrc_human_assignment \
+            spec/lib/online_status_tracker_spec.rb \
+            spec/models/account_user_spec.rb \
+            spec/models/inbox_member_spec.rb \
             --format progress --format json --out /tmp/whatsapp-connections-rspec.json
           ruby -rjson -e 's=JSON.parse(File.read("/tmp/whatsapp-connections-rspec.json")).fetch("summary"); puts s; abort "failed or pending" unless s.fetch("failure_count").zero? && s.fetch("pending_count").zero?'
       - name: Preservar fonte e schema versionado
