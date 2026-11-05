@@ -16,6 +16,7 @@ import PlaybookExecutionPanel from './PlaybookExecutionPanel.vue';
 import PlaybookDesignPreview from './PlaybookDesignPreview.vue';
 import PlaybookFlowPolicyForm from './PlaybookFlowPolicyForm.vue';
 import PortfolioCapacityLimitsForm from './PortfolioCapacityLimitsForm.vue';
+import HealthConfigurationPreview from './HealthConfigurationPreview.vue';
 const props = defineProps({
   screen: { type: String, default: 'settings' },
   allowed: Boolean,
@@ -406,6 +407,11 @@ const date = value => formatDate(value, props.metadata?.formatting);
         {{ t('RELATIONSHIP.SAVE') }}
       </button>
     </form>
+    <HealthConfigurationPreview
+      v-if="config && screen === 'settings' && !distributionOnly"
+      :configuration="config"
+      :disabled="busy || invalidFlowPolicy || invalidCapacity"
+    />
     <section
       v-if="config"
       class="mt-6"

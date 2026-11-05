@@ -16,6 +16,12 @@ export default {
     axios.get(`${base(accountId)}/playbook_options`, { ...options, params }),
   previewPlaybook: (accountId, fields) =>
     axios.post(`${base(accountId)}/playbook_preview`, fields),
+  previewHealthConfiguration: (accountId, fields, options) =>
+    axios.post(
+      `${base(accountId)}/configuration/health_preview`,
+      fields,
+      options
+    ),
   manualAttendance: (accountId, id, fields) =>
     axios.post(
       `${base(accountId)}/portfolio/${Number(id)}/manual_attendance`,

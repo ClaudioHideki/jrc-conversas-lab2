@@ -114,6 +114,19 @@ class JrcRelationship::Context
       JrcRelationship::Configuration.new(account: account, scope_key: 'account')
   end
 
+  # Overlay only an authorized unsaved configuration. Native precedence and
+  # every permission/source scope remain those of a fresh real Context.
+  def for_health_configuration_preview(draft)
+    authorize_configuration_scope!(draft.scope_key)
+    raise ArgumentError, 'Preview requires an unsaved valid configuration from this account' unless
+      (draft.new_record? || draft.changed?) && draft.account_id == account.id && draft.valid?
+
+    preview = self.class.new(member)
+    configurations = JrcRelationship::Configuration.where(account_id: account.id).index_by(&:scope_key)
+    preview.instance_variable_set(:@configurations, configurations.merge(draft.scope_key => draft))
+    preview
+  end
+
   def customer_configuration(assignment, configurations)
     customer_config = configurations["company:#{assignment.company_id}"] if assignment&.company_id
     unit_config = configurations["unit:#{assignment.business_unit_id}"] if assignment&.business_unit_id

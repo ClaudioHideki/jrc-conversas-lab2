@@ -1511,6 +1511,19 @@
         "projects": "Native project ownership"
       }
     },
-    "PRIORITY_SIGNAL_NOTICE": "Os pesos opcionais de tendência e SLA começam desativados. Tendência usa a queda observada em pontos de saúde; SLA usa a existência de vencimentos autorizados. Dados ausentes não são tratados como zero. A revisão manual de prioridade permanece preservada."
+    "PRIORITY_SIGNAL_NOTICE": "Os pesos opcionais de tendência e SLA começam desativados. Tendência usa a queda observada em pontos de saúde; SLA usa a existência de vencimentos autorizados. Dados ausentes não são tratados como zero. A revisão manual de prioridade permanece preservada.",
+    "HEALTH_PREVIEW": {
+      "TITLE": "Simular saúde antes de salvar",
+      "NOTE": "Consulta real com as regras em edição. Não salva configuração, score ou ações e não executa automações. A prévia cobre saúde e evidências; regras operacionais, alçadas e envios mantêm seus fluxos próprios.",
+      "RUN": "Simular sem salvar",
+      "CURRENT": "Configuração atual",
+      "PROPOSED": "Regras em edição",
+      "CHOOSE": "Selecione um cliente autorizado",
+      "EMPTY": "Nenhum cliente disponível neste filtro.",
+      "PRECEDENCE": "Este rascunho não é a configuração efetiva de saúde deste cliente. A precedência nativa de produto, segmento e demais escopos foi preservada.",
+      "PREVIOUS": "Anterior",
+      "NEXT": "Próxima",
+      "PAGE": "Página {page} · {total} clientes autorizados"
+    }
   }
 }
