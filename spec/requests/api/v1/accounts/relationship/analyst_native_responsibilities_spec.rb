@@ -8,6 +8,11 @@ RSpec.describe 'Scoped native analyst responsibility origins', type: :request do
     JrcProjects::Projects::Create.call(account: sd_account, actor: sd_user, attributes: { name: 'Real native source', contact_id: sd_contact.id },
                                        idempotency_key: SecureRandom.uuid)
   end
+  let(:assignment) { JrcRelationship::Assignment.create!(account: sd_account, owner: sd_user, contact: sd_contact) }
+  let(:plan) do
+    JrcRelationship::SuccessPlan.create!(account: sd_account, assignment: assignment, owner: sd_user, project: project,
+                                         title: 'Synthetic current CS project link')
+  end
 
   before do
     sd_as_admin!
@@ -15,6 +20,7 @@ RSpec.describe 'Scoped native analyst responsibility origins', type: :request do
   end
 
   it 'paginates actual pending task ownership and opens the precise native task without changing owners or memberships' do
+    plan
     tasks = Array.new(11) do |index|
       JrcProjects::Tasks::Create.call(account_user: sd_account_user, project: project,
                                       attributes: { title: "Pending native task #{index}", assignee_id: sd_user.id },
@@ -39,6 +45,9 @@ RSpec.describe 'Scoped native analyst responsibility origins', type: :request do
 
   it 'lists real pending unit membership tickets while omitting descriptions and completed history' do
     ticket = sd_ticket(assignee_membership: sd_membership, title: 'Current native ticket', description: 'Private body must not be projected')
+    JrcRelationship::Action.create!(account: sd_account, assignment: assignment, owner: sd_user, kind: 'manual',
+                                    reason: 'Synthetic linked ticket', source_key: SecureRandom.uuid,
+                                    metadata: { '_source_ids' => { 'tickets' => [ticket.id] } })
     closed = create(:jrc_sd_status, unit: sd_unit, phase: 'closed', initial: false)
     history = sd_ticket(assignee_membership: sd_membership, title: 'Closed historical case')
     history.update!(status: closed)
@@ -53,7 +62,7 @@ RSpec.describe 'Scoped native analyst responsibility origins', type: :request do
   end
 
   it 'lists owned active projects through native project visibility and excludes final projects' do
-    project
+    plan
     get url, headers: headers, params: { kind: 'projects' }
     expect(response).to have_http_status(:ok), response.body
     expect(response.parsed_body.fetch('payload')).to contain_exactly(include('id' => project.id))
@@ -67,6 +76,9 @@ RSpec.describe 'Scoped native analyst responsibility origins', type: :request do
     member = sd_account.account_users.find_by!(user: analyst)
     visible_membership = create(:jrc_sd_membership, unit: sd_unit, account_user: member)
     visible = sd_ticket(assignee_membership: visible_membership)
+    evidence = JrcRelationship::Action.create!(account: sd_account, assignment: assignment, owner: sd_user, kind: 'manual',
+                                               reason: 'Synthetic linked unit work', source_key: SecureRandom.uuid,
+                                               metadata: { '_source_ids' => { 'tickets' => [visible.id] } })
     permissions = %w[contact_manage jrc_relationship_view jrc_relationship_team jrc_service_desk_module_view
                      jrc_service_desk_tickets_view jrc_service_desk_tickets_view_all jrc_service_desk_customers_view]
     role = create(:custom_role, account: sd_account, permissions: permissions)
@@ -80,8 +92,9 @@ RSpec.describe 'Scoped native analyst responsibility origins', type: :request do
     hidden_member = create(:jrc_sd_membership, unit: other_unit, account_user: member)
     status = create(:jrc_sd_status, unit: other_unit)
     priority = create(:jrc_sd_priority, unit: other_unit)
-    sd_ticket(unit: other_unit, status: status, priority: priority, created_by_membership: hidden_member,
-              assignee_membership: hidden_member, title: 'Hidden other operator workload')
+    hidden = sd_ticket(unit: other_unit, status: status, priority: priority, created_by_membership: hidden_member,
+                       assignee_membership: hidden_member, title: 'Hidden other operator workload')
+    evidence.update!(metadata: { '_source_ids' => { 'tickets' => [visible.id, hidden.id] } })
     get selected_url, headers: headers, params: { kind: 'service_tickets', unit_id: sd_unit.id, operating_company_id: sd_operator.id }
     expect(response).to have_http_status(:forbidden)
     expect(response.body).not_to include('total', 'payload', 'Hidden other operator workload')
@@ -92,6 +105,8 @@ RSpec.describe 'Scoped native analyst responsibility origins', type: :request do
     hidden = JrcProjects::Projects::Create.call(account: sd_account, actor: analyst,
                                                 attributes: { name: 'Hidden native project', visibility: 'private' },
                                                 idempotency_key: SecureRandom.uuid)
+    JrcRelationship::SuccessPlan.create!(account: sd_account, assignment: assignment, owner: sd_user, project: hidden,
+                                         title: 'Synthetic private native CS link')
     permissions = %w[contact_manage jrc_relationship_view jrc_relationship_team jrc_projects_project_view jrc_projects_task_view]
     role = create(:custom_role, account: sd_account, permissions: permissions)
     sd_account_user.update!(role: :agent, custom_role: role, jrc_projects_enabled: true)
@@ -115,7 +130,7 @@ RSpec.describe 'Scoped native analyst responsibility origins', type: :request do
   end
 
   it 'does not turn native project capability revocation into an empty or disclosed responsibility list' do
-    project
+    plan
     role = create(:custom_role, account: sd_account,
                                 permissions: %w[contact_manage jrc_relationship_view jrc_relationship_team jrc_projects_project_view])
     sd_account_user.update!(role: :agent, custom_role: role, jrc_projects_enabled: false)
@@ -125,7 +140,7 @@ RSpec.describe 'Scoped native analyst responsibility origins', type: :request do
   end
 
   it 'rechecks native capabilities before disclosing a list if the grant is revoked during the query' do
-    project
+    plan
     role = create(:custom_role, account: sd_account,
                                 permissions: %w[contact_manage jrc_relationship_view jrc_relationship_team jrc_projects_project_view])
     checks = 0

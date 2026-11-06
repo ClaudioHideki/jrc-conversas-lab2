@@ -146,6 +146,17 @@
       "current_state": "Native supported handoff, source-free receipt, real Central/capacity continuation and current grants tested; no implicit customer access grant.",
       "report": "scoped_responsibility_handoff_checkpoint_20261106.json",
       "remaining": "Fresh visual acceptance and new unrelated-native boundary increment remain open."
+    },
+    {
+      "requirement": "F1 CS-only analyst withdrawal: preserve unrelated native responsibilities",
+      "word_fragments": [
+        "relacionamento:P0106",
+        "relacionamento:P0127",
+        "relacionamento:P0128"
+      ],
+      "current_state": "User business scope confirmed;34native gates passed for plan/action/risk source selection and native grants. Other module work/access/records preserved.",
+      "report": "withdrawal_cs_native_boundary_checkpoint_20261106.json",
+      "remaining": "Formal handoff origin expansion and source-selector scale are next; no full F1 or fresh visual closure."
     }
   ],
   "explicit_dependencies": [

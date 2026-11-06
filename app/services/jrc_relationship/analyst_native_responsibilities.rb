@@ -60,6 +60,7 @@ class JrcRelationship::AnalystNativeResponsibilities
       rows = native.owned_pending_scope(kind, analyst)
       visible = rows.exists? ? native.owned_scope(kind, analyst) : rows.none
     end
+    rows = JrcRelationship::WithdrawalNativeLinks.new(context).restrict(kind, rows) unless kind == 'activities'
     [rows, visible]
   end
 
