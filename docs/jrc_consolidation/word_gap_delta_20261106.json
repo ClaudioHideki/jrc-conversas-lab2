@@ -204,6 +204,12 @@
       "report": "docs/jrc_consolidation/named_portfolio_governance_checkpoint_20261106.json",
       "implemented_validated": "Actual group capacity/transfer rules in native immutable configuration and reviewed/direct admission engines;20new governance cases,13native capacity regressions,1concurrency,7sourceUI.",
       "partial": "Full master-to-group picker flow, local role/capability matrix, grouping per-item resume, scoped history/export and current-source Chrome acceptance remain open."
+    },
+    {
+      "reference": "Relationship P0099-P0104,P0123-P0128",
+      "report": "docs/jrc_consolidation/named_portfolio_configured_scale_checkpoint_20261106.json",
+      "implemented_validated": "Configured native HTTP preview50of1000customers:378SQL/18groupSQL/1.0943s local;owner integrity and v1snapshot checked.",
+      "qualification": "Generic native audit store append-only enforcement is not confirmed; do not equate it with persisted readonly configuration versions or DB-pinned batch snapshots."
     }
   ],
   "explicit_dependencies": [

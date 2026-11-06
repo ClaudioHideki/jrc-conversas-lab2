@@ -20,5 +20,6 @@
   "pending_business_data": "No inferred language/affinity/conflict-of-interest sources or illustrative default weights.",
   "restrictions": "No build,push,GHCR,deploy,cleanup,external real operations,5379change or original-container restart. Additive migration only in exact owned synthetic candidateDB.",
   "disk_bytes": 5140819968,
-  "status": "Implementation starting; design/checkpoint is not functionality acceptance."
+  "status": "Implementation starting; design/checkpoint is not functionality acceptance.",
+  "audit_verification_20261106": "Planned immutable native audit is not yet established for generic JrcCrm::AuditEvent; application-readonly ConfigurationVersion and DB-pinned BatchReview are distinct protections. Preserve full requirement as pending and do not claim a seal for operational audit summaries."
 }
