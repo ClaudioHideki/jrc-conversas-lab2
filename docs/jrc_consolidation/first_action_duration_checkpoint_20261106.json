@@ -1,0 +1,49 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "009009c4d9d58477b793e274436b4e753c7c1b5b",
+  "status": "F2/G existing reaction-time metric hardened and locally validated; stages remain open",
+  "word_reference": "Relationship P0151/P0155, operational observability and reaction time; no new business formula.",
+  "confirmed_gap": "Baseline5/2 failures: malformed elapsed metadata made the real dashboard return500; nonfinite historical numeric input poisoned the existing SQL average and hid valid observations. Native clock, isolation and finite-extreme controls already passed.",
+  "implementation": [
+    "ReportMetrics keeps its native Context.records action/account/portfolio/source scope and first_action_at period. FirstActionDuration reads only recorded elapsed-seconds evidence in native ActiveRecord batches, not full private metadata or direct unscoped models.",
+    "Finite nonnegative observations are averaged in minutes using an overflow-safe incremental mean. Actual0 remains observed; absent/invalid/nonfinite/negative values remain unavailable. No wall-time fallback, guessed zero, historical rewrite or change to SlaClock/calendar.",
+    "Retains ordinary numeric JSON/legacy decimal strings, decimal underscore notation and based integer strings accepted by the actual local PostgreSQL16.15. Read-only SQL confirmed1_2=12 and0x78/0o170/0b1111000=120; these were not incorrectly reclassified as invalid.",
+    "No new database dependency, schema, endpoint, public field, UI layout or provider operation. The existing numeric/null DTO and its UI consumer are retained."
+  ],
+  "tests": {
+    "native02": "9 examples,0 failures =5 new duration cases plus4 native operational-period regressions. Covers actual SlaClock120seconds, missing/malformed/negative/nonfinite input, genuine zero, valid legacy numeric strings, hidden/foreign/out-of-period sources and finite mean without sum overflow.",
+    "new_ruby_offenses": 0,
+    "shared_ruby": [
+      {
+        "path": "app/services/jrc_relationship/report_metrics.rb",
+        "baseline_count": 2,
+        "current_count": 2,
+        "new_cop_counts": {},
+        "current_new": []
+      }
+    ],
+    "frontend": "No frontend source or metric DTO shape changed; no redundant Vue suite, app build or false current-source Chrome claim.",
+    "diff_check": "passed"
+  },
+  "resources": {
+    "start": 7112167424,
+    "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+    "database": "jrc_rel_v2_candidate_test",
+    "no_build": true,
+    "no_server": true,
+    "spec_sha256": {
+      "spec/requests/api/v1/accounts/relationship/first_action_duration_spec.rb": "960db89544614fdee036a1f37575d2b0b44e7de46070019e9950bd77f6e291eb",
+      "spec/requests/api/v1/accounts/relationship/operational_period_spec.rb": "8bfb27cfa4219768c47cdaec81af32895fdb348b0e041b6d87299bae898ecb7d"
+    },
+    "minimum": 7111892992,
+    "exit_code": 0,
+    "end": 7111958528
+  },
+  "limitations": [
+    "Technical batching is not a production-scale latency/SLO or pilot claim.",
+    "This is recorded native calendar duration; not NICO/provider inference latency or model precision.",
+    "Fresh current-source Chrome, real provider acceptance and business dependencies remain open."
+  ],
+  "next": "Continue exact F2 Word reconciliation, identifying native reused implementation and genuine remaining requirements without duplicating stable modules.",
+  "restrictions": "No app build, cleanup, original container/server modification/restart, push, GHCR, deploy, production or real external operation."
+}
