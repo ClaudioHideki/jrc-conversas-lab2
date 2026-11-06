@@ -6,9 +6,9 @@ class JrcRelationship::ResponsibilityBlockers
     @executor_id = executor_id
   end
 
-  def call(assignment, entries, activities)
+  def call(assignment, entries, activities, project_proofs: [])
     plans = @context.records(JrcRelationship::SuccessPlan).where(id: entries.select { |row| row['kind'] == 'plans' }.pluck('id'))
-    result = reference_blockers(plans, plan_references(plans), activities)
+    result = reference_blockers(plans, plan_references(plans), activities, project_proofs)
     result << 'active_cadence_requires_native_review' if active_cadence?(assignment)
     result << 'activity_origin_requires_native_review' unless exclusive_activity_origins?(assignment, entries, activities)
     result << 'shared_activity_requires_native_review' if shared_activities?(assignment, activities)
@@ -45,9 +45,9 @@ class JrcRelationship::ResponsibilityBlockers
     references
   end
 
-  def reference_blockers(plans, references, activities)
-    result = []
-    result << 'project_responsibility_requires_native_transfer' if plans.any?(&:project_id)
+  def reference_blockers(plans, references, activities, proofs)
+    result = JrcRelationship::ProjectHandoffProof.blockers(proofs)
+    result << 'project_responsibility_requires_native_transfer' if plans.any?(&:project_id) && proofs.empty?
     result << 'activity_origin_requires_native_review' if other_activities?(references, activities)
     result
   end

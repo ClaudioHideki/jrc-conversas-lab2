@@ -1,6 +1,11 @@
 import { mount } from '@vue/test-utils';
-import { expect, it } from 'vitest';
+import { expect, it, vi } from 'vitest';
 import ResponsibilityComparison from './ResponsibilityComparison.vue';
+
+vi.mock('vue-router', async importOriginal => ({
+  ...(await importOriginal()),
+  useRoute: () => ({ params: { accountId: '42' } }),
+}));
 
 it('paginates the actual frozen responsibilities and resets after a proposal change', async () => {
   const entries = Array.from({ length: 12 }, (_, id) => ({

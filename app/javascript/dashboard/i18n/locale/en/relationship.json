@@ -578,7 +578,20 @@
         "shared_native_responsibility_requires_review": "A native task or ticket is shared by different customer plans and requires source review.",
         "native_project_requires_reopen": "Reopen the source project before transferring its pending tasks.",
         "native_actor_membership_required": "The executor needs an existing native Service Desk unit membership. This operation will not create one.",
-        "responsibility_scope_denied": "Your current permissions do not allow access to these responsibility details."
+        "responsibility_scope_denied": "Your current permissions do not allow access to these responsibility details.",
+        "project_customer_context_mismatch": "A linked project belongs to another customer. Correct the source reference before transfer.",
+        "project_tasks_require_native_transfer": "Pending source-owned project tasks must be transferred natively or explicitly included in this reviewed plan."
+      },
+      "PROJECTS": {
+        "TITLE": "Native project responsibility evidence",
+        "NOTICE": "Project ownership and membership are not transferred here. Complete any required handoff in Projects, then create a new CS simulation. Historical projects retain their original responsibility.",
+        "STATES": {
+          "already_destination": "Native project already belongs to the reviewed destination.",
+          "historical": "Historical project; original ownership is preserved.",
+          "native_transfer_required": "Complete the native project owner transfer before reviewing this CS handoff.",
+          "customer_mismatch": "Project customer differs from the reviewed CS customer. Correct the source link.",
+          "unreviewed_tasks": "Pending source-owned project tasks still require native transfer or explicit plan review."
+        }
       }
     },
     "HEALTH_EVIDENCE": {

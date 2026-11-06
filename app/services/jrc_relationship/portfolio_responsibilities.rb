@@ -17,15 +17,15 @@ class JrcRelationship::PortfolioResponsibilities
   end
 
   def snapshot(assignment, owner_id:, lock: false)
-    rows = TYPES.flat_map do |kind, (model, statuses)|
-      source = model.where(account_id: @context.account.id, assignment_id: assignment.id, status: statuses)
-      authorized!(source, @context.records(model))
-      bounded(source, :owner, lock).map { |record| entry(kind, record, owner_id) }
-    end
+    rows = pending_entries(assignment, owner_id, lock)
     activities = activity_rows(assignment, rows, lock)
     rows += JrcRelationship::NativeResponsibilities.new(@context, executor_id: @executor_id).snapshot(rows, owner_id: owner_id, lock: lock)
-    { 'assignment_id' => assignment.id, 'entries' => rows + activities.map { |row| entry('activities', row, owner_id) },
-      'blockers' => JrcRelationship::ResponsibilityBlockers.new(@context, executor_id: @executor_id).call(assignment, rows, activities) }
+    projects = JrcRelationship::ProjectHandoffProof.new(@context).capture(assignment, rows, owner_id: owner_id, lock: lock)
+    snapshot = { 'assignment_id' => assignment.id, 'entries' => rows + activities.map { |row| entry('activities', row, owner_id) },
+                 'blockers' => JrcRelationship::ResponsibilityBlockers.new(@context, executor_id: @executor_id)
+                                                                      .call(assignment, rows, activities, project_proofs: projects) }
+    snapshot['project_handoffs'] = projects if projects.any?
+    snapshot
   end
 
   def authorized!(source, visible)
@@ -33,6 +33,8 @@ class JrcRelationship::PortfolioResponsibilities
   end
 
   def visible_snapshot?(snapshot)
+    return false unless JrcRelationship::ProjectHandoffProof.new(@context).visible?(snapshot.fetch('project_handoffs', []))
+
     snapshot.fetch('entries').group_by { |row| row.fetch('kind') }.all? do |kind, rows|
       ids = rows.pluck('id')
       relation = visible_scope(kind)
@@ -59,6 +61,14 @@ class JrcRelationship::PortfolioResponsibilities
   end
 
   private
+
+  def pending_entries(assignment, owner_id, lock)
+    TYPES.flat_map do |kind, (model, statuses)|
+      source = model.where(account_id: @context.account.id, assignment_id: assignment.id, status: statuses)
+      authorized!(source, @context.records(model))
+      bounded(source, :owner, lock).map { |record| entry(kind, record, owner_id) }
+    end
+  end
 
   def plan_activity_references(entries)
     plans = @context.records(JrcRelationship::SuccessPlan).where(id: entries.select { |row| row['kind'] == 'plans' }.pluck('id'))

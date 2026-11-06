@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { buttonClass } from './definitions';
+import ProjectHandoffProofs from './ProjectHandoffProofs.vue';
 const props = defineProps({
   rows: { type: Array, default: () => [] },
   ownerName: { type: String, default: '' },
@@ -34,6 +35,7 @@ watch(
       {{ t('RELATIONSHIP.RESPONSIBILITIES.TITLE') }}
     </h3>
     <p class="text-sm">{{ t('RELATIONSHIP.RESPONSIBILITIES.NOTICE') }}</p>
+    <ProjectHandoffProofs :rows="rows" />
     <p
       v-for="row in rows"
       :key="row.assignment_id"
