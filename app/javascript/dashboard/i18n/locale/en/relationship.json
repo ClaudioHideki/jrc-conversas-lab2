@@ -1,5 +1,21 @@
 {
   "RELATIONSHIP": {
+    "PLAYBOOK_RESTORE": {
+      "TITLE": "Restore a playbook definition",
+      "OPEN": "Review playbook restoration",
+      "HISTORY": "Definition history",
+      "HELP": "Restore version {source} as version {next} from current saved version {current}. Enabled state, conditions and steps are included. Old definitions and executions remain unchanged. Confirmation saves the definition; it does not execute it.",
+      "SIMULATE": "Simulate definition",
+      "ACTIVE": "Automation enabled:",
+      "STEP": "Step {index}: {kind} — {title} — {days} days after the event",
+      "CONDITIONS": "Configured conditions: {count}",
+      "CONDITION": "{field} {operator} {value}",
+      "CONDITION_FIELDS": { "segment_id": "Segment reference", "product_id": "Product reference", "business_unit_id": "Unit reference", "health_score": "Health score", "mrr_cents": "Monthly recurring revenue (cents)", "days_without_contact": "Days without contact", "critical_tickets": "Critical tickets", "sla_breached": "Breached SLA", "nps": "NPS", "csat": "CSAT", "overdue_cents": "Overdue amount (cents)", "delayed_projects": "Delayed projects" },
+      "OPERATORS": { "lt": "less than", "lte": "at most", "eq": "equals", "gte": "at least", "gt": "greater than" },
+      "INCOMPLETE": "This historical definition is incomplete. Restoration is blocked; review its legacy fields before creating a new definition.",
+      "UNCONFIRMED": "The playbook restoration could not be confirmed for the selected definition and versions.",
+      "SAVED": "Playbook version {version} saved from version {source}. Previous definitions and executions were preserved."
+    },
     "CONFIG_RESTORE": {
       "TITLE": "Restore a prior configuration",
       "SCOPE": "Configuration scope: {scope}",
@@ -617,6 +633,10 @@
     "DAILY_SUMMARY": "{today} ações hoje, {overdue} vencidas e {risk} clientes em risco na carteira autorizada.",
     "OPEN_NICO": "Abrir NICO para analisar a carteira",
     "RULE_LABELS": {
+      "required_documents": "Required customer documents",
+      "portfolio_capacity_limits": "Analyst capacity limits",
+      "playbook_flow_policy": "Native Flow execution policy",
+      "priority_bands": "Configured priority bands",
       "no_contact_days": "Dias sem contato",
       "renewal_days": "Janela de renovação (dias)",
       "risk_threshold": "Limite de risco",

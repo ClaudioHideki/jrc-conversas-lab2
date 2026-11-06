@@ -12,6 +12,12 @@ const operationsBase = accountId =>
 export default {
   restoreConfiguration: (accountId, fields, options) =>
     axios.post(`${base(accountId)}/configuration/restore`, fields, options),
+  restorePlaybook: (accountId, id, fields, options) =>
+    axios.post(
+      `${base(accountId)}/playbooks/${Number(id)}/restore`,
+      fields,
+      options
+    ),
   portfolioGroups: (accountId, params, options) =>
     axios.get(`${base(accountId)}/portfolio_groups`, { ...options, params }),
   portfolioGroup: (accountId, id, options) =>

@@ -719,6 +719,7 @@ Rails.application.routes.draw do
             get :playbook_executions, to: 'configuration#playbook_executions'
             post :playbooks, to: 'configuration#save_playbook'
             patch 'playbooks/:id', to: 'configuration#save_playbook'
+            post 'playbooks/:id/restore', to: 'configuration#restore_playbook'
           end
           namespace :crm do
             resource :dashboard, only: :show, controller: :dashboards

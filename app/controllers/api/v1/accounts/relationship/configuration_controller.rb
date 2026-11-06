@@ -57,6 +57,23 @@ class Api::V1::Accounts::Relationship::ConfigurationController < Api::V1::Accoun
     render json: record
   end
 
+  def restore_playbook
+    response.headers['Cache-Control'] = 'no-store'
+    input = playbook_restoration_input
+    result = JrcRelationship::Playbook.transaction do
+      JrcRelationship::BatchReviewAuthority.new(account_id: Current.account.id, actor_id: Current.user.id, write: false).call do |context|
+        raise Pundit::NotAuthorizedError unless context.policy.configure?
+
+        @relationship_context = context
+        Current.account = context.account
+        Current.user = context.user
+        Current.account_user = context.member
+        restore_playbook_version!(context, input)
+      end
+    end
+    render json: result
+  end
+
   def playbook_options
     rows = relationship_context.assignments.order(:id).limit(250)
     payload = { assignments: rows.map { |row| [row.id, row.label] }, flows: JrcRelationship::PlaybookFlow.catalog(relationship_context) }
@@ -108,22 +125,54 @@ class Api::V1::Accounts::Relationship::ConfigurationController < Api::V1::Accoun
     JrcRelationship::Playbook.new(account: Current.account)
   end
 
-  def update_playbook!(record, attrs)
-    validate_playbook_version!(record)
+  def update_playbook!(record, attrs, expected_version: params.dig(:playbook, :version), review_definition: false)
+    validate_playbook_version!(record, expected_version)
 
     before = record.attributes.slice('name', 'trigger_kind', 'active', 'steps', 'conditions')
     capture_playbook_version!(record) if record.persisted?
     record.active = false if record.new_record?
     record.assign_attributes(attrs)
-    validate_flow_steps!(record.steps) if record.new_record? || record.will_save_change_to_steps?
+    validate_flow_steps!(record.steps) if review_definition || record.new_record? || record.will_save_change_to_steps?
     record.version += 1 if record.persisted?
     record.save!
     capture_playbook_version!(record)
     audit_playbook!(record, before)
   end
 
-  def validate_playbook_version!(record)
-    raise ActiveRecord::StaleObjectError.new(record, 'update') if record.persisted? && params.dig(:playbook, :version).to_s != record.version.to_s
+  def validate_playbook_version!(record, expected_version)
+    raise ActiveRecord::StaleObjectError.new(record, 'update') if record.persisted? && expected_version.to_s != record.version.to_s
+  end
+
+  def playbook_restoration_input
+    input = params.permit(:version, :source_version, :reason).to_h
+    versions = input.values_at('version', 'source_version')
+    unless versions.all? { |value| value.is_a?(Integer) && value.positive? }
+      raise ArgumentError, 'Use whole-number current and prior playbook versions'
+    end
+    raise ArgumentError, 'Choose a prior playbook version' unless versions.last < versions.first
+
+    reason = input['reason']
+    raise ArgumentError, 'Provide a bounded restoration reason' unless reason.is_a?(String) && reason.strip.length.between?(1, 4000)
+
+    input.merge('reason' => reason.strip)
+  end
+
+  def restore_playbook_version!(context, input)
+    record = JrcRelationship::Playbook.where(account_id: context.account.id).lock('FOR UPDATE NOWAIT').find(params[:id])
+    source = record.versions.lock('FOR SHARE').find_by!(account_id: context.account.id, version: input.fetch('source_version'))
+    update_playbook!(record, playbook_restoration_fields(source), expected_version: input.fetch('version'), review_definition: true)
+    context.audit!(record, action: 'playbook_restored', before: { version: input.fetch('version') },
+                           after: { version: record.version, restored_from_version: source.version, reason: input.fetch('reason') })
+    { id: record.id, version: record.version, restored_from_version: source.version }
+  end
+
+  def playbook_restoration_fields(source)
+    keys = %w[name trigger_kind active steps conditions]
+    payload = source.payload
+    complete = payload.is_a?(Hash) && keys.all? { |key| payload.key?(key) } && [true, false].include?(payload['active'])
+    raise ArgumentError, 'Historical playbook definition is incomplete' unless complete
+
+    payload.slice(*keys).deep_dup
   end
 
   def audit_playbook!(record, before)

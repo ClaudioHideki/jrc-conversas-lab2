@@ -234,6 +234,12 @@
       "report": "docs/jrc_consolidation/configuration_restore_checkpoint_20261106.json",
       "implemented_validated": "Native configuration restoration creates new version; snapshots preserved, scopes/current authority/real Central gate retained.25native/0,source19/0and22/0overlap.",
       "partial": "Playbook rollback and other full F2 automation/production pilot/visual gates remain separate; protected generic audit is not claimed sealed."
+    },
+    {
+      "reference": "Relationship P0152/P0184/P0185",
+      "report": "docs/jrc_consolidation/playbook_restore_checkpoint_20261106.json",
+      "implemented_validated": "Controlled native playbook restoration, current Flow review and simulation-only UI;6backend/0 and source cohorts19/0,25/0,11/0 with overlaps.",
+      "partial": "Actual current-source Chrome, production governance/pilot, full history pagination and other C-G requirements remain open."
     }
   ],
   "explicit_dependencies": [
@@ -254,7 +260,7 @@
       "state": "External environment/operations require separate authorization; not simulated as passed."
     }
   ],
-  "next_confirmed_local_gap": "F2 controlled playbook-history restoration through the existing versioned native writer.",
+  "next_confirmed_local_gap": "Native playbook typed JSON conditions/steps: preserve submitted shapes before Rails normalization.",
   "stage_closure": {
     "C": false,
     "D": false,

@@ -1,0 +1,55 @@
+{
+  "date": "2026-11-06",
+  "branch": "codex/relacionamento-v2-20261101",
+  "preserved_previous_checkpoint": "cbb3077831496c236fdd8ba0045b93005033081c",
+  "reference": "Relationship P0152/P0184/P0185: native version restoration, current authority, protected definitions and execution references.",
+  "status": "Native playbook restoration and source interface locally validated; no current-source Chrome or production/external acceptance and no C-G closure.",
+  "implementation": [
+    "POST playbooks/:id/restore accepts exact current/prior integer versions and a bounded reason, selects the same-account stored definition and creates the next version through the EXISTING update_playbook! writer. Caller definitions are ignored.",
+    "Fresh locked authority refreshes the SAME authenticated account/user/member in this repository's thread-local Current module; no impersonation or new source access grant.",
+    "Restoration always reviews Flow references, even when steps equal the current book. It cannot silently reuse an old pin after the published Flow changes. Existing ordinary edit behavior, native validation, current contact/conversation/unit permissions and origin checks remain in the writer.",
+    "Native model validations, old version rows, snapshots and historical execution records remain unchanged. Incomplete legacy definitions are explicitly blocked rather than merged with unrelated current fields.",
+    "Existing book-history payload now has visible review controls. Fresh server reads precede comparison; exact ID/current+1/source receipt and native readback precede saved feedback. Role/account change and conflict/unknown commit result cannot confirm or auto-retry old writes.",
+    "Reuse native PlaybookDesignPreview with simulationOnly/readOnlyDefinition for restoration. The run guard cannot execute even when a simulated approval token is returned; historical references cannot be edited/repinned inside this preview. Normal preview behavior remains covered by existing tests.",
+    "Show enabled state, conditions, step titles/types/timing and saved versions in native responsive themed dialogs. Added missing native complex-rule labels and readable structured history instead of object-placeholder text."
+  ],
+  "native_evidence": {
+    "final": { "label": "playbook-restore-final10", "examples": 6, "failures": 0 },
+    "database": "jrc_rel_v2_candidate_test",
+    "coverage": "Actual API create/edit/edit/restore; immutable original definitions and a full synthetic historical execution record; conflict/idempotent retry; caller injection ignored; foreign tenant/native configure denial; malformed versions/reason; incomplete legacy; stale published Flow pin and rollback with no runs/messages/success audit.",
+    "qualification": "Historical execution fixture was created through native model validations to test preservation. It was not a real provider delivery or newly executed playbook.",
+    "fixed_failures": [
+      "Initial five native cases passed. Additional Flow case initially had invalid fixture graph metadata and missing calendar days; native validation was kept and fixture corrected.",
+      "same-flow-baseline07 reproduced a real bug: steps unchanged from the current book skipped the full Flow review and incorrectly returned200 after publication changed. Added review_definition to the reused native writer for restoration only.",
+      "final08 failed five cases because an attempted Current.set adaptation assumed ActiveSupport::CurrentAttributes. The repository uses thread_mattr_accessor; corrected to refresh the same authenticated identities through its actual accessors. final10:6/0. No incompatible code was published."
+    ],
+    "native_capture_note": "PlaybookVersion has DB uniqueness without the ConfigurationVersion model uniqueness validator; its existing create_or_find_by! already supports successive edits. It was verified, not changed based on the earlier configuration bug."
+  },
+  "source_evidence": {
+    "first": { "label": "playbook-restore-source01", "tests": 19, "failures": 0, "breakdown": "9new playbook restore +10existing native preview/attendance regressions" },
+    "final": { "label": "playbook-restore-source-final02", "tests": 25, "failures": 0, "breakdown": "9restore overlap +6API contracts +10configuration-restore regressions" },
+    "structured_history": { "label": "playbook-history-source03", "tests": 11, "failures": 0, "breakdown": "10configuration restore overlap +1new complex history rendering" },
+    "qualification": "Mocked source interfaces, not Chrome/database UI homologation. Existing i18n-registration warnings retained; own missing preview-state fixture and native missing complex-rule labels corrected, no warning suppression."
+  },
+  "static_evidence": {
+    "new_files": "New components/specs/API0errors/0warnings; Ruby spec ruby11:0offenses.",
+    "shared_source": "ConfigurationPanel35to34 existing warnings; PlaybookDesignPreview9to9 after new attribute order correction. No added warning types retained.",
+    "shared_controller": "One inherited Metrics/ClassLength finding remains and grew with the feature: current235/175. All other new cop offenses corrected. This is retained maintainability debt, not a claim of a globally clean RuboCop run.",
+    "diff": "git diff --check clean."
+  },
+  "environment": {
+    "disk_initial_recorded_bytes": 6610165760,
+    "disk_minimum_observed_bytes": 6555914240,
+    "disk_final_observed_bytes": 6763601920,
+    "disk_note": "Free space fluctuated outside test intervals; no cleanup was performed or credited.",
+    "no_build_migration_5379change_original_container_restart_or_external_operation": true
+  },
+  "remaining": [
+    "Current-source Chrome desktop/mobile/light/dark and Word visual acceptance remain prohibited pending build authorization. Native/source tests do not close this gate.",
+    "Playbook list/history retains its existing100books/50versions bounds; broad pagination and production pilot are not claimed.",
+    "Complete local portfolio roles/durable grouping batches/full protected history/master allocation batches and remaining C-G Word requirements remain open.",
+    "Next native safety check: JSON collection normalization must not silently drop null playbook conditions/steps while preserving valid empty conditions and existing strong parameter allowlists.",
+    "TRR, deferred company documents without portfolio and external DocuSign/scanner/channel validation remain separate."
+  ],
+  "checkpoint_resolution": "git log -1 --format=%H -- docs/jrc_consolidation/playbook_restore_checkpoint_20261106.json"
+}

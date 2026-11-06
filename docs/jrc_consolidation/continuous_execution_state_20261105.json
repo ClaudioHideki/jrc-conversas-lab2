@@ -3,13 +3,13 @@
   "user_request": "499267ac-546d-4853-b4cf-7f03a2ea0629",
   "initial_head": "be54d0f7b4ce8d4e2a077cf2bdd8c2a4d5c88f5e",
   "branch": "codex/relacionamento-v2-20261101",
-  "last_validated_checkpoint": "048be0d57f5cfd4ad0dcf149e7582fb4f6e59171",
+  "last_validated_checkpoint": "cbb3077831496c236fdd8ba0045b93005033081c",
   "completed_current_work": "Sealed dossier, weighted/current capacity, native withdrawal/cadence controls and F2 increments locally tested; see linked incremental reports. No C-G closure.",
-  "active_work": "F2 playbook history and controlled restoration with existing native writer; no duplicated engine.",
+  "active_work": "Native playbook typed collection input; preserve schemas, immutable history and no external operations.",
   "exact_next_actions": [
-    "Continue F2 controlled playbook-history restoration through the existing versioned writer and native Flow validation; do not assume the configuration capture bug also exists in PlaybookVersion.",
-    "Retain native group roles/durable batching/full audit/master-batch pending scope; continue safe C-G integration work.",
-    "No builds,5379change,cleanup,push,external operations or production changes."
+    "Verify and harden native playbook JSON collection shapes without changing valid empty conditions or allowed field semantics.",
+    "Audit remaining safe C-G Word gaps; full group local roles/durable queue/master batches/history and current-source Chrome remain open.",
+    "Do not build,push,clean,deploy,change5379/containers or perform external operations."
   ],
   "test_environment": {
     "source_manifest": ".codex/d9-notifications-20261104/snapshot.json",
@@ -51,16 +51,16 @@
     "No real participant removal or provider request; tests use synthetic records and WebMock, with external network disabled."
   ],
   "restrictions": "No build/recompile, no5379 change/restart, no four-container restart/reconfiguration, no cleanup/delete of existing data, no push/GHCR/deploy/production/client change, no real provider operations. Additive migrations allowed only in owned synthetic test database.",
-  "disk_last_observed_bytes": 6610378752,
+  "disk_last_observed_bytes": 6777270272,
   "TRR": "Undefined; do not invent",
   "company_documents_without_portfolio": "Explicitly deferred",
-  "last_validated_head": "048be0d57f5cfd4ad0dcf149e7582fb4f6e59171",
-  "new_validated_code_checkpoint": "git log -1 --format=%H -- docs/jrc_consolidation/configuration_restore_checkpoint_20261106.json",
-  "current_status": "Native configuration rollback:25backend/0,source19/0and22/0overlap;history3/0. C-G open.",
+  "last_validated_head": "cbb3077831496c236fdd8ba0045b93005033081c",
+  "new_validated_code_checkpoint": "git log -1 --format=%H -- docs/jrc_consolidation/playbook_restore_checkpoint_20261106.json",
+  "current_status": "Native playbook restoration6/0;source19/0,25/0and11/0overlap. C-G open.",
   "next_actions": [
-    "Continue F2 controlled playbook-history restoration through the existing versioned writer and native Flow validation; do not assume the configuration capture bug also exists in PlaybookVersion.",
-    "Retain native group roles/durable batching/full audit/master-batch pending scope; continue safe C-G integration work.",
-    "No builds,5379change,cleanup,push,external operations or production changes."
+    "Verify and harden native playbook JSON collection shapes without changing valid empty conditions or allowed field semantics.",
+    "Audit remaining safe C-G Word gaps; full group local roles/durable queue/master batches/history and current-source Chrome remain open.",
+    "Do not build,push,clean,deploy,change5379/containers or perform external operations."
   ],
   "latest_dossier_report": "docs/jrc_consolidation/sealed_dossier_checkpoint_20261105.json",
   "capacity_report": "docs/jrc_consolidation/weighted_capacity_checkpoint_20261105.json",
@@ -140,5 +140,6 @@
   "named_portfolio_history_report": "docs/jrc_consolidation/named_portfolio_history_checkpoint_20261106.json",
   "named_portfolio_master_flow_report": "docs/jrc_consolidation/named_portfolio_master_flow_checkpoint_20261106.json",
   "named_portfolio_link_results_report": "docs/jrc_consolidation/named_portfolio_link_results_checkpoint_20261106.json",
-  "configuration_restore_report": "docs/jrc_consolidation/configuration_restore_checkpoint_20261106.json"
+  "configuration_restore_report": "docs/jrc_consolidation/configuration_restore_checkpoint_20261106.json",
+  "playbook_restore_report": "docs/jrc_consolidation/playbook_restore_checkpoint_20261106.json"
 }

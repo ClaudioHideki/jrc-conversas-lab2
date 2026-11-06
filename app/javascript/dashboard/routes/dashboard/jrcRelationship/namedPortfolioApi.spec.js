@@ -109,3 +109,17 @@ it('binds restoration to the selected account and preserves its exact versioned 
     undefined
   );
 });
+
+it('keeps playbook restoration bound to its native account, ID and immutable source version', () => {
+  const fields = {
+    version: 3,
+    source_version: 1,
+    reason: 'Reviewed definition',
+  };
+  API.restorePlaybook(12, 18, fields);
+  expect(global.axios.post).toHaveBeenCalledWith(
+    '/api/v1/accounts/12/relationship/playbooks/18/restore',
+    fields,
+    undefined
+  );
+});

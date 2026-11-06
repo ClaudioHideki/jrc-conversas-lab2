@@ -260,3 +260,35 @@ it('reloads native persistence before displaying the confirmed restored version'
       .value
   ).toBe('70');
 });
+
+it('shows native structured capacity history without missing labels or object-placeholder text', async () => {
+  mocks.api.configuration.mockResolvedValue({
+    data: {
+      ...current,
+      history: [
+        {
+          ...historical,
+          rules: {
+            required_documents: [],
+            portfolio_capacity_limits: [
+              {
+                user_id: 7,
+                unit: 'hours',
+                maximum: 12,
+                availability: 1,
+                dedication: 1,
+              },
+            ],
+          },
+        },
+      ],
+    },
+  });
+  const wrapper = render(Panel, { allowed: true, metadata: {} }, true);
+  await flushPromises();
+  expect(wrapper.text()).toContain('Analyst capacity limits');
+  expect(wrapper.text()).toContain('Required customer documents');
+  expect(wrapper.text()).toContain('"maximum":12');
+  expect(wrapper.text()).not.toContain('[object Object]');
+  expect(wrapper.text()).not.toContain('RELATIONSHIP.RULE_LABELS.');
+});

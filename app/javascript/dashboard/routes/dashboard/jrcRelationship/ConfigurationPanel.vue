@@ -19,6 +19,7 @@ import PortfolioCapacityLimitsForm from './PortfolioCapacityLimitsForm.vue';
 import HealthConfigurationPreview from './HealthConfigurationPreview.vue';
 import PriorityBandsForm from './PriorityBandsForm.vue';
 import ConfigurationRestoreDialog from './ConfigurationRestoreDialog.vue';
+import PlaybookRestoreDialog from './PlaybookRestoreDialog.vue';
 const props = defineProps({
   screen: { type: String, default: 'settings' },
   allowed: Boolean,
@@ -35,6 +36,8 @@ const busy = ref(false);
 const restoring = ref(null);
 const restorePreparing = ref(false);
 const restored = ref(null);
+const restoringPlaybook = ref(null);
+const restoredPlaybook = ref(null);
 const scopeKey = ref('account');
 const restoreIdentity = computed(() =>
   JSON.stringify([
@@ -102,6 +105,8 @@ const load = async () => {
   restoring.value = null;
   restorePreparing.value = false;
   restored.value = null;
+  restoringPlaybook.value = null;
+  restoredPlaybook.value = null;
   books.value = [];
   book.value = null;
   error.value = '';
@@ -222,6 +227,45 @@ const restorationSaved = async receipt => {
   )
     restored.value = receipt;
 };
+const openPlaybookRestore = async (id, sourceVersion) => {
+  if (busy.value || restorePreparing.value || !props.allowed) return;
+  const token = generation;
+  restorePreparing.value = true;
+  error.value = '';
+  try {
+    const { data } = await API.playbooks(route.params.accountId);
+    if (token !== generation) return;
+    const current = data.payload.find(row => row.id === id);
+    const historical = current?.history?.find(
+      row => row.version === sourceVersion
+    );
+    if (!current || !historical || historical.version >= current.version)
+      throw new Error(t('RELATIONSHIP.PLAYBOOK_RESTORE.UNCONFIRMED'));
+    restoringPlaybook.value = { current, historical };
+  } catch (err) {
+    if (token === generation) {
+      error.value = message(err);
+      if ([401, 403, 404].includes(err.response?.status)) {
+        books.value = [];
+        book.value = null;
+      }
+    }
+  } finally {
+    if (token === generation) restorePreparing.value = false;
+  }
+};
+const playbookRestored = async receipt => {
+  const identity = restoreIdentity.value;
+  restoringPlaybook.value = null;
+  await load();
+  if (
+    identity === restoreIdentity.value &&
+    books.value.some(
+      row => row.id === receipt.id && row.version === receipt.version
+    )
+  )
+    restoredPlaybook.value = receipt;
+};
 watch(
   () => route.params.accountId,
   () => {
@@ -265,6 +309,17 @@ const conditionFields = [
   'delayed_projects',
 ];
 const date = value => formatDate(value, props.metadata?.formatting);
+const historyValue = value => {
+  if (typeof value === 'boolean')
+    return value ? t('RELATIONSHIP.YES') : t('RELATIONSHIP.NO');
+  if (Array.isArray(value))
+    return value
+      .map(item =>
+        item && typeof item === 'object' ? JSON.stringify(item) : String(item)
+      )
+      .join(', ');
+  return value && typeof value === 'object' ? JSON.stringify(value) : value;
+};
 </script>
 
 <template>
@@ -555,7 +610,7 @@ const date = value => formatDate(value, props.metadata?.formatting);
           <div
             v-for="(value, key) in version.weights"
             :key="key"
-            class="flex justify-between gap-3 text-sm"
+            class="flex min-w-0 justify-between gap-3 text-sm"
           >
             <dt>{{ t(`RELATIONSHIP.FACTORS.${key}`) }}</dt>
             <dd>{{ value }}</dd>
@@ -566,17 +621,11 @@ const date = value => formatDate(value, props.metadata?.formatting);
           <div
             v-for="(value, key) in version.rules"
             :key="key"
-            class="flex justify-between gap-3 text-sm"
+            class="flex min-w-0 justify-between gap-3 text-sm"
           >
             <dt>{{ t(`RELATIONSHIP.RULE_LABELS.${key}`) }}</dt>
-            <dd>
-              {{
-                Array.isArray(value)
-                  ? value.join(', ')
-                  : typeof value === 'boolean'
-                    ? t(value ? 'RELATIONSHIP.YES' : 'RELATIONSHIP.NO')
-                    : value
-              }}
+            <dd class="min-w-0 break-words">
+              {{ historyValue(value) }}
             </dd>
           </div>
         </dl>
@@ -598,6 +647,18 @@ const date = value => formatDate(value, props.metadata?.formatting);
       :metadata="metadata"
     />
     <template v-if="screen === 'playbooks'">
+      <p
+        v-if="restoredPlaybook"
+        role="status"
+        class="mb-4 rounded-lg bg-n-teal-2 p-3 text-n-teal-11"
+      >
+        {{
+          t('RELATIONSHIP.PLAYBOOK_RESTORE.SAVED', {
+            source: restoredPlaybook.restored_from_version,
+            version: restoredPlaybook.version,
+          })
+        }}
+      </p>
       <button
         type="button"
         :class="buttonClass"
@@ -610,21 +671,61 @@ const date = value => formatDate(value, props.metadata?.formatting);
         <li
           v-for="row in books"
           :key="row.id"
-          class="flex justify-between py-3"
+          class="min-w-0 space-y-3 py-3"
         >
-          <span
-            >{{ row.name }} ·
-            {{ t(`RELATIONSHIP.TRIGGERS.${row.trigger_kind}`) }}</span
-          ><button
-            type="button"
-            :class="buttonClass"
-            :disabled="busy"
-            @click="edit(row)"
+          <div
+            class="flex min-w-0 flex-wrap items-center justify-between gap-3"
           >
-            {{ t('RELATIONSHIP.EDIT') }}
-          </button>
+            <span
+              >{{ row.name }} ·
+              {{ t(`RELATIONSHIP.TRIGGERS.${row.trigger_kind}`) }}</span
+            ><button
+              type="button"
+              :class="buttonClass"
+              :disabled="busy"
+              @click="edit(row)"
+            >
+              {{ t('RELATIONSHIP.EDIT') }}
+            </button>
+          </div>
+          <details
+            v-if="row.history?.length"
+            class="min-w-0 rounded-lg border border-n-weak p-3"
+          >
+            <summary class="cursor-pointer text-sm font-semibold">
+              {{ t('RELATIONSHIP.PLAYBOOK_RESTORE.HISTORY') }}
+            </summary>
+            <ul class="mt-3 space-y-2">
+              <li
+                v-for="version in row.history"
+                :key="version.version"
+                class="flex min-w-0 flex-wrap items-center justify-between gap-3 text-sm"
+              >
+                <span>{{
+                  t('RELATIONSHIP.VERSION', { version: version.version })
+                }}</span>
+                <button
+                  v-if="version.version < row.version"
+                  type="button"
+                  :class="buttonClass"
+                  :disabled="busy || restorePreparing"
+                  @click="openPlaybookRestore(row.id, version.version)"
+                >
+                  {{ t('RELATIONSHIP.PLAYBOOK_RESTORE.OPEN') }}
+                </button>
+              </li>
+            </ul>
+          </details>
         </li>
       </ul>
+      <PlaybookRestoreDialog
+        v-if="restoringPlaybook"
+        :current="restoringPlaybook.current"
+        :historical="restoringPlaybook.historical"
+        :allowed="allowed"
+        @close="restoringPlaybook = null"
+        @saved="playbookRestored"
+      />
       <PlaybookExecutionPanel
         v-if="metadata.playbook_versions_available"
         :allowed="allowed"
