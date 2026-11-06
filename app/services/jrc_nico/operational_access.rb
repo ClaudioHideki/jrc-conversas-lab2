@@ -9,7 +9,9 @@ class JrcNico::OperationalAccess
   def authorize!
     account.reload
     @membership = account.account_users.find_by(user_id: user&.id)
-    raise Pundit::NotAuthorizedError unless user.is_a?(User) && membership && account.active? && account.custom_attributes['nico_enabled'] == true
+    allowed = user.is_a?(User) && membership && user.reload.active_for_authentication?
+    allowed &&= account.active? && account.custom_attributes['nico_enabled'] == true
+    raise Pundit::NotAuthorizedError unless allowed
 
     self
   end
