@@ -33,14 +33,16 @@
     },
     {
       "requirement": "F1 native pending destinations/removal",
-      "current_state": "Readiness, exclusive transfer, project handoff proofs, supervised cadence stop and scoped native editor inventory locally tested",
+      "current_state": "Native readiness, reviewed handoffs, nested commitments, automation dependencies and final Relationship-only eligibility withdrawal locally tested, including actual PostgreSQL concurrency.",
       "reports": [
         "withdrawal_readiness_checkpoint_20261105.json",
         "project_handoff_proof_checkpoint_20261105.json",
         "analyst_cadence_controls_checkpoint_20261105.json",
-        "analyst_native_responsibilities_checkpoint_20261106.json"
+        "analyst_native_responsibilities_checkpoint_20261106.json",
+        "withdrawal_nested_commitments_checkpoint_20261106.json",
+        "analyst_withdrawal_checkpoint_20261106.json"
       ],
-      "remaining": "Final identity/removal scope pending explicit business answer; no global agent deletion or blanket project/cadence succession."
+      "remaining": "No account/global agent deletion. Fresh visual acceptance and controlled new reversal remain separate; native project/cadence successor decisions are not automated blanket transfers."
     },
     {
       "requirement": "F2 priority/anti-noise",

@@ -3,7 +3,7 @@ class JrcRelationship::ModulePolicy < ApplicationPolicy
                    jrc_relationship_documents_view jrc_relationship_documents_manage].freeze
 
   def access?
-    account&.active? && account_user && account.feature_enabled?('jrc_relationship') &&
+    account&.active? && eligible_member? && account.feature_enabled?('jrc_relationship') &&
       JrcCustomers::DirectoryPolicy.new(user_context, :directory).access? &&
       (admin? || account_user.custom_role_id.nil? || permission?('jrc_relationship_view'))
   end
@@ -34,5 +34,11 @@ class JrcRelationship::ModulePolicy < ApplicationPolicy
 
   def permission?(key)
     Array(account_user&.custom_role&.permissions).include?(key)
+  end
+
+  private
+
+  def eligible_member?
+    account_user && user && JrcRelationship::AnalystEligibility.available?(account.id, user.id)
   end
 end

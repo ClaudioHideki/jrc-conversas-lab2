@@ -8,6 +8,7 @@ class JrcRelationship::DistributionPreview
   end
 
   def call
+    validate_destination!
     @records.each { |row| JrcRelationship::PortfolioTransferLock.check!(row, owner_id: @inputs['owner_id']) }
     binding = JrcRelationship::DistributionApproval.new(@context).binding(@records, owner_id: @inputs['owner_id'])
     raise ArgumentError, 'A justification is required for formal distribution approval' if binding['required'] && @inputs['justification'].blank?
@@ -18,6 +19,14 @@ class JrcRelationship::DistributionPreview
   end
 
   private
+
+  def validate_destination!
+    owner_id = @inputs['owner_id']
+    return unless owner_id && @records.any? { |row| row.owner_id != owner_id }
+    return if JrcRelationship::AnalystEligibility.available?(@context.account.id, owner_id)
+
+    raise ArgumentError, 'Destination analyst is withdrawn from Relationship'
+  end
 
   def comparison
     @records.map do |row|

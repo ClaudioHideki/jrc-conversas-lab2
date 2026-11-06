@@ -43,6 +43,12 @@ export default {
       `${base(accountId)}/team/${Number(analystId)}/withdrawal_readiness`,
       options
     ),
+  withdrawAnalyst: (accountId, analystId, withdrawal, options) =>
+    axios.post(
+      `${base(accountId)}/team/${Number(analystId)}/withdraw`,
+      { withdrawal },
+      options
+    ),
   analystCapacity: (accountId, analystId, params, options) =>
     axios.get(`${base(accountId)}/team/${Number(analystId)}/capacity`, {
       ...options,

@@ -16,6 +16,8 @@ class JrcRelationship::WithdrawalReadiness
     allocations!
     responsibilities!
     nested_commitments!
+    survey_rules = JrcRelationship::WithdrawalSurveyRules.new(@context, @membership)
+    collect!('survey_rules', survey_rules.source, survey_rules.visible)
     native_sources!
     verify_viewer!
     presentation
@@ -26,8 +28,8 @@ class JrcRelationship::WithdrawalReadiness
   def prepare_source!(analyst_id)
     @source = @context.account.users.find(analyst_id)
     @digest = Digest::SHA256.new
-    membership = @context.account.account_users.find_by!(user_id: @source.id)
-    @digest << JrcServiceDesk::CanonicalJson.dump([@context.account.id, @source.id, membership.id, membership.updated_at.iso8601(6)])
+    @membership = @context.account.account_users.find_by!(user_id: @source.id)
+    @digest << JrcServiceDesk::CanonicalJson.dump([@context.account.id, @source.id, @membership.id, @membership.updated_at.iso8601(6)])
     @counts = {}
     @signature = @context.access_signature
   end
@@ -41,7 +43,14 @@ class JrcRelationship::WithdrawalReadiness
     key = Rails.application.key_generator.generate_key('relationship-withdrawal-readiness-v1', 32)
     { analyst_id: @source.id, counts: @counts, state: @counts.values.all?(&:zero?) ? 'ready_for_final_review' : 'pending_responsibilities',
       final_removal_available: false, snapshot_digest: OpenSSL::HMAC.hexdigest('SHA256', key, @digest.hexdigest + @signature),
+      relationship_withdrawn_at: @membership.jrc_relationship_withdrawn_at,
+      can_withdraw_relationship: can_withdraw_relationship?,
       generated_at: Time.current }
+  end
+
+  def can_withdraw_relationship?
+    @membership.jrc_relationship_withdrawn_at.nil? && @source.id != @context.user.id && @context.policy.configure? &&
+      @context.policy.manage? && @counts.values.all?(&:zero?) && @context.assignable_users.exists?(@source.id)
   end
 
   def collect!(kind, source, visible)

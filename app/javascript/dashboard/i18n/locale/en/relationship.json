@@ -1607,7 +1607,11 @@
       "UNAVAILABLE": "Current permissions do not allow a complete review. Hidden workload is not zero workload.",
       "pending_responsibilities": "Pending responsibilities still require native reviewed handover.",
       "ready_for_final_review": "No pending ownership found in this verified snapshot. A separate final withdrawal review is still required.",
-      "FINAL_REVIEW": "Final removal remains unavailable until the governed execution validates all destination receipts, projects and active cadences.",
+      "FINAL_REVIEW": "The final action withdraws Relationship eligibility only. Account membership and access to other modules are preserved. Current responsibilities must be handed over through their native flows.",
+      "REASON": "Reason for Relationship withdrawal",
+      "CONFIRM_SCOPE": "I confirm the reviewed handover and withdrawal from Relationship only. Other module access remains unchanged.",
+      "WITHDRAW": "Withdraw from Relationship",
+      "WITHDRAWN": "Relationship eligibility withdrawn. Account membership and other module access are preserved.",
       "KINDS": {
         "allocations": "Customer allocations",
         "actions": "CS actions",
@@ -1622,7 +1626,8 @@
         "service_tickets": "Service Desk tickets",
         "projects": "Native project ownership",
         "plan_commitments": "Active plans with owned goals or milestones",
-        "qbr_commitments": "Scheduled QBRs with owned commitments"
+        "qbr_commitments": "Scheduled QBRs with owned commitments",
+        "survey_rules": "Active survey execution policies"
       }
     },
     "PRIORITY_SIGNAL_NOTICE": "Os pesos opcionais de tendência e SLA começam desativados. Tendência usa a queda observada em pontos de saúde; SLA usa a existência de vencimentos autorizados. Dados ausentes não são tratados como zero. A revisão manual de prioridade permanece preservada.",

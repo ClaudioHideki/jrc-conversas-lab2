@@ -13,6 +13,7 @@ class JrcRelationship::DistributionCapacityGuard
 
     JrcRelationship::DistributionApproval.lock_configuration!(@record.account_id)
     JrcRelationship::PortfolioTransferLock.validate_owner!(@record)
+    JrcRelationship::AnalystEligibility.validate!(@record)
     return unless @record.owner_id && LOAD_STATUSES.include?(@record.status)
 
     sources = JrcRelationship::DistributionConfigurations.new(@record.account)

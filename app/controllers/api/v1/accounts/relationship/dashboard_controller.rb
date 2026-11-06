@@ -23,6 +23,11 @@ class Api::V1::Accounts::Relationship::DashboardController < Api::V1::Accounts::
     render json: JrcRelationship::WithdrawalReadiness.new(relationship_context).call(params[:analyst_id])
   end
 
+  def withdraw
+    attrs = params.require(:withdrawal).permit(:reason, :snapshot_digest).to_h.symbolize_keys
+    render json: JrcRelationship::AnalystWithdrawal.new(relationship_context).call(params[:analyst_id], **attrs)
+  end
+
   def metadata
     ctx = relationship_context
     render json: metadata_access(ctx).merge(metadata_surveys(ctx), metadata_operations(ctx), metadata_workflows(ctx))
