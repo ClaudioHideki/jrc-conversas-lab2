@@ -206,7 +206,7 @@ it('protects the existing generic editor as well as the follow-up popup and reta
       customers: [{ id: 4, name: 'Native customer' }],
       metadata: { owners: [] },
     },
-    global: { stubs: { SlaSummary: true } },
+    global: { stubs: { SlaSummary: true, WorkContextPanel: true } },
   });
   expect(
     wrapper

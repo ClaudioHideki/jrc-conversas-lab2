@@ -15,7 +15,9 @@ class JrcRelationship::WorkContext
     qbrs = @context.records(JrcRelationship::Qbr).where(assignment: @assignment)
     signals = JrcRelationship::CustomerSignals.new(assignment: @assignment, context: @context).call
     plans = @context.records(JrcRelationship::SuccessPlan).where(assignment: @assignment)
-    { _source_ids: signals[:_source_ids], formatting: @context.formatting, period: { from: @period.begin, to: @period.end }, health: signals[:health],
+    { _source_ids: signals[:_source_ids], formatting: @context.formatting,
+      work_owners: JrcRelationship::WorkOwnership.new(@context, @assignment).options,
+      period: { from: @period.begin, to: @period.end }, health: signals[:health],
       mrr_cents: signals[:mrr_cents], finance_overdue_cents: signals[:overdue_cents],
       tickets: tickets.count, completed_activities: activities.completed.count,
       risks: risks.where.not(status: %w[retained churn no_action]).pluck(:id, :reason, :severity),

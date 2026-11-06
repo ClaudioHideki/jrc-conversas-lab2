@@ -1,0 +1,86 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "59ff53fbc76880d05d7d5912ac9f4a8756bc0a8a",
+  "status": "F1/F2 manual record-owner selection validated locally; no stage closure",
+  "confirmed_gap": "Baseline6/3 failures: inactive target produced writes/audits; same-account target lacking portfolio visibility was accepted; assignment-scoped owner options were absent.",
+  "implementation": [
+    "WorkOwnership reuses assignable_users, fresh native User authentication, current AccountUser, Relationship Context/manage and native assignment scope. Explicit changed work owners must also read the persisted record through Context.records in the original assignment transaction, before Agenda and audit.",
+    "WorkContext returns assignment-specific work_owners under the existing500-candidate bound. Existing global metadata/filter owner lists retained. Manual ownership is independent of online presence and automatic capacity.",
+    "RecordEditor uses scoped options, disables selection before context load, clears candidates/target on new-record customer change, preserves unchanged historical owner as disabled option, and retains native team/readOnly controls. Actions and risks now load the same native context panel already used by plans and QBR.",
+    "No portfolio/team membership grant, historical owner rewrite or identity removal. Nested QBR commitment owner paths are the next separate increment."
+  ],
+  "tests": {
+    "backend": "26 examples,0 failures:8 ownership cases plus existing analyst-follow-up and Workflow lineage regressions.",
+    "additional_unit": "1 example,0 failures. First attempt failed only because a new BusinessUnit fixture used company instead of actual company_id; corrected fixture, no model relaxation.",
+    "ui_first": "27 passed/1 failed of28. Existing standalone waiting-review fixture lacked router because newly mounted WorkContextPanel; stubbed only that child in its validation-focused test.",
+    "ui_final": "12/0 =4 scoped-selector tests +8 waiting-review regressions. Existing functional-review16/0 in first run; not blindly repeated.",
+    "new_ruby_offenses": 0,
+    "shared_ruby": [
+      {
+        "path": "app/services/jrc_relationship/workflow.rb",
+        "baseline_count": 28,
+        "current_count": 28,
+        "new_cop_counts": {},
+        "current_new": []
+      },
+      {
+        "path": "app/services/jrc_relationship/work_context.rb",
+        "baseline_count": 5,
+        "current_count": 5,
+        "new_cop_counts": {},
+        "current_new": []
+      }
+    ],
+    "editor_eslint": "Baseline13 warnings/current13 warnings,0 errors after fixing new formatting issue.",
+    "new_vue_spec_eslint": "0 errors/0 warnings; diff check passed.",
+    "scope": "Real API/DB, native policies, Agenda, persistence and rollback; synthetic local records. Vue uses mocks and is not Chrome acceptance."
+  },
+  "resources": {
+    "manual-work-owner-regression02": {
+      "start": 7124959232,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/manual_work_ownership_spec.rb": "a9361e7a95b9c6d6c23557b7854b500d8e4da5c585fa84c4a23072dd236525da",
+        "spec/requests/api/v1/accounts/relationship/action_follow_up_spec.rb": "ede310e64e13f988e0b86444f56ff40e8e0b6e52358c56525ad7681b6108a0b5",
+        "spec/services/jrc_relationship/workflow_native_lineage_spec.rb": "190fb387a92d4d2752d5e21d2f6e828bb0d7df2ba70fc706784d4d2b079abae0"
+      },
+      "minimum": 7102484480,
+      "exit_code": 0,
+      "end": 7131361280
+    },
+    "manual-work-owner-unit04": {
+      "start": 7126904832,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/manual_work_ownership_spec.rb": "6d374466a3b07b117e29eb9fa37608c7b05c77c32bf092b6662d383f43c947fa"
+      },
+      "minimum": 7126880256,
+      "exit_code": 0,
+      "end": 7128092672
+    }
+  },
+  "frontend_resources": {
+    "status": "passed",
+    "free_start": 7130427392,
+    "minimum_free": 7105888256,
+    "mandatory_stop_bytes": 750000000,
+    "conservative_stop_bytes": 2000000000,
+    "no_build": true,
+    "owned_process_id": 26636,
+    "exit_code": 0,
+    "free_end": 7107809280
+  },
+  "limitations": [
+    "Current-source Chrome desktop/mobile requires authorized fresh assets; no app build/server change performed.",
+    "Candidate enumeration bounded at500; no production-scale/SLO claim for the new picker.",
+    "TRR and final analyst identity-removal scope remain business dependencies.",
+    "Companies without portfolios retain explicit deferred status."
+  ],
+  "restrictions": "No build, cleanup, container/server interruption, push, GHCR, deploy, production or external operation."
+}

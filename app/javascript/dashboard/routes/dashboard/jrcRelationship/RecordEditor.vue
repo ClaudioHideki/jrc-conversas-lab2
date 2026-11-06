@@ -1,5 +1,5 @@
 <script setup>
-import { computed, reactive, ref } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { FIELDS, STATES, buttonClass, inputClass } from './definitions';
 import SlaSummary from './SlaSummary.vue';
@@ -29,6 +29,34 @@ const form = reactive({
   renewed_contract_id: props.record.metadata?.renewed_contract_id || '',
 });
 const workContext = ref(null);
+const ownerOptions = computed(() => {
+  const options = (workContext.value?.work_owners || []).map(([id, name]) => ({
+    id,
+    name,
+    disabled: false,
+  }));
+  const previous = props.record.owner_id;
+  if (previous && !options.some(row => String(row.id) === String(previous))) {
+    options.unshift({
+      id: previous,
+      name:
+        props.record.owner_name ||
+        props.metadata.owners?.find(
+          row => String(row[0]) === String(previous)
+        )?.[1] ||
+        String(previous),
+      disabled: true,
+    });
+  }
+  return options;
+});
+watch(
+  () => form.assignment_id,
+  () => {
+    workContext.value = null;
+    if (!props.record.id) delete form.owner_id;
+  }
+);
 const waitingError = ref(false);
 const waiting = computed(
   () => props.kind === 'actions' && isWaitingStatus(form.status)
@@ -301,7 +329,7 @@ const submit = () => {
         :metadata="metadata"
       />
       <WorkContextPanel
-        v-if="['qbrs', 'plans', 'expansion'].includes(kind)"
+        v-if="['actions', 'risks', 'qbrs', 'plans', 'expansion'].includes(kind)"
         v-show="editorTab === 'context'"
         :assignment-id="form.assignment_id"
         :initial-period="record.metadata || {}"
@@ -343,15 +371,17 @@ const submit = () => {
             v-if="key === 'owner_id'"
             v-model="form[key]"
             :class="inputClass"
-            :disabled="!metadata.can_team"
+            :disabled="!metadata.can_team || !workContext"
+            data-testid="work-owner"
           >
             <option value="">{{ t('RELATIONSHIP.UNASSIGNED') }}</option>
             <option
-              v-for="owner in metadata.owners || []"
-              :key="owner[0]"
-              :value="owner[0]"
+              v-for="owner in ownerOptions"
+              :key="owner.id"
+              :value="owner.id"
+              :disabled="owner.disabled"
             >
-              {{ owner[1] }}
+              {{ owner.name }}
             </option>
           </select>
           <select

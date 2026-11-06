@@ -72,10 +72,11 @@ class JrcRelationship::Workflow
       end
       raise ArgumentError, 'Retention plan must be structured data' if kind == 'risks' && !record.plan.is_a?(Hash)
 
-      if attrs.key?('owner_id') && attrs['owner_id'].to_s != before['owner_id'].to_s
+      owner_changed = attrs.key?('owner_id') && attrs['owner_id'].to_s != before['owner_id'].to_s
+      if owner_changed
         raise Pundit::NotAuthorizedError unless @context.policy.team?
 
-        @context.assignable_users.find(record.owner_id) if record.owner_id
+        JrcRelationship::WorkOwnership.new(@context, assignment).authorize!(record.owner_id) if record.owner_id
       end
       validate_links!(record)
       confirm_renewal!(record, attrs)
@@ -115,6 +116,7 @@ class JrcRelationship::Workflow
       end
       capture_financial!(record, kind)
       record.save!
+      JrcRelationship::WorkOwnership.new(@context, assignment).authorize_record!(record) if owner_changed
       JrcRelationship::RefreshJob.perform_later(@context.member.id, [assignment.id]) if kind == 'plans'
       if kind == 'actions' && record.saved_change_to_status? && %w[in_progress completed].include?(record.status)
         JrcOperations::SlaClock.new(record).mark_first_action!
