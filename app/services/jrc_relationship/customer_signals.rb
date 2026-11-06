@@ -1,6 +1,6 @@
 class JrcRelationship::CustomerSignals
   SOURCE_MANIFEST = %i[contracts orders invoices tickets projects project_tasks conversations activities csat surveys calls
-                       ticket_events project_events plans messages].freeze
+                       ticket_events project_events plans messages sla_clocks].freeze
   attr_reader :assignment, :context, :customer, :rules
 
   def initialize(assignment:, context:)
@@ -43,7 +43,7 @@ class JrcRelationship::CustomerSignals
       'sentiment' => sentiment.except(:source_ids),
       'adoption' => JrcRelationship::AdoptionMetric.call(goals: goals, metric: rules['adoption_metric']),
       'relationship' => observation(days, [100 - days * 100.0 / rules['no_contact_days'], 0].max, 'Customer360 last interaction / assignment date'),
-      'service_desk' => observation({ critical: critical, breached: overview[:sla_breached] }, overview[:capabilities][:service_desk] ? [100 - critical * rules['ticket_penalty'] - overview[:sla_breached].to_i * rules['sla_penalty'], 0].max : nil, 'Authorized TicketPolicy and SlaClock'),
+      'service_desk' => service_desk_observation(overview, critical),
       'finance' => observation(invoices.sum(:balance_cents), overview[:capabilities][:crm] ? (invoices.exists? ? rules['overdue_finance_score'] : 100) : nil, 'Authorized customer invoices; positive overdue balance'),
       'satisfaction' => satisfaction_observation(ratings),
       'contract' => observation(renewal_on, renewal_on ? [((renewal_on - Date.current).to_i * 100.0 / rules['renewal_days']).clamp(0, 100), 100].min : nil, 'Authorized active contract ends_on'),
@@ -150,5 +150,12 @@ class JrcRelationship::CustomerSignals
 
   def observation(raw, normalized, evidence)
     { raw: raw, normalized: normalized, evidence: evidence }
+  end
+
+  def service_desk_observation(overview, critical)
+    breached = overview[:sla_breached]
+    normalized = [100 - critical * rules['ticket_penalty'] - breached * rules['sla_penalty'], 0].max if overview[:capabilities][:service_desk_sla]
+    observation({ critical: critical, breached: breached }, normalized,
+                'Authorized customer/SLA TicketPolicy intersection and native calendar ClockProjection; missing SLA access is unavailable')
   end
 end

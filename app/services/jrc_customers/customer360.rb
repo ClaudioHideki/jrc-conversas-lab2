@@ -1,6 +1,6 @@
 class JrcCustomers::Customer360
   attr_reader :contacts, :conversations, :deals, :leads, :activities, :proposals, :audits, :calls, :recipients, :tickets, :projects, :project_tasks,
-              :ticket_events, :project_events, :contracts, :orders, :follow_ups
+              :ticket_events, :project_events, :contracts, :orders, :follow_ups, :sla_clocks
 
   def initialize(account:, user:, account_user:, company: nil, contact: nil)
     @account, @user, @company, @contact, @account_user = account, user, company, contact, account_user
@@ -29,7 +29,8 @@ class JrcCustomers::Customer360
     values = {
       contacts: contacts.count, conversations_open: conversations.where(status: :open).count,
       capabilities: { conversations: true, crm: @visibility.crm?, calls: !calls.nil?, campaigns: !recipients.nil?,
-                      service_desk: @visibility.service_desk?, projects: @visibility.projects?, contracts: @visibility.crm?,
+                      service_desk: @visibility.service_desk?, service_desk_sla: @visibility.service_desk_sla?,
+                      projects: @visibility.projects?, contracts: @visibility.crm?,
                       backoffice: @visibility.crm?, central_sip_cdr: false, relationship: !@relationship_assignment.nil? },
       document_context: JrcCustomers::CompanyDocumentsContext.new(member: @account_user, company: @company).call(@relationship_assignment),
       relationship: @relationship_assignment && { id: @relationship_assignment.id, status: @relationship_assignment.status },
@@ -51,9 +52,7 @@ class JrcCustomers::Customer360
     end
     if @visibility.service_desk?
       values[:tickets_open] = tickets.joins(:status).where(jrc_service_desk_ticket_statuses: { phase: %w[open waiting] }).count
-      values[:sla_breached] = JrcServiceDesk::SlaClock.where(account_id: @account.id, ticket_id: tickets.select(:id))
-                                                      .where(state: %w[running paused]).where('due_at < ?', Time.current)
-                                                      .select(:ticket_id).distinct.count
+      values[:sla_breached] = @visibility.service_desk_sla? ? JrcServiceDesk::ClockBreachQuery.ticket_count(sla_clocks) : nil
     end
     values[:projects_active] = projects.where(status: %w[planned active on_hold]).count if @visibility.projects?
     values[:calls] = calls.count if calls
@@ -134,6 +133,7 @@ class JrcCustomers::Customer360
                else
                  ticket_scope.where(company_id: @company.id).or(ticket_scope.where(company_id: nil, requester_id: contact_ids))
                end
+    @sla_clocks = @visibility.sla_clocks(@tickets)
     @projects = related(@visibility.projects, contact_ids)
     @project_tasks = @visibility.project_tasks(@projects)
     @ticket_events = @visibility.ticket_events(@tickets).where(event_type: %w[ticket_created ticket_updated lifecycle_transitioned])

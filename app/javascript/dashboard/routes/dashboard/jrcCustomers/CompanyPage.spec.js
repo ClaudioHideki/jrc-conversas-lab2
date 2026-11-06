@@ -71,6 +71,27 @@ beforeEach(() => {
   mocks.overview.mockResolvedValue({ data: structuredClone(summary) });
 });
 
+it('shows unavailable SLA explicitly while preserving the visible native ticket count', async () => {
+  mocks.overview.mockResolvedValueOnce({
+    data: {
+      ...structuredClone(summary),
+      capabilities: { service_desk: true, service_desk_sla: false },
+      tickets_open: 2,
+      sla_breached: null,
+    },
+  });
+  const wrapper = await render();
+  await flushPromises();
+  const card = wrapper
+    .findAll('article')
+    .find(item => item.text().includes('Chamados com SLA vencido'));
+  expect(card.get('strong').text()).not.toBe('0');
+  expect(card.get('strong').text()).not.toBe('');
+  expect(card.get('strong').text()).not.toContain('CRM.');
+  expect(wrapper.text()).toContain('Chamados abertos');
+  wrapper.unmount();
+});
+
 it('uses the popup subject rather than a missing standalone route parameter and preserves the canonical edit revision', async () => {
   const wrapper = await render();
   await flushPromises();

@@ -8,6 +8,7 @@ class JrcCustomers::AttendanceMetrics
     @member = member
     @customer = customer
     @user_context = { account: account, user: user, account_user: member }
+    @visibility = JrcCustomers::Visibility.new(account: account, user: user, account_user: member)
   end
 
   def call(filters = {})
@@ -103,16 +104,9 @@ class JrcCustomers::AttendanceMetrics
   end
 
   def ticket_sla
-    context = JrcServiceDesk::OperationalContext.new(@user_context)
-    return { available: false, reason: 'permission' } unless context.capability?(:sla_view) && context.capability?(:customers_view)
+    return { available: false, reason: 'permission' } unless @visibility.service_desk_sla?
 
-    permitted = JrcServiceDesk::TicketPolicy::Scope.new(context.to_h, JrcServiceDesk::Ticket).resolve_for('sla_view')
-    # Keep both native permissions as a set intersection. Nesting the complete
-    # SLA scope in the customer scope causes an expensive flattened join plan.
-    customer_ids = @customer.tickets.reselect(:id).reorder(nil).to_sql
-    sla_ids = permitted.reselect(:id).reorder(nil).to_sql
-    clocks = JrcServiceDesk::SlaClock.where(account_id: account.id, created_at: @period)
-                                     .where("ticket_id IN (#{customer_ids} INTERSECT #{sla_ids})")
+    clocks = @visibility.sla_clocks(@customer.tickets).where(created_at: @period)
     { available: true, clocks: clocks.count, current_states: clocks.group(:state).count,
       currently_breached_running_clocks: JrcServiceDesk::ClockBreachQuery.count(clocks) }
   end

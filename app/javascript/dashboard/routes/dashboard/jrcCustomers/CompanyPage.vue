@@ -136,7 +136,12 @@ const cards = computed(() => {
   if (overview.value.capabilities.service_desk)
     result.push(
       { label: T.openTickets, value: overview.value.tickets_open },
-      { label: T.slaBreached, value: overview.value.sla_breached }
+      {
+        label: T.slaBreached,
+        value:
+          overview.value.sla_breached ??
+          t('CRM.CONTACT_LEAD.METRIC_UNAVAILABLE'),
+      }
     );
   if (overview.value.capabilities.projects)
     result.push({
