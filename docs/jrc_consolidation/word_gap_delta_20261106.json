@@ -64,6 +64,20 @@
       ],
       "current_state": "Implemented native-base percentage-to-cents input; exact shared calculator vectors and atomic source adjustment tested",
       "remaining": "No new percentage source field or generic write adapter; other unspecified domains not declared complete."
+    },
+    {
+      "requirement": "F1 linked CRM commitments and native edit/reschedule",
+      "reports": [
+        "analyst_crm_commitments_checkpoint_20261106.json",
+        "native_activity_editing_checkpoint_20261106.json"
+      ],
+      "current_state": "Scoped source inventory and native content/date editor implemented and locally tested. No final identity removal or ownership transfer claimed."
+    },
+    {
+      "requirement": "C B3 limited representative attendance source scale",
+      "report": "attendance_source_scale_checkpoint_20261106.json",
+      "current_state": "1000 conversations/1150 fixture messages plus native templates and100 tickets/200 clocks; native query/permission regressions passed.",
+      "remaining": "Other C scale cohorts, real current-source popup/browser acceptance and production pilot remain open."
     }
   ],
   "explicit_dependencies": [
@@ -100,5 +114,5 @@
     "G": false
   },
   "unreviewed_literal_and_visual_fragments": "Not auto-marked complete; the original context/requirements inventory remains classification_pending where not explicitly reconciled.",
-  "next_source_review": "F1 native CRM commitments remain opaque counts in readiness, while project/task/ticket/cadence origins are now actionable. Reuse the same existing ownership/source query and CRM authorization; do not change identities or grants."
+  "next_source_review": "F2 customer360/health SLA signal must reuse native calendar projections and SLA-view permissions; review in customer_sla_native_gap_review_20261106.json."
 }
