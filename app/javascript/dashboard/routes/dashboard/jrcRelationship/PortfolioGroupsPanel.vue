@@ -6,6 +6,7 @@ import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcRelationship';
 import PortfolioGroupEditor from './PortfolioGroupEditor.vue';
 import PortfolioGroupCustomersDialog from './PortfolioGroupCustomersDialog.vue';
+import PortfolioGroupWorkloadPanel from './PortfolioGroupWorkloadPanel.vue';
 import CustomerPanel from './CustomerPanel.vue';
 import { buttonClass, inputClass, message } from './definitions';
 const props = defineProps({ metadata: { type: Object, required: true } });
@@ -116,6 +117,15 @@ const load = async (page = 1) => {
 const openGroup = id =>
   router.replace({
     query: { ...route.query, section: 'groups', group_id: id || undefined },
+  });
+const openNativeCustomers = () =>
+  router.replace({
+    query: {
+      ...route.query,
+      section: 'customers',
+      group_id: undefined,
+      portfolio_group_id: group.value.id,
+    },
   });
 const openEditor = record => {
   if (loading.value || saving.value) return;
@@ -229,6 +239,15 @@ onBeforeUnmount(() => {
         </p>
       </div>
       <div class="flex flex-wrap gap-2">
+        <button
+          v-if="group"
+          type="button"
+          :class="buttonClass"
+          :disabled="loading || saving"
+          @click="openNativeCustomers"
+        >
+          {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.OPEN_NATIVE_CUSTOMERS') }}
+        </button>
         <button
           v-if="selectedId"
           type="button"
@@ -412,7 +431,22 @@ onBeforeUnmount(() => {
         >
           {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.TABS.goals') }}
         </button>
+        <button
+          type="button"
+          :class="[
+            buttonClass,
+            detailsTab === 'workload' &&
+              'border-n-amber-7 bg-n-amber-2 text-n-amber-11',
+          ]"
+          @click="detailsTab = 'workload'"
+        >
+          {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.WORKLOAD.TITLE') }}
+        </button>
       </nav>
+      <PortfolioGroupWorkloadPanel
+        v-if="detailsTab === 'workload'"
+        :group="group"
+      />
       <section
         v-if="detailsTab === 'details'"
         class="grid min-w-0 gap-4 rounded-xl border border-n-blue-6 bg-n-solid-2 p-4 sm:grid-cols-2"

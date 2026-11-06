@@ -2,6 +2,20 @@
   "RELATIONSHIP": {
     "NAMED_PORTFOLIOS": {
       "TITLE": "Operational portfolios",
+      "OPEN_NATIVE_CUSTOMERS": "Open filtered customer list",
+      "FILTER_ACTIVE": "This list is limited to the selected operational portfolio and your current customer permissions.",
+      "CLEAR_GROUP_FILTER": "Remove portfolio filter",
+      "WORKLOAD": {
+        "TITLE": "Observed workload",
+        "UNAVAILABLE": "The current workload could not be loaded. Refresh after checking your access.",
+        "HELP": "Current native workload for active linked customers. These measurements do not grant admission or transfer approval. A shared customer is counted once in each portfolio; global customer capacity stays unique.",
+        "customers": "Active customers",
+        "points": "Configured workload points",
+        "hours": "Explicit equivalent hours",
+        "MISSING": "Explicit workload inputs are unavailable.",
+        "SCOPE_DENIED": "Full workload is unavailable in your current customer access.",
+        "CONTROLLED_REVIEW": "Use a controlled review for portfolios with more than 10000 active customers."
+      },
       "HELP": "Organize existing customers into one or more named portfolios.",
       "NEW": "New portfolio",
       "EDIT": "Edit portfolio",

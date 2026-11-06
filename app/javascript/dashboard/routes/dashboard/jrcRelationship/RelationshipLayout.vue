@@ -30,6 +30,9 @@ const link = key => ({
     ...(supportsSegment(key) && route.query.customer_segment_id
       ? { customer_segment_id: route.query.customer_segment_id }
       : {}),
+    ...(supportsSegment(key) && route.query.portfolio_group_id
+      ? { portfolio_group_id: route.query.portfolio_group_id }
+      : {}),
   },
 });
 const items = computed(() =>

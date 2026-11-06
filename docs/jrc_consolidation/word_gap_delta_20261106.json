@@ -192,6 +192,12 @@
       "report": "git log -1 --format=%H -- docs/jrc_consolidation/named_portfolio_foundation_checkpoint_20261106.json",
       "implemented_validated": "Named group/link foundation and sourceUI;28native+20Vue/API passed. Multiple active memberships preserve unique root allocations and global counts.",
       "partial": "Group-specific capacity/rules, distinct capabilities, scoped history/export and current-source Chrome acceptance remain open."
+    },
+    {
+      "reference": "Relationship P0091-P0107,P0123-P0128",
+      "report": "docs/jrc_consolidation/named_portfolio_native_integration_checkpoint_20261106.json",
+      "implemented_validated": "Native group filters, action cohorts, observed workload and sourceUI; real1000customer proof via full model validations:40SQL,1.0861s local request.",
+      "partial": "Configurable group capacity/rules enforcement, distinct capabilities/history/export and current-source Chrome acceptance remain open."
     }
   ],
   "explicit_dependencies": [
@@ -212,7 +218,7 @@
       "state": "External environment/operations require separate authorization; not simulated as passed."
     }
   ],
-  "next_confirmed_local_gap": "Integrate named-portfolio filtering/capacity through native scopes and immutable reviewed policies.",
+  "next_confirmed_local_gap": "Named portfolio native capacity/rule governance and reviewed admission; no invented defaults.",
   "stage_closure": {
     "C": false,
     "D": false,

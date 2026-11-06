@@ -9,6 +9,10 @@ class Api::V1::Accounts::Relationship::PortfolioGroupsController < Api::V1::Acco
     render json: reader.show(params[:id])
   end
 
+  def workload
+    render json: JrcRelationship::PortfolioGroupWorkload.new(relationship_context).call(params[:id])
+  end
+
   def create
     render json: writer.create!(attributes), status: :created
   end

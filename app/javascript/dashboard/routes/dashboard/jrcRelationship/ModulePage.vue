@@ -163,6 +163,7 @@ const stageOptions = computed(
 );
 const scope = () => ({
   customer_segment_id: route.query.customer_segment_id || undefined,
+  portfolio_group_id: route.query.portfolio_group_id || undefined,
   ...Object.fromEntries(
     Object.entries(filters).filter(
       ([, value]) => value !== '' && value !== false
@@ -173,11 +174,14 @@ const scope = () => ({
   page: pagination.value.page,
   ...normalizeFixedSurveyScope(props.fixedSurveyScope, props.screen),
 });
-const customerSegmentQuery = computed(() =>
-  route.query.customer_segment_id
+const customerSegmentQuery = computed(() => ({
+  ...(route.query.customer_segment_id
     ? { customer_segment_id: route.query.customer_segment_id }
-    : {}
-);
+    : {}),
+  ...(route.query.portfolio_group_id
+    ? { portfolio_group_id: route.query.portfolio_group_id }
+    : {}),
+}));
 let generation = 0;
 let controller;
 const load = async () => {
@@ -236,6 +240,7 @@ const load = async () => {
           per_page: 50,
           assignment_id: route.query.assignment_id || undefined,
           customer_segment_id: route.query.customer_segment_id || undefined,
+          portfolio_group_id: route.query.portfolio_group_id || undefined,
         },
         options
       ),
@@ -403,6 +408,8 @@ watch(
   [
     () => route.params.accountId,
     () => store.getters.getCurrentUserID,
+    () => store.getters.getCurrentRole,
+    () => JSON.stringify(store.getters.getCurrentUser?.accounts),
     () => props.screen,
   ],
   () => {
@@ -591,6 +598,8 @@ watch(
   [
     () => route.params.accountId,
     () => store.getters.getCurrentUserID,
+    () => store.getters.getCurrentRole,
+    () => JSON.stringify(store.getters.getCurrentUser?.accounts),
     () => props.screen,
     () => props.fixedSurveyScope,
     () => props.fixedSurveyScope?.unit_id,
@@ -609,6 +618,7 @@ watch(
     () => route.query.mode,
     () => route.query.segment_id,
     () => route.query.customer_segment_id,
+    () => route.query.portfolio_group_id,
     () => route.query.product_id,
     () => route.query.business_unit_id,
     () => route.query.complexity,
@@ -759,6 +769,27 @@ const money = value => formatMoney(value, metadata.value?.formatting);
     >
       {{ error }}
     </p>
+    <div
+      v-if="route.query.portfolio_group_id"
+      class="flex min-w-0 flex-wrap items-center justify-between gap-3 rounded-lg border border-n-teal-6 bg-n-teal-2 p-3"
+      data-testid="active-portfolio-group-filter"
+    >
+      <p class="min-w-0 break-words text-sm">
+        {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.FILTER_ACTIVE') }}
+      </p>
+      <button
+        type="button"
+        :class="buttonClass"
+        :disabled="loading || saving"
+        @click="
+          router.replace({
+            query: { ...route.query, portfolio_group_id: undefined },
+          })
+        "
+      >
+        {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.CLEAR_GROUP_FILTER') }}
+      </button>
+    </div>
     <form
       v-if="periodError"
       data-testid="operational-period-recovery"

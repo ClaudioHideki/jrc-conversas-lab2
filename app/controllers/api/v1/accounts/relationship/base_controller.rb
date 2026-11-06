@@ -39,10 +39,12 @@ class Api::V1::Accounts::Relationship::BaseController < Api::V1::Accounts::BaseC
   end
 
   def filtered_assignments
+    response.headers['Cache-Control'] = 'no-store' if params[:portfolio_group_id].present?
     scope = relationship_context.assignments
     filter = JrcCustomers::ModuleSegmentFilter.new(account: Current.account, actor: Current.user, module_key: 'relationship',
                                                    segment_id: params[:customer_segment_id])
     scope = filter.call(scope, company_column: :company_id, contact_column: :contact_id)
+    scope = JrcRelationship::PortfolioGroupFilter.call(relationship_context, scope, params[:portfolio_group_id])
     scope = scope.where(id: params[:assignment_id]) if params[:assignment_id].present?
     %w[owner_id team_id company_id business_unit_id status].each { |key| scope = scope.where(key => params[key]) if params[key].present? }
     scope = scope.where(owner_id: Current.user.id) if params[:mode] == 'mine'

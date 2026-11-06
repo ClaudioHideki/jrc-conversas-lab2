@@ -612,6 +612,7 @@ Rails.application.routes.draw do
           end
           namespace :relationship do
             resources :portfolio_groups, only: [:index, :show, :create, :update] do
+              get :workload, on: :member
               member do
                 get :customers
                 patch :customers, action: :update_customers, as: :update_customers

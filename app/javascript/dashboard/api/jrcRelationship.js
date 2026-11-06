@@ -14,6 +14,11 @@ export default {
     axios.get(`${base(accountId)}/portfolio_groups`, { ...options, params }),
   portfolioGroup: (accountId, id, options) =>
     axios.get(`${base(accountId)}/portfolio_groups/${Number(id)}`, options),
+  portfolioGroupWorkload: (accountId, id, options) =>
+    axios.get(
+      `${base(accountId)}/portfolio_groups/${Number(id)}/workload`,
+      options
+    ),
   savePortfolioGroup: (accountId, fields, id) =>
     id
       ? axios.patch(`${base(accountId)}/portfolio_groups/${Number(id)}`, fields)
