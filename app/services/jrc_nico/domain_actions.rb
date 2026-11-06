@@ -81,6 +81,7 @@ class JrcNico::DomainActions
     snapshot = JrcRelationship::SnapshotAccess.scope(ctx, relation).order(:id).last
     signals = snapshot&.signals&.deep_symbolize_keys || { health: { score: nil, band: 'unavailable', factors: [] } }
     signals = JrcRelationship::SatisfactionEvidenceProjection.annotate(signals: signals, configuration: ctx.configuration(assignment))
+    signals = JrcRelationship::SentimentEvidenceProjection.annotate(signals: signals, configuration: ctx.configuration(assignment))
     risks = ctx.records(JrcRelationship::RiskCase).where(assignment: assignment).where.not(status: %w[retained churn no_action]).limit(10)
     actions = ctx.records(JrcRelationship::Action).where(assignment: assignment, status: JrcRelationship::Action::ACTIVE_STATUSES).order(priority: :desc).limit(10)
     plans = ctx.records(JrcRelationship::SuccessPlan).where(assignment: assignment).limit(10)

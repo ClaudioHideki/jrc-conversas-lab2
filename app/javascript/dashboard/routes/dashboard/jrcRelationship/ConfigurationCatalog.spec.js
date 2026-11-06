@@ -149,3 +149,47 @@ it('persists a recovery margin through the existing versioned configuration form
   );
   wrapper.unmount();
 });
+
+it('edits the real sentiment window with whole-day bounds in the existing versioned form', async () => {
+  mocks.configuration.mockResolvedValue({
+    data: {
+      scope_key: 'account',
+      version: 11,
+      weights: { sentiment: 100 },
+      rules: { required_documents: [], sentiment_window_days: 90 },
+      history: [],
+    },
+  });
+  mocks.saveConfiguration.mockResolvedValue({ data: {} });
+  const wrapper = mount(Configuration, {
+    props: { allowed: true },
+    global: {
+      stubs: { PlaybookFlowPolicyForm: true, HealthConfigurationPreview: true },
+    },
+  });
+  await flushPromises();
+  const input = wrapper.get(
+    '[data-testid="relationship-rule-sentiment_window_days"]'
+  );
+  expect(input.attributes()).toEqual(
+    expect.objectContaining({ min: '1', max: '3650', step: '1' })
+  );
+  await input.setValue('14');
+  await wrapper.get('form').trigger('submit');
+  await flushPromises();
+  expect(mocks.saveConfiguration).toHaveBeenCalledWith(
+    '1400',
+    expect.objectContaining({
+      version: 11,
+      rules: expect.objectContaining({ sentiment_window_days: 14 }),
+    })
+  );
+  await wrapper.setProps({ allowed: false });
+  await flushPromises();
+  expect(
+    wrapper
+      .find('[data-testid="relationship-rule-sentiment_window_days"]')
+      .exists()
+  ).toBe(false);
+  wrapper.unmount();
+});

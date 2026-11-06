@@ -1,6 +1,6 @@
 class JrcRelationship::HealthTemporalPolicy
   def self.validation_errors(rules)
-    errors = %w[satisfaction_window_days health_trend_window_days].filter_map do |key|
+    errors = %w[satisfaction_window_days health_trend_window_days sentiment_window_days].filter_map do |key|
       value = rules.fetch(key)
       "#{key} must be a whole number from 1 to 3650 days" unless value.is_a?(Integer) && value.between?(1, 3650)
     end

@@ -103,3 +103,51 @@ it('uses server read-time freshness for cached scores and explains the need to r
   expect(wrapper.text()).toContain('HEALTH_EVIDENCE.REFRESH_REQUIRED');
   wrapper.unmount();
 });
+
+it('shows actual sentiment evidence, captured and current windows and clears it after access is lost', async () => {
+  const wrapper = mount(Summary, {
+    props: {
+      signals: {
+        sentiment_evidence: {
+          state: 'requires_refresh',
+          window_days: 90,
+          current_window_days: 14,
+          observed_at: '2026-10-01T12:00:00Z',
+          recalculation_required: true,
+        },
+      },
+    },
+  });
+  const evidence = wrapper.find('[data-testid="sentiment-evidence"]');
+  expect(evidence.text()).toContain('STATES.requires_refresh');
+  expect(evidence.text()).toContain('"days":90');
+  expect(evidence.text()).toContain('CURRENT_WINDOW');
+  expect(evidence.text()).toContain('"days":14');
+  expect(evidence.text()).toContain('SENTIMENT_OBSERVED');
+  expect(evidence.text()).toContain('SENTIMENT_SOURCE');
+  expect(evidence.text()).toContain('REFRESH_REQUIRED');
+  await wrapper.setProps({ signals: {} });
+  expect(wrapper.find('[data-testid="sentiment-evidence"]').exists()).toBe(
+    false
+  );
+  wrapper.unmount();
+});
+
+it('does not invent a sentiment observation or scoring date from an old snapshot', () => {
+  const wrapper = mount(Summary, {
+    props: {
+      signals: {
+        health: { score: 80, factors: [] },
+        sentiment_evidence: {
+          state: 'missing',
+          window_days: 90,
+          current_window_days: 90,
+        },
+      },
+    },
+  });
+  expect(wrapper.text()).toContain('STATES.missing');
+  expect(wrapper.text()).not.toContain('SENTIMENT_OBSERVED');
+  expect(wrapper.text()).not.toContain('CURRENT_WINDOW');
+  wrapper.unmount();
+});

@@ -98,10 +98,7 @@ class JrcRelationship::CustomerSignals
   end
 
   def sentiment_observation
-    rows = Message.where(account_id: context.account.id, conversation_id: customer.conversations.select(:id),
-                         private: false, message_type: [0, 1], created_at: 90.days.ago..Time.current)
-                  .where("sentiment IS NOT NULL AND sentiment <> '{}'::jsonb").order(created_at: :desc, id: :desc).limit(100)
-    JrcRelationship::SentimentMetric.call(rows.pluck(:id, :sentiment))
+    JrcRelationship::SentimentSignals.new(context: context, customer: customer, window_days: rules.fetch('sentiment_window_days')).call
   end
 
   def resolved_critical_ids(tickets)

@@ -26,6 +26,7 @@ class JrcRelationship::Configuration < ApplicationRecord
                     'health_hysteresis_points' => 0, 'health_drop_points' => 20, 'health_drop_action_priority' => 70,
                     'portfolio_transfer_approval_required' => false, 'portfolio_review_validity_minutes' => 15,
                     'portfolio_capacity_limits' => [], 'satisfaction_window_days' => 90, 'health_trend_window_days' => 30,
+                    'sentiment_window_days' => 90,
                     'automatic_action_cooldown_hours' => 0, 'automatic_action_daily_limit' => 0,
                     'auto_handoff' => true, 'missing_factor_policy' => 'renormalize', 'survey_automation_enabled' => false,
                     'renewal_window_days' => [15, 30, 60, 90, 120],

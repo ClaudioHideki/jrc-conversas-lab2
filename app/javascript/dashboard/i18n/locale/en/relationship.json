@@ -433,7 +433,8 @@
       "satisfaction_window_days": "Satisfaction evidence window (days)",
       "health_trend_window_days": "Health trend window (days)",
       "automatic_action_cooldown_hours": "Monitoring alert repeat cooldown (hours; 0 disables)",
-      "automatic_action_daily_limit": "Daily ceiling for monitoring and reviewed cadence actions, activities and meetings (0 disables; account time zone)"
+      "automatic_action_daily_limit": "Daily ceiling for monitoring and reviewed cadence actions, activities and meetings (0 disables; account time zone)",
+      "sentiment_window_days": "Existing sentiment evidence window (days)"
     },
     "ACCOUNT_SCOPE": "Toda a conta",
     "CONFIG_SCOPE": "Configuração por conta, segmento ou produto",
@@ -612,7 +613,11 @@
         "improved": "Improved",
         "declined": "Declined",
         "stable": "Stable"
-      }
+      },
+      "SENTIMENT": "Existing public-message sentiment",
+      "SENTIMENT_SOURCE": "Reads recognized analysis already stored on authorized public messages; no new AI inference. At most100 recent messages per window are inspected.",
+      "SENTIMENT_OBSERVED": "Latest contributing public message: {date}",
+      "CURRENT_WINDOW": "Current policy window: {days} days"
     },
     "CAPACITY": {
       "TITLE": "Customer allocation capacity",

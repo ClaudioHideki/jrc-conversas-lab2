@@ -320,6 +320,7 @@ const date = value => formatDate(value, props.metadata?.formatting);
                 ? 'any'
                 : [
                       'satisfaction_window_days',
+                      'sentiment_window_days',
                       'health_trend_window_days',
                       'automatic_action_daily_limit',
                     ].includes(key)
@@ -337,6 +338,7 @@ const date = value => formatDate(value, props.metadata?.formatting);
                 ? 0
                 : [
                       'satisfaction_window_days',
+                      'sentiment_window_days',
                       'health_trend_window_days',
                     ].includes(key)
                   ? 1
@@ -347,6 +349,7 @@ const date = value => formatDate(value, props.metadata?.formatting);
                 ? 100 - config.rules.healthy_threshold
                 : [
                       'satisfaction_window_days',
+                      'sentiment_window_days',
                       'health_trend_window_days',
                     ].includes(key)
                   ? 3650
