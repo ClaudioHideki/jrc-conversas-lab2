@@ -44,7 +44,8 @@ class JrcRelationship::PortfolioGroupReader
   def with_authority
     JrcRelationship::PortfolioGroup.transaction do
       JrcRelationship::BatchReviewAuthority.new(account_id: @account_id, actor_id: @actor_id, write: false).call do |context|
-        capabilities = { 'can_manage' => context.policy.manage? && context.policy.team?, 'can_configure' => context.policy.configure? }
+        capabilities = { 'can_manage' => context.policy.manage? && context.policy.team?, 'can_configure' => context.policy.configure?,
+                         'can_export_history' => context.policy.admin? }
         yield context, capabilities
       end
     end
@@ -74,7 +75,8 @@ class JrcRelationship::PortfolioGroupReader
   def access_flags(group, capabilities, complete)
     editable = capabilities.fetch('editable_ids').include?(group.id)
     { 'can_manage' => editable,
-      'can_configure' => complete && group.status == 'active' && editable && capabilities.fetch('can_configure') }
+      'can_configure' => complete && group.status == 'active' && editable && capabilities.fetch('can_configure'),
+      'can_read_history' => complete && editable, 'can_export_history' => complete && editable && capabilities.fetch('can_export_history') }
   end
 
   def reference_names(group)

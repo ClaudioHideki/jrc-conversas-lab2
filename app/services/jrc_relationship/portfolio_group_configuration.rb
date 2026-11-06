@@ -5,11 +5,7 @@ class JrcRelationship::PortfolioGroupConfiguration
 
   def self.authorize!(context, scope_key)
     id = JrcRelationship::PortfolioOwnerInput.parse(scope_key.split(':', 2).last)
-    group = JrcRelationship::PortfolioGroupScope.writable(context).find(id)
-    links = group.customer_links.where(active: true)
-    raise Pundit::NotAuthorizedError if links.where.not(assignment_id: context.assignments.select(:id)).exists?
-
-    group
+    JrcRelationship::PortfolioGroupAccess.complete_management!(context, id)
   end
 
   def self.verify_revision!(context, scope_key, version)

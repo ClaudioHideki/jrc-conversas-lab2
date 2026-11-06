@@ -38,6 +38,8 @@ it('preserves cancellation, filters and pagination for group and child reads', (
   );
   API.portfolioGroup(12, 18, { signal });
   API.portfolioGroupWorkload(12, 18, { signal });
+  API.portfolioGroupHistory(12, 18, { page: 2, kind: 'updated' }, { signal });
+  API.exportPortfolioGroupHistory(12, 18, { from: '2026-11-01' }, { signal });
   API.portfolioGroupCustomers(12, 18, { page: 3 }, { signal });
   expect(global.axios.get).toHaveBeenCalledWith(
     '/api/v1/accounts/12/relationship/portfolio_groups',
@@ -54,6 +56,14 @@ it('preserves cancellation, filters and pagination for group and child reads', (
   expect(global.axios.get).toHaveBeenCalledWith(
     '/api/v1/accounts/12/relationship/portfolio_groups/18/workload',
     { signal }
+  );
+  expect(global.axios.get).toHaveBeenCalledWith(
+    '/api/v1/accounts/12/relationship/portfolio_groups/18/history',
+    { signal, params: { page: 2, kind: 'updated' } }
+  );
+  expect(global.axios.get).toHaveBeenCalledWith(
+    '/api/v1/accounts/12/relationship/portfolio_groups/18/export_history',
+    { signal, params: { from: '2026-11-01' } }
   );
 });
 it('rejects malformed account contexts before making any group request', () => {

@@ -13,6 +13,17 @@ class Api::V1::Accounts::Relationship::PortfolioGroupsController < Api::V1::Acco
     render json: JrcRelationship::PortfolioGroupWorkload.new(relationship_context).call(params[:id])
   end
 
+  def history
+    render json: JrcRelationship::PortfolioGroupHistory.new(relationship_context)
+                                                       .index(params[:id], page: params.fetch(:page, 1),
+                                                                           kind: params.fetch(:kind, ''), period: report_period)
+  end
+
+  def export_history
+    render json: JrcRelationship::PortfolioGroupHistory.new(relationship_context)
+                                                       .export(params[:id], kind: params.fetch(:kind, ''), period: report_period)
+  end
+
   def create
     render json: writer.create!(attributes), status: :created
   end

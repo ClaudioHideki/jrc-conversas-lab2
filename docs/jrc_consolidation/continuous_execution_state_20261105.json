@@ -51,16 +51,16 @@
     "No real participant removal or provider request; tests use synthetic records and WebMock, with external network disabled."
   ],
   "restrictions": "No build/recompile, no5379 change/restart, no four-container restart/reconfiguration, no cleanup/delete of existing data, no push/GHCR/deploy/production/client change, no real provider operations. Additive migrations allowed only in owned synthetic test database.",
-  "disk_last_observed_bytes": 6641061888,
+  "disk_last_observed_bytes": 6632841216,
   "TRR": "Undefined; do not invent",
   "company_documents_without_portfolio": "Explicitly deferred",
-  "last_validated_head": "18d2be80ee80fc582df63b7eb331358f8cbd1849",
-  "new_validated_code_checkpoint": "git log -1 --format=%H -- docs/jrc_consolidation/named_portfolio_configured_scale_checkpoint_20261106.json",
-  "current_status": "Configured-group HTTP50/1000scale passed:378queries total,18group queries,1.0943s;no transfer. C-G open.",
+  "last_validated_head": "6d568a7e7826874b090fefcb780ae53761009d90",
+  "new_validated_code_checkpoint": "git log -1 --format=%H -- docs/jrc_consolidation/named_portfolio_history_checkpoint_20261106.json",
+  "current_status": "Scoped operational group history/summary export:11native/0,10sourceUI/API/0;full audit and C-G open.",
   "next_actions": [
-    "Implement scoped operational group history/export using the existing audit store, with safe projections and native permissions.",
-    "Continue native master-selection/group workflow and remaining role/per-item requirements without inventing grants.",
-    "Keep build/Chrome/current assets pending authorization; preserve5379."
+    "Implement the existing master-customer allocation to reviewed group-link flow without duplicate customer records or implicit ownership changes.",
+    "Continue group local capability/per-item requirements and other safe C-G gaps.",
+    "Preserve5379;current-source Chrome/build/external acceptance remain unauthorized."
   ],
   "latest_dossier_report": "docs/jrc_consolidation/sealed_dossier_checkpoint_20261105.json",
   "capacity_report": "docs/jrc_consolidation/weighted_capacity_checkpoint_20261105.json",
@@ -136,5 +136,6 @@
   "named_portfolio_foundation_report": "docs/jrc_consolidation/named_portfolio_foundation_checkpoint_20261106.json",
   "named_portfolio_native_integration_report": "docs/jrc_consolidation/named_portfolio_native_integration_checkpoint_20261106.json",
   "named_portfolio_governance_report": "docs/jrc_consolidation/named_portfolio_governance_checkpoint_20261106.json",
-  "named_portfolio_configured_scale_report": "docs/jrc_consolidation/named_portfolio_configured_scale_checkpoint_20261106.json"
+  "named_portfolio_configured_scale_report": "docs/jrc_consolidation/named_portfolio_configured_scale_checkpoint_20261106.json",
+  "named_portfolio_history_report": "docs/jrc_consolidation/named_portfolio_history_checkpoint_20261106.json"
 }

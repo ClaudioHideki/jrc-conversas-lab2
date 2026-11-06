@@ -5,6 +5,24 @@
       "OPEN_NATIVE_CUSTOMERS": "Open filtered customer list",
       "FILTER_ACTIVE": "This list is limited to the selected operational portfolio and your current customer permissions.",
       "CLEAR_GROUP_FILTER": "Remove portfolio filter",
+      "HISTORY": {
+        "TITLE": "Portfolio history",
+        "HELP": "Review authorized administrative changes. Historical values and reasons retain their source access restrictions.",
+        "EXPORT": "Export operational summary",
+        "PREPARED": "Operational summary prepared for download.",
+        "UNCONFIRMED": "The operational history could not be confirmed for this portfolio.",
+        "KIND": "Change type",
+        "UNKNOWN_OPERATOR": "Operator unavailable in your current access",
+        "REASON_RECORDED": "A reason is recorded in the source audit.",
+        "EMPTY": "No authorized events match these filters.",
+        "KINDS": {
+          "created": "Portfolio created",
+          "updated": "Portfolio updated",
+          "customers": "Customer links reviewed",
+          "rules": "Rule version recorded",
+          "exported": "Operational summary exported"
+        }
+      },
       "RULES": {
         "TITLE": "Capacity and transfer rules",
         "CAPACITY": "Capacity limits",

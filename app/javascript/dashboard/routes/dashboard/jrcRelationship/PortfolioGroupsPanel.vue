@@ -8,6 +8,7 @@ import PortfolioGroupEditor from './PortfolioGroupEditor.vue';
 import PortfolioGroupCustomersDialog from './PortfolioGroupCustomersDialog.vue';
 import PortfolioGroupWorkloadPanel from './PortfolioGroupWorkloadPanel.vue';
 import PortfolioGroupRulesPanel from './PortfolioGroupRulesPanel.vue';
+import PortfolioGroupHistoryPanel from './PortfolioGroupHistoryPanel.vue';
 import CustomerPanel from './CustomerPanel.vue';
 import { buttonClass, inputClass, message } from './definitions';
 const props = defineProps({ metadata: { type: Object, required: true } });
@@ -88,6 +89,8 @@ const load = async (page = 1) => {
         return;
       group.value = detail.data;
       if (detailsTab.value === 'rules' && !detail.data.can_configure)
+        detailsTab.value = 'customers';
+      if (detailsTab.value === 'history' && !detail.data.can_read_history)
         detailsTab.value = 'customers';
       customers.value = list.data.payload;
       pagination.value = list.data.meta;
@@ -457,7 +460,24 @@ onBeforeUnmount(() => {
         >
           {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.RULES.TITLE') }}
         </button>
+        <button
+          v-if="group.can_read_history"
+          type="button"
+          :class="[
+            buttonClass,
+            detailsTab === 'history' &&
+              'border-n-violet-7 bg-n-violet-2 text-n-violet-11',
+          ]"
+          @click="detailsTab = 'history'"
+        >
+          {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.HISTORY.TITLE') }}
+        </button>
       </nav>
+      <PortfolioGroupHistoryPanel
+        v-if="detailsTab === 'history' && group.can_read_history"
+        :group="group"
+        :metadata="metadata"
+      />
       <PortfolioGroupRulesPanel
         v-if="detailsTab === 'rules' && group.can_configure"
         :group="group"
