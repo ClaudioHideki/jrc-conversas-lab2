@@ -119,12 +119,18 @@ const saveTransferLock = fields =>
   execute(() =>
     API.saveTransferLock(route.params.accountId, props.assignmentId, fields)
   );
+const assignmentFields = fields => ({
+  ...fields,
+  ...(typeof record.value?.assignment_version === 'string'
+    ? { expected_version: record.value.assignment_version }
+    : {}),
+});
 const assign = () => {
   if (busy.value || record.value?.transfer_locked) return undefined;
   return execute(() =>
     API.saveAssignment(
       route.params.accountId,
-      { owner_id: ownerId.value || null },
+      assignmentFields({ owner_id: ownerId.value || null }),
       props.assignmentId
     )
   );
@@ -133,7 +139,9 @@ const saveWorkload = () =>
   execute(() =>
     API.saveAssignment(
       route.params.accountId,
-      { settings: { capacity_workload: capacityWorkload.value } },
+      assignmentFields({
+        settings: { capacity_workload: capacityWorkload.value },
+      }),
       props.assignmentId
     )
   );

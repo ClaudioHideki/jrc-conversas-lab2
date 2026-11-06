@@ -48,12 +48,12 @@
     "No real participant removal or provider request; tests use synthetic records and WebMock, with external network disabled."
   ],
   "restrictions": "No build/recompile, no5379 change/restart, no four-container restart/reconfiguration, no cleanup/delete of existing data, no push/GHCR/deploy/production/client change, no real provider operations. Additive migrations allowed only in owned synthetic test database.",
-  "disk_last_observed_bytes": 7081230336,
+  "disk_last_observed_bytes": 7056355328,
   "TRR": "Undefined; do not invent",
   "company_documents_without_portfolio": "Explicitly deferred",
-  "last_validated_head": "21ba2ee507dc361506be8712dd0eef11088c8fb2",
+  "last_validated_head": "4ae906c2d62d91ca906a67009e36079dd20f95a0",
   "new_validated_code_checkpoint": "Resolve latest local CS code checkpoint with git log -1 --format=%H -- docs/jrc_consolidation/cs_signature_origin_checkpoint_20261105.json",
-  "current_status": "No-op owner propagation fixed; continuing optimistic portfolio update protection",
+  "current_status": "Portfolio revision validated; implementing Relationship-only final analyst withdrawal",
   "next_actions": [
     "Finish safe analyst withdrawal via native scope/readiness and immutable reviewed responsibility receipts, including project owner/cadence dependencies.",
     "Continue F2 and C/D/G functional and Word/scale gaps without reducing requirements.",
@@ -80,7 +80,7 @@
   "priority_bands_report": "docs/jrc_consolidation/priority_bands_checkpoint_20261105.json",
   "automatic_playbook_budget_report": "docs/jrc_consolidation/automatic_playbook_budget_checkpoint_20261106.json",
   "analyst_native_responsibilities_report": "docs/jrc_consolidation/analyst_native_responsibilities_checkpoint_20261106.json",
-  "checkpoint_resolution": "git log -1 --format=%H -- docs/jrc_consolidation/portfolio_owner_noop_checkpoint_20261106.json",
+  "checkpoint_resolution": "git log -1 --format=%H -- docs/jrc_consolidation/portfolio_revision_checkpoint_20261106.json",
   "approval_percentage_input_report": "docs/jrc_consolidation/approval_percentage_input_checkpoint_20261106.json",
   "word_gap_delta": "docs/jrc_consolidation/word_gap_delta_20261106.json",
   "workspace_card_sources_report": "docs/jrc_consolidation/workspace_card_sources_checkpoint_20261106.json",
@@ -106,5 +106,7 @@
   "first_action_duration_report": "docs/jrc_consolidation/first_action_duration_checkpoint_20261106.json",
   "health_observed_coverage_report": "docs/jrc_consolidation/health_observed_coverage_checkpoint_20261106.json",
   "portfolio_transfer_lock_report": "docs/jrc_consolidation/portfolio_transfer_lock_checkpoint_20261106.json",
-  "portfolio_owner_noop_report": "docs/jrc_consolidation/portfolio_owner_noop_checkpoint_20261106.json"
+  "portfolio_owner_noop_report": "docs/jrc_consolidation/portfolio_owner_noop_checkpoint_20261106.json",
+  "portfolio_revision_report": "docs/jrc_consolidation/portfolio_revision_checkpoint_20261106.json",
+  "analyst_withdrawal_business_decision": "Relationship eligibility only; preserve AccountUser and every other module access. User answer received2026-11-06."
 }

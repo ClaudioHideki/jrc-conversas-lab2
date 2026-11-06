@@ -340,6 +340,52 @@ describe('Relationship interface integration', () => {
     wrapper.unmount();
   });
 
+  it('binds ordinary owner edits to the viewed revision and preserves the draft after a native conflict', async () => {
+    const current = {
+      ...customer,
+      assignment_version: '2026-11-06T12:00:00.123456Z',
+      transfer_locked: false,
+    };
+    mocks.api.customer.mockResolvedValue({ data: current });
+    mocks.api.saveAssignment.mockRejectedValueOnce({
+      response: {
+        status: 409,
+        data: { errors: ['Record changed. Refresh before retrying.'] },
+      },
+    });
+    const wrapper = shallowMount(CustomerPanel, {
+      props: {
+        assignmentId: 19,
+        metadata: {
+          ...metadata,
+          owners: [
+            [7, 'CS'],
+            [8, 'Other analyst'],
+          ],
+        },
+      },
+    });
+    await flushPromises();
+    await wrapper.get('[data-testid="portfolio-owner"]').setValue('8');
+    const form = wrapper
+      .findAll('form')
+      .find(node => node.find('[data-testid="portfolio-owner"]').exists());
+    await form.trigger('submit');
+    await flushPromises();
+    expect(mocks.api.saveAssignment).toHaveBeenCalledWith(
+      '1',
+      { owner_id: 8, expected_version: current.assignment_version },
+      19
+    );
+    expect(wrapper.get('[data-testid="portfolio-owner"]').element.value).toBe(
+      '8'
+    );
+    expect(wrapper.get('[role="alert"]').text()).toContain('Record changed');
+    expect(wrapper.emitted('changed')).toBeUndefined();
+    expect(mocks.api.customer).toHaveBeenCalledTimes(1);
+    wrapper.unmount();
+  });
+
   it('CS-07 switches the existing management page and retains global dates', async () => {
     const wrapper = shallowMount(ManagementView);
     await flushPromises();

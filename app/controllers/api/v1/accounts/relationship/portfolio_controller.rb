@@ -181,6 +181,7 @@ class Api::V1::Accounts::Relationship::PortfolioController < Api::V1::Accounts::
     JrcRelationship::Assignment.transaction do
       JrcRelationship::DistributionApproval.lock_configuration!(Current.account.id)
       record.with_lock do
+        verify_assignment_revision!(record)
         attrs[:settings] = record.settings.merge(attrs[:settings].to_h) if attrs.key?(:settings)
         JrcRelationship::DistributionScopeGuard.check!(relationship_context, record, attrs)
         if attrs.key?(:owner_id) && attrs[:owner_id].to_s != record.owner_id.to_s
@@ -189,6 +190,17 @@ class Api::V1::Accounts::Relationship::PortfolioController < Api::V1::Accounts::
         yield
       end
     end
+  end
+
+  def verify_assignment_revision!(record)
+    input = params[:assignment]
+    return unless input.respond_to?(:key?) && input.key?(:expected_version)
+
+    expected = input[:expected_version]
+    raise ArgumentError, 'Use a scalar current assignment revision' unless expected.is_a?(String) && expected.present?
+    return if expected == record.updated_at.utc.iso8601(6)
+
+    raise ActiveRecord::StaleObjectError.new(record, 'update')
   end
 
   def initialize_assignment!(record)

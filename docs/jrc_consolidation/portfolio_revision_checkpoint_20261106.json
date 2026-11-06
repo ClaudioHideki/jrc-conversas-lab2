@@ -1,0 +1,67 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "4ae906c2d62d91ca906a67009e36079dd20f95a0",
+  "status": "Optional optimistic portfolio revision enforced; C-G remain open",
+  "confirmed_gap": "Baseline5/2 failures reproduced stale overwrite and ignored malformed explicit revisions.",
+  "implementation": [
+    "Ordinary portfolio writes validate supplied expected_version under existing account configuration and assignment locks before any change/audit. Explicit malformed values reject422; stale revision rejects409. Omitted value preserves legacy client compatibility.",
+    "CustomerPanel sends the viewed assignment_version for owner and workload saves. Conflict preserves draft and does not automatically retry. No migration, permission grant, historical rewrite or served-asset change."
+  ],
+  "tests": {
+    "backend": "portfolio-revision-native02:24examples,0failures (5 revision,5 no-op owner,14 transfer restriction)",
+    "vue": "portfoliorevisionui01:9tests,0failures; source components with mocked transport, not Chrome acceptance",
+    "new_ruby_offenses": 0,
+    "shared_ruby": [
+      {
+        "path": "app/controllers/api/v1/accounts/relationship/portfolio_controller.rb",
+        "baseline_count": 8,
+        "current_count": 8,
+        "new_cop_counts": {},
+        "current_new": []
+      }
+    ],
+    "final_customer_eslint": {
+      "path": "app/javascript/dashboard/routes/dashboard/jrcRelationship/CustomerPanel.vue",
+      "baseline": 32,
+      "current": 32,
+      "added": {}
+    },
+    "interface_eslint": "0 baseline /0 current",
+    "diff_check": "passed"
+  },
+  "resources": {
+    "backend": {
+      "start": 7080583168,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/portfolio_revision_spec.rb": "3ce3bfb78392d9441b942263952065e26632cce2b838422eb432c94602f76770",
+        "spec/requests/api/v1/accounts/relationship/portfolio_owner_noop_spec.rb": "128b4a43fbfa53684e2465675c4b36e3537584c721189fabdbebab47e12272a6",
+        "spec/requests/api/v1/accounts/relationship/portfolio_transfer_lock_spec.rb": "2a6e0039da635289d64edb11da275f63fc62f8e51bd9c3df53cba942922399e6"
+      },
+      "minimum": 7056707584,
+      "exit_code": 0,
+      "end": 7056068608
+    },
+    "vue": {
+      "status": "passed",
+      "free_start": 7080583168,
+      "minimum_free": 7054794752,
+      "mandatory_stop_bytes": 750000000,
+      "conservative_stop_bytes": 2000000000,
+      "no_build": true,
+      "owned_process_id": 15832,
+      "exit_code": 0,
+      "free_end": 7078526976
+    }
+  },
+  "disk_final_bytes": 7056355328,
+  "restrictions": "No app build,5379 change,container restart,cleanup,push,GHCR,deploy,production or external operations.",
+  "remaining": [
+    "Fresh built desktop/mobile visual acceptance remains blocked by no-build/no5379-change restriction.",
+    "User has now defined final analyst withdrawal as Relationship-only, preserving account and all other module access. Implement next with readiness and current native authorization.",
+    "TRR remains undefined; companies without portfolios deferred."
+  ]
+}
