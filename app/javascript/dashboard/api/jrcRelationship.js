@@ -10,6 +10,11 @@ const base = accountId => {
 const operationsBase = accountId =>
   base(accountId).replace(/\/relationship$/, '/crm');
 export default {
+  analystNativeResponsibilities: (accountId, analystId, params, options) =>
+    axios.get(
+      `${base(accountId)}/team/${Number(analystId)}/native_responsibilities`,
+      { ...options, params }
+    ),
   metadata: (accountId, options) =>
     axios.get(`${base(accountId)}/metadata`, options),
   playbookOptions: (accountId, params, options) =>

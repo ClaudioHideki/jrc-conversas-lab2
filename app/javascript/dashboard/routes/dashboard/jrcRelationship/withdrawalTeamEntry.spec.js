@@ -30,6 +30,7 @@ const render = () =>
         WithdrawalReadinessDialog: true,
         AnalystCapacityDialog: true,
         AnalystCadencesDialog: true,
+        AnalystNativeResponsibilitiesDialog: true,
       },
     },
   });
@@ -71,6 +72,29 @@ it('opens native cadence review without allocated rows and clears the selection 
   await flushPromises();
   expect(
     wrapper.findComponent({ name: 'AnalystCadencesDialog' }).exists()
+  ).toBe(false);
+  wrapper.unmount();
+});
+
+it('opens pending native origins even with no allocated customers and clears them on account changes', async () => {
+  const wrapper = render();
+  await flushPromises();
+  await wrapper.get('[data-testid="withdrawal-analyst"]').setValue('7');
+  await wrapper.get('[data-testid="analyst-native-open"]').trigger('click');
+  expect(
+    wrapper
+      .findComponent({ name: 'AnalystNativeResponsibilitiesDialog' })
+      .props('analystId')
+  ).toBe(7);
+  expect(
+    wrapper.findComponent({ name: 'WithdrawalReadinessDialog' }).exists()
+  ).toBe(false);
+  mocks.route.params.accountId = 2;
+  await flushPromises();
+  expect(
+    wrapper
+      .findComponent({ name: 'AnalystNativeResponsibilitiesDialog' })
+      .exists()
   ).toBe(false);
   wrapper.unmount();
 });

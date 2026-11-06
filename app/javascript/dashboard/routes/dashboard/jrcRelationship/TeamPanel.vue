@@ -7,6 +7,7 @@ import API from 'dashboard/api/jrcRelationship';
 import WithdrawalReadinessDialog from './WithdrawalReadinessDialog.vue';
 import AnalystCapacityDialog from './AnalystCapacityDialog.vue';
 import AnalystCadencesDialog from './AnalystCadencesDialog.vue';
+import AnalystNativeResponsibilitiesDialog from './AnalystNativeResponsibilitiesDialog.vue';
 import MetricsPanel from './MetricsPanel.vue';
 import MetricDrilldownPanel from './MetricDrilldownPanel.vue';
 import {
@@ -36,6 +37,7 @@ const withdrawalUser = ref('');
 const withdrawalAnalyst = ref(null);
 const capacityAnalyst = ref(null);
 const cadenceAnalyst = ref(null);
+const nativeAnalyst = ref(null);
 const cadenceRefresh = ref(false);
 const closeCadences = () => {
   cadenceAnalyst.value = null;
@@ -131,6 +133,7 @@ watch(
     withdrawalAnalyst.value = null;
     capacityAnalyst.value = null;
     cadenceAnalyst.value = null;
+    nativeAnalyst.value = null;
     cadenceRefresh.value = false;
     withdrawalUser.value = '';
     metadata.value = null;
@@ -288,6 +291,15 @@ const money = value => formatMoney(value, metadata.value?.formatting);
       >
         {{ t('RELATIONSHIP.CADENCE_TEAM.OPEN') }}
       </button>
+      <button
+        type="button"
+        data-testid="analyst-native-open"
+        :class="buttonClass"
+        :disabled="!withdrawalUser || busy"
+        @click="nativeAnalyst = Number(withdrawalUser)"
+      >
+        {{ t('RELATIONSHIP.NATIVE_RESPONSIBILITIES.OPEN') }}
+      </button>
     </form>
     <div
       v-if="rows.length"
@@ -359,5 +371,11 @@ const money = value => formatMoney(value, metadata.value?.formatting);
     :formatting="metadata?.formatting || {}"
     @close="closeCadences"
     @changed="cadenceRefresh = true"
+  />
+  <AnalystNativeResponsibilitiesDialog
+    v-if="nativeAnalyst"
+    :analyst-id="nativeAnalyst"
+    :formatting="metadata?.formatting || {}"
+    @close="nativeAnalyst = null"
   />
 </template>

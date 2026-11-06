@@ -106,18 +106,10 @@ class JrcRelationship::WithdrawalReadiness
   def native_sources!
     native = JrcRelationship::NativeResponsibilities.new(@context)
     JrcRelationship::NativeResponsibilities::KINDS.each do |kind|
-      source = native_owned_source(native, kind)
+      source = native.owned_pending_scope(kind, @source)
       collect!(kind, source, source.exists? ? native.owned_scope(kind, @source) : source.none)
     end
     projects = JrcProjects::Project.where(account: @context.account, owner: @source).where.not(status: %w[completed canceled])
     collect!('projects', projects, projects.exists? ? JrcOperations::Access.projects(@context.member) : projects.none)
-  end
-
-  def native_owned_source(native, kind)
-    source = native.pending_scope(kind)
-    return source.where(assignee_id: @source.id) if kind == 'project_tasks'
-
-    member = @context.account.account_users.find_by!(user_id: @source.id)
-    source.where(assignee_membership_id: JrcServiceDesk::UnitMembership.where(account: @context.account, account_user_id: member.id).select(:id))
   end
 end

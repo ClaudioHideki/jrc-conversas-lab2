@@ -3,13 +3,13 @@
   "user_request": "499267ac-546d-4853-b4cf-7f03a2ea0629",
   "initial_head": "be54d0f7b4ce8d4e2a077cf2bdd8c2a4d5c88f5e",
   "branch": "codex/relacionamento-v2-20261101",
-  "last_validated_checkpoint": "9340184aaf19d00991b1beed4e50064612496641",
+  "last_validated_checkpoint": "8622af58c6bc7b2ce06b606aa312bfae06a91d1e",
   "completed_current_work": "Sealed dossier, weighted/current capacity, native withdrawal/cadence controls and F2 increments locally tested; see linked incremental reports. No C-G closure.",
-  "active_work": "F1 read-only native responsibility origins with authorized paging/navigation; no final analyst removal or identity change.",
+  "active_work": "Consolidated Word/source/evidence delta audit to select the next executable C/D/F2 gap, then continue implementation; no stage closure.",
   "exact_next_actions": [
-    "Finish safe analyst withdrawal via native scope/readiness and immutable reviewed responsibility receipts, including project owner/cadence dependencies.",
-    "Continue F2 and C/D/G functional and Word/scale gaps without reducing requirements.",
-    "Preserve no-build/current-server restriction; do not claim fresh visual or external acceptance."
+    "Reconcile Word fragments with later evidence; implement next locally executable C/D/F2 gap.",
+    "Final analyst withdrawal scope awaits business answer; do not call native global agent deletion.",
+    "Preserve no-build/current-server restrictions and do not claim fresh visual/external acceptance."
   ],
   "test_environment": {
     "source_manifest": ".codex/d9-notifications-20261104/snapshot.json",
@@ -51,9 +51,9 @@
   "disk_last_observed_bytes": 7314264064,
   "TRR": "Undefined; do not invent",
   "company_documents_without_portfolio": "Explicitly deferred",
-  "last_validated_head": "9340184aaf19d00991b1beed4e50064612496641",
+  "last_validated_head": "8622af58c6bc7b2ce06b606aa312bfae06a91d1e",
   "new_validated_code_checkpoint": "Resolve latest local CS code checkpoint with git log -1 --format=%H -- docs/jrc_consolidation/cs_signature_origin_checkpoint_20261105.json",
-  "current_status": "Automatic monitor playbook task admission implemented and locally validated; F2 and C-G remain open",
+  "current_status": "F1 native responsibility origin inventory implemented/tested; final withdrawal and C-G remain open",
   "next_actions": [
     "Finish safe analyst withdrawal via native scope/readiness and immutable reviewed responsibility receipts, including project owner/cadence dependencies.",
     "Continue F2 and C/D/G functional and Word/scale gaps without reducing requirements.",
@@ -78,5 +78,7 @@
   "waiting_review_notice_report": "docs/jrc_consolidation/waiting_review_notice_checkpoint_20261105.json",
   "analyst_cadence_controls_report": "docs/jrc_consolidation/analyst_cadence_controls_checkpoint_20261105.json",
   "priority_bands_report": "docs/jrc_consolidation/priority_bands_checkpoint_20261105.json",
-  "automatic_playbook_budget_report": "docs/jrc_consolidation/automatic_playbook_budget_checkpoint_20261106.json"
+  "automatic_playbook_budget_report": "docs/jrc_consolidation/automatic_playbook_budget_checkpoint_20261106.json",
+  "analyst_native_responsibilities_report": "docs/jrc_consolidation/analyst_native_responsibilities_checkpoint_20261106.json",
+  "checkpoint_resolution": "Use git log -1 --format=%H -- docs/jrc_consolidation/analyst_native_responsibilities_checkpoint_20261106.json to resolve this report commit; parent_head is the prior checkpoint."
 }

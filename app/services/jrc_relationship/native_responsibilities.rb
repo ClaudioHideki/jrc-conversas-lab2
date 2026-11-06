@@ -19,6 +19,15 @@ class JrcRelationship::NativeResponsibilities
     pending(kind)
   end
 
+  def owned_pending_scope(kind, owner)
+    source = pending_scope(kind)
+    return source.where(assignee_id: owner.id) if kind == 'project_tasks'
+
+    member = @context.account.account_users.find_by!(user_id: owner.id)
+    memberships = JrcServiceDesk::UnitMembership.where(account: @context.account, account_user_id: member.id)
+    source.where(assignee_membership_id: memberships.select(:id))
+  end
+
   def snapshot(entries, owner_id:, lock:)
     references = plan_references(entries)
     KINDS.flat_map do |kind|
