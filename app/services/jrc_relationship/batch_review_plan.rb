@@ -6,13 +6,12 @@ class JrcRelationship::BatchReviewPlan
 
   def normalize(raw)
     input = raw.to_h.deep_stringify_keys
-    ids = input.fetch('ids')
-    raise ArgumentError, 'Choose 1 to 50 unique customers' unless ids.is_a?(Array) && ids.size.between?(1, 50) && ids.uniq.size == ids.size
+    ids = JrcRelationship::PortfolioGroupCustomerInput.parse(input.fetch('ids'))
     raise ArgumentError, 'Invalid request identity' unless UUID.match?(input.fetch('request_id').to_s)
 
     operation = input.fetch('operation')
     options = operation_options(operation, input)
-    { 'ids' => ids.map { |id| Integer(id) }.sort, 'operation' => operation, 'request_id' => input.fetch('request_id'), **options }
+    { 'ids' => ids, 'operation' => operation, 'request_id' => input.fetch('request_id'), **options }
   end
 
   def snapshot(inputs, lock: false)
@@ -30,6 +29,7 @@ class JrcRelationship::BatchReviewPlan
       add_responsibility_snapshot(result, inputs, records, lock)
     end
     add_cadence_snapshot(result, inputs, book, lock) if inputs['operation'] == 'cadence'
+    add_membership_snapshot(result, inputs, lock, records)
     result
   end
 
@@ -46,6 +46,7 @@ class JrcRelationship::BatchReviewPlan
     raise ArgumentError, 'Reviewed playbook changed' unless review.snapshot['book'] == book_snapshot(review.inputs, lock: true)
 
     validate_cadence!(review)
+    JrcRelationship::PortfolioMembershipReview.new(@context).validate!(review) if review.inputs['operation'] == 'portfolio_membership'
     JrcRelationship::ResponsibilityReview.new(@context).verify!(review, assignment: assignment)
 
     records = assignment ? [assignment] : reviewed_assignments(review)
@@ -57,6 +58,12 @@ class JrcRelationship::BatchReviewPlan
   end
 
   private
+
+  def add_membership_snapshot(result, inputs, lock, records)
+    return unless inputs['operation'] == 'portfolio_membership'
+
+    result.merge!(JrcRelationship::PortfolioMembershipReview.new(@context).snapshot(inputs, lock: lock, records: records))
+  end
 
   def add_cadence_snapshot(result, inputs, book, lock)
     result['cadence'] = JrcRelationship::CadencePlan.new(@context).snapshot(inputs, lock: lock)
@@ -79,6 +86,7 @@ class JrcRelationship::BatchReviewPlan
       id = inputs['owner_id']
       { 'owner_id' => id, 'owner_name' => id ? @context.assignable_users.find(id).name : nil }
     when 'playbook', 'cadence' then { 'book_name' => book.fetch('name'), 'book_version' => book.fetch('version') }
+    when 'portfolio_membership' then {}
     else { 'title' => inputs.fetch('title'), 'due_at' => inputs.fetch('due_at') }
     end
   end
@@ -100,6 +108,7 @@ class JrcRelationship::BatchReviewPlan
     case operation
     when 'assign'
       assign_options(input)
+    when 'portfolio_membership' then JrcRelationship::PortfolioMembershipInput.new(@context).call(input)
     when 'activity'
       title = input.fetch('title').to_s.strip
       raise ArgumentError, 'Activity title is required' unless title.length.between?(1, 250)

@@ -136,7 +136,9 @@ class JrcRelationship::ReviewedPortfolioBatch
   end
 
   def apply_reviewed_item(review, item, assignment, context)
-    if review.inputs['operation'] == 'cadence'
+    if review.inputs['operation'] == 'portfolio_membership'
+      JrcRelationship::PortfolioMembershipReview.new(context).apply!(review, item)
+    elsif review.inputs['operation'] == 'cadence'
       enrollment = JrcRelationship::ReviewedCadence.enroll!(context: context, assignment: assignment, review: review)
       { 'updated' => 1, 'operation' => 'cadence', 'assignment_id' => assignment.id, 'cadence_id' => enrollment.id }
     else
@@ -173,7 +175,7 @@ class JrcRelationship::ReviewedPortfolioBatch
   def project(review, context)
     return JrcRelationship::ReviewedBatchReceiptView.new(review).call if JrcRelationship::ReviewedAssignmentScope.new(context, review).limited?
 
-    JrcRelationship::PortfolioGroupConfiguration.authorize_snapshot!(context, review.snapshot)
+    authorize_projection!(review, context)
     { 'id' => review.id, 'state' => review.state, 'revision' => review.revision, 'digest' => review.digest,
       'expires_at' => review.expires_at.iso8601(6), 'inputs' => review.inputs,
       'summary' => review.snapshot['summary'], 'distribution' => review.snapshot['distribution'],
@@ -189,5 +191,10 @@ class JrcRelationship::ReviewedPortfolioBatch
       { 'assignment_id' => item.assignment_id, 'label' => row.fetch('label'), 'state' => item.state,
         'receipt' => item.receipt, 'error_code' => item.error_code }
     end
+  end
+
+  def authorize_projection!(review, context)
+    JrcRelationship::PortfolioMembershipReview.new(context).authorize_read!(review) if review.inputs['operation'] == 'portfolio_membership'
+    JrcRelationship::PortfolioGroupConfiguration.authorize_snapshot!(context, review.snapshot)
   end
 end

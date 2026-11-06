@@ -270,6 +270,12 @@
       "report": "docs/jrc_consolidation/configuration_history_lookup_checkpoint_20261106.json",
       "implemented_validated": "Exact older stored configuration selection and same governed restoration;4native directed/0,8integrated/0overlap,17source/0. Original76rows preserved throughv77.",
       "partial": "Recent history list is still bounded50 with exact lookup, not full broad paging; full Word/Chrome acceptance remains open."
+    },
+    {
+      "reference": "Relationship P0124/P0128/P0181/P0184/P0185",
+      "report": "docs/jrc_consolidation/reviewed_portfolio_membership_native_checkpoint_20261106.json",
+      "implemented_validated": "Native/API durable group membership through existing reviewed engine;32backend/0 including14existing regressions; protected terminal history and linked unresolved-item re-review.",
+      "partial": "UI integration started but not yet tested; whole-audience projected capacity, broad saved-operation listing and current-source visual acceptance remain open."
     }
   ],
   "explicit_dependencies": [
@@ -290,7 +296,7 @@
       "state": "External environment/operations require separate authorization; not simulated as passed."
     }
   ],
-  "next_confirmed_local_gap": "Durable named-portfolio membership batches and new linked re-review of unresolved items, reusing existing reviewed engine.",
+  "next_confirmed_local_gap": "Connect durable membership operation to native group source interface, with scoped resume and strict receipts.",
   "stage_closure": {
     "C": false,
     "D": false,

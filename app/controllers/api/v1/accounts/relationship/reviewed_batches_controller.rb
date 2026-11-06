@@ -11,7 +11,8 @@ class Api::V1::Accounts::Relationship::ReviewedBatchesController < Api::V1::Acco
 
   def create
     render json: service.preview(body!('ids', 'operation', 'owner_id', 'playbook_id', 'title', 'due_at', 'request_id', 'conversation_id', 'starts_at',
-                                       'justification', 'transfer_responsibilities'))
+                                       'justification', 'transfer_responsibilities', 'portfolio_group_id', 'expected_version',
+                                       'active', 'previous_review_id'))
   end
 
   def approve
@@ -43,8 +44,15 @@ class Api::V1::Accounts::Relationship::ReviewedBatchesController < Api::V1::Acco
   end
 
   def body!(*keys)
-    input = request.request_parameters
-    raise ArgumentError, 'Invalid reviewed batch request' unless (input.keys - keys).empty? && request.query_parameters.empty?
+    # Keep null entries visible to the finite native input validators rather
+    # than letting Rails silently reduce the reviewed audience.
+    input = if request.media_type == 'application/json'
+              ActiveSupport::JSON.decode(request.raw_post.presence || '{}')
+            else
+              request.request_parameters
+            end
+    valid = input.is_a?(Hash) && (input.keys - keys).empty? && request.query_parameters.empty?
+    raise ArgumentError, 'Invalid reviewed batch request' unless valid
 
     input
   end
