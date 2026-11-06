@@ -1,0 +1,86 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "0fb3ba35b4c6b36cc3bd6fbb9bfd6112dc22285f",
+  "status": "Native source-only customer selection removes eager360 overhead while retaining shared customer predicates and permissions",
+  "measured_cause": "Withdrawal handoff validation constructed full Customer360, eagerly compiling unrelated modules,timelines,audits and survey/source policies merely to read projects/orders.",
+  "implementation": [
+    "Extract shared SubjectSources with existing Visibility.authorize_subject!,CRM ownership/organizational coverage,Project scope and the exact company/direct-contact/authorized-deal predicates. Full Customer360 delegates those same selectors; other360behavior is preserved.",
+    "Handoff withdrawal selector uses only the authorized subject project/order relations, without constructing full aggregate360. No global permission cache,parallel customer registry,new endpoint,dependency or migration. Current final actor/source revocation checks remain mandatory.",
+    "Scale fixture now reuses native association objects during model-validated seeding and measures only API SQL, excluding assertion-side total query. No validation bypass or waived lint gate."
+  ],
+  "tests_non_additive": {
+    "native01": "22examples:21passed,1fixture failure because Project has company_id but no company association. Fixture corrected without changing production behavior;16formal-handoff/native-origin permission cases passed.",
+    "customer_regression02": "55/0:6new subject-scope cases plus existing complete360relationship map,operations integration,contract renewal,company documents andtimeline. Includes real CRM owner,private Project,operator/unit andforeign-subject denials.",
+    "scale03": "1/0 real PostgreSQL cohort:1000linked tasks,1000unrelated tasks,2projects,3API requests perphase,correctfirst/lastpages and native source IDs.",
+    "static": "New service/spec,changed handoff selector and scale spec0RuboCop offenses. Shared Customer36018->17existing offenses,none added. No cop disabled.",
+    "diff_check": "passed",
+    "chrome": "No new assets/browser acceptance under explicit no-build/no5379-change."
+  },
+  "metrics": {
+    "before_small_sql": 3155,
+    "before_large_sql": 3156,
+    "before_note": "Large included1assertion-side total query.",
+    "after_small_sql": 453,
+    "after_large_sql": 453,
+    "query_reduction_percent": 85.64,
+    "before_large_phase_seconds": 21.962,
+    "after_large_phase_seconds": 0.88,
+    "after_response_bytes": 2298,
+    "interpretation": "Observed local measurements,not a production latency orcapacity SLA. Same native authorization and source predicates; no query growth per candidate task."
+  },
+  "resources": {
+    "subject-sources-native01": {
+      "start": 6334849024,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/services/jrc_customers/subject_sources_spec.rb": "afc030c7058285c908c5e19d309ae83ef89baa70f43cf8422d1968900f95f958",
+        "spec/services/jrc_relationship/withdrawal_handoff_projects_spec.rb": "52fa8fb58bef99fd293ebb0418091e5c0204205b529368f0ef8e28c32ef472b1",
+        "spec/requests/api/v1/accounts/relationship/analyst_native_responsibilities_spec.rb": "df6932907c1b597c30a8fb02f71d018e3755e2f31f200a5b8d0b215ebe176993"
+      },
+      "minimum": 6334697472,
+      "exit_code": 1,
+      "end": 6334697472
+    },
+    "subject-sources-customer-regression02": {
+      "start": 6409801728,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/services/jrc_customers/subject_sources_spec.rb": "b78edb05ba094ab58953d59bea71cd8b42316081c1adbbe0633e2e2a101dffc4",
+        "spec/services/jrc_customers/customer360_relationship_map_spec.rb": "feaa1209ae84fbcc581e10c6b2b7526421875cd830ac03fbc39c91807a84fc7d",
+        "spec/services/jrc_customers/operations_integration_spec.rb": "2c7f396d5bf35d64a955518c0d99c8f9e9ba8af27ded9fb08cce295040e682ae",
+        "spec/services/jrc_customers/contract_renewal_context_spec.rb": "14201fb36fd676bd128fc1ff8e10d9c9c156f9418437e9332d6b95ee6989c6f2",
+        "spec/services/jrc_customers/company_documents_context_spec.rb": "dcb450ef9b742aeb9efa673bcc71af3623471e28271ee3f956e3ea8b782b0ea6",
+        "spec/services/jrc_customers/timeline_spec.rb": "700965cc5df561e0da3ad65c86930c7e46f0e72da446d70bf55bbf82d9819609"
+      },
+      "minimum": 6389944320,
+      "exit_code": 0,
+      "end": 6420852736
+    },
+    "subject-sources-scale03": {
+      "start": 6384148480,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/withdrawal_native_links_scale_spec.rb": "f31f26de21349b9855dd88c9dbad86fe813cc9a1694ab446a5cd258169b78c50"
+      },
+      "minimum": 6377332736,
+      "exit_code": 0,
+      "end": 6423560192
+    }
+  },
+  "disk_final_bytes": 6402703360,
+  "remaining": [
+    "Many distinct order-bound implementation-project cohorts not measured;canonical resolution per candidate remains separate.",
+    "Portfolio direct create/update and reviewed preview malformed-owner inputs need directed diagnosis;legacy batch is already protected.",
+    "Fresh compiled Chrome andfullC-Gliteral/visual acceptance remain open;TRR undefined,portfolio-less documents deferred,external provider/scanner/channel acceptance not performed."
+  ],
+  "restrictions": "No build,cleanup,push,GHCR,deploy,external operation,production or runtime change."
+}

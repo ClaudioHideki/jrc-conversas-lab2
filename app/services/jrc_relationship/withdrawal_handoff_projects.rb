@@ -50,7 +50,7 @@ class JrcRelationship::WithdrawalHandoffProjects
 
   def authorize_direct_cases!(direct)
     direct.group_by(&:first).each do |assignment_id, pairs|
-      customer = @context.assignment(assignment_id).customer_context(@context.member)
+      customer = subject_sources(assignment_id)
       ids = pairs.map(&:last).uniq
       raise Pundit::NotAuthorizedError unless customer.projects.where(id: ids).count == ids.length
     end
@@ -65,9 +65,14 @@ class JrcRelationship::WithdrawalHandoffProjects
   end
 
   def authorize_case!(handoff, project, order)
-    assignment = @context.assignment(handoff.assignment_id)
-    customer = assignment.customer_context(@context.member)
+    customer = subject_sources(handoff.assignment_id)
     raise Pundit::NotAuthorizedError unless customer.projects.exists?(id: project.id)
     raise Pundit::NotAuthorizedError unless customer.orders.exists?(id: order.id)
+  end
+
+  def subject_sources(assignment_id)
+    assignment = @context.assignment(assignment_id)
+    JrcCustomers::SubjectSources.new(account: @context.account, user: @context.user, account_user: @context.member,
+                                     company: assignment.company, contact: assignment.contact)
   end
 end

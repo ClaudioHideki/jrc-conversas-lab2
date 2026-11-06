@@ -163,6 +163,12 @@
       "current_state": "Native prepare/accept and immutable case, canonical order resolution, rejection/archived roots and wrong-customer denial tested.1000linked/1000unrelated real tasks, correct native API pages1/100.",
       "report": "withdrawal_formal_handoff_checkpoint_20261106.json",
       "remaining": "High fixed native authorization-query cost; many distinct order-linked project cohorts and fresh compiled visual acceptance not completed."
+    },
+    {
+      "requirement": "C/F1/G source selection performance with native authorization",
+      "current_state": "Shared customer predicates extracted without full360eager initialization;55customer regressions,16additional origin/permission cases and1000linked/1000unrelated task read scale passed.",
+      "report": "subject_source_performance_checkpoint_20261106.json",
+      "remaining": "Current compiled Chrome and broader production/many-order-project pilot not validated."
     }
   ],
   "explicit_dependencies": [

@@ -54,18 +54,20 @@ RSpec.describe 'Native CS responsibility links at representative task scale', ty
     templates.each_with_index do |template, index|
       # Model-validated synthetic seeding; not two thousand UI creation flows.
       rows = Array.new(999) do |number|
-        template.attributes.except('id').merge('title' => "Synthetic #{index} task #{number + 1}")
+        template.attributes.except('id').merge('title' => "Synthetic #{index} task #{number + 1}",
+                                               'project' => template.project, 'assignee' => analyst, 'created_by' => analyst)
       end
       JrcProjects::Task.create!(rows)
     end
     headers = actor.reload.create_new_auth_token
+    total_tasks = JrcProjects::Task.where(account: account).count
     phase = :large
     started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     ActiveSupport::Notifications.subscribed(counter, 'sql.active_record') do
       get "#{base}/withdrawal_readiness", headers: headers
       expect(response).to have_http_status(:ok)
       counts = response.parsed_body.fetch('counts')
-      expect([small_total, counts.fetch('project_tasks'), counts.fetch('projects'), JrcProjects::Task.where(account: account).count])
+      expect([small_total, counts.fetch('project_tasks'), counts.fetch('projects'), total_tasks])
         .to eq([1, 1000, 1, 2000])
       get "#{base}/native_responsibilities", headers: headers, params: { kind: 'project_tasks' }
       expect([response.status, response.parsed_body.fetch('meta').fetch('total'), response.parsed_body.fetch('payload').length])
