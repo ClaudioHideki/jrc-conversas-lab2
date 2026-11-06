@@ -6,7 +6,9 @@ class Api::V1::Accounts::Relationship::DocumentsController < Api::V1::Accounts::
   def index
     scope = service.scope.where(assignment_id: relationship_context.assignment(params.require(:assignment_id)).id)
     records, meta = page(scope.includes(:responsible, assignment: :owner).order(updated_at: :desc, id: :desc))
-    render json: { payload: records.map { |record| present(record, include_versions: false) }, meta: meta,
+    records = records.to_a
+    versions = service.latest_versions(document_ids: records.map(&:id))
+    render json: { payload: records.map { |record| present(record, include_versions: false, latest_version: versions[record.id]) }, meta: meta,
                    requirements: JrcRelationship::DocumentRequirements.new(relationship_context).call(assignment_id: params[:assignment_id]) }
   end
 
@@ -68,11 +70,14 @@ class Api::V1::Accounts::Relationship::DocumentsController < Api::V1::Accounts::
     render json: present(document, include_versions: true), status: :created
   end
 
-  def present(document, include_versions:)
-    versions = document.versions.includes(:uploaded_by, file_attachment: :blob).order(number: :desc)
+  def present(document, include_versions:, latest_version: nil)
     data = { id: document.id, assignment_id: document.assignment_id, title: document.title, category: document.category, status: document.status }
     data.merge!(document_metadata(document))
-    selected, meta = include_versions ? page(versions) : [versions.limit(1), nil]
+    selected, meta = if include_versions
+                       page(document.versions.includes(:uploaded_by, file_attachment: :blob).order(number: :desc))
+                     else
+                       [[latest_version].compact, nil]
+                     end
     data[:versions_meta] = meta if include_versions
     data[:versions] = selected.map { |version| present_version(version) }
     data

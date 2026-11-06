@@ -39,23 +39,18 @@ class JrcRelationship::DocumentRequirements
   end
 
   def call(assignment_id:)
-    scope = JrcRelationship::CustomerDocuments.new(@context).scope
+    service = JrcRelationship::CustomerDocuments.new(@context)
+    scope = service.scope
     assignment = @context.assignment(assignment_id)
     configuration = @context.configuration(assignment)
     entries = configuration.effective_rules['required_documents']
     documents = scope.where(assignment_id: assignment.id, status: 'active', requirement_key: entries.pluck('code')).index_by(&:requirement_key)
-    versions = latest_versions(documents.values.map(&:id))
+    versions = service.latest_versions(document_ids: documents.values.map(&:id))
     { scope_key: configuration.scope_key, configuration_version: configuration.version,
       entries: entries.map { |entry| project(entry, documents[entry['code']], versions) } }
   end
 
   private
-
-  def latest_versions(document_ids)
-    JrcRelationship::DocumentVersion.where(account_id: @context.account.id, document_id: document_ids)
-                                    .select('DISTINCT ON (document_id) jrc_relationship_document_versions.*')
-                                    .order(:document_id, number: :desc).includes(file_attachment: :blob).index_by(&:document_id)
-  end
 
   def project(entry, document, versions)
     version = document && versions[document.id]

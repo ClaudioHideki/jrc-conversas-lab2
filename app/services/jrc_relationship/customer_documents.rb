@@ -14,6 +14,15 @@ class JrcRelationship::CustomerDocuments
     JrcRelationship::CustomerDocument.where(account_id: @context.account.id, assignment_id: @context.assignments.select(:id))
   end
 
+  def latest_versions(document_ids:)
+    documents = scope.where(id: document_ids)
+    return {} if document_ids.empty?
+
+    JrcRelationship::DocumentVersion.where(account_id: @context.account.id, document_id: documents.pluck(:id))
+                                    .select('DISTINCT ON (document_id) jrc_relationship_document_versions.*')
+                                    .order(:document_id, number: :desc).includes(:uploaded_by, file_attachment: :blob).index_by(&:document_id)
+  end
+
   def upload!(assignment_id:, attributes:, upload:, document_id: nil)
     raise Pundit::NotAuthorizedError unless @context.policy.documents_manage?
 

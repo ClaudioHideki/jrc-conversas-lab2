@@ -63,9 +63,10 @@ RSpec.describe 'Protected Relationship customer documents', type: :request do
     analyst_headers = analyst.create_new_auth_token
     get url, headers: analyst_headers, params: { assignment_id: assignment.id }
     expect(response).to have_http_status(:forbidden)
-    post url, headers: analyst_headers, params: { assignment_id: assignment.id, document: attributes, file: file }
+    expect do
+      post url, headers: analyst_headers, params: { assignment_id: assignment.id, document: attributes, file: file }
+    end.not_to change(JrcRelationship::CustomerDocument, :count)
     expect(response).to have_http_status(:forbidden)
-    expect(JrcRelationship::CustomerDocument.count).to eq(0)
   end
 
   it 'revalidates scope and custom role on every download and rejects a modified file hash' do
