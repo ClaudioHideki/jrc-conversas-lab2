@@ -5,7 +5,7 @@
   "branch": "codex/relacionamento-v2-20261101",
   "last_validated_checkpoint": "12cab9ff304cc540d65117adaa33f8b70c7a481a",
   "completed_current_work": "Sealed dossier, weighted/current capacity, native withdrawal/cadence controls and F2 increments locally tested; see linked incremental reports. No C-G closure.",
-  "active_work": "F2/G period filter integrity: an end date without a start date is silently ignored by report_period and RecordFilters. Reject incomplete input consistently, preserve legacy start-only one-day behavior and native account timezone/bounds; add functional UI feedback and directed tests.",
+  "active_work": "F2: preserve pinned priority band policy when native action editor resubmits unchanged priority; genuine score edits retain explicit recalculation semantics.",
   "exact_next_actions": [
     "Reconcile Word fragments with later evidence; implement next locally executable C/D/F2 gap.",
     "Final analyst withdrawal scope awaits business answer; do not call native global agent deletion.",
@@ -48,10 +48,10 @@
     "No real participant removal or provider request; tests use synthetic records and WebMock, with external network disabled."
   ],
   "restrictions": "No build/recompile, no5379 change/restart, no four-container restart/reconfiguration, no cleanup/delete of existing data, no push/GHCR/deploy/production/client change, no real provider operations. Additive migrations allowed only in owned synthetic test database.",
-  "disk_last_observed_bytes": 7216926720,
+  "disk_last_observed_bytes": 7175442432,
   "TRR": "Undefined; do not invent",
   "company_documents_without_portfolio": "Explicitly deferred",
-  "last_validated_head": "27d62d217110171d7128e4e324fccfc1b235e9b4",
+  "last_validated_head": "d94db6a96c6c523e72853d67be1b2cb8e005338e",
   "new_validated_code_checkpoint": "Resolve latest local CS code checkpoint with git log -1 --format=%H -- docs/jrc_consolidation/cs_signature_origin_checkpoint_20261105.json",
   "current_status": "F2 workspace card source workflow fixed and locally tested; C-G remain open",
   "next_actions": [
@@ -80,12 +80,13 @@
   "priority_bands_report": "docs/jrc_consolidation/priority_bands_checkpoint_20261105.json",
   "automatic_playbook_budget_report": "docs/jrc_consolidation/automatic_playbook_budget_checkpoint_20261106.json",
   "analyst_native_responsibilities_report": "docs/jrc_consolidation/analyst_native_responsibilities_checkpoint_20261106.json",
-  "checkpoint_resolution": "git log -1 --format=%H -- docs/jrc_consolidation/customer_sla_signals_checkpoint_20261106.json",
+  "checkpoint_resolution": "git log -1 --format=%H -- docs/jrc_consolidation/operational_period_checkpoint_20261106.json",
   "approval_percentage_input_report": "docs/jrc_consolidation/approval_percentage_input_checkpoint_20261106.json",
   "word_gap_delta": "docs/jrc_consolidation/word_gap_delta_20261106.json",
   "workspace_card_sources_report": "docs/jrc_consolidation/workspace_card_sources_checkpoint_20261106.json",
   "analyst_crm_commitments_report": "docs/jrc_consolidation/analyst_crm_commitments_checkpoint_20261106.json",
   "native_activity_editing_report": "docs/jrc_consolidation/native_activity_editing_checkpoint_20261106.json",
   "attendance_source_scale_report": "docs/jrc_consolidation/attendance_source_scale_checkpoint_20261106.json",
-  "customer_sla_signals_report": "docs/jrc_consolidation/customer_sla_signals_checkpoint_20261106.json"
+  "customer_sla_signals_report": "docs/jrc_consolidation/customer_sla_signals_checkpoint_20261106.json",
+  "operational_period_report": "docs/jrc_consolidation/operational_period_checkpoint_20261106.json"
 }

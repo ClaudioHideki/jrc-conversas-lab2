@@ -1,0 +1,86 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "d94db6a96c6c523e72853d67be1b2cb8e005338e",
+  "branch": "codex/relacionamento-v2-20261101",
+  "status": "Implemented and locally tested; no C-G closure",
+  "problem": "End-only operational filters were silently ignored; error responses also hid the date controls, preventing repair.",
+  "implementation": [
+    "One native account-timezone date parser shared by dashboard and due-date record filters. Typed422 rejects incomplete, inverted, malformed or longer-than-native366-day-difference periods. Start-only retains native one-day behavior.",
+    "Repairable localized date controls remain available after validation errors; no unfiltered/previous data displayed; clearing removes only period query keys. Fixed survey paths retain their separate native validation.",
+    "Existing account/assignment scopes, pagination, permission order and source records unchanged."
+  ],
+  "tests": {
+    "backend": "7/0: real owned candidateDB; date boundaries, filters/page/clear, malformed arrays, foreign access and unauthorized assignments",
+    "vue": "16/0: 4 new recovery cases plus12 existing functional cases",
+    "fixture_correction": "Initial16/1 was new assertion expecting numeric unit7; native survey helper canonicalizes string7. Assertion corrected; nativehelper unchanged.",
+    "ruby_new_offenses": 0,
+    "ruby_shared_delta": [
+      {
+        "path": "app/controllers/api/v1/accounts/relationship/base_controller.rb",
+        "baseline_count": 23,
+        "current_count": 19,
+        "new_cop_counts": {},
+        "current_new": []
+      },
+      {
+        "path": "app/services/jrc_relationship/record_filters.rb",
+        "baseline_count": 0,
+        "current_count": 0,
+        "new_cop_counts": {},
+        "current_new": []
+      }
+    ],
+    "module_eslint_delta": {
+      "baseline": 114,
+      "current": 114,
+      "added": {},
+      "diagnostics_on_changed_lines": []
+    },
+    "spec_eslint_errors": 0,
+    "diff_check": "passed"
+  },
+  "resources": {
+    "backend": {
+      "start": 7202709504,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/services/jrc_relationship/operational_period_spec.rb": "05566987e402deed4f9a359f7b0b4574ff89fc587700e6782679ba0c54dede8b",
+        "spec/requests/api/v1/accounts/relationship/operational_period_spec.rb": "8bfb27cfa4219768c47cdaec81af32895fdb348b0e041b6d87299bae898ecb7d"
+      },
+      "minimum": 7185256448,
+      "exit_code": 0,
+      "end": 7185059840
+    },
+    "vue": {
+      "status": "passed",
+      "free_start": 7203528704,
+      "minimum_free": 7174176768,
+      "mandatory_stop_bytes": 750000000,
+      "conservative_stop_bytes": 2000000000,
+      "no_build": true,
+      "owned_process_id": 27528,
+      "exit_code": 0,
+      "free_end": 7202058240
+    },
+    "final_free": 7175450624
+  },
+  "source_sha256": {
+    "app/controllers/api/v1/accounts/relationship/base_controller.rb": "8471fe2745c11875bb8cc6d12dee0c426cc4d8cede0a97786b6f529f440c518c",
+    "app/javascript/dashboard/i18n/locale/en/relationship.json": "82b04117a0d072ad9ec96ab31a25523ddcfae69e71d6ef9c6f69c5e4f6a09936",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ModulePage.vue": "a79ed8967a36916c0fb9bc54111b6bc49e375d0e7fa1ebc72a04009ac0bf7b06",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/functionalReview.spec.js": "774d907b7b42d565bf4a953f601a350033e5aba566a1726e0385be9c3106b628",
+    "app/services/jrc_relationship/record_filters.rb": "a2de1113f7e238c24b2633d26d14d0bc951aff4000006264994b6d2f50962ade",
+    "app/services/jrc_relationship/operational_period.rb": "f1aa207c4bf558c4c5b89ce2dd2ab11da69ea5bb9145afd2103687128b80eb31",
+    "spec/services/jrc_relationship/operational_period_spec.rb": "05566987e402deed4f9a359f7b0b4574ff89fc587700e6782679ba0c54dede8b",
+    "spec/requests/api/v1/accounts/relationship/operational_period_spec.rb": "8bfb27cfa4219768c47cdaec81af32895fdb348b0e041b6d87299bae898ecb7d"
+  },
+  "restrictions": "No appbuild/servedassets/restart/cleanup/push/deploy/provider calls/schema migrations.5379 and original containers preserved.",
+  "remaining": [
+    "Fresh current-source Chrome requires build authorization.",
+    "Final analyst removal scope pending business answer; TRR undefined; companydocs without portfolio deferred.",
+    "Next independent implementation: preserve priority-band snapshots when an editor resubmits unchanged priority."
+  ]
+}

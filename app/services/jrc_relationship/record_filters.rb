@@ -52,12 +52,11 @@ class JrcRelationship::RecordFilters
   end
 
   def period_scope(scope)
-    return scope unless @params[:from].present? && @model.column_names.include?('due_at')
+    return scope unless @model.column_names.include?('due_at')
 
-    from = Date.iso8601(@params[:from])
-    to = Date.iso8601(@params.fetch(:to, @params[:from]))
-    raise ArgumentError, 'Invalid period' if to < from || (to - from).to_i > 366
+    period = JrcRelationship::OperationalPeriod.call(@params)
+    return scope unless period
 
-    scope.where(due_at: from.beginning_of_day..to.end_of_day)
+    scope.where(due_at: period)
   end
 end

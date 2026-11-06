@@ -1,5 +1,7 @@
 {
   "RELATIONSHIP": {
+    "PERIOD_START_REQUIRED": "Select a start date before applying an end date.",
+    "CLEAR_PERIOD": "Clear period",
     "DRILLDOWN_DIALOG": {
       "NOTE": "Current authorized records behind this indicator, using the same portfolio filters. Open the original record to continue its workflow. Values may change while work progresses.",
       "RETRY": "Try again"

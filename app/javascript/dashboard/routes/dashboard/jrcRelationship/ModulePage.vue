@@ -51,6 +51,7 @@ const pagination = ref({ page: 1, total: 0, per_page: 25 });
 const loading = ref(false);
 const saving = ref(false);
 const error = ref('');
+const periodError = ref(false);
 const editing = ref(null);
 const recordDialog = ref(null);
 watch(editing, async value => {
@@ -146,6 +147,14 @@ const configScreen = computed(() =>
 const dedicatedScreen = computed(() =>
   ['survey_admin', 'handoffs'].includes(props.screen)
 );
+const incompletePeriod = computed(
+  () =>
+    !configScreen.value &&
+    !dedicatedScreen.value &&
+    !props.fixedSurveyScope &&
+    Boolean(filters.to) &&
+    !filters.from
+);
 const stageOptions = computed(
   () =>
     metadata.value?.pipelines.find(
@@ -179,10 +188,20 @@ const load = async () => {
   const accountId = route.params.accountId;
   const options = { signal: controller.signal };
   error.value = '';
+  periodError.value = false;
   loading.value = true;
   rows.value = [];
   drilldown.value = null;
   selected.value = [];
+  if (incompletePeriod.value) {
+    metadata.value = null;
+    metrics.value = null;
+    customers.value = [];
+    error.value = t('RELATIONSHIP.PERIOD_START_REQUIRED');
+    periodError.value = true;
+    loading.value = false;
+    return;
+  }
   try {
     const fixed = normalizeFixedSurveyScope(
       props.fixedSurveyScope,
@@ -235,6 +254,9 @@ const load = async () => {
       error.value = message(err);
       metadata.value = null;
       metrics.value = null;
+      periodError.value =
+        err.response?.data?.code === 'INVALID_OPERATIONAL_PERIOD';
+      if (periodError.value) customers.value = [];
     }
   } finally {
     if (version === generation) loading.value = false;
@@ -243,6 +265,18 @@ const load = async () => {
 const refresh = () => {
   pagination.value.page = 1;
   load();
+};
+const clearPeriod = () => {
+  filters.from = '';
+  filters.to = '';
+  if (route.query.from !== undefined || route.query.to !== undefined) {
+    const query = { ...route.query };
+    delete query.from;
+    delete query.to;
+    router.replace({ query });
+    return;
+  }
+  refresh();
 };
 const mutate = async operation => {
   const version = generation;
@@ -725,6 +759,45 @@ const money = value => formatMoney(value, metadata.value?.formatting);
     >
       {{ error }}
     </p>
+    <form
+      v-if="periodError"
+      data-testid="operational-period-recovery"
+      class="flex flex-wrap items-end gap-3 rounded-xl border border-n-weak bg-n-solid-2 p-3"
+      @submit.prevent="refresh"
+    >
+      <label class="grid min-w-0 gap-1 text-sm">
+        {{ t('RELATIONSHIP.FIELDS.from') }}
+        <input
+          v-model="filters.from"
+          type="date"
+          required
+          :class="inputClass"
+        />
+      </label>
+      <label class="grid min-w-0 gap-1 text-sm">
+        {{ t('RELATIONSHIP.FIELDS.to') }}
+        <input
+          v-model="filters.to"
+          type="date"
+          :class="inputClass"
+        />
+      </label>
+      <button
+        type="submit"
+        :class="buttonClass"
+        :disabled="loading"
+      >
+        {{ t('RELATIONSHIP.FILTER') }}
+      </button>
+      <button
+        type="button"
+        data-testid="clear-operational-period"
+        :class="buttonClass"
+        @click="clearPeriod"
+      >
+        {{ t('RELATIONSHIP.CLEAR_PERIOD') }}
+      </button>
+    </form>
     <p
       v-if="loading"
       role="status"

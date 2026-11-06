@@ -7,6 +7,9 @@ class Api::V1::Accounts::Relationship::BaseController < Api::V1::Accounts::BaseC
   rescue_from ArgumentError, KeyError do |error|
     render json: { errors: [error.message] }, status: :unprocessable_entity
   end
+  rescue_from JrcRelationship::OperationalPeriod::Invalid do |error|
+    render json: { errors: [error.message], code: 'INVALID_OPERATIONAL_PERIOD' }, status: :unprocessable_entity
+  end
   rescue_from ActiveRecord::StaleObjectError, ActiveRecord::RecordNotUnique, ActiveRecord::LockWaitTimeout, ActiveRecord::Deadlocked do |_error|
     render json: { errors: ['Record changed. Refresh before retrying.'] }, status: :conflict
   end
@@ -95,9 +98,6 @@ class Api::V1::Accounts::Relationship::BaseController < Api::V1::Accounts::BaseC
   end
 
   def report_period
-    return unless params[:from].present?
-    from = Date.iso8601(params[:from]); to = Date.iso8601(params.fetch(:to, params[:from]).presence || params[:from])
-    raise ArgumentError, 'Invalid period' if to < from || (to - from).to_i > 366
-    from.beginning_of_day..to.end_of_day
+    JrcRelationship::OperationalPeriod.call(params)
   end
 end
