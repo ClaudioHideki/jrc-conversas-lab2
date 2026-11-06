@@ -29,7 +29,7 @@ class JrcRelationship::PortfolioBatch
   private
 
   def authorize_transfer!(rows)
-    @owner_id = parsed_owner_id
+    @owner_id = JrcRelationship::PortfolioOwnerInput.parse(@params[:owner_id])
     JrcRelationship::DistributionApproval.lock_configuration!(@context.account.id)
     raise ArgumentError, 'Complete responsibility transfer requires a reviewed proposal' if @params[:transfer_responsibilities] && !@review
 
@@ -43,19 +43,6 @@ class JrcRelationship::PortfolioBatch
 
   def changed_owner_id(rows)
     @owner_id if rows.any? { |row| row.owner_id != @owner_id }
-  end
-
-  def parsed_owner_id
-    value = @params[:owner_id]
-    return if value.nil? || value == ''
-
-    valid = value.is_a?(Integer) || (value.is_a?(String) && value.match?(/\A[0-9]+\z/))
-    raise ArgumentError, 'Use a scalar positive owner ID or nil to unassign' unless valid
-
-    id = Integer(value.to_s, 10)
-    raise ArgumentError, 'Use a scalar positive owner ID or nil to unassign' unless id.positive?
-
-    id
   end
 
   def assert_review_identity!(rows)

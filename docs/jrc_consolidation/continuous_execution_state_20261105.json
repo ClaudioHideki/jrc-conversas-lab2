@@ -3,13 +3,13 @@
   "user_request": "499267ac-546d-4853-b4cf-7f03a2ea0629",
   "initial_head": "be54d0f7b4ce8d4e2a077cf2bdd8c2a4d5c88f5e",
   "branch": "codex/relacionamento-v2-20261101",
-  "last_validated_checkpoint": "c3961c576691eb7f716f6ceb8b68f7e82190ffdd",
+  "last_validated_checkpoint": "bb04df63dd2d8d3ed30166af746c408f0f734c0a",
   "completed_current_work": "Sealed dossier, weighted/current capacity, native withdrawal/cadence controls and F2 increments locally tested; see linked incremental reports. No C-G closure.",
-  "active_work": "Native scoped supervisor full handoff, then remaining F2/C/D/G gaps.",
+  "active_work": "Targeted Backoffice completion and native CS responsibility regressions after shared subject selection extraction.",
   "exact_next_actions": [
-    "Reproduce full handoff under a scoped supervisor without preserving access through an artificial grant.",
-    "Continue remaining executable F2/C/D and Word evidence gaps.",
-    "Keep fresh compiled visual/external acceptance separate."
+    "Run directed Backoffice completion handoff and native responsibility regressions in owned synthetic DB.",
+    "Reconcile live Word gaps against newer checkpoints; continue remaining safe defined functionality.",
+    "Preserve no-build/no5379-change boundary; do not claim fresh Chrome or external acceptance."
   ],
   "test_environment": {
     "source_manifest": ".codex/d9-notifications-20261104/snapshot.json",
@@ -51,16 +51,16 @@
     "No real participant removal or provider request; tests use synthetic records and WebMock, with external network disabled."
   ],
   "restrictions": "No build/recompile, no5379 change/restart, no four-container restart/reconfiguration, no cleanup/delete of existing data, no push/GHCR/deploy/production/client change, no real provider operations. Additive migrations allowed only in owned synthetic test database.",
-  "disk_last_observed_bytes": 6402695168,
+  "disk_last_observed_bytes": 6208139264,
   "TRR": "Undefined; do not invent",
   "company_documents_without_portfolio": "Explicitly deferred",
-  "last_validated_head": "0fb3ba35b4c6b36cc3bd6fbb9bfd6112dc22285f",
+  "last_validated_head": "bb04df63dd2d8d3ed30166af746c408f0f734c0a",
   "new_validated_code_checkpoint": "Resolve latest local CS code checkpoint with git log -1 --format=%H -- docs/jrc_consolidation/cs_signature_origin_checkpoint_20261105.json",
-  "current_status": "Native source selection55customer regressions and1000/1000scale passed; continuing direct/reviewed portfolio owner-input gates",
+  "current_status": "Strict native portfolio destination shapes validated:45+2 backend cases; continuing cross-module G.",
   "next_actions": [
-    "Finish safe analyst withdrawal via native scope/readiness and immutable reviewed responsibility receipts, including project owner/cadence dependencies.",
-    "Continue F2 and C/D/G functional and Word/scale gaps without reducing requirements.",
-    "Preserve no-build/current-server restriction; do not claim fresh visual or external acceptance."
+    "Run directed Backoffice completion handoff and native responsibility regressions in owned synthetic DB.",
+    "Reconcile live Word gaps against newer checkpoints; continue remaining safe defined functionality.",
+    "Preserve no-build/no5379-change boundary; do not claim fresh Chrome or external acceptance."
   ],
   "latest_dossier_report": "docs/jrc_consolidation/sealed_dossier_checkpoint_20261105.json",
   "capacity_report": "docs/jrc_consolidation/weighted_capacity_checkpoint_20261105.json",
@@ -125,5 +125,6 @@
   "withdrawal_cs_native_boundary_report": "docs/jrc_consolidation/withdrawal_cs_native_boundary_checkpoint_20261106.json",
   "withdrawal_formal_handoff_report": "docs/jrc_consolidation/withdrawal_formal_handoff_checkpoint_20261106.json",
   "withdrawal_read_auth_report": "docs/jrc_consolidation/withdrawal_read_auth_checkpoint_20261106.json",
-  "subject_source_performance_report": "docs/jrc_consolidation/subject_source_performance_checkpoint_20261106.json"
+  "subject_source_performance_report": "docs/jrc_consolidation/subject_source_performance_checkpoint_20261106.json",
+  "portfolio_owner_shapes_report": "docs/jrc_consolidation/portfolio_owner_shapes_checkpoint_20261106.json"
 }

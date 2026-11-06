@@ -116,7 +116,8 @@ class JrcRelationship::BatchReviewPlan
   def assign_options(input)
     raise Pundit::NotAuthorizedError unless @context.policy.team?
 
-    result = { 'owner_id' => input['owner_id'].present? ? @context.assignable_users.find(input['owner_id']).id : nil }
+    owner_id = JrcRelationship::PortfolioOwnerInput.parse(input['owner_id'])
+    result = { 'owner_id' => owner_id ? @context.assignable_users.find(owner_id).id : nil }
     result.merge!(responsibility_options(input))
     if input.key?('justification')
       reason = input['justification']

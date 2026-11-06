@@ -1,0 +1,63 @@
+{
+  "date": "2026-11-06",
+  "status": "Implemented and locally tested; not C-G closure",
+  "parent_checkpoint": "bb04df63dd2d8d3ed30166af746c408f0f734c0a",
+  "problem": "false owner input caused direct update/audit and reviewed unassignment proposal; create returned HTTP500. Arrays/maps could be silently discarded by strong parameters.",
+  "implementation": [
+    "Extract the existing strict legacy owner parser and reuse it in native create/update and reviewed preview before mutation.",
+    "Reject non-scalar, boolean, nonpositive and malformed IDs; preserve explicit nil/empty unassignment and existing positive integer/string semantics.",
+    "Native account, team, assignable destination, source access, active responsibility, immutable review and transaction gates remain mandatory. No historical rewrite."
+  ],
+  "files": [
+    "app/services/jrc_relationship/portfolio_owner_input.rb",
+    "app/services/jrc_relationship/portfolio_batch.rb",
+    "app/services/jrc_relationship/batch_review_plan.rb",
+    "app/controllers/api/v1/accounts/relationship/portfolio_controller.rb",
+    "spec/requests/api/v1/accounts/relationship/portfolio_owner_shapes_spec.rb"
+  ],
+  "evidence": {
+    "baseline": "portfolio-owner-shapes-baseline01:3 genuine failures; no success claim for failed create",
+    "native": "portfolio-owner-shapes-native02:45 examples,0 failures (9 malformed-shape,8 legacy,9 native destination,5 revision,14 reviewed batch)",
+    "positive": "portfolio-owner-shapes-positive03:2 examples,0 failures; actual persisted string-owner/nil creation",
+    "static": "portfolio-owner-shapes-final-ruby04:0 offenses; controller8->8,review plan0->0 baseline delta; no added debt"
+  },
+  "resources": {
+    "portfolio-owner-shapes-native02": {
+      "start": 6416179200,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/portfolio_owner_shapes_spec.rb": "a56d5bee584e7bd0e4c9697b22304adeb6c755cccaf41139b67a2ddbd27f91cf",
+        "spec/requests/api/v1/accounts/relationship/portfolio_batch_owner_input_spec.rb": "2f91222b453bdd3d835171e1cd18b437325c2161b4f8957ab668c39a7157f211",
+        "spec/requests/api/v1/accounts/relationship/portfolio_destination_access_spec.rb": "779b351785b176a87525f32e3d9daa5331f5c256d35310eb6df793ed34ab47b2",
+        "spec/requests/api/v1/accounts/relationship/portfolio_revision_spec.rb": "3ce3bfb78392d9441b942263952065e26632cce2b838422eb432c94602f76770",
+        "spec/services/jrc_relationship/reviewed_portfolio_batch_spec.rb": "ea899c17aacc8afd1f1c8f9511c389b2269ba21a903ffb0fced7e8a5ed86cc40"
+      },
+      "minimum": 6415900672,
+      "exit_code": 0,
+      "end": 6416007168
+    },
+    "portfolio-owner-shapes-positive03": {
+      "start": 6412398592,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/portfolio_owner_shapes_spec.rb": "c4467001953a850c6127c7cef8d5b6abf67f20af84934b6e4cfe0d9f78fcb379"
+      },
+      "minimum": 6412292096,
+      "exit_code": 0,
+      "end": 6412926976
+    }
+  },
+  "disk_final_bytes": 6208143360,
+  "remaining": [
+    "Current-source compiled desktop/mobile Chrome acceptance remains pending explicit build/server authorization.",
+    "Continue targeted native Backoffice completion and CS responsibility cross-module regressions.",
+    "TRR undefined; portfolio-less company documents deferred; no external acceptance claimed."
+  ],
+  "restrictions": "No build,cleanup,push,GHCR,deploy,external operation,production or runtime change."
+}

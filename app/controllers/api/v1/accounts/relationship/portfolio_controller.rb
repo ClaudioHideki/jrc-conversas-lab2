@@ -28,6 +28,7 @@ class Api::V1::Accounts::Relationship::PortfolioController < Api::V1::Accounts::
 
     attrs = params.require(:assignment).permit(:company_id, :contact_id, :owner_id, :team_id, :business_unit_id,
       settings: [:segment_id, :product_id, :complexity, { capacity_workload: [:hours, { points: JrcRelationship::CapacityWorkload::FACTORS }] }])
+    normalize_assignment_owner!(attrs)
     if attrs[:contact_id].present?
       contact = JrcOperations::Access.contact!(relationship_context.member, attrs[:contact_id])
       if contact.company_id
@@ -48,6 +49,7 @@ class Api::V1::Accounts::Relationship::PortfolioController < Api::V1::Accounts::
       settings: [:segment_id, :product_id, :complexity, { capacity_workload: [:hours, { points: JrcRelationship::CapacityWorkload::FACTORS }] }])
     raise Pundit::NotAuthorizedError unless relationship_context.policy.team?
 
+    normalize_assignment_owner!(attrs)
     relationship_context.assignable_users.find(attrs[:owner_id]) if attrs[:owner_id].present?
     with_assignment_update(record, attrs) do
       before = record.attributes.slice(*attrs.keys)
@@ -159,6 +161,11 @@ class Api::V1::Accounts::Relationship::PortfolioController < Api::V1::Accounts::
   end
 
   private
+
+  def normalize_assignment_owner!(attrs)
+    input = params.require(:assignment)
+    attrs[:owner_id] = JrcRelationship::PortfolioOwnerInput.parse(input[:owner_id]) if input.key?(:owner_id)
+  end
 
   def work_owner_record(assignment)
     kind, id = params.values_at(:work_kind, :work_record_id)
