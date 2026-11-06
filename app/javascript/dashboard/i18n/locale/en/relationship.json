@@ -1,5 +1,14 @@
 {
   "RELATIONSHIP": {
+    "TRANSFER_LOCK": {
+      "TITLE": "Portfolio transfer restriction",
+      "NOTICE": "Protect continuity by blocking changes to this portfolio owner. Changing or releasing the restriction requires a reason and current configuration authority. A stale record requires closing and reopening this form to review the current state.",
+      "LOCKED": "Block portfolio owner transfers",
+      "REASON": "Justification (required for setting or releasing the restriction)",
+      "CURRENT_REASON": "Current recorded justification: {reason}",
+      "REQUIRED": "Provide a justification of up to 4000 characters and review the current record.",
+      "ACTIVE": "Portfolio owner transfer is explicitly locked."
+    },
     "OBSERVED_HEALTH_COVERAGE": {
       "OBSERVED": "Observed source-weight coverage: {value}",
       "CALCULATION": "Weight used in this calculation: {value}",

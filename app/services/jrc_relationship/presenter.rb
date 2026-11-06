@@ -10,6 +10,7 @@ class JrcRelationship::Presenter
     signals = JrcRelationship::SentimentEvidenceProjection.annotate(signals: signals, configuration: @context.configuration(record))
     next_action = next_actions[record.id]
     { id: record.id, name: record.label, company_id: record.company_id, contact_id: record.contact_id,
+      assignment_version: record.updated_at.utc.iso8601(6), transfer_locked: JrcRelationship::PortfolioTransferLock.locked?(record.settings),
       business_unit_id: record.business_unit_id, business_unit: record.business_unit&.name,
       owner: record.owner && { id: record.owner.id, name: record.owner.name }, team_id: record.team_id,
       status: record.status, settings: record.settings, signals: signals.except(:_source_ids),

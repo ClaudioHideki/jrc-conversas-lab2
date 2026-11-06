@@ -5,6 +5,7 @@ import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import HealthStabilityNote from './HealthStabilityNote.vue';
 import HealthCoverageNote from './HealthCoverageNote.vue';
+import TransferLockDialog from './TransferLockDialog.vue';
 import HealthEvidenceSummary from './HealthEvidenceSummary.vue';
 import AutomaticPlaybookNotice from './AutomaticPlaybookNotice.vue';
 import ProductHealthHistory from './ProductHealthHistory.vue';
@@ -41,6 +42,7 @@ const recommendation = ref(null);
 const ownerId = ref('');
 const capacityWorkload = ref({});
 const sendCsat = ref(false);
+const transferLockOpen = ref(false);
 const contact = computed(() =>
   channels.value?.contacts.find(
     row => String(row.id) === String(contactId.value)
@@ -48,6 +50,7 @@ const contact = computed(() =>
 );
 let generation = 0;
 const load = async () => {
+  transferLockOpen.value = false;
   generation += 1;
   const version = generation;
   const accountId = route.params.accountId;
@@ -91,14 +94,41 @@ const execute = async action => {
 };
 const recalculate = () =>
   execute(() => API.recalculate(route.params.accountId, props.assignmentId));
-const assign = () =>
+const openTransferLock = async () => {
+  if (busy.value) return;
+  const version = generation;
+  const accountId = route.params.accountId;
+  const id = props.assignmentId;
+  busy.value = true;
+  error.value = '';
+  try {
+    const { data } = await API.customer(accountId, id);
+    if (version !== generation) return;
+    record.value = data;
+    transferLockOpen.value = true;
+  } catch (err) {
+    if (version === generation) {
+      error.value = message(err);
+      if ([401, 403, 404].includes(err.response?.status)) record.value = null;
+    }
+  } finally {
+    if (version === generation) busy.value = false;
+  }
+};
+const saveTransferLock = fields =>
   execute(() =>
+    API.saveTransferLock(route.params.accountId, props.assignmentId, fields)
+  );
+const assign = () => {
+  if (busy.value || record.value?.transfer_locked) return undefined;
+  return execute(() =>
     API.saveAssignment(
       route.params.accountId,
       { owner_id: ownerId.value || null },
       props.assignmentId
     )
   );
+};
 const saveWorkload = () =>
   execute(() =>
     API.saveAssignment(
@@ -202,6 +232,37 @@ const money = value => formatMoney(value, props.metadata?.formatting);
       {{ t('RELATIONSHIP.LOADING') }}
     </p>
     <template v-if="record">
+      <p
+        v-if="record.transfer_locked"
+        class="mb-3 min-w-0 break-words rounded-lg border border-n-amber-6 bg-n-amber-2 p-3 text-sm text-n-amber-11"
+        data-testid="portfolio-transfer-locked"
+      >
+        {{ t('RELATIONSHIP.TRANSFER_LOCK.ACTIVE') }}
+        {{
+          record.settings?.transfer_lock?.reason ||
+          t('RELATIONSHIP.UNAVAILABLE')
+        }}
+      </p>
+      <button
+        v-if="
+          metadata.can_configure && metadata.can_team && metadata.can_manage
+        "
+        type="button"
+        :class="buttonClass"
+        :disabled="busy"
+        data-testid="open-transfer-lock"
+        @click="openTransferLock"
+      >
+        {{ t('RELATIONSHIP.TRANSFER_LOCK.TITLE') }}
+      </button>
+      <TransferLockDialog
+        v-if="transferLockOpen"
+        :record="record"
+        :busy="busy"
+        :error="error"
+        @close="transferLockOpen = false"
+        @save="saveTransferLock"
+      />
       <AutomaticPlaybookNotice
         :attempt="record.automatic_playbook_attempt"
         :formatting="metadata.formatting"
@@ -411,6 +472,8 @@ const money = value => formatMoney(value, props.metadata?.formatting);
           }}<select
             v-model="ownerId"
             :class="inputClass"
+            :disabled="busy || record.transfer_locked"
+            data-testid="portfolio-owner"
           >
             <option value="">{{ t('RELATIONSHIP.UNASSIGNED') }}</option>
             <option
@@ -424,7 +487,8 @@ const money = value => formatMoney(value, props.metadata?.formatting);
         ><button
           type="submit"
           :class="buttonClass"
-          :disabled="busy"
+          :disabled="busy || record.transfer_locked"
+          data-testid="assign-portfolio-owner"
         >
           {{ t('RELATIONSHIP.ASSIGN') }}
         </button>

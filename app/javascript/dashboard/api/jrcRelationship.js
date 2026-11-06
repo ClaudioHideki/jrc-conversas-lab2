@@ -62,6 +62,10 @@ export default {
     axios.get(`${base(accountId)}/portfolio`, { ...options, params }),
   customer: (accountId, id, options) =>
     axios.get(`${base(accountId)}/portfolio/${Number(id)}`, options),
+  saveTransferLock: (accountId, id, restriction) =>
+    axios.patch(`${base(accountId)}/portfolio/${Number(id)}/transfer_lock`, {
+      restriction,
+    }),
   productHealthHistory: (accountId, id, params, options) =>
     axios.get(
       `${base(accountId)}/portfolio/${Number(id)}/product_health_history`,

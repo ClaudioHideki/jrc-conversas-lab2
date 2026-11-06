@@ -4,6 +4,7 @@ import { shallowMount, flushPromises } from '@vue/test-utils';
 import ModulePage from './ModulePage.vue';
 import PortfolioTable from './PortfolioTable.vue';
 import CustomerPanel from './CustomerPanel.vue';
+import TransferLockDialog from './TransferLockDialog.vue';
 import ManagementView from '../crm/views/management/ManagementView.vue';
 import TeamPanel from './TeamPanel.vue';
 
@@ -16,6 +17,8 @@ const mocks = vi.hoisted(() => ({
     portfolio: vi.fn(),
     customer: vi.fn(),
     channels: vi.fn(),
+    saveTransferLock: vi.fn(),
+    saveAssignment: vi.fn(),
   },
   commercial: vi.fn(),
 }));
@@ -94,6 +97,8 @@ describe('Relationship interface integration', () => {
       data: { payload: [customer], meta: { page: 1, total: 1, per_page: 25 } },
     });
     mocks.api.customer.mockResolvedValue({ data: customer });
+    mocks.api.saveTransferLock.mockResolvedValue({ data: {} });
+    mocks.api.saveAssignment.mockResolvedValue({ data: {} });
     mocks.api.channels.mockResolvedValue({
       data: {
         contacts: [
@@ -215,6 +220,123 @@ describe('Relationship interface integration', () => {
     expect(
       wrapper.findComponent({ name: 'HealthCoverageNote' }).props('health')
     ).toEqual(customer.signals.health);
+    wrapper.unmount();
+  });
+
+  it('reloads current portfolio facts before editing the restriction and reflects the persisted response', async () => {
+    const current = {
+      ...customer,
+      assignment_version: '2026-11-06T12:00:00.123456Z',
+      transfer_locked: false,
+      settings: {},
+    };
+    const saved = {
+      ...current,
+      assignment_version: '2026-11-06T12:01:00.123456Z',
+      transfer_locked: true,
+      settings: {
+        transfer_lock: { locked: true, reason: 'Synthetic continuity review' },
+      },
+    };
+    mocks.api.customer.mockResolvedValue({ data: current });
+    const wrapper = shallowMount(CustomerPanel, {
+      props: { assignmentId: 19, metadata },
+    });
+    await flushPromises();
+    await wrapper.get('[data-testid="open-transfer-lock"]').trigger('click');
+    await flushPromises();
+    expect(mocks.api.customer).toHaveBeenCalledTimes(2);
+    const dialog = wrapper.getComponent(TransferLockDialog);
+    expect(dialog.props('record').assignment_version).toBe(
+      current.assignment_version
+    );
+    mocks.api.saveTransferLock.mockImplementationOnce(async () => {
+      mocks.api.customer.mockResolvedValue({ data: saved });
+      return { data: { id: 19, transfer_locked: true } };
+    });
+    const fields = {
+      locked: true,
+      reason: 'Synthetic continuity review',
+      expected_version: current.assignment_version,
+    };
+    dialog.vm.$emit('save', fields);
+    await flushPromises();
+    expect(mocks.api.saveTransferLock).toHaveBeenCalledWith('1', 19, fields);
+    expect(wrapper.findComponent(TransferLockDialog).exists()).toBe(false);
+    expect(
+      wrapper.get('[data-testid="portfolio-transfer-locked"]').text()
+    ).toContain(fields.reason);
+    expect(
+      wrapper.get('[data-testid="portfolio-owner"]').attributes('disabled')
+    ).toBeDefined();
+    expect(
+      wrapper
+        .get('[data-testid="assign-portfolio-owner"]')
+        .attributes('disabled')
+    ).toBeDefined();
+    const form = wrapper
+      .findAll('form')
+      .find(node => node.find('[data-testid="portfolio-owner"]').exists());
+    await form.trigger('submit');
+    expect(mocks.api.saveAssignment).not.toHaveBeenCalled();
+    wrapper.unmount();
+  });
+
+  it('keeps a restricted portfolio visible but does not offer policy mutation without configuration authority', async () => {
+    mocks.api.customer.mockResolvedValue({
+      data: {
+        ...customer,
+        transfer_locked: true,
+        settings: {
+          transfer_lock: { locked: true, reason: 'Synthetic configured hold' },
+        },
+      },
+    });
+    const wrapper = shallowMount(CustomerPanel, {
+      props: {
+        assignmentId: 19,
+        metadata: { ...metadata, can_configure: false },
+      },
+    });
+    await flushPromises();
+    expect(wrapper.find('[data-testid="open-transfer-lock"]').exists()).toBe(
+      false
+    );
+    expect(
+      wrapper.get('[data-testid="portfolio-transfer-locked"]').text()
+    ).toContain('Synthetic configured hold');
+    expect(
+      wrapper.get('[data-testid="portfolio-owner"]').attributes('disabled')
+    ).toBeDefined();
+    wrapper.unmount();
+  });
+
+  it('does not open an old policy response after the authenticated user changes', async () => {
+    const wrapper = shallowMount(CustomerPanel, {
+      props: { assignmentId: 19, metadata },
+    });
+    await flushPromises();
+    let finish;
+    mocks.api.customer.mockImplementationOnce(
+      () =>
+        new Promise(resolve => {
+          finish = resolve;
+        })
+    );
+    await wrapper.get('[data-testid="open-transfer-lock"]').trigger('click');
+    mocks.store.getters.getCurrentUserID = 8;
+    await flushPromises();
+    finish({
+      data: {
+        ...customer,
+        name: 'Previous actor private policy',
+        transfer_locked: true,
+      },
+    });
+    await flushPromises();
+    expect(wrapper.text()).not.toContain('Previous actor private policy');
+    expect(wrapper.findComponent(TransferLockDialog).exists()).toBe(false);
+    expect(mocks.api.saveTransferLock).not.toHaveBeenCalled();
     wrapper.unmount();
   });
 

@@ -116,6 +116,12 @@
       "current_state": "Native engine reused; read-only multi-surface presentation and source/consumer Vue tests passed",
       "evidence": "docs/jrc_consolidation/health_observed_coverage_checkpoint_20261106.json",
       "remaining": "Fresh Chrome/visual acceptance and P0148 calibrated inference confidence are separate."
+    },
+    {
+      "requirement": "relacionamento:P0095 strategic owner-transfer hold",
+      "current_state": "Explicit opt-in native guard, reviewed-batch integration and functional dialog locally validated",
+      "evidence": "docs/jrc_consolidation/portfolio_transfer_lock_checkpoint_20261106.json",
+      "remaining": "No inferred strategic status, personnel conflict detection, final roster removal or full F1/visual closure."
     }
   ],
   "explicit_dependencies": [

@@ -8,6 +8,7 @@ class JrcRelationship::DistributionPreview
   end
 
   def call
+    @records.each { |row| JrcRelationship::PortfolioTransferLock.check!(row, owner_id: @inputs['owner_id']) }
     binding = JrcRelationship::DistributionApproval.new(@context).binding(@records, owner_id: @inputs['owner_id'])
     raise ArgumentError, 'A justification is required for formal distribution approval' if binding['required'] && @inputs['justification'].blank?
 

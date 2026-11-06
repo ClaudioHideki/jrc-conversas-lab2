@@ -107,6 +107,14 @@ class Api::V1::Accounts::Relationship::PortfolioController < Api::V1::Accounts::
                                                   source: source, work_record: work_owner_record(record)).call.except(:_source_ids)
   end
 
+  def transfer_lock
+    attrs = params.require(:restriction).permit(:locked, :reason, :expected_version).to_h.symbolize_keys
+    record = JrcRelationship::PortfolioTransferLock.new(relationship_context).update!(id: params[:id], **attrs)
+    render json: { id: record.id, assignment_version: record.updated_at.utc.iso8601(6),
+                   transfer_locked: JrcRelationship::PortfolioTransferLock.locked?(record.settings),
+                   restriction: record.settings[JrcRelationship::PortfolioTransferLock::KEY] }
+  end
+
   def batch
     count = JrcRelationship::PortfolioBatch.new(relationship_context, params).call
     render json: { updated: count }
