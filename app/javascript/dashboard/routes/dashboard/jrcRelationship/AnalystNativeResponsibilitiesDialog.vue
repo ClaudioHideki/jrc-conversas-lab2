@@ -20,7 +20,7 @@ const busy = ref(false);
 const error = ref('');
 const kind = ref('project_tasks');
 const page = ref(1);
-const kinds = ['project_tasks', 'service_tickets', 'projects'];
+const kinds = ['project_tasks', 'service_tickets', 'projects', 'activities'];
 const pages = computed(() =>
   Math.max(1, Math.ceil((result.value?.meta.total || 0) / 10))
 );

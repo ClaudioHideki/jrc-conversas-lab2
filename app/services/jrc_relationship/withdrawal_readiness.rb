@@ -68,39 +68,13 @@ class JrcRelationship::WithdrawalReadiness
   end
 
   def activities!
-    activities = @context.account.jrc_crm_activities.where(user: @source).where.not(status: %w[completed cancelled])
-    linked = activities.where("metadata ->> 'relationship_assignment_id' IS NOT NULL")
-    activity_references.each { |ids| linked = linked.or(activities.where(id: ids)) }
+    linked = JrcRelationship::LinkedCrmCommitments.new(@context.account).owned_pending_scope(@source)
     collect!('activities', linked, JrcRelationship::PortfolioResponsibilities.new(@context).activity_scope)
-  end
-
-  def activity_references
-    [JrcRelationship::Action.where(account: @context.account).select(:activity_id),
-     JrcRelationship::Qbr.where(account: @context.account).select(:activity_id), plan_activity_ids]
   end
 
   def cadences!
     enrollments = JrcRelationship::AnalystCadences.responsibilities(@context.account, @source).where(state: 'active')
     collect!('cadences', enrollments, enrollments.where(assignment_id: @context.assignments.select(:id)))
-  end
-
-  def plan_activity_ids
-    ids = plan_references.filter_map { |row| row['activity_id'] }.map { |id| Integer(id.to_s, 10) }.uniq
-    unless @context.account.jrc_crm_activities.where(id: ids).count == ids.length
-      raise ArgumentError, 'Plan activity references require an authorized native origin review'
-    end
-
-    ids
-  end
-
-  def plan_references
-    plans = JrcRelationship::SuccessPlan.where(account: @context.account, status: %w[active paused]).limit(MAX_ROWS + 1).to_a
-    raise ArgumentError, 'Too many plans for a single withdrawal review' if plans.length > MAX_ROWS
-
-    refs = plans.flat_map { |plan| plan.goals + Array(plan.metadata['milestones']) }
-    raise ArgumentError, 'Plan references require a native review before analyst withdrawal' unless refs.length <= MAX_ROWS && refs.all?(Hash)
-
-    refs
   end
 
   def native_sources!

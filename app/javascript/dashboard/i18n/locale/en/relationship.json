@@ -8,13 +8,13 @@
       "TITLE": "Native responsibilities",
       "RETRY": "Try again",
       "OPEN": "Review native responsibilities",
-      "NOTE": "Current pending ownership in Projects and Service Desk. Open each source to review destinations through its own permissions and workflow. This view does not transfer work, change memberships or authorize analyst removal.",
+      "NOTE": "Current pending ownership in Projects, Service Desk and CRM commitments linked to Relationship. Open each source to review destinations through its own permissions and workflow. This view does not transfer work, change memberships or authorize analyst removal.",
       "TOTAL": "{count} pending records in this category",
       "UPDATED": "Last updated",
       "OPEN_SOURCE": "Open original module",
       "PAGE": "Page {page} of {pages}",
-      "KINDS": { "project_tasks": "Project tasks", "service_tickets": "Service Desk tickets", "projects": "Owned projects" },
-      "STATES": { "planned": "Planned", "active": "Active", "on_hold": "On hold", "backlog": "Backlog", "in_progress": "In progress", "review": "In review", "blocked": "Blocked", "open": "Open", "waiting": "Waiting" }
+      "KINDS": { "project_tasks": "Project tasks", "service_tickets": "Service Desk tickets", "projects": "Owned projects", "activities": "Linked CRM commitments" },
+      "STATES": { "planned": "Planned", "active": "Active", "on_hold": "On hold", "backlog": "Backlog", "in_progress": "In progress", "review": "In review", "blocked": "Blocked", "open": "Open", "waiting": "Waiting", "scheduled": "Scheduled" }
     },
     "PLAYBOOK_BUDGET": {
       "TITLE": "Last automatic task admission deferred",

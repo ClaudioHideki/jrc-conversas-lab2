@@ -1,0 +1,66 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "f01dcb1127149be1ad2eacb98a1ff0e2f56508e6",
+  "scope": "F1 linked CRM commitment origins; native read-only inventory and exact existing CRM route",
+  "changes": [
+    "Extract exact existing withdrawal ownership/reference query; no new parallel commitment registry.",
+    "Include plan goals/milestones even after both allocation and plan owners changed.",
+    "Apply native CRM visibility and current Team authority before rows or counts; hidden ownership denies whole category.",
+    "Fixed10 pagination and minimal source projection; no notes/metadata.",
+    "Add fourth horizontal source category; existing source page supports completion, not yet editing or reassignment."
+  ],
+  "files": {
+    "app/services/jrc_relationship/linked_crm_commitments.rb": "096c19df2b05a349df155abd86c829adfcce20ed212d51025e29757f24ec2f85",
+    "app/services/jrc_relationship/withdrawal_readiness.rb": "42fcfa14830ccf8b3793ef9a1a68df6271fe55aa74b22d7bbe95457bc02b12f2",
+    "app/services/jrc_relationship/analyst_native_responsibilities.rb": "8deb4a0f587c3d90ba8f7f5bb5d70de2286d66d9a00d7a6a914d44e4fbe33f01",
+    "spec/requests/api/v1/accounts/relationship/analyst_crm_commitments_spec.rb": "93f110b4bfdaa8ad9d59e73bca3cbff38a841b9746323f8dcf9af7cca592e8b8",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/AnalystNativeResponsibilitiesDialog.vue": "9c6c28969d39146e236ee29eba3b84636a48ab7a5a98e9c7e8ff90eff96e0cb1",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/analystNativeResponsibilities.spec.js": "a0a75adeb76e773c402c7a3a15ff9561542d883ede2ca195e55d900f7b0729cb",
+    "app/javascript/dashboard/i18n/locale/en/relationship.json": "1c253ad5782bf077b7c841d29a6e77233b703697ffbf485617ba9e55d727adcb"
+  },
+  "tests": {
+    "initial_native": "12 examples/4 fixture failures: unlinked native CRM activities require lead/deal;5 existing readiness passed. Fixtures corrected; no model validation weakened.",
+    "corrected_native": "7/0",
+    "final_native": "16/0 incl7 CRM and9 existing native origins after shared scope extraction",
+    "vue": "6/0",
+    "ruby": "new+changed files0 offenses",
+    "eslint_errors": 0,
+    "eslint_warnings": 3
+  },
+  "resource": {
+    "start": 7238090752,
+    "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+    "database": "jrc_rel_v2_candidate_test",
+    "no_build": true,
+    "no_server": true,
+    "spec_sha256": {
+      "spec/requests/api/v1/accounts/relationship/analyst_crm_commitments_spec.rb": "93f110b4bfdaa8ad9d59e73bca3cbff38a841b9746323f8dcf9af7cca592e8b8",
+      "spec/requests/api/v1/accounts/relationship/analyst_native_responsibilities_spec.rb": "6fd4fbadfaab6555f34778ae3ba7935102ae5535e5cd56f5c99ff62fddf42457"
+    },
+    "minimum": 7218229248,
+    "exit_code": 0,
+    "end": 7238000640
+  },
+  "frontend_resource": {
+    "status": "passed",
+    "free_start": 7236984832,
+    "minimum_free": 7213953024,
+    "mandatory_stop_bytes": 750000000,
+    "conservative_stop_bytes": 2000000000,
+    "no_build": true,
+    "owned_process_id": 18464,
+    "exit_code": 0,
+    "free_end": 7235518464
+  },
+  "free_final_bytes": 7237660672,
+  "preserved": [
+    "53d0b022 and3b31577e are ancestors",
+    "all four original container start times unchanged",
+    "no build, no server5379 change, no cleanup/push/external operation"
+  ],
+  "limits": [
+    "Final analyst-removal scope awaits business answer; no identity/membership mutation.",
+    "Fresh Chrome/visual acceptance blocked by no-build restriction; stages C-G remain open."
+  ],
+  "next_work": "Native activity editing/rescheduling UI: existing buttons disabled despite an existing authorized update endpoint; preserve source identity and existing owner-transfer rules."
+}

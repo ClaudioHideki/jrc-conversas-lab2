@@ -1,7 +1,7 @@
 # A read-only inventory with links to the original module editors. Viewing a
 # row never grants assignment, membership or final analyst-removal authority.
 class JrcRelationship::AnalystNativeResponsibilities
-  KINDS = (JrcRelationship::NativeResponsibilities::KINDS + ['projects']).freeze
+  KINDS = (JrcRelationship::NativeResponsibilities::KINDS + %w[projects activities]).freeze
 
   def initialize(context)
     @authority = JrcRelationship::BatchReviewAuthority.new(account_id: context.account.id, actor_id: context.user.id, write: false)
@@ -42,7 +42,17 @@ class JrcRelationship::AnalystNativeResponsibilities
   end
 
   def authorized_source(context, analyst, kind)
-    if kind == 'projects'
+    rows, visible = source_scopes(context, analyst, kind)
+    raise Pundit::NotAuthorizedError if rows.where.not(id: visible.select(:id)).exists?
+
+    kind == 'service_tickets' ? rows.includes(:status) : rows
+  end
+
+  def source_scopes(context, analyst, kind)
+    if kind == 'activities'
+      rows = JrcRelationship::LinkedCrmCommitments.new(context.account).owned_pending_scope(analyst)
+      visible = JrcRelationship::PortfolioResponsibilities.new(context).activity_scope
+    elsif kind == 'projects'
       rows = JrcProjects::Project.where(account: context.account, owner: analyst).where.not(status: %w[completed canceled])
       visible = rows.exists? ? JrcOperations::Access.projects(context.member) : rows.none
     else
@@ -50,9 +60,7 @@ class JrcRelationship::AnalystNativeResponsibilities
       rows = native.owned_pending_scope(kind, analyst)
       visible = rows.exists? ? native.owned_scope(kind, analyst) : rows.none
     end
-    raise Pundit::NotAuthorizedError if rows.where.not(id: visible.select(:id)).exists?
-
-    kind == 'service_tickets' ? rows.includes(:status) : rows
+    [rows, visible]
   end
 
   def project(context, row, kind)
@@ -61,7 +69,9 @@ class JrcRelationship::AnalystNativeResponsibilities
   end
 
   def source_route(account_id, row, kind)
-    if kind == 'service_tickets'
+    if kind == 'activities'
+      { name: 'crm_activities', params: { accountId: account_id }, query: { activityId: row.id } }
+    elsif kind == 'service_tickets'
       { name: 'jrc_service_desk_detail', params: { accountId: account_id, ticketId: row.id } }
     else
       project_id = kind == 'projects' ? row.id : row.project_id

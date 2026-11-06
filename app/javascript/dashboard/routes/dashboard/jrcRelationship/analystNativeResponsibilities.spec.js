@@ -111,6 +111,37 @@ it('resets pagination and private rows when switching native categories', async 
   wrapper.unmount();
 });
 
+it('opens linked CRM commitments through their existing native editor and resets category pagination', async () => {
+  const wrapper = render();
+  await flushPromises();
+  await wrapper.get('[data-testid="native-next"]').trigger('click');
+  await flushPromises();
+  const crm = response('activities', 1);
+  crm.data.payload[0].status = 'scheduled';
+  crm.data.payload[0].source_route = {
+    name: 'crm_activities',
+    params: { accountId: 1 },
+    query: { activityId: 14 },
+  };
+  mocks.list.mockResolvedValueOnce(crm);
+  await wrapper.get('[data-testid="native-kind-activities"]').trigger('click');
+  await flushPromises();
+  expect(mocks.list).toHaveBeenLastCalledWith(
+    '1',
+    7,
+    { kind: 'activities', page: 1 },
+    { signal: expect.any(AbortSignal) }
+  );
+  expect(wrapper.findComponent(RouterLinkStub).props('to')).toEqual(
+    crm.data.payload[0].source_route
+  );
+  expect(wrapper.text()).toContain(
+    'RELATIONSHIP.NATIVE_RESPONSIBILITIES.STATES.scheduled'
+  );
+  expect(wrapper.find('form').exists()).toBe(false);
+  wrapper.unmount();
+});
+
 it('clears rows, totals and links when current source permissions are denied and retries only the native read', async () => {
   const wrapper = render();
   await flushPromises();
