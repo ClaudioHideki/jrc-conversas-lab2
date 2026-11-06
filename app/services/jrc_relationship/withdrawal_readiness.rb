@@ -15,6 +15,7 @@ class JrcRelationship::WithdrawalReadiness
     prepare_source!(analyst_id)
     allocations!
     responsibilities!
+    nested_commitments!
     native_sources!
     verify_viewer!
     presentation
@@ -70,6 +71,17 @@ class JrcRelationship::WithdrawalReadiness
   def activities!
     linked = JrcRelationship::LinkedCrmCommitments.new(@context.account).owned_pending_scope(@source)
     collect!('activities', linked, JrcRelationship::PortfolioResponsibilities.new(@context).activity_scope)
+  end
+
+  def nested_commitments!
+    plans = JrcRelationship::SuccessPlan.where(account: @context.account, status: %w[active paused])
+    plan_rows = "goals || COALESCE(NULLIF(metadata -> 'milestones', 'null'::jsonb), '[]'::jsonb)"
+    plans = plans.where("EXISTS (SELECT 1 FROM jsonb_array_elements(#{plan_rows}) AS item(value) WHERE item.value ->> 'owner_id' = ?)",
+                        @source.id.to_s)
+    collect!('plan_commitments', plans, @context.records(JrcRelationship::SuccessPlan))
+    qbrs = JrcRelationship::Qbr.where(account: @context.account, status: 'scheduled')
+    qbrs = qbrs.where("EXISTS (SELECT 1 FROM jsonb_array_elements(decisions) AS item(value) WHERE item.value ->> 'owner_id' = ?)", @source.id.to_s)
+    collect!('qbr_commitments', qbrs, @context.records(JrcRelationship::Qbr))
   end
 
   def cadences!

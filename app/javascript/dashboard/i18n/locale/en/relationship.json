@@ -1620,7 +1620,9 @@
         "cadences": "Active cadences bound to this executor",
         "project_tasks": "Native project tasks",
         "service_tickets": "Service Desk tickets",
-        "projects": "Native project ownership"
+        "projects": "Native project ownership",
+        "plan_commitments": "Active plans with owned goals or milestones",
+        "qbr_commitments": "Scheduled QBRs with owned commitments"
       }
     },
     "PRIORITY_SIGNAL_NOTICE": "Os pesos opcionais de tendência e SLA começam desativados. Tendência usa a queda observada em pontos de saúde; SLA usa a existência de vencimentos autorizados. Dados ausentes não são tratados como zero. A revisão manual de prioridade permanece preservada.",
