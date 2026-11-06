@@ -24,7 +24,7 @@ class Api::V1::Accounts::Relationship::PortfolioController < Api::V1::Accounts::
   end
 
   def create
-    raise Pundit::NotAuthorizedError unless relationship_context.policy.team?
+    raise Pundit::NotAuthorizedError unless relationship_context.policy.team? && relationship_context.policy.manage?
 
     attrs = params.require(:assignment).permit(:company_id, :contact_id, :owner_id, :team_id, :business_unit_id,
       settings: [:segment_id, :product_id, :complexity, { capacity_workload: [:hours, { points: JrcRelationship::CapacityWorkload::FACTORS }] }])
@@ -185,7 +185,7 @@ class Api::V1::Accounts::Relationship::PortfolioController < Api::V1::Accounts::
         attrs[:settings] = record.settings.merge(attrs[:settings].to_h) if attrs.key?(:settings)
         JrcRelationship::DistributionScopeGuard.check!(relationship_context, record, attrs)
         if attrs.key?(:owner_id) && attrs[:owner_id].to_s != record.owner_id.to_s
-          JrcRelationship::DistributionApproval.direct_allowed!(relationship_context, [record])
+          JrcRelationship::DistributionApproval.direct_allowed!(relationship_context, [record], owner_id: attrs[:owner_id])
         end
         yield
       end
@@ -212,6 +212,7 @@ class Api::V1::Accounts::Relationship::PortfolioController < Api::V1::Accounts::
       validate_assignment_eligibility!(record)
       record.save!
       relationship_context.assignment(record.id)
+      JrcRelationship::DistributionPolicyBinding.new(relationship_context).call([record], owner_id: record.owner_id) if record.owner_id
       relationship_context.audit!(record, after: attrs.to_h, action: 'assignment_created')
       audit_eligibility_exception!(record)
     end

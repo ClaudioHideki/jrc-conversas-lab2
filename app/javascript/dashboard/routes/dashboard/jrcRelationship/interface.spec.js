@@ -78,6 +78,22 @@ const mountPortfolio = () =>
   });
 
 describe('Relationship interface integration', () => {
+  it('keeps portfolio reassignment controls unavailable for a team viewer without native manage permission', async () => {
+    mocks.api.customer.mockResolvedValue({ data: customer });
+    const wrapper = shallowMount(CustomerPanel, {
+      props: { assignmentId: 19, metadata: { ...metadata, can_manage: false } },
+    });
+    await flushPromises();
+    expect(wrapper.find('[data-testid="portfolio-owner"]').exists()).toBe(
+      false
+    );
+    expect(
+      wrapper.find('[data-testid="assign-portfolio-owner"]').exists()
+    ).toBe(false);
+    expect(mocks.api.saveAssignment).not.toHaveBeenCalled();
+    wrapper.unmount();
+  });
+
   beforeEach(() => {
     mocks.store = {
       getters: reactive({

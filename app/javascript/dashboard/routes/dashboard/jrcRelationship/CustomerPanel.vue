@@ -471,7 +471,7 @@ const money = value => formatMoney(value, props.metadata?.formatting);
         </ul>
       </details>
       <form
-        v-if="metadata.can_team"
+        v-if="metadata.can_team && metadata.can_manage"
         class="my-4 flex flex-wrap items-end gap-2"
         @submit.prevent="assign"
       >

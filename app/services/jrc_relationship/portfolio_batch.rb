@@ -34,8 +34,13 @@ class JrcRelationship::PortfolioBatch
       assert_review_identity!(rows)
       JrcRelationship::DistributionApproval.new(@context).check!(@review)
     else
-      JrcRelationship::DistributionApproval.direct_allowed!(@context, rows)
+      JrcRelationship::DistributionApproval.direct_allowed!(@context, rows, owner_id: changed_owner_id(rows))
     end
+  end
+
+  def changed_owner_id(rows)
+    owner_id = @params[:owner_id]
+    owner_id if rows.any? { |row| row.owner_id.to_s != owner_id.to_s }
   end
 
   def assert_review_identity!(rows)

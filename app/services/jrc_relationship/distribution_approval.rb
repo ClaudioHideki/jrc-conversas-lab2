@@ -55,7 +55,7 @@ class JrcRelationship::DistributionApproval
     current
   end
 
-  def self.direct_allowed!(context, records)
+  def self.direct_allowed!(context, records, owner_id: nil)
     ids = records.map(&:id)
     authority = JrcRelationship::BatchReviewAuthority.new(account_id: context.account.id, actor_id: context.user.id)
     authority.call do |current|
@@ -63,7 +63,9 @@ class JrcRelationship::DistributionApproval
 
       rows = current.assignments.where(id: ids).order(:id).to_a
       raise ActiveRecord::RecordNotFound unless rows.size == ids.size
-      raise ArgumentError, 'Use the reviewed transfer and formal Central approval' if new(current).binding(rows).fetch('required')
+
+      binding = new(current).binding(rows, owner_id: owner_id)
+      raise ArgumentError, 'Use the reviewed transfer and formal Central approval' if binding.fetch('required')
     end
   end
 
