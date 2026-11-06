@@ -611,6 +611,12 @@ Rails.application.routes.draw do
             end
           end
           namespace :relationship do
+            resources :portfolio_groups, only: [:index, :show, :create, :update] do
+              member do
+                get :customers
+                patch :customers, action: :update_customers, as: :update_customers
+              end
+            end
             resources :survey_models, only: [:index, :show, :create, :update] do
               collection { get :options }
               member do

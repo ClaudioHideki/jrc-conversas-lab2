@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_11_06_101000) do
+ActiveRecord::Schema[7.1].define(version: 2026_11_06_113000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -4896,6 +4896,43 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_06_101000) do
     t.index ["owner_id"], name: "index_jrc_relationship_renewals_on_owner_id"
   end
 
+  create_table "jrc_relationship_portfolio_group_assignments", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "portfolio_group_id", null: false
+    t.bigint "assignment_id", null: false
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "assignment_id", "active"], name: "rel_group_customer_scope"
+    t.index ["account_id", "portfolio_group_id", "assignment_id"], name: "rel_group_unique_customer", unique: true
+    t.index ["account_id"], name: "rel_group_link_account"
+  end
+
+  create_table "jrc_relationship_portfolio_groups", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.string "name", null: false
+    t.text "objective", default: "", null: false
+    t.bigint "owner_id", null: false
+    t.bigint "team_id"
+    t.bigint "business_unit_id"
+    t.bigint "segment_id"
+    t.string "visibility", default: "private", null: false
+    t.string "status", default: "active", null: false
+    t.jsonb "goals", default: [], null: false
+    t.integer "lock_version", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index "account_id, lower((name)::text)", name: "rel_group_unique_name", unique: true
+    t.index ["account_id", "id"], name: "rel_group_tenant_ref", unique: true
+    t.index ["account_id", "owner_id", "status"], name: "rel_group_owner"
+    t.index ["account_id"], name: "rel_group_account"
+    t.index ["team_id"], name: "index_jrc_relationship_portfolio_groups_on_team_id"
+    t.check_constraint "jsonb_typeof(goals) = 'array'::text AND jsonb_array_length(goals) <= 50", name: "rel_group_goals"
+    t.check_constraint "status::text = ANY (ARRAY['active'::character varying, 'archived'::character varying]::text[])", name: "rel_group_status"
+    t.check_constraint "visibility::text <> 'team'::text OR team_id IS NOT NULL", name: "rel_group_team_visibility"
+    t.check_constraint "visibility::text = ANY (ARRAY['private'::character varying, 'team'::character varying, 'account'::character varying]::text[])", name: "rel_group_visibility"
+  end
+
   create_table "jrc_relationship_risk_cases", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.bigint "assignment_id", null: false
@@ -7083,6 +7120,14 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_06_101000) do
   add_foreign_key "jrc_relationship_renewals", "jrc_crm_deals", column: "deal_id"
   add_foreign_key "jrc_relationship_renewals", "jrc_relationship_assignments", column: "assignment_id"
   add_foreign_key "jrc_relationship_renewals", "users", column: "owner_id"
+  add_foreign_key "jrc_relationship_portfolio_group_assignments", "accounts"
+  add_foreign_key "jrc_relationship_portfolio_group_assignments", "jrc_relationship_assignments", column: ["account_id", "assignment_id"], primary_key: ["account_id", "id"], name: "rel_group_customer_tenant"
+  add_foreign_key "jrc_relationship_portfolio_group_assignments", "jrc_relationship_portfolio_groups", column: ["account_id", "portfolio_group_id"], primary_key: ["account_id", "id"], name: "rel_group_link_tenant"
+  add_foreign_key "jrc_relationship_portfolio_groups", "account_users", column: ["account_id", "owner_id"], primary_key: ["account_id", "user_id"], name: "rel_group_owner_tenant"
+  add_foreign_key "jrc_relationship_portfolio_groups", "accounts"
+  add_foreign_key "jrc_relationship_portfolio_groups", "jrc_crm_business_units", column: "business_unit_id"
+  add_foreign_key "jrc_relationship_portfolio_groups", "jrc_customer_taxonomies", column: "segment_id"
+  add_foreign_key "jrc_relationship_portfolio_groups", "teams"
   add_foreign_key "jrc_relationship_risk_cases", "accounts"
   add_foreign_key "jrc_relationship_risk_cases", "jrc_relationship_assignments", column: "assignment_id"
   add_foreign_key "jrc_relationship_risk_cases", "users", column: "owner_id"

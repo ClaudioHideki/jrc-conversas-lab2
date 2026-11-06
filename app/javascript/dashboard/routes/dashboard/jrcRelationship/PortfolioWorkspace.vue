@@ -6,6 +6,7 @@ import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcRelationship';
 import ModulePage from './ModulePage.vue';
 import TeamPanel from './TeamPanel.vue';
+import PortfolioGroupsPanel from './PortfolioGroupsPanel.vue';
 import { buttonClass, message } from './definitions';
 const route = useRoute();
 const router = useRouter();
@@ -15,7 +16,12 @@ const metadata = ref(null);
 const error = ref('');
 const section = computed(() => route.query.section || 'customers');
 watch(
-  [() => route.params.accountId, () => store.getters.getCurrentUserID],
+  [
+    () => route.params.accountId,
+    () => store.getters.getCurrentUserID,
+    () => store.getters.getCurrentRole,
+    () => JSON.stringify(store.getters.getCurrentUser?.accounts),
+  ],
   async (_, __, cleanup) => {
     const controller = new AbortController();
     cleanup(() => controller.abort());
@@ -42,7 +48,11 @@ watch(
       :aria-label="t('RELATIONSHIP.V2.AREAS.portfolio')"
     >
       <button
-        v-for="key in ['customers', ...(metadata.can_team ? ['team'] : [])]"
+        v-for="key in [
+          'customers',
+          'groups',
+          ...(metadata.can_team ? ['team'] : []),
+        ]"
         :key="key"
         type="button"
         :class="[
@@ -64,7 +74,13 @@ watch(
       {{ error }}
     </p>
     <div
-      v-if="metadata && section === 'team' && metadata.can_team"
+      v-if="metadata && section === 'groups'"
+      class="min-h-0 flex-1 overflow-y-auto p-5"
+    >
+      <PortfolioGroupsPanel :metadata="metadata" />
+    </div>
+    <div
+      v-else-if="metadata && section === 'team' && metadata.can_team"
       class="min-h-0 flex-1 overflow-y-auto p-5"
     >
       <TeamPanel />

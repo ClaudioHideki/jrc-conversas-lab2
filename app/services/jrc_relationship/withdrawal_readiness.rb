@@ -16,6 +16,7 @@ class JrcRelationship::WithdrawalReadiness
     allocations!
     responsibilities!
     nested_commitments!
+    portfolio_groups!
     survey_rules = JrcRelationship::WithdrawalSurveyRules.new(@context, @membership)
     collect!('survey_rules', survey_rules.source, survey_rules.visible)
     native_sources!
@@ -24,6 +25,11 @@ class JrcRelationship::WithdrawalReadiness
   end
 
   private
+
+  def portfolio_groups!
+    source = JrcRelationship::PortfolioGroup.where(account_id: @context.account.id, owner_id: @source.id, status: 'active')
+    collect!('portfolio_groups', source, JrcRelationship::PortfolioGroupScope.resolve(@context))
+  end
 
   def prepare_source!(analyst_id)
     @source = @context.account.users.find(analyst_id)

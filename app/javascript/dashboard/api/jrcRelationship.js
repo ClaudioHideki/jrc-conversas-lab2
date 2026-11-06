@@ -10,6 +10,24 @@ const base = accountId => {
 const operationsBase = accountId =>
   base(accountId).replace(/\/relationship$/, '/crm');
 export default {
+  portfolioGroups: (accountId, params, options) =>
+    axios.get(`${base(accountId)}/portfolio_groups`, { ...options, params }),
+  portfolioGroup: (accountId, id, options) =>
+    axios.get(`${base(accountId)}/portfolio_groups/${Number(id)}`, options),
+  savePortfolioGroup: (accountId, fields, id) =>
+    id
+      ? axios.patch(`${base(accountId)}/portfolio_groups/${Number(id)}`, fields)
+      : axios.post(`${base(accountId)}/portfolio_groups`, fields),
+  portfolioGroupCustomers: (accountId, id, params, options) =>
+    axios.get(`${base(accountId)}/portfolio_groups/${Number(id)}/customers`, {
+      ...options,
+      params,
+    }),
+  savePortfolioGroupCustomers: (accountId, id, fields) =>
+    axios.patch(
+      `${base(accountId)}/portfolio_groups/${Number(id)}/customers`,
+      fields
+    ),
   analystNativeResponsibilities: (accountId, analystId, params, options) =>
     axios.get(
       `${base(accountId)}/team/${Number(analystId)}/native_responsibilities`,

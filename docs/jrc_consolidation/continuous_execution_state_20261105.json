@@ -3,13 +3,13 @@
   "user_request": "499267ac-546d-4853-b4cf-7f03a2ea0629",
   "initial_head": "be54d0f7b4ce8d4e2a077cf2bdd8c2a4d5c88f5e",
   "branch": "codex/relacionamento-v2-20261101",
-  "last_validated_checkpoint": "08af931b0efa94726be5a3a77ffd894dbb9df71e",
+  "last_validated_checkpoint": "d88804cd51f5172dfafc2fb2dcbc1c1cbf50fffc",
   "completed_current_work": "Sealed dossier, weighted/current capacity, native withdrawal/cadence controls and F2 increments locally tested; see linked incremental reports. No C-G closure.",
-  "active_work": "Named portfolio grouping with user-approved multiple active memberships; preserve unique native customer allocations and permissions.",
+  "active_work": "Native named-portfolio filters and capacity/rules integration after tested vertical-slice checkpoint.",
   "exact_next_actions": [
-    "Implement additive native group/link foundation and transactional scoped services in owned candidateDB.",
-    "Validate account/unit/private-group bounds, no source grants, optimistic updates, real persistence and CS-only withdrawal dependencies.",
-    "Integrate existing source UI/components and native capacity/filter/review semantics incrementally; no build/Chrome closure."
+    "Integrate native group filter and read-only workload projection without granting source access or multiplying global capacity.",
+    "Add group-scoped capacity/rules only through existing reviewed immutable policy mechanisms; preserve old snapshots.",
+    "Continue record-aware history/export and real independent C-G gaps; no build or frozenasset acceptance."
   ],
   "test_environment": {
     "source_manifest": ".codex/d9-notifications-20261104/snapshot.json",
@@ -51,16 +51,16 @@
     "No real participant removal or provider request; tests use synthetic records and WebMock, with external network disabled."
   ],
   "restrictions": "No build/recompile, no5379 change/restart, no four-container restart/reconfiguration, no cleanup/delete of existing data, no push/GHCR/deploy/production/client change, no real provider operations. Additive migrations allowed only in owned synthetic test database.",
-  "disk_last_observed_bytes": 5122527232,
+  "disk_last_observed_bytes": 9265532928,
   "TRR": "Undefined; do not invent",
   "company_documents_without_portfolio": "Explicitly deferred",
-  "last_validated_head": "08af931b0efa94726be5a3a77ffd894dbb9df71e",
-  "new_validated_code_checkpoint": "Resolve latest local CS code checkpoint with git log -1 --format=%H -- docs/jrc_consolidation/cs_signature_origin_checkpoint_20261105.json",
-  "current_status": "HTTP recommendation5/0checkpoint preserved; implementing named portfolio native vertical slice.",
+  "last_validated_head": "d88804cd51f5172dfafc2fb2dcbc1c1cbf50fffc",
+  "new_validated_code_checkpoint": "git log -1 --format=%H -- docs/jrc_consolidation/named_portfolio_foundation_checkpoint_20261106.json",
+  "current_status": "Named portfolios:28native+20sourceUI tests passed; no build/Chrome acceptance. C-G remain open.",
   "next_actions": [
-    "Implement additive native group/link foundation and transactional scoped services in owned candidateDB.",
-    "Validate account/unit/private-group bounds, no source grants, optimistic updates, real persistence and CS-only withdrawal dependencies.",
-    "Integrate existing source UI/components and native capacity/filter/review semantics incrementally; no build/Chrome closure."
+    "Integrate native group filter and read-only workload projection without granting source access or multiplying global capacity.",
+    "Add group-scoped capacity/rules only through existing reviewed immutable policy mechanisms; preserve old snapshots.",
+    "Continue record-aware history/export and real independent C-G gaps; no build or frozenasset acceptance."
   ],
   "latest_dossier_report": "docs/jrc_consolidation/sealed_dossier_checkpoint_20261105.json",
   "capacity_report": "docs/jrc_consolidation/weighted_capacity_checkpoint_20261105.json",
@@ -132,5 +132,6 @@
   "customer_explanation_report": "docs/jrc_consolidation/customer_explanation_checkpoint_20261106.json",
   "health_recommendation_http_report": "docs/jrc_consolidation/health_recommendation_http_checkpoint_20261106.json",
   "portfolio_membership_business_decision": "Multiple active operational portfolios per customer, explicitly approved in current user reply.",
-  "named_portfolio_plan": "docs/jrc_consolidation/named_portfolio_multi_membership_plan_20261106.json"
+  "named_portfolio_plan": "docs/jrc_consolidation/named_portfolio_multi_membership_plan_20261106.json",
+  "named_portfolio_foundation_report": "docs/jrc_consolidation/named_portfolio_foundation_checkpoint_20261106.json"
 }

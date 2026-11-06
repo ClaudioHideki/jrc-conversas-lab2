@@ -186,6 +186,12 @@
       "current_state": "Native CustomerSignals reproduction5cases/4failures corrected;10native regression cases passed. Exact risk threshold and positive weights used; missing/blocked data never imply maintained healthy cadence.",
       "report": "health_recommendation_checkpoint_20261106.json",
       "remaining": "Popup stale explanation source tests in progress; no calibrated model confidence, fresh Chrome or external acceptance claim."
+    },
+    {
+      "reference": "Relationship P0123-P0128",
+      "report": "git log -1 --format=%H -- docs/jrc_consolidation/named_portfolio_foundation_checkpoint_20261106.json",
+      "implemented_validated": "Named group/link foundation and sourceUI;28native+20Vue/API passed. Multiple active memberships preserve unique root allocations and global counts.",
+      "partial": "Group-specific capacity/rules, distinct capabilities, scoped history/export and current-source Chrome acceptance remain open."
     }
   ],
   "explicit_dependencies": [
@@ -206,14 +212,7 @@
       "state": "External environment/operations require separate authorization; not simulated as passed."
     }
   ],
-  "next_confirmed_local_gap": {
-    "source": "app/javascript/dashboard/routes/dashboard/jrcRelationship/AnalystWorkspace.vue",
-    "finding": "Summary cards route to generic lists: actions_today supplies no due-day filter and at_risk supplies no risk filter; dashboard uses portfolio mode=mine but action-list mine filters action ownership. A delegated task can therefore disappear from the linked list despite contributing to the card.",
-    "native_reuse": "MetricDrilldown already applies the authorized dashboard portfolio and source predicates. Reuse its existing paginated panel in a popup, add the missing overdue_returns source and exact action navigation.",
-    "scope": "Incremental functional fix; preserve dashboard portfolio semantics, layouts, permissions and all existing editors.",
-    "current_state": "Native/Vue fix implemented and locally tested; current-build visual acceptance remains open",
-    "implemented_report": "workspace_card_sources_checkpoint_20261106.json"
-  },
+  "next_confirmed_local_gap": "Integrate named-portfolio filtering/capacity through native scopes and immutable reviewed policies.",
   "stage_closure": {
     "C": false,
     "D": false,
