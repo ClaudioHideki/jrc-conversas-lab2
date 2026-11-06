@@ -88,7 +88,9 @@
     "source": "app/javascript/dashboard/routes/dashboard/jrcRelationship/AnalystWorkspace.vue",
     "finding": "Summary cards route to generic lists: actions_today supplies no due-day filter and at_risk supplies no risk filter; dashboard uses portfolio mode=mine but action-list mine filters action ownership. A delegated task can therefore disappear from the linked list despite contributing to the card.",
     "native_reuse": "MetricDrilldown already applies the authorized dashboard portfolio and source predicates. Reuse its existing paginated panel in a popup, add the missing overdue_returns source and exact action navigation.",
-    "scope": "Incremental functional fix; preserve dashboard portfolio semantics, layouts, permissions and all existing editors."
+    "scope": "Incremental functional fix; preserve dashboard portfolio semantics, layouts, permissions and all existing editors.",
+    "current_state": "Native/Vue fix implemented and locally tested; current-build visual acceptance remains open",
+    "implemented_report": "workspace_card_sources_checkpoint_20261106.json"
   },
   "stage_closure": {
     "C": false,
@@ -97,5 +99,6 @@
     "F": false,
     "G": false
   },
-  "unreviewed_literal_and_visual_fragments": "Not auto-marked complete; the original context/requirements inventory remains classification_pending where not explicitly reconciled."
+  "unreviewed_literal_and_visual_fragments": "Not auto-marked complete; the original context/requirements inventory remains classification_pending where not explicitly reconciled.",
+  "next_source_review": "F1 native CRM commitments remain opaque counts in readiness, while project/task/ticket/cadence origins are now actionable. Reuse the same existing ownership/source query and CRM authorization; do not change identities or grants."
 }

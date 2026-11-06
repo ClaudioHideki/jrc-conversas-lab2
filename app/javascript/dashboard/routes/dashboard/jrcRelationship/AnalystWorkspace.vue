@@ -6,6 +6,7 @@ import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcRelationship';
 import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import ActionCasePanel from './ActionCasePanel.vue';
+import MetricDrilldownDialog from './MetricDrilldownDialog.vue';
 import PriorityBandBadge from './PriorityBandBadge.vue';
 import { priorityCodes } from './priorityBands';
 import NicoSummaryPanel from './NicoSummaryPanel.vue';
@@ -24,6 +25,7 @@ const store = useStore();
 const { t } = useI18n();
 const metadata = ref(null);
 const metrics = ref(null);
+const drilldownMetric = ref(null);
 const rows = ref([]);
 const pagination = ref({ page: 1, per_page: 25, total: 0 });
 const error = ref('');
@@ -42,6 +44,10 @@ const scope = computed(() => ({
   page: Number(route.query.page) || 1,
 }));
 const date = value => formatDate(value, metadata.value?.formatting);
+const dashboardFilters = computed(() => ({
+  mode: scope.value.mine ? 'mine' : undefined,
+  customer_segment_id: scope.value.customer_segment_id,
+}));
 const patchQuery = values =>
   router.replace({ query: { ...route.query, page: undefined, ...values } });
 const open = id => patchQuery({ action_id: id, page: route.query.page });
@@ -69,6 +75,7 @@ const load = async () => {
   rows.value = [];
   metrics.value = null;
   metadata.value = null;
+  drilldownMetric.value = null;
   try {
     const meta = await API.metadata(accountId, options);
     if (version !== generation) return;
@@ -76,10 +83,7 @@ const load = async () => {
     if (isDashboard.value) {
       const result = await API.dashboard(
         accountId,
-        {
-          mode: scope.value.mine ? 'mine' : undefined,
-          customer_segment_id: scope.value.customer_segment_id,
-        },
+        dashboardFilters.value,
         options
       );
       if (version === generation) {
@@ -114,6 +118,11 @@ watch(
   [
     () => route.params.accountId,
     () => store.getters.getCurrentUserID,
+    () =>
+      JSON.stringify([
+        store.getters.getCurrentRole,
+        store.getters.getCurrentUser,
+      ]),
     () => props.screen,
     () => JSON.stringify(scope.value),
   ],
@@ -130,33 +139,26 @@ const cards = computed(() => [
     key: 'customers',
     tone: 'border-blue-300 bg-blue-50 text-blue-900 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-200',
     icon: 'i-lucide-users',
-    to: 'portfolio',
   },
   {
     key: 'at_risk',
     tone: 'border-rose-300 bg-rose-50 text-rose-900 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-200',
     icon: 'i-lucide-heart-pulse',
-    to: 'health',
   },
   {
     key: 'actions_today',
     tone: 'border-n-violet-6 bg-n-violet-2 text-n-violet-12 ',
     icon: 'i-lucide-calendar-check',
-    to: 'actions',
   },
   {
     key: 'overdue_returns',
     tone: 'border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200',
     icon: 'i-lucide-clock-alert',
-    to: 'actions',
-    query: { returns_overdue: 'true' },
   },
   {
     key: 'waiting_customer_actions',
     tone: 'border-teal-300 bg-teal-50 text-teal-900 dark:border-teal-800 dark:bg-teal-950/40 dark:text-teal-200',
     icon: 'i-lucide-message-circle',
-    to: 'actions',
-    query: { record_status: 'waiting_customer' },
   },
 ]);
 </script>
@@ -228,20 +230,17 @@ const cards = computed(() => [
         v-if="metrics"
         class="grid gap-3 sm:grid-cols-2 xl:grid-cols-5"
       >
-        <RouterLink
+        <button
           v-for="card in cards"
           :key="card.key"
-          :to="{
-            name: `jrc_relationship_${card.to}`,
-            params: route.params,
-            query: {
-              mine: String(scope.mine),
-              customer_segment_id: scope.customer_segment_id,
-              ...card.query,
-            },
-          }"
-          class="rounded-xl border p-4 transition hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-n-violet-8"
+          type="button"
+          :data-testid="`dashboard-card-${card.key}`"
+          :disabled="
+            metrics[card.key] === null || metrics[card.key] === undefined
+          "
+          class="rounded-xl border p-4 text-left transition hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-n-violet-8 disabled:cursor-not-allowed"
           :class="card.tone"
+          @click="drilldownMetric = card.key"
         >
           <span
             :class="card.icon"
@@ -254,7 +253,7 @@ const cards = computed(() => [
           <strong class="mt-2 block text-3xl">{{
             metrics[card.key] ?? t('RELATIONSHIP.UNAVAILABLE')
           }}</strong>
-        </RouterLink>
+        </button>
       </div>
       <section
         v-if="metrics?.monitoring"
@@ -549,6 +548,14 @@ const cards = computed(() => [
         :metadata="metadata"
         @close="close"
         @changed="load"
+        @invalidated="load"
+      />
+      <MetricDrilldownDialog
+        v-if="drilldownMetric"
+        :metric="drilldownMetric"
+        :filters="dashboardFilters"
+        :metadata="metadata"
+        @close="drilldownMetric = null"
         @invalidated="load"
       />
     </template>

@@ -1,5 +1,9 @@
 {
   "RELATIONSHIP": {
+    "DRILLDOWN_DIALOG": {
+      "NOTE": "Current authorized records behind this indicator, using the same portfolio filters. Open the original record to continue its workflow. Values may change while work progresses.",
+      "RETRY": "Try again"
+    },
     "NATIVE_RESPONSIBILITIES": {
       "TITLE": "Native responsibilities",
       "RETRY": "Try again",
@@ -321,6 +325,7 @@
       "without_contact": "Sem contato",
       "overdue_activities": "Atividades vencidas",
       "actions_today": "Ações hoje",
+      "overdue_returns": "Overdue follow-ups",
       "overdue_actions": "Ações vencidas",
       "expansion_potential_cents": "Expansão em aberto",
       "expansion_won_cents": "Expansão ganha",

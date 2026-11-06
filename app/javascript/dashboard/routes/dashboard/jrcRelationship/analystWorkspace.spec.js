@@ -3,6 +3,7 @@ import { shallowMount, flushPromises } from '@vue/test-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import AnalystWorkspace from './AnalystWorkspace.vue';
 import ActionCasePanel from './ActionCasePanel.vue';
+import MetricDrilldownDialog from './MetricDrilldownDialog.vue';
 import { AREAS, areaForScreen, visibleAreas } from './navigation';
 import { SCREENS } from './definitions';
 const mocks = vi.hoisted(() => ({
@@ -60,6 +61,62 @@ beforeEach(() => {
   mocks.api.channels.mockResolvedValue({ data: { channel_conversations: [] } });
 });
 describe('Relationship V2 analyst workflow', () => {
+  it('opens actual counter sources under the original portfolio scope instead of navigating to an inconsistent generic list', async () => {
+    mocks.route.query.customer_segment_id = '4';
+    mocks.api.dashboard.mockResolvedValue({
+      data: {
+        customers: 3,
+        at_risk: 1,
+        actions_today: 2,
+        overdue_returns: 1,
+        waiting_customer_actions: 1,
+        priority_actions: [],
+      },
+    });
+    const wrapper = shallowMount(AnalystWorkspace, {
+      props: { screen: 'overview' },
+    });
+    await flushPromises();
+    await wrapper
+      .get('[data-testid="dashboard-card-actions_today"]')
+      .trigger('click');
+    const panel = wrapper.findComponent(MetricDrilldownDialog);
+    expect(panel.props()).toMatchObject({
+      metric: 'actions_today',
+      filters: { mode: 'mine', customer_segment_id: '4' },
+    });
+    expect(mocks.replace).not.toHaveBeenCalled();
+    mocks.route.query.mine = 'false';
+    await flushPromises();
+    expect(wrapper.findComponent(MetricDrilldownDialog).exists()).toBe(false);
+    await wrapper
+      .get('[data-testid="dashboard-card-at_risk"]')
+      .trigger('click');
+    expect(
+      wrapper.findComponent(MetricDrilldownDialog).props('filters').mode
+    ).toBeUndefined();
+    wrapper.unmount();
+  });
+
+  it('keeps actual zero counters inspectable, disables unavailable measurements and clears source popups on role changes', async () => {
+    const wrapper = shallowMount(AnalystWorkspace, {
+      props: { screen: 'overview' },
+    });
+    await flushPromises();
+    expect(
+      wrapper.get('[data-testid="dashboard-card-at_risk"]').element.disabled
+    ).toBe(true);
+    expect(
+      wrapper.get('[data-testid="dashboard-card-customers"]').element.disabled
+    ).toBe(false);
+    await wrapper
+      .get('[data-testid="dashboard-card-customers"]')
+      .trigger('click');
+    mocks.store.getters.getCurrentRole = 'agent';
+    await flushPromises();
+    expect(wrapper.findComponent(MetricDrilldownDialog).exists()).toBe(false);
+    wrapper.unmount();
+  });
   it('loads and clears the actual priority band filter while resetting pagination and preserving customer context', async () => {
     mocks.route.query.priority_band = 'P0';
     const wrapper = shallowMount(AnalystWorkspace, {
