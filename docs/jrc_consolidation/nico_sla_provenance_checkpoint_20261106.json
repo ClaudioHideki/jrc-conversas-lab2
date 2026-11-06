@@ -1,0 +1,44 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "b30bb3e720fed446d3391c5eee2916c1f4214305",
+  "status": "F/G SLA provenance integration locally validated; no stage closure",
+  "confirmed_gap": "WorkContext returns native SLA-clock evidence. DomainAccess supported-type inventory/ProtectedResourceReader lacked that type, so OperatorSession ignored these references during saved history reauthorization. Removing only departmental SLA grant left native ticket access/general digest unchanged and old answers visible.",
+  "fix": "Recognize JrcServiceDesk::SlaClock and map to existing SnapshotAccess.sources.sla_clocks, which enforces current account/customer/SLA/operator/unit/department intersections. No direct unscoped model query, new provider request or global role grant.",
+  "tests": {
+    "baseline": "3/3 failures: missing type; unknown type raised generic forbidden instead of native scoped lookup; unchanged-digest departmental revocation retained messages. The third case demonstrates actual saved-history behavior.",
+    "final": "31/0 =3 new actual tool/receipt/history cases +28 existing NICO/R2/Projects domain cases",
+    "model_simulation": "Only OperationalInference response is simulated in saved-summary case; actual local tool reading, lifecycle clocks, stored receipts, unchanged digest and authorization/history purge are native. Not external NICO inference acceptance.",
+    "preservation": "Clock attributes unchanged; previously succeeded command remains succeeded/audited after visible history reset. Foreign account and revoked SLA source denied.",
+    "ruby_new_offenses": 0,
+    "shared_delta": {
+      "path": "app/services/jrc_nico/domain_access.rb",
+      "baseline": 5,
+      "current": 5,
+      "added": {}
+    },
+    "frontend": "No frontend source/contract modified; actual current-source Chrome still gated by no-build.",
+    "diff_check": "passed"
+  },
+  "resource": {
+    "start": 7181725696,
+    "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+    "database": "jrc_rel_v2_candidate_test",
+    "no_build": true,
+    "no_server": true,
+    "spec_sha256": {
+      "spec/services/jrc_nico/domain_access_relationship_sla_spec.rb": "7d66fdd3634f4ff8d33ee5da17edc83134051ec7ae7273b1e316dbcdbaf0abcd",
+      "spec/services/jrc_nico/domain_actions_spec.rb": "6c4e1203a488da56f03e9bb102d8323f1a455498979608f75f955b5de6c8b241"
+    },
+    "minimum": 7181570048,
+    "exit_code": 0,
+    "end": 7182553088
+  },
+  "free_final": 7177805824,
+  "source_sha256": {
+    "app/services/jrc_nico/domain_access.rb": "b7c23fdb2c0f740f816094aab3f7968279edd57833731846031fda16a860de9d",
+    "app/services/jrc_nico/protected_resource_reader.rb": "48b0e5a7cb13615ca0ebdbda26d3c0f365cf1df3ed62c545e2d3756a30b089e9",
+    "spec/services/jrc_nico/domain_access_relationship_sla_spec.rb": "7d66fdd3634f4ff8d33ee5da17edc83134051ec7ae7273b1e316dbcdbaf0abcd"
+  },
+  "restrictions": "No appbuild, runtime/container/5379 changes, cleanup, push/deploy/GHCR or real external operation.",
+  "next": "G: audit finite history receipt producers before making unsupported saved resources fail closed. Preserve existing campaign Inbox provenance with its native scope/channel checks; no speculative write adapter."
+}

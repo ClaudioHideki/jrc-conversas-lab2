@@ -3,7 +3,7 @@ class JrcNico::DomainAccess
   RESOURCE_TYPES = %w[JrcRelationship::Assignment JrcRelationship::HealthSnapshot JrcRelationship::Action JrcRelationship::RiskCase
                       JrcRelationship::SuccessPlan JrcRelationship::Qbr JrcServiceDesk::Ticket JrcServiceDesk::TicketNote JrcServiceDesk::LifecycleTransition
                       JrcRelationship::Survey JrcCrm::Invoice CsatSurveyResponse Contact Conversation Message Call
-                      JrcServiceDesk::TicketEvent JrcProjects::AuditEvent
+                      JrcServiceDesk::TicketEvent JrcServiceDesk::SlaClock JrcProjects::AuditEvent
                       JrcProjects::Project JrcProjects::Task JrcOperations::Link JrcCrm::SalesOrder
                       JrcCrm::Contract JrcCrm::SalesCommission JrcCrm::BackofficeRequest
                       JrcCrm::SalesGoal JrcCrm::CommissionProgram JrcCrm::FollowUp
