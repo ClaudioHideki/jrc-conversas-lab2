@@ -187,6 +187,14 @@ describe('Relationship interface integration', () => {
   });
 
   it('CS-06 passes the existing customer to the real channel components', async () => {
+    const attempt = {
+      state: 'deferred',
+      reason: 'account_daily_budget',
+      required_actions: 2,
+    };
+    mocks.api.customer.mockResolvedValueOnce({
+      data: { ...customer, automatic_playbook_attempt: attempt },
+    });
     const wrapper = shallowMount(CustomerPanel, {
       props: { assignmentId: 19, metadata },
       global: { stubs: { RouterLink: true } },
@@ -199,6 +207,11 @@ describe('Relationship interface integration', () => {
       wrapper.findComponent({ name: 'VoiceCallButton' }).props('contactId')
     ).toBe('31');
     expect(mocks.api.channels).toHaveBeenCalledWith('1', 19);
+    expect(
+      wrapper
+        .findComponent({ name: 'AutomaticPlaybookNotice' })
+        .props('attempt')
+    ).toEqual(attempt);
     wrapper.unmount();
   });
 

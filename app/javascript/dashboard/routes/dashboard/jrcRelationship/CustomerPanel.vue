@@ -5,6 +5,7 @@ import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import HealthStabilityNote from './HealthStabilityNote.vue';
 import HealthEvidenceSummary from './HealthEvidenceSummary.vue';
+import AutomaticPlaybookNotice from './AutomaticPlaybookNotice.vue';
 import ProductHealthHistory from './ProductHealthHistory.vue';
 import API from 'dashboard/api/jrcRelationship';
 import CapacityWorkloadForm from './CapacityWorkloadForm.vue';
@@ -200,6 +201,10 @@ const money = value => formatMoney(value, props.metadata?.formatting);
       {{ t('RELATIONSHIP.LOADING') }}
     </p>
     <template v-if="record">
+      <AutomaticPlaybookNotice
+        :attempt="record.automatic_playbook_attempt"
+        :formatting="metadata.formatting"
+      />
       <NicoSummaryPanel
         :assignment-id="assignmentId"
         :enabled="metadata.can_nico"

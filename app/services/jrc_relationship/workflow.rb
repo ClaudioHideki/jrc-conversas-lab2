@@ -285,6 +285,7 @@ class JrcRelationship::Workflow
                              due_at: record.due_at || action.due_at, metadata: record.metadata.merge('relationship_risk_id' => record.id))
     if action.new_record?
       action.priority = { 'critical' => 90, 'high' => 80, 'medium' => 50, 'low' => 20 }.fetch(record.severity)
+      capture_priority_band!(action)
       JrcRelationship::OperationalRouting.new(@context).prepare!(action, preserve_owner: record.owner_id.present?)
     end
     if %w[retained churn].include?(record.status)

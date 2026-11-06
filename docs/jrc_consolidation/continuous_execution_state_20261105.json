@@ -3,9 +3,9 @@
   "user_request": "499267ac-546d-4853-b4cf-7f03a2ea0629",
   "initial_head": "be54d0f7b4ce8d4e2a077cf2bdd8c2a4d5c88f5e",
   "branch": "codex/relacionamento-v2-20261101",
-  "last_validated_checkpoint": "ded8fe028309f2d8094627dda359e04dbb3ff153",
-  "completed_current_work": "Native version-bound evidence/CS gates plus real immutable sealed dossier; see sealed_dossier_checkpoint_20261105.json. Full stages not closed.",
-  "active_work": "Native automatic playbook task budget: preserve deferred work and source critical risks, without false immutable completion receipts.",
+  "last_validated_checkpoint": "9340184aaf19d00991b1beed4e50064612496641",
+  "completed_current_work": "Sealed dossier, weighted/current capacity, native withdrawal/cadence controls and F2 increments locally tested; see linked incremental reports. No C-G closure.",
+  "active_work": "F1 read-only native responsibility origins with authorized paging/navigation; no final analyst removal or identity change.",
   "exact_next_actions": [
     "Finish safe analyst withdrawal via native scope/readiness and immutable reviewed responsibility receipts, including project owner/cadence dependencies.",
     "Continue F2 and C/D/G functional and Word/scale gaps without reducing requirements.",
@@ -15,7 +15,7 @@
     "source_manifest": ".codex/d9-notifications-20261104/snapshot.json",
     "source_root": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
     "database": "jrc_rel_v2_candidate_test",
-    "no_application_schema_migrations_executed": true,
+    "no_application_schema_migrations_executed": false,
     "E1_migration_at_time_of_note": "20261105120000,20261105121000,20261105122000 applied only to owned candidate testDB; exact environment/host/pending guards;no host schema dump.",
     "backend_helper": ".codex/d9-notifications-20261104/backend.py",
     "frontend_helper": ".codex/d-approvals-20261104/frontend.py",
@@ -34,7 +34,8 @@
       "recovery-cs-signature-gate:16/0",
       "recovery-cs-project-origin:6/0(overlap)",
       "recovery-cs-origin-foreign-order:1/0"
-    ]
+    ],
+    "migration_scope_note": "Only owned candidate testDB migrations, including sealed dossier20261105130000, were applied in earlier checkpoints. No non-test schema changed; none in this increment."
   },
   "provider_validation_sources": [
     "https://developers.docusign.com/docs/esign-rest-api/reference/envelopes/envelopedocuments/",
@@ -50,9 +51,9 @@
   "disk_last_observed_bytes": 7314264064,
   "TRR": "Undefined; do not invent",
   "company_documents_without_portfolio": "Explicitly deferred",
-  "last_validated_head": "3051ba390138dc33c78916d019648b53f535aa0d",
+  "last_validated_head": "9340184aaf19d00991b1beed4e50064612496641",
   "new_validated_code_checkpoint": "Resolve latest local CS code checkpoint with git log -1 --format=%H -- docs/jrc_consolidation/cs_signature_origin_checkpoint_20261105.json",
-  "current_status": "Optional P0-P3 numeric bands implemented and locally tested; F2/C-G remain open",
+  "current_status": "Automatic monitor playbook task admission implemented and locally validated; F2 and C-G remain open",
   "next_actions": [
     "Finish safe analyst withdrawal via native scope/readiness and immutable reviewed responsibility receipts, including project owner/cadence dependencies.",
     "Continue F2 and C/D/G functional and Word/scale gaps without reducing requirements.",
@@ -76,5 +77,6 @@
   "waiting_review_report": "docs/jrc_consolidation/waiting_review_checkpoint_20261105.json",
   "waiting_review_notice_report": "docs/jrc_consolidation/waiting_review_notice_checkpoint_20261105.json",
   "analyst_cadence_controls_report": "docs/jrc_consolidation/analyst_cadence_controls_checkpoint_20261105.json",
-  "priority_bands_report": "docs/jrc_consolidation/priority_bands_checkpoint_20261105.json"
+  "priority_bands_report": "docs/jrc_consolidation/priority_bands_checkpoint_20261105.json",
+  "automatic_playbook_budget_report": "docs/jrc_consolidation/automatic_playbook_budget_checkpoint_20261106.json"
 }

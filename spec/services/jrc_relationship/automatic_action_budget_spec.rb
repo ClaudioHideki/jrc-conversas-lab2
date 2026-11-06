@@ -11,6 +11,18 @@ RSpec.describe JrcRelationship::AutomaticActionBudget do
 
   before { account.enable_features!('jrc_customer_master', 'jrc_relationship', 'jrc_crm') }
 
+  it 'rejects malformed reservations before executing any work and admits only an entire explicitly required set' do
+    [0, -1, 1.5, '2', false].each do |invalid|
+      expect { described_class.new(context: context, assignment: assignment).call(required: invalid) { raise 'Must not execute' } }
+        .to raise_error(ArgumentError)
+    end
+    configuration
+    budget = described_class.new(context: context, assignment: assignment)
+    expect(budget.call(required: 2) { raise 'A two-task set cannot fit the configured one-task ceiling' }).to be_nil
+    expect(budget.next_allowed_at).to be_present
+    expect(assignment.actions).to be_empty
+  end
+
   it 'shares the configured daily ceiling across customers without suppressing updates of existing actions or risks' do
     rules = configuration.effective_rules
     action = processor.action!('health', 'Synthetic first cause', data, rules)

@@ -19,7 +19,8 @@ class Api::V1::Accounts::Relationship::PortfolioController < Api::V1::Accounts::
                                                        current: snapshot.attributes.symbolize_keys)
       )
     end
-    render json: presenter.assignment(record).merge(health_history: health_history)
+    attempt = JrcRelationship::AutomaticPlaybookBudget.new(relationship_context, record).last_attempt
+    render json: presenter.assignment(record).merge(health_history: health_history, automatic_playbook_attempt: attempt)
   end
 
   def create

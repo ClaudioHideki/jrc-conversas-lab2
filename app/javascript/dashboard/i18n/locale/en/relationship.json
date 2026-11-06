@@ -1,5 +1,13 @@
 {
   "RELATIONSHIP": {
+    "PLAYBOOK_BUDGET": {
+      "TITLE": "Last automatic task admission deferred",
+      "DAILY": "The daily task ceiling could not admit this set of {count} new actions or Agenda commitments.",
+      "ASSIGNMENT": "An Agenda commitment is awaiting an available authorized analyst; this attempt did not create the new task set.",
+      "NOTE": "This shows the last recorded attempt. Monitoring reevaluates current conditions; the eligibility date does not guarantee execution. If the task set is larger than the daily ceiling, a manager must review the configuration or playbook. Risk records remain available.",
+      "ATTEMPTED": "Attempt recorded",
+      "ELIGIBLE": "May be reevaluated after"
+    },
     "PRIORITY_BANDS": {
       "TITLE": "Priority bands",
       "NOTE": "Optional mapping of the calculated or explicitly overridden 0–100 priority. Enter all four descending minima, with P3 at zero. Limits are captured with the action; changing configuration does not rewrite existing actions.",
@@ -447,7 +455,7 @@
       "satisfaction_window_days": "Satisfaction evidence window (days)",
       "health_trend_window_days": "Health trend window (days)",
       "automatic_action_cooldown_hours": "Monitoring alert repeat cooldown (hours; 0 disables)",
-      "automatic_action_daily_limit": "Daily ceiling for monitoring and reviewed cadence actions, activities and meetings (0 disables; account time zone)",
+      "automatic_action_daily_limit": "Daily ceiling for monitoring, its automatic playbooks and reviewed cadence actions, activities and meetings (0 disables; account time zone)",
       "sentiment_window_days": "Existing sentiment evidence window (days)"
     },
     "ACCOUNT_SCOPE": "Toda a conta",
@@ -554,7 +562,7 @@
     "APPLY_PLAYBOOK": "Aplicar playbook",
     "EXPORT": "Exportar carteira",
     "PORTFOLIO_BATCH": "Operar {count} clientes selecionados",
-    "AUTOMATIC_ACTION_NOTICE": "For monitoring alerts, cooldown delays repeated tasks only when a previously closed cause has exactly the same source evidence and health measurement. Active tasks keep updating and risks remain visible. Changed evidence is evaluated normally. Existing daily deduplication is preserved. Survey rules and separately started playbooks retain their own policies. Action, Agenda activity and meeting steps in reviewed cadences share the daily ceiling and stay pending when exhausted. Native risks, success plans, surveys and independently started playbooks retain their separate workflows.",
+    "AUTOMATIC_ACTION_NOTICE": "For monitoring alerts, cooldown delays repeated tasks only when a previously closed cause has exactly the same source evidence and health measurement. Active tasks keep updating and risks remain visible. Changed evidence is evaluated normally. Existing daily deduplication is preserved. Monitoring playbooks reserve capacity for their new actions and Agenda commitments together; a denied attempt is reevaluated by monitoring. Reviewed cadence steps retain their individual pending/retry behavior. Manually started playbooks, surveys and success plans retain their own policies. Risk identification and its native retention follow-up remain outside the task ceiling so critical cases stay visible.",
     "RESPONSIBILITIES": {
       "TITLE": "Reviewed responsibility destinations",
       "INCLUDE": "Transfer pending CS responsibilities and their linked agenda activities",

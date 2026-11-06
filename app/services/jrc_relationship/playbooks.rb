@@ -42,18 +42,24 @@ class JrcRelationship::Playbooks
 
   def execute!(assignment, trigger, source_key, playbook_id, approvals)
     rows = selected_playbooks(assignment, trigger, source_key, playbook_id)
-    executions = flow_executions(rows, assignment, source_key, approvals)
     steps = rows.flat_map { |book| book.steps.map.with_index { |step, index| [step_key(book, step, index, source_key), step, book] } }
     steps = onboarding_steps(source_key) if default_onboarding?(rows, trigger, playbook_id)
-    steps.each do |key, step, book|
-      execution_context = { trigger: trigger, start: trigger == 'onboarded' ? assignment.created_at : Time.current.beginning_of_day }
-      if step['kind'] == 'flow'
-        flow_step!(assignment, step, key, executions.fetch(book.id), approvals[key])
-      else
-        native_step!(assignment, step, key, execution_context)
+    execution_context = { trigger: trigger, start: trigger == 'onboarded' ? assignment.created_at : Time.current.beginning_of_day }
+    with_step_budget(assignment, steps, execution_context) do
+      executions = flow_executions(rows, assignment, source_key, approvals)
+      steps.each do |key, step, book|
+        if step['kind'] == 'flow'
+          flow_step!(assignment, step, key, executions.fetch(book.id), approvals[key])
+        else
+          native_step!(assignment, step, key, execution_context)
+        end
       end
+      rows.each { |book| record_execution!(book, assignment, source_key) unless executions.key?(book.id) }
     end
-    rows.each { |book| record_execution!(book, assignment, source_key) unless executions.key?(book.id) }
+  end
+
+  def with_step_budget(_assignment, _steps, _execution_context)
+    yield
   end
 
   def selected_playbooks(assignment, trigger, source_key, playbook_id)

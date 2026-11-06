@@ -8,7 +8,9 @@ class JrcRelationship::AutomaticActionBudget
     @assignment = assignment
   end
 
-  def call
+  def call(required: 1)
+    raise ArgumentError, 'Required actions must be a positive integer' unless required.is_a?(Integer) && required.positive?
+
     @next_allowed_at = nil
     @context = JrcRelationship::Context.new(@context.member)
     raise Pundit::NotAuthorizedError unless @context.user.active_for_authentication?
@@ -20,7 +22,7 @@ class JrcRelationship::AutomaticActionBudget
       next yield if limit.zero?
 
       day = account_day
-      if automatic_actions.where(created_at: day...day.advance(days: 1)).limit(limit).count >= limit
+      if exhausted?(day, limit, required)
         @next_allowed_at = day.advance(days: 1)
         audit_suppression!(configuration, day)
         next nil
@@ -30,6 +32,10 @@ class JrcRelationship::AutomaticActionBudget
   end
 
   private
+
+  def exhausted?(day, limit, required)
+    automatic_actions.where(created_at: day...day.advance(days: 1)).limit(limit).count + required > limit
+  end
 
   def account_day
     zone = Time.find_zone(@context.account.reporting_timezone) || Time.zone

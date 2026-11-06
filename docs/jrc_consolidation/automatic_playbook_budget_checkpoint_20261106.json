@@ -1,0 +1,202 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "9340184aaf19d00991b1beed4e50064612496641",
+  "status": "Automatic monitor playbook task admission implemented and locally validated; F2 and C-G remain open",
+  "word_reference": {
+    "document": "RelationshipV2 Word",
+    "paragraphs": [
+      73,
+      99,
+      104,
+      105,
+      149,
+      152
+    ],
+    "scope": "Daily automatic action/Agenda budget, truthful deferral, native authority and immutable receipts; not universal automation completion"
+  },
+  "implemented": [
+    "AutomaticActionBudget accepts a positive integer required set and serializes account-wide admission under its existing PostgreSQL transaction lock and account-local day. Existing one-action calls and reviewed cadence semantics retained.",
+    "Monitoring uses AutomaticPlaybooks, inheriting native selection/conditions/source authorization/idempotence and Flow approval. One private hook enables automatic action/Agenda routing and the new admission check; native manual run! signature and context retained. No parallel write engine.",
+    "All newly needed action/activity/meeting keys for the chosen set must fit before creation. Savepoint rolls back new tasks/CRM rows if an automatic Agenda owner is unavailable. Deferred attempts create no PlaybookExecution completion receipt. Existing committed work/history remains intact; native monitoring reevaluates current causes and versions.",
+    "Risk steps run idempotently before task admission, including their existing native retention projection. These follow-ups remain deliberately outside the automatic ceiling so critical risks are not suppressed; this is explicit in configuration help. This increment does not claim a universal ceiling across all risk/survey/plan/manual workflows.",
+    "Native risk projection now also captures an explicitly configured priority band; regression asserts the actual retained priority80/P1 and preserves the quota exemption.",
+    "Account/source-scoped audit stores hashed origin, coded reason, required action count and eligibility time without private playbook contents, global remaining capacity or provider tokens. Repeated same deferral is deduplicated.",
+    "Existing customer detail adds a current scoped last-attempt projection; it omits source digest/plan identity. Existing customer UI displays last deferral, reason and eligibility in light/dark themes. No execution guarantee or full pending-inventory claim; existing identity clearing preserved."
+  ],
+  "tests_non_additive": [
+    {
+      "gate": "automatic-playbook-budget-native01",
+      "examples": 12,
+      "failures": 4,
+      "correction": "Fixtures now account for pre-existing native risk-to-retention projection, compare actual instants across timezones and create the source allocation before setting zero capacity."
+    },
+    {
+      "gate": "automatic-playbook-budget-native02",
+      "examples": 13,
+      "failures": 0
+    },
+    {
+      "gate": "automatic-playbook-budget-native-final",
+      "examples": 27,
+      "failures": 2,
+      "correction": "Legacy Flow assertions wrongly assumed an empty preserved DB; scoped to their account. Routing intentionally fails fast on configuration contention; concurrency fixture now performs one bounded real retry after transactions finish, still requiring exactly one admitted action."
+    },
+    {
+      "gate": "automatic-playbook-budget-settled",
+      "examples": 27,
+      "failures": 0,
+      "coverage": [
+        "two real concurrent two-action plans, only one admitted",
+        "one-action contention/bounded recovery",
+        "full required reservation/real persistence",
+        "monitor invocation/Agenda unavailability rollback",
+        "risk visibility and optional P0-P3 capture",
+        "local-day re-evaluation/idempotence/immutable execution",
+        "native manual Flow approval/off snapshots and foreign refs",
+        "reviewed cadence quotas, customer replies, revocation, retry scheduling",
+        "HTTP scoped customer projection/private portfolios/foreign account denial"
+      ]
+    },
+    {
+      "gate": "automatic-playbook-budget-ui01",
+      "examples": 7,
+      "failures": 0,
+      "kind": "Vue component/API simulations; not real Chrome acceptance"
+    }
+  ],
+  "static": {
+    "new_ruby_files_offenses": 0,
+    "shared_delta": [
+      {
+        "path": "app/services/jrc_relationship/automatic_action_budget.rb",
+        "baseline_count": 0,
+        "current_count": 0,
+        "new_cop_counts": {},
+        "current_new": []
+      },
+      {
+        "path": "app/services/jrc_relationship/playbooks.rb",
+        "baseline_count": 3,
+        "current_count": 3,
+        "new_cop_counts": {},
+        "current_new": []
+      },
+      {
+        "path": "app/services/jrc_relationship/processor.rb",
+        "baseline_count": 22,
+        "current_count": 22,
+        "new_cop_counts": {},
+        "current_new": []
+      },
+      {
+        "path": "app/services/jrc_relationship/workflow.rb",
+        "baseline_count": 28,
+        "current_count": 28,
+        "new_cop_counts": {},
+        "current_new": []
+      },
+      {
+        "path": "app/controllers/api/v1/accounts/relationship/portfolio_controller.rb",
+        "baseline_count": 8,
+        "current_count": 8,
+        "new_cop_counts": {},
+        "current_new": []
+      },
+      {
+        "path": "spec/services/jrc_relationship/automatic_action_budget_spec.rb",
+        "baseline_count": 0,
+        "current_count": 0,
+        "new_cop_counts": {},
+        "current_new": []
+      },
+      {
+        "path": "spec/services/jrc_relationship/automatic_action_budget_concurrency_spec.rb",
+        "baseline_count": 0,
+        "current_count": 0,
+        "new_cop_counts": {},
+        "current_new": []
+      },
+      {
+        "path": "spec/services/jrc_relationship/playbooks_integration_spec.rb",
+        "baseline_count": 0,
+        "current_count": 0,
+        "new_cop_counts": {},
+        "current_new": []
+      }
+    ],
+    "eslint_errors": 0,
+    "eslint_warnings": {
+      "AutomaticPlaybookNotice.vue": 4,
+      "CustomerPanel.vue": 32
+    },
+    "note": "Only line endings of the scoped legacy Flow spec normalized after tests; no semantic change."
+  },
+  "resources": {
+    "initial_free_bytes": 7307796480,
+    "native_final": {
+      "start": 7298621440,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/services/jrc_relationship/automatic_playbook_budget_spec.rb": "90a7ab299aa47e16816c5296698b9ef951520064a5c29fc2ac6a2ae99df06410",
+        "spec/services/jrc_relationship/automatic_playbook_budget_concurrency_spec.rb": "4945b2308203d9d34ec58f5db55b4eeed2607769c19a359bd5d24403bb7190b8",
+        "spec/services/jrc_relationship/automatic_action_budget_spec.rb": "1ea7643be744a336e4200b96d08fe041b150c8eeb6b326fca01acfa735007c49",
+        "spec/services/jrc_relationship/automatic_action_budget_concurrency_spec.rb": "f77dbc23a0d9ee4c029df6b569fe2bcbcce3066f579baee41399280f0d6815b1",
+        "spec/services/jrc_relationship/playbooks_integration_spec.rb": "87f395ea8b0baa418174620c2dedf1c30ae81987ab84246f08359b29ba1ec5b3",
+        "spec/services/jrc_relationship/cadence_action_budget_spec.rb": "4ebde1595311d6ab9dd51e1775cfeca1d029c5fdcdffc63fb0d126a2725ebd3c"
+      },
+      "minimum": 7277981696,
+      "exit_code": 0,
+      "end": 7298162688
+    },
+    "vue": {
+      "status": "passed",
+      "free_start": 7303073792,
+      "minimum_free": 7277326336,
+      "mandatory_stop_bytes": 750000000,
+      "conservative_stop_bytes": 2000000000,
+      "no_build": true,
+      "owned_process_id": 26708,
+      "exit_code": 0,
+      "free_end": 7301722112
+    },
+    "current_free_bytes": 7298318336
+  },
+  "runtime_preservation": {
+    "four_original_containers": "All running with identical StartedAt values from2026-11-04; verified read-only2026-11-06",
+    "server5379": {
+      "address": "127.0.0.1",
+      "pid": 6464,
+      "unchanged": true
+    },
+    "no_restarts_or_reconfiguration": true
+  },
+  "files_sha256": {
+    "app/controllers/api/v1/accounts/relationship/portfolio_controller.rb": "fc6dd64aa6f9ba89b88b31762787e0fa6d874db88915bee795864b2c86b049fc",
+    "app/javascript/dashboard/i18n/locale/en/relationship.json": "3befef4d5333cd2a4a7315b7c18cdf359c24c23bf5420146d830dc5870d5f8bf",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/CustomerPanel.vue": "26912ba56f76b4d19b31748c41bf29742c703857a4eae1ffae591826e865df00",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/interface.spec.js": "3797958518a3687550f206c884005aabad5798eef7a0b976601d65c7cfb24cd4",
+    "app/services/jrc_relationship/automatic_action_budget.rb": "1f7cbb940deb28733939535c6a49486c0a254fc2b2c825bc6164333e9d3b4fce",
+    "app/services/jrc_relationship/playbooks.rb": "ca77c6326c16f4ad11e4c07d7d98768df1192652ea99c4dee363a5e38eada6ab",
+    "app/services/jrc_relationship/processor.rb": "a57080f3f872dd8cafa1b452148cde315c34fccd4a3f6a76cf646adcf6b88bf9",
+    "app/services/jrc_relationship/workflow.rb": "78a3c958ba5b19c68ee700bcae08548789890e75b43417341ba57df60983f33a",
+    "spec/services/jrc_relationship/automatic_action_budget_concurrency_spec.rb": "f77dbc23a0d9ee4c029df6b569fe2bcbcce3066f579baee41399280f0d6815b1",
+    "spec/services/jrc_relationship/automatic_action_budget_spec.rb": "1ea7643be744a336e4200b96d08fe041b150c8eeb6b326fca01acfa735007c49",
+    "spec/services/jrc_relationship/playbooks_integration_spec.rb": "1c9d7f4425ac0dc8d06e51da5736c25b15f94ad08a57884e8ffba1860951a17b",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/AutomaticPlaybookNotice.vue": "c93f5e86445e9912d2b65417d35700927d2bd1a5d16d0180507bf2684764c533",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/automaticPlaybookBudget.spec.js": "dc8eec68378f94f0d299a651b3c70c4a1b7fe2bdb9316ff20c166340354272af",
+    "app/services/jrc_relationship/automatic_playbook_budget.rb": "9850fef8efe058a654c7b674a98e84163e33120787e72ce69696f24d3b798501",
+    "app/services/jrc_relationship/automatic_playbooks.rb": "ea3a8d2ed9479d9ffbf1a26b5013eab90d069afe6d7af247eaff0036ec456b5c",
+    "spec/services/jrc_relationship/automatic_playbook_budget_concurrency_spec.rb": "4945b2308203d9d34ec58f5db55b4eeed2607769c19a359bd5d24403bb7190b8",
+    "spec/services/jrc_relationship/automatic_playbook_budget_spec.rb": "90a7ab299aa47e16816c5296698b9ef951520064a5c29fc2ac6a2ae99df06410"
+  },
+  "limitations": [
+    "No guaranteed retry scheduling added; native monitor reevaluates current conditions. A task set larger than the configured daily maximum remains deferred until an explicit policy/playbook review. Existing automatic Agenda availability must be satisfied; a missing eligible analyst is visible deferral, not fallback impersonation.",
+    "Independent manual playbooks, success plans and surveys retain their policies. Risk identification and retention projection intentionally remain exempt. No universal quota/whole F2 closure claim.",
+    "No build, current-source Chrome acceptance, cleanup, push, deployment, external/provider operation, schema migration or change to5379.",
+    "Final analyst identity-removal semantics await business answer; TRR undefined; documents without portfolio user-deferred."
+  ],
+  "next_active_work": "F1 read-only native responsibility origins with authorized paging/navigation; no final analyst removal or identity change."
+}
