@@ -29,7 +29,9 @@ class JrcRelationship::WithdrawalReadiness
     @source = @context.account.users.find(analyst_id)
     @digest = Digest::SHA256.new
     @membership = @context.account.account_users.find_by!(user_id: @source.id)
-    @digest << JrcServiceDesk::CanonicalJson.dump([@context.account.id, @source.id, @membership.id, @membership.updated_at.iso8601(6)])
+    @digest << JrcServiceDesk::CanonicalJson.dump([@context.account.id, @source.id, @membership.id, @membership.updated_at.iso8601(6),
+                                                   @membership.role, @membership.custom_role_id, @membership.jrc_relationship_eligibility_version,
+                                                   @membership.jrc_relationship_withdrawn_at&.iso8601(6)])
     @counts = {}
     @signature = @context.access_signature
   end
@@ -45,12 +47,17 @@ class JrcRelationship::WithdrawalReadiness
       final_removal_available: false, snapshot_digest: OpenSSL::HMAC.hexdigest('SHA256', key, @digest.hexdigest + @signature),
       relationship_withdrawn_at: @membership.jrc_relationship_withdrawn_at,
       can_withdraw_relationship: can_withdraw_relationship?,
+      eligibility_version: @membership.jrc_relationship_eligibility_version,
+      can_restore_relationship: @membership.jrc_relationship_withdrawn_at.present? && can_change_eligibility?,
       generated_at: Time.current }
   end
 
   def can_withdraw_relationship?
-    @membership.jrc_relationship_withdrawn_at.nil? && @source.id != @context.user.id && @context.policy.configure? &&
-      @context.policy.manage? && @counts.values.all?(&:zero?) && @context.assignable_users.exists?(@source.id)
+    @membership.jrc_relationship_withdrawn_at.nil? && @counts.values.all?(&:zero?) && can_change_eligibility?
+  end
+
+  def can_change_eligibility?
+    @source.id != @context.user.id && @context.policy.configure? && @context.policy.manage? && @context.assignable_users.exists?(@source.id)
   end
 
   def collect!(kind, source, visible)

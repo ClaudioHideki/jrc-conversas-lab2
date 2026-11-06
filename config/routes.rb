@@ -628,6 +628,7 @@ Rails.application.routes.draw do
             get :team, to: 'dashboard#team'
             get 'team/:analyst_id/withdrawal_readiness', to: 'dashboard#withdrawal_readiness'
             post 'team/:analyst_id/withdraw', to: 'dashboard#withdraw'
+            post 'team/:analyst_id/restore', to: 'dashboard#restore'
             get 'team/:analyst_id/capacity', to: 'analyst_capacities#show'
             get 'team/:analyst_id/cadences', to: 'analyst_cadences#index'
             get 'team/:analyst_id/native_responsibilities', to: 'analyst_native_responsibilities#index'

@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   getters: null,
   request: vi.fn(),
   withdraw: vi.fn(),
+  restore: vi.fn(),
 }));
 vi.mock('vue-router', () => ({ useRoute: () => mocks.route }));
 vi.mock('vuex', () => ({ useStore: () => ({ getters: mocks.getters }) }));
@@ -14,6 +15,7 @@ vi.mock('dashboard/api/jrcRelationship', () => ({
   default: {
     withdrawalReadiness: mocks.request,
     withdrawAnalyst: mocks.withdraw,
+    restoreAnalyst: mocks.restore,
   },
 }));
 const Dialog = defineComponent({
@@ -214,5 +216,83 @@ it('clears protected review data when current permission is denied during submis
   expect(wrapper.emitted('close')).toHaveLength(1);
   expect(wrapper.findAll('dd')).toHaveLength(0);
   expect(wrapper.find('textarea').exists()).toBe(false);
+  wrapper.unmount();
+});
+
+it('restores eligibility only after a fresh authorized revision and never restarts a withdrawal automatically', async () => {
+  mocks.request.mockResolvedValueOnce({
+    data: {
+      state: 'ready_for_final_review',
+      counts: { allocations: 0 },
+      relationship_withdrawn_at: '2026-11-06T12:00:00Z',
+      can_restore_relationship: true,
+      eligibility_version: 1,
+    },
+  });
+  mocks.restore.mockResolvedValueOnce({
+    data: { state: 'withdrawal_reversed', eligibility_version: 2 },
+  });
+  const wrapper = render();
+  await flushPromises();
+  expect(wrapper.text()).toContain('RELATIONSHIP.WITHDRAWAL.RESTORE_SCOPE');
+  await wrapper.get('textarea').setValue('Synthetic new eligibility decision');
+  await wrapper.get('input[type="checkbox"]').setValue(true);
+  await wrapper.get('form').trigger('submit');
+  await flushPromises();
+  expect(mocks.restore).toHaveBeenCalledWith(
+    1,
+    7,
+    { reason: 'Synthetic new eligibility decision', expected_version: 1 },
+    expect.any(Object)
+  );
+  expect(mocks.withdraw).not.toHaveBeenCalled();
+  expect(wrapper.text()).toContain('RELATIONSHIP.WITHDRAWAL.RESTORED');
+  expect(wrapper.find('form').exists()).toBe(false);
+  expect(mocks.request).toHaveBeenCalledTimes(1);
+  wrapper.unmount();
+});
+
+it('requires a new revision to restore legacy withdrawn rows and retains the reason on a stale restoration', async () => {
+  mocks.request.mockResolvedValueOnce({
+    data: {
+      state: 'ready_for_final_review',
+      counts: {},
+      relationship_withdrawn_at: '2026-11-06T12:00:00Z',
+      can_restore_relationship: true,
+    },
+  });
+  const wrapper = render();
+  await flushPromises();
+  expect(wrapper.find('form').exists()).toBe(false);
+  mocks.request.mockResolvedValueOnce({
+    data: {
+      state: 'ready_for_final_review',
+      counts: {},
+      relationship_withdrawn_at: '2026-11-06T12:00:00Z',
+      can_restore_relationship: true,
+      eligibility_version: 0,
+    },
+  });
+  await wrapper.get('[data-testid="eligibility-refresh"]').trigger('click');
+  await flushPromises();
+  mocks.restore.mockRejectedValueOnce({
+    response: { status: 409, data: { errors: ['Eligibility changed.'] } },
+  });
+  await wrapper.get('textarea').setValue('Synthetic preserved restoration');
+  await wrapper.get('input[type="checkbox"]').setValue(true);
+  await wrapper.get('form').trigger('submit');
+  await flushPromises();
+  expect(mocks.restore).toHaveBeenCalledWith(
+    1,
+    7,
+    { reason: 'Synthetic preserved restoration', expected_version: 0 },
+    expect.any(Object)
+  );
+  expect(wrapper.get('textarea').element.value).toBe(
+    'Synthetic preserved restoration'
+  );
+  expect(wrapper.get('[role="alert"]').text()).toBe('Eligibility changed.');
+  expect(wrapper.text()).not.toContain('RELATIONSHIP.WITHDRAWAL.RESTORED');
+  expect(mocks.restore).toHaveBeenCalledTimes(1);
   wrapper.unmount();
 });

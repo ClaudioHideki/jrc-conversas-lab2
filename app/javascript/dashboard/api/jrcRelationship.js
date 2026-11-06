@@ -49,6 +49,12 @@ export default {
       { withdrawal },
       options
     ),
+  restoreAnalyst: (accountId, analystId, restoration, options) =>
+    axios.post(
+      `${base(accountId)}/team/${Number(analystId)}/restore`,
+      { restoration },
+      options
+    ),
   analystCapacity: (accountId, analystId, params, options) =>
     axios.get(`${base(accountId)}/team/${Number(analystId)}/capacity`, {
       ...options,

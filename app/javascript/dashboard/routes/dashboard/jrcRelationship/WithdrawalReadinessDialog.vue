@@ -18,6 +18,20 @@ const busy = ref(false);
 const reason = ref('');
 const acknowledged = ref(false);
 const submitError = ref('');
+const restored = ref(false);
+const restoring = computed(
+  () =>
+    result.value?.relationship_withdrawn_at &&
+    result.value?.can_restore_relationship &&
+    Number.isSafeInteger(result.value?.eligibility_version)
+);
+const canDecide = computed(
+  () =>
+    restoring.value ||
+    (!result.value?.relationship_withdrawn_at &&
+      result.value?.can_withdraw_relationship &&
+      !restored.value)
+);
 const identity = computed(() =>
   JSON.stringify([
     route.params.accountId,
@@ -36,11 +50,12 @@ const clear = () => {
   reason.value = '';
   acknowledged.value = false;
   submitError.value = '';
+  restored.value = false;
 };
-const withdraw = async () => {
+const decideEligibility = async () => {
   if (
     busy.value ||
-    !result.value?.can_withdraw_relationship ||
+    !canDecide.value ||
     !acknowledged.value ||
     !reason.value.trim() ||
     reason.value.length > 4000
@@ -50,22 +65,33 @@ const withdraw = async () => {
   const token = generation;
   busy.value = true;
   submitError.value = '';
+  const restore = restoring.value;
   try {
-    const { data } = await API.withdrawAnalyst(
+    const fields = restore
+      ? {
+          reason: reason.value.trim(),
+          expected_version: result.value.eligibility_version,
+        }
+      : {
+          reason: reason.value.trim(),
+          snapshot_digest: result.value.snapshot_digest,
+        };
+    const request = restore ? API.restoreAnalyst : API.withdrawAnalyst;
+    const { data } = await request(
       route.params.accountId,
       props.analystId,
-      {
-        reason: reason.value.trim(),
-        snapshot_digest: result.value.snapshot_digest,
-      },
+      fields,
       { signal: controller.signal }
     );
     if (token === generation) {
       result.value = {
         ...result.value,
         can_withdraw_relationship: false,
-        relationship_withdrawn_at: data.withdrawn_at,
+        can_restore_relationship: false,
+        relationship_withdrawn_at: restore ? null : data.withdrawn_at,
+        eligibility_version: data.eligibility_version,
       };
+      restored.value = !!restore;
     }
   } catch (err) {
     if (token === generation) {
@@ -154,17 +180,24 @@ onBeforeUnmount(clear);
         {{ t('RELATIONSHIP.WITHDRAWAL.FINAL_REVIEW') }}
       </p>
       <p
-        v-if="result.relationship_withdrawn_at"
+        v-if="restored"
+        role="status"
+        class="rounded-lg bg-n-teal-3 p-3 text-sm text-n-teal-12"
+      >
+        {{ t('RELATIONSHIP.WITHDRAWAL.RESTORED') }}
+      </p>
+      <p
+        v-else-if="result.relationship_withdrawn_at"
         role="status"
         class="rounded-lg bg-n-teal-3 p-3 text-sm text-n-teal-12"
       >
         {{ t('RELATIONSHIP.WITHDRAWAL.WITHDRAWN') }}
       </p>
       <form
-        v-else-if="result.can_withdraw_relationship"
+        v-if="canDecide"
         class="min-w-0 space-y-3 rounded-lg border border-n-weak p-3"
         data-testid="withdrawal-confirmation"
-        @submit.prevent="withdraw"
+        @submit.prevent="decideEligibility"
       >
         <label class="block text-sm">
           {{ t('RELATIONSHIP.WITHDRAWAL.REASON') }}
@@ -184,7 +217,10 @@ onBeforeUnmount(clear);
             :disabled="busy"
             required
           />
-          {{ t('RELATIONSHIP.WITHDRAWAL.CONFIRM_SCOPE') }}
+          <span v-if="restoring">{{
+            t('RELATIONSHIP.WITHDRAWAL.RESTORE_SCOPE')
+          }}</span>
+          <span v-else>{{ t('RELATIONSHIP.WITHDRAWAL.CONFIRM_SCOPE') }}</span>
         </label>
         <p
           v-if="submitError"
@@ -200,7 +236,10 @@ onBeforeUnmount(clear);
             busy || !acknowledged || !reason.trim() || reason.length > 4000
           "
         >
-          {{ t('RELATIONSHIP.WITHDRAWAL.WITHDRAW') }}
+          <span v-if="restoring">{{
+            t('RELATIONSHIP.WITHDRAWAL.RESTORE')
+          }}</span>
+          <span v-else>{{ t('RELATIONSHIP.WITHDRAWAL.WITHDRAW') }}</span>
         </button>
         <button
           v-if="submitError"
@@ -212,6 +251,16 @@ onBeforeUnmount(clear);
           {{ t('RELATIONSHIP.REFRESH') }}
         </button>
       </form>
+      <button
+        v-if="result.relationship_withdrawn_at || restored"
+        type="button"
+        :class="buttonClass"
+        :disabled="busy"
+        data-testid="eligibility-refresh"
+        @click="load"
+      >
+        {{ t('RELATIONSHIP.WITHDRAWAL.REVIEW_CURRENT') }}
+      </button>
     </section>
   </Dialog>
 </template>

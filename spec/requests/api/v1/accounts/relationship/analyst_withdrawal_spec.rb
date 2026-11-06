@@ -23,10 +23,10 @@ RSpec.describe 'Governed Relationship-only analyst withdrawal', type: :request d
     post url, headers: headers, as: :json, params: { withdrawal: { snapshot_digest: expected, reason: 'Synthetic approved CS withdrawal' } }
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body).to include('state' => 'withdrawn', 'scope' => 'relationship', 'analyst_id' => analyst.id)
-    expect(member.reload.jrc_relationship_withdrawn_at).to be_present
+    expect([member.reload.jrc_relationship_withdrawn_at.present?, member.jrc_relationship_eligibility_version]).to eq([true, 1])
     expect([User.count, AccountUser.count, TeamMember.count]).to eq(before.first(3))
-    expect(member.attributes.except('updated_at', 'jrc_relationship_withdrawn_at')).to eq(
-      before.last.except('jrc_relationship_withdrawn_at')
+    expect(member.attributes.except('updated_at', 'jrc_relationship_withdrawn_at', 'jrc_relationship_eligibility_version')).to eq(
+      before.last.except('jrc_relationship_withdrawn_at', 'jrc_relationship_eligibility_version')
     )
     event = JrcCrm::AuditEvent.where(account: account).for_resource('AccountUser', member.id).last!
     expect(event.actor_id).to eq(actor.id)

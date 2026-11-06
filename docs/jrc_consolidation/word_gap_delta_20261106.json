@@ -124,6 +124,15 @@
       "current_state": "Explicit opt-in native guard, reviewed-batch integration and functional dialog locally validated",
       "evidence": "docs/jrc_consolidation/portfolio_transfer_lock_checkpoint_20261106.json",
       "remaining": "No inferred strategic status, personnel conflict detection, final roster removal or full F1/visual closure."
+    },
+    {
+      "requirement": "F1 controlled new reversal of Relationship eligibility",
+      "word_fragments": [
+        "relacionamento:P0107"
+      ],
+      "current_state": "Implemented audited native reversal with monotonic revision, pre-counter compatibility and new reviewed execution after restoration. Prior snapshots/events and untouched epoch0 signatures preserved.",
+      "report": "analyst_restoration_checkpoint_20261106.json",
+      "remaining": "Fresh compiled visual acceptance and other F1 distribution dimensions remain separate."
     }
   ],
   "explicit_dependencies": [

@@ -84,7 +84,7 @@ class JrcRelationship::Context
 
   def access_signature
     require 'digest'
-    @access_signature ||= Digest::SHA256.hexdigest(
+    @access_signature ||= eligibility_digest(
       [member.role, member.custom_role_id, member.custom_role&.updated_at,
        member.permissions.sort, account[:feature_flags], account[:feature_flags_ext_1],
        account.custom_attributes[JrcCrm::OrganizationalStructureService::SETTINGS_KEY],
@@ -148,5 +148,13 @@ class JrcRelationship::Context
       raise Pundit::NotAuthorizedError unless assignments.exists?(['settings ->> ? = ?', "#{kind}_id", id])
     else raise Pundit::NotAuthorizedError
     end
+  end
+
+  private
+
+  def eligibility_digest(value)
+    version = member.jrc_relationship_eligibility_version
+    value = "#{value}:relationship_eligibility:#{version}" if version.positive?
+    Digest::SHA256.hexdigest(value)
   end
 end
