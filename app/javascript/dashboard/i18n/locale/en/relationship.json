@@ -5,6 +5,17 @@
       "OPEN_NATIVE_CUSTOMERS": "Open filtered customer list",
       "FILTER_ACTIVE": "This list is limited to the selected operational portfolio and your current customer permissions.",
       "CLEAR_GROUP_FILTER": "Remove portfolio filter",
+      "RULES": {
+        "TITLE": "Capacity and transfer rules",
+        "CAPACITY": "Capacity limits",
+        "TRANSFER": "Transfer rules",
+        "HELP": "Use explicit native limits. Account, unit, product and other portfolio limits remain cumulative. Changing the grouping cannot bypass a governed transfer rule.",
+        "APPROVAL": "Require formal Central approval for owner transfers",
+        "VALIDITY": "Maximum review validity in minutes",
+        "REVIEW": "Review these limits and transfer rules for the current customer grouping. Configured points and hours use the existing workload inputs.",
+        "SAVE": "Confirm and save rules",
+        "SAVED": "Versioned portfolio rules saved"
+      },
       "WORKLOAD": {
         "TITLE": "Observed workload",
         "UNAVAILABLE": "The current workload could not be loaded. Refresh after checking your access.",

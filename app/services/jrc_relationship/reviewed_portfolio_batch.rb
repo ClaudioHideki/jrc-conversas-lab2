@@ -173,6 +173,7 @@ class JrcRelationship::ReviewedPortfolioBatch
   def project(review, context)
     return JrcRelationship::ReviewedBatchReceiptView.new(review).call if JrcRelationship::ReviewedAssignmentScope.new(context, review).limited?
 
+    JrcRelationship::PortfolioGroupConfiguration.authorize_snapshot!(context, review.snapshot)
     { 'id' => review.id, 'state' => review.state, 'revision' => review.revision, 'digest' => review.digest,
       'expires_at' => review.expires_at.iso8601(6), 'inputs' => review.inputs,
       'summary' => review.snapshot['summary'], 'distribution' => review.snapshot['distribution'],

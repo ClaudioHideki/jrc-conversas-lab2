@@ -22,6 +22,7 @@ class JrcRelationship::DistributionApprovalCatalog
     context = JrcRelationship::Context.new(member)
     raise Pundit::NotAuthorizedError unless review.inputs['operation'] == 'assign'
 
+    JrcRelationship::PortfolioGroupConfiguration.authorize_snapshot!(context, review.snapshot)
     ids = review.inputs.fetch('ids')
     scope = JrcRelationship::ReviewedAssignmentScope.new(context, review).scope
     raise Pundit::NotAuthorizedError unless scope.where(id: ids).count == ids.size

@@ -30,6 +30,7 @@ class JrcRelationship::PortfolioGroups
       group.assign_attributes(normalize(attributes))
       verify_sharing!(context, group)
       verify_unit_members!(group)
+      JrcRelationship::PortfolioGroupConfiguration.before_archive!(group)
       group.save!
       verify_source_and_destination!(context, group)
       context.audit!(group, action: 'portfolio_group_updated', before: before,
@@ -104,15 +105,23 @@ class JrcRelationship::PortfolioGroups
     rows = context.assignments.where(id: selected).order(:id).to_a
     raise ActiveRecord::RecordNotFound unless rows.size == selected.size
 
+    JrcRelationship::PortfolioGroupConfiguration.before_unlink!(group, selected) unless active
+
     links = group.customer_links.where(assignment_id: selected).order(:assignment_id)
     before = links.pluck(:assignment_id, :active)
+    persist_customer_links(group, rows, active)
+    existing = before.select { |_, enabled| enabled }.map(&:first)
+    JrcRelationship::PortfolioGroupConfiguration.admit!(group, rows.reject { |row| existing.include?(row.id) }) if active
+    [before, links.pluck(:assignment_id, :active)]
+  end
+
+  def persist_customer_links(group, rows, active)
     rows.each do |assignment|
-      link = group.customer_links.find_or_initialize_by(account_id: context.account.id, assignment_id: assignment.id)
+      link = group.customer_links.find_or_initialize_by(account_id: group.account_id, assignment_id: assignment.id)
       next if !active && link.new_record?
 
       link.update!(active: active)
     end
-    [before, links.pluck(:assignment_id, :active)]
   end
 
   def locked_group(context, id, version)

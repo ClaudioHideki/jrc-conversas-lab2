@@ -7,6 +7,7 @@ import API from 'dashboard/api/jrcRelationship';
 import PortfolioGroupEditor from './PortfolioGroupEditor.vue';
 import PortfolioGroupCustomersDialog from './PortfolioGroupCustomersDialog.vue';
 import PortfolioGroupWorkloadPanel from './PortfolioGroupWorkloadPanel.vue';
+import PortfolioGroupRulesPanel from './PortfolioGroupRulesPanel.vue';
 import CustomerPanel from './CustomerPanel.vue';
 import { buttonClass, inputClass, message } from './definitions';
 const props = defineProps({ metadata: { type: Object, required: true } });
@@ -86,6 +87,8 @@ const load = async (page = 1) => {
       if (signal.aborted || token !== generation || current !== identity.value)
         return;
       group.value = detail.data;
+      if (detailsTab.value === 'rules' && !detail.data.can_configure)
+        detailsTab.value = 'customers';
       customers.value = list.data.payload;
       pagination.value = list.data.meta;
     } else {
@@ -442,7 +445,24 @@ onBeforeUnmount(() => {
         >
           {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.WORKLOAD.TITLE') }}
         </button>
+        <button
+          v-if="group.can_configure"
+          type="button"
+          :class="[
+            buttonClass,
+            detailsTab === 'rules' &&
+              'border-n-blue-7 bg-n-blue-2 text-n-blue-11',
+          ]"
+          @click="detailsTab = 'rules'"
+        >
+          {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.RULES.TITLE') }}
+        </button>
       </nav>
+      <PortfolioGroupRulesPanel
+        v-if="detailsTab === 'rules' && group.can_configure"
+        :group="group"
+        :metadata="metadata"
+      />
       <PortfolioGroupWorkloadPanel
         v-if="detailsTab === 'workload'"
         :group="group"

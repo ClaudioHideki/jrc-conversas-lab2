@@ -11,6 +11,7 @@ class JrcRelationship::DistributionCapacity
   def preview(inputs, records, applied_ids: [])
     return [] unless inputs['owner_id']
 
+    @sources.preload(records)
     configs = records.flat_map { |row| @sources.for(row) }.uniq(&:scope_key)
     configs.filter_map do |config|
       limits = config.effective_rules.fetch('portfolio_capacity_limits')
@@ -47,6 +48,7 @@ class JrcRelationship::DistributionCapacity
   end
 
   def for_view(review)
+    JrcRelationship::PortfolioGroupConfiguration.authorize_snapshot!(@context, review.snapshot)
     review.snapshot.fetch('capacity', []).map do |row|
       config = JrcRelationship::Configuration.new(account: @context.account, scope_key: row.fetch('scope_key'))
       pool = @sources.relation(config).where(owner_id: row.fetch('user_id'), status: JrcRelationship::DistributionCapacityGuard::LOAD_STATUSES)
@@ -61,6 +63,7 @@ class JrcRelationship::DistributionCapacity
   private
 
   def current_configurations(records)
+    @sources.preload(records)
     configs = records.flat_map { |row| @sources.for(row) }.uniq(&:scope_key)
     configs = JrcRelationship::Configuration.where(account: @context.account, scope_key: 'account').to_a if records.empty?
     configs.reject { |config| config.effective_rules.fetch('portfolio_capacity_limits').empty? }.sort_by(&:scope_key)

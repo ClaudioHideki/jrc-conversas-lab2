@@ -12,6 +12,7 @@ class JrcRelationship::DistributionConfigurationGovernance
 
     kind, id = configuration.scope_key.split(':')
     unit = account.jrc_crm_business_units.find(id) if kind == 'unit'
+    unit = JrcRelationship::PortfolioGroup.where(account: account).find(id).business_unit if kind == 'portfolio'
     JrcApprovals::Authorization.new(account: account, user: user)
                                .authorize!('policy_manage', company_id: unit&.company_id, unit_id: unit&.id)
   end

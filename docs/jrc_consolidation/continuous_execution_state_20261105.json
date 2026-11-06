@@ -3,13 +3,14 @@
   "user_request": "499267ac-546d-4853-b4cf-7f03a2ea0629",
   "initial_head": "be54d0f7b4ce8d4e2a077cf2bdd8c2a4d5c88f5e",
   "branch": "codex/relacionamento-v2-20261101",
-  "last_validated_checkpoint": "0db8bb4a7d85542db391b47945a0089bdae6ed7f",
+  "last_validated_checkpoint": "038cde84eaebb464f3a63e293881b277da490d89",
   "completed_current_work": "Sealed dossier, weighted/current capacity, native withdrawal/cadence controls and F2 increments locally tested; see linked incremental reports. No C-G closure.",
-  "active_work": "Integrate named-portfolio capacity/rules into existing immutable distribution governance; preserve source scopes, unique global workload and old snapshots.",
+  "active_work": "Configured-group scale and scoped history/export audit after native governance checkpoint.",
   "exact_next_actions": [
-    "Add named group capacity/rules only through existing reviewed immutable policy mechanisms, with native admission and hidden-scope guards.",
-    "Continue record-aware group history/export and remaining independent C-G Word gaps.",
-    "Preserve no-build/no5379change restriction; do not claim Chrome acceptance."
+    "Validate representative configured-group/batch scale without changing production or5379.",
+    "Continue scoped group history/export and the native master-selection/group workflow; preserve source records and explicit ownership review.",
+    "Audit local group roles and grouping per-item/resume requirements against Word without inventing permissions or declaring partial controls complete.",
+    "Keep current-source Chrome acceptance pending authorization for build."
   ],
   "test_environment": {
     "source_manifest": ".codex/d9-notifications-20261104/snapshot.json",
@@ -51,16 +52,17 @@
     "No real participant removal or provider request; tests use synthetic records and WebMock, with external network disabled."
   ],
   "restrictions": "No build/recompile, no5379 change/restart, no four-container restart/reconfiguration, no cleanup/delete of existing data, no push/GHCR/deploy/production/client change, no real provider operations. Additive migrations allowed only in owned synthetic test database.",
-  "disk_last_observed_bytes": 9237045248,
+  "disk_last_observed_bytes": 9214435328,
   "TRR": "Undefined; do not invent",
   "company_documents_without_portfolio": "Explicitly deferred",
-  "last_validated_head": "0db8bb4a7d85542db391b47945a0089bdae6ed7f",
-  "new_validated_code_checkpoint": "git log -1 --format=%H -- docs/jrc_consolidation/named_portfolio_native_integration_checkpoint_20261106.json",
-  "current_status": "Named grouping/filter/workload:11native cases,7new sourceUI,7existing Segment regressions,3expanded API cases passed; no C-G closure.",
+  "last_validated_head": "038cde84eaebb464f3a63e293881b277da490d89",
+  "new_validated_code_checkpoint": "git log -1 --format=%H -- docs/jrc_consolidation/named_portfolio_governance_checkpoint_20261106.json",
+  "current_status": "Native group capacity/rule engine and source UI tested;20new native cases+13capacity regressions+1concurrency,7Vue; no C-G closure.",
   "next_actions": [
-    "Add named group capacity/rules only through existing reviewed immutable policy mechanisms, with native admission and hidden-scope guards.",
-    "Continue record-aware group history/export and remaining independent C-G Word gaps.",
-    "Preserve no-build/no5379change restriction; do not claim Chrome acceptance."
+    "Validate representative configured-group/batch scale without changing production or5379.",
+    "Continue scoped group history/export and the native master-selection/group workflow; preserve source records and explicit ownership review.",
+    "Audit local group roles and grouping per-item/resume requirements against Word without inventing permissions or declaring partial controls complete.",
+    "Keep current-source Chrome acceptance pending authorization for build."
   ],
   "latest_dossier_report": "docs/jrc_consolidation/sealed_dossier_checkpoint_20261105.json",
   "capacity_report": "docs/jrc_consolidation/weighted_capacity_checkpoint_20261105.json",
@@ -134,5 +136,6 @@
   "portfolio_membership_business_decision": "Multiple active operational portfolios per customer, explicitly approved in current user reply.",
   "named_portfolio_plan": "docs/jrc_consolidation/named_portfolio_multi_membership_plan_20261106.json",
   "named_portfolio_foundation_report": "docs/jrc_consolidation/named_portfolio_foundation_checkpoint_20261106.json",
-  "named_portfolio_native_integration_report": "docs/jrc_consolidation/named_portfolio_native_integration_checkpoint_20261106.json"
+  "named_portfolio_native_integration_report": "docs/jrc_consolidation/named_portfolio_native_integration_checkpoint_20261106.json",
+  "named_portfolio_governance_report": "docs/jrc_consolidation/named_portfolio_governance_checkpoint_20261106.json"
 }

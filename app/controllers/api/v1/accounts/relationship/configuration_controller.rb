@@ -20,6 +20,7 @@ class Api::V1::Accounts::Relationship::ConfigurationController < Api::V1::Accoun
 
         scope = params.fetch(:scope_key, 'account')
         relationship_context.authorize_configuration_scope!(scope)
+        JrcRelationship::PortfolioGroupConfiguration.verify_revision!(relationship_context, scope, params[:portfolio_revision])
         row = JrcRelationship::Configuration.find_or_initialize_by(account: Current.account, scope_key: scope)
         update_configuration!(row)
         row
@@ -78,8 +79,9 @@ class Api::V1::Accounts::Relationship::ConfigurationController < Api::V1::Accoun
   end
 
   def configuration_payload(record)
+    response.headers['Cache-Control'] = 'no-store' if record.scope_key.start_with?('portfolio:')
     { scope_key: record.scope_key, version: record.version, weights: record.effective_weights, rules: record.effective_rules,
-      history: configuration_history(record) }
+      history: configuration_history(record) }.merge(JrcRelationship::PortfolioGroupConfiguration.payload(relationship_context, record.scope_key))
   end
 
   def configuration_history(record)

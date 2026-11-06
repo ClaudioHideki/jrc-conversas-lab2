@@ -1,4 +1,5 @@
 class JrcRelationship::Configuration < ApplicationRecord
+  SCOPE_PATTERN = /\A(account|(?:segment|product|company|unit|team):\d+|portfolio:[1-9]\d*)\z/
   self.table_name = 'jrc_relationship_configurations'
   belongs_to :account
   has_many :versions, class_name: 'JrcRelationship::ConfigurationVersion', dependent: :restrict_with_error
@@ -10,7 +11,7 @@ class JrcRelationship::Configuration < ApplicationRecord
       row.actor = actor
     end
   end
-  validates :scope_key, uniqueness: { scope: :account_id }, format: { with: /\A(account|segment:\d+|product:\d+|company:\d+|unit:\d+|team:\d+)\z/ }
+  validates :scope_key, uniqueness: { scope: :account_id }, format: { with: SCOPE_PATTERN }
   validates :version, numericality: { only_integer: true, greater_than: 0 }
   validate :valid_config
   before_save { JrcRelationship::DistributionApproval.lock_configuration!(account_id) }
@@ -67,6 +68,7 @@ class JrcRelationship::Configuration < ApplicationRecord
       errors.add(:rules, 'unknown rules')
       return
     end
+    JrcRelationship::PortfolioGroupConfiguration.validate!(self)
     validate_numeric_rules
     validate_risk_bands
     validate_health_hysteresis
@@ -193,11 +195,6 @@ class JrcRelationship::Configuration < ApplicationRecord
   end
 
   def validate_scope
-    kind, id = scope_key.to_s.split(':')
-    target = { 'segment' => JrcCustomers::Taxonomy, 'product' => JrcCrm::Product, 'company' => JrcCustomers::Company,
-               'unit' => JrcCrm::BusinessUnit, 'team' => Team }[kind]
-    scope = target&.where(account_id: account_id, id: id)
-    scope = scope.where(kind: 'segment') if kind == 'segment' && scope
-    errors.add(:scope_key, 'scope must belong to this account and kind') if scope && !scope.exists?
+    JrcRelationship::ConfigurationScope.validate(self)
   end
 end

@@ -67,10 +67,14 @@ class JrcRelationship::PortfolioGroupReader
     group.attributes.slice('id', 'name', 'objective', 'visibility', 'status', 'owner_id', 'team_id', 'business_unit_id', 'segment_id', 'goals')
          .merge(reference_names(group)).merge('version' => group.lock_version,
                                               'customer_count' => visible == total ? total : nil,
-                                              'visible_customer_count' => visible, 'access_limited' => visible != total,
-                                              'can_manage' => capabilities.fetch('editable_ids').include?(group.id),
-                                              'can_configure' => capabilities.fetch('editable_ids').include?(group.id) &&
-                                                capabilities.fetch('can_configure'))
+                                              'visible_customer_count' => visible, 'access_limited' => visible != total)
+         .merge(access_flags(group, capabilities, visible == total))
+  end
+
+  def access_flags(group, capabilities, complete)
+    editable = capabilities.fetch('editable_ids').include?(group.id)
+    { 'can_manage' => editable,
+      'can_configure' => complete && group.status == 'active' && editable && capabilities.fetch('can_configure') }
   end
 
   def reference_names(group)

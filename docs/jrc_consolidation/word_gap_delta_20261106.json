@@ -198,6 +198,12 @@
       "report": "docs/jrc_consolidation/named_portfolio_native_integration_checkpoint_20261106.json",
       "implemented_validated": "Native group filters, action cohorts, observed workload and sourceUI; real1000customer proof via full model validations:40SQL,1.0861s local request.",
       "partial": "Configurable group capacity/rules enforcement, distinct capabilities/history/export and current-source Chrome acceptance remain open."
+    },
+    {
+      "reference": "Relationship P0091-P0107,P0123-P0128",
+      "report": "docs/jrc_consolidation/named_portfolio_governance_checkpoint_20261106.json",
+      "implemented_validated": "Actual group capacity/transfer rules in native immutable configuration and reviewed/direct admission engines;20new governance cases,13native capacity regressions,1concurrency,7sourceUI.",
+      "partial": "Full master-to-group picker flow, local role/capability matrix, grouping per-item resume, scoped history/export and current-source Chrome acceptance remain open."
     }
   ],
   "explicit_dependencies": [
@@ -218,7 +224,7 @@
       "state": "External environment/operations require separate authorization; not simulated as passed."
     }
   ],
-  "next_confirmed_local_gap": "Named portfolio native capacity/rule governance and reviewed admission; no invented defaults.",
+  "next_confirmed_local_gap": "Configured-group scale and scoped group history/export/master-selection integration.",
   "stage_closure": {
     "C": false,
     "D": false,

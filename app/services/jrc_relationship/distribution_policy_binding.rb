@@ -6,12 +6,14 @@ class JrcRelationship::DistributionPolicyBinding
 
   def call(records, owner_id: nil)
     sources = JrcRelationship::DistributionConfigurations.new(@context.account)
+    sources.preload(records)
     configurations = records.flat_map do |row|
       sources.for(row).map do |config|
         { 'assignment_id' => row.id, 'scope_key' => config.scope_key, 'version' => config.version,
-          'required' => config.effective_rules.fetch('portfolio_transfer_approval_required') }
+          'required' => config.effective_rules.fetch('portfolio_transfer_approval_required') }.merge(sources.portfolio_reference(config))
       end
     end
+    JrcRelationship::PortfolioGroupConfiguration.authorize_bindings!(@context, configurations)
     corporate_scope(records).merge('required' => configurations.any? { |row| row.fetch('required') },
                                    'configurations' => configurations,
                                    'destination_access_signature' => destination_signature(records, owner_id))
