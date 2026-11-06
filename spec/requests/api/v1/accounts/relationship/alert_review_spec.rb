@@ -33,7 +33,8 @@ RSpec.describe 'Native human monitoring alert assessment', type: :request do
                                                            'alert_review')).to include('status' => 'false_positive',
                                                                                        'note' => values[:alert_review_note])
     get "#{base}/dashboard", headers: headers
-    expect(response.parsed_body.fetch('automatic_alert_review')).to eq('total' => 1, 'confirmed' => 0, 'false_positive' => 1, 'pending' => 0)
+    expect(response.parsed_body.fetch('automatic_alert_review')).to eq('total' => 1, 'confirmed' => 0, 'false_positive' => 1, 'pending' => 0,
+                                                                       'reviewed' => 1, 'human_confirmation_percent' => 0.0)
   end
 
   it 'rejects missing reasons and invalid states atomically and does not infer an assessment from dismissal' do

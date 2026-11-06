@@ -9,6 +9,9 @@
       "REQUIRED": "Provide a reason for the assessment.",
       "REVIEWER": "Reviewed by user #{id} on {at}",
       "SUMMARY": "Human assessment of monitoring alerts",
+      "HUMAN_RATIO": "Human confirmation among current assessments: {percent} ({confirmed}/{reviewed}).",
+      "HUMAN_RATIO_UNAVAILABLE": "No current human assessments; the confirmation rate is unavailable.",
+      "HUMAN_RATIO_NOTICE": "Descriptive human-reviewed cohort only; this is not model precision, automated validation or a production pilot result.",
       "COHORT": "Automatic monitoring alerts created in the selected period (last 90 days by default), within this authorized portfolio. Counts refer to the current evidence, not model precision; closing or dismissing an action does not classify it.",
       "STATUS": {
         "pending": "Awaiting human assessment",

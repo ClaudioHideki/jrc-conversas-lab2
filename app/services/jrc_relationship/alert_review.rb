@@ -28,7 +28,9 @@ class JrcRelationship::AlertReview
     confirmed = counts.fetch('confirmed', 0)
     false_positive = counts.fetch('false_positive', 0)
     total = alerts.count
-    { total: total, confirmed: confirmed, false_positive: false_positive, pending: total - confirmed - false_positive }
+    reviewed = confirmed + false_positive
+    { total: total, confirmed: confirmed, false_positive: false_positive, pending: total - reviewed, reviewed: reviewed,
+      human_confirmation_percent: reviewed.positive? ? (confirmed.fdiv(reviewed) * 100).round(1) : nil }
   end
 
   def self.apply!(record, attributes, actor:)

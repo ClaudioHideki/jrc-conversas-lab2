@@ -10,6 +10,7 @@ import MetricDrilldownDialog from './MetricDrilldownDialog.vue';
 import PriorityBandBadge from './PriorityBandBadge.vue';
 import { priorityCodes } from './priorityBands';
 import { alertReviewLabels } from './alertReview';
+import HumanAssessmentRate from './HumanAssessmentRate.vue';
 import NicoSummaryPanel from './NicoSummaryPanel.vue';
 import { rememberViewport, viewportPosition } from './listViewport';
 import {
@@ -346,6 +347,10 @@ const cards = computed(() => [
             </dd>
           </div>
         </dl>
+        <HumanAssessmentRate
+          :summary="metrics.automatic_alert_review"
+          :formatting="metadata.formatting"
+        />
       </section>
       <button
         v-if="metrics"
