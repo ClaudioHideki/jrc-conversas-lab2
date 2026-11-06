@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcRelationship';
-import CapacityWorkloadForm from './CapacityWorkloadForm.vue';
+import PortfolioAssignmentForm from './PortfolioAssignmentForm.vue';
 import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import MetricsPanel from './MetricsPanel.vue';
 import NicoSummaryPanel from './NicoSummaryPanel.vue';
@@ -24,7 +24,6 @@ import SurveyDeliveryPanel from './SurveyDeliveryPanel.vue';
 import HealthScorePanel from './HealthScorePanel.vue';
 import RenewalPipeline from './RenewalPipeline.vue';
 import MetricDrilldownPanel from './MetricDrilldownPanel.vue';
-import CompanyPicker from '../jrcCustomers/components/CompanyPicker.vue';
 import ReviewedPortfolioBatchPanel from './ReviewedPortfolioBatchPanel.vue';
 import { fixedSurveyScope as normalizeFixedSurveyScope } from './fixedSurveyScope';
 import {
@@ -119,13 +118,6 @@ const portfolioOperation = reactive({
   due_at: '',
   playbook_id: '',
   request_id: crypto.randomUUID(),
-});
-const assignment = reactive({
-  company_id: null,
-  owner_id: '',
-  team_id: '',
-  business_unit_id: '',
-  settings: { segment_id: '', product_id: '', complexity: '' },
 });
 const batch = reactive({
   status: 'completed',
@@ -317,7 +309,7 @@ const save = fields => {
       surveyLink.value = `${window.location.origin}/jrc/relacionamento/pesquisas/${data.survey_token}`;
   });
 };
-const saveAssignment = () =>
+const saveAssignment = assignment =>
   mutate(() =>
     API.saveAssignment(route.params.accountId, {
       ...assignment,
@@ -635,14 +627,6 @@ watch(
     newAssignment.value = false;
     opportunity.value = null;
     batchMode.value = false;
-    Object.assign(assignment, {
-      company_id: null,
-      owner_id: '',
-      team_id: '',
-      business_unit_id: '',
-      exception_reason: '',
-      settings: { segment_id: '', product_id: '', complexity: '' },
-    });
     surveyLink.value = '';
     surveyDelivery.value = null;
     surveyPreparation.value = null;
@@ -1128,121 +1112,12 @@ const money = value => formatMoney(value, metadata.value?.formatting);
           {{ t('RELATIONSHIP.FACTORS.' + filters.factor) }} ·
           {{ t('RELATIONSHIP.CLEAR_FACTOR_FILTER') }}
         </button>
-        <form
+        <PortfolioAssignmentForm
           v-if="newAssignment"
-          class="rounded-xl border border-n-weak p-4"
-          @submit.prevent="saveAssignment"
-        >
-          <h3 class="mb-3 font-semibold">
-            {{ t('RELATIONSHIP.ADD_CUSTOMER') }}
-          </h3>
-          <CompanyPicker
-            v-model="assignment.company_id"
-            :disabled="saving"
-          />
-          <div class="mt-3 flex gap-3">
-            <label class="flex-1 text-sm"
-              >{{ t('RELATIONSHIP.FIELDS.owner_id')
-              }}<select
-                v-model="assignment.owner_id"
-                :class="inputClass"
-              >
-                <option value="">{{ t('RELATIONSHIP.UNASSIGNED') }}</option>
-                <option
-                  v-for="owner in metadata.owners"
-                  :key="owner[0]"
-                  :value="owner[0]"
-                >
-                  {{ owner[1] }}
-                </option>
-              </select></label
-            ><label class="flex-1 text-sm"
-              >{{ t('RELATIONSHIP.FIELDS.team_id')
-              }}<select
-                v-model="assignment.team_id"
-                :class="inputClass"
-              >
-                <option value="">{{ t('RELATIONSHIP.SELECT') }}</option>
-                <option
-                  v-for="team in metadata.teams"
-                  :key="team[0]"
-                  :value="team[0]"
-                >
-                  {{ team[1] }}
-                </option>
-              </select></label
-            >
-          </div>
-          <div class="mt-3 grid gap-3 md:grid-cols-3">
-            <label class="text-sm"
-              >{{ t('RELATIONSHIP.FIELDS.business_unit_id')
-              }}<select
-                v-model="assignment.business_unit_id"
-                :class="inputClass"
-              >
-                <option value="">{{ t('RELATIONSHIP.SELECT') }}</option>
-                <option
-                  v-for="unit in metadata.units"
-                  :key="unit[0]"
-                  :value="unit[0]"
-                >
-                  {{ unit[1] }}
-                </option>
-              </select></label
-            >
-            <label
-              v-for="key in ['segment_id', 'product_id']"
-              :key="key"
-              class="text-sm"
-              >{{ t(`RELATIONSHIP.FIELDS.${key}`)
-              }}<select
-                v-model="assignment.settings[key]"
-                :class="inputClass"
-              >
-                <option value="">{{ t('RELATIONSHIP.SELECT') }}</option>
-                <option
-                  v-for="item in metadata[
-                    key === 'segment_id' ? 'segments' : 'products'
-                  ] || []"
-                  :key="item[0]"
-                  :value="item[0]"
-                >
-                  {{ item[1] }}
-                </option>
-              </select></label
-            >
-          </div>
-          <label class="mt-3 block text-sm"
-            >{{ t('RELATIONSHIP.FIELDS.complexity')
-            }}<input
-              v-model="assignment.settings.complexity"
-              :class="inputClass"
-          /></label>
-          <CapacityWorkloadForm
-            v-model="assignment.settings.capacity_workload"
-            :disabled="saving"
-          />
-          <label class="mt-3 block text-sm"
-            >{{ t('RELATIONSHIP.ELIGIBILITY_EXCEPTION_REASON')
-            }}<textarea
-              v-model="assignment.exception_reason"
-              maxlength="2000"
-              :class="inputClass"
-              data-testid="eligibility-exception-reason"
-            />
-            <span class="text-xs text-n-slate-11">{{
-              t('RELATIONSHIP.ELIGIBILITY_EXCEPTION_GUIDANCE')
-            }}</span></label
-          >
-          <button
-            type="submit"
-            :class="buttonClass"
-            class="mt-3"
-            :disabled="saving || !assignment.company_id"
-          >
-            {{ t('RELATIONSHIP.SAVE') }}
-          </button>
-        </form>
+          :metadata="metadata"
+          :disabled="saving"
+          @submit="saveAssignment"
+        />
         <MetricsPanel
           v-if="
             metrics &&

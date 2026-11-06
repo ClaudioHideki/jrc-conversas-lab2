@@ -9,6 +9,7 @@ import { buttonClass, inputClass, message } from './definitions';
 const props = defineProps({
   group: { type: Object, required: true },
   customer: { type: Object, default: null },
+  initialCustomer: { type: Object, default: null },
   busy: Boolean,
   error: { type: String, default: '' },
   conflict: Boolean,
@@ -22,7 +23,7 @@ const rows = ref([]);
 const selected = ref(new Map());
 const query = ref('');
 const reason = ref('');
-const step = ref(props.customer ? 'review' : 'select');
+const step = ref(props.customer || props.initialCustomer ? 'review' : 'select');
 const loading = ref(false);
 const loadError = ref('');
 const title = computed(() =>
@@ -119,6 +120,11 @@ watch(
     }
     if (props.customer)
       selected.value.set(Number(props.customer.id), props.customer);
+    else if (props.initialCustomer)
+      selected.value.set(
+        Number(props.initialCustomer.id),
+        props.initialCustomer
+      );
     else load();
   },
   { immediate: true }

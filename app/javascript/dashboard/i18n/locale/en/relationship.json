@@ -5,6 +5,17 @@
       "OPEN_NATIVE_CUSTOMERS": "Open filtered customer list",
       "FILTER_ACTIVE": "This list is limited to the selected operational portfolio and your current customer permissions.",
       "CLEAR_GROUP_FILTER": "Remove portfolio filter",
+      "MASTER": {
+        "TITLE": "Select from master directory",
+        "HELP": "Choose an existing master customer. Existing Relationship ownership is preserved; adding the portfolio link requires a separate reason and review.",
+        "CHECK": "Check current Relationship allocation",
+        "ALLOCATION_NOTICE": "No accessible Relationship allocation was found. This step creates only the native allocation for the existing customer. It persists even if you cancel the later portfolio link review; no company is created or duplicated.",
+        "ALLOCATE": "Create native allocation",
+        "CREATED": "Native allocation saved. Review the portfolio link next.",
+        "EXISTING": "Existing native allocation selected. Its owner and responsibilities are preserved.",
+        "REVIEW": "Review portfolio link",
+        "UNCONFIRMED": "The native allocation could not be confirmed. Check the current allocation before attempting another creation."
+      },
       "HISTORY": {
         "TITLE": "Portfolio history",
         "HELP": "Review authorized administrative changes. Historical values and reasons retain their source access restrictions.",

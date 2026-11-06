@@ -216,6 +216,12 @@
       "report": "docs/jrc_consolidation/named_portfolio_history_checkpoint_20261106.json",
       "implemented_validated": "Scoped operational history/summary export:8newnative+3authorityregressions/0,10sourceUI/API/0.",
       "partial": "Full historical values/reasons,append-only audit,local-role matrix,master flow,per-item resume and current-source Chrome remain pending."
+    },
+    {
+      "reference": "Relationship P0124/P0125",
+      "report": "docs/jrc_consolidation/named_portfolio_master_flow_checkpoint_20261106.json",
+      "implemented_validated": "Individual native master selection, existing allocation reuse or explicit creation and later reason/revision link review;4native/0,34sourceUI/0.",
+      "partial": "True master multi-select allocation batches, local roles, durable per-item resume, full audit and current-source visual acceptance remain open."
     }
   ],
   "explicit_dependencies": [
@@ -236,7 +242,7 @@
       "state": "External environment/operations require separate authorization; not simulated as passed."
     }
   ],
-  "next_confirmed_local_gap": "Existing master-customer allocation into reviewed group-link flow.",
+  "next_confirmed_local_gap": "Per-item grouping result receipts and controlled retry on existing atomic link writes; durable reviewed batches remain separate.",
   "stage_closure": {
     "C": false,
     "D": false,

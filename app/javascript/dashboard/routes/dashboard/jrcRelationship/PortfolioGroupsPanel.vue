@@ -9,6 +9,7 @@ import PortfolioGroupCustomersDialog from './PortfolioGroupCustomersDialog.vue';
 import PortfolioGroupWorkloadPanel from './PortfolioGroupWorkloadPanel.vue';
 import PortfolioGroupRulesPanel from './PortfolioGroupRulesPanel.vue';
 import PortfolioGroupHistoryPanel from './PortfolioGroupHistoryPanel.vue';
+import PortfolioGroupMasterDialog from './PortfolioGroupMasterDialog.vue';
 import CustomerPanel from './CustomerPanel.vue';
 import { buttonClass, inputClass, message } from './definitions';
 const props = defineProps({ metadata: { type: Object, required: true } });
@@ -31,6 +32,7 @@ const blocked = ref(false);
 const editorOpen = ref(false);
 const editorRecord = ref(null);
 const customerDialog = ref(null);
+const masterOpen = ref(false);
 const selectedCustomer = ref(null);
 const detailsTab = ref('customers');
 const identity = computed(() =>
@@ -65,6 +67,7 @@ const closeDrafts = () => {
   editorOpen.value = false;
   editorRecord.value = null;
   customerDialog.value = null;
+  masterOpen.value = false;
   saveError.value = '';
   conflict.value = false;
 };
@@ -145,6 +148,12 @@ const openCustomers = customer => {
   closeDrafts();
   dialogContext = viewIdentity.value;
   customerDialog.value = { customer };
+};
+const reviewMasterCustomer = customer => {
+  if (!group.value?.can_manage || saving.value) return;
+  closeDrafts();
+  dialogContext = viewIdentity.value;
+  customerDialog.value = { customer: null, initialCustomer: customer };
 };
 const mutate = async (action, groupId) => {
   if (saving.value || dialogContext !== viewIdentity.value) return;
@@ -565,6 +574,23 @@ onBeforeUnmount(() => {
             {{ group.customer_count ?? t('RELATIONSHIP.UNAVAILABLE') }}
           </p>
           <button
+            v-if="
+              group.can_manage &&
+              group.status === 'active' &&
+              metadata.can_manage &&
+              metadata.can_team
+            "
+            type="button"
+            :class="buttonClass"
+            :disabled="saving || loading"
+            @click="
+              closeDrafts();
+              masterOpen = true;
+            "
+          >
+            {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.TITLE') }}
+          </button>
+          <button
             v-if="group.can_manage && group.status === 'active'"
             type="button"
             :class="buttonClass"
@@ -678,12 +704,20 @@ onBeforeUnmount(() => {
       v-if="customerDialog && group"
       :group="group"
       :customer="customerDialog.customer"
+      :initial-customer="customerDialog.initialCustomer"
       :busy="saving"
       :error="saveError"
       :conflict="conflict"
       @close="closeDrafts"
       @save="saveCustomers"
       @reload="reloadDraft"
+    />
+    <PortfolioGroupMasterDialog
+      v-if="masterOpen && group"
+      :group="group"
+      :metadata="metadata"
+      @close="masterOpen = false"
+      @review="reviewMasterCustomer"
     />
     <CustomerPanel
       v-if="selectedCustomer"
