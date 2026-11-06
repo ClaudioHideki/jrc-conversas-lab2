@@ -1,0 +1,32 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "882b1f727d461735d67618bbffed2c4f0eb7beed",
+  "status": "Successful owner handoff no longer appears as a failed save when native scope removes the source",
+  "implementation": [
+    "Only a confirmed successful owner mutation enables closing on a subsequent403/404 reload. Emit changed once, clear source/channels and close the existing panel. No synthetic success for a denied mutation.",
+    "Initial403/404 remains an error. Mutation403 retains form/error with no changed/close. Reload500 remains visible; stale identity/generation guards and409 draft preservation remain intact. Other actions keep native existing reload behavior."
+  ],
+  "tests_non_additive": {
+    "baseline01": "13examples:11passed/2real failures for403/404 after successful save; no close emitted.",
+    "vue02": "15/0: both corrected cases, denied mutation, initial denial, reload500 and10existing interface cases.",
+    "eslint": "CustomerPanel0errors/32warnings unchanged from HEAD;interface spec0errors/0warnings.",
+    "chrome": "Not executed against new assets: no-build/no5379-change restriction retained.",
+    "diff_check": "passed"
+  },
+  "resources": {
+    "status": "passed",
+    "free_start": 11082371072,
+    "minimum_free": 10987483136,
+    "mandatory_stop_bytes": 750000000,
+    "conservative_stop_bytes": 2000000000,
+    "no_build": true,
+    "owned_process_id": 5628,
+    "exit_code": 0,
+    "free_end": 11074113536
+  },
+  "disk_final_bytes": 10091798528,
+  "remaining": [
+    "Current compiled browser acceptance and other C-G Word gaps remain open."
+  ],
+  "restrictions": "No build,runtime change,cleanup,push,GHCR,deploy,production or external operation."
+}

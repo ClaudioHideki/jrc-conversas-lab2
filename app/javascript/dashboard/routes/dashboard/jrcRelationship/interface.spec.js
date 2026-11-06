@@ -78,6 +78,111 @@ const mountPortfolio = () =>
   });
 
 describe('Relationship interface integration', () => {
+  it.each([403, 404])(
+    'closes after a confirmed owner transfer whose reload returns %s, without presenting it as a failed save',
+    async status => {
+      mocks.api.customer
+        .mockResolvedValueOnce({ data: customer })
+        .mockRejectedValueOnce({
+          response: {
+            status,
+            data: { errors: ['Customer is outside current scope'] },
+          },
+        });
+      const wrapper = shallowMount(CustomerPanel, {
+        props: {
+          assignmentId: 19,
+          metadata: {
+            ...metadata,
+            owners: [
+              [7, 'CS'],
+              [8, 'Other analyst'],
+            ],
+          },
+        },
+      });
+      await flushPromises();
+      await wrapper.get('[data-testid="portfolio-owner"]').setValue('8');
+      await wrapper
+        .findAll('form')
+        .find(node => node.find('[data-testid="portfolio-owner"]').exists())
+        .trigger('submit');
+      await flushPromises();
+      expect(mocks.api.saveAssignment).toHaveBeenCalledTimes(1);
+      expect(wrapper.emitted('changed')).toHaveLength(1);
+      expect(wrapper.emitted('close')).toHaveLength(1);
+      expect(wrapper.text()).not.toContain('Thiago');
+      expect(wrapper.find('[role="alert"]').exists()).toBe(false);
+      wrapper.unmount();
+    }
+  );
+
+  it('does not claim a transfer succeeded or close its form when the mutation itself is denied', async () => {
+    mocks.api.saveAssignment.mockRejectedValueOnce({
+      response: { status: 403, data: { errors: ['Transfer denied'] } },
+    });
+    const wrapper = shallowMount(CustomerPanel, {
+      props: {
+        assignmentId: 19,
+        metadata: {
+          ...metadata,
+          owners: [
+            [7, 'CS'],
+            [8, 'Other analyst'],
+          ],
+        },
+      },
+    });
+    await flushPromises();
+    await wrapper.get('[data-testid="portfolio-owner"]').setValue('8');
+    await wrapper
+      .findAll('form')
+      .find(node => node.find('[data-testid="portfolio-owner"]').exists())
+      .trigger('submit');
+    await flushPromises();
+    expect(wrapper.emitted('changed')).toBeUndefined();
+    expect(wrapper.emitted('close')).toBeUndefined();
+    expect(wrapper.get('[role="alert"]').text()).toContain('Transfer denied');
+    expect(mocks.api.customer).toHaveBeenCalledTimes(1);
+    wrapper.unmount();
+  });
+
+  it('keeps a reload server error visible after a confirmed transfer instead of claiming access was removed', async () => {
+    mocks.api.customer
+      .mockResolvedValueOnce({ data: customer })
+      .mockRejectedValueOnce({
+        response: { status: 500, data: { errors: ['Reload failed'] } },
+      });
+    const wrapper = shallowMount(CustomerPanel, {
+      props: { assignmentId: 19, metadata },
+    });
+    await flushPromises();
+    await wrapper
+      .findAll('form')
+      .find(node => node.find('[data-testid="portfolio-owner"]').exists())
+      .trigger('submit');
+    await flushPromises();
+    expect(wrapper.emitted('changed')).toHaveLength(1);
+    expect(wrapper.emitted('close')).toBeUndefined();
+    expect(wrapper.get('[role="alert"]').text()).toContain('Reload failed');
+    wrapper.unmount();
+  });
+
+  it('shows an initial access denial without claiming any transfer was performed', async () => {
+    mocks.api.customer.mockRejectedValueOnce({
+      response: { status: 403, data: { errors: ['Access denied'] } },
+    });
+    const wrapper = shallowMount(CustomerPanel, {
+      props: { assignmentId: 19, metadata },
+    });
+    await flushPromises();
+    expect(wrapper.emitted('changed')).toBeUndefined();
+    expect(wrapper.emitted('close')).toBeUndefined();
+    expect(wrapper.get('[role="alert"]').text()).toContain('Access denied');
+    expect(mocks.api.saveAssignment).not.toHaveBeenCalled();
+    wrapper.unmount();
+  });
+
   it('keeps portfolio reassignment controls unavailable for a team viewer without native manage permission', async () => {
     mocks.api.customer.mockResolvedValue({ data: customer });
     const wrapper = shallowMount(CustomerPanel, {

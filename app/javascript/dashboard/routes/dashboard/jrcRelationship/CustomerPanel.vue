@@ -49,12 +49,13 @@ const contact = computed(() =>
   )
 );
 let generation = 0;
-const load = async () => {
+const load = async ({ closeIfUnavailable = false } = {}) => {
   transferLockOpen.value = false;
   generation += 1;
   const version = generation;
   const accountId = route.params.accountId;
   record.value = null;
+  channels.value = null;
   error.value = '';
   busy.value = true;
   try {
@@ -71,12 +72,18 @@ const load = async () => {
     ownerId.value = record.value.owner?.id || '';
     contactId.value = channels.value.contacts[0]?.id || '';
   } catch (err) {
-    if (version === generation) error.value = message(err);
+    if (version === generation) {
+      if (closeIfUnavailable && [403, 404].includes(err.response?.status)) {
+        emit('close');
+        return;
+      }
+      error.value = message(err);
+    }
   } finally {
     if (version === generation) busy.value = false;
   }
 };
-const execute = async action => {
+const execute = async (action, { closeIfUnavailable = false } = {}) => {
   const version = generation;
   busy.value = true;
   error.value = '';
@@ -84,7 +91,7 @@ const execute = async action => {
     await action();
     if (version === generation) {
       emit('changed');
-      await load();
+      await load({ closeIfUnavailable });
     }
   } catch (err) {
     if (version === generation) error.value = message(err);
@@ -127,12 +134,14 @@ const assignmentFields = fields => ({
 });
 const assign = () => {
   if (busy.value || record.value?.transfer_locked) return undefined;
-  return execute(() =>
-    API.saveAssignment(
-      route.params.accountId,
-      assignmentFields({ owner_id: ownerId.value || null }),
-      props.assignmentId
-    )
+  return execute(
+    () =>
+      API.saveAssignment(
+        route.params.accountId,
+        assignmentFields({ owner_id: ownerId.value || null }),
+        props.assignmentId
+      ),
+    { closeIfUnavailable: true }
   );
 };
 const saveWorkload = () =>
