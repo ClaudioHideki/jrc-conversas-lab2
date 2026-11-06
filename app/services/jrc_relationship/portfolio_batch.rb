@@ -88,11 +88,15 @@ class JrcRelationship::PortfolioBatch
 
     before = { owner_id: record.owner_id }
     record.update!(owner: owner)
+    propagate_action_owner!(record, owner) if record.saved_change_to_owner_id?
+    @context.audit!(record, before: before, after: { owner_id: owner&.id }, action: 'assignment_updated')
+  end
+
+  def propagate_action_owner!(record, owner)
     record.actions.where(status: JrcRelationship::Action::ACTIVE_STATUSES).find_each do |action|
       action.update!(owner: owner)
       action.activity.update!(user: owner) if owner && action.activity
     end
-    @context.audit!(record, before: before, after: { owner_id: owner&.id }, action: 'assignment_updated')
   end
 
   def apply_playbook!(record, options)
