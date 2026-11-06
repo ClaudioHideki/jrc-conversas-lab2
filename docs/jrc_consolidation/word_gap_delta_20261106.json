@@ -276,6 +276,12 @@
       "report": "docs/jrc_consolidation/reviewed_portfolio_membership_native_checkpoint_20261106.json",
       "implemented_validated": "Native/API durable group membership through existing reviewed engine;32backend/0 including14existing regressions; protected terminal history and linked unresolved-item re-review.",
       "partial": "UI integration started but not yet tested; whole-audience projected capacity, broad saved-operation listing and current-source visual acceptance remain open."
+    },
+    {
+      "reference": "Relationship P0124/P0125/P0128/P0184/P0185",
+      "report": "docs/jrc_consolidation/reviewed_portfolio_membership_ui_checkpoint_20261106.json",
+      "implemented_validated": "Native group resumable membership review UI using existing engine;32source/0 and33previous atomic/results/master regressions passed, with corrected failed-button gate documented.",
+      "partial": "Current-source Chrome/liveSidekiq, broad own-operation listing and remaining C-G gaps are open."
     }
   ],
   "explicit_dependencies": [
@@ -296,7 +302,7 @@
       "state": "External environment/operations require separate authorization; not simulated as passed."
     }
   ],
-  "next_confirmed_local_gap": "Connect durable membership operation to native group source interface, with scoped resume and strict receipts.",
+  "next_confirmed_local_gap": "Source-free own pending-reviewed operations inventory/cancellation and integration with safe analyst withdrawal.",
   "stage_closure": {
     "C": false,
     "D": false,

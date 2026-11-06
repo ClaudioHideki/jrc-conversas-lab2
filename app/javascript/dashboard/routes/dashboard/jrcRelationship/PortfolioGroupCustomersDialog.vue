@@ -14,7 +14,7 @@ const props = defineProps({
   error: { type: String, default: '' },
   conflict: Boolean,
 });
-const emit = defineEmits(['close', 'save', 'reviewed']);
+const emit = defineEmits(['close', 'save', 'reviewed', 'batch']);
 const route = useRoute();
 const store = useStore();
 const { t } = useI18n();
@@ -137,7 +137,7 @@ const reloadReview = async () => {
     if (token === generation && !signal.aborted) loading.value = false;
   }
 };
-const save = () => {
+const save = (mode = 'save') => {
   if (
     props.busy ||
     props.conflict ||
@@ -146,12 +146,14 @@ const save = () => {
     !reason.value.trim()
   )
     return;
-  emit('save', {
+  const fields = {
     assignment_ids: [...selected.value.keys()],
     active: !props.customer,
     expected_version: expectedVersion.value,
     reason: reason.value.trim(),
-  });
+  };
+  if (mode === 'batch') emit('batch', fields);
+  else emit('save', fields);
 };
 watch(
   identity,
@@ -360,6 +362,16 @@ onBeforeUnmount(() => {
           />
         </label>
         <footer class="flex flex-wrap justify-end gap-2">
+          <button
+            type="button"
+            :class="buttonClass"
+            :disabled="
+              busy || conflict || loading || !selected.size || !reason.trim()
+            "
+            @click="save('batch')"
+          >
+            {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.BATCH.PREPARE') }}
+          </button>
           <button
             type="button"
             :class="buttonClass"

@@ -10,6 +10,7 @@ import PortfolioGroupWorkloadPanel from './PortfolioGroupWorkloadPanel.vue';
 import PortfolioGroupRulesPanel from './PortfolioGroupRulesPanel.vue';
 import PortfolioGroupHistoryPanel from './PortfolioGroupHistoryPanel.vue';
 import PortfolioGroupMasterDialog from './PortfolioGroupMasterDialog.vue';
+import PortfolioMembershipBatchPanel from './PortfolioMembershipBatchPanel.vue';
 import CustomerPanel from './CustomerPanel.vue';
 import { buttonClass, inputClass, message } from './definitions';
 import { confirmedMembership } from './portfolioGroupMembershipReceipt';
@@ -47,6 +48,7 @@ const customerDialog = ref(null);
 const masterOpen = ref(false);
 const selectedCustomer = ref(null);
 const detailsTab = ref('customers');
+const membershipProposal = ref(null);
 const identity = computed(() =>
   JSON.stringify([
     route.params.accountId,
@@ -226,6 +228,27 @@ const saveCustomers = fields => {
     fields
   );
 };
+const prepareMembershipBatch = fields => {
+  if (
+    saving.value ||
+    loading.value ||
+    !group.value?.can_manage ||
+    group.value.status !== 'active' ||
+    dialogContext !== viewIdentity.value
+  )
+    return;
+  membershipProposal.value = {
+    operation: 'portfolio_membership',
+    ids: fields.assignment_ids,
+    portfolio_group_id: group.value.id,
+    expected_version: fields.expected_version,
+    active: fields.active,
+    justification: fields.reason,
+    request_id: crypto.randomUUID(),
+  };
+  closeDrafts();
+  detailsTab.value = 'batches';
+};
 const reloadDraft = () => {
   closeDrafts();
   load(pagination.value.page);
@@ -247,6 +270,7 @@ watch(
     membershipResult.value = null;
     saving.value = false;
     detailsTab.value = 'customers';
+    membershipProposal.value = null;
     load();
   },
   { immediate: true }
@@ -457,6 +481,18 @@ onBeforeUnmount(() => {
         :aria-label="t('RELATIONSHIP.NAMED_PORTFOLIOS.DETAILS')"
       >
         <button
+          v-if="group.can_manage"
+          type="button"
+          :class="[
+            buttonClass,
+            detailsTab === 'batches' &&
+              'border-n-violet-7 bg-n-violet-2 text-n-violet-11',
+          ]"
+          @click="detailsTab = 'batches'"
+        >
+          {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.BATCH.TITLE') }}
+        </button>
+        <button
           type="button"
           :class="[
             buttonClass,
@@ -525,6 +561,14 @@ onBeforeUnmount(() => {
           {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.HISTORY.TITLE') }}
         </button>
       </nav>
+      <PortfolioMembershipBatchPanel
+        v-if="detailsTab === 'batches' && group.can_manage"
+        :key="group.id"
+        :group="group"
+        :proposal="membershipProposal"
+        @proposal="membershipProposal = $event"
+        @updated="load(pagination.page)"
+      />
       <PortfolioGroupHistoryPanel
         v-if="detailsTab === 'history' && group.can_read_history"
         :group="group"
@@ -753,6 +797,7 @@ onBeforeUnmount(() => {
       :conflict="conflict"
       @close="closeDrafts"
       @save="saveCustomers"
+      @batch="prepareMembershipBatch"
       @reviewed="
         conflict = false;
         saveError = '';

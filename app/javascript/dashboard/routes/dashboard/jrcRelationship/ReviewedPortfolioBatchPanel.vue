@@ -8,13 +8,21 @@ import DistributionComparison from './DistributionComparison.vue';
 import DistributionCapacitySummary from './DistributionCapacitySummary.vue';
 import ResponsibilityComparison from './ResponsibilityComparison.vue';
 import { intent } from 'dashboard/routes/dashboard/approvals/model';
+import { validMembershipReview } from './portfolioMembershipReviewReceipt';
 const props = defineProps({
   accountId: { type: [String, Number], required: true },
   actorId: { type: [String, Number], default: null },
   authorizationKey: { type: String, default: '' },
   proposal: { type: Object, default: null },
+  portfolioGroupId: { type: Number, default: null },
+  canExecute: { type: Boolean, default: true },
 });
-const emit = defineEmits(['updated']);
+const emit = defineEmits([
+  'updated',
+  'reviewed',
+  'previewFailed',
+  'accessDenied',
+]);
 const { t } = useI18n();
 const review = ref(null);
 const error = ref('');
@@ -40,9 +48,27 @@ const hasPendingApproval = computed(() =>
 let epoch = 0;
 let controller = new AbortController();
 let timer;
+let preparedAuthority = null;
+const authorityKey = () =>
+  JSON.stringify([
+    props.accountId,
+    props.actorId,
+    props.authorizationKey,
+    props.portfolioGroupId,
+  ]);
 const storageKey = () =>
-  `relationship-reviewed-batch:${props.accountId}:${props.actorId ?? 'operator'}`;
+  `relationship-reviewed-batch:${props.accountId}:${props.actorId ?? 'operator'}${props.portfolioGroupId ? `:portfolio:${props.portfolioGroupId}` : ''}`;
 const stateLabel = state => t(`RELATIONSHIP.REVIEWED_BATCH.STATES.${state}`);
+const membershipStateLabels = computed(() => ({
+  linked: t('RELATIONSHIP.NAMED_PORTFOLIOS.MEMBERSHIP.STATES.linked'),
+  already_linked: t(
+    'RELATIONSHIP.NAMED_PORTFOLIOS.MEMBERSHIP.STATES.already_linked'
+  ),
+  unlinked: t('RELATIONSHIP.NAMED_PORTFOLIOS.MEMBERSHIP.STATES.unlinked'),
+  already_unlinked: t(
+    'RELATIONSHIP.NAMED_PORTFOLIOS.MEMBERSHIP.STATES.already_unlinked'
+  ),
+}));
 const reset = () => {
   epoch += 1;
   controller.abort();
@@ -54,8 +80,20 @@ const reset = () => {
   reading.value = false;
   uncertain.value = false;
   executionConfirmed.value = false;
+  preparedAuthority = null;
 };
 const remember = value => {
+  if (
+    (props.portfolioGroupId !== null ||
+      value.inputs?.operation === 'portfolio_membership') &&
+    !validMembershipReview(value, props.portfolioGroupId, props.proposal)
+  ) {
+    review.value = null;
+    uncertain.value = true;
+    executionConfirmed.value = false;
+    clearInterval(timer);
+    throw new Error(t('RELATIONSHIP.NAMED_PORTFOLIOS.BATCH.UNCONFIRMED'));
+  }
   if (review.value?.id === value.id && review.value.revision > value.revision)
     return;
   const previous = review.value;
@@ -65,6 +103,7 @@ const remember = value => {
   )
     executionConfirmed.value = false;
   review.value = value;
+  emit('reviewed', value);
   try {
     sessionStorage.setItem(storageKey(), String(value.id));
   } catch {
@@ -84,7 +123,52 @@ const remember = value => {
   )
     emit('updated');
 };
+const clearDenied = failure => {
+  const status = failure.response?.status;
+  if (![401, 403, 404].includes(status)) return;
+  review.value = null;
+  uncertain.value = true;
+  executionConfirmed.value = false;
+  preparedAuthority = null;
+  clearInterval(timer);
+  emit('accessDenied', status);
+};
+async function prepare(proposal) {
+  if (!proposal) {
+    if (!review.value || review.value.state === 'previewed') reset();
+    return;
+  }
+  reset();
+  preparedAuthority = authorityKey();
+  const version = epoch;
+  const accountId = props.accountId;
+  busy.value = true;
+  try {
+    const { data } = await API.previewPortfolioBatch(accountId, proposal, {
+      signal: controller.signal,
+    });
+    if (version === epoch) remember(data);
+  } catch (failure) {
+    if (version === epoch) {
+      error.value = message(failure) || t('RELATIONSHIP.REVIEWED_BATCH.ERROR');
+      clearDenied(failure);
+      emit('previewFailed', failure.response?.status ?? null);
+    }
+  } finally {
+    if (version === epoch) busy.value = false;
+  }
+}
 async function refresh() {
+  if (busy.value || reading.value) return;
+  if (
+    props.portfolioGroupId &&
+    !review.value &&
+    props.proposal &&
+    preparedAuthority === authorityKey()
+  ) {
+    await prepare(props.proposal);
+    return;
+  }
   let id = review.value?.id;
   try {
     id ||= Number(sessionStorage.getItem(storageKey()));
@@ -105,14 +189,21 @@ async function refresh() {
       error.value = '';
     }
   } catch (failure) {
-    if (version === epoch)
+    if (version === epoch) {
       error.value = message(failure) || t('RELATIONSHIP.REVIEWED_BATCH.ERROR');
+      clearDenied(failure);
+    }
   } finally {
     if (version === epoch) reading.value = false;
   }
 }
 async function mutate(action) {
   if (busy.value || !review.value) return;
+  if (
+    ['approve', 'advance', 'requestApproval'].includes(action) &&
+    !props.canExecute
+  )
+    return;
   if (
     action === 'approve' &&
     review.value.approval?.required &&
@@ -170,39 +261,21 @@ async function mutate(action) {
     if (version === epoch) {
       error.value = message(failure) || t('RELATIONSHIP.REVIEWED_BATCH.ERROR');
       uncertain.value = true;
+      clearDenied(failure);
     }
   } finally {
     if (version === epoch) busy.value = false;
   }
 }
+
+watch(() => props.proposal, prepare, { immediate: true, deep: true });
 watch(
-  () => props.proposal,
-  async proposal => {
-    if (!proposal) {
-      if (!review.value || review.value.state === 'previewed') reset();
-      return;
-    }
-    reset();
-    const version = epoch;
-    const accountId = props.accountId;
-    busy.value = true;
-    try {
-      const { data } = await API.previewPortfolioBatch(accountId, proposal, {
-        signal: controller.signal,
-      });
-      if (version === epoch) remember(data);
-    } catch (failure) {
-      if (version === epoch)
-        error.value =
-          message(failure) || t('RELATIONSHIP.REVIEWED_BATCH.ERROR');
-    } finally {
-      if (version === epoch) busy.value = false;
-    }
-  },
-  { immediate: true, deep: true }
-);
-watch(
-  [() => props.accountId, () => props.actorId, () => props.authorizationKey],
+  [
+    () => props.accountId,
+    () => props.actorId,
+    () => props.authorizationKey,
+    () => props.portfolioGroupId,
+  ],
   reset
 );
 onMounted(() => {
@@ -277,6 +350,12 @@ onBeforeUnmount(reset);
         }}
       </p>
       <p
+        v-if="review.inputs.operation === 'portfolio_membership'"
+        class="min-w-0 break-words text-sm"
+      >
+        {{ review.summary.portfolio_group_name }}
+      </p>
+      <p
         v-if="review.inputs.title"
         class="text-sm"
       >
@@ -342,6 +421,7 @@ onBeforeUnmount(reset);
           :class="buttonClass"
           :disabled="
             busy ||
+            !canExecute ||
             uncertain ||
             responsibilitiesBlocked ||
             review.capacity?.some(row => row.blocker)
@@ -373,6 +453,12 @@ onBeforeUnmount(reset);
           {{ item.label || t('RELATIONSHIP.REVIEWED_BATCH.RECEIPT_ITEM') }} ·
           {{ stateLabel(item.state) }}
           <span
+            v-if="item.receipt?.membership_state"
+            class="block"
+          >
+            {{ membershipStateLabels[item.receipt.membership_state] }}
+          </span>
+          <span
             v-if="item.error_code"
             class="block"
           >
@@ -393,6 +479,7 @@ onBeforeUnmount(reset);
           :class="buttonClass"
           :disabled="
             busy ||
+            !canExecute ||
             uncertain ||
             responsibilitiesBlocked ||
             review.capacity?.some(row => row.blocker) ||
@@ -414,7 +501,7 @@ onBeforeUnmount(reset);
           type="button"
           data-test="review-advance"
           :class="buttonClass"
-          :disabled="busy || uncertain"
+          :disabled="busy || uncertain || !canExecute"
           @click="mutate('advance')"
         >
           {{ t('RELATIONSHIP.REVIEWED_BATCH.ADVANCE') }}

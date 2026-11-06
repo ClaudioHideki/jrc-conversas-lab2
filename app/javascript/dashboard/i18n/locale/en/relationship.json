@@ -48,6 +48,16 @@
       "OPEN_NATIVE_CUSTOMERS": "Open filtered customer list",
       "FILTER_ACTIVE": "This list is limited to the selected operational portfolio and your current customer permissions.",
       "CLEAR_GROUP_FILTER": "Remove portfolio filter",
+      "BATCH": {
+        "TITLE": "Resumable customer link reviews",
+        "PREPARE": "Prepare resumable review",
+        "HELP": "This review changes portfolio links only. Confirm to process finite items through native permissions and capacity checks. Earlier committed items remain if a later item fails. Known unit and governed-unlink restrictions are checked in preview; live capacity is checked per item, not presented as a final-audience capacity simulation.",
+        "UNCONFIRMED": "The saved review could not be confirmed for this portfolio, customer selection and native receipts.",
+        "UNRESOLVED": "{count} unresolved items can be selected for a new review. The original terminal history remains unchanged.",
+        "REVIEW_REMAINING": "Review unresolved items",
+        "NEW_REASON": "Reason for this new review",
+        "FRESH_BLOCKED": "Reload the current portfolio and permissions before preparing another review."
+      },
       "MEMBERSHIP": {
         "RELOAD_REVIEW": "Reload selected customers for a new review",
         "REVIEW_RELOADED": "Current customers and revision loaded. Review and confirm again; all rules are checked on save.",
@@ -286,6 +296,7 @@
       "RECEIPT_ITEM": "Item do lote",
       "ERROR": "Não foi possível confirmar o resultado. Consulte o lote salvo antes de repetir a ação.",
       "OPERATIONS": {
+        "portfolio_membership": "Reviewed portfolio customer links",
         "assign": "Alteração de responsável",
         "activity": "Criação de atividade",
         "playbook": "Aplicação do playbook e da versão revisada",
