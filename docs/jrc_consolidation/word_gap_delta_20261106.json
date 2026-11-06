@@ -258,6 +258,12 @@
       "report": "docs/jrc_consolidation/playbook_execution_access_checkpoint_20261106.json",
       "implemented_validated": "Role/membership invalidation of loaded and pending execution histories;4source/0,5native/0 including native Flow HTTP scope/origin regression.",
       "partial": "Execution-wide pagination and full current-source visual acceptance remain open."
+    },
+    {
+      "reference": "Relationship P0152",
+      "report": "docs/jrc_consolidation/playbook_history_attribution_checkpoint_20261106.json",
+      "implemented_validated": "Recorded actor/date in native playbook history using current authorized metadata, without inventing legacy authors;10source/0 with8overlap.",
+      "partial": "Original legacy creation authors are not retroactively proved; current-source Chrome and full F2 remain open."
     }
   ],
   "explicit_dependencies": [
@@ -278,7 +284,7 @@
       "state": "External environment/operations require separate authorization; not simulated as passed."
     }
   ],
-  "next_confirmed_local_gap": "Version authors are stored as actor_id; verify usable current-scope attribution in native version history UI (P0152).",
+  "next_confirmed_local_gap": "Configuration UI restoration only offers the latest50stored versions; exact older-source lookup/control is missing.",
   "stage_closure": {
     "C": false,
     "D": false,

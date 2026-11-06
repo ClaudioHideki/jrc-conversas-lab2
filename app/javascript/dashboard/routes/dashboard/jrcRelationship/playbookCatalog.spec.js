@@ -222,3 +222,52 @@ it('prevents catalog pagination from discarding an open draft', async () => {
   await button(wrapper, 'NEXT').trigger('click');
   expect(mocks.api.playbooks).toHaveBeenCalledOnce();
 });
+
+it('shows the recorded author using only current native metadata and formats the capture date in the account timezone', async () => {
+  mocks.api.playbookHistory.mockResolvedValue({
+    data: {
+      current: book,
+      payload: [
+        { version: 1, actor_id: 7, created_at: '2026-11-06T12:00:00Z' },
+      ],
+      meta: { page: 1, per_page: 25, total: 1 },
+    },
+  });
+  const wrapper = render(History, {
+    book,
+    allowed: true,
+    metadata: {
+      owners: [[7, 'Synthetic current account name']],
+      formatting: { locale: 'en-US', timeZone: 'America/Sao_Paulo' },
+    },
+  });
+  await open(wrapper);
+  expect(wrapper.text()).toContain('Definition version 1');
+  expect(wrapper.text()).toContain(
+    'Recorded by: Synthetic current account name'
+  );
+  expect(wrapper.text()).toContain('Recorded on: 11/6/26, 9:00 AM');
+});
+
+it('retains attribution to the recorded ID without inventing an inaccessible name or a legacy system author', async () => {
+  mocks.api.playbookHistory.mockResolvedValue({
+    data: {
+      current: book,
+      payload: [
+        { version: 1, actor_id: 9 },
+        { version: 2, actor_id: null },
+      ],
+      meta: { page: 1, per_page: 25, total: 2 },
+    },
+  });
+  const wrapper = render(History, {
+    book,
+    allowed: true,
+    metadata: { owners: [[7, 'Unrelated native visible name']] },
+  });
+  await open(wrapper);
+  expect(wrapper.text()).toContain('Recorded by: Usuário 9');
+  expect(wrapper.text()).toContain('Recorded by: Author not recorded');
+  expect(wrapper.text()).not.toContain('Unrelated native visible name');
+  expect(wrapper.text()).not.toContain('Sistema');
+});

@@ -4,11 +4,12 @@ import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcRelationship';
-import { buttonClass, message } from './definitions';
+import { buttonClass, date, message } from './definitions';
 const props = defineProps({
   book: { type: Object, required: true },
   allowed: Boolean,
   disabled: Boolean,
+  metadata: { type: Object, default: () => ({}) },
 });
 const emit = defineEmits(['restore']);
 const route = useRoute();
@@ -128,9 +129,35 @@ onBeforeUnmount(reset);
           :key="version.version"
           class="flex min-w-0 flex-wrap items-center justify-between gap-3 text-sm"
         >
-          <span>{{
-            t('RELATIONSHIP.VERSION', { version: version.version })
-          }}</span>
+          <div class="min-w-0 space-y-1 break-words">
+            <p>
+              {{
+                t('RELATIONSHIP.PLAYBOOK_RESTORE.VERSION', {
+                  version: version.version,
+                })
+              }}
+            </p>
+            <p>
+              {{
+                t('RELATIONSHIP.PLAYBOOK_RESTORE.RECORDED_BY', {
+                  name:
+                    metadata.owners?.find(
+                      owner => owner[0] === version.actor_id
+                    )?.[1] ||
+                    (version.actor_id
+                      ? t('RELATIONSHIP.CONFIG_ACTOR', { id: version.actor_id })
+                      : t('RELATIONSHIP.PLAYBOOK_RESTORE.UNKNOWN_AUTHOR')),
+                })
+              }}
+            </p>
+            <p v-if="version.created_at">
+              {{
+                t('RELATIONSHIP.PLAYBOOK_RESTORE.RECORDED_ON', {
+                  date: date(version.created_at, metadata.formatting),
+                })
+              }}
+            </p>
+          </div>
           <button
             v-if="version.version < book.version"
             type="button"

@@ -2,6 +2,10 @@
   "RELATIONSHIP": {
     "PLAYBOOK_RESTORE": {
       "RETRY": "Reload saved history",
+      "VERSION": "Definition version {version}",
+      "RECORDED_BY": "Recorded by: {name}",
+      "RECORDED_ON": "Recorded on: {date}",
+      "UNKNOWN_AUTHOR": "Author not recorded",
       "TITLE": "Restore a playbook definition",
       "OPEN": "Review playbook restoration",
       "HISTORY": "Definition history",

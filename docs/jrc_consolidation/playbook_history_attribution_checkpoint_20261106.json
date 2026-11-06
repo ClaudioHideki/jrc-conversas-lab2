@@ -1,0 +1,30 @@
+{
+  "date": "2026-11-06",
+  "branch": "codex/relacionamento-v2-20261101",
+  "preserved_previous_checkpoint": "0265cf9d4fac06c2db65997414e51c3389e434c9",
+  "reference": "Relationship P0152: version and recorded actor attribution.",
+  "already_existing": "Configuration history already displayed actor metadata and date. No duplicate configuration-author system added. Native PlaybookVersion already stores actor_id and created_at.",
+  "implementation": [
+    "Playbook history now displays definition-version wording, recorded-by identity and recorded-on date using existing current visible metadata owners and native account formatting/timezone.",
+    "No additional user lookup, email exposure, stored snapshot change or inferred system/original author. Unavailable names fall back to the stored actorID; null authors are explicitly not recorded.",
+    "Recorded-by describes the actual capture actor, since a legacy definition may first be captured during a later edit. It is not a claim of a verified original creation author or frozen historical username."
+  ],
+  "evidence": {
+    "source": "playbook-history-attribution-source01:10/0,8prior catalog/history cases overlap+2new attribution/timezone/fallback cases.",
+    "static": "New history Vue/spec0errors/0warnings; shared ConfigurationPanel34existing warnings unchanged. Diff check clean.",
+    "native": "No backend behavior changed; prior native catalog payload/scope evidence retained, not repeated.",
+    "chrome": "No build/current-source Chrome acceptance; source mocks do not replace it."
+  },
+  "environment": {
+    "disk_start_bytes": 6918995968,
+    "disk_minimum_bytes": 6904160256,
+    "disk_final_test_bytes": 6925856768,
+    "no_build_cleanup_5379change_migration_external_operation": true
+  },
+  "remaining": [
+    "Native configuration restoration selection is still limited to the recent50history rows in the UI; add exact stored-version selection while preserving native scope/governance.",
+    "Full pagination for configuration/execution histories and other C-G requirements remain open.",
+    "Local group roles/batches, Word visual acceptance, undefinedTRR/deferred portfolio-less documents and external pilots unchanged."
+  ],
+  "checkpoint_resolution": "git log -1 --format=%H -- docs/jrc_consolidation/playbook_history_attribution_checkpoint_20261106.json"
+}

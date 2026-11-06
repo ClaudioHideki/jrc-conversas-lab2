@@ -723,6 +723,7 @@ const historyValue = value => {
           </div>
           <PlaybookHistoryPanel
             :book="row"
+            :metadata="metadata"
             :allowed="allowed"
             :disabled="busy || restorePreparing || Boolean(book)"
             @restore="openPlaybookRestore"
