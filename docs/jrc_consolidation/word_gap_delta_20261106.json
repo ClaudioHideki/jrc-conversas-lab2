@@ -169,6 +169,17 @@
       "current_state": "Shared customer predicates extracted without full360eager initialization;55customer regressions,16additional origin/permission cases and1000linked/1000unrelated task read scale passed.",
       "report": "subject_source_performance_checkpoint_20261106.json",
       "remaining": "Current compiled Chrome and broader production/many-order-project pilot not validated."
+    },
+    {
+      "requirement": "F1/G native CS-only withdrawal boundary and distinct implementation-order scale",
+      "current_state": "User approved unrelated native responsibilities remaining in source modules; actual CS links and canonical handoffs are enforced. Native20cross-module regressions and25orders/1000linked-task cohort passed.",
+      "reports": [
+        "withdrawal_cs_native_boundary_checkpoint_20261106.json",
+        "withdrawal_formal_handoff_checkpoint_20261106.json",
+        "withdrawal_multiorder_scale_checkpoint_20261106.json",
+        "analyst_restoration_checkpoint_20261106.json"
+      ],
+      "remaining": "Fresh current-source visual acceptance, broader independent-customer cohort and assisted affinity/rebalancing remain partial; controlled restoration is already implemented, superseding older pending notes."
     }
   ],
   "explicit_dependencies": [
@@ -205,5 +216,5 @@
     "G": false
   },
   "unreviewed_literal_and_visual_fragments": "Not auto-marked complete; the original context/requirements inventory remains classification_pending where not explicitly reconciled.",
-  "next_source_review": "Bounded native QBR/plan collection validation and targeted G authorization regressions; no stage closure."
+  "next_source_review": "Configured health recommendation threshold/zero-weight/missing evidence; native reproduction in progress, not stage closure."
 }

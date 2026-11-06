@@ -6,6 +6,7 @@ class JrcRelationship::WithdrawalHandoffProjects
   end
 
   def restrict(projects)
+    @subjects = {}
     projects = projects.where(account_id: @context.account.id)
     candidates = candidate_projects(projects)
     return projects.none unless candidates.exists?
@@ -71,8 +72,10 @@ class JrcRelationship::WithdrawalHandoffProjects
   end
 
   def subject_sources(assignment_id)
-    assignment = @context.assignment(assignment_id)
-    JrcCustomers::SubjectSources.new(account: @context.account, user: @context.user, account_user: @context.member,
-                                     company: assignment.company, contact: assignment.contact)
+    @subjects[assignment_id] ||= begin
+      assignment = @context.assignment(assignment_id)
+      JrcCustomers::SubjectSources.new(account: @context.account, user: @context.user, account_user: @context.member,
+                                       company: assignment.company, contact: assignment.contact)
+    end
   end
 end
