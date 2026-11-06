@@ -56,7 +56,7 @@ class Api::V1::Accounts::Relationship::ConfigurationController < Api::V1::Accoun
     response.headers['Cache-Control'] = 'no-store'
     book = JrcRelationship::Playbook.where(account: Current.account).find(params[:id])
     versions = book.versions.where(account: Current.account).order(version: :desc, id: :desc)
-    source = playbook_history_version
+    source = history_source_version
     versions = versions.where(version: source) if source
     rows, meta = page(versions)
     render json: { current: book.as_json, payload: rows.as_json, meta: meta }
@@ -118,7 +118,7 @@ class Api::V1::Accounts::Relationship::ConfigurationController < Api::V1::Accoun
 
   private
 
-  def playbook_history_version
+  def history_source_version
     return unless params.key?(:source_version)
 
     value = params[:source_version].to_s
@@ -140,9 +140,12 @@ class Api::V1::Accounts::Relationship::ConfigurationController < Api::V1::Accoun
   end
 
   def configuration_history(record)
+    source = history_source_version
     return [] unless record.persisted?
 
-    record.versions.order(version: :desc).limit(50).as_json(only: [:version, :weights, :rules, :actor_id, :created_at])
+    versions = record.versions.where(account_id: Current.account.id).order(version: :desc)
+    versions = versions.where(version: source) if source
+    versions.limit(50).as_json(only: [:version, :weights, :rules, :actor_id, :created_at])
   end
 
   def find_playbook

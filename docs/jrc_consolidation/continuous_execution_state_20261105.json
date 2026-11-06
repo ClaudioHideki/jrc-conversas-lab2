@@ -3,13 +3,14 @@
   "user_request": "499267ac-546d-4853-b4cf-7f03a2ea0629",
   "initial_head": "be54d0f7b4ce8d4e2a077cf2bdd8c2a4d5c88f5e",
   "branch": "codex/relacionamento-v2-20261101",
-  "last_validated_checkpoint": "0265cf9d4fac06c2db65997414e51c3389e434c9",
+  "last_validated_checkpoint": "81df8195704071737f0d57dd879cd2148eae921a",
   "completed_current_work": "Sealed dossier, weighted/current capacity, native withdrawal/cadence controls and F2 increments locally tested; see linked incremental reports. No C-G closure.",
-  "active_work": "Native configuration exact stored-version selection beyond the recent50history window, without mutating old versions or form drafts.",
+  "active_work": "Native durable portfolio-membership extension of EXISTING reviewed batches; preserve v1 transfer/cadence/playbook reviews and immutable terminal snapshots.",
   "exact_next_actions": [
-    "Extend native scoped configuration read with explicit stored source_version, reusing typed version validation.",
-    "Add source review selector and test old source lookup, missing/invalid sources, native permissions and draft preservation.",
-    "Continue safe C-G implementation; no build,push,cleanup,deploy,5379change or external operations."
+    "Implement native portfolio_membership plan/receipts through existing BatchReview/BatchItem/job and PortfolioGroups writer, not a parallel batch engine.",
+    "Pin group/configuration revision, source visibility and selected membership state; re-review unresolved items in a NEW linked review instead of mutating terminal history.",
+    "Test native functionality/concurrency/revocation and existing reviewed-operation regressions, then integrate source UI and local resume controls.",
+    "No build,push,cleanup,deploy,5379change or external operations."
   ],
   "test_environment": {
     "source_manifest": ".codex/d9-notifications-20261104/snapshot.json",
@@ -145,5 +146,6 @@
   "playbook_input_report": "docs/jrc_consolidation/playbook_input_checkpoint_20261106.json",
   "playbook_catalog_report": "docs/jrc_consolidation/playbook_catalog_checkpoint_20261106.json",
   "playbook_execution_access_report": "docs/jrc_consolidation/playbook_execution_access_checkpoint_20261106.json",
-  "playbook_history_attribution_report": "docs/jrc_consolidation/playbook_history_attribution_checkpoint_20261106.json"
+  "playbook_history_attribution_report": "docs/jrc_consolidation/playbook_history_attribution_checkpoint_20261106.json",
+  "configuration_history_lookup_report": "docs/jrc_consolidation/configuration_history_lookup_checkpoint_20261106.json"
 }

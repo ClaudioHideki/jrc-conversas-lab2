@@ -292,3 +292,69 @@ it('shows native structured capacity history without missing labels or object-pl
   expect(wrapper.text()).not.toContain('[object Object]');
   expect(wrapper.text()).not.toContain('RELATIONSHIP.RULE_LABELS.');
 });
+
+it('looks up an older stored configuration directly and preserves the current unsaved draft when review is cancelled', async () => {
+  const saved = { ...current, version: 76 };
+  mocks.api.configuration
+    .mockResolvedValueOnce({ data: { ...structuredClone(saved), history: [] } })
+    .mockResolvedValue({ data: structuredClone(saved) });
+  const wrapper = render(Panel, { allowed: true, metadata: {} }, true);
+  await flushPromises();
+  await wrapper
+    .get('[data-testid="relationship-rule-healthy_threshold"]')
+    .setValue('85');
+  const selector = wrapper.get('[data-testid="configuration-stored-version"]');
+  expect(selector.get('input').attributes('max')).toBe('75');
+  await selector.get('input').setValue('1');
+  await selector.trigger('submit');
+  await flushPromises();
+  expect(mocks.api.configuration).toHaveBeenLastCalledWith('1400', {
+    params: { scope_key: 'account', source_version: 1 },
+  });
+  expect(wrapper.findComponent(Restore).props('historical')).toEqual(
+    historical
+  );
+  expect(
+    wrapper.findComponent(Restore).props('current').rules.healthy_threshold
+  ).toBe(80);
+  wrapper.findComponent(Restore).vm.$emit('close');
+  await flushPromises();
+  expect(
+    wrapper.get('[data-testid="relationship-rule-healthy_threshold"]').element
+      .value
+  ).toBe('85');
+  expect(mocks.api.restoreConfiguration).not.toHaveBeenCalled();
+});
+
+it('does not invent a missing stored source or open its confirmation dialog', async () => {
+  mocks.api.configuration.mockResolvedValue({
+    data: { ...structuredClone(current), history: [] },
+  });
+  const wrapper = render(Panel, { allowed: true, metadata: {} }, true);
+  await flushPromises();
+  const selector = wrapper.get('[data-testid="configuration-stored-version"]');
+  await selector.get('input').setValue('1');
+  await selector.trigger('submit');
+  await flushPromises();
+  expect(wrapper.findComponent(Restore).exists()).toBe(false);
+  expect(wrapper.get('[role="alert"]').text()).toBe(
+    messages.RELATIONSHIP.CONFIG_RESTORE.UNCONFIRMED
+  );
+  expect(mocks.api.restoreConfiguration).not.toHaveBeenCalled();
+});
+
+it.each(['0', '-1', '3', '1.5'])(
+  'does not fetch invalid stored source %s even on a programmatic form submit',
+  async value => {
+    const wrapper = render(Panel, { allowed: true, metadata: {} }, true);
+    await flushPromises();
+    const selector = wrapper.get(
+      '[data-testid="configuration-stored-version"]'
+    );
+    await selector.get('input').setValue(value);
+    await selector.trigger('submit');
+    await flushPromises();
+    expect(mocks.api.configuration).toHaveBeenCalledOnce();
+    expect(wrapper.findComponent(Restore).exists()).toBe(false);
+  }
+);

@@ -22,6 +22,9 @@
       "SAVED": "Playbook version {version} saved from version {source}. Previous definitions and executions were preserved."
     },
     "CONFIG_RESTORE": {
+      "STORED_VERSION": "Stored version number",
+      "FIND_VERSION": "Review a stored version",
+      "FIND_VERSION_HELP": "The list shows recent history. Enter an earlier saved version to review its exact stored values; this does not save or execute changes.",
       "TITLE": "Restore a prior configuration",
       "SCOPE": "Configuration scope: {scope}",
       "OPEN": "Review restoration",

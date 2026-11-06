@@ -45,6 +45,7 @@ const restored = ref(null);
 const restoringPlaybook = ref(null);
 const restoredPlaybook = ref(null);
 const scopeKey = ref('account');
+const storedVersion = ref(null);
 const restoreIdentity = computed(() =>
   JSON.stringify([
     route.params.accountId,
@@ -117,6 +118,7 @@ const load = async () => {
   book.value = null;
   error.value = '';
   busy.value = false;
+  storedVersion.value = null;
   invalidFlowPolicy.value = false;
   invalidCapacity.value = false;
   invalidPriorityBands.value = false;
@@ -214,7 +216,7 @@ const openRestore = async sourceVersion => {
   error.value = '';
   try {
     const { data } = await API.configuration(route.params.accountId, {
-      params: { scope_key: scope },
+      params: { scope_key: scope, source_version: sourceVersion },
     });
     if (token !== generation) return;
     const historical = data.history?.find(row => row.version === sourceVersion);
@@ -251,6 +253,16 @@ const restorationSaved = async receipt => {
     config.value.version === receipt.version
   )
     restored.value = receipt;
+};
+const findStoredConfiguration = () => {
+  const version = storedVersion.value;
+  if (
+    !Number.isInteger(version) ||
+    version < 1 ||
+    version >= config.value?.version
+  )
+    return;
+  openRestore(version);
 };
 const openPlaybookRestore = async (id, sourceVersion) => {
   if (busy.value || restorePreparing.value || !props.allowed) return;
@@ -609,6 +621,36 @@ const historyValue = value => {
       >
         {{ t('RELATIONSHIP.CONFIG_HISTORY') }}
       </h3>
+      <form
+        v-if="config.version > 1"
+        data-testid="configuration-stored-version"
+        class="mb-4 flex min-w-0 flex-wrap items-end gap-3"
+        @submit.prevent="findStoredConfiguration"
+      >
+        <label class="min-w-0 text-sm">
+          {{ t('RELATIONSHIP.CONFIG_RESTORE.STORED_VERSION') }}
+          <input
+            v-model.number="storedVersion"
+            required
+            type="number"
+            min="1"
+            :max="config.version - 1"
+            step="1"
+            :class="inputClass"
+            :disabled="busy || restorePreparing"
+          />
+        </label>
+        <button
+          type="submit"
+          :class="buttonClass"
+          :disabled="busy || restorePreparing"
+        >
+          {{ t('RELATIONSHIP.CONFIG_RESTORE.FIND_VERSION') }}
+        </button>
+        <p class="w-full text-sm text-n-slate-11">
+          {{ t('RELATIONSHIP.CONFIG_RESTORE.FIND_VERSION_HELP') }}
+        </p>
+      </form>
       <p v-if="!config.history?.length">
         {{ t('RELATIONSHIP.CONFIG_HISTORY_EMPTY') }}
       </p>

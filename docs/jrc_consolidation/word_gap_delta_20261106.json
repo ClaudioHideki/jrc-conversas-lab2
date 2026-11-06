@@ -264,6 +264,12 @@
       "report": "docs/jrc_consolidation/playbook_history_attribution_checkpoint_20261106.json",
       "implemented_validated": "Recorded actor/date in native playbook history using current authorized metadata, without inventing legacy authors;10source/0 with8overlap.",
       "partial": "Original legacy creation authors are not retroactively proved; current-source Chrome and full F2 remain open."
+    },
+    {
+      "reference": "Relationship P0152/P0181/P0185",
+      "report": "docs/jrc_consolidation/configuration_history_lookup_checkpoint_20261106.json",
+      "implemented_validated": "Exact older stored configuration selection and same governed restoration;4native directed/0,8integrated/0overlap,17source/0. Original76rows preserved throughv77.",
+      "partial": "Recent history list is still bounded50 with exact lookup, not full broad paging; full Word/Chrome acceptance remains open."
     }
   ],
   "explicit_dependencies": [
@@ -284,7 +290,7 @@
       "state": "External environment/operations require separate authorization; not simulated as passed."
     }
   ],
-  "next_confirmed_local_gap": "Configuration UI restoration only offers the latest50stored versions; exact older-source lookup/control is missing.",
+  "next_confirmed_local_gap": "Durable named-portfolio membership batches and new linked re-review of unresolved items, reusing existing reviewed engine.",
   "stage_closure": {
     "C": false,
     "D": false,
