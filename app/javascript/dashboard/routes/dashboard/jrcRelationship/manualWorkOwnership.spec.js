@@ -29,6 +29,10 @@ const mountEditor = props =>
 
 it('disables ownership selection until the assignment context arrives and avoids global candidates', async () => {
   const wrapper = mountEditor();
+  expect(wrapper.getComponent(Context).props('workHint')).toEqual({
+    work_kind: 'actions',
+    work_record_id: 31,
+  });
   const select = wrapper.get('[data-testid="work-owner"]');
   expect(select.attributes('disabled')).toBeDefined();
   expect(select.text()).not.toContain('Unrelated account analyst');
@@ -60,6 +64,7 @@ it('clears a new-record target and old candidates when the customer changes', as
       { id: 20, name: 'Two' },
     ],
   });
+  expect(wrapper.getComponent(Context).props('workHint')).toBeNull();
   wrapper.getComponent(Context).vm.$emit('loaded', context);
   await flushPromises();
   await wrapper.get('[data-testid="work-owner"]').setValue('9');

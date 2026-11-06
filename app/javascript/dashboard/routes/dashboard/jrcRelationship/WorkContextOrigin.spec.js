@@ -74,3 +74,36 @@ it('aborts old requests and ignores their context after source navigation change
   ).toHaveLength(1);
   wrapper.unmount();
 });
+
+it('includes existing work identity alongside the origin and reloads when work changes', async () => {
+  const wrapper = mount(Panel, {
+    props: {
+      assignmentId: 99,
+      sourceHint: { source_type: 'JrcCrm::SalesOrder', source_id: 40 },
+      workHint: { work_kind: 'plans', work_record_id: 7 },
+    },
+  });
+  await flushPromises();
+  expect(mocks.api).toHaveBeenLastCalledWith(
+    '1',
+    99,
+    {
+      source_type: 'JrcCrm::SalesOrder',
+      source_id: 40,
+      work_kind: 'plans',
+      work_record_id: 7,
+    },
+    expect.anything()
+  );
+  const previousSignal = mocks.api.mock.calls[0][3].signal;
+  await wrapper.setProps({
+    workHint: { work_kind: 'plans', work_record_id: 8 },
+  });
+  await flushPromises();
+  expect(previousSignal.aborted).toBe(true);
+  expect(mocks.api.mock.calls.at(-1)[2]).toMatchObject({
+    work_record_id: 8,
+    source_id: 40,
+  });
+  wrapper.unmount();
+});

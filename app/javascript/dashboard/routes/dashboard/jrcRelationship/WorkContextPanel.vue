@@ -14,6 +14,7 @@ const props = defineProps({
   assignmentId: { type: [Number, String], default: '' },
   initialPeriod: { type: Object, default: () => ({}) },
   sourceHint: { type: Object, default: null },
+  workHint: { type: Object, default: null },
 });
 const emit = defineEmits(['loaded']);
 const route = useRoute();
@@ -31,6 +32,7 @@ watch(
     () => route.params.accountId,
     () => store.getters.getCurrentUserID,
     () => JSON.stringify(props.sourceHint),
+    () => JSON.stringify(props.workHint),
     from,
     to,
   ],
@@ -52,6 +54,7 @@ watch(
       const params = {
         ...(from.value ? { from: from.value, to: to.value || from.value } : {}),
         ...(props.sourceHint || {}),
+        ...(props.workHint || {}),
       };
       const { data } = await API.workContext(
         identity.accountId,

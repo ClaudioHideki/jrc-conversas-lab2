@@ -5,9 +5,12 @@ class JrcRelationship::WorkOwnership
     @assignment = context.assignment(assignment.id)
   end
 
-  def options
+  def options(record: nil)
+    record = @context.records(record.class).where(assignment_id: @assignment.id).find(record.id) if record
     @context.assignable_users.order(:name, :id).limit(500).filter_map do |user|
-      authorize!(user.id)
+      candidate = authorize!(user.id)
+      next if record && !candidate.records(record.class).exists?(id: record.id)
+
       [user.id, user.name]
     rescue Pundit::NotAuthorizedError, ActiveRecord::RecordNotFound
       nil

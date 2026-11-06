@@ -29,6 +29,11 @@ const form = reactive({
   renewed_contract_id: props.record.metadata?.renewed_contract_id || '',
 });
 const workContext = ref(null);
+const workHint = computed(() =>
+  props.record.id && ['actions', 'risks', 'plans', 'qbrs'].includes(props.kind)
+    ? { work_kind: props.kind, work_record_id: props.record.id }
+    : null
+);
 const ownerOptions = computed(() => {
   const options = (workContext.value?.work_owners || []).map(([id, name]) => ({
     id,
@@ -347,6 +352,7 @@ const submit = () => {
         v-show="editorTab === 'context'"
         :assignment-id="form.assignment_id"
         :initial-period="record.metadata || {}"
+        :work-hint="workHint"
         @loaded="loadContext"
       />
       <div

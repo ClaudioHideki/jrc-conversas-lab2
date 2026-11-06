@@ -1,10 +1,11 @@
 class JrcRelationship::WorkContext
-  def initialize(context:, assignment:, period: nil, source: nil)
+  def initialize(context:, assignment:, period: nil, source: nil, work_record: nil)
     @context = context
     @assignment = context.assignment(assignment.id)
     @period = period || (90.days.ago..Time.current)
     @customer = @assignment.customer_context(context.member)
     @source = source
+    @work_record = work_record
   end
 
   def call
@@ -16,7 +17,7 @@ class JrcRelationship::WorkContext
     signals = JrcRelationship::CustomerSignals.new(assignment: @assignment, context: @context).call
     plans = @context.records(JrcRelationship::SuccessPlan).where(assignment: @assignment)
     { _source_ids: signals[:_source_ids], formatting: @context.formatting,
-      work_owners: JrcRelationship::WorkOwnership.new(@context, @assignment).options,
+      work_owners: JrcRelationship::WorkOwnership.new(@context, @assignment).options(record: @work_record),
       period: { from: @period.begin, to: @period.end }, health: signals[:health],
       mrr_cents: signals[:mrr_cents], finance_overdue_cents: signals[:overdue_cents],
       tickets: tickets.count, completed_activities: activities.completed.count,

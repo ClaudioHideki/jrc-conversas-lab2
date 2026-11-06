@@ -104,7 +104,7 @@ class Api::V1::Accounts::Relationship::PortfolioController < Api::V1::Accounts::
     record = relationship_context.assignment(params[:id])
     source = { type: params[:source_type], id: params[:source_id] } if params[:source_type].present? || params[:source_id].present?
     render json: JrcRelationship::WorkContext.new(context: relationship_context, assignment: record, period: report_period,
-                                                  source: source).call.except(:_source_ids)
+                                                  source: source, work_record: work_owner_record(record)).call.except(:_source_ids)
   end
 
   def batch
@@ -154,6 +154,20 @@ class Api::V1::Accounts::Relationship::PortfolioController < Api::V1::Accounts::
   end
 
   private
+
+  def work_owner_record(assignment)
+    kind, id = params.values_at(:work_kind, :work_record_id)
+    return if kind.blank? && id.blank?
+
+    kinds = %w[actions risks plans qbrs]
+    raise ArgumentError, 'Select a supported work kind and record' unless kinds.include?(kind) && id.present?
+
+    model = JrcRelationship::Workflow::MODELS.fetch(kind)
+    id = Integer(id.to_s, 10)
+    raise ArgumentError, 'Select a positive work record ID' unless id.positive?
+
+    relationship_context.records(model).where(assignment_id: assignment.id).find(id)
+  end
 
   def with_assignment_update(record, attrs)
     JrcRelationship::Assignment.transaction do

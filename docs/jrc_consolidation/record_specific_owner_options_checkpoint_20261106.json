@@ -1,0 +1,107 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "62c7973fe55dca3c663f8b832ecbe39597fe6319",
+  "status": "F1/F2 record-aware operational owner choices locally validated; stages remain open",
+  "motivation": "Existing assignment-specific options could still offer a destination that cannot read the current finance/private-source record; final save correctly refused it. This increment prevents that unusable choice in an existing-record editor.",
+  "implementation": [
+    "Optional work_kind/work_record_id on the existing work_context endpoint resolve only4 allowlisted native work models. IDs must be positive scalar integers. Actor Context.records plus exact assignment constrain resolution; supplied IDs do not grant access.",
+    "WorkOwnership.options applies each eligible candidate current native record scope before exposing the choice. Inactive users, out-of-portfolio scopes and denied source access remain excluded; no online/capacity override added. Existing final transactional authorization is retained.",
+    "RecordEditor passes the current work identity only for supported persisted records; new records retain assignment-only options and final save authorization. WorkContextPanel composes the work hint with existing origin/period parameters, aborts old requests and reloads when work identity changes.",
+    "No new endpoint, role/grant, native source bypass or global metadata-owner filter changes. Historical selected labels remain preserved. Existing Handoff/NICO/context callers without hints keep their original optional contract."
+  ],
+  "tests": {
+    "baseline": "4/4 failed because the new optional hint contract was absent: finance-inaccessible choice still present, record hints ignored and unsupported hints returned200. No claim foreign record contents were exposed by the old endpoint.",
+    "native02": "17 examples,0 failures =4 new choices cases plus9 manual ownership and4 operational-period regressions.",
+    "final03": "4 examples,0 failures after removing repeated parameter reads; includes valid/no-hint calls, cross-portfolio/account, unsupported kinds, incomplete IDs, arrays and zero IDs.",
+    "vue": "10/0 =6 owner-editor cases plus4 origin/work-context composition/cancellation cases.",
+    "new_ruby_offenses": 0,
+    "shared_ruby": [
+      {
+        "path": "app/controllers/api/v1/accounts/relationship/portfolio_controller.rb",
+        "baseline_count": 8,
+        "current_count": 8,
+        "new_cop_counts": {},
+        "current_new": []
+      },
+      {
+        "path": "app/services/jrc_relationship/work_context.rb",
+        "baseline_count": 5,
+        "current_count": 5,
+        "new_cop_counts": {},
+        "current_new": []
+      },
+      {
+        "path": "app/services/jrc_relationship/work_ownership.rb",
+        "baseline_count": 0,
+        "current_count": 0,
+        "new_cop_counts": {},
+        "current_new": []
+      }
+    ],
+    "shared_eslint": [
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/jrcRelationship/RecordEditor.vue",
+        "baseline": 13,
+        "current": 13,
+        "added": {}
+      },
+      {
+        "path": "app/javascript/dashboard/routes/dashboard/jrcRelationship/WorkContextPanel.vue",
+        "baseline": 13,
+        "current": 13,
+        "added": {}
+      }
+    ],
+    "spec_eslint": "0 errors/0 warnings",
+    "diff_check": "passed"
+  },
+  "resources": {
+    "work-owner-options-native02": {
+      "start": 7110832128,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/work_owner_options_spec.rb": "179b08c4434d4c8b2ac62932ebd57e6c841b074cb71717480338b7c3f589194c",
+        "spec/requests/api/v1/accounts/relationship/manual_work_ownership_spec.rb": "c39da13c6f8956ae93420fbf088bba3c05d36086751847b8cc8e868546a7ed2b",
+        "spec/requests/api/v1/accounts/relationship/operational_period_spec.rb": "8bfb27cfa4219768c47cdaec81af32895fdb348b0e041b6d87299bae898ecb7d"
+      },
+      "minimum": 7088345088,
+      "exit_code": 0,
+      "end": 7088345088
+    },
+    "work-owner-options-final03": {
+      "start": 7107690496,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/work_owner_options_spec.rb": "7587a99d80b2ecb15a93150df170bca202d0754803503214451856971eaf2ed6"
+      },
+      "minimum": 7087501312,
+      "exit_code": 0,
+      "end": 7107878912
+    }
+  },
+  "frontend_resources": {
+    "status": "passed",
+    "free_start": 7109873664,
+    "minimum_free": 7088336896,
+    "mandatory_stop_bytes": 750000000,
+    "conservative_stop_bytes": 2000000000,
+    "no_build": true,
+    "owned_process_id": 2764,
+    "exit_code": 0,
+    "free_end": 7109455872
+  },
+  "pending": [
+    "New unsaved source links still require final native transactional validation; no speculative source grant inferred by the picker.",
+    "500-candidate inherited bound retained; no production-scale latency/SLO claim.",
+    "Current-build Chrome and external validation remain blocked by explicit restrictions.",
+    "TRR, final identity-removal scope and companies without portfolios retain their prior statuses."
+  ],
+  "next": "Reconcile literal F2/Word requirements with implemented native aggregation, coverage, review and governance evidence before adding new rules.",
+  "restrictions": "No app build, cleanup, server5379 change, container restart, push, GHCR, deploy, production or real external operation."
+}
