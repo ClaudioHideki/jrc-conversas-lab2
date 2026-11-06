@@ -56,6 +56,7 @@ const load = async ({ closeIfUnavailable = false } = {}) => {
   const accountId = route.params.accountId;
   record.value = null;
   channels.value = null;
+  recommendation.value = null;
   error.value = '';
   busy.value = true;
   try {
@@ -165,6 +166,8 @@ const activity = () =>
   );
 const explain = async () => {
   const version = generation;
+  recommendation.value = null;
+  error.value = '';
   try {
     const { data } = await API.recommendations(
       route.params.accountId,

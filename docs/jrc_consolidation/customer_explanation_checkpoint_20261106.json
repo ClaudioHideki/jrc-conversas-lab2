@@ -1,0 +1,47 @@
+{
+  "date": "2026-11-06",
+  "status": "Source Vue behavior validated; no fresh Chrome/build acceptance",
+  "parent_checkpoint": "9eb11d5cf9d93dbc6e28d30577ef6abddd87b685",
+  "baseline": "customer-explanation-baseline01:17tests,2actualfailures,15passed; previous explanation retained after same-customer health reload and denied explicit refresh.",
+  "fix": [
+    "Clear obsolete recommendation when any customer reload starts.",
+    "Clear recommendation and previous explanation error before an explicit fresh request.",
+    "Preserve existing generation/identity guards, confirmed-mutation events, conflict drafts, native authorization and layout. No new automatic requests or mutations."
+  ],
+  "files": [
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/CustomerPanel.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/interface.spec.js"
+  ],
+  "gates": {
+    "vue": "customer-explanation-final02:18/0, including successful explicit retry, previous15scope/user/native-owner-dialog regressions.",
+    "eslint": "CustomerPanel0errors/32unchangedwarnings;spec0errors/0warnings;no added diagnostics.",
+    "chrome": "Not performed; no-build/no5379-change instruction retained."
+  },
+  "resources": {
+    "customer-explanation-baseline01": {
+      "status": "failed",
+      "free_start": 5145600000,
+      "minimum_free": 5098672128,
+      "mandatory_stop_bytes": 750000000,
+      "conservative_stop_bytes": 2000000000,
+      "no_build": true,
+      "owned_process_id": 4708,
+      "exit_code": 1,
+      "free_end": 5142179840
+    },
+    "customer-explanation-final02": {
+      "status": "passed",
+      "free_start": 5144457216,
+      "minimum_free": 5106737152,
+      "mandatory_stop_bytes": 750000000,
+      "conservative_stop_bytes": 2000000000,
+      "no_build": true,
+      "owned_process_id": 25300,
+      "exit_code": 0,
+      "free_end": 5146451968
+    }
+  },
+  "disk_final_bytes": 5145341952,
+  "next": "HTTP-native recommendation contract/no-write/foreign-scope checks; continue independent authorized C-G work.",
+  "restrictions": "No build,cleanup,push,GHCR,deploy,external operation or runtime/server change."
+}

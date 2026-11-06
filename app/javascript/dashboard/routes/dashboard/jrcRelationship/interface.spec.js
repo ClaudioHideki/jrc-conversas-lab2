@@ -19,6 +19,8 @@ const mocks = vi.hoisted(() => ({
     channels: vi.fn(),
     saveTransferLock: vi.fn(),
     saveAssignment: vi.fn(),
+    recommendations: vi.fn(),
+    recalculate: vi.fn(),
   },
   commercial: vi.fn(),
 }));
@@ -78,6 +80,86 @@ const mountPortfolio = () =>
   });
 
 describe('Relationship interface integration', () => {
+  it('clears a previous explanation after recalculating and reloading customer health', async () => {
+    mocks.api.recommendations.mockResolvedValue({
+      data: { recommended_action: 'Previous health explanation' },
+    });
+    mocks.api.recalculate.mockResolvedValue({ data: {} });
+    const wrapper = shallowMount(CustomerPanel, {
+      props: { assignmentId: 19, metadata },
+    });
+    await flushPromises();
+    await wrapper
+      .findAll('button')
+      .find(button => button.text().includes('Explicar score'))
+      .trigger('click');
+    await flushPromises();
+    expect(wrapper.text()).toContain('Previous health explanation');
+    await wrapper
+      .findAll('button')
+      .find(button => button.text() === 'Recalcular saúde')
+      .trigger('click');
+    await flushPromises();
+    expect(wrapper.emitted('changed')).toHaveLength(1);
+    expect(wrapper.text()).not.toContain('Previous health explanation');
+    wrapper.unmount();
+  });
+
+  it('does not retain a previous explanation when a new explanation request is denied', async () => {
+    mocks.api.recommendations
+      .mockResolvedValueOnce({
+        data: { recommended_action: 'Previous health explanation' },
+      })
+      .mockRejectedValueOnce({
+        response: {
+          status: 403,
+          data: { errors: ['Explanation access denied'] },
+        },
+      });
+    const wrapper = shallowMount(CustomerPanel, {
+      props: { assignmentId: 19, metadata },
+    });
+    await flushPromises();
+    const explain = wrapper
+      .findAll('button')
+      .find(button => button.text().includes('Explicar score'));
+    await explain.trigger('click');
+    await flushPromises();
+    expect(wrapper.text()).toContain('Previous health explanation');
+    await explain.trigger('click');
+    await flushPromises();
+    expect(wrapper.text()).toContain('Explanation access denied');
+    expect(wrapper.text()).not.toContain('Previous health explanation');
+    expect(wrapper.emitted('changed')).toBeUndefined();
+    wrapper.unmount();
+  });
+
+  it('clears the previous explanation error after an explicitly successful retry', async () => {
+    mocks.api.recommendations
+      .mockRejectedValueOnce({
+        response: { data: { errors: ['Temporary explanation failure'] } },
+      })
+      .mockResolvedValueOnce({
+        data: { recommended_action: 'Updated health explanation' },
+      });
+    const wrapper = shallowMount(CustomerPanel, {
+      props: { assignmentId: 19, metadata },
+    });
+    await flushPromises();
+    const explain = wrapper
+      .findAll('button')
+      .find(button => button.text().includes('Explicar score'));
+    await explain.trigger('click');
+    await flushPromises();
+    expect(wrapper.text()).toContain('Temporary explanation failure');
+    await explain.trigger('click');
+    await flushPromises();
+    expect(wrapper.text()).toContain('Updated health explanation');
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false);
+    expect(wrapper.emitted('changed')).toBeUndefined();
+    wrapper.unmount();
+  });
+
   it.each([403, 404])(
     'closes after a confirmed owner transfer whose reload returns %s, without presenting it as a failed save',
     async status => {
