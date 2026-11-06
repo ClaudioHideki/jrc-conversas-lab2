@@ -54,6 +54,24 @@ class JrcRelationship::ReviewedCadence
     end
   end
 
+  # A supervisor may explicitly stop remaining work. This does not transfer
+  # execution authority or expose the original actor's frozen source contents.
+  def cancel_for_team(analyst_id:, id:, expected_revision:, reason:)
+    transaction do |context|
+      record, reviewed_analyst_id = find_for_team(id, analyst_id, context)
+      explanation = team_stop_reason!(reason)
+      raise ActiveRecord::StaleObjectError.new(record, 'cancel') unless record.revision == Integer(expected_revision.to_s, 10)
+      raise ArgumentError, 'Cadence is not active' unless record.state == 'active'
+
+      before = { state: record.state, revision: record.revision }
+      stop!(record, 'CANCELED_BY_SUPERVISOR')
+      context.audit!(record, before: before,
+                             after: { state: record.state, revision: record.revision, reason: explanation, reviewed_analyst_id: reviewed_analyst_id },
+                             action: 'cadence_stopped_by_team')
+      { id: record.id, state: record.state, revision: record.revision, stop_reason: record.stop_reason }
+    end
+  end
+
   # Revoked authority can stop approved work, never execute native work.
   def self.stop_revoked(id)
     JrcRelationship::CadenceEnrollment.transaction do
@@ -66,6 +84,25 @@ class JrcRelationship::ReviewedCadence
   end
 
   private
+
+  def find_for_team(id, analyst_id, context)
+    raise Pundit::NotAuthorizedError unless context.policy.team?
+
+    analyst = context.account.users.find(analyst_id)
+    source = JrcRelationship::AnalystCadences.responsibilities(context.account, analyst)
+    record = source.lock.find(id)
+    context.assignment(record.assignment_id, write: true).lock!
+    raise ActiveRecord::StaleObjectError.new(record, 'cancel') unless source.exists?(id: record.id)
+
+    [record, analyst.id]
+  end
+
+  def team_stop_reason!(reason)
+    raise ArgumentError, 'A bounded reason is required to stop pending cadence work' unless
+      reason.is_a?(String) && reason.strip.present? && reason.length <= 4000
+
+    reason.strip
+  end
 
   def transaction(&)
     JrcRelationship::CadenceEnrollment.transaction { @authority.call(&) }

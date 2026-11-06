@@ -43,6 +43,16 @@ export default {
       ...options,
       params,
     }),
+  analystCadences: (accountId, analystId, params, options) =>
+    axios.get(`${base(accountId)}/team/${Number(analystId)}/cadences`, {
+      ...options,
+      params,
+    }),
+  stopAnalystCadence: (accountId, analystId, id, data) =>
+    axios.post(
+      `${base(accountId)}/team/${Number(analystId)}/cadences/${Number(id)}/cancel`,
+      data
+    ),
   portfolio: (accountId, params, options) =>
     axios.get(`${base(accountId)}/portfolio`, { ...options, params }),
   customer: (accountId, id, options) =>

@@ -29,6 +29,7 @@ const render = () =>
         MetricDrilldownPanel: true,
         WithdrawalReadinessDialog: true,
         AnalystCapacityDialog: true,
+        AnalystCadencesDialog: true,
       },
     },
   });
@@ -55,6 +56,42 @@ it('keeps the readiness entry available after the analyst has no remaining alloc
   const dialog = wrapper.findComponent({ name: 'WithdrawalReadinessDialog' });
   expect(dialog.exists()).toBe(true);
   expect(dialog.props('analystId')).toBe(7);
+  wrapper.unmount();
+});
+
+it('opens native cadence review without allocated rows and clears the selection on role changes', async () => {
+  const wrapper = render();
+  await flushPromises();
+  await wrapper.get('[data-testid="withdrawal-analyst"]').setValue('7');
+  await wrapper.get('[data-testid="analyst-cadences-open"]').trigger('click');
+  expect(
+    wrapper.findComponent({ name: 'AnalystCadencesDialog' }).props('analystId')
+  ).toBe(7);
+  mocks.getters.getCurrentRole = 'agent';
+  await flushPromises();
+  expect(
+    wrapper.findComponent({ name: 'AnalystCadencesDialog' }).exists()
+  ).toBe(false);
+  wrapper.unmount();
+});
+
+it('keeps supervised review open for the next pending cadence and refreshes team metrics when it closes', async () => {
+  const wrapper = render();
+  await flushPromises();
+  await wrapper.get('[data-testid="withdrawal-analyst"]').setValue('7');
+  await wrapper.get('[data-testid="analyst-cadences-open"]').trigger('click');
+  wrapper.findComponent({ name: 'AnalystCadencesDialog' }).vm.$emit('changed');
+  await flushPromises();
+  expect(
+    wrapper.findComponent({ name: 'AnalystCadencesDialog' }).exists()
+  ).toBe(true);
+  expect(mocks.team).toHaveBeenCalledTimes(1);
+  wrapper.findComponent({ name: 'AnalystCadencesDialog' }).vm.$emit('close');
+  await flushPromises();
+  expect(
+    wrapper.findComponent({ name: 'AnalystCadencesDialog' }).exists()
+  ).toBe(false);
+  expect(mocks.team).toHaveBeenCalledTimes(2);
   wrapper.unmount();
 });
 

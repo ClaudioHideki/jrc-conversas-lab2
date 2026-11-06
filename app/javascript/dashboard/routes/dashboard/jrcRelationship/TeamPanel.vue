@@ -6,6 +6,7 @@ import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcRelationship';
 import WithdrawalReadinessDialog from './WithdrawalReadinessDialog.vue';
 import AnalystCapacityDialog from './AnalystCapacityDialog.vue';
+import AnalystCadencesDialog from './AnalystCadencesDialog.vue';
 import MetricsPanel from './MetricsPanel.vue';
 import MetricDrilldownPanel from './MetricDrilldownPanel.vue';
 import {
@@ -34,6 +35,15 @@ const localRefresh = ref(0);
 const withdrawalUser = ref('');
 const withdrawalAnalyst = ref(null);
 const capacityAnalyst = ref(null);
+const cadenceAnalyst = ref(null);
+const cadenceRefresh = ref(false);
+const closeCadences = () => {
+  cadenceAnalyst.value = null;
+  if (cadenceRefresh.value) {
+    cadenceRefresh.value = false;
+    localRefresh.value += 1;
+  }
+};
 const filters = reactive({
   segment_id: '',
   product_id: '',
@@ -120,6 +130,8 @@ watch(
     rows.value = [];
     withdrawalAnalyst.value = null;
     capacityAnalyst.value = null;
+    cadenceAnalyst.value = null;
+    cadenceRefresh.value = false;
     withdrawalUser.value = '';
     metadata.value = null;
     metrics.value = null;
@@ -267,6 +279,15 @@ const money = value => formatMoney(value, metadata.value?.formatting);
       >
         {{ t('RELATIONSHIP.CAPACITY.CURRENT_OPEN') }}
       </button>
+      <button
+        type="button"
+        data-testid="analyst-cadences-open"
+        :class="buttonClass"
+        :disabled="!withdrawalUser || busy"
+        @click="cadenceAnalyst = Number(withdrawalUser)"
+      >
+        {{ t('RELATIONSHIP.CADENCE_TEAM.OPEN') }}
+      </button>
     </form>
     <div
       v-if="rows.length"
@@ -331,5 +352,12 @@ const money = value => formatMoney(value, metadata.value?.formatting);
     v-if="capacityAnalyst"
     :analyst-id="capacityAnalyst"
     @close="capacityAnalyst = null"
+  />
+  <AnalystCadencesDialog
+    v-if="cadenceAnalyst"
+    :analyst-id="cadenceAnalyst"
+    :formatting="metadata?.formatting || {}"
+    @close="closeCadences"
+    @changed="cadenceRefresh = true"
   />
 </template>

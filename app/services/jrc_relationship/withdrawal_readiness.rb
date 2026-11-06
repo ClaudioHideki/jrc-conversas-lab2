@@ -80,8 +80,7 @@ class JrcRelationship::WithdrawalReadiness
   end
 
   def cadences!
-    enrollments = JrcRelationship::CadenceEnrollment.where(account: @context.account, state: 'active')
-                                                    .joins(:batch_review).where(jrc_relationship_batch_reviews: { actor_id: @source.id })
+    enrollments = JrcRelationship::AnalystCadences.responsibilities(@context.account, @source).where(state: 'active')
     collect!('cadences', enrollments, enrollments.where(assignment_id: @context.assignments.select(:id)))
   end
 

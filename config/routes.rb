@@ -628,6 +628,8 @@ Rails.application.routes.draw do
             get :team, to: 'dashboard#team'
             get 'team/:analyst_id/withdrawal_readiness', to: 'dashboard#withdrawal_readiness'
             get 'team/:analyst_id/capacity', to: 'analyst_capacities#show'
+            get 'team/:analyst_id/cadences', to: 'analyst_cadences#index'
+            post 'team/:analyst_id/cadences/:id/cancel', to: 'analyst_cadences#cancel'
             resources :documents, only: [:index, :show, :create, :update] do
               member do
                 get :responsibles

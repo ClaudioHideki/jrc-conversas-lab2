@@ -68,7 +68,8 @@
         "AUTHORITY_CHANGED": "As permissões mudaram.",
         "AUTHORITY_REVOKED": "O operador perdeu a autorização.",
         "CONDITIONS_CHANGED": "O cliente não atende mais às condições do playbook.",
-        "CUSTOMER_CHANGED": "O cadastro ou o responsável pelo cliente mudou; revise antes de inscrever novamente."
+        "CUSTOMER_CHANGED": "O cadastro ou o responsável pelo cliente mudou; revise antes de inscrever novamente.",
+        "CANCELED_BY_SUPERVISOR": "Stopped after an explicit, audited supervisor review."
       },
       "BUDGET_DEFERRED": "A última tentativa foi adiada pelo orçamento diário até {date}. O passo continua pendente, sem recibo de execução. Mudanças de acesso, cliente ou resposta continuam sendo verificadas antes de executar.",
       "DEFERRED": {
@@ -1560,6 +1561,22 @@
       "PREVIOUS": "Anterior",
       "NEXT": "Próxima",
       "PAGE": "Página {page} · {total} clientes autorizados"
+    },
+    "CADENCE_TEAM": {
+      "TITLE": "Supervised active cadence review",
+      "NOTICE": "Review active execution and portfolio dependencies. Stopping preserves original authors, applied steps, receipts and frozen snapshots. It cancels remaining steps and does not transfer execution authority.",
+      "OPEN": "Review active cadences",
+      "CONFIRM": "This decision stops {count} pending steps. Applied work remains historical. Record why the remaining schedule should not continue.",
+      "STOP": "Stop pending steps",
+      "BACK": "Back to current list",
+      "PENDING": "{count} pending steps · reviewed revision {revision}",
+      "REVIEW": "Review pending work",
+      "STOPPED": "Pending cadence work stopped and audited.",
+      "UNCONFIRMED": "The server did not confirm that the cadence stopped.",
+      "DEPENDENCIES": {
+        "execution_actor": "Original execution authority belongs to the selected analyst.",
+        "portfolio_owner": "The selected analyst owns this active customer portfolio; original execution authority remains with its recorded operator."
+      }
     }
   }
 }
