@@ -3,7 +3,7 @@
 class JrcRelationship::PortfolioGroupHistory
   ACTIONS = { 'portfolio_group_created' => 'created', 'portfolio_group_updated' => 'updated',
               'portfolio_group_customers_updated' => 'customers', 'configuration_versioned' => 'rules',
-              'portfolio_group_history_exported' => 'exported' }.freeze
+              'portfolio_group_history_exported' => 'exported', 'configuration_restored' => 'restored' }.freeze
 
   def initialize(context)
     @account_id = context.account.id
@@ -50,7 +50,7 @@ class JrcRelationship::PortfolioGroupHistory
 
   def filtered_events(context, group, kind, period)
     raise ArgumentError, 'Invalid portfolio history kind' unless kind == '' || ACTIONS.value?(kind)
-    raise Pundit::NotAuthorizedError if kind == 'rules' && !context.policy.configure?
+    raise Pundit::NotAuthorizedError if %w[rules restored].include?(kind) && !context.policy.configure?
 
     events = history_events(context, group)
     events = events.where("metadata ->> 'action' = ?", ACTIONS.key(kind)) unless kind.empty?

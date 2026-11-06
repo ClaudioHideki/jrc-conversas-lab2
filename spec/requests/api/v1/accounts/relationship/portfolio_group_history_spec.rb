@@ -75,8 +75,10 @@ RSpec.describe 'Named portfolio operational history', type: :request do
     get "#{base}/history", headers: viewer.create_new_auth_token
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body).to include('payload' => [], 'meta' => include('can_read_rules' => false))
-    get "#{base}/history", headers: viewer.create_new_auth_token, params: { kind: 'rules' }
-    expect(response).to have_http_status(:forbidden)
+    %w[rules restored].each do |kind|
+      get "#{base}/history", headers: viewer.create_new_auth_token, params: { kind: kind }
+      expect(response).to have_http_status(:forbidden)
+    end
     before = JrcCrm::AuditEvent.count
     get "#{base}/export_history", headers: viewer.create_new_auth_token
     expect(response).to have_http_status(:forbidden)

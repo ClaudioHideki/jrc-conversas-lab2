@@ -94,3 +94,18 @@ it('binds a non-mutating selected-customer re-review to the explicit account and
     { signal }
   );
 });
+
+it('binds restoration to the selected account and preserves its exact versioned body', () => {
+  const fields = {
+    scope_key: 'account',
+    version: 3,
+    source_version: 1,
+    reason: 'Reviewed restore',
+  };
+  API.restoreConfiguration(12, fields);
+  expect(global.axios.post).toHaveBeenCalledWith(
+    '/api/v1/accounts/12/relationship/configuration/restore',
+    fields,
+    undefined
+  );
+});

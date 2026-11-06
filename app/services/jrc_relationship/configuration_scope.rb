@@ -1,5 +1,13 @@
 # Reference validation only; current actor authorization stays in Context.
 class JrcRelationship::ConfigurationScope
+  def self.authorize_corporate!(context, kind, id)
+    coverage = JrcCrm::CorporateCoverage.new(account: context.account, user: context.user)
+    case kind
+    when 'company' then coverage.companies(context.account.master_companies).find(id)
+    when 'unit' then coverage.restrict(context.account.jrc_crm_business_units).find(id)
+    end
+  end
+
   def self.validate(record)
     kind, id = record.scope_key.to_s.split(':')
     target = { 'segment' => JrcCustomers::Taxonomy, 'product' => JrcCrm::Product, 'company' => JrcCustomers::Company,

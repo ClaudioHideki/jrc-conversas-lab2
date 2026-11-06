@@ -10,6 +10,8 @@ const base = accountId => {
 const operationsBase = accountId =>
   base(accountId).replace(/\/relationship$/, '/crm');
 export default {
+  restoreConfiguration: (accountId, fields, options) =>
+    axios.post(`${base(accountId)}/configuration/restore`, fields, options),
   portfolioGroups: (accountId, params, options) =>
     axios.get(`${base(accountId)}/portfolio_groups`, { ...options, params }),
   portfolioGroup: (accountId, id, options) =>

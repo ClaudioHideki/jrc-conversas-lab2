@@ -1,4 +1,8 @@
 class Api::V1::Accounts::Relationship::ConfigurationController < Api::V1::Accounts::Relationship::BaseController
+  rescue_from JrcApprovals::Error do |error|
+    render json: { errors: [error.code] }, status: :unprocessable_entity
+  end
+
   before_action do
     raise Pundit::NotAuthorizedError unless relationship_context.policy.configure?
   end
@@ -27,6 +31,14 @@ class Api::V1::Accounts::Relationship::ConfigurationController < Api::V1::Accoun
       end
     end
     render json: configuration_payload(record)
+  end
+
+  def restore
+    response.headers['Cache-Control'] = 'no-store'
+    render json: JrcRelationship::ConfigurationRestore.new(relationship_context).call(
+      scope_key: params.fetch(:scope_key, 'account'), version: params[:version], source_version: params[:source_version],
+      reason: params[:reason], portfolio_revision: params[:portfolio_revision]
+    )
   end
 
   def playbooks
@@ -139,11 +151,24 @@ class Api::V1::Accounts::Relationship::ConfigurationController < Api::V1::Accoun
     raise ActiveRecord::StaleObjectError.new(record, 'update') unless expected == record.version
 
     previous = configuration_version(record)
+    rules = configuration_rules
     JrcRelationship::DistributionConfigurationGovernance.authorize!(account: Current.account, user: Current.user,
-                                                                    configuration: record, rules: params.require(:rules))
-    record.assign_attributes(weights: params.require(:weights).to_unsafe_h, rules: params.require(:rules).to_unsafe_h, version: expected + 1)
+                                                                    configuration: record, rules: rules)
+    record.assign_attributes(weights: params.require(:weights).to_unsafe_h, rules: rules, version: expected + 1)
     record.save!
     JrcRelationship::DistributionConfigurationGovernance.record_versions!(record, actor: Current.user, previous: previous)
+  end
+
+  def configuration_rules
+    return params.require(:rules).to_unsafe_h unless request.media_type == 'application/json'
+
+    # Rails deep-munges [null] into []; preserve the submitted collection shapes
+    # so native rules cannot silently turn invalid entries into empty catalogs.
+    body = ActiveSupport::JSON.decode(request.raw_post)
+    rules = body.fetch('rules') if body.is_a?(Hash)
+    raise ArgumentError, 'Configuration rules must be an object' unless rules.is_a?(Hash)
+
+    rules
   end
 
   def configuration_version(record)

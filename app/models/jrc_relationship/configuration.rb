@@ -5,7 +5,7 @@ class JrcRelationship::Configuration < ApplicationRecord
   has_many :versions, class_name: 'JrcRelationship::ConfigurationVersion', dependent: :restrict_with_error
 
   def capture_version!(values, actor: nil)
-    versions.create_or_find_by!(account_id: account_id, version: values.fetch('version')) do |row|
+    versions.find_or_create_by!(account_id: account_id, version: values.fetch('version')) do |row|
       row.weights = values.fetch('weights')
       row.rules = values.fetch('rules')
       row.actor = actor

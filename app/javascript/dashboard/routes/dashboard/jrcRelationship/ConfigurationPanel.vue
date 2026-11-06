@@ -18,6 +18,7 @@ import PlaybookFlowPolicyForm from './PlaybookFlowPolicyForm.vue';
 import PortfolioCapacityLimitsForm from './PortfolioCapacityLimitsForm.vue';
 import HealthConfigurationPreview from './HealthConfigurationPreview.vue';
 import PriorityBandsForm from './PriorityBandsForm.vue';
+import ConfigurationRestoreDialog from './ConfigurationRestoreDialog.vue';
 const props = defineProps({
   screen: { type: String, default: 'settings' },
   allowed: Boolean,
@@ -31,7 +32,21 @@ const books = ref([]);
 const book = ref(null);
 const error = ref('');
 const busy = ref(false);
+const restoring = ref(null);
+const restorePreparing = ref(false);
+const restored = ref(null);
 const scopeKey = ref('account');
+const restoreIdentity = computed(() =>
+  JSON.stringify([
+    route.params.accountId,
+    scopeKey.value,
+    props.screen,
+    props.allowed,
+    store.getters.getCurrentUserID,
+    store.getters.getCurrentRole,
+    store.getters.getCurrentUser?.accounts,
+  ])
+);
 const invalidFlowPolicy = ref(false);
 const invalidCapacity = ref(false);
 const invalidPriorityBands = ref(false);
@@ -84,6 +99,9 @@ const load = async () => {
   generation += 1;
   const v = generation;
   config.value = null;
+  restoring.value = null;
+  restorePreparing.value = false;
+  restored.value = null;
   books.value = [];
   book.value = null;
   error.value = '';
@@ -157,6 +175,53 @@ const edit = row => {
     step_key: step.step_key || String(index),
   }));
 };
+const openRestore = async sourceVersion => {
+  if (busy.value || restorePreparing.value || !props.allowed || !config.value)
+    return;
+  const token = generation;
+  const scope = scopeKey.value;
+  restorePreparing.value = true;
+  error.value = '';
+  try {
+    const { data } = await API.configuration(route.params.accountId, {
+      params: { scope_key: scope },
+    });
+    if (token !== generation) return;
+    const historical = data.history?.find(row => row.version === sourceVersion);
+    if (
+      data.scope_key !== scope ||
+      !historical ||
+      historical.version >= data.version
+    ) {
+      throw new Error(t('RELATIONSHIP.CONFIG_RESTORE.UNCONFIRMED'));
+    }
+    restoring.value = {
+      current: data,
+      historical,
+      scopeLabel:
+        scopeOptions.value.find(row => row[0] === scope)?.[1] ||
+        t('RELATIONSHIP.CONFIG_SCOPE'),
+    };
+  } catch (err) {
+    if (token === generation) {
+      error.value = message(err);
+      if ([401, 403, 404].includes(err.response?.status)) config.value = null;
+    }
+  } finally {
+    if (token === generation) restorePreparing.value = false;
+  }
+};
+const restorationSaved = async receipt => {
+  const identity = restoreIdentity.value;
+  restoring.value = null;
+  await load();
+  if (
+    identity === restoreIdentity.value &&
+    config.value?.scope_key === receipt.scope_key &&
+    config.value.version === receipt.version
+  )
+    restored.value = receipt;
+};
 watch(
   () => route.params.accountId,
   () => {
@@ -167,6 +232,8 @@ watch(
   [
     () => route.params.accountId,
     () => store.getters.getCurrentUserID,
+    () => store.getters.getCurrentRole,
+    () => JSON.stringify(store.getters.getCurrentUser?.accounts),
     () => props.screen,
     () => props.allowed,
   ],
@@ -208,6 +275,18 @@ const date = value => formatDate(value, props.metadata?.formatting);
     {{ t('RELATIONSHIP.RESTRICTED') }}
   </p>
   <section v-else>
+    <p
+      v-if="restored"
+      role="status"
+      class="mb-4 rounded-lg bg-n-teal-2 p-3 text-n-teal-11"
+    >
+      {{
+        t('RELATIONSHIP.CONFIG_RESTORE.SAVED', {
+          source: restored.restored_from_version,
+          version: restored.version,
+        })
+      }}
+    </p>
     <label
       v-if="screen === 'settings'"
       class="mb-4 block text-sm"
@@ -462,6 +541,15 @@ const date = value => formatDate(value, props.metadata?.formatting);
               : t('RELATIONSHIP.SYSTEM'))
           }}
         </summary>
+        <button
+          v-if="version.version < config.version"
+          type="button"
+          :class="buttonClass"
+          :disabled="busy || restorePreparing"
+          @click="openRestore(version.version)"
+        >
+          {{ t('RELATIONSHIP.CONFIG_RESTORE.OPEN') }}
+        </button>
         <h4 class="mt-3 font-semibold">{{ t('RELATIONSHIP.WEIGHTS') }}</h4>
         <dl class="grid gap-2 sm:grid-cols-2">
           <div
@@ -493,6 +581,16 @@ const date = value => formatDate(value, props.metadata?.formatting);
           </div>
         </dl>
       </details>
+      <ConfigurationRestoreDialog
+        v-if="restoring"
+        :current="restoring.current"
+        :historical="restoring.historical"
+        :scope-label="restoring.scopeLabel"
+        :allowed="allowed"
+        :formatting="metadata.formatting"
+        @close="restoring = null"
+        @saved="restorationSaved"
+      />
     </section>
     <OperationsSettingsPanel
       v-if="screen === 'settings'"

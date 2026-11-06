@@ -138,6 +138,7 @@ class JrcRelationship::Context
     raise Pundit::NotAuthorizedError unless policy.configure?
 
     kind, id = scope_key.to_s.split(':')
+    JrcRelationship::ConfigurationScope.authorize_corporate!(self, kind, id)
     return JrcRelationship::PortfolioGroupConfiguration.authorize!(self, scope_key) if kind == 'portfolio'
     return if policy.admin?
 

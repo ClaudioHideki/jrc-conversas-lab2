@@ -228,6 +228,12 @@
       "report": "docs/jrc_consolidation/named_portfolio_link_results_checkpoint_20261106.json",
       "implemented_validated": "Real per-item atomic receipts and controlled fresh re-review; no false partial/background success.",
       "partial": "Durable grouping queue/item resumption, full local roles, master allocation batches and current-source Chrome remain open."
+    },
+    {
+      "reference": "Relationship P0152/P0185/P0188",
+      "report": "docs/jrc_consolidation/configuration_restore_checkpoint_20261106.json",
+      "implemented_validated": "Native configuration restoration creates new version; snapshots preserved, scopes/current authority/real Central gate retained.25native/0,source19/0and22/0overlap.",
+      "partial": "Playbook rollback and other full F2 automation/production pilot/visual gates remain separate; protected generic audit is not claimed sealed."
     }
   ],
   "explicit_dependencies": [
@@ -248,7 +254,7 @@
       "state": "External environment/operations require separate authorization; not simulated as passed."
     }
   ],
-  "next_confirmed_local_gap": "F2 P0152 controlled rollback to a new native configuration version; history is currently displayed but has no functional restore action.",
+  "next_confirmed_local_gap": "F2 controlled playbook-history restoration through the existing versioned native writer.",
   "stage_closure": {
     "C": false,
     "D": false,

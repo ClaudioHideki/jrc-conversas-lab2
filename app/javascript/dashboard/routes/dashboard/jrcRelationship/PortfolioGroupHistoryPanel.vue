@@ -39,11 +39,13 @@ const kinds = computed(() => ({
   customers: t('RELATIONSHIP.NAMED_PORTFOLIOS.HISTORY.KINDS.customers'),
   rules: t('RELATIONSHIP.NAMED_PORTFOLIOS.HISTORY.KINDS.rules'),
   exported: t('RELATIONSHIP.NAMED_PORTFOLIOS.HISTORY.KINDS.exported'),
+  restored: t('RELATIONSHIP.NAMED_PORTFOLIOS.HISTORY.KINDS.restored'),
 }));
 const visibleKinds = computed(() =>
   Object.fromEntries(
     Object.entries(kinds.value).filter(
-      ([kind]) => kind !== 'rules' || pagination.value.can_read_rules
+      ([kind]) =>
+        !['rules', 'restored'].includes(kind) || pagination.value.can_read_rules
     )
   )
 );

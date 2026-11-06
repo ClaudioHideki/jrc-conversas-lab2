@@ -1,0 +1,56 @@
+{
+  "date": "2026-11-06",
+  "branch": "codex/relacionamento-v2-20261101",
+  "preserved_previous_checkpoint": "048be0d57f5cfd4ad0dcf149e7582fb4f6e59171",
+  "word_reference": "Relationship P0152 controlled configuration rollback; P0185 scoped reads/writes and protected history.",
+  "status": "Native configuration restoration and source interface implemented/tested; full F2, production governance and current-source Chrome remain open.",
+  "implementation": [
+    "New account-bound POST configuration/restore selects a stored version from the same native Configuration only, validates exact current/prior integer versions and bounded reason, then creates the next native version. Caller weights/rules cannot replace the chosen stored source.",
+    "Fresh locked account/user/member/role/grant authority and existing configuration ledger, optimistic version and scope authorization. Group rules additionally pin the current group revision and preserve distribution-only namespace.",
+    "Reuse native configuration model validation, DistributionConfigurationGovernance, immutable ConfigurationVersion capture, native audit and Central policy-manage gate for formal approval changes. Old review snapshots/versions and their references are unchanged; changed bindings require a new review.",
+    "Configuration version capture now finds an existing immutable row before trying creation. Uniqueness validation previously made capture of an already stored version fail, blocking restoration and successive native edits. No history overwrite.",
+    "Preserve raw JSON rule collection shapes for native validation: Rails deep-munging of [null] into[] must not silently clear catalogs. Explicitly empty catalogs remain valid under the existing model semantics; no new minimum was invented.",
+    "Explicit company/unit configuration scopes now check existing CorporateCoverage before administrator early return. Existing account-wide configuration semantics remain unchanged; this is not a new global-role or customer-access grant.",
+    "Native INVALID_SCOPE from Central is returned as422 rather than500. Legacy unit without an issuer cannot restore formal approval requirements; permissions or scope are not bypassed.",
+    "Source interface freshly reads saved configuration/history, compares saved values in responsive tabs, reuses native representative health simulation where applicable, requires reason/confirmation and checks exact saved scope/current+1/source receipt. Cancel retains unsaved form edits; confirmed restoration reloads native persistence.",
+    "Late identities, permissions or scopes cannot open/confirm an old restore dialog. Conflict/unknown commit result requires explicit reopen, no automatic retry. Source history adds a permission-protected restored event with no raw reasons or historic values."
+  ],
+  "native_evidence": {
+    "final": { "label": "configuration-restore-final10", "examples": 25, "failures": 0, "breakdown": "13restore/input/authority/snapshot cases +12existing operations/configuration/health-preview/priority regressions" },
+    "directed_history": { "label": "configuration-restore-history07", "examples": 3, "failures": 0, "qualification": "History-kind denial and2group rule regressions, before the additional corporate-boundary guard; group restore and pinned snapshot remain covered in final10." },
+    "corrected_failures": [
+      "native01:8cases/3failures; diagnostic02 confirmed Version has already been taken on native capture. Fixed lookup without changing historic rows; native03:9/0.",
+      "native05:22cases/1failure exposed null-array normalization that had been hidden by the earlier capture failure. Preserve submitted shapes; native06:23/0.",
+      "corporate08:12cases/1failure exposed a legacy-unit INVALID_SCOPE500 while improving the Central gate fixture. Test now proves native configure scope is allowed before Central permission denial; separate legacy-scope422 test added. final10:25/0."
+    ],
+    "database": "jrc_rel_v2_candidate_test",
+    "qualification": "Real local PostgreSQL and native HTTP/services; no production migrations, external provider operations or fresh Chrome acceptance."
+  },
+  "source_interface_evidence": {
+    "initial": { "label": "configuration-restore-source01", "tests": 19, "failures": 0, "breakdown": "10new restore +4native catalog +5native distribution UI" },
+    "final": { "label": "configuration-restore-source-final02", "tests": 22, "failures": 0, "breakdown": "10restore overlap +5API +7history UI. Counts are not added." },
+    "warnings": "Existing duplicate-i18n registrations retained. New fixture missing native catalog arrays was corrected to match native effective_rules; no runtime fallback or warning suppression.",
+    "visual_qualification": "Tabs use existing theme utilities and native dialog. No current-source desktop/mobile/light/dark Chrome validation because build/5379 changes remain prohibited."
+  },
+  "static_evidence": {
+    "new_ruby": "ruby11:0offenses",
+    "shared_ruby": "Context14to14,ConfigurationController1to1,Configuration0to0; no added cop counts at corporate-static gate. Generic legacy debt retained.",
+    "new_source": "final-eslint05:0errors/0warnings in restore dialog/spec,API,history component. Contract/spec eslint04 clean.",
+    "shared_source": "ConfigurationPanel0errors/35warnings before and after; no added warning types/counts. git diff --check clean."
+  },
+  "environment": {
+    "disk_initial_recorded_bytes": 6623023104,
+    "disk_minimum_observed_bytes": 6591758336,
+    "disk_final_observed_bytes": 6610976768,
+    "original_four_container_started_at_unchanged": true,
+    "no_build_migration_server_change_cleanup_or_external_operation": true
+  },
+  "remaining": [
+    "F2 playbook configuration history/controlled restoration and other remaining native gaps still require review; not covered by this Health/distribution configuration rollback.",
+    "Representative health simulation is available, not a full operational pilot or calibrated inference/production activation approval.",
+    "Account-wide native configure semantics remain existing behavior; no claim that all role/business scope decisions or all C-G literal Word fragments are closed.",
+    "Local portfolio roles/capabilities, durable grouping batches, full protected historic audit, true master allocation batches and fresh visual acceptance remain pending.",
+    "TRR, deferred company documents without portfolio and external provider/scanner/channel environments remain separate dependencies."
+  ],
+  "checkpoint_resolution": "git log -1 --format=%H -- docs/jrc_consolidation/configuration_restore_checkpoint_20261106.json"
+}

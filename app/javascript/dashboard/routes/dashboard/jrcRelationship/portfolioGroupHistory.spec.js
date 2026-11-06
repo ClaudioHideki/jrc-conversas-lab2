@@ -224,6 +224,9 @@ it('omits unavailable actor identities, configuration choices and unauthorized e
     false
   );
   expect(button(wrapper, 'Export operational summary')).toBeUndefined();
+  expect(wrapper.get('select').find('option[value="restored"]').exists()).toBe(
+    false
+  );
 });
 
 it('wires the history tab and returns to customers when record-specific history access is revoked', async () => {

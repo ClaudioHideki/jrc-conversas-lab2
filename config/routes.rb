@@ -711,6 +711,7 @@ Rails.application.routes.draw do
             get :export, to: 'dashboard#export'
             get :export_history, to: 'dashboard#export_history'
             resource :configuration, only: [:show, :update], controller: :configuration
+            post 'configuration/restore', to: 'configuration#restore'
             post 'configuration/health_preview', to: 'health_configuration_previews#create'
             get :playbooks, to: 'configuration#playbooks'
             get :playbook_options, to: 'configuration#playbook_options'

@@ -1,5 +1,24 @@
 {
   "RELATIONSHIP": {
+    "CONFIG_RESTORE": {
+      "TITLE": "Restore a prior configuration",
+      "SCOPE": "Configuration scope: {scope}",
+      "OPEN": "Review restoration",
+      "HELP": "Restore the saved values from version {source}. Current saved version {current} becomes version {next}; previous versions and their pinned reviews remain unchanged.",
+      "DRAFT_NOTICE": "This comparison uses saved data. Cancel preserves unsaved form edits; confirmed restoration reloads the form. Simulation is representative and does not execute customer actions.",
+      "COMPARE": "Compare saved values",
+      "SIMULATE": "Simulate health impact",
+      "REVIEW": "Reason and confirmation",
+      "CURRENT": "Current saved value",
+      "RESTORED": "Value to restore",
+      "OTHER_RULE": "Other configured rule",
+      "NO_CHANGES": "The saved values are equal. A confirmed restoration still creates a new version with its reason.",
+      "REASON": "Reason for restoration",
+      "CONFIRM": "Confirm and create new version",
+      "UNCONFIRMED": "The restoration could not be confirmed for the selected scope and versions.",
+      "REOPEN": "Close this review and reload the current saved version before another attempt. No automatic retry will be performed.",
+      "SAVED": "Version {version} saved from version {source}. Previous versions were preserved."
+    },
     "NAMED_PORTFOLIOS": {
       "TITLE": "Operational portfolios",
       "OPEN_NATIVE_CUSTOMERS": "Open filtered customer list",
@@ -41,6 +60,7 @@
           "updated": "Portfolio updated",
           "customers": "Customer links reviewed",
           "rules": "Rule version recorded",
+          "restored": "Configuration restored as a new version",
           "exported": "Operational summary exported"
         }
       },
