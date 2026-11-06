@@ -3,13 +3,13 @@
   "user_request": "499267ac-546d-4853-b4cf-7f03a2ea0629",
   "initial_head": "be54d0f7b4ce8d4e2a077cf2bdd8c2a4d5c88f5e",
   "branch": "codex/relacionamento-v2-20261101",
-  "last_validated_checkpoint": "9eb11d5cf9d93dbc6e28d30577ef6abddd87b685",
+  "last_validated_checkpoint": "93bf2c0c7e656af63d94f49ce1f25c2e714bc7c9",
   "completed_current_work": "Sealed dossier, weighted/current capacity, native withdrawal/cadence controls and F2 increments locally tested; see linked incremental reports. No C-G closure.",
-  "active_work": "Read-only recommendation endpoint actual native API: permission and tenant denial, no business writes and private response caching.",
+  "active_work": "Reconcile stale C scale/native SLA/document audit notes with validated newer evidence; preserve pending portfolio cardinality business question.",
   "exact_next_actions": [
-    "Validate authenticated actual recommendation response and absence of business writes.",
-    "Validate foreign customer/account and revoked native CS access without evidence disclosure.",
-    "Continue remaining safe C-G requirements; no fresh build/visual/external acceptance claim."
+    "Update C native scale/SLA/document evidence without repeating approved cohorts or claiming current-source Chrome.",
+    "Inspect named portfolio grouping against Word and native account/assignment/team authorization; cardinality question pending.",
+    "Continue safe defined C-G gaps; preserve no-build/no5379-change and external restrictions."
   ],
   "test_environment": {
     "source_manifest": ".codex/d9-notifications-20261104/snapshot.json",
@@ -51,16 +51,16 @@
     "No real participant removal or provider request; tests use synthetic records and WebMock, with external network disabled."
   ],
   "restrictions": "No build/recompile, no5379 change/restart, no four-container restart/reconfiguration, no cleanup/delete of existing data, no push/GHCR/deploy/production/client change, no real provider operations. Additive migrations allowed only in owned synthetic test database.",
-  "disk_last_observed_bytes": 5145337856,
+  "disk_last_observed_bytes": 5122527232,
   "TRR": "Undefined; do not invent",
   "company_documents_without_portfolio": "Explicitly deferred",
-  "last_validated_head": "9eb11d5cf9d93dbc6e28d30577ef6abddd87b685",
+  "last_validated_head": "93bf2c0c7e656af63d94f49ce1f25c2e714bc7c9",
   "new_validated_code_checkpoint": "Resolve latest local CS code checkpoint with git log -1 --format=%H -- docs/jrc_consolidation/cs_signature_origin_checkpoint_20261105.json",
-  "current_status": "Popup stale explanation corrected;18sourceVuepassed. Continue native HTTP recommendation safety and contract checks.",
+  "current_status": "Native recommendation HTTP5casespassed,no business writes,no-store;continuing C audit and named portfolio gap.",
   "next_actions": [
-    "Validate authenticated actual recommendation response and absence of business writes.",
-    "Validate foreign customer/account and revoked native CS access without evidence disclosure.",
-    "Continue remaining safe C-G requirements; no fresh build/visual/external acceptance claim."
+    "Update C native scale/SLA/document evidence without repeating approved cohorts or claiming current-source Chrome.",
+    "Inspect named portfolio grouping against Word and native account/assignment/team authorization; cardinality question pending.",
+    "Continue safe defined C-G gaps; preserve no-build/no5379-change and external restrictions."
   ],
   "latest_dossier_report": "docs/jrc_consolidation/sealed_dossier_checkpoint_20261105.json",
   "capacity_report": "docs/jrc_consolidation/weighted_capacity_checkpoint_20261105.json",
@@ -129,5 +129,6 @@
   "portfolio_owner_shapes_report": "docs/jrc_consolidation/portfolio_owner_shapes_checkpoint_20261106.json",
   "withdrawal_multiorder_scale_report": "docs/jrc_consolidation/withdrawal_multiorder_scale_checkpoint_20261106.json",
   "health_recommendation_report": "docs/jrc_consolidation/health_recommendation_checkpoint_20261106.json",
-  "customer_explanation_report": "docs/jrc_consolidation/customer_explanation_checkpoint_20261106.json"
+  "customer_explanation_report": "docs/jrc_consolidation/customer_explanation_checkpoint_20261106.json",
+  "health_recommendation_http_report": "docs/jrc_consolidation/health_recommendation_http_checkpoint_20261106.json"
 }

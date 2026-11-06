@@ -88,6 +88,7 @@ class Api::V1::Accounts::Relationship::PortfolioController < Api::V1::Accounts::
   end
 
   def recommendations
+    response.headers['Cache-Control'] = 'no-store'
     render json: presenter.recommendations(relationship_context.assignment(params[:id]))
   end
 
