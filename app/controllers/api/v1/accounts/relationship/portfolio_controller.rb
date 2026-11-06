@@ -51,13 +51,10 @@ class Api::V1::Accounts::Relationship::PortfolioController < Api::V1::Accounts::
     relationship_context.assignable_users.find(attrs[:owner_id]) if attrs[:owner_id].present?
     with_assignment_update(record, attrs) do
       before = record.attributes.slice(*attrs.keys)
-      record.update!(attrs)
-      if record.saved_change_to_owner_id?
-        record.actions.where(status: JrcRelationship::Action::ACTIVE_STATUSES).find_each do |action|
-          action.update!(owner_id: record.owner_id)
-          action.activity.update!(user_id: record.owner_id) if action.activity && record.owner_id
-        end
-      end
+      record.assign_attributes(attrs)
+      work = JrcRelationship::PortfolioActionTransfer.prepare(relationship_context, record)
+      record.save!
+      work&.apply!(record.owner)
       relationship_context.audit!(record, before: before, after: attrs.to_h, action: 'assignment_updated')
     end
     render json: presenter.assignment(record)

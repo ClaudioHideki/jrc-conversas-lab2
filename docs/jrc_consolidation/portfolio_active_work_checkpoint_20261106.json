@@ -1,0 +1,57 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "c3961c576691eb7f716f6ceb8b68f7e82190ffdd",
+  "status": "Legacy active-work handoff respects native source and destination permissions; not C-G closure",
+  "baseline": "5examples/4failures:3 actual permission bypasses (access-only recipient,direct hidden-action propagation,legacy batch) and1 valid-case fixture missing a due date, so native Agenda projection returnednil. Fixture corrected to create a real scheduled Activity without relaxing native rules.",
+  "implementation": [
+    "Prepare only on an actual typed owner change; authorize the current writable assignment, lock current active Action rows and check their native Context.records visibility before root mutation. Lock/read referenced Agenda rows through native PortfolioResponsibilities.activity_scope.",
+    "Apply under the existing account/assignment transaction and fresh target BatchReviewAuthority manage grant, including locked memberships, units, inbox/project grants and native authentication. Verify target Action and Agenda visibility after all ownership changes; failure rolls back root,work,Agenda and audit. No permission granted by receipt or client IDs.",
+    "Closed historical work remains unchanged. Owner no-op/unrelated edits do not inspect or move hidden delegated work. Root-only access admission with no pending work retains the existing access-only contract. Nil-owner legacy Agenda behavior retained.",
+    "Legacy batch reuses the same service. Complete reviewed responsibility transfer path remains unchanged; original snapshots and native receipts retained. No new routes,fields,migrations or frontend changes."
+  ],
+  "tests_non_additive": {
+    "native02": "20/0 (5 new +5 no-op +10 complete reviewed transfer).",
+    "native03": "15/0 (6 final active-work cases +9 root-destination cases); actual private conversation/Inbox denial rolls back all three owners, then real InboxMember grant enables successful handoff.",
+    "ruby": "New service and spec0offenses;shared PortfolioController8->8/PortfolioBatch0->0, no added offenses.",
+    "frontend": "No frontend behavior change in this block; prior source interface gate remains10/0, not fresh Chrome acceptance.",
+    "diff_check": "passed"
+  },
+  "resources": {
+    "portfolio-active-work-native02": {
+      "start": 9392099328,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/portfolio_active_work_access_spec.rb": "6dd3283a29735e45efd15ce55b1ed16deda5395ea2776f351a91bc7211d414ec",
+        "spec/requests/api/v1/accounts/relationship/portfolio_owner_noop_spec.rb": "128b4a43fbfa53684e2465675c4b36e3537584c721189fabdbebab47e12272a6",
+        "spec/services/jrc_relationship/responsibility_transfer_spec.rb": "a7b48889e92d20eca912e2812cb8eb062527acb26d6d955dd18b9e0b4f2f221a"
+      },
+      "minimum": 9390931968,
+      "exit_code": 0,
+      "end": 9390866432
+    },
+    "portfolio-active-work-native03": {
+      "start": 9389481984,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/portfolio_active_work_access_spec.rb": "57f348458372d9ac7566e710e96ccfce2a18ba8c0aca389b3819130fba4ff1df",
+        "spec/requests/api/v1/accounts/relationship/portfolio_destination_access_spec.rb": "779b351785b176a87525f32e3d9daa5331f5c256d35310eb6df793ed34ab47b2"
+      },
+      "minimum": 9369694208,
+      "exit_code": 0,
+      "end": 9389260800
+    }
+  },
+  "disk_final_bytes": 9390043136,
+  "next": "Exercise complete reviewed responsibility handoff with a scoped team supervisor who legitimately loses old root visibility after transfer; preserve immutable reviewed facts and current native scopes.",
+  "remaining": [
+    "Full C-G Word and fresh built visual acceptance remain open.",
+    "TRR undefined and portfolio-less documents deferred; no actual staff operation or external provider acceptance."
+  ],
+  "restrictions": "No build,cleanup,push,GHCR,deploy,external operation,production,5379 modification or container restart."
+}
