@@ -282,6 +282,12 @@
       "report": "docs/jrc_consolidation/reviewed_portfolio_membership_ui_checkpoint_20261106.json",
       "implemented_validated": "Native group resumable membership review UI using existing engine;32source/0 and33previous atomic/results/master regressions passed, with corrected failed-button gate documented.",
       "partial": "Current-source Chrome/liveSidekiq, broad own-operation listing and remaining C-G gaps are open."
+    },
+    {
+      "reference": "Relationship P0128/P0181/P0184/P0185",
+      "report": "docs/jrc_consolidation/reviewed_batch_inventory_native_checkpoint_20261106.json",
+      "implemented_validated": "Own source-free reviewed-operation inventory and explicit own pending cancellation;21native/0 including14legacy regressions. No new source access or other-actor cancellation grant.",
+      "partial": "Source interface and safe withdrawal integration remain open, as do current-source Chrome and other C-G requirements."
     }
   ],
   "explicit_dependencies": [
@@ -302,7 +308,7 @@
       "state": "External environment/operations require separate authorization; not simulated as passed."
     }
   ],
-  "next_confirmed_local_gap": "Source-free own pending-reviewed operations inventory/cancellation and integration with safe analyst withdrawal.",
+  "next_confirmed_local_gap": "Pending reviewed intentions must block native analyst withdrawal, with conservative current origin scope and no private payload access.",
   "stage_closure": {
     "C": false,
     "D": false,

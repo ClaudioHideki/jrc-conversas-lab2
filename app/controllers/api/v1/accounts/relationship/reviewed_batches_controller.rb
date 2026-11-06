@@ -5,6 +5,19 @@ class Api::V1::Accounts::Relationship::ReviewedBatchesController < Api::V1::Acco
     render json: { errors: [error.code] }, status: :unprocessable_entity
   end
 
+  def index
+    allowed = %w[page per_page status portfolio_group_id]
+    raise ArgumentError, 'Unsupported reviewed operation filter' unless (request.query_parameters.keys - allowed).empty?
+
+    render json: inventory.index(page: params.fetch(:page, 1), per_page: params.fetch(:per_page, 25),
+                                 status: params.fetch(:status, 'all'), portfolio_group_id: params[:portfolio_group_id])
+  end
+
+  def cancel_pending
+    input = body!('expected_revision', 'reason')
+    render json: inventory.cancel_pending(params[:id], expected_revision: input.fetch('expected_revision'), reason: input.fetch('reason'))
+  end
+
   def show
     render json: service.get(params[:id])
   end
@@ -38,6 +51,10 @@ class Api::V1::Accounts::Relationship::ReviewedBatchesController < Api::V1::Acco
   end
 
   private
+
+  def inventory
+    JrcRelationship::ReviewedBatchInventory.new(relationship_context)
+  end
 
   def service
     JrcRelationship::ReviewedPortfolioBatch.new(relationship_context)

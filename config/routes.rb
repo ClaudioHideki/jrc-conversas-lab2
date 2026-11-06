@@ -670,8 +670,9 @@ Rails.application.routes.draw do
             patch 'records/:kind/:id', to: 'records#update'
             post 'records/:kind/:id/opportunity', to: 'records#opportunity'
             post 'portfolio/batch', to: 'portfolio#batch'
-            resources :reviewed_batches, only: [:create, :show] do
+            resources :reviewed_batches, only: [:index, :create, :show] do
               member do
+                post :cancel_pending
                 post :approve
                 post :request_approval
                 post :advance

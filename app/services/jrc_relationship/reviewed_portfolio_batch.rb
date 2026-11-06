@@ -44,10 +44,7 @@ class JrcRelationship::ReviewedPortfolioBatch
   def cancel(id)
     transaction do |context|
       review = reviews.lock.find(id)
-      if %w[previewed running].include?(review.state)
-        review.items.where(state: 'pending').find_each { |item| item.update!(state: 'canceled') }
-        review.update!(state: 'canceled', revision: review.revision + 1)
-      end
+      review = JrcRelationship::ReviewedBatchCancellation.new(context).call(review.id, expected_revision: review.revision)
       project(review, context)
     end
   end
