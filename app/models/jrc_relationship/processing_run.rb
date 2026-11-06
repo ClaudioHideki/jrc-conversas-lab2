@@ -14,7 +14,8 @@ class JrcRelationship::ProcessingRun < ApplicationRecord
   def summary(scope)
     ids = scope.where(id: requested_ids).pluck(:id).map(&:to_s)
     visible = outcomes.slice(*ids)
+    duration = (finished_at - started_at) * 1000 if state != 'running' && finished_at && finished_at >= started_at
     { state: state, started_at: started_at, finished_at: finished_at, requested: ids.size,
-      processed: visible.values.count('processed'), failed: visible.values.count { |value| value != 'processed' } }
+      processed: visible.values.count('processed'), failed: visible.values.count { |value| value != 'processed' }, duration_ms: duration&.round }
   end
 end

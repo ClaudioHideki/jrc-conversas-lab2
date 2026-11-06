@@ -61,6 +61,73 @@ beforeEach(() => {
   mocks.api.channels.mockResolvedValue({ data: { channel_conversations: [] } });
 });
 describe('Relationship V2 analyst workflow', () => {
+  it.each([1250, 0])(
+    'shows the measured batch duration including a real zero value (%i ms)',
+    async duration => {
+      mocks.api.dashboard.mockResolvedValue({
+        data: {
+          priority_actions: [],
+          monitoring: {
+            latest_attempt: {
+              state: 'completed',
+              duration_ms: duration,
+              processed: 1,
+              failed: 0,
+            },
+          },
+        },
+      });
+      const wrapper = shallowMount(AnalystWorkspace, {
+        props: { screen: 'overview' },
+      });
+      await flushPromises();
+      const measurement = wrapper
+        .get('[data-testid="processing-duration"]')
+        .text();
+      expect(measurement).toContain(`${duration} ms`);
+      expect(measurement).toContain(
+        'excludes queue wait and external delivery'
+      );
+      expect(measurement).not.toContain('RELATIONSHIP.');
+      wrapper.unmount();
+    }
+  );
+
+  it('keeps unfinished duration unavailable and clears the measurement when the next account denies access', async () => {
+    mocks.api.dashboard.mockResolvedValue({
+      data: {
+        priority_actions: [],
+        monitoring: {
+          latest_attempt: {
+            state: 'running',
+            duration_ms: null,
+            processed: 0,
+            failed: 0,
+          },
+        },
+      },
+    });
+    const wrapper = shallowMount(AnalystWorkspace, {
+      props: { screen: 'overview' },
+    });
+    await flushPromises();
+    expect(wrapper.get('[data-testid="processing-duration"]').text()).toContain(
+      'Indisponível'
+    );
+    expect(
+      wrapper.get('[data-testid="processing-duration"]').text()
+    ).not.toContain('0 ms');
+    mocks.api.metadata.mockRejectedValue({
+      response: { status: 403, data: { errors: ['Denied'] } },
+    });
+    mocks.route.params.accountId = '2';
+    await flushPromises();
+    expect(wrapper.find('[data-testid="processing-duration"]').exists()).toBe(
+      false
+    );
+    wrapper.unmount();
+  });
+
   it('opens actual counter sources under the original portfolio scope instead of navigating to an inconsistent generic list', async () => {
     mocks.route.query.customer_segment_id = '4';
     mocks.api.dashboard.mockResolvedValue({

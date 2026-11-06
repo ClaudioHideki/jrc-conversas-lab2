@@ -304,6 +304,20 @@ const cards = computed(() => [
             )
           }}
         </p>
+        <p
+          v-if="metrics.monitoring.latest_attempt"
+          class="mt-1 text-xs text-n-slate-11"
+          data-testid="processing-duration"
+        >
+          {{ t('RELATIONSHIP.V2.PROCESSING_DURATION') }}:
+          {{
+            metrics.monitoring.latest_attempt.duration_ms == null
+              ? t('RELATIONSHIP.UNAVAILABLE')
+              : t('RELATIONSHIP.V2.PROCESSING_MILLISECONDS', {
+                  value: metrics.monitoring.latest_attempt.duration_ms,
+                })
+          }}
+        </p>
       </section>
       <button
         v-if="metrics"

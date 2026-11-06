@@ -1478,6 +1478,8 @@
         "failed": "Processamento com falhas"
       },
       "PROCESSING_RESULT": "{processed} clientes processados; {failed} falhas no escopo",
+      "PROCESSING_DURATION": "Measured duration of the complete internal batch (excludes queue wait and external delivery)",
+      "PROCESSING_MILLISECONDS": "{value} ms",
       "NICO_SUMMARY": "Consultar resumo e recomendações NICO",
       "SCHEDULE_RETURN": "Agendar retorno",
       "ESCALATE": "Acionar área responsável no Service Desk",
