@@ -1,6 +1,7 @@
 {
   "RELATIONSHIP": {
     "PLAYBOOK_RESTORE": {
+      "RETRY": "Reload saved history",
       "TITLE": "Restore a playbook definition",
       "OPEN": "Review playbook restoration",
       "HISTORY": "Definition history",

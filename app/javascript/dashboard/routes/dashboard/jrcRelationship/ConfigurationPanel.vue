@@ -20,6 +20,7 @@ import HealthConfigurationPreview from './HealthConfigurationPreview.vue';
 import PriorityBandsForm from './PriorityBandsForm.vue';
 import ConfigurationRestoreDialog from './ConfigurationRestoreDialog.vue';
 import PlaybookRestoreDialog from './PlaybookRestoreDialog.vue';
+import PlaybookHistoryPanel from './PlaybookHistoryPanel.vue';
 const props = defineProps({
   screen: { type: String, default: 'settings' },
   allowed: Boolean,
@@ -30,6 +31,11 @@ const store = useStore();
 const { t } = useI18n();
 const config = ref(null);
 const books = ref([]);
+const bookPage = ref(1);
+const bookMeta = ref({ per_page: 25, total: 0 });
+const bookPages = computed(() =>
+  Math.max(1, Math.ceil(bookMeta.value.total / bookMeta.value.per_page))
+);
 const book = ref(null);
 const error = ref('');
 const busy = ref(false);
@@ -121,16 +127,34 @@ const load = async () => {
       ? API.configuration(route.params.accountId, {
           params: { scope_key: scopeKey.value },
         })
-      : API.playbooks(route.params.accountId));
+      : API.playbooks(route.params.accountId, {
+          params: { page: bookPage.value, per_page: 25 },
+        }));
     if (v === generation) {
       if (props.screen === 'settings') config.value = data;
-      else books.value = data.payload;
+      else {
+        books.value = data.payload;
+        bookMeta.value = data.meta;
+      }
     }
   } catch (err) {
     if (v === generation) error.value = message(err);
   } finally {
     if (v === generation) busy.value = false;
   }
+};
+const changeBookPage = async page => {
+  if (
+    busy.value ||
+    restorePreparing.value ||
+    !props.allowed ||
+    book.value ||
+    page < 1 ||
+    page > bookPages.value
+  )
+    return;
+  bookPage.value = page;
+  await load();
 };
 const save = async () => {
   if (
@@ -165,6 +189,7 @@ const save = async () => {
   }
 };
 const edit = row => {
+  if (busy.value || restorePreparing.value || !props.allowed) return;
   book.value = row
     ? JSON.parse(JSON.stringify(row))
     : {
@@ -233,13 +258,17 @@ const openPlaybookRestore = async (id, sourceVersion) => {
   restorePreparing.value = true;
   error.value = '';
   try {
-    const { data } = await API.playbooks(route.params.accountId);
+    const { data } = await API.playbookHistory(route.params.accountId, id, {
+      source_version: sourceVersion,
+    });
     if (token !== generation) return;
-    const current = data.payload.find(row => row.id === id);
-    const historical = current?.history?.find(
-      row => row.version === sourceVersion
-    );
-    if (!current || !historical || historical.version >= current.version)
+    const current = data.current;
+    const historical = data.payload.find(row => row.version === sourceVersion);
+    if (
+      current?.id !== id ||
+      !historical ||
+      historical.version >= current.version
+    )
       throw new Error(t('RELATIONSHIP.PLAYBOOK_RESTORE.UNCONFIRMED'));
     restoringPlaybook.value = { current, historical };
   } catch (err) {
@@ -281,7 +310,11 @@ watch(
     () => props.screen,
     () => props.allowed,
   ],
-  load,
+  () => {
+    bookPage.value = 1;
+    bookMeta.value = { per_page: 25, total: 0 };
+    load();
+  },
   { immediate: true }
 );
 watch(scopeKey, load);
@@ -688,36 +721,37 @@ const historyValue = value => {
               {{ t('RELATIONSHIP.EDIT') }}
             </button>
           </div>
-          <details
-            v-if="row.history?.length"
-            class="min-w-0 rounded-lg border border-n-weak p-3"
-          >
-            <summary class="cursor-pointer text-sm font-semibold">
-              {{ t('RELATIONSHIP.PLAYBOOK_RESTORE.HISTORY') }}
-            </summary>
-            <ul class="mt-3 space-y-2">
-              <li
-                v-for="version in row.history"
-                :key="version.version"
-                class="flex min-w-0 flex-wrap items-center justify-between gap-3 text-sm"
-              >
-                <span>{{
-                  t('RELATIONSHIP.VERSION', { version: version.version })
-                }}</span>
-                <button
-                  v-if="version.version < row.version"
-                  type="button"
-                  :class="buttonClass"
-                  :disabled="busy || restorePreparing"
-                  @click="openPlaybookRestore(row.id, version.version)"
-                >
-                  {{ t('RELATIONSHIP.PLAYBOOK_RESTORE.OPEN') }}
-                </button>
-              </li>
-            </ul>
-          </details>
+          <PlaybookHistoryPanel
+            :book="row"
+            :allowed="allowed"
+            :disabled="busy || restorePreparing || Boolean(book)"
+            @restore="openPlaybookRestore"
+          />
         </li>
       </ul>
+      <footer class="mt-4 flex flex-wrap items-center justify-end gap-2">
+        <button
+          type="button"
+          :class="buttonClass"
+          :disabled="busy || restorePreparing || Boolean(book) || bookPage <= 1"
+          @click="changeBookPage(bookPage - 1)"
+        >
+          {{ t('RELATIONSHIP.PREVIOUS') }}
+        </button>
+        <span class="text-sm">{{
+          t('RELATIONSHIP.PAGE', { page: bookPage, total: bookMeta.total })
+        }}</span>
+        <button
+          type="button"
+          :class="buttonClass"
+          :disabled="
+            busy || restorePreparing || Boolean(book) || bookPage >= bookPages
+          "
+          @click="changeBookPage(bookPage + 1)"
+        >
+          {{ t('RELATIONSHIP.NEXT') }}
+        </button>
+      </footer>
       <PlaybookRestoreDialog
         v-if="restoringPlaybook"
         :current="restoringPlaybook.current"

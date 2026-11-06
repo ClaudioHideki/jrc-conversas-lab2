@@ -42,9 +42,24 @@ class Api::V1::Accounts::Relationship::ConfigurationController < Api::V1::Accoun
   end
 
   def playbooks
-    render json: { payload: JrcRelationship::Playbook.where(account: Current.account).includes(:versions).order(:id).limit(100).map do |row|
-      row.as_json.merge(history: row.versions.order(version: :desc).limit(50).as_json)
-    end }
+    response.headers['Cache-Control'] = 'no-store'
+    rows = JrcRelationship::Playbook.where(account: Current.account).order(:id)
+    if params.key?(:page) || params.key?(:per_page)
+      rows, meta = page(rows)
+      render json: { payload: rows.as_json, meta: meta }
+    else
+      render json: { payload: rows.limit(100).map { |row| row.as_json.merge(history: row.versions.order(version: :desc).limit(50).as_json) } }
+    end
+  end
+
+  def playbook_history
+    response.headers['Cache-Control'] = 'no-store'
+    book = JrcRelationship::Playbook.where(account: Current.account).find(params[:id])
+    versions = book.versions.where(account: Current.account).order(version: :desc, id: :desc)
+    source = playbook_history_version
+    versions = versions.where(version: source) if source
+    rows, meta = page(versions)
+    render json: { current: book.as_json, payload: rows.as_json, meta: meta }
   end
 
   def save_playbook
@@ -101,6 +116,16 @@ class Api::V1::Accounts::Relationship::ConfigurationController < Api::V1::Accoun
   end
 
   private
+
+  def playbook_history_version
+    return unless params.key?(:source_version)
+
+    value = params[:source_version].to_s
+    valid = value.match?(/\A[1-9]\d{0,9}\z/) && value.to_i <= 2_147_483_647
+    raise ArgumentError, 'Use a positive whole-number source version' unless valid
+
+    value.to_i
+  end
 
   def execution_payload(row)
     results = JrcRelationship::PlaybookFlow.new(relationship_context).projection(execution: row)

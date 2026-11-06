@@ -316,6 +316,11 @@ export default {
         }),
   playbooks: (accountId, options) =>
     axios.get(`${base(accountId)}/playbooks`, options),
+  playbookHistory: (accountId, id, params = {}, options = {}) =>
+    axios.get(`${base(accountId)}/playbooks/${Number(id)}/history`, {
+      ...options,
+      params,
+    }),
   playbookExecutions: (accountId, options) =>
     axios.get(`${base(accountId)}/playbook_executions`, options),
   surveyDefinitions: (accountId, options) =>

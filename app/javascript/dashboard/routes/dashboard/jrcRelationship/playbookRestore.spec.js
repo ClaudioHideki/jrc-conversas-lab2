@@ -7,11 +7,13 @@ import Restore from './PlaybookRestoreDialog.vue';
 import Summary from './PlaybookDefinitionSummary.vue';
 import Preview from './PlaybookDesignPreview.vue';
 import Panel from './ConfigurationPanel.vue';
+import History from './PlaybookHistoryPanel.vue';
 const mocks = vi.hoisted(() => ({
   route: null,
   store: null,
   api: {
     playbooks: vi.fn(),
+    playbookHistory: vi.fn(),
     restorePlaybook: vi.fn(),
     playbookOptions: vi.fn(),
     previewPlaybook: vi.fn(),
@@ -88,7 +90,17 @@ beforeEach(() => {
     },
   });
   mocks.api.playbooks.mockImplementation(async () => ({
-    data: { payload: [structuredClone(current)] },
+    data: {
+      payload: [structuredClone(current)],
+      meta: { page: 1, per_page: 25, total: 1 },
+    },
+  }));
+  mocks.api.playbookHistory.mockImplementation(async () => ({
+    data: {
+      current: structuredClone(current),
+      payload: [structuredClone(historical)],
+      meta: { page: 1, per_page: 25, total: 1 },
+    },
   }));
   mocks.api.restorePlaybook.mockResolvedValue({
     data: { id: 18, version: 4, restored_from_version: 1 },
@@ -217,12 +229,19 @@ it('freshly reads the native book/history before review and confirms saved state
     true
   );
   await flushPromises();
-  await button(wrapper, 'Review playbook restoration').trigger('click');
+  wrapper
+    .findComponent(History)
+    .vm.$emit('restore', current.id, historical.version);
   await flushPromises();
-  expect(mocks.api.playbooks).toHaveBeenCalledTimes(2);
+  expect(mocks.api.playbookHistory).toHaveBeenCalledWith('1400', current.id, {
+    source_version: historical.version,
+  });
   expect(wrapper.findComponent(Restore).props('current')).toEqual(current);
   mocks.api.playbooks.mockResolvedValue({
-    data: { payload: [{ ...current, version: 4, name: definition.name }] },
+    data: {
+      payload: [{ ...current, version: 4, name: definition.name }],
+      meta: { page: 1, per_page: 25, total: 1 },
+    },
   });
   wrapper
     .findComponent(Restore)
@@ -240,16 +259,18 @@ it('does not reopen an old native history read after current account membership 
   );
   await flushPromises();
   let resolve;
-  mocks.api.playbooks.mockReturnValueOnce(
+  mocks.api.playbookHistory.mockReturnValueOnce(
     new Promise(done => {
       resolve = done;
     })
   );
-  await button(wrapper, 'Review playbook restoration').trigger('click');
+  wrapper
+    .findComponent(History)
+    .vm.$emit('restore', current.id, historical.version);
   mocks.api.playbooks.mockRejectedValue({ response: { status: 403 } });
   mocks.store.getters.getCurrentRole = 'agent';
   await flushPromises();
-  resolve({ data: { payload: [current] } });
+  resolve({ data: { current, payload: [historical] } });
   await flushPromises();
   expect(wrapper.findComponent(Restore).exists()).toBe(false);
   expect(wrapper.text()).not.toContain('Current saved definition');

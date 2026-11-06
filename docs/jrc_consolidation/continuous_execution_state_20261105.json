@@ -3,13 +3,13 @@
   "user_request": "499267ac-546d-4853-b4cf-7f03a2ea0629",
   "initial_head": "be54d0f7b4ce8d4e2a077cf2bdd8c2a4d5c88f5e",
   "branch": "codex/relacionamento-v2-20261101",
-  "last_validated_checkpoint": "2cd84c16c03f0023e95349fdbcadd97bc1d7dc75",
+  "last_validated_checkpoint": "42c54fa106ba75fbcc012fb1487456e0480cfa87",
   "completed_current_work": "Sealed dossier, weighted/current capacity, native withdrawal/cadence controls and F2 increments locally tested; see linked incremental reports. No C-G closure.",
-  "active_work": "Native playbook/history pagination and fresh selected-version access; preserve legacy API and current permissions.",
+  "active_work": "F2 native execution-history identity invalidation: inspect role/membership changes and validate no stale authorized results remain.",
   "exact_next_actions": [
-    "Implement bounded native playbook catalog/history pagination and source controls without losing access to older versions.",
-    "Test native scopes/denials/limits and source navigation, restore review and late identity changes.",
-    "Continue safe authorized C-G work; no build,push,cleanup,deploy,5379change or external operations."
+    "Test and correct execution-panel response/data invalidation on native role/membership changes, preserving backend source gates.",
+    "Continue safe remaining Word gaps without duplicating completed features.",
+    "No build,push,cleanup,deploy,5379change or external operations."
   ],
   "test_environment": {
     "source_manifest": ".codex/d9-notifications-20261104/snapshot.json",
@@ -142,5 +142,6 @@
   "named_portfolio_link_results_report": "docs/jrc_consolidation/named_portfolio_link_results_checkpoint_20261106.json",
   "configuration_restore_report": "docs/jrc_consolidation/configuration_restore_checkpoint_20261106.json",
   "playbook_restore_report": "docs/jrc_consolidation/playbook_restore_checkpoint_20261106.json",
-  "playbook_input_report": "docs/jrc_consolidation/playbook_input_checkpoint_20261106.json"
+  "playbook_input_report": "docs/jrc_consolidation/playbook_input_checkpoint_20261106.json",
+  "playbook_catalog_report": "docs/jrc_consolidation/playbook_catalog_checkpoint_20261106.json"
 }

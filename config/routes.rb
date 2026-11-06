@@ -714,6 +714,7 @@ Rails.application.routes.draw do
             post 'configuration/restore', to: 'configuration#restore'
             post 'configuration/health_preview', to: 'health_configuration_previews#create'
             get :playbooks, to: 'configuration#playbooks'
+            get 'playbooks/:id/history', to: 'configuration#playbook_history'
             get :playbook_options, to: 'configuration#playbook_options'
             post :playbook_preview, to: 'configuration#playbook_preview'
             get :playbook_executions, to: 'configuration#playbook_executions'

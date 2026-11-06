@@ -69,7 +69,9 @@ beforeEach(() => {
   mocks.api.records.mockResolvedValue({
     data: { payload: [], meta: { page: 1, total: 0, per_page: 25 } },
   });
-  mocks.api.playbooks.mockResolvedValue({ data: { payload: [] } });
+  mocks.api.playbooks.mockResolvedValue({
+    data: { payload: [], meta: { page: 1, per_page: 25, total: 0 } },
+  });
   mocks.api.savePlaybook.mockResolvedValue({ data: {} });
   mocks.api.batch.mockResolvedValue({ data: {} });
 });
@@ -218,6 +220,7 @@ describe('Complementary CS review', () => {
   it('keeps original step identities after removing a previous playbook step', async () => {
     mocks.api.playbooks.mockResolvedValue({
       data: {
+        meta: { page: 1, per_page: 25, total: 1 },
         payload: [
           {
             id: 5,
@@ -271,6 +274,7 @@ describe('Complementary CS review', () => {
     );
     mocks.api.playbooks.mockResolvedValue({
       data: {
+        meta: { page: 1, per_page: 25, total: 1 },
         payload: [
           {
             id: 5,
@@ -488,6 +492,7 @@ describe('Complementary CS review', () => {
   it('configures product-specific playbooks using native metadata references', async () => {
     mocks.api.playbooks.mockResolvedValue({
       data: {
+        meta: { page: 1, per_page: 25, total: 1 },
         payload: [
           {
             id: 5,

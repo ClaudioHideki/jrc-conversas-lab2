@@ -3,6 +3,19 @@ import API from 'dashboard/api/jrcRelationship';
 beforeEach(() => {
   global.axios = { get: vi.fn(), post: vi.fn(), patch: vi.fn() };
 });
+it('pages the native book catalog and reads selected history with cancellable requests', () => {
+  const signal = new AbortController().signal;
+  API.playbooks(12, { params: { page: 5, per_page: 25 }, signal });
+  API.playbookHistory(12, 18, { source_version: 1 }, { signal });
+  expect(global.axios.get).toHaveBeenCalledWith(
+    '/api/v1/accounts/12/relationship/playbooks',
+    { params: { page: 5, per_page: 25 }, signal }
+  );
+  expect(global.axios.get).toHaveBeenCalledWith(
+    '/api/v1/accounts/12/relationship/playbooks/18/history',
+    { params: { source_version: 1 }, signal }
+  );
+});
 it('binds every group operation to its explicit account without changing the native customer API', () => {
   const fields = {
     portfolio_group: { name: 'Reviewed' },
