@@ -3,13 +3,13 @@
   "user_request": "499267ac-546d-4853-b4cf-7f03a2ea0629",
   "initial_head": "be54d0f7b4ce8d4e2a077cf2bdd8c2a4d5c88f5e",
   "branch": "codex/relacionamento-v2-20261101",
-  "last_validated_checkpoint": "42c54fa106ba75fbcc012fb1487456e0480cfa87",
+  "last_validated_checkpoint": "9ea3122e9b9a0098549b194451f909e1d0f4bd92",
   "completed_current_work": "Sealed dossier, weighted/current capacity, native withdrawal/cadence controls and F2 increments locally tested; see linked incremental reports. No C-G closure.",
-  "active_work": "F2 native execution-history identity invalidation: inspect role/membership changes and validate no stale authorized results remain.",
+  "active_work": "Version author attribution through native current visible account users; retain historical author IDs and omit inaccessible names.",
   "exact_next_actions": [
-    "Test and correct execution-panel response/data invalidation on native role/membership changes, preserving backend source gates.",
-    "Continue safe remaining Word gaps without duplicating completed features.",
-    "No build,push,cleanup,deploy,5379change or external operations."
+    "Review native version author metadata and source UI against Word P0152; reuse native account/user visibility.",
+    "Implement/test missing author attribution without broadening permissions or modifying stored snapshots.",
+    "Continue safe C-G work; no build,push,cleanup,deploy,5379change or external operations."
   ],
   "test_environment": {
     "source_manifest": ".codex/d9-notifications-20261104/snapshot.json",
@@ -143,5 +143,6 @@
   "configuration_restore_report": "docs/jrc_consolidation/configuration_restore_checkpoint_20261106.json",
   "playbook_restore_report": "docs/jrc_consolidation/playbook_restore_checkpoint_20261106.json",
   "playbook_input_report": "docs/jrc_consolidation/playbook_input_checkpoint_20261106.json",
-  "playbook_catalog_report": "docs/jrc_consolidation/playbook_catalog_checkpoint_20261106.json"
+  "playbook_catalog_report": "docs/jrc_consolidation/playbook_catalog_checkpoint_20261106.json",
+  "playbook_execution_access_report": "docs/jrc_consolidation/playbook_execution_access_checkpoint_20261106.json"
 }

@@ -17,6 +17,8 @@ watch(
   [
     () => route.params.accountId,
     () => store.getters.getCurrentUserID,
+    () => store.getters.getCurrentRole,
+    () => JSON.stringify(store.getters.getCurrentUser?.accounts),
     () => props.allowed,
   ],
   async () => {

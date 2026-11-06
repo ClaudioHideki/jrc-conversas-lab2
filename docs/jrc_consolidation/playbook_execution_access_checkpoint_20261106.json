@@ -1,0 +1,32 @@
+{
+  "date": "2026-11-06",
+  "branch": "codex/relacionamento-v2-20261101",
+  "preserved_previous_checkpoint": "9ea3122e9b9a0098549b194451f909e1d0f4bd92",
+  "reference": "Relationship P0151/P0184/P0185: current permission-aware operational history.",
+  "status": "Execution history identity invalidation locally validated; not C-G closure.",
+  "implementation": [
+    "Existing execution panel now invalidates, clears and aborts the owned read on changed current role or account membership, in addition to its existing account/user/allowed guards. Late old-authority responses cannot repopulate results.",
+    "Execution endpoint now no-store. Existing native configure, allocation/source/Flow visibility, immutable snapshots and projection remain unchanged. No new engine, provider send or database schema."
+  ],
+  "evidence": {
+    "source_baseline": "playbook-execution-identity-baseline01:4cases,2failures reproduced retained loaded data after role change and uncancelled pending response after membership change.",
+    "source_final": "playbook-execution-identity-final03:4/0. Own RouterLink fixture declaration corrected; no missing-component warnings masked.",
+    "native_final": "playbook-execution-access-final03:5/0 (3new execution read tests +2native approved Flow HTTP regressions).",
+    "native_qualification": "Historical projection fixture uses native model creation, not provider delivery. Existing Flow HTTP regression executes only approved internal-note graph in isolatedDB with external networking disabled.",
+    "native_initial_failure": "native02:5cases,1failure in pre-existing unscoped empty-database assertion. Preserved candidateDB contains historical execution(s). Replaced global not-exist assumption with unchanged global run/execution counts AND no runs/executions in the test account; no data removed and no weaker success/status check.",
+    "static": "New source spec0ESLint findings; shared execution panel0errors/8existing warnings unchanged. Both Ruby specs ruby04:0offenses; diff check clean.",
+    "database": "jrc_rel_v2_candidate_test"
+  },
+  "environment": {
+    "disk_initial_bytes": 6923751424,
+    "disk_minimum_observed_bytes": 6896205824,
+    "disk_final_test_bytes": 6917423104,
+    "no_build_cleanup_5379change_migration_external_operation": true
+  },
+  "remaining": [
+    "Execution history broad pagination retains native100bound; no claim this list is fully paginated.",
+    "Current-source browser/visual acceptance and full C-G requirements remain open.",
+    "Complete local group roles/batches and other Word requirements are not marked complete; TRR undefined/external pilots/deferred portfolio-less documents unchanged."
+  ],
+  "checkpoint_resolution": "git log -1 --format=%H -- docs/jrc_consolidation/playbook_execution_access_checkpoint_20261106.json"
+}

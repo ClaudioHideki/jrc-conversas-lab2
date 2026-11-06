@@ -252,6 +252,12 @@
       "report": "docs/jrc_consolidation/playbook_catalog_checkpoint_20261106.json",
       "implemented_validated": "Operational native book/history pagination and fresh selected-history restoration, scoped reads;5native directed/0,11integrated/0overlap;39source/0.",
       "partial": "Execution-history broad paging, remaining F2 governance/pilot and actual current-source Chrome remain open."
+    },
+    {
+      "reference": "Relationship P0151/P0184/P0185",
+      "report": "docs/jrc_consolidation/playbook_execution_access_checkpoint_20261106.json",
+      "implemented_validated": "Role/membership invalidation of loaded and pending execution histories;4source/0,5native/0 including native Flow HTTP scope/origin regression.",
+      "partial": "Execution-wide pagination and full current-source visual acceptance remain open."
     }
   ],
   "explicit_dependencies": [
@@ -272,7 +278,7 @@
       "state": "External environment/operations require separate authorization; not simulated as passed."
     }
   ],
-  "next_confirmed_local_gap": "Execution panel identity invalidation currently watches account/user/allowed but not changed role/membership; verify before correction.",
+  "next_confirmed_local_gap": "Version authors are stored as actor_id; verify usable current-scope attribution in native version history UI (P0152).",
   "stage_closure": {
     "C": false,
     "D": false,

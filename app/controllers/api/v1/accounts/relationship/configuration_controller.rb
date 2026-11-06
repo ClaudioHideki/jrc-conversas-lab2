@@ -110,6 +110,7 @@ class Api::V1::Accounts::Relationship::ConfigurationController < Api::V1::Accoun
   end
 
   def playbook_executions
+    response.headers['Cache-Control'] = 'no-store'
     rows = JrcRelationship::PlaybookExecution.where(account: Current.account, assignment_id: relationship_context.assignments.select(:id))
     render json: { payload: rows.includes(:assignment).order(id: :desc).limit(100).select { |row| execution_visible?(row) }
                                 .map { |row| execution_payload(row) } }
