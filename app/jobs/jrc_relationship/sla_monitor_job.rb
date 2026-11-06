@@ -2,6 +2,7 @@ class JrcRelationship::SlaMonitorJob < ApplicationJob
   queue_as :scheduled_jobs
 
   def perform(account_id = nil)
+    JrcRelationship::WaitingReviewMonitor.new(account_id: account_id).call
     rows = JrcRelationship::Action.where(status: JrcRelationship::Action::ACTIVE_STATUSES).where.not(operations_sla_policy_id: nil).includes(:account)
     rows = rows.where(account_id: account_id) if account_id
     rows.find_each do |action|

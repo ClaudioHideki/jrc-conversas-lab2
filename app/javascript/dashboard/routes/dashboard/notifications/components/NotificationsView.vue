@@ -54,6 +54,12 @@ export default {
         return;
       }
       if (notification.notification_type === 'relationship_action') {
+        if (
+          String(notification.account_id) !== String(this.accountId) ||
+          notification.primary_actor_type !== 'JrcRelationship::Action' ||
+          !notification.primary_actor
+        )
+          return;
         this.$store.dispatch('notifications/read', {
           id: notification.id,
           primaryActorId: notification.primary_actor_id,
@@ -63,7 +69,10 @@ export default {
         this.$router.push({
           name: 'jrc_relationship_actions',
           params: { accountId: this.accountId },
-          query: { assignment_id: notification.primary_actor.assignment_id },
+          query: {
+            assignment_id: notification.primary_actor.assignment_id,
+            action_id: notification.primary_actor_id,
+          },
         });
         return;
       }

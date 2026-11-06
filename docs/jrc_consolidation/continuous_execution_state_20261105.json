@@ -3,9 +3,9 @@
   "user_request": "499267ac-546d-4853-b4cf-7f03a2ea0629",
   "initial_head": "be54d0f7b4ce8d4e2a077cf2bdd8c2a4d5c88f5e",
   "branch": "codex/relacionamento-v2-20261101",
-  "last_validated_checkpoint": "b187d282cf6744b560aae0d03ffd213f573badd1",
+  "last_validated_checkpoint": "c81e1333d89b65cffc933c75888945f379ad6bb4",
   "completed_current_work": "Native version-bound evidence/CS gates plus real immutable sealed dossier; see sealed_dossier_checkpoint_20261105.json. Full stages not closed.",
-  "active_work": "Implement native internal due-review notice through the existing scheduled SLA job and scoped relationship notification feed, with durable deduplication and transactional retries.",
+  "active_work": "F1 supervised native active-cadence review/stop control, preserving applied receipts and original immutable actor/snapshot; do not impersonate a successor or claim full succession.",
   "exact_next_actions": [
     "Finish safe analyst withdrawal via native scope/readiness and immutable reviewed responsibility receipts, including project owner/cadence dependencies.",
     "Continue F2 and C/D/G functional and Word/scale gaps without reducing requirements.",
@@ -47,12 +47,12 @@
     "No real participant removal or provider request; tests use synthetic records and WebMock, with external network disabled."
   ],
   "restrictions": "No build/recompile, no5379 change/restart, no four-container restart/reconfiguration, no cleanup/delete of existing data, no push/GHCR/deploy/production/client change, no real provider operations. Additive migrations allowed only in owned synthetic test database.",
-  "disk_last_observed_bytes": 7345324032,
+  "disk_last_observed_bytes": 7301115904,
   "TRR": "Undefined; do not invent",
   "company_documents_without_portfolio": "Explicitly deferred",
-  "last_validated_head": "b187d282cf6744b560aae0d03ffd213f573badd1",
+  "last_validated_head": "c81e1333d89b65cffc933c75888945f379ad6bb4",
   "new_validated_code_checkpoint": "Resolve latest local CS code checkpoint with git log -1 --format=%H -- docs/jrc_consolidation/cs_signature_origin_checkpoint_20261105.json",
-  "current_status": "Bounded waiting review gates passed; proceeding directly to native due-review notices, no C-G closure.",
+  "current_status": "Due-review native notice/feed/navigation gates passed; continuing F1 supervised cadence controls, not C-G closure.",
   "next_actions": [
     "Finish safe analyst withdrawal via native scope/readiness and immutable reviewed responsibility receipts, including project owner/cadence dependencies.",
     "Continue F2 and C/D/G functional and Word/scale gaps without reducing requirements.",
@@ -73,5 +73,6 @@
   "project_handoff_proof_report": "docs/jrc_consolidation/project_handoff_proof_checkpoint_20261105.json",
   "financial_segment_scale_report": "docs/jrc_consolidation/financial_segment_scale_checkpoint_20261105.json",
   "sentiment_evidence_report": "docs/jrc_consolidation/sentiment_evidence_checkpoint_20261105.json",
-  "waiting_review_report": "docs/jrc_consolidation/waiting_review_checkpoint_20261105.json"
+  "waiting_review_report": "docs/jrc_consolidation/waiting_review_checkpoint_20261105.json",
+  "waiting_review_notice_report": "docs/jrc_consolidation/waiting_review_notice_checkpoint_20261105.json"
 }

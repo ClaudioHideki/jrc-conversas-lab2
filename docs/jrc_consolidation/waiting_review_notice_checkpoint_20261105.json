@@ -1,0 +1,80 @@
+{
+  "date": "2026-11-05",
+  "parent_head": "c81e1333d89b65cffc933c75888945f379ad6bb4",
+  "status": "F2 internal overdue-review monitor and native notification navigation validated locally; no stage closure",
+  "implemented": [
+    "The existing scheduled relationship SLA job also scans due waiting reviews, including actions without an SLA policy and clocks currently paused. No cron/process/runtime setting changes.",
+    "Native Action row lock and a durable bounded system audit deduplicate by account-local action, current owner/status and exact UTC review instant. Failed native notification projection rolls back its writes and the audit; rescheduling creates a new event without multiplying per-recipient feed rows.",
+    "Uses existing relationship notifications, native recipient/source permissions, current read/count and ActionCable guards. Existing relationship notification delivery already skips email/browser-push jobs; in-app only. No source status, clock, membership or assignment is changed.",
+    "CS feed clicks now open the exact action popup through native action_id, retaining current customer context. A stale notification from another account is not marked read or navigated. Source access is still checked by the native record endpoint."
+  ],
+  "tests_non_additive": [
+    {
+      "label": "waiting-notice01",
+      "examples": 6,
+      "failures": 1,
+      "note": "Five passed; rescheduling fixture used unsupported nested travel_to. Paused-clock fixture was subsequently strengthened to require a real native pause."
+    },
+    {
+      "label": "waiting-notice-final",
+      "examples": 19,
+      "failures": 1,
+      "note": "All13 existing operational regressions and five monitor cases passed; strengthened paused fixture called the native keyword-only API positionally."
+    },
+    {
+      "label": "waiting-notice-source-final",
+      "examples": 6,
+      "failures": 0,
+      "note": "Final source includes real paused SLA, post-projection rollback/retry, UTC-zone-stable dedup, reschedule/unread, current source read/count and denied broadcast after revocation."
+    },
+    {
+      "label": "waiting-notice-ui01",
+      "tests": 10,
+      "failures": 1,
+      "note": "Nine passed including existing workspace. Cross-account fixture incorrectly prohibited the component initial feed query rather than only read/navigation."
+    },
+    {
+      "label": "waiting-notice-ui-final",
+      "tests": 4,
+      "failures": 0,
+      "note": "Two CS/current-account click cases plus existing approval navigation; fixture now distinguishes initial feed query from forbidden cross-account writes."
+    }
+  ],
+  "static": [
+    "New service/spec0 RuboCop offenses; existing SLA job28 inherited offenses and0 added cop counts.",
+    "Directed notification view/spec ESLint0 errors,0 warnings.",
+    "git diff --check clean. No related Enterprise override or dependencies/migrations changed."
+  ],
+  "files": [
+    "app/javascript/dashboard/routes/dashboard/notifications/components/NotificationsView.spec.js",
+    "app/javascript/dashboard/routes/dashboard/notifications/components/NotificationsView.vue",
+    "app/jobs/jrc_relationship/sla_monitor_job.rb",
+    "app/services/jrc_relationship/waiting_review_monitor.rb",
+    "spec/services/jrc_relationship/waiting_review_monitor_spec.rb"
+  ],
+  "disk": {
+    "waiting-notice01": {
+      "start": 7361093632,
+      "minimum": 7327535104,
+      "end": 7327596544
+    },
+    "waiting-notice-final": {
+      "start": 7325274112,
+      "minimum": 7301849088,
+      "end": 7322976256
+    },
+    "waiting-notice-source-final": {
+      "start": 7322075136,
+      "minimum": 7322075136,
+      "end": 7322497024
+    },
+    "final_bytes": 7301115904
+  },
+  "limits": [
+    "Automated native DB/feed/permission and listener tests do not claim an operational worker, actual WebSocket client or Chrome current-build acceptance.",
+    "No automatic wait resumption or external customer/provider contact. Notices with zero eligible current recipients are audited as due events, not fabricated deliveries.",
+    "Global final analyst withdrawal, active cadence successor authority and broader F2/C/D/G requirements remain open."
+  ],
+  "next": "F1 supervised native active-cadence review/stop control, preserving applied receipts and original immutable actor/snapshot; do not impersonate a successor or claim full succession.",
+  "restrictions": "No build,cleanup,push,GHCR,deploy,5379 change,container restart or real external operation."
+}

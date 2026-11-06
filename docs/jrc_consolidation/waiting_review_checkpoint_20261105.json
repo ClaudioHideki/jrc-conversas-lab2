@@ -55,7 +55,7 @@
   ],
   "static": [
     "New HTTP spec0 reported offenses with one explicitly documented synthetic pre-rule fixture SQL exception; production validation is not bypassed.",
-    "Action3,Workflow28,RecordsController13,operations specs28 andfunctional specs34 inherited offenses;0 new cop counts.",
+    "Final directed Action model/spec lint0 reported offenses; shared delta had0 new cop counts. Workflow28,RecordsController13,operations specs28 andfunctional specs34 inherited offenses remain.",
     "Directed ESLint0 errors after fixing new markup/return lint; existing module114,case18,dialog14,editor13 warnings retained.",
     "git diff --check clean; no build, migration or Enterprise override change."
   ],
