@@ -27,13 +27,13 @@ RSpec.describe 'Native configured relationship priority bands', type: :request d
     row = JrcRelationship::Action.find(response.parsed_body.fetch('id'))
     configuration
     patch "#{url}/#{row.id}", headers: headers, as: :json,
-                              params: { record: { assignment_id: assignment.id, lock_version: row.lock_version, priority: 88 } }
+                              params: { record: { assignment_id: assignment.id, lock_version: row.lock_version, priority: 95 } }
     expect(response).to have_http_status(:ok), response.body
-    expect(row.reload.factors).to include('priority_band' => 'P1', 'priority_band_score' => 88)
+    expect(row.reload.factors).to include('priority_band' => 'P0', 'priority_band_score' => 95)
     patch "#{url}/#{row.id}", headers: headers, as: :json,
-                              params: { record: { assignment_id: assignment.id, lock_version: 0, priority: 95 } }
+                              params: { record: { assignment_id: assignment.id, lock_version: 0, priority: 80 } }
     expect(response).to have_http_status(:conflict)
-    expect(row.reload.priority).to eq(88)
+    expect(row.reload.priority).to eq(95)
   end
 
   it 'retains the captured policy during unrelated edits and native system escalation after the default changes' do
@@ -46,7 +46,39 @@ RSpec.describe 'Native configured relationship priority bands', type: :request d
                                              'priority_band_policy' => original.fetch('priority_band_policy'))
     values = { assignment_id: assignment.id, lock_version: action.lock_version, priority: 100 }
     JrcRelationship::Workflow.new(JrcRelationship::Context.new(member)).save(kind: 'actions', id: action.id, attributes: values)
+    expect(action.reload.factors).to include('priority_band_policy' => original.fetch('priority_band_policy'), 'priority_band_score' => 100)
+    values[:lock_version] = action.lock_version
+    values[:priority] = 99
+    JrcRelationship::Workflow.new(JrcRelationship::Context.new(member)).save(kind: 'actions', id: action.id, attributes: values)
     expect(action.reload.factors.keys.grep(/priority_band/)).to eq([])
+  end
+
+  it 'does not replace pinned evidence when the native editor resubmits an unchanged score after a configuration publication' do
+    original_factors = action.factors.deep_dup
+    original_metadata = action.metadata.deep_dup
+    original_source = action.source_key
+    get config_url, headers: headers
+    change = response.parsed_body.slice('scope_key', 'version', 'weights', 'rules')
+    replacement = %w[P0 P1 P2 P3].zip([95, 90, 70, 0]).map { |code, minimum| { 'code' => code, 'minimum' => minimum } }
+    change['rules']['priority_bands'] = replacement
+    patch config_url, headers: headers, as: :json, params: change
+    expect(response).to have_http_status(:ok), response.body
+    configuration_history = response.parsed_body.fetch('history').deep_dup
+
+    patch "#{url}/#{action.id}", headers: headers, as: :json,
+                                 params: { record: { assignment_id: assignment.id, lock_version: action.lock_version,
+                                                     reason: 'Only the operational reason changed', priority: '88', status: action.status } }
+    expect(response).to have_http_status(:ok), response.body
+    expect(action.reload.factors).to eq(original_factors)
+    expect(action.attributes).to include('metadata' => original_metadata, 'source_key' => original_source,
+                                         'reason' => 'Only the operational reason changed')
+
+    patch "#{url}/#{action.id}", headers: headers, as: :json,
+                                 params: { record: { assignment_id: assignment.id, lock_version: action.lock_version, priority: 89 } }
+    expect(response).to have_http_status(:ok), response.body
+    expect(action.reload.factors).to include('priority_band' => 'P2', 'priority_band_score' => 89, 'priority_band_policy' => replacement.to_json)
+    get config_url, headers: headers
+    expect(response.parsed_body.fetch('history')).to eq(configuration_history)
   end
 
   it 'feeds the native calculation, CRM activity and playbook action constructors rather than only rendering a visual badge' do
