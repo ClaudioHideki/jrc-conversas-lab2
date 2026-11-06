@@ -21,8 +21,10 @@ class JrcRelationship::SignalJob < ApplicationJob
             end
     scope.find_each do |assignment|
       member = record.account.account_users.find_by(user_id: assignment.owner_id)
-      next unless member && JrcRelationship::ModulePolicy.new({ account: record.account, user: member.user, account_user: member },
-                                                              record.account).access?
+      next unless member&.user&.active_for_authentication?
+
+      user_context = { account: record.account, user: member.user, account_user: member }
+      next unless JrcRelationship::ModulePolicy.new(user_context, record.account).access?
 
       context = JrcRelationship::Context.new(member)
       next unless context.assignments.exists?(id: assignment.id)

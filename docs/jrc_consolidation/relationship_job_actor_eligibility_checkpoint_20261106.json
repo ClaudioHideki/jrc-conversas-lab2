@@ -1,0 +1,69 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "8ca69314c9dad6c2cbfb51164170c1b25a02c86e",
+  "status": "F/G native jobs increment validated; stages remain open",
+  "implementation": [
+    "SignalJob rejects owners who no longer satisfy native active_for_authentication? before native Context and assignment scopes. Offline presence remains allowed.",
+    "SlaMonitorJob refuses an unauthenticated escalation target before changing the action and native Agenda; breach audit and original ownership remain. Valid targets retain existing escalation behavior.",
+    "Existing SchedulerJob fallback to an authenticated authorized manager and RefreshJob checks reused; no identity removal, new roles or portfolio reassignment."
+  ],
+  "tests": {
+    "baseline": "Five examples/four failures: three were new Activity fixtures missing a native lead; one reproduced actual SLA assignment to an unconfirmed target. Fixtures corrected without changing model validation.",
+    "native01": "17 examples,0 failures:5 new job cases plus6 monitoring and6 waiting-review regression cases.",
+    "final02": "5 examples,0 failures after formatting-only guard extraction.",
+    "new_spec_offenses": 0,
+    "shared_static_delta": [
+      {
+        "path": "app/jobs/jrc_relationship/signal_job.rb",
+        "baseline": 5,
+        "current": 5,
+        "added": {}
+      },
+      {
+        "path": "app/jobs/jrc_relationship/sla_monitor_job.rb",
+        "baseline": 28,
+        "current": 28,
+        "added": {}
+      }
+    ],
+    "runtime": "Actual Rails/models/policies/jobs and synthetic candidate database. Account.find_each restricted to owned account in Scheduler test; no external events or provider calls."
+  },
+  "resources": {
+    "relationship-job-actor-native01": {
+      "start": 7146115072,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/jobs/jrc_relationship/signal_job_actor_eligibility_spec.rb": "4aeaa47967d33690eb4b9b166fc5eef26204284adf879eabd39d72f17b7f277a",
+        "spec/jobs/jrc_relationship/sla_monitor_job_actor_eligibility_spec.rb": "115236198eaada2b5912748c5a369277c4bdab5aab96b13b14ff08cd1da62a78",
+        "spec/services/jrc_relationship/monitoring_runs_spec.rb": "3c7152fbaff056037c2879f5f49df277ca98a5106a8aacdaf1ae2a04aef44082",
+        "spec/services/jrc_relationship/waiting_review_monitor_spec.rb": "74c41aabf22a68d7c0f2457fd07c66a015069b6dfbb5563e9ef5274de4b68b7a"
+      },
+      "minimum": 7145979904,
+      "exit_code": 0,
+      "end": 7145979904
+    },
+    "relationship-job-actor-final02": {
+      "start": 7129530368,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/jobs/jrc_relationship/signal_job_actor_eligibility_spec.rb": "4aeaa47967d33690eb4b9b166fc5eef26204284adf879eabd39d72f17b7f277a",
+        "spec/jobs/jrc_relationship/sla_monitor_job_actor_eligibility_spec.rb": "115236198eaada2b5912748c5a369277c4bdab5aab96b13b14ff08cd1da62a78"
+      },
+      "minimum": 7129464832,
+      "exit_code": 0,
+      "end": 7129534464
+    }
+  },
+  "pending": [
+    "Final analyst identity-removal scope awaiting business definition; do not remove account membership.",
+    "SLA skip retains existing once-per-breach behavior; no new retry policy claimed.",
+    "No fresh Chrome/current-assets validation under no-build restriction; no stage closure."
+  ],
+  "restrictions": "No build, cleanup, server5379 change, container restart, push, publication, deployment or external operation."
+}

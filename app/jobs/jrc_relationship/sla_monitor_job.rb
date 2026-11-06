@@ -40,6 +40,8 @@ class JrcRelationship::SlaMonitorJob < ApplicationJob
         escalation_id = action.operations_sla_policy.escalation['user_id']
         next unless escalation_id
         member = action.account.account_users.find_by!(user_id: escalation_id)
+        next unless member.user.active_for_authentication?
+
         context = JrcRelationship::Context.new(member)
         next unless context.policy.manage? && context.assignments.exists?(id: action.assignment_id)
         old_owner = action.owner_id
