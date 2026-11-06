@@ -29,6 +29,7 @@ class JrcRelationship::PortfolioBatch
   private
 
   def authorize_transfer!(rows)
+    @owner_id = parsed_owner_id
     JrcRelationship::DistributionApproval.lock_configuration!(@context.account.id)
     raise ArgumentError, 'Complete responsibility transfer requires a reviewed proposal' if @params[:transfer_responsibilities] && !@review
 
@@ -41,14 +42,25 @@ class JrcRelationship::PortfolioBatch
   end
 
   def changed_owner_id(rows)
-    owner_id = @params[:owner_id]
-    owner_id if rows.any? { |row| row.owner_id.to_s != owner_id.to_s }
+    @owner_id if rows.any? { |row| row.owner_id != @owner_id }
+  end
+
+  def parsed_owner_id
+    value = @params[:owner_id]
+    return if value.nil? || value == ''
+
+    valid = value.is_a?(Integer) || (value.is_a?(String) && value.match?(/\A[0-9]+\z/))
+    raise ArgumentError, 'Use a scalar positive owner ID or nil to unassign' unless valid
+
+    id = Integer(value.to_s, 10)
+    raise ArgumentError, 'Use a scalar positive owner ID or nil to unassign' unless id.positive?
+
+    id
   end
 
   def assert_review_identity!(rows)
     expected = { 'account_id' => @context.account.id, 'actor_id' => @context.user.id, 'state' => 'running' }
-    owner_id = @params[:owner_id].present? ? Integer(@params[:owner_id]) : nil
-    inputs = { 'operation' => 'assign', 'owner_id' => owner_id }
+    inputs = { 'operation' => 'assign', 'owner_id' => @owner_id }
     valid = @review.attributes.slice(*expected.keys) == expected && @review.inputs.slice(*inputs.keys) == inputs &&
             (rows.pluck(:id) - @review.inputs.fetch('ids')).empty?
     raise ArgumentError, 'Reviewed transfer identity mismatch' unless valid
@@ -68,7 +80,7 @@ class JrcRelationship::PortfolioBatch
     request_id = @params.require(:request_id)
     case operation
     when 'assign'
-      owner = @context.assignable_users.find(@params[:owner_id]) if @params[:owner_id].present?
+      owner = @context.assignable_users.find(@owner_id) if @owner_id
       { owner: owner }
     when 'playbook'
       book = JrcRelationship::Playbook.where(account: @context.account, active: true).find(@params.require(:playbook_id))
