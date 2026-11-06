@@ -43,7 +43,7 @@ class JrcRelationship::PortfolioGroups
     validate_reason!(reason)
     raise ArgumentError, 'Use an explicit customer membership boolean' unless [true, false].include?(active)
 
-    selected = customer_ids(ids)
+    selected = JrcRelationship::PortfolioGroupCustomerInput.parse(ids)
     with_authority do |context|
       group = locked_group(context, id, expected_version)
       raise ArgumentError, 'Archived portfolios cannot change their customer links' unless group.status == 'active'
@@ -57,7 +57,8 @@ class JrcRelationship::PortfolioGroups
         context.audit!(group, action: 'portfolio_group_customers_updated', before: { customers: before },
                               after: { customers: after, reason: reason.strip })
       end
-      receipt(group)
+      receipt(group).merge(results: JrcRelationship::PortfolioGroupMembershipResults.call(ids: selected, before: before, after: after,
+                                                                                          active: active))
     end
   end
 
@@ -84,15 +85,6 @@ class JrcRelationship::PortfolioGroups
     validate_text!(attrs)
     attrs['name'] = attrs['name'].strip if attrs.key?('name')
     attrs
-  end
-
-  def customer_ids(ids)
-    raise ArgumentError, 'Choose1to50 existing customer allocations' unless ids.is_a?(Array) && ids.size.between?(1, 50)
-
-    values = ids.map { |id| JrcRelationship::PortfolioOwnerInput.parse(id) }
-    raise ArgumentError, 'Choose unique positive allocation IDs' if values.any?(&:nil?) || values.uniq.size != values.size
-
-    values.sort
   end
 
   def validate_text!(attrs)

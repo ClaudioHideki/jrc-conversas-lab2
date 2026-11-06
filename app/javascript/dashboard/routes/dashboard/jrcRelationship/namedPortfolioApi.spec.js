@@ -79,3 +79,18 @@ it('rejects malformed account contexts before making any group request', () => {
   expect(global.axios.get).not.toHaveBeenCalled();
   expect(global.axios.post).not.toHaveBeenCalled();
 });
+
+it('binds a non-mutating selected-customer re-review to the explicit account and group with cancellation', () => {
+  const signal = new AbortController().signal;
+  API.portfolioGroupCustomerReview(
+    12,
+    18,
+    { assignment_ids: [31] },
+    { signal }
+  );
+  expect(global.axios.post).toHaveBeenCalledWith(
+    '/api/v1/accounts/12/relationship/portfolio_groups/18/customer_review',
+    { assignment_ids: [31] },
+    { signal }
+  );
+});

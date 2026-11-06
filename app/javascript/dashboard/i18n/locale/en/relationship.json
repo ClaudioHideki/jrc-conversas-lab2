@@ -5,6 +5,16 @@
       "OPEN_NATIVE_CUSTOMERS": "Open filtered customer list",
       "FILTER_ACTIVE": "This list is limited to the selected operational portfolio and your current customer permissions.",
       "CLEAR_GROUP_FILTER": "Remove portfolio filter",
+      "MEMBERSHIP": {
+        "RELOAD_REVIEW": "Reload selected customers for a new review",
+        "REVIEW_RELOADED": "Current customers and revision loaded. Review and confirm again; all rules are checked on save.",
+        "CURRENTLY_LINKED": "Currently linked",
+        "CURRENTLY_UNLINKED": "Currently unlinked",
+        "RESULT_TITLE": "Customer link results",
+        "RESULT_ITEM": "Customer allocation #{id}: {state}",
+        "ATOMIC_HELP": "This request commits all selected links together. A rejected request commits none; keep the draft, correct the cause and review again. This result is not a background batch queue.",
+        "STATES": { "linked": "Link activated", "already_linked": "Link already active", "unlinked": "Link deactivated", "already_unlinked": "Link already inactive" }
+      },
       "MASTER": {
         "TITLE": "Select from master directory",
         "HELP": "Choose an existing master customer. Existing Relationship ownership is preserved; adding the portfolio link requires a separate reason and review.",

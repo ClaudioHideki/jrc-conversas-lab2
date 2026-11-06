@@ -222,6 +222,12 @@
       "report": "docs/jrc_consolidation/named_portfolio_master_flow_checkpoint_20261106.json",
       "implemented_validated": "Individual native master selection, existing allocation reuse or explicit creation and later reason/revision link review;4native/0,34sourceUI/0.",
       "partial": "True master multi-select allocation batches, local roles, durable per-item resume, full audit and current-source visual acceptance remain open."
+    },
+    {
+      "reference": "Relationship P0128/P0184/P0185",
+      "report": "docs/jrc_consolidation/named_portfolio_link_results_checkpoint_20261106.json",
+      "implemented_validated": "Real per-item atomic receipts and controlled fresh re-review; no false partial/background success.",
+      "partial": "Durable grouping queue/item resumption, full local roles, master allocation batches and current-source Chrome remain open."
     }
   ],
   "explicit_dependencies": [
@@ -242,7 +248,7 @@
       "state": "External environment/operations require separate authorization; not simulated as passed."
     }
   ],
-  "next_confirmed_local_gap": "Per-item grouping result receipts and controlled retry on existing atomic link writes; durable reviewed batches remain separate.",
+  "next_confirmed_local_gap": "F2 P0152 controlled rollback to a new native configuration version; history is currently displayed but has no functional restore action.",
   "stage_closure": {
     "C": false,
     "D": false,

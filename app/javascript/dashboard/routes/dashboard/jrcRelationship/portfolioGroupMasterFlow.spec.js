@@ -125,7 +125,11 @@ beforeEach(() => {
   mocks.api.portfolioGroupCustomers.mockResolvedValue(page([]));
   mocks.api.saveAssignment.mockResolvedValue({ data: customer });
   mocks.api.savePortfolioGroupCustomers.mockResolvedValue({
-    data: { id: 18, version: 5 },
+    data: {
+      id: 18,
+      version: 5,
+      results: [{ assignment_id: 31, state: 'linked' }],
+    },
   });
 });
 afterEach(() => wrappers.splice(0).forEach(wrapper => wrapper.unmount()));

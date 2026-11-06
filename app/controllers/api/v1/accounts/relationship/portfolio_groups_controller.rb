@@ -42,6 +42,10 @@ class Api::V1::Accounts::Relationship::PortfolioGroupsController < Api::V1::Acco
                                                     expected_version: params[:expected_version], reason: params[:reason])
   end
 
+  def customer_review
+    render json: JrcRelationship::PortfolioGroupCustomerReview.new(relationship_context).call(params[:id], ids: params[:assignment_ids])
+  end
+
   private
 
   def attributes

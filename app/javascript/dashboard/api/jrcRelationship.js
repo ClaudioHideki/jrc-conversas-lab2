@@ -43,6 +43,12 @@ export default {
       `${base(accountId)}/portfolio_groups/${Number(id)}/customers`,
       fields
     ),
+  portfolioGroupCustomerReview: (accountId, id, fields, options) =>
+    axios.post(
+      `${base(accountId)}/portfolio_groups/${Number(id)}/customer_review`,
+      fields,
+      options
+    ),
   analystNativeResponsibilities: (accountId, analystId, params, options) =>
     axios.get(
       `${base(accountId)}/team/${Number(analystId)}/native_responsibilities`,

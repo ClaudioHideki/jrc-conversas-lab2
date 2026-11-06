@@ -12,6 +12,7 @@ import PortfolioGroupHistoryPanel from './PortfolioGroupHistoryPanel.vue';
 import PortfolioGroupMasterDialog from './PortfolioGroupMasterDialog.vue';
 import CustomerPanel from './CustomerPanel.vue';
 import { buttonClass, inputClass, message } from './definitions';
+import { confirmedMembership } from './portfolioGroupMembershipReceipt';
 const props = defineProps({ metadata: { type: Object, required: true } });
 const route = useRoute();
 const router = useRouter();
@@ -27,6 +28,17 @@ const saving = ref(false);
 const error = ref('');
 const saveError = ref('');
 const saved = ref(false);
+const membershipResult = ref(null);
+const membershipStates = computed(() => ({
+  linked: t('RELATIONSHIP.NAMED_PORTFOLIOS.MEMBERSHIP.STATES.linked'),
+  already_linked: t(
+    'RELATIONSHIP.NAMED_PORTFOLIOS.MEMBERSHIP.STATES.already_linked'
+  ),
+  unlinked: t('RELATIONSHIP.NAMED_PORTFOLIOS.MEMBERSHIP.STATES.unlinked'),
+  already_unlinked: t(
+    'RELATIONSHIP.NAMED_PORTFOLIOS.MEMBERSHIP.STATES.already_unlinked'
+  ),
+}));
 const conflict = ref(false);
 const blocked = ref(false);
 const editorOpen = ref(false);
@@ -155,7 +167,7 @@ const reviewMasterCustomer = customer => {
   dialogContext = viewIdentity.value;
   customerDialog.value = { customer: null, initialCustomer: customer };
 };
-const mutate = async (action, groupId) => {
+const mutate = async (action, groupId, membershipRequest = null) => {
   if (saving.value || dialogContext !== viewIdentity.value) return;
   mutationGeneration += 1;
   const operation = mutationGeneration;
@@ -164,6 +176,8 @@ const mutate = async (action, groupId) => {
   saving.value = true;
   saveError.value = '';
   conflict.value = false;
+  saved.value = false;
+  membershipResult.value = null;
   try {
     const { data } = await action();
     if (operation !== mutationGeneration || viewed !== viewIdentity.value)
@@ -173,11 +187,13 @@ const mutate = async (action, groupId) => {
       data.id <= 0 ||
       !Number.isSafeInteger(data.version) ||
       data.version < 0 ||
-      (groupId && String(data.id) !== String(groupId))
+      (groupId && String(data.id) !== String(groupId)) ||
+      (membershipRequest && !confirmedMembership(data, membershipRequest))
     ) {
       throw new Error(t('RELATIONSHIP.NAMED_PORTFOLIOS.SAVE_UNCONFIRMED'));
     }
     closeDrafts();
+    if (membershipRequest) membershipResult.value = data.results;
     if (String(selectedId.value) !== String(groupId || data.id))
       await openGroup(groupId || data.id);
     else await load(1);
@@ -206,7 +222,8 @@ const saveCustomers = fields => {
   const id = group.value?.id;
   return mutate(
     () => API.savePortfolioGroupCustomers(accountId, id, fields),
-    id
+    id,
+    fields
   );
 };
 const reloadDraft = () => {
@@ -227,6 +244,7 @@ watch(
     customers.value = [];
     selectedCustomer.value = null;
     saved.value = false;
+    membershipResult.value = null;
     saving.value = false;
     detailsTab.value = 'customers';
     load();
@@ -320,6 +338,31 @@ onBeforeUnmount(() => {
     >
       {{ t('RELATIONSHIP.LOADING') }}
     </p>
+    <section
+      v-if="saved && membershipResult && group && !error"
+      class="min-w-0 rounded-xl border border-n-teal-6 bg-n-teal-2 p-4"
+    >
+      <h3 class="font-semibold">
+        {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.MEMBERSHIP.RESULT_TITLE') }}
+      </h3>
+      <p class="text-sm text-n-slate-11">
+        {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.MEMBERSHIP.ATOMIC_HELP') }}
+      </p>
+      <ul class="mt-3 grid min-w-0 gap-2 sm:grid-cols-2">
+        <li
+          v-for="item in membershipResult"
+          :key="item.assignment_id"
+          class="break-words text-sm"
+        >
+          {{
+            t('RELATIONSHIP.NAMED_PORTFOLIOS.MEMBERSHIP.RESULT_ITEM', {
+              id: item.assignment_id,
+              state: membershipStates[item.state],
+            })
+          }}
+        </li>
+      </ul>
+    </section>
     <form
       v-if="!selectedId"
       class="flex min-w-0 flex-wrap items-end gap-3 rounded-xl border border-n-weak bg-n-solid-2 p-4"
@@ -710,7 +753,10 @@ onBeforeUnmount(() => {
       :conflict="conflict"
       @close="closeDrafts"
       @save="saveCustomers"
-      @reload="reloadDraft"
+      @reviewed="
+        conflict = false;
+        saveError = '';
+      "
     />
     <PortfolioGroupMasterDialog
       v-if="masterOpen && group"

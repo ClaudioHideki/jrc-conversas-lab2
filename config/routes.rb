@@ -612,6 +612,7 @@ Rails.application.routes.draw do
           end
           namespace :relationship do
             resources :portfolio_groups, only: [:index, :show, :create, :update] do
+              post :customer_review, on: :member
               get :history, on: :member
               get :export_history, on: :member
               get :workload, on: :member

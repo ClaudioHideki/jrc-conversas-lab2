@@ -412,7 +412,11 @@ it('limits each reviewed customer batch to fifty existing allocations', async ()
 it('persists the reviewed link batch through its scoped API and reloads the detail revision', async () => {
   mocks.route.query.group_id = '18';
   mocks.api.savePortfolioGroupCustomers.mockResolvedValue({
-    data: { id: 18, version: 5 },
+    data: {
+      id: 18,
+      version: 5,
+      results: [{ assignment_id: 31, state: 'linked' }],
+    },
   });
   const wrapper = render(Panel, { metadata }, true);
   await flushPromises();

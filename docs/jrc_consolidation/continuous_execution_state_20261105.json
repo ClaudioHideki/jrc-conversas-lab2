@@ -3,13 +3,13 @@
   "user_request": "499267ac-546d-4853-b4cf-7f03a2ea0629",
   "initial_head": "be54d0f7b4ce8d4e2a077cf2bdd8c2a4d5c88f5e",
   "branch": "codex/relacionamento-v2-20261101",
-  "last_validated_checkpoint": "41ed9b5b6498a348cb86b910cb363fb2d26f0502",
+  "last_validated_checkpoint": "52f2c39f024d386464ca58fea48aff76d4b0b4a7",
   "completed_current_work": "Sealed dossier, weighted/current capacity, native withdrawal/cadence controls and F2 increments locally tested; see linked incremental reports. No C-G closure.",
-  "active_work": "Per-item grouping receipts and controlled retry; complete role/durable batch/visual requirements remain open.",
+  "active_work": "Native configuration rollback from immutable history, not an old-version overwrite.",
   "exact_next_actions": [
-    "Implement per-item grouping result receipts and controlled retry using existing atomic link writes; keep durable reviewed batch requirements explicit.",
-    "Continue local-role/source-boundary audit and other safe C-G native gaps without inventing new global permissions.",
-    "No build/5379change;current-source Chrome remains pending authorization."
+    "Implement controlled configuration rollback by creating a new native version from an authorized immutable historical version; preserve all native governance.",
+    "Continue remaining safe C-G gaps; local role matrix/durable grouping queue remain explicit pending requirements.",
+    "No build/5379change/external operations;fresh visual acceptance pending."
   ],
   "test_environment": {
     "source_manifest": ".codex/d9-notifications-20261104/snapshot.json",
@@ -51,16 +51,16 @@
     "No real participant removal or provider request; tests use synthetic records and WebMock, with external network disabled."
   ],
   "restrictions": "No build/recompile, no5379 change/restart, no four-container restart/reconfiguration, no cleanup/delete of existing data, no push/GHCR/deploy/production/client change, no real provider operations. Additive migrations allowed only in owned synthetic test database.",
-  "disk_last_observed_bytes": 6628794368,
+  "disk_last_observed_bytes": 6624251904,
   "TRR": "Undefined; do not invent",
   "company_documents_without_portfolio": "Explicitly deferred",
-  "last_validated_head": "41ed9b5b6498a348cb86b910cb363fb2d26f0502",
-  "new_validated_code_checkpoint": "git log -1 --format=%H -- docs/jrc_consolidation/named_portfolio_master_flow_checkpoint_20261106.json",
-  "current_status": "Native master/allocation/review integration4HTTPtests/0,34sourceUI/0;C-G open.",
+  "last_validated_head": "52f2c39f024d386464ca58fea48aff76d4b0b4a7",
+  "new_validated_code_checkpoint": "git log -1 --format=%H -- docs/jrc_consolidation/named_portfolio_link_results_checkpoint_20261106.json",
+  "current_status": "Grouping per-item receipts and controlled retry validated;6newnative/0,24shared regressions passed,source33/0 and10/0(overlap);C-G open.",
   "next_actions": [
-    "Implement per-item grouping result receipts and controlled retry using existing atomic link writes; keep durable reviewed batch requirements explicit.",
-    "Continue local-role/source-boundary audit and other safe C-G native gaps without inventing new global permissions.",
-    "No build/5379change;current-source Chrome remains pending authorization."
+    "Implement controlled configuration rollback by creating a new native version from an authorized immutable historical version; preserve all native governance.",
+    "Continue remaining safe C-G gaps; local role matrix/durable grouping queue remain explicit pending requirements.",
+    "No build/5379change/external operations;fresh visual acceptance pending."
   ],
   "latest_dossier_report": "docs/jrc_consolidation/sealed_dossier_checkpoint_20261105.json",
   "capacity_report": "docs/jrc_consolidation/weighted_capacity_checkpoint_20261105.json",
@@ -138,5 +138,6 @@
   "named_portfolio_governance_report": "docs/jrc_consolidation/named_portfolio_governance_checkpoint_20261106.json",
   "named_portfolio_configured_scale_report": "docs/jrc_consolidation/named_portfolio_configured_scale_checkpoint_20261106.json",
   "named_portfolio_history_report": "docs/jrc_consolidation/named_portfolio_history_checkpoint_20261106.json",
-  "named_portfolio_master_flow_report": "docs/jrc_consolidation/named_portfolio_master_flow_checkpoint_20261106.json"
+  "named_portfolio_master_flow_report": "docs/jrc_consolidation/named_portfolio_master_flow_checkpoint_20261106.json",
+  "named_portfolio_link_results_report": "docs/jrc_consolidation/named_portfolio_link_results_checkpoint_20261106.json"
 }

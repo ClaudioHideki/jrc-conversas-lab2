@@ -14,7 +14,7 @@ const props = defineProps({
   error: { type: String, default: '' },
   conflict: Boolean,
 });
-const emit = defineEmits(['close', 'save', 'reload']);
+const emit = defineEmits(['close', 'save', 'reviewed']);
 const route = useRoute();
 const store = useStore();
 const { t } = useI18n();
@@ -37,7 +37,8 @@ const help = computed(() =>
     : t('RELATIONSHIP.NAMED_PORTFOLIOS.CUSTOMERS_HELP')
 );
 const pagination = ref({ page: 1, per_page: 25, total: 0 });
-const expectedVersion = props.group.version;
+const expectedVersion = ref(props.group.version);
+const refreshed = ref(false);
 const pages = computed(() =>
   Math.max(1, Math.ceil(pagination.value.total / pagination.value.per_page))
 );
@@ -91,6 +92,51 @@ const toggle = row => {
   if (selected.value.has(id)) selected.value.delete(id);
   else if (selected.value.size < 50) selected.value.set(id, row);
 };
+const reloadReview = async () => {
+  if (props.busy || loading.value || !selected.value.size) return;
+  const ids = [...selected.value.keys()];
+  generation += 1;
+  const token = generation;
+  controller?.abort();
+  controller = new AbortController();
+  const signal = controller.signal;
+  loading.value = true;
+  loadError.value = '';
+  refreshed.value = false;
+  try {
+    const { data } = await API.portfolioGroupCustomerReview(
+      route.params.accountId,
+      props.group.id,
+      { assignment_ids: ids },
+      { signal }
+    );
+    if (signal.aborted || token !== generation) return;
+    if (
+      String(data.group?.id) !== String(props.group.id) ||
+      !Number.isSafeInteger(data.group.version) ||
+      data.group.version < expectedVersion.value ||
+      !Array.isArray(data.payload) ||
+      data.payload.length !== ids.length ||
+      !data.payload.every(
+        row => row && ids.includes(row.id) && typeof row.linked === 'boolean'
+      ) ||
+      new Set(data.payload.map(row => row.id)).size !== ids.length
+    ) {
+      throw new Error(t('RELATIONSHIP.NAMED_PORTFOLIOS.SAVE_UNCONFIRMED'));
+    }
+    selected.value = new Map(data.payload.map(row => [row.id, row]));
+    expectedVersion.value = data.group.version;
+    step.value = 'review';
+    refreshed.value = true;
+    emit('reviewed');
+  } catch (err) {
+    if (signal.aborted || token !== generation) return;
+    loadError.value = message(err);
+    if ([401, 403, 404].includes(err.response?.status)) selected.value.clear();
+  } finally {
+    if (token === generation && !signal.aborted) loading.value = false;
+  }
+};
 const save = () => {
   if (
     props.busy ||
@@ -103,7 +149,7 @@ const save = () => {
   emit('save', {
     assignment_ids: [...selected.value.keys()],
     active: !props.customer,
-    expected_version: expectedVersion,
+    expected_version: expectedVersion.value,
     reason: reason.value.trim(),
   });
 };
@@ -160,17 +206,24 @@ onBeforeUnmount(() => {
         role="alert"
         class="break-words text-sm text-n-ruby-11"
       >
-        {{ error || loadError }}
+        {{ loadError || error }}
       </p>
       <button
         v-if="conflict"
         type="button"
         :class="buttonClass"
-        :disabled="busy"
-        @click="emit('reload')"
+        :disabled="busy || loading || !selected.size"
+        @click="reloadReview"
       >
-        {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.RELOAD_DRAFT') }}
+        {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.MEMBERSHIP.RELOAD_REVIEW') }}
       </button>
+      <p
+        v-if="refreshed"
+        role="status"
+        class="text-sm text-n-teal-11"
+      >
+        {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.MEMBERSHIP.REVIEW_RELOADED') }}
+      </p>
       <p
         v-if="loading"
         role="status"
@@ -270,13 +323,30 @@ onBeforeUnmount(() => {
         class="space-y-3"
         @submit.prevent="save"
       >
-        <ul class="max-h-64 space-y-2 overflow-y-auto">
+        <ul
+          v-if="!loading"
+          class="max-h-64 space-y-2 overflow-y-auto"
+        >
           <li
             v-for="row in selected.values()"
             :key="row.id"
             class="break-words rounded-lg border border-n-weak p-2"
           >
-            {{ row.name }}
+            <p>{{ row.name }}</p>
+            <span
+              v-if="typeof row.linked === 'boolean'"
+              class="block text-xs text-n-slate-11"
+            >
+              {{
+                row.linked
+                  ? t(
+                      'RELATIONSHIP.NAMED_PORTFOLIOS.MEMBERSHIP.CURRENTLY_LINKED'
+                    )
+                  : t(
+                      'RELATIONSHIP.NAMED_PORTFOLIOS.MEMBERSHIP.CURRENTLY_UNLINKED'
+                    )
+              }}
+            </span>
           </li>
         </ul>
         <label class="block">
