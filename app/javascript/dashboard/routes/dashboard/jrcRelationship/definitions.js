@@ -53,6 +53,7 @@ export const FIELDS = {
     'return_at',
     'customer_confirmation',
     'customer_feedback',
+    'waiting_reason',
   ],
   risks: [
     'reason',

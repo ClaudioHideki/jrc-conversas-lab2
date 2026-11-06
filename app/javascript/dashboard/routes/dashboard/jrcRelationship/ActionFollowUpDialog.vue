@@ -1,8 +1,9 @@
 <script setup>
-import { reactive, ref, onMounted } from 'vue';
+import { computed, reactive, ref, onMounted, watch, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import { buttonClass, inputClass, STATES } from './definitions';
+import { isWaitingStatus, validWaitingReview } from './waitingReview';
 const props = defineProps({
   record: { type: Object, required: true },
   busy: Boolean,
@@ -27,12 +28,38 @@ const form = reactive({
   return_at: localTime(props.record.return_at),
   customer_confirmation: props.record.customer_confirmation || 'pending',
   customer_feedback: props.record.customer_feedback || '',
+  waiting_reason: props.record.metadata?.waiting_reason || '',
 });
-const submit = () =>
+const waiting = computed(() => isWaitingStatus(form.status));
+const attemptedReview = ref(false);
+const waitingError = computed(
+  () => attemptedReview.value && waiting.value && !validWaitingReview(form)
+);
+watch(
+  () => form.status,
+  status => {
+    if (isWaitingStatus(status)) tab.value = 'followup';
+  }
+);
+const invalidField = async event => {
+  const fieldTab = event.target.closest('[data-action-tab]')?.dataset.actionTab;
+  if (fieldTab) tab.value = fieldTab;
+  if (waiting.value && fieldTab === 'followup') attemptedReview.value = true;
+  await nextTick();
+  event.target.focus();
+};
+const submit = () => {
+  if (props.busy) return;
+  if (waiting.value && !validWaitingReview(form)) {
+    attemptedReview.value = true;
+    tab.value = 'followup';
+    return;
+  }
   emit('save', {
     ...form,
     return_at: form.return_at ? new Date(form.return_at).toISOString() : null,
   });
+};
 onMounted(() => dialog.value.open());
 </script>
 
@@ -49,6 +76,7 @@ onMounted(() => dialog.value.open());
     <form
       class="space-y-4"
       @submit.prevent="submit"
+      @invalid.capture="invalidField"
     >
       <div
         class="flex gap-2"
@@ -77,14 +105,23 @@ onMounted(() => dialog.value.open());
       >
         {{ error }}
       </p>
+      <p
+        v-if="waitingError"
+        role="alert"
+        class="text-sm text-n-ruby-11"
+      >
+        {{ t('RELATIONSHIP.V2.WAITING_REVIEW_REQUIRED') }}
+      </p>
       <div
         v-show="tab === 'result'"
+        data-action-tab="result"
         class="space-y-3"
       >
         <label class="block text-sm"
           >{{ t('RELATIONSHIP.FIELDS.status')
           }}<select
             v-model="form.status"
+            data-testid="action-status"
             :class="inputClass"
           >
             <option
@@ -146,27 +183,45 @@ onMounted(() => dialog.value.open());
       </div>
       <div
         v-show="tab === 'followup'"
+        data-action-tab="followup"
         class="space-y-3"
       >
+        <label
+          v-if="waiting"
+          class="block text-sm"
+        >
+          {{ t('RELATIONSHIP.FIELDS.waiting_reason') }}
+          <textarea
+            v-model="form.waiting_reason"
+            data-testid="action-waiting-reason"
+            :class="inputClass"
+            rows="3"
+            maxlength="4000"
+            required
+          />
+        </label>
         <label class="block text-sm"
           >{{ t('RELATIONSHIP.FIELDS.next_step')
           }}<textarea
             v-model="form.next_step"
+            data-testid="action-next-step"
             :class="inputClass"
             rows="3"
             maxlength="4000"
-            :required="!!form.return_at"
+            :required="waiting || !!form.return_at"
           />
         </label>
         <label class="block text-sm"
           >{{ t('RELATIONSHIP.FIELDS.return_at')
           }}<input
             v-model="form.return_at"
+            data-testid="action-return-at"
             type="datetime-local"
             :class="inputClass"
             :required="
-              !!form.next_step &&
-              !['completed', 'dismissed'].includes(form.status)
+              waiting ||
+              (!!form.next_step &&
+                !['completed', 'dismissed'].includes(form.status))
             "
         /></label>
       </div>

@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { FIELDS, STATES, buttonClass, inputClass } from './definitions';
 import SlaSummary from './SlaSummary.vue';
 import WorkContextPanel from './WorkContextPanel.vue';
+import { isWaitingStatus, validWaitingReview } from './waitingReview';
 const props = defineProps({
   kind: { type: String, required: true },
   record: { type: Object, default: () => ({}) },
@@ -20,6 +21,7 @@ const form = reactive({
   request_id: crypto.randomUUID(),
   ...props.record,
   notes: props.record.metadata?.notes || '',
+  waiting_reason: props.record.metadata?.waiting_reason || '',
   expansion_kind:
     props.record.metadata?.expansion_kind ||
     props.record.metadata?.kind ||
@@ -27,6 +29,10 @@ const form = reactive({
   renewed_contract_id: props.record.metadata?.renewed_contract_id || '',
 });
 const workContext = ref(null);
+const waitingError = ref(false);
+const waiting = computed(
+  () => props.kind === 'actions' && isWaitingStatus(form.status)
+);
 const loadContext = data => {
   workContext.value = data;
   if (props.kind === 'qbrs' && !form.agenda && data)
@@ -178,6 +184,12 @@ const add = key => {
 };
 const submit = () => {
   if (props.readOnly || props.busy) return;
+  if (waiting.value && !validWaitingReview(form)) {
+    waitingError.value = true;
+    editorTab.value = 'record';
+    return;
+  }
+  waitingError.value = false;
   const payload = { ...form };
   ['due_at', 'scheduled_at', 'return_at'].forEach(key => {
     if (payload[key]) payload[key] = new Date(payload[key]).toISOString();
@@ -220,6 +232,13 @@ const submit = () => {
         editorTab
     "
   >
+    <p
+      v-if="waitingError"
+      role="alert"
+      class="mb-3 text-sm text-n-ruby-11"
+    >
+      {{ t('RELATIONSHIP.V2.WAITING_REVIEW_REQUIRED') }}
+    </p>
     <div class="mb-4 flex items-center justify-between">
       <h3 class="font-semibold">
         {{ t(record.id ? 'RELATIONSHIP.EDIT' : 'RELATIONSHIP.NEW') }}
@@ -400,6 +419,7 @@ const submit = () => {
             v-else-if="
               [
                 'reason',
+                'waiting_reason',
                 'next_step',
                 'customer_feedback',
                 'result',
@@ -412,8 +432,11 @@ const submit = () => {
             v-model="form[key]"
             :class="inputClass"
             rows="3"
+            :data-testid="`relationship-field-${key}`"
+            :maxlength="key === 'waiting_reason' ? 4000 : undefined"
             :required="
               ['reason'].includes(key) ||
+              (waiting && ['waiting_reason', 'next_step'].includes(key)) ||
               (key === 'result' && form.status === 'completed') ||
               (key === 'summary' && form.status === 'completed') ||
               (key === 'outcome' &&
@@ -425,8 +448,12 @@ const submit = () => {
             v-model="form[key]"
             :class="inputClass"
             :type="fieldType(key)"
+            :data-testid="`relationship-field-${key}`"
             :min="fieldType(key) === 'number' ? 0 : undefined"
-            :required="['title', 'scheduled_at'].includes(key)"
+            :required="
+              ['title', 'scheduled_at'].includes(key) ||
+              (waiting && key === 'return_at')
+            "
           />
         </label>
       </div>

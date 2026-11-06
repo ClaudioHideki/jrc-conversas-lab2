@@ -114,7 +114,7 @@ class Api::V1::Accounts::Relationship::RecordsController < Api::V1::Accounts::Re
     ids = params.require(:ids)
     raise ArgumentError, 'Select between 1 and 50 actions' unless ids.is_a?(Array) && ids.size.between?(1, 50)
 
-    attrs = params.require(:record).permit(:status, :due_at, :priority, :result, :owner_id).to_h
+    attrs = params.require(:record).permit(:status, :due_at, :priority, :result, :owner_id, :waiting_reason, :next_step, :return_at).to_h
     raise Pundit::NotAuthorizedError unless relationship_context.policy.manage?
 
     rows = relationship_context.records(JrcRelationship::Action).where(id: ids).order(:id)
@@ -201,7 +201,7 @@ class Api::V1::Accounts::Relationship::RecordsController < Api::V1::Accounts::Re
     params.require(:record).permit(
       :assignment_id, :request_id, :lock_version, :owner_id, :reason, :status, :priority, :due_at,
       :result, :kind, :severity, :outcome, :title, :target_on, :project_id, :scheduled_at, :agenda, :summary,
-      :next_step, :return_at, :customer_confirmation, :customer_feedback,
+      :next_step, :return_at, :customer_confirmation, :customer_feedback, :waiting_reason,
       :proposed_mrr_cents, :renewed_contract_id, :product_id, :contract_id, :source_contract_id, :source_product_id,
       :potential_cents, :evidence, :expansion_kind, :meeting_url, :recording_url, :provider, :contact_id,
       plan: [:cause, :hypothesis, :strategy, :actions, :concessions], goals: [], participants: [], decisions: []

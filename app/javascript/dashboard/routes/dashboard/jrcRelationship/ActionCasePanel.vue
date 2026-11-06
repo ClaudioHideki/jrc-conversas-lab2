@@ -169,6 +169,17 @@ const save = async fields => {
           {{ t('RELATIONSHIP.V2.ROUTING_WAITING') }}
         </p>
         <dl class="grid grid-cols-2 gap-3 text-sm">
+          <div
+            v-if="record.metadata?.waiting_reason"
+            class="col-span-2 min-w-0"
+          >
+            <dt class="text-n-slate-11">
+              {{ t('RELATIONSHIP.FIELDS.waiting_reason') }}
+            </dt>
+            <dd class="whitespace-pre-wrap break-words">
+              {{ record.metadata.waiting_reason }}
+            </dd>
+          </div>
           <div>
             <dt class="text-n-slate-11">
               {{ t('RELATIONSHIP.FIELDS.owner_id') }}

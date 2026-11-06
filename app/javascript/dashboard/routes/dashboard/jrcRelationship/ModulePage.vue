@@ -10,6 +10,7 @@ import MetricsPanel from './MetricsPanel.vue';
 import NicoSummaryPanel from './NicoSummaryPanel.vue';
 import PortfolioTable from './PortfolioTable.vue';
 import RecordEditor from './RecordEditor.vue';
+import { isWaitingStatus, validWaitingReview } from './waitingReview';
 import CustomerPanel from './CustomerPanel.vue';
 import ConfigurationPanel from './ConfigurationPanel.vue';
 import SurveyAdministrationPanel from './SurveyAdministrationPanel.vue';
@@ -131,6 +132,9 @@ const batch = reactive({
   due_at: '',
   priority: '',
   owner_id: '',
+  waiting_reason: '',
+  next_step: '',
+  return_at: '',
 });
 const commercial = reactive({ pipeline_id: '', stage_id: '', contact_id: '' });
 const portfolioScreen = computed(() =>
@@ -311,8 +315,13 @@ const chooseOpportunity = async row => {
       error.value = message(err);
   }
 };
-const completeBatch = () =>
-  mutate(() =>
+const completeBatch = () => {
+  const waiting = isWaitingStatus(batch.status);
+  if (waiting && !validWaitingReview(batch)) {
+    error.value = t('RELATIONSHIP.V2.WAITING_REVIEW_REQUIRED');
+    return false;
+  }
+  return mutate(() =>
     API.batch(route.params.accountId, selected.value, {
       ...batch,
       status: batch.status || undefined,
@@ -320,8 +329,12 @@ const completeBatch = () =>
       priority: batch.priority === '' ? undefined : Number(batch.priority),
       owner_id: batch.owner_id === '' ? undefined : Number(batch.owner_id),
       due_at: batch.due_at ? new Date(batch.due_at).toISOString() : undefined,
+      waiting_reason: waiting ? batch.waiting_reason : undefined,
+      next_step: waiting ? batch.next_step : undefined,
+      return_at: waiting ? new Date(batch.return_at).toISOString() : undefined,
     })
   );
+};
 const updatePortfolioBatch = () => {
   portfolioReviewProposal.value = {
     ...portfolioOperation,
@@ -1447,6 +1460,49 @@ const money = value => formatMoney(value, metadata.value?.formatting);
             class="mt-3 flex flex-wrap items-end gap-2 rounded-xl border border-n-weak p-4"
             @submit.prevent="completeBatch"
           >
+            <div
+              v-if="isWaitingStatus(batch.status)"
+              class="grid w-full min-w-0 gap-3 md:grid-cols-3"
+            >
+              <label class="text-sm">
+                <span class="block">{{
+                  t('RELATIONSHIP.FIELDS.waiting_reason')
+                }}</span>
+                <textarea
+                  v-model="batch.waiting_reason"
+                  data-testid="batch-waiting-reason"
+                  :class="inputClass"
+                  maxlength="4000"
+                  rows="2"
+                  required
+                />
+              </label>
+              <label class="text-sm">
+                <span class="block">{{
+                  t('RELATIONSHIP.FIELDS.next_step')
+                }}</span>
+                <textarea
+                  v-model="batch.next_step"
+                  data-testid="batch-next-step"
+                  :class="inputClass"
+                  maxlength="4000"
+                  rows="2"
+                  required
+                />
+              </label>
+              <label class="text-sm">
+                <span class="block">{{
+                  t('RELATIONSHIP.FIELDS.return_at')
+                }}</span>
+                <input
+                  v-model="batch.return_at"
+                  data-testid="batch-return-at"
+                  type="datetime-local"
+                  :class="inputClass"
+                  required
+                />
+              </label>
+            </div>
             <label class="text-sm"
               >{{ t('RELATIONSHIP.FIELDS.status')
               }}<select

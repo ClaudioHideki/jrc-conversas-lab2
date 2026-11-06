@@ -8,7 +8,7 @@ class JrcRelationship::Workflow
              'renewals' => JrcRelationship::Renewal, 'expansion' => JrcRelationship::ExpansionSignal,
              'surveys' => JrcRelationship::Survey }.freeze
   FIELDS = {
-    'actions' => %w[reason status priority due_at result owner_id next_step return_at customer_confirmation customer_feedback],
+    'actions' => %w[reason status priority due_at result owner_id next_step return_at customer_confirmation customer_feedback waiting_reason],
     'risks' => %w[kind severity reason status due_at outcome plan owner_id],
     'plans' => %w[title status target_on goals project_id contract_id product_id owner_id],
     'qbrs' => %w[title scheduled_at status agenda summary participants decisions owner_id meeting_url recording_url provider contact_id contract_id

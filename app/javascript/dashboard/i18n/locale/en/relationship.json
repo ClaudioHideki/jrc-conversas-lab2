@@ -269,7 +269,8 @@
       "next_step": "Próximo passo",
       "return_at": "Data de retorno",
       "customer_confirmation": "Confirmação do cliente",
-      "customer_feedback": "Retorno do cliente"
+      "customer_feedback": "Retorno do cliente",
+      "waiting_reason": "Reason for waiting / pause"
     },
     "METRICS": {
       "customers": "Clientes na carteira",
@@ -1519,7 +1520,8 @@
           "before": "Antes",
           "after": "Depois"
         }
-      }
+      },
+      "WAITING_REVIEW_REQUIRED": "Provide the reason for waiting, the next step and a future reassessment date. The native SLA policy remains in effect."
     },
     "WITHDRAWAL": {
       "TITLE": "Analyst withdrawal readiness",
