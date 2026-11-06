@@ -225,9 +225,7 @@ class Api::V1::Accounts::Relationship::ConfigurationController < Api::V1::Accoun
   end
 
   def playbook_attributes
-    params.require(:playbook).permit(:name, :trigger_kind, :active,
-                                     steps: [:kind, :title, :after_days, :step_key, *JrcRelationship::PlaybookSteps::FLOW_FIELDS],
-                                     conditions: [:field, :operator, :value])
+    JrcRelationship::PlaybookInput.call(request: request, params: params)
   end
 
   def validate_flow_steps!(steps)

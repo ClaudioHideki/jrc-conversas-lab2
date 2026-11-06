@@ -1,0 +1,37 @@
+{
+  "date": "2026-11-06",
+  "branch": "codex/relacionamento-v2-20261101",
+  "preserved_previous_checkpoint": "2cd84c16c03f0023e95349fdbcadd97bc1d7dc75",
+  "status": "Native input correction validated; C-G remain open.",
+  "implementation": [
+    "Validate original JSON collection shapes before Rails deep-munging so null conditions cannot become unconditional automation and null steps cannot silently disappear.",
+    "Preserve native field allowlists, empty conditions, partial JSON/form edits and all model validation and permission/version/Flow gates. No new endpoints or migration.",
+    "Malformed root/collection inputs return controlled422 without altering records, versions or success audit."
+  ],
+  "evidence": {
+    "baseline": "playbook-input-baseline01:5examples,3failures reproduced two silent200 mutations and malformed root500.",
+    "intermediate": "playbook-input-final02:11/0 overlapping five inputs and six restoration regressions.",
+    "final": {
+      "label": "playbook-input-final05",
+      "examples": 16,
+      "failures": 0,
+      "coverage": "7input cases including malformed-shape matrix and native form compatibility +6restoration regressions +3native Flow/playbook integration cases.",
+      "database": "jrc_rel_v2_candidate_test"
+    },
+    "ruby": "playbook-input-ruby04:0offenses in both new files; previous helper complexity corrected by separating submitted-object read and collection validation.",
+    "frontend": "Unchanged; no sourceUI tests repeated and no build/Chrome claim.",
+    "diff": "git diff --check clean."
+  },
+  "environment": {
+    "disk_start_bytes": 6758215680,
+    "disk_minimum_bytes": 6738489344,
+    "disk_end_bytes": 6757945344,
+    "no_build_cleanup_5379change_migration_external_operation": true
+  },
+  "remaining": [
+    "Bounded native playbook/history list still needs operational pagination and fresh selected-history restoration beyond the legacy bounds.",
+    "Full portfolio-local roles, durable grouped batches, master allocation batches, other Word gaps and current-source Chrome remain open.",
+    "TRR undefined; company documents without portfolio deferred; external validation not authorized."
+  ],
+  "checkpoint_resolution": "git log -1 --format=%H -- docs/jrc_consolidation/playbook_input_checkpoint_20261106.json"
+}

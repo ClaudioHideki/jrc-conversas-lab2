@@ -240,6 +240,12 @@
       "report": "docs/jrc_consolidation/playbook_restore_checkpoint_20261106.json",
       "implemented_validated": "Controlled native playbook restoration, current Flow review and simulation-only UI;6backend/0 and source cohorts19/0,25/0,11/0 with overlaps.",
       "partial": "Actual current-source Chrome, production governance/pilot, full history pagination and other C-G requirements remain open."
+    },
+    {
+      "reference": "Relationship P0152/P0181/P0185",
+      "report": "docs/jrc_consolidation/playbook_input_checkpoint_20261106.json",
+      "implemented_validated": "Typed JSON/form input gate;16native/0 with overlap qualifications. No silently unconditional condition or shortened step sequence.",
+      "partial": "Catalog/history pagination and remaining F2/current-source visual acceptance remain open."
     }
   ],
   "explicit_dependencies": [
@@ -260,7 +266,7 @@
       "state": "External environment/operations require separate authorization; not simulated as passed."
     }
   ],
-  "next_confirmed_local_gap": "Native playbook typed JSON conditions/steps: preserve submitted shapes before Rails normalization.",
+  "next_confirmed_local_gap": "Native playbook catalog/history pagination and fresh selected-version access.",
   "stage_closure": {
     "C": false,
     "D": false,
