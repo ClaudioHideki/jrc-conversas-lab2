@@ -3,9 +3,9 @@
   "user_request": "499267ac-546d-4853-b4cf-7f03a2ea0629",
   "initial_head": "be54d0f7b4ce8d4e2a077cf2bdd8c2a4d5c88f5e",
   "branch": "codex/relacionamento-v2-20261101",
-  "last_validated_checkpoint": "4f4531739f696deb1b34c77dd19fa4a24efc0bf9",
+  "last_validated_checkpoint": "d41c0b08ee00b7bbc515e2d57702df5071d66baa",
   "completed_current_work": "Native version-bound evidence/CS gates plus real immutable sealed dossier; see sealed_dossier_checkpoint_20261105.json. Full stages not closed.",
-  "active_work": "C/G representative financial segment scale: one thousand native synthetic customers, invoiced orders and CRM leads; then continue F2/C/D gaps.",
+  "active_work": "F2 sentiment evidence: preserve current90-day default, configurable real observation window and read-time freshness without rewriting historical scores.",
   "exact_next_actions": [
     "Finish safe analyst withdrawal via native scope/readiness and immutable reviewed responsibility receipts, including project owner/cadence dependencies.",
     "Continue F2 and C/D/G functional and Word/scale gaps without reducing requirements.",
@@ -47,12 +47,12 @@
     "No real participant removal or provider request; tests use synthetic records and WebMock, with external network disabled."
   ],
   "restrictions": "No build/recompile, no5379 change/restart, no four-container restart/reconfiguration, no cleanup/delete of existing data, no push/GHCR/deploy/production/client change, no real provider operations. Additive migrations allowed only in owned synthetic test database.",
-  "disk_last_observed_bytes": 7383494656,
+  "disk_last_observed_bytes": 7378669568,
   "TRR": "Undefined; do not invent",
   "company_documents_without_portfolio": "Explicitly deferred",
-  "last_validated_head": "4f4531739f696deb1b34c77dd19fa4a24efc0bf9",
+  "last_validated_head": "d41c0b08ee00b7bbc515e2d57702df5071d66baa",
   "new_validated_code_checkpoint": "Resolve latest local CS code checkpoint with git log -1 --format=%H -- docs/jrc_consolidation/cs_signature_origin_checkpoint_20261105.json",
-  "current_status": "Native project handoff proof gates passed; F1 full withdrawal and C-G remain open.",
+  "current_status": "Financial representative-scale gate passed after real query optimization; continuous F2 work begins, no C-G closure.",
   "next_actions": [
     "Finish safe analyst withdrawal via native scope/readiness and immutable reviewed responsibility receipts, including project owner/cadence dependencies.",
     "Continue F2 and C/D/G functional and Word/scale gaps without reducing requirements.",
@@ -70,5 +70,6 @@
   "cadence_action_budget_report": "docs/jrc_consolidation/cadence_action_budget_checkpoint_20261105.json",
   "cadence_agenda_report": "docs/jrc_consolidation/cadence_agenda_governance_checkpoint_20261105.json",
   "analyst_current_capacity_report": "docs/jrc_consolidation/analyst_current_capacity_checkpoint_20261105.json",
-  "project_handoff_proof_report": "docs/jrc_consolidation/project_handoff_proof_checkpoint_20261105.json"
+  "project_handoff_proof_report": "docs/jrc_consolidation/project_handoff_proof_checkpoint_20261105.json",
+  "financial_segment_scale_report": "docs/jrc_consolidation/financial_segment_scale_checkpoint_20261105.json"
 }

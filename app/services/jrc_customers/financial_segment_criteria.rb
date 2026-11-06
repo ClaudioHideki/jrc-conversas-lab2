@@ -38,14 +38,21 @@ class JrcCustomers::FinancialSegmentCriteria
 
   def call(rule)
     relation, aggregate, value = financial_source(rule, authorized_visibility)
-    companies = @scope.klass.arel_table
-    relation = relation.joins(:contact).where(contacts: { account_id: @account.id })
-                       .where(Contact.arel_table[:company_id].eq(companies[:id]))
-    scalar = Arel::Nodes::Grouping.new(relation.reselect(Arel.sql(aggregate)).arel)
-    @scope.where(scalar.public_send(OPERATORS.fetch(rule['operator']), value))
+    company = Contact.arel_table[:company_id]
+    relation = relation.joins(:contact).where(contacts: { account_id: @account.id }).where.not(contacts: { company_id: nil }).reorder(nil)
+    grouped = relation.group(company).having(Arel.sql(aggregate).public_send(OPERATORS.fetch(rule['operator']), value)).reselect(company)
+    matched = @scope.where(id: grouped)
+    # Missing authorized sources contribute zero, preserving the original scalar
+    # aggregate semantics without rescanning the entire source for each company.
+    matches_zero?(rule['operator'], value) ? matched.or(@scope.where.not(id: relation.reselect(company))) : matched
   end
 
   private
+
+  def matches_zero?(operator, value)
+    { 'equal_to' => value.zero?, 'not_equal_to' => value.positive?, 'greater_than' => false,
+      'at_least' => value.zero?, 'less_than' => value.positive?, 'at_most' => true }.fetch(operator)
+  end
 
   def authorized_visibility
     JrcCustomers::ContactDirectory.new(account: @account, actor: @actor).authorize!

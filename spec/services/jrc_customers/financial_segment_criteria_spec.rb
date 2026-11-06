@@ -105,4 +105,19 @@ RSpec.describe JrcCustomers::FinancialSegmentCriteria do
     expect(JrcCustomers::SegmentCriteria.rule_error(rule.merge('account_id' => account.id))).to be_present
     expect(JrcCustomers::SegmentCriteria.rule_error(rule.merge('field' => 'trr'))).to be_present
   end
+
+  it 'preserves every comparison at zero and the exact threshold including companies without authorized sources' do
+    empty
+    account.jrc_crm_sales_orders.create!(owner: actor, source_type: 'manual', order_origin: 'direct_sale',
+                                         status: 'invoiced', total_cents: 99_999, sold_at: order.sold_at)
+    zero = { 'equal_to' => [empty.id], 'not_equal_to' => [company.id], 'greater_than' => [company.id],
+             'at_least' => [company.id, empty.id], 'less_than' => [], 'at_most' => [empty.id] }
+    boundary = { 'equal_to' => [company.id], 'not_equal_to' => [empty.id], 'greater_than' => [],
+                 'at_least' => [company.id], 'less_than' => [empty.id], 'at_most' => [company.id, empty.id] }
+    [zero, boundary].zip(%w[0 123.45]).each do |expected, amount|
+      expected.each do |operator, ids|
+        expect(query.call(rule.merge('operator' => operator, 'value' => amount)).pluck(:id)).to match_array(ids)
+      end
+    end
+  end
 end

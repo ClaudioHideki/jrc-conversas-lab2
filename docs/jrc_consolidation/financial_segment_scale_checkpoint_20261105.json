@@ -1,0 +1,110 @@
+{
+  "date": "2026-11-05",
+  "parent_head": "d41c0b08ee00b7bbc515e2d57702df5071d66baa",
+  "status": "C/G financial segment representative scale and necessary native CRM correction validated locally; C-G remain open",
+  "implementation": [
+    "Financial criteria now group the same native authorized CRM sources by canonical contact.company_id once, instead of a correlated source rescan per company. Missing authorized sources still contribute zero for the exact existing comparison operators. No native visibility scope or financial meaning changed.",
+    "The approved source remains invoiced orders in the chosen inclusive account-timezone period, with existing shipped/completed status and sold/closed/created precedence. No receipts or undefined TRR substitution.",
+    "Scale exposed a real random order-number collision. The native model retries up to ten unoccupied account-local numbers, preserves the existing human format/manual numbers and unique index/validation, and fails normally after bounded exhaustion. No existing order is overwritten."
+  ],
+  "tests_non_additive": [
+    {
+      "label": "financial-segment-scale01",
+      "examples": 1,
+      "failures": 1,
+      "note": "Native random number collision during synthetic setup; retained as failed evidence."
+    },
+    {
+      "label": "crm-number-reproduction",
+      "examples": 4,
+      "failures": 2,
+      "note": "Deterministically reproduced missing collision retry and one-attempt exhaustion; two unchanged behavior cases passed."
+    },
+    {
+      "label": "crm-number-financial-scale-final",
+      "examples": 5,
+      "failures": 1,
+      "note": "Four number cases passed after correction. Scale reached a real query timeout on count under unchanged14s setting."
+    },
+    {
+      "label": "financial-segment-grouped01",
+      "examples": 20,
+      "failures": 0,
+      "note": "One1000-customer scale case plus all existing financial/member-filter and new exact boundary/operator matrix tests."
+    },
+    {
+      "label": "crm-number-native-regression",
+      "examples": 12,
+      "failures": 0,
+      "note": "Four overlapping number cases and eight existing native request integrity/authorization/linkage cases."
+    }
+  ],
+  "representative_measurement": {
+    "synthetic_customers": 1000,
+    "synthetic_orders": 1000,
+    "synthetic_leads": 1000,
+    "matching_leads": 250,
+    "page_size": 30,
+    "pages_tested": 9,
+    "setup_seconds": 33.543,
+    "paginated_query_seconds": 1.664,
+    "statement_timeout": "Native14s unchanged; not a universal production SLA.",
+    "real_persistence": "Native model writes and real SQL in transactional candidate test database; no mocks or external sends.",
+    "coverage": [
+      "Exact page identities/no duplicates/empty final page",
+      "Native input relation cannot be widened",
+      "Manual company include/exclude respected",
+      "Canceled order reevaluates live membership",
+      "Clearing segment returns exact original native relation",
+      "Six financial operators at zero and exact money threshold",
+      "MissingCRM denied, ownership/org/account restrictions from existing regression suites"
+    ]
+  },
+  "static_gates": [
+    "Financial service, two financial specs and new number spec0 RuboCop offenses.",
+    "SalesOrder existing style debt preserved; no new cop counts after LF normalization.",
+    "git diff --check clean; no migrations or indexes altered."
+  ],
+  "files": [
+    "app/models/jrc_crm/sales_order.rb",
+    "app/services/jrc_customers/financial_segment_criteria.rb",
+    "spec/models/jrc_crm/sales_order_number_spec.rb",
+    "spec/services/jrc_customers/financial_segment_criteria_spec.rb",
+    "spec/services/jrc_customers/module_segment_filter_scale_spec.rb"
+  ],
+  "disk": {
+    "financial-segment-scale01": {
+      "start": 7385047040,
+      "minimum": 7383502848,
+      "end": 7383629824
+    },
+    "crm-number-reproduction": {
+      "start": 7383203840,
+      "minimum": 7383130112,
+      "end": 7383126016
+    },
+    "crm-number-financial-scale-final": {
+      "start": 7385329664,
+      "minimum": 7365201920,
+      "end": 7383265280
+    },
+    "financial-segment-grouped01": {
+      "start": 7382360064,
+      "minimum": 7363579904,
+      "end": 7382384640
+    },
+    "crm-number-native-regression": {
+      "start": 7380525056,
+      "minimum": 7380324352,
+      "end": 7380320256
+    },
+    "final_bytes": 7378669568
+  },
+  "remaining": [
+    "Concurrent random generation still relies on the existing database unique index for a coincident race; this change does not claim globally serialized numbering.",
+    "This is a representative backend scale case, not current-source Chrome desktop/mobile or full module load acceptance.",
+    "TRR undefined; documents without portfolio explicitly deferred; full C and remaining D/F audit still open."
+  ],
+  "next": "F2 sentiment evidence: preserve current90-day default, configurable real observation window and read-time freshness without rewriting historical scores.",
+  "restrictions": "No build,cleanup,push,GHCR,deploy,5379 changes,container restart,real external operations or existing data deletion."
+}

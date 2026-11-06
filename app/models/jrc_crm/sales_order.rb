@@ -163,7 +163,11 @@ module JrcCrm
 
     def assign_number
       return if order_number.present?
-      self.order_number = "PED-#{Time.zone.today.year}-#{SecureRandom.random_number(1_000_000).to_s.rjust(6, '0')}"
+
+      10.times do
+        self.order_number = "PED-#{Time.zone.today.year}-#{SecureRandom.random_number(1_000_000).to_s.rjust(6, '0')}"
+        return unless self.class.exists?(account_id: account_id, order_number: order_number)
+      end
     end
   end
 end
