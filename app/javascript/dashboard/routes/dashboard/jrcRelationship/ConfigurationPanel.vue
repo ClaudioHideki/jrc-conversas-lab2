@@ -426,6 +426,7 @@ const date = value => formatDate(value, props.metadata?.formatting);
     <HealthConfigurationPreview
       v-if="config && screen === 'settings' && !distributionOnly"
       :configuration="config"
+      :formatting="metadata.formatting"
       :disabled="
         busy || invalidFlowPolicy || invalidCapacity || invalidPriorityBands
       "

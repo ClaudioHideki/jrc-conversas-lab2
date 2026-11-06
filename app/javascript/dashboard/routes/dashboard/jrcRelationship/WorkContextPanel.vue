@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcRelationship';
+import HealthCoverageNote from './HealthCoverageNote.vue';
 import {
   money as formatMoney,
   date as formatDate,
@@ -116,6 +117,10 @@ const date = value => formatDate(value, context.value?.formatting);
         {{ t('RELATIONSHIP.METRICS.health_average') }}:
         {{ context.health?.score ?? '—' }}
       </p>
+      <HealthCoverageNote
+        :health="context.health"
+        :formatting="context.formatting"
+      />
       <p class="text-sm">
         {{ t('RELATIONSHIP.FIELDS.from') }}: {{ date(context.period.from) }} ·
         {{ t('RELATIONSHIP.FIELDS.to') }}: {{ date(context.period.to) }}

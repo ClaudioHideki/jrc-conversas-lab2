@@ -1,5 +1,11 @@
 {
   "RELATIONSHIP": {
+    "OBSERVED_HEALTH_COVERAGE": {
+      "OBSERVED": "Observed source-weight coverage: {value}",
+      "CALCULATION": "Weight used in this calculation: {value}",
+      "POLICY": "Missing-evidence policy: {policy}",
+      "NOTICE": "Coverage describes observed configured weights, not the health score or model confidence. Missing evidence is not a zero measurement."
+    },
     "ALERT_REVIEW": {
       "TITLE": "Human assessment of the automatic alert",
       "NOTICE": "Assess the current monitoring evidence. This does not complete the action, confirm the customer's outcome or change automation rules.",

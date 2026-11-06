@@ -212,6 +212,9 @@ describe('Relationship interface integration', () => {
         .findComponent({ name: 'AutomaticPlaybookNotice' })
         .props('attempt')
     ).toEqual(attempt);
+    expect(
+      wrapper.findComponent({ name: 'HealthCoverageNote' }).props('health')
+    ).toEqual(customer.signals.health);
     wrapper.unmount();
   });
 

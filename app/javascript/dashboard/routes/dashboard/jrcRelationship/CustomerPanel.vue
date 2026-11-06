@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import HealthStabilityNote from './HealthStabilityNote.vue';
+import HealthCoverageNote from './HealthCoverageNote.vue';
 import HealthEvidenceSummary from './HealthEvidenceSummary.vue';
 import AutomaticPlaybookNotice from './AutomaticPlaybookNotice.vue';
 import ProductHealthHistory from './ProductHealthHistory.vue';
@@ -214,6 +215,10 @@ const money = value => formatMoney(value, props.metadata?.formatting);
         :signals="record.signals"
         :formatting="metadata.formatting"
       />
+      <HealthCoverageNote
+        :health="record.signals.health"
+        :formatting="metadata.formatting"
+      />
       <div class="flex flex-wrap gap-3">
         <strong class="text-2xl">{{
           record.signals.health.score ?? '—'
@@ -329,6 +334,10 @@ const money = value => formatMoney(value, props.metadata?.formatting);
           </p>
           <HealthStabilityNote
             :health="record.signals.product_health?.[product.id]"
+          />
+          <HealthCoverageNote
+            :health="record.signals.product_health?.[product.id]"
+            :formatting="metadata.formatting"
           />
           <ProductHealthHistory
             :assignment-id="record.id"

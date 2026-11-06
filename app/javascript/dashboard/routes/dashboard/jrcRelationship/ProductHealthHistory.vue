@@ -5,6 +5,7 @@ import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcRelationship';
 import HealthStabilityNote from './HealthStabilityNote.vue';
+import HealthCoverageNote from './HealthCoverageNote.vue';
 import { buttonClass, date } from './definitions';
 
 const props = defineProps({
@@ -119,6 +120,10 @@ const load = async (page = 1) => {
             }}
           </p>
           <HealthStabilityNote :health="row.health" />
+          <HealthCoverageNote
+            :health="row.health"
+            :formatting="formatting"
+          />
           <p
             v-if="row.change"
             class="text-xs"

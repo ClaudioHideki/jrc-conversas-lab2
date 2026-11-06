@@ -4,9 +4,11 @@ import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcRelationship';
+import HealthCoverageNote from './HealthCoverageNote.vue';
 import { buttonClass, inputClass, message } from './definitions';
 const props = defineProps({
   configuration: { type: Object, required: true },
+  formatting: { type: Object, default: () => ({}) },
   disabled: Boolean,
 });
 const route = useRoute();
@@ -240,6 +242,10 @@ onBeforeUnmount(() => invalidate(true));
             {{ result[mode].health.score ?? t('RELATIONSHIP.UNAVAILABLE') }}
           </p>
           <p>{{ t(`RELATIONSHIP.BANDS.${result[mode].health.band}`) }}</p>
+          <HealthCoverageNote
+            :health="result[mode].health"
+            :formatting="formatting"
+          />
           <dl class="mt-3 space-y-2 text-sm">
             <div
               v-for="factor in result[mode].health.factors"
