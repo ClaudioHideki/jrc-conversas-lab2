@@ -18,6 +18,108 @@ const record = {
   metadata: {},
 };
 
+it('keeps manual work outside alert assessment and does not add assessment fields to ordinary saves', async () => {
+  const wrapper = mount(Dialog, {
+    props: { record },
+    global: { stubs: { Dialog: NativeDialog } },
+  });
+  expect(wrapper.find('[data-testid="alert-review-editor"]').exists()).toBe(
+    false
+  );
+  await wrapper.get('form').trigger('submit');
+  expect(wrapper.emitted('save')[0][0]).not.toHaveProperty(
+    'alert_review_status'
+  );
+  wrapper.unmount();
+});
+
+it('requires a deliberate reason and emits the human assessment independently from operational completion and customer confirmation', async () => {
+  const wrapper = mount(Dialog, {
+    props: {
+      record: {
+        ...record,
+        alert_review: { available: true, status: 'pending' },
+      },
+    },
+    global: { stubs: { Dialog: NativeDialog } },
+  });
+  await wrapper
+    .get('[data-testid="alert-review-status"]')
+    .setValue('false_positive');
+  await wrapper.get('form').trigger('submit');
+  expect(wrapper.emitted('save')).toBeUndefined();
+  expect(wrapper.text()).toContain('ALERT_REVIEW.REQUIRED');
+  await wrapper
+    .get('[data-testid="alert-review-note"]')
+    .setValue('Reviewed the actual source evidence');
+  await wrapper.get('form').trigger('submit');
+  expect(wrapper.emitted('save')[0][0]).toMatchObject({
+    status: 'open',
+    customer_confirmation: 'pending',
+    alert_review_status: 'false_positive',
+    alert_review_note: 'Reviewed the actual source evidence',
+  });
+  expect(wrapper.emitted('save')[0][0]).not.toHaveProperty('actor_id');
+  wrapper.unmount();
+});
+
+it('preserves an unchanged assessment and requires a reason to withdraw it, retaining form contents while a save is rejected or busy', async () => {
+  const wrapper = mount(Dialog, {
+    props: {
+      record: {
+        ...record,
+        alert_review: {
+          available: true,
+          status: 'confirmed',
+          note: 'Previously verified',
+        },
+      },
+    },
+    global: { stubs: { Dialog: NativeDialog } },
+  });
+  await wrapper.get('form').trigger('submit');
+  expect(wrapper.emitted('save')[0][0]).not.toHaveProperty(
+    'alert_review_status'
+  );
+  await wrapper.get('[data-testid="alert-review-status"]').setValue('pending');
+  await wrapper
+    .get('[data-testid="alert-review-note"]')
+    .setValue('Reopened human verification');
+  await wrapper.setProps({ busy: true });
+  await wrapper.get('form').trigger('submit');
+  expect(wrapper.emitted('save')).toHaveLength(1);
+  await wrapper.setProps({ busy: false, error: 'Native revision conflict' });
+  expect(wrapper.get('[data-testid="alert-review-note"]').element.value).toBe(
+    'Reopened human verification'
+  );
+  await wrapper.get('form').trigger('submit');
+  expect(wrapper.emitted('save')[1][0]).toMatchObject({
+    alert_review_status: 'pending',
+    alert_review_note: 'Reopened human verification',
+  });
+  wrapper.unmount();
+});
+
+it('shows changed-evidence assessment as pending without reusing the historical reason', async () => {
+  const wrapper = mount(Dialog, {
+    props: {
+      record: {
+        ...record,
+        alert_review: { available: true, status: 'pending', stale: true },
+      },
+    },
+    global: { stubs: { Dialog: NativeDialog } },
+  });
+  expect(wrapper.text()).toContain('ALERT_REVIEW.STALE');
+  expect(wrapper.get('[data-testid="alert-review-status"]').element.value).toBe(
+    'pending'
+  );
+  expect(wrapper.get('[data-testid="alert-review-note"]').element.value).toBe(
+    ''
+  );
+  wrapper.unmount();
+});
+
 it('navigates to the waiting review fields and refuses an incomplete pause, then emits the actual reason and future deadline', async () => {
   const wrapper = mount(Dialog, {
     props: { record },

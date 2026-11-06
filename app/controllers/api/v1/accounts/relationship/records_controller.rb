@@ -38,7 +38,8 @@ class Api::V1::Accounts::Relationship::RecordsController < Api::V1::Accounts::Re
                               .order(created_at: :desc, id: :desc).limit(50)
     history = events.map do |event|
       { id: event.id, at: event.created_at, event: event.event_type, actor_id: event.actor_id,
-        before: event.from_value.slice(*fields), after: event.to_value.slice(*fields) }
+        before: JrcRelationship::RecordPresentation.history_values(event.from_value, fields, model: model),
+        after: JrcRelationship::RecordPresentation.history_values(event.to_value, fields, model: model) }
     end
     render json: presenter.record(record).merge(history: history)
   end
@@ -203,6 +204,7 @@ class Api::V1::Accounts::Relationship::RecordsController < Api::V1::Accounts::Re
       :assignment_id, :request_id, :lock_version, :owner_id, :reason, :status, :priority, :due_at,
       :result, :kind, :severity, :outcome, :title, :target_on, :project_id, :scheduled_at, :agenda, :summary,
       :next_step, :return_at, :customer_confirmation, :customer_feedback, :waiting_reason,
+      :alert_review_status, :alert_review_note,
       :proposed_mrr_cents, :renewed_contract_id, :product_id, :contract_id, :source_contract_id, :source_product_id,
       :potential_cents, :evidence, :expansion_kind, :meeting_url, :recording_url, :provider, :contact_id,
       plan: [:cause, :hypothesis, :strategy, :actions, :concessions], goals: [], participants: [], decisions: []

@@ -9,6 +9,7 @@ import ActionCasePanel from './ActionCasePanel.vue';
 import MetricDrilldownDialog from './MetricDrilldownDialog.vue';
 import PriorityBandBadge from './PriorityBandBadge.vue';
 import { priorityCodes } from './priorityBands';
+import { alertReviewLabels } from './alertReview';
 import NicoSummaryPanel from './NicoSummaryPanel.vue';
 import { rememberViewport, viewportPosition } from './listViewport';
 import {
@@ -23,6 +24,7 @@ const route = useRoute();
 const router = useRouter();
 const store = useStore();
 const { t } = useI18n();
+const reviewLabels = computed(() => alertReviewLabels(t));
 const metadata = ref(null);
 const metrics = ref(null);
 const drilldownMetric = ref(null);
@@ -318,6 +320,32 @@ const cards = computed(() => [
                 })
           }}
         </p>
+      </section>
+      <section
+        v-if="metrics?.automatic_alert_review"
+        class="space-y-2 rounded-xl border border-n-violet-6 bg-n-violet-2 p-4"
+        data-testid="alert-review-summary"
+      >
+        <h3 class="font-semibold">
+          {{ t('RELATIONSHIP.ALERT_REVIEW.SUMMARY') }}
+        </h3>
+        <p class="text-xs text-n-slate-11">
+          {{ t('RELATIONSHIP.ALERT_REVIEW.COHORT') }}
+        </p>
+        <dl class="grid grid-cols-1 gap-2 sm:grid-cols-3">
+          <div
+            v-for="(label, status) in reviewLabels"
+            :key="status"
+            class="min-w-0 rounded-lg border border-n-violet-6 p-2"
+          >
+            <dt class="text-sm">
+              {{ label }}
+            </dt>
+            <dd class="font-semibold">
+              {{ metrics.automatic_alert_review[status] }}
+            </dd>
+          </div>
+        </dl>
       </section>
       <button
         v-if="metrics"

@@ -1,5 +1,21 @@
 {
   "RELATIONSHIP": {
+    "ALERT_REVIEW": {
+      "TITLE": "Human assessment of the automatic alert",
+      "NOTICE": "Assess the current monitoring evidence. This does not complete the action, confirm the customer's outcome or change automation rules.",
+      "STALE": "The underlying evidence changed after the previous assessment. Review the current cause again; the earlier assessment remains in history.",
+      "ASSESSMENT": "Assessment",
+      "REASON": "Evidence and reason (required when changing the assessment)",
+      "REQUIRED": "Provide a reason for the assessment.",
+      "REVIEWER": "Reviewed by user #{id} on {at}",
+      "SUMMARY": "Human assessment of monitoring alerts",
+      "COHORT": "Automatic monitoring alerts created in the selected period (last 90 days by default), within this authorized portfolio. Counts refer to the current evidence, not model precision; closing or dismissing an action does not classify it.",
+      "STATUS": {
+        "pending": "Awaiting human assessment",
+        "confirmed": "Evidence confirmed by a reviewer",
+        "false_positive": "False alert identified by a reviewer"
+      }
+    },
     "PERIOD_START_REQUIRED": "Select a start date before applying an end date.",
     "CLEAR_PERIOD": "Clear period",
     "DRILLDOWN_DIALOG": {

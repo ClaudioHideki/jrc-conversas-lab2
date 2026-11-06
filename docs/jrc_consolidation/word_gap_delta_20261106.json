@@ -78,6 +78,17 @@
       "report": "attendance_source_scale_checkpoint_20261106.json",
       "current_state": "1000 conversations/1150 fixture messages plus native templates and100 tickets/200 clocks; native query/permission regressions passed.",
       "remaining": "Other C scale cohorts, real current-source popup/browser acceptance and production pilot remain open."
+    },
+    {
+      "requirement": "F2 explicit human assessment and internal run observability P0148/P0151",
+      "current_state": "Native guarded alert assessment, immutable audit, exact cause/factors/priority freshness, authorized raw-count cohort and persisted internal-batch duration locally tested. Closure/dismissal/customer feedback do not infer false alerts.",
+      "reports": [
+        "automatic_alert_review_checkpoint_20261106.json",
+        "processing_duration_checkpoint_20261106.json",
+        "priority_band_pinning_checkpoint_20261106.json",
+        "operational_period_checkpoint_20261106.json"
+      ],
+      "remaining": "No model precision or external NICO/end-to-end latency acceptance. Fresh UI/current-source visual gates remain open."
     }
   ],
   "explicit_dependencies": [

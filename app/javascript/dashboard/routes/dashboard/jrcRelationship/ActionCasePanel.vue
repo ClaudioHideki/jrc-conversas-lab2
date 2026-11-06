@@ -5,6 +5,7 @@ import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcRelationship';
 import ActionFollowUpDialog from './ActionFollowUpDialog.vue';
+import { alertReviewLabels } from './alertReview';
 import PriorityBandBadge from './PriorityBandBadge.vue';
 import { buttonClass, date as formatDate, message } from './definitions';
 const props = defineProps({
@@ -15,6 +16,7 @@ const emit = defineEmits(['close', 'changed', 'invalidated']);
 const route = useRoute();
 const store = useStore();
 const { t } = useI18n();
+const reviewLabels = computed(() => alertReviewLabels(t));
 const record = ref(null);
 const channels = ref(null);
 const error = ref('');
@@ -304,6 +306,38 @@ const save = async fields => {
             <h3 class="mb-2 font-semibold">
               {{ t('RELATIONSHIP.V2.EVIDENCE') }}
             </h3>
+            <div
+              v-if="record.alert_review?.available"
+              class="mb-3 rounded-lg border border-n-violet-6 bg-n-violet-2 p-3"
+              data-testid="alert-review-detail"
+            >
+              <p class="font-semibold">
+                {{ t('RELATIONSHIP.ALERT_REVIEW.TITLE') }}
+              </p>
+              <p>
+                {{ reviewLabels[record.alert_review.status] }}
+              </p>
+              <p
+                v-if="record.alert_review.stale"
+                class="text-sm"
+              >
+                {{ t('RELATIONSHIP.ALERT_REVIEW.STALE') }}
+              </p>
+              <p class="whitespace-pre-wrap text-sm">
+                {{ record.alert_review.note }}
+              </p>
+              <p
+                v-if="record.alert_review.reviewed_at"
+                class="text-xs text-n-slate-11"
+              >
+                {{
+                  t('RELATIONSHIP.ALERT_REVIEW.REVIEWER', {
+                    id: record.alert_review.actor_id,
+                    at: date(record.alert_review.reviewed_at),
+                  })
+                }}
+              </p>
+            </div>
             <ul class="space-y-2">
               <li
                 v-for="source in record.source_links || []"
@@ -388,6 +422,20 @@ const save = async fields => {
                 )
               }}
             </p>
+            <div
+              v-if="event.after?.alert_review?.available"
+              class="mt-2 text-sm"
+            >
+              <p>
+                {{ t('RELATIONSHIP.ALERT_REVIEW.TITLE') }}
+              </p>
+              <p>
+                {{ reviewLabels[event.after.alert_review.status] }}
+              </p>
+              <p class="whitespace-pre-wrap">
+                {{ event.after.alert_review.note }}
+              </p>
+            </div>
           </li>
           <li
             v-if="!record.history?.length"

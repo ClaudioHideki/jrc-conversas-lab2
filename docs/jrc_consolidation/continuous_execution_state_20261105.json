@@ -5,7 +5,7 @@
   "branch": "codex/relacionamento-v2-20261101",
   "last_validated_checkpoint": "12cab9ff304cc540d65117adaa33f8b70c7a481a",
   "completed_current_work": "Sealed dossier, weighted/current capacity, native withdrawal/cadence controls and F2 increments locally tested; see linked incremental reports. No C-G closure.",
-  "active_work": "F2 human assessment of automatic engine alerts; explicit evidence and actor, no inferred false-positive classification from dismissal or customer feedback.",
+  "active_work": "C B2 document catalog scale: native index performs latest version/uploader/attachment/blob queries per displayed document. Measure, bound queries and preserve private/versioned scope.",
   "exact_next_actions": [
     "Reconcile Word fragments with later evidence; implement next locally executable C/D/F2 gap.",
     "Final analyst withdrawal scope awaits business answer; do not call native global agent deletion.",
@@ -48,10 +48,10 @@
     "No real participant removal or provider request; tests use synthetic records and WebMock, with external network disabled."
   ],
   "restrictions": "No build/recompile, no5379 change/restart, no four-container restart/reconfiguration, no cleanup/delete of existing data, no push/GHCR/deploy/production/client change, no real provider operations. Additive migrations allowed only in owned synthetic test database.",
-  "disk_last_observed_bytes": 7189577728,
+  "disk_last_observed_bytes": 7174299648,
   "TRR": "Undefined; do not invent",
   "company_documents_without_portfolio": "Explicitly deferred",
-  "last_validated_head": "ea780d5bf89646d56b9ba7f7247e436373ffaae5",
+  "last_validated_head": "3690fbb114b9fe17666fdb4e0eff39976ee32660",
   "new_validated_code_checkpoint": "Resolve latest local CS code checkpoint with git log -1 --format=%H -- docs/jrc_consolidation/cs_signature_origin_checkpoint_20261105.json",
   "current_status": "F2 workspace card source workflow fixed and locally tested; C-G remain open",
   "next_actions": [
@@ -80,7 +80,7 @@
   "priority_bands_report": "docs/jrc_consolidation/priority_bands_checkpoint_20261105.json",
   "automatic_playbook_budget_report": "docs/jrc_consolidation/automatic_playbook_budget_checkpoint_20261106.json",
   "analyst_native_responsibilities_report": "docs/jrc_consolidation/analyst_native_responsibilities_checkpoint_20261106.json",
-  "checkpoint_resolution": "git log -1 --format=%H -- docs/jrc_consolidation/processing_duration_checkpoint_20261106.json",
+  "checkpoint_resolution": "git log -1 --format=%H -- docs/jrc_consolidation/automatic_alert_review_checkpoint_20261106.json",
   "approval_percentage_input_report": "docs/jrc_consolidation/approval_percentage_input_checkpoint_20261106.json",
   "word_gap_delta": "docs/jrc_consolidation/word_gap_delta_20261106.json",
   "workspace_card_sources_report": "docs/jrc_consolidation/workspace_card_sources_checkpoint_20261106.json",
@@ -90,5 +90,6 @@
   "customer_sla_signals_report": "docs/jrc_consolidation/customer_sla_signals_checkpoint_20261106.json",
   "operational_period_report": "docs/jrc_consolidation/operational_period_checkpoint_20261106.json",
   "priority_band_pinning_report": "docs/jrc_consolidation/priority_band_pinning_checkpoint_20261106.json",
-  "processing_duration_report": "docs/jrc_consolidation/processing_duration_checkpoint_20261106.json"
+  "processing_duration_report": "docs/jrc_consolidation/processing_duration_checkpoint_20261106.json",
+  "automatic_alert_review_report": "docs/jrc_consolidation/automatic_alert_review_checkpoint_20261106.json"
 }

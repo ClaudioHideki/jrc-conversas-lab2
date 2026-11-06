@@ -60,6 +60,9 @@ class JrcRelationship::Workflow
         record.metadata = record.metadata.merge('manual_priority' => true)
       end
       capture_priority_band!(record) if kind == 'actions' && (record.new_record? || record.will_save_change_to_priority?)
+      if kind == 'actions' && (attrs.key?('alert_review_status') || attrs.key?('alert_review_note'))
+        JrcRelationship::AlertReview.apply!(record, attrs, actor: @context.user)
+      end
       record.metadata = record.metadata.merge(attrs.slice('period_from', 'period_to', 'milestones', 'notes')) if %w[plans qbrs].include?(kind)
       record.agenda ||= @context.configuration(assignment).effective_rules['qbr_agenda_template'] if kind == 'qbrs'
       if kind == 'expansion' && attrs.key?('expansion_kind')

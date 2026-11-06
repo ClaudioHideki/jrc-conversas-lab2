@@ -61,6 +61,79 @@ beforeEach(() => {
   mocks.api.channels.mockResolvedValue({ data: { channel_conversations: [] } });
 });
 describe('Relationship V2 analyst workflow', () => {
+  it('renders explicit human-review counts without claiming model precision or inferring dismissals', async () => {
+    mocks.api.dashboard.mockResolvedValue({
+      data: {
+        priority_actions: [],
+        automatic_alert_review: {
+          total: 7,
+          pending: 4,
+          confirmed: 2,
+          false_positive: 1,
+        },
+      },
+    });
+    const wrapper = shallowMount(AnalystWorkspace, {
+      props: { screen: 'overview' },
+    });
+    await flushPromises();
+    const summary = wrapper.get('[data-testid="alert-review-summary"]');
+    expect(summary.findAll('dd').map(node => node.text())).toEqual([
+      '4',
+      '2',
+      '1',
+    ]);
+    expect(summary.text()).toContain('not model precision');
+    expect(summary.text()).not.toContain('RELATIONSHIP.');
+    expect(summary.findAll('button')).toHaveLength(0);
+    wrapper.unmount();
+  });
+
+  it('displays the current alert assessment and preserved native review history in the operational case', async () => {
+    mocks.api.record.mockResolvedValue({
+      data: {
+        id: 5,
+        assignment_id: 19,
+        customer_name: 'Synthetic',
+        status: 'open',
+        customer_confirmation: 'pending',
+        alert_review: {
+          available: true,
+          status: 'confirmed',
+          note: 'Current evidence verified',
+          actor_id: 7,
+          reviewed_at: '2026-11-06T12:00:00Z',
+        },
+        history: [
+          {
+            id: 8,
+            event: 'relationship_updated',
+            after: {
+              alert_review: {
+                available: true,
+                status: 'false_positive',
+                note: 'Earlier observation disproved',
+              },
+            },
+          },
+        ],
+      },
+    });
+    const wrapper = shallowMount(ActionCasePanel, {
+      props: { actionId: 5, metadata },
+    });
+    await flushPromises();
+    expect(wrapper.get('[data-testid="alert-review-detail"]').text()).toContain(
+      'Current evidence verified'
+    );
+    expect(
+      wrapper.get('[data-testid="alert-review-detail"]').text()
+    ).not.toContain('RELATIONSHIP.');
+    await wrapper.findAll('[aria-pressed]').at(1).trigger('click');
+    expect(wrapper.text()).toContain('Earlier observation disproved');
+    wrapper.unmount();
+  });
+
   it.each([1250, 0])(
     'shows the measured batch duration including a real zero value (%i ms)',
     async duration => {

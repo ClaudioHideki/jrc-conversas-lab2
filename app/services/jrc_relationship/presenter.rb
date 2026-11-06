@@ -88,6 +88,9 @@ class JrcRelationship::Presenter
                     scored_customers: health.where.not(score: nil).count,
                     stale_customers: health.where('calculated_at < ?', 15.minutes.ago).count,
                     latest_attempt: JrcRelationship::ProcessingRun.latest_for(@context, scope)&.summary(scope) },
+      automatic_alert_review: JrcRelationship::AlertReview.summary(
+        @context.records(JrcRelationship::Action).where(assignment_id: ids, created_at: period || (90.days.ago..Time.current))
+      ),
       waiting_finance_actions: actions.where(status: 'waiting_finance').count,
       priority_actions: priority_actions(actions),
       expansion_potential_cents: visibility.crm? ? JrcRelationship::ExpansionPipeline.open(expansion, deals).sum(:potential_cents) : nil,

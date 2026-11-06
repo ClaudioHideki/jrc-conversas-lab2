@@ -1,0 +1,147 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "3690fbb114b9fe17666fdb4e0eff39976ee32660",
+  "branch": "codex/relacionamento-v2-20261101",
+  "status": "Increment implemented and locally validated; F2 and C-G remain open",
+  "word_reference": "Relationship P0148,P0151; explicit human review/false-alert evidence. No model precision formula invented.",
+  "implementation": [
+    "Native action-follow-up popup provides pending/confirmed/false-positive assessment with mandatory reason when changed; no parallel action/customer registry. Manual tasks, generic automatic playbooks without monitoring cause and imported unclassified history are not automatically classified.",
+    "Native Workflow assignment lock/record lock/optimistic concurrency and current manage/portfolio/source permissions reused; server sets reviewer/time, ignores client actor/cause/metadata. Native AuditEvent preserves before/after. Same assessment resubmission retains reviewer/time.",
+    "Assessment pins exact engine cause, factors and priority. A changed cause/factors/priority projects as pending/stale and is excluded from current reviewed counts; old note/evidence remain in audited history. No automation suppression, training, customer outcome confirmation or operational closure inferred.",
+    "Record and history projections expose status/note/reviewer/time, not internal captured factor copy. Other domain metadata remains unchanged. Dedicated native record presentation used.",
+    "Read-only workspace counts use current authorized action scope and portfolio/segment filters; created-at selected period or native90-day default, including closed alerts. No statistical precision/percent claim."
+  ],
+  "tests": {
+    "backend_initial": "6/0",
+    "backend_regression": "21/0 =6 new HTTP +5 bounded wait/SLA +10 existing handoff/health/risk/plan/QBR integration cases",
+    "final_history_projection": "6/0 overlap after projection extraction; no need to repeat21",
+    "vue": "22/0 =6 new +16 existing cases; final detail/history check1/0 with13 explicitly skipped after punctuation-only edit",
+    "ruby_new_offenses": 0,
+    "ruby_shared_delta": [
+      {
+        "path": "app/services/jrc_relationship/presenter.rb",
+        "baseline": 26,
+        "current": 26,
+        "added": {}
+      },
+      {
+        "path": "app/services/jrc_relationship/workflow.rb",
+        "baseline": 28,
+        "current": 28,
+        "added": {}
+      },
+      {
+        "path": "app/services/jrc_relationship/record_presentation.rb",
+        "baseline": 0,
+        "current": 0,
+        "added": {}
+      },
+      {
+        "path": "app/controllers/api/v1/accounts/relationship/records_controller.rb",
+        "baseline": 13,
+        "current": 13,
+        "added": {}
+      }
+    ],
+    "eslint_new_diagnostics": 0,
+    "eslint_shared_diagnostics": "Existing warnings retained: Case18,FollowUp14,Workspace24. Case settled18->18; other final delta unchanged. New helper/tests0 errors/warnings.",
+    "warnings": "Existing shallow RouterLink and incomplete synthetic confirmation fixture warnings retained; no new review translation errors.",
+    "diff_check": "passed"
+  },
+  "resources": {
+    "native_initial": {
+      "start": 6845366272,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/alert_review_spec.rb": "75774d1dcefe03f67b57321da94553f6b5c56dfe2fa460e561d6db4fb8e0c2cd"
+      },
+      "minimum": 6824566784,
+      "exit_code": 0,
+      "end": 7188893696
+    },
+    "native_regression": {
+      "start": 7193600000,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/alert_review_spec.rb": "75774d1dcefe03f67b57321da94553f6b5c56dfe2fa460e561d6db4fb8e0c2cd",
+        "spec/requests/api/v1/accounts/relationship/action_waiting_review_spec.rb": "349e6a1a8e68c74f04396e213b61961d40f3cec99b355a7c61c8ed3dba99b17f",
+        "spec/services/jrc_relationship/functional_review_spec.rb": "cc7542ae1e89f6329bb28f728486571b903d940fff40d9564483b147214140b9"
+      },
+      "minimum": 7162015744,
+      "exit_code": 0,
+      "end": 7200698368
+    },
+    "native_final_history": {
+      "start": 7190507520,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/relationship/alert_review_spec.rb": "75774d1dcefe03f67b57321da94553f6b5c56dfe2fa460e561d6db4fb8e0c2cd"
+      },
+      "minimum": 7173308416,
+      "exit_code": 0,
+      "end": 7194714112
+    },
+    "vue": {
+      "status": "passed",
+      "free_start": 7158693888,
+      "minimum_free": 7158693888,
+      "mandatory_stop_bytes": 750000000,
+      "conservative_stop_bytes": 2000000000,
+      "no_build": true,
+      "owned_process_id": 24400,
+      "exit_code": 0,
+      "free_end": 7197814784
+    },
+    "vue_final_history": {
+      "status": "passed",
+      "free_start": 7195676672,
+      "minimum_free": 7173500928,
+      "mandatory_stop_bytes": 750000000,
+      "conservative_stop_bytes": 2000000000,
+      "no_build": true,
+      "owned_process_id": 23372,
+      "exit_code": 0,
+      "free_end": 7195172864
+    },
+    "free_final": 7174311936
+  },
+  "source_sha256": {
+    "app/controllers/api/v1/accounts/relationship/records_controller.rb": "ebce9c8ba39b4a5f7797658ee74b096c76f66008f35edb11c9606afc45a46902",
+    "app/javascript/dashboard/i18n/locale/en/relationship.json": "c426b765356d816faef4fa63431227c3cb53906ab60cdb23f4104146b35f6605",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ActionCasePanel.vue": "02c85cb6a19664b7c4cde89730187c6376d8ec1133ff193d81e55f59a54e7371",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ActionFollowUpDialog.vue": "e262272f550ecc26c42f77b44ec22abf23c296e198491e2711ab2c57890e5f53",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/AnalystWorkspace.vue": "84711a24d0b405d466e24e4a76898207f30de8cac9e559d2518020293f428df0",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/actionWaitingReview.spec.js": "107d010986a8c173e50742b7702eabba2947a46e868f47006d417de6719cf018",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/analystWorkspace.spec.js": "219ae39331a9bb7a1419d240451b4d272a739eb5e0690e8ceb160917737c1676",
+    "app/services/jrc_relationship/presenter.rb": "8e14ced652ddb12bcaa86af37344b7aadb200fc4ef1bccba9386fe8cbb897cb0",
+    "app/services/jrc_relationship/record_presentation.rb": "2572186bce28c589b664b28d88eff1123bb00b41a1cc71b60492be4a9bfc6bd1",
+    "app/services/jrc_relationship/workflow.rb": "690845d56d8903dd9907abf4291f7a6ba44439a2e06da289f3192f70c8a9f7d8",
+    "app/services/jrc_relationship/alert_review.rb": "6c273f6c4a7e349d6329a0deb00e13c4eaae51daafd1601b3037ccf796c1ac12",
+    "spec/requests/api/v1/accounts/relationship/alert_review_spec.rb": "75774d1dcefe03f67b57321da94553f6b5c56dfe2fa460e561d6db4fb8e0c2cd",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/alertReview.js": "e065cfbf96234b0f0529f134209f235cf67ffd93955c97d2a73c1930ec8d1652"
+  },
+  "preserved_runtime": {
+    "listener": "127.0.0.1:5379 PID6464 unchanged",
+    "container_started_at": {
+      "run": "2026-11-04T11:34:25.650429595Z",
+      "pg": "2026-11-04T11:34:28.691130017Z",
+      "redis": "2026-11-04T11:34:29.041643269Z",
+      "proxy": "2026-11-04T12:04:25.285490323Z"
+    }
+  },
+  "limitations": [
+    "No actual NICO inference/external pilot or model precision measurement.",
+    "Fresh current-source Chrome and visual/mobile acceptance remain pending under no-build restriction.",
+    "No schema change/build/cleanup/runtime restart/push/deploy/provider operation."
+  ],
+  "next": "C B2 catalog source scale: existing index loads latest version/uploader/attachment/blob individually per displayed document. Measure and bound native source queries, preserving version pagination and quarantine."
+}
