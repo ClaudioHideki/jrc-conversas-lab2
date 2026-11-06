@@ -38,6 +38,11 @@ export default {
       `${base(accountId)}/team/${Number(analystId)}/withdrawal_readiness`,
       options
     ),
+  analystCapacity: (accountId, analystId, params, options) =>
+    axios.get(`${base(accountId)}/team/${Number(analystId)}/capacity`, {
+      ...options,
+      params,
+    }),
   portfolio: (accountId, params, options) =>
     axios.get(`${base(accountId)}/portfolio`, { ...options, params }),
   customer: (accountId, id, options) =>

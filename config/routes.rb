@@ -627,6 +627,7 @@ Rails.application.routes.draw do
             get :drilldown, to: 'dashboard#drilldown'
             get :team, to: 'dashboard#team'
             get 'team/:analyst_id/withdrawal_readiness', to: 'dashboard#withdrawal_readiness'
+            get 'team/:analyst_id/capacity', to: 'analyst_capacities#show'
             resources :documents, only: [:index, :show, :create, :update] do
               member do
                 get :responsibles

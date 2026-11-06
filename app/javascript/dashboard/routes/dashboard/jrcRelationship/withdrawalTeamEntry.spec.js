@@ -28,6 +28,7 @@ const render = () =>
         MetricsPanel: true,
         MetricDrilldownPanel: true,
         WithdrawalReadinessDialog: true,
+        AnalystCapacityDialog: true,
       },
     },
   });
@@ -57,6 +58,24 @@ it('keeps the readiness entry available after the analyst has no remaining alloc
   wrapper.unmount();
 });
 
+it('opens current capacity without allocated rows and closes it on a role change without submitting withdrawal', async () => {
+  const wrapper = render();
+  await flushPromises();
+  await wrapper.get('[data-testid="withdrawal-analyst"]').setValue('7');
+  await wrapper.get('[data-testid="analyst-capacity-open"]').trigger('click');
+  expect(
+    wrapper.findComponent({ name: 'AnalystCapacityDialog' }).props('analystId')
+  ).toBe(7);
+  expect(
+    wrapper.findComponent({ name: 'WithdrawalReadinessDialog' }).exists()
+  ).toBe(false);
+  mocks.getters.getCurrentRole = 'agent';
+  await flushPromises();
+  expect(
+    wrapper.findComponent({ name: 'AnalystCapacityDialog' }).exists()
+  ).toBe(false);
+  wrapper.unmount();
+});
 it('removes cached readiness/owner options and reloads native metadata on a role change', async () => {
   const wrapper = render();
   await flushPromises();

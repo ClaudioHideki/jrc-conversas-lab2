@@ -651,7 +651,18 @@
         "activity_effort": "Activity effort in points",
         "hours": "Equivalent hours",
         "SAVE": "Save workload inputs"
-      }
+      },
+      "CURRENT_TITLE": "Carga e capacidade atuais",
+      "CURRENT_NOTICE": "Leitura da carga ativa real nos escopos configurados, sem proposta de novas atribuições. Usa toda a carteira autorizada, independentemente dos filtros e período desta tabela. Unidades diferentes permanecem separadas.",
+      "CURRENT_OPEN": "Ver carga e capacidade",
+      "CURRENT_UNAVAILABLE": "Capacidade indisponível neste acesso. Não é possível apresentar uma contagem parcial como carga zero.",
+      "CURRENT_EMPTY": "Nenhum limite de capacidade aplicável configurado neste escopo.",
+      "CURRENT_OVERLOAD": "A carga atual excede a capacidade efetiva. Esta consulta não transfere nem remove responsabilidades.",
+      "CURRENT_INACTIVE": "Usuário inativo. Este quadro é informativo e não autoriza novas atribuições.",
+      "CURRENT_PAGE": "Página {page} · {total} escopos",
+      "CURRENT_SCOPE_ID": "Referência {id}",
+      "CURRENT_REMAINING": "Saldo de capacidade",
+      "CURRENT_FORMULA": "Capacidade configurada {maximum} × disponibilidade {availability} × dedicação {dedication}."
     },
     "DISTRIBUTION": {
       "PORTFOLIO_TEAM": "Portfolio team",

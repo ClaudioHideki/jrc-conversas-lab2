@@ -1,0 +1,58 @@
+{
+  "date": "2026-11-05",
+  "parent_head": "f94be60b090d0f475404730211e856e09af7c95e",
+  "status": "Current typed analyst capacity is available on demand in the native team interface; F1 retirement and C-G remain open.",
+  "implementation": [
+    "Uses the existing DistributionCapacity facts with no incoming/proposed assignments. Actual current customer, point and equivalent-hour units stay separate and paginated.",
+    "The service uses fresh native team/assignable-user/assignment scopes and refuses hidden active workload before returning counts or limits. Missing measurements remain unavailable, never zero.",
+    "Existing overload and a genuinely empty active portfolio are distinguished. Baseline hashes and proposal-only fields are omitted from the current view. No ownership, role, configuration or membership changes occur.",
+    "The team panel opens a native read-only dialog from a row or its existing analyst selector, including analysts without current customer rows. The shared summary retains its original proposal mode by default.",
+    "Grouped TeamMetrics queries are unchanged; capacity SQL runs only when requested. Identity/role changes abort and clear the dialog."
+  ],
+  "tests_non_additive": [
+    {
+      "label": "analyst-capacity01",
+      "examples": 5,
+      "failures": 0
+    },
+    {
+      "label": "analyst-capacity-final",
+      "examples": 5,
+      "failures": 0,
+      "note": "Overlapping revalidation after narrow helper extraction; no unrelated suite repeat."
+    },
+    {
+      "label": "analyst-capacity-ui01",
+      "tests": 11,
+      "failures": 0,
+      "note": "Four dialog cases,three team-entry cases and four pre-existing shared-summary/form cases."
+    }
+  ],
+  "static_gates": [
+    "New service/controller/spec0 RuboCop offenses; DistributionCapacity0 offenses and0 delta.",
+    "Directed ESLint0 errors; shared-summary7 and existing TeamPanel9 standard warnings remain visible; new dialog/spec0 warnings.",
+    "git diff --check clean; TeamPanel diff contains only the capacity entry/reset/dialog."
+  ],
+  "files": [
+    "app/controllers/api/v1/accounts/relationship/analyst_capacities_controller.rb",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/AnalystCapacityDialog.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/analystCapacity.spec.js",
+    "app/services/jrc_relationship/analyst_capacity.rb",
+    "spec/requests/api/v1/accounts/relationship/analyst_capacity_spec.rb",
+    "app/javascript/dashboard/api/jrcRelationship.js",
+    "app/javascript/dashboard/i18n/locale/en/relationship.json",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/DistributionCapacitySummary.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/TeamPanel.vue",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/withdrawalTeamEntry.spec.js",
+    "app/services/jrc_relationship/distribution_capacity.rb",
+    "config/routes.rb"
+  ],
+  "limits": [
+    "This is current workload information, not authorization to allocate or remove an analyst. Existing admission/approval and historical receipts remain mandatory.",
+    "Fresh-build Chrome/desktop/mobile acceptance remains pending the no-build restriction.",
+    "Safe project/cadence authority transitions and final governed analyst removal remain pending."
+  ],
+  "disk_final_bytes": 7389220864,
+  "next": "F1 native project handoff proofs: allow a CS responsibility review only when the linked project is already at the reviewed destination or historically closed, preserving native source ownership and private access.",
+  "restrictions": "No build,cleanup,push,GHCR,deploy,5379 change,container restart or external operation."
+}

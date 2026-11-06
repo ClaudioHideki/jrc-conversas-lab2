@@ -5,6 +5,7 @@ import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcRelationship';
 import WithdrawalReadinessDialog from './WithdrawalReadinessDialog.vue';
+import AnalystCapacityDialog from './AnalystCapacityDialog.vue';
 import MetricsPanel from './MetricsPanel.vue';
 import MetricDrilldownPanel from './MetricDrilldownPanel.vue';
 import {
@@ -32,6 +33,7 @@ const metadata = ref(null);
 const localRefresh = ref(0);
 const withdrawalUser = ref('');
 const withdrawalAnalyst = ref(null);
+const capacityAnalyst = ref(null);
 const filters = reactive({
   segment_id: '',
   product_id: '',
@@ -117,6 +119,7 @@ watch(
     cleanup(() => controller.abort());
     rows.value = [];
     withdrawalAnalyst.value = null;
+    capacityAnalyst.value = null;
     withdrawalUser.value = '';
     metadata.value = null;
     metrics.value = null;
@@ -255,6 +258,15 @@ const money = value => formatMoney(value, metadata.value?.formatting);
       >
         {{ t('RELATIONSHIP.WITHDRAWAL.REVIEW') }}
       </button>
+      <button
+        type="button"
+        data-testid="analyst-capacity-open"
+        :class="buttonClass"
+        :disabled="!withdrawalUser || busy"
+        @click="capacityAnalyst = Number(withdrawalUser)"
+      >
+        {{ t('RELATIONSHIP.CAPACITY.CURRENT_OPEN') }}
+      </button>
     </form>
     <div
       v-if="rows.length"
@@ -278,7 +290,16 @@ const money = value => formatMoney(value, metadata.value?.formatting);
             v-for="row in rows"
             :key="row.user.id"
           >
-            <td class="p-3 font-semibold">{{ row.user.name }}</td>
+            <td class="p-3 font-semibold">
+              {{ row.user.name }}
+              <button
+                type="button"
+                :class="buttonClass"
+                @click="capacityAnalyst = row.user.id"
+              >
+                {{ t('RELATIONSHIP.CAPACITY.CURRENT_OPEN') }}
+              </button>
+            </td>
             <td
               v-for="key in keys"
               :key="key"
@@ -305,5 +326,10 @@ const money = value => formatMoney(value, metadata.value?.formatting);
     v-if="withdrawalAnalyst"
     :analyst-id="withdrawalAnalyst"
     @close="withdrawalAnalyst = null"
+  />
+  <AnalystCapacityDialog
+    v-if="capacityAnalyst"
+    :analyst-id="capacityAnalyst"
+    @close="capacityAnalyst = null"
   />
 </template>

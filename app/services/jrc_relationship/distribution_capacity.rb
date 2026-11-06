@@ -31,6 +31,18 @@ class JrcRelationship::DistributionCapacity
     raise ArgumentError, 'Destination capacity is not available for this transfer' if actual.any? { |row| row['blocker'] }
   end
 
+  # Current workload only: no proposed incoming customer and no admission receipt.
+  def current_page(owner_id:, records:, page: 1, per_page: 10)
+    number = Integer(page.to_s, 10).clamp(1, 10_000)
+    size = Integer(per_page.to_s, 10).clamp(1, 20)
+    configs = current_configurations(records)
+    rows = configs.drop((number - 1) * size).first(size).map do |config|
+      fact(config, config.effective_rules.fetch('portfolio_capacity_limits'), { 'owner_id' => owner_id, 'ids' => [] }, records, [])
+        .except('baseline_digest', 'incoming', 'incoming_customers', 'projected')
+    end
+    { payload: rows, meta: { page: number, per_page: size, total: configs.size } }
+  end
+
   def for_view(review)
     review.snapshot.fetch('capacity', []).map do |row|
       config = JrcRelationship::Configuration.new(account: @context.account, scope_key: row.fetch('scope_key'))
@@ -44,6 +56,12 @@ class JrcRelationship::DistributionCapacity
   end
 
   private
+
+  def current_configurations(records)
+    configs = records.flat_map { |row| @sources.for(row) }.uniq(&:scope_key)
+    configs = JrcRelationship::Configuration.where(account: @context.account, scope_key: 'account').to_a if records.empty?
+    configs.reject { |config| config.effective_rules.fetch('portfolio_capacity_limits').empty? }.sort_by(&:scope_key)
+  end
 
   def live_facts(review)
     records = @context.assignments.where(id: review.inputs.fetch('ids')).order(:id).to_a
