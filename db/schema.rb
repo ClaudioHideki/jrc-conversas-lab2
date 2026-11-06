@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_11_04_170000) do
+ActiveRecord::Schema[7.1].define(version: 2026_11_06_101000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -61,6 +61,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_04_170000) do
     t.index ["agent_capacity_policy_id"], name: "index_account_users_on_agent_capacity_policy_id"
     t.index ["custom_role_id"], name: "index_account_users_on_custom_role_id"
     t.index ["user_id"], name: "index_account_users_on_user_id"
+    t.datetime "jrc_relationship_withdrawn_at"
+    t.bigint "jrc_relationship_eligibility_version", default: 0, null: false
+    t.check_constraint "jrc_relationship_eligibility_version >= 0", name: "account_users_relationship_eligibility_nonnegative"
   end
 
   create_table "accounts", id: :serial, force: :cascade do |t|
@@ -1378,6 +1381,62 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_04_170000) do
     t.index ["contract_id"], name: "index_jrc_backoffice_signer_rosters_on_contract_id"
     t.index ["created_by_id"], name: "index_jrc_backoffice_signer_rosters_on_created_by_id"
     t.check_constraint "revision > 0 AND (customer_mode::text = ANY (ARRAY['single'::character varying, 'joint'::character varying]::text[])) AND (issuer_mode::text = ANY (ARRAY['single'::character varying, 'joint'::character varying]::text[]))", name: "bo_signer_roster_modes"
+  end
+
+  create_table "jrc_backoffice_completion_dossiers", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "backoffice_request_id", null: false
+    t.bigint "archive_blob_id", null: false
+    t.bigint "sealed_by_id", null: false
+    t.integer "number", null: false
+    t.text "source_snapshot", null: false
+    t.string "source_digest", limit: 64, null: false
+    t.string "manifest_digest", limit: 64, null: false
+    t.string "archive_sha256", limit: 64, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_backoffice_completion_dossiers_on_account_id"
+    t.index ["archive_blob_id"], name: "index_jrc_backoffice_completion_dossiers_on_archive_blob_id"
+    t.index ["backoffice_request_id", "manifest_digest"], name: "bo_dossier_manifest", unique: true
+    t.index ["backoffice_request_id", "number"], name: "bo_dossier_number", unique: true
+    t.index ["backoffice_request_id"], name: "idx_on_backoffice_request_id_30f7ebbcf0"
+    t.index ["sealed_by_id"], name: "index_jrc_backoffice_completion_dossiers_on_sealed_by_id"
+  end
+
+  create_table "jrc_backoffice_signature_acceptances", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "contract_id", null: false
+    t.bigint "bundle_id", null: false
+    t.bigint "signed_blob_id", null: false
+    t.bigint "accepted_by_id", null: false
+    t.text "source_snapshot", null: false
+    t.string "source_digest", limit: 64, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["accepted_by_id"], name: "index_jrc_backoffice_signature_acceptances_on_accepted_by_id"
+    t.index ["account_id"], name: "index_jrc_backoffice_signature_acceptances_on_account_id"
+    t.index ["bundle_id"], name: "index_jrc_backoffice_signature_acceptances_on_bundle_id", unique: true
+    t.index ["contract_id"], name: "index_jrc_backoffice_signature_acceptances_on_contract_id", unique: true
+    t.index ["signed_blob_id"], name: "index_jrc_backoffice_signature_acceptances_on_signed_blob_id"
+  end
+
+  create_table "jrc_backoffice_signature_artifact_bundles", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "delivery_id", null: false
+    t.bigint "contract_version_id", null: false
+    t.bigint "signed_document_id", null: false
+    t.bigint "certificate_document_id", null: false
+    t.bigint "captured_by_id", null: false
+    t.text "source_snapshot", null: false
+    t.string "source_digest", limit: 64, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_backoffice_signature_artifact_bundles_on_account_id"
+    t.index ["captured_by_id"], name: "idx_on_captured_by_id_37641ccf53"
+    t.index ["certificate_document_id"], name: "idx_on_certificate_document_id_f6fa72fade"
+    t.index ["contract_version_id"], name: "idx_on_contract_version_id_d7ba43b27b", unique: true
+    t.index ["delivery_id"], name: "index_jrc_backoffice_signature_artifact_bundles_on_delivery_id", unique: true
+    t.index ["signed_document_id"], name: "idx_on_signed_document_id_5a3b09f706"
   end
 
   create_table "jrc_backoffice_authority_proposals", force: :cascade do |t|
@@ -7275,6 +7334,22 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_04_170000) do
   add_foreign_key "video_conference_settings", "accounts"
   add_foreign_key "video_conference_settings", "users"
   add_foreign_key "whatsapp_calling_configurations", "accounts"
+  add_foreign_key "jrc_backoffice_completion_dossiers", "accounts"
+  add_foreign_key "jrc_backoffice_completion_dossiers", "active_storage_blobs", column: "archive_blob_id"
+  add_foreign_key "jrc_backoffice_completion_dossiers", "jrc_crm_backoffice_requests", column: "backoffice_request_id"
+  add_foreign_key "jrc_backoffice_completion_dossiers", "users", column: "sealed_by_id"
+  add_foreign_key "jrc_backoffice_signature_acceptances", "accounts"
+  add_foreign_key "jrc_backoffice_signature_acceptances", "active_storage_blobs", column: "signed_blob_id"
+  add_foreign_key "jrc_backoffice_signature_acceptances", "jrc_backoffice_signature_artifact_bundles", column: "bundle_id"
+  add_foreign_key "jrc_backoffice_signature_acceptances", "jrc_crm_contracts", column: "contract_id"
+  add_foreign_key "jrc_backoffice_signature_acceptances", "users", column: "accepted_by_id"
+  add_foreign_key "jrc_backoffice_signature_artifact_bundles", "accounts"
+  add_foreign_key "jrc_backoffice_signature_artifact_bundles", "jrc_backoffice_contract_versions", column: "contract_version_id"
+  add_foreign_key "jrc_backoffice_signature_artifact_bundles", "jrc_backoffice_document_versions", column: "certificate_document_id"
+  add_foreign_key "jrc_backoffice_signature_artifact_bundles", "jrc_backoffice_document_versions", column: "signed_document_id"
+  add_foreign_key "jrc_backoffice_signature_artifact_bundles", "jrc_backoffice_signature_deliveries", column: "delivery_id"
+  add_foreign_key "jrc_backoffice_signature_artifact_bundles", "users", column: "captured_by_id"
+
   execute <<~'JRC_SCHEMA_SQL_8d59563fc72a'
     ALTER TABLE "companies" DROP CONSTRAINT "jrc_master_not_own_parent";
   JRC_SCHEMA_SQL_8d59563fc72a
@@ -9497,7 +9572,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_04_170000) do
     $function$
   JRC_SCHEMA_SQL_b230812f3afd
 
-  execute <<~'JRC_SCHEMA_SQL_6cfd3ff9ee5c'
+  execute <<~'JRC_SCHEMA_SQL_855aad828892'
     CREATE OR REPLACE FUNCTION public.jrc_bo_private_attachment()
      RETURNS trigger
      LANGUAGE plpgsql
@@ -9506,13 +9581,20 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_04_170000) do
       IF TG_OP <> 'INSERT' AND OLD.record_type = 'JrcBackoffice::DocumentVersion' THEN
         RAISE EXCEPTION 'Document version files are immutable';
       END IF;
+      IF TG_OP <> 'INSERT' AND OLD.record_type = 'JrcCrm::Contract' AND OLD.name = 'signed_document'
+        AND EXISTS (SELECT 1 FROM jrc_backoffice_signature_acceptances WHERE contract_id = OLD.record_id) THEN
+        RAISE EXCEPTION 'Accepted signed contract files are immutable';
+      END IF;
       IF TG_OP = 'DELETE' THEN
         RETURN OLD;
       END IF;
-      IF EXISTS (SELECT 1 FROM jrc_backoffice_contract_versions WHERE pdf_blob_id = NEW.blob_id)
+      IF (EXISTS (SELECT 1 FROM jrc_backoffice_contract_versions WHERE pdf_blob_id = NEW.blob_id)
         OR EXISTS (SELECT 1 FROM jrc_backoffice_document_scans WHERE source_blob_id = NEW.blob_id)
         OR EXISTS (SELECT 1 FROM active_storage_attachments
-          WHERE blob_id = NEW.blob_id AND record_type = 'JrcBackoffice::DocumentVersion') THEN
+          WHERE blob_id = NEW.blob_id AND record_type = 'JrcBackoffice::DocumentVersion'))
+        AND NOT (NEW.record_type = 'JrcCrm::Contract' AND NEW.name = 'signed_document'
+          AND EXISTS (SELECT 1 FROM jrc_backoffice_signature_acceptances
+            WHERE contract_id = NEW.record_id AND signed_blob_id = NEW.blob_id)) THEN
         RAISE EXCEPTION 'Private Backoffice files cannot be relinked';
       END IF;
       IF NEW.record_type = 'JrcBackoffice::DocumentVersion' THEN
@@ -9528,7 +9610,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_04_170000) do
       RETURN NEW;
     END;
     $function$
-  JRC_SCHEMA_SQL_6cfd3ff9ee5c
+  JRC_SCHEMA_SQL_855aad828892
 
   execute <<~'JRC_SCHEMA_SQL_b843a3e990c8'
     CREATE TRIGGER jrc_bo_private_attachment BEFORE INSERT OR DELETE OR UPDATE ON active_storage_attachments FOR EACH ROW EXECUTE FUNCTION jrc_bo_private_attachment();
@@ -9701,6 +9783,110 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_04_170000) do
   execute <<~'JRC_SCHEMA_SQL_7c8aa86d3a47'
     CREATE TRIGGER jrc_ap_notice_source_guard BEFORE UPDATE ON jrc_approvals_notification_outboxes FOR EACH ROW EXECUTE FUNCTION jrc_ap_notice_source_guard();
   JRC_SCHEMA_SQL_7c8aa86d3a47
+
+
+
+  execute <<~'JRC_SCHEMA_SQL_c5f6ae8b90d9'
+    ALTER TABLE "account_users" DROP CONSTRAINT "account_users_relationship_eligibility_nonnegative";
+  JRC_SCHEMA_SQL_c5f6ae8b90d9
+
+  execute <<~'JRC_SCHEMA_SQL_4e5fdcebe715'
+    ALTER TABLE "account_users" ADD CONSTRAINT "account_users_relationship_eligibility_nonnegative" CHECK ((jrc_relationship_eligibility_version >= 0));
+  JRC_SCHEMA_SQL_4e5fdcebe715
+
+  execute <<~'JRC_SCHEMA_SQL_aba51a781779'
+    CREATE OR REPLACE FUNCTION public.jrc_bo_dossier_attachment_guard()
+     RETURNS trigger
+     LANGUAGE plpgsql
+    AS $function$
+    BEGIN
+      IF EXISTS (SELECT 1 FROM jrc_backoffice_completion_dossiers WHERE archive_blob_id = NEW.blob_id)
+        OR EXISTS (SELECT 1 FROM active_storage_blobs WHERE id = NEW.blob_id
+          AND metadata::jsonb ->> 'jrc_backoffice_dossier_archive' = 'true') THEN
+        RAISE EXCEPTION 'Sealed archives require the scoped dossier endpoint';
+      END IF;
+      RETURN NEW;
+    END;
+    $function$
+  JRC_SCHEMA_SQL_aba51a781779
+
+  execute <<~'JRC_SCHEMA_SQL_afe4aa4c1056'
+    CREATE OR REPLACE FUNCTION public.jrc_bo_dossier_blob_pin()
+     RETURNS trigger
+     LANGUAGE plpgsql
+    AS $function$
+    BEGIN
+      IF EXISTS (SELECT 1 FROM jrc_backoffice_completion_dossiers WHERE archive_blob_id = OLD.id) THEN
+        RAISE EXCEPTION 'Sealed archive blobs are immutable';
+      END IF;
+      IF TG_OP = 'DELETE' THEN RETURN OLD; END IF;
+      RETURN NEW;
+    END;
+    $function$
+  JRC_SCHEMA_SQL_afe4aa4c1056
+
+  execute <<~'JRC_SCHEMA_SQL_1352393d31eb'
+    CREATE OR REPLACE FUNCTION public.jrc_bo_dossier_pin()
+     RETURNS trigger
+     LANGUAGE plpgsql
+    AS $function$
+    BEGIN
+      IF TG_OP <> 'INSERT' THEN
+        RAISE EXCEPTION 'Completion dossiers are immutable';
+      END IF;
+      IF NEW.number < 1 OR NOT EXISTS (
+        SELECT 1 FROM jrc_crm_backoffice_requests r JOIN active_storage_blobs b ON b.id = NEW.archive_blob_id
+        WHERE r.id = NEW.backoffice_request_id AND r.account_id = NEW.account_id
+          AND b.content_type = 'application/gzip' AND b.metadata::jsonb ->> 'jrc_backoffice_dossier_archive' = 'true'
+      ) THEN
+        RAISE EXCEPTION 'Dossier must preserve its account, request and private archive';
+      END IF;
+      RETURN NEW;
+    END;
+    $function$
+  JRC_SCHEMA_SQL_1352393d31eb
+
+  execute <<~'JRC_SCHEMA_SQL_a95c269a4444'
+    CREATE OR REPLACE FUNCTION public.jrc_bo_signature_acceptance_pin()
+     RETURNS trigger
+     LANGUAGE plpgsql
+    AS $function$
+    BEGIN
+      IF TG_OP <> 'INSERT' THEN
+        RAISE EXCEPTION 'Signature acceptances are immutable';
+      END IF;
+      IF NOT EXISTS (
+        SELECT 1 FROM jrc_backoffice_signature_artifact_bundles b
+        JOIN jrc_backoffice_signature_deliveries d ON d.id = b.delivery_id
+        JOIN jrc_crm_contracts c ON c.id = NEW.contract_id AND c.account_id = NEW.account_id
+        JOIN jrc_backoffice_document_versions v ON v.id = b.signed_document_id AND v.account_id = NEW.account_id
+        JOIN active_storage_attachments a ON a.record_type = 'JrcBackoffice::DocumentVersion'
+          AND a.record_id = v.id AND a.name = 'file' AND a.blob_id = NEW.signed_blob_id
+        WHERE b.id = NEW.bundle_id AND b.account_id = NEW.account_id
+          AND d.contract_id = c.id AND d.account_id = NEW.account_id
+      ) THEN
+        RAISE EXCEPTION 'Signature acceptance must preserve the exact account, contract and signed file';
+      END IF;
+      RETURN NEW;
+    END;
+    $function$
+  JRC_SCHEMA_SQL_a95c269a4444
+
+  execute <<~'JRC_SCHEMA_SQL_9bb5f47a2a78'
+    CREATE TRIGGER jrc_bo_dossier_attachment_guard BEFORE INSERT OR UPDATE ON active_storage_attachments FOR EACH ROW EXECUTE FUNCTION jrc_bo_dossier_attachment_guard();
+  JRC_SCHEMA_SQL_9bb5f47a2a78
+
+  execute <<~'JRC_SCHEMA_SQL_e55acb627278'
+    CREATE TRIGGER jrc_bo_dossier_blob_pin BEFORE DELETE OR UPDATE ON active_storage_blobs FOR EACH ROW EXECUTE FUNCTION jrc_bo_dossier_blob_pin();
+  JRC_SCHEMA_SQL_e55acb627278
+
+  execute <<~'JRC_SCHEMA_SQL_d9a5172ab451'
+    CREATE TRIGGER jrc_bo_dossier_pin BEFORE INSERT OR DELETE OR UPDATE ON jrc_backoffice_completion_dossiers FOR EACH ROW EXECUTE FUNCTION jrc_bo_dossier_pin();
+  JRC_SCHEMA_SQL_d9a5172ab451
+
+  execute <<~'JRC_SCHEMA_SQL_7b903fc4ea96'
+    CREATE TRIGGER jrc_bo_signature_acceptance_pin BEFORE INSERT OR DELETE OR UPDATE ON jrc_backoffice_signature_acceptances FOR EACH ROW EXECUTE FUNCTION jrc_bo_signature_acceptance_pin();
+  JRC_SCHEMA_SQL_7b903fc4ea96
 
 
 end
