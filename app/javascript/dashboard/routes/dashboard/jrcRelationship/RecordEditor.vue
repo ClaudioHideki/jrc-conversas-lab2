@@ -70,9 +70,23 @@ const loadContext = data => {
     form.period_to = data.period.to;
   }
 };
-const references = key =>
+const referenceOwners = item => {
+  const options = (workContext.value?.work_owners || []).map(row => [
+    ...row,
+    false,
+  ]);
+  const id = item?.owner_id;
+  if (id && !options.some(row => String(row[0]) === String(id))) {
+    const label = props.metadata.owners?.find(
+      row => String(row[0]) === String(id)
+    )?.[1];
+    options.unshift([id, label || String(id), true]);
+  }
+  return options;
+};
+const references = (key, item) =>
   ({
-    owner_id: props.metadata.owners,
+    owner_id: referenceOwners(item),
     user_id: props.metadata.owners,
     product_id: props.metadata.products,
     source_product_id: props.metadata.products,
@@ -556,15 +570,18 @@ const submit = () => {
                 {{ t(`RELATIONSHIP.PARTICIPANTS.${type}`) }}
               </option></select
             ><select
-              v-else-if="references(key)"
+              v-else-if="references(key, item)"
               v-model="item[key]"
               :class="inputClass"
+              :disabled="key === 'owner_id' && !workContext"
+              :data-testid="key === 'owner_id' ? 'commitment-owner' : undefined"
             >
               <option value="">{{ t('RELATIONSHIP.SELECT') }}</option>
               <option
-                v-for="reference in references(key)"
+                v-for="reference in references(key, item)"
                 :key="reference[0]"
                 :value="reference[0]"
+                :disabled="reference[2] === true"
               >
                 {{ reference[1] }}
               </option></select

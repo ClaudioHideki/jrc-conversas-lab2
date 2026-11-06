@@ -165,7 +165,10 @@ class JrcRelationship::Workflow
 
   def prepare_activity_owner!(action, owner_id, automatic)
     action.metadata = action.metadata.merge('automatic' => true) if automatic
-    action.owner = @context.assignable_users.find(owner_id) if owner_id
+    if owner_id
+      candidate = JrcRelationship::WorkOwnership.new(@context, action.assignment).authorize!(owner_id)
+      action.owner = candidate.user
+    end
     JrcRelationship::OperationalRouting.new(@context).prepare!(action, preserve_owner: owner_id.present?)
     raise AutomaticWorkUnavailable, 'Automatic work requires an available authorized owner' if automatic && !action.owner
 

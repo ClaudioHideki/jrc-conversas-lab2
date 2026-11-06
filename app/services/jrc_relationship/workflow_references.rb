@@ -63,8 +63,27 @@ class JrcRelationship::WorkflowReferences
 
   def validate_qbr!(record)
     record.assignment.customer_context(@context.member).contacts.find(record.contact_id) if record.contact_id
-    Array(record.decisions).each { |decision| @context.assignable_users.find(decision['owner_id']) if decision['owner_id'].present? }
+    validate_decision_owners!(record)
     Array(record.participants).each { |participant| @context.assignable_users.find(participant['user_id']) if participant['user_id'].present? }
+  end
+
+  def validate_decision_owners!(record)
+    previous = Array(record.attribute_in_database('decisions')).each_with_index.to_h do |decision, index|
+      [decision.fetch('decision_key', index.to_s).to_s, decision]
+    end
+    Array(record.decisions).each_with_index do |decision, index|
+      original = previous[decision.fetch('decision_key', index.to_s).to_s]
+      validate_decision_owner!(record, decision, original)
+    end
+  end
+
+  def validate_decision_owner!(record, decision, original)
+    return if decision['owner_id'].blank?
+
+    @context.assignable_users.find(decision['owner_id'])
+    return if original && original['owner_id'].to_s == decision['owner_id'].to_s
+
+    JrcRelationship::WorkOwnership.new(@context, record.assignment).authorize!(decision['owner_id'])
   end
 
   def validate_expansion!(record)

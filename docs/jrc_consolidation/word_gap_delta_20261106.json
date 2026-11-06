@@ -95,6 +95,15 @@
       "current_state": "Measured1000 versioned documents, real native API pages5/25/50/lastpage; fixed N+1 using shared authorized selector;20 native gates passed. Original cohorts/files preserved.",
       "report": "document_catalog_scale_checkpoint_20261106.json",
       "remaining": "Not upload/scanner throughput or full production pilot; fresh UI/visual acceptance still pending."
+    },
+    {
+      "requirement": "F1/F2 manual responsibility and QBR commitment destinations",
+      "current_state": "Implemented and native/Vue tested; historic responsibilities preserved",
+      "evidence": [
+        "docs/jrc_consolidation/manual_work_ownership_checkpoint_20261106.json",
+        "docs/jrc_consolidation/qbr_commitment_ownership_checkpoint_20261106.json"
+      ],
+      "remaining": "Plan goal/milestone guard is next; final identity-removal business scope and fresh visual gates remain open."
     }
   ],
   "explicit_dependencies": [

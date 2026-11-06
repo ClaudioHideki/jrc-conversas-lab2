@@ -6,8 +6,6 @@ class JrcRelationship::WorkOwnership
   end
 
   def options
-    return [] unless @context.policy.team?
-
     @context.assignable_users.order(:name, :id).limit(500).filter_map do |user|
       authorize!(user.id)
       [user.id, user.name]
