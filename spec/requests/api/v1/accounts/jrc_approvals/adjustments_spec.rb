@@ -61,6 +61,22 @@ RSpec.describe 'Atomic native proposal adjustments', :approval_core, :commercial
     expect(JrcApprovals::RequestVerification.approved?(revised, revised.policy_version, revised.snapshot)).to be(true)
   end
 
+  it 'accepts the exact monetary equivalent of the Word25-to20-percent example without installing a percentage source field' do
+    proposal.update!(discount_cents: 200)
+    proposal.recalculate_totals!
+    base = service.options(record).fetch(:maximum_discount_cents)
+    expect(base).to eq(800)
+    original = record.attributes.slice('snapshot', 'stage_plan', 'requester_id', 'policy_version_id')
+    native = JrcCrm::CommercialFinancials.new(attributes: { products_cents: base, snapshot: { discount_percent: '20' } }, items: []).call
+    expect(native.fetch(:discount_cents)).to eq(160)
+    revised = service.call(**values, changes: { 'discount_cents' => native.fetch(:discount_cents) }, mode: 'approve', step_code: 'review')
+    expect([proposal.reload.discount_cents, revised.state]).to eq([160, 'approved'])
+    expect(record.reload.attributes.slice(*original.keys)).to eq(original)
+    audit = JrcApprovals::AuditEvent.find_by!(request_id: record.id, event_type: 'request_adjusted')
+    expect(audit.data).to include('before' => { 'discount_cents' => 200 }, 'after' => { 'discount_cents' => 160 }, 'mode' => 'approve')
+    expect(JrcApprovals::RequestVerification.approved?(revised, revised.policy_version, revised.snapshot)).to be(true)
+  end
+
   it 'persists the exact applied amount without changing native commercial terms or old approval snapshots' do
     proposal.update!(commercial_notes: 'Synthetic retained native term')
     terms = proposal.attributes.slice('commercial_notes', 'term_months', 'renewal_type')
@@ -151,7 +167,7 @@ RSpec.describe 'Atomic native proposal adjustments', :approval_core, :commercial
 
   it 'rejects uninstalled fields and malformed values instead of granting arbitrary model updates' do
     input = values
-    [{ 'owner_id' => manager.user_id }, { 'discount_cents' => '100' }, { 'discount_cents' => -1 }].each do |changes|
+    [{ 'owner_id' => manager.user_id }, { 'discount_percent' => 20 }, { 'discount_cents' => '100' }, { 'discount_cents' => -1 }].each do |changes|
       expect { service.call(**input, changes: changes) }.to raise_error(JrcApprovals::Error, 'INVALID_ADJUSTMENT_FIELDS')
     end
     expect(proposal.reload.discount_cents).to eq(300)

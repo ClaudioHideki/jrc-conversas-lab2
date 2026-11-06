@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import { decisionChoices, moneyCents } from './model';
 import { minorAmountText } from './tierPresentation';
+import { percentageDiscountCents } from './discountPercentage';
 const props = defineProps({
   request: { type: Object, required: true },
   busy: Boolean,
@@ -15,6 +16,16 @@ const dialog = ref(null);
 const amount = ref(
   minorAmountText(props.request.adjustment.values.discount_cents)
 );
+const percentage = ref('');
+const inputUnit = ref('amount');
+const baseOnOpen = props.request.adjustment.maximum_discount_cents ?? null;
+const inputText = computed({
+  get: () => (inputUnit.value === 'percent' ? percentage.value : amount.value),
+  set: value => {
+    if (inputUnit.value === 'percent') percentage.value = value;
+    else amount.value = value;
+  },
+});
 const reason = ref('');
 const mode = ref('save');
 const selected = ref(0);
@@ -27,9 +38,25 @@ const choices = computed(() =>
 const maximumDiscount = computed(
   () => props.request.adjustment.maximum_discount_cents ?? null
 );
+const baseUnchanged = computed(() => maximumDiscount.value === baseOnOpen);
+const percentAvailable = computed(
+  () =>
+    Number.isSafeInteger(baseOnOpen) && baseOnOpen > 0 && baseUnchanged.value
+);
+const selectUnit = unit => {
+  if (
+    props.busy ||
+    submitted.value ||
+    (unit === 'percent' && !percentAvailable.value)
+  )
+    return;
+  inputUnit.value = unit;
+};
 const parsed = computed(() => {
   try {
-    return moneyCents(amount.value.replace(',', '.'));
+    return inputUnit.value === 'percent'
+      ? percentageDiscountCents(baseOnOpen, percentage.value)
+      : moneyCents(amount.value.replace(',', '.'));
   } catch {
     return null;
   }
@@ -38,6 +65,7 @@ const ready = computed(
   () =>
     !props.busy &&
     !submitted.value &&
+    baseUnchanged.value &&
     reason.value.trim() &&
     reason.value.length <= 4096 &&
     parsed.value !== null &&
@@ -145,10 +173,70 @@ onMounted(() => dialog.value.open());
         <section
           class="min-w-0 rounded-xl border border-n-weak bg-n-solid-2 p-4"
         >
+          <div
+            class="mb-3 flex flex-wrap gap-2"
+            role="group"
+            :aria-label="t('JRC_APPROVALS.adjustment.inputUnit')"
+          >
+            <button
+              type="button"
+              data-testid="discount-unit-amount"
+              :aria-pressed="inputUnit === 'amount'"
+              :disabled="busy || submitted"
+              class="rounded-lg border border-n-weak px-3 py-2 text-sm font-medium"
+              :class="
+                inputUnit === 'amount'
+                  ? 'bg-n-blue-3 text-n-blue-11'
+                  : 'bg-n-solid-2'
+              "
+              @click="selectUnit('amount')"
+            >
+              {{
+                t('JRC_APPROVALS.adjustment.amountMode', {
+                  currency: request.adjustment.currency,
+                })
+              }}
+            </button>
+            <button
+              type="button"
+              data-testid="discount-unit-percent"
+              :aria-pressed="inputUnit === 'percent'"
+              :disabled="busy || submitted || !percentAvailable"
+              class="rounded-lg border border-n-weak px-3 py-2 text-sm font-medium"
+              :class="
+                inputUnit === 'percent'
+                  ? 'bg-n-teal-3 text-n-teal-11'
+                  : 'bg-n-solid-2'
+              "
+              @click="selectUnit('percent')"
+            >
+              {{ t('JRC_APPROVALS.adjustment.percentMode') }}
+            </button>
+          </div>
+          <p
+            v-if="inputUnit === 'percent'"
+            class="mb-3 text-sm text-n-slate-11"
+          >
+            {{ t('JRC_APPROVALS.adjustment.percentNote') }}
+          </p>
+          <p
+            v-if="!baseUnchanged"
+            role="alert"
+            data-testid="discount-base-changed"
+            class="mb-3 text-sm text-n-ruby-11"
+          >
+            {{ t('JRC_APPROVALS.adjustment.baseChanged') }}
+          </p>
           <label class="block text-sm font-medium"
-            >{{ t('JRC_APPROVALS.adjustment.discount') }}
+            >{{
+              t(
+                inputUnit === 'percent'
+                  ? 'JRC_APPROVALS.adjustment.percentLabel'
+                  : 'JRC_APPROVALS.adjustment.discount'
+              )
+            }}
             <input
-              v-model="amount"
+              v-model="inputText"
               inputmode="decimal"
               :disabled="busy || submitted"
               class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 p-3"

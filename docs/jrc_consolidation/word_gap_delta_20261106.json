@@ -1,0 +1,101 @@
+{
+  "date": "2026-11-06",
+  "source_head": "3b33af4f1fe7a4bd9534d1fb1f73b06d5f274523",
+  "audit_kind": "Incremental verified source/evidence delta; not a completed literal/visual Word acceptance matrix",
+  "original_inventory_preserved": true,
+  "literal_fragment_counts": {
+    "cadastro-mestre": 373,
+    "relacionamento": 298,
+    "backoffice": 449,
+    "central-aprovacoes": 426
+  },
+  "document_sha256": {
+    "cadastro-mestre": "2a9b7bb58b61856646c29d7681f97473c6a51973684167c62f57937239ac2fbf",
+    "relacionamento": "7ec0c32f0d33b509b47fc8c4c99c10aaa60cdc2ba52fec53100973180c685fee",
+    "backoffice": "ebd5cd1db7fa53cc7bf7e2fa6a801e498735eaef9d67040002a5a9ade4878284",
+    "central-aprovacoes": "3456a7fa3ad15235d9e072aeb00bd4c0eef5ae08d52992463a6bf609ef94c917"
+  },
+  "confirmed_deltas": [
+    {
+      "requirement": "E final sealed dossier",
+      "current_state": "Native implementation and automated evidence supersede the older pending note",
+      "report": "sealed_dossier_checkpoint_20261105.json",
+      "remaining": "External signature/scanner acceptance and fresh UI remain separate."
+    },
+    {
+      "requirement": "F1 points/hours/current capacity",
+      "current_state": "Explicit opt-in typed calculation and native/current capacity tested; old pending note partially superseded",
+      "reports": [
+        "weighted_capacity_checkpoint_20261105.json",
+        "analyst_current_capacity_checkpoint_20261105.json"
+      ],
+      "remaining": "No illustrative production defaults or blanket full F1 closure."
+    },
+    {
+      "requirement": "F1 native pending destinations/removal",
+      "current_state": "Readiness, exclusive transfer, project handoff proofs, supervised cadence stop and scoped native editor inventory locally tested",
+      "reports": [
+        "withdrawal_readiness_checkpoint_20261105.json",
+        "project_handoff_proof_checkpoint_20261105.json",
+        "analyst_cadence_controls_checkpoint_20261105.json",
+        "analyst_native_responsibilities_checkpoint_20261106.json"
+      ],
+      "remaining": "Final identity/removal scope pending explicit business answer; no global agent deletion or blanket project/cadence succession."
+    },
+    {
+      "requirement": "F2 priority/anti-noise",
+      "current_state": "Trend/SLA inputs, optional P0-P3 mapping and monitor/cadence/automatic-playbook budgets tested",
+      "reports": [
+        "priority_critical_checkpoint_20261105.json",
+        "priority_bands_checkpoint_20261105.json",
+        "automatic_playbook_budget_checkpoint_20261106.json"
+      ],
+      "remaining": "Other dimensions/aggregation and full functional/visual audit remain open. Risk follow-up, surveys/plans/manual workflows deliberately retain separate policies."
+    },
+    {
+      "requirement": "D percentage adjustment input",
+      "word_fragments": [
+        "central-aprovacoes:P0111",
+        "central-aprovacoes:P0112",
+        "central-aprovacoes:P0126",
+        "central-aprovacoes:P0411",
+        "central-aprovacoes:P0413",
+        "central-aprovacoes:P0437"
+      ],
+      "current_state": "Implemented native-base percentage-to-cents input; exact shared calculator vectors and atomic source adjustment tested",
+      "remaining": "No new percentage source field or generic write adapter; other unspecified domains not declared complete."
+    }
+  ],
+  "explicit_dependencies": [
+    {
+      "requirement": "TRR",
+      "state": "Business definition absent; no formula invented."
+    },
+    {
+      "requirement": "Company documents without portfolio",
+      "state": "User explicitly deferred expansion; existing authorized portfolio flow retained."
+    },
+    {
+      "requirement": "Current-source Chrome/visual acceptance",
+      "state": "Blocked by explicit no-build/no-recompile/no5379-change instruction; old assets are not evidence."
+    },
+    {
+      "requirement": "DocuSign/scanner/channel pilot",
+      "state": "External environment/operations require separate authorization; not simulated as passed."
+    }
+  ],
+  "next_confirmed_local_gap": {
+    "source": "app/javascript/dashboard/routes/dashboard/jrcRelationship/AnalystWorkspace.vue",
+    "finding": "Summary cards route to generic lists: actions_today supplies no due-day filter and at_risk supplies no risk filter; dashboard uses portfolio mode=mine but action-list mine filters action ownership. A delegated task can therefore disappear from the linked list despite contributing to the card.",
+    "native_reuse": "MetricDrilldown already applies the authorized dashboard portfolio and source predicates. Reuse its existing paginated panel in a popup, add the missing overdue_returns source and exact action navigation.",
+    "scope": "Incremental functional fix; preserve dashboard portfolio semantics, layouts, permissions and all existing editors."
+  },
+  "stage_closure": {
+    "C": false,
+    "D": false,
+    "E": false,
+    "F": false,
+    "G": false
+  },
+  "unreviewed_literal_and_visual_fragments": "Not auto-marked complete; the original context/requirements inventory remains classification_pending where not explicitly reconciled."
+}

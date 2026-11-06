@@ -320,6 +320,12 @@
     },
     "adjustment": {
       "title": "Adjust permitted fields",
+      "inputUnit": "Enter the general discount as",
+      "amountMode": "Amount ({currency})",
+      "percentMode": "Percentage of discount base",
+      "percentLabel": "Adjusted percentage (0–100%)",
+      "percentNote": "The percentage uses the discount base shown here, after existing item calculations. Enter up to four decimal places. The preview shows the monetary amount rounded to cents, with halves rounded up; that exact amount is saved and audited.",
+      "baseChanged": "The source discount base changed. Close and reopen the review before saving.",
       "notice": "Only the installed proposal discount can be edited here. A new audited request preserves the original requester, policy version and deadline. Saving and approving rechecks the current authority; an ineligible decision rolls back the whole adjustment.",
       "original": "Original general discount",
       "discount": "Adjusted general discount",
