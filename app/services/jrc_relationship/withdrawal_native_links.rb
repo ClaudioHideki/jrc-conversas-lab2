@@ -13,6 +13,7 @@ class JrcRelationship::WithdrawalNativeLinks
 
   def restrict(kind, rows)
     KEYS.fetch(kind)
+    rows = rows.where(account_id: @context.account.id)
     selected = direct(kind, rows)
     if kind == 'projects'
       tasks = JrcProjects::Task.where(account_id: @context.account.id, project_id: rows.select(:id))
@@ -27,7 +28,8 @@ class JrcRelationship::WithdrawalNativeLinks
   private
 
   def direct(kind, rows)
-    SOURCES.reduce(rows.none) do |selected, model|
+    initial = kind == 'projects' ? JrcRelationship::WithdrawalHandoffProjects.new(@context).restrict(rows) : rows.none
+    SOURCES.reduce(initial) do |selected, model|
       origins = authorized_origins(model, rows, kind)
       next selected unless origins
 
