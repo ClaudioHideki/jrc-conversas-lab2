@@ -5,6 +5,7 @@ import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcRelationship';
 import ActionFollowUpDialog from './ActionFollowUpDialog.vue';
+import PriorityBandBadge from './PriorityBandBadge.vue';
 import { buttonClass, date as formatDate, message } from './definitions';
 const props = defineProps({
   actionId: { type: [Number, String], required: true },
@@ -155,6 +156,7 @@ const save = async fields => {
             >{{ t('RELATIONSHIP.FIELDS.priority') }}:
             {{ record.priority }}</span
           >
+          <PriorityBandBadge :record="record" />
         </div>
         <p
           v-if="

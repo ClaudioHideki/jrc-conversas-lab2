@@ -5,7 +5,7 @@
   "branch": "codex/relacionamento-v2-20261101",
   "last_validated_checkpoint": "ded8fe028309f2d8094627dda359e04dbb3ff153",
   "completed_current_work": "Native version-bound evidence/CS gates plus real immutable sealed dossier; see sealed_dossier_checkpoint_20261105.json. Full stages not closed.",
-  "active_work": "F2 explicit numeric P0-P3 policy through native versioned configuration/priority calculation and queue UI, preserving legacy behavior when absent.",
+  "active_work": "Native automatic playbook task budget: preserve deferred work and source critical risks, without false immutable completion receipts.",
   "exact_next_actions": [
     "Finish safe analyst withdrawal via native scope/readiness and immutable reviewed responsibility receipts, including project owner/cadence dependencies.",
     "Continue F2 and C/D/G functional and Word/scale gaps without reducing requirements.",
@@ -50,9 +50,9 @@
   "disk_last_observed_bytes": 7314264064,
   "TRR": "Undefined; do not invent",
   "company_documents_without_portfolio": "Explicitly deferred",
-  "last_validated_head": "ded8fe028309f2d8094627dda359e04dbb3ff153",
+  "last_validated_head": "3051ba390138dc33c78916d019648b53f535aa0d",
   "new_validated_code_checkpoint": "Resolve latest local CS code checkpoint with git log -1 --format=%H -- docs/jrc_consolidation/cs_signature_origin_checkpoint_20261105.json",
-  "current_status": "Supervised cadence/readiness/scale gates passed; continuing independent F2 classification while final withdrawal scope is clarified.",
+  "current_status": "Optional P0-P3 numeric bands implemented and locally tested; F2/C-G remain open",
   "next_actions": [
     "Finish safe analyst withdrawal via native scope/readiness and immutable reviewed responsibility receipts, including project owner/cadence dependencies.",
     "Continue F2 and C/D/G functional and Word/scale gaps without reducing requirements.",
@@ -75,5 +75,6 @@
   "sentiment_evidence_report": "docs/jrc_consolidation/sentiment_evidence_checkpoint_20261105.json",
   "waiting_review_report": "docs/jrc_consolidation/waiting_review_checkpoint_20261105.json",
   "waiting_review_notice_report": "docs/jrc_consolidation/waiting_review_notice_checkpoint_20261105.json",
-  "analyst_cadence_controls_report": "docs/jrc_consolidation/analyst_cadence_controls_checkpoint_20261105.json"
+  "analyst_cadence_controls_report": "docs/jrc_consolidation/analyst_cadence_controls_checkpoint_20261105.json",
+  "priority_bands_report": "docs/jrc_consolidation/priority_bands_checkpoint_20261105.json"
 }

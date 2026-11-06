@@ -7,7 +7,7 @@ class JrcRelationship::PrioritySignals
     RULES.filter_map do |key|
       value = rules.fetch(key, 0)
       "#{key} must be a finite nonnegative weight" unless value.is_a?(Numeric) && value.finite? && value >= 0
-    end
+    end + JrcRelationship::PriorityBands.validation_errors(rules)
   end
 
   def self.call(data, rules)

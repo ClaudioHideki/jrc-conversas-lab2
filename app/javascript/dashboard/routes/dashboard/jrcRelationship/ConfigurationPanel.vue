@@ -17,6 +17,7 @@ import PlaybookDesignPreview from './PlaybookDesignPreview.vue';
 import PlaybookFlowPolicyForm from './PlaybookFlowPolicyForm.vue';
 import PortfolioCapacityLimitsForm from './PortfolioCapacityLimitsForm.vue';
 import HealthConfigurationPreview from './HealthConfigurationPreview.vue';
+import PriorityBandsForm from './PriorityBandsForm.vue';
 const props = defineProps({
   screen: { type: String, default: 'settings' },
   allowed: Boolean,
@@ -33,6 +34,7 @@ const busy = ref(false);
 const scopeKey = ref('account');
 const invalidFlowPolicy = ref(false);
 const invalidCapacity = ref(false);
+const invalidPriorityBands = ref(false);
 const distributionOnly = computed(() => scopeKey.value.startsWith('team:'));
 const ordinaryRules = computed(() =>
   Object.fromEntries(
@@ -42,6 +44,7 @@ const ordinaryRules = computed(() =>
           'playbook_flow_policy',
           'required_documents',
           'portfolio_capacity_limits',
+          'priority_bands',
         ].includes(key) &&
         (key !== 'automatic_action_daily_limit' ||
           scopeKey.value === 'account') &&
@@ -87,6 +90,7 @@ const load = async () => {
   busy.value = false;
   invalidFlowPolicy.value = false;
   invalidCapacity.value = false;
+  invalidPriorityBands.value = false;
   if (!props.allowed) return;
   busy.value = true;
   try {
@@ -110,7 +114,8 @@ const save = async () => {
     busy.value ||
     !props.allowed ||
     invalidFlowPolicy.value ||
-    invalidCapacity.value
+    invalidCapacity.value ||
+    invalidPriorityBands.value
   )
     return;
   const version = generation;
@@ -395,6 +400,12 @@ const date = value => formatDate(value, props.metadata?.formatting);
         v-model="config.rules.required_documents"
         :disabled="busy"
       />
+      <PriorityBandsForm
+        v-if="!distributionOnly"
+        v-model="config.rules.priority_bands"
+        :disabled="busy"
+        @validity="invalidPriorityBands = !$event"
+      />
       <PlaybookFlowPolicyForm
         v-if="!distributionOnly && config.rules.playbook_flow_policy"
         v-model="config.rules.playbook_flow_policy"
@@ -405,7 +416,9 @@ const date = value => formatDate(value, props.metadata?.formatting);
         type="submit"
         :class="buttonClass"
         class="mt-5"
-        :disabled="busy || invalidFlowPolicy || invalidCapacity"
+        :disabled="
+          busy || invalidFlowPolicy || invalidCapacity || invalidPriorityBands
+        "
       >
         {{ t('RELATIONSHIP.SAVE') }}
       </button>
@@ -413,7 +426,9 @@ const date = value => formatDate(value, props.metadata?.formatting);
     <HealthConfigurationPreview
       v-if="config && screen === 'settings' && !distributionOnly"
       :configuration="config"
-      :disabled="busy || invalidFlowPolicy || invalidCapacity"
+      :disabled="
+        busy || invalidFlowPolicy || invalidCapacity || invalidPriorityBands
+      "
     />
     <section
       v-if="config"

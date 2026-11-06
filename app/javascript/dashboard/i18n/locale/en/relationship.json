@@ -1,5 +1,17 @@
 {
   "RELATIONSHIP": {
+    "PRIORITY_BANDS": {
+      "TITLE": "Priority bands",
+      "NOTE": "Optional mapping of the calculated or explicitly overridden 0–100 priority. Enter all four descending minima, with P3 at zero. Limits are captured with the action; changing configuration does not rewrite existing actions.",
+      "ENABLE": "Enable explicit P0–P3 limits",
+      "MINIMUM": "{code} minimum score",
+      "INVALID": "Enter four descending integer minima from 0 to 100; P3 must be zero.",
+      "CAPTURED": "Band captured with this priority score and its configured limits.",
+      "P0": "Critical",
+      "P1": "High",
+      "P2": "Medium",
+      "P3": "Routine"
+    },
     "PRODUCT_HISTORY": {
       "TITLE": "Product health history",
       "LOADING": "Loading authorized product observations…",

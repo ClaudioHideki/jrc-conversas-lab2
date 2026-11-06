@@ -1,6 +1,7 @@
 import { mount, flushPromises } from '@vue/test-utils';
 import { beforeEach, expect, it, vi } from 'vitest';
 import Panel from './ConfigurationPanel.vue';
+import PriorityBandsForm from './PriorityBandsForm.vue';
 const api = vi.hoisted(() => ({
   configuration: vi.fn(),
   saveConfiguration: vi.fn(),
@@ -51,6 +52,37 @@ const mountPanel = () =>
     },
     global: { stubs: { OperationsSettingsPanel: true } },
   });
+
+it('prevents a malformed numeric band policy from reaching save and persists explicit typed limits with the native configuration version', async () => {
+  const wrapper = mountPanel();
+  await flushPromises();
+  const form = wrapper.findComponent(PriorityBandsForm);
+  expect(form.exists()).toBe(true);
+  await form.get('input[type="checkbox"]').setValue(true);
+  await wrapper.get('form').trigger('submit');
+  expect(api.saveConfiguration).not.toHaveBeenCalled();
+  await [90, 80, 60, 0].reduce(async (previous, minimum, index) => {
+    await previous;
+    await form.findAll('input[type="number"]')[index].setValue(minimum);
+  }, Promise.resolve());
+  await wrapper.get('form').trigger('submit');
+  await flushPromises();
+  expect(api.saveConfiguration).toHaveBeenCalledWith(
+    '12',
+    expect.objectContaining({
+      version: 1,
+      rules: expect.objectContaining({
+        priority_bands: [
+          { code: 'P0', minimum: 90 },
+          { code: 'P1', minimum: 80 },
+          { code: 'P2', minimum: 60 },
+          { code: 'P3', minimum: 0 },
+        ],
+      }),
+    })
+  );
+  wrapper.unmount();
+});
 
 it('edits and persists customer capacity as typed native configuration, not a comma-separated string', async () => {
   const wrapper = mountPanel();

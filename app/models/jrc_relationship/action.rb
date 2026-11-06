@@ -5,6 +5,7 @@ class JrcRelationship::Action < JrcRelationship::Record
   store_accessor :metadata, :waiting_reason
   validates :waiting_reason, length: { maximum: 4000 }
   validate :valid_waiting_review
+  before_validation :refresh_priority_band, if: :will_save_change_to_priority?
   belongs_to :operations_queue, class_name: 'JrcOperations::Queue', optional: true
   belongs_to :operations_sla_policy, class_name: 'JrcOperations::SlaPolicy', optional: true
   after_save :sync_sla_pause, if: :saved_change_to_status?
@@ -38,6 +39,10 @@ class JrcRelationship::Action < JrcRelationship::Record
   end
 
   private
+
+  def refresh_priority_band
+    self.factors = JrcRelationship::PriorityBands.refresh_captured(factors, priority)
+  end
 
   def valid_waiting_review
     return unless WAITING_STATUSES.include?(status) && waiting_review_changed?

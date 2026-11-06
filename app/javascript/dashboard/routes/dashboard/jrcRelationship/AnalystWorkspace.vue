@@ -6,6 +6,8 @@ import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcRelationship';
 import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import ActionCasePanel from './ActionCasePanel.vue';
+import PriorityBandBadge from './PriorityBandBadge.vue';
+import { priorityCodes } from './priorityBands';
 import NicoSummaryPanel from './NicoSummaryPanel.vue';
 import { rememberViewport, viewportPosition } from './listViewport';
 import {
@@ -34,6 +36,7 @@ const scope = computed(() => ({
   customer_segment_id: route.query.customer_segment_id || undefined,
   q: route.query.q || '',
   record_status: route.query.record_status || '',
+  priority_band: route.query.priority_band || '',
   mine: route.query.mine !== 'false',
   returns_overdue: route.query.returns_overdue === 'true',
   page: Number(route.query.page) || 1,
@@ -362,8 +365,27 @@ const cards = computed(() => [
               {{ t(`RELATIONSHIP.STATES.${status}`) }}
             </option>
           </select></label
-        ><label class="flex items-center gap-2 text-sm"
-          ><input
+        ><label class="text-sm">
+          {{ t('RELATIONSHIP.PRIORITY_BANDS.TITLE') }}
+          <select
+            :value="scope.priority_band"
+            :class="inputClass"
+            @change="
+              patchQuery({ priority_band: $event.target.value || undefined })
+            "
+          >
+            <option value="">{{ t('RELATIONSHIP.ALL') }}</option>
+            <option
+              v-for="code in priorityCodes"
+              :key="code"
+              :value="code"
+            >
+              {{ code }} · {{ t(`RELATIONSHIP.PRIORITY_BANDS.${code}`) }}
+            </option>
+          </select>
+        </label>
+        <label class="flex items-center gap-2 text-sm">
+          <input
             type="checkbox"
             :checked="scope.returns_overdue"
             @change="
@@ -371,8 +393,9 @@ const cards = computed(() => [
                 returns_overdue: $event.target.checked ? 'true' : undefined,
               })
             "
-          />{{ t('RELATIONSHIP.V2.CARDS.overdue_returns') }}</label
-        ><button
+          />{{ t('RELATIONSHIP.V2.CARDS.overdue_returns') }}
+        </label>
+        <button
           type="submit"
           :class="buttonClass"
         >
@@ -463,6 +486,10 @@ const cards = computed(() => [
                     "
                     >{{ row.priority }}</span
                   >
+                  <PriorityBandBadge
+                    :record="row"
+                    class="mt-1"
+                  />
                 </td>
                 <td class="whitespace-nowrap p-3">{{ date(row.due_at) }}</td>
                 <td class="p-3">

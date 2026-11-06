@@ -45,7 +45,7 @@ class JrcRelationship::Configuration < ApplicationRecord
                          risk_reasons survey_question_nps survey_question_ces renewal_window_days eligibility_mode handoff_acceptance_required
                          playbook_flow_effects_enabled playbook_flow_policy required_documents health_hysteresis_points
                          portfolio_transfer_approval_required portfolio_capacity_limits automatic_action_cooldown_hours
-                         automatic_action_daily_limit priority_trend priority_sla].freeze
+                         automatic_action_daily_limit priority_trend priority_sla priority_bands].freeze
 
   def effective_weights
     DEFAULT_WEIGHTS.merge(weights)
@@ -63,7 +63,7 @@ class JrcRelationship::Configuration < ApplicationRecord
 
   def valid_config
     validate_weights
-    unless rules.is_a?(Hash) && (rules.keys - DEFAULT_RULES.keys).empty?
+    unless rules.is_a?(Hash) && (rules.keys - DEFAULT_RULES.keys - ['priority_bands']).empty?
       errors.add(:rules, 'unknown rules')
       return
     end

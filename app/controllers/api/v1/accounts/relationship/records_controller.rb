@@ -33,6 +33,7 @@ class Api::V1::Accounts::Relationship::RecordsController < Api::V1::Accounts::Re
     model = JrcRelationship::Workflow::MODELS.fetch(params[:kind])
     record = relationship_context.records(model).find(params[:id])
     fields = JrcRelationship::Workflow::FIELDS.fetch(params[:kind])
+    fields += ['factors'] if params[:kind] == 'actions'
     events = JrcCrm::AuditEvent.where(account_id: Current.account.id, resource_type: model.name, resource_id: record.id)
                               .order(created_at: :desc, id: :desc).limit(50)
     history = events.map do |event|

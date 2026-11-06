@@ -59,6 +59,7 @@ class JrcRelationship::Workflow
       if kind == 'actions' && attrs.key?('priority') && record.will_save_change_to_priority?
         record.metadata = record.metadata.merge('manual_priority' => true)
       end
+      capture_priority_band!(record) if kind == 'actions' && (record.new_record? || attrs.key?('priority'))
       record.metadata = record.metadata.merge(attrs.slice('period_from', 'period_to', 'milestones', 'notes')) if %w[plans qbrs].include?(kind)
       record.agenda ||= @context.configuration(assignment).effective_rules['qbr_agenda_template'] if kind == 'qbrs'
       if kind == 'expansion' && attrs.key?('expansion_kind')
@@ -144,11 +145,17 @@ class JrcRelationship::Workflow
     return action.activity if action.persisted?
 
     action.assign_attributes(account: @context.account, owner: assignment.owner, kind: 'manual', reason: title, due_at: due_at)
+    capture_priority_band!(action)
     prepare_activity_owner!(action, owner_id, automatic)
     action.save!
     activity = project_action!(action, kind: kind)
     @context.audit!(activity, after: { title: title, due_at: due_at }, action: 'activity_created')
     activity
+  end
+
+  def capture_priority_band!(action)
+    bands = @context.configuration(action.assignment).effective_rules['priority_bands']
+    action.factors = JrcRelationship::PriorityBands.capture(action.factors, action.priority, bands)
   end
 
   def prepare_activity_owner!(action, owner_id, automatic)
@@ -196,7 +203,7 @@ class JrcRelationship::Workflow
   end
 
   def audit_fields_for(kind)
-    fields = FIELDS.fetch(kind) + (kind == 'actions' ? %w[completed_at completed_by_id customer_confirmed_at customer_confirmed_by_id] : [])
+    fields = FIELDS.fetch(kind) + (kind == 'actions' ? %w[completed_at completed_by_id customer_confirmed_at customer_confirmed_by_id factors] : [])
     fields += %w[metadata] if %w[actions plans qbrs expansion renewals].include?(kind)
     fields += %w[financial_captured_at] if kind == 'risks'
     fields

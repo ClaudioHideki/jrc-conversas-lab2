@@ -131,6 +131,7 @@ class JrcRelationship::Playbooks
     record.assign_attributes(account: @context.account, owner: assignment.owner, reason: step['title'], kind: execution_context[:trigger],
                              due_at: execution_context[:start] + step['after_days'].to_i.days)
     record.metadata = record.metadata.merge('automatic' => true) if execution_context[:automatic]
+    JrcRelationship::Workflow.new(@context).capture_priority_band!(record)
     JrcRelationship::OperationalRouting.new(@context).prepare!(record)
     record.save!
     JrcRelationship::Workflow.new(@context).project_action!(record)

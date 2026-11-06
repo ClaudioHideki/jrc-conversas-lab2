@@ -21,7 +21,8 @@ class JrcRelationship::Priority
               end
     weighted = factors.values.sum { |factor| factor[:contribution].to_f }
     calculated = [weighted, urgency].max.round.clamp(0, 100)
-    { score: manual_priority.nil? ? calculated : manual_priority, factors: factors.merge('urgency_floor' => urgency) }
+    priority = manual_priority.nil? ? calculated : manual_priority
+    { score: priority, factors: JrcRelationship::PriorityBands.capture(factors.merge('urgency_floor' => urgency), priority, rules['priority_bands']) }
   end
 
   def self.factors_for(raw, rules)

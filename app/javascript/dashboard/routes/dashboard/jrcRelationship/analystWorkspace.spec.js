@@ -60,6 +60,35 @@ beforeEach(() => {
   mocks.api.channels.mockResolvedValue({ data: { channel_conversations: [] } });
 });
 describe('Relationship V2 analyst workflow', () => {
+  it('loads and clears the actual priority band filter while resetting pagination and preserving customer context', async () => {
+    mocks.route.query.priority_band = 'P0';
+    const wrapper = shallowMount(AnalystWorkspace, {
+      props: { screen: 'actions' },
+    });
+    await flushPromises();
+    expect(mocks.api.records.mock.calls[0][2]).toEqual(
+      expect.objectContaining({ priority_band: 'P0', page: 2 })
+    );
+    const select = wrapper
+      .findAll('select')
+      .find(row => row.find('option[value="P0"]').exists());
+    await select.setValue('P2');
+    expect(mocks.replace).toHaveBeenLastCalledWith({
+      query: expect.objectContaining({
+        priority_band: 'P2',
+        page: undefined,
+        q: 'Synthetic',
+      }),
+    });
+    await select.setValue('');
+    expect(mocks.replace).toHaveBeenLastCalledWith({
+      query: expect.objectContaining({
+        priority_band: undefined,
+        page: undefined,
+      }),
+    });
+    wrapper.unmount();
+  });
   it('shows real pending routing without pretending a critical case has an owner and keeps native follow-up available', async () => {
     mocks.api.record.mockResolvedValue({
       data: {
