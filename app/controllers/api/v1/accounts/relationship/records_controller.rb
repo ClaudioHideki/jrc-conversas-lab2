@@ -191,9 +191,7 @@ class Api::V1::Accounts::Relationship::RecordsController < Api::V1::Accounts::Re
       attrs[:plan] =
         params.require(:record).permit(plan: [:cause, :hypothesis, :strategy, :actions, :concessions, :approval_status])[:plan]
     end
-    attrs.merge!(params.require(:record).permit(:period_from, :period_to, :notes,
-                                                milestones: [:title, :due_at, :status, :owner_id, :evidence, :notes, :activity_id, :task_id,
-                                                             :ticket_id, :qbr_id]))
+    attrs.merge!(params.require(:record).permit(:period_from, :period_to, :notes))
     assign_structured_collections!(attrs)
     result = JrcRelationship::Workflow.new(relationship_context).save(kind: params[:kind], attributes: attrs, id: params[:id])
     render json: presenter.record(result[:record]).merge(survey_token: result[:survey_token]), status: params[:id] ? :ok : :created
@@ -213,18 +211,22 @@ class Api::V1::Accounts::Relationship::RecordsController < Api::V1::Accounts::Re
 
   def assign_structured_collections!(attrs)
     # Structured collections are limited to finite work items, never domain identity copies.
-    %w[goals participants decisions].each do |key|
+    %w[goals participants decisions milestones].each do |key|
       value = params.dig(:record, key)
       next if value.nil?
 
       validate_structured_collection!(value)
 
-      attrs[key] = value.map do |row|
-        row.permit(:metric, :baseline, :target, :current, :due_at, :status, :title, :name, :email,
-                   :owner_id, :evidence, :notes, :activity_id, :task_id, :ticket_id, :qbr_id, :product_id, :user_id, :participant_type,
-                   :decision_key).to_h
-      end
+      fields = structured_collection_fields(key)
+      attrs[key] = value.map { |row| row.permit(*fields).to_h }
     end
+  end
+
+  def structured_collection_fields(key)
+    return %i[title due_at status owner_id evidence notes activity_id task_id ticket_id qbr_id] if key == 'milestones'
+
+    %i[metric baseline target current due_at status title name email owner_id evidence notes activity_id task_id ticket_id qbr_id product_id
+       user_id participant_type decision_key]
   end
 
   def validate_structured_collection!(value)
