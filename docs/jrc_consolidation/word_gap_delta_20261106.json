@@ -180,6 +180,12 @@
         "analyst_restoration_checkpoint_20261106.json"
       ],
       "remaining": "Fresh current-source visual acceptance, broader independent-customer cohort and assisted affinity/rebalancing remain partial; controlled restoration is already implemented, superseding older pending notes."
+    },
+    {
+      "requirement": "F2 P0148/P0082 explainable recommendations from configured and observed health",
+      "current_state": "Native CustomerSignals reproduction5cases/4failures corrected;10native regression cases passed. Exact risk threshold and positive weights used; missing/blocked data never imply maintained healthy cadence.",
+      "report": "health_recommendation_checkpoint_20261106.json",
+      "remaining": "Popup stale explanation source tests in progress; no calibrated model confidence, fresh Chrome or external acceptance claim."
     }
   ],
   "explicit_dependencies": [
@@ -216,5 +222,5 @@
     "G": false
   },
   "unreviewed_literal_and_visual_fragments": "Not auto-marked complete; the original context/requirements inventory remains classification_pending where not explicitly reconciled.",
-  "next_source_review": "Configured health recommendation threshold/zero-weight/missing evidence; native reproduction in progress, not stage closure."
+  "next_source_review": "Same-customer explanation reload/denial flow; no stage closure."
 }

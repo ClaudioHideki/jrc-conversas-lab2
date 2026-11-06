@@ -195,10 +195,8 @@ class JrcRelationship::Presenter
   public
 
   def recommendations(record)
-    signals = JrcRelationship::CustomerSignals.new(assignment: record, context: @context).call
-    reasons = signals[:health][:factors].select { |f| f[:available] && f[:normalized] < 60 }
-    { customer: record.label, health: signals[:health], evidence: reasons,
-      recommended_action: reasons.empty? ? 'Manter cadência de relacionamento' : 'Revisar fatores e preparar plano com o responsável',
-      external_actions_require_confirmation: true }
+    source = JrcRelationship::CustomerSignals.new(assignment: record, context: @context)
+    signals = source.call
+    JrcRelationship::HealthRecommendation.call(health: signals.fetch(:health), rules: source.rules).merge(customer: record.label)
   end
 end

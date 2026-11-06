@@ -30,6 +30,11 @@
 # available at https://guides.rubyonrails.org/i18n.html.
 
 en:
+  jrc_relationship:
+    recommendations:
+      unavailable: 'Revisar os dados disponíveis antes de recomendar uma ação.'
+      maintain_cadence: 'Manter cadência de relacionamento'
+      review_factors: 'Revisar fatores e preparar plano com o responsável'
   hello: 'Hello world'
   inbox:
     reauthorization:

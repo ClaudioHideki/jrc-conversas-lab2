@@ -3,13 +3,13 @@
   "user_request": "499267ac-546d-4853-b4cf-7f03a2ea0629",
   "initial_head": "be54d0f7b4ce8d4e2a077cf2bdd8c2a4d5c88f5e",
   "branch": "codex/relacionamento-v2-20261101",
-  "last_validated_checkpoint": "83bb988efb223f0e4be63ac360e7b9a43bd636f2",
+  "last_validated_checkpoint": "7117d9f28f1bd72b698ee755c85724addc43939e",
   "completed_current_work": "Sealed dossier, weighted/current capacity, native withdrawal/cadence controls and F2 increments locally tested; see linked incremental reports. No C-G closure.",
-  "active_work": "Reproduce recommendation mismatch with configured risk threshold, zero factor weights and missing data.",
+  "active_work": "Clear obsolete popup explanations after reloading/recalculating or denied explanation requests; preserve request generation guards.",
   "exact_next_actions": [
-    "Execute native recommendation reproduction using actual CustomerSignals and configured policies.",
-    "Fix verified recommendation defects and re-run affected native gates.",
-    "Continue remaining defined C/D/F2 gaps without claiming fresh visual/external acceptance."
+    "Reproduce source Vue popup stale explanation on successful reload and denied refresh.",
+    "Fix only proven interface defects; run affected source Vue and static gates.",
+    "Continue remaining defined C/D/F2/G work; current-source Chrome/external acceptance remain separate."
   ],
   "test_environment": {
     "source_manifest": ".codex/d9-notifications-20261104/snapshot.json",
@@ -51,16 +51,16 @@
     "No real participant removal or provider request; tests use synthetic records and WebMock, with external network disabled."
   ],
   "restrictions": "No build/recompile, no5379 change/restart, no four-container restart/reconfiguration, no cleanup/delete of existing data, no push/GHCR/deploy/production/client change, no real provider operations. Additive migrations allowed only in owned synthetic test database.",
-  "disk_last_observed_bytes": 6006521856,
+  "disk_last_observed_bytes": 5122777088,
   "TRR": "Undefined; do not invent",
   "company_documents_without_portfolio": "Explicitly deferred",
-  "last_validated_head": "83bb988efb223f0e4be63ac360e7b9a43bd636f2",
+  "last_validated_head": "7117d9f28f1bd72b698ee755c85724addc43939e",
   "new_validated_code_checkpoint": "Resolve latest local CS code checkpoint with git log -1 --format=%H -- docs/jrc_consolidation/cs_signature_origin_checkpoint_20261105.json",
-  "current_status": "Native multi-order scale and20cross-module regressions passed; continue F2 configured recommendation accuracy.",
+  "current_status": "F2 recommendation native10cases passed; continue popup stale explanation reproduction.",
   "next_actions": [
-    "Execute native recommendation reproduction using actual CustomerSignals and configured policies.",
-    "Fix verified recommendation defects and re-run affected native gates.",
-    "Continue remaining defined C/D/F2 gaps without claiming fresh visual/external acceptance."
+    "Reproduce source Vue popup stale explanation on successful reload and denied refresh.",
+    "Fix only proven interface defects; run affected source Vue and static gates.",
+    "Continue remaining defined C/D/F2/G work; current-source Chrome/external acceptance remain separate."
   ],
   "latest_dossier_report": "docs/jrc_consolidation/sealed_dossier_checkpoint_20261105.json",
   "capacity_report": "docs/jrc_consolidation/weighted_capacity_checkpoint_20261105.json",
@@ -127,5 +127,6 @@
   "withdrawal_read_auth_report": "docs/jrc_consolidation/withdrawal_read_auth_checkpoint_20261106.json",
   "subject_source_performance_report": "docs/jrc_consolidation/subject_source_performance_checkpoint_20261106.json",
   "portfolio_owner_shapes_report": "docs/jrc_consolidation/portfolio_owner_shapes_checkpoint_20261106.json",
-  "withdrawal_multiorder_scale_report": "docs/jrc_consolidation/withdrawal_multiorder_scale_checkpoint_20261106.json"
+  "withdrawal_multiorder_scale_report": "docs/jrc_consolidation/withdrawal_multiorder_scale_checkpoint_20261106.json",
+  "health_recommendation_report": "docs/jrc_consolidation/health_recommendation_checkpoint_20261106.json"
 }
