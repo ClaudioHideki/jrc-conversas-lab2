@@ -26,9 +26,9 @@ class JrcRelationship::WorkOwnership
     candidate
   end
 
-  def authorize_record!(record)
-    return unless record.owner_id
+  def authorize_record!(record, user_id: record.owner_id)
+    return unless user_id
 
-    authorize!(record.owner_id).records(record.class).find(record.id)
+    authorize!(user_id).records(record.class).find(record.id)
   end
 end

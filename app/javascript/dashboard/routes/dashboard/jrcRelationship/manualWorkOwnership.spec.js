@@ -111,3 +111,37 @@ it('scopes commitment owners while retaining historical labels and independent p
   });
   wrapper.unmount();
 });
+
+it('preserves plan metrics and historical milestones while selecting a scoped goal owner', async () => {
+  const wrapper = mountEditor({
+    kind: 'plans',
+    record: {
+      ...record,
+      title: 'Synthetic adoption plan',
+      goals: [
+        { metric: 'usage', baseline: 1, current: 2, target: 10, owner_id: 7 },
+      ],
+      metadata: { milestones: [{ title: 'Review adoption', owner_id: 7 }] },
+    },
+  });
+  wrapper.getComponent(Context).vm.$emit('loaded', context);
+  await flushPromises();
+  const selects = wrapper.findAll('[data-testid="commitment-owner"]');
+  expect(selects).toHaveLength(2);
+  expect(
+    selects[1].get('option[value="7"]').attributes('disabled')
+  ).toBeDefined();
+  await selects[0].setValue('9');
+  await wrapper.get('form').trigger('submit');
+  expect(wrapper.emitted('save')[0][0].goals[0]).toMatchObject({
+    baseline: 1,
+    current: 2,
+    target: 10,
+    owner_id: 9,
+  });
+  expect(wrapper.emitted('save')[0][0].milestones[0]).toMatchObject({
+    title: 'Review adoption',
+    owner_id: 7,
+  });
+  wrapper.unmount();
+});

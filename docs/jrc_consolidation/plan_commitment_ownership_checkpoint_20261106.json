@@ -1,0 +1,74 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "8dae3665e760be07ec0ecea3a50ebbe6af17f030",
+  "status": "F1/F2 success-plan responsibility access locally validated; stages remain open",
+  "confirmed_gap": "Baseline5/4 failures: new goals and milestones accepted inactive targets; out-of-portfolio target accepted; goal linked to a native CRM activity accepted a target who could not read that source. All returned201.",
+  "implementation": [
+    "Native WorkflowReferences validates newly selected goal/milestone owners, comparing persisted positional entries without rewriting unchanged historical owners. QBR decision_key/legacy-position comparison retained.",
+    "The same validator instance retains only changed owner IDs during pre-save validation, then rechecks each unique target against Context.records after persistence but inside the assignment transaction, before RefreshJob/Agenda/audit. Native project, CRM, ticket, organization and snapshot visibility remain authoritative.",
+    "WorkOwnership accepts an explicit target ID for this post-save check; no new grants, new registry or cross-account model access. Empty changed-owner sets produce no extra source query.",
+    "Plan form reuses the previously added scoped picker; metrics and historical milestones remain intact. No new UI source changed in this increment."
+  ],
+  "tests": {
+    "native02": "19 examples,0 failures =5 plan ownership +4 QBR ownership +10 existing native functional Workflow regressions.",
+    "vue": "6/0 scoped ownership form tests, including one added goal/milestone preservation scenario. No fresh Chrome/assets claim.",
+    "new_ruby_offenses": 0,
+    "shared_delta": [
+      {
+        "path": "app/services/jrc_relationship/workflow.rb",
+        "baseline_count": 28,
+        "current_count": 28,
+        "new_cop_counts": {},
+        "current_new": []
+      },
+      {
+        "path": "app/services/jrc_relationship/workflow_references.rb",
+        "baseline_count": 0,
+        "current_count": 0,
+        "new_cop_counts": {},
+        "current_new": []
+      }
+    ],
+    "new_vue_spec_eslint": "0 errors/0 warnings",
+    "diff_check": "passed"
+  },
+  "resources": {
+    "start": 7120166912,
+    "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+    "database": "jrc_rel_v2_candidate_test",
+    "no_build": true,
+    "no_server": true,
+    "spec_sha256": {
+      "spec/requests/api/v1/accounts/relationship/plan_commitment_ownership_spec.rb": "7a2bef2d82df23add305684a37709b6a12d66755fefc8878630b1ec3f928f10c",
+      "spec/requests/api/v1/accounts/relationship/qbr_commitment_ownership_spec.rb": "0c7552efd7d17df4ad693bf81c90d52ecfcd08d04ca43928834d5c9be9770714",
+      "spec/services/jrc_relationship/functional_review_spec.rb": "cc7542ae1e89f6329bb28f728486571b903d940fff40d9564483b147214140b9"
+    },
+    "minimum": 7083040768,
+    "exit_code": 0,
+    "end": 7123271680
+  },
+  "frontend_resources": {
+    "status": "passed",
+    "free_start": 7123271680,
+    "minimum_free": 7089598464,
+    "mandatory_stop_bytes": 750000000,
+    "conservative_stop_bytes": 2000000000,
+    "no_build": true,
+    "owned_process_id": 24548,
+    "exit_code": 0,
+    "free_end": 7123570688
+  },
+  "preserved_runtime": {
+    "run_started_at": "2026-11-04T11:34:25.650429595Z",
+    "pg_started_at": "2026-11-04T11:34:28.691130017Z",
+    "redis_started_at": "2026-11-04T11:34:29.041643269Z",
+    "proxy_started_at": "2026-11-04T12:04:25.285490323Z",
+    "listener": "127.0.0.1:5379 PID6464, unchanged; verified read-only"
+  },
+  "remaining": [
+    "Inspect malformed/oversized native workflow collections so validation occurs without unbounded authorization queries or500 errors.",
+    "Fresh current-source desktop/mobile UI requires future build authorization.",
+    "Final analyst identity-removal scope, TRR and external provider acceptance remain separate blocked dependencies."
+  ],
+  "restrictions": "No app build, cleanup, container/server restart or modification, push, GHCR, deploy, real external/production operation."
+}

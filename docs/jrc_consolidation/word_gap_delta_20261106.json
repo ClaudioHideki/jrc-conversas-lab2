@@ -104,6 +104,12 @@
         "docs/jrc_consolidation/qbr_commitment_ownership_checkpoint_20261106.json"
       ],
       "remaining": "Plan goal/milestone guard is next; final identity-removal business scope and fresh visual gates remain open."
+    },
+    {
+      "requirement": "F1/F2 success-plan metric/milestone responsible and source access",
+      "current_state": "Implemented and native/Vue tested; positional historical references preserved",
+      "evidence": "docs/jrc_consolidation/plan_commitment_ownership_checkpoint_20261106.json",
+      "remaining": "Current-source Chrome and final withdrawal/business gates remain open."
     }
   ],
   "explicit_dependencies": [
@@ -140,5 +146,5 @@
     "G": false
   },
   "unreviewed_literal_and_visual_fragments": "Not auto-marked complete; the original context/requirements inventory remains classification_pending where not explicitly reconciled.",
-  "next_source_review": "F2 customer360/health SLA signal must reuse native calendar projections and SLA-view permissions; review in customer_sla_native_gap_review_20261106.json."
+  "next_source_review": "Bounded native QBR/plan collection validation and targeted G authorization regressions; no stage closure."
 }

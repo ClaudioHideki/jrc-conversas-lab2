@@ -78,7 +78,7 @@ class JrcRelationship::Workflow
 
         JrcRelationship::WorkOwnership.new(@context, assignment).authorize!(record.owner_id) if record.owner_id
       end
-      validate_links!(record)
+      references = validate_links!(record)
       confirm_renewal!(record, attrs)
       record.source_key ||= "manual:#{attrs.fetch('request_id')}" if record.respond_to?(:source_key)
       record.kind ||= 'manual' if kind == 'actions'
@@ -117,6 +117,7 @@ class JrcRelationship::Workflow
       capture_financial!(record, kind)
       record.save!
       JrcRelationship::WorkOwnership.new(@context, assignment).authorize_record!(record) if owner_changed
+      references.authorize_work_owners!(record)
       JrcRelationship::RefreshJob.perform_later(@context.member.id, [assignment.id]) if kind == 'plans'
       if kind == 'actions' && record.saved_change_to_status? && %w[in_progress completed].include?(record.status)
         JrcOperations::SlaClock.new(record).mark_first_action!
@@ -222,7 +223,9 @@ class JrcRelationship::Workflow
   end
 
   def validate_links!(record)
-    JrcRelationship::WorkflowReferences.new(@context).validate!(record)
+    references = JrcRelationship::WorkflowReferences.new(@context)
+    references.validate!(record)
+    references
   end
 
   def prepare_survey(record)
