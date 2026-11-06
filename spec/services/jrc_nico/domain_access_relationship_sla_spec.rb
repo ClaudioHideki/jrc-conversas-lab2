@@ -21,6 +21,13 @@ RSpec.describe JrcNico::DomainAccess do
     lc_publish(definition: lc_definition(tracked: true))
   end
 
+  it 'keeps every current relationship snapshot source within the finite history receipt authorizers' do
+    context = JrcRelationship::Context.new(sd_account_user)
+    types = JrcRelationship::SnapshotAccess.sources(context).values.map { |scope| scope.klass.name }.uniq
+    # CRM activities use the existing direct branch in OperatorSession; the rest use DomainAccess.
+    expect(types - (described_class::RESOURCE_TYPES + %w[JrcCrm::Activity])).to eq([])
+  end
+
   it 'reads actual clock evidence through the native tool and recognizes every clock receipt for current authorization without modifying clocks' do
     clocks = ticket.sla_cycles.sole.sla_clocks.order(:id)
     original = clocks.map(&:attributes)

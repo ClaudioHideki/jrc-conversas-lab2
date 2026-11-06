@@ -1,6 +1,10 @@
 require 'rails_helper'
 
 RSpec.describe JrcNico::OperatorSession do
+  around do |example|
+    with_modified_env(FRONTEND_URL: 'https://nico-history.example.test') { example.run }
+  end
+
   let(:account) { create(:account, custom_attributes: { 'nico_enabled' => true }) }
   let(:admin) { create(:user, account: account, role: :administrator) }
   let(:conversation) { create(:conversation, account: account) }

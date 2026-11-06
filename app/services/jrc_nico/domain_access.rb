@@ -2,7 +2,7 @@
 class JrcNico::DomainAccess
   RESOURCE_TYPES = %w[JrcRelationship::Assignment JrcRelationship::HealthSnapshot JrcRelationship::Action JrcRelationship::RiskCase
                       JrcRelationship::SuccessPlan JrcRelationship::Qbr JrcServiceDesk::Ticket JrcServiceDesk::TicketNote JrcServiceDesk::LifecycleTransition
-                      JrcRelationship::Survey JrcCrm::Invoice CsatSurveyResponse Contact Conversation Message Call
+                      JrcRelationship::Survey JrcCrm::Invoice CsatSurveyResponse Contact Inbox Conversation Message Call
                       JrcServiceDesk::TicketEvent JrcServiceDesk::SlaClock JrcProjects::AuditEvent
                       JrcProjects::Project JrcProjects::Task JrcOperations::Link JrcCrm::SalesOrder
                       JrcCrm::Contract JrcCrm::SalesCommission JrcCrm::BackofficeRequest
@@ -68,6 +68,11 @@ class JrcNico::DomainAccess
 
     case type
     when 'Contact' then access.contact(id)
+    when 'Inbox'
+      inbox = access.account.inboxes.find(id)
+      raise Pundit::NotAuthorizedError unless access.inbox_visible?(inbox)
+
+      inbox
     when 'JrcNico::KnowledgeDocument'
       JrcNico::KnowledgeDocument.where(account: access.account).approved.find(id)
     when 'JrcRelationship::Assignment'

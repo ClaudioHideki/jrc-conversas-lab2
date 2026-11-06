@@ -216,7 +216,9 @@ class JrcNico::OperatorSession
           access.account.jrc_campaigns.find(id)
         when 'JrcNico::KnowledgeDocument' then JrcNico::KnowledgeDocument.where(account: access.account).approved.find(id)
         else
-          JrcNico::DomainAccess.authorize_resource!(access, type, id) if JrcNico::DomainAccess::RESOURCE_TYPES.include?(type)
+          raise Pundit::NotAuthorizedError unless JrcNico::DomainAccess::RESOURCE_TYPES.include?(type)
+
+          JrcNico::DomainAccess.authorize_resource!(access, type, id)
         end
         true
       rescue Pundit::NotAuthorizedError, ActiveRecord::RecordNotFound
