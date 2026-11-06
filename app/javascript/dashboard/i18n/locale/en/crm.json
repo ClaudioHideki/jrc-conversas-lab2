@@ -14,6 +14,21 @@
       "COMPLETED": "Completed",
       "COMPLETE": "Mark as completed"
     },
+    "ACTIVITY_EDIT": {
+      "TITLE": "Edit or reschedule activity",
+      "NOTE": "Update the original CRM commitment. Its owner, source links and activity type are preserved.",
+      "SAVE": "Save changes",
+      "SUBJECT": "Title",
+      "DUE_AT": "Scheduled date and time",
+      "DESCRIPTION": "Notes",
+      "ZONE": "Account time zone: {zone}",
+      "CLOSED": "This activity is already completed or cancelled and cannot be edited here.",
+      "UNAVAILABLE": "The original activity is unavailable or your current access does not allow it.",
+      "FAILED": "Changes could not be saved. Your draft is still available; review the fields and try again.",
+      "CONFLICT": "The original activity changed. Your draft was preserved. Reload the current record before trying again.",
+      "RELOAD": "Discard this draft and reload current record",
+      "RETRY": "Try again"
+    },
     "FUNNEL": {
       "RETRY": "Tentar novamente",
       "NO_PIPELINES": "Nenhum funil disponível. Solicite a configuração de um funil ao administrador.",

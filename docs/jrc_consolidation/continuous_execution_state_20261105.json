@@ -5,7 +5,7 @@
   "branch": "codex/relacionamento-v2-20261101",
   "last_validated_checkpoint": "12cab9ff304cc540d65117adaa33f8b70c7a481a",
   "completed_current_work": "Sealed dossier, weighted/current capacity, native withdrawal/cadence controls and F2 increments locally tested; see linked incremental reports. No C-G closure.",
-  "active_work": "Native activity editing/rescheduling UI: existing buttons disabled despite an existing authorized update endpoint; preserve source identity and existing owner-transfer rules.",
+  "active_work": "C B3 representative source scale: verify native attendance totals and calendar-aware ticket clocks with synthetic committed source data and query measurements; preserve all grants.",
   "exact_next_actions": [
     "Reconcile Word fragments with later evidence; implement next locally executable C/D/F2 gap.",
     "Final analyst withdrawal scope awaits business answer; do not call native global agent deletion.",
@@ -48,10 +48,10 @@
     "No real participant removal or provider request; tests use synthetic records and WebMock, with external network disabled."
   ],
   "restrictions": "No build/recompile, no5379 change/restart, no four-container restart/reconfiguration, no cleanup/delete of existing data, no push/GHCR/deploy/production/client change, no real provider operations. Additive migrations allowed only in owned synthetic test database.",
-  "disk_last_observed_bytes": 7237652480,
+  "disk_last_observed_bytes": 7234551808,
   "TRR": "Undefined; do not invent",
   "company_documents_without_portfolio": "Explicitly deferred",
-  "last_validated_head": "f01dcb1127149be1ad2eacb98a1ff0e2f56508e6",
+  "last_validated_head": "bbdc386dfa637784e933cde914599ee8ee405c24",
   "new_validated_code_checkpoint": "Resolve latest local CS code checkpoint with git log -1 --format=%H -- docs/jrc_consolidation/cs_signature_origin_checkpoint_20261105.json",
   "current_status": "F2 workspace card source workflow fixed and locally tested; C-G remain open",
   "next_actions": [
@@ -80,9 +80,10 @@
   "priority_bands_report": "docs/jrc_consolidation/priority_bands_checkpoint_20261105.json",
   "automatic_playbook_budget_report": "docs/jrc_consolidation/automatic_playbook_budget_checkpoint_20261106.json",
   "analyst_native_responsibilities_report": "docs/jrc_consolidation/analyst_native_responsibilities_checkpoint_20261106.json",
-  "checkpoint_resolution": "git log -1 --format=%H -- docs/jrc_consolidation/analyst_crm_commitments_checkpoint_20261106.json",
+  "checkpoint_resolution": "git log -1 --format=%H -- docs/jrc_consolidation/native_activity_editing_checkpoint_20261106.json",
   "approval_percentage_input_report": "docs/jrc_consolidation/approval_percentage_input_checkpoint_20261106.json",
   "word_gap_delta": "docs/jrc_consolidation/word_gap_delta_20261106.json",
   "workspace_card_sources_report": "docs/jrc_consolidation/workspace_card_sources_checkpoint_20261106.json",
-  "analyst_crm_commitments_report": "docs/jrc_consolidation/analyst_crm_commitments_checkpoint_20261106.json"
+  "analyst_crm_commitments_report": "docs/jrc_consolidation/analyst_crm_commitments_checkpoint_20261106.json",
+  "native_activity_editing_report": "docs/jrc_consolidation/native_activity_editing_checkpoint_20261106.json"
 }

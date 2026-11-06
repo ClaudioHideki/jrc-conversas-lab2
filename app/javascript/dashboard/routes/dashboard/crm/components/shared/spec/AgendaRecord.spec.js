@@ -24,11 +24,31 @@ it('loads and completes the original Activity without creating a copied commitme
   await flushPromises();
   expect(activitiesAPI.show).toHaveBeenCalledWith('9');
   expect(wrapper.text()).toContain('Original meeting');
-  await wrapper.get('button').trigger('click');
+  await wrapper.get('[data-testid="agenda-record-complete"]').trigger('click');
   await flushPromises();
   expect(activitiesAPI.complete).toHaveBeenCalledWith('9');
   expect(wrapper.find('button').exists()).toBe(false);
   expect(wrapper.emitted('changed')).toHaveLength(1);
+  wrapper.unmount();
+});
+
+it('opens editing for the original activity ID and refreshes that source after an editor save', async () => {
+  useRoute.mockReturnValue(
+    reactive({ params: { accountId: '1' }, query: { activityId: '9' } })
+  );
+  activitiesAPI.show.mockResolvedValueOnce({
+    data: { id: 9, title: 'Original commitment', status: 'scheduled' },
+  });
+  const wrapper = mount(AgendaRecord);
+  await flushPromises();
+  await wrapper.get('[data-testid="agenda-record-edit"]').trigger('click');
+  expect(wrapper.emitted('edit')).toEqual([[9]]);
+  activitiesAPI.show.mockResolvedValueOnce({
+    data: { id: 9, title: 'Persisted revised commitment', status: 'scheduled' },
+  });
+  await wrapper.setProps({ refreshKey: 1 });
+  await flushPromises();
+  expect(wrapper.text()).toContain('Persisted revised commitment');
   wrapper.unmount();
 });
 

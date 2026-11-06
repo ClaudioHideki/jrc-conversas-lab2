@@ -14,6 +14,7 @@ import CrmStatCard from '../../components/shared/CrmStatCard.vue';
 import { useI18n } from 'vue-i18n';
 import { filterActivities } from '../../utils/activityFilters';
 import AgendaRecord from '../../components/shared/AgendaRecord.vue';
+import ActivityEditDialog from '../../components/shared/ActivityEditDialog.vue';
 
 const { t } = useI18n();
 const filters = reactive({ search: '', type: '', owner: '', status: '' });
@@ -23,6 +24,8 @@ const store = useStore();
 const route = useRoute();
 const router = useRouter();
 const showForm = ref(false);
+const editingActivityId = ref(null);
+const agendaRefresh = ref(0);
 useQuickActionTarget('crm_activities', () => {
   activityDraft.open(); showForm.value = true;
 });
@@ -81,7 +84,13 @@ const owners = computed(() => [
 ]);
 const loading = computed(() => store.getters['jrcCrm/activities/isLoading']);
 const error = computed(() => store.getters['jrcCrm/activities/error']);
-const openActivities = computed(() => activities.value.filter(activity => !activity.completed_at));
+const openActivities = computed(() =>
+  activities.value.filter(
+    activity =>
+      !activity.completed_at &&
+      !['completed', 'cancelled'].includes(activity.status)
+  )
+);
 const nextActivity = computed(() => [...openActivities.value].sort((a,b) => new Date(a.due_at) - new Date(b.due_at))[0] || null);
 const completionRate = computed(() => activities.value.length ? Math.round((activities.value.filter(activity => activity.completed_at).length / activities.value.length) * 100) : 0);
 const displayStatus = activity => activity.overdue ? 'Atrasada' : activity.completed_at ? 'Concluída' : ['scheduled','pending','open'].includes(activity.status) ? 'Agendada' : (activity.status || 'Agendada');
@@ -98,7 +107,7 @@ const activityStats = computed(() => [
   },
   {
     label: 'Em aberto',
-    value: activities.value.filter(activity => !activity.completed_at).length,
+    value: openActivities.value.length,
     detail: 'Aguardando conclusão',
     icon: 'i-lucide-calendar-clock',
     tone: 'amber',
@@ -129,6 +138,10 @@ const activityStats = computed(() => [
 const { segmentParams, watchSegment } = useCustomerSegmentFilter();
 const load = () =>
   store.dispatch('jrcCrm/activities/fetchActivities', segmentParams());
+const activitySaved = () => {
+  agendaRefresh.value += 1;
+  load();
+};
 watchSegment(load);
 
 const complete = async id => {
@@ -172,7 +185,17 @@ onMounted(async () => {
     <div
       class="mx-auto flex min-h-full w-full max-w-[1680px] flex-col gap-5 p-4 sm:p-6"
     >
-      <AgendaRecord @changed="load" />
+      <AgendaRecord
+        :refresh-key="agendaRefresh"
+        @changed="load"
+        @edit="editingActivityId = $event"
+      />
+      <ActivityEditDialog
+        v-if="editingActivityId"
+        :activity-id="editingActivityId"
+        @close="editingActivityId = null"
+        @saved="activitySaved"
+      />
       <CrmPageHeader
         eyebrow="Organização comercial"
         title="Atividades"
@@ -358,11 +381,14 @@ onMounted(async () => {
                     </button>
                     <button
                       type="button"
-                      disabled
+                      :disabled="
+                        Boolean(activity.completed_at) ||
+                        activity.status === 'cancelled'
+                      "
                       :aria-label="t('CRM.HOMOLOGATION.RESCHEDULE')"
-                      aria-describedby="crm-activity-edit-note"
-                      :title="t('CRM.HOMOLOGATION.EDIT_ACTIVITY_UNAVAILABLE')"
-                      class="grid size-8 cursor-not-allowed place-content-center rounded-lg bg-n-slate-3 text-n-slate-11"
+                      :title="t('CRM.ACTIVITY_EDIT.TITLE')"
+                      class="grid size-8 place-content-center rounded-lg bg-n-amber-3 text-n-amber-11 disabled:cursor-not-allowed disabled:opacity-50"
+                      @click="editingActivityId = activity.id"
                     >
                       <i class="i-lucide-calendar-days size-3.5" />
                     </button>
@@ -377,11 +403,14 @@ onMounted(async () => {
                     </button>
                     <button
                       type="button"
-                      disabled
+                      :disabled="
+                        Boolean(activity.completed_at) ||
+                        activity.status === 'cancelled'
+                      "
                       :aria-label="t('CRM.HOMOLOGATION.EDIT_ACTIVITY')"
-                      aria-describedby="crm-activity-edit-note"
-                      :title="t('CRM.HOMOLOGATION.EDIT_ACTIVITY_UNAVAILABLE')"
-                      class="grid size-8 cursor-not-allowed place-content-center rounded-lg bg-n-slate-3 text-n-slate-11"
+                      :title="t('CRM.ACTIVITY_EDIT.TITLE')"
+                      class="grid size-8 place-content-center rounded-lg bg-n-blue-3 text-n-blue-11 disabled:cursor-not-allowed disabled:opacity-50"
+                      @click="editingActivityId = activity.id"
                     >
                       <i class="i-lucide-pencil size-3.5" />
                     </button>
@@ -416,9 +445,8 @@ onMounted(async () => {
                 </button>
                 <button
                   type="button"
-                  disabled
-                  aria-describedby="crm-activity-edit-note"
-                  class="cursor-not-allowed rounded-xl bg-n-slate-3 px-3 py-2.5 text-sm font-semibold text-n-slate-11"
+                  class="rounded-xl bg-n-amber-3 px-3 py-2.5 text-sm font-semibold text-n-amber-11"
+                  @click="editingActivityId = nextActivity.id"
                 >
                   {{ t('CRM.HOMOLOGATION.RESCHEDULE') }}
                 </button>
@@ -438,9 +466,6 @@ onMounted(async () => {
               class="mt-3 text-xs text-n-slate-11"
             >
               {{ t('CRM.HOMOLOGATION.START_ACTION_UNAVAILABLE') }}
-            </p>
-            <p id="crm-activity-edit-note" class="mt-2 text-xs text-n-slate-11">
-              {{ t('CRM.HOMOLOGATION.EDIT_ACTIVITY_UNAVAILABLE') }}
             </p>
           </section>
         <section class="rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm"><h3 class="font-semibold text-n-slate-12">Resumo do dia</h3><div class="mt-4 flex items-center gap-4"><div class="grid size-20 place-content-center rounded-full" :style="{background: `conic-gradient(#16a76b ${completionRate * 3.6}deg,#eef2f6 0)`}"><div class="grid size-14 place-content-center rounded-full bg-n-solid-2 text-lg font-bold text-n-slate-12">{{ completionRate }}%</div></div><div class="text-xs text-n-slate-11"><p><b class="text-emerald-600">{{ activities.filter(a => a.completed_at).length }}</b> concluídas</p><p class="mt-2"><b class="text-blue-600">{{ openActivities.length }}</b> agendadas</p><p class="mt-2"><b class="text-red-600">{{ activities.filter(a => a.overdue).length }}</b> atrasadas</p></div></div></section>

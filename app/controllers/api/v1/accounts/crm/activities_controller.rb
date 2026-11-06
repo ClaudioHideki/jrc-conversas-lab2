@@ -48,10 +48,17 @@ module Api
           end
 
           def update
-            if @activity.update(activity_params)
-              render json: JrcCrm::ActivitySerializer.new(@activity).as_json
-            else
-              render json: { errors: @activity.errors.full_messages }, status: :unprocessable_entity
+            @activity.with_lock do
+              if params.key?(:expected_version) && params[:expected_version] != @activity.updated_at.utc.iso8601(6)
+                raise ActiveRecord::StaleObjectError.new(@activity, 'update')
+              end
+
+              if @activity.update(activity_params)
+                audit_activity_edit! if params.key?(:expected_version)
+                render json: JrcCrm::ActivitySerializer.new(@activity).as_json
+              else
+                render json: { errors: @activity.errors.full_messages }, status: :unprocessable_entity
+              end
             end
           end
 
@@ -72,6 +79,14 @@ module Api
           end
 
           private
+
+          def audit_activity_edit!
+            changes = @activity.saved_changes.except('updated_at')
+            JrcCustomers::Audit.record!(account: crm_scope, actor: Current.user, resource: @activity, event_type: 'activity_updated',
+                                        metadata: { source: 'native_activity_editor', changed_fields: changes.keys },
+                                        from_value: changes.transform_values(&:first).slice('due_at', 'user_id', 'deal_id', 'lead_id'),
+                                        to_value: changes.transform_values(&:last).slice('due_at', 'user_id', 'deal_id', 'lead_id'))
+          end
 
           def set_activity
             @activity = visible_to_current_user(

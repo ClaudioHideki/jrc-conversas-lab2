@@ -1,0 +1,78 @@
+{
+  "date": "2026-11-06",
+  "parent_head": "bbdc386dfa637784e933cde914599ee8ee405c24",
+  "scope": "Native CRM activity edit/reschedule integration; closes a disabled-button gap found while making F1 origins actionable",
+  "files": {
+    "app/controllers/api/v1/accounts/crm/activities_controller.rb": "c9dd1a67ce3058cf886d8323d0202545c26796c3c226d740fb254f0b847e8353",
+    "app/javascript/dashboard/api/crm/activities.js": "698cb445e7f4d0a6accf1b037091f3d96806880d393549163dc6a90bb6c46181",
+    "app/javascript/dashboard/i18n/locale/en/crm.json": "fa49e679ccb36274ab314b8cb291bac2d895866895d2c09c36dd7e4afc5686be",
+    "app/javascript/dashboard/routes/dashboard/crm/components/shared/AgendaRecord.vue": "cdf9b6958b43151c04c792436c5e91818fbafa490591287fa19f54d38ca9f374",
+    "app/javascript/dashboard/routes/dashboard/crm/components/shared/spec/AgendaRecord.spec.js": "82ac2ee84d0ccbb1251a9dd8f7fbb55b93de845f4af6d9a3abe3ac102380f480",
+    "app/javascript/dashboard/routes/dashboard/crm/views/activities/ActivitiesIndex.vue": "e8d42a3463f6a636f3f8cf693d0e2bfb5c2b8f176dd738c037f7751f1293a3fd",
+    "app/javascript/dashboard/routes/dashboard/crm/views/activities/spec/ActivitiesIndex.spec.js": "87b09ce100bad038d1b328355ed3fe7bcc2b7e8c62a0c6be72ccb20a11a9c3ce",
+    "app/models/jrc_crm/audit_event.rb": "e1b136602c696575d39546bb4c04b9a40cc0593c2aa91d7aff80f48df3ee0fa3",
+    "app/serializers/jrc_crm/activity_serializer.rb": "60ce90a07451ce78486effc2a70c62378f992891e5d4df0074dc505c490d4dbb",
+    "app/javascript/dashboard/api/crm/spec/activityEditing.spec.js": "34b825d7992dde39118f0cf07e4e8364d9661f9fe55c25c678975abdd1d2332e",
+    "app/javascript/dashboard/routes/dashboard/crm/components/shared/ActivityEditDialog.vue": "cf9090574c47105555a4bb708b07df7a9b2a3f6b6c55935e8a9022d3d71165e0",
+    "app/javascript/dashboard/routes/dashboard/crm/components/shared/spec/ActivityEditDialog.spec.js": "0d41ecc5882b2fd71f5959c735721df8dbfb595095f762a4aa30fd55ecf581b9",
+    "spec/requests/api/v1/accounts/crm/activity_editing_spec.rb": "7ed59b2fc2bdaeabc14c55ba0715f02b25363f324bd67ade53155c18070f7f8a"
+  },
+  "implemented": [
+    "Existing activity update endpoint reused; optional exact UTC microsecond edit_version checked under native row lock. Existing clients without expected_version remain compatible.",
+    "Native serializer supplies explicit account timezone/local due date; no browser timezone conversion of the local editing value.",
+    "Existing audit store records guarded editor updates inside the same transaction; audit failure rolls back source mutation. Notes/title content are omitted from audit payload.",
+    "Responsive shared native Dialog; list edit/reschedule and original AgendaRecord edit entry; direct activity/source identity preserved. No owner, resource link or channel type controls.",
+    "Draft retained on validation or409; conflicting source must be explicitly reloaded. Denial/identity change clears private data; API binds captured account even on same-tick route change.",
+    "Original activity refreshes after save; cancelled/completed commitments excluded from next-pending sidebar."
+  ],
+  "tests": {
+    "initial_backend": "8 examples/3 failed new fixtures: Integer.microsecond unsupported, nativeRecordInvalid is rescued, foreign-account nativeCRM response401. Existing2 CRM tests passed.",
+    "corrected_backend": "6/0; actual persistence, exact microsecond stale rejection, legacy update, validation, audit rollback, native ownership/module/account/unit denied",
+    "initial_vue": "12/1: datetime-local DOM normalizes milliseconds; fixture corrected",
+    "final_vue": "15/0 incl8 editor+3 origin+2 list+2 API",
+    "ruby_new": 0,
+    "ruby_shared_new_offenses": 0,
+    "eslint_new_errors": 0,
+    "eslint_shared_index": {
+      "baseline": 80,
+      "current": 79,
+      "added": {}
+    },
+    "warnings": "Existing i18n andBrowserslist/Rails deprecations retained in raw logs."
+  },
+  "backend_resource": {
+    "start": 7228821504,
+    "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+    "database": "jrc_rel_v2_candidate_test",
+    "no_build": true,
+    "no_server": true,
+    "spec_sha256": {
+      "spec/requests/api/v1/accounts/crm/activity_editing_spec.rb": "7ed59b2fc2bdaeabc14c55ba0715f02b25363f324bd67ade53155c18070f7f8a"
+    },
+    "minimum": 7214395392,
+    "exit_code": 0,
+    "end": 7213404160
+  },
+  "frontend_resource": {
+    "status": "passed",
+    "free_start": 7230611456,
+    "minimum_free": 7187206144,
+    "mandatory_stop_bytes": 750000000,
+    "conservative_stop_bytes": 2000000000,
+    "no_build": true,
+    "owned_process_id": 19012,
+    "exit_code": 0,
+    "free_end": 7228182528
+  },
+  "free_final_bytes": 7234560000,
+  "no_build": true,
+  "no5379_change": true,
+  "no_external_operations": true,
+  "no_schema_change": true,
+  "limits": [
+    "No current-source desktop/mobile Chrome acceptance; no build authorized.",
+    "Owner reassignment/final analyst withdrawal not added by this content/date editor; existing native transfer guards retained.",
+    "C-G remain open."
+  ],
+  "next_work": "C B3 representative source scale: verify native attendance totals and calendar-aware ticket clocks with synthetic committed source data and query measurements; preserve all grants."
+}

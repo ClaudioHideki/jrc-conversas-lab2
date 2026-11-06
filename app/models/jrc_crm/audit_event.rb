@@ -41,6 +41,7 @@ module JrcCrm
     EVENT_TYPES.concat(%w[signature_configuration_updated signature_authorization_checked signature_connect_checked])
     EVENT_TYPES.concat(%w[backoffice_contract_version_created backoffice_contract_version_accessed])
     EVENT_TYPES.push('backoffice_completion_report_accessed')
+    EVENT_TYPES.push('activity_updated')
     EVENT_TYPES.push('backoffice_completion_package_accessed')
     EVENT_TYPES.concat(%w[backoffice_completion_dossier_sealed backoffice_completion_dossier_accessed])
     EVENT_TYPES.push('backoffice_signer_roster_created')
