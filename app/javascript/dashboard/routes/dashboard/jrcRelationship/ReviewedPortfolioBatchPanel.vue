@@ -235,6 +235,13 @@ onBeforeUnmount(reset);
     </p>
     <template v-if="review">
       <p class="mt-2 font-medium">{{ stateLabel(review.state) }}</p>
+      <p
+        v-if="review.source_access_limited"
+        data-test="review-limited-receipt"
+        class="my-2 rounded-lg border border-n-blue-6 bg-n-blue-2 p-3 text-sm text-n-slate-12"
+      >
+        {{ t('RELATIONSHIP.REVIEWED_BATCH.LIMITED_RECEIPT') }}
+      </p>
       <p class="text-sm">
         {{
           t('RELATIONSHIP.REVIEWED_BATCH.IDENTITY', {
@@ -295,7 +302,7 @@ onBeforeUnmount(reset);
         </ul>
       </div>
       <DistributionComparison
-        v-if="review.distribution"
+        v-if="review.distribution?.length"
         :rows="review.distribution"
       />
       <DistributionCapacitySummary :rows="review.capacity || []" />
@@ -321,8 +328,9 @@ onBeforeUnmount(reset);
             params: { accountId, screen: 'inbox', id: request.id },
           }"
           class="block text-sm text-n-blue-11 underline"
-          >#{{ request.id }} · {{ request.state }}</RouterLink
         >
+          #{{ request.id }} · {{ request.state }}
+        </RouterLink>
         <button
           v-if="
             review.state === 'previewed' &&
@@ -362,7 +370,8 @@ onBeforeUnmount(reset);
           :key="item.assignment_id"
           class="text-sm"
         >
-          {{ item.label }} · {{ stateLabel(item.state) }}
+          {{ item.label || t('RELATIONSHIP.REVIEWED_BATCH.RECEIPT_ITEM') }} ·
+          {{ stateLabel(item.state) }}
           <span
             v-if="item.error_code"
             class="block"

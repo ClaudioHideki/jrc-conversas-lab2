@@ -45,7 +45,8 @@ class JrcRelationship::DistributionApproval
   end
 
   def current_binding!(review)
-    rows = @context.assignments.where(id: review.inputs.fetch('ids')).order(:id).to_a
+    scope = JrcRelationship::ReviewedAssignmentScope.new(@context, review).scope
+    rows = scope.where(id: review.inputs.fetch('ids')).order(:id).to_a
     raise ActiveRecord::RecordNotFound unless rows.size == review.inputs.fetch('ids').size
 
     current = binding(rows, owner_id: review.inputs['owner_id'])

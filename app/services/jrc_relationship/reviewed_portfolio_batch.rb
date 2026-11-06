@@ -141,7 +141,7 @@ class JrcRelationship::ReviewedPortfolioBatch
       { 'updated' => 1, 'operation' => 'cadence', 'assignment_id' => assignment.id, 'cadence_id' => enrollment.id }
     else
       apply_native(review, item, context)
-      JrcRelationship::BatchNativeReceipt.new(context, review, item).call
+      JrcRelationship::BatchNativeReceipt.new(context, review, item, assignment: assignment).call
     end
   end
 
@@ -171,7 +171,8 @@ class JrcRelationship::ReviewedPortfolioBatch
   end
 
   def project(review, context)
-    review.inputs.fetch('ids').each { |id| context.assignment(id) }
+    return JrcRelationship::ReviewedBatchReceiptView.new(review).call if JrcRelationship::ReviewedAssignmentScope.new(context, review).limited?
+
     { 'id' => review.id, 'state' => review.state, 'revision' => review.revision, 'digest' => review.digest,
       'expires_at' => review.expires_at.iso8601(6), 'inputs' => review.inputs,
       'summary' => review.snapshot['summary'], 'distribution' => review.snapshot['distribution'],

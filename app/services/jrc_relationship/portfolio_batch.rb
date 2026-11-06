@@ -21,7 +21,9 @@ class JrcRelationship::PortfolioBatch
         record.with_lock { apply!(record, operation, options) }
       end
     end
-    rows.count
+    # The loaded, authorized rows were processed atomically. A handoff can
+    # legitimately remove them from the original actor's ownership scope.
+    rows.size
   end
 
   private

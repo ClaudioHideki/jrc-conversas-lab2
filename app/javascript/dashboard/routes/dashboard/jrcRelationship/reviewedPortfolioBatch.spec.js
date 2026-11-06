@@ -34,6 +34,44 @@ const review = {
   ],
 };
 let wrapper;
+it('replaces the private preview with a limited receipt and continues remaining work explicitly', async () => {
+  const receipt = {
+    ...review,
+    state: 'running',
+    revision: 3,
+    inputs: { ids: [19], operation: 'assign', owner_id: 29 },
+    source_access_limited: true,
+    summary: null,
+    distribution: [],
+    capacity: [],
+    responsibilities: [],
+    approval: null,
+    items: [{ ...review.items[0], label: null, state: 'applied' }],
+  };
+  api.advancePortfolioBatch.mockResolvedValueOnce({ data: receipt });
+  wrapper = mount(ReviewedPortfolioBatchPanel, {
+    props: { accountId: '12', proposal },
+  });
+  await flushPromises();
+  expect(wrapper.text()).toContain('Synthetic customer');
+  await wrapper.get('[data-test="review-approve"]').trigger('click');
+  await flushPromises();
+  await wrapper.get('[data-test="review-advance"]').trigger('click');
+  await flushPromises();
+  expect(wrapper.get('[data-test="review-limited-receipt"]').exists()).toBe(
+    true
+  );
+  expect(wrapper.text()).not.toContain('Synthetic customer');
+  expect(wrapper.find('[data-test="review-approve"]').exists()).toBe(false);
+  api.advancePortfolioBatch.mockResolvedValueOnce({
+    data: { ...receipt, state: 'completed', revision: 4 },
+  });
+  await wrapper.get('[data-test="review-advance"]').trigger('click');
+  await flushPromises();
+  expect(api.advancePortfolioBatch).toHaveBeenCalledTimes(2);
+  expect(wrapper.find('[data-test="review-advance"]').exists()).toBe(false);
+  expect(wrapper.emitted('updated')).toBeTruthy();
+});
 it.each(['blocked', 'stale', 'unavailable', 'failed'])(
   'prevents confirmation and approval requests for %s responsibilities',
   async state => {

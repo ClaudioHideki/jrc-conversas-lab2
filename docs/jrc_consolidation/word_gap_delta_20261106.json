@@ -133,6 +133,19 @@
       "current_state": "Implemented audited native reversal with monotonic revision, pre-counter compatibility and new reviewed execution after restoration. Prior snapshots/events and untouched epoch0 signatures preserved.",
       "report": "analyst_restoration_checkpoint_20261106.json",
       "remaining": "Fresh compiled visual acceptance and other F1 distribution dimensions remain separate."
+    },
+    {
+      "requirement": "F1 reviewed partial responsibility transfer with legitimate source scope loss",
+      "word_fragments": [
+        "relacionamento:P0099",
+        "relacionamento:P0104",
+        "relacionamento:P0105",
+        "relacionamento:P0106",
+        "relacionamento:P0128"
+      ],
+      "current_state": "Native supported handoff, source-free receipt, real Central/capacity continuation and current grants tested; no implicit customer access grant.",
+      "report": "scoped_responsibility_handoff_checkpoint_20261106.json",
+      "remaining": "Fresh visual acceptance and new unrelated-native boundary increment remain open."
     }
   ],
   "explicit_dependencies": [

@@ -2,10 +2,11 @@ class JrcRelationship::BatchNativeReceipt
   MODELS = { 'JrcRelationship::Action' => JrcRelationship::Action, 'JrcRelationship::RiskCase' => JrcRelationship::RiskCase,
              'JrcRelationship::SuccessPlan' => JrcRelationship::SuccessPlan }.freeze
 
-  def initialize(context, review, item)
+  def initialize(context, review, item, assignment:)
     @context = context
     @review = review
     @item = item
+    @assignment = assignment
   end
 
   def call
@@ -22,7 +23,13 @@ class JrcRelationship::BatchNativeReceipt
   private
 
   def assignment_receipt
-    record = @context.assignment(@item.assignment_id, write: true).reload
+    unless @assignment.account_id == @context.account.id && @assignment.id == @item.assignment_id
+      raise ArgumentError, 'Native assignment receipt identity mismatch'
+    end
+
+    # This instance was authorized and locked by perform_item before mutation.
+    # Rechecking ownership scope here would undo a valid scoped handoff.
+    record = @assignment.reload
     raise ArgumentError, 'Native assignment did not match review' unless record.owner_id == @review.inputs['owner_id']
 
     { 'resource_type' => record.class.name, 'resource_id' => record.id, 'owner_id' => record.owner_id }

@@ -23,12 +23,15 @@ class JrcRelationship::DistributionCapacity
   def verify!(review)
     return unless review.inputs['operation'] == 'assign'
 
+    @execution_assignments = JrcRelationship::ReviewedAssignmentScope.new(@context, review).scope
     actual = live_facts(review)
     raise Pundit::NotAuthorizedError if actual.any? { |row| row['blocker'] == 'capacity_scope_denied' }
 
     captured = review.snapshot.fetch('capacity', [])
     raise ArgumentError, 'Reviewed capacity changed. Create a new simulation.' unless actual == captured
     raise ArgumentError, 'Destination capacity is not available for this transfer' if actual.any? { |row| row['blocker'] }
+  ensure
+    @execution_assignments = nil
   end
 
   # Current workload only: no proposed incoming customer and no admission receipt.
@@ -64,7 +67,7 @@ class JrcRelationship::DistributionCapacity
   end
 
   def live_facts(review)
-    records = @context.assignments.where(id: review.inputs.fetch('ids')).order(:id).to_a
+    records = capacity_assignments.where(id: review.inputs.fetch('ids')).order(:id).to_a
     raise ActiveRecord::RecordNotFound unless records.size == review.inputs.fetch('ids').size
 
     preview(review.inputs, records, applied_ids: applied_ids(review))
@@ -85,7 +88,7 @@ class JrcRelationship::DistributionCapacity
 
     pool = @sources.relation(config).where(status: JrcRelationship::DistributionCapacityGuard::LOAD_STATUSES)
     target = pool.where(owner_id: inputs['owner_id'])
-    visible = target.where(id: @context.assignments.select(:id))
+    visible = target.where(id: capacity_assignments.select(:id))
     return result.merge('blocker' => 'capacity_scope_denied') unless target.count == visible.count
 
     sources = { records: records, applied_ids: applied_ids }
@@ -104,6 +107,10 @@ class JrcRelationship::DistributionCapacity
     result.merge(entry.except('user_id')).merge(counts).merge('effective_capacity' => limit,
                                                               'available_after' => limit - counts.fetch('projected'),
                                                               'blocker' => exceeded ? 'capacity_exceeded' : nil)
+  end
+
+  def capacity_assignments
+    @execution_assignments || @context.assignments
   end
 
   def capacity_identity(config, user_id, entry)

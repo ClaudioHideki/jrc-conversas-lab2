@@ -13,8 +13,8 @@ class JrcRelationship::ResponsibilityTransfer
     JrcRelationship::ResponsibilityReview.new(@context).verify!(@review, assignment: assignment)
     captured = @review.snapshot.fetch('responsibilities').find { |row| row.fetch('assignment_id') == assignment.id }
     before = assignment.owner_id
-    assignment.update!(owner: owner)
     captured.fetch('entries').each { |row| transfer_entry!(row, assignment, owner) }
+    assignment.update!(owner: owner)
     verify_destination!(captured, owner)
     after = { owner_id: owner.id, review_id: @review.id, responsibility_count: captured.fetch('entries').size }
     @context.audit!(assignment, before: { owner_id: before }, after: after, action: 'responsibilities_transferred')

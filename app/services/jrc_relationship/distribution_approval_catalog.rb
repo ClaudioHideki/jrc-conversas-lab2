@@ -23,7 +23,8 @@ class JrcRelationship::DistributionApprovalCatalog
     raise Pundit::NotAuthorizedError unless review.inputs['operation'] == 'assign'
 
     ids = review.inputs.fetch('ids')
-    raise Pundit::NotAuthorizedError unless context.assignments.where(id: ids).count == ids.size
+    scope = JrcRelationship::ReviewedAssignmentScope.new(context, review).scope
+    raise Pundit::NotAuthorizedError unless scope.where(id: ids).count == ids.size
 
     context
   end

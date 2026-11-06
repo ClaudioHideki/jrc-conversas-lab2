@@ -104,6 +104,8 @@
       "CADENCE_HELP": "Selecione um único cliente e informe a conversa dele. A prévia mostra a versão e as datas. Resposta do cliente, intervenção humana ou cancelamento interrompem os passos restantes. Não envia WhatsApp.",
       "CADENCE_TARGET": "{name} · Conversa #{number}",
       "ITEM_FAILED": "Não executado; revise a configuração e as permissões.",
+      "LIMITED_RECEIPT": "A transferência alterou seu acesso à carteira. Este recibo mostra somente o andamento do lote, sem os dados dos clientes transferidos.",
+      "RECEIPT_ITEM": "Item do lote",
       "ERROR": "Não foi possível confirmar o resultado. Consulte o lote salvo antes de repetir a ação.",
       "OPERATIONS": {
         "assign": "Alteração de responsável",

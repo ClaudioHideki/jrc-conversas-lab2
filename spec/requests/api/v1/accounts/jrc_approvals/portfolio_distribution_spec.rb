@@ -56,6 +56,27 @@ RSpec.describe 'Native Central portfolio distribution', :approval_core, :commerc
                                                    'justification' => 'Synthetic approved workload transfer')
   end
 
+  context 'with owner-scoped complete pending responsibilities' do
+    let(:preview) do
+      service.preview('ids' => [first.id, second.id], 'operation' => 'assign', 'owner_id' => destination.user_id,
+                      'transfer_responsibilities' => true, 'justification' => 'Synthetic scoped Central transfer', 'request_id' => SecureRandom.uuid)
+    end
+
+    it 'retains the native formal approval across its own partial handoff without restoring customer access' do
+      review_team = create(:team, account: scope[:account])
+      TeamMember.create!(team: review_team, user: reviewer.user)
+      [first, second].each { |row| row.update!(team: review_team) }
+      approval_vote(scope, reviewer, approval)
+      original = review.attributes.slice('snapshot', 'digest')
+      service.approve(review.id, digest: review.digest)
+      expect(service.advance(review.id, limit: 1)).to include('state' => 'running', 'source_access_limited' => true)
+      expect(service.advance(review.id)).to include('state' => 'completed', 'source_access_limited' => true)
+      expect([first.reload.owner_id, second.reload.owner_id]).to eq([destination.user_id, destination.user_id])
+      expect(JrcRelationship::Context.new(author).assignments.where(id: [first.id, second.id])).not_to exist
+      expect(review.reload.attributes.slice('snapshot', 'digest')).to eq(original)
+    end
+  end
+
   context 'with complete pending responsibilities' do
     let(:preview) do
       service.preview('ids' => [first.id], 'operation' => 'assign', 'owner_id' => destination.user_id,
