@@ -38,7 +38,7 @@ class JrcRelationship::WithdrawalReadiness
 
   def verify_viewer!
     current = JrcRelationship::Context.new(@context.member)
-    raise Pundit::NotAuthorizedError unless current.policy.team? && current.access_signature == @signature
+    raise Pundit::NotAuthorizedError unless current.user.active_for_authentication? && current.policy.team? && current.access_signature == @signature
   end
 
   def presentation

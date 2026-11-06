@@ -138,4 +138,13 @@ RSpec.describe JrcRelationship::WithdrawalNativeLinks do
     review = JrcRelationship::WithdrawalReadiness.new(context).call(analyst.id)
     expect(review.fetch(:counts).fetch('service_tickets')).to eq(1)
   end
+
+  it 'denies a readiness result when the acting user loses native authentication before the final check' do
+    reader = JrcRelationship::WithdrawalReadiness.new(context)
+    allow(reader).to receive(:verify_viewer!).and_wrap_original do |verify|
+      sd_user.update!(confirmed_at: nil)
+      verify.call
+    end
+    expect { reader.call(analyst.id) }.to raise_error(Pundit::NotAuthorizedError)
+  end
 end
