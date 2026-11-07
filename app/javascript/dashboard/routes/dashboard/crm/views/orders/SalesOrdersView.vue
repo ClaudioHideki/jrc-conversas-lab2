@@ -4,12 +4,24 @@ import { useCustomerSegmentFilter } from '../../helpers/useCustomerSegmentFilter
 import ApprovalGateBadge from 'dashboard/routes/dashboard/approvals/ApprovalGateBadge.vue';
 import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 import { salesOrdersAPI } from 'dashboard/api/crm/commercialCycle';
 import { useAlert } from 'dashboard/composables';
 import { crmControlClasses } from '../../crmControlClasses';
 
 const route = useRoute();
 const router = useRouter();
+const store = useStore();
+const identity = computed(() =>
+  JSON.stringify([
+    route.params.accountId,
+    store.getters.getCurrentUserID,
+    store.getters.getCurrentRole,
+    store.getters.getCurrentUser?.accounts,
+  ])
+);
+let disposed = false;
+const currentIdentity = value => !disposed && value === identity.value;
 const rows = ref([]);
 const loading = ref(false);
 const selected = ref(null);
@@ -295,6 +307,7 @@ const clearOrderDetail = () => {
   detailLoading.value = false;
 };
 const open = async row => {
+  const authority = identity.value;
   clearOrderDetail();
   const token = detailGeneration;
   const accountId = route.params.accountId;
@@ -303,7 +316,11 @@ const open = async row => {
   router.replace({ query: { ...route.query, orderId: row.id } });
   try {
     const { data } = await salesOrdersAPI.show(row.id);
-    if (token === detailGeneration && route.params.accountId === accountId)
+    if (
+      token === detailGeneration &&
+      route.params.accountId === accountId &&
+      currentIdentity(authority)
+    )
       selected.value = data;
   } catch (e) {
     if (token === detailGeneration) {
@@ -317,13 +334,14 @@ const open = async row => {
 const { segmentParams, watchSegment } = useCustomerSegmentFilter();
 let listGeneration = 0;
 const load = async () => {
+  const authority = identity.value;
   listGeneration += 1;
   const token = listGeneration;
   rows.value = [];
   loading.value = true;
   try {
     const response = await salesOrdersAPI.list(segmentParams());
-    if (token !== listGeneration) return;
+    if (token !== listGeneration || !currentIdentity(authority)) return;
     rows.value = response.data || [];
     const q = route.query.orderId;
     if (
@@ -353,20 +371,24 @@ const close = () => {
 const changeStatus = async status => {
   if (!selected.value) return;
   saving.value = true;
+  const authority = identity.value;
   try {
     const { data } = await salesOrdersAPI.update(selected.value.id, {
       sales_order: { status },
     });
+    if (!currentIdentity(authority)) return;
     selected.value = data;
     await load();
+    if (!currentIdentity(authority)) return;
     useAlert('Status do pedido atualizado.');
   } catch (e) {
+    if (!currentIdentity(authority)) return;
     useAlert(
       e.response?.data?.errors?.join(', ') ||
         'Não foi possível atualizar o pedido.'
     );
   } finally {
-    saving.value = false;
+    if (currentIdentity(authority)) saving.value = false;
   }
 };
 const startItemEdit = () => {
@@ -383,21 +405,25 @@ const recalculateItem = item => {
 const saveItems = async () => {
   if (!selected.value) return;
   saving.value = true;
+  const authority = identity.value;
   try {
     const { data } = await salesOrdersAPI.update(selected.value.id, {
       sales_order: { items: draftItems.value },
     });
+    if (!currentIdentity(authority)) return;
     selected.value = data;
     editingItems.value = false;
     await load();
+    if (!currentIdentity(authority)) return;
     useAlert('Itens e indicadores recalculados.');
   } catch (e) {
+    if (!currentIdentity(authority)) return;
     useAlert(
       e.response?.data?.errors?.join(', ') ||
         'Não foi possível atualizar os itens.'
     );
   } finally {
-    saving.value = false;
+    if (currentIdentity(authority)) saving.value = false;
   }
 };
 const newContract = () =>
@@ -408,8 +434,10 @@ const newContract = () =>
   });
 const downloadPdf = async (row, event) => {
   event?.stopPropagation();
+  const authority = identity.value;
   try {
     const { data } = await salesOrdersAPI.pdf(row.id);
+    if (!currentIdentity(authority)) return;
     const url = URL.createObjectURL(data);
     const a = document.createElement('a');
     a.href = url;
@@ -417,6 +445,7 @@ const downloadPdf = async (row, event) => {
     a.click();
     URL.revokeObjectURL(url);
   } catch (e) {
+    if (!currentIdentity(authority)) return;
     useAlert('Não foi possível gerar o PDF do pedido.');
   }
 };
@@ -499,13 +528,23 @@ watch(
   }
 );
 watch(
-  () => route.params.accountId,
+  identity,
   () => {
     clearOrderDetail();
+    selectedIds.value = [];
+    draftItems.value = [];
+    editingItems.value = false;
+    saving.value = false;
+    clearFilters();
     return load();
-  }
+  },
+  { flush: 'sync' }
 );
-onBeforeUnmount(clearOrderDetail);
+onBeforeUnmount(() => {
+  disposed = true;
+  listGeneration += 1;
+  clearOrderDetail();
+});
 </script>
 
 <template>

@@ -16,7 +16,7 @@ const mocks = vi.hoisted(() => ({
     renew: vi.fn(),
     pdf: vi.fn(),
   },
-  orders: { list: vi.fn(), show: vi.fn() },
+  orders: { list: vi.fn(), show: vi.fn(), update: vi.fn(), pdf: vi.fn() },
 }));
 vi.mock('vue-router', () => ({
   useRoute: () => mocks.route,
@@ -48,6 +48,17 @@ const record = (id, code) => ({
   attachments: [],
   history: [],
 });
+const stubDownloadURL = () => {
+  const createObjectURL = vi.fn(() => 'blob:synthetic-download');
+  const NativeURL = URL;
+  class DownloadURL extends NativeURL {
+    static createObjectURL = createObjectURL;
+
+    static revokeObjectURL = vi.fn();
+  }
+  vi.stubGlobal('URL', DownloadURL);
+  return createObjectURL;
+};
 const mountPage = Component =>
   shallowMount(Component, {
     global: { stubs: { Teleport: true }, directives: { tooltip: () => {} } },
@@ -72,6 +83,8 @@ beforeEach(() => {
   mocks.contracts.renew.mockReset();
   mocks.contracts.pdf.mockReset();
   mocks.orders.list.mockReset().mockResolvedValue({ data: [] });
+  mocks.orders.update.mockReset();
+  mocks.orders.pdf.mockReset();
   mocks.orders.show
     .mockReset()
     .mockResolvedValue({ data: record(99, 'SYNTHETIC-ORDER-99') });
@@ -316,16 +329,7 @@ it('does not open a completed renewal response in the new users context or retry
 
 it('discards a late PDF instead of downloading it for a different user', async () => {
   let resolvePdf;
-  const createObjectURL = vi.fn(() => 'blob:synthetic-contract');
-  const NativeURL = URL;
-  vi.stubGlobal(
-    'URL',
-    class extends NativeURL {
-      static createObjectURL = createObjectURL;
-
-      static revokeObjectURL = vi.fn();
-    }
-  );
+  const createObjectURL = stubDownloadURL();
   mocks.route.query = { contractId: '99' };
   mocks.contracts.pdf.mockImplementationOnce(
     () =>
@@ -343,6 +347,119 @@ it('discards a late PDF instead of downloading it for a different user', async (
   mocks.store.getters.getCurrentUserID = 8;
   await flushPromises();
   resolvePdf({ data: new Blob(['synthetic private PDF']) });
+  await flushPromises();
+  expect(createObjectURL).not.toHaveBeenCalled();
+  wrapper.unmount();
+});
+
+it.each(['user', 'role', 'accounts'])(
+  'clears an order when the same-account %s authority changes and a new read is denied',
+  async identityField => {
+    mocks.route.query = { orderId: '99' };
+    mocks.orders.list.mockResolvedValue({
+      data: [record(99, 'PRIVATE-ORDER-LIST')],
+    });
+    const wrapper = mountPage(Orders);
+    await flushPromises();
+    expect(wrapper.text()).toContain('SYNTHETIC-ORDER-99');
+    mocks.orders.list.mockResolvedValue({ data: [] });
+    mocks.orders.show.mockRejectedValue({ response: { status: 403 } });
+    if (identityField === 'user') mocks.store.getters.getCurrentUserID = 8;
+    if (identityField === 'role') mocks.store.getters.getCurrentRole = 'agent';
+    if (identityField === 'accounts')
+      mocks.store.getters.getCurrentUser.accounts = [{ id: 17, role: 'agent' }];
+    await flushPromises();
+    expect(wrapper.text()).not.toContain('SYNTHETIC-ORDER-99');
+    expect(wrapper.text()).not.toContain('PRIVATE-ORDER-LIST');
+    wrapper.unmount();
+  }
+);
+
+it('discards an order detail that returns after the same-account user was replaced', async () => {
+  let resolveOld;
+  mocks.route.query = { orderId: '99' };
+  mocks.orders.show.mockImplementationOnce(
+    () =>
+      new Promise(resolve => {
+        resolveOld = resolve;
+      })
+  );
+  const wrapper = mountPage(Orders);
+  await flushPromises();
+  mocks.store.getters.getCurrentUserID = 8;
+  await flushPromises();
+  resolveOld({ data: record(99, 'FORMER-USER-ORDER') });
+  await flushPromises();
+  expect(wrapper.text()).not.toContain('FORMER-USER-ORDER');
+  wrapper.unmount();
+});
+
+it.each(['status', 'items'])(
+  'does not reopen a late order %s mutation after an identity change or retry it',
+  async operation => {
+    let resolveUpdate;
+    mocks.route.query = { orderId: '99' };
+    mocks.orders.show.mockResolvedValue({
+      data: { ...record(99, 'CURRENT-ORDER'), allowed_statuses: ['canceled'] },
+    });
+    mocks.orders.update.mockImplementationOnce(
+      () =>
+        new Promise(resolve => {
+          resolveUpdate = resolve;
+        })
+    );
+    const wrapper = mountPage(Orders);
+    await flushPromises();
+    if (operation === 'items') {
+      await wrapper
+        .findAll('button')
+        .find(node => node.text() === 'Editar itens')
+        .trigger('click');
+      await wrapper
+        .findAll('button')
+        .find(node => node.text() === 'Salvar e recalcular')
+        .trigger('click');
+    } else {
+      await wrapper
+        .findAll('button')
+        .find(node => node.text() === 'Cancelar pedido')
+        .trigger('click');
+    }
+    expect(mocks.orders.update).toHaveBeenCalledTimes(1);
+    mocks.orders.show.mockRejectedValue({ response: { status: 403 } });
+    mocks.store.getters.getCurrentUserID = 8;
+    await flushPromises();
+    const reads = mocks.orders.list.mock.calls.length;
+    mocks.alert.mockClear();
+    resolveUpdate({ data: record(99, 'FORMER-USER-UPDATED-ORDER') });
+    await flushPromises();
+    expect(wrapper.text()).not.toContain('FORMER-USER-UPDATED-ORDER');
+    expect(mocks.orders.list).toHaveBeenCalledTimes(reads);
+    expect(mocks.orders.update).toHaveBeenCalledTimes(1);
+    expect(mocks.alert).not.toHaveBeenCalled();
+    wrapper.unmount();
+  }
+);
+
+it('does not download an order PDF when its requesting identity changed', async () => {
+  let resolvePdf;
+  const createObjectURL = stubDownloadURL();
+  mocks.route.query = { orderId: '99' };
+  mocks.orders.pdf.mockImplementationOnce(
+    () =>
+      new Promise(resolve => {
+        resolvePdf = resolve;
+      })
+  );
+  const wrapper = mountPage(Orders);
+  await flushPromises();
+  await wrapper
+    .findAll('button')
+    .find(node => node.text() === 'Gerar PDF')
+    .trigger('click');
+  mocks.store.getters.getCurrentUserID = 8;
+  await flushPromises();
+  resolvePdf({ data: new Blob(['synthetic order PDF']) });
   await flushPromises();
   expect(createObjectURL).not.toHaveBeenCalled();
   wrapper.unmount();

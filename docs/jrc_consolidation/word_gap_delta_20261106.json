@@ -354,6 +354,12 @@
       "report": "docs/jrc_consolidation/contract_identity_checkpoint_20261106.json",
       "current_state": "24 source and7native tests passed;identity-bound views,downloads and late mutation receipts.",
       "remaining": "Orders analogous gap and current-source Chrome/fullC-Gopen."
+    },
+    {
+      "requirement": "C-GnativeOrders UI authority isolation",
+      "report": "docs/jrc_consolidation/order_identity_checkpoint_20261106.json",
+      "current_state": "30source and3nativepassed;2download targeted checks passed after test helper cleanup.",
+      "remaining": "Current-source Chrome and remainingC-Gopen."
     }
   ],
   "explicit_dependencies": [
