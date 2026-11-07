@@ -1,0 +1,50 @@
+{
+  "date": "2026-11-07",
+  "previous_head": "32ad6067f55f0145bb5373d615bfde2133936521",
+  "scope": "D/G current-authority Central approval UI lifecycle, not a replacement approval engine",
+  "implemented": [
+    "Clear old requests,policy templates,versions,simulation,catalogs,context and provisional resource selection synchronously when account/actor/effective membership changes;reload capabilities from the existing server context.",
+    "Pin native API receipts to captured authority+route and component lifetime;invalidate obsolete reads/notices/navigation after access change or unmount. Bound same-view read ordering to avoid older list continuations replacing a newer query.",
+    "Serialize pending native commands;retain expected_version,explicit choice/reason,native adjustment flow and replay identity. New actor/access gets a separate frontend retry scope;historical persisted tokens untouched.",
+    "Refresh retries a failed initial context instead of leaving the screen permanently blank;presence-only membership updates preserve current review reason and do not reload.",
+    "Existing tests now provide real empty Vuex stores for the newly explicit current-user dependency;no permission fallback or role-name grants added."
+  ],
+  "evidence": {
+    "approvals-authority-baseline01": "6genuine failures/2passes:stale context/read/decision receipt,unmounted followup,broken initial-context Refresh and duplicate decision.",
+    "approvals-authority-source02": "100/0 across8new lifecycle,existing approvals/API/composable/native pages,decision confirmation,adjustment and own delegation cases. Source components and native client/composable;transport mocked,not real external/browser/database acceptance.",
+    "approvals-authority-lint03": "10prettier errors in introduced test lines corrected exactly;no rule suppression.",
+    "approvals-authority-lint04": "All4files0errors;ApprovalsPage32style warnings retained,other3files0warnings. Duplicate i18n registration and old Browserslist warnings preserved in logs."
+  },
+  "files_sha256": {
+    "app/javascript/dashboard/routes/dashboard/approvals/ApprovalsPage.vue": "b81ee87bcb297ce18eeb8e9f454853719f198bb5c23b43c586ac6000850f62d1",
+    "app/javascript/dashboard/routes/dashboard/approvals/useApprovals.js": "d00ca3d48d91c0621ac0637327c0c3abd047dbe85273c6a7d24b98b553705a54",
+    "app/javascript/dashboard/routes/dashboard/approvals/specs/authorityLifecycle.spec.js": "4b4798a8a55bed6cd54df46fd53582dee9cfa14d460ee268b3772a8293651163",
+    "app/javascript/dashboard/routes/dashboard/approvals/specs/approvals.spec.js": "20e8d072f5f7ae9064c52baec4ee617775d03cbd7f13a65e3af1efce6ac8df7d"
+  },
+  "resources": {
+    "status": "passed",
+    "free_start": 6451687424,
+    "minimum_free": 6441951232,
+    "mandatory_stop_bytes": 750000000,
+    "conservative_stop_bytes": 2000000000,
+    "no_build": true,
+    "owned_process_id": 21032,
+    "exit_code": 0,
+    "free_end": 6464843776
+  },
+  "free_at_report": 6445072384,
+  "preserved": {
+    "backend_approvals_services_or_policies_changed": false,
+    "v1_snapshots_audit_versions_changed": false,
+    "account_company_operator_unit_native_authorization": true,
+    "build_server_container_restart_cleanup": false,
+    "new_dependencies_or_migrations": false,
+    "push_deploy_external_real_operations": false
+  },
+  "remaining": [
+    "Current-source Chrome and literal Word visual acceptance remain blocked by no-build/no5379-change.",
+    "No claim that client instantly learns unrefreshed server grants;native server remains authoritative for every call.",
+    "Master allocation actual queued worker acceptance is still distinct from maximum native service scale and earlier membership/notification queue evidence;inspect owned isolation prerequisites without reusing expired Redis15 ownership.",
+    "FullC-G,local-role matrix,TRR,deferred company docs and external provider/scanner/channel dependencies remain separate."
+  ]
+}

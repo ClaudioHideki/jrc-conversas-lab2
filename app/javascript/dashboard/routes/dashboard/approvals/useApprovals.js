@@ -1,7 +1,7 @@
 import { reactive } from 'vue';
 import { approvalClient } from 'dashboard/api/approvals';
 import { pagination } from './model';
-export const useApprovals = () => {
+export const useApprovals = (currentScope = () => null) => {
   const state = reactive({
     accountId: null,
     context: null,
@@ -12,6 +12,12 @@ export const useApprovals = () => {
     success: false,
   });
   let generation = 0;
+  let disposed = false;
+  const invalidate = () => {
+    generation += 1;
+    state.loading = false;
+    state.success = false;
+  };
   const reset = accountId => {
     generation += 1;
     Object.assign(state, {
@@ -25,19 +31,26 @@ export const useApprovals = () => {
     });
   };
   const run = async fn => {
+    if (disposed) return null;
     generation += 1;
     const current = generation;
     const account = state.accountId;
+    const scope = currentScope();
+    const isCurrent = () =>
+      !disposed &&
+      current === generation &&
+      account === state.accountId &&
+      scope === currentScope();
     state.loading = true;
     state.error = null;
     state.success = false;
     try {
       const result = await fn(approvalClient(account));
-      if (current !== generation || account !== state.accountId) return null;
+      if (!isCurrent()) return null;
       state.success = true;
       return result;
     } catch (error) {
-      if (current !== generation) return null;
+      if (!isCurrent()) return null;
       state.error = {
         status: error.response?.status,
         code: error.response?.data?.error || error.response?.data?.code,
@@ -45,7 +58,7 @@ export const useApprovals = () => {
       };
       return null;
     } finally {
-      if (current === generation) state.loading = false;
+      if (isCurrent()) state.loading = false;
     }
   };
   const loadContext = async () => {
@@ -60,5 +73,9 @@ export const useApprovals = () => {
       state.page = pagination(result);
     }
   };
-  return { state, reset, run, list, loadContext };
+  const dispose = () => {
+    disposed = true;
+    reset(null);
+  };
+  return { state, reset, run, list, loadContext, invalidate, dispose };
 };

@@ -456,6 +456,12 @@
       "report": "docs/jrc_consolidation/agenda_record_authority_checkpoint_20261107.json",
       "current_state": "3original failures corrected;12source cases and zero lint errors/warnings.",
       "remaining": "Current-sourceChrome and completeC-G remain open."
+    },
+    {
+      "requirement": "D/G native Central authority,request/decision lifecycle and operational Refresh",
+      "report": "docs/jrc_consolidation/approval_authority_lifecycle_checkpoint_20261107.json",
+      "current_state": "6original failures corrected;100source regression cases passed and4files0lint errors;backend engine/history untouched.",
+      "remaining": "Current-sourceChrome/fullWordacceptance/C-G and explicit business/external dependencies remain open."
     }
   ],
   "explicit_dependencies": [
@@ -476,7 +482,7 @@
       "state": "External environment/operations require separate authorization; not simulated as passed."
     }
   ],
-  "next_confirmed_local_gap": "Next confirmed local source gap:ApprovalsPage reacts only to route and account,retaining old server context/records after same-account actor/access changes;useApprovals only pins account/request generation. Preserve native decisions,v1 snapshots and version/idempotency contracts.",
+  "next_confirmed_local_gap": "Verify safe isolated prerequisites for genuine Master allocation worker delivery;preserve expired/nonempty Redis15 and previous evidence,do not loosen its guards.",
   "stage_closure": {
     "C": false,
     "D": false,
@@ -485,5 +491,5 @@
     "G": false
   },
   "unreviewed_literal_and_visual_fragments": "Not auto-marked complete; the original context/requirements inventory remains classification_pending where not explicitly reconciled.",
-  "next_source_review": "Next confirmed local source gap:ApprovalsPage reacts only to route and account,retaining old server context/records after same-account actor/access changes;useApprovals only pins account/request generation. Preserve native decisions,v1 snapshots and version/idempotency contracts."
+  "next_source_review": "Verify safe isolated prerequisites for genuine Master allocation worker delivery;preserve expired/nonempty Redis15 and previous evidence,do not loosen its guards."
 }

@@ -3,11 +3,11 @@
   "user_request": "499267ac-546d-4853-b4cf-7f03a2ea0629",
   "initial_head": "be54d0f7b4ce8d4e2a077cf2bdd8c2a4d5c88f5e",
   "branch": "codex/relacionamento-v2-20261101",
-  "last_validated_checkpoint": "0a3457fe3116bdbb2f05e0c86fb862aacff3558c",
+  "last_validated_checkpoint": "32ad6067f55f0145bb5373d615bfde2133936521",
   "completed_current_work": "Sealed dossier, weighted/current capacity, native withdrawal/cadence controls and F2 increments locally tested; see linked incremental reports. No C-G closure.",
-  "active_work": "Next confirmed local source gap:ApprovalsPage reacts only to route and account,retaining old server context/records after same-account actor/access changes;useApprovals only pins account/request generation. Preserve native decisions,v1 snapshots and version/idempotency contracts.",
+  "active_work": "Verify safe isolated prerequisites for genuine Master allocation worker delivery;preserve expired/nonempty Redis15 and previous evidence,do not loosen its guards.",
   "exact_next_actions": [
-    "Next confirmed local source gap:ApprovalsPage reacts only to route and account,retaining old server context/records after same-account actor/access changes;useApprovals only pins account/request generation. Preserve native decisions,v1 snapshots and version/idempotency contracts."
+    "Verify safe isolated prerequisites for genuine Master allocation worker delivery;preserve expired/nonempty Redis15 and previous evidence,do not loosen its guards."
   ],
   "test_environment": {
     "source_manifest": ".codex/d9-notifications-20261104/snapshot.json",
@@ -50,14 +50,14 @@
     "No real participant removal or provider request; tests use synthetic records and WebMock, with external network disabled."
   ],
   "restrictions": "No build/recompile, no5379 change/restart, no four-container restart/reconfiguration, no cleanup/delete of existing data, no push/GHCR/deploy/production/client change, no real provider operations. Additive migrations allowed only in owned synthetic test database.",
-  "disk_last_observed_bytes": 6463561728,
+  "disk_last_observed_bytes": 6445072384,
   "TRR": "Undefined; do not invent",
   "company_documents_without_portfolio": "Explicitly deferred",
-  "last_validated_head": "0a3457fe3116bdbb2f05e0c86fb862aacff3558c",
-  "new_validated_code_checkpoint": "git log -1 --format=%H -- docs/jrc_consolidation/agenda_record_authority_checkpoint_20261107.json",
+  "last_validated_head": "32ad6067f55f0145bb5373d615bfde2133936521",
+  "new_validated_code_checkpoint": "git log -1 --format=%H -- docs/jrc_consolidation/approval_authority_lifecycle_checkpoint_20261107.json",
   "current_status": "Native maximum master allocations,multiple active portfolios,CRM source caches/forms and activity origin gate incrementally tested;C-G and Chrome not closed.",
   "next_actions": [
-    "Next confirmed local source gap:ApprovalsPage reacts only to route and account,retaining old server context/records after same-account actor/access changes;useApprovals only pins account/request generation. Preserve native decisions,v1 snapshots and version/idempotency contracts."
+    "Verify safe isolated prerequisites for genuine Master allocation worker delivery;preserve expired/nonempty Redis15 and previous evidence,do not loosen its guards."
   ],
   "latest_dossier_report": "docs/jrc_consolidation/sealed_dossier_checkpoint_20261105.json",
   "capacity_report": "docs/jrc_consolidation/weighted_capacity_checkpoint_20261105.json",
@@ -176,5 +176,6 @@
   "crm_presence_authority_report": "docs/jrc_consolidation/crm_presence_authority_checkpoint_20261107.json",
   "deals_authority_report": "docs/jrc_consolidation/deals_authority_checkpoint_20261107.json",
   "calendar_native_actions_report": "docs/jrc_consolidation/calendar_native_actions_checkpoint_20261107.json",
-  "agenda_record_authority_report": "docs/jrc_consolidation/agenda_record_authority_checkpoint_20261107.json"
+  "agenda_record_authority_report": "docs/jrc_consolidation/agenda_record_authority_checkpoint_20261107.json",
+  "approval_authority_lifecycle_report": "docs/jrc_consolidation/approval_authority_lifecycle_checkpoint_20261107.json"
 }

@@ -729,7 +729,7 @@ describe('E4 components using bounded real DTO contracts', () => {
     });
     const wrapper = mount(ApprovalsPage, {
       global: {
-        plugins: [i18n(), router],
+        plugins: [i18n(), router, createStore({})],
         stubs: { Button: buttonStub, Dialog: decisionDialogStub },
       },
     });
@@ -762,7 +762,10 @@ describe('E4 components using bounded real DTO contracts', () => {
       response: { status: 422, data: { error: 'INVALID_DELEGATION' } },
     });
     const wrapper = mount(ApprovalsPage, {
-      global: { plugins: [i18n(), router], stubs: { Button: buttonStub } },
+      global: {
+        plugins: [i18n(), router, createStore({})],
+        stubs: { Button: buttonStub },
+      },
     });
     await flushPromises();
     wrapper
@@ -832,7 +835,10 @@ describe('E4 components using bounded real DTO contracts', () => {
       response({ ...policy, id: 302, name: 'Copy of Synthetic policy' })
     );
     const wrapper = mount(ApprovalsPage, {
-      global: { plugins: [i18n(), router], stubs: { Button: buttonStub } },
+      global: {
+        plugins: [i18n(), router, createStore({})],
+        stubs: { Button: buttonStub },
+      },
     });
     await flushPromises();
     await wrapper
@@ -888,7 +894,10 @@ describe('E4 components using bounded real DTO contracts', () => {
       );
     });
     const wrapper = mount(ApprovalsPage, {
-      global: { plugins: [i18n(), router], stubs: { Button: buttonStub } },
+      global: {
+        plugins: [i18n(), router, createStore({})],
+        stubs: { Button: buttonStub },
+      },
     });
     await flushPromises();
     expect(
@@ -916,7 +925,10 @@ describe('E4 components using bounded real DTO contracts', () => {
       )
     );
     const wrapper = mount(ApprovalsPage, {
-      global: { plugins: [i18n(), router], stubs: { Button: buttonStub } },
+      global: {
+        plugins: [i18n(), router, createStore({})],
+        stubs: { Button: buttonStub },
+      },
     });
     await flushPromises();
     expect(wrapper.text()).toContain('Synthetic policy');

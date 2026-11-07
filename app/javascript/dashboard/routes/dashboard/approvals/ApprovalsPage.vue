@@ -1,5 +1,7 @@
 <script setup>
-import { computed, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import { useStore } from 'vuex';
+import { authorityScope } from 'dashboard/store/crm/authorityScope';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import Button from 'dashboard/components-next/button/Button.vue';
@@ -21,7 +23,32 @@ import {
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
-const { state, reset, run, loadContext, list } = useApprovals();
+const store = useStore();
+const accessIdentity = computed(() =>
+  JSON.stringify([route.params.accountId, authorityScope(store.getters)])
+);
+const viewIdentity = computed(() =>
+  JSON.stringify([accessIdentity.value, route.fullPath])
+);
+const { state, reset, run, loadContext, list, invalidate, dispose } =
+  useApprovals(() => viewIdentity.value);
+let disposed = false;
+let viewGeneration = 0;
+let loadGeneration = 0;
+let loadedAccess = null;
+const captureView = () => ({
+  identity: viewIdentity.value,
+  generation: viewGeneration,
+});
+const isCurrent = context =>
+  !disposed &&
+  context.identity === viewIdentity.value &&
+  context.generation === viewGeneration;
+onBeforeUnmount(() => {
+  disposed = true;
+  viewGeneration += 1;
+  dispose();
+});
 const record = ref(null);
 const templatePolicy = ref(null);
 const versions = ref(null);
@@ -79,6 +106,10 @@ const navigate = (target, targetId, query = {}) =>
     query,
   });
 const load = async () => {
+  if (disposed) return;
+  const context = captureView();
+  loadGeneration += 1;
+  const request = loadGeneration;
   record.value = null;
   templatePolicy.value = null;
   versions.value = null;
@@ -132,6 +163,7 @@ const load = async () => {
   } else if (screen.value === 'delegations') await list('delegations', params);
   else if (screen.value === 'own-delegations')
     await list('own_delegations', params);
+  if (!isCurrent(context) || request !== loadGeneration) return;
   if (['simulate', 'policies'].includes(screen.value) && can('policy_manage')) {
     const scope = state.context.scopes.find(row =>
       row.capabilities.includes('policy_manage')
@@ -145,30 +177,53 @@ const load = async () => {
     if (result) catalogs.value = result.data;
   }
 };
+const refresh = async () => {
+  if (disposed || state.loading) return;
+  const context = captureView();
+  if (!state.context) await loadContext();
+  if (isCurrent(context) && state.context) await load();
+};
 watch(
-  () => route.fullPath,
+  viewIdentity,
   async () => {
+    viewGeneration += 1;
+    const context = captureView();
     const account = Number(route.params.accountId);
+    invalidate();
     notice.value = '';
     catalogs.value = [];
-    if (state.accountId !== account) {
+    record.value = null;
+    templatePolicy.value = null;
+    versions.value = null;
+    simulation.value = null;
+    state.rows = [];
+    if (loadedAccess !== accessIdentity.value || !state.context) {
+      const changedAccess = loadedAccess !== accessIdentity.value;
+      loadedAccess = accessIdentity.value;
       reset(account);
-      filters.value = {
-        state: '',
-        module_key: '',
-        event_key: '',
-        issuer_company_id: '',
-        business_unit_id: '',
-        resource_type: '',
-        resource_id: '',
-      };
+      if (changedAccess) {
+        filters.value = {
+          state: '',
+          module_key: '',
+          event_key: '',
+          issuer_company_id: '',
+          business_unit_id: '',
+          resource_type: '',
+          resource_id: '',
+        };
+        requestKey.value = '';
+        resourceId.value = '';
+      }
       await loadContext();
     }
-    await load();
+    if (isCurrent(context) && state.context) await load();
   },
-  { immediate: true }
+  { immediate: true, flush: 'sync' }
 );
+const canSubmit = () => !disposed && allowed.value && !state.loading;
 const savePolicy = async policy => {
+  if (!canSubmit()) return;
+  const context = captureView();
   const result = await run(api =>
     id.value === 'new'
       ? api.post('policies', { policy })
@@ -177,6 +232,7 @@ const savePolicy = async policy => {
           expected_version: record.value.lock_version,
         })
   );
+  if (!isCurrent(context)) return;
   if (result) {
     record.value = result.data;
     notice.value = t('JRC_APPROVALS.saved');
@@ -184,11 +240,14 @@ const savePolicy = async policy => {
   }
 };
 const operate = async operation => {
+  if (!canSubmit()) return;
+  const context = captureView();
   const result = await run(api =>
     api.post(`policies/${id.value}/${operation}`, {
       expected_version: record.value.lock_version,
     })
   );
+  if (!isCurrent(context)) return;
   if (result) {
     record.value = result.data;
     notice.value = t('JRC_APPROVALS.saved');
@@ -206,20 +265,25 @@ const loadVersions = async page => {
     };
 };
 const decide = async decision => {
+  if (!canSubmit()) return;
+  const context = captureView();
   const result = await run(api =>
     api.post(`requests/${id.value}/decide`, {
       decision: decisionIntent(
         decision,
-        `${state.accountId}:request:${id.value}`
+        `${accessIdentity.value}:request:${id.value}`
       ),
     })
   );
+  if (!isCurrent(context)) return;
   if (result) {
     await load();
+    if (!isCurrent(context)) return;
     notice.value = t('JRC_APPROVALS.saved');
   } else if (state.error?.status === 409) {
     const error = state.error;
     await load();
+    if (!isCurrent(context)) return;
     state.error = error;
     notice.value = t('JRC_APPROVALS.concurrent');
   } else if ([401, 403, 404].includes(state.error?.status)) {
@@ -228,25 +292,42 @@ const decide = async decision => {
   }
 };
 const simulate = async body => {
+  if (!canSubmit()) return;
+  const context = captureView();
   const result = await run(api => api.post('requests/simulate', body));
-  if (result) simulation.value = result.data;
+  if (result && isCurrent(context)) simulation.value = result.data;
 };
 const adjust = async body => {
+  if (!canSubmit()) return;
+  const context = captureView();
   const result = await run(api =>
     api.post(`requests/${id.value}/adjust`, {
       adjustment: adjustmentIntent(
         body,
-        `${state.accountId}:adjust:${id.value}`
+        `${accessIdentity.value}:adjust:${id.value}`
       ),
     })
   );
+  if (!isCurrent(context)) return;
   if (result) {
-    await navigate('inbox', result.data.request?.id);
+    const access = accessIdentity.value;
+    const target = result.data.request?.id;
+    await navigate('inbox', target);
+    if (
+      disposed ||
+      access !== accessIdentity.value ||
+      screen.value !== 'inbox' ||
+      String(id.value) !== String(target)
+    )
+      return;
+    const destination = captureView();
     await load();
-    notice.value = t('JRC_APPROVALS.adjustment.saved');
+    if (isCurrent(destination))
+      notice.value = t('JRC_APPROVALS.adjustment.saved');
   } else if (state.error?.status === 409) {
     const error = state.error;
     await load();
+    if (!isCurrent(context)) return;
     state.error = error;
   } else if ([401, 403, 404].includes(state.error?.status)) {
     record.value = null;
@@ -254,41 +335,59 @@ const adjust = async body => {
   }
 };
 const grant = async delegation => {
+  if (!canSubmit()) return;
+  const context = captureView();
   const result = await run(api => api.post('delegations', { delegation }));
+  if (!isCurrent(context)) return;
   if (result) {
     await load();
+    if (!isCurrent(context)) return;
     notice.value = t('JRC_APPROVALS.saved');
   }
 };
 const revoke = async grantId => {
+  if (!canSubmit()) return;
+  const context = captureView();
   const result = await run(api => api.revoke(grantId));
+  if (!isCurrent(context)) return;
   if (result) {
     await load();
+    if (!isCurrent(context)) return;
     notice.value = t('JRC_APPROVALS.revoked');
   }
 };
 const grantOwn = async delegation => {
+  if (!canSubmit()) return;
+  const context = captureView();
   const result = await run(api =>
     api.post('own_delegations', {
       delegation: ownDelegationIntent(
         delegation,
-        `${state.accountId}:own-delegation`
+        `${accessIdentity.value}:own-delegation`
       ),
     })
   );
+  if (!isCurrent(context)) return;
   if (result) {
     await load();
+    if (!isCurrent(context)) return;
     notice.value = t('JRC_APPROVALS.saved');
   }
 };
 const revokeOwn = async grantId => {
+  if (!canSubmit()) return;
+  const context = captureView();
   const result = await run(api => api.revokeOwn(grantId));
+  if (!isCurrent(context)) return;
   if (result) {
     await load();
+    if (!isCurrent(context)) return;
     notice.value = t('JRC_APPROVALS.revoked');
   }
 };
 const createRequest = async () => {
+  if (!canSubmit()) return;
+  const context = captureView();
   const result = await run(api =>
     api.post('requests', {
       approval_request: requestIntent(
@@ -296,12 +395,14 @@ const createRequest = async () => {
           key: requestKey.value,
           resource_id: resourceId.value,
         },
-        String(state.accountId)
+        accessIdentity.value
       ),
     })
   );
+  if (!isCurrent(context)) return;
   if (result) {
     await load();
+    if (!isCurrent(context)) return;
     notice.value = result.data.length
       ? t('JRC_APPROVALS.saved')
       : t('JRC_APPROVALS.notRequired');
@@ -357,7 +458,7 @@ const errorText = computed(() => {
           :label="t('JRC_APPROVALS.refresh')"
           variant="faded"
           :disabled="state.loading"
-          @click="load"
+          @click="refresh"
         />
       </header>
       <nav
@@ -493,7 +594,7 @@ const errorText = computed(() => {
         </section>
         <RequestDetail
           v-if="screen === 'inbox' && record"
-          :key="record.id"
+          :key="`${accessIdentity}:${record.id}`"
           :request="record"
           :error="state.error ? errorText : ''"
           :error-state="state.error"
