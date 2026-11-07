@@ -426,6 +426,12 @@
       "report": "docs/jrc_consolidation/activities_authority_checkpoint_20261107.json",
       "current_state": "7baseline failures corrected;22sourcepassed plus2additional checks and2post-lint existing UI checks;0lint errors.",
       "remaining": "Native source lookup scope mismatch next;not Chrome/fullC-G acceptance."
+    },
+    {
+      "requirement": "C/GnativeActivity origin/account/owner/corporate scope and real persistence",
+      "report": "docs/jrc_consolidation/activity_origin_scope_checkpoint_20261107.json",
+      "current_state": "Hidden origin writes reproduced in candidate and fixed using existing native read scope;17nativepassed plus1post-stylecase. No new permission or internal service rewrite.",
+      "remaining": "DealsIndex local form/receipt boundary next;broader assignee semantics,Chrome and fullC-G not claimed."
     }
   ],
   "explicit_dependencies": [
@@ -446,7 +452,7 @@
       "state": "External environment/operations require separate authorization; not simulated as passed."
     }
   ],
-  "next_confirmed_local_gap": "Test native ActivitiesController creation/reparenting against hidden same-account deals/leads and corporate coverage;reuse existing visible_to_current_user source scope if the mismatch is reproduced,preserve internal services and legacy versioned editor.",
+  "next_confirmed_local_gap": "Bind native DealsIndex creation options,local form/product caches and detail mutation continuations to current authority/lifecycle and selected detail;preserve financial/product APIs and native drafts;start with failing rendered actual-store tests.",
   "stage_closure": {
     "C": false,
     "D": false,
@@ -455,5 +461,5 @@
     "G": false
   },
   "unreviewed_literal_and_visual_fragments": "Not auto-marked complete; the original context/requirements inventory remains classification_pending where not explicitly reconciled.",
-  "next_source_review": "Native activity origin source lookup versus native read/corporate scope."
+  "next_source_review": "DealsIndex local async options,creation drafts and selected-detail product mutations."
 }

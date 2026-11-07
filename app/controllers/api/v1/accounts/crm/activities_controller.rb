@@ -110,12 +110,12 @@ module Api
 
             if attributes.key?(:deal_id)
               deal_id = attributes.delete(:deal_id)
-              attributes[:deal] = deal_id.present? ? crm_scope.jrc_crm_deals.find(deal_id) : nil
+              attributes[:deal] = deal_id.present? ? visible_to_current_user(crm_scope.jrc_crm_deals).find(deal_id) : nil
             end
 
             if attributes.key?(:lead_id)
               lead_id = attributes.delete(:lead_id)
-              attributes[:lead] = lead_id.present? ? crm_scope.jrc_crm_leads.find(lead_id) : nil
+              attributes[:lead] = lead_id.present? ? visible_to_current_user(crm_scope.jrc_crm_leads).find(lead_id) : nil
             end
 
             attributes
