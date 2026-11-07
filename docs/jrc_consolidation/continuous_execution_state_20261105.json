@@ -3,12 +3,12 @@
   "user_request": "499267ac-546d-4853-b4cf-7f03a2ea0629",
   "initial_head": "be54d0f7b4ce8d4e2a077cf2bdd8c2a4d5c88f5e",
   "branch": "codex/relacionamento-v2-20261101",
-  "last_validated_checkpoint": "3c02b39056b6f69e0c7fc03c154991d0391e847b",
+  "last_validated_checkpoint": "501fa070f494632a09ba298f71be543d75dee203",
   "completed_current_work": "Sealed dossier, weighted/current capacity, native withdrawal/cadence controls and F2 increments locally tested; see linked incremental reports. No C-G closure.",
-  "active_work": "Execute bounded synthetic master-allocation maximum-audience regression with50companies,explicit native hours,finite progress,duplicate delivery,no extra master identity and preserved snapshots. No new server/queue/build.",
+  "active_work": "Extend the already validated proposal list authority binding to native CRM lead/activity/deal caches where read-only inspection confirmed the same stale-account/role pattern;first add failing native store regression cases,preserve filters and source APIs.",
   "exact_next_actions": [
-    "Execute bounded synthetic master-allocation maximum-audience regression with50companies,explicit native hours,finite progress,duplicate delivery,no extra master identity and preserved snapshots. No new server/queue/build.",
-    "Continue only independent authorized C-G gaps;preserve current-sourceChrome and business/external dependencies."
+    "Extend the already validated proposal list authority binding to native CRM lead/activity/deal caches where read-only inspection confirmed the same stale-account/role pattern;first add failing native store regression cases,preserve filters and source APIs.",
+    "Keep browser,business and external dependencies explicit;continue independent safe authorized work."
   ],
   "test_environment": {
     "source_manifest": ".codex/d9-notifications-20261104/snapshot.json",
@@ -54,7 +54,7 @@
   "disk_last_observed_bytes": 6682873856,
   "TRR": "Undefined; do not invent",
   "company_documents_without_portfolio": "Explicitly deferred",
-  "last_validated_head": "3c02b39056b6f69e0c7fc03c154991d0391e847b",
+  "last_validated_head": "501fa070f494632a09ba298f71be543d75dee203",
   "new_validated_code_checkpoint": "git log -1 --format=%H -- docs/jrc_consolidation/native_allocation_creation_checkpoint_20261107.json",
   "current_status": "Native allocation creation prerequisite validated;true masterbatch remains next. C-Gopen.",
   "next_actions": [
@@ -83,7 +83,7 @@
   "priority_bands_report": "docs/jrc_consolidation/priority_bands_checkpoint_20261105.json",
   "automatic_playbook_budget_report": "docs/jrc_consolidation/automatic_playbook_budget_checkpoint_20261106.json",
   "analyst_native_responsibilities_report": "docs/jrc_consolidation/analyst_native_responsibilities_checkpoint_20261106.json",
-  "checkpoint_resolution": "git log -1 --format=%H -- docs/jrc_consolidation/proposal_authority_checkpoint_20261107.json",
+  "checkpoint_resolution": "git log -1 --format=%H -- docs/jrc_consolidation/master_maximum_scale_checkpoint_20261107.json",
   "approval_percentage_input_report": "docs/jrc_consolidation/approval_percentage_input_checkpoint_20261106.json",
   "word_gap_delta": "docs/jrc_consolidation/word_gap_delta_20261106.json",
   "workspace_card_sources_report": "docs/jrc_consolidation/workspace_card_sources_checkpoint_20261106.json",
@@ -168,5 +168,6 @@
   "native_allocation_creation_report": "docs/jrc_consolidation/native_allocation_creation_checkpoint_20261107.json",
   "master_subject_schema_report": "docs/jrc_consolidation/master_subject_schema_checkpoint_20261107.json",
   "master_reviewed_allocation_report": "docs/jrc_consolidation/master_reviewed_allocation_checkpoint_20261107.json",
-  "proposal_authority_report": "docs/jrc_consolidation/proposal_authority_checkpoint_20261107.json"
+  "proposal_authority_report": "docs/jrc_consolidation/proposal_authority_checkpoint_20261107.json",
+  "master_maximum_scale_report": "docs/jrc_consolidation/master_maximum_scale_checkpoint_20261107.json"
 }

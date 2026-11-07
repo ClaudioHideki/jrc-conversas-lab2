@@ -390,6 +390,12 @@
       "report": "docs/jrc_consolidation/proposal_authority_checkpoint_20261107.json",
       "current_state": "Six original failing assertions corrected;40source+13targeted and5native checks passed. Native drafts,financial inputs,source policy and committed command history preserved.",
       "remaining": "No current-sourceChrome or completeC-Gclosure;documented business/external dependencies remain."
+    },
+    {
+      "requirement": "Relationship P0124/P0128 and G bounded workload/real native integration",
+      "report": "docs/jrc_consolidation/master_maximum_scale_checkpoint_20261107.json",
+      "current_state": "Maximum50native companies created then reused in another active portfolio:100links,50roots,75global hours;20finite advances;native1/0 in287.97s.",
+      "remaining": "Not current-sourceChrome,real master queue or productionthroughput;fullC-G and explicit business/external dependencies remain open."
     }
   ],
   "explicit_dependencies": [
@@ -410,7 +416,7 @@
       "state": "External environment/operations require separate authorization; not simulated as passed."
     }
   ],
-  "next_confirmed_local_gap": "Execute bounded synthetic master-allocation maximum-audience regression with50companies,explicit native hours,finite progress,duplicate delivery,no extra master identity and preserved snapshots. No new server/queue/build.",
+  "next_confirmed_local_gap": "Extend the already validated proposal list authority binding to native CRM lead/activity/deal caches where read-only inspection confirmed the same stale-account/role pattern;first add failing native store regression cases,preserve filters and source APIs.",
   "stage_closure": {
     "C": false,
     "D": false,
@@ -419,5 +425,5 @@
     "G": false
   },
   "unreviewed_literal_and_visual_fragments": "Not auto-marked complete; the original context/requirements inventory remains classification_pending where not explicitly reconciled.",
-  "next_source_review": "Bounded maximum native master audience with explicit hours and per-item progress."
+  "next_source_review": "CRM caches and native role/account authority boundary."
 }
