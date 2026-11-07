@@ -1,0 +1,45 @@
+{
+  "date": "2026-11-07",
+  "previous_head": "4b5de4c490ff1bae8911d2f1f81540fffbe2a3c0",
+  "scope": "G operational native Calendar filtering;not external calendar integration",
+  "implemented": [
+    "Replace visibly disabled placeholder calendars with working search,type,owner,status andclear controls by reusing the existing Activity list filterActivities utility.",
+    "Filter only native-authorized source rows;owner choices derive from unfiltered authorized DTOs,never from guessed global roster or user-supplied authorization IDs.",
+    "Apply filters to all4period views and both sidebars. Clearing preserves current date/view;account/access replacement clears old selected IDs and owner choices. Presence-only updates retain selection.",
+    "Complete through existing API,then reread persisted native list and reapply filters;do not fabricate a completed card. Existing versioned native editor and race/error protections retained."
+  ],
+  "evidence": {
+    "calendar-filters-source01": "26/0 across7new filter cases,11period views,7native editor/completion cases and1adapted legacy view. Actual Vuex/component/filter utility,transport mocked;not real Chrome/database proof.",
+    "calendar-filters-lint03": "New/adapted specs0errors0warnings;shared Calendar27prettiererrors10markupwarnings versus HEAD31prettiererrors3warnings. Shared lint explicitly not green;no suppression or unrelated rewrite."
+  },
+  "files_sha256": {
+    "app/javascript/dashboard/routes/dashboard/crm/views/calendar/CalendarView.vue": "2103bf5556a468bb96ac517b09638ee8a07de02ff5cc3f14cc87303cbefb70af",
+    "app/javascript/dashboard/routes/dashboard/crm/views/calendar/spec/CalendarView.spec.js": "42ff98aaf0a46d68aafc5c4fe1bff8dc44deb8eb3f9cbf40ed9602b64026087d",
+    "app/javascript/dashboard/routes/dashboard/crm/views/calendar/spec/CalendarFilters.spec.js": "699a2a4267214fc0bcd111c6d71236c2a63cc085d1c2a69fbab8d9485e00e7d8",
+    "app/javascript/dashboard/i18n/locale/en/crm.json": "a66ee1d03c285385f1a454f0404c1fd2b121e3ad711b46fdc5ffb6c284778de5"
+  },
+  "resources": {
+    "status": "passed",
+    "free_start": 6416502784,
+    "minimum_free": 6373597184,
+    "mandatory_stop_bytes": 750000000,
+    "conservative_stop_bytes": 2000000000,
+    "no_build": true,
+    "owned_process_id": 11932,
+    "exit_code": 0,
+    "free_end": 6414876672
+  },
+  "free_at_report": 6409646080,
+  "preserved": {
+    "backend_APIs_policies_migrations_changed": false,
+    "new_appointment_registry_or_external_channel": false,
+    "build_assets_server5379_container_restart": false,
+    "cleanup_push_deploy_external_ops": false
+  },
+  "remaining": [
+    "Current-source desktop/mobile/light-dark browser acceptance requires a separately authorized build/environment;old assets not evidence.",
+    "External sync/phone/WhatsApp remain unavailable here;no real operation attempted.",
+    "Existing Activity endpoint still returns its full authorized array;no new backend date pagination or large-scale Calendar performance claim.",
+    "C-G remain open;local-role matrix,TRR,company docs without portfolio,historical audit-scope design and external provider/scanner/channel dependencies retained."
+  ]
+}

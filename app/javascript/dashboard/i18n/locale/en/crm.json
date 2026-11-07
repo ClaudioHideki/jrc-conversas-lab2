@@ -9,6 +9,16 @@
       "MANAGEMENT": "Gestão"
     },
     "CALENDAR_ACTIONS": {
+      "FILTERS": "Filters",
+      "ALL_TYPES": "All types",
+      "ALL_STATUSES": "All statuses",
+      "STATUS": "Status",
+      "TYPES": {
+        "CALL": "Call",
+        "MEETING": "Meeting",
+        "WHATSAPP": "WhatsApp",
+        "EMAIL": "E-mail"
+      },
       "PREVIOUS_PERIOD": "Previous period",
       "NEXT_PERIOD": "Next period",
       "VIEWS": "Calendar views",

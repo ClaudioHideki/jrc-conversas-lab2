@@ -15,6 +15,7 @@ import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 import { activitiesAPI } from 'dashboard/api/crm';
 import { formatCrmDateTime } from '../../utils/dateTime';
+import { filterActivities } from '../../utils/activityFilters';
 import CrmPageHeader from '../../components/shared/CrmPageHeader.vue';
 
 const store = useStore();
@@ -39,13 +40,35 @@ const activities = computed(() =>
     (left, right) => new Date(left.due_at) - new Date(right.due_at)
   )
 );
+const filters = reactive({ search: '', type: '', owner: '', status: '' });
+const clearFilters = () =>
+  Object.assign(filters, { search: '', type: '', owner: '', status: '' });
+const filteredActivities = computed(() =>
+  filterActivities(activities.value, filters)
+);
+const owners = computed(() => [
+  ...new Map(
+    activities.value
+      .filter(activity => activity.user)
+      .map(activity => [activity.user.id, activity.user])
+  ).values(),
+]);
+const activityTypes = computed(() => [
+  { value: 'call', label: t('CRM.CALENDAR_ACTIONS.TYPES.CALL') },
+  { value: 'meeting', label: t('CRM.CALENDAR_ACTIONS.TYPES.MEETING') },
+  { value: 'whatsapp', label: t('CRM.CALENDAR_ACTIONS.TYPES.WHATSAPP') },
+  { value: 'email', label: t('CRM.CALENDAR_ACTIONS.TYPES.EMAIL') },
+  { value: 'follow_up', label: t('CRM.ACTIVITY_FILTERS.FOLLOW_UP') },
+  { value: 'task', label: t('CRM.ACTIVITY_FILTERS.TASK') },
+  { value: 'demonstration', label: t('CRM.ACTIVITY_FILTERS.DEMONSTRATION') },
+]);
 const nextActivity = computed(
   () =>
-    activities.value.find(
+    filteredActivities.value.find(
       activity =>
         !activity.completed_at &&
         !['completed', 'cancelled'].includes(activity.status)
-    ) || activities.value[0]
+    ) || filteredActivities.value[0]
 );
 const canEdit = activity =>
   activity &&
@@ -90,7 +113,7 @@ const presentDay = date => ({
     .format(date)
     .replace('.', ''),
   day: String(date.getDate()).padStart(2, '0'),
-  activities: activities.value.filter(
+  activities: filteredActivities.value.filter(
     activity => dateKey(new Date(activity.due_at)) === dateKey(date)
   ),
 });
@@ -225,6 +248,7 @@ watch(identity, () => {
   completingIds.clear();
   completionError.value = '';
   editingActivityId.value = null;
+  clearFilters();
   load();
 });
 watch(
@@ -311,24 +335,93 @@ onMounted(async () => {
             >
             <button v-for="day in miniCalendarDays" :key="day.key" type="button" class="grid aspect-square place-content-center rounded-full text-[11px] transition hover:bg-n-blue-3" :class="[day.currentMonth ? 'text-n-slate-12' : 'text-n-slate-11', day.today ? 'ring-1 ring-[#7c3aed]' : '', day.selected ? 'bg-[#7c3aed] !text-white font-bold' : '']" @click="selectCalendarDay(day)">{{ day.day }}</button>
           </div>
-          <div class="mt-6 border-t border-n-weak pt-4">
-            <h3 class="mb-3 text-sm font-semibold text-n-slate-12">Calendários</h3>
-            <label v-for="item in ['Minha agenda','Equipe comercial','Ligações','Reuniões','WhatsApp','Prazos']" :key="item" class="mb-2 flex items-center gap-2 text-xs text-n-slate-11">
-              <input
-                type="checkbox"
-                disabled
-                aria-describedby="crm-calendar-filter-note"
-                class="size-3.5 cursor-not-allowed rounded"
-              />
-              {{ item }}
-            </label>
-            <p id="crm-calendar-filter-note" class="mt-3 text-xs text-n-slate-11">
-              {{ $t('CRM.HOMOLOGATION.CALENDAR_FILTERS_UNAVAILABLE') }}
-            </p>
-          </div>
+          <fieldset class="mt-6 min-w-0 space-y-3 border-t border-n-weak pt-4">
+            <legend class="text-sm font-semibold text-n-slate-12">
+              {{ t('CRM.CALENDAR_ACTIONS.FILTERS') }}
+            </legend>
+            <label class="block text-xs text-n-slate-11"
+              >{{ t('CRM.ACTIVITY_FILTERS.SEARCH')
+              }}<input
+                v-model="filters.search"
+                data-testid="calendar-filter-search"
+                type="search"
+                class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 px-2 py-2 text-n-slate-12"
+            /></label>
+            <label class="block text-xs text-n-slate-11"
+              >{{ t('CRM.ACTIVITY_FILTERS.TYPE')
+              }}<select
+                v-model="filters.type"
+                data-testid="calendar-filter-type"
+                class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 px-2 py-2 text-n-slate-12"
+              >
+                <option value="">
+                  {{ t('CRM.CALENDAR_ACTIONS.ALL_TYPES') }}
+                </option>
+                <option
+                  v-for="type in activityTypes"
+                  :key="type.value"
+                  :value="type.value"
+                >
+                  {{ type.label }}
+                </option>
+              </select></label
+            >
+            <label class="block text-xs text-n-slate-11"
+              >{{ t('CRM.ACTIVITY_FILTERS.OWNER')
+              }}<select
+                v-model="filters.owner"
+                data-testid="calendar-filter-owner"
+                class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 px-2 py-2 text-n-slate-12"
+              >
+                <option value="">
+                  {{ t('CRM.ACTIVITY_FILTERS.ALL_OWNERS') }}
+                </option>
+                <option
+                  v-for="owner in owners"
+                  :key="owner.id"
+                  :value="owner.id"
+                >
+                  {{ owner.name }}
+                </option>
+              </select></label
+            >
+            <label class="block text-xs text-n-slate-11"
+              >{{ t('CRM.CALENDAR_ACTIONS.STATUS')
+              }}<select
+                v-model="filters.status"
+                data-testid="calendar-filter-status"
+                class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 px-2 py-2 text-n-slate-12"
+              >
+                <option value="">
+                  {{ t('CRM.CALENDAR_ACTIONS.ALL_STATUSES') }}
+                </option>
+                <option value="open">
+                  {{ t('CRM.ACTIVITY_FILTERS.OPEN') }}
+                </option>
+                <option value="overdue">
+                  {{ t('CRM.ACTIVITY_FILTERS.OVERDUE') }}
+                </option>
+                <option value="completed">
+                  {{ t('CRM.ACTIVITY_FILTERS.COMPLETED') }}
+                </option>
+              </select></label
+            >
+            <button
+              type="button"
+              data-testid="calendar-clear-filters"
+              class="rounded-lg border border-n-weak px-3 py-2 text-xs font-semibold text-n-slate-12"
+              @click="clearFilters"
+            >
+              {{ t('CRM.ACTIVITY_FILTERS.CLEAR') }}
+            </button>
+          </fieldset>
           <div class="mt-6 border-t border-n-weak pt-4">
             <div class="mb-2 flex items-center justify-between"><h3 class="text-sm font-semibold text-n-slate-12">Próximos</h3><RouterLink :to="{ name: 'crm_activities' }" class="text-[11px] font-semibold text-[#087cf0]">Ver todos</RouterLink></div>
-            <div v-for="activity in activities.slice(0,3)" :key="activity.id" class="mb-3 flex gap-2 text-xs">
+            <div
+              v-for="activity in filteredActivities.slice(0, 3)"
+              :key="activity.id"
+              class="mb-3 flex gap-2 text-xs"
+            >
               <span class="grid size-7 shrink-0 place-content-center rounded-lg bg-[#f4f3ff] text-[#7c3aed]"><i class="size-3.5" :class="activityIcon(activity.activity_type)" /></span>
               <div class="min-w-0"><p class="truncate font-semibold text-n-slate-12">{{ activity.title }}</p><p class="text-n-slate-11">{{ formatCrmDateTime(activity.due_at) }}</p></div>
             </div>

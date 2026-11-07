@@ -53,13 +53,9 @@ it('explains unsupported calendar controls while preserving the weekly view and 
       await button.trigger('click');
     })
   );
-  const filters = wrapper.findAll('input[type="checkbox"]');
-  expect(filters).toHaveLength(6);
-  expect(filters.every(input => input.element.disabled)).toBe(true);
-  expect(filters.every(input => !input.element.checked)).toBe(true);
-  expect(wrapper.get('#crm-calendar-filter-note').text()).toContain(
-    'não estão disponíveis'
-  );
+  const filters = wrapper.findAll('[data-testid^="calendar-filter-"]');
+  expect(filters).toHaveLength(4);
+  expect(filters.every(input => !input.element.disabled)).toBe(true);
   expect(wrapper.get('[aria-current="true"]').text()).toBe('Semana');
   expect(wrapper.get('article').text()).toContain('Reunião de teste');
   expect(
