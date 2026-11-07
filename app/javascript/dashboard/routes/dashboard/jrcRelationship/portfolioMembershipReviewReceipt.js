@@ -1,3 +1,4 @@
+import { validMembershipCapacity } from './portfolioMembershipCapacityReceipt';
 const positive = value => Number.isSafeInteger(value) && value > 0;
 const revision = value => Number.isSafeInteger(value) && value >= 0;
 const sameIds = (first, second) =>
@@ -15,6 +16,7 @@ export const validMembershipReview = (value, groupId, proposal = null) => {
     !positive(value.revision) ||
     !/^[a-f0-9]{64}$/.test(value.digest || '') ||
     value.source_access_limited ||
+    !validMembershipCapacity(value.membership_capacity, groupId) ||
     !['previewed', 'running', 'completed', 'canceled', 'attention'].includes(
       value.state
     ) ||

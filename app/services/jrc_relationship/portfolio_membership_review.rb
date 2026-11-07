@@ -15,6 +15,7 @@ class JrcRelationship::PortfolioMembershipReview
     { 'group_membership' => { 'portfolio_group_id' => group.id, 'initial_revision' => group.lock_version,
                               'digest' => fingerprint(group, configuration), 'links' => links(group, inputs.fetch('ids')) },
       'validity_minutes' => [15, minutes].min,
+      'membership_capacity' => JrcRelationship::PortfolioMembershipCapacity.new(@context).capture(group, inputs, records, configuration),
       'summary' => { 'portfolio_group_id' => group.id, 'portfolio_group_name' => group.name, 'active' => inputs.fetch('active') } }
   end
 

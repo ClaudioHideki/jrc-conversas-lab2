@@ -316,6 +316,14 @@
       "SUMMARY": "Page {page} of {pages}; {total} stored versions",
       "UNCONFIRMED": "The configuration history page could not be confirmed. The current draft has been preserved."
     },
+    "MEMBERSHIP_CAPACITY": {
+      "TITLE": "Selected portfolio workload",
+      "NOTICE": "Projection captured at {date}. Review every affected analyst before confirming. Capacity is checked again for each item; processing may stop while preserving committed results. Portfolio links preserve the existing customer owner and global allocation workload.",
+      "PROJECTED": "The projection includes all selected final memberships, without counting an existing link twice.",
+      "NOT_CONFIGURED": "No group-specific quota is configured. This does not change the existing global allocation limits.",
+      "SCOPE_DENIED": "Your current permissions cannot verify the complete workload sources. Counts are hidden.",
+      "CONTROLLED_REVIEW": "This portfolio requires a narrower controlled review before its complete workload can be calculated."
+    },
     "REVIEWED_BATCH": {
       "FAILURES": {
         "STALE": "The reviewed data or configuration changed. Prepare a fresh review for unresolved items.",
@@ -942,6 +950,7 @@
     },
     "CAPACITY": {
       "TITLE": "Customer allocation capacity",
+      "OWNER_ID": "Analyst #{id}",
       "POLICY_NOTICE": "Limits use customer counts. Effective capacity is the configured maximum × availability × dedication, rounded down. An empty policy adds no capacity limit. With limits configured, unlisted analysts cannot receive new allocations in this scope.",
       "ANALYST": "Analyst",
       "PRESERVED_ANALYST": "Previously configured analyst (not in current options)",
@@ -954,6 +963,7 @@
       "REVIEW_TITLE": "Reviewed destination capacity",
       "REVIEW_NOTICE": "Captured before and after counts are revalidated at execution. Changes require a new simulation.",
       "SCOPES": {
+        "portfolio": "Operational portfolio",
         "account": "Account",
         "unit": "Operational unit",
         "company": "Customer company",
@@ -969,6 +979,7 @@
         "available_after": "Available after transfer"
       },
       "BLOCKERS": {
+        "capacity_owner_unavailable": "The analyst is currently unavailable or no longer eligible in Relationship.",
         "capacity_missing": "No limit is configured for this analyst in this scope.",
         "capacity_scope_denied": "Your permissions do not allow verification of the full destination workload. Counts are hidden.",
         "capacity_exceeded": "This transfer exceeds the destination capacity.",

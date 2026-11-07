@@ -1,0 +1,38 @@
+{
+  "date": "2026-11-06",
+  "branch": "codex/relacionamento-v2-20261101",
+  "preserved_previous_checkpoint": "e46d4be451ebee8bc0c06d5f8ac54dbfc56f26b6",
+  "reference": "Relationship P0091/P0092/P0095/P0123/P0128: complete selected workload and native capacity preservation",
+  "status": "Historical read-only whole-selection workload projection validated;remaining C-G gaps remain open.",
+  "implementation": [
+    "New membership reviews capture the final selected group workload for affected analysts, deduplicating already-linked native allocations. Uses existing CapacityWorkload point/hour inputs and DistributionCapacityPolicy effective quota, without defaults/conversions or duplicated global allocation workload.",
+    "Native owner eligibility was extracted as the same reusable PortfolioGroupAdmission.available? check; per-item admission remains authoritative and rejects actual overload/ineligible/missing quota cases. Existing finite partial success/rollback and immutable receipts are preserved. The new projection is not a new all-or-nothing admission policy or automatic redistribution engine.",
+    "Raw source assignment IDs remain inside the immutable snapshot, never in public metadata. Every read rechecks complete current group scope AND captured historical source IDs, including a source unlinked before later access loss. Inaccessible workload is redacted without fabricated zero. Old snapshots are not recaptured or rewritten.",
+    "Configured quantities, points and supplied equivalent hours show current/incoming/final/effective/remaining figures;missing explicit weights or unlisted quota expose a bounded blocker with no numeric workload facts. No group-specific configuration is a distinct state, not an invented zero limit.",
+    "Source UI reuses the existing capacity summary with current permitted owner labels, adds captured-time/per-item semantics notice, validates the public receipt and pauses approval/advance on unavailable full-scope/read-budget evidence. Stopping own pending work remains available. Portfolio scope translation was added after the initial source run exposed a missing key."
+  ],
+  "evidence": {
+    "native": "membership-capacity-native01:40/0 (8new projection/privacy/legacy cases +12reviewed link regressions +20native group-governance regressions). native-final02:3/0 targeted additional supplied-hours/unlisted-quota/read-budget cases;no unnecessary repeat of40.",
+    "source": "source01:23/0 with one missing portfolio scope translation observed;corrected key and added assertion. source-final02:42/0 (21membership including2unavailable-evidence cases +4new strict projection cases +17existing generic panel regressions).",
+    "static": "ruby-final03:all5changed/new Ruby files0offenses after scoped complexity extraction. ESLintnew validator/specs and group/wrapper files0/0;shared native panel8existing warnings;shared capacity summary7existing warnings.",
+    "privacy": "Public projection omits raw source IDs;forged public source IDs and foreign scopes are rejected by source receipt validation. Native tests demonstrate current AND removed historical source redaction, unchanged saved snapshot and legacy no-new-projection contract.",
+    "qualification": "Small real synthetic native datasets, not a10000member performance pilot or promised team productivity. Read-budget branch uses a reduced2assignment test constant. Source Vue tests are not current-source Chrome acceptance."
+  },
+  "environment": {
+    "initial_free_bytes": 6825955328,
+    "minimum_observed_bytes": 6784053248,
+    "final_free_bytes": 6818496512,
+    "database": "jrc_rel_v2_candidate_test",
+    "migrations": false,
+    "build": false,
+    "server5379_changed": false,
+    "external_operations": false,
+    "push": false
+  },
+  "remaining": [
+    "Automatic assisted redistribution/local capability matrix and true reviewed mass creation of missing master allocations remain distinct pending requirements.",
+    "Current-source Chrome desktop/mobile/themes,visual/literal Word audit and full C-G closure remain open.",
+    "TRR undefined;portfolio-less documents deferred;external provider/scanner/channel pilot not authorized/performed."
+  ],
+  "next": "Add multi-customer master selection collection for a common reviewed membership batch, reusing the native company picker and explicit per-customer allocation creation/reuse;preserve the original individual flow and document remaining mass-creation limitations."
+}

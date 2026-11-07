@@ -567,6 +567,7 @@ onBeforeUnmount(() => {
         :group="group"
         :proposal="membershipProposal"
         :formatting="metadata.formatting"
+        :owners="metadata.owners"
         @proposal="membershipProposal = $event"
         @updated="load(pagination.page)"
       />

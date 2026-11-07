@@ -179,7 +179,15 @@ class JrcRelationship::ReviewedPortfolioBatch
       'capacity' => JrcRelationship::DistributionCapacity.new(context).for_view(review),
       'responsibilities' => JrcRelationship::ResponsibilityReview.new(context).for_view(review),
       'approval' => JrcRelationship::DistributionApproval.new(context).projection(review),
-      'items' => reviewed_items(review) }
+      'items' => reviewed_items(review) }.merge(membership_capacity_view(review, context))
+  end
+
+  def membership_capacity_view(review, context)
+    return {} unless review.snapshot.key?('membership_capacity')
+
+    data = JrcRelationship::PortfolioMembershipCapacity.new(context).for_view(review.inputs.fetch('portfolio_group_id'),
+                                                                              review.snapshot.fetch('membership_capacity'))
+    { 'membership_capacity' => data }
   end
 
   def reviewed_items(review)

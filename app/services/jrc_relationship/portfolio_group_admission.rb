@@ -22,6 +22,14 @@ class JrcRelationship::PortfolioGroupAdmission
     @record.errors.add(:owner, e.message)
   end
 
+  def self.available?(account_id, entry)
+    return false unless entry.fetch('availability').positive? && entry.fetch('dedication').positive?
+
+    JrcRelationship::BatchReviewAuthority.new(account_id: account_id, actor_id: entry.fetch('user_id'), write: false).call { true }
+  rescue Pundit::NotAuthorizedError, ActiveRecord::RecordNotFound
+    false
+  end
+
   private
 
   def matching_configuration?
@@ -33,19 +41,11 @@ class JrcRelationship::PortfolioGroupAdmission
   end
 
   def validate_entry(entry)
-    return @record.errors.add(:owner, :portfolio_capacity_unavailable) unless available?(entry)
+    return @record.errors.add(:owner, :portfolio_capacity_unavailable) unless self.class.available?(@record.account_id, entry)
 
     scope = JrcRelationship::DistributionConfigurations.new(@record.account).relation(@configuration)
     pool = scope.where(owner_id: @record.owner_id, status: JrcRelationship::DistributionCapacityGuard::LOAD_STATUSES)
     value = JrcRelationship::CapacityWorkload.sum(pool, entry.fetch('unit', 'customers'))
     @record.errors.add(:owner, :portfolio_capacity_exceeded) if value > JrcRelationship::DistributionCapacityPolicy.effective(entry)
-  end
-
-  def available?(entry)
-    return false unless entry.fetch('availability').positive? && entry.fetch('dedication').positive?
-
-    JrcRelationship::BatchReviewAuthority.new(account_id: @record.account_id, actor_id: @record.owner_id, write: false).call { true }
-  rescue Pundit::NotAuthorizedError, ActiveRecord::RecordNotFound
-    false
   end
 end

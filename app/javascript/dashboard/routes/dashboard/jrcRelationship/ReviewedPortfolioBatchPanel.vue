@@ -2,7 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcRelationship';
-import { buttonClass, message } from './definitions';
+import { buttonClass, message, date } from './definitions';
 import ReviewedCadencePanel from './ReviewedCadencePanel.vue';
 import DistributionComparison from './DistributionComparison.vue';
 import DistributionCapacitySummary from './DistributionCapacitySummary.vue';
@@ -19,6 +19,7 @@ const props = defineProps({
   canExecute: { type: Boolean, default: true },
   showInventory: Boolean,
   formatting: { type: Object, default: () => ({}) },
+  owners: { type: Array, default: () => [] },
 });
 const emit = defineEmits([
   'updated',
@@ -35,6 +36,13 @@ const uncertain = ref(false);
 const executionConfirmed = ref(false);
 const savedView = ref(false);
 const requestedSavedId = ref(null);
+const canExecuteReview = computed(
+  () =>
+    props.canExecute &&
+    !['scope_denied', 'controlled_review_required'].includes(
+      review.value?.membership_capacity?.state
+    )
+);
 const approvalIntent = intent();
 const responsibilitiesBlocked = computed(() =>
   (review.value?.responsibilities || []).some(
@@ -87,6 +95,14 @@ const failureLabels = computed(() => ({
   ),
   BATCH_NATIVE_VALIDATION_FAILED: t(
     'RELATIONSHIP.REVIEWED_BATCH.FAILURES.VALIDATION'
+  ),
+}));
+const membershipCapacityLabels = computed(() => ({
+  projected: t('RELATIONSHIP.MEMBERSHIP_CAPACITY.PROJECTED'),
+  not_configured: t('RELATIONSHIP.MEMBERSHIP_CAPACITY.NOT_CONFIGURED'),
+  scope_denied: t('RELATIONSHIP.MEMBERSHIP_CAPACITY.SCOPE_DENIED'),
+  controlled_review_required: t(
+    'RELATIONSHIP.MEMBERSHIP_CAPACITY.CONTROLLED_REVIEW'
   ),
 }));
 const reset = () => {
@@ -241,7 +257,7 @@ async function mutate(action) {
   if (busy.value || !review.value) return;
   if (
     ['approve', 'advance', 'requestApproval'].includes(action) &&
-    !props.canExecute
+    !canExecuteReview.value
   )
     return;
   if (
@@ -439,6 +455,32 @@ onBeforeUnmount(reset);
         :rows="review.distribution"
       />
       <DistributionCapacitySummary :rows="review.capacity || []" />
+      <section
+        v-if="
+          review.inputs.operation === 'portfolio_membership' &&
+          review.membership_capacity
+        "
+        class="my-3 min-w-0 space-y-2 rounded-xl border border-n-violet-6 bg-n-solid-2 p-3"
+      >
+        <h3 class="font-semibold">
+          {{ t('RELATIONSHIP.MEMBERSHIP_CAPACITY.TITLE') }}
+        </h3>
+        <p class="break-words text-sm">
+          {{
+            t('RELATIONSHIP.MEMBERSHIP_CAPACITY.NOTICE', {
+              date: date(review.membership_capacity.captured_at, formatting),
+            })
+          }}
+        </p>
+        <p class="text-sm">
+          {{ membershipCapacityLabels[review.membership_capacity.state] }}
+        </p>
+        <DistributionCapacitySummary
+          :rows="review.membership_capacity.rows"
+          show-owner
+          :owners="owners"
+        />
+      </section>
       <ResponsibilityComparison
         :rows="review.responsibilities || []"
         :owner-name="review.summary?.owner_name || ''"
@@ -475,7 +517,7 @@ onBeforeUnmount(reset);
           :class="buttonClass"
           :disabled="
             busy ||
-            !canExecute ||
+            !canExecuteReview ||
             uncertain ||
             responsibilitiesBlocked ||
             review.capacity?.some(row => row.blocker)
@@ -537,7 +579,7 @@ onBeforeUnmount(reset);
           :class="buttonClass"
           :disabled="
             busy ||
-            !canExecute ||
+            !canExecuteReview ||
             uncertain ||
             responsibilitiesBlocked ||
             review.capacity?.some(row => row.blocker) ||
@@ -559,7 +601,7 @@ onBeforeUnmount(reset);
           type="button"
           data-test="review-advance"
           :class="buttonClass"
-          :disabled="busy || uncertain || !canExecute"
+          :disabled="busy || uncertain || !canExecuteReview"
           @click="mutate('advance')"
         >
           {{ t('RELATIONSHIP.REVIEWED_BATCH.ADVANCE') }}

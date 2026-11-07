@@ -1,6 +1,11 @@
 <script setup>
 import { useI18n } from 'vue-i18n';
-defineProps({ rows: { type: Array, default: () => [] }, currentOnly: Boolean });
+defineProps({
+  rows: { type: Array, default: () => [] },
+  currentOnly: Boolean,
+  showOwner: Boolean,
+  owners: { type: Array, default: () => [] },
+});
 const { t } = useI18n();
 </script>
 
@@ -41,6 +46,15 @@ const { t } = useI18n();
             })
           }}
         </span>
+      </p>
+      <p
+        v-if="showOwner"
+        class="min-w-0 break-words font-medium"
+      >
+        {{
+          owners.find(owner => owner[0] === row.user_id)?.[1] ||
+          t('RELATIONSHIP.CAPACITY.OWNER_ID', { id: row.user_id })
+        }}
       </p>
       <p class="text-sm">
         {{ t(`RELATIONSHIP.CAPACITY.UNITS.${row.unit || 'customers'}`) }}

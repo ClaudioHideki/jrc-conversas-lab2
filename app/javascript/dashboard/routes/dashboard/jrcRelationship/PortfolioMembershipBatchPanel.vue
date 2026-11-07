@@ -10,6 +10,7 @@ const props = defineProps({
   group: { type: Object, required: true },
   proposal: { type: Object, default: null },
   formatting: { type: Object, default: () => ({}) },
+  owners: { type: Array, default: () => [] },
 });
 const emit = defineEmits(['updated', 'proposal']);
 const route = useRoute();
@@ -152,6 +153,7 @@ onBeforeUnmount(() => {
       :proposal="proposal"
       show-inventory
       :formatting="formatting"
+      :owners="owners"
       @reviewed="reviewed = $event"
       @access-denied="blocked = true"
       @preview-failed="

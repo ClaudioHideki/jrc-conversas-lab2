@@ -318,6 +318,12 @@
       "report": "docs/jrc_consolidation/configuration_history_pagination_checkpoint_20261106.json",
       "current_state": "Paged configuration history native8/0 andsource21/0;draft preserved and exact governed restoration reused.",
       "remaining": "Current-source Chrome/visual acceptance,otherC-Grequirements and business/external dependencies remain open."
+    },
+    {
+      "requirement": "Relationship P0091/P0092/P0095/P0123/P0128: complete selected workload and native capacity preservation",
+      "report": "docs/jrc_consolidation/membership_capacity_projection_checkpoint_20261106.json",
+      "current_state": "Native whole-selection historical workload projection40/0+3/0 andsource42/0 with source/privacy checks;original per-item admission remains authoritative.",
+      "remaining": "Not automatic redistribution or all-or-nothing preflight;master mass allocation,local roles,current-source Chrome/visual and remainingC-Gopen."
     }
   ],
   "explicit_dependencies": [
@@ -338,7 +344,7 @@
       "state": "External environment/operations require separate authorization; not simulated as passed."
     }
   ],
-  "next_confirmed_local_gap": "Reuse native group admission formulas/scopes to expose a read-only full selected-membership workload projection, preserving the existing per-item admission/partial receipt contract and every historical review.",
+  "next_confirmed_local_gap": "Add multi-customer master selection collection for a common reviewed membership batch, reusing the native company picker and explicit per-customer allocation creation/reuse;preserve the original individual flow and document remaining mass-creation limitations.",
   "stage_closure": {
     "C": false,
     "D": false,

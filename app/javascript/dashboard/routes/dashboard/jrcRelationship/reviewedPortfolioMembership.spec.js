@@ -8,6 +8,7 @@ import Groups from './PortfolioGroupsPanel.vue';
 import Customers from './PortfolioGroupCustomersDialog.vue';
 import { validMembershipReview } from './portfolioMembershipReviewReceipt';
 import Inventory from './ReviewedOperationInventory.vue';
+import Capacity from './DistributionCapacitySummary.vue';
 const mocks = vi.hoisted(() => ({
   route: null,
   store: null,
@@ -150,6 +151,98 @@ beforeEach(() => {
   });
 });
 afterEach(() => wrappers.splice(0).forEach(wrapper => wrapper.unmount()));
+
+it('shows the complete captured membership workload with current native owner labels while retaining per-item processing', async () => {
+  const row = {
+    scope_key: 'portfolio:18',
+    user_id: 7,
+    configuration_version: 1,
+    unit: 'customers',
+    current: 1,
+    incoming: 1,
+    projected: 2,
+    effective_capacity: 1,
+    available_after: -1,
+    blocker: 'capacity_exceeded',
+  };
+  const data = {
+    ...structuredClone(preview),
+    membership_capacity: {
+      state: 'projected',
+      read_only: true,
+      captured_at: '2026-11-06T12:00:00Z',
+      rows: [row],
+    },
+  };
+  mocks.api.previewPortfolioBatch.mockResolvedValueOnce({ data });
+  const wrapper = render();
+  await wrapper.setProps({ owners: [[7, 'Current permitted analyst label']] });
+  await flushPromises();
+  const summary = wrapper
+    .findAllComponents(Capacity)
+    .find(component => component.props('showOwner'));
+  expect(summary.props('rows')).toEqual([row]);
+  expect(wrapper.text()).toContain('Current permitted analyst label');
+  expect(wrapper.text()).toContain(
+    messages.RELATIONSHIP.CAPACITY.SCOPES.portfolio
+  );
+  expect(wrapper.text()).not.toContain('RELATIONSHIP.CAPACITY.SCOPES.');
+  expect(wrapper.text()).toContain(
+    messages.RELATIONSHIP.MEMBERSHIP_CAPACITY.PROJECTED
+  );
+  expect(wrapper.get('[data-test="review-approve"]').element.disabled).toBe(
+    false
+  );
+  expect(mocks.api.approvePortfolioBatch).not.toHaveBeenCalled();
+});
+
+it('rejects a public projection that includes frozen private source IDs instead of trusting a successful preview response', async () => {
+  mocks.api.previewPortfolioBatch.mockResolvedValueOnce({
+    data: {
+      ...structuredClone(preview),
+      membership_capacity: {
+        state: 'projected',
+        read_only: true,
+        captured_at: '2026-11-06T12:00:00Z',
+        rows: [],
+        source_assignment_ids: [999],
+      },
+    },
+  });
+  const wrapper = render();
+  await flushPromises();
+  expect(wrapper.find('[data-test="review-approve"]').exists()).toBe(false);
+  expect(
+    sessionStorage.getItem('relationship-reviewed-batch:1400:7:portfolio:18')
+  ).toBeNull();
+});
+
+it.each(['scope_denied', 'controlled_review_required'])(
+  'keeps execution paused for unavailable whole-workload evidence: %s',
+  async state => {
+    mocks.api.previewPortfolioBatch.mockResolvedValueOnce({
+      data: {
+        ...structuredClone(preview),
+        membership_capacity: {
+          state,
+          read_only: true,
+          captured_at: '2026-11-06T12:00:00Z',
+          rows: [],
+        },
+      },
+    });
+    const wrapper = render();
+    await flushPromises();
+    expect(wrapper.get('[data-test="review-approve"]').element.disabled).toBe(
+      true
+    );
+    await wrapper.get('[data-test="review-approve"]').trigger('click');
+    expect(mocks.api.approvePortfolioBatch).not.toHaveBeenCalled();
+    expect(wrapper.get('[data-test="review-cancel"]').element.disabled).toBe(
+      false
+    );
+  }
+);
 
 it('opens another saved review in this portfolio without binding it to the previous draft UUID', async () => {
   const wrapper = render();
