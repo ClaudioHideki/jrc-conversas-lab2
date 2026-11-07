@@ -84,7 +84,8 @@ class JrcOwnedWorkerGate
   end
 
   def validate_redis!
-    check!('exact isolated Redis', ENV.fetch('REDIS_URL') == 'redis://jrc-rel-v2-redis-20261101:6379/15' &&
+    redis_index = ENV['JRC_G_MODE'] == 'master' ? 12 : 15
+    check!('exact isolated Redis', ENV.fetch('REDIS_URL') == "redis://jrc-rel-v2-redis-20261101:6379/#{redis_index}" &&
                                   Redis::Config.app.fetch(:url) == ENV.fetch('REDIS_URL'))
     check!('Redis ownership claim', Sidekiq.redis { |redis| redis.call('GET', 'jrc_g_worker_claim') } == @nonce)
   end
@@ -208,4 +209,4 @@ class JrcOwnedWorkerGate
   end
 end
 
-JrcOwnedWorkerGate.new.run unless ENV['JRC_G_MODE'] == 'approvals'
+JrcOwnedWorkerGate.new.run unless %w[approvals master].include?(ENV['JRC_G_MODE'])

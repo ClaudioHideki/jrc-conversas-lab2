@@ -8,10 +8,15 @@ WebMock.disable_net_connect!
 nonce = ENV.fetch('JRC_G_NONCE')
 database = ENV.fetch('JRC_G_DATABASE')
 queue = ENV.fetch('JRC_G_QUEUE')
+mode = ENV.fetch('JRC_G_MODE', 'relationship')
+raise 'Unknown owned worker mode' unless %w[relationship approvals master].include?(mode)
+
 raise 'Owned worker environment required' unless ENV.fetch('RAILS_ENV') == 'test' && nonce.match?(/\A[0-9a-f]{12}\z/) &&
                                                  database == "jrc_g_worker_20261106_#{nonce}" && queue == "jrc_g_worker_#{nonce}"
 raise 'Owned database URL required' unless URI(ENV.fetch('DATABASE_URL')).path == "/#{database}" && ENV.fetch('POSTGRES_DATABASE') == database
-raise 'Owned Redis URL required' unless ENV.fetch('REDIS_URL') == 'redis://jrc-rel-v2-redis-20261101:6379/15'
+
+redis_index = mode == 'master' ? 12 : 15
+raise 'Owned Redis URL required' unless ENV.fetch('REDIS_URL') == "redis://jrc-rel-v2-redis-20261101:6379/#{redis_index}"
 
 require File.expand_path('../../../config/environment', __dir__)
 raise 'Unexpected worker database' unless Rails.env.test? && ActiveRecord::Base.connection.select_value('SELECT current_database()') == database
@@ -21,9 +26,6 @@ Rails.logger.level = Logger::WARN
 
 # Only routing/delivery configuration is changed for this isolated test. The
 # native perform/authentication/transaction code remains untouched.
-mode = ENV.fetch('JRC_G_MODE', 'relationship')
-raise 'Unknown owned worker mode' unless %w[relationship approvals].include?(mode)
-
 jobs = if mode == 'approvals'
          require_relative 'owned_approval_witness'
          [JrcApprovals::NotificationRecoveryJob, JrcApprovals::NotificationProjectionJob, EventDispatcherJob, ActionCableBroadcastJob]
@@ -44,6 +46,11 @@ class JrcOwnedWorkerReceipt
     return yield if health_job?(job, queue)
 
     raise 'Unexpected owned queue payload' unless allowed_payload?(job, queue)
+
+    if ENV['JRC_G_MODE'] == 'master'
+      claim = Sidekiq.redis { |redis| redis.call('GET', 'jrc_g_worker_claim') }
+      raise 'Owned master Redis lease lost' unless claim == ENV.fetch('JRC_G_NONCE')
+    end
 
     yield
     event_job = %w[EventDispatcherJob ActionCableBroadcastJob].include?(job['wrapped'])
