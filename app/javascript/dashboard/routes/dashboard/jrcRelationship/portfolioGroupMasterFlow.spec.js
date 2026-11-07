@@ -10,6 +10,7 @@ import Customers from './PortfolioGroupCustomersDialog.vue';
 import ModulePage from './ModulePage.vue';
 import Workload from './CapacityWorkloadForm.vue';
 import CompanyPicker from '../jrcCustomers/components/CompanyPicker.vue';
+import MembershipBatch from './PortfolioMembershipBatchPanel.vue';
 const mocks = vi.hoisted(() => ({
   route: null,
   store: null,
@@ -364,4 +365,186 @@ it('starts the native link dialog on review for the chosen master customer and k
       },
     ],
   ]);
+});
+
+it('collects several existing master allocations and requires one explicit reason before preparing their native link review', async () => {
+  mocks.api.portfolio
+    .mockResolvedValueOnce(page([customer]))
+    .mockResolvedValueOnce(
+      page([
+        { ...customer, id: 32, company_id: 12, name: 'Second native customer' },
+      ])
+    );
+  const wrapper = render();
+  await selectCompany(wrapper);
+  await wrapper.get('[data-test="master-add-selection"]').trigger('click');
+  await flushPromises();
+  wrapper.findComponent(CompanyPicker).vm.$emit('update:modelValue', 12);
+  await flushPromises();
+  await button(wrapper, 'Check current Relationship allocation').trigger(
+    'click'
+  );
+  await flushPromises();
+  await wrapper.get('[data-test="master-add-selection"]').trigger('click');
+  await flushPromises();
+  expect(wrapper.findAll('[data-test="master-selection-row"]')).toHaveLength(2);
+  expect(
+    wrapper.get('[data-test="master-review-selection"]').element.disabled
+  ).toBe(true);
+  await wrapper.get('[data-test="master-selection-review"]').trigger('submit');
+  expect(wrapper.emitted('batch')).toBeUndefined();
+  await wrapper
+    .get('[data-test="master-selection-reason"]')
+    .setValue(' Reviewed native customer collection ');
+  await wrapper.get('[data-test="master-selection-review"]').trigger('submit');
+  await wrapper.get('[data-test="master-selection-review"]').trigger('submit');
+  expect(wrapper.emitted('batch')).toEqual([
+    [
+      {
+        assignment_ids: [31, 32],
+        active: true,
+        expected_version: 4,
+        reason: 'Reviewed native customer collection',
+      },
+    ],
+  ]);
+  expect(mocks.api.saveAssignment).not.toHaveBeenCalled();
+  expect(mocks.api.savePortfolioGroupCustomers).not.toHaveBeenCalled();
+});
+
+it('deduplicates selected native customers and lets the user clear the current choice without losing the collected draft', async () => {
+  mocks.api.portfolio.mockResolvedValue(page([customer]));
+  const wrapper = render();
+  await selectCompany(wrapper);
+  await wrapper.get('[data-test="master-add-selection"]').trigger('click');
+  await flushPromises();
+  await wrapper
+    .get('[data-test="master-selection-reason"]')
+    .setValue('Preserved collection reason');
+  await selectCompany(wrapper);
+  expect(
+    wrapper.get('[data-test="master-add-selection"]').element.disabled
+  ).toBe(true);
+  expect(
+    wrapper.get('[data-test="master-review-selection"]').element.disabled
+  ).toBe(true);
+  await wrapper.get('[data-test="master-another-customer"]').trigger('click');
+  await flushPromises();
+  expect(wrapper.findAll('[data-test="master-selection-row"]')).toHaveLength(1);
+  expect(
+    wrapper.get('[data-test="master-selection-reason"]').element.value
+  ).toBe('Preserved collection reason');
+  await wrapper.get('[data-test="master-remove-selection"]').trigger('click');
+  await flushPromises();
+  expect(wrapper.findAll('[data-test="master-selection-row"]')).toHaveLength(0);
+  expect(mocks.api.saveAssignment).not.toHaveBeenCalled();
+  expect(mocks.api.savePortfolioGroupCustomers).not.toHaveBeenCalled();
+});
+
+it('bounds selection at fifty with ten visible rows and reopens capacity when removing a staged customer', async () => {
+  mocks.api.portfolio.mockImplementation(async (_, params) =>
+    page([
+      {
+        id: 1000 + params.company_id,
+        company_id: params.company_id,
+        name: `Synthetic selected ${params.company_id}`,
+      },
+    ])
+  );
+  const wrapper = render();
+  /* eslint-disable no-await-in-loop -- Each interaction uses the same picker and must finish before selecting the next company. */
+  for (let id = 1; id <= 50; id += 1) {
+    wrapper.findComponent(CompanyPicker).vm.$emit('update:modelValue', id);
+    await flushPromises();
+    await button(wrapper, 'Check current Relationship allocation').trigger(
+      'click'
+    );
+    await flushPromises();
+    await wrapper.get('[data-test="master-add-selection"]').trigger('click');
+    await flushPromises();
+  }
+  /* eslint-enable no-await-in-loop */
+  expect(wrapper.findAll('[data-test="master-selection-row"]')).toHaveLength(
+    10
+  );
+  expect(wrapper.findComponent(CompanyPicker).props('disabled')).toBe(true);
+  expect(
+    wrapper.get('[data-test="master-selection-next"]').element.disabled
+  ).toBe(true);
+  await wrapper.get('[data-test="master-selection-previous"]').trigger('click');
+  await flushPromises();
+  expect(
+    wrapper.get('[data-test="master-selection-next"]').element.disabled
+  ).toBe(false);
+  await wrapper
+    .findAll('[data-test="master-remove-selection"]')[0]
+    .trigger('click');
+  await flushPromises();
+  expect(wrapper.findComponent(CompanyPicker).props('disabled')).toBe(false);
+  expect(mocks.api.saveAssignment).not.toHaveBeenCalled();
+});
+
+it('keeps missing allocation creation explicit and preserves its native receipt separately from the collected link review', async () => {
+  const wrapper = render();
+  await selectCompany(wrapper);
+  expect(wrapper.find('[data-test="master-add-selection"]').exists()).toBe(
+    false
+  );
+  wrapper
+    .findComponent(Form)
+    .vm.$emit('submit', { company_id: 11, owner_id: 7 });
+  await flushPromises();
+  expect(mocks.api.saveAssignment).toHaveBeenCalledOnce();
+  await wrapper.get('[data-test="master-add-selection"]').trigger('click');
+  await flushPromises();
+  expect(wrapper.text()).toContain(customer.name);
+  expect(wrapper.text()).toContain(
+    messages.RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.SELECTION_NOTICE
+  );
+  expect(wrapper.emitted('batch')).toBeUndefined();
+  expect(mocks.api.savePortfolioGroupCustomers).not.toHaveBeenCalled();
+});
+
+it('clears collected private names and reason when native authority changes', async () => {
+  mocks.api.portfolio.mockResolvedValue(page([customer]));
+  const wrapper = render();
+  await selectCompany(wrapper);
+  await wrapper.get('[data-test="master-add-selection"]').trigger('click');
+  await flushPromises();
+  await wrapper
+    .get('[data-test="master-selection-reason"]')
+    .setValue('Private native reason');
+  mocks.store.getters.getCurrentRole = 'agent';
+  await flushPromises();
+  expect(wrapper.text()).not.toContain(customer.name);
+  expect(wrapper.find('[data-test="master-selection-reason"]').exists()).toBe(
+    false
+  );
+  expect(wrapper.emitted('close')).toHaveLength(1);
+  expect(wrapper.emitted('batch')).toBeUndefined();
+});
+
+it('passes a collected master audience to the existing durable membership panel using the captured view context', async () => {
+  mocks.route.query = { group_id: '18' };
+  const wrapper = render(Groups, { metadata }, true);
+  await flushPromises();
+  await button(wrapper, 'Select from master directory').trigger('click');
+  wrapper.findComponent(Master).vm.$emit('batch', {
+    assignment_ids: [31, 32],
+    active: true,
+    expected_version: 4,
+    reason: 'Reviewed selection',
+  });
+  await flushPromises();
+  expect(wrapper.findComponent(Master).exists()).toBe(false);
+  expect(wrapper.findComponent(MembershipBatch).props('proposal')).toEqual({
+    operation: 'portfolio_membership',
+    ids: [31, 32],
+    portfolio_group_id: 18,
+    expected_version: 4,
+    active: true,
+    justification: 'Reviewed selection',
+    request_id: expect.any(String),
+  });
+  expect(mocks.api.savePortfolioGroupCustomers).not.toHaveBeenCalled();
 });

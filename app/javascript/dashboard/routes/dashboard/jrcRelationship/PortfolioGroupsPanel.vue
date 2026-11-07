@@ -169,6 +169,20 @@ const reviewMasterCustomer = customer => {
   dialogContext = viewIdentity.value;
   customerDialog.value = { customer: null, initialCustomer: customer };
 };
+const openMaster = () => {
+  if (
+    loading.value ||
+    saving.value ||
+    !group.value?.can_manage ||
+    group.value.status !== 'active' ||
+    !props.metadata.can_manage ||
+    !props.metadata.can_team
+  )
+    return;
+  closeDrafts();
+  dialogContext = viewIdentity.value;
+  masterOpen.value = true;
+};
 const mutate = async (action, groupId, membershipRequest = null) => {
   if (saving.value || dialogContext !== viewIdentity.value) return;
   mutationGeneration += 1;
@@ -672,10 +686,7 @@ onBeforeUnmount(() => {
             type="button"
             :class="buttonClass"
             :disabled="saving || loading"
-            @click="
-              closeDrafts();
-              masterOpen = true;
-            "
+            @click="openMaster"
           >
             {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.TITLE') }}
           </button>
@@ -809,8 +820,10 @@ onBeforeUnmount(() => {
       v-if="masterOpen && group"
       :group="group"
       :metadata="metadata"
+      :disabled="loading || saving"
       @close="masterOpen = false"
       @review="reviewMasterCustomer"
+      @batch="prepareMembershipBatch"
     />
     <CustomerPanel
       v-if="selectedCustomer"

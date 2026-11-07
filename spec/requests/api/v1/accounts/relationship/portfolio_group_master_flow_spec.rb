@@ -79,4 +79,34 @@ RSpec.describe 'Master customer to operational portfolio flow', type: :request d
     expect(response).to have_http_status(:forbidden)
     expect([allocation.reload.owner_id, group.customer_links.count]).to eq([actor.id, 0])
   end
+
+  it 'reuses one master allocation and explicitly creates another before one durable reviewed membership batch' do
+    existing = JrcRelationship::Assignment.create!(account: account, owner: actor, company: company)
+    other_group = JrcRelationship::PortfolioGroup.create!(account: account, owner: actor, name: 'Synthetic preserved existing grouping')
+    other_group.customer_links.create!(account: account, assignment: existing)
+    get "#{base}/portfolio", headers: headers, params: { company_id: company.id, page: 1, per_page: 1 }
+    reused_ids = response.parsed_body.fetch('payload').pluck('id')
+    second_company = account.master_companies.create!(name: 'Synthetic second master customer', relationship_type: 'customer')
+    post "#{base}/portfolio", headers: headers, as: :json, params: { assignment: { company_id: second_company.id, owner_id: actor.id } }
+    expect([reused_ids, response.status]).to eq([[existing.id], 201])
+    created_id = response.parsed_body.fetch('id')
+    ids = [existing.id, created_id]
+    originals = JrcRelationship::Assignment.where(id: ids).order(:id).map(&:attributes)
+    post "#{base}/reviewed_batches", headers: headers, as: :json, params: {
+      ids: ids, operation: 'portfolio_membership', portfolio_group_id: group.id, expected_version: group.lock_version,
+      active: true, justification: 'Reviewed multiple native master customer links', request_id: SecureRandom.uuid
+    }
+    expect([response.status, group.customer_links.count]).to eq([200, 0])
+    preview = response.parsed_body
+    post "#{base}/reviewed_batches/#{preview.fetch('id')}/approve", headers: headers, as: :json, params: { digest: preview.fetch('digest') }
+    expect(response).to have_http_status(:ok)
+    post "#{base}/reviewed_batches/#{preview.fetch('id')}/advance", headers: headers, as: :json, params: {}
+    result = response.parsed_body
+    expect([response.status, result.fetch('state'), result.fetch('items').pluck('assignment_id', 'state')])
+      .to eq([200, 'completed', ids.map { |id| [id, 'applied'] }])
+    expect(group.customer_links.where(active: true).order(:assignment_id).pluck(:assignment_id)).to eq(ids)
+    expect(other_group.customer_links.where(active: true).pluck(:assignment_id)).to eq([existing.id])
+    expect([account.master_companies.count, JrcRelationship::Assignment.where(account: account).count,
+            JrcRelationship::Assignment.where(id: ids).order(:id).map(&:attributes)]).to eq([2, 2, originals])
+  end
 end

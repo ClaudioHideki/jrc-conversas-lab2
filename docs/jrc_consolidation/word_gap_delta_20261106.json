@@ -324,6 +324,12 @@
       "report": "docs/jrc_consolidation/membership_capacity_projection_checkpoint_20261106.json",
       "current_state": "Native whole-selection historical workload projection40/0+3/0 andsource42/0 with source/privacy checks;original per-item admission remains authoritative.",
       "remaining": "Not automatic redistribution or all-or-nothing preflight;master mass allocation,local roles,current-source Chrome/visual and remainingC-Gopen."
+    },
+    {
+      "requirement": "Relationship P0124/P0125/P0128: master selection, deduplication and durable reviewed grouping",
+      "report": "docs/jrc_consolidation/master_selection_collection_checkpoint_20261106.json",
+      "current_state": "Collected native master audiences with explicit individual allocation and durable grouping;5native/0 and54source/0.",
+      "remaining": "Not a one-operation mass allocation-creation engine;local roles,Chrome/visual/completeC-Gstillopen."
     }
   ],
   "explicit_dependencies": [
@@ -344,7 +350,7 @@
       "state": "External environment/operations require separate authorization; not simulated as passed."
     }
   ],
-  "next_confirmed_local_gap": "Add multi-customer master selection collection for a common reviewed membership batch, reusing the native company picker and explicit per-customer allocation creation/reuse;preserve the original individual flow and document remaining mass-creation limitations.",
+  "next_confirmed_local_gap": "Inspect native queue/runtime isolation and implement a guarded real local-worker integration gate if an unused isolated Redis/database can be guaranteed;otherwise continue another safe native gap. No original process/container/server changes or builds.",
   "stage_closure": {
     "C": false,
     "D": false,

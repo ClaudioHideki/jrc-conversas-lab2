@@ -77,7 +77,21 @@
         "CREATED": "Native allocation saved. Review the portfolio link next.",
         "EXISTING": "Existing native allocation selected. Its owner and responsibilities are preserved.",
         "REVIEW": "Review portfolio link",
-        "UNCONFIRMED": "The native allocation could not be confirmed. Check the current allocation before attempting another creation."
+        "UNCONFIRMED": "The native allocation could not be confirmed. Check the current allocation before attempting another creation.",
+        "ADD_SELECTION": "Add to reviewed selection",
+        "ALREADY_SELECTED": "This native customer allocation is already selected.",
+        "SELECTION_TITLE": "Selected customers ({count}/50)",
+        "SELECTION_NOTICE": "This selection links existing native allocations. Creating a missing allocation is a separate explicit step; saved allocations remain even when this selection is removed or canceled. The reviewed batch is saved on the server after its preview succeeds.",
+        "REMOVE_SELECTION": "Remove {name} from this selection only",
+        "REMOVE": "Remove selection",
+        "SELECTION_PAGES": "Selected master customer pages",
+        "PREVIOUS": "Previous",
+        "NEXT": "Next",
+        "SELECTION_PAGE": "Page {page} of {pages}",
+        "SELECTION_REASON": "Reason for these portfolio links",
+        "REVIEW_SELECTION": "Prepare reviewed customer links",
+        "ANOTHER_CUSTOMER": "Choose another customer",
+        "CURRENT_CHOICE": "Add or clear the current customer before preparing the selected links."
       },
       "HISTORY": {
         "TITLE": "Portfolio history",

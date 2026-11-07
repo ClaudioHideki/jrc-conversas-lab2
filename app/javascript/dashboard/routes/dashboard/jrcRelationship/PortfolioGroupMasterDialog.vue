@@ -7,12 +7,13 @@ import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import CompanyPicker from '../jrcCustomers/components/CompanyPicker.vue';
 import PortfolioAssignmentForm from './PortfolioAssignmentForm.vue';
 import API from 'dashboard/api/jrcRelationship';
-import { buttonClass, message } from './definitions';
+import { buttonClass, inputClass, message } from './definitions';
 const props = defineProps({
   group: { type: Object, required: true },
   metadata: { type: Object, required: true },
+  disabled: Boolean,
 });
-const emit = defineEmits(['close', 'review']);
+const emit = defineEmits(['close', 'review', 'batch']);
 const route = useRoute();
 const store = useStore();
 const { t } = useI18n();
@@ -24,6 +25,32 @@ const busy = ref(false);
 const error = ref('');
 const created = ref(false);
 const unconfirmed = ref(false);
+const selection = ref([]);
+const selectionPage = ref(1);
+const selectionReason = ref('');
+const selectionReasonLabel = computed(() =>
+  t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.SELECTION_REASON')
+);
+const submitted = ref(false);
+const locked = computed(() => busy.value || props.disabled || submitted.value);
+const selectionPages = computed(() =>
+  Math.max(1, Math.ceil(selection.value.length / 10))
+);
+const selectionRows = computed(() =>
+  selection.value.slice(
+    (selectionPage.value - 1) * 10,
+    selectionPage.value * 10
+  )
+);
+const alreadySelected = computed(
+  () =>
+    candidate.value &&
+    selection.value.some(
+      row =>
+        row.id === candidate.value.id ||
+        String(row.company_id) === String(candidate.value.company_id)
+    )
+);
 const allowed = computed(
   () =>
     props.group.can_manage &&
@@ -56,7 +83,13 @@ const validCandidate = row =>
   row.id > 0 &&
   String(row.company_id) === String(companyId.value);
 const check = async () => {
-  if (busy.value || !allowed.value || !companyId.value) return;
+  if (
+    locked.value ||
+    !allowed.value ||
+    !companyId.value ||
+    selection.value.length >= 50
+  )
+    return;
   generation += 1;
   const current = generation;
   controller?.abort();
@@ -95,9 +128,10 @@ const check = async () => {
 };
 const allocate = async fields => {
   if (
-    busy.value ||
+    locked.value ||
     unconfirmed.value ||
     !allowed.value ||
+    selection.value.length >= 50 ||
     step.value !== 'allocate' ||
     String(fields.company_id) !== String(companyId.value)
   )
@@ -131,8 +165,64 @@ const allocate = async fields => {
   }
 };
 const review = () => {
-  if (!busy.value && allowed.value && validCandidate(candidate.value))
+  if (
+    !locked.value &&
+    !selection.value.length &&
+    allowed.value &&
+    validCandidate(candidate.value)
+  )
     emit('review', candidate.value);
+};
+const addToSelection = () => {
+  if (
+    locked.value ||
+    !allowed.value ||
+    unconfirmed.value ||
+    !validCandidate(candidate.value) ||
+    alreadySelected.value ||
+    selection.value.length >= 50
+  )
+    return;
+  selection.value = [
+    ...selection.value,
+    {
+      id: candidate.value.id,
+      company_id: candidate.value.company_id,
+      name: candidate.value.name,
+    },
+  ];
+  selectionPage.value = selectionPages.value;
+  companyId.value = null;
+  candidate.value = null;
+  created.value = false;
+  step.value = 'select';
+};
+const removeSelection = id => {
+  if (locked.value || !allowed.value) return;
+  selection.value = selection.value.filter(row => row.id !== id);
+  selectionPage.value = Math.min(selectionPage.value, selectionPages.value);
+};
+const reviewSelection = () => {
+  if (
+    locked.value ||
+    !allowed.value ||
+    unconfirmed.value ||
+    companyId.value ||
+    !selection.value.length ||
+    selection.value.length > 50 ||
+    !selectionReason.value.trim() ||
+    selectionReason.value.length > 4000 ||
+    !Number.isSafeInteger(props.group.version) ||
+    props.group.version < 0
+  )
+    return;
+  submitted.value = true;
+  emit('batch', {
+    assignment_ids: selection.value.map(row => row.id),
+    active: true,
+    expected_version: props.group.version,
+    reason: selectionReason.value.trim(),
+  });
 };
 watch(
   [identity, allowed],
@@ -140,6 +230,9 @@ watch(
     generation += 1;
     controller?.abort();
     candidate.value = null;
+    selection.value = [];
+    selectionReason.value = '';
+    submitted.value = false;
     if (previous?.length) emit('close');
   },
   { immediate: true }
@@ -194,13 +287,13 @@ onBeforeUnmount(() => {
       <CompanyPicker
         v-if="step === 'select'"
         v-model="companyId"
-        :disabled="busy || !allowed"
+        :disabled="locked || !allowed || selection.length >= 50"
       />
       <button
         v-if="step === 'select' || unconfirmed"
         type="button"
         :class="buttonClass"
-        :disabled="busy || !allowed || !companyId"
+        :disabled="locked || !allowed || !companyId || selection.length >= 50"
         @click="check"
       >
         {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.CHECK') }}
@@ -212,7 +305,9 @@ onBeforeUnmount(() => {
         <PortfolioAssignmentForm
           :metadata="metadata"
           :initial-value="defaults"
-          :disabled="busy || !allowed || unconfirmed"
+          :disabled="
+            locked || !allowed || unconfirmed || selection.length >= 50
+          "
           lock-company
           :submit-label="t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.ALLOCATE')"
           @submit="allocate"
@@ -233,12 +328,146 @@ onBeforeUnmount(() => {
         <button
           type="button"
           :class="buttonClass"
-          :disabled="busy || !allowed"
+          :disabled="locked || !allowed || selection.length > 0"
           @click="review"
         >
           {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.REVIEW') }}
         </button>
+        <button
+          type="button"
+          :class="buttonClass"
+          :disabled="
+            locked || !allowed || alreadySelected || selection.length >= 50
+          "
+          data-test="master-add-selection"
+          @click="addToSelection"
+        >
+          {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.ADD_SELECTION') }}
+        </button>
+        <p
+          v-if="alreadySelected"
+          class="text-sm"
+        >
+          {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.ALREADY_SELECTED') }}
+        </p>
       </template>
+      <button
+        v-if="companyId"
+        type="button"
+        :class="buttonClass"
+        :disabled="locked"
+        data-test="master-another-customer"
+        @click="companyId = null"
+      >
+        {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.ANOTHER_CUSTOMER') }}
+      </button>
+      <section
+        v-if="selection.length"
+        class="min-w-0 space-y-3 rounded-xl border border-n-violet-6 bg-n-solid-2 p-3"
+      >
+        <h3 class="font-semibold">
+          {{
+            t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.SELECTION_TITLE', {
+              count: selection.length,
+            })
+          }}
+        </h3>
+        <p class="break-words text-sm text-n-slate-11">
+          {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.SELECTION_NOTICE') }}
+        </p>
+        <ul class="space-y-2">
+          <li
+            v-for="row in selectionRows"
+            :key="row.id"
+            class="flex min-w-0 flex-wrap items-center justify-between gap-2"
+            data-test="master-selection-row"
+          >
+            <span class="min-w-0 break-words">{{ row.name }}</span>
+            <button
+              type="button"
+              :class="buttonClass"
+              :disabled="locked || !allowed"
+              data-test="master-remove-selection"
+              :aria-label="
+                t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.REMOVE_SELECTION', {
+                  name: row.name,
+                })
+              "
+              @click="removeSelection(row.id)"
+            >
+              {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.REMOVE') }}
+            </button>
+          </li>
+        </ul>
+        <nav
+          class="flex flex-wrap items-center gap-2"
+          :aria-label="
+            t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.SELECTION_PAGES')
+          "
+        >
+          <button
+            type="button"
+            :class="buttonClass"
+            :disabled="locked || selectionPage <= 1"
+            data-test="master-selection-previous"
+            @click="selectionPage -= 1"
+          >
+            {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.PREVIOUS') }}
+          </button>
+          <span>{{
+            t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.SELECTION_PAGE', {
+              page: selectionPage,
+              pages: selectionPages,
+            })
+          }}</span>
+          <button
+            type="button"
+            :class="buttonClass"
+            :disabled="locked || selectionPage >= selectionPages"
+            data-test="master-selection-next"
+            @click="selectionPage += 1"
+          >
+            {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.NEXT') }}
+          </button>
+        </nav>
+        <form
+          class="space-y-3"
+          data-test="master-selection-review"
+          @submit.prevent="reviewSelection"
+        >
+          <label class="block text-sm">
+            <span>{{ selectionReasonLabel }}</span>
+            <textarea
+              v-model="selectionReason"
+              :class="inputClass"
+              required
+              maxlength="4000"
+              :disabled="locked || !allowed"
+              data-test="master-selection-reason"
+            />
+          </label>
+          <p
+            v-if="companyId"
+            class="text-sm text-n-amber-11"
+          >
+            {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.CURRENT_CHOICE') }}
+          </p>
+          <button
+            type="submit"
+            :class="buttonClass"
+            :disabled="
+              locked ||
+              !allowed ||
+              unconfirmed ||
+              !!companyId ||
+              !selectionReason.trim()
+            "
+            data-test="master-review-selection"
+          >
+            {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.REVIEW_SELECTION') }}
+          </button>
+        </form>
+      </section>
       <button
         type="button"
         :class="buttonClass"

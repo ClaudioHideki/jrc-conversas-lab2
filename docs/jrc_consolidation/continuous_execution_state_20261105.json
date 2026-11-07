@@ -3,11 +3,11 @@
   "user_request": "499267ac-546d-4853-b4cf-7f03a2ea0629",
   "initial_head": "be54d0f7b4ce8d4e2a077cf2bdd8c2a4d5c88f5e",
   "branch": "codex/relacionamento-v2-20261101",
-  "last_validated_checkpoint": "e46d4be451ebee8bc0c06d5f8ac54dbfc56f26b6",
+  "last_validated_checkpoint": "75ee96842ca6d65d060e9d8b3291e51b5fa193e2",
   "completed_current_work": "Sealed dossier, weighted/current capacity, native withdrawal/cadence controls and F2 increments locally tested; see linked incremental reports. No C-G closure.",
-  "active_work": "Add multi-customer master selection collection for a common reviewed membership batch, reusing the native company picker and explicit per-customer allocation creation/reuse;preserve the original individual flow and document remaining mass-creation limitations.",
+  "active_work": "Inspect native queue/runtime isolation and implement a guarded real local-worker integration gate if an unused isolated Redis/database can be guaranteed;otherwise continue another safe native gap. No original process/container/server changes or builds.",
   "exact_next_actions": [
-    "Add multi-customer master selection collection for a common reviewed membership batch, reusing the native company picker and explicit per-customer allocation creation/reuse;preserve the original individual flow and document remaining mass-creation limitations."
+    "Inspect native queue/runtime isolation and implement a guarded real local-worker integration gate if an unused isolated Redis/database can be guaranteed;otherwise continue another safe native gap. No original process/container/server changes or builds."
   ],
   "test_environment": {
     "source_manifest": ".codex/d9-notifications-20261104/snapshot.json",
@@ -49,14 +49,14 @@
     "No real participant removal or provider request; tests use synthetic records and WebMock, with external network disabled."
   ],
   "restrictions": "No build/recompile, no5379 change/restart, no four-container restart/reconfiguration, no cleanup/delete of existing data, no push/GHCR/deploy/production/client change, no real provider operations. Additive migrations allowed only in owned synthetic test database.",
-  "disk_last_observed_bytes": 6818488320,
+  "disk_last_observed_bytes": 6811049984,
   "TRR": "Undefined; do not invent",
   "company_documents_without_portfolio": "Explicitly deferred",
-  "last_validated_head": "e46d4be451ebee8bc0c06d5f8ac54dbfc56f26b6",
-  "new_validated_code_checkpoint": "git log -1 --format=%H -- docs/jrc_consolidation/membership_capacity_projection_checkpoint_20261106.json",
-  "current_status": "Membership workload native40/0+3/0;source42/0;C-G open.",
+  "last_validated_head": "75ee96842ca6d65d060e9d8b3291e51b5fa193e2",
+  "new_validated_code_checkpoint": "git log -1 --format=%H -- docs/jrc_consolidation/master_selection_collection_checkpoint_20261106.json",
+  "current_status": "Master collection native5/0,source54/0;C-G open.",
   "next_actions": [
-    "Add multi-customer master selection collection for a common reviewed membership batch, reusing the native company picker and explicit per-customer allocation creation/reuse;preserve the original individual flow and document remaining mass-creation limitations."
+    "Inspect native queue/runtime isolation and implement a guarded real local-worker integration gate if an unused isolated Redis/database can be guaranteed;otherwise continue another safe native gap. No original process/container/server changes or builds."
   ],
   "latest_dossier_report": "docs/jrc_consolidation/sealed_dossier_checkpoint_20261105.json",
   "capacity_report": "docs/jrc_consolidation/weighted_capacity_checkpoint_20261105.json",
@@ -151,5 +151,6 @@
   "reviewed_item_diagnostics_report": "docs/jrc_consolidation/reviewed_item_diagnostics_checkpoint_20261106.json",
   "playbook_execution_pagination_report": "docs/jrc_consolidation/playbook_execution_pagination_checkpoint_20261106.json",
   "configuration_history_pagination_report": "docs/jrc_consolidation/configuration_history_pagination_checkpoint_20261106.json",
-  "membership_capacity_projection_report": "docs/jrc_consolidation/membership_capacity_projection_checkpoint_20261106.json"
+  "membership_capacity_projection_report": "docs/jrc_consolidation/membership_capacity_projection_checkpoint_20261106.json",
+  "master_selection_collection_report": "docs/jrc_consolidation/master_selection_collection_checkpoint_20261106.json"
 }
