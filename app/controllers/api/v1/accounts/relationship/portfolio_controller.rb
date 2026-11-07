@@ -27,26 +27,18 @@ class Api::V1::Accounts::Relationship::PortfolioController < Api::V1::Accounts::
     raise Pundit::NotAuthorizedError unless relationship_context.policy.team? && relationship_context.policy.manage?
 
     attrs = params.require(:assignment).permit(:company_id, :contact_id, :owner_id, :team_id, :business_unit_id,
-      settings: [:segment_id, :product_id, :complexity, { capacity_workload: [:hours, { points: JrcRelationship::CapacityWorkload::FACTORS }] }])
+                                               settings: [:segment_id, :product_id, :complexity, { capacity_workload: [:hours, { points: JrcRelationship::CapacityWorkload::FACTORS }] }])
     normalize_assignment_owner!(attrs)
-    if attrs[:contact_id].present?
-      contact = JrcOperations::Access.contact!(relationship_context.member, attrs[:contact_id])
-      if contact.company_id
-        attrs[:company_id] = contact.company_id
-        attrs[:contact_id] = nil
-      end
-    end
-    relationship_context.assignable_users.find(attrs[:owner_id]) if attrs[:owner_id].present?
-    record = JrcRelationship::Assignment.new(attrs.merge(account: Current.account))
-    initialize_assignment!(record)
-    save_assignment!(record, attrs)
+    record = JrcRelationship::AssignmentCreation.new(relationship_context).call(
+      attrs, exception_reason: params.dig(:assignment, :exception_reason)
+    )
     render json: presenter.assignment(record), status: :created
   end
 
   def update
     record = relationship_context.assignment(params[:id], write: true)
     attrs = params.require(:assignment).permit(:owner_id, :team_id, :status,
-      settings: [:segment_id, :product_id, :complexity, { capacity_workload: [:hours, { points: JrcRelationship::CapacityWorkload::FACTORS }] }])
+                                               settings: [:segment_id, :product_id, :complexity, { capacity_workload: [:hours, { points: JrcRelationship::CapacityWorkload::FACTORS }] }])
     raise Pundit::NotAuthorizedError unless relationship_context.policy.team?
 
     normalize_assignment_owner!(attrs)
@@ -206,43 +198,5 @@ class Api::V1::Accounts::Relationship::PortfolioController < Api::V1::Accounts::
     return if expected == record.updated_at.utc.iso8601(6)
 
     raise ActiveRecord::StaleObjectError.new(record, 'update')
-  end
-
-  def initialize_assignment!(record)
-    record.status = 'onboarding' if relationship_context.configuration.effective_rules['handoff_acceptance_required']
-  end
-
-  def save_assignment!(record, attrs)
-    record.transaction do
-      validate_assignment_eligibility!(record)
-      record.save!
-      relationship_context.assignment(record.id)
-      JrcRelationship::DistributionPolicyBinding.new(relationship_context).call([record], owner_id: record.owner_id) if record.owner_id
-      relationship_context.audit!(record, after: attrs.to_h, action: 'assignment_created')
-      audit_eligibility_exception!(record)
-    end
-  end
-
-  def audit_eligibility_exception!(record)
-    return unless record.settings['eligibility_exception']
-
-    relationship_context.audit!(record, after: record.settings['eligibility_exception'], action: 'eligibility_exception_approved')
-  end
-
-  def validate_assignment_eligibility!(record)
-    return unless relationship_context.configuration.effective_rules['eligibility_mode'] == 'active_contract_product'
-
-    reason = JrcRelationship::CommercialEligibility.reason(record.customer_context(relationship_context.member).contracts,
-                                                           account: Current.account, product_id: record.settings['product_id'])
-    return unless reason
-
-    exception = params.dig(:assignment, :exception_reason)
-    raise ArgumentError, reason unless exception.is_a?(String) && exception.strip.length.between?(1, 2000)
-
-    record.settings = record.settings.merge('eligibility_exception' => eligibility_exception(exception))
-  end
-
-  def eligibility_exception(exception)
-    { 'reason' => exception.strip, 'approved_by_id' => Current.user.id, 'approved_at' => Time.current.iso8601 }
   end
 end

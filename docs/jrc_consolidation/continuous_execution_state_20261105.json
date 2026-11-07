@@ -3,7 +3,7 @@
   "user_request": "499267ac-546d-4853-b4cf-7f03a2ea0629",
   "initial_head": "be54d0f7b4ce8d4e2a077cf2bdd8c2a4d5c88f5e",
   "branch": "codex/relacionamento-v2-20261101",
-  "last_validated_checkpoint": "581d8557f96610d0059bb21d1a16f22980804110",
+  "last_validated_checkpoint": "b76ff87848db4423dec950f1792141aafd117037",
   "completed_current_work": "Sealed dossier, weighted/current capacity, native withdrawal/cadence controls and F2 increments locally tested; see linked incremental reports. No C-G closure.",
   "active_work": "Add failing ActiveJob scheduling regression,rename the PABX integration-specific helper and update its known controller/direct-test callers while retaining HTTP permissions,locks,interval and sync behavior.",
   "exact_next_actions": [
@@ -52,14 +52,14 @@
     "No real participant removal or provider request; tests use synthetic records and WebMock, with external network disabled."
   ],
   "restrictions": "No build/recompile, no5379 change/restart, no four-container restart/reconfiguration, no cleanup/delete of existing data, no push/GHCR/deploy/production/client change, no real provider operations. Additive migrations allowed only in owned synthetic test database.",
-  "disk_last_observed_bytes": 6727106560,
+  "disk_last_observed_bytes": 6682873856,
   "TRR": "Undefined; do not invent",
   "company_documents_without_portfolio": "Explicitly deferred",
-  "last_validated_head": "e7d28602f6f129a9eec0980eb7b6e7cfed4f0332",
-  "new_validated_code_checkpoint": "git log -1 --format=%H -- docs/jrc_consolidation/approval_worker_runtime_checkpoint_20261106.json",
-  "current_status": "Native approvaldeliveryreceipts validated after two preservedverifierfailures;final29read-onlychecks passed. C-Gopen.",
+  "last_validated_head": "b76ff87848db4423dec950f1792141aafd117037",
+  "new_validated_code_checkpoint": "git log -1 --format=%H -- docs/jrc_consolidation/native_allocation_creation_checkpoint_20261107.json",
+  "current_status": "Native allocation creation prerequisite validated;true masterbatch remains next. C-Gopen.",
   "next_actions": [
-    "Extract and test native Assignment creation for reuse in reviewed master batch;preserve originalpermissions/eligibility/capacity/audit.",
+    "Add/test master-company reviewed subjects without changing old v1 snapshot/receipt permissions;then complete native execution and sourceUI.",
     "Local portfolio role action matrix question pending;no inferred permission grant.",
     "Preserve no-build/no5379-change and external business dependencies."
   ],
@@ -165,5 +165,6 @@
   "contract_identity_report": "docs/jrc_consolidation/contract_identity_checkpoint_20261106.json",
   "order_identity_report": "docs/jrc_consolidation/order_identity_checkpoint_20261106.json",
   "approval_worker_initial_failure_report": "docs/jrc_consolidation/approval_worker_initial_failure_checkpoint_20261106.json",
-  "approval_worker_runtime_report": "docs/jrc_consolidation/approval_worker_runtime_checkpoint_20261106.json"
+  "approval_worker_runtime_report": "docs/jrc_consolidation/approval_worker_runtime_checkpoint_20261106.json",
+  "native_allocation_creation_report": "docs/jrc_consolidation/native_allocation_creation_checkpoint_20261107.json"
 }

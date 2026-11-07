@@ -366,6 +366,12 @@
       "report": "docs/jrc_consolidation/approval_worker_runtime_checkpoint_20261106.json",
       "current_state": "5actualjobACKacross2workers;nativecreated/read cablefacts,duplicate/revocation/foreigndenial and29finalread-onlychecks;2failedverifierattemptspreserved.",
       "remaining": "Chrome/WebSocketrealclient,defaultdeploymentandcompleteD/Gopen."
+    },
+    {
+      "requirement": "Relationship P0124nativeMaster reviewedmasscreation prerequisite",
+      "report": "docs/jrc_consolidation/native_allocation_creation_checkpoint_20261107.json",
+      "current_state": "9newnative service+1existingHTTPeligibility+16HTTPregressions passed;existing individualcreation nowreusable with freshauthority.",
+      "remaining": "Mass subject/schema/engine/UInotyetimplemented;ChromeandC-Gopen."
     }
   ],
   "explicit_dependencies": [
