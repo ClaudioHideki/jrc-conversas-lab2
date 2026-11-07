@@ -8,6 +8,9 @@
       "PLANNING": "Planejamento",
       "MANAGEMENT": "Gestão"
     },
+    "CALENDAR_ACTIONS": {
+      "COMPLETE_FAILED": "Unable to complete the activity. You can try again."
+    },
     "DEAL_CREATION": {
       "LOAD_ERROR": "Deal options could not be loaded. Check your access and try again.",
       "RETRY": "Try again"

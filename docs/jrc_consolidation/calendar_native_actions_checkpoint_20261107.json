@@ -1,0 +1,63 @@
+{
+  "date": "2026-11-07",
+  "previous_head": "47eb38d2a420cc057b1c9b51c2716742b824d86d",
+  "scope": "C/G native Calendar operational reschedule/completion and shared Activity editor draft authority; not full calendar feature acceptance",
+  "implemented": [
+    "Enable Reagendar and native per-card editing by reusing the existing ActivityEditDialog, versioned scoped read/update and native conflict/denial handling. No parallel editor or mirror appointments.",
+    "Prevent duplicate completion from card/sidebar while pending; report a rejected write and allow explicit retry. Ignore obsolete completion follow-up reads after account/access replacement or unmount.",
+    "Reload the native authorized list and close old editor on effective access changes; preserve draft on presence-only membership changes using existing normalized authorityScope.",
+    "Prefer earliest unfinished native appointment in sidebar; preserve weekly layout, native calendar controls, account policies and source APIs."
+  ],
+  "evidence": {
+    "calendar-native-baseline01": "5 genuine source failures/2notselected.",
+    "calendar-native-source02": "25passed/1failed of26; only remaining failure was test expectation seconds versus datetime-local DOM .000 serialization.",
+    "calendar-native-final04": "7/0 after exact DOM submitted value plus valueAsNumber timestamp assertion;6 overlap source02. Total26unique passed across native editor8,activities10,existing calendar1 and newCalendar7. Transport mocked,actual Vuex/modules/editor;not Chrome or database proof.",
+    "calendar-native-lint05": "New and adapted specs0errors/warnings;shared ActivityEditDialog0errors2existingwarnings;Calendar53prettiererrors0warnings. Readonly HEAD baseline06 had59prettiererrors0warnings. Lint not globally green, no suppression or unrelated reformat."
+  },
+  "source_sha256": {
+    "app/javascript/dashboard/routes/dashboard/crm/views/calendar/CalendarView.vue": "f48b36fdbf6c26c033e1f1c0ff6776d00c5878fb115dc4abe2f9c7eeb68af9bc",
+    "app/javascript/dashboard/routes/dashboard/crm/components/shared/ActivityEditDialog.vue": "c913edc9e2a4fb2ec0aeae23e042937f78747f8486c914e2cf9473f3403a4e3f",
+    "app/javascript/dashboard/routes/dashboard/crm/views/calendar/spec/CalendarNativeActions.spec.js": "290a53f563a306682eff848876a39f121c81718f03cecebe71778652ab71c636",
+    "app/javascript/dashboard/routes/dashboard/crm/views/calendar/spec/CalendarView.spec.js": "e4a4bfa9449c0257f49aed221678e79610047d83ff680b013915bc03eb2af7c4",
+    "app/javascript/dashboard/i18n/locale/en/crm.json": "2aa492d624c8efc26aac2224eb49493d81bd72ce8552acc27a133ce8846c0fbf"
+  },
+  "resources": {
+    "calendar-native-source02": {
+      "status": "failed",
+      "free_start": 6475108352,
+      "minimum_free": 6192746496,
+      "mandatory_stop_bytes": 750000000,
+      "conservative_stop_bytes": 2000000000,
+      "no_build": true,
+      "owned_process_id": 22736,
+      "exit_code": 1,
+      "free_end": 6470426624
+    },
+    "calendar-native-final04": {
+      "status": "passed",
+      "free_start": 6450429952,
+      "minimum_free": 6438408192,
+      "mandatory_stop_bytes": 750000000,
+      "conservative_stop_bytes": 2000000000,
+      "no_build": true,
+      "owned_process_id": 22332,
+      "exit_code": 0,
+      "free_end": 6467764224
+    }
+  },
+  "free_at_report": 6450843648,
+  "preserved": {
+    "build": false,
+    "server5379_change": false,
+    "container_restart": false,
+    "new_backend_api_or_migration": false,
+    "native_time_zone_version_access_contracts": true,
+    "external_calls_push_deploy": false
+  },
+  "remaining": [
+    "Calendar external sync/channel actions and month/day/list/filter controls remain visibly unavailable; not declared implemented by this block.",
+    "Current-source desktop/mobile Chrome blocked by explicit no-build/no5379-change; no frozen assets used as new evidence.",
+    "AgendaRecord per-link private content currently lacks actor/access/lifetime watcher;next safe authorized task.",
+    "C-G not closed;TRR,company-documents-without-portfolio and local-role/external dependencies retained."
+  ]
+}

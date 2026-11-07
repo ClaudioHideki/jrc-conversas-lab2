@@ -9,6 +9,7 @@ import {
 } from 'vue';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
+import { authorityScope } from 'dashboard/store/crm/authorityScope';
 import { useI18n } from 'vue-i18n';
 import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import { activitiesAPI } from 'dashboard/api/crm';
@@ -30,9 +31,7 @@ const identity = computed(() =>
   JSON.stringify([
     route.params.accountId,
     props.activityId,
-    store.getters.getCurrentUserID,
-    store.getters.getCurrentRole,
-    store.getters.getCurrentUser,
+    authorityScope(store.getters),
   ])
 );
 const editable = computed(

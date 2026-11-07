@@ -44,7 +44,6 @@ it('explains unsupported calendar controls while preserving the weekly view and 
     'Lista',
     'Iniciar ligação',
     'WhatsApp',
-    'Reagendar',
   ]);
   await Promise.all(
     unavailableButtons.map(async button => {
@@ -66,6 +65,11 @@ it('explains unsupported calendar controls while preserving the weekly view and 
   );
   expect(wrapper.get('[aria-current="true"]').text()).toBe('Semana');
   expect(wrapper.get('article').text()).toContain('Reunião de teste');
+  expect(
+    wrapper
+      .findAll('button')
+      .find(button => button.text().includes('Reagendar')).element.disabled
+  ).toBe(false);
   expect(store.dispatch).toHaveBeenCalledTimes(1);
   expect(activitiesAPI.complete).not.toHaveBeenCalled();
 

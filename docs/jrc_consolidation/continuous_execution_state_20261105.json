@@ -3,12 +3,12 @@
   "user_request": "499267ac-546d-4853-b4cf-7f03a2ea0629",
   "initial_head": "be54d0f7b4ce8d4e2a077cf2bdd8c2a4d5c88f5e",
   "branch": "codex/relacionamento-v2-20261101",
-  "last_validated_checkpoint": "a72d013d29e5cebebd3b7919e3f223dd9b0f4c5e",
+  "last_validated_checkpoint": "47eb38d2a420cc057b1c9b51c2716742b824d86d",
   "completed_current_work": "Sealed dossier, weighted/current capacity, native withdrawal/cadence controls and F2 increments locally tested; see linked incremental reports. No C-G closure.",
-  "active_work": "Inspect next native Word/source gap after verified Deals lifecycle; retain current-source Chrome, business-role matrix and external environment dependencies.",
+  "active_work": "Scope AgendaRecord per-link private activity/follow-up content and mutation receipts to native current authority and component lifetime;reuse existing APIs and tests.",
   "exact_next_actions": [
-    "Inspect next native Word/source gap after verified Deals lifecycle; retain current-source Chrome, business-role matrix and external environment dependencies.",
-    "Continue next independent authorized C-G task without build or runtime changes."
+    "Scope AgendaRecord per-link private activity/follow-up content and mutation receipts to native current authority and component lifetime;reuse existing APIs and tests.",
+    "Continue next independent safe C-G task."
   ],
   "test_environment": {
     "source_manifest": ".codex/d9-notifications-20261104/snapshot.json",
@@ -51,15 +51,14 @@
     "No real participant removal or provider request; tests use synthetic records and WebMock, with external network disabled."
   ],
   "restrictions": "No build/recompile, no5379 change/restart, no four-container restart/reconfiguration, no cleanup/delete of existing data, no push/GHCR/deploy/production/client change, no real provider operations. Additive migrations allowed only in owned synthetic test database.",
-  "disk_last_observed_bytes": 6472564736,
+  "disk_last_observed_bytes": 6450843648,
   "TRR": "Undefined; do not invent",
   "company_documents_without_portfolio": "Explicitly deferred",
-  "last_validated_head": "a72d013d29e5cebebd3b7919e3f223dd9b0f4c5e",
-  "new_validated_code_checkpoint": "git log -1 --format=%H -- docs/jrc_consolidation/deals_authority_checkpoint_20261107.json",
+  "last_validated_head": "47eb38d2a420cc057b1c9b51c2716742b824d86d",
+  "new_validated_code_checkpoint": "git log -1 --format=%H -- docs/jrc_consolidation/calendar_native_actions_checkpoint_20261107.json",
   "current_status": "Native maximum master allocations,multiple active portfolios,CRM source caches/forms and activity origin gate incrementally tested;C-G and Chrome not closed.",
   "next_actions": [
-    "Inspect next native Word/source gap after verified Deals lifecycle; retain current-source Chrome, business-role matrix and external environment dependencies.",
-    "Continue next independent authorized C-G task without build or runtime changes."
+    "Scope AgendaRecord per-link private activity/follow-up content and mutation receipts to native current authority and component lifetime;reuse existing APIs and tests."
   ],
   "latest_dossier_report": "docs/jrc_consolidation/sealed_dossier_checkpoint_20261105.json",
   "capacity_report": "docs/jrc_consolidation/weighted_capacity_checkpoint_20261105.json",
@@ -176,5 +175,6 @@
   "activities_authority_report": "docs/jrc_consolidation/activities_authority_checkpoint_20261107.json",
   "activity_origin_scope_report": "docs/jrc_consolidation/activity_origin_scope_checkpoint_20261107.json",
   "crm_presence_authority_report": "docs/jrc_consolidation/crm_presence_authority_checkpoint_20261107.json",
-  "deals_authority_report": "docs/jrc_consolidation/deals_authority_checkpoint_20261107.json"
+  "deals_authority_report": "docs/jrc_consolidation/deals_authority_checkpoint_20261107.json",
+  "calendar_native_actions_report": "docs/jrc_consolidation/calendar_native_actions_checkpoint_20261107.json"
 }

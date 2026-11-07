@@ -1,6 +1,16 @@
 <script setup>
 /* eslint-disable vue/no-bare-strings-in-template, @intlify/vue-i18n/no-raw-text */
-import { computed, onMounted, ref } from 'vue';
+import {
+  computed,
+  onMounted,
+  onBeforeUnmount,
+  reactive,
+  ref,
+  watch,
+} from 'vue';
+import { useI18n } from 'vue-i18n';
+import { authorityScope } from 'dashboard/store/crm/authorityScope';
+import ActivityEditDialog from '../../components/shared/ActivityEditDialog.vue';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 import { activitiesAPI } from 'dashboard/api/crm';
@@ -9,11 +19,42 @@ import CrmPageHeader from '../../components/shared/CrmPageHeader.vue';
 
 const store = useStore();
 const route = useRoute();
+const { t } = useI18n();
+let disposed = false;
+let generation = 0;
+const identity = computed(
+  () => `${route.params.accountId}:${authorityScope(store.getters)}`
+);
+const captureContext = () => ({ identity: identity.value, generation });
+const isCurrent = context =>
+  !disposed &&
+  context.identity === identity.value &&
+  context.generation === generation;
+const completingIds = reactive(new Set());
+const completionError = ref('');
+const editingActivityId = ref(null);
+const load = () => store.dispatch('jrcCrm/activities/fetchActivities');
 const activities = computed(() =>
   [...(store.getters['jrcCrm/activities/allActivities'] || [])].sort(
     (left, right) => new Date(left.due_at) - new Date(right.due_at)
   )
 );
+const nextActivity = computed(
+  () =>
+    activities.value.find(
+      activity =>
+        !activity.completed_at &&
+        !['completed', 'cancelled'].includes(activity.status)
+    ) || activities.value[0]
+);
+const canEdit = activity =>
+  activity &&
+  !activity.completed_at &&
+  !['completed', 'cancelled'].includes(activity.status);
+const openEditor = activity => {
+  if (!disposed && canEdit(activity) && !completingIds.has(activity.id))
+    editingActivityId.value = activity.id;
+};
 const loading = computed(() => store.getters['jrcCrm/activities/isLoading']);
 const error = computed(() => store.getters['jrcCrm/activities/error']);
 const routeDate = route.query.date ? new Date(String(route.query.date)) : null;
@@ -110,17 +151,55 @@ const activityTone = activity => {
 };
 
 const complete = async id => {
-  await activitiesAPI.complete(id);
-  await store.dispatch('jrcCrm/activities/fetchActivities');
+  if (
+    disposed ||
+    completingIds.has(id) ||
+    !activities.value.some(activity => activity.id === id && canEdit(activity))
+  )
+    return;
+  const context = captureContext();
+  completingIds.add(id);
+  completionError.value = '';
+  try {
+    await activitiesAPI.complete(id);
+    if (isCurrent(context)) await load();
+  } catch {
+    if (isCurrent(context))
+      completionError.value = t('CRM.CALENDAR_ACTIONS.COMPLETE_FAILED');
+  } finally {
+    if (isCurrent(context)) completingIds.delete(id);
+  }
 };
-
+watch(identity, () => {
+  generation += 1;
+  completingIds.clear();
+  completionError.value = '';
+  editingActivityId.value = null;
+  load();
+});
+watch(
+  () => route.query.date,
+  value => {
+    if (!value) return;
+    const date = new Date(String(value));
+    if (!Number.isNaN(date.getTime())) calendarDate.value = date;
+  }
+);
+onBeforeUnmount(() => {
+  disposed = true;
+  generation += 1;
+});
 onMounted(async () => {
-  await store.dispatch('jrcCrm/activities/fetchActivities');
-  if (!route.query.date) {
-    const next = activities.value.find(item => !item.completed_at && new Date(item.due_at) >= new Date());
+  const context = captureContext();
+  await load();
+  if (isCurrent(context) && !route.query.date) {
+    const next = activities.value.find(
+      item => canEdit(item) && new Date(item.due_at) >= new Date()
+    );
     if (next) calendarDate.value = new Date(next.due_at);
   }
 });
+
 </script>
 
 <template>
@@ -154,6 +233,19 @@ onMounted(async () => {
         {{ $t('CRM.HOMOLOGATION.CALENDAR_SYNC_UNAVAILABLE') }}
       </p>
 
+      <ActivityEditDialog
+        v-if="editingActivityId"
+        :activity-id="editingActivityId"
+        @close="editingActivityId = null"
+        @saved="load"
+      />
+      <p
+        v-if="completionError"
+        role="alert"
+        class="rounded-lg border border-n-ruby-6 bg-n-ruby-3 p-3 text-sm text-n-ruby-11"
+      >
+        {{ completionError }}
+      </p>
       <div class="grid min-h-[660px] grid-cols-1 gap-4 xl:grid-cols-[210px_minmax(0,1fr)_280px]">
         <aside class="rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm">
           <div class="mb-4 flex items-center justify-between">
@@ -252,7 +344,24 @@ onMounted(async () => {
                 <article v-for="activity in day.activities" :key="activity.id" class="rounded-xl border p-2.5 text-xs shadow-sm" :class="activityTone(activity)">
                   <div class="mb-1 flex items-center gap-1.5 font-bold"><i class="size-3.5" :class="activityIcon(activity.activity_type)" />{{ new Date(activity.due_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) }}</div>
                   <p class="break-words font-semibold leading-4">{{ activity.title }}</p>
-                  <button v-if="!activity.completed_at" type="button" class="mt-2 rounded-md bg-white/70 px-2 py-1 text-[10px] font-semibold" @click="complete(activity.id)">Concluir</button>
+                  <button
+                    v-if="canEdit(activity)"
+                    type="button"
+                    :disabled="completingIds.has(activity.id)"
+                    class="mt-2 rounded-md bg-white/70 px-2 py-1 text-[10px] font-semibold"
+                    @click="complete(activity.id)"
+                  >
+                    Concluir
+                  </button>
+                  <button
+                    v-if="canEdit(activity)"
+                    type="button"
+                    :disabled="completingIds.has(activity.id)"
+                    class="mt-2 rounded-md border border-current px-2 py-1 text-[10px] font-semibold disabled:opacity-50"
+                    @click="openEditor(activity)"
+                  >
+                    {{ t('CRM.ACTIVITY_EDIT.TITLE') }}
+                  </button>
                 </article>
               </div>
             </div>
@@ -260,12 +369,37 @@ onMounted(async () => {
         </section>
 
         <aside class="rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm">
-          <template v-if="activities[0]">
-            <div class="mb-4 flex items-start justify-between"><div><p class="text-xs font-semibold text-n-slate-11">Próxima atividade</p><h3 class="mt-1 text-lg font-bold text-n-slate-12">{{ activities[0].title }}</h3></div><i class="i-lucide-x size-4 text-n-slate-11" /></div>
+          <template v-if="nextActivity">
+            <div class="mb-4 flex items-start justify-between">
+              <div>
+                <p class="text-xs font-semibold text-n-slate-11">
+                  Próxima atividade
+                </p>
+                <h3 class="mt-1 text-lg font-bold text-n-slate-12">
+                  {{ nextActivity.title }}
+                </h3>
+              </div>
+              <i class="i-lucide-x size-4 text-n-slate-11" />
+            </div>
             <dl class="space-y-3 text-xs">
-              <div class="flex justify-between gap-3"><dt class="text-n-slate-11">Data</dt><dd class="font-semibold text-n-slate-12">{{ formatCrmDateTime(activities[0].due_at) }}</dd></div>
-              <div class="flex justify-between gap-3"><dt class="text-n-slate-11">Tipo</dt><dd class="font-semibold text-n-slate-12">{{ activities[0].activity_type }}</dd></div>
-              <div class="flex justify-between gap-3"><dt class="text-n-slate-11">Status</dt><dd class="font-semibold text-n-slate-12">{{ activities[0].completed_at ? 'Concluída' : 'Agendada' }}</dd></div>
+              <div class="flex justify-between gap-3">
+                <dt class="text-n-slate-11">Data</dt>
+                <dd class="font-semibold text-n-slate-12">
+                  {{ formatCrmDateTime(nextActivity.due_at) }}
+                </dd>
+              </div>
+              <div class="flex justify-between gap-3">
+                <dt class="text-n-slate-11">Tipo</dt>
+                <dd class="font-semibold text-n-slate-12">
+                  {{ nextActivity.activity_type }}
+                </dd>
+              </div>
+              <div class="flex justify-between gap-3">
+                <dt class="text-n-slate-11">Status</dt>
+                <dd class="font-semibold text-n-slate-12">
+                  {{ nextActivity.completed_at ? 'Concluída' : 'Agendada' }}
+                </dd>
+              </div>
             </dl>
             <div class="mt-5 grid gap-2">
               <button
@@ -288,17 +422,23 @@ onMounted(async () => {
                 {{ $t('CRM.HOMOLOGATION.START_ACTION_UNAVAILABLE') }}
               </p>
               <button
+                v-if="canEdit(nextActivity)"
                 type="button"
-                disabled
-                aria-describedby="crm-calendar-edit-note"
-                class="cursor-not-allowed rounded-xl bg-n-slate-3 px-3 py-2.5 text-sm font-semibold text-n-slate-11"
+                :disabled="completingIds.has(nextActivity.id)"
+                class="rounded-xl border border-n-weak bg-n-solid-2 px-3 py-2.5 text-sm font-semibold text-n-slate-12 disabled:opacity-50"
+                @click="openEditor(nextActivity)"
               >
                 <i class="i-lucide-calendar mr-1 size-4" /> Reagendar
               </button>
-              <p id="crm-calendar-edit-note" class="text-xs text-n-slate-11">
-                {{ $t('CRM.HOMOLOGATION.EDIT_ACTIVITY_UNAVAILABLE') }}
-              </p>
-              <button v-if="!activities[0].completed_at" class="rounded-xl bg-[#0f9f95] px-3 py-2.5 text-sm font-semibold text-white" @click="complete(activities[0].id)">Concluir</button>
+              <button
+                v-if="canEdit(nextActivity)"
+                type="button"
+                :disabled="completingIds.has(nextActivity.id)"
+                class="rounded-xl bg-[#0f9f95] px-3 py-2.5 text-sm font-semibold text-white"
+                @click="complete(nextActivity.id)"
+              >
+                Concluir
+              </button>
             </div>
           </template>
           <div v-else class="grid h-full place-content-center text-center text-sm text-n-slate-11">Nenhum compromisso agendado.</div>
