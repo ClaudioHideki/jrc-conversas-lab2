@@ -1,12 +1,18 @@
 /* eslint-disable no-console */
 
 import { dealsAPI, stagesAPI } from '../../../api/crm';
+import { authorityScope, hasCurrentAuthority } from '../authorityScope';
 
 export default {
   namespaced: true,
 
   state: {
     listRequestId: 0,
+    authorityScope: null,
+    detailScope: null,
+    detailRequestId: 0,
+    detailLoading: false,
+    detailError: null,
     deals: [],
     currentDeal: null,
     filters: {},
@@ -14,35 +20,62 @@ export default {
     pagination: {},
     kanbanColumns: [],
     error: null,
-    kanbanRequest: 0,
   },
 
   getters: {
-    allDeals: state => state.deals,
-    currentDeal: state => state.currentDeal,
-
-    dealById: state => id =>
-      state.deals.find(deal => Number(deal.id) === Number(id)),
-
-    dealsByStage: state => {
-      return state.kanbanColumns.map(col => ({
-        stage: col,
-        deals: state.deals.filter(
-          deal => Number(deal.stage_id) === Number(col.id)
-        ),
-      }));
-    },
-
-    openDeals: state => state.deals.filter(deal => deal.status === 'open'),
-
-    overdue: state =>
-      state.deals.filter(deal => deal.overdue || deal.is_overdue),
-
-    isLoading: state => state.isLoading,
-    error: state => state.error,
+    allDeals: (state, _getters, _rootState, rootGetters) =>
+      hasCurrentAuthority(state, rootGetters) ? state.deals : [],
+    currentDeal: (state, _getters, _rootState, rootGetters) =>
+      state.detailScope === authorityScope(rootGetters)
+        ? state.currentDeal
+        : null,
+    detailError: (state, _getters, _rootState, rootGetters) =>
+      state.detailScope === authorityScope(rootGetters)
+        ? state.detailError
+        : null,
+    dealById: (_state, getters) => id =>
+      getters.allDeals.find(deal => Number(deal.id) === Number(id)),
+    dealsByStage: (state, getters, _rootState, rootGetters) =>
+      hasCurrentAuthority(state, rootGetters)
+        ? state.kanbanColumns.map(stage => ({
+            stage,
+            deals: getters.allDeals.filter(
+              deal => Number(deal.stage_id) === Number(stage.id)
+            ),
+          }))
+        : [],
+    openDeals: (_state, getters) =>
+      getters.allDeals.filter(deal => deal.status === 'open'),
+    overdue: (_state, getters) =>
+      getters.allDeals.filter(deal => deal.overdue || deal.is_overdue),
+    isLoading: (state, _getters, _rootState, rootGetters) =>
+      (hasCurrentAuthority(state, rootGetters) && state.isLoading) ||
+      (state.detailScope === authorityScope(rootGetters) &&
+        state.detailLoading),
+    error: (state, _getters, _rootState, rootGetters) =>
+      (hasCurrentAuthority(state, rootGetters) ? state.error : null) ||
+      (state.detailScope === authorityScope(rootGetters)
+        ? state.detailError
+        : null),
   },
 
   mutations: {
+    SET_AUTHORITY_SCOPE(state, scope) {
+      state.authorityScope = scope;
+    },
+    START_DETAIL_REQUEST(state, scope) {
+      state.detailScope = scope;
+      state.detailRequestId += 1;
+      state.currentDeal = null;
+      state.detailLoading = false;
+      state.detailError = null;
+    },
+    SET_DETAIL_LOADING(state, value) {
+      state.detailLoading = value;
+    },
+    SET_DETAIL_ERROR(state, value) {
+      state.detailError = value;
+    },
     SET_LIST_REQUEST_ID(state, value) {
       state.listRequestId = value;
     },
@@ -53,7 +86,7 @@ export default {
     SET_CURRENT_DEAL(state, payload) {
       state.currentDeal = payload;
 
-      if (!payload?.id) return;
+      if (!payload?.id || state.authorityScope !== state.detailScope) return;
 
       const index = state.deals.findIndex(
         deal => Number(deal.id) === Number(payload.id)
@@ -120,29 +153,39 @@ export default {
     SET_KANBAN_COLUMNS(state, payload) {
       state.kanbanColumns = Array.isArray(payload) ? payload : [];
     },
-    START_KANBAN_REQUEST(state) {
-      state.kanbanRequest += 1;
-    },
   },
 
   actions: {
-    async fetchDeals({ commit, state }, params = {}) {
+    async fetchDeals({ commit, state, rootGetters }, params = {}) {
       const requestId = state.listRequestId + 1;
       commit('SET_LIST_REQUEST_ID', requestId);
+      const scope = authorityScope(rootGetters);
+      commit('SET_AUTHORITY_SCOPE', scope);
+      commit('SET_KANBAN_COLUMNS', []);
       commit('SET_DEALS', []);
       commit('SET_LOADING', true);
       commit('SET_ERROR', null);
 
       try {
         const response = await dealsAPI.list(params);
-        if (requestId !== state.listRequestId) return;
+        if (
+          requestId !== state.listRequestId ||
+          scope !== authorityScope(rootGetters)
+        )
+          return;
 
         const payload = response.data?.payload || response.data;
 
         commit('SET_DEALS', payload);
       } catch (error) {
-        if (requestId !== state.listRequestId) return;
-        console.error('Erro ao carregar negócios:', error);
+        if (
+          requestId !== state.listRequestId ||
+          scope !== authorityScope(rootGetters)
+        )
+          return;
+        console.error('CRM deals list request failed', {
+          status: error.response?.status,
+        });
 
         commit(
           'SET_ERROR',
@@ -150,39 +193,48 @@ export default {
             'Não foi possível carregar os negócios.'
         );
       } finally {
-        if (requestId === state.listRequestId) commit('SET_LOADING', false);
+        if (
+          requestId === state.listRequestId &&
+          scope === authorityScope(rootGetters)
+        )
+          commit('SET_LOADING', false);
       }
     },
 
-    async fetchDeal({ commit }, id) {
-      if (!id) {
-        commit('SET_CURRENT_DEAL', null);
-        return;
-      }
-
-      commit('SET_LOADING', true);
-      commit('SET_ERROR', null);
-
+    async fetchDeal({ commit, state, rootGetters }, id) {
+      const scope = authorityScope(rootGetters);
+      commit('START_DETAIL_REQUEST', scope);
+      const requestId = state.detailRequestId;
+      if (!id) return;
+      commit('SET_DETAIL_LOADING', true);
       try {
         const response = await dealsAPI.show(id);
-
+        if (
+          requestId !== state.detailRequestId ||
+          scope !== authorityScope(rootGetters)
+        )
+          return;
         const payload = response.data?.payload || response.data;
-
-        console.log(
-          'JRC CRM DEAL INDIVIDUAL:',
-          JSON.stringify(payload, null, 2)
-        );
-
         commit('SET_CURRENT_DEAL', payload);
       } catch (error) {
-        console.error('Erro ao carregar negócio:', error);
-
+        if (
+          requestId !== state.detailRequestId ||
+          scope !== authorityScope(rootGetters)
+        )
+          return;
+        console.error('CRM deal detail request failed', {
+          status: error.response?.status,
+        });
         commit(
-          'SET_ERROR',
+          'SET_DETAIL_ERROR',
           error.response?.data?.error || 'Não foi possível carregar o negócio.'
         );
       } finally {
-        commit('SET_LOADING', false);
+        if (
+          requestId === state.detailRequestId &&
+          scope === authorityScope(rootGetters)
+        )
+          commit('SET_DETAIL_LOADING', false);
       }
     },
 
@@ -193,12 +245,14 @@ export default {
       });
     },
 
-    async fetchKanbanData({ commit, state, rootState }, filters = {}) {
+    async fetchKanbanData({ commit, state, rootGetters }, filters = {}) {
       commit('SET_FILTERS', { ...filters });
-      commit('START_KANBAN_REQUEST');
-      const request = state.kanbanRequest;
+      commit('SET_LIST_REQUEST_ID', state.listRequestId + 1);
+      const request = state.listRequestId;
+      const scope = authorityScope(rootGetters);
+      commit('SET_AUTHORITY_SCOPE', scope);
       const pipelineId = filters.pipeline_id || filters.pipelineId;
-      const pipelines = rootState.jrcCrm.pipelines.pipelines;
+      const pipelines = rootGetters['jrcCrm/pipelines/allPipelines'];
       const pipelineIds = pipelineId ? [pipelineId] : pipelines.map(p => p.id);
       commit('SET_LOADING', true);
       commit('SET_ERROR', null);
@@ -215,7 +269,11 @@ export default {
             search: filters.search,
           }),
         ]);
-        if (request !== state.kanbanRequest) return;
+        if (
+          request !== state.listRequestId ||
+          scope !== authorityScope(rootGetters)
+        )
+          return;
         const stages = stagesResponses.flatMap(
           response => response.data?.payload || response.data
         );
@@ -235,13 +293,21 @@ export default {
           )
         );
       } catch (error) {
-        if (request !== state.kanbanRequest) return;
+        if (
+          request !== state.listRequestId ||
+          scope !== authorityScope(rootGetters)
+        )
+          return;
         commit(
           'SET_ERROR',
           error.response?.data?.error || 'Não foi possível carregar o funil.'
         );
       } finally {
-        if (request === state.kanbanRequest) commit('SET_LOADING', false);
+        if (
+          request === state.listRequestId &&
+          scope === authorityScope(rootGetters)
+        )
+          commit('SET_LOADING', false);
       }
     },
   },

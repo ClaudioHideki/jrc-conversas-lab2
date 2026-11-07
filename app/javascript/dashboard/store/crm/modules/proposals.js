@@ -1,13 +1,7 @@
 /* eslint-disable no-console */
 import { proposalsAPI } from '../../../api/crm';
 
-const authorityScope = getters =>
-  JSON.stringify([
-    getters.getCurrentAccountId,
-    getters.getCurrentUserID,
-    getters.getCurrentRole,
-    getters.getCurrentUser?.accounts,
-  ]);
+import { authorityScope } from '../authorityScope';
 
 export default {
   namespaced: true,

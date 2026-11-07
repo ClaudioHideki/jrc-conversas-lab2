@@ -18,6 +18,7 @@ import { useProjects } from '../../../jrcProjects/useProjects';
 import { errorMessage } from '../../../jrcOperations/api';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
+import { authorityScope } from 'dashboard/store/crm/authorityScope';
 import ContactsAPI from 'dashboard/api/contacts';
 import AgentsAPI from 'dashboard/api/agents';
 import { dealsAPI, pipelinesAPI, stagesAPI, productsAPI } from 'dashboard/api/crm';
@@ -90,7 +91,8 @@ const error = computed(() => store.getters['jrcCrm/deals/error']);
 const detailLoading = ref(false);
 const detailError = ref('');
 const loadedDetailKey = ref('');
-const detailKey = () => `${route.params.accountId}:${route.query.dealId || ''}`;
+const detailKey = () =>
+  `${route.params.accountId}:${authorityScope(store.getters)}:${route.query.dealId || ''}`;
 const selectedDeal = computed(() => {
   if (props.creationOnly) return null;
   if (!route.query.dealId || detailLoading.value || detailError.value || loadedDetailKey.value !== detailKey()) return null;
@@ -308,12 +310,14 @@ async function loadDetails() {
   const dealId = route.query.dealId;
   detailLoading.value = Boolean(dealId); detailError.value = ''; loadedDetailKey.value = '';
   editingDetails.value = false;
-  store.commit('jrcCrm/deals/SET_CURRENT_DEAL', null);
-  if (!dealId) return;
+  if (!dealId) {
+    await store.dispatch('jrcCrm/deals/fetchDeal', null);
+    return;
+  }
   try {
-    const response = await dealsAPI.show(dealId);
+    await store.dispatch('jrcCrm/deals/fetchDeal', dealId);
     if (current !== detailGeneration || key !== detailKey()) return;
-    store.commit('jrcCrm/deals/SET_CURRENT_DEAL', response.data?.payload || response.data);
+    detailError.value = store.getters['jrcCrm/deals/detailError'] || '';
     loadedDetailKey.value = key;
   } catch (requestError) {
     if (current === detailGeneration && key === detailKey()) detailError.value = errorMessage(requestError);
@@ -321,7 +325,15 @@ async function loadDetails() {
     if (current === detailGeneration) detailLoading.value = false;
   }
 }
-watch(() => [route.params.accountId, route.query.dealId], loadDetails, { immediate: true });
+watch(
+  () => [
+    route.params.accountId,
+    authorityScope(store.getters),
+    route.query.dealId,
+  ],
+  loadDetails,
+  { immediate: true }
+);
 onBeforeUnmount(() => { detailGeneration += 1; });
 
 watch(() => form.pipeline_id, loadStages);
