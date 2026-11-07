@@ -6,11 +6,11 @@ class Api::V1::Accounts::Relationship::ReviewedBatchesController < Api::V1::Acco
   end
 
   def index
-    allowed = %w[page per_page status portfolio_group_id]
+    allowed = %w[page per_page status portfolio_group_id review_id]
     raise ArgumentError, 'Unsupported reviewed operation filter' unless (request.query_parameters.keys - allowed).empty?
 
     render json: inventory.index(page: params.fetch(:page, 1), per_page: params.fetch(:per_page, 25),
-                                 status: params.fetch(:status, 'all'), portfolio_group_id: params[:portfolio_group_id])
+                                 status: params.fetch(:status, 'all'), portfolio_group_id: params[:portfolio_group_id], review_id: params[:review_id])
   end
 
   def cancel_pending

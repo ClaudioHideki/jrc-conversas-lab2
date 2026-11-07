@@ -3,14 +3,11 @@
   "user_request": "499267ac-546d-4853-b4cf-7f03a2ea0629",
   "initial_head": "be54d0f7b4ce8d4e2a077cf2bdd8c2a4d5c88f5e",
   "branch": "codex/relacionamento-v2-20261101",
-  "last_validated_checkpoint": "a52b4c77d4dd7be2a7f5212226ef653a04dcb024",
+  "last_validated_checkpoint": "2c5810f9b7d9a117633385b9bda8f0dcb41aec3b",
   "completed_current_work": "Sealed dossier, weighted/current capacity, native withdrawal/cadence controls and F2 increments locally tested; see linked incremental reports. No C-G closure.",
-  "active_work": "Source own saved-operation inventory with exact-ID conflict/unknown-outcome reread and explicit pending-stop confirmation.",
+  "active_work": "Typed safe item failure diagnostics in existing reviewed engine.",
   "exact_next_actions": [
-    "Extend existing actor-scoped metadata inventory with an optional exact review_id filter; no source/customer/other-actor grant.",
-    "Implement reusable native themed paginated own-operation inventory and reason/current-revision confirmation. On409/unknown outcome reread exact current metadata and require explicit confirmation again; never auto-retry writes.",
-    "Connect inventory/open actions to existing reviewed panel and group/global workspace through current native manage capability; details still use original source guards.",
-    "Test native/source scope, invalid receipts, identity changes, pagination and old flows; continue safe C-G work without build,push,cleanup,deploy,5379change or external operations."
+    "Implement typed safe per-item diagnostics and preserve generic fallback, immutable receipts and native denial semantics, then continue safe C-G work."
   ],
   "test_environment": {
     "source_manifest": ".codex/d9-notifications-20261104/snapshot.json",
@@ -52,16 +49,14 @@
     "No real participant removal or provider request; tests use synthetic records and WebMock, with external network disabled."
   ],
   "restrictions": "No build/recompile, no5379 change/restart, no four-container restart/reconfiguration, no cleanup/delete of existing data, no push/GHCR/deploy/production/client change, no real provider operations. Additive migrations allowed only in owned synthetic test database.",
-  "disk_last_observed_bytes": 6777270272,
+  "disk_last_observed_bytes": 6829056000,
   "TRR": "Undefined; do not invent",
   "company_documents_without_portfolio": "Explicitly deferred",
-  "last_validated_head": "cbb3077831496c236fdd8ba0045b93005033081c",
-  "new_validated_code_checkpoint": "git log -1 --format=%H -- docs/jrc_consolidation/playbook_restore_checkpoint_20261106.json",
-  "current_status": "Native playbook restoration6/0;source19/0,25/0and11/0overlap. C-G open.",
+  "last_validated_head": "2c5810f9b7d9a117633385b9bda8f0dcb41aec3b",
+  "new_validated_code_checkpoint": "git log -1 --format=%H -- docs/jrc_consolidation/reviewed_batch_inventory_ui_checkpoint_20261106.json",
+  "current_status": "Own inventory native8/0;source31/0,32/0,14/0overlap. No C-G closure.",
   "next_actions": [
-    "Verify and harden native playbook JSON collection shapes without changing valid empty conditions or allowed field semantics.",
-    "Audit remaining safe C-G Word gaps; full group local roles/durable queue/master batches/history and current-source Chrome remain open.",
-    "Do not build,push,clean,deploy,change5379/containers or perform external operations."
+    "Implement typed safe per-item diagnostics and preserve generic fallback, immutable receipts and native denial semantics, then continue safe C-G work."
   ],
   "latest_dossier_report": "docs/jrc_consolidation/sealed_dossier_checkpoint_20261105.json",
   "capacity_report": "docs/jrc_consolidation/weighted_capacity_checkpoint_20261105.json",
@@ -151,5 +146,6 @@
   "reviewed_portfolio_membership_native_report": "docs/jrc_consolidation/reviewed_portfolio_membership_native_checkpoint_20261106.json",
   "reviewed_portfolio_membership_ui_report": "docs/jrc_consolidation/reviewed_portfolio_membership_ui_checkpoint_20261106.json",
   "reviewed_batch_inventory_native_report": "docs/jrc_consolidation/reviewed_batch_inventory_native_checkpoint_20261106.json",
-  "withdrawal_reviewed_operations_report": "docs/jrc_consolidation/withdrawal_reviewed_operations_checkpoint_20261106.json"
+  "withdrawal_reviewed_operations_report": "docs/jrc_consolidation/withdrawal_reviewed_operations_checkpoint_20261106.json",
+  "reviewed_batch_inventory_ui_report": "docs/jrc_consolidation/reviewed_batch_inventory_ui_checkpoint_20261106.json"
 }

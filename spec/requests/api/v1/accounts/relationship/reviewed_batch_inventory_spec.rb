@@ -49,6 +49,21 @@ RSpec.describe 'Own source-free reviewed-operation inventory', type: :request do
     expect(JrcRelationship::BatchReview.find(saved.fetch('id')).state).to eq('previewed')
   end
 
+  it 'rereads one exact operation without weakening account, actor or group filters' do
+    saved = review
+    service.preview(input.merge('request_id' => SecureRandom.uuid))
+    get url, headers: headers, params: { review_id: saved.fetch('id'), status: 'all', portfolio_group_id: group.id }
+    expect(response.parsed_body.fetch('payload').pluck('id')).to eq([saved.fetch('id')])
+    other = create(:user, account: account, role: :administrator)
+    get url, headers: other.create_new_auth_token, params: { review_id: saved.fetch('id') }
+    expect(response.parsed_body.fetch('payload')).to eq([])
+    other_group = JrcRelationship::PortfolioGroup.create!(account: account, owner: actor, name: 'Other synthetic group')
+    get url, headers: headers, params: { review_id: saved.fetch('id'), portfolio_group_id: other_group.id }
+    expect(response.parsed_body.fetch('payload')).to eq([])
+    get url, headers: headers, params: { review_id: ['1'] }
+    expect(response).to have_http_status(:unprocessable_entity)
+  end
+
   it 'stops only own pending intentions after losing source-management access without gaining customer or group details' do
     saved = review
     record = JrcRelationship::BatchReview.find(saved.fetch('id'))

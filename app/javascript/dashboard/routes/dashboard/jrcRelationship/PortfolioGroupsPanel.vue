@@ -566,6 +566,7 @@ onBeforeUnmount(() => {
         :key="group.id"
         :group="group"
         :proposal="membershipProposal"
+        :formatting="metadata.formatting"
         @proposal="membershipProposal = $event"
         @updated="load(pagination.page)"
       />

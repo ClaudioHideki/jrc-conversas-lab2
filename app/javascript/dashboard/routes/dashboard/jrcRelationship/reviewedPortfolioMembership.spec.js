@@ -7,6 +7,7 @@ import Membership from './PortfolioMembershipBatchPanel.vue';
 import Groups from './PortfolioGroupsPanel.vue';
 import Customers from './PortfolioGroupCustomersDialog.vue';
 import { validMembershipReview } from './portfolioMembershipReviewReceipt';
+import Inventory from './ReviewedOperationInventory.vue';
 const mocks = vi.hoisted(() => ({
   route: null,
   store: null,
@@ -149,6 +150,46 @@ beforeEach(() => {
   });
 });
 afterEach(() => wrappers.splice(0).forEach(wrapper => wrapper.unmount()));
+
+it('opens another saved review in this portfolio without binding it to the previous draft UUID', async () => {
+  const wrapper = render();
+  await flushPromises();
+  await wrapper.setProps({ showInventory: true });
+  const saved = {
+    ...structuredClone(preview),
+    id: 92,
+    inputs: { ...proposal, request_id: 'a6617842-8401-44bf-a34a-8f1f90b623e6' },
+  };
+  mocks.api.portfolioBatchReview.mockResolvedValueOnce({ data: saved });
+  wrapper.findComponent(Inventory).vm.$emit('open', 92);
+  await flushPromises();
+  expect(
+    sessionStorage.getItem('relationship-reviewed-batch:1400:7:portfolio:18')
+  ).toBe('92');
+  expect(mocks.api.previewPortfolioBatch).toHaveBeenCalledTimes(1);
+  expect(wrapper.get('[data-test="review-approve"]').element.disabled).toBe(
+    false
+  );
+});
+
+it('retains the exact portfolio boundary when opening a saved review', async () => {
+  const wrapper = render();
+  await flushPromises();
+  await wrapper.setProps({ showInventory: true });
+  mocks.api.portfolioBatchReview.mockResolvedValueOnce({
+    data: {
+      ...structuredClone(preview),
+      id: 92,
+      inputs: { ...proposal, portfolio_group_id: 19 },
+    },
+  });
+  wrapper.findComponent(Inventory).vm.$emit('open', 92);
+  await flushPromises();
+  expect(
+    sessionStorage.getItem('relationship-reviewed-batch:1400:7:portfolio:18')
+  ).not.toBe('92');
+  expect(wrapper.find('[data-test="review-approve"]').exists()).toBe(false);
+});
 
 it('prepares without writes and requires explicit confirmation before showing validated native per-item receipts', async () => {
   const wrapper = render();

@@ -9,6 +9,7 @@ import DistributionCapacitySummary from './DistributionCapacitySummary.vue';
 import ResponsibilityComparison from './ResponsibilityComparison.vue';
 import { intent } from 'dashboard/routes/dashboard/approvals/model';
 import { validMembershipReview } from './portfolioMembershipReviewReceipt';
+import ReviewedOperationInventory from './ReviewedOperationInventory.vue';
 const props = defineProps({
   accountId: { type: [String, Number], required: true },
   actorId: { type: [String, Number], default: null },
@@ -16,6 +17,8 @@ const props = defineProps({
   proposal: { type: Object, default: null },
   portfolioGroupId: { type: Number, default: null },
   canExecute: { type: Boolean, default: true },
+  showInventory: Boolean,
+  formatting: { type: Object, default: () => ({}) },
 });
 const emit = defineEmits([
   'updated',
@@ -30,6 +33,8 @@ const busy = ref(false);
 const reading = ref(false);
 const uncertain = ref(false);
 const executionConfirmed = ref(false);
+const savedView = ref(false);
+const requestedSavedId = ref(null);
 const approvalIntent = intent();
 const responsibilitiesBlocked = computed(() =>
   (review.value?.responsibilities || []).some(
@@ -81,12 +86,18 @@ const reset = () => {
   uncertain.value = false;
   executionConfirmed.value = false;
   preparedAuthority = null;
+  savedView.value = false;
+  requestedSavedId.value = null;
 };
 const remember = value => {
   if (
     (props.portfolioGroupId !== null ||
       value.inputs?.operation === 'portfolio_membership') &&
-    !validMembershipReview(value, props.portfolioGroupId, props.proposal)
+    !validMembershipReview(
+      value,
+      props.portfolioGroupId,
+      savedView.value ? null : props.proposal
+    )
   ) {
     review.value = null;
     uncertain.value = true;
@@ -158,24 +169,8 @@ async function prepare(proposal) {
     if (version === epoch) busy.value = false;
   }
 }
-async function refresh() {
-  if (busy.value || reading.value) return;
-  if (
-    props.portfolioGroupId &&
-    !review.value &&
-    props.proposal &&
-    preparedAuthority === authorityKey()
-  ) {
-    await prepare(props.proposal);
-    return;
-  }
-  let id = review.value?.id;
-  try {
-    id ||= Number(sessionStorage.getItem(storageKey()));
-  } catch {
-    /* No cached operation. */
-  }
-  if (!Number.isSafeInteger(id) || id < 1 || reading.value) return;
+async function readSaved(id) {
+  if (!Number.isSafeInteger(id) || id < 1) return;
   const version = epoch;
   const accountId = props.accountId;
   reading.value = true;
@@ -184,6 +179,8 @@ async function refresh() {
       signal: controller.signal,
     });
     if (version === epoch) {
+      if (data.id !== id)
+        throw new Error(t('RELATIONSHIP.REVIEWED_INVENTORY.UNCONFIRMED'));
       remember(data);
       uncertain.value = false;
       error.value = '';
@@ -196,6 +193,34 @@ async function refresh() {
   } finally {
     if (version === epoch) reading.value = false;
   }
+}
+async function openSaved(id) {
+  if (busy.value || reading.value) return;
+  reset();
+  savedView.value = true;
+  requestedSavedId.value = id;
+  emit('reviewed', null);
+  await readSaved(id);
+}
+async function refresh() {
+  if (busy.value || reading.value) return;
+  if (
+    props.portfolioGroupId &&
+    !review.value &&
+    props.proposal &&
+    preparedAuthority === authorityKey()
+  ) {
+    await prepare(props.proposal);
+    return;
+  }
+  let id = review.value?.id || requestedSavedId.value;
+  try {
+    id ||= Number(sessionStorage.getItem(storageKey()));
+  } catch {
+    /* No cached operation. */
+  }
+  if (!Number.isSafeInteger(id) || id < 1 || reading.value) return;
+  await readSaved(id);
 }
 async function mutate(action) {
   if (busy.value || !review.value) return;
@@ -290,6 +315,20 @@ onBeforeUnmount(reset);
     aria-live="polite"
   >
     <h3 class="font-semibold">{{ t('RELATIONSHIP.REVIEWED_BATCH.TITLE') }}</h3>
+    <ReviewedOperationInventory
+      v-if="showInventory && actorId"
+      :account-id="accountId"
+      :actor-id="actorId"
+      :authorization-key="authorizationKey"
+      :portfolio-group-id="portfolioGroupId"
+      :formatting="formatting"
+      :disabled="busy || reading"
+      @open="openSaved"
+      @updated="
+        refresh();
+        emit('updated');
+      "
+    />
     <p class="mt-2 text-sm">
       {{ t('RELATIONSHIP.REVIEWED_BATCH.DESCRIPTION') }}
     </p>

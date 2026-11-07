@@ -1421,6 +1421,8 @@ const money = value => formatMoney(value, metadata.value?.formatting);
             ])
           "
           :proposal="portfolioReviewProposal"
+          show-inventory
+          :formatting="metadata.formatting"
           @updated="load"
         />
         <template v-if="!portfolioScreen && rows.length">

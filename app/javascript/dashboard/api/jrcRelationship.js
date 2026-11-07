@@ -178,6 +178,14 @@ export default {
     axios.post(`${base(accountId)}/cadences/${Number(id)}/cancel`, {}, options),
   previewPortfolioBatch: (accountId, fields, options) =>
     axios.post(`${base(accountId)}/reviewed_batches`, fields, options),
+  ownReviewedBatches: (accountId, params, options) =>
+    axios.get(`${base(accountId)}/reviewed_batches`, { ...options, params }),
+  stopOwnReviewedBatch: (accountId, id, fields, options) =>
+    axios.post(
+      `${base(accountId)}/reviewed_batches/${Number(id)}/cancel_pending`,
+      fields,
+      options
+    ),
   portfolioBatchReview: (accountId, id, options) =>
     axios.get(`${base(accountId)}/reviewed_batches/${Number(id)}`, options),
   approvePortfolioBatch: (accountId, id, digest, options) =>

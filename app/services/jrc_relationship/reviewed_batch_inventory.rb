@@ -9,14 +9,14 @@ class JrcRelationship::ReviewedBatchInventory
     @authority = JrcRelationship::BatchReviewAuthority.new(account_id: context.account.id, actor_id: context.user.id)
   end
 
-  def index(page: 1, per_page: 25, status: 'all', portfolio_group_id: nil)
+  def index(page: 1, per_page: 25, status: 'all', portfolio_group_id: nil, review_id: nil)
     number = Integer(page.to_s, 10).clamp(1, 10_000)
     size = Integer(per_page.to_s, 10).clamp(1, 50)
     raise ArgumentError, 'Invalid reviewed operation status' unless (%w[all pending] + STATES).include?(status)
 
     JrcRelationship::BatchReview.transaction do
       @authority.call do |context|
-        rows = filtered_owned(context, status, portfolio_group_id)
+        rows = filtered_owned(context, status, portfolio_group_id, review_id)
         inventory_page(rows, number, size)
       end
     end
@@ -38,8 +38,10 @@ class JrcRelationship::ReviewedBatchInventory
     JrcRelationship::BatchReview.where(account_id: context.account.id, actor_id: context.user.id)
   end
 
-  def filtered_owned(context, status, portfolio_group_id)
+  def filtered_owned(context, status, portfolio_group_id, review_id)
     rows = owned(context)
+    id = JrcRelationship::PortfolioOwnerInput.parse(review_id)
+    rows = rows.where(id: id) if id
     rows = rows.where(state: status == 'pending' ? %w[previewed running] : status) unless status == 'all'
     group_id = JrcRelationship::PortfolioOwnerInput.parse(portfolio_group_id)
     group_id ? rows.where("inputs ->> 'portfolio_group_id' = ?", group_id.to_s) : rows

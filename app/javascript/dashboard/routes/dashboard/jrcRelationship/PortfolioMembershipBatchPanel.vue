@@ -9,6 +9,7 @@ import { buttonClass, inputClass, message } from './definitions';
 const props = defineProps({
   group: { type: Object, required: true },
   proposal: { type: Object, default: null },
+  formatting: { type: Object, default: () => ({}) },
 });
 const emit = defineEmits(['updated', 'proposal']);
 const route = useRoute();
@@ -149,6 +150,8 @@ onBeforeUnmount(() => {
       :portfolio-group-id="group.id"
       :can-execute="group.status === 'active' && !busy"
       :proposal="proposal"
+      show-inventory
+      :formatting="formatting"
       @reviewed="reviewed = $event"
       @access-denied="blocked = true"
       @preview-failed="
