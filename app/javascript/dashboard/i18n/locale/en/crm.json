@@ -8,6 +8,10 @@
       "PLANNING": "Planejamento",
       "MANAGEMENT": "Gestão"
     },
+    "DEAL_CREATION": {
+      "LOAD_ERROR": "Deal options could not be loaded. Check your access and try again.",
+      "RETRY": "Try again"
+    },
     "LEAD_LIST": {
       "LOAD_ERROR": "Leads or their creation options could not be loaded. Check your access and try again.",
       "LOADING": "Loading leads…",

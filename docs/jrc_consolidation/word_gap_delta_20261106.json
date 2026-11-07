@@ -438,6 +438,12 @@
       "report": "docs/jrc_consolidation/crm_presence_authority_checkpoint_20261107.json",
       "current_state": "10presence regressions reproduced and corrected using existing Cadastro Mestre rule;84sourcepassed and0lint errors. Actual permission/tenant/status/future-scope negative cases remain passing.",
       "remaining": "DealsIndex local continuation boundary next;not Chrome or completeC-G acceptance."
+    },
+    {
+      "requirement": "C/G functional deal creation, products, authority and native draft persistence",
+      "report": "docs/jrc_consolidation/deals_authority_checkpoint_20261107.json",
+      "current_state": "9 genuine failing source cases and slow-stage global-draft regression corrected;43source then13final source and12native cases passed; shared legacy lint reported honestly.",
+      "remaining": "Current-sourceChrome/Wordvisual acceptance and fullC-G remain open."
     }
   ],
   "explicit_dependencies": [
@@ -458,7 +464,7 @@
       "state": "External environment/operations require separate authorization; not simulated as passed."
     }
   ],
-  "next_confirmed_local_gap": "Continue previously identified DealsIndex local options,creation form/product caches and selected-detail mutation receipts;native stores are already scoped and presence-compatible. Add failing rendered actual-store cases,preserve financial APIs and native drafts.",
+  "next_confirmed_local_gap": "Inspect next native Word/source gap after verified Deals lifecycle; retain current-source Chrome, business-role matrix and external environment dependencies.",
   "stage_closure": {
     "C": false,
     "D": false,
@@ -467,5 +473,5 @@
     "G": false
   },
   "unreviewed_literal_and_visual_fragments": "Not auto-marked complete; the original context/requirements inventory remains classification_pending where not explicitly reconciled.",
-  "next_source_review": "DealsIndex local form/options and native product/detail receipts after context changes."
+  "next_source_review": "Inspect next native Word/source gap after verified Deals lifecycle; retain current-source Chrome, business-role matrix and external environment dependencies."
 }
