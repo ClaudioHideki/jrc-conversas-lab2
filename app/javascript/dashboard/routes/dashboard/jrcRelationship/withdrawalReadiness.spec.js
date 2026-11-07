@@ -296,3 +296,27 @@ it('requires a new revision to restore legacy withdrawn rows and retains the rea
   expect(mocks.restore).toHaveBeenCalledTimes(1);
   wrapper.unmount();
 });
+
+it('shows pending reviewed operations as a real withdrawal blocker without manager controls for another actor private review', async () => {
+  mocks.request.mockResolvedValue({
+    data: {
+      state: 'pending_responsibilities',
+      analyst_id: 7,
+      counts: { reviewed_batches: 1 },
+      can_withdraw_relationship: false,
+      final_removal_available: false,
+    },
+  });
+  const wrapper = render();
+  await flushPromises();
+  expect(wrapper.text()).toContain(
+    'RELATIONSHIP.WITHDRAWAL.KINDS.reviewed_batches'
+  );
+  expect(wrapper.text()).toContain(
+    'RELATIONSHIP.WITHDRAWAL.REVIEWED_OPERATIONS_HELP'
+  );
+  expect(wrapper.findAll('dd').map(node => node.text())).toEqual(['1']);
+  expect(wrapper.find('form').exists()).toBe(false);
+  expect(mocks.withdraw).not.toHaveBeenCalled();
+  wrapper.unmount();
+});

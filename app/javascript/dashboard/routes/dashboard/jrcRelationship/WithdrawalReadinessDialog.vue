@@ -176,6 +176,12 @@ onBeforeUnmount(clear);
           <dd class="font-bold">{{ count }}</dd>
         </div>
       </dl>
+      <p
+        v-if="result.counts?.reviewed_batches > 0"
+        class="rounded-lg border border-n-violet-6 bg-n-violet-2 p-3 text-sm text-n-violet-11"
+      >
+        {{ t('RELATIONSHIP.WITHDRAWAL.REVIEWED_OPERATIONS_HELP') }}
+      </p>
       <p class="text-sm text-n-slate-11">
         {{ t('RELATIONSHIP.WITHDRAWAL.FINAL_REVIEW') }}
       </p>

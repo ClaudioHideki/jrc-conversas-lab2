@@ -3,14 +3,14 @@
   "user_request": "499267ac-546d-4853-b4cf-7f03a2ea0629",
   "initial_head": "be54d0f7b4ce8d4e2a077cf2bdd8c2a4d5c88f5e",
   "branch": "codex/relacionamento-v2-20261101",
-  "last_validated_checkpoint": "6d29a947113376f4c4d1e023bef60bcbcf3deecb",
+  "last_validated_checkpoint": "a52b4c77d4dd7be2a7f5212226ef653a04dcb024",
   "completed_current_work": "Sealed dossier, weighted/current capacity, native withdrawal/cadence controls and F2 increments locally tested; see linked incremental reports. No C-G closure.",
-  "active_work": "Native withdrawal readiness must inventory pending reviewed intentions without private payload disclosure, then source UI for own saved operations.",
+  "active_work": "Source own saved-operation inventory with exact-ID conflict/unknown-outcome reread and explicit pending-stop confirmation.",
   "exact_next_actions": [
-    "Add reviewed_batches count/digest category to native readiness for previewed/running actor reviews, conservatively requiring visible current native allocations and group metadata for the inventory operator.",
-    "Keep cancellation actor-only. Use explicit own-operation stop before withdrawal; no manager impersonation or another-actor private snapshot access.",
-    "Implement source inventory/open/filters/pagination/explicit reason/current-revision stop controls through new native endpoints, preserving existing reviewed panels.",
-    "Test native/source boundaries and continue safe C-G work; no build,push,cleanup,deploy,5379change or external operations."
+    "Extend existing actor-scoped metadata inventory with an optional exact review_id filter; no source/customer/other-actor grant.",
+    "Implement reusable native themed paginated own-operation inventory and reason/current-revision confirmation. On409/unknown outcome reread exact current metadata and require explicit confirmation again; never auto-retry writes.",
+    "Connect inventory/open actions to existing reviewed panel and group/global workspace through current native manage capability; details still use original source guards.",
+    "Test native/source scope, invalid receipts, identity changes, pagination and old flows; continue safe C-G work without build,push,cleanup,deploy,5379change or external operations."
   ],
   "test_environment": {
     "source_manifest": ".codex/d9-notifications-20261104/snapshot.json",
@@ -150,5 +150,6 @@
   "configuration_history_lookup_report": "docs/jrc_consolidation/configuration_history_lookup_checkpoint_20261106.json",
   "reviewed_portfolio_membership_native_report": "docs/jrc_consolidation/reviewed_portfolio_membership_native_checkpoint_20261106.json",
   "reviewed_portfolio_membership_ui_report": "docs/jrc_consolidation/reviewed_portfolio_membership_ui_checkpoint_20261106.json",
-  "reviewed_batch_inventory_native_report": "docs/jrc_consolidation/reviewed_batch_inventory_native_checkpoint_20261106.json"
+  "reviewed_batch_inventory_native_report": "docs/jrc_consolidation/reviewed_batch_inventory_native_checkpoint_20261106.json",
+  "withdrawal_reviewed_operations_report": "docs/jrc_consolidation/withdrawal_reviewed_operations_checkpoint_20261106.json"
 }

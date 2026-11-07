@@ -1796,6 +1796,7 @@
       "WAITING_REVIEW_REQUIRED": "Provide the reason for waiting, the next step and a future reassessment date. The native SLA policy remains in effect."
     },
     "WITHDRAWAL": {
+      "REVIEWED_OPERATIONS_HELP": "The analyst must finish or stop their own pending reviewed operations before final withdrawal. Applied items and historical snapshots remain unchanged; this inventory does not grant access to their private review details.",
       "TITLE": "Analyst withdrawal readiness",
       "NOTE": "Current scoped pending responsibilities must have effective destinations before final withdrawal. This consultation never removes a member or changes historical executors.",
       "ANALYST": "Analyst",
@@ -1815,6 +1816,7 @@
       "KINDS": {
         "allocations": "Customer allocations",
         "portfolio_groups": "Active portfolio coordination",
+        "reviewed_batches": "Pending reviewed operations",
         "actions": "CS actions",
         "plans": "Success plans",
         "qbrs": "Meetings and QBRs",

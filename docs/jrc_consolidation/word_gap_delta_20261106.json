@@ -288,6 +288,12 @@
       "report": "docs/jrc_consolidation/reviewed_batch_inventory_native_checkpoint_20261106.json",
       "implemented_validated": "Own source-free reviewed-operation inventory and explicit own pending cancellation;21native/0 including14legacy regressions. No new source access or other-actor cancellation grant.",
       "partial": "Source interface and safe withdrawal integration remain open, as do current-source Chrome and other C-G requirements."
+    },
+    {
+      "reference": "Relationship F1/P0119/P0120/P0184/P0185",
+      "report": "docs/jrc_consolidation/withdrawal_reviewed_operations_checkpoint_20261106.json",
+      "implemented_validated": "Pending CS-reviewed intentions now block scoped withdrawal;20native/0 with1000allocation request and11source/0. Actor-only cancellation and fresh readiness digest preserve other module/account rights.",
+      "partial": "Own inventory UI/exceptional inactive actor handling/current-source Chrome and remaining F1/F2/C-G requirements remain open."
     }
   ],
   "explicit_dependencies": [
@@ -308,7 +314,7 @@
       "state": "External environment/operations require separate authorization; not simulated as passed."
     }
   ],
-  "next_confirmed_local_gap": "Pending reviewed intentions must block native analyst withdrawal, with conservative current origin scope and no private payload access.",
+  "next_confirmed_local_gap": "Own-operation inventory source controls and exact-ID current-state recovery, preserving source/detail scopes.",
   "stage_closure": {
     "C": false,
     "D": false,

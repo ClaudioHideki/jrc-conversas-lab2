@@ -17,6 +17,7 @@ class JrcRelationship::WithdrawalReadiness
     responsibilities!
     nested_commitments!
     portfolio_groups!
+    reviewed_operations!
     survey_rules = JrcRelationship::WithdrawalSurveyRules.new(@context, @membership)
     collect!('survey_rules', survey_rules.source, survey_rules.visible)
     native_sources!
@@ -25,6 +26,11 @@ class JrcRelationship::WithdrawalReadiness
   end
 
   private
+
+  def reviewed_operations!
+    reviewed = JrcRelationship::WithdrawalReviewedOperations.new(@context, @source)
+    collect!('reviewed_batches', reviewed.source, reviewed.visible)
+  end
 
   def portfolio_groups!
     source = JrcRelationship::PortfolioGroup.where(account_id: @context.account.id, owner_id: @source.id, status: 'active')
