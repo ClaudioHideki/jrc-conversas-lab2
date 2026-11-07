@@ -6,9 +6,14 @@ import { buttonClass, message, date } from './definitions';
 import ReviewedCadencePanel from './ReviewedCadencePanel.vue';
 import DistributionComparison from './DistributionComparison.vue';
 import DistributionCapacitySummary from './DistributionCapacitySummary.vue';
+import CapacityWorkloadForm from './CapacityWorkloadForm.vue';
 import ResponsibilityComparison from './ResponsibilityComparison.vue';
 import { intent } from 'dashboard/routes/dashboard/approvals/model';
 import { validMembershipReview } from './portfolioMembershipReviewReceipt';
+import {
+  validMasterAllocationReview,
+  validMasterTransition,
+} from './masterAllocationReviewReceipt';
 import ReviewedOperationInventory from './ReviewedOperationInventory.vue';
 const props = defineProps({
   accountId: { type: [String, Number], required: true },
@@ -36,9 +41,19 @@ const uncertain = ref(false);
 const executionConfirmed = ref(false);
 const savedView = ref(false);
 const requestedSavedId = ref(null);
+const itemPage = ref(1);
+const itemPages = computed(() =>
+  Math.max(1, Math.ceil((review.value?.items.length || 0) / 10))
+);
+const visibleItems = computed(() =>
+  review.value?.inputs.operation === 'master_allocation'
+    ? review.value.items.slice((itemPage.value - 1) * 10, itemPage.value * 10)
+    : review.value?.items || []
+);
 const canExecuteReview = computed(
   () =>
     props.canExecute &&
+    !(review.value?.master_capacity?.rows || []).some(row => row.blocker) &&
     !['scope_denied', 'controlled_review_required'].includes(
       review.value?.membership_capacity?.state
     )
@@ -72,6 +87,18 @@ const authorityKey = () =>
 const storageKey = () =>
   `relationship-reviewed-batch:${props.accountId}:${props.actorId ?? 'operator'}${props.portfolioGroupId ? `:portfolio:${props.portfolioGroupId}` : ''}`;
 const stateLabel = state => t(`RELATIONSHIP.REVIEWED_BATCH.STATES.${state}`);
+const allocationModeLabels = computed(() => ({
+  create: t('RELATIONSHIP.MASTER_ALLOCATION.MODES.create'),
+  reuse: t('RELATIONSHIP.MASTER_ALLOCATION.MODES.reuse'),
+}));
+const allocationTarget = allocation =>
+  t('RELATIONSHIP.MASTER_ALLOCATION.TARGET', {
+    owner:
+      props.owners.find(owner => owner[0] === allocation.owner_id)?.[1] ||
+      allocation.owner_id ||
+      t('RELATIONSHIP.UNASSIGNED'),
+    unit: allocation.business_unit_id || t('RELATIONSHIP.UNASSIGNED'),
+  });
 const membershipStateLabels = computed(() => ({
   linked: t('RELATIONSHIP.NAMED_PORTFOLIOS.MEMBERSHIP.STATES.linked'),
   already_linked: t(
@@ -119,16 +146,22 @@ const reset = () => {
   preparedAuthority = null;
   savedView.value = false;
   requestedSavedId.value = null;
+  itemPage.value = 1;
 };
 const remember = value => {
+  const master =
+    value.inputs?.operation === 'master_allocation' ||
+    (!savedView.value && props.proposal?.operation === 'master_allocation');
   if (
     (props.portfolioGroupId !== null ||
-      value.inputs?.operation === 'portfolio_membership') &&
-    !validMembershipReview(
+      value.inputs?.operation === 'portfolio_membership' ||
+      master) &&
+    (!(master ? validMasterAllocationReview : validMembershipReview)(
       value,
       props.portfolioGroupId,
       savedView.value ? null : props.proposal
-    )
+    ) ||
+      (master && !validMasterTransition(review.value, value)))
   ) {
     review.value = null;
     uncertain.value = true;
@@ -139,6 +172,7 @@ const remember = value => {
   if (review.value?.id === value.id && review.value.revision > value.revision)
     return;
   const previous = review.value;
+  if (previous?.id !== value.id) itemPage.value = 1;
   if (
     JSON.stringify([previous?.id, previous?.digest, previous?.approval]) !==
     JSON.stringify([value.id, value.digest, value.approval])
@@ -262,8 +296,11 @@ async function mutate(action) {
     return;
   if (
     action === 'approve' &&
-    review.value.approval?.required &&
-    (review.value.approval.state !== 'approved' || !executionConfirmed.value)
+    ((review.value.inputs.operation === 'master_allocation' &&
+      !executionConfirmed.value) ||
+      (review.value.approval?.required &&
+        (review.value.approval.state !== 'approved' ||
+          !executionConfirmed.value)))
   )
     return;
   epoch += 1;
@@ -420,11 +457,48 @@ onBeforeUnmount(reset);
         }}
       </p>
       <p
-        v-if="review.inputs.operation === 'portfolio_membership'"
+        v-if="
+          ['portfolio_membership', 'master_allocation'].includes(
+            review.inputs.operation
+          )
+        "
         class="min-w-0 break-words text-sm"
       >
         {{ review.summary.portfolio_group_name }}
       </p>
+      <section
+        v-if="review.inputs.operation === 'master_allocation'"
+        class="my-3 min-w-0 space-y-3 rounded-xl border border-n-teal-6 bg-n-solid-2 p-3"
+        data-test="master-allocation-summary"
+      >
+        <p class="break-words text-sm">
+          {{
+            t('RELATIONSHIP.MASTER_ALLOCATION.SUMMARY', {
+              create: review.summary.create_count,
+              reuse: review.summary.reuse_count,
+            })
+          }}
+        </p>
+        <p class="text-sm text-n-slate-11">
+          {{ t('RELATIONSHIP.MASTER_ALLOCATION.ATOMIC_NOTICE') }}
+        </p>
+        <DistributionCapacitySummary
+          :rows="review.master_capacity.rows"
+          show-owner
+          :owners="owners"
+        />
+        <label
+          v-if="review.state === 'previewed'"
+          class="flex items-start gap-2 text-sm"
+        >
+          <input
+            v-model="executionConfirmed"
+            type="checkbox"
+            data-test="master-allocation-confirmation"
+          />
+          {{ t('RELATIONSHIP.MASTER_ALLOCATION.CONFIRM') }}
+        </label>
+      </section>
       <p
         v-if="review.inputs.title"
         class="text-sm"
@@ -542,18 +616,42 @@ onBeforeUnmount(reset);
       </section>
       <ul class="my-3 space-y-2">
         <li
-          v-for="item in review.items"
-          :key="item.assignment_id"
+          v-for="item in visibleItems"
+          :key="
+            review.inputs.operation === 'master_allocation'
+              ? item.company_id
+              : item.assignment_id
+          "
           class="text-sm"
         >
           {{ item.label || t('RELATIONSHIP.REVIEWED_BATCH.RECEIPT_ITEM') }} ·
           {{ stateLabel(item.state) }}
+          <span
+            v-if="item.mode"
+            class="block"
+          >
+            {{ allocationModeLabels[item.mode] }}
+          </span>
+          <span
+            v-if="item.allocation"
+            class="block break-words"
+          >
+            {{ allocationTarget(item.allocation) }}
+          </span>
           <span
             v-if="item.receipt?.membership_state"
             class="block"
           >
             {{ membershipStateLabels[item.receipt.membership_state] }}
           </span>
+          <CapacityWorkloadForm
+            v-if="
+              Object.keys(item.allocation?.settings?.capacity_workload || {})
+                .length
+            "
+            :model-value="item.allocation.settings.capacity_workload"
+            disabled
+          />
           <span
             v-if="item.error_code"
             class="block"
@@ -571,6 +669,36 @@ onBeforeUnmount(reset);
           />
         </li>
       </ul>
+      <nav
+        v-if="review.inputs.operation === 'master_allocation' && itemPages > 1"
+        class="my-3 flex flex-wrap items-center gap-2"
+        :aria-label="t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.SELECTION_PAGES')"
+      >
+        <button
+          type="button"
+          :class="buttonClass"
+          :disabled="itemPage <= 1"
+          data-test="master-review-previous"
+          @click="itemPage -= 1"
+        >
+          {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.PREVIOUS') }}
+        </button>
+        <span>{{
+          t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.SELECTION_PAGE', {
+            page: itemPage,
+            pages: itemPages,
+          })
+        }}</span>
+        <button
+          type="button"
+          :class="buttonClass"
+          :disabled="itemPage >= itemPages"
+          data-test="master-review-next"
+          @click="itemPage += 1"
+        >
+          {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.NEXT') }}
+        </button>
+      </nav>
       <div class="flex flex-wrap gap-2">
         <button
           v-if="review.state === 'previewed'"
@@ -583,6 +711,8 @@ onBeforeUnmount(reset);
             uncertain ||
             responsibilitiesBlocked ||
             review.capacity?.some(row => row.blocker) ||
+            (review.inputs.operation === 'master_allocation' &&
+              !executionConfirmed) ||
             (review.approval?.required &&
               (review.approval.state !== 'approved' || !executionConfirmed))
           "

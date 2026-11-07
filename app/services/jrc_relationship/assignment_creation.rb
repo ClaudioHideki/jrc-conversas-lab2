@@ -10,10 +10,7 @@ class JrcRelationship::AssignmentCreation
   end
 
   def call(attributes, exception_reason: nil)
-    attrs = attributes.to_h.deep_stringify_keys
-    raise ArgumentError, 'Unsupported allocation fields' unless (attrs.keys - FIELDS).empty?
-
-    validate_settings!(attrs)
+    attrs = input(attributes)
     JrcRelationship::Assignment.transaction do
       authority = JrcRelationship::BatchReviewAuthority.new(account_id: @account_id, actor_id: @actor_id)
       authority.call do |context|
@@ -24,7 +21,31 @@ class JrcRelationship::AssignmentCreation
     end
   end
 
+  # Native validations and source policies without INSERT, temporary records or
+  # sequence consumption. Execution still rechecks through the native writer.
+  def preview(attributes, exception_reason: nil)
+    attrs = input(attributes)
+    JrcRelationship::Assignment.transaction do
+      JrcRelationship::BatchReviewAuthority.new(account_id: @account_id, actor_id: @actor_id).call do |context|
+        raise Pundit::NotAuthorizedError unless context.policy.team?
+
+        record = prepare(context, normalize(context, attrs), exception_reason)
+        record.validate!
+        JrcRelationship::AssignmentProposalAccess.new(context).call(record)
+        record
+      end
+    end
+  end
+
   private
+
+  def input(attributes)
+    attrs = attributes.to_h.deep_stringify_keys
+    raise ArgumentError, 'Unsupported allocation fields' unless (attrs.keys - FIELDS).empty?
+
+    validate_settings!(attrs)
+    attrs
+  end
 
   def validate_settings!(attrs)
     return unless attrs.key?('settings')
@@ -48,9 +69,7 @@ class JrcRelationship::AssignmentCreation
   end
 
   def persist!(context, attrs, exception_reason)
-    record = JrcRelationship::Assignment.new(attrs.merge('account_id' => context.account.id))
-    record.status = 'onboarding' if context.configuration.effective_rules['handoff_acceptance_required']
-    validate_eligibility!(context, record, exception_reason)
+    record = prepare(context, attrs, exception_reason)
     record.save!
     context.assignment(record.id)
     JrcRelationship::DistributionPolicyBinding.new(context).call([record], owner_id: record.owner_id) if record.owner_id
@@ -58,6 +77,13 @@ class JrcRelationship::AssignmentCreation
     if record.settings['eligibility_exception']
       context.audit!(record, after: record.settings['eligibility_exception'], action: 'eligibility_exception_approved')
     end
+    record
+  end
+
+  def prepare(context, attrs, exception_reason)
+    record = JrcRelationship::Assignment.new(attrs.merge('account_id' => context.account.id))
+    record.status = 'onboarding' if context.configuration.effective_rules['handoff_acceptance_required']
+    validate_eligibility!(context, record, exception_reason)
     record
   end
 

@@ -373,7 +373,9 @@
         "assign": "Alteração de responsável",
         "activity": "Criação de atividade",
         "playbook": "Aplicação do playbook e da versão revisada",
-        "cadence": "Inscrição na cadência revisada"
+        "cadence": "Inscrição na cadência revisada",
+        "master_allocation": "Alocações iniciais e vínculos revisados",
+        "portfolio_membership": "Vínculos revisados da carteira"
       },
       "STATES": {
         "previewed": "Aguardando sua confirmação",
@@ -997,7 +999,9 @@
         "capacity_missing": "No limit is configured for this analyst in this scope.",
         "capacity_scope_denied": "Your permissions do not allow verification of the full destination workload. Counts are hidden.",
         "capacity_exceeded": "This transfer exceeds the destination capacity.",
-        "capacity_workload_missing": "Explicit workload inputs are missing or invalid; this is not spare capacity."
+        "capacity_workload_missing": "Explicit workload inputs are missing or invalid; this is not spare capacity.",
+        "controlled_review_required": "Seleção ampla: refine o escopo para uma revisão controlada.",
+        "capacity_owner_unavailable": "O responsável não está disponível neste escopo."
       },
       "UNIT": "Capacity unit",
       "UNITS": {
@@ -1922,6 +1926,22 @@
       "PREVIOUS": "Anterior",
       "NEXT": "Próxima",
       "PAGE": "Página {page} · {total} clientes autorizados"
+    },
+    "MASTER_ALLOCATION": {
+      "TITLE": "Revisar alocações em lote",
+      "HELP": "Selecione empresas do Cadastro Mestre e prepare as alocações que faltam. A prévia não cria alocações. Após confirmar, cada item cria ou reutiliza a alocação nativa e a vincula a esta carteira.",
+      "CUSTOMER_ID": "Empresa do Cadastro Mestre #{id}",
+      "DRAFT_NOTICE": "Rascunhos locais: nenhuma alocação foi criada. Ao revisar, o servidor valida o cadastro, a visibilidade, a elegibilidade e a capacidade de toda a seleção. Alocações existentes mantêm seus responsáveis e regras.",
+      "ADD_DRAFT": "Preparar alocação sem salvar",
+      "DRAFT_READY": "Proposta preparada. Adicione à seleção para revisar com as demais empresas; ainda não foi salva uma alocação.",
+      "SUMMARY": "{create} alocações a criar · {reuse} alocações a reutilizar sem alterar o responsável.",
+      "ATOMIC_NOTICE": "A transação é por item: alocação e vínculo são gravados juntos. Itens concluídos permanecem no histórico se o restante for interrompido. A confirmação operacional não substitui aprovações formais de transferência.",
+      "CONFIRM": "Conferi as empresas, os responsáveis e a capacidade. Confirmo a criação das alocações que faltam e os vínculos desta seleção.",
+      "TARGET": "Responsável: {owner} · Unidade: {unit}",
+      "MODES": {
+        "create": "Criar alocação nativa após confirmar",
+        "reuse": "Reutilizar alocação existente sem alterar seus dados"
+      }
     },
     "CADENCE_TEAM": {
       "TITLE": "Supervised active cadence review",

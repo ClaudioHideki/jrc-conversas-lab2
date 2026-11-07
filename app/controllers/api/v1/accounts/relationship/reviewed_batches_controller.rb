@@ -25,7 +25,7 @@ class Api::V1::Accounts::Relationship::ReviewedBatchesController < Api::V1::Acco
   def create
     render json: service.preview(body!('ids', 'operation', 'owner_id', 'playbook_id', 'title', 'due_at', 'request_id', 'conversation_id', 'starts_at',
                                        'justification', 'transfer_responsibilities', 'portfolio_group_id', 'expected_version',
-                                       'active', 'previous_review_id'))
+                                       'active', 'previous_review_id', 'creations'))
   end
 
   def approve

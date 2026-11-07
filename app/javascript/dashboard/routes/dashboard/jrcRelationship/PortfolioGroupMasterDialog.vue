@@ -12,11 +12,29 @@ const props = defineProps({
   group: { type: Object, required: true },
   metadata: { type: Object, required: true },
   disabled: Boolean,
+  staged: Boolean,
 });
-const emit = defineEmits(['close', 'review', 'batch']);
+const emit = defineEmits(['close', 'review', 'batch', 'masterBatch']);
 const route = useRoute();
 const store = useStore();
 const { t } = useI18n();
+const masterCopy = computed(() => ({
+  title: props.staged
+    ? t('RELATIONSHIP.MASTER_ALLOCATION.TITLE')
+    : t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.TITLE'),
+  help: props.staged
+    ? t('RELATIONSHIP.MASTER_ALLOCATION.HELP')
+    : t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.HELP'),
+  allocationNotice: props.staged
+    ? t('RELATIONSHIP.MASTER_ALLOCATION.DRAFT_NOTICE')
+    : t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.ALLOCATION_NOTICE'),
+  allocate: props.staged
+    ? t('RELATIONSHIP.MASTER_ALLOCATION.ADD_DRAFT')
+    : t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.ALLOCATE'),
+  selectionNotice: props.staged
+    ? t('RELATIONSHIP.MASTER_ALLOCATION.DRAFT_NOTICE')
+    : t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.SELECTION_NOTICE'),
+}));
 const dialog = ref(null);
 const companyId = ref(null);
 const candidate = ref(null);
@@ -47,7 +65,7 @@ const alreadySelected = computed(
     candidate.value &&
     selection.value.some(
       row =>
-        row.id === candidate.value.id ||
+        (!props.staged && row.id === candidate.value.id) ||
         String(row.company_id) === String(candidate.value.company_id)
     )
 );
@@ -63,6 +81,7 @@ const identity = computed(() =>
     route.params.accountId,
     props.group.id,
     props.group.version,
+    props.staged,
     store.getters.getCurrentUserID,
     store.getters.getCurrentRole,
     store.getters.getCurrentUser?.accounts,
@@ -79,8 +98,8 @@ let generation = 0;
 let controller;
 const validCandidate = row =>
   row &&
-  Number.isSafeInteger(row.id) &&
-  row.id > 0 &&
+  ((Number.isSafeInteger(row.id) && row.id > 0) ||
+    (props.staged && row.id === null && row.proposed_fields)) &&
   String(row.company_id) === String(companyId.value);
 const check = async () => {
   if (
@@ -136,6 +155,27 @@ const allocate = async fields => {
     String(fields.company_id) !== String(companyId.value)
   )
     return;
+  if (props.staged) {
+    const proposal = {
+      ...fields,
+      company_id: Number(fields.company_id),
+      owner_id: fields.owner_id || null,
+      team_id: fields.team_id || null,
+      business_unit_id: fields.business_unit_id || null,
+    };
+    if (!proposal.exception_reason?.trim()) delete proposal.exception_reason;
+    else proposal.exception_reason = proposal.exception_reason.trim();
+    candidate.value = {
+      id: null,
+      company_id: proposal.company_id,
+      name: t('RELATIONSHIP.MASTER_ALLOCATION.CUSTOMER_ID', {
+        id: proposal.company_id,
+      }),
+      proposed_fields: proposal,
+    };
+    step.value = 'ready';
+    return;
+  }
   const current = generation;
   busy.value = true;
   error.value = '';
@@ -166,6 +206,7 @@ const allocate = async fields => {
 };
 const review = () => {
   if (
+    !props.staged &&
     !locked.value &&
     !selection.value.length &&
     allowed.value &&
@@ -189,6 +230,9 @@ const addToSelection = () => {
       id: candidate.value.id,
       company_id: candidate.value.company_id,
       name: candidate.value.name,
+      ...(props.staged && candidate.value.proposed_fields
+        ? { proposed_fields: candidate.value.proposed_fields }
+        : {}),
     },
   ];
   selectionPage.value = selectionPages.value;
@@ -199,7 +243,9 @@ const addToSelection = () => {
 };
 const removeSelection = id => {
   if (locked.value || !allowed.value) return;
-  selection.value = selection.value.filter(row => row.id !== id);
+  selection.value = selection.value.filter(row =>
+    props.staged ? row.company_id !== id : row.id !== id
+  );
   selectionPage.value = Math.min(selectionPage.value, selectionPages.value);
 };
 const reviewSelection = () => {
@@ -217,6 +263,17 @@ const reviewSelection = () => {
   )
     return;
   submitted.value = true;
+  if (props.staged) {
+    emit('masterBatch', {
+      company_ids: selection.value.map(row => Number(row.company_id)),
+      creations: selection.value
+        .filter(row => row.proposed_fields)
+        .map(row => row.proposed_fields),
+      expected_version: props.group.version,
+      reason: selectionReason.value.trim(),
+    });
+    return;
+  }
   emit('batch', {
     assignment_ids: selection.value.map(row => row.id),
     active: true,
@@ -256,7 +313,7 @@ onBeforeUnmount(() => {
   <Dialog
     ref="dialog"
     width="2xl"
-    :title="t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.TITLE')"
+    :title="masterCopy.title"
     :use-form="false"
     :show-confirm-button="false"
     :show-cancel-button="false"
@@ -269,7 +326,7 @@ onBeforeUnmount(() => {
     <div class="min-w-0 space-y-4">
       <p class="break-words font-semibold">{{ group.name }}</p>
       <p class="text-sm text-n-slate-11">
-        {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.HELP') }}
+        {{ masterCopy.help }}
       </p>
       <p
         v-if="error"
@@ -300,7 +357,7 @@ onBeforeUnmount(() => {
       </button>
       <template v-if="step === 'allocate'">
         <p class="rounded-lg bg-n-amber-2 p-3 text-sm text-n-amber-11">
-          {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.ALLOCATION_NOTICE') }}
+          {{ masterCopy.allocationNotice }}
         </p>
         <PortfolioAssignmentForm
           :metadata="metadata"
@@ -309,7 +366,7 @@ onBeforeUnmount(() => {
             locked || !allowed || unconfirmed || selection.length >= 50
           "
           lock-company
-          :submit-label="t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.ALLOCATE')"
+          :submit-label="masterCopy.allocate"
           @submit="allocate"
         />
       </template>
@@ -319,13 +376,16 @@ onBeforeUnmount(() => {
           class="rounded-lg bg-n-teal-2 p-3 text-sm text-n-teal-11"
         >
           {{
-            created
-              ? t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.CREATED')
-              : t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.EXISTING')
+            staged && candidate.proposed_fields
+              ? t('RELATIONSHIP.MASTER_ALLOCATION.DRAFT_READY')
+              : created
+                ? t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.CREATED')
+                : t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.EXISTING')
           }}
         </p>
         <p class="break-words font-semibold">{{ candidate.name }}</p>
         <button
+          v-if="!staged"
           type="button"
           :class="buttonClass"
           :disabled="locked || !allowed || selection.length > 0"
@@ -373,12 +433,12 @@ onBeforeUnmount(() => {
           }}
         </h3>
         <p class="break-words text-sm text-n-slate-11">
-          {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.SELECTION_NOTICE') }}
+          {{ masterCopy.selectionNotice }}
         </p>
         <ul class="space-y-2">
           <li
             v-for="row in selectionRows"
-            :key="row.id"
+            :key="staged ? row.company_id : row.id"
             class="flex min-w-0 flex-wrap items-center justify-between gap-2"
             data-test="master-selection-row"
           >
@@ -393,7 +453,7 @@ onBeforeUnmount(() => {
                   name: row.name,
                 })
               "
-              @click="removeSelection(row.id)"
+              @click="removeSelection(staged ? row.company_id : row.id)"
             >
               {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.REMOVE') }}
             </button>

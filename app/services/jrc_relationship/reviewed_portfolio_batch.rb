@@ -76,7 +76,8 @@ class JrcRelationship::ReviewedPortfolioBatch
     review = reviews.create!(inputs: inputs, snapshot: snapshot, digest: plan.digest([inputs, snapshot]),
                              request_id: inputs.fetch('request_id'), expires_at: snapshot.fetch('validity_minutes', 15).minutes.from_now)
     snapshot.fetch('rows').each_with_index do |row, ordinal|
-      review.items.create!(account_id: @account_id, assignment_id: row.fetch('assignment_id'), ordinal: ordinal)
+      subject = inputs['operation'] == 'master_allocation' ? { company_id: row.fetch('company_id') } : { assignment_id: row.fetch('assignment_id') }
+      review.items.create!(account_id: @account_id, ordinal: ordinal, **subject)
     end
     review
   end
@@ -120,6 +121,8 @@ class JrcRelationship::ReviewedPortfolioBatch
   end
 
   def perform_item(review, item, context)
+    return JrcRelationship::MasterAllocationReview.new(context).apply!(review, item) if review.inputs['operation'] == 'master_allocation'
+
     assignment = context.assignment(item.assignment_id, write: true)
     assignment.lock!
     JrcRelationship::BatchReviewPlan.new(context).validate!(review, assignment: assignment)
@@ -145,7 +148,8 @@ class JrcRelationship::ReviewedPortfolioBatch
   end
 
   def commit_receipt(review, item, receipt)
-    item.update!(state: 'applied', receipt: receipt)
+    subject = item.company_id ? { assignment_id: receipt.fetch('assignment_id') } : {}
+    item.update!(state: 'applied', receipt: receipt, **subject)
     state = review.items.exists?(state: 'pending') ? 'running' : 'completed'
     review.update!(state: state, revision: review.revision + 1)
   end
@@ -170,16 +174,18 @@ class JrcRelationship::ReviewedPortfolioBatch
   end
 
   def project(review, context)
+    return JrcRelationship::MasterAllocationProjection.new(context).call(review) if review.inputs['operation'] == 'master_allocation'
+
     return JrcRelationship::ReviewedBatchReceiptView.new(review).call if JrcRelationship::ReviewedAssignmentScope.new(context, review).limited?
 
     authorize_projection!(review, context)
-    { 'id' => review.id, 'state' => review.state, 'revision' => review.revision, 'digest' => review.digest,
-      'expires_at' => review.expires_at.iso8601(6), 'inputs' => review.inputs,
+    JrcRelationship::BatchReviewIdentity.call(review).merge(
       'summary' => review.snapshot['summary'], 'distribution' => review.snapshot['distribution'],
       'capacity' => JrcRelationship::DistributionCapacity.new(context).for_view(review),
       'responsibilities' => JrcRelationship::ResponsibilityReview.new(context).for_view(review),
       'approval' => JrcRelationship::DistributionApproval.new(context).projection(review),
-      'items' => reviewed_items(review) }.merge(membership_capacity_view(review, context))
+      'items' => reviewed_items(review)
+    ).merge(membership_capacity_view(review, context))
   end
 
   def membership_capacity_view(review, context)

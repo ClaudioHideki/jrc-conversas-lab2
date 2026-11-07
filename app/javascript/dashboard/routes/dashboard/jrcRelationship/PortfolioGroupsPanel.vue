@@ -46,6 +46,7 @@ const editorOpen = ref(false);
 const editorRecord = ref(null);
 const customerDialog = ref(null);
 const masterOpen = ref(false);
+const stagedMaster = ref(false);
 const selectedCustomer = ref(null);
 const detailsTab = ref('customers');
 const membershipProposal = ref(null);
@@ -169,7 +170,7 @@ const reviewMasterCustomer = customer => {
   dialogContext = viewIdentity.value;
   customerDialog.value = { customer: null, initialCustomer: customer };
 };
-const openMaster = () => {
+const openMaster = (staged = false) => {
   if (
     loading.value ||
     saving.value ||
@@ -181,6 +182,7 @@ const openMaster = () => {
     return;
   closeDrafts();
   dialogContext = viewIdentity.value;
+  stagedMaster.value = staged;
   masterOpen.value = true;
 };
 const mutate = async (action, groupId, membershipRequest = null) => {
@@ -266,6 +268,28 @@ const prepareMembershipBatch = fields => {
 const reloadDraft = () => {
   closeDrafts();
   load(pagination.value.page);
+};
+const prepareMasterBatch = fields => {
+  if (
+    saving.value ||
+    loading.value ||
+    !stagedMaster.value ||
+    !group.value?.can_manage ||
+    group.value.status !== 'active' ||
+    dialogContext !== viewIdentity.value
+  )
+    return;
+  membershipProposal.value = {
+    operation: 'master_allocation',
+    ids: fields.company_ids,
+    creations: fields.creations,
+    portfolio_group_id: group.value.id,
+    expected_version: fields.expected_version,
+    justification: fields.reason,
+    request_id: crypto.randomUUID(),
+  };
+  closeDrafts();
+  detailsTab.value = 'batches';
 };
 watch(
   [identity, selectedId],
@@ -686,9 +710,24 @@ onBeforeUnmount(() => {
             type="button"
             :class="buttonClass"
             :disabled="saving || loading"
-            @click="openMaster"
+            @click="openMaster()"
           >
             {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.MASTER.TITLE') }}
+          </button>
+          <button
+            v-if="
+              group.can_manage &&
+              group.status === 'active' &&
+              metadata.can_manage &&
+              metadata.can_team
+            "
+            type="button"
+            :class="buttonClass"
+            :disabled="saving || loading"
+            data-test="master-reviewed-create"
+            @click="openMaster(true)"
+          >
+            {{ t('RELATIONSHIP.MASTER_ALLOCATION.TITLE') }}
           </button>
           <button
             v-if="group.can_manage && group.status === 'active'"
@@ -821,9 +860,11 @@ onBeforeUnmount(() => {
       :group="group"
       :metadata="metadata"
       :disabled="loading || saving"
+      :staged="stagedMaster"
       @close="masterOpen = false"
       @review="reviewMasterCustomer"
       @batch="prepareMembershipBatch"
+      @master-batch="prepareMasterBatch"
     />
     <CustomerPanel
       v-if="selectedCustomer"

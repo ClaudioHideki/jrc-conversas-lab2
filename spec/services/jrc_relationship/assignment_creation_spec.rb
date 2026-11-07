@@ -10,6 +10,35 @@ RSpec.describe JrcRelationship::AssignmentCreation do
 
   before { account.enable_features!('jrc_customer_master', 'jrc_relationship', 'jrc_crm') }
 
+  it 'validates an unsaved native proposal with the actual source policy without inserting, allocating a sequence or recording an audit' do
+    company
+    creator = service
+    statements = []
+    original = [JrcRelationship::Assignment.count, JrcCrm::AuditEvent.count]
+    subscriber = ->(_name, _start, _finish, _id, payload) { statements << payload.fetch(:sql) }
+    record = ActiveSupport::Notifications.subscribed(subscriber, 'sql.active_record') do
+      creator.preview({ 'company_id' => company.id, 'owner_id' => actor.id })
+    end
+    expect(record).to be_new_record
+    expect(record.id).to be_nil
+    expect([JrcRelationship::Assignment.count, JrcCrm::AuditEvent.count]).to eq(original)
+    expect(statements.grep(/\b(?:INSERT|UPDATE|DELETE|nextval)\b/i)).to be_empty
+    expect(statements.grep(/jsonb_populate_record/)).not_to be_empty
+  end
+
+  it 'denies a proposed allocation outside the native issuer and unit scope before any insert' do
+    issuer = account.master_companies.create!(name: 'Synthetic preview issuer', relationship_type: 'internal')
+    units = Array.new(2) do |index|
+      account.jrc_crm_business_units.create!(name: "Synthetic preview unit #{index}", code: SecureRandom.hex(6), operating_company: issuer)
+    end
+    account.jrc_crm_user_business_units.create!(user: actor, scope: 'BUSINESS_UNIT', company: issuer,
+                                                business_unit: units.first, active: true, structure_managed: true)
+    expect do
+      service.preview({ 'company_id' => company.id, 'owner_id' => actor.id, 'business_unit_id' => units.last.id })
+    end.to raise_error(ActiveRecord::RecordNotFound)
+    expect(JrcRelationship::Assignment.where(account: account)).to be_empty
+  end
+
   it 'reuses an existing master company through its authorized contact and audits native creation without duplicating the directory' do
     contact = create(:contact, account: account, company_id: company.id)
     expect do

@@ -378,6 +378,12 @@
       "report": "docs/jrc_consolidation/master_subject_schema_checkpoint_20261107.json",
       "current_state": "36 native cases passed; additive candidate-only migration preserved original rows and immutable parent guard.",
       "remaining": "Master batch engine/UI and current-source Chrome not complete; C-G open."
+    },
+    {
+      "requirement": "Relationship P0124/P0125/P0128: genuine reviewed initial allocation and multi-membership native integration",
+      "report": "docs/jrc_consolidation/master_reviewed_allocation_checkpoint_20261107.json",
+      "current_state": "Native45/0 final,source50/0 plus18 targeted;actual company subjects,atomic native creation/link,readonly preview,source/current authority/capacity gates and usable staged UI.",
+      "remaining": "No current-sourceChrome/fullC-Gclosure;localrole matrix,real master queue/maximum scale and documented business/external dependencies remain."
     }
   ],
   "explicit_dependencies": [
@@ -398,7 +404,7 @@
       "state": "External environment/operations require separate authorization; not simulated as passed."
     }
   ],
-  "next_confirmed_local_gap": "Continue actual remaining functional source gaps without rebuilding or touching5379.",
+  "next_confirmed_local_gap": "Continue independent CRM source/authority UI gaps: ProposalsIndex currently retains async detail/list/form responses across account/actor/role changes;preserve native draft, financial, approval and source workflows.",
   "stage_closure": {
     "C": false,
     "D": false,
@@ -407,5 +413,5 @@
     "G": false
   },
   "unreviewed_literal_and_visual_fragments": "Not auto-marked complete; the original context/requirements inventory remains classification_pending where not explicitly reconciled.",
-  "next_source_review": "Same-customer explanation reload/denial flow; no stage closure."
+  "next_source_review": "CRM ProposalsIndex identity-bound async detail/drafts/actions."
 }

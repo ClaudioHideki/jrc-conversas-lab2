@@ -12,10 +12,23 @@ class JrcRelationship::WithdrawalReviewedOperations
   end
 
   def visible
-    outside = JrcRelationship::BatchItem.where(account_id: @context.account.id)
-                                        .where.not(assignment_id: @context.assignments.select(:id)).select(:batch_review_id)
     groups = JrcRelationship::PortfolioGroupScope.resolve(@context).select(Arel.sql('jrc_relationship_portfolio_groups.id::text'))
-    source.where.not(id: outside)
-          .where("COALESCE(inputs ->> 'operation', '') <> ? OR inputs ->> 'portfolio_group_id' IN (?)", 'portfolio_membership', groups)
+    source.where.not(id: outside_allocations)
+          .where.not(id: outside_master_subjects)
+          .where("COALESCE(inputs ->> 'operation', '') NOT IN (?) OR inputs ->> 'portfolio_group_id' IN (?)",
+                 %w[portfolio_membership master_allocation], groups)
+  end
+
+  private
+
+  def outside_allocations
+    JrcRelationship::BatchItem.where(account_id: @context.account.id).where.not(assignment_id: nil)
+                              .where.not(assignment_id: @context.assignments.select(:id)).select(:batch_review_id)
+  end
+
+  def outside_master_subjects
+    companies = JrcRelationship::MasterAllocationSources.new(@context).companies.select(:id)
+    JrcRelationship::BatchItem.where(account_id: @context.account.id).where.not(company_id: nil)
+                              .where.not(company_id: companies).select(:batch_review_id)
   end
 end

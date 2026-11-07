@@ -12,6 +12,7 @@ export const validOperationMetadata = row =>
     'activity',
     'cadence',
     'portfolio_membership',
+    'master_allocation',
   ].includes(row.operation) &&
   typeof row.can_cancel_pending === 'boolean' &&
   row.can_cancel_pending === ['previewed', 'running'].includes(row.state) &&

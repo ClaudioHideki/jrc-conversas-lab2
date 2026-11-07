@@ -15,6 +15,8 @@ class JrcRelationship::BatchReviewPlan
   end
 
   def snapshot(inputs, lock: false)
+    return JrcRelationship::MasterAllocationReview.new(@context).snapshot(inputs, lock: lock) if inputs['operation'] == 'master_allocation'
+
     rows = @context.assignments.where(id: inputs.fetch('ids')).order(:id)
     rows = rows.lock if lock
     records = rows.to_a
@@ -23,11 +25,7 @@ class JrcRelationship::BatchReviewPlan
     book = book_snapshot(inputs, lock: lock)
     result = { 'version' => 1, 'access_signature' => @context.access_signature, 'book' => book, 'summary' => operation_summary(inputs, book),
                'rows' => records.map { |record| row_snapshot(record) } }
-    if inputs['operation'] == 'assign'
-      result.merge!(JrcRelationship::DistributionPreview.new(context: @context, inputs: inputs, records: records,
-                                                             summary: result['summary']).call)
-      add_responsibility_snapshot(result, inputs, records, lock)
-    end
+    add_distribution_snapshot(result, inputs, records, lock)
     add_cadence_snapshot(result, inputs, book, lock) if inputs['operation'] == 'cadence'
     add_membership_snapshot(result, inputs, lock, records)
     result
@@ -42,13 +40,9 @@ class JrcRelationship::BatchReviewPlan
   end
 
   def validate!(review, assignment: nil)
-    unless review.snapshot.fetch('access_signature') == @context.access_signature
-      raise JrcRelationship::BatchReviewError.new('BATCH_REVIEW_STALE', 'Reviewed access changed')
-    end
-    unless review.snapshot['book'] == book_snapshot(review.inputs, lock: true)
-      raise JrcRelationship::BatchReviewError.new('BATCH_REVIEW_STALE', 'Reviewed playbook changed')
-    end
+    return JrcRelationship::MasterAllocationReview.new(@context).validate!(review) if review.inputs['operation'] == 'master_allocation'
 
+    validate_source_pins!(review)
     validate_cadence!(review)
     JrcRelationship::PortfolioMembershipReview.new(@context).validate!(review) if review.inputs['operation'] == 'portfolio_membership'
     JrcRelationship::ResponsibilityReview.new(@context).verify!(review, assignment: assignment)
@@ -62,6 +56,23 @@ class JrcRelationship::BatchReviewPlan
   end
 
   private
+
+  def validate_source_pins!(review)
+    unless review.snapshot.fetch('access_signature') == @context.access_signature
+      raise JrcRelationship::BatchReviewError.new('BATCH_REVIEW_STALE', 'Reviewed access changed')
+    end
+    return if review.snapshot['book'] == book_snapshot(review.inputs, lock: true)
+
+    raise JrcRelationship::BatchReviewError.new('BATCH_REVIEW_STALE', 'Reviewed playbook changed')
+  end
+
+  def add_distribution_snapshot(result, inputs, records, lock)
+    return unless inputs['operation'] == 'assign'
+
+    result.merge!(JrcRelationship::DistributionPreview.new(context: @context, inputs: inputs, records: records,
+                                                           summary: result['summary']).call)
+    add_responsibility_snapshot(result, inputs, records, lock)
+  end
 
   def add_membership_snapshot(result, inputs, lock, records)
     return unless inputs['operation'] == 'portfolio_membership'
@@ -115,17 +126,22 @@ class JrcRelationship::BatchReviewPlan
     when 'assign'
       assign_options(input)
     when 'portfolio_membership' then JrcRelationship::PortfolioMembershipInput.new(@context).call(input)
+    when 'master_allocation' then JrcRelationship::MasterAllocationInput.new(@context).call(input)
     when 'activity'
-      title = input.fetch('title').to_s.strip
-      raise ArgumentError, 'Activity title is required' unless title.length.between?(1, 250)
-
-      { 'title' => title, 'due_at' => Time.iso8601(input.fetch('due_at')).iso8601(6) }
+      activity_options(input)
     when 'playbook' then { 'playbook_id' => selected_book(input) }
     when 'cadence'
       { 'playbook_id' => selected_book(input), 'conversation_id' => Integer(input.fetch('conversation_id')),
         'starts_at' => Time.iso8601(input.fetch('starts_at')).iso8601(6) }
     else raise ArgumentError, 'Unsupported portfolio operation'
     end
+  end
+
+  def activity_options(input)
+    title = input.fetch('title').to_s.strip
+    raise ArgumentError, 'Activity title is required' unless title.length.between?(1, 250)
+
+    { 'title' => title, 'due_at' => Time.iso8601(input.fetch('due_at')).iso8601(6) }
   end
 
   def assign_options(input)

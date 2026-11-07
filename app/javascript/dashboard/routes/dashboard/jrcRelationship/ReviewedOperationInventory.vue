@@ -77,6 +77,9 @@ const operations = computed(() => ({
   portfolio_membership: t(
     'RELATIONSHIP.REVIEWED_BATCH.OPERATIONS.portfolio_membership'
   ),
+  master_allocation: t(
+    'RELATIONSHIP.REVIEWED_BATCH.OPERATIONS.master_allocation'
+  ),
 }));
 const label = key => labels.value[key];
 const clearDenied = failure => {

@@ -97,4 +97,31 @@ RSpec.describe JrcRelationship::WithdrawalReadiness do
     expect(JrcRelationship::BatchReview.find(other.fetch('id')).state).to eq('previewed')
     expect(membership.reload.jrc_relationship_withdrawn_at).to be_nil
   end
+
+  it 'counts native pending company subjects without an allocation ID rather than reporting a false zero for analyst withdrawal' do
+    company = account.master_companies.create!(name: 'Synthetic unallocated withdrawal customer')
+    group = JrcRelationship::PortfolioGroup.create!(account: account, owner: manager, name: 'Synthetic pending master portfolio')
+    proposal = { 'operation' => 'master_allocation', 'ids' => [company.id], 'portfolio_group_id' => group.id,
+                 'expected_version' => 0, 'justification' => 'Native pending master allocation', 'request_id' => SecureRandom.uuid,
+                 'creations' => [{ 'company_id' => company.id, 'owner_id' => manager.id }] }
+    saved = JrcRelationship::ReviewedPortfolioBatch.new(analyst_context).preview(proposal)
+    result = described_class.new(manager_context).call(analyst.id)
+    expect(result.fetch(:counts).fetch('reviewed_batches')).to eq(1)
+    expect(result.fetch(:can_withdraw_relationship)).to be(false)
+    expect(JrcRelationship::BatchReview.find(saved.fetch('id')).items.pluck(:assignment_id)).to eq([nil])
+  end
+
+  it 'denies a pending master audience hidden by native named-portfolio metadata rather than treating its nullable subject as visible' do
+    company = account.master_companies.create!(name: 'Synthetic private master withdrawal customer')
+    owner = create(:user, account: account, role: :administrator)
+    group = JrcRelationship::PortfolioGroup.create!(account: account, owner: owner, name: 'Synthetic private master group')
+    proposal = { 'operation' => 'master_allocation', 'ids' => [company.id], 'portfolio_group_id' => group.id,
+                 'expected_version' => 0, 'justification' => 'Native private master review', 'request_id' => SecureRandom.uuid,
+                 'creations' => [{ 'company_id' => company.id, 'owner_id' => owner.id }] }
+    JrcRelationship::ReviewedPortfolioBatch.new(analyst_context).preview(proposal)
+    manager_member.update!(role: :agent, custom_role: manager_role)
+    team = create(:team, account: account)
+    [manager, analyst].each { |user| TeamMember.create!(team: team, user: user) }
+    expect { described_class.new(manager_context).call(analyst.id) }.to raise_error(Pundit::NotAuthorizedError)
+  end
 end

@@ -23,6 +23,7 @@ class JrcRelationship::DistributionApproval
   end
 
   def request!(review, digest:, idempotency_key:)
+    raise ArgumentError, 'Formal transfer approval is not available for this operation' unless review.inputs['operation'] == 'assign'
     raise ArgumentError, 'Review identity mismatch' unless review.digest == digest
     raise ArgumentError, 'Review is not available' unless review.state == 'previewed'
     raise ArgumentError, 'Formal approval is not required' unless current_binding!(review).fetch('required')

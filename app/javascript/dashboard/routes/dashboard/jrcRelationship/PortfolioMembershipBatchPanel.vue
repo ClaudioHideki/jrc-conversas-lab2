@@ -23,12 +23,25 @@ const busy = ref(false);
 const blocked = ref(false);
 const error = ref('');
 const previewRejected = ref(false);
+const master = computed(
+  () =>
+    (reviewed.value?.inputs || proposal.value)?.operation ===
+    'master_allocation'
+);
+const batchCopy = computed(() => ({
+  title: master.value
+    ? t('RELATIONSHIP.MASTER_ALLOCATION.TITLE')
+    : t('RELATIONSHIP.NAMED_PORTFOLIOS.BATCH.TITLE'),
+  help: master.value
+    ? t('RELATIONSHIP.MASTER_ALLOCATION.HELP')
+    : t('RELATIONSHIP.NAMED_PORTFOLIOS.BATCH.HELP'),
+}));
 const unresolved = computed(() => {
   if (previewRejected.value && proposal.value) return proposal.value.ids;
   if (!['attention', 'canceled'].includes(reviewed.value?.state)) return [];
   return reviewed.value.items
     .filter(item => ['failed', 'canceled'].includes(item.state))
-    .map(item => item.assignment_id);
+    .map(item => (master.value ? item.company_id : item.assignment_id));
 });
 const identity = computed(() =>
   JSON.stringify([
@@ -54,7 +67,7 @@ const reReview = async () => {
     return;
   const token = generation;
   const previous = reviewed.value;
-  const active = previous ? previous.inputs.active : proposal.value.active;
+  const original = previous ? previous.inputs : proposal.value;
   const ids = [...unresolved.value];
   controller?.abort();
   controller = new AbortController();
@@ -77,12 +90,19 @@ const reReview = async () => {
       blocked.value = true;
       throw new Error(t('RELATIONSHIP.NAMED_PORTFOLIOS.BATCH.FRESH_BLOCKED'));
     }
+    const operationFields = master.value
+      ? {
+          operation: 'master_allocation',
+          creations: original.creations.filter(row =>
+            ids.includes(row.company_id)
+          ),
+        }
+      : { operation: 'portfolio_membership', active: original.active };
     proposal.value = {
-      operation: 'portfolio_membership',
+      ...operationFields,
       ids,
       portfolio_group_id: data.id,
       expected_version: data.version,
-      active,
       ...(previous ? { previous_review_id: previous.id } : {}),
       justification: reason.value.trim(),
       request_id: crypto.randomUUID(),
@@ -131,10 +151,10 @@ onBeforeUnmount(() => {
     class="min-w-0 space-y-3 rounded-xl border border-n-violet-6 bg-n-solid-2 p-4"
   >
     <h3 class="font-semibold">
-      {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.BATCH.TITLE') }}
+      {{ batchCopy.title }}
     </h3>
     <p class="text-sm text-n-slate-11">
-      {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.BATCH.HELP') }}
+      {{ batchCopy.help }}
     </p>
     <p
       v-if="error"

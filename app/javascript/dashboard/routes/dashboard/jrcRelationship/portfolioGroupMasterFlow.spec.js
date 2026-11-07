@@ -548,3 +548,118 @@ it('passes a collected master audience to the existing durable membership panel 
   });
   expect(mocks.api.savePortfolioGroupCustomers).not.toHaveBeenCalled();
 });
+
+it('stages two missing native allocations without saving either before the full company-subject review', async () => {
+  const wrapper = render(Master, { group, metadata, staged: true });
+  await selectCompany(wrapper);
+  wrapper.findComponent(Form).vm.$emit('submit', {
+    company_id: 11,
+    owner_id: 7,
+    team_id: '',
+    business_unit_id: 5,
+    exception_reason: '  Explicit eligible exception  ',
+    settings: { capacity_workload: { hours: 1.5 } },
+  });
+  await flushPromises();
+  await wrapper.get('[data-test="master-add-selection"]').trigger('click');
+  await flushPromises();
+  wrapper.findComponent(CompanyPicker).vm.$emit('update:modelValue', 12);
+  await flushPromises();
+  await button(wrapper, 'Check current Relationship allocation').trigger(
+    'click'
+  );
+  await flushPromises();
+  wrapper
+    .findComponent(Form)
+    .vm.$emit('submit', { company_id: 12, owner_id: 8, exception_reason: '' });
+  await flushPromises();
+  await wrapper.get('[data-test="master-add-selection"]').trigger('click');
+  await flushPromises();
+  await wrapper
+    .get('[data-test="master-selection-reason"]')
+    .setValue('Review both prepared allocations');
+  await wrapper.get('[data-test="master-selection-review"]').trigger('submit');
+  const result = wrapper.emitted('masterBatch')[0][0];
+  expect(result.company_ids).toEqual([11, 12]);
+  expect(result.creations).toEqual([
+    {
+      company_id: 11,
+      owner_id: 7,
+      team_id: null,
+      business_unit_id: 5,
+      exception_reason: 'Explicit eligible exception',
+      settings: { capacity_workload: { hours: 1.5 } },
+    },
+    { company_id: 12, owner_id: 8, team_id: null, business_unit_id: null },
+  ]);
+  expect(wrapper.emitted('batch')).toBeUndefined();
+  expect(wrapper.emitted('review')).toBeUndefined();
+  expect(mocks.api.saveAssignment).not.toHaveBeenCalled();
+  expect(mocks.api.savePortfolioGroupCustomers).not.toHaveBeenCalled();
+});
+
+it('deduplicates staged companies without treating their absent allocation IDs as the same customer', async () => {
+  const wrapper = render(Master, { group, metadata, staged: true });
+  await selectCompany(wrapper);
+  wrapper
+    .findComponent(Form)
+    .vm.$emit('submit', { company_id: 11, owner_id: 7 });
+  await flushPromises();
+  await wrapper.get('[data-test="master-add-selection"]').trigger('click');
+  await flushPromises();
+  await selectCompany(wrapper);
+  wrapper
+    .findComponent(Form)
+    .vm.$emit('submit', { company_id: 11, owner_id: 8 });
+  await flushPromises();
+  expect(
+    wrapper.get('[data-test="master-add-selection"]').element.disabled
+  ).toBe(true);
+  await wrapper.get('[data-test="master-another-customer"]').trigger('click');
+  await flushPromises();
+  await wrapper.get('[data-test="master-remove-selection"]').trigger('click');
+  expect(wrapper.findAll('[data-test="master-selection-row"]')).toHaveLength(0);
+  expect(mocks.api.saveAssignment).not.toHaveBeenCalled();
+});
+
+it('opens a distinct staged master mode and hands company IDs and native proposals to the same durable group panel', async () => {
+  mocks.route.query = { group_id: '18' };
+  const wrapper = render(Groups, { metadata }, true);
+  await flushPromises();
+  await wrapper.get('[data-test="master-reviewed-create"]').trigger('click');
+  expect(wrapper.findComponent(Master).props('staged')).toBe(true);
+  const creations = [{ company_id: 11, owner_id: 7 }];
+  wrapper.findComponent(Master).vm.$emit('masterBatch', {
+    company_ids: [11, 12],
+    creations,
+    expected_version: 4,
+    reason: 'Reviewed company subjects',
+  });
+  await flushPromises();
+  expect(wrapper.findComponent(MembershipBatch).props('proposal')).toEqual({
+    operation: 'master_allocation',
+    ids: [11, 12],
+    creations,
+    portfolio_group_id: 18,
+    expected_version: 4,
+    justification: 'Reviewed company subjects',
+    request_id: expect.any(String),
+  });
+  expect(mocks.api.saveAssignment).not.toHaveBeenCalled();
+});
+
+it('clears staged allocation proposals on native authority changes without issuing creation or membership commands', async () => {
+  const wrapper = render(Master, { group, metadata, staged: true });
+  await selectCompany(wrapper);
+  wrapper
+    .findComponent(Form)
+    .vm.$emit('submit', { company_id: 11, owner_id: 7 });
+  await flushPromises();
+  await wrapper.get('[data-test="master-add-selection"]').trigger('click');
+  await flushPromises();
+  mocks.store.getters.getCurrentUserID = 99;
+  await flushPromises();
+  expect(wrapper.findAll('[data-test="master-selection-row"]')).toHaveLength(0);
+  expect(wrapper.emitted('close')).toHaveLength(1);
+  expect(mocks.api.saveAssignment).not.toHaveBeenCalled();
+});

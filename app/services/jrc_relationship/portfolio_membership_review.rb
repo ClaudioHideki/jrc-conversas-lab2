@@ -6,17 +6,29 @@ class JrcRelationship::PortfolioMembershipReview
   end
 
   def snapshot(inputs, lock:, records:)
-    group = group!(inputs, lock: lock)
-    raise ArgumentError, 'Reviewed portfolio changed' unless group.lock_version == inputs.fetch('expected_version')
-
+    group, configuration, pin = capture_group(inputs, lock: lock)
     validate_links!(group, records, inputs.fetch('active'))
-    configuration = configuration(group)
     minutes = configuration&.effective_rules&.fetch('portfolio_review_validity_minutes', 15) || 15
-    { 'group_membership' => { 'portfolio_group_id' => group.id, 'initial_revision' => group.lock_version,
-                              'digest' => fingerprint(group, configuration), 'links' => links(group, inputs.fetch('ids')) },
+    { 'group_membership' => pin.merge('links' => links(group, inputs.fetch('ids'))),
       'validity_minutes' => [15, minutes].min,
       'membership_capacity' => JrcRelationship::PortfolioMembershipCapacity.new(@context).capture(group, inputs, records, configuration),
       'summary' => { 'portfolio_group_id' => group.id, 'portfolio_group_name' => group.name, 'active' => inputs.fetch('active') } }
+  end
+
+  def capture_group(inputs, lock:)
+    group = group!(inputs, lock: lock)
+    raise ArgumentError, 'Reviewed portfolio changed' unless group.lock_version == inputs.fetch('expected_version')
+
+    config = configuration(group)
+    [group, config, { 'portfolio_group_id' => group.id, 'initial_revision' => group.lock_version, 'digest' => fingerprint(group, config) }]
+  end
+
+  def validate_group!(inputs, pin, revision:)
+    group = group!(inputs, lock: true)
+    valid = group.lock_version == revision && pin.fetch('digest') == fingerprint(group, configuration(group))
+    raise JrcRelationship::BatchReviewError.new('BATCH_REVIEW_STALE', 'Reviewed portfolio changed') unless valid
+
+    group
   end
 
   def validate!(review)
