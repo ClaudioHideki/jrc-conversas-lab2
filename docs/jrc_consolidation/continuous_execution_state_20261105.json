@@ -3,12 +3,12 @@
   "user_request": "499267ac-546d-4853-b4cf-7f03a2ea0629",
   "initial_head": "be54d0f7b4ce8d4e2a077cf2bdd8c2a4d5c88f5e",
   "branch": "codex/relacionamento-v2-20261101",
-  "last_validated_checkpoint": "d3e14bd30402518212646efbc3955ebf5135ab89",
+  "last_validated_checkpoint": "c4048eb212f127f1da97ea35d24e19c8b69f8e9b",
   "completed_current_work": "Sealed dossier, weighted/current capacity, native withdrawal/cadence controls and F2 increments locally tested; see linked incremental reports. No C-G closure.",
-  "active_work": "Bind shared LeadCreateModal (including global action caller) to original account/actor/role/lifecycle,preserve native drafts,ignore obsolete create receipts and never claim success before current draft confirmation;test existing creation behavior.",
+  "active_work": "Protect existing ActivitiesIndex local deal options,creation draft/navigation and native completion receipts with captured authority/lifecycle;retain existing filters,editor,read policies and native payloads;add failing source regressions first.",
   "exact_next_actions": [
-    "Bind shared LeadCreateModal (including global action caller) to original account/actor/role/lifecycle,preserve native drafts,ignore obsolete create receipts and never claim success before current draft confirmation;test existing creation behavior.",
-    "Continue other independently safe C-G work;respect browser/business/external dependencies."
+    "Protect existing ActivitiesIndex local deal options,creation draft/navigation and native completion receipts with captured authority/lifecycle;retain existing filters,editor,read policies and native payloads;add failing source regressions first.",
+    "Continue independent safe work;no build/no5379 change."
   ],
   "test_environment": {
     "source_manifest": ".codex/d9-notifications-20261104/snapshot.json",
@@ -51,15 +51,15 @@
     "No real participant removal or provider request; tests use synthetic records and WebMock, with external network disabled."
   ],
   "restrictions": "No build/recompile, no5379 change/restart, no four-container restart/reconfiguration, no cleanup/delete of existing data, no push/GHCR/deploy/production/client change, no real provider operations. Additive migrations allowed only in owned synthetic test database.",
-  "disk_last_observed_bytes": 6553817088,
+  "disk_last_observed_bytes": 6554353664,
   "TRR": "Undefined; do not invent",
   "company_documents_without_portfolio": "Explicitly deferred",
-  "last_validated_head": "d3e14bd30402518212646efbc3955ebf5135ab89",
-  "new_validated_code_checkpoint": "git log -1 --format=%H -- docs/jrc_consolidation/lead_native_actions_checkpoint_20261107.json",
+  "last_validated_head": "c4048eb212f127f1da97ea35d24e19c8b69f8e9b",
+  "new_validated_code_checkpoint": "git log -1 --format=%H -- docs/jrc_consolidation/lead_create_authority_checkpoint_20261107.json",
   "current_status": "Native maximum master allocation and CRM cache boundary source tests passed;not fullC-G or Chrome closure.",
   "next_actions": [
-    "Bind shared LeadCreateModal (including global action caller) to original account/actor/role/lifecycle,preserve native drafts,ignore obsolete create receipts and never claim success before current draft confirmation;test existing creation behavior.",
-    "No build/no5379 change/push/external operations."
+    "Protect existing ActivitiesIndex local deal options,creation draft/navigation and native completion receipts with captured authority/lifecycle;retain existing filters,editor,read policies and native payloads;add failing source regressions first.",
+    "Keep business/external/Chrome dependencies explicit."
   ],
   "latest_dossier_report": "docs/jrc_consolidation/sealed_dossier_checkpoint_20261105.json",
   "capacity_report": "docs/jrc_consolidation/weighted_capacity_checkpoint_20261105.json",
@@ -82,7 +82,7 @@
   "priority_bands_report": "docs/jrc_consolidation/priority_bands_checkpoint_20261105.json",
   "automatic_playbook_budget_report": "docs/jrc_consolidation/automatic_playbook_budget_checkpoint_20261106.json",
   "analyst_native_responsibilities_report": "docs/jrc_consolidation/analyst_native_responsibilities_checkpoint_20261106.json",
-  "checkpoint_resolution": "git log -1 --format=%H -- docs/jrc_consolidation/lead_native_actions_checkpoint_20261107.json",
+  "checkpoint_resolution": "git log -1 --format=%H -- docs/jrc_consolidation/lead_create_authority_checkpoint_20261107.json",
   "approval_percentage_input_report": "docs/jrc_consolidation/approval_percentage_input_checkpoint_20261106.json",
   "word_gap_delta": "docs/jrc_consolidation/word_gap_delta_20261106.json",
   "workspace_card_sources_report": "docs/jrc_consolidation/workspace_card_sources_checkpoint_20261106.json",
@@ -171,5 +171,6 @@
   "master_maximum_scale_report": "docs/jrc_consolidation/master_maximum_scale_checkpoint_20261107.json",
   "crm_cache_authority_report": "docs/jrc_consolidation/crm_cache_authority_checkpoint_20261107.json",
   "funnel_authority_report": "docs/jrc_consolidation/funnel_authority_checkpoint_20261107.json",
-  "lead_native_actions_report": "docs/jrc_consolidation/lead_native_actions_checkpoint_20261107.json"
+  "lead_native_actions_report": "docs/jrc_consolidation/lead_native_actions_checkpoint_20261107.json",
+  "lead_create_authority_report": "docs/jrc_consolidation/lead_create_authority_checkpoint_20261107.json"
 }

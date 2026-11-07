@@ -1,0 +1,100 @@
+{
+  "date": "2026-11-07",
+  "status": "shared_creation_source_authority_and_native_drafts_validated_not_chrome",
+  "branch": "codex/relacionamento-v2-20261101",
+  "previous_checkpoint": "c4048eb212f127f1da97ea35d24e19c8b69f8e9b",
+  "files": [
+    "app/javascript/dashboard/routes/dashboard/crm/views/leads/LeadCreateModal.vue",
+    "app/javascript/dashboard/routes/dashboard/crm/views/leads/spec/LeadCreateAuthority.spec.js"
+  ],
+  "implementation": [
+    "Shared modal (native LeadsIndex and GlobalCrmCreation callers) binds its whole lifetime to original account/actor/role/grants. Changed identity irreversibly hides it and emits close;an old form cannot revive after returning to the former account.",
+    "Existing native useFormDraft scopes/serialization retained. Before invalidation the current owner draft is flushed where applicable;no old contact draft is moved into a new account/user key. Existing other-owner drafts preserved. No draft helper rewritten.",
+    "Native create payload/contact linkage and duplicate-save guard unchanged. Current native completion must pass context and original draft completion before success toast/created event.",
+    "Obsolete success/failure after invalidation/unmount does not alter the new UI,clear another draft,show old conflict or retry/undo the already committed native command."
+  ],
+  "validation": {
+    "baseline01": "5failed/1passed expected source assertions before correction.",
+    "source02": "11passed:6authority/draft source regressions,4existing shared creation cases,1native draft helper regression. Transport mocked;Vue and draft helper real.",
+    "stale04": "1passed/5notselected:additionally submitted old detached form after role invalidation;no native request. Other cases already passed source02.",
+    "lint_final05": [
+      {
+        "file": "LeadCreateModal.vue",
+        "errors": 0,
+        "warnings": 5
+      },
+      {
+        "file": "LeadCreateAuthority.spec.js",
+        "errors": 0,
+        "warnings": 0
+      }
+    ],
+    "resources": {
+      "lead-create-authority-baseline01": {
+        "status": "failed",
+        "free_start": 6554021888,
+        "minimum_free": 6526631936,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 18532,
+        "exit_code": 1,
+        "free_end": 6552010752
+      },
+      "lead-create-authority-source02": {
+        "status": "passed",
+        "free_start": 6550646784,
+        "minimum_free": 6536044544,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 7812,
+        "exit_code": 0,
+        "free_end": 6557773824
+      },
+      "lead-create-authority-stale04": {
+        "status": "passed",
+        "free_start": 6536056832,
+        "minimum_free": 6532706304,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 22420,
+        "exit_code": 0,
+        "free_end": 6553280512
+      },
+      "lead-create-authority-lint-final05": {
+        "status": "passed",
+        "free_start": 6553849856,
+        "minimum_free": 6553763840,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 8924,
+        "exit_code": 0,
+        "free_end": 6553747456
+      }
+    },
+    "new_native_backend_tests": false,
+    "chrome": false
+  },
+  "disk": {
+    "initial_bytes": 6554021888,
+    "minimum_measured_bytes": 6526631936,
+    "final_bytes": 6554353664
+  },
+  "preservation": {
+    "api_contracts_changed": false,
+    "draft_helper_changed": false,
+    "build": false,
+    "server5379_changed": false,
+    "original_containers_restarted": false,
+    "cleanup": false,
+    "push": false,
+    "external_operations": false
+  },
+  "remaining": [
+    "ActivitiesIndex confirmed analogous unbound local deal options and post-create/post-complete navigation/refresh;next incremental source task,reuse native editor and draft helper.",
+    "Other CRM/source forms,Chrome/desktop/mobile and literal/visual Word audit remain open. No C-G closure;TRR/local portfolio matrix/external dependencies unchanged."
+  ]
+}
