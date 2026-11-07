@@ -12,6 +12,7 @@ import shutil
 import subprocess
 import time
 import uuid
+import sys
 
 root = Path(__file__).resolve().parent.parent
 assert Path.cwd().resolve() == root
@@ -22,15 +23,27 @@ assert source.startswith("/consolidation-approval-notifications-tests-20261104-"
 container = "jrc-rel-v2-run-20261101"
 postgres = "jrc-rel-v2-pg-20261101"
 redis = "jrc-rel-v2-redis-20261101"
-nonce = uuid.uuid4().hex[:12]
+resume = len(sys.argv) == 3 and sys.argv[1] == '--resume'
+assert len(sys.argv) == 1 or resume
+nonce = sys.argv[2] if resume else uuid.uuid4().hex[:12]
+assert re.fullmatch(r"[0-9a-f]{12}", nonce)
+attempt = uuid.uuid4().hex[:8] if resume else None
 database = "jrc_g_worker_20261106_" + nonce
 queue = "jrc_g_worker_" + nonce
-directory = "/tmp/" + queue
+directory = "/tmp/" + queue + ("/attempt_" + attempt if resume else "")
 assert re.fullmatch(r"jrc_g_worker_20261106_[0-9a-f]{12}", database)
 artifact = root / ".codex/g-worker-20261106" / nonce
+if resume:
+    prior = json.loads((artifact / "resource.json").read_text())
+    native_prior = json.loads((artifact / "native-result.json").read_text())
+    assert prior["nonce"] == nonce and prior["database"] == database and prior["queue"] == queue
+    assert prior["business_data_copied"] is False and prior["passed"] is False
+    assert native_prior["status"] == "failed" and native_prior["phase"] == "worker_boot"
+    assert native_prior["delivery_acknowledgments"] == 0
+    artifact = artifact / ("attempt_" + attempt)
 artifact.mkdir(parents=True, exist_ok=False)
 result = {"nonce": nonce, "database": database, "redis_index": 15, "queue": queue,
-          "source": source, "head": subprocess.check_output(["git", "rev-parse", "HEAD"]).decode().strip(),
+          "source": source, "resume": resume, "attempt": attempt, "head": subprocess.check_output(["git", "rev-parse", "HEAD"]).decode().strip(),
           "free_start": shutil.disk_usage(root).free, "minimum_free": shutil.disk_usage(root).free,
           "original_containers_changed": False, "application_build": False, "cleanup": False}
 
@@ -58,36 +71,47 @@ try:
         assert digest == remote_digest, "Sync the owned source snapshot before running the gate"
         result["code_sha256"][relative] = digest
         command(["docker", "exec", container, "ruby", "-c", remote])
-    assert command(["docker", "exec", redis, "redis-cli", "-n", "15", "DBSIZE"]).decode().strip() == "0", "Redis15 is not empty; no cleanup authorized"
-    exists = command(["docker", "exec", postgres, "psql", "-U", "postgres", "-d", "postgres", "-At", "-c",
-                      "SELECT count(*) FROM pg_database WHERE datname='" + database + "'"]).decode().strip()
-    assert exists == "0", "Never replace an existing test database"
-    result["phase"] = "new_schema_only_database"
-    schema = command(["docker", "exec", postgres, "pg_dump", "-U", "postgres", "--schema-only", "--no-owner", "--no-privileges",
-                      "--dbname=jrc_rel_v2_candidate_test"])
-    metadata = command(["docker", "exec", postgres, "pg_dump", "-U", "postgres", "--data-only", "--no-owner", "--no-privileges",
-                        "--table=schema_migrations", "--table=ar_internal_metadata", "--dbname=jrc_rel_v2_candidate_test"])
-    result["schema_sha256"] = hashlib.sha256(schema).hexdigest()
-    result["schema_bytes"] = len(schema)
-    result["migration_metadata_bytes"] = len(metadata)
-    command(["docker", "exec", postgres, "createdb", "-U", "postgres", "--template=template0", database])
-    command(["docker", "exec", "-i", postgres, "psql", "-X", "-U", "postgres", "--set=ON_ERROR_STOP=1", "--dbname=" + database], schema + b"\n" + metadata)
-    empty = command(["docker", "exec", postgres, "psql", "-U", "postgres", "-d", database, "-At", "-c",
-                     "SELECT (SELECT count(*) FROM accounts),(SELECT count(*) FROM users),(SELECT count(*) FROM jrc_relationship_assignments);"]).decode().strip()
-    assert empty == "0|0|0", "No business data may be cloned"
-    result["business_data_copied"] = False
-    assert command(["docker", "exec", redis, "redis-cli", "-n", "15", "DBSIZE"]).decode().strip() == "0"
-    claim = command(["docker", "exec", redis, "redis-cli", "-n", "15", "SET", "jrc_g_worker_claim", nonce, "NX", "EX", "3600"]).decode().strip()
-    assert claim == "OK"
+    if resume:
+        result["phase"] = "preserved_fixture_ownership"
+        assert command(["docker", "exec", redis, "redis-cli", "-n", "15", "GET", "jrc_g_worker_claim"]).decode().strip() == nonce
+        assert int(command(["docker", "exec", redis, "redis-cli", "-n", "15", "TTL", "jrc_g_worker_claim"]).decode().strip()) > 600
+        assert command(["docker", "exec", redis, "redis-cli", "-n", "15", "SCARD", "jrc_g_worker:" + nonce + ":ack"]).decode().strip() == "0"
+        active = command(["docker", "exec", postgres, "psql", "-U", "postgres", "-d", "postgres", "-At", "-c",
+                          "SELECT count(*) FROM pg_stat_activity WHERE datname='" + database + "'"]).decode().strip()
+        assert active == "0", "Do not resume while another client is using the owned database"
+        result["business_data_copied"] = False
+        result["original_fixture_artifacts"] = str(artifact.parent)
+    else:
+        assert command(["docker", "exec", redis, "redis-cli", "-n", "15", "DBSIZE"]).decode().strip() == "0", "Redis15 is not empty; no cleanup authorized"
+        exists = command(["docker", "exec", postgres, "psql", "-U", "postgres", "-d", "postgres", "-At", "-c",
+                          "SELECT count(*) FROM pg_database WHERE datname='" + database + "'"]).decode().strip()
+        assert exists == "0", "Never replace an existing test database"
+        result["phase"] = "new_schema_only_database"
+        schema = command(["docker", "exec", postgres, "pg_dump", "-U", "postgres", "--schema-only", "--no-owner", "--no-privileges",
+                          "--dbname=jrc_rel_v2_candidate_test"])
+        metadata = command(["docker", "exec", postgres, "pg_dump", "-U", "postgres", "--data-only", "--no-owner", "--no-privileges",
+                            "--table=schema_migrations", "--table=ar_internal_metadata", "--dbname=jrc_rel_v2_candidate_test"])
+        result["schema_sha256"] = hashlib.sha256(schema).hexdigest()
+        result["schema_bytes"] = len(schema)
+        result["migration_metadata_bytes"] = len(metadata)
+        command(["docker", "exec", postgres, "createdb", "-U", "postgres", "--template=template0", database])
+        command(["docker", "exec", "-i", postgres, "psql", "-X", "-U", "postgres", "--set=ON_ERROR_STOP=1", "--dbname=" + database], schema + b"\n" + metadata)
+        empty = command(["docker", "exec", postgres, "psql", "-U", "postgres", "-d", database, "-At", "-c",
+                         "SELECT (SELECT count(*) FROM accounts),(SELECT count(*) FROM users),(SELECT count(*) FROM jrc_relationship_assignments);"]).decode().strip()
+        assert empty == "0|0|0", "No business data may be cloned"
+        result["business_data_copied"] = False
+        assert command(["docker", "exec", redis, "redis-cli", "-n", "15", "DBSIZE"]).decode().strip() == "0"
+        claim = command(["docker", "exec", redis, "redis-cli", "-n", "15", "SET", "jrc_g_worker_claim", nonce, "NX", "EX", "3600"]).decode().strip()
+        assert claim == "OK"
     command(["docker", "exec", container, "ruby", "-rfileutils", "-e",
-             "p=ARGV.fetch(0);raise unless p.match?(/\\A\\/tmp\\/jrc_g_worker_[0-9a-f]{12}\\z/) && !File.exist?(p);FileUtils.mkdir_p(p)", directory])
+             "p=ARGV.fetch(0);raise unless p.match?(/\\A\\/tmp\\/jrc_g_worker_[0-9a-f]{12}(?:\\/attempt_[0-9a-f]{8})?\\z/) && !File.exist?(p);FileUtils.mkdir_p(p)", directory])
     env = {"RAILS_ENV": "test", "POSTGRES_DATABASE": database, "POSTGRES_HOST": postgres,
            "POSTGRES_USERNAME": "postgres", "POSTGRES_PASSWORD": "rel-v2-disposable-only",
            "DATABASE_URL": "postgresql://postgres:rel-v2-disposable-only@" + postgres + "/" + database,
            "REDIS_URL": "redis://" + redis + ":6379/15", "REDIS_SENTINELS": "", "REDIS_PASSWORD": "",
            "BUNDLE_PATH": "/gems", "BUNDLE_WITHOUT": "development", "BUNDLE_GEMFILE": source + "/Gemfile",
            "SECRET_KEY_BASE": "g-owned-worker-synthetic-only", "TZ": "UTC", "LOG_LEVEL": "warn",
-           "JRC_G_NONCE": nonce, "JRC_G_DATABASE": database, "JRC_G_QUEUE": queue,
+           "JRC_G_RESUME": str(resume).lower(), "JRC_G_NONCE": nonce, "JRC_G_DATABASE": database, "JRC_G_QUEUE": queue,
            "JRC_G_DIRECTORY": directory, "JRC_G_READY_FILE": directory + "/ready",
            "JRC_G_WORKER_NETWORK_FILE": directory + "/network.json",
            "JRC_G_RECEIPT_KEY": "jrc_g_worker:" + nonce + ":ack"}

@@ -26,7 +26,7 @@ class JrcOwnedWorkerGate
   def run
     validate_environment!
     @phase = 'synthetic_records'
-    seed!
+    ENV['JRC_G_RESUME'] == 'true' ? resume_fixtures! : seed!
     @phase = 'worker_boot'
     start_worker!
     exercise!
@@ -50,6 +50,7 @@ class JrcOwnedWorkerGate
     @phase = 'revoked_authority'
     execute_revoked!
     @phase = 'tenant_and_network'
+    verify_expired_unchanged!
     check!('foreign account allocation unchanged', @foreign.reload.attributes == @foreign_attributes)
     check!('no HTTP requests attempted', WebMock::RequestRegistry.instance.requested_signatures.hash.empty?)
   end
@@ -65,7 +66,7 @@ class JrcOwnedWorkerGate
                                                    @database == "jrc_g_worker_20261106_#{@nonce}" && @queue == "jrc_g_worker_#{@nonce}")
     validate_database!
     validate_redis!
-    check!('owned artifact directory', @directory == "/tmp/jrc_g_worker_#{@nonce}" && File.directory?(@directory))
+    check!('owned artifact directory', owned_directory? && File.directory?(@directory))
     @validated = true
     Rails.logger.level = Logger::WARN
     JrcRelationship::BatchExecutionJob.queue_adapter = :sidekiq
@@ -76,7 +77,9 @@ class JrcOwnedWorkerGate
     check!('exact PostgreSQL URL/database', URI(ENV.fetch('DATABASE_URL')).path == "/#{@database}" &&
                                           ActiveRecord::Base.connection.select_value('SELECT current_database()') == @database)
     check!('no pending migrations', !ActiveRecord::Base.connection.migration_context.needs_migration?)
-    check!('fresh empty business database', Account.count.zero? && User.count.zero? && JrcRelationship::Assignment.count.zero?)
+    unless ENV['JRC_G_RESUME'] == 'true'
+      check!('fresh empty business database', Account.count.zero? && User.count.zero? && JrcRelationship::Assignment.count.zero?)
+    end
     check!('committed cross-process fixtures', !ActiveRecord::Base.connection.transaction_open?)
   end
 
@@ -116,10 +119,12 @@ class JrcOwnedWorkerGate
     )
     wait_for('owned worker startup') do
       File.file?(ENV.fetch('JRC_G_READY_FILE')) &&
-        Sidekiq::ProcessSet.new.any? { |process| process['pid'] == @worker_pid && process['queues'] == [@queue] }
+        Sidekiq::ProcessSet.new.any? do |process|
+          process['pid'] == @worker_pid && process['queues'].sort == [@queue, SidekiqAlive.current_queue].sort
+        end
     end
-    check!('worker registered only the owned queue', Sidekiq::ProcessSet.new.any? do |process|
-      process['pid'] == @worker_pid && process['queues'] == [@queue]
+    check!('worker registered only the owned business and native health queues', Sidekiq::ProcessSet.new.any? do |process|
+      process['pid'] == @worker_pid && process['queues'].sort == [@queue, SidekiqAlive.current_queue].sort
     end)
   end
 
@@ -198,7 +203,7 @@ class JrcOwnedWorkerGate
              delivery_acknowledgments: acknowledgments, fresh_worker: true, application_build: false, production: false,
              qualification: 'Synthetic-only PostgreSQL; real Redis and Sidekiq. Queue routing overridden only for isolation. ' \
                             'No default queue/cron/deployment/Chrome claim.' }
-    if @nonce.match?(/\A[0-9a-f]{12}\z/) && @directory == "/tmp/jrc_g_worker_#{@nonce}" && File.directory?(@directory)
+    if @nonce.match?(/\A[0-9a-f]{12}\z/) && owned_directory? && File.directory?(@directory)
       File.write(File.join(@directory, 'result.json'), JSON.pretty_generate(data))
     end
     puts JSON.generate(data)

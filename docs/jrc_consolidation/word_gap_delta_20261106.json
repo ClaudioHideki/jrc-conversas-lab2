@@ -336,6 +336,12 @@
       "report": "docs/jrc_consolidation/owned_worker_initial_failure_checkpoint_20261106.json",
       "current_state": "Runtime gate failed atstartup;synthetic database/artifacts and0appliedbusinessitems preserved.",
       "remaining": "Correct native health verification and actual PABXActiveJob enqueue collision before claiming runtime queue success."
+    },
+    {
+      "requirement": "G real native batch worker delivery",
+      "report": "docs/jrc_consolidation/owned_worker_runtime_checkpoint_20261106.json",
+      "current_state": "32 native checks,5 real ACK;12 business results,duplicate no-op,revocation/account/history preservation;failed attempts retained.",
+      "remaining": "Default runtime/deployment,current-source Chrome and remainingC-Gopen."
     }
   ],
   "explicit_dependencies": [
@@ -356,7 +362,7 @@
       "state": "External environment/operations require separate authorization; not simulated as passed."
     }
   ],
-  "next_confirmed_local_gap": "Add failing ActiveJob scheduling regression,rename the PABX integration-specific helper and update its known controller/direct-test callers while retaining HTTP permissions,locks,interval and sync behavior.",
+  "next_confirmed_local_gap": "Continue actual remaining functional source gaps without rebuilding or touching5379.",
   "stage_closure": {
     "C": false,
     "D": false,

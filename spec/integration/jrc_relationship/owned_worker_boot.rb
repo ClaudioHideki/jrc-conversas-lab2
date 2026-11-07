@@ -30,6 +30,8 @@ class JrcOwnedWorkerReceipt
   end
 
   def call(_worker, job, queue)
+    return yield if queue == SidekiqAlive.current_queue && job['class'] == 'SidekiqAlive::Worker' && job['args'] == [SidekiqAlive.hostname]
+
     raise 'Unexpected owned queue payload' unless queue == ENV.fetch('JRC_G_QUEUE') && job['wrapped'] == 'JrcRelationship::BatchExecutionJob'
 
     yield
@@ -40,7 +42,7 @@ end
 Sidekiq.configure_server do |config|
   config.logger.level = Logger::WARN
   config.on(:startup) do
-    raise 'Unexpected consumer queues' unless config.queues == [queue]
+    raise 'Unexpected consumer queues' unless (config.queues - [queue, SidekiqAlive.current_queue]).empty? && config.queues.include?(queue)
     raise 'Unexpected consumer concurrency' unless config.concurrency == 1
 
     claim = Sidekiq.redis { |redis| redis.call('GET', 'jrc_g_worker_claim') }

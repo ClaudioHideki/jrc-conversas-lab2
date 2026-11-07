@@ -1,0 +1,99 @@
+{
+  "status": "real_isolated_queue_gate_passed",
+  "previous_checkpoint": "0cf2b8fad8c196df0b4aae52c7f13e8d09cce61a",
+  "native_result": {
+    "status": "passed",
+    "phase": "tenant_and_network",
+    "checks": [
+      "test environment and exact owned names",
+      "exact PostgreSQL URL/database",
+      "no pending migrations",
+      "committed cross-process fixtures",
+      "exact isolated Redis",
+      "Redis ownership claim",
+      "owned artifact directory",
+      "preserved exact synthetic counts",
+      "no prior business delivery",
+      "success authority remains native administrator",
+      "revoked authority remains view only",
+      "preserved selection sizes",
+      "preserved pending items",
+      "preserved pending items",
+      "no preserved group links",
+      "same pinned membership groups",
+      "expired original review retained",
+      "worker registered only the owned business and native health queues",
+      "real Redis provider job ID",
+      "twelve committed native results",
+      "native allocations and owners unchanged",
+      "real Redis provider job ID",
+      "duplicate delivery has no repeated effect",
+      "real Redis provider job ID",
+      "revoked actor pending items stopped",
+      "revoked actor cannot write customer links",
+      "revoked review history stays pinned",
+      "owned queue drained",
+      "original expired approval unchanged",
+      "foreign account allocation unchanged",
+      "no HTTP requests attempted",
+      "worker made no HTTP requests"
+    ],
+    "database": "jrc_g_worker_20261106_db4184c50703",
+    "queue": "jrc_g_worker_db4184c50703",
+    "delivery_acknowledgments": 5,
+    "fresh_worker": true,
+    "application_build": false,
+    "production": false,
+    "qualification": "Synthetic-only PostgreSQL; real Redis and Sidekiq. Queue routing overridden only for isolation. No default queue/cron/deployment/Chrome claim."
+  },
+  "resources": {
+    "nonce": "db4184c50703",
+    "database": "jrc_g_worker_20261106_db4184c50703",
+    "redis_index": 15,
+    "queue": "jrc_g_worker_db4184c50703",
+    "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+    "resume": true,
+    "attempt": "89dce1ee",
+    "head": "0cf2b8fad8c196df0b4aae52c7f13e8d09cce61a",
+    "free_start": 6754000896,
+    "minimum_free": 6733676544,
+    "original_containers_changed": false,
+    "application_build": false,
+    "cleanup": false,
+    "phase": "real_worker",
+    "code_sha256": {
+      "spec/integration/jrc_relationship/owned_worker_boot.rb": "0d8f671cba817c31f15f68a9bc7cfe2490bfe3380ae6a8e45e585a91a5e16df6",
+      "spec/integration/jrc_relationship/owned_worker_gate.rb": "5d59502e0a8f9a1d217ca64ac6fc41b8c27bf646c5ccfbb824a2538b7542351b",
+      "spec/integration/jrc_relationship/owned_worker_fixtures.rb": "79645622706a779b84018afffe71643ca9f40c47b39aecfa9db4847cbd335569"
+    },
+    "business_data_copied": false,
+    "original_fixture_artifacts": "C:\\Users\\DEV03\\Documents\\Jrc\\relacionamento-v2-20261101\\.codex\\g-worker-20261106\\db4184c50703",
+    "exit_code": 0,
+    "passed": true,
+    "free_end": 6753529856,
+    "artifacts_preserved": true
+  },
+  "evidence_sha256": {
+    "native-result.json": "91d8c7e55cdc3c388da0fd4b32e974959859a97a56656a33b0e6ba26feda384a",
+    "resource.json": "594435bd893d84a05996cbf8804d3a632a8a19c8ca4520f425744a52f3549fd6",
+    "runtime.log": "b2780ff982c0d0b6d453ea9ba6bb5ea9c5e59af2a5b12601d92970e72f0384dd"
+  },
+  "preserved_failures": [
+    "Initial startup failure with native health queue and actual PABX collision retained.",
+    "attempt_ceaba9ba: verifier incorrectly used Sidekiq::Queue#empty?;failed before business operations;corrected to numeric size API."
+  ],
+  "expired_snapshot": "Original expired review and items untouched;new native preview/approval uses existing assignments for new positive attempt. Revoked original still denied before work.",
+  "native_health": "SidekiqAlive2.5.0 current_queue/hostname verified from installed source;only exact native health payload passes middleware without business ACK.",
+  "original_container_started_at_unchanged": true,
+  "disk_bytes": {
+    "start": 6754000896,
+    "minimum": 6733676544,
+    "end": 6753529856
+  },
+  "limitations": [
+    "Not default queue/production cron/deployment acceptance.",
+    "Not browser/current-source frontend acceptance.",
+    "No full C-G closure or external provider homologation."
+  ],
+  "next": "Continue native UI/source review and remaining functional Word gaps;preserve queue gate evidence."
+}
