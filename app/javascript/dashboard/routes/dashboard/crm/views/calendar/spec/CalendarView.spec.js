@@ -39,9 +39,6 @@ it('explains unsupported calendar controls while preserving the weekly view and 
   const unavailableButtons = wrapper.findAll('button[aria-describedby]');
   expect(unavailableButtons.map(button => button.text())).toEqual([
     'Sincronizar calendário',
-    'Mês',
-    'Dia',
-    'Lista',
     'Iniciar ligação',
     'WhatsApp',
   ]);

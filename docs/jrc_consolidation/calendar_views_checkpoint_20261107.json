@@ -1,0 +1,62 @@
+{
+  "date": "2026-11-07",
+  "previous_head": "6bb8c3b88dcaa9180ac7af80c96dae8a6151e89c",
+  "scope": "G functional native Calendar views and portfolio Word reconciliation",
+  "implemented": [
+    "Enable native month/week/day/list view controls over the same authorized Vuex activity array;no separate appointment store or extra access path.",
+    "Month uses42Monday-aligned local-date cells;day uses exact selected local day;list uses only actual appointments in selected month,including completed records;genuine empty state.",
+    "Previous/next follows active period:7days forweek,1day forday and1month formonth/list. Open day and reactive native date links retain current data/editor authority.",
+    "Preserve all existing native completion/reschedule/version/conflict protections. Wrap dense month/week grid in its own horizontal scrolling container;no new app assets or claimed mobile measurement.",
+    "Static translated view labels remain locale reactive;external sync/phone/WhatsApp and unsupported source-calendar filters remain visibly unavailable,not fake functional controls."
+  ],
+  "evidence": {
+    "calendar-views-source01": "16/0 =8new view cases+7native command cases+1existing weekly control case.",
+    "calendar-views-final03": "11/0 after converting one4iteration assertion into4independent cases for lint;7cases overlap prior run.",
+    "calendar-views-final05": "12/0 final11view+1weekly after static-label binding and formatting changed period block. Final total19unique definitions across gates,not39summed tests.",
+    "calendar-views-lint06": "New/adapted specs0errors0warnings;shared Calendar31prettier errors3markupwarnings,priorHEAD53prettiererrors0warnings. No semantic error or rule suppression;shared lint explicitly not globally green."
+  },
+  "word_audit": "docs/jrc_consolidation/portfolio_word_reconciliation_20261107.json",
+  "resources": {
+    "calendar-views-source01": {
+      "status": "passed",
+      "free_start": 6420705280,
+      "minimum_free": 6379040768,
+      "mandatory_stop_bytes": 750000000,
+      "conservative_stop_bytes": 2000000000,
+      "no_build": true,
+      "owned_process_id": 19116,
+      "exit_code": 0,
+      "free_end": 6420021248
+    },
+    "calendar-views-final05": {
+      "status": "passed",
+      "free_start": 6418141184,
+      "minimum_free": 6394466304,
+      "mandatory_stop_bytes": 750000000,
+      "conservative_stop_bytes": 2000000000,
+      "no_build": true,
+      "owned_process_id": 21996,
+      "exit_code": 0,
+      "free_end": 6416138240
+    }
+  },
+  "files_sha256": {
+    "app/javascript/dashboard/routes/dashboard/crm/views/calendar/CalendarView.vue": "fe200005608beb024fceb1a8b6b939b773eccfc2b8d33511bb87032714682978",
+    "app/javascript/dashboard/routes/dashboard/crm/views/calendar/spec/CalendarView.spec.js": "b3fd54717ce29d7cb257e795b1dac31dedcd4578c300386c21f458f9c2f2da2f",
+    "app/javascript/dashboard/routes/dashboard/crm/views/calendar/spec/CalendarViews.spec.js": "6dd430facc0d9783e80d3d16239f6c45316a784febb023aca0b9bb0fecc41e37",
+    "app/javascript/dashboard/i18n/locale/en/crm.json": "460b27f78a815d9922b9b54b973930f1b8a06278d6286aece6da13821c64db82"
+  },
+  "free_at_report": 6395400192,
+  "preserved": {
+    "backend_models_APIs_migrations_changed": false,
+    "build_assets_server5379_container_restart": false,
+    "cleanup_push_deploy_external_ops": false,
+    "native_account_actor_scope": true
+  },
+  "remaining": [
+    "No current-source Chrome/desktop/mobile/light-dark visual evidence;existing frozen assets not substituted.",
+    "LocalCalendar source-type/owner filters and external sync/channel controls remain separate partial features.",
+    "P0123-P0128 audit records delivered native grouping/queue results and actual local-role/history/visual differences;no full C-G closure.",
+    "Next:known presence-only membership changes incorrectly invalidate Relationship dialogs;reuse existing pure normalization and retain all access fields."
+  ]
+}
