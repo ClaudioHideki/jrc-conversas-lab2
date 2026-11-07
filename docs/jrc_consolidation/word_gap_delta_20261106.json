@@ -402,6 +402,12 @@
       "report": "docs/jrc_consolidation/crm_cache_authority_checkpoint_20261107.json",
       "current_state": "10 failing baseline assertions corrected;39/0source then50/0finalsource;scope-bound lists/details/funnel metadata,native API contracts unchanged.",
       "remaining": "Rendered funnel lifecycle/popups and other local CRM forms,next;no current-source Chrome/fullC-G closure. Existing DealsIndex lint explicitly reported."
+    },
+    {
+      "requirement": "C/GnativeCRM funnel popup,drag/drop and current authority",
+      "report": "docs/jrc_consolidation/funnel_authority_checkpoint_20261107.json",
+      "current_state": "6failing baseline assertions corrected;43sourcepassed then18finalpassed including actual loss confirmation;0lint errors.",
+      "remaining": "Chrome/sourceasset authorization,other nativeCRM forms and completeC-G still open."
     }
   ],
   "explicit_dependencies": [
@@ -422,7 +428,7 @@
       "state": "External environment/operations require separate authorization; not simulated as passed."
     }
   ],
-  "next_confirmed_local_gap": "Bind rendered native funnel initialization,lost-reason selection and post-move receipts to current authority and lifecycle;add failing rendered regressions first,retain native APIs and source filters.",
+  "next_confirmed_local_gap": "Restore the missing native lead deletion action used by the existing UI;test actual Vuex integration,confirmation/cancellation/native errors/current authority and backend contact/history/account preservation without changing native deletion rules.",
   "stage_closure": {
     "C": false,
     "D": false,
@@ -431,5 +437,5 @@
     "G": false
   },
   "unreviewed_literal_and_visual_fragments": "Not auto-marked complete; the original context/requirements inventory remains classification_pending where not explicitly reconciled.",
-  "next_source_review": "Rendered funnel async initialization,lost popup and post-command authority."
+  "next_source_review": "Actual Vuex lead delete action absent despite existing rendered confirmation/backend API."
 }
