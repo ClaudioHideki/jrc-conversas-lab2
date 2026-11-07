@@ -474,6 +474,12 @@
       "report": "docs/jrc_consolidation/calendar_views_checkpoint_20261107.json",
       "current_state": "Native source month/day/list/week activated;19unique final source definitions passed across gates;exact6Wordfragment audit retains real divergences.",
       "remaining": "No current-sourceChrome/fullC-G/local-role/history immutability or external channel closure."
+    },
+    {
+      "requirement": "F/G preserve operational drafts and exact native receipts during chat presence refresh",
+      "report": "docs/jrc_consolidation/relationship_presence_checkpoint_20261107.json",
+      "current_state": "3reproduced losses corrected;145source cases and22files0lint errors;native permission boundaries unchanged.",
+      "remaining": "No current-sourceChrome/fullC-G/business/local-role/audit or external acceptance closure."
     }
   ],
   "explicit_dependencies": [
@@ -494,7 +500,7 @@
       "state": "External environment/operations require separate authorization; not simulated as passed."
     }
   ],
-  "next_confirmed_local_gap": "Next:known presence-only membership changes incorrectly invalidate Relationship dialogs;reuse existing pure normalization and retain all access fields.",
+  "next_confirmed_local_gap": "Next independent G task:activate real Calendar search/type/owner/status filters using existing filterActivities over authorized native records.",
   "stage_closure": {
     "C": false,
     "D": false,
@@ -503,5 +509,5 @@
     "G": false
   },
   "unreviewed_literal_and_visual_fragments": "Not auto-marked complete; the original context/requirements inventory remains classification_pending where not explicitly reconciled.",
-  "next_source_review": "Next:known presence-only membership changes incorrectly invalidate Relationship dialogs;reuse existing pure normalization and retain all access fields."
+  "next_source_review": "Next independent G task:activate real Calendar search/type/owner/status filters using existing filterActivities over authorized native records."
 }

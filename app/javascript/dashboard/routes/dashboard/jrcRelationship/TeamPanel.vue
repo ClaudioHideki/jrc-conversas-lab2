@@ -1,4 +1,5 @@
 <script setup>
+import { accountMembershipAccess } from 'dashboard/helper/accountMembershipAccess';
 import { ref, watch, reactive } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -116,7 +117,7 @@ watch(
     () =>
       JSON.stringify([
         store.getters.getCurrentRole,
-        store.getters.getCurrentUser?.accounts,
+        store.getters.getCurrentUser?.accounts?.map(accountMembershipAccess),
       ]),
     () => props.refresh,
     () => localRefresh.value,

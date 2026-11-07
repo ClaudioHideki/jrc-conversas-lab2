@@ -1,4 +1,5 @@
 <script setup>
+import { accountMembershipAccess } from 'dashboard/helper/accountMembershipAccess';
 import { computed, ref, reactive, watch, onBeforeUnmount, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -401,7 +402,10 @@ watch(
     () => route.params.accountId,
     () => store.getters.getCurrentUserID,
     () => store.getters.getCurrentRole,
-    () => JSON.stringify(store.getters.getCurrentUser?.accounts),
+    () =>
+      JSON.stringify(
+        store.getters.getCurrentUser?.accounts?.map(accountMembershipAccess)
+      ),
     () => props.screen,
   ],
   () => {
@@ -591,7 +595,10 @@ watch(
     () => route.params.accountId,
     () => store.getters.getCurrentUserID,
     () => store.getters.getCurrentRole,
-    () => JSON.stringify(store.getters.getCurrentUser?.accounts),
+    () =>
+      JSON.stringify(
+        store.getters.getCurrentUser?.accounts?.map(accountMembershipAccess)
+      ),
     () => props.screen,
     () => props.fixedSurveyScope,
     () => props.fixedSurveyScope?.unit_id,
@@ -1417,7 +1424,9 @@ const money = value => formatMoney(value, metadata.value?.formatting);
           :authorization-key="
             JSON.stringify([
               store.getters.getCurrentRole,
-              store.getters.getCurrentUser?.accounts,
+              store.getters.getCurrentUser?.accounts?.map(
+                accountMembershipAccess
+              ),
             ])
           "
           :proposal="portfolioReviewProposal"

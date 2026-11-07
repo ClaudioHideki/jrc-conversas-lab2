@@ -85,6 +85,22 @@ beforeEach(() => {
 });
 afterEach(() => wrappers.splice(0).forEach(wrapper => wrapper.unmount()));
 
+it('keeps the exact unsaved capacity and native revisions when only native presence changes', async () => {
+  mocks.store.getters.getCurrentUser.accounts = [
+    { id: 1400, role: 'administrator', availability: 'online' },
+  ];
+  const wrapper = render();
+  await flushPromises();
+  await wrapper.get('input[type="number"]').setValue('25');
+  mocks.store.getters.getCurrentUser.accounts[0].availability = 'offline';
+  await flushPromises();
+  expect(wrapper.findComponent(Capacity).props('modelValue')[0].maximum).toBe(
+    25
+  );
+  expect(mocks.configuration).toHaveBeenCalledTimes(1);
+  expect(mocks.saveConfiguration).not.toHaveBeenCalled();
+});
+
 it('reuses native capacity controls and reviews exact configuration and group revisions before persistence', async () => {
   const wrapper = render();
   await flushPromises();

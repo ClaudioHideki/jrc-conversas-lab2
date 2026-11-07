@@ -135,6 +135,70 @@ beforeEach(() => {
 });
 afterEach(() => wrappers.splice(0).forEach(wrapper => wrapper.unmount()));
 
+it('keeps the original allocation draft when only native presence changes', async () => {
+  mocks.store.getters.getCurrentUser.accounts = [
+    { id: 1400, role: 'administrator', availability: 'online' },
+  ];
+  const wrapper = render();
+  await selectCompany(wrapper);
+  await wrapper
+    .findComponent(Form)
+    .get('[data-testid="eligibility-exception-reason"]')
+    .setValue('Retained native allocation reason');
+  mocks.store.getters.getCurrentUser.accounts[0].availability = 'offline';
+  mocks.store.getters.getCurrentUser.accounts[0].active_at =
+    '2026-11-07T12:00:00Z';
+  await flushPromises();
+  expect(wrapper.emitted('close')).toBeUndefined();
+  expect(
+    wrapper
+      .findComponent(Form)
+      .get('[data-testid="eligibility-exception-reason"]').element.value
+  ).toBe('Retained native allocation reason');
+  expect(mocks.api.portfolio).toHaveBeenCalledTimes(1);
+  expect(mocks.api.saveAssignment).not.toHaveBeenCalled();
+});
+
+it('accepts its own pending native allocation receipt through a native presence update', async () => {
+  mocks.store.getters.getCurrentUser.accounts = [
+    { id: 1400, role: 'administrator', availability: 'online' },
+  ];
+  let finish;
+  mocks.api.saveAssignment.mockReturnValueOnce(
+    new Promise(resolve => {
+      finish = resolve;
+    })
+  );
+  const wrapper = render();
+  await selectCompany(wrapper);
+  await wrapper.findComponent(Form).get('form').trigger('submit');
+  mocks.store.getters.getCurrentUser.accounts[0].availability = 'offline';
+  await flushPromises();
+  finish({ data: customer });
+  await flushPromises();
+  expect(wrapper.emitted('close')).toBeUndefined();
+  expect(wrapper.text()).toContain('Native allocation saved');
+  expect(mocks.api.saveAssignment).toHaveBeenCalledTimes(1);
+  expect(mocks.api.savePortfolioGroupCustomers).not.toHaveBeenCalled();
+});
+
+it('still invalidates a changed custom-role membership for the same actor and native role', async () => {
+  mocks.store.getters.getCurrentUser.accounts = [
+    {
+      id: 1400,
+      role: 'administrator',
+      custom_role_id: 1,
+      availability: 'online',
+    },
+  ];
+  const wrapper = render();
+  await selectCompany(wrapper);
+  mocks.store.getters.getCurrentUser.accounts[0].custom_role_id = 2;
+  await flushPromises();
+  expect(wrapper.emitted('close')).toHaveLength(1);
+  expect(mocks.api.saveAssignment).not.toHaveBeenCalled();
+});
+
 it('reuses an existing native allocation without writes and requires explicit portfolio review', async () => {
   mocks.api.portfolio.mockResolvedValue(page([customer]));
   const wrapper = render();

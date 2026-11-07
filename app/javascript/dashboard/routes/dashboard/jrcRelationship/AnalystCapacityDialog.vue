@@ -1,4 +1,5 @@
 <script setup>
+import { accountMembershipAccess } from 'dashboard/helper/accountMembershipAccess';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
@@ -22,7 +23,7 @@ const identity = computed(() =>
     props.analystId,
     store.getters.getCurrentUserID,
     store.getters.getCurrentRole,
-    store.getters.getCurrentUser?.accounts,
+    store.getters.getCurrentUser?.accounts?.map(accountMembershipAccess),
   ])
 );
 let generation = 0;

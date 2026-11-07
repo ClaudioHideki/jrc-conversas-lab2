@@ -1,4 +1,5 @@
 <script setup>
+import { accountMembershipAccess } from 'dashboard/helper/accountMembershipAccess';
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -20,7 +21,10 @@ watch(
     () => route.params.accountId,
     () => store.getters.getCurrentUserID,
     () => store.getters.getCurrentRole,
-    () => JSON.stringify(store.getters.getCurrentUser?.accounts),
+    () =>
+      JSON.stringify(
+        store.getters.getCurrentUser?.accounts?.map(accountMembershipAccess)
+      ),
   ],
   async (_, __, cleanup) => {
     const controller = new AbortController();

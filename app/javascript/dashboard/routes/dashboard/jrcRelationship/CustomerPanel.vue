@@ -1,4 +1,5 @@
 <script setup>
+import { accountMembershipAccess } from 'dashboard/helper/accountMembershipAccess';
 import { computed, ref, watch, onBeforeUnmount } from 'vue';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
@@ -221,7 +222,7 @@ watch(
     () =>
       JSON.stringify([
         store.getters.getCurrentRole,
-        store.getters.getCurrentUser?.accounts,
+        store.getters.getCurrentUser?.accounts?.map(accountMembershipAccess),
       ]),
   ],
   () => {

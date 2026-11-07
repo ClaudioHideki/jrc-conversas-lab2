@@ -1,4 +1,5 @@
 <script setup>
+import { accountMembershipAccess } from 'dashboard/helper/accountMembershipAccess';
 import { ref, watch, computed, onBeforeUnmount } from 'vue';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
@@ -63,7 +64,7 @@ const restoreIdentity = computed(() =>
     props.allowed,
     store.getters.getCurrentUserID,
     store.getters.getCurrentRole,
-    store.getters.getCurrentUser?.accounts,
+    store.getters.getCurrentUser?.accounts?.map(accountMembershipAccess),
   ])
 );
 const invalidFlowPolicy = ref(false);
@@ -405,7 +406,10 @@ watch(
     () => route.params.accountId,
     () => store.getters.getCurrentUserID,
     () => store.getters.getCurrentRole,
-    () => JSON.stringify(store.getters.getCurrentUser?.accounts),
+    () =>
+      JSON.stringify(
+        store.getters.getCurrentUser?.accounts?.map(accountMembershipAccess)
+      ),
     () => props.screen,
     () => props.allowed,
   ],

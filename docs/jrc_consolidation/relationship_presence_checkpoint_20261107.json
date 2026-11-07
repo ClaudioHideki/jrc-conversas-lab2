@@ -1,0 +1,83 @@
+{
+  "date": "2026-11-07",
+  "previous_head": "7e43119f58424ce0c154adb85c1631c8d6df616b",
+  "scope": "F/G native presence-compatible Relationship form/cache identity",
+  "implemented": [
+    "Reuse the previously validated accountMembershipAccess helper at23existing identity/watch/key positions in20components. No parallel helper or altered native access policy.",
+    "Exclude only native membership active_at,availability,availability_status,auto_offline from cache/form access identity. Preserve role,custom role,permissions,status,team/unit/company/new future scope fields and every other original tuple member.",
+    "Preserve Master allocation draft/current native write feedback,edited capacity,configuration/history and scoped operational views during chat presence refresh. Existing changed-access invalidation remains active.",
+    "No presence list,online status,routing eligibility,C6 activation criterion or native capacity calculation changed. No local-role grants inferred."
+  ],
+  "evidence": {
+    "relationship-presence-baseline01": "3genuine failures+1positive custom-role invalidation,27notselected:closed draft,dropped write receipt and capacity25resetto10.",
+    "relationship-presence-source02": "145/0 across12representative source suites covering all20changed components;includes4new cases and existing tenant/actor/role/late-response/historical-scope cases. Actual components,transport mocked,not Chrome/database proof.",
+    "relationship-presence-lint03": "6prettier errors on modified lines corrected exactly;no unrelated template formatting.",
+    "relationship-presence-lint04": {
+      "files": 22,
+      "errors": 0,
+      "warnings": 192,
+      "qualification": "Existing style warnings retained;no rule suppression. New/adapted test files0warnings."
+    }
+  },
+  "targeted_test_files": [
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/portfolioGroupMasterFlow.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/portfolioGroupRules.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/configurationRestore.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/interface.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/playbookRestore.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/analystCadences.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/analystCapacity.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/namedPortfolios.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/playbookExecutionIdentity.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/portfolioGroupHistory.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/portfolioGroupIntegration.spec.js",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ProductHealthHistory.spec.js"
+  ],
+  "files_sha256": {
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/AnalystCadencesDialog.vue": "07a928df5ca4c938facf96150345e1b90575c6d829b82e539cb5b6f3674c76b8",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/AnalystCapacityDialog.vue": "b6eab17c269a34ba41f2365816ad9522cca601e9954d87aaa3720da3d7db81ca",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ConfigurationPanel.vue": "1df4f8b13ce59d33e1488576dfba6f83cb0e801f6409e960a843a637aa9fdd21",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ConfigurationRestoreDialog.vue": "c06e4ad47edf2d54ead1c488ca800bc461e78c4318ad55b737afb1c953baac08",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/CustomerPanel.vue": "603889ed3ac673e6dafb5220b7113001b4986d8d5752ea0383c67554df3a7e5c",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/HealthConfigurationPreview.vue": "b3948d61998f454c7876aba7b641944af4edea407b228696bfa6cc222842c25b",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ModulePage.vue": "6caf1f4a003bfc68dba7adf4ab00551dbadf15484d249e6e39c10bb8de0327a3",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/PlaybookExecutionPanel.vue": "bf882aaa1c1e1ba101f8a925b964a8c58dc7cbb1397581d0df8193bd23803dac",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/PlaybookHistoryPanel.vue": "6da1473e622d4aeb3b4907f516e50517912cece27552628fde0ff37bc62012b0",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/PlaybookRestoreDialog.vue": "cc183633d4dbe30486dfcb404cefe04f6baa6d412c0ec95bf25b94551c0f06ad",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/PortfolioGroupCustomersDialog.vue": "a6e41b2fc410fb2e0c2a347795b5043f1eca61c393bfb093848071d62ef46fbf",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/PortfolioGroupHistoryPanel.vue": "8cb6e08c06d80d32617d04a13dd8a00ad62019f5ee1e66d18a834fd54c513982",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/PortfolioGroupMasterDialog.vue": "b792a46ca9d5c5446aef082fc053e17702a7657f30eebf1299776c4230122de5",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/PortfolioGroupRulesPanel.vue": "f3900ab425cc13178afa78c5008cf4f1d8e1021d314c90357040e8a043163a1e",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/PortfolioGroupsPanel.vue": "4382ece151be0924e5c272a6fbfd42a63b37722a6e6875021d8dff0c9e714e72",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/PortfolioGroupWorkloadPanel.vue": "012ca4dcd45ae3d38678adc0a69b5fbd7f6b8676b422a820832154ac7da7c733",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/PortfolioMembershipBatchPanel.vue": "60de2e7adbb622954e93724522c2a4748a987a7d39bdf88f138373c296d0e30a",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/PortfolioWorkspace.vue": "2f48389eacf8ce2816e2a12d7bfad5fa43d65cb9065ce064d92f9ce6c26ab6a4",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/ProductHealthHistory.vue": "e984c6eaeae8ab9126efb12849c96eab69c4c6d8a09ea9add9c54987f5199ad4",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/TeamPanel.vue": "772c5b64a137a25f57054d7e4674ccbb8a1ca8e6254de5dcb8507da84cc9db7b",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/portfolioGroupMasterFlow.spec.js": "56177ef50ce7b26e55244033416ef1e77e8239b70537e7eb4bfae10191ca8b6d",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/portfolioGroupRules.spec.js": "c5aecd31c5841a5c0afba560d4fd149c566212924cc592387986249a828fe493"
+  },
+  "resources": {
+    "status": "passed",
+    "free_start": 6411386880,
+    "minimum_free": 6366924800,
+    "mandatory_stop_bytes": 750000000,
+    "conservative_stop_bytes": 2000000000,
+    "no_build": true,
+    "owned_process_id": 5632,
+    "exit_code": 0,
+    "free_end": 6416433152
+  },
+  "free_at_report": 6394765312,
+  "preserved": {
+    "native_policies_models_APIs_or_migrations_changed": false,
+    "build_assets_server5379_containers": false,
+    "cleanup_push_deploy_external_ops": false
+  },
+  "remaining": [
+    "No instantaneous knowledge of unrefreshed server access changes claimed;native fresh authorization remains mandatory for each call.",
+    "Current-source Chrome/full Word visual acceptance and C-G remain open.",
+    "Next independent G task:activate real Calendar search/type/owner/status filters using existing filterActivities over authorized native records.",
+    "Local-role matrix,historical full-value scope/audit design,TRR,deferred company docs and external dependencies remain explicit."
+  ]
+}
