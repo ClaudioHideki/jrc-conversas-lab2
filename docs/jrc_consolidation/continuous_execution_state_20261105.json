@@ -3,12 +3,12 @@
   "user_request": "499267ac-546d-4853-b4cf-7f03a2ea0629",
   "initial_head": "be54d0f7b4ce8d4e2a077cf2bdd8c2a4d5c88f5e",
   "branch": "codex/relacionamento-v2-20261101",
-  "last_validated_checkpoint": "14262fe161068693af0ceba5e14991dce3bf59b2",
+  "last_validated_checkpoint": "4bdc87cdd34e59cf17a447c0e7610efc17761696",
   "completed_current_work": "Sealed dossier, weighted/current capacity, native withdrawal/cadence controls and F2 increments locally tested; see linked incremental reports. No C-G closure.",
-  "active_work": "Bind native DealsIndex creation options,local form/product caches and detail mutation continuations to current authority/lifecycle and selected detail;preserve financial/product APIs and native drafts;start with failing rendered actual-store tests.",
+  "active_work": "Continue previously identified DealsIndex local options,creation form/product caches and selected-detail mutation receipts;native stores are already scoped and presence-compatible. Add failing rendered actual-store cases,preserve financial APIs and native drafts.",
   "exact_next_actions": [
-    "Bind native DealsIndex creation options,local form/product caches and detail mutation continuations to current authority/lifecycle and selected detail;preserve financial/product APIs and native drafts;start with failing rendered actual-store tests.",
-    "Continue safe C-G work while retaining explicit business/browser/external dependencies."
+    "Continue previously identified DealsIndex local options,creation form/product caches and selected-detail mutation receipts;native stores are already scoped and presence-compatible. Add failing rendered actual-store cases,preserve financial APIs and native drafts.",
+    "Continue independent safe C-G work,retaining explicit business/browser/external dependencies."
   ],
   "test_environment": {
     "source_manifest": ".codex/d9-notifications-20261104/snapshot.json",
@@ -51,14 +51,14 @@
     "No real participant removal or provider request; tests use synthetic records and WebMock, with external network disabled."
   ],
   "restrictions": "No build/recompile, no5379 change/restart, no four-container restart/reconfiguration, no cleanup/delete of existing data, no push/GHCR/deploy/production/client change, no real provider operations. Additive migrations allowed only in owned synthetic test database.",
-  "disk_last_observed_bytes": 6541316096,
+  "disk_last_observed_bytes": 6496665600,
   "TRR": "Undefined; do not invent",
   "company_documents_without_portfolio": "Explicitly deferred",
-  "last_validated_head": "14262fe161068693af0ceba5e14991dce3bf59b2",
-  "new_validated_code_checkpoint": "git log -1 --format=%H -- docs/jrc_consolidation/activity_origin_scope_checkpoint_20261107.json",
+  "last_validated_head": "4bdc87cdd34e59cf17a447c0e7610efc17761696",
+  "new_validated_code_checkpoint": "git log -1 --format=%H -- docs/jrc_consolidation/crm_presence_authority_checkpoint_20261107.json",
   "current_status": "Native maximum master allocations,multiple active portfolios,CRM source caches/forms and activity origin gate incrementally tested;C-G and Chrome not closed.",
   "next_actions": [
-    "Bind native DealsIndex creation options,local form/product caches and detail mutation continuations to current authority/lifecycle and selected detail;preserve financial/product APIs and native drafts;start with failing rendered actual-store tests.",
+    "Continue previously identified DealsIndex local options,creation form/product caches and selected-detail mutation receipts;native stores are already scoped and presence-compatible. Add failing rendered actual-store cases,preserve financial APIs and native drafts.",
     "No build/no5379 change/push/external operations."
   ],
   "latest_dossier_report": "docs/jrc_consolidation/sealed_dossier_checkpoint_20261105.json",
@@ -82,7 +82,7 @@
   "priority_bands_report": "docs/jrc_consolidation/priority_bands_checkpoint_20261105.json",
   "automatic_playbook_budget_report": "docs/jrc_consolidation/automatic_playbook_budget_checkpoint_20261106.json",
   "analyst_native_responsibilities_report": "docs/jrc_consolidation/analyst_native_responsibilities_checkpoint_20261106.json",
-  "checkpoint_resolution": "git log -1 --format=%H -- docs/jrc_consolidation/activity_origin_scope_checkpoint_20261107.json",
+  "checkpoint_resolution": "git log -1 --format=%H -- docs/jrc_consolidation/crm_presence_authority_checkpoint_20261107.json",
   "approval_percentage_input_report": "docs/jrc_consolidation/approval_percentage_input_checkpoint_20261106.json",
   "word_gap_delta": "docs/jrc_consolidation/word_gap_delta_20261106.json",
   "workspace_card_sources_report": "docs/jrc_consolidation/workspace_card_sources_checkpoint_20261106.json",
@@ -174,5 +174,6 @@
   "lead_native_actions_report": "docs/jrc_consolidation/lead_native_actions_checkpoint_20261107.json",
   "lead_create_authority_report": "docs/jrc_consolidation/lead_create_authority_checkpoint_20261107.json",
   "activities_authority_report": "docs/jrc_consolidation/activities_authority_checkpoint_20261107.json",
-  "activity_origin_scope_report": "docs/jrc_consolidation/activity_origin_scope_checkpoint_20261107.json"
+  "activity_origin_scope_report": "docs/jrc_consolidation/activity_origin_scope_checkpoint_20261107.json",
+  "crm_presence_authority_report": "docs/jrc_consolidation/crm_presence_authority_checkpoint_20261107.json"
 }

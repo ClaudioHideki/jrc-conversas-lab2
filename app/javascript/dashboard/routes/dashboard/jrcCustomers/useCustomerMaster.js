@@ -2,12 +2,7 @@ import { computed } from 'vue';
 import { useAccount } from 'dashboard/composables/useAccount';
 import { useMapGetter } from 'dashboard/composables/store';
 import { FEATURE_FLAGS } from 'dashboard/featureFlags';
-const presenceFields = [
-  'active_at',
-  'availability',
-  'availability_status',
-  'auto_offline',
-];
+import { accountMembershipAccess } from 'dashboard/helper/accountMembershipAccess';
 export function useCustomerMaster() {
   const { accountId, accountScopedRoute, currentAccount } = useAccount();
   const feature = useMapGetter('accounts/isFeatureEnabledonAccount');
@@ -19,13 +14,7 @@ export function useCustomerMaster() {
     );
     // Activity/presence refreshes must not discard a form. All other membership
     // fields, including future access scopes, still invalidate its context.
-    const access = membership
-      ? Object.fromEntries(
-          Object.entries(membership).filter(
-            ([key]) => !presenceFields.includes(key)
-          )
-        )
-      : null;
+    const access = accountMembershipAccess(membership);
     return JSON.stringify([
       accountId.value,
       user.value?.id,

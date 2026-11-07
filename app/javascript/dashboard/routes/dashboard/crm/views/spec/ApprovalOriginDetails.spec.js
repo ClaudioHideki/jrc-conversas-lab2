@@ -464,3 +464,31 @@ it('does not download an order PDF when its requesting identity changed', async 
   expect(createObjectURL).not.toHaveBeenCalled();
   wrapper.unmount();
 });
+
+it.each([
+  ['contract', Contracts, 'contractId', mocks.contracts],
+  ['order', Orders, 'orderId', mocks.orders],
+])(
+  'preserves the loaded %s when only native membership presence changes and still rejects a changed access grant',
+  async (_kind, Component, parameter, api) => {
+    mocks.route.query = { [parameter]: '99' };
+    const wrapper = mountPage(Component);
+    try {
+      await flushPromises();
+      const requests = api.show.mock.calls.length;
+      mocks.store.getters.getCurrentUser.accounts[0].availability_status =
+        'online';
+      mocks.store.getters.getCurrentUser.accounts[0].active_at =
+        '2026-11-07T10:00:00Z';
+      await flushPromises();
+      expect(api.show).toHaveBeenCalledTimes(requests);
+      expect(wrapper.text()).toContain('99');
+      api.show.mockRejectedValue({ response: { status: 403 } });
+      mocks.store.getters.getCurrentUser.accounts[0].custom_role_id = 7;
+      await flushPromises();
+      expect(wrapper.text()).not.toContain('SYNTHETIC-');
+    } finally {
+      wrapper.unmount();
+    }
+  }
+);

@@ -1,4 +1,5 @@
 <script setup>
+import { accountMembershipAccess } from 'dashboard/helper/accountMembershipAccess';
 import { computed, ref, watch, onBeforeUnmount } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
@@ -31,7 +32,7 @@ const identity = () =>
     route.params.accountId,
     store.getters.getCurrentUserID,
     store.getters.getCurrentRole,
-    store.getters.getCurrentUser?.accounts,
+    store.getters.getCurrentUser?.accounts?.map(accountMembershipAccess),
     props.proposalId,
   ]);
 const current = startedFor => !disposed && startedFor === identity();

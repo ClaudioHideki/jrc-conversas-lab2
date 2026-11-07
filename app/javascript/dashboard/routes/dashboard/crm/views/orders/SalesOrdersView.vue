@@ -1,4 +1,5 @@
 <script setup>
+import { accountMembershipAccess } from 'dashboard/helper/accountMembershipAccess';
 import { useCustomerSegmentFilter } from '../../helpers/useCustomerSegmentFilter';
 /* eslint-disable vue/no-bare-strings-in-template */
 import ApprovalGateBadge from 'dashboard/routes/dashboard/approvals/ApprovalGateBadge.vue';
@@ -17,7 +18,7 @@ const identity = computed(() =>
     route.params.accountId,
     store.getters.getCurrentUserID,
     store.getters.getCurrentRole,
-    store.getters.getCurrentUser?.accounts,
+    store.getters.getCurrentUser?.accounts?.map(accountMembershipAccess),
   ])
 );
 let disposed = false;

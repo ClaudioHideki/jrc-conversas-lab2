@@ -323,3 +323,22 @@ it('does not save provisional financial defaults or request approval while its n
   await flushPromises();
   expect(button('Solicitar aprovação').element.disabled).toBe(false);
 });
+
+it('preserves an unsaved proposal during native presence refresh and still invalidates changed access scopes', async () => {
+  await mountPage();
+  await wrapper
+    .findAll('aside textarea')[1]
+    .setValue('Synthetic continuing commercial draft');
+  const requests = mocks.proposals.show.mock.calls.length;
+  authority.accounts[0].availability_status = 'offline';
+  authority.accounts[0].active_at = '2026-11-07T10:00:00Z';
+  await flushPromises();
+  expect(wrapper.find('aside').exists()).toBe(true);
+  expect(wrapper.findAll('aside textarea')[1].element.value).toBe(
+    'Synthetic continuing commercial draft'
+  );
+  expect(mocks.proposals.show).toHaveBeenCalledTimes(requests);
+  authority.accounts[0].custom_role_id = 7;
+  await flushPromises();
+  expect(wrapper.find('aside').exists()).toBe(false);
+});

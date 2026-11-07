@@ -64,7 +64,11 @@ const mountDelivery = (props = {}) => {
     getters: {
       getCurrentUserID: () => 25,
       getCurrentRole: state => state.role,
-      getCurrentUser: state => ({ accounts: [{ id: 7, role: state.role }] }),
+      getCurrentUser: state => ({
+        accounts: [
+          { id: 7, role: state.role, availability_status: state.presence },
+        ],
+      }),
     },
   });
   store.dispatch = vi.fn().mockResolvedValue({
@@ -236,4 +240,24 @@ it('does not confirm a simulated delivery after its native recipient component w
   finish({ data: { proposal: { id: 31 } } });
   expect(await pending).toBe(false);
   expect(useAlert).not.toHaveBeenCalled();
+});
+
+it('retains a simulated current delivery receipt when only native availability changes', async () => {
+  let finish;
+  proposalsAPI.sendToRecipient.mockImplementationOnce(
+    () =>
+      new Promise(resolve => {
+        finish = resolve;
+      })
+  );
+  mountDelivery();
+  const pending = submit(payload);
+  store.state.presence = 'online';
+  await flushPromises();
+  finish({ data: { proposal: { id: 31 }, delivery: { conversation_id: 22 } } });
+  expect(await pending).toEqual({
+    proposal: { id: 31 },
+    delivery: { conversation_id: 22 },
+  });
+  expect(proposalsAPI.sendToRecipient).toHaveBeenCalledTimes(1);
 });

@@ -5,6 +5,7 @@ import leads from '../modules/leads';
 import activities from '../modules/activities';
 import deals from '../modules/deals';
 import pipelines from '../modules/pipelines';
+import proposals from '../modules/proposals';
 import { authorityScope } from '../authorityScope';
 const apis = vi.hoisted(() => ({
   leadsAPI: {
@@ -18,9 +19,11 @@ const apis = vi.hoisted(() => ({
   dealsAPI: { list: vi.fn(), show: vi.fn() },
   stagesAPI: { list: vi.fn() },
   pipelinesAPI: { list: vi.fn() },
+  proposalsAPI: { list: vi.fn() },
 }));
 vi.mock('dashboard/api/crm', () => apis);
 const modules = [
+  ['proposals', proposals, 'fetchProposals', 'allProposals', apis.proposalsAPI],
   ['pipelines', pipelines, 'fetchPipelines', 'allPipelines', apis.pipelinesAPI],
   ['leads', leads, 'fetchLeads', 'allLeads', apis.leadsAPI],
   [
@@ -50,6 +53,7 @@ const mountStore = module => {
             id: authority.account,
             role: authority.role,
             custom_role_id: authority.grant,
+            availability_status: authority.presence,
           },
         ],
       }),
@@ -324,3 +328,18 @@ it('hides loaded lead detail and ignores its late predecessor', async () => {
   authority.user = 99;
   expect(store.getters['list/currentLead']).toBeNull();
 });
+
+it.each(modules)(
+  'retains a loaded %s cache across native availability refresh without ignoring later grant changes',
+  async (_key, module, action, getter, api) => {
+    const { store, authority } = mountStore(module);
+    api.list.mockResolvedValue({ data: [{ id: 1 }] });
+    await store.dispatch(`list/${action}`);
+    authority.presence = 'online';
+    expect(store.getters[`list/${getter}`]).toEqual([{ id: 1 }]);
+    authority.presence = 'offline';
+    expect(store.getters[`list/${getter}`]).toEqual([{ id: 1 }]);
+    authority.grant = 2;
+    expect(store.getters[`list/${getter}`]).toEqual([]);
+  }
+);

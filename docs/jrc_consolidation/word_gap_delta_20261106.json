@@ -432,6 +432,12 @@
       "report": "docs/jrc_consolidation/activity_origin_scope_checkpoint_20261107.json",
       "current_state": "Hidden origin writes reproduced in candidate and fixed using existing native read scope;17nativepassed plus1post-stylecase. No new permission or internal service rewrite.",
       "remaining": "DealsIndex local form/receipt boundary next;broader assignee semantics,Chrome and fullC-G not claimed."
+    },
+    {
+      "requirement": "C/Gpreserve native presence and unsaved commercial UI while enforcing access changes",
+      "report": "docs/jrc_consolidation/crm_presence_authority_checkpoint_20261107.json",
+      "current_state": "10presence regressions reproduced and corrected using existing Cadastro Mestre rule;84sourcepassed and0lint errors. Actual permission/tenant/status/future-scope negative cases remain passing.",
+      "remaining": "DealsIndex local continuation boundary next;not Chrome or completeC-G acceptance."
     }
   ],
   "explicit_dependencies": [
@@ -452,7 +458,7 @@
       "state": "External environment/operations require separate authorization; not simulated as passed."
     }
   ],
-  "next_confirmed_local_gap": "Bind native DealsIndex creation options,local form/product caches and detail mutation continuations to current authority/lifecycle and selected detail;preserve financial/product APIs and native drafts;start with failing rendered actual-store tests.",
+  "next_confirmed_local_gap": "Continue previously identified DealsIndex local options,creation form/product caches and selected-detail mutation receipts;native stores are already scoped and presence-compatible. Add failing rendered actual-store cases,preserve financial APIs and native drafts.",
   "stage_closure": {
     "C": false,
     "D": false,
@@ -461,5 +467,5 @@
     "G": false
   },
   "unreviewed_literal_and_visual_fragments": "Not auto-marked complete; the original context/requirements inventory remains classification_pending where not explicitly reconciled.",
-  "next_source_review": "DealsIndex local async options,creation drafts and selected-detail product mutations."
+  "next_source_review": "DealsIndex local form/options and native product/detail receipts after context changes."
 }

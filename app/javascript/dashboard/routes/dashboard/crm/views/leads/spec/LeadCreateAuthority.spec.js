@@ -36,6 +36,7 @@ beforeEach(() => {
             id: authority.account,
             role: authority.role,
             custom_role_id: authority.grant,
+            availability_status: authority.presence,
           },
         ],
       }),
@@ -162,4 +163,18 @@ it('completes only the current native owner draft after success, preserving anot
   expect(useAlert).toHaveBeenCalledTimes(1);
   expect(readDraft(ownerKey)).toBeNull();
   expect(readDraft(otherKey).form.notes).toBe('Synthetic unrelated draft');
+});
+
+it('keeps the current unsaved form across presence-only updates and still closes on a real role change', async () => {
+  await wrapper.get('[name="notes"]').setValue('Synthetic continuing draft');
+  authority.presence = 'online';
+  await flushPromises();
+  expect(wrapper.find('form').exists()).toBe(true);
+  expect(wrapper.get('[name="notes"]').element.value).toBe(
+    'Synthetic continuing draft'
+  );
+  expect(wrapper.emitted('close')).toBeUndefined();
+  authority.role = 'agent';
+  await flushPromises();
+  expect(wrapper.find('form').exists()).toBe(false);
 });
