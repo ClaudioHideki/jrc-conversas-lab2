@@ -300,6 +300,15 @@
       "PAGE_SUMMARY": "Page {page} of {pages}; {total} operations"
     },
     "REVIEWED_BATCH": {
+      "FAILURES": {
+        "STALE": "The reviewed data or configuration changed. Prepare a fresh review for unresolved items.",
+        "EXPIRED": "The review expired before this item could run. Prepare a fresh review.",
+        "RECEIPT": "The native receipt could not be verified. No success is assumed; review the operation history.",
+        "CAPACITY": "The native capacity limit was reached. Review capacity before preparing unresolved items again.",
+        "UNCONFIGURED": "The destination has no configured capacity for this scope. Review the native rules.",
+        "UNAVAILABLE": "The destination or required capacity data is unavailable. Review the native allocation settings.",
+        "VALIDATION": "Native validation prevented this item. Review its source data and prepare a fresh review."
+      },
       "TITLE": "Lote revisado",
       "DESCRIPTION": "Confira os clientes e a operação antes de confirmar. Cada item terá seu próprio resultado. Cancelar preserva o que já foi aplicado. Este lote não autoriza mensagens nem um Flow de atendimento.",
       "PREVIEW": "Revisar lote",

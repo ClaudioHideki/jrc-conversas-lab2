@@ -294,6 +294,18 @@
       "report": "docs/jrc_consolidation/withdrawal_reviewed_operations_checkpoint_20261106.json",
       "implemented_validated": "Pending CS-reviewed intentions now block scoped withdrawal;20native/0 with1000allocation request and11source/0. Actor-only cancellation and fresh readiness digest preserve other module/account rights.",
       "partial": "Own inventory UI/exceptional inactive actor handling/current-source Chrome and remaining F1/F2/C-G requirements remain open."
+    },
+    {
+      "reference": "Relationship P0125/P0128/P0181/P0184/P0185",
+      "report": "docs/jrc_consolidation/reviewed_batch_inventory_ui_checkpoint_20261106.json",
+      "implemented_validated": "Own saved-operation source controls, native exact reread and explicit pending-stop;8native/0;source31/0,32/0,14/0overlap.",
+      "partial": "Current-source Chrome, native audience capacity simulation, local capability matrix and C-G closure remain open."
+    },
+    {
+      "requirement": "Relationship P0128/P0184/P0185: bounded per-item failures and preserved resumable history",
+      "report": "docs/jrc_consolidation/reviewed_item_diagnostics_checkpoint_20261106.json",
+      "current_state": "Typed safe per-item diagnostics native29/0,source22/0;terminal receipts and explicit re-review preserved.",
+      "remaining": "Unclassified legacy failures remain generic;Chrome/Word visual and C-G closure remain open."
     }
   ],
   "explicit_dependencies": [
@@ -314,7 +326,7 @@
       "state": "External environment/operations require separate authorization; not simulated as passed."
     }
   ],
-  "next_confirmed_local_gap": "Own-operation inventory source controls and exact-ID current-state recovery, preserving source/detail scopes.",
+  "next_confirmed_local_gap": "Paginate native playbook execution history beyond the legacy100cap without counting or returning source-denied rows; retain legacy contract and original projection guards.",
   "stage_closure": {
     "C": false,
     "D": false,

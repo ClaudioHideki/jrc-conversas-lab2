@@ -24,8 +24,10 @@ class JrcRelationship::PortfolioMembershipReview
     progress = JrcRelationship::PortfolioMembershipProgress.call(review)
     valid = group.lock_version == progress.fetch(:revision) && pin.fetch('digest') == fingerprint(group, configuration(group)) &&
             progress.fetch(:links) == links(group, review.inputs.fetch('ids'))
-    raise ArgumentError, 'Reviewed portfolio changed; create a fresh review' unless valid
-    raise ArgumentError, 'Reviewed portfolio expired; create a fresh review' if review.expires_at <= Time.current
+    raise JrcRelationship::BatchReviewError.new('BATCH_REVIEW_STALE', 'Reviewed portfolio changed; create a fresh review') unless valid
+    return unless review.expires_at <= Time.current
+
+    raise JrcRelationship::BatchReviewError.new('BATCH_REVIEW_EXPIRED', 'Reviewed portfolio expired; create a fresh review')
   end
 
   def apply!(review, item)
@@ -36,7 +38,7 @@ class JrcRelationship::PortfolioMembershipReview
                                                                            expected_version: revision, reason: inputs.fetch('justification'))
     membership = result.fetch(:results).sole
     unless result.fetch(:id) == review.inputs.fetch('portfolio_group_id') && membership.fetch(:assignment_id) == item.assignment_id
-      raise ArgumentError, 'Native portfolio membership receipt mismatch'
+      raise JrcRelationship::BatchReviewError.new('BATCH_RECEIPT_INVALID', 'Native portfolio membership receipt mismatch')
     end
 
     { 'updated' => 1, 'operation' => 'portfolio_membership', 'assignment_id' => item.assignment_id,

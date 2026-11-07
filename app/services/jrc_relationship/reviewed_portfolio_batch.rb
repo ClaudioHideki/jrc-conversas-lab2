@@ -115,7 +115,7 @@ class JrcRelationship::ReviewedPortfolioBatch
     raise unless item_id
 
     Rails.logger.warn({ event: 'reviewed_batch_item_failed', batch_id: id, item_id: item_id, error_class: e.class.name }.to_json)
-    record_failure(id, item_id)
+    record_failure(id, item_id, JrcRelationship::BatchReviewError.item_code(e))
     false
   end
 
@@ -150,13 +150,13 @@ class JrcRelationship::ReviewedPortfolioBatch
     review.update!(state: state, revision: review.revision + 1)
   end
 
-  def record_failure(id, item_id)
+  def record_failure(id, item_id, code)
     JrcRelationship::BatchReview.transaction do
       review = reviews.lock.find(id)
       next unless review.state == 'running'
 
       review.items.where(id: item_id, state: 'pending').find_each do |item|
-        item.update!(state: 'failed', error_code: 'BATCH_NATIVE_OPERATION_FAILED')
+        item.update!(state: 'failed', error_code: code)
       end
       review.items.where(state: 'pending').find_each { |item| item.update!(state: 'canceled') }
       review.update!(state: 'attention', revision: review.revision + 1)

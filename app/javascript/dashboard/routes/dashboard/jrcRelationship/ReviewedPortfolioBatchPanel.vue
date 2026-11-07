@@ -74,6 +74,21 @@ const membershipStateLabels = computed(() => ({
     'RELATIONSHIP.NAMED_PORTFOLIOS.MEMBERSHIP.STATES.already_unlinked'
   ),
 }));
+const failureLabels = computed(() => ({
+  BATCH_REVIEW_STALE: t('RELATIONSHIP.REVIEWED_BATCH.FAILURES.STALE'),
+  BATCH_REVIEW_EXPIRED: t('RELATIONSHIP.REVIEWED_BATCH.FAILURES.EXPIRED'),
+  BATCH_RECEIPT_INVALID: t('RELATIONSHIP.REVIEWED_BATCH.FAILURES.RECEIPT'),
+  BATCH_CAPACITY_EXCEEDED: t('RELATIONSHIP.REVIEWED_BATCH.FAILURES.CAPACITY'),
+  BATCH_CAPACITY_UNCONFIGURED: t(
+    'RELATIONSHIP.REVIEWED_BATCH.FAILURES.UNCONFIGURED'
+  ),
+  BATCH_CAPACITY_UNAVAILABLE: t(
+    'RELATIONSHIP.REVIEWED_BATCH.FAILURES.UNAVAILABLE'
+  ),
+  BATCH_NATIVE_VALIDATION_FAILED: t(
+    'RELATIONSHIP.REVIEWED_BATCH.FAILURES.VALIDATION'
+  ),
+}));
 const reset = () => {
   epoch += 1;
   controller.abort();
@@ -501,7 +516,11 @@ onBeforeUnmount(reset);
             v-if="item.error_code"
             class="block"
           >
-            {{ t('RELATIONSHIP.REVIEWED_BATCH.ITEM_FAILED') }}
+            {{
+              Object.hasOwn(failureLabels, item.error_code)
+                ? failureLabels[item.error_code]
+                : t('RELATIONSHIP.REVIEWED_BATCH.ITEM_FAILED')
+            }}
           </span>
           <ReviewedCadencePanel
             v-if="item.receipt?.cadence_id"

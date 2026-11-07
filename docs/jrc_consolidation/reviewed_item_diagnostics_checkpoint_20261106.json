@@ -1,0 +1,39 @@
+{
+  "date": "2026-11-06",
+  "preserved_previous_checkpoint": "525036cef9141dc681c96b03de9a402cfc2ebfcf",
+  "branch": "codex/relacionamento-v2-20261101",
+  "reference": "Relationship P0128/P0184/P0185: bounded per-item failures and preserved resumable history",
+  "status": "Typed diagnostics validated natively and in source UI; C-G remain open.",
+  "implementation": [
+    "Existing reviewed transaction now records allowlisted codes for stale customer/book/group review, group expiry, receipt mismatch and typed native capacity/validation errors. No private exception message or validation value is serialized into an item code.",
+    "Typed domain exception remains an ArgumentError for existing HTTP/transaction contracts. Security denial, missing-source and database lock exceptions keep their existing escape behavior; no failure conversion grants access.",
+    "Existing finite rollback, previously applied receipts, terminal history and explicit new review remain unchanged. No migration, historical rewrite or automatic retry.",
+    "Source panel shows translated instructions for known codes; unknown legacy/string/prototype-property codes keep the generic message. Terminal attention offers no execution/approval action.",
+    "Repaired incremental Word ledger link for the previous own-inventory UI checkpoint; the original requirement inventory remains preserved."
+  ],
+  "evidence": {
+    "native": "reviewed-item-codes-native01:29/0 (2typed projection,15native-engine including a new actual stale-customer transition,12group-native regressions with stale/expiry/live-capacity code assertions).",
+    "source": "reviewed-item-codes-source01:22/0 (5new diagnostics/unknown-code cases +17existing panel regressions).",
+    "static": "ruby01:new/changed production and new specs0offenses; existing reviewed_portfolio_batch_spec retains2preexisting AnyInstance offenses. ESLintnew spec0/0;shared panel8existing warnings/0errors.",
+    "qualification": "Real PostgreSQL synthetic rows and source Vue tests with mocked API; no fresh assets/Chrome/live worker claim.",
+    "privacy": "No parsing exception strings for diagnosis. Unknown input text and native string validation messages fall back to fixed codes. Existing logs contain only exception class/item/review IDs."
+  },
+  "environment": {
+    "initial_free_bytes": 6816210944,
+    "minimum_observed_bytes": 6782832640,
+    "final_free_bytes": 6821965824,
+    "database": "jrc_rel_v2_candidate_test",
+    "build": false,
+    "migrations": false,
+    "server5379_changed": false,
+    "external_operations": false,
+    "push": false
+  },
+  "remaining": [
+    "Unclassified native failures deliberately remain generic; no heuristic or translated-message parsing.",
+    "Execution history still has legacy100candidate cap; implement bounded authorization-preserving pagination next.",
+    "Whole-audience membership capacity preview/local capability matrix/current-source Chrome and full Word C-G audit remain open.",
+    "TRR/business and external provider/scanner/channel validation dependencies unchanged."
+  ],
+  "next": "Paginate native playbook execution history beyond the legacy100cap without counting or returning source-denied rows; retain legacy contract and original projection guards."
+}

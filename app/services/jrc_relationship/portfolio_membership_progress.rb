@@ -7,7 +7,9 @@ class JrcRelationship::PortfolioMembershipProgress
     links = pin.fetch('links').deep_dup
     review.items.where(state: 'applied').order(:ordinal).each do |item|
       expected = expected_receipt(review, item, revision, links)
-      raise ArgumentError, 'Reviewed portfolio receipt changed' unless item.receipt.is_a?(Hash) && item.receipt.slice(*expected.keys) == expected
+      unless item.receipt.is_a?(Hash) && item.receipt.slice(*expected.keys) == expected
+        raise JrcRelationship::BatchReviewError.new('BATCH_RECEIPT_INVALID', 'Reviewed portfolio receipt changed')
+      end
 
       revision = expected.fetch('group_version')
       links[item.assignment_id.to_s] = review.inputs.fetch('active')

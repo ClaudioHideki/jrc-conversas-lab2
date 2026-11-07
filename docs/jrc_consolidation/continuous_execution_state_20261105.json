@@ -3,11 +3,11 @@
   "user_request": "499267ac-546d-4853-b4cf-7f03a2ea0629",
   "initial_head": "be54d0f7b4ce8d4e2a077cf2bdd8c2a4d5c88f5e",
   "branch": "codex/relacionamento-v2-20261101",
-  "last_validated_checkpoint": "2c5810f9b7d9a117633385b9bda8f0dcb41aec3b",
+  "last_validated_checkpoint": "525036cef9141dc681c96b03de9a402cfc2ebfcf",
   "completed_current_work": "Sealed dossier, weighted/current capacity, native withdrawal/cadence controls and F2 increments locally tested; see linked incremental reports. No C-G closure.",
-  "active_work": "Typed safe item failure diagnostics in existing reviewed engine.",
+  "active_work": "Paginate native playbook execution history beyond the legacy100cap without counting or returning source-denied rows; retain legacy contract and original projection guards.",
   "exact_next_actions": [
-    "Implement typed safe per-item diagnostics and preserve generic fallback, immutable receipts and native denial semantics, then continue safe C-G work."
+    "Paginate native playbook execution history beyond the legacy100cap without counting or returning source-denied rows; retain legacy contract and original projection guards."
   ],
   "test_environment": {
     "source_manifest": ".codex/d9-notifications-20261104/snapshot.json",
@@ -49,14 +49,14 @@
     "No real participant removal or provider request; tests use synthetic records and WebMock, with external network disabled."
   ],
   "restrictions": "No build/recompile, no5379 change/restart, no four-container restart/reconfiguration, no cleanup/delete of existing data, no push/GHCR/deploy/production/client change, no real provider operations. Additive migrations allowed only in owned synthetic test database.",
-  "disk_last_observed_bytes": 6829056000,
+  "disk_last_observed_bytes": 6821961728,
   "TRR": "Undefined; do not invent",
   "company_documents_without_portfolio": "Explicitly deferred",
-  "last_validated_head": "2c5810f9b7d9a117633385b9bda8f0dcb41aec3b",
-  "new_validated_code_checkpoint": "git log -1 --format=%H -- docs/jrc_consolidation/reviewed_batch_inventory_ui_checkpoint_20261106.json",
-  "current_status": "Own inventory native8/0;source31/0,32/0,14/0overlap. No C-G closure.",
+  "last_validated_head": "525036cef9141dc681c96b03de9a402cfc2ebfcf",
+  "new_validated_code_checkpoint": "git log -1 --format=%H -- docs/jrc_consolidation/reviewed_item_diagnostics_checkpoint_20261106.json",
+  "current_status": "Typed item diagnostics native29/0/source22/0;C-G open.",
   "next_actions": [
-    "Implement typed safe per-item diagnostics and preserve generic fallback, immutable receipts and native denial semantics, then continue safe C-G work."
+    "Paginate native playbook execution history beyond the legacy100cap without counting or returning source-denied rows; retain legacy contract and original projection guards."
   ],
   "latest_dossier_report": "docs/jrc_consolidation/sealed_dossier_checkpoint_20261105.json",
   "capacity_report": "docs/jrc_consolidation/weighted_capacity_checkpoint_20261105.json",
@@ -147,5 +147,6 @@
   "reviewed_portfolio_membership_ui_report": "docs/jrc_consolidation/reviewed_portfolio_membership_ui_checkpoint_20261106.json",
   "reviewed_batch_inventory_native_report": "docs/jrc_consolidation/reviewed_batch_inventory_native_checkpoint_20261106.json",
   "withdrawal_reviewed_operations_report": "docs/jrc_consolidation/withdrawal_reviewed_operations_checkpoint_20261106.json",
-  "reviewed_batch_inventory_ui_report": "docs/jrc_consolidation/reviewed_batch_inventory_ui_checkpoint_20261106.json"
+  "reviewed_batch_inventory_ui_report": "docs/jrc_consolidation/reviewed_batch_inventory_ui_checkpoint_20261106.json",
+  "reviewed_item_diagnostics_report": "docs/jrc_consolidation/reviewed_item_diagnostics_checkpoint_20261106.json"
 }

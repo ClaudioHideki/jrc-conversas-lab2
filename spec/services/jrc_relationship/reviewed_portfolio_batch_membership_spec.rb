@@ -83,6 +83,7 @@ RSpec.describe JrcRelationship::ReviewedPortfolioBatch do
     group.reload.update!(objective: 'Synthetic change requiring a fresh review')
     result = service.advance(review.fetch('id'), limit: 1)
     expect(result.fetch('state')).to eq('attention')
+    expect(result.fetch('items').second.fetch('error_code')).to eq('BATCH_REVIEW_STALE')
     old = JrcRelationship::BatchReview.find(review.fetch('id'))
     frozen = [old.attributes, old.items.order(:ordinal).map(&:attributes)]
     retry_input = proposal.merge('ids' => allocations.drop(1).map(&:id), 'expected_version' => group.reload.lock_version,
@@ -134,6 +135,7 @@ RSpec.describe JrcRelationship::ReviewedPortfolioBatch do
     result = service.advance(review.fetch('id'))
     expect(result.fetch('state')).to eq('attention')
     expect(result.fetch('items').pluck('state')).to eq(%w[applied failed canceled])
+    expect(result.fetch('items').second.fetch('error_code')).to eq('BATCH_CAPACITY_EXCEEDED')
     expect(group.customer_links.where(active: true).count).to eq(1)
     expect(allocations.map { |row| row.reload.attributes }).to eq(original)
   end
@@ -156,7 +158,9 @@ RSpec.describe JrcRelationship::ReviewedPortfolioBatch do
     review = service.preview(input)
     service.approve(review.fetch('id'), digest: review.fetch('digest'))
     travel 6.minutes do
-      expect(service.advance(review.fetch('id')).fetch('state')).to eq('attention')
+      result = service.advance(review.fetch('id'))
+      expect(result.fetch('state')).to eq('attention')
+      expect(result.fetch('items').first.fetch('error_code')).to eq('BATCH_REVIEW_EXPIRED')
       expect(group.customer_links).not_to exist
     end
   end

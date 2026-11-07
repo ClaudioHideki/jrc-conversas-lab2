@@ -42,8 +42,12 @@ class JrcRelationship::BatchReviewPlan
   end
 
   def validate!(review, assignment: nil)
-    raise ArgumentError, 'Reviewed access changed' unless review.snapshot.fetch('access_signature') == @context.access_signature
-    raise ArgumentError, 'Reviewed playbook changed' unless review.snapshot['book'] == book_snapshot(review.inputs, lock: true)
+    unless review.snapshot.fetch('access_signature') == @context.access_signature
+      raise JrcRelationship::BatchReviewError.new('BATCH_REVIEW_STALE', 'Reviewed access changed')
+    end
+    unless review.snapshot['book'] == book_snapshot(review.inputs, lock: true)
+      raise JrcRelationship::BatchReviewError.new('BATCH_REVIEW_STALE', 'Reviewed playbook changed')
+    end
 
     validate_cadence!(review)
     JrcRelationship::PortfolioMembershipReview.new(@context).validate!(review) if review.inputs['operation'] == 'portfolio_membership'
@@ -101,7 +105,9 @@ class JrcRelationship::BatchReviewPlan
 
   def validate_row!(review, record)
     original = review.snapshot.fetch('rows').find { |row| row.fetch('assignment_id') == record.id }
-    raise ArgumentError, 'Reviewed customer changed' unless original && original == row_snapshot(record)
+    return if original && original == row_snapshot(record)
+
+    raise JrcRelationship::BatchReviewError.new('BATCH_REVIEW_STALE', 'Reviewed customer changed')
   end
 
   def operation_options(operation, input)
