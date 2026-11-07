@@ -1,0 +1,124 @@
+{
+  "date": "2026-11-07",
+  "status": "native_lead_actions_source_and_candidate_http_validated_not_chrome",
+  "branch": "codex/relacionamento-v2-20261101",
+  "previous_checkpoint": "d3e14bd30402518212646efbc3955ebf5135ab89",
+  "files": [
+    "app/javascript/dashboard/store/crm/modules/leads.js",
+    "app/javascript/dashboard/routes/dashboard/crm/views/leads/LeadsIndex.vue",
+    "app/javascript/dashboard/routes/dashboard/crm/views/leads/spec/LeadNativeActions.spec.js",
+    "app/javascript/dashboard/api/crm/spec/phase1.spec.js",
+    "app/javascript/dashboard/i18n/locale/en/crm.json",
+    "spec/requests/api/v1/accounts/crm/lead_deletion_access_spec.rb"
+  ],
+  "confirmed_gap": "Existing Excluir lead called a missing Vuex action. The prior source view test replaced that action with a mock;actual module integration exposed the missing native API invocation.",
+  "implementation": [
+    "Added actual deleteLead action using inherited native account-scoped API.delete;errors propagate without optimistic removal or a force path. Existing native controller,policies,transaction,deal blocker,contact/history/audit preservation unchanged.",
+    "Refresh retains explicit current search/status/customer segment filters;current detail invalidated only after native success. Caller confirms/can cancel and blocks duplicate deletion while pending.",
+    "Lead UI captures account/actor/role/grants and lifecycle across delete,status,conversion and metadata read. Changed authority clears stale popups/options and reloads through native filters;old mutation receipts cannot navigate,show success or alter newer records.",
+    "Native list failure has scoped bounded flag and translated error/retry instead of false empty success. Loading feedback uses source translation;no private error payload logged.",
+    "Only en source translations updated;existing layout/native lists and conversion/creation components reused."
+  ],
+  "validation": {
+    "baseline01": "7failed/1passed;missing-action failures prevented deferred native mocks from starting in two receipt cases. Artifacts retained.",
+    "source02": "35passed/1failed plus12render errors:missing useI18n/t introduced in this increment. Corrected and original failed artifacts retained.",
+    "source05": "36/0:8actual Vuex/rendered actions,6oldLeadUI,18cache authority,4segment list regressions;no unhandled errors.",
+    "source_final08": "14/0:11actual Vuex/rendered action cases plus3API client contracts;includes additional duplicate/late metadata/late status checks. API transport mocked,not Chrome or PostgreSQL.",
+    "native03": "5examples,0failures in owned jrc_rel_v2_candidate_test:foreign account,other owner,disabled CRM,successful deletion preserving activity/contact/audit,linked-deal409. Existing native controller/policies exercised;synthetic transaction only.",
+    "native_resource": {
+      "start": 6558597120,
+      "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+      "database": "jrc_rel_v2_candidate_test",
+      "no_build": true,
+      "no_server": true,
+      "spec_sha256": {
+        "spec/requests/api/v1/accounts/crm/lead_deletion_access_spec.rb": "131e8d63b30b12f4d065e56ef8e1ed07265cd051ff7488932dcad0af22315bec",
+        "spec/requests/api/v1/accounts/crm/consolidated_commercial_protection_spec.rb": "c668cb7a647c4e487d91b4a1463f4fd10f76c97248827443b170fa6341b9538b"
+      },
+      "minimum": 6539489280,
+      "exit_code": 0,
+      "end": 6559043584
+    },
+    "source_resources": {
+      "lead-native-actions-baseline01": {
+        "status": "failed",
+        "free_start": 6542422016,
+        "minimum_free": 6530990080,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 27428,
+        "exit_code": 1,
+        "free_end": 6561083392
+      },
+      "lead-native-actions-source02": {
+        "status": "failed",
+        "free_start": 6560030720,
+        "minimum_free": 6525267968,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 16044,
+        "exit_code": 1,
+        "free_end": 6559498240
+      },
+      "lead-native-actions-source05": {
+        "status": "passed",
+        "free_start": 6558842880,
+        "minimum_free": 6497869824,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 12528,
+        "exit_code": 0,
+        "free_end": 6556168192
+      },
+      "lead-native-actions-source-final08": {
+        "status": "passed",
+        "free_start": 6556880896,
+        "minimum_free": 6534172672,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 16396,
+        "exit_code": 0,
+        "free_end": 6555607040
+      },
+      "lead-native-actions-lint-final09": {
+        "status": "passed",
+        "free_start": 6555570176,
+        "minimum_free": 6555439104,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 25856,
+        "exit_code": 0,
+        "free_end": 6555029504
+      }
+    },
+    "ruby_lint": "New native request spec0offenses,no source content changed by lint (executed SHA verified).",
+    "eslint": "All4touchedJS/Vuefiles0errors;LeadsIndex17warnings,otherfiles0warnings. Original HEAD comparison artifact retained;do not suppress existing warnings.",
+    "chrome": false
+  },
+  "disk": {
+    "initial_bytes": 6542422016,
+    "minimum_measured_bytes": 6497869824,
+    "final_bytes": 6553817088
+  },
+  "preservation": {
+    "new_backend_endpoint_or_policy": false,
+    "migrations": false,
+    "build": false,
+    "server5379_changed": false,
+    "original_containers_interrupted": false,
+    "cleanup": false,
+    "existing_data_deleted": false,
+    "push": false,
+    "external_operations": false
+  },
+  "remaining": [
+    "Shared LeadCreateModal still needs its own captured authority/unmount boundary for its standalone global action use and draft success ordering. Parent view protection alone is not claimed sufficient.",
+    "Actual Chrome/desktop/mobile and full Word visual/literal audit remain blocked/open;frozen assets are not source evidence.",
+    "Other CRM local forms and explicit C-G,business/external dependencies remain."
+  ]
+}

@@ -4,7 +4,7 @@ import managementAPI from '../management';
 describe('Phase 1 CRM API contracts', () => {
   const originalAxios = window.axios;
   beforeEach(() => {
-    window.axios = { get: vi.fn(), post: vi.fn() };
+    window.axios = { get: vi.fn(), post: vi.fn(), delete: vi.fn() };
     window.history.replaceState({}, '', '/app/accounts/17/contacts');
   });
   afterEach(() => {
@@ -21,6 +21,12 @@ describe('Phase 1 CRM API contracts', () => {
     expect(window.axios.post).toHaveBeenCalledWith(
       '/api/v1/accounts/17/crm/leads/from_contact',
       { contact_id: 42 }
+    );
+  });
+  it('uses the inherited native account-scoped delete endpoint without a special force path', () => {
+    leadsAPI.delete(42);
+    expect(window.axios.delete).toHaveBeenCalledWith(
+      '/api/v1/accounts/17/crm/leads/42'
     );
   });
   it('passes the metrics date filters to the existing account-scoped resource', () => {

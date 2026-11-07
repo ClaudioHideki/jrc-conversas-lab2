@@ -8,6 +8,11 @@
       "PLANNING": "Planejamento",
       "MANAGEMENT": "Gestão"
     },
+    "LEAD_LIST": {
+      "LOAD_ERROR": "Leads or their creation options could not be loaded. Check your access and try again.",
+      "LOADING": "Loading leads…",
+      "RETRY": "Try again"
+    },
     "AGENDA_RECORD": {
       "LOADING": "Loading the original CRM record…",
       "UNAVAILABLE": "This record is unavailable or you no longer have access.",

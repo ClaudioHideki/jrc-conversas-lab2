@@ -408,6 +408,12 @@
       "report": "docs/jrc_consolidation/funnel_authority_checkpoint_20261107.json",
       "current_state": "6failing baseline assertions corrected;43sourcepassed then18finalpassed including actual loss confirmation;0lint errors.",
       "remaining": "Chrome/sourceasset authorization,other nativeCRM forms and completeC-G still open."
+    },
+    {
+      "requirement": "C/Gfunctional native lead deletion,conversion and current-authority sourceUI",
+      "report": "docs/jrc_consolidation/lead_native_actions_checkpoint_20261107.json",
+      "current_state": "Actual store deletion missing despite mocked action test;restored native path with36source then14directedpassed and5native HTTPpassed. No new native deletion permissions.",
+      "remaining": "Shared standalone creation modal authority next;Chrome and completeC-G open."
     }
   ],
   "explicit_dependencies": [
@@ -428,7 +434,7 @@
       "state": "External environment/operations require separate authorization; not simulated as passed."
     }
   ],
-  "next_confirmed_local_gap": "Restore the missing native lead deletion action used by the existing UI;test actual Vuex integration,confirmation/cancellation/native errors/current authority and backend contact/history/account preservation without changing native deletion rules.",
+  "next_confirmed_local_gap": "Bind shared LeadCreateModal (including global action caller) to original account/actor/role/lifecycle,preserve native drafts,ignore obsolete create receipts and never claim success before current draft confirmation;test existing creation behavior.",
   "stage_closure": {
     "C": false,
     "D": false,
@@ -437,5 +443,5 @@
     "G": false
   },
   "unreviewed_literal_and_visual_fragments": "Not auto-marked complete; the original context/requirements inventory remains classification_pending where not explicitly reconciled.",
-  "next_source_review": "Actual Vuex lead delete action absent despite existing rendered confirmation/backend API."
+  "next_source_review": "Shared LeadCreateModal global creation and native draft receipt scope."
 }

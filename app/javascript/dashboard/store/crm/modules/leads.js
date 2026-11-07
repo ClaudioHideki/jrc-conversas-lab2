@@ -15,12 +15,15 @@ export default {
     filters: {},
     isLoading: false,
     pagination: {},
+    error: null,
   },
   getters: {
     allLeads: (state, _getters, _rootState, rootGetters) =>
       hasCurrentAuthority(state, rootGetters) ? state.leads : [],
     leadById: (_state, getters) => id =>
       getters.allLeads.find(l => l.id === id),
+    error: (state, _getters, _rootState, rootGetters) =>
+      hasCurrentAuthority(state, rootGetters) ? state.error : null,
     currentLead: (state, _getters, _rootState, rootGetters) =>
       state.detailScope === authorityScope(rootGetters)
         ? state.currentLead
@@ -31,6 +34,9 @@ export default {
         state.detailLoading),
   },
   mutations: {
+    SET_ERROR(state, value) {
+      state.error = value;
+    },
     SET_AUTHORITY_SCOPE(state, value) {
       state.authorityScope = value;
     },
@@ -66,6 +72,7 @@ export default {
       const scope = authorityScope(rootGetters);
       commit('SET_AUTHORITY_SCOPE', scope);
       commit('SET_LEADS', []);
+      commit('SET_ERROR', null);
       commit('SET_LOADING', true);
       try {
         const response = await leadsAPI.list(params);
@@ -84,6 +91,7 @@ export default {
         console.error('CRM leads list request failed', {
           status: error.response?.status,
         });
+        commit('SET_ERROR', true);
       } finally {
         if (
           requestId === state.listRequestId &&
@@ -122,6 +130,21 @@ export default {
         )
           commit('SET_DETAIL_LOADING', false);
       }
+    },
+    async deleteLead(
+      { dispatch, commit, state, rootGetters },
+      { leadId, params }
+    ) {
+      const scope = authorityScope(rootGetters);
+      await leadsAPI.delete(leadId);
+      if (scope !== authorityScope(rootGetters)) return;
+      if (
+        state.detailScope === scope &&
+        Number(state.currentLead?.id) === Number(leadId)
+      ) {
+        commit('START_DETAIL_REQUEST', scope);
+      }
+      await dispatch('fetchLeads', params);
     },
     async createLead({ dispatch, rootGetters }, data) {
       const scope = authorityScope(rootGetters);
