@@ -1,0 +1,94 @@
+{
+  "date": "2026-11-07",
+  "candidate_code_commit": "d8d7c960ce34829d43c7fed58165a8a1098e4fba",
+  "branch": "codex/relacionamento-v2-20261101",
+  "status": "Prepared only;build/isolated current-source app and browser execution await explicit user authorization.",
+  "frozen5379_readonly_proof": {
+    "login_http": 200,
+    "asset_path": "/consolidation-customer-b1-b4-4d4a6de3-vite/assets/v3app-Dc7pKck9.js",
+    "asset_sha256": "ae6897f4131fe8b6d08767ed31bbff7f780cca17cb5e9da960b8d2e4bcfbca52",
+    "matches_preserved_asset": true,
+    "current_candidate_accepted": false
+  },
+  "native_runtime_proof": {
+    "four_original_containers_running_started_at_unchanged": true,
+    "synthetic_candidate_and_master_connections_remaining": 0,
+    "synthetic_waiting_locks": 0,
+    "no_process_interrupted": true
+  },
+  "conditional_environment": {
+    "execute_now": false,
+    "one_protected_vite_build_only_if_authorized": true,
+    "preferred_start_bytes": 3221225472,
+    "user_minimum_start_bytes": 1610612736,
+    "mandatory_stop_bytes": 750000000,
+    "no_simultaneous_vite_builds": true,
+    "isolated_app_and_synthetic_DB_only_if_authorized": true,
+    "do_not_replace5379_assets_or_instance": true,
+    "source_and_manifest_hash_required": true,
+    "no_provider_requests_no_push_GHCR_deploy": true
+  },
+  "browser_matrix": {
+    "desktop": "1440x900 reference viewport",
+    "mobile": "390x844 reference viewport",
+    "themes": [
+      "light",
+      "dark"
+    ],
+    "evidence_required": [
+      "Exact served source/code and new manifest digest;old asset must not count",
+      "Real native API success/denial and post-reload DB/record persistence,not mocked transport",
+      "Screenshots of each tested dialog/tab/filter/navigation/state,including long-content containment",
+      "Expected-version conflict and changed-access tests using real synthetic accounts/roles via native interfaces",
+      "No unredacted auth headers,private body or provider credentials in evidence/logs"
+    ]
+  },
+  "scenarios": [
+    {
+      "module": "CRM Calendar",
+      "route_name": "crm_calendar",
+      "steps": [
+        "Open actual month/week/day/list over native authorized activities;switch previous/next/day/date links.",
+        "Combine search/type/owner/status,clear while preserving selected date/view;verify sidebar and period agree.",
+        "Create a native activity through Atividades;open from calendar and reschedule through existing exact-version dialog;reload and verify actual timezone/date/content.",
+        "Use2tabs to create a native edit conflict;verify retained rejected draft,explicit reload and no silent overwrite.",
+        "Complete once and verify persisted completion after native reread;test denial/actor replacement and no private old owner options.",
+        "Toggle native online status through application UI while a draft/filter is open;no lost draft;repeat real role/custom-role revocation and require old content closure."
+      ]
+    },
+    {
+      "module": "Relationship portfolios",
+      "route_name": "jrc_relationship_portfolio",
+      "steps": [
+        "Search an existing Cadastro Mestre company;reuse/create its native allocation through explicit form and review.",
+        "Link same customer to2activeoperationalportfolios;verify exactly1native allocation,original owner/tasks and global capacity,not2allocations.",
+        "Review real master multi-selection,digest/current capacity,explicit approval and per-item progress/results;read persisted native links after reload.",
+        "Edit name/goals/rules with captured group/config revisions;reject stale revisions and preserve entered values.",
+        "Verify native account/company/unit/private portfolio restrictions and withdrawn Relationship eligibility,without removing unrelated access.",
+        "Inspect history as operational summary;do not mark raw historic values or sealed generic audit complete. Local named-role matrix remains blocked."
+      ]
+    },
+    {
+      "module": "Central Approvals",
+      "route_name": "jrc_approvals",
+      "steps": [
+        "Open native request/policy and history;verify original v1 snapshots and exact native published versions remain readable.",
+        "Exercise approved numeric tier boundaries with configured synthetic amounts and real native plan/simulator;do not change original policy histories.",
+        "Perform explicit decision with reason/native expected_version;reject double clicks,stale version and denied current actor.",
+        "Exercise atomic allowed proposal discount adjustment and exact revised-request navigation;verify native proposal/request persisted together.",
+        "Refresh after unavailable initial context;verify current server capabilities and role/tenant denial replace old content.",
+        "Verify native delegation history/revocation and internal notifications;existing real worker evidence is separate from actual browser/WebSocket delivery."
+      ]
+    }
+  ],
+  "retained_open_items": [
+    "TRR remains undefined;approved financial segment basis remains invoiced orders in a period",
+    "Local named-role capability matrix still requires business definition;no role-name grants",
+    "Full historical portfolio values/reasons need immutable historical-scope proof;generic audit changes must preserve native import and account deletion lifecycle",
+    "Company documents without portfolio expansion explicitly deferred",
+    "Real DocuSign demo/consent/Connect/scanner/channel acceptance requires separate environment/authorization",
+    "Broader literal/visual Word audit,C/D/E/F/G closure and native large-scale Calendar date pagination remain open"
+  ],
+  "disk_at_preparation_bytes": 6408962048,
+  "no_build_no_current_source_browser_run": true
+}

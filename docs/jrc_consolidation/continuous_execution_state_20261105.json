@@ -51,7 +51,7 @@
     "No real participant removal or provider request; tests use synthetic records and WebMock, with external network disabled."
   ],
   "restrictions": "No build/recompile, no5379 change/restart, no four-container restart/reconfiguration, no cleanup/delete of existing data, no push/GHCR/deploy/production/client change, no real provider operations. Additive migrations allowed only in owned synthetic test database.",
-  "disk_last_observed_bytes": 6409646080,
+  "disk_last_observed_bytes": 6387355648,
   "TRR": "Undefined; do not invent",
   "company_documents_without_portfolio": "Explicitly deferred",
   "last_validated_head": "4b5de4c490ff1bae8911d2f1f81540fffbe2a3c0",
@@ -183,5 +183,10 @@
   "calendar_views_report": "docs/jrc_consolidation/calendar_views_checkpoint_20261107.json",
   "portfolio_word_reconciliation": "docs/jrc_consolidation/portfolio_word_reconciliation_20261107.json",
   "relationship_presence_report": "docs/jrc_consolidation/relationship_presence_checkpoint_20261107.json",
-  "calendar_filters_report": "docs/jrc_consolidation/calendar_filters_checkpoint_20261107.json"
+  "calendar_filters_report": "docs/jrc_consolidation/calendar_filters_checkpoint_20261107.json",
+  "candidate_code_commit": "d8d7c960ce34829d43c7fed58165a8a1098e4fba",
+  "controlled_continuation_report": "docs/jrc_consolidation/controlled_continuation_checkpoint_20261107.json",
+  "candidate_browser_acceptance_plan": "docs/jrc_consolidation/candidate_browser_acceptance_plan_20261107.json",
+  "build_authorization_pending": true,
+  "build_started": false
 }
