@@ -19,6 +19,10 @@
       "COMPLETED": "Completed",
       "COMPLETE": "Mark as completed"
     },
+    "ACTIVITY_CREATION": {
+      "LOAD_ERROR": "Related deals could not be loaded. Check your access and try again.",
+      "RETRY": "Try again"
+    },
     "ACTIVITY_EDIT": {
       "TITLE": "Edit or reschedule activity",
       "NOTE": "Update the original CRM commitment. Its owner, source links and activity type are preserved.",

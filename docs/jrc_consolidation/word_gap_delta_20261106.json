@@ -420,6 +420,12 @@
       "report": "docs/jrc_consolidation/lead_create_authority_checkpoint_20261107.json",
       "current_state": "5failing assertions corrected;11sourcepassed plus1stale-submit check;lint0errors. Global action caller reuses the protected modal.",
       "remaining": "Activities local form boundary,next;Chrome/fullC-G and explicit dependencies remain."
+    },
+    {
+      "requirement": "C/GnativeActivity source form,lifecycle,drafts and completion UI",
+      "report": "docs/jrc_consolidation/activities_authority_checkpoint_20261107.json",
+      "current_state": "7baseline failures corrected;22sourcepassed plus2additional checks and2post-lint existing UI checks;0lint errors.",
+      "remaining": "Native source lookup scope mismatch next;not Chrome/fullC-G acceptance."
     }
   ],
   "explicit_dependencies": [
@@ -440,7 +446,7 @@
       "state": "External environment/operations require separate authorization; not simulated as passed."
     }
   ],
-  "next_confirmed_local_gap": "Protect existing ActivitiesIndex local deal options,creation draft/navigation and native completion receipts with captured authority/lifecycle;retain existing filters,editor,read policies and native payloads;add failing source regressions first.",
+  "next_confirmed_local_gap": "Test native ActivitiesController creation/reparenting against hidden same-account deals/leads and corporate coverage;reuse existing visible_to_current_user source scope if the mismatch is reproduced,preserve internal services and legacy versioned editor.",
   "stage_closure": {
     "C": false,
     "D": false,
@@ -449,5 +455,5 @@
     "G": false
   },
   "unreviewed_literal_and_visual_fragments": "Not auto-marked complete; the original context/requirements inventory remains classification_pending where not explicitly reconciled.",
-  "next_source_review": "Existing ActivitiesIndex local options and post-command UI receipts."
+  "next_source_review": "Native activity origin source lookup versus native read/corporate scope."
 }
