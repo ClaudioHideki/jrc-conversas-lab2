@@ -1,7 +1,8 @@
 """Explicit local-only real queue gate. No build, cleanup, migration or deployment.
 
 Creates a new empty PostgreSQL database from schema plus migration metadata only.
-Requires Redis index15 to be completely empty; never flushes or deletes its data.
+Fresh mode requires Redis15 empty. Resume/approval modes require exact preserved
+fixtures, original evidence and the owned Redis lease; never flush or delete data.
 All generated records and artifacts are preserved for inspection after the run.
 """
 from pathlib import Path
@@ -23,7 +24,8 @@ assert source.startswith("/consolidation-approval-notifications-tests-20261104-"
 container = "jrc-rel-v2-run-20261101"
 postgres = "jrc-rel-v2-pg-20261101"
 redis = "jrc-rel-v2-redis-20261101"
-resume = len(sys.argv) == 3 and sys.argv[1] == '--resume'
+resume = len(sys.argv) == 3 and sys.argv[1] in ('--resume', '--approvals')
+approvals = resume and sys.argv[1] == '--approvals'
 assert len(sys.argv) == 1 or resume
 nonce = sys.argv[2] if resume else uuid.uuid4().hex[:12]
 assert re.fullmatch(r"[0-9a-f]{12}", nonce)
@@ -40,10 +42,17 @@ if resume:
     assert prior["business_data_copied"] is False and prior["passed"] is False
     assert native_prior["status"] == "failed" and native_prior["phase"] == "worker_boot"
     assert native_prior["delivery_acknowledgments"] == 0
+    if approvals:
+        proofs = []
+        for path in artifact.glob("attempt_*/native-result.json"):
+            proof = json.loads(path.read_text())
+            if proof["status"] == "passed" and proof["delivery_acknowledgments"] == 5 and proof["database"] == database:
+                proofs.append(path)
+        assert len(proofs) == 1, "One exact previously passed business gate must be preserved"
     artifact = artifact / ("attempt_" + attempt)
 artifact.mkdir(parents=True, exist_ok=False)
 result = {"nonce": nonce, "database": database, "redis_index": 15, "queue": queue,
-          "source": source, "resume": resume, "attempt": attempt, "head": subprocess.check_output(["git", "rev-parse", "HEAD"]).decode().strip(),
+          "source": source, "resume": resume, "mode": "approvals" if approvals else "relationship", "attempt": attempt, "head": subprocess.check_output(["git", "rev-parse", "HEAD"]).decode().strip(),
           "free_start": shutil.disk_usage(root).free, "minimum_free": shutil.disk_usage(root).free,
           "original_containers_changed": False, "application_build": False, "cleanup": False}
 
@@ -61,6 +70,9 @@ try:
     result["phase"] = "syntax_and_empty_scope"
     files = ["spec/integration/jrc_relationship/owned_worker_boot.rb", "spec/integration/jrc_relationship/owned_worker_gate.rb",
              "spec/integration/jrc_relationship/owned_worker_fixtures.rb"]
+    if approvals:
+        files += ["spec/integration/jrc_relationship/owned_approval_worker_gate.rb",
+                  "spec/integration/jrc_relationship/owned_approval_witness.rb"]
     result["code_sha256"] = {}
     for relative in files:
         raw = (root / relative).read_bytes()
@@ -75,7 +87,7 @@ try:
         result["phase"] = "preserved_fixture_ownership"
         assert command(["docker", "exec", redis, "redis-cli", "-n", "15", "GET", "jrc_g_worker_claim"]).decode().strip() == nonce
         assert int(command(["docker", "exec", redis, "redis-cli", "-n", "15", "TTL", "jrc_g_worker_claim"]).decode().strip()) > 600
-        assert command(["docker", "exec", redis, "redis-cli", "-n", "15", "SCARD", "jrc_g_worker:" + nonce + ":ack"]).decode().strip() == "0"
+        assert command(["docker", "exec", redis, "redis-cli", "-n", "15", "SCARD", "jrc_g_worker:" + nonce + ":ack"]).decode().strip() == ("5" if approvals else "0")
         active = command(["docker", "exec", postgres, "psql", "-U", "postgres", "-d", "postgres", "-At", "-c",
                           "SELECT count(*) FROM pg_stat_activity WHERE datname='" + database + "'"]).decode().strip()
         assert active == "0", "Do not resume while another client is using the owned database"
@@ -111,10 +123,10 @@ try:
            "REDIS_URL": "redis://" + redis + ":6379/15", "REDIS_SENTINELS": "", "REDIS_PASSWORD": "",
            "BUNDLE_PATH": "/gems", "BUNDLE_WITHOUT": "development", "BUNDLE_GEMFILE": source + "/Gemfile",
            "SECRET_KEY_BASE": "g-owned-worker-synthetic-only", "TZ": "UTC", "LOG_LEVEL": "warn",
-           "JRC_G_RESUME": str(resume).lower(), "JRC_G_NONCE": nonce, "JRC_G_DATABASE": database, "JRC_G_QUEUE": queue,
+           "JRC_G_MODE": "approvals" if approvals else "relationship", "JRC_G_RESUME": str(resume).lower(), "JRC_G_NONCE": nonce, "JRC_G_DATABASE": database, "JRC_G_QUEUE": queue,
            "JRC_G_DIRECTORY": directory, "JRC_G_READY_FILE": directory + "/ready",
            "JRC_G_WORKER_NETWORK_FILE": directory + "/network.json",
-           "JRC_G_RECEIPT_KEY": "jrc_g_worker:" + nonce + ":ack"}
+           "JRC_G_RECEIPT_KEY": "jrc_g_worker:" + nonce + (":approval_ack:" + attempt if approvals else ":ack")}
     args = ["docker", "exec", "-w", source]
     for key, value in env.items():
         args += ["-e", key + "=" + value]
@@ -122,7 +134,8 @@ try:
     # child; the Ruby gate gracefully stops its own Sidekiq child in ensure.
     pidfile = directory + "/wrapper.pid"
     wrapper = "file,nonce,gate=ARGV;child=Process.spawn('bundle','exec','ruby','-rwebmock','-e',\"WebMock.enable!;WebMock.disable_net_connect!;load 'bin/rails'\",'runner',gate,nonce);File.write(file,Process.pid.to_s);Signal.trap('USR1'){Process.kill('TERM',child) rescue nil};_,status=Process.wait2(child);exit(status.exitstatus || 1)"
-    args += [container, "ruby", "-e", wrapper, pidfile, nonce, "spec/integration/jrc_relationship/owned_worker_gate.rb"]
+    entrypoint = "spec/integration/jrc_relationship/" + ("owned_approval_worker_gate.rb" if approvals else "owned_worker_gate.rb")
+    args += [container, "ruby", "-e", wrapper, pidfile, nonce, entrypoint]
     result["phase"] = "real_worker"
     with (artifact / "runtime.log").open("xb") as output:
         process = subprocess.Popen(args, stdout=output, stderr=subprocess.STDOUT)

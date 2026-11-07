@@ -194,13 +194,15 @@ class JrcOwnedWorkerGate
     end
     network = JSON.parse(File.read(ENV.fetch('JRC_G_WORKER_NETWORK_FILE')))
     check!('worker made no HTTP requests', network.fetch('attempts').zero?)
+    check!('worker requested no email or push', network.fetch('external_delivery_requested') == false)
   rescue Errno::ECHILD
     @worker_pid = nil
   end
 
   def write_report!
     data = { status: @passed && @shutdown_clean ? 'passed' : 'failed', phase: @phase, checks: @checks, database: @database, queue: @queue,
-             delivery_acknowledgments: acknowledgments, fresh_worker: true, application_build: false, production: false,
+             delivery_acknowledgments: acknowledgments, fresh_worker: true, mode: ENV.fetch('JRC_G_MODE', 'relationship'),
+             application_build: false, production: false,
              qualification: 'Synthetic-only PostgreSQL; real Redis and Sidekiq. Queue routing overridden only for isolation. ' \
                             'No default queue/cron/deployment/Chrome claim.' }
     if @nonce.match?(/\A[0-9a-f]{12}\z/) && owned_directory? && File.directory?(@directory)
@@ -210,4 +212,4 @@ class JrcOwnedWorkerGate
   end
 end
 
-JrcOwnedWorkerGate.new.run
+JrcOwnedWorkerGate.new.run unless ENV['JRC_G_MODE'] == 'approvals'

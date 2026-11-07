@@ -57,7 +57,7 @@
   "company_documents_without_portfolio": "Explicitly deferred",
   "last_validated_head": "32577a4998832d586a3c2662db95e0ef9bfa2ab3",
   "new_validated_code_checkpoint": "git log -1 --format=%H -- docs/jrc_consolidation/order_identity_checkpoint_20261106.json",
-  "current_status": "Native business worker and Customer/Contracts/Orders authority UI gates passed;C-Gopen.",
+  "current_status": "Approval real-runtime gate failed at runner query-cache wait;partial native positive delivery preserved,not full acceptance. Next guarded resume.",
   "next_actions": [
     "Validate native approval outbox recovery/projection with real isolated worker;no mock delivery success.",
     "Local portfolio role action matrix question pending;no inferred permission grant.",
@@ -163,5 +163,6 @@
   "owned_worker_runtime_report": "docs/jrc_consolidation/owned_worker_runtime_checkpoint_20261106.json",
   "customer_denied_read_report": "docs/jrc_consolidation/customer_denied_read_checkpoint_20261106.json",
   "contract_identity_report": "docs/jrc_consolidation/contract_identity_checkpoint_20261106.json",
-  "order_identity_report": "docs/jrc_consolidation/order_identity_checkpoint_20261106.json"
+  "order_identity_report": "docs/jrc_consolidation/order_identity_checkpoint_20261106.json",
+  "approval_worker_initial_failure_report": "docs/jrc_consolidation/approval_worker_initial_failure_checkpoint_20261106.json"
 }

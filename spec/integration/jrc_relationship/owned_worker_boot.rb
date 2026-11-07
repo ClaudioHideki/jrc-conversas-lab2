@@ -21,8 +21,19 @@ Rails.logger.level = Logger::WARN
 
 # Only routing/delivery configuration is changed for this isolated test. The
 # native perform/authentication/transaction code remains untouched.
-JrcRelationship::BatchExecutionJob.queue_adapter = :sidekiq
-JrcRelationship::BatchExecutionJob.queue_as queue
+mode = ENV.fetch('JRC_G_MODE', 'relationship')
+raise 'Unknown owned worker mode' unless %w[relationship approvals].include?(mode)
+
+jobs = if mode == 'approvals'
+         require_relative 'owned_approval_witness'
+         [JrcApprovals::NotificationRecoveryJob, JrcApprovals::NotificationProjectionJob, EventDispatcherJob, ActionCableBroadcastJob]
+       else
+         [JrcRelationship::BatchExecutionJob]
+       end
+jobs.each do |job|
+  job.queue_adapter = :sidekiq
+  job.queue_as queue
+end
 
 class JrcOwnedWorkerReceipt
   def initialize(key)
@@ -30,12 +41,28 @@ class JrcOwnedWorkerReceipt
   end
 
   def call(_worker, job, queue)
-    return yield if queue == SidekiqAlive.current_queue && job['class'] == 'SidekiqAlive::Worker' && job['args'] == [SidekiqAlive.hostname]
+    return yield if health_job?(job, queue)
 
-    raise 'Unexpected owned queue payload' unless queue == ENV.fetch('JRC_G_QUEUE') && job['wrapped'] == 'JrcRelationship::BatchExecutionJob'
+    raise 'Unexpected owned queue payload' unless allowed_payload?(job, queue)
 
     yield
-    Sidekiq.redis { |redis| redis.call('SADD', @key, job.fetch('jid')) }
+    event_job = %w[EventDispatcherJob ActionCableBroadcastJob].include?(job['wrapped'])
+    JrcOwnedApprovalWitness.capture(job, @key) if job['wrapped'] == 'ActionCableBroadcastJob'
+    receipt = event_job ? "#{@key}:native_events" : @key
+    Sidekiq.redis { |redis| redis.call('SADD', receipt, job.fetch('jid')) }
+  end
+
+  def health_job?(job, queue)
+    queue == SidekiqAlive.current_queue && job['class'] == 'SidekiqAlive::Worker' && job['args'] == [SidekiqAlive.hostname]
+  end
+
+  def allowed_payload?(job, queue)
+    allowed = if ENV['JRC_G_MODE'] == 'approvals'
+                %w[JrcApprovals::NotificationRecoveryJob JrcApprovals::NotificationProjectionJob EventDispatcherJob ActionCableBroadcastJob]
+              else
+                ['JrcRelationship::BatchExecutionJob']
+              end
+    queue == ENV.fetch('JRC_G_QUEUE') && allowed.include?(job['wrapped'])
   end
 end
 
@@ -53,6 +80,8 @@ Sidekiq.configure_server do |config|
   config.server_middleware { |chain| chain.add JrcOwnedWorkerReceipt, ENV.fetch('JRC_G_RECEIPT_KEY') }
   config.on(:shutdown) do
     attempts = WebMock::RequestRegistry.instance.requested_signatures.hash.values.sum
-    File.write(ENV.fetch('JRC_G_WORKER_NETWORK_FILE'), JSON.generate(attempts: attempts))
+    jobs = ActiveJob::Base.queue_adapter.enqueued_jobs.map { |job| job[:job].name }
+    forbidden = jobs.intersect?(%w[Notification::EmailNotificationJob Notification::PushNotificationJob])
+    File.write(ENV.fetch('JRC_G_WORKER_NETWORK_FILE'), JSON.generate(attempts: attempts, external_delivery_requested: forbidden))
   end
 end
