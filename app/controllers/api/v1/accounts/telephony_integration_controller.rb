@@ -39,7 +39,8 @@ class Api::V1::Accounts::TelephonyIntegrationController < Api::V1::Accounts::Bas
     settings = Pabx::Settings.new(integration)
     raise Pabx::Error, 'SYNC_DISABLED' unless settings.sync_enabled?
 
-    raise Pabx::Error, 'SYNC_PENDING' unless Pabx::ScheduleJob.new.enqueue(integration)
+    raise Pabx::Error, 'SYNC_PENDING' unless Pabx::ScheduleJob.new.enqueue_integration(integration)
+
     head :accepted
   end
 

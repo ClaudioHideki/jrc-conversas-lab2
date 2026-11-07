@@ -68,8 +68,8 @@ RSpec.describe Pabx::Sync, :pabx do
     integration
     scheduler = Pabx::ScheduleJob.new
     expect do
-      expect(scheduler.enqueue(integration)).to be(true)
-      expect(scheduler.enqueue(integration)).to be(false)
+      expect(scheduler.enqueue_integration(integration)).to be(true)
+      expect(scheduler.enqueue_integration(integration)).to be(false)
     end.to have_enqueued_job(Pabx::SyncJob).with(integration.account_id, integration.id).exactly(:once)
   end
 end

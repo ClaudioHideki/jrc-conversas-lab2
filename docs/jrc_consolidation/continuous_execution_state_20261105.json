@@ -159,5 +159,6 @@
   "configuration_history_pagination_report": "docs/jrc_consolidation/configuration_history_pagination_checkpoint_20261106.json",
   "membership_capacity_projection_report": "docs/jrc_consolidation/membership_capacity_projection_checkpoint_20261106.json",
   "master_selection_collection_report": "docs/jrc_consolidation/master_selection_collection_checkpoint_20261106.json",
-  "owned_worker_initial_failure_report": "docs/jrc_consolidation/owned_worker_initial_failure_checkpoint_20261106.json"
+  "owned_worker_initial_failure_report": "docs/jrc_consolidation/owned_worker_initial_failure_checkpoint_20261106.json",
+  "pabx_active_job_contract_report": "docs/jrc_consolidation/pabx_active_job_contract_checkpoint_20261106.json"
 }

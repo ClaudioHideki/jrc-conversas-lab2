@@ -57,6 +57,33 @@ RSpec.describe 'Native PABX settings and history API', :pabx, type: :request do
     expect(response).to have_http_status(:unauthorized)
   end
 
+  it 'queues only the current account integration once through the native manual synchronization action' do
+    integration
+    expect(Pabx::Client).not_to receive(:new)
+    expect do
+      post "#{base}/telephony_integration/synchronize", headers: root.create_new_auth_token
+    end.to have_enqueued_job(Pabx::SyncJob).with(account.id, integration.id).exactly(:once)
+    expect(response).to have_http_status(:accepted)
+    expect do
+      post "#{base}/telephony_integration/synchronize", headers: root.create_new_auth_token
+    end.not_to have_enqueued_job(Pabx::SyncJob)
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response.parsed_body['error']).to eq('SYNC_PENDING')
+  end
+
+  it 'denies manual synchronization to native account administrators and agents without queue effects' do
+    integration
+    admin = create(:user, account: account, role: :administrator)
+    expect(Pabx::Client).not_to receive(:new)
+    [admin, agent].each do |user|
+      expect do
+        post "#{base}/telephony_integration/synchronize", headers: user.create_new_auth_token
+      end.not_to have_enqueued_job(Pabx::SyncJob)
+      expect(response).to have_http_status(:forbidden)
+    end
+    expect(integration.reload.pabx_sync_state).to eq({})
+  end
+
   it 'returns only the authenticated operator extension and current tenant from persisted history' do
     integration
     create(:sip_credential, account: account, user: agent, call_history_extension: '1410')

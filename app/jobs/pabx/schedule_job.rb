@@ -2,12 +2,12 @@ class Pabx::ScheduleJob < ApplicationJob
   queue_as :scheduled_jobs
 
   def perform
-    TelephonyIntegration.where("pabx_settings @> ?", { enabled: true, sync_enabled: true }.to_json).find_each do |integration|
-      enqueue(integration)
+    TelephonyIntegration.where('pabx_settings @> ?', { enabled: true, sync_enabled: true }.to_json).find_each do |integration|
+      enqueue_integration(integration)
     end
   end
 
-  def enqueue(integration)
+  def enqueue_integration(integration)
     integration.with_lock do
       settings = Pabx::Settings.new(integration)
       return false unless settings.sync_enabled?
