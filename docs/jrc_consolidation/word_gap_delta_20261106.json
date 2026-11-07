@@ -312,6 +312,12 @@
       "report": "docs/jrc_consolidation/playbook_execution_pagination_checkpoint_20261106.json",
       "current_state": "Execution history native9/0 andsource18/0 with source-visible cursor, bounded scan and old contract preservation.",
       "remaining": "Broad all-book reads require narrowing at budget;current-source Chrome/visual/completeC-G remain open."
+    },
+    {
+      "requirement": "Relationship P0152/P0184: stored versions, complete history browsing and fresh governed restore",
+      "report": "docs/jrc_consolidation/configuration_history_pagination_checkpoint_20261106.json",
+      "current_state": "Paged configuration history native8/0 andsource21/0;draft preserved and exact governed restoration reused.",
+      "remaining": "Current-source Chrome/visual acceptance,otherC-Grequirements and business/external dependencies remain open."
     }
   ],
   "explicit_dependencies": [
@@ -332,7 +338,7 @@
       "state": "External environment/operations require separate authorization; not simulated as passed."
     }
   ],
-  "next_confirmed_local_gap": "Add bounded native configuration-version pagination and source controls that preserve unsaved definitions and reuse fresh native restore review.",
+  "next_confirmed_local_gap": "Reuse native group admission formulas/scopes to expose a read-only full selected-membership workload projection, preserving the existing per-item admission/partial receipt contract and every historical review.",
   "stage_closure": {
     "C": false,
     "D": false,

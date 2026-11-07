@@ -3,11 +3,11 @@
   "user_request": "499267ac-546d-4853-b4cf-7f03a2ea0629",
   "initial_head": "be54d0f7b4ce8d4e2a077cf2bdd8c2a4d5c88f5e",
   "branch": "codex/relacionamento-v2-20261101",
-  "last_validated_checkpoint": "e76fb2ce6b6b515db3eda36d3ced7c074b9d2308",
+  "last_validated_checkpoint": "84d3f89e29d3eddb45fb2361d135cecf5c3bed6e",
   "completed_current_work": "Sealed dossier, weighted/current capacity, native withdrawal/cadence controls and F2 increments locally tested; see linked incremental reports. No C-G closure.",
-  "active_work": "Add bounded native configuration-version pagination and source controls that preserve unsaved definitions and reuse fresh native restore review.",
+  "active_work": "Reuse native group admission formulas/scopes to expose a read-only full selected-membership workload projection, preserving the existing per-item admission/partial receipt contract and every historical review.",
   "exact_next_actions": [
-    "Add bounded native configuration-version pagination and source controls that preserve unsaved definitions and reuse fresh native restore review."
+    "Reuse native group admission formulas/scopes to expose a read-only full selected-membership workload projection, preserving the existing per-item admission/partial receipt contract and every historical review."
   ],
   "test_environment": {
     "source_manifest": ".codex/d9-notifications-20261104/snapshot.json",
@@ -49,14 +49,14 @@
     "No real participant removal or provider request; tests use synthetic records and WebMock, with external network disabled."
   ],
   "restrictions": "No build/recompile, no5379 change/restart, no four-container restart/reconfiguration, no cleanup/delete of existing data, no push/GHCR/deploy/production/client change, no real provider operations. Additive migrations allowed only in owned synthetic test database.",
-  "disk_last_observed_bytes": 6826844160,
+  "disk_last_observed_bytes": 6830682112,
   "TRR": "Undefined; do not invent",
   "company_documents_without_portfolio": "Explicitly deferred",
-  "last_validated_head": "e76fb2ce6b6b515db3eda36d3ced7c074b9d2308",
-  "new_validated_code_checkpoint": "git log -1 --format=%H -- docs/jrc_consolidation/playbook_execution_pagination_checkpoint_20261106.json",
-  "current_status": "Execution pagination native9/0,source18/0;C-G open.",
+  "last_validated_head": "84d3f89e29d3eddb45fb2361d135cecf5c3bed6e",
+  "new_validated_code_checkpoint": "git log -1 --format=%H -- docs/jrc_consolidation/configuration_history_pagination_checkpoint_20261106.json",
+  "current_status": "Configuration history native8/0,source21/0;C-G open.",
   "next_actions": [
-    "Add bounded native configuration-version pagination and source controls that preserve unsaved definitions and reuse fresh native restore review."
+    "Reuse native group admission formulas/scopes to expose a read-only full selected-membership workload projection, preserving the existing per-item admission/partial receipt contract and every historical review."
   ],
   "latest_dossier_report": "docs/jrc_consolidation/sealed_dossier_checkpoint_20261105.json",
   "capacity_report": "docs/jrc_consolidation/weighted_capacity_checkpoint_20261105.json",
@@ -149,5 +149,6 @@
   "withdrawal_reviewed_operations_report": "docs/jrc_consolidation/withdrawal_reviewed_operations_checkpoint_20261106.json",
   "reviewed_batch_inventory_ui_report": "docs/jrc_consolidation/reviewed_batch_inventory_ui_checkpoint_20261106.json",
   "reviewed_item_diagnostics_report": "docs/jrc_consolidation/reviewed_item_diagnostics_checkpoint_20261106.json",
-  "playbook_execution_pagination_report": "docs/jrc_consolidation/playbook_execution_pagination_checkpoint_20261106.json"
+  "playbook_execution_pagination_report": "docs/jrc_consolidation/playbook_execution_pagination_checkpoint_20261106.json",
+  "configuration_history_pagination_report": "docs/jrc_consolidation/configuration_history_pagination_checkpoint_20261106.json"
 }

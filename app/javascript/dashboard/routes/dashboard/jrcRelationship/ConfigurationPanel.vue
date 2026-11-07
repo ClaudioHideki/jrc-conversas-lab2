@@ -39,6 +39,15 @@ const bookPages = computed(() =>
 const book = ref(null);
 const error = ref('');
 const busy = ref(false);
+const historyMeta = ref(null);
+const historyCurrentVersion = ref(null);
+const historyLoading = ref(false);
+const historyError = ref('');
+const historyPages = computed(() =>
+  Math.max(1, Math.ceil((historyMeta.value?.total || 0) / 25))
+);
+let historyGeneration = 0;
+let historyController;
 const restoring = ref(null);
 const restorePreparing = ref(false);
 const restored = ref(null);
@@ -108,6 +117,12 @@ let generation = 0;
 const load = async () => {
   generation += 1;
   const v = generation;
+  historyGeneration += 1;
+  historyController?.abort();
+  historyMeta.value = null;
+  historyCurrentVersion.value = null;
+  historyLoading.value = false;
+  historyError.value = '';
   config.value = null;
   restoring.value = null;
   restorePreparing.value = false;
@@ -127,14 +142,21 @@ const load = async () => {
   try {
     const { data } = await (props.screen === 'settings'
       ? API.configuration(route.params.accountId, {
-          params: { scope_key: scopeKey.value },
+          params: {
+            scope_key: scopeKey.value,
+            history_page: 1,
+            history_per_page: 25,
+          },
         })
       : API.playbooks(route.params.accountId, {
           params: { page: bookPage.value, per_page: 25 },
         }));
     if (v === generation) {
-      if (props.screen === 'settings') config.value = data;
-      else {
+      if (props.screen === 'settings') {
+        config.value = data;
+        historyMeta.value = data.history_meta;
+        historyCurrentVersion.value = data.version;
+      } else {
         books.value = data.payload;
         bookMeta.value = data.meta;
       }
@@ -143,6 +165,65 @@ const load = async () => {
     if (v === generation) error.value = message(err);
   } finally {
     if (v === generation) busy.value = false;
+  }
+};
+const loadHistory = async page => {
+  if (
+    busy.value ||
+    restorePreparing.value ||
+    historyLoading.value ||
+    !props.allowed ||
+    !config.value ||
+    page < 1 ||
+    page > historyPages.value
+  )
+    return;
+  historyGeneration += 1;
+  const token = historyGeneration;
+  const rootToken = generation;
+  const scope = scopeKey.value;
+  historyController?.abort();
+  historyController = new AbortController();
+  historyLoading.value = true;
+  historyError.value = '';
+  try {
+    const { data } = await API.configuration(route.params.accountId, {
+      params: { scope_key: scope, history_page: page, history_per_page: 25 },
+      signal: historyController.signal,
+    });
+    if (rootToken !== generation || token !== historyGeneration) return;
+    if (
+      data.scope_key !== scope ||
+      !Number.isSafeInteger(data.version) ||
+      data.version < 1 ||
+      !Array.isArray(data.history) ||
+      data.history.length > 25 ||
+      data.history.some(
+        (row, index) =>
+          !Number.isSafeInteger(row.version) ||
+          row.version < 1 ||
+          row.version > data.version ||
+          (index > 0 && data.history[index - 1].version <= row.version)
+      ) ||
+      data.history_meta?.page !== page ||
+      data.history_meta.per_page !== 25 ||
+      !Number.isSafeInteger(data.history_meta.total) ||
+      data.history_meta.total < 0
+    )
+      throw new Error(t('RELATIONSHIP.CONFIG_HISTORY_PAGE.UNCONFIRMED'));
+    config.value.history = data.history;
+    historyMeta.value = data.history_meta;
+    historyCurrentVersion.value = data.version;
+  } catch (err) {
+    if (rootToken !== generation || token !== historyGeneration) return;
+    historyError.value = message(err);
+    if ([401, 403, 404].includes(err.response?.status)) {
+      config.value = null;
+      error.value = message(err);
+    }
+  } finally {
+    if (rootToken === generation && token === historyGeneration)
+      historyLoading.value = false;
   }
 };
 const changeBookPage = async page => {
@@ -208,7 +289,13 @@ const edit = row => {
   }));
 };
 const openRestore = async sourceVersion => {
-  if (busy.value || restorePreparing.value || !props.allowed || !config.value)
+  if (
+    busy.value ||
+    restorePreparing.value ||
+    historyLoading.value ||
+    !props.allowed ||
+    !config.value
+  )
     return;
   const token = generation;
   const scope = scopeKey.value;
@@ -332,6 +419,8 @@ watch(
 watch(scopeKey, load);
 onBeforeUnmount(() => {
   generation += 1;
+  historyGeneration += 1;
+  historyController?.abort();
 });
 const conditionReferences = field =>
   ({
@@ -651,7 +740,67 @@ const historyValue = value => {
           {{ t('RELATIONSHIP.CONFIG_RESTORE.FIND_VERSION_HELP') }}
         </p>
       </form>
-      <p v-if="!config.history?.length">
+      <p
+        v-if="historyLoading"
+        role="status"
+      >
+        {{ t('RELATIONSHIP.LOADING') }}
+      </p>
+      <p
+        v-if="historyError"
+        role="alert"
+        class="mb-3 break-words text-n-ruby-11"
+      >
+        {{ historyError }}
+      </p>
+      <nav
+        v-if="historyMeta"
+        class="mb-3 flex flex-wrap items-center gap-2"
+        :aria-label="t('RELATIONSHIP.CONFIG_HISTORY_PAGE.NAVIGATION')"
+      >
+        <button
+          type="button"
+          :class="buttonClass"
+          :disabled="
+            busy || restorePreparing || historyLoading || historyMeta.page <= 1
+          "
+          data-test="configuration-history-previous"
+          @click="loadHistory(historyMeta.page - 1)"
+        >
+          {{ t('RELATIONSHIP.CONFIG_HISTORY_PAGE.PREVIOUS') }}
+        </button>
+        <span>{{
+          t('RELATIONSHIP.CONFIG_HISTORY_PAGE.SUMMARY', {
+            page: historyMeta.page,
+            pages: historyPages,
+            total: historyMeta.total,
+          })
+        }}</span>
+        <button
+          type="button"
+          :class="buttonClass"
+          :disabled="
+            busy ||
+            restorePreparing ||
+            historyLoading ||
+            historyMeta.page >= historyPages
+          "
+          data-test="configuration-history-next"
+          @click="loadHistory(historyMeta.page + 1)"
+        >
+          {{ t('RELATIONSHIP.CONFIG_HISTORY_PAGE.NEXT') }}
+        </button>
+        <button
+          type="button"
+          :class="buttonClass"
+          :disabled="busy || restorePreparing || historyLoading"
+          data-test="configuration-history-reload"
+          @click="loadHistory(historyMeta.page)"
+        >
+          {{ t('RELATIONSHIP.CONFIG_HISTORY_PAGE.RELOAD') }}
+        </button>
+      </nav>
+      <p v-if="!config.history?.length && !historyLoading">
         {{ t('RELATIONSHIP.CONFIG_HISTORY_EMPTY') }}
       </p>
       <details
@@ -672,10 +821,10 @@ const historyValue = value => {
           }}
         </summary>
         <button
-          v-if="version.version < config.version"
+          v-if="version.version < (historyCurrentVersion || config.version)"
           type="button"
           :class="buttonClass"
-          :disabled="busy || restorePreparing"
+          :disabled="busy || restorePreparing || historyLoading"
           @click="openRestore(version.version)"
         >
           {{ t('RELATIONSHIP.CONFIG_RESTORE.OPEN') }}

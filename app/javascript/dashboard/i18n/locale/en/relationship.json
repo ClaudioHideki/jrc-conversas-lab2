@@ -308,6 +308,14 @@
       "PAGE": "Page {page}",
       "UNCONFIRMED": "The execution history page could not be confirmed. Reload before continuing."
     },
+    "CONFIG_HISTORY_PAGE": {
+      "NAVIGATION": "Stored configuration history pages",
+      "PREVIOUS": "Previous",
+      "NEXT": "Next",
+      "RELOAD": "Reload history",
+      "SUMMARY": "Page {page} of {pages}; {total} stored versions",
+      "UNCONFIRMED": "The configuration history page could not be confirmed. The current draft has been preserved."
+    },
     "REVIEWED_BATCH": {
       "FAILURES": {
         "STALE": "The reviewed data or configuration changed. Prepare a fresh review for unresolved items.",

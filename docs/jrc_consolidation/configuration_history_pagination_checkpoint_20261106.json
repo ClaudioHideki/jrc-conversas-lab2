@@ -1,0 +1,37 @@
+{
+  "date": "2026-11-06",
+  "branch": "codex/relacionamento-v2-20261101",
+  "preserved_previous_checkpoint": "84d3f89e29d3eddb45fb2361d135cecf5c3bed6e",
+  "reference": "Relationship P0152/P0184: stored versions, complete history browsing and fresh governed restore",
+  "status": "Native/source configuration history pagination validated;not C-G closure.",
+  "implementation": [
+    "Optional history_page/history_per_page on the existing native configuration GET. Current configure and account/company/unit/group authorization remains before the bound stored-version reader. Legacy recent50and exact source_version contracts remain available.",
+    "Only authorized configuration versions and existing projected fields are counted/returned;strict bounded pages1..10000and sizes1..50. Unsaved default configurations return genuine zero history without creating a record or audit. GET is no-store.",
+    "Existing history section has previous/next/read-only reload and translated counts with responsive wrapping. Paging updates only historical data, never the unsaved weights/rules or their save revision.",
+    "Current server version can guide history action visibility while selecting restoration still rereads the exact stored source/current version through the existing native comparison/simulation/reason/confirmation flow.",
+    "Old-scope/invalid200metadata is rejected and the draft preserved. Identity change aborts old history reads;observed permission denial clears the configuration view. No history rewrite or parallel settings catalog."
+  ],
+  "evidence": {
+    "native": "configuration-pagination-native01:8/0 (4new with76real stored versions, page3/4, immutable attributes, empty/no-write state,scope/permission/type/bounds;+4existing recent50/exact1lookup/native restoration regressions).",
+    "source": "configuration-pagination-source01:21/0 (17existing restore/lookup/simulation/control cases +4new paging/draft/fresh-restore/old-authority/read-only reload cases).",
+    "static": "ruby01:new service/spec0offenses;shared controller retains only ClassLength269/175 (previous268). ESLintConfigurationPanel0errors/34existing warnings;changed spec0/0.",
+    "qualification": "Native PostgreSQL synthetic data and Vue source tests. No fresh application assets/Chrome/visual acceptance or production claim."
+  },
+  "environment": {
+    "initial_free_bytes": 6825750528,
+    "minimum_observed_bytes": 6795112448,
+    "final_free_bytes": 6830686208,
+    "database": "jrc_rel_v2_candidate_test",
+    "migrations": false,
+    "build": false,
+    "server5379_changed": false,
+    "external_operations": false,
+    "push": false
+  },
+  "remaining": [
+    "Current-source Chrome desktop/mobile and literal/visual Word conformity remain unvalidated under explicitno-build/no5379-change restrictions.",
+    "Whole selected-audience membership workload projection,local group capability definitions and remaining C-G gaps remain open.",
+    "TRR undefined;portfolio-less documents deferred;external provider/scanner/channel homologation not performed."
+  ],
+  "next": "Reuse native group admission formulas/scopes to expose a read-only full selected-membership workload projection, preserving the existing per-item admission/partial receipt contract and every historical review."
+}

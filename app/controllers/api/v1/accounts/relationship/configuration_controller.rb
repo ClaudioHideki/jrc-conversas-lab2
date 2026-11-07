@@ -8,6 +8,7 @@ class Api::V1::Accounts::Relationship::ConfigurationController < Api::V1::Accoun
   end
 
   def show
+    response.headers['Cache-Control'] = 'no-store'
     scope_key = params.fetch(:scope_key, 'account')
     relationship_context.authorize_configuration_scope!(scope_key)
     record = JrcRelationship::Configuration.find_or_initialize_by(account: Current.account, scope_key: scope_key)
@@ -146,17 +147,16 @@ class Api::V1::Accounts::Relationship::ConfigurationController < Api::V1::Accoun
 
   def configuration_payload(record)
     response.headers['Cache-Control'] = 'no-store' if record.scope_key.start_with?('portfolio:')
-    { scope_key: record.scope_key, version: record.version, weights: record.effective_weights, rules: record.effective_rules,
-      history: configuration_history(record) }.merge(JrcRelationship::PortfolioGroupConfiguration.payload(relationship_context, record.scope_key))
+    { scope_key: record.scope_key, version: record.version, weights: record.effective_weights, rules: record.effective_rules }
+      .merge(configuration_history(record), JrcRelationship::PortfolioGroupConfiguration.payload(relationship_context, record.scope_key))
   end
 
   def configuration_history(record)
-    source = history_source_version
-    return [] unless record.persisted?
-
-    versions = record.versions.where(account_id: Current.account.id).order(version: :desc)
-    versions = versions.where(version: source) if source
-    versions.limit(50).as_json(only: [:version, :weights, :rules, :actor_id, :created_at])
+    paginate = request.get? && %i[history_page history_per_page].any? { |key| params.key?(key) }
+    JrcRelationship::ConfigurationHistory.new(account: Current.account, configuration: record).call(
+      source_version: history_source_version, paginate: paginate,
+      page: params.fetch(:history_page, 1), per_page: params.fetch(:history_per_page, 25)
+    )
   end
 
   def find_playbook

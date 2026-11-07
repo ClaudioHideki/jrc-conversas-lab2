@@ -358,3 +358,171 @@ it.each(['0', '-1', '3', '1.5'])(
     expect(wrapper.findComponent(Restore).exists()).toBe(false);
   }
 );
+
+it('pages immutable history while preserving unsaved rules and reuses a fresh native restore review', async () => {
+  const saved = {
+    ...structuredClone(current),
+    version: 76,
+    history: [{ ...historical, version: 76 }],
+    history_meta: { page: 1, per_page: 25, total: 76 },
+  };
+  mocks.api.configuration.mockResolvedValueOnce({
+    data: structuredClone(saved),
+  });
+  const wrapper = render(Panel, { allowed: true, metadata: {} }, true);
+  await flushPromises();
+  expect(mocks.api.configuration.mock.calls[0][1].params).toEqual({
+    scope_key: 'account',
+    history_page: 1,
+    history_per_page: 25,
+  });
+  await wrapper
+    .get('[data-testid="relationship-rule-healthy_threshold"]')
+    .setValue('85');
+  mocks.api.configuration.mockResolvedValueOnce({
+    data: {
+      ...saved,
+      rules: { healthy_threshold: 10 },
+      history: [{ ...historical, version: 51 }],
+      history_meta: { page: 2, per_page: 25, total: 76 },
+    },
+  });
+  await wrapper
+    .get('[data-test="configuration-history-next"]')
+    .trigger('click');
+  await flushPromises();
+  expect(mocks.api.configuration.mock.lastCall[1].params).toEqual({
+    scope_key: 'account',
+    history_page: 2,
+    history_per_page: 25,
+  });
+  expect(
+    wrapper.get('[data-testid="relationship-rule-healthy_threshold"]').element
+      .value
+  ).toBe('85');
+  mocks.api.configuration.mockResolvedValueOnce({
+    data: { ...saved, history: [{ ...historical, version: 51 }] },
+  });
+  await button(wrapper, messages.RELATIONSHIP.CONFIG_RESTORE.OPEN).trigger(
+    'click'
+  );
+  await flushPromises();
+  expect(mocks.api.configuration.mock.lastCall[1].params).toEqual({
+    scope_key: 'account',
+    source_version: 51,
+  });
+  expect(wrapper.findComponent(Restore).props('historical').version).toBe(51);
+  expect(
+    wrapper.findComponent(Restore).props('current').rules.healthy_threshold
+  ).toBe(80);
+  wrapper.findComponent(Restore).vm.$emit('close');
+  await flushPromises();
+  expect(
+    wrapper.get('[data-testid="relationship-rule-healthy_threshold"]').element
+      .value
+  ).toBe('85');
+  expect(mocks.api.restoreConfiguration).not.toHaveBeenCalled();
+});
+
+it('retains the old page and current draft after malformed history metadata instead of accepting another scope', async () => {
+  const saved = {
+    ...structuredClone(current),
+    version: 76,
+    history_meta: { page: 1, per_page: 25, total: 76 },
+  };
+  mocks.api.configuration.mockResolvedValueOnce({
+    data: structuredClone(saved),
+  });
+  const wrapper = render(Panel, { allowed: true, metadata: {} }, true);
+  await flushPromises();
+  await wrapper
+    .get('[data-testid="relationship-rule-healthy_threshold"]')
+    .setValue('85');
+  mocks.api.configuration.mockResolvedValueOnce({
+    data: {
+      ...saved,
+      scope_key: 'company:999',
+      history: [{ ...historical, version: 2 }],
+      history_meta: { page: 2, per_page: 25, total: 76 },
+    },
+  });
+  await wrapper
+    .get('[data-test="configuration-history-next"]')
+    .trigger('click');
+  await flushPromises();
+  expect(wrapper.get('[role="alert"]').text()).toBe(
+    messages.RELATIONSHIP.CONFIG_HISTORY_PAGE.UNCONFIRMED
+  );
+  expect(
+    wrapper.get('[data-testid="relationship-rule-healthy_threshold"]').element
+      .value
+  ).toBe('85');
+  expect(
+    wrapper.get('[data-test="configuration-history-previous"]').element.disabled
+  ).toBe(true);
+});
+
+it('aborts a pending history page and ignores its old payload after a native role change', async () => {
+  const saved = {
+    ...structuredClone(current),
+    version: 76,
+    history_meta: { page: 1, per_page: 25, total: 76 },
+  };
+  mocks.api.configuration.mockResolvedValueOnce({
+    data: structuredClone(saved),
+  });
+  const wrapper = render(Panel, { allowed: true, metadata: {} }, true);
+  await flushPromises();
+  let finish;
+  mocks.api.configuration.mockImplementationOnce(
+    () =>
+      new Promise(resolve => {
+        finish = resolve;
+      })
+  );
+  await wrapper
+    .get('[data-test="configuration-history-next"]')
+    .trigger('click');
+  await flushPromises();
+  const options = mocks.api.configuration.mock.lastCall[1];
+  mocks.api.configuration.mockRejectedValueOnce({
+    response: { status: 403, data: { error: 'Native configure denied' } },
+  });
+  mocks.store.getters.getCurrentRole = 'agent';
+  await flushPromises();
+  finish({
+    data: { ...saved, history_meta: { page: 2, per_page: 25, total: 76 } },
+  });
+  await flushPromises();
+  expect(options.signal.aborted).toBe(true);
+  expect(
+    wrapper.find('[data-testid="relationship-rule-healthy_threshold"]').exists()
+  ).toBe(false);
+  expect(wrapper.get('[role="alert"]').text()).toContain(
+    'Native configure denied'
+  );
+});
+
+it('uses read-only reload for the current history page without persisting the draft', async () => {
+  const saved = {
+    ...structuredClone(current),
+    history_meta: { page: 1, per_page: 25, total: 1 },
+  };
+  mocks.api.configuration.mockResolvedValue({ data: saved });
+  const wrapper = render(Panel, { allowed: true, metadata: {} }, true);
+  await flushPromises();
+  await wrapper
+    .get('[data-test="configuration-history-reload"]')
+    .trigger('click');
+  await flushPromises();
+  expect(mocks.api.configuration).toHaveBeenCalledTimes(2);
+  expect(mocks.api.configuration.mock.lastCall[1].params).toEqual({
+    scope_key: 'account',
+    history_page: 1,
+    history_per_page: 25,
+  });
+  expect(
+    wrapper.get('[data-test="configuration-history-next"]').element.disabled
+  ).toBe(true);
+  expect(mocks.api.restoreConfiguration).not.toHaveBeenCalled();
+});
