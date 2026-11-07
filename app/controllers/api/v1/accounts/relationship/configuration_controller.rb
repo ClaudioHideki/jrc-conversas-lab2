@@ -111,12 +111,23 @@ class Api::V1::Accounts::Relationship::ConfigurationController < Api::V1::Accoun
 
   def playbook_executions
     response.headers['Cache-Control'] = 'no-store'
+    if %i[per_page before_id playbook_id].any? { |key| params.key?(key) }
+      render json: paged_execution_payload
+      return
+    end
     rows = JrcRelationship::PlaybookExecution.where(account: Current.account, assignment_id: relationship_context.assignments.select(:id))
     render json: { payload: rows.includes(:assignment).order(id: :desc).limit(100).select { |row| execution_visible?(row) }
                                 .map { |row| execution_payload(row) } }
   end
 
   private
+
+  def paged_execution_payload
+    result = JrcRelationship::PlaybookExecutionHistory.new(relationship_context).call(
+      per_page: params.fetch(:per_page, 25), before_id: params[:before_id], playbook_id: params[:playbook_id]
+    ) { |row| execution_visible?(row) }
+    result.merge(payload: result.fetch(:payload).map { |row| execution_payload(row) })
+  end
 
   def history_source_version
     return unless params.key?(:source_version)

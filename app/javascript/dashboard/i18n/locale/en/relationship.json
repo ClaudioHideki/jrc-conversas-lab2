@@ -299,6 +299,15 @@
       "CURRENT": "#{id} · {state} · revision {revision}",
       "PAGE_SUMMARY": "Page {page} of {pages}; {total} operations"
     },
+    "EXECUTION_HISTORY": {
+      "NAVIGATION": "Playbook execution history pages",
+      "CURRENT_BOOK": "Only this playbook: {name}",
+      "PREVIOUS": "Previous",
+      "NEXT": "Next",
+      "RELOAD": "Reload",
+      "PAGE": "Page {page}",
+      "UNCONFIRMED": "The execution history page could not be confirmed. Reload before continuing."
+    },
     "REVIEWED_BATCH": {
       "FAILURES": {
         "STALE": "The reviewed data or configuration changed. Prepare a fresh review for unresolved items.",

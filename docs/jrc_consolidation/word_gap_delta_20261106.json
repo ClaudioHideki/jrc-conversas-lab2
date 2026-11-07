@@ -306,6 +306,12 @@
       "report": "docs/jrc_consolidation/reviewed_item_diagnostics_checkpoint_20261106.json",
       "current_state": "Typed safe per-item diagnostics native29/0,source22/0;terminal receipts and explicit re-review preserved.",
       "remaining": "Unclassified legacy failures remain generic;Chrome/Word visual and C-G closure remain open."
+    },
+    {
+      "requirement": "Relationship P0152/P0181/P0184: native history, pagination, original source guards",
+      "report": "docs/jrc_consolidation/playbook_execution_pagination_checkpoint_20261106.json",
+      "current_state": "Execution history native9/0 andsource18/0 with source-visible cursor, bounded scan and old contract preservation.",
+      "remaining": "Broad all-book reads require narrowing at budget;current-source Chrome/visual/completeC-G remain open."
     }
   ],
   "explicit_dependencies": [
@@ -326,7 +332,7 @@
       "state": "External environment/operations require separate authorization; not simulated as passed."
     }
   ],
-  "next_confirmed_local_gap": "Paginate native playbook execution history beyond the legacy100cap without counting or returning source-denied rows; retain legacy contract and original projection guards.",
+  "next_confirmed_local_gap": "Add bounded native configuration-version pagination and source controls that preserve unsaved definitions and reuse fresh native restore review.",
   "stage_closure": {
     "C": false,
     "D": false,

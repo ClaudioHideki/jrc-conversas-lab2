@@ -806,6 +806,8 @@ const historyValue = value => {
       <PlaybookExecutionPanel
         v-if="metadata.playbook_versions_available"
         :allowed="allowed"
+        :book="book"
+        :formatting="metadata.formatting"
       />
       <form
         v-if="book"
