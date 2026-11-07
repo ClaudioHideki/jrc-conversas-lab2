@@ -134,6 +134,94 @@ describe('Relationship interface integration', () => {
     wrapper.unmount();
   });
 
+  it.each([401, 403, 404])(
+    'removes the loaded customer and channel controls when the explanation read returns %s',
+    async status => {
+      mocks.api.recommendations.mockRejectedValueOnce({
+        response: {
+          status,
+          data: { errors: ['Current customer access denied'] },
+        },
+      });
+      const wrapper = shallowMount(CustomerPanel, {
+        props: { assignmentId: 19, metadata },
+      });
+      await flushPromises();
+      expect(wrapper.text()).toContain('Thiago');
+      await wrapper
+        .findAll('button')
+        .find(button => button.text().includes('Explicar score'))
+        .trigger('click');
+      await flushPromises();
+      expect(wrapper.get('[role="alert"]').text()).toContain(
+        'Current customer access denied'
+      );
+      expect(wrapper.text()).not.toContain('Thiago');
+      expect(
+        wrapper.findComponent({ name: 'ComposeConversation' }).exists()
+      ).toBe(false);
+      expect(wrapper.find('[data-testid="portfolio-owner"]').exists()).toBe(
+        false
+      );
+      expect(wrapper.emitted('changed')).toBeUndefined();
+      wrapper.unmount();
+    }
+  );
+
+  it('allows only one explanation request while its read is pending', async () => {
+    let resolveRead;
+    mocks.api.recommendations.mockImplementationOnce(
+      () =>
+        new Promise(resolve => {
+          resolveRead = resolve;
+        })
+    );
+    const wrapper = shallowMount(CustomerPanel, {
+      props: { assignmentId: 19, metadata },
+    });
+    await flushPromises();
+    const button = wrapper
+      .findAll('button')
+      .find(node => node.text().includes('Explicar score'));
+    await button.trigger('click');
+    expect(button.attributes('disabled')).toBeDefined();
+    await button.trigger('click');
+    expect(mocks.api.recommendations).toHaveBeenCalledTimes(1);
+    resolveRead({ data: { recommended_action: 'Current result' } });
+    await flushPromises();
+    expect(button.attributes('disabled')).toBeUndefined();
+    expect(wrapper.text()).toContain('Current result');
+    wrapper.unmount();
+  });
+
+  it('aborts an explanation after an identity change and discards its late result', async () => {
+    let resolveRead;
+    let options;
+    mocks.api.recommendations.mockImplementationOnce(
+      (_account, _id, config) => {
+        options = config;
+        return new Promise(resolve => {
+          resolveRead = resolve;
+        });
+      }
+    );
+    const wrapper = shallowMount(CustomerPanel, {
+      props: { assignmentId: 19, metadata },
+    });
+    await flushPromises();
+    await wrapper
+      .findAll('button')
+      .find(node => node.text().includes('Explicar score'))
+      .trigger('click');
+    mocks.store.getters.getCurrentUserID = 8;
+    await flushPromises();
+    expect(options.signal.aborted).toBe(true);
+    resolveRead({ data: { recommended_action: 'Former user private result' } });
+    await flushPromises();
+    expect(wrapper.text()).not.toContain('Former user private result');
+    wrapper.unmount();
+  });
+
   it('clears the previous explanation error after an explicitly successful retry', async () => {
     mocks.api.recommendations
       .mockRejectedValueOnce({

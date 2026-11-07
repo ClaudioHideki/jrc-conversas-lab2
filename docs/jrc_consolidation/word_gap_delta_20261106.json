@@ -342,6 +342,12 @@
       "report": "docs/jrc_consolidation/owned_worker_runtime_checkpoint_20261106.json",
       "current_state": "32 native checks,5 real ACK;12 business results,duplicate no-op,revocation/account/history preservation;failed attempts retained.",
       "remaining": "Default runtime/deployment,current-source Chrome and remainingC-Gopen."
+    },
+    {
+      "requirement": "F1/F2customer sourceUI denial/privacy",
+      "report": "docs/jrc_consolidation/customer_denied_read_checkpoint_20261106.json",
+      "current_state": "23sourceVue and5nativeHTTP cases passed;old data removed ondenial and requests canceled byidentity.",
+      "remaining": "Chrome/visual and completeC-Gauditopen."
     }
   ],
   "explicit_dependencies": [

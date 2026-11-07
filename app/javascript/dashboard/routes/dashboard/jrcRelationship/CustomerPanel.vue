@@ -39,6 +39,14 @@ const contactId = ref('');
 const activityTitle = ref('');
 const dueAt = ref('');
 const recommendation = ref(null);
+const explaining = ref(false);
+let explanationRequest = null;
+const resetExplanation = () => {
+  explanationRequest?.abort();
+  explanationRequest = null;
+  explaining.value = false;
+  recommendation.value = null;
+};
 const ownerId = ref('');
 const capacityWorkload = ref({});
 const sendCsat = ref(false);
@@ -50,6 +58,7 @@ const contact = computed(() =>
 );
 let generation = 0;
 const load = async ({ closeIfUnavailable = false } = {}) => {
+  resetExplanation();
   transferLockOpen.value = false;
   generation += 1;
   const version = generation;
@@ -85,6 +94,7 @@ const load = async ({ closeIfUnavailable = false } = {}) => {
   }
 };
 const execute = async (action, { closeIfUnavailable = false } = {}) => {
+  resetExplanation();
   const version = generation;
   busy.value = true;
   error.value = '';
@@ -165,17 +175,42 @@ const activity = () =>
     })
   );
 const explain = async () => {
+  if (busy.value || explaining.value || !record.value) return;
   const version = generation;
+  const request = new AbortController();
+  explanationRequest = request;
+  explaining.value = true;
   recommendation.value = null;
   error.value = '';
+  const current = () =>
+    version === generation && explanationRequest === request;
   try {
     const { data } = await API.recommendations(
       route.params.accountId,
-      props.assignmentId
+      props.assignmentId,
+      { signal: request.signal }
     );
-    if (version === generation) recommendation.value = data;
+    if (current()) recommendation.value = data;
   } catch (err) {
-    if (version === generation) error.value = message(err);
+    if (current()) {
+      error.value = message(err);
+      if ([401, 403, 404].includes(err.response?.status)) {
+        generation += 1;
+        record.value = null;
+        channels.value = null;
+        contactId.value = '';
+        ownerId.value = '';
+        activityTitle.value = '';
+        dueAt.value = '';
+        capacityWorkload.value = {};
+        transferLockOpen.value = false;
+      }
+    }
+  } finally {
+    if (explanationRequest === request) {
+      explanationRequest = null;
+      explaining.value = false;
+    }
   }
 };
 watch(
@@ -201,6 +236,7 @@ watch(
   { immediate: true }
 );
 onBeforeUnmount(() => {
+  resetExplanation();
   generation += 1;
 });
 const date = value => formatDate(value, props.metadata?.formatting);
@@ -319,6 +355,8 @@ const money = value => formatMoney(value, props.metadata?.formatting);
         ><button
           type="button"
           :class="buttonClass"
+          :disabled="busy || explaining"
+          :aria-busy="explaining"
           @click="explain"
         >
           {{ t('RELATIONSHIP.EXPLAIN') }}

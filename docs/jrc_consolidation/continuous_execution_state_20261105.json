@@ -52,17 +52,16 @@
     "No real participant removal or provider request; tests use synthetic records and WebMock, with external network disabled."
   ],
   "restrictions": "No build/recompile, no5379 change/restart, no four-container restart/reconfiguration, no cleanup/delete of existing data, no push/GHCR/deploy/production/client change, no real provider operations. Additive migrations allowed only in owned synthetic test database.",
-  "disk_last_observed_bytes": 6767505408,
+  "disk_last_observed_bytes": 6727106560,
   "TRR": "Undefined; do not invent",
   "company_documents_without_portfolio": "Explicitly deferred",
-  "last_validated_head": "581d8557f96610d0059bb21d1a16f22980804110",
-  "new_validated_code_checkpoint": "git log -1 --format=%H -- docs/jrc_consolidation/master_selection_collection_checkpoint_20261106.json",
-  "current_status": "Owned real worker failed before business deliveries;startup harness and real PABX ActiveJob collision identified. C-Gopen.",
+  "last_validated_head": "306deefb",
+  "new_validated_code_checkpoint": "git log -1 --format=%H -- docs/jrc_consolidation/customer_denied_read_checkpoint_20261106.json",
+  "current_status": "Real isolated business worker gate passed;customer panel denied-read privacy/source gate passed. C-Gremainopen.",
   "next_actions": [
-    "Add failing ActiveJob scheduling regression,rename the PABX integration-specific helper and update its known controller/direct-test callers while retaining HTTP permissions,locks,interval and sync behavior.",
-    "Fix the worker harness native health handling;preserve every original artifact.",
-    "Resume the exact untouched synthetic setup only after verifying0applied items,expected actors/group/record scope and the Redis ownership claim;write a separate attempt directory. Do not drop data or pretend the first gate passed.",
-    "Continue other safe C-G work if a real external/business dependency blocks this gate."
+    "Continue safe local functional gaps,including native role/capability review and Word audit;no repeated completed module implementations.",
+    "Local portfolio role action matrix question pending;no inferred permission grant.",
+    "Preserve no-build/no5379-change and external business dependencies."
   ],
   "latest_dossier_report": "docs/jrc_consolidation/sealed_dossier_checkpoint_20261105.json",
   "capacity_report": "docs/jrc_consolidation/weighted_capacity_checkpoint_20261105.json",
@@ -161,5 +160,6 @@
   "master_selection_collection_report": "docs/jrc_consolidation/master_selection_collection_checkpoint_20261106.json",
   "owned_worker_initial_failure_report": "docs/jrc_consolidation/owned_worker_initial_failure_checkpoint_20261106.json",
   "pabx_active_job_contract_report": "docs/jrc_consolidation/pabx_active_job_contract_checkpoint_20261106.json",
-  "owned_worker_runtime_report": "docs/jrc_consolidation/owned_worker_runtime_checkpoint_20261106.json"
+  "owned_worker_runtime_report": "docs/jrc_consolidation/owned_worker_runtime_checkpoint_20261106.json",
+  "customer_denied_read_report": "docs/jrc_consolidation/customer_denied_read_checkpoint_20261106.json"
 }
