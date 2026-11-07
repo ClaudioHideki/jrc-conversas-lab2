@@ -1,0 +1,38 @@
+{
+  "status": "implemented_and_targeted_tests_passed",
+  "previous_checkpoint": "4b948e15",
+  "scope": "C B4 and E native CRM contract UI;identity changes in the same account.",
+  "implementation": [
+    "Account/user/role/membership identity invalidates contract detail,list,files,history,signature and unsaved document/addendum/renewal fields.",
+    "Guards discard responses from former identity or unmounted view;late PDF is not downloaded and late signature/renewal does not reopen or report success.",
+    "Native API commands,server authorization,version history and persisted writes unchanged;no implicit retry or rollback of an accepted native command.",
+    "Existing exact contract navigation,segment filter,local signature date and native manual controls retained."
+  ],
+  "tests": {
+    "contract-identity-baseline01": "4 new failures reproduced;8 existing cases filtered out.",
+    "contract-identity-fixed02": "12 passed,0failed.",
+    "contract-identity-regression03": "24 passed,0failed across15origin (7new total),8commercial and1signature date.",
+    "contract-identity-native04": "7 native B4 renewal/authorization tests passed,0failed.",
+    "eslint": {
+      "errors": 0,
+      "template_warnings": 137,
+      "new_specs_errors_warnings": 0
+    }
+  },
+  "resources": {
+    "status": "passed",
+    "free_start": 6735765504,
+    "minimum_free": 6691926016,
+    "mandatory_stop_bytes": 750000000,
+    "conservative_stop_bytes": 2000000000,
+    "no_build": true,
+    "owned_process_id": 21824,
+    "exit_code": 0,
+    "free_end": 6729383936
+  },
+  "remaining": [
+    "Orders has analogous same-account identity gap;continue next.",
+    "Current-source Chrome,build and C-G closure remain unapproved/open.",
+    "Local portfolio role matrix choice pending;do not infer grants."
+  ]
+}

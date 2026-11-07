@@ -5,6 +5,7 @@ import ApprovalGateBadge from 'dashboard/routes/dashboard/approvals/ApprovalGate
 import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue';
 import { format } from 'date-fns';
 import { useRoute, useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 import { contractsAPI } from 'dashboard/api/crm/commercialCycle';
 import { useAlert } from 'dashboard/composables';
 import SignatureDeliveryNotice from './SignatureDeliveryNotice.vue';
@@ -12,6 +13,17 @@ import { crmControlClasses } from '../../crmControlClasses';
 
 const router = useRouter();
 const route = useRoute();
+const store = useStore();
+const identity = computed(() =>
+  JSON.stringify([
+    route.params.accountId,
+    store.getters.getCurrentUserID,
+    store.getters.getCurrentRole,
+    store.getters.getCurrentUser?.accounts,
+  ])
+);
+let disposed = false;
+const currentIdentity = value => !disposed && value === identity.value;
 
 const rows = ref([]);
 const loading = ref(false);
@@ -160,12 +172,19 @@ const clearManagedContract = () => {
   detailLoading.value = false;
 };
 const refreshManagedContract = async (id, stillCurrent = null) => {
+  const authority = identity.value;
+  const generation = detailGeneration;
   const accountId = route.params.accountId;
   const [{ data: detail }, { data: history }] = await Promise.all([
     contractsAPI.show(id),
     contractsAPI.history(id),
   ]);
-  if (route.params.accountId !== accountId || (stillCurrent && !stillCurrent()))
+  if (
+    !currentIdentity(authority) ||
+    generation !== detailGeneration ||
+    route.params.accountId !== accountId ||
+    (stillCurrent && !stillCurrent())
+  )
     return false;
   manageContract.value = detail;
   contractFiles.value = detail.documents || [];
@@ -212,6 +231,7 @@ const openManage = async contract => {
 const { segmentParams, watchSegment } = useCustomerSegmentFilter();
 let listGeneration = 0;
 const load = async () => {
+  const authority = identity.value;
   listGeneration += 1;
   const token = listGeneration;
   rows.value = [];
@@ -219,7 +239,7 @@ const load = async () => {
 
   try {
     const response = await contractsAPI.list(segmentParams());
-    if (token !== listGeneration) return;
+    if (token !== listGeneration || !currentIdentity(authority)) return;
     rows.value = response.data || [];
   } catch {
     if (token === listGeneration)
@@ -243,8 +263,9 @@ const openRequestedContract = async () => {
     await openManage({ id: value });
 };
 onMounted(async () => {
+  const authority = identity.value;
   await load();
-  await openRequestedContract();
+  if (currentIdentity(authority)) await openRequestedContract();
 });
 watch(
   () => route.query.contractId,
@@ -253,15 +274,39 @@ watch(
     return openRequestedContract();
   }
 );
+const clearFilters = () => {
+  q.value = '';
+  status.value = 'all';
+  owner.value = 'all';
+  validity.value = 'all';
+  dealFilter.value = 'all';
+  page.value = 1;
+};
+
 watch(
-  () => route.params.accountId,
+  identity,
   async () => {
+    const authority = identity.value;
     clearManagedContract();
+    signatureContract.value = null;
+    signedByName.value = '';
+    signedFile.value = null;
+    contractUploadFiles.value = [];
+    renewStartsOn.value = '';
+    addendumTitle.value = '';
+    addendumNotes.value = '';
+    saving.value = false;
+    clearFilters();
     await load();
-    await openRequestedContract();
-  }
+    if (currentIdentity(authority)) await openRequestedContract();
+  },
+  { flush: 'sync' }
 );
-onBeforeUnmount(clearManagedContract);
+onBeforeUnmount(() => {
+  disposed = true;
+  listGeneration += 1;
+  clearManagedContract();
+});
 
 const badge = value =>
   ({
@@ -293,15 +338,6 @@ const statusIcon = value =>
     renewed: 'i-lucide-refresh-cw',
   })[value] || 'i-lucide-circle';
 
-const clearFilters = () => {
-  q.value = '';
-  status.value = 'all';
-  owner.value = 'all';
-  validity.value = 'all';
-  dealFilter.value = 'all';
-  page.value = 1;
-};
-
 const filterByStatus = value => {
   status.value = status.value === value ? 'all' : value;
 };
@@ -313,8 +349,10 @@ const newContract = () => {
 };
 
 const downloadPdf = async contract => {
+  const authority = identity.value;
   try {
     const { data } = await contractsAPI.pdf(contract.id);
+    if (!currentIdentity(authority)) return;
     const url = URL.createObjectURL(data);
     const a = document.createElement('a');
     a.href = url;
@@ -322,10 +360,10 @@ const downloadPdf = async contract => {
     a.click();
     URL.revokeObjectURL(url);
   } catch (error) {
+    if (!currentIdentity(authority)) return;
     useAlert('Não foi possível gerar o PDF do contrato.');
   }
 };
-
 const openSignature = contract => {
   signatureContract.value = contract;
   signedByName.value = '';
@@ -335,26 +373,31 @@ const openSignature = contract => {
 const prepareSignature = async mode => {
   if (!signatureContract.value) return;
   saving.value = true;
+  const authority = identity.value;
   try {
     const { data } = await contractsAPI.prepareSignature(
       signatureContract.value.id,
       { mode }
     );
+    if (!currentIdentity(authority)) return;
     signatureContract.value = data;
     await load();
+    if (!currentIdentity(authority)) return;
     if (manageContract.value?.id === data.id)
       await refreshManagedContract(data.id);
+    if (!currentIdentity(authority)) return;
     useAlert(
       mode === 'manual'
         ? 'Assinatura manual preparada.'
         : 'Fluxo de provedor preparado; nenhum envio externo foi simulado.'
     );
   } catch (error) {
+    if (!currentIdentity(authority)) return;
     useAlert(
       error.response?.data?.message || 'Não foi possível preparar a assinatura.'
     );
   } finally {
-    saving.value = false;
+    if (currentIdentity(authority)) saving.value = false;
   }
 };
 const registerManualSignature = async () => {
@@ -363,6 +406,7 @@ const registerManualSignature = async () => {
     return;
   }
   saving.value = true;
+  const authority = identity.value;
   try {
     const { data } = await contractsAPI.registerManualSignature(
       signatureContract.value.id,
@@ -372,12 +416,16 @@ const registerManualSignature = async () => {
         signed_file: signedFile.value,
       }
     );
+    if (!currentIdentity(authority)) return;
     signatureContract.value = data;
     await load();
+    if (!currentIdentity(authority)) return;
     if (manageContract.value?.id === data.id)
       await refreshManagedContract(data.id);
+    if (!currentIdentity(authority)) return;
     useAlert('Assinatura manual registrada.');
   } catch (error) {
+    if (!currentIdentity(authority)) return;
     useAlert(
       [
         error.response?.data?.message ||
@@ -389,41 +437,46 @@ const registerManualSignature = async () => {
         .join(' · ')
     );
   } finally {
-    saving.value = false;
+    if (currentIdentity(authority)) saving.value = false;
   }
 };
-
 const uploadContractDocuments = async () => {
   if (!manageContract.value || !contractUploadFiles.value.length) {
     useAlert('Selecione ao menos um documento.');
     return;
   }
   saving.value = true;
+  const authority = identity.value;
   try {
     await contractsAPI.uploadDocuments(
       manageContract.value.id,
       contractUploadFiles.value
     );
+    if (!currentIdentity(authority)) return;
     contractUploadFiles.value = [];
     await refreshManagedContract(manageContract.value.id);
+    if (!currentIdentity(authority)) return;
     await load();
+    if (!currentIdentity(authority)) return;
     useAlert('Documento anexado e persistido.');
   } catch (error) {
+    if (!currentIdentity(authority)) return;
     useAlert(
       error.response?.data?.message || 'Não foi possível enviar os documentos.'
     );
   } finally {
-    saving.value = false;
+    if (currentIdentity(authority)) saving.value = false;
   }
 };
-
 const downloadContractDocument = async documentRow => {
   if (!manageContract.value) return;
+  const authority = identity.value;
   try {
     const { data } = await contractsAPI.downloadDocument(
       manageContract.value.id,
       documentRow.id
     );
+    if (!currentIdentity(authority)) return;
     const url = URL.createObjectURL(data);
     const link = document.createElement('a');
     link.href = url;
@@ -431,19 +484,21 @@ const downloadContractDocument = async documentRow => {
     link.click();
     URL.revokeObjectURL(url);
   } catch (error) {
+    if (!currentIdentity(authority)) return;
     useAlert('Não foi possível baixar o documento.');
   }
 };
-
 const downloadSignedDocument = async () => {
   if (!manageContract.value?.signed_document) {
     useAlert('Este contrato não possui documento assinado anexado.');
     return;
   }
+  const authority = identity.value;
   try {
     const { data } = await contractsAPI.downloadSignedDocument(
       manageContract.value.id
     );
+    if (!currentIdentity(authority)) return;
     const url = URL.createObjectURL(data);
     const link = document.createElement('a');
     link.href = url;
@@ -453,36 +508,40 @@ const downloadSignedDocument = async () => {
     link.click();
     URL.revokeObjectURL(url);
   } catch (error) {
+    if (!currentIdentity(authority)) return;
     useAlert(
       error.response?.data?.message ||
         'Não foi possível baixar o documento assinado.'
     );
   }
 };
-
 const renewContract = async () => {
   if (!manageContract.value) return;
   saving.value = true;
+  const authority = identity.value;
   try {
     const { data } = await contractsAPI.renew(manageContract.value.id, {
       starts_on: renewStartsOn.value || null,
       term_months: Number(renewTermMonths.value || 12),
     });
+    if (!currentIdentity(authority)) return;
     await load();
+    if (!currentIdentity(authority)) return;
     await openManage(data);
+    if (!currentIdentity(authority)) return;
     manageTab.value = 'summary';
     useAlert('Renovação criada como novo contrato em rascunho.');
   } catch (error) {
+    if (!currentIdentity(authority)) return;
     useAlert(
       error.response?.data?.message ||
         error.response?.data?.errors?.join(', ') ||
         'Não foi possível criar a renovação.'
     );
   } finally {
-    saving.value = false;
+    if (currentIdentity(authority)) saving.value = false;
   }
 };
-
 const createAddendum = async () => {
   if (!manageContract.value) return;
   if (!addendumTitle.value.trim()) {
@@ -490,25 +549,29 @@ const createAddendum = async () => {
     return;
   }
   saving.value = true;
+  const authority = identity.value;
   try {
     await contractsAPI.addendum(manageContract.value.id, {
       title: addendumTitle.value.trim(),
       notes: addendumNotes.value.trim(),
     });
+    if (!currentIdentity(authority)) return;
     addendumTitle.value = '';
     addendumNotes.value = '';
     await refreshManagedContract(manageContract.value.id);
+    if (!currentIdentity(authority)) return;
     await load();
+    if (!currentIdentity(authority)) return;
     useAlert('Aditivo registrado no histórico do contrato.');
   } catch (error) {
+    if (!currentIdentity(authority)) return;
     useAlert(
       error.response?.data?.message || 'Não foi possível registrar o aditivo.'
     );
   } finally {
-    saving.value = false;
+    if (currentIdentity(authority)) saving.value = false;
   }
 };
-
 const openManageSignature = () => {
   if (!manageContract.value) return;
   openSignature(manageContract.value);
@@ -516,19 +579,23 @@ const openManageSignature = () => {
 
 const updateStatus = async (contract, nextStatus) => {
   saving.value = true;
+  const authority = identity.value;
   try {
     await contractsAPI.update(contract.id, {
       contract: { status: nextStatus },
     });
+    if (!currentIdentity(authority)) return;
     await load();
+    if (!currentIdentity(authority)) return;
     useAlert('Contrato atualizado.');
   } catch (error) {
+    if (!currentIdentity(authority)) return;
     useAlert(
       error.response?.data?.errors?.join(', ') ||
         'Não foi possível atualizar o contrato.'
     );
   } finally {
-    saving.value = false;
+    if (currentIdentity(authority)) saving.value = false;
   }
 };
 </script>
@@ -1140,8 +1207,8 @@ const updateStatus = async (contract, nextStatus) => {
 
     <Teleport to="body">
       <div
-        :class="crmControlClasses"
         v-if="manageContract"
+        :class="crmControlClasses"
         class="fixed inset-0 z-[95] flex justify-end bg-black/40"
         @click.self="clearManagedContract"
       >
@@ -1527,8 +1594,8 @@ const updateStatus = async (contract, nextStatus) => {
 
     <Teleport to="body">
       <div
-        :class="crmControlClasses"
         v-if="signatureContract"
+        :class="crmControlClasses"
         class="fixed inset-0 z-[100] grid place-items-center bg-black/45 p-4"
         @click.self="signatureContract = null"
       >

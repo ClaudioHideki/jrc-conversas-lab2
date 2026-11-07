@@ -6,6 +6,12 @@ vi.mock('vue-router', () => ({
   useRoute: () => ({ params: { accountId: '1' }, query: {} }),
   useRouter: () => ({ push: vi.fn() }),
 }));
+vi.mock('vuex', async importOriginal => ({
+  ...(await importOriginal()),
+  useStore: () => ({
+    getters: { getCurrentUserID: 1, getCurrentRole: 'administrator' },
+  }),
+}));
 vi.mock('dashboard/api/crm/commercialCycle', () => ({ contractsAPI: mocks }));
 vi.mock('dashboard/composables', () => ({ useAlert: vi.fn() }));
 vi.mock('dashboard/routes/dashboard/approvals/ApprovalGateBadge.vue', () => ({

@@ -348,6 +348,12 @@
       "report": "docs/jrc_consolidation/customer_denied_read_checkpoint_20261106.json",
       "current_state": "23sourceVue and5nativeHTTP cases passed;old data removed ondenial and requests canceled byidentity.",
       "remaining": "Chrome/visual and completeC-Gauditopen."
+    },
+    {
+      "requirement": "C B4 / Econtract UI authority isolation",
+      "report": "docs/jrc_consolidation/contract_identity_checkpoint_20261106.json",
+      "current_state": "24 source and7native tests passed;identity-bound views,downloads and late mutation receipts.",
+      "remaining": "Orders analogous gap and current-source Chrome/fullC-Gopen."
     }
   ],
   "explicit_dependencies": [
