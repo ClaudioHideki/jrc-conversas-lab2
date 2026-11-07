@@ -1,10 +1,19 @@
 /* eslint-disable no-console */
 import { proposalsAPI } from '../../../api/crm';
 
+const authorityScope = getters =>
+  JSON.stringify([
+    getters.getCurrentAccountId,
+    getters.getCurrentUserID,
+    getters.getCurrentRole,
+    getters.getCurrentUser?.accounts,
+  ]);
+
 export default {
   namespaced: true,
   state: {
     listRequestId: 0,
+    authorityScope: null,
     proposals: [],
     filters: {},
     isLoading: false,
@@ -12,11 +21,19 @@ export default {
     error: null,
   },
   getters: {
-    allProposals: state => state.proposals,
-    isLoading: state => state.isLoading,
-    error: state => state.error,
+    allProposals: (state, _getters, _rootState, rootGetters) =>
+      state.authorityScope === authorityScope(rootGetters)
+        ? state.proposals
+        : [],
+    isLoading: (state, _getters, _rootState, rootGetters) =>
+      state.authorityScope === authorityScope(rootGetters) && state.isLoading,
+    error: (state, _getters, _rootState, rootGetters) =>
+      state.authorityScope === authorityScope(rootGetters) ? state.error : null,
   },
   mutations: {
+    SET_AUTHORITY_SCOPE(state, value) {
+      state.authorityScope = value;
+    },
     SET_LIST_REQUEST_ID(state, value) {
       state.listRequestId = value;
     },
@@ -31,26 +48,42 @@ export default {
     },
   },
   actions: {
-    async fetchProposals({ commit, state }, params) {
+    async fetchProposals({ commit, state, rootGetters }, params) {
       const requestId = state.listRequestId + 1;
+      const scope = authorityScope(rootGetters);
       commit('SET_LIST_REQUEST_ID', requestId);
+      commit('SET_AUTHORITY_SCOPE', scope);
       commit('SET_PROPOSALS', []);
       commit('SET_LOADING', true);
       commit('SET_ERROR', null);
       try {
         const response = await proposalsAPI.list(params);
-        if (requestId !== state.listRequestId) return;
+        if (
+          requestId !== state.listRequestId ||
+          scope !== authorityScope(rootGetters)
+        )
+          return;
         commit('SET_PROPOSALS', response.data);
       } catch (error) {
-        if (requestId !== state.listRequestId) return;
-        console.error(error);
+        if (
+          requestId !== state.listRequestId ||
+          scope !== authorityScope(rootGetters)
+        )
+          return;
+        console.error('CRM proposals list request failed', {
+          status: error.response?.status,
+        });
         commit(
           'SET_ERROR',
           error.response?.data?.error ||
             'Não foi possível carregar as propostas.'
         );
       } finally {
-        if (requestId === state.listRequestId) commit('SET_LOADING', false);
+        if (
+          requestId === state.listRequestId &&
+          scope === authorityScope(rootGetters)
+        )
+          commit('SET_LOADING', false);
       }
     },
   },

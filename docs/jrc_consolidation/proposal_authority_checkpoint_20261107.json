@@ -1,0 +1,132 @@
+{
+  "date": "2026-11-07",
+  "status": "proposal_source_authority_and_draft_fix_validated_not_Chrome_acceptance",
+  "previous_checkpoint": "3c02b39056b6f69e0c7fc03c154991d0391e847b",
+  "branch": "codex/relacionamento-v2-20261101",
+  "confirmed_gap": "Six failing baseline assertions reproduced stale detail/draft,PDF,order navigation,detail selection and shared-list receipts after current account/actor/role or view changed.",
+  "implementation": [
+    "Proposal list cache,getters and outstanding native fetches bind account,actor,role and membership data;stale errors are not logged or rendered. Logging retains only fixed event/status,not Axios headers or tokens.",
+    "Detail/products/creation options and command receipts bind the current view generation and identity. Scope changes close forms,clear loaded metadata and invalidate outstanding callbacks;unmount does the same.",
+    "PDF,public preview,clipboard fallback,order navigation and save-to-approval/send chains stop following stale receipts. Native commands already committed on the server are not falsely rolled back or retried.",
+    "Native useFormDraft account/user keys remain. Creation draft reset no longer erases an active detail before its own watcher saves it;old drafts are preserved without copying private text into another actor/account namespace.",
+    "Mutations are blocked while native detail is loading,and item updates require the selected item. Native monetary payloads,approvals,source endpoints and version semantics remain unchanged.",
+    "Recipient component includes current role/memberships and disposal in its identity,preventing late simulated success after role change or unmount. No actual external delivery executed."
+  ],
+  "files": [
+    "app/javascript/dashboard/routes/dashboard/crm/views/proposals/ProposalRecipientDelivery.vue",
+    "app/javascript/dashboard/routes/dashboard/crm/views/proposals/ProposalsIndex.vue",
+    "app/javascript/dashboard/routes/dashboard/crm/views/proposals/spec/ProposalRecipientDelivery.spec.js",
+    "app/javascript/dashboard/store/crm/modules/proposals.js",
+    "app/javascript/dashboard/routes/dashboard/crm/views/proposals/spec/ProposalAuthority.spec.js"
+  ],
+  "validation": {
+    "baseline01": "6/6 failed for the intended native UI assertions before implementation;artifact retained.",
+    "source02": "38passed/1failed:additional draft preservation case exposed shared creation/detail reset ordering. Corrected rather than weakening assertion.",
+    "source03": "40/0:11authority+16existingproposalfinancial/PDF/nativeUI+9recipient(including2new)+4sharedsegment list regressions.",
+    "source_final04": "13/0 targeted after final helper organization;7recipient cases not selected by explicit CLI filter,already passed in source03.",
+    "native01": "3/0 existing HTTP cross-account,CRM-only role and foreign-owner delivery denials on synthetic candidate database.",
+    "native02": "2/0 existing actual native proposal read and item persistence/totals in cents.",
+    "eslint": "All5changed code/spec files0errors. ProposalsIndex retains41original warnings;read-only original-source lint confirmed the same41warnings and2old errors(now corrected). Otherchangedfiles0warnings.",
+    "browser": "Not tested on current-source Chrome. Server5379/assets remain frozen and no build was authorized.",
+    "runtime_warnings": "Existing missing source-map/i18n warnings and transient string proposalId prop warning during loading retained;not hidden or treated as browser acceptance."
+  },
+  "resources": {
+    "free_start": 6660481024,
+    "minimum_observed": 6569668608,
+    "free_end": 6594719744,
+    "gates": [
+      {
+        "gate": "proposal-authority-baseline01",
+        "status": "failed",
+        "free_start": 6658162688,
+        "minimum_free": 6631129088,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 26384,
+        "exit_code": 1,
+        "free_end": 6656233472
+      },
+      {
+        "gate": "proposal-authority-source02",
+        "status": "failed",
+        "free_start": 6633914368,
+        "minimum_free": 6625468416,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 25264,
+        "exit_code": 1,
+        "free_end": 6651523072
+      },
+      {
+        "gate": "proposal-authority-source03",
+        "status": "passed",
+        "free_start": 6630506496,
+        "minimum_free": 6601502720,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 16052,
+        "exit_code": 0,
+        "free_end": 6638383104
+      },
+      {
+        "gate": "proposal-authority-source-final04",
+        "status": "passed",
+        "free_start": 6596747264,
+        "minimum_free": 6569668608,
+        "mandatory_stop_bytes": 750000000,
+        "conservative_stop_bytes": 2000000000,
+        "no_build": true,
+        "owned_process_id": 3828,
+        "exit_code": 0,
+        "free_end": 6595604480
+      },
+      {
+        "gate": "proposal-authority-native01",
+        "start": 6627123200,
+        "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+        "database": "jrc_rel_v2_candidate_test",
+        "no_build": true,
+        "no_server": true,
+        "spec_sha256": {
+          "spec/requests/api/v1/accounts/crm/proposal_recipient_delivery_spec.rb": "f68e4b7594404292656c686d1e3da622d1df64e36712ec9286a81e1ae788d552"
+        },
+        "minimum": 6627123200,
+        "exit_code": 0,
+        "end": 6627147776
+      },
+      {
+        "gate": "proposal-preserved-native02",
+        "start": 6606024704,
+        "source": "/consolidation-approval-notifications-tests-20261104-1e6a1b2749244c379eb021380d5f6240",
+        "database": "jrc_rel_v2_candidate_test",
+        "no_build": true,
+        "no_server": true,
+        "spec_sha256": {
+          "spec/requests/api/v1/accounts/crm/proposals_spec.rb": "c5abf6f1f812f992dfaa1cba037f31bcba69c9be8d45a8c050147223f65dee44"
+        },
+        "minimum": 6605352960,
+        "exit_code": 0,
+        "end": 6605275136
+      }
+    ]
+  },
+  "restrictions": {
+    "build": false,
+    "cleanup": false,
+    "push": false,
+    "deploy": false,
+    "GHCR": false,
+    "external_delivery": false,
+    "production": false,
+    "server5379_changed": false,
+    "database_schema_changed": false
+  },
+  "remaining": [
+    "Current-source desktop/mobile/light/dark browser validation and literal/visual Word audit still open;no stage C-G closure.",
+    "TRR,local named-portfolio capability matrix and external provider/scanner/channel dependencies remain explicit;documents without portfolio still deferred."
+  ],
+  "next": "Execute bounded synthetic master-allocation maximum-audience regression with50companies,explicit native hours,finite progress,duplicate delivery,no extra master identity and preserved snapshots. No new server/queue/build."
+}

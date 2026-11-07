@@ -384,6 +384,12 @@
       "report": "docs/jrc_consolidation/master_reviewed_allocation_checkpoint_20261107.json",
       "current_state": "Native45/0 final,source50/0 plus18 targeted;actual company subjects,atomic native creation/link,readonly preview,source/current authority/capacity gates and usable staged UI.",
       "remaining": "No current-sourceChrome/fullC-Gclosure;localrole matrix,real master queue/maximum scale and documented business/external dependencies remain."
+    },
+    {
+      "requirement": "G CRM source authority,commercial draft integrity and approval/origin UI",
+      "report": "docs/jrc_consolidation/proposal_authority_checkpoint_20261107.json",
+      "current_state": "Six original failing assertions corrected;40source+13targeted and5native checks passed. Native drafts,financial inputs,source policy and committed command history preserved.",
+      "remaining": "No current-sourceChrome or completeC-Gclosure;documented business/external dependencies remain."
     }
   ],
   "explicit_dependencies": [
@@ -404,7 +410,7 @@
       "state": "External environment/operations require separate authorization; not simulated as passed."
     }
   ],
-  "next_confirmed_local_gap": "Continue independent CRM source/authority UI gaps: ProposalsIndex currently retains async detail/list/form responses across account/actor/role changes;preserve native draft, financial, approval and source workflows.",
+  "next_confirmed_local_gap": "Execute bounded synthetic master-allocation maximum-audience regression with50companies,explicit native hours,finite progress,duplicate delivery,no extra master identity and preserved snapshots. No new server/queue/build.",
   "stage_closure": {
     "C": false,
     "D": false,
@@ -413,5 +419,5 @@
     "G": false
   },
   "unreviewed_literal_and_visual_fragments": "Not auto-marked complete; the original context/requirements inventory remains classification_pending where not explicitly reconciled.",
-  "next_source_review": "CRM ProposalsIndex identity-bound async detail/drafts/actions."
+  "next_source_review": "Bounded maximum native master audience with explicit hours and per-item progress."
 }

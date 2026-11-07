@@ -59,7 +59,14 @@ const payload = {
   message: { content: 'Proposal ' + publicUrl },
 };
 const mountDelivery = (props = {}) => {
-  store = createStore({ getters: { getCurrentUserID: () => 25 } });
+  store = createStore({
+    state: { role: 'agent' },
+    getters: {
+      getCurrentUserID: () => 25,
+      getCurrentRole: state => state.role,
+      getCurrentUser: state => ({ accounts: [{ id: 7, role: state.role }] }),
+    },
+  });
   store.dispatch = vi.fn().mockResolvedValue({
     id: 12,
     name: 'Test recipient',
@@ -195,4 +202,38 @@ it('blocks submission while the parent proposal has unsaved or terminal data', a
     wrapper.get('[data-proposal-recipient-trigger]').attributes('disabled')
   ).toBeDefined();
   expect(messages.CRM.PROPOSAL_RECIPIENT.ERROR).toBeTruthy();
+});
+
+it('does not confirm a simulated delivery after the same user changes native role', async () => {
+  let finish;
+  proposalsAPI.sendToRecipient.mockImplementationOnce(
+    () =>
+      new Promise(resolve => {
+        finish = resolve;
+      })
+  );
+  mountDelivery();
+  const pending = submit(payload);
+  store.state.role = 'administrator';
+  await flushPromises();
+  finish({ data: { proposal: { id: 31 } } });
+  expect(await pending).toBe(false);
+  expect(useAlert).not.toHaveBeenCalled();
+});
+
+it('does not confirm a simulated delivery after its native recipient component was unmounted', async () => {
+  let finish;
+  proposalsAPI.sendToRecipient.mockImplementationOnce(
+    () =>
+      new Promise(resolve => {
+        finish = resolve;
+      })
+  );
+  mountDelivery();
+  const pending = submit(payload);
+  wrapper.unmount();
+  wrapper = null;
+  finish({ data: { proposal: { id: 31 } } });
+  expect(await pending).toBe(false);
+  expect(useAlert).not.toHaveBeenCalled();
 });
