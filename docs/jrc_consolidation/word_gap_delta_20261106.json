@@ -330,6 +330,12 @@
       "report": "docs/jrc_consolidation/master_selection_collection_checkpoint_20261106.json",
       "current_state": "Collected native master audiences with explicit individual allocation and durable grouping;5native/0 and54source/0.",
       "remaining": "Not a one-operation mass allocation-creation engine;local roles,Chrome/visual/completeC-Gstillopen."
+    },
+    {
+      "requirement": "G real worker runtime and preserved PABXintegration",
+      "report": "docs/jrc_consolidation/owned_worker_initial_failure_checkpoint_20261106.json",
+      "current_state": "Runtime gate failed atstartup;synthetic database/artifacts and0appliedbusinessitems preserved.",
+      "remaining": "Correct native health verification and actual PABXActiveJob enqueue collision before claiming runtime queue success."
     }
   ],
   "explicit_dependencies": [
@@ -350,7 +356,7 @@
       "state": "External environment/operations require separate authorization; not simulated as passed."
     }
   ],
-  "next_confirmed_local_gap": "Inspect native queue/runtime isolation and implement a guarded real local-worker integration gate if an unused isolated Redis/database can be guaranteed;otherwise continue another safe native gap. No original process/container/server changes or builds.",
+  "next_confirmed_local_gap": "Add failing ActiveJob scheduling regression,rename the PABX integration-specific helper and update its known controller/direct-test callers while retaining HTTP permissions,locks,interval and sync behavior.",
   "stage_closure": {
     "C": false,
     "D": false,
