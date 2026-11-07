@@ -55,7 +55,7 @@
   "disk_last_observed_bytes": 6682873856,
   "TRR": "Undefined; do not invent",
   "company_documents_without_portfolio": "Explicitly deferred",
-  "last_validated_head": "b76ff87848db4423dec950f1792141aafd117037",
+  "last_validated_head": "b0c1ae37b01554f6faa0c9525b3e10377a082484",
   "new_validated_code_checkpoint": "git log -1 --format=%H -- docs/jrc_consolidation/native_allocation_creation_checkpoint_20261107.json",
   "current_status": "Native allocation creation prerequisite validated;true masterbatch remains next. C-Gopen.",
   "next_actions": [
@@ -84,7 +84,7 @@
   "priority_bands_report": "docs/jrc_consolidation/priority_bands_checkpoint_20261105.json",
   "automatic_playbook_budget_report": "docs/jrc_consolidation/automatic_playbook_budget_checkpoint_20261106.json",
   "analyst_native_responsibilities_report": "docs/jrc_consolidation/analyst_native_responsibilities_checkpoint_20261106.json",
-  "checkpoint_resolution": "git log -1 --format=%H -- docs/jrc_consolidation/subject_source_performance_checkpoint_20261106.json",
+  "checkpoint_resolution": "git log -1 --format=%H -- docs/jrc_consolidation/master_subject_schema_checkpoint_20261107.json",
   "approval_percentage_input_report": "docs/jrc_consolidation/approval_percentage_input_checkpoint_20261106.json",
   "word_gap_delta": "docs/jrc_consolidation/word_gap_delta_20261106.json",
   "workspace_card_sources_report": "docs/jrc_consolidation/workspace_card_sources_checkpoint_20261106.json",
@@ -166,5 +166,6 @@
   "order_identity_report": "docs/jrc_consolidation/order_identity_checkpoint_20261106.json",
   "approval_worker_initial_failure_report": "docs/jrc_consolidation/approval_worker_initial_failure_checkpoint_20261106.json",
   "approval_worker_runtime_report": "docs/jrc_consolidation/approval_worker_runtime_checkpoint_20261106.json",
-  "native_allocation_creation_report": "docs/jrc_consolidation/native_allocation_creation_checkpoint_20261107.json"
+  "native_allocation_creation_report": "docs/jrc_consolidation/native_allocation_creation_checkpoint_20261107.json",
+  "master_subject_schema_report": "docs/jrc_consolidation/master_subject_schema_checkpoint_20261107.json"
 }

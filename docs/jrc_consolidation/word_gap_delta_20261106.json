@@ -372,6 +372,12 @@
       "report": "docs/jrc_consolidation/native_allocation_creation_checkpoint_20261107.json",
       "current_state": "9newnative service+1existingHTTPeligibility+16HTTPregressions passed;existing individualcreation nowreusable with freshauthority.",
       "remaining": "Mass subject/schema/engine/UInotyetimplemented;ChromeandC-Gopen."
+    },
+    {
+      "requirement": "Relationship P0124/P0128 native master subject preservation prerequisite",
+      "report": "docs/jrc_consolidation/master_subject_schema_checkpoint_20261107.json",
+      "current_state": "36 native cases passed; additive candidate-only migration preserved original rows and immutable parent guard.",
+      "remaining": "Master batch engine/UI and current-source Chrome not complete; C-G open."
     }
   ],
   "explicit_dependencies": [
