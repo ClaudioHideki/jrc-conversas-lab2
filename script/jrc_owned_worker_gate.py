@@ -24,8 +24,12 @@ assert source.startswith("/consolidation-approval-notifications-tests-20261104-"
 container = "jrc-rel-v2-run-20261101"
 postgres = "jrc-rel-v2-pg-20261101"
 redis = "jrc-rel-v2-redis-20261101"
-resume = len(sys.argv) == 3 and sys.argv[1] in ('--resume', '--approvals')
-approvals = resume and sys.argv[1] == '--approvals'
+resume = len(sys.argv) == 3 and sys.argv[1] in ('--resume', '--approvals', '--approvals-resume', '--approvals-finalize')
+approvals = resume and sys.argv[1] in ('--approvals', '--approvals-resume', '--approvals-finalize')
+approval_final = approvals and sys.argv[1] == '--approvals-finalize'
+approval_resume = approvals and sys.argv[1] in ('--approvals-resume', '--approvals-finalize')
+completed_delivery_attempt = None
+previous_attempt = None
 assert len(sys.argv) == 1 or resume
 nonce = sys.argv[2] if resume else uuid.uuid4().hex[:12]
 assert re.fullmatch(r"[0-9a-f]{12}", nonce)
@@ -46,13 +50,34 @@ if resume:
         proofs = []
         for path in artifact.glob("attempt_*/native-result.json"):
             proof = json.loads(path.read_text())
-            if proof["status"] == "passed" and proof["delivery_acknowledgments"] == 5 and proof["database"] == database:
+            if proof["status"] == "passed" and proof["delivery_acknowledgments"] == 5 and proof["database"] == database and proof.get("mode", "relationship") == "relationship":
                 proofs.append(path)
         assert len(proofs) == 1, "One exact previously passed business gate must be preserved"
+    if approval_resume:
+        failures = []
+        for path in artifact.glob("attempt_*/native-result.json"):
+            failed = json.loads(path.read_text())
+            if (failed["status"] == "failed" and failed["phase"] == "native_outbox_recovery" and
+                    failed.get("mode") == "approvals" and failed["delivery_acknowledgments"] == 2 and failed["database"] == database):
+                failures.append(path)
+        assert len(failures) == 1, "One exact failed positive notification setup is required"
+        previous_attempt = failures[0].parent.name.removeprefix("attempt_")
+        assert re.fullmatch(r"[0-9a-f]{8}", previous_attempt)
+    if approval_final:
+        deliveries = []
+        for path in artifact.glob("attempt_*/native-result.json"):
+            receipt = json.loads(path.read_text())
+            if (receipt["status"] == "failed" and receipt["phase"] == "native_notice_revoked_recipient" and
+                    receipt.get("mode") == "approvals" and receipt["delivery_acknowledgments"] == 5 and receipt["database"] == database):
+                deliveries.append(path)
+        assert len(deliveries) == 1, "One exact completed-delivery attempt with failed counter assertion required"
+        completed_delivery_attempt = deliveries[0].parent.name.removeprefix("attempt_")
+        assert re.fullmatch(r"[0-9a-f]{8}", completed_delivery_attempt)
     artifact = artifact / ("attempt_" + attempt)
 artifact.mkdir(parents=True, exist_ok=False)
 result = {"nonce": nonce, "database": database, "redis_index": 15, "queue": queue,
-          "source": source, "resume": resume, "mode": "approvals" if approvals else "relationship", "attempt": attempt, "head": subprocess.check_output(["git", "rev-parse", "HEAD"]).decode().strip(),
+          "source": source, "resume": resume, "mode": "approvals" if approvals else "relationship", "previous_approval_attempt": previous_attempt, "read_only_final_verification": approval_final,
+          "completed_delivery_attempt": completed_delivery_attempt, "attempt": attempt, "head": subprocess.check_output(["git", "rev-parse", "HEAD"]).decode().strip(),
           "free_start": shutil.disk_usage(root).free, "minimum_free": shutil.disk_usage(root).free,
           "original_containers_changed": False, "application_build": False, "cleanup": False}
 
@@ -72,7 +97,8 @@ try:
              "spec/integration/jrc_relationship/owned_worker_fixtures.rb"]
     if approvals:
         files += ["spec/integration/jrc_relationship/owned_approval_worker_gate.rb",
-                  "spec/integration/jrc_relationship/owned_approval_witness.rb"]
+                  "spec/integration/jrc_relationship/owned_approval_witness.rb",
+                  "spec/integration/jrc_relationship/owned_approval_receipt_verification.rb"]
     result["code_sha256"] = {}
     for relative in files:
         raw = (root / relative).read_bytes()
@@ -123,10 +149,12 @@ try:
            "REDIS_URL": "redis://" + redis + ":6379/15", "REDIS_SENTINELS": "", "REDIS_PASSWORD": "",
            "BUNDLE_PATH": "/gems", "BUNDLE_WITHOUT": "development", "BUNDLE_GEMFILE": source + "/Gemfile",
            "SECRET_KEY_BASE": "g-owned-worker-synthetic-only", "TZ": "UTC", "LOG_LEVEL": "warn",
-           "JRC_G_MODE": "approvals" if approvals else "relationship", "JRC_G_RESUME": str(resume).lower(), "JRC_G_NONCE": nonce, "JRC_G_DATABASE": database, "JRC_G_QUEUE": queue,
+           "JRC_G_APPROVAL_FINALIZE": str(approval_final).lower(),
+           "JRC_G_APPROVAL_DELIVERY_ATTEMPT": completed_delivery_attempt or "",
+           "JRC_G_APPROVAL_RESUME": previous_attempt or "", "JRC_G_MODE": "approvals" if approvals else "relationship", "JRC_G_RESUME": str(resume).lower(), "JRC_G_NONCE": nonce, "JRC_G_DATABASE": database, "JRC_G_QUEUE": queue,
            "JRC_G_DIRECTORY": directory, "JRC_G_READY_FILE": directory + "/ready",
            "JRC_G_WORKER_NETWORK_FILE": directory + "/network.json",
-           "JRC_G_RECEIPT_KEY": "jrc_g_worker:" + nonce + (":approval_ack:" + attempt if approvals else ":ack")}
+           "JRC_G_RECEIPT_KEY": "jrc_g_worker:" + nonce + (":approval_ack:" + (previous_attempt or attempt) if approvals else ":ack")}
     args = ["docker", "exec", "-w", source]
     for key, value in env.items():
         args += ["-e", key + "=" + value]
@@ -136,7 +164,7 @@ try:
     wrapper = "file,nonce,gate=ARGV;child=Process.spawn('bundle','exec','ruby','-rwebmock','-e',\"WebMock.enable!;WebMock.disable_net_connect!;load 'bin/rails'\",'runner',gate,nonce);File.write(file,Process.pid.to_s);Signal.trap('USR1'){Process.kill('TERM',child) rescue nil};_,status=Process.wait2(child);exit(status.exitstatus || 1)"
     entrypoint = "spec/integration/jrc_relationship/" + ("owned_approval_worker_gate.rb" if approvals else "owned_worker_gate.rb")
     args += [container, "ruby", "-e", wrapper, pidfile, nonce, entrypoint]
-    result["phase"] = "real_worker"
+    result["phase"] = "read_only_receipts" if approval_final else "real_worker"
     with (artifact / "runtime.log").open("xb") as output:
         process = subprocess.Popen(args, stdout=output, stderr=subprocess.STDOUT)
         deadline = time.monotonic() + 360

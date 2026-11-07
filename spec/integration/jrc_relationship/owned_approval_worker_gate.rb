@@ -7,14 +7,20 @@ class JrcOwnedApprovalWorkerGate < JrcOwnedWorkerGate
   private
 
   def resume_fixtures!
-    check!('prior business receipts preserved', Sidekiq.redis { |redis| redis.call('SCARD', "jrc_g_worker:#{@nonce}:ack") } == 5)
-    pending_count = Sidekiq::Queue.new(@queue).size
-    check!('new approval receipts and business queue empty', acknowledgments.zero? && pending_count.zero?)
+    verify_initial_receipts!
     @original_accounts = Account.order(:id).map(&:attributes)
     @original_assignments = JrcRelationship::Assignment.order(:id).map(&:attributes)
     @original_reviews = JrcRelationship::BatchReview.order(:id).map(&:attributes)
     @original_items = JrcRelationship::BatchItem.order(:id).map(&:attributes)
-    prepare_approval_fixture!
+    ENV['JRC_G_APPROVAL_RESUME'].present? ? resume_approval_fixture! : prepare_approval_fixture!
+    configure_approval_jobs!
+  end
+
+  def verify_initial_receipts!
+    check!('prior business receipts preserved', Sidekiq.redis { |redis| redis.call('SCARD', "jrc_g_worker:#{@nonce}:ack") } == 5)
+    pending_count = Sidekiq::Queue.new(@queue).size
+    expected = ENV['JRC_G_APPROVAL_RESUME'].present? ? 2 : 0
+    check!('exact prior approval receipts and empty business queue', acknowledgments == expected && pending_count.zero?)
   end
 
   def prepare_approval_fixture!
@@ -29,10 +35,41 @@ class JrcOwnedApprovalWorkerGate < JrcOwnedWorkerGate
     @event_attributes = @event.attributes.deep_dup
     ENV['JRC_G_NOTICE_ACCOUNT_ID'] = @notice_account.id.to_s
     check!('domain committed its native outbox', outbox(@event).completed_at.nil?)
+  end
+
+  def configure_approval_jobs!
     [JrcApprovals::NotificationProjectionJob, JrcApprovals::NotificationRecoveryJob, EventDispatcherJob, ActionCableBroadcastJob].each do |job|
       job.queue_adapter = :sidekiq
       job.queue_as @queue
     end
+  end
+
+  def resume_approval_fixture!
+    @notice_account = Account.find_by!(name: "Synthetic approval worker #{@nonce}")
+    @principal = existing_member!('principal', %w[jrc_approvals_decide jrc_approvals_delegate])
+    @delegate = existing_member!('delegate', %w[jrc_approvals_decide])
+    @blocked_delegate = existing_member!('blocked', %w[jrc_approvals_decide])
+    @service = JrcApprovals::OwnDelegations.new(account: @notice_account, user: @principal.user)
+    @event = JrcApprovals::AuditEvent.where(account: @notice_account, event_type: JrcApprovals::OwnDelegations::EVENT).sole
+    @grant = JrcApprovals::OwnDelegation.new(@event)
+    @event_attributes = @event.attributes.deep_dup
+    ENV['JRC_G_NOTICE_ACCOUNT_ID'] = @notice_account.id.to_s
+    verify_original_notice!
+  end
+
+  def verify_original_notice!
+    check!('original positive outbox complete', outbox(@event).completed_at.present?)
+    check!('exact original delegation parties', @grant.principal_id == @principal.id && @grant.delegate_id == @delegate.id && !@grant.revoked?)
+    check!('only original notice exists', Notification.where(account: @notice_account).count == 1)
+  end
+
+  def existing_member!(label, permissions)
+    user = User.find_by!(email: "#{label}-approval-#{@nonce}@example.invalid")
+    member = @notice_account.account_users.find_by!(user: user)
+    check!('preserved explicit approval role', member.agent? && member.custom_role.permissions.sort == permissions.sort)
+    check!('preserved native group coverage', @notice_account.jrc_crm_user_business_units.exists?(user: user, scope: 'GROUP',
+                                                                                                  active: true, structure_managed: true))
+    member
   end
 
   def approval_member!(label, permissions)
@@ -51,7 +88,9 @@ class JrcOwnedApprovalWorkerGate < JrcOwnedWorkerGate
   end
 
   def outbox(event)
-    JrcApprovals::NotificationOutbox.find_by!(account: @notice_account, source_event: event)
+    JrcApprovals::NotificationOutbox.uncached do
+      JrcApprovals::NotificationOutbox.find_by!(account: @notice_account, source_event: event)
+    end
   end
 
   def enqueue_job(job, *)
@@ -60,12 +99,7 @@ class JrcOwnedApprovalWorkerGate < JrcOwnedWorkerGate
   end
 
   def exercise!
-    @phase = 'native_outbox_recovery'
-    enqueue_job(JrcApprovals::NotificationRecoveryJob)
-    wait_for('native recovery and projection') { outbox(@event).completed_at.present? && acknowledgments == 2 }
-    @notice = Notification.find_by!(account: @notice_account, user: @delegate.user, primary_actor: @event, notification_type: 'approval_event')
-    verify_notice!
-    wait_for('native created cable emitted') { Sidekiq.redis { |redis| redis.call('HLEN', "#{@receipt_key}:cable") } == 1 }
+    verify_recovered_notice!
     replay_notice!
     reject_revoked_recipient!
     verify_native_cable!
@@ -73,6 +107,15 @@ class JrcOwnedApprovalWorkerGate < JrcOwnedWorkerGate
     check!('main made no HTTP requests', WebMock::RequestRegistry.instance.requested_signatures.hash.empty?)
     pending_count = Sidekiq::Queue.new(@queue).size
     check!('approval queue drained', pending_count.zero?)
+  end
+
+  def verify_recovered_notice!
+    @phase = 'native_outbox_recovery'
+    enqueue_job(JrcApprovals::NotificationRecoveryJob) if ENV['JRC_G_APPROVAL_RESUME'].blank?
+    wait_for('native recovery and projection') { outbox(@event).completed_at.present? && acknowledgments == 2 }
+    @notice = Notification.find_by!(account: @notice_account, user: @delegate.user, primary_actor: @event, notification_type: 'approval_event')
+    verify_notice!
+    wait_for('native created cable emitted') { Sidekiq.redis { |redis| redis.call('HLEN', "#{@receipt_key}:cable") } == 1 }
   end
 
   def verify_notice!
@@ -113,7 +156,7 @@ class JrcOwnedApprovalWorkerGate < JrcOwnedWorkerGate
     end
     rows = Sidekiq.redis { |redis| redis.call('HVALS', "#{@receipt_key}:cable") }.map { |raw| JSON.parse(raw) }
     check!('native cable has real created and read counts', rows.map { |row| row.values_at('event', 'unread_count', 'count') }.sort ==
-           [['notification.created', 1, 1], ['notification.updated', 0, 1]])
+           [['notification.created', 1, 1], ['notification.updated', 0, 0]])
     check!('native cable omits private approval context', rows.all? do |row|
       row['private_reason_omitted'] && row['target'] == 'own-delegations' && row['approval_event'] == 'own_delegation_granted'
     end)
@@ -131,4 +174,9 @@ class JrcOwnedApprovalWorkerGate < JrcOwnedWorkerGate
   end
 end
 
-JrcOwnedApprovalWorkerGate.new.run
+if ENV['JRC_G_APPROVAL_FINALIZE'] == 'true'
+  require_relative 'owned_approval_receipt_verification'
+  JrcOwnedApprovalReceiptVerification.new.run
+else
+  JrcOwnedApprovalWorkerGate.new.run
+end

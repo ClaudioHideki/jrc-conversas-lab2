@@ -2,6 +2,18 @@
 module JrcOwnedWorkerFixtures
   private
 
+  def acknowledgments
+    return unless @validated
+
+    Sidekiq.redis { |redis| redis.call('SCARD', @receipt_key) }
+  end
+
+  def retained_acknowledgments
+    return 5 if ENV['JRC_G_APPROVAL_FINALIZE'] == 'true'
+
+    ENV['JRC_G_APPROVAL_RESUME'].present? ? 2 : 0
+  end
+
   def resume_fixtures!
     check!('preserved exact synthetic counts', Account.count == 2 && User.count == 3 && JrcRelationship::Assignment.count == 15)
     pending_count = Sidekiq::Queue.new(@queue).size

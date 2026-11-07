@@ -360,6 +360,12 @@
       "report": "docs/jrc_consolidation/order_identity_checkpoint_20261106.json",
       "current_state": "30source and3nativepassed;2download targeted checks passed after test helper cleanup.",
       "remaining": "Current-source Chrome and remainingC-Gopen."
+    },
+    {
+      "requirement": "D9/G native internal approvalnotification runtime",
+      "report": "docs/jrc_consolidation/approval_worker_runtime_checkpoint_20261106.json",
+      "current_state": "5actualjobACKacross2workers;nativecreated/read cablefacts,duplicate/revocation/foreigndenial and29finalread-onlychecks;2failedverifierattemptspreserved.",
+      "remaining": "Chrome/WebSocketrealclient,defaultdeploymentandcompleteD/Gopen."
     }
   ],
   "explicit_dependencies": [

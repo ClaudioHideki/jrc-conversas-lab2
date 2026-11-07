@@ -134,12 +134,6 @@ class JrcOwnedWorkerGate
     job.provider_job_id
   end
 
-  def acknowledgments
-    return unless @validated
-
-    Sidekiq.redis { |redis| redis.call('SCARD', @receipt_key) }
-  end
-
   def wait_for(label)
     deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + 75
     until yield
@@ -201,8 +195,10 @@ class JrcOwnedWorkerGate
 
   def write_report!
     data = { status: @passed && @shutdown_clean ? 'passed' : 'failed', phase: @phase, checks: @checks, database: @database, queue: @queue,
-             delivery_acknowledgments: acknowledgments, fresh_worker: true, mode: ENV.fetch('JRC_G_MODE', 'relationship'),
+             delivery_acknowledgments: acknowledgments, fresh_worker: ENV['JRC_G_APPROVAL_FINALIZE'] != 'true',
+             mode: ENV.fetch('JRC_G_MODE', 'relationship'),
              application_build: false, production: false,
+             retained_approval_acknowledgments: retained_acknowledgments,
              qualification: 'Synthetic-only PostgreSQL; real Redis and Sidekiq. Queue routing overridden only for isolation. ' \
                             'No default queue/cron/deployment/Chrome claim.' }
     if @nonce.match?(/\A[0-9a-f]{12}\z/) && owned_directory? && File.directory?(@directory)

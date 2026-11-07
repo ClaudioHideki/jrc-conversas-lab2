@@ -21,7 +21,8 @@ class JrcOwnedApprovalWitness
     raise 'Owned approval payload required' unless notice.fetch('notification_type') == 'approval_event' &&
                                                    notice.fetch('account_id') == ENV.fetch('JRC_G_NOTICE_ACCOUNT_ID').to_i
 
-    facts(payload, data, notice).merge(private_reason_omitted: raw.exclude?('PRIVATE_SYNTHETIC_DELEGATION_REASON') && raw.exclude?('@example.invalid'))
+    facts(payload, data,
+          notice).merge(private_reason_omitted: raw.exclude?('PRIVATE_SYNTHETIC_DELEGATION_REASON') && raw.exclude?('@example.invalid'))
   end
 
   def self.facts(payload, data, notice)
