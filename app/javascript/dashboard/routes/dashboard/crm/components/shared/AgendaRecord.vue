@@ -1,5 +1,7 @@
 <script setup>
-import { computed, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue';
+import { useStore } from 'vuex';
+import { authorityScope } from 'dashboard/store/crm/authorityScope';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { activitiesAPI, followUpsAPI } from 'dashboard/api/crm';
@@ -8,11 +10,21 @@ import { formatCrmDateTime } from '../../utils/dateTime';
 const props = defineProps({ refreshKey: { type: Number, default: 0 } });
 const emit = defineEmits(['changed', 'edit']);
 const route = useRoute();
+const store = useStore();
 const { t } = useI18n();
 const record = ref(null);
 const error = ref(false);
 const loading = ref(false);
-const busy = ref(false);
+const pendingIdentities = reactive(new Set());
+const identity = computed(() =>
+  JSON.stringify([
+    route.params.accountId,
+    authorityScope(store.getters),
+    route.query.activityId,
+    route.query.followUpId,
+  ])
+);
+const busy = computed(() => pendingIdentities.has(identity.value));
 const selectedId = computed(
   () => route.query.followUpId || route.query.activityId
 );
@@ -26,45 +38,74 @@ const completed = computed(
     record.value?.status === 'completed'
 );
 let generation = 0;
+let requestGeneration = 0;
+let disposed = false;
+const captureContext = () => ({ identity: identity.value, generation });
+const isCurrent = context =>
+  !disposed &&
+  context.identity === identity.value &&
+  context.generation === generation;
+const load = async () => {
+  const context = captureContext();
+  requestGeneration += 1;
+  const request = requestGeneration;
+  record.value = null;
+  error.value = false;
+  loading.value = Boolean(selectedId.value);
+  if (!selectedId.value || disposed) return;
+  try {
+    const { data } = await api.value.show(selectedId.value);
+    if (isCurrent(context) && request === requestGeneration)
+      record.value = data;
+  } catch {
+    if (isCurrent(context) && request === requestGeneration) error.value = true;
+  } finally {
+    if (isCurrent(context) && request === requestGeneration)
+      loading.value = false;
+  }
+};
 watch(
-  () => [
-    route.params.accountId,
-    route.query.activityId,
-    route.query.followUpId,
-    props.refreshKey,
-  ],
-  async () => {
+  identity,
+  () => {
     generation += 1;
-    const version = generation;
-    record.value = null;
-    error.value = false;
-    loading.value = Boolean(selectedId.value);
-    if (!selectedId.value) return;
-    try {
-      const { data } = await api.value.show(selectedId.value);
-      if (version === generation) record.value = data;
-    } catch {
-      if (version === generation) error.value = true;
-    } finally {
-      if (version === generation) loading.value = false;
-    }
+    load();
   },
-  { immediate: true }
+  { immediate: true, flush: 'sync' }
 );
-
+watch(() => props.refreshKey, load);
+onBeforeUnmount(() => {
+  disposed = true;
+  generation += 1;
+  requestGeneration += 1;
+});
+const editable = () =>
+  !disposed &&
+  record.value &&
+  !loading.value &&
+  !error.value &&
+  !busy.value &&
+  !completed.value &&
+  record.value.status !== 'cancelled';
+const edit = () => {
+  if (editable() && !route.query.followUpId) emit('edit', record.value.id);
+};
 async function complete() {
-  const version = generation;
-  busy.value = true;
+  if (!editable()) return;
+  const context = captureContext();
+  pendingIdentities.add(context.identity);
   try {
     const { data } = await api.value.complete(selectedId.value);
-    if (version === generation) {
+    if (isCurrent(context)) {
+      requestGeneration += 1;
+      loading.value = false;
       record.value = data;
+      error.value = false;
       emit('changed');
     }
   } catch {
-    if (version === generation) error.value = true;
+    if (isCurrent(context)) error.value = true;
   } finally {
-    busy.value = false;
+    pendingIdentities.delete(context.identity);
   }
 }
 </script>
@@ -90,7 +131,8 @@ async function complete() {
         type="button"
         data-testid="agenda-record-edit"
         class="mr-2 mt-3 rounded-lg border border-n-weak px-3 py-2"
-        @click="emit('edit', record.id)"
+        :disabled="busy"
+        @click="edit"
       >
         {{ t('CRM.ACTIVITY_EDIT.TITLE') }}
       </button>
