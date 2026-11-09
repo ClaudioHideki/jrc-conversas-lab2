@@ -1,0 +1,84 @@
+{
+  "date": "2026-11-09",
+  "branch": "codex/relacionamento-v2-20261101",
+  "previous_head": "8d4c8ad8a947e40819ec6804238680e54908d68c",
+  "status": "Partial implementation preserved;new build not started because available physical RAM is below the explicitly required 5GiB. C-G remain open.",
+  "new_build_authorization": {
+    "candidate": "d8d7c960ce34829d43c7fed58165a8a1098e4fba",
+    "authorized_attempts": 1,
+    "actual_vite_invocations": 0,
+    "consumed": false,
+    "required_start_ram_bytes": 5368709120,
+    "required_start_disk_bytes": 3221225472,
+    "stop_ram_bytes": 786432000,
+    "stop_disk_bytes": 750000000,
+    "concurrent_vite_found": false,
+    "pinned_snapshot_modified": false,
+    "old_interrupted_build_record_preserved": true
+  },
+  "resource_diagnostics": {
+    "initial_native_available_ram_bytes": 1844137984,
+    "independent_wmi_available_ram_bytes": 846643200,
+    "independent_wmi_disk_free_bytes": 5451984896,
+    "latest_wmi_ram_bytes": 929021952,
+    "latest_wmi_disk_bytes": 5443891200,
+    "initial_disk_bytes": 5477380096,
+    "sampled_only_not_continuous_whole_session": true
+  },
+  "independent_work": {
+    "scope": "C/G native Calendar list pagination;not backend query pagination or the approved d8d7 snapshot",
+    "implemented_pending_behavior_tests": [
+      "25appointments per page,retaining day headers and ordered authorized native rows",
+      "Reset page on filter,period,view or authority change;clamp after source shrinks",
+      "Reuse shared Button and native filtering/API/store;no new record store,permission grant or API",
+      "Other Calendar views remain unpaginated;local DOM limitation does not solve full authorized-array transport scale"
+    ],
+    "new_source_scenarios_pending": 5,
+    "pure_js_scenarios_pending": 4
+  },
+  "validation": {
+    "guard_selftest": "9simulated cases passed;no real process launched/stopped",
+    "vue_static": "Script parsed and template compiled to memory before the final pagination-helper extraction;initial new source translation keys parsed. This is not a final application build or behavior acceptance.",
+    "diff_check": "passed",
+    "directed_vue_initial": "Runner failed before tests at esbuild spawn EPERM;no suite result. See calendar-list-pagination01.log/json.",
+    "directed_vue_guarded_retries": "02 and03preflights blocked for RAM;no test process started. No continuous retry loop.",
+    "pure_js_gate": "Preflight blocked below950MiB before launching Node;4behavior cases not executed.",
+    "chrome_desktop_mobile": "Not run;no valid new build. Old assets not acceptance evidence.",
+    "application_build": false,
+    "assertion_of_completed_functionality": false
+  },
+  "preserved": {
+    "original_four_container_start_times_unchanged": true,
+    "server5379_modified": false,
+    "original_database_redis_writes": false,
+    "new_isolated_database_redis_writes": false,
+    "new_assets_served": false,
+    "processes_interrupted": false,
+    "cleanup_push_GHCR_deploy_external_ops": false
+  },
+  "files_sha256": {
+    "app/javascript/dashboard/routes/dashboard/crm/views/calendar/CalendarView.vue": "1ebd998e74782bbdd66c7c7c3bf4f6d10b96f53f1b429a6c3cb846b123a7baeb",
+    "app/javascript/dashboard/routes/dashboard/crm/views/calendar/spec/CalendarViews.spec.js": "df9debe503554a6501b2c9cb7dbc53e846ae62065fe5a03dc7fec62d4fea55fa",
+    "app/javascript/dashboard/routes/dashboard/crm/views/calendar/spec/CalendarFilters.spec.js": "17c42ce42ede15c97175fb2fba1f960fe377a4029036d39d7670837e468bfd55",
+    "app/javascript/dashboard/routes/dashboard/crm/utils/calendarPagination.js": "919a421ecce24cbb8ae0a8898812ddda3a1239c5dd5205c58119c5dd991e0c17",
+    "app/javascript/dashboard/i18n/locale/en/crm.json": "c8a86c16d6e1feee3c68b6e22102ed2ce04d073fa039ef24ad0345e277ab76b4",
+    "script/jrc_calendar_pagination.test.mjs": "862c5fbcb70c7c66d7cd3f4c86d5fe8ba14fd9f9ff0794c7ff931731ea81b36b"
+  },
+  "remaining": [
+    "Finish the directed Vue gates once RAM is sufficient;do not mark this pagination complete before them",
+    "One new d8d7 build remains conditionally authorized;launch only with fresh5GiB RAM/3GiB disk preflight,no simultaneous build,and RAM/disk monitoring from startup. Use new attempt marker/output prefix;do not reset the consumed old launcher.",
+    "Post-d8d7 source changes must not silently replace the pinned d8d7 candidate;they require separate future build scope.",
+    "Desktop/mobile native-database acceptance and remaining Word literal/visual reconciliation",
+    "Backend Calendar date pagination/scale not implemented by local paging",
+    "Local-role capability matrix and historical audit-scope proof remain pending",
+    "TRR undefined;company documents without portfolio expansion explicitly deferred",
+    "External DocuSign/scanner/channel acceptance pending separate environment/authorization"
+  ],
+  "stage_closure": {
+    "C": false,
+    "D": false,
+    "E": false,
+    "F": false,
+    "G": false
+  }
+}

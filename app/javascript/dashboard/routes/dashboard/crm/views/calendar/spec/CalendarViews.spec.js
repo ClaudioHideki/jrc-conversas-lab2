@@ -197,3 +197,104 @@ it('follows a native date link reactively while retaining the chosen view', asyn
   ).toBe('true');
   expect(activitiesAPI.list).toHaveBeenCalledTimes(1);
 });
+
+it('pages appointments rather than days without losing or repeating authorized rows', async () => {
+  activitiesAPI.list.mockResolvedValueOnce({
+    data: Array.from({ length: 61 }, (_, index) => ({
+      id: index + 10,
+      title: `Authorized appointment ${index + 1}`,
+      due_at: index < 30 ? '2026-11-07T12:00:00Z' : '2026-11-09T12:00:00Z',
+      status: 'scheduled',
+    })),
+  });
+  await render();
+  await mode('list');
+  const titles = [];
+  for (const count of [25, 25, 11]) {
+    const cards = grid().findAll('article');
+    expect(cards).toHaveLength(count);
+    titles.push(...cards.map(card => card.get('p').text()));
+    if (count === 25) {
+      await wrapper.get('[data-testid="calendar-list-next"]').trigger('click');
+    }
+  }
+  expect(new Set(titles).size).toBe(61);
+  expect(titles[0]).toBe('Authorized appointment 1');
+  expect(titles[60]).toBe('Authorized appointment 61');
+  expect(
+    wrapper.get('[data-testid="calendar-list-next"]').element.disabled
+  ).toBe(true);
+  await wrapper.get('[data-testid="calendar-list-previous"]').trigger('click');
+  expect(grid().findAll('article')).toHaveLength(25);
+  expect(grid().findAll('article')[0].text()).toContain(
+    'Authorized appointment 26'
+  );
+  expect(activitiesAPI.list).toHaveBeenCalledTimes(1);
+});
+
+it('resets the page when filtering, clearing filters or changing the period', async () => {
+  activitiesAPI.list.mockResolvedValueOnce({
+    data: Array.from({ length: 30 }, (_, index) => ({
+      id: index + 10,
+      title: index === 29 ? 'Unique appointment' : `Meeting ${index}`,
+      due_at: '2026-11-07T12:00:00Z',
+      status: 'scheduled',
+    })),
+  });
+  await render();
+  await mode('list');
+  await wrapper.get('[data-testid="calendar-list-next"]').trigger('click');
+  await wrapper
+    .get('[data-testid="calendar-filter-search"]')
+    .setValue('Unique');
+  expect(grid().findAll('article')).toHaveLength(1);
+  expect(grid().text()).toContain('Unique appointment');
+  expect(
+    wrapper.get('[data-testid="calendar-list-previous"]').element.disabled
+  ).toBe(true);
+  await wrapper.get('[data-testid="calendar-clear-filters"]').trigger('click');
+  expect(grid().findAll('article')).toHaveLength(25);
+  await wrapper.get('[data-testid="calendar-list-next"]').trigger('click');
+  await wrapper.get('[data-testid="calendar-next-period"]').trigger('click');
+  expect(wrapper.find('[data-testid="calendar-list-next"]').exists()).toBe(
+    false
+  );
+  await wrapper
+    .get('[data-testid="calendar-previous-period"]')
+    .trigger('click');
+  expect(grid().findAll('article')).toHaveLength(25);
+  expect(activitiesAPI.list).toHaveBeenCalledTimes(1);
+});
+
+it('clamps a later page after a native refresh shrinks the result, preserving full day and month views', async () => {
+  activitiesAPI.list.mockResolvedValueOnce({
+    data: Array.from({ length: 30 }, (_, index) => ({
+      id: index + 10,
+      title: `Current appointment ${index}`,
+      due_at: '2026-11-07T12:00:00Z',
+      status: 'scheduled',
+    })),
+  });
+  await render();
+  await mode('day');
+  expect(grid().findAll('article')).toHaveLength(30);
+  await mode('month');
+  expect(grid().findAll('article')).toHaveLength(30);
+  await mode('list');
+  await wrapper.get('[data-testid="calendar-list-next"]').trigger('click');
+  store.commit('jrcCrm/activities/SET_ACTIVITIES', [
+    {
+      id: 100,
+      title: 'Remaining authorized appointment',
+      due_at: '2026-11-07T12:00:00Z',
+      status: 'scheduled',
+    },
+  ]);
+  await flushPromises();
+  expect(grid().findAll('article')).toHaveLength(1);
+  expect(grid().text()).toContain('Remaining authorized appointment');
+  expect(grid().text()).not.toContain('Current appointment');
+  expect(
+    wrapper.get('[data-testid="calendar-list-previous"]').element.disabled
+  ).toBe(true);
+});

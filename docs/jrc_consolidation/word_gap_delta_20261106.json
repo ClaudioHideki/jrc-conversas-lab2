@@ -515,5 +515,18 @@
     "G": false
   },
   "unreviewed_literal_and_visual_fragments": "Not auto-marked complete; the original context/requirements inventory remains classification_pending where not explicitly reconciled.",
-  "next_source_review": "Prepare consolidated current-source isolated Chrome acceptance for committed candidate;build/new local instance still require explicit authorization and5379must remain frozen."
+  "next_source_review": "Prepare consolidated current-source isolated Chrome acceptance for committed candidate;build/new local instance still require explicit authorization and5379must remain frozen.",
+  "latest_unvalidated_increment": {
+    "date": "2026-11-09",
+    "report": "docs/jrc_consolidation/conditional_build_preflight_and_calendar_wip_20261109.json",
+    "state": "Native Calendar list paging implementation and regression cases prepared;behavior gates blocked by RAM. No Word requirement marked complete.",
+    "pinned_build_candidate_unchanged": "d8d7c960",
+    "stage_closure": {
+      "C": false,
+      "D": false,
+      "E": false,
+      "F": false,
+      "G": false
+    }
+  }
 }

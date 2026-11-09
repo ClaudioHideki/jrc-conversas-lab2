@@ -16,7 +16,9 @@ import { useStore } from 'vuex';
 import { activitiesAPI } from 'dashboard/api/crm';
 import { formatCrmDateTime } from '../../utils/dateTime';
 import { filterActivities } from '../../utils/activityFilters';
+import { paginateCalendarDays } from '../../utils/calendarPagination';
 import CrmPageHeader from '../../components/shared/CrmPageHeader.vue';
+import Button from 'dashboard/components-next/button/Button.vue';
 
 const store = useStore();
 const route = useRoute();
@@ -170,6 +172,23 @@ const displayDays = computed(() => {
     ? days.filter(day => day.activities.length)
     : days;
 });
+const listPage = ref(1);
+const listPagination = computed(() =>
+  paginateCalendarDays(displayDays.value, listPage.value)
+);
+const visibleDays = computed(() => {
+  if (calendarView.value !== 'list') return displayDays.value;
+  return listPagination.value.days;
+});
+watch([filters, calendarDate, calendarView, identity], () => {
+  listPage.value = 1;
+});
+watch(
+  () => listPagination.value.pages,
+  () => {
+    listPage.value = listPagination.value.page;
+  }
+);
 const periodLabel = computed(() => {
   if (calendarView.value === 'day')
     return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long' }).format(
@@ -519,7 +538,7 @@ onMounted(async () => {
               "
             >
               <div
-                v-for="day in displayDays"
+                v-for="day in visibleDays"
                 :key="day.key"
                 :data-calendar-day="day.key"
                 class="min-w-0 bg-gradient-to-b from-n-solid-2 to-n-slate-2"
@@ -597,6 +616,46 @@ onMounted(async () => {
               </div>
             </div>
           </div>
+          <nav
+            v-if="
+              calendarView === 'list' &&
+              listPagination.total &&
+              !loading &&
+              !error
+            "
+            :aria-label="t('CRM.CALENDAR_ACTIONS.LIST_PAGES')"
+            class="flex flex-wrap items-center justify-between gap-2 border-t border-n-weak p-3"
+          >
+            <p role="status" class="m-0 text-xs text-n-slate-11">
+              {{
+                t('CRM.CALENDAR_ACTIONS.LIST_PAGE', {
+                  page: listPagination.page,
+                  pages: listPagination.pages,
+                  total: listPagination.total,
+                })
+              }}
+            </p>
+            <div class="flex items-center gap-2">
+              <Button
+                data-testid="calendar-list-previous"
+                variant="outline"
+                color="slate"
+                size="sm"
+                :label="t('CRM.CALENDAR_ACTIONS.PREVIOUS_PAGE')"
+                :disabled="listPagination.page === 1"
+                @click="listPage = listPagination.page - 1"
+              />
+              <Button
+                data-testid="calendar-list-next"
+                variant="outline"
+                color="slate"
+                size="sm"
+                :label="t('CRM.CALENDAR_ACTIONS.NEXT_PAGE')"
+                :disabled="listPagination.page === listPagination.pages"
+                @click="listPage = listPagination.page + 1"
+              />
+            </div>
+          </nav>
         </section>
 
         <aside

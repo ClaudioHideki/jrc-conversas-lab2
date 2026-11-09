@@ -242,3 +242,36 @@ it('refreshes native persistence after completion and re-applies the open filter
   expect(cards()).toHaveLength(0);
   expect(wrapper.text()).not.toContain('Native renewal call');
 });
+
+it.each([
+  ['account', 2],
+  ['role', 'revoked'],
+])(
+  'clears paged content after a denied native %s replacement',
+  async (field, value) => {
+    activitiesAPI.list.mockResolvedValueOnce({
+      data: Array.from({ length: 30 }, (_, index) => ({
+        ...sources()[0],
+        id: index + 10,
+        title: `Previous private appointment ${index}`,
+      })),
+    });
+    await render();
+    await wrapper.get('[data-testid="calendar-view-list"]').trigger('click');
+    await wrapper.get('[data-testid="calendar-list-next"]').trigger('click');
+    expect(cards()).toHaveLength(5);
+    activitiesAPI.list.mockRejectedValueOnce({
+      response: { status: 403, data: { error: 'Access denied' } },
+    });
+    authority[field] = value;
+    if (field === 'account') navigation.route.params.accountId = String(value);
+    await flushPromises();
+    expect(wrapper.text()).toContain('Access denied');
+    expect(wrapper.text()).not.toContain('Previous private appointment');
+    expect(wrapper.find('[data-testid="calendar-list-next"]').exists()).toBe(
+      false
+    );
+    expect(activitiesAPI.list).toHaveBeenCalledTimes(2);
+    expect(activitiesAPI.complete).not.toHaveBeenCalled();
+  }
+);

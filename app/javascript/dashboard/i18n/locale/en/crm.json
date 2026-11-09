@@ -22,6 +22,10 @@
       "PREVIOUS_PERIOD": "Previous period",
       "NEXT_PERIOD": "Next period",
       "VIEWS": "Calendar views",
+      "LIST_PAGES": "Activity list pages",
+      "LIST_PAGE": "Page {page} of {pages} · {total} activities",
+      "PREVIOUS_PAGE": "Previous",
+      "NEXT_PAGE": "Next",
       "EMPTY_PERIOD": "No activities in this period.",
       "OPEN_DAY": "Open day {date}",
       "COMPLETE_FAILED": "Unable to complete the activity. You can try again."
