@@ -588,6 +588,15 @@ const attachFloatingBridge = () => {
 
 const initialize = accountId => {
   if (!accountId) return Promise.resolve();
+  if (
+    activeAccountId.value &&
+    activeAccountId.value !== accountId &&
+    hasCall.value
+  ) {
+    errorMessage.value =
+      'Finalize a ligação na conta de origem antes de trocar o ramal de conta.';
+    return Promise.resolve(false);
+  }
   attachFloatingBridge();
   attachNetworkListeners();
   if (initializationPromise && activeAccountId.value === accountId) {

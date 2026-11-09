@@ -75,7 +75,33 @@ jobs:
             spec/jobs/jrc_contact_center \
             --format progress --format json --out /tmp/voice-v4-rspec.json
       - name: RuboCop do incremento
-        run: bundle exec rubocop app/services/jrc_contact_center/customer_context.rb app/controllers/api/v1/accounts/jrc_contact_center/call_sessions_controller.rb --format progress
+        run: bundle exec rubocop app/services/jrc_contact_center/customer_context.rb app/services/jrc_contact_center/agent_state_manager.rb app/controllers/api/v1/accounts/jrc_contact_center/call_sessions_controller.rb --format progress
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - name: Dependencias JavaScript sem alterar lockfile
+        run: pnpm install --frozen-lockfile
+      - name: Lint dos fontes JavaScript alterados
+        run: |
+          git fetch --no-tags origin 0163e1ee324e0f0de46ed6dc0b869afb3dbc9895
+          mapfile -t files < <(git diff --name-only --diff-filter=ACMR 0163e1ee324e0f0de46ed6dc0b869afb3dbc9895 HEAD -- app/javascript | grep -E '\.(js|vue)$')
+          if [ "${#files[@]}" -gt 0 ]; then pnpm exec eslint "${files[@]}"; fi
+      - name: Vitest voz, inbox, chamadas e acoes globais
+        run: >-
+          pnpm exec vitest run
+          app/javascript/dashboard/routes/dashboard/webphone
+          app/javascript/dashboard/routes/dashboard/inbox
+          app/javascript/dashboard/routes/dashboard/jrcContactCenter
+          app/javascript/dashboard/components-next/layout/specs
+          --maxWorkers=2 --minWorkers=1 --no-file-parallelism
+          --reporter=default --reporter=json --outputFile=/tmp/voice-v4-vitest.json
+      - name: Build frontend real
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+        run: bundle exec vite build
       - name: Integridade do checkout
         if: always()
         run: git diff --exit-code && git diff --check
@@ -83,5 +109,7 @@ jobs:
         if: always()
         with:
           name: voice-v4-rails-${{ github.sha }}
-          path: /tmp/voice-v4-rspec.json
+          path: |
+            /tmp/voice-v4-rspec.json
+            /tmp/voice-v4-vitest.json
           if-no-files-found: ignore

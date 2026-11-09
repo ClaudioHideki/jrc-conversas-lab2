@@ -38,13 +38,23 @@ vi.mock('dashboard/routes/dashboard/webphone/useSipWebphone', () => ({
   useSipWebphone: () => ({
     initialize: vi.fn(),
     shutdown: vi.fn(),
-    hasCall: { value: false },
+    hasCall: ref(false),
+    accountId: state.identity,
+    registered: ref(true),
+    callId: ref(''),
+    credential: ref({ extension: 'synthetic-extension' }),
   }),
 }));
 vi.mock('dashboard/components-next/jrcCopilot/useJrcCopilot', () => ({
   useJrcCopilot: () => ({ isFull: state.full, openQuick: vi.fn() }),
 }));
 vi.mock('../useQuickActionAccess', () => ({
+  useQuickActionContext: () => ({
+    accountId: state.identity,
+    userId: ref(7),
+    routeAllowed: () => true,
+    policy: { isFeatureFlagEnabled: () => false },
+  }),
   useQuickActionAccess: () => ({
     actions: state.actions,
     accountId: state.identity,
@@ -52,6 +62,9 @@ vi.mock('../useQuickActionAccess', () => ({
   }),
 }));
 vi.mock('../GlobalCallPanel.vue', () => ({
+  default: { template: '<div data-phone-panel />' },
+}));
+vi.mock('../OutboundVoiceDialog.vue', () => ({
   default: { template: '<div data-phone-panel />' },
 }));
 vi.mock('dashboard/store', () => ({
@@ -233,6 +246,7 @@ describe('Quick actions in the real authenticated route shell', () => {
       await wrapper.get('button[aria-label="Nova ligação"]').trigger('click');
       expect(wrapper.find('[data-phone-panel]').exists()).toBe(true);
       const rail = wrapper.get('[data-global-quick-actions]').element;
+      const voiceBar = wrapper.get('[data-global-voice-bar]').element;
       await router.push(`/app/accounts/1${path}`);
       await flushPromises();
       expect(
@@ -241,6 +255,8 @@ describe('Quick actions in the real authenticated route shell', () => {
         )
       ).toBe(true);
       expect(wrapper.findAll('[data-global-quick-actions]')).toHaveLength(1);
+      expect(wrapper.findAll('[data-global-voice-bar]')).toHaveLength(1);
+      expect(wrapper.get('[data-global-voice-bar]').element).toBe(voiceBar);
       expect(wrapper.get('[data-global-quick-actions]').element === rail).toBe(
         true
       );

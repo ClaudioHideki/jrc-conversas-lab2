@@ -5,6 +5,7 @@ import { useAccount } from 'dashboard/composables/useAccount';
 import { useKbd } from 'dashboard/composables/utils/useKbd';
 import { useMapGetter } from 'dashboard/composables/store';
 import SoftphoneDownload from './SoftphoneDownload.vue';
+import VoicePresenceControl from './VoicePresenceControl.vue';
 
 import Avatar from 'next/avatar/Avatar.vue';
 import SidebarNotificationBell from 'dashboard/components-next/sidebar/SidebarNotificationBell.vue';
@@ -12,11 +13,12 @@ import SidebarProfileMenuStatus from 'dashboard/components-next/sidebar/SidebarP
 import { DropdownContainer, DropdownBody } from 'next/dropdown-menu/base';
 
 const { t } = useI18n();
-const { accountScopedRoute } = useAccount();
+const { accountId, accountScopedRoute } = useAccount();
 const searchShortcut = useKbd([`$mod`, 'k']);
 const SEARCH_PLACEHOLDER = 'Pesquisar conversas, contatos ou mensagens...';
 
 const currentUser = useMapGetter('getCurrentUser');
+const currentUserId = useMapGetter('getCurrentUserID');
 const currentUserAvailability = useMapGetter('getCurrentUserAvailability');
 
 const availability = computed(() => {
@@ -58,23 +60,28 @@ const availability = computed(() => {
     </RouterLink>
 
     <div class="flex flex-shrink-0 items-center gap-3">
-      <DropdownContainer>
-        <template #trigger="{ toggle, isOpen }">
-          <button
-            type="button"
-            class="flex h-10 items-center gap-2 rounded-full border border-n-weak bg-n-surface-1 px-4 text-sm font-medium text-n-slate-12 transition hover:bg-n-alpha-1"
-            :class="{ 'bg-n-alpha-1': isOpen }"
-            @click="toggle"
-          >
-            <span class="size-2.5 rounded-full" :class="availability.color" />
-            <span>{{ availability.label }}</span>
-            <span class="i-lucide-chevron-down size-4 text-n-slate-10" />
-          </button>
-        </template>
-        <DropdownBody class="z-50 mt-2 min-w-80 ltr:right-0 rtl:left-0">
-          <SidebarProfileMenuStatus />
-        </DropdownBody>
-      </DropdownContainer>
+      <VoicePresenceControl
+        :account-id="Number(accountId)"
+        :user-id="Number(currentUserId)"
+      >
+        <DropdownContainer>
+          <template #trigger="{ toggle, isOpen }">
+            <button
+              type="button"
+              class="flex h-10 items-center gap-2 rounded-full border border-n-weak bg-n-surface-1 px-4 text-sm font-medium text-n-slate-12 transition hover:bg-n-alpha-1"
+              :class="{ 'bg-n-alpha-1': isOpen }"
+              @click="toggle"
+            >
+              <span class="size-2.5 rounded-full" :class="availability.color" />
+              <span>{{ availability.label }}</span>
+              <span class="i-lucide-chevron-down size-4 text-n-slate-10" />
+            </button>
+          </template>
+          <DropdownBody class="z-50 mt-2 min-w-80 ltr:right-0 rtl:left-0">
+            <SidebarProfileMenuStatus />
+          </DropdownBody>
+        </DropdownContainer>
+      </VoicePresenceControl>
 
       <SoftphoneDownload />
 

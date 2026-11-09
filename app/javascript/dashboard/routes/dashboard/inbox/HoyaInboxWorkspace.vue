@@ -1,5 +1,5 @@
 <script setup>
-import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, inject, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import {
   inbox360Labels,
@@ -43,6 +43,9 @@ import {
   CONVERSATION_TOOL_KEYS,
 } from './conversationTools';
 import { useInboxListResize } from './useInboxListResize';
+import { GLOBAL_VOICE_SHELL } from '../webphone/voiceShell';
+import { activeVoiceAttendance } from './useActiveVoiceContext';
+import VoiceCallSummary from './VoiceCallSummary.vue';
 
 const props = defineProps({
   accountId: { type: Number, required: true },
@@ -84,6 +87,8 @@ const selectedChat = useMapGetter('getSelectedChat');
 const currentUserId = useMapGetter('getCurrentUserID');
 const featureEnabled = useMapGetter('accounts/isFeatureEnabledonAccount');
 const sip = useSipWebphone();
+const globalVoiceShell = inject(GLOBAL_VOICE_SHELL, false);
+const moreOpen = ref(false);
 const tab = ref('CONVERSATION');
 const voiceSection = ref('journey');
 const listOpen = ref(false);
@@ -209,6 +214,13 @@ const toolDefinitions = Object.fromEntries(
 );
 const workspaceLabels = computed(() => ({
   ...labels.value,
+  ...(globalVoiceShell && voiceView.value
+    ? {
+        CONVERSATION: t('VOICE_V4.CALL_TAB'),
+        OVERVIEW: t('VOICE_V4.CUSTOMER_TAB'),
+        MORE: t('VOICE_V4.MORE'),
+      }
+    : {}),
   ...Object.fromEntries(
     CONVERSATION_TOOLS.map(item => [item.key, item.label(t)])
   ),
@@ -217,6 +229,12 @@ const call = computed(() => callDetails.value?.call);
 const contactId = computed(() => {
   if (phoneOpen.value) return null;
   if (!isVoice.value) return conversation.value?.meta?.sender?.id;
+  if (
+    ['error', 'restricted', 'unavailable'].includes(
+      callDetails.value?.customerStatus
+    )
+  )
+    return null;
   if (call.value?.contact_id) return call.value.contact_id;
   const customer = callDetails.value?.customer;
   return !customer?.ambiguous && customer?.contacts?.length === 1
@@ -271,7 +289,9 @@ const customerProps = computed(() => ({
   crm: crm.value,
   cases: cases.value,
   loading: customerLoading.value,
-  failed: customerFailed.value,
+  failed:
+    customerFailed.value ||
+    (isVoice.value && callDetails.value?.customerStatus === 'error'),
   unavailable: unavailable.value,
   crmEnabled: features.value.crm,
   interaction: isVoice.value
@@ -301,19 +321,34 @@ const supportsClosing = computed(
   () =>
     Boolean(props.context) && (isVoice.value || requiresWhatsAppClosing.value)
 );
-const workspaceTabs = computed(() => [
-  'CONVERSATION',
-  'OVERVIEW',
-  'SCRIPT',
+const voiceExtraTabs = computed(() => [
   'CUSTOMER_DATA',
   'ORDERS',
   'CASES',
-  'HISTORY',
-  'TASKS',
-  ...visibleConversationTools.value.map(item => item.key),
   ...(supportsClosing.value ? ['CLOSING'] : []),
 ]);
+const workspaceTabs = computed(() =>
+  globalVoiceShell && voiceView.value
+    ? ['CONVERSATION', 'OVERVIEW', 'HISTORY', 'TASKS', 'MORE']
+    : [
+        'CONVERSATION',
+        'OVERVIEW',
+        'SCRIPT',
+        'CUSTOMER_DATA',
+        'ORDERS',
+        'CASES',
+        'HISTORY',
+        'TASKS',
+        ...visibleConversationTools.value.map(item => item.key),
+        ...(supportsClosing.value ? ['CLOSING'] : []),
+      ]
+);
 const selectWorkspaceTab = key => {
+  if (key === 'MORE') {
+    moreOpen.value = !moreOpen.value;
+    return;
+  }
+  moreOpen.value = false;
   if (CONVERSATION_TOOL_KEYS.has(key) && !nativeToolsReady.value) return;
   tab.value = key;
   voiceSection.value = { CASES: 'case', TASKS: 'callback' }[key] || 'journey';
@@ -366,7 +401,7 @@ const statusLabel = computed(() =>
     : conversationLabels.value[conversation.value?.status]
 );
 const duration = computed(() => {
-  const start = call.value?.answered_at || call.value?.started_at;
+  const start = call.value?.answered_at;
   const end = call.value?.ended_at
     ? new Date(call.value.ended_at).getTime()
     : now.value;
@@ -634,12 +669,35 @@ const rejectPendingIncoming = () => {
 };
 watch([() => sip.incoming.value, closing.loading], () => {
   if (
+    !globalVoiceShell &&
     sip.incoming.value &&
     !closing.loading.value &&
     props.softphoneAccess &&
     Number(sip.accountId.value) === props.accountId
   )
     openPhone();
+});
+watch(activeVoiceAttendance, value => {
+  if (
+    !globalVoiceShell ||
+    value?.status !== 'linked' ||
+    value.accountId !== props.accountId ||
+    value.sessionId !== sip.callId.value
+  )
+    return;
+  if (
+    phoneOpen.value &&
+    closing.allowSelection('voice', Number(value.record.id))
+  ) {
+    phoneOpen.value = false;
+    emit('selectCall', value.record);
+  }
+  if (Number(value.record.id) === props.currentCallId)
+    loaded({
+      call: value.record,
+      customer: value.customer,
+      customerStatus: value.customer?.status,
+    });
 });
 watch([() => props.calls, () => sip.callId.value], () => {
   if (
@@ -655,6 +713,7 @@ watch(
   () => {
     actionGeneration += 1;
     phoneOpen.value = false;
+    moreOpen.value = false;
     tab.value = 'CONVERSATION';
     voiceSection.value = 'journey';
     callDetails.value = null;
@@ -713,6 +772,7 @@ onBeforeUnmount(() => {
         :request-closing="requiresWhatsAppClosing ? startClosing : null"
       />
       <button
+        v-if="!globalVoiceShell"
         type="button"
         :disabled="!canOperate"
         class="flex h-8 shrink-0 items-center gap-2 rounded-md border border-n-amber-6 bg-n-amber-2 px-2.5 text-xs font-semibold text-n-amber-11 hover:bg-n-amber-3 disabled:opacity-40"
@@ -722,6 +782,7 @@ onBeforeUnmount(() => {
         {{ displayAgent?.state === 'paused' ? labels.RESUME : labels.PAUSE }}
       </button>
       <span
+        v-if="!globalVoiceShell"
         class="hidden shrink-0 items-center gap-2 border-l border-n-weak px-2 text-xs text-n-slate-11 2xl:flex"
       >
         <span
@@ -983,7 +1044,7 @@ onBeforeUnmount(() => {
             />
             <h2 class="m-0 truncate text-sm font-medium text-white">
               {{
-                voiceView || !hasSelection
+                (voiceView && !globalVoiceShell) || !hasSelection
                   ? t('JRC_CONTACT_CENTER.INBOX.TITLE')
                   : title
               }}
@@ -996,7 +1057,11 @@ onBeforeUnmount(() => {
             </h2>
           </div>
           <span
-            v-if="voiceView && (voicePanel?.duration || (isVoice && duration))"
+            v-if="
+              !globalVoiceShell &&
+              voiceView &&
+              (voicePanel?.duration || (isVoice && duration))
+            "
             class="flex shrink-0 items-center gap-2 text-xs tabular-nums"
           >
             <span class="size-2 rounded-full bg-n-ruby-9" />
@@ -1010,8 +1075,11 @@ onBeforeUnmount(() => {
           </span>
           <button
             v-if="
-              (voiceView && voicePanel?.canEnd) ||
-              (isVoice && call && !['ended', 'failed'].includes(call.status)) ||
+              (!globalVoiceShell &&
+                ((voiceView && voicePanel?.canEnd) ||
+                  (isVoice &&
+                    call &&
+                    !['ended', 'failed'].includes(call.status)))) ||
               (requiresWhatsAppClosing && conversation?.status !== 'resolved')
             "
             type="button"
@@ -1035,6 +1103,16 @@ onBeforeUnmount(() => {
                 ? t('JRC_CONTACT_CENTER.INBOX_360.END_CALL')
                 : t('JRC_CONTACT_CENTER.INBOX_360.END_ATTENDANCE')
             }}
+          </button>
+          <button
+            v-if="globalVoiceShell && isVoice && supportsClosing"
+            type="button"
+            :disabled="closingSaving"
+            class="ml-auto min-h-10 rounded-lg border border-white/30 px-3 text-xs font-semibold focus-visible:ring-2 focus-visible:ring-white"
+            :aria-label="t('VOICE_V4.ATTENDANCE_ACTIONS')"
+            @click="tab = 'CLOSING'"
+          >
+            {{ t('VOICE_V4.FINALIZE') }}
           </button>
           <button
             type="button"
@@ -1068,8 +1146,14 @@ onBeforeUnmount(() => {
               class="flex shrink-0 items-center whitespace-nowrap rounded-lg border px-3 py-2 text-xs font-semibold transition focus-visible:ring-2 focus-visible:ring-n-brand disabled:cursor-not-allowed disabled:opacity-40"
               :class="
                 tab === key
-                  ? WORKSPACE_APPEARANCE[key].active
-                  : WORKSPACE_APPEARANCE[key].idle
+                  ? (
+                      WORKSPACE_APPEARANCE[key] ||
+                      WORKSPACE_APPEARANCE.CONVERSATION
+                    ).active
+                  : (
+                      WORKSPACE_APPEARANCE[key] ||
+                      WORKSPACE_APPEARANCE.CONVERSATION
+                    ).idle
               "
               :aria-pressed="tab === key"
               :aria-label="workspaceLabels[key]"
@@ -1095,7 +1179,7 @@ onBeforeUnmount(() => {
                   v-if="key === 'OVERVIEW'"
                   class="i-lucide-layout-dashboard mr-1 inline-block size-4 align-middle"
                 />
-                {{ labels[key] }}
+                {{ workspaceLabels[key] }}
               </span>
               <span v-if="!toolDefinitions[key]" class="2xl:hidden">
                 {{
@@ -1103,7 +1187,7 @@ onBeforeUnmount(() => {
                     ? t('JRC_CONTACT_CENTER.INBOX_360.SCRIPT_SHORT')
                     : key === 'CUSTOMER_DATA'
                       ? labels.CUSTOMER
-                      : labels[key]
+                      : workspaceLabels[key]
                 }}
               </span>
             </button>
@@ -1115,6 +1199,22 @@ onBeforeUnmount(() => {
             @click="scrollWorkspaceTabs(1)"
           >
             <span class="i-lucide-chevron-right size-4" />
+          </button>
+        </div>
+        <div
+          v-if="moreOpen && globalVoiceShell && voiceView"
+          class="flex flex-wrap gap-2 border-b border-n-weak bg-n-slate-2 p-3"
+          :aria-label="t('VOICE_V4.MORE')"
+        >
+          <button
+            v-for="key in voiceExtraTabs"
+            :key="key"
+            type="button"
+            class="min-h-10 rounded-lg border border-n-strong bg-n-solid-1 px-3 text-xs focus-visible:ring-2 focus-visible:ring-n-brand"
+            :aria-pressed="tab === key"
+            @click="selectWorkspaceTab(key)"
+          >
+            {{ workspaceLabels[key] }}
           </button>
         </div>
         <div
@@ -1141,6 +1241,30 @@ onBeforeUnmount(() => {
           class="min-h-0 flex-1 overflow-y-auto"
           data-central-voice
         >
+          <div
+            v-if="globalVoiceShell"
+            data-voice-script
+            class="border-b border-n-weak"
+          >
+            <VoiceCallSummary
+              :call="call"
+              :customer="callDetails?.customer"
+              :customer-status="callDetails?.customerStatus || ''"
+              :elapsed="duration"
+            />
+            <p
+              v-if="contact?.blocked"
+              role="alert"
+              class="m-3 rounded-lg border border-n-ruby-6 bg-n-ruby-2 p-3 text-sm text-n-ruby-11"
+            >
+              {{ t('VOICE_V4.BLOCKED_CONTACT') }}
+            </p>
+            <InboxContextContent
+              tab="SCRIPT"
+              :script-reply="scriptReply"
+              @replies="openQuick('REPLIES')"
+            />
+          </div>
           <InboxVoicePanel
             v-if="softphoneAccess || isVoice"
             ref="voicePanel"
@@ -1160,6 +1284,9 @@ onBeforeUnmount(() => {
             :ambiguous="isVoice && Boolean(callDetails?.customer?.ambiguous)"
             :session-view="phoneOpen"
             :elapsed="isVoice ? duration : ''"
+            :show-controls="!globalVoiceShell"
+            :notes-only="globalVoiceShell"
+            :draft-user-id="Number(currentUserId) || null"
             @open="openPhone"
             @ended="
               closing.load();
@@ -1415,7 +1542,7 @@ onBeforeUnmount(() => {
           :tool="tab"
         />
         <footer
-          v-if="isVoice && hasSelection"
+          v-if="isVoice && hasSelection && !globalVoiceShell"
           class="flex shrink-0 items-center gap-3 border-t border-n-weak px-4 py-3 text-[11px]"
         >
           <button

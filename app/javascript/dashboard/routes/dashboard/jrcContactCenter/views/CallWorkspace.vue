@@ -30,6 +30,7 @@ const actionLabels = computed(() => ({
 }));
 const call = ref(null);
 const customer = ref(null);
+const customerStatus = ref('unknown');
 const agent = ref(null);
 const busy = ref(false);
 const failed = ref(false);
@@ -63,12 +64,15 @@ const callTone = computed(() => {
   };
   return tones[call.value?.status] || 'blue';
 });
-const customerName = computed(
-  () => customer.value?.contacts?.[0]?.name || phone.value || '-'
+const customerName = computed(() =>
+  customer.value?.ambiguous
+    ? t('JRC_CONTACT_CENTER.CALL.AMBIGUOUS')
+    : customer.value?.contacts?.[0]?.name || phone.value || '-'
 );
 const customerCompany = computed(
   () =>
-    customer.value?.contacts?.[0]?.company?.name ||
+    (!customer.value?.ambiguous &&
+      customer.value?.contacts?.[0]?.company?.name) ||
     t('JRC_CONTACT_CENTER.VISUAL.UNCONFIRMED_COMPANY')
 );
 const journeyEvents = computed(() => [
@@ -97,6 +101,7 @@ const load = async () => {
   const version = generation;
   call.value = null;
   customer.value = null;
+  customerStatus.value = 'unknown';
   agent.value = null;
   failed.value = false;
   saved.value = false;
@@ -107,24 +112,39 @@ const load = async () => {
   busy.value = true;
   emit('loaded', null);
   try {
-    const [callResponse, agentResponse] = await Promise.all([
+    const [callResult, agentResult] = await Promise.allSettled([
       JrcContactCenterAPI.call(props.accountId, props.callId),
       JrcContactCenterAPI.agentState(props.accountId),
     ]);
     if (version !== generation) return;
-    call.value = callResponse.data.item;
-    agent.value = agentResponse.data.item;
-    if (phone.value) {
-      const response = await JrcContactCenterAPI.customerContext(
-        props.accountId,
-        phone.value
-      );
-      if (version === generation) customer.value = response.data;
+    if (callResult.status === 'rejected') throw callResult.reason;
+    call.value = callResult.value.data.item;
+    agent.value =
+      agentResult.status === 'fulfilled' ? agentResult.value.data.item : null;
+    if (Object.hasOwn(call.value, 'customer')) {
+      customer.value = call.value.customer;
+      customerStatus.value = call.value.customer?.status || 'unknown';
+    } else if (phone.value) {
+      try {
+        const response = await JrcContactCenterAPI.customerContext(
+          props.accountId,
+          phone.value
+        );
+        if (version !== generation) return;
+        customer.value = response.data;
+        customerStatus.value = response.data.ambiguous ? 'ambiguous' : 'loaded';
+      } catch (error) {
+        if (version !== generation) return;
+        customerStatus.value = [401, 403].includes(error.response?.status)
+          ? 'restricted'
+          : 'error';
+      }
     }
     if (version === generation)
       emit('loaded', {
         call: call.value,
         customer: customer.value,
+        customerStatus: customerStatus.value,
         agent: agent.value,
       });
   } catch {

@@ -14,6 +14,7 @@ import auditLogs from './auditLogs.json';
 import automation from './automation.json';
 import bulkActions from './bulkActions.json';
 import calls from './calls.json';
+import voiceV4 from './voiceV4.json';
 import campaign from './campaign.json';
 import cannedMgmt from './cannedMgmt.json';
 import chatlist from './chatlist.json';
@@ -77,6 +78,7 @@ export default {
   ...automation,
   ...bulkActions,
   ...calls,
+  ...voiceV4,
   ...campaign,
   ...cannedMgmt,
   ...chatlist,

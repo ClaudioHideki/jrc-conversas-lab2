@@ -7,6 +7,7 @@ import CCAPI from 'dashboard/api/jrcContactCenter';
 import HoyaInboxWorkspace from './HoyaInboxWorkspace.vue';
 import { openEmbeddedSoftphone } from '../webphone/useEmbeddedSoftphone';
 import { CONVERSATION_TOOLS } from './conversationTools';
+import { GLOBAL_VOICE_SHELL } from '../webphone/voiceShell';
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({ t: key => key, locale: ref('pt_BR') }),
 }));
@@ -100,6 +101,30 @@ const global = {
   },
 };
 describe('inbox native SIP action guards', () => {
+  it('composes the five Voice V4 tabs and keeps script and notes in the call without duplicate SIP controls', async () => {
+    const wrapper = mount(HoyaInboxWorkspace, {
+      props,
+      global: { ...global, provide: { [GLOBAL_VOICE_SHELL]: true } },
+    });
+    await flushPromises();
+    const tabs = wrapper.get(
+      'nav[aria-label="JRC_CONTACT_CENTER.INBOX_360.WORKSPACE_TABS"]'
+    );
+    expect(tabs.findAll('button')).toHaveLength(5);
+    expect(tabs.text()).toContain('VOICE_V4.CALL_TAB');
+    expect(tabs.text()).toContain('VOICE_V4.MORE');
+    expect(wrapper.get('[data-voice-script]').text()).toContain(
+      'JRC_CONTACT_CENTER.INBOX_360.SCRIPT'
+    );
+    expect(
+      wrapper.find('[data-central-voice] [data-voice-controls]').exists()
+    ).toBe(false);
+    expect(
+      wrapper
+        .find('button[aria-label="JRC_CONTACT_CENTER.INBOX_360.HANGUP"]')
+        .exists()
+    ).toBe(false);
+  });
   it('opens the authorized SIP session centrally without requesting Contact Center state', async () => {
     CCAPI.agentState.mockClear();
     const wrapper = mount(HoyaInboxWorkspace, {

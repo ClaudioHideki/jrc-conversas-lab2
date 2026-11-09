@@ -1,5 +1,5 @@
 <script setup>
-import { computed, nextTick, ref, watch } from 'vue';
+import { computed, inject, nextTick, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useCallsStore } from 'dashboard/stores/calls';
 import { useWhatsappCallSession } from 'dashboard/composables/useWhatsappCallSession';
@@ -7,7 +7,9 @@ import ContactCenterAPI from 'dashboard/api/jrcContactCenter';
 import { useSipWebphone } from '../webphone/useSipWebphone';
 import { normalizeSipDialNumber } from '../webphone/phoneNumber';
 import { useEmbeddedSoftphone } from '../webphone/useEmbeddedSoftphone';
+import { GLOBAL_VOICE_SHELL } from '../webphone/voiceShell';
 import { callStateLabels } from './inboxPresentation';
+import { readVoiceNoteDraft, writeVoiceNoteDraft } from './voiceNoteDrafts';
 
 const props = defineProps({
   accountId: { type: Number, required: true },
@@ -20,10 +22,15 @@ const props = defineProps({
   ambiguous: { type: Boolean, default: false },
   sessionView: { type: Boolean, default: false },
   elapsed: { type: String, default: '' },
+  controlsOnly: { type: Boolean, default: false },
+  showControls: { type: Boolean, default: true },
+  draftUserId: { type: Number, default: null },
+  notesOnly: { type: Boolean, default: false },
 });
 const emit = defineEmits(['open', 'ended', 'updated']);
 const { t, locale } = useI18n();
 const sip = useSipWebphone();
+const globalShell = inject(GLOBAL_VOICE_SHELL, false);
 const calls = useCallsStore();
 const { isInitiating } = useWhatsappCallSession();
 const input = ref(null);
@@ -182,21 +189,41 @@ const info = computed(() => [
   ['AGENT', props.callRecord?.attendant?.name],
   ['STATUS', stateLabel.value],
 ]);
-const selectionKey = computed(
-  () => `${props.accountId}:${props.nativeCallId || 'session'}`
+const draftIdentity = computed(
+  () =>
+    props.nativeCallId ||
+    (props.notesOnly &&
+    props.sessionView &&
+    sameAccount.value &&
+    sip.callId.value
+      ? `sip:${sip.callId.value}`
+      : null)
 );
-watch(selectionKey, () => {
-  note.value = '';
-  noteBaseline.value = '';
-  noteVersion.value = null;
-  noteSaving.value = false;
-  noteError.value = '';
-  noteSaved.value = false;
-  lastRemote.value = '';
-  lastDuration.value = '';
-  keypadOpen.value = false;
-  transferOpen.value = false;
-});
+const selectionKey = computed(
+  () =>
+    `${props.accountId}:${props.draftUserId}:${draftIdentity.value || 'session'}`
+);
+watch(
+  selectionKey,
+  () => {
+    const draft = readVoiceNoteDraft(
+      props.accountId,
+      props.draftUserId,
+      draftIdentity.value
+    );
+    note.value = draft?.text || '';
+    noteBaseline.value = draft?.baseline || '';
+    noteVersion.value = draft?.version ?? null;
+    noteSaving.value = false;
+    noteError.value = '';
+    noteSaved.value = false;
+    lastRemote.value = '';
+    lastDuration.value = '';
+    keypadOpen.value = false;
+    transferOpen.value = false;
+  },
+  { immediate: true }
+);
 watch(
   () => props.callRecord,
   record => {
@@ -209,6 +236,23 @@ watch(
     }
   },
   { immediate: true }
+);
+watch(
+  [note, noteBaseline, noteVersion],
+  () => {
+    if (props.controlsOnly) return;
+    writeVoiceNoteDraft(
+      props.accountId,
+      props.draftUserId,
+      draftIdentity.value,
+      {
+        text: note.value,
+        baseline: noteBaseline.value,
+        version: noteVersion.value,
+      }
+    );
+  },
+  { flush: 'sync' }
 );
 watch(
   [() => sip.remoteNumber.value, matches],
@@ -382,13 +426,14 @@ const open = async numberToDial => {
 };
 useEmbeddedSoftphone(
   computed(() => props.accountId),
-  available,
+  computed(() => available.value && !props.controlsOnly && !globalShell),
   open
 );
 watch(
   [() => sip.incoming.value, available],
   ([incoming, allowed]) => {
-    if (incoming && allowed) emit('open');
+    if (incoming && allowed && !props.controlsOnly && !globalShell)
+      emit('open');
   },
   { immediate: true }
 );
@@ -396,8 +441,13 @@ defineExpose({ endCall, canEnd, duration });
 </script>
 
 <template>
-  <section data-inbox-softphone class="min-w-0 space-y-5 p-4 sm:p-5">
+  <section
+    data-inbox-softphone
+    class="min-w-0"
+    :class="controlsOnly ? 'w-full' : 'space-y-5 p-4 sm:p-5'"
+  >
     <div
+      v-if="!controlsOnly && !notesOnly"
       class="flex flex-wrap items-center justify-between gap-2 text-xs text-n-slate-10"
     >
       <span class="flex items-center gap-2"
@@ -458,7 +508,11 @@ defineExpose({ endCall, canEnd, duration });
       }}
     </p>
     <template v-if="hasInteraction">
-      <div class="flex flex-wrap items-center gap-4" data-voice-identity>
+      <div
+        v-if="!controlsOnly && !notesOnly"
+        class="flex flex-wrap items-center gap-4"
+        data-voice-identity
+      >
         <span
           class="grid size-16 shrink-0 place-items-center rounded-full bg-n-blue-3 text-xl font-semibold text-n-blue-11"
           >{{ initials }}</span
@@ -510,6 +564,7 @@ defineExpose({ endCall, canEnd, duration });
         </dl>
       </div>
       <div
+        v-if="!controlsOnly && !notesOnly"
         role="status"
         class="flex items-center gap-3 rounded-lg bg-n-blue-2 px-4 py-3 font-medium text-n-blue-11"
         data-voice-status
@@ -520,7 +575,7 @@ defineExpose({ endCall, canEnd, duration });
         <span v-if="duration" class="tabular-nums">· {{ duration }}</span>
       </div>
       <div
-        v-if="matches && sip.incoming.value"
+        v-if="showControls && matches && sip.incoming.value"
         class="flex flex-wrap justify-center gap-3"
       >
         <button
@@ -545,7 +600,16 @@ defineExpose({ endCall, canEnd, duration });
           }}
         </button>
       </div>
-      <div class="grid grid-cols-2 gap-3 sm:grid-cols-4" data-voice-controls>
+      <div
+        v-if="showControls"
+        class="gap-3"
+        :class="
+          controlsOnly
+            ? 'flex flex-wrap items-center'
+            : 'grid grid-cols-2 sm:grid-cols-4'
+        "
+        data-voice-controls
+      >
         <button
           v-for="control in controls"
           :key="control.key"
@@ -553,13 +617,49 @@ defineExpose({ endCall, canEnd, duration });
           :data-voice-action="control.key"
           :aria-label="t(`SOFTPHONE.CENTRAL.${control.label}`)"
           :disabled="!control.enabled"
-          class="flex min-h-24 flex-col items-center gap-2 rounded-lg p-2 text-xs text-n-slate-11 hover:bg-n-alpha-1 disabled:opacity-40"
+          :aria-pressed="
+            control.key === 'MUTE'
+              ? matches && sip.muted.value
+              : control.key === 'HOLD'
+                ? matches && sip.held.value
+                : control.key === 'KEYPAD'
+                  ? keypadOpen
+                  : undefined
+          "
+          class="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-n-strong bg-n-solid-1 px-3 py-2 text-xs font-semibold text-n-slate-12 shadow-[0_3px_0_0_rgba(0,0,0,0.18)] transition-[transform,box-shadow,background-color] duration-150 hover:bg-n-alpha-2 active:translate-y-0.5 active:shadow-none active:duration-100 motion-reduce:transform-none motion-reduce:transition-none disabled:translate-y-0 disabled:shadow-none disabled:opacity-40"
+          :class="{
+            'bg-n-teal-3 ring-2 ring-n-teal-7':
+              (control.key === 'MUTE' && matches && sip.muted.value) ||
+              (control.key === 'HOLD' && matches && sip.held.value),
+          }"
           @click="run(control.enabled, control.action)"
         >
-          <span
-            class="grid size-14 place-items-center rounded-full bg-n-alpha-2"
-            ><span class="size-6" :class="control.icon" /></span
+          <span class="grid size-6 place-items-center"
+            ><span class="size-5" :class="control.icon" /></span
           >{{ t(`SOFTPHONE.CENTRAL.${control.label}`) }}
+        </button>
+        <button
+          v-if="controlsOnly"
+          type="button"
+          disabled
+          :title="t('VOICE_V4.CONFERENCE_UNAVAILABLE')"
+          class="min-h-11 rounded-lg border border-n-strong px-3 text-xs opacity-50"
+        >
+          {{ t('VOICE_V4.CONFERENCE') }}
+        </button>
+        <button
+          v-if="controlsOnly && !sip.incoming.value"
+          type="button"
+          :disabled="!canEnd"
+          class="ml-auto flex min-h-11 min-w-32 items-center justify-center gap-2 rounded-lg border border-n-ruby-10 bg-n-ruby-9 px-5 font-semibold text-white shadow-[0_3px_0_0_rgba(0,0,0,0.25)] transition-[transform,box-shadow] duration-150 active:translate-y-0.5 active:shadow-none active:duration-100 motion-reduce:transform-none motion-reduce:transition-none disabled:shadow-none disabled:opacity-40"
+          @click="endCall"
+        >
+          <span class="i-lucide-phone-off size-5" aria-hidden="true" />
+          {{
+            sip.established.value
+              ? t('VOICE_V4.HANGUP')
+              : t('VOICE_V4.CANCEL_CALL')
+          }}
         </button>
       </div>
       <form
@@ -603,7 +703,7 @@ defineExpose({ endCall, canEnd, duration });
       </p>
     </template>
     <form
-      v-if="sessionView && !sip.hasCall.value"
+      v-if="!controlsOnly && !notesOnly && sessionView && !sip.hasCall.value"
       class="mx-auto max-w-md space-y-4 rounded-xl border border-n-weak p-5"
       data-central-dialer
       @submit.prevent="startCall"
@@ -656,7 +756,7 @@ defineExpose({ endCall, canEnd, duration });
         {{ tone }}
       </button>
     </div>
-    <template v-if="hasInteraction">
+    <template v-if="hasInteraction && !controlsOnly">
       <form
         class="space-y-3 rounded-lg border border-n-weak p-4"
         data-call-observations
@@ -672,7 +772,12 @@ defineExpose({ endCall, canEnd, duration });
           v-model="note"
           rows="3"
           maxlength="1000"
-          :disabled="!allowed || !nativeCallId || noteVersion === null"
+          :disabled="
+            !allowed ||
+            (nativeCallId
+              ? noteVersion === null
+              : !(notesOnly && matches && draftUserId))
+          "
           :placeholder="t('SOFTPHONE.CENTRAL.NOTES_HINT')"
           class="w-full resize-y rounded-md border border-n-weak bg-n-solid-1 p-3 text-sm disabled:opacity-50"
         />
@@ -714,7 +819,10 @@ defineExpose({ endCall, canEnd, duration });
           {{ t('SOFTPHONE.CENTRAL.NOTES_SAVED') }}
         </p>
       </form>
-      <section class="overflow-hidden rounded-lg border border-n-weak">
+      <section
+        v-if="!notesOnly"
+        class="overflow-hidden rounded-lg border border-n-weak"
+      >
         <h3
           class="m-0 flex items-center gap-3 bg-n-blue-2 px-4 py-3 text-sm font-semibold text-n-slate-12"
         >

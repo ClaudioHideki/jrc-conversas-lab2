@@ -79,6 +79,21 @@ describe('softphone reconnect coordinator', () => {
     await api.shutdown();
     expect(api.accountId.value).toBeUndefined();
   });
+  it('does not disconnect or replace a live session when another Account is selected', async () => {
+    mock.callbacks.onSession({
+      state: 'Established',
+      remote: 'synthetic-party',
+      direction: 'entrada',
+      callId: 'synthetic-call-a',
+    });
+    mock.callbacks.onEstablished();
+    mock.disconnect.mockClear();
+    await api.initialize(2);
+    expect(mock.disconnect).not.toHaveBeenCalled();
+    expect(api.accountId.value).toBe(1);
+    expect(api.hasCall.value).toBe(true);
+    expect(api.errorMessage.value).toContain('Finalize a ligação');
+  });
   it('reconnects after Registered to Unregistered without a transport disconnect', async () => {
     mock.callbacks.onRegister('Unregistered');
     expect(api.reconnecting.value).toBe(true);

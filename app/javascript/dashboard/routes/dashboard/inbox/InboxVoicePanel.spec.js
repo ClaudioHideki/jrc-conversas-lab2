@@ -42,6 +42,7 @@ const record = {
   dnis: '1411',
   lock_version: 3,
   started_at: '2026-10-23T12:00:00Z',
+  answered_at: '2026-10-23T12:00:00Z',
   metadata: { attendance_observations: { text: 'Texto salvo' } },
   queue: { name: 'Fila sintética' },
   attendant: { name: 'Agente sintético' },
@@ -97,6 +98,52 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 describe('central shared voice panel', () => {
+  it('renders a controls-only global surface without a second dialer or notes form', () => {
+    state.sip.hasCall.value = true;
+    const wrapper = mount(InboxVoicePanel, {
+      props: { ...props, controlsOnly: true },
+    });
+    expect(wrapper.find('[data-voice-controls]').exists()).toBe(true);
+    expect(wrapper.find('[data-call-observations]').exists()).toBe(false);
+    expect(wrapper.find('[data-central-dialer]').exists()).toBe(false);
+  });
+
+  it('keeps note editing while the global shell owns all telephone controls', () => {
+    state.sip.hasCall.value = true;
+    const wrapper = mount(InboxVoicePanel, {
+      props: { ...selected, showControls: false },
+    });
+    expect(wrapper.find('[data-call-observations] textarea').exists()).toBe(
+      true
+    );
+    expect(wrapper.find('[data-voice-controls]').exists()).toBe(false);
+  });
+
+  it('marks confirmed mute and hold as persistent pressed states', () => {
+    state.sip.hasCall.value = true;
+    state.sip.established.value = true;
+    state.sip.muted.value = true;
+    state.sip.held.value = true;
+    const wrapper = mount(InboxVoicePanel, { props: selected });
+    expect(button(wrapper, 'MUTE').attributes('aria-pressed')).toBe('true');
+    expect(button(wrapper, 'HOLD').attributes('aria-pressed')).toBe('true');
+  });
+
+  it('preserves an unsaved draft across internal remount for the same user and attendance', async () => {
+    const draftProps = { ...selected, draftUserId: 91 };
+    const first = mount(InboxVoicePanel, { props: draftProps });
+    await first.get('textarea').setValue('Rascunho ainda não salvo');
+    first.unmount();
+    const reopened = mount(InboxVoicePanel, { props: draftProps });
+    expect(reopened.get('textarea').element.value).toBe(
+      'Rascunho ainda não salvo'
+    );
+    const otherUser = mount(InboxVoicePanel, {
+      props: { ...draftProps, draftUserId: 92 },
+    });
+    expect(otherUser.get('textarea').element.value).toBe('Texto salvo');
+  });
+
   it('opens the central dialer and prefills a customer number without placing a call', async () => {
     const wrapper = mount(InboxVoicePanel, { props, attachTo: document.body });
     expect(openEmbeddedSoftphone(1, '+55 (11) 98765-0000')).toBe(true);
@@ -327,6 +374,21 @@ describe('central shared voice panel', () => {
     expect(wrapper.get('textarea').attributes('disabled')).toBeDefined();
     await wrapper.get('[data-call-observations]').trigger('submit');
     expect(API.saveCallObservations).not.toHaveBeenCalled();
+  });
+  it('keeps a clearly unsaved draft while the server attendance identity is pending', async () => {
+    state.sip.hasCall.value = true;
+    const pending = { ...props, draftUserId: 94, notesOnly: true };
+    const first = mount(InboxVoicePanel, { props: pending });
+    expect(first.get('textarea').attributes('disabled')).toBeUndefined();
+    await first.get('textarea').setValue('Rascunho durante correlação');
+    await first.get('[data-call-observations]').trigger('submit');
+    expect(API.saveCallObservations).not.toHaveBeenCalled();
+    first.unmount();
+    const reopened = mount(InboxVoicePanel, { props: pending });
+    expect(reopened.get('textarea').element.value).toBe(
+      'Rascunho durante correlação'
+    );
+    expect(reopened.text()).toContain('SOFTPHONE.CENTRAL.NOTES_PENDING');
   });
 });
 describe('terminated SIP timing', () => {
