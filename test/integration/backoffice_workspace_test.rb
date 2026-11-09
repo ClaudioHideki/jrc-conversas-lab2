@@ -60,7 +60,7 @@ class BackofficeWorkspaceIntegrationTest < Minitest::Test
 
   def test_mine_uses_the_authenticated_actor_and_filters_do_not_grant_access
     @api.get "#{@url}/workspace", params: { view: 'mine', user_id: @agent.id }, headers: @headers
-    assert_equal [@request.id], @api.response.parsed_body['data'].map { |row| row['id'] }
+    assert_equal([@request.id], @api.response.parsed_body['data'].map { |row| row['id'] })
     @api.get "#{@url}/workspace", params: { owner_id: @admin.id, user_id: @admin.id }, headers: @agent.create_new_auth_token
     assert_equal 200, @api.response.status
     assert_empty @api.response.parsed_body['data']
@@ -82,7 +82,7 @@ class BackofficeWorkspaceIntegrationTest < Minitest::Test
     assert_equal @request.id, @api.response.parsed_body['data'].first['id']
     @api.get "#{@url}/workspace", params: { status: 'blocked', priority: 'critical', q: 'Urgent', owner_id: @admin.id,
                                            sort: 'priority; SELECT 1' }, headers: @headers
-    assert_equal [urgent.id], @api.response.parsed_body['data'].map { |row| row['id'] }
+    assert_equal([urgent.id], @api.response.parsed_body['data'].map { |row| row['id'] })
     assert_equal 1, @api.response.parsed_body.dig('summary', 'total')
     @api.get "#{@url}/workspace", params: { q: '%' }, headers: @headers
     assert_empty @api.response.parsed_body['data']
@@ -117,7 +117,7 @@ class BackofficeWorkspaceIntegrationTest < Minitest::Test
     @order.update_columns(business_unit_id: allowed.id)
     @request.update_columns(business_unit_id: allowed.id)
     @api.get "#{@url}/workspace", headers: @headers
-    assert_equal [@request.id], @api.response.parsed_body['data'].map { |row| row['id'] }
+    assert_equal([@request.id], @api.response.parsed_body['data'].map { |row| row['id'] })
   end
 
   def test_overdue_filter_uses_stage_and_first_action_clocks_and_freezes_paused_sla
@@ -128,12 +128,12 @@ class BackofficeWorkspaceIntegrationTest < Minitest::Test
     @request.update_columns(sla_paused_at: nil)
     @api.get "#{@url}/workspace", params: { overdue: 'true' }, headers: @headers
     body = @api.response.parsed_body
-    assert_equal [@request.id], body['data'].map { |row| row['id'] }
+    assert_equal([@request.id], body['data'].map { |row| row['id'] })
     assert_equal 'overdue', body['data'].first.dig('sla', 'state')
     assert_equal 1, body.dig('summary', 'overdue')
     @request.update_columns(first_action_at: Time.current, stage_due_at: 1.hour.ago)
     @api.get "#{@url}/workspace", params: { overdue: 'true' }, headers: @headers
-    assert_equal [@request.id], @api.response.parsed_body['data'].map { |row| row['id'] }
+    assert_equal([@request.id], @api.response.parsed_body['data'].map { |row| row['id'] })
   end
 
   def test_detail_preview_is_read_only_and_native_advancement_still_enforces_dependencies
@@ -141,7 +141,7 @@ class BackofficeWorkspaceIntegrationTest < Minitest::Test
     before = @request.reload.attributes
     @api.get "#{@url}/#{@request.id}", headers: @headers
     assert_equal 200, @api.response.status
-    assert @api.response.parsed_body['stage_blockers'].any? { |message| message.include?('Identity') }
+    assert(@api.response.parsed_body['stage_blockers'].any? { |message| message.include?('Identity') })
     assert_equal before, @request.reload.attributes
     @api.post "#{@url}/#{@request.id}/advance", headers: @headers
     assert_equal 422, @api.response.status
@@ -152,7 +152,7 @@ class BackofficeWorkspaceIntegrationTest < Minitest::Test
     assert_equal 200, @api.response.status
     assert_equal 'completed', @request.reload.stage
     @api.get "#{@url}/#{@request.id}", headers: @headers
-    assert @api.response.parsed_body['history'].any? { |event| event['event_type'] == 'backoffice_stage_changed' }
+    assert(@api.response.parsed_body['history'].any? { |event| event['event_type'] == 'backoffice_stage_changed' })
   end
   def test_customer_directory_company_filter_covers_linked_contacts_and_never_grants_access
     @account.enable_features!('jrc_customer_master')
@@ -191,14 +191,14 @@ class BackofficeWorkspaceIntegrationTest < Minitest::Test
     other = @account.jrc_crm_backoffice_requests.create!(sales_order: @order, contact: @contact, owner: @admin,
       requested_by: @admin, request_kind: 'cancellation', title: 'Other stage', stage: 'implementation')
     @api.get "#{@url}/workspace", params: { view: 'docs', per_page: 1 }, headers: @headers
-    assert_equal [@request.id], @api.response.parsed_body['data'].map { |row| row['id'] }
+    assert_equal([@request.id], @api.response.parsed_body['data'].map { |row| row['id'] })
     @api.get "#{@url}/workspace", params: { view: 'implement', per_page: 1 }, headers: @headers
-    assert_equal [other.id], @api.response.parsed_body['data'].map { |row| row['id'] }
+    assert_equal([other.id], @api.response.parsed_body['data'].map { |row| row['id'] })
     @api.get "#{@url}/workspace", params: { view: 'reports', per_page: 1 }, headers: @headers
     body = @api.response.parsed_body
     assert_equal 2, body.dig('summary', 'total')
     assert_equal 1, body['data'].size
-    assert_equal 2, body.dig('summary', 'kinds').sum { |kind| kind['total'] }
+    assert_equal(2, body.dig('summary', 'kinds').sum { |kind| kind['total'] })
     assert body['summary'].key?('average_open_hours')
   end
 
@@ -212,8 +212,8 @@ class BackofficeWorkspaceIntegrationTest < Minitest::Test
     assert_equal 200, @api.response.status
     assert_equal 2, body.dig('summary', 'total')
     assert_equal 2, body.dig('summary', 'statuses').values.sum
-    assert_equal 2, body.dig('summary', 'kinds').sum { |item| item['total'] }
-    assert_equal [@request.id], body.dig('dashboard', 'mine').map { |item| item['id'] }
+    assert_equal(2, body.dig('summary', 'kinds').sum { |item| item['total'] })
+    assert_equal([@request.id], body.dig('dashboard', 'mine').map { |item| item['id'] })
     assert_equal 1, body.dig('dashboard', 'mine_total')
     assert_equal 1800, body.dig('summary', 'observed', 'first_action_seconds')
     assert_nil body.dig('summary', 'observed', 'completion_seconds')
@@ -263,7 +263,7 @@ class BackofficeWorkspaceIntegrationTest < Minitest::Test
     @api.post "#{@url}/#{@request.id}/document_status", params: { document_key: 'identity', status: 'approved' }, headers: @headers
     assert_equal 422, @api.response.status
     @api.get endpoint, headers: @headers
-    assert_equal [2, 1], @api.response.parsed_body['data'].map { |row| row['version'] }
+    assert_equal([2, 1], @api.response.parsed_body['data'].map { |row| row['version'] })
     @api.get "#{endpoint}/#{first.id}", headers: @headers
     assert_equal 200, @api.response.status
     assert_equal 'no-store', @api.response.headers['Cache-Control']
@@ -399,7 +399,7 @@ class BackofficeWorkspaceIntegrationTest < Minitest::Test
     assert_equal 'approval', @request.reload.next_applicable_stage
     assert_equal JrcCrm::BackofficeRequest::STAGES, @request.workflow_stages
     @request.update_columns(stage: 'approval')
-    assert @request.reload.stage_blockers.any? { |message| message.include?('administrador') }
+    assert(@request.reload.stage_blockers.any? { |message| message.include?('administrador') })
     @request.update_columns(metadata: @request.metadata.merge('approval_decision' => { 'status' => 'approved' }))
     assert_equal 'completed', @request.reload.next_applicable_stage
     assert_empty @request.stage_blockers

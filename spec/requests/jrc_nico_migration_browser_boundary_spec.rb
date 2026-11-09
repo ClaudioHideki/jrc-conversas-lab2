@@ -42,7 +42,7 @@ RSpec.describe 'NICO native HTTP execution after browser claim', type: :request 
   it 'rejects revocation between a valid claim and the native effect' do
     claim_command
     make_pending(task)
-    expect { patch path, params: body, headers: native_headers, as: :json }.not_to change { task.reload.title }
+    expect { patch path, params: body, headers: native_headers, as: :json }.not_to(change { task.reload.title })
     expect(response).to have_http_status(:forbidden)
   end
 
@@ -57,7 +57,7 @@ RSpec.describe 'NICO native HTTP execution after browser claim', type: :request 
     claim_command
     expect do
       patch path, params: { task: { lock_version: 0, title: 'Altered after review' } }, headers: native_headers, as: :json
-    end.not_to change { task.reload.title }
+    end.not_to(change { task.reload.title })
     expect(response).to have_http_status(:forbidden)
   end
 
@@ -65,7 +65,7 @@ RSpec.describe 'NICO native HTTP execution after browser claim', type: :request 
     claim_command
     other = create(:user, account: account, role: :administrator)
     forged = other.create_new_auth_token.merge(native_headers.slice('X-JRC-Nico-Command-Id', 'X-JRC-Nico-Contract'))
-    expect { patch path, params: body, headers: forged, as: :json }.not_to change { task.reload.title }
+    expect { patch path, params: body, headers: forged, as: :json }.not_to(change { task.reload.title })
     expect(response).to have_http_status(:forbidden)
   end
 
@@ -79,7 +79,7 @@ RSpec.describe 'NICO native HTTP execution after browser claim', type: :request 
     foreign_task = JrcProjects::Task.create!(account: foreign, project: foreign_project, created_by: admin,
       title: 'Other original', status: 'backlog', priority: 'medium', estimated_minutes: 0)
     foreign_path = "/api/v1/accounts/#{foreign.id}/projects/projects/#{foreign_project.id}/tasks/#{foreign_task.id}"
-    expect { patch foreign_path, params: body, headers: native_headers, as: :json }.not_to change { foreign_task.reload.title }
+    expect { patch foreign_path, params: body, headers: native_headers, as: :json }.not_to(change { foreign_task.reload.title })
     expect(response).to have_http_status(:forbidden)
   end
 
@@ -98,14 +98,14 @@ RSpec.describe 'NICO native HTTP execution after browser claim', type: :request 
     command.update!(arguments: command.arguments.merge('title' => 'Changed command'))
     expect do
       patch path, params: { task: { title: 'Changed command', lock_version: 0 } }, headers: native_headers, as: :json
-    end.not_to change { task.reload.title }
+    end.not_to(change { task.reload.title })
     expect(response).to have_http_status(:forbidden)
   end
 
   it 'rejects an expired context at the native endpoint' do
     claim_command
     travel 3.minutes do
-      expect { patch path, params: body, headers: native_headers, as: :json }.not_to change { task.reload.title }
+      expect { patch path, params: body, headers: native_headers, as: :json }.not_to(change { task.reload.title })
       expect(response).to have_http_status(:forbidden)
     end
   end
@@ -115,7 +115,7 @@ RSpec.describe 'NICO native HTTP execution after browser claim', type: :request 
     command.update!(arguments: command.arguments.merge('title' => ''))
     claim_command
     rejected_body = { task: { title: '', lock_version: 0 } }
-    expect { patch path, params: rejected_body, headers: native_headers, as: :json }.not_to change { task.reload.title }
+    expect { patch path, params: rejected_body, headers: native_headers, as: :json }.not_to(change { task.reload.title })
     expect(response).to have_http_status(:unprocessable_entity)
     expect(command.reload.status).to eq('executing')
     contract = command.execution_context.fetch('native_browser_command')
@@ -132,7 +132,7 @@ RSpec.describe 'NICO native HTTP execution after browser claim', type: :request 
     # Exercise the native around-action's handled 403 after a valid preflight;
     # the separate two-connection case covers actual role revocation timing.
     allow_any_instance_of(JrcProjects::Api::V1::TasksController).to receive(:authorize_capability!).and_raise(Pundit::NotAuthorizedError)
-    expect { patch path, params: body, headers: native_headers, as: :json }.not_to change { task.reload.title }
+    expect { patch path, params: body, headers: native_headers, as: :json }.not_to(change { task.reload.title })
     expect(response).to have_http_status(:forbidden)
     expect(command.reload.status).to eq('executing')
     consumed_at = command.execution_context.dig('native_browser_command', 'consumed_at')

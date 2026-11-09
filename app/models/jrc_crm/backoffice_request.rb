@@ -128,7 +128,6 @@ module JrcCrm
                    when 'provisioning' then %w[finance completed]
                    when 'finance' then %w[issues approval completed]
                    when 'issues' then %w[approval completed]
-                   when 'approval' then %w[completed]
                    else %w[completed]
                    end
       candidates.find { |candidate| stage_applicable?(candidate) } || 'completed'

@@ -24,7 +24,7 @@ RSpec.describe JrcBroker::ConnectionHistory do
   it 'revalidates the binding inside the locked write instead of storing a delayed response for a previous integration' do
     delayed = health.merge('phoneNumber' => '+15550000001')
     binding.update!(integration_id: SecureRandom.uuid)
-    expect { history.observe!(delayed) }.to raise_error { |error| expect(error.message).to eq('JRC_BROKER_INVALID_RESPONSE') }
+    expect { history.observe!(delayed) }.to(raise_error { |error| expect(error.message).to eq('JRC_BROKER_INVALID_RESPONSE') })
     expect(binding.reload.connection_state).not_to have_key('origin')
   end
 

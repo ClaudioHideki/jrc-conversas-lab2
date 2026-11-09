@@ -349,8 +349,8 @@ module Api::V1::Accounts::Crm
 
       company = contact.company_id.present? ? JrcCustomers::Company.where(account_id: crm_scope.id).find_by(id: contact.company_id) : nil
       { id: contact.id, name: contact.name, email: contact.email, phone_number: contact.phone_number, identifier: contact.identifier,
-        company_id: company&.id, company_name: company&.name, trade_name: company&.respond_to?(:trade_name) ? company.trade_name : nil,
-        tax_id: company&.respond_to?(:tax_id) ? company.tax_id : nil, customer_code: company&.respond_to?(:customer_code) ? company.customer_code : nil }
+        company_id: company&.id, company_name: company&.name, trade_name: company.respond_to?(:trade_name) ? company.trade_name : nil,
+        tax_id: company.respond_to?(:tax_id) ? company.tax_id : nil, customer_code: company.respond_to?(:customer_code) ? company.customer_code : nil }
     end
 
     def serialize_selection_deal(deal)

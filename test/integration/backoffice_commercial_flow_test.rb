@@ -102,7 +102,7 @@ class BackofficeCommercialFlowTest < Minitest::Test
     call_api(:post, "#{path}/resolve_issue", { issue_id: issue_id })
     assert_equal 'completed', call_api(:post, "#{path}/advance")['status']
     detail = call_api(:get, path)
-    assert detail['history'].any? { |event| event['event_type'] == 'backoffice_stage_changed' }
+    assert(detail['history'].any? { |event| event['event_type'] == 'backoffice_stage_changed' })
     assert_equal 'approved', detail.dig('metadata', 'document_statuses', 'identity')
     assert_equal 'signed', detail.dig('contract', 'signature_status')
     call_api(:patch, "sales_orders/#{order_id}", { sales_order: { status: 'shipped' } })

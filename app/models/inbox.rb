@@ -205,6 +205,8 @@ class Inbox < ApplicationRecord
   end
 
   def member_ids_with_assignment_capacity(respect_availability: true)
+    # Preserve the keyword used by enterprise overrides; this implementation returns all members.
+    _respect_availability = respect_availability
     members.ids
   end
 
