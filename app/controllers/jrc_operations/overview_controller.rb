@@ -9,6 +9,7 @@ module JrcOperations
       if Access.project_access?(Current.account_user)
         projects = Access.projects(Current.account_user)
         tasks = JrcProjects::Task.where(account_id: Current.account.id, project_id: projects.select(:id), assignee_id: Current.user.id).where.not(status: %w[completed canceled])
+        tasks = tasks.none unless JrcProjects::Authorization.allowed?(account_user: Current.account_user, capability: 'projects.task.view')
         data[:projects] = { active: projects.where(status: 'active').count, my_tasks: tasks.count, overdue: tasks.where('due_on < ?', Date.current).count,
           tasks: tasks.order(:due_on).limit(5).as_json(only: %i[id project_id title due_on status]) }
       end

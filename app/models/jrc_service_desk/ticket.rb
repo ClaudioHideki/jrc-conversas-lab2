@@ -5,6 +5,8 @@ class JrcServiceDesk::Ticket < JrcServiceDesk::UnitRecord
   include JrcRelationship::SignalDispatch
   include JrcCustomers::OperationalCompanyLink
   belongs_to :requester, class_name: '::Contact', optional: false
+  belongs_to :establishment_company, class_name: 'JrcCustomers::Company', optional: true
+  validate :establishment_is_authorized_reference
   belongs_to :status, class_name: 'JrcServiceDesk::TicketStatus', optional: false
   belongs_to :priority, class_name: 'JrcServiceDesk::Priority', optional: false
   belongs_to :category, class_name: 'JrcServiceDesk::Category', optional: true
@@ -49,6 +51,13 @@ class JrcServiceDesk::Ticket < JrcServiceDesk::UnitRecord
   validate :service_answers_are_valid
 
   # No duplicated operator_company_id column, no fallback unit, no Project relation.
+  def establishment_is_authorized_reference
+    return unless establishment_company_id && (new_record? || will_save_change_to_establishment_company_id?)
+    return if JrcCustomers::EstablishmentMetadata.scope(account).exists?(id: establishment_company_id)
+
+    errors.add(:establishment_company_id, 'must be an active establishment in this account')
+  end
+
   def operator_company
     unit&.operator_company
   end
@@ -68,7 +77,8 @@ class JrcServiceDesk::Ticket < JrcServiceDesk::UnitRecord
   protected
 
   def ownership_columns
-    super + %i[impact_code urgency_code service_id created_by_membership_id idempotency_key request_fingerprint origin_channel opened_at]
+    super + %i[establishment_company_id impact_code urgency_code service_id created_by_membership_id
+               idempotency_key request_fingerprint origin_channel opened_at]
   end
 
   private

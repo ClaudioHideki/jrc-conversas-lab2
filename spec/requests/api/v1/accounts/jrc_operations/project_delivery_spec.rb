@@ -17,7 +17,7 @@ RSpec.describe 'Project delivery portfolio and serializers', type: :request do
 
   before do
     account.enable_features!('jrc_projects')
-    account.account_users.find_by!(user: agent).update!(jrc_projects_enabled: true)
+    account.account_users.find_by!(user: agent).update!(jrc_projects_enabled: true, jrc_projects_permissions: { 'projects.project.create' => true })
   end
 
   it 'aggregates deliveries and filter options only for projects visible to the requesting agent' do

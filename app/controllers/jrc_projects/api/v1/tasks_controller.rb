@@ -12,7 +12,8 @@ module JrcProjects
           read_projection = ReadProjection.new(account_user: Current.account_user, projects: [project])
           render json: {
             data: records.map do |task|
-              serialize(task, worked_minutes: minutes.fetch(task.id, 0), counts: counts.fetch(task.id), read_projection: read_projection)
+              serialize(task, worked_minutes: minutes.fetch(task.id, 0), counts: counts.fetch(task.id),
+                        read_projection: read_projection, project: project)
             end, meta: meta
           }
         end
@@ -53,7 +54,11 @@ module JrcProjects
             authorize_capability!('projects.task.update', project: project, record: task)
             assert_lock!(task, params.require(:task)[:lock_version])
             before = task.attributes
-            task.assign_attributes(task_params(project))
+            values = task_params(project)
+            if values.key?(:assignee_id) && values[:assignee_id].to_s != task.assignee_id.to_s
+              authorize_capability!('projects.task.assign', project: project, record: task)
+            end
+            task.assign_attributes(values)
             task.save!
             if task.saved_changes.any?
               AuditEvent.record!(account: Current.account, actor: Current.user, action: 'projects.task.updated', auditable: task,
@@ -127,14 +132,21 @@ module JrcProjects
           end
         end
 
-        def serialize(task, worked_minutes: nil, counts: nil, read_projection: nil)
+        def serialize(task, worked_minutes: nil, counts: nil, read_projection: nil, project: task.project)
           data = task.as_json(only: %i[id project_id parent_id title description status priority board_column_id assignee_id created_by_id
                                        position estimated_minutes starts_on due_on lock_version created_at updated_at],
                               include: { assignee: { only: %i[id name] } })
           data['labels'] = task.labels
           data.merge!(counts || task_counts([task.id]).fetch(task.id))
-          data['worked_minutes'] = worked_minutes || task.time_entries.where(account_id: Current.account.id, project_id: task.project_id)
-                                                        .where.not(status: 'rejected').sum(:minutes)
+          time_visible = if read_projection
+                           read_projection.capabilities(project).include?('projects.time_entry.view')
+                         else
+                           Authorization.allowed?(account_user: Current.account_user, capability: 'projects.time_entry.view', project: project)
+                         end
+          if time_visible
+            data['worked_minutes'] = worked_minutes || task.time_entries.where(account_id: Current.account.id, project_id: task.project_id)
+                                                          .where.not(status: 'rejected').sum(:minutes)
+          end
           if read_projection
             data.merge!(read_projection.task_permissions(task))
           else

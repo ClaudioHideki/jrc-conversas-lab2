@@ -12,13 +12,17 @@ on:
         type: boolean
         default: false
       validation_run_id:
-        description: Run bem-sucedido de backoffice-flow.yml no mesmo SHA (obrigatorio para publicar candidata Backoffice)
+        description: Run de integracao bem-sucedido no mesmo SHA (Backoffice ou Projetos e Portal)
         type: string
         required: false
       source_sha:
         description: SHA completo aprovado do codigo-fonte (40 caracteres)
         type: string
         required: true
+      projects_validation_run_id:
+        description: Run de projects-portal-candidate.yml no mesmo SHA e branch para release consolidada
+        type: string
+        required: false
       base_sha:
         description: SHA base da integracao para validar tambem commits de correcao (opcional)
         type: string
@@ -67,6 +71,52 @@ jobs:
       - name: Exigir gate nativo na candidata consolidada
         if: (github.ref_name == 'main' || github.ref_name == 'codex/release-integrada-specs-20261102' || github.ref_name == 'codex/lab2-integral-20261102' || github.ref_name == 'codex/shared-inbox-history-20261104' || startsWith(github.ref_name, 'codex/ura-padrao-lab2-') || startsWith(github.ref_name, 'codex/consolidacao-')) && inputs.component == 'app'
         run: test "$BACKOFFICE_CANDIDATE" = true
+
+      - name: Exigir integracao de Projetos e Portal no SHA exato
+        if: startsWith(github.ref_name, 'codex/projetos-portal-') && inputs.component == 'app'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VALIDATION_RUN_ID: ${{ inputs.validation_run_id }}
+        run: |
+          test "$GITHUB_SHA" = "$SOURCE_SHA"
+          python3 - <<'PYTHON'
+          import json, os, urllib.request
+          run_id = os.environ['VALIDATION_RUN_ID']
+          assert run_id.isdecimal(), 'Integration validation run ID required'
+          request = urllib.request.Request(
+              f"https://api.github.com/repos/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{run_id}",
+              headers={'Authorization': 'Bearer ' + os.environ['GH_TOKEN'], 'Accept': 'application/vnd.github+json'})
+          with urllib.request.urlopen(request, timeout=30) as response:
+              run = json.load(response)
+          assert run['head_sha'] == os.environ['SOURCE_SHA'], 'Validation SHA mismatch'
+          assert run['head_branch'] == os.environ['GITHUB_REF_NAME'], 'Validation branch mismatch'
+          assert run['path'] == '.github/workflows/projects-portal-candidate.yml', 'Unexpected integration workflow'
+          assert run['conclusion'] == 'success', 'Integration validation has not passed'
+          print('Exact candidate integration confirmed:', run['html_url'])
+          PYTHON
+
+      - name: Exigir Projetos e Portal tambem na release consolidada
+        if: (github.ref_name == 'main' || startsWith(github.ref_name, 'codex/consolidacao-')) && inputs.component == 'app'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VALIDATION_RUN_ID: ${{ inputs.projects_validation_run_id }}
+        run: |
+          test "$GITHUB_SHA" = "$SOURCE_SHA"
+          python3 - <<'PYTHON'
+          import json, os, urllib.request
+          run_id = os.environ['VALIDATION_RUN_ID']
+          assert run_id.isdecimal(), 'Projects and Portal validation run ID required'
+          request = urllib.request.Request(
+              f"https://api.github.com/repos/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{run_id}",
+              headers={'Authorization': 'Bearer ' + os.environ['GH_TOKEN'], 'Accept': 'application/vnd.github+json'})
+          with urllib.request.urlopen(request, timeout=30) as response:
+              run = json.load(response)
+          assert run['head_sha'] == os.environ['SOURCE_SHA'], 'Projects validation SHA mismatch'
+          assert run['head_branch'] == os.environ['GITHUB_REF_NAME'], 'Projects validation branch mismatch'
+          assert run['path'] == '.github/workflows/projects-portal-candidate.yml', 'Unexpected Projects workflow'
+          assert run['conclusion'] == 'success', 'Projects and Portal validation has not passed'
+          print('Exact consolidated Projects and Portal integration confirmed:', run['html_url'])
+          PYTHON
 
       - name: Baixar a revisao exata
         uses: actions/checkout@v4

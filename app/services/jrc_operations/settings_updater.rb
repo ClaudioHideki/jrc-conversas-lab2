@@ -11,10 +11,12 @@ class JrcOperations::SettingsUpdater
         target = account.account_users.find(item.fetch('account_user_id'))
         enabled = item.fetch('enabled')
         raise ArgumentError, 'Permissão deve ser true ou false.' unless [true, false].include?(enabled)
-        before = target.jrc_projects_enabled
-        target.update!(jrc_projects_enabled: enabled)
+        permissions = item.fetch('permissions', target.jrc_projects_permissions)
+        JrcProjects::IndividualPermissions.validate!(permissions)
+        before = { enabled: target.jrc_projects_enabled, permissions: target.jrc_projects_permissions }
+        target.update!(jrc_projects_enabled: enabled, jrc_projects_permissions: permissions)
         JrcProjects::AuditEvent.record!(account: account, actor: member.user, action: 'projects.access.changed',
-          auditable: target, before_data: { enabled: before }, after_data: { enabled: enabled })
+          auditable: target, before_data: before, after_data: { enabled: enabled, permissions: permissions })
       end
     end
   end

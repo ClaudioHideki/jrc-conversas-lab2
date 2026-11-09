@@ -1,5 +1,6 @@
 class JrcProjects::Api::V1::PortfolioController < JrcProjects::Api::V1::BaseController
   def show
+    authorize_capability!('projects.report.view')
     projects = JrcOperations::Access.projects(Current.account_user)
     tasks = JrcProjects::Task.where(account_id: Current.account.id, project_id: projects.select(:id))
     task_statuses = tasks.group(:status).count

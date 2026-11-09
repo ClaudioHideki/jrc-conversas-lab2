@@ -34,7 +34,7 @@
     "PENDING": "Waiting tickets",
     "PENDING_HELP": "Tickets currently in a waiting status. Open a ticket to check its public updates.",
     "TOTAL": "Authorized tickets",
-    "SEARCH": "Search by protocol or subject",
+    "SEARCH": "Search",
     "STATUS": "Status",
     "ALL": "All statuses",
     "FROM": "From",
@@ -98,6 +98,20 @@
       "closed": "Closed",
       "cancelled": "Cancelled"
     },
-    "BRAND_SHORT": "JRC"
+    "BRAND_SHORT": "JRC",
+    "STORE": "Requesting store",
+    "STORE_SEARCH": "Search by code, name or tax ID",
+    "LOADING_STORES": "Loading authorized stores…",
+    "NO_STORES": "No authorized stores found.",
+    "CLUSTER": "Cluster",
+    "ROUTING_TITLE": "New ticket routing",
+    "DEFAULT_QUEUE": "Default queue",
+    "DEFAULT_ASSIGNEE": "Default assignee",
+    "STORES_ENABLED": "Enable store selection",
+    "SAVE": "Save",
+    "REMOVE_ROUTING": "Remove routing",
+    "AUTHORIZED_STORES": "Authorized stores",
+    "SAVED": "Configuration saved.",
+    "TAX_ID": "CNPJ"
   }
 }

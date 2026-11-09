@@ -9,6 +9,22 @@ const props = defineProps({ ticket: { type: Object, required: true } });
 const emit = defineEmits(['open', 'list', 'createAnother']);
 const { t } = useI18n();
 const fields = computed(() => [
+  ...(props.ticket.establishment
+    ? [
+        {
+          label: t('PORTAL.STORE'),
+          value:
+            props.ticket.establishment.store_code +
+            ' — ' +
+            props.ticket.establishment.name,
+        },
+        { label: t('PORTAL.TAX_ID'), value: props.ticket.establishment.cnpj },
+        {
+          label: t('PORTAL.CLUSTER'),
+          value: props.ticket.establishment.cluster,
+        },
+      ]
+    : []),
   {
     label: t('JRC_SERVICE_DESK.FIELDS.status'),
     value: props.ticket.status?.name,

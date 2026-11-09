@@ -11,7 +11,7 @@ RSpec.describe JrcProjects::ReadProjection do
 
   before do
     account.enable_features!('jrc_projects')
-    member.update!(jrc_projects_enabled: true)
+    member.update!(jrc_projects_enabled: true, jrc_projects_permissions: { 'projects.project.create' => true })
   end
 
   %w[owner manager member contributor viewer].each do |role|
@@ -25,7 +25,7 @@ RSpec.describe JrcProjects::ReadProjection do
   it 'matches owner, administrator, account-visible and foreign-account capabilities' do
     admin = create(:user, account: account, role: :administrator).account_users.find_by!(account: account)
     owner_member = account.account_users.find_by!(user: owner)
-    owner_member.update!(jrc_projects_enabled: true)
+    owner_member.update!(jrc_projects_enabled: true, jrc_projects_permissions: { 'projects.project.create' => true })
     project.update!(visibility: 'account')
     foreign = create(:account)
     foreign_project = JrcProjects::Project.create!(account: foreign, owner: create(:user, account: foreign), key: 'OTHER', name: 'Other',
@@ -53,7 +53,7 @@ RSpec.describe JrcProjects::ReadProjection do
     expect(described_class.new(account_user: member, projects: [project]).capabilities(project)).not_to be_empty
     AccountUser.find(member.id).update!(jrc_projects_enabled: false)
     expect(described_class.new(account_user: member, projects: [project]).capabilities(project)).to eq([])
-    AccountUser.find(member.id).update!(jrc_projects_enabled: true)
+    AccountUser.find(member.id).update!(jrc_projects_enabled: true, jrc_projects_permissions: { 'projects.project.create' => true })
     account.disable_features!('jrc_projects')
     expect(described_class.new(account_user: member, projects: [project]).capabilities(project)).to eq([])
     member.destroy!
@@ -107,7 +107,7 @@ RSpec.describe JrcProjects::ReadProjection do
     it 'preserves actual owner and custom-role administrator flags' do
       admin = create(:user, account: account, role: :administrator).account_users.find_by!(account: account)
       owner_member = account.account_users.find_by!(user: owner)
-      owner_member.update!(jrc_projects_enabled: true)
+      owner_member.update!(jrc_projects_enabled: true, jrc_projects_permissions: { 'projects.project.create' => true })
       role = create(:custom_role, account: account, permissions: %w[jrc_projects_task_view jrc_projects_task_update])
       [owner_member, admin].each do |actor|
         projection = described_class.new(account_user: actor, projects: [project])
@@ -125,7 +125,7 @@ RSpec.describe JrcProjects::ReadProjection do
     it 'keeps actual owner privileges despite a contributor membership on another creators task' do
       project.project_members.create!(account: account, user: owner, role: 'contributor')
       owner_member = account.account_users.find_by!(user: owner)
-      owner_member.update!(jrc_projects_enabled: true)
+      owner_member.update!(jrc_projects_enabled: true, jrc_projects_permissions: { 'projects.project.create' => true })
       task.created_by_id = agent.id
       projection = described_class.new(account_user: owner_member, projects: [project])
       expect(projection.task_permissions(task)).to eq('can_update' => true, 'can_move' => true, 'can_delete' => true)

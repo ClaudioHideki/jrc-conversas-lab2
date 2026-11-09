@@ -76,7 +76,7 @@ class Api::V1::Accounts::JrcServiceDesk::RequesterPeopleController < Api::V1::Ac
     Pundit.authorize(context.to_h, record, :show?)
     reason = ::JrcCustomers::RequesterIdentity.reason(record)
     row ||= ::JrcCustomers::Serializer.new(account: context.account).contact(record)
-    row.merge('requester_eligible' => reason.nil?, 'review_reason' => reason,
+    row.merge(::JrcServiceDesk::RequesterContactDetails.call(record)).merge('requester_eligible' => reason.nil?, 'review_reason' => reason,
               'can_link' => reason.nil? && context.capability?(:tickets_create) &&
                 ::JrcCustomers::DirectoryPolicy.new(context.to_h, :directory).access? &&
                 Pundit.policy!(context.to_h, record).update?)

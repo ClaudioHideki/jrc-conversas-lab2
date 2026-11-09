@@ -4,12 +4,13 @@ class JrcProjects::Api::V1::SettingsController < JrcOperations::BaseController
     render json: { data: {
       projects_enabled: true, administrator: true,
       agent_access: Current.account.account_users.includes(:user).map { |m| {
-        account_user_id: m.id, name: m.user.name, role: m.role, enabled: m.jrc_projects_enabled?
+        account_user_id: m.id, name: m.user.name, role: m.role, administrator: m.administrator? && m.custom_role_id.nil?,
+        enabled: m.jrc_projects_enabled?, permissions: m.jrc_projects_permissions
       } }
     } }
   end
   def update
-    values = params.require(:settings).permit(agent_access: [:account_user_id, :enabled]).to_h
+    values = params.require(:settings).permit(agent_access: [:account_user_id, :enabled, { permissions: {} }]).to_h
     raise ArgumentError, 'Ativação é exclusiva do Super Admin.' if params[:settings].key?(:projects_enabled)
     JrcOperations::SettingsUpdater.call(account: Current.account, account_user: Current.account_user, values: values)
     show

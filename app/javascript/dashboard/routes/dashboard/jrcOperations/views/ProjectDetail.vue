@@ -69,32 +69,48 @@ const can = name => project.value?.capabilities?.includes('projects.' + name);
 const editable = computed(
   () => !['completed', 'canceled'].includes(project.value?.status)
 );
-const tabs = computed(() => [
+const tabs = computed(() =>
   [
-    'overview',
-    projectText('OVERVIEW', 'Visão geral'),
-    'i-lucide-layout-dashboard',
-  ],
-  ['board', projectText('EXECUTION', 'Execução'), 'i-lucide-square-check-big'],
-  [
-    'planning',
-    projectText('PLANNING', 'Planejamento'),
-    'i-lucide-calendar-days',
-  ],
-  ['team', projectText('TEAM', 'Equipe'), 'i-lucide-users'],
-  [
-    'hours',
-    projectText('TIME_BUDGET', 'Horas e orçamento'),
-    'i-lucide-clock-3',
-  ],
-  ['files', projectText('FILES', 'Arquivos'), 'i-lucide-folder-open'],
-  ['links', projectText('RELATED_ITEMS', 'Relacionados'), 'i-lucide-link'],
-  [
-    'settings',
-    projectText('PROJECT_ACCEPTANCE', 'Projeto e aceite'),
-    'i-lucide-settings',
-  ],
-]);
+    [
+      'overview',
+      projectText('OVERVIEW', 'Visão geral'),
+      'i-lucide-layout-dashboard',
+    ],
+    [
+      'board',
+      projectText('EXECUTION', 'Execução'),
+      'i-lucide-square-check-big',
+    ],
+    [
+      'planning',
+      projectText('PLANNING', 'Planejamento'),
+      'i-lucide-calendar-days',
+    ],
+    ['team', projectText('TEAM', 'Equipe'), 'i-lucide-users'],
+    [
+      'hours',
+      projectText('TIME_BUDGET', 'Horas e orçamento'),
+      'i-lucide-clock-3',
+    ],
+    ['files', projectText('FILES', 'Arquivos'), 'i-lucide-folder-open'],
+    ['links', projectText('RELATED_ITEMS', 'Relacionados'), 'i-lucide-link'],
+    [
+      'settings',
+      projectText('PROJECT_ACCEPTANCE', 'Projeto e aceite'),
+      'i-lucide-settings',
+    ],
+  ].filter(([key]) => {
+    const capability = {
+      board: 'task.view',
+      planning: 'planning.view',
+      team: 'member.view',
+      hours: 'time_entry.view',
+      files: 'attachment.view',
+      settings: 'project.update',
+    }[key];
+    return !capability || can(capability);
+  })
+);
 const tab = computed(() =>
   tabs.value.some(item => item[0] === route.query.tab)
     ? route.query.tab
@@ -127,7 +143,6 @@ function openQueryTask() {
 async function load({ throwOnError = false } = {}) {
   generation += 1;
   const current = generation;
-  let failed = false;
   if (!status.value?.projects_enabled || !projectId.value) {
     loading.value = false;
     tasksLoading.value = false;
@@ -138,25 +153,24 @@ async function load({ throwOnError = false } = {}) {
   tasksSynced.value = false;
   error.value = '';
   try {
-    const [, list] = await Promise.all([
-      request(accountId.value, 'projects/projects/' + projectId.value).then(
-        record => {
-          if (current !== generation || failed) return;
-          project.value = record.data;
-          loading.value = false;
-        }
-      ),
-      allPages(
-        accountId.value,
-        'projects/projects/' + projectId.value + '/tasks'
-      ),
-    ]);
+    const record = await request(
+      accountId.value,
+      'projects/projects/' + projectId.value
+    );
+    if (current !== generation) return;
+    project.value = record.data;
+    loading.value = false;
+    const list = can('task.view')
+      ? await allPages(
+          accountId.value,
+          'projects/projects/' + projectId.value + '/tasks'
+        )
+      : [];
     if (current !== generation) return;
     tasks.value = list;
     tasksSynced.value = true;
     openQueryTask();
   } catch (err) {
-    failed = true;
     if (current !== generation) return;
     project.value = null;
     tasks.value = [];

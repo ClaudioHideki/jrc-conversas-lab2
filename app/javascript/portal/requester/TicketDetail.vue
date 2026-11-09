@@ -152,6 +152,26 @@ const date = value => new Date(value).toLocaleString();
               {{ detail.ticket.description }}
             </p>
           </article>
+          <dl
+            v-if="detail.ticket.establishment"
+            class="grid gap-3 rounded-xl border border-slate-200 p-4 text-sm sm:grid-cols-2"
+          >
+            <div>
+              <dt>{{ t('PORTAL.STORE') }}</dt>
+              <dd>
+                {{ detail.ticket.establishment.store_code }} —
+                {{ detail.ticket.establishment.name }}
+              </dd>
+            </div>
+            <div>
+              <dt>{{ t('PORTAL.TAX_ID') }}</dt>
+              <dd>{{ detail.ticket.establishment.cnpj }}</dd>
+            </div>
+            <div>
+              <dt>{{ t('PORTAL.CLUSTER') }}</dt>
+              <dd>{{ detail.ticket.establishment.cluster }}</dd>
+            </div>
+          </dl>
           <h2 class="text-base font-semibold">
             {{ t('PORTAL.PUBLIC_CONVERSATION') }}
           </h2>

@@ -2986,5 +2986,27 @@
       "partial_save": "The operation did not complete. The current membership and automatic assignment setting were reloaded; review them before trying again.",
       "readback_failed": "Could not confirm the current membership and automatic assignment setting. Reopen the assignee and review both before trying again."
     }
+  },
+  "PORTAL": {
+    "STORE": "Requesting store",
+    "STORE_SEARCH": "Search by code, name or tax ID",
+    "SEARCH": "Search",
+    "LOADING_STORES": "Loading authorized stores…",
+    "NO_STORES": "No authorized stores found.",
+    "CLUSTER": "Cluster",
+    "ROUTING_TITLE": "New ticket routing",
+    "DEFAULT_QUEUE": "Default queue",
+    "DEFAULT_ASSIGNEE": "Default assignee",
+    "STORES_ENABLED": "Enable store selection",
+    "SAVE": "Save",
+    "REMOVE_ROUTING": "Remove routing",
+    "AUTHORIZED_STORES": "Authorized stores",
+    "SAVED": "Configuration saved.",
+    "SELECT": "Select",
+    "ORGANIZATION": "Organization",
+    "ERROR": "Unable to complete. Check the data and try again.",
+    "STORE_CODE": "Store code",
+    "STORE_PHONES": "Store phones, one per line",
+    "TAX_ID": "CNPJ"
   }
 }

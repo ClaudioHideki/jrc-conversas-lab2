@@ -84,6 +84,51 @@ describe('Requester portal ticket opening', () => {
     expect(wrapper.get('h1').text()).toContain('42');
   });
 
+  it('requires an authorized store and sends it independently from the selected service', async () => {
+    const store = {
+      id: '30',
+      store_code: '030',
+      name: 'Synthetic store',
+      cnpj: '11222333000181',
+      legal_name: 'Synthetic customer',
+      cluster: 'North',
+    };
+    request.mockImplementation(path =>
+      Promise.resolve(
+        path === '/portal/api/catalogo'
+          ? { services: [{ ...service, stores_enabled: true }] }
+          : { establishments: [store] }
+      )
+    );
+    const wrapper = buildWrapper();
+    await flushPromises();
+    await wrapper.get('select').setValue(service.id);
+    await flushPromises();
+    await wrapper.get('input[maxlength="255"]').setValue('Support for store');
+    await wrapper.get('textarea').setValue('Description');
+    await wrapper.get('form').trigger('submit');
+    expect(wrapper.get('h1').text()).toBe(en.PORTAL.NEW);
+    await wrapper.findAll('select')[1].setValue('30');
+    await wrapper.get('form').trigger('submit');
+    expect(wrapper.get('h1').text()).toBe(en.PORTAL.REVIEW_TITLE);
+    request.mockResolvedValueOnce({
+      ticket: {
+        id: '43',
+        title: 'Support for store',
+        description: 'Description',
+      },
+    });
+    await wrapper.get('form').trigger('submit');
+    await flushPromises();
+    const [path, options] = request.mock.calls.at(-1);
+    expect(path).toBe('/portal/api/chamados');
+    expect(JSON.parse(options.body.get('ticket'))).toMatchObject({
+      service_id: '12',
+      establishment_company_id: '30',
+    });
+    wrapper.unmount();
+  });
+
   it('reuses an uncertain submission key when the requester retries confirmation', async () => {
     const wrapper = buildWrapper();
     await flushPromises();

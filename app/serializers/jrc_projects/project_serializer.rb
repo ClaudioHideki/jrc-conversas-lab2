@@ -29,9 +29,14 @@ module JrcProjects
         data['contact_locked'] = project.contact_locked?
         data['accepted_by'] = project.accepted_by&.as_json(only: %i[id name])
         data['columns'] = project.board_columns.order(:board_id, :position, :id).as_json(only: %i[id board_id name status_key position wip_limit])
-        data['members'] = members(project)
-        data['phases'] = project.phases.where(account_id: project.account_id, project_id: project.id).order(:position, :id).as_json(only: %i[id name])
-        data['overview'] = overview(project)
+        data['members'] = data['capabilities'].include?('projects.member.view') ? members(project) : []
+        data['phases'] = if data['capabilities'].include?('projects.planning.view')
+                           project.phases.where(account_id: project.account_id, project_id: project.id)
+                             .order(:position, :id).as_json(only: %i[id name])
+                         else
+                           []
+                         end
+        data['overview'] = data['capabilities'].include?('projects.report.view') ? overview(project, capabilities: data['capabilities']) : {}
         financial = data['capabilities'].include?('projects.budget.view')
         data['budget'] = Reporting::FinancialProjection.call(project: project) if financial
         data['recent_activity'] = recent_activity(project, financial: financial, account_user: account_user)
@@ -75,11 +80,11 @@ module JrcProjects
       end
     end
 
-    def self.overview(project)
+    def self.overview(project, capabilities: Authorization::OWNER)
       tasks = project.tasks.where(account_id: project.account_id, project_id: project.id)
       time = project.time_entries.where(account_id: project.account_id, project_id: project.id)
       milestones = project.milestones.where(account_id: project.account_id, project_id: project.id)
-      {
+      result = {
         status_counts: tasks.group(:status).count,
         overdue_tasks: tasks.where('due_on < ?', Date.current).where.not(status: %w[completed canceled]).count,
         team_size: project.project_members.where(account_id: project.account_id, project_id: project.id).count,
@@ -93,6 +98,10 @@ module JrcProjects
         upcoming_milestones: milestones.where(status: 'open').where.not(due_on: nil).order(:due_on, :id)
                                       .limit(5).as_json(only: %i[id name due_on status phase_id])
       }
+      result.except!(:worked_minutes, :approved_minutes) unless capabilities.include?('projects.time_entry.view')
+      result.except!(:team_size) unless capabilities.include?('projects.member.view')
+      result.except!(:milestones_total, :milestones, :upcoming_milestones) unless capabilities.include?('projects.planning.view')
+      result
     end
 
     def self.recent_activity(project, financial:, account_user:)
@@ -102,6 +111,10 @@ module JrcProjects
         'JrcProjects::Task' => project.tasks, 'JrcProjects::Milestone' => project.milestones, 'JrcProjects::Phase' => project.phases,
         'JrcProjects::ProjectMember' => project.project_members, 'JrcProjects::TimeEntry' => project.time_entries
       }
+      permissions = { 'JrcProjects::Task' => 'projects.task.view', 'JrcProjects::Milestone' => 'projects.planning.view',
+                      'JrcProjects::Phase' => 'projects.planning.view', 'JrcProjects::ProjectMember' => 'projects.member.view',
+                      'JrcProjects::TimeEntry' => 'projects.time_entry.view' }
+      resources.select! { |type, _| Authorization.allowed?(account_user: account_user, capability: permissions.fetch(type), project: project) }
       resources.each do |type, records|
         events = events.or(scope.where(auditable_type: type, auditable_id: records.where(account_id: project.account_id).select(:id)))
       end

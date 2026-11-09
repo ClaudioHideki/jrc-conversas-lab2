@@ -29,7 +29,7 @@ RSpec.describe 'JRC Projects tasks and Kanban checkpoint 3B', type: :request do
   let(:fixture_path) { Rails.root.join('spec/fixtures/files/jrc_projects_task.txt') }
 
   before do
-    account.account_users.find_by!(user: member).update!(jrc_projects_enabled: true)
+    account.account_users.find_by!(user: member).update!(jrc_projects_enabled: true, jrc_projects_permissions: { 'projects.project.create' => true })
     account.enable_features!('jrc_projects')
     project.project_members.create!(account: account, user: member, role: 'member')
   end

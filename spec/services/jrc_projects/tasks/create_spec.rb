@@ -13,7 +13,7 @@ RSpec.describe JrcProjects::Tasks::Create do
 
   before do
     account.enable_features!('jrc_projects')
-    member.update!(jrc_projects_enabled: true)
+    member.update!(jrc_projects_enabled: true, jrc_projects_permissions: { 'projects.project.create' => true })
   end
 
   def create_task(values = attributes)

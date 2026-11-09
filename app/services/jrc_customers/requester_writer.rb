@@ -40,16 +40,31 @@ class JrcCustomers::RequesterWriter
 
         next @account.contacts.find(previous.resource_id)
       end
-      identities = JrcCustomers::IdentityResolver.new(account: @account).call(email: values['email'], phone: values['phone_number'], country: 'BR').to_a
-      raise Duplicate.new(identities) if identities.any?
-
       names = @account.contacts.where('lower(trim(name)) = ?', values['name'].to_s.downcase).limit(50).to_a
       raise Duplicate.new(names, allow_distinct: true) if names.any? && !confirm_distinct
 
-      contact = @account.contacts.create!(values.merge(company_id: company.id, registration_status: 'registered',
-                                                       additional_attributes: { 'entity_type' => 'person' }))
+      raise ArgumentError, 'Invalid contact email' if values['email'] && JrcCustomers::Identity.email(values['email']).nil?
+      if values['phone_number'] && JrcCustomers::Identity.phone(values['phone_number'], country: 'BR').nil?
+        raise ArgumentError, 'Invalid contact phone'
+      end
+
+      values.values_at('email', 'phone_number').compact.sort.each do |value|
+        channel_lock = Digest::SHA256.hexdigest("sd-requester-channel:#{@account.id}:#{value}").first(15).to_i(16)
+        Contact.connection.execute("SELECT pg_advisory_xact_lock(#{channel_lock})")
+      end
+      primary = {}
+      resolver = JrcCustomers::IdentityResolver.new(account: @account)
+      primary[:email] = values['email'] if values['email'] && resolver.call(email: values['email']).empty?
+      primary[:phone_number] = values['phone_number'] if values['phone_number'] && resolver.call(phone: values['phone_number'], country: 'BR').empty?
+      contact = @account.contacts.create!(primary.merge(name: values.fetch('name'), company_id: company.id, registration_status: 'registered',
+                                         identifier: "jrc-requester:#{SecureRandom.uuid}", additional_attributes: { 'entity_type' => 'person' }))
+      { 'email' => 'email', 'phone_number' => 'phone' }.each do |field, kind|
+        next unless values[field]
+
+        JrcCustomers::ContactPoint.create!(account: @account, contact: contact, kind: kind, value: values[field])
+      end
       JrcCustomers::Audit.record!(account: @account, actor: @actor, resource: contact, event_type: 'customer_contact_updated',
-                                  to_value: @serializer.contact(contact),
+                                  to_value: @serializer.contact(contact).merge(JrcServiceDesk::RequesterContactDetails.call(contact)),
                                   metadata: { requester_request_key: request_key, requester_fingerprint: fingerprint, source: 'service_desk' })
       contact
     end

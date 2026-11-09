@@ -157,6 +157,16 @@ export function decodeRecord(row, context, resource) {
           }
         : {}),
       ...(Object.hasOwn(row, 'company') ? { company: named(row.company) } : {}),
+      establishment: object(row.establishment)
+        ? {
+            id: id(row.establishment.id),
+            name: text(row.establishment.name),
+            store_code: text(row.establishment.store_code),
+            cnpj: text(row.establishment.cnpj),
+            cluster: text(row.establishment.cluster),
+            legal_name: text(row.establishment.legal_name),
+          }
+        : null,
       requester: object(row.requester)
         ? {
             ...named(row.requester),

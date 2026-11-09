@@ -4,6 +4,7 @@ module JrcProjects
       class FilesController < BaseController
         def index
           project = scoped_project
+          authorize_capability!('projects.attachment.view', project: project)
           record = params[:task_id].present? ? scoped_tasks(project).find(params[:task_id]) : project
           authorize_capability!(record.is_a?(Task) ? 'projects.task.view' : 'projects.project.view', project: project, record: record)
           render json: { data: serialize_files(record) }

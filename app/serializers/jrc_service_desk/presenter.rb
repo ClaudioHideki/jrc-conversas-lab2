@@ -49,6 +49,7 @@ class JrcServiceDesk::Presenter
                          **catalogue_fields(record, policy),
                          requester: policy.view_customer? ? requester_details(requester) : nil,
                          **master_company_fields(record, policy),
+                         establishment: policy.view_customer? ? record.catalogue_snapshot['establishment'] : nil,
                          assignee: assignee(record.assignee_membership),
                          team: native_named(team),
                          queue: named(record.queue), source: record.origin_channel, lock_version: record.lock_version,
@@ -174,7 +175,7 @@ class JrcServiceDesk::Presenter
 
   def requester_details(record)
     value = native_named(record)
-    value && value.merge(phone_number: record.phone_number, email: record.email)
+    value && value.merge(JrcServiceDesk::RequesterContactDetails.call(record).slice('email', 'phone_number').symbolize_keys)
   end
 
   def note_deliveries(record)

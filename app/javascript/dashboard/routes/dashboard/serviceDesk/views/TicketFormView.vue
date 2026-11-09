@@ -1,5 +1,6 @@
 <script setup>
 import QuickTicketForm from '../components/QuickTicketForm.vue';
+import EstablishmentPicker from '../components/EstablishmentPicker.vue';
 import TicketAssetLinks from '../components/TicketAssetLinks.vue';
 import OperationsLinks from '../../jrcOperations/components/OperationsLinks.vue';
 import ImpactUrgencySelect from '../components/ImpactUrgencySelect.vue';
@@ -85,6 +86,7 @@ const quickSeed = ref(null);
 const operatorId = ref('');
 const blank = () => ({
   company_id: null,
+  establishment_company_id: null,
   unit_id: '',
   requester_id: '',
   priority_id: '',
@@ -684,6 +686,13 @@ const submit = async () => {
                 :label="t('JRC_SERVICE_DESK.COMMON.client_company')"
                 :placeholder="t('JRC_SERVICE_DESK.NATIVE.company_from_contact')"
                 disabled
+              />
+              <EstablishmentPicker
+                v-if="!edit && hasCustomerMaster"
+                v-model="draft.establishment_company_id"
+                :account-id="session.accountId.value"
+                :unit-id="draft.unit_id"
+                :disabled="busy"
               />
               <RequesterSelect
                 v-model="draft.requester_id"

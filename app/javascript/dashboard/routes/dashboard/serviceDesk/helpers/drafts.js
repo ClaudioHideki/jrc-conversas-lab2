@@ -61,6 +61,8 @@ export function createTicketDraft(
   });
   if (customerMaster && draft.company_id)
     ticket.company_id = id(draft.company_id);
+  if (customerMaster && draft.establishment_company_id)
+    ticket.establishment_company_id = id(draft.establishment_company_id);
   if (draft.assignee_id && draft.use_channel_routing !== true)
     ticket.assignee_account_user_id = id(draft.assignee_id);
   if (

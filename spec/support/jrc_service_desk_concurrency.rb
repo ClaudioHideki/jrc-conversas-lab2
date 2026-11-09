@@ -3,7 +3,7 @@ require 'timeout'
 module JrcServiceDeskConcurrency
   extend ActiveSupport::Concern
 
-  DISPOSABLE_DATABASES = %w[lab2_candidate_cold_20261103_test
+  DISPOSABLE_DATABASES = %w[jrc_portal_integrado_20261109_test lab2_candidate_cold_20261103_test
                             jrc_durable_review_test jrc_sd_bc_portal_20261025_test jrc_sd_bc_portal_concurrency_20261025_test
                             jrc_sd_sete_concurrency_20261025_test jrc_sd_five_concurrency_20261024_test jrc_rel_sd_candidate_test jrc_rel_sd_r2_concurrency_test jrc_rel_sd_r345_concurrency_test
                             jrc_flow_modules_test jrc_flow_effects_test jrc_production_stability_test jrc_nico_broker_candidate_test

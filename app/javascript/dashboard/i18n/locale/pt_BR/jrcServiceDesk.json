@@ -2986,5 +2986,27 @@
       "partial_save": "A operação não foi concluída. O vínculo e a configuração da atribuição automática foram relidos; revise os dois antes de tentar novamente.",
       "readback_failed": "Não foi possível confirmar o vínculo e a configuração da atribuição automática. Reabra o responsável e revise os dois antes de tentar novamente."
     }
+  },
+  "PORTAL": {
+    "STORE": "Loja solicitante",
+    "STORE_SEARCH": "Pesquisar por código, nome ou CNPJ",
+    "SEARCH": "Pesquisar",
+    "LOADING_STORES": "Carregando lojas autorizadas…",
+    "NO_STORES": "Nenhuma loja autorizada encontrada.",
+    "CLUSTER": "Cluster",
+    "ROUTING_TITLE": "Roteamento dos novos chamados",
+    "DEFAULT_QUEUE": "Fila padrão",
+    "DEFAULT_ASSIGNEE": "Responsável padrão",
+    "STORES_ENABLED": "Permitir seleção de loja",
+    "SAVE": "Salvar",
+    "REMOVE_ROUTING": "Remover roteamento",
+    "AUTHORIZED_STORES": "Lojas autorizadas",
+    "SAVED": "Configuração salva.",
+    "SELECT": "Selecione",
+    "ORGANIZATION": "Empresa",
+    "ERROR": "Não foi possível concluir. Verifique os dados e tente novamente.",
+    "STORE_CODE": "Código da loja",
+    "STORE_PHONES": "Telefones da loja, um por linha",
+    "TAX_ID": "CNPJ"
   }
 }

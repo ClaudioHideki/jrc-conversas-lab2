@@ -45,6 +45,11 @@ export default {
     API.get(`${root}/services`, options(websiteToken, signal)).then(
       response => response.data
     ),
+  establishments: (websiteToken, service, query, signal) =>
+    API.get(
+      `${root}/services/${id(service)}/establishments`,
+      searchOptions(websiteToken, query, signal)
+    ).then(response => response.data),
   tickets: (websiteToken, signal, query = '') =>
     API.get(`${root}/tickets`, searchOptions(websiteToken, query, signal)).then(
       response => response.data

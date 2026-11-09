@@ -1,6 +1,10 @@
 <script setup>
 import { computed, reactive, ref, watch, onMounted } from 'vue';
 import API from 'dashboard/api/jrcCustomers';
+import { useI18n } from 'vue-i18n';
+const props = defineProps({ company: { type: Object, default: null } });
+const emit = defineEmits(['saved', 'cancel']);
+const { t } = useI18n();
 import CompanyPicker from './CompanyPicker.vue';
 import {
   T,
@@ -14,9 +18,6 @@ import {
   primaryClass,
   errorMessage,
 } from '../copy';
-
-const props = defineProps({ company: { type: Object, default: null } });
-const emit = defineEmits(['saved', 'cancel']);
 
 const textFields = [
   'name',
@@ -63,6 +64,9 @@ watch(
       parent_company_id: value?.parent_company_id || null,
       active: value?.active ?? true,
       description: value?.description || '',
+      storeCode: value?.establishment?.store_code || '',
+      storeCluster: value?.establishment?.cluster || '',
+      storePhones: (value?.establishment?.phones || []).join('\n'),
     });
   },
   { immediate: true }
@@ -99,6 +103,19 @@ const save = async () => {
       .slice(0, 50);
     const payload = { ...form, tags, revision: props.company?.revision };
     delete payload.tagsText;
+    if (form.storeCode || form.storeCluster || form.storePhones) {
+      payload.establishment = {
+        store_code: form.storeCode,
+        cluster: form.storeCluster,
+        phones: form.storePhones
+          .split(/[,;\n]/)
+          .map(value => value.trim())
+          .filter(Boolean),
+      };
+    }
+    delete payload.storeCode;
+    delete payload.storeCluster;
+    delete payload.storePhones;
     payload.relationship_tags = (payload.relationship_tags || []).filter(
       value => value !== payload.relationship_type
     );
@@ -117,6 +134,37 @@ const save = async () => {
     class="rounded-xl border border-n-weak bg-n-solid-2 p-5"
     @submit.prevent="save"
   >
+    <fieldset
+      class="col-span-full space-y-3 rounded-lg border border-n-weak p-3"
+    >
+      <legend class="px-1 text-sm font-semibold">
+        {{ t('PORTAL.STORE') }}
+      </legend>
+      <div class="grid gap-3 sm:grid-cols-2">
+        <label class="text-sm"
+          >{{ t('PORTAL.STORE_CODE')
+          }}<input
+            v-model="form.storeCode"
+            :class="inputClass"
+            maxlength="80"
+        /></label>
+        <label class="text-sm"
+          >{{ t('PORTAL.CLUSTER')
+          }}<input
+            v-model="form.storeCluster"
+            :class="inputClass"
+            maxlength="255"
+        /></label>
+      </div>
+      <label class="block text-sm"
+        >{{ t('PORTAL.STORE_PHONES')
+        }}<textarea
+          v-model="form.storePhones"
+          :class="inputClass"
+          rows="3"
+        />
+      </label>
+    </fieldset>
     <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
       <div>
         <h2 class="text-xl font-semibold">

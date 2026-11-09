@@ -261,6 +261,11 @@
       "copied": "Protocol copied",
       "public_only": "Only public updates and attachments authorized for your identity are shown."
     },
-    "own_survey_response": "Your response"
+    "own_survey_response": "Your response",
+    "store": "Requesting store",
+    "store_search": "Store code, name or tax ID",
+    "search_stores": "Search stores",
+    "store_company": "Legal name",
+    "store_cluster": "Cluster"
   }
 }

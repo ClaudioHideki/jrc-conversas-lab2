@@ -1,6 +1,7 @@
 <script setup>
 import { computed, inject, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import EstablishmentPicker from '../../dashboard/routes/dashboard/serviceDesk/components/EstablishmentPicker.vue';
 import { catalogueAnswers } from '../../dashboard/routes/dashboard/serviceDesk/helpers/catalogueFields';
 import { request, upload, submission, errorKey } from './client';
 
@@ -9,6 +10,7 @@ const context = inject('portalContext');
 const services = ref([]);
 const serviceId = ref('');
 const contractId = ref('');
+const establishmentId = ref(null);
 const subject = ref('');
 const description = ref('');
 const answers = ref({});
@@ -28,6 +30,9 @@ const input = () => ({
   description: description.value,
   service_fields: catalogueAnswers(selected.value.form_fields, answers.value),
   ...(contractId.value ? { contract_id: contractId.value } : {}),
+  ...(establishmentId.value
+    ? { establishment_company_id: establishmentId.value }
+    : {}),
 });
 onMounted(async () => {
   busy.value = true;
@@ -49,6 +54,8 @@ watch(serviceId, () => {
 });
 const prepare = () => {
   try {
+    if (selected.value?.stores_enabled && !establishmentId.value)
+      throw new Error('Select a store');
     input();
     review.value = true;
     error.value = '';
@@ -164,6 +171,12 @@ const edit = () => {
           </option>
         </select>
       </label>
+      <EstablishmentPicker
+        v-if="selected?.stores_enabled"
+        v-model="establishmentId"
+        :service-id="serviceId"
+        :disabled="review || busy"
+      />
       <div
         v-if="selected"
         class="grid gap-4 text-sm sm:grid-cols-2"

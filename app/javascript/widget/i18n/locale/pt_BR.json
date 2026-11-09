@@ -164,6 +164,11 @@
     "REPLY_TO": "Respondendo a:"
   },
   "SERVICE_DESK": {
-    "own_survey_response": "Sua resposta"
+    "own_survey_response": "Sua resposta",
+    "store": "Loja solicitante",
+    "store_search": "Código, nome ou CNPJ da loja",
+    "search_stores": "Pesquisar lojas",
+    "store_company": "Razão social",
+    "store_cluster": "Cluster"
   }
 }

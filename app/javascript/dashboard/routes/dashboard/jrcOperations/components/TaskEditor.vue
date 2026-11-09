@@ -200,7 +200,9 @@ async function submit() {
     const data = {
       task: {
         ...form,
-        assignee_id: form.assignee_id || null,
+        ...(props.project.capabilities?.includes('projects.task.assign')
+          ? { assignee_id: form.assignee_id || null }
+          : {}),
         parent_id: form.parent_id || null,
         labels: labelsText.value
           .split(',')
@@ -632,7 +634,13 @@ async function openSubtask(id) {
           </label>
           <label class="flex flex-col gap-1 min-w-0"
             ><span>{{ projectText('ASSIGNEE', 'Responsável') }}</span
-            ><select v-model="form.assignee_id" :disabled="!editable">
+            ><select
+              v-model="form.assignee_id"
+              :disabled="
+                !editable ||
+                !project.capabilities?.includes('projects.task.assign')
+              "
+            >
               <option value="">
                 {{ projectText('UNASSIGNED', 'Não atribuído') }}
               </option>

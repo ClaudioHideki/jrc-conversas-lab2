@@ -40,7 +40,7 @@ RSpec.describe 'Projects native account authorization', type: :request do
       expect(response).to have_http_status(:ok)
       expect(response.parsed_body.dig('data', 'projects_enabled')).to be(false)
 
-      member.update!(jrc_projects_enabled: true)
+      member.update!(jrc_projects_enabled: true, jrc_projects_permissions: { 'projects.project.create' => true })
       get status_url, headers: headers
       expect(response).to have_http_status(:ok)
       expect(response.parsed_body.dig('data', 'projects_enabled')).to be(true)

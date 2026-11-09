@@ -22,7 +22,7 @@ RSpec.describe 'JRC Projects Core checkpoint 3A', type: :request do
   let(:endpoint) { "#{collection}/#{project.id}" }
 
   before do
-    [owner, colleague].each { |u| account.account_users.find_by!(user: u).update!(jrc_projects_enabled: true) }
+    [owner, colleague].each { |u| account.account_users.find_by!(user: u).update!(jrc_projects_enabled: true, jrc_projects_permissions: { 'projects.project.create' => true }) }
     account.enable_features!('jrc_projects')
   end
 

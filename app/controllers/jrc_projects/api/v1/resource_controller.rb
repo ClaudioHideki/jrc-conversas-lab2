@@ -83,6 +83,10 @@ module JrcProjects
           params[:project_id].present? ? scoped_project : nil
         end
         def authorize_read!(project)
+          authorize_capability!('projects.member.view', project: project) if catalog_model == ProjectMember
+          if [Phase, Milestone, Sprint, Risk, Issue, Decision].include?(catalog_model)
+            authorize_capability!('projects.planning.view', project: project)
+          end
           authorize_capability!('projects.project.view', project: project)
         end
         def authorize_write!(project)
