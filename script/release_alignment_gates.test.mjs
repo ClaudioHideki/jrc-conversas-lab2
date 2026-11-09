@@ -30,3 +30,16 @@ test('consolidated releases also require the exact Projects and Portal validatio
   assert.ok(gate.includes("run['path'] == '.github/workflows/projects-portal-candidate.yml'"));
   assert.ok(gate.includes("run['conclusion'] == 'success'"));
 });
+
+test('Projects validation uses each product baseline and the guarded concurrency databases', () => {
+  const workflow = read('.github/workflows/projects-portal-candidate.yml');
+  assert.ok(workflow.includes('EXTENSION-REFERENCE.json'));
+  assert.ok(workflow.includes('extensionBaselineSha'));
+  assert.ok(workflow.includes('git merge-base --is-ancestor "$baseline" HEAD'));
+  assert.ok(workflow.includes('git diff --name-only --diff-filter=ACMR "$REVIEW_BASE_SHA" HEAD'));
+  assert.ok(workflow.includes('bundle exec rubocop --force-exclusion --only Lint'));
+  assert.ok(workflow.includes('POSTGRES_DATABASE: jrc_sd_integrated_concurrency_20261023_test'));
+  assert.ok(workflow.includes("JRC_SD_INTEGRATED_CONCURRENCY: '1'"));
+  assert.ok(workflow.includes('POSTGRES_DATABASE: jrc_four_fronts_concurrency_20261026_test'));
+  assert.ok(workflow.includes("JRC_PROJECT_COMMENT_CONCURRENCY: '1'"));
+});

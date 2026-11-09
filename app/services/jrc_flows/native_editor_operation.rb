@@ -4,7 +4,7 @@ module JrcFlows; end
 
 class JrcFlows::NativeEditorOperation
   class Invalid < StandardError; end
-  Operation = Struct.new(:method, :path, :scope, :request_limit, :response_limit, keyword_init: true)
+  Operation = Struct.new(:http_method, :path, :scope, :request_limit, :response_limit, keyword_init: true)
   GRAPH_LIMIT = 2_200_000
   CONTROL_LIMIT = 16_384
   PREFIX = '/v1/delegated-flows'.freeze
@@ -63,7 +63,7 @@ class JrcFlows::NativeEditorOperation
 
     path = operation_path(operation, id, suffix) + target_path(operation, target_id, resource_id) +
            pagination(operation, cursor) + execution_query(operation, query)
-    Operation.new(method: verb, path: path, scope: scope,
+    Operation.new(http_method: verb, path: path, scope: scope,
                   request_limit: graph_request ? GRAPH_LIMIT : CONTROL_LIMIT,
                   response_limit: graph_response ? GRAPH_LIMIT : CONTROL_LIMIT)
   end

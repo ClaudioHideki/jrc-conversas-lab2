@@ -7,7 +7,7 @@ RSpec.describe 'Native execution inspection policy' do
   it 'requires the explicit execution capability and encodes a bounded period' do
     op = JrcFlows::NativeEditorOperation.resolve!('executions', id: root, query: period)
     expect(op.scope).to eq('flow:executions:read')
-    expect(op.method).to eq(:get)
+    expect(op.http_method).to eq(:get)
     expect(op.path).to eq("/v1/delegated-flows/#{root}/executions?#{URI.encode_www_form(period.sort)}")
     expect(op.response_limit).to eq(2_200_000)
     detail = JrcFlows::NativeEditorOperation.resolve!('execution', id: root, target_id: execution)

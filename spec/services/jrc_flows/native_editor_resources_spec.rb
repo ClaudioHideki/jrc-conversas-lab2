@@ -22,7 +22,7 @@ RSpec.describe JrcFlows::NativeEditorOperation do
     write = described_class.resolve!('save_action_resource', id: root_id, target_id: channel_id)
     expect(read.path).to eq("/v1/delegated-flows/#{root_id}/channels/#{channel_id}/action-catalog?pageSize=1&cursor=abc")
     expect(read.response_limit).to eq(2_200_000)
-    expect([write.method, write.scope,
+    expect([write.http_method, write.scope,
             write.path]).to eq([:post, 'flow:edit', "/v1/delegated-flows/#{root_id}/channels/#{channel_id}/action-resources"])
     expect(write.request_limit).to eq(16_384)
   end
@@ -32,7 +32,7 @@ RSpec.describe JrcFlows::NativeEditorOperation do
     revoke = described_class.resolve!('revoke_media', id: root_id, target_id: channel_id, resource_id: media_id)
     expect(read.path).to eq("/v1/delegated-flows/#{root_id}/channels/#{channel_id}/media")
     expect(read.response_limit).to eq(2_200_000)
-    expect([revoke.method, revoke.scope,
+    expect([revoke.http_method, revoke.scope,
             revoke.path]).to eq([:post, 'flow:edit', "/v1/delegated-flows/#{root_id}/channels/#{channel_id}/media/#{media_id}/revoke"])
     expect(revoke.request_limit).to eq(16_384)
   end

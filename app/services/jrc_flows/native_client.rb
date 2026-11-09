@@ -62,7 +62,7 @@ class JrcFlows::NativeClient
   def editor(operation, body: nil, idempotency_key: nil)
     raise Error.new('FLOW_INVALID_REQUEST', status: 400) unless operation.is_a?(JrcFlows::NativeEditorOperation::Operation)
 
-    request(operation.method, operation.path, body: body, limit: operation.response_limit,
+    request(operation.http_method, operation.path, body: body, limit: operation.response_limit,
                                               request_limit: operation.request_limit, absolute: true, idempotency_key: idempotency_key)
   end
 

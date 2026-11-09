@@ -45,6 +45,7 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
+          fetch-depth: 0
           persist-credentials: false
       - name: Dependencias Rails
         run: |
@@ -86,13 +87,38 @@ jobs:
           # Committed concurrency fixtures must not contaminate global-count assertions above.
           mapfile -t specs < <(git ls-files spec/requests/api/v1/accounts/jrc_operations spec/requests/api/v1/accounts/jrc_service_desk spec/services/jrc_service_desk spec/services/jrc_contact_center | grep 'concurrency_spec.rb$')
           bundle exec rspec "${specs[@]}" --format progress --format json --out /tmp/projects-portal-concurrency.json
+      - name: Concorrencia SD no banco dedicado exigido pelos guards
+        env:
+          POSTGRES_DATABASE: jrc_sd_integrated_concurrency_20261023_test
+          JRC_SD_INTEGRATED_CONCURRENCY: '1'
+        run: |
+          SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
+          bundle exec rails db:migrate
+          bundle exec rspec spec/services/jrc_service_desk/closure_revision_concurrency_spec.rb spec/services/jrc_service_desk/integrated_assignment_concurrency_spec.rb
+      - name: Comentarios ricos concorrentes no banco dedicado exigido pelo guard
+        env:
+          POSTGRES_DATABASE: jrc_four_fronts_concurrency_20261026_test
+          JRC_PROJECT_COMMENT_CONCURRENCY: '1'
+        run: |
+          SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
+          bundle exec rails db:migrate
+          bundle exec rspec spec/requests/api/v1/accounts/jrc_operations/rich_comments_concurrency_spec.rb
+      - name: Baseline revisado do produto ou da extensao
+        run: |
+          baseline=35976b08077035ee79843b07ad02c0389d002f09
+          if [ -f deploy/jrc/EXTENSION-REFERENCE.json ]; then
+            baseline=$(ruby -rjson -e 'puts JSON.parse(File.read(ARGV.fetch(0))).fetch("extensionBaselineSha")' deploy/jrc/EXTENSION-REFERENCE.json)
+          fi
+          [[ "$baseline" =~ ^[0-9a-f]{40}$ ]]
+          git fetch --no-tags origin "$baseline"
+          git merge-base --is-ancestor "$baseline" HEAD
+          echo "REVIEW_BASE_SHA=$baseline" >> "$GITHUB_ENV"
       - name: Sintaxe Ruby do incremento
         run: |
-          git fetch --no-tags origin 35976b08077035ee79843b07ad02c0389d002f09
-          git diff --name-only --diff-filter=ACMR 35976b08077035ee79843b07ad02c0389d002f09 HEAD -- '*.rb' | xargs -r -n 1 ruby -c
+          git diff --name-only --diff-filter=ACMR "$REVIEW_BASE_SHA" HEAD -- '*.rb' | xargs -r -n 1 ruby -c
       - name: RuboCop Lint dos fontes Ruby alterados
         run: |
-          mapfile -t files < <(git diff --name-only --diff-filter=ACMR 35976b08077035ee79843b07ad02c0389d002f09 HEAD -- '*.rb')
+          mapfile -t files < <(git diff --name-only --diff-filter=ACMR "$REVIEW_BASE_SHA" HEAD -- '*.rb')
           bundle exec rubocop --force-exclusion --only Lint --format simple "${files[@]}"
       - name: Preservar guards existentes de custodia ao carregar o schema
         run: >-
@@ -110,8 +136,7 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Lint dos fontes JavaScript alterados
         run: |
-          git fetch --no-tags origin 35976b08077035ee79843b07ad02c0389d002f09
-          mapfile -t files < <(git diff --name-only --diff-filter=ACMR 35976b08077035ee79843b07ad02c0389d002f09 HEAD -- app/javascript | grep -E '\.(js|vue)$')
+          mapfile -t files < <(git diff --name-only --diff-filter=ACMR "$REVIEW_BASE_SHA" HEAD -- app/javascript | grep -E '\.(js|vue)$')
           if [ "${#files[@]}" -gt 0 ]; then pnpm exec eslint "${files[@]}"; fi
       - name: Vitest voz, inbox, chamadas e acoes globais
         run: >-

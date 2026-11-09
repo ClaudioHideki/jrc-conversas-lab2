@@ -10,11 +10,11 @@ class NativeBoxRoutingContractTest < Minitest::Test
   def test_catalog_is_scoped_to_root_channel_and_explicit_version
     op = API.resolve!('box_routing', id: ROOT, target_id: CHANNEL, query: { 'version' => '2', 'teamId' => '7' })
     assert_equal "/v1/delegated-flows/#{ROOT}/channels/#{CHANNEL}/box-routing?teamId=7&version=2", op.path
-    assert_equal :get, op.method
+    assert_equal :get, op.http_method
     assert_equal 'flow:read', op.scope
     assert_equal API::GRAPH_LIMIT, op.response_limit
     write = API.resolve!('save_box_routing', id: ROOT, target_id: CHANNEL)
-    assert_equal :put, write.method
+    assert_equal :put, write.http_method
     assert_equal 'flow:edit', write.scope
     assert_equal API::CONTROL_LIMIT, write.request_limit
   end

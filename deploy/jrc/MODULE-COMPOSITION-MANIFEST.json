@@ -532,8 +532,8 @@
     {
       "path": "app/services/jrc_flows/native_client.rb",
       "baseSha256": null,
-      "sha256": "acb0c69a3113226adc06445d99d670d7bb2738efac23dbd35100d62ab3cbc130",
-      "bytes": 7806
+      "sha256": "edf666da344eddde5905b8d6b360fd778d37edfc928442c81013f903434ec5d9",
+      "bytes": 7811
     },
     {
       "path": "app/services/jrc_flows/native_configuration.rb",
@@ -556,8 +556,8 @@
     {
       "path": "app/services/jrc_flows/native_editor_operation.rb",
       "baseSha256": null,
-      "sha256": "535e63c2f3493aefaa2b508e35c5796ed2fc1cbb686fc859a8227de4960bd962",
-      "bytes": 7162
+      "sha256": "b1bd2453c8cc4fbda57cf444e1fe1b365c99114c853a3fca180067bd0b37753c",
+      "bytes": 7172
     },
     {
       "path": "app/services/jrc_flows/native_editor.rb",
@@ -808,7 +808,7 @@
     {
       "path": "config/jrc_flow_ownership_guards.json",
       "baseSha256": null,
-      "sha256": "81220879ddafdb68a83824f59a543dcfc4dc9e0ac8792d2e3aefb7e6767b0529",
+      "sha256": "c0aedb326a9eec02e2871fd39e69ec25cc2a84b32a2b6e5636b85ee63980c8be",
       "bytes": 11718
     },
     {
@@ -1168,8 +1168,8 @@
     {
       "path": "spec/services/jrc_flows/native_editor_resources_spec.rb",
       "baseSha256": null,
-      "sha256": "3ee8ab48b502c61378fc1303002e64020388dd3ce2c0f28d34d97835c1f92665",
-      "bytes": 4675
+      "sha256": "2d8ce5a4e7a81fb0c5080c320627c86c044ada665309ed403a5a70a45a728fb4",
+      "bytes": 4685
     },
     {
       "path": "spec/services/jrc_flows/native_responders_spec.rb",
