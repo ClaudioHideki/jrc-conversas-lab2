@@ -5,6 +5,7 @@ import {
   computed,
   onBeforeUnmount,
   watch,
+  provide,
 } from 'vue';
 
 import NextSidebar from 'next/sidebar/Sidebar.vue';
@@ -33,6 +34,8 @@ import { useJrcCopilot } from 'dashboard/components-next/jrcCopilot/useJrcCopilo
 
 import MobileSidebarLauncher from 'dashboard/components-next/sidebar/MobileSidebarLauncher.vue';
 import JrcTopBar from 'dashboard/components-next/layout/JrcTopBar.vue';
+import GlobalVoiceBar from 'dashboard/components-next/layout/GlobalVoiceBar.vue';
+import { GLOBAL_VOICE_SHELL } from './webphone/voiceShell';
 import { useCallsStore } from 'dashboard/stores/calls';
 import SipCallWidget from './webphone/SipCallWidget.vue';
 import { useSipWebphone } from './webphone/useSipWebphone';
@@ -49,9 +52,11 @@ export default {
     FloatingCallWidget,
     MobileSidebarLauncher,
     JrcTopBar,
+    GlobalVoiceBar,
     SipCallWidget,
   },
   setup() {
+    provide(GLOBAL_VOICE_SHELL, true);
     const upgradePageRef = ref(null);
     const { uiSettings, updateUISettings } = useUISettings();
     const { accountId } = useAccount();
@@ -59,9 +64,13 @@ export default {
     const callsStore = useCallsStore();
     const sipWebphone = useSipWebphone();
 
-    watch(accountId, value => sipWebphone.initialize(value), {
-      immediate: true,
-    });
+    watch(
+      [accountId, sipWebphone.hasCall],
+      ([value]) => sipWebphone.initialize(value),
+      {
+        immediate: true,
+      }
+    );
     onBeforeUnmount(() => sipWebphone.shutdown());
 
     return {
@@ -173,6 +182,7 @@ export default {
       class="flex flex-1 flex-col h-full w-full min-w-0 min-h-0 overflow-hidden bg-n-surface-1"
     >
       <JrcTopBar />
+      <GlobalVoiceBar />
       <div
         class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden lg:flex-row"
       >

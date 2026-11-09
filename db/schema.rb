@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_11_02_202000) do
+ActiveRecord::Schema[7.1].define(version: 2026_11_09_150000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -1780,6 +1780,19 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_202000) do
     t.check_constraint "status::text = ANY (ARRAY['created'::character varying, 'ringing'::character varying, 'queued'::character varying, 'connected'::character varying, 'held'::character varying, 'transferred'::character varying, 'ended'::character varying, 'failed'::character varying]::text[])", name: "jrc_cc_leg_status"
   end
 
+  create_table "jrc_contact_center_call_observations", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "call_session_id", null: false
+    t.bigint "author_user_id"
+    t.integer "call_version", null: false
+    t.text "text", null: false
+    t.datetime "created_at", null: false
+    t.index ["account_id", "call_session_id", "call_version"], name: "jrc_cc_observation_once", unique: true
+    t.index ["account_id", "call_session_id", "id"], name: "jrc_cc_observation_page"
+    t.check_constraint "call_version >= 0", name: "jrc_cc_observation_version"
+    t.check_constraint "char_length(text) <= 1000", name: "jrc_cc_observation_length"
+  end
+
   create_table "jrc_contact_center_call_sessions", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.string "provider", default: "jrc_pabx", null: false
@@ -3426,8 +3439,43 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_202000) do
     t.datetime "migrated_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["account_id", "batch_id", "id"], name: "jrc_migration_item_tenant_batch", unique: true
     t.index ["account_id"], name: "index_jrc_migration_items_on_account_id"
     t.index ["batch_id", "legacy_id"], name: "index_jrc_migration_items_on_batch_id_and_legacy_id", unique: true
+  end
+
+  create_table "jrc_migration_media_objects", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "batch_id", null: false
+    t.bigint "item_id", null: false
+    t.integer "generation", null: false
+    t.string "service_name", null: false
+    t.string "storage_key", null: false
+    t.string "source_sha256", null: false
+    t.bigint "byte_size", null: false
+    t.string "status", default: "reserved", null: false
+    t.bigint "blob_id"
+    t.uuid "claim_token"
+    t.datetime "claimed_at"
+    t.datetime "checked_at"
+    t.string "error_code"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "storage_identity"
+    t.datetime "absence_verified_at"
+    t.integer "scan_generation", default: 0, null: false
+    t.uuid "scan_token"
+    t.datetime "scan_started_at"
+    t.index ["account_id"], name: "index_jrc_migration_media_objects_on_account_id"
+    t.index ["blob_id"], name: "index_jrc_migration_media_objects_on_blob_id"
+    t.index ["item_id", "generation"], name: "jrc_migration_media_generation", unique: true
+    t.index ["service_name", "storage_key"], name: "jrc_migration_media_storage_identity", unique: true
+    t.check_constraint "(status::text <> ALL (ARRAY['planned'::character varying, 'attached'::character varying, 'recovering'::character varying, 'cleanup_required'::character varying, 'cleaned'::character varying]::text[])) OR absence_verified_at IS NOT NULL", name: "jrc_migration_media_absence_before_write"
+    t.check_constraint "generation > 0 AND byte_size > 0 AND byte_size <= 1048576", name: "jrc_migration_media_payload_bound"
+    t.check_constraint "scan_generation >= 0", name: "jrc_migration_media_scan_generation"
+    t.check_constraint "status::text = ANY (ARRAY['reserved'::character varying, 'verifying'::character varying, 'verification_required'::character varying, 'planned'::character varying, 'attached'::character varying, 'recovering'::character varying, 'cleanup_required'::character varying, 'cleaned'::character varying, 'kept'::character varying]::text[])", name: "jrc_migration_media_status"
+    t.check_constraint "storage_identity IS NULL AND status::text = 'kept'::text OR storage_identity IS NOT NULL AND storage_identity::text ~ '^[a-f0-9]{64}$'::text", name: "jrc_migration_media_destination_identity"
+    t.check_constraint "storage_key::text ~ '^[a-z0-9]{28}$'::text AND source_sha256::text ~ '^[a-f0-9]{64}$'::text", name: "jrc_migration_media_identity_format"
   end
 
   create_table "jrc_migration_mappings", force: :cascade do |t|
@@ -6386,6 +6434,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_202000) do
   add_foreign_key "jrc_contact_center_call_legs", "jrc_contact_center_call_legs", column: ["account_id", "parent_leg_id"], primary_key: ["account_id", "id"], name: "jrc_cc_leg_parent_fk"
   add_foreign_key "jrc_contact_center_call_legs", "jrc_contact_center_call_sessions", column: ["account_id", "call_session_id"], primary_key: ["account_id", "id"], name: "jrc_cc_leg_session_fk"
   add_foreign_key "jrc_contact_center_call_legs", "jrc_contact_center_queues", column: ["account_id", "queue_id"], primary_key: ["account_id", "id"], name: "jrc_cc_leg_queue_fk"
+  add_foreign_key "jrc_contact_center_call_observations", "accounts"
+  add_foreign_key "jrc_contact_center_call_observations", "jrc_contact_center_call_sessions", column: ["account_id", "call_session_id"], primary_key: ["account_id", "id"], name: "jrc_cc_observation_session_fk"
+  add_foreign_key "jrc_contact_center_call_observations", "users", column: "author_user_id", on_delete: :nullify
   add_foreign_key "jrc_contact_center_call_sessions", "accounts"
   add_foreign_key "jrc_contact_center_call_sessions", "companies", column: ["account_id", "company_id"], primary_key: ["account_id", "id"], name: "jrc_cc_session_company_fk"
   add_foreign_key "jrc_contact_center_call_sessions", "contacts", column: ["account_id", "contact_id"], primary_key: ["account_id", "id"], name: "jrc_cc_session_contact_fk"
@@ -6607,6 +6658,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_202000) do
   add_foreign_key "jrc_migration_batches", "accounts"
   add_foreign_key "jrc_migration_batches", "users", column: "accepted_by_id"
   add_foreign_key "jrc_migration_batches", "users", column: "created_by_id"
+  add_foreign_key "jrc_migration_media_objects", "accounts"
+  add_foreign_key "jrc_migration_media_objects", "active_storage_blobs", column: "blob_id", on_delete: :nullify
+  add_foreign_key "jrc_migration_media_objects", "jrc_migration_items", column: ["account_id", "batch_id", "item_id"], primary_key: ["account_id", "batch_id", "id"], on_delete: :cascade
   add_foreign_key "jrc_migration_items", "accounts"
   add_foreign_key "jrc_migration_items", "jrc_migration_batches", column: ["account_id", "batch_id"], primary_key: ["account_id", "id"]
   add_foreign_key "jrc_migration_mappings", "accounts"
@@ -9289,4 +9343,20 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_02_202000) do
   execute <<~'JRC_SCHEMA_SQL_b780ed2b2bc1'
     CREATE TRIGGER jrc_migration_event_truncate BEFORE TRUNCATE ON jrc_migration_events FOR EACH STATEMENT EXECUTE FUNCTION jrc_migration_event_guard();
   JRC_SCHEMA_SQL_b780ed2b2bc1
+  execute <<~'JRC_SCHEMA_SQL_eb63c32829c8'
+    CREATE OR REPLACE FUNCTION public.jrc_migration_media_owner_guard()
+     RETURNS trigger
+     LANGUAGE plpgsql
+     SET search_path TO 'pg_catalog', 'public'
+    AS $function$ BEGIN IF TG_OP = 'DELETE' AND pg_trigger_depth() > 1 AND NOT EXISTS (SELECT 1 FROM public.jrc_migration_items WHERE id = OLD.item_id AND account_id = OLD.account_id) THEN RETURN OLD; ELSIF TG_OP = 'UPDATE' AND (to_jsonb(NEW) - ARRAY['status','blob_id','claim_token','claimed_at','checked_at','error_code','updated_at', 'absence_verified_at','scan_generation','scan_token','scan_started_at']) IS NOT DISTINCT FROM (to_jsonb(OLD) - ARRAY['status','blob_id','claim_token','claimed_at','checked_at','error_code','updated_at', 'absence_verified_at','scan_generation','scan_token','scan_started_at']) AND (NEW.absence_verified_at IS NOT DISTINCT FROM OLD.absence_verified_at OR (OLD.absence_verified_at IS NULL AND NEW.absence_verified_at IS NOT NULL AND OLD.status = 'verifying' AND NEW.status = 'planned')) AND NEW.scan_generation >= OLD.scan_generation THEN RETURN NEW; END IF; RAISE EXCEPTION 'Migration media ownership is immutable' USING ERRCODE = '23514'; END; $function$
+  JRC_SCHEMA_SQL_eb63c32829c8
+
+  execute <<~'JRC_SCHEMA_SQL_2bca6b23c834'
+    CREATE TRIGGER jrc_migration_media_owner_rows BEFORE DELETE OR UPDATE ON jrc_migration_media_objects FOR EACH ROW EXECUTE FUNCTION jrc_migration_media_owner_guard();
+  JRC_SCHEMA_SQL_2bca6b23c834
+
+  execute <<~'JRC_SCHEMA_SQL_808eaf09795b'
+    CREATE TRIGGER jrc_migration_media_owner_truncate BEFORE TRUNCATE ON jrc_migration_media_objects FOR EACH STATEMENT EXECUTE FUNCTION jrc_migration_media_owner_guard();
+  JRC_SCHEMA_SQL_808eaf09795b
+
 end

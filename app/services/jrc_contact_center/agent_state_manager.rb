@@ -5,6 +5,10 @@ require 'digest'
 class JrcContactCenter::AgentStateManager
   OPERATOR_STATES = %w[offline available paused].freeze
   LOCAL_SOURCE = 'jrc_conversas'
+  NATIVE_PAUSES = {
+    'lunch' => 'lunch_break', 'bathroom' => 'bathroom_break', 'meeting' => 'meeting',
+    'training' => 'training', 'feedback' => 'feedback', 'end_shift' => 'end_shift'
+  }.freeze
 
   def initialize(account:, account_user:)
     @account = account
@@ -66,19 +70,31 @@ class JrcContactCenter::AgentStateManager
     return replay(existing, digest) if existing
 
     state = snapshot
-    raise JrcContactCenter::OperationError.new('state_conflict', status: :conflict) unless state.version == expected_version.to_s
-
+    validate_operator_state!(state, attributes, expected_version)
     previous = state.current
-    if attributes[:state] == 'available' && JrcContactCenter::Qualification.pending.exists?(account: @account, account_user: @member)
-      raise JrcContactCenter::OperationError.new('tabulation_pending', status: :conflict)
-    end
-    blocked = state.active_call? || %w[busy ringing in_call].include?(previous&.state)
-    raise JrcContactCenter::OperationError.new('call_active', status: :conflict) if blocked
-
     event = events.create!(attributes.merge(started_at: Time.current, source: LOCAL_SOURCE, external_event_id: event_id,
                                             metadata: { 'request_digest' => digest, 'provider_confirmed' => false }))
     close_previous(previous, event)
+    sync_native_availability(attributes)
     event
+  end
+
+  def validate_operator_state!(state, attributes, expected_version)
+    raise JrcContactCenter::OperationError.new('state_conflict', status: :conflict) unless state.version == expected_version.to_s
+
+    raise JrcContactCenter::OperationError.new('tabulation_pending', status: :conflict) if attributes[:state] == 'available' && pending_qualification?
+
+    blocked = state.active_call? || %w[busy ringing in_call].include?(state.current&.state)
+    raise JrcContactCenter::OperationError.new('call_active', status: :conflict) if blocked
+  end
+
+  def sync_native_availability(attributes)
+    availability = case attributes[:state]
+                   when 'available' then 'online'
+                   when 'offline' then 'offline'
+                   else NATIVE_PAUSES.fetch(attributes[:reason_code], 'busy')
+                   end
+    @member.update!(availability: availability)
   end
 
   def replay(event, digest)
@@ -96,14 +112,19 @@ class JrcContactCenter::AgentStateManager
       return
     end
 
-    return if previous.ended_at
-    if previous.state == 'acw' && JrcContactCenter::Qualification.pending.exists?(account: @account, account_user: @member)
-      return
-    end
+    return if previous.ended_at || pending_acw?(previous)
 
     previous.update!(ended_at: event.started_at)
     session_id = previous.metadata['jrc_call_session_id']
     @closed_sessions << session_id if previous.state == 'acw' && session_id
+  end
+
+  def pending_acw?(event)
+    event.state == 'acw' && pending_qualification?
+  end
+
+  def pending_qualification?
+    JrcContactCenter::Qualification.pending.exists?(account: @account, account_user: @member)
   end
 
   def project_closed_sessions

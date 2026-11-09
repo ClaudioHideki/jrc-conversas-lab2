@@ -1,0 +1,29 @@
+{
+  "date": "2026-11-09",
+  "repository": "ClaudioHideki/jrc-conversas-lab2",
+  "branch": "codex/voz-v4-20261109",
+  "base_commit": "0163e1ee324e0f0de46ed6dc0b869afb3dbc9895",
+  "source_commit": "resolve_exact_head_before_build",
+  "pr": null,
+  "ci": {
+    "exact_sha_required": true,
+    "workflow": ".github/workflows/voice-v4-candidate.yml",
+    "url": "https://github.com/ClaudioHideki/jrc-conversas-lab2/actions/workflows/voice-v4-candidate.yml",
+    "historical_success_run": 42634218497,
+    "historical_success_sha": "f02031cda3c662fd645af9b2560c10e5a8167433",
+    "historical_success_does_not_approve_later_commits": true
+  },
+  "migration": "20261109150000_create_jrc_contact_center_call_observations.rb",
+  "image": { "published": false, "digest": null, "workflow": ".github/workflows/build-ghcr.yml" },
+  "production": { "changed": false, "deployed": false, "last_observed_rails_sha": "0163e1ee324e0f0de46ed6dc0b869afb3dbc9895" },
+  "physical_pabx_homologation": false,
+  "broker": {
+    "branch": "codex/broker-device-name-20261109",
+    "commit": "d1ae9563167f45dad2157794bbd13e0c9c70889e",
+    "ci_run": 42632287978,
+    "ci_result": "success",
+    "production_changed": false,
+    "engine_rebuild_required_for_branding": false
+  },
+  "delivery_manifest": "The final evidence package records the resolved commit, CI run and any image digest separately; never infer deployment from publication."
+}

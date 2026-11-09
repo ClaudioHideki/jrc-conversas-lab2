@@ -8,6 +8,24 @@ RSpec.describe JrcContactCenter::AgentStateManager do
   let(:member) { account.account_users.find_by!(user: user) }
   let(:manager) { described_class.new(account: account, account_user: member) }
 
+  it 'keeps native distribution availability aligned with an explicit operator pause and resume' do
+    event = manager.transition(state: 'paused', reason_code: 'lunch', command_id: 'pause-lunch', expected_state_version: '0')
+    expect(member.reload.availability).to eq('lunch_break')
+    expect(event.metadata['provider_confirmed']).to be(false)
+    manager.transition(state: 'available', command_id: 'resume-lunch', expected_state_version: event.id.to_s)
+    expect(member.reload.availability).to eq('online')
+    expect(JrcContactCenter::AgentStateSnapshot.new(account_user: member).call[:provider_confirmed]).to be(false)
+  end
+
+  it 'does not change native availability when a stale operator command is rejected' do
+    event = manager.transition(state: 'paused', reason_code: 'lunch', command_id: 'pause-stale', expected_state_version: '0')
+    expect do
+      manager.transition(state: 'available', command_id: 'stale-resume', expected_state_version: '0')
+    end.to raise_error(JrcContactCenter::OperationError, 'state_conflict')
+    expect(member.reload.availability).to eq('lunch_break')
+    expect(event.reload.ended_at).to be_nil
+  end
+
   it 'records local intent without claiming provider confirmation or eligibility' do
     event = manager.transition(state: 'available', command_id: 'state-1', expected_state_version: '0')
     snapshot = JrcContactCenter::AgentStateSnapshot.new(account_user: member).call

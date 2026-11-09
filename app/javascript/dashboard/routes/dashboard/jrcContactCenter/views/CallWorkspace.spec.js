@@ -19,6 +19,21 @@ vi.mock('vue-i18n', () => ({
 enableAutoUnmount(afterEach);
 
 describe('CallWorkspace', () => {
+  it('keeps the authorized attendance and notes identity when customer lookup is unavailable', async () => {
+    JrcContactCenterAPI.customerContext.mockRejectedValueOnce({
+      response: { status: 503 },
+    });
+    const wrapper = mount(CallWorkspace, {
+      props: { accountId: 1, callId: 10, compact: true },
+    });
+    await flushPromises();
+    expect(wrapper.emitted('loaded').at(-1)[0]).toMatchObject({
+      call: { id: 10, status: 'connected' },
+      customer: null,
+      customerStatus: 'error',
+    });
+  });
+
   beforeEach(() => {
     JrcContactCenterAPI.call.mockResolvedValue({
       data: {

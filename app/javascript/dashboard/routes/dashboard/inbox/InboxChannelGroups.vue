@@ -35,7 +35,7 @@ const callPhone = call =>
   call.direction === 'outbound' ? call.dnis : call.ani || call.dnis;
 const callDuration = call => {
   if (call.local) return call.duration;
-  const start = Date.parse(call.answered_at || call.started_at);
+  const start = Date.parse(call.answered_at);
   const end = call.ended_at ? Date.parse(call.ended_at) : props.now;
   if (!Number.isFinite(start) || !Number.isFinite(end)) return '';
   const seconds = Math.max(0, Math.floor((end - start) / 1000));

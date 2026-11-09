@@ -1,0 +1,142 @@
+name: Voz V4 - contratos e regressao isolados
+
+on:
+  push:
+    branches: ['codex/voz-v4-*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: voice-v4-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rails:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: disposable-test-only
+        ports: ['5432:5432']
+        options: --health-cmd "pg_isready -U postgres -d postgres" --health-interval 5s --health-timeout 5s --health-retries 12
+      redis:
+        image: redis:7.4.0-alpine@sha256:c35af3bbcef51a62c8bae5a9a563c6f1b60d7ebaea4cb5a3ccbcc157580ae098
+        ports: ['6379:6379']
+    env:
+      RAILS_ENV: test
+      POSTGRES_HOST: 127.0.0.1
+      POSTGRES_PORT: '5432'
+      POSTGRES_USERNAME: postgres
+      POSTGRES_PASSWORD: disposable-test-only
+      POSTGRES_DATABASE: jrc_sd_bc_portal_concurrency_20261025_test
+      JRC_SD_CONCURRENCY: '1'
+      DB_POOL_SIZE: '10'
+      REDIS_URL: redis://127.0.0.1:6379/15
+      FRONTEND_URL: https://host.example.test
+      SECRET_KEY_BASE: isolated-voice-v4-ci-not-a-production-secret
+      BUNDLE_FROZEN: 'true'
+      SCHEMA: /tmp/voice-v4-schema.rb
+      TZ: UTC
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Dependencias Rails
+        run: |
+          for source in /etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources /etc/apt/apt-mirrors*.txt; do
+            if [ -f "$source" ]; then
+              sudo sed -i -E -e 's|https?://azure[.]archive[.]ubuntu[.]com/ubuntu/?|https://archive.ubuntu.com/ubuntu/|g' -e 's#http://(archive|security)[.]ubuntu[.]com/ubuntu/?#https://\1.ubuntu.com/ubuntu/#g' "$source"
+            fi
+          done
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libpq-dev libvips libvips-dev
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4.4'
+          bundler: 2.5.16
+          bundler-cache: true
+      - name: Schema somente no banco descartavel
+        run: |
+          test "$RAILS_ENV" = test
+          test "$POSTGRES_HOST" = 127.0.0.1
+          test "$POSTGRES_DATABASE" = jrc_sd_bc_portal_concurrency_20261025_test
+          SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
+          bundle exec rails db:migrate
+          bundle exec rails db:migrate:down VERSION=20261109150000
+          bundle exec rails db:migrate:up VERSION=20261109150000
+      - name: RSpec telefonia, permissoes e persistencia
+        run: |
+          bundle exec rspec spec/services/jrc_contact_center \
+            spec/models/jrc_contact_center \
+            spec/requests/api/v1/accounts/jrc_contact_center \
+            spec/jobs/jrc_contact_center \
+            --format progress --format json --out /tmp/voice-v4-rspec.json
+      - name: RuboCop do incremento
+        run: >-
+          bundle exec rubocop
+          app/services/jrc_contact_center/customer_context.rb
+          app/services/jrc_contact_center/agent_state_manager.rb
+          app/services/jrc_contact_center/call_observation_writer.rb
+          app/models/jrc_contact_center/call_observation.rb
+          app/controllers/api/v1/accounts/jrc_contact_center/call_sessions_controller.rb
+          app/controllers/api/v1/accounts/jrc_contact_center/call_observations_controller.rb
+          db/migrate/20261109150000_create_jrc_contact_center_call_observations.rb
+          --format progress
+      - name: Preservar guards existentes de custodia ao carregar o schema
+        run: >-
+          bundle exec rspec spec/services/jrc_migrations/media_protocol_spec.rb
+          --example 'reserves an immutable new storage key'
+          --example 'rejects a reserved SQL row'
+          --format progress --format json --out /tmp/voice-v4-schema-regression.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - name: Dependencias JavaScript sem alterar lockfile
+        run: pnpm install --frozen-lockfile
+      - name: Lint dos fontes JavaScript alterados
+        run: |
+          git fetch --no-tags origin 0163e1ee324e0f0de46ed6dc0b869afb3dbc9895
+          mapfile -t files < <(git diff --name-only --diff-filter=ACMR 0163e1ee324e0f0de46ed6dc0b869afb3dbc9895 HEAD -- app/javascript | grep -E '\.(js|vue)$')
+          if [ "${#files[@]}" -gt 0 ]; then pnpm exec eslint "${files[@]}"; fi
+      - name: Vitest voz, inbox, chamadas e acoes globais
+        run: >-
+          pnpm exec vitest run
+          app/javascript/dashboard/routes/dashboard/webphone
+          app/javascript/dashboard/routes/dashboard/inbox
+          app/javascript/dashboard/routes/dashboard/jrcContactCenter
+          app/javascript/dashboard/components-next/layout/specs
+          app/javascript/dashboard/__tests__/voiceV4Locale.spec.js
+          --maxWorkers=2 --minWorkers=1 --no-file-parallelism
+          --reporter=default --reporter=json --outputFile=/tmp/voice-v4-vitest.json
+      - name: Build frontend real
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+        run: bundle exec vite build
+      - name: Dependencias do laboratorio E2E isolado
+        run: pnpm --dir tests/playwright install --frozen-lockfile --ignore-scripts
+      - name: Chromium para o laboratorio sintetico
+        run: node tests/playwright/node_modules/playwright/cli.js install --with-deps chromium
+      - name: E2E Voz V4 em componentes reais e adaptadores sinteticos
+        run: node tests/playwright/node_modules/@playwright/test/cli.js test --config tests/playwright/voice-v4.config.ts
+      - name: Integridade do checkout
+        if: always()
+        run: git diff --exit-code && git diff --check
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: voice-v4-rails-${{ github.sha }}
+          path: |
+            /tmp/voice-v4-rspec.json
+            /tmp/voice-v4-vitest.json
+            /tmp/voice-v4-schema.rb
+            /tmp/voice-v4-schema-regression.json
+            .codex/voice-v4-e2e
+          if-no-files-found: ignore

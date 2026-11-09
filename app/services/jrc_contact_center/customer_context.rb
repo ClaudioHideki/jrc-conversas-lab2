@@ -6,8 +6,11 @@ class JrcContactCenter::CustomerContext
   end
 
   def by_phone(phone)
+    # SIP identities and short PBX extensions are not customer identifiers.
+    return empty_result unless phone.to_s.match?(/\A\+?[\d\s().-]+\z/)
+
     normalized = phone.to_s.gsub(/\D/, '')
-    return empty_result if normalized.blank?
+    return empty_result unless normalized.length.between?(8, 15)
 
     contacts = @account.contacts.where("regexp_replace(phone_number, '[^0-9]', '', 'g') = ?", normalized).limit(10).to_a
     company_ids = contacts.filter_map(&:company_id).uniq
@@ -18,6 +21,15 @@ class JrcContactCenter::CustomerContext
     }
   end
 
+  def for_call(call)
+    raise ArgumentError, 'call account mismatch' unless call.account_id == @account.id
+
+    return linked_contact(call.contact_id) if call.contact_id
+
+    result = by_phone(call.direction == 'outbound' ? call.dnis : call.ani)
+    result.merge(status: identity_status(result))
+  end
+
   def module_context(user_context:, access:)
     policy = JrcContactCenter::ModulePolicy.new(user_context, :contact_center)
     { feature: 'jrc_contact_center', capabilities: module_capabilities(policy), provider: provider_context, counts: module_counts(access),
@@ -25,6 +37,20 @@ class JrcContactCenter::CustomerContext
   end
 
   private
+
+  def linked_contact(id)
+    contact = @account.contacts.find_by(id: id)
+    return empty_result.merge(status: 'unavailable') unless contact
+
+    company = @account.master_companies.find_by(id: contact.company_id) if contact.company_id
+    { contacts: [contact_payload(contact, company)], ambiguous: false, status: 'identified' }
+  end
+
+  def identity_status(result)
+    return 'ambiguous' if result[:ambiguous]
+
+    result[:contacts].any? ? 'identified' : 'unidentified'
+  end
 
   def module_capabilities(policy)
     { operate: policy.operate?, supervise: policy.supervise?, configure: policy.configure?, reports: policy.reports? }

@@ -4,6 +4,10 @@ import jrcApprovals from './jrcApprovals.json';
 import jrcHome from './jrcHome.json';
 import jrcBroker from './jrcBroker.json';
 import calls from './calls.json';
+import voiceV4 from './voiceV4.json';
+// This existing catalogue already contains the Portuguese operational labels.
+// Register it explicitly instead of depending on the English fallback locale.
+import jrcContactCenter from '../en/jrcContactCenter.json';
 import jrcNico from './jrcNico.json';
 import jrcNicoHelpdesk from './jrcNicoHelpdesk.json';
 import crm from './crm.json';
@@ -65,6 +69,8 @@ export default {
   ...jrcHome,
   ...jrcBroker,
   ...calls,
+  ...voiceV4,
+  ...jrcContactCenter,
   ...jrcNico,
   ...jrcNicoHelpdesk,
   ...crm,
