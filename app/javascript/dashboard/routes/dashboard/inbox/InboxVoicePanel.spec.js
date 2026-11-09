@@ -100,6 +100,34 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 describe('central shared voice panel', () => {
+  it('can hang up once while a hold request is still awaiting a response', async () => {
+    state.sip.hasCall.value = true;
+    state.sip.established.value = true;
+    let resolveHold;
+    let resolveHangup;
+    state.sip.setHold.mockImplementation(
+      () =>
+        new Promise(done => {
+          resolveHold = done;
+        })
+    );
+    state.sip.hangup.mockImplementation(
+      () =>
+        new Promise(done => {
+          resolveHangup = done;
+        })
+    );
+    const wrapper = mount(InboxVoicePanel, {
+      props: { ...props, controlsOnly: true },
+    });
+    await button(wrapper, 'HOLD').trigger('click');
+    wrapper.vm.endCall();
+    wrapper.vm.endCall();
+    expect(state.sip.hangup).toHaveBeenCalledOnce();
+    resolveHangup();
+    resolveHold();
+    await flushPromises();
+  });
   it('renders a controls-only global surface without a second dialer or notes form', () => {
     state.sip.hasCall.value = true;
     const wrapper = mount(InboxVoicePanel, {

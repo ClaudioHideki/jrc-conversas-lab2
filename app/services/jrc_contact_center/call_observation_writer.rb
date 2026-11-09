@@ -9,8 +9,9 @@ class JrcContactCenter::CallObservationWriter
 
       payload = { 'text' => text, 'account_user_id' => member.id, 'updated_at' => Time.current.iso8601 }
       call.update!(metadata: call.metadata.merge('attendance_observations' => payload))
-      JrcContactCenter::CallObservation.create!(account_id: call.account_id, call_session: call, author_user_id: member.user_id,
-                                               text: text, call_version: call.lock_version)
+      JrcContactCenter::CallObservation.create!(
+        account_id: call.account_id, call_session: call, author_user_id: member.user_id, text: text, call_version: call.lock_version
+      )
     end
   end
 end

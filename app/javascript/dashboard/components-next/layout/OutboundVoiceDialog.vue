@@ -122,7 +122,9 @@ onMounted(() => dialog.value?.open());
     :show-confirm-button="false"
     :show-cancel-button="false"
     :use-form="false"
-    show-close-button
+    :dismissible="!busy"
+    :close-on-click-outside="!busy"
+    :show-close-button="!busy"
     @close="emit('close')"
   >
     <form class="space-y-4" @submit.prevent="dial">

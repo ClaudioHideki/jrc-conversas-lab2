@@ -49,6 +49,7 @@ const transferMode = ref('immediate');
 const transferDestination = ref('');
 const transferSent = ref(false);
 const pending = ref(false);
+const ending = ref(false);
 const actionError = ref(false);
 const note = ref('');
 const noteBaseline = ref('');
@@ -85,18 +86,23 @@ const otherBusy = computed(
   () => calls.hasActiveCall || calls.hasIncomingCall || isInitiating.value
 );
 const canEnd = computed(
-  () => matches.value && sip.hasCall.value && !pending.value
+  () => matches.value && sip.hasCall.value && !ending.value
 );
 const canAnswer = computed(
   () =>
     canEnd.value &&
+    !pending.value &&
     sip.incoming.value &&
     !otherBusy.value &&
     !props.qualificationPending
 );
 const canControl = computed(
   () =>
-    matches.value && sip.established.value && !pending.value && !otherBusy.value
+    matches.value &&
+    sip.established.value &&
+    !pending.value &&
+    !ending.value &&
+    !otherBusy.value
 );
 const canDial = computed(
   () =>
@@ -300,11 +306,20 @@ const run = async (allowed, action) => {
     pending.value = false;
   }
 };
-const endCall = () =>
-  run(canEnd.value, async () => {
+const endCall = async () => {
+  if (!canEnd.value) return;
+  const session = sip.callId.value;
+  ending.value = true;
+  actionError.value = false;
+  try {
     await sip.hangup();
-    emit('ended');
-  });
+    if (sip.callId.value === session) emit('ended');
+  } catch {
+    if (sip.callId.value === session) actionError.value = true;
+  } finally {
+    ending.value = false;
+  }
+};
 const startCall = () =>
   run(canDial.value, () => {
     sip.destination.value = normalizeSipDialNumber(sip.destination.value);

@@ -18,6 +18,8 @@ const options = {
   global: {
     stubs: {
       Dialog: {
+        name: 'Dialog',
+        props: ['dismissible', 'closeOnClickOutside', 'showCloseButton'],
         methods: { open() {}, close() {} },
         template: '<div><slot /></div>',
       },
@@ -41,6 +43,29 @@ beforeEach(() => {
   });
 });
 describe('outbound confirmation without changing selected attendance', () => {
+  it('keeps an in-flight originate visible until it resolves instead of dismissing and losing its reviewed draft', async () => {
+    let resolve;
+    state.sip.call.mockImplementation(
+      () =>
+        new Promise(done => {
+          resolve = done;
+        })
+    );
+    const wrapper = mount(OutboundVoiceDialog, {
+      ...options,
+      props: { ...options.props, initialPhone: '12345678' },
+    });
+    await wrapper.get('[data-outbound-reason]').setValue('Retorno');
+    await wrapper.get('[data-outbound-call]').trigger('click');
+    const dialog = wrapper.getComponent({ name: 'Dialog' });
+    expect(dialog.props('dismissible')).toBe(false);
+    expect(dialog.props('closeOnClickOutside')).toBe(false);
+    expect(dialog.props('showCloseButton')).toBe(false);
+    resolve(false);
+    await flushPromises();
+    expect(dialog.props('dismissible')).toBe(true);
+    wrapper.unmount();
+  });
   it('does not dial on opening or while a required reason is missing', async () => {
     const wrapper = mount(OutboundVoiceDialog, {
       ...options,
