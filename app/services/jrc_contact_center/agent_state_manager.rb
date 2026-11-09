@@ -5,6 +5,10 @@ require 'digest'
 class JrcContactCenter::AgentStateManager
   OPERATOR_STATES = %w[offline available paused].freeze
   LOCAL_SOURCE = 'jrc_conversas'
+  NATIVE_PAUSES = {
+    'lunch' => 'lunch_break', 'bathroom' => 'bathroom_break', 'meeting' => 'meeting',
+    'training' => 'training', 'feedback' => 'feedback', 'end_shift' => 'end_shift'
+  }.freeze
 
   def initialize(account:, account_user:)
     @account = account
@@ -78,7 +82,17 @@ class JrcContactCenter::AgentStateManager
     event = events.create!(attributes.merge(started_at: Time.current, source: LOCAL_SOURCE, external_event_id: event_id,
                                             metadata: { 'request_digest' => digest, 'provider_confirmed' => false }))
     close_previous(previous, event)
+    sync_native_availability(attributes)
     event
+  end
+
+  def sync_native_availability(attributes)
+    availability = case attributes[:state]
+                   when 'available' then 'online'
+                   when 'offline' then 'offline'
+                   else NATIVE_PAUSES.fetch(attributes[:reason_code], 'busy')
+                   end
+    @member.update!(availability: availability)
   end
 
   def replay(event, digest)
