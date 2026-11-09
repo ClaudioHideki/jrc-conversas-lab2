@@ -116,4 +116,52 @@ RSpec.describe 'Contact Center call observations', type: :request do
     expect(response).to have_http_status(:unauthorized)
     expect(call.reload.attributes).to eq(original)
   end
+
+  it 'keeps each saved revision including an intentional clear and paginates without overlap' do
+    %w[Primeira Segunda].each do |text|
+      patch path, params: { observations: { text: text, lock_version: call.reload.lock_version } }, headers: headers, as: :json
+      expect(response).to have_http_status(:ok)
+    end
+    patch path, params: { observations: { text: '', lock_version: call.reload.lock_version } }, headers: headers, as: :json
+    get path, params: { limit: 2 }, headers: headers, as: :json
+    expect(response).to have_http_status(:ok)
+    first_page = response.parsed_body
+    expect(first_page.fetch('items').pluck('text')).to eq(['', 'Segunda'])
+    expect(first_page.fetch('items').pluck('author_user_id').uniq).to eq([agent.id])
+    get path, params: { limit: 2, before_id: first_page.fetch('next_before_id') }, headers: headers, as: :json
+    expect(response.parsed_body.fetch('items').pluck('text')).to eq(['Primeira'])
+    expect(response.parsed_body['next_before_id']).to be_nil
+  end
+
+  it 'does not create a revision for a rejected stale write or an unchanged retry' do
+    patch path, params: { observations: { text: 'Primeira', lock_version: call.lock_version } }, headers: headers, as: :json
+    current_version = call.reload.lock_version
+    patch path, params: { observations: { text: 'Primeira', lock_version: current_version } }, headers: headers, as: :json
+    expect(response).to have_http_status(:ok)
+    expect(call.reload.lock_version).to eq(current_version)
+    patch path, params: { observations: { text: 'Outra', lock_version: current_version - 1 } }, headers: headers, as: :json
+    expect(response).to have_http_status(:conflict)
+    get path, headers: headers, as: :json
+    expect(response.parsed_body.fetch('items').pluck('text')).to eq(['Primeira'])
+  end
+
+  it 'denies observation history to an unassigned agent and another Account' do
+    stranger = create(:user, account: account, role: :agent)
+    outsider = create(:user, account: create(:account), role: :administrator)
+    [stranger, outsider].each do |user|
+      get path, headers: user.create_new_auth_token, as: :json
+      expect(response).to have_http_status(:not_found)
+    end
+  end
+
+  it 'does not expose private notes through a view-only call projection or history' do
+    call.update!(metadata: call.metadata.merge('attendance_observations' => { 'text' => 'Privado' }))
+    role = create(:custom_role, account: account, permissions: ['jrc_contact_center_view'])
+    member.update!(custom_role: role)
+    get path.delete_suffix('/observations'), headers: headers, as: :json
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.dig('item', 'metadata')).not_to have_key('attendance_observations')
+    get path, headers: headers, as: :json
+    expect(response).to have_http_status(:unauthorized)
+  end
 end
