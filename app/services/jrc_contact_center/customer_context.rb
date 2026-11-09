@@ -24,16 +24,10 @@ class JrcContactCenter::CustomerContext
   def for_call(call)
     raise ArgumentError, 'call account mismatch' unless call.account_id == @account.id
 
-    if call.contact_id
-      contact = @account.contacts.find_by(id: call.contact_id)
-      return empty_result.merge(status: 'unavailable') unless contact
-
-      company = @account.master_companies.find_by(id: contact.company_id) if contact.company_id
-      return { contacts: [contact_payload(contact, company)], ambiguous: false, status: 'identified' }
-    end
+    return linked_contact(call.contact_id) if call.contact_id
 
     result = by_phone(call.direction == 'outbound' ? call.dnis : call.ani)
-    result.merge(status: result[:ambiguous] ? 'ambiguous' : (result[:contacts].any? ? 'identified' : 'unidentified'))
+    result.merge(status: identity_status(result))
   end
 
   def module_context(user_context:, access:)
@@ -43,6 +37,20 @@ class JrcContactCenter::CustomerContext
   end
 
   private
+
+  def linked_contact(id)
+    contact = @account.contacts.find_by(id: id)
+    return empty_result.merge(status: 'unavailable') unless contact
+
+    company = @account.master_companies.find_by(id: contact.company_id) if contact.company_id
+    { contacts: [contact_payload(contact, company)], ambiguous: false, status: 'identified' }
+  end
+
+  def identity_status(result)
+    return 'ambiguous' if result[:ambiguous]
+
+    result[:contacts].any? ? 'identified' : 'unidentified'
+  end
 
   def module_capabilities(policy)
     { operate: policy.operate?, supervise: policy.supervise?, configure: policy.configure?, reports: policy.reports? }
