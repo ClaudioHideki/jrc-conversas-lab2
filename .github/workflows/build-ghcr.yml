@@ -65,7 +65,7 @@ jobs:
           echo "IMAGE=$image" >> "$GITHUB_ENV"
 
       - name: Exigir gate nativo na candidata consolidada
-        if: (github.ref_name == 'main' || github.ref_name == 'codex/release-integrada-specs-20261102' || github.ref_name == 'codex/lab2-integral-20261102' || github.ref_name == 'codex/shared-inbox-history-20261104' || startsWith(github.ref_name, 'codex/ura-padrao-lab2-')) && inputs.component == 'app'
+        if: (github.ref_name == 'main' || github.ref_name == 'codex/release-integrada-specs-20261102' || github.ref_name == 'codex/lab2-integral-20261102' || github.ref_name == 'codex/shared-inbox-history-20261104' || startsWith(github.ref_name, 'codex/ura-padrao-lab2-') || startsWith(github.ref_name, 'codex/consolidacao-')) && inputs.component == 'app'
         run: test "$BACKOFFICE_CANDIDATE" = true
 
       - name: Baixar a revisao exata
@@ -284,7 +284,7 @@ jobs:
           PUBLISH: ${{ inputs.publish }}
         run: |
           case "$GITHUB_REF_NAME" in
-            main|codex/crm-backoffice-servicedesk-visual-20261101|codex/release-integrada-specs-20261102|codex/lab2-integral-20261102|codex/shared-inbox-history-20261104|codex/ura-padrao-lab2-*) ;;
+            main|codex/crm-backoffice-servicedesk-visual-20261101|codex/release-integrada-specs-20261102|codex/lab2-integral-20261102|codex/shared-inbox-history-20261104|codex/ura-padrao-lab2-*|codex/consolidacao-*) ;;
             *) echo 'Branch candidata nao autorizada para este gate' >&2; exit 1 ;;
           esac
           test "$COMPONENT" = app

@@ -22,14 +22,14 @@
     {
       "path": ".github/workflows/backoffice-flow.yml",
       "baseSha256": null,
-      "sha256": "624686a258d8bb97549016210c9d5acd4812b41cd8330c6ca0111acfc77cdf6d",
-      "bytes": 15084
+      "sha256": "20d102880cda0a9e26b02ee3b09ae3ebac7b13e2a64161561eec1207b99031a0",
+      "bytes": 15198
     },
     {
       "path": ".github/workflows/build-ghcr.yml",
       "baseSha256": "05b856abe74f1897c52e76910a03a77065e8c12418b7cffbc74b15d906ce9fd2",
-      "sha256": "4effc99105c12c8bef46cdff836f8c8d189a6c92219b40a438624c41afdae8a9",
-      "bytes": 18782
+      "sha256": "571b15ad31bfb85ac88302c01de0206e411f60ca8800a6541d3006f25f77c993",
+      "bytes": 18857
     },
     {
       "path": ".github/workflows/nico-broker-candidate.yml",
@@ -1000,8 +1000,8 @@
     {
       "path": "script/jrc_native_module_manifest.mjs",
       "baseSha256": null,
-      "sha256": "ae2bec0a702984eadfd132b76f1458400940a0d14c47b827875c1b97c0ae9492",
-      "bytes": 3697
+      "sha256": "4efa8218e8feab9783f6ba9430ded27270aa0db51df00ac0d24a407ebf0c8139",
+      "bytes": 5033
     },
     {
       "path": "script/lab2_release_gates.test.mjs",

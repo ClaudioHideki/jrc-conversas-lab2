@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "releaseId": "jrc-core-20261109-candidate",
+  "status": "CANDIDATE_NOT_DEPLOYMENT_PROOF",
+  "product": "JRC Conversas",
+  "repository": "ClaudioHideki/jrc-conversas-lab2",
+  "baselineSha": "35976b08077035ee79843b07ad02c0389d002f09",
+  "broker": {
+    "repository": "ClaudioHideki/BrokerJRCIA",
+    "contract": "/v1",
+    "deployedBaselineSha": "56f9e772c9331710bed65d1d46a4f925f3d3d86d"
+  },
+  "policy": {
+    "genericChangesReturnToCore": true,
+    "customerDataIsNotPartOfImage": true,
+    "customerExtensionsRemainSeparate": true
+  },
+  "candidateIdentity": "The exact final source SHA and image digest must be recorded by CI/release evidence; baselineSha is not the final SHA."
+}

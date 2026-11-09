@@ -2,7 +2,7 @@ name: Voz V4 - contratos e regressao isolados
 
 on:
   push:
-    branches: ['codex/voz-v4-*']
+    branches: ['codex/voz-v4-*', 'codex/consolidacao-*']
   workflow_dispatch:
 
 permissions:

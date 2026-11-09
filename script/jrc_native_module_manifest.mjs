@@ -34,18 +34,36 @@ export function buildManifests(root,input,baseBlob){
  return new Map([['config/jrc_flow_ownership_guards.json',guardBytes],['deploy/jrc/MODULE-COMPOSITION-MANIFEST.json',Buffer.from(JSON.stringify(composition,null,2)+'\n')]]);
 }
 
+export function readBaseBlobs(root, baseSha, relatives) {
+ if(!/^[a-f0-9]{40}$/.test(baseSha))throw new Error('Exact Git base SHA required');
+ for(const relative of relatives){
+  if(typeof relative!=='string'||/[\r\n\0]/.test(relative)||relative.includes('\\')||path.posix.isAbsolute(relative)||relative.split('/').some(part=>!part||part==='.'||part==='..'))throw new Error('Unsafe module path');
+ }
+ if(!relatives.length)return new Map();
+ const result=spawnSync('git',['-c','safe.directory='+path.resolve(root).replaceAll('\\','/'),'cat-file','--batch'],{
+  cwd:root,input:relatives.map(relative=>baseSha+':'+relative).join('\n')+'\n',maxBuffer:64*1024*1024,
+ });
+ if(result.error||result.status!==0)throw new Error('Cannot read exact Git base blobs');
+ const output=result.stdout,blobs=new Map();let offset=0;
+ for(const relative of relatives){
+  const end=output.indexOf(10,offset);if(end<0)throw new Error('Incomplete Git blob header');
+  const header=output.subarray(offset,end).toString('utf8');offset=end+1;
+  if(header===baseSha+':'+relative+' missing'){blobs.set(relative,null);continue;}
+  const match=/^[a-f0-9]{40} blob (\d+)$/.exec(header);if(!match)throw new Error('Unexpected Git base object');
+  const size=Number(match[1]);if(!Number.isSafeInteger(size)||offset+size>=output.length||output[offset+size]!==10)throw new Error('Incomplete Git blob content');
+  blobs.set(relative,Buffer.from(output.subarray(offset,offset+size)));offset+=size+1;
+ }
+ if(offset!==output.length)throw new Error('Unexpected Git blob output');
+ return blobs;
+}
+
 function main(){
  const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..'),input=JSON.parse(fs.readFileSync(path.join(root,'deploy/jrc/module-composition-input.json'),'utf8'));
  if(!/^[a-f0-9]{40}$/.test(input.baseSourceSha))throw new Error('Exact Git base SHA required');
  const exists=spawnSync('git',['cat-file','-e',input.baseSourceSha+'^{commit}'],{cwd:root});
  if(exists.status!==0)throw new Error('Exact Git base is not available; fetch its history before generation');
- const baseBlob=relative=>{
-  const object=input.baseSourceSha+':'+relative;
-  if(spawnSync('git',['cat-file','-e',object],{cwd:root}).status!==0)return null;
-  const result=spawnSync('git',['show',object],{cwd:root,maxBuffer:32*1024*1024});
-  if(result.status!==0)throw new Error('Cannot read exact Git base blob '+relative);
-  return result.stdout;
- };
+ const baseBlobs=readBaseBlobs(root,input.baseSourceSha,input.artifactFiles);
+ const baseBlob=relative=>baseBlobs.get(relative)??null;
  const manifests=buildManifests(root,input,baseBlob),write=process.argv.includes('--write');
  for(const [relative,bytes] of manifests){
   const target=path.join(root,relative);

@@ -8,6 +8,18 @@ import {
 } from './omnichannelFilters';
 
 describe('omnichannel inbox assignee filters', () => {
+  it('treats an AgentBot assignment as lacking a human owner without exposing it as personal or shared work', () => {
+    const conversation = {
+      inbox_id: 8,
+      meta: { assignee: { id: 42 }, assignee_type: 'AgentBot' },
+    };
+    expect(matchesAssigneeFilter(conversation, 'unassigned', 42)).toBe(true);
+    expect(matchesAssigneeFilter(conversation, 'me', 42)).toBe(false);
+    expect(matchesAssigneeFilter(conversation, 'mine_or_shared', 42, [8])).toBe(
+      false
+    );
+    expect(matchesAssigneeFilter(conversation, 'all', 42)).toBe(true);
+  });
   it('offers an additive shared filter only with a server capability', () => {
     expect(
       assigneeFilterOptions(false, true).map(option => option.key)

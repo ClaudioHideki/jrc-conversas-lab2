@@ -29,7 +29,8 @@ export const matchesAssigneeFilter = (
         )
     );
   }
-  if (filter === ASSIGNEE_FILTERS.UNASSIGNED) return !assignee;
+  if (filter === ASSIGNEE_FILTERS.UNASSIGNED)
+    return !assignee || assigneeType === 'AgentBot';
   return filter === ASSIGNEE_FILTERS.ALL;
 };
 
