@@ -38,7 +38,7 @@ class Api::V1::Accounts::JrcFlowDelegationController < Api::V1::Accounts::BaseCo
     render json: JrcFlows::NativeEditor.new(**identity, handle_id: params[:session_id]).call!(
       operation: params[:editor_operation], id: params[:id], cursor: params[:editor_operation] == 'executions' ? nil : request.query_parameters['cursor'],
       target_id: params[:target_id], resource_id: params[:resource_id],
-      query: params[:editor_operation] == 'executions' ? request.query_parameters : nil,
+      query: %w[executions box_routing].include?(params[:editor_operation]) ? request.query_parameters : nil,
       body: request.get? ? nil : request.request_parameters,
       idempotency_key: params[:editor_operation] == 'create' ? request.headers['Idempotency-Key'] : nil
     )
@@ -92,6 +92,8 @@ class Api::V1::Accounts::JrcFlowDelegationController < Api::V1::Accounts::BaseCo
     paginated = params[:action] == 'editor' && JrcFlows::NativeEditorOperation::PAGINATED.include?(params[:editor_operation])
     allowed_query = if params[:action] == 'editor' && params[:editor_operation] == 'executions'
                       JrcFlows::NativeEditorOperation::EXECUTION_FILTERS
+                    elsif params[:action] == 'editor' && params[:editor_operation] == 'box_routing'
+                      %w[version teamId]
                     else
                       paginated ? %w[cursor] : []
                     end

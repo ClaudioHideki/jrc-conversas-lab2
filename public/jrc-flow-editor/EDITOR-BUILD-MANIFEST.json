@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "component": "jrc-native-flow-editor",
   "sourceRepository": "ClaudioHideki/BrokerJRCIA",
-  "sourceSha": "2d30a5a544aa0eae12c208867e4912c369626787",
+  "sourceSha": "5f98f767bea9645aa8f3d6029568ce028e053fd2",
   "sourceCommitted": true,
   "lockfileSha256": "dafcbad0115860b04c4b17525222e9d405964759458a0bda05bf7d53d8fc5829",
   "inputs": [
@@ -13,7 +13,7 @@
     },
     {
       "path": "apps/web/src/api/client.ts",
-      "sha256": "373285fb7b94d5a6296ad2416a0ff925ba0d970144f296e209eb5ca771a39c59",
+      "sha256": "cd23f21e36dcb8b76701580bed140bb2257e2ac31a70240aa5673902e48c09f5",
       "dependency": false
     },
     {
@@ -44,6 +44,11 @@
     {
       "path": "apps/web/src/automations/AvailabilityNotice.tsx",
       "sha256": "cc1f1fa86a5e35c0f52b671c3ed53b8c9acd1b2070420583cacaae21086a2402",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/automations/BoxRoutingPanel.tsx",
+      "sha256": "1f7517dcbbcf75450b799f246d9ab621bcfc89030fb373cbd8efba8bf0adfa70",
       "dependency": false
     },
     {
@@ -92,6 +97,16 @@
       "dependency": false
     },
     {
+      "path": "apps/web/src/automations/box-routing-api.ts",
+      "sha256": "8e18a491aafa073bac15e688697165922e350df88d038341c8aeb72f63079a55",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/automations/box-template-api.ts",
+      "sha256": "9f319cd02829e5ba64158cb5ba12b6b6b4d91eb4bec4e6d1093bb83aff730c62",
+      "dependency": false
+    },
+    {
       "path": "apps/web/src/automations/conversation-api.ts",
       "sha256": "6f3def640ce338cc664e03be30a5da10c300996975f99d1b1caa5f31038bef09",
       "dependency": false
@@ -108,12 +123,12 @@
     },
     {
       "path": "apps/web/src/automations/node-editors/ConversationActionEditor.tsx",
-      "sha256": "0fec11ab74de347f1ca9887178111f43ee5001ebfb617af999e9e9d3e3df10b8",
+      "sha256": "f3a51563f2e45cdb260c0ad0823c9c0cb4945f358c2428adddb63c9d937c4e8d",
       "dependency": false
     },
     {
       "path": "apps/web/src/automations/node-editors/DataNodeEditor.tsx",
-      "sha256": "1bf2094132b1bc4ddd4017a62b063034238e7fe2fc011f8cc5beedbd8cb3f6b0",
+      "sha256": "0afd70caeab36de50c09c9a95294a0e63d21c15e856876f4a0e826737ff28214",
       "dependency": false
     },
     {
@@ -122,8 +137,13 @@
       "dependency": false
     },
     {
+      "path": "apps/web/src/automations/node-editors/DirectoryMenuEditor.tsx",
+      "sha256": "0d7fcc91b63ca589efc2158f610f69a958a39ed045e4c4b00bc2dc01aa448ed1",
+      "dependency": false
+    },
+    {
       "path": "apps/web/src/automations/node-editors/DomainCommandFields.tsx",
-      "sha256": "5f1256b7b8151ebacf22cfaa328d9644b9b7e6858177d2ea25c7434812ce32e2",
+      "sha256": "34b4066f1e8682479db75a2702e6a76495741b06e55acaed936187bba4562df7",
       "dependency": false
     },
     {
@@ -133,7 +153,7 @@
     },
     {
       "path": "apps/web/src/automations/node-editors/HandoffEditor.tsx",
-      "sha256": "7e8bb46ddf9b54dd2339dea24255b0bc16b63db1d90e3e0684e8606bdbfea95e",
+      "sha256": "ba0751cd19e5689d86b43804502602c898c5f7a2343eb54e00501eada8fc5630",
       "dependency": false
     },
     {
@@ -178,7 +198,12 @@
     },
     {
       "path": "apps/web/src/automations/studio.css",
-      "sha256": "5a86a6130cba4e08a4df8c99f1b18112919d4b2be4df29eec2304ae59282c7aa",
+      "sha256": "8010f1ebbbcc4ece1cf5e926e08a7ef8cd3f9ab5fdb1f7196ad4c6e815a146a0",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/channels/api.ts",
+      "sha256": "d3942cd62d7581d49992ea8b9ddbd796a4f9876f712f8ae00b00e018b6eb91d4",
       "dependency": false
     },
     {
@@ -188,7 +213,7 @@
     },
     {
       "path": "apps/web/src/flows/FlowCanvas.tsx",
-      "sha256": "504fc6320e8d96e504f9ecd25f95c4a6fd6954ade042fa86e4e9184c6de8ce93",
+      "sha256": "8132d10dd9f2938c5379dc43727a6e7b32bf78bdd15d557402f2629c9b4fa6d6",
       "dependency": false
     },
     {
@@ -197,8 +222,18 @@
       "dependency": false
     },
     {
+      "path": "apps/web/src/guided-setup/navigation.ts",
+      "sha256": "44c39baa34d863eea8c63084c72a9d678480b4517c6b85d097bd58b750a94d9d",
+      "dependency": false
+    },
+    {
       "path": "apps/web/src/native-flow/Binding.tsx",
-      "sha256": "d0fe674fec064ef6cc0e521bc673e50b96a591f65f48b630dda39b9f78b96109",
+      "sha256": "be24d616bf3fa1d9dfbb1e2125d23ee1011053e54495c7b5fac2a82d3cd817bf",
+      "dependency": false
+    },
+    {
+      "path": "apps/web/src/native-flow/BoxRouting.tsx",
+      "sha256": "5117129e8914da99b01709a9607c87415bd80fe2706d5befa9b5bd3a62416648",
       "dependency": false
     },
     {
@@ -218,7 +253,7 @@
     },
     {
       "path": "apps/web/src/native-flow/transport.ts",
-      "sha256": "9fbab12664cf70cf042b237f0251f2d4f6eeca8353d94edc44ec241b065ba3d3",
+      "sha256": "a268867db5d053675a9c6259e713d5a214de54c7b81282276295d22370df1197",
       "dependency": false
     },
     {
@@ -233,7 +268,7 @@
     },
     {
       "path": "apps/web/src/pages/AutomationStudio.tsx",
-      "sha256": "1d770495393a14e79f34247ab5ae9bc5faa6944e6432318fcdefdf72d6cbce59",
+      "sha256": "383d4e31db2686b68ba2ecd46f7e20829b8144fa2f672eb41566fc641bdd526d",
       "dependency": false
     },
     {
@@ -243,7 +278,7 @@
     },
     {
       "path": "apps/web/src/pages/NewAutomation.tsx",
-      "sha256": "9385ad62452027b3b6a001aa0c3306ea049329cd20538445abeb65e22b5c722b",
+      "sha256": "f9c20a37781081b5b3c4748aac75208ebcf92b05840fef8e573b06959ddc3d8a",
       "dependency": false
     },
     {
@@ -847,18 +882,28 @@
       "dependency": false
     },
     {
+      "path": "packages/contracts/src/automation-box-routing.ts",
+      "sha256": "4f18aace33a5baf09510504d181d474611a01d23469b5fe0bc485733e8899b94",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/automation-box-template.ts",
+      "sha256": "45d0379aabcb54242eeb82ea099099948674bc1d87a34d4d885a5bd785d0139d",
+      "dependency": false
+    },
+    {
       "path": "packages/contracts/src/automation-conversation-effects.ts",
-      "sha256": "9d21b72107b8afcdab9d9481044bf6d22ef52d3b66e39e9848b0d1cc5a5bb3d0",
+      "sha256": "64323226f48bf7aacc413960d4fce6472877236eec168c9614941b674f48a965",
       "dependency": false
     },
     {
       "path": "packages/contracts/src/automation-data-v2.ts",
-      "sha256": "e6cd067b8f1968432192c9f62c9f56dcea171c12df5fa309e37d51dd3a9fa51e",
+      "sha256": "122a80b9742e952b1089f3ff643591e7f44fff7e7d15b06d83f7725bad038638",
       "dependency": false
     },
     {
       "path": "packages/contracts/src/automation-domain-command.ts",
-      "sha256": "46018646f0e3bede1a1de0da9cb64711e50941daf7ad4601a4e83f93dcf16d37",
+      "sha256": "da988782a627483c993e4925cb7141b5e3d23b89b449b48159a24e77653e9d2a",
       "dependency": false
     },
     {
@@ -868,7 +913,7 @@
     },
     {
       "path": "packages/contracts/src/automation-handoff-v1.ts",
-      "sha256": "e16f4c81bdda0582de0b23f6b531441ffff97c6a8bf615312368c2ef92a82e11",
+      "sha256": "685b540bab34932b04c5d71ae5c5d74f7232f4a3f6a1c2e967f3fab4a82bd803",
       "dependency": false
     },
     {
@@ -893,7 +938,12 @@
     },
     {
       "path": "packages/contracts/src/automation-node-definitions.ts",
-      "sha256": "a61b684a508eaef9dac5ac3581e128def464058880cda9102dacc7b914f2fc91",
+      "sha256": "eac1d65a854f002de2669233dd0b3bc0530cd006a993913a3a055e65975dc70b",
+      "dependency": false
+    },
+    {
+      "path": "packages/contracts/src/automation-package.ts",
+      "sha256": "0c7ab10c5d9ae06e62204ec438c25de571068ecc1627fc056e4a34540bc7ae13",
       "dependency": false
     },
     {
@@ -918,7 +968,7 @@
     },
     {
       "path": "packages/contracts/src/automations-v1.ts",
-      "sha256": "fbb9fc77bab5a0d84114da662f99212fe9a8895b3be42add0e2db3c388869655",
+      "sha256": "a837e8d584a70e85bd5111d62b9747f66578845fdd824bac8ba743b7d6680713",
       "dependency": false
     },
     {
@@ -958,7 +1008,7 @@
     },
     {
       "path": "packages/contracts/src/flow-delegation.ts",
-      "sha256": "d56d744965bd862a049b27ef25ecb8ad70ef8bb3ccc987b381f9026276242ef8",
+      "sha256": "3081bfe448b5892f62107529a6173b3d4de4f3c2c8f1228e973f5cf4e75cbb90",
       "dependency": false
     },
     {
@@ -977,13 +1027,18 @@
       "dependency": false
     },
     {
+      "path": "packages/contracts/src/guided-setup.ts",
+      "sha256": "a66b896163e610b2dff65522f2886346f08f56709863767eac01431b82ccba42",
+      "dependency": false
+    },
+    {
       "path": "packages/contracts/src/history-import.ts",
       "sha256": "a68bfb72e2dba5488c3da8b6d747f1aa013fda06dbaaf0042539d9d04ddc5905",
       "dependency": false
     },
     {
       "path": "packages/contracts/src/index.ts",
-      "sha256": "1de2ef263e73d128756177216792eee52c9900a351524ddbd9cfbc65d83a5154",
+      "sha256": "9fd469dcdf8bb86743a976f71832caa60f5cead3d6f92d7b86dcda7a5a013dfb",
       "dependency": false
     },
     {
@@ -993,7 +1048,7 @@
     },
     {
       "path": "packages/contracts/src/integrations/control.ts",
-      "sha256": "ac42ce8d9e2c3c9688328b029e5712eae580edcae29da09b391fe7fe527a624c",
+      "sha256": "60ac91840fae2cb8b75863febd47263c1f6950ede15f3ec39361943b51cade3b",
       "dependency": false
     },
     {
@@ -1100,13 +1155,13 @@
     },
     {
       "path": "editor.css",
-      "bytes": 29555,
-      "sha256": "71fa57194fdee277348c5a6b7abaf2024fb2a072a8083e2a5cc80f3e94ad85f6"
+      "bytes": 30597,
+      "sha256": "42548825c675edc419225c00df7c6c1a7d60c23b1d008395b2ea06d0462319db"
     },
     {
       "path": "editor.js",
-      "bytes": 966510,
-      "sha256": "310416a69f9f344faebbe059312eb4cf2814955ae2fcb4e1acf26aa8f12e584b"
+      "bytes": 989542,
+      "sha256": "329b15d30680b9b9902fbbf5b4319a48777203e95b1a16ae8d9f7fb2041900d9"
     },
     {
       "path": "editor.js.LEGAL.txt",

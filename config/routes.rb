@@ -78,6 +78,8 @@ Rails.application.routes.draw do
           get ':id/integrations/:target_id/attendance-catalog', action: :editor, defaults: { editor_operation: 'handoff_catalog' }
           get ':id/channels/:target_id/local-attendance-catalog', action: :editor, defaults: { editor_operation: 'local_handoff_catalog' }
           post ':id/channels/:channel_id/media', action: :upload_media
+          get ':id/channels/:target_id/box-routing', action: :editor, defaults: { editor_operation: 'box_routing' }
+          put ':id/channels/:target_id/box-routing', action: :editor, defaults: { editor_operation: 'save_box_routing' }
           get ':id/resource-channels', action: :editor, defaults: { editor_operation: 'resource_channels' }
           get ':id/channels/:target_id/action-catalog', action: :editor, defaults: { editor_operation: 'action_catalog' }
           post ':id/channels/:target_id/action-resources', action: :editor, defaults: { editor_operation: 'save_action_resource' }

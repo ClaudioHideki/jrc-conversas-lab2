@@ -34,6 +34,8 @@ class JrcFlows::NativeEditorOperation
     'local_handoff_channels' => [:get, '/local-handoff-channels', 'flow:read', false, false, true],
     'handoff_catalog' => [:get, '', 'flow:read', false, false, true],
     'local_handoff_catalog' => [:get, '', 'flow:read', false, false, true],
+    'box_routing' => [:get, '', 'flow:read', false, true, true],
+    'save_box_routing' => [:put, '', 'flow:edit', false, true, true],
     'resource_channels' => [:get, '/resource-channels', 'flow:read', false, false, true],
     'action_catalog' => [:get, '', 'flow:read', false, true, true],
     'save_action_resource' => [:post, '', 'flow:edit', false, false, true],
@@ -45,6 +47,7 @@ class JrcFlows::NativeEditorOperation
   }.freeze
   PAGINATED = %w[list versions http_catalog subflow_catalog ai_catalog resource_channels action_catalog].freeze
   TARGET_PATHS = {
+    'box_routing' => '/channels/%s/box-routing', 'save_box_routing' => '/channels/%s/box-routing',
     'execution' => '/executions/%s',
     'handoff_catalog' => '/integrations/%s/attendance-catalog', 'local_handoff_catalog' => '/channels/%s/local-attendance-catalog',
     'action_catalog' => '/channels/%s/action-catalog', 'save_action_resource' => '/channels/%s/action-resources',
@@ -93,6 +96,11 @@ class JrcFlows::NativeEditorOperation
 
   EXECUTION_FILTERS = %w[from to status channelId search nodeId cursor pageSize].freeze
   def self.execution_query(operation, query)
+    if operation == 'box_routing'
+      raise Invalid unless query.is_a?(Hash) && query.key?('version') && (query.keys - %w[version teamId]).empty? &&
+                           query.values.all? { |value| value.is_a?(String) && /\A[1-9][0-9]{0,8}\z/.match?(value) }
+      return '?' + URI.encode_www_form(query.sort)
+    end
     raise Invalid if operation != 'executions' && query
     return '' unless operation == 'executions'
 

@@ -46,8 +46,8 @@
     {
       "path": "app/controllers/api/v1/accounts/jrc_flow_delegation_controller.rb",
       "baseSha256": null,
-      "sha256": "f4f26ef5e3f7d29a3a8d6b2c53fff3c3bda99105a215ab63f4a2d25b8f303935",
-      "bytes": 5364
+      "sha256": "ee9c87345a1dbba1e96c5606cdfaf1059f5641b4972959fd1db7abbb6c6fbe3b",
+      "bytes": 5526
     },
     {
       "path": "app/controllers/api/v1/accounts/jrc_flow_effects_controller.rb",
@@ -190,7 +190,7 @@
     {
       "path": "app/javascript/dashboard/routes/dashboard/jrcFlows/nativeEditorBuild.js",
       "baseSha256": null,
-      "sha256": "02bd3a4e320bdebb44ed7917bac3a2dee453eca35cdb23582f6140fdb350c842",
+      "sha256": "e1fb6d8d50d9f119323791e013cbf444273db82e5b79b5279c9ac1694d363cbf",
       "bytes": 161
     },
     {
@@ -556,8 +556,8 @@
     {
       "path": "app/services/jrc_flows/native_editor_operation.rb",
       "baseSha256": null,
-      "sha256": "54f04b36e78404828e49d27178d8fa33153d4a288d871cd97fd1cb8c90b6d4ee",
-      "bytes": 6602
+      "sha256": "535e63c2f3493aefaa2b508e35c5796ed2fc1cbb686fc859a8227de4960bd962",
+      "bytes": 7162
     },
     {
       "path": "app/services/jrc_flows/native_editor.rb",
@@ -808,7 +808,7 @@
     {
       "path": "config/jrc_flow_ownership_guards.json",
       "baseSha256": null,
-      "sha256": "9827447dcc8597e329a75cbf4c2e6fd1774bf36506112b1c7084dacda4f1633d",
+      "sha256": "eb8d67453df1a7294d415c3059475d9be4d487224b091b9cad136e2be6dddf5d",
       "bytes": 11718
     },
     {
@@ -820,8 +820,8 @@
     {
       "path": "config/routes.rb",
       "baseSha256": "a00b0f9b8f9735ec0673eed1719ac5b5df16f8b19e24bbd20cb7bd2cfee38596",
-      "sha256": "69b641a800b6d80ca13441716268e10388934f56dcbf7b943be7ec5b2c344705",
-      "bytes": 68690
+      "sha256": "1ed01889566b02b8cfa3feb0641a2f87ecfa17c410905555edd5880f048282aa",
+      "bytes": 68927
     },
     {
       "path": "config/schedule.yml",
@@ -964,20 +964,20 @@
     {
       "path": "public/jrc-flow-editor/EDITOR-BUILD-MANIFEST.json",
       "baseSha256": null,
-      "sha256": "451d5da90d980bea7e9e93c531b5df19217fad6bda75d8f7bf02d6643a876240",
-      "bytes": 39997
+      "sha256": "4abb24f0787191afdacea828b8dff96c6633743e64baaf5c46c328bc0d070ccd",
+      "bytes": 42025
     },
     {
       "path": "public/jrc-flow-editor/editor.css",
       "baseSha256": null,
-      "sha256": "71fa57194fdee277348c5a6b7abaf2024fb2a072a8083e2a5cc80f3e94ad85f6",
-      "bytes": 29555
+      "sha256": "42548825c675edc419225c00df7c6c1a7d60c23b1d008395b2ea06d0462319db",
+      "bytes": 30597
     },
     {
       "path": "public/jrc-flow-editor/editor.js",
       "baseSha256": null,
-      "sha256": "310416a69f9f344faebbe059312eb4cf2814955ae2fcb4e1acf26aa8f12e584b",
-      "bytes": 966510
+      "sha256": "329b15d30680b9b9902fbbf5b4319a48777203e95b1a16ae8d9f7fb2041900d9",
+      "bytes": 989542
     },
     {
       "path": "public/jrc-flow-editor/editor.js.LEGAL.txt",

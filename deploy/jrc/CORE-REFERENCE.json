@@ -8,7 +8,10 @@
   "broker": {
     "repository": "ClaudioHideki/BrokerJRCIA",
     "contract": "/v1",
-    "deployedBaselineSha": "56f9e772c9331710bed65d1d46a4f925f3d3d86d"
+    "deployedBaselineSha": "56f9e772c9331710bed65d1d46a4f925f3d3d86d",
+    "candidateSourceSha": "5f98f767bea9645aa8f3d6029568ce028e053fd2",
+    "requiredSchema": "0086_automation_box_routing",
+    "embeddedEditorSha256": "329b15d30680b9b9902fbbf5b4319a48777203e95b1a16ae8d9f7fb2041900d9"
   },
   "policy": {
     "genericChangesReturnToCore": true,
