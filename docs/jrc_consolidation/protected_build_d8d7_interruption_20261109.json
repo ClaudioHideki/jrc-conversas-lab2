@@ -1,0 +1,161 @@
+{
+  "date": "2026-11-09",
+  "branch": "codex/relacionamento-v2-20261101",
+  "previous_head": "71a054b74d823f4abfad491af24cb055b07c5194",
+  "candidate_code_commit": "d8d7c960ce34829d43c7fed58165a8a1098e4fba",
+  "status": "Authorized single build interrupted for resource risk;current-source Chrome homologation not executed",
+  "authorized_attempts": 1,
+  "actual_vite_invocations": 1,
+  "completed_builds": 0,
+  "build": {
+    "candidate": "d8d7c960ce34829d43c7fed58165a8a1098e4fba",
+    "status": "failed",
+    "free_start": 5509246976,
+    "disk_stop_bytes": 750000000,
+    "guard_self_test": {
+      "status": "passed",
+      "method": "simulated disk samples and process handle; no real process stopped",
+      "cases": [
+        {
+          "sample_free_bytes": 749999999,
+          "termination_requested": true
+        },
+        {
+          "sample_free_bytes": 750000000,
+          "termination_requested": true
+        },
+        {
+          "sample_free_bytes": 750000001,
+          "termination_requested": false
+        }
+      ]
+    },
+    "build_attempt": 1,
+    "snapshot_root": "C:\\Users\\DEV03\\Documents\\Jrc\\relacionamento-v2-20261101\\.codex\\homolog-d8d7-20261109-ece043b6\\source",
+    "prefix": "homolog-d8d7-ece043b6-vite",
+    "dependencies_installed": false,
+    "shared_dependency_cache_modified": false,
+    "old_assets_changed": false,
+    "owned_node_pid": 6856,
+    "guard_samples": 254,
+    "minimum_free": 4332027904,
+    "exit_code": 4294967295,
+    "elapsed_seconds": 262.55,
+    "free_end": 4368400384
+  },
+  "interruption": {
+    "node_pid": 6856,
+    "free_memory_bytes": 685850624,
+    "free_disk_bytes": 4354760704,
+    "stop_requested": true,
+    "reason": "Available physical memory below750MiB;stop only owned Vite to preserve other environments",
+    "node_active": true
+  },
+  "memory_diagnostics": {
+    "lowest_observed_during_build_bytes": 551555072,
+    "available_at_stop_bytes": 685850624,
+    "available_now_bytes": 2180272128,
+    "threshold_used_bytes": 786432000,
+    "qualification": "Safety threshold chosen to protect preserved workloads;not an original user-defined RAM limit. RAM was checked late in this attempt;future preflight must require headroom before launch."
+  },
+  "disk_bytes": {
+    "initial_environment": 5748953088,
+    "build_start": 5509246976,
+    "minimum_recorded": 4332027904,
+    "after_interruption": 4361019392,
+    "user_stop_limit": 750000000,
+    "disk_guard_triggered": false
+  },
+  "source_preflight": {
+    "git_archive_candidate": "d8d7c960ce34829d43c7fed58165a8a1098e4fba",
+    "archive_sha256": "c102994a92fbaaf708247c72ed7600cde54b869272f0f82bf1b139d1dd4e3938",
+    "snapshot_path": "C:\\Users\\DEV03\\Documents\\Jrc\\relacionamento-v2-20261101\\.codex\\homolog-d8d7-20261109-ece043b6\\source",
+    "line_endings": "Git archive on Windows emitted CRLF text. Initial byte-exact preflight halted before Vite;canonical LF comparison proved same pinned content,then the one actual build started. No code edited or second compilation.",
+    "dependencies": "108read links/copies in own node_modules directory;no dependency installation. Own config temp path;no broad byte-for-byte attestation of other dependency caches."
+  },
+  "runtime_isolation": {
+    "new_app": "jrc-homolog-app-ece043b6",
+    "new_postgres": "jrc-homolog-pg-ece043b6",
+    "new_redis": "jrc-homolog-redis-ece043b6",
+    "network": "jrc-homolog-d8d7-ece043b6",
+    "network_internal": true,
+    "reserved_loopback_port": 5391,
+    "existing_volumes_reused": false,
+    "old_database_or_redis_write": false,
+    "new_business_tables": 0,
+    "new_redis_keys": 0,
+    "rails_application_started": false,
+    "source_migrations_executed": false,
+    "new_resources_retained_not_deleted": true
+  },
+  "preservation": {
+    "four_original_containers_started_at_unchanged": true,
+    "proxy_process_start_observed": "Wed Nov4 12:03:24 2026",
+    "frozen_asset_readonly_proof": {
+      "container": "jrc-rel-v2-run-20261101",
+      "assets": [
+        {
+          "path": "/consolidation-customer-b1-b4-browser-4d4a6de3/public/consolidation-customer-b1-b4-4d4a6de3-vite/assets/v3app-Dc7pKck9.js",
+          "sha256": "ae6897f4131fe8b6d08767ed31bbff7f780cca17cb5e9da960b8d2e4bcfbca52"
+        },
+        {
+          "path": "/consolidation-document-responsibility-tests-20261104/public/consolidation-customer-b1-b4-4d4a6de3-vite/assets/v3app-Dc7pKck9.js",
+          "sha256": "ae6897f4131fe8b6d08767ed31bbff7f780cca17cb5e9da960b8d2e4bcfbca52"
+        }
+      ]
+    },
+    "old_http_login_not_used_for_current_qa": true,
+    "only_owned_node_terminated": 6856,
+    "parent_command_nonce_verified": true,
+    "other_codex_processes_interrupted": false,
+    "no_push_GHCR_deploy_production_or_real_external_ops": true
+  },
+  "chrome": {
+    "connector": "Browser Chrome provider unavailable;native Chrome discovered through supported computer-use skill.",
+    "actual_application_navigation": false,
+    "desktop_mobile_screenshots": 0,
+    "functional_results": "Not executed;no valid compiled candidate available. Do not substitute frozen assets,mocks or generated screenshots."
+  },
+  "warnings_preserved": [
+    "Browserslist metadata outdated;no installation/update performed",
+    "/brand-assets/jrc-background.jpeg unresolved at build time;runtime availability remains to be checked,not declared broken or corrected"
+  ],
+  "remediation_prepared": {
+    "future_guard_module": "C:\\Users\\DEV03\\Documents\\Jrc\\relacionamento-v2-20261101\\.codex\\homolog-d8d7-20261109-ece043b6\\resource_guard.py",
+    "selftest": {
+      "status": "passed",
+      "simulated_cases": 9,
+      "real_build_started": false,
+      "real_process_stopped": false,
+      "qualification": "Results of the already executed --self-test;no second build.",
+      "module_sha256": "c7f0a4281e1f76c010c0336426ee90697a0300c963a789a692ad68ffc90e6267"
+    },
+    "future_recommended_start_memory_at4096MiB_heap": 5368709120,
+    "future_start_disk": 3221225472,
+    "current_resource_preflight_ready": false,
+    "qualification": "Guard prepared/tested with simulated cases;not integrated into another executed build. Original failed launcher/log preserved."
+  },
+  "artifact_sha256": {
+    "state.json": "0a847bd8501acdd5ac640003eea76104aee7ee9c9b5242f4477f2576ce36b0dd",
+    "build_once.py": "6cf2c093a6c3d12a8e6426ac8b5da0f1cb97db6aae2af64e67d3f4bddfe30d64",
+    "build.json": "36bc61ca72b56d8527ee845990d26390e476601e537b0222f5f98735e9db1f3a",
+    "build.log": "eab82c448bcebbd4bd4ea836defe69d8da66f054335791cbda9a45f8f945a521",
+    "memory-guard-stop.json": "188b4d30ec5ef42985e84057abc4e4af1ea145507e4e36c48aa60937fae34cde",
+    "resource_guard.py": "c7f0a4281e1f76c010c0336426ee90697a0300c963a789a692ad68ffc90e6267",
+    "resource-guard-selftest.json": "308ad162d09187bcbc3d4b4e94ab28aa8ce7a91142a8b7efb320cdd02a4dba63",
+    "preserved5379-readonly.json": "3d0c4e4ddbe738188d56178dcab2d466d7f57175a2e573fb89101c16967633dc"
+  },
+  "next": [
+    "Wait for sufficient free physical memory without stopping other Codex,5379 or original containers.",
+    "A second actual build requires new explicit authorization;do not reuse one-shot launcher or partial output.",
+    "After a valid fresh build,initialize only the new isolated schema and synthetic fixtures,then perform real Chrome desktop/mobile acceptance.",
+    "C-G and all previously documented functional/visual/business/external dependencies remain open."
+  ],
+  "stage_closure": {
+    "C": false,
+    "D": false,
+    "E": false,
+    "F": false,
+    "G": false
+  }
+}
