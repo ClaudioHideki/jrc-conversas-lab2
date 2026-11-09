@@ -21,6 +21,7 @@ class JrcCustomers::Serializer
       row['customer_code'] ||= format('EMP-%06d', company.id)
       row.merge(
         'revision' => company.updated_at&.iso8601(6),
+        'establishment' => JrcCustomers::EstablishmentMetadata.read(company),
         'contact_count' => counts.fetch(company.id, 0),
         'owner_name' => users[company.owner_id],
         'created_by_name' => users[safe_attribute(company, :created_by_id)],

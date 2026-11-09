@@ -24,6 +24,14 @@ class JrcServiceDesk::PortalIdentityProof
     true
   end
 
+  def establishment_ids(identity:)
+    verify!(identity: identity)
+    JrcServiceDesk::PortalGrant.where(account_id: identity.contact.account_id, contact_id: identity.contact_id,
+                                     contact_inbox_id: identity.id, active: true).includes(:user).select do |grant|
+      grant.available? && grant.user.active_for_authentication?
+    end.flat_map(&:establishment_ids).uniq
+  end
+
   private
 
   def identifier_matches?(current_identifier)

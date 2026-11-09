@@ -6,7 +6,7 @@ require 'digest'
 class JrcCustomers::CompanyImport
   class InvalidImport < StandardError; end
   FIELDS = %w[id name person_kind trade_name tax_id state_registration municipal_registration segment size website domain email
-              phone_number source economic_group parent_company_id owner_id relationship_type active description].freeze
+              phone_number source economic_group parent_company_id owner_id relationship_type active description store_code cluster establishment_phones].freeze
   MAX_BYTES = 1_048_576
   MAX_ROWS = 500
 
@@ -94,6 +94,11 @@ class JrcCustomers::CompanyImport
         company ||= @account.master_companies.new(relationship_type: 'prospect')
         attrs['relationship_type'] ||= company.relationship_type
         original_stamp = company.persisted? ? company.updated_at.iso8601(6) : nil
+        if attrs.keys.intersect?(%w[store_code cluster establishment_phones])
+          attrs['establishment'] = { 'store_code' => attrs.delete('store_code'), 'cluster' => attrs.delete('cluster'),
+                                     'phones' => attrs.delete('establishment_phones').to_s.split('|').map(&:strip).reject(&:empty?) }
+        end
+        attrs = JrcCustomers::EstablishmentMetadata.attributes(company, attrs)
         company.assign_attributes(attrs)
         raise InvalidImport, company.errors.full_messages.join('; ') unless company.valid?
         result[:rows] << { line: index + 2, action: company.persisted? ? 'update' : 'create', company_id: company.id,

@@ -44,6 +44,32 @@ const { t } = useI18n();
       />
     </Panel>
     <Panel
+      v-if="ticket.establishment"
+      :title="t('PORTAL.STORE')"
+    >
+      <dl class="grid gap-3 text-sm">
+        <div>
+          <dt class="text-n-slate-11">{{ t('PORTAL.STORE') }}</dt>
+          <dd>
+            {{ ticket.establishment.store_code }} —
+            {{ ticket.establishment.name }}
+          </dd>
+        </div>
+        <div>
+          <dt class="text-n-slate-11">{{ t('PORTAL.TAX_ID') }}</dt>
+          <dd>{{ ticket.establishment.cnpj }}</dd>
+        </div>
+        <div>
+          <dt class="text-n-slate-11">{{ t('PORTAL.ORGANIZATION') }}</dt>
+          <dd>{{ ticket.establishment.legal_name }}</dd>
+        </div>
+        <div>
+          <dt class="text-n-slate-11">{{ t('PORTAL.CLUSTER') }}</dt>
+          <dd>{{ ticket.establishment.cluster }}</dd>
+        </div>
+      </dl>
+    </Panel>
+    <Panel
       v-if="ticket.permissions.view_notes"
       :title="t('JRC_SERVICE_DESK.TICKET.tabs.files')"
     >

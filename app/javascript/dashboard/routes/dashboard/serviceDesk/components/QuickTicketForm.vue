@@ -16,6 +16,7 @@ import {
 import { canonicalId } from '../helpers/access';
 import LookupSelect from './LookupSelect.vue';
 import RequesterSelect from './RequesterSelect.vue';
+import EstablishmentPicker from './EstablishmentPicker.vue';
 import ScopeBar from './ScopeBar.vue';
 import CatalogueAnswers from './CatalogueAnswers.vue';
 import TicketCreationReceipt from './TicketCreationReceipt.vue';
@@ -41,6 +42,7 @@ const units = computed(() =>
 const blank = () => ({
   unit_id: '',
   company_id: null,
+  establishment_company_id: null,
   requester_id: '',
   title: '',
   description: '',
@@ -311,6 +313,13 @@ defineExpose({ busy: locked });
           :disabled="locked || creatingPerson || !unit"
         />
       </div>
+      <EstablishmentPicker
+        v-if="master"
+        v-model="draft.establishment_company_id"
+        :account-id="session.accountId.value"
+        :unit-id="draft.unit_id"
+        :disabled="locked"
+      />
       <RequesterSelect
         v-model="draft.requester_id"
         :company-id="draft.company_id"
@@ -329,8 +338,8 @@ defineExpose({ busy: locked });
       />
       <TextArea
         id="sd-quick-description"
-        custom-text-area-class="min-h-24"
         v-model="draft.description"
+        custom-text-area-class="min-h-24"
         :label="t('JRC_SERVICE_DESK.FIELDS.description')"
         :max-length="20000"
         resize

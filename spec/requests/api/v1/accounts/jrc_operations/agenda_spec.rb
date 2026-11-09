@@ -22,7 +22,7 @@ RSpec.describe 'Agenda from native CRM and Projects', type: :request do
   around { |example| travel_to(Time.utc(2026, 9, 24, 15)) { example.run } }
   before do
     account.enable_features!('jrc_crm', 'jrc_projects')
-    member.update!(jrc_projects_enabled: true)
+    member.update!(jrc_projects_enabled: true, jrc_projects_permissions: { 'projects.project.create' => true })
   end
 
   it 'combines real sources with stable identity and actual responsible person' do

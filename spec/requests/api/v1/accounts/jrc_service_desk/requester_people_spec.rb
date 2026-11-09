@@ -192,14 +192,15 @@ RSpec.describe 'Global Service Desk company and people intake', type: :request d
     expect(sd_account.contacts.count).to eq(1)
   end
 
-  it 'offers duplicate candidates without creating or merging a contact' do
+  it 'creates a distinct person when another person already uses the contact email' do
     unlinked.update!(email: body[:contact][:email])
     expect do
       post "#{base}/requester_people", params: body, headers: headers, as: :json
-    end.not_to change(Contact, :count)
-    expect(response).to have_http_status(:conflict)
-    expect(response.parsed_body['code']).to eq('POSSIBLE_DUPLICATE')
-    expect(response.parsed_body['candidates'].map { |row| row['id'] }).to include(unlinked.id)
+    end.to change(Contact, :count).by(1)
+    expect(response).to have_http_status(:created)
+    person = Contact.find(response.parsed_body.dig('person', 'id'))
+    expect(person.id).not_to eq(unlinked.id)
+    expect(JrcServiceDesk::RequesterContactDetails.call(person)['email']).to eq(body[:contact][:email])
     expect(unlinked.reload.company_id).to be_nil
   end
 
@@ -210,7 +211,7 @@ RSpec.describe 'Global Service Desk company and people intake', type: :request d
     expect(sd_account.contacts.count).to eq(1)
   end
 
-  it 'allows explicitly confirmed different people with the same name but never duplicate identities' do
+  it 'requires explicit confirmation for people sharing a name and keeps their identities separate' do
     unlinked.update!(name: body[:contact][:name])
     post "#{base}/requester_people", params: body, headers: headers, as: :json
     expect(response).to have_http_status(:conflict)
@@ -219,9 +220,9 @@ RSpec.describe 'Global Service Desk company and people intake', type: :request d
     expect(response).to have_http_status(:created)
     expect(sd_account.contacts.count).to eq(2)
     post "#{base}/requester_people", params: body.merge(request_key: 'another-identity-attempt', confirm_distinct: true), headers: headers, as: :json
-    expect(response).to have_http_status(:conflict)
-    expect(response.parsed_body['allow_distinct']).to be(false)
-    expect(sd_account.contacts.count).to eq(2)
+    expect(response).to have_http_status(:created)
+    expect(sd_account.contacts.count).to eq(3)
+    expect(sd_account.contacts.where.not(id: unlinked.id).pluck(:identifier).uniq.size).to eq(2)
   end
 
   it 'never returns or links contacts belonging to an internal company outside corporate coverage' do

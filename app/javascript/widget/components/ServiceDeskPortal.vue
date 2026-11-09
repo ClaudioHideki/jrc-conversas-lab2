@@ -35,6 +35,9 @@ const tickets = ref([]);
 const open = ref(false);
 const detail = ref(null);
 const serviceId = ref('');
+const establishmentId = ref('');
+const establishments = ref([]);
+const establishmentQuery = ref('');
 const title = ref('');
 const description = ref('');
 const answers = ref({});
@@ -134,8 +137,27 @@ watch(
     deep: true,
   }
 );
+const loadEstablishments = async () => {
+  if (!selected.value?.stores_enabled) return;
+  const run = start();
+  try {
+    const payload = await API.establishments(
+      websiteToken(),
+      serviceId.value,
+      establishmentQuery.value,
+      run.signal
+    );
+    if (current(run)) establishments.value = payload.establishments;
+  } catch (error) {
+    failure(run, error);
+  }
+};
 watch(serviceId, () => {
   contractId.value = '';
+  establishmentId.value = '';
+  establishments.value = [];
+  establishmentQuery.value = '';
+  loadEstablishments();
   answers.value = Object.fromEntries(
     (selected.value?.form_fields || [])
       .filter(field => field.type === 'boolean')
@@ -218,7 +240,8 @@ const create = async () => {
     busy.value ||
     !selected.value ||
     !title.value.trim() ||
-    (selected.value.contract_required && !selectedContract.value)
+    (selected.value.contract_required && !selectedContract.value) ||
+    (selected.value.stores_enabled && !establishmentId.value)
   )
     return;
   const run = start();
@@ -234,6 +257,9 @@ const create = async () => {
         selected.value.form_fields,
         answers.value
       ),
+      ...(establishmentId.value
+        ? { establishment_company_id: establishmentId.value }
+        : {}),
       ...(selectedContract.value
         ? { contract_id: selectedContract.value.id }
         : {}),
@@ -544,6 +570,40 @@ onBeforeUnmount(() => {
           </select>
         </label>
         <p v-if="selected" class="text-sm">{{ selected.description }}</p>
+        <fieldset
+          v-if="selected?.stores_enabled"
+          class="space-y-2 rounded border border-n-weak p-3"
+        >
+          <legend>{{ t('SERVICE_DESK.store') }}</legend>
+          <input
+            v-model="establishmentQuery"
+            :aria-label="t('SERVICE_DESK.store_search')"
+            :placeholder="t('SERVICE_DESK.store_search')"
+            class="w-full rounded border border-n-weak p-2"
+            :disabled="busy"
+            @keydown.enter.prevent="loadEstablishments"
+          />
+          <button
+            type="button"
+            class="rounded border border-n-weak px-3 py-2"
+            :disabled="busy"
+            @click="loadEstablishments"
+          >
+            {{ t('SERVICE_DESK.search_stores') }}
+          </button>
+          <select
+            v-model="establishmentId"
+            required
+            class="w-full rounded border border-n-weak p-2"
+            :aria-label="t('SERVICE_DESK.store')"
+            :disabled="busy"
+          >
+            <option value="" />
+            <option v-for="row in establishments" :key="row.id" :value="row.id">
+              {{ row.store_code }} {{ row.name }} {{ row.cnpj }}
+            </option>
+          </select>
+        </fieldset>
         <label v-if="selected?.contracts.length || selected?.contract_required">
           {{ t('SERVICE_DESK.contract') }}
           <select

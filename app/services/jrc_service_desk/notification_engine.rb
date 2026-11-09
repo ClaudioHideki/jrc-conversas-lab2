@@ -41,7 +41,7 @@ class JrcServiceDesk::NotificationEngine
   end
 
   def self.recipient(conversation, channel)
-    channel == 'email' ? conversation.contact.email : conversation.contact.phone_number
+    JrcServiceDesk::RequesterContactDetails.notification_recipient(conversation.contact, channel)
   end
 
   def self.current_policy(record, channel)

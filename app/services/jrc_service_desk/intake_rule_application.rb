@@ -154,6 +154,7 @@ class JrcServiceDesk::IntakeRuleApplication
     models = { 'priority_id' => JrcServiceDesk::Priority, 'category_id' => JrcServiceDesk::Category, 'service_id' => JrcServiceDesk::Service }
     models.each do |field, model|
       next unless classification[field]
+      next if field == 'service_id' && @ticket.origin_channel == 'portal'
       raise JrcServiceDesk::IdempotencyConflict, 'Explicit classification disagrees with published routing' if @supplied[field] && @supplied[field].to_i != classification[field]
 
       @ticket.public_send("#{field}=", model.where(account_id: @ticket.account_id, unit_id: @ticket.unit_id, active: true).find(classification[field]).id)

@@ -16,7 +16,7 @@ class JrcCustomers::CompanyWriter
         raise StaleRevision, 'This company changed since it was opened. Reload before saving.'
       end
 
-      attributes = attributes.to_h.symbolize_keys
+      attributes = JrcCustomers::EstablishmentMetadata.attributes(company, attributes).symbolize_keys
       created = company.new_record?
       if @actor && company.has_attribute?(:updated_by_id)
         attributes[:updated_by_id] = @actor.id

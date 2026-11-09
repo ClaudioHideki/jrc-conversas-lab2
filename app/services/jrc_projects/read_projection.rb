@@ -2,7 +2,7 @@
 # serializers; never use this projection to authorize a write.
 class JrcProjects::ReadProjection
   EMPTY_CAPABILITIES = [].freeze
-  CARD_CAPABILITIES = (JrcProjects::Authorization::OWNER + ['projects.project.create']).freeze
+  CARD_CAPABILITIES = JrcProjects::Authorization::OWNER.freeze
 
   def initialize(account_user:, projects:)
     member = JrcOperations::Access.refresh(account_user)
@@ -64,6 +64,7 @@ class JrcProjects::ReadProjection
     @account_id = account.id
     @user_id = member.user_id
     @admin = member.administrator? && member.custom_role_id.nil?
+    @individual = member.jrc_projects_permissions.dup.freeze
     @enabled = projects_enabled?(account, member)
     @permissions = role_permissions(member)&.map { |permission| permission.dup.freeze }&.freeze
   end
@@ -92,7 +93,9 @@ class JrcProjects::ReadProjection
 
     grants = project_grants(project, memberships)
     CARD_CAPABILITIES.select do |capability|
-      grants.include?(capability) && (@permissions.nil? || @permissions.include?(JrcProjects::Authorization.permission(capability)))
+      required = JrcProjects::IndividualPermissions::READ_ALIASES.fetch(capability, capability)
+      individually_allowed = @admin || @individual.fetch(capability, true)
+      grants.include?(capability) && individually_allowed && (@permissions.nil? || @permissions.include?(JrcProjects::Authorization.permission(required)))
     end
   end
 

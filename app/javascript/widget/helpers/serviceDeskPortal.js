@@ -66,6 +66,7 @@ export function portalServices(payload) {
       revision: row.revision,
       form_fields: catalogueFields(row.form_fields),
       contract_required: row.contract_required === true,
+      stores_enabled: row.stores_enabled === true,
       contracts: list(row.contracts ?? [], contract => ({
         id: id(contract.id),
         name: text(contract.name),

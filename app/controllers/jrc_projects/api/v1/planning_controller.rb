@@ -4,10 +4,12 @@ module JrcProjects
       class PlanningController < BaseController
         def critical_path
           project = scoped_project
+          authorize_capability!('projects.planning.view', project: project)
           render json: { data: Planning::CriticalPath.call(project: project) }
         end
         def dependencies
           project = scoped_project
+          authorize_capability!('projects.planning.view', project: project)
           edges = TaskDependency.where(account_id: Current.account.id, predecessor_id: scoped_tasks(project).select(:id), successor_id: scoped_tasks(project).select(:id))
           render json: { data: edges.as_json(only: %i[id predecessor_id successor_id kind]) }
         end

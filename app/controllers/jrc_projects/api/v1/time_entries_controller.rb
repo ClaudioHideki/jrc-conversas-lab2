@@ -4,6 +4,7 @@ module JrcProjects
       class TimeEntriesController < BaseController
         def index
           project = scoped_project
+          authorize_capability!('projects.time_entry.view', project: project)
           records, meta = pagination(project.time_entries.where(account_id: Current.account.id, project_id: project.id).includes(:user).order(worked_on: :desc, id: :desc))
           render json: { data: records.map { |r| serialize(r, project) }, meta: meta }
         end

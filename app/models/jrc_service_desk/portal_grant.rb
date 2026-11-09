@@ -14,6 +14,7 @@ class JrcServiceDesk::PortalGrant < JrcServiceDesk::AccountRecord
   validates :contact_inbox_id, uniqueness: { scope: %i[user_id account_id company_id] }
   validate :native_references
   validate :additional_contacts
+  validate :authorized_establishments, if: -> { new_record? || will_save_change_to_establishment_ids? }
 
   def self.available_for(user)
     where(user_id: user.id, active: true).where('expires_at IS NULL OR expires_at > ?', Time.current).includes(:account, :company, :contact, :inbox, :contact_inbox)
@@ -30,7 +31,7 @@ class JrcServiceDesk::PortalGrant < JrcServiceDesk::AccountRecord
 
   def public_context
     { id: id.to_s, organization: company.name, account: account.name, role: role,
-      contact: { name: contact.name, email: contact.email, phone_number: contact.phone_number } }
+      contact: JrcServiceDesk::RequesterContactDetails.call(contact).except('company_id') }
   end
 
   protected
@@ -40,6 +41,13 @@ class JrcServiceDesk::PortalGrant < JrcServiceDesk::AccountRecord
   end
 
   private
+
+  def authorized_establishments
+    ids = establishment_ids
+    valid = ids.is_a?(Array) && ids.size <= 1000 && ids.uniq == ids && ids.all? { |id| id.is_a?(Integer) && id.positive? }
+    valid &&= JrcCustomers::EstablishmentMetadata.scope(account).where(id: ids).count == ids.size if valid
+    errors.add(:establishment_ids, 'requires explicit active establishments in this account') unless valid
+  end
 
   def native_references
     %i[company contact inbox].each { |name| validate_account_reference(name) }

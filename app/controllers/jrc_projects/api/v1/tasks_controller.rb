@@ -53,7 +53,11 @@ module JrcProjects
             authorize_capability!('projects.task.update', project: project, record: task)
             assert_lock!(task, params.require(:task)[:lock_version])
             before = task.attributes
-            task.assign_attributes(task_params(project))
+            values = task_params(project)
+            if values.key?(:assignee_id) && values[:assignee_id].to_s != task.assignee_id.to_s
+              authorize_capability!('projects.task.assign', project: project, record: task)
+            end
+            task.assign_attributes(values)
             task.save!
             if task.saved_changes.any?
               AuditEvent.record!(account: Current.account, actor: Current.user, action: 'projects.task.updated', auditable: task,

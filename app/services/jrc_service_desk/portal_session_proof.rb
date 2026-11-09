@@ -23,4 +23,9 @@ class JrcServiceDesk::PortalSessionProof
 
     true
   end
+
+  def establishment_ids(identity:)
+    verify!(identity: identity)
+    @grant.establishment_ids
+  end
 end

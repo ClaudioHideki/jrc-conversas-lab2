@@ -19,6 +19,11 @@ class JrcServiceDesk::CreateTicketService < JrcServiceDesk::BaseService
       IDS.each { |name| normalized[name] = JrcServiceDesk::Input.id(normalized[name]) unless normalized[name].nil? }
       # Omitted/null company uses the historical fingerprint format for safe replay.
       normalize_company!(values, normalized)
+      if values['establishment_company_id'].present?
+        raise Pundit::NotAuthorizedError unless JrcServiceDesk::PortalRoutingConfiguration.read(unit)['stores_enabled'] == true
+        normalized['establishment_company_id'] = JrcServiceDesk::Input.id(values['establishment_company_id'])
+        JrcServiceDesk::RequesterDirectory.new(context).company!(normalized['establishment_company_id'])
+      end
       key = JrcServiceDesk::Input.request_key(idempotency_key)
       service_id = JrcServiceDesk::Input.id(service_id) unless service_id.nil?
       normalized['service_fields'] = values['service_fields'] if values.key?('service_fields')
@@ -91,7 +96,7 @@ class JrcServiceDesk::CreateTicketService < JrcServiceDesk::BaseService
   end
 
   def creation_fields
-    context.account.feature_enabled?('jrc_customer_master') ? FIELDS + %w[company_id service_fields] : FIELDS + ['service_fields']
+    context.account.feature_enabled?('jrc_customer_master') ? FIELDS + %w[company_id service_fields establishment_company_id] : FIELDS + ['service_fields']
   end
 
   def catalogue_references(service_id, normalized, unit)
@@ -105,6 +110,7 @@ class JrcServiceDesk::CreateTicketService < JrcServiceDesk::BaseService
 
   def configure_catalogue(ticket, service, normalized, values)
     ticket.company_id = normalized['company_id'] if normalized.key?('company_id')
+    ticket.establishment_company_id = normalized['establishment_company_id'] if normalized.key?('establishment_company_id')
     ticket.service_fields = values.fetch('service_fields', {})
     ticket.service = service
     ticket.lifecycle_policy_version = JrcServiceDesk::LifecycleSelector.new(ticket).applicable

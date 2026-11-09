@@ -23,7 +23,11 @@ const project = {
   name: 'Authorized project',
   status: 'active',
   priority: 'medium',
-  capabilities: [],
+  capabilities: [
+    'projects.project.view',
+    'projects.task.view',
+    'projects.board.view',
+  ],
   columns: [],
   members: [],
   tasks_completed: 0,
@@ -100,6 +104,8 @@ describe('Project detail progressive loading', () => {
       wrapper = shallowMount(ProjectDetail, {
         global: { stubs: { KeepAlive: false, RouterLink: true } },
       });
+      oldProject.resolve({ data: project });
+      await flushPromises();
       request.mockResolvedValue({
         data: { ...project, id: 8, name: 'Current project' },
       });
@@ -134,6 +140,7 @@ describe('Project detail progressive loading', () => {
     await flushPromises();
     expect(wrapper.find('h1').exists()).toBe(false);
     expect(wrapper.findComponent(ProjectExecution).exists()).toBe(false);
+    expect(allPages).not.toHaveBeenCalled();
     pending.reject(new Error('Forbidden'));
     await flushPromises();
     expect(wrapper.get('[role="alert"]').text()).toContain('Forbidden');
@@ -164,6 +171,19 @@ describe('Project detail progressive loading', () => {
       expect(wrapper.get('h1').text()).toBe('Current project');
     }
   );
+
+  it('does not request tasks or show their tabs without task permission', async () => {
+    request.mockResolvedValue({
+      data: { ...project, capabilities: ['projects.project.view'] },
+    });
+    wrapper = shallowMount(ProjectDetail, {
+      global: { stubs: { KeepAlive: false, RouterLink: true } },
+    });
+    await flushPromises();
+    expect(wrapper.get('h1').text()).toBe('Authorized project');
+    expect(allPages).not.toHaveBeenCalled();
+    expect(wrapper.findComponent(ProjectExecution).exists()).toBe(false);
+  });
 
   it('clears previously authorized content if a project refresh is denied', async () => {
     wrapper = shallowMount(ProjectDetail, {

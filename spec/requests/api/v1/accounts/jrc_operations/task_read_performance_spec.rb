@@ -9,7 +9,7 @@ RSpec.describe 'Task read query scaling', type: :request do
       account.enable_features!('jrc_projects')
       admin = create(:user, account: account, role: :administrator)
       actor = role == 'administrator' ? admin : create(:user, account: account, role: :agent)
-      account.account_users.find_by!(user: actor).update!(jrc_projects_enabled: true)
+      account.account_users.find_by!(user: actor).update!(jrc_projects_enabled: true, jrc_projects_permissions: { 'projects.project.create' => true })
       project = JrcProjects::Projects::Create.call(account: account, actor: admin, attributes: { name: 'Synthetic task read' },
                                                    idempotency_key: SecureRandom.uuid)
       project.project_members.create!(account: account, user: actor, role: role) unless role == 'administrator'

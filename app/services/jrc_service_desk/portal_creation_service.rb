@@ -7,7 +7,7 @@ class JrcServiceDesk::PortalCreationService
   end
 
   def call(attributes:, idempotency_key:, files: [])
-    fields = %w[service_id service_revision title description service_fields conversation_id contract_id]
+    fields = %w[service_id service_revision title description service_fields conversation_id contract_id establishment_company_id]
     values = JrcServiceDesk::Input.attributes(attributes, fields)
     key = JrcServiceDesk::Input.request_key(idempotency_key)
     uploads = JrcServiceDesk::InteractionAttachments.prepare(files)
@@ -30,6 +30,7 @@ class JrcServiceDesk::PortalCreationService
   def locked_service(values)
     initial = JrcServiceDesk::PortalScope.new(contact_inbox: @identity, identity_proof: @identity_proof)
     service = initial.services.find(JrcServiceDesk::Input.id(values.fetch('service_id')))
+    Account.where(id: service.account_id).lock('FOR SHARE').take!
     service.unit.lock!
     @identity.lock!('FOR SHARE')
     scope = JrcServiceDesk::PortalScope.new(contact_inbox: @identity, identity_proof: @identity_proof)
@@ -62,6 +63,7 @@ class JrcServiceDesk::PortalCreationService
   end
 
   def create_request(service, scope, context, values, submission)
+    validate_establishment!(service, values)
     conversation = conversation_for(scope, values)
     namespace = "portal:#{@identity.contact_id}:#{Digest::SHA256.hexdigest(submission[:key])}"
     ticket = create_ticket(service, context, conversation, values, namespace)
@@ -75,7 +77,9 @@ class JrcServiceDesk::PortalCreationService
       conversation: conversation, message: message, request_key: submission[:key], fingerprint: submission[:fingerprint],
       service_revision: JrcServiceDesk::ConfigurationResources.revision('services', service),
       service_snapshot: JrcServiceDesk::ConfigurationResources.fields('services', service).merge(
-        'requester_snapshot' => @identity.contact.slice('name', 'email', 'phone_number', 'company_id')
+        'requester_snapshot' => JrcServiceDesk::RequesterContactDetails.call(@identity.contact),
+        'portal_routing' => JrcServiceDesk::PortalRoutingConfiguration.read(service.unit),
+        'establishment' => ticket.catalogue_snapshot['establishment']
       )
     )
   end
@@ -92,9 +96,20 @@ class JrcServiceDesk::PortalCreationService
     attributes = { title: values.fetch('title'), description: values['description'], requester_id: @identity.contact_id,
                    status_id: status.id, service_fields: values.fetch('service_fields', {}) }
     attributes[:contract_id] = values['contract_id'] if values.key?('contract_id')
+    attributes[:establishment_company_id] = values['establishment_company_id'] if values['establishment_company_id']
+    attributes.merge!(JrcServiceDesk::PortalRoutingConfiguration.resolve(unit: service.unit, context: context))
     JrcServiceDesk::CreateTicketWorkflowService.new(user_context: context.to_h).call(
       unit_id: service.unit_id, attributes: attributes, conversation_id: conversation.id, service_id: service.id,
       idempotency_key: namespace, origin_channel: 'portal'
     )
+  end
+
+  def validate_establishment!(service, values)
+    required = JrcServiceDesk::PortalRoutingConfiguration.read(service.unit)['stores_enabled'] == true
+    raise ArgumentError, 'Select an authorized establishment' if required && values['establishment_company_id'].blank?
+    return unless values['establishment_company_id']
+
+    JrcServiceDesk::PortalEstablishments.new(identity: @identity, proof: @identity_proof)
+      .find!(values['establishment_company_id'], service: service)
   end
 end

@@ -90,7 +90,8 @@ class RequesterPortal::TicketsController < Api::V1::Widget::ServiceDeskControlle
 
   def require_current_master_profile
     contact = requester_grant.contact
-    valid = contact.name.present? && JrcCustomers::Identity.email(contact.email) && JrcCustomers::Identity.phone(contact.phone_number)
+    details = JrcServiceDesk::RequesterContactDetails.call(contact)
+    valid = contact.name.present? && JrcCustomers::Identity.email(details['email']) && JrcCustomers::Identity.phone(details['phone_number'])
     return render json: { code: 'master_profile_incomplete' }, status: :unprocessable_entity unless valid
 
     values = ticket_attributes(JrcServiceDesk::Input.attributes(request.request_parameters, %w[ticket files]))

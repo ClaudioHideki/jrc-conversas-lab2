@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_11_09_150000) do
+ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -54,6 +54,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_150000) do
     t.bigint "agent_capacity_policy_id"
     t.boolean "crm_enabled", default: false, null: false
     t.boolean "jrc_projects_enabled", default: false, null: false
+    t.jsonb "jrc_projects_permissions", default: {}, null: false
+    t.check_constraint "jsonb_typeof(jrc_projects_permissions) = 'object'::text", name: "jrc_project_permissions_object"
     t.boolean "auto_assignment_enabled", default: true, null: false
     t.index ["account_id", "id"], name: "jrc_sd_ref_account_users", unique: true
     t.index ["account_id", "user_id"], name: "uniq_user_id_per_account_id", unique: true
@@ -5253,6 +5255,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_150000) do
     t.index ["user_id", "active"], name: "jrc_sd_pg_access"
     t.check_constraint "jsonb_typeof(visible_contact_ids) = 'array'::text AND jsonb_array_length(visible_contact_ids) <= 100", name: "jrc_sd_pg_visible_contacts"
     t.check_constraint "role::text = ANY (ARRAY['requester'::character varying, 'manager'::character varying, 'organization_admin'::character varying]::text[])", name: "jrc_sd_pg_role"
+    t.jsonb "establishment_ids", default: [], null: false
+    t.check_constraint "jsonb_typeof(establishment_ids) = 'array'::text AND jsonb_array_length(establishment_ids) <= 1000", name: "jrc_sd_grant_establishments"
   end
 
   create_table "jrc_service_desk_portal_requests", force: :cascade do |t|
@@ -5674,6 +5678,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_150000) do
     t.check_constraint "btrim(title::text) <> ''::text AND btrim(origin_channel::text) <> ''::text AND btrim(idempotency_key::text) <> ''::text", name: "jrc_sd_ticket_required_text"
     t.check_constraint "impact_code IS NULL AND urgency_code IS NULL OR impact_code IS NOT NULL AND urgency_code IS NOT NULL AND impact_code::text ~ '^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$'::text AND urgency_code::text ~ '^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$'::text", name: "jrc_sd_explicit_impact_urgency"
     t.check_constraint "request_fingerprint::text ~ '^[a-f0-9]{64}$'::text", name: "jrc_sd_ticket_fingerprint"
+    t.bigint "establishment_company_id"
+    t.index ["account_id", "establishment_company_id"], name: "jrc_sd_ticket_establishment"
   end
 
   create_table "jrc_service_desk_unit_memberships", force: :cascade do |t|
@@ -9358,5 +9364,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_150000) do
   execute <<~'JRC_SCHEMA_SQL_808eaf09795b'
     CREATE TRIGGER jrc_migration_media_owner_truncate BEFORE TRUNCATE ON jrc_migration_media_objects FOR EACH STATEMENT EXECUTE FUNCTION jrc_migration_media_owner_guard();
   JRC_SCHEMA_SQL_808eaf09795b
+
+  add_foreign_key "jrc_service_desk_tickets", "companies", column: ["account_id", "establishment_company_id"], primary_key: ["account_id", "id"], name: "jrc_sd_establishment_account_fk"
 
 end

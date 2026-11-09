@@ -387,6 +387,7 @@ export function verifyWrittenFields(action, payload, ticket) {
     });
     const associations = {
       company_id: 'company',
+      establishment_company_id: 'establishment',
       requester_id: 'requester',
       status_id: 'status',
       priority_id: 'priority',

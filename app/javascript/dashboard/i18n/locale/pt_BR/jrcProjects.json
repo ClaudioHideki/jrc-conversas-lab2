@@ -564,5 +564,26 @@
   "EVENT_TIME_DELETED": "Apontamento excluído",
   "EVENT_PHASE_CREATED": "Fase criada",
   "EVENT_PHASE_UPDATED": "Fase atualizada",
-  "EVENT_PHASE_DELETED": "Fase excluída"
+  "EVENT_PHASE_DELETED": "Fase excluída",
+  "CREATE_PERMISSION": "Criar projetos",
+  "PERMISSION_INHERIT": "Herdar do papel no projeto",
+  "PERMISSION_ALLOW": "Permitir dentro do escopo",
+  "PERMISSION_DENY": "Negar",
+  "INDIVIDUAL_PERMISSIONS": "Permissões individuais",
+  "CAPABILITY_LABELS": {
+    "projects_project_view": "Visualizar projetos",
+    "projects_project_create": "Criar projetos",
+    "projects_project_update": "Editar projetos",
+    "projects_task_create": "Criar tarefas",
+    "projects_task_update": "Atualizar tarefas",
+    "projects_task_move": "Mover tarefas no Kanban",
+    "projects_member_manage": "Gerenciar integrantes",
+    "projects_member_view": "Visualizar equipe",
+    "projects_planning_view": "Visualizar planejamento",
+    "projects_time_entry_view": "Visualizar horas",
+    "projects_time_entry_create": "Registrar horas",
+    "projects_report_view": "Visualizar indicadores",
+    "projects_attachment_view": "Visualizar arquivos",
+    "projects_task_assign": "Gerenciar responsáveis de tarefas"
+  }
 }

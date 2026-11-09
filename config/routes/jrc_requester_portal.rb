@@ -13,6 +13,7 @@ scope '/portal', module: :requester_portal do
   end
   scope '/api' do
     get '/catalogo', to: 'tickets#services'
+    get '/catalogo/:service_id/lojas', to: 'tickets#establishments'
     get '/conhecimento', to: 'tickets#knowledge'
     get '/chamados', to: 'tickets#index'
     post '/chamados', to: 'tickets#create'
@@ -27,6 +28,9 @@ end
 scope '/api/v1/accounts/:account_id/jrc_service_desk', module: 'api/v1/accounts/jrc_service_desk' do
   get '/requester_portal', to: 'requester_portal#show'
   patch '/requester_portal', to: 'requester_portal#update'
+  get '/requester_portal/routing', to: 'requester_portal#routing'
+  patch '/requester_portal/routing', to: 'requester_portal#update_routing'
+  get '/requester_portal/establishments', to: 'requester_portal#establishments'
   post '/requester_portal/grants', to: 'requester_portal#create'
   patch '/requester_portal/grants/:id', to: 'requester_portal#change_grant'
 end

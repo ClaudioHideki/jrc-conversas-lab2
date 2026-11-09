@@ -5,13 +5,15 @@ class JrcServiceDesk::PortalPresenter
   def ticket(record)
     { id: record.id.to_s, number: record.id.to_s, title: record.title, description: record.description,
       status: { name: record.status.name, phase: record.status.phase }, opened_at: record.opened_at.iso8601(6),
-      contract_id: record.contract_id&.to_s, service_id: record.service_id&.to_s }
+      contract_id: record.contract_id&.to_s, service_id: record.service_id&.to_s,
+      establishment: record.catalogue_snapshot['establishment'] }
   end
 
   def service(record, contact: nil)
     catalogue = JrcServiceDesk::PortalCatalogue.new(contact: contact, service: record) if contact
     { id: record.id.to_s, name: record.name, description: record.description,
       form_fields: catalogue ? catalogue.form_fields : record.form_fields,
+      stores_enabled: JrcServiceDesk::PortalRoutingConfiguration.read(record.unit)['stores_enabled'] == true,
       contract_required: record.allowed_contract_ids.any?,
       contracts: catalogue ? catalogue.contracts.map { |row| { id: row.id.to_s, name: row.contract_number } } : [],
       revision: JrcServiceDesk::ConfigurationResources.revision('services', record) }

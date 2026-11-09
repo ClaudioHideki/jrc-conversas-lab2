@@ -1,5 +1,7 @@
 <script setup>
 import { computed } from 'vue';
+import { useStore } from 'vuex';
+import PortalRoutingSettings from '../components/PortalRoutingSettings.vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import Button from 'dashboard/components-next/button/Button.vue';
@@ -9,6 +11,10 @@ import { useServiceDeskStructure } from 'dashboard/composables/useServiceDeskStr
 import { canPreviewScreen } from '../helpers/access';
 import { SERVICE_DESK_ROUTES, serviceDeskRouteName } from '../routeDefinitions';
 const { t } = useI18n();
+const store = useStore();
+const portalAdministrator = computed(
+  () => store.getters.getCurrentUserRole === 'administrator'
+);
 const router = useRouter();
 const session = useServiceDesk();
 const structure = useServiceDeskStructure(
@@ -138,6 +144,10 @@ const open = key =>
         />
       </Panel>
     </div>
+    <PortalRoutingSettings
+      v-if="portalAdministrator"
+      :account-id="session.accountId.value"
+    />
     <div
       class="mt-4 rounded-xl border border-n-weak bg-n-solid-1 p-4 text-sm text-n-slate-11"
     >

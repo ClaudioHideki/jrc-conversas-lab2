@@ -24,6 +24,21 @@ class Api::V1::Widget::ServiceDeskController < Api::V1::Widget::BaseController
     render json: { services: rows.map { |row| portal_presenter.service(row, contact: portal_scope.contact) } }
   end
 
+  def establishments
+    service = portal_scope.services.find(JrcServiceDesk::Input.id(params[:service_id]))
+    raise Pundit::NotAuthorizedError unless JrcServiceDesk::PortalRoutingConfiguration.read(service.unit)['stores_enabled'] == true
+
+    query = params.fetch(:q, '')
+    raise ArgumentError unless query.is_a?(String) && query.size <= 200
+
+    rows = JrcServiceDesk::PortalEstablishments.new(identity: @contact_inbox, proof: portal_identity_proof).scope
+    if query.present?
+      pattern = "%#{ActiveRecord::Base.sanitize_sql_like(query.strip)}%"
+      rows = rows.where("name ILIKE :q OR trade_name ILIKE :q OR tax_id ILIKE :tax OR additional_attributes -> 'jrc_establishment' ->> 'store_code' ILIKE :q", q: pattern, tax: "%#{JrcCustomers::TaxIdentifier.normalize(query)}%")
+    end
+    render json: { establishments: rows.order(:name, :id).limit(100).map { |company| JrcCustomers::EstablishmentMetadata.snapshot(company) } }
+  end
+
   def knowledge
     values = JrcServiceDesk::Input.attributes(request.query_parameters, %w[website_token q])
     rows = portal_scope.knowledge(values.fetch('q', ''))

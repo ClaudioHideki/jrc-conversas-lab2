@@ -1,7 +1,7 @@
 module JrcProjects
   class Authorization
-    VIEW = %w[projects.project.view projects.task.view projects.report.view].freeze
-    WORK = (VIEW + %w[projects.task.create projects.task.update projects.task.move projects.time_entry.create]).freeze
+    VIEW = %w[projects.project.view projects.task.view projects.report.view projects.planning.view projects.member.view projects.time_entry.view projects.attachment.view].freeze
+    WORK = (VIEW + %w[projects.task.create projects.task.update projects.task.assign projects.task.move projects.time_entry.create]).freeze
     MANAGE = (WORK + %w[projects.project.update projects.member.manage projects.board.manage projects.task.delete projects.milestone.manage projects.sprint.manage projects.risk.manage projects.issue.manage projects.decision.manage projects.report.export projects.time_entry.manage projects.attachment.manage]).freeze
     OWNER = (MANAGE + %w[projects.budget.view projects.budget.manage projects.project.delete projects.project.transfer]).freeze
     ROLE_GRANTS = { 'owner' => OWNER, 'manager' => MANAGE, 'member' => WORK, 'contributor' => VIEW + %w[projects.task.update projects.time_entry.create], 'viewer' => VIEW }.freeze
@@ -11,10 +11,12 @@ module JrcProjects
       if account_user.custom_role_id.present?
         role = account_user.custom_role
         return false unless role && role.account_id == account_user.account_id && account_user.permissions.include?('custom_role')
-        return false unless role.permissions.include?(permission(capability))
+        required = IndividualPermissions::READ_ALIASES.fetch(capability, capability)
+        return false unless role.permissions.include?(permission(required))
       end
       return false if project && project.account_id != account_user.account_id
       return false if record && record.respond_to?(:account_id) && record.account_id != account_user.account_id
+      return false unless JrcOperations::Access.admin?(account_user) || IndividualPermissions.allowed?(account_user, capability)
       if capability == 'projects.project.transfer'
         return project.present? && (JrcOperations::Access.admin?(account_user) || project.owner_id == account_user.user_id)
       end
@@ -37,7 +39,7 @@ module JrcProjects
     end
     PERMISSIONS = (OWNER + %w[projects.project.create projects.template.manage]).map { |cap| permission(cap) }.freeze
     def self.capabilities(account_user, project)
-      (OWNER + ['projects.project.create']).select { |cap| allowed?(account_user: account_user, capability: cap, project: project) }
+      OWNER.select { |cap| allowed?(account_user: account_user, capability: cap, project: project) }
     end
   end
 end

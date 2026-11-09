@@ -134,7 +134,7 @@ RSpec.describe 'Rich project task comments', type: :request do
     get image_path, headers: foreign_user.create_new_auth_token
     expect(response.status).to be_in([401, 403, 404])
     member = create(:user, account: account, role: :agent)
-    account.account_users.find_by!(user: member).update!(jrc_projects_enabled: true)
+    account.account_users.find_by!(user: member).update!(jrc_projects_enabled: true, jrc_projects_permissions: { 'projects.project.create' => true })
     get image_path, headers: member.create_new_auth_token
     expect(response.status).to be_in([403, 404])
   end
@@ -177,7 +177,7 @@ RSpec.describe 'Rich project task comments', type: :request do
     expect(response).to have_http_status(:ok)
     expect(record.reload.body).to end_with('New ending')
     viewer = create(:user, account: account, role: :agent)
-    account.account_users.find_by!(user: viewer).update!(jrc_projects_enabled: true)
+    account.account_users.find_by!(user: viewer).update!(jrc_projects_enabled: true, jrc_projects_permissions: { 'projects.project.create' => true })
     project.project_members.create!(account: account, user: viewer, role: 'viewer')
     expect do
       patch "#{base}/comments/#{record.id}", params: { comment: { body: 'Forbidden' } }, headers: viewer.create_new_auth_token

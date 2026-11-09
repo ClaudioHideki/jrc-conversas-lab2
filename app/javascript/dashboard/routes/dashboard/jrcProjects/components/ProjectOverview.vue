@@ -314,7 +314,10 @@ function activityLabel(action) {
 
 <template>
   <div class="flex min-w-0 flex-col gap-4">
-    <div class="grid grid-cols-2 gap-3 md:grid-cols-3 2xl:grid-cols-6">
+    <div
+      v-if="project.capabilities?.includes('projects.report.view')"
+      class="grid grid-cols-2 gap-3 md:grid-cols-3 2xl:grid-cols-6"
+    >
       <article
         v-for="metric in metrics"
         :key="metric.key"
@@ -364,7 +367,10 @@ function activityLabel(action) {
       </article>
     </div>
 
-    <div class="grid min-w-0 grid-cols-1 gap-4 xl:grid-cols-3">
+    <div
+      v-if="project.capabilities?.includes('projects.report.view')"
+      class="grid min-w-0 grid-cols-1 gap-4 xl:grid-cols-3"
+    >
       <section class="rounded-xl border border-n-weak bg-n-solid-1 p-4">
         <h3 class="text-sm font-semibold">
           {{ projectText('PROJECT_PROGRESS', 'Progresso do projeto') }}
