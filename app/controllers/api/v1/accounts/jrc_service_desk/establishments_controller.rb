@@ -8,7 +8,7 @@ class Api::V1::Accounts::JrcServiceDesk::EstablishmentsController < Api::V1::Acc
     raise Pundit::NotAuthorizedError unless context.capability?(:customers_view)
 
     authorize :directory, :access?, policy_class: ::JrcCustomers::DirectoryPolicy
-    unit = context.unit_scope.find(::JrcServiceDesk::Input.id(values.fetch('unit_id')))
+    unit = policy_scope(::JrcServiceDesk::Unit).find(::JrcServiceDesk::Input.id(values.fetch('unit_id')))
     enabled = ::JrcServiceDesk::PortalRoutingConfiguration.read(unit)['stores_enabled'] == true
     scope = ::JrcCrm::CorporateCoverage.new(account: Current.account, user: Current.user)
       .companies(::JrcCustomers::EstablishmentMetadata.scope(Current.account))
