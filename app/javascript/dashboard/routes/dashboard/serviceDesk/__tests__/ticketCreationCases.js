@@ -107,6 +107,40 @@ export function registerTicketCreationCases(test, assert) {
     assert.equal(ops.mutation('create').status, 'confirmed');
   });
 
+  test('selected store reaches native HTTP creation and verified readback with its textual code and CNPJ intact', async () => {
+    const store = {
+      id: '9007199254740997',
+      name: 'Synthetic store',
+      store_code: '030',
+      cnpj: '11222333000181',
+      legal_name: 'Synthetic customer',
+      cluster: 'North',
+    };
+    const payload = createTicketDraft(
+      form({ establishment_company_id: store.id }),
+      unit(),
+      'store-key',
+      true
+    );
+    const calls = [];
+    const { ops } = await session({
+      post: async (url, body) => {
+        calls.push('POST');
+        assert.equal(body.ticket.establishment_company_id, store.id);
+        assert.equal(body.ticket.requester_id, '33');
+        assert.equal(Object.hasOwn(body.ticket, 'company_id'), false);
+        return { data: ack() };
+      },
+      get: async () => {
+        calls.push('GET');
+        return { data: detail(persisted({ establishment: store })) };
+      },
+    });
+    const result = await ops.write('create', 'create', payload);
+    assert.deepEqual(calls, ['POST', 'GET']);
+    assert.deepEqual(result.establishment, store);
+  });
+
   test('manual priority creation still transports the explicit assignee AccountUser, not a guessed membership ID', async () => {
     const payload = createTicketDraft(
       form({ assignee_id: '77', queue_id: '6', team_id: '8' }),

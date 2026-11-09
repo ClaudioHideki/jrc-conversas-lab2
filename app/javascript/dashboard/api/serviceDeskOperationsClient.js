@@ -99,12 +99,17 @@ export function createServiceDeskOperationsClient(http) {
         'assignee_account_user_id',
         'service_fields',
         'company_id',
+        'establishment_company_id',
       ]);
-      ['company_id', 'ticket_type_id', 'subcategory_id', 'contract_id'].forEach(
-        field => {
-          if (ticket[field] != null) ticket[field] = id(ticket[field]);
-        }
-      );
+      [
+        'company_id',
+        'establishment_company_id',
+        'ticket_type_id',
+        'subcategory_id',
+        'contract_id',
+      ].forEach(field => {
+        if (ticket[field] != null) ticket[field] = id(ticket[field]);
+      });
       const body = {
         unit_id: id(payload.unit_id),
         ticket,
