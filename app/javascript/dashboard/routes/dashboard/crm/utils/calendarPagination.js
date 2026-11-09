@@ -15,7 +15,9 @@ export const paginateCalendarDays = (days, requestedPage, pageSize = 25) => {
     days: days
       .map(day => ({
         ...day,
-        activities: day.activities.filter(activity => visibleIds.has(activity.id)),
+        activities: day.activities.filter(activity =>
+          visibleIds.has(activity.id)
+        ),
       }))
       .filter(day => day.activities.length),
   };

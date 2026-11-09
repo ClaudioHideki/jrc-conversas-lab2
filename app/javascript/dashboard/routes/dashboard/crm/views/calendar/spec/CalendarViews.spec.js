@@ -210,14 +210,15 @@ it('pages appointments rather than days without losing or repeating authorized r
   await render();
   await mode('list');
   const titles = [];
-  for (const count of [25, 25, 11]) {
+  await [25, 25, 11].reduce(async (previous, count) => {
+    await previous;
     const cards = grid().findAll('article');
     expect(cards).toHaveLength(count);
     titles.push(...cards.map(card => card.get('p').text()));
     if (count === 25) {
       await wrapper.get('[data-testid="calendar-list-next"]').trigger('click');
     }
-  }
+  }, Promise.resolve());
   expect(new Set(titles).size).toBe(61);
   expect(titles[0]).toBe('Authorized appointment 1');
   expect(titles[60]).toBe('Authorized appointment 61');
