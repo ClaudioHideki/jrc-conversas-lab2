@@ -33,7 +33,7 @@ RSpec.describe 'Distinct portal histories with concurrent shared contact channel
         proof = JrcServiceDesk::PortalIdentityProof.new(identifier: identity.contact.identifier,
           token: OpenSSL::HMAC.hexdigest('sha256', widget.hmac_token, identity.contact.identifier))
         JrcServiceDesk::PortalCreationService.new(contact_inbox: identity, identity_proof: proof).call(
-          attributes: { service_id: service.id, service_revision: revision, title: 'Individual request', service_fields: {} },
+          attributes: { service_id: service.id, service_revision: revision, title: 'Individual request', description: 'Synthetic concurrent request', service_fields: {} },
           idempotency_key: 'same-client-key-per-person').ticket_id
       end
     end)

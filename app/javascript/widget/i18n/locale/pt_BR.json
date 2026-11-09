@@ -167,6 +167,8 @@
     "own_survey_response": "Sua resposta",
     "store": "Loja solicitante",
     "store_search": "Código, nome ou CNPJ da loja",
-    "search_stores": "Pesquisar lojas"
+    "search_stores": "Pesquisar lojas",
+    "store_company": "Razão social",
+    "store_cluster": "Cluster"
   }
 }

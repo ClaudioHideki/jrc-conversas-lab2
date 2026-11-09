@@ -77,7 +77,7 @@ class JrcServiceDesk::Ticket < JrcServiceDesk::UnitRecord
   protected
 
   def ownership_columns
-    super + %i[impact_code urgency_code service_id created_by_membership_id idempotency_key request_fingerprint origin_channel opened_at]
+    super + %i[establishment_company_id impact_code urgency_code service_id created_by_membership_id idempotency_key request_fingerprint origin_channel opened_at]
   end
 
   private

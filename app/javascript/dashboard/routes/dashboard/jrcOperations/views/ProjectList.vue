@@ -87,7 +87,11 @@ async function loadSummary() {
   const current = summaryGeneration;
   portfolio.value = null;
   summaryError.value = '';
-  if (!status.value?.projects_enabled) return;
+  if (
+    !status.value?.projects_enabled ||
+    status.value?.can_view_project_reports === false
+  )
+    return;
   try {
     const result = await request(accountId.value, 'projects/portfolio');
     if (current === summaryGeneration) portfolio.value = result.data;
@@ -96,7 +100,12 @@ async function loadSummary() {
   }
 }
 watch(
-  () => [accountId.value, userId.value, status.value?.projects_enabled],
+  () => [
+    accountId.value,
+    userId.value,
+    status.value?.projects_enabled,
+    status.value?.can_view_project_reports,
+  ],
   () => {
     clearTimeout(debounce);
     generation += 1;

@@ -23,7 +23,7 @@ module JrcProjects
       return true if JrcOperations::Access.admin?(account_user)
       if project.nil?
         return true if capability == 'projects.project.create'
-        return %w[projects.project.view projects.report.view].include?(capability)
+        return VIEW.include?(capability)
       end
       return true if project.owner_id == account_user.user_id && OWNER.include?(capability)
       member = project.project_members.where(account_id: account_user.account_id, project_id: project.id).find_by(user_id: account_user.user_id)

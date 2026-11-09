@@ -56,6 +56,9 @@ const busy = ref(false);
 const selected = computed(() =>
   services.value.find(row => row.id === serviceId.value)
 );
+const selectedEstablishment = computed(() =>
+  establishments.value.find(row => row.id === establishmentId.value)
+);
 const websiteToken = () => window.chatwootWebChannel.websiteToken;
 let generation = 0;
 let controller;
@@ -603,6 +606,16 @@ onBeforeUnmount(() => {
               {{ row.store_code }} {{ row.name }} {{ row.cnpj }}
             </option>
           </select>
+          <dl v-if="selectedEstablishment" class="grid gap-2 text-sm">
+            <div>
+              <dt>{{ t('SERVICE_DESK.store_company') }}</dt>
+              <dd>{{ selectedEstablishment.legal_name }}</dd>
+            </div>
+            <div>
+              <dt>{{ t('SERVICE_DESK.store_cluster') }}</dt>
+              <dd>{{ selectedEstablishment.cluster }}</dd>
+            </div>
+          </dl>
         </fieldset>
         <label v-if="selected?.contracts.length || selected?.contract_required">
           {{ t('SERVICE_DESK.contract') }}

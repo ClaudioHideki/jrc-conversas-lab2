@@ -7,6 +7,8 @@ class JrcServiceDesk::PortalEstablishments
   end
 
   def scope
+    raise Pundit::NotAuthorizedError unless @identity.inbox.account.feature_enabled?('jrc_customer_master')
+
     @proof.verify!(identity: @identity)
     ids = @proof.establishment_ids(identity: @identity)
     JrcCustomers::EstablishmentMetadata.scope(@identity.inbox.account).where(id: ids)

@@ -108,8 +108,7 @@ async function save() {
             >
               {{
                 projectText(
-                  'CAPABILITY_LABELS.projects_' +
-                    capability.replaceAll('.', '_')
+                  'CAPABILITY_projects_' + capability.replaceAll('.', '_')
                 )
               }}
               <select

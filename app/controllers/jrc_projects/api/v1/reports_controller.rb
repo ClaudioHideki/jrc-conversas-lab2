@@ -9,7 +9,11 @@ module JrcProjects
         def index
           project = scoped_project
           authorize_capability!('projects.report.view', project: project)
-          render json: { data: { tasks: project.tasks.group(:status).count, time_minutes: project.time_entries.sum(:minutes) } }
+          data = { tasks: project.tasks.group(:status).count }
+          if Authorization.allowed?(account_user: Current.account_user, capability: 'projects.time_entry.view', project: project)
+            data[:time_minutes] = project.time_entries.sum(:minutes)
+          end
+          render json: { data: data }
         end
         def export
           project = scoped_project

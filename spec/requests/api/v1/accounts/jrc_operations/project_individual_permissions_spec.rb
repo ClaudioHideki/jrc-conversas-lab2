@@ -37,6 +37,18 @@ RSpec.describe 'Individual Projects permissions without global role changes', ty
     expect(projection.capabilities(project)).not_to include('projects.time_entry.view')
     get "/api/v1/accounts/#{account.id}/projects/projects/#{project.id}/time_entries", headers: agent.create_new_auth_token
     expect(response).to have_http_status(:forbidden)
+    get "#{url}/#{project.id}", headers: agent.create_new_auth_token
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.dig('data', 'overview')).not_to have_key('worked_minutes')
+    get "#{url}/#{project.id}/reports", headers: agent.create_new_auth_token
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('data')).not_to have_key('time_minutes')
+    member.update!(jrc_projects_permissions: { 'projects.report.view' => false })
+    get "/api/v1/accounts/#{account.id}/projects/portfolio", headers: agent.create_new_auth_token
+    expect(response).to have_http_status(:forbidden)
+    member.update!(jrc_projects_permissions: { 'projects.planning.view' => false })
+    get "#{url}/#{project.id}/phases", headers: agent.create_new_auth_token
+    expect(response).to have_http_status(:forbidden)
   end
 
   it 'cannot use an individual allow to bypass a restrictive CustomRole' do

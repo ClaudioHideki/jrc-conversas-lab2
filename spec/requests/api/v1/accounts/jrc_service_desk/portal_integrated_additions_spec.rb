@@ -69,6 +69,38 @@ RSpec.describe 'Portal routing, shared requester channels and authorized establi
     expect(sd_account.conversations).to be_empty
   end
 
+  it 'lists only active explicitly authorized stores and rejects cross-account grant changes' do
+    grant
+    hidden = sd_account.master_companies.create!(name: 'Other store', additional_attributes: { 'jrc_establishment' => { 'store_code' => '999' } })
+    foreign = sd_foreign_account.master_companies.create!(name: 'Foreign store', additional_attributes: { 'jrc_establishment' => { 'store_code' => '888' } })
+    expect { grant.update!(establishment_ids: [foreign.id]) }.to raise_error(ActiveRecord::RecordInvalid)
+    grant.reload
+    JrcServiceDesk::PortalRoutingConfiguration.save!(unit: sd_unit, actor: sd_account_user, values: { 'stores_enabled' => true },
+      expected_revision: JrcServiceDesk::PortalRoutingConfiguration.revision(sd_unit))
+    get "/api/v1/widget/service_desk/services/#{service.id}/establishments", params: { website_token: widget.website_token }, headers: headers
+    expect(response).to have_http_status(:ok), response.body
+    expect(response.parsed_body.fetch('establishments').map { |row| row['id'] }).to eq([establishment.id.to_s])
+    expect(response.body).not_to include(hidden.name, foreign.name)
+    establishment.update!(active: false)
+    get "/api/v1/widget/service_desk/services/#{service.id}/establishments", params: { website_token: widget.website_token }, headers: headers
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('establishments')).to be_empty
+    post '/api/v1/widget/service_desk/tickets', params: { website_token: widget.website_token, ticket: values }, headers: headers, as: :json
+    expect(response).to have_http_status(:not_found)
+    expect(JrcServiceDesk::Ticket.where(account: sd_account)).to be_empty
+  end
+
+  it 'rolls back creation when the configured manual destination is later disabled' do
+    queue = create(:jrc_sd_queue, unit: sd_unit, distribution_mode: 'manual')
+    JrcServiceDesk::PortalRoutingConfiguration.save!(unit: sd_unit, actor: sd_account_user, values: { 'queue_id' => queue.id },
+      expected_revision: JrcServiceDesk::PortalRoutingConfiguration.revision(sd_unit))
+    queue.update!(active: false)
+    post '/api/v1/widget/service_desk/tickets', params: { website_token: widget.website_token, ticket: values.except(:establishment_company_id) }, headers: headers, as: :json
+    expect(response).to have_http_status(:not_found)
+    expect(JrcServiceDesk::Ticket.where(account: sd_account)).to be_empty
+    expect(sd_account.conversations).to be_empty
+  end
+
   it 'assigns manually without automatic availability or capacity and derives the queue team' do
     team = create(:team, account: sd_account)
     agent = create(:user, account: sd_account)

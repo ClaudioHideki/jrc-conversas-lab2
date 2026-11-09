@@ -15,7 +15,7 @@ concurrency:
 jobs:
   rails:
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: 45
     services:
       postgres:
         image: pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a
@@ -77,7 +77,13 @@ jobs:
             spec/services/jrc_projects spec/models/jrc_service_desk \
             spec/services/jrc_contact_center spec/models/jrc_contact_center \
             spec/requests/api/v1/accounts/jrc_contact_center \
+            --exclude-pattern '**/*concurrency_spec.rb' \
             --format progress --format json --out /tmp/projects-portal-rspec.json
+      - name: Concorrencia com fixtures commitadas apos a suite transacional
+        run: |
+          # Committed concurrency fixtures must not contaminate global-count assertions above.
+          mapfile -t specs < <(git ls-files spec/requests/api/v1/accounts/jrc_operations spec/requests/api/v1/accounts/jrc_service_desk spec/services/jrc_service_desk spec/services/jrc_contact_center | grep 'concurrency_spec.rb$')
+          bundle exec rspec "${specs[@]}" --format progress --format json --out /tmp/projects-portal-concurrency.json
       - name: Sintaxe Ruby do incremento
         run: |
           git fetch --no-tags origin 35976b08077035ee79843b07ad02c0389d002f09
@@ -132,9 +138,10 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: voice-v4-rails-${{ github.sha }}
+          name: projects-portal-validation-${{ github.sha }}
           path: |
             /tmp/projects-portal-rspec.json
+            /tmp/projects-portal-concurrency.json
             /tmp/projects-portal-vitest.json
             /tmp/projects-portal-schema.rb
             /tmp/projects-portal-schema-regression.json

@@ -10,7 +10,7 @@ class JrcServiceDesk::PortalSessionProof
   end
 
   def verify!(identity:)
-    @grant.reload
+    @grant.reload(lock: 'FOR SHARE')
     allowed = @grant.user_id == @user.id && @user.active_for_authentication? && @grant.available?
     allowed &&= identity.inbox_id == @grant.inbox_id && identity.contact.account_id == @grant.account_id &&
                 identity.contact.company_id == @grant.company_id && !identity.contact.blocked?

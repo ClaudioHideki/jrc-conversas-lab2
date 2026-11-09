@@ -84,6 +84,7 @@ module JrcProjects
         end
         def authorize_read!(project)
           authorize_capability!('projects.member.view', project: project) if catalog_model == ProjectMember
+          authorize_capability!('projects.planning.view', project: project) if [Phase, Milestone, Sprint, Risk, Issue, Decision].include?(catalog_model)
           authorize_capability!('projects.project.view', project: project)
         end
         def authorize_write!(project)

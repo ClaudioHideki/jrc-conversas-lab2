@@ -105,7 +105,7 @@ class JrcServiceDesk::PortalCreationService
   end
 
   def validate_establishment!(service, values)
-    required = JrcServiceDesk::PortalRoutingConfiguration.read(service.unit)['stores_enabled'] == true
+    required = service.account.feature_enabled?('jrc_customer_master') && JrcServiceDesk::PortalRoutingConfiguration.read(service.unit)['stores_enabled'] == true
     raise ArgumentError, 'Select an authorized establishment' if required && values['establishment_company_id'].blank?
     return unless values['establishment_company_id']
 
