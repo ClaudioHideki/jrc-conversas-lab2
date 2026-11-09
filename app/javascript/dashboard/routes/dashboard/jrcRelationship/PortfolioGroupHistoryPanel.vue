@@ -150,9 +150,19 @@ const download = async () => {
     URL.revokeObjectURL(url);
     prepared.value = true;
   } catch (err) {
-    if (current === generation)
+    if (current === generation) {
+      if ([401, 403, 404].includes(err.response?.status)) {
+        rows.value = [];
+        pagination.value = {
+          page: 1,
+          per_page: 25,
+          total: 0,
+          can_read_rules: false,
+        };
+      }
       error.value =
         message(err) || t('RELATIONSHIP.NAMED_PORTFOLIOS.HISTORY.UNCONFIRMED');
+    }
   } finally {
     if (current === generation) exporting.value = false;
   }

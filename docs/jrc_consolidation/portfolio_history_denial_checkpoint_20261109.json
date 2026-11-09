@@ -1,0 +1,220 @@
+{
+  "date": "2026-11-09",
+  "previous_head": "f82ddf2255caa422c86bc196384502a64cdbc5f9",
+  "branch": "codex/relacionamento-v2-20261101",
+  "status": "Current-history UI export-denial invalidation fixed;directed source and adjacent legacy regression passed. Not full audit/C-G/Chrome closure.",
+  "trigger": "After an explicit401/403/404 from native export,the previously fetched operator/events,page count and rules choices remained visible. New tests reproduced3denial failures plus stale-read recovery failure before the fix.",
+  "implementation": [
+    "On a current-generation explicit401/403/404,clear previous event rows,page/total and rule-read evidence",
+    "Keep already authorized read rows for transient500;native error remains visible andno download is fabricated",
+    "Do not change server roles/grants,ledger rows,history projection or generic audit immutability",
+    "A new read must use the existing native scoped API;late/unmounted responses still cannot download"
+  ],
+  "validation": {
+    "initial": "6source cases:4failed/2passed;genuine stale-content assertions retained in denial01 artifacts",
+    "final": "13passed/0failed:6new source denial/transient/fresh-read/unmount cases +7legacy history/filter/pagination/export/group revocation cases",
+    "unique_history_cases": 13,
+    "lint": "2files0errors0warnings",
+    "warnings": "Existing duplicate i18n registration warnings from the7legacy cases retained;no warning or test-gate suppression",
+    "qualification": "Real Vue component/reactivity and mocked API transport in JSDOM;not real Chrome,PostgreSQL,provider or filesystem-download acceptance",
+    "backend_tests": "Not repeated;backend models,policies,services,queries,migrations untouched in this increment"
+  },
+  "resources": {
+    "portfolio-history-denial01": {
+      "kind": "source_tests_not_application_build",
+      "ram_start": 1345880064,
+      "disk_start": 15748714496,
+      "minimum_ram": 1109286912,
+      "minimum_disk": 15748714496,
+      "status": "failed",
+      "start_ram_threshold": 1342177280,
+      "stop_ram_threshold": 891289600,
+      "stop_disk_threshold": 2000000000,
+      "build_authorization_consumed": false,
+      "pid": 18104,
+      "exit_code": 1,
+      "log_tail": "tain their source access restrictions.Native access deniedChange typeAll statusesPortfolio createdPortfolio updatedCustomer links reviewedRule version recordedOperational summary exportedConfiguration restored as a new versionDeAtéApply filtersClear filtersPortfolio updated06/11/2026, 07:00Previously authorized operatorObjectiveA reason is recorded in the source audit.Previous pagePage 1 of 2Next page\"\n\n ❯ app/javascript/dashboard/routes/dashboard/jrcRelationship/portfolioHistoryDenial.spec.js:83:32\n     81|     await button(labels.HISTORY.EXPORT).trigger('click');\n     82|     await flushPromises();\n     83|     expect(wrapper.text()).not.toContain('Previously authorized operat…\n       |                                ^\n     84|     expect(wrapper.findAll('ol li')).toHaveLength(0);\n     85|     expect(wrapper.get('select').find('option[value=\"rules\"]').exists(…\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯\n\n FAIL  app/javascript/dashboard/routes/dashboard/jrcRelationship/portfolioHistoryDenial.spec.js > can read again only through a fresh native response after export access was denied\nAssertionError: expected [ DOMWrapper{ …(2) } ] to have a length of +0 but got 1\n\n- Expected\n+ Received\n\n- 0\n+ 1\n\n ❯ app/javascript/dashboard/routes/dashboard/jrcRelationship/portfolioHistoryDenial.spec.js:111:36\n    109|   await button(labels.HISTORY.EXPORT).trigger('click');\n    110|   await flushPromises();\n    111|   expect(wrapper.findAll('ol li')).toHaveLength(0);\n       |                                    ^\n    112|   const current = response();\n    113|   current.payload[0].actor.name = 'Currently authorized operator';\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯\n\n\n Test Files  1 failed (1)\n      Tests  4 failed | 2 passed (6)\n   Start at  10:22:53\n   Duration  2.98s (transform 225ms, setup 291ms, collect 211ms, tests 210ms, environment 1.68s, prepare 195ms)\n\nJSON report written to C:/Users/DEV03/Documents/Jrc/relacionamento-v2-20261101/.codex/d-approvals-20261104/portfolio-history-denial01-tests.json\n",
+      "ram_end": 1331290112,
+      "disk_end": 15748706304
+    },
+    "portfolio-history-denial02": {
+      "kind": "source_tests_not_application_build",
+      "ram_start": 1362513920,
+      "disk_start": 15748698112,
+      "minimum_ram": 1121759232,
+      "minimum_disk": 15748698112,
+      "status": "passed",
+      "start_ram_threshold": 1342177280,
+      "stop_ram_threshold": 891289600,
+      "stop_disk_threshold": 2000000000,
+      "build_authorization_consumed": false,
+      "pid": 24528,
+      "exit_code": 0,
+      "log_tail": "\n RUN  v3.0.5 C:/Users/DEV03/Documents/Jrc/relacionamento-v2-20261101\n\n ✓ app/javascript/dashboard/routes/dashboard/jrcRelationship/portfolioHistoryDenial.spec.js (6 tests) 192ms\n\n Test Files  1 passed (1)\n      Tests  6 passed (6)\n   Start at  10:23:25\n   Duration  2.61s (transform 229ms, setup 258ms, collect 229ms, tests 192ms, environment 1.28s, prepare 178ms)\n\nJSON report written to C:/Users/DEV03/Documents/Jrc/relacionamento-v2-20261101/.codex/d-approvals-20261104/portfolio-history-denial02-tests.json\n",
+      "ram_end": 1354412032,
+      "disk_end": 15748698112
+    },
+    "portfolio-history-regression01": {
+      "kind": "source_tests_not_application_build",
+      "ram_start": 1289994240,
+      "disk_start": 15748665344,
+      "minimum_ram": 1289994240,
+      "minimum_disk": 15748665344,
+      "status": "preflight_blocked",
+      "start_ram_threshold": 1342177280,
+      "stop_ram_threshold": 891289600,
+      "stop_disk_threshold": 2000000000,
+      "build_authorization_consumed": false,
+      "ram_end": 1289977856,
+      "disk_end": 15748665344
+    },
+    "portfolio-history-regression02": {
+      "kind": "source_tests_not_application_build",
+      "ram_start": 1205657600,
+      "disk_start": 15741206528,
+      "minimum_ram": 1205657600,
+      "minimum_disk": 15741206528,
+      "status": "preflight_blocked",
+      "start_ram_threshold": 1342177280,
+      "stop_ram_threshold": 891289600,
+      "stop_disk_threshold": 2000000000,
+      "build_authorization_consumed": false,
+      "ram_end": 1205723136,
+      "disk_end": 15741206528
+    },
+    "portfolio-history-lint01": {
+      "kind": "directed_eslint_not_application_build",
+      "ram_start": 1140506624,
+      "disk_start": 15606439936,
+      "minimum_ram": 1140506624,
+      "minimum_disk": 15606439936,
+      "status": "preflight_blocked",
+      "start_ram_threshold": 1159725056,
+      "stop_ram_threshold": 891289600,
+      "stop_disk_threshold": 2000000000,
+      "build_authorization_consumed": false,
+      "heap_mib": 128,
+      "native_allowance_mib": 128,
+      "ram_end": 1140490240,
+      "disk_end": 15606439936
+    },
+    "portfolio-history-lint02": {
+      "kind": "directed_eslint_not_application_build",
+      "ram_start": 1833328640,
+      "disk_start": 15511818240,
+      "minimum_ram": 1685114880,
+      "minimum_disk": 15511621632,
+      "status": "passed",
+      "start_ram_threshold": 1159725056,
+      "stop_ram_threshold": 891289600,
+      "stop_disk_threshold": 2000000000,
+      "build_authorization_consumed": false,
+      "heap_mib": 128,
+      "native_allowance_mib": 128,
+      "pid": 23176,
+      "exit_code": 0,
+      "log_tail": "",
+      "ram_end": 1855475712,
+      "disk_end": 15511814144
+    },
+    "portfolio-history-regression03": {
+      "kind": "source_tests_not_application_build",
+      "ram_start": 1863065600,
+      "disk_start": 15511814144,
+      "minimum_ram": 1780441088,
+      "minimum_disk": 15511797760,
+      "status": "passed",
+      "start_ram_threshold": 1342177280,
+      "stop_ram_threshold": 891289600,
+      "stop_disk_threshold": 2000000000,
+      "build_authorization_consumed": false,
+      "pid": 9268,
+      "exit_code": 0,
+      "log_tail": " already been registered in target app.\n\nstderr | app/javascript/dashboard/routes/dashboard/jrcRelationship/portfolioGroupHistory.spec.js > omits unavailable actor identities, configuration choices and unauthorized export controls\n[Vue warn]: Component \"i18n-t\" has already been registered in target app.\n[Vue warn]: Component \"I18nT\" has already been registered in target app.\n[Vue warn]: Component \"i18n-n\" has already been registered in target app.\n[Vue warn]: Component \"I18nN\" has already been registered in target app.\n[Vue warn]: Component \"i18n-d\" has already been registered in target app.\n[Vue warn]: Component \"I18nD\" has already been registered in target app.\n[Vue warn]: Directive \"t\" has already been registered in target app.\n\nstderr | app/javascript/dashboard/routes/dashboard/jrcRelationship/portfolioGroupHistory.spec.js > wires the history tab and returns to customers when record-specific history access is revoked\n[Vue warn]: Component \"i18n-t\" has already been registered in target app.\n[Vue warn]: Component \"I18nT\" has already been registered in target app.\n[Vue warn]: Component \"i18n-n\" has already been registered in target app.\n[Vue warn]: Component \"I18nN\" has already been registered in target app.\n[Vue warn]: Component \"i18n-d\" has already been registered in target app.\n[Vue warn]: Component \"I18nD\" has already been registered in target app.\n[Vue warn]: Directive \"t\" has already been registered in target app.\n\n ✓ app/javascript/dashboard/routes/dashboard/jrcRelationship/portfolioGroupHistory.spec.js (7 tests) 308ms\n ✓ app/javascript/dashboard/routes/dashboard/jrcRelationship/portfolioHistoryDenial.spec.js (6 tests) 161ms\n\n Test Files  2 passed (2)\n      Tests  13 passed (13)\n   Start at  10:40:05\n   Duration  5.34s (transform 855ms, setup 605ms, collect 1.05s, tests 470ms, environment 2.16s, prepare 346ms)\n\nJSON report written to C:/Users/DEV03/Documents/Jrc/relacionamento-v2-20261101/.codex/d-approvals-20261104/portfolio-history-regression03-tests.json\n",
+      "ram_end": 2573803520,
+      "disk_end": 15511789568
+    }
+  },
+  "files_sha256": {
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/PortfolioGroupHistoryPanel.vue": "549ceec73a75548a7b5fffd0b06626cae9b44bbac320e5522d89c7b96628492e",
+    "app/javascript/dashboard/routes/dashboard/jrcRelationship/portfolioHistoryDenial.spec.js": "afb1b729779482c77972aa296b99f491f38e22f98c4baf0c9597af077417b2de"
+  },
+  "build_candidate": {
+    "sha": "d8d7c960ce34829d43c7fed58165a8a1098e4fba",
+    "actual_new_vite_invocations": 0,
+    "conditional_attempt_consumed": false,
+    "pinned_history_component_verified_exact": true,
+    "new_history_fix_not_in_d8d7": true,
+    "minimum_host_ram_bytes": 5368709120,
+    "minimum_disk_bytes": 3221225472
+  },
+  "runtime_preservation": {
+    "date": "2026-11-09T13:47:05.7178568Z",
+    "method": "Read-only Docker Engine HTTP GET over existing local named pipe;no CLI reinstall,no restart,no exec,no container mutation",
+    "endpoint": "local dockerDesktopLinuxEngine named pipe",
+    "raw_inspect_saved": false,
+    "protected_containers": [
+      {
+        "name": "/jrc-rel-v2-run-20261101",
+        "running": true,
+        "started_at": "2026-11-04T11:34:25.650429595Z",
+        "linux_host_pid": 616
+      },
+      {
+        "name": "/jrc-rel-v2-pg-20261101",
+        "running": true,
+        "started_at": "2026-11-04T11:34:28.691130017Z",
+        "linux_host_pid": 682
+      },
+      {
+        "name": "/jrc-rel-v2-redis-20261101",
+        "running": true,
+        "started_at": "2026-11-04T11:34:29.041643269Z",
+        "linux_host_pid": 742
+      },
+      {
+        "name": "/jrc-customer-b1-b4-proxy-4d4a6de3",
+        "running": true,
+        "started_at": "2026-11-04T12:04:25.285490323Z",
+        "linux_host_pid": 1273
+      }
+    ],
+    "frozen_asset_hash_rechecked": false,
+    "asset_note": "CLI missing;no archive/exec request issued. Previous frozen asset hash evidence retained,not asserted freshly checked."
+  },
+  "resource_snapshot_end": {
+    "ram_bytes": 1465065472,
+    "disk_bytes": 15369986048,
+    "no_competing_vite_seen": true,
+    "server5379_windows_pid": 6464
+  },
+  "tooling_note": "Default Git launcher unavailable internally;bundled Git2.56.0 works with unchanged repository. docker.exe later absent fromPATH/known installed locations;backend still alive. Final protected metadata were read through local Docker Engine namedpipe GET only. No install/repair/restart;original asset hash not freshly rechecked.",
+  "previous_checkpoint_ancestry_confirmed": [
+    "a1fef624",
+    "9bb8d2ec",
+    "3390725e",
+    "07a9e400",
+    "0f768a98",
+    "3b31577e",
+    "53d0b022",
+    "d8d7c960",
+    "32558d46"
+  ],
+  "untracked_diagnostics_preserved": true,
+  "operations": {
+    "existing_DB_Redis_mutations": false,
+    "source_app_build": false,
+    "Chrome_acceptance": false,
+    "cleanup": false,
+    "push_GHCR_deploy_external_provider": false,
+    "other_Codex_or_environment_interruption": false
+  },
+  "full_history_remaining": "Operational summary is not sealed historical audit. Before/after/reasons need exact protected historical-scope evidence and legacy import/account deletion compatibility. No historical private values newly exposed.",
+  "all_stage_closure": {
+    "C": false,
+    "D": false,
+    "E": false,
+    "F": false,
+    "G": false
+  }
+}

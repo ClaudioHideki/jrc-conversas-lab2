@@ -518,9 +518,9 @@
   "next_source_review": "Prepare consolidated current-source isolated Chrome acceptance for committed candidate;build/new local instance still require explicit authorization and5379must remain frozen.",
   "latest_unvalidated_increment": {
     "date": "2026-11-09",
-    "report": "docs/jrc_consolidation/conditional_build_preflight_and_calendar_wip_20261109.json",
-    "state": "Native Calendar list paging implementation and regression cases prepared;behavior gates blocked by RAM. No Word requirement marked complete.",
-    "pinned_build_candidate_unchanged": "d8d7c960",
+    "report": "docs/jrc_consolidation/calendar_list_pagination_checkpoint_20261109.json",
+    "state": "Supersedes prior WIP:35unique Calendar source/pure cases passed;still no build/Chrome/DB acceptance.",
+    "pinned_build_candidate_unchanged": "d8d7c960ce34829d43c7fed58165a8a1098e4fba",
     "stage_closure": {
       "C": false,
       "D": false,
@@ -528,5 +528,10 @@
       "F": false,
       "G": false
     }
-  }
+  },
+  "current_history_increment": {
+    "report": "docs/jrc_consolidation/portfolio_history_denial_checkpoint_20261109.json",
+    "state": "4reproduced failures fixed;13source cases and2files0lint;generic historical audit remains partial"
+  },
+  "current_literal_matrix": "docs/jrc_consolidation/cg_word_reconciliation_20261109.json"
 }

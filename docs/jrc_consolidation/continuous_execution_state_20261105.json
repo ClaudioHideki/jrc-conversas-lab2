@@ -3,13 +3,16 @@
   "user_request": "499267ac-546d-4853-b4cf-7f03a2ea0629",
   "initial_head": "be54d0f7b4ce8d4e2a077cf2bdd8c2a4d5c88f5e",
   "branch": "codex/relacionamento-v2-20261101",
-  "last_validated_checkpoint": "4b5de4c490ff1bae8911d2f1f81540fffbe2a3c0",
+  "last_validated_checkpoint": "f82ddf2255caa422c86bc196384502a64cdbc5f9",
   "completed_current_work": "Sealed dossier, weighted/current capacity, native withdrawal/cadence controls and F2 increments locally tested; see linked incremental reports. No C-G closure.",
-  "active_work": "Calendar paging35unique source cases passed;continuing history export current-access denial regression.",
+  "active_work": "Calendar paging35cases and history-denial13cases passed;C-G literal/visual/business/external closure remains open.",
   "exact_next_actions": [
-    "Reproduce stale history rows after explicit native history-export401/403/404,then preserve current read authority on failures without changing backend grants.",
-    "Reconcile C-G exact Word/evidence delta;do not claim Chrome or external acceptance.",
-    "If resources permit,run only new/changed source regressions sequentially."
+    "Retain native rules and address remaining protected historical-scope design/domain-adapter gaps only with directed native isolated validation;no speculative grants or existingDB changes.",
+    "Define local portfolio role matrix and TRR before implementing their missing semantics;portfolio-less document expansion remains explicitly deferred.",
+    "For d8d7 build recheck>=5GiB hostRAM,>=3GiBdisk,no competing Vite and guard from start;do not reset the consumed old launcher/output. Preserve approved snapshot and keep post-d8d7paging/history fixes separate.",
+    "Revalidate Docker client/runtime for isolated native-DB/Chrome acceptance without restarting the frozen environments;current read-only fallback is not an installation repair.",
+    "After a valid authorized build,perform real desktop/mobile/light-dark/persistence/denial/revision-conflict acceptance;no5379oldassets as proof.",
+    "External DocuSign demo/scanner/channel pilot and whole Word visual/scale acceptance remain open."
   ],
   "test_environment": {
     "source_manifest": ".codex/d9-notifications-20261104/snapshot.json",
@@ -56,12 +59,15 @@
   "TRR": "Undefined; do not invent",
   "company_documents_without_portfolio": "Explicitly deferred",
   "last_validated_head": "4b5de4c490ff1bae8911d2f1f81540fffbe2a3c0",
-  "new_validated_code_checkpoint": "git log -1 --format=%H -- docs/jrc_consolidation/calendar_filters_checkpoint_20261107.json",
-  "current_status": "Native maximum master allocations,multiple active portfolios,CRM source caches/forms and activity origin gate incrementally tested;C-G and Chrome not closed.",
+  "new_validated_code_checkpoint": "git log -1 --format=%H -- docs/jrc_consolidation/portfolio_history_denial_checkpoint_20261109.json",
+  "current_status": "48distinct final source/pure cases passed;no native backend changes,new Vite build,Chrome or production claim.",
   "next_actions": [
-    "Reproduce stale history rows after explicit native history-export401/403/404,then preserve current read authority on failures without changing backend grants.",
-    "Reconcile C-G exact Word/evidence delta;do not claim Chrome or external acceptance.",
-    "If resources permit,run only new/changed source regressions sequentially."
+    "Retain native rules and address remaining protected historical-scope design/domain-adapter gaps only with directed native isolated validation;no speculative grants or existingDB changes.",
+    "Define local portfolio role matrix and TRR before implementing their missing semantics;portfolio-less document expansion remains explicitly deferred.",
+    "For d8d7 build recheck>=5GiB hostRAM,>=3GiBdisk,no competing Vite and guard from start;do not reset the consumed old launcher/output. Preserve approved snapshot and keep post-d8d7paging/history fixes separate.",
+    "Revalidate Docker client/runtime for isolated native-DB/Chrome acceptance without restarting the frozen environments;current read-only fallback is not an installation repair.",
+    "After a valid authorized build,perform real desktop/mobile/light-dark/persistence/denial/revision-conflict acceptance;no5379oldassets as proof.",
+    "External DocuSign demo/scanner/channel pilot and whole Word visual/scale acceptance remain open."
   ],
   "latest_dossier_report": "docs/jrc_consolidation/sealed_dossier_checkpoint_20261105.json",
   "capacity_report": "docs/jrc_consolidation/weighted_capacity_checkpoint_20261105.json",
@@ -194,7 +200,7 @@
   "build_started": false,
   "approved_build_candidate": "d8d7c960ce34829d43c7fed58165a8a1098e4fba",
   "approved_build_attempt_consumed": true,
-  "current_build_status": "New d8d7 authorization unconsumed;physical hostRAM below5GiB;no Vite build started",
+  "current_build_status": "Conditional d8d7 attempt unconsumed;last Windows hostRAM1.36GiB below5GiB. docker.exe absent;read-only engine metadata confirmed original containers intact.",
   "current_source_browser_qa": false,
   "protected_build_interruption_report": "docs/jrc_consolidation/protected_build_d8d7_interruption_20261109.json",
   "current_build_authorization": {
@@ -205,5 +211,7 @@
     "preflight_blocked": true
   },
   "latest_partial_report": "docs/jrc_consolidation/calendar_list_pagination_checkpoint_20261109.json",
-  "calendar_pagination_report": "docs/jrc_consolidation/calendar_list_pagination_checkpoint_20261109.json"
+  "calendar_pagination_report": "docs/jrc_consolidation/calendar_list_pagination_checkpoint_20261109.json",
+  "history_denial_report": "docs/jrc_consolidation/portfolio_history_denial_checkpoint_20261109.json",
+  "word_reconciliation_current": "docs/jrc_consolidation/cg_word_reconciliation_20261109.json"
 }
