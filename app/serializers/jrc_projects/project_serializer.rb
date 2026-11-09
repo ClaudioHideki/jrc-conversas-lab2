@@ -30,7 +30,12 @@ module JrcProjects
         data['accepted_by'] = project.accepted_by&.as_json(only: %i[id name])
         data['columns'] = project.board_columns.order(:board_id, :position, :id).as_json(only: %i[id board_id name status_key position wip_limit])
         data['members'] = data['capabilities'].include?('projects.member.view') ? members(project) : []
-        data['phases'] = data['capabilities'].include?('projects.planning.view') ? project.phases.where(account_id: project.account_id, project_id: project.id).order(:position, :id).as_json(only: %i[id name]) : []
+        data['phases'] = if data['capabilities'].include?('projects.planning.view')
+                           project.phases.where(account_id: project.account_id, project_id: project.id)
+                             .order(:position, :id).as_json(only: %i[id name])
+                         else
+                           []
+                         end
         data['overview'] = data['capabilities'].include?('projects.report.view') ? overview(project, capabilities: data['capabilities']) : {}
         financial = data['capabilities'].include?('projects.budget.view')
         data['budget'] = Reporting::FinancialProjection.call(project: project) if financial

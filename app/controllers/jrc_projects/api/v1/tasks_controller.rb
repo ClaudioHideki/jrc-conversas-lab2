@@ -12,7 +12,8 @@ module JrcProjects
           read_projection = ReadProjection.new(account_user: Current.account_user, projects: [project])
           render json: {
             data: records.map do |task|
-              serialize(task, worked_minutes: minutes.fetch(task.id, 0), counts: counts.fetch(task.id), read_projection: read_projection, project: project)
+              serialize(task, worked_minutes: minutes.fetch(task.id, 0), counts: counts.fetch(task.id),
+                        read_projection: read_projection, project: project)
             end, meta: meta
           }
         end

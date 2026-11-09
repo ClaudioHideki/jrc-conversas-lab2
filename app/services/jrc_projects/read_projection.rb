@@ -95,7 +95,8 @@ class JrcProjects::ReadProjection
     CARD_CAPABILITIES.select do |capability|
       required = JrcProjects::IndividualPermissions::READ_ALIASES.fetch(capability, capability)
       individually_allowed = @admin || @individual.fetch(capability, true)
-      grants.include?(capability) && individually_allowed && (@permissions.nil? || @permissions.include?(JrcProjects::Authorization.permission(required)))
+      grants.include?(capability) && individually_allowed &&
+        (@permissions.nil? || @permissions.include?(JrcProjects::Authorization.permission(required)))
     end
   end
 

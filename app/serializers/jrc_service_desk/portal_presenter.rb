@@ -13,7 +13,8 @@ class JrcServiceDesk::PortalPresenter
     catalogue = JrcServiceDesk::PortalCatalogue.new(contact: contact, service: record) if contact
     { id: record.id.to_s, name: record.name, description: record.description,
       form_fields: catalogue ? catalogue.form_fields : record.form_fields,
-      stores_enabled: record.account.feature_enabled?('jrc_customer_master') && JrcServiceDesk::PortalRoutingConfiguration.read(record.unit)['stores_enabled'] == true,
+      stores_enabled: record.account.feature_enabled?('jrc_customer_master') &&
+                      JrcServiceDesk::PortalRoutingConfiguration.read(record.unit)['stores_enabled'] == true,
       contract_required: record.allowed_contract_ids.any?,
       contracts: catalogue ? catalogue.contracts.map { |row| { id: row.id.to_s, name: row.contract_number } } : [],
       revision: JrcServiceDesk::ConfigurationResources.revision('services', record) }

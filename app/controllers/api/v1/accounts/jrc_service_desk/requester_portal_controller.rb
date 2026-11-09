@@ -42,7 +42,8 @@ class Api::V1::Accounts::JrcServiceDesk::RequesterPortalController < Api::V1::Ac
   end
 
   def change_grant
-    values = ::JrcServiceDesk::Input.attributes(request.request_parameters, %w[active role visible_contact_ids expose_sla expires_at establishment_ids expected_revision])
+    fields = %w[active role visible_contact_ids expose_sla expires_at establishment_ids expected_revision]
+    values = ::JrcServiceDesk::Input.attributes(request.request_parameters, fields)
     grant = ::JrcServiceDesk::PortalGrant.where(account: Current.account).find(::JrcServiceDesk::Input.id(params[:id]))
     expected = values.delete('expected_revision')
     grant.with_lock do
@@ -91,7 +92,9 @@ class Api::V1::Accounts::JrcServiceDesk::RequesterPortalController < Api::V1::Ac
   end
 
   def grant_payload(grant)
-    { 'contact_name' => grant.contact.name, 'user_name' => grant.user.name, 'revision' => grant.updated_at.iso8601(6) }.merge(grant.attributes.slice('id', 'user_id', 'company_id', 'contact_id', 'contact_inbox_id', 'active', 'role', 'visible_contact_ids', 'expose_sla', 'expires_at', 'establishment_ids'))
+    fields = %w[id user_id company_id contact_id contact_inbox_id active role visible_contact_ids expose_sla expires_at establishment_ids]
+    { 'contact_name' => grant.contact.name, 'user_name' => grant.user.name, 'revision' => grant.updated_at.iso8601(6) }
+      .merge(grant.attributes.slice(*fields))
   end
 
   def audit(record, action, changes)

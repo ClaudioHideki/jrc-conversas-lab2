@@ -21,7 +21,8 @@ class JrcServiceDesk::PortalRoutingConfiguration
     return result unless values['assignee_account_user_id']
 
     member = JrcServiceDesk::UnitMembership.operational.where(account_id: unit.account_id, unit_id: unit.id, active: true,
-                                                             manual_assignment_enabled: true).find_by!(account_user_id: values['assignee_account_user_id'])
+                                                             manual_assignment_enabled: true)
+      .find_by!(account_user_id: values['assignee_account_user_id'])
     candidate = JrcServiceDesk::Ticket.new(account: unit.account, unit: unit, queue: queue, team_id: queue.team_id)
     raise Pundit::NotAuthorizedError unless JrcServiceDesk::AssignmentEligibility.manual_domain?(member, candidate)
 

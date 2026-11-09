@@ -34,7 +34,10 @@ class Api::V1::Widget::ServiceDeskController < Api::V1::Widget::BaseController
     rows = JrcServiceDesk::PortalEstablishments.new(identity: @contact_inbox, proof: portal_identity_proof).scope
     if query.present?
       pattern = "%#{ActiveRecord::Base.sanitize_sql_like(query.strip)}%"
-      rows = rows.where("name ILIKE :q OR trade_name ILIKE :q OR tax_id ILIKE :tax OR additional_attributes -> 'jrc_establishment' ->> 'store_code' ILIKE :q", q: pattern, tax: "%#{JrcCustomers::TaxIdentifier.normalize(query)}%")
+      tax = JrcCustomers::TaxIdentifier.normalize(query)
+      tax_pattern = tax.present? ? "%#{ActiveRecord::Base.sanitize_sql_like(tax)}%" : nil
+      rows = rows.where("name ILIKE :q OR trade_name ILIKE :q OR tax_id ILIKE :tax OR " \
+                            "additional_attributes -> 'jrc_establishment' ->> 'store_code' ILIKE :q", q: pattern, tax: tax_pattern)
     end
     render json: { establishments: rows.order(:name, :id).limit(100).map { |company| JrcCustomers::EstablishmentMetadata.snapshot(company) } }
   end

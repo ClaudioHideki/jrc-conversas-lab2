@@ -88,6 +88,10 @@ jobs:
         run: |
           git fetch --no-tags origin 35976b08077035ee79843b07ad02c0389d002f09
           git diff --name-only --diff-filter=ACMR 35976b08077035ee79843b07ad02c0389d002f09 HEAD -- '*.rb' | xargs -r -n 1 ruby -c
+      - name: RuboCop Lint dos fontes Ruby alterados
+        run: |
+          mapfile -t files < <(git diff --name-only --diff-filter=ACMR 35976b08077035ee79843b07ad02c0389d002f09 HEAD -- '*.rb')
+          bundle exec rubocop --force-exclusion --only Lint --format simple "${files[@]}"
       - name: Preservar guards existentes de custodia ao carregar o schema
         run: >-
           bundle exec rspec spec/services/jrc_migrations/media_protocol_spec.rb

@@ -1,6 +1,7 @@
 module JrcProjects
   class Authorization
-    VIEW = %w[projects.project.view projects.task.view projects.report.view projects.planning.view projects.member.view projects.time_entry.view projects.attachment.view].freeze
+    VIEW = %w[projects.project.view projects.task.view projects.report.view projects.planning.view
+              projects.member.view projects.time_entry.view projects.attachment.view].freeze
     WORK = (VIEW + %w[projects.task.create projects.task.update projects.task.assign projects.task.move projects.time_entry.create]).freeze
     MANAGE = (WORK + %w[projects.project.update projects.member.manage projects.board.manage projects.task.delete projects.milestone.manage projects.sprint.manage projects.risk.manage projects.issue.manage projects.decision.manage projects.report.export projects.time_entry.manage projects.attachment.manage]).freeze
     OWNER = (MANAGE + %w[projects.budget.view projects.budget.manage projects.project.delete projects.project.transfer]).freeze

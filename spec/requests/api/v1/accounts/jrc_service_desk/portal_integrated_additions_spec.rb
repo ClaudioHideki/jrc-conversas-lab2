@@ -49,6 +49,11 @@ RSpec.describe 'Portal routing, shared requester channels and authorized establi
     expect(ticket).to have_attributes(requester_id: sd_contact.id, company_id: company.id, establishment_company_id: establishment.id,
                                       service_id: service.id, queue_id: queue.id, unit_id: sd_unit.id)
     expect(ticket.catalogue_snapshot.dig('establishment', 'store_code')).to eq('030')
+    original_store_snapshot = ticket.catalogue_snapshot.fetch('establishment').deep_dup
+    establishment.update!(name: 'Renamed store')
+    context = JrcServiceDesk::OperationalContext.new(sd_context)
+    JrcServiceDesk::TicketCatalogue.new(ticket, context: context).bind!({})
+    expect(ticket.catalogue_snapshot.fetch('establishment')).to eq(original_store_snapshot)
     JrcServiceDesk::PortalRoutingConfiguration.save!(unit: sd_unit, actor: sd_account_user, values: {},
       expected_revision: JrcServiceDesk::PortalRoutingConfiguration.revision(sd_unit))
     expect do

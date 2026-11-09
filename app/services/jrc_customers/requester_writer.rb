@@ -44,7 +44,9 @@ class JrcCustomers::RequesterWriter
       raise Duplicate.new(names, allow_distinct: true) if names.any? && !confirm_distinct
 
       raise ArgumentError, 'Invalid contact email' if values['email'] && JrcCustomers::Identity.email(values['email']).nil?
-      raise ArgumentError, 'Invalid contact phone' if values['phone_number'] && JrcCustomers::Identity.phone(values['phone_number'], country: 'BR').nil?
+      if values['phone_number'] && JrcCustomers::Identity.phone(values['phone_number'], country: 'BR').nil?
+        raise ArgumentError, 'Invalid contact phone'
+      end
 
       values.values_at('email', 'phone_number').compact.sort.each do |value|
         channel_lock = Digest::SHA256.hexdigest("sd-requester-channel:#{@account.id}:#{value}").first(15).to_i(16)

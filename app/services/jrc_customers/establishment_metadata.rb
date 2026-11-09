@@ -18,11 +18,19 @@ class JrcCustomers::EstablishmentMetadata
     values = values.stringify_keys
     raise ArgumentError, 'Invalid establishment fields' unless (values.keys - FIELDS).empty?
 
+    tax = JrcCustomers::TaxIdentifier.normalize(attrs.fetch('tax_id', company.tax_id))
+    unless attrs.fetch('person_kind', company.person_kind) == 'organization' && tax.present? &&
+           JrcCustomers::TaxIdentifier.valid?(tax, person_kind: 'organization')
+      raise ArgumentError, 'An establishment requires its own valid CNPJ'
+    end
+
     code = values.fetch('store_code')
     cluster = values.fetch('cluster')
     phones = values.fetch('phones', [])
     valid = code.is_a?(String) && code.strip.length.between?(1, 80) && cluster.is_a?(String) && cluster.strip.length.between?(1, 255)
-    valid &&= phones.is_a?(Array) && phones.size <= 20 && phones.all? { |phone| phone.is_a?(String) && JrcCustomers::Identity.phone(phone, country: 'BR') }
+    valid &&= phones.is_a?(Array) && phones.size <= 20 && phones.all? do |phone|
+      phone.is_a?(String) && JrcCustomers::Identity.phone(phone, country: 'BR')
+    end
     raise ArgumentError, 'Invalid establishment code, cluster or phones' unless valid
 
     data = { 'store_code' => code.strip, 'cluster' => cluster.strip,
@@ -31,7 +39,7 @@ class JrcCustomers::EstablishmentMetadata
   end
 
   def self.scope(account)
-    JrcCustomers::Company.where(account_id: account.id, active: true)
+    JrcCustomers::Company.where(account_id: account.id, active: true, person_kind: 'organization').where.not(tax_id: [nil, ''])
       .where("COALESCE(additional_attributes -> 'jrc_establishment' ->> 'store_code', '') <> ''")
   end
 

@@ -44,9 +44,14 @@ class JrcServiceDesk::TicketCatalogue
     definition = JrcServiceDesk::CatalogueFields.new(fields)
     raise ArgumentError, 'Catalogue contains duplicate or unsupported fields' unless definition.valid? && !definition.duplicate_keys?
 
+    establishment_snapshot = @ticket.catalogue_snapshot['establishment']
     @ticket.catalogue_snapshot = { 'form_fields' => fields, 'classification' => classification_snapshot }
     if @ticket.establishment_company
-      @ticket.catalogue_snapshot['establishment'] = JrcCustomers::EstablishmentMetadata.snapshot(@ticket.establishment_company)
+      @ticket.catalogue_snapshot['establishment'] = if @ticket.new_record?
+                                                     JrcCustomers::EstablishmentMetadata.snapshot(@ticket.establishment_company)
+                                                   else
+                                                     establishment_snapshot
+                                                   end
     end
     return unless service
 

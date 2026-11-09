@@ -6,7 +6,8 @@ require 'digest'
 class JrcCustomers::CompanyImport
   class InvalidImport < StandardError; end
   FIELDS = %w[id name person_kind trade_name tax_id state_registration municipal_registration segment size website domain email
-              phone_number source economic_group parent_company_id owner_id relationship_type active description store_code cluster establishment_phones].freeze
+              phone_number source economic_group parent_company_id owner_id relationship_type active description
+              store_code cluster establishment_phones].freeze
   MAX_BYTES = 1_048_576
   MAX_ROWS = 500
 

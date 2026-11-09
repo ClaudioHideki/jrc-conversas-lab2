@@ -96,7 +96,8 @@ class JrcServiceDesk::CreateTicketService < JrcServiceDesk::BaseService
   end
 
   def creation_fields
-    context.account.feature_enabled?('jrc_customer_master') ? FIELDS + %w[company_id service_fields establishment_company_id] : FIELDS + ['service_fields']
+    fields = FIELDS + ['service_fields']
+    context.account.feature_enabled?('jrc_customer_master') ? fields + %w[company_id establishment_company_id] : fields
   end
 
   def catalogue_references(service_id, normalized, unit)

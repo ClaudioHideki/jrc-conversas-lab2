@@ -35,7 +35,9 @@ class JrcProjects::Tasks::Create
     allowed = JrcProjects::Authorization.allowed?(account_user: @member, capability: 'projects.task.create', project: project)
     raise Pundit::NotAuthorizedError unless allowed
     if @input['assignee_id'].present?
-      raise Pundit::NotAuthorizedError unless JrcProjects::Authorization.allowed?(account_user: @member, capability: 'projects.task.assign', project: project)
+      unless JrcProjects::Authorization.allowed?(account_user: @member, capability: 'projects.task.assign', project: project)
+        raise Pundit::NotAuthorizedError
+      end
     end
     raise ArgumentError, 'Reabra o projeto antes de alterar tarefas.' if %w[completed canceled].include?(project.status)
   end

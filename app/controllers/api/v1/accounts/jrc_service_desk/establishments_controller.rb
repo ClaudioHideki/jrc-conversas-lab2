@@ -17,8 +17,12 @@ class Api::V1::Accounts::JrcServiceDesk::EstablishmentsController < Api::V1::Acc
 
     if query.present?
       pattern = "%#{ActiveRecord::Base.sanitize_sql_like(query.strip)}%"
-      scope = scope.where("name ILIKE :q OR trade_name ILIKE :q OR tax_id ILIKE :tax OR additional_attributes -> 'jrc_establishment' ->> 'store_code' ILIKE :q", q: pattern, tax: "%#{JrcCustomers::TaxIdentifier.normalize(query)}%")
+      tax = JrcCustomers::TaxIdentifier.normalize(query)
+      tax_pattern = tax.present? ? "%#{ActiveRecord::Base.sanitize_sql_like(tax)}%" : nil
+      scope = scope.where("name ILIKE :q OR trade_name ILIKE :q OR tax_id ILIKE :tax OR " \
+                            "additional_attributes -> 'jrc_establishment' ->> 'store_code' ILIKE :q", q: pattern, tax: tax_pattern)
     end
-    render json: { enabled: enabled, establishments: enabled ? scope.order(:name, :id).limit(100).map { |row| ::JrcCustomers::EstablishmentMetadata.snapshot(row) } : [] }
+    establishments = enabled ? scope.order(:name, :id).limit(100).map { |row| ::JrcCustomers::EstablishmentMetadata.snapshot(row) } : []
+    render json: { enabled: enabled, establishments: establishments }
   end
 end
