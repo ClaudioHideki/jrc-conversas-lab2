@@ -166,8 +166,8 @@
     {
       "path": "app/javascript/dashboard/components-next/sidebar/Sidebar.vue",
       "baseSha256": "4eb35689e3727861a17007c90d86e85cdfae3955409b6150261010e992406358",
-      "sha256": "397374c5823a32d7280623f97d7c9b7af0c4ac3e109c67f81a0cc97fb64fc092",
-      "bytes": 62224
+      "sha256": "24184441e576bacc08c57963352e5d901b7d44a5ac596dabfab3846eb0e6496f",
+      "bytes": 63365
     },
     {
       "path": "app/javascript/dashboard/i18n/locale/en/jrcNico.json",
@@ -196,8 +196,8 @@
     {
       "path": "app/javascript/dashboard/routes/dashboard/jrcFlows/NativeFlowModule.vue",
       "baseSha256": null,
-      "sha256": "9b8ca75aab68d8f1970fd17c0aee23b008eb0a63f9d56cf0e8ceef9f864aed4c",
-      "bytes": 12253
+      "sha256": "ba58c6ee726063512c3ce2840ec25ae5f27865509adee7054c0477b3e46fb543",
+      "bytes": 12317
     },
     {
       "path": "app/javascript/dashboard/routes/dashboard/jrcFlows/routes.js",

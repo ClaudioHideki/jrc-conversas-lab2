@@ -151,11 +151,12 @@ const hasJrcCampaigns = computed(() =>
   isFeatureEnabledonAccount.value(accountId.value, FEATURE_FLAGS.JRC_CAMPAIGNS)
 );
 
-const hasServiceDesk = computed(() =>
-  isFeatureEnabledonAccount.value(
-    accountId.value,
-    FEATURE_FLAGS.JRC_SERVICE_DESK
-  ) === true
+const hasServiceDesk = computed(
+  () =>
+    isFeatureEnabledonAccount.value(
+      accountId.value,
+      FEATURE_FLAGS.JRC_SERVICE_DESK
+    ) === true
 );
 
 const hasContactCenter = computed(
@@ -180,12 +181,32 @@ const hasContactCenterAccess = computed(() => {
 });
 
 const { status: operationsStatus } = useOperations();
-const serviceDeskNavigation = useServiceDeskNavigation(accountId, currentUserId, hasServiceDesk);
-const operatorEnabled = computed(() => isFeatureEnabledonAccount.value(accountId.value, 'jrc_operator'));
-const operatorAccess = useOperatorAccess(accountId, currentUserId, operatorEnabled);
-const approvalEnabled = computed(() => isFeatureEnabledonAccount.value(accountId.value, 'jrc_approvals'));
-const approvalAccess = useApprovalAccess(accountId, currentUserId, approvalEnabled);
-const serviceDeskStructure = useServiceDeskStructure(accountId, currentUserId, hasServiceDesk);
+const serviceDeskNavigation = useServiceDeskNavigation(
+  accountId,
+  currentUserId,
+  hasServiceDesk
+);
+const operatorEnabled = computed(() =>
+  isFeatureEnabledonAccount.value(accountId.value, 'jrc_operator')
+);
+const operatorAccess = useOperatorAccess(
+  accountId,
+  currentUserId,
+  operatorEnabled
+);
+const approvalEnabled = computed(() =>
+  isFeatureEnabledonAccount.value(accountId.value, 'jrc_approvals')
+);
+const approvalAccess = useApprovalAccess(
+  accountId,
+  currentUserId,
+  approvalEnabled
+);
+const serviceDeskStructure = useServiceDeskStructure(
+  accountId,
+  currentUserId,
+  hasServiceDesk
+);
 
 const hasCrmUserAccess = computed(() => {
   const currentAccount = currentUser.value?.accounts?.find(
@@ -1134,6 +1155,32 @@ const menuItems = computed(() => {
   const contactsModule = find('Contacts');
   const companiesModule = find('Companies');
   const captainModule = find('Captain');
+  const contactsFallback = contactsModule
+    ? { ...contactsModule, label: 'Contatos' }
+    : null;
+  const approvalScreen =
+    approvalAccess.visible.value &&
+    approvalAccess.context.value.scopes.some(row =>
+      row.capabilities.includes('policy_manage')
+    )
+      ? 'policies'
+      : 'inbox';
+  let reportItem = null;
+  if (reportsModule) {
+    if (isAgent.value) {
+      reportItem = flattenModule(reportsModule, {
+        label: 'Meu Desempenho',
+        to: accountScopedRoute('my_performance'),
+        activeOn: ['my_performance'],
+      });
+    } else {
+      reportItem = {
+        ...reportsModule,
+        label: t('SIDEBAR.REPORTS'),
+        to: accountScopedRoute('account_overview_reports'),
+      };
+    }
+  }
   const automationItem = settingsModule?.children?.find(
     item => item.name === 'Settings Automation'
   );
@@ -1268,24 +1315,53 @@ const menuItems = computed(() => {
           ),
         }
       : null,
-    operatorAccess.visible.value ? { name: 'JRC Operator', label: t('JRC_OPERATOR.title'), icon: 'i-lucide-network', to: accountScopedRoute('jrc_operator'), activeOn: ['jrc_operator'] } : null,
-    approvalAccess.visible.value ? { name: 'JRC Approvals', label: t('JRC_APPROVALS.title'), icon: 'i-lucide-shield-check', to: { name: 'jrc_approvals', params: { accountId: accountId.value, screen: approvalAccess.context.value.scopes.some(row => row.capabilities.includes('policy_manage')) ? 'policies' : 'inbox' } }, activeOn: ['jrc_approvals'] } : null,
-    hasServiceDesk.value && serviceDeskStructure.state.visible
-      ? { name: 'JRC Service Desk Structure', label: t('JRC_SERVICE_DESK.STRUCTURE.title'),
-          icon: 'i-lucide-building-2', to: accountScopedRoute('jrc_service_desk_structure'),
-          activeOn: ['jrc_service_desk_structure'] }
+    operatorAccess.visible.value
+      ? {
+          name: 'JRC Operator',
+          label: t('JRC_OPERATOR.title'),
+          icon: 'i-lucide-network',
+          to: accountScopedRoute('jrc_operator'),
+          activeOn: ['jrc_operator'],
+        }
       : null,
-    operationsStatus.value?.projects_enabled ? {
-      name: 'JRC Projects', label: 'Projetos', icon: 'i-lucide-folder-kanban',
-      to: accountScopedRoute('jrc_projects_list'),
+    approvalAccess.visible.value
+      ? {
+          name: 'JRC Approvals',
+          label: t('JRC_APPROVALS.title'),
+          icon: 'i-lucide-shield-check',
+          to: {
+            name: 'jrc_approvals',
+            params: { accountId: accountId.value, screen: approvalScreen },
+          },
+          activeOn: ['jrc_approvals'],
+        }
+      : null,
+    hasServiceDesk.value && serviceDeskStructure.state.visible
+      ? {
+          name: 'JRC Service Desk Structure',
+          label: t('JRC_SERVICE_DESK.STRUCTURE.title'),
+          icon: 'i-lucide-building-2',
+          to: accountScopedRoute('jrc_service_desk_structure'),
+          activeOn: ['jrc_service_desk_structure'],
+        }
+      : null,
+    operationsStatus.value?.projects_enabled
+      ? {
+          name: 'JRC Projects',
+          label: 'Projetos',
+          icon: 'i-lucide-folder-kanban',
+          to: accountScopedRoute('jrc_projects_list'),
           activeOn: [
             'jrc_projects_list',
             'jrc_projects_detail',
             'jrc_projects_settings',
           ],
           ignoreFeatureFlag: true,
-    } : null,
-    operationsStatus.value?.projects_enabled || operationsStatus.value?.crm_enabled ? {
+        }
+      : null,
+    operationsStatus.value?.projects_enabled ||
+    operationsStatus.value?.crm_enabled
+      ? {
           name: 'JRC Agenda',
           label: 'Minha Agenda',
           icon: 'i-lucide-calendar-days',
@@ -1299,7 +1375,8 @@ const menuItems = computed(() => {
           name: 'Customers',
           label: 'Clientes',
           icon: 'i-lucide-building-2',
-          to: accountScopedRoute('jrc_customer_companies'), ignoreFeatureFlag: true,
+          to: accountScopedRoute('jrc_customer_companies'),
+          ignoreFeatureFlag: true,
           activeOn: [
             'jrc_customer_companies',
             'jrc_customer_company',
@@ -1363,20 +1440,30 @@ const menuItems = computed(() => {
             },
           ],
         }
-      : contactsModule
-        ? { ...contactsModule, label: 'Contatos' }
-        : null,
+      : contactsFallback,
     !hasCustomerMaster.value && companiesModule
       ? { ...companiesModule, label: 'Empresas' }
       : null,
-    hasCustomerMaster.value && isFeatureEnabledonAccount.value(accountId.value, FEATURE_FLAGS.JRC_RELATIONSHIP)
+    hasCustomerMaster.value &&
+    isFeatureEnabledonAccount.value(
+      accountId.value,
+      FEATURE_FLAGS.JRC_RELATIONSHIP
+    )
       ? {
-          name: 'Relationship', label: t('RELATIONSHIP.TITLE'), icon: 'i-lucide-heart-handshake',
+          name: 'Relationship',
+          label: t('RELATIONSHIP.TITLE'),
+          icon: 'i-lucide-heart-handshake',
           to: accountScopedRoute('jrc_relationship_overview'),
-          activeOn: RELATIONSHIP_SCREENS.map(screen => `jrc_relationship_${screen}`),
-          children: RELATIONSHIP_SCREENS.map(screen => ({ name: `Relationship ${screen}`,
-            label: t(`RELATIONSHIP.SCREENS.${screen}`), icon: 'i-lucide-circle-small',
-            to: accountScopedRoute(`jrc_relationship_${screen}`), activeOn: [`jrc_relationship_${screen}`] })),
+          activeOn: RELATIONSHIP_SCREENS.map(
+            screen => `jrc_relationship_${screen}`
+          ),
+          children: RELATIONSHIP_SCREENS.map(screen => ({
+            name: `Relationship ${screen}`,
+            label: t(`RELATIONSHIP.SCREENS.${screen}`),
+            icon: 'i-lucide-circle-small',
+            to: accountScopedRoute(`jrc_relationship_${screen}`),
+            activeOn: [`jrc_relationship_${screen}`],
+          })),
         }
       : null,
     {
@@ -1465,7 +1552,11 @@ const menuItems = computed(() => {
       label: t('CRM.BACKOFFICE_WORKSPACE.MODULE'),
       icon: 'i-lucide-settings-2',
       to: accountScopedRoute('crm_backoffice'),
-      activeOn: ['crm_backoffice', 'crm_backoffice_request', 'crm_backoffice_new'],
+      activeOn: [
+        'crm_backoffice',
+        'crm_backoffice_request',
+        'crm_backoffice_new',
+      ],
       disabled: !hasJrcCrm.value || !hasCrmUserAccess.value,
       ignoreFeatureFlag: true,
     },
@@ -1488,19 +1579,7 @@ const menuItems = computed(() => {
       newBadge: true,
       ignoreFeatureFlag: true,
     },
-    reportsModule
-      ? isAgent.value
-        ? flattenModule(reportsModule, {
-            label: 'Meu Desempenho',
-            to: accountScopedRoute('my_performance'),
-            activeOn: ['my_performance'],
-          })
-        : {
-            ...reportsModule,
-            label: t('SIDEBAR.REPORTS'),
-            to: accountScopedRoute('account_overview_reports'),
-          }
-      : null,
+    reportItem,
     isAccountAdministrator.value
       ? {
           name: 'JRC AI Administration',
@@ -1515,11 +1594,41 @@ const menuItems = computed(() => {
             'jrc_ai_logs',
           ],
           children: [
-            { name: 'JRC AI Providers', label: 'Provedores', icon: 'i-lucide-key-round', to: accountScopedRoute('jrc_ai_providers'), activeOn: ['jrc_ai_providers'] },
-            { name: 'JRC AI Models', label: 'Modelos', icon: 'i-lucide-boxes', to: accountScopedRoute('jrc_ai_models'), activeOn: ['jrc_ai_models'] },
-            { name: 'JRC AI Usage', label: 'Tokens e Consumo', icon: 'i-lucide-gauge', to: accountScopedRoute('jrc_ai_usage'), activeOn: ['jrc_ai_usage'] },
-            { name: 'JRC AI Security', label: 'Seguranca', icon: 'i-lucide-shield-check', to: accountScopedRoute('jrc_ai_settings'), activeOn: ['jrc_ai_settings'] },
-            { name: 'JRC AI Logs', label: 'Logs', icon: 'i-lucide-scroll-text', to: accountScopedRoute('jrc_ai_logs'), activeOn: ['jrc_ai_logs'] },
+            {
+              name: 'JRC AI Providers',
+              label: 'Provedores',
+              icon: 'i-lucide-key-round',
+              to: accountScopedRoute('jrc_ai_providers'),
+              activeOn: ['jrc_ai_providers'],
+            },
+            {
+              name: 'JRC AI Models',
+              label: 'Modelos',
+              icon: 'i-lucide-boxes',
+              to: accountScopedRoute('jrc_ai_models'),
+              activeOn: ['jrc_ai_models'],
+            },
+            {
+              name: 'JRC AI Usage',
+              label: 'Tokens e Consumo',
+              icon: 'i-lucide-gauge',
+              to: accountScopedRoute('jrc_ai_usage'),
+              activeOn: ['jrc_ai_usage'],
+            },
+            {
+              name: 'JRC AI Security',
+              label: 'Seguranca',
+              icon: 'i-lucide-shield-check',
+              to: accountScopedRoute('jrc_ai_settings'),
+              activeOn: ['jrc_ai_settings'],
+            },
+            {
+              name: 'JRC AI Logs',
+              label: 'Logs',
+              icon: 'i-lucide-scroll-text',
+              to: accountScopedRoute('jrc_ai_logs'),
+              activeOn: ['jrc_ai_logs'],
+            },
           ],
           ignoreFeatureFlag: true,
         }
@@ -1692,20 +1801,21 @@ const menuSections = computed(() => {
       ]),
     },
 
-
-
-
     {
       name: 'administration',
       label: 'Administracao',
       items: take([
         'JRC Service Desk Structure',
-    'JRC Approvals',
+        'JRC Approvals',
         'JRC AI Administration',
         'Settings',
       ]),
     },
-    { name: 'learning', label: t('JRC_HOME.LEARNING'), items: [universityLink] },
+    {
+      name: 'learning',
+      label: t('JRC_HOME.LEARNING'),
+      items: [universityLink],
+    },
     { name: 'legacy-tools', label: 'Outros recursos', items: legacyExtras },
   ]);
 });
@@ -1861,7 +1971,10 @@ const menuSections = computed(() => {
           :class="{ 'items-center': isEffectivelyCollapsed }"
         >
           <template v-for="item in section.items" :key="item.name">
-            <SidebarUniversity v-if="item.name === universityLink.name" :collapsed="isEffectivelyCollapsed" />
+            <SidebarUniversity
+              v-if="item.name === universityLink.name"
+              :collapsed="isEffectivelyCollapsed"
+            />
             <SidebarGroup v-else v-bind="item" />
           </template>
         </ul>

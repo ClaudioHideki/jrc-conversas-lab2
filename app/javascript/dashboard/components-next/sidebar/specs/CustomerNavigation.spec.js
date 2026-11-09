@@ -39,6 +39,9 @@ const customer = returned.argument.callee.object.callee.object.elements.find(
     row.type === 'ConditionalExpression' &&
     source.slice(row.test.start, row.test.end) === 'hasCustomerMaster.value'
 );
+const contactsFallback = menu.body.body.find(
+  row => row.declarations?.[0]?.id.name === 'contactsFallback'
+);
 const flag = declaration('hasCustomerMaster');
 const composer = declaration('menuSections');
 const context = enabled => ({
@@ -56,7 +59,7 @@ const context = enabled => ({
 });
 const customerItem = enabled =>
   runInNewContext(
-    `${source.slice(flag.start, flag.end)}; (${source.slice(customer.start, customer.end)})`,
+    `${source.slice(flag.start, flag.end)}; ${source.slice(contactsFallback.start, contactsFallback.end)}; (${source.slice(customer.start, customer.end)})`,
     context(enabled)
   );
 const sections = (enabled, unified) =>
