@@ -20,6 +20,25 @@ RSpec.describe 'Contact Center call observations', type: :request do
                                     direction: 'inbound', status: 'connected', started_at: call.started_at)
   end
 
+  it 'includes customer context in the authorized call even without a queue membership' do
+    customer = create(:contact, account: account, phone_number: '+5511987650000')
+    call.update!(contact: customer)
+
+    get path.delete_suffix('/observations'), headers: headers, as: :json
+
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.dig('item', 'customer', 'status')).to eq('identified')
+    expect(response.parsed_body.dig('item', 'customer', 'contacts').pluck('id')).to eq([customer.id.to_s])
+  end
+
+  it 'resolves only the exact authorized provider session without listing another call' do
+    call.update!(external_session_id: 'synthetic-sip-call')
+    get path.delete_suffix("/#{call.id}/observations"),
+        params: { external_session_id: 'does-not-exist', provider: 'jrc_pabx' }, headers: headers, as: :json
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('items')).to be_empty
+  end
+
   it 'persists and reloads observations without changing call state, assignment or qualification' do
     patch path, params: { observations: { text: 'Retornar com o protocolo sintético.', lock_version: call.lock_version },
                          status: 'ended', account_id: create(:account).id }, headers: headers, as: :json
