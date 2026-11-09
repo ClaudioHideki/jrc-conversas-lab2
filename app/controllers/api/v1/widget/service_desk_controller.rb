@@ -21,7 +21,10 @@ class Api::V1::Widget::ServiceDeskController < Api::V1::Widget::BaseController
 
   def services
     rows = portal_scope.services.order(:name, :id).limit(100)
-    render json: { services: rows.map { |row| portal_presenter.service(row, contact: portal_scope.contact) } }
+    establishments = JrcServiceDesk::PortalEstablishments.new(identity: @contact_inbox, proof: portal_identity_proof)
+    render json: { services: rows.map do |row|
+      portal_presenter.service(row, contact: portal_scope.contact, stores_authorized: establishments.enabled?(row))
+    end }
   end
 
   def establishments

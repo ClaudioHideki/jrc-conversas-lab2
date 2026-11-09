@@ -6,6 +6,12 @@ class JrcServiceDesk::PortalEstablishments
     @proof = proof
   end
 
+  def enabled?(service)
+    service.account.feature_enabled?('jrc_customer_master') &&
+      JrcServiceDesk::PortalRoutingConfiguration.read(service.unit)['stores_enabled'] == true &&
+      @proof.establishment_ids(identity: @identity).any?
+  end
+
   def scope
     raise Pundit::NotAuthorizedError unless @identity.inbox.account.feature_enabled?('jrc_customer_master')
 

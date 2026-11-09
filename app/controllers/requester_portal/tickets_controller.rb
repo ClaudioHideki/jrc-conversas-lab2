@@ -57,8 +57,10 @@ class RequesterPortal::TicketsController < Api::V1::Widget::ServiceDeskControlle
   end
 
   def services
+    establishments = JrcServiceDesk::PortalEstablishments.new(identity: @contact_inbox, proof: portal_identity_proof)
     render json: { services: portal_scope.services.order(:name, :id).limit(100).map do |service|
-      portal_presenter.service(service, contact: portal_scope.contact).merge(category: service.default_category&.name, unit: service.unit.name)
+      portal_presenter.service(service, contact: portal_scope.contact, stores_authorized: establishments.enabled?(service))
+        .merge(category: service.default_category&.name, unit: service.unit.name)
     end }
   end
 

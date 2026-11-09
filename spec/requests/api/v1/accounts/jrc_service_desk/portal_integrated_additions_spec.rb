@@ -38,6 +38,31 @@ RSpec.describe 'Portal routing, shared requester channels and authorized establi
     sd_status
   end
 
+  it 'preserves the normal form and creation for a requester without store grants in the same unit' do
+    grant.update!(establishment_ids: [])
+    JrcServiceDesk::PortalRoutingConfiguration.save!(unit: sd_unit, actor: sd_account_user, values: { 'stores_enabled' => true },
+      expected_revision: JrcServiceDesk::PortalRoutingConfiguration.revision(sd_unit))
+    service
+    get '/api/v1/widget/service_desk/services', params: { website_token: widget.website_token }, headers: headers
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('services').find { |row| row['id'] == service.id.to_s }.fetch('stores_enabled')).to be(false)
+    post '/api/v1/widget/service_desk/tickets', params: { website_token: widget.website_token, ticket: values.except(:establishment_company_id) }, headers: headers, as: :json
+    expect(response).to have_http_status(:created), response.body
+  end
+
+  it 'requires a selected store only for a requester with explicit store grants' do
+    grant
+    JrcServiceDesk::PortalRoutingConfiguration.save!(unit: sd_unit, actor: sd_account_user, values: { 'stores_enabled' => true },
+      expected_revision: JrcServiceDesk::PortalRoutingConfiguration.revision(sd_unit))
+    service
+    get '/api/v1/widget/service_desk/services', params: { website_token: widget.website_token }, headers: headers
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch('services').find { |row| row['id'] == service.id.to_s }.fetch('stores_enabled')).to be(true)
+    post '/api/v1/widget/service_desk/tickets', params: { website_token: widget.website_token, ticket: values.except(:establishment_company_id) }, headers: headers, as: :json
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(sd_account.conversations).to be_empty
+  end
+
   it 'creates one ticket for the selected store and preserves requester, company and service on replay after configuration changes' do
     grant
     queue = create(:jrc_sd_queue, unit: sd_unit, distribution_mode: 'manual')
