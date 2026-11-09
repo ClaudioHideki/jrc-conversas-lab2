@@ -159,6 +159,9 @@ RSpec.describe JrcContactCenter::QualificationManager do
 
   it 'excludes pending ACW from the native round robin and restores that pool only after completion' do
     create(:inbox_member, inbox: inbox, user: agent)
+    # Isolate ACW from the separate online-presence/working-hours requirements.
+    agent.account_users.find_by!(account: account).update!(availability: :online, auto_assignment_enabled: true)
+    allow(OnlineStatusTracker).to receive(:effective_available_users).with(account.id).and_return(agent.id.to_s => 'online')
     record = manager.start!(conversation: conversation)
     selector = AutoAssignment::InboxRoundRobinService.new(inbox: inbox)
     expect(selector.available_agent(allowed_agent_ids: [agent.id.to_s])).to be_nil

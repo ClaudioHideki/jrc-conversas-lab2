@@ -6,8 +6,11 @@ class JrcContactCenter::CustomerContext
   end
 
   def by_phone(phone)
+    # SIP identities and short PBX extensions are not customer identifiers.
+    return empty_result unless phone.to_s.match?(/\A\+?[\d\s().-]+\z/)
+
     normalized = phone.to_s.gsub(/\D/, '')
-    return empty_result if normalized.blank?
+    return empty_result unless normalized.length.between?(8, 15)
 
     contacts = @account.contacts.where("regexp_replace(phone_number, '[^0-9]', '', 'g') = ?", normalized).limit(10).to_a
     company_ids = contacts.filter_map(&:company_id).uniq
@@ -16,6 +19,21 @@ class JrcContactCenter::CustomerContext
       contacts: contacts.map { |contact| contact_payload(contact, companies[contact.company_id]) },
       ambiguous: contacts.size > 1
     }
+  end
+
+  def for_call(call)
+    raise ArgumentError, 'call account mismatch' unless call.account_id == @account.id
+
+    if call.contact_id
+      contact = @account.contacts.find_by(id: call.contact_id)
+      return empty_result.merge(status: 'unavailable') unless contact
+
+      company = @account.master_companies.find_by(id: contact.company_id) if contact.company_id
+      return { contacts: [contact_payload(contact, company)], ambiguous: false, status: 'identified' }
+    end
+
+    result = by_phone(call.direction == 'outbound' ? call.dnis : call.ani)
+    result.merge(status: result[:ambiguous] ? 'ambiguous' : (result[:contacts].any? ? 'identified' : 'unidentified'))
   end
 
   def module_context(user_context:, access:)

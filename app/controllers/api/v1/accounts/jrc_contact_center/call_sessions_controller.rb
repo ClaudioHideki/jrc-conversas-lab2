@@ -5,6 +5,9 @@ class Api::V1::Accounts::JrcContactCenter::CallSessionsController < Api::V1::Acc
     authorize_contact_center!
     calls = scoped_calls.order(started_at: :desc).limit(limit)
     calls = calls.where(status: params[:status]) if params[:status].present?
+    if params[:external_session_id].present?
+      calls = calls.where(provider: params.require(:provider), external_session_id: params[:external_session_id])
+    end
     render json: base_payload.merge(items: calls.map { |call| serialize(call) })
   end
 
@@ -57,7 +60,14 @@ class Api::V1::Accounts::JrcContactCenter::CallSessionsController < Api::V1::Acc
 
     attendant = call.legs.where.not(account_user_id: nil).order(started_at: :desc, id: :desc).first&.account_user
     payload.merge('queue' => call.current_queue&.as_json(only: %i[id name]),
-                  'attendant' => attendant && { id: attendant.id, name: attendant.user.name })
+                  'attendant' => attendant && { id: attendant.id, name: attendant.user.name },
+                  'customer' => call_customer(call))
+  end
+
+  def call_customer(call)
+    return { status: 'restricted', contacts: [], ambiguous: false } unless contact_center_access.policy.operate?
+
+    JrcContactCenter::CustomerContext.new(account: Current.account).for_call(call)
   end
 
   def journey(call)
