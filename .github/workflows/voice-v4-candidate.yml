@@ -87,6 +87,12 @@ jobs:
           app/controllers/api/v1/accounts/jrc_contact_center/call_observations_controller.rb
           db/migrate/20261109150000_create_jrc_contact_center_call_observations.rb
           --format progress
+      - name: Preservar guards existentes de custodia ao carregar o schema
+        run: >-
+          bundle exec rspec spec/services/jrc_migrations/media_protocol_spec.rb
+          --example 'reserves an immutable new storage key'
+          --example 'rejects a reserved SQL row'
+          --format progress --format json --out /tmp/voice-v4-schema-regression.json
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -131,5 +137,6 @@ jobs:
             /tmp/voice-v4-rspec.json
             /tmp/voice-v4-vitest.json
             /tmp/voice-v4-schema.rb
+            /tmp/voice-v4-schema-regression.json
             .codex/voice-v4-e2e
           if-no-files-found: ignore

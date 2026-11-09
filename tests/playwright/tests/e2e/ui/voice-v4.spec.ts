@@ -42,6 +42,14 @@ test('mantem chamada A e controles ao abrir WhatsApp B sem overflow da pagina', 
     fullPage: true,
   });
   await bar.locator('[data-voice-action=KEYPAD]').click();
+  await bar.locator('[data-voice-action=HOLD]').click();
+  await expect(bar).toContainText('Em espera');
+  await page.screenshot({
+    path: testInfo.outputPath('em-espera.png'),
+    fullPage: true,
+  });
+  await bar.locator('[data-voice-action=HOLD]').click();
+  await expect(bar).toContainText('Em ligação');
   await page.locator('[data-fixture-whatsapp]').click();
   await expect(page.locator('[data-whatsapp-fixture]')).toBeVisible();
   await expect(
@@ -71,6 +79,10 @@ test('popup de saida preserva contexto e exige motivo antes de chamar', async ({
   await page.goto(`${fixture}?state=idle`);
   const bar = page.locator('[data-global-voice-bar]');
   await expect(bar).toContainText('Nenhuma ligação ativa');
+  await page.screenshot({
+    path: testInfo.outputPath('vazio.png'),
+    fullPage: true,
+  });
   await bar.getByRole('button', { name: 'Nova ligação', exact: true }).click();
   await expect(
     page.getByRole('dialog', { name: 'Nova ligação' })
