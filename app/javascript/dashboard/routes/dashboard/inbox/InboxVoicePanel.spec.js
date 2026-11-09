@@ -128,6 +128,32 @@ describe('central shared voice panel', () => {
     expect(button(wrapper, 'MUTE').attributes('aria-pressed')).toBe('true');
     expect(button(wrapper, 'HOLD').attributes('aria-pressed')).toBe('true');
   });
+  it('accepts call shortcuts outside editors but never captures typing or ends a call with Escape', async () => {
+    state.sip.hasCall.value = true;
+    state.sip.established.value = true;
+    const wrapper = mount(InboxVoicePanel, {
+      props: { ...props, controlsOnly: true },
+      attachTo: document.body,
+    });
+    document.body.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'm', bubbles: true })
+    );
+    await flushPromises();
+    expect(state.sip.setMuted).toHaveBeenCalledOnce();
+    const editor = document.createElement('textarea');
+    document.body.appendChild(editor);
+    editor.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'm', bubbles: true })
+    );
+    document.body.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })
+    );
+    await flushPromises();
+    expect(state.sip.setMuted).toHaveBeenCalledOnce();
+    expect(state.sip.hangup).not.toHaveBeenCalled();
+    editor.remove();
+    wrapper.unmount();
+  });
 
   it('preserves an unsaved draft across internal remount for the same user and attendance', async () => {
     const draftProps = { ...selected, draftUserId: 91 };

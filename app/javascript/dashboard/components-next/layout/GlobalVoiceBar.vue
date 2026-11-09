@@ -20,6 +20,7 @@ import {
   setOutboundVoiceDraft,
 } from 'dashboard/routes/dashboard/inbox/outboundVoiceDrafts';
 import OutboundVoiceDialog from './OutboundVoiceDialog.vue';
+import VoicePresenceControl from './VoicePresenceControl.vue';
 import { voiceShellState } from 'dashboard/routes/dashboard/webphone/voiceShell';
 
 defineOptions({ inheritAttrs: false });
@@ -200,6 +201,12 @@ const openAttendance = () => {
     :class="active ? 'bg-n-teal-3' : 'bg-n-solid-1'"
   >
     <div class="flex flex-wrap items-center gap-3">
+      <div class="md:hidden">
+        <VoicePresenceControl
+          :account-id="Number(accountId)"
+          :user-id="Number(userId)"
+        />
+      </div>
       <span
         class="i-lucide-phone size-5 shrink-0 text-n-teal-10"
         aria-hidden="true"

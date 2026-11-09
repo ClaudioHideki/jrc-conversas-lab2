@@ -96,12 +96,19 @@ jobs:
           app/javascript/dashboard/routes/dashboard/inbox
           app/javascript/dashboard/routes/dashboard/jrcContactCenter
           app/javascript/dashboard/components-next/layout/specs
+          app/javascript/dashboard/__tests__/voiceV4Locale.spec.js
           --maxWorkers=2 --minWorkers=1 --no-file-parallelism
           --reporter=default --reporter=json --outputFile=/tmp/voice-v4-vitest.json
       - name: Build frontend real
         env:
           NODE_OPTIONS: --max-old-space-size=6144
         run: bundle exec vite build
+      - name: Dependencias do laboratorio E2E isolado
+        run: pnpm --dir tests/playwright install --frozen-lockfile --ignore-scripts
+      - name: Chromium para o laboratorio sintetico
+        run: node tests/playwright/node_modules/playwright/cli.js install --with-deps chromium
+      - name: E2E Voz V4 em componentes reais e adaptadores sinteticos
+        run: node tests/playwright/node_modules/@playwright/test/cli.js test --config tests/playwright/voice-v4.config.ts
       - name: Integridade do checkout
         if: always()
         run: git diff --exit-code && git diff --check
@@ -112,4 +119,5 @@ jobs:
           path: |
             /tmp/voice-v4-rspec.json
             /tmp/voice-v4-vitest.json
+            .codex/voice-v4-e2e
           if-no-files-found: ignore

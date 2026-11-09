@@ -1,5 +1,13 @@
 <script setup>
-import { computed, inject, nextTick, ref, watch } from 'vue';
+import {
+  computed,
+  inject,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+} from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useCallsStore } from 'dashboard/stores/calls';
 import { useWhatsappCallSession } from 'dashboard/composables/useWhatsappCallSession';
@@ -356,6 +364,43 @@ const controls = computed(() => [
     },
   },
 ]);
+const shortcut = event => {
+  if (
+    !props.controlsOnly ||
+    !matches.value ||
+    !sip.hasCall.value ||
+    event.defaultPrevented ||
+    event.repeat ||
+    event.ctrlKey ||
+    event.metaKey ||
+    event.altKey
+  )
+    return;
+  const target = event.target;
+  if (
+    target instanceof Element &&
+    target.closest(
+      'input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"], [role="searchbox"]'
+    )
+  )
+    return;
+  if (event.key === 'Escape') {
+    if (!keypadOpen.value && !transferOpen.value) return;
+    event.preventDefault();
+    keypadOpen.value = false;
+    transferOpen.value = false;
+    return;
+  }
+  const action = { m: 'MUTE', h: 'HOLD', t: 'TRANSFER', d: 'KEYPAD' }[
+    event.key.toLowerCase()
+  ];
+  const control = controls.value.find(item => item.key === action);
+  if (!control?.enabled) return;
+  event.preventDefault();
+  run(true, control.action);
+};
+onMounted(() => window.addEventListener('keydown', shortcut));
+onBeforeUnmount(() => window.removeEventListener('keydown', shortcut));
 const saveNote = async () => {
   if (
     !props.allowed ||
@@ -626,7 +671,7 @@ defineExpose({ endCall, canEnd, duration });
                   ? keypadOpen
                   : undefined
           "
-          class="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-n-strong bg-n-solid-1 px-3 py-2 text-xs font-semibold text-n-slate-12 shadow-[0_3px_0_0_rgba(0,0,0,0.18)] transition-[transform,box-shadow,background-color] duration-150 hover:bg-n-alpha-2 active:translate-y-0.5 active:shadow-none active:duration-100 motion-reduce:transform-none motion-reduce:transition-none disabled:translate-y-0 disabled:shadow-none disabled:opacity-40"
+          class="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-n-strong bg-n-solid-1 px-3 py-2 text-xs font-semibold text-n-slate-12 shadow-[0_3px_0_0_rgba(0,0,0,0.18)] transition-[transform,box-shadow,background-color] duration-150 hover:bg-n-alpha-2 active:translate-y-0.5 active:shadow-none active:duration-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-n-brand motion-reduce:transform-none motion-reduce:transition-none disabled:translate-y-0 disabled:shadow-none disabled:opacity-40"
           :class="{
             'bg-n-teal-3 ring-2 ring-n-teal-7':
               (control.key === 'MUTE' && matches && sip.muted.value) ||
@@ -750,7 +795,7 @@ defineExpose({ endCall, canEnd, duration });
         v-for="tone in tones"
         :key="tone"
         type="button"
-        class="min-h-11 rounded-lg bg-n-alpha-2 text-lg text-n-slate-12"
+        class="min-h-11 rounded-lg border border-n-strong bg-n-alpha-2 text-lg text-n-slate-12 shadow-[0_3px_0_0_rgba(0,0,0,0.18)] transition-transform duration-150 active:translate-y-0.5 active:shadow-none active:duration-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-n-brand motion-reduce:transform-none motion-reduce:transition-none"
         @click="key(tone)"
       >
         {{ tone }}
