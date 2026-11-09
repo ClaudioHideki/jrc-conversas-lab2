@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
 class Api::V1::Accounts::JrcContactCenter::CallSessionsController < Api::V1::Accounts::JrcContactCenter::BaseController
+  CALL_FIELDS = %i[
+    id provider external_session_id correlation_id direction status ani dnis contact_id company_id
+    current_unit_id current_queue_id started_at answered_at ended_at lock_version
+  ].freeze
+
   def index
     authorize_contact_center!
     calls = scoped_calls.order(started_at: :desc).limit(limit)
@@ -26,11 +31,7 @@ class Api::V1::Accounts::JrcContactCenter::CallSessionsController < Api::V1::Acc
       return
     end
 
-    call.with_lock do
-      raise JrcContactCenter::OperationError.new('stale_observations', status: :conflict) if call.lock_version != note[:lock_version].to_i
-
-      call.update!(metadata: call.metadata.merge('attendance_observations' => observation_payload(note)))
-    end
+    call.with_lock { update_observations!(call, note) }
     render json: base_payload.merge(item: serialize(call, details: true))
   end
 
@@ -42,6 +43,12 @@ class Api::V1::Accounts::JrcContactCenter::CallSessionsController < Api::V1::Acc
 
   def observation_payload(note)
     { 'text' => note[:text], 'account_user_id' => Current.account_user.id, 'updated_at' => Time.current.iso8601 }
+  end
+
+  def update_observations!(call, note)
+    raise JrcContactCenter::OperationError.new('stale_observations', status: :conflict) if call.lock_version != note[:lock_version].to_i
+
+    call.update!(metadata: call.metadata.merge('attendance_observations' => observation_payload(note)))
   end
 
   def scoped_calls
@@ -57,8 +64,7 @@ class Api::V1::Accounts::JrcContactCenter::CallSessionsController < Api::V1::Acc
   end
 
   def serialize(call, details: false)
-    payload = call.as_json(only: %i[id provider external_session_id correlation_id direction status ani dnis contact_id company_id current_unit_id
-                                  current_queue_id started_at answered_at ended_at lock_version])
+    payload = call.as_json(only: CALL_FIELDS)
                   .merge('metadata' => call.metadata.except('jrc_f1'))
     return payload unless details
 
