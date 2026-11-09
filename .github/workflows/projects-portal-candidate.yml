@@ -69,6 +69,8 @@ jobs:
           bundle exec rails db:migrate
           bundle exec rails db:migrate:down VERSION=20261109160000
           bundle exec rails db:migrate:up VERSION=20261109160000
+      - name: Regressao autenticada do endpoint de estabelecimentos
+        run: bundle exec rspec spec/requests/api/v1/accounts/jrc_service_desk/establishments_spec.rb
       - name: RSpec Projetos, Portal, identidade, lojas e regressao de voz
         run: |
           bundle exec rspec spec/requests/api/v1/accounts/jrc_operations \
