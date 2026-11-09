@@ -128,5 +128,6 @@ jobs:
           path: |
             /tmp/voice-v4-rspec.json
             /tmp/voice-v4-vitest.json
+            /tmp/voice-v4-schema.rb
             .codex/voice-v4-e2e
           if-no-files-found: ignore

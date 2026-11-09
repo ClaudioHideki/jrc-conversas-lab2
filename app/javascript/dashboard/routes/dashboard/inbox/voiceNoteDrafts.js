@@ -1,5 +1,6 @@
 // Session memory only: notes never enter localStorage, logs or another tenant.
-const drafts = new Map();
+import { shallowReactive } from 'vue';
+const drafts = shallowReactive(new Map());
 const key = (accountId, userId, callId) => {
   const scope = [accountId, userId].map(Number);
   if (!scope.every(value => Number.isSafeInteger(value) && value > 0))
@@ -23,3 +24,5 @@ export const writeVoiceNoteDraft = (accountId, userId, callId, draft) => {
 };
 
 export const clearVoiceNoteDrafts = () => drafts.clear();
+export const deleteVoiceNoteDraft = (accountId, userId, callId) =>
+  drafts.delete(key(accountId, userId, callId));

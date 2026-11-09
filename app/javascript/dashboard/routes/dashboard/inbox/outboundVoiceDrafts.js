@@ -7,4 +7,6 @@ export const setOutboundVoiceDraft = value => {
   if (value.sessionId) drafts.set(key(value), { ...value });
 };
 export const getOutboundVoiceDraft = identity => drafts.get(key(identity));
+export const deleteOutboundVoiceDraft = identity =>
+  drafts.delete(key(identity));
 export const clearOutboundVoiceDrafts = () => drafts.clear();

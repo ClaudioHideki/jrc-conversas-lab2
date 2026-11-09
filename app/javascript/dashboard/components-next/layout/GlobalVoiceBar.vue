@@ -13,11 +13,13 @@ import { useEmbeddedSoftphone } from 'dashboard/routes/dashboard/webphone/useEmb
 import {
   writeVoiceNoteDraft,
   readVoiceNoteDraft,
+  deleteVoiceNoteDraft,
 } from 'dashboard/routes/dashboard/inbox/voiceNoteDrafts';
 import {
   clearOutboundVoiceDrafts,
   getOutboundVoiceDraft,
   setOutboundVoiceDraft,
+  deleteOutboundVoiceDraft,
 } from 'dashboard/routes/dashboard/inbox/outboundVoiceDrafts';
 import OutboundVoiceDialog from './OutboundVoiceDialog.vue';
 import VoicePresenceControl from './VoicePresenceControl.vue';
@@ -45,6 +47,7 @@ const identity = computed(() =>
   allowed.value &&
   sameAccount.value &&
   sip.callId.value &&
+  sip.callId.value !== '—' &&
   context.value?.provider?.key
     ? {
         accountId: Number(accountId.value),
@@ -159,9 +162,14 @@ watch(attendance, value => {
     userId.value,
     `sip:${value.sessionId}`
   );
+  const currentDraft = readVoiceNoteDraft(
+    value.accountId,
+    userId.value,
+    value.record.id
+  );
   if (
     (!draft && !pendingNote?.text) ||
-    readVoiceNoteDraft(value.accountId, userId.value, value.record.id)
+    (currentDraft && currentDraft.text !== currentDraft.baseline)
   )
     return;
   const baseline = value.record.metadata?.attendance_observations?.text || '';
@@ -178,6 +186,8 @@ watch(attendance, value => {
     baseline,
     version: value.record.lock_version,
   });
+  deleteOutboundVoiceDraft({ ...value, userId: userId.value });
+  deleteVoiceNoteDraft(value.accountId, userId.value, `sip:${value.sessionId}`);
 });
 const openAttendance = () => {
   if (attendance.value?.status !== 'linked' || !active.value) return;

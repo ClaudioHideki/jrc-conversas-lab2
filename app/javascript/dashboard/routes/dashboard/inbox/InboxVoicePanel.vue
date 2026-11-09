@@ -264,6 +264,16 @@ watch(
   { flush: 'sync' }
 );
 watch(
+  () =>
+    readVoiceNoteDraft(props.accountId, props.draftUserId, draftIdentity.value),
+  draft => {
+    if (!draft || note.value !== noteBaseline.value) return;
+    note.value = draft.text;
+    noteBaseline.value = draft.baseline;
+    noteVersion.value = draft.version;
+  }
+);
+watch(
   [() => sip.remoteNumber.value, matches],
   ([remote, matching]) => {
     if (matching && remote && remote !== '—') lastRemote.value = remote;

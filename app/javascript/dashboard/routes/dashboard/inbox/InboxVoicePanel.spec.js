@@ -5,6 +5,7 @@ import InboxVoicePanel from './InboxVoicePanel.vue';
 import InboxChannelGroups from './InboxChannelGroups.vue';
 import { openEmbeddedSoftphone } from '../webphone/useEmbeddedSoftphone';
 import API from 'dashboard/api/jrcContactCenter';
+import { clearVoiceNoteDrafts, writeVoiceNoteDraft } from './voiceNoteDrafts';
 
 const state = vi.hoisted(() => ({ sip: null, calls: {}, initiating: null }));
 vi.mock('vue-i18n', () => ({
@@ -56,6 +57,7 @@ const selected = {
 };
 const button = (wrapper, key) => wrapper.get(`[data-voice-action="${key}"]`);
 beforeEach(() => {
+  clearVoiceNoteDrafts();
   state.sip = Object.fromEntries(
     Object.entries({
       accountId: 1,
@@ -168,6 +170,31 @@ describe('central shared voice panel', () => {
       props: { ...draftProps, draftUserId: 92 },
     });
     expect(otherUser.get('textarea').element.value).toBe('Texto salvo');
+  });
+
+  it('accepts a late linked outbound draft without requiring a remount or overwriting user edits', async () => {
+    const wrapper = mount(InboxVoicePanel, {
+      props: { ...selected, draftUserId: 91 },
+    });
+    writeVoiceNoteDraft(1, 91, 7, {
+      text: 'Motivo da ligação: Retorno',
+      baseline: 'Texto salvo',
+      version: 3,
+    });
+    await flushPromises();
+    expect(wrapper.get('textarea').element.value).toBe(
+      'Motivo da ligação: Retorno'
+    );
+    await wrapper.get('textarea').setValue('Minha edição em andamento');
+    writeVoiceNoteDraft(1, 91, 7, {
+      text: 'Resposta atrasada',
+      baseline: 'Texto salvo',
+      version: 3,
+    });
+    await flushPromises();
+    expect(wrapper.get('textarea').element.value).toBe(
+      'Minha edição em andamento'
+    );
   });
 
   it('opens the central dialer and prefills a customer number without placing a call', async () => {

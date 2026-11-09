@@ -148,9 +148,9 @@ RSpec.describe 'Contact Center call observations', type: :request do
   it 'denies observation history to an unassigned agent and another Account' do
     stranger = create(:user, account: account, role: :agent)
     outsider = create(:user, account: create(:account), role: :administrator)
-    [stranger, outsider].each do |user|
+    [[stranger, :not_found], [outsider, :unauthorized]].each do |user, status|
       get path, headers: user.create_new_auth_token, as: :json
-      expect(response).to have_http_status(:not_found)
+      expect(response).to have_http_status(status)
     end
   end
 
