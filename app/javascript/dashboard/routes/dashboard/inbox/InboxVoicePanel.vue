@@ -18,6 +18,7 @@ import { useEmbeddedSoftphone } from '../webphone/useEmbeddedSoftphone';
 import { GLOBAL_VOICE_SHELL } from '../webphone/voiceShell';
 import { callStateLabels } from './inboxPresentation';
 import { readVoiceNoteDraft, writeVoiceNoteDraft } from './voiceNoteDrafts';
+import CallObservationHistory from './CallObservationHistory.vue';
 
 const props = defineProps({
   accountId: { type: Number, required: true },
@@ -864,6 +865,13 @@ defineExpose({ endCall, canEnd, duration });
           {{ t('SOFTPHONE.CENTRAL.NOTES_SAVED') }}
         </p>
       </form>
+      <CallObservationHistory
+        v-if="nativeCallId"
+        :account-id="accountId"
+        :call-id="nativeCallId"
+        :allowed="allowed"
+        :version="callRecord?.lock_version"
+      />
       <section
         v-if="!notesOnly"
         class="overflow-hidden rounded-lg border border-n-weak"

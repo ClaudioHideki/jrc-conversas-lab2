@@ -26,6 +26,11 @@ test('mantem chamada A e controles ao abrir WhatsApp B sem overflow da pagina', 
   await expect(bar).toContainText('Em ligação');
   await expect(page.locator('[data-voice-script]')).toBeVisible();
   await expect(page.locator('body')).not.toContainText('JRC_CONTACT_CENTER.');
+  await expect(
+    page
+      .locator('[data-testid=interaction-workspace] header')
+      .getByRole('button', { name: 'Encerrar', exact: false })
+  ).toHaveCount(0);
   await page.screenshot({
     path: testInfo.outputPath('ligacao-conectada.png'),
     fullPage: true,

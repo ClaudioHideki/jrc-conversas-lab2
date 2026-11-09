@@ -309,7 +309,7 @@ const channelKey = computed(() =>
 );
 const isWhatsApp = computed(() => channelKey.value === 'whatsapp');
 const requiresWhatsAppClosing = computed(() => {
-  if (!props.context) return false;
+  if (!props.context || voiceView.value) return false;
   const inbox = props.inboxFor(conversation.value || {});
   const type = inbox.channel_type || inbox.channelType;
   return (

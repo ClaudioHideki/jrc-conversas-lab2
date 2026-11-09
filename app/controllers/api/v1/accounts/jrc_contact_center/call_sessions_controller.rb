@@ -31,7 +31,7 @@ class Api::V1::Accounts::JrcContactCenter::CallSessionsController < Api::V1::Acc
       return
     end
 
-    call.with_lock { update_observations!(call, note) }
+    JrcContactCenter::CallObservationWriter.call(call: call, text: note[:text], version: note[:lock_version].to_i, member: Current.account_user)
     render json: base_payload.merge(item: serialize(call, details: true))
   end
 
@@ -39,16 +39,6 @@ class Api::V1::Accounts::JrcContactCenter::CallSessionsController < Api::V1::Acc
 
   def valid_observations?(note)
     note[:text].is_a?(String) && note[:text].length <= 1000 && note[:lock_version].to_s.match?(/\A\d+\z/)
-  end
-
-  def observation_payload(note)
-    { 'text' => note[:text], 'account_user_id' => Current.account_user.id, 'updated_at' => Time.current.iso8601 }
-  end
-
-  def update_observations!(call, note)
-    raise JrcContactCenter::OperationError.new('stale_observations', status: :conflict) if call.lock_version != note[:lock_version].to_i
-
-    call.update!(metadata: call.metadata.merge('attendance_observations' => observation_payload(note)))
   end
 
   def scoped_calls
@@ -64,8 +54,9 @@ class Api::V1::Accounts::JrcContactCenter::CallSessionsController < Api::V1::Acc
   end
 
   def serialize(call, details: false)
-    payload = call.as_json(only: CALL_FIELDS)
-                  .merge('metadata' => call.metadata.except('jrc_f1'))
+    metadata = call.metadata.except('jrc_f1')
+    metadata = metadata.except('attendance_observations') unless contact_center_access.policy.operate?
+    payload = call.as_json(only: CALL_FIELDS).merge('metadata' => metadata)
     return payload unless details
 
     attendant = call.legs.where.not(account_user_id: nil).order(started_at: :desc, id: :desc).first&.account_user

@@ -103,7 +103,10 @@ const global = {
 describe('inbox native SIP action guards', () => {
   it('composes the five Voice V4 tabs and keeps script and notes in the call without duplicate SIP controls', async () => {
     const wrapper = mount(HoyaInboxWorkspace, {
-      props,
+      props: {
+        ...props,
+        inboxFor: () => ({ channel_type: 'Channel::Whatsapp' }),
+      },
       global: { ...global, provide: { [GLOBAL_VOICE_SHELL]: true } },
     });
     await flushPromises();

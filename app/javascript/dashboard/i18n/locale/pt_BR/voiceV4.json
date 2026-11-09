@@ -38,6 +38,14 @@
     "FINALIZE": "Finalizar atendimento",
     "AWAITING_END": "Aguardando confirmação do encerramento da ligação",
     "BLOCKED_CONTACT": "Contato bloqueado no cadastro. Verifique a restrição antes de orientar o cliente.",
-    "UNAVAILABLE": "Indisponível"
+    "UNAVAILABLE": "Indisponível",
+    "HISTORY_ERROR": "Não foi possível consultar o histórico.",
+    "NOTE_HISTORY": "Histórico das observações",
+    "HISTORY_LOADING": "Carregando revisões…",
+    "HISTORY_MORE": "Carregar revisões anteriores",
+    "NOTE_VERSION": "Versão",
+    "HISTORY_RETRY": "Tentar novamente",
+    "NOTE_CLEARED": "Observação limpa pelo agente",
+    "HISTORY_EMPTY": "Nenhuma revisão registrada a partir desta versão."
   }
 }

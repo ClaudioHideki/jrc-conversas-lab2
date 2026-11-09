@@ -75,7 +75,16 @@ jobs:
             spec/jobs/jrc_contact_center \
             --format progress --format json --out /tmp/voice-v4-rspec.json
       - name: RuboCop do incremento
-        run: bundle exec rubocop app/services/jrc_contact_center/customer_context.rb app/services/jrc_contact_center/agent_state_manager.rb app/controllers/api/v1/accounts/jrc_contact_center/call_sessions_controller.rb --format progress
+        run: >-
+          bundle exec rubocop
+          app/services/jrc_contact_center/customer_context.rb
+          app/services/jrc_contact_center/agent_state_manager.rb
+          app/services/jrc_contact_center/call_observation_writer.rb
+          app/models/jrc_contact_center/call_observation.rb
+          app/controllers/api/v1/accounts/jrc_contact_center/call_sessions_controller.rb
+          app/controllers/api/v1/accounts/jrc_contact_center/call_observations_controller.rb
+          db/migrate/20261109150000_create_jrc_contact_center_call_observations.rb
+          --format progress
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc

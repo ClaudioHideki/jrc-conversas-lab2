@@ -38,6 +38,14 @@
     "FINALIZE": "Finish attendance",
     "AWAITING_END": "Waiting for confirmed call termination",
     "BLOCKED_CONTACT": "This contact is blocked. Check the restriction before advising the customer.",
-    "UNAVAILABLE": "Unavailable"
+    "UNAVAILABLE": "Unavailable",
+    "HISTORY_ERROR": "Não foi possível consultar o histórico.",
+    "NOTE_HISTORY": "Histórico das observações",
+    "HISTORY_LOADING": "Carregando revisões…",
+    "HISTORY_MORE": "Carregar revisões anteriores",
+    "NOTE_VERSION": "Versão",
+    "HISTORY_RETRY": "Tentar novamente",
+    "NOTE_CLEARED": "Observação limpa pelo agente",
+    "HISTORY_EMPTY": "Nenhuma revisão registrada a partir desta versão."
   }
 }
