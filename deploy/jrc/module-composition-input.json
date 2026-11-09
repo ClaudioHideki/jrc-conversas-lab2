@@ -27,7 +27,7 @@
   "additionalEntrypoints": [],
   "editorStatus": {
     "sourceRepository": "ClaudioHideki/BrokerJRCIA",
-    "sourceSha": "2d30a5a544aa0eae12c208867e4912c369626787",
+    "sourceSha": "5f98f767bea9645aa8f3d6029568ce028e053fd2",
     "sourceCommitted": true,
     "buildManifest": "public/jrc-flow-editor/EDITOR-BUILD-MANIFEST.json"
   },
