@@ -3,6 +3,7 @@ import { computed, onMounted, provide, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { request, errorKey } from './client';
+import PortalIcon from './PortalIcon.vue';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -16,10 +17,10 @@ provide(
   computed(() => session.value?.context)
 );
 const links = [
-  { path: '/', label: 'PORTAL.HOME' },
-  { path: '/chamados/novo', label: 'PORTAL.NEW' },
-  { path: '/chamados', label: 'PORTAL.TICKETS' },
-  { path: '/conhecimento', label: 'PORTAL.KNOWLEDGE' },
+  { path: '/', label: 'PORTAL.HOME', icon: 'home' },
+  { path: '/chamados/novo', label: 'PORTAL.NEW', icon: 'plus' },
+  { path: '/chamados', label: 'PORTAL.TICKETS', icon: 'headset' },
+  { path: '/conhecimento', label: 'PORTAL.KNOWLEDGE', icon: 'book' },
 ];
 onMounted(async () => {
   if (isLogin.value) {
@@ -65,35 +66,34 @@ const logout = async () => {
   <RouterView v-if="isLogin" />
   <div
     v-else
-    class="min-h-screen bg-slate-50 text-slate-800"
+    class="min-h-screen bg-[#eaf3ff] text-slate-950 [&_*]:border-solid"
   >
-    <header class="border-b border-slate-200 bg-white px-5 py-4 sm:px-8">
+    <header
+      class="relative z-20 border-b border-blue-800 bg-gradient-to-r from-[#02172e] via-[#052b5b] to-[#031d3d] px-5 py-4 text-white shadow-lg lg:px-8"
+    >
       <div
-        class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4"
+        class="mx-auto flex max-w-[1920px] flex-wrap items-center justify-between gap-4"
       >
         <RouterLink
           to="/"
-          class="flex items-center gap-3 text-slate-900"
+          class="flex shrink-0 items-center gap-4 text-white"
         >
-          <span
-            class="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-900 text-lg font-bold text-white"
+          <img
+            src="/brand-assets/logo-jrc-thumbnail.png"
+            :alt="t('PORTAL.BRAND_SHORT')"
+            class="h-14 w-16 rounded-xl object-cover"
+          />
+          <strong
+            class="border-l border-white/40 pl-4 text-xl font-bold tracking-tight sm:text-3xl"
           >
-            {{ t('PORTAL.BRAND_SHORT') }}
-          </span>
-          <span>
-            <strong class="block text-base">{{ t('PORTAL.BRAND') }}</strong>
-            <span class="text-sm text-slate-500">{{ t('PORTAL.TITLE') }}</span>
-          </span>
+            {{ t('PORTAL.BRAND') }}
+          </strong>
         </RouterLink>
-        <div
-          class="flex w-full min-w-0 max-w-full flex-wrap items-center gap-3 sm:w-auto"
-        >
-          <label
-            class="flex w-full min-w-0 flex-col gap-2 text-xs font-semibold text-slate-600 sm:w-auto sm:flex-row sm:items-center"
-          >
+        <div class="flex max-w-full flex-wrap items-center gap-4 sm:gap-6">
+          <label class="flex min-w-0 flex-col gap-1 text-xs text-blue-100">
             {{ t('PORTAL.CONTEXT') }}
             <select
-              class="w-full min-w-0 max-w-full rounded-lg border border-slate-300 bg-white p-2 text-sm sm:w-auto sm:max-w-md"
+              class="w-full min-w-0 max-w-md rounded-xl border border-blue-200/60 bg-[#062348] px-3 py-2 text-sm text-white shadow-inner focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-300 sm:min-w-64"
               :value="session?.context?.id || ''"
               :disabled="loading"
               @change="changeContext"
@@ -110,38 +110,68 @@ const logout = async () => {
           </label>
           <RouterLink
             to="/perfil"
-            class="rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            class="flex items-center gap-3 rounded-lg px-2 py-2 text-sm hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-cyan-300"
           >
+            <span
+              class="rounded-full bg-gradient-to-b from-sky-400 to-blue-700 p-2"
+            >
+              <PortalIcon name="user" />
+            </span>
             {{ t('PORTAL.PROFILE') }}
           </RouterLink>
           <button
-            class="rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-100"
+            class="flex items-center gap-2 border-l border-white/25 py-2 pl-5 text-sm hover:text-cyan-200 focus-visible:ring-2 focus-visible:ring-cyan-300"
             @click="logout"
           >
+            <PortalIcon name="logout" />
             {{ t('PORTAL.SIGN_OUT') }}
           </button>
         </div>
       </div>
     </header>
     <div
-      class="mx-auto grid max-w-7xl gap-6 p-5 sm:p-8 lg:grid-cols-[200px_minmax(0,1fr)]"
+      class="mx-auto grid min-h-[calc(100vh-90px)] max-w-[1920px] lg:grid-cols-[250px_minmax(0,1fr)]"
     >
-      <nav
-        :aria-label="t('PORTAL.TITLE')"
-        class="flex flex-wrap content-start gap-2 lg:flex-col"
-      >
-        <RouterLink
-          v-for="link in links"
-          :key="link.path"
-          :to="link.path"
-          class="rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-white"
-          active-class="bg-white text-slate-900 shadow-sm"
-          exact-active-class="ring-1 ring-slate-200"
+      <aside class="relative overflow-hidden bg-[#04234c] text-white">
+        <img
+          src="/brand-assets/portal-sidebar.svg"
+          alt=""
+          aria-hidden="true"
+          class="pointer-events-none absolute inset-0 h-full w-full object-cover"
+        />
+        <nav
+          :aria-label="t('PORTAL.TITLE')"
+          class="relative flex gap-2 overflow-x-auto p-3 lg:sticky lg:top-0 lg:flex-col lg:gap-3 lg:px-4 lg:py-10"
         >
-          {{ t(link.label) }}
-        </RouterLink>
-      </nav>
-      <main class="min-w-0">
+          <RouterLink
+            v-for="link in links"
+            :key="link.path"
+            :to="link.path"
+            class="flex shrink-0 items-center gap-3 whitespace-nowrap rounded-xl px-4 py-3 text-sm font-semibold transition hover:bg-blue-700/40 focus-visible:ring-2 focus-visible:ring-cyan-300 lg:text-base"
+            :class="
+              route.path === link.path ||
+              (link.path === '/chamados' &&
+                /^\/chamados\/[^/]+$/.test(route.path) &&
+                route.path !== '/chamados/novo')
+                ? 'bg-gradient-to-b from-sky-400 via-blue-600 to-blue-700 shadow-lg ring-1 ring-sky-400/50'
+                : 'text-blue-50'
+            "
+          >
+            <PortalIcon
+              :name="link.icon"
+              class="h-7 w-7"
+            />
+            {{ t(link.label) }}
+          </RouterLink>
+        </nav>
+      </aside>
+      <main class="relative isolate min-w-0 overflow-hidden p-5 sm:p-7 xl:p-8">
+        <img
+          src="/brand-assets/portal-waves.svg"
+          alt=""
+          aria-hidden="true"
+          class="pointer-events-none absolute inset-x-0 top-0 -z-10 w-full"
+        />
         <p
           v-if="error"
           role="alert"
@@ -161,7 +191,7 @@ const logout = async () => {
         />
         <p
           v-else
-          class="rounded-2xl border border-slate-200 bg-white p-8"
+          class="rounded-2xl border border-blue-200 bg-white/90 p-8 shadow-sm"
         >
           {{ t('PORTAL.SELECT_CONTEXT') }}
         </p>

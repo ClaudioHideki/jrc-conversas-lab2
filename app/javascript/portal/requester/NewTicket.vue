@@ -1,6 +1,8 @@
 <script setup>
 import { computed, inject, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import PortalIcon from './PortalIcon.vue';
+import PortalHeading from './PortalHeading.vue';
 import EstablishmentPicker from '../../dashboard/routes/dashboard/serviceDesk/components/EstablishmentPicker.vue';
 import { catalogueAnswers } from '../../dashboard/routes/dashboard/serviceDesk/helpers/catalogueFields';
 import { request, upload, submission, errorKey } from './client';
@@ -96,8 +98,9 @@ const edit = () => {
 
 <template>
   <section class="space-y-6">
-    <h1 class="text-2xl font-semibold text-slate-900">
-      {{
+    <PortalHeading
+      icon="headset"
+      :title="
         t(
           created
             ? 'PORTAL.CREATED'
@@ -106,8 +109,8 @@ const edit = () => {
               : 'PORTAL.NEW',
           { number: created?.number }
         )
-      }}
-    </h1>
+      "
+    />
     <p
       v-if="error"
       role="alert"
@@ -117,34 +120,59 @@ const edit = () => {
     </p>
     <div
       v-if="created"
-      class="rounded-2xl border border-slate-200 bg-white p-8"
+      class="rounded-2xl border border-blue-200/80 bg-white/90 shadow-[0_3px_12px_#0754a414] p-8"
     >
       <h2 class="text-lg font-semibold">{{ created.title }}</h2>
       <p class="mt-3 whitespace-pre-wrap text-sm">{{ created.description }}</p>
       <RouterLink
         :to="`/chamados/${created.id}`"
-        class="mt-6 inline-block rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white"
+        class="mt-6 inline-block rounded-xl bg-gradient-to-b from-blue-500 to-blue-800 shadow-md hover:from-blue-600 hover:to-blue-900 px-5 py-3 text-sm font-semibold text-white"
       >
         {{ t('PORTAL.FOLLOW') }}
       </RouterLink>
     </div>
     <form
       v-else
-      class="space-y-6 rounded-2xl border border-slate-200 bg-white p-5 sm:p-8"
+      class="space-y-4 rounded-2xl border border-blue-200/80 bg-white/90 shadow-[0_3px_12px_#0754a414] p-5 sm:p-6"
       @submit.prevent="review ? confirm() : prepare()"
     >
-      <dl class="grid gap-4 rounded-xl bg-slate-50 p-4 text-sm sm:grid-cols-2">
-        <div
-          v-for="(value, key) in {
-            NAME: context.contact.name,
-            EMAIL: context.contact.email,
-            PHONE: context.contact.phone_number,
-            ORGANIZATION: context.organization,
-          }"
-          :key="key"
-        >
-          <dt class="text-xs text-slate-500">{{ t(`PORTAL.${key}`) }}</dt>
-          <dd class="mt-1 break-words font-medium">{{ value }}</dd>
+      <dl
+        class="grid gap-5 rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50 to-blue-100/80 p-4 text-sm md:grid-cols-3 md:divide-x md:divide-blue-200"
+      >
+        <div class="flex gap-3">
+          <span class="self-start rounded-xl bg-blue-100 p-3 text-blue-700">
+            <PortalIcon name="user" />
+          </span>
+          <div>
+            <dt class="text-xs text-slate-600">{{ t('PORTAL.NAME') }}</dt>
+            <dd class="mt-1 font-bold">{{ context.contact.name }}</dd>
+            <dt class="mt-2 text-xs text-slate-600">{{ t('PORTAL.PHONE') }}</dt>
+            <dd class="font-semibold">{{ context.contact.phone_number }}</dd>
+          </div>
+        </div>
+        <div class="flex min-w-0 gap-3 md:pl-5">
+          <span class="self-start rounded-xl bg-blue-100 p-3 text-blue-700">
+            <PortalIcon name="mail" />
+          </span>
+          <div class="min-w-0">
+            <dt class="text-xs text-slate-600">{{ t('PORTAL.EMAIL') }}</dt>
+            <dd class="mt-1 break-words font-bold">
+              {{ context.contact.email }}
+            </dd>
+          </div>
+        </div>
+        <div class="flex min-w-0 gap-3 md:pl-5">
+          <span class="self-start rounded-xl bg-blue-100 p-3 text-blue-700">
+            <PortalIcon name="building" />
+          </span>
+          <div class="min-w-0">
+            <dt class="text-xs text-slate-600">
+              {{ t('PORTAL.ORGANIZATION') }}
+            </dt>
+            <dd class="mt-1 break-words font-bold">
+              {{ context.organization }}
+            </dd>
+          </div>
         </div>
       </dl>
       <p
@@ -159,7 +187,7 @@ const edit = () => {
           v-model="serviceId"
           required
           :disabled="review || busy"
-          class="mt-2 w-full rounded-xl border border-slate-300 p-3"
+          class="mt-2 w-full rounded-xl border border-blue-200 shadow-inner focus:border-blue-500 focus:ring-2 focus:ring-blue-200 p-3"
         >
           <option value="">{{ t('PORTAL.SELECT') }}</option>
           <option
@@ -173,6 +201,7 @@ const edit = () => {
       </label>
       <EstablishmentPicker
         v-if="selected?.stores_enabled"
+        class="rounded-2xl border border-blue-100 bg-blue-50/50 [&_input]:bg-white [&_select]:bg-white"
         v-model="establishmentId"
         :service-id="serviceId"
         :disabled="review || busy"
@@ -195,7 +224,7 @@ const edit = () => {
           v-model="contractId"
           :required="selected.contract_required"
           :disabled="review || busy"
-          class="mt-2 w-full rounded-xl border border-slate-300 p-3"
+          class="mt-2 w-full rounded-xl border border-blue-200 shadow-inner focus:border-blue-500 focus:ring-2 focus:ring-blue-200 p-3"
         >
           <option value="">{{ t('PORTAL.SELECT') }}</option>
           <option
@@ -211,21 +240,23 @@ const edit = () => {
         {{ t('PORTAL.SUBJECT') }}
         <input
           v-model="subject"
+          :placeholder="t('PORTAL.SUBJECT')"
           required
           maxlength="255"
           :readonly="review"
-          class="mt-2 w-full rounded-xl border border-slate-300 p-3"
+          class="mt-2 w-full rounded-xl border border-blue-200 shadow-inner focus:border-blue-500 focus:ring-2 focus:ring-blue-200 p-3"
         />
       </label>
       <label class="block text-sm font-semibold">
         {{ t('PORTAL.DESCRIPTION') }}
         <textarea
           v-model="description"
+          :placeholder="t('PORTAL.DESCRIPTION')"
           required
           maxlength="20000"
-          rows="5"
+          rows="4"
           :readonly="review"
-          class="mt-2 w-full rounded-xl border border-slate-300 p-3"
+          class="mt-2 w-full rounded-xl border border-blue-200 shadow-inner focus:border-blue-500 focus:ring-2 focus:ring-blue-200 p-3"
         />
       </label>
       <label
@@ -239,7 +270,7 @@ const edit = () => {
           :value="answers[field.key] || ''"
           :required="field.required"
           :disabled="review"
-          class="mt-2 w-full rounded-xl border border-slate-300 p-3"
+          class="mt-2 w-full rounded-xl border border-blue-200 shadow-inner focus:border-blue-500 focus:ring-2 focus:ring-blue-200 p-3"
           @change="updateAnswer(field, $event)"
         >
           <option value="">{{ t('PORTAL.SELECT') }}</option>
@@ -264,7 +295,7 @@ const edit = () => {
           :checked="answers[field.key] === true"
           :required="field.required && field.type !== 'boolean'"
           :disabled="review"
-          class="mt-2 rounded-lg border border-slate-300 p-3"
+          class="mt-2 rounded-lg border border-blue-200 shadow-inner focus:border-blue-500 focus:ring-2 focus:ring-blue-200 p-3"
           :class="field.type === 'boolean' ? 'ml-3' : 'w-full'"
           @change="updateAnswer(field, $event)"
         />
@@ -275,7 +306,7 @@ const edit = () => {
           v-if="!review"
           type="file"
           multiple
-          class="mt-2 block w-full text-sm"
+          class="mt-2 block w-full rounded-xl border border-dashed border-blue-300 bg-blue-50/70 p-4 text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-blue-100 file:px-4 file:py-2 file:font-semibold file:text-blue-800"
           @change="files = Array.from($event.target.files)"
         />
         <span class="mt-2 block text-xs font-normal text-slate-500">
@@ -290,19 +321,21 @@ const edit = () => {
         </span>
       </label>
       <p class="text-xs text-slate-500">{{ t('PORTAL.PRIORITY_HELP') }}</p>
-      <div class="flex flex-wrap gap-3">
+      <div
+        class="flex flex-wrap justify-end gap-3 border-t border-blue-100 pt-4"
+      >
         <button
           v-if="review"
           type="button"
           :disabled="busy"
-          class="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold"
+          class="rounded-xl border border-blue-200 shadow-inner focus:border-blue-500 focus:ring-2 focus:ring-blue-200 px-5 py-3 text-sm font-semibold"
           @click="edit"
         >
           {{ t('PORTAL.EDIT') }}
         </button>
         <button
           :disabled="busy || !selected"
-          class="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white disabled:opacity-40"
+          class="rounded-xl bg-gradient-to-b from-blue-500 to-blue-800 shadow-md hover:from-blue-600 hover:to-blue-900 px-5 py-3 text-sm font-semibold text-white disabled:opacity-40"
         >
           {{
             t(
