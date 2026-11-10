@@ -14,7 +14,16 @@ RSpec.describe JrcNico::DomainActions do
   before do
     sd_account.update!(custom_attributes: { 'nico_enabled' => true })
     sd_account.enable_features!('jrc_projects')
-    sd_account_user.update!(jrc_projects_enabled: true)
+    sd_account_user.update!(jrc_projects_enabled: true, jrc_projects_permissions: { 'projects.project.create' => true })
+  end
+
+  it 'does not expose or execute project creation after the individual create grant is revoked' do
+    sd_account_user.update!(jrc_projects_permissions: { 'projects.project.create' => false })
+    expect(JrcNico::ToolCatalog.new(access).available.pluck(:name)).not_to include('create_project')
+    expect do
+      executor.call('create_project', { 'name' => 'Denied creation' })
+    end.to raise_error(Pundit::NotAuthorizedError)
+    expect(JrcProjects::Project.where(account: sd_account)).to be_empty
   end
 
   it 'creates a real R2 ticket once per command and preserves its unit and requester' do

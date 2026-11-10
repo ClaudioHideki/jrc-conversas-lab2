@@ -2,7 +2,7 @@ name: Flow e QR - composicao candidata
 
 on:
   push:
-    branches: [main, codex/nico-broker-coordenado-20261015, codex/nico-jornada-candidato-20261016]
+    branches: [main, codex/nico-broker-coordenado-20261015, codex/nico-jornada-candidato-20261016, 'codex/consolidacao-*']
   workflow_dispatch:
 
 permissions:
@@ -81,7 +81,7 @@ jobs:
         run: |
           case "$GITHUB_REF" in
             refs/heads/codex/nico-broker-coordenado-20261015) baseline=b58e093dd3a32fe97829a4566660b83ee48b9eca ;;
-            refs/heads/main|refs/heads/codex/nico-jornada-candidato-20261016) baseline=98a4be7714be41d33bf9ff52b254ebb773864769 ;;
+            refs/heads/main|refs/heads/codex/nico-jornada-candidato-20261016|refs/heads/codex/consolidacao-*) baseline=98a4be7714be41d33bf9ff52b254ebb773864769 ;;
             *) echo 'Branch fora das candidatas autorizadas'; exit 1 ;;
           esac
           git merge-base --is-ancestor "$baseline" HEAD
@@ -109,7 +109,7 @@ jobs:
           bundle exec rails db:migrate
       - name: Executar contratos e corridas contra PostgreSQL
         run: |
-          bundle exec rspec $SPEC_ARGS --format progress --format json --out /tmp/flow-broker-rspec.json
+          bundle exec rspec $SPEC_ARGS --exclude-pattern spec/services/jrc_broker/routing_context_connection_spec.rb --format progress --format json --out /tmp/flow-broker-rspec.json
           python3 - <<'PYTHON'
           import json, os
           summary = json.load(open('/tmp/flow-broker-rspec.json'))['summary']
@@ -117,6 +117,20 @@ jobs:
           assert summary['failure_count'] == 0
           assert summary['pending_count'] == 0
           assert summary['example_count'] >= int(os.environ['MINIMUM_EXAMPLES'])
+          PYTHON
+      - name: Routing HTTP com fixtures commitadas em banco protegido separado
+        if: matrix.suite == 'modules'
+        env:
+          POSTGRES_DATABASE: jrc_durable_review_test
+          DB_POOL_SIZE: '10'
+        run: |
+          SCHEMA=db/schema.rb bundle exec rails db:create db:schema:load
+          bundle exec rails db:migrate
+          bundle exec rspec spec/services/jrc_broker/routing_context_connection_spec.rb --format progress --format json --out /tmp/routing-context-rspec.json
+          python3 - <<'PYTHON'
+          import json
+          summary = json.load(open('/tmp/routing-context-rspec.json'))['summary']
+          assert summary['failure_count'] == 0 and summary['pending_count'] == 0 and summary['example_count'] >= 1
           PYTHON
       - name: Preservar fonte e schema versionados
         run: git diff --exit-code

@@ -2,7 +2,7 @@ name: NICO e Broker - candidato coordenado
 
 on:
   push:
-    branches: [main, codex/nico-broker-coordenado-20261015, codex/nico-jornada-candidato-20261016, codex/nico-chat-ux-20261019]
+    branches: [main, codex/nico-broker-coordenado-20261015, codex/nico-jornada-candidato-20261016, codex/nico-chat-ux-20261019, 'codex/consolidacao-*']
   workflow_dispatch:
 
 permissions:
@@ -48,7 +48,7 @@ jobs:
         run: |
           case "$GITHUB_REF" in
             refs/heads/codex/nico-broker-coordenado-20261015) baseline=b58e093dd3a32fe97829a4566660b83ee48b9eca ;;
-            refs/heads/main|refs/heads/codex/nico-jornada-candidato-20261016|refs/heads/codex/nico-chat-ux-20261019) baseline=98a4be7714be41d33bf9ff52b254ebb773864769 ;;
+            refs/heads/main|refs/heads/codex/nico-jornada-candidato-20261016|refs/heads/codex/nico-chat-ux-20261019|refs/heads/codex/consolidacao-*) baseline=98a4be7714be41d33bf9ff52b254ebb773864769 ;;
             *) echo 'Branch fora das candidatas autorizadas'; exit 1 ;;
           esac
           git merge-base --is-ancestor "$baseline" HEAD

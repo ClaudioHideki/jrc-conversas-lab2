@@ -34,8 +34,8 @@
     {
       "path": ".github/workflows/nico-broker-candidate.yml",
       "baseSha256": null,
-      "sha256": "1cf643cf2950e0c206e7a7d446adc6cd7869573baf5f57a9580f3e233fccea76",
-      "bytes": 12407
+      "sha256": "092ca723d5041069fa737dc16f9d3c7acbc2ae87aba323d3b03b916ab437ea1a",
+      "bytes": 12463
     },
     {
       "path": "app/controllers/api/v1/accounts/jrc_domain_commands_controller.rb",

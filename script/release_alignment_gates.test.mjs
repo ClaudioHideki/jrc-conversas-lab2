@@ -43,3 +43,15 @@ test('Projects validation uses each product baseline and the guarded concurrency
   assert.ok(workflow.includes('POSTGRES_DATABASE: jrc_four_fronts_concurrency_20261026_test'));
   assert.ok(workflow.includes("JRC_PROJECT_COMMENT_CONCURRENCY: '1'"));
 });
+
+test('consolidation exercises legacy NICO and Flow gates and keeps committed routing fixtures isolated', () => {
+  const nico = read('.github/workflows/nico-broker-candidate.yml');
+  const flow = read('.github/workflows/flow-broker-candidate.yml');
+  for (const workflow of [nico, flow]) {
+    assert.ok(workflow.includes('codex/consolidacao-*'));
+    assert.ok(workflow.includes('refs/heads/codex/consolidacao-*'));
+  }
+  assert.ok(flow.includes('--exclude-pattern spec/services/jrc_broker/routing_context_connection_spec.rb'));
+  assert.ok(flow.includes('POSTGRES_DATABASE: jrc_durable_review_test'));
+  assert.ok(flow.includes('bundle exec rspec spec/services/jrc_broker/routing_context_connection_spec.rb'));
+});
