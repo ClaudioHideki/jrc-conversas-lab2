@@ -26,6 +26,7 @@ import { useServiceDesk } from '../composables/useServiceDesk';
 import { usePublicationConfirmation } from '../composables/usePublicationConfirmation';
 import { communicationLabels } from '../helpers/communicationLabels';
 import { canAct, canonicalId } from '../helpers/access';
+import { selfAssignment } from '../helpers/selfAssignment';
 import { serviceDeskRouteName } from '../routeDefinitions';
 import {
   ticketListReturn,
@@ -50,6 +51,14 @@ let deletionController = new AbortController();
 const deleting = computed(() => deleteStatus.value === 'saving');
 const result = computed(() => session.resource(key));
 const ticket = computed(() => result.value.record);
+const selfAssignee = computed(() =>
+  selfAssignment(session.state.context, ticket.value)
+);
+const assigning = computed(
+  () =>
+    session.operations?.mutation?.(`ticket:actions:${ticket.value?.id}`)
+      ?.status === 'saving'
+);
 const editConfirmed = computed(() => {
   const mutation = session.operations?.mutation?.('ticket:form:write');
   const saved = mutation?.ticket;
@@ -297,11 +306,14 @@ const actionUpdated = async () => {
   action.value = '';
   await refresh();
 };
-const actionTitle = computed(() =>
-  action.value === 'closure'
-    ? t('JRC_SERVICE_DESK.REFINEMENT.closure.title')
-    : t(`JRC_SERVICE_DESK.REDESIGN_DETAIL.actions.${action.value || 'status'}`)
-);
+const actionTitle = computed(() => {
+  if (action.value === 'assume') return t('CONVERSATION.ASSIGN_TO_ME');
+  if (action.value === 'closure')
+    return t('JRC_SERVICE_DESK.REFINEMENT.closure.title');
+  return t(
+    `JRC_SERVICE_DESK.REDESIGN_DETAIL.actions.${action.value || 'status'}`
+  );
+});
 const deleteTicket = async () => {
   if (
     deleting.value ||
@@ -427,7 +439,17 @@ const deleteTicket = async () => {
               @click="action = 'status'"
             />
             <Button
-              v-if="!ticket.assignee && ticket.permissions.assign"
+              v-if="selfAssignee"
+              data-testid="assume-ticket-shortcut"
+              size="xs"
+              variant="outline"
+              icon="i-lucide-user-round-check"
+              :disabled="assigning"
+              :label="t('CONVERSATION.ASSIGN_TO_ME')"
+              @click="action = 'assume'"
+            />
+            <Button
+              v-if="ticket.permissions.assign"
               data-testid="assign-ticket-shortcut"
               size="xs"
               variant="outline"
@@ -680,7 +702,7 @@ const deleteTicket = async () => {
       :open="!!action && !!ticket"
       :title="actionTitle"
       :compact="action === 'closure'"
-      :busy="deleting || lifecycleBusy"
+      :busy="deleting || lifecycleBusy || assigning"
       @close="action = ''"
     >
       <form
