@@ -136,6 +136,8 @@ RSpec.describe 'Requester portal Phase 1 over the native Service Desk', type: :r
       get "/portal/api/chamados/#{ticket.id}"
       expect(response).to have_http_status(:ok)
       expect(response.parsed_body['notes'].pluck('id')).to eq([public_note.id.to_s])
+      expect(response.parsed_body['ticket']).to include('requester_name' => sd_contact.name, 'company_name' => company.name,
+                                                       'service_name' => service.name, 'priority_name' => ticket.priority.name)
       expect(response.parsed_body['public_messages'].pluck('body')).to include('Native public response')
       expect(response.body).not_to include(private_note.body, 'Private native response', 'Private incoming response',
                                            'actor_membership', 'routing', 'source_snapshot')
@@ -163,6 +165,7 @@ RSpec.describe 'Requester portal Phase 1 over the native Service Desk', type: :r
       expect(response).to have_http_status(:ok)
       expect(response.parsed_body['tickets'].pluck('id')).to eq([ticket.id.to_s])
       expect(response.parsed_body.values_at('page', 'per_page', 'total')).to eq([1, 20, 1])
+      expect(response.parsed_body['phase_counts']).to eq(ticket.status.phase => 1)
       get '/portal/api/chamados', params: { account_id: sd_foreign_account.id }
       expect(response).to have_http_status(:unprocessable_entity)
     end
@@ -190,6 +193,9 @@ RSpec.describe 'Requester portal Phase 1 over the native Service Desk', type: :r
         get "/portal/api/chamados/#{denied.id}/mensagens/1/anexos/1"
         expect(response).to have_http_status(:not_found)
       end
+      get '/portal/api/chamados'
+      expect(response.parsed_body['phase_counts'].values.sum).to eq(1)
+      expect(response.parsed_body['tickets'].pluck('id')).to eq([ticket.id.to_s])
     end
 
     it 'allows only enumerated manager visibility, and never writes as another native customer' do

@@ -37,6 +37,7 @@ jobs:
       - run: python3 script/jrc_ag_native_plan_test.py
       - run: python3 script/jrc_ag_catalog_compare_test.py
       - run: python3 script/jrc_ag_guarded_frontend_build_test.py
+      - run: python3 script/jrc_ag_guarded_image_build_test.py
       # Known identity collisions must be resolved with a tested history-adoption plan.
       # Never mark the current combined tree as database-ready while this gate fails.
       - run: node script/validate_ag_migration_identity.mjs
@@ -202,6 +203,7 @@ jobs:
         shell: bash
         run: |
           bundle exec rspec \
+            spec/services/jrc_service_desk/internal_intake_integration_spec.rb \
             spec/services/jrc_crm/nexora_end_to_end_spec.rb \
             spec/requests/api/v1/accounts/relationship/sofia_operational_journey_spec.rb \
             spec/requests/api/v1/accounts/relationship/native_completions_spec.rb \

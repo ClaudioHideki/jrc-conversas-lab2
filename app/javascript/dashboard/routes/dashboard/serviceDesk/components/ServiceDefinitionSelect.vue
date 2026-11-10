@@ -13,6 +13,8 @@ const props = defineProps({
   unitId: { type: String, default: '' },
   disabled: Boolean,
   cards: Boolean,
+  unrestrictedOnly: Boolean,
+  generalLabel: { type: String, default: '' },
 });
 const emit = defineEmits(['update:modelValue']);
 const { t } = useI18n();
@@ -54,7 +56,14 @@ const load = async () => {
       props.unitId,
       'services'
     );
-    items.value = result.items;
+    items.value = props.unrestrictedOnly
+      ? result.items.filter(
+          row =>
+            row.active &&
+            !row.allowed_company_ids.length &&
+            !row.allowed_contract_ids.length
+        )
+      : result.items;
     total.value = result.meta.total;
     status.value = result.items.length ? 'ready' : 'empty';
   } catch {
@@ -122,7 +131,10 @@ onBeforeUnmount(() => {
       v-model="selected"
       :disabled="disabled || !unitId || status === 'loading'"
       :options="[
-        { value: '', label: t('JRC_SERVICE_DESK.LIFECYCLE.unit_policy') },
+        {
+          value: '',
+          label: generalLabel || t('JRC_SERVICE_DESK.LIFECYCLE.unit_policy'),
+        },
         ...items.map(row => ({ value: row.id, label: row.name })),
       ]"
     />

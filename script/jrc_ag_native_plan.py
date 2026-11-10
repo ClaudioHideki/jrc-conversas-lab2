@@ -14,6 +14,12 @@ SCOPES = [
     'spec/models/jrc_backoffice', 'spec/jobs/jrc_backoffice',
 ]
 EXTRA_SPECS = [
+    'spec/services/jrc_service_desk/create_ticket_service_spec.rb',
+    'spec/services/jrc_service_desk/internal_intake_integration_spec.rb',
+    'spec/services/jrc_service_desk/assignment_eligibility_spec.rb',
+    'spec/requests/api/v1/accounts/jrc_service_desk/operations_spec.rb',
+    'spec/requests/requester_portal/phase_one_spec.rb',
+    'spec/requests/requester_portal/protected_attachment_owners_spec.rb',
     'spec/listeners/action_cable_listener_spec.rb',
     'spec/enterprise/listeners/action_cable_listener_spec.rb',
     'spec/models/notification_spec.rb',

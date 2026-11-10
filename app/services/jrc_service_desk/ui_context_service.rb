@@ -26,7 +26,15 @@ class JrcServiceDesk::UiContextService
     initial = initial_status(unit)
     { id: unit.id.to_s, account_id: @context.account.id.to_s, name: unit.name, active: true,
       operator_company: { id: unit.operator_company.id.to_s, account_id: unit.account_id.to_s, name: unit.operator_company.name },
-      initial_status: initial ? { id: initial.id.to_s, name: initial.name } : nil, permissions: unit_permissions(unit) }
+      initial_status: initial ? { id: initial.id.to_s, name: initial.name } : nil, permissions: unit_permissions(unit),
+      internal_intake: JrcServiceDesk::InternalIntake.presentation(unit, @context), self_assignee: self_assignee(unit) }
+  end
+
+  def self_assignee(unit)
+    return unless @context.capability?(:tickets_assign)
+
+    member = @context.active_memberships.operational.where(unit_id: unit.id, manual_assignment_enabled: true).first
+    { id: member.account_user_id.to_s, name: @context.user.name } if member
   end
 
   def unit_permissions(unit)

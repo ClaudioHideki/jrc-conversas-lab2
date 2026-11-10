@@ -30,15 +30,18 @@ class RequesterPortal::TicketsController < Api::V1::Widget::ServiceDeskControlle
     raise ArgumentError unless page.between?(1, 100_000)
 
     total = rows.count
-    records = rows.order(created_at: :desc, id: :desc).offset((page - 1) * 20).limit(20)
-    render json: { tickets: records.map { |ticket| ticket_payload(ticket) }, page: page, total: total, per_page: 20 }
+    records = rows.includes(:status).order(created_at: :desc, id: :desc).offset((page - 1) * 20).limit(20)
+    counts = portal_scope.tickets.group('jrc_service_desk_ticket_statuses.phase').count
+    render json: { tickets: records.map { |ticket| ticket_payload(ticket) }, page: page, total: total, per_page: 20, phase_counts: counts }
   end
 
   def show
     ticket = portal_ticket
     details = JrcServiceDesk::PortalTicketDetails.new(scope: portal_scope, ticket: ticket).call
     details[:sla] = [] unless sla_visible?(ticket)
-    render json: { ticket: ticket_payload(ticket), notes: notes_payload(ticket),
+    ticket_details = ticket_payload(ticket).merge(requester_name: ticket.requester.name, company_name: ticket.master_company&.name,
+                                                  service_name: ticket.service&.name, priority_name: ticket.priority.name)
+    render json: { ticket: ticket_details, notes: notes_payload(ticket),
                    conversations: own_ticket?(ticket) ? ticket_conversations(ticket).order(:id).pluck(:id).map(&:to_s) : [],
                    replies: customer_messages(ticket).map { |message| portal_presenter.customer_message(message) },
                    public_messages: public_messages(ticket).timeline.map { |message| portal_presenter.customer_message(message) },

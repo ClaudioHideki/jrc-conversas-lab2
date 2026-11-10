@@ -29,8 +29,8 @@
     {
       "path": ".github/workflows/build-ghcr.yml",
       "baseSha256": "05b856abe74f1897c52e76910a03a77065e8c12418b7cffbc74b15d906ce9fd2",
-      "sha256": "caba30f6f254846b1fee51a861c1c7de9e9e3dc8540a38a721727b3593d93d6d",
-      "bytes": 21927
+      "sha256": "ed9dec140998bde4c546d03dc4953a7ba118e8c765be3ba8e270de8e484848b3",
+      "bytes": 25093
     },
     {
       "path": ".github/workflows/nico-broker-candidate.yml",
@@ -1223,8 +1223,8 @@
     {
       "path": "spec/services/jrc_relationship/reviewed_operations_upgrade_spec.rb",
       "baseSha256": null,
-      "sha256": "050f26d17e8fa62f676e8e1bd569ac0ca5b30e227dc669e43355a3270be440e0",
-      "bytes": 3262
+      "sha256": "94f1b81bdeb1aaa53de9787fd962c20b8a1178eb37254323d98b5170e97c35c4",
+      "bytes": 3511
     },
     {
       "path": "spec/services/jrc_relationship/reviewed_portfolio_batch_spec.rb",

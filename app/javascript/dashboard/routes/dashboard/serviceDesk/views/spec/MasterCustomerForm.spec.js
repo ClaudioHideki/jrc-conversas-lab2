@@ -90,7 +90,7 @@ async function render(
           messages: { en: { ...sd, ...crm } },
         }),
       ],
-      stubs: { QuickTicketForm: Quick },
+      stubs: { QuickTicketForm: Quick, InternalTicketForm: true },
     },
   });
   await flushPromises();
@@ -105,6 +105,19 @@ it('waits for the native unit selection, then supplies only the verified custome
     { unitId: '10', companyId: '80', contactId: '33' },
     expect.any(AbortSignal)
   );
+  expect(wrapper.findComponent(Quick).props('customerContext')).toMatchObject({
+    company_id: '80',
+    requester: { id: '33' },
+  });
+});
+it('preserves master customer context when employee intake is also configured', async () => {
+  mocks.session.state.context.units[0].internal_intake = {
+    requester: { name: 'Synthetic' },
+  };
+  await render();
+  expect(wrapper.find('internal-ticket-form-stub').exists()).toBe(false);
+  wrapper.findComponent(Quick).vm.$emit('unitChange', '10');
+  await flushPromises();
   expect(wrapper.findComponent(Quick).props('customerContext')).toMatchObject({
     company_id: '80',
     requester: { id: '33' },
