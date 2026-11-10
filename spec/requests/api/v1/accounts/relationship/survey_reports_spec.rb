@@ -67,7 +67,7 @@ RSpec.describe 'Authorized survey response reports', type: :request do
     hidden = JrcRelationship::SurveyEngine.evaluate_closure(source: other, cycle_key: 'inaccessible-inbox').survey
     JrcRelationship::SurveyResponse.new(hidden).call(answers: { rating: 2 }, comment: 'INACCESSIBLE_INBOX_RESPONSE')
     exporter = create(:custom_role, account: sd_account,
-                       permissions: %w[contact_manage jrc_relationship_view jrc_relationship_export])
+                       permissions: %w[contact_manage jrc_relationship_view jrc_relationship_export conversation_unassigned_manage])
     sd_account_user.update!(role: :agent, custom_role: exporter)
     get "#{url}/survey_responses/export", headers: headers
     expect(response).to have_http_status(:ok)
@@ -109,7 +109,8 @@ RSpec.describe 'Authorized survey response reports', type: :request do
     JrcRelationship::SurveyResponse.new(hidden).call(answers: { rating: 2 }, comment: 'OTHER_UNIT_RESPONSE')
     other_membership.update!(active: false)
     exporter = create(:custom_role, account: sd_account,
-                       permissions: %w[contact_manage jrc_relationship_view jrc_relationship_export])
+                       permissions: %w[contact_manage jrc_relationship_view jrc_relationship_export
+                                       jrc_service_desk_module_view jrc_service_desk_tickets_view jrc_service_desk_customers_view])
     sd_account_user.update!(role: :agent, custom_role: exporter)
     get "#{url}/survey_responses/export", params: { source_type: 'JrcServiceDesk::Ticket' }, headers: headers
     expect(response.body).to include('OWN_UNIT_RESPONSE')

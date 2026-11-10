@@ -187,6 +187,7 @@ jobs:
             spec/jobs/jrc_backoffice/document_preanalysis_job_spec.rb \
             spec/requests/api/v1/accounts/relationship/configuration_restore_spec.rb \
             spec/requests/api/v1/accounts/relationship/portfolio_group_governance_spec.rb \
+            spec/requests/api/v1/accounts/relationship/portfolio_history_details_spec.rb \
             spec/requests/api/v1/accounts/jrc_approvals/adjustments_spec.rb \
             spec/services/jrc_backoffice/document_safety_spec.rb \
             spec/requests/api/v1/accounts/crm/approved_human_requirements_spec.rb \
@@ -387,6 +388,10 @@ jobs:
             script/jrc_calendar_server_state.test.mjs script/jrc_local_role_boundaries.test.mjs \
             script/jrc_portfolio_history_state.test.mjs script/jrc_requirement_history_state.test.mjs \
             script/jrc_requirement_state.test.mjs
+      - name: Bounded historical proof capture and disclosure regression
+        run: |
+          ruby script/jrc_portfolio_history_capture.test.rb
+          ruby script/jrc_portfolio_history_boundary.test.rb
       - name: Vue integration regressions on the exact consolidated source
         run: |
           pnpm exec vitest run app/javascript/dashboard/routes/dashboard/jrcCustomers \

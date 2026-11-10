@@ -47,7 +47,9 @@ class JrcRelationship::PortfolioHistoryDetails
         if !rules.is_a?(Hash) && value['version'].is_a?(Integer)
           rules = resource.versions.find_by(account_id: group.account_id, version: value['version'])&.rules
         end
-        { 'version' => value['version'], 'rules' => rules.to_h.slice(*JrcRelationship::PortfolioGroupConfiguration::RULES) }
+        # The complete event remains digest-bound; this detail projection does
+        # not expose explicit local user grants stored in configuration versions.
+        { 'version' => value['version'], 'rules' => rules.to_h.slice(*JrcRelationship::PortfolioHistoryBoundary::RULE_FIELDS) }
       else
         value.slice(*FIELDS)
       end

@@ -1,0 +1,34 @@
+{
+  "utc": "2026-11-10T17:23:39.305102+00:00",
+  "source_sha": "4ac14ef5f50de4c8fae76176d9bcf697419dbdf0",
+  "workflow_run": 42863585981,
+  "job": 129996119281,
+  "artifact": 13785289348,
+  "native_gate": "passed",
+  "schema_sha256": "f040ecbdedf709a99fd852108260e049aa0e42cd661c08f5664bd6047307c365",
+  "schema_origin": "Exact bytes of Rails-generated ag-fresh-schema.rb; no manual union of schema fragments",
+  "admission": {
+    "fresh_migrations": true,
+    "pinned_main_upgrade": true,
+    "existing_synthetic_account_preserved": true,
+    "schema_reload": true,
+    "all_constraints_actually_validated": true,
+    "catalogs_equivalent": true,
+    "original_schema_unchanged_by_comparison": true,
+    "expected_cumulative_versions": [
+      "20261109190000",
+      "20261109191000",
+      "20261109200000",
+      "20261109210000",
+      "20261109211000",
+      "20261109212000",
+      "20261110190000"
+    ]
+  },
+  "navigation_fixture": "The C6 operational activity link is distinct from contacts_dashboard_active. The original native contacts routes remain unchanged; do not restore the obsolete sidebar expectation to online presence.",
+  "remaining": [
+    "Focused RSpec, complete native matrix, additional sidebar tests, real CSS browser acceptance",
+    "External provider/AV/channels and real operational parameters are not accepted by this synthetic gate"
+  ],
+  "production_ready": false
+}

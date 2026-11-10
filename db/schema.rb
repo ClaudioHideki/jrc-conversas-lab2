@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
+ActiveRecord::Schema[7.1].define(version: 2026_11_10_190000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -54,15 +54,18 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.bigint "agent_capacity_policy_id"
     t.boolean "crm_enabled", default: false, null: false
     t.boolean "jrc_projects_enabled", default: false, null: false
-    t.jsonb "jrc_projects_permissions", default: {}, null: false
-    t.check_constraint "jsonb_typeof(jrc_projects_permissions) = 'object'::text", name: "jrc_project_permissions_object"
     t.boolean "auto_assignment_enabled", default: true, null: false
+    t.datetime "jrc_relationship_withdrawn_at"
+    t.bigint "jrc_relationship_eligibility_version", default: 0, null: false
+    t.jsonb "jrc_projects_permissions", default: {}, null: false
     t.index ["account_id", "id"], name: "jrc_sd_ref_account_users", unique: true
     t.index ["account_id", "user_id"], name: "uniq_user_id_per_account_id", unique: true
     t.index ["account_id"], name: "index_account_users_on_account_id"
     t.index ["agent_capacity_policy_id"], name: "index_account_users_on_agent_capacity_policy_id"
     t.index ["custom_role_id"], name: "index_account_users_on_custom_role_id"
     t.index ["user_id"], name: "index_account_users_on_user_id"
+    t.check_constraint "jrc_relationship_eligibility_version >= 0", name: "account_users_relationship_eligibility_nonnegative"
+    t.check_constraint "jsonb_typeof(jrc_projects_permissions) = 'object'::text", name: "jrc_project_permissions_object"
   end
 
   create_table "accounts", id: :serial, force: :cascade do |t|
@@ -739,9 +742,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.index ["created_by_id"], name: "index_companies_on_created_by_id"
     t.index ["name", "account_id"], name: "index_companies_on_name_and_account_id"
     t.index ["updated_by_id"], name: "index_companies_on_updated_by_id"
-    t.check_constraint "parent_company_id IS NULL OR parent_company_id <> id", name: "jrc_master_not_own_parent", validate: false
-    t.check_constraint "person_kind::text = ANY (ARRAY['organization'::character varying::text, 'individual'::character varying::text])", name: "jrc_master_person_kind", validate: false
-    t.check_constraint "relationship_type::text = ANY (ARRAY['prospect'::character varying::text, 'lead'::character varying::text, 'customer'::character varying::text, 'former_customer'::character varying::text, 'partner'::character varying::text, 'supplier'::character varying::text, 'internal'::character varying::text, 'other'::character varying::text])", name: "jrc_master_relationship_type", validate: false
+    t.check_constraint "parent_company_id IS NULL OR parent_company_id <> id", name: "jrc_master_not_own_parent"
+    t.check_constraint "person_kind::text = ANY (ARRAY['organization'::character varying, 'individual'::character varying]::text[])", name: "jrc_master_person_kind"
+    t.check_constraint "relationship_type::text = ANY (ARRAY['prospect'::character varying, 'lead'::character varying, 'customer'::character varying, 'former_customer'::character varying, 'partner'::character varying, 'supplier'::character varying, 'internal'::character varying, 'other'::character varying]::text[])", name: "jrc_master_relationship_type"
   end
 
   create_table "company_addresses", force: :cascade do |t|
@@ -759,7 +762,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["account_id", "company_id"], name: "index_company_addresses_on_account_id_and_company_id"
-    t.check_constraint "address_type::text = ANY (ARRAY['tax'::character varying::text, 'billing'::character varying::text, 'business'::character varying::text, 'installation'::character varying::text, 'branch'::character varying::text, 'other'::character varying::text])", name: "jrc_master_address_type"
+    t.check_constraint "address_type::text = ANY (ARRAY['tax'::character varying, 'billing'::character varying, 'business'::character varying, 'installation'::character varying, 'branch'::character varying, 'other'::character varying]::text[])", name: "jrc_master_address_type"
   end
 
   create_table "contact_inboxes", force: :cascade do |t|
@@ -789,7 +792,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.datetime "updated_at", null: false
     t.index ["account_id", "normalized_value"], name: "index_contact_points_on_account_id_and_normalized_value"
     t.index ["contact_id", "kind", "normalized_value"], name: "jrc_master_contact_point_unique", unique: true
-    t.check_constraint "kind::text = ANY (ARRAY['mobile'::character varying::text, 'phone'::character varying::text, 'whatsapp'::character varying::text, 'whatsapp_business'::character varying::text, 'extension'::character varying::text, 'email'::character varying::text, 'corporate_email'::character varying::text, 'alternate_email'::character varying::text])", name: "jrc_master_contact_point_kind"
+    t.check_constraint "kind::text = ANY (ARRAY['mobile'::character varying, 'phone'::character varying, 'whatsapp'::character varying, 'whatsapp_business'::character varying, 'extension'::character varying, 'email'::character varying, 'corporate_email'::character varying, 'alternate_email'::character varying]::text[])", name: "jrc_master_contact_point_kind"
   end
 
   create_table "contacts", id: :serial, force: :cascade do |t|
@@ -813,11 +816,16 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.string "job_title"
     t.string "department"
     t.string "registration_status", default: "provisional", null: false
+    t.string "company_role", limit: 40
+    t.boolean "company_primary", default: false, null: false
+    t.string "company_contact_status", limit: 20, default: "active", null: false
     t.index "account_id, lower(TRIM(BOTH FROM email))", name: "jrc_master_contact_normalized_email"
     t.index "account_id, regexp_replace((phone_number)::text, '[^0-9]'::text, ''::text, 'g'::text)", name: "jrc_master_contact_normalized_phone"
     t.index "lower((email)::text), account_id", name: "index_contacts_on_lower_email_account_id"
+    t.index ["account_id", "company_id"], name: "contacts_one_primary_per_company", unique: true, where: "company_primary"
     t.index ["account_id", "contact_type"], name: "index_contacts_on_account_id_and_contact_type"
     t.index ["account_id", "email", "phone_number", "identifier"], name: "index_contacts_on_nonempty_fields", where: "(((email)::text <> ''::text) OR ((phone_number)::text <> ''::text) OR ((identifier)::text <> ''::text))"
+    t.index ["account_id", "id"], name: "jrc_contact_signing_tenant_ref", unique: true
     t.index ["account_id", "id"], name: "jrc_sd_ref_contacts", unique: true
     t.index ["account_id", "last_activity_at"], name: "index_contacts_on_account_id_and_last_activity_at", order: { last_activity_at: "DESC NULLS LAST" }
     t.index ["account_id"], name: "index_contacts_on_account_id"
@@ -828,7 +836,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.index ["identifier", "account_id"], name: "uniq_identifier_per_account_contact", unique: true
     t.index ["name", "email", "phone_number", "identifier"], name: "index_contacts_on_name_email_phone_number_identifier", opclass: :gin_trgm_ops, using: :gin
     t.index ["phone_number", "account_id"], name: "index_contacts_on_phone_number_and_account_id"
-    t.check_constraint "registration_status::text = ANY (ARRAY['provisional'::character varying::text, 'registered'::character varying::text])", name: "jrc_master_registration_status", validate: false
+    t.check_constraint "NOT company_primary OR company_id IS NOT NULL AND company_contact_status::text = 'active'::text", name: "contacts_company_primary_requires_active_link"
+    t.check_constraint "registration_status::text = ANY (ARRAY['provisional'::character varying, 'registered'::character varying]::text[])", name: "jrc_master_registration_status"
   end
 
   create_table "conversation_participants", force: :cascade do |t|
@@ -1252,7 +1261,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.index ["account_id", "id"], name: "jrc_ap_decisions_ref", unique: true
     t.index ["request_id", "cycle", "step_code", "actor_id"], name: "jrc_ap_actor_vote", unique: true
     t.index ["request_id", "cycle", "step_code", "principal_id"], name: "jrc_ap_principal_vote", unique: true
-    t.check_constraint "(decision::text = ANY (ARRAY['approved'::character varying::text, 'rejected'::character varying::text, 'returned'::character varying::text, 'escalated'::character varying::text])) AND cycle > 0", name: "jrc_ap_decision_state"
+    t.check_constraint "(decision::text = ANY (ARRAY['approved'::character varying, 'rejected'::character varying, 'returned'::character varying, 'escalated'::character varying]::text[])) AND cycle > 0", name: "jrc_ap_decision_state"
     t.check_constraint "length(TRIM(BOTH FROM reason)) > 0", name: "jrc_ap_decision_reason"
   end
 
@@ -1274,6 +1283,17 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.check_constraint "ends_at > starts_at AND principal_id <> delegate_id", name: "jrc_ap_delegation_window"
   end
 
+  create_table "jrc_approvals_notification_outboxes", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "source_event_id", null: false
+    t.datetime "completed_at"
+    t.integer "lock_version", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "source_event_id"], name: "jrc_ap_notice_source_once", unique: true
+    t.index ["id"], name: "jrc_ap_notice_pending", where: "(completed_at IS NULL)"
+  end
+
   create_table "jrc_approvals_policies", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.bigint "issuer_company_id"
@@ -1293,7 +1313,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.index ["account_id", "code"], name: "jrc_ap_policy_code", unique: true
     t.index ["account_id", "id"], name: "jrc_ap_policies_ref", unique: true
     t.check_constraint "business_unit_id IS NULL OR issuer_company_id IS NOT NULL", name: "jrc_ap_policies_scope"
-    t.check_constraint "state::text = ANY (ARRAY['draft'::character varying::text, 'validated'::character varying::text, 'published'::character varying::text, 'retired'::character varying::text])", name: "jrc_ap_policy_state"
+    t.check_constraint "state::text = ANY (ARRAY['draft'::character varying, 'validated'::character varying, 'published'::character varying, 'retired'::character varying]::text[])", name: "jrc_ap_policy_state"
   end
 
   create_table "jrc_approvals_policy_versions", force: :cascade do |t|
@@ -1336,8 +1356,86 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.index ["account_id", "id"], name: "jrc_ap_requests_ref", unique: true
     t.index ["account_id", "requester_id", "request_key", "policy_version_id"], name: "jrc_ap_request_once", unique: true
     t.index ["account_id", "state", "expires_at"], name: "jrc_ap_pending"
-    t.check_constraint "(state::text = ANY (ARRAY['pending'::character varying::text, 'approved'::character varying::text, 'rejected'::character varying::text, 'returned'::character varying::text, 'escalated'::character varying::text, 'expired'::character varying::text, 'canceled'::character varying::text, 'stale'::character varying::text])) AND cycle > 0", name: "jrc_ap_request_state"
+    t.check_constraint "(state::text = ANY (ARRAY['pending'::character varying, 'approved'::character varying, 'rejected'::character varying, 'returned'::character varying, 'escalated'::character varying, 'expired'::character varying, 'canceled'::character varying, 'stale'::character varying]::text[])) AND cycle > 0", name: "jrc_ap_request_state"
     t.check_constraint "business_unit_id IS NULL OR issuer_company_id IS NOT NULL", name: "jrc_ap_requests_scope"
+  end
+
+  create_table "jrc_backoffice_authority_proposals", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "contract_version_id", null: false
+    t.bigint "signer_roster_id", null: false
+    t.bigint "contract_id", null: false
+    t.bigint "backoffice_request_id", null: false
+    t.bigint "created_by_id", null: false
+    t.integer "revision", null: false
+    t.string "idempotency_key", null: false
+    t.string "input_digest", null: false
+    t.string "source_digest", null: false
+    t.string "change_reason", limit: 2000, null: false
+    t.text "source_snapshot", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "contract_id", "backoffice_request_id", "signer_roster_id", "contract_version_id", "id"], name: "bo_authority_exact_origin", unique: true
+    t.index ["account_id", "id"], name: "bo_authority_proposal_tenant", unique: true
+    t.index ["account_id"], name: "index_jrc_backoffice_authority_proposals_on_account_id"
+    t.index ["backoffice_request_id", "idempotency_key"], name: "bo_authority_proposal_intent", unique: true
+    t.index ["backoffice_request_id"], name: "idx_on_backoffice_request_id_be19ccba86"
+    t.index ["contract_id"], name: "index_jrc_backoffice_authority_proposals_on_contract_id"
+    t.index ["contract_version_id", "revision"], name: "bo_authority_proposal_revision", unique: true
+    t.index ["contract_version_id"], name: "idx_on_contract_version_id_58a11aa370"
+    t.index ["created_by_id"], name: "index_jrc_backoffice_authority_proposals_on_created_by_id"
+    t.index ["signer_roster_id"], name: "index_jrc_backoffice_authority_proposals_on_signer_roster_id"
+    t.check_constraint "revision > 0", name: "bo_authority_proposal_positive"
+  end
+
+  create_table "jrc_backoffice_completion_dossiers", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "backoffice_request_id", null: false
+    t.bigint "archive_blob_id", null: false
+    t.bigint "sealed_by_id", null: false
+    t.integer "number", null: false
+    t.text "source_snapshot", null: false
+    t.string "source_digest", limit: 64, null: false
+    t.string "manifest_digest", limit: 64, null: false
+    t.string "archive_sha256", limit: 64, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_backoffice_completion_dossiers_on_account_id"
+    t.index ["archive_blob_id"], name: "index_jrc_backoffice_completion_dossiers_on_archive_blob_id"
+    t.index ["backoffice_request_id", "manifest_digest"], name: "bo_dossier_manifest", unique: true
+    t.index ["backoffice_request_id", "number"], name: "bo_dossier_number", unique: true
+    t.index ["backoffice_request_id"], name: "idx_on_backoffice_request_id_30f7ebbcf0"
+    t.index ["sealed_by_id"], name: "index_jrc_backoffice_completion_dossiers_on_sealed_by_id"
+  end
+
+  create_table "jrc_backoffice_contract_versions", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "backoffice_request_id", null: false
+    t.bigint "contract_id", null: false
+    t.bigint "created_by_id", null: false
+    t.bigint "pdf_blob_id", null: false
+    t.integer "number", null: false
+    t.integer "source_format_version", default: 1, null: false
+    t.string "idempotency_key", null: false
+    t.string "source_digest", null: false
+    t.string "pdf_sha256", null: false
+    t.text "source_snapshot", null: false
+    t.text "change_reason", null: false
+    t.jsonb "change_paths", default: [], null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "signer_roster_id"
+    t.index ["account_id", "contract_id", "backoffice_request_id", "signer_roster_id", "id"], name: "bo_contract_version_signing_origin", unique: true
+    t.index ["account_id", "id"], name: "bo_contract_version_tenant", unique: true
+    t.index ["account_id"], name: "index_jrc_backoffice_contract_versions_on_account_id"
+    t.index ["backoffice_request_id"], name: "idx_on_backoffice_request_id_c299d77c81"
+    t.index ["contract_id", "idempotency_key"], name: "bo_contract_version_intent", unique: true
+    t.index ["contract_id", "number"], name: "bo_contract_version_number", unique: true
+    t.index ["contract_id"], name: "index_jrc_backoffice_contract_versions_on_contract_id"
+    t.index ["created_by_id"], name: "index_jrc_backoffice_contract_versions_on_created_by_id"
+    t.index ["pdf_blob_id"], name: "index_jrc_backoffice_contract_versions_on_pdf_blob_id"
+    t.index ["signer_roster_id"], name: "index_jrc_backoffice_contract_versions_on_signer_roster_id"
+    t.check_constraint "number > 0 AND source_format_version > 0", name: "bo_contract_version_positive"
   end
 
   create_table "jrc_backoffice_document_analyses", force: :cascade do |t|
@@ -1357,8 +1455,31 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.text "reason", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.date "expires_on"
+    t.string "validity_timezone"
     t.index ["actor_id"], name: "index_jrc_backoffice_document_decisions_on_actor_id"
     t.index ["document_version_id", "id"], name: "idx_backoffice_decision_history"
+    t.check_constraint "expires_on IS NULL AND validity_timezone IS NULL OR expires_on IS NOT NULL AND expires_on >= '0001-01-01'::date AND expires_on <= '9999-12-31'::date AND validity_timezone IS NOT NULL AND char_length(validity_timezone::text) >= 1 AND char_length(validity_timezone::text) <= 100", name: "bo_document_validity_pair"
+  end
+
+  create_table "jrc_backoffice_document_scans", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "document_version_id", null: false
+    t.bigint "source_blob_id", null: false
+    t.integer "attempt", null: false
+    t.string "state", null: false
+    t.string "expected_sha256", null: false
+    t.string "scanner_adapter", null: false
+    t.string "observed_sha256"
+    t.string "failure_code"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_backoffice_document_scans_on_account_id"
+    t.index ["document_version_id", "attempt"], name: "bo_document_scan_attempt", unique: true
+    t.index ["document_version_id"], name: "index_jrc_backoffice_document_scans_on_document_version_id"
+    t.index ["source_blob_id"], name: "index_jrc_backoffice_document_scans_on_source_blob_id"
+    t.check_constraint "attempt > 0 AND (state::text = ANY (ARRAY['clean'::character varying, 'infected'::character varying, 'unavailable'::character varying, 'checksum_mismatch'::character varying]::text[]))", name: "bo_document_scan_state"
+    t.check_constraint "state::text <> 'clean'::text OR observed_sha256 IS NOT NULL AND observed_sha256::text = expected_sha256::text", name: "bo_document_scan_clean"
   end
 
   create_table "jrc_backoffice_document_versions", force: :cascade do |t|
@@ -1371,11 +1492,247 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.string "sha256", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["account_id", "id"], name: "bo_document_version_tenant", unique: true
     t.index ["account_id"], name: "index_jrc_backoffice_document_versions_on_account_id"
     t.index ["backoffice_request_id", "document_key", "version"], name: "idx_backoffice_document_version", unique: true
     t.index ["backoffice_request_id", "idempotency_key"], name: "idx_backoffice_document_intent", unique: true
     t.index ["uploaded_by_id"], name: "index_jrc_backoffice_document_versions_on_uploaded_by_id"
     t.check_constraint "version > 0", name: "backoffice_document_positive_version"
+  end
+
+  create_table "jrc_backoffice_requirement_plans", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "backoffice_request_id", null: false
+    t.bigint "created_by_id", null: false
+    t.integer "version", null: false
+    t.jsonb "entries", default: [], null: false
+    t.jsonb "source_facts", default: {}, null: false
+    t.string "digest", limit: 64, null: false
+    t.text "reason", null: false
+    t.datetime "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.index ["account_id"], name: "index_jrc_backoffice_requirement_plans_on_account_id"
+    t.index ["backoffice_request_id", "version"], name: "bo_req_plan_revision", unique: true
+    t.index ["created_by_id"], name: "index_jrc_backoffice_requirement_plans_on_created_by_id"
+    t.check_constraint "version > 0 AND jsonb_typeof(entries) = 'array'::text AND jsonb_array_length(entries) <= 100 AND jsonb_typeof(source_facts) = 'object'::text", name: "bo_req_plan_shape"
+  end
+
+  create_table "jrc_backoffice_requirement_responses", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "requirement_plan_id", null: false
+    t.bigint "actor_id", null: false
+    t.string "requirement_key", null: false
+    t.integer "revision", null: false
+    t.jsonb "payload", null: false
+    t.text "reason", null: false
+    t.datetime "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.index ["account_id"], name: "index_jrc_backoffice_requirement_responses_on_account_id"
+    t.index ["actor_id"], name: "index_jrc_backoffice_requirement_responses_on_actor_id"
+    t.index ["requirement_plan_id", "requirement_key", "revision"], name: "bo_req_response_revision", unique: true
+    t.check_constraint "revision > 0 AND jsonb_typeof(payload) = 'object'::text", name: "bo_req_response_shape"
+  end
+
+  create_table "jrc_backoffice_requirement_rules", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "created_by_id", null: false
+    t.bigint "business_unit_id"
+    t.bigint "product_id"
+    t.string "rule_key", null: false
+    t.integer "version", null: false
+    t.string "state", default: "active", null: false
+    t.string "operation"
+    t.string "customer_kind"
+    t.jsonb "definition", null: false
+    t.text "reason", null: false
+    t.datetime "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.index ["account_id", "rule_key", "version"], name: "bo_req_rule_revision", unique: true
+    t.index ["account_id"], name: "index_jrc_backoffice_requirement_rules_on_account_id"
+    t.index ["business_unit_id"], name: "index_jrc_backoffice_requirement_rules_on_business_unit_id"
+    t.index ["created_by_id"], name: "index_jrc_backoffice_requirement_rules_on_created_by_id"
+    t.index ["product_id"], name: "index_jrc_backoffice_requirement_rules_on_product_id"
+    t.check_constraint "jsonb_typeof(definition) = 'object'::text", name: "bo_req_rule_object"
+    t.check_constraint "version > 0 AND (state::text = ANY (ARRAY['active'::character varying, 'archived'::character varying]::text[]))", name: "bo_req_rule_state"
+  end
+
+  create_table "jrc_backoffice_signature_acceptances", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "contract_id", null: false
+    t.bigint "bundle_id", null: false
+    t.bigint "signed_blob_id", null: false
+    t.bigint "accepted_by_id", null: false
+    t.text "source_snapshot", null: false
+    t.string "source_digest", limit: 64, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["accepted_by_id"], name: "index_jrc_backoffice_signature_acceptances_on_accepted_by_id"
+    t.index ["account_id"], name: "index_jrc_backoffice_signature_acceptances_on_account_id"
+    t.index ["bundle_id"], name: "index_jrc_backoffice_signature_acceptances_on_bundle_id", unique: true
+    t.index ["contract_id"], name: "index_jrc_backoffice_signature_acceptances_on_contract_id", unique: true
+    t.index ["signed_blob_id"], name: "index_jrc_backoffice_signature_acceptances_on_signed_blob_id"
+  end
+
+  create_table "jrc_backoffice_signature_artifact_bundles", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "delivery_id", null: false
+    t.bigint "contract_version_id", null: false
+    t.bigint "signed_document_id", null: false
+    t.bigint "certificate_document_id", null: false
+    t.bigint "captured_by_id", null: false
+    t.text "source_snapshot", null: false
+    t.string "source_digest", limit: 64, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_backoffice_signature_artifact_bundles_on_account_id"
+    t.index ["captured_by_id"], name: "idx_on_captured_by_id_37641ccf53"
+    t.index ["certificate_document_id"], name: "idx_on_certificate_document_id_f6fa72fade"
+    t.index ["contract_version_id"], name: "idx_on_contract_version_id_d7ba43b27b", unique: true
+    t.index ["delivery_id"], name: "index_jrc_backoffice_signature_artifact_bundles_on_delivery_id", unique: true
+    t.index ["signed_document_id"], name: "idx_on_signed_document_id_5a3b09f706"
+  end
+
+  create_table "jrc_backoffice_signature_connections", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "integration_id", null: false
+    t.bigint "created_by_id", null: false
+    t.string "public_id", null: false
+    t.string "provider", null: false
+    t.string "environment", null: false
+    t.string "integration_key", null: false
+    t.string "impersonated_user_id", null: false
+    t.string "external_account_id", null: false
+    t.string "credentials_purpose", null: false
+    t.text "encrypted_credentials", null: false
+    t.integer "revision", null: false
+    t.boolean "enabled", default: false, null: false
+    t.datetime "authorization_checked_at"
+    t.datetime "connect_checked_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "id"], name: "bo_signature_connection_tenant_ref", unique: true
+    t.index ["account_id"], name: "index_jrc_backoffice_signature_connections_on_account_id"
+    t.index ["created_by_id"], name: "index_jrc_backoffice_signature_connections_on_created_by_id"
+    t.index ["integration_id", "revision"], name: "bo_signature_connection_revision", unique: true
+    t.index ["integration_id"], name: "index_jrc_backoffice_signature_connections_on_integration_id"
+    t.index ["public_id"], name: "bo_signature_connection_public", unique: true
+  end
+
+  create_table "jrc_backoffice_signature_deliveries", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "contract_id", null: false
+    t.bigint "backoffice_request_id", null: false
+    t.bigint "contract_version_id", null: false
+    t.bigint "signer_roster_id", null: false
+    t.bigint "authority_proposal_id", null: false
+    t.bigint "connection_id", null: false
+    t.bigint "created_by_id", null: false
+    t.string "idempotency_key", null: false
+    t.string "input_digest", null: false
+    t.string "source_digest", null: false
+    t.string "transaction_id", null: false
+    t.text "source_snapshot", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "connection_id", "id"], name: "bo_delivery_tenant_connection", unique: true
+    t.index ["account_id", "created_by_id", "idempotency_key"], name: "bo_delivery_intent", unique: true
+    t.index ["account_id"], name: "index_jrc_backoffice_signature_deliveries_on_account_id"
+    t.index ["authority_proposal_id"], name: "idx_on_authority_proposal_id_e6fd1ab6c4"
+    t.index ["backoffice_request_id"], name: "idx_on_backoffice_request_id_455f0280d3"
+    t.index ["connection_id"], name: "index_jrc_backoffice_signature_deliveries_on_connection_id"
+    t.index ["contract_id"], name: "index_jrc_backoffice_signature_deliveries_on_contract_id"
+    t.index ["contract_version_id"], name: "bo_delivery_one_envelope_per_version", unique: true
+    t.index ["contract_version_id"], name: "idx_on_contract_version_id_606f57aeb3"
+    t.index ["created_by_id"], name: "index_jrc_backoffice_signature_deliveries_on_created_by_id"
+    t.index ["signer_roster_id"], name: "index_jrc_backoffice_signature_deliveries_on_signer_roster_id"
+    t.index ["transaction_id"], name: "bo_delivery_transaction", unique: true
+  end
+
+  create_table "jrc_backoffice_signature_delivery_events", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "delivery_id", null: false
+    t.bigint "connection_id", null: false
+    t.string "kind", null: false
+    t.string "event_key", null: false
+    t.string "external_id"
+    t.text "source_snapshot", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_backoffice_signature_delivery_events_on_account_id"
+    t.index ["connection_id", "external_id"], name: "bo_delivery_external_origin", unique: true, where: "(external_id IS NOT NULL)"
+    t.index ["delivery_id", "event_key"], name: "bo_delivery_event_intent", unique: true
+    t.index ["delivery_id"], name: "bo_delivery_dispatch_once", unique: true, where: "((kind)::text = 'dispatch_started'::text)"
+    t.index ["delivery_id"], name: "bo_delivery_one_external_binding", unique: true, where: "(external_id IS NOT NULL)"
+    t.index ["delivery_id"], name: "index_jrc_backoffice_signature_delivery_events_on_delivery_id"
+    t.check_constraint "(kind::text = 'send_confirmed'::text) = (external_id IS NOT NULL)", name: "bo_delivery_confirmed_requires_envelope"
+    t.check_constraint "kind::text = ANY (ARRAY['prepared'::character varying, 'dispatch_started'::character varying, 'send_confirmed'::character varying, 'send_uncertain'::character varying, 'send_rejected'::character varying, 'sender_blocked'::character varying, 'canceled_before_send'::character varying, 'completion_reported'::character varying, 'envelope_canceled'::character varying, 'envelope_declined'::character varying, 'reconciliation_started'::character varying, 'reconciliation_finished'::character varying]::text[])", name: "bo_delivery_event_kind"
+  end
+
+  create_table "jrc_backoffice_signature_integrations", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "created_by_id", null: false
+    t.string "public_id", null: false
+    t.string "environment", default: "demo", null: false
+    t.string "integration_key", null: false
+    t.string "impersonated_user_id", null: false
+    t.string "external_account_id", null: false
+    t.text "encrypted_credentials", null: false
+    t.integer "revision", default: 1, null: false
+    t.boolean "enabled", default: false, null: false
+    t.datetime "authorization_checked_at"
+    t.datetime "connect_checked_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "provider", default: "docusign", null: false
+    t.index ["account_id", "id"], name: "bo_signature_tenant_ref", unique: true
+    t.index ["account_id"], name: "bo_signature_account", unique: true
+    t.index ["created_by_id"], name: "index_jrc_backoffice_signature_integrations_on_created_by_id"
+    t.index ["public_id"], name: "bo_signature_public_ref", unique: true
+    t.check_constraint "environment::text = ANY (ARRAY['demo'::character varying, 'production'::character varying]::text[])", name: "bo_signature_environment"
+    t.check_constraint "revision > 0", name: "bo_signature_revision"
+  end
+
+  create_table "jrc_backoffice_signature_notifications", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "integration_id", null: false
+    t.integer "integration_revision", null: false
+    t.string "body_sha256", null: false
+    t.string "event_type", null: false
+    t.string "envelope_id", null: false
+    t.text "encrypted_payload", null: false
+    t.string "state", default: "received", null: false
+    t.datetime "provider_generated_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "connection_id"
+    t.index ["account_id", "envelope_id"], name: "bo_signature_notification_envelope"
+    t.index ["account_id"], name: "index_jrc_backoffice_signature_notifications_on_account_id"
+    t.index ["connection_id"], name: "index_jrc_backoffice_signature_notifications_on_connection_id"
+    t.index ["integration_id", "integration_revision", "body_sha256"], name: "bo_signature_notification_dedup", unique: true
+    t.index ["integration_id"], name: "index_jrc_backoffice_signature_notifications_on_integration_id"
+    t.check_constraint "state::text = ANY (ARRAY['received'::character varying, 'processed'::character varying, 'ignored'::character varying, 'failed'::character varying]::text[])", name: "bo_signature_notification_state"
+  end
+
+  create_table "jrc_backoffice_signer_rosters", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "contract_id", null: false
+    t.bigint "backoffice_request_id", null: false
+    t.bigint "created_by_id", null: false
+    t.integer "revision", null: false
+    t.string "customer_mode", null: false
+    t.string "issuer_mode", null: false
+    t.string "idempotency_key", null: false
+    t.string "source_digest", null: false
+    t.string "input_digest", null: false
+    t.string "change_reason", limit: 2000, null: false
+    t.text "source_snapshot", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "contract_id", "backoffice_request_id", "id"], name: "bo_signer_roster_origin", unique: true
+    t.index ["account_id"], name: "index_jrc_backoffice_signer_rosters_on_account_id"
+    t.index ["backoffice_request_id", "contract_id", "revision"], name: "bo_signer_roster_revision", unique: true
+    t.index ["backoffice_request_id", "idempotency_key"], name: "bo_signer_roster_intent", unique: true
+    t.index ["backoffice_request_id"], name: "index_jrc_backoffice_signer_rosters_on_backoffice_request_id"
+    t.index ["contract_id"], name: "index_jrc_backoffice_signer_rosters_on_contract_id"
+    t.index ["created_by_id"], name: "index_jrc_backoffice_signer_rosters_on_created_by_id"
+    t.check_constraint "revision > 0 AND (customer_mode::text = ANY (ARRAY['single'::character varying, 'joint'::character varying]::text[])) AND (issuer_mode::text = ANY (ARRAY['single'::character varying, 'joint'::character varying]::text[]))", name: "bo_signer_roster_modes"
   end
 
   create_table "jrc_broker_connection_events", force: :cascade do |t|
@@ -2239,6 +2596,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.datetime "sla_paused_at"
     t.integer "sla_paused_seconds", default: 0, null: false
     t.integer "workflow_version", default: 1, null: false
+    t.index ["account_id", "id"], name: "bo_contract_version_request_tenant", unique: true
     t.index ["account_id", "operations_queue_id", "status"], name: "idx_jrc_bko_queue_status"
     t.index ["account_id", "request_number"], name: "idx_jrc_crm_backoffice_number", unique: true
     t.index ["account_id", "sales_order_id", "request_kind"], name: "idx_jrc_crm_backoffice_order_kind", unique: true, where: "((request_kind)::text = 'fulfillment'::text)"
@@ -2371,6 +2729,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.text "content_override"
     t.bigint "source_contract_id"
     t.index ["account_id", "contract_number"], name: "idx_jrc_crm_contracts_account_number", unique: true
+    t.index ["account_id", "id"], name: "bo_contract_version_contract_tenant", unique: true
     t.index ["account_id", "id"], name: "jrc_sd_r3_jrc_crm_contracts_account_ref", unique: true
     t.index ["account_id"], name: "index_jrc_crm_contracts_on_account_id"
     t.index ["business_unit_id"], name: "index_jrc_crm_contracts_on_business_unit_id"
@@ -3020,6 +3379,53 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.check_constraint "structure_managed = false OR scope::text = 'GROUP'::text AND company_id IS NULL AND business_unit_id IS NULL OR scope::text = 'COMPANY'::text AND company_id IS NOT NULL AND business_unit_id IS NULL OR scope::text = 'BUSINESS_UNIT'::text AND business_unit_id IS NOT NULL", name: "jrc_crm_user_scope_shape"
   end
 
+  create_table "jrc_customer_economic_groups", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.text "name", null: false
+    t.text "description"
+    t.bigint "principal_company_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index "account_id, md5(name)", name: "customer_economic_group_name", unique: true
+    t.index ["account_id"], name: "index_jrc_customer_economic_groups_on_account_id"
+  end
+
+  create_table "jrc_customer_segment_overrides", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "taxonomy_id", null: false
+    t.bigint "company_id"
+    t.integer "contact_id"
+    t.string "mode", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_customer_segment_overrides_on_account_id"
+    t.index ["company_id"], name: "index_jrc_customer_segment_overrides_on_company_id"
+    t.index ["contact_id"], name: "index_jrc_customer_segment_overrides_on_contact_id"
+    t.index ["taxonomy_id", "company_id"], name: "customer_segment_company_override", unique: true, where: "(company_id IS NOT NULL)"
+    t.index ["taxonomy_id", "contact_id"], name: "customer_segment_contact_override", unique: true, where: "(contact_id IS NOT NULL)"
+    t.index ["taxonomy_id"], name: "index_jrc_customer_segment_overrides_on_taxonomy_id"
+    t.check_constraint "(company_id IS NULL) <> (contact_id IS NULL)", name: "customer_segment_override_subject"
+    t.check_constraint "mode::text = ANY (ARRAY['include'::character varying, 'exclude'::character varying]::text[])", name: "customer_segment_override_mode"
+  end
+
+  create_table "jrc_customer_signing_identities", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "contact_id", null: false
+    t.bigint "created_by_id", null: false
+    t.text "personal_tax_identifier", null: false
+    t.string "lookup_digest", null: false
+    t.integer "revision", default: 1, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "contact_id"], name: "jrc_signing_contact_once", unique: true
+    t.index ["account_id", "id"], name: "jrc_signing_identity_tenant_ref", unique: true
+    t.index ["account_id", "lookup_digest"], name: "jrc_signing_identifier_once", unique: true
+    t.index ["account_id"], name: "index_jrc_customer_signing_identities_on_account_id"
+    t.index ["contact_id"], name: "index_jrc_customer_signing_identities_on_contact_id"
+    t.index ["created_by_id"], name: "index_jrc_customer_signing_identities_on_created_by_id"
+    t.check_constraint "revision > 0", name: "jrc_signing_identity_revision"
+  end
+
   create_table "jrc_customer_taxonomies", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.string "kind", null: false
@@ -3028,9 +3434,14 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.integer "position", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "description"
+    t.string "selection_mode", default: "classification", null: false
+    t.jsonb "criteria", default: {"match" => "all", "rules" => []}, null: false
+    t.string "modules", default: [], null: false, array: true
     t.index "account_id, kind, lower((name)::text)", name: "idx_jrc_customer_taxonomies_unique", unique: true
     t.index ["account_id", "kind", "active", "position"], name: "idx_jrc_customer_taxonomies_directory"
     t.check_constraint "kind::text = 'segment'::text", name: "jrc_customer_taxonomy_kind"
+    t.check_constraint "selection_mode::text = ANY (ARRAY['classification'::character varying, 'dynamic'::character varying]::text[])", name: "customer_segment_selection_mode"
   end
 
   create_table "jrc_flow_connections", force: :cascade do |t|
@@ -3355,7 +3766,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.datetime "updated_at", null: false
     t.index ["account_id", "created_at"], name: "index_jrc_flow_runs_on_account_id_and_created_at"
     t.index ["account_id"], name: "index_jrc_flow_runs_on_account_id"
-    t.index ["conversation_id"], name: "idx_jrc_one_live_flow_per_conversation", unique: true, where: "((status)::text = ANY (ARRAY[('running'::character varying)::text, ('waiting'::character varying)::text, ('delayed'::character varying)::text]))"
+    t.index ["conversation_id"], name: "idx_jrc_one_live_flow_per_conversation", unique: true, where: "((status)::text = ANY ((ARRAY['running'::character varying, 'waiting'::character varying, 'delayed'::character varying])::text[]))"
     t.index ["conversation_id"], name: "index_jrc_flow_runs_on_conversation_id"
     t.index ["flow_id", "event_key"], name: "index_jrc_flow_runs_on_flow_id_and_event_key", unique: true
     t.index ["flow_id"], name: "index_jrc_flow_runs_on_flow_id"
@@ -3424,6 +3835,19 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.index ["created_by_id"], name: "index_jrc_migration_batches_on_created_by_id"
   end
 
+  create_table "jrc_migration_events", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "batch_id", null: false
+    t.bigint "user_id"
+    t.string "action", null: false
+    t.jsonb "metadata", default: {}, null: false
+    t.datetime "occurred_at", null: false
+    t.datetime "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.index ["account_id", "batch_id", "id"], name: "jrc_migration_event_history"
+    t.index ["account_id"], name: "index_jrc_migration_events_on_account_id"
+    t.index ["user_id"], name: "index_jrc_migration_events_on_user_id"
+  end
+
   create_table "jrc_migration_items", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.bigint "batch_id", null: false
@@ -3444,6 +3868,26 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.index ["account_id", "batch_id", "id"], name: "jrc_migration_item_tenant_batch", unique: true
     t.index ["account_id"], name: "index_jrc_migration_items_on_account_id"
     t.index ["batch_id", "legacy_id"], name: "index_jrc_migration_items_on_batch_id_and_legacy_id", unique: true
+  end
+
+  create_table "jrc_migration_mappings", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "batch_id", null: false
+    t.string "source", null: false
+    t.string "domain", null: false
+    t.string "legacy_id", null: false
+    t.bigint "target_id", null: false
+    t.string "source_digest", null: false
+    t.string "target_digest", null: false
+    t.datetime "source_updated_at", null: false
+    t.datetime "accepted_at"
+    t.bigint "accepted_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["accepted_by_id"], name: "index_jrc_migration_mappings_on_accepted_by_id"
+    t.index ["account_id", "domain", "target_id"], name: "jrc_migration_target"
+    t.index ["account_id", "source", "domain", "legacy_id"], name: "jrc_migration_source_identity", unique: true
+    t.index ["account_id"], name: "index_jrc_migration_mappings_on_account_id"
   end
 
   create_table "jrc_migration_media_objects", force: :cascade do |t|
@@ -3478,39 +3922,6 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.check_constraint "status::text = ANY (ARRAY['reserved'::character varying, 'verifying'::character varying, 'verification_required'::character varying, 'planned'::character varying, 'attached'::character varying, 'recovering'::character varying, 'cleanup_required'::character varying, 'cleaned'::character varying, 'kept'::character varying]::text[])", name: "jrc_migration_media_status"
     t.check_constraint "storage_identity IS NULL AND status::text = 'kept'::text OR storage_identity IS NOT NULL AND storage_identity::text ~ '^[a-f0-9]{64}$'::text", name: "jrc_migration_media_destination_identity"
     t.check_constraint "storage_key::text ~ '^[a-z0-9]{28}$'::text AND source_sha256::text ~ '^[a-f0-9]{64}$'::text", name: "jrc_migration_media_identity_format"
-  end
-
-  create_table "jrc_migration_mappings", force: :cascade do |t|
-    t.bigint "account_id", null: false
-    t.bigint "batch_id", null: false
-    t.string "source", null: false
-    t.string "domain", null: false
-    t.string "legacy_id", null: false
-    t.bigint "target_id", null: false
-    t.string "source_digest", null: false
-    t.string "target_digest", null: false
-    t.datetime "source_updated_at", null: false
-    t.datetime "accepted_at"
-    t.bigint "accepted_by_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["accepted_by_id"], name: "index_jrc_migration_mappings_on_accepted_by_id"
-    t.index ["account_id", "domain", "target_id"], name: "jrc_migration_target"
-    t.index ["account_id", "source", "domain", "legacy_id"], name: "jrc_migration_source_identity", unique: true
-    t.index ["account_id"], name: "index_jrc_migration_mappings_on_account_id"
-  end
-
-  create_table "jrc_migration_events", force: :cascade do |t|
-    t.bigint "account_id", null: false
-    t.bigint "batch_id", null: false
-    t.bigint "user_id"
-    t.string "action", null: false
-    t.jsonb "metadata", default: {}, null: false
-    t.datetime "occurred_at", null: false
-    t.datetime "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
-    t.index ["account_id", "batch_id", "id"], name: "jrc_migration_event_history"
-    t.index ["account_id"], name: "index_jrc_migration_events_on_account_id"
-    t.index ["user_id"], name: "index_jrc_migration_events_on_user_id"
   end
 
   create_table "jrc_nico_broker_send_operations", force: :cascade do |t|
@@ -3694,14 +4105,14 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.index ["account_id", "recipient_id", "source_type", "source_id", "channel"], name: "nico_hd_delivery_once", unique: true
     t.index ["account_id"], name: "index_jrc_nico_helpdesk_delivery_receipts_on_account_id"
     t.index ["recipient_id"], name: "index_jrc_nico_helpdesk_delivery_receipts_on_recipient_id"
-    t.check_constraint "(state::text <> 'sent'::text OR sent_at IS NOT NULL) AND (sent_at IS NULL OR (state::text = ANY (ARRAY['sent'::character varying::text, 'delivered'::character varying::text])))", name: "nico_hd_receipt_sent"
-    t.check_constraint "(state::text <> ALL (ARRAY['dispatching'::character varying::text, 'sent'::character varying::text])) OR claim_token IS NOT NULL AND dispatching_at IS NOT NULL AND attempted_at IS NOT NULL AND payload_digest IS NOT NULL AND routing_digest IS NOT NULL AND attempt_number >= 1", name: "nico_hd_receipt_dispatch"
+    t.check_constraint "(state::text <> 'sent'::text OR sent_at IS NOT NULL) AND (sent_at IS NULL OR (state::text = ANY (ARRAY['sent'::character varying, 'delivered'::character varying]::text[])))", name: "nico_hd_receipt_sent"
+    t.check_constraint "(state::text <> ALL (ARRAY['dispatching'::character varying, 'sent'::character varying]::text[])) OR claim_token IS NOT NULL AND dispatching_at IS NOT NULL AND attempted_at IS NOT NULL AND payload_digest IS NOT NULL AND routing_digest IS NOT NULL AND attempt_number >= 1", name: "nico_hd_receipt_dispatch"
     t.check_constraint "(state::text = 'delivered'::text) = (delivered_at IS NOT NULL)", name: "nico_hd_receipt_delivered"
     t.check_constraint "attempt_number >= 0", name: "nico_hd_receipt_attempt"
     t.check_constraint "claim_token IS NULL OR attempt_number >= 1", name: "nico_hd_receipt_claim"
     t.check_constraint "payload_digest IS NULL OR payload_digest::text ~ '^[a-f0-9]{64}$'::text", name: "nico_hd_receipt_payload_digest"
     t.check_constraint "routing_digest IS NULL OR routing_digest::text ~ '^[a-f0-9]{64}$'::text", name: "nico_hd_receipt_routing_digest"
-    t.check_constraint "state::text = ANY (ARRAY['pending'::character varying::text, 'dispatching'::character varying::text, 'sent'::character varying::text, 'delivered'::character varying::text, 'failed'::character varying::text, 'blocked'::character varying::text, 'unknown'::character varying::text])", name: "nico_hd_receipt_state"
+    t.check_constraint "state::text = ANY (ARRAY['pending'::character varying, 'dispatching'::character varying, 'sent'::character varying, 'delivered'::character varying, 'failed'::character varying, 'blocked'::character varying, 'unknown'::character varying]::text[])", name: "nico_hd_receipt_state"
   end
 
   create_table "jrc_nico_helpdesk_events", force: :cascade do |t|
@@ -3838,7 +4249,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.index ["activity_id"], name: "index_jrc_nico_proposals_on_activity_id"
     t.index ["run_id"], name: "index_jrc_nico_proposals_on_run_id"
     t.index ["user_id"], name: "index_jrc_nico_proposals_on_user_id"
-    t.check_constraint "status::text = ANY (ARRAY['pending'::character varying::text, 'executed'::character varying::text])", name: "nico_proposal_status"
+    t.check_constraint "status::text = ANY (ARRAY['pending'::character varying, 'executed'::character varying]::text[])", name: "nico_proposal_status"
   end
 
   create_table "jrc_nico_runs", force: :cascade do |t|
@@ -3867,7 +4278,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.index ["conversation_id"], name: "index_jrc_nico_runs_on_conversation_id"
     t.index ["user_id"], name: "index_jrc_nico_runs_on_user_id"
     t.check_constraint "reserved_tokens >= 0", name: "nico_nonnegative_reservation"
-    t.check_constraint "status::text = ANY (ARRAY['queued'::character varying::text, 'running'::character varying::text, 'completed'::character varying::text, 'failed'::character varying::text, 'cancelled'::character varying::text])", name: "nico_run_status"
+    t.check_constraint "status::text = ANY (ARRAY['queued'::character varying, 'running'::character varying, 'completed'::character varying, 'failed'::character varying, 'cancelled'::character varying]::text[])", name: "nico_run_status"
   end
 
   create_table "jrc_nico_sessions", force: :cascade do |t|
@@ -4385,8 +4796,15 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.datetime "sla_due_at"
     t.datetime "sla_paused_at"
     t.integer "sla_paused_seconds", default: 0, null: false
+    t.text "next_step"
+    t.datetime "return_at"
+    t.string "customer_confirmation", default: "pending", null: false
+    t.text "customer_feedback"
+    t.datetime "customer_confirmed_at"
+    t.bigint "customer_confirmed_by_id"
     t.index ["account_id", "assignment_id"], name: "actions_rel_scope"
     t.index ["account_id", "operations_queue_id", "status"], name: "rel_operational_queue"
+    t.index ["account_id", "owner_id", "return_at"], name: "rel_action_return_queue", where: "((status)::text = ANY ((ARRAY['open'::character varying, 'in_progress'::character varying, 'waiting_customer'::character varying, 'waiting_finance'::character varying])::text[]))"
     t.index ["account_id", "status", "due_at", "priority"], name: "rel_action_queue"
     t.index ["account_id"], name: "index_jrc_relationship_actions_on_account_id"
     t.index ["activity_id"], name: "index_jrc_relationship_actions_on_activity_id"
@@ -4395,6 +4813,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.index ["operations_queue_id"], name: "index_jrc_relationship_actions_on_operations_queue_id"
     t.index ["operations_sla_policy_id"], name: "index_jrc_relationship_actions_on_operations_sla_policy_id"
     t.index ["owner_id"], name: "index_jrc_relationship_actions_on_owner_id"
+    t.check_constraint "customer_confirmation::text = ANY (ARRAY['pending'::character varying, 'confirmed'::character varying, 'unresolved'::character varying, 'not_applicable'::character varying]::text[])", name: "rel_action_customer_confirmation"
   end
 
   create_table "jrc_relationship_assignments", force: :cascade do |t|
@@ -4424,16 +4843,19 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
   create_table "jrc_relationship_batch_items", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.bigint "batch_review_id", null: false
-    t.bigint "assignment_id", null: false
+    t.bigint "assignment_id"
     t.integer "ordinal", null: false
     t.string "state", default: "pending", null: false
     t.jsonb "receipt"
     t.string "error_code"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "company_id"
     t.index ["account_id", "batch_review_id", "assignment_id"], name: "rel_batch_customer_once", unique: true
+    t.index ["account_id", "batch_review_id", "company_id"], name: "rel_batch_master_once", unique: true
     t.index ["batch_review_id", "ordinal"], name: "rel_batch_order_once", unique: true
     t.check_constraint "(state::text = ANY (ARRAY['pending'::character varying, 'applied'::character varying, 'failed'::character varying, 'canceled'::character varying]::text[])) AND ordinal >= 0 AND ordinal <= 49 AND (state::text = 'applied'::text) = (receipt IS NOT NULL)", name: "rel_batch_item_state"
+    t.check_constraint "company_id IS NULL AND assignment_id IS NOT NULL OR company_id IS NOT NULL AND (state::text = 'applied'::text AND assignment_id IS NOT NULL OR state::text <> 'applied'::text AND assignment_id IS NULL)", name: "rel_batch_subject_shape"
   end
 
   create_table "jrc_relationship_batch_reviews", force: :cascade do |t|
@@ -4515,6 +4937,41 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.index ["account_id"], name: "index_jrc_relationship_configurations_on_account_id"
   end
 
+  create_table "jrc_relationship_customer_documents", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "assignment_id", null: false
+    t.string "title", null: false
+    t.string "category", default: "other", null: false
+    t.string "status", default: "active", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "responsible_id"
+    t.integer "lock_version", default: 0, null: false
+    t.string "requirement_key", limit: 60
+    t.string "confidentiality"
+    t.index ["account_id", "assignment_id", "requirement_key"], name: "rel_doc_active_requirement", unique: true, where: "(((status)::text = 'active'::text) AND (requirement_key IS NOT NULL))"
+    t.index ["account_id", "id"], name: "rel_document_tenant_ref", unique: true
+    t.index ["account_id"], name: "index_jrc_relationship_customer_documents_on_account_id"
+    t.index ["assignment_id"], name: "index_jrc_relationship_customer_documents_on_assignment_id"
+    t.index ["responsible_id"], name: "index_jrc_relationship_customer_documents_on_responsible_id"
+    t.check_constraint "confidentiality IS NULL OR (confidentiality::text = ANY (ARRAY['operational'::character varying, 'restricted'::character varying]::text[]))", name: "rel_doc_confidentiality_known"
+  end
+
+  create_table "jrc_relationship_document_versions", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "document_id", null: false
+    t.bigint "uploaded_by_id", null: false
+    t.integer "number", null: false
+    t.date "valid_until"
+    t.string "change_reason", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_jrc_relationship_document_versions_on_account_id"
+    t.index ["document_id", "number"], name: "rel_document_version_number", unique: true
+    t.index ["document_id"], name: "index_jrc_relationship_document_versions_on_document_id"
+    t.index ["uploaded_by_id"], name: "index_jrc_relationship_document_versions_on_uploaded_by_id"
+  end
+
   create_table "jrc_relationship_expansion_signals", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.bigint "assignment_id", null: false
@@ -4577,6 +5034,32 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.index ["viewer_id"], name: "index_jrc_relationship_health_snapshots_on_viewer_id"
   end
 
+  create_table "jrc_relationship_management_requests", force: :cascade do |t|
+    t.integer "account_id", null: false
+    t.integer "requester_id", null: false
+    t.integer "analyst_id"
+    t.bigint "assignment_id"
+    t.bigint "batch_review_id"
+    t.bigint "resolution_event_id"
+    t.string "kind", null: false
+    t.string "state", default: "pending", null: false
+    t.text "reason", null: false
+    t.string "idempotency_key", null: false
+    t.string "input_digest", null: false
+    t.integer "lock_version", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "requester_id", "idempotency_key"], name: "rel_mgmt_request_key", unique: true
+    t.index ["account_id"], name: "index_jrc_relationship_management_requests_on_account_id"
+    t.index ["analyst_id"], name: "index_jrc_relationship_management_requests_on_analyst_id"
+    t.index ["assignment_id"], name: "index_jrc_relationship_management_requests_on_assignment_id"
+    t.index ["batch_review_id"], name: "index_jrc_relationship_management_requests_on_batch_review_id"
+    t.index ["requester_id"], name: "index_jrc_relationship_management_requests_on_requester_id"
+    t.index ["resolution_event_id"], name: "idx_on_resolution_event_id_c531b2bfa1"
+    t.check_constraint "kind::text = 'transfer'::text AND assignment_id IS NOT NULL AND analyst_id IS NULL OR (kind::text = ANY (ARRAY['suspend'::character varying, 'restore'::character varying]::text[])) AND assignment_id IS NULL AND analyst_id IS NOT NULL", name: "rel_mgmt_request_origin"
+    t.check_constraint "state::text = 'pending'::text AND batch_review_id IS NULL AND resolution_event_id IS NULL OR state::text = 'routed'::text AND (kind::text = 'transfer'::text AND batch_review_id IS NOT NULL AND resolution_event_id IS NULL OR (kind::text = ANY (ARRAY['suspend'::character varying, 'restore'::character varying]::text[])) AND resolution_event_id IS NOT NULL AND batch_review_id IS NULL)", name: "rel_mgmt_request_state"
+  end
+
   create_table "jrc_relationship_playbook_executions", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.bigint "assignment_id", null: false
@@ -4618,6 +5101,72 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.jsonb "conditions", default: [], null: false
     t.integer "version", default: 1, null: false
     t.index ["account_id"], name: "index_jrc_relationship_playbooks_on_account_id"
+  end
+
+  create_table "jrc_relationship_portfolio_group_assignments", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "portfolio_group_id", null: false
+    t.bigint "assignment_id", null: false
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "assignment_id", "active"], name: "rel_group_customer_scope"
+    t.index ["account_id", "portfolio_group_id", "assignment_id"], name: "rel_group_unique_customer", unique: true
+    t.index ["account_id"], name: "rel_group_link_account"
+  end
+
+  create_table "jrc_relationship_portfolio_groups", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.string "name", null: false
+    t.text "objective", default: "", null: false
+    t.bigint "owner_id", null: false
+    t.bigint "team_id"
+    t.bigint "business_unit_id"
+    t.bigint "segment_id"
+    t.string "visibility", default: "private", null: false
+    t.string "status", default: "active", null: false
+    t.jsonb "goals", default: [], null: false
+    t.integer "lock_version", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index "account_id, lower((name)::text)", name: "rel_group_unique_name", unique: true
+    t.index ["account_id", "id"], name: "rel_group_tenant_ref", unique: true
+    t.index ["account_id", "owner_id", "status"], name: "rel_group_owner"
+    t.index ["account_id"], name: "rel_group_account"
+    t.index ["team_id"], name: "index_jrc_relationship_portfolio_groups_on_team_id"
+    t.check_constraint "jsonb_typeof(goals) = 'array'::text AND jsonb_array_length(goals) <= 50", name: "rel_group_goals"
+    t.check_constraint "status::text = ANY (ARRAY['active'::character varying, 'archived'::character varying]::text[])", name: "rel_group_status"
+    t.check_constraint "visibility::text <> 'team'::text OR team_id IS NOT NULL", name: "rel_group_team_visibility"
+    t.check_constraint "visibility::text = ANY (ARRAY['private'::character varying, 'team'::character varying, 'account'::character varying]::text[])", name: "rel_group_visibility"
+  end
+
+  create_table "jrc_relationship_portfolio_history_receipts", force: :cascade do |t|
+    t.integer "account_id", null: false
+    t.bigint "portfolio_group_id", null: false
+    t.bigint "audit_event_id", null: false
+    t.jsonb "snapshot", null: false
+    t.string "digest", limit: 64, null: false
+    t.datetime "created_at", null: false
+    t.index ["account_id", "portfolio_group_id", "id"], name: "idx_rel_portfolio_history_scope"
+    t.index ["account_id"], name: "idx_on_account_id_089c2a52f6"
+    t.index ["audit_event_id"], name: "idx_rel_portfolio_history_event", unique: true
+    t.check_constraint "jsonb_typeof(snapshot) = 'object'::text AND digest::text ~ '^[a-f0-9]{64}$'::text", name: "rel_portfolio_history_shape"
+  end
+
+  create_table "jrc_relationship_processing_runs", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "viewer_id", null: false
+    t.string "access_signature", null: false
+    t.string "state", default: "running", null: false
+    t.jsonb "requested_ids", default: [], null: false
+    t.jsonb "outcomes", default: {}, null: false
+    t.datetime "started_at", null: false
+    t.datetime "finished_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "viewer_id", "created_at"], name: "rel_processing_viewer_history"
+    t.index ["account_id"], name: "index_jrc_relationship_processing_runs_on_account_id"
+    t.index ["viewer_id"], name: "index_jrc_relationship_processing_runs_on_viewer_id"
   end
 
   create_table "jrc_relationship_qbrs", force: :cascade do |t|
@@ -4670,6 +5219,26 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.index ["contract_id"], name: "index_jrc_relationship_renewals_on_contract_id"
     t.index ["deal_id"], name: "index_jrc_relationship_renewals_on_deal_id"
     t.index ["owner_id"], name: "index_jrc_relationship_renewals_on_owner_id"
+  end
+
+  create_table "jrc_relationship_retention_coverages", force: :cascade do |t|
+    t.integer "account_id", null: false
+    t.datetime "started_at", null: false
+    t.index ["account_id"], name: "index_jrc_relationship_retention_coverages_on_account_id", unique: true
+  end
+
+  create_table "jrc_relationship_retention_states", force: :cascade do |t|
+    t.integer "account_id", null: false
+    t.string "customer_key", null: false
+    t.bigint "assignment_id", null: false
+    t.bigint "owner_id"
+    t.bigint "team_id"
+    t.bigint "business_unit_id"
+    t.jsonb "facts", null: false
+    t.datetime "observed_at", null: false
+    t.index ["account_id", "customer_key", "observed_at", "id"], name: "rel_retention_customer_time"
+    t.index ["account_id"], name: "index_jrc_relationship_retention_states_on_account_id"
+    t.check_constraint "customer_key::text ~ '^(company|contact):[1-9][0-9]*$'::text AND jsonb_typeof(facts) = 'object'::text", name: "rel_retention_identity"
   end
 
   create_table "jrc_relationship_risk_cases", force: :cascade do |t|
@@ -5007,7 +5576,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.index ["account_id", "unit_id", "id"], name: "jrc_sd_incident_scope_ref", unique: true
     t.index ["account_id", "unit_id", "resource_kind", "status", "created_at"], name: "jrc_sd_case_board_idx"
     t.check_constraint "jsonb_typeof(details) = 'object'::text", name: "jrc_sd_case_details_object"
-    t.check_constraint "resource_kind::text = ANY (ARRAY['incident'::character varying::text, 'problem'::character varying::text])", name: "jrc_sd_r3_incident_kind"
+    t.check_constraint "resource_kind::text = ANY (ARRAY['incident'::character varying, 'problem'::character varying]::text[])", name: "jrc_sd_r3_incident_kind"
   end
 
   create_table "jrc_service_desk_lifecycle_pauses", force: :cascade do |t|
@@ -5080,7 +5649,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.index ["account_id", "unit_id", "ticket_id", "actor_membership_id", "request_key"], name: "jrc_sd_lc_transition_key", unique: true
     t.index ["account_id", "unit_id", "ticket_id", "id"], name: "jrc_sd_lc_lifecycle_transitions_ref", unique: true
     t.index ["account_id", "unit_id", "ticket_id", "occurred_at", "id"], name: "jrc_sd_lc_transition_timeline"
-    t.check_constraint "(action::text = ANY (ARRAY['pause'::character varying::text, 'resume'::character varying::text, 'resolve'::character varying::text, 'close'::character varying::text, 'cancel'::character varying::text, 'reopen'::character varying::text, 'work_status'::character varying::text])) AND jsonb_typeof(payload) = 'object'::text AND fingerprint::text ~ '^[a-f0-9]{64}$'::text AND btrim(request_key::text) <> ''::text", name: "jrc_sd_lc_transition_valid"
+    t.check_constraint "(action::text = ANY (ARRAY['pause'::character varying, 'resume'::character varying, 'resolve'::character varying, 'close'::character varying, 'cancel'::character varying, 'reopen'::character varying, 'work_status'::character varying]::text[])) AND jsonb_typeof(payload) = 'object'::text AND fingerprint::text ~ '^[a-f0-9]{64}$'::text AND btrim(request_key::text) <> ''::text", name: "jrc_sd_lc_transition_valid"
   end
 
   create_table "jrc_service_desk_notification_deliveries", force: :cascade do |t|
@@ -5201,9 +5770,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.index ["account_id", "unit_id", "created_by_membership_id", "idempotency_key"], name: "jrc_sd_r3_resource_request", unique: true
     t.index ["account_id", "unit_id", "id"], name: "jrc_sd_r3_resource_scope", unique: true
     t.index ["account_id", "unit_id", "resource_kind", "code"], name: "jrc_sd_r3_resource_code", unique: true, where: "(code IS NOT NULL)"
-    t.check_constraint "(resource_kind::text = ANY (ARRAY['change'::character varying::text, 'asset'::character varying::text])) AND (priority::text = ANY (ARRAY['low'::character varying::text, 'normal'::character varying::text, 'high'::character varying::text, 'critical'::character varying::text]))", name: "jrc_sd_r3_resource_values"
+    t.check_constraint "(resource_kind::text = ANY (ARRAY['change'::character varying, 'asset'::character varying]::text[])) AND (priority::text = ANY (ARRAY['low'::character varying, 'normal'::character varying, 'high'::character varying, 'critical'::character varying]::text[]))", name: "jrc_sd_r3_resource_values"
     t.check_constraint "planned_end_at IS NULL OR planned_start_at IS NOT NULL AND planned_end_at > planned_start_at", name: "jrc_sd_r3_resource_window"
-    t.check_constraint "resource_kind::text = 'change'::text AND (state::text = ANY (ARRAY['requested'::character varying::text, 'planned'::character varying::text, 'approved'::character varying::text, 'in_progress'::character varying::text, 'completed'::character varying::text, 'cancelled'::character varying::text])) OR resource_kind::text = 'asset'::text AND (state::text = ANY (ARRAY['active'::character varying::text, 'inactive'::character varying::text, 'retired'::character varying::text]))", name: "jrc_sd_r3_resource_state"
+    t.check_constraint "resource_kind::text = 'change'::text AND (state::text = ANY (ARRAY['requested'::character varying, 'planned'::character varying, 'approved'::character varying, 'in_progress'::character varying, 'completed'::character varying, 'cancelled'::character varying]::text[])) OR resource_kind::text = 'asset'::text AND (state::text = ANY (ARRAY['active'::character varying, 'inactive'::character varying, 'retired'::character varying]::text[]))", name: "jrc_sd_r3_resource_state"
   end
 
   create_table "jrc_service_desk_operational_rule_versions", force: :cascade do |t|
@@ -5219,7 +5788,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.index ["account_id", "unit_id", "id"], name: "jrc_sd_rule_scope_unique", unique: true
     t.index ["account_id", "unit_id", "kind", "version"], name: "jrc_sd_rule_version_unique", unique: true
     t.check_constraint "jsonb_typeof(definition) = 'object'::text AND digest::text ~ '^[a-f0-9]{64}$'::text", name: "jrc_sd_rule_definition"
-    t.check_constraint "kind::text = ANY (ARRAY['routing'::character varying::text, 'priority_matrix'::character varying::text, 'sla_selection'::character varying::text, 'approval_deadline'::character varying::text, 'recurrence'::character varying::text])", name: "jrc_sd_rule_finite_kind"
+    t.check_constraint "kind::text = ANY (ARRAY['routing'::character varying, 'priority_matrix'::character varying, 'sla_selection'::character varying, 'approval_deadline'::character varying, 'recurrence'::character varying]::text[])", name: "jrc_sd_rule_finite_kind"
     t.check_constraint "version > 0", name: "jrc_sd_rule_positive_version"
   end
 
@@ -5251,12 +5820,12 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.datetime "expires_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.jsonb "establishment_ids", default: [], null: false
     t.index ["user_id", "account_id", "company_id", "contact_inbox_id"], name: "jrc_sd_pg_identity", unique: true
     t.index ["user_id", "active"], name: "jrc_sd_pg_access"
+    t.check_constraint "jsonb_typeof(establishment_ids) = 'array'::text AND jsonb_array_length(establishment_ids) <= 1000", name: "jrc_sd_grant_establishments"
     t.check_constraint "jsonb_typeof(visible_contact_ids) = 'array'::text AND jsonb_array_length(visible_contact_ids) <= 100", name: "jrc_sd_pg_visible_contacts"
     t.check_constraint "role::text = ANY (ARRAY['requester'::character varying, 'manager'::character varying, 'organization_admin'::character varying]::text[])", name: "jrc_sd_pg_role"
-    t.jsonb "establishment_ids", default: [], null: false
-    t.check_constraint "jsonb_typeof(establishment_ids) = 'array'::text AND jsonb_array_length(establishment_ids) <= 1000", name: "jrc_sd_grant_establishments"
   end
 
   create_table "jrc_service_desk_portal_requests", force: :cascade do |t|
@@ -5403,7 +5972,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.datetime "updated_at", null: false
     t.index ["account_id", "unit_id", "ticket_id", "id"], name: "jrc_sd_lc_sla_clocks_ref", unique: true
     t.index ["account_id", "unit_id", "ticket_id", "sla_cycle_id", "kind"], name: "jrc_sd_lc_clock_kind", unique: true
-    t.check_constraint "(kind::text = ANY (ARRAY['first_response'::character varying::text, 'attendance'::character varying::text, 'resolution'::character varying::text])) AND (state::text = ANY (ARRAY['running'::character varying::text, 'paused'::character varying::text, 'completed'::character varying::text, 'stopped'::character varying::text])) AND budget_seconds > 0 AND elapsed_seconds >= 0::numeric", name: "jrc_sd_lc_clock_values"
+    t.check_constraint "(kind::text = ANY (ARRAY['first_response'::character varying, 'attendance'::character varying, 'resolution'::character varying]::text[])) AND (state::text = ANY (ARRAY['running'::character varying, 'paused'::character varying, 'completed'::character varying, 'stopped'::character varying]::text[])) AND budget_seconds > 0 AND elapsed_seconds >= 0::numeric", name: "jrc_sd_lc_clock_values"
     t.check_constraint "(state::text = 'completed'::text) = (achieved_at IS NOT NULL)", name: "jrc_sd_lc_clock_completion"
   end
 
@@ -5439,7 +6008,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.index ["account_id", "unit_id", "sla_snapshot_id", "kind"], name: "jrc_sd_milestone_unique", unique: true
     t.index ["account_id", "unit_id", "ticket_id"], name: "jrc_sd_milestone_ticket"
     t.check_constraint "due_at IS NULL AND calculated_at IS NULL AND calculator_version IS NULL OR due_at IS NOT NULL AND calculated_at IS NOT NULL AND calculator_version IS NOT NULL AND btrim(calculator_version::text) <> ''::text", name: "jrc_sd_milestone_calculation"
-    t.check_constraint "kind::text = ANY (ARRAY['first_response'::character varying::text, 'resolution'::character varying::text])", name: "jrc_sd_milestone_kind"
+    t.check_constraint "kind::text = ANY (ARRAY['first_response'::character varying, 'resolution'::character varying]::text[])", name: "jrc_sd_milestone_kind"
   end
 
   create_table "jrc_service_desk_sla_snapshots", force: :cascade do |t|
@@ -5466,7 +6035,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.index ["account_id", "unit_id", "ticket_id", "id"], name: "jrc_sd_snapshot_ref", unique: true
     t.index ["account_id", "unit_id", "ticket_id", "payload_digest"], name: "jrc_sd_snapshot_deduplicate", unique: true
     t.index ["account_id", "unit_id", "ticket_id", "version"], name: "jrc_sd_snapshot_version", unique: true
-    t.check_constraint "calendar_scope::text = ANY (ARRAY['account'::character varying::text, 'operator_company'::character varying::text, 'unit'::character varying::text])", name: "jrc_sd_snapshot_scope"
+    t.check_constraint "calendar_scope::text = ANY (ARRAY['account'::character varying, 'operator_company'::character varying, 'unit'::character varying]::text[])", name: "jrc_sd_snapshot_scope"
     t.check_constraint "jsonb_typeof(calendar_conditions) = 'object'::text", name: "jrc_sd_snapshot_calendar_conditions"
     t.check_constraint "jsonb_typeof(contract_conditions) = 'object'::text", name: "jrc_sd_snapshot_contract_conditions"
     t.check_constraint "jsonb_typeof(policy_conditions) = 'object'::text", name: "jrc_sd_snapshot_policy_conditions"
@@ -5560,7 +6129,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.index ["account_id", "unit_id", "ticket_id", "created_at", "id"], name: "jrc_sd_notes_timeline"
     t.index ["account_id", "unit_id", "ticket_id", "id"], name: "jrc_sd_note_scope_ref", unique: true
     t.check_constraint "(visibility::text = 'technical_team'::text) = (audience_team_id IS NOT NULL)", name: "jrc_sd_note_team_audience"
-    t.check_constraint "(visibility::text = ANY (ARRAY['internal'::character varying::text, 'technical_team'::character varying::text, 'customer'::character varying::text, 'public_without_notification'::character varying::text])) AND btrim(body) <> ''::text", name: "jrc_sd_note_visibility"
+    t.check_constraint "(visibility::text = ANY (ARRAY['internal'::character varying, 'technical_team'::character varying, 'customer'::character varying, 'public_without_notification'::character varying]::text[])) AND btrim(body) <> ''::text", name: "jrc_sd_note_visibility"
     t.check_constraint "btrim(idempotency_key::text) <> ''::text AND request_fingerprint::text ~ '^[a-f0-9]{64}$'::text", name: "jrc_sd_note_fingerprint"
     t.check_constraint "previous_note_id IS NULL OR publication_reason IS NOT NULL AND btrim(publication_reason) <> ''::text AND previous_note_id <> id", name: "jrc_sd_note_publication_reason"
     t.check_constraint "visibility::text = 'customer'::text OR notification_channels = '[]'::jsonb", name: "jrc_sd_note_notifications"
@@ -5585,7 +6154,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.check_constraint "NOT initial OR phase::text = 'open'::text", name: "jrc_sd_status_initial_phase"
     t.check_constraint "\"position\" >= 0", name: "jrc_sd_status_position"
     t.check_constraint "btrim(code::text) <> ''::text AND btrim(name::text) <> ''::text", name: "jrc_sd_ticket_statuses_names"
-    t.check_constraint "phase::text = ANY (ARRAY['open'::character varying::text, 'waiting'::character varying::text, 'resolved'::character varying::text, 'closed'::character varying::text, 'cancelled'::character varying::text])", name: "jrc_sd_status_phase"
+    t.check_constraint "phase::text = ANY (ARRAY['open'::character varying, 'waiting'::character varying, 'resolved'::character varying, 'closed'::character varying, 'cancelled'::character varying]::text[])", name: "jrc_sd_status_phase"
   end
 
   create_table "jrc_service_desk_ticket_tasks", force: :cascade do |t|
@@ -5614,7 +6183,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.index ["account_id", "unit_id", "ticket_id", "created_by_membership_id", "idempotency_key"], name: "jrc_sd_task_request_unique", unique: true
     t.index ["account_id", "unit_id", "ticket_id", "id"], name: "ticket_tasks_scope_ref", unique: true
     t.check_constraint "(visibility::text = 'technical_team'::text) = (audience_team_id IS NOT NULL)", name: "jrc_sd_task_team_audience"
-    t.check_constraint "(visibility::text = ANY (ARRAY['internal'::character varying::text, 'technical_team'::character varying::text, 'customer'::character varying::text, 'public_without_notification'::character varying::text])) AND btrim(title::text) <> ''::text", name: "jrc_sd_task_visibility"
+    t.check_constraint "(visibility::text = ANY (ARRAY['internal'::character varying, 'technical_team'::character varying, 'customer'::character varying, 'public_without_notification'::character varying]::text[])) AND btrim(title::text) <> ''::text", name: "jrc_sd_task_visibility"
     t.check_constraint "parent_task_id IS NULL OR parent_task_id <> id", name: "jrc_sd_r3_task_not_self"
   end
 
@@ -5662,7 +6231,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.jsonb "catalogue_snapshot", default: {}, null: false
     t.string "impact_code"
     t.string "urgency_code"
+    t.bigint "establishment_company_id"
     t.index ["account_id", "company_id"], name: "jrc_master_jrc_service_desk_tickets_company_idx"
+    t.index ["account_id", "establishment_company_id"], name: "jrc_sd_ticket_establishment"
     t.index ["account_id", "requester_id"], name: "jrc_sd_ticket_requester"
     t.index ["account_id", "unit_id", "assignee_membership_id", "created_at"], name: "jrc_sd_ticket_assignee_membership_id"
     t.index ["account_id", "unit_id", "category_id", "created_at"], name: "jrc_sd_ticket_category_id"
@@ -5678,8 +6249,6 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     t.check_constraint "btrim(title::text) <> ''::text AND btrim(origin_channel::text) <> ''::text AND btrim(idempotency_key::text) <> ''::text", name: "jrc_sd_ticket_required_text"
     t.check_constraint "impact_code IS NULL AND urgency_code IS NULL OR impact_code IS NOT NULL AND urgency_code IS NOT NULL AND impact_code::text ~ '^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$'::text AND urgency_code::text ~ '^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$'::text", name: "jrc_sd_explicit_impact_urgency"
     t.check_constraint "request_fingerprint::text ~ '^[a-f0-9]{64}$'::text", name: "jrc_sd_ticket_fingerprint"
-    t.bigint "establishment_company_id"
-    t.index ["account_id", "establishment_company_id"], name: "jrc_sd_ticket_establishment"
   end
 
   create_table "jrc_service_desk_unit_memberships", force: :cascade do |t|
@@ -6337,12 +6906,12 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "companies", "companies", column: ["account_id", "parent_company_id"], primary_key: ["account_id", "id"], name: "jrc_master_company_parent_fk", validate: false
+  add_foreign_key "companies", "companies", column: ["account_id", "parent_company_id"], primary_key: ["account_id", "id"], name: "jrc_master_company_parent_fk"
   add_foreign_key "companies", "users", column: "created_by_id", on_delete: :nullify
   add_foreign_key "companies", "users", column: "updated_by_id", on_delete: :nullify
-  add_foreign_key "company_addresses", "companies", column: ["account_id", "company_id"], primary_key: ["account_id", "id"], name: "jrc_master_company_addresses_company_fk", validate: false
+  add_foreign_key "company_addresses", "companies", column: ["account_id", "company_id"], primary_key: ["account_id", "id"], name: "jrc_master_company_addresses_company_fk"
   add_foreign_key "contact_points", "contacts", column: ["account_id", "contact_id"], primary_key: ["account_id", "id"], name: "jrc_master_contact_point_contact_fk"
-  add_foreign_key "contacts", "companies", column: ["account_id", "company_id"], primary_key: ["account_id", "id"], name: "jrc_master_contacts_company_fk", validate: false
+  add_foreign_key "contacts", "companies", column: ["account_id", "company_id"], primary_key: ["account_id", "id"], name: "jrc_master_contacts_company_fk"
   add_foreign_key "inboxes", "portals"
   add_foreign_key "jrc_ai_providers", "accounts"
   add_foreign_key "jrc_ai_providers", "users", column: "created_by_id"
@@ -6365,6 +6934,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
   add_foreign_key "jrc_approvals_delegations", "account_users", column: ["account_id", "principal_id"], primary_key: ["account_id", "id"], name: "jrc_ap_delegations_principal_id_fk"
   add_foreign_key "jrc_approvals_delegations", "accounts"
   add_foreign_key "jrc_approvals_delegations", "jrc_approvals_policy_versions", column: ["account_id", "policy_version_id"], primary_key: ["account_id", "id"], name: "jrc_ap_delegations_policy_version_id_fk"
+  add_foreign_key "jrc_approvals_notification_outboxes", "accounts"
+  add_foreign_key "jrc_approvals_notification_outboxes", "jrc_approvals_audit_events", column: ["account_id", "source_event_id"], primary_key: ["account_id", "id"], name: "jrc_ap_notice_source_fk"
   add_foreign_key "jrc_approvals_policies", "account_users", column: ["account_id", "author_id"], primary_key: ["account_id", "id"], name: "jrc_ap_policies_author_id_fk"
   add_foreign_key "jrc_approvals_policies", "accounts"
   add_foreign_key "jrc_approvals_policies", "companies", column: ["account_id", "issuer_company_id"], primary_key: ["account_id", "id"], name: "jrc_ap_policies_company_fk"
@@ -6378,12 +6949,87 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
   add_foreign_key "jrc_approvals_requests", "companies", column: ["account_id", "issuer_company_id"], primary_key: ["account_id", "id"], name: "jrc_ap_requests_company_fk"
   add_foreign_key "jrc_approvals_requests", "jrc_approvals_policy_versions", column: ["account_id", "policy_version_id"], primary_key: ["account_id", "id"], name: "jrc_ap_requests_policy_version_id_fk"
   add_foreign_key "jrc_approvals_requests", "jrc_crm_business_units", column: ["account_id", "issuer_company_id", "business_unit_id"], primary_key: ["account_id", "company_id", "id"], name: "jrc_ap_requests_unit_fk"
+  add_foreign_key "jrc_backoffice_authority_proposals", "accounts"
+  add_foreign_key "jrc_backoffice_authority_proposals", "jrc_backoffice_contract_versions", column: "contract_version_id"
+  add_foreign_key "jrc_backoffice_authority_proposals", "jrc_backoffice_contract_versions", column: ["account_id", "contract_id", "backoffice_request_id", "signer_roster_id", "contract_version_id"], primary_key: ["account_id", "contract_id", "backoffice_request_id", "signer_roster_id", "id"], name: "bo_authority_exact_version_origin"
+  add_foreign_key "jrc_backoffice_authority_proposals", "jrc_backoffice_signer_rosters", column: "signer_roster_id"
+  add_foreign_key "jrc_backoffice_authority_proposals", "jrc_crm_backoffice_requests", column: "backoffice_request_id"
+  add_foreign_key "jrc_backoffice_authority_proposals", "jrc_crm_contracts", column: "contract_id"
+  add_foreign_key "jrc_backoffice_authority_proposals", "users", column: "created_by_id"
+  add_foreign_key "jrc_backoffice_completion_dossiers", "accounts"
+  add_foreign_key "jrc_backoffice_completion_dossiers", "active_storage_blobs", column: "archive_blob_id"
+  add_foreign_key "jrc_backoffice_completion_dossiers", "jrc_crm_backoffice_requests", column: "backoffice_request_id"
+  add_foreign_key "jrc_backoffice_completion_dossiers", "users", column: "sealed_by_id"
+  add_foreign_key "jrc_backoffice_contract_versions", "accounts"
+  add_foreign_key "jrc_backoffice_contract_versions", "active_storage_blobs", column: "pdf_blob_id"
+  add_foreign_key "jrc_backoffice_contract_versions", "jrc_backoffice_signer_rosters", column: "signer_roster_id"
+  add_foreign_key "jrc_backoffice_contract_versions", "jrc_backoffice_signer_rosters", column: ["account_id", "contract_id", "backoffice_request_id", "signer_roster_id"], primary_key: ["account_id", "contract_id", "backoffice_request_id", "id"], name: "bo_version_signer_roster_origin"
+  add_foreign_key "jrc_backoffice_contract_versions", "jrc_crm_backoffice_requests", column: "backoffice_request_id"
+  add_foreign_key "jrc_backoffice_contract_versions", "jrc_crm_backoffice_requests", column: ["account_id", "backoffice_request_id"], primary_key: ["account_id", "id"], name: "bo_version_backoffice_request_tenant"
+  add_foreign_key "jrc_backoffice_contract_versions", "jrc_crm_contracts", column: "contract_id"
+  add_foreign_key "jrc_backoffice_contract_versions", "jrc_crm_contracts", column: ["account_id", "contract_id"], primary_key: ["account_id", "id"], name: "bo_version_contract_tenant"
+  add_foreign_key "jrc_backoffice_contract_versions", "users", column: "created_by_id"
   add_foreign_key "jrc_backoffice_document_analyses", "jrc_backoffice_document_versions", column: "document_version_id"
   add_foreign_key "jrc_backoffice_document_decisions", "jrc_backoffice_document_versions", column: "document_version_id"
   add_foreign_key "jrc_backoffice_document_decisions", "users", column: "actor_id"
+  add_foreign_key "jrc_backoffice_document_scans", "accounts"
+  add_foreign_key "jrc_backoffice_document_scans", "active_storage_blobs", column: "source_blob_id"
+  add_foreign_key "jrc_backoffice_document_scans", "jrc_backoffice_document_versions", column: "document_version_id"
+  add_foreign_key "jrc_backoffice_document_scans", "jrc_backoffice_document_versions", column: ["account_id", "document_version_id"], primary_key: ["account_id", "id"], name: "bo_document_scan_tenant"
   add_foreign_key "jrc_backoffice_document_versions", "accounts"
   add_foreign_key "jrc_backoffice_document_versions", "jrc_crm_backoffice_requests", column: "backoffice_request_id"
+  add_foreign_key "jrc_backoffice_document_versions", "jrc_crm_backoffice_requests", column: ["account_id", "backoffice_request_id"], primary_key: ["account_id", "id"], name: "bo_document_request_tenant"
   add_foreign_key "jrc_backoffice_document_versions", "users", column: "uploaded_by_id"
+  add_foreign_key "jrc_backoffice_requirement_plans", "accounts"
+  add_foreign_key "jrc_backoffice_requirement_plans", "jrc_crm_backoffice_requests", column: "backoffice_request_id"
+  add_foreign_key "jrc_backoffice_requirement_plans", "users", column: "created_by_id"
+  add_foreign_key "jrc_backoffice_requirement_responses", "accounts"
+  add_foreign_key "jrc_backoffice_requirement_responses", "jrc_backoffice_requirement_plans", column: "requirement_plan_id"
+  add_foreign_key "jrc_backoffice_requirement_responses", "users", column: "actor_id"
+  add_foreign_key "jrc_backoffice_requirement_rules", "accounts"
+  add_foreign_key "jrc_backoffice_requirement_rules", "jrc_crm_business_units", column: "business_unit_id"
+  add_foreign_key "jrc_backoffice_requirement_rules", "jrc_crm_products", column: "product_id"
+  add_foreign_key "jrc_backoffice_requirement_rules", "users", column: "created_by_id"
+  add_foreign_key "jrc_backoffice_signature_acceptances", "accounts"
+  add_foreign_key "jrc_backoffice_signature_acceptances", "active_storage_blobs", column: "signed_blob_id"
+  add_foreign_key "jrc_backoffice_signature_acceptances", "jrc_backoffice_signature_artifact_bundles", column: "bundle_id"
+  add_foreign_key "jrc_backoffice_signature_acceptances", "jrc_crm_contracts", column: "contract_id"
+  add_foreign_key "jrc_backoffice_signature_acceptances", "users", column: "accepted_by_id"
+  add_foreign_key "jrc_backoffice_signature_artifact_bundles", "accounts"
+  add_foreign_key "jrc_backoffice_signature_artifact_bundles", "jrc_backoffice_contract_versions", column: "contract_version_id"
+  add_foreign_key "jrc_backoffice_signature_artifact_bundles", "jrc_backoffice_document_versions", column: "certificate_document_id"
+  add_foreign_key "jrc_backoffice_signature_artifact_bundles", "jrc_backoffice_document_versions", column: "signed_document_id"
+  add_foreign_key "jrc_backoffice_signature_artifact_bundles", "jrc_backoffice_signature_deliveries", column: "delivery_id"
+  add_foreign_key "jrc_backoffice_signature_artifact_bundles", "users", column: "captured_by_id"
+  add_foreign_key "jrc_backoffice_signature_connections", "accounts"
+  add_foreign_key "jrc_backoffice_signature_connections", "jrc_backoffice_signature_integrations", column: "integration_id"
+  add_foreign_key "jrc_backoffice_signature_connections", "jrc_backoffice_signature_integrations", column: ["account_id", "integration_id"], primary_key: ["account_id", "id"], name: "bo_signature_connection_tenant"
+  add_foreign_key "jrc_backoffice_signature_connections", "users", column: "created_by_id"
+  add_foreign_key "jrc_backoffice_signature_deliveries", "accounts"
+  add_foreign_key "jrc_backoffice_signature_deliveries", "jrc_backoffice_authority_proposals", column: "authority_proposal_id"
+  add_foreign_key "jrc_backoffice_signature_deliveries", "jrc_backoffice_authority_proposals", column: ["account_id", "contract_id", "backoffice_request_id", "signer_roster_id", "contract_version_id", "authority_proposal_id"], primary_key: ["account_id", "contract_id", "backoffice_request_id", "signer_roster_id", "contract_version_id", "id"], name: "bo_delivery_exact_authority"
+  add_foreign_key "jrc_backoffice_signature_deliveries", "jrc_backoffice_contract_versions", column: "contract_version_id"
+  add_foreign_key "jrc_backoffice_signature_deliveries", "jrc_backoffice_signature_connections", column: "connection_id"
+  add_foreign_key "jrc_backoffice_signature_deliveries", "jrc_backoffice_signature_connections", column: ["account_id", "connection_id"], primary_key: ["account_id", "id"], name: "bo_delivery_tenant_connection_fk"
+  add_foreign_key "jrc_backoffice_signature_deliveries", "jrc_backoffice_signer_rosters", column: "signer_roster_id"
+  add_foreign_key "jrc_backoffice_signature_deliveries", "jrc_crm_backoffice_requests", column: "backoffice_request_id"
+  add_foreign_key "jrc_backoffice_signature_deliveries", "jrc_crm_contracts", column: "contract_id"
+  add_foreign_key "jrc_backoffice_signature_deliveries", "users", column: "created_by_id"
+  add_foreign_key "jrc_backoffice_signature_delivery_events", "accounts"
+  add_foreign_key "jrc_backoffice_signature_delivery_events", "jrc_backoffice_signature_deliveries", column: "delivery_id"
+  add_foreign_key "jrc_backoffice_signature_delivery_events", "jrc_backoffice_signature_deliveries", column: ["account_id", "connection_id", "delivery_id"], primary_key: ["account_id", "connection_id", "id"], name: "bo_delivery_event_exact_origin"
+  add_foreign_key "jrc_backoffice_signature_integrations", "accounts"
+  add_foreign_key "jrc_backoffice_signature_integrations", "users", column: "created_by_id"
+  add_foreign_key "jrc_backoffice_signature_notifications", "accounts"
+  add_foreign_key "jrc_backoffice_signature_notifications", "jrc_backoffice_signature_connections", column: "connection_id"
+  add_foreign_key "jrc_backoffice_signature_notifications", "jrc_backoffice_signature_connections", column: ["account_id", "connection_id"], primary_key: ["account_id", "id"], name: "bo_signature_notification_connection_tenant"
+  add_foreign_key "jrc_backoffice_signature_notifications", "jrc_backoffice_signature_integrations", column: "integration_id"
+  add_foreign_key "jrc_backoffice_signer_rosters", "accounts"
+  add_foreign_key "jrc_backoffice_signer_rosters", "jrc_crm_backoffice_requests", column: "backoffice_request_id"
+  add_foreign_key "jrc_backoffice_signer_rosters", "jrc_crm_backoffice_requests", column: ["account_id", "backoffice_request_id"], primary_key: ["account_id", "id"], name: "bo_signer_roster_request_tenant"
+  add_foreign_key "jrc_backoffice_signer_rosters", "jrc_crm_contracts", column: "contract_id"
+  add_foreign_key "jrc_backoffice_signer_rosters", "jrc_crm_contracts", column: ["account_id", "contract_id"], primary_key: ["account_id", "id"], name: "bo_signer_roster_contract_tenant"
+  add_foreign_key "jrc_backoffice_signer_rosters", "users", column: "created_by_id"
   add_foreign_key "jrc_broker_connection_events", "accounts", on_delete: :cascade
   add_foreign_key "jrc_broker_connection_events", "inboxes", on_delete: :cascade
   add_foreign_key "jrc_broker_connection_events", "users", on_delete: :nullify
@@ -6498,20 +7144,20 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
   add_foreign_key "jrc_contact_center_units", "accounts"
   add_foreign_key "jrc_contact_center_units", "jrc_contact_center_units", column: ["account_id", "parent_unit_id"], primary_key: ["account_id", "id"], name: "jrc_cc_unit_parent_fk"
   add_foreign_key "jrc_crm_activities", "accounts"
-  add_foreign_key "jrc_crm_activities", "companies", column: ["account_id", "company_id"], primary_key: ["account_id", "id"], name: "jrc_master_jrc_crm_activities_company_fk", validate: false
+  add_foreign_key "jrc_crm_activities", "companies", column: ["account_id", "company_id"], primary_key: ["account_id", "id"], name: "jrc_master_jrc_crm_activities_company_fk"
   add_foreign_key "jrc_crm_activities", "contacts"
-  add_foreign_key "jrc_crm_activities", "contacts", column: ["account_id", "contact_id"], primary_key: ["account_id", "id"], name: "jrc_master_jrc_crm_activities_contact_fk", validate: false
+  add_foreign_key "jrc_crm_activities", "contacts", column: ["account_id", "contact_id"], primary_key: ["account_id", "id"], name: "jrc_master_jrc_crm_activities_contact_fk"
   add_foreign_key "jrc_crm_activities", "conversations"
   add_foreign_key "jrc_crm_activities", "jrc_crm_business_units", column: "business_unit_id"
   add_foreign_key "jrc_crm_activities", "jrc_crm_deals", column: "deal_id"
   add_foreign_key "jrc_crm_activities", "jrc_crm_leads", column: "lead_id"
   add_foreign_key "jrc_crm_activities", "jrc_crm_organizations", column: "organization_id"
-  add_foreign_key "jrc_crm_activities", "jrc_crm_organizations", column: ["account_id", "organization_id"], primary_key: ["account_id", "id"], name: "jrc_master_jrc_crm_activities_organization_fk", validate: false
+  add_foreign_key "jrc_crm_activities", "jrc_crm_organizations", column: ["account_id", "organization_id"], primary_key: ["account_id", "id"], name: "jrc_master_jrc_crm_activities_organization_fk"
   add_foreign_key "jrc_crm_activities", "users"
   add_foreign_key "jrc_crm_audit_events", "accounts"
   add_foreign_key "jrc_crm_backoffice_requests", "accounts"
   add_foreign_key "jrc_crm_backoffice_requests", "contacts"
-  add_foreign_key "jrc_crm_backoffice_requests", "contacts", column: ["account_id", "contact_id"], primary_key: ["account_id", "id"], name: "jrc_master_jrc_crm_backoffice_requests_contact_fk", validate: false
+  add_foreign_key "jrc_crm_backoffice_requests", "contacts", column: ["account_id", "contact_id"], primary_key: ["account_id", "id"], name: "jrc_master_jrc_crm_backoffice_requests_contact_fk"
   add_foreign_key "jrc_crm_backoffice_requests", "jrc_crm_business_units", column: "business_unit_id"
   add_foreign_key "jrc_crm_backoffice_requests", "jrc_crm_contracts", column: "contract_id"
   add_foreign_key "jrc_crm_backoffice_requests", "jrc_crm_sales_orders", column: "sales_order_id"
@@ -6521,7 +7167,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
   add_foreign_key "jrc_crm_backoffice_requests", "users", column: "requested_by_id"
   add_foreign_key "jrc_crm_business_units", "accounts"
   add_foreign_key "jrc_crm_business_units", "companies"
-  add_foreign_key "jrc_crm_business_units", "companies", column: ["account_id", "company_id"], primary_key: ["account_id", "id"], name: "jrc_crm_bu_company_account_fk", validate: false
+  add_foreign_key "jrc_crm_business_units", "companies", column: ["account_id", "company_id"], primary_key: ["account_id", "id"], name: "jrc_crm_bu_company_account_fk"
   add_foreign_key "jrc_crm_commission_programs", "accounts"
   add_foreign_key "jrc_crm_commission_programs", "jrc_crm_business_units", column: "business_unit_id"
   add_foreign_key "jrc_crm_contract_items", "jrc_crm_contracts", column: "contract_id"
@@ -6529,7 +7175,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
   add_foreign_key "jrc_crm_contract_templates", "accounts"
   add_foreign_key "jrc_crm_contracts", "accounts"
   add_foreign_key "jrc_crm_contracts", "contacts"
-  add_foreign_key "jrc_crm_contracts", "contacts", column: ["account_id", "contact_id"], primary_key: ["account_id", "id"], name: "jrc_master_jrc_crm_contracts_contact_fk", validate: false
+  add_foreign_key "jrc_crm_contracts", "contacts", column: ["account_id", "contact_id"], primary_key: ["account_id", "id"], name: "jrc_master_jrc_crm_contracts_contact_fk"
   add_foreign_key "jrc_crm_contracts", "jrc_crm_business_units", column: "business_unit_id"
   add_foreign_key "jrc_crm_contracts", "jrc_crm_contract_templates", column: "contract_template_id"
   add_foreign_key "jrc_crm_contracts", "jrc_crm_contracts", column: "source_contract_id"
@@ -6545,14 +7191,14 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
   add_foreign_key "jrc_crm_deal_products", "jrc_crm_deals", column: "deal_id"
   add_foreign_key "jrc_crm_deal_products", "jrc_crm_products", column: "product_id"
   add_foreign_key "jrc_crm_deals", "accounts"
-  add_foreign_key "jrc_crm_deals", "companies", column: ["account_id", "company_id"], primary_key: ["account_id", "id"], name: "jrc_master_jrc_crm_deals_company_fk", validate: false
+  add_foreign_key "jrc_crm_deals", "companies", column: ["account_id", "company_id"], primary_key: ["account_id", "id"], name: "jrc_master_jrc_crm_deals_company_fk"
   add_foreign_key "jrc_crm_deals", "contacts"
-  add_foreign_key "jrc_crm_deals", "contacts", column: ["account_id", "contact_id"], primary_key: ["account_id", "id"], name: "jrc_master_jrc_crm_deals_contact_fk", validate: false
+  add_foreign_key "jrc_crm_deals", "contacts", column: ["account_id", "contact_id"], primary_key: ["account_id", "id"], name: "jrc_master_jrc_crm_deals_contact_fk"
   add_foreign_key "jrc_crm_deals", "jrc_crm_business_units", column: "business_unit_id"
   add_foreign_key "jrc_crm_deals", "jrc_crm_leads", column: "lead_id"
   add_foreign_key "jrc_crm_deals", "jrc_crm_lost_reasons", column: "lost_reason_id"
   add_foreign_key "jrc_crm_deals", "jrc_crm_organizations", column: "organization_id"
-  add_foreign_key "jrc_crm_deals", "jrc_crm_organizations", column: ["account_id", "organization_id"], primary_key: ["account_id", "id"], name: "jrc_master_jrc_crm_deals_organization_fk", validate: false
+  add_foreign_key "jrc_crm_deals", "jrc_crm_organizations", column: ["account_id", "organization_id"], primary_key: ["account_id", "id"], name: "jrc_master_jrc_crm_deals_organization_fk"
   add_foreign_key "jrc_crm_deals", "jrc_crm_pipelines", column: "pipeline_id"
   add_foreign_key "jrc_crm_deals", "jrc_crm_stages", column: "stage_id"
   add_foreign_key "jrc_crm_deals", "teams"
@@ -6563,14 +7209,14 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
   add_foreign_key "jrc_crm_follow_ups", "users"
   add_foreign_key "jrc_crm_invoices", "accounts"
   add_foreign_key "jrc_crm_invoices", "contacts"
-  add_foreign_key "jrc_crm_invoices", "contacts", column: ["account_id", "contact_id"], primary_key: ["account_id", "id"], name: "jrc_master_jrc_crm_invoices_contact_fk", validate: false
+  add_foreign_key "jrc_crm_invoices", "contacts", column: ["account_id", "contact_id"], primary_key: ["account_id", "id"], name: "jrc_master_jrc_crm_invoices_contact_fk"
   add_foreign_key "jrc_crm_invoices", "jrc_crm_business_units", column: "business_unit_id"
   add_foreign_key "jrc_crm_invoices", "jrc_crm_contracts", column: "contract_id"
   add_foreign_key "jrc_crm_invoices", "jrc_crm_sales_orders", column: "sales_order_id"
   add_foreign_key "jrc_crm_leads", "accounts"
-  add_foreign_key "jrc_crm_leads", "companies", column: ["account_id", "company_id"], primary_key: ["account_id", "id"], name: "jrc_master_jrc_crm_leads_company_fk", validate: false
+  add_foreign_key "jrc_crm_leads", "companies", column: ["account_id", "company_id"], primary_key: ["account_id", "id"], name: "jrc_master_jrc_crm_leads_company_fk"
   add_foreign_key "jrc_crm_leads", "contacts"
-  add_foreign_key "jrc_crm_leads", "contacts", column: ["account_id", "contact_id"], primary_key: ["account_id", "id"], name: "jrc_master_jrc_crm_leads_contact_fk", validate: false
+  add_foreign_key "jrc_crm_leads", "contacts", column: ["account_id", "contact_id"], primary_key: ["account_id", "id"], name: "jrc_master_jrc_crm_leads_contact_fk"
   add_foreign_key "jrc_crm_leads", "conversations"
   add_foreign_key "jrc_crm_leads", "jrc_crm_business_units", column: "business_unit_id"
   add_foreign_key "jrc_crm_leads", "teams"
@@ -6579,7 +7225,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
   add_foreign_key "jrc_crm_order_items", "jrc_crm_products", column: "product_id"
   add_foreign_key "jrc_crm_order_items", "jrc_crm_sales_orders", column: "sales_order_id"
   add_foreign_key "jrc_crm_organizations", "accounts"
-  add_foreign_key "jrc_crm_organizations", "companies", column: ["account_id", "company_id"], primary_key: ["account_id", "id"], name: "jrc_master_jrc_crm_organizations_company_fk", validate: false
+  add_foreign_key "jrc_crm_organizations", "companies", column: ["account_id", "company_id"], primary_key: ["account_id", "id"], name: "jrc_master_jrc_crm_organizations_company_fk"
   add_foreign_key "jrc_crm_organizations", "users", column: "owner_id"
   add_foreign_key "jrc_crm_payments", "accounts"
   add_foreign_key "jrc_crm_payments", "jrc_crm_business_units", column: "business_unit_id"
@@ -6609,7 +7255,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
   add_foreign_key "jrc_crm_sales_goals", "users"
   add_foreign_key "jrc_crm_sales_orders", "accounts"
   add_foreign_key "jrc_crm_sales_orders", "contacts"
-  add_foreign_key "jrc_crm_sales_orders", "contacts", column: ["account_id", "contact_id"], primary_key: ["account_id", "id"], name: "jrc_master_jrc_crm_sales_orders_contact_fk", validate: false
+  add_foreign_key "jrc_crm_sales_orders", "contacts", column: ["account_id", "contact_id"], primary_key: ["account_id", "id"], name: "jrc_master_jrc_crm_sales_orders_contact_fk"
   add_foreign_key "jrc_crm_sales_orders", "jrc_crm_business_units", column: "business_unit_id"
   add_foreign_key "jrc_crm_sales_orders", "jrc_crm_deals", column: "deal_id"
   add_foreign_key "jrc_crm_sales_orders", "jrc_crm_proposals", column: "proposal_id"
@@ -6618,18 +7264,28 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
   add_foreign_key "jrc_crm_stages", "accounts"
   add_foreign_key "jrc_crm_stages", "jrc_crm_pipelines", column: "pipeline_id"
   add_foreign_key "jrc_crm_team_scopes", "accounts"
-  add_foreign_key "jrc_crm_team_scopes", "companies", column: ["account_id", "company_id"], primary_key: ["account_id", "id"], name: "jrc_crm_team_scope_company_account_fk", validate: false
-  add_foreign_key "jrc_crm_team_scopes", "jrc_crm_business_units", column: ["account_id", "business_unit_id"], primary_key: ["account_id", "id"], name: "jrc_crm_team_scope_unit_account_fk", validate: false
+  add_foreign_key "jrc_crm_team_scopes", "companies", column: ["account_id", "company_id"], primary_key: ["account_id", "id"], name: "jrc_crm_team_scope_company_account_fk"
+  add_foreign_key "jrc_crm_team_scopes", "jrc_crm_business_units", column: ["account_id", "business_unit_id"], primary_key: ["account_id", "id"], name: "jrc_crm_team_scope_unit_account_fk"
   add_foreign_key "jrc_crm_team_scopes", "teams"
-  add_foreign_key "jrc_crm_team_scopes", "teams", column: ["account_id", "team_id"], primary_key: ["account_id", "id"], name: "jrc_crm_team_scope_team_account_fk", validate: false
+  add_foreign_key "jrc_crm_team_scopes", "teams", column: ["account_id", "team_id"], primary_key: ["account_id", "id"], name: "jrc_crm_team_scope_team_account_fk"
   add_foreign_key "jrc_crm_user_business_units", "accounts"
   add_foreign_key "jrc_crm_user_business_units", "companies"
-  add_foreign_key "jrc_crm_user_business_units", "companies", column: ["account_id", "company_id"], primary_key: ["account_id", "id"], name: "jrc_crm_user_scope_company_account_fk", validate: false
+  add_foreign_key "jrc_crm_user_business_units", "companies", column: ["account_id", "company_id"], primary_key: ["account_id", "id"], name: "jrc_crm_user_scope_company_account_fk"
   add_foreign_key "jrc_crm_user_business_units", "jrc_crm_business_units", column: "business_unit_id"
-  add_foreign_key "jrc_crm_user_business_units", "jrc_crm_business_units", column: ["account_id", "business_unit_id"], primary_key: ["account_id", "id"], name: "jrc_crm_user_scope_unit_account_fk", validate: false
+  add_foreign_key "jrc_crm_user_business_units", "jrc_crm_business_units", column: ["account_id", "business_unit_id"], primary_key: ["account_id", "id"], name: "jrc_crm_user_scope_unit_account_fk"
   add_foreign_key "jrc_crm_user_business_units", "teams"
-  add_foreign_key "jrc_crm_user_business_units", "teams", column: ["account_id", "team_id"], primary_key: ["account_id", "id"], name: "jrc_crm_user_scope_team_account_fk", validate: false
+  add_foreign_key "jrc_crm_user_business_units", "teams", column: ["account_id", "team_id"], primary_key: ["account_id", "id"], name: "jrc_crm_user_scope_team_account_fk"
   add_foreign_key "jrc_crm_user_business_units", "users"
+  add_foreign_key "jrc_customer_economic_groups", "accounts", on_delete: :cascade
+  add_foreign_key "jrc_customer_economic_groups", "companies", column: ["account_id", "principal_company_id"], primary_key: ["account_id", "id"], name: "customer_economic_group_principal_account"
+  add_foreign_key "jrc_customer_segment_overrides", "accounts", on_delete: :cascade
+  add_foreign_key "jrc_customer_segment_overrides", "companies", on_delete: :cascade
+  add_foreign_key "jrc_customer_segment_overrides", "contacts", on_delete: :cascade
+  add_foreign_key "jrc_customer_segment_overrides", "jrc_customer_taxonomies", column: "taxonomy_id", on_delete: :cascade
+  add_foreign_key "jrc_customer_signing_identities", "accounts"
+  add_foreign_key "jrc_customer_signing_identities", "contacts"
+  add_foreign_key "jrc_customer_signing_identities", "contacts", column: ["account_id", "contact_id"], primary_key: ["account_id", "id"], name: "jrc_signing_identity_contact_tenant"
+  add_foreign_key "jrc_customer_signing_identities", "users", column: "created_by_id"
   add_foreign_key "jrc_customer_taxonomies", "accounts", on_delete: :cascade
   add_foreign_key "jrc_flow_connections", "accounts"
   add_foreign_key "jrc_flow_effect_receipts", "accounts", on_delete: :cascade
@@ -6664,17 +7320,17 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
   add_foreign_key "jrc_migration_batches", "accounts"
   add_foreign_key "jrc_migration_batches", "users", column: "accepted_by_id"
   add_foreign_key "jrc_migration_batches", "users", column: "created_by_id"
-  add_foreign_key "jrc_migration_media_objects", "accounts"
-  add_foreign_key "jrc_migration_media_objects", "active_storage_blobs", column: "blob_id", on_delete: :nullify
-  add_foreign_key "jrc_migration_media_objects", "jrc_migration_items", column: ["account_id", "batch_id", "item_id"], primary_key: ["account_id", "batch_id", "id"], on_delete: :cascade
+  add_foreign_key "jrc_migration_events", "accounts", on_delete: :cascade
+  add_foreign_key "jrc_migration_events", "jrc_migration_batches", column: ["account_id", "batch_id"], primary_key: ["account_id", "id"], on_delete: :cascade
+  add_foreign_key "jrc_migration_events", "users", on_delete: :nullify
   add_foreign_key "jrc_migration_items", "accounts"
   add_foreign_key "jrc_migration_items", "jrc_migration_batches", column: ["account_id", "batch_id"], primary_key: ["account_id", "id"]
   add_foreign_key "jrc_migration_mappings", "accounts"
   add_foreign_key "jrc_migration_mappings", "jrc_migration_batches", column: ["account_id", "batch_id"], primary_key: ["account_id", "id"]
   add_foreign_key "jrc_migration_mappings", "users", column: "accepted_by_id"
-  add_foreign_key "jrc_migration_events", "accounts", on_delete: :cascade
-  add_foreign_key "jrc_migration_events", "jrc_migration_batches", column: ["account_id", "batch_id"], primary_key: ["account_id", "id"], on_delete: :cascade
-  add_foreign_key "jrc_migration_events", "users", on_delete: :nullify
+  add_foreign_key "jrc_migration_media_objects", "accounts"
+  add_foreign_key "jrc_migration_media_objects", "active_storage_blobs", column: "blob_id", on_delete: :nullify
+  add_foreign_key "jrc_migration_media_objects", "jrc_migration_items", column: ["account_id", "batch_id", "item_id"], primary_key: ["account_id", "batch_id", "id"], on_delete: :cascade
   add_foreign_key "jrc_nico_broker_send_operations", "accounts", on_delete: :cascade
   add_foreign_key "jrc_nico_broker_send_operations", "conversations", on_delete: :cascade
   add_foreign_key "jrc_nico_broker_send_operations", "inboxes", on_delete: :cascade
@@ -6791,9 +7447,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
   add_foreign_key "jrc_projects_project_members", "users"
   add_foreign_key "jrc_projects_project_templates", "accounts"
   add_foreign_key "jrc_projects_projects", "accounts"
-  add_foreign_key "jrc_projects_projects", "companies", column: ["account_id", "company_id"], primary_key: ["account_id", "id"], name: "jrc_master_jrc_projects_projects_company_fk", validate: false
+  add_foreign_key "jrc_projects_projects", "companies", column: ["account_id", "company_id"], primary_key: ["account_id", "id"], name: "jrc_master_jrc_projects_projects_company_fk"
   add_foreign_key "jrc_projects_projects", "contacts"
-  add_foreign_key "jrc_projects_projects", "contacts", column: ["account_id", "contact_id"], primary_key: ["account_id", "id"], name: "jrc_master_jrc_projects_projects_contact_fk", validate: false
+  add_foreign_key "jrc_projects_projects", "contacts", column: ["account_id", "contact_id"], primary_key: ["account_id", "id"], name: "jrc_master_jrc_projects_projects_contact_fk"
   add_foreign_key "jrc_projects_projects", "users", column: "accepted_by_id"
   add_foreign_key "jrc_projects_projects", "users", column: "owner_id"
   add_foreign_key "jrc_projects_recurrences", "accounts"
@@ -6825,6 +7481,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
   add_foreign_key "jrc_relationship_actions", "jrc_operations_sla_policies", column: "operations_sla_policy_id"
   add_foreign_key "jrc_relationship_actions", "jrc_relationship_assignments", column: "assignment_id"
   add_foreign_key "jrc_relationship_actions", "users", column: "completed_by_id"
+  add_foreign_key "jrc_relationship_actions", "users", column: "customer_confirmed_by_id"
   add_foreign_key "jrc_relationship_actions", "users", column: "owner_id"
   add_foreign_key "jrc_relationship_assignments", "accounts"
   add_foreign_key "jrc_relationship_assignments", "companies"
@@ -6832,6 +7489,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
   add_foreign_key "jrc_relationship_assignments", "jrc_crm_business_units", column: "business_unit_id"
   add_foreign_key "jrc_relationship_assignments", "teams"
   add_foreign_key "jrc_relationship_assignments", "users", column: "owner_id"
+  add_foreign_key "jrc_relationship_batch_items", "companies", column: ["account_id", "company_id"], primary_key: ["account_id", "id"], name: "rel_batch_master_tenant"
   add_foreign_key "jrc_relationship_batch_items", "jrc_relationship_assignments", column: ["account_id", "assignment_id"], primary_key: ["account_id", "id"], name: "rel_batch_item_customer", on_delete: :cascade
   add_foreign_key "jrc_relationship_batch_items", "jrc_relationship_batch_reviews", column: ["account_id", "batch_review_id"], primary_key: ["account_id", "id"], name: "rel_batch_item_tenant", on_delete: :cascade
   add_foreign_key "jrc_relationship_batch_reviews", "accounts", on_delete: :cascade
@@ -6843,6 +7501,14 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
   add_foreign_key "jrc_relationship_configuration_versions", "jrc_relationship_configurations", column: "configuration_id"
   add_foreign_key "jrc_relationship_configuration_versions", "users", column: "actor_id"
   add_foreign_key "jrc_relationship_configurations", "accounts"
+  add_foreign_key "jrc_relationship_customer_documents", "accounts"
+  add_foreign_key "jrc_relationship_customer_documents", "jrc_relationship_assignments", column: "assignment_id"
+  add_foreign_key "jrc_relationship_customer_documents", "jrc_relationship_assignments", column: ["account_id", "assignment_id"], primary_key: ["account_id", "id"], name: "rel_document_assignment_tenant"
+  add_foreign_key "jrc_relationship_customer_documents", "users", column: "responsible_id"
+  add_foreign_key "jrc_relationship_document_versions", "accounts"
+  add_foreign_key "jrc_relationship_document_versions", "jrc_relationship_customer_documents", column: "document_id"
+  add_foreign_key "jrc_relationship_document_versions", "jrc_relationship_customer_documents", column: ["account_id", "document_id"], primary_key: ["account_id", "id"], name: "rel_document_version_tenant"
+  add_foreign_key "jrc_relationship_document_versions", "users", column: "uploaded_by_id"
   add_foreign_key "jrc_relationship_expansion_signals", "accounts"
   add_foreign_key "jrc_relationship_expansion_signals", "jrc_crm_contracts", column: "source_contract_id"
   add_foreign_key "jrc_relationship_expansion_signals", "jrc_crm_deals", column: "deal_id"
@@ -6856,6 +7522,12 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
   add_foreign_key "jrc_relationship_health_snapshots", "accounts"
   add_foreign_key "jrc_relationship_health_snapshots", "jrc_relationship_assignments", column: "assignment_id"
   add_foreign_key "jrc_relationship_health_snapshots", "users", column: "viewer_id"
+  add_foreign_key "jrc_relationship_management_requests", "accounts", on_delete: :cascade
+  add_foreign_key "jrc_relationship_management_requests", "jrc_crm_audit_events", column: "resolution_event_id"
+  add_foreign_key "jrc_relationship_management_requests", "jrc_relationship_assignments", column: "assignment_id"
+  add_foreign_key "jrc_relationship_management_requests", "jrc_relationship_batch_reviews", column: "batch_review_id"
+  add_foreign_key "jrc_relationship_management_requests", "users", column: "analyst_id"
+  add_foreign_key "jrc_relationship_management_requests", "users", column: "requester_id"
   add_foreign_key "jrc_relationship_playbook_executions", "accounts"
   add_foreign_key "jrc_relationship_playbook_executions", "jrc_relationship_assignments", column: "assignment_id"
   add_foreign_key "jrc_relationship_playbook_executions", "jrc_relationship_playbooks", column: "playbook_id"
@@ -6864,6 +7536,19 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
   add_foreign_key "jrc_relationship_playbook_versions", "jrc_relationship_playbooks", column: "playbook_id"
   add_foreign_key "jrc_relationship_playbook_versions", "users", column: "actor_id"
   add_foreign_key "jrc_relationship_playbooks", "accounts"
+  add_foreign_key "jrc_relationship_portfolio_group_assignments", "accounts"
+  add_foreign_key "jrc_relationship_portfolio_group_assignments", "jrc_relationship_assignments", column: ["account_id", "assignment_id"], primary_key: ["account_id", "id"], name: "rel_group_customer_tenant"
+  add_foreign_key "jrc_relationship_portfolio_group_assignments", "jrc_relationship_portfolio_groups", column: ["account_id", "portfolio_group_id"], primary_key: ["account_id", "id"], name: "rel_group_link_tenant"
+  add_foreign_key "jrc_relationship_portfolio_groups", "account_users", column: ["account_id", "owner_id"], primary_key: ["account_id", "user_id"], name: "rel_group_owner_tenant"
+  add_foreign_key "jrc_relationship_portfolio_groups", "accounts"
+  add_foreign_key "jrc_relationship_portfolio_groups", "jrc_crm_business_units", column: "business_unit_id"
+  add_foreign_key "jrc_relationship_portfolio_groups", "jrc_customer_taxonomies", column: "segment_id"
+  add_foreign_key "jrc_relationship_portfolio_groups", "teams"
+  add_foreign_key "jrc_relationship_portfolio_history_receipts", "accounts", on_delete: :cascade
+  add_foreign_key "jrc_relationship_portfolio_history_receipts", "jrc_crm_audit_events", column: "audit_event_id", on_delete: :cascade
+  add_foreign_key "jrc_relationship_portfolio_history_receipts", "jrc_relationship_portfolio_groups", column: "portfolio_group_id", on_delete: :restrict
+  add_foreign_key "jrc_relationship_processing_runs", "accounts"
+  add_foreign_key "jrc_relationship_processing_runs", "users", column: "viewer_id"
   add_foreign_key "jrc_relationship_qbrs", "accounts"
   add_foreign_key "jrc_relationship_qbrs", "contacts"
   add_foreign_key "jrc_relationship_qbrs", "jrc_crm_activities", column: "activity_id"
@@ -6876,6 +7561,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
   add_foreign_key "jrc_relationship_renewals", "jrc_crm_deals", column: "deal_id"
   add_foreign_key "jrc_relationship_renewals", "jrc_relationship_assignments", column: "assignment_id"
   add_foreign_key "jrc_relationship_renewals", "users", column: "owner_id"
+  add_foreign_key "jrc_relationship_retention_coverages", "accounts", on_delete: :cascade
+  add_foreign_key "jrc_relationship_retention_states", "accounts", on_delete: :cascade
   add_foreign_key "jrc_relationship_risk_cases", "accounts"
   add_foreign_key "jrc_relationship_risk_cases", "jrc_relationship_assignments", column: "assignment_id"
   add_foreign_key "jrc_relationship_risk_cases", "users", column: "owner_id"
@@ -7074,7 +7761,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
   add_foreign_key "jrc_service_desk_ticket_tasks", "teams", column: ["account_id", "audience_team_id"], primary_key: ["account_id", "id"], name: "ticket_tasks_audience_team_fk"
   add_foreign_key "jrc_service_desk_ticket_types", "jrc_service_desk_units", column: ["account_id", "unit_id"], primary_key: ["account_id", "id"], name: "jrc_sd_r3_type_unit_fk"
   add_foreign_key "jrc_service_desk_tickets", "accounts", name: "jrc_sd_tickets_account_fk"
-  add_foreign_key "jrc_service_desk_tickets", "companies", column: ["account_id", "company_id"], primary_key: ["account_id", "id"], name: "jrc_master_jrc_service_desk_tickets_company_fk", validate: false
+  add_foreign_key "jrc_service_desk_tickets", "companies", column: ["account_id", "company_id"], primary_key: ["account_id", "id"], name: "jrc_master_jrc_service_desk_tickets_company_fk"
+  add_foreign_key "jrc_service_desk_tickets", "companies", column: ["account_id", "establishment_company_id"], primary_key: ["account_id", "id"], name: "jrc_sd_establishment_account_fk"
   add_foreign_key "jrc_service_desk_tickets", "contacts", column: ["account_id", "requester_id"], primary_key: ["account_id", "id"], name: "jrc_sd_ticket_requester_fk"
   add_foreign_key "jrc_service_desk_tickets", "jrc_crm_contracts", column: ["account_id", "contract_id"], primary_key: ["account_id", "id"], name: "jrc_sd_r3_ticket_contract_fk"
   add_foreign_key "jrc_service_desk_tickets", "jrc_service_desk_categories", column: ["account_id", "unit_id", "category_id"], primary_key: ["account_id", "unit_id", "id"], name: "jrc_sd_ticket_category_id_fk"
@@ -7127,53 +7815,77 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
   add_foreign_key "video_conference_settings", "accounts"
   add_foreign_key "video_conference_settings", "users"
   add_foreign_key "whatsapp_calling_configurations", "accounts"
+  execute <<~'JRC_SCHEMA_SQL_c5f6ae8b90d9'
+    ALTER TABLE "account_users" DROP CONSTRAINT "account_users_relationship_eligibility_nonnegative";
+  JRC_SCHEMA_SQL_c5f6ae8b90d9
+
+  execute <<~'JRC_SCHEMA_SQL_4e5fdcebe715'
+    ALTER TABLE "account_users" ADD CONSTRAINT "account_users_relationship_eligibility_nonnegative" CHECK ((jrc_relationship_eligibility_version >= 0));
+  JRC_SCHEMA_SQL_4e5fdcebe715
+
+  execute <<~'JRC_SCHEMA_SQL_85ef22bbb014'
+    ALTER TABLE "account_users" DROP CONSTRAINT "jrc_project_permissions_object";
+  JRC_SCHEMA_SQL_85ef22bbb014
+
+  execute <<~'JRC_SCHEMA_SQL_6139036a1b3d'
+    ALTER TABLE "account_users" ADD CONSTRAINT "jrc_project_permissions_object" CHECK ((jsonb_typeof(jrc_projects_permissions) = 'object'::text));
+  JRC_SCHEMA_SQL_6139036a1b3d
+
   execute <<~'JRC_SCHEMA_SQL_8d59563fc72a'
     ALTER TABLE "companies" DROP CONSTRAINT "jrc_master_not_own_parent";
   JRC_SCHEMA_SQL_8d59563fc72a
 
-  execute <<~'JRC_SCHEMA_SQL_7278e98945e5'
-    ALTER TABLE "companies" ADD CONSTRAINT "jrc_master_not_own_parent" CHECK (((parent_company_id IS NULL) OR (parent_company_id <> id))) NOT VALID;
-  JRC_SCHEMA_SQL_7278e98945e5
+  execute <<~'JRC_SCHEMA_SQL_f9e7d8989873'
+    ALTER TABLE "companies" ADD CONSTRAINT "jrc_master_not_own_parent" CHECK (((parent_company_id IS NULL) OR (parent_company_id <> id)));
+  JRC_SCHEMA_SQL_f9e7d8989873
 
   execute <<~'JRC_SCHEMA_SQL_666128e0657c'
     ALTER TABLE "companies" DROP CONSTRAINT "jrc_master_person_kind";
   JRC_SCHEMA_SQL_666128e0657c
 
-  execute <<~'JRC_SCHEMA_SQL_e37b0e12c187'
-    ALTER TABLE "companies" ADD CONSTRAINT "jrc_master_person_kind" CHECK (((person_kind)::text = ANY (ARRAY[('organization'::character varying)::text, ('individual'::character varying)::text]))) NOT VALID;
-  JRC_SCHEMA_SQL_e37b0e12c187
+  execute <<~'JRC_SCHEMA_SQL_d8dc22e27bc9'
+    ALTER TABLE "companies" ADD CONSTRAINT "jrc_master_person_kind" CHECK (((person_kind)::text = ANY ((ARRAY['organization'::character varying, 'individual'::character varying])::text[])));
+  JRC_SCHEMA_SQL_d8dc22e27bc9
 
   execute <<~'JRC_SCHEMA_SQL_7de98660fdd7'
     ALTER TABLE "companies" DROP CONSTRAINT "jrc_master_relationship_type";
   JRC_SCHEMA_SQL_7de98660fdd7
 
-  execute <<~'JRC_SCHEMA_SQL_57122fd03b87'
-    ALTER TABLE "companies" ADD CONSTRAINT "jrc_master_relationship_type" CHECK (((relationship_type)::text = ANY (ARRAY[('prospect'::character varying)::text, ('lead'::character varying)::text, ('customer'::character varying)::text, ('former_customer'::character varying)::text, ('partner'::character varying)::text, ('supplier'::character varying)::text, ('internal'::character varying)::text, ('other'::character varying)::text]))) NOT VALID;
-  JRC_SCHEMA_SQL_57122fd03b87
+  execute <<~'JRC_SCHEMA_SQL_b10f92a1d9b4'
+    ALTER TABLE "companies" ADD CONSTRAINT "jrc_master_relationship_type" CHECK (((relationship_type)::text = ANY ((ARRAY['prospect'::character varying, 'lead'::character varying, 'customer'::character varying, 'former_customer'::character varying, 'partner'::character varying, 'supplier'::character varying, 'internal'::character varying, 'other'::character varying])::text[])));
+  JRC_SCHEMA_SQL_b10f92a1d9b4
 
   execute <<~'JRC_SCHEMA_SQL_5dc3bdeffbe2'
     ALTER TABLE "company_addresses" DROP CONSTRAINT "jrc_master_address_type";
   JRC_SCHEMA_SQL_5dc3bdeffbe2
 
-  execute <<~'JRC_SCHEMA_SQL_73d986a367e1'
-    ALTER TABLE "company_addresses" ADD CONSTRAINT "jrc_master_address_type" CHECK (((address_type)::text = ANY (ARRAY[('tax'::character varying)::text, ('billing'::character varying)::text, ('business'::character varying)::text, ('installation'::character varying)::text, ('branch'::character varying)::text, ('other'::character varying)::text])));
-  JRC_SCHEMA_SQL_73d986a367e1
+  execute <<~'JRC_SCHEMA_SQL_d272fa3df6fd'
+    ALTER TABLE "company_addresses" ADD CONSTRAINT "jrc_master_address_type" CHECK (((address_type)::text = ANY ((ARRAY['tax'::character varying, 'billing'::character varying, 'business'::character varying, 'installation'::character varying, 'branch'::character varying, 'other'::character varying])::text[])));
+  JRC_SCHEMA_SQL_d272fa3df6fd
 
   execute <<~'JRC_SCHEMA_SQL_25b276542905'
     ALTER TABLE "contact_points" DROP CONSTRAINT "jrc_master_contact_point_kind";
   JRC_SCHEMA_SQL_25b276542905
 
-  execute <<~'JRC_SCHEMA_SQL_c0ee8209a368'
-    ALTER TABLE "contact_points" ADD CONSTRAINT "jrc_master_contact_point_kind" CHECK (((kind)::text = ANY (ARRAY[('mobile'::character varying)::text, ('phone'::character varying)::text, ('whatsapp'::character varying)::text, ('whatsapp_business'::character varying)::text, ('extension'::character varying)::text, ('email'::character varying)::text, ('corporate_email'::character varying)::text, ('alternate_email'::character varying)::text])));
-  JRC_SCHEMA_SQL_c0ee8209a368
+  execute <<~'JRC_SCHEMA_SQL_2c728ea0d7f5'
+    ALTER TABLE "contact_points" ADD CONSTRAINT "jrc_master_contact_point_kind" CHECK (((kind)::text = ANY ((ARRAY['mobile'::character varying, 'phone'::character varying, 'whatsapp'::character varying, 'whatsapp_business'::character varying, 'extension'::character varying, 'email'::character varying, 'corporate_email'::character varying, 'alternate_email'::character varying])::text[])));
+  JRC_SCHEMA_SQL_2c728ea0d7f5
+
+  execute <<~'JRC_SCHEMA_SQL_b5176badee7c'
+    ALTER TABLE "contacts" DROP CONSTRAINT "contacts_company_primary_requires_active_link";
+  JRC_SCHEMA_SQL_b5176badee7c
+
+  execute <<~'JRC_SCHEMA_SQL_c9521fedbe94'
+    ALTER TABLE "contacts" ADD CONSTRAINT "contacts_company_primary_requires_active_link" CHECK (((NOT company_primary) OR ((company_id IS NOT NULL) AND ((company_contact_status)::text = 'active'::text))));
+  JRC_SCHEMA_SQL_c9521fedbe94
 
   execute <<~'JRC_SCHEMA_SQL_7f6a3a01fb1c'
     ALTER TABLE "contacts" DROP CONSTRAINT "jrc_master_registration_status";
   JRC_SCHEMA_SQL_7f6a3a01fb1c
 
-  execute <<~'JRC_SCHEMA_SQL_d331cce37f96'
-    ALTER TABLE "contacts" ADD CONSTRAINT "jrc_master_registration_status" CHECK (((registration_status)::text = ANY (ARRAY[('provisional'::character varying)::text, ('registered'::character varying)::text]))) NOT VALID;
-  JRC_SCHEMA_SQL_d331cce37f96
+  execute <<~'JRC_SCHEMA_SQL_8ce117299455'
+    ALTER TABLE "contacts" ADD CONSTRAINT "jrc_master_registration_status" CHECK (((registration_status)::text = ANY ((ARRAY['provisional'::character varying, 'registered'::character varying])::text[])));
+  JRC_SCHEMA_SQL_8ce117299455
 
   execute <<~'JRC_SCHEMA_SQL_99f00d0b8425'
     ALTER TABLE "jrc_approvals_decisions" DROP CONSTRAINT "jrc_ap_decision_reason";
@@ -7187,9 +7899,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     ALTER TABLE "jrc_approvals_decisions" DROP CONSTRAINT "jrc_ap_decision_state";
   JRC_SCHEMA_SQL_35176e4f5077
 
-  execute <<~'JRC_SCHEMA_SQL_79d1566e6113'
-    ALTER TABLE "jrc_approvals_decisions" ADD CONSTRAINT "jrc_ap_decision_state" CHECK ((((decision)::text = ANY (ARRAY[('approved'::character varying)::text, ('rejected'::character varying)::text, ('returned'::character varying)::text, ('escalated'::character varying)::text])) AND (cycle > 0)));
-  JRC_SCHEMA_SQL_79d1566e6113
+  execute <<~'JRC_SCHEMA_SQL_3ff2da2fa324'
+    ALTER TABLE "jrc_approvals_decisions" ADD CONSTRAINT "jrc_ap_decision_state" CHECK ((((decision)::text = ANY ((ARRAY['approved'::character varying, 'rejected'::character varying, 'returned'::character varying, 'escalated'::character varying])::text[])) AND (cycle > 0)));
+  JRC_SCHEMA_SQL_3ff2da2fa324
 
   execute <<~'JRC_SCHEMA_SQL_e4e6b2d88ed3'
     ALTER TABLE "jrc_approvals_delegations" DROP CONSTRAINT "jrc_ap_delegation_window";
@@ -7211,9 +7923,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     ALTER TABLE "jrc_approvals_policies" DROP CONSTRAINT "jrc_ap_policy_state";
   JRC_SCHEMA_SQL_53e028d0122f
 
-  execute <<~'JRC_SCHEMA_SQL_22aa15f5b94d'
-    ALTER TABLE "jrc_approvals_policies" ADD CONSTRAINT "jrc_ap_policy_state" CHECK (((state)::text = ANY (ARRAY[('draft'::character varying)::text, ('validated'::character varying)::text, ('published'::character varying)::text, ('retired'::character varying)::text])));
-  JRC_SCHEMA_SQL_22aa15f5b94d
+  execute <<~'JRC_SCHEMA_SQL_891226e3763a'
+    ALTER TABLE "jrc_approvals_policies" ADD CONSTRAINT "jrc_ap_policy_state" CHECK (((state)::text = ANY ((ARRAY['draft'::character varying, 'validated'::character varying, 'published'::character varying, 'retired'::character varying])::text[])));
+  JRC_SCHEMA_SQL_891226e3763a
 
   execute <<~'JRC_SCHEMA_SQL_2161a33bf6f1'
     ALTER TABLE "jrc_approvals_policy_versions" DROP CONSTRAINT "jrc_ap_version_positive";
@@ -7227,9 +7939,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     ALTER TABLE "jrc_approvals_requests" DROP CONSTRAINT "jrc_ap_request_state";
   JRC_SCHEMA_SQL_47f747d7eeb8
 
-  execute <<~'JRC_SCHEMA_SQL_39a6220d6743'
-    ALTER TABLE "jrc_approvals_requests" ADD CONSTRAINT "jrc_ap_request_state" CHECK ((((state)::text = ANY (ARRAY[('pending'::character varying)::text, ('approved'::character varying)::text, ('rejected'::character varying)::text, ('returned'::character varying)::text, ('escalated'::character varying)::text, ('expired'::character varying)::text, ('canceled'::character varying)::text, ('stale'::character varying)::text])) AND (cycle > 0)));
-  JRC_SCHEMA_SQL_39a6220d6743
+  execute <<~'JRC_SCHEMA_SQL_fc73894ceb8a'
+    ALTER TABLE "jrc_approvals_requests" ADD CONSTRAINT "jrc_ap_request_state" CHECK ((((state)::text = ANY ((ARRAY['pending'::character varying, 'approved'::character varying, 'rejected'::character varying, 'returned'::character varying, 'escalated'::character varying, 'expired'::character varying, 'canceled'::character varying, 'stale'::character varying])::text[])) AND (cycle > 0)));
+  JRC_SCHEMA_SQL_fc73894ceb8a
 
   execute <<~'JRC_SCHEMA_SQL_1ab010717e6e'
     ALTER TABLE "jrc_approvals_requests" DROP CONSTRAINT "jrc_ap_requests_scope";
@@ -7239,6 +7951,46 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     ALTER TABLE "jrc_approvals_requests" ADD CONSTRAINT "jrc_ap_requests_scope" CHECK (((business_unit_id IS NULL) OR (issuer_company_id IS NOT NULL)));
   JRC_SCHEMA_SQL_a15b3c0529f6
 
+  execute <<~'JRC_SCHEMA_SQL_4eabfd4d2b6a'
+    ALTER TABLE "jrc_backoffice_authority_proposals" DROP CONSTRAINT "bo_authority_proposal_positive";
+  JRC_SCHEMA_SQL_4eabfd4d2b6a
+
+  execute <<~'JRC_SCHEMA_SQL_540b1b5c80a1'
+    ALTER TABLE "jrc_backoffice_authority_proposals" ADD CONSTRAINT "bo_authority_proposal_positive" CHECK ((revision > 0));
+  JRC_SCHEMA_SQL_540b1b5c80a1
+
+  execute <<~'JRC_SCHEMA_SQL_982754c39de7'
+    ALTER TABLE "jrc_backoffice_contract_versions" DROP CONSTRAINT "bo_contract_version_positive";
+  JRC_SCHEMA_SQL_982754c39de7
+
+  execute <<~'JRC_SCHEMA_SQL_e9913913177f'
+    ALTER TABLE "jrc_backoffice_contract_versions" ADD CONSTRAINT "bo_contract_version_positive" CHECK (((number > 0) AND (source_format_version > 0)));
+  JRC_SCHEMA_SQL_e9913913177f
+
+  execute <<~'JRC_SCHEMA_SQL_47fc5968e50d'
+    ALTER TABLE "jrc_backoffice_document_decisions" DROP CONSTRAINT "bo_document_validity_pair";
+  JRC_SCHEMA_SQL_47fc5968e50d
+
+  execute <<~'JRC_SCHEMA_SQL_6f6c28ffe440'
+    ALTER TABLE "jrc_backoffice_document_decisions" ADD CONSTRAINT "bo_document_validity_pair" CHECK ((((expires_on IS NULL) AND (validity_timezone IS NULL)) OR ((expires_on IS NOT NULL) AND ((expires_on >= '0001-01-01'::date) AND (expires_on <= '9999-12-31'::date)) AND (validity_timezone IS NOT NULL) AND ((char_length((validity_timezone)::text) >= 1) AND (char_length((validity_timezone)::text) <= 100)))));
+  JRC_SCHEMA_SQL_6f6c28ffe440
+
+  execute <<~'JRC_SCHEMA_SQL_1239956ec2c7'
+    ALTER TABLE "jrc_backoffice_document_scans" DROP CONSTRAINT "bo_document_scan_clean";
+  JRC_SCHEMA_SQL_1239956ec2c7
+
+  execute <<~'JRC_SCHEMA_SQL_6a75a5d5cc94'
+    ALTER TABLE "jrc_backoffice_document_scans" ADD CONSTRAINT "bo_document_scan_clean" CHECK ((((state)::text <> 'clean'::text) OR ((observed_sha256 IS NOT NULL) AND ((observed_sha256)::text = (expected_sha256)::text))));
+  JRC_SCHEMA_SQL_6a75a5d5cc94
+
+  execute <<~'JRC_SCHEMA_SQL_64b110cfa8f2'
+    ALTER TABLE "jrc_backoffice_document_scans" DROP CONSTRAINT "bo_document_scan_state";
+  JRC_SCHEMA_SQL_64b110cfa8f2
+
+  execute <<~'JRC_SCHEMA_SQL_e11cfebe60db'
+    ALTER TABLE "jrc_backoffice_document_scans" ADD CONSTRAINT "bo_document_scan_state" CHECK (((attempt > 0) AND ((state)::text = ANY ((ARRAY['clean'::character varying, 'infected'::character varying, 'unavailable'::character varying, 'checksum_mismatch'::character varying])::text[]))));
+  JRC_SCHEMA_SQL_e11cfebe60db
+
   execute <<~'JRC_SCHEMA_SQL_89266eca31eb'
     ALTER TABLE "jrc_backoffice_document_versions" DROP CONSTRAINT "backoffice_document_positive_version";
   JRC_SCHEMA_SQL_89266eca31eb
@@ -7246,6 +7998,86 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
   execute <<~'JRC_SCHEMA_SQL_4e8f64428c52'
     ALTER TABLE "jrc_backoffice_document_versions" ADD CONSTRAINT "backoffice_document_positive_version" CHECK ((version > 0));
   JRC_SCHEMA_SQL_4e8f64428c52
+
+  execute <<~'JRC_SCHEMA_SQL_d0ce3edb0c33'
+    ALTER TABLE "jrc_backoffice_requirement_plans" DROP CONSTRAINT "bo_req_plan_shape";
+  JRC_SCHEMA_SQL_d0ce3edb0c33
+
+  execute <<~'JRC_SCHEMA_SQL_8c81131a718a'
+    ALTER TABLE "jrc_backoffice_requirement_plans" ADD CONSTRAINT "bo_req_plan_shape" CHECK (((version > 0) AND (jsonb_typeof(entries) = 'array'::text) AND (jsonb_array_length(entries) <= 100) AND (jsonb_typeof(source_facts) = 'object'::text)));
+  JRC_SCHEMA_SQL_8c81131a718a
+
+  execute <<~'JRC_SCHEMA_SQL_36a4080c017d'
+    ALTER TABLE "jrc_backoffice_requirement_responses" DROP CONSTRAINT "bo_req_response_shape";
+  JRC_SCHEMA_SQL_36a4080c017d
+
+  execute <<~'JRC_SCHEMA_SQL_008414cddea2'
+    ALTER TABLE "jrc_backoffice_requirement_responses" ADD CONSTRAINT "bo_req_response_shape" CHECK (((revision > 0) AND (jsonb_typeof(payload) = 'object'::text)));
+  JRC_SCHEMA_SQL_008414cddea2
+
+  execute <<~'JRC_SCHEMA_SQL_bc0915ebdfb9'
+    ALTER TABLE "jrc_backoffice_requirement_rules" DROP CONSTRAINT "bo_req_rule_object";
+  JRC_SCHEMA_SQL_bc0915ebdfb9
+
+  execute <<~'JRC_SCHEMA_SQL_a2e61223ddb3'
+    ALTER TABLE "jrc_backoffice_requirement_rules" ADD CONSTRAINT "bo_req_rule_object" CHECK ((jsonb_typeof(definition) = 'object'::text));
+  JRC_SCHEMA_SQL_a2e61223ddb3
+
+  execute <<~'JRC_SCHEMA_SQL_efbf722e4000'
+    ALTER TABLE "jrc_backoffice_requirement_rules" DROP CONSTRAINT "bo_req_rule_state";
+  JRC_SCHEMA_SQL_efbf722e4000
+
+  execute <<~'JRC_SCHEMA_SQL_7d339055d8d1'
+    ALTER TABLE "jrc_backoffice_requirement_rules" ADD CONSTRAINT "bo_req_rule_state" CHECK (((version > 0) AND ((state)::text = ANY ((ARRAY['active'::character varying, 'archived'::character varying])::text[]))));
+  JRC_SCHEMA_SQL_7d339055d8d1
+
+  execute <<~'JRC_SCHEMA_SQL_98bb439c227c'
+    ALTER TABLE "jrc_backoffice_signature_delivery_events" DROP CONSTRAINT "bo_delivery_confirmed_requires_envelope";
+  JRC_SCHEMA_SQL_98bb439c227c
+
+  execute <<~'JRC_SCHEMA_SQL_5c8e4b7aa43e'
+    ALTER TABLE "jrc_backoffice_signature_delivery_events" ADD CONSTRAINT "bo_delivery_confirmed_requires_envelope" CHECK ((((kind)::text = 'send_confirmed'::text) = (external_id IS NOT NULL)));
+  JRC_SCHEMA_SQL_5c8e4b7aa43e
+
+  execute <<~'JRC_SCHEMA_SQL_ebaa74f22ff1'
+    ALTER TABLE "jrc_backoffice_signature_delivery_events" DROP CONSTRAINT "bo_delivery_event_kind";
+  JRC_SCHEMA_SQL_ebaa74f22ff1
+
+  execute <<~'JRC_SCHEMA_SQL_f81d88eae73e'
+    ALTER TABLE "jrc_backoffice_signature_delivery_events" ADD CONSTRAINT "bo_delivery_event_kind" CHECK (((kind)::text = ANY ((ARRAY['prepared'::character varying, 'dispatch_started'::character varying, 'send_confirmed'::character varying, 'send_uncertain'::character varying, 'send_rejected'::character varying, 'sender_blocked'::character varying, 'canceled_before_send'::character varying, 'completion_reported'::character varying, 'envelope_canceled'::character varying, 'envelope_declined'::character varying, 'reconciliation_started'::character varying, 'reconciliation_finished'::character varying])::text[])));
+  JRC_SCHEMA_SQL_f81d88eae73e
+
+  execute <<~'JRC_SCHEMA_SQL_a4a02a10a547'
+    ALTER TABLE "jrc_backoffice_signature_integrations" DROP CONSTRAINT "bo_signature_environment";
+  JRC_SCHEMA_SQL_a4a02a10a547
+
+  execute <<~'JRC_SCHEMA_SQL_d1424646fcd3'
+    ALTER TABLE "jrc_backoffice_signature_integrations" ADD CONSTRAINT "bo_signature_environment" CHECK (((environment)::text = ANY ((ARRAY['demo'::character varying, 'production'::character varying])::text[])));
+  JRC_SCHEMA_SQL_d1424646fcd3
+
+  execute <<~'JRC_SCHEMA_SQL_9d344639b094'
+    ALTER TABLE "jrc_backoffice_signature_integrations" DROP CONSTRAINT "bo_signature_revision";
+  JRC_SCHEMA_SQL_9d344639b094
+
+  execute <<~'JRC_SCHEMA_SQL_b01201355423'
+    ALTER TABLE "jrc_backoffice_signature_integrations" ADD CONSTRAINT "bo_signature_revision" CHECK ((revision > 0));
+  JRC_SCHEMA_SQL_b01201355423
+
+  execute <<~'JRC_SCHEMA_SQL_aa0bf3120d05'
+    ALTER TABLE "jrc_backoffice_signature_notifications" DROP CONSTRAINT "bo_signature_notification_state";
+  JRC_SCHEMA_SQL_aa0bf3120d05
+
+  execute <<~'JRC_SCHEMA_SQL_6fc6ad8350be'
+    ALTER TABLE "jrc_backoffice_signature_notifications" ADD CONSTRAINT "bo_signature_notification_state" CHECK (((state)::text = ANY ((ARRAY['received'::character varying, 'processed'::character varying, 'ignored'::character varying, 'failed'::character varying])::text[])));
+  JRC_SCHEMA_SQL_6fc6ad8350be
+
+  execute <<~'JRC_SCHEMA_SQL_6a62fd96317d'
+    ALTER TABLE "jrc_backoffice_signer_rosters" DROP CONSTRAINT "bo_signer_roster_modes";
+  JRC_SCHEMA_SQL_6a62fd96317d
+
+  execute <<~'JRC_SCHEMA_SQL_b322cc4cff7a'
+    ALTER TABLE "jrc_backoffice_signer_rosters" ADD CONSTRAINT "bo_signer_roster_modes" CHECK (((revision > 0) AND ((customer_mode)::text = ANY ((ARRAY['single'::character varying, 'joint'::character varying])::text[])) AND ((issuer_mode)::text = ANY ((ARRAY['single'::character varying, 'joint'::character varying])::text[]))));
+  JRC_SCHEMA_SQL_b322cc4cff7a
 
   execute <<~'JRC_SCHEMA_SQL_1bd69d0a93ee'
     ALTER TABLE "jrc_broker_integrations" DROP CONSTRAINT "jrc_broker_revision_positive";
@@ -7286,6 +8118,22 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
   execute <<~'JRC_SCHEMA_SQL_e1b0cb4202be'
     ALTER TABLE "jrc_contact_center_call_legs" ADD CONSTRAINT "jrc_cc_leg_status" CHECK (((status)::text = ANY ((ARRAY['created'::character varying, 'ringing'::character varying, 'queued'::character varying, 'connected'::character varying, 'held'::character varying, 'transferred'::character varying, 'ended'::character varying, 'failed'::character varying])::text[])));
   JRC_SCHEMA_SQL_e1b0cb4202be
+
+  execute <<~'JRC_SCHEMA_SQL_e837e8050c3b'
+    ALTER TABLE "jrc_contact_center_call_observations" DROP CONSTRAINT "jrc_cc_observation_length";
+  JRC_SCHEMA_SQL_e837e8050c3b
+
+  execute <<~'JRC_SCHEMA_SQL_d464ee9bd766'
+    ALTER TABLE "jrc_contact_center_call_observations" ADD CONSTRAINT "jrc_cc_observation_length" CHECK ((char_length(text) <= 1000));
+  JRC_SCHEMA_SQL_d464ee9bd766
+
+  execute <<~'JRC_SCHEMA_SQL_f999887a4138'
+    ALTER TABLE "jrc_contact_center_call_observations" DROP CONSTRAINT "jrc_cc_observation_version";
+  JRC_SCHEMA_SQL_f999887a4138
+
+  execute <<~'JRC_SCHEMA_SQL_f59ad903b116'
+    ALTER TABLE "jrc_contact_center_call_observations" ADD CONSTRAINT "jrc_cc_observation_version" CHECK ((call_version >= 0));
+  JRC_SCHEMA_SQL_f59ad903b116
 
   execute <<~'JRC_SCHEMA_SQL_4e09531b72bf'
     ALTER TABLE "jrc_contact_center_call_sessions" DROP CONSTRAINT "jrc_cc_session_direction";
@@ -7519,6 +8367,38 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     ALTER TABLE "jrc_crm_user_business_units" ADD CONSTRAINT "jrc_crm_user_scope_shape" CHECK (((structure_managed = false) OR (((scope)::text = 'GROUP'::text) AND (company_id IS NULL) AND (business_unit_id IS NULL)) OR (((scope)::text = 'COMPANY'::text) AND (company_id IS NOT NULL) AND (business_unit_id IS NULL)) OR (((scope)::text = 'BUSINESS_UNIT'::text) AND (business_unit_id IS NOT NULL))));
   JRC_SCHEMA_SQL_420781fa3e18
 
+  execute <<~'JRC_SCHEMA_SQL_aa30d3603065'
+    ALTER TABLE "jrc_customer_segment_overrides" DROP CONSTRAINT "customer_segment_override_mode";
+  JRC_SCHEMA_SQL_aa30d3603065
+
+  execute <<~'JRC_SCHEMA_SQL_694ce3b6f777'
+    ALTER TABLE "jrc_customer_segment_overrides" ADD CONSTRAINT "customer_segment_override_mode" CHECK (((mode)::text = ANY ((ARRAY['include'::character varying, 'exclude'::character varying])::text[])));
+  JRC_SCHEMA_SQL_694ce3b6f777
+
+  execute <<~'JRC_SCHEMA_SQL_0e72ee9a6c66'
+    ALTER TABLE "jrc_customer_segment_overrides" DROP CONSTRAINT "customer_segment_override_subject";
+  JRC_SCHEMA_SQL_0e72ee9a6c66
+
+  execute <<~'JRC_SCHEMA_SQL_a2d7aa0d92a8'
+    ALTER TABLE "jrc_customer_segment_overrides" ADD CONSTRAINT "customer_segment_override_subject" CHECK (((company_id IS NULL) <> (contact_id IS NULL)));
+  JRC_SCHEMA_SQL_a2d7aa0d92a8
+
+  execute <<~'JRC_SCHEMA_SQL_d4d76c567b5a'
+    ALTER TABLE "jrc_customer_signing_identities" DROP CONSTRAINT "jrc_signing_identity_revision";
+  JRC_SCHEMA_SQL_d4d76c567b5a
+
+  execute <<~'JRC_SCHEMA_SQL_18d7decb754b'
+    ALTER TABLE "jrc_customer_signing_identities" ADD CONSTRAINT "jrc_signing_identity_revision" CHECK ((revision > 0));
+  JRC_SCHEMA_SQL_18d7decb754b
+
+  execute <<~'JRC_SCHEMA_SQL_85ae7712a05a'
+    ALTER TABLE "jrc_customer_taxonomies" DROP CONSTRAINT "customer_segment_selection_mode";
+  JRC_SCHEMA_SQL_85ae7712a05a
+
+  execute <<~'JRC_SCHEMA_SQL_5b37afe31e19'
+    ALTER TABLE "jrc_customer_taxonomies" ADD CONSTRAINT "customer_segment_selection_mode" CHECK (((selection_mode)::text = ANY ((ARRAY['classification'::character varying, 'dynamic'::character varying])::text[])));
+  JRC_SCHEMA_SQL_5b37afe31e19
+
   execute <<~'JRC_SCHEMA_SQL_671721cc05e2'
     ALTER TABLE "jrc_customer_taxonomies" DROP CONSTRAINT "jrc_customer_taxonomy_kind";
   JRC_SCHEMA_SQL_671721cc05e2
@@ -7695,6 +8575,62 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     ALTER TABLE "jrc_flow_ownership_scopes" ADD CONSTRAINT "jrc_ownership_scope_valid" CHECK (((generation > 0) AND ((state)::text = ANY ((ARRAY['LEGACY'::character varying, 'FENCED'::character varying])::text[]))));
   JRC_SCHEMA_SQL_fb5ad7b7f970
 
+  execute <<~'JRC_SCHEMA_SQL_ed2150e2fbd9'
+    ALTER TABLE "jrc_human_assignment_policy_events" DROP CONSTRAINT "jrc_human_policy_global_account_scope";
+  JRC_SCHEMA_SQL_ed2150e2fbd9
+
+  execute <<~'JRC_SCHEMA_SQL_b4f35ba8b80f'
+    ALTER TABLE "jrc_human_assignment_policy_events" ADD CONSTRAINT "jrc_human_policy_global_account_scope" CHECK (((inbox_id IS NOT NULL) OR (NOT ((next_policy ->> 'scope'::text) IS DISTINCT FROM 'GLOBAL_ACCOUNT'::text))));
+  JRC_SCHEMA_SQL_b4f35ba8b80f
+
+  execute <<~'JRC_SCHEMA_SQL_6affe0e96597'
+    ALTER TABLE "jrc_migration_media_objects" DROP CONSTRAINT "jrc_migration_media_absence_before_write";
+  JRC_SCHEMA_SQL_6affe0e96597
+
+  execute <<~'JRC_SCHEMA_SQL_5e2d715c93d4'
+    ALTER TABLE "jrc_migration_media_objects" ADD CONSTRAINT "jrc_migration_media_absence_before_write" CHECK ((((status)::text <> ALL ((ARRAY['planned'::character varying, 'attached'::character varying, 'recovering'::character varying, 'cleanup_required'::character varying, 'cleaned'::character varying])::text[])) OR (absence_verified_at IS NOT NULL)));
+  JRC_SCHEMA_SQL_5e2d715c93d4
+
+  execute <<~'JRC_SCHEMA_SQL_bb6aad868530'
+    ALTER TABLE "jrc_migration_media_objects" DROP CONSTRAINT "jrc_migration_media_destination_identity";
+  JRC_SCHEMA_SQL_bb6aad868530
+
+  execute <<~'JRC_SCHEMA_SQL_2dda0ee5d496'
+    ALTER TABLE "jrc_migration_media_objects" ADD CONSTRAINT "jrc_migration_media_destination_identity" CHECK ((((storage_identity IS NULL) AND ((status)::text = 'kept'::text)) OR ((storage_identity IS NOT NULL) AND ((storage_identity)::text ~ '^[a-f0-9]{64}$'::text))));
+  JRC_SCHEMA_SQL_2dda0ee5d496
+
+  execute <<~'JRC_SCHEMA_SQL_407ab2b1fe34'
+    ALTER TABLE "jrc_migration_media_objects" DROP CONSTRAINT "jrc_migration_media_identity_format";
+  JRC_SCHEMA_SQL_407ab2b1fe34
+
+  execute <<~'JRC_SCHEMA_SQL_da8df6798475'
+    ALTER TABLE "jrc_migration_media_objects" ADD CONSTRAINT "jrc_migration_media_identity_format" CHECK ((((storage_key)::text ~ '^[a-z0-9]{28}$'::text) AND ((source_sha256)::text ~ '^[a-f0-9]{64}$'::text)));
+  JRC_SCHEMA_SQL_da8df6798475
+
+  execute <<~'JRC_SCHEMA_SQL_65950d7e5476'
+    ALTER TABLE "jrc_migration_media_objects" DROP CONSTRAINT "jrc_migration_media_payload_bound";
+  JRC_SCHEMA_SQL_65950d7e5476
+
+  execute <<~'JRC_SCHEMA_SQL_0be034d343f6'
+    ALTER TABLE "jrc_migration_media_objects" ADD CONSTRAINT "jrc_migration_media_payload_bound" CHECK (((generation > 0) AND (byte_size > 0) AND (byte_size <= 1048576)));
+  JRC_SCHEMA_SQL_0be034d343f6
+
+  execute <<~'JRC_SCHEMA_SQL_930fe8e777e8'
+    ALTER TABLE "jrc_migration_media_objects" DROP CONSTRAINT "jrc_migration_media_scan_generation";
+  JRC_SCHEMA_SQL_930fe8e777e8
+
+  execute <<~'JRC_SCHEMA_SQL_6c64ff36b3b1'
+    ALTER TABLE "jrc_migration_media_objects" ADD CONSTRAINT "jrc_migration_media_scan_generation" CHECK ((scan_generation >= 0));
+  JRC_SCHEMA_SQL_6c64ff36b3b1
+
+  execute <<~'JRC_SCHEMA_SQL_11fa251e23b1'
+    ALTER TABLE "jrc_migration_media_objects" DROP CONSTRAINT "jrc_migration_media_status";
+  JRC_SCHEMA_SQL_11fa251e23b1
+
+  execute <<~'JRC_SCHEMA_SQL_cc294732a6bb'
+    ALTER TABLE "jrc_migration_media_objects" ADD CONSTRAINT "jrc_migration_media_status" CHECK (((status)::text = ANY ((ARRAY['reserved'::character varying, 'verifying'::character varying, 'verification_required'::character varying, 'planned'::character varying, 'attached'::character varying, 'recovering'::character varying, 'cleanup_required'::character varying, 'cleaned'::character varying, 'kept'::character varying])::text[])));
+  JRC_SCHEMA_SQL_cc294732a6bb
+
   execute <<~'JRC_SCHEMA_SQL_e1be20685b8b'
     ALTER TABLE "jrc_nico_broker_send_operations" DROP CONSTRAINT "nico_broker_send_actor";
   JRC_SCHEMA_SQL_e1be20685b8b
@@ -7763,9 +8699,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     ALTER TABLE "jrc_nico_helpdesk_delivery_receipts" DROP CONSTRAINT "nico_hd_receipt_dispatch";
   JRC_SCHEMA_SQL_c4ab9b1fda14
 
-  execute <<~'JRC_SCHEMA_SQL_a22821177ccf'
-    ALTER TABLE "jrc_nico_helpdesk_delivery_receipts" ADD CONSTRAINT "nico_hd_receipt_dispatch" CHECK ((((state)::text <> ALL (ARRAY[('dispatching'::character varying)::text, ('sent'::character varying)::text])) OR ((claim_token IS NOT NULL) AND (dispatching_at IS NOT NULL) AND (attempted_at IS NOT NULL) AND (payload_digest IS NOT NULL) AND (routing_digest IS NOT NULL) AND (attempt_number >= 1))));
-  JRC_SCHEMA_SQL_a22821177ccf
+  execute <<~'JRC_SCHEMA_SQL_1ab8da28abb0'
+    ALTER TABLE "jrc_nico_helpdesk_delivery_receipts" ADD CONSTRAINT "nico_hd_receipt_dispatch" CHECK ((((state)::text <> ALL ((ARRAY['dispatching'::character varying, 'sent'::character varying])::text[])) OR ((claim_token IS NOT NULL) AND (dispatching_at IS NOT NULL) AND (attempted_at IS NOT NULL) AND (payload_digest IS NOT NULL) AND (routing_digest IS NOT NULL) AND (attempt_number >= 1))));
+  JRC_SCHEMA_SQL_1ab8da28abb0
 
   execute <<~'JRC_SCHEMA_SQL_c3186eddb9d0'
     ALTER TABLE "jrc_nico_helpdesk_delivery_receipts" DROP CONSTRAINT "nico_hd_receipt_payload_digest";
@@ -7787,25 +8723,25 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     ALTER TABLE "jrc_nico_helpdesk_delivery_receipts" DROP CONSTRAINT "nico_hd_receipt_sent";
   JRC_SCHEMA_SQL_9a3185620eba
 
-  execute <<~'JRC_SCHEMA_SQL_d4cbcba45281'
-    ALTER TABLE "jrc_nico_helpdesk_delivery_receipts" ADD CONSTRAINT "nico_hd_receipt_sent" CHECK (((((state)::text <> 'sent'::text) OR (sent_at IS NOT NULL)) AND ((sent_at IS NULL) OR ((state)::text = ANY (ARRAY[('sent'::character varying)::text, ('delivered'::character varying)::text])))));
-  JRC_SCHEMA_SQL_d4cbcba45281
+  execute <<~'JRC_SCHEMA_SQL_d9b8badd6e33'
+    ALTER TABLE "jrc_nico_helpdesk_delivery_receipts" ADD CONSTRAINT "nico_hd_receipt_sent" CHECK (((((state)::text <> 'sent'::text) OR (sent_at IS NOT NULL)) AND ((sent_at IS NULL) OR ((state)::text = ANY ((ARRAY['sent'::character varying, 'delivered'::character varying])::text[])))));
+  JRC_SCHEMA_SQL_d9b8badd6e33
 
   execute <<~'JRC_SCHEMA_SQL_dc5f6c879710'
     ALTER TABLE "jrc_nico_helpdesk_delivery_receipts" DROP CONSTRAINT "nico_hd_receipt_state";
   JRC_SCHEMA_SQL_dc5f6c879710
 
-  execute <<~'JRC_SCHEMA_SQL_36e68dd946b8'
-    ALTER TABLE "jrc_nico_helpdesk_delivery_receipts" ADD CONSTRAINT "nico_hd_receipt_state" CHECK (((state)::text = ANY (ARRAY[('pending'::character varying)::text, ('dispatching'::character varying)::text, ('sent'::character varying)::text, ('delivered'::character varying)::text, ('failed'::character varying)::text, ('blocked'::character varying)::text, ('unknown'::character varying)::text])));
-  JRC_SCHEMA_SQL_36e68dd946b8
+  execute <<~'JRC_SCHEMA_SQL_4cd8c3695113'
+    ALTER TABLE "jrc_nico_helpdesk_delivery_receipts" ADD CONSTRAINT "nico_hd_receipt_state" CHECK (((state)::text = ANY ((ARRAY['pending'::character varying, 'dispatching'::character varying, 'sent'::character varying, 'delivered'::character varying, 'failed'::character varying, 'blocked'::character varying, 'unknown'::character varying])::text[])));
+  JRC_SCHEMA_SQL_4cd8c3695113
 
   execute <<~'JRC_SCHEMA_SQL_4f9c52c45c5e'
     ALTER TABLE "jrc_nico_proposals" DROP CONSTRAINT "nico_proposal_status";
   JRC_SCHEMA_SQL_4f9c52c45c5e
 
-  execute <<~'JRC_SCHEMA_SQL_fae3c6f1fbd4'
-    ALTER TABLE "jrc_nico_proposals" ADD CONSTRAINT "nico_proposal_status" CHECK (((status)::text = ANY (ARRAY[('pending'::character varying)::text, ('executed'::character varying)::text])));
-  JRC_SCHEMA_SQL_fae3c6f1fbd4
+  execute <<~'JRC_SCHEMA_SQL_ec1fa90b6e18'
+    ALTER TABLE "jrc_nico_proposals" ADD CONSTRAINT "nico_proposal_status" CHECK (((status)::text = ANY ((ARRAY['pending'::character varying, 'executed'::character varying])::text[])));
+  JRC_SCHEMA_SQL_ec1fa90b6e18
 
   execute <<~'JRC_SCHEMA_SQL_029d7aeb72f0'
     ALTER TABLE "jrc_nico_runs" DROP CONSTRAINT "nico_nonnegative_reservation";
@@ -7819,9 +8755,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     ALTER TABLE "jrc_nico_runs" DROP CONSTRAINT "nico_run_status";
   JRC_SCHEMA_SQL_2ce0b74dbc16
 
-  execute <<~'JRC_SCHEMA_SQL_10385ba82722'
-    ALTER TABLE "jrc_nico_runs" ADD CONSTRAINT "nico_run_status" CHECK (((status)::text = ANY (ARRAY[('queued'::character varying)::text, ('running'::character varying)::text, ('completed'::character varying)::text, ('failed'::character varying)::text, ('cancelled'::character varying)::text])));
-  JRC_SCHEMA_SQL_10385ba82722
+  execute <<~'JRC_SCHEMA_SQL_b33b113d236d'
+    ALTER TABLE "jrc_nico_runs" ADD CONSTRAINT "nico_run_status" CHECK (((status)::text = ANY ((ARRAY['queued'::character varying, 'running'::character varying, 'completed'::character varying, 'failed'::character varying, 'cancelled'::character varying])::text[])));
+  JRC_SCHEMA_SQL_b33b113d236d
 
   execute <<~'JRC_SCHEMA_SQL_d892809e6e70'
     ALTER TABLE "jrc_operations_links" DROP CONSTRAINT "jrc_project_link_shape";
@@ -7830,6 +8766,14 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
   execute <<~'JRC_SCHEMA_SQL_7deb4b36c6df'
     ALTER TABLE "jrc_operations_links" ADD CONSTRAINT "jrc_project_link_shape" CHECK (((num_nonnulls(ticket_id, conversation_id, crm_deal_id) = 1) AND ((task_id IS NULL) OR (ticket_id IS NOT NULL)) AND ((ticket_id IS NULL) = (ticket_unit_id IS NULL))));
   JRC_SCHEMA_SQL_7deb4b36c6df
+
+  execute <<~'JRC_SCHEMA_SQL_5782b8cf4878'
+    ALTER TABLE "jrc_relationship_actions" DROP CONSTRAINT "rel_action_customer_confirmation";
+  JRC_SCHEMA_SQL_5782b8cf4878
+
+  execute <<~'JRC_SCHEMA_SQL_a05cb973ef33'
+    ALTER TABLE "jrc_relationship_actions" ADD CONSTRAINT "rel_action_customer_confirmation" CHECK (((customer_confirmation)::text = ANY ((ARRAY['pending'::character varying, 'confirmed'::character varying, 'unresolved'::character varying, 'not_applicable'::character varying])::text[])));
+  JRC_SCHEMA_SQL_a05cb973ef33
 
   execute <<~'JRC_SCHEMA_SQL_e29258ba3b6d'
     ALTER TABLE "jrc_relationship_assignments" DROP CONSTRAINT "rel_one_identity";
@@ -7846,6 +8790,14 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
   execute <<~'JRC_SCHEMA_SQL_a03e15dfd33a'
     ALTER TABLE "jrc_relationship_batch_items" ADD CONSTRAINT "rel_batch_item_state" CHECK ((((state)::text = ANY ((ARRAY['pending'::character varying, 'applied'::character varying, 'failed'::character varying, 'canceled'::character varying])::text[])) AND ((ordinal >= 0) AND (ordinal <= 49)) AND (((state)::text = 'applied'::text) = (receipt IS NOT NULL))));
   JRC_SCHEMA_SQL_a03e15dfd33a
+
+  execute <<~'JRC_SCHEMA_SQL_0ba1561b6255'
+    ALTER TABLE "jrc_relationship_batch_items" DROP CONSTRAINT "rel_batch_subject_shape";
+  JRC_SCHEMA_SQL_0ba1561b6255
+
+  execute <<~'JRC_SCHEMA_SQL_c6d228d9d64e'
+    ALTER TABLE "jrc_relationship_batch_items" ADD CONSTRAINT "rel_batch_subject_shape" CHECK ((((company_id IS NULL) AND (assignment_id IS NOT NULL)) OR ((company_id IS NOT NULL) AND ((((state)::text = 'applied'::text) AND (assignment_id IS NOT NULL)) OR (((state)::text <> 'applied'::text) AND (assignment_id IS NULL))))));
+  JRC_SCHEMA_SQL_c6d228d9d64e
 
   execute <<~'JRC_SCHEMA_SQL_afdb17d9cb0d'
     ALTER TABLE "jrc_relationship_batch_reviews" DROP CONSTRAINT "rel_batch_bounds";
@@ -7878,6 +8830,78 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
   execute <<~'JRC_SCHEMA_SQL_0bdc96bb434b'
     ALTER TABLE "jrc_relationship_cadence_steps" ADD CONSTRAINT "rel_cadence_step_state" CHECK ((((state)::text = ANY ((ARRAY['pending'::character varying, 'applied'::character varying, 'canceled'::character varying])::text[])) AND ((ordinal >= 0) AND (ordinal <= 49)) AND (((state)::text = 'applied'::text) = (receipt IS NOT NULL))));
   JRC_SCHEMA_SQL_0bdc96bb434b
+
+  execute <<~'JRC_SCHEMA_SQL_4f3555a3588b'
+    ALTER TABLE "jrc_relationship_customer_documents" DROP CONSTRAINT "rel_doc_confidentiality_known";
+  JRC_SCHEMA_SQL_4f3555a3588b
+
+  execute <<~'JRC_SCHEMA_SQL_f0e2fd4c88d7'
+    ALTER TABLE "jrc_relationship_customer_documents" ADD CONSTRAINT "rel_doc_confidentiality_known" CHECK (((confidentiality IS NULL) OR ((confidentiality)::text = ANY ((ARRAY['operational'::character varying, 'restricted'::character varying])::text[]))));
+  JRC_SCHEMA_SQL_f0e2fd4c88d7
+
+  execute <<~'JRC_SCHEMA_SQL_96b6aedec40c'
+    ALTER TABLE "jrc_relationship_management_requests" DROP CONSTRAINT "rel_mgmt_request_origin";
+  JRC_SCHEMA_SQL_96b6aedec40c
+
+  execute <<~'JRC_SCHEMA_SQL_cde0d0cfa325'
+    ALTER TABLE "jrc_relationship_management_requests" ADD CONSTRAINT "rel_mgmt_request_origin" CHECK (((((kind)::text = 'transfer'::text) AND (assignment_id IS NOT NULL) AND (analyst_id IS NULL)) OR (((kind)::text = ANY ((ARRAY['suspend'::character varying, 'restore'::character varying])::text[])) AND (assignment_id IS NULL) AND (analyst_id IS NOT NULL))));
+  JRC_SCHEMA_SQL_cde0d0cfa325
+
+  execute <<~'JRC_SCHEMA_SQL_abe41605f919'
+    ALTER TABLE "jrc_relationship_management_requests" DROP CONSTRAINT "rel_mgmt_request_state";
+  JRC_SCHEMA_SQL_abe41605f919
+
+  execute <<~'JRC_SCHEMA_SQL_f74c735918e7'
+    ALTER TABLE "jrc_relationship_management_requests" ADD CONSTRAINT "rel_mgmt_request_state" CHECK (((((state)::text = 'pending'::text) AND (batch_review_id IS NULL) AND (resolution_event_id IS NULL)) OR (((state)::text = 'routed'::text) AND ((((kind)::text = 'transfer'::text) AND (batch_review_id IS NOT NULL) AND (resolution_event_id IS NULL)) OR (((kind)::text = ANY ((ARRAY['suspend'::character varying, 'restore'::character varying])::text[])) AND (resolution_event_id IS NOT NULL) AND (batch_review_id IS NULL))))));
+  JRC_SCHEMA_SQL_f74c735918e7
+
+  execute <<~'JRC_SCHEMA_SQL_ee9e0c2b7fb2'
+    ALTER TABLE "jrc_relationship_portfolio_groups" DROP CONSTRAINT "rel_group_goals";
+  JRC_SCHEMA_SQL_ee9e0c2b7fb2
+
+  execute <<~'JRC_SCHEMA_SQL_c3ede91185ab'
+    ALTER TABLE "jrc_relationship_portfolio_groups" ADD CONSTRAINT "rel_group_goals" CHECK (((jsonb_typeof(goals) = 'array'::text) AND (jsonb_array_length(goals) <= 50)));
+  JRC_SCHEMA_SQL_c3ede91185ab
+
+  execute <<~'JRC_SCHEMA_SQL_0a6ceadcd314'
+    ALTER TABLE "jrc_relationship_portfolio_groups" DROP CONSTRAINT "rel_group_status";
+  JRC_SCHEMA_SQL_0a6ceadcd314
+
+  execute <<~'JRC_SCHEMA_SQL_dd5294700ad2'
+    ALTER TABLE "jrc_relationship_portfolio_groups" ADD CONSTRAINT "rel_group_status" CHECK (((status)::text = ANY ((ARRAY['active'::character varying, 'archived'::character varying])::text[])));
+  JRC_SCHEMA_SQL_dd5294700ad2
+
+  execute <<~'JRC_SCHEMA_SQL_0c62e81b9659'
+    ALTER TABLE "jrc_relationship_portfolio_groups" DROP CONSTRAINT "rel_group_team_visibility";
+  JRC_SCHEMA_SQL_0c62e81b9659
+
+  execute <<~'JRC_SCHEMA_SQL_2bb05b2fb263'
+    ALTER TABLE "jrc_relationship_portfolio_groups" ADD CONSTRAINT "rel_group_team_visibility" CHECK ((((visibility)::text <> 'team'::text) OR (team_id IS NOT NULL)));
+  JRC_SCHEMA_SQL_2bb05b2fb263
+
+  execute <<~'JRC_SCHEMA_SQL_16b503a0ca71'
+    ALTER TABLE "jrc_relationship_portfolio_groups" DROP CONSTRAINT "rel_group_visibility";
+  JRC_SCHEMA_SQL_16b503a0ca71
+
+  execute <<~'JRC_SCHEMA_SQL_440a91285722'
+    ALTER TABLE "jrc_relationship_portfolio_groups" ADD CONSTRAINT "rel_group_visibility" CHECK (((visibility)::text = ANY ((ARRAY['private'::character varying, 'team'::character varying, 'account'::character varying])::text[])));
+  JRC_SCHEMA_SQL_440a91285722
+
+  execute <<~'JRC_SCHEMA_SQL_2b1662d916ab'
+    ALTER TABLE "jrc_relationship_portfolio_history_receipts" DROP CONSTRAINT "rel_portfolio_history_shape";
+  JRC_SCHEMA_SQL_2b1662d916ab
+
+  execute <<~'JRC_SCHEMA_SQL_7fd68314c719'
+    ALTER TABLE "jrc_relationship_portfolio_history_receipts" ADD CONSTRAINT "rel_portfolio_history_shape" CHECK (((jsonb_typeof(snapshot) = 'object'::text) AND ((digest)::text ~ '^[a-f0-9]{64}$'::text)));
+  JRC_SCHEMA_SQL_7fd68314c719
+
+  execute <<~'JRC_SCHEMA_SQL_ff3366c261b1'
+    ALTER TABLE "jrc_relationship_retention_states" DROP CONSTRAINT "rel_retention_identity";
+  JRC_SCHEMA_SQL_ff3366c261b1
+
+  execute <<~'JRC_SCHEMA_SQL_aad3e570906a'
+    ALTER TABLE "jrc_relationship_retention_states" ADD CONSTRAINT "rel_retention_identity" CHECK ((((customer_key)::text ~ '^(company|contact):[1-9][0-9]*$'::text) AND (jsonb_typeof(facts) = 'object'::text)));
+  JRC_SCHEMA_SQL_aad3e570906a
 
   execute <<~'JRC_SCHEMA_SQL_6b3255b193bb'
     ALTER TABLE "jrc_service_desk_automation_publications" DROP CONSTRAINT "jrc_sd_automation_publication_kind";
@@ -7959,9 +8983,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     ALTER TABLE "jrc_service_desk_incidents" DROP CONSTRAINT "jrc_sd_r3_incident_kind";
   JRC_SCHEMA_SQL_b6f40c779433
 
-  execute <<~'JRC_SCHEMA_SQL_79dbbf31c3fa'
-    ALTER TABLE "jrc_service_desk_incidents" ADD CONSTRAINT "jrc_sd_r3_incident_kind" CHECK (((resource_kind)::text = ANY (ARRAY[('incident'::character varying)::text, ('problem'::character varying)::text])));
-  JRC_SCHEMA_SQL_79dbbf31c3fa
+  execute <<~'JRC_SCHEMA_SQL_bfc7e9b751c8'
+    ALTER TABLE "jrc_service_desk_incidents" ADD CONSTRAINT "jrc_sd_r3_incident_kind" CHECK (((resource_kind)::text = ANY ((ARRAY['incident'::character varying, 'problem'::character varying])::text[])));
+  JRC_SCHEMA_SQL_bfc7e9b751c8
 
   execute <<~'JRC_SCHEMA_SQL_a9e85673b6c1'
     ALTER TABLE "jrc_service_desk_lifecycle_pauses" DROP CONSTRAINT "jrc_sd_lc_pause_period";
@@ -7983,9 +9007,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     ALTER TABLE "jrc_service_desk_lifecycle_transitions" DROP CONSTRAINT "jrc_sd_lc_transition_valid";
   JRC_SCHEMA_SQL_2715ccc6004e
 
-  execute <<~'JRC_SCHEMA_SQL_6282b9f22521'
-    ALTER TABLE "jrc_service_desk_lifecycle_transitions" ADD CONSTRAINT "jrc_sd_lc_transition_valid" CHECK ((((action)::text = ANY (ARRAY[('pause'::character varying)::text, ('resume'::character varying)::text, ('resolve'::character varying)::text, ('close'::character varying)::text, ('cancel'::character varying)::text, ('reopen'::character varying)::text, ('work_status'::character varying)::text])) AND (jsonb_typeof(payload) = 'object'::text) AND ((fingerprint)::text ~ '^[a-f0-9]{64}$'::text) AND (btrim((request_key)::text) <> ''::text)));
-  JRC_SCHEMA_SQL_6282b9f22521
+  execute <<~'JRC_SCHEMA_SQL_c59ba849f2e7'
+    ALTER TABLE "jrc_service_desk_lifecycle_transitions" ADD CONSTRAINT "jrc_sd_lc_transition_valid" CHECK ((((action)::text = ANY ((ARRAY['pause'::character varying, 'resume'::character varying, 'resolve'::character varying, 'close'::character varying, 'cancel'::character varying, 'reopen'::character varying, 'work_status'::character varying])::text[])) AND (jsonb_typeof(payload) = 'object'::text) AND ((fingerprint)::text ~ '^[a-f0-9]{64}$'::text) AND (btrim((request_key)::text) <> ''::text)));
+  JRC_SCHEMA_SQL_c59ba849f2e7
 
   execute <<~'JRC_SCHEMA_SQL_03b3a4f76fa6'
     ALTER TABLE "jrc_service_desk_notification_deliveries" DROP CONSTRAINT "jrc_sd_delivery_attempt_positive";
@@ -8023,17 +9047,17 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     ALTER TABLE "jrc_service_desk_operational_resources" DROP CONSTRAINT "jrc_sd_r3_resource_state";
   JRC_SCHEMA_SQL_d215052bea68
 
-  execute <<~'JRC_SCHEMA_SQL_cbaffe32177a'
-    ALTER TABLE "jrc_service_desk_operational_resources" ADD CONSTRAINT "jrc_sd_r3_resource_state" CHECK (((((resource_kind)::text = 'change'::text) AND ((state)::text = ANY (ARRAY[('requested'::character varying)::text, ('planned'::character varying)::text, ('approved'::character varying)::text, ('in_progress'::character varying)::text, ('completed'::character varying)::text, ('cancelled'::character varying)::text]))) OR (((resource_kind)::text = 'asset'::text) AND ((state)::text = ANY (ARRAY[('active'::character varying)::text, ('inactive'::character varying)::text, ('retired'::character varying)::text])))));
-  JRC_SCHEMA_SQL_cbaffe32177a
+  execute <<~'JRC_SCHEMA_SQL_0579539f9d8f'
+    ALTER TABLE "jrc_service_desk_operational_resources" ADD CONSTRAINT "jrc_sd_r3_resource_state" CHECK (((((resource_kind)::text = 'change'::text) AND ((state)::text = ANY ((ARRAY['requested'::character varying, 'planned'::character varying, 'approved'::character varying, 'in_progress'::character varying, 'completed'::character varying, 'cancelled'::character varying])::text[]))) OR (((resource_kind)::text = 'asset'::text) AND ((state)::text = ANY ((ARRAY['active'::character varying, 'inactive'::character varying, 'retired'::character varying])::text[])))));
+  JRC_SCHEMA_SQL_0579539f9d8f
 
   execute <<~'JRC_SCHEMA_SQL_4b06aac0aa3e'
     ALTER TABLE "jrc_service_desk_operational_resources" DROP CONSTRAINT "jrc_sd_r3_resource_values";
   JRC_SCHEMA_SQL_4b06aac0aa3e
 
-  execute <<~'JRC_SCHEMA_SQL_1f5bb3057ce9'
-    ALTER TABLE "jrc_service_desk_operational_resources" ADD CONSTRAINT "jrc_sd_r3_resource_values" CHECK ((((resource_kind)::text = ANY (ARRAY[('change'::character varying)::text, ('asset'::character varying)::text])) AND ((priority)::text = ANY (ARRAY[('low'::character varying)::text, ('normal'::character varying)::text, ('high'::character varying)::text, ('critical'::character varying)::text]))));
-  JRC_SCHEMA_SQL_1f5bb3057ce9
+  execute <<~'JRC_SCHEMA_SQL_b6fd5b53d0e4'
+    ALTER TABLE "jrc_service_desk_operational_resources" ADD CONSTRAINT "jrc_sd_r3_resource_values" CHECK ((((resource_kind)::text = ANY ((ARRAY['change'::character varying, 'asset'::character varying])::text[])) AND ((priority)::text = ANY ((ARRAY['low'::character varying, 'normal'::character varying, 'high'::character varying, 'critical'::character varying])::text[]))));
+  JRC_SCHEMA_SQL_b6fd5b53d0e4
 
   execute <<~'JRC_SCHEMA_SQL_56e33ac558ce'
     ALTER TABLE "jrc_service_desk_operational_resources" DROP CONSTRAINT "jrc_sd_r3_resource_window";
@@ -8055,9 +9079,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     ALTER TABLE "jrc_service_desk_operational_rule_versions" DROP CONSTRAINT "jrc_sd_rule_finite_kind";
   JRC_SCHEMA_SQL_60a7b08a4f9b
 
-  execute <<~'JRC_SCHEMA_SQL_885604a078c8'
-    ALTER TABLE "jrc_service_desk_operational_rule_versions" ADD CONSTRAINT "jrc_sd_rule_finite_kind" CHECK (((kind)::text = ANY (ARRAY[('routing'::character varying)::text, ('priority_matrix'::character varying)::text, ('sla_selection'::character varying)::text, ('approval_deadline'::character varying)::text, ('recurrence'::character varying)::text])));
-  JRC_SCHEMA_SQL_885604a078c8
+  execute <<~'JRC_SCHEMA_SQL_fb8362db90fa'
+    ALTER TABLE "jrc_service_desk_operational_rule_versions" ADD CONSTRAINT "jrc_sd_rule_finite_kind" CHECK (((kind)::text = ANY ((ARRAY['routing'::character varying, 'priority_matrix'::character varying, 'sla_selection'::character varying, 'approval_deadline'::character varying, 'recurrence'::character varying])::text[])));
+  JRC_SCHEMA_SQL_fb8362db90fa
 
   execute <<~'JRC_SCHEMA_SQL_7b24b55822aa'
     ALTER TABLE "jrc_service_desk_operational_rule_versions" DROP CONSTRAINT "jrc_sd_rule_positive_version";
@@ -8074,6 +9098,14 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
   execute <<~'JRC_SCHEMA_SQL_5d9d84f109ef'
     ALTER TABLE "jrc_service_desk_operator_companies" ADD CONSTRAINT "jrc_sd_operator_companies_names" CHECK (((btrim((code)::text) <> ''::text) AND (btrim((name)::text) <> ''::text)));
   JRC_SCHEMA_SQL_5d9d84f109ef
+
+  execute <<~'JRC_SCHEMA_SQL_f140361c0328'
+    ALTER TABLE "jrc_service_desk_portal_grants" DROP CONSTRAINT "jrc_sd_grant_establishments";
+  JRC_SCHEMA_SQL_f140361c0328
+
+  execute <<~'JRC_SCHEMA_SQL_ce513687a1c5'
+    ALTER TABLE "jrc_service_desk_portal_grants" ADD CONSTRAINT "jrc_sd_grant_establishments" CHECK (((jsonb_typeof(establishment_ids) = 'array'::text) AND (jsonb_array_length(establishment_ids) <= 1000)));
+  JRC_SCHEMA_SQL_ce513687a1c5
 
   execute <<~'JRC_SCHEMA_SQL_7f2d6d1f2b15'
     ALTER TABLE "jrc_service_desk_portal_grants" DROP CONSTRAINT "jrc_sd_pg_role";
@@ -8151,9 +9183,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     ALTER TABLE "jrc_service_desk_sla_clocks" DROP CONSTRAINT "jrc_sd_lc_clock_values";
   JRC_SCHEMA_SQL_6bd39541d1c5
 
-  execute <<~'JRC_SCHEMA_SQL_c97fb3a83697'
-    ALTER TABLE "jrc_service_desk_sla_clocks" ADD CONSTRAINT "jrc_sd_lc_clock_values" CHECK ((((kind)::text = ANY (ARRAY[('first_response'::character varying)::text, ('attendance'::character varying)::text, ('resolution'::character varying)::text])) AND ((state)::text = ANY (ARRAY[('running'::character varying)::text, ('paused'::character varying)::text, ('completed'::character varying)::text, ('stopped'::character varying)::text])) AND (budget_seconds > 0) AND (elapsed_seconds >= (0)::numeric)));
-  JRC_SCHEMA_SQL_c97fb3a83697
+  execute <<~'JRC_SCHEMA_SQL_37cd5a1498ee'
+    ALTER TABLE "jrc_service_desk_sla_clocks" ADD CONSTRAINT "jrc_sd_lc_clock_values" CHECK ((((kind)::text = ANY ((ARRAY['first_response'::character varying, 'attendance'::character varying, 'resolution'::character varying])::text[])) AND ((state)::text = ANY ((ARRAY['running'::character varying, 'paused'::character varying, 'completed'::character varying, 'stopped'::character varying])::text[])) AND (budget_seconds > 0) AND (elapsed_seconds >= (0)::numeric)));
+  JRC_SCHEMA_SQL_37cd5a1498ee
 
   execute <<~'JRC_SCHEMA_SQL_a825c146490c'
     ALTER TABLE "jrc_service_desk_sla_cycles" DROP CONSTRAINT "jrc_sd_lc_cycle_number_valid";
@@ -8175,9 +9207,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     ALTER TABLE "jrc_service_desk_sla_milestones" DROP CONSTRAINT "jrc_sd_milestone_kind";
   JRC_SCHEMA_SQL_737b7b4e6ddd
 
-  execute <<~'JRC_SCHEMA_SQL_08f1d091b9be'
-    ALTER TABLE "jrc_service_desk_sla_milestones" ADD CONSTRAINT "jrc_sd_milestone_kind" CHECK (((kind)::text = ANY (ARRAY[('first_response'::character varying)::text, ('resolution'::character varying)::text])));
-  JRC_SCHEMA_SQL_08f1d091b9be
+  execute <<~'JRC_SCHEMA_SQL_c3544556d370'
+    ALTER TABLE "jrc_service_desk_sla_milestones" ADD CONSTRAINT "jrc_sd_milestone_kind" CHECK (((kind)::text = ANY ((ARRAY['first_response'::character varying, 'resolution'::character varying])::text[])));
+  JRC_SCHEMA_SQL_c3544556d370
 
   execute <<~'JRC_SCHEMA_SQL_27d7f0efa6d0'
     ALTER TABLE "jrc_service_desk_sla_snapshots" DROP CONSTRAINT "jrc_sd_snapshot_calendar_conditions";
@@ -8215,9 +9247,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     ALTER TABLE "jrc_service_desk_sla_snapshots" DROP CONSTRAINT "jrc_sd_snapshot_scope";
   JRC_SCHEMA_SQL_e142b2d55ec3
 
-  execute <<~'JRC_SCHEMA_SQL_fe9ea5f1af9f'
-    ALTER TABLE "jrc_service_desk_sla_snapshots" ADD CONSTRAINT "jrc_sd_snapshot_scope" CHECK (((calendar_scope)::text = ANY (ARRAY[('account'::character varying)::text, ('operator_company'::character varying)::text, ('unit'::character varying)::text])));
-  JRC_SCHEMA_SQL_fe9ea5f1af9f
+  execute <<~'JRC_SCHEMA_SQL_9079cb57e050'
+    ALTER TABLE "jrc_service_desk_sla_snapshots" ADD CONSTRAINT "jrc_sd_snapshot_scope" CHECK (((calendar_scope)::text = ANY ((ARRAY['account'::character varying, 'operator_company'::character varying, 'unit'::character varying])::text[])));
+  JRC_SCHEMA_SQL_9079cb57e050
 
   execute <<~'JRC_SCHEMA_SQL_5740f2aef017'
     ALTER TABLE "jrc_service_desk_sla_snapshots" DROP CONSTRAINT "jrc_sd_snapshot_version_positive";
@@ -8279,9 +9311,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     ALTER TABLE "jrc_service_desk_ticket_notes" DROP CONSTRAINT "jrc_sd_note_visibility";
   JRC_SCHEMA_SQL_a9c64937cd6f
 
-  execute <<~'JRC_SCHEMA_SQL_341e6ec42c26'
-    ALTER TABLE "jrc_service_desk_ticket_notes" ADD CONSTRAINT "jrc_sd_note_visibility" CHECK ((((visibility)::text = ANY (ARRAY[('internal'::character varying)::text, ('technical_team'::character varying)::text, ('customer'::character varying)::text, ('public_without_notification'::character varying)::text])) AND (btrim(body) <> ''::text)));
-  JRC_SCHEMA_SQL_341e6ec42c26
+  execute <<~'JRC_SCHEMA_SQL_5599e87cdc57'
+    ALTER TABLE "jrc_service_desk_ticket_notes" ADD CONSTRAINT "jrc_sd_note_visibility" CHECK ((((visibility)::text = ANY ((ARRAY['internal'::character varying, 'technical_team'::character varying, 'customer'::character varying, 'public_without_notification'::character varying])::text[])) AND (btrim(body) <> ''::text)));
+  JRC_SCHEMA_SQL_5599e87cdc57
 
   execute <<~'JRC_SCHEMA_SQL_d953b1caf6a5'
     ALTER TABLE "jrc_service_desk_ticket_statuses" DROP CONSTRAINT "jrc_sd_status_initial_phase";
@@ -8295,9 +9327,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     ALTER TABLE "jrc_service_desk_ticket_statuses" DROP CONSTRAINT "jrc_sd_status_phase";
   JRC_SCHEMA_SQL_8b971d2d7e19
 
-  execute <<~'JRC_SCHEMA_SQL_e7115918051b'
-    ALTER TABLE "jrc_service_desk_ticket_statuses" ADD CONSTRAINT "jrc_sd_status_phase" CHECK (((phase)::text = ANY (ARRAY[('open'::character varying)::text, ('waiting'::character varying)::text, ('resolved'::character varying)::text, ('closed'::character varying)::text, ('cancelled'::character varying)::text])));
-  JRC_SCHEMA_SQL_e7115918051b
+  execute <<~'JRC_SCHEMA_SQL_c3f71ce0201e'
+    ALTER TABLE "jrc_service_desk_ticket_statuses" ADD CONSTRAINT "jrc_sd_status_phase" CHECK (((phase)::text = ANY ((ARRAY['open'::character varying, 'waiting'::character varying, 'resolved'::character varying, 'closed'::character varying, 'cancelled'::character varying])::text[])));
+  JRC_SCHEMA_SQL_c3f71ce0201e
 
   execute <<~'JRC_SCHEMA_SQL_738317e1ce1d'
     ALTER TABLE "jrc_service_desk_ticket_statuses" DROP CONSTRAINT "jrc_sd_status_position";
@@ -8335,9 +9367,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     ALTER TABLE "jrc_service_desk_ticket_tasks" DROP CONSTRAINT "jrc_sd_task_visibility";
   JRC_SCHEMA_SQL_35230ea4d5d7
 
-  execute <<~'JRC_SCHEMA_SQL_331bd9b63ff2'
-    ALTER TABLE "jrc_service_desk_ticket_tasks" ADD CONSTRAINT "jrc_sd_task_visibility" CHECK ((((visibility)::text = ANY (ARRAY[('internal'::character varying)::text, ('technical_team'::character varying)::text, ('customer'::character varying)::text, ('public_without_notification'::character varying)::text])) AND (btrim((title)::text) <> ''::text)));
-  JRC_SCHEMA_SQL_331bd9b63ff2
+  execute <<~'JRC_SCHEMA_SQL_b52b032c4cc4'
+    ALTER TABLE "jrc_service_desk_ticket_tasks" ADD CONSTRAINT "jrc_sd_task_visibility" CHECK ((((visibility)::text = ANY ((ARRAY['internal'::character varying, 'technical_team'::character varying, 'customer'::character varying, 'public_without_notification'::character varying])::text[])) AND (btrim((title)::text) <> ''::text)));
+  JRC_SCHEMA_SQL_b52b032c4cc4
 
   execute <<~'JRC_SCHEMA_SQL_0014f6592e3e'
     ALTER TABLE "jrc_service_desk_tickets" DROP CONSTRAINT "jrc_sd_explicit_impact_urgency";
@@ -8394,6 +9426,54 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
   execute <<~'JRC_SCHEMA_SQL_6197efcc38e4'
     ALTER TABLE "jrc_service_desk_units" ADD CONSTRAINT "jrc_sd_units_names" CHECK (((btrim((code)::text) <> ''::text) AND (btrim((name)::text) <> ''::text)));
   JRC_SCHEMA_SQL_6197efcc38e4
+
+  execute <<~'JRC_SCHEMA_SQL_bdb7450aba4f'
+    DROP INDEX "bo_delivery_dispatch_once";
+  JRC_SCHEMA_SQL_bdb7450aba4f
+
+  execute <<~'JRC_SCHEMA_SQL_0add3aeb4c6d'
+    CREATE UNIQUE INDEX bo_delivery_dispatch_once ON public.jrc_backoffice_signature_delivery_events USING btree (delivery_id) WHERE ((kind)::text = 'dispatch_started'::text);
+  JRC_SCHEMA_SQL_0add3aeb4c6d
+
+  execute <<~'JRC_SCHEMA_SQL_4f45e344d034'
+    DROP INDEX "bo_delivery_external_origin";
+  JRC_SCHEMA_SQL_4f45e344d034
+
+  execute <<~'JRC_SCHEMA_SQL_b4f1023a518d'
+    CREATE UNIQUE INDEX bo_delivery_external_origin ON public.jrc_backoffice_signature_delivery_events USING btree (connection_id, external_id) WHERE (external_id IS NOT NULL);
+  JRC_SCHEMA_SQL_b4f1023a518d
+
+  execute <<~'JRC_SCHEMA_SQL_78ed3f6a9683'
+    DROP INDEX "bo_delivery_one_external_binding";
+  JRC_SCHEMA_SQL_78ed3f6a9683
+
+  execute <<~'JRC_SCHEMA_SQL_73fe145d0ef8'
+    CREATE UNIQUE INDEX bo_delivery_one_external_binding ON public.jrc_backoffice_signature_delivery_events USING btree (delivery_id) WHERE (external_id IS NOT NULL);
+  JRC_SCHEMA_SQL_73fe145d0ef8
+
+  execute <<~'JRC_SCHEMA_SQL_1ac2285b2e2f'
+    DROP INDEX "contacts_one_primary_per_company";
+  JRC_SCHEMA_SQL_1ac2285b2e2f
+
+  execute <<~'JRC_SCHEMA_SQL_76703e6623d3'
+    CREATE UNIQUE INDEX contacts_one_primary_per_company ON public.contacts USING btree (account_id, company_id) WHERE company_primary;
+  JRC_SCHEMA_SQL_76703e6623d3
+
+  execute <<~'JRC_SCHEMA_SQL_745ab33716e8'
+    DROP INDEX "customer_segment_company_override";
+  JRC_SCHEMA_SQL_745ab33716e8
+
+  execute <<~'JRC_SCHEMA_SQL_6e444abc39b1'
+    CREATE UNIQUE INDEX customer_segment_company_override ON public.jrc_customer_segment_overrides USING btree (taxonomy_id, company_id) WHERE (company_id IS NOT NULL);
+  JRC_SCHEMA_SQL_6e444abc39b1
+
+  execute <<~'JRC_SCHEMA_SQL_5f87843f81d3'
+    DROP INDEX "customer_segment_contact_override";
+  JRC_SCHEMA_SQL_5f87843f81d3
+
+  execute <<~'JRC_SCHEMA_SQL_bbae5d27d76e'
+    CREATE UNIQUE INDEX customer_segment_contact_override ON public.jrc_customer_segment_overrides USING btree (taxonomy_id, contact_id) WHERE (contact_id IS NOT NULL);
+  JRC_SCHEMA_SQL_bbae5d27d76e
 
   execute <<~'JRC_SCHEMA_SQL_420a30ca76df'
     DROP INDEX "idx_captain_faq_observations_on_conversation_and_suggestion";
@@ -8551,9 +9631,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     DROP INDEX "idx_jrc_one_live_flow_per_conversation";
   JRC_SCHEMA_SQL_b97e2f514c80
 
-  execute <<~'JRC_SCHEMA_SQL_c9526bce3982'
-    CREATE UNIQUE INDEX idx_jrc_one_live_flow_per_conversation ON public.jrc_flow_runs USING btree (conversation_id) WHERE ((status)::text = ANY (ARRAY[('running'::character varying)::text, ('waiting'::character varying)::text, ('delayed'::character varying)::text]));
-  JRC_SCHEMA_SQL_c9526bce3982
+  execute <<~'JRC_SCHEMA_SQL_edeb7e6ddce3'
+    CREATE UNIQUE INDEX idx_jrc_one_live_flow_per_conversation ON public.jrc_flow_runs USING btree (conversation_id) WHERE ((status)::text = ANY ((ARRAY['running'::character varying, 'waiting'::character varying, 'delayed'::character varying])::text[]));
+  JRC_SCHEMA_SQL_edeb7e6ddce3
 
   execute <<~'JRC_SCHEMA_SQL_e5e1704bae1d'
     DROP INDEX "idx_jrc_ops_project_ticket";
@@ -8706,6 +9786,14 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
   execute <<~'JRC_SCHEMA_SQL_8a093c1ed9da'
     CREATE UNIQUE INDEX index_sales_opportunities_on_account_id_and_idempotency_key ON public.sales_opportunities USING btree (account_id, idempotency_key) WHERE (idempotency_key IS NOT NULL);
   JRC_SCHEMA_SQL_8a093c1ed9da
+
+  execute <<~'JRC_SCHEMA_SQL_f2c8d6f97c4e'
+    DROP INDEX "jrc_ap_notice_pending";
+  JRC_SCHEMA_SQL_f2c8d6f97c4e
+
+  execute <<~'JRC_SCHEMA_SQL_9d31d270e83a'
+    CREATE INDEX jrc_ap_notice_pending ON public.jrc_approvals_notification_outboxes USING btree (id) WHERE (completed_at IS NULL);
+  JRC_SCHEMA_SQL_9d31d270e83a
 
   execute <<~'JRC_SCHEMA_SQL_6e1ce0f9a725'
     DROP INDEX "jrc_cc_agent_state_external";
@@ -8915,6 +10003,14 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     CREATE INDEX nico_broker_send_recovery ON public.jrc_nico_broker_send_operations USING btree (next_attempt_at, id) WHERE ((state)::text = ANY ((ARRAY['PAUSING'::character varying, 'DRAINING'::character varying, 'UNKNOWN'::character varying, 'MESSAGE_CREATED'::character varying, 'CANCELING'::character varying])::text[]));
   JRC_SCHEMA_SQL_5d6b1142aa1e
 
+  execute <<~'JRC_SCHEMA_SQL_e6cd0333c70a'
+    DROP INDEX "rel_action_return_queue";
+  JRC_SCHEMA_SQL_e6cd0333c70a
+
+  execute <<~'JRC_SCHEMA_SQL_023386ff5301'
+    CREATE INDEX rel_action_return_queue ON public.jrc_relationship_actions USING btree (account_id, owner_id, return_at) WHERE ((status)::text = ANY ((ARRAY['open'::character varying, 'in_progress'::character varying, 'waiting_customer'::character varying, 'waiting_finance'::character varying])::text[]));
+  JRC_SCHEMA_SQL_023386ff5301
+
   execute <<~'JRC_SCHEMA_SQL_92cc7fc579f0'
     DROP INDEX "rel_cadence_due";
   JRC_SCHEMA_SQL_92cc7fc579f0
@@ -8922,6 +10018,14 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
   execute <<~'JRC_SCHEMA_SQL_99106d1a608e'
     CREATE INDEX rel_cadence_due ON public.jrc_relationship_cadence_steps USING btree (due_at) WHERE ((state)::text = 'pending'::text);
   JRC_SCHEMA_SQL_99106d1a608e
+
+  execute <<~'JRC_SCHEMA_SQL_67761bc345f7'
+    DROP INDEX "rel_doc_active_requirement";
+  JRC_SCHEMA_SQL_67761bc345f7
+
+  execute <<~'JRC_SCHEMA_SQL_25410bb2436d'
+    CREATE UNIQUE INDEX rel_doc_active_requirement ON public.jrc_relationship_customer_documents USING btree (account_id, assignment_id, requirement_key) WHERE (((status)::text = 'active'::text) AND (requirement_key IS NOT NULL));
+  JRC_SCHEMA_SQL_25410bb2436d
 
   execute <<~'JRC_SCHEMA_SQL_8dda31ee5c9b'
     DROP INDEX "rel_survey_origin_cycle_rule";
@@ -9003,6 +10107,13 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     BEGIN RAISE EXCEPTION 'Approval history is immutable'; END; $function$
   JRC_SCHEMA_SQL_233355fd61f9
 
+  execute <<~'JRC_SCHEMA_SQL_c9613629ed50'
+    CREATE OR REPLACE FUNCTION public.jrc_ap_notice_source_guard()
+     RETURNS trigger
+     LANGUAGE plpgsql
+    AS $function$ BEGIN IF ROW(NEW.account_id, NEW.source_event_id, NEW.created_at) IS DISTINCT FROM ROW(OLD.account_id, OLD.source_event_id, OLD.created_at) OR (OLD.completed_at IS NOT NULL AND NEW.completed_at IS DISTINCT FROM OLD.completed_at) THEN RAISE EXCEPTION 'Approval notification source and completion are immutable'; END IF; RETURN NEW; END; $function$
+  JRC_SCHEMA_SQL_c9613629ed50
+
   execute <<~'JRC_SCHEMA_SQL_51f239b6f6c6'
     CREATE OR REPLACE FUNCTION public.jrc_ap_request_guard()
      RETURNS trigger
@@ -9022,6 +10133,287 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
       RETURN NEW;
     END; $function$
   JRC_SCHEMA_SQL_51f239b6f6c6
+
+  execute <<~'JRC_SCHEMA_SQL_4337e9a6df7e'
+    CREATE OR REPLACE FUNCTION public.jrc_bo_document_scan_pin()
+     RETURNS trigger
+     LANGUAGE plpgsql
+    AS $function$
+    BEGIN
+      -- ActiveStorage touches its owner after the initial file link. It may
+      -- update only this technical timestamp, never the version's evidence.
+      IF TG_TABLE_NAME = 'jrc_backoffice_document_versions' AND TG_OP = 'UPDATE'
+        AND (to_jsonb(NEW) - 'updated_at') = (to_jsonb(OLD) - 'updated_at') THEN
+        RETURN NEW;
+      END IF;
+      RAISE EXCEPTION 'Document security observations are immutable';
+    END;
+    $function$
+  JRC_SCHEMA_SQL_4337e9a6df7e
+
+  execute <<~'JRC_SCHEMA_SQL_c5674ba17b61'
+    CREATE OR REPLACE FUNCTION public.jrc_bo_document_validity_guard()
+     RETURNS trigger
+     LANGUAGE plpgsql
+    AS $function$
+    BEGIN
+      IF TG_OP = 'UPDATE' AND (
+        NEW.expires_on IS DISTINCT FROM OLD.expires_on OR
+        NEW.validity_timezone IS DISTINCT FROM OLD.validity_timezone
+      ) THEN
+        RAISE EXCEPTION 'Document validity is immutable; append a new decision' USING ERRCODE = '23514';
+      END IF;
+      IF NEW.expires_on IS NOT NULL AND NOT EXISTS (
+        SELECT 1 FROM pg_timezone_names WHERE name = NEW.validity_timezone
+      ) THEN
+        RAISE EXCEPTION 'Unknown document validity time zone' USING ERRCODE = '23514';
+      END IF;
+      RETURN NEW;
+    END;
+    $function$
+  JRC_SCHEMA_SQL_c5674ba17b61
+
+  execute <<~'JRC_SCHEMA_SQL_aba51a781779'
+    CREATE OR REPLACE FUNCTION public.jrc_bo_dossier_attachment_guard()
+     RETURNS trigger
+     LANGUAGE plpgsql
+    AS $function$
+    BEGIN
+      IF EXISTS (SELECT 1 FROM jrc_backoffice_completion_dossiers WHERE archive_blob_id = NEW.blob_id)
+        OR EXISTS (SELECT 1 FROM active_storage_blobs WHERE id = NEW.blob_id
+          AND metadata::jsonb ->> 'jrc_backoffice_dossier_archive' = 'true') THEN
+        RAISE EXCEPTION 'Sealed archives require the scoped dossier endpoint';
+      END IF;
+      RETURN NEW;
+    END;
+    $function$
+  JRC_SCHEMA_SQL_aba51a781779
+
+  execute <<~'JRC_SCHEMA_SQL_afe4aa4c1056'
+    CREATE OR REPLACE FUNCTION public.jrc_bo_dossier_blob_pin()
+     RETURNS trigger
+     LANGUAGE plpgsql
+    AS $function$
+    BEGIN
+      IF EXISTS (SELECT 1 FROM jrc_backoffice_completion_dossiers WHERE archive_blob_id = OLD.id) THEN
+        RAISE EXCEPTION 'Sealed archive blobs are immutable';
+      END IF;
+      IF TG_OP = 'DELETE' THEN RETURN OLD; END IF;
+      RETURN NEW;
+    END;
+    $function$
+  JRC_SCHEMA_SQL_afe4aa4c1056
+
+  execute <<~'JRC_SCHEMA_SQL_1352393d31eb'
+    CREATE OR REPLACE FUNCTION public.jrc_bo_dossier_pin()
+     RETURNS trigger
+     LANGUAGE plpgsql
+    AS $function$
+    BEGIN
+      IF TG_OP <> 'INSERT' THEN
+        RAISE EXCEPTION 'Completion dossiers are immutable';
+      END IF;
+      IF NEW.number < 1 OR NOT EXISTS (
+        SELECT 1 FROM jrc_crm_backoffice_requests r JOIN active_storage_blobs b ON b.id = NEW.archive_blob_id
+        WHERE r.id = NEW.backoffice_request_id AND r.account_id = NEW.account_id
+          AND b.content_type = 'application/gzip' AND b.metadata::jsonb ->> 'jrc_backoffice_dossier_archive' = 'true'
+      ) THEN
+        RAISE EXCEPTION 'Dossier must preserve its account, request and private archive';
+      END IF;
+      RETURN NEW;
+    END;
+    $function$
+  JRC_SCHEMA_SQL_1352393d31eb
+
+  execute <<~'JRC_SCHEMA_SQL_855aad828892'
+    CREATE OR REPLACE FUNCTION public.jrc_bo_private_attachment()
+     RETURNS trigger
+     LANGUAGE plpgsql
+    AS $function$
+    BEGIN
+      IF TG_OP <> 'INSERT' AND OLD.record_type = 'JrcBackoffice::DocumentVersion' THEN
+        RAISE EXCEPTION 'Document version files are immutable';
+      END IF;
+      IF TG_OP <> 'INSERT' AND OLD.record_type = 'JrcCrm::Contract' AND OLD.name = 'signed_document'
+        AND EXISTS (SELECT 1 FROM jrc_backoffice_signature_acceptances WHERE contract_id = OLD.record_id) THEN
+        RAISE EXCEPTION 'Accepted signed contract files are immutable';
+      END IF;
+      IF TG_OP = 'DELETE' THEN
+        RETURN OLD;
+      END IF;
+      IF (EXISTS (SELECT 1 FROM jrc_backoffice_contract_versions WHERE pdf_blob_id = NEW.blob_id)
+        OR EXISTS (SELECT 1 FROM jrc_backoffice_document_scans WHERE source_blob_id = NEW.blob_id)
+        OR EXISTS (SELECT 1 FROM active_storage_attachments
+          WHERE blob_id = NEW.blob_id AND record_type = 'JrcBackoffice::DocumentVersion'))
+        AND NOT (NEW.record_type = 'JrcCrm::Contract' AND NEW.name = 'signed_document'
+          AND EXISTS (SELECT 1 FROM jrc_backoffice_signature_acceptances
+            WHERE contract_id = NEW.record_id AND signed_blob_id = NEW.blob_id)) THEN
+        RAISE EXCEPTION 'Private Backoffice files cannot be relinked';
+      END IF;
+      IF NEW.record_type = 'JrcBackoffice::DocumentVersion' THEN
+        PERFORM 1 FROM jrc_backoffice_document_versions WHERE id = NEW.record_id FOR NO KEY UPDATE;
+        IF NOT FOUND THEN
+          RAISE EXCEPTION 'Document version required';
+        END IF;
+        IF NEW.name <> 'file' OR EXISTS (SELECT 1 FROM active_storage_attachments
+          WHERE record_type = NEW.record_type AND record_id = NEW.record_id) THEN
+          RAISE EXCEPTION 'Document versions have one immutable file';
+        END IF;
+      END IF;
+      RETURN NEW;
+    END;
+    $function$
+  JRC_SCHEMA_SQL_855aad828892
+
+  execute <<~'JRC_SCHEMA_SQL_bc9be52e48fb'
+    CREATE OR REPLACE FUNCTION public.jrc_bo_requirement_guard()
+     RETURNS trigger
+     LANGUAGE plpgsql
+    AS $function$
+    DECLARE
+      parent_account bigint;
+      item jsonb;
+      captured jsonb;
+    BEGIN
+      IF TG_OP IN ('UPDATE', 'DELETE') THEN
+        RAISE EXCEPTION 'Backoffice requirement revisions are immutable';
+      END IF;
+      IF TG_TABLE_NAME = 'jrc_backoffice_requirement_rules' THEN
+        IF NOT EXISTS (SELECT 1 FROM account_users WHERE account_id=NEW.account_id AND user_id=NEW.created_by_id)
+        THEN RAISE EXCEPTION 'Requirement creator account mismatch'; END IF;
+        IF NEW.business_unit_id IS NOT NULL AND NOT EXISTS (
+          SELECT 1 FROM jrc_crm_business_units WHERE id=NEW.business_unit_id AND account_id=NEW.account_id
+        ) THEN RAISE EXCEPTION 'Requirement unit account mismatch'; END IF;
+        IF NEW.product_id IS NOT NULL AND NOT EXISTS (
+          SELECT 1 FROM jrc_crm_products WHERE id=NEW.product_id AND account_id=NEW.account_id
+        ) THEN RAISE EXCEPTION 'Requirement product account mismatch'; END IF;
+      ELSIF TG_TABLE_NAME = 'jrc_backoffice_requirement_plans' THEN
+        SELECT account_id INTO parent_account FROM jrc_crm_backoffice_requests WHERE id=NEW.backoffice_request_id;
+        IF parent_account IS DISTINCT FROM NEW.account_id THEN RAISE EXCEPTION 'Requirement plan account mismatch'; END IF;
+        IF NOT EXISTS (SELECT 1 FROM account_users WHERE account_id=NEW.account_id AND user_id=NEW.created_by_id)
+        THEN RAISE EXCEPTION 'Requirement creator account mismatch'; END IF;
+        FOR item IN SELECT value FROM jsonb_array_elements(NEW.entries) LOOP
+          IF NOT EXISTS (SELECT 1 FROM jrc_backoffice_requirement_rules
+              WHERE id=(item->>'rule_id')::bigint AND account_id=NEW.account_id
+                AND rule_key=item->>'key' AND version=(item->>'rule_version')::int
+                AND definition=item->'definition'
+                AND COALESCE(to_jsonb(customer_kind), 'null'::jsonb)=item->'scope'->'customer_kind')
+          THEN RAISE EXCEPTION 'Requirement rule snapshot mismatch'; END IF;
+        END LOOP;
+      ELSE
+        SELECT account_id INTO parent_account FROM jrc_backoffice_requirement_plans WHERE id=NEW.requirement_plan_id;
+        IF parent_account IS DISTINCT FROM NEW.account_id THEN RAISE EXCEPTION 'Requirement response account mismatch'; END IF;
+        IF NOT EXISTS (SELECT 1 FROM account_users WHERE account_id=NEW.account_id AND user_id=NEW.actor_id)
+        THEN RAISE EXCEPTION 'Requirement respondent account mismatch'; END IF;
+        SELECT value->'definition' INTO captured
+          FROM jrc_backoffice_requirement_plans, jsonb_array_elements(entries)
+          WHERE id=NEW.requirement_plan_id AND value->>'key'=NEW.requirement_key;
+        IF captured IS NULL THEN RAISE EXCEPTION 'Requirement is not in plan'; END IF;
+        IF (CASE WHEN captured->>'kind'='conditional' THEN captured->>'requirement_kind' ELSE captured->>'kind' END) = 'information' THEN
+          IF NOT (NEW.payload ? 'value') OR (NEW.payload - 'value') <> '{}'::jsonb
+          THEN RAISE EXCEPTION 'Invalid information response'; END IF;
+        ELSIF (CASE WHEN captured->>'kind'='conditional' THEN captured->>'requirement_kind' ELSE captured->>'kind' END) = 'validation'
+            AND captured->>'source'='manual_review' THEN
+          IF COALESCE(NEW.payload->>'decision','') NOT IN ('approved','rejected') OR (NEW.payload - 'decision') <> '{}'::jsonb
+          THEN RAISE EXCEPTION 'Invalid manual review'; END IF;
+        ELSIF (CASE WHEN captured->>'kind'='conditional' THEN captured->>'requirement_kind' ELSE captured->>'kind' END) IN ('consultation','confirmation','human_activity') THEN
+          IF jsonb_typeof(NEW.payload->'decision') IS DISTINCT FROM 'string'
+             OR jsonb_typeof(NEW.payload->'note') IS DISTINCT FROM 'string'
+             OR (NEW.payload - ARRAY['decision','note']) <> '{}'::jsonb
+             OR char_length(NEW.payload->>'note') NOT BETWEEN 1 AND 4000
+             OR (NEW.payload->>'note') !~ '[^[:space:]]'
+             OR ((CASE WHEN captured->>'kind'='conditional' THEN captured->>'requirement_kind' ELSE captured->>'kind' END)='confirmation' AND NEW.payload->>'decision' NOT IN ('confirmed','rejected'))
+             OR ((CASE WHEN captured->>'kind'='conditional' THEN captured->>'requirement_kind' ELSE captured->>'kind' END) IN ('consultation','human_activity') AND NEW.payload->>'decision' NOT IN ('completed','rejected'))
+          THEN RAISE EXCEPTION 'Invalid explicit human response'; END IF;
+          IF NOT (
+            COALESCE(captured->'reviewer_ids','[]'::jsonb) @> jsonb_build_array(NEW.actor_id)
+            OR EXISTS (
+              SELECT 1 FROM team_members m JOIN teams t ON t.id=m.team_id
+              WHERE m.user_id=NEW.actor_id AND t.account_id=NEW.account_id
+                AND COALESCE(captured->'reviewer_team_ids','[]'::jsonb) @> jsonb_build_array(t.id)
+            )
+          ) THEN RAISE EXCEPTION 'A configured human reviewer is required'; END IF;
+        ELSE RAISE EXCEPTION 'Native evidence cannot be supplied manually'; END IF;
+      END IF;
+      RETURN NEW;
+    END;
+    $function$
+  JRC_SCHEMA_SQL_bc9be52e48fb
+
+  execute <<~'JRC_SCHEMA_SQL_a95c269a4444'
+    CREATE OR REPLACE FUNCTION public.jrc_bo_signature_acceptance_pin()
+     RETURNS trigger
+     LANGUAGE plpgsql
+    AS $function$
+    BEGIN
+      IF TG_OP <> 'INSERT' THEN
+        RAISE EXCEPTION 'Signature acceptances are immutable';
+      END IF;
+      IF NOT EXISTS (
+        SELECT 1 FROM jrc_backoffice_signature_artifact_bundles b
+        JOIN jrc_backoffice_signature_deliveries d ON d.id = b.delivery_id
+        JOIN jrc_crm_contracts c ON c.id = NEW.contract_id AND c.account_id = NEW.account_id
+        JOIN jrc_backoffice_document_versions v ON v.id = b.signed_document_id AND v.account_id = NEW.account_id
+        JOIN active_storage_attachments a ON a.record_type = 'JrcBackoffice::DocumentVersion'
+          AND a.record_id = v.id AND a.name = 'file' AND a.blob_id = NEW.signed_blob_id
+        WHERE b.id = NEW.bundle_id AND b.account_id = NEW.account_id
+          AND d.contract_id = c.id AND d.account_id = NEW.account_id
+      ) THEN
+        RAISE EXCEPTION 'Signature acceptance must preserve the exact account, contract and signed file';
+      END IF;
+      RETURN NEW;
+    END;
+    $function$
+  JRC_SCHEMA_SQL_a95c269a4444
+
+  execute <<~'JRC_SCHEMA_SQL_feb9ccd7d1f6'
+    CREATE OR REPLACE FUNCTION public.jrc_connection_event_immutable_guard()
+     RETURNS trigger
+     LANGUAGE plpgsql
+     SET search_path TO 'pg_catalog', 'public'
+    AS $function$ BEGIN IF TG_OP = 'DELETE' AND pg_trigger_depth() > 1 AND ( NOT EXISTS (SELECT 1 FROM public.accounts WHERE id = OLD.account_id) OR NOT EXISTS (SELECT 1 FROM public.inboxes WHERE id = OLD.inbox_id) ) THEN RETURN OLD; ELSIF TG_OP = 'UPDATE' AND pg_trigger_depth() > 1 AND OLD.user_id IS NOT NULL AND NEW.user_id IS NULL AND (to_jsonb(NEW) - 'user_id') IS NOT DISTINCT FROM (to_jsonb(OLD) - 'user_id') AND NOT EXISTS (SELECT 1 FROM public.users WHERE id = OLD.user_id) THEN RETURN NEW; END IF; RAISE EXCEPTION 'Connection history is append-only' USING ERRCODE = '23514'; END; $function$
+  JRC_SCHEMA_SQL_feb9ccd7d1f6
+
+  execute <<~'JRC_SCHEMA_SQL_0765e8167801'
+    CREATE OR REPLACE FUNCTION public.jrc_contract_delivery_source_fence()
+     RETURNS trigger
+     LANGUAGE plpgsql
+    AS $function$
+    DECLARE
+      legal_columns text[] := ARRAY[
+        'account_id', 'contract_number', 'sales_order_id', 'contract_template_id', 'business_unit_id',
+        'contract_type', 'starts_on', 'ends_on', 'term_months', 'renewal_type', 'adjustment_index',
+        'monthly_cents', 'one_time_cents', 'payment_condition', 'due_day', 'auto_renew',
+        'renewal_notice_days', 'renewal_term_months', 'content_override', 'notes', 'contact_id', 'owner_id'
+      ];
+    BEGIN
+      IF ((SELECT jsonb_object_agg(key, value) FROM jsonb_each(to_jsonb(NEW)) WHERE key = ANY(legal_columns))
+          IS DISTINCT FROM
+          (SELECT jsonb_object_agg(key, value) FROM jsonb_each(to_jsonb(OLD)) WHERE key = ANY(legal_columns))
+          OR NEW.lifecycle_metadata->'financials' IS DISTINCT FROM OLD.lifecycle_metadata->'financials'
+          OR NEW.lifecycle_metadata->'addenda' IS DISTINCT FROM OLD.lifecycle_metadata->'addenda')
+         AND EXISTS (
+           SELECT 1 FROM jrc_backoffice_signature_deliveries d
+           WHERE d.account_id = OLD.account_id AND d.contract_id = OLD.id
+           AND NOT EXISTS (
+             SELECT 1 FROM jrc_backoffice_signature_delivery_events e
+             WHERE e.account_id = d.account_id AND e.delivery_id = d.id
+             AND e.kind IN ('send_rejected', 'sender_blocked', 'canceled_before_send', 'envelope_canceled', 'envelope_declined')
+           )
+         ) THEN
+        RAISE EXCEPTION 'signature_delivery_source_locked' USING ERRCODE = '23514';
+      END IF;
+      RETURN NEW;
+    END
+    $function$
+  JRC_SCHEMA_SQL_0765e8167801
+
+  execute <<~'JRC_SCHEMA_SQL_25d6dc0c6f17'
+    CREATE OR REPLACE FUNCTION public.jrc_contract_version_pin()
+     RETURNS trigger
+     LANGUAGE plpgsql
+    AS $function$ BEGIN RAISE EXCEPTION 'Contract versions are immutable'; END; $function$
+  JRC_SCHEMA_SQL_25d6dc0c6f17
 
   execute <<~'JRC_SCHEMA_SQL_732bbdea12cf'
     CREATE OR REPLACE FUNCTION public.jrc_effect_contact_control()
@@ -9065,7 +10457,51 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     AS $function$ BEGIN IF NEW IS DISTINCT FROM OLD THEN RAISE EXCEPTION 'jrc_effect_receipt_immutable' USING ERRCODE = '23514'; END IF; RETURN NEW; END $function$
   JRC_SCHEMA_SQL_5ef513db2e3c
 
-  execute <<~'JRC_SCHEMA_SQL_7f4ae9c15df6'
+  execute <<~'JRC_SCHEMA_SQL_ae900f5e1338'
+    CREATE OR REPLACE FUNCTION public.jrc_human_policy_immutable_guard()
+     RETURNS trigger
+     LANGUAGE plpgsql
+     SET search_path TO 'pg_catalog', 'public'
+    AS $function$
+    BEGIN
+      -- Preserve only the parent-removal actions already defined by the original FKs.
+      IF TG_OP = 'DELETE' THEN
+        IF pg_trigger_depth() > 1 AND (
+          NOT EXISTS (SELECT 1 FROM public.accounts WHERE id = OLD.account_id) OR
+          (OLD.inbox_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM public.inboxes WHERE id = OLD.inbox_id))
+        ) THEN
+          RETURN OLD;
+        END IF;
+      ELSIF TG_OP = 'UPDATE' THEN
+        IF pg_trigger_depth() > 1 AND OLD.user_id IS NOT NULL AND NEW.user_id IS NULL AND
+          (to_jsonb(NEW) - 'user_id') IS NOT DISTINCT FROM (to_jsonb(OLD) - 'user_id') AND
+          NOT EXISTS (SELECT 1 FROM public.users WHERE id = OLD.user_id)
+        THEN
+          RETURN NEW;
+        END IF;
+      END IF;
+      RAISE EXCEPTION 'Human assignment policy history is append-only' USING ERRCODE = '23514';
+    END;
+    $function$
+  JRC_SCHEMA_SQL_ae900f5e1338
+
+  execute <<~'JRC_SCHEMA_SQL_6635904880b1'
+    CREATE OR REPLACE FUNCTION public.jrc_migration_event_guard()
+     RETURNS trigger
+     LANGUAGE plpgsql
+     SET search_path TO 'pg_catalog', 'public'
+    AS $function$ BEGIN IF TG_OP = 'DELETE' AND pg_trigger_depth() > 1 AND ( NOT EXISTS (SELECT 1 FROM public.accounts WHERE id = OLD.account_id) OR NOT EXISTS (SELECT 1 FROM public.jrc_migration_batches WHERE id = OLD.batch_id) ) THEN RETURN OLD; ELSIF TG_OP = 'UPDATE' AND pg_trigger_depth() > 1 AND OLD.user_id IS NOT NULL AND NEW.user_id IS NULL AND (to_jsonb(NEW) - 'user_id') IS NOT DISTINCT FROM (to_jsonb(OLD) - 'user_id') AND NOT EXISTS (SELECT 1 FROM public.users WHERE id = OLD.user_id) THEN RETURN NEW; END IF; RAISE EXCEPTION 'Migration history is append-only' USING ERRCODE = '23514'; END; $function$
+  JRC_SCHEMA_SQL_6635904880b1
+
+  execute <<~'JRC_SCHEMA_SQL_eb63c32829c8'
+    CREATE OR REPLACE FUNCTION public.jrc_migration_media_owner_guard()
+     RETURNS trigger
+     LANGUAGE plpgsql
+     SET search_path TO 'pg_catalog', 'public'
+    AS $function$ BEGIN IF TG_OP = 'DELETE' AND pg_trigger_depth() > 1 AND NOT EXISTS (SELECT 1 FROM public.jrc_migration_items WHERE id = OLD.item_id AND account_id = OLD.account_id) THEN RETURN OLD; ELSIF TG_OP = 'UPDATE' AND (to_jsonb(NEW) - ARRAY['status','blob_id','claim_token','claimed_at','checked_at','error_code','updated_at', 'absence_verified_at','scan_generation','scan_token','scan_started_at']) IS NOT DISTINCT FROM (to_jsonb(OLD) - ARRAY['status','blob_id','claim_token','claimed_at','checked_at','error_code','updated_at', 'absence_verified_at','scan_generation','scan_token','scan_started_at']) AND (NEW.absence_verified_at IS NOT DISTINCT FROM OLD.absence_verified_at OR (OLD.absence_verified_at IS NULL AND NEW.absence_verified_at IS NOT NULL AND OLD.status = 'verifying' AND NEW.status = 'planned')) AND NEW.scan_generation >= OLD.scan_generation THEN RETURN NEW; END IF; RAISE EXCEPTION 'Migration media ownership is immutable' USING ERRCODE = '23514'; END; $function$
+  JRC_SCHEMA_SQL_eb63c32829c8
+
+  execute <<~'JRC_SCHEMA_SQL_c2193a5d0e96'
     CREATE OR REPLACE FUNCTION public.jrc_native_responder_config_fence()
      RETURNS trigger
      LANGUAGE plpgsql
@@ -9135,7 +10571,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
       IF TG_OP='DELETE' THEN RETURN OLD; ELSE RETURN NEW; END IF;
     END;
     $function$
-  JRC_SCHEMA_SQL_7f4ae9c15df6
+  JRC_SCHEMA_SQL_c2193a5d0e96
 
   execute <<~'JRC_SCHEMA_SQL_98757180a316'
     CREATE OR REPLACE FUNCTION public.jrc_nico_preserve_send_fact()
@@ -9144,12 +10580,200 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     AS $function$ BEGIN IF NEW.actor_id IS DISTINCT FROM OLD.actor_id OR (OLD.message_created_at IS NOT NULL AND (NEW.message_created_at IS DISTINCT FROM OLD.message_created_at OR (NEW.message_id IS NOT NULL AND NEW.message_id IS DISTINCT FROM OLD.message_id))) THEN RAISE EXCEPTION 'NICO send identity and Message creation fact are immutable' USING ERRCODE = '23514'; END IF; RETURN NEW; END; $function$
   JRC_SCHEMA_SQL_98757180a316
 
-  execute <<~'JRC_SCHEMA_SQL_8031634e8df1'
+  execute <<~'JRC_SCHEMA_SQL_ab8cd4ea7bff'
+    CREATE OR REPLACE FUNCTION public.jrc_rel_history_receipt_guard()
+     RETURNS trigger
+     LANGUAGE plpgsql
+    AS $function$
+    DECLARE native_group_account integer; native_event jrc_crm_audit_events%ROWTYPE;
+    BEGIN
+      IF TG_OP = 'DELETE' AND NOT EXISTS (SELECT 1 FROM accounts WHERE id = OLD.account_id) THEN
+        RETURN OLD; -- Keep the existing explicit whole-account lifecycle.
+      END IF;
+      IF TG_OP <> 'INSERT' THEN
+        RAISE EXCEPTION 'Portfolio history receipts are immutable' USING ERRCODE = '23514';
+      END IF;
+      SELECT account_id INTO native_group_account FROM jrc_relationship_portfolio_groups WHERE id = NEW.portfolio_group_id;
+      SELECT * INTO native_event FROM jrc_crm_audit_events WHERE id = NEW.audit_event_id;
+      IF native_group_account IS DISTINCT FROM NEW.account_id OR native_event.account_id IS DISTINCT FROM NEW.account_id
+         OR native_event.event_type IS DISTINCT FROM 'relationship_updated' THEN
+        RAISE EXCEPTION 'Portfolio history scope mismatch' USING ERRCODE = '23514';
+      END IF;
+      IF NOT ((native_event.resource_type = 'JrcRelationship::PortfolioGroup' AND native_event.resource_id = NEW.portfolio_group_id)
+         OR (native_event.resource_type = 'JrcRelationship::Configuration' AND EXISTS (
+           SELECT 1 FROM jrc_relationship_configurations WHERE id = native_event.resource_id AND account_id = NEW.account_id
+           AND scope_key = 'portfolio:' || NEW.portfolio_group_id::text))) THEN
+        RAISE EXCEPTION 'Portfolio history origin mismatch' USING ERRCODE = '23514';
+      END IF;
+      IF NEW.snapshot ->> 'account_id' IS DISTINCT FROM NEW.account_id::text
+         OR NEW.snapshot ->> 'group_id' IS DISTINCT FROM NEW.portfolio_group_id::text
+         OR NEW.snapshot ->> 'version' IS DISTINCT FROM '1'
+         OR jsonb_typeof(NEW.snapshot -> 'boundaries') IS DISTINCT FROM 'array'
+         OR jsonb_typeof(NEW.snapshot -> 'origins') IS DISTINCT FROM 'array'
+         OR NEW.snapshot ->> 'resolved' IS DISTINCT FROM 'true' THEN
+        RAISE EXCEPTION 'Portfolio history snapshot mismatch' USING ERRCODE = '23514';
+      END IF;
+      RETURN NEW;
+    END; $function$
+  JRC_SCHEMA_SQL_ab8cd4ea7bff
+
+  execute <<~'JRC_SCHEMA_SQL_07547109f11b'
+    CREATE OR REPLACE FUNCTION public.jrc_rel_history_source_guard()
+     RETURNS trigger
+     LANGUAGE plpgsql
+    AS $function$
+    BEGIN
+      IF TG_OP = 'DELETE' AND NOT EXISTS (SELECT 1 FROM accounts WHERE id = OLD.account_id) THEN RETURN OLD; END IF;
+      IF EXISTS (SELECT 1 FROM jrc_relationship_portfolio_history_receipts WHERE audit_event_id = OLD.id) THEN
+        RAISE EXCEPTION 'Captured portfolio audit events are immutable' USING ERRCODE = '23514';
+      END IF;
+      IF TG_OP = 'DELETE' THEN RETURN OLD; END IF;
+      RETURN NEW;
+    END; $function$
+  JRC_SCHEMA_SQL_07547109f11b
+
+  execute <<~'JRC_SCHEMA_SQL_f7a19fecd52c'
+    CREATE OR REPLACE FUNCTION public.jrc_rel_management_guard()
+     RETURNS trigger
+     LANGUAGE plpgsql
+    AS $function$
+    BEGIN
+      IF TG_OP = 'DELETE' THEN
+        IF NOT EXISTS (SELECT 1 FROM accounts WHERE id = OLD.account_id) THEN RETURN OLD; END IF;
+        RAISE EXCEPTION 'Management request retained' USING ERRCODE = '23514';
+      END IF;
+      IF TG_OP = 'UPDATE' AND
+        ((OLD.id,OLD.created_at,OLD.account_id,OLD.requester_id,OLD.assignment_id,OLD.analyst_id,OLD.kind,OLD.reason,OLD.input_digest,OLD.idempotency_key) IS DISTINCT FROM
+         (NEW.id,NEW.created_at,NEW.account_id,NEW.requester_id,NEW.assignment_id,NEW.analyst_id,NEW.kind,NEW.reason,NEW.input_digest,NEW.idempotency_key)
+         OR (OLD.state='routed' AND to_jsonb(OLD) IS DISTINCT FROM to_jsonb(NEW))) THEN
+        RAISE EXCEPTION 'Management request immutable origin or receipt' USING ERRCODE = '23514';
+      END IF;
+      IF NOT EXISTS (SELECT 1 FROM account_users WHERE account_id=NEW.account_id AND user_id=NEW.requester_id) OR
+        (NEW.analyst_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM account_users WHERE account_id=NEW.account_id AND user_id=NEW.analyst_id)) OR
+        (NEW.assignment_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM jrc_relationship_assignments WHERE account_id=NEW.account_id AND id=NEW.assignment_id)) OR
+        (NEW.batch_review_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM jrc_relationship_batch_reviews WHERE account_id=NEW.account_id AND id=NEW.batch_review_id)) OR
+        (NEW.resolution_event_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM jrc_crm_audit_events WHERE account_id=NEW.account_id AND id=NEW.resolution_event_id)) THEN
+        RAISE EXCEPTION 'Management request account mismatch' USING ERRCODE='23514';
+      END IF;
+      RETURN NEW;
+    END; $function$
+  JRC_SCHEMA_SQL_f7a19fecd52c
+
+  execute <<~'JRC_SCHEMA_SQL_62697fbad032'
+    CREATE OR REPLACE FUNCTION public.jrc_rel_retention_assignment_capture()
+     RETURNS trigger
+     LANGUAGE plpgsql
+    AS $function$
+    BEGIN
+      IF TG_OP = 'DELETE' THEN PERFORM jrc_rel_retention_observe(to_jsonb(OLD), true); RETURN OLD; END IF;
+      IF TG_OP = 'UPDATE' AND (OLD.account_id, OLD.company_id, OLD.contact_id) IS DISTINCT FROM (NEW.account_id, NEW.company_id, NEW.contact_id)
+        THEN PERFORM jrc_rel_retention_observe(to_jsonb(OLD), true); END IF;
+      PERFORM jrc_rel_retention_observe(to_jsonb(NEW), false); RETURN NEW;
+    END; $function$
+  JRC_SCHEMA_SQL_62697fbad032
+
+  execute <<~'JRC_SCHEMA_SQL_147a26b8b800'
+    CREATE OR REPLACE FUNCTION public.jrc_rel_retention_immutable()
+     RETURNS trigger
+     LANGUAGE plpgsql
+    AS $function$
+    BEGIN
+      IF TG_OP = 'DELETE' AND NOT EXISTS (SELECT 1 FROM accounts WHERE id = OLD.account_id) THEN RETURN OLD; END IF;
+      RAISE EXCEPTION 'Retention history is immutable' USING ERRCODE = '23514';
+    END; $function$
+  JRC_SCHEMA_SQL_147a26b8b800
+
+  execute <<~'JRC_SCHEMA_SQL_3cad14097b38'
+    CREATE OR REPLACE FUNCTION public.jrc_rel_retention_observe(a jsonb, removed boolean DEFAULT false, baseline boolean DEFAULT false)
+     RETURNS void
+     LANGUAGE plpgsql
+    AS $function$
+    DECLARE account_key integer; identity_key text; kind text; master_present boolean; active boolean;
+            registered text; groups jsonb; facts jsonb; previous jsonb;
+    BEGIN
+      account_key := (a->>'account_id')::integer;
+      IF NOT EXISTS (SELECT 1 FROM accounts WHERE id = account_key) THEN RETURN; END IF;
+      PERFORM pg_advisory_xact_lock(1280528947, account_key);
+      IF NOT baseline AND NOT EXISTS (SELECT 1 FROM jrc_relationship_retention_coverages WHERE account_id = account_key) THEN RETURN; END IF;
+      IF a->>'company_id' IS NOT NULL THEN
+        kind := 'company'; identity_key := 'company:' || (a->>'company_id');
+        SELECT true, c.active INTO master_present, active FROM companies c
+          WHERE c.account_id = account_key AND c.id = (a->>'company_id')::bigint;
+      ELSE
+        kind := 'contact'; identity_key := 'contact:' || (a->>'contact_id');
+        SELECT true, c.registration_status INTO master_present, registered FROM contacts c
+          WHERE c.account_id = account_key AND c.id = (a->>'contact_id')::bigint;
+      END IF;
+      SELECT COALESCE(jsonb_agg(g.id ORDER BY g.id), '[]'::jsonb) INTO groups
+        FROM jrc_relationship_portfolio_groups g
+        JOIN jrc_relationship_portfolio_group_assignments l ON l.portfolio_group_id = g.id AND l.account_id = g.account_id
+        WHERE l.account_id = account_key AND l.assignment_id = (a->>'id')::bigint AND l.active AND g.status = 'active';
+      facts := jsonb_build_object('customer_key', identity_key, 'customer_type', kind,
+        'source_present', COALESCE(master_present, false) AND NOT removed,
+        'status', CASE WHEN removed THEN 'inactive' ELSE a->>'status' END,
+        'master_active', active, 'registration_status', registered,
+        'owner_id', a->'owner_id', 'team_id', a->'team_id', 'business_unit_id', a->'business_unit_id',
+        'assignment_id', (a->>'id')::bigint, 'portfolio_ids', groups);
+      SELECT s.facts INTO previous FROM jrc_relationship_retention_states s
+        WHERE s.account_id = account_key AND s.customer_key = identity_key ORDER BY s.observed_at DESC, s.id DESC LIMIT 1;
+      IF previous IS NOT DISTINCT FROM facts THEN RETURN; END IF;
+      INSERT INTO jrc_relationship_retention_states(account_id, customer_key, assignment_id, owner_id, team_id, business_unit_id, facts, observed_at)
+        VALUES(account_key, identity_key, (a->>'id')::bigint, (a->>'owner_id')::bigint, (a->>'team_id')::bigint,
+               (a->>'business_unit_id')::bigint, facts, timezone('UTC', clock_timestamp()));
+    END; $function$
+  JRC_SCHEMA_SQL_3cad14097b38
+
+  execute <<~'JRC_SCHEMA_SQL_8acd01517b80'
+    CREATE OR REPLACE FUNCTION public.jrc_rel_retention_source_capture()
+     RETURNS trigger
+     LANGUAGE plpgsql
+    AS $function$
+    DECLARE source jsonb; row_data record; linked bigint;
+    BEGIN
+      source := CASE WHEN TG_OP = 'DELETE' THEN to_jsonb(OLD) ELSE to_jsonb(NEW) END;
+      IF TG_TABLE_NAME = 'companies' THEN
+        FOR row_data IN SELECT * FROM jrc_relationship_assignments WHERE account_id = (source->>'account_id')::integer
+          AND company_id = (source->>'id')::bigint LOOP PERFORM jrc_rel_retention_observe(to_jsonb(row_data), false); END LOOP;
+      ELSIF TG_TABLE_NAME = 'contacts' THEN
+        FOR row_data IN SELECT * FROM jrc_relationship_assignments WHERE account_id = (source->>'account_id')::integer
+          AND contact_id = (source->>'id')::bigint LOOP PERFORM jrc_rel_retention_observe(to_jsonb(row_data), false); END LOOP;
+      ELSIF TG_TABLE_NAME = 'jrc_relationship_portfolio_groups' THEN
+        FOR row_data IN SELECT a.* FROM jrc_relationship_assignments a JOIN jrc_relationship_portfolio_group_assignments l
+          ON l.assignment_id = a.id AND l.account_id = a.account_id WHERE l.portfolio_group_id = (source->>'id')::bigint
+          AND a.account_id = (source->>'account_id')::integer LOOP PERFORM jrc_rel_retention_observe(to_jsonb(row_data), false); END LOOP;
+      ELSE
+        linked := (source->>'assignment_id')::bigint;
+        FOR row_data IN SELECT * FROM jrc_relationship_assignments WHERE account_id = (source->>'account_id')::integer
+          AND id = linked LOOP PERFORM jrc_rel_retention_observe(to_jsonb(row_data), false); END LOOP;
+        IF TG_OP = 'UPDATE' AND OLD.assignment_id IS DISTINCT FROM NEW.assignment_id THEN
+          FOR row_data IN SELECT * FROM jrc_relationship_assignments WHERE account_id = OLD.account_id
+            AND id = OLD.assignment_id LOOP PERFORM jrc_rel_retention_observe(to_jsonb(row_data), false); END LOOP;
+        END IF;
+      END IF;
+      IF TG_OP = 'DELETE' THEN RETURN OLD; END IF; RETURN NEW;
+    END; $function$
+  JRC_SCHEMA_SQL_8acd01517b80
+
+  execute <<~'JRC_SCHEMA_SQL_a5fe242bff3b'
+    CREATE OR REPLACE FUNCTION public.jrc_signature_connection_pin()
+     RETURNS trigger
+     LANGUAGE plpgsql
+    AS $function$ BEGIN IF TG_OP = 'DELETE' OR (to_jsonb(NEW) - ARRAY['authorization_checked_at','connect_checked_at','updated_at']) IS DISTINCT FROM (to_jsonb(OLD) - ARRAY['authorization_checked_at','connect_checked_at','updated_at']) THEN RAISE EXCEPTION 'Signature connection snapshots are immutable'; END IF; RETURN NEW; END; $function$
+  JRC_SCHEMA_SQL_a5fe242bff3b
+
+  execute <<~'JRC_SCHEMA_SQL_abc9df016378'
     CREATE OR REPLACE FUNCTION public.rel_batch_item_guard()
      RETURNS trigger
      LANGUAGE plpgsql
-    AS $function$ BEGIN IF OLD.state<>'pending' OR NEW.state NOT IN ('applied','failed','canceled') OR (to_jsonb(NEW)-ARRAY['state','receipt','error_code','updated_at']) IS DISTINCT FROM (to_jsonb(OLD)-ARRAY['state','receipt','error_code','updated_at']) THEN RAISE EXCEPTION 'Batch receipt is immutable'; END IF; RETURN NEW; END; $function$
-  JRC_SCHEMA_SQL_8031634e8df1
+    AS $function$ BEGIN IF OLD.company_id IS NULL THEN IF OLD.state<>'pending' OR NEW.state NOT IN ('applied','failed','canceled') OR (to_jsonb(NEW)-ARRAY['state','receipt','error_code','updated_at']) IS DISTINCT FROM (to_jsonb(OLD)-ARRAY['state','receipt','error_code','updated_at']) THEN RAISE EXCEPTION 'Batch receipt is immutable'; END IF; RETURN NEW; END IF; IF OLD.state<>'pending' OR NEW.state NOT IN ('applied','failed','canceled') OR (to_jsonb(NEW)-ARRAY['state','receipt','error_code','updated_at','assignment_id']) IS DISTINCT FROM (to_jsonb(OLD)-ARRAY['state','receipt','error_code','updated_at','assignment_id']) THEN RAISE EXCEPTION 'Master batch receipt is immutable'; END IF; IF NEW.state='applied' AND ( NEW.assignment_id IS NULL OR NEW.receipt->>'operation' IS DISTINCT FROM 'master_allocation' OR NEW.receipt->>'company_id' IS DISTINCT FROM NEW.company_id::text OR NEW.receipt->>'assignment_id' IS DISTINCT FROM NEW.assignment_id::text OR NOT EXISTS (SELECT 1 FROM jrc_relationship_assignments a WHERE a.id=NEW.assignment_id AND a.account_id=NEW.account_id AND a.company_id=NEW.company_id) ) THEN RAISE EXCEPTION 'Master batch receipt must identify its exact native company allocation'; END IF; RETURN NEW; END; $function$
+  JRC_SCHEMA_SQL_abc9df016378
+
+  execute <<~'JRC_SCHEMA_SQL_36d84425ef63'
+    CREATE OR REPLACE FUNCTION public.rel_batch_master_insert_guard()
+     RETURNS trigger
+     LANGUAGE plpgsql
+    AS $function$ BEGIN IF NEW.company_id IS NOT NULL AND (NEW.state<>'pending' OR NEW.assignment_id IS NOT NULL OR NOT EXISTS ( SELECT 1 FROM jrc_relationship_batch_reviews r WHERE r.id=NEW.batch_review_id AND r.account_id=NEW.account_id AND r.inputs->>'operation'='master_allocation' )) THEN RAISE EXCEPTION 'Master allocation subject requires a pending native master review'; END IF; RETURN NEW; END; $function$
+  JRC_SCHEMA_SQL_36d84425ef63
 
   execute <<~'JRC_SCHEMA_SQL_d9371cb3bd39'
     CREATE OR REPLACE FUNCTION public.rel_batch_review_guard()
@@ -9180,6 +10804,18 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     CREATE TRIGGER camp_dpid_before_insert AFTER INSERT ON accounts FOR EACH ROW EXECUTE FUNCTION camp_dpid_before_insert();
   JRC_SCHEMA_SQL_f39569df0429
 
+  execute <<~'JRC_SCHEMA_SQL_9bb5f47a2a78'
+    CREATE TRIGGER jrc_bo_dossier_attachment_guard BEFORE INSERT OR UPDATE ON active_storage_attachments FOR EACH ROW EXECUTE FUNCTION jrc_bo_dossier_attachment_guard();
+  JRC_SCHEMA_SQL_9bb5f47a2a78
+
+  execute <<~'JRC_SCHEMA_SQL_b843a3e990c8'
+    CREATE TRIGGER jrc_bo_private_attachment BEFORE INSERT OR DELETE OR UPDATE ON active_storage_attachments FOR EACH ROW EXECUTE FUNCTION jrc_bo_private_attachment();
+  JRC_SCHEMA_SQL_b843a3e990c8
+
+  execute <<~'JRC_SCHEMA_SQL_e55acb627278'
+    CREATE TRIGGER jrc_bo_dossier_blob_pin BEFORE DELETE OR UPDATE ON active_storage_blobs FOR EACH ROW EXECUTE FUNCTION jrc_bo_dossier_blob_pin();
+  JRC_SCHEMA_SQL_e55acb627278
+
   execute <<~'JRC_SCHEMA_SQL_3b8f5d2adf1e'
     CREATE TRIGGER jrc_native_agent_bot_inbox_fence BEFORE INSERT OR DELETE OR UPDATE ON agent_bot_inboxes FOR EACH ROW EXECUTE FUNCTION jrc_native_responder_config_fence();
   JRC_SCHEMA_SQL_3b8f5d2adf1e
@@ -9192,6 +10828,10 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     CREATE TRIGGER campaigns_before_insert_row_tr BEFORE INSERT ON campaigns FOR EACH ROW EXECUTE FUNCTION campaigns_before_insert_row_tr();
   JRC_SCHEMA_SQL_06360109065e
 
+  execute <<~'JRC_SCHEMA_SQL_b67a6f873a55'
+    CREATE TRIGGER rel_retention_company_capture AFTER DELETE OR UPDATE OF active ON companies FOR EACH ROW EXECUTE FUNCTION jrc_rel_retention_source_capture();
+  JRC_SCHEMA_SQL_b67a6f873a55
+
   execute <<~'JRC_SCHEMA_SQL_70a82d62aefd'
     CREATE TRIGGER jrc_effect_contact_inbox_control BEFORE UPDATE ON contact_inboxes FOR EACH ROW EXECUTE FUNCTION jrc_effect_contact_inbox_control();
   JRC_SCHEMA_SQL_70a82d62aefd
@@ -9199,6 +10839,10 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
   execute <<~'JRC_SCHEMA_SQL_efb7b3c83074'
     CREATE TRIGGER jrc_effect_contact_control BEFORE UPDATE ON contacts FOR EACH ROW EXECUTE FUNCTION jrc_effect_contact_control();
   JRC_SCHEMA_SQL_efb7b3c83074
+
+  execute <<~'JRC_SCHEMA_SQL_7f96b467338c'
+    CREATE TRIGGER rel_retention_contact_capture AFTER DELETE OR UPDATE OF registration_status ON contacts FOR EACH ROW EXECUTE FUNCTION jrc_rel_retention_source_capture();
+  JRC_SCHEMA_SQL_7f96b467338c
 
   execute <<~'JRC_SCHEMA_SQL_1e88bbf38162'
     CREATE TRIGGER conversations_before_insert_row_tr BEFORE INSERT ON conversations FOR EACH ROW EXECUTE FUNCTION conversations_before_insert_row_tr();
@@ -9228,6 +10872,10 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     CREATE TRIGGER jrc_ap_immutable BEFORE DELETE OR UPDATE ON jrc_approvals_decisions FOR EACH ROW EXECUTE FUNCTION jrc_ap_immutable();
   JRC_SCHEMA_SQL_d9f4290e72ac
 
+  execute <<~'JRC_SCHEMA_SQL_7c8aa86d3a47'
+    CREATE TRIGGER jrc_ap_notice_source_guard BEFORE UPDATE ON jrc_approvals_notification_outboxes FOR EACH ROW EXECUTE FUNCTION jrc_ap_notice_source_guard();
+  JRC_SCHEMA_SQL_7c8aa86d3a47
+
   execute <<~'JRC_SCHEMA_SQL_3ce820c2d1b3'
     CREATE TRIGGER jrc_ap_immutable BEFORE DELETE OR UPDATE ON jrc_approvals_policy_versions FOR EACH ROW EXECUTE FUNCTION jrc_ap_immutable();
   JRC_SCHEMA_SQL_3ce820c2d1b3
@@ -9236,17 +10884,121 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     CREATE TRIGGER jrc_ap_request_guard BEFORE DELETE OR UPDATE ON jrc_approvals_requests FOR EACH ROW EXECUTE FUNCTION jrc_ap_request_guard();
   JRC_SCHEMA_SQL_a9a593e95eda
 
+  execute <<~'JRC_SCHEMA_SQL_428a8c7973b5'
+    CREATE TRIGGER jrc_authority_proposal_pin BEFORE DELETE OR UPDATE ON jrc_backoffice_authority_proposals FOR EACH ROW EXECUTE FUNCTION jrc_contract_version_pin();
+  JRC_SCHEMA_SQL_428a8c7973b5
+
+  execute <<~'JRC_SCHEMA_SQL_d9a5172ab451'
+    CREATE TRIGGER jrc_bo_dossier_pin BEFORE INSERT OR DELETE OR UPDATE ON jrc_backoffice_completion_dossiers FOR EACH ROW EXECUTE FUNCTION jrc_bo_dossier_pin();
+  JRC_SCHEMA_SQL_d9a5172ab451
+
+  execute <<~'JRC_SCHEMA_SQL_ced701519db3'
+    CREATE TRIGGER jrc_contract_version_pin BEFORE DELETE OR UPDATE ON jrc_backoffice_contract_versions FOR EACH ROW EXECUTE FUNCTION jrc_contract_version_pin();
+  JRC_SCHEMA_SQL_ced701519db3
+
+  execute <<~'JRC_SCHEMA_SQL_59a600bc3dc4'
+    CREATE TRIGGER jrc_bo_document_validity_guard BEFORE INSERT OR UPDATE OF expires_on, validity_timezone ON jrc_backoffice_document_decisions FOR EACH ROW EXECUTE FUNCTION jrc_bo_document_validity_guard();
+  JRC_SCHEMA_SQL_59a600bc3dc4
+
+  execute <<~'JRC_SCHEMA_SQL_33adea1f3970'
+    CREATE TRIGGER jrc_bo_document_scan_pin BEFORE DELETE OR UPDATE ON jrc_backoffice_document_scans FOR EACH ROW EXECUTE FUNCTION jrc_bo_document_scan_pin();
+  JRC_SCHEMA_SQL_33adea1f3970
+
+  execute <<~'JRC_SCHEMA_SQL_1d29d7a0dc08'
+    CREATE TRIGGER jrc_bo_document_version_pin BEFORE DELETE OR UPDATE ON jrc_backoffice_document_versions FOR EACH ROW EXECUTE FUNCTION jrc_bo_document_scan_pin();
+  JRC_SCHEMA_SQL_1d29d7a0dc08
+
+  execute <<~'JRC_SCHEMA_SQL_631ac5a251d7'
+    CREATE TRIGGER jrc_bo_req_plans_guard BEFORE INSERT OR DELETE OR UPDATE ON jrc_backoffice_requirement_plans FOR EACH ROW EXECUTE FUNCTION jrc_bo_requirement_guard();
+  JRC_SCHEMA_SQL_631ac5a251d7
+
+  execute <<~'JRC_SCHEMA_SQL_768659446057'
+    CREATE TRIGGER jrc_bo_req_responses_guard BEFORE INSERT OR DELETE OR UPDATE ON jrc_backoffice_requirement_responses FOR EACH ROW EXECUTE FUNCTION jrc_bo_requirement_guard();
+  JRC_SCHEMA_SQL_768659446057
+
+  execute <<~'JRC_SCHEMA_SQL_575427e1aa6b'
+    CREATE TRIGGER jrc_bo_req_rules_guard BEFORE INSERT OR DELETE OR UPDATE ON jrc_backoffice_requirement_rules FOR EACH ROW EXECUTE FUNCTION jrc_bo_requirement_guard();
+  JRC_SCHEMA_SQL_575427e1aa6b
+
+  execute <<~'JRC_SCHEMA_SQL_7b903fc4ea96'
+    CREATE TRIGGER jrc_bo_signature_acceptance_pin BEFORE INSERT OR DELETE OR UPDATE ON jrc_backoffice_signature_acceptances FOR EACH ROW EXECUTE FUNCTION jrc_bo_signature_acceptance_pin();
+  JRC_SCHEMA_SQL_7b903fc4ea96
+
+  execute <<~'JRC_SCHEMA_SQL_37a866c4a59d'
+    CREATE TRIGGER jrc_signature_connection_pin BEFORE DELETE OR UPDATE ON jrc_backoffice_signature_connections FOR EACH ROW EXECUTE FUNCTION jrc_signature_connection_pin();
+  JRC_SCHEMA_SQL_37a866c4a59d
+
+  execute <<~'JRC_SCHEMA_SQL_f9c3a75a4bf5'
+    CREATE TRIGGER jrc_signature_deliveries_pin BEFORE DELETE OR UPDATE ON jrc_backoffice_signature_deliveries FOR EACH ROW EXECUTE FUNCTION jrc_contract_version_pin();
+  JRC_SCHEMA_SQL_f9c3a75a4bf5
+
+  execute <<~'JRC_SCHEMA_SQL_1390707fe8c3'
+    CREATE TRIGGER jrc_signature_delivery_events_pin BEFORE DELETE OR UPDATE ON jrc_backoffice_signature_delivery_events FOR EACH ROW EXECUTE FUNCTION jrc_contract_version_pin();
+  JRC_SCHEMA_SQL_1390707fe8c3
+
+  execute <<~'JRC_SCHEMA_SQL_3ee03d5826c7'
+    CREATE TRIGGER jrc_signer_roster_pin BEFORE DELETE OR UPDATE ON jrc_backoffice_signer_rosters FOR EACH ROW EXECUTE FUNCTION jrc_contract_version_pin();
+  JRC_SCHEMA_SQL_3ee03d5826c7
+
+  execute <<~'JRC_SCHEMA_SQL_2ce7f4f547fa'
+    CREATE TRIGGER jrc_connection_event_immutable_rows BEFORE DELETE OR UPDATE ON jrc_broker_connection_events FOR EACH ROW EXECUTE FUNCTION jrc_connection_event_immutable_guard();
+  JRC_SCHEMA_SQL_2ce7f4f547fa
+
+  execute <<~'JRC_SCHEMA_SQL_aeac535f8e23'
+    CREATE TRIGGER jrc_connection_event_immutable_truncate BEFORE TRUNCATE ON jrc_broker_connection_events FOR EACH STATEMENT EXECUTE FUNCTION jrc_connection_event_immutable_guard();
+  JRC_SCHEMA_SQL_aeac535f8e23
+
+  execute <<~'JRC_SCHEMA_SQL_d42a05653bc6'
+    CREATE TRIGGER rel_history_source_guard BEFORE DELETE OR UPDATE ON jrc_crm_audit_events FOR EACH ROW EXECUTE FUNCTION jrc_rel_history_source_guard();
+  JRC_SCHEMA_SQL_d42a05653bc6
+
+  execute <<~'JRC_SCHEMA_SQL_95a6607240d5'
+    CREATE TRIGGER jrc_contract_delivery_source_fence BEFORE UPDATE ON jrc_crm_contracts FOR EACH ROW EXECUTE FUNCTION jrc_contract_delivery_source_fence();
+  JRC_SCHEMA_SQL_95a6607240d5
+
   execute <<~'JRC_SCHEMA_SQL_2c7633192b4d'
     CREATE TRIGGER jrc_effect_receipt_immutable BEFORE UPDATE ON jrc_flow_effect_receipts FOR EACH ROW EXECUTE FUNCTION jrc_effect_receipt_immutable();
   JRC_SCHEMA_SQL_2c7633192b4d
+
+  execute <<~'JRC_SCHEMA_SQL_e738d6ee27ad'
+    CREATE TRIGGER jrc_human_policy_immutable_rows BEFORE DELETE OR UPDATE ON jrc_human_assignment_policy_events FOR EACH ROW EXECUTE FUNCTION jrc_human_policy_immutable_guard();
+  JRC_SCHEMA_SQL_e738d6ee27ad
+
+  execute <<~'JRC_SCHEMA_SQL_0df134023ee3'
+    CREATE TRIGGER jrc_human_policy_immutable_truncate BEFORE TRUNCATE ON jrc_human_assignment_policy_events FOR EACH STATEMENT EXECUTE FUNCTION jrc_human_policy_immutable_guard();
+  JRC_SCHEMA_SQL_0df134023ee3
+
+  execute <<~'JRC_SCHEMA_SQL_9da8f3a6aa81'
+    CREATE TRIGGER jrc_migration_event_rows BEFORE DELETE OR UPDATE ON jrc_migration_events FOR EACH ROW EXECUTE FUNCTION jrc_migration_event_guard();
+  JRC_SCHEMA_SQL_9da8f3a6aa81
+
+  execute <<~'JRC_SCHEMA_SQL_b780ed2b2bc1'
+    CREATE TRIGGER jrc_migration_event_truncate BEFORE TRUNCATE ON jrc_migration_events FOR EACH STATEMENT EXECUTE FUNCTION jrc_migration_event_guard();
+  JRC_SCHEMA_SQL_b780ed2b2bc1
+
+  execute <<~'JRC_SCHEMA_SQL_2bca6b23c834'
+    CREATE TRIGGER jrc_migration_media_owner_rows BEFORE DELETE OR UPDATE ON jrc_migration_media_objects FOR EACH ROW EXECUTE FUNCTION jrc_migration_media_owner_guard();
+  JRC_SCHEMA_SQL_2bca6b23c834
+
+  execute <<~'JRC_SCHEMA_SQL_808eaf09795b'
+    CREATE TRIGGER jrc_migration_media_owner_truncate BEFORE TRUNCATE ON jrc_migration_media_objects FOR EACH STATEMENT EXECUTE FUNCTION jrc_migration_media_owner_guard();
+  JRC_SCHEMA_SQL_808eaf09795b
 
   execute <<~'JRC_SCHEMA_SQL_a8f49adde71a'
     CREATE TRIGGER jrc_nico_send_fact_guard BEFORE UPDATE ON jrc_nico_broker_send_operations FOR EACH ROW EXECUTE FUNCTION jrc_nico_preserve_send_fact();
   JRC_SCHEMA_SQL_a8f49adde71a
 
+  execute <<~'JRC_SCHEMA_SQL_699911a81a87'
+    CREATE TRIGGER rel_retention_assignment_capture AFTER INSERT OR DELETE OR UPDATE ON jrc_relationship_assignments FOR EACH ROW EXECUTE FUNCTION jrc_rel_retention_assignment_capture();
+  JRC_SCHEMA_SQL_699911a81a87
+
   execute <<~'JRC_SCHEMA_SQL_bbdeb4fd75e1'
     CREATE TRIGGER rel_batch_item_immutable BEFORE UPDATE ON jrc_relationship_batch_items FOR EACH ROW EXECUTE FUNCTION rel_batch_item_guard();
   JRC_SCHEMA_SQL_bbdeb4fd75e1
+
+  execute <<~'JRC_SCHEMA_SQL_74a10f85c746'
+    CREATE TRIGGER rel_batch_master_subject_insert BEFORE INSERT ON jrc_relationship_batch_items FOR EACH ROW EXECUTE FUNCTION rel_batch_master_insert_guard();
+  JRC_SCHEMA_SQL_74a10f85c746
 
   execute <<~'JRC_SCHEMA_SQL_c48183d1823d'
     CREATE TRIGGER rel_batch_review_immutable BEFORE UPDATE ON jrc_relationship_batch_reviews FOR EACH ROW EXECUTE FUNCTION rel_batch_review_guard();
@@ -9260,111 +11012,32 @@ ActiveRecord::Schema[7.1].define(version: 2026_11_09_160000) do
     CREATE TRIGGER rel_cadence_receipt_immutable BEFORE UPDATE ON jrc_relationship_cadence_steps FOR EACH ROW EXECUTE FUNCTION rel_cadence_step_guard();
   JRC_SCHEMA_SQL_795090ef5ef9
 
+  execute <<~'JRC_SCHEMA_SQL_da2c8b748547'
+    CREATE TRIGGER rel_management_guard BEFORE INSERT OR DELETE OR UPDATE ON jrc_relationship_management_requests FOR EACH ROW EXECUTE FUNCTION jrc_rel_management_guard();
+  JRC_SCHEMA_SQL_da2c8b748547
+
+  execute <<~'JRC_SCHEMA_SQL_88b7327464b4'
+    CREATE TRIGGER rel_retention_link_capture AFTER INSERT OR DELETE OR UPDATE ON jrc_relationship_portfolio_group_assignments FOR EACH ROW EXECUTE FUNCTION jrc_rel_retention_source_capture();
+  JRC_SCHEMA_SQL_88b7327464b4
+
+  execute <<~'JRC_SCHEMA_SQL_209f302c927f'
+    CREATE TRIGGER rel_retention_group_capture AFTER UPDATE OF status ON jrc_relationship_portfolio_groups FOR EACH ROW EXECUTE FUNCTION jrc_rel_retention_source_capture();
+  JRC_SCHEMA_SQL_209f302c927f
+
+  execute <<~'JRC_SCHEMA_SQL_8a03be729324'
+    CREATE TRIGGER rel_history_receipt_guard BEFORE INSERT OR DELETE OR UPDATE ON jrc_relationship_portfolio_history_receipts FOR EACH ROW EXECUTE FUNCTION jrc_rel_history_receipt_guard();
+  JRC_SCHEMA_SQL_8a03be729324
+
+  execute <<~'JRC_SCHEMA_SQL_d3e4db06ab9f'
+    CREATE TRIGGER rel_retention_coverage_immutable BEFORE DELETE OR UPDATE ON jrc_relationship_retention_coverages FOR EACH ROW EXECUTE FUNCTION jrc_rel_retention_immutable();
+  JRC_SCHEMA_SQL_d3e4db06ab9f
+
+  execute <<~'JRC_SCHEMA_SQL_a0feced6d0ec'
+    CREATE TRIGGER rel_retention_immutable BEFORE DELETE OR UPDATE ON jrc_relationship_retention_states FOR EACH ROW EXECUTE FUNCTION jrc_rel_retention_immutable();
+  JRC_SCHEMA_SQL_a0feced6d0ec
+
   execute <<~'JRC_SCHEMA_SQL_213d81448354'
     CREATE TRIGGER jrc_effect_message_control BEFORE INSERT ON messages FOR EACH ROW EXECUTE FUNCTION jrc_effect_message_control();
   JRC_SCHEMA_SQL_213d81448354
-
-
-  execute <<~'JRC_SCHEMA_SQL_ed2150e2fbd9'
-    ALTER TABLE "jrc_human_assignment_policy_events" DROP CONSTRAINT "jrc_human_policy_global_account_scope";
-  JRC_SCHEMA_SQL_ed2150e2fbd9
-
-  execute <<~'JRC_SCHEMA_SQL_b4f35ba8b80f'
-    ALTER TABLE "jrc_human_assignment_policy_events" ADD CONSTRAINT "jrc_human_policy_global_account_scope" CHECK (((inbox_id IS NOT NULL) OR (NOT ((next_policy ->> 'scope'::text) IS DISTINCT FROM 'GLOBAL_ACCOUNT'::text))));
-  JRC_SCHEMA_SQL_b4f35ba8b80f
-
-  execute <<~'JRC_SCHEMA_SQL_ae900f5e1338'
-    CREATE OR REPLACE FUNCTION public.jrc_human_policy_immutable_guard()
-     RETURNS trigger
-     LANGUAGE plpgsql
-     SET search_path TO 'pg_catalog', 'public'
-    AS $function$
-    BEGIN
-      -- Preserve only the parent-removal actions already defined by the original FKs.
-      IF TG_OP = 'DELETE' THEN
-        IF pg_trigger_depth() > 1 AND (
-          NOT EXISTS (SELECT 1 FROM public.accounts WHERE id = OLD.account_id) OR
-          (OLD.inbox_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM public.inboxes WHERE id = OLD.inbox_id))
-        ) THEN
-          RETURN OLD;
-        END IF;
-      ELSIF TG_OP = 'UPDATE' THEN
-        IF pg_trigger_depth() > 1 AND OLD.user_id IS NOT NULL AND NEW.user_id IS NULL AND
-          (to_jsonb(NEW) - 'user_id') IS NOT DISTINCT FROM (to_jsonb(OLD) - 'user_id') AND
-          NOT EXISTS (SELECT 1 FROM public.users WHERE id = OLD.user_id)
-        THEN
-          RETURN NEW;
-        END IF;
-      END IF;
-      RAISE EXCEPTION 'Human assignment policy history is append-only' USING ERRCODE = '23514';
-    END;
-    $function$
-  JRC_SCHEMA_SQL_ae900f5e1338
-
-  execute <<~'JRC_SCHEMA_SQL_e738d6ee27ad'
-    CREATE TRIGGER jrc_human_policy_immutable_rows BEFORE DELETE OR UPDATE ON jrc_human_assignment_policy_events FOR EACH ROW EXECUTE FUNCTION jrc_human_policy_immutable_guard();
-  JRC_SCHEMA_SQL_e738d6ee27ad
-
-  execute <<~'JRC_SCHEMA_SQL_0df134023ee3'
-    CREATE TRIGGER jrc_human_policy_immutable_truncate BEFORE TRUNCATE ON jrc_human_assignment_policy_events FOR EACH STATEMENT EXECUTE FUNCTION jrc_human_policy_immutable_guard();
-  JRC_SCHEMA_SQL_0df134023ee3
-  execute <<~'JRC_SCHEMA_SQL_9a7c1bf6b1f5'
-    CREATE OR REPLACE FUNCTION public.jrc_connection_event_immutable_guard()
-     RETURNS trigger
-     LANGUAGE plpgsql
-     SET search_path TO 'pg_catalog', 'public'
-    AS $function$
-    BEGIN
-      IF TG_OP = 'DELETE' AND pg_trigger_depth() > 1 AND (
-        NOT EXISTS (SELECT 1 FROM public.accounts WHERE id = OLD.account_id) OR
-        NOT EXISTS (SELECT 1 FROM public.inboxes WHERE id = OLD.inbox_id)
-      ) THEN RETURN OLD;
-      ELSIF TG_OP = 'UPDATE' AND pg_trigger_depth() > 1 AND OLD.user_id IS NOT NULL AND NEW.user_id IS NULL AND
-        (to_jsonb(NEW) - 'user_id') IS NOT DISTINCT FROM (to_jsonb(OLD) - 'user_id') AND
-        NOT EXISTS (SELECT 1 FROM public.users WHERE id = OLD.user_id)
-      THEN RETURN NEW;
-      END IF;
-      RAISE EXCEPTION 'Connection history is append-only' USING ERRCODE = '23514';
-    END;
-    $function$
-  JRC_SCHEMA_SQL_9a7c1bf6b1f5
-  execute <<~'JRC_SCHEMA_SQL_2ce7f4f547fa'
-    CREATE TRIGGER jrc_connection_event_immutable_rows BEFORE DELETE OR UPDATE ON jrc_broker_connection_events FOR EACH ROW EXECUTE FUNCTION jrc_connection_event_immutable_guard();
-  JRC_SCHEMA_SQL_2ce7f4f547fa
-  execute <<~'JRC_SCHEMA_SQL_aeac535f8e23'
-    CREATE TRIGGER jrc_connection_event_immutable_truncate BEFORE TRUNCATE ON jrc_broker_connection_events FOR EACH STATEMENT EXECUTE FUNCTION jrc_connection_event_immutable_guard();
-  JRC_SCHEMA_SQL_aeac535f8e23
-  execute <<~'JRC_SCHEMA_SQL_6635904880b1'
-    CREATE OR REPLACE FUNCTION public.jrc_migration_event_guard()
-     RETURNS trigger
-     LANGUAGE plpgsql
-     SET search_path TO 'pg_catalog', 'public'
-    AS $function$ BEGIN IF TG_OP = 'DELETE' AND pg_trigger_depth() > 1 AND ( NOT EXISTS (SELECT 1 FROM public.accounts WHERE id = OLD.account_id) OR NOT EXISTS (SELECT 1 FROM public.jrc_migration_batches WHERE id = OLD.batch_id) ) THEN RETURN OLD; ELSIF TG_OP = 'UPDATE' AND pg_trigger_depth() > 1 AND OLD.user_id IS NOT NULL AND NEW.user_id IS NULL AND (to_jsonb(NEW) - 'user_id') IS NOT DISTINCT FROM (to_jsonb(OLD) - 'user_id') AND NOT EXISTS (SELECT 1 FROM public.users WHERE id = OLD.user_id) THEN RETURN NEW; END IF; RAISE EXCEPTION 'Migration history is append-only' USING ERRCODE = '23514'; END; $function$
-  JRC_SCHEMA_SQL_6635904880b1
-
-  execute <<~'JRC_SCHEMA_SQL_9da8f3a6aa81'
-    CREATE TRIGGER jrc_migration_event_rows BEFORE DELETE OR UPDATE ON jrc_migration_events FOR EACH ROW EXECUTE FUNCTION jrc_migration_event_guard();
-  JRC_SCHEMA_SQL_9da8f3a6aa81
-
-  execute <<~'JRC_SCHEMA_SQL_b780ed2b2bc1'
-    CREATE TRIGGER jrc_migration_event_truncate BEFORE TRUNCATE ON jrc_migration_events FOR EACH STATEMENT EXECUTE FUNCTION jrc_migration_event_guard();
-  JRC_SCHEMA_SQL_b780ed2b2bc1
-  execute <<~'JRC_SCHEMA_SQL_eb63c32829c8'
-    CREATE OR REPLACE FUNCTION public.jrc_migration_media_owner_guard()
-     RETURNS trigger
-     LANGUAGE plpgsql
-     SET search_path TO 'pg_catalog', 'public'
-    AS $function$ BEGIN IF TG_OP = 'DELETE' AND pg_trigger_depth() > 1 AND NOT EXISTS (SELECT 1 FROM public.jrc_migration_items WHERE id = OLD.item_id AND account_id = OLD.account_id) THEN RETURN OLD; ELSIF TG_OP = 'UPDATE' AND (to_jsonb(NEW) - ARRAY['status','blob_id','claim_token','claimed_at','checked_at','error_code','updated_at', 'absence_verified_at','scan_generation','scan_token','scan_started_at']) IS NOT DISTINCT FROM (to_jsonb(OLD) - ARRAY['status','blob_id','claim_token','claimed_at','checked_at','error_code','updated_at', 'absence_verified_at','scan_generation','scan_token','scan_started_at']) AND (NEW.absence_verified_at IS NOT DISTINCT FROM OLD.absence_verified_at OR (OLD.absence_verified_at IS NULL AND NEW.absence_verified_at IS NOT NULL AND OLD.status = 'verifying' AND NEW.status = 'planned')) AND NEW.scan_generation >= OLD.scan_generation THEN RETURN NEW; END IF; RAISE EXCEPTION 'Migration media ownership is immutable' USING ERRCODE = '23514'; END; $function$
-  JRC_SCHEMA_SQL_eb63c32829c8
-
-  execute <<~'JRC_SCHEMA_SQL_2bca6b23c834'
-    CREATE TRIGGER jrc_migration_media_owner_rows BEFORE DELETE OR UPDATE ON jrc_migration_media_objects FOR EACH ROW EXECUTE FUNCTION jrc_migration_media_owner_guard();
-  JRC_SCHEMA_SQL_2bca6b23c834
-
-  execute <<~'JRC_SCHEMA_SQL_808eaf09795b'
-    CREATE TRIGGER jrc_migration_media_owner_truncate BEFORE TRUNCATE ON jrc_migration_media_objects FOR EACH STATEMENT EXECUTE FUNCTION jrc_migration_media_owner_guard();
-  JRC_SCHEMA_SQL_808eaf09795b
-
-  add_foreign_key "jrc_service_desk_tickets", "companies", column: ["account_id", "establishment_company_id"], primary_key: ["account_id", "id"], name: "jrc_sd_establishment_account_fk"
 
 end

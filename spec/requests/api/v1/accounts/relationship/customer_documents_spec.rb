@@ -88,6 +88,9 @@ RSpec.describe 'Protected Relationship customer documents', type: :request do
     account.account_users.find_by!(user: analyst).update!(custom_role: role)
     analyst_headers = analyst.create_new_auth_token
     get "#{url}/#{document.id}/versions/#{version.id}/download", headers: analyst_headers
+    expect(response).to have_http_status(:forbidden)
+    role.update!(permissions: %w[contact_manage jrc_relationship_view jrc_relationship_documents_view jrc_relationship_documents_download])
+    get "#{url}/#{document.id}/versions/#{version.id}/download", headers: analyst_headers
     expect(response).to have_http_status(:ok)
     expect(response.headers['Cache-Control']).to eq('no-store')
     role.update!(permissions: %w[contact_manage jrc_relationship_view])

@@ -30,6 +30,20 @@ RSpec.describe 'Scoped original portfolio history', type: :request do
     expect(response.headers['Cache-Control']).to include('no-store')
   end
 
+  it 'captures native distribution rules without projecting explicit local user grants' do
+    configuration = JrcRelationship::Configuration.create!(account: account, scope_key: "portfolio:#{group.id}")
+    rules = configuration.effective_rules
+    event = context.audit!(configuration, action: 'configuration_versioned',
+                            before: { version: 1, rules: rules }, after: { version: 2, rules: rules })
+    receipt = JrcRelationship::PortfolioHistoryReceipt.find_by!(audit_event_id: event.id)
+    expect(receipt.snapshot.fetch('after').fetch('rules').keys).to match_array(JrcRelationship::PortfolioHistoryBoundary::RULE_FIELDS)
+    expect(event.reload.to_value.fetch('rules')).to have_key('portfolio_local_access')
+    detail(event)
+    expect(response).to have_http_status(:ok), response.body
+    expect(response.parsed_body).to include('available' => true)
+    expect(response.body).not_to include('portfolio_local_access')
+  end
+
   it 'does not synthesize proof for an old audit event' do
     event = JrcCustomers::Audit.record!(account: account, actor: actor, resource: group, event_type: 'relationship_updated',
       metadata: { action: 'portfolio_group_updated' }, from_value: { objective: 'PRIVATE LEGACY' }, to_value: {})

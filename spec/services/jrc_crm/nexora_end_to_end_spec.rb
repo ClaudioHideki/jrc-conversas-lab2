@@ -10,7 +10,7 @@ RSpec.describe 'JRC CRM Nexora end-to-end commercial lifecycle', :approval_core,
     raise 'Exclusive synthetic integration database required' unless Rails.env.test? && config.database == 'jrc_rel_v2_candidate_test' &&
                                                                     config.host == 'jrc-rel-v2-pg-20261101'
 
-    account.enable_features!('jrc_crm', 'jrc_customer_master', 'jrc_projects')
+    account.enable_features!('jrc_crm', 'jrc_customer_master', 'jrc_projects', 'jrc_approvals')
   end
 
   it 'preserves one company/contact from lead through won sale, order, contract, backoffice and implementation project' do

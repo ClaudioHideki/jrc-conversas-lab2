@@ -10,7 +10,7 @@ module JrcRelationship
     FIELDS = %w[name objective owner_id team_id business_unit_id segment_id visibility status goals].freeze
   end
   class PortfolioGroupConfiguration
-    RULES = %w[portfolio_capacity_limits portfolio_transfer_approval_required portfolio_review_validity_minutes].freeze
+    RULES = %w[portfolio_capacity_limits portfolio_transfer_approval_required portfolio_review_validity_minutes portfolio_local_access].freeze
   end
   class TestRows
     def initialize(rows) = @rows = rows
@@ -111,6 +111,16 @@ class PortfolioHistoryCaptureTest < Minitest::Test
     @event.from_value={'version'=>1,'rules'=>{'portfolio_review_validity_minutes'=>20,'health_private'=>'ignored'}}
     @event.to_value={'version'=>2,'rules'=>{'portfolio_review_validity_minutes'=>30}}
     row=capture(JrcRelationship::Configuration.new(1,'portfolio:3',[]));assert_equal 'rules',row['kind'];refute row['before']['rules'].key?('health_private')
+  end
+  def test_native_local_access_is_retained_in_event_but_excluded_from_history_projection
+    @event.metadata={'action'=>'configuration_versioned'}
+    @event.from_value={'version'=>1,'rules'=>{'portfolio_local_access'=>{'enabled'=>false},'portfolio_review_validity_minutes'=>20}}
+    @event.to_value={'version'=>2,'rules'=>{'portfolio_local_access'=>{'enabled'=>true},'portfolio_review_validity_minutes'=>30}}
+    row=capture(JrcRelationship::Configuration.new(1,'portfolio:3',[]))
+    assert_equal 30,row['after']['rules']['portfolio_review_validity_minutes']
+    refute row['before']['rules'].key?('portfolio_local_access')
+    refute row['after']['rules'].key?('portfolio_local_access')
+    assert_equal true,@event.to_value['rules']['portfolio_local_access']['enabled']
   end
   def test_restore_uses_exact_version_record_not_current_rules
     @event.metadata={'action'=>'configuration_restored'};@event.from_value={'version'=>1};@event.to_value={'version'=>2,'reason'=>'Restored'}
