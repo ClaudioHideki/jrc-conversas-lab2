@@ -16,6 +16,7 @@ import ComposeConversation from 'dashboard/components-next/NewConversation/Compo
 import VoiceCallButton from 'dashboard/components-next/Contacts/VoiceCallButton.vue';
 import SurveyDeliveryPanel from './SurveyDeliveryPanel.vue';
 import NicoSummaryPanel from './NicoSummaryPanel.vue';
+import ManagementRequestsPanel from './ManagementRequestsPanel.vue';
 import ManualAttendancePanel from './ManualAttendancePanel.vue';
 import {
   buttonClass,
@@ -654,6 +655,10 @@ const money = value => formatMoney(value, props.metadata?.formatting);
           {{ t('RELATIONSHIP.SAVE') }}
         </button>
       </form>
+      <ManagementRequestsPanel
+        :metadata="metadata"
+        :assignment-id="assignmentId"
+      />
       <ManualAttendancePanel
         v-if="metadata.can_manage && channels?.can_crm"
         :assignment-id="assignmentId"

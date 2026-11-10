@@ -193,9 +193,10 @@ module Api::V1::Accounts::Crm
 
     def confirm_provisioning
       if @request.workflow_version == 2 && (@request.stage != 'provisioning' ||
-         (@request.stage_applicable?('contract') && @request.contract&.signature_status != 'signed'))
+         (@request.stage_applicable?('contract') && !JrcBackoffice::SignatureRelease.satisfied?(@request)))
         return render json: { message: 'Confirme o provisionamento na etapa própria, após a assinatura exigida.' }, status: :unprocessable_entity
       end
+      JrcBackoffice::Requirements.check!(request: @request, actor: Current.user, through: 'implementation')
       mode = params[:mode].to_s
       unless mode.in?(%w[manual external])
         return render json: { message: 'Modo de provisionamento inválido.' }, status: :unprocessable_entity
@@ -231,7 +232,7 @@ module Api::V1::Accounts::Crm
 
       before = audit_snapshot(@request)
       if @request.fulfillment? && %w[implementation provisioning finance completed].include?(target_stage) &&
-         (@request.stage_applicable?('contract') && @request.contract&.signature_status != 'signed')
+         (@request.stage_applicable?('contract') && !JrcBackoffice::SignatureRelease.satisfied?(@request))
         return render json: { message: 'A assinatura do contrato ainda está pendente.' }, status: :unprocessable_entity
       end
       @request.update!(stage: target_stage, status: 'in_progress', completed_at: nil)
@@ -321,7 +322,8 @@ module Api::V1::Accounts::Crm
         data[:company] = company && { id: company.id, name: company.name }
         data[:queue] = request.operations_queue && { id: request.operations_queue.id, name: request.operations_queue.name }
         data[:sla] = JrcOperations::SlaClock.new(request).snapshot
-        data[:stage_blockers] = request.stage_blockers
+        data[:stage_blockers] = request.stage_blockers +
+          JrcBackoffice::Requirements.blocking_messages(request: request, actor: Current.user)
         data[:workflow_stages] = request.order_approval? ? ['approval'] : request.workflow_stages.select { |stage| request.stage_applicable?(stage) || stage == request.stage }
         data[:commercial] = commercial_context(order)
         data[:commercial][:contract_accessible] = request.contract && visible_to_current_user(crm_scope.jrc_crm_contracts).exists?(id: request.contract.id)

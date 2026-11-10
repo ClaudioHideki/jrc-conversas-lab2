@@ -1,6 +1,8 @@
 require 'stringio'
 
 class JrcBackoffice::Documents
+  class Conflict < StandardError; end
+
   MAX_BYTES = 20.megabytes
   CONTENT_TYPES = { '.pdf' => 'application/pdf', '.png' => 'image/png', '.jpg' => 'image/jpeg', '.jpeg' => 'image/jpeg' }.freeze
   SignatureFile = Struct.new(:tempfile, :original_filename)
@@ -15,7 +17,7 @@ class JrcBackoffice::Documents
     legacy = Array(@request.metadata['required_documents']).map do |key|
       { 'key' => key, 'label' => key, 'required' => true, 'blocking' => true, 'source' => 'manual' }
     end
-    (configured + legacy).uniq { |row| row['key'] }
+    (configured + legacy + JrcBackoffice::Requirements.documents(@request)).uniq { |row| row['key'] }
   end
 
   def upload!(key:, file:, idempotency_key:)
@@ -57,17 +59,30 @@ class JrcBackoffice::Documents
       next unless latest.id == version.id
 
       update_status!(version.document_key, version.status)
+      writable!
       audit!('backoffice_document_analyzed', version_id: version.id, analysis_id: version.analysis.id, status: version.status)
     end
   end
 
-  def decide!(version:, status:, reason:)
+  def decide!(version:, status:, reason:, expires_on: JrcBackoffice::DocumentValidity::UNSPECIFIED,
+              expected_decision_id: JrcBackoffice::DocumentValidity::UNSPECIFIED)
     @request.with_lock do
       writable!
       validate_review!(version, status)
-      decision = version.decisions.create!(actor: @actor, status: status, reason: reason)
-      update_status!(version.document_key, decision.status)
-      audit!('backoffice_document_decided', version_id: version.id, decision_id: decision.id, status: decision.status)
+      previous = version.current_decision
+      JrcBackoffice::DocumentValidity.revision!(expected_decision_id, previous&.id, validity: expires_on)
+      expiration = JrcBackoffice::DocumentValidity.resolve(value: expires_on, previous: previous&.expires_on)
+      zone = expiration && (expires_on.equal?(JrcBackoffice::DocumentValidity::UNSPECIFIED) ? previous.validity_timezone :
+        (Time.find_zone(@request.account.reporting_timezone) || Time.find_zone!('UTC')).tzinfo.identifier)
+      if status == 'approved' && expiration && expiration < Time.current.in_time_zone(Time.find_zone!(zone)).to_date
+        raise ArgumentError, 'An expired document cannot be approved; send a new valid version'
+      end
+      decision = version.decisions.create!(actor: @actor, status: status, reason: reason,
+                                           expires_on: expiration, validity_timezone: zone)
+      update_status!(version.document_key, version.status)
+      writable!
+      audit!('backoffice_document_decided', version_id: version.id, decision_id: decision.id, status: decision.status,
+        expires_on: decision.expires_on&.iso8601, validity_timezone: decision.validity_timezone)
       decision
     end
   end

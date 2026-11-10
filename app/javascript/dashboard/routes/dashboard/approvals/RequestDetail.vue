@@ -7,6 +7,8 @@ import ApprovalOriginLink from './ApprovalOriginLink.vue';
 import ApprovalDecisionDialog from './ApprovalDecisionDialog.vue';
 import AuthorityOrigin from './AuthorityOrigin.vue';
 import AdjustmentDialog from './AdjustmentDialog.vue';
+import FinancialAdjustmentDialog from './FinancialAdjustmentDialog.vue';
+import ReviewDirectionsPanel from './ReviewDirectionsPanel.vue';
 import ApprovalRequestReport from './ApprovalRequestReport.vue';
 import DistributionApprovalOrigin from './DistributionApprovalOrigin.vue';
 const props = defineProps({
@@ -18,7 +20,7 @@ const props = defineProps({
   error: { type: String, default: '' },
   errorState: { type: Object, default: null },
 });
-const emit = defineEmits(['decide', 'adjust', 'audit']);
+const emit = defineEmits(['decide', 'adjust', 'audit', 'refresh']);
 const { t } = useI18n();
 const reason = ref('');
 const choices = computed(() => decisionChoices(props.request));
@@ -183,13 +185,26 @@ const confirm = payload => {
       :disabled="busy"
       @click="adjusting = true"
     />
-    <AdjustmentDialog
+    <component
+      :is="
+        request.adjustment?.financial
+          ? FinancialAdjustmentDialog
+          : AdjustmentDialog
+      "
       v-if="!readOnly && adjusting && request.adjustment"
       :request="request"
       :busy="busy"
       :error="error"
+      :error-state="errorState"
       @close="adjusting = false"
       @confirm="emit('adjust', $event)"
+    />
+    <ReviewDirectionsPanel
+      v-if="!readOnly && context && request.review_directions"
+      :request="request"
+      :context="context"
+      :busy="busy"
+      @recorded="emit('refresh')"
     />
     <ApprovalDecisionDialog
       v-if="!readOnly && selectedChoice"

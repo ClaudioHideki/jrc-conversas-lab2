@@ -49,6 +49,10 @@ class JrcRelationship::ConfigurationRestore
     previous = { 'version' => record.version, 'weights' => record.effective_weights, 'rules' => record.effective_rules }
     JrcRelationship::DistributionConfigurationGovernance.authorize!(account: context.account, user: context.user, configuration: record,
                                                                     rules: source.rules)
+    local = source.rules[JrcRelationship::LocalAccess::KEY]
+    if local && !JrcRelationship::LocalRoleRules.allowed?(local, user_id: context.user.id, action: 'configure', owner_id: :metadata)
+      raise Pundit::NotAuthorizedError
+    end
     record.assign_attributes(weights: source.weights.deep_dup, rules: source.rules.deep_dup, version: record.version + 1)
     record.save!
     JrcRelationship::DistributionConfigurationGovernance.record_versions!(record, actor: context.user, previous: previous)

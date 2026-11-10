@@ -22,7 +22,7 @@ class JrcRelationship::PortfolioGroupHistory
 
   def export(id, kind: '', period: nil)
     with_authority(id) do |context, group|
-      raise Pundit::NotAuthorizedError unless context.policy.admin?
+      raise Pundit::NotAuthorizedError unless context.policy.export_history? && JrcRelationship::LocalAccess.group_allowed?(context, group, 'export_history')
 
       events = filtered_events(context, group, kind, period)
       upper = events.maximum(:id)
@@ -31,7 +31,7 @@ class JrcRelationship::PortfolioGroupHistory
 
       rows = []
       events.find_in_batches(batch_size: 100) { |batch| rows.concat(present(context, batch)) }
-      context.audit!(group, after: { events: rows.size }, action: 'portfolio_group_history_exported')
+      context.audit!(group, after: { events: rows.size, scope: "portfolio:#{group.id}", filters: { kind: kind, from: period&.begin, to: period&.end }, format: 'json' }, action: 'portfolio_group_history_exported')
       { version: 1, projection: 'operational_summary', group: { id: group.id, name: group.name },
         exported_at: Time.current.iso8601(6), events: rows }
     end

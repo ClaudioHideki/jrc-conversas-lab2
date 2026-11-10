@@ -4,7 +4,7 @@ class Api::V1::Accounts::Approvals::ResourcesController < Api::V1::Accounts::App
 
   def index
     key = params[:key].to_s
-    allowed = JrcApprovals::CommercialCatalog::EVENTS.key?(key) || [JrcBackoffice::AuthorityCatalog::KEY,
+    allowed = JrcApprovals::CommercialCatalog::EVENTS.key?(key) || JrcApprovals::FinancialCatalog::EVENTS.key?(key) || [JrcApprovals::DraftReviewCatalog::KEY, JrcBackoffice::AuthorityCatalog::KEY,
                                                                     JrcRelationship::DistributionApproval::KEY].include?(key)
     raise JrcApprovals::Error, 'ADAPTER_NOT_INSTALLED' unless allowed
 

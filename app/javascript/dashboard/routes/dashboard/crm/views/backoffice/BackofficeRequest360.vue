@@ -15,6 +15,7 @@ import BackofficeCompletionReport from './BackofficeCompletionReport.vue';
 import BackofficeCompletionPackage from './BackofficeCompletionPackage.vue';
 import BackofficeCompletionHandoff from './BackofficeCompletionHandoff.vue';
 import BackofficeApprovalMirror from './BackofficeApprovalMirror.vue';
+import BackofficeRequirementsPanel from './BackofficeRequirementsPanel.vue';
 import ApprovalGateBadge from 'dashboard/routes/dashboard/approvals/ApprovalGateBadge.vue';
 import { useBackofficePresentation } from './useBackofficePresentation';
 
@@ -30,6 +31,7 @@ const tabs = [
   'operations',
   'context',
   'documents',
+  'requirements',
   'approvals',
   'contracts',
   'checklist',
@@ -47,6 +49,7 @@ const tabTones = {
   operations: 'blue',
   context: 'cyan',
   documents: 'amber',
+  requirements: 'amber',
   approvals: 'violet',
   contracts: 'blue',
   checklist: 'teal',
@@ -83,24 +86,40 @@ const load = async () => {
   record.value = null;
   try {
     const { data } = await backofficeAPI.show(route.params.requestId);
-    if (sequence === request) record.value = data;
+    if (sequence === request) {
+      record.value = data;
+      return true;
+    }
   } catch {
     if (sequence === request) error.value = text('DETAIL_ERROR');
   } finally {
     if (sequence === request) loading.value = false;
   }
+  return false;
+};
+const clearDeniedContext = () => {
+  // Invalidate concurrent refreshes so an older success cannot restore private data.
+  sequence += 1;
+  record.value = null;
+  message.value = '';
+  historyPage.value = 1;
+  startIssue.value = false;
+  loading.value = false;
 };
 const refreshDocuments = async () => {
   const current = sequence;
   const context = requestContext.value;
   try {
     const { data } = await backofficeAPI.show(route.params.requestId);
-    if (current === sequence && context === requestContext.value)
+    if (current === sequence && context === requestContext.value) {
       record.value = data;
+      error.value = '';
+    }
   } catch (failure) {
     if (current !== sequence || context !== requestContext.value) return;
     error.value = text('DETAIL_ERROR');
-    if ([401, 403, 404].includes(failure.response?.status)) record.value = null;
+    if ([401, 403, 404].includes(failure.response?.status))
+      clearDeniedContext();
   }
 };
 const action = async command => {
@@ -112,11 +131,16 @@ const action = async command => {
   try {
     await command();
     if (context !== requestContext.value) return;
-    await load();
+    const loaded = await load();
     if (context !== requestContext.value) return;
-    message.value = text('ACTION_SUCCESS');
+    if (loaded) message.value = text('ACTION_SUCCESS');
   } catch (failure) {
     if (context !== requestContext.value) return;
+    if ([401, 403, 404].includes(failure.response?.status)) {
+      clearDeniedContext();
+      error.value = text('DETAIL_ERROR');
+      return;
+    }
     error.value =
       failure.response?.data?.errors?.join(', ') ||
       failure.response?.data?.message ||
@@ -448,6 +472,11 @@ onBeforeUnmount(() => {
                 />
               </details>
             </div>
+            <BackofficeRequirementsPanel
+              v-else-if="tab === 'requirements'"
+              :record="record"
+              @changed="refreshDocuments"
+            />
             <BackofficeApprovalMirror
               v-else-if="tab === 'approvals'"
               :record="record"

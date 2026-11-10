@@ -8,6 +8,7 @@ class JrcRelationship::CustomerDocument < ApplicationRecord
                       inverse_of: :document, dependent: :restrict_with_exception
   validates :title, presence: true, length: { maximum: 160 }
   validates :category, inclusion: { in: CATEGORIES }
+  validates :confidentiality, inclusion: { in: %w[operational restricted] }, allow_nil: true
   validates :requirement_key, format: { with: /\A[a-z][a-z0-9_-]{0,59}\z/ }, allow_nil: true
   validates :status, inclusion: { in: %w[active archived] }
   validate :responsible_belongs_to_account

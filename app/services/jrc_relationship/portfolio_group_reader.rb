@@ -45,7 +45,7 @@ class JrcRelationship::PortfolioGroupReader
     JrcRelationship::PortfolioGroup.transaction do
       JrcRelationship::BatchReviewAuthority.new(account_id: @account_id, actor_id: @actor_id, write: false).call do |context|
         capabilities = { 'can_manage' => context.policy.manage? && context.policy.team?, 'can_configure' => context.policy.configure?,
-                         'can_export_history' => context.policy.admin? }
+                         'can_export_history' => context.policy.export_history? }
         yield context, capabilities
       end
     end

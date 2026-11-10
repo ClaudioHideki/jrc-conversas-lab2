@@ -19,9 +19,16 @@ class JrcRelationship::DocumentMetadata
       authorize_current!(document)
       validate_revision!(document, attributes.fetch('revision'))
 
-      before = document.attributes.slice('responsible_id', 'status', 'requirement_key')
+      before = document.attributes.slice('responsible_id', 'status', 'requirement_key', 'confidentiality')
       assign_responsible!(document, attributes['responsible_id']) if attributes.key?('responsible_id')
       document.status = attributes['status'] if attributes.key?('status')
+      if attributes.key?('confidentiality')
+        raise ArgumentError, 'Use an explicit confidentiality' unless %w[operational restricted].include?(attributes['confidentiality'])
+        document.confidentiality = attributes['confidentiality']
+        if document.confidentiality == 'restricted'
+          JrcRelationship::DocumentAccess.authorize!(@context, document, 'manage')
+        end
+      end
       assign_requirement!(document, attributes['requirement_key']) if attributes.key?('requirement_key')
       document.save!
       audit_change!(document, before, reason)
@@ -41,6 +48,7 @@ class JrcRelationship::DocumentMetadata
     @context = JrcRelationship::Context.new(@context.member)
     authorize!
     @context.assignment(document.assignment_id)
+    JrcRelationship::DocumentAccess.authorize!(@context, document, 'manage')
   end
 
   def validate_revision!(document, value)
@@ -49,7 +57,7 @@ class JrcRelationship::DocumentMetadata
   end
 
   def audit_change!(document, before, reason)
-    changes = document.attributes.slice('responsible_id', 'status', 'requirement_key').merge('reason' => reason)
+    changes = document.attributes.slice('responsible_id', 'status', 'requirement_key', 'confidentiality').merge('reason' => reason)
     @context.audit!(document, before: before, after: changes, action: 'document_metadata_updated')
   end
 

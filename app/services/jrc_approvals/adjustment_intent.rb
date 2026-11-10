@@ -28,7 +28,9 @@ class JrcApprovals::AdjustmentIntent
   end
 
   def valid_changes?
-    changes.is_a?(Hash) && changes.keys == ['discount_cents'] && changes['discount_cents'].is_a?(Integer) &&
-      changes['discount_cents'].between?(0, JrcApprovals::TierRanges::MAX_EXACT_BOUND)
+    JrcApprovals::AdjustmentPolicy.validate_changes!(changes)
+    true
+  rescue JrcApprovals::Error
+    false
   end
 end

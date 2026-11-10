@@ -12,7 +12,7 @@ namespace :api, defaults: { format: 'json' } do
         end
         resources :requests, only: %i[index show create] do
           collection { post :simulate }
-          member { post :decide; post :adjust; post :transition; get :audit; get :report }
+          member { post :decide; post :adjust; post :review_direction; post :transition; get :audit; get :report }
         end
         resources :delegations, only: %i[index create destroy]
         resources :own_delegations, only: %i[index create destroy] do

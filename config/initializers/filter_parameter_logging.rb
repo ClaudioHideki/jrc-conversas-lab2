@@ -23,3 +23,6 @@ Rails.application.config.filter_parameters += [:file, :files, :reason, :justific
 Rails.application.config.filter_parameters += [:next_step, :customer_feedback, :change_reason, :result, :notes]
 Rails.application.config.filter_parameters += [:personal_tax_identifier, :cpf, :lookup_digest]
 Rails.application.config.filter_parameters += [:column_mapping, :import_options]
+
+# Configurable Backoffice answers may contain private signer/customer values.
+Rails.application.config.filter_parameters += [:answer]

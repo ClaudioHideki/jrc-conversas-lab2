@@ -7,6 +7,7 @@ import ConditionEditor from './ConditionEditor.vue';
 import StepEditor from './StepEditor.vue';
 import TierEditor from './TierEditor.vue';
 import TierSummary from './TierSummary.vue';
+import AdjustmentRulesForm from './AdjustmentRulesForm.vue';
 import { conditionSummary } from './conditionSummary';
 import {
   copy,
@@ -28,6 +29,14 @@ const tab = ref('general');
 const scopeIndex = ref('');
 const catalogs = ref([]);
 const options = ref({});
+const adjustmentValid = ref(true);
+const routePolicies = ref([]);
+const directionActions = [
+  'request_adjustment',
+  'suggest_redaction',
+  'escalate',
+];
+const directionDraft = ref({ actions: [], escalation_policy_id: null });
 const loadError = ref('');
 const confirmation = ref(null);
 const tabs = ['general', 'conditions', 'steps', 'summary'];
@@ -72,6 +81,37 @@ const fields = computed(
   () => catalogs.value.find(row => row.key === key.value)?.fields || {}
 );
 const definition = computed(() => draft.value.draft_definition);
+const adjustmentFields = computed(
+  () =>
+    catalogs.value.find(row => row.key === key.value)?.adjustment_fields || []
+);
+const setAdjustment = value => {
+  if (value) definition.value.adjustments = value;
+  else delete definition.value.adjustments;
+};
+const setDirections = () => {
+  if (!directionDraft.value.actions.includes('escalate'))
+    directionDraft.value.escalation_policy_id = null;
+  if (!directionDraft.value.actions.length)
+    delete definition.value.review_directions;
+  else definition.value.review_directions = copy(directionDraft.value);
+};
+watch(
+  () => definition.value?.review_directions,
+  value => {
+    directionDraft.value = copy(
+      value || { actions: [], escalation_policy_id: null }
+    );
+  },
+  { deep: true }
+);
+watch(key, (value, old) => {
+  if (old && old !== '.' && value !== old && definition.value) {
+    delete definition.value.adjustments;
+    delete definition.value.review_directions;
+  }
+});
+
 const tierDraft = ref(null);
 const tierMode = enabled => {
   if (enabled) {
@@ -194,10 +234,18 @@ watch(
       const results = await Promise.all([
         api.get('catalogs', params),
         api.get('options', params),
+        api.get('policies', params),
       ]);
       if (current === generation) {
         catalogs.value = results[0].data;
         options.value = results[1].data;
+        routePolicies.value = results[2].data.filter(
+          row =>
+            row.state === 'published' &&
+            row.id !== props.policy?.id &&
+            row.issuer_company_id === params.issuer_company_id &&
+            row.business_unit_id === params.business_unit_id
+        );
       }
     } catch {
       if (current === generation)
@@ -207,6 +255,14 @@ watch(
   { immediate: true }
 );
 const save = () => {
+  if (!adjustmentValid.value) return;
+  if (
+    definition.value.review_directions?.actions.includes('escalate') &&
+    !Number.isSafeInteger(
+      definition.value.review_directions.escalation_policy_id
+    )
+  )
+    return;
   const body = props.policy
     ? { name: draft.value.name, definition: copy(definition.value) }
     : {
@@ -277,10 +333,10 @@ const confirm = () => {
         :key="name"
         role="tab"
         :tabindex="tab === name ? 0 : -1"
-        @keydown="tabKey"
         :aria-selected="tab === name"
         class="rounded-lg border border-n-weak px-3 py-2 text-sm focus-visible:outline-blue-500"
         :class="tab === name ? 'bg-n-blue-3 text-n-blue-11' : 'bg-n-solid-2'"
+        @keydown="tabKey"
         @click="tab = name"
       >
         {{
@@ -527,6 +583,54 @@ const confirm = () => {
         >
       </div>
     </details>
+    <section
+      v-show="tab === 'steps'"
+      class="space-y-3"
+    >
+      <AdjustmentRulesForm
+        :model-value="definition.adjustments || null"
+        :allowed="adjustmentFields"
+        :busy="busy"
+        @update:model-value="setAdjustment"
+        @validity="adjustmentValid = $event"
+      />
+      <details>
+        <summary>{{ t('JRC_APPROVALS.directions.configure') }}</summary>
+        <p>{{ t('JRC_APPROVALS.directions.help') }}</p>
+        <label
+          v-for="action in directionActions"
+          :key="action"
+          ><input
+            v-model="directionDraft.actions"
+            type="checkbox"
+            :value="action"
+            :disabled="busy"
+            @change="setDirections"
+          />{{ t(`JRC_APPROVALS.directions.${action}`) }}</label
+        >
+        <label v-if="directionDraft.actions.includes('escalate')"
+          >{{ t('JRC_APPROVALS.directions.target')
+          }}<select
+            v-model.number="directionDraft.escalation_policy_id"
+            :disabled="busy"
+            @change="setDirections"
+          >
+            <option :value="null">—</option>
+            <option
+              v-for="row in routePolicies.filter(
+                item =>
+                  item.module_key === draft.module_key &&
+                  item.event_key === draft.event_key
+              )"
+              :key="row.id"
+              :value="row.id"
+            >
+              {{ row.name }}
+            </option>
+          </select></label
+        >
+      </details>
+    </section>
     <div
       v-show="tab === 'summary'"
       class="space-y-3 rounded-xl border border-n-weak p-4"

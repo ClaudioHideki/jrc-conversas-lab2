@@ -29,6 +29,7 @@ class JrcRelationship::PortfolioBatch
   private
 
   def authorize_transfer!(rows)
+    rows.each { |row| JrcRelationship::LocalAccess.authorize_assignment!(@context, row, 'execute_transfer') }
     @owner_id = JrcRelationship::PortfolioOwnerInput.parse(@params[:owner_id])
     JrcRelationship::DistributionApproval.lock_configuration!(@context.account.id)
     raise ArgumentError, 'Complete responsibility transfer requires a reviewed proposal' if @params[:transfer_responsibilities] && !@review

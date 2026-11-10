@@ -78,7 +78,13 @@ class Api::V1::Accounts::Relationship::RecordsController < Api::V1::Accounts::Re
   end
 
   def export_surveys
+    response.headers['Cache-Control'] = 'no-store'
+    raise Pundit::NotAuthorizedError unless relationship_context.policy.export?
+    signature = relationship_context.access_signature
     csv = JrcRelationship::SurveyReport.new(relationship_context, survey_filters).csv
+    fresh = JrcRelationship::Context.new(relationship_context.member)
+    raise Pundit::NotAuthorizedError unless fresh.policy.export? && fresh.access_signature == signature
+    fresh.audit!(Current.account, action: 'survey_report_exported', after: { scope: 'authorized_survey_responses', filters: survey_filters, format: 'csv' })
     send_data csv, type: 'text/csv; charset=utf-8', disposition: 'attachment', filename: "survey-responses-#{Date.current.iso8601}.csv"
   end
 

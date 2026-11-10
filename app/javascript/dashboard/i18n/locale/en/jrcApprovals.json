@@ -221,7 +221,10 @@
       "crm_deal_gratuity": "CRM — Deal gratuity",
       "crm_proposal_gratuity": "CRM — Proposal gratuity",
       "crm_order_gratuity": "CRM — Order gratuity",
-      "contracts_signer_authority": "Contracts — Signing authority"
+      "contracts_signer_authority": "Contracts — Signing authority",
+      "crm_proposal_terms": "Condicao financeira da proposta",
+      "crm_order_terms": "Condicao financeira do pedido",
+      "contracts.draft_review": "Revisao humana da minuta contratual"
     },
     "catalogFields": {
       "price_status": "Price evaluation status",
@@ -353,6 +356,40 @@
       "period": "Validity period",
       "removed": "Removed member"
     },
-    "viewDistributionOrigin": "View reviewed transfers"
+    "viewDistributionOrigin": "View reviewed transfers",
+    "approvedTerms": {
+      "title": "Ajustar condicoes autorizadas",
+      "notice": "Somente os campos e limites desta regra podem ser alterados. O registro de origem continua sujeito a suas permissoes.",
+      "invalid": "Confira os valores e os limites configurados.",
+      "escalation": "Se a nova proposta exigir outra alcada, ela permanece pendente para o plano nativo, sem voto automatico.",
+      "configure": "Campos de ajuste permitidos",
+      "configHelp": "Defina explicitamente cada campo, opcoes e limites. As novas regras nao alteram solicitacoes anteriores.",
+      "enable": "Configurar limites de ajuste nesta versao",
+      "minimum": "Minimo (dias quando data)",
+      "maximum": "Maximo (dias quando data)",
+      "options": "Opcoes autorizadas, separadas por virgula",
+      "fields": {
+        "discount_cents": "Desconto monetario em centavos",
+        "payment_condition": "Condicao de pagamento",
+        "payment_method": "Forma de pagamento",
+        "installments_count": "Quantidade de parcelas",
+        "first_billing_days": "Prazo para primeiro faturamento (dias)",
+        "first_due_date": "Primeiro vencimento"
+      }
+    },
+    "directions": {
+      "title": "Solicitar revisao ou encaminhar",
+      "help": "Esta acao registra uma orientacao. Nao altera a origem nem substitui uma aprovacao. Encaminhamento exige politica de destino ativa e aplicavel.",
+      "action": "Acao",
+      "reason": "Motivo e sugestao para revisao humana",
+      "request_adjustment": "Solicitar ajuste",
+      "suggest_redaction": "Sugerir redacao da minuta",
+      "escalate": "Encaminhar para alcada configurada",
+      "confirm": "Confirmar orientacao",
+      "uncertain": "Resultado incerto. Consulte novamente a solicitacao antes de repetir.",
+      "recorded": "Orientacao registrada; a origem nao foi modificada.",
+      "configure": "Orientacoes e encaminhamento permitido",
+      "target": "Regra de destino publicada"
+    }
   }
 }

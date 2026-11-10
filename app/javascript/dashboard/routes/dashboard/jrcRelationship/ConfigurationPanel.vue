@@ -19,6 +19,8 @@ import PlaybookFlowPolicyForm from './PlaybookFlowPolicyForm.vue';
 import PortfolioCapacityLimitsForm from './PortfolioCapacityLimitsForm.vue';
 import HealthConfigurationPreview from './HealthConfigurationPreview.vue';
 import PriorityBandsForm from './PriorityBandsForm.vue';
+import RetentionPolicyForm from './RetentionPolicyForm.vue';
+import LocalRoleForm from './LocalRoleForm.vue';
 import ConfigurationRestoreDialog from './ConfigurationRestoreDialog.vue';
 import PlaybookRestoreDialog from './PlaybookRestoreDialog.vue';
 import PlaybookHistoryPanel from './PlaybookHistoryPanel.vue';
@@ -70,6 +72,9 @@ const restoreIdentity = computed(() =>
 const invalidFlowPolicy = ref(false);
 const invalidCapacity = ref(false);
 const invalidPriorityBands = ref(false);
+const invalidRetention = ref(false);
+const invalidLocalRoles = ref(false);
+const configurationReason = ref('');
 const distributionOnly = computed(() => scopeKey.value.startsWith('team:'));
 const ordinaryRules = computed(() =>
   Object.fromEntries(
@@ -80,6 +85,8 @@ const ordinaryRules = computed(() =>
           'required_documents',
           'portfolio_capacity_limits',
           'priority_bands',
+          'retention_policy',
+          'portfolio_local_access',
         ].includes(key) &&
         (key !== 'automatic_action_daily_limit' ||
           scopeKey.value === 'account') &&
@@ -137,6 +144,9 @@ const load = async () => {
   storedVersion.value = null;
   invalidFlowPolicy.value = false;
   invalidCapacity.value = false;
+  invalidLocalRoles.value = false;
+  invalidRetention.value = false;
+  configurationReason.value = '';
   invalidPriorityBands.value = false;
   if (!props.allowed) return;
   busy.value = true;
@@ -246,7 +256,9 @@ const save = async () => {
     !props.allowed ||
     invalidFlowPolicy.value ||
     invalidCapacity.value ||
-    invalidPriorityBands.value
+    invalidPriorityBands.value ||
+    invalidRetention.value ||
+    invalidLocalRoles.value
   )
     return;
   const version = generation;
@@ -260,6 +272,7 @@ const save = async () => {
         version: config.value.version,
         weights: config.value.weights,
         rules: config.value.rules,
+        reason: configurationReason.value,
       });
     else {
       await API.savePlaybook(accountId, book.value, book.value.id);
@@ -661,6 +674,30 @@ const historyValue = value => {
           />
         </label>
       </div>
+      <LocalRoleForm
+        v-if="scopeKey === 'account'"
+        v-model="config.rules.portfolio_local_access"
+        :scope-key="scopeKey"
+        :disabled="busy"
+        @validity="invalidLocalRoles = !$event"
+      />
+      <label
+        v-if="scopeKey === 'account'"
+        class="block text-sm"
+        >{{ t('RELATIONSHIP.LOCAL_ROLES.REASON')
+        }}<textarea
+          v-model="configurationReason"
+          :class="inputClass"
+          maxlength="2000"
+          :disabled="busy"
+        />
+      </label>
+      <RetentionPolicyForm
+        v-if="scopeKey === 'account'"
+        v-model="config.rules.retention_policy"
+        :disabled="busy"
+        @validity="invalidRetention = !$event"
+      />
       <PortfolioCapacityLimitsForm
         v-model="config.rules.portfolio_capacity_limits"
         :owners="metadata.owners || []"
@@ -689,7 +726,12 @@ const historyValue = value => {
         :class="buttonClass"
         class="mt-5"
         :disabled="
-          busy || invalidFlowPolicy || invalidCapacity || invalidPriorityBands
+          busy ||
+          invalidFlowPolicy ||
+          invalidCapacity ||
+          invalidPriorityBands ||
+          invalidRetention ||
+          invalidLocalRoles
         "
       >
         {{ t('RELATIONSHIP.SAVE') }}
@@ -700,7 +742,12 @@ const historyValue = value => {
       :configuration="config"
       :formatting="metadata.formatting"
       :disabled="
-        busy || invalidFlowPolicy || invalidCapacity || invalidPriorityBands
+        busy ||
+        invalidFlowPolicy ||
+        invalidCapacity ||
+        invalidPriorityBands ||
+        invalidRetention ||
+        invalidLocalRoles
       "
     />
     <section

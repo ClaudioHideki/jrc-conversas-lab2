@@ -20,6 +20,8 @@ class JrcBackoffice::Signatures::Preparation
     prepare!(request, contract)
   rescue JrcBackoffice::Signatures::DeliveryError, JrcBackoffice::Signatures::ProviderError, JrcApprovals::Error => e
     blocked(e.code)
+  rescue JrcBackoffice::Requirements::Blocked
+    blocked('BACKOFFICE_REQUIREMENTS_PENDING')
   end
 
   private
@@ -28,6 +30,7 @@ class JrcBackoffice::Signatures::Preparation
     version = current_version!(request, contract)
     proposal = approved_proposal!(request, version)
     JrcBackoffice::ContractRelease.check!(order: request.sales_order, actor: @actor)
+    JrcBackoffice::Requirements.check_before_signature!(request: request, actor: @actor)
     connection = JrcBackoffice::Signatures::ConnectionSelection.for_new_delivery(account: @account)
     @access.writable!(@access.request(request.id))
     { can_send: true, blocked_code: nil, version: version.slice('id', 'number', 'pdf_sha256'), authority_proposal_id: proposal.id,

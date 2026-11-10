@@ -16,12 +16,13 @@ import { useStore } from 'vuex';
 import { activitiesAPI } from 'dashboard/api/crm';
 import { formatCrmDateTime } from '../../utils/dateTime';
 import { filterActivities } from '../../utils/activityFilters';
-import { paginateCalendarDays } from '../../utils/calendarPagination';
+import { parseCalendarDate } from '../../utils/calendarDate';
 import CrmPageHeader from '../../components/shared/CrmPageHeader.vue';
-import Button from 'dashboard/components-next/button/Button.vue';
+import CalendarServerList from './CalendarServerList.vue';
 
 const store = useStore();
 const route = useRoute();
+const calendarView = ref(route.query.view === 'list' ? 'list' : 'week');
 const { t } = useI18n();
 let disposed = false;
 let generation = 0;
@@ -36,11 +37,21 @@ const isCurrent = context =>
 const completingIds = reactive(new Set());
 const completionError = ref('');
 const editingActivityId = ref(null);
-const load = () => store.dispatch('jrcCrm/activities/fetchActivities');
+const listRevision = ref(0);
+const listOwners = ref([]);
+const load = () => {
+  if (calendarView.value === 'list') {
+    listRevision.value += 1;
+    return Promise.resolve();
+  }
+  return store.dispatch('jrcCrm/activities/fetchActivities');
+};
 const activities = computed(() =>
-  [...(store.getters['jrcCrm/activities/allActivities'] || [])].sort(
-    (left, right) => new Date(left.due_at) - new Date(right.due_at)
-  )
+  [
+    ...(calendarView.value === 'list'
+      ? []
+      : store.getters['jrcCrm/activities/allActivities'] || []),
+  ].sort((left, right) => new Date(left.due_at) - new Date(right.due_at))
 );
 const filters = reactive({ search: '', type: '', owner: '', status: '' });
 const clearFilters = () =>
@@ -48,13 +59,17 @@ const clearFilters = () =>
 const filteredActivities = computed(() =>
   filterActivities(activities.value, filters)
 );
-const owners = computed(() => [
-  ...new Map(
-    activities.value
-      .filter(activity => activity.user)
-      .map(activity => [activity.user.id, activity.user])
-  ).values(),
-]);
+const owners = computed(() =>
+  calendarView.value === 'list'
+    ? listOwners.value
+    : [
+        ...new Map(
+          activities.value
+            .filter(activity => activity.user)
+            .map(activity => [activity.user.id, activity.user])
+        ).values(),
+      ]
+);
 const activityTypes = computed(() => [
   { value: 'call', label: t('CRM.CALENDAR_ACTIONS.TYPES.CALL') },
   { value: 'meeting', label: t('CRM.CALENDAR_ACTIONS.TYPES.MEETING') },
@@ -82,8 +97,8 @@ const openEditor = activity => {
 };
 const loading = computed(() => store.getters['jrcCrm/activities/isLoading']);
 const error = computed(() => store.getters['jrcCrm/activities/error']);
-const routeDate = route.query.date ? new Date(String(route.query.date)) : null;
-const calendarDate = ref(routeDate && !Number.isNaN(routeDate.getTime()) ? routeDate : new Date());
+const routeDate = parseCalendarDate(route.query.date);
+const calendarDate = ref(routeDate || new Date());
 
 const startOfWeek = computed(() => {
   const source = calendarDate.value;
@@ -95,7 +110,9 @@ const startOfWeek = computed(() => {
   return date;
 });
 
-const calendarView = ref('week');
+watch(calendarView, (view, previous) => {
+  if (previous === 'list' && view !== 'list') load();
+});
 const calendarViews = computed(() => [
   { key: 'month', label: t('CRM.HOMOLOGATION.VIEWS.month') },
   { key: 'week', label: t('CRM.HOMOLOGATION.VIEWS.week') },
@@ -108,6 +125,13 @@ const dateKey = date =>
     String(date.getMonth() + 1).padStart(2, '0'),
     String(date.getDate()).padStart(2, '0'),
   ].join('-');
+const listWindow = computed(() => {
+  const day = calendarDate.value;
+  return {
+    startsOn: dateKey(new Date(day.getFullYear(), day.getMonth(), 1)),
+    endsBefore: dateKey(new Date(day.getFullYear(), day.getMonth() + 1, 1)),
+  };
+});
 const presentDay = date => ({
   key: dateKey(date),
   date,
@@ -128,7 +152,9 @@ const weekDays = computed(() =>
 );
 
 const monthLabel = computed(() =>
-  new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }).format(calendarDate.value)
+  new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }).format(
+    calendarDate.value
+  )
 );
 
 const changeMonth = offset => {
@@ -172,23 +198,7 @@ const displayDays = computed(() => {
     ? days.filter(day => day.activities.length)
     : days;
 });
-const listPage = ref(1);
-const listPagination = computed(() =>
-  paginateCalendarDays(displayDays.value, listPage.value)
-);
-const visibleDays = computed(() => {
-  if (calendarView.value !== 'list') return displayDays.value;
-  return listPagination.value.days;
-});
-watch([filters, calendarDate, calendarView, identity], () => {
-  listPage.value = 1;
-});
-watch(
-  () => listPagination.value.pages,
-  () => {
-    listPage.value = listPagination.value.page;
-  }
-);
+const visibleDays = computed(() => displayDays.value);
 const periodLabel = computed(() => {
   if (calendarView.value === 'day')
     return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long' }).format(
@@ -216,22 +226,23 @@ const openCalendarDay = day => {
   calendarView.value = 'day';
 };
 
-
 const selectCalendarDay = day => {
   calendarDate.value = new Date(day.date);
 };
 
-const activityIcon = type => ({
-  call: 'i-lucide-phone',
-  meeting: 'i-lucide-users-round',
-  follow_up: 'i-lucide-message-circle-more',
-  demonstration: 'i-lucide-monitor-play',
-  email: 'i-lucide-mail',
-}[type] || 'i-lucide-list-checks');
+const activityIcon = type =>
+  ({
+    call: 'i-lucide-phone',
+    meeting: 'i-lucide-users-round',
+    follow_up: 'i-lucide-message-circle-more',
+    demonstration: 'i-lucide-monitor-play',
+    email: 'i-lucide-mail',
+  })[type] || 'i-lucide-list-checks';
 
 const activityTone = activity => {
   if (activity.overdue) return 'border-[#fecaca] bg-[#fff3f3] text-[#b42318]';
-  if (activity.completed_at) return 'border-[#bbf7d0] bg-[#effdf5] text-[#067647]';
+  if (activity.completed_at)
+    return 'border-[#bbf7d0] bg-[#effdf5] text-[#067647]';
   const tones = {
     call: 'border-[#bfdbfe] bg-[#eff6ff] text-[#175cd3]',
     meeting: 'border-[#ddd6fe] bg-[#f5f3ff] text-[#6941c6]',
@@ -239,7 +250,10 @@ const activityTone = activity => {
     demonstration: 'border-[#a5f3fc] bg-[#ecfeff] text-[#0e7490]',
     email: 'border-[#fed7aa] bg-[#fff7ed] text-[#c2410c]',
   };
-  return tones[activity.activity_type] || 'border-n-weak bg-n-slate-2 text-n-slate-11';
+  return (
+    tones[activity.activity_type] ||
+    'border-n-weak bg-n-slate-2 text-n-slate-11'
+  );
 };
 
 const complete = async id => {
@@ -267,6 +281,7 @@ watch(identity, () => {
   completingIds.clear();
   completionError.value = '';
   editingActivityId.value = null;
+  listOwners.value = [];
   clearFilters();
   load();
 });
@@ -274,8 +289,8 @@ watch(
   () => route.query.date,
   value => {
     if (!value) return;
-    const date = new Date(String(value));
-    if (!Number.isNaN(date.getTime())) calendarDate.value = date;
+    const date = parseCalendarDate(value);
+    if (date) calendarDate.value = date;
   }
 );
 onBeforeUnmount(() => {
@@ -283,6 +298,7 @@ onBeforeUnmount(() => {
   generation += 1;
 });
 onMounted(async () => {
+  if (calendarView.value === 'list') return;
   const context = captureContext();
   await load();
   if (isCurrent(context) && !route.query.date) {
@@ -292,12 +308,13 @@ onMounted(async () => {
     if (next) calendarDate.value = new Date(next.due_at);
   }
 });
-
 </script>
 
 <template>
   <div class="h-full overflow-auto bg-transparent">
-    <div class="mx-auto flex min-h-full w-full max-w-[1680px] flex-col gap-5 p-4 sm:p-6">
+    <div
+      class="mx-auto flex min-h-full w-full max-w-[1680px] flex-col gap-5 p-4 sm:p-6"
+    >
       <CrmPageHeader
         title="Agenda comercial"
         description="Organize reuniões, ligações, retornos e compromissos da equipe."
@@ -305,10 +322,16 @@ onMounted(async () => {
         tone="iris"
       >
         <template #actions>
-          <RouterLink :to="{ name: 'crm_leads', query: { new: '1' } }" class="rounded-xl bg-[#087cf0] px-4 py-2.5 text-sm font-semibold text-white shadow-md">
+          <RouterLink
+            :to="{ name: 'crm_leads', query: { new: '1' } }"
+            class="rounded-xl bg-[#087cf0] px-4 py-2.5 text-sm font-semibold text-white shadow-md"
+          >
             <i class="i-lucide-plus mr-1 size-4" /> Novo lead
           </RouterLink>
-          <RouterLink :to="{ name: 'crm_activities', query: { new: '1' } }" class="rounded-xl bg-[#7c3aed] px-4 py-2.5 text-sm font-semibold text-white shadow-md">
+          <RouterLink
+            :to="{ name: 'crm_activities', query: { new: '1' } }"
+            class="rounded-xl bg-[#7c3aed] px-4 py-2.5 text-sm font-semibold text-white shadow-md"
+          >
             <i class="i-lucide-plus mr-1 size-4" /> Novo compromisso
           </RouterLink>
           <button
@@ -339,20 +362,60 @@ onMounted(async () => {
       >
         {{ completionError }}
       </p>
-      <div class="grid min-h-[660px] grid-cols-1 gap-4 xl:grid-cols-[210px_minmax(0,1fr)_280px]">
-        <aside class="rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm">
+      <div
+        class="grid min-h-[660px] grid-cols-1 gap-4"
+        :class="
+          calendarView === 'list'
+            ? 'xl:grid-cols-[210px_minmax(0,1fr)]'
+            : 'xl:grid-cols-[210px_minmax(0,1fr)_280px]'
+        "
+      >
+        <aside
+          class="rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm"
+        >
           <div class="mb-4 flex items-center justify-between">
-            <button type="button" class="grid size-8 place-content-center rounded-lg border border-n-weak text-n-slate-11 transition hover:bg-n-slate-2" aria-label="Mês anterior" @click="changeMonth(-1)"><i class="i-lucide-chevron-left size-4" /></button>
-            <strong class="text-sm capitalize text-n-slate-12">{{ monthLabel }}</strong>
-            <button type="button" class="grid size-8 place-content-center rounded-lg border border-n-weak text-n-slate-11 transition hover:bg-n-slate-2" aria-label="Próximo mês" @click="changeMonth(1)"><i class="i-lucide-chevron-right size-4" /></button>
+            <button
+              type="button"
+              class="grid size-8 place-content-center rounded-lg border border-n-weak text-n-slate-11 transition hover:bg-n-slate-2"
+              aria-label="Mês anterior"
+              @click="changeMonth(-1)"
+            >
+              <i class="i-lucide-chevron-left size-4" />
+            </button>
+            <strong class="text-sm capitalize text-n-slate-12">{{
+              monthLabel
+            }}</strong>
+            <button
+              type="button"
+              class="grid size-8 place-content-center rounded-lg border border-n-weak text-n-slate-11 transition hover:bg-n-slate-2"
+              aria-label="Próximo mês"
+              @click="changeMonth(1)"
+            >
+              <i class="i-lucide-chevron-right size-4" />
+            </button>
           </div>
-          <div class="grid grid-cols-7 gap-1 text-center text-[11px] text-n-slate-11">
+          <div
+            class="grid grid-cols-7 gap-1 text-center text-[11px] text-n-slate-11"
+          >
             <span
               v-for="(day, index) in ['S', 'T', 'Q', 'Q', 'S', 'S', 'D']"
               :key="index"
               >{{ day }}</span
             >
-            <button v-for="day in miniCalendarDays" :key="day.key" type="button" class="grid aspect-square place-content-center rounded-full text-[11px] transition hover:bg-n-blue-3" :class="[day.currentMonth ? 'text-n-slate-12' : 'text-n-slate-11', day.today ? 'ring-1 ring-[#7c3aed]' : '', day.selected ? 'bg-[#7c3aed] !text-white font-bold' : '']" @click="selectCalendarDay(day)">{{ day.day }}</button>
+            <button
+              v-for="day in miniCalendarDays"
+              :key="day.key"
+              type="button"
+              class="grid aspect-square place-content-center rounded-full text-[11px] transition hover:bg-n-blue-3"
+              :class="[
+                day.currentMonth ? 'text-n-slate-12' : 'text-n-slate-11',
+                day.today ? 'ring-1 ring-[#7c3aed]' : '',
+                day.selected ? 'bg-[#7c3aed] !text-white font-bold' : '',
+              ]"
+              @click="selectCalendarDay(day)"
+            >
+              {{ day.day }}
+            </button>
           </div>
           <fieldset class="mt-6 min-w-0 space-y-3 border-t border-n-weak pt-4">
             <legend class="text-sm font-semibold text-n-slate-12">
@@ -434,15 +497,38 @@ onMounted(async () => {
               {{ t('CRM.ACTIVITY_FILTERS.CLEAR') }}
             </button>
           </fieldset>
-          <div class="mt-6 border-t border-n-weak pt-4">
-            <div class="mb-2 flex items-center justify-between"><h3 class="text-sm font-semibold text-n-slate-12">Próximos</h3><RouterLink :to="{ name: 'crm_activities' }" class="text-[11px] font-semibold text-[#087cf0]">Ver todos</RouterLink></div>
+          <div
+            v-if="calendarView !== 'list'"
+            class="mt-6 border-t border-n-weak pt-4"
+          >
+            <div class="mb-2 flex items-center justify-between">
+              <h3 class="text-sm font-semibold text-n-slate-12">Próximos</h3>
+              <RouterLink
+                :to="{ name: 'crm_activities' }"
+                class="text-[11px] font-semibold text-[#087cf0]"
+              >
+                Ver todos
+              </RouterLink>
+            </div>
             <div
               v-for="activity in filteredActivities.slice(0, 3)"
               :key="activity.id"
               class="mb-3 flex gap-2 text-xs"
             >
-              <span class="grid size-7 shrink-0 place-content-center rounded-lg bg-[#f4f3ff] text-[#7c3aed]"><i class="size-3.5" :class="activityIcon(activity.activity_type)" /></span>
-              <div class="min-w-0"><p class="truncate font-semibold text-n-slate-12">{{ activity.title }}</p><p class="text-n-slate-11">{{ formatCrmDateTime(activity.due_at) }}</p></div>
+              <span
+                class="grid size-7 shrink-0 place-content-center rounded-lg bg-[#f4f3ff] text-[#7c3aed]"
+                ><i
+                  class="size-3.5"
+                  :class="activityIcon(activity.activity_type)"
+              /></span>
+              <div class="min-w-0">
+                <p class="truncate font-semibold text-n-slate-12">
+                  {{ activity.title }}
+                </p>
+                <p class="text-n-slate-11">
+                  {{ formatCrmDateTime(activity.due_at) }}
+                </p>
+              </div>
             </div>
           </div>
         </aside>
@@ -505,160 +591,138 @@ onMounted(async () => {
               </button>
             </nav>
           </div>
-          <div
-            v-if="loading"
-            class="grid min-h-[560px] place-content-center text-sm text-n-slate-11"
-          >
-            Carregando agenda…
-          </div>
-          <div
-            v-else-if="error"
-            class="grid min-h-[560px] place-content-center text-sm text-[#b42318]"
-          >
-            {{ error }}
-          </div>
-          <p
-            v-else-if="!displayDays.length"
-            data-testid="calendar-empty-period"
-            role="status"
-            class="p-6 text-center text-sm text-n-slate-11"
-          >
-            {{ t('CRM.CALENDAR_ACTIONS.EMPTY_PERIOD') }}
-          </p>
-          <div v-else class="min-w-0 overflow-x-auto">
+          <CalendarServerList
+            v-if="calendarView === 'list'"
+            :account-id="route.params.accountId"
+            :identity="identity"
+            :starts-on="listWindow.startsOn"
+            :ends-before="listWindow.endsBefore"
+            :filters="filters"
+            :customer-segment-id="route.query.customer_segment_id || ''"
+            :revision="listRevision"
+            @owners="listOwners = $event"
+            @edit="editingActivityId = $event"
+          />
+          <template v-else>
             <div
-              data-testid="calendar-period"
-              class="grid min-h-[560px] divide-n-weak"
-              :class="
-                ['day', 'list'].includes(calendarView)
-                  ? 'grid-cols-1 divide-y'
-                  : calendarView === 'month'
-                    ? 'min-w-[560px] grid-cols-7 divide-x'
-                    : 'min-w-[840px] grid-cols-7 divide-x'
-              "
+              v-if="loading"
+              class="grid min-h-[560px] place-content-center text-sm text-n-slate-11"
             >
+              Carregando agenda…
+            </div>
+            <div
+              v-else-if="error"
+              class="grid min-h-[560px] place-content-center text-sm text-[#b42318]"
+            >
+              {{ error }}
+            </div>
+            <p
+              v-else-if="!displayDays.length"
+              data-testid="calendar-empty-period"
+              role="status"
+              class="p-6 text-center text-sm text-n-slate-11"
+            >
+              {{ t('CRM.CALENDAR_ACTIONS.EMPTY_PERIOD') }}
+            </p>
+            <div v-else class="min-w-0 overflow-x-auto">
               <div
-                v-for="day in visibleDays"
-                :key="day.key"
-                :data-calendar-day="day.key"
-                class="min-w-0 bg-gradient-to-b from-n-solid-2 to-n-slate-2"
+                data-testid="calendar-period"
+                class="grid min-h-[560px] divide-n-weak"
+                :class="
+                  ['day', 'list'].includes(calendarView)
+                    ? 'grid-cols-1 divide-y'
+                    : calendarView === 'month'
+                      ? 'min-w-[560px] grid-cols-7 divide-x'
+                      : 'min-w-[840px] grid-cols-7 divide-x'
+                "
               >
-                <header class="border-b border-n-weak px-2 py-3 text-center">
-                  <button
-                    type="button"
-                    data-testid="calendar-open-day"
-                    class="rounded-lg px-2 py-1 hover:bg-n-slate-3"
-                    :aria-label="
-                      t('CRM.CALENDAR_ACTIONS.OPEN_DAY', { date: day.key })
-                    "
-                    @click="openCalendarDay(day)"
-                  >
-                    <span
-                      class="block text-[11px] font-semibold uppercase text-n-slate-11"
-                      >{{ day.weekday }}</span
-                    >
-                    <span
-                      class="mt-1 block text-sm font-bold text-n-slate-12"
-                      >{{ day.day }}</span
-                    >
-                  </button>
-                </header>
                 <div
-                  class="space-y-2 p-2"
-                  :class="
-                    calendarView === 'month'
-                      ? 'min-h-[120px]'
-                      : calendarView === 'list'
-                        ? ''
-                        : 'min-h-[500px] bg-[repeating-linear-gradient(to_bottom,transparent_0,transparent_54px,#f3f5f8_55px)]'
-                  "
+                  v-for="day in visibleDays"
+                  :key="day.key"
+                  :data-calendar-day="day.key"
+                  class="min-w-0 bg-gradient-to-b from-n-solid-2 to-n-slate-2"
                 >
-                  <article
-                    v-for="activity in day.activities"
-                    :key="activity.id"
-                    class="rounded-xl border p-2.5 text-xs shadow-sm"
-                    :class="activityTone(activity)"
+                  <header class="border-b border-n-weak px-2 py-3 text-center">
+                    <button
+                      type="button"
+                      data-testid="calendar-open-day"
+                      class="rounded-lg px-2 py-1 hover:bg-n-slate-3"
+                      :aria-label="
+                        t('CRM.CALENDAR_ACTIONS.OPEN_DAY', { date: day.key })
+                      "
+                      @click="openCalendarDay(day)"
+                    >
+                      <span
+                        class="block text-[11px] font-semibold uppercase text-n-slate-11"
+                        >{{ day.weekday }}</span
+                      >
+                      <span
+                        class="mt-1 block text-sm font-bold text-n-slate-12"
+                        >{{ day.day }}</span
+                      >
+                    </button>
+                  </header>
+                  <div
+                    class="space-y-2 p-2"
+                    :class="
+                      calendarView === 'month'
+                        ? 'min-h-[120px]'
+                        : calendarView === 'list'
+                          ? ''
+                          : 'min-h-[500px] bg-[repeating-linear-gradient(to_bottom,transparent_0,transparent_54px,#f3f5f8_55px)]'
+                    "
                   >
-                    <div class="mb-1 flex items-center gap-1.5 font-bold">
-                      <i
-                        class="size-3.5"
-                        :class="activityIcon(activity.activity_type)"
-                      />{{
-                        new Date(activity.due_at).toLocaleTimeString('pt-BR', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })
-                      }}
-                    </div>
-                    <p class="break-words font-semibold leading-4">
-                      {{ activity.title }}
-                    </p>
-                    <button
-                      v-if="canEdit(activity)"
-                      type="button"
-                      :disabled="completingIds.has(activity.id)"
-                      class="mt-2 rounded-md bg-white/70 px-2 py-1 text-[10px] font-semibold"
-                      @click="complete(activity.id)"
+                    <article
+                      v-for="activity in day.activities"
+                      :key="activity.id"
+                      class="rounded-xl border p-2.5 text-xs shadow-sm"
+                      :class="activityTone(activity)"
                     >
-                      Concluir
-                    </button>
-                    <button
-                      v-if="canEdit(activity)"
-                      type="button"
-                      :disabled="completingIds.has(activity.id)"
-                      class="mt-2 rounded-md border border-current px-2 py-1 text-[10px] font-semibold disabled:opacity-50"
-                      @click="openEditor(activity)"
-                    >
-                      {{ t('CRM.ACTIVITY_EDIT.TITLE') }}
-                    </button>
-                  </article>
+                      <div class="mb-1 flex items-center gap-1.5 font-bold">
+                        <i
+                          class="size-3.5"
+                          :class="activityIcon(activity.activity_type)"
+                        />{{
+                          new Date(activity.due_at).toLocaleTimeString(
+                            'pt-BR',
+                            {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            }
+                          )
+                        }}
+                      </div>
+                      <p class="break-words font-semibold leading-4">
+                        {{ activity.title }}
+                      </p>
+                      <button
+                        v-if="canEdit(activity)"
+                        type="button"
+                        :disabled="completingIds.has(activity.id)"
+                        class="mt-2 rounded-md bg-white/70 px-2 py-1 text-[10px] font-semibold"
+                        @click="complete(activity.id)"
+                      >
+                        Concluir
+                      </button>
+                      <button
+                        v-if="canEdit(activity)"
+                        type="button"
+                        :disabled="completingIds.has(activity.id)"
+                        class="mt-2 rounded-md border border-current px-2 py-1 text-[10px] font-semibold disabled:opacity-50"
+                        @click="openEditor(activity)"
+                      >
+                        {{ t('CRM.ACTIVITY_EDIT.TITLE') }}
+                      </button>
+                    </article>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          <nav
-            v-if="
-              calendarView === 'list' &&
-              listPagination.total &&
-              !loading &&
-              !error
-            "
-            :aria-label="t('CRM.CALENDAR_ACTIONS.LIST_PAGES')"
-            class="flex flex-wrap items-center justify-between gap-2 border-t border-n-weak p-3"
-          >
-            <p role="status" class="m-0 text-xs text-n-slate-11">
-              {{
-                t('CRM.CALENDAR_ACTIONS.LIST_PAGE', {
-                  page: listPagination.page,
-                  pages: listPagination.pages,
-                  total: listPagination.total,
-                })
-              }}
-            </p>
-            <div class="flex items-center gap-2">
-              <Button
-                data-testid="calendar-list-previous"
-                variant="outline"
-                color="slate"
-                size="sm"
-                :label="t('CRM.CALENDAR_ACTIONS.PREVIOUS_PAGE')"
-                :disabled="listPagination.page === 1"
-                @click="listPage = listPagination.page - 1"
-              />
-              <Button
-                data-testid="calendar-list-next"
-                variant="outline"
-                color="slate"
-                size="sm"
-                :label="t('CRM.CALENDAR_ACTIONS.NEXT_PAGE')"
-                :disabled="listPagination.page === listPagination.pages"
-                @click="listPage = listPagination.page + 1"
-              />
-            </div>
-          </nav>
+          </template>
         </section>
 
         <aside
+          v-if="calendarView !== 'list'"
           class="rounded-2xl border border-n-weak bg-n-solid-2 p-4 shadow-sm"
         >
           <template v-if="nextActivity">
@@ -733,7 +797,12 @@ onMounted(async () => {
               </button>
             </div>
           </template>
-          <div v-else class="grid h-full place-content-center text-center text-sm text-n-slate-11">Nenhum compromisso agendado.</div>
+          <div
+            v-else
+            class="grid h-full place-content-center text-center text-sm text-n-slate-11"
+          >
+            Nenhum compromisso agendado.
+          </div>
         </aside>
       </div>
     </div>

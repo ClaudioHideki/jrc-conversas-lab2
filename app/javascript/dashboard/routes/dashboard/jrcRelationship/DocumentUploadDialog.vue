@@ -18,6 +18,7 @@ const form = reactive({
   requirement_key: props.document?.requirement_key || '',
   title: props.document?.title || '',
   category: props.document?.category || 'registration',
+  confidentiality: props.document?.confidentiality || '',
   valid_until: '',
   change_reason: '',
 });
@@ -109,6 +110,31 @@ onMounted(() => dialog.value.open());
             </option>
           </select></label
         >
+        <label
+          v-if="!document"
+          class="block text-sm"
+        >
+          {{ t('RELATIONSHIP.V2.DOCS.CONFIDENTIALITY') }}
+          <select
+            v-model="form.confidentiality"
+            required
+            :disabled="busy"
+            :class="inputClass"
+          >
+            <option
+              value=""
+              disabled
+            >
+              {{ t('RELATIONSHIP.V2.DOCS.CLASSIFY') }}
+            </option>
+            <option value="operational">
+              {{ t('RELATIONSHIP.V2.DOCS.OPERATIONAL') }}
+            </option>
+            <option value="restricted">
+              {{ t('RELATIONSHIP.V2.DOCS.RESTRICTED') }}
+            </option>
+          </select>
+        </label>
         <DocumentRequirementField
           v-if="!document"
           v-model="form.requirement_key"

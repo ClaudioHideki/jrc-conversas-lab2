@@ -43,7 +43,7 @@ class JrcRelationship::AnalystWithdrawal
   def with_member(analyst_id)
     AccountUser.transaction do
       @authority.call do |context|
-        raise Pundit::NotAuthorizedError unless context.policy.configure? && context.policy.team?
+        raise Pundit::NotAuthorizedError unless context.policy.configure? && context.policy.team? && context.policy.local?('manage_eligibility')
 
         analyst = context.assignable_users.find(analyst_id)
         raise Pundit::NotAuthorizedError if analyst.id == context.user.id

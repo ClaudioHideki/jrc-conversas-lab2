@@ -611,9 +611,18 @@ Rails.application.routes.draw do
             end
           end
           namespace :relationship do
+            get :retention, to: 'retention#show'
+            get :local_role_options, to: 'local_role_options#index'
+            resources :management_requests, only: [:index, :create] do
+              post :route, on: :member
+              get :resolution_options, on: :member
+            end
+            get 'retention/status', to: 'retention#status'
+            post 'retention/start', to: 'retention#start'
             resources :portfolio_groups, only: [:index, :show, :create, :update] do
               post :customer_review, on: :member
               get :history, on: :member
+              get :history_detail, on: :member
               get :export_history, on: :member
               get :workload, on: :member
               member do
@@ -816,7 +825,15 @@ Rails.application.routes.draw do
             resources :commission_programs, only: [:index, :show, :create, :update] do
               post :simulate, on: :collection
             end
+            resources :backoffice_requirement_rules, only: [:index, :create, :update] do
+              get :capabilities, on: :collection
+              get :options, on: :collection
+            end
             resources :backoffice_requests, only: [:index, :show, :create, :update] do
+              get 'requirements', to: 'backoffice_requirements#index'
+              get 'requirements/history', to: 'backoffice_requirements#history'
+              post 'requirements/adopt', to: 'backoffice_requirements#adopt'
+              post 'requirements/answer', to: 'backoffice_requirements#answer'
               get 'completion_report', to: 'backoffice_completion_reports#show'
               get 'completion_handoff', to: 'backoffice_completion_handoffs#show'
               get 'completion_package', to: 'backoffice_completion_packages#show'

@@ -13,7 +13,7 @@ class Api::V1::Accounts::Approvals::RequestsController < Api::V1::Accounts::Appr
       values.merge('actor_name' => decision.actor.user.name,
                    'delegated_from_name' => decision.delegation_id && decision.principal.user.name)
     end
-    render json: request_payload(record).merge(decisions: decisions, adjustment: service(JrcApprovals::Adjustments).options(record),
+    render json: request_payload(record).merge(decisions: decisions, review_directions: service(JrcApprovals::ReviewDirections).options(record), adjustment: service(JrcApprovals::Adjustments).options(record),
                                                allowed_decisions: JrcApprovals::DecisionOptions.call(
                                                  account: Current.account, user: Current.user, record: record
                                                ))
@@ -56,7 +56,7 @@ class Api::V1::Accounts::Approvals::RequestsController < Api::V1::Accounts::Appr
     raise JrcApprovals::Error, 'INVALID_ADJUSTMENT_FIELDS' unless (changes.keys - JrcApprovals::Adjustments::FIELDS).empty?
 
     values = input.permit(:mode, :reason, :expected_version, :idempotency_key, :step_code, :delegation_id, :own_delegation_id).to_h.symbolize_keys
-    record = service(JrcApprovals::Adjustments).call(request_id: params[:id], changes: changes.permit(:discount_cents).to_h, **values)
+    record = service(JrcApprovals::Adjustments).call(request_id: params[:id], changes: changes.permit(*JrcApprovals::Adjustments::FIELDS).to_h, **values)
     readable = JrcApprovals::RequestVisibility.authorize!(account: Current.account, user: Current.user, record: record)
     render json: { saved: true, request: readable && request_payload(record) }
   rescue Pundit::NotAuthorizedError
@@ -66,6 +66,13 @@ class Api::V1::Accounts::Approvals::RequestsController < Api::V1::Accounts::Appr
     render json: { saved: true, request: nil }
   rescue JrcCrm::CommercialFinancials::InvalidTerms
     render json: { error: 'INVALID_COMMERCIAL_TERMS' }, status: :unprocessable_entity
+  end
+
+  def review_direction
+    response.headers['Cache-Control'] = 'no-store'
+    input = params.require(:review_direction).permit(:kind, :text, :expected_version, :idempotency_key, :step_code,
+      :delegation_id, :own_delegation_id).to_h.symbolize_keys
+    render json: service(JrcApprovals::ReviewDirections).call(request_id: params[:id], **input)
   end
 
   def audit

@@ -25,9 +25,14 @@ class JrcBackoffice::CompletionPackage
     files = document_entries + contracts
     signature = JrcBackoffice::CompletionSignature.new(account: @access.account, actor: @access.actor, request_id: @request_id).call(contract)
     missing = missing_entries(contract, contracts, signature)
+    requirements = JrcBackoffice::Requirements.manifest(request: @request, actor: @access.actor)
+    if requirements && (requirements[:stale] || requirements[:items].any? { |item| item[:blocking] })
+      missing << { kind: 'requirements', reason: 'REQUIREMENTS_PENDING_OR_STALE' }
+    end
     result = request_manifest.merge(files: files, missing: missing, coverage: coverage(files, missing),
                                     contract_id: contract&.id,
                                     signature: signature)
+    result[:requirements] = requirements if requirements
     @access.request(@request_id)
     @access.contract!(@request) if contract
     result
@@ -128,7 +133,7 @@ class JrcBackoffice::CompletionPackage
       path: "documents/#{version.id}/v#{version.version}#{extension}", sha256: version.sha256, byte_size: blob ? blob.byte_size : 0,
       created_at: version.created_at, actor_id: version.uploaded_by_id, review_status: version.status,
       availability: scan&.clean? ? 'available' : 'blocked', scan_state: scan&.state || 'pending',
-      decisions: limited(version.decisions.order(:id)).map { |row| row.slice('id', 'actor_id', 'status', 'created_at') } }
+      decisions: limited(version.decisions.order(:id)).map { |row| row.slice('id', 'actor_id', 'status', 'created_at', 'expires_on', 'validity_timezone') } }
   end
 
   def contract_entries

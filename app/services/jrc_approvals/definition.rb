@@ -6,13 +6,20 @@ class JrcApprovals::Definition
 
   def self.validate!(definition, entry)
     data = JrcServiceDesk::CanonicalJson.normalize(definition)
-    if data.is_a?(Hash) && data['schema_version'] == 2
+    adjustment = data.is_a?(Hash) && data['adjustments']
+    JrcApprovals::AdjustmentPolicy.validate!(adjustment, entry.key) if adjustment
+    directions = data.is_a?(Hash) && data['review_directions']
+    JrcApprovals::ReviewDirectivePolicy.validate!(directions) if directions
+    base = data.is_a?(Hash) ? data.except('adjustments', 'review_directions') : data
+    invalid! if data.is_a?(Hash) && ((data.key?('adjustments') && !adjustment) || (data.key?('review_directions') && !directions))
+    if base.is_a?(Hash) && base['schema_version'] == 2
       JrcServiceDesk::CanonicalJson.dump(data)
-      validate_base!(data.except('tiers').merge('schema_version' => 1), entry)
-      JrcApprovals::TierRanges.new(data, entry).validate!
+      validate_base!(base.except('tiers').merge('schema_version' => 1), entry)
+      JrcApprovals::TierRanges.new(base, entry).validate!
       data
     else
-      validate_base!(data, entry)
+      validate_base!(base, entry)
+      data
     end
   rescue ArgumentError, NoMethodError, KeyError, TypeError
     invalid!

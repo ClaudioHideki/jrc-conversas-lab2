@@ -6,6 +6,7 @@ import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcRelationship';
 import PortfolioCapacityLimitsForm from './PortfolioCapacityLimitsForm.vue';
+import LocalRoleForm from './LocalRoleForm.vue';
 import { buttonClass, inputClass, message } from './definitions';
 const props = defineProps({
   group: { type: Object, required: true },
@@ -21,6 +22,8 @@ const error = ref('');
 const saved = ref(false);
 const conflict = ref(false);
 const capacityValid = ref(false);
+const localRoleValid = ref(true);
+const configurationReason = ref('');
 const reload = ref(0);
 const identity = computed(() =>
   JSON.stringify([
@@ -35,11 +38,13 @@ const identity = computed(() =>
 const tabs = computed(() => [
   { key: 'capacity', label: t('RELATIONSHIP.NAMED_PORTFOLIOS.RULES.CAPACITY') },
   { key: 'transfer', label: t('RELATIONSHIP.NAMED_PORTFOLIOS.RULES.TRANSFER') },
+  { key: 'roles', label: t('RELATIONSHIP.LOCAL_ROLES.TITLE') },
   { key: 'review', label: t('RELATIONSHIP.NAMED_PORTFOLIOS.REVIEW') },
 ]);
 const valid = computed(
   () =>
     capacityValid.value &&
+    localRoleValid.value &&
     configuration.value &&
     Number.isFinite(
       configuration.value.rules.portfolio_review_validity_minutes
@@ -69,6 +74,7 @@ watch(
     saved.value = false;
     conflict.value = false;
     tab.value = 'capacity';
+    configurationReason.value = '';
     busy.value = false;
     if (!props.group.can_configure) return;
     busy.value = true;
@@ -110,7 +116,9 @@ const save = async () => {
     version: record.version,
     portfolio_revision: record.portfolio_revision,
     weights: record.weights,
+    reason: configurationReason.value,
     rules: {
+      portfolio_local_access: record.rules.portfolio_local_access,
       portfolio_capacity_limits: record.rules.portfolio_capacity_limits,
       portfolio_transfer_approval_required:
         record.rules.portfolio_transfer_approval_required,
@@ -155,6 +163,23 @@ const save = async () => {
     <p class="text-sm text-n-slate-11">
       {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.RULES.HELP') }}
     </p>
+    <template v-if="configuration && tab === 'roles'">
+      <LocalRoleForm
+        v-model="configuration.rules.portfolio_local_access"
+        :scope-key="`portfolio:${group.id}`"
+        :disabled="busy"
+        @validity="localRoleValid = $event"
+      />
+      <label class="block text-sm"
+        >{{ t('RELATIONSHIP.LOCAL_ROLES.REASON')
+        }}<textarea
+          v-model="configurationReason"
+          :class="inputClass"
+          maxlength="2000"
+          :disabled="busy"
+        />
+      </label>
+    </template>
     <p
       v-if="busy"
       role="status"

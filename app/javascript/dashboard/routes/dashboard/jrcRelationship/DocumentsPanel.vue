@@ -100,6 +100,7 @@ const upload = async fields => {
   [
     'title',
     'category',
+    'confidentiality',
     'valid_until',
     'change_reason',
     'requirement_key',
@@ -161,7 +162,7 @@ const download = async (document, version) => {
 const saveMetadata = async fields => {
   const version = generation;
   const document = metadataDocument.value;
-  if (!document || !props.metadata.can_manage_documents || busy.value) return;
+  if (!document || !document.can_manage || busy.value) return;
   busy.value = true;
   error.value = '';
   try {
@@ -203,7 +204,7 @@ const date = value => formatDate(value, props.metadata.formatting);
         >
           {{ t('RELATIONSHIP.REFRESH') }}</button
         ><button
-          v-if="metadata.can_manage_documents"
+          v-if="metadata.can_upload_documents"
           type="button"
           class="rounded-lg bg-n-violet-9 px-4 py-2 font-semibold text-white"
           :disabled="busy"
@@ -277,7 +278,7 @@ const date = value => formatDate(value, props.metadata.formatting);
             {{ t('RELATIONSHIP.V2.DOCS.HISTORY') }}
           </button>
           <button
-            v-if="metadata.can_manage_documents"
+            v-if="document.can_manage"
             type="button"
             :class="buttonClass"
             :disabled="busy"
@@ -292,7 +293,7 @@ const date = value => formatDate(value, props.metadata.formatting);
           >
             {{ t('RELATIONSHIP.V2.DOCS.VERSIONS') }}</button
           ><button
-            v-if="metadata.can_manage_documents"
+            v-if="document.can_replace"
             type="button"
             :class="buttonClass"
             @click="

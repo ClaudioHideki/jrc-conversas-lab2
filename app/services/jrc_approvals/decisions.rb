@@ -67,6 +67,7 @@ class JrcApprovals::Decisions
     raise JrcApprovals::Error, 'REQUEST_NOT_PENDING' unless request.state == 'pending' ||
       (replay && %w[approved rejected returned escalated].include?(request.state))
 
+    JrcRelationship::DistributionVoteAuthority.authorize!(account: @account, user: @user, record: request)
     snapshot = JrcApprovals::Catalog.snapshot(account: @account, user: @user,
       key: "#{request.module_key}.#{request.event_key}", resource_id: request.resource_id)
     raise JrcApprovals::Error, 'CONTEXT_STALE' unless snapshot == request.snapshot

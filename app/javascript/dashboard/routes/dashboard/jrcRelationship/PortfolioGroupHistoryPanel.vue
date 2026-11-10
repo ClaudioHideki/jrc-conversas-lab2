@@ -5,6 +5,7 @@ import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import API from 'dashboard/api/jrcRelationship';
+import PortfolioHistoryDetail from './PortfolioHistoryDetail.vue';
 import { buttonClass, inputClass, date, message } from './definitions';
 const props = defineProps({
   group: { type: Object, required: true },
@@ -74,12 +75,25 @@ const pages = computed(() =>
 );
 let generation = 0;
 let controller;
+const detailEpoch = ref(0);
+const denyDetail = () => {
+  detailEpoch.value += 1;
+  generation += 1;
+  controller?.abort();
+  rows.value = [];
+  pagination.value = { page: 1, per_page: 25, total: 0, can_read_rules: false };
+  loading.value = false;
+  exporting.value = false;
+  prepared.value = false;
+  error.value = t('RELATIONSHIP.NAMED_PORTFOLIOS.HISTORY.DETAIL.DENIED');
+};
 const query = () =>
   Object.fromEntries(
     Object.entries(filters).filter(([, value]) => value !== '')
   );
 const load = async (page = 1) => {
   generation += 1;
+  detailEpoch.value += 1;
   const current = generation;
   controller?.abort();
   controller = new AbortController();
@@ -329,6 +343,13 @@ onBeforeUnmount(() => {
             {{ t('RELATIONSHIP.NAMED_PORTFOLIOS.HISTORY.REASON_RECORDED') }}
           </p>
         </div>
+        <PortfolioHistoryDetail
+          :account-id="route.params.accountId"
+          :group-id="group.id"
+          :event-id="row.id"
+          :authority="`${identity}:${detailEpoch}`"
+          @denied="denyDetail"
+        />
       </li>
     </ol>
     <p

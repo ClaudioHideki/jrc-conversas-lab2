@@ -15,8 +15,27 @@
       "STEP": "Step {index}: {kind} — {title} — {days} days after the event",
       "CONDITIONS": "Configured conditions: {count}",
       "CONDITION": "{field} {operator} {value}",
-      "CONDITION_FIELDS": { "segment_id": "Segment reference", "product_id": "Product reference", "business_unit_id": "Unit reference", "health_score": "Health score", "mrr_cents": "Monthly recurring revenue (cents)", "days_without_contact": "Days without contact", "critical_tickets": "Critical tickets", "sla_breached": "Breached SLA", "nps": "NPS", "csat": "CSAT", "overdue_cents": "Overdue amount (cents)", "delayed_projects": "Delayed projects" },
-      "OPERATORS": { "lt": "less than", "lte": "at most", "eq": "equals", "gte": "at least", "gt": "greater than" },
+      "CONDITION_FIELDS": {
+        "segment_id": "Segment reference",
+        "product_id": "Product reference",
+        "business_unit_id": "Unit reference",
+        "health_score": "Health score",
+        "mrr_cents": "Monthly recurring revenue (cents)",
+        "days_without_contact": "Days without contact",
+        "critical_tickets": "Critical tickets",
+        "sla_breached": "Breached SLA",
+        "nps": "NPS",
+        "csat": "CSAT",
+        "overdue_cents": "Overdue amount (cents)",
+        "delayed_projects": "Delayed projects"
+      },
+      "OPERATORS": {
+        "lt": "less than",
+        "lte": "at most",
+        "eq": "equals",
+        "gte": "at least",
+        "gt": "greater than"
+      },
       "INCOMPLETE": "This historical definition is incomplete. Restoration is blocked; review its legacy fields before creating a new definition.",
       "UNCONFIRMED": "The playbook restoration could not be confirmed for the selected definition and versions.",
       "SAVED": "Playbook version {version} saved from version {source}. Previous definitions and executions were preserved."
@@ -66,7 +85,12 @@
         "RESULT_TITLE": "Customer link results",
         "RESULT_ITEM": "Customer allocation #{id}: {state}",
         "ATOMIC_HELP": "This request commits all selected links together. A rejected request commits none; keep the draft, correct the cause and review again. This result is not a background batch queue.",
-        "STATES": { "linked": "Link activated", "already_linked": "Link already active", "unlinked": "Link deactivated", "already_unlinked": "Link already inactive" }
+        "STATES": {
+          "linked": "Link activated",
+          "already_linked": "Link already active",
+          "unlinked": "Link deactivated",
+          "already_unlinked": "Link already inactive"
+        }
       },
       "MASTER": {
         "TITLE": "Select from master directory",
@@ -110,6 +134,62 @@
           "rules": "Rule version recorded",
           "restored": "Configuration restored as a new version",
           "exported": "Operational summary exported"
+        },
+        "DETAIL": {
+          "OPEN": "Consultar valores e motivo",
+          "CLOSE": "Fechar detalhes",
+          "LOADING": "Verificando o acesso ao histórico...",
+          "DENIED": "O histórico não está disponível no seu acesso atual. Consulte novamente antes de continuar.",
+          "FAILED": "Não foi possível confirmar o histórico. Nenhum valor anterior foi mantido na tela.",
+          "LEGACY": "Este registro não possui prova do escopo original. O resumo permanece disponível, sem revelar valores ou motivos antigos.",
+          "NOTICE": "Valores preservados no evento original. A exibição depende também das permissões atuais; compartilhar a carteira não libera seu histórico privado.",
+          "BEFORE": "Antes",
+          "AFTER": "Depois",
+          "REASON": "Motivo",
+          "NOT_RECORDED": "Não registrado",
+          "EMPTY": "Não informado",
+          "UNAVAILABLE": "Indisponível",
+          "YES": "Sim",
+          "NO": "Não",
+          "ASSIGNMENT": "Alocação",
+          "ACTIVE": "Ativa",
+          "INACTIVE": "Inativa",
+          "AVAILABILITY": "Disponibilidade",
+          "DEDICATION": "Dedicação",
+          "FIELDS": {
+            "name": "Nome",
+            "objective": "Objetivo",
+            "owner_id": "Coordenador",
+            "team_id": "Equipe",
+            "business_unit_id": "Unidade",
+            "segment_id": "Segmento",
+            "visibility": "Visibilidade",
+            "status": "Situação",
+            "goals": "Metas",
+            "customers": "Vínculos de clientes",
+            "version": "Revisão",
+            "rules": "Regras",
+            "portfolio_capacity_limits": "Limites de capacidade",
+            "portfolio_transfer_approval_required": "Aprovação obrigatória",
+            "portfolio_review_validity_minutes": "Validade da revisão (minutos)"
+          },
+          "GOALS": {
+            "baseline": "Referência",
+            "target": "Meta",
+            "current": "Atual"
+          },
+          "UNITS": {
+            "customers": "clientes",
+            "points": "pontos",
+            "hours": "horas"
+          },
+          "VALUES": {
+            "private": "Privada",
+            "team": "Equipe",
+            "account": "Conta",
+            "active": "Ativa",
+            "archived": "Arquivada"
+          }
         }
       },
       "RULES": {
@@ -197,10 +277,26 @@
       "REMOVE_REVIEW": "Review customer link deactivation",
       "REMOVE_HELP": "This deactivates the portfolio link and preserves the customer, responsibilities and link history.",
       "NOT_AVAILABLE": "The portfolio is unavailable in your current access.",
-      "TABS": { "general": "General", "goals": "Goals", "permissions": "Team and access", "review": "Review" },
-      "MEASURES": { "baseline": "Baseline", "target": "Target", "current": "Current measurement" },
-      "STATES": { "active": "Active", "archived": "Archived" },
-      "VISIBILITY_OPTIONS": { "private": "Coordinator and administrators", "team": "Existing team", "account": "Authorized users in this account" }
+      "TABS": {
+        "general": "General",
+        "goals": "Goals",
+        "permissions": "Team and access",
+        "review": "Review"
+      },
+      "MEASURES": {
+        "baseline": "Baseline",
+        "target": "Target",
+        "current": "Current measurement"
+      },
+      "STATES": {
+        "active": "Active",
+        "archived": "Archived"
+      },
+      "VISIBILITY_OPTIONS": {
+        "private": "Coordinator and administrators",
+        "team": "Existing team",
+        "account": "Authorized users in this account"
+      }
     },
     "TRANSFER_LOCK": {
       "TITLE": "Portfolio transfer restriction",
@@ -251,8 +347,24 @@
       "UPDATED": "Last updated",
       "OPEN_SOURCE": "Open original module",
       "PAGE": "Page {page} of {pages}",
-      "KINDS": { "project_tasks": "Project tasks", "service_tickets": "Service Desk tickets", "projects": "Owned projects", "activities": "Linked CRM commitments" },
-      "STATES": { "planned": "Planned", "active": "Active", "on_hold": "On hold", "backlog": "Backlog", "in_progress": "In progress", "review": "In review", "blocked": "Blocked", "open": "Open", "waiting": "Waiting", "scheduled": "Scheduled" }
+      "KINDS": {
+        "project_tasks": "Project tasks",
+        "service_tickets": "Service Desk tickets",
+        "projects": "Owned projects",
+        "activities": "Linked CRM commitments"
+      },
+      "STATES": {
+        "planned": "Planned",
+        "active": "Active",
+        "on_hold": "On hold",
+        "backlog": "Backlog",
+        "in_progress": "In progress",
+        "review": "In review",
+        "blocked": "Blocked",
+        "open": "Open",
+        "waiting": "Waiting",
+        "scheduled": "Scheduled"
+      }
     },
     "PLAYBOOK_BUDGET": {
       "TITLE": "Last automatic task admission deferred",
@@ -369,13 +481,12 @@
       "RECEIPT_ITEM": "Item do lote",
       "ERROR": "Não foi possível confirmar o resultado. Consulte o lote salvo antes de repetir a ação.",
       "OPERATIONS": {
-        "portfolio_membership": "Reviewed portfolio customer links",
+        "portfolio_membership": "Vínculos revisados da carteira",
         "assign": "Alteração de responsável",
         "activity": "Criação de atividade",
         "playbook": "Aplicação do playbook e da versão revisada",
         "cadence": "Inscrição na cadência revisada",
-        "master_allocation": "Alocações iniciais e vínculos revisados",
-        "portfolio_membership": "Vínculos revisados da carteira"
+        "master_allocation": "Alocações iniciais e vínculos revisados"
       },
       "STATES": {
         "previewed": "Aguardando sua confirmação",
@@ -995,13 +1106,12 @@
         "available_after": "Available after transfer"
       },
       "BLOCKERS": {
-        "capacity_owner_unavailable": "The analyst is currently unavailable or no longer eligible in Relationship.",
+        "capacity_owner_unavailable": "O responsável não está disponível neste escopo.",
         "capacity_missing": "No limit is configured for this analyst in this scope.",
         "capacity_scope_denied": "Your permissions do not allow verification of the full destination workload. Counts are hidden.",
         "capacity_exceeded": "This transfer exceeds the destination capacity.",
         "capacity_workload_missing": "Explicit workload inputs are missing or invalid; this is not spare capacity.",
-        "controlled_review_required": "Seleção ampla: refine o escopo para uma revisão controlada.",
-        "capacity_owner_unavailable": "O responsável não está disponível neste escopo."
+        "controlled_review_required": "Seleção ampla: refine o escopo para uma revisão controlada."
       },
       "UNIT": "Capacity unit",
       "UNITS": {
@@ -1871,7 +1981,12 @@
         "HISTORY_SIDES": {
           "before": "Antes",
           "after": "Depois"
-        }
+        },
+        "CONFIDENTIALITY": "Classificação documental",
+        "CLASSIFY": "Selecione a classificação",
+        "OPERATIONAL": "Operacional",
+        "RESTRICTED": "Restrito: exige permissão específica",
+        "UNCLASSIFIED": "Classificação pendente: download indisponível"
       },
       "WAITING_REVIEW_REQUIRED": "Provide the reason for waiting, the next step and a future reassessment date. The native SLA policy remains in effect."
     },
@@ -1958,6 +2073,127 @@
         "execution_actor": "Original execution authority belongs to the selected analyst.",
         "portfolio_owner": "The selected analyst owns this active customer portfolio; original execution authority remains with its recorded operator."
       }
+    },
+    "RETENTION": {
+      "TITLE": "TRR — Taxa de Retenção de Relacionamento",
+      "DEFINITION": "Clientes elegíveis no início que permanecem elegíveis no encerramento. Novas entradas não ampliam a base inicial.",
+      "POLICY": "Definição de elegibilidade do TRR",
+      "POLICY_HELP": "Mapeie explicitamente os estados nativos. A fórmula aprovada não muda e nenhum estado histórico será inventado.",
+      "CONFIGURE": "Configurar o indicador",
+      "CONTACT_MODE": "Elegibilidade dos contatos",
+      "CHOOSE": "Selecione uma regra",
+      "STATUS_ONLY": "Situação histórica no Relacionamento",
+      "REGISTERED_ONLY": "Situação no Relacionamento e cadastro confirmado",
+      "TARGET": "Meta opcional (%)",
+      "CONFIG_REQUIRED": "Defina os estados elegíveis e a origem dos contatos.",
+      "PERIOD": "Período",
+      "PERIODS": {
+        "monthly": "Mensal",
+        "quarterly": "Trimestral",
+        "annual": "Anual",
+        "custom": "Personalizado"
+      },
+      "REFERENCE": "Data de referência",
+      "FROM": "Início",
+      "TO": "Fim",
+      "CALCULATE": "Consultar TRR",
+      "DENIED": "Acesso indisponível para este recorte.",
+      "UNAVAILABLE": "Não foi possível confirmar a consulta. Atualize antes de tentar novamente.",
+      "COUNTS": {
+        "initial": "Base inicial",
+        "retained": "Retidos",
+        "exits": "Saídas",
+        "target_percent": "Meta (%)"
+      },
+      "PREVIOUS": "Período anterior",
+      "CHANGE": "Variação em pontos percentuais",
+      "HISTORY_SINCE": "Histórico observado desde",
+      "START_HELP": "Iniciar coleta somente a partir de agora. Não reconstruirá períodos anteriores.",
+      "REASON": "Motivo",
+      "CONFIRM": "Confirmo a coleta futura no escopo da conta.",
+      "START": "Iniciar histórico verificável",
+      "CODES": {
+        "configuration_required": "Configure a política de elegibilidade antes do cálculo.",
+        "period_not_closed": "O período ainda não foi encerrado.",
+        "insufficient_history": "Sem dados suficientes para calcular o indicador no período selecionado.",
+        "not_applicable": "Não aplicável: a base inicial elegível é zero.",
+        "scope_unavailable": "O histórico e o acesso atual não permitem consultar esta base.",
+        "scope_too_large": "Reduza o recorte para consultar este volume.",
+        "invalid_history": "Histórico insuficiente ou inválido.",
+        "ambiguous_history": "A identidade histórica precisa de revisão."
+      }
+    },
+    "LOCAL_ROLES": {
+      "TITLE": "Perfis locais e capacidades",
+      "HELP": "As escolhas restringem permissões nativas. Não concedem acesso a clientes ou módulos. Quando várias carteiras possuem regras, todas as restrições aplicáveis são respeitadas.",
+      "ENABLED": "Aplicar esta matriz local",
+      "ROLE_SETTINGS": "Revisar as capacidades dos perfis",
+      "ROLE": "Perfil",
+      "SCOPE": "Alcance dentro das permissões nativas",
+      "SEARCH": "Buscar usuário autorizado",
+      "OPTIONS_FAILED": "Não foi possível confirmar os usuários.",
+      "USER": "Usuário",
+      "CHOOSE": "Selecione",
+      "PREVIOUS": "Anterior",
+      "NEXT": "Próxima",
+      "ADD": "Adicionar perfil local",
+      "REMOVE": "Remover da proposta de permissões",
+      "INDEPENDENT": "Autorizações independentes; também exigem a capacidade do perfil e o direito nativo.",
+      "DOC_CATEGORIES": "Categorias documentais autorizadas",
+      "INVALID": "Confira os usuários, perfis e capacidades.",
+      "REASON": "Motivo da alteração de permissões",
+      "REVIEW_HELP": "Nada muda antes da confirmação da configuração revisada. Mantenha um gestor autorizado a configurar esta matriz.",
+      "ROLES": {
+        "viewer": "Consulta",
+        "analyst": "Analista",
+        "supervisor": "Supervisor",
+        "manager": "Gestor"
+      },
+      "SCOPES": {
+        "authorized": "Somente fontes autorizadas",
+        "own": "Própria carteira autorizada",
+        "team": "Equipe/unidade autorizada",
+        "managed": "Operação autorizada de gestão"
+      },
+      "ACTIONS": {
+        "view": "Consultar",
+        "work": "Tratar ações e retornos",
+        "team": "Acompanhar equipe",
+        "manage_portfolios": "Gerir carteiras",
+        "configure": "Configurar regras",
+        "request_transfer": "Solicitar transferência",
+        "approve_transfer": "Aprovar conforme alçada nativa",
+        "execute_transfer": "Executar transferência aprovada",
+        "request_eligibility": "Solicitar suspensão/restauração",
+        "manage_eligibility": "Executar suspensão/restauração",
+        "export_data": "Exportar dados",
+        "export_history": "Exportar histórico autorizado",
+        "document_view": "Visualizar documentos",
+        "document_download": "Baixar documentos",
+        "document_upload": "Incluir documentos",
+        "document_replace": "Enviar nova versão",
+        "document_manage": "Administrar documentos",
+        "document_restricted": "Acessar documentos restritos"
+      }
+    },
+    "MANAGEMENT_REQUESTS": {
+      "title": "Solicitacoes de gestao",
+      "help": "Solicitar nao aprova nem executa transferencias ou mudancas de elegibilidade. A gestao utiliza os fluxos nativos e vincula seu recibo.",
+      "reason": "Motivo obrigatorio",
+      "submit": "Registrar solicitacao",
+      "kind": "Tipo de solicitacao",
+      "analyst": "Analista autorizado",
+      "suspend": "Solicitar suspensao no Relacionamento",
+      "restore": "Solicitar restauracao no Relacionamento",
+      "transfer": "Solicitar transferencia da carteira",
+      "uncertain": "Resultado incerto. Consulte as solicitacoes antes de tentar novamente.",
+      "redacted": "Origem fora do acesso atual; somente recibo disponivel.",
+      "link": "Vincular encaminhamento autorizado",
+      "nativeOnly": "Selecione uma proposta revisada compativel ou uma decisao de elegibilidade ja realizada pelo fluxo nativo. Esta vinculacao nao executa a operacao.",
+      "confirm": "Confirmar vinculo",
+      "previous": "Anterior",
+      "next": "Proxima",
+      "error": "Nao foi possivel confirmar a operacao."
     }
   }
 }

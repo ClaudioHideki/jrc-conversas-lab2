@@ -47,7 +47,10 @@ class JrcRelationship::DocumentRequirements
     documents = scope.where(assignment_id: assignment.id, status: 'active', requirement_key: entries.pluck('code')).index_by(&:requirement_key)
     versions = service.latest_versions(document_ids: documents.values.map(&:id))
     { scope_key: configuration.scope_key, configuration_version: configuration.version,
-      entries: entries.map { |entry| project(entry, documents[entry['code']], versions) } }
+      entries: entries.map do |entry|
+        allowed = JrcRelationship::LocalAccess.assignment_allowed?(@context.member, assignment, 'document_view', document_category: entry['category'])
+        allowed ? project(entry, documents[entry['code']], versions) : entry.merge(state: 'unavailable', document_id: nil, version_id: nil, version_number: nil)
+      end }
   end
 
   private

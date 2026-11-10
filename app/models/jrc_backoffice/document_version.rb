@@ -20,8 +20,17 @@ class JrcBackoffice::DocumentVersion < ApplicationRecord
     JrcBackoffice::PrivateBlob.clean_uncommitted(new_upload_blob, marker: 'jrc_backoffice_document_upload')
   end
 
-  def status
-    decisions.order(id: :desc).first&.status || analysis&.state || 'processing'
+  def status(decision: current_decision)
+    return analysis&.state || 'processing' unless decision
+    return decision.status unless decision.expires_on
+
+    zone = Time.find_zone!(decision.validity_timezone)
+    JrcBackoffice::DocumentValidity.status(decision_status: decision.status, expires_on: decision.expires_on,
+      local_date: Time.current.in_time_zone(zone).to_date)
+  end
+
+  def current_decision
+    decisions.order(id: :desc).first
   end
 
   private

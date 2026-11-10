@@ -23,6 +23,10 @@ module Api
             render json: { error: exception.message, errors: [exception.message], code: 'REVIEW_REQUIRED' }, status: :conflict
           end
 
+          rescue_from JrcBackoffice::Requirements::Blocked do |exception|
+            render json: { code: 'BACKOFFICE_REQUIREMENTS_PENDING', message: exception.message }, status: :unprocessable_entity
+          end
+
           private
 
           def ensure_crm_enabled

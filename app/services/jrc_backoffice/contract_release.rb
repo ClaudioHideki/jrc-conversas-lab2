@@ -3,7 +3,9 @@ class JrcBackoffice::ContractRelease
   def self.check!(order:, actor:)
     JrcApprovals::CommercialGate.check!(resource: order, user: actor, key: 'crm.order_price')
     order.backoffice_requests.where(request_kind: 'fulfillment').order(:id).each do |request|
-      if request.workflow_version == 2 && request.stage_applicable?('approval') &&
+      JrcBackoffice::Requirements.check!(request: request, actor: actor, through: 'approval')
+      JrcBackoffice::DocumentGate.check!(request, required_keys: request.precontract_documents)
+      if request.workflow_version == 2 && request.native_approval_required? &&
          JrcApprovals::CommercialGate.mode(order.account, 'backoffice.release') != 'enforcement'
         raise JrcApprovals::Error, 'POLICY_REQUIRED'
       end

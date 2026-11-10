@@ -10,6 +10,33 @@ const base = accountId => {
 const operationsBase = accountId =>
   base(accountId).replace(/\/relationship$/, '/crm');
 export default {
+  managementRequests: (accountId, params, options = {}) =>
+    axios.get(`${base(accountId)}/management_requests`, { ...options, params }),
+  createManagementRequest: (accountId, values, options = {}) =>
+    axios.post(
+      `${base(accountId)}/management_requests`,
+      { management_request: values },
+      options
+    ),
+  managementResolutionOptions: (accountId, id, params, options = {}) =>
+    axios.get(
+      `${base(accountId)}/management_requests/${Number(id)}/resolution_options`,
+      { ...options, params }
+    ),
+  routeManagementRequest: (accountId, id, values, options = {}) =>
+    axios.post(
+      `${base(accountId)}/management_requests/${Number(id)}/route`,
+      { management_request: values },
+      options
+    ),
+  retention: (accountId, params, options = {}) =>
+    axios.get(`${base(accountId)}/retention`, { ...options, params }),
+  retentionStatus: (accountId, options = {}) =>
+    axios.get(`${base(accountId)}/retention/status`, options),
+  startRetentionHistory: (accountId, reason, options = {}) =>
+    axios.post(`${base(accountId)}/retention/start`, { reason }, options),
+  localRoleOptions: (accountId, params, options = {}) =>
+    axios.get(`${base(accountId)}/local_role_options`, { ...options, params }),
   restoreConfiguration: (accountId, fields, options) =>
     axios.post(`${base(accountId)}/configuration/restore`, fields, options),
   restorePlaybook: (accountId, id, fields, options) =>
@@ -32,6 +59,14 @@ export default {
       ...options,
       params,
     }),
+  portfolioGroupHistoryDetail: (accountId, id, eventId, options) =>
+    axios.get(
+      `${base(accountId)}/portfolio_groups/${Number(id)}/history_detail`,
+      {
+        ...options,
+        params: { event_id: eventId },
+      }
+    ),
   exportPortfolioGroupHistory: (accountId, id, params, options) =>
     axios.get(
       `${base(accountId)}/portfolio_groups/${Number(id)}/export_history`,

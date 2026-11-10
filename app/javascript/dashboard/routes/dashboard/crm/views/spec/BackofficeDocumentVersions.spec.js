@@ -1,5 +1,9 @@
+import { reactive } from 'vue';
 import { mount, flushPromises } from '@vue/test-utils';
 import Versions from '../backoffice/BackofficeDocumentVersions.vue';
+
+const authority = vi.hoisted(() => ({ getters: null }));
+vi.mock('vuex', () => ({ useStore: () => ({ getters: authority.getters }) }));
 
 const api = vi.hoisted(() => ({
   documentVersions: vi.fn(),
@@ -30,6 +34,12 @@ const version = {
 };
 beforeEach(() => {
   vi.clearAllMocks();
+  authority.getters = reactive({
+    getCurrentAccountId: 1,
+    getCurrentUserID: 7,
+    getCurrentRole: 'administrator',
+    getCurrentUser: { accounts: [{ id: 1, role: 'administrator' }] },
+  });
   api.documentVersions.mockResolvedValue({
     data: {
       requirements: [{ key: 'cnpj', label: 'Cadastro da empresa' }],
@@ -60,6 +70,7 @@ describe('Backoffice documentary review', () => {
     await flushPromises();
     expect(api.decideDocumentVersion).toHaveBeenCalledWith(7, 19, {
       status: 'approved',
+      expected_decision_id: null,
       reason: 'Conferido com o cadastro e evidência original',
     });
     expect(wrapper.emitted('changed')).toHaveLength(1);
@@ -213,6 +224,108 @@ describe('Backoffice documentary review', () => {
       intent
     );
     expect(wrapper.emitted('changed')).toHaveLength(1);
+    wrapper.unmount();
+  });
+});
+
+describe('Backoffice version-bound calendar validity', () => {
+  const create = () =>
+    mount(Versions, { props: { record: { id: 7, status: 'in_progress' } } });
+  const approve = wrapper =>
+    wrapper.findAll('button').find(button => button.text() === 'Aprovar');
+  const withDate = async () => {
+    const body = (await api.documentVersions()).data;
+    Object.assign(body.data[0], {
+      decision_revision: 77,
+      expires_on: '2099-01-01',
+      validity_timezone: 'UTC',
+    });
+    api.documentVersions.mockResolvedValue({ data: body });
+  };
+  it('sends the exact reviewed version with an explicit new date', async () => {
+    await withDate();
+    const wrapper = create();
+    await flushPromises();
+    expect(wrapper.get('input[type="date"]').element.value).toBe('2099-01-01');
+    await wrapper.get('textarea').setValue('Synthetic review');
+    await wrapper.get('input[type="date"]').setValue('2099-02-01');
+    await approve(wrapper).trigger('click');
+    await flushPromises();
+    expect(api.decideDocumentVersion).toHaveBeenCalledWith(7, 19, {
+      status: 'approved',
+      reason: 'Synthetic review',
+      expected_decision_id: 77,
+      expires_on: '2099-02-01',
+    });
+    wrapper.unmount();
+  });
+  it('sends null only after the user explicitly clears validity', async () => {
+    await withDate();
+    const wrapper = create();
+    await flushPromises();
+    await wrapper.get('textarea').setValue('Synthetic clear');
+    await wrapper.get('input[type="date"]').setValue('');
+    await approve(wrapper).trigger('click');
+    await flushPromises();
+    expect(api.decideDocumentVersion.mock.calls[0][2]).toMatchObject({
+      expires_on: null,
+      expected_decision_id: 77,
+    });
+    wrapper.unmount();
+  });
+  it('preserves date and reason after a revision conflict, without automatic retry', async () => {
+    await withDate();
+    api.decideDocumentVersion.mockRejectedValueOnce({
+      response: { status: 409, data: { message: 'Review changed' } },
+    });
+    const wrapper = create();
+    await flushPromises();
+    await wrapper.get('textarea').setValue('Preserve draft');
+    await wrapper.get('input[type="date"]').setValue('2099-02-01');
+    await approve(wrapper).trigger('click');
+    await flushPromises();
+    expect(wrapper.get('textarea').element.value).toBe('Preserve draft');
+    expect(wrapper.get('input[type="date"]').element.value).toBe('2099-02-01');
+    expect(api.decideDocumentVersion).toHaveBeenCalledTimes(1);
+    wrapper.unmount();
+  });
+  it('clears private document context after a role change and denied refresh', async () => {
+    const wrapper = create();
+    await flushPromises();
+    api.documentVersions.mockRejectedValueOnce({ response: { status: 403 } });
+    authority.getters.getCurrentRole = 'agent';
+    await flushPromises();
+    expect(wrapper.text()).not.toContain('cadastro.pdf');
+    expect(wrapper.find('input[type="date"]').exists()).toBe(false);
+    wrapper.unmount();
+  });
+  it('discards a late response for a previous account without restoring the old names', async () => {
+    const wrapper = create();
+    await flushPromises();
+    let finish;
+    api.documentVersions.mockReturnValueOnce(
+      new Promise(resolve => {
+        finish = resolve;
+      })
+    );
+    await wrapper
+      .findAll('button')
+      .find(button => button.text() === 'Atualizar')
+      .trigger('click');
+    api.documentVersions.mockRejectedValueOnce({ response: { status: 403 } });
+    authority.getters.getCurrentAccountId = 2;
+    await flushPromises();
+    finish({
+      data: {
+        requirements: [{ key: 'cnpj', label: 'Old private data' }],
+        selected_key: 'cnpj',
+        data: [version],
+        meta: { page: 1, pages: 1 },
+      },
+    });
+    await flushPromises();
+    expect(wrapper.text()).not.toContain('cadastro.pdf');
+    expect(wrapper.text()).not.toContain('Old private data');
     wrapper.unmount();
   });
 });

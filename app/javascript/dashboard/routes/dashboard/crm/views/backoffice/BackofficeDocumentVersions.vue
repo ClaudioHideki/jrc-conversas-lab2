@@ -1,9 +1,15 @@
 <script setup>
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import { useStore } from 'vuex';
+import { authorityScope } from 'dashboard/store/crm/authorityScope';
 import { backofficeAPI } from 'dashboard/api/crm/commercialCycle';
 import { useBackofficePresentation } from './useBackofficePresentation';
 const props = defineProps({ record: { type: Object, required: true } });
 const emit = defineEmits(['changed']);
+const store = useStore();
+const identity = computed(() =>
+  JSON.stringify([authorityScope(store.getters), props.record.id])
+);
 const { text, date } = useBackofficePresentation();
 const result = ref(null);
 const selected = ref('');
@@ -17,6 +23,8 @@ const visibleVersions = computed(() =>
 const file = ref(null);
 const fileInput = ref(null);
 const reason = ref('');
+const expiration = ref('');
+const expirationChanged = ref(false);
 const busy = ref(false);
 const error = ref('');
 const terminal = computed(() =>
@@ -33,22 +41,29 @@ const clearUpload = () => {
 const load = async () => {
   sequence += 1;
   const current = sequence;
+  const currentIdentity = identity.value;
   error.value = '';
   try {
     const { data } = await backofficeAPI.documentVersions(props.record.id, {
       document_key: selected.value,
       page: page.value,
     });
-    if (!active || current !== sequence) return false;
+    if (!active || current !== sequence || currentIdentity !== identity.value)
+      return false;
     result.value = data;
     selected.value = data.selected_key || '';
+    const latest = (data.data || []).find(version => version.current);
+    expiration.value = latest?.expires_on || '';
+    expirationChanged.value = false;
     return true;
   } catch (failure) {
-    if (active && current === sequence) {
+    if (active && current === sequence && currentIdentity === identity.value) {
       error.value = text('DOCUMENTS.LOAD_ERROR');
       if ([401, 403, 404].includes(failure.response?.status)) {
         result.value = null;
         reason.value = '';
+        expiration.value = '';
+        expirationChanged.value = false;
         clearUpload();
       }
     }
@@ -57,19 +72,21 @@ const load = async () => {
 };
 const run = async action => {
   if (busy.value) return;
-  const context = props.record.id;
+  const context = identity.value;
   const token = sequence;
   busy.value = true;
   error.value = '';
   try {
     await action();
-    if (!active || context !== props.record.id || token !== sequence) return;
+    if (!active || context !== identity.value || token !== sequence) return;
     if (await load()) emit('changed');
   } catch (failure) {
-    if (!active || context !== props.record.id || token !== sequence) return;
+    if (!active || context !== identity.value || token !== sequence) return;
     if ([401, 403, 404].includes(failure.response?.status)) {
       result.value = null;
       reason.value = '';
+      expiration.value = '';
+      expirationChanged.value = false;
       clearUpload();
     }
     error.value =
@@ -77,12 +94,12 @@ const run = async action => {
       failure.response?.data?.errors?.join(', ') ||
       text('ACTION_ERROR');
   } finally {
-    if (active && context === props.record.id) busy.value = false;
+    if (active && context === identity.value) busy.value = false;
   }
 };
 const upload = () =>
   run(async () => {
-    const context = props.record.id;
+    const context = identity.value;
     const key = selected.value;
     const source = file.value;
     if (uploadIntent?.file !== source || uploadIntent?.documentKey !== key)
@@ -92,25 +109,25 @@ const upload = () =>
         id: crypto.randomUUID(),
       };
     const { data } = await backofficeAPI.uploadDocumentVersion(
-      context,
+      props.record.id,
       key,
       source,
       uploadIntent.id
     );
-    if (!active || context !== props.record.id) return;
+    if (!active || context !== identity.value) return;
     if (!data?.id) throw new Error('Document upload was not confirmed');
     clearUpload();
     page.value = 1;
   });
 const download = version =>
   run(async () => {
-    const context = props.record.id;
+    const context = identity.value;
     const token = sequence;
     const { data } = await backofficeAPI.downloadDocumentVersion(
       props.record.id,
       version.id
     );
-    if (!active || context !== props.record.id || token !== sequence) return;
+    if (!active || context !== identity.value || token !== sequence) return;
     const url = URL.createObjectURL(data);
     const link = document.createElement('a');
     link.href = url;
@@ -123,13 +140,19 @@ const decide = (version, status) =>
     backofficeAPI.decideDocumentVersion(props.record.id, version.id, {
       status,
       reason: reason.value,
+      expected_decision_id: version.decision_revision ?? null,
+      ...(expirationChanged.value
+        ? { expires_on: expiration.value || null }
+        : {}),
     })
   );
 watch(
-  () => props.record.id,
+  identity,
   () => {
     selected.value = '';
     reason.value = '';
+    expiration.value = '';
+    expirationChanged.value = false;
     clearUpload();
     busy.value = false;
     page.value = 1;
@@ -147,6 +170,9 @@ const select = () => {
   view.value = 'current';
   page.value = 1;
   reason.value = '';
+  result.value = null;
+  expiration.value = '';
+  expirationChanged.value = false;
   clearUpload();
   load();
 };
@@ -250,6 +276,22 @@ const select = () => {
           class="mt-1 w-full rounded-lg border border-n-weak bg-n-solid-2 p-2"
           :disabled="busy || terminal"
         />
+      </label>
+      <label
+        v-if="view === 'current'"
+        class="block text-sm"
+      >
+        {{ text('DOCUMENTS.EXPIRES_ON') }}
+        <input
+          v-model="expiration"
+          type="date"
+          :disabled="busy || terminal"
+          class="mt-1 block rounded-lg border border-n-weak bg-n-solid-2 p-2"
+          @input="expirationChanged = true"
+        />
+        <span class="mt-1 block text-xs text-n-slate-11">
+          {{ text('DOCUMENTS.EXPIRY_NOTE') }}
+        </span>
       </label>
       <article
         v-for="version in visibleVersions"
@@ -384,6 +426,10 @@ const select = () => {
             {{ text(`DOCUMENTS.STATES.${decision.status}`) }}
             {{ text('SEPARATOR') }}
             {{ decision.reason }}
+            <span v-if="decision.expires_on">
+              {{ text('SEPARATOR') }} {{ text('DOCUMENTS.EXPIRES_ON') }}
+              {{ decision.expires_on }} ({{ decision.validity_timezone }})
+            </span>
           </p>
         </details>
       </article>

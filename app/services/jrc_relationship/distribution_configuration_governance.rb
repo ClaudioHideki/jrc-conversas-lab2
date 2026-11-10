@@ -21,7 +21,9 @@ class JrcRelationship::DistributionConfigurationGovernance
     current = { 'version' => record.version, 'weights' => record.effective_weights, 'rules' => record.effective_rules }
     record.capture_version!(previous, actor: actor)
     record.capture_version!(current, actor: actor)
-    JrcCustomers::Audit.record!(account: record.account, actor: actor, resource: record, event_type: 'relationship_updated',
-                                from_value: previous, to_value: current, metadata: { action: 'configuration_versioned', scope_key: record.scope_key })
+    event = JrcCustomers::Audit.record!(account: record.account, actor: actor, resource: record, event_type: 'relationship_updated',
+                                        from_value: previous, to_value: current, metadata: { action: 'configuration_versioned', scope_key: record.scope_key })
+    JrcRelationship::PortfolioHistoryDetails.capture!(event, resource: record)
+    event
   end
 end

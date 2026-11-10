@@ -37,7 +37,7 @@ class JrcRelationship::Configuration < ApplicationRecord
                     'adoption_metric' => 'adoption', 'recurring_ticket_count' => 3, 'growth_threshold_percent' => 20, 'ces_threshold' => 6,
                     'survey_question_nps' => 'De 0 a 10, quanto você recomendaria nossa empresa?',
                     'survey_question_ces' => 'De 0 a 10, quanto foi fácil alcançar seu objetivo?',
-                    'required_documents' => [],
+                    'retention_policy' => nil, 'portfolio_local_access' => nil, 'required_documents' => [],
                     'risk_reasons' => ['Baixa adoção', 'Insatisfação', 'Suporte recorrente', 'Financeiro', 'Renovação',
                                        'Cancelamento solicitado'] }.freeze
 
@@ -46,7 +46,7 @@ class JrcRelationship::Configuration < ApplicationRecord
                          risk_reasons survey_question_nps survey_question_ces renewal_window_days eligibility_mode handoff_acceptance_required
                          playbook_flow_effects_enabled playbook_flow_policy required_documents health_hysteresis_points
                          portfolio_transfer_approval_required portfolio_capacity_limits automatic_action_cooldown_hours
-                         automatic_action_daily_limit priority_trend priority_sla priority_bands].freeze
+                         automatic_action_daily_limit priority_trend priority_sla priority_bands retention_policy portfolio_local_access].freeze
 
   def effective_weights
     DEFAULT_WEIGHTS.merge(weights)
@@ -79,9 +79,26 @@ class JrcRelationship::Configuration < ApplicationRecord
     validate_document_requirements
     validate_capacity_limits
     validate_temporal_policy
+    validate_retention_policy
+    validate_local_roles
     validate_automatic_action_budget
     validate_priority_signals
     validate_scope
+  end
+
+  def validate_local_roles
+    JrcRelationship::LocalAccess.validate_references!(self)
+  rescue ArgumentError => error
+    errors.add(:rules, error.message)
+  end
+
+  def validate_retention_policy
+    value = effective_rules['retention_policy']
+    return if value.nil?
+    raise ArgumentError, 'TRR policy is configured at account scope' unless scope_key == 'account'
+    JrcRelationship::RetentionPolicy.normalize!(value)
+  rescue ArgumentError => error
+    errors.add(:rules, error.message)
   end
 
   def validate_priority_signals

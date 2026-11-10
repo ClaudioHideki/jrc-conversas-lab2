@@ -185,6 +185,7 @@ class JrcBackoffice::ContractVersions
   def manual_document_ready?(request, version)
     return false unless version.decisions.order(id: :desc).first&.status == 'approved'
     return true if request.workflow_version == 1
+    return false unless version.status == 'approved'
 
     JrcBackoffice::DocumentSafety.new(version).current&.clean?
   end

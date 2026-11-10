@@ -62,7 +62,10 @@ class JrcBackoffice::CompletionDossiers
   end
 
   def candidate_ready?(request, manifest)
+    JrcBackoffice::Requirements.check!(request: request, actor: @access.actor, through: 'finance')
     manifest.is_a?(Hash) && manifest[:coverage] == 'available' && request.stage_blockers.empty?
+  rescue JrcBackoffice::Requirements::Blocked
+    false
   end
 
   def candidate_digest(manifest)

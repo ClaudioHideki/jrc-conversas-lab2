@@ -1,0 +1,160 @@
+{
+  "CRM": {
+    "BACKOFFICE_WORKSPACE": {
+      "REQUIREMENTS": {
+        "TITLE": "Requisitos da solicitação",
+        "DESCRIPTION": "Checklist versionado. Cada evidência continua sendo verificada pelo módulo de origem.",
+        "SETTINGS": "Requisitos do Backoffice",
+        "SETTINGS_DESCRIPTION": "Cadastre um requisito por vez. As versões anteriores e os checklists capturados permanecem preservados.",
+        "REFRESH": "Consultar novamente",
+        "DENIED": "O acesso foi negado. Os dados anteriores foram removidos.",
+        "LOAD_ERROR": "Não foi possível consultar os requisitos.",
+        "SAVE_ERROR": "Não foi possível confirmar a gravação. Consulte o estado antes de tentar novamente.",
+        "CONFLICT": "A revisão mudou. O rascunho foi preservado; consulte a versão atual antes de salvar.",
+        "INVALID_VALUE": "Informe um valor válido para o tipo selecionado.",
+        "INVALID_RULE": "Confira os campos do requisito.",
+        "INVALID_SCOPE": "Selecione um escopo autorizado.",
+        "INVALID_CONDITION": "Confira as condições e seus valores.",
+        "INVALID_DOCUMENT_KEY": "Use uma chave documental válida; artefatos de assinatura não podem ser substituídos pelo catálogo.",
+        "INVALID_SIGNATURE_STAGE": "A assinatura só pode bloquear a etapa Contrato ou uma etapa posterior.",
+        "REASON_REQUIRED": "Informe o motivo da alteração.",
+        "REOPEN_RULE": "Consulte a regra atual e reabra a edição. A versão do rascunho anterior não foi substituída automaticamente.",
+        "STALE": "A origem da solicitação mudou. Reabra a documentação e revise o checklist antes de continuar.",
+        "NO_RULES": "Não há requisitos deste catálogo capturados. As verificações documentais e de aprovação existentes continuam obrigatórias.",
+        "REVISION": "Revisão",
+        "BLOCKING": "Bloqueia o avanço enquanto não estiver atendido",
+        "ANSWER": "Responder / revisar",
+        "NATIVE_VERIFICATION": "Documentos, aprovações e assinaturas dependem das verificações do fluxo nativo. Uma resposta manual não libera essas evidências.",
+        "VALUE": "Valor",
+        "SELECT": "Selecione",
+        "YES": "Sim",
+        "NO": "Não",
+        "DECISION": "Resultado da análise",
+        "APPROVE": "Aprovado pela análise humana",
+        "REJECT": "Rejeitado pela análise humana",
+        "REASON": "Motivo / justificativa",
+        "CANCEL": "Cancelar",
+        "SAVE": "Confirmar e salvar",
+        "ADOPT": "Revisar checklist configurado",
+        "ADOPT_DESCRIPTION": "Será criada uma nova revisão do checklist com as regras atuais. As respostas anteriores permanecerão no histórico e não serão copiadas como evidências da nova revisão.",
+        "CONFIRM_ADOPT": "Confirmo a adoção explícita da nova revisão.",
+        "SEARCH": "Pesquisar",
+        "ALL": "Todos",
+        "ALL_PRODUCTS": "Todos os produtos",
+        "ALL_UNITS": "Todas as unidades",
+        "SCOPE_SELECTED": "Escopo já selecionado",
+        "PREVIOUS": "Anterior",
+        "NEXT": "Próxima",
+        "NEW": "Novo requisito",
+        "EDIT": "Editar requisito",
+        "PAGES": "Páginas de requisitos",
+        "LABEL": "Nome do requisito",
+        "KIND": "Tipo",
+        "STAGE": "Exigido até a etapa",
+        "CONDITIONAL_KIND": "O que exigir quando a condição se aplicar",
+        "DOCUMENT_KEY": "Identificador do documento",
+        "ANSWER_TYPE": "Tipo de informação",
+        "SOURCE": "Verificação utilizada",
+        "FIELD": "Campo",
+        "REQUIRED": "Obrigatório",
+        "SCOPE": "Aplicação",
+        "SCOPE_IMMUTABLE": "Para mudar o escopo, arquive esta regra e crie outra.",
+        "OPERATION": "Operação",
+        "CUSTOMER_KIND": "Tipo de cliente",
+        "COMPANY": "Pessoa jurídica",
+        "INDIVIDUAL": "Pessoa física",
+        "PRODUCT": "Produto",
+        "UNIT": "Unidade",
+        "CONDITIONS": "Condições",
+        "CONDITIONS_ALL": "Todas as condições devem se aplicar. Dados necessários ausentes não dispensam um requisito obrigatório.",
+        "OPERATOR": "Comparação",
+        "EQUAL": "É igual a",
+        "NOT_EQUAL": "É diferente de",
+        "REMOVE": "Remover condição",
+        "ADD_CONDITION": "Adicionar condição",
+        "STATE": "Situação",
+        "REVIEW_EFFECT": "Esta revisão vale para novas solicitações. Solicitações existentes só mudam por adoção explícita, preservando o histórico.",
+        "CONFIRM_RULE": "Revisei o tipo, o escopo e os bloqueios desta regra.",
+        "REVIEW": "Revisar antes de salvar",
+        "BACK": "Voltar",
+        "SAVED": "Requisito salvo; confirmação recebida do servidor.",
+        "READ_BEFORE_RETRY": "A gravação não pode ser repetida sem uma consulta autorizada do estado atual.",
+        "KINDS": {
+          "document": "Documento",
+          "information": "Informação",
+          "validation": "Validação",
+          "approval": "Aprovação",
+          "signature": "Assinatura",
+          "field": "Campo cadastral",
+          "conditional": "Requisito condicional"
+        },
+        "STATES": {
+          "satisfied": "Atendido",
+          "not_applicable": "Não se aplica",
+          "unavailable": "Indisponível para verificação",
+          "missing": "Não informado / não enviado",
+          "pending": "Aguardando validação",
+          "rejected": "Rejeitado",
+          "expired": "Vencido",
+          "quarantined": "Bloqueado pela segurança"
+        },
+        "RULE_STATES": {
+          "active": "Ativo",
+          "archived": "Arquivado"
+        },
+        "ANSWER_TYPES": {
+          "text": "Texto",
+          "boolean": "Sim ou não",
+          "number": "Número",
+          "email": "E-mail",
+          "phone": "Telefone"
+        },
+        "SOURCES": {
+          "manual_review": "Análise humana auditada",
+          "customer_registration": "Cadastro do cliente",
+          "billing_registration": "Dados de faturamento",
+          "implementation_info": "Dados de implantação",
+          "crm_order_price": "Aprovação comercial do pedido",
+          "backoffice_release": "Liberação pela Central de Aprovações",
+          "contracts_company_signature": "Aprovação da assinatura contratual"
+        },
+        "FIELDS": {
+          "customer_name": "Nome da empresa",
+          "customer_tax_id": "CPF/CNPJ da empresa",
+          "contact_name": "Nome do contato",
+          "contact_email": "E-mail do contato",
+          "contact_phone_number": "Telefone do contato",
+          "order_payment_condition": "Condição de pagamento"
+        },
+        "CONDITION_FIELDS": {
+          "request_kind": "Operação",
+          "business_unit_id": "Unidade",
+          "product_id": "Produto",
+          "customer_kind": "Tipo de cliente"
+        },
+        "INVALID_APPROVAL_STAGE": "A aprovação deve ser exigida na etapa nativa de liberação correspondente.",
+        "ONE_OF": "É um dos valores",
+        "ADD_VALUE": "Adicionar valor",
+        "CONDITIONS_COUNT": "condições revisadas.",
+        "RECORDED_ANSWER": "Resposta registrada",
+        "ANSWER_HISTORY": "Histórico de respostas",
+        "NO_ANSWER_HISTORY": "Ainda não há respostas neste checklist.",
+        "HISTORY_UNAVAILABLE": "O histórico não está disponível neste contexto.",
+        "HISTORY_LOADING": "Consultando respostas autorizadas...",
+        "CLOSE_HISTORY": "Fechar histórico",
+        "ACCESS_REQUIRED": "Configuração disponível somente após confirmar sua permissão atual."
+      },
+      "NAV": {
+        "requirements": "Requisitos"
+      },
+      "TABS": {
+        "requirements": "Requisitos"
+      },
+      "CONTRACT_SIGNATURES": {
+        "ACTION_ERRORS": {
+          "BACKOFFICE_REQUIREMENTS_PENDING": "Conclua os requisitos bloqueantes na aba Requisitos antes de enviar o contrato."
+        }
+      }
+    }
+  }
+}

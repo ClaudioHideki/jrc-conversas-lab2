@@ -28,6 +28,7 @@ class JrcRelationship::Context
   def assignment(id, write: false)
     record = assignments.find(id)
     raise Pundit::NotAuthorizedError if write && !policy.manage?
+    JrcRelationship::LocalAccess.authorize_assignment!(self, record, 'work') if write
 
     record
   end
@@ -77,9 +78,11 @@ class JrcRelationship::Context
                     else
                       record.try(:assignment_id) || record.try(:metadata)&.dig('relationship_assignment_id')
                     end
-    JrcCustomers::Audit.record!(account: account, actor: user, resource: record, event_type: 'relationship_updated',
-                                from_value: before, to_value: after,
-                                metadata: { action: action, assignment_id: assignment_id })
+    event = JrcCustomers::Audit.record!(account: account, actor: user, resource: record, event_type: 'relationship_updated',
+                                        from_value: before, to_value: after,
+                                        metadata: { action: action, assignment_id: assignment_id })
+    JrcRelationship::PortfolioHistoryDetails.capture!(event, resource: record)
+    event
   end
 
   def access_signature
@@ -155,6 +158,8 @@ class JrcRelationship::Context
   private
 
   def eligibility_digest(value)
+    local_rules = JrcRelationship::LocalAccess.signature(member)
+    value = "#{value}:local_role_policies:#{local_rules.to_json}" if local_rules.any?
     version = member.jrc_relationship_eligibility_version
     value = "#{value}:relationship_eligibility:#{version}" if version.positive?
     Digest::SHA256.hexdigest(value)

@@ -611,6 +611,7 @@ const errorText = computed(() => {
           @decide="decide"
           @adjust="adjust"
           @audit="navigate('history', record.id)"
+          @refresh="refresh"
         />
         <SimulatorView
           v-if="screen === 'simulate'"

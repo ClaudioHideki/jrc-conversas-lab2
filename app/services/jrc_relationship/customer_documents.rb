@@ -11,7 +11,8 @@ class JrcRelationship::CustomerDocuments
   def scope
     raise Pundit::NotAuthorizedError unless @context.policy.documents_view?
 
-    JrcRelationship::CustomerDocument.where(account_id: @context.account.id, assignment_id: @context.assignments.select(:id))
+    JrcRelationship::DocumentAccess.scope(@context,
+      JrcRelationship::CustomerDocument.where(account_id: @context.account.id, assignment_id: @context.assignments.select(:id)))
   end
 
   def latest_versions(document_ids:)
@@ -24,7 +25,8 @@ class JrcRelationship::CustomerDocuments
   end
 
   def upload!(assignment_id:, attributes:, upload:, document_id: nil)
-    raise Pundit::NotAuthorizedError unless @context.policy.documents_manage?
+    permitted = document_id ? @context.policy.documents_replace? : @context.policy.documents_upload?
+    raise Pundit::NotAuthorizedError unless permitted
 
     type = validate_upload!(upload)
     assignment = @context.assignment(assignment_id)
@@ -33,10 +35,13 @@ class JrcRelationship::CustomerDocuments
 
     version = nil
     assignment.with_lock do
+      @context = JrcRelationship::Context.new(@context.member)
+      @context.assignment(assignment.id)
       document.lock! if document.persisted?
       raise ArgumentError, 'Archived document cannot receive a version' if document.status == 'archived'
 
       assign_new_document!(document, attributes) unless document_id
+      JrcRelationship::DocumentAccess.authorize!(@context, document, document_id ? 'replace' : 'upload')
       document.save!
       version = create_version!(document, attributes, upload, type)
     end
@@ -46,20 +51,23 @@ class JrcRelationship::CustomerDocuments
 
   def download!(document_id:, version_id:)
     document = scope.find(document_id)
+    JrcRelationship::DocumentAccess.authorize!(@context, document, 'download')
     version = document.versions.where(account_id: @context.account.id).find(version_id)
     bytes = JrcServiceDesk::AttachmentScanner.download(version.file.blob)
     current_context = JrcRelationship::Context.new(@context.member)
-    raise Pundit::NotAuthorizedError unless current_context.policy.documents_view?
-
-    current_context.assignment(document.assignment_id)
-    @context.audit!(document, after: { version_id: version.id, version: version.number }, action: 'document_downloaded')
+    document.reload
+    JrcRelationship::DocumentAccess.authorize!(current_context, document, 'download')
+    # The native scanner is rechecked after bytes are read and before returning them.
+    raise JrcServiceDesk::AttachmentScanError unless JrcServiceDesk::AttachmentScanner.clean?(version.file.blob.reload)
+    current_context.audit!(document, after: { version_id: version.id, version: version.number }, action: 'document_downloaded')
     [version.file.blob, bytes]
   end
 
   private
 
   def assign_new_document!(document, attributes)
-    document.assign_attributes(attributes.slice('title', 'category'))
+    document.assign_attributes(attributes.slice('title', 'category', 'confidentiality'))
+    raise ArgumentError, 'Choose an explicit document confidentiality' unless %w[operational restricted].include?(document.confidentiality)
     document.requirement_key = JrcRelationship::DocumentRequirements.new(@context).validate_link!(document, attributes['requirement_key'])
   end
 

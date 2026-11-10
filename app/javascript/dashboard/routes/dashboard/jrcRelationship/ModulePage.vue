@@ -8,6 +8,8 @@ import API from 'dashboard/api/jrcRelationship';
 import PortfolioAssignmentForm from './PortfolioAssignmentForm.vue';
 import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import MetricsPanel from './MetricsPanel.vue';
+import ManagementRequestsPanel from './ManagementRequestsPanel.vue';
+import RetentionPanel from './RetentionPanel.vue';
 import NicoSummaryPanel from './NicoSummaryPanel.vue';
 import PortfolioTable from './PortfolioTable.vue';
 import RecordEditor from './RecordEditor.vue';
@@ -706,7 +708,7 @@ const money = value => formatMoney(value, metadata.value?.formatting);
         >
           {{ t('RELATIONSHIP.REFRESH') }}</button
         ><button
-          v-if="metadata?.can_team && portfolioScreen"
+          v-if="metadata?.can_export && portfolioScreen"
           type="button"
           :class="buttonClass"
           @click="exportPortfolio"
@@ -1124,6 +1126,15 @@ const money = value => formatMoney(value, metadata.value?.formatting);
           :metadata="metadata"
           :disabled="saving"
           @submit="saveAssignment"
+        />
+        <ManagementRequestsPanel
+          v-if="metadata && screen === 'team'"
+          :metadata="metadata"
+        />
+        <RetentionPanel
+          v-if="metadata && screen === 'reports'"
+          :metadata="metadata"
+          :portfolio-group-id="route.query.portfolio_group_id || null"
         />
         <MetricsPanel
           v-if="

@@ -34,6 +34,7 @@ const form = reactive({
   requirement_key: props.document?.requirement_key || '',
   responsible_id: props.document.responsible?.id || '',
   status: props.document.status,
+  confidentiality: props.document.confidentiality || '',
   revision: props.document.revision,
   reason: '',
 });
@@ -118,6 +119,28 @@ onBeforeUnmount(() => {
       >
         {{ error || loadError }}
       </p>
+      <label class="grid gap-1 text-sm">
+        {{ t('RELATIONSHIP.V2.DOCS.CONFIDENTIALITY') }}
+        <select
+          v-model="form.confidentiality"
+          required
+          :disabled="busy"
+          :class="inputClass"
+        >
+          <option
+            value=""
+            disabled
+          >
+            {{ t('RELATIONSHIP.V2.DOCS.CLASSIFY') }}
+          </option>
+          <option value="operational">
+            {{ t('RELATIONSHIP.V2.DOCS.OPERATIONAL') }}
+          </option>
+          <option value="restricted">
+            {{ t('RELATIONSHIP.V2.DOCS.RESTRICTED') }}
+          </option>
+        </select>
+      </label>
       <label class="grid gap-1 text-sm"
         >{{ t('RELATIONSHIP.V2.DOCS.RESPONSIBLE_SEARCH')
         }}<input

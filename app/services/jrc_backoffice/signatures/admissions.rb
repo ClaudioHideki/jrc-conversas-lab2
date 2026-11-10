@@ -55,6 +55,7 @@ class JrcBackoffice::Signatures::Admissions
     JrcBackoffice::Signatures::DeliveryGuard.check_editable!(contract)
     version, proposal = legal_source!(contract, input)
     JrcBackoffice::ContractRelease.check!(order: request.sales_order, actor: @actor)
+    JrcBackoffice::Requirements.check_before_signature!(request: request, actor: @actor)
     connection = JrcBackoffice::Signatures::ConnectionSelection.for_new_delivery(account: @account)
     raise JrcBackoffice::Signatures::DeliveryError, 'CONNECTION_CHANGED' unless connection.id.to_s == input[:expected_connection_id]
 

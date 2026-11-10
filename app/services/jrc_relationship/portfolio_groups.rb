@@ -14,6 +14,7 @@ class JrcRelationship::PortfolioGroups
       attrs = normalize(attributes)
       attrs['owner_id'] = context.user.id unless attrs.key?('owner_id')
       group = JrcRelationship::PortfolioGroup.new(attrs.merge('account_id' => context.account.id))
+      raise Pundit::NotAuthorizedError unless context.policy.local?('manage_portfolios')
       verify_sharing!(context, group)
       group.save!
       verify_source_and_destination!(context, group)

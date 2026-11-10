@@ -1,7 +1,7 @@
 # Only explicitly installed type/field pairs can mutate an origin. Read adapters stay read-only.
 class JrcApprovals::Adjustments
-  KEYS = %w[crm.proposal_send crm.proposal_convert].freeze
-  FIELDS = %w[discount_cents].freeze
+  KEYS = JrcApprovals::AdjustmentSources::SOURCES.keys.freeze
+  FIELDS = JrcApprovals::AdjustmentPolicy::FIELDS.keys.freeze
 
   def initialize(account:, user:)
     @account = account
@@ -12,9 +12,13 @@ class JrcApprovals::Adjustments
   def options(record)
     resource = source!(record)
     authorize!(record, resource)
-    return unless current_choices(record).any? && !resource.locked_for_editing?
+    return unless current_choices(record).any? && !source_locked?(resource)
 
-    { values: resource.attributes.slice(*FIELDS), currency: record.snapshot.dig('values', 'currency'),
+    fields = record.policy_version.definition.dig('adjustments', 'fields')
+    financial = %w[proposal_terms order_terms].include?(record.event_key)
+    return if financial && fields.blank?
+    { values: financial ? JrcApprovals::FinancialCatalog.values(resource).slice(*fields.keys) : resource.attributes.slice('discount_cents'),
+      fields: fields, financial: financial, currency: record.snapshot.dig('values', 'currency'),
       maximum_discount_cents: resource.financial_summary.fetch(:products_cents) }
   rescue Pundit::NotAuthorizedError, ActiveRecord::RecordNotFound, JrcApprovals::Error, JrcCrm::CommercialFinancials::InvalidTerms
     nil
@@ -41,16 +45,33 @@ class JrcApprovals::Adjustments
 
   def perform!(original, resource, actor, intent)
     ensure_current!(original, intent)
-    before = resource.attributes.slice(*FIELDS)
+    key = "#{original.module_key}.#{original.event_key}"
+    zone = Time.find_zone(@account.reporting_timezone) || Time.zone
+    JrcApprovals::AdjustmentPolicy.authorize!(original.policy_version.definition, key, intent.changes, today: Time.current.in_time_zone(zone).to_date)
+    before = source_values(resource).slice(*intent.changes.keys)
     raise JrcApprovals::Error, 'NO_ADJUSTMENT_CHANGE' if before == intent.changes
 
-    JrcCrm::ProposalMutation.call!(proposal: resource, actor: @user, attributes: intent.changes)
-    unless resource.financial_summary.fetch(:discount_cents) == intent.changes.fetch('discount_cents')
+    mutate_source!(resource, intent.changes)
+    unless intent.changes.all? { |field, value| field == 'discount_cents' ? resource.financial_summary.fetch(:discount_cents) == value : source_values(resource)[field] == value }
       raise JrcApprovals::Error, 'INVALID_COMMERCIAL_TERMS'
     end
 
     revised = revise!(original, resource, actor, intent.digest(original.id))
-    approve!(revised, intent, intent.digest(original.id)) if intent.mode == 'approve'
+    if intent.mode == 'approve'
+      available = current_choices(revised)
+      matching = available.any? { |step| step[:step_code] == intent.step_code && step[:choices].any? { |choice| choice[:actions].include?('approved') && choice[:delegation_id] == intent.delegation_id && choice[:own_delegation_id] == intent.own_delegation_id } }
+      if matching
+        approve!(revised, intent, intent.digest(original.id))
+      else
+        # The native recalculated plan owns the next authority. No vote is invented.
+        raise JrcApprovals::Error, 'APPROVER_CONFIGURATION_REQUIRED' if revised.stage_plan.empty?
+        JrcApprovals::Ledger.audit!(account: @account, actor: actor, event: 'adjustment_routed', key: "adjustment_route:#{revised.id}",
+          data: { original_request_id: original.id, revised_request_id: revised.id, reason: intent.reason }, request_id: revised.id,
+          policy_version_id: revised.policy_version_id)
+      end
+    end
+    JrcApprovals::Authorization.new(account: @account, user: @user).authorize!('adjust', company_id: revised.issuer_company_id, unit_id: revised.business_unit_id)
+    source_mutation(resource).authorize!(resource, @user)
     audit!(original, revised, actor, before, intent)
     revised
   end
@@ -73,16 +94,37 @@ class JrcApprovals::Adjustments
 
   def source!(record)
     key = "#{record.module_key}.#{record.event_key}"
-    raise JrcApprovals::Error, 'ADJUSTMENT_NOT_SUPPORTED' unless KEYS.include?(key) && record.resource_type == 'JrcCrm::Proposal'
-
-    JrcCrm::Proposal.where(account_id: @account.id).find(record.resource_id)
+    type = JrcApprovals::AdjustmentSources.type!(key: key, resource_type: record.resource_type)
+    model = type == 'JrcCrm::Proposal' ? JrcCrm::Proposal : JrcCrm::SalesOrder
+    model.where(account_id: @account.id).find(record.resource_id)
   end
 
   def authorize!(record, resource)
     JrcApprovals::RequestVisibility.authorize!(account: @account, user: @user, record: record)
     actor = @authorization.authorize!('adjust', company_id: record.issuer_company_id, unit_id: record.business_unit_id)
-    JrcCrm::ProposalMutation.authorize!(resource, @user)
+    source_mutation(resource).authorize!(resource, @user)
     actor
+  end
+
+  def source_values(resource)
+    resource.attributes.slice(*FIELDS).merge(JrcApprovals::FinancialCatalog.values(resource))
+  end
+
+  def source_mutation(resource)
+    resource.is_a?(JrcCrm::SalesOrder) ? JrcCrm::OrderDiscountMutation : JrcCrm::ProposalMutation
+  end
+
+  def source_locked?(resource)
+    resource.is_a?(JrcCrm::SalesOrder) ? JrcCrm::OrderDiscountMutation.locked?(resource) : resource.locked_for_editing?
+  end
+
+  def mutate_source!(resource, changes)
+    if resource.is_a?(JrcCrm::SalesOrder)
+      service = changes.keys == ['discount_cents'] ? JrcCrm::OrderDiscountMutation : JrcCrm::OrderTermsMutation
+      service.call!(order: resource, actor: @user, attributes: changes)
+    else
+      JrcCrm::ProposalMutation.call!(proposal: resource, actor: @user, attributes: changes)
+    end
   end
 
   def current_choices(record)

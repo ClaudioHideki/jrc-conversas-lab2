@@ -19,6 +19,11 @@ class Api::V1::Accounts::Relationship::PortfolioGroupsController < Api::V1::Acco
                                                                            kind: params.fetch(:kind, ''), period: report_period)
   end
 
+  def history_detail
+    render json: JrcRelationship::PortfolioHistoryDetails.new(relationship_context)
+                                                       .call(group_id: params[:id], event_id: params.require(:event_id))
+  end
+
   def export_history
     render json: JrcRelationship::PortfolioGroupHistory.new(relationship_context)
                                                        .export(params[:id], kind: params.fetch(:kind, ''), period: report_period)

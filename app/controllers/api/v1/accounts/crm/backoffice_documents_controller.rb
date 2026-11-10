@@ -3,6 +3,9 @@ class Api::V1::Accounts::Crm::BackofficeDocumentsController < Api::V1::Accounts:
   rescue_from ArgumentError do |error|
     render json: { message: error.message }, status: :unprocessable_entity
   end
+  rescue_from JrcBackoffice::Documents::Conflict do |error|
+    render json: { code: 'DOCUMENT_REVIEW_CONFLICT', message: error.message }, status: :conflict
+  end
   rescue_from JrcBackoffice::DocumentSafety::NotClean, ActiveStorage::IntegrityError do
     render json: { code: 'DOCUMENT_QUARANTINED', message: 'Documento bloqueado até a verificação de segurança do arquivo.' },
            status: :unprocessable_entity
@@ -13,7 +16,9 @@ class Api::V1::Accounts::Crm::BackofficeDocumentsController < Api::V1::Accounts:
     requirements = service.requirements
     selected = requirements.find { |row| row['key'] == params[:document_key] } || requirements.first
     scope = versions.where(document_key: selected&.fetch('key')).order(version: :desc)
-    render json: document_page(scope).merge(requirements: requirements, selected_key: selected&.fetch('key'))
+    data = document_page(scope).merge(requirements: requirements, selected_key: selected&.fetch('key'))
+    access.request(@request.id)
+    render json: data
   end
 
   def create
@@ -34,7 +39,11 @@ class Api::V1::Accounts::Crm::BackofficeDocumentsController < Api::V1::Accounts:
 
   def decide
     version = versions.find(params[:version_id])
-    service.decide!(version: version, status: params[:status], reason: params[:reason])
+    options = {}
+    options[:expires_on] = params[:expires_on] if params.key?(:expires_on)
+    options[:expected_decision_id] = params[:expected_decision_id] if params.key?(:expected_decision_id)
+    service.decide!(version: version, status: params[:status], reason: params[:reason], **options)
+    access.request(@request.id)
     render json: serialize(version.reload)
   end
 
@@ -85,14 +94,17 @@ class Api::V1::Accounts::Crm::BackofficeDocumentsController < Api::V1::Accounts:
 
   def serialize(version)
     inspection = JrcBackoffice::DocumentSafety.new(version).current
-    { id: version.id, document_key: version.document_key, version: version.version, status: version.status,
+    decision = version.current_decision
+    { id: version.id, document_key: version.document_key, version: version.version, status: version.status(decision: decision),
       safety: { state: inspection&.state || 'pending', checked_at: inspection&.created_at },
+      decision_revision: decision&.id, expires_on: decision&.expires_on,
+      validity_timezone: decision&.validity_timezone,
       current: !versions.where(document_key: version.document_key).exists?(['version > ?', version.version]),
       filename: version.file.filename.to_s, byte_size: version.file.byte_size, created_at: version.created_at }.merge(review_details(version))
   end
 
   def review_details(version)
     { analysis: version.analysis&.attributes&.slice('analyzer_version', 'state', 'evidence', 'created_at'),
-      decisions: version.decisions.order(id: :desc).limit(10).map { |row| row.attributes.slice('id', 'actor_id', 'status', 'reason', 'created_at') } }
+      decisions: version.decisions.order(id: :desc).limit(10).map { |row| row.attributes.slice('id', 'actor_id', 'status', 'reason', 'created_at', 'expires_on', 'validity_timezone') } }
   end
 end

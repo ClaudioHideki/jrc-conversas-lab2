@@ -8,6 +8,7 @@ class JrcApprovals::DecisionOptions
                                               key: "#{record.module_key}.#{record.event_key}", resource_id: record.resource_id)
     return [] unless record.snapshot == snapshot
 
+    JrcRelationship::DistributionVoteAuthority.authorize!(account: account, user: user, record: record)
     definition = record.policy_version.definition
     pending = record.stage_plan.reject do |plan|
       record.decisions.where(cycle: record.cycle, step_code: plan['code'], decision: 'approved').count >= plan['quorum']

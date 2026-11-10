@@ -243,9 +243,19 @@ class Api::V1::Accounts::Relationship::ConfigurationController < Api::V1::Accoun
     rules = configuration_rules
     JrcRelationship::DistributionConfigurationGovernance.authorize!(account: Current.account, user: Current.user,
                                                                     configuration: record, rules: rules)
+    if rules['portfolio_local_access'] != record.rules[JrcRelationship::LocalAccess::KEY]
+      raise ArgumentError, 'Provide a reason for the local permission change' unless params[:reason].is_a?(String) && params[:reason].strip.length.between?(1, 2000)
+      normalized = rules['portfolio_local_access']
+      if normalized && normalized['enabled'] == true
+        permitted = JrcRelationship::LocalRoleRules.allowed?(normalized, user_id: Current.user.id, action: 'configure', owner_id: :metadata)
+        raise ArgumentError, 'Keep an authorized configuration manager in this scope' unless permitted
+      end
+    end
     record.assign_attributes(weights: params.require(:weights).to_unsafe_h, rules: rules, version: expected + 1)
     record.save!
     JrcRelationship::DistributionConfigurationGovernance.record_versions!(record, actor: Current.user, previous: previous)
+    relationship_context.audit!(record, action: 'configuration_changed_with_reason',
+      before: { version: expected }, after: { version: record.version, scope_key: record.scope_key, reason: params[:reason] }) if params[:reason].present?
   end
 
   def configuration_rules

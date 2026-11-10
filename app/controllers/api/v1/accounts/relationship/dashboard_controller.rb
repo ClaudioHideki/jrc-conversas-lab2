@@ -39,9 +39,12 @@ class Api::V1::Accounts::Relationship::DashboardController < Api::V1::Accounts::
   end
 
   def export
-    raise Pundit::NotAuthorizedError unless relationship_context.policy.team?
+    response.headers['Cache-Control'] = 'no-store'
+    raise Pundit::NotAuthorizedError unless relationship_context.policy.export?
 
+    signature = relationship_context.access_signature
     scope = filtered_assignments
+    row_ids = []
     raise ArgumentError, 'Limit the export to 10000 customers' if scope.count > 10_000
 
     require 'csv'
@@ -50,6 +53,7 @@ class Api::V1::Accounts::Relationship::DashboardController < Api::V1::Accounts::
       scope.includes(:company, :contact, :owner, :business_unit).find_in_batches(batch_size: 100) do |records|
         presenter.preload(records)
         records.each do |record|
+          row_ids << record.id
           row = presenter.assignment(record)
           cells = [row[:name], row.dig(:owner, :name), row[:status], row[:business_unit],
                    row.dig(:signals, :mrr_cents), row.dig(:signals, :health, :score), row.dig(:signals, :health, :band),
@@ -58,14 +62,20 @@ class Api::V1::Accounts::Relationship::DashboardController < Api::V1::Accounts::
         end
       end
     end
-    relationship_context.audit!(Current.account, after: { rows: scope.count }, action: 'portfolio_exported')
+    fresh = JrcRelationship::Context.new(relationship_context.member)
+    raise Pundit::NotAuthorizedError unless fresh.policy.export? && fresh.access_signature == signature &&
+      fresh.assignments.where(id: row_ids).count == row_ids.uniq.size
+    fresh.audit!(Current.account, after: { rows: row_ids.size, scope: 'authorized_assignments', filters: export_filters, format: 'csv' }, action: 'portfolio_exported')
     send_data "\uFEFF#{csv}", filename: 'relationship-portfolio.csv', type: 'text/csv; charset=utf-8'
   end
 
   def export_history
-    raise Pundit::NotAuthorizedError unless relationship_context.policy.admin?
+    response.headers['Cache-Control'] = 'no-store'
+    raise Pundit::NotAuthorizedError unless relationship_context.policy.export_history?
 
+    signature = relationship_context.access_signature
     assignments = filtered_assignments
+    assignment_ids = assignments.pluck(:id)
     events = JrcCrm::AuditEvent.where(account_id: Current.account.id).none
     models = [JrcRelationship::Assignment] + JrcRelationship::Workflow::MODELS.values.uniq
     models.each do |model|
@@ -80,18 +90,28 @@ class Api::V1::Accounts::Relationship::DashboardController < Api::V1::Accounts::
     events = events.where(created_at: report_period) if report_period
     raise ArgumentError, 'Limit the history export to 10000 events' if events.count > 10_000
 
-    data = events.order(:created_at, :id).as_json(only: [:id, :resource_type, :resource_id, :event_type, :actor_type, :actor_id,
-                                                         :created_at, :from_value, :to_value, :metadata])
-    relationship_context.audit!(Current.account, after: { rows: data.size }, action: 'history_exported')
+    data = events.order(:created_at, :id).map do |event|
+      event.as_json(only: [:id, :resource_type, :resource_id, :event_type, :actor_type, :actor_id, :created_at])
+        .merge('projection' => 'operational_summary', 'historical_values' => 'require_scoped_receipt')
+    end
+    fresh = JrcRelationship::Context.new(relationship_context.member)
+    raise Pundit::NotAuthorizedError unless fresh.policy.export_history? && fresh.access_signature == signature &&
+      fresh.assignments.where(id: assignment_ids).count == assignment_ids.size
+    relationship_context.audit!(Current.account, after: { rows: data.size, scope: 'authorized_history', filters: export_filters, format: 'json' }, action: 'history_exported')
     send_data JSON.pretty_generate(data), filename: 'relationship-history.json', type: 'application/json'
   end
 
   private
 
+  def export_filters
+    params.permit(:from, :to, :owner_id, :team_id, :business_unit_id, :portfolio_group_id, :customer_segment_id,
+                  :status, :mode).to_h
+  end
+
   def metadata_access(ctx)
     { current_user: { id: Current.user.id, name: Current.user.name },
-      can_manage: ctx.policy.manage?, can_team: ctx.policy.team?, can_configure: ctx.policy.configure?, can_export_history: ctx.policy.admin?,
-      can_view_documents: ctx.policy.documents_view?, can_manage_documents: ctx.policy.documents_manage?,
+      can_request_transfer: ctx.policy.manage? && ctx.policy.local?('request_transfer'), can_request_eligibility: ctx.policy.team? && ctx.policy.local?('request_eligibility'), can_manage: ctx.policy.manage?, can_team: ctx.policy.team?, can_configure: ctx.policy.configure?, can_export: ctx.policy.export?, can_export_history: ctx.policy.export_history?,
+      can_view_documents: ctx.policy.documents_view?, can_download_documents: ctx.policy.documents_download?, can_upload_documents: ctx.policy.documents_upload?, can_replace_documents: ctx.policy.documents_replace?, can_manage_documents: ctx.policy.documents_manage?,
       owners: metadata_owners(ctx), configuration_teams: metadata_configuration_teams(ctx),
       can_crm: JrcOperations::Access.crm?(ctx.member),
       can_configure_operations: ctx.policy.configure? && JrcOperations::Access.crm?(ctx.member) && ctx.member.administrator?,

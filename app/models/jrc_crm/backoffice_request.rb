@@ -66,6 +66,8 @@ module JrcCrm
     belongs_to :operations_sla_policy, class_name: 'JrcOperations::SlaPolicy', optional: true
     has_many :document_versions, class_name: 'JrcBackoffice::DocumentVersion', dependent: :restrict_with_exception
     has_many_attached :documents
+    has_many :requirement_plans, class_name: 'JrcBackoffice::RequirementPlan', dependent: :restrict_with_exception
+    after_create { JrcBackoffice::Requirements.capture_initial!(self) }
 
     enum request_kind: { fulfillment: 'fulfillment', approval: 'approval', change: 'change', cancellation: 'cancellation' }
     enum status: { pending: 'pending', in_progress: 'in_progress', waiting_customer: 'waiting_customer', blocked: 'blocked',
@@ -92,6 +94,11 @@ module JrcCrm
           end
           if %w[contract implementation provisioning finance issues approval].include?(stage)
             JrcApprovals::CommercialGate.check_contracts!(order: sales_order, user: actor)
+          end
+          if workflow_version == 2 && !%w[request analysis].include?(stage)
+            through = JrcBackoffice::RequirementDefinition::STAGES.include?(stage) ? stage : 'finance'
+            JrcBackoffice::Requirements.check!(request: self, actor: actor, through: through)
+            JrcBackoffice::DocumentGate.check!(self, required_keys: precontract_documents)
           end
           validate_stage_dependencies!
           target = next_applicable_stage
@@ -134,7 +141,17 @@ module JrcCrm
       candidates.find { |candidate| stage_applicable?(candidate) } || 'completed'
     end
 
+    # Only the original release conditions require a Backoffice release policy.
+    # A typed informational item due at approval must not create a second policy.
+    def native_approval_required?
+      data = (metadata || {}).with_indifferent_access
+      JrcApprovals::CommercialGate.mode(account, 'backoffice.release') == 'enforcement' ||
+        request_kind.in?(%w[approval change cancellation]) || bool(data[:approval_required])
+    end
+
     def stage_applicable?(candidate)
+      return true if workflow_version == 2 && JrcBackoffice::Requirements.required_stage?(self, candidate)
+
       data = (metadata || {}).with_indifferent_access
       snap = (sales_order.snapshot || {}).with_indifferent_access
       case candidate
@@ -187,14 +204,14 @@ module JrcCrm
       end
 
       if stage == 'documentation'
-        statuses = (data[:document_statuses] || {}).with_indifferent_access
+        statuses = JrcBackoffice::DocumentGate.statuses(self).with_indifferent_access
         keys = workflow_version == 2 ? precontract_documents : required_documents
         pending = keys.reject { |name| statuses[name.to_s].to_s == 'approved' }
         errors << "Documentos obrigatórios pendentes: #{pending.join(', ')}" if pending.any?
       end
 
       if fulfillment? && stage.in?(%w[contract implementation provisioning finance completed])
-        statuses = (data[:document_statuses] || {}).with_indifferent_access
+        statuses = JrcBackoffice::DocumentGate.statuses(self).with_indifferent_access
         errors << 'Existem requisitos documentais bloqueantes pendentes.' if required_documents.any? { |key| statuses[key.to_s] != 'approved' }
       end
 
@@ -226,7 +243,8 @@ module JrcCrm
         errors << 'Há faturamento/recebimento pendente.' unless sales_order.invoices.any?(&:paid?)
       end
 
-      if workflow_version == 2 && stage == 'approval' && JrcApprovals::CommercialGate.mode(account, 'backoffice.release') != 'enforcement'
+      if workflow_version == 2 && stage == 'approval' && native_approval_required? &&
+         JrcApprovals::CommercialGate.mode(account, 'backoffice.release') != 'enforcement'
         errors << 'Configure a política obrigatória na Central de Aprovações antes de liberar a solicitação.'
       end
 

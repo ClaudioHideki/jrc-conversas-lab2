@@ -149,7 +149,11 @@ class JrcApprovals::CommercialGate
   def context_result(key, snapshot)
     values = snapshot.fetch('values')
     return gratuity_context_result(snapshot) if JrcApprovals::GratuityCatalog.gratuity_key?(key)
-    return if key == 'contracts.company_signature'
+    return if key == 'contracts.company_signature' || key == 'contracts.draft_review'
+    if JrcApprovals::FinancialCatalog::EVENTS.key?(key)
+      return payload('PRICE_CONTEXT_PENDING', snapshot) if values['price_status'] != 'evaluated'
+      return nil # Financial conditions use their own applicable native policy, not price-floor shortcuts.
+    end
     return payload('PRICE_CONTEXT_PENDING', snapshot) if values['price_status'] != 'evaluated'
 
     payload('ready', snapshot, required: false) if values['below_minimum_count'].zero? && key != 'backoffice.release'

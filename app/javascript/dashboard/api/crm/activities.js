@@ -10,4 +10,18 @@ activitiesAPI.showInAccount = (accountId, id, options) =>
 activitiesAPI.updateInAccount = (accountId, id, data, options) =>
   axios.patch(`${activitiesAPI.urlForAccount(accountId)}/${id}`, data, options);
 
+// Explicit account and bounded window; existing list consumers retain arrays.
+activitiesAPI.calendarPageInAccount = (accountId, params, options = {}) =>
+  axios.get(activitiesAPI.urlForAccount(accountId), {
+    ...options,
+    params: { ...params, calendar_page: 1 },
+  });
+
 export default activitiesAPI;
+
+activitiesAPI.completeInAccount = (accountId, id, options) =>
+  axios.post(
+    `${activitiesAPI.urlForAccount(accountId)}/${id}/complete`,
+    {},
+    options
+  );

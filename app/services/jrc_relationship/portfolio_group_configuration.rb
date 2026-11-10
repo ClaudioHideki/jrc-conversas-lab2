@@ -1,7 +1,7 @@
 # Distribution-only policies live in the existing immutable configuration store.
 # Multiple memberships never choose or override the customer's health configuration.
 class JrcRelationship::PortfolioGroupConfiguration
-  RULES = %w[portfolio_capacity_limits portfolio_transfer_approval_required portfolio_review_validity_minutes].freeze
+  RULES = %w[portfolio_capacity_limits portfolio_transfer_approval_required portfolio_review_validity_minutes portfolio_local_access].freeze
 
   def self.authorize!(context, scope_key)
     id = JrcRelationship::PortfolioOwnerInput.parse(scope_key.split(':', 2).last)
@@ -33,7 +33,7 @@ class JrcRelationship::PortfolioGroupConfiguration
     defaults = JrcRelationship::Configuration::DEFAULT_RULES
     extra = configuration.rules.except(*RULES)
     valid = configuration.effective_weights == JrcRelationship::Configuration::DEFAULT_WEIGHTS && extra.all? { |key, value| value == defaults[key] }
-    configuration.errors.add(:rules, 'named portfolios configure distribution only') unless valid
+    configuration.errors.add(:rules, 'named portfolios configure distribution and local authority only') unless valid
   end
 
   def self.authorize_groups!(context, ids)
@@ -68,7 +68,7 @@ class JrcRelationship::PortfolioGroupConfiguration
 
   def self.governed?(group)
     rules = self.for(group)&.effective_rules
-    rules && (rules.fetch('portfolio_transfer_approval_required') || rules.fetch('portfolio_capacity_limits').present?)
+    rules && (rules.fetch('portfolio_transfer_approval_required') || rules.fetch('portfolio_capacity_limits').present? || rules.dig('portfolio_local_access', 'enabled') == true)
   end
 
   def self.before_unlink!(group, ids)

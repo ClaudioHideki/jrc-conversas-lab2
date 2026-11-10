@@ -25,7 +25,7 @@ class JrcRelationship::WorkOwnership
     candidate = JrcRelationship::Context.new(member)
     raise Pundit::NotAuthorizedError unless candidate.policy.manage?
 
-    candidate.assignment(@assignment.id)
+    candidate.assignment(@assignment.id, write: true)
     candidate
   end
 

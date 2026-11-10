@@ -66,6 +66,7 @@ class JrcRelationship::DistributionApproval
       rows = current.assignments.where(id: ids).order(:id).to_a
       raise ActiveRecord::RecordNotFound unless rows.size == ids.size
 
+      rows.each { |row| JrcRelationship::LocalAccess.authorize_assignment!(current, row, 'execute_transfer') }
       binding = new(current).binding(rows, owner_id: owner_id)
       raise ArgumentError, 'Use the reviewed transfer and formal Central approval' if binding.fetch('required')
     end
