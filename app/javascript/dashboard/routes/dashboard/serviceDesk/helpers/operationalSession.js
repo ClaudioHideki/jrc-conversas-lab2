@@ -239,6 +239,17 @@ export function createOperationalSession(
         payload,
         decodeTicket(result, context, ticketId)
       );
+      if (action === 'create' && payload.internal_request === true) {
+        const intake = context.units.find(
+          unit => unit.id === canonicalId(payload.unit_id)
+        )?.internal_intake;
+        if (
+          !intake ||
+          confirmed.assignee?.id !== intake.primary.id ||
+          confirmed.queue?.id !== intake.queue.id
+        )
+          throw new ContractError();
+      }
       let relation = null;
       if (action === 'add_note') relation = 'notes';
       else if (

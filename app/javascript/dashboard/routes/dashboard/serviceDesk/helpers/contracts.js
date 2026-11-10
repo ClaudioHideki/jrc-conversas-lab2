@@ -62,6 +62,19 @@ export function decodeContext(payload, identity) {
       name: text(unit.name),
       operator_company: named(unit.operator_company),
       permissions: permissions(unit.permissions),
+      ...(unit.internal_intake
+        ? {
+            internal_intake: {
+              requester: {
+                name: text(unit.internal_intake.requester?.name),
+                email: text(unit.internal_intake.requester?.email),
+              },
+              primary: named(unit.internal_intake.primary),
+              observer: named(unit.internal_intake.observer),
+              queue: named(unit.internal_intake.queue),
+            },
+          }
+        : {}),
       ...(unit.initial_status
         ? { initial_status: named(unit.initial_status) }
         : {}),

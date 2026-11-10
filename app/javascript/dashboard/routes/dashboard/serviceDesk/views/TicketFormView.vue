@@ -1,5 +1,6 @@
 <script setup>
 import QuickTicketForm from '../components/QuickTicketForm.vue';
+import InternalTicketForm from '../components/InternalTicketForm.vue';
 import EstablishmentPicker from '../components/EstablishmentPicker.vue';
 import TicketAssetLinks from '../components/TicketAssetLinks.vue';
 import OperationsLinks from '../../jrcOperations/components/OperationsLinks.vue';
@@ -523,8 +524,21 @@ const submit = async () => {
 </script>
 
 <template>
+  <InternalTicketForm
+    v-if="
+      !edit &&
+      !advanced &&
+      !relationshipSeed &&
+      session.state.context?.units.some(
+        row => row.internal_intake && row.permissions.create_ticket
+      )
+    "
+    ref="quickForm"
+    @cancel="cancel"
+    @open="openCreatedTicket"
+  />
   <QuickTicketForm
-    v-if="!edit && !advanced"
+    v-else-if="!edit && !advanced"
     ref="quickForm"
     :initial-draft="quickSeed || relationshipSeed"
     @advanced="openAdvanced"

@@ -22,14 +22,17 @@ class JrcServiceDesk::CreateTicketWorkflowService < JrcServiceDesk::BaseService
   private
 
   def workflow_options(options)
-    raise ArgumentError unless (options.keys - %i[conversation_id service_id origin_channel files]).empty?
+    raise ArgumentError unless (options.keys - %i[conversation_id service_id origin_channel files internal_request]).empty?
 
+    internal_request = options.fetch(:internal_request, false)
+    raise ArgumentError unless [true, false].include?(internal_request)
+    raise ArgumentError if internal_request && options[:conversation_id]
     files = options.fetch(:files, [])
     uploads = JrcServiceDesk::InteractionAttachments.prepare(files)
 
     { conversation_id: optional_id(options[:conversation_id]),
       service_id: optional_id(options[:service_id]),
-      origin_channel: options.fetch(:origin_channel, 'manual'), files: files,
+      origin_channel: options.fetch(:origin_channel, 'manual'), files: files, internal_request: internal_request,
       file_fingerprints: uploads.map { |file| file.except(:io).deep_stringify_keys } }
   end
 
@@ -65,13 +68,13 @@ class JrcServiceDesk::CreateTicketWorkflowService < JrcServiceDesk::BaseService
     previous = marker&.data&.fetch('conversation_id', nil)
     files = marker&.data&.fetch('file_fingerprints', []) || []
     input_service_id = marker&.data&.key?('input_service_id') ? marker.data['input_service_id'] : ticket.service_id
-    previous == inputs[:conversation_id] && input_service_id == inputs[:service_id] && files == inputs[:file_fingerprints]
+    (marker&.data&.fetch('internal_request', false) || false) == inputs[:internal_request] && previous == inputs[:conversation_id] && input_service_id == inputs[:service_id] && files == inputs[:file_fingerprints]
   end
 
   def create_ticket(unit, attributes, key, inputs)
     JrcServiceDesk::CreateTicketService.new(user_context: context.to_h).call(
       unit_id: unit.id, attributes: attributes, idempotency_key: key,
-      service_id: inputs[:service_id], origin_channel: inputs[:origin_channel], intake_conversation: @intake_conversation
+      service_id: inputs[:service_id], origin_channel: inputs[:origin_channel], intake_conversation: @intake_conversation, internal_request: inputs[:internal_request]
     )
   end
 
@@ -81,11 +84,13 @@ class JrcServiceDesk::CreateTicketWorkflowService < JrcServiceDesk::BaseService
       JrcServiceDesk::LinkConversationService.new(user_context: context.to_h).call(ticket_id: ticket.id, conversation_id: conversation_id)
     end
     marker = { 'conversation_id' => conversation_id }
+    marker['internal_request'] = true if inputs[:internal_request]
     marker['input_service_id'] = inputs[:service_id] if ticket.service_id != inputs[:service_id]
     marker['file_fingerprints'] = inputs[:file_fingerprints] if inputs[:files].any?
     append_event!(ticket, 'creation_context_recorded', marker)
     attach_opening_files(ticket, inputs[:files], key) if inputs[:files].any?
     JrcServiceDesk::OlaTracker.sync!(ticket)
+    return if inputs[:internal_request]
     return unless ticket.queue
 
     JrcServiceDesk::AutomaticRoutingService.new(user_context: context.to_h).call(ticket_id: ticket.id)

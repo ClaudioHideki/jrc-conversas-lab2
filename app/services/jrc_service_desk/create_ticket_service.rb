@@ -6,14 +6,19 @@ class JrcServiceDesk::CreateTicketService < JrcServiceDesk::BaseService
   IDS = (FIELDS - %w[title description impact_code urgency_code]).freeze
   CLASSIFICATION_FIELDS = %w[ticket_type_id subcategory_id contract_id impact_code urgency_code].freeze
 
-  def call(unit_id:, attributes:, idempotency_key:, service_id: nil, origin_channel: 'manual', intake_conversation: nil)
+  def call(unit_id:, attributes:, idempotency_key:, service_id: nil, origin_channel: 'manual', intake_conversation: nil, internal_request: false)
     raise ArgumentError unless %w[manual portal].include?(origin_channel)
 
     with_unit(unit_id) do |unit|
-      fields = creation_fields
+      raise ArgumentError unless [true, false].include?(internal_request)
+      raise Pundit::NotAuthorizedError unless context.capability?(:tickets_create)
+      raise ArgumentError if internal_request && origin_channel != 'manual'
+
+      fields = internal_request ? %w[title description service_fields] : creation_fields
       values = JrcServiceDesk::Input.attributes(attributes, fields)
       normalized = (FIELDS - CLASSIFICATION_FIELDS).index_with { |name| values[name] }
       normalized.merge!(values.slice(*CLASSIFICATION_FIELDS))
+      normalized.merge!(JrcServiceDesk::InternalIntake.defaults!(unit, context)) if internal_request
       normalized['title'] = text(normalized['title'])
       normalized['description'] = text(normalized['description'], nullable: true)
       IDS.each { |name| normalized[name] = JrcServiceDesk::Input.id(normalized[name]) unless normalized[name].nil? }
@@ -29,6 +34,7 @@ class JrcServiceDesk::CreateTicketService < JrcServiceDesk::BaseService
       normalized['service_fields'] = values['service_fields'] if values.key?('service_fields')
       fingerprint_values = service_id ? normalized.merge('service_id' => service_id) : normalized
       fingerprint_values = fingerprint_values.merge('origin_channel' => origin_channel) if origin_channel != 'manual'
+      fingerprint_values = fingerprint_values.merge('internal_request' => true) if internal_request
       fingerprint = JrcServiceDesk::CanonicalJson.digest(fingerprint_values)
 
       raise Pundit::NotAuthorizedError unless context.capability?(:tickets_create)
@@ -50,8 +56,8 @@ class JrcServiceDesk::CreateTicketService < JrcServiceDesk::BaseService
       requester = Contact.where(account_id: context.account.id).find(JrcServiceDesk::Input.id(normalized['requester_id']))
       authorize!(requester, :show?)
       JrcServiceDesk::RequesterDirectory.new(context).validate!(requester, company_id: normalized['company_id'])
-      apply_company_route!(unit, requester, values, normalized) if origin_channel == 'manual'
-      service, queue = catalogue_references(service_id, normalized, unit)
+      apply_company_route!(unit, requester, values, normalized) if origin_channel == 'manual' && !internal_request
+      service, queue = catalogue_references(service_id, normalized, unit, internal_request: internal_request)
       ticket = JrcServiceDesk::Ticket.new(
         account: context.account, unit: unit, title: normalized['title'], description: normalized['description'], requester: requester,
         status: reference(JrcServiceDesk::TicketStatus, normalized['status_id'], unit),
@@ -62,11 +68,13 @@ class JrcServiceDesk::CreateTicketService < JrcServiceDesk::BaseService
         created_by_membership: actor_membership, origin_channel: origin_channel, opened_at: Time.current,
         idempotency_key: key, request_fingerprint: fingerprint
       )
+      JrcServiceDesk::InternalIntake.apply!(ticket) if internal_request
       configure_catalogue(ticket, service, normalized, values)
       JrcServiceDesk::TicketCatalogue.new(ticket, context: context).bind!(normalized)
       intake = JrcServiceDesk::IntakeRuleApplication.new(ticket: ticket, context: context, supplied: values, conversation: intake_conversation)
       intake.apply!
-      if ticket.assignee_membership && normalized['assignee_account_user_id'].nil?
+      JrcServiceDesk::InternalIntake.apply!(ticket) if internal_request
+      if !internal_request && ticket.assignee_membership && normalized['assignee_account_user_id'].nil?
         reason = JrcServiceDesk::AssignmentEligibility.new(membership: ticket.assignee_membership, ticket: ticket).reason
         ticket.assignee_membership = nil if reason
       end
@@ -74,6 +82,12 @@ class JrcServiceDesk::CreateTicketService < JrcServiceDesk::BaseService
       raise Pundit::NotAuthorizedError unless context.supervision_access.allowed?(ticket, 'tickets_create')
       authorize!(ticket, :create?)
       ticket.save!
+      if internal_request
+        _, _, observer = JrcServiceDesk::InternalIntake.destinations(unit)
+        observer_context = JrcServiceDesk::OperationalContext.new(account: unit.account, user: observer.account_user.user, account_user: observer.account_user)
+        Pundit.authorize(observer_context.to_h, ticket, :show?)
+        append_event!(ticket, 'resource_updated', 'internal_request' => true, 'observer_account_user_id' => observer.account_user_id)
+      end
       intake.record_actions!
       intake.record_sla!
       if ticket.lifecycle_policy_version
@@ -111,10 +125,10 @@ class JrcServiceDesk::CreateTicketService < JrcServiceDesk::BaseService
     context.account.feature_enabled?('jrc_customer_master') ? fields + %w[company_id establishment_company_id] : fields
   end
 
-  def catalogue_references(service_id, normalized, unit)
+  def catalogue_references(service_id, normalized, unit, internal_request: false)
     service = reference(JrcServiceDesk::Service, service_id, unit)
     queue = reference(JrcServiceDesk::Queue, normalized['queue_id'] || service&.default_queue_id, unit)
-    raise Pundit::NotAuthorizedError if queue && !context.capability?(:tickets_assign)
+    raise Pundit::NotAuthorizedError if queue && !internal_request && !context.capability?(:tickets_assign)
 
     normalized['priority_id'] ||= service&.default_priority_id
     [service, queue]
