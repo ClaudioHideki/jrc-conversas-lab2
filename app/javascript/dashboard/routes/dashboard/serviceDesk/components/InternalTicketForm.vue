@@ -162,7 +162,11 @@ defineExpose({ busy: locked });
     class="mx-auto min-w-0 max-w-5xl rounded-2xl bg-gradient-to-br from-blue-50 via-white to-sky-100 p-4 text-slate-900 sm:p-6 [&_*]:border-solid"
     data-testid="internal-ticket-form"
   >
-    <PortalHeading icon="headset" :title="t('PORTAL.NEW')" />
+    <PortalHeading
+      id="sd-ticket-form-title"
+      icon="headset"
+      :title="t('PORTAL.NEW')"
+    />
     <TicketCreationReceipt
       v-if="created"
       :ticket="created"
