@@ -21,6 +21,7 @@ jobs:
           node-version-file: .nvmrc
       - run: git merge-base --is-ancestor d8a83b824b11cc68ddbbce7c79681f368051fb70 HEAD
       - run: node --test script/validate_ag_migration_identity.test.mjs
+      - run: python3 script/jrc_ag_native_plan_test.py
       # Known identity collisions must be resolved with a tested history-adoption plan.
       # Never mark the current combined tree as database-ready while this gate fails.
       - run: node script/validate_ag_migration_identity.mjs
@@ -31,10 +32,10 @@ jobs:
     timeout-minutes: 90
     strategy:
       fail-fast: false
-      max-parallel: 1
+      max-parallel: 2
       matrix:
         installation: [fresh, upgrade]
-        database: [jrc_rel_v2_candidate_test, jrc_four_domains_schema_admission_test, jrc_rel_sd_candidate_test, jrc_jornada_candidate_test]
+        database: [jrc_rel_v2_candidate_test, jrc_four_domains_schema_admission_test, jrc_rel_sd_candidate_test, jrc_jornada_candidate_test, jrc_four_domains_schema_authority_test, jrc_four_domains_schema_test]
     services:
       postgres:
         image: pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a
@@ -119,3 +120,58 @@ jobs:
           if-no-files-found: warn
       - name: Source remains unchanged
         run: git diff --exit-code
+
+  frontend:
+    needs: identities
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4.4'
+          bundler: 2.5.16
+      - run: pnpm install --frozen-lockfile
+      - name: Lint reconciled application components and establishment regression
+        run: |
+          pnpm exec eslint app/javascript/dashboard/components-next/sidebar/Sidebar.vue \
+            app/javascript/dashboard/routes/dashboard/crm/views/contracts/ContractsView.vue \
+            app/javascript/dashboard/routes/dashboard/jrcCustomers/components/CompanyEditor.vue \
+            app/javascript/dashboard/routes/dashboard/jrcCustomers/components/CompanyEditor.spec.js \
+            app/javascript/dashboard/routes/dashboard/jrcOperations/views/ProjectDetail.vue \
+            app/javascript/dashboard/routes/dashboard/jrcOperations/views/ProjectList.vue \
+            app/javascript/dashboard/routes/dashboard/serviceDesk/components/QuickTicketForm.vue \
+            app/javascript/dashboard/routes/dashboard/serviceDesk/views/TicketFormView.vue
+      - name: Frontend state boundaries, including native Ruby role-ceiling parity
+        run: |
+          node --test script/jrc_approved_ui_state.test.mjs script/jrc_backoffice_context_privacy.test.mjs \
+            script/jrc_calendar_dates.test.mjs script/jrc_calendar_pagination.test.mjs \
+            script/jrc_calendar_server_state.test.mjs script/jrc_local_role_boundaries.test.mjs \
+            script/jrc_portfolio_history_state.test.mjs script/jrc_requirement_history_state.test.mjs \
+            script/jrc_requirement_state.test.mjs
+      - name: Vue integration regressions on the exact consolidated source
+        run: |
+          pnpm exec vitest run app/javascript/dashboard/routes/dashboard/jrcCustomers \
+            app/javascript/dashboard/routes/dashboard/jrcRelationship \
+            app/javascript/dashboard/routes/dashboard/crm \
+            app/javascript/dashboard/routes/dashboard/approvals \
+            app/javascript/dashboard/routes/dashboard/jrcOperations \
+            app/javascript/dashboard/routes/dashboard/serviceDesk \
+            --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
+            --reporter=default --reporter=json --outputFile=/tmp/ag-vue-results.json
+      - name: Preserve native frontend evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ag-frontend-${{ github.sha }}
+          path: /tmp/ag-vue-results.json
+          if-no-files-found: warn
+      - run: git diff --exit-code

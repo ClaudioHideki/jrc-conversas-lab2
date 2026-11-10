@@ -438,39 +438,39 @@ const save = async () => {
           :class="inputClass"
         />
       </label>
-    <fieldset
-      data-section="structure"
-      data-testid="establishment-fields"
-      class="col-span-full space-y-3 rounded-lg border border-n-weak p-3"
-    >
-      <legend class="px-1 text-sm font-semibold">
-        {{ t('PORTAL.STORE') }}
-      </legend>
-      <div class="grid gap-3 sm:grid-cols-2">
-        <label class="text-sm"
-          >{{ t('PORTAL.STORE_CODE')
-          }}<input
-            v-model="form.storeCode"
+      <fieldset
+        data-section="structure"
+        data-testid="establishment-fields"
+        class="col-span-full space-y-3 rounded-lg border border-n-weak p-3"
+      >
+        <legend class="px-1 text-sm font-semibold">
+          {{ t('PORTAL.STORE') }}
+        </legend>
+        <div class="grid gap-3 sm:grid-cols-2">
+          <label class="text-sm"
+            >{{ t('PORTAL.STORE_CODE')
+            }}<input
+              v-model="form.storeCode"
+              :class="inputClass"
+              maxlength="80"
+          /></label>
+          <label class="text-sm"
+            >{{ t('PORTAL.CLUSTER')
+            }}<input
+              v-model="form.storeCluster"
+              :class="inputClass"
+              maxlength="255"
+          /></label>
+        </div>
+        <label class="block text-sm"
+          >{{ t('PORTAL.STORE_PHONES')
+          }}<textarea
+            v-model="form.storePhones"
             :class="inputClass"
-            maxlength="80"
-        /></label>
-        <label class="text-sm"
-          >{{ t('PORTAL.CLUSTER')
-          }}<input
-            v-model="form.storeCluster"
-            :class="inputClass"
-            maxlength="255"
-        /></label>
-      </div>
-      <label class="block text-sm"
-        >{{ t('PORTAL.STORE_PHONES')
-        }}<textarea
-          v-model="form.storePhones"
-          :class="inputClass"
-          rows="3"
-        />
-      </label>
-    </fieldset>
+            rows="3"
+          />
+        </label>
+      </fieldset>
     </fieldset>
 
     <p

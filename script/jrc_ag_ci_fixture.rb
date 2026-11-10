@@ -6,7 +6,8 @@ require 'open3'
 require 'tempfile'
 
 base = 'd8a83b824b11cc68ddbbce7c79681f368051fb70'
-databases = %w[jrc_rel_v2_candidate_test jrc_four_domains_schema_admission_test jrc_rel_sd_candidate_test jrc_jornada_candidate_test]
+databases = %w[jrc_rel_v2_candidate_test jrc_four_domains_schema_admission_test jrc_rel_sd_candidate_test jrc_jornada_candidate_test
+               jrc_four_domains_schema_authority_test jrc_four_domains_schema_test]
 config = ActiveRecord::Base.connection_db_config
 owned = ENV['GITHUB_ACTIONS'] == 'true' && ENV['RUNNER_ENVIRONMENT'] == 'github-hosted' &&
         ENV.fetch('GITHUB_RUN_ID', '').match?(/\A[0-9]+\z/) && ENV.fetch('JRC_AG_POSTGRES_SERVICE_ID', '').match?(/\A[a-f0-9]{12,64}\z/)

@@ -16,6 +16,7 @@ SCOPES = [
 DATABASES = [
     'jrc_rel_v2_candidate_test', 'jrc_four_domains_schema_admission_test',
     'jrc_rel_sd_candidate_test', 'jrc_jornada_candidate_test',
+    'jrc_four_domains_schema_authority_test', 'jrc_four_domains_schema_test',
 ]
 
 
@@ -24,7 +25,10 @@ def plan():
     paths = sorted({p for scope in SCOPES for p in (ROOT / scope).rglob('*_spec.rb')})
     for path in paths:
         text = path.read_text(encoding='utf-8')
-        guarded = set(re.findall(r'jrc_[a-z0-9_]+_test', text)) if 'POSTGRES_DATABASE' in text else set()
+        has_database_guard = any(token in text for token in (
+            'POSTGRES_DATABASE', 'connection_db_config', 'config.database', 'current_database',
+        ))
+        guarded = set(re.findall(r'jrc_[a-z0-9_]+_test', text)) if has_database_guard else set()
         database = next((name for name in DATABASES if name in guarded), None)
         if guarded and database is None:
             raise ValueError(f'Unreviewed synthetic database guard: {path.relative_to(ROOT)}')
