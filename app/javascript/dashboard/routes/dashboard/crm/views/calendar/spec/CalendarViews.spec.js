@@ -9,10 +9,61 @@ import { activitiesAPI } from 'dashboard/api/crm';
 const navigation = vi.hoisted(() => ({ route: null }));
 vi.mock('vue-router', () => ({ useRoute: () => navigation.route }));
 vi.mock('dashboard/api/crm', () => ({
-  activitiesAPI: { list: vi.fn(), complete: vi.fn() },
+  activitiesAPI: {
+    list: vi.fn(),
+    complete: vi.fn(),
+    calendarPageInAccount: vi.fn(),
+  },
 }));
 let wrapper;
 let store;
+const sourceRows = () => [
+  {
+    id: 1,
+    title: 'Authorized selected-day appointment',
+    activity_type: 'meeting',
+    due_at: '2026-11-07T12:00:00Z',
+    status: 'scheduled',
+  },
+  {
+    id: 2,
+    title: 'Authorized next-week appointment',
+    activity_type: 'call',
+    due_at: '2026-11-09T12:00:00Z',
+    status: 'scheduled',
+  },
+  {
+    id: 3,
+    title: 'Authorized first-month appointment',
+    activity_type: 'email',
+    due_at: '2026-11-01T12:00:00Z',
+    status: 'completed',
+    completed_at: '2026-11-01T13:00:00Z',
+  },
+  {
+    id: 4,
+    title: 'Authorized following-month appointment',
+    activity_type: 'meeting',
+    due_at: '2026-12-01T12:00:00Z',
+    status: 'scheduled',
+  },
+];
+const pageResponse = (rows, page = 1, total = rows.length) => ({
+  data: {
+    data: rows.map(row => ({
+      ...row,
+      due_at_local: row.due_at.replace('Z', ''),
+      due_at_display: row.due_at,
+    })),
+    owners: [],
+    meta: {
+      page,
+      per_page: 25,
+      total,
+      pages: Math.max(1, Math.ceil(total / 25)),
+    },
+  },
+});
 beforeEach(() => {
   vi.resetAllMocks();
   navigation.route = reactive({
@@ -38,39 +89,10 @@ beforeEach(() => {
       },
     },
   });
-  activitiesAPI.list.mockResolvedValue({
-    data: [
-      {
-        id: 1,
-        title: 'Authorized selected-day appointment',
-        activity_type: 'meeting',
-        due_at: '2026-11-07T12:00:00Z',
-        status: 'scheduled',
-      },
-      {
-        id: 2,
-        title: 'Authorized next-week appointment',
-        activity_type: 'call',
-        due_at: '2026-11-09T12:00:00Z',
-        status: 'scheduled',
-      },
-      {
-        id: 3,
-        title: 'Authorized first-month appointment',
-        activity_type: 'email',
-        due_at: '2026-11-01T12:00:00Z',
-        status: 'completed',
-        completed_at: '2026-11-01T13:00:00Z',
-      },
-      {
-        id: 4,
-        title: 'Authorized following-month appointment',
-        activity_type: 'meeting',
-        due_at: '2026-12-01T12:00:00Z',
-        status: 'scheduled',
-      },
-    ],
-  });
+  activitiesAPI.list.mockResolvedValue({ data: sourceRows() });
+  activitiesAPI.calendarPageInAccount.mockResolvedValue(
+    pageResponse(sourceRows().slice(0, 3))
+  );
 });
 afterEach(() => wrapper?.unmount());
 const render = async () => {
@@ -86,12 +108,14 @@ const render = async () => {
   });
   await flushPromises();
 };
-const mode = async name =>
-  wrapper.get(`[data-testid="calendar-view-${name}"]`).trigger('click');
+const mode = async name => {
+  await wrapper.get(`[data-testid="calendar-view-${name}"]`).trigger('click');
+  await flushPromises();
+};
 const grid = () => wrapper.get('[data-testid="calendar-period"]');
 
 it.each(['month', 'day', 'list', 'week'])(
-  'opens the working %s view over the same native authorized list without another transport call',
+  'opens the working %s view and uses the native transport for that view',
   async name => {
     await render();
     expect(
@@ -104,6 +128,9 @@ it.each(['month', 'day', 'list', 'week'])(
         .attributes('aria-current')
     ).toBe('true');
     expect(activitiesAPI.list).toHaveBeenCalledTimes(1);
+    expect(activitiesAPI.calendarPageInAccount).toHaveBeenCalledTimes(
+      name === 'list' ? 1 : 0
+    );
   }
 );
 
@@ -175,10 +202,30 @@ it('moves by the active week or day rather than always jumping one month', async
 it('moves the list by month and displays a real empty state after the last known month', async () => {
   await render();
   await mode('list');
+  const requestsBeforeMove =
+    activitiesAPI.calendarPageInAccount.mock.calls.length;
+  activitiesAPI.calendarPageInAccount.mockResolvedValueOnce(
+    pageResponse(sourceRows().slice(3))
+  );
   await wrapper.get('[data-testid="calendar-next-period"]').trigger('click');
+  await flushPromises();
+  expect(activitiesAPI.calendarPageInAccount).toHaveBeenCalledTimes(
+    requestsBeforeMove + 1
+  );
+  expect(activitiesAPI.calendarPageInAccount).toHaveBeenLastCalledWith(
+    '1',
+    expect.objectContaining({
+      starts_on: '2026-12-01',
+      ends_before: '2027-01-01',
+      page: 1,
+    }),
+    expect.any(Object)
+  );
   expect(grid().findAll('article')).toHaveLength(1);
   expect(grid().text()).toContain('Authorized following-month appointment');
+  activitiesAPI.calendarPageInAccount.mockResolvedValueOnce(pageResponse([]));
   await wrapper.get('[data-testid="calendar-next-period"]').trigger('click');
+  await flushPromises();
   expect(wrapper.find('[data-testid="calendar-empty-period"]').exists()).toBe(
     true
   );
@@ -199,14 +246,18 @@ it('follows a native date link reactively while retaining the chosen view', asyn
 });
 
 it('pages appointments rather than days without losing or repeating authorized rows', async () => {
-  activitiesAPI.list.mockResolvedValueOnce({
-    data: Array.from({ length: 61 }, (_, index) => ({
-      id: index + 10,
-      title: `Authorized appointment ${index + 1}`,
-      due_at: index < 30 ? '2026-11-07T12:00:00Z' : '2026-11-09T12:00:00Z',
-      status: 'scheduled',
-    })),
-  });
+  const rows = Array.from({ length: 61 }, (_, index) => ({
+    id: index + 10,
+    title: `Authorized appointment ${index + 1}`,
+    due_at: index < 30 ? '2026-11-07T12:00:00Z' : '2026-11-09T12:00:00Z',
+    status: 'scheduled',
+  }));
+  activitiesAPI.list.mockResolvedValueOnce({ data: rows });
+  activitiesAPI.calendarPageInAccount
+    .mockResolvedValueOnce(pageResponse(rows.slice(0, 25), 1, 61))
+    .mockResolvedValueOnce(pageResponse(rows.slice(25, 50), 2, 61))
+    .mockResolvedValueOnce(pageResponse(rows.slice(50), 3, 61))
+    .mockResolvedValueOnce(pageResponse(rows.slice(25, 50), 2, 61));
   await render();
   await mode('list');
   const titles = [];
@@ -217,6 +268,7 @@ it('pages appointments rather than days without losing or repeating authorized r
     titles.push(...cards.map(card => card.get('p').text()));
     if (count === 25) {
       await wrapper.get('[data-testid="calendar-list-next"]').trigger('click');
+      await flushPromises();
     }
   }, Promise.resolve());
   expect(new Set(titles).size).toBe(61);
@@ -226,56 +278,90 @@ it('pages appointments rather than days without losing or repeating authorized r
     wrapper.get('[data-testid="calendar-list-next"]').element.disabled
   ).toBe(true);
   await wrapper.get('[data-testid="calendar-list-previous"]').trigger('click');
+  await flushPromises();
   expect(grid().findAll('article')).toHaveLength(25);
   expect(grid().findAll('article')[0].text()).toContain(
     'Authorized appointment 26'
   );
+  expect(
+    activitiesAPI.calendarPageInAccount.mock.calls.map(
+      ([, params]) => params.page
+    )
+  ).toEqual([1, 2, 3, 2]);
   expect(activitiesAPI.list).toHaveBeenCalledTimes(1);
 });
 
-it('resets the page when filtering, clearing filters or changing the period', async () => {
-  activitiesAPI.list.mockResolvedValueOnce({
-    data: Array.from({ length: 30 }, (_, index) => ({
-      id: index + 10,
-      title: index === 29 ? 'Unique appointment' : `Meeting ${index}`,
-      due_at: '2026-11-07T12:00:00Z',
-      status: 'scheduled',
-    })),
-  });
+it('resets the server page when filtering, clearing filters or changing the period', async () => {
+  const rows = Array.from({ length: 30 }, (_, index) => ({
+    id: index + 10,
+    title: index === 29 ? 'Unique appointment' : `Meeting ${index}`,
+    due_at: '2026-11-07T12:00:00Z',
+    status: 'scheduled',
+  }));
+  const first = pageResponse(rows.slice(0, 25), 1, 30);
+  const second = pageResponse(rows.slice(25), 2, 30);
+  activitiesAPI.calendarPageInAccount
+    .mockResolvedValueOnce(first)
+    .mockResolvedValueOnce(second)
+    .mockResolvedValueOnce(pageResponse(rows.slice(29)))
+    .mockResolvedValueOnce(first)
+    .mockResolvedValueOnce(second)
+    .mockResolvedValueOnce(pageResponse([]))
+    .mockResolvedValueOnce(first);
   await render();
   await mode('list');
   await wrapper.get('[data-testid="calendar-list-next"]').trigger('click');
+  await flushPromises();
   await wrapper
     .get('[data-testid="calendar-filter-search"]')
     .setValue('Unique');
+  await flushPromises();
   expect(grid().findAll('article')).toHaveLength(1);
   expect(grid().text()).toContain('Unique appointment');
+  expect(activitiesAPI.calendarPageInAccount).toHaveBeenLastCalledWith(
+    '1',
+    expect.objectContaining({ page: 1, search: 'Unique' }),
+    expect.any(Object)
+  );
   expect(
     wrapper.get('[data-testid="calendar-list-previous"]').element.disabled
   ).toBe(true);
   await wrapper.get('[data-testid="calendar-clear-filters"]').trigger('click');
+  await flushPromises();
   expect(grid().findAll('article')).toHaveLength(25);
   await wrapper.get('[data-testid="calendar-list-next"]').trigger('click');
+  await flushPromises();
   await wrapper.get('[data-testid="calendar-next-period"]').trigger('click');
+  await flushPromises();
   expect(wrapper.find('[data-testid="calendar-list-next"]').exists()).toBe(
     false
   );
   await wrapper
     .get('[data-testid="calendar-previous-period"]')
     .trigger('click');
+  await flushPromises();
   expect(grid().findAll('article')).toHaveLength(25);
   expect(activitiesAPI.list).toHaveBeenCalledTimes(1);
 });
 
-it('clamps a later page after a native refresh shrinks the result, preserving full day and month views', async () => {
-  activitiesAPI.list.mockResolvedValueOnce({
-    data: Array.from({ length: 30 }, (_, index) => ({
-      id: index + 10,
-      title: `Current appointment ${index}`,
-      due_at: '2026-11-07T12:00:00Z',
-      status: 'scheduled',
-    })),
-  });
+it('reloads the bounded server list after a native refresh shrinks the result, preserving full day and month views', async () => {
+  const rows = Array.from({ length: 30 }, (_, index) => ({
+    id: index + 10,
+    title: `Current appointment ${index}`,
+    due_at: '2026-11-07T12:00:00Z',
+    status: 'scheduled',
+  }));
+  const remaining = {
+    id: 100,
+    title: 'Remaining authorized appointment',
+    due_at: '2026-11-07T12:00:00Z',
+    status: 'scheduled',
+  };
+  activitiesAPI.list.mockResolvedValueOnce({ data: rows });
+  activitiesAPI.calendarPageInAccount
+    .mockResolvedValueOnce(pageResponse(rows.slice(0, 25), 1, 30))
+    .mockResolvedValueOnce(pageResponse(rows.slice(25), 2, 30))
+    .mockResolvedValueOnce(pageResponse([remaining]));
   await render();
   await mode('day');
   expect(grid().findAll('article')).toHaveLength(30);
@@ -283,14 +369,8 @@ it('clamps a later page after a native refresh shrinks the result, preserving fu
   expect(grid().findAll('article')).toHaveLength(30);
   await mode('list');
   await wrapper.get('[data-testid="calendar-list-next"]').trigger('click');
-  store.commit('jrcCrm/activities/SET_ACTIVITIES', [
-    {
-      id: 100,
-      title: 'Remaining authorized appointment',
-      due_at: '2026-11-07T12:00:00Z',
-      status: 'scheduled',
-    },
-  ]);
+  await flushPromises();
+  store.commit('jrcCrm/activities/SET_ACTIVITIES', [remaining]);
   await flushPromises();
   expect(grid().findAll('article')).toHaveLength(1);
   expect(grid().text()).toContain('Remaining authorized appointment');
@@ -298,4 +378,9 @@ it('clamps a later page after a native refresh shrinks the result, preserving fu
   expect(
     wrapper.get('[data-testid="calendar-list-previous"]').element.disabled
   ).toBe(true);
+  expect(activitiesAPI.calendarPageInAccount).toHaveBeenLastCalledWith(
+    '1',
+    expect.objectContaining({ page: 1 }),
+    expect.any(Object)
+  );
 });

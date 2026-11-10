@@ -39,6 +39,12 @@ const completionError = ref('');
 const editingActivityId = ref(null);
 const listRevision = ref(0);
 const listOwners = ref([]);
+watch(
+  () => store.getters['jrcCrm/activities/allActivities'],
+  () => {
+    if (calendarView.value === 'list') listRevision.value += 1;
+  }
+);
 const load = () => {
   if (calendarView.value === 'list') {
     listRevision.value += 1;

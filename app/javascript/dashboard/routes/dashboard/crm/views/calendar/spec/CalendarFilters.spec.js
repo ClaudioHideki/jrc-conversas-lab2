@@ -9,7 +9,11 @@ import { activitiesAPI } from 'dashboard/api/crm';
 const navigation = vi.hoisted(() => ({ route: null }));
 vi.mock('vue-router', () => ({ useRoute: () => navigation.route }));
 vi.mock('dashboard/api/crm', () => ({
-  activitiesAPI: { list: vi.fn(), complete: vi.fn() },
+  activitiesAPI: {
+    list: vi.fn(),
+    complete: vi.fn(),
+    calendarPageInAccount: vi.fn(),
+  },
 }));
 let wrapper;
 let authority;
@@ -51,6 +55,25 @@ const sources = () => [
     status: 'cancelled',
   },
 ];
+const pageResponse = (rows, page = 1, total = rows.length) => ({
+  data: {
+    data: rows.map(row => ({
+      ...row,
+      due_at_local: row.due_at.replace('Z', ''),
+      due_at_display: row.due_at,
+    })),
+    owners: [
+      { id: 7, name: 'Native owner seven' },
+      { id: 8, name: 'Native owner eight' },
+    ],
+    meta: {
+      total,
+      page,
+      per_page: 25,
+      pages: Math.max(1, Math.ceil(total / 25)),
+    },
+  },
+});
 beforeEach(() => {
   vi.resetAllMocks();
   authority = reactive({
@@ -92,6 +115,9 @@ beforeEach(() => {
     },
   });
   activitiesAPI.list.mockResolvedValue({ data: sources() });
+  activitiesAPI.calendarPageInAccount.mockResolvedValue(
+    pageResponse(sources())
+  );
   activitiesAPI.complete.mockResolvedValue({
     data: {
       ...sources()[0],
@@ -157,6 +183,7 @@ it('clears every filter while keeping the selected native date and view', async 
       .findAll('[data-testid^="calendar-filter-"]')
       .map(control => control.element.value)
   ).toEqual(['', '', '', '']);
+  await flushPromises();
   expect(cards()).toHaveLength(4);
   expect(
     wrapper.get('[data-testid="calendar-view-list"]').attributes('aria-current')
@@ -256,22 +283,35 @@ it.each([
         title: `Previous private appointment ${index}`,
       })),
     });
+    const rows = Array.from({ length: 30 }, (_, index) => ({
+      ...sources()[0],
+      id: index + 10,
+      title: `Previous private appointment ${index}`,
+    }));
+    activitiesAPI.calendarPageInAccount
+      .mockResolvedValueOnce(pageResponse(rows.slice(0, 25), 1, 30))
+      .mockResolvedValueOnce(pageResponse(rows.slice(25), 2, 30));
     await render();
     await wrapper.get('[data-testid="calendar-view-list"]').trigger('click');
+    await flushPromises();
     await wrapper.get('[data-testid="calendar-list-next"]').trigger('click');
+    await flushPromises();
     expect(cards()).toHaveLength(5);
-    activitiesAPI.list.mockRejectedValueOnce({
+    activitiesAPI.calendarPageInAccount.mockRejectedValue({
       response: { status: 403, data: { error: 'Access denied' } },
     });
     authority[field] = value;
     if (field === 'account') navigation.route.params.accountId = String(value);
     await flushPromises();
-    expect(wrapper.text()).toContain('Access denied');
+    expect(wrapper.find('[role="alert"]').exists()).toBe(true);
     expect(wrapper.text()).not.toContain('Previous private appointment');
     expect(wrapper.find('[data-testid="calendar-list-next"]').exists()).toBe(
       false
     );
-    expect(activitiesAPI.list).toHaveBeenCalledTimes(2);
+    expect(activitiesAPI.calendarPageInAccount.mock.calls.at(-1)[0]).toBe(
+      field === 'account' ? '2' : '1'
+    );
+    expect(activitiesAPI.list).toHaveBeenCalledTimes(1);
     expect(activitiesAPI.complete).not.toHaveBeenCalled();
   }
 );

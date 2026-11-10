@@ -114,6 +114,14 @@ describe('Backoffice workspace', () => {
     expect(content).not.toContain('VALUES.blocked');
   });
 
+  it('labels the requirements tab instead of exposing its translation key', async () => {
+    const wrapper = mount(BackofficeRequest360, options);
+    await flushPromises();
+    expect(wrapper.text()).toContain('Requisitos');
+    expect(wrapper.text()).not.toContain('DETAIL_TABS.requirements');
+    wrapper.unmount();
+  });
+
   it('shows a rejected approval gate without pretending the stage advanced', async () => {
     mocks.advance.mockRejectedValueOnce({
       response: { status: 409, data: { code: 'APPROVAL_REQUIRED' } },

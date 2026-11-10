@@ -1,0 +1,1493 @@
+{
+  "scope": "Acceptance clauses extracted from the four original Word plus the 13 Backoffice items. Approved business addendum governs TRR/profiles and supersedes older pending-definition notes.",
+  "all_acceptance_completed": false,
+  "criteria": [
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.1 Empresas / 1",
+      "observable_requirement": "Lista premium com filtros e busca funcional.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/customer360.rb",
+          "present": true
+        },
+        {
+          "path": "docs/jrc_customers/stage_c_word_audit_20261104.json",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.1 Empresas / 2",
+      "observable_requirement": "Clique abre popup 360º.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/customer360.rb",
+          "present": true
+        },
+        {
+          "path": "docs/jrc_customers/stage_c_word_audit_20261104.json",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.1 Empresas / 3",
+      "observable_requirement": "Pessoas podem ser cadastradas, vinculadas, marcadas como principal e desvinculadas sem duplicar pessoa.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/customer360.rb",
+          "present": true
+        },
+        {
+          "path": "docs/jrc_customers/stage_c_word_audit_20261104.json",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.1 Empresas / 4",
+      "observable_requirement": "Abas consultam módulos existentes e respeitam permissões.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/customer360.rb",
+          "present": true
+        },
+        {
+          "path": "docs/jrc_customers/stage_c_word_audit_20261104.json",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.2 Contatos / 1",
+      "observable_requirement": "Lista mestre com indicadores e estados de sem empresa/sem responsável/duplicado.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/customer360.rb",
+          "present": true
+        },
+        {
+          "path": "docs/jrc_customers/stage_c_word_audit_20261104.json",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.2 Contatos / 2",
+      "observable_requirement": "Clique abre popup com 6 abas aprovadas.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/customer360.rb",
+          "present": true
+        },
+        {
+          "path": "docs/jrc_customers/stage_c_word_audit_20261104.json",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.2 Contatos / 3",
+      "observable_requirement": "Vincular empresa funciona sem criar empresa/contato paralelo.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/customer360.rb",
+          "present": true
+        },
+        {
+          "path": "docs/jrc_customers/stage_c_word_audit_20261104.json",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.2 Contatos / 4",
+      "observable_requirement": "Ações rápidas usam canais reais.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/customer360.rb",
+          "present": true
+        },
+        {
+          "path": "docs/jrc_customers/stage_c_word_audit_20261104.json",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.3 Segmentos / 1",
+      "observable_requirement": "CRUD em popup.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/customer360.rb",
+          "present": true
+        },
+        {
+          "path": "docs/jrc_customers/stage_c_word_audit_20261104.json",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.3 Segmentos / 2",
+      "observable_requirement": "Critérios E/OU e prévia funcionam.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/customer360.rb",
+          "present": true
+        },
+        {
+          "path": "docs/jrc_customers/stage_c_word_audit_20261104.json",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.3 Segmentos / 3",
+      "observable_requirement": "Listas de empresas/contatos vinculados são paginadas e filtráveis.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/customer360.rb",
+          "present": true
+        },
+        {
+          "path": "docs/jrc_customers/stage_c_word_audit_20261104.json",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.3 Segmentos / 4",
+      "observable_requirement": "Uso por módulo não altera permissão do usuário.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/customer360.rb",
+          "present": true
+        },
+        {
+          "path": "docs/jrc_customers/stage_c_word_audit_20261104.json",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.4 Grupos / 1",
+      "observable_requirement": "Grupo econômico separado de etiqueta/grupo de contato.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/customer360.rb",
+          "present": true
+        },
+        {
+          "path": "docs/jrc_customers/stage_c_word_audit_20261104.json",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.4 Grupos / 2",
+      "observable_requirement": "Vínculo de empresa com grupo econômico auditável.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/customer360.rb",
+          "present": true
+        },
+        {
+          "path": "docs/jrc_customers/stage_c_word_audit_20261104.json",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.5 Contatos ativos / 1",
+      "observable_requirement": "Critério operacional claro e diferente da lista geral.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/customer360.rb",
+          "present": true
+        },
+        {
+          "path": "docs/jrc_customers/stage_c_word_audit_20261104.json",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.5 Contatos ativos / 2",
+      "observable_requirement": "Ações abrem conversa/módulo correspondente.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/customer360.rb",
+          "present": true
+        },
+        {
+          "path": "docs/jrc_customers/stage_c_word_audit_20261104.json",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.6 Importações / 1",
+      "observable_requirement": "CSV UTF-8, modelo para download, mapeamento, prévia e histórico.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/customer360.rb",
+          "present": true
+        },
+        {
+          "path": "docs/jrc_customers/stage_c_word_audit_20261104.json",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.6 Importações / 2",
+      "observable_requirement": "Sem mescla automática por nome.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/customer360.rb",
+          "present": true
+        },
+        {
+          "path": "docs/jrc_customers/stage_c_word_audit_20261104.json",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.6 Importações / 3",
+      "observable_requirement": "Relatório de erros disponível.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/customer360.rb",
+          "present": true
+        },
+        {
+          "path": "docs/jrc_customers/stage_c_word_audit_20261104.json",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Cadastro Mestre",
+      "criterion": "12.6 Importações / 4",
+      "observable_requirement": "Nenhuma exclusão implícita.",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_customers/customer360.rb",
+          "present": true
+        },
+        {
+          "path": "docs/jrc_customers/stage_c_word_audit_20261104.json",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Central de Aprovações",
+      "criterion": "CA-01",
+      "observable_requirement": "Usuário com alçada visualiza apenas aprovações dentro de seu escopo ou delegadas a ele.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/approvals/RequestDetail.vue",
+          "present": true
+        },
+        {
+          "path": "app/services/jrc_approvals/financial_catalog.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Central de Aprovações",
+      "criterion": "CA-02",
+      "observable_requirement": "Aprovador consegue abrir o pedido/registro de origem antes de decidir.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/approvals/RequestDetail.vue",
+          "present": true
+        },
+        {
+          "path": "app/services/jrc_approvals/financial_catalog.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Central de Aprovações",
+      "criterion": "CA-03",
+      "observable_requirement": "Aprovação é concluída com confirmação e fica registrada no histórico.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/approvals/RequestDetail.vue",
+          "present": true
+        },
+        {
+          "path": "app/services/jrc_approvals/financial_catalog.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Central de Aprovações",
+      "criterion": "CA-04",
+      "observable_requirement": "Rejeição exige motivo e devolve resultado ao solicitante/módulo de origem.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/approvals/RequestDetail.vue",
+          "present": true
+        },
+        {
+          "path": "app/services/jrc_approvals/financial_catalog.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Central de Aprovações",
+      "criterion": "CA-05",
+      "observable_requirement": "Ajuste preserva valor original, registra novo valor e exige observação.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/approvals/RequestDetail.vue",
+          "present": true
+        },
+        {
+          "path": "app/services/jrc_approvals/financial_catalog.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Central de Aprovações",
+      "criterion": "CA-06",
+      "observable_requirement": "Salvar e aprovar executa ajuste + decisão de forma atômica.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/approvals/RequestDetail.vue",
+          "present": true
+        },
+        {
+          "path": "app/services/jrc_approvals/financial_catalog.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Central de Aprovações",
+      "criterion": "CA-07",
+      "observable_requirement": "Administrador cria regra em quatro passos sem código/evento técnico visível.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/approvals/RequestDetail.vue",
+          "present": true
+        },
+        {
+          "path": "app/services/jrc_approvals/financial_catalog.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Central de Aprovações",
+      "criterion": "CA-08",
+      "observable_requirement": "Alçadas não podem ter sobreposição inválida.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/approvals/RequestDetail.vue",
+          "present": true
+        },
+        {
+          "path": "app/services/jrc_approvals/financial_catalog.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Central de Aprovações",
+      "criterion": "CA-09",
+      "observable_requirement": "Simulador usa regras reais mas não cria solicitação nem altera registro.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/approvals/RequestDetail.vue",
+          "present": true
+        },
+        {
+          "path": "app/services/jrc_approvals/financial_catalog.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Central de Aprovações",
+      "criterion": "CA-10",
+      "observable_requirement": "Delegação simples transfere aprovações do titular ao delegado durante período definido.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/approvals/RequestDetail.vue",
+          "present": true
+        },
+        {
+          "path": "app/services/jrc_approvals/financial_catalog.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Central de Aprovações",
+      "criterion": "CA-11",
+      "observable_requirement": "Auditoria registra ator, data/hora, ação, regra/versão e alterações.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/approvals/RequestDetail.vue",
+          "present": true
+        },
+        {
+          "path": "app/services/jrc_approvals/financial_catalog.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Central de Aprovações",
+      "criterion": "CA-12",
+      "observable_requirement": "Duas decisões simultâneas não podem finalizar a mesma solicitação duas vezes.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/approvals/RequestDetail.vue",
+          "present": true
+        },
+        {
+          "path": "app/services/jrc_approvals/financial_catalog.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Central de Aprovações",
+      "criterion": "CA-13",
+      "observable_requirement": "Pausa/edição de regra não altera solicitações já abertas.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/approvals/RequestDetail.vue",
+          "present": true
+        },
+        {
+          "path": "app/services/jrc_approvals/financial_catalog.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Central de Aprovações",
+      "criterion": "CA-14",
+      "observable_requirement": "Permissões e isolamento multiempresa são validados no backend.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/approvals/RequestDetail.vue",
+          "present": true
+        },
+        {
+          "path": "app/services/jrc_approvals/financial_catalog.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Central de Aprovações",
+      "criterion": "CA-15",
+      "observable_requirement": "Interface funciona em desktop com os padrões visuais atuais do JRC Conversas.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/approvals/RequestDetail.vue",
+          "present": true
+        },
+        {
+          "path": "app/services/jrc_approvals/financial_catalog.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Backoffice",
+      "criterion": "WORD-BO-01",
+      "observable_requirement": "Backoffice aparece como módulo principal no menu lateral e não como aba interna do CRM.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeRequest360.vue",
+          "present": true
+        },
+        {
+          "path": "app/models/jrc_crm/backoffice_request.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Backoffice",
+      "criterion": "WORD-BO-02",
+      "observable_requirement": "Rota antiga do CRM redireciona sem quebrar links existentes.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeRequest360.vue",
+          "present": true
+        },
+        {
+          "path": "app/models/jrc_crm/backoffice_request.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Backoffice",
+      "criterion": "WORD-BO-03",
+      "observable_requirement": "Pedido aprovado no CRM pode originar/abrir uma única solicitação operacional de fulfillment, respeitando idempotência.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeRequest360.vue",
+          "present": true
+        },
+        {
+          "path": "app/models/jrc_crm/backoffice_request.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Backoffice",
+      "criterion": "WORD-BO-04",
+      "observable_requirement": "Tela 360 mostra venda, pedido, cliente, contrato, documentos, aprovações, pendências, SLA e histórico.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeRequest360.vue",
+          "present": true
+        },
+        {
+          "path": "app/models/jrc_crm/backoffice_request.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Backoffice",
+      "criterion": "WORD-BO-05",
+      "observable_requirement": "Documentos obrigatórios são derivados de regras configuradas por produto/operação e impedem avanço quando bloqueantes.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeRequest360.vue",
+          "present": true
+        },
+        {
+          "path": "app/models/jrc_crm/backoffice_request.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Backoffice",
+      "criterion": "WORD-BO-06",
+      "observable_requirement": "Upload substituído gera nova versão e preserva histórico.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeRequest360.vue",
+          "present": true
+        },
+        {
+          "path": "app/models/jrc_crm/backoffice_request.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Backoffice",
+      "criterion": "WORD-BO-07",
+      "observable_requirement": "Pré-análise documental persiste resultado e evidências; divergências ficam visíveis ao analista.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeRequest360.vue",
+          "present": true
+        },
+        {
+          "path": "app/models/jrc_crm/backoffice_request.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Backoffice",
+      "criterion": "WORD-BO-08",
+      "observable_requirement": "Aprovação obrigatória pendente bloqueia contrato; decisão da Central de Aprovações é refletida no Backoffice.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeRequest360.vue",
+          "present": true
+        },
+        {
+          "path": "app/models/jrc_crm/backoffice_request.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Backoffice",
+      "criterion": "WORD-BO-09",
+      "observable_requirement": "Contrato obrigatório não assinado bloqueia implantação/provisionamento.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeRequest360.vue",
+          "present": true
+        },
+        {
+          "path": "app/models/jrc_crm/backoffice_request.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Backoffice",
+      "criterion": "WORD-BO-10",
+      "observable_requirement": "Pendências têm tipo, responsável, prazo, bloqueio, status e evidências.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeRequest360.vue",
+          "present": true
+        },
+        {
+          "path": "app/models/jrc_crm/backoffice_request.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Backoffice",
+      "criterion": "WORD-BO-11",
+      "observable_requirement": "SLA pausa/retoma conforme política e exibe tempo restante por etapa.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeRequest360.vue",
+          "present": true
+        },
+        {
+          "path": "app/models/jrc_crm/backoffice_request.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Backoffice",
+      "criterion": "WORD-BO-12",
+      "observable_requirement": "Toda ação relevante gera auditoria com ator e timestamp.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeRequest360.vue",
+          "present": true
+        },
+        {
+          "path": "app/models/jrc_crm/backoffice_request.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Backoffice",
+      "criterion": "WORD-BO-13",
+      "observable_requirement": "Relatórios respeitam permissões e filtros de escopo.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeRequest360.vue",
+          "present": true
+        },
+        {
+          "path": "app/models/jrc_crm/backoffice_request.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Backoffice",
+      "criterion": "WORD-BO-14",
+      "observable_requirement": "Fluxos de Relacionamento/Retenção permanecem fora do Backoffice.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeRequest360.vue",
+          "present": true
+        },
+        {
+          "path": "app/models/jrc_crm/backoffice_request.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Backoffice",
+      "criterion": "WORD-BO-15",
+      "observable_requirement": "Testes automatizados cobrem transições, bloqueios e regressão das APIs atuais.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeRequest360.vue",
+          "present": true
+        },
+        {
+          "path": "app/models/jrc_crm/backoffice_request.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Relacionamento V2/NICO",
+      "criterion": "Cliente saudável",
+      "observable_requirement": "Não gera tarefa repetitiva; monitoramento e score atualizados; contato apenas por cadência autorizada.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/jrcRelationship/ModulePage.vue",
+          "present": true
+        },
+        {
+          "path": "app/policies/jrc_relationship/module_policy.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Relacionamento V2/NICO",
+      "criterion": "Queda de saúde",
+      "observable_requirement": "Sinal explicável; caso priorizado; analista recebe causa e ação; histórico preservado.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/jrcRelationship/ModulePage.vue",
+          "present": true
+        },
+        {
+          "path": "app/policies/jrc_relationship/module_policy.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Relacionamento V2/NICO",
+      "criterion": "NPS detrator",
+      "observable_requirement": "Vincula resposta da pesquisa existente; sugere follow-up; sem duplicar pesquisa ou atendimento.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/jrcRelationship/ModulePage.vue",
+          "present": true
+        },
+        {
+          "path": "app/policies/jrc_relationship/module_policy.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Relacionamento V2/NICO",
+      "criterion": "Analista ausente",
+      "observable_requirement": "Fila redistribuída temporariamente conforme regras; críticos não ficam órfãos.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/jrcRelationship/ModulePage.vue",
+          "present": true
+        },
+        {
+          "path": "app/policies/jrc_relationship/module_policy.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Relacionamento V2/NICO",
+      "criterion": "Novo analista",
+      "observable_requirement": "Capacidade cadastrada sem transferências; simulação mostra antes/depois e impactos.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/jrcRelationship/ModulePage.vue",
+          "present": true
+        },
+        {
+          "path": "app/policies/jrc_relationship/module_policy.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Relacionamento V2/NICO",
+      "criterion": "Remover analista",
+      "observable_requirement": "Bloqueia remoção se houver qualquer vínculo ou compromisso não realocado.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/jrcRelationship/ModulePage.vue",
+          "present": true
+        },
+        {
+          "path": "app/policies/jrc_relationship/module_policy.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Relacionamento V2/NICO",
+      "criterion": "Aprovação pendente",
+      "observable_requirement": "Nenhum cliente muda de responsável até autorização e execução válida.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/jrcRelationship/ModulePage.vue",
+          "present": true
+        },
+        {
+          "path": "app/policies/jrc_relationship/module_policy.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Relacionamento V2/NICO",
+      "criterion": "Execução parcial",
+      "observable_requirement": "Mostra sucesso/erro/pendente por item; retry só nos falhos; conclusão global bloqueada.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/jrcRelationship/ModulePage.vue",
+          "present": true
+        },
+        {
+          "path": "app/policies/jrc_relationship/module_policy.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Relacionamento V2/NICO",
+      "criterion": "Conflito após aprovação",
+      "observable_requirement": "Detecta mudança de vínculo ou capacidade; bloqueia item e exige revisão quando pertinente.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/jrcRelationship/ModulePage.vue",
+          "present": true
+        },
+        {
+          "path": "app/policies/jrc_relationship/module_policy.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Relacionamento V2/NICO",
+      "criterion": "Documentos",
+      "observable_requirement": "Nova versão mantém antiga e histórico; usuário sem acesso não visualiza ou baixa.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/jrcRelationship/ModulePage.vue",
+          "present": true
+        },
+        {
+          "path": "app/policies/jrc_relationship/module_policy.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Relacionamento V2/NICO",
+      "criterion": "Multiempresa",
+      "observable_requirement": "Não vaza dados por tela, API, exportação, jobs, documentos ou pesquisa.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/jrcRelationship/ModulePage.vue",
+          "present": true
+        },
+        {
+          "path": "app/policies/jrc_relationship/module_policy.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Relacionamento V2/NICO",
+      "criterion": "Escala",
+      "observable_requirement": "Paginação e jobs suportam bases crescentes; não criar uma tarefa para cada cliente sem sinal.",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/jrcRelationship/ModulePage.vue",
+          "present": true
+        },
+        {
+          "path": "app/policies/jrc_relationship/module_policy.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Adendo Backoffice",
+      "criterion": "BO-ADENDO-01",
+      "observable_requirement": "Backoffice como modulo independente — Menu/rotas proprios e redirecionamento legado",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/crm/crm.routes.js",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Adendo Backoffice",
+      "criterion": "BO-ADENDO-02",
+      "observable_requirement": "Visao contextual dentro do cliente — Somente solicitacoes/documentos/aprovacoes/contratos/pendencias/historico do cliente autorizado",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/jrcCustomers/CompanyPage.vue",
+          "present": true
+        },
+        {
+          "path": "app/services/jrc_customers/customer360.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Adendo Backoffice",
+      "criterion": "BO-ADENDO-03",
+      "observable_requirement": "Cadastro de requisitos — Documento, informacao, validacao, aprovacao, assinatura, campo cadastral e condicional; por operacao/produto/tipo de cliente",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_crm/backoffice_document_checklist.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Adendo Backoffice",
+      "criterion": "BO-ADENDO-04",
+      "observable_requirement": "Assinantes e poderes — Contato reutilizavel, multiplos assinantes e comprovacao de poderes",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_backoffice/signer_rosters.rb",
+          "present": true
+        },
+        {
+          "path": "app/services/jrc_backoffice/authority_proofs.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Adendo Backoffice",
+      "criterion": "BO-ADENDO-05",
+      "observable_requirement": "Validacao documental — Versoes, historico, motivo, validade, analista e preanalise assistida",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_backoffice/documents.rb",
+          "present": true
+        },
+        {
+          "path": "app/services/jrc_backoffice/document_preanalysis.rb",
+          "present": true
+        },
+        {
+          "path": "app/services/jrc_backoffice/document_safety.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Adendo Backoffice",
+      "criterion": "BO-ADENDO-06",
+      "observable_requirement": "Aprovacoes explicitas — Motivo/politica/cliente/valor/aprovador visiveis; usar Central existente",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeApprovalMirror.vue",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Adendo Backoffice",
+      "criterion": "BO-ADENDO-07",
+      "observable_requirement": "Ordem obrigatoria — Documentacao e aprovacoes antes do contrato quando exigidas",
+      "native_source_references": [
+        {
+          "path": "app/models/jrc_crm/backoffice_request.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Adendo Backoffice",
+      "criterion": "BO-ADENDO-08",
+      "observable_requirement": "Painel Contrato — Gerar, versionar, editar quando permitido, enviar, reenviar, lembrar, cancelar e consultar evidencia na solicitacao",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeContractPanel.vue",
+          "present": true
+        },
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeContractSignatures.vue",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Adendo Backoffice",
+      "criterion": "BO-ADENDO-09",
+      "observable_requirement": "Estados e evidencia de assinatura — Envio, usuario, assinantes, conexao, versao, arquivos finais e estado confiavel",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_backoffice/signatures/evidence_acceptance.rb",
+          "present": true
+        },
+        {
+          "path": "app/services/jrc_backoffice/completion_signature.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Adendo Backoffice",
+      "criterion": "BO-ADENDO-10",
+      "observable_requirement": "Bloqueio de implantacao — Contrato obrigatorio sem evidencia valida deve bloquear implantacao",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_backoffice/signature_release.rb",
+          "present": true
+        },
+        {
+          "path": "app/services/jrc_crm/backoffice_document_checklist.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Adendo Backoffice",
+      "criterion": "BO-ADENDO-11",
+      "observable_requirement": "Central da solicitacao — Protocolo, pedido, cliente, valor, prioridade, dono, etapa, SLA, bloqueios e assinatura",
+      "native_source_references": [
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeRequestSummary.vue",
+          "present": true
+        },
+        {
+          "path": "app/javascript/dashboard/routes/dashboard/crm/views/backoffice/BackofficeRequest360.vue",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Adendo Backoffice",
+      "criterion": "BO-ADENDO-12",
+      "observable_requirement": "Pendencias estruturadas — Tipo, descricao, responsavel, prazo, status, bloqueio, origem e historico",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_backoffice/issues.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    },
+    {
+      "module": "Adendo Backoffice",
+      "criterion": "BO-ADENDO-13",
+      "observable_requirement": "Auditoria e dossie — Antes/depois, ator, instante, versao, envio, aceite e liberacao",
+      "native_source_references": [
+        {
+          "path": "app/services/jrc_backoffice/completion_dossiers.rb",
+          "present": true
+        },
+        {
+          "path": "app/models/jrc_crm/audit_event.rb",
+          "present": true
+        }
+      ],
+      "status": "native_end_to_end_pending",
+      "native_database_verified": false,
+      "Chrome_verified": false,
+      "prior_audits_retained": true,
+      "module_sources_are_not_proof_of_acceptance": true
+    }
+  ],
+  "approved_business": "TRR initial cohort retention and configurable viewer/analyst/supervisor/manager semantics are approved. Missing real mappings or authorities remain unconfigured, not guessed.",
+  "current_evidence": "Native frontend component tests and source/lint/lock checks; no PostgreSQL/Rails or real browser acceptance.",
+  "legacy_runner_do_not_use": ".codex/d-approvals-20261104/backend.py targets a protected original container and database. It was inspected but never executed; do not use it under the current isolation restrictions."
+}

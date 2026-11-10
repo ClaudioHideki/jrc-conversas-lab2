@@ -94,7 +94,7 @@ watch(
     completionError.value = '';
     load();
   },
-  { deep: true, immediate: true, flush: 'sync' }
+  { deep: true, immediate: true }
 );
 onBeforeUnmount(() => {
   disposed = true;
@@ -133,6 +133,7 @@ onBeforeUnmount(() => {
     </div>
     <p
       v-else-if="!state.rows.length"
+      data-testid="calendar-empty-period"
       role="status"
       class="p-6 text-sm text-n-slate-11"
     >
@@ -176,7 +177,9 @@ onBeforeUnmount(() => {
       </section>
     </div>
     <nav
-      v-if="state.meta && !state.loading && !state.error"
+      v-if="
+        state.meta && state.meta.total > 0 && !state.loading && !state.error
+      "
       :aria-label="t('CRM.CALENDAR_ACTIONS.LIST_PAGES')"
       class="flex flex-wrap items-center justify-between gap-3 border-t border-n-weak p-3"
     >

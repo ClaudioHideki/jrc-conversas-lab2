@@ -225,6 +225,7 @@ onBeforeUnmount(() => {
         >{{ t('RELATIONSHIP.LOCAL_ROLES.USER')
         }}<select
           v-model.number="memberID"
+          data-testid="local-role-member"
           :class="inputClass"
           :disabled="loading || failed"
         >
@@ -257,6 +258,7 @@ onBeforeUnmount(() => {
           type="button"
           :class="buttonClass"
           :disabled="page * 25 >= total || loading"
+          data-testid="local-role-next"
           @click="move(1)"
         >
           {{ t('RELATIONSHIP.LOCAL_ROLES.NEXT') }}
@@ -281,6 +283,7 @@ onBeforeUnmount(() => {
         type="button"
         :disabled="!memberID || loading"
         :class="buttonClass"
+        data-testid="local-role-add"
         @click="add"
       >
         {{ t('RELATIONSHIP.LOCAL_ROLES.ADD') }}

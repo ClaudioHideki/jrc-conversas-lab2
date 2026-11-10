@@ -705,6 +705,7 @@
       "REVIEW_APPROVAL": "Revisar aprovação do pedido",
       "DETAIL_NAV": "Informações da solicitação",
       "DETAIL_TABS": {
+        "requirements": "Requisitos",
         "completion": "Final documents",
         "context": "Dados e SLA",
         "documents": "Documentos",

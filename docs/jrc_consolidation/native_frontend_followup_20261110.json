@@ -1,0 +1,311 @@
+{
+  "utc": "2026-11-10T14:00:24.711391+00:00",
+  "parent_checkpoint": "c34631439420c922fab28de7038bf09fd76911aa",
+  "branch": "codex/integracao-ag-20261110-094025",
+  "native_frontend": {
+    "unique_examples": 98,
+    "files": 13,
+    "duplicate_runs_not_added": true,
+    "vue_compiler_files": 28,
+    "lint_files": 49,
+    "lint_errors": 0,
+    "lint_warnings": 459,
+    "dependency_versions_match_lock": 9,
+    "API_transport_in_component_tests_is_doubled": true,
+    "real_browser_acceptance": false
+  },
+  "isolated_Node": {
+    "approved_examples": 229,
+    "approved_pure_Node_suites": 8,
+    "hybrid_Ruby_suite": "blocked, failure retained; not counted as approved"
+  },
+  "additional_fixes": [
+    "TRR authorization metadata clears current and pending results; captured in parent checkpoint.",
+    "Calendar coalesces prop updates before querying, preventing intermediate mixed date windows.",
+    "Calendar refreshes bounded server pages when the native activity collection changes.",
+    "Empty calendar pages preserve the native empty-state hook and omit unusable paging controls.",
+    "Backoffice requirements tab has a real translation instead of a raw key."
+  ],
+  "additional_tests": [
+    "Local role membership: no assignment on opening, no independent grants by preset, inactive member disabled, read-only, paging, stale account response.",
+    "Financial adjustment dialog: bounded configured values, reason, original terms preserved, native choice required to approve, captured revision and denial cleanup.",
+    "Calendar legacy view/filter/paging regression fixtures now use bounded native transport; all scenarios retained."
+  ],
+  "four_Word_and_approved_addendum": "Identity hashes verified; observable criteria retained in native_acceptance_ledger_20261110.json. No reopened TRR/profile question, no real policy values guessed.",
+  "backend_received_Ruby_files_unchanged": 133,
+  "native_Rails_examples": 0,
+  "migrations_prepared": 6,
+  "migrations_executed": 0,
+  "schema_regenerated": false,
+  "CustomRole_registry_runtime_verified": false,
+  "Sofia_and_Backoffice_real_database_Chrome_acceptance": false,
+  "stage_closure": {
+    "A": false,
+    "B": false,
+    "C": false,
+    "D": false,
+    "E": false,
+    "F": false,
+    "G": false
+  },
+  "blocked": "No native Ruby/Bundler/PostgreSQL on Windows. Docker read-only request returned HTTP503; user selected continue without Docker. No further daemon operation attempted.",
+  "old_runner_not_used": "The legacy backend.py uses a protected original app and database and is not permitted for this isolated task.",
+  "build_attempted": false,
+  "original_5379_assets_changed": false,
+  "existing_containers_changed": false,
+  "external_provider_calls": false,
+  "real_grants_applied": false,
+  "cleanup": false,
+  "push_or_deploy": false,
+  "evidence": {
+    "frontend-unique-results.json": {
+      "sha256": "24113878cde24a7c9dc9fbc0f7fdfa4257c1810ef124c3fff3b2a9506f69b1e7",
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\integracao-nativa-ag-20261110-094025\\CONTROLE\\frontend-unique-results.json"
+    },
+    "roles-components.json": {
+      "sha256": "a49552fb205ad76d0c2ed47befadad65f8948ff496b77edf180c911f93f44ea1",
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\integracao-nativa-ag-20261110-094025\\CONTROLE\\roles-components.json"
+    },
+    "calendar-refresh-corrected.json": {
+      "sha256": "cff7ee0a9e0d55925160a0936dde975c2e4d7b2f457421cfad2e93ceb175e21b",
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\integracao-nativa-ag-20261110-094025\\CONTROLE\\calendar-refresh-corrected.json"
+    },
+    "backoffice-native-regression.json": {
+      "sha256": "3c5ca5a857234690ba62f69b2f0a129abd21caa994ce983c772ef3108785b812",
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\integracao-nativa-ag-20261110-094025\\CONTROLE\\backoffice-native-regression.json"
+    },
+    "final-component-regressions.json": {
+      "sha256": "00a43957bfab27d596a608534d7d67b833f148e1bcdc171fa8a5bacec17f73db",
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\integracao-nativa-ag-20261110-094025\\CONTROLE\\final-component-regressions.json"
+    },
+    "financial-render-regression.json": {
+      "sha256": "bee84ec4aafd3e7615dabc683c505e28ec96f79dd3da1276e46096a87c6dcae4",
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\integracao-nativa-ag-20261110-094025\\CONTROLE\\financial-render-regression.json"
+    },
+    "lint-final-verified.json": {
+      "sha256": "41942bc9bfde39793c3c1ac9b89d59e1ba88e2ec56608d86521cc9feefbbdd76",
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\integracao-nativa-ag-20261110-094025\\CONTROLE\\lint-final-verified.json"
+    },
+    "sfc-candidate-final.json": {
+      "sha256": "c08868a2f232e5bbfe5880667e90dc95c8993fa93c4645063a526569f38a4d01",
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\integracao-nativa-ag-20261110-094025\\CONTROLE\\sfc-candidate-final.json"
+    },
+    "node-only-regressions.json": {
+      "sha256": "a7c754a241df6687b0a8b63caa75e8c9c1a51ce0889b7c49dd82703344483321",
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\integracao-nativa-ag-20261110-094025\\CONTROLE\\node-only-regressions.json"
+    },
+    "locked-dependency-versions.json": {
+      "sha256": "fde483013ebf4340f30ccc8b40b85064d47bc9ba919c803ddaa72203251a1171",
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\integracao-nativa-ag-20261110-094025\\CONTROLE\\locked-dependency-versions.json"
+    },
+    "backend-payload-integrity.json": {
+      "sha256": "15dc30131d33ac1e74a50b8d3f2f6161f17b275f7ad0d86681bd36922f931e8b",
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\integracao-nativa-ag-20261110-094025\\CONTROLE\\backend-payload-integrity.json"
+    },
+    "native-preflight-after-integration.json": {
+      "sha256": "abcf9edbdf4426e3515a2d106acc949c05ac65630732ad913f7d635011c14350",
+      "path": "C:\\Users\\DEV03\\Documents\\Jrc\\integracao-nativa-ag-20261110-094025\\CONTROLE\\native-preflight-after-integration.json"
+    }
+  },
+  "resource_tasks": [
+    {
+      "label": "backoffice-native-regression-resources.json",
+      "status": "passed",
+      "disk_min": 4237180928,
+      "ram_min": 1926995968
+    },
+    {
+      "label": "calendar-contract-format-resources.json",
+      "status": "passed",
+      "disk_min": 4239208448,
+      "ram_min": 1749286912
+    },
+    {
+      "label": "calendar-native-regression-resources.json",
+      "status": "failed",
+      "disk_min": 4243972096,
+      "ram_min": 1289297920
+    },
+    {
+      "label": "calendar-refresh-corrected-resources.json",
+      "status": "passed",
+      "disk_min": 4239777792,
+      "ram_min": 1316352000
+    },
+    {
+      "label": "calendar-refresh-format-resources.json",
+      "status": "passed",
+      "disk_min": 4235644928,
+      "ram_min": 2241331200
+    },
+    {
+      "label": "calendar-server-contract-resources.json",
+      "status": "failed",
+      "disk_min": 4238946304,
+      "ram_min": 929370112
+    },
+    {
+      "label": "dependency-lock-check-resources.json",
+      "status": "failed",
+      "disk_min": 4237426688,
+      "ram_min": 2833756160
+    },
+    {
+      "label": "final-component-regressions-resources.json",
+      "status": "passed",
+      "disk_min": 5394276352,
+      "ram_min": 916590592
+    },
+    {
+      "label": "final-test-style-resources.json",
+      "status": "passed",
+      "disk_min": 5411573760,
+      "ram_min": 1514061824
+    },
+    {
+      "label": "financial-format-resources.json",
+      "status": "passed",
+      "disk_min": 5389979648,
+      "ram_min": 1610493952
+    },
+    {
+      "label": "financial-render-regression-resources.json",
+      "status": "passed",
+      "disk_min": 5408346112,
+      "ram_min": 986357760
+    },
+    {
+      "label": "format-checkpoint-resources.json",
+      "status": "passed",
+      "disk_min": 4270620672,
+      "ram_min": 1398169600
+    },
+    {
+      "label": "frontend-format-final-resources.json",
+      "status": "passed",
+      "disk_min": 4289441792,
+      "ram_min": 1436262400
+    },
+    {
+      "label": "frontend-normalize-resources.json",
+      "status": "passed",
+      "disk_min": 4264374272,
+      "ram_min": 1322602496
+    },
+    {
+      "label": "lint-candidate-final-resources.json",
+      "status": "failed",
+      "disk_min": 5394698240,
+      "ram_min": 1360629760
+    },
+    {
+      "label": "lint-checkpoint-resources.json",
+      "status": "passed",
+      "disk_min": 4267474944,
+      "ram_min": 1172344832
+    },
+    {
+      "label": "lint-corrected-resources.json",
+      "status": "failed",
+      "disk_min": 4277329920,
+      "ram_min": 1277849600
+    },
+    {
+      "label": "lint-final-verified-resources.json",
+      "status": "passed",
+      "disk_min": 5406908416,
+      "ram_min": 1985957888
+    },
+    {
+      "label": "lint-format-fix-resources.json",
+      "status": "interrupted",
+      "disk_min": 4269879296,
+      "ram_min": 755335168
+    },
+    {
+      "label": "lint-initial-resources.json",
+      "status": "failed",
+      "disk_min": 4273532928,
+      "ram_min": 1082056704
+    },
+    {
+      "label": "lint-normalized-resources.json",
+      "status": "failed",
+      "disk_min": 4260683776,
+      "ram_min": 1065709568
+    },
+    {
+      "label": "locked-dependency-versions-resources.json",
+      "status": "passed",
+      "disk_min": 4246233088,
+      "ram_min": 2223382528
+    },
+    {
+      "label": "node-only-regressions-resources.json",
+      "status": "passed",
+      "disk_min": 4270645248,
+      "ram_min": 1795317760
+    },
+    {
+      "label": "node-state-regressions-resources.json",
+      "status": "failed",
+      "disk_min": 4280586240,
+      "ram_min": 1807114240
+    },
+    {
+      "label": "retention-component-before-resources.json",
+      "status": "failed",
+      "disk_min": 4260589568,
+      "ram_min": 1456336896
+    },
+    {
+      "label": "roles-components-resources.json",
+      "status": "passed",
+      "disk_min": 4239667200,
+      "ram_min": 1455849472
+    },
+    {
+      "label": "roles-format-resources.json",
+      "status": "passed",
+      "disk_min": 4240596992,
+      "ram_min": 1470267392
+    },
+    {
+      "label": "sfc-candidate-final-resources.json",
+      "status": "passed",
+      "disk_min": 5397843968,
+      "ram_min": 1786642432
+    },
+    {
+      "label": "sfc-initial-resources.json",
+      "status": "passed",
+      "disk_min": 4281282560,
+      "ram_min": 1576910848
+    },
+    {
+      "label": "vitest-components-corrected-resources.json",
+      "status": "passed",
+      "disk_min": 4286656512,
+      "ram_min": 1323589632
+    },
+    {
+      "label": "vitest-received-elevated-resources.json",
+      "status": "failed",
+      "disk_min": 4264058880,
+      "ram_min": 1281048576
+    },
+    {
+      "label": "vitest-received-fsallow-resources.json",
+      "status": "passed",
+      "disk_min": 4264185856,
+      "ram_min": 1055694848
+    },
+    {
+      "label": "vitest-received-initial-resources.json",
+      "status": "failed",
+      "disk_min": 4272930816,
+      "ram_min": 1882263552
+    }
+  ],
+  "free_disk_now": 5411815424
+}
