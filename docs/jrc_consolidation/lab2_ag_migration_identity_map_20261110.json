@@ -1,0 +1,24 @@
+{
+  "main_sha": "d8a83b824b11cc68ddbbce7c79681f368051fb70",
+  "ag_original_sha": "647fda5177a653b4a08b5b80679e61fa399f1919",
+  "scope": "New, unpublished consolidated candidate only. Original repositories, commits, SQL payload filenames, six cumulative migration identities and databases remain intact.",
+  "supported_origin_pending_native_proof": "Fresh install and pinned LAB2 main upgrade",
+  "legacy_ag_databases": "Fail closed until a separate explicit schema/history admission proves existing deliveries and main migrations. Numeric schema_migrations entries are not enough. No automatic ledger rewrite or if_not_exists adoption.",
+  "records": [
+    {
+      "original_path": "db/migrate/20261102090000_create_backoffice_signature_deliveries.rb",
+      "candidate_path": "db/migrate/20261102090100_create_backoffice_signature_deliveries.rb",
+      "original_canonical_sha256": "4dddd2b0a744929f962df04f1eb36795ad32f1564b03547fdd1d67846f5d3f5f",
+      "class_and_SQL_preserved_except_explicit_origin_guard": true,
+      "main_identity_untouched": true
+    },
+    {
+      "original_path": "db/migrate/20261102100000_allow_signature_reconciliation_observations.rb",
+      "candidate_path": "db/migrate/20261102100100_allow_signature_reconciliation_observations.rb",
+      "original_canonical_sha256": "9b0d5245ba42e50a4608811e79b6b21d9172b822ddc6e790d465893c364ff8f9",
+      "class_and_SQL_preserved_except_explicit_origin_guard": true,
+      "main_identity_untouched": true
+    }
+  ],
+  "native_verified": false
+}

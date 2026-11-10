@@ -57,7 +57,6 @@ jobs:
       BUNDLE_FROZEN: 'true'
       SCHEMA: /tmp/ag-schema.rb
       JRC_AG_FIXTURE_RECEIPT: /tmp/ag-fixture-receipt.json
-      JRC_AG_POSTGRES_SERVICE_ID: ${{ job.services.postgres.id }}
       JRC_SD_CONCURRENCY: '1'
       JRC_REVIEWED_CONCURRENCY: '1'
       DB_POOL_SIZE: '10'
@@ -69,11 +68,14 @@ jobs:
           fetch-depth: 0
       - name: Prove disposable service; legacy spec alias exists only on this ephemeral runner
         shell: bash
+        env:
+          JRC_AG_POSTGRES_SERVICE_ID: ${{ job.services.postgres.id }}
         run: |
           test "$GITHUB_ACTIONS" = true
           test "$RUNNER_ENVIRONMENT" = github-hosted
           docker inspect "$JRC_AG_POSTGRES_SERVICE_ID" --format '{{.Id}} {{.Config.Image}}'
           test "$(docker inspect "$JRC_AG_POSTGRES_SERVICE_ID" --format '{{json .HostConfig.Binds}}')" = null
+          echo "JRC_AG_POSTGRES_SERVICE_ID=$JRC_AG_POSTGRES_SERVICE_ID" >> "$GITHUB_ENV"
           echo '127.0.0.1 jrc-rel-v2-pg-20261101' | sudo tee -a /etc/hosts >/dev/null
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends libpq-dev libvips-dev imagemagick poppler-utils tesseract-ocr tesseract-ocr-por tesseract-ocr-eng

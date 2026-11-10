@@ -1,6 +1,6 @@
 require 'rails_helper'
 require 'timeout'
-require Rails.root.join('db/migrate/20261102100000_allow_signature_reconciliation_observations')
+require Rails.root.join('db/migrate/20261102100100_allow_signature_reconciliation_observations')
 
 # Committed rows, actual locks/HMAC and an independently visible read lease.
 # Every DocuSign/AV reply is simulated; this is not external homologation.

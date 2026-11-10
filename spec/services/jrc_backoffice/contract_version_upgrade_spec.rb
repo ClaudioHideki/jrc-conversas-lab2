@@ -3,7 +3,7 @@ require Rails.root.join('db/migrate/20261102050000_create_backoffice_contract_ve
 require Rails.root.join('db/migrate/20261102060000_create_backoffice_document_scans')
 require Rails.root.join('db/migrate/20261102070000_create_backoffice_signer_rosters')
 require Rails.root.join('db/migrate/20261102080000_create_backoffice_authority_proposals')
-require Rails.root.join('db/migrate/20261102090000_create_backoffice_signature_deliveries')
+require Rails.root.join('db/migrate/20261102090100_create_backoffice_signature_deliveries')
 
 RSpec.describe JrcBackoffice::ContractVersion do
   let(:account) { create(:account) }

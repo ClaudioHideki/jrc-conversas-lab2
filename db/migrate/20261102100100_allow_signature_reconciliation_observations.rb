@@ -5,6 +5,8 @@ class AllowSignatureReconciliationObservations < ActiveRecord::Migration[7.1]
   OBSERVATIONS = %w[reconciliation_started reconciliation_finished].freeze
 
   def up
+    raise ActiveRecord::MigrationError, 'Consolidated LAB2 main history required; legacy A-G databases need explicit admission' unless table_exists?(:jrc_human_assignment_policy_events)
+
     replace_constraint(ORIGINAL + OBSERVATIONS)
   end
 

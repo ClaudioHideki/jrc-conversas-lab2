@@ -1,5 +1,8 @@
 class CreateBackofficeSignatureDeliveries < ActiveRecord::Migration[7.1]
   def up
+    raise ActiveRecord::MigrationError, 'Consolidated LAB2 main history required; legacy A-G databases need explicit admission' unless table_exists?(:jrc_broker_webhook_obligations)
+    raise ActiveRecord::MigrationError, 'Existing A-G signature history requires explicit admission, never automatic recreation' if table_exists?(:jrc_backoffice_signature_deliveries)
+
     add_index :jrc_backoffice_authority_proposals, %i[account_id contract_id backoffice_request_id signer_roster_id contract_version_id id],
               unique: true, name: 'bo_authority_exact_origin'
     create_deliveries

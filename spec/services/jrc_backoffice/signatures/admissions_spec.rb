@@ -1,5 +1,5 @@
 require 'rails_helper'
-require Rails.root.join('db/migrate/20261102090000_create_backoffice_signature_deliveries')
+require Rails.root.join('db/migrate/20261102090100_create_backoffice_signature_deliveries')
 
 RSpec.describe JrcBackoffice::Signatures::Admissions, :approval_core, :authority_core do
   let(:account) { create(:account) }

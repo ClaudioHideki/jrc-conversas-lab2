@@ -1,6 +1,6 @@
 require 'rails_helper'
 require Rails.root.join('db/migrate/20261102040000_pin_signature_provider_connections')
-require Rails.root.join('db/migrate/20261102090000_create_backoffice_signature_deliveries')
+require Rails.root.join('db/migrate/20261102090100_create_backoffice_signature_deliveries')
 
 RSpec.describe JrcBackoffice::SignatureConnection do
   it 'backfills the existing connection and known notification revision without changing native data or old ciphertext' do

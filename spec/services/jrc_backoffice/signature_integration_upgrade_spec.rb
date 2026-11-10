@@ -2,7 +2,7 @@ require 'rails_helper'
 require Rails.root.join('db/migrate/20261102010000_create_backoffice_signature_integrations')
 require Rails.root.join('db/migrate/20261102020000_create_backoffice_signature_notifications')
 require Rails.root.join('db/migrate/20261102040000_pin_signature_provider_connections')
-require Rails.root.join('db/migrate/20261102090000_create_backoffice_signature_deliveries')
+require Rails.root.join('db/migrate/20261102090100_create_backoffice_signature_deliveries')
 
 RSpec.describe JrcBackoffice::SignatureIntegration do
   it 'reverses and reapplies the isolated signature tables while preserving native account and conversation data' do
