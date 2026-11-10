@@ -40,8 +40,8 @@ when 'load_main'
   connection.execute('DELETE FROM schema_migrations')
   versions.uniq.each { |value| connection.execute("INSERT INTO schema_migrations(version) VALUES (#{connection.quote(value)})") }
   id = connection.select_value("INSERT INTO accounts(name, created_at, updated_at) VALUES ('SYNTHETIC A-G upgrade receipt', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING id")
-  row = connection.select_one("SELECT * FROM accounts WHERE id = #{Integer(id)}")
-  File.write(marker_path, JSON.generate(account_id: id, digest: Digest::SHA256.hexdigest(JSON.generate(row)), main_sha: base))
+  original_account_row = connection.select_one("SELECT * FROM accounts WHERE id = #{Integer(id)}")
+  File.write(marker_path, JSON.generate(account_id: id, digest: Digest::SHA256.hexdigest(JSON.generate(original_account_row)), main_sha: base))
 when 'validate_constraints'
   # Main deliberately defers some validations on installed data. Prove every
   # constraint against our synthetic fixture instead of suppressing that gate.
@@ -132,8 +132,8 @@ when 'verify'
 
   if File.exist?(marker_path)
     receipt = JSON.parse(File.read(marker_path))
-    row = connection.select_one("SELECT * FROM accounts WHERE id = #{Integer(receipt.fetch('account_id'))}")
-    raise 'Synthetic existing row changed during upgrade' unless Digest::SHA256.hexdigest(JSON.generate(row)) == receipt.fetch('digest')
+    preserved_account_row = connection.select_one("SELECT * FROM accounts WHERE id = #{Integer(receipt.fetch('account_id'))}")
+    raise 'Synthetic existing row changed during upgrade' unless Digest::SHA256.hexdigest(JSON.generate(preserved_account_row)) == receipt.fetch('digest')
   end
   functions = %w[jrc_bo_requirement_guard jrc_rel_history_receipt_guard jrc_bo_document_validity_guard jrc_rel_retention_immutable jrc_rel_management_guard]
   actual = connection.select_values("SELECT proname FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public'")

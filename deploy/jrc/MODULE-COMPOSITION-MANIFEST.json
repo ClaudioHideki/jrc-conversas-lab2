@@ -641,8 +641,8 @@
     {
       "path": "app/services/jrc_flows/ownership_effects.rb",
       "baseSha256": null,
-      "sha256": "1387de964eb5ba79c03f55e7bbf65f21d07f7d2c9585a46faf8b0bc76e2f3698",
-      "bytes": 5605
+      "sha256": "d2f14e0581b1dbdf7ec75608b40c579a4813ce0a6aec418f2632b1b37004deeb",
+      "bytes": 5802
     },
     {
       "path": "app/services/jrc_flows/ownership_entrypoints.rb",
@@ -809,7 +809,7 @@
     {
       "path": "config/jrc_flow_ownership_guards.json",
       "baseSha256": null,
-      "sha256": "d9579df7ad014f07939b8460b3fb261da11451b0abb111d1f79bee3100678e7d",
+      "sha256": "59458f6c0db6dc191f42354b10e233554897363c4bcdc71fffe2606c05058a9a",
       "bytes": 11718
     },
     {

@@ -30,7 +30,7 @@ RSpec.describe 'Relationship reviewed preview and manual attendance endpoints', 
     expect do
       post "#{url}/playbook_preview", params: { assignment_id: assignment.id, source_key: 'preview-request', playbook: book }, headers: headers,
                                       as: :json
-    end.not_to change { [JrcRelationship::Playbook.count, JrcRelationship::PlaybookExecution.count, JrcRelationship::Action.count] }
+    end.not_to(change { [JrcRelationship::Playbook.count, JrcRelationship::PlaybookExecution.count, JrcRelationship::Action.count] })
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body).to include('state' => 'preview', 'matched' => true, 'active' => false)
     expect(response.parsed_body['steps'].first).to include('kind' => 'action', 'state' => 'planned')

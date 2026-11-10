@@ -1,0 +1,30 @@
+{
+  "date": "2026-11-10",
+  "source_reviewed": "1175943f9789558afa2d7c109a9a80271e329e03",
+  "projects_run": 42900640360,
+  "failed_job": 130125458903,
+  "findings": {
+    "ruby_lint": 26,
+    "native_main": {
+      "examples": 1256,
+      "failures": 0,
+      "pending": 1
+    },
+    "native_general_concurrency": {
+      "examples": 23,
+      "failures": 0,
+      "pending": 3
+    },
+    "dedicated_concurrency": "Three guarded examples also executed in their required named databases; generic occurrences were skipped duplicates.",
+    "MFA": "Native encryption variables absent; native MFA test was skipped."
+  },
+  "changes": {
+    "lint": "Parentheses preserve arithmetic order; unused locals and ambiguous layout corrected; no approved financial/TRR formula changed.",
+    "flow_unwind": "Ensure records UNKNOWN/CANCELED on an unconfirmed dispatch and propagates interruptions. Added control-flow regressions for StandardError/Interrupt/SystemExit and pre-dispatch rejection. No provider operation executed.",
+    "CI": "Full increment lint moved ahead of native database matrix. Synthetic encryption keys only in disposable CI. Guarded concurrent specs remain in dedicated database steps with JSON and strict positive/no-failure/no-pending gates."
+  },
+  "validation_status": "Pending current-SHA CI; prior failures and partial results retained.",
+  "video_exclusion": "User explicitly selected committed updates only; unfinished PlugNMeet workspace is unchanged.",
+  "image_publication": "Still blocked until all required current-SHA gates pass.",
+  "production_changed": false
+}

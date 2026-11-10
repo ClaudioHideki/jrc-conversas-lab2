@@ -45,7 +45,7 @@ RSpec.describe 'Consolidated employee intake', type: :request do
     expect do
       post "#{base}/tickets", headers: headers, params: input, as: :json
       expect(response).to have_http_status(:created)
-    end.not_to change { [JrcServiceDesk::Ticket.count, JrcServiceDesk::TicketEvent.count] }
+    end.not_to(change { [JrcServiceDesk::Ticket.count, JrcServiceDesk::TicketEvent.count] })
   end
 
   it 'rejects caller-supplied requester or assignee instead of bypassing the fixed destinations' do

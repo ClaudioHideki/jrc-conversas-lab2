@@ -105,7 +105,8 @@ module JrcCrm
         snap = CommercialFinancials.symbolize(raw[:snapshot] || {})
         normalized = if @kind == :proposal
                        CommercialFinancials.new(attributes: @financials, items: []).normalize_item(raw)
-                     else raw
+                     else
+                       raw
                      end
         name = raw[:name] || raw[:name_snapshot] || 'Item'
         description = raw[:description_snapshot] || snap[:description]

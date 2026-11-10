@@ -31,7 +31,6 @@ class JrcRelationship::RetentionReport
         next result('scope_too_large', context, start_date, end_date)
       end
       cohort = opening.select { |row| historical_visible?(context, row, group) && JrcRelationship::RetentionPolicy.eligible?(row, rule) != false }
-      ids = cohort.map { |row| row.fetch('assignment_id') }
       complete_access = cohort_authorized?(context, cohort)
       data = JrcRelationship::RetentionMetric.call(opening: cohort, closing: closing, policy: rule, complete: true, authorized: complete_access)
       metadata(context, start_date, end_date).merge(data).merge(policy_version: context.configuration.version,

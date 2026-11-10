@@ -4,7 +4,7 @@ module JrcCrm
       @activity = activity
     end
 
-    def as_json(options = {})
+    def as_json(_options = {})
       {
         id: @activity.id,
         activity_type: @activity.activity_type,

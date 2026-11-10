@@ -4,7 +4,7 @@ module JrcCrm
     # item descriptions; tables repeat their header across page boundaries.
     class Layout
       LEFT = 44.0
-      WIDTH = Document::WIDTH - LEFT * 2
+      WIDTH = Document::WIDTH - (LEFT * 2)
       BOTTOM = 76.0
       TOP = 722.0
       BLUE = [0.05, 0.27, 0.53].freeze
@@ -145,7 +145,7 @@ module JrcCrm
           FontMetrics.wrap(value.to_s, width: widths[i] - 14, size: size)
         end
         remaining = lines.map(&:length).max || 1
-        full_height = [remaining * leading + padding, 31].max
+        full_height = [(remaining * leading) + padding, 31].max
         fresh_height = TOP - BOTTOM - (@table_header ? 27 : 0)
         if full_height <= fresh_height && @y - full_height < BOTTOM
           new_page
@@ -160,13 +160,13 @@ module JrcCrm
             fit = ((@y - BOTTOM - padding) / leading).floor
           end
           count = [remaining, fit].min
-          height = [count * leading + padding, 31].max
+          height = [(count * leading) + padding, 31].max
           @page.fill_rect(LEFT, @y - height, WIDTH, height, stripe ? PALE : WHITE)
           x = LEFT
           values.each_index do |column|
             chunk = lines[column].slice(offset, count) || []
             chunk.each_with_index do |value, line|
-              @page.text(x + 7, @y - 15 - line * leading, value, size: size, color: TEXT)
+              @page.text(x + 7, @y - 15 - (line * leading), value, size: size, color: TEXT)
             end
             x += widths[column]
           end

@@ -80,11 +80,11 @@ class PortfolioHistoryCaptureTest < Minitest::Test
   end
   def test_before_private_owner_is_not_replaced_by_current_owner
     @event.from_value={'owner_id'=>7};row=capture
-    assert_equal [7,8],row['boundaries'].map{|r|r['owner_id']}
+    assert_equal [7,8],(row['boundaries'].map{|r|r['owner_id']})
   end
   def test_removed_customers_are_in_historic_authorization_set
     @event.metadata={'action'=>'portfolio_group_customers_updated'};@event.from_value={'customers'=>[[9,true]]};@event.to_value={'customers'=>[[9,false]],'reason'=>'Removed'}
-    assert_equal [7,9],capture['origins'].map{|r|r['id']}
+    assert_equal [7,9],(capture['origins'].map{|r|r['id']})
   end
   def test_unresolved_assignment_cannot_be_silently_omitted
     @event.from_value={'customers'=>[[99,true]]};assert_raises(ActiveRecord::RecordNotFound){capture}

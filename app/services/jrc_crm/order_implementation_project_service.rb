@@ -93,7 +93,7 @@ module JrcCrm
 
     def due_on
       parsed = Date.iso8601(snapshot[:activation_date].to_s) if snapshot[:activation_date].present?
-      parsed || Date.current + [snapshot[:activation_days].to_i, 30].max
+      parsed || (Date.current + [snapshot[:activation_days].to_i, 30].max)
     rescue ArgumentError
       Date.current + 30
     end

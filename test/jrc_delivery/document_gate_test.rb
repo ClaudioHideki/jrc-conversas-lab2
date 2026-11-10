@@ -8,7 +8,10 @@ module JrcBackoffice
     class Blocked < StandardError; end
   end
   class Documents
-    def initialize(request:, actor:); @request = request; end
+    def initialize(request:, actor:)
+      @request = request
+      _actor = actor
+    end
     def requirements; @request.test_requirements; end
   end
   class DocumentSafety

@@ -42,13 +42,13 @@ class JrcRelationship::CustomerSignals
     observations = {
       'sentiment' => sentiment.except(:source_ids),
       'adoption' => JrcRelationship::AdoptionMetric.call(goals: goals, metric: rules['adoption_metric']),
-      'relationship' => observation(days, [100 - days * 100.0 / rules['no_contact_days'], 0].max, 'Customer360 last interaction / assignment date'),
+      'relationship' => observation(days, [100 - (days * 100.0 / rules['no_contact_days']), 0].max, 'Customer360 last interaction / assignment date'),
       'service_desk' => service_desk_observation(overview, critical),
       'finance' => observation(invoices.sum(:balance_cents), overview[:capabilities][:crm] ? (invoices.exists? ? rules['overdue_finance_score'] : 100) : nil, 'Authorized customer invoices; positive overdue balance'),
       'satisfaction' => satisfaction_observation(ratings),
       'contract' => observation(renewal_on, renewal_on ? [((renewal_on - Date.current).to_i * 100.0 / rules['renewal_days']).clamp(0, 100), 100].min : nil, 'Authorized active contract ends_on'),
-      'projects' => observation({ delayed: project_late, delayed_tasks: late_tasks }, overview[:capabilities][:projects] ? [100 - project_late * rules['project_penalty'] - late_tasks * rules['task_penalty'], 0].max : nil, 'Authorized Projects/Tasks due_on'),
-      'engagement' => observation(overview[:last_conversation_at], overview[:last_conversation_at] ? [100 - (Time.current - Time.iso8601(overview[:last_conversation_at])) / 1.day * 100 / rules['no_contact_days'], 0].max : nil, 'Authorized public conversation messages')
+      'projects' => observation({ delayed: project_late, delayed_tasks: late_tasks }, overview[:capabilities][:projects] ? [100 - (project_late * rules['project_penalty']) - (late_tasks * rules['task_penalty']), 0].max : nil, 'Authorized Projects/Tasks due_on'),
+      'engagement' => observation(overview[:last_conversation_at], overview[:last_conversation_at] ? [100 - ((Time.current - Time.iso8601(overview[:last_conversation_at])) / 1.day * 100 / rules['no_contact_days']), 0].max : nil, 'Authorized public conversation messages')
     }
     health = JrcRelationship::HealthScore.call(observations: observations, weights: context.configuration(assignment).effective_weights, rules: rules)
     product_history_sources = []
@@ -154,7 +154,7 @@ class JrcRelationship::CustomerSignals
 
   def service_desk_observation(overview, critical)
     breached = overview[:sla_breached]
-    normalized = [100 - critical * rules['ticket_penalty'] - breached * rules['sla_penalty'], 0].max if overview[:capabilities][:service_desk_sla]
+    normalized = [100 - (critical * rules['ticket_penalty']) - (breached * rules['sla_penalty']), 0].max if overview[:capabilities][:service_desk_sla]
     observation({ critical: critical, breached: breached }, normalized,
                 'Authorized customer/SLA TicketPolicy intersection and native calendar ClockProjection; missing SLA access is unavailable')
   end

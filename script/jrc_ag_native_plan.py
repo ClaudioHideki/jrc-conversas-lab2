@@ -28,6 +28,7 @@ EXTRA_SPECS = [
     'spec/services/jrc_nico/context_builder_spec.rb',
     'spec/services/jrc_nico/domain_actions_spec.rb',
     'spec/services/jrc_flows/ownership_identity_spec.rb',
+    'spec/services/jrc_flows/ownership_effects_spec.rb',
     'spec/requests/api/v1/accounts/jrc_operations/project_individual_permissions_spec.rb',
 ]
 
