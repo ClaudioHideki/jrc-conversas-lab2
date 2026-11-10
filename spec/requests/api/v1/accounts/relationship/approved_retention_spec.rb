@@ -3,6 +3,7 @@ require 'rails_helper'
 # Prepared native HTTP/PostgreSQL acceptance. NOT executed in the export environment.
 # Historical facts below are explicitly synthetic, not a production backfill.
 RSpec.describe 'Approved TRR historical cohort', type: :request do
+  self.use_transactional_tests = false
   let(:account) { create(:account) }
   let(:manager) { create(:user, account: account, role: :administrator) }
   let(:headers) { manager.create_new_auth_token }
@@ -10,7 +11,14 @@ RSpec.describe 'Approved TRR historical cohort', type: :request do
   let(:context) { JrcRelationship::Context.new(account.account_users.find_by!(user: manager)) }
   let(:mapping) { { 'eligible_statuses' => ['active'], 'contact_mode' => 'relationship_status', 'target_percent' => 90 } }
   let(:assignment) { JrcRelationship::Assignment.create!(account: account, contact: create(:contact, account: account), owner: manager, status: 'active') }
-  before { account.enable_features!('jrc_customer_master', 'jrc_relationship', 'jrc_crm') }
+  before do
+    config = ActiveRecord::Base.connection_db_config
+    owned = Rails.env.test? && config.adapter == 'postgresql' && config.database == 'jrc_ag_retention_native_test'
+    owned &&= ActiveRecord::Base.connection.current_database == config.database && !ActiveRecord::Base.connection.transaction_open?
+    raise 'Committed TRR fixtures require their exclusive synthetic PostgreSQL database' unless owned
+
+    account.enable_features!('jrc_customer_master', 'jrc_relationship', 'jrc_crm')
+  end
 
   def configure
     JrcRelationship::Configuration.create!(account: account, scope_key: 'account', rules: { 'retention_policy' => mapping })

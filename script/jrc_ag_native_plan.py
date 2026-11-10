@@ -17,6 +17,7 @@ DATABASES = [
     'jrc_rel_v2_candidate_test', 'jrc_four_domains_schema_admission_test',
     'jrc_rel_sd_candidate_test', 'jrc_jornada_candidate_test',
     'jrc_four_domains_schema_authority_test', 'jrc_four_domains_schema_test',
+    'jrc_ag_retention_native_test',
 ]
 
 

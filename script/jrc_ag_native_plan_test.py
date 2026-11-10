@@ -27,6 +27,10 @@ class NativePlanGuardsTest(unittest.TestCase):
         self.assertEqual(len(actual), len(set(actual)))
         self.assertEqual(set(actual), expected)
 
+    def test_repeatable_read_retention_api_uses_committed_fixtures_in_its_own_database(self):
+        self.assertIn('spec/requests/api/v1/accounts/relationship/approved_retention_spec.rb',
+                      plan()['jrc_ag_retention_native_test'])
+
 
 if __name__ == '__main__':
     unittest.main()

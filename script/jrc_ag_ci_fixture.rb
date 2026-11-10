@@ -7,7 +7,7 @@ require 'tempfile'
 
 base = 'd8a83b824b11cc68ddbbce7c79681f368051fb70'
 databases = %w[jrc_rel_v2_candidate_test jrc_four_domains_schema_admission_test jrc_rel_sd_candidate_test jrc_jornada_candidate_test
-               jrc_four_domains_schema_authority_test jrc_four_domains_schema_test]
+               jrc_four_domains_schema_authority_test jrc_four_domains_schema_test jrc_ag_retention_native_test]
 config = ActiveRecord::Base.connection_db_config
 owned = ENV['GITHUB_ACTIONS'] == 'true' && ENV['RUNNER_ENVIRONMENT'] == 'github-hosted' &&
         ENV.fetch('GITHUB_RUN_ID', '').match?(/\A[0-9]+\z/) && ENV.fetch('JRC_AG_POSTGRES_SERVICE_ID', '').match?(/\A[a-f0-9]{12,64}\z/)
@@ -59,7 +59,7 @@ when 'validate_constraints'
   puts JSON.generate(synthetic_constraints_actually_validated: constraints.length)
 when 'verify'
   versions = connection.select_values('SELECT version FROM schema_migrations')
-  expected = %w[20261109190000 20261109191000 20261109200000 20261109210000 20261109211000 20261109212000]
+  expected = %w[20261109190000 20261109191000 20261109200000 20261109210000 20261109211000 20261109212000 20261110190000]
   raise 'Cumulative migrations missing' unless (expected - versions).empty?
 
   pending = ActiveRecord::MigrationContext.new(Rails.root.join('db/migrate')).needs_migration?

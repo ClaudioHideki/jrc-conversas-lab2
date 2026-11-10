@@ -54,6 +54,21 @@ RSpec.describe 'Approved Backoffice human requirements', type: :request do
     expect(JrcBackoffice::RequirementRule.where(account: account)).not_to exist
   end
 
+  it 'also rejects a forged same-account human reviewer at the PostgreSQL boundary' do
+    key = publish('consultation')
+    plan = JrcBackoffice::Requirements.current(operation)
+    other = create(:user, account: account, role: :administrator)
+    attributes = { account_id: account.id, requirement_plan_id: plan.id, actor_id: other.id,
+      requirement_key: key, revision: 1, payload: { decision: 'completed', note: 'Synthetic unauthorized SQL assertion' },
+      reason: 'Synthetic SQL boundary test', created_at: Time.current }
+    expect do
+      JrcBackoffice::RequirementResponse.transaction(requires_new: true) do
+        JrcBackoffice::RequirementResponse.insert_all!([attributes])
+      end
+    end.to raise_error(ActiveRecord::StatementInvalid, /configured human reviewer/)
+    expect(plan.responses).to be_empty
+  end
+
   it 'never accepts a manually submitted assertion of signatory powers' do
     key = SecureRandom.uuid
     post catalog, headers: headers, as: :json, params: { intent: key, version: 0, reason: 'Synthetic powers gate',
@@ -64,6 +79,16 @@ RSpec.describe 'Approved Backoffice human requirements', type: :request do
     post "#{url}/answer", headers: headers, as: :json, params: { key: key, plan_revision: plan.version,
       response_revision: 0, answer: { decision: 'approved' }, reason: 'Cannot replace native human authority proof' }
     expect(response).to have_http_status(:unprocessable_entity)
+    expect(plan.responses).to be_empty
+
+    attributes = { account_id: account.id, requirement_plan_id: plan.id, actor_id: admin.id,
+      requirement_key: key, revision: 1, payload: { decision: 'approved' },
+      reason: 'Synthetic forged native evidence', created_at: Time.current }
+    expect do
+      JrcBackoffice::RequirementResponse.transaction(requires_new: true) do
+        JrcBackoffice::RequirementResponse.insert_all!([attributes])
+      end
+    end.to raise_error(ActiveRecord::StatementInvalid, /Native evidence cannot be supplied manually/)
     expect(plan.responses).to be_empty
   end
 end
