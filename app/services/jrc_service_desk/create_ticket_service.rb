@@ -68,17 +68,20 @@ class JrcServiceDesk::CreateTicketService < JrcServiceDesk::BaseService
         created_by_membership: actor_membership, origin_channel: origin_channel, opened_at: Time.current,
         idempotency_key: key, request_fingerprint: fingerprint
       )
-      JrcServiceDesk::InternalIntake.apply!(ticket) if internal_request
+      if internal_request
+        JrcServiceDesk::InternalIntake.apply!(ticket)
+        values.merge!('queue_id' => ticket.queue_id, 'team_id' => ticket.team_id,
+                      'assignee_account_user_id' => ticket.assignee_membership.account_user_id)
+      end
       configure_catalogue(ticket, service, normalized, values)
       JrcServiceDesk::TicketCatalogue.new(ticket, context: context).bind!(normalized)
       intake = JrcServiceDesk::IntakeRuleApplication.new(ticket: ticket, context: context, supplied: values, conversation: intake_conversation)
       intake.apply!
-      JrcServiceDesk::InternalIntake.apply!(ticket) if internal_request
       if !internal_request && ticket.assignee_membership && normalized['assignee_account_user_id'].nil?
         reason = JrcServiceDesk::AssignmentEligibility.new(membership: ticket.assignee_membership, ticket: ticket).reason
         ticket.assignee_membership = nil if reason
       end
-      verify_assignee_team!(ticket, manual: normalized['assignee_account_user_id'].present?)
+      verify_assignee_team!(ticket, manual: internal_request || normalized['assignee_account_user_id'].present?)
       raise Pundit::NotAuthorizedError unless context.supervision_access.allowed?(ticket, 'tickets_create')
       authorize!(ticket, :create?)
       ticket.save!
