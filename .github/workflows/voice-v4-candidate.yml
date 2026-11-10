@@ -105,7 +105,7 @@ jobs:
             report = JSON.parse(File.read(path))
             raise 'Expected one analyzed file' unless report.fetch('files').size == 1
             report.fetch('files').flat_map { |file| file.fetch('offenses') }
-                  .map { |offense| offense.values_at('cop_name', 'severity', 'message') }.tally
+                  .map { |offense| [offense.fetch('cop_name'), offense.fetch('severity'), offense.fetch('message').gsub(/on line \d+/, 'on line <offset>')] }.tally
           end
           baseline = counts.call('/tmp/voice-lint-baseline.json')
           current = counts.call('/tmp/voice-lint-candidate.json')
