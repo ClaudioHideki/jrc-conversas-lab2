@@ -100,12 +100,23 @@ jobs:
           bundle exec rails db:migrate
           bundle exec rails runner script/jrc_ag_ci_fixture.rb verify
           bundle exec rails zeitwerk:check
+      - name: Focused cumulative and integration regressions before the broad suite
+        if: matrix.database == 'jrc_rel_v2_candidate_test'
+        run: |
+          bundle exec rspec spec/requests/api/v1/accounts/relationship/approved_retention_spec.rb \
+            spec/services/jrc_relationship/approved_local_roles_spec.rb \
+            spec/requests/api/v1/accounts/crm/approved_human_requirements_spec.rb \
+            spec/requests/api/v1/accounts/jrc_approvals/approved_financial_adjustments_spec.rb \
+            spec/services/jrc_customers/company_import_corporate_scope_spec.rb \
+            spec/services/jrc_backoffice/consolidated_migration_identity_spec.rb \
+            --seed 20261110 --format documentation --format json --out /tmp/ag-focused-rspec.json
+          ruby -rjson -e 'r=JSON.parse(File.read(ARGV.fetch(0))).fetch("summary"); abort "Empty, failed or pending native examples" unless r.fetch("example_count").positive? && r.fetch("failure_count").zero? && r.fetch("pending_count").zero?' /tmp/ag-focused-rspec.json
       - name: Authenticated APIs, policies, immutable history, signatures and real transactions
         shell: bash
         run: |
           mapfile -t specs < <(python3 script/jrc_ag_native_plan.py --database "$POSTGRES_DATABASE" --paths)
           test "${#specs[@]}" -gt 0
-          bundle exec rspec "${specs[@]}" --seed 20261110 --format progress --format json --out /tmp/ag-rspec.json
+          bundle exec rspec "${specs[@]}" --seed 20261110 --format documentation --format json --out /tmp/ag-rspec.json
           ruby -rjson -e 'r=JSON.parse(File.read(ARGV.fetch(0))).fetch("summary"); abort "Empty, failed or pending native examples" unless r.fetch("example_count").positive? && r.fetch("failure_count").zero? && r.fetch("pending_count").zero?' /tmp/ag-rspec.json
       - name: Preserve synthetic evidence, including failures
         if: always()
@@ -115,6 +126,7 @@ jobs:
           path: |
             /tmp/ag-test-plan.json
             /tmp/ag-rspec.json
+            /tmp/ag-focused-rspec.json
             /tmp/ag-schema.rb
             /tmp/ag-fixture-receipt.json
           if-no-files-found: warn
