@@ -26,7 +26,7 @@ RSpec.describe JrcBackoffice::DocumentSafety do
   # This is a real Unix-socket protocol exercise, with a simulated daemon
   # reply. It does not demonstrate an installed ClamAV or malware detection.
   def scan_with_reply(reply)
-    path = "/run/jrc-bo-av-test-#{SecureRandom.hex(8)}.sock"
+    path = "#{ENV.fetch('JRC_BO_TEST_SOCKET_DIRECTORY', '/run')}/jrc-bo-av-test-#{SecureRandom.hex(8)}.sock"
     server = UNIXServer.new(path)
     received = Queue.new
     worker = Thread.new { scanner_reply(server, reply, received) }

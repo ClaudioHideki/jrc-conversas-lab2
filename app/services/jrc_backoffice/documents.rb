@@ -53,14 +53,22 @@ class JrcBackoffice::Documents
     @pending_blob = nil
   end
 
+  # Technical job projection only. It cannot reuse a user's document authority
+  # or create a human decision; interactive commands still require writable!.
   def reflect_analysis!(version)
-    @request.with_lock do
-      latest = versions.where(document_key: version.document_key).order(version: :desc).first
-      next unless latest.id == version.id
+    raise Pundit::NotAuthorizedError unless @actor.nil?
 
-      update_status!(version.document_key, version.status)
-      writable!
-      audit!('backoffice_document_analyzed', version_id: version.id, analysis_id: version.analysis.id, status: version.status)
+    @request.with_lock do
+      current = versions.find(version.id)
+      latest = versions.where(document_key: current.document_key).order(version: :desc).first
+      next unless latest.id == current.id && current.analysis
+      next if @request.status.in?(%w[completed canceled rejected])
+
+      # Recheck tenant, feature, current security observation and exact bytes
+      # after parsing, before changing the operational projection.
+      JrcBackoffice::DocumentSafety.new(current).bytes!
+      update_status!(current.document_key, current.status)
+      audit!('backoffice_document_analyzed', version_id: current.id, analysis_id: current.analysis.id, status: current.status)
     end
   end
 

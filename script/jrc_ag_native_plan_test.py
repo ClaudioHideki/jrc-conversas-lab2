@@ -1,6 +1,6 @@
 import unittest
 
-from jrc_ag_native_plan import DATABASES, EXTRA_SPECS, ROOT, SCOPES, plan, shard
+from jrc_ag_native_plan import DATABASES, EXCLUSIVE_SPECS, EXTRA_SPECS, ROOT, SCOPES, plan, shard
 
 
 class NativePlanGuardsTest(unittest.TestCase):
@@ -22,11 +22,16 @@ class NativePlanGuardsTest(unittest.TestCase):
         groups = plan()
         expected = {p.relative_to(ROOT).as_posix() for scope in SCOPES for p in (ROOT / scope).rglob('*_spec.rb')}
         expected.update(EXTRA_SPECS)
-        actual = [path for files in groups.values() for path in files]
+        actual = [path for files in groups.values() for path in files] + [entry['path'] for entry in EXCLUSIVE_SPECS.values()]
         self.assertTrue(expected)
         self.assertEqual(set(groups), set(DATABASES))
         self.assertEqual(len(actual), len(set(actual)))
         self.assertEqual(set(actual), expected)
+
+    def test_shared_opt_in_concurrency_executes_in_the_admitted_native_database(self):
+        grouped = plan()['jrc_rel_sd_candidate_test']
+        self.assertIn('spec/services/jrc_relationship/playbook_flow_webhook_delivery_spec.rb', grouped)
+        self.assertIn('spec/services/jrc_relationship/survey_models_concurrency_spec.rb', grouped)
 
     def test_shards_cover_every_example_source_once_without_excluding_failures(self):
         paths = plan()[DATABASES[0]]

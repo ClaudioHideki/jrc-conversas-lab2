@@ -5,7 +5,7 @@ require Rails.root.join('db/migrate/20261102070000_create_backoffice_signer_rost
 require Rails.root.join('db/migrate/20261102080000_create_backoffice_authority_proposals')
 require Rails.root.join('db/migrate/20261102090100_create_backoffice_signature_deliveries')
 
-RSpec.describe JrcBackoffice::ContractVersion do
+RSpec.describe JrcBackoffice::ContractVersion, :unused_signature_upgrade do
   let(:account) { create(:account) }
   let(:actor) { create(:user, account: account, role: :administrator) }
   let(:contact) { create(:contact, account: account) }
@@ -27,18 +27,20 @@ RSpec.describe JrcBackoffice::ContractVersion do
     counts = [Account.count, Contact.count, JrcCrm::Contract.count, JrcCrm::BackofficeRequest.count]
     # The newer document fence references the version extension's tenant index.
     # Roll back dependent extensions first, as the real migration stack does.
-    CreateBackofficeSignatureDeliveries.new.migrate(:down)
-    CreateBackofficeAuthorityProposals.new.migrate(:down)
-    CreateBackofficeSignerRosters.new.migrate(:down)
-    CreateBackofficeDocumentScans.new.migrate(:down)
-    CreateBackofficeContractVersions.new.migrate(:down)
-    CreateBackofficeContractVersions.new.migrate(:up)
-    CreateBackofficeDocumentScans.new.migrate(:up)
-    CreateBackofficeSignerRosters.new.migrate(:up)
-    CreateBackofficeAuthorityProposals.new.migrate(:up)
-    CreateBackofficeSignatureDeliveries.new.migrate(:up)
-    expect([contract.reload.attributes, request.reload.attributes, contact.reload.attributes]).to eq(original)
-    expect([Account.count, Contact.count, JrcCrm::Contract.count, JrcCrm::BackofficeRequest.count]).to eq(counts)
+    with_unused_signature_evidence do
+      CreateBackofficeSignatureDeliveries.new.migrate(:down)
+      CreateBackofficeAuthorityProposals.new.migrate(:down)
+      CreateBackofficeSignerRosters.new.migrate(:down)
+      CreateBackofficeDocumentScans.new.migrate(:down)
+      CreateBackofficeContractVersions.new.migrate(:down)
+      CreateBackofficeContractVersions.new.migrate(:up)
+      CreateBackofficeDocumentScans.new.migrate(:up)
+      CreateBackofficeSignerRosters.new.migrate(:up)
+      CreateBackofficeAuthorityProposals.new.migrate(:up)
+      CreateBackofficeSignatureDeliveries.new.migrate(:up)
+      expect([contract.reload.attributes, request.reload.attributes, contact.reload.attributes]).to eq(original)
+      expect([Account.count, Contact.count, JrcCrm::Contract.count, JrcCrm::BackofficeRequest.count]).to eq(counts)
+    end
   ensure
     CreateBackofficeContractVersions.new.migrate(:up) unless ActiveRecord::Base.connection.table_exists?(:jrc_backoffice_contract_versions)
     CreateBackofficeDocumentScans.new.migrate(:up) unless ActiveRecord::Base.connection.table_exists?(:jrc_backoffice_document_scans)

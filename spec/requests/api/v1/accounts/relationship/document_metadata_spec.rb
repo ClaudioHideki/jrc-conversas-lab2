@@ -9,7 +9,7 @@ RSpec.describe 'Protected document responsibility metadata', type: :request do
   let(:assignment) { JrcRelationship::Assignment.create!(account: account, contact: create(:contact, account: account), owner: analyst) }
   let(:document) do
     post base, headers: headers, params: { assignment_id: assignment.id, file: fixture_file_upload('jrc_projects_task.txt', 'text/plain'),
-                                           document: { title: 'SYNTHETIC protected metadata', category: 'registration',
+                                           document: { title: 'SYNTHETIC protected metadata', category: 'registration', confidentiality: 'operational',
                                                        change_reason: 'Synthetic initial version' } }
     JrcRelationship::CustomerDocument.find(response.parsed_body.fetch('id'))
   end

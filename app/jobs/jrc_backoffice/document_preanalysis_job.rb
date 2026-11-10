@@ -12,6 +12,8 @@ class JrcBackoffice::DocumentPreanalysisJob < ApplicationJob
     request = version.backoffice_request
     # Match document decisions: request first, version second (including FK locks).
     request.with_lock do
+      next if request.status.in?(%w[completed canceled rejected])
+
       version.with_lock do
         next if version.analysis
 

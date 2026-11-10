@@ -38,7 +38,7 @@ RSpec.describe 'Governed Relationship configuration restoration', type: :request
 
   it 'uses the stored scoped version instead of caller-supplied weights or rules' do
     post url, headers: headers, as: :json, params: fields.merge(weights: { invented: 100 }, rules: { healthy_threshold: 5 })
-    expect(response).to have_http_status(:ok)
+    expect(response).to have_http_status(:ok), response.body
     expect([configuration.reload.weights, configuration.rules]).to eq([prior.weights, prior.rules])
   end
 
@@ -67,7 +67,7 @@ RSpec.describe 'Governed Relationship configuration restoration', type: :request
       scope_key: 'account', version: 3, weights: configuration.effective_weights,
       rules: configuration.effective_rules.merge('risk_reasons' => [])
     }
-    expect(response).to have_http_status(:ok)
+    expect(response).to have_http_status(:ok), response.body
     expect(configuration.reload.effective_rules.fetch('risk_reasons')).to eq([])
   end
 
@@ -129,7 +129,7 @@ RSpec.describe 'Governed Relationship configuration restoration', type: :request
     post url, headers: headers, as: :json, params: fields.merge(scope_key: scoped.scope_key, portfolio_revision: 1)
     expect(response).to have_http_status(:conflict)
     post url, headers: headers, as: :json, params: fields.merge(scope_key: scoped.scope_key, portfolio_revision: 0)
-    expect(response).to have_http_status(:ok)
+    expect(response).to have_http_status(:ok), response.body
     expect(response.parsed_body).to include('portfolio_revision' => 0, 'version' => 4)
     expect(scoped.reload.effective_rules.fetch('portfolio_review_validity_minutes')).to eq(5)
     get "/api/v1/accounts/#{account.id}/relationship/portfolio_groups/#{group.id}/history", headers: headers, params: { kind: 'restored' }
@@ -150,7 +150,7 @@ RSpec.describe 'Governed Relationship configuration restoration', type: :request
     review = JrcRelationship::BatchReview.find(receipt.fetch('id'))
     original = review.snapshot.deep_dup
     post url, headers: headers, as: :json, params: fields.merge(scope_key: scoped.scope_key, portfolio_revision: 0)
-    expect(response).to have_http_status(:ok)
+    expect(response).to have_http_status(:ok), response.body
     expect { service.approve(review.id, digest: review.digest) }.to raise_error(ArgumentError)
     expect([review.reload.state, review.snapshot, review.snapshot.fetch('version'), allocation.reload.owner_id])
       .to eq(['previewed', original, 1, actor.id])

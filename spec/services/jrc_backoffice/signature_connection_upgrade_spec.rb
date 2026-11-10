@@ -2,7 +2,7 @@ require 'rails_helper'
 require Rails.root.join('db/migrate/20261102040000_pin_signature_provider_connections')
 require Rails.root.join('db/migrate/20261102090100_create_backoffice_signature_deliveries')
 
-RSpec.describe JrcBackoffice::SignatureConnection do
+RSpec.describe JrcBackoffice::SignatureConnection, :unused_signature_upgrade do
   it 'backfills the existing connection and known notification revision without changing native data or old ciphertext' do
     raise 'Disposable database required' unless Rails.env.test? && ENV['POSTGRES_DATABASE'] == 'jrc_rel_v2_candidate_test'
 
@@ -22,19 +22,21 @@ RSpec.describe JrcBackoffice::SignatureConnection do
     ciphertext = integration.encrypted_credentials
     native = conversation.reload.attributes
     counts = [Account.count, Contact.count, Conversation.count, Message.count]
-    CreateBackofficeSignatureDeliveries.new.migrate(:down)
-    PinSignatureProviderConnections.new.migrate(:down)
-    PinSignatureProviderConnections.new.migrate(:up)
-    CreateBackofficeSignatureDeliveries.new.migrate(:up)
-    [described_class, JrcBackoffice::SignatureIntegration, JrcBackoffice::SignatureNotification].each(&:reset_column_information)
-    connection = integration.reload.connection
-    expect(connection).to have_attributes(provider: 'docusign', public_id: integration.public_id)
-    expect(connection.encrypted_credentials).to eq(ciphertext)
-    expect(connection.credentials['private_key']).to eq(credentials[:private_key].strip)
-    expect(notification.reload.connection_id).to eq(connection.id)
-    expect(notification.payload).to eq(JSON.parse(payload))
-    expect([Account.count, Contact.count, Conversation.count, Message.count]).to eq(counts)
-    expect(conversation.reload.attributes).to eq(native)
+    with_unused_signature_evidence do
+      CreateBackofficeSignatureDeliveries.new.migrate(:down)
+      PinSignatureProviderConnections.new.migrate(:down)
+      PinSignatureProviderConnections.new.migrate(:up)
+      CreateBackofficeSignatureDeliveries.new.migrate(:up)
+      [described_class, JrcBackoffice::SignatureIntegration, JrcBackoffice::SignatureNotification].each(&:reset_column_information)
+      connection = integration.reload.connection
+      expect(connection).to have_attributes(provider: 'docusign', public_id: integration.public_id)
+      expect(connection.encrypted_credentials).to eq(ciphertext)
+      expect(connection.credentials['private_key']).to eq(credentials[:private_key].strip)
+      expect(notification.reload.connection_id).to eq(connection.id)
+      expect(notification.payload).to eq(JSON.parse(payload))
+      expect([Account.count, Contact.count, Conversation.count, Message.count]).to eq(counts)
+      expect(conversation.reload.attributes).to eq(native)
+    end
   ensure
     ActiveRecord::Base.connection.schema_cache.clear!
     [described_class, JrcBackoffice::SignatureIntegration, JrcBackoffice::SignatureNotification].each(&:reset_column_information)

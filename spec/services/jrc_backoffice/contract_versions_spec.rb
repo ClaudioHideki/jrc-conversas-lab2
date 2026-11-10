@@ -97,7 +97,7 @@ RSpec.describe JrcBackoffice::ContractVersions do
 
   it 'requires actual document decisions for v2 rather than caller-supplied approved metadata' do
     request.update!(metadata: { required_documents: ['representation'], document_statuses: { representation: 'approved' } })
-    expect { version }.to raise_error(ArgumentError, /documentação obrigatória/)
+    expect { version }.to raise_error(JrcBackoffice::Requirements::Blocked)
     expect(JrcBackoffice::ContractVersion.count).to eq(0)
   end
 
@@ -196,7 +196,7 @@ RSpec.describe JrcBackoffice::ContractVersions do
     documents.upload!(key: 'representation', file: file, idempotency_key: SecureRandom.uuid)
     expect do
       service.create!(idempotency_key: SecureRandom.uuid, expected_source_digest: source, change_reason: 'Documento substituído')
-    end.to raise_error(ArgumentError, /documentação obrigatória/)
+    end.to raise_error(JrcBackoffice::Requirements::Blocked)
     expect(JrcBackoffice::ContractVersion.where(contract: contract).count).to eq(1)
   end
 

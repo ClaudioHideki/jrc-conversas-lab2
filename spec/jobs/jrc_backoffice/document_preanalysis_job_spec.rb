@@ -56,6 +56,31 @@ RSpec.describe JrcBackoffice::DocumentPreanalysisJob, type: :job do
     expect(JrcBackoffice::DocumentScan.where(document_version: version).count).to eq(1)
   end
 
+  it 'does not turn interactive document authority into a system analysis command' do
+    expect do
+      JrcBackoffice::Documents.new(request: operation, actor: actor).reflect_analysis!(version)
+    end.to raise_error(Pundit::NotAuthorizedError)
+    expect(version.reload.analysis).to be_nil
+    expect(version.decisions).to be_empty
+  end
+
+  it 'retains technical scan evidence but does not parse or rewrite a canceled operational request' do
+    version
+    operation.update!(status: 'canceled')
+    before = operation.reload.attributes
+    scanner = instance_double(JrcServiceDesk::AttachmentScanner)
+    allow(JrcServiceDesk::AttachmentScanner).to receive(:new).and_return(scanner)
+    allow(scanner).to receive(:scan).with(version.file.blob, socket_path: anything).and_return(
+      'service_desk_scan_state' => 'clean', 'service_desk_scan_sha256' => version.sha256
+    )
+    expect(JrcBackoffice::TextExtraction).not_to receive(:call)
+    described_class.perform_now(version.id)
+    expect(operation.reload.attributes).to eq(before)
+    expect(version.reload.analysis).to be_nil
+    expect(version.decisions).to be_empty
+    expect(JrcBackoffice::DocumentSafety.new(version).current.state).to eq('clean')
+  end
+
   it 'does not inspect or parse a document from a suspended account' do
     version
     account.update!(status: 'suspended')

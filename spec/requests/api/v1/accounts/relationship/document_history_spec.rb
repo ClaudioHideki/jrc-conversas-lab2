@@ -9,7 +9,7 @@ RSpec.describe 'Protected native document history', type: :request do
   let(:context) { JrcRelationship::Context.new(member) }
   let(:assignment) { JrcRelationship::Assignment.create!(account: account, contact: create(:contact, account: account), owner: reader) }
   let(:document) do
-    JrcRelationship::CustomerDocument.create!(account: account, assignment: assignment, category: 'registration',
+    JrcRelationship::CustomerDocument.create!(account: account, assignment: assignment, category: 'registration', confidentiality: 'operational',
                                               title: 'SYNTHETIC private history')
   end
   let(:url) { "/api/v1/accounts/#{account.id}/relationship/documents/#{document.id}/history" }

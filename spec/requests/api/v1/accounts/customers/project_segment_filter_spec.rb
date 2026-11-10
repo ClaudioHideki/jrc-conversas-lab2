@@ -29,7 +29,13 @@ RSpec.describe 'Published customer segments in native Projects reads', type: :re
 
   before do
     account.enable_features!('jrc_projects', 'jrc_customer_master')
-    [actor, colleague].each { |user| account.account_users.find_by!(user: user).update!(jrc_projects_enabled: true) }
+    [actor, colleague].each do |user|
+      account.account_users.find_by!(user: user).update!(jrc_projects_enabled: true,
+                                                        jrc_projects_permissions: { 'projects.project.create' => true })
+    end
+    account.account_users.find_by!(user: actor).update!(jrc_projects_permissions: {
+      'projects.project.create' => true, 'projects.report.view' => true
+    })
     selected
     unmatched
     hidden

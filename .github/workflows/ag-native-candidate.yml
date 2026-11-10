@@ -58,6 +58,7 @@ jobs:
       SCHEMA: /tmp/ag-fresh-schema.rb
       JRC_AG_FIXTURE_RECEIPT: /tmp/ag-fixture-receipt.json
       JRC_SD_CONCURRENCY: '1'
+      JRC_BO_TEST_SOCKET_DIRECTORY: /run/jrc-ag-ci-av
       JRC_REVIEWED_CONCURRENCY: '1'
       DB_POOL_SIZE: '10'
       TZ: UTC
@@ -77,6 +78,7 @@ jobs:
           test "$(docker inspect "$JRC_AG_POSTGRES_SERVICE_ID" --format '{{json .HostConfig.Binds}}')" = null
           echo "JRC_AG_POSTGRES_SERVICE_ID=$JRC_AG_POSTGRES_SERVICE_ID" >> "$GITHUB_ENV"
           echo '127.0.0.1 jrc-rel-v2-pg-20261101' | sudo tee -a /etc/hosts >/dev/null
+          sudo install -d -m 0700 -o "$(id -u)" -g "$(id -g)" /run/jrc-ag-ci-av
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends libpq-dev libvips-dev imagemagick poppler-utils tesseract-ocr tesseract-ocr-por tesseract-ocr-eng
       - uses: ruby/setup-ruby@v1
@@ -152,6 +154,7 @@ jobs:
       SCHEMA: /tmp/ag-focused-schema.rb
       JRC_AG_FIXTURE_RECEIPT: /tmp/ag-fixture-receipt.json
       JRC_SD_CONCURRENCY: '1'
+      JRC_BO_TEST_SOCKET_DIRECTORY: /run/jrc-ag-ci-av
       JRC_REVIEWED_CONCURRENCY: '1'
       DB_POOL_SIZE: '10'
       TZ: UTC
@@ -171,6 +174,7 @@ jobs:
           test "$(docker inspect "$JRC_AG_POSTGRES_SERVICE_ID" --format '{{json .HostConfig.Binds}}')" = null
           echo "JRC_AG_POSTGRES_SERVICE_ID=$JRC_AG_POSTGRES_SERVICE_ID" >> "$GITHUB_ENV"
           echo '127.0.0.1 jrc-rel-v2-pg-20261101' | sudo tee -a /etc/hosts >/dev/null
+          sudo install -d -m 0700 -o "$(id -u)" -g "$(id -g)" /run/jrc-ag-ci-av
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends libpq-dev libvips-dev imagemagick poppler-utils tesseract-ocr tesseract-ocr-por tesseract-ocr-eng
       - uses: ruby/setup-ruby@v1
@@ -188,6 +192,11 @@ jobs:
         run: |
           bundle exec rspec \
             spec/services/jrc_relationship/approved_local_roles_spec.rb \
+            spec/jobs/jrc_backoffice/document_preanalysis_job_spec.rb \
+            spec/requests/api/v1/accounts/relationship/configuration_restore_spec.rb \
+            spec/requests/api/v1/accounts/relationship/portfolio_group_governance_spec.rb \
+            spec/requests/api/v1/accounts/jrc_approvals/adjustments_spec.rb \
+            spec/services/jrc_backoffice/document_safety_spec.rb \
             spec/requests/api/v1/accounts/crm/approved_human_requirements_spec.rb \
             spec/requests/api/v1/accounts/jrc_approvals/approved_financial_adjustments_spec.rb \
             spec/services/jrc_customers/company_import_corporate_scope_spec.rb \
@@ -223,18 +232,24 @@ jobs:
       matrix:
         installation: [fresh, upgrade]
         target:
-          - {database: jrc_rel_v2_candidate_test, shard: 0, count: 6}
-          - {database: jrc_rel_v2_candidate_test, shard: 1, count: 6}
-          - {database: jrc_rel_v2_candidate_test, shard: 2, count: 6}
-          - {database: jrc_rel_v2_candidate_test, shard: 3, count: 6}
-          - {database: jrc_rel_v2_candidate_test, shard: 4, count: 6}
-          - {database: jrc_rel_v2_candidate_test, shard: 5, count: 6}
-          - {database: jrc_four_domains_schema_admission_test, shard: 0, count: 1}
-          - {database: jrc_rel_sd_candidate_test, shard: 0, count: 1}
-          - {database: jrc_jornada_candidate_test, shard: 0, count: 1}
-          - {database: jrc_four_domains_schema_authority_test, shard: 0, count: 1}
-          - {database: jrc_four_domains_schema_test, shard: 0, count: 1}
-          - {database: jrc_ag_retention_native_test, shard: 0, count: 1}
+          - {database: jrc_rel_v2_candidate_test, shard: 0, count: 6, exclusive: ''}
+          - {database: jrc_rel_v2_candidate_test, shard: 1, count: 6, exclusive: ''}
+          - {database: jrc_rel_v2_candidate_test, shard: 2, count: 6, exclusive: ''}
+          - {database: jrc_rel_v2_candidate_test, shard: 3, count: 6, exclusive: ''}
+          - {database: jrc_rel_v2_candidate_test, shard: 4, count: 6, exclusive: ''}
+          - {database: jrc_rel_v2_candidate_test, shard: 5, count: 6, exclusive: ''}
+          - {database: jrc_four_domains_schema_admission_test, shard: 0, count: 1, exclusive: ''}
+          - {database: jrc_rel_sd_candidate_test, shard: 0, count: 1, exclusive: ''}
+          - {database: jrc_jornada_candidate_test, shard: 0, count: 1, exclusive: ''}
+          - {database: jrc_four_domains_schema_authority_test, shard: 0, count: 1, exclusive: ''}
+          - {database: jrc_four_domains_schema_test, shard: 0, count: 1, exclusive: ''}
+          - {database: jrc_ag_retention_native_test, shard: 0, count: 1, exclusive: ''}
+          - {database: jrc_rel_v2_candidate_test, shard: 0, count: 1, exclusive: signing_identity}
+          - {database: jrc_rel_v2_candidate_test, shard: 0, count: 1, exclusive: document_scan}
+          - {database: jrc_rel_v2_candidate_test, shard: 0, count: 1, exclusive: contract_version}
+          - {database: jrc_rel_v2_candidate_test, shard: 0, count: 1, exclusive: signature_integration}
+          - {database: jrc_rel_v2_candidate_test, shard: 0, count: 1, exclusive: signature_connection}
+          - {database: jrc_jornada_candidate_test, shard: 0, count: 1, exclusive: reviewed_operations}
     services:
       postgres:
         image: pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a
@@ -253,12 +268,14 @@ jobs:
       POSTGRES_USERNAME: postgres
       POSTGRES_PASSWORD: disposable-test-only
       POSTGRES_DATABASE: ${{ matrix.target.database }}
+      JRC_AG_EXCLUSIVE_SPEC: ${{ matrix.target.exclusive }}
       REDIS_URL: redis://127.0.0.1:6379/15
       SECRET_KEY_BASE: synthetic-ag-ci-not-a-production-secret
       BUNDLE_FROZEN: 'true'
       SCHEMA: /tmp/ag-schema.rb
       JRC_AG_FIXTURE_RECEIPT: /tmp/ag-fixture-receipt.json
       JRC_SD_CONCURRENCY: '1'
+      JRC_BO_TEST_SOCKET_DIRECTORY: /run/jrc-ag-ci-av
       JRC_REVIEWED_CONCURRENCY: '1'
       DB_POOL_SIZE: '10'
       TZ: UTC
@@ -278,6 +295,7 @@ jobs:
           test "$(docker inspect "$JRC_AG_POSTGRES_SERVICE_ID" --format '{{json .HostConfig.Binds}}')" = null
           echo "JRC_AG_POSTGRES_SERVICE_ID=$JRC_AG_POSTGRES_SERVICE_ID" >> "$GITHUB_ENV"
           echo '127.0.0.1 jrc-rel-v2-pg-20261101' | sudo tee -a /etc/hosts >/dev/null
+          sudo install -d -m 0700 -o "$(id -u)" -g "$(id -g)" /run/jrc-ag-ci-av
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends libpq-dev libvips-dev imagemagick poppler-utils tesseract-ocr tesseract-ocr-por tesseract-ocr-eng
       - uses: ruby/setup-ruby@v1
@@ -301,7 +319,7 @@ jobs:
           bundle exec rails runner script/jrc_ag_ci_fixture.rb verify
           bundle exec rails zeitwerk:check
       - name: Focused cumulative and integration regressions before the broad suite
-        if: matrix.target.database == 'jrc_rel_v2_candidate_test' && matrix.target.shard == 0
+        if: matrix.target.database == 'jrc_rel_v2_candidate_test' && matrix.target.shard == 0 && matrix.target.exclusive == ''
         run: |
           bundle exec rspec spec/services/jrc_relationship/approved_local_roles_spec.rb \
             spec/requests/api/v1/accounts/crm/approved_human_requirements_spec.rb \
@@ -313,7 +331,7 @@ jobs:
       - name: Authenticated APIs, policies, immutable history, signatures and real transactions
         shell: bash
         run: |
-          mapfile -t specs < <(python3 script/jrc_ag_native_plan.py --database "$POSTGRES_DATABASE" --paths --shard-index "${{ matrix.target.shard }}" --shard-count "${{ matrix.target.count }}")
+          mapfile -t specs < <(python3 script/jrc_ag_native_plan.py --database "$POSTGRES_DATABASE" --paths --shard-index "${{ matrix.target.shard }}" --shard-count "${{ matrix.target.count }}" --exclusive "${{ matrix.target.exclusive }}")
           test "${#specs[@]}" -gt 0
           bundle exec rspec "${specs[@]}" --seed 20261110 --require ./script/jrc_ag_ci_formatter.rb --format JrcAgCiFormatter --format json --out /tmp/ag-rspec.json
           ruby -rjson -e 'r=JSON.parse(File.read(ARGV.fetch(0))).fetch("summary"); abort "Empty, failed or pending native examples" unless r.fetch("example_count").positive? && r.fetch("failure_count").zero? && r.fetch("pending_count").zero?' /tmp/ag-rspec.json
@@ -321,7 +339,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ag-native-${{ github.sha }}-${{ matrix.installation }}-${{ matrix.target.database }}-${{ matrix.target.shard }}
+          name: ag-native-${{ github.sha }}-${{ matrix.installation }}-${{ matrix.target.database }}-${{ matrix.target.shard }}-${{ matrix.target.exclusive }}
           path: |
             /tmp/ag-test-plan.json
             /tmp/ag-rspec.json

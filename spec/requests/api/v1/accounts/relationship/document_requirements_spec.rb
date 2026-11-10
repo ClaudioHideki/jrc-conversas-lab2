@@ -11,7 +11,7 @@ RSpec.describe 'Native versioned required document catalog', type: :request do
   let(:entry) { { 'code' => 'registration_proof', 'title' => 'SYNTHETIC registration evidence', 'category' => 'registration' } }
   let(:configuration) { JrcRelationship::Configuration.create!(account: account, rules: { 'required_documents' => [entry] }) }
   let(:upload) { fixture_file_upload('jrc_projects_task.txt', 'text/plain') }
-  let(:attributes) { { title: 'SYNTHETIC evidence', category: 'registration', requirement_key: entry['code'], change_reason: 'Synthetic upload' } }
+  let(:attributes) { { title: 'SYNTHETIC evidence', category: 'registration', confidentiality: 'operational', requirement_key: entry['code'], change_reason: 'Synthetic upload' } }
   let(:document) do
     configuration
     post base, headers: headers, params: { assignment_id: assignment.id, document: attributes, file: upload }

@@ -115,13 +115,26 @@ RSpec.describe 'Atomic native proposal adjustments', :approval_core, :commercial
     expect(proposal.reload.financial_summary.fetch(:discount_cents)).to eq(100)
   end
 
-  it 'rolls back the source, invalidations, revisions, audit and votes when the new tier needs another principal' do
+  it 'atomically routes an adjustment above the current authority to the configured next tier without inventing a vote' do
+    # Approved addendum: beyond the current authority, preserve the adjustment
+    # and forward it to the configured next level; never approve at the old tier.
     initial = values.merge(mode: 'approve', step_code: 'review', changes: { 'discount_cents' => 0 })
-    before = [proposal.reload.attributes, record.reload.attributes, JrcApprovals::Request.count,
-              JrcApprovals::AuditEvent.count, JrcApprovals::Decision.count, proposal.events.count]
-    expect { service.call(**initial) }.to raise_error(JrcApprovals::Error, 'STEP_NOT_CURRENT')
-    expect([proposal.reload.attributes, record.reload.attributes, JrcApprovals::Request.count,
-            JrcApprovals::AuditEvent.count, JrcApprovals::Decision.count, proposal.events.count]).to eq(before)
+    immutable = record.attributes.slice('snapshot', 'stage_plan', 'fingerprint', 'requester_id', 'policy_version_id')
+    before_votes = JrcApprovals::Decision.count
+    revised = service.call(**initial)
+    expect(proposal.reload.financial_summary).to include(discount_cents: 0, total_cents: 800)
+    expect(revised).to have_attributes(state: 'pending', requester_id: author.id, policy_version_id: record.policy_version_id)
+    expect(revised.stage_plan.pluck('code')).to eq(['director'])
+    expect(revised.decisions).to be_empty
+    expect(JrcApprovals::Decision.count).to eq(before_votes)
+    expect(record.reload.state).to eq('stale')
+    expect(record.attributes.slice(*immutable.keys)).to eq(immutable)
+    route = JrcApprovals::AuditEvent.find_by!(request_id: revised.id, event_type: 'adjustment_routed')
+    expect(route).to have_attributes(actor_id: manager.id, data: include('original_request_id' => record.id,
+                                                                         'revised_request_id' => revised.id))
+    receipts = [JrcApprovals::Request.count, JrcApprovals::AuditEvent.count, JrcApprovals::Decision.count]
+    expect(service.call(**initial).id).to eq(revised.id)
+    expect([JrcApprovals::Request.count, JrcApprovals::AuditEvent.count, JrcApprovals::Decision.count]).to eq(receipts)
   end
 
   it 'can save into another tier without approving it or disclosing its request through the HTTP receipt' do

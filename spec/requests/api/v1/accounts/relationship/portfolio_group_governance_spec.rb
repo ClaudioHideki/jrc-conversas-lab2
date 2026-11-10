@@ -26,13 +26,13 @@ RSpec.describe 'Named portfolio native distribution governance', type: :request 
   it 'versions explicit group capacity in the existing configuration API without changing native health precedence' do
     first
     get "#{base}/configuration", headers: headers, params: { scope_key: scope_key }
-    expect(response).to have_http_status(:ok)
+    expect(response).to have_http_status(:ok), response.body
     expect(response.headers['Cache-Control']).to include('no-store')
     patch "#{base}/configuration", headers: headers, as: :json, params: {
-      scope_key: scope_key, version: 1, portfolio_revision: 0, weights: JrcRelationship::Configuration::DEFAULT_WEIGHTS,
+      scope_key: scope_key, version: 1, portfolio_revision: 0, reason: reason, weights: JrcRelationship::Configuration::DEFAULT_WEIGHTS,
       rules: { portfolio_capacity_limits: limits }
     }
-    expect(response).to have_http_status(:ok)
+    expect(response).to have_http_status(:ok), response.body
     stored = JrcRelationship::Configuration.find_by!(account: account, scope_key: scope_key)
     expect(stored.version).to eq(2)
     expect(stored.versions.order(:version).pluck(:version)).to eq([1, 2])
@@ -110,7 +110,7 @@ RSpec.describe 'Named portfolio native distribution governance', type: :request 
     writer.set_customers!(group.id, ids: [first.id], active: true, expected_version: 0, reason: reason)
     expect do
       patch "#{base}/configuration", headers: headers, as: :json, params: {
-        scope_key: scope_key, version: 1, portfolio_revision: 0,
+        scope_key: scope_key, version: 1, portfolio_revision: 0, reason: reason,
         weights: JrcRelationship::Configuration::DEFAULT_WEIGHTS, rules: { portfolio_capacity_limits: limits }
       }
     end.not_to change(JrcRelationship::Configuration, :count)
@@ -292,7 +292,7 @@ RSpec.describe 'Named portfolio native distribution governance', type: :request 
     expect(JrcRelationship::PortfolioGroupScope.writable(current)).to exist(id: group.id)
     expect(current.assignments).not_to exist(id: first.id)
     get "#{base}/portfolio_groups/#{group.id}", headers: headers
-    expect(response).to have_http_status(:ok)
+    expect(response).to have_http_status(:ok), response.body
     expect(response.parsed_body).to include('can_configure' => false, 'customer_count' => nil)
     get "#{base}/configuration", headers: headers, params: { scope_key: scope_key }
     expect(response).to have_http_status(:forbidden)
@@ -317,17 +317,17 @@ RSpec.describe 'Named portfolio native distribution governance', type: :request 
     JrcRelationship::PortfolioGroupAssignment.create!(account: account, portfolio_group: group, assignment: first)
     configuration
     patch "#{base}/configuration", headers: headers, as: :json, params: {
-      scope_key: scope_key, version: 1, portfolio_revision: 0,
+      scope_key: scope_key, version: 1, portfolio_revision: 0, reason: reason,
       weights: JrcRelationship::Configuration::DEFAULT_WEIGHTS, rules: { portfolio_capacity_limits: [] }
     }
-    expect(response).to have_http_status(:ok)
+    expect(response).to have_http_status(:ok), response.body
     writer.update!(group.id, attributes: { status: 'archived' }, expected_version: 0, reason: reason)
     sources = JrcRelationship::DistributionConfigurations.new(account)
     expect(sources.for(first).map(&:scope_key)).not_to include(scope_key)
     get "#{base}/portfolio_groups/#{group.id}", headers: headers
     expect(response.parsed_body).to include('status' => 'archived', 'can_configure' => false)
     get "#{base}/configuration", headers: headers, params: { scope_key: scope_key }
-    expect(response).to have_http_status(:ok)
+    expect(response).to have_http_status(:ok), response.body
     expect(response.parsed_body.fetch('history').pluck('version')).to include(1, 2)
     patch "#{base}/configuration", headers: headers, as: :json, params: {
       scope_key: scope_key, version: 2, portfolio_revision: 1,

@@ -89,7 +89,7 @@ RSpec.describe 'Scoped original portfolio history', type: :request do
     role = create(:custom_role, account: account, permissions: %w[contact_manage jrc_relationship_view jrc_relationship_manage jrc_relationship_team])
     reader = create(:user, account: account, role: :agent)
     account.account_users.find_by!(user: reader).update!(custom_role: role)
-    group.update!(owner: reader, visibility: 'account')
+    group.reload.update!(owner: reader, visibility: 'account')
     get "#{base}/history_detail", headers: reader.create_new_auth_token, params: { event_id: event.id }
     expect(response).to have_http_status(:forbidden)
     expect(response.body).not_to include('New reviewed value')

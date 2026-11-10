@@ -14,7 +14,10 @@ RSpec.describe JrcBackoffice::SignatureRelease do
   end
   let(:signed_file) { Rails.root.join('spec/fixtures/files/sample.pdf') }
 
-  before { JrcApprovals::SignatureEvidence.verifier = nil }
+  before do
+    account.enable_features!('jrc_crm')
+    JrcApprovals::SignatureEvidence.verifier = nil
+  end
 
   it 'preserves the native manual signature semantics for a legacy contract without a v2 request' do
     contract.signed_document.attach(io: File.open(signed_file), filename: 'synthetic-manual.pdf', content_type: 'application/pdf')
