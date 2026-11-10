@@ -49,7 +49,10 @@ async function saveUnit(unit, remove = false) {
   saved.value = false;
   try {
     const configuration = remove
-      ? { stores_enabled: unit.configuration.stores_enabled === true }
+      ? {
+          stores_enabled: unit.configuration.stores_enabled === true,
+          company_routes: unit.configuration.company_routes || [],
+        }
       : unit.configuration;
     await axios.patch(`${base()}/routing`, {
       unit_id: unit.id,

@@ -97,7 +97,8 @@ class JrcServiceDesk::PortalCreationService
                    status_id: status.id, service_fields: values.fetch('service_fields', {}) }
     attributes[:contract_id] = values['contract_id'] if values.key?('contract_id')
     attributes[:establishment_company_id] = values['establishment_company_id'] if values['establishment_company_id']
-    attributes.merge!(JrcServiceDesk::PortalRoutingConfiguration.resolve(unit: service.unit, context: context))
+    attributes.merge!(JrcServiceDesk::PortalRoutingConfiguration.resolve(unit: service.unit, context: context,
+                                                                       company_id: @identity.contact.company_id))
     JrcServiceDesk::CreateTicketWorkflowService.new(user_context: context.to_h).call(
       unit_id: service.unit_id, attributes: attributes, conversation_id: conversation.id, service_id: service.id,
       idempotency_key: namespace, origin_channel: 'portal'
