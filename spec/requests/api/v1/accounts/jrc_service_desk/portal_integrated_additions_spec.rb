@@ -162,6 +162,57 @@ RSpec.describe 'Portal routing, shared requester channels and authorized establi
     end.to raise_error(JrcServiceDesk::IdempotencyConflict)
   end
 
+  it 'routes by the authenticated company while retaining the default for other companies' do
+    grant
+    default_agent = create(:user, account: sd_account)
+    company_agent = create(:user, account: sd_account)
+    default_member = create(:jrc_sd_membership, unit: sd_unit, account_user: sd_account.account_users.find_by!(user: default_agent),
+      availability: 'unavailable', capacity: nil, manual_assignment_enabled: true)
+    company_member = create(:jrc_sd_membership, unit: sd_unit, account_user: sd_account.account_users.find_by!(user: company_agent),
+      availability: 'unavailable', capacity: nil, manual_assignment_enabled: true)
+    queue = create(:jrc_sd_queue, unit: sd_unit, distribution_mode: 'manual')
+    configuration = { 'queue_id' => queue.id, 'assignee_account_user_id' => default_member.account_user_id, 'stores_enabled' => true,
+                      'company_routes' => [{ 'company_id' => company.id, 'queue_id' => queue.id,
+                                            'assignee_account_user_id' => company_member.account_user_id }] }
+    JrcServiceDesk::PortalRoutingConfiguration.save!(unit: sd_unit, actor: sd_account_user, values: configuration,
+      expected_revision: JrcServiceDesk::PortalRoutingConfiguration.revision(sd_unit))
+    post '/api/v1/widget/service_desk/tickets', params: { website_token: widget.website_token, ticket: values }, headers: headers, as: :json
+    expect(response).to have_http_status(:created), response.body
+    ticket = JrcServiceDesk::Ticket.find(response.parsed_body.dig('ticket', 'id'))
+    expect(ticket).to have_attributes(assignee_membership_id: company_member.id, queue_id: queue.id,
+                                     establishment_company_id: establishment.id)
+
+    other_company = sd_account.master_companies.create!(name: 'Other authorized customer')
+    other_contact = create(:contact, account: sd_account, company_id: other_company.id, identifier: SecureRandom.uuid)
+    other_identity = create(:contact_inbox, contact: other_contact, inbox: widget.inbox, hmac_verified: true)
+    other_grant = JrcServiceDesk::PortalGrant.create!(account: sd_account, user: portal_user, granted_by: sd_user, company: other_company,
+      contact: other_contact, contact_inbox: other_identity, inbox: widget.inbox, active: true)
+    proof = JrcServiceDesk::PortalSessionProof.new(grant: other_grant, user: portal_user)
+    request = JrcServiceDesk::PortalCreationService.new(contact_inbox: other_identity, identity_proof: proof).call(
+      attributes: values.except(:establishment_company_id), idempotency_key: 'other-company-route')
+    expect(request.ticket).to have_attributes(assignee_membership_id: default_member.id, queue_id: queue.id)
+    expect(JrcServiceDesk::PortalRoutingConfiguration.read(sd_unit)).to eq(configuration)
+  end
+
+  it 'rejects foreign company routes and inactive recipients without replacing the current configuration' do
+    queue = create(:jrc_sd_queue, unit: sd_unit, distribution_mode: 'manual')
+    agent = create(:user, account: sd_account)
+    membership = create(:jrc_sd_membership, unit: sd_unit, account_user: sd_account.account_users.find_by!(user: agent))
+    foreign = sd_foreign_account.master_companies.create!(name: 'Foreign customer')
+    route = { 'company_id' => foreign.id, 'queue_id' => queue.id, 'assignee_account_user_id' => membership.account_user_id }
+    revision = JrcServiceDesk::PortalRoutingConfiguration.revision(sd_unit)
+    expect do
+      JrcServiceDesk::PortalRoutingConfiguration.save!(unit: sd_unit, actor: sd_account_user,
+        values: { 'company_routes' => [route] }, expected_revision: revision)
+    end.to raise_error(ActiveRecord::RecordNotFound)
+    membership.update!(active: false)
+    expect do
+      JrcServiceDesk::PortalRoutingConfiguration.save!(unit: sd_unit, actor: sd_account_user,
+        values: { 'company_routes' => [route.merge('company_id' => company.id)] }, expected_revision: revision)
+    end.to raise_error(ActiveRecord::RecordNotFound)
+    expect(JrcServiceDesk::PortalRoutingConfiguration.read(sd_unit)).to eq({})
+  end
+
   it 'keeps three people with shared channels distinct and reuses only an exact registration retry' do
     writer = JrcCustomers::RequesterWriter.new(account: sd_account, actor: sd_user)
     people = %w[Joao Maria Pedro].map do |name|

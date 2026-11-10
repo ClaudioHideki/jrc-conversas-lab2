@@ -2,7 +2,8 @@
 
 class JrcServiceDesk::PortalRoutingConfiguration
   KEY = 'jrc_service_desk_portal'
-  FIELDS = %w[queue_id assignee_account_user_id stores_enabled].freeze
+  FIELDS = %w[queue_id assignee_account_user_id stores_enabled company_routes].freeze
+  ROUTE_FIELDS = %w[company_id queue_id assignee_account_user_id].freeze
 
   def self.read(unit)
     unit.account.internal_attributes.fetch(KEY, {}).fetch(unit.id.to_s, {})
@@ -12,7 +13,9 @@ class JrcServiceDesk::PortalRoutingConfiguration
     JrcServiceDesk::CanonicalJson.digest(read(unit))
   end
 
-  def self.resolve(unit:, context:, values: read(unit))
+  def self.resolve(unit:, context:, values: read(unit), company_id: nil)
+    route = Array(values['company_routes']).find { |row| row['company_id'] == company_id } if company_id
+    values = route || values
     return {} unless values['queue_id']
     raise Pundit::NotAuthorizedError unless context.capability?(:tickets_assign)
 
@@ -34,19 +37,23 @@ class JrcServiceDesk::PortalRoutingConfiguration
     raise Pundit::NotAuthorizedError unless context.administrator? && context.view_unit_scope.exists?(id: unit.id)
     raise ArgumentError, 'Invalid portal configuration' unless values.is_a?(Hash) && (values.keys - FIELDS).empty?
 
-    values = values.compact
+    values = values.deep_dup.compact
     if values['stores_enabled'] == true && !unit.account.feature_enabled?('jrc_customer_master')
       raise ArgumentError, 'Customer Master must be enabled for store selection'
     end
     raise ArgumentError, 'Invalid store selection' if values.key?('stores_enabled') && ![true, false].include?(values['stores_enabled'])
     %w[queue_id assignee_account_user_id].each { |key| values[key] = JrcServiceDesk::Input.id(values[key]) if values[key] }
     raise ArgumentError, 'An assignee requires a queue' if values['assignee_account_user_id'] && !values['queue_id']
+    normalize_company_routes!(unit, values) if values.key?('company_routes')
 
     unit.account.with_lock do
       raise JrcServiceDesk::IdempotencyConflict unless expected_revision == revision(unit)
 
       previous = read(unit)
       resolve(unit: unit, context: context, values: values)
+      Array(values['company_routes']).each do |route|
+        resolve(unit: unit, context: context, values: route)
+      end
       data = unit.account.internal_attributes
       unit.account.update!(internal_attributes: data.merge(KEY => data.fetch(KEY, {}).merge(unit.id.to_s => values)))
       Audited::Audit.create!(auditable: unit, associated: unit.account, user: actor.user, action: 'update',
@@ -54,4 +61,20 @@ class JrcServiceDesk::PortalRoutingConfiguration
     end
     values
   end
+
+  def self.normalize_company_routes!(unit, values)
+    routes = values.fetch('company_routes')
+    raise ArgumentError, 'Invalid company routes' unless routes.is_a?(Array) && routes.size <= 100
+
+    routes.each do |route|
+      unless route.is_a?(Hash) && (route.keys - ROUTE_FIELDS).empty? && ROUTE_FIELDS.all? { |key| route[key].present? }
+        raise ArgumentError, 'Each company route requires a company, queue and assignee'
+      end
+
+      ROUTE_FIELDS.each { |key| route[key] = JrcServiceDesk::Input.id(route[key]) }
+      unit.account.master_companies.where(active: true).find(route.fetch('company_id'))
+    end
+    raise ArgumentError, 'Duplicate company route' unless routes.map { |route| route['company_id'] }.uniq.size == routes.size
+  end
+  private_class_method :normalize_company_routes!
 end
