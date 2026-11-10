@@ -37,7 +37,7 @@ const history = {
   scope_key: 'account',
   version: 2,
   weights: { relationship: 100 },
-  rules: { sla_hours: 24 },
+  rules: { sla_hours: 24, required_documents: [] },
   history: [
     {
       version: 1,
@@ -281,10 +281,18 @@ describe('Existing operational configuration controls', () => {
       global: { stubs: { OperationsSettingsPanel: true } },
     });
     await flushPromises();
-    expect(wrapper.findAll('details')).toHaveLength(2);
-    expect(wrapper.findAll('details')[0].text()).toContain('CS');
-    expect(wrapper.findAll('details')[0].text()).toContain('80');
-    expect(wrapper.findAll('details')[1].text()).toContain('100');
+    expect(
+      wrapper.findAll('[data-testid="configuration-history-version"]')
+    ).toHaveLength(2);
+    const first = wrapper.get(
+      '[data-testid="configuration-history-version"][data-version="1"]'
+    );
+    const second = wrapper.get(
+      '[data-testid="configuration-history-version"][data-version="2"]'
+    );
+    expect(first.text()).toContain('CS');
+    expect(first.text()).toContain('80');
+    expect(second.text()).toContain('100');
     await wrapper.get('form').trigger('submit');
     await flushPromises();
     expect(mocks.api.saveConfiguration.mock.calls[0][1]).not.toHaveProperty(
@@ -301,7 +309,9 @@ describe('Existing operational configuration controls', () => {
     await wrapper.setProps({ allowed: false });
     mocks.store.getters.getCurrentUserID = 8;
     await flushPromises();
-    expect(wrapper.findAll('details')).toHaveLength(0);
+    expect(
+      wrapper.findAll('[data-testid="configuration-history-version"]')
+    ).toHaveLength(0);
     wrapper.unmount();
   });
   it('displays a paused clock separately from overdue and displays completed first action', () => {

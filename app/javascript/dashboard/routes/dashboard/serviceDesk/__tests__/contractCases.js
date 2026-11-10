@@ -84,15 +84,18 @@ export function registerContractCases(test, assert) {
   test('API adapter exposes GET-only reads, no generic mutation methods', async () => {
     const calls = [];
     const client = createServiceDeskClient({ get: async (...args) => { calls.push(args); return { data: { ok: true } }; } });
-    assert.deepEqual(Object.keys(client).sort(), ['context', 'list', 'ticket']);
+    assert.deepEqual(Object.keys(client).sort(), ['context', 'list', 'requesterContext', 'ticket']);
     await client.context('1');
     await client.list('1', 'tickets', { unit_id: '10' });
     await client.ticket('1', '20');
-    assert.deepEqual(calls.map(c => c[0]), ['/api/v1/accounts/1/jrc_service_desk/ui_context', '/api/v1/accounts/1/jrc_service_desk/tickets', '/api/v1/accounts/1/jrc_service_desk/tickets/20']);
+    await client.requesterContext('1', { unitId: '10', companyId: '3', contactId: '20' });
+    assert.deepEqual(calls.map(c => c[0]), ['/api/v1/accounts/1/jrc_service_desk/ui_context', '/api/v1/accounts/1/jrc_service_desk/tickets', '/api/v1/accounts/1/jrc_service_desk/tickets/20', '/api/v1/accounts/1/jrc_service_desk/requester_people/20']);
+    assert.deepEqual(calls[3][1], { params: { unit_id: '10', company_id: '3' } });
   });
   test('API adapter rejects path and filter injection before HTTP', () => {
     const client = createServiceDeskClient({ get: () => { throw new Error('must not call'); } });
     assert.throws(() => client.ticket('1', '../2'), TypeError);
+    assert.throws(() => client.requesterContext('1', { unitId: '10', companyId: '3', contactId: '../2' }), TypeError);
     assert.throws(() => client.list('1', '../users', {}), TypeError);
     assert.throws(() => client.list('1', 'units', { mine: 'true' }), TypeError);
   });

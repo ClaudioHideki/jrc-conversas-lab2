@@ -149,7 +149,9 @@ it('preserves all advanced controls, historical step codes, native definition an
       .element.disabled
   ).toBe(true);
   await wrapper.findAll('[role="tab"]')[2].trigger('click');
-  expect(wrapper.findAll('details')).toHaveLength(2);
+  expect(wrapper.findAllComponents(StepEditor)).toHaveLength(
+    original.draft_definition.steps.length
+  );
   expect(
     wrapper.findAll('select').some(row => row.element.value === 'parallel')
   ).toBe(true);

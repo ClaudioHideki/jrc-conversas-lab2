@@ -650,6 +650,7 @@ const historyValue = value => {
             :class="inputClass"
           /><input
             v-else-if="key === 'renewal_window_days'"
+            data-testid="relationship-rule-renewal_window_days"
             :value="config.rules[key].join(', ')"
             :class="inputClass"
             @change="
@@ -687,6 +688,7 @@ const historyValue = value => {
         >{{ t('RELATIONSHIP.LOCAL_ROLES.REASON')
         }}<textarea
           v-model="configurationReason"
+          data-testid="configuration-change-reason"
           :class="inputClass"
           maxlength="2000"
           :disabled="busy"
@@ -857,6 +859,8 @@ const historyValue = value => {
       <details
         v-for="version in config.history || []"
         :key="version.version"
+        data-testid="configuration-history-version"
+        :data-version="version.version"
         class="mb-2 rounded-xl border border-n-weak p-3"
       >
         <summary class="cursor-pointer text-sm">

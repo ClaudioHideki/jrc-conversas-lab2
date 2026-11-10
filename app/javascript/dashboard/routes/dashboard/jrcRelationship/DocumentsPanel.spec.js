@@ -106,6 +106,12 @@ it('opens preserved version history with authors and validity and clears it on d
 });
 
 it('persists metadata through the authenticated API and reloads the native read model', async () => {
+  mocks.documents.mockResolvedValue({
+    data: {
+      payload: [{ ...record, can_manage: true }],
+      meta: { total: 1, per_page: 20 },
+    },
+  });
   const wrapper = render();
   await wrapper.setProps({
     metadata: { can_manage_documents: true, formatting: { locale: 'pt-BR' } },
@@ -119,6 +125,7 @@ it('persists metadata through the authenticated API and reloads the native read 
   const dialog = wrapper.findComponent({ name: 'DocumentMetadataDialog' });
   const fields = {
     responsible_id: 8,
+    confidentiality: 'operational',
     revision: 0,
     status: 'active',
     reason: 'Reviewed documentary ownership',

@@ -55,13 +55,17 @@ it('loads native eligible options and sends explicit responsibility, status, rea
     expect.objectContaining({ signal: expect.any(AbortSignal) })
   );
   expect(wrapper.get('option[value="9"]').element.disabled).toBe(true);
-  await wrapper.findAll('select')[0].setValue('8');
-  await wrapper.findAll('select')[1].setValue('archived');
+  await wrapper
+    .get('[data-testid="document-confidentiality"]')
+    .setValue('operational');
+  await wrapper.get('[data-testid="document-responsible"]').setValue('8');
+  await wrapper.get('[data-testid="document-status"]').setValue('archived');
   await wrapper.get('textarea').setValue('Explicit responsibility review');
   await wrapper.get('form').trigger('submit');
   expect(wrapper.emitted('save')[0][0]).toEqual({
     requirement_key: '',
     responsible_id: 8,
+    confidentiality: 'operational',
     status: 'archived',
     revision: 2,
     reason: 'Explicit responsibility review',
@@ -90,6 +94,22 @@ it('searches and paginates without submitting an unrelated metadata update', asy
   expect(wrapper.emitted('save')).toBeUndefined();
   wrapper.unmount();
 });
+
+it('requires an explicit confidentiality classification before emitting a metadata update', async () => {
+  const wrapper = render();
+  await flushPromises();
+  await wrapper
+    .get('textarea')
+    .setValue('Explicit synthetic classification review');
+  await wrapper.get('form').trigger('submit');
+  expect(wrapper.emitted('save')).toBeUndefined();
+  await wrapper
+    .get('[data-testid="document-confidentiality"]')
+    .setValue('restricted');
+  await wrapper.get('form').trigger('submit');
+  expect(wrapper.emitted('save')[0][0].confidentiality).toBe('restricted');
+  wrapper.unmount();
+});
 it('keeps save disabled after permission denial and aborts pending options on unmount', async () => {
   mocks.documentResponsibles.mockRejectedValue({ response: { status: 403 } });
   const wrapper = render();
@@ -105,6 +125,9 @@ it('allows correcting and retrying a rejected metadata form while preserving the
   const wrapper = render();
   await flushPromises();
   await wrapper.setProps({ error: 'Invalid reason' });
+  await wrapper
+    .get('[data-testid="document-confidentiality"]')
+    .setValue('operational');
   await wrapper.get('textarea').setValue('Corrected reason');
   expect(wrapper.get('button[type="submit"]').element.disabled).toBe(false);
   await wrapper.get('form').trigger('submit');

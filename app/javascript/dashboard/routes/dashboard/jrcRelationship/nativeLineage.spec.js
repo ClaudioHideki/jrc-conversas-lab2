@@ -38,6 +38,7 @@ beforeEach(() => {
       rules: {
         renewal_window_days: [15, 30, 60, 90, 120],
         survey_automation_enabled: false,
+        required_documents: [],
       },
       history: [],
     },
@@ -70,14 +71,14 @@ describe('Native renewal configuration', () => {
       global: { stubs: { OperationsSettingsPanel: true } },
     });
     await flushPromises();
-    const limits = wrapper
-      .findAll('label')
-      .find(label =>
-        label.text().includes('RELATIONSHIP.RULE_LABELS.renewal_window_days')
-      )
-      .get('input');
+    const limits = wrapper.get(
+      '[data-testid="relationship-rule-renewal_window_days"]'
+    );
     await limits.setValue('10, 25, 50, 75, 100');
     await limits.trigger('change');
+    await wrapper
+      .get('[data-testid="configuration-change-reason"]')
+      .setValue('Synthetic renewal review');
     await wrapper.get('form').trigger('submit');
     await flushPromises();
     expect(mocks.api.saveConfiguration).toHaveBeenCalledWith('12', {
@@ -87,7 +88,9 @@ describe('Native renewal configuration', () => {
       rules: {
         renewal_window_days: [10, 25, 50, 75, 100],
         survey_automation_enabled: false,
+        required_documents: [],
       },
+      reason: 'Synthetic renewal review',
     });
     wrapper.unmount();
   });

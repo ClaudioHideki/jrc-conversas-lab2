@@ -2,6 +2,7 @@ import { mount, flushPromises } from '@vue/test-utils';
 import { beforeEach, expect, it, vi } from 'vitest';
 import Panel from './ConfigurationPanel.vue';
 import PriorityBandsForm from './PriorityBandsForm.vue';
+import PortfolioCapacityLimitsForm from './PortfolioCapacityLimitsForm.vue';
 const api = vi.hoisted(() => ({
   configuration: vi.fn(),
   saveConfiguration: vi.fn(),
@@ -87,7 +88,7 @@ it('prevents a malformed numeric band policy from reaching save and persists exp
 it('edits and persists customer capacity as typed native configuration, not a comma-separated string', async () => {
   const wrapper = mountPanel();
   await flushPromises();
-  const capacity = wrapper.find('fieldset');
+  const capacity = wrapper.findComponent(PortfolioCapacityLimitsForm);
   await capacity.get('button').trigger('click');
   await capacity.findAll('input')[0].setValue('10');
   await capacity.findAll('input')[1].setValue('50');
@@ -112,7 +113,7 @@ it('offers native team settings without presenting health controls that do not r
   await wrapper.findAll('select')[0].setValue('team:22');
   await flushPromises();
   expect(api.configuration).toHaveBeenLastCalledWith('12', {
-    params: { scope_key: 'team:22' },
+    params: { scope_key: 'team:22', history_page: 1, history_per_page: 25 },
   });
   expect(wrapper.text()).not.toContain('RELATIONSHIP.WEIGHTS');
   expect(

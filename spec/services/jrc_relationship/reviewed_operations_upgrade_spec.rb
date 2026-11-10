@@ -5,6 +5,7 @@ require Rails.root.join('db/migrate/20261019140000_add_flow_domain_results')
 require Rails.root.join('db/migrate/20261101210000_add_relationship_action_follow_up')
 require Rails.root.join('db/migrate/20261101220000_create_relationship_customer_documents')
 require Rails.root.join('db/migrate/20261101230000_create_relationship_processing_runs')
+require Rails.root.join('db/migrate/20261109212000_create_relationship_management_requests')
 
 RSpec.describe 'Reviewed operations reversible PostgreSQL upgrade' do
   self.use_transactional_tests = false
@@ -22,7 +23,8 @@ RSpec.describe 'Reviewed operations reversible PostgreSQL upgrade' do
       counts = [Account.count, Contact.count, Conversation.count, Message.count]
       # A real rollback reverses later migrations before dropping the shared
       # assignment index. Keep the cross-account document foreign key intact.
-      newer = [AddRelationshipActionFollowUp, CreateRelationshipCustomerDocuments, CreateRelationshipProcessingRuns]
+      newer = [AddRelationshipActionFollowUp, CreateRelationshipCustomerDocuments, CreateRelationshipProcessingRuns,
+               CreateRelationshipManagementRequests]
       newer.reverse_each { |migration| migration.new.migrate(:down) }
       AddFlowDomainResults.new.down
       CreateReviewedRelationshipCadences.new.down

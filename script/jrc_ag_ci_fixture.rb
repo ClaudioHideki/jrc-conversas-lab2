@@ -39,7 +39,7 @@ when 'load_main'
   # Reproduce only the versions actually shipped in main in this empty fixture.
   connection.execute('DELETE FROM schema_migrations')
   versions.uniq.each { |value| connection.execute("INSERT INTO schema_migrations(version) VALUES (#{connection.quote(value)})") }
-  id = connection.select_value("INSERT INTO accounts(name, locale, created_at, updated_at) VALUES ('SYNTHETIC A-G upgrade receipt', 'en', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING id")
+  id = connection.select_value("INSERT INTO accounts(name, created_at, updated_at) VALUES ('SYNTHETIC A-G upgrade receipt', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING id")
   row = connection.select_one("SELECT * FROM accounts WHERE id = #{Integer(id)}")
   File.write(marker_path, JSON.generate(account_id: id, digest: Digest::SHA256.hexdigest(JSON.generate(row)), main_sha: base))
 when 'validate_constraints'

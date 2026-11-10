@@ -70,7 +70,11 @@ const load = async () => {
 };
 const maySave = computed(
   () =>
-    !props.busy && !loading.value && optionsReady.value && !!form.reason.trim()
+    !props.busy &&
+    !loading.value &&
+    optionsReady.value &&
+    ['operational', 'restricted'].includes(form.confidentiality) &&
+    !!form.reason.trim()
 );
 const submit = () => {
   if (maySave.value) emit('save', { ...form });
@@ -123,6 +127,7 @@ onBeforeUnmount(() => {
         {{ t('RELATIONSHIP.V2.DOCS.CONFIDENTIALITY') }}
         <select
           v-model="form.confidentiality"
+          data-testid="document-confidentiality"
           required
           :disabled="busy"
           :class="inputClass"
@@ -162,6 +167,7 @@ onBeforeUnmount(() => {
         >{{ t('RELATIONSHIP.V2.DOCS.RESPONSIBLE')
         }}<select
           v-model="form.responsible_id"
+          data-testid="document-responsible"
           :class="inputClass"
           :disabled="busy || loading || !!loadError"
         >
@@ -213,6 +219,7 @@ onBeforeUnmount(() => {
         >{{ t('RELATIONSHIP.V2.DOCS.STATUS')
         }}<select
           v-model="form.status"
+          data-testid="document-status"
           :class="inputClass"
           :disabled="busy"
         >

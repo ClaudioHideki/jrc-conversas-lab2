@@ -1,6 +1,6 @@
 import unittest
 
-from jrc_ag_native_plan import DATABASES, ROOT, SCOPES, plan
+from jrc_ag_native_plan import DATABASES, ROOT, SCOPES, plan, shard
 
 
 class NativePlanGuardsTest(unittest.TestCase):
@@ -26,6 +26,17 @@ class NativePlanGuardsTest(unittest.TestCase):
         self.assertEqual(set(groups), set(DATABASES))
         self.assertEqual(len(actual), len(set(actual)))
         self.assertEqual(set(actual), expected)
+
+    def test_shards_cover_every_example_source_once_without_excluding_failures(self):
+        paths = plan()[DATABASES[0]]
+        shards = [shard(paths, index, 6) for index in range(6)]
+        actual = [path for part in shards for path in part]
+        self.assertTrue(all(shards))
+        self.assertEqual(len(actual), len(set(actual)))
+        self.assertEqual(set(actual), set(paths))
+        for index, count in [(-1, 6), (6, 6), (0, 0)]:
+            with self.assertRaises(ValueError):
+                shard(paths, index, count)
 
     def test_repeatable_read_retention_api_uses_committed_fixtures_in_its_own_database(self):
         self.assertIn('spec/requests/api/v1/accounts/relationship/approved_retention_spec.rb',

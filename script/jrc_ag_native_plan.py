@@ -38,15 +38,25 @@ def plan():
     return groups
 
 
+def shard(paths, index, count):
+    if count < 1 or not 0 <= index < count:
+        raise ValueError('Invalid native test shard')
+    return paths[index::count]
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--database', choices=DATABASES)
     parser.add_argument('--paths', action='store_true')
+    parser.add_argument('--shard-index', type=int, default=0)
+    parser.add_argument('--shard-count', type=int, default=1)
     args = parser.parse_args()
     groups = plan()
+    if args.shard_count < 1 or not 0 <= args.shard_index < args.shard_count:
+        parser.error('Invalid native test shard')
     if args.paths:
         if not args.database:
             parser.error('--paths requires --database')
-        print('\n'.join(groups[args.database]))
+        print('\n'.join(shard(groups[args.database], args.shard_index, args.shard_count)))
     else:
         print(json.dumps({'executed': False, 'groups': groups}, indent=2))

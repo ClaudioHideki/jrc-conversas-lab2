@@ -8,6 +8,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ag-native-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   identities:
     runs-on: ubuntu-24.04
@@ -32,10 +36,22 @@ jobs:
     timeout-minutes: 90
     strategy:
       fail-fast: false
-      max-parallel: 2
+      max-parallel: 4
       matrix:
         installation: [fresh, upgrade]
-        database: [jrc_rel_v2_candidate_test, jrc_four_domains_schema_admission_test, jrc_rel_sd_candidate_test, jrc_jornada_candidate_test, jrc_four_domains_schema_authority_test, jrc_four_domains_schema_test, jrc_ag_retention_native_test]
+        target:
+          - {database: jrc_rel_v2_candidate_test, shard: 0, count: 6}
+          - {database: jrc_rel_v2_candidate_test, shard: 1, count: 6}
+          - {database: jrc_rel_v2_candidate_test, shard: 2, count: 6}
+          - {database: jrc_rel_v2_candidate_test, shard: 3, count: 6}
+          - {database: jrc_rel_v2_candidate_test, shard: 4, count: 6}
+          - {database: jrc_rel_v2_candidate_test, shard: 5, count: 6}
+          - {database: jrc_four_domains_schema_admission_test, shard: 0, count: 1}
+          - {database: jrc_rel_sd_candidate_test, shard: 0, count: 1}
+          - {database: jrc_jornada_candidate_test, shard: 0, count: 1}
+          - {database: jrc_four_domains_schema_authority_test, shard: 0, count: 1}
+          - {database: jrc_four_domains_schema_test, shard: 0, count: 1}
+          - {database: jrc_ag_retention_native_test, shard: 0, count: 1}
     services:
       postgres:
         image: pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a
@@ -52,7 +68,7 @@ jobs:
       POSTGRES_HOST: jrc-rel-v2-pg-20261101
       POSTGRES_USERNAME: postgres
       POSTGRES_PASSWORD: disposable-test-only
-      POSTGRES_DATABASE: ${{ matrix.database }}
+      POSTGRES_DATABASE: ${{ matrix.target.database }}
       REDIS_URL: redis://127.0.0.1:6379/15
       SECRET_KEY_BASE: synthetic-ag-ci-not-a-production-secret
       BUNDLE_FROZEN: 'true'
@@ -101,27 +117,27 @@ jobs:
           bundle exec rails runner script/jrc_ag_ci_fixture.rb verify
           bundle exec rails zeitwerk:check
       - name: Focused cumulative and integration regressions before the broad suite
-        if: matrix.database == 'jrc_rel_v2_candidate_test'
+        if: matrix.target.database == 'jrc_rel_v2_candidate_test' && matrix.target.shard == 0
         run: |
           bundle exec rspec spec/services/jrc_relationship/approved_local_roles_spec.rb \
             spec/requests/api/v1/accounts/crm/approved_human_requirements_spec.rb \
             spec/requests/api/v1/accounts/jrc_approvals/approved_financial_adjustments_spec.rb \
             spec/services/jrc_customers/company_import_corporate_scope_spec.rb \
             spec/services/jrc_backoffice/consolidated_migration_identity_spec.rb \
-            --seed 20261110 --format documentation --format json --out /tmp/ag-focused-rspec.json
+            --seed 20261110 --require ./script/jrc_ag_ci_formatter.rb --format JrcAgCiFormatter --format json --out /tmp/ag-focused-rspec.json
           ruby -rjson -e 'r=JSON.parse(File.read(ARGV.fetch(0))).fetch("summary"); abort "Empty, failed or pending native examples" unless r.fetch("example_count").positive? && r.fetch("failure_count").zero? && r.fetch("pending_count").zero?' /tmp/ag-focused-rspec.json
       - name: Authenticated APIs, policies, immutable history, signatures and real transactions
         shell: bash
         run: |
-          mapfile -t specs < <(python3 script/jrc_ag_native_plan.py --database "$POSTGRES_DATABASE" --paths)
+          mapfile -t specs < <(python3 script/jrc_ag_native_plan.py --database "$POSTGRES_DATABASE" --paths --shard-index "${{ matrix.target.shard }}" --shard-count "${{ matrix.target.count }}")
           test "${#specs[@]}" -gt 0
-          bundle exec rspec "${specs[@]}" --seed 20261110 --format documentation --format json --out /tmp/ag-rspec.json
+          bundle exec rspec "${specs[@]}" --seed 20261110 --require ./script/jrc_ag_ci_formatter.rb --format JrcAgCiFormatter --format json --out /tmp/ag-rspec.json
           ruby -rjson -e 'r=JSON.parse(File.read(ARGV.fetch(0))).fetch("summary"); abort "Empty, failed or pending native examples" unless r.fetch("example_count").positive? && r.fetch("failure_count").zero? && r.fetch("pending_count").zero?' /tmp/ag-rspec.json
       - name: Preserve synthetic evidence, including failures
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ag-native-${{ github.sha }}-${{ matrix.installation }}-${{ matrix.database }}
+          name: ag-native-${{ github.sha }}-${{ matrix.installation }}-${{ matrix.target.database }}-${{ matrix.target.shard }}
           path: |
             /tmp/ag-test-plan.json
             /tmp/ag-rspec.json
@@ -160,7 +176,16 @@ jobs:
             app/javascript/dashboard/routes/dashboard/jrcOperations/views/ProjectDetail.vue \
             app/javascript/dashboard/routes/dashboard/jrcOperations/views/ProjectList.vue \
             app/javascript/dashboard/routes/dashboard/serviceDesk/components/QuickTicketForm.vue \
-            app/javascript/dashboard/routes/dashboard/serviceDesk/views/TicketFormView.vue
+            app/javascript/dashboard/routes/dashboard/serviceDesk/views/TicketFormView.vue \
+            app/javascript/dashboard/routes/dashboard/jrcRelationship/ConfigurationPanel.vue \
+            app/javascript/dashboard/routes/dashboard/jrcRelationship/DocumentMetadataDialog.vue \
+            app/javascript/dashboard/routes/dashboard/jrcRelationship/DocumentMetadataDialog.spec.js \
+            app/javascript/dashboard/routes/dashboard/jrcRelationship/DocumentsPanel.spec.js \
+            app/javascript/dashboard/routes/dashboard/jrcRelationship/distributionConfiguration.spec.js \
+            app/javascript/dashboard/routes/dashboard/jrcRelationship/nativeLineage.spec.js \
+            app/javascript/dashboard/routes/dashboard/jrcRelationship/operations.spec.js \
+            app/javascript/dashboard/routes/dashboard/approvals/specs/policyWizard.spec.js \
+            app/javascript/dashboard/routes/dashboard/crm/views/spec/BackofficeLegacyFlow.spec.js
       - name: Frontend state boundaries, including native Ruby role-ceiling parity
         run: |
           node --test script/jrc_approved_ui_state.test.mjs script/jrc_backoffice_context_privacy.test.mjs \

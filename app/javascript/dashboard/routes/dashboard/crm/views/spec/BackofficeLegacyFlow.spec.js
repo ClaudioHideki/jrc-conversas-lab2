@@ -2,12 +2,18 @@ import { mount, flushPromises } from '@vue/test-utils';
 import BackofficeLayout from '../backoffice/BackofficeLayout.vue';
 
 const mocks = vi.hoisted(() => ({ replace: vi.fn(), route: null }));
+vi.mock('vuex', () => ({
+  useStore: () => ({
+    getters: { getCurrentUserID: 7, getCurrentAccountId: null },
+  }),
+}));
 vi.mock('vue-router', () => ({
   useRoute: () => mocks.route,
   useRouter: () => ({ replace: mocks.replace }),
 }));
 const stubs = {
   RouterLink: true,
+  ModuleSegmentFilter: true,
   BackofficeOverview: true,
   BackofficeWorklist: true,
   BackofficeRequest360: true,
