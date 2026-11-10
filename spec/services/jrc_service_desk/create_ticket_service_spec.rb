@@ -94,6 +94,62 @@ RSpec.describe JrcServiceDesk::CreateTicketService do
     expect { create_command(unit_id: "#{sd_unit.id}abc") }.to raise_error(ArgumentError)
   end
 
+  context 'with a configured company destination' do
+    let(:company) { sd_account.master_companies.create!(name: 'Synthetic internal customer') }
+    let(:recipient) { create(:user, account: sd_account) }
+    let(:recipient_membership) do
+      create(:jrc_sd_membership, unit: sd_unit, account_user: sd_account.account_users.find_by!(user: recipient),
+        availability: 'unavailable', capacity: nil, manual_assignment_enabled: true)
+    end
+    let(:queue) { create(:jrc_sd_queue, unit: sd_unit, distribution_mode: 'manual') }
+
+    before do
+      sd_as_admin!
+      sd_account.enable_features!('jrc_customer_master')
+      sd_contact.update!(company_id: company.id)
+      JrcServiceDesk::PortalRoutingConfiguration.save!(unit: sd_unit, actor: sd_account_user,
+        values: { 'company_routes' => [{ 'company_id' => company.id, 'queue_id' => queue.id,
+                                       'assignee_account_user_id' => recipient_membership.account_user_id }] },
+        expected_revision: JrcServiceDesk::PortalRoutingConfiguration.revision(sd_unit))
+      sd_account_user.update!(role: :agent)
+    end
+
+    it 'lets an internal agent create a ticket for the customer and assigns the fixed recipient offline' do
+      ticket = create_command(sd_create_attributes.merge(company_id: company.id))
+      expect(ticket).to have_attributes(assignee_membership_id: recipient_membership.id, queue_id: queue.id,
+                                       created_by_membership_id: sd_membership.id, origin_channel: 'manual')
+    end
+
+    it 'replays the original ticket after configuration changes without reassigning it' do
+      ticket = create_command
+      sd_as_admin!
+      JrcServiceDesk::PortalRoutingConfiguration.save!(unit: sd_unit, actor: sd_account_user, values: {},
+        expected_revision: JrcServiceDesk::PortalRoutingConfiguration.revision(sd_unit))
+      sd_account_user.update!(role: :agent)
+      expect(create_command.id).to eq(ticket.id)
+      expect(ticket.reload.assignee_membership_id).to eq(recipient_membership.id)
+    end
+
+    it 'preserves an explicit destination chosen by the internal agent' do
+      other_queue = create(:jrc_sd_queue, unit: sd_unit, distribution_mode: 'manual')
+      ticket = create_command(sd_create_attributes.merge(queue_id: other_queue.id, assignee_account_user_id: sd_account_user.id))
+      expect(ticket).to have_attributes(queue_id: other_queue.id, assignee_membership_id: sd_membership.id)
+    end
+
+    it 'does not apply the portal default or another customer route to an unrelated company' do
+      sd_as_admin!
+      configuration = JrcServiceDesk::PortalRoutingConfiguration.read(sd_unit).merge(
+        'queue_id' => queue.id, 'assignee_account_user_id' => recipient_membership.account_user_id)
+      JrcServiceDesk::PortalRoutingConfiguration.save!(unit: sd_unit, actor: sd_account_user, values: configuration,
+        expected_revision: JrcServiceDesk::PortalRoutingConfiguration.revision(sd_unit))
+      sd_account_user.update!(role: :agent)
+      sd_contact.update!(company_id: nil)
+      ticket = create_command
+      expect(ticket.queue_id).to be_nil
+      expect(ticket.assignee_membership_id).to be_nil
+    end
+  end
+
   it 'does not create a default unit or configuration when required data is missing' do
     count = JrcServiceDesk::Unit.count
     expect { create_command(sd_create_attributes.except(:status_id)) }.to raise_error(ActiveRecord::RecordInvalid)

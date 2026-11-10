@@ -50,6 +50,7 @@ class JrcServiceDesk::CreateTicketService < JrcServiceDesk::BaseService
       requester = Contact.where(account_id: context.account.id).find(JrcServiceDesk::Input.id(normalized['requester_id']))
       authorize!(requester, :show?)
       JrcServiceDesk::RequesterDirectory.new(context).validate!(requester, company_id: normalized['company_id'])
+      apply_company_route!(unit, requester, values, normalized) if origin_channel == 'manual'
       service, queue = catalogue_references(service_id, normalized, unit)
       ticket = JrcServiceDesk::Ticket.new(
         account: context.account, unit: unit, title: normalized['title'], description: normalized['description'], requester: requester,
@@ -85,6 +86,16 @@ class JrcServiceDesk::CreateTicketService < JrcServiceDesk::BaseService
   end
 
   private
+
+  def apply_company_route!(unit, requester, values, normalized)
+    return if normalized.values_at('queue_id', 'team_id', 'assignee_account_user_id').any?
+
+    configuration = JrcServiceDesk::PortalRoutingConfiguration.read(unit).slice('company_routes')
+    route = JrcServiceDesk::PortalRoutingConfiguration.resolve(unit: unit, context: context, values: configuration,
+                                                              company_id: normalized['company_id'] || requester.company_id)
+    normalized.merge!(route)
+    values.merge!(route)
+  end
 
   def normalize_company!(values, normalized)
     return if values['company_id'].blank?
