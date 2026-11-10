@@ -30,8 +30,191 @@ jobs:
       # Never mark the current combined tree as database-ready while this gate fails.
       - run: node script/validate_ag_migration_identity.mjs
 
-  rails:
+  migration-admission:
     needs: identities
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: disposable-test-only
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 12
+      redis:
+        image: redis:7.4.0-alpine@sha256:c35af3bbcef51a62c8bae5a9a563c6f1b60d7ebaea4cb5a3ccbcc157580ae098
+        ports: ['6379:6379']
+    env:
+      RAILS_ENV: test
+      FRONTEND_URL: https://host.example.test
+      POSTGRES_HOST: jrc-rel-v2-pg-20261101
+      POSTGRES_USERNAME: postgres
+      POSTGRES_PASSWORD: disposable-test-only
+      POSTGRES_DATABASE: jrc_rel_v2_candidate_test
+      REDIS_URL: redis://127.0.0.1:6379/15
+      SECRET_KEY_BASE: synthetic-ag-ci-not-a-production-secret
+      BUNDLE_FROZEN: 'true'
+      SCHEMA: /tmp/ag-fresh-schema.rb
+      JRC_AG_FIXTURE_RECEIPT: /tmp/ag-fixture-receipt.json
+      JRC_SD_CONCURRENCY: '1'
+      JRC_REVIEWED_CONCURRENCY: '1'
+      DB_POOL_SIZE: '10'
+      TZ: UTC
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Prove disposable service; legacy spec alias exists only on this ephemeral runner
+        shell: bash
+        env:
+          JRC_AG_POSTGRES_SERVICE_ID: ${{ job.services.postgres.id }}
+        run: |
+          test "$GITHUB_ACTIONS" = true
+          test "$RUNNER_ENVIRONMENT" = github-hosted
+          docker inspect "$JRC_AG_POSTGRES_SERVICE_ID" --format '{{.Id}} {{.Config.Image}}'
+          test "$(docker inspect "$JRC_AG_POSTGRES_SERVICE_ID" --format '{{json .HostConfig.Binds}}')" = null
+          echo "JRC_AG_POSTGRES_SERVICE_ID=$JRC_AG_POSTGRES_SERVICE_ID" >> "$GITHUB_ENV"
+          echo '127.0.0.1 jrc-rel-v2-pg-20261101' | sudo tee -a /etc/hosts >/dev/null
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libpq-dev libvips-dev imagemagick poppler-utils tesseract-ocr tesseract-ocr-por tesseract-ocr-eng
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4.4'
+          bundler: 2.5.16
+          bundler-cache: true
+      - name: Prove fresh, pinned-main upgrade and real schema reload on three new databases
+        shell: bash
+        run: |
+          bundle exec rails db:create db:migrate
+          bundle exec rails runner script/jrc_ag_ci_fixture.rb validate_constraints
+          bundle exec rails runner script/jrc_ag_ci_fixture.rb verify
+          bundle exec rails db:schema:dump
+          JRC_AG_CATALOG_OUTPUT=/tmp/ag-fresh-catalog.json bundle exec rails runner script/jrc_ag_ci_fixture.rb catalog
+          POSTGRES_DATABASE=jrc_jornada_candidate_test bundle exec rails db:create
+          POSTGRES_DATABASE=jrc_jornada_candidate_test bundle exec rails runner script/jrc_ag_ci_fixture.rb load_main
+          POSTGRES_DATABASE=jrc_jornada_candidate_test SCHEMA=/tmp/ag-upgrade-schema.rb bundle exec rails db:migrate
+          POSTGRES_DATABASE=jrc_jornada_candidate_test bundle exec rails runner script/jrc_ag_ci_fixture.rb validate_constraints
+          POSTGRES_DATABASE=jrc_jornada_candidate_test bundle exec rails runner script/jrc_ag_ci_fixture.rb verify
+          POSTGRES_DATABASE=jrc_jornada_candidate_test JRC_AG_CATALOG_OUTPUT=/tmp/ag-upgrade-catalog.json bundle exec rails runner script/jrc_ag_ci_fixture.rb catalog
+          POSTGRES_DATABASE=jrc_four_domains_schema_test bundle exec rails db:create db:schema:load
+          POSTGRES_DATABASE=jrc_four_domains_schema_test bundle exec rails runner script/jrc_ag_ci_fixture.rb validate_constraints
+          POSTGRES_DATABASE=jrc_four_domains_schema_test JRC_AG_FIXTURE_RECEIPT=/tmp/ag-reload-receipt.json bundle exec rails runner script/jrc_ag_ci_fixture.rb verify
+          POSTGRES_DATABASE=jrc_four_domains_schema_test JRC_AG_CATALOG_OUTPUT=/tmp/ag-reload-catalog.json bundle exec rails runner script/jrc_ag_ci_fixture.rb catalog
+          python3 - <<'PYTHON'
+          import json
+          from pathlib import Path
+          baseline=json.loads(Path('/tmp/ag-fresh-catalog.json').read_text())
+          for path in ('/tmp/ag-upgrade-catalog.json','/tmp/ag-reload-catalog.json'):
+              actual=json.loads(Path(path).read_text())
+              differences=[key for key in baseline if baseline[key]!=actual[key]]
+              print(path, {'catalog_groups_with_differences': differences})
+              assert not differences, 'Native schema parity is not proved'
+          PYTHON
+      - name: Preserve actual synthetic catalogs and generated schema, including failure evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ag-migration-admission-${{ github.sha }}
+          path: |
+            /tmp/ag-fresh-schema.rb
+            /tmp/ag-upgrade-schema.rb
+            /tmp/ag-*-catalog.json
+            /tmp/ag-fixture-receipt.json
+          if-no-files-found: warn
+
+  native-focused:
+    needs: [identities, migration-admission]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: disposable-test-only
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 12
+      redis:
+        image: redis:7.4.0-alpine@sha256:c35af3bbcef51a62c8bae5a9a563c6f1b60d7ebaea4cb5a3ccbcc157580ae098
+        ports: ['6379:6379']
+    env:
+      RAILS_ENV: test
+      FRONTEND_URL: https://host.example.test
+      POSTGRES_HOST: jrc-rel-v2-pg-20261101
+      POSTGRES_USERNAME: postgres
+      POSTGRES_PASSWORD: disposable-test-only
+      POSTGRES_DATABASE: jrc_rel_v2_candidate_test
+      REDIS_URL: redis://127.0.0.1:6379/15
+      SECRET_KEY_BASE: synthetic-ag-ci-not-a-production-secret
+      BUNDLE_FROZEN: 'true'
+      SCHEMA: /tmp/ag-focused-schema.rb
+      JRC_AG_FIXTURE_RECEIPT: /tmp/ag-fixture-receipt.json
+      JRC_SD_CONCURRENCY: '1'
+      JRC_REVIEWED_CONCURRENCY: '1'
+      DB_POOL_SIZE: '10'
+      TZ: UTC
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Prove disposable service; legacy spec alias exists only on this ephemeral runner
+        shell: bash
+        env:
+          JRC_AG_POSTGRES_SERVICE_ID: ${{ job.services.postgres.id }}
+        run: |
+          test "$GITHUB_ACTIONS" = true
+          test "$RUNNER_ENVIRONMENT" = github-hosted
+          docker inspect "$JRC_AG_POSTGRES_SERVICE_ID" --format '{{.Id}} {{.Config.Image}}'
+          test "$(docker inspect "$JRC_AG_POSTGRES_SERVICE_ID" --format '{{json .HostConfig.Binds}}')" = null
+          echo "JRC_AG_POSTGRES_SERVICE_ID=$JRC_AG_POSTGRES_SERVICE_ID" >> "$GITHUB_ENV"
+          echo '127.0.0.1 jrc-rel-v2-pg-20261101' | sudo tee -a /etc/hosts >/dev/null
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libpq-dev libvips-dev imagemagick poppler-utils tesseract-ocr tesseract-ocr-por tesseract-ocr-eng
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4.4'
+          bundler: 2.5.16
+          bundler-cache: true
+      - name: Admit only an empty disposable native database
+        run: |
+          bundle exec rails db:create db:migrate
+          bundle exec rails runner script/jrc_ag_ci_fixture.rb validate_constraints
+          bundle exec rails runner script/jrc_ag_ci_fixture.rb verify
+      - name: Reproduce corrected native failures before the full regression matrix
+        shell: bash
+        run: |
+          bundle exec rspec \
+            spec/services/jrc_relationship/approved_local_roles_spec.rb \
+            spec/requests/api/v1/accounts/crm/approved_human_requirements_spec.rb \
+            spec/requests/api/v1/accounts/jrc_approvals/approved_financial_adjustments_spec.rb \
+            spec/services/jrc_customers/company_import_corporate_scope_spec.rb \
+            spec/services/jrc_backoffice/consolidated_migration_identity_spec.rb \
+            spec/services/jrc_crm/nexora_end_to_end_spec.rb \
+            spec/services/jrc_relationship/playbook_flow_spec.rb \
+            spec/services/jrc_relationship/survey_message_execution_provider_boundary_spec.rb \
+            spec/services/jrc_relationship/operations_spec.rb \
+            spec/requests/api/v1/accounts/relationship/survey_reports_spec.rb \
+            spec/services/jrc_relationship/customer_documents_latest_versions_spec.rb \
+            spec/requests/api/v1/accounts/relationship/document_catalog_scale_spec.rb \
+            spec/services/jrc_backoffice/signatures/admissions_spec.rb \
+            spec/requests/api/v1/accounts/relationship/analyst_restoration_spec.rb \
+            spec/requests/api/v1/accounts/jrc_approvals/commercial_api_spec.rb \
+            spec/requests/api/v1/accounts/relationship/customer_documents_spec.rb \
+            --seed 20261110 --require ./script/jrc_ag_ci_formatter.rb --format JrcAgCiFormatter --format json --out /tmp/ag-focused-rspec.json
+          ruby -rjson -e 'r=JSON.parse(File.read(ARGV.fetch(0))).fetch("summary"); abort "Empty, failed or pending native examples" unless r.fetch("example_count").positive? && r.fetch("failure_count").zero? && r.fetch("pending_count").zero?' /tmp/ag-focused-rspec.json
+      - name: Preserve focused native failures and evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ag-native-focused-${{ github.sha }}
+          path: /tmp/ag-focused-rspec.json
+          if-no-files-found: warn
+
+  rails:
+    needs: [identities, migration-admission, native-focused]
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     strategy:
@@ -65,6 +248,7 @@ jobs:
         ports: ['6379:6379']
     env:
       RAILS_ENV: test
+      FRONTEND_URL: https://host.example.test
       POSTGRES_HOST: jrc-rel-v2-pg-20261101
       POSTGRES_USERNAME: postgres
       POSTGRES_PASSWORD: disposable-test-only
@@ -201,6 +385,7 @@ jobs:
             app/javascript/dashboard/routes/dashboard/approvals \
             app/javascript/dashboard/routes/dashboard/jrcOperations \
             app/javascript/dashboard/routes/dashboard/serviceDesk \
+            app/javascript/dashboard/components-next/sidebar \
             --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
             --reporter=default --reporter=json --outputFile=/tmp/ag-vue-results.json
       - name: Preserve native frontend evidence

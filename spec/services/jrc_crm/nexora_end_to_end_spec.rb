@@ -1,10 +1,15 @@
 require 'rails_helper'
 
-RSpec.describe 'JRC CRM Nexora end-to-end commercial lifecycle' do
+RSpec.describe 'JRC CRM Nexora end-to-end commercial lifecycle', :approval_core, :authority_core, :signature_delivery_core do
+  self.use_transactional_tests = false
   let(:account) { create(:account) }
   let(:seller) { create(:user, account: account, role: :administrator, name: 'Thiago Ribeiro') }
 
   before do
+    config = ActiveRecord::Base.connection_db_config
+    raise 'Exclusive synthetic integration database required' unless Rails.env.test? && config.database == 'jrc_rel_v2_candidate_test' &&
+                                                                    config.host == 'jrc-rel-v2-pg-20261101'
+
     account.enable_features!('jrc_crm', 'jrc_customer_master', 'jrc_projects')
   end
 
@@ -171,13 +176,57 @@ RSpec.describe 'JRC CRM Nexora end-to-end commercial lifecycle' do
 
     # The operational handoff remains explicit: contract signature and the
     # implementation checklist are real gates and are not auto-completed.
-    File.open(Rails.root.join('spec/assets/sample.pdf')) do |file|
-      contract.signed_document.attach(io: file, filename: 'nexora-assinado.pdf', content_type: 'application/pdf')
-    end
-    contract.update!(
-      status: 'active', signature_status: 'signed', signature_mode: 'manual',
-      signed_by_name: 'Marcelo Andrade', signed_at: Time.current
+    expect { backoffice.advance!(actor: seller) }.to raise_error(ActiveRecord::RecordInvalid)
+    expect(backoffice.reload.stage).to eq('contract')
+    # Preserve the same customer/order. The v2 path requires real native versions,
+    # signer identities, powers approval and accepted evidence; a manual flag is insufficient.
+    # Only provider HTTP and antivirus results are synthetic, not legal decisions.
+    issuer = account.master_companies.create!(name: 'SYNTHETIC Nexora issuer', relationship_type: 'internal', tax_id: '11444777000161')
+    unit = account.jrc_crm_business_units.create!(name: 'SYNTHETIC Nexora unit', code: SecureRandom.hex(6), company_id: issuer.id)
+    company.update!(tax_id: '11222333000181')
+    issuer_person = create(:contact, account: account, company_id: issuer.id, email: 'issuer.nexora@example.test')
+    domain = { account: account, actor: seller, company: issuer, customer: company, unit: unit,
+               customer_person: contact, issuer_person: issuer_person, order: order, contract: contract, operation: backoffice,
+               documents: JrcBackoffice::Documents.new(request: backoffice, actor: seller),
+               versions: JrcBackoffice::ContractVersions.new(account: account, actor: seller, request_id: backoffice.id),
+               file: Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/files/sample.pdf'), 'application/pdf') }
+    authority_identity_setup(domain)
+    # Explicit synthetic group coverage keeps the pre-existing cross-module manager scope.
+    account.jrc_crm_user_business_units.create!(user: seller, scope: 'GROUP', active: true, structure_managed: true)
+    order.update!(business_unit: unit)
+    contract.update!(business_unit: unit)
+    backoffice.update!(business_unit: unit, metadata: backoffice.metadata.merge('required_documents' => ['representation']))
+    legal = signature_legal_context(domain)
+    connection = synthetic_delivery_connection(account)
+    delivery = JrcBackoffice::Signatures::Admissions.new(account: account, actor: seller, request_id: backoffice.id).create!(
+      version_id: legal[:version].id, authority_proposal_id: legal[:proposal].id, expected_connection_id: connection.id,
+      expected_source_digest: legal[:version].source_digest, idempotency_key: SecureRandom.uuid
     )
+    external_id = SecureRandom.uuid
+    delivery.events.create!(account: account, connection: connection, kind: 'send_confirmed', event_key: SecureRandom.uuid,
+                            external_id: external_id, source_snapshot: '{}')
+    gateway = instance_double(JrcBackoffice::Signatures::Gateway)
+    allow(JrcBackoffice::Signatures::Gateway).to receive(:new).with(connection: connection).and_return(gateway)
+    observation = {
+      external_id: external_id, state: 'completion_reported', document_references: ['1'], observed_at: Time.current.iso8601(6),
+      signers: delivery.snapshot.fetch('recipients').map do |row|
+        { id: row.fetch('position').to_s, name: row.fetch('name'), email: row.fetch('email'), completed: true,
+          signed_at: Time.current.iso8601(6), provider_state: 'completed' }
+      end,
+      signed_document: "%PDF-1.4\nSYNTHETIC NEXORA SIGNED FILE", certificate: "%PDF-1.4\nSYNTHETIC NEXORA CERTIFICATE"
+    }
+    allow(gateway).to receive(:evidence).with(external_id).and_return(observation)
+    bundle = JrcBackoffice::Signatures::Artifacts.new(account: account, actor: seller, request_id: backoffice.id)
+                                               .capture!(delivery_id: delivery.id)
+    [bundle.signed_document, bundle.certificate_document].each do |version|
+      JrcBackoffice::DocumentScan.create!(account: account, document_version: version, source_blob: version.file.blob,
+                                          attempt: 1, state: 'clean', expected_sha256: version.sha256,
+                                          observed_sha256: version.sha256, scanner_adapter: 'clamav-instream-v1')
+    end
+    JrcBackoffice::Signatures::EvidenceAcceptance.new(account: account, actor: seller, request_id: backoffice.id)
+                                               .call(delivery_id: delivery.id, expected_source_digest: bundle.source_digest)
+    expect(JrcBackoffice::SignatureRelease.verified?(contract.reload)).to be(true)
+    contract.update!(status: 'active')
     JrcCrm::BackofficeDocumentChecklist.new(request: backoffice, actor: seller).sync!
     expect(backoffice.reload.stage).to eq('contract')
     backoffice.advance! # contract -> implementation

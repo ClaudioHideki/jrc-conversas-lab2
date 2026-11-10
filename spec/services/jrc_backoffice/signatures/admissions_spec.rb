@@ -172,7 +172,7 @@ RSpec.describe JrcBackoffice::Signatures::Admissions, :approval_core, :authority
     input
     original = document.file.blob.download
     document.file.blob.service.upload(document.file.blob.key, StringIO.new('%PDF-corrupt-synthetic'), checksum: nil)
-    expect { service.create!(**input) }.to raise_error(JrcApprovals::Error, 'AUTHORITY_EVIDENCE_UNAVAILABLE')
+    expect { service.create!(**input) }.to raise_error(JrcBackoffice::Requirements::Blocked)
     expect(service.scope).to be_empty
   ensure
     document.file.blob.service.upload(document.file.blob.key, StringIO.new(original), checksum: nil) if original

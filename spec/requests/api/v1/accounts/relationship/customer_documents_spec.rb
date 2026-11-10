@@ -8,8 +8,15 @@ RSpec.describe 'Protected Relationship customer documents', type: :request do
   let(:url) { "/api/v1/accounts/#{account.id}/relationship/documents" }
   let!(:assignment) { JrcRelationship::Assignment.create!(account: account, contact: create(:contact, account: account), owner: analyst) }
   let(:file) { fixture_file_upload('jrc_projects_task.txt', 'text/plain') }
-  let(:attributes) { { title: 'SYNTHETIC registration evidence', category: 'registration', change_reason: 'Initial synthetic upload' } }
+  let(:attributes) { { title: 'SYNTHETIC registration evidence', category: 'registration', confidentiality: 'operational', change_reason: 'Initial synthetic upload' } }
   before { account.enable_features!('jrc_customer_master', 'jrc_relationship', 'jrc_crm') }
+
+  it 'rejects an unclassified new upload without creating document history' do
+    expect do
+      post url, headers: headers, params: { assignment_id: assignment.id, document: attributes.except(:confidentiality), file: file }
+    end.not_to change(JrcRelationship::DocumentVersion, :count)
+    expect(response).to have_http_status(:unprocessable_entity)
+  end
 
   it 'preserves previous versions, quarantines unscanned content and never returns a bearer storage URL' do
     post url, headers: headers, params: { assignment_id: assignment.id, document: attributes, file: file }

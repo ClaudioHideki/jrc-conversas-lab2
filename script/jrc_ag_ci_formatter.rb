@@ -36,12 +36,15 @@ class JrcAgCiFormatter
     @current = notification.example.location
   end
 
-  def example_finished(_notification)
-    @current = nil
+  def example_finished(notification)
+    @started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    @current = "after #{notification.example.location}"
   end
 
   def example_group_started(notification)
     group = notification.group
+    @started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    @current = "group #{group.metadata[:file_path]}:#{group.metadata[:line_number]}"
     @output.puts "Native source: #{group.metadata[:file_path]}" if group.parent_groups.length == 1
   end
 

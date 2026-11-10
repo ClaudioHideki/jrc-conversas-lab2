@@ -86,6 +86,17 @@ RSpec.describe 'Relationship operational regression' do
 
   it 'preserves a responsible user explicitly selected by the manager' do
     selected = create(:user, account: sd_account, role: :agent)
+    expect do
+      workflow.save(kind: 'actions', attributes: { assignment_id: assignment.id, request_id: 'unauthorized-owner',
+                                                   reason: 'No portfolio grant', owner_id: selected.id })
+    end.to raise_error(ActiveRecord::RecordNotFound)
+    expect(assignment.reload.actions).to be_empty
+    role = create(:custom_role, account: sd_account,
+                  permissions: %w[contact_manage jrc_relationship_view jrc_relationship_manage jrc_relationship_team jrc_crm])
+    selected.account_users.find_by!(account: sd_account).update!(custom_role: role)
+    team = create(:team, account: sd_account)
+    team.team_members.create!(user: selected)
+    assignment.update!(team: team)
     JrcOperations::Queue.create!(account: sd_account, name: 'Rotating CS', code: 'CS-ROTATING', assignment_strategy: 'round_robin', settings: { scopes: ['relationship'] })
     action = workflow.save(kind: 'actions', attributes: { assignment_id: assignment.id, request_id: 'owner', reason: 'Selected owner', owner_id: selected.id })[:record]
     expect(action.owner_id).to eq(selected.id)

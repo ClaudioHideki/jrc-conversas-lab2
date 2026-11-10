@@ -13,6 +13,18 @@ SCOPES = [
     'spec/requests/api/v1/accounts/jrc_approvals', 'spec/models/jrc_relationship',
     'spec/models/jrc_backoffice', 'spec/jobs/jrc_backoffice',
 ]
+EXTRA_SPECS = [
+    'spec/listeners/action_cable_listener_spec.rb',
+    'spec/enterprise/listeners/action_cable_listener_spec.rb',
+    'spec/models/notification_spec.rb',
+    'spec/services/jrc_nico/operational_access_authentication_spec.rb',
+    'spec/services/jrc_nico/domain_access_relationship_sla_spec.rb',
+    'spec/services/jrc_nico/context_builder_spec.rb',
+    'spec/services/jrc_nico/domain_actions_spec.rb',
+    'spec/services/jrc_flows/ownership_identity_spec.rb',
+    'spec/requests/api/v1/accounts/jrc_operations/project_individual_permissions_spec.rb',
+]
+
 DATABASES = [
     'jrc_rel_v2_candidate_test', 'jrc_four_domains_schema_admission_test',
     'jrc_rel_sd_candidate_test', 'jrc_jornada_candidate_test',
@@ -23,7 +35,7 @@ DATABASES = [
 
 def plan():
     groups = {database: [] for database in DATABASES}
-    paths = sorted({p for scope in SCOPES for p in (ROOT / scope).rglob('*_spec.rb')})
+    paths = sorted({p for scope in SCOPES for p in (ROOT / scope).rglob('*_spec.rb')} | {ROOT / p for p in EXTRA_SPECS})
     for path in paths:
         text = path.read_text(encoding='utf-8')
         has_database_guard = any(token in text for token in (

@@ -143,12 +143,26 @@ RSpec.describe 'Controlled reversal of Relationship withdrawal', type: :request 
     proposal = JrcRelationship::BatchReview.find(old.fetch('id'))
     original = proposal.attributes.slice('snapshot', 'digest')
     review = JrcRelationship::WithdrawalReadiness.new(context).call(analyst.id)
+    expect(review.fetch(:counts).fetch('reviewed_batches')).to eq(1)
+    expect do
+      JrcRelationship::AnalystWithdrawal.new(context).call(analyst.id, reason: 'Synthetic still-pending withdrawal',
+                                                                      snapshot_digest: review.fetch(:snapshot_digest))
+    end.to raise_error(ArgumentError, 'Pending responsibilities require effective native handover before withdrawal')
+    expect(member.reload.jrc_relationship_withdrawn_at).to be_nil
+    post "#{base}/reviewed_batches/#{proposal.id}/cancel", headers: analyst_headers
+    expect(response).to have_http_status(:ok)
+    expect(proposal.reload.state).to eq('canceled')
+    expect(proposal.attributes.slice('snapshot', 'digest')).to eq(original)
+    review = JrcRelationship::WithdrawalReadiness.new(context).call(analyst.id)
     JrcRelationship::AnalystWithdrawal.new(context).call(analyst.id, reason: 'Synthetic operator withdrawal',
                                                                      snapshot_digest: review.fetch(:snapshot_digest))
     post url, headers: headers, as: :json, params: { restoration: { reason: 'Synthetic restored operator', expected_version: 1 } }
     expect(response).to have_http_status(:ok)
     post "#{base}/reviewed_batches/#{proposal.id}/approve", headers: analyst_headers, as: :json, params: { digest: old.fetch('digest') }
-    expect([response.status, response.parsed_body['errors']]).to eq([422, ['Reviewed access changed']])
+    expect([response.status, response.parsed_body['errors']]).to eq([422, ['Review is not available']])
+    restored = JrcRelationship::Context.new(member.reload)
+    expect { JrcRelationship::BatchReviewPlan.new(restored).validate!(proposal.reload) }
+      .to raise_error(JrcRelationship::BatchReviewError, 'Reviewed access changed')
     expect(proposal.reload.attributes.slice('snapshot', 'digest')).to eq(original)
     post "#{base}/reviewed_batches", headers: analyst_headers, as: :json, params: inputs.merge(request_id: SecureRandom.uuid)
     expect(response).to have_http_status(:ok)

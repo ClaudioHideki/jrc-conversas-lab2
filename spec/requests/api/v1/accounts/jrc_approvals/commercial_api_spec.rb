@@ -76,7 +76,9 @@ RSpec.describe 'Commercial E3 and E4 backend contracts', :approval_core, :commer
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.pluck('key')).to match_array(
       JrcApprovals::CommercialCatalog::EVENTS.keys + [JrcApprovals::CommercialCatalog::PRICE_FAMILY] +
-        JrcApprovals::GratuityCatalog::EVENTS.keys + [JrcApprovals::GratuityCatalog::FAMILY, JrcBackoffice::AuthorityCatalog::KEY]
+        JrcApprovals::GratuityCatalog::EVENTS.keys + JrcApprovals::FinancialCatalog::EVENTS.keys +
+        [JrcApprovals::GratuityCatalog::FAMILY, JrcBackoffice::AuthorityCatalog::KEY, JrcApprovals::DraftReviewCatalog::KEY,
+         JrcRelationship::DistributionApproval::KEY]
     )
     legal = response.parsed_body.find { |row| row['key'] == JrcBackoffice::AuthorityCatalog::KEY }
     expect(legal).to include('fields' => JrcBackoffice::AuthorityCatalog::FIELDS, 'resource_type' => 'JrcBackoffice::AuthorityProposal',

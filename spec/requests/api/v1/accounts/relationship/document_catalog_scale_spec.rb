@@ -18,7 +18,7 @@ RSpec.describe 'Native synthetic document catalog scale', type: :request do
   let(:fixture_timings) { {} }
   let(:first) do
     service.upload!(assignment_id: assignment.id, attributes: {
-                      'title' => 'Synthetic catalog document 0', 'category' => 'evidence', 'change_reason' => 'Synthetic baseline upload'
+                      'title' => 'Synthetic catalog document 0', 'category' => 'evidence', 'confidentiality' => 'operational', 'change_reason' => 'Synthetic baseline upload'
                     }, upload: upload)
   end
 
@@ -35,7 +35,7 @@ RSpec.describe 'Native synthetic document catalog scale', type: :request do
     # This measures catalog queries, not scanner throughput or 1000 upload requests.
     999.times do |index|
       document = JrcRelationship::CustomerDocument.create!(account: account, assignment: assignment, title: "Synthetic catalog document #{index + 1}",
-                                                           category: 'evidence', responsible: actor)
+                                                           category: 'evidence', confidentiality: 'operational', responsible: actor)
       version = document.versions.create!(account: account, uploaded_by: actor, number: 1, change_reason: 'Synthetic catalog version')
       version.file.attach(blob)
       expected[document.id] = 1

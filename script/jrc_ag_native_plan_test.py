@@ -1,6 +1,6 @@
 import unittest
 
-from jrc_ag_native_plan import DATABASES, ROOT, SCOPES, plan, shard
+from jrc_ag_native_plan import DATABASES, EXTRA_SPECS, ROOT, SCOPES, plan, shard
 
 
 class NativePlanGuardsTest(unittest.TestCase):
@@ -21,6 +21,7 @@ class NativePlanGuardsTest(unittest.TestCase):
     def test_every_native_spec_is_planned_exactly_once_without_changing_guards(self):
         groups = plan()
         expected = {p.relative_to(ROOT).as_posix() for scope in SCOPES for p in (ROOT / scope).rglob('*_spec.rb')}
+        expected.update(EXTRA_SPECS)
         actual = [path for files in groups.values() for path in files]
         self.assertTrue(expected)
         self.assertEqual(set(groups), set(DATABASES))

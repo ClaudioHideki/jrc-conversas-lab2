@@ -9,7 +9,7 @@ RSpec.describe JrcRelationship::CustomerDocuments do
   end
   let(:assignment) { JrcRelationship::Assignment.create!(account: account, owner: actor, contact: create(:contact, account: account)) }
   let(:document) do
-    JrcRelationship::CustomerDocument.create!(account: account, assignment: assignment, title: 'Synthetic selector', category: 'evidence')
+    JrcRelationship::CustomerDocument.create!(account: account, assignment: assignment, title: 'Synthetic selector', category: 'evidence', confidentiality: 'operational')
   end
   let(:context) { JrcRelationship::Context.new(member) }
 
@@ -24,14 +24,14 @@ RSpec.describe JrcRelationship::CustomerDocuments do
     document.versions.create!(account: account, uploaded_by: actor, number: 1, change_reason: 'Older number inserted later')
     other = create(:user, account: account, role: :agent)
     hidden_assignment = JrcRelationship::Assignment.create!(account: account, owner: other, contact: create(:contact, account: account))
-    hidden = JrcRelationship::CustomerDocument.create!(account: account, assignment: hidden_assignment, title: 'Hidden', category: 'evidence')
+    hidden = JrcRelationship::CustomerDocument.create!(account: account, assignment: hidden_assignment, title: 'Hidden', category: 'evidence', confidentiality: 'operational')
     hidden.versions.create!(account: account, uploaded_by: other, number: 10, change_reason: 'Private portfolio version')
     foreign_account = create(:account)
     foreign_actor = create(:user, account: foreign_account)
     foreign_assignment = JrcRelationship::Assignment.create!(account: foreign_account, owner: foreign_actor,
                                                              contact: create(:contact, account: foreign_account))
     foreign = JrcRelationship::CustomerDocument.create!(account: foreign_account, assignment: foreign_assignment, title: 'Foreign',
-                                                        category: 'evidence')
+                                                        category: 'evidence', confidentiality: 'operational')
     foreign.versions.create!(account: foreign_account, uploaded_by: foreign_actor, number: 20, change_reason: 'Foreign immutable version')
     result = described_class.new(context).latest_versions(document_ids: [document.id, hidden.id, foreign.id])
     expect(result.keys).to eq([document.id])

@@ -57,6 +57,28 @@ when 'validate_constraints'
     connection.execute("ALTER TABLE #{table} VALIDATE CONSTRAINT #{name}")
   end
   puts JSON.generate(synthetic_constraints_actually_validated: constraints.length)
+when 'catalog'
+  output = ENV.fetch('JRC_AG_CATALOG_OUTPUT')
+  raise 'Owned temporary catalog output required' unless output.start_with?('/tmp/ag-') && !File.exist?(output)
+
+  queries = {
+    columns: "SELECT table_name, column_name, is_nullable, column_default, data_type, udt_name " \
+             "FROM information_schema.columns WHERE table_schema='public' ORDER BY table_name, column_name",
+    constraints: "SELECT c.relname, k.conname, k.contype, k.condeferrable, k.condeferred, k.convalidated, " \
+                 "pg_get_constraintdef(k.oid) AS definition FROM pg_constraint k JOIN pg_class c ON c.oid=k.conrelid " \
+                 "WHERE k.connamespace='public'::regnamespace AND k.contype IN ('f','c') ORDER BY c.relname, k.conname",
+    indexes: "SELECT tablename, indexname, indexdef FROM pg_indexes WHERE schemaname='public' ORDER BY tablename, indexname",
+    functions: "SELECT pg_get_functiondef(p.oid) AS definition FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace " \
+               "WHERE n.nspname='public' AND p.prokind='f' AND NOT EXISTS (SELECT 1 FROM pg_depend d " \
+               "WHERE d.classid='pg_proc'::regclass AND d.objid=p.oid AND d.deptype='e') " \
+               "ORDER BY p.proname, pg_get_function_identity_arguments(p.oid)",
+    triggers: "SELECT c.relname, t.tgname, pg_get_triggerdef(t.oid, true) AS definition FROM pg_trigger t " \
+              "JOIN pg_class c ON c.oid=t.tgrelid WHERE c.relnamespace='public'::regnamespace AND NOT t.tgisinternal " \
+              "ORDER BY c.relname, t.tgname"
+  }
+  catalog = queries.transform_values { |sql| connection.select_all(sql).to_a }
+  File.write(output, JSON.pretty_generate(catalog))
+  puts JSON.generate(catalog_sha256: Digest::SHA256.file(output).hexdigest, groups: catalog.transform_values(&:length))
 when 'verify'
   versions = connection.select_values('SELECT version FROM schema_migrations')
   expected = %w[20261109190000 20261109191000 20261109200000 20261109210000 20261109211000 20261109212000 20261110190000]
