@@ -94,6 +94,7 @@ jobs:
       - name: Native migrations and idempotent reexecution
         run: |
           bundle exec rails db:migrate
+          bundle exec rails runner script/jrc_ag_ci_fixture.rb validate_constraints
           bundle exec rails runner script/jrc_ag_ci_fixture.rb verify
           bundle exec rails db:migrate
           bundle exec rails runner script/jrc_ag_ci_fixture.rb verify

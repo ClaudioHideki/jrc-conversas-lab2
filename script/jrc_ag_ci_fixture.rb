@@ -41,6 +41,21 @@ when 'load_main'
   id = connection.select_value("INSERT INTO accounts(name, locale, created_at, updated_at) VALUES ('SYNTHETIC A-G upgrade receipt', 'en', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING id")
   row = connection.select_one("SELECT * FROM accounts WHERE id = #{Integer(id)}")
   File.write(marker_path, JSON.generate(account_id: id, digest: Digest::SHA256.hexdigest(JSON.generate(row)), main_sha: base))
+when 'validate_constraints'
+  # Main deliberately defers some validations on installed data. Prove every
+  # constraint against our synthetic fixture instead of suppressing that gate.
+  constraints = connection.select_all(<<~SQL)
+    SELECT c.relname, k.conname FROM pg_constraint k
+    JOIN pg_class c ON c.oid=k.conrelid
+    WHERE k.connamespace='public'::regnamespace AND k.contype IN ('f','c') AND NOT k.convalidated
+    ORDER BY c.relname, k.conname
+  SQL
+  constraints.each do |row|
+    table = connection.quote_table_name(row.fetch('relname'))
+    name = connection.quote_column_name(row.fetch('conname'))
+    connection.execute("ALTER TABLE #{table} VALIDATE CONSTRAINT #{name}")
+  end
+  puts JSON.generate(synthetic_constraints_actually_validated: constraints.length)
 when 'verify'
   versions = connection.select_values('SELECT version FROM schema_migrations')
   expected = %w[20261109190000 20261109191000 20261109200000 20261109210000 20261109211000 20261109212000]
