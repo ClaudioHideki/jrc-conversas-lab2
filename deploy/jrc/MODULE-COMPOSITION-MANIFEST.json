@@ -29,8 +29,8 @@
     {
       "path": ".github/workflows/build-ghcr.yml",
       "baseSha256": "05b856abe74f1897c52e76910a03a77065e8c12418b7cffbc74b15d906ce9fd2",
-      "sha256": "ed9dec140998bde4c546d03dc4953a7ba118e8c765be3ba8e270de8e484848b3",
-      "bytes": 25093
+      "sha256": "1240064b644ab6a5026c7c23210ff75f768b5eeab4d29c0b14d64b5004a7c912",
+      "bytes": 26008
     },
     {
       "path": ".github/workflows/nico-broker-candidate.yml",
@@ -1013,8 +1013,8 @@
     {
       "path": "script/smoke_backoffice_candidate.sh",
       "baseSha256": null,
-      "sha256": "20c717637dd03b7b8965c47a7c537e57c48bdb7ec50fdf0482ff8c2a1b160622",
-      "bytes": 5369
+      "sha256": "075e2d849fd9b308e0a522bec2b100467184cc101bbbc8304e9d8fc3fc9f45a3",
+      "bytes": 6240
     },
     {
       "path": "script/ura_hml_timezone_check.rb",

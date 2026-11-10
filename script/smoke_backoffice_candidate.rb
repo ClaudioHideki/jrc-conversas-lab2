@@ -34,6 +34,10 @@ versions = Tempfile.create(['candidate-smoke-', '.pdf']) do |pdf|
   pdf.binmode
   pdf.write(JrcCrm::OrderPdfService.new(order).call)
   pdf.flush
+  # The native scanner adapter remains mandatory. Only these two synthetic byte
+  # streams are admitted by the test daemon; OCR/Poppler and Sidekiq remain real.
+  File.write('/run/jrc-candidate-av/synthetic-sha256.json',
+    JSON.generate([Digest::SHA256.file('/candidate-fixture.png').hexdigest, Digest::SHA256.file(pdf.path).hexdigest]), perm: 0o600)
   [['identity', '/candidate-fixture.png', 'image/png'], ['identity_pdf', pdf.path, 'application/pdf']].map do |key, path, type|
     File.open(path, 'rb') do |file|
       upload = ActionDispatch::Http::UploadedFile.new(tempfile: file, filename: File.basename(path), type: type)
@@ -63,3 +67,4 @@ end
 puts "Candidate documentary evidence: tesseract confidence=#{image_analysis.evidence['ocr_confidence']}, " \
      'poppler PDF, queue=low, human review required.'
 puts 'Exact candidate: Rails boot, native schema, shared storage, Sidekiq heartbeat and real queued OCR/PDF verified.'
+puts 'Malware scanner response: synthetic exact-byte fixture boundary, not real scanner acceptance.'

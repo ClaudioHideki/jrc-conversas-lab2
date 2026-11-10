@@ -397,6 +397,7 @@ jobs:
         run: |
           ruby script/jrc_portfolio_history_capture.test.rb
           ruby script/jrc_portfolio_history_boundary.test.rb
+          ruby test/jrc_consolidation/candidate_fixture_scanner_test.rb
       - name: Vue integration regressions on the exact consolidated source
         run: |
           pnpm exec vitest run app/javascript/dashboard/routes/dashboard/jrcCustomers \

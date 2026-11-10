@@ -373,6 +373,15 @@ jobs:
           require 'grpc'
           require 'pg'
           require 'nokogiri'
+          manifest_path = %w[public/vite/manifest.json public/vite/.vite/manifest.json].find { |path| File.file?(path) }
+          raise 'New compiled frontend manifest missing' unless manifest_path
+          manifest = JSON.parse(File.read(manifest_path))
+          %w[entrypoints/dashboard.js entrypoints/v3app.js entrypoints/requester_portal.js].each do |key|
+            entry = manifest.fetch(key)
+            path = File.expand_path(entry.fetch('file'), '/app/public/vite')
+            raise 'Compiled entry missing or outside candidate' unless entry['isEntry'] && path.start_with?('/app/public/vite/') && File.file?(path)
+          end
+          raise 'Compiled CSS missing' if Dir.glob('public/vite/**/*.css').empty?
           puts JSON.generate(verified_product_files: expected.size, migrations: expected.keys.count { |path| path.start_with?('db/migrate/') }, grpc: GRPC::VERSION, pg: PG::VERSION, nokogiri: Nokogiri::VERSION)
           RUBY
 
