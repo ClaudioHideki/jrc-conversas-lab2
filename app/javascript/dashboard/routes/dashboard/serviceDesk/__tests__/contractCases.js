@@ -90,7 +90,9 @@ export function registerContractCases(test, assert) {
     await client.ticket('1', '20');
     await client.requesterContext('1', { unitId: '10', companyId: '3', contactId: '20' });
     assert.deepEqual(calls.map(c => c[0]), ['/api/v1/accounts/1/jrc_service_desk/ui_context', '/api/v1/accounts/1/jrc_service_desk/tickets', '/api/v1/accounts/1/jrc_service_desk/tickets/20', '/api/v1/accounts/1/jrc_service_desk/requester_people/20']);
-    assert.deepEqual(calls[3][1], { params: { unit_id: '10', company_id: '3' } });
+    assert.deepEqual(calls[3][1].params, { unit_id: '10', company_id: '3' });
+    assert.equal(calls[3][1].timeout, 15000);
+    assert.equal(calls[3][1].signal, undefined);
   });
   test('API adapter rejects path and filter injection before HTTP', () => {
     const client = createServiceDeskClient({ get: () => { throw new Error('must not call'); } });
