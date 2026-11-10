@@ -35,7 +35,7 @@ const draft = reactive({
 const files = ref([]);
 const fileInput = ref(null);
 const filesError = ref(false);
-const ready = ref(false);
+const ready = ref(true);
 const hashing = ref(false);
 const receipt = ref(null);
 const key = 'ticket:internal:write';
@@ -48,9 +48,13 @@ const busy = computed(
 const locked = computed(
   () =>
     busy.value ||
-    ['readback_pending', 'error', 'invalid_contract', 'interrupted'].includes(
-      mutation.value.status
-    )
+    [
+      'readback_pending',
+      'error',
+      'invalid_contract',
+      'interrupted',
+      'conflict',
+    ].includes(mutation.value.status)
 );
 const created = computed(() =>
   confirmedCreationTicket(
@@ -82,13 +86,13 @@ watch(() => session.state.context, reset, { immediate: true });
 watch(
   () => draft.service,
   () => {
-    ready.value = false;
+    ready.value = !draft.service;
   }
 );
 watch(unitId, () => {
   draft.service = '';
   draft.answers = {};
-  ready.value = false;
+  ready.value = !draft.service;
 });
 const chooseFiles = selected => {
   if (locked.value) return;
@@ -101,7 +105,6 @@ const chooseFiles = selected => {
 const maySave = computed(
   () =>
     unit.value &&
-    draft.service &&
     ready.value &&
     draft.title.trim() &&
     draft.description.trim() &&
@@ -120,7 +123,7 @@ const submit = async () => {
       payload = {
         unit_id: unitId.value,
         internal_request: true,
-        service_id: draft.service,
+        ...(draft.service ? { service_id: draft.service } : {}),
         ticket: {
           title: draft.title,
           description: draft.description,
@@ -219,6 +222,8 @@ defineExpose({ busy: locked });
         <ServiceDefinitionSelect
           v-model="draft.service"
           :unit-id="unitId"
+          :general-label="t('JRC_SERVICE_DESK.REDESIGN_FORM.general_request')"
+          unrestricted-only
           :disabled="locked"
         />
       </div>
