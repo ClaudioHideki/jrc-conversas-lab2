@@ -70,6 +70,7 @@ class JrcServiceDesk::CreateTicketService < JrcServiceDesk::BaseService
       )
       if internal_request
         JrcServiceDesk::InternalIntake.apply!(ticket)
+        ticket.assignee_membership = assignee(ticket.assignee_membership.account_user_id, unit)
         values.merge!('queue_id' => ticket.queue_id, 'team_id' => ticket.team_id,
                       'assignee_account_user_id' => ticket.assignee_membership.account_user_id)
       end
