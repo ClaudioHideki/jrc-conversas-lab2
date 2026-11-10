@@ -20,10 +20,7 @@ class JrcContactCenter::AcwPolicy
   end
 
   def update!(attributes = nil, voice_required: :unchanged, **legacy_limits)
-    values = (attributes || legacy_limits).to_h.transform_keys(&:to_s).slice(*DEFAULTS.keys)
-    unless values.size == DEFAULTS.size && values.values.all? { |value| value.is_a?(Integer) && value.between?(1, 3600) }
-      raise JrcContactCenter::OperationError, 'invalid_acw_policy'
-    end
+    values = validated_limits(attributes || legacy_limits)
     raise JrcContactCenter::OperationError, 'invalid_acw_policy' unless [true, false, :unchanged].include?(voice_required)
 
     @account.with_lock do
@@ -32,5 +29,16 @@ class JrcContactCenter::AcwPolicy
       @account.update!(settings: @account.settings.merge(KEY => current))
     end
     call
+  end
+
+  private
+
+  def validated_limits(attributes)
+    values = attributes.to_h.transform_keys(&:to_s).slice(*DEFAULTS.keys)
+    unless values.size == DEFAULTS.size && values.values.all? { |value| value.is_a?(Integer) && value.between?(1, 3600) }
+      raise JrcContactCenter::OperationError, 'invalid_acw_policy'
+    end
+
+    values
   end
 end
