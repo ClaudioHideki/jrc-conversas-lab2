@@ -26,6 +26,7 @@ jobs:
       - run: git merge-base --is-ancestor d8a83b824b11cc68ddbbce7c79681f368051fb70 HEAD
       - run: node --test script/validate_ag_migration_identity.test.mjs
       - run: python3 script/jrc_ag_native_plan_test.py
+      - run: python3 script/jrc_ag_catalog_compare_test.py
       # Known identity collisions must be resolved with a tested history-adoption plan.
       # Never mark the current combined tree as database-ready while this gate fails.
       - run: node script/validate_ag_migration_identity.mjs
@@ -104,16 +105,7 @@ jobs:
           POSTGRES_DATABASE=jrc_four_domains_schema_test bundle exec rails runner script/jrc_ag_ci_fixture.rb validate_constraints
           POSTGRES_DATABASE=jrc_four_domains_schema_test JRC_AG_FIXTURE_RECEIPT=/tmp/ag-reload-receipt.json bundle exec rails runner script/jrc_ag_ci_fixture.rb verify
           POSTGRES_DATABASE=jrc_four_domains_schema_test JRC_AG_CATALOG_OUTPUT=/tmp/ag-reload-catalog.json bundle exec rails runner script/jrc_ag_ci_fixture.rb catalog
-          python3 - <<'PYTHON'
-          import json
-          from pathlib import Path
-          baseline=json.loads(Path('/tmp/ag-fresh-catalog.json').read_text())
-          for path in ('/tmp/ag-upgrade-catalog.json','/tmp/ag-reload-catalog.json'):
-              actual=json.loads(Path(path).read_text())
-              differences=[key for key in baseline if baseline[key]!=actual[key]]
-              print(path, {'catalog_groups_with_differences': differences})
-              assert not differences, 'Native schema parity is not proved'
-          PYTHON
+          python3 script/jrc_ag_catalog_compare.py /tmp/ag-fresh-catalog.json /tmp/ag-upgrade-catalog.json /tmp/ag-reload-catalog.json
       - name: Preserve actual synthetic catalogs and generated schema, including failure evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -122,7 +114,7 @@ jobs:
           path: |
             /tmp/ag-fresh-schema.rb
             /tmp/ag-upgrade-schema.rb
-            /tmp/ag-*-catalog.json
+            /tmp/ag-*-catalog*.json
             /tmp/ag-fixture-receipt.json
           if-no-files-found: warn
 

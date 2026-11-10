@@ -77,6 +77,49 @@ when 'catalog'
               "ORDER BY c.relname, t.tgname"
   }
   catalog = queries.transform_values { |sql| connection.select_all(sql).to_a }
+  raw_output = output.sub(/\.json\z/, '-raw.json')
+  raise 'Prior raw catalog must remain intact' if raw_output == output || File.exist?(raw_output)
+
+  raw_catalog = catalog.deep_dup
+  File.write(raw_output, JSON.pretty_generate(raw_catalog))
+  # PostgreSQL's own deparser moves varchar-array casts to individual members
+  # when its output is parsed again. Reparse only comparison copies inside
+  # rollback-only transactions; original objects/data and the raw catalog remain.
+  catalog[:constraints].each_with_index do |row, index|
+    next unless row.fetch('contype') == 'c'
+
+    connection.transaction(requires_new: true) do
+      name = "jrc_ag_catalog_check_#{index}"
+      table = connection.quote_table_name(row.fetch('relname'))
+      connection.execute("ALTER TABLE #{table} ADD CONSTRAINT #{connection.quote_column_name(name)} #{row.fetch('definition')}")
+      row['definition'] = connection.select_value("SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE conname=#{connection.quote(name)} AND conrelid=#{connection.quote(row.fetch('relname'))}::regclass")
+      raise ActiveRecord::Rollback
+    end
+  end
+  catalog[:indexes].each_with_index do |row, index|
+    next unless row.fetch('indexdef').include?(' WHERE ')
+
+    original = row.fetch('indexname')
+    original_token = Regexp.union(original, connection.quote_column_name(original))
+    prefix = /\ACREATE (UNIQUE )?INDEX (#{original_token}) ON /
+    raise 'Unexpected native index definition' unless prefix.match?(row.fetch('indexdef'))
+
+    connection.transaction(requires_new: true) do
+      name = "jrc_ag_catalog_index_#{index}"
+      source = row.fetch('indexdef').sub(prefix) { "CREATE #{Regexp.last_match(1)}INDEX #{connection.quote_column_name(name)} ON " }
+      connection.execute(source)
+      normalized = connection.select_value("SELECT pg_get_indexdef(#{connection.quote(name)}::regclass)")
+      temporary_prefix = /\ACREATE (UNIQUE )?INDEX #{Regexp.escape(name)} ON /
+      raise 'Unexpected comparison index definition' unless temporary_prefix.match?(normalized)
+
+      original_name = prefix.match(row.fetch('indexdef'))[2]
+      row['indexdef'] = normalized.sub(temporary_prefix) { "CREATE #{Regexp.last_match(1)}INDEX #{original_name} ON " }
+      raise ActiveRecord::Rollback
+    end
+  end
+  unchanged = queries.transform_values { |sql| connection.select_all(sql).to_a }
+  raise 'Comparison changed the original synthetic schema' unless unchanged == raw_catalog
+
   File.write(output, JSON.pretty_generate(catalog))
   puts JSON.generate(catalog_sha256: Digest::SHA256.file(output).hexdigest, groups: catalog.transform_values(&:length))
 when 'verify'

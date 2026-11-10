@@ -159,6 +159,7 @@ RSpec.describe 'Native versioned required document catalog', type: :request do
     expect(response.body).not_to include('FOREIGN required file')
     expect(JrcRelationship::Assignment.where(account: account).count).to eq(0)
     get config_url, headers: headers, params: { scope_key: "company:#{company.id}" }
-    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response).to have_http_status(:not_found)
+    expect(response.body).not_to include('FOREIGN required file')
   end
 end

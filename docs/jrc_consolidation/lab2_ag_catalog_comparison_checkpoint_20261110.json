@@ -1,0 +1,46 @@
+{
+  "utc": "2026-11-10T17:17:17.785224+00:00",
+  "observed_sha": "cd41973fe81af4fc19e8d952638deb78048027e9",
+  "native_admission_run": 42861241226,
+  "artifact_id": 13785646185,
+  "migration_execution_confirmed": {
+    "fresh": true,
+    "upgrade_from_pinned_main": true,
+    "schema_reload": true,
+    "seven_expected_versions_verified": true,
+    "unvalidated_constraints": 0,
+    "columns": 4720,
+    "constraints": 1111,
+    "indexes": 1662,
+    "functions": 42,
+    "triggers": 61
+  },
+  "literal_catalog_gate": "Failed; no native suite was released from this gate",
+  "observed_differences": {
+    "fresh_vs_upgrade": "66 CHECK definitions and three partial indexes deparsed with array casts in different PostgreSQL forms; one PL/pgSQL function differs in whitespace",
+    "fresh_vs_reload": "CHECK/partial index array-cast deparsing differences; all function definitions exact"
+  },
+  "candidate_comparison_fix": {
+    "constraints": "PostgreSQL reparses a temporary duplicate check inside a rollback-only transaction",
+    "partial_indexes": "PostgreSQL reparses a temporary duplicate partial index inside a rollback-only transaction",
+    "original_schema": "Recaptured after comparison; must be byte-for-byte equal to original catalog. Raw catalogs retained separately.",
+    "functions": "For SQL/PLpgSQL only, compare exact lexical tokens while preserving all quoted literal bytes, identifiers, operators and parameters. Unknown forms fail closed.",
+    "local_comparator_cases": 6,
+    "passed": 6,
+    "observed_native_function_comparisons": 42,
+    "different_function_tokens": 0,
+    "native_expression_reparse_pending": true
+  },
+  "additional_unvalidated_fixtures": [
+    "Versioned Backoffice document gate replaces legacy manual attachment approval in the financial immutability scenario",
+    "Survey export fixture receives the independent explicit export capability while retaining per-model role/team denial",
+    "Foreign company configuration responds 404 without revealing the catalog"
+  ],
+  "not_claimed": [
+    "Whole database equivalence before the corrected native gate executes",
+    "Full native regression approval",
+    "Real antivirus/provider acceptance",
+    "CSS browser acceptance",
+    "Production readiness"
+  ]
+}

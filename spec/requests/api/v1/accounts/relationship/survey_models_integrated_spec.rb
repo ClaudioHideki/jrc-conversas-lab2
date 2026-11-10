@@ -243,7 +243,9 @@ RSpec.describe 'Survey models native persistence, security and ticket events', t
     survey = JrcRelationship::SurveyEngine.evaluate_event(source: ticket, event: 'closure', cycle_key: 'sql-grants').survey
     JrcRelationship::SurveyResponse.new(survey).call(answers: { score: 9 })
     create(:team_member, team: team, user: sd_user)
-    sd_account_user.update!(role: :agent)
+    exporter = create(:custom_role, account: sd_account,
+                       permissions: %w[contact_manage jrc_relationship_view jrc_relationship_export])
+    sd_account_user.update!(role: :agent, custom_role: exporter)
     get "/api/v1/accounts/#{sd_account.id}/relationship/records/surveys", headers: survey_headers,
       params: { source_type: 'JrcServiceDesk::Ticket', unit_id: sd_unit.id }
     expect(response).to have_http_status(:ok)

@@ -249,7 +249,22 @@ RSpec.describe 'CRM commercial flow integration', type: :request do
     attachment_id = response.parsed_body.fetch('documents').first.fetch('id')
     post "#{path}/document_status", params: { document_key: 'identity', attachment_id: attachment_id, status: 'approved' },
       headers: headers, as: :json
-    expect(response).to have_http_status(:ok)
+    expect(response).to have_http_status(:unprocessable_entity)
+    # Legacy attachments do not satisfy the v2 document gate. Preserve the
+    # financial-lock assertions using a real version, technical scan and human decision.
+    post "#{path}/document_versions", params: { document_key: 'identity', file: file, idempotency_key: SecureRandom.uuid }, headers: headers
+    expect(response).to have_http_status(:created), response.body
+    version = JrcBackoffice::DocumentVersion.find(response.parsed_body.fetch('id'))
+    scanner = instance_double(JrcServiceDesk::AttachmentScanner)
+    allow(JrcServiceDesk::AttachmentScanner).to receive(:new).and_return(scanner)
+    allow(scanner).to receive(:scan).with(version.file.blob, socket_path: anything).and_return(
+      'service_desk_scan_state' => 'clean', 'service_desk_scan_sha256' => version.sha256
+    )
+    JrcBackoffice::DocumentPreanalysisJob.perform_now(version.id)
+    expect(version.reload.decisions).to be_empty
+    post "#{path}/document_versions/#{version.id}/decision", params: { status: 'approved', reason: 'SYNTHETIC reviewed identity' },
+      headers: headers, as: :json
+    expect(response).to have_http_status(:ok), response.body
     post "#{path}/advance", headers: headers, as: :json
     expect(response).to have_http_status(:ok)
     expect(request.reload.stage).to eq('contract')
